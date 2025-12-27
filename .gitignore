@@ -7,36 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Package manager: this project uses bun — bun.lock IS committed.
-# Global ~/.gitignore_global has `*.lock`, so force bun.lock back in.
-!bun.lock
-# Ignore lockfiles from other managers to prevent accidental drift.
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
-
-# Dependencies
 node_modules
-
-# Build output
 dist
 dist-ssr
-dist-quicknote/
-dist-editor/
-dist-electron/
-dist-desktop/
-default.profraw
-# Vite stubs live in src/lib/vite-stubs/ (NOT src/lib/build/).
-# Global ~/.gitignore_global has `build/`; a folder named build is dropped by
-# electron publish and store Linux CI then fails (missing node-fs-stub.ts).
-!src/lib/vite-stubs/
-!src/lib/vite-stubs/*
 *.local
-.env
-.env.*
-!.env.example
 
 # Editor directories and files
+.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -45,62 +22,3 @@ default.profraw
 *.njsproj
 *.sln
 *.sw?
-
-# Local docs / changelog
-!/docs/
-/docs/*
-!/docs/showcase/
-/docs/showcase/*
-!/docs/showcase/cover.png
-!/docs/showcase/01-writing-ai.png
-!/docs/showcase/02-code-and-diagram-user.png
-!/docs/showcase/PUBLISH.md
-CHANGELOG.md
-
-skills-lock.json
-!src/agent/AGENTS.md
-!src/agent/**/SKILL.md
-
-# ---- Local-only scratch ----
-tasks/
-.pi-lens.json
-scripts/*
-!scripts/audit-editor.mjs
-!scripts/serve-editor.mjs
-!scripts/collect-desktop-artifacts.mjs
-!scripts/compile-electron.mjs
-!scripts/electron-build-linux.mjs
-!scripts/electron-build-mac.mjs
-!scripts/electron-build-win.mjs
-!scripts/electron-dev.mjs
-!scripts/prepare-electron-pack.mjs
-!scripts/generate-license-notices.mjs
-# stray verification screenshots in repo root
-/*.png
-!cover.png
-!series-features.png
-
-未命名/
-
-# PDF CJK font (downloaded at build; not committed)
-public/fonts/*.ttf
-public/fonts/*.otf
-
-# Local QA evidence and throwaway prototypes
-/artifacts/
-/screenshots/
-/prototypes/
-/.ego-qa/
-/output/
-/test-results/
-/src/**/_prototype/
-
-# Private desktop CI configuration
-!/.github/
-!/.github/workflows/
-!/.github/workflows/desktop-build.yml
-!scripts/build-ci-installers.mjs
-!scripts/publish-release.mjs
-
-!/docs/showcase/goose-note-first-release.mp4
-
