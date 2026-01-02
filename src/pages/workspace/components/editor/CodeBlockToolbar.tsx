@@ -1,88 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import { Copy, Check, Sparkles, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { useFormatCode } from "@/hooks/useFormatCode";
-
-const POPULAR_LANGUAGES = [
-  "javascript",
-  "typescript",
-  "python",
-  "java",
-  "csharp",
-  "php",
-  "ruby",
-  "go",
-  "rust",
-  "swift",
-  "kotlin",
-  "cpp",
-  "c",
-  "html",
-  "css",
-  "scss",
-  "json",
-  "yaml",
-  "xml",
-  "markdown",
-  "sql",
-  "bash",
-  "shell",
-  "powershell",
-  "docker",
-  "nginx",
-  "graphql",
-  "vue",
-  "jsx",
-  "tsx",
-];
-
-const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
-  javascript: "JavaScript",
-  typescript: "TypeScript",
-  python: "Python",
-  java: "Java",
-  csharp: "C#",
-  php: "PHP",
-  ruby: "Ruby",
-  go: "Go",
-  rust: "Rust",
-  swift: "Swift",
-  kotlin: "Kotlin",
-  cpp: "C++",
-  c: "C",
-  html: "HTML",
-  css: "CSS",
-  scss: "SCSS",
-  json: "JSON",
-  yaml: "YAML",
-  xml: "XML",
-  markdown: "Markdown",
-  sql: "SQL",
-  bash: "Bash",
-  shell: "Shell",
-  powershell: "PowerShell",
-  docker: "Dockerfile",
-  nginx: "Nginx",
-  graphql: "GraphQL",
-  vue: "Vue",
-  jsx: "JSX",
-  tsx: "TSX",
-};
+import {
+  FORMAT_SUPPORTED_LANGUAGES,
+  LANGUAGE_DISPLAY_NAMES,
+  POPULAR_LANGUAGES,
+} from "./codeBlockLanguages";
 
 interface CodeBlockToolbarProps {
   language: string;
@@ -118,9 +39,6 @@ export function CodeBlockToolbar({
     const content = getCodeContent();
     if (!content) return;
 
-    // Check if language supports formatting (simple check based on hook logic)
-    // The hook handles unsupported languages gracefully but we might want to prevent click if obvious.
-    // For now let the hook handle it and just try formatting.
     const formatted = await format(content, language || "text");
     if (formatted) {
       onFormat(formatted);
@@ -145,22 +63,9 @@ export function CodeBlockToolbar({
     }
   }, [isOpen]);
 
-  // Supports formatting if language is one of supported types
-  const canFormat = [
-    "javascript",
-    "js",
-    "jsx",
-    "typescript",
-    "ts",
-    "tsx",
-    "json",
-    "css",
-    "scss",
-    "less",
-    "html",
-    "markdown",
-    "md",
-  ].includes((language || "").toLowerCase());
+  const canFormat = FORMAT_SUPPORTED_LANGUAGES.includes(
+    (language || "").toLowerCase(),
+  );
 
   return (
     <TooltipProvider>
@@ -235,9 +140,9 @@ export function CodeBlockToolbar({
                 )}
               >
                 {isLoading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <LucideIcons.Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <LucideIcons.Sparkles className="h-3.5 w-3.5" />
                 )}
               </Button>
             </TooltipTrigger>
@@ -261,9 +166,9 @@ export function CodeBlockToolbar({
               )}
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <LucideIcons.Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
-                <Copy className="h-3.5 w-3.5" />
+                <LucideIcons.Copy className="h-3.5 w-3.5" />
               )}
             </Button>
           </TooltipTrigger>

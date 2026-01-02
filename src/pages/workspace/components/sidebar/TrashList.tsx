@@ -1,9 +1,3 @@
-import { usePages } from '@/stores/usePages'
-import { useNotebooks } from '@/stores/useNotebooks'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { RotateCcw, Trash2, File, ArrowLeft } from 'lucide-react'
-import * as LucideIcons from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 
@@ -27,10 +21,10 @@ export function TrashList({ onBack }: TrashListProps) {
           className="h-7 w-7"
           onClick={onBack}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <LucideIcons.ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-2">
-          <Trash2 className="h-4 w-4 text-muted-foreground" />
+          <LucideIcons.Trash2 className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">垃圾箱</span>
         </div>
       </div>
@@ -39,7 +33,7 @@ export function TrashList({ onBack }: TrashListProps) {
       <ScrollArea className="flex-1">
         {trashedPages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <Trash2 className="h-10 w-10 mb-3 opacity-50" />
+            <LucideIcons.Trash2 className="h-10 w-10 mb-3 opacity-50" />
             <p className="text-sm">垃圾箱是空的</p>
           </div>
         ) : (
@@ -69,7 +63,7 @@ export function TrashList({ onBack }: TrashListProps) {
                       )}
                     </div>
                   ) : (
-                    <File className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <LucideIcons.File className="h-4 w-4 shrink-0 text-muted-foreground" />
                   )}
 
                   {/* 标题和时间 */}
@@ -92,7 +86,7 @@ export function TrashList({ onBack }: TrashListProps) {
                       }}
                       title="恢复"
                     >
-                      <RotateCcw className="h-3.5 w-3.5" />
+                      <LucideIcons.RotateCcw className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       type="button"
@@ -106,7 +100,7 @@ export function TrashList({ onBack }: TrashListProps) {
                       }}
                       title="永久删除"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <LucideIcons.Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>

@@ -1,13 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
 import { Editor } from "@tiptap/react";
-import { Plus } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
 interface TableHoverControlsProps {
   editor: Editor;
 }
@@ -185,7 +176,7 @@ export function TableHoverControls({ editor }: TableHoverControlsProps) {
                 onMouseEnter={suppressDragHandle}
                 onMouseLeave={restoreDragHandle}
               >
-                <Plus className="h-4 w-4" />
+                <LucideIcons.Plus className="h-4 w-4" />
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom">
@@ -205,7 +196,7 @@ export function TableHoverControls({ editor }: TableHoverControlsProps) {
                 onMouseEnter={suppressDragHandle}
                 onMouseLeave={restoreDragHandle}
               >
-                <Plus className="h-4 w-4" />
+                <LucideIcons.Plus className="h-4 w-4" />
               </div>
             </TooltipTrigger>
             <TooltipContent side="right">

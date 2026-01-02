@@ -1,16 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { useEditorState } from "@tiptap/react";
-import { AlignLeft, AlignCenter, AlignRight, Trash2 } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 type ImageBubbleMenuProps = Omit<
   React.ComponentProps<typeof BubbleMenu>,
@@ -93,7 +83,7 @@ export function ImageBubbleMenu({ editor, ...props }: ImageBubbleMenuProps) {
               aria-label="左对齐"
               className="text-foreground"
             >
-              <AlignLeft className="h-4 w-4" />
+              <LucideIcons.AlignLeft className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -110,7 +100,7 @@ export function ImageBubbleMenu({ editor, ...props }: ImageBubbleMenuProps) {
               aria-label="居中"
               className="text-foreground"
             >
-              <AlignCenter className="h-4 w-4" />
+              <LucideIcons.AlignCenter className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -127,7 +117,7 @@ export function ImageBubbleMenu({ editor, ...props }: ImageBubbleMenuProps) {
               aria-label="右对齐"
               className="text-foreground"
             >
-              <AlignRight className="h-4 w-4" />
+              <LucideIcons.AlignRight className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -145,7 +135,7 @@ export function ImageBubbleMenu({ editor, ...props }: ImageBubbleMenuProps) {
               onClick={() => editor.chain().focus().deleteSelection().run()}
               className="h-8 px-2 text-destructive hover:text-destructive"
             >
-              <Trash2 className="h-4 w-4" />
+              <LucideIcons.Trash2 className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

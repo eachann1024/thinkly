@@ -1,14 +1,4 @@
 import { BubbleMenu } from "@tiptap/react/menus";
-import { Bold, Italic, Strikethrough, Code } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
 type EditorBubbleMenuProps = Omit<
   React.ComponentProps<typeof BubbleMenu>,
   "children"
@@ -43,7 +33,7 @@ export function EditorBubbleMenu({ editor, ...props }: EditorBubbleMenuProps) {
               aria-label="粗体"
               className="text-foreground"
             >
-              <Bold className="h-4 w-4" />
+              <LucideIcons.Bold className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -62,7 +52,7 @@ export function EditorBubbleMenu({ editor, ...props }: EditorBubbleMenuProps) {
               aria-label="斜体"
               className="text-foreground"
             >
-              <Italic className="h-4 w-4" />
+              <LucideIcons.Italic className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -81,7 +71,7 @@ export function EditorBubbleMenu({ editor, ...props }: EditorBubbleMenuProps) {
               aria-label="删除线"
               className="text-foreground"
             >
-              <Strikethrough className="h-4 w-4" />
+              <LucideIcons.Strikethrough className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -100,7 +90,7 @@ export function EditorBubbleMenu({ editor, ...props }: EditorBubbleMenuProps) {
               aria-label="行内代码"
               className="text-foreground"
             >
-              <Code className="h-4 w-4" />
+              <LucideIcons.Code className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>

@@ -1,224 +1,255 @@
-import {
-  closestCenter,
-  pointerWithin,
-  PointerSensor,
-  type Collision,
-  type CollisionDetection,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNotebooks } from "@/stores/useNotebooks";
-import { usePages } from "@/stores/usePages";
-import { useStoreWithEqualityFn } from "zustand/traditional";
-import { areSidebarPagesEqual } from "@/stores/pages/areSidebarPagesEqual";
+import { Tree } from "react-arborist";
+import type { NodeApi, NodeRendererProps } from "react-arborist";
 import type { Page } from "@/types";
-import { LocalFolderLoadingSkeleton } from "./LocalFolderLoadingSkeleton";
-import { buildSidebarTitleDisambiguationMap } from "./sidebar-title-disambiguation";
-import { buildVisibleTree, type FlatTreeItem } from "./tree-dnd";
-import {
-  useTreeDragHandlers,
-  type DropIntent,
-  type SidebarDragGuide,
-} from "./tree/useTreeDragHandlers";
-import { TreeViewport } from "./tree/TreeViewport";
-import { TreeEmptyState } from "./tree/TreeEmptyState";
+import { SidebarContextMenu } from "./SidebarContextMenu";
 
 interface SidebarTreeProps {
   activeNotebookId: string | null;
-  selectedPageId?: string | null;
   width: number;
   rowHeight: number;
   itemHeight: number;
-  viewportHeight: number;
   onCreatePage: () => void;
-  onDragGuideChange?: (guide: SidebarDragGuide | null) => void;
-  rootPageIds?: string[];
-  fitContent?: boolean;
-  showEmptyState?: boolean;
-  allowNest?: boolean;
-  resolveSiblings?: (parentId: string | undefined) => Page[];
-  onReorder?: (ids: string[], parentId: string | undefined) => void;
-  showAddChildButton?: boolean;
-  draggablePageIds?: string[];
-  flatRoots?: boolean;
 }
 
-class LeftButtonPointerSensor extends PointerSensor {
-  static activators = [
-    {
-      eventName: "onPointerDown" as const,
-      handler: ({ nativeEvent }: { nativeEvent: PointerEvent }) =>
-        nativeEvent.isPrimary &&
-        nativeEvent.button === 0 &&
-        !nativeEvent.ctrlKey,
-    },
-  ];
+interface TreeNode {
+  id: string;
+  name: string;
+  icon?: string;
+  children?: TreeNode[];
+  page?: Page;
+  isPlaceholder?: boolean;
+}
+
+const buildTree = (
+  pages: Record<string, Page>,
+  openPageIds: Set<string>,
+  parentId?: string,
+  workspaceId?: string,
+): TreeNode[] => {
+  const children = Object.values(pages)
+    .filter((p) => {
+      const matchParent = p.parentId === parentId && !p.trashedAt;
+      const matchWorkspace = workspaceId ? p.workspaceId === workspaceId : true;
+      return matchParent && matchWorkspace;
+    })
+    .sort((a, b) => (a.order ?? a.createdAt) - (b.order ?? b.createdAt));
+
+  const nodes: TreeNode[] = children.map((page) => ({
+    id: page.id,
+    name: page.title || "无标题",
+    icon: page.icon,
+    children: buildTree(pages, openPageIds, page.id, workspaceId),
+    page,
+  }));
+
+  if (parentId && openPageIds.has(parentId) && nodes.length === 0) {
+    return [
+      {
+        id: `${parentId}-empty`,
+        name: "内无页面",
+        isPlaceholder: true,
+      },
+    ];
+  }
+
+  return nodes;
+};
+
+type PageNodeProps = NodeRendererProps<TreeNode> & {
+  itemHeight: number;
+  activeNotebookId: string | null;
+};
+
+function PageNode({ node, style, dragHandle, itemHeight, activeNotebookId }: PageNodeProps) {
+  const { activePageId, setActivePage, createPage, pages } = usePages();
+  const isActive = activePageId === node.id;
+  const isPlaceholder = node.data.isPlaceholder;
+  const iconName = node.data.icon;
+
+  const { paddingLeft: _ignored, height: _ignoredHeight, ...itemStyle } = style;
+
+  const indent = node.level * 16;
+  const paddingLeft = indent;
+
+  if (isPlaceholder) {
+    return (
+      <div
+        style={{ ...itemStyle, height: itemHeight }}
+        className="flex items-center px-2 mx-1 select-none"
+      >
+        <div
+          style={{ paddingLeft: paddingLeft + 18 }}
+          className="text-[13px] text-muted-foreground/45 italic truncate"
+        >
+          {node.data.name}
+        </div>
+      </div>
+    );
+  }
+
+  const handleAddChild = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const existingBlankChild = Object.values(pages).find((p) => {
+      const isChild = p.parentId === node.id && !p.trashedAt;
+      const isBlankTitle = !p.title || p.title.trim() === "";
+      const isBlankContent =
+        !p.content ||
+        p.content.type !== "doc" ||
+        !p.content.content ||
+        p.content.content.length === 0 ||
+        (p.content.content.length === 1 &&
+          p.content.content[0].type === "paragraph" &&
+          (!p.content.content[0].content ||
+            p.content.content[0].content.length === 0));
+      return isChild && isBlankTitle && isBlankContent;
+    });
+
+    if (existingBlankChild) {
+      if (!node.isOpen) node.open();
+      setActivePage(existingBlankChild.id);
+    } else {
+      if (!node.isOpen) node.open();
+      createPage(node.id, activeNotebookId || DEFAULT_NOTEBOOK);
+    }
+  };
+
+  return (
+    <SidebarContextMenu page={node.data.page!}>
+      <div
+        ref={dragHandle}
+        style={{ ...itemStyle, height: itemHeight }}
+        className={cn(
+          "group relative flex items-center px-2 mx-1 rounded-md cursor-pointer transition-colors text-sm font-medium",
+          isActive
+            ? "bg-muted text-foreground"
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+          node.state.isDragging && "opacity-50",
+        )}
+        onClick={(e) => {
+          e.stopPropagation();
+          setActivePage(node.id);
+        }}
+      >
+        <div
+          className="flex items-center h-full gap-2 min-w-0 flex-1"
+          style={{ paddingLeft }}
+        >
+          <div
+            className="group/icon relative flex items-center justify-center w-5 h-5 shrink-0 -ml-0.5 rounded hover:bg-muted-foreground/10 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              node.toggle();
+            }}
+          >
+            <div className="relative flex items-center justify-center w-full h-full z-10">
+              <div
+                className={cn(
+                  "flex items-center justify-center",
+                  !node.isOpen && "group-hover/icon:hidden",
+                )}
+              >
+                {node.isOpen ? (
+                  <LucideIcons.ChevronRight className="h-4 w-4 rotate-90 text-muted-foreground/70" />
+                ) : (
+                  <>
+                    {iconName ? (
+                      <div className="h-4 w-4 flex items-center justify-center">
+                        {(LucideIcons as any)[iconName] ? (
+                          (() => {
+                            const Icon = (LucideIcons as any)[iconName];
+                            return <Icon className="h-4 w-4" />;
+                          })()
+                        ) : (
+                          <span className="text-sm">{iconName}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <LucideIcons.File className="h-4 w-4 text-muted-foreground/70" />
+                    )}
+                  </>
+                )}
+              </div>
+
+              {!node.isOpen && (
+                <div className="hidden group-hover/icon:flex items-center justify-center">
+                  <LucideIcons.ChevronRight className="h-4 w-4 text-muted-foreground/70" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <span className="truncate text-sm flex-1">{node.data.name}</span>
+        </div>
+
+        <div
+          className={cn(
+            "absolute right-0 top-0 h-full flex items-center gap-0.5 pr-1 pl-4 opacity-0 group-hover:opacity-100 transition-opacity",
+            "bg-gradient-to-r from-transparent",
+            isActive ? "to-muted" : "to-[hsl(var(--muted)/0.6)]",
+          )}
+        >
+          <button
+            className="p-1 rounded hover:bg-muted-foreground/20 active:bg-muted-foreground/30 text-muted-foreground/70 hover:text-foreground transition-colors"
+            onClick={handleAddChild}
+          >
+            <LucideIcons.Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+    </SidebarContextMenu>
+  );
 }
 
 export function SidebarTree({
   activeNotebookId,
-  selectedPageId,
   width,
   rowHeight,
   itemHeight,
-  viewportHeight,
   onCreatePage,
-  onDragGuideChange,
-  rootPageIds,
-  fitContent = false,
-  showEmptyState = true,
-  allowNest = true,
-  resolveSiblings,
-  onReorder,
-  showAddChildButton = true,
-  draggablePageIds,
-  flatRoots = false,
 }: SidebarTreeProps) {
-  const pages = useStoreWithEqualityFn(
-    usePages,
-    (s) => s.pages,
-    areSidebarPagesEqual,
-  );
-  const activePageId = usePages((s) => s.activePageId);
-  const reorderPages = usePages((s) => s.reorderPages);
-  const getChildren = usePages((s) => s.getChildren);
-  const expandPageId = usePages((s) => s.expandPageId);
-  const setExpandPageId = usePages((s) => s.setExpandPageId);
-  // selectedPageId 传 null 表示"不高亮任何项"（如 AI 界面打开时），undefined 才 fallback 到 activePageId
-  const highlightedPageId =
-    selectedPageId !== undefined ? selectedPageId : activePageId;
-
-  const notebook = activeNotebookId
-    ? useNotebooks.getState().notebooks[activeNotebookId]
-    : undefined;
-  const isLocalNotebook = notebook?.source === "local-folder";
-  const localLoadStatus = useNotebooks((state) =>
-    activeNotebookId
-      ? (state.localFolderLoadStates[activeNotebookId]?.status ?? "idle")
-      : "idle",
-  );
-  const shouldShowLocalSkeleton =
-    !rootPageIds && isLocalNotebook && localLoadStatus === "loading";
-
+  const {
+    pages,
+    activePageId,
+    setActivePage,
+    updatePage,
+    reorderPages,
+    getChildren,
+  } = usePages();
   const [openPageIds, setOpenPageIds] = useState<Set<string>>(new Set());
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [dropIntent, setDropIntent] = useState<DropIntent | null>(null);
-  const [titleRevealResetSignal, setTitleRevealResetSignal] = useState(0);
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const dragGuideKeyRef = useRef<string>("__init__");
-
-  const visibleItems = useMemo(
-    () =>
-      buildVisibleTree({
-        pages,
-        openIds: openPageIds,
-        workspaceId: activeNotebookId || undefined,
-        isLocalNotebook,
-        rootPageIds,
-        flatRoots,
-      }),
-    [
-      pages,
-      openPageIds,
-      activeNotebookId,
-      isLocalNotebook,
-      rootPageIds,
-      flatRoots,
-    ],
+  const treeData = useMemo(
+    () => buildTree(pages, openPageIds, undefined, activeNotebookId || undefined),
+    [pages, openPageIds, activeNotebookId],
   );
 
-  const activeDescendantIds = useMemo(() => {
-    // flatRoots 模式（收藏区平铺列表）下所有 item 视为虚拟根的直接子项，
-    // 不存在祖先-后代关系，强制返回空集，避免误拦截平铺重排。
-    if (!activeId || flatRoots) return new Set<string>();
-    const descendants = new Set<string>();
-    const stack = [activeId];
-
-    while (stack.length > 0) {
-      const currentId = stack.pop()!;
-      Object.values(pages).forEach((page) => {
-        if (page.trashedAt || page.parentId !== currentId) return;
-        descendants.add(page.id);
-        stack.push(page.id);
-      });
-    }
-
-    return descendants;
-  }, [activeId, pages, flatRoots]);
-
-  const renderItems = useMemo(
-    () =>
-      activeId
-        ? visibleItems.filter((item) =>
-            "isPlaceholder" in item ? true : !activeDescendantIds.has(item.id),
-          )
-        : visibleItems,
-    [visibleItems, activeId, activeDescendantIds],
-  );
-  const titleDisambiguationMap = useMemo(
-    () =>
-      buildSidebarTitleDisambiguationMap({
-        pages,
-        activeNotebookId,
-        notebook,
-        rootPageIds,
-      }),
-    [pages, activeNotebookId, notebook, rootPageIds],
+  const handleMove = useCallback(
+    ({ dragIds, parentId, index }: { dragIds: string[]; parentId: string | null; index: number }) => {
+      const targetParentId = parentId || undefined;
+      const siblings = getChildren(targetParentId, activeNotebookId || undefined);
+      const filteredSiblings = siblings.filter((p) => !dragIds.includes(p.id));
+      const movedPages = dragIds.map((id) => pages[id]).filter(Boolean) as Page[];
+      const newSiblings = [...filteredSiblings];
+      newSiblings.splice(index, 0, ...movedPages);
+      const newOrderIds = newSiblings.map((p) => p.id);
+      reorderPages(newOrderIds, targetParentId);
+    },
+    [getChildren, activeNotebookId, pages, reorderPages],
   );
 
-  const flatItems = useMemo(
-    () =>
-      renderItems.filter(
-        (item) => !("isPlaceholder" in item),
-      ) as FlatTreeItem[],
-    [renderItems],
-  );
-  const draggablePageIdSet = useMemo(
-    () => (draggablePageIds ? new Set(draggablePageIds) : null),
-    [draggablePageIds],
+  const handleRename = useCallback(
+    ({ id, name }: { id: string; name: string }) => {
+      updatePage(id, { title: name });
+    },
+    [updatePage],
   );
 
-  const visibleIndexMap = useMemo(() => {
-    const map = new Map<string, number>();
-    renderItems.forEach((item, index) => {
-      if ("isPlaceholder" in item) return;
-      map.set(item.id, index);
-    });
-    return map;
-  }, [renderItems]);
-  const resetTitleReveal = useCallback(() => {
-    setTitleRevealResetSignal((current) => current + 1);
-  }, []);
-
-  const DragSensor = LeftButtonPointerSensor;
-  const sensors = useSensors(
-    useSensor(DragSensor, {
-      activationConstraint: {
-        distance: 4,
-      },
-    }),
+  const handleActivate = useCallback(
+    (node: NodeApi<TreeNode>) => {
+      setActivePage(node.id);
+    },
+    [setActivePage],
   );
-  const collisionDetection: CollisionDetection = useCallback((args) => {
-    const filterSelf = (collisions: Collision[]) =>
-      collisions.filter(
-        (collision) => String(collision.id) !== String(args.active.id),
-      );
-    const pointerHits = filterSelf(pointerWithin(args));
-    if (pointerHits.length > 0) {
-      return pointerHits;
-    }
-    return filterSelf(closestCenter(args));
-  }, []);
-
-  const virtualizer = useVirtualizer({
-    count: renderItems.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => rowHeight,
-    overscan: 10,
-  });
 
   const handleToggle = useCallback((id: string) => {
     setOpenPageIds((prev) => {
@@ -232,166 +263,47 @@ export function SidebarTree({
     });
   }, []);
 
-  const getSiblingPages = useCallback(
-    (parentId: string | undefined) => {
-      if (resolveSiblings) {
-        return resolveSiblings(parentId);
-      }
-      return getChildren(parentId, activeNotebookId || undefined);
-    },
-    [resolveSiblings, getChildren, activeNotebookId],
-  );
-
-  useEffect(() => {
-    if (!expandPageId) return;
-
-    const page = pages[expandPageId];
-    if (!page) return;
-    if (page.trashedAt) {
-      setExpandPageId(null);
-      return;
-    }
-    if (activeNotebookId && page.workspaceId !== activeNotebookId) {
-      return;
-    }
-
-    const ancestorIds: string[] = [];
-    let current = page;
-    while (current.parentId && pages[current.parentId]) {
-      ancestorIds.push(current.parentId);
-      current = pages[current.parentId];
-    }
-
-    setOpenPageIds((prev) => {
-      const next = new Set(prev);
-      ancestorIds.forEach((id) => next.add(id));
-      return next;
-    });
-
-    const timer = window.setTimeout(() => {
-      const index = renderItems.findIndex((item) => item.id === expandPageId);
-      if (index >= 0) {
-        virtualizer.scrollToIndex(index, { align: "center" });
-      }
-    }, 80);
-
-    setExpandPageId(null);
-    return () => window.clearTimeout(timer);
-  }, [
-    expandPageId,
-    pages,
-    activeNotebookId,
-    setExpandPageId,
-    renderItems,
-    virtualizer,
-  ]);
-
-  const emitDragGuide = useCallback(
-    (guide: SidebarDragGuide | null) => {
-      if (!onDragGuideChange) return;
-      const key = guide ? `${guide.direction}:${guide.mode}` : "__none__";
-      if (dragGuideKeyRef.current === key) return;
-      dragGuideKeyRef.current = key;
-      onDragGuideChange(guide);
-    },
-    [onDragGuideChange],
-  );
-
-  useEffect(() => {
-    return () => {
-      onDragGuideChange?.(null);
-    };
-  }, [onDragGuideChange]);
-
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      resetTitleReveal();
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
-    };
-  }, [resetTitleReveal]);
-
-  const {
-    handleDragCancel,
-    handleDragEnd,
-    handleDragMove,
-    handleDragOver,
-    handleDragStart,
-  } = useTreeDragHandlers({
-    activeDescendantIds,
-    allowNest,
-    dropIntent,
-    emitDragGuide,
-    flatItems,
-    getSiblingPages,
-    isLocalNotebook,
-    itemHeight,
-    onReorder,
-    pages,
-    reorderPages,
-    resetTitleReveal,
-    rowHeight,
-    scrollRef,
-    setActiveId,
-    setDropIntent,
-    setOpenPageIds,
-    visibleIndexMap,
-  });
-
-  if (shouldShowLocalSkeleton) {
-    return <LocalFolderLoadingSkeleton />;
-  }
-
-  if (flatItems.length === 0) {
-    if (!showEmptyState) return null;
+  if (treeData.length === 0) {
     return (
-      <div className="flex min-h-0 w-full flex-1 flex-col">
-        <TreeEmptyState
-          isLocalNotebook={isLocalNotebook}
-          height={viewportHeight}
-        />
+      <div className="text-sm text-muted-foreground px-4 py-8 text-center bg-muted/30 rounded mx-2 border border-dashed">
+        <div className="mb-2">👻</div>
+        <p>暂无页面</p>
+        <Button
+          variant="link"
+          onClick={onCreatePage}
+          className="h-auto p-0 mt-1"
+        >
+          创建第一个页面
+        </Button>
       </div>
     );
   }
 
-  const contentHeight = fitContent
-    ? Math.max(renderItems.length * rowHeight, rowHeight)
-    : Math.max(virtualizer.getTotalSize(), viewportHeight || 0);
-
   return (
-    <TreeViewport
-      activeId={activeId}
-      collisionDetection={collisionDetection}
-      contentHeight={contentHeight}
-      draggablePageIdSet={draggablePageIdSet}
-      dropIntent={dropIntent}
-      fitContent={fitContent}
-      handleDragCancel={handleDragCancel}
-      handleDragEnd={handleDragEnd}
-      handleDragMove={handleDragMove}
-      handleDragOver={handleDragOver}
-      handleDragStart={handleDragStart}
-      highlightedPageId={highlightedPageId}
-      isLocalNotebook={isLocalNotebook}
-      itemHeight={itemHeight}
-      renderItems={renderItems}
-      rowHeight={rowHeight}
-      scrollRef={scrollRef}
-      sensors={sensors}
-      showAddChildButton={showAddChildButton}
-      titleDisambiguationMap={titleDisambiguationMap}
-      showExpandControls={!flatRoots}
-      titleRevealResetSignal={titleRevealResetSignal}
-      virtualItems={virtualizer.getVirtualItems()}
-      viewportHeight={viewportHeight}
+    <Tree
+      data={treeData}
+      onMove={handleMove}
+      onRename={handleRename}
+      onActivate={handleActivate}
+      selection={activePageId || undefined}
+      openByDefault={false}
       width={width}
-      onToggleOpen={handleToggle}
-    />
+      height={600}
+      indent={16}
+      rowHeight={rowHeight}
+      overscanCount={5}
+      disableEdit={false}
+      disableDrag={false}
+      disableDrop={false}
+      onToggle={handleToggle}
+    >
+      {(props) => (
+        <PageNode
+          {...props}
+          itemHeight={itemHeight}
+          activeNotebookId={activeNotebookId}
+        />
+      )}
+    </Tree>
   );
 }

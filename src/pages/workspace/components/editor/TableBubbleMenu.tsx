@@ -1,22 +1,4 @@
 import { BubbleMenu } from "@tiptap/react/menus";
-import {
-  Trash2,
-  Merge,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Heading,
-  ArrowRight,
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Toggle } from "@/components/ui/toggle";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
 type TableBubbleMenuProps = Omit<
   React.ComponentProps<typeof BubbleMenu>,
   "children"
@@ -63,7 +45,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               aria-label="左对齐"
               className="text-foreground"
             >
-              <AlignLeft className="h-4 w-4" />
+              <LucideIcons.AlignLeft className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -86,7 +68,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               aria-label="居中"
               className="text-foreground"
             >
-              <AlignCenter className="h-4 w-4" />
+              <LucideIcons.AlignCenter className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -109,7 +91,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               aria-label="右对齐"
               className="text-foreground"
             >
-              <AlignRight className="h-4 w-4" />
+              <LucideIcons.AlignRight className="h-4 w-4" />
             </Toggle>
           </TooltipTrigger>
           <TooltipContent>
@@ -125,7 +107,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               onClick={() => editor.chain().focus().toggleHeaderRow().run()}
               className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors"
             >
-              <Heading className="h-4 w-4" />
+              <LucideIcons.Heading className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent>
@@ -139,7 +121,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
               className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors"
             >
-              <ArrowRight className="h-4 w-4" />
+              <LucideIcons.ArrowRight className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent>
@@ -153,7 +135,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               onClick={() => editor.chain().focus().mergeCells().run()}
               className="p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors"
             >
-              <Merge className="h-4 w-4" />
+              <LucideIcons.Merge className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent>
@@ -169,7 +151,7 @@ export function TableBubbleMenu({ editor, ...props }: TableBubbleMenuProps) {
               onClick={() => editor.chain().focus().deleteTable().run()}
               className="p-1.5 text-destructive/80 hover:bg-destructive/10 hover:text-destructive rounded transition-colors"
             >
-              <Trash2 className="h-4 w-4" />
+              <LucideIcons.Trash2 className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent>

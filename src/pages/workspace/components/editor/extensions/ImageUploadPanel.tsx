@@ -1,8 +1,4 @@
 import { NodeViewWrapper, type NodeViewProps } from '@tiptap/react'
-import { useState, useRef, useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import { processImageForStorage, isValidImageUrl } from '@/lib/imageProcessor'
-import { Image as ImageIcon, Link, Upload } from 'lucide-react'
 
 type TabType = 'upload' | 'embed'
 
@@ -95,7 +91,7 @@ export function ImageUploadPanel({ editor, deleteNode }: NodeViewProps) {
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Upload className="h-4 w-4" />
+            <LucideIcons.Upload className="h-4 w-4" />
             上传
           </button>
           <button
@@ -107,7 +103,7 @@ export function ImageUploadPanel({ editor, deleteNode }: NodeViewProps) {
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Link className="h-4 w-4" />
+            <LucideIcons.Link className="h-4 w-4" />
             嵌入链接
           </button>
         </div>
@@ -132,7 +128,7 @@ export function ImageUploadPanel({ editor, deleteNode }: NodeViewProps) {
                   : 'text-muted-foreground hover:border-primary hover:bg-muted/50 hover:text-foreground'
               )}
             >
-              <ImageIcon className="h-5 w-5" />
+              <LucideIcons.Image className="h-5 w-5" />
               {isUploading ? '处理中...' : '点击选择图片'}
             </button>
           </>
@@ -166,4 +162,3 @@ export function ImageUploadPanel({ editor, deleteNode }: NodeViewProps) {
     </NodeViewWrapper>
   )
 }
-

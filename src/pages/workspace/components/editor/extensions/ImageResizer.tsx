@@ -1,6 +1,4 @@
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 
 export function ImageResizer(props: NodeViewProps) {
   const { node, updateAttributes, selected } = props;

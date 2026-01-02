@@ -1,13 +1,5 @@
 
-import React, { useState, useMemo } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Search, X } from "lucide-react"
-import { cn } from "@/lib/utils"
 import EmojiPicker, { EmojiStyle, Theme } from 'emoji-picker-react'
-
-import * as LucideIcons from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 
 interface IconSelectorProps<T extends HTMLElement = HTMLElement> {
@@ -30,7 +22,7 @@ export function IconSelector<T extends HTMLElement = HTMLElement>({
 
     const filteredIcons = useMemo(() => {
         if (!search) return Object.keys(LucideIcons).filter(key => key !== 'icons' && key !== 'createLucideIcon' && isNaN(Number(key))).slice(0, 300)
-        
+
         return Object.keys(LucideIcons)
             .filter(key => key.toLowerCase().includes(search.toLowerCase()) && key !== 'icons' && key !== 'createLucideIcon' && isNaN(Number(key)))
             .slice(0, 50)
@@ -65,7 +57,7 @@ export function IconSelector<T extends HTMLElement = HTMLElement>({
                      </button>
                 </div>
 
-                <div className="h-[320px]">
+                <div className="h-[320px] ">
                     {tab === 'emoji' ? (
                         <div className="w-full h-full">
                              <EmojiPicker
@@ -85,8 +77,8 @@ export function IconSelector<T extends HTMLElement = HTMLElement>({
                     ) : (
                          <div className="flex flex-col h-full">
                              <div className="flex items-center border-b px-3 pb-2 pt-3">
-                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                                <input 
+                                <LucideIcons.Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                <input
                                     className="flex h-5 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                                     placeholder="搜索图标..."
                                     value={search}
@@ -105,7 +97,7 @@ export function IconSelector<T extends HTMLElement = HTMLElement>({
                                         }}
                                         title="Remove Icon"
                                     >
-                                        <X className="h-4 w-4 text-muted-foreground" />
+                                        <LucideIcons.X className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                     {filteredIcons.map((iconName) => {
                                         const Icon = (LucideIcons as any)[iconName]
