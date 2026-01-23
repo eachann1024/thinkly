@@ -1,19 +1,28 @@
 /**
  * Base64 存储策略
- * 用于 Electron 默认模式，保持现有 Base64 方案（支持多端同步）
+ * 用于 uTools 默认模式，保持现有 Base64 方案（支持多端同步）
  */
 
 import type { IImageStorageStrategy } from '../types'
 import { blobToBase64 } from '../utils'
-import { compressIfNeeded } from '../../imageProcessor'
+import { compressImage } from '../../imageProcessor'
+
+const COMPRESS_THRESHOLD = 500 * 1024 // 500KB
+const COMPRESS_QUALITY = 0.8
 
 export class Base64Strategy implements IImageStorageStrategy {
   /**
-   * 保存为 base64（统一 WebP@80%；已是 WebP 不二次压缩）
+   * 保存为 base64（压缩大图片）
    */
-  async save(blob: Blob, _mimeType: string): Promise<string> {
-    const out = await compressIfNeeded(blob)
-    return blobToBase64(out)
+  async save(blob: Blob, mimeType: string): Promise<string> {
+    // 压缩 > 500KB 的图片
+    let processedBlob = blob
+    if (blob.size > COMPRESS_THRESHOLD) {
+      const file = new File([blob], 'image.jpg', { type: mimeType })
+      processedBlob = await compressImage(file, COMPRESS_QUALITY)
+    }
+
+    return blobToBase64(processedBlob)
   }
 
   /**
