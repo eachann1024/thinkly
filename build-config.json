@@ -17,7 +17,7 @@
   "dark-mode": false,
   "disabled-web-shortcuts": false,
   "force-internal-navigation": true,
-  "multi-arch": true,
+  "multi-arch": false,
   "user-agent": "",
   "show-system-tray": false,
   "system-tray-icon": "",

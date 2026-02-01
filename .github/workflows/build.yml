@@ -58,8 +58,7 @@ jobs:
           node dist/cli.js "${{ steps.config.outputs.URL }}" \
             --name "${{ steps.config.outputs.NAME }}" \
             --hide-title-bar \
-            --multi-arch \
-            --targets universal
+            --targets apple
           mkdir -p output
           mv "${{ steps.config.outputs.NAME }}.dmg" "output/${{ steps.config.outputs.TITLE }}.dmg"
 
