@@ -1,0 +1,99 @@
+name: Build Goose Note Desktop App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.26.2"
+
+jobs:
+  build:
+    name: Build Goose Note (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Clone Pake
+        uses: actions/checkout@v4
+        with:
+          repository: tw93/Pake
+          ref: main
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+
+      - name: Build Pake CLI
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Load config
+        id: config
+        run: |
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -o config.json \
+               https://raw.githubusercontent.com/eachann1024/goose-note/main/build-config.json
+          
+          echo "NAME=$(jq -r '.name' config.json)" >> $GITHUB_OUTPUT
+          echo "TITLE=$(jq -r '.title' config.json)" >> $GITHUB_OUTPUT
+          echo "URL=$(jq -r '.url' config.json)" >> $GITHUB_OUTPUT
+
+      - name: Build macOS
+        if: runner.os == 'macOS'
+        run: |
+          node dist/cli.js "${{ steps.config.outputs.URL }}" \
+            --name "${{ steps.config.outputs.NAME }}" \
+            --hide-title-bar \
+            --multi-arch \
+            --targets universal
+          mkdir -p output
+          mv "${{ steps.config.outputs.NAME }}.dmg" "output/${{ steps.config.outputs.TITLE }}.dmg"
+
+      - name: Build Windows
+        if: runner.os == 'Windows'
+        run: |
+          node dist/cli.js "${{ steps.config.outputs.URL }}" \
+            --name "${{ steps.config.outputs.NAME }}" \
+            --targets x64
+          New-Item -ItemType Directory -Path output
+          Move-Item "${{ steps.config.outputs.NAME }}.msi" "output/${{ steps.config.outputs.TITLE }}_x64.msi"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: goose-note-${{ matrix.os }}
+          path: output/*
+          retention-days: 30
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Goose Note v${{ github.run_number }}
+          body: |
+            ## Goose Note Desktop App v${{ github.run_number }}
+            
+            ### Downloads
+            - macOS: Goose Note.dmg
+            - Windows: Goose Note_x64.msi
+            
+            Built with [Pake](https://github.com/tw93/Pake).
+          files: output/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
