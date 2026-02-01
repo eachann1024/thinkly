@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10.26.2"
@@ -43,11 +46,12 @@ jobs:
 
       - name: Load config
         id: config
+        shell: bash
         run: |
           curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -o config.json \
                https://raw.githubusercontent.com/eachann1024/goose-note/main/build-config.json
-          
+
           echo "NAME=$(jq -r '.name' config.json)" >> $GITHUB_OUTPUT
           echo "TITLE=$(jq -r '.title' config.json)" >> $GITHUB_OUTPUT
           echo "URL=$(jq -r '.url' config.json)" >> $GITHUB_OUTPUT
