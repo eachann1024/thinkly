@@ -68,12 +68,13 @@ jobs:
 
       - name: Build Windows
         if: runner.os == 'Windows'
+        shell: bash
         run: |
           node dist/cli.js "${{ steps.config.outputs.URL }}" \
             --name "${{ steps.config.outputs.NAME }}" \
             --targets x64
-          New-Item -ItemType Directory -Path output
-          Move-Item "${{ steps.config.outputs.NAME }}.msi" "output/${{ steps.config.outputs.TITLE }}_x64.msi"
+          mkdir -p output
+          mv "${{ steps.config.outputs.NAME }}.msi" "output/${{ steps.config.outputs.TITLE }}_x64.msi"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
