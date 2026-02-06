@@ -24,14 +24,14 @@ interface BuildVisibleTreeOptions {
   openIds: Set<string>;
   workspaceId?: string;
   isLocalNotebook: boolean;
-  rootPageIds?: string[];
-  flatRoots?: boolean;
 }
 
 interface ProjectionOptions {
   items: FlatTreeItem[];
   activeId: string;
   overId: string;
+  dragOffsetX: number;
+  indentationWidth: number;
   pages: Record<string, Page>;
   isLocalNotebook: boolean;
 }
@@ -64,8 +64,6 @@ export function buildVisibleTree({
   openIds,
   workspaceId,
   isLocalNotebook,
-  rootPageIds,
-  flatRoots,
 }: BuildVisibleTreeOptions): VisibleTreeItem[] {
   const childrenMap = new Map<string | undefined, Page[]>();
 
@@ -80,61 +78,44 @@ export function buildVisibleTree({
     childrenMap.get(key)!.push(page);
   });
 
-  if (!(flatRoots && rootPageIds?.length)) {
-    for (const [key, children] of childrenMap.entries()) {
-      childrenMap.set(key, sortPages(children, isLocalNotebook));
-    }
+  for (const [key, children] of childrenMap.entries()) {
+    childrenMap.set(key, sortPages(children, isLocalNotebook));
   }
 
   const visible: VisibleTreeItem[] = [];
-  const visitedRootIds = new Set<string>();
-
-  const appendNode = (page: Page, depth: number) => {
-    const pageChildren = childrenMap.get(page.id) || [];
-    const hasChildren = flatRoots ? false : pageChildren.length > 0;
-    const isOpen = flatRoots ? false : openIds.has(page.id);
-
-    visible.push({
-      id: page.id,
-      page,
-      depth,
-      parentId: flatRoots ? undefined : page.parentId,
-      hasChildren,
-      isOpen,
-    });
-
-    if (!isOpen) return;
-
-    if (hasChildren) {
-      pageChildren.forEach((child) => appendNode(child, depth + 1));
-      return;
-    }
-
-    visible.push({
-      id: `${page.id}__placeholder`,
-      depth: depth + 1,
-      parentId: page.id,
-      isPlaceholder: true,
-      name: isLocalNotebook ? "内无文件" : "内无页面",
-    });
-  };
 
   const walk = (parentId: string | undefined, depth: number) => {
     const children = childrenMap.get(parentId) || [];
-    children.forEach((page) => appendNode(page, depth));
-  };
 
-  if (rootPageIds && rootPageIds.length > 0) {
-    rootPageIds.forEach((rootId) => {
-      if (visitedRootIds.has(rootId)) return;
-      const rootPage = pages[rootId];
-      if (!rootPage || rootPage.trashedAt) return;
-      if (workspaceId && rootPage.workspaceId !== workspaceId) return;
-      visitedRootIds.add(rootId);
-      appendNode(rootPage, 0);
+    children.forEach((page) => {
+      const pageChildren = childrenMap.get(page.id) || [];
+      const hasChildren = pageChildren.length > 0;
+      const isOpen = openIds.has(page.id);
+
+      visible.push({
+        id: page.id,
+        page,
+        depth,
+        parentId,
+        hasChildren,
+        isOpen,
+      });
+
+      if (isOpen) {
+        if (hasChildren) {
+          walk(page.id, depth + 1);
+        } else {
+          visible.push({
+            id: `${page.id}__placeholder`,
+            depth: depth + 1,
+            parentId: page.id,
+            isPlaceholder: true,
+            name: isLocalNotebook ? "内无文件" : "内无页面",
+          });
+        }
+      }
     });
-    return visible;
-  }
+  };
 
   walk(undefined, 0);
   return visible;
@@ -142,7 +123,7 @@ export function buildVisibleTree({
 
 function getPageTitle(page: Page): string {
   const nodes = Array.isArray(page.content?.content) ? page.content.content : [];
-  const headingNode = nodes.find((node: any) => {
+  const headingNode = nodes.find((node) => {
     const attrs = (node as { attrs?: { level?: number } }).attrs;
     return node.type === "heading" && attrs?.level === 1;
   });
@@ -154,6 +135,8 @@ export function getProjection({
   items,
   activeId,
   overId,
+  dragOffsetX,
+  indentationWidth,
   pages,
   isLocalNotebook,
 }: ProjectionOptions): ProjectionResult | null {
@@ -162,15 +145,30 @@ export function getProjection({
   if (activeIndex < 0 || overIndex < 0) return null;
 
   const activeItem = items[activeIndex];
+  const overItem = items[overIndex];
   const reordered = arrayMove(items, activeIndex, overIndex);
   const projectedIndex = reordered.findIndex((item) => item.id === activeId);
   const prevItem = reordered[projectedIndex - 1];
 
-  const projectedDepth = activeItem.depth;
+  const dragDepth = Math.round(dragOffsetX / indentationWidth);
+  const projectedDepth = activeItem.depth + dragDepth;
 
   const maxDepth = prevItem ? prevItem.depth + 1 : 0;
   let depth = clamp(projectedDepth, 0, maxDepth);
   let parentId = getParentId(depth, projectedIndex, reordered);
+
+  // 当横向右移并悬停在目标节点上时，优先视为“成为该节点的子节点”
+  const wantsNestIntoOverItem =
+    overItem &&
+    overItem.id !== activeId &&
+    dragOffsetX > indentationWidth * 0.65;
+  if (wantsNestIntoOverItem) {
+    const canNestInLocalMode = !isLocalNotebook || !!pages[overItem.id]?.isFolder;
+    if (canNestInLocalMode) {
+      depth = overItem.depth + 1;
+      parentId = overItem.id;
+    }
+  }
 
   if (isLocalNotebook && parentId && !pages[parentId]?.isFolder) {
     const parent = pages[parentId];
