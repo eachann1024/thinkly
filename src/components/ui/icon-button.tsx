@@ -1,19 +1,19 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
 
 const iconButtonVariants = cva(
-  "goose-interactive inline-flex shrink-0 items-center justify-center rounded-md border border-transparent transition-colors ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       tone: {
-        default:
-          "text-foreground/90",
+        default: "text-foreground/90 hover:bg-muted",
         muted:
-          "text-muted-foreground/70 dark:text-muted-foreground/55",
+          "text-muted-foreground/70 dark:text-muted-foreground/55 hover:text-foreground dark:hover:text-foreground/85 hover:bg-muted-foreground/15",
         danger:
-          "goose-interactive-danger",
+          "text-destructive/80 hover:bg-destructive/10 hover:text-destructive",
         handle:
-          "bg-muted/80 text-muted-foreground border-border/50 backdrop-blur-[1px] cursor-grab",
+          "bg-muted/80 text-muted-foreground border border-border/50 backdrop-blur-[1px] cursor-grab hover:bg-primary/20 hover:text-foreground",
       },
       size: {
         xs: "h-6 w-6",
@@ -21,7 +21,7 @@ const iconButtonVariants = cva(
         icon: "h-8 w-8",
       },
       active: {
-        true: "goose-interactive--selected",
+        true: "bg-accent text-foreground",
         false: "",
       },
     },
@@ -30,26 +30,29 @@ const iconButtonVariants = cva(
       size: "sm",
       active: false,
     },
-  },
-);
+  }
+)
 
 export interface IconButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof iconButtonVariants> {}
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof iconButtonVariants> {
+  asChild?: boolean
+}
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ className, tone, size, active, ...props }, ref) => {
+  ({ className, tone, size, active, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+
     return (
-      <button
+      <Comp
         ref={ref}
         className={cn(iconButtonVariants({ tone, size, active, className }))}
         {...props}
       />
-    );
-  },
-);
+    )
+  }
+)
 
-IconButton.displayName = "IconButton";
+IconButton.displayName = "IconButton"
 
-export { IconButton };
+export { IconButton }
