@@ -30,14 +30,12 @@ export function InlineOverflowRevealText({
   const textRef = useRef<HTMLSpanElement | null>(null);
 
   const [isOverflow, setIsOverflow] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [hoverEnabled, setHoverEnabled] = useState(false);
+  const [hoverSignal, setHoverSignal] = useState<number | null>(null);
+  const hoverEnabled = useMemo(() => canUseHoverReveal(), []);
 
   const revealText = expandedText?.trim() ? expandedText : text;
-
-  useEffect(() => {
-    setHoverEnabled(canUseHoverReveal());
-  }, []);
+  const isExpanded =
+    hoverSignal === resetSignal && hoverEnabled && isOverflow && !disabled;
 
   useLayoutEffect(() => {
     const node = textRef.current;
@@ -46,9 +44,6 @@ export function InlineOverflowRevealText({
     const measureOverflow = () => {
       const nextOverflow = node.scrollWidth > node.clientWidth;
       setIsOverflow(nextOverflow);
-      if (!nextOverflow) {
-        setIsExpanded(false);
-      }
     };
 
     measureOverflow();
@@ -68,16 +63,6 @@ export function InlineOverflowRevealText({
   }, [text, expandedText]);
 
   useEffect(() => {
-    if (disabled) {
-      setIsExpanded(false);
-    }
-  }, [disabled]);
-
-  useEffect(() => {
-    setIsExpanded(false);
-  }, [resetSignal]);
-
-  useEffect(() => {
     onExpandedChange?.(isExpanded);
   }, [isExpanded, onExpandedChange]);
 
@@ -85,7 +70,7 @@ export function InlineOverflowRevealText({
     if (!isExpanded) return;
 
     const closeReveal = () => {
-      setIsExpanded(false);
+      setHoverSignal(null);
     };
 
     const handleWindowBlur = () => closeReveal();
@@ -102,21 +87,17 @@ export function InlineOverflowRevealText({
 
   const handleMouseEnter = () => {
     if (!hoverEnabled || disabled || !isOverflow) return;
-    setIsExpanded(true);
+    setHoverSignal(resetSignal);
   };
 
   const handleMouseLeave = () => {
-    setIsExpanded(false);
+    setHoverSignal(null);
   };
 
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "relative min-w-0 flex-1 select-none",
-        active && "text-[var(--goose-interactive-selected-fg)]",
-        className,
-      )}
+      className={cn("relative min-w-0 flex-1 select-none", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       {...props}
@@ -128,7 +109,10 @@ export function InlineOverflowRevealText({
       {isExpanded && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 z-40 whitespace-nowrap text-inherit"
+          className={cn(
+            "pointer-events-none absolute left-0 top-0 z-40 whitespace-nowrap",
+            active ? "text-foreground" : "text-foreground dark:text-foreground/92",
+          )}
         >
           {revealText}
         </span>
