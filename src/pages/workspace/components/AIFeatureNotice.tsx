@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
-import { FeatureToastCard } from "@/components/ui/feature-toast-card";
-import { useSettings } from "@/stores/useSettings";
-import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-const NOTICE_ID = "ai-writing-assistant";
-const NOTICE_TOAST_ID = "ai-feature-notice";
+const NOTICE_STORAGE_KEY = "goose-note-ai-feature-notice-dismissed";
+const NOTICE_EVENT_NAME = "goose-note:show-ai-feature-notice";
 
 function openAISettings() {
   window.dispatchEvent(
@@ -16,60 +15,88 @@ function openAISettings() {
 }
 
 function createNoticeContent(handleClose: () => void) {
-  const settingsRef = { current: false };
-  const closeRef = { current: false };
   return (
-    <FeatureToastCard
-      icon={<LucideIcons.Sparkles className="h-5 w-5" />}
-      title="✨ AI 写作助手已上线"
-      actions={[
-        {
-          label: "设置",
-          onPointerDown: (e) => { e.preventDefault(); settingsRef.current = true; openAISettings(); handleClose(); },
-          onClick: () => { if (settingsRef.current) { settingsRef.current = false; return; } openAISettings(); handleClose(); },
-        },
-        {
-          label: "我知道了",
-          onPointerDown: (e) => { e.preventDefault(); closeRef.current = true; handleClose(); },
-          onClick: () => { if (closeRef.current) { closeRef.current = false; return; } handleClose(); },
-          variant: "ghost",
-          className: "text-muted-foreground hover:text-[var(--goose-interactive-hover-fg)]",
-        },
-      ]}
-    >
-      <p>· 空白段落按空格 → 唤起行内 AI</p>
-      <p>· 选中文字 → 一键润色改写</p>
-      <p>支持 DeepSeek、GLM、MiniMax 等供应商一键接入，前往设置填写 API Key 即可。</p>
-    </FeatureToastCard>
+    <div className="flex max-w-[360px] gap-3">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
+        <LucideIcons.Sparkles className="h-4.5 w-4.5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="pr-6 text-sm font-semibold text-foreground">✨ AI 写作助手已上线</div>
+        <div className="mt-1 space-y-1 text-[13px] leading-5 text-muted-foreground">
+          <p>· 输入框内按空格 → 唤起 AI</p>
+          <p>· 选中文字 → 一键润色改写</p>
+          <p>支持 uTools AI 或自定义接入，前往设置配置。</p>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 rounded-[10px] px-3 text-xs"
+            onClick={() => {
+              openAISettings();
+              handleClose();
+            }}
+          >
+            设置
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 rounded-[10px] px-3 text-xs text-muted-foreground hover:text-foreground"
+            onClick={handleClose}
+          >
+            我知道了
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function AIFeatureNotice() {
-  const dismissed = useSettings(
-    (s) => s.dismissedNotices[NOTICE_ID] === true,
-  );
-  const hydrated = useSettings((s) => s._hasHydrated === true);
-  const dismissNotice = useSettings((s) => s.dismissNotice);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // 等 hydration 完成后再决定是否弹窗，避免读到默认值
-    if (!hydrated || dismissed) return;
+    const dismissed = localStorage.getItem(NOTICE_STORAGE_KEY) === "true";
+    if (!dismissed) {
+      setVisible(true);
+    }
 
-    const handleClose = () => {
-      dismissNotice(NOTICE_ID);
-      toast.dismiss(NOTICE_TOAST_ID);
+    const handleShowNotice = () => {
+      localStorage.removeItem(NOTICE_STORAGE_KEY);
+      setVisible(true);
     };
 
-    toast.custom(() => createNoticeContent(handleClose), {
-      id: NOTICE_TOAST_ID,
+    window.addEventListener(NOTICE_EVENT_NAME, handleShowNotice);
+    return () => {
+      window.removeEventListener(NOTICE_EVENT_NAME, handleShowNotice);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const dismiss = () => {
+      localStorage.setItem(NOTICE_STORAGE_KEY, "true");
+      setVisible(false);
+      toast.dismiss("ai-feature-notice");
+    };
+
+    toast.custom(() => createNoticeContent(dismiss), {
+      id: "ai-feature-notice",
       duration: Infinity,
       dismissible: false,
     });
 
     return () => {
-      toast.dismiss(NOTICE_TOAST_ID);
+      toast.dismiss("ai-feature-notice");
     };
-  }, [dismissed, hydrated, dismissNotice]);
+  }, [visible]);
 
   return null;
+}
+
+export function showAIFeatureNotice() {
+  window.dispatchEvent(new CustomEvent(NOTICE_EVENT_NAME));
 }
