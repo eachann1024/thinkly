@@ -5,7 +5,6 @@ import { Button, type ButtonProps } from "./button";
 type FeatureToastAction = {
   label: string;
   onClick: () => void;
-  onPointerDown?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   variant?: ButtonProps["variant"];
   className?: string;
 };
@@ -27,7 +26,7 @@ export function FeatureToastCard({
 }: FeatureToastCardProps) {
   return (
     <div className={cn("flex max-w-[360px] gap-3", className)}>
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--goose-interactive-hover-border)] bg-[var(--goose-interactive-hover)] text-[var(--goose-interactive-hover-fg)]">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -44,7 +43,6 @@ export function FeatureToastCard({
               size="sm"
               className={cn("h-8 rounded-[10px] px-3 text-xs", action.className)}
               onClick={action.onClick}
-              onPointerDown={action.onPointerDown}
             >
               {action.label}
             </Button>
