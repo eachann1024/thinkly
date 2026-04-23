@@ -132,48 +132,6 @@ export const jsonRenderCatalog = defineCatalog(schema, {
       description:
         "A CSS grid container. Use for card grids, metric grids, comparison grids, etc.",
     },
-    DataTable: {
-      props: z.object({
-        columns: z.array(z.string()).describe("Column header labels"),
-        rows: z.array(z.array(z.string())).describe("Table rows, each row is an array of cell strings matching column count"),
-        caption: z.string().optional().describe("Optional table caption shown below"),
-        className: z.string().optional(),
-      }),
-      description:
-        "A data table with column headers and rows. Use for structured tabular data. Provide columns as string array and rows as 2D string array.",
-    },
-    Progress: {
-      props: z.object({
-        value: z.number().min(0).max(100).describe("Progress value 0-100"),
-        label: z.string().optional().describe("Optional label shown above the bar"),
-        className: z.string().optional(),
-      }),
-      description:
-        "A progress bar showing completion percentage (0-100). Use for tasks, loading states, skill levels.",
-    },
-    Badge: {
-      props: z.object({
-        text: z.string().describe("Badge label text"),
-        variant: z
-          .enum(["default", "secondary", "destructive", "outline"])
-          .optional()
-          .describe("Badge visual style: default (primary), secondary, destructive (red), outline"),
-        className: z.string().optional(),
-      }),
-      description:
-        "A small inline badge/tag for status labels, categories, or counts. Use inside FlexRow for tag groups.",
-    },
-    Stat: {
-      props: z.object({
-        label: z.string().describe("Metric label, e.g. 'Total Revenue'"),
-        value: z.string().describe("Primary metric value, e.g. '$12,345'"),
-        delta: z.string().optional().describe("Change value, e.g. '+12%' or '-3.2'"),
-        trend: z.enum(["up", "down", "flat"]).optional().describe("Trend direction affecting delta color"),
-        className: z.string().optional(),
-      }),
-      description:
-        "A single metric/stat display with label, value, and optional delta trend. Use inside Grid for metric dashboards.",
-    },
   },
 });
 
@@ -183,30 +141,51 @@ export const jsonRenderCatalog = defineCatalog(schema, {
  */
 export function getJsonRenderPromptFragment(): string {
   return `
-# json-render
+### JSON Render UI 组件（轻量交互界面）
 
-用户要求界面、仪表盘、表单或卡片布局时，用 \`\`\`json-render\`\`\` 输出 Spec，不要输出完整 HTML。
+当用户要求生成界面、仪表盘、数据面板、表单、卡片布局等**结构化 UI** 时，优先使用 \`\`\`json-render\`\`\` 代码围栏输出 JSON Spec，而不是输出完整的 HTML 页面。
 
-可用组件：
+json-render 比 HTML 更轻量、渲染更快，且使用项目内置的 design system 组件。
+
+#### 可用组件
 ${jsonRenderCatalog.componentNames.map((name) => `- ${name}`).join("\n")}
 
+#### Spec 格式
 \`\`\`json-render
 {
   "root": "card-1",
   "elements": {
-    "card-1": { "type": "Card", "children": ["header-1", "content-1"] },
-    "header-1": { "type": "CardHeader", "children": ["title-1"] },
-    "title-1": { "type": "CardTitle", "props": { "text": "标题" } },
-    "content-1": { "type": "CardContent", "children": ["text-1"] },
-    "text-1": { "type": "Text", "props": { "content": "内容文本" } }
+    "card-1": {
+      "type": "Card",
+      "children": ["header-1", "content-1"]
+    },
+    "header-1": {
+      "type": "CardHeader",
+      "children": ["title-1"]
+    },
+    "title-1": {
+      "type": "CardTitle",
+      "props": { "text": "标题" }
+    },
+    "content-1": {
+      "type": "CardContent",
+      "children": ["text-1"]
+    },
+    "text-1": {
+      "type": "Text",
+      "props": { "content": "内容文本" }
+    }
   }
 }
 \`\`\`
 
-- 顶层用 Card；标题区用 CardHeader、CardTitle、CardDescription；主体用 CardContent。
-- 横向用 FlexRow，纵向用 FlexCol，等宽网格用 Grid（2-4 列），指标用 Stat。
-- 表格用 DataTable（columns + rows）；进度用 Progress（0-100）；标签用 Badge。
-- 每个元素要有唯一 key，children 用 key 数组引用。
-- 不用 className 控制布局。
+#### 设计原则
+- 用 Card 作为顶层容器，CardHeader + CardTitle + CardDescription 做标题区，CardContent 放主体内容
+- 用 FlexRow 横向排列按钮/标签，FlexCol 纵向堆叠内容
+- 用 Grid 做等宽卡片/指标网格（2-4 列）
+- 用 Separator 做分隔线
+- 每个元素必须有唯一 key（如 card-1, header-1），children 用 key 数组引用子元素
+- 不要在 props 中写 className 来控制布局，优先使用 FlexRow/FlexCol/Grid 等布局组件
+- 整体风格保持简洁，不要过度嵌套
 `.trim();
 }

@@ -1,5 +1,5 @@
 import { jsonContentToMarkdown } from "@/lib/export";
-import { getPageTitle } from "@/components/editor/utils/page-title";
+import { getPageTitle } from "@/lib/page-title";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
@@ -44,16 +44,16 @@ function buildSearchHaystack(page: Page) {
 
 function findPageByTitle(title: string, originNotebookId?: string | null) {
   const normalizedTitle = normalizeText(title);
-  const pages = getReadablePages().filter(
-    (page) => page.workspaceId === originNotebookId,
-  );
+  const pages = getReadablePages();
   const exactMatches = pages.filter((page) => normalizeText(getPageTitle(page)) === normalizedTitle);
-  if (exactMatches[0]) return exactMatches[0];
+  const exactPreferred =
+    exactMatches.find((page) => page.workspaceId === originNotebookId) ?? exactMatches[0];
+  if (exactPreferred) return exactPreferred;
 
   const fuzzyMatches = pages.filter((page) =>
     normalizeText(getPageTitle(page)).includes(normalizedTitle),
   );
-  return fuzzyMatches[0] ?? null;
+  return fuzzyMatches.find((page) => page.workspaceId === originNotebookId) ?? fuzzyMatches[0] ?? null;
 }
 
 function extractMarkdownSection(markdown: string, sectionTitle: string) {
@@ -87,13 +87,14 @@ function extractMarkdownSection(markdown: string, sectionTitle: string) {
 }
 
 function executeSearchTool(argument: string, originNotebookId?: string | null) {
+  const scopeAll = /\bscope:all\b/i.test(argument);
   const query = argument.replace(/\bscope:all\b/gi, "").trim();
   if (!query) {
     return "搜索失败：缺少查询关键词。";
   }
 
   const pages = getReadablePages()
-    .filter((page) => page.workspaceId === originNotebookId)
+    .filter((page) => scopeAll || page.workspaceId === originNotebookId)
     .filter((page) => buildSearchHaystack(page).includes(query.toLowerCase()))
     .slice(0, 5);
 
