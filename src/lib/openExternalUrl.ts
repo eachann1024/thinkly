@@ -1,5 +1,3 @@
-import { shell } from "@/lib/electron-platform/shell";
-
 export function normalizeExternalUrl(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return "";
@@ -11,5 +9,11 @@ export function openExternalUrl(url: string): void {
   const targetUrl = normalizeExternalUrl(url);
   if (!targetUrl) return;
 
-  shell.openUrl(targetUrl);
+  const utools = typeof window !== "undefined" ? window.utools : null;
+  if (typeof utools?.shellOpenExternal === "function") {
+    utools.shellOpenExternal(targetUrl);
+    return;
+  }
+
+  window.open(targetUrl, "_blank", "noopener,noreferrer");
 }
