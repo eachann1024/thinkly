@@ -1,172 +1,128 @@
-import {
-  DEFAULT_CLAUDE_BASE_URL,
-  DEFAULT_OPENAI_BASE_URL,
-  getAIProviderPreset,
-  getProviderCredentialSlots,
-  getProviderFixedBaseURL,
-  isAIProviderId,
-  resolveProtocolForProvider,
-  type AIModelOption,
-  type AIProviderId,
-  type CustomAIProtocol,
-  type AIReasoningLevel,
-} from "@/lib/ai-provider";
-import type { AISettings } from "../types";
-import {
-  normalizeAIModelOptions,
-  normalizeAIBaseURL,
-  normalizeAIApiKey,
-} from "../types";
+import { DEFAULT_CLAUDE_BASE_URL, DEFAULT_OPENAI_BASE_URL, type AIModelOption, type CustomAIProtocol, type AIReasoningLevel } from '@/lib/ai-provider'
+import { getAIAnalyticsContext, trackEvent } from '@/lib/analytics'
+import type { AISettings } from '../types'
+import { normalizeAIModelOptions, normalizeAIBaseURL, normalizeAIApiKey } from '../types'
 
 export interface AISliceState {
-  ai: AISettings;
+    ai: AISettings
 }
 
 export interface AISliceActions {
-  setAIEnabled: (enabled: boolean) => void;
-  setAIReadGlobalPrompt: (enabled: boolean) => void;
-  setAIReadLocalSkills: (enabled: boolean) => void;
-  setAISelectedModelId: (modelId: string | null) => void;
-  setAIWorkspaceSelectedModelId: (modelId: string | null) => void;
-  setAIWorkspaceReasoningLevel: (level: AIReasoningLevel) => void;
-  saveAICustomConfig: (config: {
-    providerId: AIProviderId;
-    protocol?: CustomAIProtocol;
-    baseURL: string;
-    apiKey: string;
-    modelOptions: AIModelOption[];
-  }) => void;
+    setAIEnabled: (enabled: boolean) => void
+    setAISelectedModelId: (modelId: string | null) => void
+    setAIWorkspaceSelectedModelId: (modelId: string | null) => void
+    setAIWorkspaceReasoningLevel: (level: AIReasoningLevel) => void
+    setAICustomProviderEnabled: (enabled: boolean) => void
+    saveAICustomConfig: (config: {
+        protocol: CustomAIProtocol
+        baseURL: string
+        apiKey: string
+        modelOptions: AIModelOption[]
+    }) => void
 }
 
-export type AISlice = AISliceState & AISliceActions;
+export type AISlice = AISliceState & AISliceActions
 
 export const AI_INITIAL_STATE: AISliceState = {
-  ai: {
-    enabled: false,
-    readGlobalPrompt: true,
-    readLocalSkills: true,
-    runtime: "pi",
-    selectedModelId: null,
-    workspaceSelectedModelId: null,
-    workspaceReasoningLevel: "default",
-    customProviderId: "deepseek",
-    customProtocol: "openai-responses",
-    customOpenAIResponsesBaseURL: DEFAULT_OPENAI_BASE_URL,
-    customOpenAIBaseURL: DEFAULT_OPENAI_BASE_URL,
-    customClaudeBaseURL: DEFAULT_CLAUDE_BASE_URL,
-    customOpenAIResponsesApiKey: "",
-    customOpenAIApiKey: "",
-    customClaudeApiKey: "",
-    customModelOptions: [],
-    tinyfishApiKey: "",
-  },
-};
+    ai: {
+        enabled: false,
+        selectedModelId: null,
+        workspaceSelectedModelId: null,
+        workspaceReasoningLevel: 'default',
+        useCustomProvider: false,
+        customProtocol: 'openai',
+        customOpenAIBaseURL: DEFAULT_OPENAI_BASE_URL,
+        customClaudeBaseURL: DEFAULT_CLAUDE_BASE_URL,
+        customOpenAIApiKey: '',
+        customClaudeApiKey: '',
+        customModelOptions: [],
+    },
+}
 
-type SetFn = (
-  updater: Partial<AISlice> | ((state: AISlice) => Partial<AISlice>),
-) => void;
+type SetFn = (updater: Partial<AISlice> | ((state: AISlice) => Partial<AISlice>)) => void
 
 export function createAISlice(set: SetFn): AISlice {
-  return {
-    ...AI_INITIAL_STATE,
-    setAIEnabled: (enabled) =>
-      set((state) => {
-        const nextAI = { ...state.ai, enabled };
-        return { ai: nextAI };
-      }),
-    setAIReadGlobalPrompt: (readGlobalPrompt) =>
-      set((state) => ({ ai: { ...state.ai, readGlobalPrompt } })),
-    setAIReadLocalSkills: (readLocalSkills) =>
-      set((state) => ({ ai: { ...state.ai, readLocalSkills } })),
-    setAISelectedModelId: (selectedModelId) =>
-      set((state) => {
-        const nextAI = { ...state.ai, selectedModelId };
-        return { ai: nextAI };
-      }),
-    setAIWorkspaceSelectedModelId: (workspaceSelectedModelId) =>
-      set((state) => ({
-        ai: { ...state.ai, workspaceSelectedModelId },
-      })),
-    setAIWorkspaceReasoningLevel: (workspaceReasoningLevel) =>
-      set((state) => ({
-        ai: { ...state.ai, workspaceReasoningLevel },
-      })),
-    saveAICustomConfig: ({
-      providerId: rawProviderId,
-      protocol: protocolOverride,
-      baseURL,
-      apiKey,
-      modelOptions,
-    }) =>
-      set((state) => {
-        const providerId: AIProviderId = isAIProviderId(rawProviderId)
-          ? rawProviderId
-          : "deepseek";
-        const preset = getAIProviderPreset(providerId);
-        const normalizedModelOptions = normalizeAIModelOptions(modelOptions);
-        // 保留用户当前默认模型（仍在新列表中时）；否则回落到列表首项
-        const preservedSelectedModelId =
-          state.ai.selectedModelId &&
-          normalizedModelOptions.some(
-            (item) => item.id === state.ai.selectedModelId,
-          )
-            ? state.ai.selectedModelId
-            : (normalizedModelOptions[0]?.id ?? state.ai.selectedModelId);
-        const preservedWorkspaceModelId =
-          state.ai.workspaceSelectedModelId &&
-          normalizedModelOptions.some(
-            (item) => item.id === state.ai.workspaceSelectedModelId,
-          )
-            ? state.ai.workspaceSelectedModelId
-            : state.ai.workspaceSelectedModelId;
+    return {
+        ...AI_INITIAL_STATE,
+        setAIEnabled: (enabled) =>
+            set((state) => {
+                const nextAI = { ...state.ai, enabled }
+                trackEvent('ai_settings_changed', {
+                    feature: 'ai_settings',
+                    action: 'toggle',
+                    source: 'settings',
+                    enabled,
+                    provider_type: nextAI.useCustomProvider ? nextAI.customProtocol : 'utools',
+                    change_type: 'toggle_enabled',
+                    ...getAIAnalyticsContext(nextAI),
+                })
+                return { ai: nextAI }
+            }),
+        setAISelectedModelId: (selectedModelId) =>
+            set((state) => {
+                const nextAI = { ...state.ai, selectedModelId }
+                trackEvent('ai_settings_changed', {
+                    feature: 'ai_settings',
+                    action: 'change_model',
+                    source: 'settings',
+                    enabled: nextAI.enabled,
+                    provider_type: nextAI.useCustomProvider ? nextAI.customProtocol : 'utools',
+                    change_type: 'change_model',
+                    ...getAIAnalyticsContext(nextAI),
+                })
+                return { ai: nextAI }
+            }),
+        setAIWorkspaceSelectedModelId: (workspaceSelectedModelId) =>
+            set((state) => ({
+                ai: { ...state.ai, workspaceSelectedModelId },
+            })),
+        setAIWorkspaceReasoningLevel: (workspaceReasoningLevel) =>
+            set((state) => ({
+                ai: { ...state.ai, workspaceReasoningLevel },
+            })),
+        setAICustomProviderEnabled: (useCustomProvider) =>
+            set((state) => {
+                const nextAI = { ...state.ai, useCustomProvider }
+                trackEvent('ai_settings_changed', {
+                    feature: 'ai_settings',
+                    action: 'switch_provider',
+                    source: 'settings',
+                    enabled: nextAI.enabled,
+                    provider_type: nextAI.useCustomProvider ? nextAI.customProtocol : 'utools',
+                    change_type: 'switch_provider',
+                    ...getAIAnalyticsContext(nextAI),
+                })
+                return { ai: nextAI }
+            }),
+        saveAICustomConfig: ({ protocol, baseURL, apiKey, modelOptions }) =>
+            set((state) => {
+                const normalizedModelOptions = normalizeAIModelOptions(modelOptions)
+                const normalizedBaseURL = protocol === 'openai'
+                    ? normalizeAIBaseURL(baseURL, DEFAULT_OPENAI_BASE_URL)
+                    : normalizeAIBaseURL(baseURL, DEFAULT_CLAUDE_BASE_URL)
+                const normalizedApiKey = normalizeAIApiKey(apiKey)
+                const nextAI = {
+                    ...state.ai,
+                    customProtocol: protocol,
+                    customOpenAIBaseURL: protocol === 'openai' ? normalizedBaseURL : state.ai.customOpenAIBaseURL,
+                    customClaudeBaseURL: protocol === 'claude' ? normalizedBaseURL : state.ai.customClaudeBaseURL,
+                    customOpenAIApiKey: protocol === 'openai' ? normalizedApiKey : state.ai.customOpenAIApiKey,
+                    customClaudeApiKey: protocol === 'claude' ? normalizedApiKey : state.ai.customClaudeApiKey,
+                    customModelOptions: normalizedModelOptions,
+                    selectedModelId: normalizedModelOptions[0]?.id ?? state.ai.selectedModelId,
+                }
 
-        const protocol =
-          protocolOverride ??
-          resolveProtocolForProvider(
-            providerId,
-            preservedSelectedModelId,
-            preset.protocol,
-          );
-        const fixedBaseURL = getProviderFixedBaseURL(providerId);
-        const fallbackBaseURL =
-          protocol === "claude"
-            ? DEFAULT_CLAUDE_BASE_URL
-            : DEFAULT_OPENAI_BASE_URL;
-        const normalizedBaseURL = normalizeAIBaseURL(
-          fixedBaseURL ?? baseURL,
-          fallbackBaseURL,
-        );
-        const normalizedApiKey = normalizeAIApiKey(apiKey);
-        const slots = getProviderCredentialSlots(providerId);
+                trackEvent('ai_settings_changed', {
+                    feature: 'ai_settings',
+                    action: 'save_config',
+                    source: 'settings',
+                    enabled: nextAI.enabled,
+                    provider_type: nextAI.useCustomProvider ? nextAI.customProtocol : 'utools',
+                    change_type: 'save_custom_config',
+                    ...getAIAnalyticsContext(nextAI),
+                })
 
-        const nextAI: AISettings = {
-          ...state.ai,
-          customProviderId: providerId,
-          customProtocol: protocol,
-          customOpenAIResponsesBaseURL: slots.includes("openai-responses")
-            ? normalizedBaseURL
-            : state.ai.customOpenAIResponsesBaseURL,
-          customOpenAIBaseURL: slots.includes("openai")
-            ? normalizedBaseURL
-            : state.ai.customOpenAIBaseURL,
-          customClaudeBaseURL: slots.includes("claude")
-            ? normalizedBaseURL
-            : state.ai.customClaudeBaseURL,
-          customOpenAIResponsesApiKey: slots.includes("openai-responses")
-            ? normalizedApiKey
-            : state.ai.customOpenAIResponsesApiKey,
-          customOpenAIApiKey: slots.includes("openai")
-            ? normalizedApiKey
-            : state.ai.customOpenAIApiKey,
-          customClaudeApiKey: slots.includes("claude")
-            ? normalizedApiKey
-            : state.ai.customClaudeApiKey,
-          customModelOptions: normalizedModelOptions,
-          selectedModelId: preservedSelectedModelId,
-          workspaceSelectedModelId: preservedWorkspaceModelId,
-        };
-
-        return { ai: nextAI };
-      }),
-  };
+                return { ai: nextAI }
+            }),
+    }
 }
