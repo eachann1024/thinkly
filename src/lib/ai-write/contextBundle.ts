@@ -1,14 +1,13 @@
 import type { Page } from "@/types";
 import { extractBlocksInRange } from "@/lib/ai-block-scope";
-import { extractStructureSummary } from "@/components/editor/utils/content-text-extractor";
+import { extractStructureSummary } from "@/lib/content-text-extractor";
 import { jsonContentToMarkdown } from "@/lib/export";
 import { usePages } from "@/stores/usePages";
-import { useNotebooks } from "@/stores/useNotebooks";
 import {
   formatAiReferenceContextBlock,
   resolveAiReferenceContexts,
   type AiComposerPayload,
-} from "@/components/editor/ai/composer/referenceLookup";
+} from "@/pages/workspace/components/editor/ai-composer/referenceLookup";
 import type { AiContextBundle, AiResolvedTarget } from "./targetResolution";
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
@@ -81,7 +80,7 @@ export function buildAiContextBundle(params: {
 
   return {
     referenceContextBlock: formatAiReferenceContextBlock(
-      resolveAiReferenceContexts(filteredReferences, usePages.getState().pages, useNotebooks.getState().notebooks),
+      resolveAiReferenceContexts(filteredReferences),
     ),
     originContextBlock: getPageContextBlock(
       params.originPageId
