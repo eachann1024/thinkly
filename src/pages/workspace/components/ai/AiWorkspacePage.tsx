@@ -1,37 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as LucideIcons from "lucide-react";
 import { toast } from "sonner";
-import { AiGradientIcon } from "@/components/ui/ai-gradient-icon";
 import {
   buildAgentPlan,
   commitAgentArtifact,
   executeAgentPlan,
 } from "@/agent/core/runtime";
 import { buildWorkspaceIntentRouterDeps } from "@/agent/core/routerDeps";
-import type {
-  AgentArtifact,
-  AgentPlan,
-  MarkdownNoteArtifact,
-} from "@/agent/core/types";
-import { AgentArtifactView, StreamingDatavizText, textHasDataviz, artifactHasDataviz } from "@/agent/renderers/AgentArtifactView";
-import {
-  type AIMessage,
-  type AIStreamPhase,
-} from "@/lib/ai-provider";
+import type { AgentArtifact, MarkdownNoteArtifact } from "@/agent/core/types";
+import type { AiSessionMessageVersion } from "@/stores/useAiSessions";
+import type { AIMessage } from "@/lib/ai-provider";
 import { getAIErrorType, trackEvent } from "@/lib/analytics";
 import {
   createStickyTargetFromResolvedTarget,
   resolvedTargetToSelection,
-  type AiWritePlan,
 } from "@/lib/ai-write";
 import { cn } from "@/lib/utils";
 import {
   EDITOR_FONT_SIZE_DEFAULT,
   useSettings,
 } from "@/stores/useSettings";
-import { useAiSessions, type AiSession, type AiSessionMessage } from "@/stores/useAiSessions";
 import { useAiStatus } from "@/stores/useAiStatus";
-import { getPageTitle } from "@/lib/page-title";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
@@ -40,520 +29,102 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  type AiComposerInputHandle,
-} from "../editor/ai-composer/AiComposerInput";
+import type { AiComposerInputHandle } from "../editor/ai-composer/AiComposerInput";
 import {
   getAiReferenceStats,
   serializeAiComposerDoc,
   type AiFileReferenceAttrs,
 } from "../editor/ai-composer/referenceLookup";
-import { AiWorkspaceComposerBar } from "./AiWorkspaceComposerBar";
+import { AiPromptComposer } from "./AiPromptComposer";
+import { AiSessionHistoryPanel } from "./AiSessionHistoryPanel";
+import { AiWorkspaceMessages } from "./AiWorkspaceMessages";
 import { CLOSE_AI_WORKSPACE_EVENT } from "./events";
-
-const AI_WORKSPACE_DEFAULT_DIAGRAM_URL =
-  "https://goose-notion-1257312034.cos.ap-guangzhou.myqcloud.com/AI%20default%20diagram.png";
-
-interface AiConversationMessage extends AiSessionMessage {
-  streaming?: boolean;
-}
-
-const STREAM_PHASE_LABEL: Record<AIStreamPhase, string> = {
-  connecting: "正在连接模型",
-  thinking: "正在整理上下文",
-  generating: "正在生成回答",
-  finishing: "正在整理结果",
-};
-
-function MessageReferenceChip({ reference }: { reference: AiFileReferenceAttrs }) {
-  const page = usePages((state) => state.getPage(reference.pageId));
-  const { openTab } = useTabs();
-  const title = page ? getPageTitle(page) : reference.titleSnapshot;
-  const icon = page?.icon;
-  const isAvailable = !!page && !page.trashedAt;
-
-  const handleOpen = (event: React.MouseEvent | React.KeyboardEvent) => {
-    if (!isAvailable) return;
-    event.stopPropagation();
-    if ("key" in event && event.key !== "Enter" && event.key !== " ") return;
-    openTab(reference.pageId);
-  };
-
-  return (
-    <span
-      role={isAvailable ? "button" : undefined}
-      tabIndex={isAvailable ? 0 : undefined}
-      onClick={isAvailable ? handleOpen : undefined}
-      onKeyDown={isAvailable ? handleOpen : undefined}
-      className={cn(
-        "ai-message-ref inline-flex items-center gap-1 align-baseline rounded-md px-1.5 py-[1px] text-[12.5px] leading-snug mx-[1px]",
-        "bg-background/70 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border)/0.55)]",
-        isAvailable &&
-          "cursor-pointer transition-colors hover:bg-background hover:shadow-[inset_0_0_0_1px_hsl(var(--border))]",
-        !isAvailable && "italic text-muted-foreground/85",
-      )}
-    >
-      {icon ? (
-        <span className="text-[12px] leading-none">{icon}</span>
-      ) : (
-        <LucideIcons.FileText className="h-3 w-3 shrink-0 text-muted-foreground/80" />
-      )}
-      <span className="max-w-[200px] truncate">{title}</span>
-    </span>
-  );
-}
-
-function renderMessageWithReferences(
-  text: string,
-  references: AiFileReferenceAttrs[] | undefined,
-): React.ReactNode {
-  if (!text) return null;
-  if (!references || references.length === 0) return text;
-
-  const sorted = [...references].sort(
-    (a, b) => b.titleSnapshot.length - a.titleSnapshot.length,
-  );
-
-  const nodes: React.ReactNode[] = [];
-  let cursor = 0;
-  let key = 0;
-
-  while (cursor < text.length) {
-    let best: { idx: number; ref: AiFileReferenceAttrs; len: number } | null = null;
-    for (const ref of sorted) {
-      if (!ref.titleSnapshot) continue;
-      const needle = `@${ref.titleSnapshot}`;
-      const idx = text.indexOf(needle, cursor);
-      if (idx !== -1 && (best === null || idx < best.idx)) {
-        best = { idx, ref, len: needle.length };
-      }
-    }
-
-    if (!best) {
-      nodes.push(<span key={`t-${key++}`}>{text.slice(cursor)}</span>);
-      break;
-    }
-
-    if (best.idx > cursor) {
-      nodes.push(<span key={`t-${key++}`}>{text.slice(cursor, best.idx)}</span>);
-    }
-    nodes.push(
-      <MessageReferenceChip key={`r-${key++}-${best.ref.pageId}`} reference={best.ref} />,
-    );
-    cursor = best.idx + best.len;
-  }
-
-  return nodes;
-}
-
-/** 生成新会话 ID */
-function genSessionId() {
-  return `ai-session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/** 从首条用户消息中提取标题（最多 40 字） */
-function extractSessionTitle(messages: AiConversationMessage[]) {
-  const first = messages.find((m) => m.role === "user");
-  if (!first?.text) return "新对话";
-  return first.text.length > 40 ? `${first.text.slice(0, 40)}…` : first.text;
-}
-
-/** 格式化时间戳为人类可读文字 */
-function formatSessionTime(ts: number) {
-  const now = Date.now();
-  const diff = now - ts;
-  const minutes = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-  const days = Math.floor(diff / 86_400_000);
-
-  if (minutes < 1) return "刚刚";
-  if (minutes < 60) return `${minutes} 分钟前`;
-  if (hours < 24) return `${hours} 小时前`;
-  if (days < 7) return `${days} 天前`;
-  return new Date(ts).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
-}
-
-function normalizeMessagesForPersistence(
-  messages: AiConversationMessage[],
-  streamPhase: AIStreamPhase,
-) {
-  return messages.map(({
-    id,
-    role,
-    text,
-    references,
-    error,
-    streaming,
-    agentPlan,
-    artifact,
-    writePlan,
-  }) => ({
-    id,
-    role,
-    text: text || (streaming ? STREAM_PHASE_LABEL[streamPhase] : ""),
-    references,
-    error,
-    agentPlan,
-    artifact,
-    writePlan:
-      artifact?.type === "markdown_note"
-        ? artifact.plan
-        : writePlan,
-  }));
-}
-
-function legacyWritePlanToAgentPlan(writePlan: AiWritePlan | null | undefined): AgentPlan | null {
-  if (!writePlan) return null;
-  const capabilityId =
-    writePlan.action === "append_page"
-      ? "note.append"
-      : writePlan.action === "replace_page" ||
-          writePlan.action === "replace_block_range"
-        ? "note.replace"
-        : "note.create";
-  return {
-    id: `legacy-plan-${writePlan.action}-${writePlan.previewTitle}`,
-    capabilityId,
-    artifactType: "markdown_note",
-    executionStrategy: "single",
-    surface: "workspace",
-    promptText: writePlan.promptText,
-    systemPrompt: "",
-    userPrompt: "",
-    intentReason: "legacy_write_plan",
-    targetType: writePlan.target.mode,
-    resolvedTarget: writePlan.target,
-    createdAt: Date.now(),
-  };
-}
-
-function legacyWritePlanToArtifact(writePlan: AiWritePlan | null | undefined): AgentArtifact | null {
-  if (!writePlan) return null;
-  return {
-    type: "markdown_note",
-    plan: writePlan,
-  } as MarkdownNoteArtifact;
-}
-
-function normalizeConversationMessage<T extends AiConversationMessage>(message: T): T {
-  const artifact = message.artifact ?? legacyWritePlanToArtifact(message.writePlan);
-  const agentPlan = message.agentPlan ?? legacyWritePlanToAgentPlan(message.writePlan);
-
-  // 运行时类型检查：确保 text 始终是字符串，防止 localStorage 数据损坏导致对象被渲染为 React child
-  let text = message.text;
-  if (artifact?.type === "text_response") {
-    text = typeof artifact.text === "string" ? artifact.text : "";
-  } else {
-    text = typeof message.text === "string" ? message.text : "";
-  }
-
-  return {
-    ...message,
-    text,
-    agentPlan,
-    artifact,
-    writePlan:
-      artifact?.type === "markdown_note"
-        ? artifact.plan
-        : message.writePlan,
-  };
-}
-
-function getLastAgentPlan(messages: AiConversationMessage[]) {
-  return (
-    messages
-      .map((message) => message.agentPlan)
-      .filter(Boolean)
-      .at(-1) ?? null
-  );
-}
-
-function getLastArtifact(messages: AiConversationMessage[]) {
-  return (
-    messages
-      .map((message) => message.artifact)
-      .filter(Boolean)
-      .at(-1) ?? null
-  );
-}
-
-// ── 历史会话下拉面板
-interface SessionHistoryPanelProps {
-  sessions: AiSession[];
-  activeSessionId: string | null;
-  onSelectSession: (session: AiSession) => void;
-  onDeleteSession: (id: string) => void;
-  onClose: () => void;
-}
-
-function SessionHistoryPanel({
-  sessions,
-  activeSessionId,
-  onSelectSession,
-  onDeleteSession,
-  onClose,
-}: SessionHistoryPanelProps) {
-  if (sessions.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <LucideIcons.History className="mb-2 h-8 w-8 text-muted-foreground/40" />
-        <p className="text-[12px] text-muted-foreground">暂无历史会话</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-0.5">
-      {sessions.map((session) => (
-        <div
-          key={session.id}
-          className={cn(
-            "group flex cursor-pointer items-start gap-2 rounded-[10px] px-2.5 py-2 transition-colors",
-            session.id === activeSessionId
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent/60",
-          )}
-          onClick={() => {
-            onSelectSession(session);
-            onClose();
-          }}
-        >
-          <LucideIcons.MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[12px] font-medium text-foreground">
-              {session.title}
-            </div>
-            <div className="mt-0.5 text-[10px] text-muted-foreground">
-              {formatSessionTime(session.updatedAt)} · {session.messages.filter((m) => m.role === "user").length} 条提问
-            </div>
-          </div>
-          {/* 删除按钮 */}
-          <button
-            type="button"
-            className="ml-1 shrink-0 rounded p-0.5 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteSession(session.id);
-            }}
-          >
-            <LucideIcons.X className="h-3 w-3" />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
+import {
+  getLastAgentPlan,
+  getLastArtifact,
+  normalizeConversationMessage,
+  type AiConversationMessage,
+  useAiSessionHistory,
+} from "./useAiSessionHistory";
 
 export function AiWorkspacePage() {
   const composerRef = useRef<AiComposerInputHandle | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement | null>(null);
-  // 用于智能自动滚动：记录用户是否已主动上滚
   const userScrolledUpRef = useRef(false);
   const activeRequestIdRef = useRef(0);
   const streamAbortRef = useRef<AbortController | null>(null);
-  const currentSessionIdRef = useRef<string | null>(null);
-  const latestMessagesRef = useRef<AiConversationMessage[]>([]);
-  const latestStreamPhaseRef = useRef<AIStreamPhase>("connecting");
-  // RAF throttle refs for streaming updates
-  const streamingAccRef = useRef<{ text: string; phase: AIStreamPhase }>({ text: "", phase: "connecting" });
+  const streamingAccRef = useRef<{ text: string; phase: import("@/lib/ai-provider").AIStreamPhase }>({ text: "", phase: "connecting" });
   const streamingRafRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
-  // Stable refs for unmount cleanup — avoids re-registering cleanup on every plan/artifact change
-  const persistSessionSnapshotRef = useRef<typeof persistSessionSnapshot | null>(null);
-  const activeLastAgentPlanRef = useRef<AgentPlan | null>(null);
-  const activeLastArtifactRef = useRef<AgentArtifact | null>(null);
-  const [applyingMessageId, setApplyingMessageId] = useState<string | null>(null);
-  // Retry: store last submitted payload and model overrides
   const lastSubmitPayloadRef = useRef<import("../editor/ai-composer/referenceLookup").AiComposerPayload | null>(null);
   const lastSubmitOverridesRef = useRef<{ selectedModelId: string | null } | null>(null);
+  const cancelActiveRequestRef = useRef<() => void>(() => {});
 
+  const [applyingMessageId, setApplyingMessageId] = useState<string | null>(null);
   const [composerFocusToken, setComposerFocusToken] = useState(0);
-  const [messages, setMessages] = useState<AiConversationMessage[]>([]);
-  const [streamPhase, setStreamPhase] = useState<AIStreamPhase>("connecting");
   const [isStreaming, setIsStreaming] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { activePageId } = usePages();
   const { activeNotebookId } = useNotebooks();
   const { openTab } = useTabs();
+  const editorFontSize = useSettings((s) => s.editorFontSize);
+  const aiWorkspaceScale = editorFontSize / EDITOR_FONT_SIZE_DEFAULT;
+
+  const cancelActiveRequest = useCallback(() => {
+    cancelActiveRequestRef.current();
+  }, []);
 
   const {
     sessions,
     activeSessionId,
-    activeMessages,
     draftContent,
-    activeOriginPageId,
-    activeOriginNotebookId,
     activeLastWritePlan,
-    activeLastAgentPlan,
-    activeLastArtifact,
-    saveSession,
-    setActiveSession,
-    setActiveMessages,
+    originPageId,
+    originNotebookId,
+    messages,
+    setMessages,
+    streamPhase,
+    setStreamPhase,
+    currentSessionIdRef,
+    latestMessagesRef,
+    latestStreamPhaseRef,
+    activeLastArtifactRef,
+    syncActiveMessages,
+    persistSessionSnapshot,
+    switchMessageVersion,
+    handleSelectSession,
+    handleNewSession,
+    ensureCurrentSessionId,
     setDraftContent,
-    setActiveOrigin,
-    setActiveResolvedTarget,
     setActiveLastWritePlan,
     setActiveLastAgentPlan,
     setActiveLastArtifact,
-    resetActiveState,
     deleteSession,
-  } = useAiSessions();
-  const originPageId = activeOriginPageId ?? activePageId;
-  const originNotebookId = activeOriginNotebookId ?? activeNotebookId;
+  } = useAiSessionHistory({
+    activePageId,
+    activeNotebookId,
+    composerRef,
+    cancelActiveRequest,
+    isStreaming,
+    setComposerFocusToken,
+    setHistoryOpen,
+    streamAbortRef,
+  });
+
+  cancelActiveRequestRef.current = () => {
+    activeRequestIdRef.current += 1;
+    streamAbortRef.current?.abort();
+    streamAbortRef.current = null;
+    setIsStreaming(false);
+    setStreamPhase("connecting");
+    useAiStatus.getState().finishStreaming({ celebrate: false });
+  };
+
   const draftPayload = useMemo(
     () => serializeAiComposerDoc(draftContent),
     [draftContent],
   );
 
-  const editorFontSize = useSettings((s) => s.editorFontSize);
-  const aiWorkspaceScale = editorFontSize / EDITOR_FONT_SIZE_DEFAULT;
-
-  const syncActiveMessages = useCallback(
-    (nextMessages: AiConversationMessage[], phase: AIStreamPhase = streamPhase) => {
-      latestMessagesRef.current = nextMessages;
-      latestStreamPhaseRef.current = phase;
-      setActiveMessages(normalizeMessagesForPersistence(nextMessages, phase));
-    },
-    [setActiveMessages, streamPhase],
-  );
-
-  const persistSessionSnapshot = useCallback(
-    (
-      nextMessages: AiConversationMessage[],
-      options?: {
-        plan?: AgentPlan | null;
-        artifact?: AgentArtifact | null;
-      },
-    ) => {
-      const snapshot = normalizeMessagesForPersistence(
-        nextMessages,
-        latestStreamPhaseRef.current,
-      );
-      const sessionId = currentSessionIdRef.current;
-      if (!sessionId || snapshot.length === 0) return;
-
-      saveSession({
-        id: sessionId,
-        title: extractSessionTitle(nextMessages),
-        pageId: undefined,
-        originPageId,
-        originNotebookId,
-        resolvedTarget:
-          options?.plan?.resolvedTarget ??
-          (options?.artifact?.type === "markdown_note"
-            ? options.artifact.plan.target
-            : null),
-        lastWritePlan:
-          options?.artifact?.type === "markdown_note"
-            ? options.artifact.plan
-            : activeLastWritePlan,
-        lastAgentPlan: options?.plan ?? activeLastAgentPlan,
-        lastArtifact: options?.artifact ?? activeLastArtifact,
-        messages: snapshot,
-      });
-    },
-    [
-      activeLastAgentPlan,
-      activeLastArtifact,
-      activeLastWritePlan,
-      originNotebookId,
-      originPageId,
-      saveSession,
-    ],
-  );
-
-  useEffect(() => {
-    latestMessagesRef.current = messages;
-  }, [messages]);
-
-  useEffect(() => {
-    latestStreamPhaseRef.current = streamPhase;
-  }, [streamPhase]);
-
-  // Keep refs in sync so the unmount cleanup can access the latest values
-  // without being re-registered every time these change (which would cause
-  // the cleanup to fire prematurely and trigger an infinite setState loop).
-  useEffect(() => {
-    persistSessionSnapshotRef.current = persistSessionSnapshot;
-  }, [persistSessionSnapshot]);
-  useEffect(() => {
-    activeLastAgentPlanRef.current = activeLastAgentPlan;
-  }, [activeLastAgentPlan]);
-  useEffect(() => {
-    activeLastArtifactRef.current = activeLastArtifact;
-  }, [activeLastArtifact]);
-
-  useEffect(() => {
-    // Guard: do not overwrite local messages state while a stream is active.
-    // syncActiveMessages → setActiveMessages would otherwise trigger this effect and
-    // reset all message.streaming flags to false, causing a false "未收到响应" flash.
-    if (isStreaming) return;
-    const restoredMessages =
-      activeMessages.length > 0
-        ? activeMessages.map((message) =>
-            normalizeConversationMessage({
-              ...message,
-              streaming: false,
-            } as AiConversationMessage),
-          )
-        : activeSessionId
-          ? sessions
-              .find((session) => session.id === activeSessionId)
-              ?.messages.map((message) =>
-                normalizeConversationMessage({
-                  ...message,
-                  streaming: false,
-                } as AiConversationMessage),
-              ) ?? []
-          : [];
-
-    currentSessionIdRef.current = activeSessionId;
-    setMessages(restoredMessages);
-    latestMessagesRef.current = restoredMessages;
-    if (activeSessionId) {
-      const session = sessions.find((item) => item.id === activeSessionId);
-      setActiveOrigin({
-        pageId: session?.originPageId ?? null,
-        notebookId: session?.originNotebookId ?? null,
-      });
-      setActiveResolvedTarget(session?.resolvedTarget ?? null);
-      setActiveLastWritePlan(
-        session?.lastWritePlan ??
-          (session?.lastArtifact?.type === "markdown_note"
-            ? session.lastArtifact.plan
-            : null),
-      );
-      setActiveLastAgentPlan(
-        session?.lastAgentPlan ??
-          legacyWritePlanToAgentPlan(session?.lastWritePlan ?? null),
-      );
-      setActiveLastArtifact(
-        session?.lastArtifact ??
-          legacyWritePlanToArtifact(session?.lastWritePlan ?? null),
-      );
-    }
-  }, [
-    isStreaming,
-    activeMessages,
-    activeSessionId,
-    sessions,
-    setActiveLastAgentPlan,
-    setActiveLastArtifact,
-    setActiveLastWritePlan,
-    setActiveOrigin,
-    setActiveResolvedTarget,
-  ]);
-
-  useEffect(() => {
-    if (!activeOriginPageId && activePageId) {
-      setActiveOrigin({
-        pageId: activePageId,
-        notebookId: activeNotebookId,
-      });
-    }
-  }, [activeNotebookId, activeOriginPageId, activePageId, setActiveOrigin]);
-
-  // ── 智能自动滚动：用户上滚时不打断，新消息发出时强制滚底
   const isAutoScrollingRef = useRef(false);
 
   useEffect(() => {
@@ -572,111 +143,11 @@ export function AiWorkspacePage() {
     if (!userScrolledUpRef.current) {
       isAutoScrollingRef.current = true;
       messagesEndRef.current?.scrollIntoView({ block: "end" });
-      // scrollIntoView 是同步的，但 scroll 事件在下一微任务才触发，用 rAF 安全恢复
       requestAnimationFrame(() => {
         isAutoScrollingRef.current = false;
       });
     }
   }, [messages, isStreaming]);
-
-  // ── 卸载时终止流
-  // 使用 [] 依赖（仅卸载时执行），通过 refs 读取最新值，
-  // 避免每次 activeLastAgentPlan / persistSessionSnapshot 变化时提前触发 cleanup，
-  // 从而防止 cleanup → setActiveMessages → restore effect → setActiveLastAgentPlan → cleanup 的无限循环。
-  useEffect(() => {
-    return () => {
-      const snapshot = normalizeMessagesForPersistence(
-        latestMessagesRef.current,
-        latestStreamPhaseRef.current,
-      );
-
-      streamAbortRef.current?.abort();
-      streamAbortRef.current = null;
-
-      setActiveMessages(snapshot);
-
-      persistSessionSnapshotRef.current?.(latestMessagesRef.current, {
-        plan: activeLastAgentPlanRef.current,
-        artifact: activeLastArtifactRef.current,
-      });
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const cancelActiveRequest = useCallback(() => {
-    activeRequestIdRef.current += 1;
-    streamAbortRef.current?.abort();
-    streamAbortRef.current = null;
-    setIsStreaming(false);
-    setStreamPhase("connecting");
-    useAiStatus.getState().finishStreaming({ celebrate: false });
-  }, []);
-
-  // ── 加载历史会话
-  const handleSelectSession = useCallback(
-    (session: AiSession) => {
-      cancelActiveRequest();
-      currentSessionIdRef.current = session.id;
-      setActiveSession(session.id);
-      setActiveOrigin({
-        pageId: session.originPageId ?? null,
-        notebookId: session.originNotebookId ?? null,
-      });
-      setActiveResolvedTarget(session.resolvedTarget ?? null);
-      setActiveLastWritePlan(
-        session.lastWritePlan ??
-          (session.lastArtifact?.type === "markdown_note"
-            ? session.lastArtifact.plan
-            : null),
-      );
-      setActiveLastAgentPlan(
-        session.lastAgentPlan ??
-          legacyWritePlanToAgentPlan(session.lastWritePlan ?? null),
-      );
-      setActiveLastArtifact(
-        session.lastArtifact ??
-          legacyWritePlanToArtifact(session.lastWritePlan ?? null),
-      );
-      const restoredMessages = session.messages.map((m) =>
-        normalizeConversationMessage({
-          ...m,
-          streaming: false,
-        } as AiConversationMessage),
-      );
-      setMessages(restoredMessages);
-      syncActiveMessages(restoredMessages, "connecting");
-      setComposerFocusToken((v) => v + 1);
-    },
-    [
-      cancelActiveRequest,
-      setActiveLastAgentPlan,
-      setActiveLastArtifact,
-      setActiveLastWritePlan,
-      setActiveSession,
-      syncActiveMessages,
-    ],
-  );
-
-  // ── 新建会话
-  const handleNewSession = useCallback(() => {
-    cancelActiveRequest();
-    currentSessionIdRef.current = null;
-    latestMessagesRef.current = [];
-    latestStreamPhaseRef.current = "connecting";
-    composerRef.current?.clear();
-    setMessages([]);
-    resetActiveState({
-      pageId: activePageId ?? null,
-      notebookId: activeNotebookId ?? null,
-    });
-    setComposerFocusToken((v) => v + 1);
-    setHistoryOpen(false);
-  }, [
-    activeNotebookId,
-    activePageId,
-    cancelActiveRequest,
-    resetActiveState,
-  ]);
 
   const handleReferenceAdded = (reference: AiFileReferenceAttrs) => {
     trackEvent("ai_reference_added", {
@@ -694,6 +165,7 @@ export function AiWorkspacePage() {
       selectedModelId: string | null;
     },
     payloadOverride?: import("../editor/ai-composer/referenceLookup").AiComposerPayload,
+    priorVersions?: AiSessionMessageVersion[],
   ) => {
     if (isStreaming) return;
 
@@ -706,7 +178,6 @@ export function AiWorkspacePage() {
     const promptText = payload.promptText.trim();
     if (!promptText) return;
 
-    // 仅非重试时更新 retry refs
     if (!payloadOverride) {
       lastSubmitPayloadRef.current = payload;
       lastSubmitOverridesRef.current = requestOverrides;
@@ -716,7 +187,6 @@ export function AiWorkspacePage() {
     setStreamPhase("connecting");
     useAiStatus.getState().beginStreaming();
     let streamSucceeded = false;
-    // 新消息发出时重置上滚标记，强制滚到底部
     userScrolledUpRef.current = false;
 
     await new Promise<void>((resolve) => {
@@ -725,27 +195,22 @@ export function AiWorkspacePage() {
 
     const requestId = activeRequestIdRef.current + 1;
     activeRequestIdRef.current = requestId;
+    ensureCurrentSessionId();
 
-    if (!currentSessionIdRef.current) {
-      currentSessionIdRef.current = genSessionId();
-    }
-
-    const userMessageId = `user-${requestId}`;
     const assistantMessageId = `assistant-${requestId}`;
-
     const previousMessages = latestMessagesRef.current;
-
-    // ── 在 setMessages updater 外构建消息并同步 Zustand，避免 React error #185
+    const isRegenerate = !!payloadOverride;
     const initMessages: AiConversationMessage[] = [
       ...latestMessagesRef.current,
-      { id: userMessageId, role: "user" as const, text: promptText, references: payload.references },
-      { id: assistantMessageId, role: "assistant" as const, text: "", streaming: true, error: false, agentPlan: null, artifact: null, writePlan: null },
+      ...(isRegenerate
+        ? []
+        : [{ id: `user-${requestId}`, role: "user" as const, text: promptText, references: payload.references }]),
+      { id: assistantMessageId, role: "assistant" as const, text: "", streaming: true, error: false, agentPlan: null, artifact: null, writePlan: null, versions: priorVersions },
     ];
     latestMessagesRef.current = initMessages;
     setMessages(initMessages);
     syncActiveMessages(initMessages, "connecting");
 
-    // 重试时不清空 composer（composer 本身没有内容）
     if (!payloadOverride) {
       composerRef.current?.clear();
       setDraftContent(null);
@@ -759,7 +224,6 @@ export function AiWorkspacePage() {
     const providerType = aiSettings.useCustomProvider ? aiSettings.customProtocol : "utools";
     const modelId = requestOverrides.selectedModelId ?? aiSettings.selectedModelId ?? "";
 
-    // 重置流式累积器，取消旧的待执行 RAF
     streamingAccRef.current = { text: "", phase: "connecting" };
     if (streamingRafRef.current !== null) {
       cancelAnimationFrame(streamingRafRef.current);
@@ -815,6 +279,7 @@ export function AiWorkspacePage() {
         model_id: modelId,
         capability_id: planning.intent?.capabilityId,
         has_reference: payload.references.length > 0,
+        ...getAiReferenceStats(payload.references),
       });
 
       if (!planning.plan) {
@@ -850,8 +315,7 @@ export function AiWorkspacePage() {
           selectedModelId: requestOverrides.selectedModelId,
         },
         abortSignal: controller.signal,
-        // RAF 节流：只更新内存累积值，每帧最多一次 setMessages，且不在 updater 内调用 Zustand
-        onUpdate: (update: { phase: AIStreamPhase; text: string }) => {
+        onUpdate: (update) => {
           if (activeRequestIdRef.current !== requestId) return;
           streamingAccRef.current = { text: update.text, phase: update.phase };
           if (streamingRafRef.current === null) {
@@ -873,8 +337,6 @@ export function AiWorkspacePage() {
       });
 
       if (activeRequestIdRef.current !== requestId) return;
-
-      // 取消未执行的 RAF，确保使用最终文本
       if (streamingRafRef.current !== null) {
         cancelAnimationFrame(streamingRafRef.current);
         streamingRafRef.current = null;
@@ -895,12 +357,19 @@ export function AiWorkspacePage() {
       const idxSuccess = latestMessagesRef.current.findIndex((m) => m.id === assistantMessageId);
       if (idxSuccess !== -1) {
         const nextMsgsSuccess = [...latestMessagesRef.current];
+        const prevMsg = nextMsgsSuccess[idxSuccess];
+        const completedVersions: AiSessionMessageVersion[] = [
+          ...(prevMsg.versions ?? []),
+          { text: finalText, artifact: result.artifact, agentPlan: result.plan },
+        ];
         nextMsgsSuccess[idxSuccess] = {
-          ...nextMsgsSuccess[idxSuccess],
+          ...prevMsg,
           text: finalText,
           streaming: false,
           artifact: result.artifact,
           agentPlan: result.plan,
+          versions: completedVersions,
+          activeVersionIndex: completedVersions.length - 1,
         };
         latestMessagesRef.current = nextMsgsSuccess;
         setMessages(nextMsgsSuccess);
@@ -915,11 +384,8 @@ export function AiWorkspacePage() {
       }
       streamSucceeded = true;
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        return;
-      }
+      if (err instanceof DOMException && err.name === "AbortError") return;
       if (activeRequestIdRef.current !== requestId) return;
-
       if (streamingRafRef.current !== null) {
         cancelAnimationFrame(streamingRafRef.current);
         streamingRafRef.current = null;
@@ -957,19 +423,9 @@ export function AiWorkspacePage() {
   };
 
   const updateMessageArtifact = useCallback(
-    (
-      messageId: string,
-      updater: (artifact: MarkdownNoteArtifact) => MarkdownNoteArtifact,
-    ) => {
-      // Compute next messages from the latest ref to avoid stale closures,
-      // then call all state setters OUTSIDE the setMessages updater (React rule:
-      // no side effects / nested setState inside an updater function).
-      const current = latestMessagesRef.current;
-      const nextMessages = current.map((message) => {
-        if (message.id !== messageId || message.artifact?.type !== "markdown_note") {
-          return message;
-        }
-
+    (messageId: string, updater: (artifact: MarkdownNoteArtifact) => MarkdownNoteArtifact) => {
+      const nextMessages = latestMessagesRef.current.map((message) => {
+        if (message.id !== messageId || message.artifact?.type !== "markdown_note") return message;
         const nextArtifact = updater(message.artifact);
         return normalizeConversationMessage({
           ...message,
@@ -982,23 +438,17 @@ export function AiWorkspacePage() {
       syncActiveMessages(nextMessages, latestStreamPhaseRef.current);
       const latestPlan = getLastAgentPlan(nextMessages);
       const latestArtifact = getLastArtifact(nextMessages);
-      setActiveLastWritePlan(
-        latestArtifact?.type === "markdown_note"
-          ? latestArtifact.plan
-          : null,
-      );
+      setActiveLastWritePlan(latestArtifact?.type === "markdown_note" ? latestArtifact.plan : null);
       setActiveLastAgentPlan(latestPlan);
       setActiveLastArtifact(latestArtifact);
-      persistSessionSnapshot(nextMessages, {
-        plan: latestPlan,
-        artifact: latestArtifact,
-      });
+      persistSessionSnapshot(nextMessages, { plan: latestPlan, artifact: latestArtifact });
     },
     [
       persistSessionSnapshot,
       setActiveLastAgentPlan,
       setActiveLastArtifact,
       setActiveLastWritePlan,
+      setMessages,
       syncActiveMessages,
     ],
   );
@@ -1027,10 +477,7 @@ export function AiWorkspacePage() {
 
       try {
         const result = await commitAgentArtifact(artifact);
-        if (!result?.pageId) {
-          throw new Error("写入失败，请稍后再试");
-        }
-
+        if (!result?.pageId) throw new Error("写入失败，请稍后再试");
         updateMessageArtifact(messageId, (currentArtifact) => ({
           ...currentArtifact,
           plan: {
@@ -1039,7 +486,6 @@ export function AiWorkspacePage() {
             committedPageId: result.pageId,
           },
         }));
-
         trackEvent("agent_commit_succeeded", {
           feature: "agent_runtime",
           capability_id: "note.commit",
@@ -1104,7 +550,6 @@ export function AiWorkspacePage() {
 
   const handleRetry = useCallback(() => {
     if (isStreaming || !lastSubmitPayloadRef.current || !lastSubmitOverridesRef.current) return;
-    // 移除末尾的 user + assistant error 这一对消息
     const currentMsgs = latestMessagesRef.current;
     const lastMsg = currentMsgs[currentMsgs.length - 1];
     if (lastMsg?.role !== "assistant" || !lastMsg.error) return;
@@ -1112,14 +557,47 @@ export function AiWorkspacePage() {
     latestMessagesRef.current = trimmed;
     setMessages(trimmed);
     syncActiveMessages(trimmed, latestStreamPhaseRef.current);
-    // 使用当前用户选择的模型配置，而非上次提交时的旧配置
     const currentSettings = useSettings.getState().ai;
     const currentOverrides = {
       selectedModelId: currentSettings.selectedModelId ?? lastSubmitOverridesRef.current.selectedModelId,
     };
     void handleSubmit(currentOverrides, lastSubmitPayloadRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStreaming, syncActiveMessages]);
+  }, [isStreaming, setMessages, syncActiveMessages]);
+
+  const handleRegenerate = useCallback(
+    (messageIndex: number) => {
+      if (isStreaming) return;
+      const currentMsgs = latestMessagesRef.current;
+      const targetMsg = currentMsgs[messageIndex];
+      if (!targetMsg || targetMsg.role !== "assistant") return;
+      const userMsg = currentMsgs[messageIndex - 1];
+      if (!userMsg || userMsg.role !== "user") return;
+
+      const existingVersions: AiSessionMessageVersion[] = targetMsg.versions ?? [
+        { text: targetMsg.text, artifact: targetMsg.artifact, agentPlan: targetMsg.agentPlan },
+      ];
+
+      const trimmed = currentMsgs.slice(0, messageIndex);
+      latestMessagesRef.current = trimmed;
+      setMessages(trimmed);
+      syncActiveMessages(trimmed, latestStreamPhaseRef.current);
+
+      const payload: import("../editor/ai-composer/referenceLookup").AiComposerPayload = {
+        promptText: userMsg.text,
+        freeformText: "",
+        references: userMsg.references ?? [],
+        tokens: [],
+      };
+      const currentSettings = useSettings.getState().ai;
+      const currentOverrides = {
+        selectedModelId: currentSettings.selectedModelId ?? null,
+      };
+      void handleSubmit(currentOverrides, payload, existingVersions);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isStreaming, setMessages, syncActiveMessages],
+  );
 
   const handleOpenResultPage = useCallback(
     (pageId: string) => {
@@ -1136,10 +614,7 @@ export function AiWorkspacePage() {
       className="flex h-full flex-col bg-[hsl(var(--goose-editor-bg))]"
       style={{ zoom: aiWorkspaceScale }}
     >
-
-      {/* ── 顶部工具栏：历史 & 新建会话 */}
       <div className="flex shrink-0 items-center justify-end gap-1 px-4 pt-3 pb-1">
-        {/* 新建会话 */}
         <button
           type="button"
           onClick={handleNewSession}
@@ -1151,7 +626,6 @@ export function AiWorkspacePage() {
           <LucideIcons.SquarePen className="h-4 w-4" />
         </button>
 
-        {/* 历史会话 */}
         <Popover open={historyOpen} onOpenChange={setHistoryOpen}>
           <PopoverTrigger asChild>
             <button
@@ -1172,7 +646,6 @@ export function AiWorkspacePage() {
             sideOffset={6}
             className="w-[300px] rounded-[16px] border border-border/75 bg-popover p-2 shadow-[0_14px_34px_rgba(15,23,42,0.16)]"
           >
-            {/* 面板标题 */}
             <div className="mb-1.5 flex items-center justify-between px-1">
               <span className="text-[11px] font-semibold text-foreground/80">历史会话</span>
               {sessions.length > 0 && (
@@ -1180,7 +653,7 @@ export function AiWorkspacePage() {
               )}
             </div>
             <div className="max-h-[340px] overflow-y-auto scrollbar-hide">
-              <SessionHistoryPanel
+              <AiSessionHistoryPanel
                 sessions={sessions}
                 activeSessionId={activeSessionId}
                 onSelectSession={handleSelectSession}
@@ -1192,166 +665,26 @@ export function AiWorkspacePage() {
         </Popover>
       </div>
 
-      {/* ── 消息列表 */}
       <div ref={messagesScrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[760px] py-2">
-        {messages.length === 0 ? (
-          <div className="flex h-[calc(100vh-180px)] flex-col justify-center px-4 pb-10">
-            <div
-              data-ai-empty-state-card="true"
-              className="relative overflow-hidden rounded-[30px] border border-border/70 bg-muted/60 dark:bg-[#1c2027] shadow-[0_18px_48px_rgba(15,23,42,0.18)]"
-            >
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-90"
-                style={{
-                  backgroundImage: `url("${AI_WORKSPACE_DEFAULT_DIAGRAM_URL}")`,
-                }}
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,16,24,0.14)_0%,rgba(12,16,24,0.35)_48%,rgba(12,16,24,0.6)_100%)] dark:bg-[linear-gradient(180deg,rgba(12,16,24,0.14)_0%,rgba(12,16,24,0.5)_48%,rgba(12,16,24,0.82)_100%)]" />
-              <div className="relative flex min-h-[220px] flex-col justify-end px-6 py-7 sm:min-h-[248px] sm:px-7">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-black/20 backdrop-blur-[6px]">
-                  <AiGradientIcon className="h-5 w-5" />
-                </div>
-                <div className="text-base font-medium text-white">
-                  在底部输入框直接提问
-                </div>
-                <div className="mt-2 max-w-xl text-sm leading-6 text-white dark:text-white/72">
-                  可以直接发起独立聊天，也可以通过 @ 引用应用页面或本地文件。
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col pb-20">
-            {messages.map((message, index) => {
-              const isLastMessage = index === messages.length - 1;
-              const isRetryable =
-                message.role === "assistant" &&
-                message.error &&
-                isLastMessage &&
-                !isStreaming &&
-                !draftPayload.promptText.trim() &&
-                !!lastSubmitPayloadRef.current;
-
-              const isDataviz =
-                message.role === "assistant" &&
-                !message.error &&
-                (artifactHasDataviz(message.artifact) || textHasDataviz(message.text));
-
-              const isUserMsg = message.role === "user";
-
-              if (isDataviz) {
-                return (
-                  <div key={message.id} className="flex flex-col gap-1.5 px-4 py-2">
-                    <div className="select-text w-full text-foreground">
-                      {message.artifact ? (
-                        <AgentArtifactView
-                          artifact={message.artifact}
-                          applying={applyingMessageId === message.id}
-                          onConfirmMarkdownNote={(artifact) => {
-                            void handleConfirmWrite(message.id, artifact);
-                          }}
-                          onCancelMarkdownNote={(artifact) => {
-                            handleCancelWrite(message.id, artifact);
-                          }}
-                          onOpenResult={handleOpenResultPage}
-                        />
-                      ) : (
-                        <StreamingDatavizText
-                          text={message.text}
-                          streaming={!!message.streaming}
-                          streamPhaseLabel={STREAM_PHASE_LABEL[streamPhase]}
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-
-              if (isUserMsg) {
-                return (
-                  <div key={message.id} className="flex flex-col items-end px-4 py-2">
-                    <div
-                      className={cn(
-                        "ai-message-user select-text max-w-[88%]",
-                        "rounded-[14px] px-3.5 py-2.5",
-                        "bg-[hsl(var(--goose-selected-bg))] text-foreground",
-                        "shadow-[inset_0_0_0_1px_hsl(var(--border)/0.55)]",
-                      )}
-                    >
-                      <div className="whitespace-pre-wrap break-words text-sm leading-[1.55]">
-                        {renderMessageWithReferences(message.text, message.references)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={message.id} className="flex gap-2.5 px-4 py-2">
-                  <div
-                    className={cn(
-                      "shrink-0 pt-[3px]",
-                      message.error && "text-destructive",
-                    )}
-                  >
-                    {message.error ? (
-                      <LucideIcons.AlertCircle className="h-3.5 w-3.5" />
-                    ) : (
-                      <AiGradientIcon className="h-3.5 w-3.5" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1 select-text">
-                    {message.error ? (
-                      <div className="text-sm leading-6 text-destructive whitespace-pre-wrap break-words">
-                        {message.text || "请求失败，请重试"}
-                      </div>
-                    ) : message.artifact ? (
-                      <AgentArtifactView
-                        artifact={message.artifact}
-                        applying={applyingMessageId === message.id}
-                        onConfirmMarkdownNote={(artifact) => {
-                          void handleConfirmWrite(message.id, artifact);
-                        }}
-                        onCancelMarkdownNote={(artifact) => {
-                          handleCancelWrite(message.id, artifact);
-                        }}
-                        onOpenResult={handleOpenResultPage}
-                      />
-                    ) : message.text ? (
-                      <StreamingDatavizText
-                        text={message.text}
-                        streaming={!!message.streaming}
-                        streamPhaseLabel={STREAM_PHASE_LABEL[streamPhase]}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2 text-sm leading-6 text-muted-foreground/85">
-                        {message.streaming ? (
-                          <>
-                            <span className="inline-block h-[7px] w-[7px] rounded-full bg-foreground/45 animate-pulse" />
-                            <span>{STREAM_PHASE_LABEL[streamPhase]}</span>
-                          </>
-                        ) : (
-                          <span className="text-destructive">未收到响应，请重试</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {/* 重试按钮：仅错误消息 & 最后一条 & composer 为空时显示 */}
-                  {isRetryable && (
-                    <RetryButton onClick={handleRetry} />
-                  )}
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+          <AiWorkspaceMessages
+            messages={messages}
+            isStreaming={isStreaming}
+            streamPhase={streamPhase}
+            applyingMessageId={applyingMessageId}
+            messagesEndRef={messagesEndRef}
+            onRegenerate={handleRegenerate}
+            onSwitchVersion={switchMessageVersion}
+            onConfirmWrite={(messageId, artifact) => {
+              void handleConfirmWrite(messageId, artifact);
+            }}
+            onCancelWrite={handleCancelWrite}
+            onOpenResultPage={handleOpenResultPage}
+          />
         </div>
       </div>
 
-      {/* ── 底部输入框：全宽，去除多余边距 */}
-      <AiWorkspaceComposerBar
+      <AiPromptComposer
         composerRef={composerRef}
         composerFocusToken={composerFocusToken}
         isStreaming={isStreaming}
@@ -1363,18 +696,5 @@ export function AiWorkspacePage() {
         onReferenceAdded={handleReferenceAdded}
       />
     </div>
-  );
-}
-
-function RetryButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-fit shrink-0 items-center gap-1.5 self-start rounded-lg px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-    >
-      <LucideIcons.RotateCcw className="h-3 w-3" />
-      重试
-    </button>
   );
 }
