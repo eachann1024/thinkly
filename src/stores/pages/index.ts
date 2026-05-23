@@ -1,74 +1,172 @@
 import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
+import type { Page, JSONContent } from "@/types";
 import { useNotebooks, DEFAULT_NOTEBOOK } from "../useNotebooks";
-import type { JSONContent } from "@/types";
+import { extractTitleFromContent } from "@/lib/content-text-extractor";
+import { jsonContentToMarkdown } from "@/lib/export";
+import { getPageTitle } from "@/lib/page-title";
+import {
+  buildLocalPageId,
+  scanLocalFolderPages,
+} from "@/lib/local-folder-scanner";
+import {
+  ONBOARDING_PAGE_CONTENT,
+  ONBOARDING_CHILD_PAGE_CONTENT,
+  ONBOARDING_SECOND_CHILD_CONTENT,
+} from "@/lib/onboarding";
+import {
+  clonePageContent as cloneBlockNotePageContent,
+  createEmptyBlockNoteContent,
+  normalizePageContent,
+} from "@/lib/blocknote-content";
+import {
+  loadPagesFromStorage,
+  savePagesMeta,
+  saveInternalPage,
+} from "@/lib/storage/pageRepository";
+import { getDbStorageItem, setDbStorageItem } from "@/lib/storage/utoolsDbStorage";
 
-import { loadInternalPage } from "@/lib/storage/pageRepository";
 import type { PagesState } from "./types";
 import {
+  LEGACY_TITLE_CHILDREN_REPAIR_MARK_KEY,
+  NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY,
+} from "./types";
+import {
+  localPageMetadataCache,
   isLocalFolderPage,
   persistPageSnapshot,
   persistPageSnapshots,
+  removePersistedPageSnapshot,
   removePersistedPageSnapshots,
   shouldPersistLocalPageMetaUpdate,
+  syncLocalPageMetadataCache,
+  seedLocalPageMetadataCache,
 } from "./persistence";
 import {
-  isLocalPageFrontmatterSettingsUpdate,
-  normalizePageLayout,
-  mergeLocalPageSettingsIntoFrontmatter,
-  applyFrontmatterBodyToContent,
-  getContentFrontmatterBody,
-} from "@/lib/local-frontmatter";
-import { queueLocalPageSave } from "./folderSync";
-import { getContentSignature } from "@/components/editor/utils/blocknote-content";
-import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
+  repairLegacyTitleChildrenInPages,
+  repairNormalizedContentInPages,
+} from "./migrations";
 import {
-  acknowledgeRecoveryEntry,
-  recordRecoveryEntry,
-} from "@/lib/storage/recoveryJournal";
-import { toast } from "@/components/ui/sonner";
+  queueLocalPageSave,
+  flushPendingLocalSaveByPageIdInternal,
+  flushAllPendingLocalSavesInternal,
+  cloneJSONContent,
+} from "./folderSync";
 
-// Re-export flushEditorContent for external consumers
-export { flushEditorContent } from "./actions/flushEditor";
-export { clearLocalPageMetadataCache } from "./clearCache";
+// 本地文件采用近实时后台保存，尽量缩短独立窗口关闭前的未落盘窗口。
 
-import { hydrateFromStorageAction } from "./actions/hydrate";
-import {
-  createOnboardingPagesAction,
-  createPageAction,
-  createPageRecordAction,
-  createLocalPageAction,
-  createLocalPageRecordAction,
-  createLocalFolderRecordAction,
-  createUnsavedLocalPageAction,
-  discardUnsavedLocalPageAction,
-  materializeUnsavedLocalPageAction,
-  duplicatePageAction,
-} from "./actions/pageCreate";
-import {
-  loadLocalFolderPagesAction,
-  loadAllLocalFolderPagesAction,
-  reloadLocalPageFromDiskAction,
-  removeSingleLocalPageAction,
-  addSingleLocalPageAction,
-  writePageContentAction,
-  appendPageContentAction,
-  replaceBlockRangeAction,
-  saveLocalPageContentAction,
-  flushPendingLocalSaveByPageIdAction,
-  flushPendingLocalSavesAction,
-  isLocalPageDirtyAction,
-  saveDirtyLocalPageAction,
-  renameLocalPageFileAction,
-  moveLocalPageAction,
-} from "./actions/localFolder";
-import {
-  deletePageAction,
-  restorePageAction,
-  permanentlyDeletePageAction,
-  movePageTreeToNotebookAction,
-  undoMovePageTreeAction,
-  setActivePageAction,
-} from "./actions/pageMutations";
+function generateLocalPageId(notebookId: string, filePath: string): string {
+  const notebook = useNotebooks.getState().notebooks[notebookId];
+  if (!notebook?.localPath) return uuidv4();
+  return buildLocalPageId(notebookId, notebook.localPath, filePath);
+}
+
+function compareSiblingPages(
+  a: Page,
+  b: Page,
+  isLocalNotebook: boolean,
+): number {
+  if (isLocalNotebook) {
+    if (a.isFolder !== b.isFolder) {
+      return a.isFolder ? -1 : 1;
+    }
+    const titleCompare = getPageTitle(a).localeCompare(getPageTitle(b), "zh-CN", {
+      numeric: true,
+    });
+    if (titleCompare !== 0) return titleCompare;
+    return a.id.localeCompare(b.id);
+  }
+
+  const orderA = a.order ?? a.createdAt;
+  const orderB = b.order ?? b.createdAt;
+  if (orderA !== orderB) return orderA - orderB;
+  return a.id.localeCompare(b.id);
+}
+
+function resolveAdjacentPageAfterDeletion({
+  pages,
+  currentPage,
+  removedIds,
+  isLocalNotebook,
+}: {
+  pages: Record<string, Page>;
+  currentPage: Page;
+  removedIds: Set<string>;
+  isLocalNotebook: boolean;
+}): string | null {
+  const siblingsBeforeDelete = Object.values(pages)
+    .filter(
+      (candidate) =>
+        candidate.workspaceId === currentPage.workspaceId &&
+        !candidate.trashedAt &&
+        candidate.parentId === currentPage.parentId,
+    )
+    .sort((a, b) => compareSiblingPages(a, b, isLocalNotebook));
+
+  const deletedPageIndex = siblingsBeforeDelete.findIndex(
+    (candidate) => candidate.id === currentPage.id,
+  );
+  const siblingsAfterDelete = siblingsBeforeDelete.filter(
+    (candidate) => !removedIds.has(candidate.id),
+  );
+
+  if (siblingsAfterDelete.length === 0) {
+    return null;
+  }
+
+  const fallbackIndex =
+    deletedPageIndex === -1
+      ? siblingsAfterDelete.length - 1
+      : Math.min(deletedPageIndex, siblingsAfterDelete.length - 1);
+
+  return siblingsAfterDelete[fallbackIndex]?.id ?? null;
+}
+
+const initialContent: JSONContent = createEmptyBlockNoteContent();
+
+function createDefaultPageContent(title = ""): JSONContent {
+  return createEmptyBlockNoteContent(title);
+}
+
+function clonePageContent(content?: JSONContent | null) {
+  if (!content) {
+    return cloneBlockNotePageContent(initialContent);
+  }
+  return cloneBlockNotePageContent(normalizePageContent(content));
+}
+
+function mergePageContent(base: JSONContent, addition: JSONContent): JSONContent {
+  const baseBlocks = normalizePageContent(base);
+  const additionBlocks = normalizePageContent(addition);
+  if (!additionBlocks.length) {
+    return baseBlocks;
+  }
+
+  const lastBlock = baseBlocks.at(-1);
+  const firstAdditionBlock = additionBlocks[0];
+  const needsSpacer =
+    baseBlocks.length > 0 &&
+    lastBlock?.type !== "paragraph" &&
+    firstAdditionBlock?.type !== "paragraph";
+
+  return [
+    ...baseBlocks,
+    ...(needsSpacer ? ([{ type: "paragraph", content: "" }] as JSONContent) : []),
+    ...additionBlocks,
+  ];
+}
+
+export const flushEditorContent = (immediate = false) => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("goose-note:flush-editor", { detail: { immediate } })
+    );
+  }
+};
+
+export const clearLocalPageMetadataCache = () => {
+  localPageMetadataCache.clear();
+};
 
 export const usePages = create<PagesState>()((set, get) => ({
   pages: {},
@@ -82,84 +180,346 @@ export const usePages = create<PagesState>()((set, get) => ({
   hydrated: false,
   lastSavedAt: null,
   onboardingCompleted: false,
-  dirtyLocalPageIds: {},
 
-  hydrateFromStorage: () => hydrateFromStorageAction(set),
+  hydrateFromStorage: async () => {
+    const { pages, localPageMetas, onboardingCompleted } =
+      loadPagesFromStorage();
+    const hasRepairedLegacyTitleChildren =
+      getDbStorageItem(LEGACY_TITLE_CHILDREN_REPAIR_MARK_KEY) === "1";
+    const { pages: repairedPages, repairedPageIds } = hasRepairedLegacyTitleChildren
+      ? { pages, repairedPageIds: [] as string[] }
+      : repairLegacyTitleChildrenInPages(pages);
+    const hasRepairedNestedEmptyWrappers =
+      getDbStorageItem(NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY) === "1";
+    const {
+      pages: contentRepairedPages,
+      repairedPageIds: contentRepairedPageIds,
+    } = hasRepairedNestedEmptyWrappers
+      ? { pages: repairedPages, repairedPageIds: [] as string[] }
+      : repairNormalizedContentInPages(repairedPages);
 
-  reloadPageFromStorage: (pageId) => {
-    const current = get().pages[pageId];
-    const fresh = loadInternalPage(pageId);
-    if (!fresh) return false;
-    // 仅当 db 版本更新时才覆盖，避免回退本进程尚未落盘的较新编辑。
-    if (current && fresh.updatedAt <= current.updatedAt) return false;
-    set((state) => ({
-      pages: { ...state.pages, [pageId]: fresh },
-    }));
-    return true;
+    if (!hasRepairedLegacyTitleChildren) {
+      if (repairedPageIds.length > 0) {
+        repairedPageIds.forEach((pageId) => {
+          const repairedPage = contentRepairedPages[pageId];
+          if (!repairedPage || repairedPage.localFilePath) return;
+          saveInternalPage(repairedPage);
+        });
+        console.info(
+          `[usePages] repaired legacy title-children structure in ${repairedPageIds.length} page(s).`,
+        );
+      }
+      setDbStorageItem(LEGACY_TITLE_CHILDREN_REPAIR_MARK_KEY, "1");
+    }
+
+    if (!hasRepairedNestedEmptyWrappers) {
+      if (contentRepairedPageIds.length > 0) {
+        contentRepairedPageIds.forEach((pageId) => {
+          const repairedPage = contentRepairedPages[pageId];
+          if (!repairedPage || isLocalFolderPage(repairedPage)) return;
+          saveInternalPage(repairedPage);
+        });
+        console.info(
+          `[usePages] repaired nested empty wrapper content in ${contentRepairedPageIds.length} page(s).`,
+        );
+      }
+      setDbStorageItem(NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY, "1");
+    }
+
+    seedLocalPageMetadataCache(localPageMetas);
+    set({
+      pages: contentRepairedPages,
+      activePageId: null,
+      pendingNavigatePageId: null,
+      expandPageId: null,
+      searchHighlightQuery: null,
+      searchHighlightPageId: null,
+      searchHighlightNonce: 0,
+      handledSearchHighlightNonce: 0,
+      hydrated: true,
+      lastSavedAt: null,
+      onboardingCompleted,
+    });
   },
 
-  createOnboardingPages: () => createOnboardingPagesAction(set, get),
+  createOnboardingPages: () => {
+    let createdMainId: string | null = null;
+    const workspaceId = DEFAULT_NOTEBOOK;
 
-  createPage: (parentId, workspaceId = DEFAULT_NOTEBOOK) =>
-    createPageAction(set, get, parentId, workspaceId),
+    set((state) => {
+      const hasExistingOnboardingPage = Object.values(state.pages).some(
+        (page) =>
+          page.workspaceId === workspaceId &&
+          !page.trashedAt &&
+          extractTitleFromContent(page.content) === "鹅的笔记 · 新手指南",
+      );
 
-  createPageRecord: (options) => createPageRecordAction(set, get, options),
+      if (state.onboardingCompleted || hasExistingOnboardingPage) {
+        if (state.onboardingCompleted) return state;
+        return { ...state, onboardingCompleted: true };
+      }
 
-  createLocalPage: (parentId, workspaceId) =>
-    createLocalPageAction(set, get, parentId, workspaceId),
+      const mainId = uuidv4();
+      const childId1 = uuidv4();
+      const childId2 = uuidv4();
+      const now = Date.now();
 
-  createLocalPageRecord: (options) =>
-    createLocalPageRecordAction(set, get, options),
+      createdMainId = mainId;
 
-  createLocalFolderRecord: (options) =>
-    createLocalFolderRecordAction(set, get, options),
+      const mainPage: Page = {
+        id: mainId,
+        workspaceId,
+        parentId: undefined,
+        content: ONBOARDING_PAGE_CONTENT,
+        isFolder: false,
+        isLocked: false,
+        isFullWidth: false,
+        fontSize: "default",
+        fontFamily: "default",
+        createdAt: now,
+        updatedAt: now,
+        order: now,
+      };
 
-  createUnsavedLocalPage: (workspaceId, parentId) =>
-    createUnsavedLocalPageAction(set, get, workspaceId, parentId),
+      const childPage1: Page = {
+        id: childId1,
+        workspaceId,
+        parentId: mainId,
+        content: ONBOARDING_CHILD_PAGE_CONTENT,
+        isFolder: false,
+        isLocked: false,
+        isFullWidth: false,
+        fontSize: "default",
+        fontFamily: "default",
+        createdAt: now + 1,
+        updatedAt: now + 1,
+        order: now + 1,
+      };
 
-  discardUnsavedLocalPage: (pageId) =>
-    discardUnsavedLocalPageAction(set, get, pageId),
+      const childPage2: Page = {
+        id: childId2,
+        workspaceId,
+        parentId: mainId,
+        content: ONBOARDING_SECOND_CHILD_CONTENT,
+        isFolder: false,
+        isLocked: false,
+        isFullWidth: false,
+        fontSize: "default",
+        fontFamily: "default",
+        createdAt: now + 2,
+        updatedAt: now + 2,
+        order: now + 2,
+      };
 
-  materializeUnsavedLocalPage: (pageId, options) =>
-    materializeUnsavedLocalPageAction(set, get, pageId, options),
+      return {
+        ...state,
+        pages: {
+          ...state.pages,
+          [mainId]: mainPage,
+          [childId1]: childPage1,
+          [childId2]: childPage2,
+        },
+        activePageId: mainId,
+        onboardingCompleted: true,
+        expandPageId: mainId,
+      };
+    });
 
-  updatePage: (id, updates, options) => {
-    if ("pageLayout" in updates) {
-      updates = { ...updates, pageLayout: updates.pageLayout === undefined ? undefined : normalizePageLayout(updates.pageLayout) };
+    if (createdMainId) {
+      useNotebooks.getState().setActiveNotebook(workspaceId);
+      useNotebooks.getState().setLastActivePage(workspaceId, createdMainId);
+      const currentPages = get().pages;
+      persistPageSnapshots(currentPages, [createdMainId]);
+      Object.values(currentPages)
+        .filter((page) => page.parentId === createdMainId)
+        .forEach((page) => persistPageSnapshot(page));
     }
+    savePagesMeta({ onboardingCompleted: true });
+  },
+
+  createPage: (parentId, workspaceId = DEFAULT_NOTEBOOK) => {
+    flushEditorContent();
+
+    const id = get().createPageRecord({
+      workspaceId,
+      parentId,
+    });
+    set({ activePageId: id });
+    useNotebooks.getState().setLastActivePage(workspaceId, id);
+
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("goose-note:focus-editor-start"),
+        );
+      }, 100);
+    }
+
+    return id;
+  },
+
+  createPageRecord: ({ workspaceId, parentId, content }) => {
+    const id = uuidv4();
+    const now = Date.now();
+    const newPage: Page = {
+      id,
+      workspaceId,
+      parentId,
+      content: clonePageContent(content),
+      isFolder: false,
+      isLocked: false,
+      isFullWidth: false,
+      fontSize: "default",
+      fontFamily: "default",
+      createdAt: now,
+      updatedAt: now,
+      order: now,
+    };
+
+    set((state) => ({
+      pages: { ...state.pages, [id]: newPage },
+    }));
+
+    persistPageSnapshot(get().pages[id]);
+    return id;
+  },
+
+  createLocalPage: async (parentId?: string, workspaceId?: string) => {
+    if (!workspaceId) return null;
+    const id = await get().createLocalPageRecord({
+      workspaceId,
+      parentId,
+      title: "新页面",
+      content: createDefaultPageContent(""),
+    });
+    if (!id) return null;
+    set({ activePageId: id });
+    useNotebooks.getState().setLastActivePage(workspaceId, id);
+
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("goose-note:focus-editor-start"),
+        );
+      }, 100);
+    }
+
+    return id;
+  },
+
+  createLocalPageRecord: async ({
+    workspaceId,
+    parentId,
+    title,
+    content,
+  }) => {
+    const notebook = useNotebooks.getState().notebooks[workspaceId];
+    if (
+      !notebook?.localPath ||
+      typeof window === "undefined" ||
+      !window.gooseFs
+    ) {
+      return null;
+    }
+
+    const resolveParentPath = () => {
+      if (!parentId) return null;
+      const parentPage = get().pages[parentId];
+      if (parentPage?.localFilePath) return parentPage.localFilePath;
+      const prefix = `local-${workspaceId}-`;
+      if (!parentId.startsWith(prefix)) return null;
+      const encoded = parentId.slice(prefix.length);
+      try {
+        const relativePath = decodeURIComponent(encoded);
+        return `${notebook.localPath}/${relativePath}`;
+      } catch {
+        return null;
+      }
+    };
+
+    const now = Date.now();
+    const normalizedTitle =
+      ((title || "新页面").trim() || "新页面").replace(/[\\/:*?"<>|]/g, "_");
+    const parentPath = resolveParentPath();
+    const parentPage = parentId ? get().pages[parentId] : undefined;
+    const storedParentId =
+      parentPage?.localFilePath && !parentPage.isFolder
+        ? parentPage.parentId
+        : parentId;
+    const baseDir = parentPath
+      ? parentPage?.isFolder
+        ? parentPath
+        : parentPath.replace(/[^\/\\]+$/, "")
+      : notebook.localPath;
+    const normalizedBaseDir = baseDir.replace(/[\/\\]$/, "");
+    let filePath = `${normalizedBaseDir}/${normalizedTitle}.md`;
+
+    const checkExists = async (path: string) => {
+      if (window.gooseFs?.existsAsync) {
+        return await window.gooseFs.existsAsync(path);
+      }
+      return window.gooseFs?.exists(path) ?? false;
+    };
+
+    if (await checkExists(filePath)) {
+      let suffix = 1;
+      while (
+        await checkExists(`${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`)
+      ) {
+        suffix++;
+      }
+      filePath = `${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`;
+    }
+
+    if (window.gooseFs.writeFileAsync) {
+      const ok = await window.gooseFs.writeFileAsync(filePath, `# \n`);
+      if (!ok) return null;
+    } else {
+      if (!window.gooseFs.writeFile(filePath, `# \n`)) {
+        return null;
+      }
+    }
+
+    const id = generateLocalPageId(workspaceId, filePath);
+    const newPage: Page = {
+      id,
+      workspaceId,
+      parentId: storedParentId,
+      content: clonePageContent(content),
+      isFolder: false,
+      isLocked: false,
+      isFullWidth: false,
+      fontSize: "default",
+      fontFamily: "default",
+      localFilePath: filePath,
+      createdAt: now,
+      updatedAt: now,
+      order: now,
+    };
+
+    set((state) => ({
+      pages: { ...state.pages, [id]: newPage },
+    }));
+
+    syncLocalPageMetadataCache(id, null);
+    const saved = await get().saveLocalPageContent(id, clonePageContent(newPage.content));
+    if (!saved) {
+      set((state) => {
+        const nextPages = { ...state.pages };
+        delete nextPages[id];
+        return { pages: nextPages };
+      });
+      return null;
+    }
+
+    return id;
+  },
+
+  updatePage: (id, updates) => {
     const page = get().pages[id];
     const shouldPersistLocalMeta =
       isLocalFolderPage(page) && shouldPersistLocalPageMetaUpdate(updates);
-    const silent = options?.silent === true;
-    const isLocal = isLocalFolderPage(page);
-    const isDurableContentEdit =
-      Boolean(page) && "content" in updates && !silent;
-    const recoveryEntry = isDurableContentEdit
-      ? recordRecoveryEntry({
-          source: isLocal ? "local-file" : "internal-page",
-          id,
-          content: updates.content ?? null,
-          baseSignature: () => getContentSignature(page?.content ?? null),
-          baseUpdatedAt: page?.updatedAt,
-        })
-      : null;
-    if (isDurableContentEdit && !recoveryEntry) {
-      toast.error("无法写入恢复备份", {
-        id: "goose-recovery-journal-failed",
-        description: "请先不要关闭窗口，并复制重要内容后重试。",
-      });
-    }
-    const shouldMergeFrontmatterSettings =
-      isLocal && !silent && isLocalPageFrontmatterSettingsUpdate(updates);
-    // 仅改字体/锁定也要落盘；读失败页不写，避免覆盖坏文件
-    const shouldQueueLocalSettingsSave =
-      shouldMergeFrontmatterSettings && page?.localReadState !== "error";
 
-    if (shouldMergeFrontmatterSettings && page?.localReadState === "error") {
-      toast.error("页面读取失败，未更改设置");
-      return;
-    }
-    let settingsRejected = false;
     set((state) => {
       const page = state.pages[id];
       if (!page) return state;
@@ -188,75 +548,20 @@ export const usePages = create<PagesState>()((set, get) => ({
         pinnedAt = undefined;
       }
 
-      // 只有真正的内容编辑才刷新 updatedAt：必须显式传入 content 字段，
-      // 且没有标记为 silent（silent 用于切页/normalize 这类被动同步）。
-      const isContentEdit = "content" in updates && !silent;
-      let updatedPage = {
+      const updatedPage = {
         ...page,
         ...updates,
         ...(favoriteOrder !== undefined ? { favoriteOrder } : {}),
         pinnedAt,
-        updatedAt: isContentEdit ? now : page.updatedAt,
+        updatedAt: now,
       };
 
-      // 本地页：字体/锁定/置顶/收藏 merge 进 frontmatter blob（解析失败保留原文，避免破坏手写 YAML）
-      if (shouldMergeFrontmatterSettings) {
-        // 以编辑器当前首块 YAML 为基准（用户可能在编辑器里改过 name/description），
-        // 而不是用过期的 localFrontmatter 覆盖手写内容。
-        const contentYamlBody = getContentFrontmatterBody(updatedPage.content);
-        const baseBlob = contentYamlBody !== null
-          ? `---\n${contentYamlBody}\n---`
-          : updatedPage.localFrontmatter;
-        const mergeResult = mergeLocalPageSettingsIntoFrontmatter(baseBlob, {
-          fontFamily: updatedPage.fontFamily ?? "default",
-          pageLayout: updatedPage.pageLayout,
-          isLocked: Boolean(updatedPage.isLocked),
-          isPinned: Boolean(updatedPage.isPinned),
-          isFavorite: Boolean(updatedPage.isFavorite),
-        });
-        if (!mergeResult.parseFailed) {
-          const yamlBody = mergeResult.blob
-            ? mergeResult.blob
-                .replace(/^---\r?\n/, "")
-                .replace(/\r?\n---$/, "")
-            : null;
-          updatedPage = {
-            ...updatedPage,
-            localFrontmatter: mergeResult.blob,
-            // 仅用户属性同步进编辑器首块；只有收藏/置顶等 goose 键时去掉该块。
-            content: applyFrontmatterBodyToContent(updatedPage.content, yamlBody),
-          };
-        } else {
-          settingsRejected = true;
-          return state;
-        }
-      }
-
-      const shouldQueueContentSave =
-        Boolean(updates.content) &&
-        !silent &&
+      if (
+        updates.content &&
         useNotebooks.getState().notebooks[page.workspaceId]?.source ===
-          "local-folder" &&
-        page.localReadState !== "error" &&
-        !(
-          page.localUnsaved &&
-          !localPageHasPersistableContent(updates.content)
-        );
-
-      // 内容编辑 或 仅改 frontmatter 设置：标脏并入防抖写盘队列
-      if (shouldQueueContentSave || shouldQueueLocalSettingsSave) {
-        // 本地文件夹与普通笔记本一致：编辑即自动保存。先标脏（短暂显示"保存中"），
-        // 再入防抖队列落盘；写盘成功后由 saveLocalPageContent 清除脏标记。
-        // 标题→文件名的 rename 仍由显式 Cmd/Ctrl+S（saveDirtyLocalPage）处理，
-        // 避免输入标题过程中频繁重命名文件。
-        // silent=true（切页/normalize 被动同步）时跳过标脏与队列，不触发写盘。
-        const contentForSave = shouldQueueContentSave
-          ? updates.content!
-          : updatedPage.content;
-        set((s) => ({
-          dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [id]: true },
-        }));
-        queueLocalPageSave(id, contentForSave, get, recoveryEntry?.revision);
+          "local-folder"
+      ) {
+        queueLocalPageSave(id, updates.content, get);
       }
 
       return {
@@ -267,40 +572,418 @@ export const usePages = create<PagesState>()((set, get) => ({
       };
     });
 
-    if (settingsRejected) {
-      toast.error("YAML 前置区格式异常，未更改设置", {
-        description: "原文已保留，请先修复 YAML 后重试。",
-      });
-      return;
-    }
     const updatedPage = get().pages[id];
     if (!updatedPage) return;
 
     if (isLocalFolderPage(updatedPage)) {
-      if (shouldPersistLocalMeta && !updatedPage.localUnsaved) {
+      if (shouldPersistLocalMeta) {
         persistPageSnapshot(updatedPage);
       }
       return;
     }
 
-    const persisted = persistPageSnapshot(updatedPage);
-    if (persisted && recoveryEntry) {
-      acknowledgeRecoveryEntry("internal-page", id, recoveryEntry.revision);
-    } else if (!persisted) {
-      toast.error("内容暂未保存", {
-        id: `goose-page-save-failed:${id}`,
-        description: "最新内容已放入恢复备份，下次打开仍可找回。",
-      });
-    }
+    persistPageSnapshot(updatedPage);
   },
 
-  deletePage: (id, options) => deletePageAction(set, get, id, options),
+  deletePage: async (id) => {
+    flushEditorContent();
+    const page = get().pages[id];
+    if (!page) return false;
 
-  restorePage: (id) => restorePageAction(set, get, id),
+    const notebook = useNotebooks.getState().notebooks[page.workspaceId];
+    const isLocalFolder = notebook?.source === "local-folder";
+    if (isLocalFolder && notebook?.localPath) {
+      const resolvePathFromId = (pageId: string) => {
+        const prefix = `local-${page.workspaceId}-`;
+        if (!pageId.startsWith(prefix)) return null;
+        const encoded = pageId.slice(prefix.length);
+        try {
+          const relativePath = decodeURIComponent(encoded);
+          return `${notebook.localPath}/${relativePath}`;
+        } catch {
+          return null;
+        }
+      };
 
-  duplicatePage: (id) => duplicatePageAction(set, get, id),
+      const targetPath = page.localFilePath || resolvePathFromId(id);
+      if (!targetPath || !window.gooseFs) return false;
 
-  permanentlyDeletePage: (id) => permanentlyDeletePageAction(set, get, id),
+      const confirmed = confirm(
+        page.isFolder
+          ? `确定要删除本地文件夹 "${getPageTitle(page)}" 及其内容吗？将移入系统回收站。`
+          : `确定要删除本地文件 "${getPageTitle(page)}" 吗？将移入系统回收站。`,
+      );
+      if (!confirmed) return false;
+
+      const removedIds = new Set<string>();
+      const stack = [id];
+      const snapshotPages = get().pages;
+      while (stack.length) {
+        const currentId = stack.pop()!;
+        removedIds.add(currentId);
+        Object.values(snapshotPages).forEach((p) => {
+          if (p.parentId === currentId) stack.push(p.id);
+        });
+      }
+
+      const removeOk = page.isFolder
+        ? await window.gooseFs.deleteDir(targetPath)
+        : await window.gooseFs.deleteFile(targetPath);
+      if (!removeOk) return false;
+
+      set((state) => {
+        const newPages = { ...state.pages };
+        removedIds.forEach((pid) => delete newPages[pid]);
+
+        let nextActivePageId = state.activePageId;
+        if (removedIds.has(state.activePageId || "")) {
+          nextActivePageId = resolveAdjacentPageAfterDeletion({
+            pages: state.pages,
+            currentPage: page,
+            removedIds,
+            isLocalNotebook: true,
+          });
+          useNotebooks.getState().setLastActivePage(
+            page.workspaceId,
+            nextActivePageId,
+          );
+        }
+
+        return {
+          pages: newPages,
+          activePageId: nextActivePageId,
+        };
+      });
+
+      removePersistedPageSnapshots(snapshotPages, removedIds);
+
+      return true;
+    }
+
+    const workspaceId = page.workspaceId;
+    const changedIds: string[] = [];
+
+    set((state) => {
+      const removedIds = new Set<string>();
+      const stack = [id];
+      while (stack.length) {
+        const currentId = stack.pop()!;
+        removedIds.add(currentId);
+        Object.values(state.pages).forEach((p) => {
+          if (p.parentId === currentId && !p.trashedAt) stack.push(p.id);
+        });
+      }
+
+      const newPages = { ...state.pages };
+      const now = Date.now();
+      removedIds.forEach((pid) => {
+        if (newPages[pid]) {
+          newPages[pid] = {
+            ...newPages[pid],
+            trashedAt: now,
+            updatedAt: now,
+            isFavorite: false,
+            isPinned: false,
+            pinnedAt: undefined,
+          };
+          changedIds.push(pid);
+        }
+      });
+
+      let newActivePageId = state.activePageId;
+      if (removedIds.has(state.activePageId || "")) {
+        newActivePageId = resolveAdjacentPageAfterDeletion({
+          pages: state.pages,
+          currentPage: page,
+          removedIds,
+          isLocalNotebook: false,
+        });
+        useNotebooks.getState().setLastActivePage(
+          workspaceId,
+          newActivePageId,
+        );
+      }
+
+      return {
+        pages: newPages,
+        activePageId: newActivePageId,
+      };
+    });
+
+    persistPageSnapshots(get().pages, changedIds);
+
+    return true;
+  },
+
+  restorePage: (id) => {
+    const snapshotPages = get().pages;
+    const page = snapshotPages[id];
+    if (!page || !page.trashedAt) {
+      return { ok: false };
+    }
+
+    const notebookName =
+      useNotebooks.getState().notebooks[page.workspaceId]?.name ||
+      "未命名记事本";
+    const pageTitle = getPageTitle(page) || "无标题";
+    const itemLabel = page.isFolder
+      ? "文件夹"
+      : page.localFilePath
+        ? "文件"
+        : "页面";
+
+    const parentTitles: string[] = [];
+    const parentVisited = new Set<string>();
+    let currentParentId = page.parentId;
+    while (currentParentId && !parentVisited.has(currentParentId)) {
+      parentVisited.add(currentParentId);
+      const parentPage = snapshotPages[currentParentId];
+      if (!parentPage) break;
+      parentTitles.unshift(getPageTitle(parentPage) || "无标题");
+      currentParentId = parentPage.parentId;
+    }
+
+    let restoredCount = 0;
+    const restoredIds: string[] = [];
+    set((state) => {
+      const currentPage = state.pages[id];
+      if (!currentPage || !currentPage.trashedAt) return state;
+
+      const trashStamp = currentPage.trashedAt;
+      const now = Date.now();
+      const restoredPages = { ...state.pages };
+
+      const stack = [id];
+      const visited = new Set<string>();
+      while (stack.length) {
+        const currentId = stack.pop()!;
+        if (visited.has(currentId)) continue;
+        visited.add(currentId);
+        const current = restoredPages[currentId];
+        if (current?.trashedAt === trashStamp) {
+          const { trashedAt, ...rest } = current;
+          restoredPages[currentId] = {
+            ...rest,
+            updatedAt: now,
+          } as Page;
+          restoredCount += 1;
+          restoredIds.push(currentId);
+        }
+        Object.values(restoredPages).forEach((p) => {
+          if (p.parentId === currentId && !visited.has(p.id)) {
+            stack.push(p.id);
+          }
+        });
+      }
+
+      return {
+        pages: restoredPages,
+      };
+    });
+
+    persistPageSnapshots(get().pages, restoredIds);
+
+    return {
+      ok: true,
+      pageTitle,
+      notebookName,
+      parentTitles,
+      restoredCount,
+      itemLabel,
+    };
+  },
+
+  duplicatePage: (id) => {
+    flushEditorContent();
+
+    const sourcePage = get().pages[id];
+    const notebook = sourcePage
+      ? useNotebooks.getState().notebooks[sourcePage.workspaceId]
+      : undefined;
+    if (notebook?.source === "local-folder") {
+      return id;
+    }
+
+    let newId = "";
+    set((state) => {
+      const page = state.pages[id];
+      if (!page) return state;
+
+      newId = uuidv4();
+      const now = Date.now();
+
+      const clonedContent = JSON.parse(JSON.stringify(page.content));
+      if (
+        clonedContent.content?.[0]?.type === "heading" &&
+        clonedContent.content[0].attrs?.level === 1
+      ) {
+        const titleNode = clonedContent.content[0];
+        const titleText = extractTitleFromContent(page.content);
+        titleNode.content = [{ type: "text", text: `${titleText} 副本` }];
+      }
+
+      const newPage: Page = {
+        ...page,
+        id: newId,
+        content: clonedContent,
+        updatedAt: now,
+        createdAt: now,
+        trashedAt: undefined,
+        isFavorite: false,
+        isPinned: false,
+        pinnedAt: undefined,
+        order: now,
+      };
+
+      return {
+        pages: {
+          ...state.pages,
+          [newId]: newPage,
+        },
+      };
+    });
+    persistPageSnapshot(get().pages[newId]);
+    return newId;
+  },
+
+  permanentlyDeletePage: async (id) => {
+    const page = get().pages[id];
+    const notebook = page
+      ? useNotebooks.getState().notebooks[page.workspaceId]
+      : undefined;
+    const isLocalFolder = notebook?.source === "local-folder";
+
+    if (isLocalFolder && notebook?.localPath) {
+      if (typeof window === "undefined" || !window.gooseFs) return;
+      if (!page) return;
+      const snapshotPages = get().pages;
+
+      const resolvePathFromId = (pageId: string) => {
+        const prefix = `local-${page.workspaceId}-`;
+        if (!pageId.startsWith(prefix)) return null;
+        const encoded = pageId.slice(prefix.length);
+        try {
+          const relativePath = decodeURIComponent(encoded);
+          return `${notebook.localPath}/${relativePath}`;
+        } catch {
+          return null;
+        }
+      };
+
+      const targetPath = page.localFilePath || resolvePathFromId(id);
+      if (!targetPath) return;
+
+      const confirmed = confirm(
+        page.isFolder
+          ? `确定要删除本地文件夹 "${getPageTitle(page)}" 及其内容吗？将移入系统回收站。`
+          : `确定要删除本地文件 "${getPageTitle(page)}" 及其对应的文件吗？将移入系统回收站。`,
+      );
+      if (!confirmed) return;
+
+      const removedIds = new Set<string>();
+      const stack = [id];
+      while (stack.length) {
+        const currentId = stack.pop()!;
+        removedIds.add(currentId);
+        Object.values(get().pages).forEach((p) => {
+          if (p.parentId === currentId) stack.push(p.id);
+        });
+      }
+
+      const deleted = page.isFolder
+        ? await window.gooseFs.deleteDir(targetPath)
+        : await window.gooseFs.deleteFile(targetPath);
+      if (!deleted) return;
+
+      set((state) => {
+        const newPages = { ...state.pages };
+        removedIds.forEach((pid) => delete newPages[pid]);
+
+        let nextActivePageId = state.activePageId;
+        if (removedIds.has(state.activePageId || "")) {
+          nextActivePageId = null;
+          useNotebooks.getState().setLastActivePage(page.workspaceId, null);
+        }
+
+        return {
+          pages: newPages,
+          activePageId: nextActivePageId,
+        };
+      });
+      removePersistedPageSnapshots(snapshotPages, removedIds);
+      return;
+    }
+
+    const targetPage = get().pages[id];
+    set((state) => {
+      const page = state.pages[id];
+      if (!page) return state;
+      const workspaceId = page.workspaceId;
+      const deletingTrashedPage = !!page.trashedAt;
+      const newPages = { ...state.pages };
+      delete newPages[id];
+
+      let newActivePageId = state.activePageId;
+      if (state.activePageId === id) {
+        if (deletingTrashedPage) {
+          const trashedPagesAfterDelete = Object.values(newPages)
+            .filter((p) => p.workspaceId === workspaceId && !!p.trashedAt)
+            .sort((a, b) => (b.trashedAt ?? 0) - (a.trashedAt ?? 0));
+
+          if (trashedPagesAfterDelete.length > 0) {
+            const trashedPagesBeforeDelete = Object.values(state.pages)
+              .filter((p) => p.workspaceId === workspaceId && !!p.trashedAt)
+              .sort((a, b) => (b.trashedAt ?? 0) - (a.trashedAt ?? 0));
+
+            const deletedPageIndex = trashedPagesBeforeDelete.findIndex(
+              (p) => p.id === id,
+            );
+            const safeCurrentIndex = Math.max(deletedPageIndex, 0);
+            const nextIndex =
+              safeCurrentIndex >= trashedPagesAfterDelete.length
+                ? trashedPagesAfterDelete.length - 1
+                : safeCurrentIndex;
+
+            newActivePageId = trashedPagesAfterDelete[nextIndex].id;
+          } else {
+            newActivePageId = null;
+          }
+        } else {
+          const siblings = Object.values(newPages)
+            .filter(
+              (p) =>
+                p.workspaceId === workspaceId && !p.trashedAt && p.id !== id,
+            )
+            .sort(
+              (a, b) => (a.order ?? a.createdAt) - (b.order ?? b.createdAt),
+            );
+
+          if (siblings.length > 0) {
+            const deletedPageIndex = Object.values(state.pages)
+              .filter((p) => p.workspaceId === workspaceId && !p.trashedAt)
+              .sort(
+                (a, b) => (a.order ?? a.createdAt) - (b.order ?? b.createdAt),
+              )
+              .findIndex((p) => p.id === id);
+
+            const nextIndex =
+              deletedPageIndex >= siblings.length
+                ? siblings.length - 1
+                : deletedPageIndex;
+            newActivePageId = siblings[nextIndex].id;
+          } else {
+            newActivePageId = null;
+          }
+        }
+      }
+
+      return {
+        pages: newPages,
+        activePageId: newActivePageId,
+      };
+    });
+    removePersistedPageSnapshot(targetPage, id);
+  },
 
   reorderPages: (ids, parentId) => {
     set((state) => {
@@ -312,6 +995,7 @@ export const usePages = create<PagesState>()((set, get) => ({
             ...newPages[id],
             parentId: parentId,
             order: index,
+            updatedAt: Date.now(),
           };
         }
       });
@@ -324,12 +1008,14 @@ export const usePages = create<PagesState>()((set, get) => ({
   reorderFavorites: (ids) => {
     set((state) => {
       const newPages = { ...state.pages };
+      const now = Date.now();
 
       ids.forEach((id, index) => {
         if (!newPages[id]) return;
         newPages[id] = {
           ...newPages[id],
           favoriteOrder: index,
+          updatedAt: now,
         };
       });
 
@@ -338,19 +1024,220 @@ export const usePages = create<PagesState>()((set, get) => ({
     persistPageSnapshots(get().pages, ids);
   },
 
-  movePageTreeToNotebook: (pageId, targetNotebookId) =>
-    movePageTreeToNotebookAction(set, get, pageId, targetNotebookId),
+  movePageTreeToNotebook: (pageId, targetNotebookId) => {
+    flushEditorContent(true);
 
-  undoMovePageTree: (undoSnapshots, sourceNotebookId, prevActivePageId) =>
-    undoMovePageTreeAction(
-      set,
-      get,
-      undoSnapshots,
+    const snapshotPages = get().pages;
+    const sourcePage = snapshotPages[pageId];
+    if (!sourcePage || sourcePage.trashedAt) {
+      return {
+        ok: false,
+        movedCount: 0,
+        reason: "page-not-found",
+      };
+    }
+
+    const sourceNotebookId = sourcePage.workspaceId;
+    const notebooksStore = useNotebooks.getState();
+    const sourceNotebook = notebooksStore.notebooks[sourceNotebookId];
+    const targetNotebook = notebooksStore.notebooks[targetNotebookId];
+
+    if (!sourceNotebook || sourceNotebook.source === "local-folder") {
+      return {
+        ok: false,
+        movedCount: 0,
+        reason: "source-not-supported",
+      };
+    }
+
+    if (!targetNotebook || targetNotebook.source === "local-folder") {
+      return {
+        ok: false,
+        movedCount: 0,
+        reason: "target-not-supported",
+      };
+    }
+
+    if (sourceNotebookId === targetNotebookId) {
+      return {
+        ok: false,
+        movedCount: 0,
+        reason: "same-notebook",
+      };
+    }
+
+    const movedIds: string[] = [];
+    const movedIdSet = new Set<string>();
+    const stack = [pageId];
+
+    while (stack.length) {
+      const currentId = stack.pop()!;
+      if (movedIdSet.has(currentId)) continue;
+      const currentPage = snapshotPages[currentId];
+      if (!currentPage || currentPage.trashedAt) continue;
+      movedIdSet.add(currentId);
+      movedIds.push(currentId);
+
+      Object.values(snapshotPages).forEach((p) => {
+        if (!p.trashedAt && p.parentId === currentId && !movedIdSet.has(p.id)) {
+          stack.push(p.id);
+        }
+      });
+    }
+
+    if (movedIds.length === 0) {
+      return {
+        ok: false,
+        movedCount: 0,
+        reason: "empty-tree",
+      };
+    }
+
+    const now = Date.now();
+    const targetTopLevelOrders = Object.values(snapshotPages)
+      .filter(
+        (p) =>
+          !p.trashedAt &&
+          p.workspaceId === targetNotebookId &&
+          p.parentId === undefined,
+      )
+      .map((p) => p.order ?? p.createdAt);
+    const maxTopLevelOrder =
+      targetTopLevelOrders.length > 0
+        ? Math.max(...targetTopLevelOrders)
+        : now - 1;
+    const rootOrder = maxTopLevelOrder + 1;
+
+    const activeNotebookId = notebooksStore.activeNotebookId;
+    const activePageId = get().activePageId;
+    const shouldFallbackActive =
+      !!activePageId &&
+      movedIdSet.has(activePageId) &&
+      activeNotebookId === sourceNotebookId;
+
+    let nextActivePageId: string | null = activePageId;
+    if (shouldFallbackActive) {
+      const remainingPages = Object.values(snapshotPages)
+        .filter(
+          (p) =>
+            !p.trashedAt &&
+            p.workspaceId === sourceNotebookId &&
+            !movedIdSet.has(p.id),
+        )
+        .sort((a, b) => {
+          const valA = a.order ?? a.createdAt;
+          const valB = b.order ?? b.createdAt;
+          if (valA !== valB) return valA - valB;
+          return a.id.localeCompare(b.id);
+        });
+      nextActivePageId = remainingPages[0]?.id ?? null;
+    }
+
+    set((state) => {
+      const newPages = { ...state.pages };
+
+      movedIds.forEach((id) => {
+        const current = newPages[id];
+        if (!current || current.trashedAt) return;
+
+        newPages[id] = {
+          ...current,
+          workspaceId: targetNotebookId,
+          parentId: id === pageId ? undefined : current.parentId,
+          order: id === pageId ? rootOrder : current.order,
+          updatedAt: now,
+        };
+      });
+
+      return {
+        pages: newPages,
+        activePageId: shouldFallbackActive ? nextActivePageId : state.activePageId,
+      };
+    });
+
+    persistPageSnapshots(get().pages, movedIds);
+
+    if (shouldFallbackActive) {
+      notebooksStore.setLastActivePage(sourceNotebookId, nextActivePageId);
+    }
+
+    return {
+      ok: true,
+      movedCount: movedIds.length,
       sourceNotebookId,
-      prevActivePageId,
-    ),
+      targetNotebookId,
+    };
+  },
 
-  setActivePage: (id) => setActivePageAction(set, get, id),
+  setActivePage: async (id) => {
+    const previousActivePageId = get().activePageId;
+    flushEditorContent(true);
+    if (previousActivePageId) {
+      await get().flushPendingLocalSaveByPageId(previousActivePageId);
+    }
+
+    if (!id) {
+      set({ activePageId: null });
+      return;
+    }
+
+    const page = get().pages[id];
+
+    if (!page) {
+      set({ activePageId: id });
+      return;
+    }
+
+    let newContent = page.content;
+    const notebook = useNotebooks.getState().notebooks[page.workspaceId];
+
+    if (
+      notebook?.source === "local-folder" &&
+      page.localFilePath &&
+      !page.isFolder &&
+      window.gooseFs
+    ) {
+      try {
+        let markdownContent = "";
+        if (window.gooseFs.readFileAsync) {
+          markdownContent =
+            (await window.gooseFs.readFileAsync(
+              page.localFilePath,
+            )) || "";
+        } else {
+          markdownContent =
+            window.gooseFs.readFile(page.localFilePath) || "";
+        }
+        const imported = importFromMarkdown(markdownContent);
+        if (imported.content) {
+          newContent = imported.content;
+        }
+      } catch (e) {
+        console.error("Failed to read local file", e);
+      }
+    }
+
+    set((state) => {
+      const currentPage = state.pages[id];
+      if (!currentPage) return { activePageId: id };
+
+      return {
+        activePageId: id,
+        pages: {
+          ...state.pages,
+          [id]: {
+            ...currentPage,
+            content: newContent,
+          },
+        },
+      };
+    });
+
+    const notebookId = useNotebooks.getState().activeNotebookId;
+    if (notebookId) {
+      useNotebooks.getState().setLastActivePage(notebookId, id);
+    }
+  },
 
   setPendingNavigatePageId: (id) => {
     set({ pendingNavigatePageId: id });
@@ -486,61 +1373,342 @@ export const usePages = create<PagesState>()((set, get) => ({
     }
   },
 
-  loadLocalFolderPages: (notebookId, basePath, options) =>
-    loadLocalFolderPagesAction(set, get, notebookId, basePath, options),
+  loadLocalFolderPages: async (notebookId, basePath, options) => {
+    if (typeof window === "undefined" || !window.gooseFs) return;
 
-  reloadLocalPageFromDisk: (pageId) =>
-    reloadLocalPageFromDiskAction(set, get, pageId),
+    const previousActivePageId = get().activePageId;
+    const previousActivePage = previousActivePageId
+      ? get().pages[previousActivePageId]
+      : undefined;
+    const previousActiveInNotebook =
+      previousActivePage?.workspaceId === notebookId
+        ? previousActivePageId
+        : null;
+    useNotebooks.getState().setLocalFolderLoadState(notebookId, {
+      status: "loading",
+      startedAt: Date.now(),
+    });
 
-  removeSingleLocalPage: (filePath) =>
-    removeSingleLocalPageAction(set, get, filePath),
+    const currentPages = get().pages;
+    const hasExistingPages = Object.values(currentPages).some(
+      (p) => p.workspaceId === notebookId,
+    );
 
-  addSingleLocalPage: (notebookId, basePath, filePath, options) =>
-    addSingleLocalPageAction(set, get, notebookId, basePath, filePath, options),
+    if (hasExistingPages) {
+      Object.values(currentPages).forEach((p) => {
+        if (p.workspaceId === notebookId) {
+          localPageMetadataCache.set(p.id, {
+            isFavorite: p.isFavorite,
+            favoriteOrder: p.favoriteOrder,
+            icon: p.icon,
+            isPinned: p.isPinned,
+            pinnedAt: p.pinnedAt,
+          });
+        }
+      });
+    }
 
-  loadAllLocalFolderPages: () => loadAllLocalFolderPagesAction(set, get),
+    get().removePagesByWorkspaceId(notebookId);
+    try {
+      const localPages = await scanLocalFolderPages({
+        notebookId,
+        basePath,
+        gooseFs: window.gooseFs,
+      });
 
-  saveLocalPageContent: (
-    pageId: string,
-    content: JSONContent,
-    options?: { force?: boolean },
-  ) => saveLocalPageContentAction(set, get, pageId, content, options),
+      set((state) => {
+        const updated = {
+          ...state.pages,
+          ...localPages.reduce(
+            (acc, page) => {
+              const existing = localPageMetadataCache.get(page.id);
+              if (existing) {
+                if (existing.isFavorite !== undefined) {
+                  page.isFavorite = existing.isFavorite;
+                }
+                if (existing.favoriteOrder !== undefined) {
+                  page.favoriteOrder = existing.favoriteOrder;
+                }
+                if (existing.icon) {
+                  page.icon = existing.icon;
+                }
+                if (existing.isPinned !== undefined) {
+                  page.isPinned = existing.isPinned;
+                }
+                if (existing.pinnedAt !== undefined) {
+                  page.pinnedAt = existing.pinnedAt;
+                }
+              }
 
-  flushPendingLocalSaves: () => flushPendingLocalSavesAction(set, get),
+              acc[page.id] = page;
+              return acc;
+            },
+            {} as Record<string, Page>,
+          ),
+        };
 
-  flushPendingLocalSaveByPageId: (pageId) =>
-    flushPendingLocalSaveByPageIdAction(set, get, pageId),
+        const { pendingNavigatePageId } = state;
+        const result: any = { pages: updated };
+        let nextActivePageId = state.activePageId;
+        let handledNavigation = false;
 
-  isLocalPageDirty: (pageId) => isLocalPageDirtyAction(get, pageId),
+        if (pendingNavigatePageId && updated[pendingNavigatePageId]) {
+          nextActivePageId = pendingNavigatePageId;
+          result.activePageId = nextActivePageId;
+          result.expandPageId = nextActivePageId;
+          result.pendingNavigatePageId = null;
+          handledNavigation = true;
+        }
 
-  saveDirtyLocalPage: (pageId) => saveDirtyLocalPageAction(set, get, pageId),
+        if (!handledNavigation) {
+          const activeNotebookId = useNotebooks.getState().activeNotebookId;
+          if (activeNotebookId === notebookId) {
+            const autoOpenLastNote =
+              typeof window !== "undefined"
+                ? (window as any).__gooseNoteAutoOpenLastNote !== false
+                : true;
+            const allowAutoRestore = autoOpenLastNote === true;
+            const notebook = useNotebooks.getState().notebooks[notebookId];
+            const isLocalFolder = notebook?.source === "local-folder";
 
-  renameLocalPageFile: (pageId, newBaseName) =>
-    renameLocalPageFileAction(set, get, pageId, newBaseName),
+            if (allowAutoRestore || !isLocalFolder) {
+              const lastActivePageId = useNotebooks
+                .getState()
+                .getLastActivePage(notebookId);
+              const pageIdSet = new Set(localPages.map((p) => p.id));
 
-  moveLocalPage: (pageId, targetFolderId) =>
-    moveLocalPageAction(set, get, pageId, targetFolderId),
+              if (lastActivePageId && pageIdSet.has(lastActivePageId)) {
+                nextActivePageId = lastActivePageId;
+              } else if (
+                previousActiveInNotebook &&
+                pageIdSet.has(previousActiveInNotebook)
+              ) {
+                nextActivePageId = previousActiveInNotebook;
+              } else if (!isLocalFolder) {
+                const firstPage = localPages
+                  .filter((p) => !p.trashedAt)
+                  .sort(
+                    (a, b) =>
+                      (a.order ?? a.createdAt) -
+                      (b.order ?? b.createdAt),
+                  )[0];
+                if (firstPage) {
+                  nextActivePageId = firstPage.id;
+                }
+              }
+
+              if (nextActivePageId !== state.activePageId) {
+                result.activePageId = nextActivePageId;
+              }
+            }
+          }
+        }
+
+        if (options?.showWelcome) {
+          result.activePageId = null;
+          result.expandPageId = null;
+          result.pendingNavigatePageId = null;
+        }
+
+        const hasActivePageUpdate = Object.prototype.hasOwnProperty.call(
+          result,
+          "activePageId",
+        );
+        const currentActive = hasActivePageUpdate
+          ? result.activePageId
+          : state.activePageId;
+        const activeNotebookId = useNotebooks.getState().activeNotebookId;
+        if (activeNotebookId === notebookId && currentActive) {
+          useNotebooks.getState().setLastActivePage(notebookId, currentActive);
+        }
+
+        return result;
+      });
+    } finally {
+      useNotebooks.getState().setLocalFolderLoadState(notebookId, {
+        status: "ready",
+        finishedAt: Date.now(),
+      });
+    }
+  },
+
+  writePageContent: async (pageId, content, _mode = "replace") => {
+    const page = get().pages[pageId];
+    if (!page || page.isFolder) return false;
+
+    get().updatePage(pageId, {
+      content: clonePageContent(content),
+    });
+
+    if (isLocalFolderPage(page)) {
+      await get().flushPendingLocalSaveByPageId(pageId);
+    }
+
+    return true;
+  },
+
+  appendPageContent: async (pageId, content) => {
+    const page = get().pages[pageId];
+    if (!page || page.isFolder) return false;
+
+    const mergedContent = mergePageContent(
+      clonePageContent(page.content),
+      clonePageContent(content),
+    );
+
+    return await get().writePageContent(pageId, mergedContent);
+  },
+
+  replaceBlockRange: async (pageId, startBlockId, endBlockId, newBlocks) => {
+    const page = get().pages[pageId];
+    if (!page || page.isFolder) return false;
+
+    const sourceContent = page.content as unknown;
+    const sourceBlocks = Array.isArray(sourceContent)
+      ? (sourceContent as any[])
+      : Array.isArray((sourceContent as any)?.content)
+        ? ((sourceContent as any).content as any[])
+        : null;
+    if (!sourceBlocks) return false;
+
+    const startIdx = sourceBlocks.findIndex(
+      (block) => block?.id === startBlockId,
+    );
+    const endIdx = sourceBlocks.findIndex(
+      (block) => block?.id === endBlockId,
+    );
+    if (startIdx < 0 || endIdx < 0 || endIdx < startIdx) return false;
+
+    const replacementBlocks = Array.isArray(newBlocks)
+      ? (newBlocks as any[])
+      : Array.isArray((newBlocks as any)?.content)
+        ? ((newBlocks as any).content as any[])
+        : [];
+    if (!replacementBlocks.length) return false;
+
+    const clonedSource = clonePageContent(sourceContent as JSONContent) as any[];
+    const cloneArr = Array.isArray(clonedSource) ? clonedSource : [];
+    const head = cloneArr.slice(0, startIdx);
+    const tail = cloneArr.slice(endIdx + 1);
+    const replacement = JSON.parse(JSON.stringify(replacementBlocks)).map(
+      (block: any) => {
+        if (block && typeof block === "object" && "id" in block) {
+          const { id: _omit, ...rest } = block;
+          void _omit;
+          return rest;
+        }
+        return block;
+      },
+    );
+
+    const nextContent = [...head, ...replacement, ...tail] as JSONContent;
+    return await get().writePageContent(pageId, nextContent);
+  },
+
+  saveLocalPageContent: async (pageId, content) => {
+    if (typeof window === "undefined" || !window.gooseFs)
+      return false;
+
+    const page = get().pages[pageId];
+    if (!page) return false;
+
+    const filePath = get().getLocalFilePath(pageId);
+    if (!filePath) return false;
+
+    const processedContent = content;
+
+    const assetsDir = filePath.replace(/[^\/\\]+$/, "") + "assets";
+    try {
+      if (window.gooseFs.mkdir) {
+        await window.gooseFs.mkdir(assetsDir);
+      }
+    } catch {}
+
+    const writePromises: Promise<any>[] = [];
+
+    const processImages = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        if (
+          (node.type === "image" || node.type === "imageResize") &&
+          node.attrs?.src?.startsWith("data:image")
+        ) {
+          const match = node.attrs.src.match(
+            /^data:(image\/([a-zA-Z+]+));base64,(.+)$/,
+          );
+          if (match) {
+            const ext = match[2] === "jpeg" ? "jpg" : match[2];
+            const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 9)}.${ext}`;
+            const imagePath = `${assetsDir}/${filename}`;
+
+            if (window.gooseFs?.writeFileAsync) {
+              writePromises.push(window.gooseFs.writeFileAsync(imagePath, match[3], "base64"));
+            } else {
+              window.gooseFs?.writeFile(imagePath, match[3]);
+            }
+
+            node.attrs.src = `./assets/${filename}`;
+          }
+        }
+        if (node.content) {
+          processImages(node.content);
+        }
+      });
+    };
+
+    if (processedContent.content) {
+      processImages(processedContent.content);
+    }
+
+    if (writePromises.length > 0) {
+      await Promise.all(writePromises);
+    }
+
+    const markdownContent = jsonContentToMarkdown(processedContent);
+
+    if (!markdownContent.trim()) {
+      let exists = false;
+      try { exists = window.gooseFs?.exists(filePath) ?? false; } catch {}
+
+      if (exists) {
+        let oldContent = "";
+        if (window.gooseFs?.readFileAsync) {
+          oldContent = await window.gooseFs.readFileAsync(filePath) || "";
+        } else {
+          oldContent = window.gooseFs?.readFile(filePath) || "";
+        }
+
+        if (oldContent && oldContent.trim().length > 10) {
+          console.error("[Data Integrity] Refusing to save empty content.");
+          return false;
+        }
+      }
+    }
+
+    let result: boolean;
+    if (window.gooseFs?.writeFileAsync) {
+      result = await window.gooseFs.writeFileAsync(filePath, markdownContent);
+    } else {
+      result = window.gooseFs?.writeFile(filePath, markdownContent) ?? false;
+    }
+
+    if (result) {
+      set({ lastSavedAt: Date.now() });
+    }
+    return result;
+  },
+
+  flushPendingLocalSaveByPageId: async (pageId) => {
+    await flushPendingLocalSaveByPageIdInternal(pageId, get);
+  },
+
+  flushPendingLocalSaves: async () => {
+    await flushAllPendingLocalSavesInternal(get);
+  },
 
   getLocalFilePath: (pageId) => {
     const page = get().pages[pageId];
     return page?.localFilePath || null;
   },
-
-  writePageContent: (pageId, content, mode) =>
-    writePageContentAction(set, get, pageId, content, mode),
-
-  appendPageContent: (pageId, content) =>
-    appendPageContentAction(set, get, pageId, content),
-
-  replaceBlockRange: (pageId, startBlockId, endBlockId, newBlocks) =>
-    replaceBlockRangeAction(
-      set,
-      get,
-      pageId,
-      startBlockId,
-      endBlockId,
-      newBlocks,
-    ),
 }));
 
 const setupImageStorageResolver = async () => {
@@ -553,9 +1721,7 @@ const setupImageStorageResolver = async () => {
     if (!page) return null;
 
     const notebook = useNotebooks.getState().notebooks[page.workspaceId];
-    return notebook?.source === "local-folder"
-      ? (page.localFilePath ?? null)
-      : null;
+    return notebook?.source === "local-folder" ? notebook.localPath : null;
   });
 };
 
