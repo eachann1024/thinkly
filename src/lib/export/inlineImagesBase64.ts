@@ -1,20 +1,8 @@
-import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { blobToBase64 } from "@/lib/imageStorage/utils";
 import {
   isLocalFilePath,
   readLocalFileAsBase64,
-  resolveToAbsolute,
 } from "@/lib/imageStorage/strategies/file-system";
-
-function resolveLocalMediaPath(
-  src: string,
-  pageLocalFilePath?: string | null,
-): string | null {
-  if (src.startsWith("/") || /^[A-Za-z]:[\\/]/.test(src)) return src;
-  if (!pageLocalFilePath) return null;
-  const dir = pageLocalFilePath.replace(/[\\/][^\\/]+$/, "");
-  return dir ? resolveToAbsolute(dir, src) : null;
-}
 
 let imageStoragePromise: Promise<{
   imageStorage: { load: (ref: string) => Promise<Blob | null> };
@@ -36,16 +24,12 @@ function guessMimeFromPath(filePath: string): string {
 }
 
 /**
- * 将单文件导出中的图片、视频资源就地替换为 data:base64。
- * 整库 ZIP 导出会把媒体写入 assets 目录，不走此处。
- * - uuid:/att:/att-video: → 内部附件存储
- * - 本地文件路径 → 文件系统
+ * 将 content 内所有 image 块的 url 就地替换为 data:base64
+ * - uuid:/att: → imageStorage 加载
+ * - 本地文件路径（绝对路径或 file://）→ fs 读取
  * - http(s) / 已是 base64 → 保留
  */
-export async function inlineExportMediaAsBase64(
-  content: BlockNoteContent,
-  pageLocalFilePath?: string | null,
-): Promise<void> {
+export async function inlineImagesAsBase64(content: any[]): Promise<void> {
   if (!Array.isArray(content)) return;
 
   for (const block of content) {
@@ -53,112 +37,32 @@ export async function inlineExportMediaAsBase64(
 
     if (block.type === "image" && block.props?.url) {
       const src: string = block.props.url;
-      const mutableProps = block.props as { url: string };
 
       if (src.startsWith("uuid:") || src.startsWith("att:")) {
         try {
           const { imageStorage } = await getImageStorage();
           const blob = await imageStorage.load(src);
-          if (blob) mutableProps.url = await blobToBase64(blob);
+          if (blob) block.props.url = await blobToBase64(blob);
         } catch (e) {
           console.warn("[export] 内联图片失败 (uuid/att):", src, e);
         }
-      } else if (src.startsWith("file:")) {
-        try {
-          const { fileUrlToLocalPath } = await import("@/lib/pdfExport/fontConfig");
-          const { readLocalFileAsBlobAsync } = await import(
-            "@/lib/imageStorage/strategies/file-system"
-          );
-          const abs = fileUrlToLocalPath(src);
-          if (abs) {
-            const blob = await readLocalFileAsBlobAsync(abs);
-            if (blob) mutableProps.url = await blobToBase64(blob);
-          }
-        } catch (e) {
-          console.warn("[export] 内联图片失败 (file://):", src, e);
-        }
-      } else if (isLocalFilePath(src)) {
-        const abs = resolveLocalMediaPath(src, pageLocalFilePath);
-        if (abs) {
-          try {
-            const { readLocalFileAsBlobAsync } = await import(
-              "@/lib/imageStorage/strategies/file-system"
-            );
-            const blob = await readLocalFileAsBlobAsync(abs);
-            if (blob) {
-              mutableProps.url = await blobToBase64(blob);
-            } else {
-              const base64 = readLocalFileAsBase64(abs);
-              if (base64) {
-                mutableProps.url = `data:${guessMimeFromPath(abs)};base64,${base64}`;
-              }
-            }
-          } catch (e) {
-            console.warn("[export] 内联图片失败 (local file):", abs, e);
-          }
-        }
-      }
-    }
-
-    if (block.type === "video" && block.props?.url) {
-      const src: string = block.props.url;
-      const mutableProps = block.props as { url: string };
-
-      if (
-        !src.startsWith("data:") &&
-        !src.startsWith("http://") &&
-        !src.startsWith("https://")
+      } else if (
+        isLocalFilePath(src) &&
+        (src.startsWith("/") || /^[A-Za-z]:[\\/]/.test(src))
       ) {
         try {
-          let blob: Blob | null = null;
-          if (src.startsWith("att-file:")) {
-            const { fileStorage } = await import("@/lib/fileStorage");
-            blob = await fileStorage.load(src, pageLocalFilePath);
-          } else {
-            const { videoStorage } = await import("@/lib/videoStorage");
-            if (videoStorage.canHandle(src)) {
-              blob = await videoStorage.load(src, pageLocalFilePath);
-            }
+          const base64 = readLocalFileAsBase64(src);
+          if (base64) {
+            block.props.url = `data:${guessMimeFromPath(src)};base64,${base64}`;
           }
-          if (blob) mutableProps.url = await blobToBase64(blob);
         } catch (e) {
-          console.warn("[export] 内联视频失败:", src, e);
-        }
-      }
-    }
-
-    if (block.type === "file" && block.props?.url) {
-      const src: string = block.props.url;
-      const mutableProps = block.props as { url: string };
-
-      if (
-        !src.startsWith("data:") &&
-        !src.startsWith("http://") &&
-        !src.startsWith("https://")
-      ) {
-        try {
-          let blob: Blob | null = null;
-          if (src.startsWith("att-file:")) {
-            const { fileStorage } = await import("@/lib/fileStorage");
-            blob = await fileStorage.load(src, pageLocalFilePath);
-          } else if (isLocalFilePath(src)) {
-            const abs = resolveLocalMediaPath(src, pageLocalFilePath);
-            if (abs) {
-              const { readLocalFileAsBlobAsync } = await import(
-                "@/lib/imageStorage/strategies/file-system"
-              );
-              blob = await readLocalFileAsBlobAsync(abs);
-            }
-          }
-          if (blob) mutableProps.url = await blobToBase64(blob);
-        } catch (e) {
-          console.warn("[export] 内联文件失败:", src, e);
+          console.warn("[export] 内联图片失败 (local file):", src, e);
         }
       }
     }
 
     if (Array.isArray(block.children) && block.children.length) {
-      await inlineExportMediaAsBase64(block.children, pageLocalFilePath);
+      await inlineImagesAsBase64(block.children);
     }
   }
 }
