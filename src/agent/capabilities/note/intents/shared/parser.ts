@@ -10,9 +10,15 @@ import {
   createAiChatOnlyTarget,
   type AiTargetSelection,
 } from "@/lib/ai-write";
+import {
+  buildIntentRouterContext,
+  classifyIntent,
+  verdictToTargetMode,
+} from "@/lib/ai-intent-router";
 import { usePages } from "@/stores/usePages";
-import { detectBlockScopeHeuristic } from "@/lib/ai-block-scope";
+import { resolveBlockScope } from "@/lib/ai-block-scope";
 import type { AISettingsLike } from "@/lib/ai-provider";
+import type { AiSessionMessage } from "@/stores/useAiSessions";
 
 export function buildInlinePrompt(params: {
   context: AgentInputContext;
@@ -55,7 +61,7 @@ export function buildInlinePrompt(params: {
 
 export interface IntentRouterDeps {
   settings: AISettingsLike;
-  messages: unknown[];
+  messages: AiSessionMessage[];
   lastArtifact?: any;
   originPageTitle?: string;
   originNotebookName?: string;
@@ -80,17 +86,47 @@ export async function parseNoteAgentInput(
         originNotebookId: context.originNotebookId,
       })
     : null;
-  // routerDeps 已不再用于 LLM 意图路由（去 LLM 化），保留签名以兼容调用方。
-  void routerDeps;
+  let intentClassification: AgentParsedInput["intentClassification"];
 
-  // 确定性路径返回 "ambiguous" 时，用保守兜底：不自动覆写当前页，歧义请求默认新建或聊天
+  // 如果确定性路径返回 "ambiguous"，尝试 LLM 路由
   if (selection?.mode === "ambiguous") {
-    selection = {
-      mode: context.originNotebookId
-        ? "current_notebook"
-        : "chat_only",
-      source: "prompt_rule",
-    };
+    if (routerDeps) {
+      const routerContext = buildIntentRouterContext({
+        userMessage: context.payload.promptText,
+        messages: routerDeps.messages,
+        originPageTitle: routerDeps.originPageTitle,
+        originNotebookName: routerDeps.originNotebookName,
+        stickyTarget: context.stickyTarget,
+        lastArtifact: routerDeps.lastArtifact,
+      });
+
+      const result = await classifyIntent(routerDeps.settings, routerContext);
+      const mappedMode = verdictToTargetMode(
+        result.verdict,
+        Boolean(context.originPageId),
+        Boolean(context.originNotebookId),
+      );
+
+      intentClassification = {
+        verdict: result.verdict,
+        confidence: result.confidence,
+        reason: result.reason,
+        source: result.source,
+      };
+
+      selection = {
+        mode: mappedMode,
+        source: "llm_router",
+      };
+    } else {
+      // 无 LLM 依赖时用保守兜底：不自动覆写当前页，歧义请求默认新建或聊天
+      selection = {
+        mode: context.originNotebookId
+          ? "current_notebook"
+          : "chat_only",
+        source: "prompt_rule",
+      };
+    }
   }
 
   let resolvedTarget =
@@ -111,13 +147,11 @@ export async function parseNoteAgentInput(
     resolvedTarget.pageId === context.originPageId
   ) {
     const page = usePages.getState().pages[resolvedTarget.pageId];
-    const scope =
-      page && !page.isFolder
-        ? detectBlockScopeHeuristic(
-            context.payload.freeformText || context.payload.promptText,
-            page.content,
-          )
-        : null;
+    const scope = await resolveBlockScope({
+      prompt: context.payload.freeformText || context.payload.promptText,
+      page,
+      settings: routerDeps?.settings ?? null,
+    });
     if (scope?.kind === "range") {
       resolvedTarget = {
         ...resolvedTarget,
@@ -156,5 +190,6 @@ export async function parseNoteAgentInput(
       .toLowerCase(),
     targetReference: targetRefMatch?.reference ?? null,
     resolvedTarget,
+    ...(intentClassification ? { intentClassification } : {}),
   };
 }
