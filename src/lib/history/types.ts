@@ -1,4 +1,4 @@
-import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import type { BlockNoteContent } from "@/lib/blocknote-content";
 
 export type HistoryTrigger = "idle" | "manual" | "pre-op";
 
@@ -31,6 +31,4 @@ export interface HistoryVersion {
   charDelta: number;
   size: number;
   content: BlockNoteContent;
-  /** 本地文件夹页面的 frontmatter 原文（恢复时一并还原） */
-  localFrontmatter?: string;
 }
