@@ -9,7 +9,12 @@ const EDGE_DROP_PADDING = 10;
 interface UseDragEndParams {
   resetTitleReveal: () => void;
   clearAutoExpandTimer: () => void;
+  clearNestDelayTimer: () => void;
+  nestCandidateRef: MutableRefObject<string | null>;
+  lockedNestIdRef: MutableRefObject<string | null>;
+  rightNestActiveRef: MutableRefObject<boolean>;
   stopPointerTracking: () => void;
+  updateNestGuide: (guide: { overId: string; locked: boolean } | null) => void;
   emitDragGuide: (guide: SidebarDragGuide | null) => void;
   dropIntent: DropIntent | null;
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -17,6 +22,8 @@ interface UseDragEndParams {
   setActiveId: Dispatch<SetStateAction<string | null>>;
   setDropIntent: Dispatch<SetStateAction<DropIntent | null>>;
   dragPointerYRef: MutableRefObject<number | null>;
+  dragPointerXRef: MutableRefObject<number | null>;
+  dragStartPointerXRef: MutableRefObject<number | null>;
   dragStartPointerYRef: MutableRefObject<number | null>;
   activeDescendantIds: Set<string>;
   pages: Record<string, Page>;
@@ -30,7 +37,12 @@ interface UseDragEndParams {
 export function useDragEnd({
   resetTitleReveal,
   clearAutoExpandTimer,
+  clearNestDelayTimer,
+  nestCandidateRef,
+  lockedNestIdRef,
+  rightNestActiveRef,
   stopPointerTracking,
+  updateNestGuide,
   emitDragGuide,
   dropIntent,
   scrollRef,
@@ -38,6 +50,8 @@ export function useDragEnd({
   setActiveId,
   setDropIntent,
   dragPointerYRef,
+  dragPointerXRef,
+  dragStartPointerXRef,
   dragStartPointerYRef,
   activeDescendantIds,
   pages,
@@ -50,7 +64,12 @@ export function useDragEnd({
   const handleDragEnd = ({ active }: DragEndEvent) => {
     resetTitleReveal();
     clearAutoExpandTimer();
+    clearNestDelayTimer();
+    nestCandidateRef.current = null;
+    lockedNestIdRef.current = null;
+    rightNestActiveRef.current = false;
     stopPointerTracking();
+    updateNestGuide(null);
     emitDragGuide(null);
 
     const activeNodeId = String(active.id);
@@ -78,6 +97,8 @@ export function useDragEnd({
     setActiveId(null);
     setDropIntent(null);
     dragPointerYRef.current = null;
+    dragPointerXRef.current = null;
+    dragStartPointerXRef.current = null;
     dragStartPointerYRef.current = null;
 
     if (!finalIntent) return;
@@ -90,7 +111,7 @@ export function useDragEnd({
     if (!activeItem || !overItem || !activePage) return;
 
     let nextParentId: string | undefined;
-    let nextOrderIds: string[] | null;
+    let nextOrderIds: string[] | null = null;
 
     if (finalIntent.kind === "nest") {
       const canNestIntoOver =
