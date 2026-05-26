@@ -2,21 +2,15 @@ import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
 import { flushEditorContent } from "../flushEditor";
 
-export const setActivePageAction = (
+export const setActivePageAction = async (
   set: StoreSet,
   get: StoreGet,
   id: string | null,
-): void => {
+): Promise<void> => {
   const previousActivePageId = get().activePageId;
-  if (previousActivePageId === id) return;
-
-  // 触发编辑器把未提交内容回填到 store；同步事件，无 IO。
   flushEditorContent(true);
-
-  // 切走时让上一页的本地保存在后台收尾，不再阻塞当前切换。
-  // flushPendingLocalSaveByPageId 内部本身按 pageId 串行写盘，安全可重入。
-  if (previousActivePageId && previousActivePageId !== id) {
-    void get().flushPendingLocalSaveByPageId(previousActivePageId);
+  if (previousActivePageId) {
+    await get().flushPendingLocalSaveByPageId(previousActivePageId);
   }
 
   if (!id) {

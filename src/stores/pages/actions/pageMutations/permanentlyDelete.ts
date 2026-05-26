@@ -1,14 +1,10 @@
 import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
+import { getPageTitle } from "@/lib/page-title";
 import {
   removePersistedPageSnapshot,
   removePersistedPageSnapshots,
 } from "../../persistence";
-import { resolveHistoryBackend } from "../../../../lib/history/backend";
-import {
-  clearLocalSaveTimers,
-  pendingLocalSaveContents,
-} from "../../folderSync";
 
 export const permanentlyDeletePageAction = async (
   set: StoreSet,
@@ -27,8 +23,6 @@ export const permanentlyDeletePageAction = async (
     const snapshotPages = get().pages;
 
     const resolvePathFromId = (pageId: string) => {
-      // 兜底：从旧格式 id（local-{nb}-{encoded}）反解路径。
-      // 稳定 id 后路径应始终来自 page.localFilePath，此分支仅用于极端兜底。
       const prefix = `local-${page.workspaceId}-`;
       if (!pageId.startsWith(prefix)) return null;
       const encoded = pageId.slice(prefix.length);
@@ -40,9 +34,15 @@ export const permanentlyDeletePageAction = async (
       }
     };
 
-    // 路径优先从 page.localFilePath 取（稳定 id 后是主路径来源）。
     const targetPath = page.localFilePath || resolvePathFromId(id);
     if (!targetPath) return;
+
+    const confirmed = confirm(
+      page.isFolder
+        ? `确定要删除本地文件夹 "${getPageTitle(page)}" 及其内容吗？将移入系统回收站。`
+        : `确定要删除本地文件 "${getPageTitle(page)}" 及其对应的文件吗？将移入系统回收站。`,
+    );
+    if (!confirmed) return;
 
     const removedIds = new Set<string>();
     const stack = [id];
@@ -59,26 +59,9 @@ export const permanentlyDeletePageAction = async (
       : await window.gooseFs.deleteFile(targetPath);
     if (!deleted) return;
 
-    // 清理历史快照：必须在 store 记录删除前解析 backend（删后解析不到
-    // notebook.localPath）。文件夹删除时连同所有被递归移除的子页一并清理。
-    removedIds.forEach((pid) => {
-      void resolveHistoryBackend(pid).dropAll(pid);
-    });
-
-    // 清理自动保存计时器与待写队列，防止删除后重建同名文件时被 dirty 守卫（load.ts:26）
-    // 拒绝加载磁盘内容，也避免计时器到期后对已不存在的页面执行写盘。
-    removedIds.forEach((pid) => {
-      clearLocalSaveTimers(pid);
-      pendingLocalSaveContents.delete(pid);
-    });
-
     set((state) => {
       const newPages = { ...state.pages };
       removedIds.forEach((pid) => delete newPages[pid]);
-
-      // 同步清理 dirtyLocalPageIds，避免删除后重建同名文件被 dirty 守卫拒绝加载。
-      const newDirtyLocalPageIds = { ...state.dirtyLocalPageIds };
-      removedIds.forEach((pid) => delete newDirtyLocalPageIds[pid]);
 
       let nextActivePageId = state.activePageId;
       if (removedIds.has(state.activePageId || "")) {
@@ -89,7 +72,6 @@ export const permanentlyDeletePageAction = async (
       return {
         pages: newPages,
         activePageId: nextActivePageId,
-        dirtyLocalPageIds: newDirtyLocalPageIds,
       };
     });
     removePersistedPageSnapshots(snapshotPages, removedIds);
@@ -97,14 +79,6 @@ export const permanentlyDeletePageAction = async (
   }
 
   const targetPage = get().pages[id];
-  // 清理历史快照：内部页存于 Electron dbStorage（gn:hist: 前缀），永久删除后
-  // 若不清理会成为孤儿数据。在 store 记录删除前调用。
-  if (targetPage) {
-    void resolveHistoryBackend(id).dropAll(id);
-  }
-  // 清理自动保存计时器与待写队列（对非本地页面无害，统一处理）。
-  clearLocalSaveTimers(id);
-  pendingLocalSaveContents.delete(id);
   set((state) => {
     const page = state.pages[id];
     if (!page) return state;
@@ -112,10 +86,6 @@ export const permanentlyDeletePageAction = async (
     const deletingTrashedPage = !!page.trashedAt;
     const newPages = { ...state.pages };
     delete newPages[id];
-
-    // 清理 dirtyLocalPageIds，避免删除后重建同名文件被 dirty 守卫拒绝加载。
-    const newDirtyLocalPageIds = { ...state.dirtyLocalPageIds };
-    delete newDirtyLocalPageIds[id];
 
     let newActivePageId = state.activePageId;
     if (state.activePageId === id) {
@@ -174,7 +144,6 @@ export const permanentlyDeletePageAction = async (
     return {
       pages: newPages,
       activePageId: newActivePageId,
-      dirtyLocalPageIds: newDirtyLocalPageIds,
     };
   });
   removePersistedPageSnapshot(targetPage, id);
