@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useRef, useState, useId } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as LucideIcons from "lucide-react";
 import {
   EMPTY_CELL_HEIGHT,
   EMPTY_CELL_WIDTH,
   type PartialTableContent,
 } from "@blocknote/core";
-import { TableHandlesExtension } from "@blocknote/core/extensions";
+import {
+  TableHandlesExtension,
+} from "@blocknote/core/extensions";
 import {
   CellSelection,
-  deleteColumn,
   deleteRow,
   selectedRect,
 } from "prosemirror-tables";
@@ -21,27 +22,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/editor/ui/dropdown-menu";
-import { Dropdown, Header } from "@heroui/react";
-import {
-  duplicateTableDimension,
-  editTableDimension,
-  hasMergedTableCells,
-  insertTableDimension,
-  tableHandleColumnIndex,
-  tableDimensionColor,
-} from "./tableMenuActions";
 import { cn } from "@/components/editor/utils/cn";
-import { useEditorSettings } from "@/components/editor/platform/hostContext";
-import {
-  createTableDeletionSnapshot,
-  getTableDeletionLabel,
-  isCellSelectionInsideBlock,
-  type TableDeletionSnapshot,
-} from "./tableDeletion";
-import { isTableExtendPointerClick } from "./tableExtendClick";
 
 type TableExtendButtonProps = {
   orientation: "addOrRemoveRows" | "addOrRemoveColumns";
@@ -66,7 +49,6 @@ export function GooseTableExtendButton({
     selector: (state) => state?.block,
   });
   const movedMouse = useRef(false);
-  const extending = useRef(false);
   const [editingState, setEditingState] = useState<
     | {
         originalContent: PartialTableContent<any, any>;
@@ -79,15 +61,14 @@ export function GooseTableExtendButton({
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (!block || event.button !== 0) return;
-      extending.current = true;
       tableHandles.freezeHandles();
       hideOtherElements(true);
 
+      if (!block) return;
+
       setEditingState({
-        originalContent: structuredClone(block.content) as any,
+        originalContent: block.content as any,
         originalCroppedContent: {
-          ...block.content,
           rows: tableHandles.cropEmptyRowsOrColumns(
             block,
             isColumnHandle ? "columns" : "rows",
@@ -101,41 +82,36 @@ export function GooseTableExtendButton({
     [block, hideOtherElements, isColumnHandle, tableHandles],
   );
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (!block || (event.detail !== 0 && movedMouse.current)) return;
+  const handleClick = useCallback(() => {
+    if (!block || movedMouse.current) return;
 
-      editor.updateBlock(block, {
-        type: "table",
-        content: {
-          ...block.content,
-          rows: isColumnHandle
-            ? tableHandles.addRowsOrColumns(block, "columns", 1)
-            : tableHandles.addRowsOrColumns(block, "rows", 1),
-        } as any,
-      });
-    },
-    [block, editor, isColumnHandle, tableHandles],
-  );
+    editor.updateBlock(block, {
+      type: "table",
+      content: {
+        ...block.content,
+        rows: isColumnHandle
+          ? tableHandles.addRowsOrColumns(block, "columns", 1)
+          : tableHandles.addRowsOrColumns(block, "rows", 1),
+      } as any,
+    });
+  }, [block, editor, isColumnHandle, tableHandles]);
 
   useEffect(() => {
     if (!editingState || !block) return;
 
     const handleMouseMove = (event: MouseEvent) => {
-      const diff =
-        (isColumnHandle ? event.clientX : event.clientY) -
-        editingState.startPos;
-      if (isTableExtendPointerClick(diff)) return;
-
       movedMouse.current = true;
+
+      const diff =
+        (isColumnHandle ? event.clientX : event.clientY) - editingState.startPos;
       const croppedCount = isColumnHandle
-        ? getTableColumnCount(editingState.originalCroppedContent)
+        ? (editingState.originalCroppedContent.rows[0]?.cells.length ?? 0)
         : editingState.originalCroppedContent.rows.length;
       const originalCount = isColumnHandle
-        ? getTableColumnCount(editingState.originalContent)
+        ? (editingState.originalContent.rows[0]?.cells.length ?? 0)
         : editingState.originalContent.rows.length;
       const currentCount = isColumnHandle
-        ? getTableColumnCount(block.content)
+        ? block.content.rows[0].cells.length
         : block.content.rows.length;
       const nextCount =
         originalCount +
@@ -143,24 +119,14 @@ export function GooseTableExtendButton({
           diff / (isColumnHandle ? EMPTY_CELL_WIDTH : EMPTY_CELL_HEIGHT),
         );
 
-      if (
-        nextCount < croppedCount ||
-        nextCount <= 0 ||
-        nextCount === currentCount
-      ) {
+      if (nextCount < croppedCount || nextCount <= 0 || nextCount === currentCount) {
         return;
       }
 
       editor.updateBlock(block, {
         type: "table",
         content: {
-          ...editingState.originalContent,
-          columnWidths: isColumnHandle
-            ? Array.from(
-                { length: nextCount },
-                (_, i) => editingState.originalContent.columnWidths?.[i],
-              )
-            : editingState.originalContent.columnWidths,
+          ...block.content,
           rows: isColumnHandle
             ? tableHandles.addRowsOrColumns(
                 {
@@ -192,28 +158,14 @@ export function GooseTableExtendButton({
     if (!editingState) return;
 
     const handleMouseUp = () => {
-      extending.current = false;
       hideOtherElements(false);
       tableHandles.unfreezeHandles();
       setEditingState(undefined);
     };
 
     window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("blur", handleMouseUp);
-    return () => {
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("blur", handleMouseUp);
-    };
+    return () => window.removeEventListener("mouseup", handleMouseUp);
   }, [editingState, hideOtherElements, tableHandles]);
-
-  useEffect(
-    () => () => {
-      if (!extending.current) return;
-      tableHandles.unfreezeHandles();
-      hideOtherElements(false);
-    },
-    [tableHandles, hideOtherElements],
-  );
 
   if (!editor.isEditable) return null;
 
@@ -221,7 +173,7 @@ export function GooseTableExtendButton({
     <button
       type="button"
       className={cn(
-        "goose-editor-inline-context-ui goose-table-extend-button",
+        "goose-table-extend-button",
         isColumnHandle
           ? "goose-table-extend-button-columns"
           : "goose-table-extend-button-rows",
@@ -241,238 +193,198 @@ type TableHandleProps = {
   hideOtherElements: (hide: boolean) => void;
 };
 
+function cloneTableCell(cell: unknown) {
+  if (typeof globalThis.structuredClone === "function") {
+    return globalThis.structuredClone(cell);
+  }
+
+  return JSON.parse(JSON.stringify(cell));
+}
+
 function getTableColumnCount(content: PartialTableContent<any, any>) {
-  return Math.max(
-    0,
-    ...content.rows.map((row) =>
-      row.cells.reduce((count, cell) => {
-        if (
-          typeof cell === "object" &&
-          cell !== null &&
-          "type" in cell &&
-          cell.type === "tableCell"
-        ) {
-          return count + Math.max(1, Number(cell.props?.colspan) || 1);
-        }
-        return count + 1;
-      }, 0),
-    ),
-  );
+  return Math.max(0, ...content.rows.map((row) => row.cells.length));
 }
 
-function getBlockElementWidth(blockId: string | undefined) {
-  if (!blockId) return 0;
-  const blockElement = document.querySelector<HTMLElement>(
-    `.bn-block[data-id="${blockId}"]`,
-  );
-  return blockElement?.getBoundingClientRect().width ?? 0;
+function getInsertedColumnRows(
+  tableHandles: ReturnType<typeof useExtension<typeof TableHandlesExtension>>,
+  block: any,
+  insertIndex: number,
+) {
+  const rowsWithTrailingColumn = tableHandles.addRowsOrColumns(block, "columns", 1);
+
+  return block.content.rows.map((row: { cells: unknown[] }, rowIndex: number) => {
+    const cells = [...row.cells];
+    const blankCell = rowsWithTrailingColumn[rowIndex]?.cells.at(-1) ?? "";
+    cells.splice(insertIndex, 0, cloneTableCell(blankCell));
+    return {
+      ...row,
+      cells,
+    };
+  });
 }
 
-function getEvenColumnWidths(columnCount: number, tableWidth: number) {
-  if (columnCount <= 0 || tableWidth <= 0) return undefined;
-  const baseWidth = Math.floor(tableWidth / columnCount);
-  const widths = Array.from({ length: columnCount }, () => baseWidth);
-  widths[widths.length - 1] += Math.round(tableWidth - baseWidth * columnCount);
-  return widths;
+function getDeletedColumnRows(
+  content: PartialTableContent<any, any>,
+  fromIndex: number,
+  toIndex = fromIndex + 1,
+) {
+  return content.rows.map((row) => ({
+    ...row,
+    cells: row.cells.filter((_, cellIndex) => cellIndex < fromIndex || cellIndex >= toIndex),
+  }));
 }
 
-function deleteTableBlock(editor: any, block: any) {
-  const previousBlock = editor.getPrevBlock(block);
-  const nextBlock = editor.getNextBlock(block);
+function getUpdatedColumnWidths(
+  columnWidths: unknown[] | undefined,
+  action:
+    | { type: "insert"; index: number }
+    | { type: "delete"; fromIndex: number; toIndex: number },
+) {
+  if (!Array.isArray(columnWidths)) return columnWidths;
 
-  if (!previousBlock && !nextBlock) {
-    const [replacement] = editor.replaceBlocks(
-      [block],
-      [{ type: "paragraph" }],
-    );
-    if (replacement) editor.setTextCursorPosition(replacement, "start");
-    return;
+  const nextColumnWidths = [...columnWidths];
+  if (action.type === "insert") {
+    nextColumnWidths.splice(action.index, 0, columnWidths[action.index] ?? columnWidths.at(-1));
+  } else {
+    nextColumnWidths.splice(action.fromIndex, action.toIndex - action.fromIndex);
   }
-
-  editor.removeBlocks([block]);
-  if (previousBlock) {
-    editor.setTextCursorPosition(previousBlock, "end");
-  } else if (nextBlock) {
-    editor.setTextCursorPosition(nextBlock, "start");
-  }
+  return nextColumnWidths;
 }
 
-export function GooseTableHandle({
-  orientation,
-  hideOtherElements,
-}: TableHandleProps) {
+export function GooseTableHandle({ orientation, hideOtherElements }: TableHandleProps) {
   const editor = useBlockNoteEditor<any, any, any>();
-  const { features } = useEditorSettings();
   const tableHandles = useExtension(TableHandlesExtension);
   const state = useExtensionState(TableHandlesExtension);
   const [open, setOpen] = useState(false);
-  const [deletionSnapshot, setDeletionSnapshot] =
-    useState<TableDeletionSnapshot>();
 
   const index = state
-    ? orientation === "column"
-      ? state.colIndex === undefined
-        ? undefined
-        : tableHandleColumnIndex(
-            editor.prosemirrorState,
-            state.block.id,
-            state.rowIndex ?? 0,
-            state.colIndex,
-          )
-      : state.rowIndex
+    ? orientation === "column" ? state.colIndex : state.rowIndex
     : undefined;
   const isRow = orientation === "row";
-  const mergeNoteId = useId();
-  const ownsInteraction = useRef(false);
+  const isHeaderRow = Boolean(state?.block.content.headerRows);
 
   const closeMenu = useCallback(() => {
     setOpen(false);
-    ownsInteraction.current = false;
     tableHandles?.unfreezeHandles();
     hideOtherElements(false);
     editor.focus();
   }, [editor, hideOtherElements, tableHandles]);
 
-  useEffect(
-    () => () => {
-      if (!ownsInteraction.current) return;
-      tableHandles?.unfreezeHandles();
-      hideOtherElements(false);
+  const handleDragStart = useCallback(
+    (e: React.DragEvent) => {
+      if (!tableHandles || !state?.block) return;
+      hideOtherElements(true);
+      if (orientation === "column") {
+        tableHandles.colDragStart(e);
+      } else {
+        tableHandles.rowDragStart(e);
+      }
     },
-    [tableHandles, hideOtherElements],
+    [tableHandles, state, orientation, hideOtherElements],
   );
 
-  const insertDimension = (before: boolean) => {
-    if (!state?.block || index === undefined) return;
-    editor.exec(
-      insertTableDimension(state.block.id, orientation, index, before),
-    );
-  };
+  const handleDragEnd = useCallback(() => {
+    if (!tableHandles) return;
+    tableHandles.dragEnd();
+    hideOtherElements(false);
+  }, [tableHandles, hideOtherElements]);
 
-  const duplicateDimension = () => {
-    if (!state?.block || index === undefined) return;
-    editor.updateBlock(state.block, {
-      type: "table",
-      content: duplicateTableDimension(state.block.content, orientation, index),
-    });
-  };
+  const updateTableColumns = useCallback(
+    (action: "add-left" | "add-right" | "delete") => {
+      if (!state?.block || !tableHandles || index === undefined || isRow) return;
 
-  const captureDeletionSnapshot = useCallback(() => {
-    if (!state?.block || index === undefined) return;
+      const block = state.block;
+      const content = block.content as PartialTableContent<any, any>;
+      const columnCount = getTableColumnCount(content);
+      const insertIndex = action === "add-left" ? index : index + 1;
+      const rows =
+        action === "delete"
+          ? getDeletedColumnRows(content, index)
+          : getInsertedColumnRows(tableHandles, block, insertIndex);
+      const columnWidths = getUpdatedColumnWidths(
+        content.columnWidths,
+        action === "delete"
+          ? { type: "delete", fromIndex: index, toIndex: index + 1 }
+          : { type: "insert", index: insertIndex },
+      );
 
-    const block = state.block;
-    const content = block.content as PartialTableContent<any, any>;
-    const selection = editor.prosemirrorState.selection;
-    let selectionRect;
-    if (
-      selection instanceof CellSelection &&
-      isCellSelectionInsideBlock(
-        editor.prosemirrorState.doc,
-        block.id,
-        selection.$anchorCell.pos,
-        selection.$headCell.pos,
-      )
-    ) {
-      const rect = selectedRect(editor.prosemirrorState);
-      selectionRect = {
-        blockId: block.id,
-        anchorCell: selection.$anchorCell.pos,
-        headCell: selection.$headCell.pos,
-        top: rect.top,
-        bottom: rect.bottom,
-        left: rect.left,
-        right: rect.right,
-      };
-    }
+      if (action === "delete" && columnCount <= 1) return;
 
-    return createTableDeletionSnapshot({
-      blockId: block.id,
-      orientation,
-      handleIndex: index,
-      rowCount: content.rows.length,
-      columnCount: getTableColumnCount(content),
-      selection: selectionRect,
-    });
-  }, [editor, index, orientation, state]);
+      editor.updateBlock(block, {
+        type: "table",
+        content: {
+          ...content,
+          columnWidths,
+          rows,
+        } as any,
+      });
+      editor.setTextCursorPosition(block);
+    },
+    [editor, index, isRow, state?.block, tableHandles],
+  );
 
   const handleDelete = useCallback(() => {
-    // Reuse the displayed target even if menu dismissal changes live selection.
-    const snapshot = deletionSnapshot;
-    if (!snapshot || !tableHandles) return;
-    const block = editor.getBlock(snapshot.blockId);
-    if (!block || block.type !== "table") return;
+    const selection = editor.prosemirrorState.selection;
+    if (selection instanceof CellSelection) {
+      const rect = selectedRect(editor.prosemirrorState);
+      const selectedRows = rect.bottom - rect.top;
+      const selectedColumns = rect.right - rect.left;
 
-    if (snapshot.plan.kind === "delete-table") {
-      deleteTableBlock(editor, block);
-      return;
+      if (isRow && selectedRows > 1) {
+        editor.exec((state, dispatch) => deleteRow(state, dispatch));
+        return;
+      }
+
+      if (!isRow && selectedColumns > 1) {
+        if (state?.block) {
+          const content = state.block.content as PartialTableContent<any, any>;
+          const columnCount = getTableColumnCount(content);
+          if (selectedColumns < columnCount) {
+            editor.updateBlock(state.block, {
+              type: "table",
+              content: {
+                ...content,
+                columnWidths: getUpdatedColumnWidths(content.columnWidths, {
+                  type: "delete",
+                  fromIndex: rect.left,
+                  toIndex: rect.right,
+                }),
+                rows: getDeletedColumnRows(content, rect.left, rect.right),
+              } as any,
+            });
+            editor.setTextCursorPosition(state.block);
+          }
+        }
+        return;
+      }
     }
 
-    const { fromIndex, toIndex } = snapshot.plan;
-    editor.exec((beforeState, dispatch) => {
-      const commandState = snapshot.cellSelection
-        ? beforeState.apply(
-            beforeState.tr.setSelection(
-              CellSelection.create(
-                beforeState.doc,
-                snapshot.cellSelection.anchorCell,
-                snapshot.cellSelection.headCell,
-              ),
-            ),
-          )
-        : tableHandles.setCellSelection(
-            beforeState,
-            isRow ? { row: fromIndex, col: 0 } : { row: 0, col: fromIndex },
-            isRow
-              ? { row: toIndex - 1, col: snapshot.columnCount - 1 }
-              : { row: snapshot.rowCount - 1, col: toIndex - 1 },
-          );
+    if (isRow) {
+      tableHandles?.removeRowOrColumn(index!, orientation);
+    } else {
+      updateTableColumns("delete");
+    }
+  }, [editor, index, isRow, orientation, state?.block, tableHandles, updateTableColumns]);
 
-      return isRow
-        ? deleteRow(commandState, dispatch)
-        : deleteColumn(commandState, dispatch);
-    });
-  }, [deletionSnapshot, editor, isRow, tableHandles]);
-
-  const toggleHeader = (key: "headerRows" | "headerCols") => {
-    if (!state?.block) return;
+  const handleToggleHeaderRow = useCallback(() => {
+    if (!state?.block || !isRow || index !== 0) return;
     editor.updateBlock(state.block, {
-      type: "table",
+      ...state.block,
       content: {
         ...state.block.content,
-        [key]: state.block.content[key] ? undefined : 1,
-      },
-    });
-  };
-
-  const handleEvenColumnWidth = useCallback(() => {
-    if (!state?.block) return;
-    const content = state.block.content as PartialTableContent<any, any>;
-    const columnCount = getTableColumnCount(content);
-    const columnWidths = getEvenColumnWidths(
-      columnCount,
-      getBlockElementWidth(state.block.id),
-    );
-    if (!columnWidths) return;
-
-    editor.updateBlock(state.block, {
-      type: "table",
-      content: {
-        ...content,
-        columnWidths,
+        headerRows: isHeaderRow ? undefined : 1,
       } as any,
     });
-    editor.setTextCursorPosition(state.block);
-  }, [editor, state?.block]);
+  }, [editor, index, isHeaderRow, isRow, state?.block]);
 
   const runMenuAction = useCallback(
     (action: () => void) => {
-      action();
       closeMenu();
+      action();
     },
     [closeMenu],
   );
 
-  if (!editor.isEditable) return null;
   if (!state || index === undefined) return null;
 
   return (
@@ -480,10 +392,7 @@ export function GooseTableHandle({
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
-        ownsInteraction.current = open;
         if (open) {
-          // Capture before focus moves into the menu; label and action share it.
-          setDeletionSnapshot(captureDeletionSnapshot());
           tableHandles?.freezeHandles();
           hideOtherElements(true);
         } else {
@@ -496,209 +405,45 @@ export function GooseTableHandle({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="bn-table-handle goose-editor-position-safe-trigger goose-table-handle-btn"
-          aria-label={isRow ? "行操作" : "列操作"}
+          className="goose-table-handle-btn"
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          style={orientation === "column" ? { transform: "rotate(0.25turn)" } : undefined}
         >
-          {isRow ? (
-            <LucideIcons.GripVertical className="h-4 w-4" />
-          ) : (
-            <LucideIcons.GripHorizontal className="h-4 w-4" />
-          )}
+          <LucideIcons.GripVertical className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        editorContext
-        variant="menu"
-        className="goose-table-menu"
-        side={isRow ? "right" : "bottom"}
-        align="start"
-      >
-        <Dropdown.Section aria-label={`第 ${index + 1} ${isRow ? "行" : "列"}`}>
-          <Header className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
-            第 {index + 1} {isRow ? "行" : "列"}
-          </Header>
-          <DropdownMenuItem
-            onSelect={() => runMenuAction(() => insertDimension(true))}
-          >
-            {isRow ? <LucideIcons.ArrowUp /> : <LucideIcons.ArrowLeft />}{" "}
-            {isRow ? "在上方插入行" : "在左侧插入列"}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => runMenuAction(() => insertDimension(false))}
-          >
-            {isRow ? <LucideIcons.ArrowDown /> : <LucideIcons.ArrowRight />}{" "}
-            {isRow ? "在下方插入行" : "在右侧插入列"}
-          </DropdownMenuItem>
-        </Dropdown.Section>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          disabled={hasMergedTableCells(state.block.content)}
-          aria-describedby={
-            hasMergedTableCells(state.block.content) ? mergeNoteId : undefined
-          }
-          onSelect={() => runMenuAction(duplicateDimension)}
-        >
-          <LucideIcons.Copy /> 复制{isRow ? "行" : "列"}
-        </DropdownMenuItem>
-        {hasMergedTableCells(state.block.content) && (
-          <DropdownMenuItem
-            disabled
-            id={mergeNoteId}
-            className="goose-table-menu-note"
-          >
-            含合并单元格，暂不支持复制行列
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem
-          onSelect={() =>
-            runMenuAction(() =>
-              editor.exec(
-                editTableDimension(state.block.id, orientation, index, {
-                  type: "clear",
-                }),
-              ),
-            )
-          }
-        >
-          <LucideIcons.Eraser /> 清空内容
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <Dropdown.SubmenuTrigger>
-          <DropdownMenuItem textValue="颜色">
-            <LucideIcons.Palette /> 颜色{" "}
-            <LucideIcons.ChevronRight className="ml-auto" />
-          </DropdownMenuItem>
-          <DropdownMenuContent
-            editorContext
-            variant="menu"
-            className="goose-table-menu goose-table-color-menu"
-            side="right"
-          >
-            {(["textColor", "backgroundColor"] as const).map((property) => {
-              const selectedColor = tableDimensionColor(
-                editor.prosemirrorState,
-                state.block.id,
-                orientation,
-                index,
-                property,
-              );
-              return (
-                <Dropdown.Section
-                  key={property}
-                  className="goose-table-color-group"
-                  aria-label={
-                    property === "textColor" ? "文字颜色" : "背景颜色"
-                  }
-                  selectionMode="single"
-                  selectedKeys={
-                    selectedColor ? [`${property}:${selectedColor}`] : []
-                  }
-                >
-                  <Header className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
-                    {property === "textColor" ? "文字颜色" : "背景颜色"}
-                  </Header>
-                  {(
-                    [
-                      ["default", "默认"],
-                      ["gray", "灰色"],
-                      ["brown", "褐色"],
-                      ["green", "绿色"],
-                      ["blue", "蓝色"],
-                    ] as const
-                  ).map(([color, label]) => (
-                    <DropdownMenuItem
-                      key={color}
-                      id={`${property}:${color}`}
-                      className="goose-table-color-swatch"
-                      aria-label={`${label}${property === "textColor" ? "文字" : "背景"}`}
-                      textValue={`${label}${property === "textColor" ? "文字" : "背景"}`}
-                      style={
-                        {
-                          "--goose-table-swatch-fg":
-                            property === "textColor" && color !== "default"
-                              ? `var(--goose-editor-highlight-${color}-text)`
-                              : "hsl(var(--foreground))",
-                          "--goose-table-swatch-bg":
-                            property === "backgroundColor" &&
-                            color !== "default"
-                              ? `var(--goose-editor-highlight-${color}-bg)`
-                              : "hsl(var(--background))",
-                        } as React.CSSProperties
-                      }
-                      onSelect={() =>
-                        runMenuAction(() =>
-                          editor.exec(
-                            editTableDimension(
-                              state.block.id,
-                              orientation,
-                              index,
-                              { type: "color", property, color },
-                            ),
-                          ),
-                        )
-                      }
-                    >
-                      <span aria-hidden="true">A</span>
-                    </DropdownMenuItem>
-                  ))}
-                </Dropdown.Section>
-              );
-            })}
-          </DropdownMenuContent>
-        </Dropdown.SubmenuTrigger>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="goose-menu-item-danger"
-          onSelect={handleDelete}
-        >
-          <LucideIcons.Trash2 />{" "}
-          {deletionSnapshot
-            ? getTableDeletionLabel(deletionSnapshot.plan)
-            : isRow
-              ? "删除行"
-              : "删除列"}
-        </DropdownMenuItem>
-        {features.tablePresentationControls && (
+      <DropdownMenuContent className="w-40" side={isRow ? "right" : "bottom"} align="start">
+        {isRow ? (
           <>
-            <DropdownMenuSeparator />
-            <Dropdown.SubmenuTrigger>
-              <DropdownMenuItem textValue="表格选项">
-                <LucideIcons.Table2 /> 表格选项{" "}
-                <LucideIcons.ChevronRight className="ml-auto" />
+            <DropdownMenuItem onClick={() => tableHandles?.addRowOrColumn(index!, { orientation: "row", side: "above" })}>
+              <LucideIcons.ArrowUp className="mr-2 h-4 w-4" /> 上方添加行
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => tableHandles?.addRowOrColumn(index!, { orientation: "row", side: "below" })}>
+              <LucideIcons.ArrowDown className="mr-2 h-4 w-4" /> 下方添加行
+            </DropdownMenuItem>
+            {index === 0 && (
+              <DropdownMenuItem onClick={handleToggleHeaderRow}>
+                <LucideIcons.Heading1 className="mr-2 h-4 w-4" />
+                {isHeaderRow ? "取消标题行" : "设为标题行"}
               </DropdownMenuItem>
-              <DropdownMenuContent
-                editorContext
-                variant="menu"
-                className="goose-table-menu"
-                side="right"
-              >
-                {(["headerRows", "headerCols"] as const).map((key) => (
-                  <DropdownMenuItem
-                    key={key}
-                    textValue={`${key === "headerRows" ? "标题行" : "标题列"}，${state.block.content[key] ? "已启用" : "未启用"}`}
-                    onSelect={() => runMenuAction(() => toggleHeader(key))}
-                  >
-                    {key === "headerRows" ? (
-                      <LucideIcons.PanelTop />
-                    ) : (
-                      <LucideIcons.PanelLeft />
-                    )}
-                    {key === "headerRows" ? "标题行" : "标题列"}
-                    <span className="sr-only">
-                      {state.block.content[key] ? "已启用" : "未启用"}
-                    </span>
-                    {Boolean(state.block.content[key]) && (
-                      <LucideIcons.Check className="ml-auto" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuItem
-                  onSelect={() => runMenuAction(handleEvenColumnWidth)}
-                >
-                  <LucideIcons.AlignJustify /> 两端对齐
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </Dropdown.SubmenuTrigger>
+            )}
+            <DropdownMenuItem onClick={handleDelete}>
+              <LucideIcons.Trash2 className="mr-2 h-4 w-4" /> 删除行
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={() => runMenuAction(() => updateTableColumns("add-left"))}>
+              <LucideIcons.ArrowLeft className="mr-2 h-4 w-4" /> 左侧添加列
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => runMenuAction(() => updateTableColumns("add-right"))}>
+              <LucideIcons.ArrowRight className="mr-2 h-4 w-4" /> 右侧添加列
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => runMenuAction(handleDelete)}>
+              <LucideIcons.Trash2 className="mr-2 h-4 w-4" /> 删除列
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>

@@ -12,7 +12,8 @@ import {
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
 
-const ITEM_CLASS = "goose-formatting-toolbar-control";
+const ITEM_CLASS =
+  "h-7 min-w-7 rounded-md px-0 text-foreground/90 hover:bg-muted data-[state=on]:bg-accent data-[state=on]:text-foreground";
 
 export function LinkButton({
   isLinkActive,
@@ -91,12 +92,11 @@ export function LinkButton({
             </Toggle>
           </PopoverTrigger>
         </TooltipTrigger>
-        <ToolbarTooltip label="添加链接" />
+        <ToolbarTooltip label="添加链接" shortcut="Mod+K" />
       </Tooltip>
       <PopoverContent
         align="center"
         side="top"
-        editorContext
         className="w-72 p-2"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
