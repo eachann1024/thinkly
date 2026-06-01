@@ -8,6 +8,7 @@
  * 非 React 调用点（BlockNote/ProseMirror extension 回调）无法用 hook，改用
  * `getEditorPlatform()` 读取模块级单例；Provider 挂载时同步该单例。
  *
+ * 来源：plans/2026-06-01-Tauri迁移与编辑器抽取计划/extraction-blueprint.md §1 / §4 Step 4
  */
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import type { EditorPlatform } from "./types";
@@ -30,13 +31,8 @@ export function EditorPlatformProvider({
   platform: EditorPlatform;
   children: ReactNode;
 }) {
-  // render 阶段同步赋值，确保首帧即可通过 getEditorPlatform() 拿到真实 platform
-  // （useEffect 在 paint 后异步执行，首帧前调用的 extension 会拿到 noopPlatform）。
-  currentPlatform = platform;
-
-  // cleanup 仍在 useEffect 中（安全回退到 noopPlatform，仅在 unmount 后生效）
+  // 同步模块级单例，供非 React 调用点读取
   useEffect(() => {
-    // 确保在 StrictMode 二次渲染后 currentPlatform 也是最新的
     currentPlatform = platform;
     return () => {
       currentPlatform = noopPlatform;

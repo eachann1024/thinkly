@@ -1,12 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useEditorSettings } from "@/components/editor/platform/hostContext";
-import { useResolvedTheme } from "@/hooks/useResolvedTheme";
-import { loadMermaid } from "@/lib/imageExport/loadMermaid";
-import {
-  getMermaidInitConfig,
-  stripMermaidInitDirectives,
-} from "@/lib/imageExport/mermaidTheme";
-import { tryRenderMermaidTimeline } from "@/lib/imageExport/timelineSvg";
+import { useEffect, useState } from "react";
+import { useSettings } from "@/stores/useSettings";
 
 interface MermaidViewProps {
   value: string;
@@ -14,13 +7,15 @@ interface MermaidViewProps {
 
 export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
   const [svg, setSvg] = useState<string>("");
-  const { theme, features } = useEditorSettings();
-  const resolvedTheme = useResolvedTheme(theme);
-  const skipDebounceRef = useRef(true);
+  const { theme } = useSettings();
 
   useEffect(() => {
     let active = true;
-    const isDark = resolvedTheme === "dark";
+    let debounceTimer: number | undefined;
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     const renderMermaid = async () => {
       if (!value) {
@@ -28,26 +23,17 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         return;
       }
       try {
-        const timeline = tryRenderMermaidTimeline(
-          value,
-          isDark ? "dark" : "light",
-        );
-        if (timeline) {
-          if (active) setSvg(timeline);
-          return;
-        }
-        const mermaid = await loadMermaid();
+        const { default: mermaid } = await import("mermaid");
         if (!active) return;
-        mermaid.initialize(
-          getMermaidInitConfig({
-            mode: isDark ? "dark" : "light",
-            securityLevel: features.mermaidUnsafeHTML ? "loose" : "strict",
-            fontFamily: "inherit",
-            useMaxWidth: true,
-          }),
-        );
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? "dark" : "default",
+          securityLevel: "loose",
+          fontFamily: "inherit",
+          suppressErrorRendering: true,
+        });
         const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
-        const { svg } = await mermaid.render(id, stripMermaidInitDirectives(value));
+        const { svg } = await mermaid.render(id, value);
         if (!active) return;
         setSvg(svg);
       } catch {
@@ -55,16 +41,12 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       }
     };
 
-    const delay = skipDebounceRef.current ? 0 : 500;
-    skipDebounceRef.current = false;
-    const debounceTimer = window.setTimeout(() => {
-      void renderMermaid();
-    }, delay);
+    debounceTimer = window.setTimeout(() => { void renderMermaid(); }, 500);
     return () => {
       active = false;
       if (debounceTimer) clearTimeout(debounceTimer);
     };
-  }, [features.mermaidUnsafeHTML, value, resolvedTheme]);
+  }, [value, theme]);
 
   if (!svg) return null;
 
