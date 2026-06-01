@@ -1,27 +1,18 @@
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core/blocks";
-import { gooseHeadingBlockSpec } from "@/components/editor/blocks/heading/headingBlockSpec";
-import { calloutBlock } from "@/components/editor/blocks/callout/calloutBlock";
+import { createHeadingBlockSpec } from "@blocknote/core";
+import { calloutBlock } from "@/pages/workspace/components/editor/calloutBlock";
 import { customFileBlock } from "../blocks/file/customFileBlock";
-import { customImageBlock } from "../blocks/image/customImageBlock";
-import { customVideoBlock } from "../blocks/video/videoBlock";
-import { codeBlockSpec } from "@/components/editor/blocks/code/codeBlockSpec";
-import { gooseEditorStyleSpecs } from "@/components/editor/inline-code/InlineCodeComponent";
-import { pageMentionSpec } from "@/components/editor/inline/pageMentionSpec";
+import { codeBlockSpec } from "@/pages/workspace/components/editor/codeBlockSpec";
 
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    // 普通 heading + props.collapsed；不用 BlockNote isToggleable children。
-    heading: gooseHeadingBlockSpec,
+    heading: createHeadingBlockSpec({
+      levels: [1, 2, 3],
+      allowToggleHeadings: false,
+    }),
     callout: calloutBlock,
-    image: customImageBlock,
-    video: customVideoBlock,
     file: customFileBlock,
     codeBlock: codeBlockSpec,
-  },
-  styleSpecs: gooseEditorStyleSpecs,
-}).extend({
-  inlineContentSpecs: {
-    pageMention: pageMentionSpec,
   },
 });
