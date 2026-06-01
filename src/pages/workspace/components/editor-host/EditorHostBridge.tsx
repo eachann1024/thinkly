@@ -1,27 +1,21 @@
 /**
- * EditorHostBridge —— 宿主（Electron app）把应用 store 桥接成编辑器内核所需的注入对象。
+ * EditorHostBridge —— 宿主（uTools app）把应用 store 桥接成编辑器内核所需的注入对象。
  *
  * 编辑器内核（@/components/editor）不直接读 usePages/useNotebooks/useSettings/useTabs，
- * 也不直接碰平台 API；本桥读取这些 store 与 Electron 平台实现，组装成 EditorSettings /
+ * 也不直接碰平台 API；本桥读取这些 store 与 uTools 平台实现，组装成 EditorSettings /
  * EditorPageContext，经 <EditorPlatformProvider> + <EditorHostProvider> 注入，再渲染
  * 传入的 <Editor>（children）。
  *
  * 行为保持不变：注入对象的各字段/回调一一对应抽取前 Editor.tsx 内的 store 直读逻辑。
  *
+ * 来源：plans/2026-06-01-Tauri迁移与编辑器抽取计划/extraction-blueprint.md §3 / §4 Step 6
  */
 import { useMemo, type ReactNode } from "react";
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
-import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { useTabs } from "@/stores/useTabs";
-import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
-import {
-  getPageTitle,
-  withInternalPageTitle,
-} from "@/components/editor/utils/page-title";
-import { shouldUseRawEditorContent } from "./editorContentMode";
 import { EditorPlatformProvider } from "@/components/editor/platform/context";
 import {
   EditorHostProvider,
@@ -33,214 +27,87 @@ import {
   getAiReferenceSuggestionItems,
   resolveAiReferenceContexts,
 } from "@/components/editor/ai/composer/referenceLookup";
-import { editorPlatform } from "@/lib/editor-platform/resolve";
-import { HostAdapter } from "@/lib/host/adapter";
-import { fileStorage } from "@/lib/fileStorage";
-import { openResourceExternally } from "@/components/editor/utils/openResourceExternally";
-import {
-  isInsideRoot,
-  resolveCandidatePath,
-} from "@/components/editor/inline-code/localPathTarget";
-import { openAssociatedMarkdownFile } from "@/lib/openAssociatedMarkdown";
-import { tryShowPageInFocusedSplit } from "@/lib/editor-split/commands";
-import { resolvePageMentionNavigation } from "@/lib/pageMentionNavigation";
-import { toast } from "@/components/ui/sonner";
+import { utoolsEditorPlatform } from "@/lib/editor-platform/utools";
 
 interface EditorHostBridgeProps {
   /** 当前被编辑的页（替换编辑器内核对 usePages.activePageId/getPage 的直读）。 */
   page: Page;
-  /** 宿主决定编辑器是否使用全宽；常规笔记固定为 true。 */
+  /** 宿主预算：notebook.editorFullWidth ?? globalEditorFullWidth。 */
   isEditorFullWidth: boolean;
-  /**
-   * 内容变更落库回调的覆盖。默认走 usePages.updatePage 落库；速记小窗草稿模式传入此项，
-   * 把内容写到草稿存储而非真实 page（草稿不入 pages map、不进笔记列表）。
-   */
-  onContentChangeOverride?: (
-    content: BlockNoteContent,
-    options?: { silent?: boolean },
-  ) => void;
-  /** 宿主显式选择正文处理方式；本地文件默认 raw，应用页面默认 normalized。 */
-  contentMode?: "raw" | "normalized";
   children: ReactNode;
 }
 
 export function EditorHostBridge({
   page,
   isEditorFullWidth,
-  onContentChangeOverride,
-  contentMode = shouldUseRawEditorContent(page) ? "raw" : "normalized",
   children,
 }: EditorHostBridgeProps) {
   const theme = useSettings((s) => s.theme);
-  const editorFontSize = useSettings((s) => s.editorFontSize);
+  const globalEditorFullWidth = useSettings((s) => s.globalEditorFullWidth);
+  const tableEvenColumnWidth = useSettings((s) => s.tableEvenColumnWidth);
   const customFonts = useSettings((s) => s.customFonts);
   const defaultCodeBlockWrap = useSettings((s) => s.defaultCodeBlockWrap);
   const setDefaultCodeBlockWrap = useSettings((s) => s.setDefaultCodeBlockWrap);
   const ai = useSettings((s) => s.ai);
   const searchProviders = useSettings((s) => s.searchProviders);
+  const utools = useSettings((s) => s.utools);
   const customActions = useSettings((s) => s.customActions);
 
   const settings = useMemo<EditorSettings>(
-    () => {
-      const notebook = useNotebooks.getState().notebooks[page.workspaceId];
-      return {
+    () => ({
       theme,
-      editorFontSize,
+      globalEditorFullWidth,
+      tableEvenColumnWidth,
       customFonts,
       defaultCodeBlockWrap,
       onDefaultCodeBlockWrapChange: setDefaultCodeBlockWrap,
       ai,
       searchProviders,
+      utools,
       customActions,
-      openLinksInHost: false,
-      useInternalImageViewer: false,
-      features: {
-        tablePresentationControls: true,
-        mermaidUnsafeHTML: true,
-        // Electron 无 FFmpeg：视频原文件保存，slash 文案走「保存为相对资源」。
-        transcodeVideoUploads: false,
-        openAttachmentsExternally: true,
-        localFolderNotebook: notebook?.source === "local-folder",
-      },
-      redirectAction: undefined,
-    };
-    },
+    }),
     [
       theme,
-      editorFontSize,
+      globalEditorFullWidth,
+      tableEvenColumnWidth,
       customFonts,
       defaultCodeBlockWrap,
       setDefaultCodeBlockWrap,
       ai,
       searchProviders,
+      utools,
       customActions,
-      page.workspaceId,
     ],
   );
 
   const pageContext = useMemo<EditorPageContext>(
     () => ({
       page,
-      contentMode,
       isEditorFullWidth,
-      onContentChange: (
-        content: BlockNoteContent,
-        options?: { silent?: boolean },
-      ) => {
-        if (onContentChangeOverride) {
-          onContentChangeOverride(content, options);
-          return;
-        }
-        const pagesStore = usePages.getState();
-        const livePage = pagesStore.pages[page.id] ?? page;
-        const contentToSave =
-          contentMode === "normalized" && effectiveSingleTabMode()
-            ? withInternalPageTitle(content, getPageTitle(livePage))
-            : content;
-        pagesStore.updatePage(
-          page.id,
-          { content: contentToSave } as Partial<Page>,
-          options?.silent ? { silent: true } : undefined,
-        );
+      onContentChange: (content: BlockNoteContent) => {
+        usePages.getState().updatePage(page.id, { content } as Partial<Page>);
       },
-      onOpenPage: (pageId, wikiTarget, options) => {
-        const pagesStore = usePages.getState();
-        const resolved = resolvePageMentionNavigation(
-          pageId,
-          pagesStore.pages,
-          useNotebooks.getState().activeNotebookId,
-          wikiTarget,
-        );
-        if (!resolved.ok) {
-          toast.error(
-            resolved.reason === "trashed" ? "这篇笔记已在回收站" : "找不到这篇笔记",
-          );
-          return false;
-        }
-        closeNotebookAiIfFullscreen();
-        if (resolved.switchNotebook) {
-          pagesStore.setPendingNavigatePageId(resolved.page.id);
-          useNotebooks.getState().setActiveNotebook(resolved.page.workspaceId);
-        }
-        if (!options?.newTab && tryShowPageInFocusedSplit(resolved.page.id)) {
-          pagesStore.setExpandPageId(resolved.page.id);
-          return true;
-        }
-        if (options?.splitOnly) return false;
-        if (options?.newTab) useTabs.getState().openPermanentTab(resolved.page.id);
-        else useTabs.getState().openInCurrentTab(resolved.page.id);
-        pagesStore.setExpandPageId(resolved.page.id);
-        return true;
+      onOpenPage: (pageId: string) => {
+        useTabs.getState().openTab(pageId);
       },
       getActivePageLocalFilePath: () => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
-        return livePage.localFilePath ?? null;
-      },
-      getActivePageLocalFolderRoot: () => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
-        const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];
-        return notebook?.source === "local-folder"
-          ? (notebook.localPath ?? null)
+        const activeId = usePages.getState().activePageId;
+        const activePage = activeId
+          ? usePages.getState().pages[activeId]
           : null;
+        return activePage?.localFilePath ?? null;
       },
-      onOpenMarkdownPath: async (source) => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
-        const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];
-        const root = notebook?.source === "local-folder" ? notebook.localPath : null;
-        if (!root || !livePage.localFilePath) return false;
-        const target = resolveCandidatePath(source, livePage.localFilePath);
-        if (!target || !isInsideRoot(target, root)) return false;
-        try {
-          if (!(await editorPlatform.fs.existsAsync(target))) return false;
-          return await openAssociatedMarkdownFile(target);
-        } catch {
-          return false;
-        }
-      },
-      onOpenAttachment: async (source, fileName) => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
-        return openResourceExternally({
-          source,
-          fileName,
-          mimeType: /\.html?$/i.test(fileName) ? "text/html" : undefined,
-          pageLocalFilePath: livePage.localFilePath ?? null,
-          platform: editorPlatform,
-          loadInternalResource: async (ref) => {
-            if (ref.startsWith("att-file:")) return fileStorage.load(ref);
-            return editorPlatform.imageStorage.load(ref);
-          },
-        });
-      },
-      searchPages: (query: string) => {
-        const { pages } = usePages.getState();
-        const { notebooks, activeNotebookId } = useNotebooks.getState();
-        const includeFolders =
-          (page.workspaceId &&
-            notebooks[page.workspaceId]?.source === "local-folder") ||
-          (activeNotebookId != null &&
-            notebooks[activeNotebookId]?.source === "local-folder");
-        return getAiReferenceSuggestionItems(
-          query,
-          pages,
-          notebooks,
-          activeNotebookId,
-          { includeFolders },
-        );
-      },
-      resolvePageContexts: (refs) => {
-        const { pages } = usePages.getState();
-        const { notebooks } = useNotebooks.getState();
-        return resolveAiReferenceContexts(refs, pages, notebooks);
-      },
-      getLatestPage: (pageId: string) =>
-        usePages.getState().pages[pageId] ?? null,
-      onPromotePreview: () => useTabs.getState().promotePreviewTab(),
+      searchPages: (query: string) => getAiReferenceSuggestionItems(query),
+      resolvePageContexts: (refs) => resolveAiReferenceContexts(refs),
     }),
-    [page, contentMode, isEditorFullWidth, onContentChangeOverride],
+    [page, isEditorFullWidth],
   );
 
+  // 触摸一次 useNotebooks 订阅，确保 notebook 变化时桥重渲染（宿主预算 isEditorFullWidth 在外层算）。
+  void useNotebooks((s) => s.activeNotebookId);
+
   return (
-    <EditorPlatformProvider platform={editorPlatform}>
+    <EditorPlatformProvider platform={utoolsEditorPlatform}>
       <EditorHostProvider settings={settings} pageContext={pageContext}>
         {children}
       </EditorHostProvider>
