@@ -17,10 +17,6 @@ export function createEmptyBlockNoteContent(title = ""): BlockNoteContent {
   return [titleHeadingBlock(title), emptyBlock()];
 }
 
-export function createEmptyLocalPageContent(): BlockNoteContent {
-  return [emptyBlock()];
-}
-
 export function isBlockNoteContent(content: unknown): content is BlockNoteContent {
   return Array.isArray(content);
 }
