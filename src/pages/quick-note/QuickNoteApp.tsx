@@ -1,779 +1,176 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import { CircleAlert, FilePlus2, X, Pencil } from "lucide-react";
-import {
-  useQuickNote,
-  buildQuickNoteDraftPage,
-  getQuickNoteSlotName,
-  loadQuickNoteSlotNames,
-  persistQuickNoteSlotNames,
-  updateQuickNoteSlotName,
-  clampQuickNoteZoom,
-  QUICKNOTE_MIN_WIDTH,
-  QUICKNOTE_MIN_HEIGHT,
-  QUICKNOTE_ZOOM_STEP,
-  QUICKNOTE_SLOTS,
-  getActiveDraftContent,
-  isQuickNoteDraftEmpty,
-  type QuickNoteSlot,
-} from "@/stores/useQuickNote";
-import { toast } from "@/components/ui/sonner";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Pin, PinOff, X } from "lucide-react";
+import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
+import { useQuickNote } from "@/stores/useQuickNote";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { Editor, type EditorRef } from "@/components/editor/core/Editor";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
-import { quickNoteWindow } from "@/lib/electron/quickNoteWindow";
-import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { getContentSignature } from "@/components/editor/utils/blocknote-content";
-import { QuickNoteSlotSwitcher } from "./QuickNoteSlotSwitcher";
-import {
-  getQuickNoteSlotShortcut,
-  getQuickNoteWorkspaceAction,
-  shouldQuickNoteEditableTargetOwnShortcut,
-} from "./quickNoteShortcuts";
-import { showDesktopMainWindow } from "@/lib/electron/windowToggle";
-import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
-import { isImeKeyboardEvent } from "@/hooks/useImeInput";
-import { formatShortcut, getPlatformKind } from "@/lib/utils";
-import { QuickNoteCollectPreview } from "./QuickNoteCollectPreview";
-import { getQuickNoteCollectVariant } from "./quickNoteCollectDetector";
-import { useSettings } from "@/stores/settings";
-import {
-  computeEditorUiScale,
-  EDITOR_UI_SCALE_CHANGE_EVENT,
-} from "@/lib/appearance";
+import { quickNoteWindow } from "@/lib/utools/quickNoteWindow";
 
-const POSITION_POLL_IDLE_MS = 500;
-const POSITION_POLL_DRAG_MS = 120;
-const POSITION_SETTLE_MS = 720;
+// 速记小窗砍掉的斜杠菜单重型项（按 title 精确匹配），保留标题/列表/待办/引用/标注/代码/分隔线。
+const QUICKNOTE_HIDDEN_SLASH_ITEMS = [
+  "生成",
+  "表格",
+  "数学公式",
+  "Mermaid 图表",
+  "图片",
+  "文件",
+];
 
 /**
  * 速记小窗根组件（独立窗口进程）。
  *
- * 小窗是「草稿便签」：不直接对应一条真实笔记，编辑内容只落到草稿存储
- * （useQuickNote.drafts[activeSlot]），不写进 pages、不进笔记列表 / 搜索、不自动存盘成文件。
- * 点标题栏「保存到笔记」才把当前槽位写入当前笔记本，并清空回到空白初始状态。
+ * 复用主应用的编辑器内核：通过 <EditorHostBridge page={page}> 注入当前笔记 +
+ * 平台能力，再渲染 <Editor>。不渲染侧栏/标签栏/大纲等外围模块——小窗只有编辑区。
  *
- * 支持 1–5 五个独立草稿槽位，各自持久化。切换槽位时重挂编辑器加载对应草稿。
- *
- * 复用主应用的编辑器内核：通过 <EditorHostBridge page={draftPage} onContentChangeOverride>
- * 注入草稿 page + 平台能力，再渲染 <Editor>。不渲染侧栏/标签栏/大纲——小窗只有编辑区。
+ * 启动模式由 URL hash 决定（# 后跟 new / last），见 quicknote.tsx。
  */
-export function QuickNoteApp() {
+export function QuickNoteApp({ mode }: { mode: "new" | "last" }) {
   const editorRef = useRef<EditorRef>(null);
-  const collectVariant = useMemo(
-    () => getQuickNoteCollectVariant(window.location.search),
-    [],
-  );
-  /** 撤销/重做重挂编辑器后，只静默一次同一槽位且与恢复内容签名一致的初始化同步。 */
-  const restoredContentSignatureRef = useRef<{
-    slot: QuickNoteSlot;
-    signature: string;
-  } | null>(null);
+  const [pageId, setPageId] = useState<string | null>(null);
 
-  const activeSlot = useQuickNote((s) => s.activeSlot);
-  const drafts = useQuickNote((s) => s.drafts);
-  const setActiveSlot = useQuickNote((s) => s.setActiveSlot);
-  const setDraftContent = useQuickNote((s) => s.setDraftContent);
-  const undoDraft = useQuickNote((s) => s.undoDraft);
-  const redoDraft = useQuickNote((s) => s.redoDraft);
-  const setWindowSize = useQuickNote((s) => s.setWindowSize);
-  const setWindowPosition = useQuickNote((s) => s.setWindowPosition);
-  const setEditorZoom = useQuickNote((s) => s.setEditorZoom);
+  const pinned = useQuickNote((s) => s.pinned);
+  const setPinned = useQuickNote((s) => s.setPinned);
 
-  // 编辑界面缩放（持久化：下次开窗沿用上次 Cmd +/- 的程度）。
-  const zoom = useQuickNote((s) => s.editorZoom);
-  const editorFontSize = useSettings((s) => s.editorFontSize);
-  const editorLineHeight = useSettings((s) => s.editorLineHeight);
+  // 订阅 pages 变化，确保编辑器在 page 内容更新时拿到最新引用。
+  const page = usePages((s) => (pageId ? s.pages[pageId] : undefined));
+
+  // 跨窗同步：小窗每次落库（updatedAt 变化）后通知主窗从 db 重读该页，防脏写。
+  const lastNotifiedRef = useRef<number>(0);
   useEffect(() => {
-    document.documentElement.style.setProperty("--editor-line-height", String(editorLineHeight));
-  }, [editorLineHeight]);
+    if (!page) return;
+    if (page.updatedAt === lastNotifiedRef.current) return;
+    lastNotifiedRef.current = page.updatedAt;
+    quickNoteWindow.notifyNoteUpdated(page.id);
+  }, [page?.id, page?.updatedAt]);
 
-  // 速记运行在独立 WebView：全局编辑字号与小窗局部缩放共同决定工具条等
-  // 编辑器 UI 的有效尺寸。卸载时不清理，避免复用窗口期间退回错误的默认值。
+  // 反向同步：主窗改了笔记 → 小窗从 db 重读。reload 写入的是 db 值（不重新落库），
+  // 同步把 lastNotifiedRef 设为新 updatedAt，避免上面的 effect 把它再回推主窗（防回环）。
   useEffect(() => {
-    const root = document.documentElement;
-    const scale = computeEditorUiScale(editorFontSize, zoom);
-    if (root.style.getPropertyValue("--editor-ui-scale") === scale) return;
-    root.style.setProperty("--editor-ui-scale", scale);
-    window.dispatchEvent(
-      new CustomEvent(EDITOR_UI_SCALE_CHANGE_EVENT, {
-        detail: { scale },
-      }),
-    );
-  }, [editorFontSize, zoom]);
-
-  /**
-   * 撤销/重做后递增，迫使 EditorHostBridge 用最新 drafts 重建。
-   * 仅依赖 activeSlot 时，关窗重开后的持久化撤销无法驱动编辑器刷新。
-   */
-  const [historyEpoch, setHistoryEpoch] = useState(0);
-  /**
-   * 按住 1–5 拖动时的临时预览槽；null 表示未在 scrub。
-   * 编辑器显示 previewSlot ?? activeSlot，松手/移走后由 onChange 正式写入 activeSlot。
-   */
-  const [previewSlot, setPreviewSlot] = useState<QuickNoteSlot | null>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [savingToNote, setSavingToNote] = useState(false);
-  const [renamingSlot, setRenamingSlot] = useState<QuickNoteSlot | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const renameInputRef = useRef<HTMLInputElement>(null);
-  const renameFinishingRef = useRef(false);
-  const [slotNames, setSlotNames] = useState(() =>
-    loadQuickNoteSlotNames(useQuickNote.getState().slotNames),
-  );
-  const slotNamesRef = useRef(slotNames);
-
-  const helpShortcuts = useMemo(() => {
-    const platform = getPlatformKind();
-    return {
-      switchSlots: formatShortcut("Mod+1–5", platform),
-      alternateSwitchSlots:
-        platform === "windows" ? formatShortcut("Alt+1–5", platform) : null,
-      zoomIn: formatShortcut("Mod+Plus", platform),
-      zoomOut: formatShortcut("Mod+-", platform),
-      zoomReset: formatShortcut("Mod+0", platform),
-      undo: formatShortcut("Mod+Z", platform),
-      redo: formatShortcut("Mod+Shift+Z", platform),
-      alternateRedo: formatShortcut("Mod+Y", platform),
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ pageId?: string }>).detail;
+      const id = detail?.pageId;
+      if (!id) return;
+      const updated = usePages.getState().reloadPageFromStorage(id);
+      if (updated) {
+        const fresh = usePages.getState().pages[id];
+        if (fresh) lastNotifiedRef.current = fresh.updatedAt;
+      }
     };
+    window.addEventListener("goose-note:note-updated-external", handler);
+    return () =>
+      window.removeEventListener("goose-note:note-updated-external", handler);
   }, []);
 
-  const displaySlot = previewSlot ?? activeSlot;
-  const displaySlotName = getQuickNoteSlotName(displaySlot, slotNames);
-  const occupiedSlots = useMemo(
-    () =>
-      Object.fromEntries(
-        QUICKNOTE_SLOTS.map((slot) => [
-          slot,
-          !isQuickNoteDraftEmpty(drafts[slot] ?? null),
-        ]),
-      ) as Record<QuickNoteSlot, boolean>,
-    [drafts],
-  );
-
-  // 草稿 page：基于显示槽位草稿现造。仅随 displaySlot / 历史恢复重建，
-  // 避免编辑 onChange 回灌打断输入。预览拖动时只换显示、不改 activeSlot。
-  const draftPage = useMemo(
-    () => buildQuickNoteDraftPage(drafts[displaySlot] ?? null),
-    // 有意不依赖 drafts 的每次击键：槽位内容变更由编辑器内部维护。
-    // historyEpoch 仅在撤销/重做后变化。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [displaySlot, historyEpoch],
-  );
-
-  // resize 抖动抑制：拖动边框期间标记，停下再持久化尺寸（见下方 resize effect）。
-  const isResizingRef = useRef(false);
-  const resizeSettleTimerRef = useRef<number | null>(null);
-
-  // 草稿内容变更：写入「当前显示的槽位」（正式 active 或 scrub 预览）。
-  // 用 displaySlot 闭包锁定槽号，避免切换后旧实例尾随 onChange 串写。
-  const onDraftChange = useMemo(() => {
-    const boundSlot = displaySlot;
-    return (content: BlockNoteContent) => {
-      const signature = getContentSignature(content);
-      const restored = restoredContentSignatureRef.current;
-      const isRestoreSync =
-        restored?.slot === boundSlot && signature === restored.signature;
-      if (restored?.slot === boundSlot) {
-        restoredContentSignatureRef.current = null;
-      }
-      setDraftContent(content as never, boundSlot, {
-        recordHistory: !isRestoreSync,
-      });
-    };
-  }, [displaySlot, setDraftContent]);
-
-  const flushEditor = useCallback(() => {
-    window.dispatchEvent(
-      new CustomEvent("goose-note:flush-editor", {
-        detail: { immediate: true },
-      }),
-    );
-  }, []);
-
-  const startRename = useCallback(
-    (slot: QuickNoteSlot) => {
-      flushEditor();
-      renameFinishingRef.current = false;
-      setHelpOpen(false);
-      setRenameValue(getQuickNoteSlotName(slot, slotNames));
-      setRenamingSlot(slot);
-    },
-    [flushEditor, slotNames],
-  );
-
-  const finishRename = useCallback(
-    (save: boolean) => {
-      if (renamingSlot === null || renameFinishingRef.current) return;
-      renameFinishingRef.current = true;
-      if (save) {
-        const next = updateQuickNoteSlotName(
-          slotNamesRef.current,
-          renamingSlot,
-          renameValue,
-        );
-        if (next !== slotNamesRef.current) {
-          slotNamesRef.current = next;
-          setSlotNames(next);
-          persistQuickNoteSlotNames(next);
-        }
-      }
-      setRenamingSlot(null);
-      requestAnimationFrame(() => {
-        renameFinishingRef.current = false;
-        editorRef.current?.editor?.focus?.();
-      });
-    },
-    [renameValue, renamingSlot],
-  );
-
+  // 首帧：按模式解析要编辑的笔记（hydration 已在 bootstrap 完成）。
   useEffect(() => {
-    if (renamingSlot === null) return;
-    const frame = requestAnimationFrame(() => {
-      renameInputRef.current?.focus();
-      renameInputRef.current?.select();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [renamingSlot]);
-
-  const applyHistoryContentToEditor = useCallback(
-    (content: BlockNoteContent | null) => {
-      restoredContentSignatureRef.current = {
-        slot: useQuickNote.getState().activeSlot,
-        signature: getContentSignature(
-          buildQuickNoteDraftPage(content as never).content,
-        ),
-      };
-      setHistoryEpoch((n) => n + 1);
-      requestAnimationFrame(() => {
-        editorRef.current?.editor?.focus?.();
-      });
-    },
-    [],
-  );
-
-  const handleUndo = useCallback(() => {
-    flushEditor();
-    const result = undoDraft();
-    if (!result.applied) return false;
-    applyHistoryContentToEditor(result.content as BlockNoteContent | null);
-    return true;
-  }, [applyHistoryContentToEditor, flushEditor, undoDraft]);
-
-  const handleRedo = useCallback(() => {
-    flushEditor();
-    const result = redoDraft();
-    if (!result.applied) return false;
-    applyHistoryContentToEditor(result.content as BlockNoteContent | null);
-    return true;
-  }, [applyHistoryContentToEditor, flushEditor, redoDraft]);
-
-  const handleSwitchSlot = useCallback(
-    (
-      slot: QuickNoteSlot,
-      source: "pointer" | "shortcut" | "switcher-keyboard",
-    ) => {
-      flushEditor();
-      setPreviewSlot(null);
-      if (slot === useQuickNote.getState().activeSlot) return;
-      setActiveSlot(slot);
-      if (source !== "switcher-keyboard") {
-        requestAnimationFrame(() => {
-          editorRef.current?.editor?.focus?.();
-        });
-      }
-    },
-    [flushEditor, setActiveSlot],
-  );
-
-  const handleHelpOpenChange = useCallback((open: boolean) => {
-    setHelpOpen(open);
-  }, []);
-
-  const handleSaveToNote = useCallback(async () => {
-    if (savingToNote) return;
-    flushEditor();
-    if (isQuickNoteDraftEmpty(getActiveDraftContent(useQuickNote.getState()))) {
-      return;
-    }
-    setSavingToNote(true);
-    try {
-      await useNotebooks.persist.rehydrate();
-      const id = await useQuickNote.getState().saveDraftToNotebook();
-      if (!id) {
-        toast.error("未能保存到笔记", {
-          description: "请确认已打开笔记本后再试。",
-        });
-        return;
-      }
-      applyHistoryContentToEditor(null);
-      toast.success("已保存到笔记");
-    } finally {
-      setSavingToNote(false);
-    }
-  }, [applyHistoryContentToEditor, flushEditor, savingToNote]);
-
-  /** 拖动预览：只改显示槽，不写 activeSlot。 */
-  const handlePreviewSlot = useCallback(
-    (slot: QuickNoteSlot | null) => {
-      flushEditor();
-      setPreviewSlot(slot);
-    },
-    [flushEditor],
-  );
-
-  /** 关窗 / 收起前把当前位置写进 store + preload，保证下次 Electron 唤起仍在原处。 */
-  const persistPlacementThenClose = useCallback(() => {
-    flushEditor();
-    const x = window.screenX;
-    const y = window.screenY;
-    if (Number.isFinite(x) && Number.isFinite(y)) {
-      setWindowPosition(x, y);
-      quickNoteWindow.persistPosition(x, y);
-    }
-    quickNoteWindow.close();
-  }, [flushEditor, setWindowPosition]);
-
-  // 首帧：聚焦光标到编辑器。
-  useEffect(() => {
-    requestAnimationFrame(() => editorRef.current?.editor?.focus?.());
-  }, []);
+    const resolvedId = useQuickNote.getState().resolveForMode(mode);
+    setPageId(resolvedId);
+  }, [mode]);
 
   // 复用窗口：父窗以「速记」再次唤起已存在的小窗时（preload 发 quicknote:enter），
-  // 重新聚焦即可（草稿延续，不重解析笔记）。
+  // 按新模式重解析，确保「速记」始终开新空白、「便签」直达上次。
   useEffect(() => {
-    const handler = () => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ mode?: "new" | "last" }>).detail;
+      const nextMode = detail?.mode === "last" ? "last" : "new";
+      const resolvedId = useQuickNote.getState().resolveForMode(nextMode);
+      setPageId(resolvedId);
       requestAnimationFrame(() => editorRef.current?.editor?.focus?.());
     };
     window.addEventListener("goose-note:quicknote-enter", handler);
     return () =>
       window.removeEventListener("goose-note:quicknote-enter", handler);
   }, []);
-  // 强制置顶（无失焦自动隐藏）：小窗常驻最前层，置顶由主窗 preload 在创建时设定，
-  // 失焦不再触发隐藏——点窗外不会收起，只能 Esc / 关闭按钮收起。
 
-  // 键盘：Esc 收起；macOS Cmd / Windows Alt+1~5 切换便签；Cmd/Ctrl+Z 超长期撤销；
-  // Cmd/Ctrl+Shift+Z / Cmd/Ctrl+Y 重做；Cmd/Ctrl +/- 缩放编辑界面（0 复位）。
+  // 置顶状态变化时同步给窗口（preload 通过 utools 设置 alwaysOnTop / 失焦行为）。
   useEffect(() => {
-    const onShortcutKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || isImeKeyboardEvent(e)) return;
-      if (e.key === "Escape") return;
-      if (
-        shouldQuickNoteEditableTargetOwnShortcut(e.target as HTMLElement | null)
-      ) {
-        return;
-      }
+    quickNoteWindow.setPinned(pinned);
+  }, [pinned]);
 
-      const shortcutSlot = getQuickNoteSlotShortcut(e);
-      if (shortcutSlot !== null) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleSwitchSlot(shortcutSlot, "shortcut");
-        return;
-      }
-
-      const appShortcuts = useSettings.getState().appShortcuts;
-      const workspaceAction = getQuickNoteWorkspaceAction(e, {
-        openSearch: appShortcuts.openSearch,
-        openSettings: getFixedAppShortcuts().openSettings,
-        toggleAIPanel: appShortcuts.toggleAIPanel,
-        newNote: getFixedAppShortcuts().newNote,
-      });
-      if (workspaceAction) {
-        e.preventDefault();
-        e.stopPropagation();
-        void showDesktopMainWindow(workspaceAction);
-        return;
-      }
-
-      // 仅在按下 Cmd（macOS）/ Ctrl 时处理缩放与撤销。
-      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
-
-      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-
-      // 超长期撤销/重做：未被浮层消费时拦截默认行为，走持久化栈。
-      if (key === "z") {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.shiftKey) {
-          handleRedo();
-        } else {
-          handleUndo();
-        }
-        return;
-      }
-      if (key === "y" && !e.shiftKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleRedo();
-        return;
-      }
-
-      if (e.key === "=" || e.key === "+") {
-        e.preventDefault();
-        setEditorZoom(
-          clampQuickNoteZoom(
-            useQuickNote.getState().editorZoom + QUICKNOTE_ZOOM_STEP,
-          ),
-        );
-      } else if (e.key === "-" || e.key === "_") {
-        e.preventDefault();
-        setEditorZoom(
-          clampQuickNoteZoom(
-            useQuickNote.getState().editorZoom - QUICKNOTE_ZOOM_STEP,
-          ),
-        );
-      } else if (e.key === "0") {
-        e.preventDefault();
-        setEditorZoom(1);
-      }
-    };
-    const onEscapeKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented || isImeKeyboardEvent(e)) {
-        return;
-      }
-      e.preventDefault();
-      persistPlacementThenClose();
-    };
-
-    // 槽位和撤销快捷键需先于编辑器默认行为处理；Escape 使用冒泡阶段，
-    // 让 Radix/编辑器浮层先关闭自身，未消费时才收起整窗。
-    window.addEventListener("keydown", onShortcutKeyDown, true);
-    window.addEventListener("keydown", onEscapeKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onShortcutKeyDown, true);
-      window.removeEventListener("keydown", onEscapeKeyDown);
-    };
-  }, [
-    handleSwitchSlot,
-    handleUndo,
-    handleRedo,
-    persistPlacementThenClose,
-    setEditorZoom,
-  ]);
-
-  // 窗口位置记忆：用户拖动窗口移动 → 停下后记住最终位置，下次开窗沿用。
-  // 仅在前台且有焦点时轮询；空闲 500ms，拖动中升到 120ms（须短于 settle，避免反复 IPC）。
+  // Raycast 手感：呼出即聚焦光标到编辑器。仅在切换笔记（pageId 变）时聚焦，
+  // 不依赖 page 内容引用——否则每次落库/反向同步 reload 都会抢焦点。
   useEffect(() => {
-    let lastX = window.screenX;
-    let lastY = window.screenY;
-    let settleTimer: number | null = null;
-    let pollTimer: number | null = null;
-    let pollMs = POSITION_POLL_IDLE_MS;
+    if (!pageId) return;
+    requestAnimationFrame(() => editorRef.current?.editor?.focus?.());
+  }, [pageId]);
 
-    const stopPoll = () => {
-      if (pollTimer === null) return;
-      window.clearInterval(pollTimer);
-      pollTimer = null;
-    };
-
-    const startPoll = (ms: number) => {
-      stopPoll();
-      pollMs = ms;
-      pollTimer = window.setInterval(() => {
-        const x = window.screenX;
-        const y = window.screenY;
-        if (x === lastX && y === lastY) return;
-        lastX = x;
-        lastY = y;
-        if (settleTimer !== null) window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(() => {
-          settleTimer = null;
-          const sx = window.screenX;
-          const sy = window.screenY;
-          // preload 权威写 db；store 同步一份，避免后续草稿 persist 用旧坐标盖掉位置。
-          quickNoteWindow.persistPosition(sx, sy);
-          setWindowPosition(sx, sy);
-          if (pollMs !== POSITION_POLL_IDLE_MS) startPoll(POSITION_POLL_IDLE_MS);
-        }, POSITION_SETTLE_MS);
-        if (pollMs !== POSITION_POLL_DRAG_MS) startPoll(POSITION_POLL_DRAG_MS);
-      }, ms);
-    };
-
-    const syncPolling = () => {
-      const shouldPoll =
-        document.visibilityState === "visible" && document.hasFocus();
-      if (shouldPoll) {
-        if (pollTimer === null) startPoll(pollMs);
-        return;
-      }
-      stopPoll();
-    };
-
-    syncPolling();
-    document.addEventListener("visibilitychange", syncPolling);
-    window.addEventListener("focus", syncPolling);
-    window.addEventListener("blur", syncPolling);
-    return () => {
-      stopPoll();
-      if (settleTimer !== null) window.clearTimeout(settleTimer);
-      document.removeEventListener("visibilitychange", syncPolling);
-      window.removeEventListener("focus", syncPolling);
-      window.removeEventListener("blur", syncPolling);
-    };
-  }, [setWindowPosition]);
-
-  // 窗口尺寸记忆：用户拖动窗口边框改宽高 → 停下后记住最终尺寸，下次开窗沿用。
+  // 失焦自动隐藏（Raycast 核心手感）：钉住时不隐藏。
+  // 子窗拿不到 win 实例事件，用 web 原生 blur，再请求父窗 hide。
   useEffect(() => {
-    const onResize = () => {
-      isResizingRef.current = true;
-      if (resizeSettleTimerRef.current !== null) {
-        window.clearTimeout(resizeSettleTimerRef.current);
-      }
-      resizeSettleTimerRef.current = window.setTimeout(() => {
-        resizeSettleTimerRef.current = null;
-        isResizingRef.current = false;
-        // 持久化由主窗用 win.getSize() 权威读取后写回 dbStorage：子窗渲染进程的
-        // outerWidth 在 Electron frameless 窗口里 resize 后并不更新，直接存会记错值，
-        // 导致下次开窗仍回默认宽度（用户每次都要重新拉宽）。
-        quickNoteWindow.persistSize();
-        // 同步进程内 store（best-effort），用视口宽高兜底，开窗尺寸以 dbStorage 为准。
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        if (w >= QUICKNOTE_MIN_WIDTH && h >= QUICKNOTE_MIN_HEIGHT) {
-          setWindowSize(w, h);
-        }
-      }, 240);
+    const onBlur = () => {
+      if (useQuickNote.getState().pinned) return;
+      quickNoteWindow.hide();
     };
-    window.addEventListener("resize", onResize);
-    return () => {
-      if (resizeSettleTimerRef.current !== null) {
-        window.clearTimeout(resizeSettleTimerRef.current);
-        resizeSettleTimerRef.current = null;
-      }
-      window.removeEventListener("resize", onResize);
-    };
-  }, [setWindowSize]);
+    window.addEventListener("blur", onBlur);
+    return () => window.removeEventListener("blur", onBlur);
+  }, []);
 
-  const headerBar = (
-    <div
-      className="quicknote-titlebar-reveal-zone"
-      data-renaming={renamingSlot === null ? "false" : "true"}
-    >
-      {renamingSlot !== null && (
-        <input
-          ref={renameInputRef}
-          value={renameValue}
-          maxLength={24}
-          aria-label={`重命名便签 ${renamingSlot}`}
-          className="quicknote-slot-name-input"
-          style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-          onChange={(event) => setRenameValue(event.target.value)}
-          onBlur={() => finishRename(true)}
-          onKeyDown={(event) => {
-            // 中文输入法按 Enter 确认候选词时不能提前提交；keyCode 229 兼容旧 Chromium。
-            if (
-              isImeKeyboardEvent(event.nativeEvent) ||
-              isImeKeyboardEvent(event)
-            ) {
-              return;
-            }
-            if (event.key === "Enter") {
-              event.preventDefault();
-              event.stopPropagation();
-              finishRename(true);
-            } else if (event.key === "Escape") {
-              event.preventDefault();
-              event.stopPropagation();
-              finishRename(false);
-            }
-          }}
-        />
-      )}
+  // Esc 收起窗口。
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        quickNoteWindow.hide();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const isEditorFullWidth = useNotebooks((s) => {
+    const nbId = s.activeNotebookId;
+    const nb = nbId ? s.notebooks[nbId] : null;
+    return nb?.editorFullWidth ?? false;
+  });
+
+  const headerBar = useMemo(
+    () => (
       <div
-        className="quicknote-titlebar"
+        className="quicknote-titlebar flex h-9 shrink-0 items-center justify-end gap-1 px-2"
         style={{ WebkitAppRegion: "drag" } as CSSProperties}
       >
-        <div className="quicknote-titlebar-left">
-          <button
-            type="button"
-            aria-label="修改标签名称"
-            title={`${displaySlotName} · 修改标签名称`}
-            className="quicknote-slot-name-display quicknote-titlebar-btn"
-            style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-            onClick={() => startRename(activeSlot)}
-          >
-            <span
-              key={`${displaySlot}-${displaySlotName}`}
-              className="quicknote-slot-name-text"
-            >
-              {displaySlotName}
-            </span>
-          </button>
-        </div>
-
-        {/* 绝对居中，避免左右内容宽度差导致视觉偏移 */}
-        <div className="quicknote-slot-switcher-positioner">
-          <div className="quicknote-slot-switcher-interactive">
-            <QuickNoteSlotSwitcher
-              activeSlot={activeSlot}
-              occupiedSlots={occupiedSlots}
-              slotNames={slotNames}
-              onChange={handleSwitchSlot}
-              onPreviewChange={handlePreviewSlot}
-              onRenameRequest={startRename}
-            />
-          </div>
-        </div>
-
-        <div className="quicknote-titlebar-actions">
-          <button
-            type="button"
-            aria-label="保存到笔记"
-            title={
-              occupiedSlots[activeSlot]
-                ? "保存到笔记"
-                : "当前便签是空的，无法保存"
-            }
-            className="quicknote-titlebar-btn quicknote-save-btn"
-            style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-            disabled={savingToNote || !occupiedSlots[activeSlot]}
-            aria-busy={savingToNote}
-            onClick={() => {
-              void handleSaveToNote();
-            }}
-          >
-            <FilePlus2 className="h-3 w-3" />
-          </button>
-          <Popover open={helpOpen} onOpenChange={handleHelpOpenChange}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                aria-label="使用说明"
-                title="使用说明"
-                className="quicknote-titlebar-btn quicknote-help-trigger"
-                style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-              >
-                <CircleAlert className="h-3 w-3" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              side="bottom"
-              collisionPadding={8}
-              className="quicknote-help-popover w-72 text-xs"
-              onCloseAutoFocus={(event) => event.preventDefault()}
-            >
-              <div className="quicknote-help-heading">
-                <div className="text-sm font-medium">速记便签</div>
-                <p>
-                  内容默认只留在当前便签。点「保存到笔记」会在当前笔记本新建一篇，并清空这张便签。
-                </p>
-              </div>
-              <button
-                type="button"
-                className="quicknote-help-rename flex w-full items-center gap-2 text-left text-xs text-foreground"
-                onClick={() => startRename(activeSlot)}
-              >
-                <Pencil className="h-3.5 w-3.5 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">重命名当前便签</span>
-                <span className="max-w-24 truncate text-muted-foreground">
-                  {getQuickNoteSlotName(activeSlot, slotNames)}
-                </span>
-              </button>
-              <ul className="quicknote-help-list text-muted-foreground">
-                <li>
-                  <b className="text-foreground">切换</b>
-                  ：顶部 1–5 是五个独立便签。点击或拖动切换；也可按
-                  {helpShortcuts.switchSlots}
-                  {helpShortcuts.alternateSwitchSlots
-                    ? `，或 ${helpShortcuts.alternateSwitchSlots}`
-                    : ""}
-                  。
-                </li>
-                <li>
-                  <b className="text-foreground">编辑</b>：
-                  {helpShortcuts.zoomIn} / {helpShortcuts.zoomOut} 缩放，
-                  {helpShortcuts.zoomReset} 复位；{helpShortcuts.undo} 撤销，
-                  {helpShortcuts.redo} 或 {helpShortcuts.alternateRedo} 重做。
-                </li>
-                <li>
-                  <b className="text-foreground">保存</b>
-                  ：点右上角
-                  <FilePlus2 className="mx-0.5 inline h-3 w-3 align-text-bottom" />
-                  把当前便签写入当前笔记本，保存后清空并回到空白。
-                </li>
-                <li>
-                  <b className="text-foreground">收起</b>
-                  ：小窗始终置顶；按 {formatShortcut(
-                    "Esc",
-                    getPlatformKind(),
-                  )}{" "}
-                  或点右上角
-                  <X className="mx-0.5 inline h-3 w-3 align-text-bottom" />
-                  收起。草稿、位置、尺寸和缩放都会保留。
-                </li>
-              </ul>
-            </PopoverContent>
-          </Popover>
-          <button
-            type="button"
-            aria-label="关闭"
-            className="quicknote-titlebar-btn quicknote-close-btn"
-            style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-            onClick={() => persistPlacementThenClose()}
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-label={pinned ? "取消置顶" : "置顶"}
+          className="quicknote-titlebar-btn flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
+          onClick={() => setPinned(!pinned)}
+        >
+          {pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
+        </button>
+        <button
+          type="button"
+          aria-label="关闭"
+          className="quicknote-titlebar-btn flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
+          onClick={() => quickNoteWindow.close()}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
-    </div>
+    ),
+    [pinned, setPinned],
   );
 
   return (
-    <div
-      className="quicknote-root relative flex h-screen w-screen flex-col bg-[hsl(var(--goose-editor-bg))]"
-      data-collect-variant={collectVariant ?? undefined}
-    >
+    <div className="quicknote-root flex h-screen w-screen flex-col overflow-hidden bg-[hsl(var(--goose-editor-bg))]">
       {headerBar}
-      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto page-scroll-container">
-        <EditorHostBridge
-          key={`${displaySlot}-${historyEpoch}`}
-          page={draftPage}
-          isEditorFullWidth
-          contentMode="raw"
-          onContentChangeOverride={onDraftChange}
-        >
-          {/*
-            用 CSS zoom（Chromium/Electron 支持）而不是 transform:scale + 反向宽高。
-            transform 不改变布局盒：缩小后 width=100/zoom% 会 > 100%，父级
-            overflow-y-auto 会连带出现底部横向滚动条，放大时也会出现可视高度与
-            scrollHeight 不一致。zoom 同步缩放布局与绘制，滚动条只随真实内容出现。
-          */}
-          <div
-            className="quicknote-editor-surface flex min-h-full flex-col"
-            style={{ zoom } as CSSProperties}
-          >
-            <Editor ref={editorRef} editable showSideMenu={false} />
-          </div>
-        </EditorHostBridge>
+      <div className="min-h-0 flex-1 overflow-y-auto page-scroll-container">
+        {page ? (
+          <EditorHostBridge page={page} isEditorFullWidth={isEditorFullWidth}>
+            <div className="flex min-h-full flex-col px-6 pt-2">
+              <Editor
+                ref={editorRef}
+                editable={!page.isLocked && !page.trashedAt}
+                hiddenSlashItemTitles={QUICKNOTE_HIDDEN_SLASH_ITEMS}
+              />
+            </div>
+          </EditorHostBridge>
+        ) : null}
       </div>
-      {collectVariant && <QuickNoteCollectPreview variant={collectVariant} />}
-      <Toaster
-        className="quicknote-toaster"
-        position="bottom-center"
-        offset={{ bottom: 30, left: 24, right: 24 }}
-        mobileOffset={{ bottom: 30, left: 24, right: 24 }}
-        toastOptions={{
-          classNames: {
-            toast: "!min-w-0 !pr-10",
-            // 速记小窗单行 toast：关闭按钮保持垂直居中。
-            closeButton: "!right-2.5 !top-1/2 !-translate-y-1/2",
-          },
-        }}
-      />
+      <Toaster />
     </div>
   );
 }

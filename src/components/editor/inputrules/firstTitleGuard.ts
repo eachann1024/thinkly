@@ -57,9 +57,7 @@ function getFirstBlock(
   return result;
 }
 
-function firstTitleGuardPlugin(
-  usesRawContentRef: { current: boolean } = { current: false },
-) {
+function firstTitleGuardPlugin() {
   return new Plugin({
     appendTransaction(
       transactions: readonly Transaction[],
@@ -67,8 +65,6 @@ function firstTitleGuardPlugin(
       newState: EditorState,
     ) {
       if (!transactions.some((tr) => tr.docChanged)) return null;
-      // raw 文档保留宿主提供的结构，不施加首块 H1 约束。
-      if (usesRawContentRef.current) return null;
 
       const first = getFirstBlock(newState.doc);
       if (!first) return null;
@@ -110,22 +106,7 @@ function firstTitleGuardPlugin(
   });
 }
 
-/**
- * 创建 firstTitleGuard 扩展实例。
- *
- * @param usesRawContentRef - 指向当前文档是否采用原始块结构的 ref。
- *   raw 文档不施加「首块恒为 H1」约束；normalized 文档仍走完整守卫。
- */
-export function createGooseFirstTitleGuardExtension(
-  usesRawContentRef: { current: boolean },
-) {
-  return createExtension({
-    key: "goose-first-title-guard",
-    prosemirrorPlugins: [firstTitleGuardPlugin(usesRawContentRef)],
-  });
-}
-
-/** 向后兼容：不传 ref 则默认启用页面级标题规范。 */
-export const gooseFirstTitleGuardExtension = createGooseFirstTitleGuardExtension({
-  current: false,
+export const gooseFirstTitleGuardExtension = createExtension({
+  key: "goose-first-title-guard",
+  prosemirrorPlugins: [firstTitleGuardPlugin()],
 });
