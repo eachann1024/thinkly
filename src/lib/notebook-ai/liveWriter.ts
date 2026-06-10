@@ -12,16 +12,15 @@
 import type { ToolUIPart } from "ai";
 import type { LiveWriterContext } from "./types";
 import { usePages } from "@/stores/usePages";
+import { useNotebooks } from "@/stores/useNotebooks";
 import { useTabs } from "@/stores/useTabs";
-import { buildAiPageContent } from "@/lib/notebook-ai/markdown";
+import { importMarkdownFragment } from "@/lib/export/markdown/parse";
 import {
-  getOrCreateAiPage,
-  type AiPageCreationResult,
-} from "@/lib/notebook-ai/pageCreationCoordinator";
-import {
-  guardPageForAiWrite,
-  writePageContentSafely,
-} from "@/lib/notebook-ai/pageWriteGuard";
+  normalizePageContent,
+  titleHeadingBlock,
+  emptyBlock,
+} from "@/components/editor/utils/blocknote-content";
+import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { JSONContent } from "@/types";
 
 // ----------------------------------------------------------------
@@ -29,7 +28,6 @@ import type { JSONContent } from "@/types";
 // ----------------------------------------------------------------
 interface WriterSession {
   pageId: string;
-  notebookId: string;
   title: string;
   lastScheduled: number;
   throttleTimer: ReturnType<typeof setTimeout> | null;
@@ -39,7 +37,28 @@ interface WriterSession {
 }
 
 const sessions = new Map<string, WriterSession>();
-const stoppedToolCalls = new Set<string>();
+
+/**
+ * liveWriter 在 input-streaming 阶段建页后会把 toolCallId → pageId 登记到这里。
+ * write.ts 的 createPage.execute() 通过 lookupCreatedPage() 查询，复用已建页面，
+ * 避免双重建页（bug 1 fix）。
+ */
+const createdPagesRegistry = new Map<string, string>();
+
+/** 查询 liveWriter 为指定 toolCallId 已建的 pageId（未建返回 undefined） */
+export function lookupCreatedPage(toolCallId: string): string | undefined {
+  return createdPagesRegistry.get(toolCallId);
+}
+
+/** liveWriter 为指定 toolCallId 建完页后调用此函数登记 */
+function registerCreatedPage(toolCallId: string, pageId: string): void {
+  createdPagesRegistry.set(toolCallId, pageId);
+}
+
+/** 清理已登记记录（execute 复用或 session 清理时调用） */
+export function unregisterCreatedPage(toolCallId: string): void {
+  createdPagesRegistry.delete(toolCallId);
+}
 
 const THROTTLE_MS = 200;
 
@@ -48,16 +67,28 @@ const THROTTLE_MS = 200;
 // ----------------------------------------------------------------
 
 /** 从部分 JSON 字符串中尽力提取 title 和 markdown 字段 */
-function tryExtractFromPartialJson(partialInput: unknown): {
-  title?: string;
-  markdown?: string;
-} {
+function tryExtractFromPartialJson(
+  partialInput: unknown,
+): { title?: string; markdown?: string } {
   if (!partialInput || typeof partialInput !== "object") return {};
   const obj = partialInput as Record<string, unknown>;
   return {
     title: typeof obj.title === "string" ? obj.title : undefined,
     markdown: typeof obj.markdown === "string" ? obj.markdown : undefined,
   };
+}
+
+/** 将 title + markdown 组合成合规的页面 BlockNoteContent */
+function buildPageContent(title: string, markdown: string): JSONContent {
+  const stripped = markdown.replace(/^\s*#[^\n]*\n?/, "").trim();
+  const bodyBlocks: BlockNoteContent = stripped
+    ? (importMarkdownFragment(stripped) ?? [emptyBlock()])
+    : [emptyBlock()];
+
+  const content: BlockNoteContent = [titleHeadingBlock(title), ...bodyBlocks];
+  return normalizePageContent(content, {
+    ensureFirstTitle: false,
+  }) as JSONContent;
 }
 
 /** 获取当前活动页的 pageId */
@@ -93,8 +124,8 @@ function followScroll(session: WriterSession) {
   setTimeout(scroll, 400);
 }
 
-/** 触发编辑器重载当前页面内容（replaceInPage 等非流式写入工具也复用此通路） */
-export function reloadEditorIfActive(pageId: string) {
+/** 触发编辑器重载当前页面内容 */
+function reloadEditorIfActive(pageId: string) {
   if (typeof window !== "undefined") {
     window.dispatchEvent(
       new CustomEvent("goose-note:reload-active-editor", {
@@ -105,53 +136,36 @@ export function reloadEditorIfActive(pageId: string) {
 }
 
 /** 写入中间帧（silent=true，不刷新 updatedAt，不触发落盘队列） */
-function writeIntermediateFrame(session: WriterSession): boolean {
-  const guard = guardPageForAiWrite(session.pageId, {
-    expectedNotebookId: session.notebookId,
-  });
-  if (!guard.ok) return false;
-
+function writeIntermediateFrame(
+  pageId: string,
+  markdown: string,
+  title: string,
+  session: WriterSession,
+) {
   try {
-    const content = buildAiPageContent(session.title, session.lastMarkdown);
-    usePages
-      .getState()
-      .updatePage(
-        session.pageId,
-        { content: content as JSONContent },
-        { silent: true },
-      );
-    reloadEditorIfActive(session.pageId);
+    const content = buildPageContent(title, markdown);
+    usePages.getState().updatePage(pageId, { content: content as JSONContent }, { silent: true });
+    reloadEditorIfActive(pageId);
     followScroll(session);
-    return true;
   } catch {
     // 部分 markdown 解析失败，跳过此帧
-    return true;
   }
 }
 
 /** 最终落盘（完整 markdown，走正常持久化路径） */
 async function writeFinalFrame(
+  pageId: string,
   markdown: string,
   title: string,
   session: WriterSession,
-): Promise<boolean> {
+) {
   try {
-    const content = buildAiPageContent(title, markdown);
-    const result = await writePageContentSafely(
-      session.pageId,
-      content as JSONContent,
-      { expectedNotebookId: session.notebookId },
-    );
-    if (!result.ok) {
-      console.error("[liveWriter] writeFinalFrame refused", result.error);
-      return false;
-    }
-    reloadEditorIfActive(session.pageId);
+    const content = buildPageContent(title, markdown);
+    await usePages.getState().writePageContent(pageId, content as JSONContent, "replace");
+    reloadEditorIfActive(pageId);
     followScroll(session);
-    return true;
   } catch (err) {
     console.error("[liveWriter] writeFinalFrame failed", err);
-    return false;
   }
 }
 
@@ -162,51 +176,46 @@ async function ensurePageCreated(
   title: string,
   notebookId: string,
   toolCallId: string,
-  initialMarkdown = "",
-  retryFailedCreation = false,
-): Promise<AiPageCreationResult> {
-  if (stoppedToolCalls.has(toolCallId)) {
-    return { ok: false, error: "本轮 AI 写入已结束" };
-  }
+): Promise<string | null> {
   const existing = sessions.get(toolCallId);
-  if (existing) return { ok: true, pageId: existing.pageId };
+  if (existing) return existing.pageId;
 
-  const request = {
-    toolCallId,
-    notebookId,
-    title,
-    content: buildAiPageContent(title, initialMarkdown) as JSONContent,
-  };
-  let creation = await getOrCreateAiPage(request);
-  if (!creation.ok && retryFailedCreation) {
-    creation = await getOrCreateAiPage(request);
+  const notebook = useNotebooks.getState().notebooks[notebookId];
+  if (!notebook) return null;
+
+  let pageId: string | null = null;
+  if (notebook.source === "local-folder") {
+    pageId = await usePages.getState().createLocalPageRecord({
+      workspaceId: notebookId,
+      title,
+      content: buildPageContent(title, "") as JSONContent,
+    });
+  } else {
+    pageId = usePages.getState().createPageRecord({
+      workspaceId: notebookId,
+      content: buildPageContent(title, "") as JSONContent,
+    });
   }
-  if (!creation.ok || stoppedToolCalls.has(toolCallId)) return creation;
 
-  const existingAfterCreate = sessions.get(toolCallId);
-  if (existingAfterCreate) {
-    return { ok: true, pageId: existingAfterCreate.pageId };
-  }
+  if (!pageId) return null;
 
-  const pageGuard = guardPageForAiWrite(creation.pageId, {
-    expectedNotebookId: notebookId,
-  });
-  if (!pageGuard.ok) return pageGuard;
+  // 打开新页面（走 tabs 体系，与侧栏点击同链路）
+  useTabs.getState().openTab(pageId);
+  useNotebooks.getState().setLastActivePage(notebookId, pageId);
 
   const session: WriterSession = {
-    pageId: creation.pageId,
-    notebookId,
+    pageId,
     title,
     lastScheduled: 0,
     throttleTimer: null,
-    lastMarkdown: initialMarkdown,
+    lastMarkdown: "",
     follow: true,
     wheelCleanup: null,
   };
   sessions.set(toolCallId, session);
 
   // 绑定滚轮监听：向上滚→停止跟随，滚回底部→恢复跟随
-  if (typeof window !== "undefined" && typeof document !== "undefined") {
+  if (typeof window !== "undefined") {
     const container = document.querySelector(".page-scroll-container");
     if (container) {
       const onWheel = (e: Event) => {
@@ -225,45 +234,10 @@ async function ensurePageCreated(
     }
   }
 
-  return creation;
-}
+  // 登记到 registry，供 execute() 复用，避免双重建页（bug 1 fix）
+  registerCreatedPage(toolCallId, pageId);
 
-/**
- * createPage 工具的唯一最终提交入口。它与流式预建共享同一个单飞创建操作，
- * 因此 execute 与 React effect 无论谁先到达都只能得到同一页。
- */
-export async function createAndFinalizePage(params: {
-  toolCallId: string;
-  notebookId: string;
-  title: string;
-  markdown: string;
-}): Promise<AiPageCreationResult> {
-  const creation = await ensurePageCreated(
-    params.title,
-    params.notebookId,
-    params.toolCallId,
-    params.markdown,
-    true,
-  );
-  if (!creation.ok) return creation;
-
-  const session = sessions.get(params.toolCallId);
-  if (!session) {
-    return { ok: false, error: "AI 写入会话已结束" };
-  }
-
-  try {
-    const written = await writeFinalFrame(
-      params.markdown,
-      params.title,
-      session,
-    );
-    return written
-      ? creation
-      : { ok: false, error: "页面写入失败，内容未保存" };
-  } finally {
-    cleanupWriterSession(params.toolCallId);
-  }
+  return pageId;
 }
 
 // ----------------------------------------------------------------
@@ -285,23 +259,10 @@ export async function handleStreamingWritePart(
   part: StreamingWritePart,
   ctx: LiveWriterContext,
 ): Promise<void> {
-  const partData = part as unknown as {
-    toolCallId: string;
-    state: string;
-    input?: unknown;
-    output?: unknown;
-  };
-  const { toolCallId, state, input, output } = partData;
+  const toolCallId = (part as any).toolCallId as string;
+  const state = (part as any).state as string;
+  const input = (part as any).input as unknown;
   const isCreatePage = part.type === "tool-createPage";
-
-  // React 会在后续文本分片到达时重复传入已经完成的工具 part。
-  // 终态只处理一次，避免同一个 updatePage 随每个文本分片重复刷新或落盘。
-  if (stoppedToolCalls.has(toolCallId)) return;
-
-  if (state.includes("error") || state.includes("denied")) {
-    cleanupWriterSession(toolCallId);
-    return;
-  }
 
   if (state === "input-streaming") {
     const { title, markdown } = tryExtractFromPartialJson(input);
@@ -318,18 +279,12 @@ export async function handleStreamingWritePart(
     const session = sessions.get(toolCallId);
     if (!session) return;
 
-    const frameGuard = guardPageForAiWrite(session.pageId, {
-      expectedNotebookId: session.notebookId,
-    });
-    if (!frameGuard.ok) {
-      cleanupWriterSession(toolCallId);
-      return;
+    // 非 createPage（即 updatePage）直接存 lastMarkdown 待节流写入
+    if (!isCreatePage) {
+      session.lastMarkdown = markdown ?? "";
+    } else {
+      session.lastMarkdown = markdown ?? "";
     }
-
-    // updatePage 的 markdown 可能因为工具调用修复/兜底暂时缺失；
-    // 缺正文时不能写空帧，否则会把当前页清空。
-    if (!isCreatePage && markdown === undefined) return;
-    session.lastMarkdown = markdown ?? "";
 
     // 节流调度写入
     const now = Date.now();
@@ -345,59 +300,68 @@ export async function handleStreamingWritePart(
     session.throttleTimer = setTimeout(() => {
       const s = sessions.get(toolCallId);
       if (!s) return;
-      if (!writeIntermediateFrame(s)) {
-        cleanupWriterSession(toolCallId);
-        return;
-      }
+      writeIntermediateFrame(s.pageId, s.lastMarkdown, s.title, s);
       s.throttleTimer = null;
     }, THROTTLE_MS);
   } else if (state === "output-available") {
     // 最终落盘
+    const output = (part as any).output as unknown;
+
     // 清理定时器
     const session = sessions.get(toolCallId);
-    // createPage 的 output 只有在 execute 完成后才应到达；若 UI 事件乱序且当前
-    // 没有 session，不要抢先把 toolCallId 标成 stopped，正式 execute 仍需建页。
-    if (isCreatePage && !session) return;
     if (session?.throttleTimer) {
       clearTimeout(session.throttleTimer);
       session.throttleTimer = null;
     }
 
-    try {
-      // output-available 时 input 已完整，从 input 取 markdown
-      const { title: inputTitle, markdown: inputMarkdown } =
-        tryExtractFromPartialJson(input);
+    // output-available 时 input 已完整，从 input 取 markdown
+    const { title: inputTitle, markdown: inputMarkdown } =
+      tryExtractFromPartialJson(input);
 
-      if (isCreatePage) {
-        // createPage：优先使用 session（liveWriter 已建的页面）中的 pageId
-        // execute() 会通过 registry 拿同一个 pageId，不会再建第二页
-        const pageId = session?.pageId ?? null;
-        if (!pageId) return;
+    if (isCreatePage) {
+      // createPage：优先使用 session（liveWriter 已建的页面）中的 pageId
+      // execute() 会通过 registry 拿同一个 pageId，不会再建第二页
+      const pageId = session?.pageId ?? null;
+      if (!pageId) return;
 
-        const md = inputMarkdown ?? "";
-        // 用最终完整 title（input 已完整），确保标题与模型输出一致
-        const title = inputTitle ?? session?.title ?? "";
-        // 若最终 title 与建页时不同，writeFinalFrame 里 buildPageContent 会用最新 title 覆盖
-        if (session) await writeFinalFrame(md, title, session);
-      } else {
-        // updatePage.execute 已经完成最终落盘；UI 层只负责刷新一次活动编辑器。
-        // 不能在这里再次写入，否则最终回复的每个文本分片都会重复保存整篇页面。
-        const pageId =
-          input && typeof input === "object"
-            ? ((input as Record<string, unknown>).pageId as string | undefined)
-            : undefined;
-        const targetPageId =
-          pageId ?? ctx.currentPageId ?? usePages.getState().activePageId;
-        if (!targetPageId) return;
-        const result =
-          output && typeof output === "object"
-            ? (output as Record<string, unknown>)
-            : null;
-        if (result?.ok === true) reloadEditorIfActive(targetPageId);
-      }
-    } finally {
-      cleanupWriterSession(toolCallId);
+      const md = inputMarkdown ?? "";
+      // 用最终完整 title（input 已完整），确保标题与模型输出一致
+      const title = inputTitle ?? session?.title ?? "";
+      // 若最终 title 与建页时不同，writeFinalFrame 里 buildPageContent 会用最新 title 覆盖
+      if (session) await writeFinalFrame(pageId, md, title, session);
+    } else {
+      // updatePage：从 input 取 pageId
+      const pageId =
+        input && typeof input === "object"
+          ? ((input as any).pageId as string | undefined)
+          : undefined;
+      if (!pageId) return;
+
+      const md = inputMarkdown ?? "";
+      const page = usePages.getState().pages[pageId];
+      if (!page) return;
+
+      const { getPageTitle } = await import(
+        "@/components/editor/utils/page-title"
+      );
+      const title = getPageTitle(page);
+      // updatePage 没有对应 session，用临时 session 对象（follow 默认 true）
+      const tmpSession: WriterSession = {
+        pageId,
+        title,
+        lastScheduled: 0,
+        throttleTimer: null,
+        lastMarkdown: md,
+        follow: true,
+        wheelCleanup: null,
+      };
+      await writeFinalFrame(pageId, md, title, tmpSession);
     }
+
+    // 解绑 wheel 监听，清理 session 和 registry
+    session?.wheelCleanup?.();
+    sessions.delete(toolCallId);
+    unregisterCreatedPage(toolCallId);
   }
 }
 
@@ -405,15 +369,11 @@ export async function handleStreamingWritePart(
  * 清理指定 toolCallId 的写入会话（例如错误发生时）。
  */
 export function cleanupWriterSession(toolCallId: string): void {
-  stoppedToolCalls.add(toolCallId);
-  if (stoppedToolCalls.size > 200) {
-    const oldest = stoppedToolCalls.values().next().value;
-    if (oldest) stoppedToolCalls.delete(oldest);
-  }
   const session = sessions.get(toolCallId);
   if (session?.throttleTimer) {
     clearTimeout(session.throttleTimer);
   }
   session?.wheelCleanup?.();
   sessions.delete(toolCallId);
+  unregisterCreatedPage(toolCallId);
 }

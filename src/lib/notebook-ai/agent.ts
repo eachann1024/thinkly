@@ -1,51 +1,48 @@
-import { ToolLoopAgent, hasToolCall, stepCountIs } from "ai";
+import { ToolLoopAgent, stepCountIs } from "ai";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { buildLanguageModel } from "./model";
 import { notebookAiTools } from "./tools";
-import {
-  getSkillToolNames,
-  NOTEBOOK_AGENT_INSTRUCTIONS,
-} from "./skills";
-import { getCurrentNotebookAiPageId } from "./context";
-import { readGlobalAgentsPrompt } from "./localContext";
-import { useSettings } from "@/stores/useSettings";
-import { repairExecuteBatchPlanInput } from "./batch-plan/tool";
 import type { ModelAvailability } from "./model";
-import type { NotebookAiAgentContext } from "./types";
 
-/** 只注入当前任务所需的稳定上下文，具体能力由 loadSkill 渐进加载。 */
-function buildSystemPrompt(
-  notebookId: string,
-  currentPageId?: string | null,
-): string {
+/** 构建注入了笔记本上下文的 system prompt */
+function buildSystemPrompt(notebookId: string): string {
   const notebook = useNotebooks.getState().notebooks[notebookId];
   const notebookName = notebook?.name ?? "未知笔记本";
 
+  // 取当前笔记本前 50 页标题摘要
   const pages = usePages.getState().pages;
-  const activePageId = currentPageId ?? getCurrentNotebookAiPageId(notebookId);
-  const activePage =
-    activePageId && pages[activePageId]?.workspaceId === notebookId
-      ? pages[activePageId]
-      : undefined;
-  const activePageLine =
-    activePage && !activePage.trashedAt
-      ? `[${activePage.id}] ${getPageTitle(activePage)}`
-      : "（无当前打开页面）";
+  const notebookPages = Object.values(pages)
+    .filter((p) => p.workspaceId === notebookId && !p.trashedAt)
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 50);
 
-  const globalPrompt = useSettings.getState().ai.readGlobalPrompt
-    ? readGlobalAgentsPrompt()
-    : "";
+  const pageList =
+    notebookPages.length > 0
+      ? notebookPages
+          .map((p) => `- [${p.id}] ${getPageTitle(p)}`)
+          .join("\n")
+      : "（暂无页面）";
 
-  return `${NOTEBOOK_AGENT_INSTRUCTIONS}
+  return `你是「${notebookName}」笔记本的 AI 助手，帮助用户管理和创作笔记内容。
 
-${globalPrompt ? `# 用户全局提示词\n\n${globalPrompt}\n` : ""}
-# 当前上下文
+当前笔记本：${notebookName}（id: ${notebookId}）
 
-- 当前笔记本：${notebookName}
-- 当前笔记本 id：${notebookId}
-- 当前打开页面：${activePageLine}`;
+当前笔记本页面（最近 50 页）：
+${pageList}
+
+## 工具使用守则
+
+1. **查找内容前先 searchNotes**：回答问题或执行任务前，先用 searchNotes 确认相关内容是否存在。
+2. **写作类任务必须用 createPage**：创建新文章时调用 createPage 工具，markdown 参数输出完整正文，首行不要重复标题。
+3. **批量修改用 replaceInPage**：需要在多页修改内容时，逐页调用 replaceInPage 并汇报每页替换结果。
+4. **表格数据用 showTable**：展示结构化数据时使用 showTable 工具。
+5. **数值对比/趋势用 showChart**：展示数值对比或趋势时使用 showChart 工具。
+6. **回答使用用户语言**：用户使用中文则用中文回答，使用英文则用英文回答。
+7. **不要编造内容**：若笔记本中没有相关内容，如实告知用户。
+
+保持回答简洁清晰，聚焦用户的实际需求。`;
 }
 
 export type BuildAgentResult =
@@ -56,15 +53,7 @@ export type BuildAgentResult =
  * 构建绑定指定笔记本的 ToolLoopAgent。
  * 每次调用都会重新构建以获取最新的笔记本上下文。
  */
-export function buildNotebookAgent(
-  notebookId: string,
-  currentPageId?: string | null,
-): BuildAgentResult {
-  const agentContext: NotebookAiAgentContext = {
-    notebookId,
-    currentPageId: currentPageId ?? getCurrentNotebookAiPageId(notebookId),
-    loadedSkills: new Set(),
-  };
+export function buildNotebookAgent(notebookId: string): BuildAgentResult {
   const modelResult: ModelAvailability = buildLanguageModel();
   if (!modelResult.ok) {
     return { ok: false, reason: modelResult.reason };
@@ -73,23 +62,9 @@ export function buildNotebookAgent(
   const agent = new ToolLoopAgent({
     model: modelResult.model,
     tools: notebookAiTools,
-    instructions: buildSystemPrompt(notebookId, agentContext.currentPageId),
-    // executeBatchPlan 已经返回本地审批卡；不要再让模型看到该结果后继续一轮。
-    // hasToolCall 在本步工具执行完成后才检查，因此不会阻止冻结计划的生成。
-    stopWhen: [hasToolCall("executeBatchPlan"), stepCountIs(16)],
-    experimental_context: agentContext,
-    prepareStep: () => {
-      const activeTools = [
-        "loadSkill",
-        ...getSkillToolNames(agentContext.loadedSkills),
-      ] as Array<keyof typeof notebookAiTools>;
-      return { activeTools };
-    },
-    experimental_repairToolCall: async ({ toolCall }) => {
-      if (toolCall.toolName !== "executeBatchPlan") return null;
-      const input = repairExecuteBatchPlanInput(toolCall.input);
-      return input ? { ...toolCall, input } : null;
-    },
+    instructions: buildSystemPrompt(notebookId),
+    stopWhen: stepCountIs(20),
+    experimental_context: { notebookId },
   });
 
   return { ok: true, agent };
