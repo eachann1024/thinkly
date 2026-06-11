@@ -11,11 +11,6 @@ import { historyRepository } from "./repository";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import type { HistoryIndex, HistoryVersion } from "./types";
-import { normalizeHistoryIndex, normalizeHistoryVersion } from "./guards";
-import {
-  consumeDiskWriteFailure,
-  DiskWriteError,
-} from "@/lib/diskWriteError";
 
 // ── 简单 FNV-1a (32-bit) ─────────────────────────────────────────────────────
 
@@ -87,13 +82,9 @@ function chainWrite(pageId: string, fn: () => Promise<void>): Promise<void> {
   const prev = writeChains.get(pageId) ?? Promise.resolve();
   const next = prev.catch(() => {}).then(fn);
   writeChains.set(pageId, next);
-  void next
-    .finally(() => {
-      if (writeChains.get(pageId) === next) writeChains.delete(pageId);
-    })
-    .catch(() => {
-      // 调用方已经处理拒绝；这里只避免 finally 派生的 Promise 变成未处理拒绝。
-    });
+  next.finally(() => {
+    if (writeChains.get(pageId) === next) writeChains.delete(pageId);
+  });
   return next;
 }
 
@@ -106,22 +97,10 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
     // 逐级确保：basePath/.goose 再 basePath/.goose/history
     const gooseDir = `${basePath}/.goose`;
     if (!(await fsExists(fs, gooseDir))) {
-      const created = await fs.mkdir(gooseDir);
-      if (created === false) {
-        throw (
-          consumeDiskWriteFailure() ??
-          new DiskWriteError(`无法创建历史目录：${gooseDir}`, { path: gooseDir })
-        );
-      }
+      await fs.mkdir(gooseDir);
     }
     if (!(await fsExists(fs, histDir))) {
-      const created = await fs.mkdir(histDir);
-      if (created === false) {
-        throw (
-          consumeDiskWriteFailure() ??
-          new DiskWriteError(`无法创建历史目录：${histDir}`, { path: histDir })
-        );
-      }
+      await fs.mkdir(histDir);
     }
   }
 
@@ -148,22 +127,17 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
 
   async function writeJson(path: string, data: unknown): Promise<void> {
     if (typeof window === "undefined" || !window.gooseFs) return;
-    const ok = await fsWrite(window.gooseFs, path, JSON.stringify(data));
-    if (!ok) {
-      throw (
-        consumeDiskWriteFailure() ??
-        new DiskWriteError(`无法写入历史文件：${path}`, { path })
-      );
-    }
+    await fsWrite(window.gooseFs, path, JSON.stringify(data));
   }
 
   return {
     async loadIndex(pageId) {
       const data = await readJson<HistoryIndex>(indexPath(pageId));
-      if (data && data.pageId !== pageId) {
-        return { pageId, versions: [], lastVersionCharCount: 0 };
+      // 校验 pageId 防碰撞
+      if (data && Array.isArray(data.versions) && data.pageId === pageId) {
+        return data;
       }
-      return normalizeHistoryIndex(data, pageId);
+      return { pageId, versions: [], lastVersionCharCount: 0 };
     },
 
     saveIndex(index) {
@@ -175,7 +149,7 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
 
     async loadVersion(pageId, versionId) {
       const data = await readJson<HistoryVersion>(versionPath(pageId, versionId));
-      return normalizeHistoryVersion(data, pageId, versionId);
+      return data ?? null;
     },
 
     saveVersion(version) {
