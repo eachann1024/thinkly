@@ -15,7 +15,6 @@ import { offset as floatingOffset, shift as floatingShift } from "@floating-ui/r
 import {
   clonePageContent,
   getContentSignature,
-  normalizePageContent,
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { CustomSlashMenu } from "@/components/editor/core/CustomSlashMenu";
@@ -40,6 +39,7 @@ import { editorSchema } from "@/components/editor/core/schema";
 import { shouldOpenSlashSuggestionMenu } from "@/components/editor/utils/slashMenuPolicy";
 import { getQuicknoteSlashMenuFloatingOptions } from "@/components/editor/utils/quicknoteSlashMenuFloating";
 import { LocalFileTitle } from "@/pages/workspace/components/page/LocalFileTitle";
+import { shouldUseRawEditorContent } from "@/components/editor/core/editorContentMode";
 
 // Re-exports to prevent broken imports elsewhere
 export {
@@ -72,7 +72,7 @@ type EditorComposerProps = {
   getSlashItems: (query: string) => Promise<any[]>;
   pageIdForUpdateRef: RefObject<string | null>;
   syncedContentSignatureRef: RefObject<string | null>;
-  debouncedUpdate: ((id: string, content: BlockNoteContent) => void) & { cancel: () => void };
+  debouncedUpdate: ((id: string) => void) & { cancel: () => void };
   /** 自上次程序化同步（切页/外部重载）以来用户是否真实交互过（见 Editor.tsx 意图门控）。 */
   userInteractedRef: RefObject<boolean>;
   /** 静默同步 store（不标脏、不入保存队列）：用于编辑器初始化后的异步 props 补全。 */
@@ -209,6 +209,7 @@ export function EditorComposer({
     () => (__GOOSE_LITE__ ? getQuicknoteSlashMenuFloatingOptions() : undefined),
     [],
   );
+  const usesRawEditorContent = shouldUseRawEditorContent(page);
 
   return (
     <EditorContextMenu
@@ -247,23 +248,19 @@ export function EditorComposer({
           // 须与 Editor.tsx 的 isLocalFolderPage 判断保持一致：草稿页(__quicknote_draft__)
           // 同样豁免 normalize，否则 onChange 在此把首块强转 H1 并回写持久化，
           // 导致小窗重开后首块永久变成「标题1」。
-          const isLocalPage =
-            Boolean(page?.localFilePath) || page?.id === "__quicknote_draft__";
-          const rawContent = clonePageContent(editor.document as BlockNoteContent);
-          const nextContent = isLocalPage
-            ? rawContent
-            : normalizePageContent(rawContent);
-          const nextSig = getContentSignature(nextContent);
-          if (nextSig === syncedContentSignatureRef.current) return;
-          syncedContentSignatureRef.current = nextSig;
+          const isLocalPage = shouldUseRawEditorContent(page);
           // 用户意图门控（仅 local 页面）：打开后无任何用户交互时的 onChange 来自
           // BlockNote 异步 props 补全（折叠块/视频/带属性图片等），静默同步 store 与
           // 基线、不入保存队列。一旦用户交互过（打字/IME/点击/拖拽…），照常入队保存。
           if (isLocalPage && !userInteractedRef.current) {
+            const nextContent = clonePageContent(editor.document as BlockNoteContent);
+            const nextSig = getContentSignature(nextContent);
+            if (nextSig === syncedContentSignatureRef.current) return;
+            syncedContentSignatureRef.current = nextSig;
             silentContentSync(nextContent);
             return;
           }
-          debouncedUpdate(safePageId, nextContent);
+          debouncedUpdate(safePageId);
           if (userInteractedRef.current) {
             useTabs.getState().promotePreviewTab();
           }
@@ -287,7 +284,7 @@ export function EditorComposer({
           shouldOpen={(event) =>
             shouldOpenSlashSuggestionMenu(event, editor, {
               allowSlashMenuOnFirstBlock:
-                Boolean(page?.localFilePath) || page?.id === "__quicknote_draft__",
+                usesRawEditorContent,
             })
           }
           suggestionMenuComponent={CustomSlashMenu as any}
@@ -304,7 +301,7 @@ export function EditorComposer({
           shouldOpen={(event) =>
             shouldOpenSlashSuggestionMenu(event, editor, {
               allowSlashMenuOnFirstBlock:
-                Boolean(page?.localFilePath) || page?.id === "__quicknote_draft__",
+                usesRawEditorContent,
             })
           }
           suggestionMenuComponent={CustomSlashMenu as any}

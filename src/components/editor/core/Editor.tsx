@@ -68,7 +68,6 @@ import { gooseCalloutKeyboardExtension } from "@/components/editor/extensions/ca
 import { gooseFirstTitleEnterExtension } from "@/components/editor/extensions/firstTitleEnterExtension";
 import { gooseCollapsedToggleEnterExtension } from "@/components/editor/extensions/collapsedToggleEnterExtension";
 import { gooseToggleHeadingAutoCollectExtension } from "@/components/editor/extensions/toggleHeadingAutoCollectExtension";
-import { gooseEnterKeyBehaviorExtension } from "@/components/editor/extensions/gooseEnterKeyBehaviorExtension";
 import { gooseCrossBlockDeleteExtension } from "@/components/editor/extensions/crossBlockDeleteExtension";
 import { gooseEmptyBlockBackspaceExtension } from "@/components/editor/extensions/emptyBlockBackspaceExtension";
 import { createGooseFirstTitleGuardExtension } from "@/components/editor/inputrules/firstTitleGuard";
@@ -92,15 +91,14 @@ import {
   shouldPreferVisibleSelectionText,
   stripMarkdownHardBreaks,
 } from "./EditorComposer";
+import { shouldUseRawEditorContent } from "./editorContentMode";
 import { isLinkworthyText } from "@/components/editor/utils/clipboard";
 import { useEditorShortcuts } from "@/components/editor/hooks/useEditorShortcuts";
 import { useEditorPaste } from "@/components/editor/hooks/useEditorPaste";
 import { pasteClipboardFilesFromClipboard } from "@/components/editor/utils/pasteClipboardFilesFromClipboard";
-import {
-  clipboardHasPasteableImage,
-  resolveImageMimeForUpload,
-  shouldUploadViaImageStorage,
-} from "@/components/editor/utils/pasteClipboardImage";
+import { clipboardHasPasteableImage } from "@/components/editor/utils/pasteClipboardImage";
+import { uploadEditorFile } from "@/components/editor/utils/uploadEditorFile";
+import { fileStorage, getFileUploadAvailability } from "@/lib/fileStorage";
 
 export interface EditorRef {
   editor: ReturnType<typeof useCreateBlockNote> | null;
@@ -131,7 +129,6 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     customActions,
     tableEvenColumnWidth,
     ai: aiSettings,
-    enterKeyBehavior,
     utools,
   } = settings;
   const {
@@ -184,8 +181,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   // 内容保持磁盘解析原样，避免 normalize 引发的结构变化误触写盘。
   // 内部笔记本仍走完整 normalizePageContent，首块 H1 约束不受影响。
   // 小窗草稿页(id 恒为 __quicknote_draft__)同样豁免首块 H1 约束,从正文开始
-  const isLocalFolderPage =
-    Boolean(page?.localFilePath) || page?.id === "__quicknote_draft__";
+  const isLocalFolderPage = shouldUseRawEditorContent(page);
   const isLocalFolderPageRef = useRef(isLocalFolderPage);
   isLocalFolderPageRef.current = isLocalFolderPage;
   const normalizeContent = (c: unknown): BlockNoteContent =>
@@ -231,14 +227,6 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
       initialContentRef.current,
     );
   }
-  // 同步 enterKeyBehavior 到 window.gooseEnterKeyBehavior 以便 keyboard extension 可以检测到变化
-  useEffect(() => {
-    interface GooseWindow extends Window {
-      gooseEnterKeyBehavior?: "create-block" | "save-exit";
-    }
-    const gooseWindow = window as unknown as GooseWindow;
-    gooseWindow.gooseEnterKeyBehavior = enterKeyBehavior;
-  }, [enterKeyBehavior]);
   const editor = useCreateBlockNote(
     {
       initialContent: initialContentRef.current as any,
@@ -274,7 +262,6 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
           isLocalFolderPageRef,
           editorInstanceRef,
         ),
-        gooseEnterKeyBehaviorExtension,
         gooseQuoteInputRuleExtension,
         gooseMarkdownInputRulesExtension,
         gooseFakeSelectionExtension,
@@ -313,15 +300,12 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
         },
       },
       uploadFile: async (file, blockId) => {
-        if (
-          shouldUploadViaImageStorage(file, blockId, (id) =>
-            editorInstanceRef.current?.getBlock(id),
-          )
-        ) {
-          const mime = resolveImageMimeForUpload(file);
-          return platformRef.current.imageStorage.save(file, mime);
-        }
-        return URL.createObjectURL(file);
+        return uploadEditorFile(file, blockId, {
+          getBlock: (id) => editorInstanceRef.current?.getBlock(id),
+          imageStorage: platformRef.current.imageStorage,
+          fileStorage,
+          getFileUploadAvailability,
+        });
       },
       pasteHandler: ({ event, editor: ed, defaultPasteHandler }) => {
         if (clipboardHasPasteableImage(event.clipboardData)) {
@@ -371,16 +355,31 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   );
   editorInstanceRef.current = editor;
 
+  const readCurrentEditorContent = useCallback(() => {
+    const rawContent = clonePageContent(editor.document as BlockNoteContent);
+    const isLocalPage =
+      Boolean(pageRef.current?.localFilePath) ||
+      pageRef.current?.id === "__quicknote_draft__";
+    const content = isLocalPage ? rawContent : normalizePageContent(rawContent);
+    return {
+      content,
+      signature: getCachedContentSignature(content),
+    };
+  }, [editor]);
+
   const debouncedUpdate = useMemo(() => {
     return createDebounce(
-      (_id: string, content: BlockNoteContent) => {
-        syncedContentSignatureRef.current = getCachedContentSignature(content);
+      (targetPageId: string) => {
+        if (targetPageId !== pageIdForUpdateRef.current) return;
+        const { content, signature } = readCurrentEditorContent();
+        if (signature === syncedContentSignatureRef.current) return;
+        syncedContentSignatureRef.current = signature;
         onContentChangeRef.current(content);
       },
       800,
       { maxWait: 3000 },
     );
-  }, []);
+  }, [readCurrentEditorContent]);
 
   const prevPageIdRef = useRef<string | null>(activePageId);
   useEffect(() => {
@@ -399,8 +398,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     // 须与本文件 :135 的 isLocalFolderPage 及 EditorComposer.onChange 的判断一致：
     // 小窗草稿页(__quicknote_draft__)同样豁免，否则切页/重开时此处 replaceBlocks 会把
     // 首块强转 H1 并刷新签名基线，导致草稿首块每次重开都变「标题1」。
-    const isLocalPage =
-      Boolean(p?.localFilePath) || p?.id === "__quicknote_draft__";
+    const isLocalPage = shouldUseRawEditorContent(p);
     const nextContent = isLocalPage
       ? toEditorBlocks(p?.content)
       : normalizePageContent(p?.content);
@@ -688,18 +686,14 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     (targetPageId?: string) => {
       const safePageId = targetPageId ?? pageIdForUpdateRef.current;
       if (!safePageId) return;
-      // local-folder 页面不走 normalizePageContent（避免 ensureFirstTitleHeading）
-      const rawContent = clonePageContent(editor.document as BlockNoteContent);
-      const nextContent = pageRef.current?.localFilePath
-        ? rawContent
-        : normalizePageContent(rawContent);
       debouncedUpdate.cancel();
-      const nextSig = getCachedContentSignature(nextContent);
-      if (nextSig === syncedContentSignatureRef.current) return;
-      syncedContentSignatureRef.current = nextSig;
-      onContentChangeRef.current(nextContent);
+      if (safePageId !== pageIdForUpdateRef.current) return;
+      const { content, signature } = readCurrentEditorContent();
+      if (signature === syncedContentSignatureRef.current) return;
+      syncedContentSignatureRef.current = signature;
+      onContentChangeRef.current(content);
     },
-    [debouncedUpdate, editor],
+    [debouncedUpdate, readCurrentEditorContent],
   );
 
   useEffect(() => {
@@ -740,7 +734,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
       const livePage = usePagesStore.getState().pages[targetId];
       if (!livePage) return;
       // local-folder 外部变更重载同样跳过 normalizePageContent
-      const isLocalPage = Boolean(livePage.localFilePath);
+      const isLocalPage = shouldUseRawEditorContent(livePage);
       const nextContent = isLocalPage
         ? toEditorBlocks(livePage.content)
         : normalizePageContent(livePage.content);

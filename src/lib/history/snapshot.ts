@@ -1,6 +1,7 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { countWords } from "@/components/editor/utils/content-text-extractor";
-import { resolveHistoryBackend } from "./backend";
+import { resolveHistoryBackend, type HistoryBackend } from "./backend";
 import { usePages } from "@/stores/usePages";
 import type {
   HistoryIndexEntry,
@@ -21,6 +22,19 @@ function estimateSize(content: BlockNoteContent): number {
   } catch {
     return 0;
   }
+}
+
+async function isSameAsLatestVersion(
+  pageId: string,
+  index: { versions: Array<{ versionId: string }> },
+  content: BlockNoteContent,
+  backend: HistoryBackend,
+): Promise<boolean> {
+  const latestEntry = index.versions[index.versions.length - 1];
+  if (!latestEntry) return false;
+  const latest = await backend.loadVersion(pageId, latestEntry.versionId);
+  if (!latest) return false;
+  return getContentSignature(latest.content) === getContentSignature(content);
 }
 
 export interface RecordSnapshotParams {
@@ -46,13 +60,10 @@ export async function recordHistorySnapshot(
   const charCount = countWords(content);
   const charDelta = charCount - index.lastVersionCharCount;
 
-  if (
-    trigger === "idle" &&
-    charDelta === 0 &&
-    !isMilestone &&
-    index.versions.length > 0
-  ) {
-    return null;
+  if (trigger === "idle" && charDelta === 0 && !isMilestone) {
+    if (await isSameAsLatestVersion(pageId, index, content, backend)) {
+      return null;
+    }
   }
 
   const versionId = genVersionId(now);
@@ -93,12 +104,18 @@ export async function recordHistorySnapshot(
   let nextVersions = [...index.versions, entry];
 
   if (nextVersions.length > MAX_VERSIONS_PER_PAGE) {
-    while (nextVersions.length > MAX_VERSIONS_PER_PAGE) {
-      const evictIdx = nextVersions.findIndex((v) => !v.isMilestone);
-      if (evictIdx === -1) break;
-      const evicted = nextVersions[evictIdx];
-      await backend.removeVersion(pageId, evicted.versionId);
-      nextVersions = nextVersions.filter((_, i) => i !== evictIdx);
+    const evictCount = nextVersions.length - MAX_VERSIONS_PER_PAGE;
+    const evictedVersionIds = nextVersions
+      .filter((v) => !v.isMilestone)
+      .slice(0, evictCount)
+      .map((v) => v.versionId);
+
+    if (evictedVersionIds.length > 0) {
+      const evictedSet = new Set(evictedVersionIds);
+      for (const versionId of evictedVersionIds) {
+        await backend.removeVersion(pageId, versionId);
+      }
+      nextVersions = nextVersions.filter((v) => !evictedSet.has(v.versionId));
     }
   }
 

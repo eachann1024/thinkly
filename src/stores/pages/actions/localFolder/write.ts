@@ -30,6 +30,35 @@ function hashBase64(data: string): string {
   return (hash >>> 0).toString(16) + data.length.toString(36);
 }
 
+function dataUrlImageExtension(subtype: string): string {
+  const normalized = subtype.toLowerCase();
+  if (normalized === "jpeg") return "jpg";
+  if (normalized === "svg+xml") return "svg";
+  return normalized.replace(/[^a-z0-9]+/g, "") || "png";
+}
+
+function findImageSourceTarget(
+  node: any,
+): { owner: Record<string, any>; key: "url" | "src"; value: string } | null {
+  const props = node?.props && typeof node.props === "object" ? node.props : null;
+  if (typeof props?.url === "string") {
+    return { owner: props, key: "url", value: props.url };
+  }
+  if (typeof props?.src === "string") {
+    return { owner: props, key: "src", value: props.src };
+  }
+
+  const attrs = node?.attrs && typeof node.attrs === "object" ? node.attrs : null;
+  if (typeof attrs?.src === "string") {
+    return { owner: attrs, key: "src", value: attrs.src };
+  }
+  if (typeof attrs?.url === "string") {
+    return { owner: attrs, key: "url", value: attrs.url };
+  }
+
+  return null;
+}
+
 function mergePageContent(
   base: JSONContent,
   addition: JSONContent,
@@ -197,25 +226,63 @@ export const saveLocalPageContentAction = async (
     return false;
   }
 
-  const processedContent = content;
+  const processedContent = cloneLocalPageContent(content);
 
   const assetsDir = filePath.replace(/[^\/\\]+$/, "") + "assets";
 
   // 先收集需要落盘的图片，真正有图片要写时才 mkdir——
   // 否则纯打开/flush（内容未变走 diff 跳过）也会在用户目录凭空创建 assets 文件夹。
   const pendingImageWrites: Array<{ imagePath: string; base64Data: string }> = [];
+  const hasExternalDiskChange = async (source: "pre-save" | "pre-write") => {
+    try {
+      let diskCurrentContent: string | null = null;
+      if (window.gooseFs?.readFileStatAsync) {
+        const r = await window.gooseFs.readFileStatAsync(filePath);
+        diskCurrentContent = r.ok ? (r.content ?? "") : null;
+      } else if (window.gooseFs?.readFileStat) {
+        const r = window.gooseFs.readFileStat(filePath);
+        diskCurrentContent = r.ok ? (r.content ?? "") : null;
+      } else if (window.gooseFs?.readFileAsync) {
+        diskCurrentContent = await window.gooseFs.readFileAsync(filePath);
+      } else if (window.gooseFs?.readFile) {
+        diskCurrentContent = window.gooseFs.readFile(filePath);
+      }
 
-  const processImages = (nodes: any[]) => {
-    nodes.forEach((node) => {
+      if (
+        diskCurrentContent !== null &&
+        !isDiskContentMatchingSnapshot(filePath, diskCurrentContent)
+      ) {
+        window.dispatchEvent(
+          new CustomEvent("goose-note:local-file-conflict", {
+            detail: { pageId, filePath, source },
+          }),
+        );
+        return true;
+      }
+    } catch {
+      // 读磁盘失败时放行（网络文件系统等异常情况下不阻断写盘）
+    }
+    return false;
+  };
+
+  const processImages = (value: unknown) => {
+    if (Array.isArray(value)) {
+      value.forEach(processImages);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+
+    const node = value as any;
       if (
         (node.type === "image" || node.type === "imageResize") &&
-        node.attrs?.src?.startsWith("data:image")
+        findImageSourceTarget(node)?.value.startsWith("data:image")
       ) {
-        const match = node.attrs.src.match(
-          /^data:(image\/([a-zA-Z+]+));base64,(.+)$/,
+        const target = findImageSourceTarget(node);
+        const match = target?.value.match(
+          /^data:(image\/([a-zA-Z0-9.+-]+));base64,(.+)$/,
         );
-        if (match) {
-          const ext = match[2] === "jpeg" ? "jpg" : match[2];
+        if (target && match) {
+          const ext = dataUrlImageExtension(match[2]);
           // 按内容哈希命名以去重：相同图片只落盘一次，避免反复保存产生重复文件。
           const base64Data = match[3];
           const filename = `img_${hashBase64(base64Data)}.${ext}`;
@@ -230,34 +297,19 @@ export const saveLocalPageContentAction = async (
             pendingImageWrites.push({ imagePath, base64Data });
           }
 
-          node.attrs.src = `./assets/${filename}`;
+          target.owner[target.key] = `./assets/${filename}`;
         }
       }
-      if (node.content) {
-        processImages(node.content);
-      }
-    });
+
+    processImages(node.content);
+    processImages(node.children);
+    processImages(node.rows);
+    processImages(node.cells);
   };
 
-  if (processedContent.content) {
-    processImages(processedContent.content);
-  }
+  processImages(processedContent);
 
-  if (pendingImageWrites.length > 0) {
-    try {
-      if (window.gooseFs.mkdir) {
-        await window.gooseFs.mkdir(assetsDir);
-      }
-    } catch {}
-    await Promise.all(
-      pendingImageWrites.map(({ imagePath, base64Data }) => {
-        if (window.gooseFs?.writeFileAsync) {
-          return window.gooseFs.writeFileAsync(imagePath, base64Data, "base64");
-        }
-        return Promise.resolve(window.gooseFs?.writeFile(imagePath, base64Data));
-      }),
-    );
-  }
+
 
   const { blocksToMarkdown } = await import("@/lib/export");
   const markdownContent = await blocksToMarkdown(processedContent as any);
@@ -313,37 +365,30 @@ export const saveLocalPageContentAction = async (
   // 读一次磁盘当前内容，与快照比较（规范化后），不一致 = 外部已改 → 不写盘，触发冲突处理。
   // 这比仅与 store 内容比较更安全：保证不会静默覆盖外部编辑。
   if (!options?.force) {
-    try {
-      let diskCurrentContent: string | null = null;
-      if (window.gooseFs?.readFileStatAsync) {
-        const r = await window.gooseFs.readFileStatAsync(filePath);
-        diskCurrentContent = r.ok ? (r.content ?? "") : null;
-      } else if (window.gooseFs?.readFileStat) {
-        const r = window.gooseFs.readFileStat(filePath);
-        diskCurrentContent = r.ok ? (r.content ?? "") : null;
-      } else if (window.gooseFs?.readFileAsync) {
-        diskCurrentContent = await window.gooseFs.readFileAsync(filePath);
-      } else if (window.gooseFs?.readFile) {
-        diskCurrentContent = window.gooseFs.readFile(filePath);
-      }
-
-      if (
-        diskCurrentContent !== null &&
-        !isDiskContentMatchingSnapshot(filePath, diskCurrentContent)
-      ) {
-        // 外部已修改磁盘文件 → 触发冲突 UX，不写盘
-        window.dispatchEvent(
-          new CustomEvent("goose-note:local-file-conflict", {
-            detail: { pageId, filePath, source: "pre-save" },
-          }),
-        );
-        return false;
-      }
-    } catch {
-      // 读磁盘失败时放行（网络文件系统等异常情况下不阻断写盘）
-    }
+    if (await hasExternalDiskChange("pre-save")) return false;
   }
   // ────────────────────────────────────────────────────────────────────────────
+
+  if (pendingImageWrites.length > 0) {
+    try {
+      if (window.gooseFs.mkdir) {
+        await window.gooseFs.mkdir(assetsDir);
+      }
+    } catch {}
+    await Promise.all(
+      pendingImageWrites.map(({ imagePath, base64Data }) => {
+        if (window.gooseFs?.writeFileAsync) {
+          return window.gooseFs.writeFileAsync(imagePath, base64Data, "base64");
+        }
+        return Promise.resolve(window.gooseFs?.writeFile(imagePath, base64Data));
+      }),
+    );
+  }
+
+  // assets 写入和正文写盘之间仍可能被外部编辑器抢写；正文写入前再比对一次。
+  if (!options?.force && (await hasExternalDiskChange("pre-write"))) {
+    return false;
+  }
 
   // 写盘前标记自写：fs.watch 对本次写入触发的 change 事件（自写回声）
   // 由 useLocalFolderWatch 据此忽略，不会误判成外部修改弹冲突提示。

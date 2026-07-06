@@ -8,8 +8,38 @@
  * 网络 URL / data: / blob: 不经过 createObjectURL，原样返回，不缓存。
  */
 
+const MAX_OBJECT_URL_CACHE_SIZE = 256
+
 // 模块级缓存：ref → ObjectURL
 const objectUrlCache = new Map<string, string>()
+
+function revokeObjectUrl(url: string) {
+  try {
+    URL.revokeObjectURL(url)
+  } catch {
+    // ignore browser/runtime revoke differences
+  }
+}
+
+function rememberObjectUrl(cacheKey: string, objectUrl: string) {
+  objectUrlCache.set(cacheKey, objectUrl)
+
+  while (objectUrlCache.size > MAX_OBJECT_URL_CACHE_SIZE) {
+    const oldest = objectUrlCache.entries().next().value as
+      | [string, string]
+      | undefined
+    if (!oldest) return
+    objectUrlCache.delete(oldest[0])
+    revokeObjectUrl(oldest[1])
+  }
+}
+
+export function clearResolvedImageObjectUrlCache() {
+  for (const objectUrl of objectUrlCache.values()) {
+    revokeObjectUrl(objectUrl)
+  }
+  objectUrlCache.clear()
+}
 
 /**
  * 将图片引用解析为可在 <img src> 中使用的 URL。
@@ -31,34 +61,46 @@ export async function resolveImageRefToUrl(
     return url
   }
 
-  // 命中缓存：复用已有 ObjectURL
-  const cached = objectUrlCache.get(url)
-  if (cached) return cached
-
   // 本地文件路径（./assets/ 等）
   const { isLocalFilePath, resolveToAbsolute, readLocalFileAsBlobAsync } = await import(
     './strategies/file-system'
   )
   if (isLocalFilePath(url)) {
-    if (pageLocalFilePath) {
-      const pageDir = pageLocalFilePath.replace(/[\\/][^\\/]+$/, '')
-      const fullPath = resolveToAbsolute(pageDir, url)
+    const isAbsolutePath = url.startsWith('/') || /^[A-Za-z]:[\\/]/.test(url)
+    const fullPath = isAbsolutePath
+      ? url
+      : pageLocalFilePath
+        ? resolveToAbsolute(
+            pageLocalFilePath.replace(/[\\/][^\\/]+$/, ''),
+            url,
+          )
+        : null
+
+    if (fullPath) {
+      const cacheKey = `local:${fullPath}`
+      const cached = objectUrlCache.get(cacheKey)
+      if (cached) return cached
+
       const blob = await readLocalFileAsBlobAsync(fullPath)
       if (blob) {
         const objectUrl = URL.createObjectURL(blob)
-        objectUrlCache.set(url, objectUrl)
+        rememberObjectUrl(cacheKey, objectUrl)
         return objectUrl
       }
     }
     return url
   }
 
+  // 命中缓存：复用已有 ObjectURL
+  const cached = objectUrlCache.get(url)
+  if (cached) return cached
+
   // att: / uuid: / 兜底 → imageStorage.load()
   const { imageStorage } = await import('./index')
   const blob = await imageStorage.load(url)
   if (blob) {
     const objectUrl = URL.createObjectURL(blob)
-    objectUrlCache.set(url, objectUrl)
+    rememberObjectUrl(url, objectUrl)
     return objectUrl
   }
 
