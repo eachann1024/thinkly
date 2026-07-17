@@ -1,70 +1,75 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
-# Package manager: this project uses bun — bun.lock IS committed.
-# Global ~/.gitignore_global has `*.lock`, so force bun.lock back in.
-!bun.lock
-# Ignore lockfiles from other managers to prevent accidental drift.
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
+## User settings
+xcuserdata/
+*.xcuserstate
 
-# Dependencies
-node_modules
+## Obj-C/Swift specific
+*.hmap
 
-# Build output
-dist
-dist-ssr
-dist-quicknote/
-# src/lib/build/ contains source (lite-empty.ts is the quicknote alias target),
-# NOT build output. Global ~/.gitignore_global has `build/` which would hide it.
-!src/lib/build/
-!src/lib/build/*
-*.local
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+## Build output
+build/
+DerivedData/
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+# Packages/
+# Package.pins
+# Package.resolved
+# *.xcodeproj
+#
+# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
+# hence it is not needed unless you have added a package configuration file to your project
+.swiftpm/
+*.swiftpm/
+Package.resolved
+
+.build/
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
+#
+# Pods/
+#
+# Add this line if you want to avoid checking in source code from the Xcode workspace
+# *.xcworkspace
+
+# Carthage
+#
+# Add this line if you want to avoid checking in source code from Carthage dependencies.
+# Carthage/Checkouts
+
+Carthage/Build/
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# macOS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
-# Local docs / changelog
-docs
-CHANGELOG.md
-
-# ---- AI assistant / tooling artifacts ----
-# Claude Code: keep shared agents/skills & project specs, ignore local-only noise
-.claude/
-# Skill/MCP tool lock files
-skills-lock.json
-# Other AI coding tools (Codex / Cursor / Zed / Trae / agent runners)
-.codex
-.cursor
-.zed
-.trae/
-.agents/
-# Skill / MCP tool outputs
-.impeccable/
-.playwright-mcp/
-.gitnexus
-.serena/
-playwright*/
-# design checks (local screenshots)
-.design-check/
-
-# ---- Local-only scratch ----
-tasks/
-scripts/
-# stray verification screenshots in repo root
-/*.png
+# Editor bundle build (scripts/editor-bundle)
+node_modules/
