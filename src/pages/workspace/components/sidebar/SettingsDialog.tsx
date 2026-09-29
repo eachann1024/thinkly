@@ -1,8 +1,8 @@
 import { SettingsAppearance } from "./SettingsAppearance";
-import { SettingsAbout } from "./settings/SettingsAbout";
 import { SettingsGeneral } from "./SettingsGeneral";
 import { SettingsShortcuts } from "./settings/SettingsShortcuts";
 import { SettingsLocalFolder } from "./SettingsLocalFolder";
+import { SettingsGitSync } from "./settings/SettingsGitSync";
 import { SettingsDataPanel } from "./settings/SettingsDataPanel";
 import { SettingsAI } from "./SettingsAI";
 import { SettingsScaffold } from "./settings/SettingsScaffold";
@@ -60,9 +60,9 @@ const SETTINGS_TABS: SettingsTabConfig[] = [
   { id: "general", label: "通用设置", icon: LucideIcons.Settings },
   { id: "shortcuts", label: "快捷键", icon: LucideIcons.Keyboard },
   { id: "local-folder", label: "本地文件夹", icon: LucideIcons.FolderOpen },
+  { id: "git-sync", label: "Git 同步", icon: LucideIcons.GitBranch },
   { id: "ai", label: "AI 助手", icon: LucideIcons.Sparkles },
   { id: "data", label: "数据管理", icon: LucideIcons.Database },
-  { id: "about", label: "关于与许可", icon: LucideIcons.Info },
 ];
 
 // 设置侧栏鹅应用：图标使用各应用随包提供的 logo.png
@@ -232,8 +232,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   useEffect(() => {
     const handleTabChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ tab?: SettingsTab }>;
-      if (customEvent.detail?.tab) {
-        setActiveTab(customEvent.detail.tab);
+      const tab = customEvent.detail?.tab;
+      if (tab && SETTINGS_TABS.some((item) => item.id === tab)) {
+        setActiveTab(tab);
       }
     };
 
@@ -774,11 +775,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </div>
           )}
 
-          {activeTab === "about" && (
-            <div className="settings-groups">
-              <SettingsAbout />
-            </div>
-          )}
+          {activeTab === "git-sync" && <SettingsGitSync />}
 
           {activeTab === "data" && (
             <div className="settings-groups">

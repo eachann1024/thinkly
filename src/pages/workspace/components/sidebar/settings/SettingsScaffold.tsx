@@ -58,7 +58,7 @@ export function SettingsScaffold({
         <span className="text-xs text-muted-foreground">/ {tabs.find((tab) => tab.id === activeTab)?.label}</span>
         <button
           type="button"
-          className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] "
           aria-label="关闭设置"
           onClick={onClose}
         >
@@ -78,7 +78,7 @@ export function SettingsScaffold({
               aria-current={activeTab === tab.id ? "page" : undefined}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "goose-interactive h-9 shrink-0 gap-2 rounded-lg px-3 text-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "goose-interactive h-9 shrink-0 gap-2 rounded-lg px-3 text-xs ",
                 activeTab === tab.id
                   ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                   : "text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",

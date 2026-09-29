@@ -119,6 +119,7 @@ import { gooseActiveLineExtension } from "@/components/editor/extensions/activeL
 import { gooseFakeSelectionExtension } from "@/components/editor/extensions/fakeSelectionExtension";
 import { ArrowInputRuleExtension } from "@/components/editor/inputrules/arrowInputRule";
 import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlugin";
+import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
 import {
   reconcilePageMentionSuggestionMenu,
@@ -400,6 +401,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
         gooseFakeSelectionExtension,
         ArrowInputRuleExtension,
         gooseFindInPageExtension,
+        gooseSearchSessionHighlightExtension,
         gooseDividerInputRuleExtension(),
         // 紧凑编辑器构建不挂 AI 扩展，避免加载不需要的模型依赖。
         ...(!__GOOSE_EDITOR_AI__
@@ -437,6 +439,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
             __GOOSE_LITE__ || isQuickNoteEditorPage(page)
               ? ""
               : "输入 / 、或随时 @ 提及笔记...",
+          quote: "引用",
           toggleListItem: "",
         },
         // 小窗无 AI，aiZh 在 lite 下是空壳，不并入字典。
@@ -657,6 +660,12 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     // 切页后 BlockNote 的异步 props 补全（折叠块/视频等）不应被算作用户编辑。
     userInteractedRef.current = false;
   }, [activePageId, debouncedUpdate, editor]);
+
+  useLayoutEffect(() => {
+    if (editor._tiptapEditor.isDestroyed) return;
+    editor.prosemirrorView.dom.dataset.searchPageId = activePageId ?? "";
+    window.dispatchEvent(new CustomEvent("goose-note:search-editor-ready"));
+  }, [activePageId, editor]);
 
   useLayoutEffect(() => () => {
     const pageId = prevPageIdRef.current;
@@ -1135,6 +1144,18 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
       }
     };
 
+    const handleAssetReferences = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        pages: { localFilePath: string; content: unknown }[];
+        failed: boolean;
+      }>).detail;
+      const localFilePath = pageRef.current?.localFilePath;
+      if (!localFilePath) return;
+      try {
+        detail.pages.push({ localFilePath, content: clonePageContent(editor.document as BlockNoteContent) });
+      } catch { detail.failed = true; }
+    };
+    window.addEventListener("goose-note:asset-references", handleAssetReferences);
     window.addEventListener("goose-note:flush-editor", handleFlush);
     window.addEventListener("goose-note:focus-editor-start", handleFocusStart);
     window.addEventListener("goose-note:focus-editor-body", handleFocusBody);
@@ -1145,6 +1166,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     );
 
     return () => {
+      window.removeEventListener("goose-note:asset-references", handleAssetReferences);
       window.removeEventListener("goose-note:flush-editor", handleFlush);
       window.removeEventListener(
         "goose-note:focus-editor-start",

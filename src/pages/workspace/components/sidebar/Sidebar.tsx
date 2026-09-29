@@ -15,6 +15,8 @@ import { SidebarResizeEdge } from "./SidebarResizeEdge";
 import { SidebarSectionHeader } from "./SidebarSectionHeader";
 import { SidebarOutline } from "./SidebarOutline";
 import { shouldDismissSidebarOverlay } from "./sidebarOverlayEscape";
+import { SidebarSearch } from "./SidebarSearch";
+import { useSearchSession } from "./useSearchSession";
 import { HistoryVersionList } from "../history/HistoryView";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
@@ -22,7 +24,7 @@ import { isElectronHost } from "@/lib/local-vault";
 import * as LucideIcons from "lucide-react";
 import "./sidebar-layout.css";
 
-type SidebarView = "pages" | "outline";
+type SidebarView = "pages" | "outline" | "search";
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   disableResize?: boolean;
@@ -69,6 +71,7 @@ export function Sidebar({
     outlinePageId ? s.pages[outlinePageId] : undefined,
   );
   const setExpanded = useSidebarView((s) => s.setExpanded);
+  const setSidebarCollapsed = useSidebarView((s) => s.setSidebarCollapsed);
   const sidebarCollapsed = useEffectiveSidebarCollapsed();
   const forceCollapseLeft = useWorkspaceViewport((s) => s.forceCollapseLeft);
   const leftExpandOverride = useWorkspaceViewport((s) => s.leftExpandOverride);
@@ -100,6 +103,12 @@ export function Sidebar({
 
   const [showSettings, setShowSettings] = useState(false);
   const [currentView, setCurrentView] = useState<SidebarView>("pages");
+  const searchSessionOpen = useSearchSession((state) => state.open);
+  useEffect(() => {
+    if (searchSessionOpen) setCurrentView("search");
+    else if (currentView === "search") setCurrentView("pages");
+  }, [searchSessionOpen, currentView]);
+  const openSearchSession = useSearchSession((s) => s.openSearch);
   const searchShortcut = useSettings((state) =>
     state.appShortcuts.openSearch
       ? formatShortcut(state.appShortcuts.openSearch)
@@ -127,8 +136,24 @@ export function Sidebar({
   }, [setLeftExpandOverride]);
 
   useEffect(() => {
+    const onOpen = (event: Event) => {
+      const detail = (event as CustomEvent<{ resetQuery?: boolean }>).detail;
+      if (detail?.resetQuery) useSearchSession.getState().setQuery("");
+      setCurrentView("search");
+      if (sidebarCollapsed) setSidebarCollapsed(false);
+      if (forceCollapseLeft) setLeftExpandOverride(true);
+      if (inHistoryMode) exitHistoryView();
+      closeNotebookAiIfFullscreen();
+      openSearchSession(activeNotebookId, activePageId, scrollContainerRef?.current?.scrollTop ?? 0);
+    };
+    window.addEventListener("goose-note:open-search", onOpen);
+    return () => window.removeEventListener("goose-note:open-search", onOpen);
+  }, [activeNotebookId, activePageId, sidebarCollapsed, forceCollapseLeft, inHistoryMode, scrollContainerRef, openSearchSession, setSidebarCollapsed, setLeftExpandOverride, exitHistoryView]);
+
+  useEffect(() => {
     if (!sidebarOverlay) return;
     const onEscape = (event: KeyboardEvent) => {
+      if (useSearchSession.getState().open) return;
       if (!shouldDismissSidebarOverlay(event, document)) return;
       event.preventDefault();
       event.stopPropagation();
@@ -160,6 +185,7 @@ export function Sidebar({
     previousNotebookIdRef.current = activeNotebookId;
     if (previousNotebookId === activeNotebookId) return;
     if (previousNotebookId === undefined && !isLocalFolder) return;
+    if (useSearchSession.getState().open) return;
 
     resetSidebarAfterNotebookChange({
       exitHistory: inHistoryMode,
@@ -258,25 +284,27 @@ export function Sidebar({
     if (siblingParentId) setExpandPageId(newPageId);
   };
 
-  const handleSearch = () => {
-    window.dispatchEvent(new CustomEvent("goose-note:open-search"));
+  const handleOpenSearch = () => {
+    setCurrentView("search");
+    if (sidebarCollapsed) setSidebarCollapsed(false);
+    if (forceCollapseLeft) setLeftExpandOverride(true);
+    if (inHistoryMode) exitHistoryView();
+    closeNotebookAiIfFullscreen();
+    openSearchSession(activeNotebookId, activePageId, scrollContainerRef?.current?.scrollTop ?? 0);
   };
 
   const switchSidebarView = (view: SidebarView) => {
+    if (view !== "search") useSearchSession.getState().closeSearch();
     if (view === "outline") closeNotebookAiIfFullscreen();
     setCurrentView(view);
   };
 
   const headerTitle =
-    currentView === "outline"
-      ? outlinePage
-        ? getPageTitle(outlinePage)
-        : "大纲"
-      : isLocalFolder
-        ? "本地"
-        : electronNoVault
-          ? "仓库"
-          : "页面";
+    currentView === "search"
+      ? "搜索"
+      : currentView === "outline"
+        ? outlinePage ? getPageTitle(outlinePage) : "大纲"
+        : isLocalFolder ? "本地" : electronNoVault ? "仓库" : "页面";
 
   return <>
     {sidebarOverlay && (
@@ -369,7 +397,8 @@ export function Sidebar({
                       type="button"
                       className="sidebar-mode-rail-button"
                       aria-label="搜索"
-                      onClick={handleSearch}
+                      aria-pressed={currentView === "search"}
+                      onClick={handleOpenSearch}
                     >
                       <LucideIcons.Search aria-hidden="true" className="h-4 w-4" />
                     </button>
@@ -409,11 +438,11 @@ export function Sidebar({
             >
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[inherit]">
                 <div className="flex min-h-0 flex-1 flex-col">
-                  <div className="sidebar-tree-heading shrink-0">
+                  <div className="sidebar-tree-heading shrink-0" hidden={currentView === "search"}>
                     <SidebarSectionHeader
-                      title={headerTitle}
+                      title={currentView === "search" ? "搜索" : headerTitle}
                       eyebrow={currentView === "outline" ? "文档大纲" : undefined}
-                      onCreate={electronNoVault ? undefined : handleCreatePage}
+                      onCreate={currentView === "search" || electronNoVault ? undefined : handleCreatePage}
                       createTitle={isLocalFolder ? "新建文件" : "新建页面"}
                       onCollapseAll={
                         currentView === "pages" && activeNotebookId
@@ -440,6 +469,7 @@ export function Sidebar({
                       onCreatePage={handleCreatePage}
                     />
                   </div>
+                  <SidebarSearch />
                   {currentView === "outline" && (
                     <div className="flex min-h-0 flex-1 overflow-hidden pr-2">
                       <SidebarOutline
