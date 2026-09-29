@@ -56,6 +56,7 @@ const assetMaintenance: AssetMaintenanceBridge = {
 const gitSync: GitSyncBridge = {
   getState: () => invoke("git-sync:state"),
   save: (config) => invoke("git-sync:save", config),
+  checkVisibility: (request) => invoke("git-sync:visibility", request),
   remove: (notebookId) => invoke("git-sync:remove", notebookId),
   syncNow: (notebookId) => invoke("git-sync:now", notebookId),
   onState: (callback) => {
@@ -64,7 +65,7 @@ const gitSync: GitSyncBridge = {
     return () => ipcRenderer.removeListener("git-sync:state", listener);
   },
   onPrepare: (callback) => {
-    const listener = (_event: unknown, requestId: string, localPath: string) => callback(requestId, localPath);
+    const listener = (_event: unknown, requestId: string, localPaths: string[]) => callback(requestId, localPaths);
     ipcRenderer.on("git-sync:prepare", listener);
     return () => ipcRenderer.removeListener("git-sync:prepare", listener);
   },
