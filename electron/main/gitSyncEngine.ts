@@ -9,11 +9,12 @@ const REMOTE = "goose-sync";
 const TIMEOUT_MS = 120_000;
 const SSH_COMMAND = "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2";
 
-async function git(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<string> {
+export async function gitBytes(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<Buffer> {
   try {
     const inheritedEnvironment = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("GIT_")));
     const { stdout } = await execFile("git", [
       "-c", "core.hooksPath=/dev/null",
+      "-c", "core.fsmonitor=false",
       "-c", "user.name=Goose Notes",
       "-c", "user.email=goose-notes@localhost",
       "-c", "protocol.allow=never",
@@ -24,6 +25,7 @@ async function git(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<s
       "-c", "sequence.editor=true",
       ...args,
     ], {
+      encoding: "buffer",
       cwd,
       timeout,
       maxBuffer: 8 * 1024 * 1024,
@@ -37,11 +39,15 @@ async function git(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<s
         GIT_CONFIG_GLOBAL: "/dev/null",
       },
     });
-    return stdout.trim();
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    throw Object.assign(new Error(`Git 操作失败：${detail}`), { cause: error });
+    return stdout;
+  } catch {
+    // Do not expose command arguments, local paths, remote output or credentials over IPC.
+    throw new Error("Git 操作失败，请检查 SSH、网络、分支权限或仓库状态");
   }
+}
+
+async function git(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<string> {
+  return (await gitBytes(cwd, args, timeout)).toString("utf8").trim();
 }
 
 function expectedUrl(config: GitSyncConfig): string {
