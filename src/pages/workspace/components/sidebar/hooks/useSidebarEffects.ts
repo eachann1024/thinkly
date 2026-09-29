@@ -87,11 +87,11 @@ export function useSidebarEffects({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("keydown", handleDeleteShortcut);
-    document.addEventListener("keydown", handleSidebarListEscape, true);
+    document.addEventListener("keydown", handleSidebarListEscape);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown, true);
       document.removeEventListener("keydown", handleDeleteShortcut);
-      document.removeEventListener("keydown", handleSidebarListEscape, true);
+      document.removeEventListener("keydown", handleSidebarListEscape);
     };
   }, [handleDeleteShortcut, handleSidebarListEscape]);
 

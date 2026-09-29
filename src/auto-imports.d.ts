@@ -49,6 +49,7 @@ declare global {
   const DEFAULT_CLAUDE_BASE_URL: typeof import('./lib/ai-provider/index').DEFAULT_CLAUDE_BASE_URL
   const DEFAULT_CLOSE_TAB_SHORTCUT: typeof import('./stores/settings/index').DEFAULT_CLOSE_TAB_SHORTCUT
   const DEFAULT_FONT_NAMES: typeof import('./lib/fontLoader').DEFAULT_FONT_NAMES
+  const DEFAULT_GIT_SYNC_INTERVAL: typeof import('./lib/git-sync-contract').DEFAULT_GIT_SYNC_INTERVAL
   const DEFAULT_NOTEBOOK: typeof import('./stores/useNotebooks').DEFAULT_NOTEBOOK
   const DEFAULT_OPENAI_BASE_URL: typeof import('./lib/ai-provider/index').DEFAULT_OPENAI_BASE_URL
   const DEFAULT_QUICKNOTE_HOTKEY: typeof import('./stores/settings/index').DEFAULT_QUICKNOTE_HOTKEY
@@ -70,6 +71,7 @@ declare global {
   const DiskWriteError: typeof import('./lib/diskWriteError').DiskWriteError
   const DropdownMenu: typeof import('./components/ui/dropdown-menu').DropdownMenu
   const DropdownMenuContent: typeof import('./components/ui/dropdown-menu').DropdownMenuContent
+  const DropdownMenuIconSlot: typeof import('./components/ui/dropdown-menu').DropdownMenuIconSlot
   const DropdownMenuItem: typeof import('./components/ui/dropdown-menu').DropdownMenuItem
   const DropdownMenuRadioGroup: typeof import('./components/ui/dropdown-menu').DropdownMenuRadioGroup
   const DropdownMenuRadioItem: typeof import('./components/ui/dropdown-menu').DropdownMenuRadioItem
@@ -87,6 +89,8 @@ declare global {
   const FILE_NAV_AI_PANEL: typeof import('./stores/useFileNavHistory').FILE_NAV_AI_PANEL
   const FILE_NAV_WELCOME: typeof import('./stores/useFileNavHistory').FILE_NAV_WELCOME
   const FIXED_APP_SHORTCUT_IDS: typeof import('./lib/fixed-app-shortcuts').FIXED_APP_SHORTCUT_IDS
+  const FIXED_CLOSE_SHORTCUT: typeof import('./lib/fixed-app-shortcuts').FIXED_CLOSE_SHORTCUT
+  const FIXED_SPLIT_SHORTCUTS: typeof import('./lib/fixed-app-shortcuts').FIXED_SPLIT_SHORTCUTS
   const FLOATING_MENU_CLOSE_MS: typeof import('./components/ui/floating-menu-motion').FLOATING_MENU_CLOSE_MS
   const FLOATING_MENU_EASE_IN: typeof import('./components/ui/floating-menu-motion').FLOATING_MENU_EASE_IN
   const FLOATING_MENU_EASE_OUT: typeof import('./components/ui/floating-menu-motion').FLOATING_MENU_EASE_OUT
@@ -131,6 +135,9 @@ declare global {
   const ONBOARDING_PAGE_CONTENT: typeof import('./lib/onboarding').ONBOARDING_PAGE_CONTENT
   const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('./lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const ONBOARDING_THIRD_CHILD_CONTENT: typeof import('./lib/onboarding').ONBOARDING_THIRD_CHILD_CONTENT
+  const OPEN_DIALOG_SELECTOR: typeof import('./lib/escape-close').OPEN_DIALOG_SELECTOR
+  const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('./lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
+  const OPEN_TOAST_SELECTOR: typeof import('./lib/escape-close').OPEN_TOAST_SELECTOR
   const ORB_PHASE_HOLD_MS: typeof import('./components/ui/ai-motion').ORB_PHASE_HOLD_MS
   const ORB_VISIBLE_MIN_MS: typeof import('./components/ui/ai-motion').ORB_VISIBLE_MIN_MS
   const PUBLIC_RELEASES_API_URL: typeof import('./lib/appUpdateRelease').PUBLIC_RELEASES_API_URL
@@ -377,6 +384,7 @@ declare global {
   const getFixedAppShortcuts: typeof import('./lib/fixed-app-shortcuts').getFixedAppShortcuts
   const getFormattingToolbarReferenceRect: typeof import('./components/editor/utils/formattingToolbarReference').getFormattingToolbarReferenceRect
   const getImageFromClipboard: typeof import('./lib/imageProcessor').getImageFromClipboard
+  const getLocalAssetKind: typeof import('./lib/local-folder-asset-maintenance').getLocalAssetKind
   const getLocalFolderFileDropTarget: typeof import('./lib/local-folder-file-drop-target').getLocalFolderFileDropTarget
   const getLocalFolderOrders: typeof import('./stores/localFolderOrder').getLocalFolderOrders
   const getLocalMdSnapshot: typeof import('./lib/local-md-snapshot').getLocalMdSnapshot
@@ -407,6 +415,7 @@ declare global {
   const hasStyledSoftWrapItems: typeof import('./components/editor/utils/softWrapPaste').hasStyledSoftWrapItems
   const hasValidSetupGuideAIResponse: typeof import('./lib/setupGuideAI').hasValidSetupGuideAIResponse
   const hasWholePageBlockTypeTransformScope: typeof import('./lib/ai-write/index').hasWholePageBlockTypeTransformScope
+  const holdGitSyncWrites: typeof import('./lib/git-sync-write-barrier').holdGitSyncWrites
   const htmlHasInlineFormatting: typeof import('./components/editor/utils/softWrapPaste').htmlHasInlineFormatting
   const htmlHasNonDefaultGooseBlockAttrs: typeof import('./components/editor/utils/clipboard').htmlHasNonDefaultGooseBlockAttrs
   const htmlHasNonTextPasteBlocks: typeof import('./components/editor/utils/multilinePaste').htmlHasNonTextPasteBlocks
@@ -426,6 +435,8 @@ declare global {
   const insertSoftWrappedLines: typeof import('./components/editor/utils/softWrapPaste').insertSoftWrappedLines
   const inspectNotebookImportZip: typeof import('./lib/export/index').inspectNotebookImportZip
   const inspectPasteContainer: typeof import('./components/editor/utils/multilinePaste').inspectPasteContainer
+  const installAssetMaintenanceSnapshotResponder: typeof import('./lib/asset-maintenance-snapshot').installAssetMaintenanceSnapshotResponder
+  const installGitSyncResponder: typeof import('./lib/git-sync-responder').installGitSyncResponder
   const isAIProviderId: typeof import('./lib/ai-provider/index').isAIProviderId
   const isBackupFileName: typeof import('./lib/webdavSync').isBackupFileName
   const isBlockNoteContent: typeof import('./components/editor/utils/blocknote-content/index').isBlockNoteContent
@@ -467,6 +478,7 @@ declare global {
   const isPlatformPrimaryModifierEvent: typeof import('./lib/shortcut-platform').isPlatformPrimaryModifierEvent
   const isQuickNoteDraftEmpty: typeof import('./stores/useQuickNote').isQuickNoteDraftEmpty
   const isRandomPageIcon: typeof import('./lib/randomPageIcon').isRandomPageIcon
+  const isReservedCloseOrSplitShortcut: typeof import('./lib/fixed-app-shortcuts').isReservedCloseOrSplitShortcut
   const isSetupGuideAIRequestCurrent: typeof import('./lib/setupGuideAI').isSetupGuideAIRequestCurrent
   const isSetupGuideVisible: typeof import('./lib/setupGuide').isSetupGuideVisible
   const isSidebarListCollapseArmed: typeof import('./lib/sidebarListCollapse').isSidebarListCollapseArmed
@@ -578,6 +590,8 @@ declare global {
   const reconcileSlashSuggestionMenu: typeof import('./components/editor/utils/slashMenuPolicy').reconcileSlashSuggestionMenu
   const recoverQuickNoteDrafts: typeof import('./stores/useQuickNote').recoverQuickNoteDrafts
   const redactSetupGuideAIError: typeof import('./lib/setupGuideAI').redactSetupGuideAIError
+  const registerEscapeClose: typeof import('./lib/escape-close').registerEscapeClose
+  const releaseGitSyncWrites: typeof import('./lib/git-sync-write-barrier').releaseGitSyncWrites
   const releaseStartupSettlingAfterPaint: typeof import('./lib/appearance').releaseStartupSettlingAfterPaint
   const rememberDiskWriteFailure: typeof import('./lib/diskWriteError').rememberDiskWriteFailure
   const rememberEditorSelectedBlocks: typeof import('./components/editor/utils/selection').rememberEditorSelectedBlocks
@@ -755,8 +769,10 @@ declare global {
   const useWorkspaceViewport: typeof import('./stores/useWorkspaceViewport').useWorkspaceViewport
   const useWorkspaceViewportCollapse: typeof import('./hooks/useWorkspaceViewportCollapse').useWorkspaceViewportCollapse
   const validateGeneratedBlockStructure: typeof import('./lib/ai-write/index').validateGeneratedBlockStructure
+  const validateGitSyncConfig: typeof import('./lib/git-sync-contract').validateGitSyncConfig
   const videoStorage: typeof import('./lib/videoStorage').videoStorage
   const waitForFonts: typeof import('./lib/fontLoader').waitForFonts
+  const waitForGitSyncWrites: typeof import('./lib/git-sync-write-barrier').waitForGitSyncWrites
   const wasRecentlyInteracting: typeof import('./lib/editor-interaction-signal').wasRecentlyInteracting
   const wasRecentlySelfWritten: typeof import('./lib/local-md-snapshot').wasRecentlySelfWritten
   const wikiKeysForLocalPath: typeof import('./lib/wikiLink').wikiKeysForLocalPath
@@ -816,16 +832,22 @@ declare global {
   export type { GithubReleaseAsset, ParsedReleaseVersion } from './lib/appUpdateRelease'
   import('./lib/appUpdateRelease')
   // @ts-ignore
+  export type { AssetAppearance, AssetNotebook, AssetWorkspaceSnapshot, AssetScan, AssetMaintenanceBridge } from './lib/asset-maintenance-contract'
+  import('./lib/asset-maintenance-contract')
+  // @ts-ignore
   export type { DiskWriteError } from './lib/diskWriteError'
   import('./lib/diskWriteError')
   // @ts-ignore
   export type { FixedAppShortcutId } from './lib/fixed-app-shortcuts'
   import('./lib/fixed-app-shortcuts')
   // @ts-ignore
+  export type { GitSyncProvider, GitSyncConfig, GitSyncStatus, GitSyncState, GitSyncBridge } from './lib/git-sync-contract'
+  import('./lib/git-sync-contract')
+  // @ts-ignore
   export type { CardTheme, CardThemeId, NotebookCardThemeContext, WatermarkConfig } from './lib/imageExport/index'
   import('./lib/imageExport/index')
   // @ts-ignore
-  export type { UnreferencedLocalAsset, RestoreMissingLocalAssetsResult } from './lib/local-folder-asset-maintenance'
+  export type { UnreferencedLocalAsset, RestoreMissingLocalAssetsResult, AssetMaintenanceFs } from './lib/local-folder-asset-maintenance'
   import('./lib/local-folder-asset-maintenance')
   // @ts-ignore
   export type { LocalFolderOpenAppKind, LocalFolderOpenAppCandidate } from './lib/local-folder-open-apps'

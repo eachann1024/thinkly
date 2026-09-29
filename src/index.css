@@ -215,11 +215,8 @@
   box-shadow: var(--goose-menu-shadow);
 }
 
-/* Radix initially focuses the menu surface, then transfers focus to the
- * highlighted item. Keep the surface shadow through that handoff: the global
- * focus reset removes box-shadow with !important, which otherwise makes an
- * empty menu look like it has a different background from the same menu while
- * an item is hovered. */
+/* 菜单从浮层外壳转移焦点到高亮项时，始终保留外壳真实投影。
+ * 控件焦点策略只清理 ring 变量，不清除浮层的 box-shadow。 */
 @layer properties {
   .goose-floating-surface,
   .goose-floating-surface:focus,
@@ -411,7 +408,6 @@
 .goose-menu-surface [data-slot="menu-item"]:focus {
   background-color: var(--goose-interactive-hover) !important;
   color: var(--goose-interactive-hover-fg) !important;
-  box-shadow: inset 0 0 0 1px var(--goose-interactive-hover-border);
 }
 
 .goose-menu-surface [data-slot="menu-item"],
@@ -437,7 +433,6 @@
 [data-slot="menu-item"]:focus {
   background-color: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
-  box-shadow: inset 0 0 0 1px var(--goose-interactive-hover-border);
 }
 
 .goose-menu-item:hover,
@@ -446,7 +441,6 @@
 .goose-menu-item[data-state="open"] {
   background-color: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
-  box-shadow: inset 0 0 0 1px var(--goose-interactive-hover-border);
 }
 
 .goose-menu-surface .goose-interactive[data-selected="true"],
@@ -456,7 +450,6 @@
 .goose-menu-surface .goose-interactive[data-state="open"] {
   background-color: var(--goose-interactive-selected) !important;
   color: var(--goose-interactive-selected-fg) !important;
-  box-shadow: inset 0 0 0 1px var(--goose-interactive-selected-border);
 }
 
 .goose-menu-item {
@@ -494,7 +487,6 @@
 .goose-menu-item-danger[data-state="open"] {
   background-color: var(--goose-interactive-danger);
   color: var(--goose-interactive-danger-fg);
-  box-shadow: inset 0 0 0 1px var(--goose-interactive-danger-border);
 }
 
 .goose-menu-separator {
@@ -634,6 +626,12 @@
   color: var(--goose-interactive-selected-fg);
 }
 
+/* 主操作默认已使用 hover 底色，键盘焦点需切到另一层实色以保持可见。 */
+.goose-interactive-primary:focus-visible:where(:not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])) {
+  background-color: var(--goose-interactive-selected) !important;
+  color: var(--goose-interactive-selected-fg) !important;
+}
+
 .goose-interactive-danger {
   --goose-interactive-hover: var(--goose-interactive-danger);
   --goose-interactive-hover-fg: var(--goose-interactive-danger-fg);
@@ -651,6 +649,10 @@
   background-color: var(--goose-color-danger-subtle-bg);
 }
 
+.goose-interactive-danger:focus-visible:where(:not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])) {
+  background-color: var(--goose-color-danger-subtle-bg) !important;
+}
+
 .goose-interactive:disabled,
 .goose-interactive[data-disabled="true"],
 .goose-interactive-primary:disabled,
@@ -662,11 +664,6 @@
 .goose-toolbar-action {
   --goose-interactive-hover-border: transparent;
   --goose-interactive-selected-border: transparent;
-}
-
-.goose-interactive:focus-visible {
-  outline: 2px solid var(--goose-accent-focus);
-  outline-offset: 2px;
 }
 
 @layer base {
@@ -975,23 +972,6 @@
     --tw-ring-shadow: 0 0 #0000 !important;
     --tw-inset-ring-shadow: 0 0 #0000 !important;
     --tw-ring-offset-shadow: 0 0 #0000 !important;
-  }
-
-  :where(
-    a[href],
-    button,
-    input,
-    textarea,
-    select,
-    summary,
-    [role="button"],
-    [role="tab"],
-    [role="menuitem"],
-    [role="menuitemcheckbox"],
-    [role="menuitemradio"]
-  ):focus-visible {
-    outline: 2px solid var(--goose-accent-focus, hsl(var(--ring)));
-    outline-offset: 2px;
   }
 
   /* Placeholder 也是操作提示，需达到与普通小号文本一致的可读性。 */
@@ -1439,8 +1419,9 @@ button.ai-icon-button {
 }
 
 .ai-icon-button:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+  outline: none;
+  background: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
 }
 
 .ai-icon-button[aria-pressed="true"],

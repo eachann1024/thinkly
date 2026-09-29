@@ -328,7 +328,9 @@ export function EditorComposer({
       setLinkPopoverOpen(false);
     };
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing && !event.repeat) {
+        event.preventDefault();
+        event.stopPropagation();
         setLinkPopoverOpen(false);
       }
     };
@@ -752,7 +754,7 @@ export function EditorComposer({
               }}
               placeholder="https://..."
               autoFocus
-              className="h-8 w-56 rounded-md border border-transparent bg-background px-2.5 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+              className="h-8 w-56 rounded-md border border-transparent bg-background px-2.5 text-sm outline-none placeholder:text-muted-foreground "
             />
             <button
               type="button"

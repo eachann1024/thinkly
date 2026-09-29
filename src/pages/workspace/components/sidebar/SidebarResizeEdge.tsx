@@ -19,7 +19,7 @@ export function SidebarResizeEdge({
 }: SidebarResizeEdgeProps) {
   return (
     <div
-      className="absolute top-0 h-full z-[60] cursor-col-resize group/resize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      className="absolute top-0 h-full z-[60] cursor-col-resize group/resize "
       style={{ right: "calc(-12px - var(--workspace-sidebar-gap, 8px) / 2)", width: "24px" }}
       onMouseDown={onMouseDown}
       onPointerDown={onPointerDown}

@@ -18,7 +18,9 @@ import {
   matchShortcut,
   shortcutHasModifier,
 } from "@/lib/shortcut-match";
-import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
+import { FIXED_SPLIT_SHORTCUTS, getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
+import { registerEscapeClose, OPEN_DIALOG_SELECTOR, OPEN_TOAST_SELECTOR } from "@/lib/escape-close";
+import { normalizeAppShortcuts } from "@/stores/settings/slices/shortcutsSlice";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import {
   closeNotebookAiIfFullscreen,
@@ -59,29 +61,18 @@ type HotkeyEntry = {
 };
 
 export function useAppHotkeys() {
-  // Subscribe to closeTabShortcut so the ref stays in sync, but the keydown
-  // listener itself is registered only once (deps=[]).
-  const { closeTabShortcut, searchPanelCloseShortcut, appShortcuts } =
-    useSettings();
+  const { appShortcuts } = useSettings();
   const { openTabs, activeTabId } = useTabs();
 
   // Dynamic values consumed inside the single keydown listener must be read
   // through refs, otherwise the once-registered listener would capture stale
   // values (breaks tab switching / close after the list changes).
-  const closeTabShortcutRef = useRef(closeTabShortcut);
-  const searchPanelCloseShortcutRef = useRef(searchPanelCloseShortcut);
-  const appShortcutsRef = useRef(appShortcuts);
+  const appShortcutsRef = useRef(normalizeAppShortcuts(appShortcuts));
   const openTabsRef = useRef(openTabs);
   const activeTabIdRef = useRef(activeTabId);
 
   useEffect(() => {
-    closeTabShortcutRef.current = closeTabShortcut;
-  }, [closeTabShortcut]);
-  useEffect(() => {
-    searchPanelCloseShortcutRef.current = searchPanelCloseShortcut;
-  }, [searchPanelCloseShortcut]);
-  useEffect(() => {
-    appShortcutsRef.current = appShortcuts;
+    appShortcutsRef.current = normalizeAppShortcuts(appShortcuts);
   }, [appShortcuts]);
   useEffect(() => {
     openTabsRef.current = openTabs;
@@ -145,23 +136,22 @@ export function useAppHotkeys() {
       ) &&
       (!isEditableEventTarget(event) || shortcutHasModifier(shortcut));
 
-    const runUnifiedClose = () => {
+    const runUnifiedClose = (fromEscape = false) => {
       if (isSetupGuideVisible(useSettings.getState())) {
         void getGooseDesktop()?.closeWindow?.();
         return;
       }
-      const toastEl = document.querySelector(
-        '[data-sonner-toast]:not([data-removed="true"])',
-      );
+      const toastEl = document.querySelector(OPEN_TOAST_SELECTOR);
       if (toastEl) {
         toast.dismiss();
         return;
       }
-      const dialogEl = document.querySelector(
-        '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]',
-      );
+      const dialogEl = Array.from(document.querySelectorAll(OPEN_DIALOG_SELECTOR)).at(-1);
       if (dialogEl) {
-        document.dispatchEvent(
+        if (fromEscape) return;
+        // HeroUI listens on the dialog subtree, not document.
+        const target = dialogEl.contains(document.activeElement) ? document.activeElement! : dialogEl;
+        target.dispatchEvent(
           new KeyboardEvent("keydown", {
             key: "Escape",
             code: "Escape",
@@ -497,7 +487,7 @@ export function useAppHotkeys() {
         id: "split-right",
         shortcutId: "splitRight",
         match: (event) => {
-          const s = appShortcutsRef.current.splitRight;
+          const s = FIXED_SPLIT_SHORTCUTS.splitRight;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -510,7 +500,7 @@ export function useAppHotkeys() {
         id: "split-down",
         shortcutId: "splitDown",
         match: (event) => {
-          const s = appShortcutsRef.current.splitDown;
+          const s = FIXED_SPLIT_SHORTCUTS.splitDown;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -524,7 +514,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusLeft",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusLeft;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusLeft;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -538,7 +528,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusRight",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusRight;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusRight;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -552,7 +542,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusUp",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusUp;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusUp;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -566,7 +556,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusDown",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusDown;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusDown;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -580,7 +570,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusPrevious",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusPrevious;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusPrevious;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -594,7 +584,7 @@ export function useAppHotkeys() {
         shortcutId: "splitFocusNext",
         allowRepeat: true,
         match: (event) => {
-          const s = appShortcutsRef.current.splitFocusNext;
+          const s = FIXED_SPLIT_SHORTCUTS.splitFocusNext;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
@@ -607,29 +597,13 @@ export function useAppHotkeys() {
         id: "split-zoom",
         shortcutId: "splitZoom",
         match: (event) => {
-          const s = appShortcutsRef.current.splitZoom;
+          const s = FIXED_SPLIT_SHORTCUTS.splitZoom;
           return !!s && matchesConfiguredShortcut(event, s);
         },
         handler: (event) => {
           event.preventDefault();
           event.stopPropagation();
           toggleZoom();
-        },
-      },
-      {
-        id: "close-split-pane",
-        shortcutId: "closeSplitPane",
-        match: (event) => {
-          const s = appShortcutsRef.current.closeSplitPane;
-          return !!s && matchesConfiguredShortcut(event, s);
-        },
-        handler: (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          if (closePaneOrTab() !== "close-tab") return;
-          if (!isElectronRuntime() && effectiveSingleTabMode()) return;
-          const activeId = activeTabIdRef.current;
-          if (activeId) useTabs.getState().closeTab(activeId);
         },
       },
       // new-tab (Mod+T)
@@ -669,63 +643,13 @@ export function useAppHotkeys() {
           void createDesktopWindow({ mode: "blank" });
         },
       },
-      // unified close (user-configurable shortcut, plus Electron 固定 Mod+W)
-      // Layered: toast → dialog → tab. Fires even inside inputs unless in shortcut recorder.
+      // Escape is routed after local handlers; desktop Mod+W retains ordered close.
       {
         id: "unified-close",
-        shortcutId: "close-tab",
-        match: (event) => {
-          if (event.defaultPrevented) return false;
-          const normalized =
-            event.key === " "
-              ? ({
-                  key: "Space",
-                  code: event.code,
-                  ctrlKey: event.ctrlKey,
-                  metaKey: event.metaKey,
-                  altKey: event.altKey,
-                  shiftKey: event.shiftKey,
-                } as KeyboardEvent)
-              : event;
-          if (matchShortcut(normalized, closeTabShortcutRef.current)) {
-            return true;
-          }
-          return isElectronRuntime() && matchShortcut(normalized, "Mod+W");
-        },
-        when: (event) => {
-          const target = event.target as HTMLElement | null;
-          // Never intercept when inside the shortcut recorder input itself
-          if (target?.closest?.("[data-shortcut-recorder]")) return false;
-          // Check if any closeable layer exists — if so, fire even from an input
-          const hasToast = !!document.querySelector(
-            '[data-sonner-toast]:not([data-removed="true"])',
-          );
-          const hasDialog = !!document.querySelector(
-            '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]',
-          );
-          if (hasToast || hasDialog) return true;
-          // Modified close shortcuts should work from the editor too; bare keys
-          // stay blocked so normal typing cannot close a tab by accident.
-          const isInEditableTarget =
-            !!target &&
-            (target.tagName === "INPUT" ||
-              target.tagName === "SELECT" ||
-              target.tagName === "TEXTAREA" ||
-              target.isContentEditable ||
-              !!target.closest?.(".bn-editor"));
-          if ("button" in event && (event.button === 3 || event.button === 4)) {
-            return true;
-          }
-          const electronModW =
-            isElectronRuntime() && matchShortcut(event, "Mod+W");
-          return (
-            !isInEditableTarget ||
-            shortcutHasModifier(closeTabShortcutRef.current) ||
-            electronModW
-          );
-        },
+        match: (event) => !event.defaultPrevented && isElectronRuntime() && matchShortcut(event, "Mod+W"),
         handler: (event) => {
           event.preventDefault();
+          event.stopPropagation();
           runUnifiedClose();
         },
       },
@@ -796,9 +720,6 @@ export function useAppHotkeys() {
     let pendingModifierOnlyEntry: HotkeyEntry | null = null;
 
     const getShortcutForEntry = (entry: HotkeyEntry) => {
-      if (entry.shortcutId === "close-tab") {
-        return closeTabShortcutRef.current;
-      }
       return entry.shortcutId
         ? (appShortcutsRef.current[entry.shortcutId] ?? "")
         : "";
@@ -893,10 +814,6 @@ export function useAppHotkeys() {
         return;
       }
 
-      // 搜索面板关闭键由 CommandPalette 自己处理；这里不抢先执行默认导航。
-      if (matchMouseShortcut(event, searchPanelCloseShortcutRef.current))
-        return;
-
       // 未将侧键分配给其他动作时，保持浏览器式的后退 / 前进体验。
       event.preventDefault();
       event.stopPropagation();
@@ -917,6 +834,13 @@ export function useAppHotkeys() {
       pendingModifierOnlyEntry = null;
     };
 
+    const unregisterEscapeClose = registerEscapeClose({
+      document,
+      window,
+      enabled: () => !isSetupGuideVisible(useSettings.getState()),
+      dismissToasts: () => toast.dismiss(),
+      closeContent: () => runUnifiedClose(true),
+    });
     document.addEventListener("keydown", dispatcher, true);
     document.addEventListener("keyup", handleModifierOnlyKeyUp, true);
     window.addEventListener("blur", clearPendingModifierOnlyEntry);
@@ -928,10 +852,11 @@ export function useAppHotkeys() {
     };
     window.addEventListener("goose-note:new-note", handleNewNoteEvent);
     const unsubscribeCloseActiveTab = getGooseDesktop()?.onCloseActiveTab?.(
-      runUnifiedClose,
+      () => runUnifiedClose(),
     );
     return () => {
       unsubscribeCloseActiveTab?.();
+      unregisterEscapeClose();
       document.removeEventListener("keydown", dispatcher, true);
       document.removeEventListener("keyup", handleModifierOnlyKeyUp, true);
       window.removeEventListener("blur", clearPendingModifierOnlyEntry);

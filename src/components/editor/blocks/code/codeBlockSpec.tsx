@@ -1021,7 +1021,7 @@ function CodeBlockComponent({
                 className={cn(
                   "h-6 w-full min-w-0 rounded-md border-0 bg-transparent px-1.5 text-xs shadow-none",
                   "placeholder:text-muted-foreground/50",
-                  "focus-visible:ring-0 focus-visible:ring-offset-0",
+                  "",
                   !isEditingSummary && !summary && "opacity-50",
                   !isEditingSummary && summary && "opacity-70",
                 )}

@@ -29,8 +29,10 @@ export function FixedFormattingToolbarController({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing || event.repeat) return;
       if (!open && !hovered) return;
+      event.preventDefault();
+      event.stopPropagation();
       formattingToolbar.store.setState(false);
       editor.focus();
     };

@@ -70,8 +70,8 @@
 }
 .sidebar-notebook-trigger:focus-visible,
 .goose-notebook-row:focus-visible {
-  outline: 1px solid var(--goose-interactive-selected-fg);
-  outline-offset: 2px;
+  background: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
 }
 .goose-notebook-menu-surface.goose-floating-surface {
   border: 1px solid hsl(var(--goose-menu-border));
