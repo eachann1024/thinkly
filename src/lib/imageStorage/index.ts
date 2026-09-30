@@ -6,8 +6,10 @@
 import type { IImageStorageStrategy } from './types'
 import { DEFAULT_STORAGE_CONFIG } from './types'
 import { AttachmentStrategy } from './strategies/attachment'
+import { Base64Strategy } from './strategies/base64'
 import { FileSystemStrategy } from './strategies/file-system'
 import { InlinedStrategy } from './strategies/inlined'
+import { UToolsAdapter } from '../utools'
 import { compressIfNeeded } from '../imageProcessor'
 
 type LocalFolderAccessState =
@@ -46,8 +48,11 @@ export class ImageStorage {
         return new FileSystemStrategy(() => this.resolveLocalFolderPath())
       }
 
-      // 非本地文件夹的 Electron 笔记使用附件磁盘存储。
-      return new AttachmentStrategy()
+      if (UToolsAdapter.isUTools) {
+        return new AttachmentStrategy()
+      }
+
+      return new Base64Strategy()
     })()
 
     this.strategy = await this.strategyPromise
@@ -78,12 +83,13 @@ export class ImageStorage {
 
   /**
    * 存储图片
-   * - 入口统一 WebP@80%（SVG 跳过；已是 WebP 不二次压缩）
+   * - 入口统一降采样（≤2560px）+ 压缩/格式转换（SVG 跳过）
    * - 小图片（< 100KB）：直接 base64 内嵌
    * - 大图片（≥ 100KB）：使用策略存储
    */
   async save(blob: Blob, mimeType: string): Promise<string> {
-    // 入口统一处理：WebP@80%；用压缩后的 size 决定是否内嵌
+    // 入口统一处理：降采样 + WebP/PNG 输出（SVG 跳过）
+    // 用压缩后的 blob.size 再决定是否内嵌，避免大图降采样后本可内嵌却走重策略
     const processed = await compressIfNeeded(blob, DEFAULT_STORAGE_CONFIG)
     const processedMime = processed.type || mimeType
 
@@ -122,11 +128,6 @@ export class ImageStorage {
     const attStrategy = new AttachmentStrategy()
     if (attStrategy.canHandle(ref)) {
       return attStrategy.load(ref)
-    }
-
-    if (ref.startsWith("att-file:")) {
-      const { fileStorage } = await import("@/lib/fileStorage")
-      return fileStorage.load(ref)
     }
 
     return null

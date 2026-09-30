@@ -1,109 +1,98 @@
-import * as LucideIcons from "lucide-react";
-import { useEffect, useState } from "react";
-import { getGooseDesktop } from "@/lib/electron/runtime";
-import { checkAppUpdate } from "@/lib/electron/appUpdate";
-import { cn } from "@/lib/utils";
-import { NotebookSwitcher } from "./NotebookSwitcher";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useSettings } from "@/stores/settings";
+import { useSidebarView } from "@/stores/useSidebarView";
 
-export interface SidebarFooterProps {
+interface SidebarFooterProps {
+  currentView: "pages" | "trash" | "outline";
   isSettingsOpen: boolean;
+  onSwitchToTrash: () => void;
   onOpenSettings: () => void;
 }
 
 export function SidebarFooter({
+  currentView,
   isSettingsOpen,
+  onSwitchToTrash,
   onOpenSettings,
 }: SidebarFooterProps) {
-  const [readyVersion, setReadyVersion] = useState("");
-  const [availableVersion, setAvailableVersion] = useState("");
-  useEffect(() => {
-    const desktop = getGooseDesktop();
-    if (!desktop) return;
-    const unsubscribe = desktop.onUpdateReady(setReadyVersion);
-    void desktop.getReadyUpdate().then(setReadyVersion).catch(() => {});
-    return unsubscribe;
-  }, []);
-  useEffect(() => {
-    if (!getGooseDesktop()) return;
-    let active = true;
-    const check = async () => {
-      try {
-        const result = await checkAppUpdate();
-        if (active) setAvailableVersion(result?.status === "available" ? result.latestVersion : "");
-      } catch { /* Network errors stay silent; manual check in About shows details. */ }
-    };
-    void check();
-    const timer = window.setInterval(() => void check(), 4 * 60 * 60 * 1000);
-    return () => { active = false; window.clearInterval(timer); };
-  }, []);
+  const theme = useSettings((s) => s.theme);
+  const toggleDarkMode = useSettings((s) => s.toggleDarkMode);
+  const sidebarCollapsed = useSidebarView((s) => s.sidebarCollapsed);
+  const toggleSidebarCollapsed = useSidebarView((s) => s.toggleSidebarCollapsed);
+  const toggleSidebarShortcutLabel = formatShortcut("Alt+B");
+
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   const btnClass =
-    "sidebar-footer-control inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md p-0 text-muted-foreground transition-[background-color,color,box-shadow,transform] hover:bg-[var(--goose-interactive-selected)] hover:text-[var(--goose-interactive-selected-fg)] active:translate-y-px active:bg-[var(--goose-interactive-selected)] active:text-[var(--goose-interactive-selected-fg)] focus-visible:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--goose-interactive-selected-fg)] [&_svg]:block";
-  const activeClass =
-    "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]";
+    "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md p-0 text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-foreground [&_svg]:block";
+  const activeClass = "text-foreground bg-[var(--goose-interactive-selected)]";
 
   return (
-    <TooltipProvider delayDuration={600}>
-      <div className="sidebar-rail-footer">
-        {readyVersion ? (
+    <div className="px-2 pb-0 pt-1 mt-auto bg-[hsl(var(--goose-shell-bg))] flex items-center justify-between">
+      <div className="flex items-center gap-0.5">
+        <TooltipProvider delayDuration={600}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
-                className={cn(btnClass, activeClass)}
-                aria-label={`更新 ${readyVersion} 已下载，点击重启安装`}
-                title={`更新 ${readyVersion} 已下载，点击重启安装`}
-                onClick={() => void getGooseDesktop()?.installReadyUpdate()}
+                className={cn(btnClass, sidebarCollapsed && activeClass)}
+                aria-label="收起侧栏"
+                onClick={toggleSidebarCollapsed}
               >
-                <LucideIcons.RotateCw className="h-4 w-4" />
+                <LucideIcons.PanelLeft className="h-4 w-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right">
-              更新 {readyVersion} 已下载，点击重启安装
+            <TooltipContent side="top">
+              <div className="flex items-center gap-2">
+                <span>收起侧栏</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {toggleSidebarShortcutLabel}
+                </span>
+              </div>
             </TooltipContent>
           </Tooltip>
-        ) : availableVersion ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className={cn(btnClass, activeClass)}
-                aria-label={`发现新版本 ${availableVersion}，打开更新说明`}
-                title={`发现新版本 ${availableVersion}，打开更新说明`}
-                onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent("goose-note:settings-tab-change", {
-                      detail: { tab: "about" },
-                    }),
-                  );
-                  onOpenSettings();
-                }}
-              >
-                <LucideIcons.Download className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              发现新版本 {availableVersion}，打开更新说明
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
-        <NotebookSwitcher variant="rail" onOpenSettings={onOpenSettings} />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className={cn(btnClass, isSettingsOpen && activeClass)}
-              aria-label="设置"
-              title="设置"
-              aria-pressed={isSettingsOpen}
-              onClick={onOpenSettings}
-            >
-              <LucideIcons.Settings className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">设置</TooltipContent>
-        </Tooltip>
+        </TooltipProvider>
+        <button
+          type="button"
+          className={cn(
+            btnClass,
+            !isSettingsOpen && currentView === "trash" && activeClass,
+          )}
+          aria-label="垃圾箱"
+          onClick={onSwitchToTrash}
+        >
+          <LucideIcons.Trash2 className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          className={cn(btnClass, isSettingsOpen && activeClass)}
+          aria-label="设置"
+          onClick={onOpenSettings}
+        >
+          <LucideIcons.Settings className="h-4 w-4" />
+        </button>
       </div>
-    </TooltipProvider>
+      <button
+        type="button"
+        className={cn(btnClass)}
+        aria-label={isDark ? "切换到亮色模式" : "切换到暗色模式"}
+        onClick={toggleDarkMode}
+      >
+        {isDark ? (
+          <LucideIcons.Sun className="h-4 w-4" />
+        ) : (
+          <LucideIcons.Moon className="h-4 w-4" />
+        )}
+      </button>
+    </div>
   );
 }

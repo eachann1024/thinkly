@@ -1,11 +1,10 @@
-import { computeSidebarRowHeight } from "@/lib/appearance";
-import { useSettings } from "@/stores/useSettings";
-
 export function useSidebarItemHeight() {
-  const sidebarFontSize = useSettings((s) => s.sidebarFontSize);
+  const { uiFontSize } = useSettings();
 
-  return useMemo(
-    () => computeSidebarRowHeight(sidebarFontSize),
-    [sidebarFontSize],
-  );
+  return useMemo(() => {
+    const rootFontSize = parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
+    return Math.round(rootFontSize * 2);
+  }, [uiFontSize]);
 }

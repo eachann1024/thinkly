@@ -2,7 +2,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@host-runtime": ["./src/lib/host/runtime.electron.ts"]
+      "@host-runtime": ["./src/lib/host/runtime.utools.ts"]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",

@@ -1,20 +1,18 @@
 import path from "path";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { defineConfig, createLogger } from "vite";
 import react from "@vitejs/plugin-react";
 import AutoImport from "unplugin-auto-import/vite";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import { debugMinify, debugSourcemap, isDebugBuild } from "./vite.debug";
 
+const hostTarget = "utools";
+
 // 构建目标区分：
 // - 默认（app）：input=index.html → dist/，完整功能（plugin A 鹅的笔记）。行为与改动前一致。
 // - GOOSE_BUILD_TARGET=quicknote：input=quicknote.html → dist-quicknote/，精简（plugin B 鹅的小窗）。
 //   通过 __GOOSE_LITE__ 标志 + 重型依赖 alias 到空壳，把 katex/mermaid/prettier/PDF/echarts
 //   等「文档级」代码排除出小窗包（约省 9MB），小窗只保留快速记文字/标题/清单/代码高亮等。
-// - GOOSE_BUILD_TARGET=electron：input=index.html + quicknote.html → dist-electron/renderer/，Electron 桌面端（仅本地模式）。
-//   renderer 与 main/preload 由 Electron 构建链分别产出。
 const isQuicknoteBuild = process.env.GOOSE_BUILD_TARGET === "quicknote";
-const hostTarget = "electron";
 
 // 小窗精简构建专用：把这些「仅经动态 import 进入图」的重型 JS 依赖 alias 到极小空壳，
 // 确保它们不被打进 dist-quicknote（消费点已被 __GOOSE_LITE__ 短路，运行时不会真正调用）。
@@ -22,18 +20,7 @@ const hostTarget = "electron";
 // 必须用「精确正则」只匹配裸包名 / 精确子路径的 JS import，不能用字符串前缀别名——
 // 否则会误伤 index.css 里的 `@import "katex/dist/katex.min.css"`（被改写成空壳目录下的
 // 不存在路径而构建失败）。katex CSS（~23KB）保留无妨，这里只剥离 katex 的 JS（~256KB）。
-const liteEmptyModule = path.resolve(__dirname, "./src/lib/vite-stubs/lite-empty.ts");
-// pi-ai provider-env 静态 require("node:fs")（仅 Bun sandbox 回退，浏览器不可达）；
-// alias 掉以免 Vite 外部化并打警告。
-const nodeFsStubModule = path.resolve(__dirname, "./src/lib/vite-stubs/node-fs-stub.ts");
-// 挡住 xl-pdf-exporter 动态 import 的 Inter_18pt / GeistMono TTF chunk（~1.8MB）。
-const pdfFontEmptyModule = path.resolve(__dirname, "./src/lib/vite-stubs/pdf-font-empty.ts");
-if (!existsSync(liteEmptyModule) || !existsSync(nodeFsStubModule) || !existsSync(pdfFontEmptyModule)) {
-  throw new Error(
-    `[vite] 缺少构建 stub（${path.relative(__dirname, liteEmptyModule)} / ${path.relative(__dirname, nodeFsStubModule)} / ${path.relative(__dirname, pdfFontEmptyModule)}）。` +
-      "不要把这些文件放在名为 build 的目录里：全局 gitignore 的 build/ 会让 electron publish 漏传，商店 Linux CI 会挂。",
-  );
-}
+const liteEmptyModule = path.resolve(__dirname, "./src/lib/build/lite-empty.ts");
 const liteStubAliases: { find: RegExp; replacement: string }[] = isQuicknoteBuild
   ? [
       { find: /^katex$/, replacement: liteEmptyModule },
@@ -46,17 +33,10 @@ const liteStubAliases: { find: RegExp; replacement: string }[] = isQuicknoteBuil
       // AI（小窗砍掉「向 AI 提问」）：精确匹配包名，不碰 `@blocknote/xl-ai/style.css`（CSS 保留）。
       { find: /^@blocknote\/xl-ai$/, replacement: liteEmptyModule },
       { find: /^@blocknote\/xl-ai\/locales$/, replacement: liteEmptyModule },
-      { find: /^@ai-sdk\/openai$/, replacement: liteEmptyModule },
       { find: /^@ai-sdk\/openai-compatible$/, replacement: liteEmptyModule },
       { find: /^@ai-sdk\/anthropic$/, replacement: liteEmptyModule },
-      { find: /exportHtmlCss\.vite/, replacement: liteEmptyModule },
     ]
-  : [
-      // 必须整段匹配 specifier（含 ./），否则 Vite 8 只替换子串，变成
-      // `.//abs/path/pdf-font-empty.tsRegular-xxxx.js` 后构建失败。
-      { find: /(?:^|.*\/)Inter_18pt-[^/]+$/, replacement: pdfFontEmptyModule },
-      { find: /(?:^|.*\/)GeistMono-Regular[^/]*$/, replacement: pdfFontEmptyModule },
-    ];
+  : [];
 
 const logger = createLogger();
 const originalWarnOnce = logger.warnOnce.bind(logger);
@@ -206,37 +186,12 @@ const codeSplittingGroups: ChunkGroup[] = [
 // https://vite.dev/config/
 export default defineConfig({
   customLogger: logger,
-  base: "./", // electron 需要相对路径
+  base: "./", // utools 需要相对路径
   define: {
     __HOST_TARGET__: JSON.stringify(hostTarget),
     __GOOSE_LITE__: JSON.stringify(isQuicknoteBuild),
-    __GOOSE_EDITOR_COMPACT__: JSON.stringify(isQuicknoteBuild),
-    __GOOSE_EDITOR_AI__: JSON.stringify(!isQuicknoteBuild),
   },
   plugins: [
-    {
-      name: "exclude-guide-assets-from-electron",
-      closeBundle() {
-        const outDir = isQuicknoteBuild
-          ? "dist-quicknote"
-          : "dist-electron/renderer";
-        rmSync(path.resolve(__dirname, outDir, "guide"), { recursive: true, force: true });
-        // 禁止 NotoSansSC 打进产物；其它 public/fonts（如 UI 字体）不动
-        for (const name of ["NotoSansSC-Regular.ttf", "NotoSansSC-Regular.otf"]) {
-          rmSync(path.resolve(__dirname, outDir, "fonts", name), { force: true });
-        }
-        // KaTeX CSS 相对 url(fonts/KaTeX_*)，对齐到 assets/fonts/*.woff2
-        const katexFontSrc = path.resolve(__dirname, "node_modules/katex/dist/fonts");
-        const katexFontDest = path.resolve(__dirname, outDir, "assets/fonts");
-        if (existsSync(katexFontSrc)) {
-          mkdirSync(katexFontDest, { recursive: true });
-          for (const name of readdirSync(katexFontSrc)) {
-            if (!name.endsWith(".woff2")) continue;
-            copyFileSync(path.join(katexFontSrc, name), path.join(katexFontDest, name));
-          }
-        }
-      },
-    },
     codeInspectorPlugin({
       bundler: "vite",
       hideConsole: true,
@@ -328,16 +283,7 @@ export default defineConfig({
     // 非小窗构建 liteStubAliases 为空数组，主应用解析与改动前完全一致。
     alias: [
       ...liteStubAliases,
-      // 浏览器打包：吞掉 pi-ai 对 node:fs 的静态 require（见 src/lib/vite-stubs/node-fs-stub.ts）。
-      { find: /^node:fs$/, replacement: nodeFsStubModule },
-      {
-        find: "@host-runtime",
-        replacement: path.resolve(
-          __dirname,
-          "./src/lib/host/runtime.electron.ts",
-        ),
-      },
-
+      { find: "@host-runtime", replacement: path.resolve(__dirname, "./src/lib/host/runtime.utools.ts") },
       { find: "@", replacement: path.resolve(__dirname, "./src") },
     ],
   },
@@ -357,38 +303,28 @@ export default defineConfig({
       "@blocknote/xl-ai",
       "@blocknote/xl-pdf-exporter",
       "@ai-sdk/react",
-      "@ai-sdk/openai",
       "@ai-sdk/anthropic",
       "@ai-sdk/openai-compatible",
       "ai",
     ],
   },
   server: {
-    host: "0.0.0.0",
-    port: 6001,
     sourcemapIgnoreList: false,
   },
 
   build: {
-    // app → dist/；quicknote → dist-quicknote/（两个 Electron 插件各自独立打包，互不共享 chunk）；
-    // electron → dist-electron/renderer/（桌面端独立产物，electron-build.js 只认 dist/dist-quicknote，不会触碰）。
-    outDir: isQuicknoteBuild
-      ? "dist-quicknote"
-      : "dist-electron/renderer",
-    // 正式 'hidden'（写盘后由 electron-build 删）；GOOSE_DEBUG=1 时 true（保留，供 DevTools 还原 src/）
+    // app → dist/；quicknote → dist-quicknote/（两个 uTools 插件各自独立打包，互不共享 chunk）。
+    outDir: isQuicknoteBuild ? "dist-quicknote" : "dist",
+    // 正式 'hidden'（写盘后由 utools-build 删）；GOOSE_DEBUG=1 时 true（保留，供 DevTools 还原 src/）
     sourcemap: debugSourcemap,
     minify: debugMinify,
     rolldownOptions: {
       // 单入口按构建目标切换：主应用打 index.html，小窗只打 quicknote.html。
       // 分开构建让 rolldown 各自按入口可达性裁剪——小窗图不含 workspace <App/>，
       // 自动甩掉 echarts / PDF 导出 / AI 图表等仅主应用需要的代码。
-      // Electron 桌面端同时打 index.html（主窗）与 quicknote.html（速记小窗），outDir 为 dist-electron/renderer。
       input: isQuicknoteBuild
         ? { quicknote: path.resolve(__dirname, "quicknote.html") }
-        : {
-            index: path.resolve(__dirname, "index.html"),
-            quicknote: path.resolve(__dirname, "quicknote.html"),
-          },
+        : { index: path.resolve(__dirname, "index.html") },
       output: {
         // rolldown 原生分包；不用废弃的 manualChunks
         codeSplitting: {

@@ -1,14 +1,11 @@
 import { useMemo } from "react";
-import { extractSvgMarkup } from "@/lib/notebook-ai/canvasSegments";
 
 export type Segment =
   | { type: "markdown"; content: string }
   | { type: "echarts"; content: string }
   | { type: "html"; content: string }
-  | { type: "json-render"; content: string }
-  | { type: "svg"; content: string };
+  | { type: "json-render"; content: string };
 
-const DATAVIZ_FENCE_LANGS = "echarts|html|json-render|svg|xml";
 const HTML_FRAGMENT_RE =
   /<(div|section|article|main|aside|header|footer|svg|canvas|table|style|script)\b/i;
 const STREAMING_HTML_START_RE =
@@ -38,18 +35,9 @@ export function splitStreamingHtmlStart(text: string) {
   return { before, html };
 }
 
-function classifyDatavizFence(lang: string, body: string): Segment {
-  if (lang === "echarts" || lang === "html" || lang === "json-render") {
-    return { type: lang, content: body.trim() };
-  }
-  const svg = extractSvgMarkup(body);
-  if (svg) return { type: "svg", content: svg };
-  return { type: "markdown", content: `\`\`\`${lang}\n${body}\`\`\`` };
-}
-
 export function parseDatavizSegments(text: string): Segment[] {
   const segments: Segment[] = [];
-  const fenceRe = new RegExp("```(" + DATAVIZ_FENCE_LANGS + ")\\s*\\n([\\s\\S]*?)```", "g");
+  const fenceRe = /```(echarts|html|json-render)\s*\n([\s\S]*?)```/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -58,7 +46,8 @@ export function parseDatavizSegments(text: string): Segment[] {
       const before = text.slice(lastIndex, match.index).trim();
       if (before) segments.push({ type: "markdown", content: before });
     }
-    segments.push(classifyDatavizFence(match[1], match[2]));
+    const lang = match[1] as "echarts" | "html" | "json-render";
+    segments.push({ type: lang, content: match[2].trim() });
     lastIndex = match.index + match[0].length;
   }
 
@@ -95,7 +84,7 @@ export function parseDatavizSegments(text: string): Segment[] {
 /** 流式场景：额外检测尾部未闭合的 dataviz 围栏 */
 export function parseStreamingSegments(text: string, streaming: boolean) {
   const segments: Segment[] = [];
-  const fenceRe = new RegExp("```(" + DATAVIZ_FENCE_LANGS + ")\\s*\\n([\\s\\S]*?)```", "g");
+  const fenceRe = /```(echarts|html|json-render)\s*\n([\s\S]*?)```/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -104,30 +93,24 @@ export function parseStreamingSegments(text: string, streaming: boolean) {
       const before = text.slice(lastIndex, match.index).trim();
       if (before) segments.push({ type: "markdown", content: before });
     }
-    segments.push(classifyDatavizFence(match[1], match[2]));
+    segments.push({
+      type: match[1] as "echarts" | "html" | "json-render",
+      content: match[2].trim(),
+    });
     lastIndex = match.index + match[0].length;
   }
 
   const remaining = text.slice(lastIndex);
-  const incompleteRe = new RegExp("```(" + DATAVIZ_FENCE_LANGS + ")\\s*\\n([\\s\\S]*)$");
+  const incompleteRe = /```(echarts|html|json-render)\s*\n([\s\S]*)$/;
   const incompleteMatch = remaining.match(incompleteRe);
 
   if (incompleteMatch) {
     const before = remaining.slice(0, incompleteMatch.index!).trim();
     if (before) segments.push({ type: "markdown", content: before });
-    const lang = incompleteMatch[1];
-    if (lang === "svg" || lang === "xml") {
-      return {
-        segments,
-        hasIncompleteBlock: true,
-        incompleteBlockType: "svg" as const,
-        incompleteContent: undefined,
-      };
-    }
     return {
       segments,
       hasIncompleteBlock: true,
-      incompleteBlockType: lang as "echarts" | "html" | "json-render",
+      incompleteBlockType: incompleteMatch[1] as "echarts" | "html" | "json-render",
       incompleteContent: incompleteMatch[2],
     };
   }
@@ -182,7 +165,7 @@ export function parseStreamingSegments(text: string, streaming: boolean) {
  */
 export function textHasDataviz(text: string | undefined | null): boolean {
   if (!text) return false;
-  if (/```(?:echarts|html|json-render|svg|xml)\s*\n/.test(text)) return true;
+  if (/```(?:echarts|html|json-render)\s*\n/.test(text)) return true;
   return looksLikeStandaloneHtml(text);
 }
 

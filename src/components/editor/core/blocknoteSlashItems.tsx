@@ -1,60 +1,8 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { FilePanelExtension } from "@blocknote/core/extensions";
 import { AIExtension } from "@blocknote/xl-ai";
-import { createRoot, type Root } from "react-dom/client";
-import {
-  CheckSquare,
-  Code,
-  FileUp,
-  GitGraph,
-  Heading1,
-  Heading2,
-  Heading3,
-  Image,
-  Info,
-  List,
-  ListOrdered,
-  Minus,
-  Quote,
-  Sigma,
-  Sparkles,
-  Table,
-  Video,
-} from "lucide-react";
-const SLASH_ICONS = {
-  sparkles: <Sparkles size={18} />,
-  heading1: <Heading1 size={18} />,
-  heading2: <Heading2 size={18} />,
-  heading3: <Heading3 size={18} />,
-  check: <CheckSquare size={18} />,
-  list: <List size={18} />,
-  listOrdered: <ListOrdered size={18} />,
-  quote: <Quote size={18} />,
-  info: <Info size={18} />,
-  minus: <Minus size={18} />,
-  table: <Table size={18} />,
-  code: <Code size={18} />,
-  sigma: <Sigma size={18} />,
-  mermaid: <GitGraph size={18} />,
-  image: <Image size={18} />,
-  video: <Video size={18} />,
-  file: <FileUp size={18} />,
-};
-
-let slashIconWarmRoot: Root | null = null;
-
-export function warmupSlashMenuIcons() {
-  if (slashIconWarmRoot || typeof document === "undefined") return;
-  const host = document.createElement("div");
-  host.setAttribute("aria-hidden", "true");
-  host.style.cssText =
-    "position:fixed;left:0;top:0;width:40px;height:40px;opacity:0;pointer-events:none;overflow:hidden";
-  document.body.appendChild(host);
-  slashIconWarmRoot = createRoot(host);
-  slashIconWarmRoot.render(
-    <div>{Object.values(SLASH_ICONS)}</div>,
-  );
-}
+import * as LucideIcons from "lucide-react";
+import { isInsideToggle } from "@/components/editor/utils/toggleNesting";
 
 export interface SlashMenuItem {
   title: string;
@@ -68,59 +16,15 @@ export interface SlashMenuItem {
   onItemClick: () => void;
 }
 
-export interface SlashMenuFeaturePolicy {
-  transcodeVideoUploads: boolean;
-  openAttachmentsExternally: boolean;
-  localFolderNotebook?: boolean;
-}
-
-export function isSlashMenuDivider(item: SlashMenuItem): boolean {
-  return (
-    typeof item === "object" &&
-    item !== null &&
-    "type" in item &&
-    (item as { type?: string }).type === "divider"
-  );
-}
-
-/** 速记小窗 / 紧凑构建只保留常用输入块。 */
-export const COMPACT_SLASH_MENU_TITLES = new Set([
-  "一级标题",
-  "二级标题",
-  "待办事项",
-  "无序列表",
-  "有序列表",
-  "引用",
-  "标注",
-  "分隔线",
-  "代码块",
-  "图片",
-]);
-
-export function filterCompactSlashMenuItems(
-  items: SlashMenuItem[],
-): SlashMenuItem[] {
-  return items.filter(
-    (it) => !isSlashMenuDivider(it) && COMPACT_SLASH_MENU_TITLES.has(it.title),
-  );
-}
-
 export function getBlockNoteSlashMenuItems(
   editor: BlockNoteEditor<any, any, any>,
   aiEnabled: boolean,
-  features: SlashMenuFeaturePolicy = {
-    transcodeVideoUploads: true,
-    openAttachmentsExternally: true,
-  },
-  options?: { compact?: boolean },
 ): SlashMenuItem[] {
   // 插入完成后：把光标移到新块、把视图滚动到新块、把焦点交回编辑器
   const focusAndScrollTo = (block: { id: string }) => {
     try {
       editor.setTextCursorPosition(block, "end");
-    } catch {
-      /* block 可能已被 BlockNote 内部刷新；忽略 */
-    }
+    } catch { /* block 可能已被 BlockNote 内部刷新；忽略 */ }
     editor.focus();
     // React 自定义块（如 codeBlock）的 contentDOM 挂载是异步的：上面同步设的
     // PM 光标位置在 DOM 里找不到落点，会被回退到块容器外——表现为创建代码块后
@@ -129,9 +33,7 @@ export function getBlockNoteSlashMenuItems(
     window.setTimeout(() => {
       try {
         editor.setTextCursorPosition(block, "end");
-      } catch {
-        /* block 可能已被 BlockNote 内部刷新；忽略 */
-      }
+      } catch { /* block 可能已被 BlockNote 内部刷新；忽略 */ }
       editor.focus();
     }, 0);
     // 等 DOM 更新一帧后再滚动，确保新块已渲染
@@ -153,7 +55,7 @@ export function getBlockNoteSlashMenuItems(
 
     // 剥掉行首触发字符（/ 或 、），返回剩余 inline 内容。
     // 不能用「先 updateBlock 清空 content 再取光标块」的两步法：清空一个带 children 的块
-    // （如带 children 的列表项）的标题后，光标会跳进它的第一个子块，第二步
+    // （如折叠列表 toggleListItem）的标题后，光标会跳进它的第一个子块，第二步
     // getTextCursorPosition() 取到的是子块而非原块，导致转换落到子块、原块标题与缩进
     // 子内容（含图片）全部错乱丢失。改为对 currentBlock（稳定引用）一次性 updateBlock。
     const stripLeadingTrigger = (
@@ -163,11 +65,7 @@ export function getBlockNoteSlashMenuItems(
         return { hasTrigger: false, content: c };
       }
       const text = c[0].text || "";
-      const trigger = text.startsWith("/")
-        ? "/"
-        : text.startsWith("、")
-          ? "、"
-          : null;
+      const trigger = text.startsWith("/") ? "/" : text.startsWith("、") ? "、" : null;
       if (!trigger) return { hasTrigger: false, content: c };
       const nextText = text.slice(trigger.length);
       return {
@@ -185,13 +83,10 @@ export function getBlockNoteSlashMenuItems(
     if (hasTrigger) {
       // 目标块若是 inline 内容块（段落/标题/各类列表项），保留剥掉触发符后的 content；
       // 若是结构化块（image/divider 等，content: "none"），不能塞 content。
-      const targetKind = (editor.schema as any).blockSchema?.[block.type]
-        ?.content;
+      const targetKind = (editor.schema as any).blockSchema?.[block.type]?.content;
       target = editor.updateBlock(
         currentBlock,
-        targetKind === "inline"
-          ? { ...block, content: stripped.content }
-          : block,
+        targetKind === "inline" ? { ...block, content: stripped.content } : block,
       );
     } else {
       const isEmpty =
@@ -212,15 +107,14 @@ export function getBlockNoteSlashMenuItems(
 
   const items: SlashMenuItem[] = [];
 
-  const compact = Boolean(options?.compact) || __GOOSE_EDITOR_COMPACT__;
-
-  // 未启用 AI 的构建 / 小窗不添加「生成」斜杠项。
-  if (aiEnabled && (__GOOSE_EDITOR_AI__ || false) && !compact) {
+  // 速记小窗（__GOOSE_LITE__）无 AI：不加「生成」斜杠项（其 handler 依赖 AIExtension）。
+  if (aiEnabled && !__GOOSE_LITE__) {
     items.push({
       title: "生成",
       description: "接着写点什么...",
-      icon: SLASH_ICONS.sparkles,
+      icon: <LucideIcons.Sparkles size={18} />,
       aliases: ["ai", "generate", "shengcheng", "xiezuo", "sparkle"],
+      badge: "Space",
       onItemClick: () => {
         // 删除触发字符 / 或 、
         const pos = editor.getTextCursorPosition();
@@ -245,6 +139,8 @@ export function getBlockNoteSlashMenuItems(
           });
         }
 
+        // xl-ai 接管：打开 BlockNote 官方 AI 菜单（uTools 模型暂不支持，
+        // 需在 设置 → AI 助手 中切到自定义 OpenAI/Claude）
         const ai = editor.getExtension(AIExtension);
         const blockId = editor.getTextCursorPosition().block.id;
         if (ai && blockId) {
@@ -258,7 +154,7 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "一级标题",
       description: "大标题",
-      icon: SLASH_ICONS.heading1,
+      icon: <LucideIcons.Heading1 size={18} />,
       aliases: ["h1", "heading1", "title", "biaoti"],
       badge: "#",
       onItemClick: () =>
@@ -270,7 +166,7 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "二级标题",
       description: "中标题",
-      icon: SLASH_ICONS.heading2,
+      icon: <LucideIcons.Heading2 size={18} />,
       aliases: ["h2", "heading2", "subtitle", "biaoti"],
       badge: "##",
       onItemClick: () =>
@@ -282,7 +178,7 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "三级标题",
       description: "小标题",
-      icon: SLASH_ICONS.heading3,
+      icon: <LucideIcons.Heading3 size={18} />,
       aliases: ["h3", "heading3", "biaoti"],
       badge: "###",
       onItemClick: () =>
@@ -291,27 +187,55 @@ export function getBlockNoteSlashMenuItems(
           props: { level: 3 },
         }),
     },
+    {
+      title: "折叠一级标题",
+      description: "可展开/收起下方内容的一级标题",
+      icon: <LucideIcons.ChevronRightSquare size={18} />,
+      aliases: ["toggleheading", "toggleh1", "toggle", "collapseheading", "fold", "zhediebiaoti", "zhedie", "shouqibiaoti"],
+      badge: "> #",
+      onItemClick: () =>
+        insertOrUpdate({
+          type: "heading",
+          props: { level: 1, isToggleable: true },
+        }),
+    },
+    {
+      title: "折叠二级标题",
+      description: "可展开/收起下方内容的二级标题",
+      icon: <LucideIcons.ChevronRightSquare size={18} />,
+      aliases: ["toggleheading2", "toggleh2", "toggle", "fold", "zhedie", "zhedieerji"],
+      badge: "> ##",
+      onItemClick: () =>
+        insertOrUpdate({
+          type: "heading",
+          props: { level: 2, isToggleable: true },
+        }),
+    },
+    {
+      title: "折叠三级标题",
+      description: "可展开/收起下方内容的三级标题",
+      icon: <LucideIcons.ChevronRightSquare size={18} />,
+      aliases: ["toggleheading3", "toggleh3", "toggle", "fold", "zhedie", "zhediesanji"],
+      badge: "> ###",
+      onItemClick: () =>
+        insertOrUpdate({
+          type: "heading",
+          props: { level: 3, isToggleable: true },
+        }),
+    },
     { type: "divider" } as any,
     {
       title: "待办事项",
       description: "带有复选框的任务列表",
-      icon: SLASH_ICONS.check,
-      aliases: [
-        "todo",
-        "task",
-        "daiban",
-        "renwu",
-        "提醒",
-        "提醒事项",
-        "tixing",
-      ],
+      icon: <LucideIcons.CheckSquare size={18} />,
+      aliases: ["todo", "task", "daiban", "renwu", "提醒", "提醒事项", "tixing"],
       badge: "[]",
       onItemClick: () => insertOrUpdate({ type: "checkListItem" }),
     },
     {
       title: "无序列表",
       description: "创建普通的项目符号列表",
-      icon: SLASH_ICONS.list,
+      icon: <LucideIcons.List size={18} />,
       aliases: ["list", "bullet", "liebiao"],
       badge: "-",
       onItemClick: () => insertOrUpdate({ type: "bulletListItem" }),
@@ -319,15 +243,23 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "有序列表",
       description: "创建带有数字的列表",
-      icon: SLASH_ICONS.listOrdered,
+      icon: <LucideIcons.ListOrdered size={18} />,
       aliases: ["ordered", "list", "liebiao"],
       badge: "1.",
       onItemClick: () => insertOrUpdate({ type: "numberedListItem" }),
     },
     {
+      title: "折叠列表",
+      description: "可展开/收起内容的折叠列表",
+      icon: <LucideIcons.ChevronRight size={18} />,
+      aliases: ["toggle", "collapse", "fold", "zhedie", "shouqi"],
+      badge: "> ",
+      onItemClick: () => insertOrUpdate({ type: "toggleListItem" }),
+    },
+    {
       title: "引用",
       description: "插入一段引用文字",
-      icon: SLASH_ICONS.quote,
+      icon: <LucideIcons.Quote size={18} />,
       aliases: ["quote", "blockquote", "yinyong"],
       badge: "| ",
       onItemClick: () => insertOrUpdate({ type: "quote" }),
@@ -335,14 +267,15 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "标注",
       description: "插入带图标的重点标注块",
-      icon: SLASH_ICONS.info,
+      icon: <LucideIcons.Info size={18} />,
       aliases: ["callout", "annotation", "info", "biaozhu", "tishi"],
+      badge: "co",
       onItemClick: () => insertOrUpdate({ type: "callout" }),
     },
     {
       title: "分隔线",
       description: "插入一条水平分割线",
-      icon: SLASH_ICONS.minus,
+      icon: <LucideIcons.Minus size={18} />,
       aliases: ["divider", "separator", "hr", "fengexian"],
       badge: "---",
       onItemClick: () => insertOrUpdate({ type: "divider" }),
@@ -351,8 +284,9 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "表格",
       description: "插入一个简单的表格",
-      icon: SLASH_ICONS.table,
+      icon: <LucideIcons.Table size={18} />,
       aliases: ["table", "biaoge"],
+      badge: "tb",
       onItemClick: () => {
         insertOrUpdate({
           type: "table",
@@ -366,7 +300,7 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "代码块",
       description: "插入带语法高亮的代码块",
-      icon: SLASH_ICONS.code,
+      icon: <LucideIcons.Code size={18} />,
       aliases: ["code", "block", "daima"],
       badge: "```",
       onItemClick: () =>
@@ -375,62 +309,38 @@ export function getBlockNoteSlashMenuItems(
     {
       title: "数学公式",
       description: "插入数学公式块 (KaTeX)",
-      icon: SLASH_ICONS.sigma,
+      icon: <LucideIcons.Sigma size={18} />,
       aliases: ["math", "formula", "gongshi", "katex"],
+      badge: "$$",
       onItemClick: () =>
         insertOrUpdate({ type: "codeBlock", props: { language: "math" } }),
     },
     {
       title: "Mermaid 图表",
       description: "插入流程图、时序图等 (Mermaid)",
-      icon: SLASH_ICONS.mermaid,
+      icon: <LucideIcons.GitGraph size={18} />,
       aliases: ["mermaid", "chart", "diagram", "tubiao"],
+      badge: "mr",
       onItemClick: () =>
         insertOrUpdate({ type: "codeBlock", props: { language: "mermaid" } }),
     },
     {
       title: "图片",
       description: "插入图片选择器模块",
-      icon: SLASH_ICONS.image,
+      icon: <LucideIcons.Image size={18} />,
       aliases: ["image", "photo", "tupian", "img"],
+      badge: "img",
       onItemClick: () => {
         const inserted = insertOrUpdate({ type: "image" });
         editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
       },
     },
     {
-      title: "视频",
-      description: features.transcodeVideoUploads
-        ? "上传视频并自动压缩为可播放的 MP4"
-        : "上传视频并保存为 Markdown 相对资源",
-      icon: SLASH_ICONS.video,
-      aliases: ["video", "movie", "shipin", "luping"],
-      onItemClick: () => {
-        const inserted = insertOrUpdate({ type: "video" });
-        // 视频为 void 块，末尾补空行便于继续书写
-        try {
-          const last = editor.document.at(-1);
-          if (last?.id === inserted?.id) {
-            editor.insertBlocks(
-              [{ type: "paragraph", content: "" }],
-              inserted,
-              "after",
-            );
-          }
-        } catch {
-          // ignore
-        }
-        editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
-      },
-    },
-    {
       title: "文件",
-      description:
-        features.localFolderNotebook || !features.openAttachmentsExternally
-          ? "上传附件并保存为 Markdown 相对资源"
-          : "上传附件并直接调用系统默认应用打开",
-      icon: SLASH_ICONS.file,
+      description: "上传附件并直接调用系统默认应用打开",
+      icon: <LucideIcons.FileUp size={18} />,
       aliases: ["file", "attachment", "pdf", "wenjian", "fujian"],
+      badge: "file",
       onItemClick: () => {
         const inserted = insertOrUpdate({ type: "file" });
         editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
@@ -438,13 +348,20 @@ export function getBlockNoteSlashMenuItems(
     },
   );
 
-  let menuItems = items;
-
-  if (compact) {
-    menuItems = filterCompactSlashMenuItems(menuItems);
+  // 折叠块内部隐藏「折叠标题/折叠列表」项,避免无限折叠嵌套(任意后代)。
+  // 输入规则侧也做了同样拦截(见 toggleHeadingInputRule)。光标此时已在目标块。
+  const currentBlock = editor.getTextCursorPosition().block;
+  if (isInsideToggle(editor, currentBlock)) {
+    const TOGGLE_TITLES = new Set([
+      "折叠一级标题",
+      "折叠二级标题",
+      "折叠三级标题",
+      "折叠列表",
+    ]);
+    return items.filter((it) => !TOGGLE_TITLES.has(it.title));
   }
 
-  return menuItems;
+  return items;
 }
 
 export function filterSlashMenuItems(

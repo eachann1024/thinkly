@@ -1,22 +1,18 @@
 import { useState, useRef } from "react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks, DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { useTabs } from "@/stores/useTabs";
-import { activateNotebook } from "@/lib/notebookNavigation";
-import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
-import { clearLocalFolderFileDropTarget } from "@/lib/local-folder-file-drop-target";
-import {
-  importTextFilesToLocalFolder,
-  isSupportedTextImportFile,
-  resolveImportParentForDrop,
-} from "@/lib/local-folder-import";
-import { useLocalFolderTargetPicker } from "@/stores/useLocalFolderTargetPicker";
 
 type WorkspaceDragIntent = "folder" | "text-file" | "file";
 
 function getFileExtension(name: string) {
   return name.split(".").pop()?.toLowerCase() ?? "";
+}
+
+function isSupportedTextImportFile(file: File) {
+  const ext = getFileExtension(file.name);
+  return ext === "md" || ext === "markdown" || ext === "txt";
 }
 
 function getWorkspaceDragIntent(dataTransfer: DataTransfer): WorkspaceDragIntent {
@@ -42,23 +38,6 @@ function getWorkspaceDragIntent(dataTransfer: DataTransfer): WorkspaceDragIntent
   return items.some((item) => item.kind === "file") ? "text-file" : "file";
 }
 
-async function openImportedPages(
-  workspaceId: string,
-  pageIds: string[],
-  description?: string,
-) {
-  const firstPageId = pageIds[0];
-  if (!firstPageId) return;
-  closeNotebookAiIfFullscreen();
-  await activateNotebook(workspaceId);
-  useTabs.getState().openTab(firstPageId);
-  await usePages.getState().setActivePage(firstPageId);
-  toast.success(
-    pageIds.length === 1 ? "文本文件已导入" : `已导入 ${pageIds.length} 个文件`,
-    { description },
-  );
-}
-
 export function useFileDrop() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragIntent, setDragIntent] = useState<WorkspaceDragIntent>("file");
@@ -81,7 +60,6 @@ export function useFileDrop() {
     dragCounter.current--;
     if (dragCounter.current === 0) {
       setIsDragging(false);
-      clearLocalFolderFileDropTarget();
     }
   };
 
@@ -117,14 +95,11 @@ export function useFileDrop() {
       await usePages
         .getState()
         .loadLocalFolderPages(notebookId, folderPath, { showWelcome: true });
-      clearLocalFolderFileDropTarget();
       toast.success("文件夹已打开");
       return;
     }
 
     const files = Array.from(e.dataTransfer.files).filter(isSupportedTextImportFile);
-    clearLocalFolderFileDropTarget();
-
     if (files.length === 0) {
       toast.error("暂不支持这种文件", {
         description: "可以拖入 .md、.markdown 或 .txt 文本文件。",
@@ -136,55 +111,13 @@ export function useFileDrop() {
     const currentNotebook = currentNotebookId
       ? useNotebooks.getState().notebooks[currentNotebookId]
       : null;
-    const isLocalFolder = currentNotebook?.source === "local-folder";
-
-    if (__HOST_TARGET__ === "electron" && !isLocalFolder) {
-      toast.error("请先打开文件夹", {
-        description: "Electron 桌面端仅支持本地文件夹仓库。",
-      });
-      return;
-    }
-
-    if (isLocalFolder && currentNotebookId) {
-      const chooseTarget = e.altKey || files.length > 3;
-      if (chooseTarget) {
-        useLocalFolderTargetPicker
-          .getState()
-          .openImportPicker(currentNotebookId, files);
-        return;
-      }
-
-      const parentId = resolveImportParentForDrop(currentNotebookId);
-      const { importedIds, failedCount } = await importTextFilesToLocalFolder({
-        workspaceId: currentNotebookId,
-        files,
-        parentId,
-      });
-
-      if (importedIds.length === 0) {
-        toast.error("导入失败", {
-          description: "文件内容无法解析为笔记。",
-        });
-        return;
-      }
-
-      await openImportedPages(
-        currentNotebookId,
-        importedIds,
-        failedCount > 0 ? `${failedCount} 个文件导入失败，已跳过` : undefined,
-      );
-      return;
-    }
-
     const targetNotebookId =
       currentNotebookId && currentNotebook?.source !== "local-folder"
         ? currentNotebookId
         : DEFAULT_NOTEBOOK;
     const createdPageIds: string[] = [];
 
-    let importFromMarkdown:
-      | ((text: string, filename: string) => { success: boolean; title: string; content: unknown })
-      | undefined;
+    let importFromMarkdown: ((text: string, filename: string) => any) | undefined;
     try {
       ({ importFromMarkdown } = await import("@/lib/export"));
     } catch {
@@ -202,20 +135,29 @@ export function useFileDrop() {
       usePages.getState().updatePage(pageId, {
         content: [
           { type: "heading", props: { level: 1 }, content: result.title },
-          ...(result.content as any[]),
+          ...result.content,
         ] as any,
       });
       createdPageIds.push(pageId);
     }
 
-    if (createdPageIds.length === 0) {
+    const firstPageId = createdPageIds[0];
+    if (!firstPageId) {
       toast.error("导入失败", {
         description: "文件内容无法解析为笔记。",
       });
       return;
     }
 
-    await openImportedPages(targetNotebookId, createdPageIds);
+    useNotebooks.getState().setActiveNotebook(targetNotebookId);
+    useTabs.getState().openTab(firstPageId);
+    await usePages.getState().setActivePage(firstPageId);
+    toast.success("文本文件已导入", {
+      description:
+        createdPageIds.length === 1
+          ? files[0].name
+          : `已导入 ${createdPageIds.length} 个文件`,
+    });
   };
 
   return {

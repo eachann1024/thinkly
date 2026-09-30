@@ -1,111 +1,60 @@
-<p align="center">
-  <img src="public/logo.png" width="64" height="64" alt="Goose Note 图标" />
-</p>
+# 鹅的笔记 · goose-note
 
-<h1 align="center">Goose Note</h1>
+[![CI](https://github.com/eachann1024/goose-notes/actions/workflows/ci.yml/badge.svg)](https://github.com/eachann1024/goose-notes/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-<p align="center">鹅的笔记 · 给思绪一个安静的地方</p>
+A local-first, Notion-style note-taking app — built as a [uTools](https://u.tools/) plugin, also runnable in the browser.
 
-<p align="center">
-  本地 Markdown、随手速记与 AI，放在同一个写作空间。
-</p>
+本地优先的 Notion 风格笔记应用，基于 [BlockNote](https://www.blocknotejs.org/) 块编辑器构建，内置 AI 能力，可作为 uTools 插件运行，也支持浏览器端使用。
 
-<p align="center">
-  <a href="https://github.com/eachann1024/goose-note-app/releases/latest">下载安装包</a> ·
-  <a href="#开始记录">开始记录</a> ·
-  <a href="DEVELOP.md">开发文档</a> ·
-  <a href="SECURITY.md">安全说明</a>
-</p>
+## ✨ 特性
 
-<p align="center">
-  macOS 可用 Homebrew 安装：<code>brew trust --cask eachann1024/goose-note-app/goose-note</code><br />
-  <code>brew tap eachann1024/goose-note-app https://github.com/eachann1024/goose-note-app</code><br />
-  <code>brew install --cask eachann1024/goose-note-app/goose-note</code><br />
-  升级：<code>brew upgrade --cask goose-note</code>
-</p>
+- **块编辑器**：基于 BlockNote 的所见即所得编辑，支持标题、列表、折叠块、代码块等
+- **本地优先**：笔记存储在本地，支持挂载本地文件夹作为记事本
+- **AI 能力**：集成 AI SDK（Anthropic / OpenAI-compatible），支持续写、改写、问答
+- **快速速记**：独立的速记小窗（鹅的小窗），随手记录、一键入库
+- **全局搜索**：跨记事本搜索标题与正文，跳转即定位
+- **深色模式**：完整的明暗主题适配
 
-<br />
+## 🛠 技术栈
 
-## 演示视频
+- **编辑器**：BlockNote（ProseMirror）+ Tiptap 扩展
+- **框架**：React + TypeScript + Vite
+- **状态管理**：Zustand
+- **UI**：Radix UI + HeroUI + Tailwind CSS
+- **AI**：Vercel AI SDK
+- **宿主**：uTools（可选）/ 浏览器
 
-https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
-
-<p align="center">
-  <a href="https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74"><img src="docs/showcase/goose-notes-demo-poster.jpg" width="480" alt="Goose Note 演示视频封面，点击观看" /></a><br />
-  <sub>75 秒看完 Goose Note。播放器未显示时，点击封面观看。</sub>
-</p>
-
-[![Goose Note：笔记编辑与 AI 助手并排，原文和整理结果随时对照](docs/showcase/01-writing-ai.png)](docs/showcase/01-writing-ai.png)
-
-<p align="center"><sub>写下想法，慢慢理清。macOS 开发版实拍，点击查看原图。</sub></p>
-
-<br />
-
-## 从自己的文件夹开始
-
-打开一个本地 Markdown 文件夹，就能继续写作。项目资料、阅读摘录与日常记录，都留在自己的文件里。
-
-灵感来得突然时，用独立速记小窗先记下来，再收进笔记。需要梳理思路时，让 AI 引用已有内容、提炼重点，或修改指定段落；原文与对话始终可以并排对照。
-
-<br />
-
-## 让复杂的内容，也容易读
-
-文字、代码、公式和 Mermaid 图示写在一起。用清单推进下一步，用表格整理信息，再将笔记导出为 Markdown、HTML、PDF、Word 或图片。
-
-[![Goose Note：代码高亮、Mermaid 图示与页面菜单](docs/showcase/02-code-and-diagram-user.png)](docs/showcase/02-code-and-diagram-user.png)
-
-<sub>macOS 开发版实拍，内容为演示笔记。页面菜单提供字体、历史与导出入口。</sub>
-
-<br />
-
-## 留下内容，也保留余地
-
-- **文件在本地。** 直接使用 Markdown 目录，解除挂载不会删除磁盘文件。
-- **重要内容有迹可循。** 页面锁定与历史版本，保留值得回看的节点。
-- **按需使用 AI。** 使用在线服务时，请求及引用的笔记内容会发送至所配置的服务。
-
-<br />
-
-## 开始记录
-
-1. 启动 Goose Note，选择「打开本地文件夹」。
-2. 打开已有 Markdown 文件，或新建一页，写下第一个想法。
-3. 需要整理时打开 AI 面板；需要分享时，从页面菜单导出。
-
-<details>
-<summary>从源码运行与平台说明</summary>
-
-采用 Electron、React、TypeScript 和 BlockNote。仓库提供 macOS、Windows 和 Linux 的开发与构建命令；上方截图来自 macOS 开发版，安装包可用性以实际提供的构建为准。
+## 🚀 本地开发
 
 ```bash
-bun install --frozen-lockfile
-bun run mac:dev
+# 安装依赖（推荐 bun）
+bun install
+
+# 启动开发服务器（http://localhost:6001）
+bun run dev
+
+# 构建（产出 uTools 插件包）
+bun run build
 ```
 
-完整运行、验证与打包步骤见 [开发文档](DEVELOP.md)。
+## 📦 构建产物
 
-</details>
+`bun run build` 会执行 `tsc` 类型检查 + `vite build` + uTools 打包脚本，产出可加载到 uTools 的插件包。
 
-<br />
+提交前请确保以下检查通过（CI 也会跑这些）：
 
----
+```bash
+bun run typecheck   # tsc -b --noEmit
+bun run lint        # eslint .
+bun run build
+```
 
-**同系列**　[鹅的书签](https://github.com/eachann1024/goose-mark) · [鹅的监控](https://github.com/eachann1024/goose-monitor) · [鹅的验证](https://github.com/eachann1024/goose-2fa) · [鹅的 Agent](https://github.com/eachann1024/eachann1024)
+## 🤝 贡献
 
-<details>
-<summary>许可与第三方声明 · GPL-3.0-only</summary>
+欢迎贡献！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解开发流程与规范，并遵守
+[行为准则](./CODE_OF_CONDUCT.md)。报告安全问题请参阅 [SECURITY.md](./SECURITY.md)。
 
-Goose Note 当前代码以 **GNU GPL 第三版（GPL-3.0-only）** 提供，允许商用、修改和再分发，不提供担保。分发受 GPL 约束的应用时，应按 GPL 向接收者提供对应版本源码及必要的构建、安装脚本；单纯内部使用或无副本传递的网络交互通常不属于 GPL 的分发。
+## 📄 许可证
 
-详见 [LICENSE](LICENSE)、[第三方声明](THIRD-PARTY-NOTICES.txt) 和 [源码获取说明](SOURCE-CODE.md)。第三方代码与历史 MIT 版本保留其原有许可和版权声明。本项目未添加强制宣传链接或其他定制署名条款。
-
-</details>
-
-## 作者与致谢
-
-本项目作者为 [eachann1024](https://github.com/eachann1024)，当前代码基本由其编写；早期协作者：xdd666t、gjxwxt。
-
-本项目早期基于开源项目 Markdown Preview（Pluk，MIT 许可）演进，其原有代码已不在当前版本中；该项目的 MIT 版权声明继续保留，感谢上游作者。
-
-详见 [LICENSE](LICENSE)、[第三方声明](THIRD-PARTY-NOTICES.txt)。
+[MIT](./LICENSE) © eachann

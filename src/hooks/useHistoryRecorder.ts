@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractPlainText } from "@/components/editor/utils/blocknote-content";
 import { countWords } from "@/components/editor/utils/content-text-extractor";
-import { recordHistorySnapshotDetailed } from "@/lib/history/snapshot";
+import { recordHistorySnapshot } from "@/lib/history/snapshot";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useHistoryView } from "@/stores/useHistoryView";
 
@@ -27,9 +27,6 @@ function substantiveFingerprint(content: BlockNoteContent): string {
  *  2) 心跳 30s（持续写作也能拿到检查点）
  *  3) 字符差 ≥ 200（突变立即落点）
  *
- * 数据层保证自动快照至少间隔 5 分钟；限频期间始终保留最新 pending，
- * 到达可写时间后再合并落盘，不影响页面自身的实时保存。
- *
  * 跳过条件：
  *  - 内容为空（countWords === 0）
  *  - signature 与上次一致
@@ -49,7 +46,6 @@ export function useHistoryRecorder(params: {
   const lastRecordedCharRef = useRef<number>(0);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const recordingRef = useRef(false);
   const pendingRef = useRef<{
     content: BlockNoteContent;
     charCount: number;
@@ -62,7 +58,6 @@ export function useHistoryRecorder(params: {
     lastRecordedSigRef.current = null;
     lastRecordedFingerprintRef.current = null;
     lastRecordedCharRef.current = 0;
-    recordingRef.current = false;
     pendingRef.current = null;
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
@@ -73,10 +68,8 @@ export function useHistoryRecorder(params: {
   // 心跳：独立的 setInterval，不随 content 变化重建
   useEffect(() => {
     if (!pageId || !workspaceId) return;
-    let cancelled = false;
 
     const tryFire = () => {
-      if (recordingRef.current) return;
       const p = pendingRef.current;
       if (!p) return;
       if (p.signature === lastRecordedSigRef.current) return;
@@ -99,46 +92,27 @@ export function useHistoryRecorder(params: {
       const sig = p.signature;
       const fingerprint = p.fingerprint;
       const charCount = p.charCount;
-      recordingRef.current = true;
-      recordHistorySnapshotDetailed({
+      recordHistorySnapshot({
         pageId,
         workspaceId,
         content: p.content,
         trigger: "idle",
-      })
-        .then((result) => {
-          if (cancelled) return;
-          if (result.status === "rate-limited") {
-            if (pendingRef.current) {
-              if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-              idleTimerRef.current = setTimeout(
-                tryFire,
-                Math.max(0, result.retryAt - Date.now()),
-              );
-            }
-            return;
-          }
-
-          if (pendingRef.current?.signature === sig) {
-            pendingRef.current = null;
-          }
+      }).then((entry) => {
+        if (entry) {
           lastRecordedSigRef.current = sig;
           lastRecordedFingerprintRef.current = fingerprint;
           lastRecordedCharRef.current = charCount;
-
-          if (result.status === "created" || result.status === "updated") {
-            const view = useHistoryView.getState();
-            if (view.active === pageId) {
-              view.bumpRefresh();
-            }
+          const view = useHistoryView.getState();
+          if (view.active === pageId) {
+            view.bumpRefresh();
           }
-        })
-        .catch((err) =>
-          console.error("[history] recordHistorySnapshot failed:", err),
-        )
-        .finally(() => {
-          if (!cancelled) recordingRef.current = false;
-        });
+        }
+      }).catch((err) => console.error("[history] recordHistorySnapshot failed:", err));
+      pendingRef.current = null;
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
+      }
     };
 
     (heartbeatRef as any).fire = tryFire;
@@ -148,7 +122,6 @@ export function useHistoryRecorder(params: {
     }, HEARTBEAT_MS);
 
     return () => {
-      cancelled = true;
       if (heartbeatRef.current) {
         clearInterval(heartbeatRef.current);
         heartbeatRef.current = null;

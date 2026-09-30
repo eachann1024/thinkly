@@ -3,7 +3,8 @@ import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
 
-const ITEM_CLASS = "goose-formatting-toolbar-control";
+const ITEM_CLASS =
+  "h-7 min-w-7 rounded-md px-0 text-foreground/90 hover:bg-muted data-[state=on]:bg-accent data-[state=on]:text-foreground";
 
 export function AlignGroup({
   textAlignment,

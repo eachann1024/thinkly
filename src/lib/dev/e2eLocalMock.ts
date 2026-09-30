@@ -1,5 +1,3 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
 /**
  * dev-only e2e harness — activated when:
  *   import.meta.env.DEV && location.search contains "e2eLocalMock"
@@ -147,7 +145,7 @@ function recordWrite(entry: WriteLogEntry) {
 //
 // 保真度关键：公开 mock 方法之间绝不通过 this.xxx 互调。main.tsx 的
 // setupMarkdownOpenWriteGuard 会 monkey-patch gooseFs.readFile/readFileAsync/
-// writeFile/writeFileAsync（包装层剥 frontmatter、记快照）。真实 Electron 里
+// writeFile/writeFileAsync（包装层剥 frontmatter、记快照）。真实 uTools 里
 // readFileStatAsync 等是独立原生方法、不经过包装；mock 若经 this.readFile
 // 委托，会让 scanner 经 readFileStatAsync 读到被包装层污染的内容。
 // 所以全部公开方法只调用以下私有实现。
@@ -461,8 +459,6 @@ type GooseTestHandle = {
     useNotebooks: typeof import("@/stores/useNotebooks").useNotebooks;
     useTabs: typeof import("@/stores/useTabs").useTabs;
   };
-  React: typeof React;
-  ReactDOM: typeof ReactDOM;
 };
 
 // ---------------------------------------------------------------------------
@@ -481,7 +477,7 @@ export async function installE2ELocalMock(): Promise<void> {
   initMemFs();
 
   // Install mock gooseFs **before** setupMarkdownOpenWriteGuard runs so the
-  // guard wraps the mock methods (exactly as it would wrap real Electron methods).
+  // guard wraps the mock methods (exactly as it would wrap real uTools methods).
   window.gooseFs = buildMockGooseFs();
 
   // Initialise the write log on window for external inspection
@@ -555,8 +551,6 @@ export async function installE2ELocalMock(): Promise<void> {
     },
 
     stores: { usePages, useNotebooks, useTabs },
-    React,
-    ReactDOM,
   };
 
   (window as any).__gooseTest = handle;

@@ -10,7 +10,5 @@
  */
 import App from "./App.tsx";
 import { bootstrap } from "./main";
-import { initGooseNoteErrorReporting } from "./error-reporting/init";
 
-initGooseNoteErrorReporting();
 void bootstrap(() => <App />);

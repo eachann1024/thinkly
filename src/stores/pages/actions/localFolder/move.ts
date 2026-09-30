@@ -6,7 +6,6 @@ import {
   deleteLocalMdSnapshot,
 } from "@/lib/local-md-snapshot";
 import { flushPendingLocalSaveByPageIdInternal } from "../../folderSync";
-import { reassignLocalFolderOrder } from "@/stores/localFolderOrder";
 import type { StoreSet, StoreGet } from "../hydrate";
 
 /**
@@ -214,13 +213,4 @@ export async function moveLocalPageAction(
       return { pages: nextPages };
     });
   }
-
-  // 移动成功后才更新手动顺序：清源目录旧槽位、追加目标目录末尾。
-  // 目录自身移动时，其孩子的手动顺序以目录 pageId 为键，不受影响。
-  reassignLocalFolderOrder(
-    page.workspaceId,
-    pageId,
-    page.parentId,
-    targetFolderId,
-  );
 }

@@ -58,7 +58,7 @@ function getFirstBlock(
 }
 
 function firstTitleGuardPlugin(
-  usesRawContentRef: { current: boolean } = { current: false },
+  isLocalFolderPageRef: { current: boolean } = { current: false },
 ) {
   return new Plugin({
     appendTransaction(
@@ -67,8 +67,10 @@ function firstTitleGuardPlugin(
       newState: EditorState,
     ) {
       if (!transactions.some((tr) => tr.docChanged)) return null;
-      // raw 文档保留宿主提供的结构，不施加首块 H1 约束。
-      if (usesRawContentRef.current) return null;
+      // local-folder 页面与速记小窗草稿都不施加首块 H1 约束：
+      // 前者保持磁盘解析原样；后者首块从正文起手，但用户仍可自由设任意格式（含标题），
+      // 不强制、也不禁止——故同样在此完全放行（草稿页判断已并入 isLocalFolderPageRef）。
+      if (isLocalFolderPageRef.current) return null;
 
       const first = getFirstBlock(newState.doc);
       if (!first) return null;
@@ -113,19 +115,21 @@ function firstTitleGuardPlugin(
 /**
  * 创建 firstTitleGuard 扩展实例。
  *
- * @param usesRawContentRef - 指向当前文档是否采用原始块结构的 ref。
- *   raw 文档不施加「首块恒为 H1」约束；normalized 文档仍走完整守卫。
+ * @param isLocalFolderPageRef - 指向当前页是否为 local-folder 或速记小窗草稿的 ref。
+ *   这两类页面都不施加「首块恒为 H1」约束（local-folder 保持磁盘原样；小窗草稿从正文
+ *   起手但用户可自由设任意格式，不强制不禁止）。内部笔记本（ref.current === false）
+ *   仍走完整守卫，行为零变化。
  */
 export function createGooseFirstTitleGuardExtension(
-  usesRawContentRef: { current: boolean },
+  isLocalFolderPageRef: { current: boolean },
 ) {
   return createExtension({
     key: "goose-first-title-guard",
-    prosemirrorPlugins: [firstTitleGuardPlugin(usesRawContentRef)],
+    prosemirrorPlugins: [firstTitleGuardPlugin(isLocalFolderPageRef)],
   });
 }
 
-/** 向后兼容：不传 ref 则默认启用页面级标题规范。 */
+/** 向后兼容：不传 ref 则永远启用（用于内部笔记本场景的单元测试等）。 */
 export const gooseFirstTitleGuardExtension = createGooseFirstTitleGuardExtension({
   current: false,
 });

@@ -9,21 +9,8 @@
  */
 import MiniSearch from "minisearch";
 import type { Page } from "@/types";
-import {
-  getPageTitle,
-  UNTITLED_PAGE_TITLE,
-} from "@/components/editor/utils/page-title";
+import { getPageTitle } from "@/components/editor/utils/page-title";
 import { extractTextFromContent } from "@/components/editor/utils/content-text-extractor";
-
-function isPlaceholderTitle(title: string): boolean {
-  return title === UNTITLED_PAGE_TITLE || title === "无标题";
-}
-
-function bodyForSearchIndex(page: Page, title: string): string {
-  const body = extractTextFromContent(page.content);
-  if (!isPlaceholderTitle(title)) return body;
-  return body.replace(/^(?:未命名|无标题)\s*/, "").trim();
-}
 
 // ——— 中文分词 ———
 
@@ -50,11 +37,8 @@ interface IndexDoc {
 
 let miniSearch: MiniSearch<IndexDoc> | null = null;
 
-/** key=pageId：用 updatedAt + content 引用判断是否需要重新抽文本 */
-const indexedVersions = new Map<
-  string,
-  { updatedAt: number; content: Page["content"] }
->();
+/** key=pageId, value=版本键（updatedAt:contentLen）: 记录已索引的版本 */
+const indexedVersions = new Map<string, string>();
 
 function getInstance(): MiniSearch<IndexDoc> {
   if (!miniSearch) {
@@ -67,7 +51,6 @@ function getInstance(): MiniSearch<IndexDoc> {
         prefix: true,
         boost: { title: 2 },
         fuzzy: 0.1,
-        combineWith: "AND",
       },
     });
   }
@@ -101,20 +84,14 @@ export function syncIndex(pages: Record<string, Page>): void {
   const toUpdate: IndexDoc[] = [];
 
   for (const page of Object.values(pages)) {
+    const body = extractTextFromContent(page.content);
+    const versionKey = `${page.updatedAt}:${body.length}`;
     const current = indexedVersions.get(page.id);
-    if (
-      current &&
-      current.updatedAt === page.updatedAt &&
-      current.content === page.content
-    ) {
-      continue;
-    }
+    if (current === versionKey) continue; // 没变，跳过
 
-    const title = getPageTitle(page);
-    const body = bodyForSearchIndex(page, title);
     const doc: IndexDoc = {
       id: page.id,
-      title: isPlaceholderTitle(title) ? "" : title,
+      title: getPageTitle(page),
       body,
     };
 
@@ -123,10 +100,7 @@ export function syncIndex(pages: Record<string, Page>): void {
     } else {
       toUpdate.push(doc);
     }
-    indexedVersions.set(page.id, {
-      updatedAt: page.updatedAt,
-      content: page.content,
-    });
+    indexedVersions.set(page.id, versionKey);
   }
 
   if (toAdd.length > 0) ms.addAll(toAdd);

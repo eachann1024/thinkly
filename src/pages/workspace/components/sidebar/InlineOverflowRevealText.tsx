@@ -112,11 +112,7 @@ export function InlineOverflowRevealText({
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "relative min-w-0 flex-1 select-none",
-        active && "text-[var(--goose-interactive-selected-fg)]",
-        className,
-      )}
+      className={cn("relative min-w-0 flex-1 select-none", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       {...props}
@@ -128,7 +124,10 @@ export function InlineOverflowRevealText({
       {isExpanded && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 z-40 whitespace-nowrap text-inherit"
+          className={cn(
+            "pointer-events-none absolute left-0 top-0 z-40 whitespace-nowrap",
+            active ? "text-foreground" : "text-foreground dark:text-foreground/92",
+          )}
         >
           {revealText}
         </span>

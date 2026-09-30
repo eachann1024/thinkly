@@ -80,10 +80,8 @@ export function buildVisibleTree({
     childrenMap.get(key)!.push(page);
   });
 
-  if (!(flatRoots && rootPageIds?.length)) {
-    for (const [key, children] of childrenMap.entries()) {
-      childrenMap.set(key, sortPages(children, isLocalNotebook));
-    }
+  for (const [key, children] of childrenMap.entries()) {
+    childrenMap.set(key, sortPages(children, isLocalNotebook));
   }
 
   const visible: VisibleTreeItem[] = [];

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 

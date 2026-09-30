@@ -36,10 +36,7 @@ export type AgentComposerToken =
   | Extract<AiComposerToken, { type: "text" }>
   | (Extract<AiComposerToken, { type: "reference" }> & {
       role?: AgentTokenRole;
-    })
-  | Extract<AiComposerToken, { type: "image" }>
-  | Extract<AiComposerToken, { type: "skill" }>
-  | Extract<AiComposerToken, { type: "selectionQuote" }>;
+    });
 
 export interface AgentInputContext {
   surface: AgentSurface;
@@ -67,7 +64,7 @@ export interface AgentParsedInput {
     tokens: AgentComposerToken[];
   };
   normalizedPrompt: string;
-  targetReference?: Omit<AiFileReferenceAttrs, "role"> | null;
+  targetReference?: AiFileReferenceAttrs | null;
   resolvedTarget: AiResolvedTarget;
   intentClassification?: AgentIntentClassification;
 }
