@@ -26,6 +26,19 @@
 
 <br />
 
+## 演示视频
+
+<p align="center">
+  <video src="docs/showcase/goose-notes-demo.mp4" poster="docs/showcase/goose-notes-demo-poster.jpg" controls muted playsinline width="100%">
+    你的浏览器不支持内嵌视频，请<a href="docs/showcase/goose-notes-demo.mp4">直接观看演示视频</a>。
+  </video>
+</p>
+
+<p align="center">
+  <a href="docs/showcase/goose-notes-demo.mp4"><img src="docs/showcase/goose-notes-demo-poster.jpg" width="480" alt="Goose Note 演示视频封面，点击观看" /></a><br />
+  <sub>75 秒看完 Goose Note。播放器未显示时，点击封面观看。</sub>
+</p>
+
 [![Goose Note：笔记编辑与 AI 助手并排，原文和整理结果随时对照](docs/showcase/01-writing-ai.png)](docs/showcase/01-writing-ai.png)
 
 <p align="center"><sub>写下想法，慢慢理清。macOS 开发版实拍，点击查看原图。</sub></p>
