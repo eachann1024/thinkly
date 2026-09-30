@@ -29,7 +29,7 @@
 ## 演示视频
 
 <p align="center">
-  <video src="docs/showcase/goose-notes-demo.mp4" poster="docs/showcase/goose-notes-demo-poster.jpg" controls muted playsinline width="100%">
+  <video src="https://github.com/eachann1024/goose-notes/raw/tmp-readme-video-test/docs/showcase/goose-notes-demo.mp4" poster="docs/showcase/goose-notes-demo-poster.jpg" controls muted playsinline width="100%">
     你的浏览器不支持内嵌视频，请<a href="docs/showcase/goose-notes-demo.mp4">直接观看演示视频</a>。
   </video>
 </p>
