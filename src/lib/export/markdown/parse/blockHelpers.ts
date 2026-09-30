@@ -1,5 +1,17 @@
 const CODE_BLOCK_META_PREFIX = "goose-note=";
 
+/**
+ * CommonMark thematic break：至少三个相同的 `-` / `*` / `_`，中间可夹空格。
+ * 行首最多 3 个空格；与 setext 标题下划线（`---` 紧跟在文本行后）互斥，由调用方保证。
+ */
+export function isThematicBreakLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  const leading = line.match(/^ */)?.[0].length ?? 0;
+  if (leading > 3) return false;
+  return /^([-*_])(?:\s*\1){2,}\s*$/.test(trimmed);
+}
+
 export function isLegacyCodeBlockMetaComment(line: string): boolean {
   return /^<!--\s*goose-note:codeblock\s+.+?\s*-->$/.test(line);
 }
@@ -70,10 +82,49 @@ export function parseTableBlock(
     return /^\|?(\s*:?-+:?\s*\|?)+$/.test(v) && v.includes("-");
   };
 
+  const isEscaped = (value: string, index: number) => {
+    let slashCount = 0;
+    for (let cursor = index - 1; cursor >= 0 && value[cursor] === "\\"; cursor -= 1) {
+      slashCount += 1;
+    }
+    return slashCount % 2 === 1;
+  };
+
+  const trimRowDelimiters = (value: string) => {
+    let content = value.trim();
+    if (content.startsWith("|")) {
+      content = content.slice(1);
+    }
+    const lastIndex = content.length - 1;
+    if (lastIndex >= 0 && content[lastIndex] === "|" && !isEscaped(content, lastIndex)) {
+      content = content.slice(0, lastIndex);
+    }
+    return content;
+  };
+
   const splitTableRow = (value: string) => {
-    const trimmed = value.trim();
-    const content = trimmed.replace(/^\|/, "").replace(/\|$/, "");
-    return content.split("|").map((cell: any) => cell.trim());
+    const content = trimRowDelimiters(value);
+    const cells: string[] = [];
+    let current = "";
+
+    for (let index = 0; index < content.length; index += 1) {
+      const char = content[index];
+      const next = content[index + 1];
+      if (char === "\\" && next === "|") {
+        current += "|";
+        index += 1;
+        continue;
+      }
+      if (char === "|") {
+        cells.push(current.trim());
+        current = "";
+        continue;
+      }
+      current += char;
+    }
+
+    cells.push(current.trim());
+    return cells;
   };
 
   const line = lines[i];
@@ -95,7 +146,7 @@ export function parseTableBlock(
       index++;
     }
 
-    const toCellContent = (text: string) => parseInline(text.replace(/\\\|/g, "|"));
+    const toCellContent = (text: string) => parseInline(text);
 
     return {
       block: {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useBlockNoteEditor } from "@blocknote/react";
+import { toast } from "@/components/ui/sonner";
 
 type EditorFilePanelProps = {
   blockId: string;
@@ -13,7 +14,9 @@ export function EditorFilePanel({ blockId }: EditorFilePanelProps) {
   const accept =
     block?.type === "image"
       ? "image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml,image/bmp,image/tiff,image/avif,image/heic,image/heif"
-      : undefined;
+      : block?.type === "video"
+        ? "video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska"
+        : undefined;
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -29,17 +32,23 @@ export function EditorFilePanel({ blockId }: EditorFilePanelProps) {
       if (!file) return;
 
       const uploadFile = (editor as any).uploadFile as
-        | ((file: File) => Promise<string>)
-        | undefined;
+        ((file: File, blockId?: string) => Promise<string>) | undefined;
       if (!uploadFile) return;
 
-      const url = await uploadFile(file);
-      editor.updateBlock(blockId, {
-        props: {
-          name: file.name,
-          url,
-        },
-      } as any);
+      try {
+        const url = await uploadFile(file, blockId);
+        editor.updateBlock(blockId, {
+          props: {
+            name: file.name,
+            url,
+          },
+        } as any);
+      } catch (error) {
+        console.error("[file-panel] upload failed", error);
+        toast.error("附件上传失败", {
+          description: error instanceof Error ? error.message : "请稍后重试",
+        });
+      }
     },
     [blockId, editor],
   );

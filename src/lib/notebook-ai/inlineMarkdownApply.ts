@@ -1,6 +1,6 @@
 /**
  * 行内 AI：将选区/光标块序列化为 markdown，并把模型返回的 markdown 写回对应块。
- * 与面板 agent 的 markdown 局部改写对齐，避免走 xl-ai 单块 update 无法扩列表的限制。
+ * 与面板 agent 的 markdown 局部改写对齐，避免单块 update 无法扩列表的限制。
  */
 import { importMarkdownFragment } from "@/lib/export/markdown/parse";
 import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
@@ -62,7 +62,7 @@ function cloneValue<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function serializeBlocksToMarkdown(
+export function serializeBlocksToMarkdown(
   editor: InlineMarkdownEditor,
   blocks: unknown[],
 ): string {
@@ -83,7 +83,7 @@ function serializeBlocksToMarkdown(
   return jsonContentToMarkdown(blocks as BlockNoteContent);
 }
 
-function parseMarkdownToBlocks(
+export function parseMarkdownToBlocks(
   editor: InlineMarkdownEditor,
   markdown: string,
 ): unknown[] {
