@@ -151,7 +151,7 @@ export function SettingsAbout() {
       </SettingsSectionCard>
       <SettingsSectionCard title="Goose Note · 鹅的笔记">
         <p className="text-sm text-foreground">
-          Copyright © 2026 eachann 与贡献者
+          Copyright © 2026 eachann
         </p>
         <p className="text-sm leading-relaxed text-foreground">
           本应用采用 GNU GPL
