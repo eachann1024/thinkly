@@ -18,7 +18,10 @@ export async function checkGitVisibility(config: GitRepositoryInput, token?: str
   }
   try {
     const response = await fetcher(url, { headers, redirect: "error", signal: AbortSignal.timeout(15_000) });
-    if (!response.ok) return { value: "unknown", checkedAt, reason: response.status === 404 ? "仓库不存在或当前凭据无权查看" : [401, 403].includes(response.status) ? "凭据无效、权限不足或请求受限" : `仓库服务暂不可用（${response.status}）` };
+    if (!response.ok) {
+      const limited = response.status === 429 || (response.status === 403 && (response.headers.get("x-ratelimit-remaining") === "0" || response.headers.has("retry-after")));
+      return { value: "unknown", checkedAt, reason: limited ? "检查请求受限，请稍后重试；不影响 SSH 同步" : response.status === 401 ? "检查凭据无效或已过期，请更新检查凭据；不影响 SSH 同步" : response.status === 403 ? "当前检查凭据权限不足或请求被拒绝；不影响 SSH 同步" : response.status === 404 ? "仓库不存在或当前检查凭据无权查看；请核对仓库地址" : `仓库服务暂不可用（${response.status}）；不影响 SSH 同步` };
+    }
     return parseGitVisibility(await response.json(), checkedAt);
   } catch {
     return { value: "unknown", checkedAt, reason: "无法检查仓库可见性：网络、超时、重定向或响应异常" };
