@@ -5,14 +5,16 @@ import path from "node:path";
 import { validateGitRepository, type GitRepositoryInput, type GitRepositoryFolder } from "../../src/lib/git-sync-contract";
 import { gitBytes } from "./gitSyncEngine";
 import { durableAtomicWrite } from "./gitSyncDisk";
+import { GitConflictError, retainGitConflicts, type GitSyncConflict } from "./gitSyncConflict";
+import { reconcileFiles } from "./gitSyncReconcile";
+export { GitConflictError, getGitConflict, resolveGitConflict } from "./gitSyncConflict";
 
 type Files = Record<string, string>; // base64 bytes; snapshots are also recovery backups.
 type Snapshots = Record<string, Files>;
 interface Journal { commit: string; before: Snapshots; after: Snapshots }
-interface Manifest { version: 1; identity: string; baseline: Snapshots; pending?: Journal }
+interface Manifest { version: 1; identity: string; baseline: Snapshots; pending?: Journal; reboundKeys?: string[] }
 const excluded = new Set([".git", ".ds_store", "thumbs.db", "desktop.ini", ".cache", "node_modules", ".goose-cache"]);
 const git = async (root: string, args: string[]) => (await gitBytes(root, args)).toString("utf8").trim();
-const own = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 const empty = (): Files => Object.create(null) as Files;
 const safeParts = (name: string) => name.split("/").every((part) => part && part !== "." && part !== ".." && !/[\\\0\r\n:]/.test(part) && !/[. ]$/.test(part) && !/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part));
 const ignored = (name: string) => name.split("/").some((part) => excluded.has(part.toLowerCase()) || part.startsWith(".goose-sync-"));
@@ -21,6 +23,12 @@ const remoteName = (folder: GitRepositoryFolder, name: string) => folder.remoteP
 
 async function atomicJson(file: string, value: unknown) {
   await durableAtomicWrite(file, JSON.stringify(value));
+}
+
+function clearReboundKeys(manifest: Manifest, folders: GitRepositoryFolder[]) {
+  const selected = new Set(folders.map(mappingKey));
+  manifest.reboundKeys = manifest.reboundKeys?.filter((key) => !selected.has(key));
+  if (!manifest.reboundKeys?.length) delete manifest.reboundKeys;
 }
 
 async function assertRoot(root: string) {
@@ -85,21 +93,8 @@ function assertTree(files: Files) {
   }
 }
 
-/** A missing baseline means first attach: absence locally must not delete remote files. */
 export function reconcileGitFiles(base: Files | undefined, local: Files, remote: Files): Files {
-  const merged = empty();
-  for (const name of new Set([...Object.keys(base ?? {}), ...Object.keys(local), ...Object.keys(remote)])) {
-    const b = base?.[name], l = local[name], r = remote[name];
-    let value: string | undefined;
-    if (l === r) value = l;
-    else if (!base || !own(base, name)) {
-      if (l !== undefined && r !== undefined) throw new Error("同步冲突：同一文件的本地与远端内容不同；双方内容已保留，请先处理后重试");
-      value = l ?? r;
-    } else if (l === b) value = r;
-    else if (r === b) value = l;
-    else throw new Error("同步冲突：同一文件被双方修改或删除；双方内容已保留，请先处理后重试");
-    if (value !== undefined) merged[name] = value;
-  }
+  const merged = reconcileFiles(base, local, remote);
   assertTree(merged);
   return merged;
 }
@@ -198,12 +193,20 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   }
   if (manifest.pending) {
     const selectedKeys = new Set(config.folders.map(mappingKey));
-    if (Object.keys(manifest.pending.after).some((key) => !selectedKeys.has(key))) throw new Error("上次同步仍有待恢复文件夹，请重新勾选原文件夹并完成同步后再取消选择");
+    const journal = manifest.pending;
+    const reboundAlias = (key: string) => config.folders.some((folder) => {
+      const selected = mappingKey(folder);
+      return manifest.reboundKeys?.includes(selected) && key.slice(key.indexOf(":") + 1) === folder.remotePath
+        && JSON.stringify(journal.before[key]) === JSON.stringify(journal.before[selected])
+        && JSON.stringify(journal.after[key]) === JSON.stringify(journal.after[selected]);
+    });
+    if (Object.keys(journal.after).some((key) => !selectedKeys.has(key) && !reboundAlias(key))) throw new Error("上次同步仍有待恢复文件夹，请重新勾选原文件夹并完成同步后再取消选择");
     const pushed = remoteHead && await git(work, ["merge-base", "--is-ancestor", manifest.pending.commit, remoteHead]).then(() => true).catch(() => false);
     if (pushed) {
       await applyJournal(config, manifest.pending, options.verifyRoot);
       manifest.baseline = { ...manifest.baseline, ...manifest.pending.after };
       delete manifest.pending;
+      clearReboundKeys(manifest, config.folders);
       await atomicJson(manifestFile, manifest);
       for (const folder of config.folders) local[mappingKey(folder)] = await scan(folder.localPath);
     } else {
@@ -236,10 +239,20 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
     }
   }
   const after: Snapshots = {};
+  const activeConflicts = new Set<string>();
+  const conflicts: GitSyncConflict[] = [];
   for (const folder of config.folders) {
     const key = mappingKey(folder);
     assertTree(remote[key]!);
-    after[key] = reconcileGitFiles(manifest.baseline[key], local[key]!, remote[key]!);
+    after[key] = reconcileFiles(manifest.reboundKeys?.includes(key) ? undefined : manifest.baseline[key], local[key]!, remote[key]!, {
+      repositoryId: config.id, identity, folder, active: activeConflicts, unresolved: conflicts,
+    });
+  }
+  retainGitConflicts(config.id, activeConflicts);
+  if (conflicts.length) throw new GitConflictError(conflicts);
+  for (const folder of config.folders) {
+    const key = mappingKey(folder);
+    assertTree(after[key]!);
     // Catch file/directory collisions and unsafe ancestors before creating/pushing a commit.
     for (const name of new Set([...Object.keys(local[key]!), ...Object.keys(after[key]!)])) await safeTarget(folder.localPath, name);
   }
@@ -267,11 +280,13 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   await atomicJson(manifestFile, manifest);
   if (!unchanged) {
     try { await git(work, ["push", "--no-verify", config.remoteUrl, `${commit}:${ref}`]); }
-    catch { throw new Error("推送失败，本地内容与恢复备份已保留；请检查 SSH 权限、网络或远端更新后重试"); }
+    catch (error) { throw Object.assign(new Error(`推送失败，本地内容与恢复备份已保留。${error instanceof Error ? error.message : "请检查 SSH 权限与网络后重试"}`), { cause: error }); }
   }
   await options.afterPush?.();
   await applyJournal(config, manifest.pending, options.verifyRoot);
   manifest.baseline = { ...manifest.baseline, ...after };
   delete manifest.pending;
+  clearReboundKeys(manifest, config.folders);
   await atomicJson(manifestFile, manifest);
+  retainGitConflicts(config.id, new Set());
 }

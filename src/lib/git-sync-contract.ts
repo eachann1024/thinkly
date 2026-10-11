@@ -15,6 +15,40 @@ export interface GitSyncStatus {
   phase: "idle" | "syncing" | "error";
   lastSyncedAt: string | null;
   error: string | null;
+  conflicts?: GitSyncConflict[];
+}
+
+export interface GitSyncConflict {
+  id: string;
+  notebookId: string;
+  folderName: string;
+  path: string;
+  localExists: boolean;
+  remoteExists: boolean;
+}
+
+export interface GitSyncConflictDetail extends GitSyncConflict {
+  localText: string | null;
+  remoteText: string | null;
+  binary: boolean;
+  truncated: boolean;
+}
+
+export interface GitConflictResolution {
+  repositoryId: string;
+  conflictId: string;
+  choice: "local" | "remote" | "both";
+}
+
+export interface GitFolderRebind {
+  repositoryId: string;
+  notebookId: string;
+  folder: GitRepositoryFolder;
+}
+
+export interface GitFolderCheck {
+  error: string | null;
+  path?: string;
 }
 
 export interface GitRepositoryFolder {
@@ -58,11 +92,14 @@ export interface GitSyncState {
 
 export interface GitSyncBridge {
   getState: () => Promise<GitSyncState>;
-  checkFolder: (localPath: string) => Promise<{ error: string | null }>;
+  checkFolder: (localPath: string) => Promise<GitFolderCheck>;
   save: (config: GitRepositoryInput) => Promise<GitSyncState>;
   remove: (repositoryId: string) => Promise<GitSyncState>;
   syncNow: (repositoryId: string) => Promise<GitSyncState>;
   checkVisibility: (request: GitVisibilityCheck) => Promise<GitSyncState>;
+  rebindFolder: (request: GitFolderRebind) => Promise<GitSyncState>;
+  getConflict: (repositoryId: string, conflictId: string) => Promise<GitSyncConflictDetail>;
+  resolveConflict: (request: GitConflictResolution) => Promise<GitSyncState>;
   onState: (callback: (state: GitSyncState) => void) => () => void;
   onPrepare: (callback: (requestId: string, localPaths: string[]) => void) => () => void;
   replyPrepare: (requestId: string, error: string | null) => void;

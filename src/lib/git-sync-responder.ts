@@ -20,10 +20,10 @@ export function installGitSyncResponder() {
         if (normalized[i] === normalized[j] || normalized[i]!.startsWith(`${normalized[j]}/`) || normalized[j]!.startsWith(`${normalized[i]}/`)) throw new Error("同步文件夹重复或重叠");
       }
       const notebooks = Object.values(useNotebooks.getState().notebooks).filter((item) => item.source === "local-folder" && item.localPath);
-      const notebookPaths = await Promise.all(notebooks.map(async (item) => ({ item, path: await window.gooseDesktop!.fsRealpath(item.localPath!) })));
+      const notebookPaths = await Promise.all(notebooks.map(async (item) => ({ item, path: await window.gooseDesktop!.fsRealpath(item.localPath!).catch(() => null) })));
       const selected = canonical.map((root) => {
         const notebook = notebookPaths.find((entry) => entry.path === root)?.item;
-        if (!notebook) throw new Error("同步笔记本已移除或路径已变化，请在设置中断开旧配置");
+        if (!notebook) throw new Error("同步笔记本未打开或路径已变化，请重新打开或关联此文件夹");
         return notebook;
       });
       window.dispatchEvent(new CustomEvent("goose-note:flush-editor", { detail: { immediate: true } }));
