@@ -58,6 +58,8 @@ export const MathView: React.FC<MathViewProps> = ({
           ? {
               margin: "calc(16px * var(--editor-scale, 1)) 0",
               minHeight: ready ? undefined : "calc(48px * var(--editor-scale, 1))",
+              contentVisibility: "auto",
+              containIntrinsicSize: "auto calc(48px * var(--editor-scale, 1))",
             }
           : { padding: "0 calc(4px * var(--editor-scale, 1))" }
       }
