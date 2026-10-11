@@ -13,14 +13,14 @@ import {
   getPageTitle,
   UNTITLED_PAGE_TITLE,
 } from "@/components/editor/utils/page-title";
-import { extractTextFromContent } from "@/components/editor/utils/content-text-extractor";
+import { getContentDerivationsForPage } from "@/components/editor/utils/content-page-derivations-cache";
 
 function isPlaceholderTitle(title: string): boolean {
   return title === UNTITLED_PAGE_TITLE || title === "无标题";
 }
 
 function bodyForSearchIndex(page: Page, title: string): string {
-  const body = extractTextFromContent(page.content);
+  const body = getContentDerivationsForPage(page).text;
   if (!isPlaceholderTitle(title)) return body;
   return body.replace(/^(?:未命名|无标题)\s*/, "").trim();
 }
@@ -50,10 +50,10 @@ interface IndexDoc {
 
 let miniSearch: MiniSearch<IndexDoc> | null = null;
 
-/** key=pageId：用 updatedAt + content 引用判断是否需要重新抽文本 */
+/** key=pageId：正文版本和展示标题共同决定索引版本（文件改名不一定更换正文）。 */
 const indexedVersions = new Map<
   string,
-  { updatedAt: number; content: Page["content"] }
+  { updatedAt: number; content: Page["content"]; title: string }
 >();
 
 function getInstance(): MiniSearch<IndexDoc> {
@@ -102,15 +102,16 @@ export function syncIndex(pages: Record<string, Page>): void {
 
   for (const page of Object.values(pages)) {
     const current = indexedVersions.get(page.id);
+    const title = getPageTitle(page);
     if (
       current &&
       current.updatedAt === page.updatedAt &&
-      current.content === page.content
+      current.content === page.content &&
+      current.title === title
     ) {
       continue;
     }
 
-    const title = getPageTitle(page);
     const body = bodyForSearchIndex(page, title);
     const doc: IndexDoc = {
       id: page.id,
@@ -126,6 +127,7 @@ export function syncIndex(pages: Record<string, Page>): void {
     indexedVersions.set(page.id, {
       updatedAt: page.updatedAt,
       content: page.content,
+      title,
     });
   }
 

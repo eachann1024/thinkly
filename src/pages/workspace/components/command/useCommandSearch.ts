@@ -1,7 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { extractTextFromContent } from "@/components/editor/utils/content-text-extractor";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { isPinyinQuery, pinyinMatchIndices } from "@/lib/pinyin-search";
 import { compareTitleMatchRank } from "./commandSearchRank";
@@ -15,23 +14,8 @@ import {
 import { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 export { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 
-const textCache = new Map<string, { updatedAt: number; text: string }>();
-
-export function getCachedText(page: Page): string {
-  const hit = textCache.get(page.id);
-  if (hit && hit.updatedAt === page.updatedAt) return hit.text;
-  const content = page.content;
-  const body = Array.isArray(content) && content[0]?.type === "heading" &&
-    extractTextFromContent([content[0]]).trim() === getPageTitle(page).trim()
-    ? content.slice(1) : content;
-  const text = extractTextFromContent(body);
-  textCache.set(page.id, { updatedAt: page.updatedAt, text });
-  return text;
-}
-
-export function getSearchBodyText(page: Page): string {
-  return getCachedText(page);
-}
+import { getSearchBodyText } from "./searchBodyCache";
+export { getCachedText, getSearchBodyText } from "./searchBodyCache";
 
 export interface SearchResultPage extends Page {
   contentSnippet?: string;
@@ -116,7 +100,7 @@ export function useCommandSearch({
       let currentPage = page;
 
       while (currentPage) {
-      const title = getPageTitle(currentPage);
+        const title = getPageTitle(currentPage);
         if (title && title !== "无标题") {
           breadcrumb.unshift(title);
         }
@@ -137,25 +121,11 @@ export function useCommandSearch({
     [pages],
   );
 
-  const searchResults: SearchResults = useMemo(() => {
+  const allMatches = useMemo(() => {
     const query = deferredQuery.trim().toLowerCase();
-    const excludedRecent = new Set(removedRecentIds);
 
     if (!query) {
-      const recent = [...filteredPages]
-        .filter((p) => !excludedRecent.has(p.id))
-        .sort((a, b) => b.updatedAt - a.updatedAt)
-        .slice(0, 5) as SearchResultPage[];
-
-      const all = filteredPages as SearchResultPage[];
-      const allDisplay = all.slice(0, displayLimit);
-      return {
-        recent,
-        all,
-        allDisplay,
-        hasQuery: false,
-        hasMore: allDisplay.length < all.length,
-      };
+      return { all: filteredPages as SearchResultPage[], recentCandidates: filteredPages as SearchResultPage[] };
     }
 
     // 构建 filteredPages 的 id 集合（已按 notebook/trash 过滤）
@@ -233,25 +203,24 @@ export function useCommandSearch({
       });
     }
 
-    const recent = matched
-      .filter((p) => !excludedRecent.has(p.id))
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .slice(0, 5);
-
     // 标题全匹配 / 前缀优先，同档保持 MiniSearch 相关度（不要按字母序重排）
     const all = [...matched].sort((a, b) =>
       compareTitleMatchRank(getPageTitle(a), getPageTitle(b), query),
     );
 
-    const allDisplay = all.slice(0, displayLimit);
-    return {
-      recent,
-      all,
-      allDisplay,
-      hasQuery: true,
-      hasMore: allDisplay.length < all.length,
-    };
-  }, [filteredPages, deferredQuery, removedRecentIds, displayLimit]);
+    return { all, recentCandidates: matched };
+  }, [filteredPages, deferredQuery]);
+
+  const recent = useMemo(() => {
+    const excluded = new Set(removedRecentIds);
+    return allMatches.recentCandidates.filter(page => !excluded.has(page.id))
+      .sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
+  }, [allMatches, removedRecentIds]);
+  const searchResults: SearchResults = useMemo(() => {
+    const allDisplay = allMatches.all.slice(0, displayLimit);
+    return { recent, all: allMatches.all, allDisplay,
+      hasQuery: Boolean(deferredQuery.trim()), hasMore: allDisplay.length < allMatches.all.length };
+  }, [allMatches, recent, displayLimit, deferredQuery]);
 
   return {
     filteredPages,

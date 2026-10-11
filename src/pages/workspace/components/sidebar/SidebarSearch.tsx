@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
@@ -22,7 +23,12 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return <>{parts}{text.slice(cursor)}</>;
 }
 export function SidebarSearch() {
-  const session = useSearchSession();
+  const session = useSearchSession(useShallow(s => ({
+    query: s.query, scope: s.scope, open: s.open, focusNonce: s.focusNonce,
+    selectedPageId: s.selectedPageId, startingNotebookId: s.startingNotebookId,
+    closeSearch: s.closeSearch, targetPage: s.targetPage, setQuery: s.setQuery,
+    setScope: s.setScope,
+  })));
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const composing = useRef(false);
@@ -54,10 +60,19 @@ export function SidebarSearch() {
     return () => { cancelled = true; };
   }, [session.open, session.scope.kind, scopedId, retry]);
   const hasQuery = Boolean(session.query.trim());
-  const results = hasQuery ? searchResults.allDisplay : showRecent ? searchResults.recent : [];
+  const results = useMemo(() => hasQuery ? searchResults.allDisplay : showRecent ? searchResults.recent : [],
+    [hasQuery, showRecent, searchResults.allDisplay, searchResults.recent]);
   const pending = session.query !== deferredQuery;
   const selected = results.find(p => p.id === session.selectedPageId) ?? results[0];
-  const duplicates = new Set(results.filter(p => results.some(other => other.id !== p.id && getPageTitle(other) === getPageTitle(p))).map(getPageTitle));
+  const duplicates = useMemo(() => {
+    const seen = new Set<string>(), repeated = new Set<string>();
+    for (const page of results) {
+      const title = getPageTitle(page);
+      if (seen.has(title)) repeated.add(title);
+      else seen.add(title);
+    }
+    return repeated;
+  }, [results]);
   const close = () => {
     session.closeSearch();
     window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
