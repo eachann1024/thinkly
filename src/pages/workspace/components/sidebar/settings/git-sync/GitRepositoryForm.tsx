@@ -5,7 +5,10 @@ import { Switch } from "@/components/ui/switch";
 import type { GitRepositoryInput } from "@/lib/git-sync-contract";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 
-export type GitDraft = Pick<GitRepositoryInput, "provider" | "remoteUrl" | "branch" | "intervalMinutes" | "enabled">;
+export type GitDraft = Pick<
+  GitRepositoryInput,
+  "provider" | "remoteUrl" | "branch" | "intervalMinutes" | "enabled"
+>;
 type GitRepositoryFormProps = {
   draft: GitDraft;
   adding: boolean;
@@ -13,27 +16,36 @@ type GitRepositoryFormProps = {
   saving: boolean;
   onChange: <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => void;
 };
-function AutomaticSync({ draft, disabled, saving, onChange }: GitRepositoryFormProps) {
+function AutomaticSync({
+  draft,
+  disabled,
+  saving,
+  onChange,
+}: GitRepositoryFormProps) {
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h4 className="text-base font-semibold">自动同步</h4>
-        {saving &&
-          Number.isInteger(draft.intervalMinutes) &&
-          draft.intervalMinutes >= 1 &&
-          draft.intervalMinutes <= 1440 && (
-            <span role="status" className="text-xs text-muted-foreground">
-              正在保存…
-            </span>
-          )}
-      </div>
       <Label
         htmlFor="git-sync-enabled"
         className="flex min-h-[64px] w-full cursor-pointer items-center justify-between gap-4"
       >
         <span className="flex flex-1 flex-col justify-center">
-          <span className="text-[15px] font-medium">后台自动同步</span>
-          <span className="mt-1 text-sm font-normal text-muted-foreground">关闭后仍可手动同步</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] font-medium">
+            后台自动同步
+            {saving &&
+              Number.isInteger(draft.intervalMinutes) &&
+              draft.intervalMinutes >= 1 &&
+              draft.intervalMinutes <= 1440 && (
+                <span
+                  role="status"
+                  className="text-xs font-normal text-muted-foreground"
+                >
+                  正在保存…
+                </span>
+              )}
+          </span>
+          <span className="mt-1 text-sm font-normal text-muted-foreground">
+            关闭后仍可手动同步
+          </span>
         </span>
         <Switch
           id="git-sync-enabled"
@@ -56,13 +68,19 @@ function AutomaticSync({ draft, disabled, saving, onChange }: GitRepositoryFormP
             step={1}
             value={draft.intervalMinutes || ""}
             disabled={disabled}
-            onChange={(event) => onChange("intervalMinutes", Number(event.target.value))}
+            onChange={(event) =>
+              onChange("intervalMinutes", Number(event.target.value))
+            }
           />
           <span className="text-sm text-muted-foreground">分钟</span>
         </div>
       </div>
-      {!Number.isInteger(draft.intervalMinutes) || draft.intervalMinutes < 1 || draft.intervalMinutes > 1440 ? (
-        <p className="text-sm text-danger">请输入 1–1440 分钟的整数，修正后自动保存。</p>
+      {!Number.isInteger(draft.intervalMinutes) ||
+      draft.intervalMinutes < 1 ||
+      draft.intervalMinutes > 1440 ? (
+        <p className="text-sm text-danger">
+          请输入 1–1440 分钟的整数，修正后自动保存。
+        </p>
       ) : null}
     </section>
   );
@@ -83,7 +101,9 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
           placeholder={"git" + "@github.com:用户名/仓库.git"}
           autoComplete="off"
         />
-        <p className="text-sm text-muted-foreground">自动识别 GitHub 或 Gitee；在下方选择要同步的文件夹。</p>
+        <p className="text-sm text-muted-foreground">
+          自动识别 GitHub 或 Gitee；在下方选择要同步的文件夹。
+        </p>
       </div>
       <GitDetails title="高级设置">
         <div className="space-y-4 px-3 pb-3">
