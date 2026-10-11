@@ -9,17 +9,26 @@ import { useFullscreenPreview } from "./useFullscreenPreview";
 
 const PREVIEW_ICON_CLASS = "cursor-pointer";
 
-export function FullscreenPreview({
-  open,
-  content,
-  title = "预览",
-  onClose,
-}: {
+type FullscreenPreviewProps = {
   open: boolean;
   content: PreviewContent | null;
   title?: string;
   onClose: () => void;
-}) {
+};
+
+export function FullscreenPreview(props: FullscreenPreviewProps) {
+  // Closed previews exist in every code block. Keep their layout reads and
+  // theme observers out of note navigation until a preview is actually opened.
+  if (!props.open || !props.content || typeof document === "undefined") return null;
+  return <ActiveFullscreenPreview {...props} />;
+}
+
+function ActiveFullscreenPreview({
+  open,
+  content,
+  title = "预览",
+  onClose,
+}: FullscreenPreviewProps) {
   const themeSurface = useThemeSurfaceSnapshot();
   const { imageSrc, zoomPercent, setZoomPercent, vectorFit, bodyRef, vectorRef, isVector, bodyClass } = useFullscreenPreview(open, content, onClose);
 
