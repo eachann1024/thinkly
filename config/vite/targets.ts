@@ -12,6 +12,7 @@ export function createBuildInput(root: string) {
   const desktopInput = {
     index: path.resolve(root, "index.html"),
     assetMaintenance: path.resolve(root, "asset-maintenance.html"),
+    previewRenderer: path.resolve(root, "preview-renderer.html"),
     quicknote: path.resolve(root, "quicknote.html"),
   };
   return isQuicknoteBuild ? quicknoteInput : desktopInput;

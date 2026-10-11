@@ -16,6 +16,9 @@ ipcRenderer.on("desktop:window-init", (_event, payload: WindowInitPayload) => {
 });
 
 const gooseDesktop = {
+  cancelMermaidPreview: (requestId: string) => ipcRenderer.send("desktop:cancelMermaidPreview", requestId),
+  renderMermaidPreview: (request: import("../../src/lib/preview-renderer/contract").MermaidPreviewRequest) =>
+    invoke("desktop:renderMermaidPreview", request) as Promise<string>,
   appearance,
   gitSync,
   assetMaintenance,
