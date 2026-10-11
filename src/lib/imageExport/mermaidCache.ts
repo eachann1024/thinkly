@@ -24,6 +24,7 @@ function instantiate(svg: string): string {
   if (!root) throw new Error("图表预览不是有效的 SVG");
   const elements = [root, ...root.querySelectorAll("*")];
   const prefix = `goose-diagram-${rendererIdentity}-${++nextInstance}-`;
+  root.setAttribute("data-goose-diagram-prefix", prefix);
   const ids = new Map<string, string>();
   for (const element of elements) {
     const id = element.getAttribute("id");

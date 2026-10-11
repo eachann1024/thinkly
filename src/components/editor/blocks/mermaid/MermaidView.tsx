@@ -4,6 +4,10 @@ import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
 import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 import { schedulePreviewCommit } from "../shared/previewCommitQueue";
+import {
+  readMermaidPreview, rememberMermaidPreview,
+  instantiateMermaidPreview, rememberMermaidHeight,
+} from "./mermaidPreviewCache";
 
 interface MermaidViewProps {
   value: string;
@@ -19,16 +23,39 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
   const resolvedTheme = useResolvedTheme(theme);
   const sourceRef = useRef(value);
   const renderedRef = useRef("");
+  const identity = JSON.stringify([value, resolvedTheme, features.mermaidUnsafeHTML, fontIdentity]);
+  const cachedHeight = readMermaidPreview(identity)?.height ?? 160;
+
+  useEffect(() => {
+    const node = previewRef.current;
+    if (!node || !svg) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) rememberMermaidHeight(identity, entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [svg, identity, previewRef]);
 
   useEffect(() => {
     if (!activated || !near) return;
-    const identity = JSON.stringify([value, resolvedTheme, features.mermaidUnsafeHTML, fontIdentity]);
     if (renderedRef.current === identity) return;
     const controller = new AbortController();
     let active = true;
     let idle: number | null = null;
     let cancelCommit: (() => void) | undefined;
     const isDark = resolvedTheme === "dark";
+    const cached = readMermaidPreview(identity);
+    if (cached) {
+      // A warm return skips IPC, the serial worker queue, source debounce and idle scheduling.
+      cancelCommit = schedulePreviewCommit(() => {
+        if (active) {
+          renderedRef.current = identity;
+          setFailed(false);
+          setSvg(instantiateMermaidPreview(cached));
+        }
+      });
+      return () => { active = false; cancelCommit?.(); };
+    }
 
     const renderMermaid = async () => {
       if (!active) return;
@@ -46,7 +73,7 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         }, "editor", fontIdentity, controller.signal);
         if (!active) return;
         cancelCommit = schedulePreviewCommit(() => {
-          if (active) { renderedRef.current = identity; setSvg(svg); }
+          if (active) { renderedRef.current = identity; rememberMermaidPreview(identity, svg); setSvg(svg); }
         });
       } catch {
         if (active) {
@@ -73,13 +100,13 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       if (debounceTimer) clearTimeout(debounceTimer);
       if (idle !== null) cancelIdleCallback(idle);
     };
-  }, [activated, near, features.mermaidUnsafeHTML, value, resolvedTheme, fontIdentity, previewRef]);
+  }, [activated, near, features.mermaidUnsafeHTML, value, resolvedTheme, fontIdentity, identity, previewRef]);
 
   return (
     <div
       ref={previewRef}
       className="mermaid-preview flex items-center justify-center overflow-x-auto bg-transparent"
-      style={{ padding: "var(--editor-code-preview-padding, 16px)", minHeight: svg ? undefined : 160, contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
+      style={{ padding: "var(--editor-code-preview-padding, 16px)", minHeight: svg ? undefined : cachedHeight, contentVisibility: "auto", containIntrinsicSize: `auto ${cachedHeight}px` }}
       dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
     >
       {svg ? null : <span className="text-sm text-muted-foreground">
