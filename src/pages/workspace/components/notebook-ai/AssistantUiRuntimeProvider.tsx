@@ -12,11 +12,10 @@ import {
 } from "@assistant-ui/react";
 import { isNotebookAiToolPart } from "@/lib/notebook-ai/messageUtils";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
-
-interface AssistantUiMessageProjection {
-  message: NotebookAiMessage;
-  isRunning: boolean;
-}
+import {
+  createAiMessageProjector,
+  type AssistantUiMessageProjection,
+} from "./aiMessageProjection";
 
 interface NotebookAiAssistantRuntimeProviderProps {
   messages: NotebookAiMessage[];
@@ -156,16 +155,10 @@ export function NotebookAiAssistantRuntimeProvider({
   onCancel,
   children,
 }: NotebookAiAssistantRuntimeProviderProps) {
+  const projectMessages = useMemo(() => createAiMessageProjector(), []);
   const projectedMessages = useMemo(
-    () =>
-      messages.map((message, index) => ({
-        message,
-        isRunning:
-          isRunning &&
-          index === messages.length - 1 &&
-          message.role === "assistant",
-      })),
-    [messages, isRunning],
+    () => projectMessages(messages, isRunning),
+    [messages, isRunning, projectMessages],
   );
 
   const runtime = useExternalStoreRuntime({
