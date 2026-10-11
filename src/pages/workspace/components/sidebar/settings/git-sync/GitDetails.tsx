@@ -8,12 +8,14 @@ export function GitDetails({
   className = "",
   description,
   spacious = false,
+  compact = false,
 }: {
   title: string;
   children: ReactNode;
   className?: string;
   description?: string;
   spacious?: boolean;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const contentId = useId();
@@ -23,9 +25,14 @@ export function GitDetails({
         type="button"
         variant="ghost"
         contentStyle="preserve"
+        size={compact ? "sm" : undefined}
         className={
-          "group relative flex h-auto w-full items-center justify-between gap-3 rounded-lg border-0 text-left text-inherit " +
-          (spacious ? "min-h-[64px] px-3 py-3" : "min-h-[44px] px-3 py-2")
+          "group relative flex w-full items-center justify-between gap-3 rounded-lg border-0 text-left text-inherit " +
+          (compact
+            ? "py-1"
+            : spacious
+              ? "h-auto min-h-[64px] px-3 py-3"
+              : "h-auto min-h-[44px] px-3 py-2")
         }
         aria-expanded={open}
         aria-controls={contentId}
@@ -38,7 +45,11 @@ export function GitDetails({
         <span className="min-w-0 flex-1">
           <span
             className={
-              spacious ? "block text-base font-semibold" : "block text-[15px]"
+              compact
+                ? "block text-[length:var(--goose-control-font-size,14px)] font-normal"
+                : spacious
+                  ? "block text-base font-semibold"
+                  : "block text-[15px]"
             }
           >
             {title}
