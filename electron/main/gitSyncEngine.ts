@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
 import { lstat, realpath } from "node:fs/promises";
 import { type GitSyncConfig, validateGitSyncConfig } from "../../src/lib/git-sync-contract";
+import { gitFailureMessage } from "./gitSyncErrors";
 
 const execFile = promisify(nodeExecFile);
 const REMOTE = "goose-sync";
@@ -40,9 +41,9 @@ export async function gitBytes(cwd: string, args: string[], timeout = TIMEOUT_MS
       },
     });
     return stdout;
-  } catch {
+  } catch (error) {
     // Do not expose command arguments, local paths, remote output or credentials over IPC.
-    throw new Error("Git 操作失败，请检查 SSH、网络、分支权限或仓库状态");
+    throw Object.assign(new Error(gitFailureMessage(error)), { cause: error });
   }
 }
 

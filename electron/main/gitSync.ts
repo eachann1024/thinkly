@@ -1,14 +1,18 @@
 import { app, BrowserWindow, ipcMain, Notification, safeStorage } from "electron";
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, realpath } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { normalizedGitRemote, unknownGitVisibility, validateGitRepository, validateRepositoryId, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus, type GitVisibilityCheck } from "../../src/lib/git-sync-contract";
-import { assertAllowed, findVaultRootContaining, normalizePath } from "./allowlist";
+import { normalizedGitRemote, unknownGitVisibility, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus, type GitVisibilityCheck } from "../../src/lib/git-sync-contract";
+import { normalizePath } from "./allowlist";
 import { broadcast, lookupWindowContext } from "./windows";
-import { syncGitRepository, validateGitSyncFolder } from "./gitRepositoryEngine";
+import { syncGitRepository, validateGitSyncFolder, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
+import { retainGitConflicts } from "./gitSyncConflict";
+import { checkedGitRoot as checkedRoot, checkGitFolder } from "./gitSyncFolders";
+import { rebindGitFolder } from "./gitSyncRebind";
 import { lockGitSyncPath } from "./gitSyncLock";
 import { GitSyncSerialQueue, migrateGitSyncState, type GitMappingHistory } from "./gitSyncStore";
 import { checkGitVisibility } from "./gitSyncVisibility";
+import { refreshGitVisibility } from "./gitSyncVisibilityRefresh";
 import { durableAtomicWrite } from "./gitSyncDisk";
 
 const configs = new Map<string, GitRepositoryConfig>();
@@ -70,17 +74,6 @@ function assertWorkspace(event: Electron.IpcMainInvokeEvent) {
   if (event.senderFrame !== event.sender.mainFrame || lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") throw new Error("请从笔记工作区操作 Git 同步");
 }
 
-async function checkedRoot(localPath: string) {
-  const allowed = assertAllowed(localPath);
-  const stat = await lstat(allowed);
-  const root = await realpath(allowed);
-  if (!stat.isDirectory() || stat.isSymbolicLink() || normalizePath(root) !== normalizePath(allowed)) throw new Error("同步文件夹不能使用符号链接");
-  assertAllowed(root);
-  const vault = findVaultRootContaining(root);
-  if (!vault || normalizePath(await realpath(vault)) !== normalizePath(root)) throw new Error("只能同步已打开笔记本的根文件夹");
-  return root;
-}
-
 function prepareWindow(win: BrowserWindow, roots: string[], requestId: string) {
   return new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => finish("工作区未响应，已跳过同步；请等待窗口加载完成后重试"), 20_000);
@@ -121,7 +114,7 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
     await persist(); notifications.delete(repositoryId);
   } catch (error) {
     const message = messageOf(error);
-    statuses.set(repositoryId, { ...(statuses.get(repositoryId) ?? idle(repositoryId)), phase: "error", error: message });
+    statuses.set(repositoryId, { ...(statuses.get(repositoryId) ?? idle(repositoryId)), phase: "error", error: message, conflicts: error instanceof GitConflictError ? [...error.conflicts] : undefined });
     notifyFailure(repositoryId, message);
   } finally {
     unlocks.reverse().forEach((unlock) => unlock());
@@ -233,14 +226,7 @@ async function visibility(request: GitVisibilityCheck) {
 export function registerGitSyncIpc() {
   ipcMain.handle("git-sync:check-folder", async (event, localPath: unknown) => {
     assertWorkspace(event);
-    try {
-      if (typeof localPath !== "string") throw new Error("文件夹路径无效");
-      await validateGitSyncFolder(await checkedRoot(localPath));
-      return { error: null };
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
-      return { error: code === "ENOENT" ? "文件夹或文件已不存在，请重新打开笔记本" : code === "EACCES" || code === "EPERM" ? "没有读取文件夹的权限，请检查权限" : messageOf(error) };
-    }
+    return checkGitFolder(localPath);
   });
   ipcMain.on("git-sync:prepare-reply", (event, requestId: string, error: string | null) => {
     if (typeof requestId !== "string") return;
@@ -248,7 +234,7 @@ export function registerGitSyncIpc() {
     if (!pending || event.sender.id !== pending.senderId || event.senderFrame !== event.sender.mainFrame) return;
     pending.finish(error === null ? null : "工作区无法保存，已停止同步");
   });
-  const handle = (channel: string, operation: (value: never) => Promise<GitSyncState>) => {
+  const handle = (channel: string, operation: (value: never) => Promise<unknown>) => {
     ipcMain.handle(channel, async (event, value) => {
       assertWorkspace(event);
       // Deliberately drop the cause at IPC: native errors can contain paths or credentials.
@@ -256,10 +242,33 @@ export function registerGitSyncIpc() {
       return queue.run(async () => { try { await load(); return await operation(value as never); } catch (error) { throw new Error(messageOf(error)); } });
     });
   };
-  handle("git-sync:state", async () => state());
+  handle("git-sync:state", async () => {
+    for (const config of configs.values()) {
+      const checkedAt = config.visibility.checkedAt, encrypted = tokens[config.id];
+      refreshGitVisibility(config, encrypted, (result) => queue.run(async () => {
+        const current = configs.get(config.id);
+        if (!current || current.visibility.checkedAt !== checkedAt || tokens[config.id] !== encrypted) return;
+        current.visibility = result;
+        await persist(); publish();
+      }));
+    }
+    return state();
+  });
   handle("git-sync:save", save);
   handle("git-sync:now", async (value) => sync(validateRepositoryId(value)));
   handle("git-sync:visibility", visibility);
+  handle("git-sync:rebind", async (request) => sync(await rebindGitFolder(request, { configs, mappingHistory, storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), persist, publish })));
+  handle("git-sync:conflict", async (request: { repositoryId: string; conflictId: string }) => {
+    const id = validateRepositoryId(request?.repositoryId);
+    if (!configs.has(id) || typeof request.conflictId !== "string" || !/^[a-f0-9]{64}$/.test(request.conflictId)) throw new Error("冲突记录无效，请重新同步");
+    return getGitConflict(id, request.conflictId);
+  });
+  handle("git-sync:resolve-conflict", async (request: GitConflictResolution) => {
+    const id = validateRepositoryId(request?.repositoryId);
+    if (!configs.has(id)) throw new Error("同步配置已移除");
+    await resolveGitConflict(request);
+    return sync(id);
+  });
   handle("git-sync:remove", async (value) => {
     const id = validateRepositoryId(value), previous = configs.get(id), previousStatus = statuses.get(id);
     configs.delete(id); statuses.delete(id);
@@ -267,6 +276,6 @@ export function registerGitSyncIpc() {
     catch (error) { if (previous) configs.set(id, previous); if (previousStatus) statuses.set(id, previousStatus); throw error; }
     // Retain notebook files, remote files, mapping identity and recovery data. Remove the token.
     const next = { ...tokens }; delete next[id]; await atomic(tokenFile(), next); tokens = next;
-    nextRun.delete(id); notifications.delete(id); publish(); return state();
+    nextRun.delete(id); notifications.delete(id); retainGitConflicts(id, new Set()); publish(); return state();
   });
 }

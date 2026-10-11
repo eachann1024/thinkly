@@ -35,6 +35,9 @@ export const gitSync: GitSyncBridge = {
   checkVisibility: (request) => invoke("git-sync:visibility", request),
   remove: (notebookId) => invoke("git-sync:remove", notebookId),
   syncNow: (notebookId) => invoke("git-sync:now", notebookId),
+  rebindFolder: (request) => invoke("git-sync:rebind", request),
+  getConflict: (repositoryId, conflictId) => invoke("git-sync:conflict", { repositoryId, conflictId }),
+  resolveConflict: (request) => invoke("git-sync:resolve-conflict", request),
   onState: (callback) => {
     const listener = (_event: unknown, state: Parameters<typeof callback>[0]) =>
       callback(state);
