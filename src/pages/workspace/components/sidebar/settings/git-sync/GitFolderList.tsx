@@ -153,7 +153,6 @@ export function GitFolderList({
                   name={folder.name}
                   summary={shortFolderReason(error)}
                   detail={displayError ?? error}
-                  path={check?.path ?? folder.localPath}
                   actionLabel={
                     needsRecovery
                       ? "重新选择文件夹"

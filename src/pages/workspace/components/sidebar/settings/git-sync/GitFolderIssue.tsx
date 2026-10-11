@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { GitDetails } from "./GitDetails";
 import { CircleAlert } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,6 @@ export function GitFolderIssue({
   name,
   summary,
   detail,
-  path,
   actionLabel,
   actionDisabled,
   onAction,
@@ -20,7 +18,6 @@ export function GitFolderIssue({
   name: string;
   summary: string;
   detail: string;
-  path: string;
   actionLabel?: string;
   actionDisabled: boolean;
   onAction: () => void;
@@ -52,15 +49,6 @@ export function GitFolderIssue({
           className="w-80 space-y-3 p-3 text-sm font-normal leading-relaxed"
         >
           <p className="text-sm whitespace-pre-wrap break-words">{detail}</p>
-          <GitDetails
-            title="文件位置"
-            compact
-            className="text-sm font-normal text-muted-foreground"
-          >
-            <p className="mt-1 break-all text-sm font-normal leading-relaxed">
-              {path}
-            </p>
-          </GitDetails>
           {actionLabel && (
             <Button
               variant="outline"
