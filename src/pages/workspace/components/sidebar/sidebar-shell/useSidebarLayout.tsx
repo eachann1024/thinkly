@@ -129,6 +129,8 @@ export function useSidebarLayout({
 
   const workspaceResize = useSidebarResize({
     disableResize: disableResize || sidebarCollapsed || settingsOpen,
+    defaultWidth: SIDEBAR_MIN_WIDTH / 2,
+    minWidth: SIDEBAR_MIN_WIDTH / 2,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
   });
