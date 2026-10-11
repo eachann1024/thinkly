@@ -1,3 +1,4 @@
+import { getParsedMarkdown, cacheParsedMarkdown } from "./parsed-cache";
 import {
   encodeUnsupportedMarkdownForEditor,
   extractFrontmatter,
@@ -108,20 +109,40 @@ export async function buildMarkdownPage(
   },
   now: number,
   resolvedId?: string,
+  cacheScope = basePath,
 ): Promise<Page> {
   const fallbackTitle = normalizeLocalFileTitle(entry.name);
   const fileId =
     resolvedId ?? buildLocalPageId(notebookId, basePath, entry.path);
-  const parsed = await parseLocalMarkdownContent(
-    readResult.content,
-    fallbackTitle,
-    readResult.error,
-  );
+  const cached =
+    typeof readResult.content === "string"
+      ? getParsedMarkdown(
+          entry.path,
+          readResult.content,
+          fallbackTitle,
+          cacheScope,
+        )
+      : undefined;
+  const parsed =
+    cached ??
+    (await parseLocalMarkdownContent(
+      readResult.content,
+      fallbackTitle,
+      readResult.error,
+    ));
 
   // 记录磁盘原始内容快照（含 frontmatter）与 mtime+size 指纹，
   // 供写盘前 diff 与 watch 快路径跳过无实质变更的读全文。
   if (typeof readResult.content === "string") {
     setLocalMdSnapshot(entry.path, readResult.content);
+    if (!cached)
+      cacheParsedMarkdown(
+        entry.path,
+        readResult.content,
+        fallbackTitle,
+        cacheScope,
+        parsed,
+      );
     if (readResult.stat) {
       updateSnapshotStat(entry.path, readResult.stat);
     }

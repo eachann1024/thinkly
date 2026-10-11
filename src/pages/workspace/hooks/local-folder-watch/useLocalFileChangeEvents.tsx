@@ -1,3 +1,7 @@
+import {
+  readSharedMarkdown,
+  withMarkdownReadHandoff,
+} from "@/lib/local-folder-scanner/read-cache";
 import { useEffect, useRef } from "react";
 import { usePages } from "@/stores/usePages";
 import {
@@ -84,23 +88,17 @@ export function useLocalFileChangeEvents({
         return;
       }
 
-      const diskContent = await readDiskContent(filePath);
-      if (diskContent === null) {
+      const fs = window.gooseFs;
+      if (!fs) return;
+      const read = await readSharedMarkdown(fs, filePath).catch(() => null);
+      const diskContent = read?.content;
+      if (diskContent == null) {
         debugWatch();
         return;
       }
       const contentMatch = isDiskContentMatchingSnapshot(filePath, diskContent);
       if (contentMatch) {
-        if (diskStat) {
-          updateSnapshotStat(filePath, diskStat);
-        } else {
-          try {
-            const lateStat = await statDisk(filePath);
-            if (lateStat) updateSnapshotStat(filePath, lateStat);
-          } catch {
-            // 指纹刷新失败不影响「内容未变」结论
-          }
-        }
+        if (read?.stat) updateSnapshotStat(filePath, read.stat);
         debugWatch(contentMatch);
         return;
       }
@@ -116,7 +114,14 @@ export function useLocalFileChangeEvents({
         return;
       }
 
-      void usePages.getState().reloadLocalPageFromDisk(target.id);
+      if (
+        read &&
+        usePages.getState().pages[target.id]?.localFilePath === filePath
+      ) {
+        withMarkdownReadHandoff(filePath, read, () => {
+          void usePages.getState().reloadLocalPageFromDisk(target.id);
+        });
+      }
     };
 
     const handleFileChange = async (event: Event) => {
