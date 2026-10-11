@@ -71,11 +71,12 @@ export const AiComposerInput = forwardRef<
       {placeholderOverlayText || placeholder ? (
         <div
           ref={placeholderRef}
+          data-input-placeholder=""
           className={cn(
             "pointer-events-none absolute left-0 right-0 z-[1] text-muted-foreground",
             variant === "panel"
-              ? "top-0 overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-default)] text-[length:var(--editor-font-size)] leading-[var(--editor-line-height)]"
-              : "top-0 pr-8 text-[12px] leading-[20px]",
+              ? "top-0 overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-default)] text-[length:calc(var(--editor-font-size)*0.875)] leading-[var(--editor-line-height)]"
+              : "top-0 pr-8 text-[10.5px] leading-[20px]",
           )}
           style={isEmpty ? undefined : { display: "none" }}
         >
