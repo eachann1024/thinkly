@@ -7,10 +7,11 @@ export const SIDEBAR_MAX_WIDTH = 480;
 export function resolveSidebarWidth(
   saved: string | null,
   defaultWidth = SIDEBAR_DEFAULT_WIDTH,
+  minWidth = SIDEBAR_MIN_WIDTH,
 ) {
   const value = saved?.trim() ? Number(saved) : NaN;
   return Number.isFinite(value) && value > 0
-    ? Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, value))
+    ? Math.max(minWidth, Math.min(SIDEBAR_MAX_WIDTH, value))
     : defaultWidth;
 }
 
@@ -18,8 +19,12 @@ export function resolveSidebarOverlayWidth(width: number, viewportWidth: number)
   return Math.min(width, Math.max(0, viewportWidth - 56));
 }
 
-export function clampSidebarResizeWidth(width: number, maxWidth = SIDEBAR_MAX_WIDTH) {
-  return Math.max(Math.min(SIDEBAR_MIN_WIDTH, maxWidth), Math.min(maxWidth, width));
+export function clampSidebarResizeWidth(
+  width: number,
+  maxWidth = SIDEBAR_MAX_WIDTH,
+  minWidth = SIDEBAR_MIN_WIDTH,
+) {
+  return Math.max(Math.min(minWidth, maxWidth), Math.min(maxWidth, width));
 }
 
 export function resolveSidebarKeyboardWidth(
@@ -27,15 +32,17 @@ export function resolveSidebarKeyboardWidth(
   key: string,
   disabled = false,
   maxWidth = SIDEBAR_MAX_WIDTH,
+  minWidth = SIDEBAR_MIN_WIDTH,
 ): number | null {
   if (disabled) return null;
-  if (key === "Home") return Math.min(SIDEBAR_MIN_WIDTH, maxWidth);
+  if (key === "Home") return Math.min(minWidth, maxWidth);
   if (key === "End") return maxWidth;
   if (key !== "ArrowLeft" && key !== "ArrowRight") return null;
-  const currentWidth = clampSidebarResizeWidth(width, maxWidth);
+  const currentWidth = clampSidebarResizeWidth(width, maxWidth, minWidth);
   return clampSidebarResizeWidth(
     currentWidth + (key === "ArrowLeft" ? -16 : 16),
     maxWidth,
+    minWidth,
   );
 }
 
@@ -44,6 +51,7 @@ interface UseSidebarResizeOptions {
   defaultWidth?: number;
   storageKey?: string;
   maxWidth?: number;
+  minWidth?: number;
   onWidthPreview: (width: number) => void;
 }
 
@@ -52,18 +60,19 @@ export function useSidebarResize({
   defaultWidth = SIDEBAR_DEFAULT_WIDTH,
   storageKey = "sidebar-width",
   maxWidth = SIDEBAR_MAX_WIDTH,
+  minWidth: configuredMinWidth = SIDEBAR_MIN_WIDTH,
   onWidthPreview,
 }: UseSidebarResizeOptions) {
   const [preferredWidth, setWidth] = useState(() => {
     try {
-      return resolveSidebarWidth(localStorage.getItem(storageKey), defaultWidth);
+      return resolveSidebarWidth(localStorage.getItem(storageKey), defaultWidth, configuredMinWidth);
     } catch {
       return defaultWidth;
     }
   });
   // 窗口只限制显示宽度，不覆盖用户保存的宽度偏好。
-  const minWidth = Math.min(SIDEBAR_MIN_WIDTH, maxWidth);
-  const width = clampSidebarResizeWidth(preferredWidth, maxWidth);
+  const minWidth = Math.min(configuredMinWidth, maxWidth);
+  const width = clampSidebarResizeWidth(preferredWidth, maxWidth, minWidth);
   const [isResizing, setIsResizing] = useState(false);
   const activeCleanupRef = useRef<(() => void) | null>(null);
   const activeStopRef = useRef<(() => void) | null>(null);
@@ -73,7 +82,7 @@ export function useSidebarResize({
     previewRef.current = onWidthPreview;
     // 窗口尺寸或侧栏模式在拖动中变化时，结束当前手势。
     activeStopRef.current?.();
-  }, [disableResize, maxWidth, onWidthPreview]);
+  }, [disableResize, minWidth, maxWidth, onWidthPreview]);
 
   useEffect(
     () => () => {
@@ -110,7 +119,7 @@ export function useSidebarResize({
       previewRef.current(pendingWidth);
     };
     const updateWidth = (clientX: number) => {
-      pendingWidth = clampSidebarResizeWidth(startWidth + clientX - startX, maxWidth);
+      pendingWidth = clampSidebarResizeWidth(startWidth + clientX - startX, maxWidth, minWidth);
       if (frame === null) frame = requestAnimationFrame(flushPreview);
     };
     const onPointerMove = (event: PointerEvent) => {
@@ -167,7 +176,7 @@ export function useSidebarResize({
 
   const handleResizeKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.nativeEvent.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
-    const nextWidth = resolveSidebarKeyboardWidth(width, event.key, disableResize, maxWidth);
+    const nextWidth = resolveSidebarKeyboardWidth(width, event.key, disableResize, maxWidth, minWidth);
     if (nextWidth === null) return;
     event.preventDefault();
     event.stopPropagation();
