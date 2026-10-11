@@ -1,3 +1,4 @@
+import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import { bindOpenMarkdownWindow } from "../openMarkdownFiles";
 import {
@@ -149,7 +150,7 @@ export function createWorkspaceWindow(
     minWidth: MIN_WORKSPACE_WIDTH,
     minHeight: MIN_WORKSPACE_HEIGHT,
     show: false,
-    backgroundColor: material.backgroundColor,
+    backgroundColor: material.backgroundColor === "#00000000" ? material.backgroundColor : appearanceBackgroundColor(),
     transparent: false,
     autoHideMenuBar: true,
     // Win/Linux：去掉原生顶栏，由 DesktopTitleBar 右侧自定义 min/max/close。
@@ -172,6 +173,7 @@ export function createWorkspaceWindow(
       : {}),
     webPreferences: windowWebPrefs(id, "workspace"),
   });
+  bindWindowAppearance(win, material.backgroundColor === "#00000000");
   if (process.platform !== "darwin") {
     win.setMenuBarVisibility(false);
   }

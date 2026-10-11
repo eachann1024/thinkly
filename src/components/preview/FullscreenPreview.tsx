@@ -1,4 +1,5 @@
-import { createPortal } from "react-dom";
+import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Minus, Plus, RotateCcw, X } from "@/components/ui/icons";
 import { IconButton } from "@/components/ui/icon-button";
 import { MathView } from "@/components/editor/blocks/math/MathView";
@@ -6,8 +7,7 @@ import { clampPreviewZoomPercent, normalizeSvgIntrinsicSize, PREVIEW_ZOOM_STEP_P
 
 import { useFullscreenPreview } from "./useFullscreenPreview";
 
-const PREVIEW_ICON_CLASS =
-  "cursor-pointer hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]";
+const PREVIEW_ICON_CLASS = "cursor-pointer";
 
 export function FullscreenPreview({
   open,
@@ -20,6 +20,7 @@ export function FullscreenPreview({
   title?: string;
   onClose: () => void;
 }) {
+  const themeSurface = useThemeSurfaceSnapshot();
   const { imageSrc, zoomPercent, setZoomPercent, vectorFit, bodyRef, vectorRef, isVector, bodyClass } = useFullscreenPreview(open, content, onClose);
 
   if (!open || !content || typeof document === "undefined") return null;
@@ -28,12 +29,11 @@ export function FullscreenPreview({
   const atMaxZoom = zoomPercent >= 400;
   const vectorScale = (vectorFit?.scale ?? 1) * (zoomPercent / 100);
 
-  return createPortal(
-    <div
+  return (
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
+    <DialogContent hideClose overlayClassName="goose-code-preview-modal-overlay !z-[22000] !bg-transparent !backdrop-blur-none"
+      style={{ position: "fixed", inset: 0, transform: "none", maxWidth: "none", padding: 0, display: "flex", borderRadius: 0 }}
       className="goose-code-preview-lightbox"
-      contentEditable={false}
-      role="dialog"
-      aria-modal="true"
       aria-label={title}
     >
       <div className="goose-code-preview-lightbox-panel">
@@ -152,15 +152,15 @@ export function FullscreenPreview({
                   className="goose-preview-html"
                   title={title}
                   sandbox="allow-scripts"
-                  srcDoc={wrapHtmlDocument(content.html)}
+                  srcDoc={wrapHtmlDocument(content.html, { background: themeSurface.background, color: themeSurface.foreground })}
                 />
               ) : null}
             </div>
           )}
         </div>
       </div>
-    </div>,
-    document.body,
+    </DialogContent>
+    </Dialog>
   );
 }
 

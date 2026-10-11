@@ -6,7 +6,6 @@ import { applyChartAxes } from "./chartAxes";
 import { createChartSeries } from "./chartSeries";
 
 export * from "./chartConfig";
-export { TM } from "./chartThemeTokens";
 export { polishRawOption } from "./polishRawOption";
 
 export function buildOption(

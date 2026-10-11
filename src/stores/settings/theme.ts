@@ -2,14 +2,16 @@ import type { Theme } from "./types";
 import { useSettings } from "./index";
 import { applyAccentColor, syncAccentColorCssVars } from "@/lib/accentColor";
 import { resolveCodeTheme } from "./types";
+import { resolveTheme, subscribeResolvedTheme } from "@/lib/resolvedTheme";
+import { startAppearanceSync, publishAppearanceSnapshot } from "@/lib/appearanceSync";
 
 // 应用主题到 DOM
 export function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const resolved = resolveTheme(theme);
+  const isDark = resolved === "dark";
+  root.dataset.theme = resolved;
+  root.style.colorScheme = resolved;
 
   if (isDark) {
     root.classList.add("dark");
@@ -38,19 +40,11 @@ export function applyCodeTheme() {
 export function startSettingsThemeLifecycle() {
   // 监听系统主题变化
   if (typeof window !== "undefined") {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleSystemThemeChange = () => {
-      const { theme } = useSettings.getState();
-      if (theme === "system") {
-        applyTheme("system");
-      }
-      applyCodeTheme();
-    };
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", handleSystemThemeChange);
-    } else {
-      mediaQuery.addListener(handleSystemThemeChange);
-    }
+    startAppearanceSync();
+    subscribeResolvedTheme(() => {
+      applyTheme(useSettings.getState().theme);
+      publishAppearanceSnapshot();
+    });
 
     // 立即初始化主题（确保在 DOM 加载后立即应用）
     const initThemes = () => {

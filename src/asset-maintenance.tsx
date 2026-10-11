@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ChevronDown, Film, Image as ImageIcon, ScanSearch, Trash2 } from "@/components/ui/icons";
-import { Checkbox } from "@heroui/react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,8 +13,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSettings } from "@/stores/useSettings";
-import { applyFontVariables } from "@/lib/fontLoader";
-import { applyAppearanceScaleVariables } from "@/lib/appearance";
+import { applyAppearanceSnapshot } from "@/lib/appearanceSync";
 import { getLocalAssetKind } from "@/lib/local-folder-asset-maintenance";
 import type { AssetNotebook, AssetScan } from "@/lib/asset-maintenance-contract";
 import "./index.css";
@@ -149,7 +148,7 @@ function AssetMaintenanceApp() {
           <div className="p-2">
             {!scan && <p className="p-6 text-sm text-muted-foreground">{busy ? "正在检查引用，请稍候…" : "请选择笔记本后点击「扫描资源」。"}</p>}
             {scan?.assets.length === 0 && <p className="p-6 text-sm text-muted-foreground">没有发现未引用的图片或视频。</p>}
-            {scan?.assets.map((asset) => <div key={asset.path} className={`mb-2 flex items-center gap-3 rounded-lg p-2 ${previewPath === asset.path ? "bg-accent" : "hover:bg-muted"}`}>
+            {scan?.assets.map((asset) => <div key={asset.path} data-goose-slot="list-row" data-selected={previewPath === asset.path || undefined} className="goose-interactive mb-2 flex items-center gap-3 rounded-lg p-2">
               <Checkbox aria-label={`选择 ${asset.name}`} isSelected={selected.has(asset.path)} isDisabled={busy} onChange={() => toggle(asset.path)} className="min-h-6 min-w-6 shrink-0 justify-center">
                 <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
               </Checkbox>
@@ -175,12 +174,7 @@ function AssetMaintenanceApp() {
 async function start() {
   await useSettings.persist.rehydrate();
   const appearance = await bridge.appearance();
-  useSettings.setState(appearance);
-  useSettings.getState().setTheme(appearance.theme);
-  useSettings.getState().setAccentColor(appearance.accentColor);
-  const settings = useSettings.getState();
-  applyFontVariables(settings.customFonts, settings);
-  applyAppearanceScaleVariables({ uiFontSize: settings.uiFontSize, editorFontSize: settings.editorFontSize, editorLineHeight: settings.editorLineHeight });
+  applyAppearanceSnapshot(appearance);
   createRoot(document.getElementById("root")!).render(<AssetMaintenanceApp />);
 }
 void start().catch((error) => { document.getElementById("root")!.textContent = `资源清理窗口初始化失败：${String(error)}`; });
