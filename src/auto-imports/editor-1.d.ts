@@ -20,6 +20,7 @@ declare global {
   const clipboardHasPasteableMedia: typeof import('../components/editor/utils/pasteClipboardImage').clipboardHasPasteableMedia
   const clonePageContent: typeof import('../components/editor/utils/blocknote-content/index').clonePageContent
   const countWords: typeof import('../components/editor/utils/content-text-extractor').countWords
+  const countWordsInText: typeof import('../components/editor/utils/content-text-extractor').countWordsInText
   const createDebounce: typeof import('../components/editor/utils/debounce').createDebounce
   const createEditorSafeContent: typeof import('../components/editor/utils/blocknote-content/index').createEditorSafeContent
   const createEmptyBlockNoteContent: typeof import('../components/editor/utils/blocknote-content/index').createEmptyBlockNoteContent
