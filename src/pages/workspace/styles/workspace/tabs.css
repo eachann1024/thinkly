@@ -59,11 +59,11 @@
 .page-title-caret {
   position: absolute;
   top: 50%;
-  width: 5px;
+  width: 2px;
   height: 1.15em;
   transform: translateY(-50%);
   border-radius: 2px;
-  background: var(--goose-accent-focus);
+  background: var(--goose-text-caret);
   pointer-events: none;
   animation: page-title-caret-blink 1.1s steps(1) infinite;
 }

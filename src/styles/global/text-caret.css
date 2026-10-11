@@ -1,0 +1,20 @@
+/* Accent insertion carets keep their own token, independent of neutral focus rings. */
+:root { --goose-text-caret: hsl(var(--primary)); }
+:is(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]),
+.bn-editor .bn-inline-content { caret-color: var(--goose-text-caret); }
+[data-goose-caret-active="true"],
+[data-goose-caret-active="true"] * { caret-color: transparent !important; }
+.goose-text-caret {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--goose-text-caret);
+  pointer-events: none;
+  z-index: 2147483647;
+  animation: goose-text-caret-blink 1.1s steps(1) infinite;
+}
+.goose-text-caret[hidden] { display: none; }
+@keyframes goose-text-caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .goose-text-caret { animation: none; } }
