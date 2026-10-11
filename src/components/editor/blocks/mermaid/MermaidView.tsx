@@ -3,6 +3,7 @@ import { useEditorPageContext, useEditorSettings } from "@/components/editor/pla
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
 import { usePreviewVisibility } from "../shared/usePreviewVisibility";
+import { schedulePreviewCommit } from "../shared/previewCommitQueue";
 
 interface MermaidViewProps {
   value: string;
@@ -11,17 +12,22 @@ interface MermaidViewProps {
 export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
   const [svg, setSvg] = useState<string>("");
   const [failed, setFailed] = useState(false);
-  const { previewRef, activated } = usePreviewVisibility();
+  const { previewRef, activated, near } = usePreviewVisibility(false, true);
   const { theme, features, customFonts } = useEditorSettings();
   const { page } = useEditorPageContext();
   const fontIdentity = JSON.stringify([page?.fontFamily, customFonts]);
   const resolvedTheme = useResolvedTheme(theme);
-  const skipDebounceRef = useRef(true);
+  const sourceRef = useRef(value);
+  const renderedRef = useRef("");
 
   useEffect(() => {
-    if (!activated) return;
+    if (!activated || !near) return;
+    const identity = JSON.stringify([value, resolvedTheme, features.mermaidUnsafeHTML, fontIdentity]);
+    if (renderedRef.current === identity) return;
+    const controller = new AbortController();
     let active = true;
     let idle: number | null = null;
+    let cancelCommit: (() => void) | undefined;
     const isDark = resolvedTheme === "dark";
 
     const renderMermaid = async () => {
@@ -35,11 +41,13 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         const svg = await renderCachedMermaid(value, {
           mode: isDark ? "dark" : "light",
           securityLevel: features.mermaidUnsafeHTML ? "loose" : "strict",
-          fontFamily: "inherit",
+          fontFamily: previewRef.current ? getComputedStyle(previewRef.current).fontFamily : "inherit",
           useMaxWidth: true,
-        }, "editor", fontIdentity);
+        }, "editor", fontIdentity, controller.signal);
         if (!active) return;
-        setSvg(svg);
+        cancelCommit = schedulePreviewCommit(() => {
+          if (active) { renderedRef.current = identity; setSvg(svg); }
+        });
       } catch {
         if (active) {
           setSvg("");
@@ -48,8 +56,8 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       }
     };
 
-    const delay = skipDebounceRef.current ? 0 : 500;
-    skipDebounceRef.current = false;
+    const delay = sourceRef.current === value ? 0 : 500;
+    sourceRef.current = value;
     const debounceTimer = window.setTimeout(() => {
       // 先让正文和输入响应；屏幕外图表不排进 Mermaid 的全局渲染队列。
       if (typeof requestIdleCallback === "function") {
@@ -60,16 +68,18 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
     }, delay);
     return () => {
       active = false;
+      controller.abort();
+      cancelCommit?.();
       if (debounceTimer) clearTimeout(debounceTimer);
       if (idle !== null) cancelIdleCallback(idle);
     };
-  }, [activated, features.mermaidUnsafeHTML, value, resolvedTheme, fontIdentity]);
+  }, [activated, near, features.mermaidUnsafeHTML, value, resolvedTheme, fontIdentity, previewRef]);
 
   return (
     <div
       ref={previewRef}
       className="mermaid-preview flex items-center justify-center overflow-x-auto bg-transparent"
-      style={{ padding: "var(--editor-code-preview-padding, 16px)", minHeight: svg ? undefined : 160 }}
+      style={{ padding: "var(--editor-code-preview-padding, 16px)", minHeight: svg ? undefined : 160, contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
       dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
     >
       {svg ? null : <span className="text-sm text-muted-foreground">

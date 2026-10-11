@@ -26,12 +26,13 @@ await esbuild.build({
 
 await esbuild.build({
   absWorkingDir: root,
-  entryPoints: [resolve(root, "electron/preload/index.ts")],
+  entryPoints: { index: resolve(root, "electron/preload/index.ts"), previewWorker: resolve(root, "electron/preload/previewWorker.ts") },
   bundle: true,
   platform: "node",
   target: "node22",
   format: "cjs",
-  outfile: resolve(root, "dist-electron/preload/index.cjs"),
+  outdir: resolve(root, "dist-electron/preload"),
+  outExtension: { ".js": ".cjs" },
   external: ["electron"],
   sourcemap,
   logLevel: "info",

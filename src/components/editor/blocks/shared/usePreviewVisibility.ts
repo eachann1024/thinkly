@@ -1,22 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 
-/** Activate a preview once it approaches the viewport; keep it mounted after scrolling away. */
-export function usePreviewVisibility<T extends HTMLElement = HTMLDivElement>(eager = false) {
+/** Keep mounted previews, and optionally track near-viewport changes to cancel queued work. */
+export function usePreviewVisibility<T extends HTMLElement = HTMLDivElement>(eager = false, trackVisibility = false) {
   const previewRef = useRef<T>(null);
   const [seen, setSeen] = useState(() => eager || typeof IntersectionObserver === "undefined");
+  const [near, setNear] = useState(() => eager || typeof IntersectionObserver === "undefined");
   const activated = eager || seen;
-
   useEffect(() => {
     const node = previewRef.current;
-    if (!node || activated) return;
+    if (!node || (activated && !trackVisibility) || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
+      const visible = entries.some(entry => entry.isIntersecting);
+      if (trackVisibility) setNear(visible);
+      if (!visible) return;
       setSeen(true);
-      observer.disconnect();
+      if (!trackVisibility) observer.disconnect();
     }, { rootMargin: "320px 0px" });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [activated]);
-
-  return { previewRef, activated };
+  }, [activated, trackVisibility]);
+  return { previewRef, activated, near: trackVisibility ? near : activated };
 }

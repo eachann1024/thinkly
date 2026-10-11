@@ -1,5 +1,6 @@
 import { registerAssetMaintenanceIpc } from "./assetMaintenance";
 import { app } from "electron";
+import { registerPreviewWorkerIpc } from "./previewWorker";
 import path from "node:path";
 import { attachmentsRoot } from "./allowlist";
 import { registerOpenMarkdownIpc } from "./openMarkdownFiles";
@@ -18,6 +19,7 @@ export { closeAllWatchers } from "./ipc/watchEvents";
 
 export function registerIpcHandlers(): void {
   registerAssetMaintenanceIpc();
+  registerPreviewWorkerIpc();
   hookWindowVisibilityForWatch();
   registerOpenMarkdownIpc();
   const undoRoot = path.join(app.getPath("userData"), "trash-undo");
