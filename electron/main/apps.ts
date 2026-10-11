@@ -1,16 +1,10 @@
 import { windowsProbes, linuxProbes, type AppProbe } from "./appsCatalog";
 import { existsSync, statSync } from "node:fs";
-import { readdir } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
-import { homedir } from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 
 export type OpenApp = { name: string; path: string; icon?: string };
-
-function macApplicationRoots(): string[] {
-  return ["/Applications", path.join(homedir(), "Applications")];
-}
 
 function spawnDetached(command: string, args: string[]): boolean {
   try {
@@ -26,7 +20,7 @@ function spawnDetached(command: string, args: string[]): boolean {
   }
 }
 
-function resolveCommand(command: string): string | null {
+export function resolveCommand(command: string): string | null {
   const trimmed = command.trim();
   if (!trimmed) return null;
   if (existsSync(trimmed)) return trimmed;
@@ -49,7 +43,7 @@ function resolveCommand(command: string): string | null {
   }
 }
 
-function firstExisting(paths: string[] | undefined): string | null {
+export function firstExisting(paths: string[] | undefined): string | null {
   if (!paths) return null;
   return paths.find((candidate) => candidate && existsSync(candidate)) ?? null;
 }
@@ -62,58 +56,7 @@ function normalizeMatch(value: string): string {
     .toLowerCase();
 }
 
-async function listMacApps(): Promise<OpenApp[]> {
-  const found = new Map<string, OpenApp>();
-  for (const [name, appPath] of [
-    ["Finder", "/System/Library/CoreServices/Finder.app"],
-    ["Terminal", "/System/Applications/Utilities/Terminal.app"],
-  ]) {
-    if (existsSync(path.join(appPath, "Contents", "Info.plist"))) {
-      found.set(name.toLowerCase(), { name, path: appPath });
-    }
-  }
-  for (const root of macApplicationRoots()) {
-    if (!existsSync(root)) continue;
-    let entries: string[];
-    try {
-      entries = await readdir(root);
-    } catch {
-      continue;
-    }
-    for (const entry of entries) {
-      if (!entry.endsWith(".app")) continue;
-      const appPath = path.join(root, entry);
-      if (!existsSync(path.join(appPath, "Contents", "Info.plist"))) continue;
-      const name = entry.replace(/\.app$/i, "");
-      if (!found.has(name.toLowerCase())) {
-        found.set(name.toLowerCase(), { name, path: appPath });
-      }
-    }
-  }
-  return [...found.values()].sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function listProbedApps(probes: AppProbe[]): OpenApp[] {
-  const found = new Map<string, OpenApp>();
-  for (const probe of probes) {
-    const resolved =
-      firstExisting(probe.winPaths) ??
-      (probe.commands ?? [])
-        .map(resolveCommand)
-        .find((value): value is string => Boolean(value)) ??
-      null;
-    if (!resolved) continue;
-    const key = probe.name.toLowerCase();
-    if (!found.has(key)) found.set(key, { name: probe.name, path: resolved });
-  }
-  return [...found.values()].sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export async function listOpenApps(): Promise<OpenApp[]> {
-  if (process.platform === "darwin") return listMacApps();
-  if (process.platform === "win32") return listProbedApps(windowsProbes());
-  return listProbedApps(linuxProbes());
-}
+export { listOpenApps } from "./appEnumeration";
 
 function parseAppInvocation(app: string): {
   command: string;
