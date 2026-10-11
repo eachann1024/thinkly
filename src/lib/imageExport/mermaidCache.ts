@@ -12,11 +12,20 @@ let nextInstance = 0;
 
 /** Give every mounted/exported SVG its own IDs, including markers and CSS selectors. */
 function instantiate(svg: string): string {
-  const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+  const parser = new DOMParser();
+  const document = parser.parseFromString(svg, "image/svg+xml");
+  // Mermaid's HTML labels may contain <br> or named HTML entities that are not XML.
+  // Never insert Chromium's XML error document (including its page-wide CSS) into the editor.
+  const root = document.documentElement.localName === "svg"
+    ? document.documentElement
+    : parser.parseFromString(svg, "text/html").querySelector("svg");
+  if (!root) throw new Error("图表预览不是有效的 SVG");
+  const elements = [root, ...root.querySelectorAll("*")];
   const prefix = `goose-diagram-${++nextInstance}-`;
   const ids = new Map<string, string>();
-  for (const element of document.querySelectorAll("[id]")) {
-    const id = element.getAttribute("id")!;
+  for (const element of elements) {
+    const id = element.getAttribute("id");
+    if (!id) continue;
     ids.set(id, `${prefix}${ids.size}`);
   }
   // SVG 的每个属性都要处理引用；匹配器只构建一次，避免属性数 × ID 数重复排序和编译。
@@ -32,7 +41,7 @@ function instantiate(svg: string): string {
   const replaceReferences = (text: string) => references
     ? text.replace(references, (_, id: string) => `#${ids.get(id)}`)
     : text;
-  for (const element of document.querySelectorAll("*")) {
+  for (const element of elements) {
     for (const attribute of [...element.attributes]) {
       if (attribute.name === "id") {
         element.setAttribute("id", ids.get(attribute.value)!);
@@ -44,7 +53,7 @@ function instantiate(svg: string): string {
     }
     if (element.tagName === "style") element.textContent = replaceReferences(element.textContent ?? "");
   }
-  return new XMLSerializer().serializeToString(document.documentElement);
+  return new XMLSerializer().serializeToString(root);
 }
 
 /** One global queue protects Mermaid's mutable initialize/render configuration. */
