@@ -30,8 +30,8 @@ export function GitSyncSettings({
   return (
     <SettingsSectionCard className="overflow-hidden p-0">
       <GitDetails title="同步设置" description="自动同步与仓库信息" spacious>
-        <div className="border-t border-border px-5 sm:px-6">
-          <div className="mx-auto max-w-[740px] divide-y divide-border">
+        <div className="border-t border-border px-5">
+          <div className="max-w-[740px] divide-y divide-border">
             <div className="py-5">
               <GitRepositoryForm
                 draft={draft}
