@@ -20,6 +20,13 @@ export const MathView: React.FC<MathViewProps> = ({
     let idle: number | null = null;
     const renderMath = async () => {
       try {
+        if (!value.trim()) {
+          if (previewRef.current && active) {
+            previewRef.current.textContent = "添加公式";
+            setReady(true);
+          }
+          return;
+        }
         const html = await renderMathPreview(value, displayMode);
         if (!previewRef.current || !active) return;
         previewRef.current.innerHTML = html;
@@ -45,7 +52,7 @@ export const MathView: React.FC<MathViewProps> = ({
     <span
       ref={previewRef}
       aria-busy={!ready || undefined}
-      className={displayMode ? "block" : "inline-block"}
+      className={`${displayMode ? "block" : "inline-block"}${value.trim() ? "" : " text-xs text-muted-foreground"}`}
       style={
         displayMode
           ? {
