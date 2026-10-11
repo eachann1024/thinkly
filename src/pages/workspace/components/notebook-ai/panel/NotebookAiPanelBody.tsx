@@ -1,3 +1,5 @@
+import { useSettings } from "@/stores/useSettings";
+import { AiUnavailableState } from "./AiUnavailableState";
 import { CircleAlert, X } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { ChatMessages } from "../ChatMessages";
@@ -41,27 +43,15 @@ export function NotebookAiPanelBody({
     isBusy,
     searchPages,
   } = session;
+  const hydrated = useSettings((state) => state._hasHydrated);
+  const unavailable = !hydrated || Boolean(unavailableReason);
   const { initialReference, composerSeedContent } = seed;
   const { handleSend, handleSlashCommand, composerPlaceholder } = commands;
   return (
     <>
       <div className="notebook-ai-zoom-slot notebook-ai-content-surface">
         <div className="notebook-ai-zoom-surface">
-          {!bodyReady ? null : unavailableReason ? (
-            <div className="flex flex-1 items-center justify-center px-6 pb-[var(--ai-composer-float-pad,7.5rem)]">
-              <div className="flex max-w-[260px] flex-col items-center gap-3 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--goose-interactive-hover)] text-muted-foreground">
-                  <CircleAlert className="h-5 w-5" strokeWidth={1.75} />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  AI 暂不可用
-                </p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {unavailableReason}
-                </p>
-              </div>
-            </div>
-          ) : (
+          {bodyReady && (!unavailable || messages.length > 0) ? (
             <ChatMessages
               messages={messages}
               onEmptySuggestion={(text) => {
@@ -96,11 +86,25 @@ export function NotebookAiPanelBody({
               onBatchApproval={onBatchApproval}
               onBatchUndo={onBatchUndo}
             />
-          )}
+          ) : null}
+          {bodyReady && unavailable ? (
+            <AiUnavailableState
+              reason={unavailableReason}
+              error={error}
+              onRetry={clearError}
+              compact={messages.length > 0}
+            />
+          ) : null}
         </div>
       </div>
 
-      <div ref={composerDockRef} className="notebook-ai-composer-dock">
+      <div
+        ref={composerDockRef}
+        className="notebook-ai-composer-dock"
+        style={unavailable ? { display: "none" } : undefined}
+        aria-hidden={unavailable || undefined}
+        inert={unavailable || undefined}
+      >
         {bodyReady && error ? (
           <div
             className={cn(
@@ -149,7 +153,7 @@ export function NotebookAiPanelBody({
             onSend={handleSend}
             onSlashCommand={handleSlashCommand}
             isStreaming={isBusy}
-            disabled={!!unavailableReason}
+            disabled={unavailable}
             placeholder={composerPlaceholder}
             searchPages={searchPages}
             onEscape={onClose}
