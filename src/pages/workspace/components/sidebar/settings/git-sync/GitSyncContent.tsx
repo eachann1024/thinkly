@@ -33,12 +33,10 @@ export interface GitSyncContentProps {
   availableIds: Set<string>;
   folderChecks: Record<string, GitFolderCheck>;
   draft: GitDraft;
-  token: string;
   error: string;
   unsavedFolders: boolean;
   unsavedSettings: boolean;
   removeConfirmation: string;
-  checking: (id: string) => boolean;
   setRemoveConfirmation: Dispatch<SetStateAction<string>>;
   updateDraft: <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => void;
   run: (id: string, label: string, operation: () => Promise<GitSyncState>, onSuccess?: () => void) => Promise<void>;
@@ -46,8 +44,6 @@ export interface GitSyncContentProps {
   recoverFolder: (folder: GitRepositoryFolder, relocate: boolean) => Promise<void>;
   locateFolder: (folder: GitRepositoryFolder) => Promise<void>;
   connect: () => void;
-  checkVisibility: (clear?: boolean) => void;
-  onToken: (value: string) => void;
   onAdd: () => void;
   onSelect: (id: string) => void;
   onReload: () => void;
@@ -73,12 +69,10 @@ export function GitSyncContent({
   availableIds,
   folderChecks,
   draft,
-  token,
   error,
   unsavedFolders,
   unsavedSettings,
   removeConfirmation,
-  checking,
   setRemoveConfirmation,
   updateDraft,
   run,
@@ -86,8 +80,6 @@ export function GitSyncContent({
   recoverFolder,
   locateFolder,
   connect,
-  checkVisibility,
-  onToken,
   onAdd,
   onSelect,
   onReload,
@@ -106,10 +98,6 @@ export function GitSyncContent({
     actionDisabled,
     saving: unsavedSettings,
     updateDraft,
-    checking: checking(id),
-    token,
-    onToken,
-    checkVisibility,
     removeConfirmation,
     setRemoveConfirmation,
     onRemove: () => {
@@ -117,7 +105,7 @@ export function GitSyncContent({
     },
   };
   return (
-    <div className="min-w-0 space-y-5">
+    <div className="w-full max-w-[860px] min-w-0 space-y-5">
       {!bridge ? (
         <SettingsSectionCard>
           <p className="text-sm text-muted-foreground">Git 同步仅在桌面版应用中可用。</p>
@@ -140,7 +128,13 @@ export function GitSyncContent({
           <SettingsSectionCard
             title="仓库"
             actions={
-              <Button variant="outline" size="sm" disabled={loading || Boolean(loadError) || adding} onClick={onAdd}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px]"
+                disabled={loading || Boolean(loadError) || adding}
+                onClick={onAdd}
+              >
                 添加仓库
               </Button>
             }
@@ -157,14 +151,13 @@ export function GitSyncContent({
                     variant={config?.id === item.id ? "secondary" : "outline"}
                     aria-pressed={config?.id === item.id}
                     onClick={() => onSelect(item.id)}
-                    className="h-auto w-full min-w-0 justify-start gap-2 rounded-lg p-3 text-left"
+                    className="h-auto min-h-[44px] w-full min-w-0 justify-start gap-2 rounded-lg p-3 text-left"
                   >
                     <span className="min-w-0 flex-1 truncate" title={item.remoteUrl}>
                       {name}
                       {differentProvider ? ` · ${item.provider === "github" ? "GitHub" : "Gitee"}` : ""}
                       {sameRepository ? ` · ${item.branch}` : ""}
                     </span>
-                    {item.visibility.value === "public" && <span className="text-xs text-danger">公开</span>}
                   </Button>
                 );
               })}
@@ -173,18 +166,28 @@ export function GitSyncContent({
               )}
             </div>
           </SettingsSectionCard>
-          {config?.visibility.value === "public" && (
-            <p role="alert" className="rounded-lg bg-muted p-3 text-sm text-danger">
-              仓库已公开，同步到仓库的笔记可被他人查看
-            </p>
-          )}
           {config && (
-            <SettingsSectionCard title="同步状态">
-              <div role="status" aria-live="polite" className="space-y-2 text-sm">
-                <p>{summary}</p>
-                <p className="text-muted-foreground">
-                  上次同步成功：{status?.lastSyncedAt ? new Date(status.lastSyncedAt).toLocaleString() : "尚无记录"}
-                </p>
+            <SettingsSectionCard>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div role="status" aria-live="polite" className="space-y-2 text-sm">
+                  <p className="text-base font-semibold">{summary}</p>
+                  <p className="text-muted-foreground">
+                    上次同步成功：{status?.lastSyncedAt ? new Date(status.lastSyncedAt).toLocaleString() : "尚无记录"}
+                  </p>
+                </div>
+                {!conflicts.length && (
+                  <Button
+                    variant="outline"
+                    className="min-h-[44px]"
+                    disabled={actionDisabled || !folders.length}
+                    onClick={() => {
+                      onFolderCheck();
+                      void run(id, "同步", () => bridge.syncNow(id));
+                    }}
+                  >
+                    {status?.phase === "error" || folderError ? "重试" : "立即同步"}
+                  </Button>
+                )}
               </div>
               {syncError && !conflicts.length && !folderError && (
                 <div className="space-y-2 text-sm">
@@ -194,7 +197,7 @@ export function GitSyncContent({
                   </GitDetails>
                 </div>
               )}
-              {conflicts.length ? (
+              {conflicts.length > 0 && (
                 <GitConflicts
                   key={id}
                   repositoryId={id}
@@ -203,17 +206,6 @@ export function GitSyncContent({
                   disabled={disabled}
                   onResolve={(request) => void run(id, "解决冲突并继续同步", () => bridge.resolveConflict(request))}
                 />
-              ) : (
-                <Button
-                  variant="outline"
-                  disabled={actionDisabled || !folders.length}
-                  onClick={() => {
-                    onFolderCheck();
-                    void run(id, "同步", () => bridge.syncNow(id));
-                  }}
-                >
-                  {status?.phase === "error" || folderError ? "重试" : "立即同步"}
-                </Button>
               )}
             </SettingsSectionCard>
           )}
@@ -236,10 +228,14 @@ export function GitSyncContent({
               />
               {adding && (
                 <div className="flex gap-2">
-                  <Button disabled={disabled || !draft.remoteUrl.trim() || !folders.length} onClick={connect}>
+                  <Button
+                    className="min-h-[44px]"
+                    disabled={disabled || !draft.remoteUrl.trim() || !folders.length}
+                    onClick={connect}
+                  >
                     连接并同步
                   </Button>
-                  <Button variant="ghost" disabled={disabled} onClick={onCancel}>
+                  <Button className="min-h-[44px]" variant="ghost" disabled={disabled} onClick={onCancel}>
                     取消
                   </Button>
                 </div>

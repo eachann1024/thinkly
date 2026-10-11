@@ -36,7 +36,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const [adding, setAdding] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, GitDraft>>({});
   const [folderDrafts, setFolderDrafts] = useState<Record<string, GitRepositoryFolder[]>>({});
-  const [tokens, setTokens] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, string>>({});
   const locks = useRef(new Set<string>());
@@ -67,9 +66,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const disabled = loading || Boolean(loadError) || Boolean(pending) || syncing;
   const selectionDisabled =
     loading || Boolean(loadError) || Boolean(pending && pending !== "保存选择并同步" && pending !== "自动保存设置");
-  const checking = (repositoryId: string) =>
-    busy[repositoryId] === "检查可见性" ||
-    state.configs.find((item) => item.id === repositoryId)?.visibility.reason === "正在检查";
   const updateDraft = <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => {
     setErrors((current) => ({ ...current, [id]: "" }));
     setDrafts((current) => ({
@@ -190,14 +186,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       };
     });
   }
-  function checkVisibility(clear = false) {
-    if (!bridge || !config || disabled) return;
-    const token = tokens[id]?.trim();
-    setTokens((current) => ({ ...current, [id]: "" }));
-    void run(id, "检查可见性", () =>
-      bridge.checkVisibility({ repositoryId: id, ...(clear ? { token: null } : token ? { token } : {}) }),
-    );
-  }
   async function recoverFolder(folder: GitRepositoryFolder, relocate: boolean) {
     if (!bridge || disabled || (config && (folderDrafts[id] || drafts[id]))) return;
     const localPath = await selectRecoveryPath(folder, relocate).catch((error) => {
@@ -263,12 +251,10 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       availableIds={availableIds}
       folderChecks={folderChecks}
       draft={draft}
-      token={tokens[id] ?? ""}
       error={errors[id] ?? ""}
       unsavedFolders={Boolean(folderDrafts[id])}
       unsavedSettings={Boolean(drafts[id])}
       removeConfirmation={removeConfirmation}
-      checking={checking}
       setRemoveConfirmation={setRemoveConfirmation}
       updateDraft={updateDraft}
       run={run}
@@ -276,8 +262,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       recoverFolder={recoverFolder}
       locateFolder={locateFolder}
       connect={connect}
-      checkVisibility={checkVisibility}
-      onToken={(value) => setTokens((current) => ({ ...current, [id]: value }))}
       onAdd={() => {
         setAdding(true);
         setRemoveConfirmation("");

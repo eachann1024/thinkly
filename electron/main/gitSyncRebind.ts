@@ -60,7 +60,7 @@ export async function rebindGitFolder(request: GitFolderRebind, context: RebindC
   const history = context.mappingHistory[id] ?? previous.folders;
   if (history.some((folder) => folder.notebookId !== original.notebookId && folder.notebookId === replacement.notebookId)) throw new Error("目标笔记本已有其他同步关联，请先解除原关联");
   await preserveReboundHistory(context.storageRoot, id, original, replacement);
-  context.configs.set(id, { ...updated, visibility: previous.visibility, hasToken: previous.hasToken });
+  context.configs.set(id, updated);
   context.mappingHistory[id] = [...history.filter((folder) => folder.notebookId !== original.notebookId), replacement];
   try { await context.persist(); }
   catch (error) {
