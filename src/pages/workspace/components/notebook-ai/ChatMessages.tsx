@@ -104,13 +104,10 @@ export function ChatMessages({
             )}
           >
             <h2 className="notebook-ai-empty-title text-foreground">
-              从这一页开始。
+              想怎么修改这篇笔记？
             </h2>
-            <p className="notebook-ai-empty-description text-muted-foreground">
-              选一段文字，或直接说说想怎么改。
-            </p>
             <div className="goose-list-layout notebook-ai-empty-suggestions flex flex-col">
-              {["润色开头", "梳理结构"].map((text) => (
+              {["润色这段文字"].map((text) => (
                 <Button contentStyle="preserve" variant="ghost" size={null}
                   key={text}
                   type="button"
@@ -119,7 +116,6 @@ export function ChatMessages({
                   aria-label={`发送建议：${text}`}
                 >
                   <span>{text}</span>
-                  <span aria-hidden="true">→</span>
                 </Button>
               ))}
             </div>
