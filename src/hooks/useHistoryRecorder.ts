@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { extractPlainText } from "@/components/editor/utils/blocknote-content";
-import { countWords } from "@/components/editor/utils/content-text-extractor";
+import { getContentDerivations } from "@/components/editor/utils/content-derivations-cache";
 import { recordHistorySnapshotDetailed } from "@/lib/history/snapshot";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useHistoryView } from "@/stores/useHistoryView";
@@ -12,14 +11,6 @@ const IDLE_MS = 15_000;
 const HEARTBEAT_MS = 30_000;
 /** 字数突变阈值 —— 大段粘贴/AI 输出立即落点 */
 const CHAR_THRESHOLD = 200;
-
-/**
- * 把内容压成"实质字符指纹"：抽出纯文本后去掉所有空白字符。
- * 只多了空格/空行/换行 → 指纹不变 → 跳过记录。
- */
-function substantiveFingerprint(content: BlockNoteContent): string {
-  return extractPlainText(content as any).replace(/\s+/g, "");
-}
 
 /**
  * 自动历史记录器，三条规则任一触发即落快照：
@@ -161,8 +152,8 @@ export function useHistoryRecorder(params: {
     if (!pageId || !workspaceId || !content) return;
     if (signature === lastRecordedSigRef.current) return;
 
-    const charCount = countWords(content);
-    const fingerprint = substantiveFingerprint(content);
+    const { wordCount: charCount, substantiveFingerprint: fingerprint } =
+      getContentDerivations(content, signature);
 
     // 实质内容指纹相同（只是空白/换行变了）→ 不入 pending，不重置 idle
     if (
