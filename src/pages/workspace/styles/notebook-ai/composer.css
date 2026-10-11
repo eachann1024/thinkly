@@ -54,20 +54,41 @@
  */
 .notebook-ai-composer-shell {
  border-radius: var(--radius-control);
- background: var(--goose-input-surface);
+ background: var(--goose-ai-composer-surface);
  transition:
   color 150ms ease,
   background-color 150ms ease,
   border-color 150ms ease;
 }
 .bui-prompt-bar {
+ --goose-ai-composer-surface: color-mix(in srgb, var(--goose-input-surface) 86%, hsl(var(--primary)));
  overflow: hidden;
  border: 1px solid hsl(var(--goose-menu-border));
  border-radius: var(--radius-control);
- background: var(--goose-input-surface);
+ background: var(--goose-ai-composer-surface);
 }
 .bui-prompt-bar > .notebook-ai-composer-shell {
  background: transparent;
+}
+
+/* 空草稿也保留清晰的按钮底色；有内容时使用主题主色强调发送。 */
+.notebook-ai-send-button {
+ background: color-mix(in srgb, var(--goose-ai-composer-surface) 85%, var(--goose-text-primary));
+ color: var(--goose-text-primary);
+ cursor: default;
+ transition: background-color 150ms ease, color 150ms ease;
+}
+.notebook-ai-send-button[data-ready="true"] {
+ background: hsl(var(--primary));
+ color: hsl(var(--primary-foreground));
+ cursor: pointer;
+}
+.notebook-ai-send-button[data-ready="true"]:hover {
+ background: color-mix(in srgb, hsl(var(--primary)) 88%, hsl(var(--primary-foreground)));
+}
+.notebook-ai-send-button:focus-visible {
+ outline: 2px solid hsl(var(--ring));
+ outline-offset: 2px;
 }
 /* panel 输入区按正文字号与行高测量，4 行封顶，超出内部滚动。 */
 [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
@@ -79,6 +100,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
  .notebook-ai-composer-shell,
+ .notebook-ai-send-button,
  .bui-prompt-bar,
  [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
   transition: none;
