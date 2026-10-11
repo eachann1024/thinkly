@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useEditorSettings } from "@/components/editor/platform/hostContext";
+import { useEditorPageContext, useEditorSettings } from "@/components/editor/platform/hostContext";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
-import { loadMermaid } from "@/lib/imageExport/loadMermaid";
-import {
-  getMermaidInitConfig,
-  stripMermaidInitDirectives,
-} from "@/lib/imageExport/mermaidTheme";
-import { tryRenderMermaidTimeline } from "@/lib/imageExport/timelineSvg";
+import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
 
 interface MermaidViewProps {
   value: string;
@@ -14,7 +9,9 @@ interface MermaidViewProps {
 
 export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
   const [svg, setSvg] = useState<string>("");
-  const { theme, features } = useEditorSettings();
+  const { theme, features, customFonts } = useEditorSettings();
+  const { page } = useEditorPageContext();
+  const fontIdentity = JSON.stringify([page?.fontFamily, customFonts]);
   const resolvedTheme = useResolvedTheme(theme);
   const skipDebounceRef = useRef(true);
 
@@ -28,26 +25,12 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         return;
       }
       try {
-        const timeline = tryRenderMermaidTimeline(
-          value,
-          isDark ? "dark" : "light",
-        );
-        if (timeline) {
-          if (active) setSvg(timeline);
-          return;
-        }
-        const mermaid = await loadMermaid();
-        if (!active) return;
-        mermaid.initialize(
-          getMermaidInitConfig({
-            mode: isDark ? "dark" : "light",
-            securityLevel: features.mermaidUnsafeHTML ? "loose" : "strict",
-            fontFamily: "inherit",
-            useMaxWidth: true,
-          }),
-        );
-        const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
-        const { svg } = await mermaid.render(id, stripMermaidInitDirectives(value));
+        const svg = await renderCachedMermaid(value, {
+          mode: isDark ? "dark" : "light",
+          securityLevel: features.mermaidUnsafeHTML ? "loose" : "strict",
+          fontFamily: "inherit",
+          useMaxWidth: true,
+        }, "editor", fontIdentity);
         if (!active) return;
         setSvg(svg);
       } catch {
@@ -64,7 +47,7 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       active = false;
       if (debounceTimer) clearTimeout(debounceTimer);
     };
-  }, [features.mermaidUnsafeHTML, value, resolvedTheme]);
+  }, [features.mermaidUnsafeHTML, value, resolvedTheme, fontIdentity]);
 
   if (!svg) return null;
 
