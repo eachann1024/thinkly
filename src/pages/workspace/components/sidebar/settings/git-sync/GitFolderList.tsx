@@ -1,4 +1,4 @@
-import { GitDetails } from "./GitDetails";
+import { GitFolderIssue } from "./GitFolderIssue";
 import { Check } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import type {
@@ -99,7 +99,7 @@ export function GitFolderList({
             <div
               key={folder.notebookId}
               className={
-                "min-w-0 overflow-hidden rounded-lg transition-colors " +
+                "relative min-w-0 rounded-lg transition-colors " +
                 (checked
                   ? "bg-[var(--goose-interactive-selected)]"
                   : "bg-[var(--goose-settings-option-bg)]" +
@@ -114,7 +114,10 @@ export function GitFolderList({
                 contentStyle="preserve"
                 role="checkbox"
                 aria-checked={checked}
-                className="group relative flex h-auto min-h-[44px] w-full min-w-0 items-center justify-start gap-3 rounded-lg px-3 py-2 text-left !bg-transparent disabled:!bg-transparent"
+                className={
+                  "group relative flex h-auto min-h-[44px] w-full min-w-0 items-center justify-start gap-3 rounded-lg px-3 py-2 text-left !bg-transparent disabled:!bg-transparent" +
+                  (error ? " pr-12" : "")
+                }
                 aria-label={`同步 ${folder.name} ${folder.localPath}${error ? `，${shortFolderReason(error)}` : ""}`}
                 disabled={blocked}
                 onClick={() => onToggle(folder, !checked)}
@@ -143,50 +146,27 @@ export function GitFolderList({
                       {shortPath}
                     </span>
                   )}
-                  {error && (
-                    <span
-                      className={
-                        "mt-1 block whitespace-normal text-sm " +
-                        (checked ? "text-danger" : "text-muted-foreground")
-                      }
-                    >
-                      {shortFolderReason(error)}
-                    </span>
-                  )}
-                  {!check && !error && (
-                    <span className="mt-1 block text-sm text-muted-foreground">
-                      检查中…
-                    </span>
-                  )}
                 </span>
               </Button>
-              {error && (checked || needsRecovery) ? (
-                <div className="space-y-2 pb-3 pl-[44px] pr-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="min-h-[44px]"
-                    disabled={needsRecovery ? recoveryDisabled : disabled}
-                    onClick={() =>
-                      needsRecovery ? onRecover(folder, true) : onLocate(folder)
-                    }
-                  >
-                    {needsRecovery ? "重新选择文件夹" : "定位问题"}
-                  </Button>
-                  {checked && (
-                    <GitDetails
-                      className="text-xs text-muted-foreground"
-                      title="问题详情"
-                    >
-                      <p className="mt-1 whitespace-pre-wrap break-all">
-                        {check?.path ?? folder.localPath}
-                        {"\n"}
-                        {displayError}
-                      </p>
-                    </GitDetails>
-                  )}
-                </div>
-              ) : null}
+              {error && (
+                <GitFolderIssue
+                  name={folder.name}
+                  summary={shortFolderReason(error)}
+                  detail={displayError ?? error}
+                  path={check?.path ?? folder.localPath}
+                  actionLabel={
+                    needsRecovery
+                      ? "重新选择文件夹"
+                      : checked
+                        ? "定位问题"
+                        : undefined
+                  }
+                  actionDisabled={needsRecovery ? recoveryDisabled : disabled}
+                  onAction={() =>
+                    needsRecovery ? onRecover(folder, true) : onLocate(folder)
+                  }
+                />
+              )}
             </div>
           );
         })}
