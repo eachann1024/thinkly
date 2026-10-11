@@ -1,5 +1,6 @@
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
 import { useEffect, useState } from "react";
+import { useTextCaret } from "@/hooks/useTextCaret";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { useShallow } from "zustand/react/shallow";
 import { WorkspacePage } from "./pages/workspace/WorkspacePage";
@@ -44,6 +45,7 @@ function AppearanceSync() {
 }
 
 function App() {
+  useTextCaret();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
   const showSetupGuide = useSettings(isSetupGuideVisible);
   const [workspaceOpened, setWorkspaceOpened] = useState(false);
