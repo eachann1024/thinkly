@@ -82,16 +82,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bui-loader-cell--on,
   .bui-loader-label,
   .bui-stream-caret,
   .bui-think-spinner,
   .bui-prompt-bar-beam rect {
     animation: none !important;
-  }
-
-  .bui-loader-cell--on {
-    opacity: 0.45;
   }
 
   .bui-loader-label {
