@@ -66,6 +66,7 @@ function VideoBlockContent({
 
   useEffect(() => {
     let cancelled = false;
+    let release: (() => void) | undefined;
     setResolvedSrc(null);
 
     if (!rawSrc) return () => undefined;
@@ -74,10 +75,17 @@ function VideoBlockContent({
       return () => undefined;
     }
 
-    void platform.imageStorage
-      .resolveRefToUrl(rawSrc, activePageLocalFilePath)
-      .then((url) => {
-        if (!cancelled) setResolvedSrc(url);
+    const storage = platform.imageStorage;
+    const request = storage.acquireVideoRefToUrl
+      ? storage.acquireVideoRefToUrl(rawSrc, activePageLocalFilePath)
+      : storage.resolveRefToUrl(rawSrc, activePageLocalFilePath)
+        .then(url => ({ url, release: () => {} }));
+    void request.then((lease) => {
+        if (cancelled) lease.release();
+        else {
+          release = lease.release;
+          setResolvedSrc(lease.url);
+        }
       })
       .catch((error) => {
         console.error("[video] 视频资源解析失败:", rawSrc, error);
@@ -86,6 +94,7 @@ function VideoBlockContent({
 
     return () => {
       cancelled = true;
+      release?.();
     };
   }, [activePageLocalFilePath, platform.imageStorage, rawSrc]);
 
