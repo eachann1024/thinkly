@@ -19,6 +19,7 @@ import type {
 import { fs as hostFs } from "@/lib/electron-platform/fs";
 import { dialogs as hostDialogs } from "@/lib/electron-platform/dialogs";
 import { imageStorage as appImageStorage } from "@/lib/imageStorage";
+import { acquireVideoRefToUrl } from "@/lib/imageStorage/videoUrlLease";
 import { resolveImageRefToUrl } from "@/lib/imageStorage/resolveUrl";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 
@@ -142,6 +143,7 @@ const imageStorage: EditorPlatformImageStorage = {
   save: (blob, mimeType) => appImageStorage.save(blob, mimeType),
   load: (ref) => appImageStorage.load(ref),
   delete: (ref) => appImageStorage.delete(ref),
+  acquireVideoRefToUrl,
   resolveRefToUrl: (ref, pageLocalFilePath) =>
     resolveImageRefToUrl(ref, pageLocalFilePath),
 };

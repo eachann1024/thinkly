@@ -87,7 +87,12 @@ export interface EditorPlatformImageStorage {
   save(blob: Blob, mimeType: string): Promise<string>;
   load(ref: string): Promise<Blob | null>;
   delete(ref: string): Promise<void>;
-  /** ObjectURL 缓存 */
+  /** Video consumers release their object URL when unmounted or replaced. */
+  acquireVideoRefToUrl?(
+    ref: string,
+    pageLocalFilePath?: string | null,
+  ): Promise<{ url: string; release: () => void }>;
+  /** Shared image resolution */
   resolveRefToUrl(
     ref: string,
     pageLocalFilePath?: string | null,
