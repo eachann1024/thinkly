@@ -1,6 +1,6 @@
 /* 常驻导航轨道与左侧留白共用外壳背景，内侧不再出现竖条。 */
 .workspace-shell:has(> .workspace-stage .sidebar-mode-rail) {
-  --workspace-stage-pad-left: 12px;
+  --workspace-stage-pad-left: 4px;
   --workspace-rail-width: 48px;
 }
 .workspace-shell .workspace-stage {
@@ -22,12 +22,6 @@
 .workspace-shell .sidebar-rail-footer .sidebar-footer-control {
   width: 40px;
   height: 40px;
-}
-.workspace-shell .workspace-stage > .workspace-content-frame {
-  left: calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
-  border-left: 0;
-  box-shadow: none;
-  transition: none;
 }
 .workspace-shell .workspace-sidebar-pane .sidebar-content-surface {
   background: var(--workspace-sidebar-surface);
@@ -98,11 +92,7 @@
 }
 @media (max-width: 768px) {
   .workspace-shell .workspace-stage {
-    padding: 0 8px 8px 12px;
-  }
-  .workspace-shell .workspace-stage > .workspace-content-frame {
-    inset: 0 8px 8px 60px;
-    border-radius: var(--radius-lg);
+    padding: 0 var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) var(--workspace-stage-pad-left);
   }
   .workspace-shell .workspace-main-sheet {
     border-radius: var(--radius-lg);

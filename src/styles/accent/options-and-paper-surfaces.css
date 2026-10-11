@@ -89,6 +89,7 @@
  * presets override them; changing an accent or appearance leaves no inline tint. */
 :root {
   --goose-shell-surface: hsl(var(--goose-shell-bg));
+  --goose-sidebar-surface: #fafafa;
   --goose-editor-surface: hsl(var(--goose-editor-bg));
   --goose-ai-surface: hsl(var(--goose-editor-bg));
   --goose-input-surface: hsl(var(--goose-editor-bg));
@@ -108,6 +109,7 @@
   --goose-menu-border: var(--border);
   --goose-selected-bg: 48.75 32% 90.196%;
   --goose-shell-surface: linear-gradient(158deg, #ece8dd, #f5f3eb);
+  --goose-sidebar-surface: #f7f5ed;
   --goose-editor-surface: linear-gradient(165deg, #fcfbf7, #fffffc);
   --goose-ai-surface: linear-gradient(165deg, #f6f5f0, #fbfbf7);
   --goose-input-surface: #ffffff;

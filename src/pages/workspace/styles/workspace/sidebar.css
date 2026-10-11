@@ -61,13 +61,6 @@ html[data-sidebar-collapsed] .bn-side-menu {
   background: var(--goose-shell-surface);
 }
 
-/* 顶边必须不透底：同一条细线跨越深浅不同的三栏，避免正文看似高出一像素。 */
-.workspace-shell[data-electron-chrome] .workspace-content-frame {
-  border-top-color: var(--workspace-top-edge);
-  /* 留出极轻的顶部环境阴影，让整板从外层留白中浮起。 */
-  clip-path: inset(-10px -16px -16px);
-}
-
 :root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .workspace-shell {
   --workspace-top-edge: color-mix(in srgb, hsl(var(--foreground)) 4.5%, color-mix(in srgb, hsl(var(--goose-shell-bg)) 60%, hsl(var(--goose-editor-bg))));
 }
@@ -77,7 +70,6 @@ html[data-sidebar-collapsed] .bn-side-menu {
 }
 @media (prefers-reduced-motion: reduce) {
   .workspace-shell .workspace-stage,
-  .workspace-shell .workspace-content-frame,
   .workspace-shell .workspace-sidebar-pane,
   .workspace-shell[data-electron-chrome] .electron-titlebar {
     transition: none;

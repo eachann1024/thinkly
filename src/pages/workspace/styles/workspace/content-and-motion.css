@@ -112,13 +112,6 @@
 }
 
 @media (max-width: 768px) {
-  .workspace-shell .workspace-content-frame {
-    inset: 0;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
   .workspace-shell .workspace-stage {
     padding: 0;
     gap: 0;
