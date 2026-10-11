@@ -1,5 +1,5 @@
 .settings-compact-navigation { display: none; }
-@media (max-width: 959px) {
+@media (max-width: 719px) {
   .settings-compact-navigation {
     display: flex;
     align-items: center;

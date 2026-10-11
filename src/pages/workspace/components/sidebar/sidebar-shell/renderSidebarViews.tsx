@@ -33,7 +33,7 @@ export function renderSidebarViews(
         ref={setSettingsSidebarHost}
         className="sidebar-content-surface relative flex min-h-0 min-w-0 flex-1 flex-col"
       >
-        {!settingsOpen && <SidebarPanelControls context={context} />}
+        {!settingsOpen && context.forceCollapseLeft && <SidebarPanelControls context={context} />}
         {inHistoryMode && !settingsOpen && (
           <div className="min-h-0 flex-1 overflow-hidden rounded-[inherit]">
             <HistoryVersionList />

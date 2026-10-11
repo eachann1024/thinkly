@@ -94,7 +94,7 @@ export function useSidebarNavigation(
       const detail = (event as CustomEvent<{ resetQuery?: boolean }>).detail;
       if (detail?.resetQuery) useSearchSession.getState().setQuery("");
       setCurrentView("search");
-      if (workspaceSidebarCollapsed) useWorkspaceViewport.getState().openLeftPanel("engaged");
+      if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
       if (inHistoryMode) exitHistoryView();
       closeNotebookAiIfFullscreen();
       openSearchSession(
@@ -112,7 +112,7 @@ export function useSidebarNavigation(
           useSearchSession.getState().closeSearch();
         if (view === "outline") closeNotebookAiIfFullscreen();
         setCurrentView(view);
-        if (workspaceSidebarCollapsed) useWorkspaceViewport.getState().openLeftPanel("engaged");
+        if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
         if (inHistoryMode) exitHistoryView();
       }
     };

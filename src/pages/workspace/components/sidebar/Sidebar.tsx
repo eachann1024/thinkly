@@ -35,7 +35,7 @@ export function Sidebar(props: SidebarProps) {
     settingsSidebarHost,
   } = context;
   // 临时面板收起后仍留在覆盖层，避免退出文档流时宽度动画挤动正文。
-  const sidebarFloating = sidebarOverlay || sidebarCollapsed;
+  const sidebarFloating = context.forceCollapseLeft && (sidebarOverlay || sidebarCollapsed);
 
   return (
     <>
