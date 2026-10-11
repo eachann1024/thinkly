@@ -1,5 +1,5 @@
 // ── Remote Image Resolver ──────────────────────────────────────
-// Resolves image URLs (att:/uuid:, http/https) to base64 data URLs
+// Resolves internal, local, remote and blob image URLs to base64 data URLs
 // for safe use during html-to-image SVG serialization.
 // Object URLs (blob:) cannot be resolved inside SVG foreignObject context,
 // so we must use inline data URLs.
@@ -8,6 +8,8 @@ import type { PartialBlock } from "@blocknote/core";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { imageStorage } from "../imageStorage";
 import { blobToBase64 } from "../imageStorage/utils";
+import { resolveImageRefToUrl } from "../imageStorage/resolveUrl";
+import { isLocalFilePath } from "../imageStorage/strategies/file-system";
 
 type ExportResolvableBlock = PartialBlock & {
   props?: Record<string, unknown>;
@@ -59,8 +61,26 @@ function loadImageViaCanvas(url: string, timeoutMs = 8000): Promise<string | nul
   });
 }
 
-async function resolveSingleUrl(url: string): Promise<string | null> {
+async function resolveSingleUrl(
+  url: string,
+  pageLocalFilePath?: string | null,
+): Promise<string | null> {
   if (url.startsWith("data:")) return url;
+
+  if (isLocalFilePath(url) || url.startsWith("blob:")) {
+    try {
+      const resolved = url.startsWith("blob:")
+        ? url : await resolveImageRefToUrl(url, pageLocalFilePath);
+      if (resolved.startsWith("data:")) return resolved;
+      if (resolved.startsWith("blob:")) {
+        const response = await fetch(resolved);
+        if (response.ok) return blobToBase64(await response.blob());
+      }
+    } catch {
+      // Missing/denied local files and revoked blob URLs retain the original ref.
+    }
+    return null;
+  }
 
   if (url.startsWith("att:") || url.startsWith("uuid:")) {
     try {
@@ -114,11 +134,26 @@ async function resolveSingleUrl(url: string): Promise<string | null> {
   return null;
 }
 
-export async function resolveRemoteImageToDataUrl(url: string): Promise<string | null> {
-  return resolveSingleUrl(url);
+export async function resolveRemoteImageToDataUrl(
+  url: string,
+  pageLocalFilePath?: string | null,
+): Promise<string | null> {
+  return resolveSingleUrl(url, pageLocalFilePath);
 }
 
-export async function resolveImageUrls(blocks: BlockNoteContent): Promise<void> {
+async function resolveBlocks(
+  blocks: BlockNoteContent,
+  urls: Map<string, Promise<string | null>>,
+  pageLocalFilePath?: string | null,
+): Promise<void> {
+  const resolve = (url: string) => {
+    let request = urls.get(url);
+    if (!request) {
+      request = resolveSingleUrl(url, pageLocalFilePath);
+      urls.set(url, request);
+    }
+    return request;
+  };
   const tasks: Promise<void>[] = [];
 
   for (const raw of blocks) {
@@ -129,7 +164,7 @@ export async function resolveImageUrls(blocks: BlockNoteContent): Promise<void> 
       const url = props?.url ?? props?.src;
       if (typeof url === "string") {
         tasks.push(
-          resolveSingleUrl(url).then((resolved) => {
+          resolve(url).then((resolved) => {
             if (resolved) {
               block.props = { ...props, url: resolved };
             }
@@ -146,7 +181,7 @@ export async function resolveImageUrls(blocks: BlockNoteContent): Promise<void> 
         const inlineSrc = attrs?.src ?? inlineProps?.url ?? inlineProps?.src;
         if (inline.type === "image" && typeof inlineSrc === "string") {
           tasks.push(
-            resolveSingleUrl(inlineSrc).then((resolved) => {
+            resolve(inlineSrc).then((resolved) => {
               if (resolved) {
                 inline.attrs = { ...(attrs ?? {}), src: resolved };
               }
@@ -156,9 +191,21 @@ export async function resolveImageUrls(blocks: BlockNoteContent): Promise<void> 
       }
     }
     if (Array.isArray(block.children)) {
-      tasks.push(resolveImageUrls(block.children));
+      tasks.push(resolveBlocks(block.children, urls, pageLocalFilePath));
     }
   }
 
   await Promise.all(tasks);
+}
+
+export async function resolveImageUrls(
+  blocks: BlockNoteContent,
+  pageLocalFilePath?: string | null,
+): Promise<void> {
+  const urls = new Map<string, Promise<string | null>>();
+  try {
+    await resolveBlocks(blocks, urls, pageLocalFilePath);
+  } finally {
+    urls.clear();
+  }
 }
