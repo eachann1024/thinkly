@@ -11,7 +11,6 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import { flushSync } from "react-dom";
 import type { JSONContent } from "@/types";
 import {
   createImagePreviewPortal,
@@ -169,7 +168,10 @@ export function useComposerEditor(options: {
             const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 24;
             const next = Math.min(Math.max(el.scrollHeight, lineHeight), lineHeight * 4);
             el.style.height = "";
-            el.style.setProperty("--ai-composer-h", `${next}px`);
+            const height = `${next}px`;
+            if (el.style.getPropertyValue("--ai-composer-h") !== height) {
+              el.style.setProperty("--ai-composer-h", height);
+            }
             const multiline = next > Math.ceil(lineHeight) + 1;
             const changed = el.dataset.multiline !== String(multiline);
             el.dataset.multiline = String(multiline);
@@ -177,13 +179,17 @@ export function useComposerEditor(options: {
             onLayoutMeasureRef.current?.();
           }
         : null;
-    // chip 增删、换行、粘贴都走 DOM 变化；MutationObserver 一并覆盖，
-    // IME composing 期间照测，不打断输入。
+    // 将同一帧的增删合并量高，避免 DOM 变化时强制刷新 React 和重复布局。
+    let measureFrame: number | null = null;
+    const scheduleMeasure = () => {
+      if (measureFrame !== null) return;
+      measureFrame = requestAnimationFrame(() => {
+        measureFrame = null;
+        measureHeight?.();
+      });
+    };
     const observer = measureHeight
-      ? new MutationObserver(() => {
-          // 高度与 chrome 换排在同一次提交完成，ResizeObserver 只看到最终布局。
-          flushSync(measureHeight);
-        })
+      ? new MutationObserver(scheduleMeasure)
       : null;
     if (observer) {
       observer.observe(el, {
@@ -203,7 +209,7 @@ export function useComposerEditor(options: {
       const signature = measureSignature();
       if (signature === measuredSignature) return;
       measuredSignature = signature;
-      measureHeight?.();
+      scheduleMeasure();
     };
     const resizeObserver = measureHeight
       ? new ResizeObserver(remeasureIfChanged)
@@ -233,6 +239,7 @@ export function useComposerEditor(options: {
     measureHeight?.();
 
     return () => {
+      if (measureFrame !== null) cancelAnimationFrame(measureFrame);
       observer?.disconnect();
       resizeObserver?.disconnect();
       appearanceObserver?.disconnect();
