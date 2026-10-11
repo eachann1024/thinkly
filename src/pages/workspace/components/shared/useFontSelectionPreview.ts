@@ -34,6 +34,11 @@ export function useFontSelectionPreview(
     removeConfirmationKeyUp.current?.();
     setOpen(false);
   }, []);
+  const previewFont = useCallback((font: string | null) => {
+    if (!session.current) return;
+    session.current.previewed = true;
+    current.current.onChange(font);
+  }, []);
 
   // React Aria filters capture props on Popover. Attach to its real DOM node,
   // so navigation is observed before the menu moves focus to the next item.
@@ -150,5 +155,5 @@ export function useFontSelectionPreview(
     setOpen(nextOpen);
   };
 
-  return { open, onOpenChange, contentRef, confirmFont };
+  return { open, onOpenChange, contentRef, confirmFont, previewFont };
 }

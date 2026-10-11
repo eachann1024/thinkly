@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SYSTEM_FONT_STACK, toCssFontFamily } from "@/lib/fontLoader";
 import {
   getAvailableLocalFonts,
@@ -16,6 +14,7 @@ import {
 } from "@/lib/localFontOptions";
 
 import { useFontSelectionPreview } from "./useFontSelectionPreview";
+import { VirtualFontList, type FontListOption } from "./VirtualFontList";
 
 export function LocalFontSelect({
   id,
@@ -34,7 +33,7 @@ export function LocalFontSelect({
   baseFontLabel?: string;
   fallbackFontFamily?: string;
 }) {
-  const { open, onOpenChange, contentRef, confirmFont } =
+  const { open, onOpenChange, contentRef, confirmFont, previewFont } =
     useFontSelectionPreview(value, onChange);
   const [fonts, setFonts] = useState<LocalFontOption[] | null>(null);
   const [fontAccessFailed, setFontAccessFailed] = useState(false);
@@ -43,6 +42,7 @@ export function LocalFontSelect({
     available: boolean;
   } | null>(null);
   useEffect(() => {
+    if (fonts !== null) return;
     let active = true;
     void getAvailableLocalFonts().then((available) => {
       if (active) {
@@ -55,9 +55,9 @@ export function LocalFontSelect({
     return () => {
       active = false;
     };
-  }, [open]);
+  }, [open, fonts]);
   useEffect(() => {
-    if (!value || value === baseFont) return;
+    if (!value || value === baseFont || fonts?.some((font) => font.family === value)) return;
     let active = true;
     void probeLocalFont(value).then((available) => {
       if (active) setSavedFont({ family: value, available });
@@ -80,19 +80,29 @@ export function LocalFontSelect({
     !value || fallback || availability === undefined
       ? fallbackFontFamily
       : `${toCssFontFamily(value)}, ${fallbackFontFamily}`;
-  const options = (fonts ?? []).filter((option) => option.family !== baseFont);
-  if (value && value !== baseFont && availability === true && !selectedOption)
-    options.push({ family: value, label: value });
+  const listedOptions = useMemo<FontListOption[]>(() => [
+    { family: null, label: baseFontLabel },
+    ...(fonts ?? []).filter((option) => option.family !== baseFont),
+  ], [fonts, baseFont, baseFontLabel]);
+  const options = value && value !== baseFont && availability === true && !selectedOption
+    ? [...listedOptions, { family: value, label: value }]
+    : listedOptions;
 
   return (
     <div className="min-w-0">
-      <DropdownMenu open={open} onOpenChange={onOpenChange}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={open} onOpenChange={onOpenChange}>
+        <PopoverTrigger asChild>
           <Button
             id={id}
             type="button"
             variant="outline"
             aria-label={`${label}：${selectedName}${fallback ? "，未安装，已回退" : ""}`}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                onOpenChange(true);
+              }
+            }}
             className="h-auto min-h-11 w-full min-w-0 justify-between gap-3 border-input px-3 py-2 font-normal text-foreground"
           >
             <span
@@ -113,57 +123,30 @@ export function LocalFontSelect({
               className="shrink-0 text-muted-foreground"
             />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
+        </PopoverTrigger>
+        <PopoverContent
           align="start"
           aria-label={label}
           ref={contentRef}
-          className="max-h-80 min-w-[var(--trigger-width)] overflow-y-auto"
+          className="goose-floating-surface min-w-[var(--goose-popover-trigger-width)] p-1.5 text-popover-foreground"
         >
-          <DropdownMenuRadioGroup value={value ?? baseFont}>
-            <DropdownMenuRadioItem
-              value={baseFont}
-              data-font-preview=""
-              onSelect={() => confirmFont(null)}
-              style={{ fontFamily: fallbackFontFamily }}
-            >
-              {baseFontLabel}
-            </DropdownMenuRadioItem>
-            {options.map((option) => (
-              <DropdownMenuRadioItem
-                key={option.family}
-                value={option.family}
-                data-font-preview={option.family}
-                onSelect={() => confirmFont(option.family)}
-                style={{
-                  fontFamily: `${toCssFontFamily(option.family)}, ${fallbackFontFamily}`,
-                }}
-              >
-                {option.family}
-              </DropdownMenuRadioItem>
-            ))}
-            {fallback && (
-              <DropdownMenuRadioItem value={value!} disabled>
-                {value}（未安装，已回退）
-              </DropdownMenuRadioItem>
-            )}
-            {fontAccessFailed ? (
-              <DropdownMenuRadioItem value="__unavailable__" disabled>
-                无法读取本机字体，请重新打开菜单重试。
-              </DropdownMenuRadioItem>
-            ) : fonts === null && (
-              <DropdownMenuRadioItem value="__loading__" disabled>
-                正在读取本机字体…
-              </DropdownMenuRadioItem>
-            )}
-            {fonts?.length === 0 && (
-              <DropdownMenuRadioItem value="__empty__" disabled>
-                未读取到本机字体。
-              </DropdownMenuRadioItem>
-            )}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <VirtualFontList
+            label={label}
+            options={options}
+            value={value === baseFont ? null : value}
+            fallbackFontFamily={fallbackFontFamily}
+            onPreview={previewFont}
+            onConfirm={confirmFont}
+          />
+          {(fallback || fontAccessFailed || fonts === null || fonts.length === 0) && (
+            <p role="status" className="px-2 py-1.5 text-xs text-muted-foreground">
+              {fallback ? `${value}（未安装，已回退）` : fontAccessFailed
+                ? "无法读取本机字体，请重新打开菜单重试。"
+                : fonts === null ? "正在读取本机字体…" : "未读取到本机字体。"}
+            </p>
+          )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
