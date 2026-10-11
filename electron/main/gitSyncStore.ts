@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { normalizedGitRemote, unknownGitVisibility, validateGitRepository, validateGitSyncConfig, type GitRepositoryConfig, type GitSyncState } from "../../src/lib/git-sync-contract";
+import { normalizedGitRemote, validateGitRepository, validateGitSyncConfig, type GitRepositoryConfig, type GitSyncState } from "../../src/lib/git-sync-contract";
 
 export interface GitMappingHistory { [repositoryId: string]: GitRepositoryConfig["folders"] }
 export interface GitSyncSavedState extends GitSyncState { version: 2; mappingHistory: GitMappingHistory }
@@ -10,9 +10,7 @@ export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
   const raw = saved as GitSyncSavedState;
   const configs = raw.configs.map((item) => {
     if (raw.version === 2) {
-      const config = validateGitRepository(item);
-      const visibility = item.visibility && ["public", "private", "unknown"].includes(item.visibility.value) ? item.visibility : unknownGitVisibility();
-      return { ...config, visibility, hasToken: false };
+      return validateGitRepository(item);
     }
     const legacy = validateGitSyncConfig(item as never);
     return {
@@ -20,7 +18,6 @@ export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
       provider: legacy.provider, remoteUrl: legacy.remoteUrl, branch: legacy.branch,
       intervalMinutes: legacy.intervalMinutes, enabled: legacy.enabled, layout: "legacy-root" as const,
       folders: [{ notebookId: legacy.notebookId, localPath: legacy.localPath, name: "原笔记本", remotePath: "" }],
-      visibility: unknownGitVisibility(), hasToken: false,
     };
   });
   if (new Set(configs.map((c) => c.id)).size !== configs.length) throw new Error("同步仓库标识重复");

@@ -58,12 +58,6 @@ export interface GitRepositoryFolder {
   remotePath: string;
 }
 
-export interface GitRepositoryVisibility {
-  value: "public" | "private" | "unknown";
-  checkedAt: string | null;
-  reason: string | null;
-}
-
 export interface GitRepositoryConfig {
   id: string;
   provider: GitSyncProvider;
@@ -73,17 +67,9 @@ export interface GitRepositoryConfig {
   enabled: boolean;
   layout: "subfolders" | "legacy-root";
   folders: GitRepositoryFolder[];
-  visibility: GitRepositoryVisibility;
-  hasToken: boolean;
 }
 
-/** Visibility/hasToken are output-only; the main process owns them. */
-export type GitRepositoryInput = Omit<GitRepositoryConfig, "visibility" | "hasToken">;
-export interface GitVisibilityCheck {
-  repositoryId: string;
-  /** Omit to reuse the encrypted token, null to clear it. */
-  token?: string | null;
-}
+export type GitRepositoryInput = GitRepositoryConfig;
 
 export interface GitSyncState {
   configs: GitRepositoryConfig[];
@@ -96,7 +82,6 @@ export interface GitSyncBridge {
   save: (config: GitRepositoryInput) => Promise<GitSyncState>;
   remove: (repositoryId: string) => Promise<GitSyncState>;
   syncNow: (repositoryId: string) => Promise<GitSyncState>;
-  checkVisibility: (request: GitVisibilityCheck) => Promise<GitSyncState>;
   rebindFolder: (request: GitFolderRebind) => Promise<GitSyncState>;
   getConflict: (repositoryId: string, conflictId: string) => Promise<GitSyncConflictDetail>;
   resolveConflict: (request: GitConflictResolution) => Promise<GitSyncState>;
@@ -128,8 +113,6 @@ export function validateGitSyncConfig(value: GitSyncConfig): GitSyncConfig {
   if (typeof value.enabled !== "boolean") throw new Error("自动同步开关无效");
   return { notebookId: value.notebookId, localPath: value.localPath, provider: value.provider, remoteUrl, branch, intervalMinutes: value.intervalMinutes, enabled: value.enabled };
 }
-
-export const unknownGitVisibility = (): GitRepositoryVisibility => ({ value: "unknown", checkedAt: null, reason: "尚未检查" });
 
 export function normalizedGitRemote(config: Pick<GitRepositoryInput, "provider" | "remoteUrl">): string {
   const host = config.provider === "github" ? "github.com" : "gitee.com";

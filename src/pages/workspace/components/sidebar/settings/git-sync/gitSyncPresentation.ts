@@ -16,7 +16,7 @@ export function gitSyncSummary(
 ) {
   if (status?.phase === "syncing") return "正在同步…";
   if (pending && /文件夹/.test(pending)) return "正在恢复文件夹…";
-  if (pending && pending !== "检查可见性") return /保存/.test(pending) ? "正在保存…" : `${pending}…`;
+  if (pending) return /保存/.test(pending) ? "正在保存…" : `${pending}…`;
   if (folderError) return `${folderError} 个文件夹需要处理`;
   if (!folderCount) return "尚未选择同步文件夹";
   if (status?.conflicts?.length) return "有内容冲突";
