@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain, Notification, safeStorage } from "electron";
+import { app, BrowserWindow, ipcMain, Notification } from "electron";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
-import { normalizedGitRemote, unknownGitVisibility, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus, type GitVisibilityCheck } from "../../src/lib/git-sync-contract";
+import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
 import { normalizePath } from "./allowlist";
 import { broadcast, lookupWindowContext } from "./windows";
 import { syncGitRepository, validateGitSyncFolder, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
@@ -11,8 +11,6 @@ import { checkedGitRoot as checkedRoot, checkGitFolder } from "./gitSyncFolders"
 import { rebindGitFolder } from "./gitSyncRebind";
 import { lockGitSyncPath } from "./gitSyncLock";
 import { GitSyncSerialQueue, migrateGitSyncState, type GitMappingHistory } from "./gitSyncStore";
-import { checkGitVisibility } from "./gitSyncVisibility";
-import { refreshGitVisibility } from "./gitSyncVisibilityRefresh";
 import { durableAtomicWrite } from "./gitSyncDisk";
 
 const configs = new Map<string, GitRepositoryConfig>();
@@ -21,16 +19,14 @@ const nextRun = new Map<string, number>();
 const notifications = new Map<string, string>();
 const queue = new GitSyncSerialQueue();
 let mappingHistory: GitMappingHistory = Object.create(null);
-let tokens: Record<string, string> = Object.create(null);
 const pendingReplies = new Map<string, { senderId: number; finish: (error: string | null) => void }>();
 let stopped = false;
 let ticking = false;
 let timer: NodeJS.Timeout | undefined;
 let loadPromise: Promise<void> | undefined;
 const configFile = () => path.join(app.getPath("userData"), "git-sync.json");
-const tokenFile = () => path.join(app.getPath("userData"), "git-sync-tokens.json");
 const idle = (repositoryId: string): GitSyncStatus => ({ repositoryId, phase: "idle", lastSyncedAt: null, error: null });
-const state = (): GitSyncState => structuredClone({ configs: [...configs.values()].map((config) => ({ ...config, hasToken: Boolean(tokens[config.id]) })), statuses: [...statuses.values()] });
+const state = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()] });
 const publish = () => broadcast("git-sync:state", state());
 const messageOf = (error: unknown) => error instanceof Error && /^[\u3400-\u9fff]/.test(error.message) ? error.message.slice(0, 500) : "同步操作失败，请检查文件夹、SSH 权限和网络后重试";
 
@@ -57,11 +53,8 @@ async function load() {
       configs.clear(); statuses.clear();
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取 Git 同步配置，已停止同步以保护现有文件"), { cause: error });
     }
-    try {
-      const raw = JSON.parse(await readFile(tokenFile(), "utf8"));
-      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error();
-      for (const [id, encrypted] of Object.entries(raw)) { validateRepositoryId(id); if (typeof encrypted !== "string") throw new Error(); tokens[id] = encrypted; }
-    } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取加密的可见性检查凭据"), { cause: error }); }
+    // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
+    await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
   })();
   return loadPromise;
 }
@@ -172,7 +165,7 @@ async function save(raw: GitRepositoryInput) {
   if (input.layout === "legacy-root" && input.folders.some((folder) => !history.some((old) => old.notebookId === folder.notebookId && old.localPath === folder.localPath))) throw new Error("旧布局只能重新选择原文件夹");
   input = { ...input, remoteUrl: previous?.remoteUrl ?? input.remoteUrl };
   const added = input.folders.some((folder) => !previous?.folders.some((old) => old.notebookId === folder.notebookId));
-  const config: GitRepositoryConfig = { ...input, visibility: previous?.visibility ?? unknownGitVisibility(), hasToken: Boolean(tokens[input.id]) };
+  const config: GitRepositoryConfig = input;
   const previousHistory = mappingHistory[input.id];
   const previousStatus = statuses.get(input.id);
   configs.set(input.id, config);
@@ -189,38 +182,6 @@ async function save(raw: GitRepositoryInput) {
   // This runs inside the same serialized operation: saving a newly selected folder always
   // gets its own sync attempt, including while automatic sync is disabled.
   return added ? sync(input.id) : state();
-}
-
-async function visibility(request: GitVisibilityCheck) {
-  if (!request || typeof request !== "object") throw new Error("可见性检查参数无效");
-  const id = validateRepositoryId(request.repositoryId), config = configs.get(id);
-  if (!config) throw new Error("请先保存同步配置");
-  if (request.token !== undefined && request.token !== null && (typeof request.token !== "string" || !request.token.trim() || request.token.length > 4096 || /[\r\n\0]/.test(request.token))) throw new Error("检查凭据格式无效");
-  // Clear stale results even when credential persistence/decryption fails.
-  config.visibility = { value: "unknown", checkedAt: new Date().toISOString(), reason: "正在检查" };
-  await persist(); publish();
-  try {
-    if (request.token !== undefined) {
-      const next = { ...tokens };
-      if (request.token === null) delete next[id];
-      else {
-        if (!safeStorage.isEncryptionAvailable() || (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")) throw new Error("系统安全加密不可用，无法保存可见性检查凭据");
-        next[id] = safeStorage.encryptString(request.token.trim()).toString("base64");
-      }
-      await atomic(tokenFile(), next); tokens = next;
-    }
-    let token: string | undefined;
-    if (tokens[id]) {
-      if (!safeStorage.isEncryptionAvailable() || (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")) throw new Error("系统安全加密不可用，无法读取检查凭据");
-      try { token = safeStorage.decryptString(Buffer.from(tokens[id]!, "base64")); }
-      catch { throw new Error("无法解密可见性检查凭据，请重新输入或清除"); }
-    }
-    config.visibility = await checkGitVisibility(config, token);
-    await persist(); publish(); return state();
-  } catch (error) {
-    config.visibility = { value: "unknown", checkedAt: new Date().toISOString(), reason: messageOf(error) };
-    await persist(); publish(); throw error;
-  }
 }
 
 export function registerGitSyncIpc() {
@@ -242,21 +203,9 @@ export function registerGitSyncIpc() {
       return queue.run(async () => { try { await load(); return await operation(value as never); } catch (error) { throw new Error(messageOf(error)); } });
     });
   };
-  handle("git-sync:state", async () => {
-    for (const config of configs.values()) {
-      const checkedAt = config.visibility.checkedAt, encrypted = tokens[config.id];
-      refreshGitVisibility(config, encrypted, (result) => queue.run(async () => {
-        const current = configs.get(config.id);
-        if (!current || current.visibility.checkedAt !== checkedAt || tokens[config.id] !== encrypted) return;
-        current.visibility = result;
-        await persist(); publish();
-      }));
-    }
-    return state();
-  });
+  handle("git-sync:state", async () => state());
   handle("git-sync:save", save);
   handle("git-sync:now", async (value) => sync(validateRepositoryId(value)));
-  handle("git-sync:visibility", visibility);
   handle("git-sync:rebind", async (request) => sync(await rebindGitFolder(request, { configs, mappingHistory, storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), persist, publish })));
   handle("git-sync:conflict", async (request: { repositoryId: string; conflictId: string }) => {
     const id = validateRepositoryId(request?.repositoryId);
@@ -274,8 +223,7 @@ export function registerGitSyncIpc() {
     configs.delete(id); statuses.delete(id);
     try { await persist(); }
     catch (error) { if (previous) configs.set(id, previous); if (previousStatus) statuses.set(id, previousStatus); throw error; }
-    // Retain notebook files, remote files, mapping identity and recovery data. Remove the token.
-    const next = { ...tokens }; delete next[id]; await atomic(tokenFile(), next); tokens = next;
+    // Retain notebook files, remote files, mapping identity and recovery data.
     nextRun.delete(id); notifications.delete(id); retainGitConflicts(id, new Set()); publish(); return state();
   });
 }

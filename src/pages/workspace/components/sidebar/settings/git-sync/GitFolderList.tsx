@@ -72,7 +72,7 @@ export function GitFolderList({
             <div
               key={folder.notebookId}
               className={
-                "min-w-0 rounded-lg border p-3 transition-colors " +
+                "min-w-0 overflow-hidden rounded-lg border transition-colors " +
                 (checked ? "border-primary/40 bg-primary/10" : "border-transparent bg-muted/50")
               }
             >
@@ -81,7 +81,7 @@ export function GitFolderList({
                 variant="ghost"
                 role="checkbox"
                 aria-checked={checked}
-                className="h-auto min-h-6 w-full min-w-0 justify-start gap-2 rounded-lg p-0 text-left hover:bg-transparent"
+                className="h-auto min-h-[64px] w-full min-w-0 justify-start gap-3 rounded-lg px-3 py-4 text-left hover:bg-transparent"
                 aria-label={`同步 ${folder.name} ${folder.localPath}`}
                 disabled={blocked}
                 onClick={() => onToggle(folder, !checked)}
@@ -96,33 +96,38 @@ export function GitFolderList({
                   {checked && <Check className="size-3.5" />}
                 </span>
                 <span className="min-w-0 flex-1" title={folder.localPath}>
-                  <span className="block truncate text-sm font-medium">{folder.name}</span>
+                  <span className="block truncate text-[15px] font-medium">{folder.name}</span>
                   {shortPath && <span className="block truncate text-xs text-muted-foreground">{shortPath}</span>}
                 </span>
               </Button>
               {error ? (
-                <div className="mt-2 space-y-2">
+                <div className="space-y-2 px-3 pb-3">
                   <p className={"text-xs " + (checked ? "text-danger" : "text-muted-foreground")}>
                     {shortFolderReason(error)}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={needsRecovery ? recoveryDisabled : disabled}
-                    onClick={() => (needsRecovery ? onRecover(folder, true) : onLocate(folder))}
-                  >
-                    {needsRecovery ? "重新选择文件夹" : "定位问题"}
-                  </Button>
-                  <GitDetails className="text-xs text-muted-foreground" title="问题详情">
-                    <p className="mt-1 whitespace-pre-wrap break-all">
-                      {check?.path ?? folder.localPath}
-                      {"\n"}
-                      {displayError}
-                    </p>
-                  </GitDetails>
+                  {(checked || needsRecovery) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-[44px]"
+                      disabled={needsRecovery ? recoveryDisabled : disabled}
+                      onClick={() => (needsRecovery ? onRecover(folder, true) : onLocate(folder))}
+                    >
+                      {needsRecovery ? "重新选择文件夹" : "定位问题"}
+                    </Button>
+                  )}
+                  {checked && (
+                    <GitDetails className="text-xs text-muted-foreground" title="问题详情">
+                      <p className="mt-1 whitespace-pre-wrap break-all">
+                        {check?.path ?? folder.localPath}
+                        {"\n"}
+                        {displayError}
+                      </p>
+                    </GitDetails>
+                  )}
                 </div>
               ) : !check ? (
-                <p className="mt-2 text-xs text-muted-foreground">检查中…</p>
+                <p className="px-3 pb-3 text-sm text-muted-foreground">检查中…</p>
               ) : null}
             </div>
           );
