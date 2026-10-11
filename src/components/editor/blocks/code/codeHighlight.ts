@@ -17,13 +17,10 @@ const lowlight = createLowlight(common);
 const lowlightParser = createLowlightParser(lowlight);
 const loadedLanguagesSet = new Set(lowlight.listLanguages());
 
-// common 外语言加入 failedSet → 走同步纯文本降级，不返回 Promise，
-// 杜绝「Promise → refresh → dispatch → 重算」的无限循环。
+// 不支持的语言直接显示纯文本，避免误触发所有已加载语言的自动识别。
 const failedLangsSet = new Set<string>();
 
-const SKIP_HIGHLIGHT_LANGUAGES = new Set(["none"]);
-
-const AUTO_HIGHLIGHT_LANGUAGES = new Set(["plain", "plaintext", "text", "txt"]);
+const PLAIN_TEXT_LANGUAGES = new Set(["none", "plain", "plaintext", "text", "txt"]);
 
 export function normalizeHighlightLanguage(language: string | undefined) {
   const normalized = (language || "text").trim().toLowerCase();
@@ -122,36 +119,20 @@ const shellCommandParser: Parser = ({ content, pos }) =>
 const codeBlockHighlightParser: Parser = (options) => {
   const language = normalizeHighlightLanguage(options.language);
 
-  if (SKIP_HIGHLIGHT_LANGUAGES.has(language)) return [];
+  if (PLAIN_TEXT_LANGUAGES.has(language)) return [];
   if (language === "mermaid") return mermaidParser(options);
 
-  // failedSet 里的语言（加载失败/vite 无法解析/别名缺失）→ 同步降级纯文本，不返回 Promise，
-  // 彻底断掉「Promise → refresh → dispatch → 重算」的无限循环。
-  if (failedLangsSet.has(language)) {
-    return lowlightParser({ ...options, language: undefined }) as any;
-  }
+  if (failedLangsSet.has(language)) return [];
 
-  // common 外语言（不在 loadedLanguagesSet 内）→ 加入 failedSet 同步降级纯文本。
-  // 不返回 Promise，避免触发 highlightPlugin 的 refresh 重算循环。
-  if (
-    !AUTO_HIGHLIGHT_LANGUAGES.has(language) &&
-    !loadedLanguagesSet.has(language) &&
-    language !== "text"
-  ) {
+  if (!loadedLanguagesSet.has(language)) {
     failedLangsSet.add(language);
-    return lowlightParser({ ...options, language: undefined }) as any;
+    return [];
   }
 
   try {
-    const useLanguage =
-      !AUTO_HIGHLIGHT_LANGUAGES.has(language) &&
-      loadedLanguagesSet.has(language)
-        ? language
-        : undefined;
-
     const decorations = lowlightParser({
       ...options,
-      language: useLanguage,
+      language,
     }) as any;
 
     if (SHELL_HIGHLIGHT_LANGUAGES.has(language)) {
@@ -164,7 +145,7 @@ const codeBlockHighlightParser: Parser = (options) => {
 
     return decorations;
   } catch {
-    return lowlightParser({ ...options, language: undefined }) as any;
+    return [];
   }
 };
 

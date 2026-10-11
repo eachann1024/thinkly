@@ -75,14 +75,10 @@ export function createHighlightPlugin({
         return { cache, decorations, promises };
       },
       apply: (tr, data) => {
-        const cache = data.cache.invalidate(tr);
         const refresh = !!tr.getMeta("prosemirror-highlight-refresh");
-        if (!tr.docChanged && !refresh)
-          return {
-            cache,
-            decorations: data.decorations?.map(tr.mapping, tr.doc),
-            promises: data.promises,
-          };
+        // 光标和选区移动没有改正文，不必比较所有代码块或重建装饰缓存。
+        if (!tr.docChanged && !refresh) return data;
+        const cache = tr.docChanged ? data.cache.invalidate(tr) : data.cache;
         const [decorations, promises] = calculateDecoration(
           tr.doc,
           parser,
