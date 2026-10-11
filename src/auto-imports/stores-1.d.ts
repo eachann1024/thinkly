@@ -135,4 +135,7 @@ declare global {
   // @ts-ignore
   export type { TabItem, TabType } from '../stores/useTabs'
   import('../stores/useTabs')
+  // @ts-ignore
+  export type { SidebarPanelMode } from '../stores/useWorkspaceViewport'
+  import('../stores/useWorkspaceViewport')
 }

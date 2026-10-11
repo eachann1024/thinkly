@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
@@ -59,9 +60,14 @@ export function SidebarSearch() {
   const duplicates = new Set(results.filter(p => results.some(other => other.id !== p.id && getPageTitle(other) === getPageTitle(p))).map(getPageTitle));
   const close = () => {
     session.closeSearch();
+    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.sidebar-mode-rail-button[aria-label="搜索"]')?.focus({ preventScroll: true }));
   };
-  const openResult = (page: SearchResultPage, enter = false) => { if (!pending) session.targetPage(page.id, enter); };
+  const openResult = (page: SearchResultPage, enter = false) => {
+    if (pending) return;
+    session.targetPage(page.id, enter);
+    if (enter) window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+  };
   const reveal = (id: string) => {
     const list = listRef.current, row = document.getElementById(`search-result-${id}`);
     if (!list || !row) return;
@@ -100,7 +106,7 @@ export function SidebarSearch() {
     <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
       <div id="sidebar-search-results" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
       {results.map(page => <div className="sidebar-search-result-wrap" key={page.id}>
-        <button id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selected?.id} className="sidebar-search-result rounded-lg" onClick={() => openResult(page)}>
+        <button id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selected?.id} className="sidebar-search-result rounded-lg" onClick={() => openResult(page, useWorkspaceViewport.getState().leftExpandOverride)}>
           <span className="sidebar-search-result-title"><Highlight text={getPageTitle(page)} query={session.query}/></span>
           <span className="sidebar-search-result-count">{hasQuery && (page.literalBodyMatchCount ? `${page.literalBodyMatchCount} 处` : page.matchKind === "title" ? "标题" : page.matchKind === "pinyin" ? "拼音" : "相关")}</span>
           {duplicates.has(getPageTitle(page)) && <span className="sidebar-search-book">{notebooks[page.workspaceId]?.name}</span>}

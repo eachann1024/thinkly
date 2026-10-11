@@ -1,7 +1,10 @@
+import { SidebarModeRail } from "./sidebar-shell/SidebarModeRail";
+import { useSidebarHover } from "./sidebar-shell/useSidebarHover";
 import { renderSidebarViews } from "./sidebar-shell/renderSidebarViews";
 import { SettingsDialog } from "./SettingsDialog";
 import { SidebarResizeEdge } from "./SidebarResizeEdge";
 import "./sidebar-layout.css";
+import "./sidebar-hover.css";
 import { type SidebarProps } from "./sidebar-shell/shared";
 import { useSidebarLayout } from "./sidebar-shell/useSidebarLayout";
 import { useSidebarNavigation } from "./sidebar-shell/useSidebarNavigation";
@@ -11,7 +14,7 @@ export function Sidebar(props: SidebarProps) {
   const layout = useSidebarLayout(props);
   const navigation = useSidebarNavigation(layout);
   const sidebarLifecycleContext = useSidebarLifecycle(navigation);
-  const context = sidebarLifecycleContext;
+  const context = useSidebarHover(sidebarLifecycleContext);
   const {
     className,
     disableResize,
@@ -20,7 +23,6 @@ export function Sidebar(props: SidebarProps) {
     settingsTab,
     onSettingsTabChange,
     settingsMainHost,
-    activeTab,
     sidebarCollapsed,
     sidebarOverlay,
     sidebarRef,
@@ -31,22 +33,20 @@ export function Sidebar(props: SidebarProps) {
     handleResizePointerDown,
     handleResizeKeyDown,
     settingsSidebarHost,
-    closeSidebarOverlay,
   } = context;
+  // 临时面板收起后仍留在覆盖层，避免退出文档流时宽度动画挤动正文。
+  const sidebarFloating = sidebarOverlay || sidebarCollapsed;
 
   return (
     <>
-      {sidebarOverlay && (
-        <button
-          type="button"
-          className="sidebar-overlay-backdrop"
-          aria-label="关闭导航面板"
-          tabIndex={-1}
-          onClick={closeSidebarOverlay}
-        />
-      )}
+      <SidebarModeRail context={context} />
       <div
         ref={sidebarRef}
+        id="workspace-sidebar-content"
+        data-sidebar-view={context.currentView}
+        data-sidebar-floating={sidebarFloating || undefined}
+        onPointerEnter={context.keepSidebarOpen}
+        onPointerLeave={context.leaveSidebar}
         className={cn(
           "pb-0 h-full flex flex-col relative group/sidebar",
           sidebarCollapsed && "pointer-events-none",
@@ -63,7 +63,7 @@ export function Sidebar(props: SidebarProps) {
         aria-hidden={sidebarCollapsed}
         inert={sidebarCollapsed}
       >
-        {!disableResize && !sidebarCollapsed && (
+        {!disableResize && !sidebarCollapsed && !sidebarOverlay && (
           <SidebarResizeEdge
             width={width}
             minWidth={minWidth}
@@ -77,8 +77,8 @@ export function Sidebar(props: SidebarProps) {
         <div
           className="sidebar-size-container flex h-full min-h-0 flex-col"
           style={{
-            width: sidebarOverlay ? "100%" : "var(--sidebar-configured-width)",
-            minWidth: sidebarOverlay ? 0 : "var(--sidebar-configured-width)",
+            width: sidebarFloating ? "100%" : "var(--sidebar-configured-width)",
+            minWidth: sidebarFloating ? 0 : "var(--sidebar-configured-width)",
           }}
         >
           {renderSidebarViews(context)}

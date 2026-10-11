@@ -1,3 +1,4 @@
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useSidebarEffects } from "../hooks/useSidebarEffects";
 import { shouldDismissSidebarOverlay } from "../sidebarOverlayEscape";
@@ -20,7 +21,6 @@ export function useSidebarNavigation(
     activePageId,
     activeNotebookId,
     workspaceSidebarCollapsed,
-    forceCollapseLeft,
     setLeftExpandOverride,
     sidebarOverlay,
     sidebarRef,
@@ -37,7 +37,7 @@ export function useSidebarNavigation(
   useEffect(() => {
     if (searchSessionOpen) setCurrentView("search");
     else if (currentView === "search") setCurrentView("pages");
-  }, [searchSessionOpen, currentView]);
+  }, [searchSessionOpen, currentView, setCurrentView]);
 
   useLayoutEffect(() => {
     const rail = sidebarModeRailRef.current;
@@ -46,7 +46,7 @@ export function useSidebarNavigation(
     rail
       .querySelector<HTMLButtonElement>('[aria-pressed="true"]')
       ?.focus({ preventScroll: true });
-  }, [currentView, settingsOpen]);
+  }, [currentView, settingsOpen, sidebarModeRailRef]);
 
   const openSearchSession = useSearchSession((s) => s.openSearch);
 
@@ -59,7 +59,7 @@ export function useSidebarNavigation(
   const sidebarViewShortcut = (digit: 1 | 2 | 3) =>
     formatShortcut(`Mod+${digit}`);
 
-  // 历史模式暂时隐藏窄轨和页面树，但保留当前模式与 Footer；退出后回到原侧栏状态。
+  // 历史列表替换内容面板；导航轨道继续提供返回笔记和设置的入口。
   const historyActivePageId = useHistoryView((s) => s.active);
 
   const exitHistoryView = useHistoryView((s) => s.exit);
@@ -82,8 +82,11 @@ export function useSidebarNavigation(
       (!!sidebarRef.current?.contains(active) ||
         active === sidebarRef.current?.previousElementSibling);
     if (settingsOpen) onSettingsSidebarExpandedChange(false);
-    else setLeftExpandOverride(false);
-  }, [settingsOpen, onSettingsSidebarExpandedChange, setLeftExpandOverride]);
+    else {
+      setLeftExpandOverride(false);
+      if (!useWorkspaceViewport.getState().forceCollapseLeft) useSidebarView.getState().setSidebarCollapsed(true);
+    }
+  }, [settingsOpen, onSettingsSidebarExpandedChange, setLeftExpandOverride, sidebarRef]);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -91,9 +94,7 @@ export function useSidebarNavigation(
       const detail = (event as CustomEvent<{ resetQuery?: boolean }>).detail;
       if (detail?.resetQuery) useSearchSession.getState().setQuery("");
       setCurrentView("search");
-      if (workspaceSidebarCollapsed && !forceCollapseLeft)
-        useSidebarView.getState().setSidebarCollapsed(false);
-      if (forceCollapseLeft) setLeftExpandOverride(true);
+      if (workspaceSidebarCollapsed) useWorkspaceViewport.getState().openLeftPanel("engaged");
       if (inHistoryMode) exitHistoryView();
       closeNotebookAiIfFullscreen();
       openSearchSession(
@@ -111,7 +112,7 @@ export function useSidebarNavigation(
           useSearchSession.getState().closeSearch();
         if (view === "outline") closeNotebookAiIfFullscreen();
         setCurrentView(view);
-        if (forceCollapseLeft) setLeftExpandOverride(true);
+        if (workspaceSidebarCollapsed) useWorkspaceViewport.getState().openLeftPanel("engaged");
         if (inHistoryMode) exitHistoryView();
       }
     };
@@ -142,7 +143,6 @@ export function useSidebarNavigation(
   }, [
     activeNotebookId,
     activePageId,
-    forceCollapseLeft,
     inHistoryMode,
     scrollContainerRef,
     openSearchSession,
@@ -150,6 +150,7 @@ export function useSidebarNavigation(
     exitHistoryView,
     onSettingsOpenChange,
     workspaceSidebarCollapsed,
+    setCurrentView,
   ]);
 
   useEffect(() => {
