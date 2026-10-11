@@ -96,7 +96,7 @@ export function permanentlyDeletePageWithCleanup(pageId: string) {
   });
 }
 
-/** 删除页面：本地文件夹直接移入系统回收站（不弹确认），应用内页面进垃圾箱并支持撤回 */
+/** 删除页面：本地文件夹直接移入系统废纸篓（不弹确认），应用内页面进垃圾箱并支持撤回 */
 export async function deletePageWithUndo(pageId: string) {
   const page = usePages.getState().pages[pageId];
   if (!page) return;
