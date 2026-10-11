@@ -25,7 +25,7 @@ export function MenuShortcut({ shortcut }: { shortcut: string }) {
 }
 
 export function getExternalAppLabel(app: string): string {
-  if (!app.trim()) return "用系统默认打开";
+  if (!app.trim()) return "用默认程序打开";
   return `用 ${formatLocalFolderOpenAppName(app, "外部应用")} 打开`;
 }
 
