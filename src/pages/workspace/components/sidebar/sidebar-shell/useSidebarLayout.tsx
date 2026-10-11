@@ -6,7 +6,6 @@ import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollap
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import {
   resolveSidebarOverlayWidth,
-  SIDEBAR_MIN_WIDTH,
   SIDEBAR_MAX_WIDTH,
   useSidebarResize,
 } from "../hooks/useSidebarResize";
@@ -129,16 +128,12 @@ export function useSidebarLayout({
 
   const workspaceResize = useSidebarResize({
     disableResize: disableResize || sidebarCollapsed || settingsOpen,
-    defaultWidth: SIDEBAR_MIN_WIDTH / 2,
-    minWidth: SIDEBAR_MIN_WIDTH / 2,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
   });
 
   const settingsResize = useSidebarResize({
     disableResize: disableResize || sidebarCollapsed || !settingsOpen,
-    defaultWidth: SIDEBAR_MIN_WIDTH / 2,
-    minWidth: SIDEBAR_MIN_WIDTH / 2,
     storageKey: "settings-sidebar-width",
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
