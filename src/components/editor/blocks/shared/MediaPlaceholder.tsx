@@ -55,15 +55,13 @@ export function MediaPlaceholder({
       onClick={handleClick}
       disabled={!editor.isEditable}
       aria-label={title}
+      title={hint || title}
     >
       <span className="goose-media-placeholder__icon" aria-hidden="true">
         {icon}
       </span>
       <span className="goose-media-placeholder__copy">
         <span className="goose-media-placeholder__title">{title}</span>
-        {hint ? (
-          <span className="goose-media-placeholder__hint">{hint}</span>
-        ) : null}
       </span>
     </EditorAction>
   );
