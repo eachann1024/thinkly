@@ -6,6 +6,7 @@
  * - 全屏模式：主内容区铺满 AI，不创建标签页，仅标签栏最左图标入口
  */
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { useTabs, isNotebookAiTab } from "@/stores/useTabs";
 import { FILE_NAV_AI_PANEL, useFileNavHistory } from "@/stores/useFileNavHistory";
 
@@ -98,7 +99,8 @@ let closeAiPanelHandler: (() => void) | null = null;
 
 /** 当前是否处于「AI 已打开且全屏」——侧栏点页面时应退出 AI 回到该标签。 */
 export function isNotebookAiFullscreenOpen(): boolean {
-  return readStoredOpen() && isFullscreenAiLayout(readStoredLayoutMode());
+  const vp = useWorkspaceViewport.getState();
+  return readStoredOpen() && (isFullscreenAiLayout(readStoredLayoutMode()) || vp.forceCollapseLeft && vp.rightExpandOverride);
 }
 
 /**
@@ -174,7 +176,7 @@ export function useNotebookAiPanel() {
   useEffect(() => {
     closeAiPanelHandler = close;
     const onCloseIfFullscreen = () => {
-      if (readStoredOpen() && isFullscreenAiLayout(layoutModeRef.current)) {
+      if (isNotebookAiFullscreenOpen()) {
         close();
       }
     };

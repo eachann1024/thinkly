@@ -61,7 +61,7 @@ export function useWorkspaceLayoutState({
 
   const {
     isOpen: aiPanelOpen,
-    layoutMode: aiLayoutMode,
+    layoutMode: preferredAiLayoutMode,
     setLayoutMode: setAiLayoutMode,
     open: openAiPanel,
     toggle: toggleAiPanel,
@@ -69,10 +69,6 @@ export function useWorkspaceLayoutState({
     capturedSelection: aiPanelCapturedSelection,
     consumeCapturedSelection: consumeAiPanelCapturedSelection,
   } = useNotebookAiPanel();
-
-  const aiFullscreen = isFullscreenAiLayout(aiLayoutMode);
-
-  const userSideAiPanel = aiEnabled && aiPanelOpen && !aiFullscreen;
 
   useWorkspaceViewportCollapse();
 
@@ -83,6 +79,10 @@ export function useWorkspaceLayoutState({
   );
 
   const forceCollapseLeft = useWorkspaceViewport(s => s.forceCollapseLeft);
+  const aiLayoutMode = forceCollapseLeft && rightExpandOverride
+    ? "fullscreen" as const : preferredAiLayoutMode;
+  const aiFullscreen = isFullscreenAiLayout(aiLayoutMode);
+  const userSideAiPanel = aiEnabled && aiPanelOpen && !aiFullscreen;
 
   const showSideAiPanel = isEffectiveRightSidePanelOpen(
     userSideAiPanel,
