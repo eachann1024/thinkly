@@ -1,3 +1,4 @@
+# 当前 AI 审核已改用 .github/codex-review（Codex ChatGPT 登录）。本文件不再被 workflow 读取。
 # PR-Agent 仓库配置：放仓库根目录。workflow 用 pull_request_target，从默认分支读取本文件，PR 改不了自己的审核规则。
 # 文档：https://docs.pr-agent.ai/usage-guide/additional_configurations/ 、https://docs.pr-agent.ai/tools/review/
 # 已核对 The-PR-Agent/pr-agent 源码 35553cb（2026-10-08）里的键名。
