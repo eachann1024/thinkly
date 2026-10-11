@@ -22,9 +22,9 @@ export const WORKSPACE_COLLAPSE_RIGHT_BELOW = 1100;
 
 /**
  * 低于此宽度强制收起左侧栏。
- * 正文、常驻导航轨道和内容面板需要独立操作空间；窄窗使用覆盖面板。
+ * 沿用原有窄窗边界；正常宽度保留并排侧栏，窄窗才使用覆盖面板。
  */
-export const WORKSPACE_COLLAPSE_LEFT_BELOW = 960;
+export const WORKSPACE_COLLAPSE_LEFT_BELOW = 720;
 
 export type WorkspaceViewportCollapse = {
   forceCollapseLeft: boolean;

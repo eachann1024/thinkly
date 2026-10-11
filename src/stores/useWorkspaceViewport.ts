@@ -30,9 +30,9 @@ export const useWorkspaceViewport = create<State>((set, get) => ({
     set({
       forceCollapseLeft: left,
       forceCollapseRight: right,
-      leftExpandOverride: cur.leftPanelPinned
-        ? left
-        : cur.leftPanelMode !== "pinned" && cur.leftExpandOverride,
+      leftExpandOverride: left && (
+        cur.leftPanelPinned || cur.forceCollapseLeft && cur.leftExpandOverride
+      ),
       rightExpandOverride: right ? cur.rightExpandOverride : false,
     });
   },
@@ -48,7 +48,7 @@ export const useWorkspaceViewport = create<State>((set, get) => ({
     set({
       leftPanelMode: mode,
       leftPanelPinned: mode === "pinned",
-      leftExpandOverride: mode !== "pinned" || get().forceCollapseLeft,
+      leftExpandOverride: get().forceCollapseLeft,
     }),
   setRightExpandOverride: (value) => {
     if (get().rightExpandOverride === value) return;
