@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { isEffectiveSidebarCollapsed } from "@/lib/workspaceViewport";
-import { useWorkspaceViewport } from "./useWorkspaceViewport";
+import { useWorkspaceViewport, type SidebarPanelMode } from "./useWorkspaceViewport";
 
 const EMPTY_ARRAY: string[] = [];
 const SIDEBAR_VIEW_PERSIST_DEBOUNCE_MS = 80;
@@ -81,6 +81,7 @@ type State = {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebarCollapsed: () => void;
+  openSidebarPanel: (mode: SidebarPanelMode) => void;
   setExpanded: (notebookId: string, ids: string[]) => void;
   expand: (notebookId: string, id: string) => void;
   collapse: (notebookId: string, id: string) => void;
@@ -108,11 +109,19 @@ export const useSidebarView = create<State>()(
         if (!get().sidebarCollapsed) set({ sidebarCollapsed: true });
         vp.setLeftExpandOverride(false);
       },
+      openSidebarPanel: (mode) => {
+        const vp = useWorkspaceViewport.getState();
+        if (vp.forceCollapseLeft) vp.openLeftPanel(mode);
+        else {
+          if (get().sidebarCollapsed) set({ sidebarCollapsed: false });
+          vp.setLeftExpandOverride(false);
+        }
+      },
       toggleSidebarCollapsed: () => {
         const vp = useWorkspaceViewport.getState();
         const userCollapsed = get().sidebarCollapsed;
         const hidden = isEffectiveSidebarCollapsed(userCollapsed, vp.forceCollapseLeft, vp.leftExpandOverride);
-        if (hidden) vp.openLeftPanel("engaged");
+        if (hidden) get().openSidebarPanel("engaged");
         else {
           vp.setLeftExpandOverride(false);
           if (!vp.forceCollapseLeft) set({ sidebarCollapsed: true });

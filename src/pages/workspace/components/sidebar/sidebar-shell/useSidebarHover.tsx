@@ -14,6 +14,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
     sidebarModeRailRef,
     sidebarCollapsed,
     sidebarOverlay,
+    forceCollapseLeft,
     settingsOpen,
     currentView,
     inHistoryMode,
@@ -36,13 +37,14 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   const openSidebarView = (view: SidebarView) => {
     keepSidebarOpen();
     if (!pinned || settingsOpen)
-      useWorkspaceViewport.getState().openLeftPanel("engaged");
+      useSidebarView.getState().openSidebarPanel("engaged");
     if (view === "search") handleOpenSearch();
     else switchSidebarView(view);
   };
   const hoverSidebarView = (view: SidebarView) => {
     keepSidebarOpen();
     if (
+      !forceCollapseLeft ||
       settingsOpen ||
       inHistoryMode ||
       pinned ||
@@ -53,6 +55,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
       return;
     if (view === "search") return;
     openTimer.current = setTimeout(() => {
+      if (!useWorkspaceViewport.getState().forceCollapseLeft) return;
       useWorkspaceViewport.getState().openLeftPanel("preview");
       switchSidebarView(view);
     }, 200);
@@ -64,6 +67,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
       const vp = useWorkspaceViewport.getState();
       if (
         pointerInside.current ||
+        !vp.forceCollapseLeft ||
         vp.leftPanelMode !== "preview" ||
         !vp.leftExpandOverride
       )
@@ -88,7 +92,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   };
   const dismissAfterNavigation = useCallback(() => {
     const vp = useWorkspaceViewport.getState();
-    if (!settingsOpen && vp.leftExpandOverride && vp.leftPanelMode !== "pinned")
+    if (!settingsOpen && vp.forceCollapseLeft && vp.leftExpandOverride && vp.leftPanelMode !== "pinned")
       closeSidebarOverlay();
   }, [settingsOpen, closeSidebarOverlay]);
   useEffect(() => {
@@ -106,7 +110,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
         !hasSidebarFloatingInteraction()
       ) {
         const vp = useWorkspaceViewport.getState();
-        if (vp.leftExpandOverride && vp.leftPanelMode !== "pinned")
+        if (vp.forceCollapseLeft && vp.leftExpandOverride && vp.leftPanelMode !== "pinned")
           closeSidebarOverlay();
       }
     };
