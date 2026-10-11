@@ -1,3 +1,4 @@
+import { clearResolvedUrlCache } from "@/lib/imageStorage/resolvedUrlCache";
 /**
  * Electron 桌面端的附件磁盘存储。
  *
@@ -138,6 +139,7 @@ export const getAttachmentType = async (id: string): Promise<string | null> => {
 };
 
 export const removeAttachment = async (id: string): Promise<void> => {
+  clearResolvedUrlCache();
   try {
     const api = getGooseDesktop();
     if (!api) return;
@@ -154,5 +156,7 @@ export const removeAttachment = async (id: string): Promise<void> => {
     }
   } catch {
     // ignore
+  } finally {
+    clearResolvedUrlCache();
   }
 };

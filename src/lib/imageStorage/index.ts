@@ -9,6 +9,7 @@ import { AttachmentStrategy } from './strategies/attachment'
 import { FileSystemStrategy } from './strategies/file-system'
 import { InlinedStrategy } from './strategies/inlined'
 import { compressIfNeeded } from '../imageProcessor'
+import { clearResolvedUrlCache } from './resolvedUrlCache'
 
 type LocalFolderAccessState =
   | boolean
@@ -136,25 +137,30 @@ export class ImageStorage {
    * 删除图片
    */
   async delete(ref: string): Promise<void> {
-    if (this.inlinedStrategy.canHandle(ref)) {
-      return this.inlinedStrategy.delete(ref)
-    }
+    clearResolvedUrlCache()
+    try {
+      if (this.inlinedStrategy.canHandle(ref)) {
+        return await this.inlinedStrategy.delete(ref)
+      }
 
-    const strategy = await this.resolveStrategy()
-    if (strategy.canHandle(ref)) {
-      return strategy.delete(ref)
-    }
+      const strategy = await this.resolveStrategy()
+      if (strategy.canHandle(ref)) {
+        return await strategy.delete(ref)
+      }
 
-    // 尝试文件系统策略
-    const fsStrategy = new FileSystemStrategy(() => this.resolveLocalFolderPath())
-    if (fsStrategy.canHandle(ref)) {
-      return fsStrategy.delete(ref)
-    }
+      // 尝试文件系统策略
+      const fsStrategy = new FileSystemStrategy(() => this.resolveLocalFolderPath())
+      if (fsStrategy.canHandle(ref)) {
+        return await fsStrategy.delete(ref)
+      }
 
-    // 尝试 attachment 策略
-    const attStrategy = new AttachmentStrategy()
-    if (attStrategy.canHandle(ref)) {
-      return attStrategy.delete(ref)
+      // 尝试 attachment 策略
+      const attStrategy = new AttachmentStrategy()
+      if (attStrategy.canHandle(ref)) {
+        return await attStrategy.delete(ref)
+      }
+    } finally {
+      clearResolvedUrlCache()
     }
   }
 }
