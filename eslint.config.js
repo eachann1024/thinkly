@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import reactPlugin from 'eslint-plugin-react'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import uiControls from './config/ui-control-eslint.mjs'
 
 export default defineConfig([
   globalIgnores([
@@ -35,11 +36,13 @@ export default defineConfig([
     plugins: {
       react: reactPlugin,
       'jsx-a11y': jsxA11y,
+      'goose-ui': uiControls,
     },
     settings: {
       react: { version: 'detect' },
     },
     rules: {
+      'goose-ui/public-controls': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-require-imports': 'warn',
