@@ -3,6 +3,8 @@ import { EditorState, Plugin } from "@tiptap/pm/state";
 import { Step } from "@tiptap/pm/transform";
 import type { Schema } from "@tiptap/pm/model";
 
+import { getCachedContentSignature } from "./editorContentPolicy";
+
 const historyKey = history().spec.key!;
 
 // prosemirror-history 没有序列化 API。这里只适配其 Branch / Item，保留原型和
@@ -21,9 +23,12 @@ function migrateHistory(value: any, schema: Schema): any {
   return clone(value, { done: branch(value.done), undone: branch(value.undone) });
 }
 
+type Source = { content: unknown; mode: "raw" | "normalized"; syncedSignature: string | null };
+
 type Snapshot = {
   signature: string;
   state: EditorState;
+  source?: Source & { signature: string };
 };
 
 /** 每个窗口本次运行内共享，最多 10 篇（含当前篇）；不保留编辑器、DOM 或宿主闭包。 */
@@ -43,7 +48,7 @@ export class PageUndoHistory {
     }
   }
 
-  save(pageId: string, state: EditorState, signature: string) {
+  save(pageId: string, state: EditorState, signature: string, source?: Source) {
     // 非聚焦分屏的卸载不应把已淘汰的笔记重新挤进最近访问列表。
     if (!this.entries.has(pageId)) return;
     const plugin = historyKey.get(state);
@@ -51,7 +56,18 @@ export class PageUndoHistory {
     this.entries.set(pageId, {
       signature,
       state: state.reconfigure({ plugins: [plugin] }),
+      source: source ? { ...source, signature: getCachedContentSignature(source.content) } : undefined,
     });
+  }
+
+  /** Restore the immutable document directly only when the host's source is unchanged. */
+  restoreCached(pageId: string, current: EditorState, content: unknown, mode: Source["mode"]) {
+    const snapshot = this.entries.get(pageId);
+    const source = snapshot?.source;
+    if (!snapshot || !source || source.mode !== mode ||
+        source.signature !== getCachedContentSignature(content)) return null;
+    const state = this.restore(pageId, current, snapshot.signature);
+    return state === current ? null : { state, syncedSignature: source.syncedSignature };
   }
 
   restore(pageId: string, current: EditorState, signature: string): EditorState {
