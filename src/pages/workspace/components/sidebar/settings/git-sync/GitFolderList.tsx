@@ -111,7 +111,7 @@ export function GitFolderList({
                 contentStyle="preserve"
                 role="checkbox"
                 aria-checked={checked}
-                className="group relative flex h-auto min-h-[64px] w-full min-w-0 items-center justify-start gap-3 rounded-lg px-3 py-4 text-left !bg-transparent disabled:!bg-transparent"
+                className="group relative flex h-auto min-h-[44px] w-full min-w-0 items-center justify-start gap-3 rounded-lg px-3 py-2 text-left !bg-transparent disabled:!bg-transparent"
                 aria-label={`同步 ${folder.name} ${folder.localPath}${error ? `，${shortFolderReason(error)}` : ""}`}
                 disabled={blocked}
                 onClick={() => onToggle(folder, !checked)}
