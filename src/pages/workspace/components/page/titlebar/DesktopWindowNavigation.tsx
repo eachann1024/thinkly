@@ -37,10 +37,11 @@ export function DesktopWindowNavigation({
           <TooltipTrigger asChild>
             <button
               type="button"
-              className={actionButtonClass}
+              className={cn(actionButtonClass, "sidebar-toggle-button")}
               onClick={onToggleSidebar ?? toggleSidebarCollapsed}
               aria-label={sidebarCollapsed ? "展开侧栏" : "收起侧栏"}
               aria-pressed={sidebarCollapsed}
+              aria-expanded={!sidebarCollapsed}
             >
               <GooseIcons.PanelLeft className="h-4 w-4" />
             </button>
