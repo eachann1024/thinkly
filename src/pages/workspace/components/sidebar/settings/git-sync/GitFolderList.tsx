@@ -99,10 +99,13 @@ export function GitFolderList({
             <div
               key={folder.notebookId}
               className={
-                "min-w-0 overflow-hidden rounded-lg border transition-colors " +
+                "min-w-0 overflow-hidden rounded-lg transition-colors " +
                 (checked
-                  ? "border-primary/40 bg-primary/10"
-                  : "border-transparent bg-muted/50")
+                  ? "bg-[var(--goose-interactive-selected)]"
+                  : "bg-[var(--goose-settings-option-bg)]" +
+                    (blocked
+                      ? ""
+                      : " hover:bg-[var(--goose-interactive-hover)]"))
               }
             >
               <Button
@@ -116,10 +119,6 @@ export function GitFolderList({
                 disabled={blocked}
                 onClick={() => onToggle(folder, !checked)}
               >
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-[3px] rounded-[inherit] border border-primary/40 opacity-0 group-hover:opacity-100 group-disabled:hidden"
-                />
                 <span
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-primary opacity-0 group-focus-visible:opacity-100"
