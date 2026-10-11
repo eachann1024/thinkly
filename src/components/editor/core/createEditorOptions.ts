@@ -51,7 +51,7 @@ export function createEditorOptions(
         default:
           __GOOSE_LITE__ || isQuickNoteEditorPage(page)
             ? ""
-            : "输入 / 唤起指令，或按 @ 引用笔记…",
+            : "输入 / 选择内容",
         quote: "引用",
         toggleListItem: "",
       },
