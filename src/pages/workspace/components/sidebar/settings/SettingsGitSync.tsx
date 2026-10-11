@@ -199,7 +199,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     );
   }
   async function recoverFolder(folder: GitRepositoryFolder, relocate: boolean) {
-    if (!bridge || !config || disabled || folderDrafts[id] || drafts[id]) return;
+    if (!bridge || disabled || (config && (folderDrafts[id] || drafts[id]))) return;
     const localPath = await selectRecoveryPath(folder, relocate).catch((error) => {
       setErrors((current) => ({ ...current, [id]: messageOf(error) }));
       return null;
@@ -207,7 +207,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     if (!localPath) return;
     void run(
       id,
-      relocate ? "重新关联文件夹" : "重新打开文件夹",
+      "恢复文件夹",
       () =>
         rebindOpenedFolder(
           bridge,
@@ -215,7 +215,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
           folder,
           localPath,
           relocate,
-          config.folders.some((item) => item.notebookId === folder.notebookId),
+          Boolean(config?.folders.some((item) => item.notebookId === folder.notebookId)),
         ),
       recheck,
     );
@@ -240,11 +240,10 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   for (const folder of config?.folders ?? [])
     if (!rows.some((row) => row.notebookId === folder.notebookId)) rows.push(folder);
   const availableIds = availableFolderIds(localNotebooks, config?.folders ?? []);
-  const selectedFolderError = folders.some(
+  const selectedFolderError = folders.filter(
     (folder) => !availableIds.has(folder.notebookId) || Boolean(folderChecks[folder.localPath]?.error),
-  );
+  ).length;
   const summary = gitSyncSummary(status, pending, selectedFolderError, folders.length, Boolean(config?.enabled));
-
   return (
     <GitSyncContent
       bridge={bridge}
@@ -258,6 +257,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       selectionDisabled={selectionDisabled}
       status={status}
       summary={summary}
+      folderErrorCount={selectedFolderError}
       rows={rows}
       folders={folders}
       availableIds={availableIds}
