@@ -106,7 +106,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
               className={cn(
                 "notebook-ai-composer-shell bui-root flex min-h-[44px] gap-2 overflow-hidden rounded-control",
                 expanded ? "flex-wrap items-end" : "flex-nowrap items-center",
-                "bg-[hsl(var(--goose-editor-bg))] py-1.5 pl-2.5 pr-2",
+                "py-1.5 pl-2.5 pr-2",
                 dropActive &&
                   "ring-2 ring-[var(--goose-interactive-selected)] ring-offset-1 ring-offset-background",
               )}
@@ -205,10 +205,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     type="button"
                     onClick={handleSubmit}
                     disabled={!canClickSend}
-                    className={cn(
-                      "bui-composer-send flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
-                      !sendLooksReady && "cursor-not-allowed text-disabled",
-                    )}
+                    className="bui-composer-send notebook-ai-send-button flex h-8 w-8 shrink-0 items-center justify-center rounded-control"
+                    data-ready={sendLooksReady ? "true" : "false"}
                     aria-label="发送消息"
                     title="发送消息"
                   >
