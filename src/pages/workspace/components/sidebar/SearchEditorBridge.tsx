@@ -1,3 +1,5 @@
+import { IconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { ArrowLeft, ChevronDown, ChevronUp, X } from "@/components/ui/icons";
@@ -148,14 +150,14 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
   crumbs.unshift(notebooks[page.workspaceId]?.name ?? "笔记本");
   const titleOnly = !count && session.query.trim() && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase());
   return <>
-    <div className="search-editor-path"><Popover open={pathOpen} onOpenChange={setPathOpen}><PopoverTrigger asChild><button aria-label="查看笔记完整路径" title={crumbs.join(" / ")}>{crumbs.length > 2 ? `${crumbs[0]} / ${crumbs.at(-2)}` : crumbs.join(" / ")}</button></PopoverTrigger><PopoverContent align="end" className="max-w-[min(24rem,85vw)] break-words text-sm">{crumbs.join(" / ")}</PopoverContent></Popover></div>
+    <div className="search-editor-path"><Popover open={pathOpen} onOpenChange={setPathOpen}><PopoverTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" aria-label="查看笔记完整路径" title={crumbs.join(" / ")}>{crumbs.length > 2 ? `${crumbs[0]} / ${crumbs.at(-2)}` : crumbs.join(" / ")}</Button></PopoverTrigger><PopoverContent align="end" className="max-w-[min(24rem,85vw)] break-words text-sm">{crumbs.join(" / ")}</PopoverContent></Popover></div>
     <div className="search-editor-matchbar" aria-label="搜索命中导航">
-      <button aria-label="返回搜索结果" onClick={() => window.dispatchEvent(new CustomEvent("goose-note:open-search"))}><ArrowLeft size={16}/><span>搜索结果</span></button>
+      <Button contentStyle="preserve" variant="ghost" size="sm" aria-label="返回搜索结果" onClick={() => window.dispatchEvent(new CustomEvent("goose-note:open-search"))}><ArrowLeft size={16}/><span>搜索结果</span></Button>
       <span role="status">{count ? `${current} / ${count} 处` : titleOnly ? "标题匹配" : "正文无匹配"}</span>
-      <button aria-label="上一处匹配" disabled={!count} onClick={() => step(-1)}><ChevronUp size={16}/></button><button aria-label="下一处匹配" disabled={!count} onClick={() => step(1)}><ChevronDown size={16}/></button>
+      <IconButton size="xs" className="p-0" aria-label="上一处匹配" disabled={!count} onClick={() => step(-1)}><ChevronUp size={16}/></IconButton><IconButton size="xs" className="p-0" aria-label="下一处匹配" disabled={!count} onClick={() => step(1)}><ChevronDown size={16}/></IconButton>
       <span className="search-match-message" aria-live="polite">{message}</span>
-      <button disabled={!session.originPageId || !pages[session.originPageId]} onClick={() => session.originPageId && useSearchSession.getState().targetPage(session.originPageId, true, useSearchSession.getState().originScrollTop)}>返回起始笔记</button>
-      <button aria-label="退出搜索" onClick={close}><X size={16}/></button>
+      <Button contentStyle="preserve" variant="ghost" size="sm" disabled={!session.originPageId || !pages[session.originPageId]} onClick={() => session.originPageId && useSearchSession.getState().targetPage(session.originPageId, true, useSearchSession.getState().originScrollTop)}>返回起始笔记</Button>
+      <IconButton size="xs" className="p-0" aria-label="退出搜索" onClick={close}><X size={16}/></IconButton>
     </div>
   </>;
 }

@@ -10,12 +10,12 @@
   justify-content: space-between;
   gap: 8px;
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   background-color: hsl(var(--muted) / 0.4);
   border: 1px solid hsl(var(--border) / 0.4);
   transition:
-    border-color 150ms ease,
-    background-color 150ms ease;
+    border-color var(--goose-control-motion-duration) ease,
+    background-color var(--goose-control-motion-duration) ease;
   width: 100%;
   box-sizing: border-box;
 }
@@ -52,7 +52,7 @@
   background: transparent;
   color: hsl(var(--muted-foreground));
   cursor: pointer;
-  transition: color 120ms ease;
+  transition: color var(--goose-control-motion-duration) ease;
 }
 
 .goose-file-block-icon-btn:hover {
@@ -87,7 +87,7 @@
   color: var(--goose-interactive-hover-fg);
   border: none;
   outline: none;
-  border-radius: 3px;
+  border-radius: var(--goose-field-radius);
   padding: 1px 4px;
 }
 
@@ -97,7 +97,7 @@
   gap: 4px;
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity 150ms ease;
+  transition: opacity var(--goose-control-motion-duration) ease;
 }
 
 .goose-file-block-content:hover .goose-file-block-actions,
@@ -109,16 +109,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  width: var(--goose-editor-dock-control-size);
+  height: var(--goose-editor-dock-control-size);
+  border-radius: var(--goose-control-radius);
   border: none;
   background: transparent;
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    color 120ms ease;
+    background-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
 }
 
 .goose-file-block-action-btn:hover {
@@ -142,10 +142,10 @@
   text-align: left;
   font: inherit;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
+    background-color var(--goose-control-motion-duration) ease,
+    border-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease,
+    box-shadow var(--goose-control-motion-duration) ease;
 }
 
 .goose-media-placeholder:hover:not(:disabled) {
@@ -193,8 +193,8 @@
   color: hsl(var(--muted-foreground));
   box-shadow: inset 0 0 0 1px var(--goose-block-subtle-border);
   transition:
-    color 150ms ease,
-    background-color 150ms ease;
+    color var(--goose-control-motion-duration) ease,
+    background-color var(--goose-control-motion-duration) ease;
 }
 
 .goose-media-placeholder--file .goose-media-placeholder__icon {

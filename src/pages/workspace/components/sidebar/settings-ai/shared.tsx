@@ -33,7 +33,7 @@ export interface SettingsAIProps {
 }
 
 export const SETTINGS_OPTION_ROW_CLASS =
-  "rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)]";
+  "goose-settings-option-row";
 
 export const CUSTOM_AI_KEY_HINT =
   "请前往「设置 › AI 助手 › AI 服务」补充 API Key";

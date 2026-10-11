@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
 import { CircleAlert, FilePlus2, X, Pencil } from "@/components/ui/icons";
 import { getQuickNoteSlotName } from "@/stores/useQuickNote";
@@ -41,7 +43,7 @@ export function renderQuickNoteHeader(
       data-renaming={renamingSlot === null ? "false" : "true"}
     >
       {renamingSlot !== null && (
-        <input
+        <Input variant="inline" controlSize={null}
           ref={renameInputRef}
           value={renameValue}
           maxLength={24}
@@ -75,7 +77,7 @@ export function renderQuickNoteHeader(
         style={{ WebkitAppRegion: "drag" } as CSSProperties}
       >
         <div className="quicknote-titlebar-left">
-          <button
+          <Button contentStyle="preserve" variant="ghost"
             type="button"
             aria-label="修改标签名称"
             title={`${displaySlotName} · 修改标签名称`}
@@ -89,7 +91,7 @@ export function renderQuickNoteHeader(
             >
               {displaySlotName}
             </span>
-          </button>
+          </Button>
         </div>
 
         {/* 绝对居中，避免左右内容宽度差导致视觉偏移 */}
@@ -107,7 +109,7 @@ export function renderQuickNoteHeader(
         </div>
 
         <div className="quicknote-titlebar-actions">
-          <button
+          <Button contentStyle="preserve" variant="ghost"
             type="button"
             aria-label="保存到笔记"
             title={
@@ -124,18 +126,18 @@ export function renderQuickNoteHeader(
             }}
           >
             <FilePlus2 className="h-3 w-3" />
-          </button>
+          </Button>
           <Popover open={helpOpen} onOpenChange={handleHelpOpenChange}>
             <PopoverTrigger asChild>
-              <button
+              <Button contentStyle="preserve" variant="ghost"
                 type="button"
                 aria-label="使用说明"
                 title="使用说明"
-                className="quicknote-titlebar-btn quicknote-help-trigger"
+                className={`quicknote-titlebar-btn quicknote-help-trigger ${helpOpen ? "goose-interactive--selected" : ""}`}
                 style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
               >
                 <CircleAlert className="h-3 w-3" />
-              </button>
+              </Button>
             </PopoverTrigger>
             <PopoverContent
               align="end"
@@ -150,7 +152,7 @@ export function renderQuickNoteHeader(
                   内容默认只留在当前便签。点「保存到笔记」会在当前笔记本新建一篇，并清空这张便签。
                 </p>
               </div>
-              <button
+              <Button contentStyle="preserve" variant="ghost"
                 type="button"
                 className="quicknote-help-rename flex w-full items-center gap-2 text-left text-xs text-foreground"
                 onClick={() => startRename(activeSlot)}
@@ -160,7 +162,7 @@ export function renderQuickNoteHeader(
                 <span className="max-w-24 truncate text-muted-foreground">
                   {getQuickNoteSlotName(activeSlot, slotNames)}
                 </span>
-              </button>
+              </Button>
               <ul className="quicknote-help-list text-muted-foreground">
                 <li>
                   <b className="text-foreground">切换</b>
@@ -196,7 +198,7 @@ export function renderQuickNoteHeader(
               </ul>
             </PopoverContent>
           </Popover>
-          <button
+          <Button contentStyle="preserve" variant="ghost"
             type="button"
             aria-label="关闭"
             className="quicknote-titlebar-btn quicknote-close-btn"
@@ -204,7 +206,7 @@ export function renderQuickNoteHeader(
             onClick={() => persistPlacementThenClose()}
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 /**
  * 处理进度：所有阶段共用紧凑状态标签，步骤与具体原因保留在正文。
  * 工具调用与思考汇总成一行；思考只在行内截成一句，不另开折叠。
@@ -102,14 +103,14 @@ function WorkCardTraceRow({
 
   if (foldable) {
     return (
-      <button
+      <Button contentStyle="preserve" variant="ghost" size={null}
         type="button"
         className="notebook-ai-work-toggle"
         aria-expanded={open}
         onClick={onToggle}
       >
         {body}
-      </button>
+      </Button>
     );
   }
 

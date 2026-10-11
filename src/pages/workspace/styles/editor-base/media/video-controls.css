@@ -14,7 +14,7 @@
   height: 3px;
   border-radius: var(--radius-marker);
   background: rgba(255, 255, 255, 0.22);
-  transition: height 120ms ease;
+  transition: height var(--goose-control-motion-duration) ease;
 }
 
 .goose-video-player__progress:hover .goose-video-player__progress-track,
@@ -44,8 +44,8 @@
   transform: translate(-50%, -50%) scale(0.6);
   opacity: 0;
   transition:
-    opacity 120ms ease,
-    transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity var(--goose-control-motion-duration) ease,
+    transform var(--goose-control-motion-duration) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .goose-video-player__progress:hover .goose-video-player__progress-thumb,
@@ -83,13 +83,13 @@
   margin: 0;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--goose-control-radius);
   color: var(--goose-text-on-dark);
   background: transparent;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    color 120ms ease;
+    background-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
 }
 
 .goose-video-player__btn:hover {

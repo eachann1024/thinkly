@@ -65,7 +65,7 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"
-              className="rounded-[10px]"
+              className="rounded-[var(--goose-control-radius)]"
               onClick={() => {
                 confirmConfig?.onCancel?.();
                 setConfirmConfig(null);
@@ -75,7 +75,7 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
             </Button>
             <Button
               variant={confirmConfig?.isDestructive ? "destructive" : "default"}
-              className="rounded-[10px]"
+              className="rounded-[var(--goose-control-radius)]"
               onClick={async () => {
                 if (!activationRef.current.active) return;
                 const onConfirm = confirmConfig?.onConfirm;

@@ -1,3 +1,5 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
 import { FilePlus2, FileText, Pencil, Trash2 } from "@/components/ui/icons";
 import { getPageTitle } from "@/components/editor/utils/page-title";
@@ -148,12 +150,13 @@ export function ReviewOperation({
     >
       <div className="notebook-ai-plan-file-bar">
         {canSelect ? (
-          <input
-            type="checkbox"
-            checked={selected}
+          <Checkbox
+            isSelected={selected}
             onChange={onSelect}
             aria-label={`执行${planOperationKindLabel(operation.type)} ${title}`}
-          />
+          >
+            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          </Checkbox>
         ) : (
           <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
         )}
@@ -161,14 +164,14 @@ export function ReviewOperation({
           {planOperationKindLabel(operation.type)}
         </span>
         {navigable ? (
-          <button
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             className="notebook-ai-plan-file-title notebook-ai-review-target"
             title={`打开目标笔记：${path}`}
             onClick={() => onOpenPage(livePage!.id)}
           >
             {title}
-          </button>
+          </Button>
         ) : (
           <span className="notebook-ai-plan-file-title">{title}</span>
         )}
@@ -187,38 +190,38 @@ export function ReviewOperation({
         <div className="notebook-ai-review-toolbar">
           {oldText !== undefined && operation.type !== "create" ? (
             <div role="group" aria-label={`${title} 预览方式`}>
-              <button
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 aria-pressed={view === "diff"}
                 onClick={() => setView("diff")}
               >
                 差异
-              </button>
-              <button
+              </Button>
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 aria-pressed={view === "new"}
                 onClick={() => setView("new")}
               >
                 {operation.type === "search_replace" ? "新片段" : "最终正文"}
-              </button>
+              </Button>
             </div>
           ) : null}
           {oldText !== undefined && operation.type !== "create" ? (
-            <button type="button" onClick={() => void copy(oldText, "原文")}>
+            <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(oldText, "原文")}>
               复制原文
-            </button>
+            </Button>
           ) : null}
-          <button type="button" onClick={() => void copy(newText, "新内容")}>
+          <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(newText, "新内容")}>
             复制新内容
-          </button>
-          <button
+          </Button>
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             disabled={!selectionText}
             onMouseDown={(event) => event.preventDefault()}
             onClick={refine}
           >
             调整选中文字
-          </button>
+          </Button>
         </div>
       ) : null}
       <p
@@ -242,14 +245,14 @@ export function ReviewOperation({
               return (
                 <li key={id}>
                   {target && !target.trashedAt && !target.isFolder ? (
-                    <button
+                    <Button contentStyle="preserve" variant="ghost" size={null}
                       type="button"
                       className="notebook-ai-review-target"
                       title={reviewPagePath(target)}
                       onClick={() => onOpenPage(id)}
                     >
                       {reviewPagePath(target)}
-                    </button>
+                    </Button>
                   ) : target ? (
                     reviewPagePath(target)
                   ) : (

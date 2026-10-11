@@ -1,5 +1,5 @@
+import { Kbd } from "@/components/ui/kbd";
 import {
-  formatShortcut,
   getPlatformKind,
   type PlatformKind,
 } from "@/lib/utils";
@@ -15,21 +15,19 @@ export function KbdShortcut({
   // 范围键仍需格式化 Mod，避免直接把内部存储值展示给用户。
   if (shortcut.includes("~")) {
     return (
-      <kbd className="inline-flex items-center rounded-[6px] bg-[var(--goose-interactive-hover)] px-2 py-0.5 font-mono text-xs text-muted-foreground">
-        {formatShortcut(shortcut, platform)}
-      </kbd>
+      <Kbd shortcut={shortcut} platform={platform} variant="chip" />
     );
   }
   const parts = shortcut.split("+");
   return (
     <span className="inline-flex items-center gap-0.5">
       {parts.map((part, i) => (
-        <kbd
+        <Kbd
           key={`${platform}-${part}-${i}`}
-          className="inline-flex items-center rounded-[6px] bg-[var(--goose-interactive-hover)] px-2 py-0.5 font-mono text-xs text-muted-foreground"
-        >
-          {formatShortcut(part, platform)}
-        </kbd>
+          shortcut={part}
+          platform={platform}
+          variant="chip"
+        />
       ))}
     </span>
   );

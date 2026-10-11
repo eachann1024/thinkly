@@ -9,7 +9,7 @@ import { canonicalizeRecordedShortcut } from "@/lib/shortcut-platform"
 import { getShortcutFromMouseEvent } from "@/lib/shortcut-match"
 
 const SETTINGS_OPTION_ROW_CLASS =
-  "rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)]"
+  "goose-settings-option-row"
 
 const MODIFIER_KEYS = new Set(["control", "ctrl", "meta", "alt", "shift", "super", "os", "win", "windows"])
 const MODIFIER_ORDER = ["Ctrl", "Meta", "Alt", "Shift"]
@@ -216,7 +216,7 @@ export function ShortcutField({
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 shrink-0 rounded-[10px]"
+            className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
             onClick={() => onChange(resetValue)}
           >
             恢复默认
@@ -226,7 +226,7 @@ export function ShortcutField({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-9 shrink-0 rounded-[10px]"
+          className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
           onClick={() => onChange("")}
         >
           清空

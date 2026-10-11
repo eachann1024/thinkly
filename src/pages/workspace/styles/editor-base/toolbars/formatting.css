@@ -43,61 +43,25 @@
 
 [data-formatting-toolbar] .goose-formatting-toolbar-control {
   display: inline-flex;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: var(--goose-editor-dock-control-size);
+  min-width: var(--goose-editor-dock-control-size);
+  height: var(--goose-editor-dock-control-size);
+  flex: 0 0 var(--goose-editor-dock-control-size);
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 7px;
-  background: transparent;
+  border-radius: var(--goose-control-radius);
   padding: 0;
-  color: hsl(var(--foreground));
   box-shadow: none;
   transition:
-    background-color 120ms ease-out,
-    color 120ms ease-out;
-}
-
-[data-formatting-toolbar] .goose-formatting-toolbar-control:not(:disabled):not([aria-disabled="true"]):hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-  outline: 1px solid var(--goose-interactive-hover-border);
-  outline-offset: -1px;
-}
-
-[data-formatting-toolbar] .goose-formatting-toolbar-control:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-[data-formatting-toolbar] .goose-formatting-toolbar-control[data-state="on"],
-[data-formatting-toolbar]
-  .goose-formatting-toolbar-control[aria-pressed="true"],
-[data-formatting-toolbar]
-  .goose-formatting-toolbar-control[data-state="on"]:hover,
-[data-formatting-toolbar]
-  .goose-formatting-toolbar-control[aria-pressed="true"]:hover {
-  background: var(--goose-interactive-selected) !important;
-  color: var(--goose-interactive-selected-fg) !important;
-  box-shadow: none !important;
-  outline: none !important;
+    background-color var(--goose-control-motion-duration) ease-out,
+    color var(--goose-control-motion-duration) ease-out;
 }
 
 /* 颜色按钮的图标显示最近一次文档颜色；容器状态仍由共享 token 控制。 */
 [data-formatting-toolbar]
   .goose-formatting-toolbar-control[data-goose-preserve-icon-color="true"] {
   color: hsl(var(--foreground)) !important;
-}
-
-/* 块工具栏统一用语义化 pressed 状态接入产品强调色。
-   图片、视频以及后续新增块控件无需再各自维护激活色。 */
-.goose-block-toolbar-control[aria-pressed="true"],
-.goose-block-toolbar-control[aria-pressed="true"]:hover,
-.goose-block-toolbar-control[aria-pressed="true"]:focus-visible {
-  background: var(--goose-interactive-selected);
-  color: var(--goose-interactive-selected-fg);
 }
 
 .goose-formatting-toolbar-separator {
@@ -116,13 +80,11 @@
   gap: 6px;
   min-width: 24px;
   min-height: 24px;
-  height: 28px;
+  height: var(--goose-editor-dock-control-size);
   flex: 0 0 auto;
   padding: 0 8px;
   border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: hsl(var(--foreground));
+  border-radius: var(--goose-control-radius);
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
@@ -130,18 +92,8 @@
   cursor: pointer;
   box-shadow: none;
   transition:
-    background-color 120ms ease-out,
-    color 120ms ease-out;
-}
-
-[data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat:not(:disabled):not([aria-disabled="true"]):hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-[data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
+    background-color var(--goose-control-motion-duration) ease-out,
+    color var(--goose-control-motion-duration) ease-out;
 }
 
 /* 选区模式由 [data-selection-mode] / .goose-formatting-toolbar--cell|--multi 挂载，供后续轻量样式区分 */
@@ -156,18 +108,18 @@
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-control {
-  width: calc(26px * var(--editor-ui-scale, 1));
-  min-width: calc(26px * var(--editor-ui-scale, 1));
-  height: calc(26px * var(--editor-ui-scale, 1));
-  flex-basis: calc(26px * var(--editor-ui-scale, 1));
-  border-radius: calc(6px * var(--editor-ui-scale, 1));
+  width: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
+  min-width: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
+  flex-basis: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
+  border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
 }
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-control
   svg {
-  width: calc(14px * var(--editor-ui-scale, 1));
-  height: calc(14px * var(--editor-ui-scale, 1));
+  width: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
 }
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
@@ -178,10 +130,10 @@
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-add-to-chat {
-  height: calc(26px * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
   min-height: 24px;
   padding: 0 calc(8px * var(--editor-ui-scale, 1));
-  border-radius: calc(6px * var(--editor-ui-scale, 1));
+  border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
   font-size: calc(12px * var(--editor-ui-scale, 1));
   gap: calc(6px * var(--editor-ui-scale, 1));
 }
@@ -192,16 +144,16 @@
 }
 
 .goose-formatting-toolbar-dock .goose-formatting-toolbar-control {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  flex-basis: 28px;
-  border-radius: 7px;
+  width: var(--goose-editor-dock-control-size);
+  min-width: var(--goose-editor-dock-control-size);
+  height: var(--goose-editor-dock-control-size);
+  flex-basis: var(--goose-editor-dock-control-size);
+  border-radius: var(--goose-control-radius);
 }
 
 .goose-formatting-toolbar-dock .goose-formatting-toolbar-control svg {
-  width: 15px;
-  height: 15px;
+  width: var(--goose-control-icon-size);
+  height: var(--goose-control-icon-size);
 }
 
 .goose-formatting-toolbar-dock .goose-formatting-toolbar-separator {
@@ -210,7 +162,7 @@
 }
 
 .goose-formatting-toolbar-dock .goose-formatting-toolbar-add-to-chat {
-  height: 28px;
-  min-height: 28px;
-  border-radius: 7px;
+  height: var(--goose-editor-dock-control-size);
+  min-height: var(--goose-editor-dock-control-size);
+  border-radius: var(--goose-control-radius);
 }

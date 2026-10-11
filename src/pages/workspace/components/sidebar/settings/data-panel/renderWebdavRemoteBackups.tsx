@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Download,
   CloudOff,
@@ -32,9 +33,9 @@ export function renderWebdavRemoteBackups(
     <SettingsSectionCard
       className="pt-3"
       title={
-        <button
+        <Button contentStyle="preserve" variant="ghost" size="sm"
           type="button"
-          className="flex items-center gap-2 text-left "
+          className="h-auto whitespace-normal border-0 px-0 py-0 flex items-center gap-2 text-left "
           onClick={toggleRemoteList}
         >
           <ChevronRight
@@ -44,7 +45,7 @@ export function renderWebdavRemoteBackups(
             )}
           />
           <span>远端备份</span>
-        </button>
+        </Button>
       }
       description="管理云盘中的打包备份文件。"
       actions={
@@ -54,7 +55,7 @@ export function renderWebdavRemoteBackups(
             size="sm"
             disabled={busy || !hasSavedConfig}
             onClick={fetchRemoteList}
-            className="h-8 rounded-[10px] px-2 text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+            className="h-8 rounded-[var(--goose-control-radius)] px-2 text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
           >
             <RefreshCw
               className={cn("h-3.5 w-3.5", remoteLoading && "animate-spin")}
@@ -71,7 +72,7 @@ export function renderWebdavRemoteBackups(
               <span>正在加载远端备份</span>
             </div>
           ) : remoteFiles.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 border border-dashed rounded-[12px] border-muted py-6 text-center">
+            <div className="flex flex-col items-center gap-2 border border-dashed rounded-[var(--goose-control-radius)] border-muted py-6 text-center">
               <CloudOff
                 className="h-6 w-6 text-muted-foreground"
                 strokeWidth={1.75}
@@ -91,7 +92,7 @@ export function renderWebdavRemoteBackups(
                 return (
                   <div
                     key={file.basename}
-                    className="flex flex-col gap-2 rounded-[12px] border p-3 bg-[hsl(var(--goose-selected-bg)/0.38)] dark:bg-[hsl(var(--foreground)/0.04)] sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 rounded-[var(--goose-control-radius)] border p-3 bg-[hsl(var(--goose-selected-bg)/0.38)] dark:bg-[hsl(var(--foreground)/0.04)] sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="space-y-1">
                       <p
@@ -109,7 +110,7 @@ export function renderWebdavRemoteBackups(
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-8 rounded-[10px] text-xs flex items-center gap-1"
+                        className="h-8 rounded-[var(--goose-control-radius)] text-xs flex items-center gap-1"
                         disabled={busy}
                         onClick={() => handleRestore(file)}
                       >
@@ -123,7 +124,7 @@ export function renderWebdavRemoteBackups(
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="h-8 rounded-[10px] text-xs flex items-center gap-1"
+                        className="h-8 rounded-[var(--goose-control-radius)] text-xs flex items-center gap-1"
                         disabled={busy}
                         onClick={() => handleDelete(file)}
                       >

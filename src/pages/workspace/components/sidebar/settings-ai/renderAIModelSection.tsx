@@ -125,7 +125,7 @@ export function renderAIModelSection(
                           size="sm"
                           disabled={modelButtonDisabled}
                           className={cn(
-                            "min-w-[220px] justify-between rounded-[10px]",
+                            "min-w-[220px] justify-between rounded-[var(--goose-control-radius)]",
                             modelButtonDisabled && "cursor-not-allowed",
                           )}
                         >

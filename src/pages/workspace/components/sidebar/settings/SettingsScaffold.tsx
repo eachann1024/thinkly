@@ -1,3 +1,6 @@
+import { IconButton } from "@/components/ui/icon-button";
+import { NativeSelect } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { X } from "@/components/ui/icons";
@@ -89,21 +92,20 @@ export function SettingsScaffold({
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
-                  <button
+                  <Button contentStyle="preserve" variant="ghost" size="sm"
                     key={tab.id}
                     type="button"
                     aria-current={activeTab === tab.id ? "page" : undefined}
+                    data-selected={activeTab === tab.id || undefined}
                     onClick={() => handleTabChange(tab.id)}
                     className={cn(
-                      "goose-interactive inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-left text-sm",
-                      activeTab === tab.id
-                        ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                        : "text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                      "goose-list-row h-auto border-0 inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-left text-sm",
+                      activeTab !== tab.id && "text-muted-foreground",
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span className="truncate">{tab.label}</span>
-                  </button>
+                  </Button>
                 );
               })}
             </nav>
@@ -122,7 +124,7 @@ export function SettingsScaffold({
           >
             <nav className="settings-compact-navigation" aria-label="设置分类">
               <span className="text-sm font-medium">设置</span>
-              <select
+              <NativeSelect controlSize="compact"
                 ref={compactNavigationRef}
                 aria-label="设置分类"
                 value={activeTab}
@@ -135,16 +137,16 @@ export function SettingsScaffold({
                     {tab.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </nav>
-            <button
+            <IconButton size="xs"
               type="button"
-              className="settings-close absolute right-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+              className="p-0 settings-close absolute right-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
               aria-label="关闭设置"
               onClick={onClose}
             >
               <X className="h-4 w-4" />
-            </button>
+            </IconButton>
             <div className="min-h-0 flex-1 bg-[hsl(var(--goose-settings-bg))]">
               <div
                 ref={scrollContainerRef}

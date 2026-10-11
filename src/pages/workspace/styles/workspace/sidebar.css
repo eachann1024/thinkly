@@ -107,68 +107,6 @@ html[data-sidebar-collapsed] .bn-side-menu {
   overflow: clip;
 }
 
-/* 历史页与侧栏控件共享状态色；选中和展开不额外绘制轮廓。 */
-.workspace-shell .history-secondary-control:hover:not(:disabled),
-.workspace-shell .history-version-item[data-selected="false"]:hover,
-.workspace-shell .history-star-control:hover:not(:disabled),
-.workspace-shell .sidebar-footer-control:hover:not([data-active="true"]),
-.workspace-shell .goose-page-icon-trigger:hover {
-  color: var(--goose-interactive-hover-fg);
-  background-color: var(--goose-interactive-hover);
-  outline: 1px solid var(--goose-interactive-hover-border);
-  outline-offset: -1px;
-}
-
-.workspace-shell .history-version-item[data-selected="true"],
-.workspace-shell .history-version-item[data-selected="true"]:hover,
-.workspace-shell .sidebar-footer-control[data-active="true"],
-.workspace-shell .sidebar-footer-control[data-active="true"]:hover,
-.workspace-shell .goose-page-icon-trigger[data-state="open"],
-.workspace-shell .history-primary-control,
-.workspace-shell .history-primary-control:hover:not(:disabled),
-.workspace-shell .history-secondary-control:active:not(:disabled),
-.workspace-shell .sidebar-footer-control:active,
-.workspace-shell .history-star-control:active:not(:disabled) {
-  color: var(--goose-interactive-selected-fg);
-  background-color: var(--goose-interactive-selected);
-}
-
-.workspace-shell .history-secondary-control:focus-visible,
-.workspace-shell .history-primary-control:focus-visible,
-.workspace-shell .sidebar-footer-control:focus-visible,
-.workspace-shell .history-star-control:focus-visible,
-.workspace-shell .history-version-item:focus-within {
-  background-color: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-.workspace-shell .history-primary-control:disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-  opacity: 1; color: var(--goose-text-disabled);
-}
-
-.workspace-shell .history-star-control svg {
-  opacity: 0;
-}
-
-.workspace-shell .history-version-item:hover .history-star-control svg,
-.workspace-shell .history-version-item:focus-within .history-star-control svg,
-.workspace-shell .history-star-control:focus-visible svg,
-.workspace-shell .history-star-control[data-marked="true"] svg,
-.workspace-shell .history-star-control[aria-busy="true"] svg {
-  opacity: 1;
-}
-
-.workspace-shell .history-star-control:hover svg {
-  color: var(--goose-interactive-selected-fg) !important;
-}
-
-.workspace-shell .history-star-control[data-marked="true"] svg {
-  color: var(--goose-interactive-selected-fg) !important;
-  fill: currentColor;
-}
-
 .workspace-shell .sidebar-expand-attention {
   color: var(--goose-interactive-selected-fg);
   background: var(--goose-interactive-selected);

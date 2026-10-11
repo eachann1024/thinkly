@@ -11,30 +11,9 @@
   line-height: 1.5;
 }
 
-:root:not(.dark) .sidebar-design {
-  --sidebar-foreground: var(--goose-text-primary);
-  --sidebar-muted: var(--goose-text-secondary);
-  --sidebar-background: #f0f0f0;
-  --goose-interactive-hover: #e8e9eb;
-  --goose-interactive-hover-fg: var(--sidebar-foreground);
-  --goose-interactive-hover-border: transparent;
-  background: var(--sidebar-background);
-}
-:root:not(.dark)[data-goose-accent="amber"] .sidebar-design,
-:root:not(.dark)[data-goose-accent="wheat"] .sidebar-design,
-:root:not(.dark)[data-goose-accent="mono"] .sidebar-design {
-  --sidebar-foreground: hsl(var(--foreground));
-  --sidebar-muted: hsl(var(--muted-foreground));
+.sidebar-design {
   --sidebar-background: var(--goose-shell-surface);
-  --goose-interactive-hover: var(--goose-sidebar-hover);
-  --goose-interactive-hover-fg: hsl(var(--foreground));
-  --goose-interactive-hover-border: var(--goose-interactive-selected-border);
-  background: var(--goose-shell-surface);
-}
-:root:not(.dark)[data-goose-accent="ocean"] .sidebar-design {
-  --goose-interactive-selected: #e6edff;
-  --goose-interactive-selected-fg: var(--goose-text-primary);
-  --goose-interactive-selected-border: #577ee8;
+  background: var(--sidebar-background);
 }
 
 .sidebar-design .sidebar-tree-heading { margin: 0 0.285714rem 0.714286rem; }
@@ -141,7 +120,7 @@
   justify-content: center;
   gap: 0.285714rem;
   border: 0;
-  border-radius: 0.571429rem;
+  border-radius: var(--goose-control-radius, 0.571429rem);
   background: transparent;
   color: hsl(var(--muted-foreground));
   cursor: pointer;
@@ -157,7 +136,7 @@
   white-space: nowrap;
 }
 .sidebar-mode-rail-button[aria-pressed="false"]:hover {
-  background: hsl(var(--foreground) / 0.06);
+  background: var(--goose-interactive-hover);
   color: hsl(var(--foreground));
 }
 .sidebar-mode-rail-button[aria-pressed="true"] {
@@ -191,7 +170,7 @@
   color: var(--goose-interactive-selected-fg);
 }
 .workspace-shell .workspace-sidebar-pane .sidebar-design :is(.main-tree-row, .sidebar-tree-row) {
-  border-radius: 0.571429rem;
+  border-radius: var(--radius-lg, 0.571429rem);
   font-size: var(--sidebar-body-size);
   font-weight: 400;
   line-height: 1.5rem;

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { MessagePrimitive, AttachmentPrimitive } from "@assistant-ui/react";
 import { Image as ImageIcon } from "@/components/ui/icons";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
@@ -125,7 +126,7 @@ export function UserMessage({
                   ? getPageTitle(page)
                   : segment.reference.titleSnapshot;
                 return (
-                  <button
+                  <Button contentStyle="preserve" variant="ghost" size={null}
                     key={segment.key}
                     type="button"
                     data-ai-mention-chip=""
@@ -140,7 +141,7 @@ export function UserMessage({
                     }
                   >
                     @{title}
-                  </button>
+                  </Button>
                 );
               })}
             </div>

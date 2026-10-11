@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { copyText, downloadText, copyImagePayload } from "./artifactClipboard";
 import { useState } from "react";
 import {
@@ -26,8 +27,7 @@ import {
 } from "@/lib/preview/previewAction";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
 
-const iconBtnClass =
-  "h-7 w-7 cursor-pointer rounded-[7px] text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] dark:hover:bg-[var(--goose-interactive-hover)]";
+const iconBtnClass = "cursor-pointer";
 
 export function ArtifactActions({
   copySource,
@@ -85,10 +85,7 @@ export function ArtifactActions({
         {hasImageCopy ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
                 aria-label="复制图片"
                 disabled={copyingImage}
@@ -117,7 +114,7 @@ export function ArtifactActions({
                 ) : (
                   <ImageIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
                 )}
-              </Button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent>复制图片</TooltipContent>
           </Tooltip>
@@ -126,16 +123,13 @@ export function ArtifactActions({
         {hasSourceCopy ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
                 aria-label="复制源码"
                 onClick={() => void copyText(copySource!)}
               >
                 <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </Button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent>复制源码</TooltipContent>
           </Tooltip>
@@ -144,10 +138,7 @@ export function ArtifactActions({
         {onInsert ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
                 aria-label="插入当前笔记"
                 onClick={async () => {
@@ -158,7 +149,7 @@ export function ArtifactActions({
                 }}
               >
                 <FilePlus2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </Button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent>插入当前笔记</TooltipContent>
           </Tooltip>
@@ -167,10 +158,7 @@ export function ArtifactActions({
         {hasPreview ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
                 disabled={previewing}
                 {...previewPointerHandlers({
@@ -215,7 +203,7 @@ export function ArtifactActions({
                 ) : (
                   <Maximize2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                 )}
-              </Button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent>{PREVIEW_ACTION_TOOLTIP}</TooltipContent>
           </Tooltip>
@@ -226,7 +214,7 @@ export function ArtifactActions({
             type="button"
             variant="ghost"
             size="sm"
-            className="notebook-ai-canvas-card-download h-7 gap-1 rounded-[7px] px-2 text-xs text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+            className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
             aria-label="下载图片"
             disabled={downloadingImage}
             onClick={() => {
@@ -262,7 +250,7 @@ export function ArtifactActions({
             type="button"
             variant="ghost"
             size="sm"
-            className="notebook-ai-canvas-card-download h-7 gap-1 rounded-[7px] px-2 text-xs text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+            className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
             aria-label="下载"
             onClick={() =>
               void downloadText(downloadSource!, filename, mimeType)

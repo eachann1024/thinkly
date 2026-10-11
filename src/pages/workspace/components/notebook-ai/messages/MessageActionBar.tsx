@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { ActionBarPrimitive, BranchPickerPrimitive } from "@assistant-ui/react";
 import { Copy, ChevronLeft, ChevronRight } from "@/components/ui/icons";
 export const MessageActionBar = () => (
@@ -8,9 +9,9 @@ export const MessageActionBar = () => (
       autohideFloat="never"
       className="flex items-center gap-1"
     >
-      <ActionBarPrimitive.Copy
+      <ActionBarPrimitive.Copy render={<IconButton size="xs" tone="muted" />}
         copiedDuration={1600}
-        className="flex h-6 w-6 items-center justify-center rounded-[6px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:hidden"
+        className="disabled:hidden"
         aria-label="复制消息"
         title="复制"
       >
@@ -21,8 +22,8 @@ export const MessageActionBar = () => (
       hideWhenSingleBranch
       className="flex items-center gap-0.5 text-[11px] text-muted-foreground"
     >
-      <BranchPickerPrimitive.Previous
-        className="flex h-6 w-6 items-center justify-center rounded-[6px] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+      <BranchPickerPrimitive.Previous render={<IconButton size="xs" tone="muted" />}
+        className="disabled:text-disabled"
         aria-label="上一个回答分支"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
@@ -30,8 +31,8 @@ export const MessageActionBar = () => (
       <span>
         <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
       </span>
-      <BranchPickerPrimitive.Next
-        className="flex h-6 w-6 items-center justify-center rounded-[6px] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+      <BranchPickerPrimitive.Next render={<IconButton size="xs" tone="muted" />}
+        className="disabled:text-disabled"
         aria-label="下一个回答分支"
       >
         <ChevronRight className="h-3.5 w-3.5" />

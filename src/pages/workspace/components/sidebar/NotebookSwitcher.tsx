@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { renderNotebookMenu } from "./notebook-switcher/renderNotebookMenu";
 import * as GooseIcons from "@/components/ui/icons";
 import "./notebook-switcher.css";
@@ -50,7 +51,7 @@ export function NotebookSwitcher(
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <button
+              <Button contentStyle="preserve" variant="ghost" size="sm"
                 type="button"
                 aria-label={`当前${notebookKind} ${activeNotebookLabel}，点击切换`}
                 title={
@@ -59,7 +60,7 @@ export function NotebookSwitcher(
                     : undefined
                 }
                 className={cn(
-                  "sidebar-notebook-trigger group text-foreground outline-none",
+                  "h-auto border-0 py-0 sidebar-notebook-trigger group text-foreground outline-none",
                   isRail && "sidebar-notebook-trigger--rail",
                 )}
                 onKeyDown={(event) => {
@@ -86,7 +87,7 @@ export function NotebookSwitcher(
                   className="goose-notebook-chevron"
                   aria-hidden="true"
                 />
-              </button>
+              </Button>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent side={isRail ? "right" : "top"}>

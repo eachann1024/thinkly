@@ -14,8 +14,8 @@
  box-shadow: none;
  overflow: hidden;
  transition:
-  border-color 0.15s ease,
-  box-shadow 0.15s ease;
+  border-color var(--goose-control-motion-duration) ease,
+  box-shadow var(--goose-control-motion-duration) ease;
 }
 
 /* 宽表走单层横向滚动：外层不能 hidden，否则旧内核会裁切而不出滚动条 */
@@ -29,21 +29,7 @@
  box-shadow: none;
 }
 
-.dark .notebook-ai-canvas-card,
-:root.dark .notebook-ai-canvas-card,
-[data-theme="dark"] .notebook-ai-canvas-card {
- border-color: hsl(var(--border));
- background: hsl(var(--background));
- box-shadow: none;
-}
 
-.dark .notebook-ai-canvas-card:hover,
-:root.dark .notebook-ai-canvas-card:hover,
-[data-theme="dark"] .notebook-ai-canvas-card:hover {
- border-color: var(--goose-interactive-hover-border);
- background: var(--goose-interactive-hover);
- box-shadow: none;
-}
 
 .notebook-ai-canvas-card-header {
  display: flex;

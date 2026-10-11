@@ -13,7 +13,7 @@ interface SettingsGeneralProps {
   setNotebookDropdownHoverExpand: (enabled: boolean) => void;
 }
 
-const ROW_CLASS = "rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)]";
+const ROW_CLASS = "goose-settings-option-row";
 const SWITCH_CLASS = "data-[state=unchecked]:bg-[hsl(var(--foreground)/0.12)]";
 
 export function SettingsGeneral({

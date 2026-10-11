@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { memo, type ComponentProps } from "react";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
@@ -18,7 +19,7 @@ function MdInput({
       </span>
     );
   }
-  return <input {...props} />;
+  return <input {...props} className={cn("goose-field", props.className)} />;
 }
 
 const PLAN_MD_COMPONENTS = {

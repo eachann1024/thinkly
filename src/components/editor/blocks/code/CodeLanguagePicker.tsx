@@ -7,8 +7,8 @@ import {
   useId,
   useCallback,
 } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/editor/ui/button";
+import { Input } from "@/components/editor/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -169,6 +169,7 @@ export function CodeLanguagePicker({
         >
           <PopoverTrigger asChild>
             <Button
+              data-state={isOpen ? "open" : "closed"}
               variant="ghost"
               size="sm"
               className={cn(
@@ -208,7 +209,7 @@ export function CodeLanguagePicker({
               />
             </div>
             {!search && <div className="text-xs">常用语言</div>}
-            <div id={languageListId} role="listbox" aria-label="代码语言">
+            <div id={languageListId} className="goose-list-layout" data-goose-menu-slot="root" role="listbox" aria-label="代码语言">
               {filteredLanguages.length === 0 ? (
                 <div className="px-2 py-2 text-xs text-muted-foreground">
                   未找到语言
@@ -219,6 +220,8 @@ export function CodeLanguagePicker({
                   key={lang}
                   id={`${languageListId}-opt-${index}`}
                   role="option"
+                  data-goose-menu-slot="row"
+                  data-keyboard-active={index === safeHighlightedIndex || undefined}
                   aria-selected={index === safeHighlightedIndex}
                   data-goose-lang-highlighted={
                     index === safeHighlightedIndex ? "true" : undefined
@@ -231,9 +234,7 @@ export function CodeLanguagePicker({
                     selectLanguage(lang);
                   }}
                   className={cn(
-                    "text-xs",
-                    index === safeHighlightedIndex &&
-                      "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]",
+                    "goose-list-row text-xs",
                   )}
                 >
                   {LANGUAGE_DISPLAY_NAMES[lang] || lang}

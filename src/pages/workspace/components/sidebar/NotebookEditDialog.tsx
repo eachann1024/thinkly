@@ -154,7 +154,7 @@ export function NotebookEditDialog({
               />
             </div>
 
-            <div className="flex items-start justify-between gap-4 rounded-[12px] border border-border/60 bg-muted/20 px-4 py-3">
+            <div className="flex items-start justify-between gap-4 rounded-[var(--goose-control-radius)] border border-border/60 bg-muted/20 px-4 py-3">
               <div className="min-w-0 space-y-1">
                 <Label
                   htmlFor="exclude-from-global-search"

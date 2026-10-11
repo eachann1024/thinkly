@@ -112,7 +112,7 @@ export function OpenAppField({
               variant="outline"
               size="sm"
               aria-labelledby={`${id}-label ${id}-value`}
-              className="min-w-36 max-w-56 shrink-0 justify-between rounded-[10px] text-left font-normal"
+              className="min-w-36 max-w-56 shrink-0 justify-between rounded-[var(--goose-control-radius)] text-left font-normal"
             >
               <span className="flex min-w-0 items-center gap-2">
                 {appIcon(selectedIcon)}

@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import {
   Maximize2,
   Minimize2,
@@ -75,7 +76,7 @@ export function VideoControls({
 
       <div className="goose-video-player__bar">
         <div className="goose-video-player__bar-left">
-          <button
+          <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
             aria-label={playing ? "暂停" : "播放"}
@@ -94,9 +95,9 @@ export function VideoControls({
                 className="goose-video-player__icon-play"
               />
             )}
-          </button>
+          </EditorAction>
 
-          <button
+          <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
             aria-label={muted || volume === 0 ? "取消静音" : "静音"}
@@ -111,7 +112,7 @@ export function VideoControls({
             ) : (
               <Volume2 size={16} strokeWidth={1.75} />
             )}
-          </button>
+          </EditorAction>
 
           <span className="goose-video-player__time">
             {formatTime(current)}
@@ -121,7 +122,7 @@ export function VideoControls({
         </div>
 
         <div className="goose-video-player__bar-right">
-          <button
+          <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
             aria-label={isFullscreen ? "退出全屏" : "全屏"}
@@ -136,7 +137,7 @@ export function VideoControls({
             ) : (
               <Maximize2 size={16} strokeWidth={1.75} />
             )}
-          </button>
+          </EditorAction>
         </div>
       </div>
     </div>

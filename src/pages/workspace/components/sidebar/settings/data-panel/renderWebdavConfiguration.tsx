@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Upload, Cloud, RefreshCw } from "@/components/ui/icons";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 import type { useWebdavRemoteActions } from "./useWebdavRemoteActions";
@@ -49,8 +50,8 @@ export function renderWebdavConfiguration(
           <Label className="text-xs font-medium text-foreground">
             服务地址
           </Label>
-          <input
-            className="flex h-9 w-full rounded-[12px] border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled"
+          <Input
+            className="h-9 bg-transparent py-1 text-sm"
             value={tempUrl}
             disabled={busy}
             onChange={(e) => setTempUrl(e.target.value)}
@@ -64,8 +65,8 @@ export function renderWebdavConfiguration(
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-foreground">账号</Label>
-            <input
-              className="flex h-9 w-full rounded-[12px] border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled"
+            <Input
+              className="h-9 bg-transparent py-1 text-sm"
               value={tempUsername}
               disabled={busy}
               onChange={(e) => setTempUsername(e.target.value)}
@@ -76,8 +77,8 @@ export function renderWebdavConfiguration(
             <Label className="text-xs font-medium text-foreground">
               远端目录
             </Label>
-            <input
-              className="flex h-9 w-full rounded-[12px] border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled"
+            <Input
+              className="h-9 bg-transparent py-1 text-sm"
               value={tempRemoteDir}
               disabled={busy}
               onChange={(e) => setTempRemoteDir(e.target.value)}
@@ -91,9 +92,9 @@ export function renderWebdavConfiguration(
             <Label className="text-xs font-medium text-foreground">
               应用密码
             </Label>
-            <input
+            <Input
               type="password"
-              className="flex h-9 w-full rounded-[12px] border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled"
+              className="h-9 bg-transparent py-1 text-sm"
               value={tempPassword}
               disabled={busy}
               onChange={(e) => setTempPassword(e.target.value)}
@@ -106,11 +107,11 @@ export function renderWebdavConfiguration(
             <Label className="text-xs font-medium text-foreground">
               云端保留天数
             </Label>
-            <input
+            <Input
               type="number"
               min={1}
               max={365}
-              className="flex h-9 w-full rounded-[12px] border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled"
+              className="h-9 bg-transparent py-1 text-sm"
               value={tempRetentionDays}
               disabled={busy}
               onChange={(e) =>
@@ -120,7 +121,7 @@ export function renderWebdavConfiguration(
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-[12px] border border-muted/20 p-3 bg-muted/10">
+        <div className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
           <div className="space-y-0.5 pr-4">
             <Label className="text-xs font-medium text-foreground">
               自动云备份
@@ -136,7 +137,7 @@ export function renderWebdavConfiguration(
           />
         </div>
 
-        <div className="rounded-[12px] border border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] p-3 text-xs text-foreground dark:bg-[hsl(var(--foreground)/0.08)]">
+        <div className="rounded-[var(--goose-control-radius)] border border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] p-3 text-xs text-foreground dark:bg-[hsl(var(--foreground)/0.08)]">
           <div className="flex flex-col gap-1.5">
             <div>
               <strong>最近上传：</strong>
@@ -151,7 +152,7 @@ export function renderWebdavConfiguration(
 
         <div className="grid grid-cols-3 gap-2 w-full pt-2">
           <Button
-            className="w-full flex items-center justify-center gap-1.5 rounded-[12px]"
+            className="w-full flex items-center justify-center gap-1.5 rounded-[var(--goose-control-radius)]"
             disabled={busy}
             onClick={handleSaveAndTest}
           >
@@ -164,7 +165,7 @@ export function renderWebdavConfiguration(
           </Button>
           <Button
             variant="secondary"
-            className="w-full flex items-center justify-center gap-1.5 rounded-[12px]"
+            className="w-full flex items-center justify-center gap-1.5 rounded-[var(--goose-control-radius)]"
             disabled={busy || !hasSavedConfig}
             onClick={handleUploadNow}
           >
@@ -177,7 +178,7 @@ export function renderWebdavConfiguration(
           </Button>
           <Button
             variant="secondary"
-            className="w-full flex items-center justify-center gap-1.5 rounded-[12px]"
+            className="w-full flex items-center justify-center gap-1.5 rounded-[var(--goose-control-radius)]"
             disabled={busy || !hasSavedConfig}
             onClick={handleSyncLatest}
           >

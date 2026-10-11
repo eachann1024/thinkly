@@ -1,5 +1,5 @@
 .workspace-shell .workspace-sidebar-pane .sidebar-notebook-trigger {
-  --notebook-motion: 480ms cubic-bezier(.4, 0, .2, 1);
+  --notebook-motion: var(--goose-control-motion-duration) cubic-bezier(.4, 0, .2, 1);
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -11,7 +11,7 @@
   min-height: 28px;
   padding: 0 8px;
   border: 1px solid hsl(var(--goose-menu-border));
-  border-radius: 8px;
+  border-radius: var(--goose-control-radius, 8px);
   background: var(--workspace-main-surface);
   font-size: 12px;
   font-weight: 400;
@@ -65,8 +65,7 @@
 @media (hover: hover) and (pointer: fine) {
   .sidebar-notebook-trigger:hover::before { opacity: 1; }
 }
-.sidebar-notebook-trigger:focus-visible,
-.goose-notebook-row:focus-visible {
+.sidebar-notebook-trigger:focus-visible {
   background: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
 }
@@ -78,7 +77,7 @@
 }
 .goose-notebook-menu-surface.goose-floating-surface {
   border: 1px solid hsl(var(--goose-menu-border));
-  border-radius: 12px;
+  border-radius: var(--goose-floating-radius, 12px);
   background: hsl(var(--goose-menu-surface));
   box-shadow: var(--goose-menu-shadow);
 }
@@ -92,4 +91,10 @@
   .sidebar-notebook-trigger > .goose-notebook-monogram,
   .sidebar-notebook-trigger > .goose-notebook-chevron { transform: none !important; transition: none; }
   .sidebar-notebook-trigger:not(.sidebar-notebook-trigger--rail)::before { transition: opacity 120ms ease; }
+}
+
+/* 拖拽列表保留连续命中与测量外框，高亮在行内留白。 */
+.goose-notebook-menu-surface .goose-notebook-row {
+  border-block: calc(var(--goose-menu-row-gap) / 2) solid transparent;
+  background-clip: padding-box;
 }

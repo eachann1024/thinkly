@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useExtension, useExtensionState } from "@blocknote/react";
 import { Sparkles, Square, X } from "@/components/ui/icons";
 import "./inlineAiSurface.css";
@@ -92,7 +93,7 @@ export function GooseAIMenu() {
                 ? "改写未完成"
                 : "编辑所选内容"}
         </span>
-        <button
+        <EditorAction
           type="button"
           className="goose-inline-ai-close"
           aria-label="关闭 AI 编辑"
@@ -101,7 +102,7 @@ export function GooseAIMenu() {
           onClick={ai.closeAIMenu}
         >
           <X className="h-4 w-4" aria-hidden />
-        </button>
+        </EditorAction>
       </div>
       {state.status === "user-reviewing" && (
         <p className="goose-ai-preview-summary" role="status">
@@ -167,7 +168,7 @@ export function GooseAIMenu() {
         rightSection={
           busy ? (
             <div className="goose-ai-menu-busy-actions bn-combobox-right-section">
-              <button
+              <EditorAction
                 type="button"
                 className="goose-ai-menu-stop"
                 aria-label="停止"
@@ -181,7 +182,7 @@ export function GooseAIMenu() {
               >
                 <Square className="h-3 w-3" strokeWidth={1.75} aria-hidden />
                 停止
-              </button>
+              </EditorAction>
             </div>
           ) : undefined
         }

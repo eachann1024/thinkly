@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { type CSSProperties, type ComponentType } from "react";
 import { createPortal } from "react-dom";
 import { FoldVertical, Plus, WandSparkles } from "@/components/ui/icons";
@@ -104,7 +105,8 @@ export function SkillSuggestionsList(props: {
     >
       <div
         ref={listRef}
-        className="goose-editor-context-ui goose-floating-surface flex w-[340px] flex-col gap-1 overflow-y-auto p-1.5"
+        data-goose-menu-slot="root"
+        className="goose-editor-context-ui goose-floating-surface goose-list-layout w-[340px] overflow-y-auto p-1.5"
         style={{ maxHeight }}
       >
         {props.items.length === 0 ? (
@@ -115,16 +117,15 @@ export function SkillSuggestionsList(props: {
           props.items.map((item, index) => {
             const description = slashItemDescription(item);
             return (
-              <button
+              <EditorAction
                 key={slashItemKey(item)}
                 type="button"
                 data-skill-index={index}
+                data-goose-menu-slot="row"
+                data-keyboard-active={index === props.activeIndex || undefined}
                 className={cn(
                   // items-start：多行描述时图标与标题首行并排，首行通过等高容器绝对居中
-                  "flex w-full flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left",
-                  index === props.activeIndex
-                    ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] [&_svg]:text-[var(--goose-interactive-selected-fg)]"
-                    : "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:[&_*]:text-[var(--goose-interactive-hover-fg)]",
+                  "goose-list-row flex w-full flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left",
                 )}
                 onMouseDown={(event) => {
                   event.preventDefault();
@@ -144,7 +145,7 @@ export function SkillSuggestionsList(props: {
                     </span>
                   ) : null}
                 </span>
-              </button>
+              </EditorAction>
             );
           })
         )}

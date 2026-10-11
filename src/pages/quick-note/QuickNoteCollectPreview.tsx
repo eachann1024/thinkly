@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClipboardPlus, Square } from "@/components/ui/icons";
 import { toast } from "@/components/ui/sonner";
@@ -93,7 +94,7 @@ export function QuickNoteCollectPreview({
         <span className="quicknote-collect-count" aria-label={`${count} 条`}>
           {count}
         </span>
-        <button
+        <Button contentStyle="preserve" variant="ghost"
           type="button"
           className="quicknote-collect-icon-btn"
           aria-label="模拟收集一条"
@@ -101,16 +102,16 @@ export function QuickNoteCollectPreview({
           onClick={simulateCollect}
         >
           <ClipboardPlus aria-hidden="true" />
-        </button>
-        <button
+        </Button>
+        <Button contentStyle="preserve" variant="ghost"
           type="button"
-          className="quicknote-collect-icon-btn quicknote-collect-stop-btn"
+          className="quicknote-collect-icon-btn quicknote-collect-stop-btn goose-interactive-danger"
           aria-label="停止自动收集"
           title="停止收集"
           onClick={stopCollecting}
         >
           <Square aria-hidden="true" />
-        </button>
+        </Button>
       </div>
     );
   }
@@ -130,20 +131,20 @@ export function QuickNoteCollectPreview({
       <span className="quicknote-collect-count" aria-label={`${count} 条`}>
         {count}
       </span>
-      <button
+      <Button contentStyle="preserve" variant="ghost"
         type="button"
         className="quicknote-collect-simulate-btn"
         onClick={simulateCollect}
       >
         模拟收集
-      </button>
-      <button
+      </Button>
+      <Button contentStyle="preserve" variant="ghost"
         type="button"
-        className="quicknote-collect-stop-text-btn"
+        className="quicknote-collect-stop-text-btn goose-interactive-danger"
         onClick={stopCollecting}
       >
         停止
-      </button>
+      </Button>
     </div>
   );
 }

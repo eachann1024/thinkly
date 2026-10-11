@@ -1,6 +1,7 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/editor/ui/button";
 import { cn } from "@/lib/utils";
 
 const LATEX_SNIPPETS = [
@@ -40,14 +41,15 @@ export function CodeLatexHints({
       {!collapsed && language === "math" && isEditable && (
         <div className="absolute bottom-2 right-2 z-20">
           <Button
+            aria-label="LaTeX 语法参考"
+            aria-expanded={showLatexHint}
+            data-state={showLatexHint ? "open" : "closed"}
             variant="ghost"
             size="sm"
             onClick={() => setShowLatexHint(!showLatexHint)}
             className={cn(
               "h-6 w-6 p-0 rounded-md",
               "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)]",
-              showLatexHint &&
-                "border-[var(--goose-callout-accent)] bg-[var(--goose-interactive-selected)] text-link",
             )}
           >
             <GooseIcons.HelpCircle className="h-3.5 w-3.5" />
@@ -56,22 +58,22 @@ export function CodeLatexHints({
             <div className="absolute bottom-8 right-0 z-30 w-[420px] max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-3 shadow-lg">
               <div className="flex items-center justify-between border-b pb-2 mb-2">
                 <span className="text-xs font-semibold">LaTeX 语法参考</span>
-                <button
+                <EditorAction
                   type="button"
                   onClick={() => setShowLatexHint(false)}
-                  className="inline-flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                  className="inline-flex h-5 w-5 items-center justify-center rounded text-muted-foreground  "
                 >
                   <GooseIcons.X className="h-3.5 w-3.5" />
-                </button>
+                </EditorAction>
               </div>
               <div className="max-h-48 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-1.5">
                   {LATEX_SNIPPETS.map((s, i) => (
-                    <button
+                    <EditorAction
                       key={i}
                       type="button"
                       onClick={() => setShowLatexHint(false)}
-                      className="flex flex-col items-start gap-1 rounded-md border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)] px-2 py-1.5 text-left hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                      className="flex flex-col items-start gap-1 rounded-md border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)] px-2 py-1.5 text-left  "
                     >
                       <span className="text-[11px] font-medium text-muted-foreground">
                         {s.label}
@@ -79,7 +81,7 @@ export function CodeLatexHints({
                       <code className="text-[11px] font-mono text-foreground break-all">
                         {s.code}
                       </code>
-                    </button>
+                    </EditorAction>
                   ))}
                 </div>
               </div>

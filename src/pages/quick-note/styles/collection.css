@@ -21,7 +21,7 @@
   box-shadow: none;
   font-size: 11px;
   line-height: 1;
-  animation: quicknote-collect-enter 180ms ease-out;
+  animation: quicknote-collect-enter var(--goose-control-motion-duration) ease-out;
 }
 
 .quicknote-root[data-collect-variant="chip"] .quicknote-slot-name-display {
@@ -75,30 +75,13 @@
   color: currentColor;
   cursor: pointer;
   transition:
-    background 180ms ease,
-    color 180ms ease;
+    background var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
 }
 
 .quicknote-collect-icon-btn svg {
   width: 12px;
   height: 12px;
-}
-
-.quicknote-collect-icon-btn:hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-.quicknote-collect-stop-btn:hover {
-  background: var(--goose-color-danger-subtle-bg);
-  color: var(--goose-color-danger);
-}
-
-.quicknote-collect-icon-btn:focus-visible,
-.quicknote-collect-simulate-btn:focus-visible,
-.quicknote-collect-stop-text-btn:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
 }
 
 .quicknote-collect-shelf {
@@ -116,7 +99,7 @@
   box-shadow: none;
   font-size: 11px;
   line-height: 1;
-  animation: quicknote-collect-shelf-enter 200ms ease-out;
+  animation: quicknote-collect-shelf-enter var(--goose-control-motion-duration) ease-out;
 }
 
 .quicknote-collect-shelf-recent {
@@ -135,7 +118,7 @@
   margin: 0;
   padding: 0 8px;
   border: 1px solid hsl(var(--border));
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   background: hsl(var(--goose-editor-bg));
   color: hsl(var(--foreground));
   font-size: 11px;
@@ -144,20 +127,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background 180ms ease,
-    border-color 180ms ease;
-}
-
-.quicknote-collect-simulate-btn:hover {
-  border-color: var(--goose-interactive-hover-border);
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-.quicknote-collect-stop-text-btn:hover {
-  border-color: var(--goose-color-danger);
-  background: var(--goose-color-danger-subtle-bg);
-  color: var(--goose-color-danger);
+    background var(--goose-control-motion-duration) ease,
+    border-color var(--goose-control-motion-duration) ease;
 }
 
 .quicknote-collect-stop-text-btn {
