@@ -44,41 +44,63 @@ function editableCaret(el: HTMLElement): CaretBox | null {
   };
 }
 
-function fieldCaret(el: TextField, mirror: HTMLDivElement): CaretBox | null {
-  const start = el.selectionStart;
-  if (start === null || start !== el.selectionEnd) return null;
-  const style = getComputedStyle(el);
-  const box = el.getBoundingClientRect();
-  const scale = box.width / el.offsetWidth || 1;
-  mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;contain:layout style paint;";
-  for (const key of ["font", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
-    mirror.style.setProperty(key, style.getPropertyValue(key));
-  }
-  mirror.style.width = `${el.offsetWidth}px`;
-  mirror.style.whiteSpace = el instanceof HTMLInputElement ? "pre" : "pre-wrap";
-  const value = el.type === "password" ? "•".repeat(el.value.length) : el.value;
-  const marker = document.createElement("span");
-  marker.textContent = value.slice(start) || "\u200b";
-  mirror.replaceChildren(document.createTextNode(value.slice(0, start)), marker);
-  const markerBox = marker.getBoundingClientRect();
-  const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
-  return {
-    left: box.left + (markerBox.left - el.scrollLeft) * scale,
-    top: el instanceof HTMLInputElement ? box.top + (box.height - lineHeight * scale) / 2 : box.top + (markerBox.top - el.scrollTop) * scale,
-    height: lineHeight * scale,
-  };
-}
-
-export function textCaretBox(el: HTMLElement, mirror: HTMLDivElement): CaretBox | null {
-  const caret = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? fieldCaret(el, mirror) : editableCaret(el);
-  if (!caret || !Number.isFinite(caret.left + caret.top + caret.height)) return null;
-  let node: HTMLElement | null = el;
-  while (node) {
+/** Cache font setup and clipping ancestors at focus/appearance changes, not on every keystroke. */
+export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () => CaretBox | null {
+  const clips: { node: HTMLElement; x: boolean; y: boolean }[] = [];
+  for (let node: HTMLElement | null = el; node; node = node.parentElement) {
     const style = getComputedStyle(node);
-    const bounds = node.getBoundingClientRect();
-    if (/(auto|scroll|hidden|clip)/.test(style.overflowX) && (caret.left < bounds.left || caret.left > bounds.right)) return null;
-    if (/(auto|scroll|hidden|clip)/.test(style.overflowY) && (caret.top + caret.height <= bounds.top || caret.top >= bounds.bottom)) return null;
-    node = node.parentElement;
+    const field = node === el && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement);
+    const x = field || /(auto|scroll|hidden|clip)/.test(style.overflowX);
+    const y = field || /(auto|scroll|hidden|clip)/.test(style.overflowY);
+    if (x || y) clips.push({ node, x, y });
   }
-  return caret;
+  let measure: () => CaretBox | null = () => editableCaret(el);
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    const style = getComputedStyle(el);
+    const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
+    mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;contain:layout style paint;";
+    for (const key of ["font", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
+      mirror.style.setProperty(key, style.getPropertyValue(key));
+    }
+    mirror.style.whiteSpace = el instanceof HTMLInputElement ? "pre" : "pre-wrap";
+    const prefix = document.createTextNode("");
+    const marker = document.createElement("span");
+    marker.textContent = "\u200b";
+    const suffix = document.createTextNode("");
+    mirror.replaceChildren(prefix, marker, suffix);
+    let width = 0;
+    measure = () => {
+      const start = el.selectionStart;
+      if (start === null || start !== el.selectionEnd) return null;
+      const box = el.getBoundingClientRect();
+      const nextWidth = el.offsetWidth;
+      const scale = box.width / nextWidth || 1;
+      if (width !== nextWidth) { width = nextWidth; mirror.style.width = `${width}px`; }
+      const value = el.type === "password" ? "•".repeat(start) : el.value.slice(0, start);
+      if (prefix.data !== value) prefix.data = value;
+      const rest = el.type === "password" ? "•".repeat(el.value.length - start) : el.value.slice(start);
+      if (suffix.data !== rest) suffix.data = rest;
+      const markerBox = marker.getBoundingClientRect();
+      return {
+        left: box.left + (markerBox.left - el.scrollLeft) * scale,
+        top: el instanceof HTMLInputElement ? box.top + (box.height - lineHeight * scale) / 2 : box.top + (markerBox.top - el.scrollTop) * scale,
+        height: lineHeight * scale,
+      };
+    };
+  }
+  return () => {
+    const caret = measure();
+    if (!caret || !Number.isFinite(caret.left + caret.top + caret.height)) return null;
+    for (const { node, x, y } of clips) {
+      const bounds = node.getBoundingClientRect();
+      if (x && (caret.left < bounds.left || caret.left > bounds.right)) return null;
+      if (y) {
+        const bottom = Math.min(caret.top + caret.height, bounds.bottom);
+        caret.top = Math.max(caret.top, bounds.top);
+        caret.height = bottom - caret.top;
+        if (caret.height <= 0) return null;
+      }
+    }
+    return caret;
+  };
 }
