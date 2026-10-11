@@ -85,8 +85,7 @@ export function useSidebarLayout({
   );
 
   const sidebarOverlay =
-    forceCollapseLeft &&
-    (settingsOpen ? settingsSidebarExpanded : leftExpandOverride) &&
+    !settingsOpen && leftExpandOverride &&
     !sidebarCollapsed;
 
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);

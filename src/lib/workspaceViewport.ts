@@ -3,7 +3,7 @@
  *
  * 最小宽度对齐 Chromium 主窗口内容区下限
  * `kMainBrowserContentsMinimumWidth = 500`。
- * 变窄时先收右侧 AI 并排栏，再收左侧栏，主区尽量保持 500px。
+ * 变窄时先收右侧 AI 并排栏，再收左侧内容面板；导航轨道常驻。
  * 自动收起不写入用户偏好；拉宽后按原偏好恢复。
  */
 
@@ -22,9 +22,9 @@ export const WORKSPACE_COLLAPSE_RIGHT_BELOW = 1100;
 
 /**
  * 低于此宽度强制收起左侧栏。
- * 500 主区 + 默认左栏 180 + stage 垫约 28。
+ * 正文、常驻导航轨道和内容面板需要独立操作空间；窄窗使用覆盖面板。
  */
-export const WORKSPACE_COLLAPSE_LEFT_BELOW = 720;
+export const WORKSPACE_COLLAPSE_LEFT_BELOW = 960;
 
 export type WorkspaceViewportCollapse = {
   forceCollapseLeft: boolean;

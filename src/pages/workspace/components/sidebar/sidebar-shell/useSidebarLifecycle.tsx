@@ -1,4 +1,3 @@
-import { useSidebarView } from "@/stores/useSidebarView";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useSearchSession } from "../useSearchSession";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
@@ -20,10 +19,7 @@ export function useSidebarLifecycle(
     activeNotebookId,
     openInCurrentTab,
     outlinePage,
-    workspaceSidebarCollapsed,
     sidebarCollapsed,
-    forceCollapseLeft,
-    setLeftExpandOverride,
     sidebarOverlay,
     setViewportWidth,
     sidebarRef,
@@ -48,7 +44,7 @@ export function useSidebarLifecycle(
       setCurrentView("pages");
       if (options.exitHistory) exitHistoryView();
     },
-    [exitHistoryView],
+    [exitHistoryView, setCurrentView],
   );
 
   useEffect(() => {
@@ -70,7 +66,8 @@ export function useSidebarLifecycle(
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    const stage = sidebarRef.current?.closest(".workspace-stage");
+    const sidebar = sidebarRef.current;
+    const stage = sidebar?.closest(".workspace-stage");
     root.toggleAttribute("data-sidebar-collapsed", sidebarCollapsed);
     sidebarRef.current?.toggleAttribute("data-sidebar-overlay", sidebarOverlay);
     if (stage instanceof HTMLElement) {
@@ -79,13 +76,13 @@ export function useSidebarLifecycle(
     }
     return () => {
       root.removeAttribute("data-sidebar-collapsed");
-      sidebarRef.current?.removeAttribute("data-sidebar-overlay");
+      sidebar?.removeAttribute("data-sidebar-overlay");
       if (stage instanceof HTMLElement) {
         stage.removeAttribute("data-sidebar-collapsed");
         stage.removeAttribute("data-sidebar-overlay");
       }
     };
-  }, [sidebarCollapsed, sidebarOverlay]);
+  }, [sidebarCollapsed, sidebarOverlay, sidebarRef]);
 
   useLayoutEffect(() => {
     previewSidebarWidth(width);
@@ -98,7 +95,7 @@ export function useSidebarLifecycle(
       ?.closest(".workspace-shell")
       ?.querySelector<HTMLButtonElement>('button[aria-label="展开侧栏"]')
       ?.focus({ preventScroll: true });
-  }, [sidebarOverlay]);
+  }, [sidebarOverlay, sidebarRef, restoreSidebarFocusRef]);
 
   useEffect(() => {
     const observer = new ResizeObserver(() => {
@@ -106,7 +103,7 @@ export function useSidebarLifecycle(
     });
     observer.observe(document.documentElement);
     return () => observer.disconnect();
-  }, []);
+  }, [setViewportWidth]);
 
   useEffect(() => {
     if (!scrollAreaNode) {
@@ -124,7 +121,7 @@ export function useSidebarLifecycle(
     const observer = new ResizeObserver(updateHeight);
     observer.observe(scrollAreaNode);
     return () => observer.disconnect();
-  }, [scrollAreaNode]);
+  }, [scrollAreaNode, setScrollAreaHeight]);
 
   const handleCreatePage = () => {
     if (!activeNotebookId) return;
@@ -141,12 +138,16 @@ export function useSidebarLifecycle(
       void Promise.resolve(
         createLocalPage(siblingParentId, activeNotebookId),
       ).then((newPageId) => {
-        if (newPageId) openInCurrentTab(newPageId);
+        if (newPageId) {
+          openInCurrentTab(newPageId);
+          window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+        }
       });
       return;
     }
     const newPageId = createPage(siblingParentId, activeNotebookId);
     openInCurrentTab(newPageId);
+    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     // 新页若落在折叠的父级下，展开祖先并聚焦使其可见
     if (siblingParentId) setExpandPageId(newPageId);
   };
@@ -154,9 +155,6 @@ export function useSidebarLifecycle(
   const handleOpenSearch = () => {
     activateWorkspace();
     setCurrentView("search");
-    if (workspaceSidebarCollapsed && !forceCollapseLeft)
-      useSidebarView.getState().setSidebarCollapsed(false);
-    if (forceCollapseLeft) setLeftExpandOverride(true);
     if (inHistoryMode) exitHistoryView();
     closeNotebookAiIfFullscreen();
     openSearchSession(
@@ -168,7 +166,6 @@ export function useSidebarLifecycle(
 
   const switchSidebarView = (view: SidebarView) => {
     activateWorkspace();
-    if (forceCollapseLeft) setLeftExpandOverride(true);
     if (inHistoryMode) exitHistoryView();
     if (view !== "search") useSearchSession.getState().closeSearch();
     if (view === "outline") closeNotebookAiIfFullscreen();

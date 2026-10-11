@@ -4,7 +4,6 @@ import type { EditorRef } from "@/components/editor/core/Editor";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
-import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/components/editor/core/headingSectionFold";
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
@@ -94,8 +93,8 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
         if (request.enterReader) {
           scrollRef.current?.focus({ preventScroll: true });
         }
-        if (useWorkspaceViewport.getState().forceCollapseLeft && (request.enterReader || document.activeElement?.tagName !== "INPUT")) {
-          useWorkspaceViewport.getState().setLeftExpandOverride(false);
+        if (request.enterReader) {
+          window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
         }
       }
     };

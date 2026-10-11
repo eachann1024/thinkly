@@ -49,7 +49,6 @@ export function PageHeader({
   const aiHeaderActions = useAiHeaderActions();
   const aiHeaderTitle = useAiHeaderTitle();
   const sidebarCollapsed = useEffectiveSidebarCollapsed();
-  const userSidebarCollapsed = useSidebarView((s) => s.sidebarCollapsed);
   const toggleSidebarCollapsed = useSidebarView(
     (s) => s.toggleSidebarCollapsed,
   );
@@ -59,21 +58,6 @@ export function PageHeader({
   const toggleAiPanelShortcutLabel = appShortcuts.toggleAIPanel
     ? formatShortcut(appShortcuts.toggleAIPanel)
     : "";
-  const prevSidebarCollapsedRef = useRef(userSidebarCollapsed);
-  const [sidebarExpandAttention, setSidebarExpandAttention] = useState(false);
-
-  useEffect(() => {
-    if (!prevSidebarCollapsedRef.current && userSidebarCollapsed) {
-      setSidebarExpandAttention(true);
-      const timer = window.setTimeout(() => {
-        setSidebarExpandAttention(false);
-      }, 4000);
-      prevSidebarCollapsedRef.current = userSidebarCollapsed;
-      return () => window.clearTimeout(timer);
-    }
-    prevSidebarCollapsedRef.current = userSidebarCollapsed;
-  }, [userSidebarCollapsed]);
-
   const showAiOnActions = Boolean(onToggleAiPanel);
   const aiFullscreenOpen =
     Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
@@ -115,7 +99,7 @@ export function PageHeader({
                   size="icon"
                   className={cn(
                     "h-8 w-8 shrink-0 rounded-[8px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
-                    sidebarExpandAttention && "sidebar-expand-attention",
+                    "sidebar-toggle-button",
                   )}
                   onClick={toggleSidebarCollapsed}
                   aria-label="展开侧栏"

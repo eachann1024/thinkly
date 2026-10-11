@@ -111,17 +111,12 @@ export const useSidebarView = create<State>()(
       toggleSidebarCollapsed: () => {
         const vp = useWorkspaceViewport.getState();
         const userCollapsed = get().sidebarCollapsed;
-        if (vp.forceCollapseLeft) {
-          const hidden = isEffectiveSidebarCollapsed(
-            userCollapsed,
-            vp.forceCollapseLeft,
-            vp.leftExpandOverride,
-          );
-          vp.setLeftExpandOverride(hidden);
-          return;
+        const hidden = isEffectiveSidebarCollapsed(userCollapsed, vp.forceCollapseLeft, vp.leftExpandOverride);
+        if (hidden) vp.openLeftPanel("engaged");
+        else {
+          vp.setLeftExpandOverride(false);
+          if (!vp.forceCollapseLeft) set({ sidebarCollapsed: true });
         }
-        set({ sidebarCollapsed: !userCollapsed });
-        vp.setLeftExpandOverride(false);
       },
       setExpanded: (notebookId, ids) => {
         const current = get().expandedByNotebook[notebookId];
