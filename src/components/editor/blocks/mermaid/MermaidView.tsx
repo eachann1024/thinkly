@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useEditorPageContext, useEditorSettings } from "@/components/editor/platform/hostContext";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
-import { usePreviewVisibility } from "./usePreviewVisibility";
+import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 
 interface MermaidViewProps {
   value: string;
