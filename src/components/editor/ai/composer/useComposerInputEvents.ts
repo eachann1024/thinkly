@@ -27,7 +27,7 @@ export function useComposerInputEvents(
   clearMentionState: () => void,
   clearCommandState: () => void,
 ) {
-  const { editorRef, isComposingRef, setPlaceholderVisible } = state;
+  const { editorRef, isComposingRef, syncEmptyState } = state;
   const {
     imeSessionRef,
     pendingFlushRef,
@@ -68,10 +68,12 @@ export function useComposerInputEvents(
         if (!el.contains(range.startContainer)) return;
       }
 
-      const coversEntire = selectionCoversEntireEditor(el, range);
-      const containsChip = rangeContainsComposerChip(range, el);
-      const chipBefore = getComposerChipBeforeCaret(el, range);
-      const chipAfter = getComposerChipAfterCaret(el, range);
+      const coversEntire = !range.collapsed && selectionCoversEntireEditor(el, range);
+      const containsChip = !range.collapsed && !coversEntire && rangeContainsComposerChip(range, el);
+      const chipBefore = range.collapsed && inputType.endsWith("Backward")
+        ? getComposerChipBeforeCaret(el, range) : null;
+      const chipAfter = range.collapsed && inputType.endsWith("Forward")
+        ? getComposerChipAfterCaret(el, range) : null;
 
       const action = resolveComposerBeforeInputDelete({
         inputType,
@@ -91,7 +93,7 @@ export function useComposerInputEvents(
       if (action === "clear-editor") {
         el.innerHTML = "";
         placeCaretInEditor(el, true);
-        setPlaceholderVisible(true);
+        syncEmptyState(true);
         scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
         return;
       }
@@ -105,7 +107,7 @@ export function useComposerInputEvents(
           // ignore
         }
         cleanupOrphanComposerZwspNodes(el);
-        setPlaceholderVisible(isEditorDomEmpty(el));
+        syncEmptyState(isEditorDomEmpty(el));
         scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
         return;
       }
@@ -113,7 +115,7 @@ export function useComposerInputEvents(
       if (action === "remove-chip-before" && chipBefore) {
         chipBefore.remove();
         cleanupOrphanComposerZwspNodes(el);
-        setPlaceholderVisible(isEditorDomEmpty(el));
+        syncEmptyState(isEditorDomEmpty(el));
         scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
         return;
       }
@@ -121,11 +123,11 @@ export function useComposerInputEvents(
       if (action === "remove-chip-after" && chipAfter) {
         chipAfter.remove();
         cleanupOrphanComposerZwspNodes(el);
-        setPlaceholderVisible(isEditorDomEmpty(el));
+        syncEmptyState(isEditorDomEmpty(el));
         scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
       }
     },
-    [imeSessionRef, scheduleFlush, setPlaceholderVisible],
+    [editorRef, isComposingRef, imeSessionRef, scheduleFlush, syncEmptyState],
   );
 
   const handleInputNative = useCallback(
@@ -156,16 +158,16 @@ export function useComposerInputEvents(
         return;
       }
 
-      // 只动 DOM 占位，不 setState；整行删光立刻显示占位
+      // 空态只在首字/末字边界变化；立即同步按钮，完整草稿仍防抖，IME 已在前面排除。
       const el = editorRef.current;
       if (el && isEditorDomEmpty(el)) {
-        setPlaceholderVisible(true);
+        syncEmptyState(true);
         clearMentionState();
         clearCommandState();
         scheduleFlush(COMPOSER_DELETE_FLUSH_MS);
         return;
       }
-      setPlaceholderVisible(false);
+      syncEmptyState(false);
       const isDelete = isComposerDeleteInputType(inputType);
       scheduleFlush(
         !isDelete ? COMPOSER_INPUT_FLUSH_MS :
@@ -181,7 +183,9 @@ export function useComposerInputEvents(
       pendingFlushRef,
       scheduleFlush,
       scheduleDetectOnly,
-      setPlaceholderVisible,
+      syncEmptyState,
+      editorRef,
+      isComposingRef,
       touchImeSession,
       clearMentionState,
       clearCommandState,

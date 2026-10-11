@@ -6,7 +6,7 @@
 export const COMPOSER_CARET_ZWSP = "\u200B";
 
 export function isComposerZwspOnlyText(text: string): boolean {
-  return text.length > 0 && text.replace(/\u200B/g, "") === "";
+  return text.length > 0 && !/[^\u200B]/.test(text);
 }
 
 export function stripComposerCaretZwsp(text: string): string {
