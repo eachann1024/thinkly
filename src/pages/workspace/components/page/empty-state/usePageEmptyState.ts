@@ -1,9 +1,8 @@
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
-import { Search, Plus, Sparkles, FolderOpen, type GooseIcon } from "@/components/ui/icons";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
-import { useEffect, useCallback, useMemo, useState } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { toast } from "@/components/ui/sonner";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { requestPageTitleFocus } from "@/lib/page-title-focus";
@@ -13,8 +12,6 @@ import { useTabs } from "@/stores/useTabs";
 import { useSettings } from "@/stores/useSettings";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { isElectronHost } from "@/lib/local-vault";
-
-import { useAiChipTilt } from "./useAiChipTilt";
 
 const isEmptyContent = (
   content:
@@ -58,8 +55,6 @@ export function usePageEmptyState() {
   } = useNotebooks();
   const openInCurrentTab = useTabs((state) => state.openInCurrentTab);
   const aiEnabled = useSettings((s) => s.ai.enabled);
-  const aiTilt = useAiChipTilt(aiEnabled);
-  const [paused, setPaused] = useState(() => document.hidden);
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
   const isLocalFolder = activeNotebook?.source === "local-folder";
 
@@ -117,7 +112,6 @@ export function usePageEmptyState() {
   }, [
     activeNotebook,
     activeNotebookId,
-    isLocalFolder,
     notebooks,
     createNotebook,
     setActiveNotebook,
@@ -172,20 +166,11 @@ export function usePageEmptyState() {
     };
   }, [onCreatePage]);
 
-  useEffect(() => {
-    const syncPaused = () => setPaused(document.hidden);
-    document.addEventListener("visibilitychange", syncPaused);
-    return () => document.removeEventListener("visibilitychange", syncPaused);
-  }, []);
-
   const actions = useMemo(() => {
     const list: Array<{
       key: string;
       title: string;
-      description: string;
       onClick: () => void | Promise<void>;
-      icon: GooseIcon;
-      variant?: "default" | "ai";
     }> = [];
 
     // Electron 无仓库空态：只有「打开文件夹」，不展示新建页面
@@ -193,39 +178,28 @@ export function usePageEmptyState() {
     if (showCreatePage) {
       list.push({
         key: "create-page",
-        icon: Plus,
         title: "新建笔记",
-        description: isLocalFolder
-          ? "在当前目录创建一篇新的 Markdown 笔记"
-          : "创建一篇空白笔记开始书写",
         onClick: onCreatePage,
       });
     }
 
     list.push({
       key: "open-folder",
-      icon: FolderOpen,
       title: "打开本地文件夹",
-      description: "批量管理 Markdown 笔记",
       onClick: onOpenLocalFolder,
     });
 
     if (aiEnabled) {
       list.push({
         key: "ai",
-        icon: Sparkles,
         title: "AI 助手",
-        description: "对话、润色、大纲整理与图表可视化",
         onClick: onOpenAi,
-        variant: "ai",
       });
     }
 
     list.push({
       key: "search",
-      icon: Search,
       title: "全文搜索",
-      description: "快速查找关键词与笔记内容",
       onClick: onSearch,
     });
 
@@ -239,5 +213,5 @@ export function usePageEmptyState() {
     onSearch,
   ]);
 
-  return { paused, isLocalFolder, aiEnabled, aiTilt, actions };
+  return { isLocalFolder, actions };
 }
