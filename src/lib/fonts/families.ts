@@ -79,7 +79,7 @@ const formatFontFamily = (family: string) => {
   const trimmed = trimFontName(family);
   if (!trimmed) return null;
   if (GENERIC_FAMILIES.has(trimmed.toLowerCase())) return trimmed;
-  return `"${trimmed}"`;
+  return `"${trimmed.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 };
 
 /** 生成可写入 CSS font-family 的单项（泛型族不加引号）。 */
@@ -91,8 +91,8 @@ export const toCssFontFamily = (family: string) =>
 export function normalizeLocalFontName(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const name = value.trim();
-  return value.length <= 80 && /^[\p{L}\p{N} ._+-]+$/u.test(value) && name
-    ? value
+  return name.length <= 200 && !/\p{Cc}/u.test(name) && name
+    ? name
     : null;
 }
 
@@ -102,7 +102,7 @@ export async function isLocalFontAvailable(value: string): Promise<boolean> {
   if (!name) return false;
   if (GENERIC_FAMILIES.has(name.toLowerCase())) return true;
   try {
-    await new FontFace("goose-local-font-probe", `local("${name}")`).load();
+    await new FontFace("goose-local-font-probe", `local(${JSON.stringify(name)})`).load();
     return true;
   } catch {
     return false;

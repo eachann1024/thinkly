@@ -13,17 +13,12 @@ export function DefaultFontSelect({
   return (
     <div className="default-font-select space-y-3">
       <div className="flex flex-col gap-3">
-        <Label htmlFor={id}>正文默认字体</Label>
+        <Label htmlFor={id}>正文字体</Label>
         <LocalFontSelect
           id={id}
-          label="正文默认字体"
+          label="正文字体"
           value={value}
           onChange={onChange}
-          defaultLabel="默认"
-          modes={[
-            { family: "serif", label: "衬线" },
-            { family: "monospace", label: "等宽" },
-          ]}
         />
       </div>
     </div>

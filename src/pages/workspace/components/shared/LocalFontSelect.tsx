@@ -17,28 +17,27 @@ import {
 
 import { useFontSelectionPreview } from "./useFontSelectionPreview";
 
-const DEFAULT_VALUE = "__goose_system_default__";
-
 export function LocalFontSelect({
   id,
   label,
   value,
   onChange,
-  defaultLabel = "默认",
-  defaultFontFamily = SYSTEM_FONT_STACK,
-  modes = [],
+  baseFont = SYSTEM_FONT_STACK,
+  baseFontLabel = "系统字体",
+  fallbackFontFamily = SYSTEM_FONT_STACK,
 }: {
   id: string;
   label: string;
   value: string | null;
   onChange: (value: string | null) => void;
-  defaultLabel?: string;
-  defaultFontFamily?: string;
-  modes?: LocalFontOption[];
+  baseFont?: string;
+  baseFontLabel?: string;
+  fallbackFontFamily?: string;
 }) {
   const { open, onOpenChange, contentRef, confirmFont } =
     useFontSelectionPreview(value, onChange);
   const [fonts, setFonts] = useState<LocalFontOption[] | null>(null);
+  const [fontAccessFailed, setFontAccessFailed] = useState(false);
   const [savedFont, setSavedFont] = useState<{
     family: string;
     available: boolean;
@@ -46,15 +45,19 @@ export function LocalFontSelect({
   useEffect(() => {
     let active = true;
     void getAvailableLocalFonts().then((available) => {
-      if (active) setFonts(available);
+      if (active) {
+        setFonts(available);
+        setFontAccessFailed(false);
+      }
+    }).catch(() => {
+      if (active) setFontAccessFailed(true);
     });
     return () => {
       active = false;
     };
-  }, []);
-  const isMode = modes.some((option) => option.family === value);
+  }, [open]);
   useEffect(() => {
-    if (!value || isMode) return;
+    if (!value || value === baseFont) return;
     let active = true;
     void probeLocalFont(value).then((available) => {
       if (active) setSavedFont({ family: value, available });
@@ -62,29 +65,23 @@ export function LocalFontSelect({
     return () => {
       active = false;
     };
-  }, [value, isMode]);
-  const selectedOption = [...modes, ...(fonts ?? [])].find(
+  }, [value, baseFont, fonts]);
+  const selectedOption = (fonts ?? []).find(
     (option) => option.family === value,
   );
-  const availability = selectedOption
+  const availability = selectedOption || value === baseFont
     ? true
     : savedFont?.family === value
       ? savedFont.available
       : undefined;
-  const selectedName = value
-    ? selectedOption &&
-      !isMode &&
-      selectedOption.label !== selectedOption.family
-      ? `${selectedOption.label} · ${selectedOption.family}`
-      : (selectedOption?.label ?? value)
-    : defaultLabel;
+  const selectedName = !value || value === baseFont ? baseFontLabel : value;
   const fallback = Boolean(value && availability === false);
   const selectedFamily =
     !value || fallback || availability === undefined
-      ? defaultFontFamily
-      : `${toCssFontFamily(value)}, ${defaultFontFamily}`;
-  const options = [...modes, ...(fonts ?? [])];
-  if (value && availability === true && !selectedOption)
+      ? fallbackFontFamily
+      : `${toCssFontFamily(value)}, ${fallbackFontFamily}`;
+  const options = (fonts ?? []).filter((option) => option.family !== baseFont);
+  if (value && value !== baseFont && availability === true && !selectedOption)
     options.push({ family: value, label: value });
 
   return (
@@ -106,7 +103,7 @@ export function LocalFontSelect({
               {(fallback || (value && availability === undefined)) && (
                 <span className="block text-xs text-muted-foreground">
                   {fallback
-                    ? "本机未找到，已使用默认字体"
+                    ? "本机未找到，已使用备用字体"
                     : "正在确认本机字体…"}
                 </span>
               )}
@@ -123,14 +120,14 @@ export function LocalFontSelect({
           ref={contentRef}
           className="max-h-80 min-w-[var(--trigger-width)] overflow-y-auto"
         >
-          <DropdownMenuRadioGroup value={value ?? DEFAULT_VALUE}>
+          <DropdownMenuRadioGroup value={value ?? baseFont}>
             <DropdownMenuRadioItem
-              value={DEFAULT_VALUE}
+              value={baseFont}
               data-font-preview=""
               onSelect={() => confirmFont(null)}
-              style={{ fontFamily: defaultFontFamily }}
+              style={{ fontFamily: fallbackFontFamily }}
             >
-              {defaultLabel}
+              {baseFontLabel}
             </DropdownMenuRadioItem>
             {options.map((option) => (
               <DropdownMenuRadioItem
@@ -139,18 +136,10 @@ export function LocalFontSelect({
                 data-font-preview={option.family}
                 onSelect={() => confirmFont(option.family)}
                 style={{
-                  fontFamily: `${toCssFontFamily(option.family)}, ${defaultFontFamily}`,
+                  fontFamily: `${toCssFontFamily(option.family)}, ${fallbackFontFamily}`,
                 }}
               >
-                <span>
-                  <span className="block">{option.label}</span>
-                  {!modes.some((mode) => mode.family === option.family) &&
-                    option.label !== option.family && (
-                      <span className="block text-xs text-muted-foreground">
-                        {option.family}
-                      </span>
-                    )}
-                </span>
+                {option.family}
               </DropdownMenuRadioItem>
             ))}
             {fallback && (
@@ -158,14 +147,18 @@ export function LocalFontSelect({
                 {value}（未安装，已回退）
               </DropdownMenuRadioItem>
             )}
-            {fonts === null && (
+            {fontAccessFailed ? (
+              <DropdownMenuRadioItem value="__unavailable__" disabled>
+                无法读取本机字体，请重新打开菜单重试。
+              </DropdownMenuRadioItem>
+            ) : fonts === null && (
               <DropdownMenuRadioItem value="__loading__" disabled>
-                正在检测可用的本机字体…
+                正在读取本机字体…
               </DropdownMenuRadioItem>
             )}
             {fonts?.length === 0 && (
               <DropdownMenuRadioItem value="__empty__" disabled>
-                未检测到列表中的本机字体，可选择默认。
+                未读取到本机字体。
               </DropdownMenuRadioItem>
             )}
           </DropdownMenuRadioGroup>
