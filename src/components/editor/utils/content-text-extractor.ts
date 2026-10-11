@@ -111,7 +111,11 @@ export function extractStructureSummary(
  * - 连续数字：算 1 字
  */
 export function countWords(content: JSONContent): number {
-  const text = extractTextFromContent(content);
+  return countWordsInText(extractTextFromContent(content));
+}
+
+/** Count an already extracted text, retaining the existing Chinese/English/number semantics. */
+export function countWordsInText(text: string): number {
   if (!text) return 0;
 
   const chineseChars = text.match(/[\u4e00-\u9fa5]/g) || [];
