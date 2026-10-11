@@ -3,8 +3,12 @@ import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import type { ExternalToast } from "sonner";
 import { CircleCheck, X } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "./button";
+import { iconButtonVariants } from "./icon-button";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>;
+type ToasterProps = React.ComponentProps<typeof Sonner> & {
+  placement?: "edge" | "center";
+};
 type ToastMessage = Parameters<typeof sonnerToast>[0];
 
 const defaultToastClassNames = {
@@ -17,19 +21,16 @@ const defaultToastClassNames = {
   // 3. 宽度由 goose-toast.css 控制：max-content + max-width，避免固定 356px。
   toast:
     // Electron 旧内核不支持 hsl(var(--x)/alpha)，避免 bg-*/95、border-*/70 退化成实色
-    "group goose-toast !bg-[rgba(255,255,255,0.95)] dark:!bg-[rgba(18,18,20,0.92)] !text-foreground !border !border-[rgba(15,23,42,0.12)] dark:!border-[rgba(255,255,255,0.14)] !shadow-[0_10px_26px_rgba(2,6,23,0.14)] dark:!shadow-[0_10px_28px_rgba(2,6,23,0.42)] backdrop-blur-md !rounded-xl !px-4 !py-2.5 !font-medium !text-sm !overflow-visible",
+    "group goose-toast goose-toast-surface !font-medium !text-sm !overflow-visible",
   title: "!text-foreground !opacity-100 !font-semibold",
   description: "!text-muted-foreground",
-  actionButton:
-    "goose-interactive goose-interactive-primary !rounded-lg !px-3.5 !h-8 !text-xs !font-semibold !border transition-all duration-150",
-  cancelButton:
-    "goose-interactive !bg-transparent !rounded-lg !px-3 !h-8 !text-xs !font-medium",
-  // 轻量关闭：无粗边框，默认细 X，hover 才淡底高亮
-  // hover 背景必须用 rgba，禁止 foreground/8 —— 旧内核会退化成实心黑圆
-  closeButton:
-    "goose-interactive goose-toast-close !absolute !left-auto !right-1.5 !top-2 !transform-none !translate-x-0 !translate-y-0 !h-[22px] !w-[22px] !rounded-control !border-0 !bg-transparent !opacity-100 !text-muted-foreground !transition-all !duration-150 !cursor-pointer !shadow-none",
+  actionButton: cn(buttonVariants({ size: "sm" }), "!text-xs"),
+  cancelButton: cn(buttonVariants({ variant: "ghost", size: "sm" }), "!text-xs"),
+  // Sonner owns the close button and dismissal; share the IconButton recipe.
+  closeButton: cn(iconButtonVariants({ tone: "muted", size: "xs" }),
+    "[&_svg]:size-3.5 goose-toast-close !absolute !left-auto !right-1.5 !top-2 !transform-none !translate-x-0 !translate-y-0 !border-0 !bg-transparent !opacity-100 !cursor-pointer !shadow-none"),
   error:
-    "goose-toast-error !border-[rgba(200,25,46,0.18)] dark:!border-[rgba(255,109,125,0.18)]",
+    "goose-toast-error",
   success: "goose-toast-success",
   icon: "goose-toast-icon",
 } satisfies NonNullable<ToasterProps["toastOptions"]>["classNames"];
@@ -47,7 +48,7 @@ function SuccessToastIcon() {
 }
 
 function CloseToastIcon() {
-  return <X className="pointer-events-none h-3 w-3" strokeWidth={2.25} />;
+  return <X className="pointer-events-none h-4 w-4" aria-hidden="true" strokeWidth={2.25} />;
 }
 
 function successToast(message: ToastMessage, data?: ExternalToast) {
@@ -68,6 +69,7 @@ const Toaster = ({
   className,
   toastOptions,
   icons,
+  placement = "edge",
   ...props
 }: ToasterProps) => {
   useEffect(() => {
@@ -93,7 +95,7 @@ const Toaster = ({
       mobileOffset={22}
       closeButton
       swipeDirections={["left", "right", "top"]}
-      className={cn("toaster group goose-toaster z-[22000]", className)}
+      className={cn("toaster group goose-toaster z-[22000]", placement === "center" && "goose-toaster-center", className)}
       // 关闭 sonner 默认 richColors，错误视觉完全由全局 goose-toast-error 接管
       richColors={false}
       icons={{
@@ -143,6 +145,7 @@ const Toaster = ({
         },
       }}
       {...props}
+      visibleToasts={placement === "center" ? 1 : props.visibleToasts}
     />
   );
 };

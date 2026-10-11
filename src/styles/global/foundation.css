@@ -122,11 +122,6 @@
   --goose-menu-surface: var(--goose-editor-bg);
   --goose-menu-hover: var(--goose-interactive-hover);
   --goose-menu-border: 0 0% 86%;
-  --goose-menu-radius: 16px;
-  --goose-menu-item-radius: 8px;
-  --goose-menu-item-height: 30px;
-  --goose-menu-item-font-size: 14px;
-  --goose-menu-item-line-height: 20px;
   --goose-menu-shadow:
     0 14px 34px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.08);
 }
@@ -137,11 +132,6 @@
   --goose-menu-surface: 220 13% 14%;
   --goose-menu-hover: var(--goose-interactive-hover);
   --goose-menu-border: 215 16% 28%;
-  --goose-menu-radius: 16px;
-  --goose-menu-item-radius: 8px;
-  --goose-menu-item-height: 30px;
-  --goose-menu-item-font-size: 14px;
-  --goose-menu-item-line-height: 20px;
   --goose-menu-shadow:
     0 14px 34px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.18);
 }

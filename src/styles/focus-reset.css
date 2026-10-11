@@ -31,8 +31,8 @@
 ):is(:focus-visible, [data-focus-visible="true"]):where(
   :not(.sidebar-mode-rail-button):not([data-goose-inline-input]):not([type="range"]):not([type="hidden"]):not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
 ) {
-  background-color: var(--goose-interactive-hover) !important;
-  color: var(--goose-interactive-hover-fg) !important;
+  background-color: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
 }
 
 /* 行内编辑的焦点由光标和外层行/输入外壳表达，不叠加局部色块。

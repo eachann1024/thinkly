@@ -71,6 +71,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             data-side={state.placement.split("-")[0]}
             data-motion={state.motionMode}
             data-goose-floating-content=""
+            data-goose-menu-slot={!editorContext ? "root" : undefined}
             className={cn(
               "z-[20000] outline-none",
               !editorContext && surface,
@@ -91,6 +92,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             <FloatingList elementsRef={state.elements} labelsRef={state.labels}>
               {editorContext ? (
                 <div
+                  data-goose-menu-slot="root"
                   className={cn("goose-editor-context-ui", surface, className)}
                 >
                   {children}

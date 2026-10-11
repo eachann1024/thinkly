@@ -1,0 +1,43 @@
+/* 控件共用几何。初值沿用迁移前尺寸；主题只改变语义颜色。 */
+:root {
+  --goose-control-radius: 8px;
+  --goose-menu-radius: 16px;
+  --goose-menu-item-radius: var(--goose-control-radius);
+  --goose-menu-item-height: 30px;
+  --goose-menu-item-font-size: 14px;
+  --goose-menu-item-line-height: 20px;
+  --goose-field-radius: var(--radius, 0.75rem);
+  --goose-icon-button-radius: calc(var(--radius, 0.75rem) - 2px);
+  --goose-editor-field-radius: 10px;
+  --goose-floating-radius: 12px;
+  --goose-kbd-radius: calc(var(--radius, 0.75rem) - 2px);
+  --goose-kbd-chip-radius: 6px;
+  --goose-choice-card-radius: 12px;
+  --goose-toggle-radius: calc(var(--radius, 0.75rem) - 2px);
+  --goose-selectable-card-radius: var(--radius, 0.75rem);
+  --goose-settings-option-radius: 12px;
+  --goose-settings-option-bg: hsl(var(--goose-selected-bg) / 0.58);
+  --goose-control-font-size: 0.875rem;
+  --goose-control-height: 2.5rem;
+  --goose-control-height-compact: 2.25rem;
+  --goose-control-height-small: 1.75rem;
+  --goose-field-height: 2.5rem;
+  --goose-control-icon-size: 1rem;
+  --goose-checkbox-size: 1rem;
+  --goose-checkbox-radius: 4px;
+  --goose-checkbox-border-width: 1px;
+  --goose-icon-button-height-small: 1.5rem;
+  --goose-icon-button-height-compact: 1.75rem;
+  --goose-icon-button-height: 2rem;
+  --goose-control-motion-duration: 150ms;
+  --goose-menu-row-gap: 4px;
+  --goose-list-row-gap: var(--goose-menu-row-gap);
+  --goose-menu-content-gap: 8px;
+  --goose-menu-surface-inset: 6px;
+  --goose-editor-toolbar-control-size: 26px;
+  --goose-editor-dock-control-size: 28px;
+  --goose-overlay-inset: 24px;
+  --goose-overlay-content-gap: 16px;
+}
+
+.dark { --goose-settings-option-bg: hsl(var(--foreground) / 0.08); }

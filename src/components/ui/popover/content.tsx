@@ -179,7 +179,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
             className={cn(
               "z-[20000] outline-none",
               !editorContext &&
-                "goose-floating-surface w-64 p-2 text-popover-foreground",
+                "goose-floating-surface goose-popover-surface w-64 text-popover-foreground",
               !editorContext && className,
             )}
             style={{
@@ -200,7 +200,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
             {editorContext ? (
               <div
                 className={cn(
-                  "goose-editor-context-ui goose-floating-surface w-64 p-2 text-popover-foreground",
+                  "goose-editor-context-ui goose-floating-surface goose-popover-surface w-64 text-popover-foreground",
                   className,
                 )}
               >

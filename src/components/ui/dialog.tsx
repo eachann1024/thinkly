@@ -1,8 +1,10 @@
 import * as GooseIcons from "@/components/ui/icons";
 import * as React from "react";
-import { Dialog as AriaDialog, Heading, ModalOverlay } from "react-aria-components";
+import { Dialog as AriaDialog, Heading, Modal as AriaModal, ModalOverlay } from "react-aria-components";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
+import { Button } from "./button";
+import { IconButton } from "./icon-button";
 
 type DialogProps = React.PropsWithChildren<{
   open?: boolean;
@@ -68,11 +70,12 @@ const DialogTrigger = React.forwardRef<
 });
 const DialogClose = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ onClick, type = "button", ...props }, ref) => {
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { icon?: boolean }
+>(({ onClick, type = "button", icon = false, ...props }, ref) => {
   const { setOpen } = useDialogState();
+  const Component = icon ? IconButton : Button;
   return (
-    <button
+    <Component
       {...props}
       ref={ref}
       type={type}
@@ -115,25 +118,28 @@ const DialogContent = React.forwardRef<HTMLElement, DialogContentProps>(
     const descriptionId = React.useContext(DialogDescriptionId);
     return (
       <DialogOverlay className={overlayClassName}>
+        <AriaModal className="contents">
         <AriaDialog
           {...props}
           ref={ref}
           aria-describedby={props["aria-describedby"] ?? descriptionId}
           className={cn(
-            "fixed left-[50%] top-[50%] z-[100] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-visible border-0 bg-background p-6 shadow-[0_16px_36px_rgba(15,23,42,0.16),0_2px_8px_rgba(15,23,42,0.08)] outline-none sm:rounded-[14px]",
+            "fixed left-[50%] top-[50%] z-[100] goose-dialog-surface grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] outline-none",
             className,
           )}
         >
           {children}
           {!hideClose && (
             <DialogClose
+              icon
               aria-label="关闭"
-              className="goose-interactive absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-sm border border-transparent bg-transparent text-muted-foreground transition-colors "
+              className="absolute right-4 top-4 text-muted-foreground"
             >
               <GooseIcons.X className="h-4 w-4" />
             </DialogClose>
           )}
         </AriaDialog>
+        </AriaModal>
       </DialogOverlay>
     );
   },

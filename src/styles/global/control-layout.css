@@ -1,0 +1,54 @@
+/* root 与 group 分别布局，保证选中行和相邻 hover 行始终有间隙。 */
+:is(.goose-list-layout, .goose-list-group, [data-goose-menu-slot="root"], [data-goose-menu-slot="group"]):not([data-goose-layout="grid"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--goose-list-row-gap);
+}
+:is(.goose-menu-surface, .goose-floating-surface, .dropdown__popover)
+  :is(.menu, .list-box, .menu-section, .list-box-section),
+.goose-menu-surface.menu,
+[cmdk-group-items] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--goose-menu-row-gap);
+}
+.goose-list-row {
+  border-radius: var(--goose-control-radius);
+}
+/* 虚拟列表与时间线保留行高、坐标；透明边框只给背景留空隙。 */
+.goose-list-row[data-goose-row-inset] {
+  box-sizing: border-box;
+  border-block: calc(var(--goose-list-row-gap) / 2) solid transparent;
+  background-clip: padding-box;
+}
+.goose-settings-option-row {
+  border-radius: var(--goose-settings-option-radius, 12px);
+  background: var(--goose-settings-option-bg);
+}
+.goose-settings-option-row--joined { border-radius: 0; }
+
+/* Checkbox keeps its own square geometry; HeroUI still owns form/keyboard state. */
+[data-goose-control="checkbox"] [data-goose-slot="check-control"] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--goose-checkbox-size);
+  height: var(--goose-checkbox-size);
+  border-width: var(--goose-checkbox-border-width);
+  border-style: solid;
+  border-radius: var(--goose-checkbox-radius);
+  box-shadow: none;
+}
+/* The supplier's accent pseudo-layer uses a different color-token format. */
+[data-goose-control="checkbox"] [data-goose-slot="check-control"]::before { display: none; }
+[data-goose-control="checkbox"] [data-goose-slot="check-indicator"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+[data-goose-control="checkbox"] [data-goose-slot="check-content"],
+[data-goose-control="checkbox"] [data-slot="label"] { font: inherit; }
