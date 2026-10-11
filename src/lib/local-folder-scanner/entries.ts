@@ -36,6 +36,7 @@ export interface LocalFolderScannerOptions {
   basePath: string;
   gooseFs: GooseFs;
   hiddenFolders?: string[];
+  forceRead?: boolean;
 }
 
 export interface LocalFolderEntry {
@@ -168,10 +169,17 @@ export async function readMarkdownFile(
     };
   };
 
-  const [fileResult, stat] = await Promise.all([
-    readContent(),
-    statMarkdownFile(gooseFs, filePath),
-  ]);
+  // A fingerprint belongs to these bytes only when stat brackets the read.
+  const before = await statMarkdownFile(gooseFs, filePath);
+  const fileResult = await readContent();
+  const after = await statMarkdownFile(gooseFs, filePath);
+  const stat =
+    before &&
+    after &&
+    before.mtimeMs === after.mtimeMs &&
+    before.size === after.size
+      ? after
+      : undefined;
   return { ...fileResult, stat };
 }
 

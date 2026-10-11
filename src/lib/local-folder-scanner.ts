@@ -1,3 +1,4 @@
+import { pruneParsedMarkdown } from "./local-folder-scanner/parsed-cache";
 import {
   type LocalPageIdMap,
   readLocalPageIdMap,
@@ -18,6 +19,7 @@ import {
   nowForScanBudget,
   yieldToRenderer,
 } from "./local-folder-scanner/entries";
+import { readUnchangedMarkdown } from "./local-folder-scanner/read-cache";
 import { buildMarkdownPage } from "./local-folder-scanner/markdown";
 export {
   buildLocalPageId,
@@ -35,6 +37,7 @@ export async function scanLocalFolderPages({
   basePath,
   gooseFs,
   hiddenFolders = [],
+  forceRead = false,
 }: LocalFolderScannerOptions): Promise<Page[]> {
   // 读取一次映射表，整个扫描过程共享（避免逐文件 IO）。
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
@@ -42,6 +45,7 @@ export async function scanLocalFolderPages({
   // 记录本次扫描实际存在的相对路径，用于扫描结束后剪枝。
   const liveRelativePaths = new Set<string>();
   const hiddenFoldersSet = new Set(hiddenFolders);
+  const cacheScope = JSON.stringify([basePath, [...hiddenFolders].sort()]);
 
   const scanDirectory = async (
     dirPath: string,
@@ -114,7 +118,11 @@ export async function scanLocalFolderPages({
     for (let i = 0; i < pendingFiles.length; i += BATCH_SIZE) {
       const batch = pendingFiles.slice(i, i + BATCH_SIZE);
       const readResults = await Promise.allSettled(
-        batch.map(({ entry }) => readMarkdownFile(gooseFs, entry.path)),
+        batch.map(({ entry }) =>
+          forceRead
+            ? readMarkdownFile(gooseFs, entry.path)
+            : readUnchangedMarkdown(gooseFs, entry.path),
+        ),
       );
 
       let sliceStartedAt = nowForScanBudget();
@@ -137,6 +145,7 @@ export async function scanLocalFolderPages({
             readResult.value,
             now,
             pending.fileId,
+            cacheScope,
           );
           page.parentId = parentId;
           pages.push(page);
@@ -160,6 +169,14 @@ export async function scanLocalFolderPages({
   };
 
   const pages = await scanDirectory(basePath);
+  pruneParsedMarkdown(
+    cacheScope,
+    new Set(
+      pages.flatMap((page) =>
+        page.localFilePath && !page.isFolder ? [page.localFilePath] : [],
+      ),
+    ),
+  );
 
   // 扫描结束后统一处理映射表持久化与剪枝。
   if (idMapDirty) {

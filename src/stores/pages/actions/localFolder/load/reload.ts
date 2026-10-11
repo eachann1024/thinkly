@@ -1,3 +1,8 @@
+import { readMarkdownFile } from "@/lib/local-folder-scanner/entries";
+import {
+  takeMarkdownReadHandoff,
+  validateMarkdownRead,
+} from "@/lib/local-folder-scanner/read-cache";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {
   parseLocalMarkdownContent,
@@ -18,32 +23,25 @@ export const reloadLocalPageFromDiskAction = async (
   if (typeof window === "undefined" || !window.gooseFs) return;
 
   const page = get().pages[pageId];
-  if (!page || page.isFolder || !page.localFilePath) return;
+  if (!page || page.isFolder || page.trashedAt || !page.localFilePath) return;
   if (get().dirtyLocalPageIds[pageId]) return;
 
   const fs = window.gooseFs;
   const filePath = page.localFilePath;
 
-  let markdown: string | null;
-  let readError: string | undefined;
+  let read;
   try {
-    if (fs.readFileStatAsync) {
-      const result = await fs.readFileStatAsync(filePath);
-      markdown = result.ok ? (result.content ?? "") : null;
-      readError = result.error || undefined;
-    } else if (fs.readFileStat) {
-      const result = fs.readFileStat(filePath);
-      markdown = result.ok ? (result.content ?? "") : null;
-      readError = result.error || undefined;
-    } else if (fs.readFileAsync) {
-      markdown = await fs.readFileAsync(filePath);
-    } else {
-      markdown = fs.readFile(filePath);
-    }
+    const supplied = takeMarkdownReadHandoff(filePath);
+    read =
+      supplied && (await validateMarkdownRead(fs, filePath, supplied))
+        ? supplied
+        : await readMarkdownFile(fs, filePath);
   } catch (error) {
     console.error("[local-folder] reload read failed", error);
     return;
   }
+  const markdown = read.content;
+  const readError = read.error;
 
   const parsed = await parseLocalMarkdownContent(
     markdown,
@@ -51,20 +49,37 @@ export const reloadLocalPageFromDiskAction = async (
     readError,
   );
 
-  // 外部变更后更新快照，保证下次写盘前 diff 与磁盘最新状态比较。
+  if (read.stat && !(await validateMarkdownRead(fs, filePath, read, false)))
+    return;
+
+  // Reading/parsing yields: don't overwrite edits, a move, or another reload.
+  const current = get().pages[pageId];
+  if (
+    !current ||
+    current.trashedAt ||
+    current.workspaceId !== page.workspaceId ||
+    current.localFilePath !== filePath ||
+    current.content !== page.content ||
+    get().dirtyLocalPageIds[pageId]
+  )
+    return;
+
   if (typeof markdown === "string") {
     setLocalMdSnapshot(filePath, markdown);
-    try {
-      const stat = await window.gooseFs.statAsync?.(filePath);
-      if (stat) updateSnapshotStat(filePath, stat);
-    } catch {
-      // 指纹失败不影响重载，下次 watch 退回读全文
-    }
+    if (read.stat) updateSnapshotStat(filePath, read.stat);
   }
 
   set((state) => {
     const current = state.pages[pageId];
-    if (!current) return state;
+    if (
+      !current ||
+      current.trashedAt ||
+      current.workspaceId !== page.workspaceId ||
+      current.localFilePath !== filePath ||
+      current.content !== page.content ||
+      state.dirtyLocalPageIds[pageId]
+    )
+      return state;
     return {
       pages: {
         ...state.pages,

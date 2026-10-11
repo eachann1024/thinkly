@@ -131,7 +131,9 @@ export function useMainTreeState({
     if (!activeNotebookId || !notebook?.localPath) return;
     void usePages
       .getState()
-      .loadLocalFolderPages(activeNotebookId, notebook.localPath)
+      .loadLocalFolderPages(activeNotebookId, notebook.localPath, {
+        forceRead: true,
+      })
       .catch((error) => {
         console.error("[local-folder] retry failed", error);
       });

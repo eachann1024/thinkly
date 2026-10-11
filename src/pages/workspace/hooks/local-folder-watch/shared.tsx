@@ -1,7 +1,13 @@
+import { readMarkdownFile } from "@/lib/local-folder-scanner/entries";
+import {
+  readSharedMarkdown,
+  withMarkdownReadHandoff,
+} from "@/lib/local-folder-scanner/read-cache";
 import { toast } from "@/components/ui/sonner";
 import { usePages } from "@/stores/usePages";
 import {
   isDiskContentMatchingSnapshot,
+  isStatMatchingSnapshot,
   updateSnapshotAfterWrite,
   updateSnapshotStat,
   deleteLocalMdSnapshot,
@@ -35,18 +41,9 @@ export async function readDiskContent(
   const fs = window.gooseFs;
   if (!fs) return null;
   try {
-    if (fs.readFileStatAsync) {
-      const r = await fs.readFileStatAsync(filePath);
-      return r.ok ? (r.content ?? "") : null;
-    }
-    if (fs.readFileStat) {
-      const r = fs.readFileStat(filePath);
-      return r.ok ? (r.content ?? "") : null;
-    }
-    if (fs.readFileAsync) return (await fs.readFileAsync(filePath)) ?? null;
-    if (fs.readFile) return fs.readFile(filePath) ?? null;
+    return (await readSharedMarkdown(fs, filePath)).content;
   } catch {
-    // 读失败按「无从判断」处理，调用方跳过本次检查
+    // Failed reads cannot establish a disk baseline.
   }
   return null;
 }
@@ -117,7 +114,10 @@ function conflictHandlers(filePath: string, pageId: string) {
     onKeepMine: () => {
       void (async () => {
         try {
-          const diskContent = await readDiskContent(filePath);
+          const fs = window.gooseFs;
+          const diskContent = fs
+            ? (await readMarkdownFile(fs, filePath)).content
+            : null;
           if (diskContent !== null) {
             updateSnapshotAfterWrite(filePath, diskContent);
             try {
@@ -166,9 +166,17 @@ async function checkLocalPageFreshness(pageId: string): Promise<void> {
   const filePath = page?.localFilePath;
   if (!filePath) return;
 
-  const diskContent = await readDiskContent(filePath);
-  if (diskContent === null) return;
-  if (isDiskContentMatchingSnapshot(filePath, diskContent)) return;
+  const fs = window.gooseFs;
+  if (!fs) return;
+  const stat = await statDisk(filePath);
+  if (stat && isStatMatchingSnapshot(filePath, stat)) return;
+  const read = await readSharedMarkdown(fs, filePath).catch(() => null);
+  if (!read || read.content === null) return;
+  if (usePages.getState().pages[pageId]?.localFilePath !== filePath) return;
+  if (isDiskContentMatchingSnapshot(filePath, read.content)) {
+    if (read.stat) updateSnapshotStat(filePath, read.stat);
+    return;
+  }
 
   const isDirty = Boolean(usePages.getState().dirtyLocalPageIds[pageId]);
   if (isDirty || wasRecentlyInteracting(2000)) {
@@ -176,5 +184,7 @@ async function checkLocalPageFreshness(pageId: string): Promise<void> {
     showConflictToast(filePath, pageId, onKeepMine, onLoadDisk);
     return;
   }
-  void usePages.getState().reloadLocalPageFromDisk(pageId);
+  withMarkdownReadHandoff(filePath, read, () => {
+    void usePages.getState().reloadLocalPageFromDisk(pageId);
+  });
 }

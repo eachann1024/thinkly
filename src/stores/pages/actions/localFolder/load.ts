@@ -14,7 +14,7 @@ export const loadLocalFolderPagesAction = (
   get: StoreGet,
   notebookId: string,
   basePath: string,
-  options?: { showWelcome?: boolean },
+  options?: { showWelcome?: boolean; forceRead?: boolean },
 ): Promise<void> => {
   if (typeof window === "undefined" || !window.gooseFs) {
     return Promise.resolve();
@@ -28,6 +28,7 @@ export const loadLocalFolderPagesAction = (
     basePath,
     hiddenFolders,
     showWelcome: Boolean(options?.showWelcome),
+    forceRead: Boolean(options?.forceRead),
   });
   const existing = localFolderLoadTasks.get(notebookId);
   if (existing?.fingerprint === fingerprint) return existing.promise;
