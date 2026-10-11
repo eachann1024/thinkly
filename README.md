@@ -58,6 +58,8 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 ## 开始记录
 
+Windows：Intel / AMD 电脑请选择文件名以 `x64-setup.exe` 结尾的安装包；基于 ARM 的电脑请选择 `arm64-setup.exe`。可在「设置 → 系统 → 关于 → 系统类型」中确认。
+
 1. 启动 Goose Note，选择「打开本地文件夹」。
 2. 打开已有 Markdown 文件，或新建一页，写下第一个想法。
 3. 需要整理时打开 AI 面板；需要分享时，从页面菜单导出。
