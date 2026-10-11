@@ -1,4 +1,5 @@
 import { loadMermaid } from "./loadMermaid";
+import { persistPreview, previewCacheKey, readPersistedPreview } from "./mermaidPersistentCache";
 import { getMermaidInitConfig, stripMermaidInitDirectives, type MermaidInitOptions } from "./mermaidTheme";
 import { tryRenderMermaidTimeline } from "./timelineSvg";
 
@@ -9,6 +10,7 @@ const pending = new Map<string, Promise<string>>();
 let bytes = 0;
 let renderQueue: Promise<unknown> = Promise.resolve();
 let nextInstance = 0;
+const rendererIdentity = crypto.randomUUID();
 
 /** Give every mounted/exported SVG its own IDs, including markers and CSS selectors. */
 function instantiate(svg: string): string {
@@ -21,7 +23,7 @@ function instantiate(svg: string): string {
     : parser.parseFromString(svg, "text/html").querySelector("svg");
   if (!root) throw new Error("图表预览不是有效的 SVG");
   const elements = [root, ...root.querySelectorAll("*")];
-  const prefix = `goose-diagram-${++nextInstance}-`;
+  const prefix = `goose-diagram-${rendererIdentity}-${++nextInstance}-`;
   const ids = new Map<string, string>();
   for (const element of elements) {
     const id = element.getAttribute("id");
@@ -62,7 +64,17 @@ export async function renderCachedMermaid(
   options: MermaidInitOptions,
   context: "editor" | "export",
   fontIdentity?: string,
+  signal?: AbortSignal,
 ): Promise<string> {
+  if (typeof window !== "undefined" && window.gooseDesktop?.renderMermaidPreview) {
+    signal?.throwIfAborted();
+    const desktop = window.gooseDesktop;
+    const requestId = crypto.randomUUID();
+    const cancel = () => desktop.cancelMermaidPreview(requestId);
+    signal?.addEventListener("abort", cancel, { once: true });
+    try { return await desktop.renderMermaidPreview({ source, options, context, fontIdentity, requestId }); }
+    finally { signal?.removeEventListener("abort", cancel); }
+  }
   const config = getMermaidInitConfig(options);
   const cleanSource = stripMermaidInitDirectives(source);
   const key = JSON.stringify([context, config, cleanSource, fontIdentity]);
@@ -75,11 +87,16 @@ export async function renderCachedMermaid(
   let request = pending.get(key);
   if (!request) {
     request = renderQueue.then(async () => {
+      const storedKey = await previewCacheKey(key);
+      const stored = await readPersistedPreview(storedKey);
+      if (stored) return stored;
       const timeline = tryRenderMermaidTimeline(cleanSource, options.mode);
-      if (timeline) return timeline;
+      if (timeline) { void persistPreview(storedKey, timeline); return timeline; }
       const mermaid = await loadMermaid();
       mermaid.initialize(config);
-      return (await mermaid.render(`goose-template-${++nextInstance}`, cleanSource)).svg;
+      const svg = (await mermaid.render(`goose-template-${++nextInstance}`, cleanSource)).svg;
+      void persistPreview(storedKey, svg);
+      return svg;
     });
     renderQueue = request.catch(() => {});
     pending.set(key, request);
