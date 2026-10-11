@@ -43,85 +43,13 @@ body:has([role="dialog"]:not([hidden]), [role="menu"]:not([hidden]))
 }
 
 .bootstrap-screen {
-  display: grid;
+  display: flex;
   min-height: 100dvh;
-  place-content: center;
-  justify-items: center;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
   padding: 32px;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  text-align: center;
-}
-
-.bootstrap-screen__mark {
-  font-size: 40px;
-  line-height: 1;
-}
-
-.bootstrap-screen h1,
-.bootstrap-screen p {
-  margin: 0;
-}
-
-.bootstrap-screen h1 {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.bootstrap-screen p,
-.bootstrap-screen code {
-  max-width: 32rem;
-  color: hsl(var(--muted-foreground));
-  font-size: 13px;
-}
-
-.bootstrap-screen code {
-  overflow-wrap: anywhere;
-}
-
-.bootstrap-screen button {
-  min-height: 36px;
-  margin-top: 4px;
-  border-radius: 8px;
-  border: 1px solid var(--goose-interactive-hover-border);
-  padding: 0 16px;
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.bootstrap-screen__progress {
-  width: 72px;
-  height: 2px;
-  overflow: hidden;
-  border-radius: var(--radius-marker);
-  background: hsl(var(--muted));
-}
-
-.bootstrap-screen__progress::after {
-  display: block;
-  width: 45%;
-  height: 100%;
-  border-radius: inherit;
-  background: hsl(var(--foreground));
-  content: "";
-  animation: bootstrap-progress 1.2s ease-in-out infinite alternate;
-}
-
-@keyframes bootstrap-progress {
-  to {
-    transform: translateX(122%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bootstrap-screen__progress::after {
-    width: 100%;
-    animation: none;
-    opacity: 0.6;
-  }
 }
 
 /* 启动恢复首帧（data-startup-settling 存在期间）：
