@@ -52,8 +52,10 @@ export function useComposerInputEvents(
         inputType === "deleteCompositionText" ||
         inputType === "deleteByComposition";
 
+      // 普通文本删除交给浏览器；IME 和无 chip 场景无需逐键扫描选区边界。
+      if (imeActive) return;
       const el = editorRef.current;
-      if (!el) return;
+      if (!el || !editorHasComposerChips(el)) return;
 
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
@@ -66,7 +68,6 @@ export function useComposerInputEvents(
         if (!el.contains(range.startContainer)) return;
       }
 
-      const hasChips = editorHasComposerChips(el);
       const coversEntire = selectionCoversEntireEditor(el, range);
       const containsChip = rangeContainsComposerChip(range, el);
       const chipBefore = getComposerChipBeforeCaret(el, range);
@@ -75,7 +76,7 @@ export function useComposerInputEvents(
       const action = resolveComposerBeforeInputDelete({
         inputType,
         imeActive,
-        hasChips,
+        hasChips: true,
         selectionCoversEntire: coversEntire,
         rangeCollapsed: range.collapsed,
         rangeContainsChip: containsChip,
@@ -166,11 +167,10 @@ export function useComposerInputEvents(
       }
       setPlaceholderVisible(false);
       const isDelete = isComposerDeleteInputType(inputType);
-      const deleteDelay =
-        el && editorHasComposerChips(el)
-          ? COMPOSER_CHIP_DELETE_FLUSH_MS
-          : COMPOSER_DELETE_FLUSH_MS;
-      scheduleFlush(isDelete ? deleteDelay : COMPOSER_INPUT_FLUSH_MS);
+      scheduleFlush(
+        !isDelete ? COMPOSER_INPUT_FLUSH_MS :
+          el && editorHasComposerChips(el) ? COMPOSER_CHIP_DELETE_FLUSH_MS : COMPOSER_DELETE_FLUSH_MS,
+      );
       // 非删除：立刻探测 @ /，菜单不跟 200ms 内容防抖绑死
       if (!isDelete) {
         scheduleDetectOnly(0);

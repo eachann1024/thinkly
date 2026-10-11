@@ -47,9 +47,9 @@
 }
 
 /*
- * 输入条外壳：单行、多行复用通用控件圆角，
+ * 输入条外壳：默认多行，复用通用控件圆角，
  * 边框与右键菜单 --goose-menu-border 一致，避免白底上看不见。
- * 高度与控件位移由 PromptBar 共用一次 180ms 布局过渡；编辑器立即完成重排。
+ * 高度和工具栏位置保持稳定；超出的输入内容在编辑器内滚动。
  * 颜色过渡由共享控件动效变量控制。
  */
 .notebook-ai-composer-shell {
@@ -81,13 +81,14 @@
 .notebook-ai-send-button[data-ready="true"] {
  cursor: pointer;
 }
-/* panel 输入区按正文字号与行高测量，4 行封顶，超出内部滚动。 */
+/* Stable two-line viewport: extra lines scroll inside, with no per-keystroke layout measurement. */
 [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
  --ai-composer-line-height: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.5));
- height: var(--ai-composer-h, var(--ai-composer-line-height));
- min-height: var(--ai-composer-line-height);
- max-height: calc(var(--ai-composer-line-height) * 4);
- /* 不单独过渡高度，避免外壳展开后输入内容才跟上。 */
+ height: calc(var(--ai-composer-line-height) * 2);
+ min-height: calc(var(--ai-composer-line-height) * 2);
+ max-height: calc(var(--ai-composer-line-height) * 2);
+ scrollbar-gutter: stable;
+ overscroll-behavior: contain;
 }
 @media (prefers-reduced-motion: reduce) {
  .notebook-ai-composer-shell,

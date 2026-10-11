@@ -21,8 +21,6 @@ export function useComposerInputHandle(
 ) {
   const {
     onIsEmptyChange,
-    onMultilineChange,
-    onLayoutMeasure,
     onContentChange,
   } = props;
   const {
@@ -54,8 +52,6 @@ export function useComposerInputHandle(
         const el = editorRef.current;
         if (!el) return;
         el.innerHTML = "";
-        el.style.removeProperty("--ai-composer-h");
-        el.dataset.multiline = "false";
         lastEmittedContentRef.current = null;
         releaseAllImages();
         setPlaceholderVisible(true);
@@ -64,8 +60,6 @@ export function useComposerInputHandle(
         clearMentionState();
         clearCommandState();
         onIsEmptyChange?.(true);
-        onMultilineChange?.(false);
-        onLayoutMeasure?.();
         onContentChange?.(null);
       },
       getPayload: (): AiComposerPayload => {
@@ -102,8 +96,6 @@ export function useComposerInputHandle(
       clearMentionState,
       clearCommandState,
       onIsEmptyChange,
-      onMultilineChange,
-      onLayoutMeasure,
       onContentChange,
       releaseAllImages,
       insertImages,

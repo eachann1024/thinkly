@@ -11,7 +11,7 @@ export function useComposerSubmission(
   cancelPendingDraftPersist: () => void,
 ) {
   const { disabled, isStreaming, onSend, onSlashCommand, notebookId } = props;
-  const { inputRef, setIsEmpty, collapseChrome, setAutoFocusToken } = surface;
+  const { inputRef, setIsEmpty, setAutoFocusToken } = surface;
   const handleSubmit = useCallback(() => {
     if (disabled || isStreaming) return;
     const input = inputRef.current;
@@ -25,7 +25,6 @@ export function useComposerSubmission(
       cancelPendingDraftPersist();
       useNotebookAiChats.getState().clearComposerDraft(notebookId);
       setIsEmpty(true);
-      collapseChrome();
       setAutoFocusToken((token) => token + 1);
       onSlashCommand?.(slashCommand);
       return;
@@ -41,7 +40,6 @@ export function useComposerSubmission(
     cancelPendingDraftPersist();
     useNotebookAiChats.getState().clearComposerDraft(notebookId);
     setIsEmpty(true);
-    collapseChrome();
     setAutoFocusToken((token) => token + 1);
   }, [
     disabled,
@@ -50,7 +48,6 @@ export function useComposerSubmission(
     onSlashCommand,
     notebookId,
     cancelPendingDraftPersist,
-    collapseChrome,
   ]);
 
   return handleSubmit;

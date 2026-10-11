@@ -6,7 +6,6 @@
 import {
   useEffect,
   useLayoutEffect,
-  useRef,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -41,10 +40,6 @@ export function useComposerEditor(options: {
   isEmptyRef: RefObject<boolean>;
   setIsEmpty: Dispatch<SetStateAction<boolean>>;
   onIsEmptyChange?: (isEmpty: boolean) => void;
-  /** 输入区超过一行时通知外层切圆角；仅值变化时触发 */
-  onMultilineChange?: (multiline: boolean) => void;
-  /** 每次量高后都触发，供外层按单行槽宽重算展开态 */
-  onLayoutMeasure?: () => void;
 }) {
   const {
     editorHostRef,
@@ -62,17 +57,7 @@ export function useComposerEditor(options: {
     isEmptyRef,
     setIsEmpty,
     onIsEmptyChange,
-    onMultilineChange,
-    onLayoutMeasure,
   } = options;
-
-  // 挂载 effect 依赖为空，回调经 ref 取最新，避免重建编辑器节点
-  const onMultilineChangeRef = useRef(onMultilineChange);
-  const onLayoutMeasureRef = useRef(onLayoutMeasure);
-  useEffect(() => {
-    onMultilineChangeRef.current = onMultilineChange;
-    onLayoutMeasureRef.current = onLayoutMeasure;
-  }, [onMultilineChange, onLayoutMeasure]);
 
   useLayoutEffect(() => {
     const host = editorHostRef.current;
@@ -158,72 +143,6 @@ export function useComposerEditor(options: {
     host.appendChild(el);
     editorRef.current = el;
 
-    // panel 变体：按实际行高测量输入区，最多显示 4 行，
-    // 超一行打 data-multiline 标记并通知外层切圆角。
-    // 先还原高度再读 scrollHeight，避免上次的高度值喂回测量。
-    const measureHeight =
-      variant === "panel"
-        ? () => {
-            el.style.height = "auto";
-            const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 24;
-            const next = Math.min(Math.max(el.scrollHeight, lineHeight), lineHeight * 4);
-            el.style.height = "";
-            const height = `${next}px`;
-            if (el.style.getPropertyValue("--ai-composer-h") !== height) {
-              el.style.setProperty("--ai-composer-h", height);
-            }
-            const multiline = next > Math.ceil(lineHeight) + 1;
-            const changed = el.dataset.multiline !== String(multiline);
-            el.dataset.multiline = String(multiline);
-            if (changed) onMultilineChangeRef.current?.(multiline);
-            onLayoutMeasureRef.current?.();
-          }
-        : null;
-    // 将同一帧的增删合并量高，避免 DOM 变化时强制刷新 React 和重复布局。
-    let measureFrame: number | null = null;
-    const scheduleMeasure = () => {
-      if (measureFrame !== null) return;
-      measureFrame = requestAnimationFrame(() => {
-        measureFrame = null;
-        measureHeight?.();
-      });
-    };
-    const observer = measureHeight
-      ? new MutationObserver(scheduleMeasure)
-      : null;
-    if (observer) {
-      observer.observe(el, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-    }
-
-    // 展开、字号和行高变化都需重新测量；忽略仅由写回高度触发的观察，避免循环。
-    const measureSignature = () => {
-      const style = getComputedStyle(el);
-      return `${el.clientWidth}:${style.fontSize}:${style.lineHeight}`;
-    };
-    let measuredSignature = measureSignature();
-    const remeasureIfChanged = () => {
-      const signature = measureSignature();
-      if (signature === measuredSignature) return;
-      measuredSignature = signature;
-      scheduleMeasure();
-    };
-    const resizeObserver = measureHeight
-      ? new ResizeObserver(remeasureIfChanged)
-      : null;
-    resizeObserver?.observe(el);
-    // 固定高度的多行输入在字号变化时未必触发 ResizeObserver。
-    const appearanceObserver = measureHeight
-      ? new MutationObserver(remeasureIfChanged)
-      : null;
-    appearanceObserver?.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["style"],
-    });
-
     // 首次种子（若有）：同步空态给发送按钮，避免切回面板时草稿已在但按钮仍灰
     const seed = lastEmittedContentRef.current;
     if (seed) {
@@ -236,13 +155,8 @@ export function useComposerEditor(options: {
     isEmptyRef.current = empty;
     setIsEmpty(empty);
     onIsEmptyChange?.(empty);
-    measureHeight?.();
 
     return () => {
-      if (measureFrame !== null) cancelAnimationFrame(measureFrame);
-      observer?.disconnect();
-      resizeObserver?.disconnect();
-      appearanceObserver?.disconnect();
       el.removeEventListener("beforeinput", onBeforeInput);
       el.removeEventListener("input", onInput);
       el.removeEventListener("keydown", onKeyDown);
