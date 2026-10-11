@@ -1,6 +1,7 @@
+import { readRevisionHistoryVersion, invalidateHistoryVersion } from "./versionReadCache";
 import { HostAdapter } from "@/lib/host/adapter";
 import type { HistoryIndex, HistoryVersion } from "./types";
-import { normalizeHistoryIndex, normalizeHistoryVersion } from "./guards";
+import { normalizeHistoryIndex } from "./guards";
 
 const VERSION_PREFIX = "gn:hist:";
 const INDEX_PREFIX = "gn:hist-idx:";
@@ -23,16 +24,18 @@ export const historyRepository = {
 
   loadVersion(pageId: string, versionId: string): HistoryVersion | null {
     const doc = HostAdapter.db.get<HistoryVersion>(versionKey(pageId, versionId));
-    return normalizeHistoryVersion(doc?.data, pageId, versionId);
+    return readRevisionHistoryVersion(versionKey(pageId, versionId), doc?._rev, doc?.data, pageId, versionId);
   },
 
   saveVersion(version: HistoryVersion): void {
     const key = versionKey(version.pageId, version.versionId);
     const existing = HostAdapter.db.get<HistoryVersion>(key);
+    invalidateHistoryVersion(key);
     HostAdapter.db.put(key, version, existing?._rev);
   },
 
   removeVersion(pageId: string, versionId: string): void {
+    invalidateHistoryVersion(versionKey(pageId, versionId));
     HostAdapter.db.remove(versionKey(pageId, versionId));
   },
 
@@ -41,7 +44,10 @@ export const historyRepository = {
     const versions = HostAdapter.db.allDocs<HistoryVersion>(
       `${VERSION_PREFIX}${pageId}:`,
     );
-    versions.forEach((doc) => HostAdapter.db.remove(doc._id));
+    versions.forEach((doc) => {
+      invalidateHistoryVersion(doc._id);
+      HostAdapter.db.remove(doc._id);
+    });
     HostAdapter.db.remove(indexKey(pageId));
   },
 
@@ -49,9 +55,15 @@ export const historyRepository = {
   clearAll(): void {
     HostAdapter.db
       .allDocs<HistoryVersion>(VERSION_PREFIX)
-      .forEach((doc) => HostAdapter.db.remove(doc._id));
+      .forEach((doc) => {
+        invalidateHistoryVersion(doc._id);
+        HostAdapter.db.remove(doc._id);
+      });
     HostAdapter.db
       .allDocs<HistoryIndex>(INDEX_PREFIX)
-      .forEach((doc) => HostAdapter.db.remove(doc._id));
+      .forEach((doc) => {
+        invalidateHistoryVersion(doc._id);
+        HostAdapter.db.remove(doc._id);
+      });
   },
 };

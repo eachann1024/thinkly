@@ -7,11 +7,12 @@
  * resolveHistoryBackend：根据 pageId 对应的页面类型自动路由。
  */
 
+import { parseHistoryVersion, invalidateHistoryVersion } from "./versionReadCache";
 import { historyRepository } from "./repository";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import type { HistoryIndex, HistoryVersion } from "./types";
-import { normalizeHistoryIndex, normalizeHistoryVersion } from "./guards";
+import { normalizeHistoryIndex } from "./guards";
 import {
   consumeDiskWriteFailure,
   DiskWriteError,
@@ -174,14 +175,22 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
     },
 
     async loadVersion(pageId, versionId) {
-      const data = await readJson<HistoryVersion>(versionPath(pageId, versionId));
-      return normalizeHistoryVersion(data, pageId, versionId);
+      if (typeof window === "undefined" || !window.gooseFs) return null;
+      const path = versionPath(pageId, versionId);
+      try {
+        return parseHistoryVersion(path, await fsRead(window.gooseFs, path), pageId, versionId);
+      } catch {
+        invalidateHistoryVersion(path);
+        return null;
+      }
     },
 
     saveVersion(version) {
       return chainWrite(version.pageId, async () => {
         await ensureDir();
-        await writeJson(versionPath(version.pageId, version.versionId), version);
+        const path = versionPath(version.pageId, version.versionId);
+        invalidateHistoryVersion(path);
+        await writeJson(path, version);
       });
     },
 
@@ -189,7 +198,9 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
       return chainWrite(pageId, async () => {
         if (typeof window === "undefined" || !window.gooseFs) return;
         try {
-          await window.gooseFs.deleteFile(versionPath(pageId, versionId));
+          const path = versionPath(pageId, versionId);
+          invalidateHistoryVersion(path);
+          await window.gooseFs.deleteFile(path);
         } catch {
           // 不存在时忽略
         }
@@ -205,7 +216,9 @@ function makeLocalFolderBackend(basePath: string): HistoryBackend {
       await Promise.all(
         idx.versions.map((v) => {
           try {
-            return fs.deleteFile(versionPath(pageId, v.versionId));
+            const path = versionPath(pageId, v.versionId);
+            invalidateHistoryVersion(path);
+            return fs.deleteFile(path);
           } catch {
             return Promise.resolve();
           }

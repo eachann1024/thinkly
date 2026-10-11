@@ -14,6 +14,9 @@ import { editorSchema } from "@/components/editor/core/EditorComposer";
 import { cn } from "@/lib/utils";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import type { Page } from "@/types";
+import { EditorHostBridge } from "../editor-host/EditorHostBridge";
+
+const ignoreReadOnlyContentChange = () => {};
 
 interface HistoryReadOnlyEditorProps {
   content: BlockNoteContent;
@@ -41,6 +44,10 @@ export function HistoryReadOnlyEditor({
   const { theme } = useSettings();
   const { activePageId } = usePages();
   const activePage = sourcePage ?? (activePageId ? usePages.getState().pages[activePageId] : null);
+  const previewPage = useMemo(
+    () => activePage ? { ...activePage, content, isLocked: true } : null,
+    [activePage, content],
+  );
   const sourcePageRef = useRef(sourcePage);
   sourcePageRef.current = sourcePage;
   const effectiveTheme = useResolvedTheme(theme);
@@ -115,8 +122,18 @@ export function HistoryReadOnlyEditor({
     );
   }
 
+  if (!previewPage) {
+    return <p className="px-6 py-12 text-center text-sm text-muted-foreground">找不到此笔记，无法预览历史版本。</p>;
+  }
+
+  // 注入原页面路径与所选版本正文；只读回调不进入页面写入链。
   // 与主 Editor 在 WorkspaceLayout 内的全宽包裹一致。
   return (
+    <EditorHostBridge
+      page={previewPage}
+      isEditorFullWidth
+      onContentChangeOverride={ignoreReadOnlyContentChange}
+    >
     <div
       data-font-family={activePage?.fontFamily ?? "default"}
       className={cn(
@@ -135,5 +152,6 @@ export function HistoryReadOnlyEditor({
         filePanel={false}
       />
     </div>
+    </EditorHostBridge>
   );
 }
