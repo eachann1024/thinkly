@@ -8,7 +8,7 @@ import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 
 /**
  * 按窗口宽度强制收起左右侧栏，不改用户持久化偏好。
- * 拉回阈值以上后恢复；窄窗下点开是临时覆盖，再跨过阈值会清掉。
+ * 拉宽后恢复原偏好；显式固定的面板在覆盖与并排布局间转换。
  */
 export function useWorkspaceViewportCollapse(): void {
   const setForceCollapse = useWorkspaceViewport((s) => s.setForceCollapse);

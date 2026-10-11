@@ -103,6 +103,7 @@ export function SidebarOutline({
         ? "auto"
         : "smooth";
       container.scrollTo({ top: Math.max(0, targetScroll), behavior });
+      window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     },
     [focusedScrollRef],
   );

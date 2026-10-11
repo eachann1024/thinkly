@@ -1,0 +1,94 @@
+import * as GooseIcons from "@/components/ui/icons";
+import { SidebarFooter } from "../SidebarFooter";
+import type { useSidebarHover } from "./useSidebarHover";
+
+export function SidebarModeRail({
+  context,
+}: {
+  context: ReturnType<typeof useSidebarHover>;
+}) {
+  const {
+    sidebarModeRailRef,
+    settingsOpen,
+    sidebarCollapsed,
+    currentView,
+    openSidebarView,
+    hoverSidebarView,
+    keepSidebarOpen,
+    leaveSidebar,
+    sidebarViewShortcut,
+    onSettingsOpenChange,
+    inHistoryMode,
+    exitHistoryView,
+  } = context;
+  const views = [
+    {
+      view: "pages" as const,
+      label: "本地",
+      Icon: GooseIcons.FolderOpen,
+      digit: 1 as const,
+    },
+    {
+      view: "outline" as const,
+      label: "大纲",
+      Icon: GooseIcons.ListTree,
+      digit: 2 as const,
+    },
+    {
+      view: "search" as const,
+      label: "搜索",
+      Icon: GooseIcons.Search,
+      digit: 3 as const,
+    },
+  ];
+  return (
+    <div
+      className="sidebar-rail-shell"
+      onPointerEnter={keepSidebarOpen}
+      onPointerLeave={leaveSidebar}
+    >
+      <TooltipProvider delayDuration={600}>
+        <nav
+          ref={sidebarModeRailRef}
+          className="sidebar-mode-rail"
+          aria-label="侧栏视图"
+        >
+          {views.map(({ view, label, Icon, digit }) => (
+            <Tooltip key={view}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="sidebar-mode-rail-button rounded-lg"
+                  aria-label={label}
+                  aria-pressed={!settingsOpen && currentView === view}
+                  aria-expanded={
+                    !settingsOpen && !sidebarCollapsed && currentView === view
+                  }
+                  aria-controls="workspace-sidebar-content"
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === "mouse") hoverSidebarView(view);
+                  }}
+                  onClick={() => openSidebarView(view)}
+                >
+                  <Icon aria-hidden="true" className="h-4 w-4" />
+                  <span className="sidebar-mode-rail-label">{label}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {label} · {sidebarViewShortcut(digit)}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </nav>
+      </TooltipProvider>
+      <SidebarFooter
+        isSettingsOpen={settingsOpen}
+        onOpenSettings={() => {
+          if (inHistoryMode) exitHistoryView();
+          context.dismissAfterNavigation();
+          onSettingsOpenChange(true);
+        }}
+      />
+    </div>
+  );
+}
