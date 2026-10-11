@@ -4,6 +4,11 @@
   --goose-raised-bg: var(--goose-editor-bg);
 }
 
+/* 普通浅色配色用近白画布；纸色主题继续沿用自己的暖色背景。 */
+:root:not(.dark):not(:is([data-goose-accent="mono"], [data-goose-accent="amber"], [data-goose-accent="wheat"])) {
+  --goose-settings-bg: 0 0% 97.255%; /* #f8f8f8 */
+}
+
 /* 深色统一使用参考图的中性灰。覆盖完整主题的染色表面，
  * 强调色仍负责链接、光标、焦点和语义状态；不改变浅色主题。 */
 :root.dark,

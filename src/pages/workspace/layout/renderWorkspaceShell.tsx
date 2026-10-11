@@ -140,10 +140,6 @@ export function renderWorkspaceShell(
         <LocalFolderTargetPicker />
         <AIFeatureNotice />
         <div className="workspace-stage">
-          <div
-            className="workspace-content-frame pointer-events-none rounded-lg shadow-md"
-            aria-hidden="true"
-          />
           <Sidebar
             className="workspace-sidebar-pane"
             disableResize={false}

@@ -26,8 +26,8 @@
   --workspace-main-surface: var(--goose-editor-surface);
   --workspace-stage-pad-top: 8px;
   --workspace-stage-pad-left: 8px;
-  --workspace-stage-pad-right: 8px;
-  --workspace-stage-pad-bottom: 8px;
+  --workspace-stage-pad-right: 4px;
+  --workspace-stage-pad-bottom: 4px;
   --workspace-sidebar-gap: 0px;
   --workspace-sidebar-width: 240px;
   --workspace-rail-width: 4rem;
@@ -114,31 +114,4 @@
   gap: var(--workspace-sidebar-gap);
   padding: var(--workspace-stage-pad-top) var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) var(--workspace-stage-pad-left);
   transition: gap var(--workspace-sidebar-motion);
-}
-
-/* ponytail: 共用外沿、不裁切跨栏拖拽热区；需要整板裁切时再重组容器。 */
-.workspace-shell .workspace-content-frame {
-  position: absolute;
-  inset: var(--workspace-stage-pad-top) var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) var(--workspace-stage-pad-left);
-  z-index: 3;
-  border: 1px solid var(--workspace-divider);
-  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.025), 0 4px 14px hsl(var(--foreground) / 0.035);
-  transition: left var(--workspace-sidebar-motion);
-}
-/* 顶栏和 stage 共用左侧留白，避免调整侧栏宽度后分隔线错位。 */
-.workspace-shell:has(> .workspace-stage:where(:not([data-sidebar-collapsed]):not([data-sidebar-overlay])) .sidebar-mode-rail) {
-  --workspace-stage-pad-left: 0px;
-}
-.workspace-stage:where(:not([data-sidebar-collapsed]):not([data-sidebar-overlay]):has(.sidebar-mode-rail)) > .workspace-content-frame {
-  left: calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
-}
-
-/* 浅色外框增强区域分隔，独立于内部细分隔线，保留主题色与圆角。 */
-:root:not(.dark) .workspace-shell .workspace-content-frame {
-  border-color: hsl(var(--foreground) / 0.12);
-}
-
-/* 深色面板四边共用不透底的细线，避免不同底色让边线忽明忽暗。 */
-.dark .workspace-shell .workspace-content-frame {
-  border-color: var(--workspace-top-edge);
 }
