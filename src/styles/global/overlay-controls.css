@@ -1,0 +1,56 @@
+/* 浮层几何沿用迁移前默认值，独立于菜单条目间距。 */
+:root {
+  --goose-popover-inset: 0.5rem;
+  --goose-tooltip-inset-y: 6px;
+  --goose-tooltip-inset-x: 10px;
+  --goose-tooltip-font-size: 12px;
+  --goose-tooltip-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+/* 放在 components layer，让调用者的既有布局类继续覆盖公共默认值。 */
+@layer components {
+  .goose-dialog-surface {
+    display: grid;
+    gap: var(--goose-overlay-content-gap);
+    padding: var(--goose-overlay-inset);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+  .goose-dialog-shell { padding: 0; grid-template-rows: auto minmax(0, 1fr) auto; }
+  .goose-dialog-shell-header { padding: var(--goose-overlay-inset); padding-bottom: 0; }
+  .goose-dialog-shell-body { min-height: 0; overflow: auto; padding: var(--goose-overlay-inset); }
+  .goose-dialog-shell-footer { padding: var(--goose-overlay-inset); padding-top: 0; }
+  .goose-dialog-shell-fullscreen .goose-dialog-shell-body { padding: 0; }
+  .goose-popover-surface { padding: var(--goose-popover-inset); }
+  .goose-tooltip-surface {
+    padding: var(--goose-tooltip-inset-y) var(--goose-tooltip-inset-x);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--goose-control-radius);
+    background: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+    box-shadow: var(--goose-tooltip-shadow);
+    font-size: var(--goose-tooltip-font-size);
+    font-weight: 500;
+    line-height: 1;
+    user-select: none;
+    overflow: hidden;
+    backdrop-filter: blur(1px);
+    white-space: nowrap;
+  }
+  .goose-tooltip-complex { white-space: normal; max-width: min(360px, calc(100vw - 24px)); }
+}
+.goose-toaster.goose-toaster-center[data-sonner-toaster] {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  width: max-content !important;
+  max-width: calc(100vw - 24px) !important;
+}
+.goose-toaster.goose-toaster-center[data-sonner-toaster] [data-sonner-toast] {
+  position: relative !important;
+  right: auto !important;
+}

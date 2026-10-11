@@ -29,6 +29,10 @@
 @import "./styles/global/menu-items.css";
 @import "./styles/global/tailwind-controls.css";
 @import "./styles/global/theme-tokens.css";
+@import "./styles/global/control-tokens.css";
+@import "./styles/global/control-layout.css";
+@import "./styles/global/control-states.css";
+@import "./styles/global/overlay-controls.css";
 @import "./styles/global/base-layout.css";
 @import "./styles/global/editor-extensions.css";
 @import "./styles/global/ai-markdown.css";

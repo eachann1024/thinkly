@@ -27,7 +27,7 @@ export function FeatureToastCard({
 }: FeatureToastCardProps) {
   return (
     <div className={cn("flex max-w-[360px] gap-3", className)}>
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--goose-interactive-hover-border)] bg-[var(--goose-interactive-hover)] text-[var(--goose-interactive-hover-fg)]">
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--goose-control-radius)] border border-[var(--goose-interactive-hover-border)] bg-[var(--goose-interactive-hover)] text-[var(--goose-interactive-hover-fg)]">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -42,7 +42,7 @@ export function FeatureToastCard({
               type="button"
               variant={action.variant}
               size="sm"
-              className={cn("h-8 rounded-[10px] px-3 text-xs", action.className)}
+              className={cn("text-xs", action.className)}
               onClick={action.onClick}
               onPointerDown={action.onPointerDown}
             >

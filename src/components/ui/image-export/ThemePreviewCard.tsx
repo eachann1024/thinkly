@@ -94,6 +94,9 @@ export function ThemePreviewCard({
   return (
     <button
       type="button"
+      data-goose-control="theme-preview-card"
+      aria-pressed={selected}
+      aria-label={theme.name}
       onClick={onClick}
       className="group flex flex-col gap-2.5 text-left outline-none "
     >

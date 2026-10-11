@@ -1,3 +1,4 @@
+import { useId } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
 import { type WatermarkConfig } from "@/lib/imageExport";
@@ -12,6 +13,7 @@ export function GenerationOptionsPanel({
   onToggle: (key: keyof WatermarkConfig) => void;
   variant: "toolbar" | "drawer";
 }) {
+  const labelPrefix = useId();
   const rows: Array<{
     key: keyof WatermarkConfig;
     label: string;
@@ -50,14 +52,15 @@ export function GenerationOptionsPanel({
               row.disabled && "text-disabled",
             )}
           >
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
+            <span id={`${labelPrefix}-${row.key}`} className="text-xs text-muted-foreground whitespace-nowrap">
               {row.shortLabel ?? row.label}
             </span>
             <Switch
+              aria-labelledby={`${labelPrefix}-${row.key}`}
+              controlSize="small"
               checked={wm[row.key]}
               onCheckedChange={() => onToggle(row.key)}
               disabled={row.disabled}
-              className="scale-75 origin-center"
             />
           </div>
         ))}
@@ -77,6 +80,7 @@ export function GenerationOptionsPanel({
             )}
           >
             <span
+              id={`${labelPrefix}-${row.key}`}
               className={cn(
                 "text-xs",
                 row.indent ? "text-muted-foreground" : "text-foreground",
@@ -85,10 +89,11 @@ export function GenerationOptionsPanel({
               {row.label}
             </span>
             <Switch
+              aria-labelledby={`${labelPrefix}-${row.key}`}
+              controlSize="small"
               checked={wm[row.key]}
               onCheckedChange={() => onToggle(row.key)}
               disabled={row.disabled}
-              className="scale-75 origin-right"
             />
           </div>
         ))}

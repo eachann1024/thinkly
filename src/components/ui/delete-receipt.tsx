@@ -1,4 +1,6 @@
 import { CircleAlert, RotateCcw, X } from "@/components/ui/icons";
+import { Button } from "./button";
+import { IconButton } from "./icon-button";
 import { SuccessToastIcon, toast } from "./sonner";
 
 type ReceiptItem = { title: string; deleted: boolean };
@@ -35,7 +37,7 @@ export function showDeleteReceipt(
         )}
         <p className="min-w-0 flex-1 truncate text-sm font-semibold" title={label}>{label}</p>
         {done > 0 && onUndo && (
-          <button type="button" aria-label="撤回删除" onClick={async () => {
+          <Button size="sm" type="button" aria-label="撤回删除" onClick={async () => {
             if (undoing) return;
             undoing = true;
             try {
@@ -46,13 +48,13 @@ export function showDeleteReceipt(
             } finally {
               undoing = false;
             }
-          }} className="inline-flex min-h-8 shrink-0 items-center gap-1.5 rounded-md bg-[var(--goose-interactive-selected)] px-2.5 text-xs font-semibold text-[var(--goose-interactive-selected-fg)]  ">
+          }} className="shrink-0 text-xs">
             <RotateCcw className="size-4" aria-hidden="true" />撤回
-          </button>
+          </Button>
         )}
-        <button type="button" aria-label="关闭删除回执" onClick={() => toast.dismiss(id)} className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted ">
+        <IconButton type="button" tone="muted" aria-label="关闭删除回执" onClick={() => toast.dismiss(id)} >
           <X className="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       </section>
     ),
     { duration: 8000, closeButton: false, className: "goose-delete-receipt-toast" },

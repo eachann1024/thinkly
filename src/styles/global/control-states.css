@@ -1,0 +1,141 @@
+/* 原生、HeroUI、编辑器均把真实状态映射到同一套语义颜色。 */
+:is(.goose-interactive, .goose-list-row) {
+  box-sizing: border-box;
+  transition: background-color var(--goose-control-motion-duration) ease,
+    border-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
+}
+:is(.goose-interactive, .goose-list-row):where(
+  :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
+):is([data-hovered="true"], [data-focused="true"], [data-highlighted], [data-keyboard-active="true"], :focus-visible),
+:is(.goose-interactive, .goose-list-row):where(
+  :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-goose-row-hover="managed"])
+):hover {
+  background-color: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
+}
+:is(.goose-interactive, .goose-list-row):where(
+  :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
+):is([data-selected="true"], [aria-selected="true"], [aria-pressed="true"],
+  [aria-checked="true"], [data-state="checked"], [data-state="on"], [data-state="open"]),
+.goose-interactive--selected {
+  background-color: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+}
+:is(.goose-interactive, .goose-list-row):is(:hover, :focus-visible,
+  [data-hovered="true"], [data-focused="true"], [data-selected="true"],
+  [aria-selected="true"], [aria-pressed="true"], [aria-checked="true"],
+  [data-keyboard-active="true"], [data-state="on"], [data-state="open"])
+  :is(svg, .text-muted, .text-muted-foreground) { color: inherit; }
+.goose-interactive-primary {
+  background-color: var(--goose-interactive-hover);
+  border-color: var(--goose-interactive-hover-border);
+  color: var(--goose-interactive-hover-fg);
+}
+.goose-interactive-primary:where(:not(:disabled):not([aria-disabled="true"])):is(:hover, :active, :focus-visible) {
+  background-color: var(--goose-interactive-selected);
+  border-color: var(--goose-interactive-selected-border);
+  color: var(--goose-interactive-selected-fg);
+}
+.goose-interactive-danger,
+.goose-menu-item-danger {
+  --goose-interactive-hover: var(--goose-interactive-danger);
+  --goose-interactive-hover-fg: var(--goose-interactive-danger-fg);
+  --goose-interactive-selected: var(--goose-interactive-danger);
+  --goose-interactive-selected-fg: var(--goose-interactive-danger-fg);
+  color: var(--goose-interactive-danger-fg);
+}
+.goose-interactive-danger {
+  background-color: var(--goose-interactive-danger);
+  border-color: var(--goose-interactive-danger-border);
+}
+.goose-interactive-danger:where(:not(:disabled)):is(:hover, :active, :focus-visible) {
+  background-color: var(--goose-color-danger-subtle-bg);
+}
+:is(.goose-interactive, .goose-list-row):is(:disabled, [data-disabled="true"], [aria-disabled="true"]) {
+  color: var(--goose-text-disabled);
+}
+.goose-interactive:is(:disabled, [data-disabled="true"], [aria-disabled="true"]) {
+  background-color: hsl(var(--muted));
+}
+.goose-field-error { color: var(--goose-text-danger); }
+.goose-field { caret-color: var(--goose-text-link); }
+.goose-field:is(:focus-visible, [aria-invalid="true"]) {
+  border-color: var(--goose-interactive-selected-border);
+}
+.goose-field[aria-invalid="true"] { border-color: var(--goose-text-danger); }
+@layer components {
+.goose-inline-field {
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
+}
+
+.goose-control-media {
+  --goose-interactive-hover: rgba(255, 255, 255, 0.15);
+  --goose-interactive-selected: rgba(255, 255, 255, 0.24);
+  --goose-interactive-hover-fg: var(--goose-text-on-dark);
+  --goose-interactive-selected-fg: var(--goose-text-on-dark);
+}
+.bn-inline-content code, .ai-markdown code,
+.ai-md [data-streamdown="inline-code"] {
+  background-color: var(--goose-inline-code-bg);
+  color: var(--goose-inline-code-fg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.goose-interactive, .goose-list-row, .goose-control) { transition: none; }
+}
+
+/* Checkbox states consume application colors, without changing vendor state semantics. */
+[data-goose-control="checkbox"] {
+  --goose-check-bg: var(--goose-input-surface, hsl(var(--background)));
+  --goose-check-border: hsl(var(--input));
+  --goose-check-fg: var(--goose-text-primary);
+}
+[data-goose-control="checkbox"]:where([data-hovered="true"], :hover):where(:not([data-disabled="true"]):not([aria-disabled="true"])) {
+  --goose-check-bg: var(--goose-interactive-hover);
+  --goose-check-border: var(--goose-interactive-hover-border);
+  --goose-check-fg: var(--goose-interactive-hover-fg);
+}
+[data-goose-control="checkbox"]:where([data-selected="true"], [data-indeterminate="true"], [aria-checked="true"], [aria-checked="mixed"]) {
+  --goose-check-bg: var(--goose-interactive-selected);
+  --goose-check-border: var(--goose-interactive-selected-border);
+  --goose-check-fg: var(--goose-interactive-selected-fg);
+}
+[data-goose-control="checkbox"]:where([data-focus-visible="true"], :focus-visible):where(:not([data-disabled="true"]):not([aria-disabled="true"])) {
+  --goose-check-border: var(--goose-text-primary);
+}
+[data-goose-control="checkbox"]:where([data-invalid="true"], [aria-invalid="true"]) {
+  --goose-check-border: var(--goose-interactive-danger-border);
+  --goose-check-fg: var(--goose-text-danger);
+}
+[data-goose-control="checkbox"]:where([data-invalid="true"], [aria-invalid="true"]):where([data-selected="true"], [data-indeterminate="true"], [aria-checked="true"], [aria-checked="mixed"]) {
+  --goose-check-bg: var(--goose-interactive-danger);
+}
+[data-goose-control="checkbox"]:where([data-disabled="true"], [aria-disabled="true"], :disabled) {
+  --goose-check-bg: hsl(var(--muted));
+  --goose-check-border: var(--goose-text-disabled);
+  --goose-check-fg: var(--goose-text-disabled);
+  opacity: 1;
+}
+[data-goose-control="checkbox"] [data-goose-slot="check-control"] {
+  background-color: var(--goose-check-bg);
+  border-color: var(--goose-check-border);
+  color: var(--goose-check-fg);
+  cursor: inherit;
+  transition: background-color var(--goose-control-motion-duration) ease,
+    border-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
+}
+[data-goose-control="checkbox"] [data-goose-slot="check-indicator"],
+[data-goose-control="checkbox"] [data-goose-slot="check-indicator"] svg { color: inherit; }
+[data-goose-control="checkbox"] [data-goose-slot="check-content"] { color: inherit; }
+@media (prefers-reduced-motion: reduce) {
+  [data-goose-control="checkbox"] [data-goose-slot="check-control"] { transition: none; }
+}
