@@ -28,9 +28,9 @@ export function GitSyncSettings({
 }) {
   if (!config) return null;
   return (
-    <SettingsSectionCard className="overflow-hidden p-0">
+    <SettingsSectionCard className="overflow-hidden p-2">
       <GitDetails title="同步设置" description="自动同步与仓库信息" spacious>
-        <div className="border-t border-border px-5">
+        <div className="px-3 pb-1">
           <div className="max-w-[740px] divide-y divide-border">
             <div className="py-5">
               <GitRepositoryForm
@@ -47,12 +47,13 @@ export function GitSyncSettings({
                 <dt className="text-muted-foreground">分支</dt>
                 <dd className="break-words">{config.branch}</dd>
                 <dt className="text-muted-foreground">SSH 地址</dt>
-                <dd className="break-all font-mono text-sm">{config.remoteUrl}</dd>
+                <dd className="break-all font-mono text-sm">
+                  {config.remoteUrl}
+                </dd>
               </dl>
             </section>
             <div className="py-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-muted-foreground">本地与远端文件始终保留</p>
+              <div className="flex justify-end">
                 <Button
                   className="min-h-[44px] text-danger"
                   variant="ghost"
@@ -64,9 +65,16 @@ export function GitSyncSettings({
               </div>
               {removeConfirmation === config.id && (
                 <div className="mt-3 space-y-3 rounded-lg border border-border p-3">
-                  <p className="text-sm">移除当前同步配置？本地与远端文件不会删除。</p>
+                  <p className="text-sm">
+                    移除当前同步配置？本地与远端文件不会删除。
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button className="min-h-[44px]" variant="destructive" disabled={actionDisabled} onClick={onRemove}>
+                    <Button
+                      className="min-h-[44px]"
+                      variant="destructive"
+                      disabled={actionDisabled}
+                      onClick={onRemove}
+                    >
                       确认移除
                     </Button>
                     <Button
