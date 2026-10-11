@@ -1,3 +1,4 @@
+import { getLoadedHistorySignature } from "./versionReadCache";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { countWords } from "@/components/editor/utils/content-text-extractor";
 import { resolveHistoryBackend, type HistoryBackend } from "./backend";
@@ -49,7 +50,7 @@ async function isSameAsLatestVersion(
   const latest = await backend.loadVersion(pageId, latestEntry.versionId);
   if (!latest) return false;
   return (
-    getHistoryVisibleSignature(latest.content, latest.localFrontmatter) ===
+    getLoadedHistorySignature(latest) ===
     getHistoryVisibleSignature(content, localFrontmatter)
   );
 }

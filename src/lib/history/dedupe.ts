@@ -1,5 +1,5 @@
 import type { HistoryBackend } from "./backend";
-import { getHistoryVisibleSignature } from "./contentSignature";
+import { getLoadedHistorySignature } from "./versionReadCache";
 import type { HistoryIndexEntry } from "./types";
 
 /**
@@ -17,10 +17,7 @@ export async function filterAdjacentDuplicateHistoryEntries(
       try {
         const version = await backend.loadVersion(pageId, entry.versionId);
         return version
-          ? getHistoryVisibleSignature(
-              version.content,
-              version.localFrontmatter,
-            )
+          ? getLoadedHistorySignature(version)
           : null;
       } catch {
         return null;
