@@ -1,7 +1,6 @@
 import type { SeriesOption } from "echarts";
 import { echarts } from "./registerEcharts";
 import { getSeriesColor, hexToRgba } from "./chartPalette";
-import { TM } from "./chartThemeTokens";
 import { areaGradient, barGradient } from "./chartGradients";
 import type { ChartOptionContext } from "./chartOptionContext";
 
@@ -62,7 +61,7 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
       };
       base.itemStyle = {
         color,
-        borderColor: isDark ? TM.dark.bg : "#ffffff",
+        borderColor: t.bg,
         borderWidth: 2,
       };
       base.emphasis = {

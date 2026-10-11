@@ -1,3 +1,4 @@
+import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import {
   clampBoundsToWorkArea,
@@ -88,7 +89,7 @@ export function createQuicknoteWindow(): BrowserWindow {
     frame: false,
     alwaysOnTop: true,
     skipTaskbar: true,
-    backgroundColor: "#ffffff",
+    backgroundColor: appearanceBackgroundColor(),
     transparent: false,
     ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
     // panel 浮在当前空间，show 时不激活整个应用，避免把已 hide 的 workspace 一起放出来。
@@ -103,6 +104,8 @@ export function createQuicknoteWindow(): BrowserWindow {
       backgroundThrottling: true,
     },
   });
+
+  bindWindowAppearance(win);
   if (isMac) {
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     win.setAlwaysOnTop(true, "floating");

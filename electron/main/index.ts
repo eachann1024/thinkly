@@ -1,3 +1,4 @@
+import { registerAppearanceIpc } from "./appearance";
 import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
 import { app, Menu, protocol } from "electron";
 import { loadVaultRoots } from "./allowlist";
@@ -79,6 +80,7 @@ function startApp(): void {
   });
 
   registerIpcHandlers();
+  registerAppearanceIpc();
   registerGitSyncIpc();
 
   function installMenu(): void {

@@ -1,3 +1,4 @@
+import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync } from "./services";
 import type {
   FsChange,
@@ -15,6 +16,7 @@ ipcRenderer.on("desktop:window-init", (_event, payload: WindowInitPayload) => {
 });
 
 const gooseDesktop = {
+  appearance,
   gitSync,
   assetMaintenance,
   selectDirectory: () =>

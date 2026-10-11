@@ -69,6 +69,7 @@ declare global {
 
 
   interface GooseDesktop {
+    appearance: import("./lib/appearance-contract").AppearanceBridge;
     gitSync: import("./lib/git-sync-contract").GitSyncBridge;
     assetMaintenance: import("./lib/asset-maintenance-contract").AssetMaintenanceBridge;
     selectDirectory: () => Promise<string | null>
