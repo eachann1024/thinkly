@@ -14,7 +14,7 @@ export const loadLocalFolderPagesOnce = async (
   get: StoreGet,
   notebookId: string,
   basePath: string,
-  options: { showWelcome?: boolean } | undefined,
+  options: { showWelcome?: boolean; forceRead?: boolean } | undefined,
   hiddenFolders: string[],
   requestId: number,
 ) => {
@@ -70,6 +70,7 @@ export const loadLocalFolderPagesOnce = async (
       basePath,
       gooseFs: window.gooseFs,
       hiddenFolders,
+      forceRead: options?.forceRead,
     });
 
     // 同一记事本可能在启动恢复、点击切换和 watch 兜底中同时发起刷新。

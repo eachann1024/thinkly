@@ -134,7 +134,7 @@ export interface PagesState {
   loadLocalFolderPages: (
     notebookId: string,
     basePath: string,
-    options?: { showWelcome?: boolean },
+    options?: { showWelcome?: boolean; forceRead?: boolean },
   ) => Promise<void>;
   reloadLocalPageFromDisk: (pageId: string) => Promise<void>;
   removeSingleLocalPage: (filePath: string) => void;
