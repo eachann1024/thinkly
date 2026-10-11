@@ -192,20 +192,6 @@ export function resolveAccentRuntimeTokens(
 
 const RUNTIME_STYLE_ID = "goose-accent-runtime-vars";
 
-function ensureRuntimeStyleEl(): HTMLStyleElement | null {
-  if (typeof document === "undefined") return null;
-  if (typeof document.getElementById !== "function") return null;
-  if (typeof document.createElement !== "function") return null;
-  let el = document.getElementById(RUNTIME_STYLE_ID) as HTMLStyleElement | null;
-  if (!el) {
-    el = document.createElement("style");
-    el.id = RUNTIME_STYLE_ID;
-    // 尽量挂到 head 末尾，压过打包 CSS
-    (document.head || document.documentElement).appendChild(el);
-  }
-  return el;
-}
-
 function writeAccentRuntimeTokens(
   root: HTMLElement,
   accentColor: AccentColor,
@@ -213,45 +199,13 @@ function writeAccentRuntimeTokens(
   if (!root?.style?.setProperty) return;
   const tokens = resolveAccentRuntimeTokens(accentColor, isDarkDocument(root));
   for (const [name, value] of Object.entries(tokens)) {
-    // 旧内核 / 后续 CSS 偶发盖掉自定义属性时，important 保证交互表面一致
-    root.style.setProperty(name, value, "important");
+    // 保留旧变量名，静态适配层负责具体控件颜色。
+    root.style.setProperty(name, value);
   }
 
-  // 再挂一份 style 标签：直接给编辑器 code 上色，彻底绕开变量被盖
-  const styleEl = ensureRuntimeStyleEl();
-  if (!styleEl) return;
-  const bg = tokens["--goose-inline-code-bg"];
-  const fg = tokens["--goose-inline-code-fg"];
-  const border = tokens["--goose-inline-code-border-hover"];
-  styleEl.textContent = `
-:root {
-  --goose-inline-code-bg: ${bg} !important;
-  --goose-inline-code-fg: ${fg} !important;
-  --goose-inline-code-border-hover: ${border} !important;
-  --goose-interactive-selected: ${tokens["--goose-interactive-selected"]} !important;
-  --goose-interactive-selected-fg: ${tokens["--goose-interactive-selected-fg"]} !important;
-  --goose-interactive-selected-border: ${tokens["--goose-interactive-selected-border"]} !important;
-  --goose-sidebar-hover: ${tokens["--goose-sidebar-hover"]} !important;
-  --goose-interactive-hover: ${tokens["--goose-interactive-hover"]} !important;
-  --goose-interactive-hover-fg: ${tokens["--goose-interactive-hover-fg"]} !important;
-  --goose-interactive-hover-border: ${tokens["--goose-interactive-hover-border"]} !important;
-  --goose-icon-chip-on-selected: ${tokens["--goose-icon-chip-on-selected"]} !important;
-  --goose-editor-selection-bg: ${tokens["--goose-editor-selection-bg"]} !important;
+  // 清除旧版本热更新遗留的页面选择器；运行时只输出变量。
+  document.getElementById(RUNTIME_STYLE_ID)?.remove();
 }
-.workspace-editor-surface .bn-inline-content code,
-.quicknote-editor-surface .bn-inline-content code,
-.ai-markdown code:not(pre > code),
-.ai-md [data-streamdown="inline-code"] {
-  background-color: ${bg} !important;
-  color: ${fg} !important;
-}
-.workspace-editor-surface .bn-inline-content code [data-goose-inline-code-content],
-.quicknote-editor-surface .bn-inline-content code [data-goose-inline-code-content] {
-  color: ${fg} !important;
-}
-`.trim();
-}
-
 /**
  * 应用强调色：
  * 1. 写 data-goose-accent，供静态 CSS preset 覆盖 primary 等其余 token

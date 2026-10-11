@@ -33,9 +33,9 @@ export function createChartBaseOption(
       typeof window === "undefined"
         ? true
         : !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches,
-    animationDuration: 720,
+    animationDuration: 150,
     animationEasing: "cubicOut",
-    animationDurationUpdate: 360,
+    animationDurationUpdate: 150,
     title: cfg.title
       ? {
           text: cfg.title,
@@ -60,7 +60,7 @@ export function createChartBaseOption(
         fontSize: labelFontSize,
         fontWeight: 500,
       },
-      extraCssText: `border-radius:10px;box-shadow:${t.tooltipShadow};backdrop-filter:blur(10px);`,
+      extraCssText: `border-radius:var(--goose-control-radius);box-shadow:${t.tooltipShadow};backdrop-filter:blur(10px);`,
       axisPointer: isCartesian
         ? {
             type: isLineLike ? "line" : "shadow",

@@ -1,5 +1,5 @@
 import { getPalette } from "./chartPalette";
-import { TM } from "./chartThemeTokens";
+import { readChartTheme } from "./chartThemeTokens";
 import type { SimplifiedConfig } from "./chartConfig";
 
 export function createChartOptionContext(
@@ -8,7 +8,7 @@ export function createChartOptionContext(
   scale: number,
 ) {
   const series = Array.isArray(cfg.series) ? cfg.series : [];
-  const t = isDark ? TM.dark : TM.light;
+  const t = readChartTheme(isDark);
   const palette = getPalette(isDark);
   const multiSeries = series.length > 1;
   const isCartesian = cfg.type !== "pie";

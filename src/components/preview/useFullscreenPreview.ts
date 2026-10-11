@@ -49,11 +49,6 @@ export function useFullscreenPreview(open: boolean, content: PreviewContent | nu
       return;
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
       if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
       if (isZoomInKey(event)) {
         event.preventDefault();

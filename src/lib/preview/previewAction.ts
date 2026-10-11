@@ -1,8 +1,8 @@
+import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { blobToBase64, getExtensionFromMimeType } from "@/lib/imageStorage/utils";
 import { fs } from "@/lib/electron-platform/fs";
 import { shell } from "@/lib/electron-platform/shell";
-import { TEXT_COLORS } from "@/lib/textColors";
 
 /** 所有「打开来看」预览按钮的统一文案 */
 export const PREVIEW_ACTION_TOOLTIP = "预览（左键全屏 / 右键系统）";
@@ -105,8 +105,9 @@ export function wrapSvgAsHtml(
   markup: string,
   options?: { title?: string; background?: string; color?: string },
 ): string {
-  const background = options?.background ?? "#ffffff";
-  const color = options?.color ?? TEXT_COLORS.light.primary;
+  const theme = readThemeSurfaceSnapshot();
+  const background = options?.background ?? theme.background;
+  const color = options?.color ?? theme.foreground;
   const title = escapeHtml(options?.title ?? "预览");
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -136,8 +137,9 @@ export function wrapHtmlDocument(
   if (/^\s*<!doctype html/i.test(body) || /^\s*<html[\s>]/i.test(body)) {
     return body;
   }
-  const background = options?.background ?? "#ffffff";
-  const color = options?.color ?? TEXT_COLORS.light.primary;
+  const theme = readThemeSurfaceSnapshot();
+  const background = options?.background ?? theme.background;
+  const color = options?.color ?? theme.foreground;
   const title = escapeHtml(options?.title ?? "预览");
   const extraHead = options?.extraHead ?? "";
   return `<!DOCTYPE html>
@@ -151,7 +153,7 @@ ${extraHead}
   html, body { margin: 0; min-height: 100%; background: ${background}; color: ${color}; }
   body { padding: 24px; box-sizing: border-box; font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif; }
   table { border-collapse: collapse; }
-  th, td { border: 1px solid #d0d0d0; padding: 8px 12px; text-align: left; }
+  th, td { border: 1px solid ${theme.border}; padding: 8px 12px; text-align: left; }
   th { background: rgba(127,127,127,0.12); }
 </style>
 </head>

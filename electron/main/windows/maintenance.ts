@@ -1,3 +1,4 @@
+import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import path from "node:path";
 import {
@@ -31,11 +32,13 @@ export function createAssetMaintenanceWindow(): BrowserWindow {
     minWidth: 760,
     minHeight: 540,
     show: false,
+    backgroundColor: appearanceBackgroundColor(),
     autoHideMenuBar: true,
     ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
     webPreferences: { ...sharedWebPrefs(), partition: "asset-maintenance" },
   });
 
+  bindWindowAppearance(win, false, false);
   assetMaintenanceWindow = win;
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event) => event.preventDefault());
