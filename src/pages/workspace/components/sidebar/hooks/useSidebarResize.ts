@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-export const SIDEBAR_MIN_WIDTH = 200;
+export const SIDEBAR_MIN_WIDTH = 160;
 const SIDEBAR_DEFAULT_WIDTH = SIDEBAR_MIN_WIDTH;
 export const SIDEBAR_MAX_WIDTH = 480;
 
