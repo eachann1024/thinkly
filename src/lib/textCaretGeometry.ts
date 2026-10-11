@@ -13,7 +13,9 @@ export function editableTarget(): HTMLElement | null {
   return active.isContentEditable ? active : null;
 }
 
-function editableCaret(el: HTMLElement): CaretBox | null {
+type EmptyLineMetrics = { top: number; height: number };
+
+function editableCaret(el: HTMLElement, emptyLine?: EmptyLineMetrics): CaretBox | null {
   const selection = window.getSelection();
   if (!selection?.isCollapsed || !selection.rangeCount) return null;
   const range = selection.getRangeAt(0);
@@ -39,8 +41,8 @@ function editableCaret(el: HTMLElement): CaretBox | null {
   const style = getComputedStyle(anchor);
   return {
     left: box.left + parseFloat(style.paddingLeft || "0"),
-    top: box.top + parseFloat(style.paddingTop || "0"),
-    height: parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2,
+    top: box.top + parseFloat(style.paddingTop || "0") + (emptyLine?.top ?? 0),
+    height: emptyLine?.height ?? (parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2),
   };
 }
 
@@ -54,7 +56,27 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
     const y = field || /(auto|scroll|hidden|clip)/.test(style.overflowY);
     if (x || y) clips.push({ node, x, y });
   }
-  let measure: () => CaretBox | null = () => editableCaret(el);
+  // Empty composers have no text Range. Cache the same font box used by typed
+  // text rather than drawing a caret as tall as the composer's whole line.
+  let emptyLine: EmptyLineMetrics | undefined;
+  if (el.hasAttribute("data-ai-composer-editor")) {
+    const style = getComputedStyle(el);
+    mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;white-space:pre;";
+    for (const key of ["font", "line-height", "letter-spacing"]) {
+      mirror.style.setProperty(key, style.getPropertyValue(key));
+    }
+    const text = document.createTextNode("\u200b");
+    mirror.replaceChildren(text);
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const textBox = range.getBoundingClientRect();
+    const scale = el.getBoundingClientRect().width / el.offsetWidth || 1;
+    emptyLine = {
+      top: (textBox.top - mirror.getBoundingClientRect().top) * scale,
+      height: textBox.height * scale,
+    };
+  }
+  let measure: () => CaretBox | null = () => editableCaret(el, emptyLine);
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     const style = getComputedStyle(el);
     const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
