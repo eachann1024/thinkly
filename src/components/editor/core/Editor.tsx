@@ -1,4 +1,4 @@
-import { useRef, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/react/style.css";
 import { createEditorSafeContent } from "@/components/editor/utils/blocknote-content";
@@ -37,20 +37,20 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     syncedContentSignatureRef,
     editorInstanceRef,
   } = session;
-  const initialContentRef = useRef(
+  const [initialContent] = useState(() =>
     createEditorSafeContent(normalizeContent(page?.content), editorSchema),
   );
   // 初次 mount 时给 syncedContentSignatureRef 设置基线，
   // 否则切走时 flush 会把"只读打开"误判成编辑、刷新 updatedAt。
   if (syncedContentSignatureRef.current === null) {
     syncedContentSignatureRef.current = getCachedContentSignature(
-      initialContentRef.current,
+      initialContent,
     );
   }
   const editor = useCreateBlockNote(
     createEditorOptions(
       session,
-      initialContentRef.current,
+      initialContent,
       extensions,
       spellCheck,
     ),

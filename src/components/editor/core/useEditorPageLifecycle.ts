@@ -34,6 +34,7 @@ export function useEditorPageLifecycle(
     contentModeRef,
     syncedContentSignatureRef,
     onContentChangeRef,
+    getLatestPage,
   } = runtime;
   useLayoutEffect(() => {
     if (!__GOOSE_EDITOR_AI__) return;
@@ -49,6 +50,27 @@ export function useEditorPageLifecycle(
     editor.isEditable = editable;
   }, [editor, editable]);
   const prevPageIdRef = useRef<string | null>(activePageId);
+  const sourceRef = useRef({ page, mode: contentModeRef.current });
+  if (activePageId === prevPageIdRef.current) {
+    sourceRef.current = { page, mode: contentModeRef.current };
+  }
+  const saveSnapshot = () => {
+    const id = prevPageIdRef.current;
+    if (!id) return;
+    const source = getLatestPage?.(id) ?? sourceRef.current.page;
+    const blocks = editor.document as BlockNoteContent;
+    const signature = getContentSignature(blocks);
+    const mode = sourceRef.current.mode;
+    const syncedSignature = mode === "raw"
+      ? signature : getCachedContentSignature(normalizePageContent(blocks));
+    // A watcher may update host content before its editor reload. Never pair that new
+    // source with the old document; only an exact content baseline enables the fast path.
+    const cachedSource = source && getCachedContentSignature(source.content) === syncedSignature
+      ? { content: source.content, mode, syncedSignature } : undefined;
+    pageUndoHistory.save(id, editor.prosemirrorState, signature, cachedSource);
+  };
+  const saveSnapshotRef = useRef(saveSnapshot);
+  saveSnapshotRef.current = saveSnapshot;
   useLayoutEffect(() => {
     if (__GOOSE_EDITOR_AI__)
       editor.getExtension(GooseAIExtension)?.detachPage();
@@ -67,13 +89,7 @@ export function useEditorPageLifecycle(
       }
       return;
     }
-    if (prevPageIdRef.current) {
-      pageUndoHistory.save(
-        prevPageIdRef.current,
-        editor.prosemirrorState,
-        getContentSignature(editor.document),
-      );
-    }
+    saveSnapshotRef.current();
     prevPageIdRef.current = activePageId;
 
     // 切页起点即重置：侧栏点击等切页前的 pointerdown 不应算进新页面的用户编辑。
@@ -84,6 +100,18 @@ export function useEditorPageLifecycle(
 
     const p = pageRef.current;
     pageIdForUpdateRef.current = p?.id ?? null;
+    sourceRef.current = { page: p, mode: contentModeRef.current };
+    const view = editor.prosemirrorView;
+    const cached = p && pageUndoHistory.restoreCached(
+      p.id, view.state, p.content, contentModeRef.current,
+    );
+    if (cached) {
+      // Rebuild plugin state once against the cached document, avoiding two NodeView mounts.
+      syncedContentSignatureRef.current = cached.syncedSignature;
+      view.updateState(cached.state);
+      return;
+    }
+
 
     // raw 文档跳过 normalizePageContent（不触发 ensureFirstTitleHeading）。
     // 须与 EditorComposer.onChange 的 contentMode 判断一致：
@@ -128,7 +156,6 @@ export function useEditorPageLifecycle(
     );
 
     // 新笔记独立建栈；最近访问过且正文未在外部变化的笔记恢复自己的历史。
-    const view = editor.prosemirrorView;
     if (view) {
       const newState = EditorState.create({
         doc: view.state.doc,
@@ -184,14 +211,7 @@ export function useEditorPageLifecycle(
 
   useLayoutEffect(
     () => () => {
-      const pageId = prevPageIdRef.current;
-      if (pageId) {
-        pageUndoHistory.save(
-          pageId,
-          editor.prosemirrorState,
-          getContentSignature(editor.document),
-        );
-      }
+      saveSnapshotRef.current();
     },
     [editor],
   );
