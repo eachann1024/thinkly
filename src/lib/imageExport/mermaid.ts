@@ -1,12 +1,10 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { CardTheme } from "./themes";
-import { loadMermaid } from "./loadMermaid";
+import { renderCachedMermaid } from "./mermaidCache";
+import { isMermaidTimeline } from "./timelineModel";
 import {
   MERMAID_FONT,
-  getMermaidInitConfig,
-  stripMermaidInitDirectives,
 } from "./mermaidTheme";
-import { tryRenderMermaidTimeline } from "./timelineSvg";
 
 export const MERMAID_EXPORT_FONT = MERMAID_FONT;
 
@@ -85,22 +83,13 @@ export async function renderMermaidSvgForExport(
   source: string,
   mode: MermaidExportMode,
 ): Promise<string> {
-  const timeline = tryRenderMermaidTimeline(source, mode);
-  if (timeline) return timeline;
-
-  const mermaid = await loadMermaid();
-  mermaid.initialize(
-    getMermaidInitConfig({
-      mode,
-      securityLevel: "loose",
-      fontFamily: MERMAID_FONT,
-      useMaxWidth: false,
-    }),
-  );
-
-  const id = `mermaid-export-${Math.random().toString(36).slice(2, 11)}`;
-  const { svg } = await mermaid.render(id, stripMermaidInitDirectives(source));
-  return hardenMermaidSvg(svg);
+  const svg = await renderCachedMermaid(source, {
+    mode,
+    securityLevel: "loose",
+    fontFamily: MERMAID_FONT,
+    useMaxWidth: false,
+  }, "export");
+  return isMermaidTimeline(source) ? svg : hardenMermaidSvg(svg);
 }
 
 export function mermaidSvgToDataUrl(svg: string): string {
