@@ -1,8 +1,12 @@
 import * as GooseIcons from "@/components/ui/icons";
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { Button } from "@/components/ui/button";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
 
 export function HistoryToolbar() {
+  const sidebarCollapsed = useEffectiveSidebarCollapsed();
+  const openVersions = () => useWorkspaceViewport.getState().openLeftPanel("engaged");
   const {
     pageTitle,
     isEmpty,
@@ -30,6 +34,11 @@ export function HistoryToolbar() {
         <span className="truncate text-sm font-medium">{pageTitle}</span>
       </div>
 
+      {sidebarCollapsed && (
+        <Button variant="ghost" size="sm" onClick={openVersions} aria-label="选择历史版本">
+          <GooseIcons.History className="h-4 w-4" />版本
+        </Button>
+      )}
       {!isEmpty && (
         <Button
           size="sm"
