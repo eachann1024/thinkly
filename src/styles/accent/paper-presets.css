@@ -38,8 +38,8 @@
   --goose-menu-surface: var(--popover);
   --goose-menu-border: var(--border);
   --goose-selected-bg: 42.353 43.590% 84.706%;
-  --goose-shell-surface: var(--goose-sidebar-surface);
-  --goose-sidebar-surface: linear-gradient(180deg, #f1e7cd, #f6f0e1);
+  --goose-shell-surface: linear-gradient(180deg, #f1e7cd, #f6f0e1);
+  --goose-sidebar-surface: linear-gradient(180deg, #f7f1e2, #faf6ec);
   --goose-editor-surface: linear-gradient(180deg, #fcfaf4, #fdfcf8);
   --goose-ai-surface: linear-gradient(180deg, #f7f2e7, #fcfaf4);
   --goose-secondary-surface: var(--goose-ai-surface);
@@ -130,8 +130,8 @@
   --goose-menu-surface: var(--popover);
   --goose-menu-border: var(--border);
   --goose-selected-bg: 52.500 27.907% 83.137%;
-  --goose-shell-surface: var(--goose-sidebar-surface);
-  --goose-sidebar-surface: linear-gradient(180deg, #e9e6d6, #f1efe4);
+  --goose-shell-surface: linear-gradient(180deg, #e9e6d6, #f1efe4);
+  --goose-sidebar-surface: linear-gradient(180deg, #f3f1e6, #f7f5ed);
   --goose-editor-surface: linear-gradient(180deg, #faf9f2, #fdfcf7);
   --goose-ai-surface: linear-gradient(180deg, #f2f0e5, #faf9f2);
   --goose-secondary-surface: var(--goose-ai-surface);
