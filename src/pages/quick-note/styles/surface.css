@@ -20,15 +20,7 @@ body,
   min-height: 100%;
   width: 100vw;
   overflow: hidden;
-  box-shadow:
-    inset 0 0 0 1px rgba(15, 23, 42, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
-}
-
-.dark .quicknote-root {
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px hsl(var(--border));
 }
 
 /* 固定标题栏：占布局高度，常驻可见；空白区拖窗，正文不再被把手/覆层误拖。 */
@@ -51,7 +43,7 @@ body,
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   background: transparent;
   color: hsl(var(--foreground));
   font-size: 12px;
@@ -59,10 +51,6 @@ body,
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.quicknote-slot-name-display:hover {
-  color: hsl(var(--foreground));
 }
 
 .quicknote-slot-name-text {
@@ -84,7 +72,7 @@ body,
   margin: 0;
   padding: 0 8px;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--goose-field-radius);
   outline: none;
   background: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
@@ -104,11 +92,7 @@ body,
   -webkit-user-select: none;
   user-select: none;
   background: hsl(var(--goose-editor-bg));
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-.dark .quicknote-titlebar {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 /* 改名时顶部只保留全宽输入框：隐藏标题栏控件。 */
@@ -138,29 +122,14 @@ body,
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   background: transparent;
   outline: 1px solid transparent;
   outline-offset: -1px;
   color: hsl(var(--muted-foreground));
   transition:
-    background 150ms ease,
-    color 150ms ease;
-}
-
-.quicknote-help-trigger:hover,
-.quicknote-save-btn:hover:not(:disabled) {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
-.quicknote-help-trigger[data-state="open"] {
-  background: var(--goose-interactive-selected);
-  color: var(--goose-interactive-selected-fg);
-}
-
-.quicknote-save-btn:disabled {
-  opacity: 1; color: var(--goose-text-disabled);
+    background var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
 }
 
 .quicknote-slot-switcher-positioner {
@@ -196,14 +165,9 @@ body,
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   background: transparent;
   color: hsl(var(--muted-foreground));
-}
-
-.quicknote-close-btn:hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
 }
 
 /* 标题栏已占布局高度；正文从剩余区域顶部开始。 */
@@ -238,25 +202,4 @@ body,
    全宽容器，故选择器要叠到同级或更高特异度才生效。 */
 .quicknote-editor-surface .workspace-editor-surface.max-w-none .bn-editor {
   padding-inline: 8px;
-}
-
-.quicknote-toaster[data-sonner-toaster] {
-  left: 0 !important;
-  right: 0 !important;
-  width: 100vw !important;
-  transform: none !important;
-}
-
-/* toast 在窗口正中弹出（不贴底）：定位到视口垂直 / 水平居中，宽度按内容自适应
-   成一颗小胶囊，而非横贯整窗。 */
-.quicknote-toaster[data-sonner-toaster] [data-sonner-toast] {
-  position: fixed !important;
-  left: 50% !important;
-  right: auto !important;
-  top: 50% !important;
-  bottom: auto !important;
-  width: max-content !important;
-  max-width: calc(100vw - 48px) !important;
-  margin-inline: 0 !important;
-  transform: translate(-50%, -50%) !important;
 }

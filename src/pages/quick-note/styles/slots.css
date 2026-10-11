@@ -11,7 +11,7 @@
   height: 22px;
   padding: 1px;
   border: 1px solid var(--goose-interactive-hover-border);
-  border-radius: 7px;
+  border-radius: var(--goose-control-radius);
   background: var(--goose-interactive-hover);
   box-shadow: none;
 }
@@ -27,7 +27,7 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--goose-control-radius);
   background: transparent;
   color: hsl(var(--muted-foreground));
   font-size: 10px;
@@ -40,9 +40,9 @@
   opacity: 1;
   box-shadow: none;
   transition:
-    opacity 0.14s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.14s ease,
-    box-shadow 0.14s ease;
+    opacity var(--goose-control-motion-duration) cubic-bezier(0.16, 1, 0.3, 1),
+    color var(--goose-control-motion-duration) ease,
+    box-shadow var(--goose-control-motion-duration) ease;
 }
 
 .quicknote-slot-switcher[data-scrubbing="true"],
@@ -60,7 +60,7 @@
 
 .quicknote-slot-name-text,
 .quicknote-slot-btn[data-active="true"] .quicknote-slot-btn-label {
-  animation: quicknote-slot-content-in 180ms ease-out;
+  animation: quicknote-slot-content-in var(--goose-control-motion-duration) ease-out;
 }
 
 @keyframes quicknote-slot-content-in {
@@ -74,26 +74,10 @@
   }
 }
 
-/* 当前项：白底高亮，与确认稿一致。 */
+
+/* 活跃槽位保留原分段器字重，颜色与背景由公共选中态维护。 */
 .quicknote-slot-btn[data-active="true"] {
-  color: var(--goose-interactive-selected-fg);
-  background: var(--goose-interactive-selected);
-  outline: 1px solid var(--goose-interactive-selected-border);
-  outline-offset: -1px;
   font-weight: 600;
-  box-shadow: none;
-}
-
-.quicknote-slot-btn:not([data-active="true"]):hover {
-  color: var(--goose-interactive-hover-fg);
-  background: var(--goose-interactive-hover);
-  outline: 1px solid var(--goose-interactive-hover-border);
-  outline-offset: -1px;
-}
-
-.quicknote-slot-btn:focus-visible {
-  background: var(--goose-interactive-selected);
-  color: var(--goose-interactive-selected-fg);
 }
 
 @media (prefers-reduced-motion: reduce) {

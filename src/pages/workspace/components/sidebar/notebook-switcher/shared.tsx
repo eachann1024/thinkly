@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -42,12 +43,10 @@ export function SortableNotebookItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "goose-notebook-row relative flex select-none items-center rounded-lg outline-none",
+        "goose-list-row goose-notebook-row relative flex select-none items-center rounded-lg outline-none",
         "justify-between gap-2 group",
-        "min-h-9 mb-0.5 last:mb-0 px-2 py-1 text-xs font-normal",
+        "min-h-9 px-2 py-1 text-xs font-normal",
         notebook.localPathMissing && "text-disabled",
-        "hover:bg-[var(--goose-interactive-hover)] focus-visible:bg-[var(--goose-interactive-hover)]",
-        isActive && "bg-[var(--goose-interactive-selected)]",
         isDragging && "cursor-grabbing z-10",
         !isDragging && "cursor-pointer",
       )}
@@ -55,6 +54,7 @@ export function SortableNotebookItem({
       {...listeners}
       role="menuitem"
       aria-current={isActive ? "true" : undefined}
+      data-selected={isActive || undefined}
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return;
@@ -97,7 +97,7 @@ export function SortableNotebookItem({
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <IconButton size="xs"
                   type="button"
                   className="inline-flex h-6 w-6 items-center justify-center rounded-md opacity-0 overflow-hidden px-0 text-muted-foreground transition-all duration-120 pointer-events-none hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger)] group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto motion-reduce:transition-none"
                   onClick={(e) => {
@@ -107,7 +107,7 @@ export function SortableNotebookItem({
                   aria-label="移除本地文件夹"
                 >
                   <GooseIcons.FolderX className="h-3.5 w-3.5" />
-                </button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">移除本地文件夹</TooltipContent>
             </Tooltip>
@@ -116,7 +116,7 @@ export function SortableNotebookItem({
         <TooltipProvider delayDuration={600}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <IconButton size="xs"
                 type="button"
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md opacity-0 overflow-hidden px-0 text-muted-foreground transition-all duration-120 pointer-events-none hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto motion-reduce:transition-none"
                 aria-label="编辑笔记本"
@@ -126,7 +126,7 @@ export function SortableNotebookItem({
                 }}
               >
                 <GooseIcons.Settings className="h-3.5 w-3.5" />
-              </button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent side="bottom">编辑笔记本</TooltipContent>
           </Tooltip>

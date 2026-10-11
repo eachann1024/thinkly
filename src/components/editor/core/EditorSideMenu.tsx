@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBlockNoteEditor, useExtension } from "@blocknote/react";
@@ -165,17 +166,17 @@ export function EditorSideMenu() {
             onOpenChange={setAddTipOpen}
           >
             <TooltipTrigger asChild>
-              <button
+              <EditorAction
                 type="button"
                 aria-label="添加块"
                 onClick={handleAdd}
                 className={cn(
                   "flex h-6 w-[22px] items-center justify-center rounded-[7px] text-muted-foreground",
-                  "transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                  "transition-colors  ",
                 )}
               >
                 <Plus className="h-3.5 w-3.5" />
-              </button>
+              </EditorAction>
             </TooltipTrigger>
             <TooltipContent editorContext side="bottom" align="start">
               <div className="flex flex-col gap-1 whitespace-nowrap">
@@ -194,7 +195,7 @@ export function EditorSideMenu() {
           </Tooltip>
         </TooltipProvider>
         {showHeadingToggle ? (
-          <button
+          <EditorAction
             type="button"
             draggable={false}
             aria-expanded={headingExpanded}
@@ -221,9 +222,9 @@ export function EditorSideMenu() {
             >
               <ChevronRight className="h-3.5 w-3.5" />
             </span>
-          </button>
+          </EditorAction>
         ) : null}
-        <button
+        <EditorAction
           type="button"
           draggable
           aria-label="拖动移动块"
@@ -235,11 +236,11 @@ export function EditorSideMenu() {
           className={cn(
             "relative flex h-6 w-[22px] cursor-grab items-center justify-center rounded-[7px] text-muted-foreground",
             "before:absolute before:-left-0.5 before:top-1 before:bottom-1 before:w-px before:bg-border/55 before:content-['']",
-            "transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] active:cursor-grabbing",
+            "transition-colors   active:cursor-grabbing",
           )}
         >
           <GripVertical className="h-3.5 w-3.5" />
-        </button>
+        </EditorAction>
       </div>
     </div>,
     portalTarget,

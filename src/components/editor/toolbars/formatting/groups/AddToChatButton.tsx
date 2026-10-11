@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { Kbd } from "@/components/editor/ui/kbd";
 import {
   SELECTION_QUOTE_ADD_SHORTCUT,
@@ -14,7 +15,7 @@ export function AddToChatButton({
   pageTitle: string;
 }) {
   return (
-    <button
+    <EditorAction
       type="button"
       className="goose-formatting-toolbar-add-to-chat"
       aria-label="将选区加入对话"
@@ -35,6 +36,6 @@ export function AddToChatButton({
         shortcut={SELECTION_QUOTE_ADD_SHORTCUT}
         className="goose-formatting-toolbar-add-to-chat-kbd"
       />
-    </button>
+    </EditorAction>
   );
 }

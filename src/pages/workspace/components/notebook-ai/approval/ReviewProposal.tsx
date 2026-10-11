@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { usePages } from "@/stores/usePages";
 import { usePlanReviewSelection } from "./PlanReviewContext";
 import { planReviewState, reviewOutput } from "./reviewState";
@@ -60,7 +61,7 @@ export function ReviewProposal({
           <span>
             已选 {selectedIds.length} / {operations.length} 项，未选项将跳过
           </span>
-          <button
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             onClick={() =>
               setSelectedIds(
@@ -71,7 +72,7 @@ export function ReviewProposal({
             }
           >
             {selectedIds.length === operations.length ? "取消全选" : "全选"}
-          </button>
+          </Button>
         </div>
       ) : null}
       {operations.map((operation) => (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/editor/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -84,16 +84,9 @@ export function CodeBlockToolbar({
   );
   const isMathOrMermaid = language === "math" || language === "mermaid";
   const hasVisualPreview = isMathOrMermaid && Boolean(onPreviewModeChange);
-  const chipClass = cn(
-    "transition-colors duration-150",
-    "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)] text-muted-foreground",
-    "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
-    "",
-    "cursor-pointer rounded-md",
-  );
-  const chipActiveClass =
-    "border-[var(--goose-block-subtle-border)] bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] hover:bg-[var(--goose-interactive-hover)]";
-  const iconSize = "h-3.5 w-3.5";
+  const chipClass = "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)] text-muted-foreground cursor-pointer";
+  const chipActiveClass = "";
+  const iconSize = "size-[var(--goose-control-icon-size)]";
 
   return (
     <TooltipProvider delayDuration={600}>
@@ -142,6 +135,7 @@ export function CodeBlockToolbar({
                   variant="ghost"
                   size="sm"
                   aria-label={wrap ? "取消换行" : "自动换行"}
+                  aria-pressed={wrap}
                   onClick={() => onWrapChange(!wrap)}
                   className={cn(
                     "h-6 w-6 p-0",

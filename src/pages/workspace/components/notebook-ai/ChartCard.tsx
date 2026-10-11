@@ -1,3 +1,4 @@
+import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 /**
  * showChart 工具的输出渲染卡片
  * 与编辑器 EChartsBlock 共用 chartTheme / chartPalette，保证视觉一致
@@ -69,6 +70,7 @@ export function ChartIncompleteNotice({ title }: { title?: string }) {
 }
 
 export function ChartCard(props: ChartCardProps) {
+  const themeSurface = useThemeSurfaceSnapshot();
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);
   const isDark = resolvedTheme === "dark";
@@ -86,6 +88,7 @@ export function ChartCard(props: ChartCardProps) {
     }) => string;
   } | null>(null);
   const uid = useId();
+  const lastData = useRef({ type: props.type, categories: props.categories, series: props.series });
 
   const hasSeries = hasRenderableChartSeries(props.series);
 
@@ -102,7 +105,10 @@ export function ChartCard(props: ChartCardProps) {
       color: getPalette(isDark),
       ...buildOption(cfg, isDark, 1),
     };
-  }, [props.type, props.categories, props.series, isDark]);
+  }, [props.type, props.categories, props.series, isDark, themeSurface]);
+
+  const latestOption = useRef(option);
+  latestOption.current = option;
 
   // 初始化实例
   useEffect(() => {
@@ -117,7 +123,7 @@ export function ChartCard(props: ChartCardProps) {
         renderer: "svg",
       }) as typeof chartRef.current;
       chartRef.current = chart;
-      if (option) chart?.setOption(option, { notMerge: true });
+      if (latestOption.current) chart?.setOption(latestOption.current, { notMerge: true });
     };
 
     void init();
@@ -142,12 +148,15 @@ export function ChartCard(props: ChartCardProps) {
       chartRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid]);
+  }, [uid, hasSeries]);
 
   // 配置 / 主题变化时重绘
   useEffect(() => {
     if (!option) return;
-    chartRef.current?.setOption(option, { notMerge: true });
+    const previous = lastData.current;
+    const dataChanged = previous.type !== props.type || previous.categories !== props.categories || previous.series !== props.series;
+    chartRef.current?.setOption(option, { notMerge: dataChanged });
+    lastData.current = { type: props.type, categories: props.categories, series: props.series };
   }, [option]);
 
   const capturePngDataUrl = useCallback(async () => {

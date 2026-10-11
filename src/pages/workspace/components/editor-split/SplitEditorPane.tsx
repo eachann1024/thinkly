@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { useCallback, useLayoutEffect, useRef } from "react";
 import { X } from "@/components/ui/icons";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -24,14 +26,14 @@ function SplitPaneCloseButton({
   alwaysVisible: boolean;
 }) {
   return (
-    <button
+    <IconButton size="xs" tone="muted"
       type="button"
       aria-label="关闭此格"
       className={cn(
-        "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+        "inline-flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground ",
         alwaysVisible
           ? "opacity-100"
-          : "opacity-0 group-hover/split-chrome:opacity-100",
+          : "opacity-0 group-hover/split-chrome:opacity-100 group-focus-within/split-chrome:opacity-100",
       )}
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => {
@@ -41,7 +43,7 @@ function SplitPaneCloseButton({
       }}
     >
       <X className="h-3.5 w-3.5" />
-    </button>
+    </IconButton>
   );
 }
 
@@ -100,13 +102,13 @@ export function SplitEditorPane({
         ) : null}
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-sm text-muted-foreground">
           <p>找不到这篇笔记</p>
-          <button
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground "
             onClick={() => closeSplitPaneFromUi(tabId, leaf.id)}
           >
             关闭此格
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -156,13 +158,13 @@ export function SplitEditorPane({
               fallback={(_, reset) => (
                 <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
                   <p>当前格子渲染失败，已阻止整窗白屏。</p>
-                  <button
+                  <Button contentStyle="preserve" variant="ghost" size={null}
                     type="button"
                     onClick={reset}
-                    className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                    className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground "
                   >
                     重试
-                  </button>
+                  </Button>
                 </div>
               )}
             >

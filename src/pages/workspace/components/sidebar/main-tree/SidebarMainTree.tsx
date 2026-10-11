@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { renderMainTreeSurface } from "./controller/renderMainTreeSurface";
 import * as GooseIcons from "@/components/ui/icons";
 import { LocalFolderLoadingSkeleton } from "../LocalFolderLoadingSkeleton";
@@ -49,13 +50,13 @@ export function SidebarMainTree(props: SidebarMainTreeProps) {
         <p className="mt-1 max-w-52 text-xs leading-relaxed text-muted-foreground">
           {localLoadError}
         </p>
-        <button
+        <Button contentStyle="preserve" variant="ghost" size="sm"
           type="button"
           onClick={retryLocalFolderLoad}
-          className="mt-3 rounded-[8px] bg-[var(--goose-interactive-selected)] px-3 py-1.5 text-xs font-medium text-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] "
+          className="h-auto whitespace-normal border-0 px-0 py-0 mt-3 rounded-[8px] bg-[var(--goose-interactive-selected)] px-3 py-1.5 text-xs font-medium text-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] "
         >
           重新加载
-        </button>
+        </Button>
       </div>
     );
   }
@@ -116,13 +117,13 @@ export function SidebarMainTree(props: SidebarMainTreeProps) {
           <span className="min-w-0 truncate" title={localLoadError}>
             文件夹刷新失败，仍显示上次内容
           </span>
-          <button
+          <Button contentStyle="preserve" variant="ghost" size="sm"
             type="button"
             onClick={retryLocalFolderLoad}
-            className="shrink-0 font-medium underline underline-offset-2 "
+            className="h-auto whitespace-normal border-0 px-0 py-0 shrink-0 font-medium underline underline-offset-2 "
           >
             重试
-          </button>
+          </Button>
         </div>
       )}
       <ContextMenu>

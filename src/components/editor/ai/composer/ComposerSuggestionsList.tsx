@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import * as GooseIcons from "@/components/ui/icons";
@@ -117,18 +118,18 @@ export function ComposerSuggestionsList({
         ) : (
           <ul
             ref={listRef}
-            className="flex flex-col gap-1 overflow-y-auto p-1.5"
+            className="goose-list-layout overflow-y-auto p-1.5"
+            data-goose-menu-slot="root"
             style={{ maxHeight }}
           >
             {items.map((item, index) => (
               <li key={item.pageId} data-mention-index={index}>
-                <button
+                <EditorAction
                   type="button"
+                  data-goose-menu-slot="row"
+                  data-keyboard-active={index === activeIndex || undefined}
                   className={cn(
-                    "flex w-full cursor-pointer flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors",
-                    index === activeIndex
-                      ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] [&_svg]:text-[var(--goose-interactive-selected-fg)]"
-                      : "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:[&_*]:text-[var(--goose-interactive-hover-fg)]",
+                    "goose-list-row flex w-full cursor-pointer flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors",
                   )}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -152,7 +153,7 @@ export function ComposerSuggestionsList({
                       </div>
                     ) : null}
                   </div>
-                </button>
+                </EditorAction>
               </li>
             ))}
           </ul>

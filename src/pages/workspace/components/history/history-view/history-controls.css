@@ -1,0 +1,15 @@
+/* The outer version row owns the continuous timeline; only its inner button paints a highlight. */
+.history-version-row {
+  position: relative;
+  justify-content: flex-start;
+  /* Transparent inset borders replace, rather than add to, the original 0.375rem vertical padding. */
+  padding-block: max(0px, calc(0.375rem - var(--goose-list-row-gap) / 2));
+}
+.history-version-row > span { position: relative; color: inherit; }
+.history-version-row:is(:hover, :focus-visible, [data-selected="true"]) .text-muted-foreground { color: inherit; }
+.history-star-control svg { opacity: 0; }
+.history-version-item:hover .history-star-control svg,
+.history-version-item:focus-within .history-star-control svg,
+.history-star-control[data-marked="true"] svg,
+.history-star-control[aria-busy="true"] svg { opacity: 1; }
+.history-star-control[data-marked="true"] svg { fill: currentColor; }

@@ -122,7 +122,7 @@ function HistoryReader() {
               type="button"
               variant="secondary"
               size="sm"
-              className="history-secondary-control mt-1 h-8 gap-1.5 rounded-[10px] text-xs shadow-none transition-[background-color,color,transform] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] active:translate-y-px active:bg-[var(--goose-interactive-selected)] active:text-[var(--goose-interactive-selected-fg)]"
+              className="history-secondary-control mt-1 h-8 gap-1.5 text-xs shadow-none"
               onClick={reset}
             >
               <GooseIcons.RotateCcw className="h-3.5 w-3.5" />

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { SidebarFooter } from "../SidebarFooter";
 import type { useSidebarHover } from "./useSidebarHover";
@@ -56,9 +57,9 @@ export function SidebarModeRail({
           {views.map(({ view, label, Icon, digit }) => (
             <Tooltip key={view}>
               <TooltipTrigger asChild>
-                <button
+                <Button contentStyle="preserve" variant="ghost" size="sm"
                   type="button"
-                  className="sidebar-mode-rail-button rounded-lg"
+                  className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-mode-rail-button rounded-lg"
                   aria-label={label}
                   aria-pressed={!settingsOpen && currentView === view}
                   aria-expanded={
@@ -72,7 +73,7 @@ export function SidebarModeRail({
                 >
                   <Icon aria-hidden="true" className="h-4 w-4" />
                   <span className="sidebar-mode-rail-label">{label}</span>
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
                 {label} · {sidebarViewShortcut(digit)}

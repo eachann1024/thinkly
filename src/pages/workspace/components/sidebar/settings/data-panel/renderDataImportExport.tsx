@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Download,
   FileText,
@@ -68,7 +69,7 @@ export function renderDataImportExport(
                 variant="ghost"
                 size="sm"
                 onClick={onSelectAll}
-                className="h-8 rounded-[10px] px-2 text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="h-8 rounded-[var(--goose-control-radius)] px-2 text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
               >
                 {selectedCount === totalCount ? "取消全选" : "全选"}
               </Button>
@@ -79,12 +80,14 @@ export function renderDataImportExport(
             {notebookList.map((notebook) => {
               const isSelected = selectedIds.includes(notebook.id);
               return (
-                <button
+                <Button contentStyle="preserve" variant="ghost" size="sm"
                   key={notebook.id}
                   type="button"
+                  aria-pressed={isSelected}
+                  data-selected={isSelected || undefined}
                   onClick={() => onToggleNotebook(notebook.id)}
                   className={cn(
-                    "flex items-center gap-2 rounded-[12px] border px-3 py-2.5 text-left transition-all duration-200",
+                    "h-auto border-0 flex items-center gap-2 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2.5 text-left transition-all duration-200",
                     "",
                     isSelected
                       ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
@@ -98,7 +101,7 @@ export function renderDataImportExport(
                     )}
                   </span>
                   <span className="truncate text-sm">{notebook.name}</span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -113,7 +116,7 @@ export function renderDataImportExport(
               selected={format === "md"}
               onClick={() => onFormatChange("md")}
               className={cn(
-                "flex h-16 items-center gap-3 rounded-[12px] border px-3 py-2 transition-all duration-200",
+                "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
                 format === "md"
                   ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                   : DATA_UNSELECTED_CARD_CLASS,
@@ -129,7 +132,7 @@ export function renderDataImportExport(
               selected={format === "html"}
               onClick={() => onFormatChange("html")}
               className={cn(
-                "flex h-16 items-center gap-3 rounded-[12px] border px-3 py-2 transition-all duration-200",
+                "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
                 format === "html"
                   ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                   : DATA_UNSELECTED_CARD_CLASS,
@@ -145,7 +148,7 @@ export function renderDataImportExport(
         </div>
 
         <Button
-          className="w-full rounded-[12px]"
+          className="w-full rounded-[var(--goose-control-radius)]"
           onClick={onExport}
           disabled={selectedCount === 0 || exporting}
         >

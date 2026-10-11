@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { useRef } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import * as GooseIcons from "@/components/ui/icons";
@@ -6,7 +7,6 @@ import type { Page } from "@/types";
 import { cn, formatShortcut } from "@/lib/utils";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { bindIdleWindowDrag } from "@/lib/electron/windowDrag";
-import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles } from "@/components/ui/icons";
 import { usePages } from "@/stores/usePages";
@@ -187,7 +187,7 @@ export function DesktopTitleBar({
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <IconButton size="icon" tone="muted"
                   type="button"
                   className={cn(
                     "ai-icon-button shrink-0",
@@ -200,7 +200,7 @@ export function DesktopTitleBar({
                   aria-pressed={aiPanelOpen}
                 >
                   <Sparkles className="h-4 w-4" />
-                </button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
@@ -221,16 +221,14 @@ export function DesktopTitleBar({
             <TooltipProvider delayDuration={600}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <IconButton size="icon" tone="muted"
                     onClick={onRestore}
                     type="button"
                     aria-label="恢复笔记"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-[8px] bg-[var(--goose-interactive-selected)] text-[hsl(var(--foreground))] transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                    className=""
                   >
                     <GooseIcons.RotateCcw className="h-4 w-4" />
-                  </Button>
+                  </IconButton>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">恢复笔记</TooltipContent>
               </Tooltip>
@@ -238,15 +236,14 @@ export function DesktopTitleBar({
             <TooltipProvider delayDuration={600}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <IconButton size="icon" tone="danger"
                     onClick={onDelete}
                     type="button"
                     aria-label="彻底删除笔记"
-                    size="icon"
-                    className="h-8 w-8 rounded-[8px] bg-[var(--goose-interactive-selected)] text-[hsl(var(--foreground))] transition-colors hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger)]"
+                    className=""
                   >
                     <GooseIcons.Trash2 className="h-4 w-4" />
-                  </Button>
+                  </IconButton>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">彻底删除</TooltipContent>
               </Tooltip>

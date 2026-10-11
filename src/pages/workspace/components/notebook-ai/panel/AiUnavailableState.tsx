@@ -63,13 +63,15 @@ export function AiUnavailableState({
             {!enabled ? "去开启 AI" : "去设置 AI"}
           </Button>
           {retryable ? (
-            <button
+            <Button contentStyle="preserve"
+              variant="ghost"
+              size={null}
               type="button"
               onClick={onRetry}
               className="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
             >
               返回对话重试
-            </button>
+            </Button>
           ) : null}
         </>
       ) : null}

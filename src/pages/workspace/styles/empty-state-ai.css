@@ -7,7 +7,7 @@
   background: var(--goose-interactive-selected);
   box-shadow: none;
   transform: none;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;
 }
 .page-empty-ai-card:hover .page-empty-ai-chip,
 .page-empty-ai-card:focus-visible .page-empty-ai-chip {

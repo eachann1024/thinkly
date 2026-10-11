@@ -64,14 +64,7 @@
  font-size: var(--editor-base-font-size, 17px);
 }
 
-.notebook-ai-empty-suggestion:hover {
- color: hsl(var(--foreground));
-}
 
-.notebook-ai-empty-suggestion:focus-visible {
- background: var(--goose-interactive-hover);
- color: var(--goose-interactive-hover-fg);
-}
 
 .notebook-ai-conversation-title {
  animation: notebook-ai-title-fade 120ms ease-out;

@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { Pause, Play, VideoOff } from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { useVideoPlayback } from "./useVideoPlayback";
@@ -107,7 +108,7 @@ export function GooseVideoPlayer({
 
       {/* 中央大播放钮：暂停态常显，播放态随控件淡出 */}
       {!loadError && (
-        <button
+        <EditorAction context="media"
           type="button"
           className="goose-video-player__center-play"
           aria-label={playing ? "暂停" : "播放"}
@@ -128,7 +129,7 @@ export function GooseVideoPlayer({
               strokeWidth={1.75}
             />
           )}
-        </button>
+        </EditorAction>
       )}
 
       <VideoControls playback={playback} />

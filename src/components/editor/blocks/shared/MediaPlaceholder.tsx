@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useCallback, type ReactNode } from "react";
 import { FilePanelExtension } from "@blocknote/core/extensions";
@@ -41,7 +42,7 @@ export function MediaPlaceholder({
   const isImage = variant === "image";
 
   return (
-    <button
+    <EditorAction
       type="button"
       className={cn(
         "goose-media-placeholder",
@@ -64,7 +65,7 @@ export function MediaPlaceholder({
           <span className="goose-media-placeholder__hint">{hint}</span>
         ) : null}
       </span>
-    </button>
+    </EditorAction>
   );
 }
 

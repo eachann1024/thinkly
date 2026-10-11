@@ -1,3 +1,6 @@
+import { Input } from "@/components/ui/input";
+import { IconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "@/components/ui/icons";
@@ -101,25 +104,25 @@ export function SidebarSearch() {
   const scopeLabel = session.scope.kind === "all" ? "所有笔记本" : session.scope.kind === "current" ? `当前笔记本 · ${notebooks[scopedId ?? ""]?.name ?? currentName}` : notebooks[scopedId ?? ""]?.name ?? "笔记本已移除";
   return <section className="sidebar-search" aria-label="全局搜索" hidden={!session.open}>
     <div className="sidebar-search-heading"><strong>搜索笔记</strong></div>
-    <div className="sidebar-search-input-wrap"><Search size={16} aria-hidden="true"/><input ref={inputRef} role="combobox" aria-label="搜索笔记" aria-controls="sidebar-search-results" aria-expanded={session.open} aria-autocomplete="list" aria-activedescendant={selected ? `search-result-${selected.id}` : undefined} value={draft} placeholder="搜索笔记内容…" autoComplete="off" spellCheck={false}
+    <div className="sidebar-search-input-wrap"><Search size={16} aria-hidden="true"/><Input variant="inline" context="shell" ref={inputRef} role="combobox" aria-label="搜索笔记" aria-controls="sidebar-search-results" aria-expanded={session.open} aria-autocomplete="list" aria-activedescendant={selected ? `search-result-${selected.id}` : undefined} value={draft} placeholder="搜索笔记内容…" autoComplete="off" spellCheck={false}
       onChange={e => { setDraft(e.target.value); if (!composing.current) session.setQuery(e.target.value); }}
       onCompositionStart={() => { composing.current = true; }} onCompositionEnd={e => { composing.current = false; session.setQuery(e.currentTarget.value); }} onKeyDown={keydown}/>
-      {draft ? <button aria-label="清空搜索" onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}><X size={16}/></button> : null}</div>
-    <div className="sidebar-search-filters">{session.open && <DropdownMenu><DropdownMenuTrigger asChild><button className="sidebar-search-scope" aria-label="搜索范围"><span>{scopeLabel}</span><ChevronDown size={14}/></button></DropdownMenuTrigger>
+      {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}><X size={16}/></IconButton> : null}</div>
+    <div className="sidebar-search-filters">{session.open && <DropdownMenu><DropdownMenuTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-scope" aria-label="搜索范围"><span>{scopeLabel}</span><ChevronDown size={14}/></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64"><DropdownMenuRadioGroup value={scopeValue} onValueChange={value => session.setScope(value === "all" ? { kind: "all" } : value === "current" ? { kind: "current", notebookId: session.startingNotebookId } : { kind: "notebook", notebookId: value.slice(9) })}>
         <DropdownMenuRadioItem value="current">当前笔记本 · {currentName}</DropdownMenuRadioItem><DropdownMenuRadioItem value="all">所有笔记本</DropdownMenuRadioItem>
         {Object.values(notebooks).map(n => <DropdownMenuRadioItem key={n.id} value={`notebook:${n.id}`}>{n.name}</DropdownMenuRadioItem>)}
       </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<span role="status">{searchError ? "" : loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
-    {!hasQuery && showRecent && <button className="sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</button>}
-    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<button onClick={() => setRetry(n => n + 1)}>重试读取</button></div>}
+    {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
+    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setRetry(n => n + 1)}>重试读取</Button></div>}
     <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
-      <div id="sidebar-search-results" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
+      <div id="sidebar-search-results" className="goose-list-layout" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
       <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
       {searchError && <div className="sidebar-search-empty" role="alert">{searchError}</div>}
-      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-empty"><strong>{hasQuery ? `未找到「${session.query.trim()}」相关内容` : "输入关键词开始搜索"}</strong>{hasQuery ? <><button onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}>清空搜索</button>{session.scope.kind !== "all" && <button onClick={() => session.setScope({ kind: "all" })}>扩大到所有笔记本</button>}</> : <p>输入标题或记得的内容。</p>}</div>}
-      {hasQuery && searchResults.hasMore && <button className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</button>}
-      {matchingSplitPaletteActions(session.query).map(action => <button key={action.id} className="sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</button>)}
+      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-empty"><strong>{hasQuery ? `未找到「${session.query.trim()}」相关内容` : "输入关键词开始搜索"}</strong>{hasQuery ? <><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}>清空搜索</Button>{session.scope.kind !== "all" && <Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => session.setScope({ kind: "all" })}>扩大到所有笔记本</Button>}</> : <p>输入标题或记得的内容。</p>}</div>}
+      {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
+      {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
     <div className="sidebar-search-footer">↑ ↓ 预览 · Enter 阅读 · Esc 退出</div>
   </section>;

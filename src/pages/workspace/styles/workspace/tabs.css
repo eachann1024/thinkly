@@ -5,16 +5,12 @@
 }
 .tab-rail-item {
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--goose-control-radius);
   border-bottom: none;
   text-decoration: none;
   transition:
     flex-basis 220ms ease-in-out,
-    background-color 150ms ease;
-}
-.tab-rail-item:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
+    background-color var(--goose-control-motion-duration) ease;
 }
 .tab-rail-item,
 .tab-rail-item span,

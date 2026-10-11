@@ -1,4 +1,5 @@
-import { useId, type CSSProperties } from "react";
+import { useId } from "react";
+import { Range } from "@/components/ui/range";
 import { Button } from "@/components/ui/button";
 import {
   EDITOR_FONT_SIZE_MIN,
@@ -36,9 +37,8 @@ export function ReadingPreferences({ showPreview = true, fontSize, lineHeight, o
           <label htmlFor={`${id}-${field.key}`}>{field.label}</label>
           <output htmlFor={`${id}-${field.key}`} className="font-medium tabular-nums">{field.step < 1 ? field.value.toFixed(2) : field.value} {field.unit}</output>
         </div>
-        <input id={`${id}-${field.key}`} type="range" min={field.min} max={field.max} step={field.step} value={field.value}
+        <Range id={`${id}-${field.key}`} min={field.min} max={field.max} step={field.step} value={field.value}
           aria-valuetext={`${field.value} ${field.unit}`}
-          style={{ "--range-fill": `${(field.value - field.min) / (field.max - field.min) * 100}%` } as CSSProperties}
           onChange={event => field.change(event.currentTarget.valueAsNumber)} />
         <div className="flex justify-between text-xs text-muted-foreground"><span>{field.min} {field.unit}</span><span>{field.max} {field.unit}</span></div>
       </div>)}
@@ -46,7 +46,7 @@ export function ReadingPreferences({ showPreview = true, fontSize, lineHeight, o
     <div className="flex flex-wrap gap-2" role="group" aria-label="行距预设">
       {([[1.4, "紧凑"], [1.5, "标准"], [1.65, "舒适"], [2, "宽松"]] as const).map(([value, label]) =>
         <Button key={value} type="button" variant="outline" size="sm" aria-pressed={lineHeight === value}
-          className="rounded-lg border-border text-xs aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background"
+          className="border-border text-xs"
           onClick={() => onLineHeightChange(value)}>{label} {value.toFixed(2)}</Button>)}
     </div>
   </div>;

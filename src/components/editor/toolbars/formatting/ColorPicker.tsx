@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useBlockNoteEditor } from "@blocknote/react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Portal } from "@/components/editor/ui/portal";
@@ -41,7 +42,7 @@ export function FormattingToolbarColorPicker({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
+      <EditorAction
         type="button"
         ref={buttonRef}
         data-goose-preserve-icon-color="true"
@@ -76,7 +77,7 @@ export function FormattingToolbarColorPicker({
             />
           ) : null}
         </span>
-      </button>
+      </EditorAction>
       <Portal>
         <ColorPickerPanel panel={panel} actions={actions} />
       </Portal>

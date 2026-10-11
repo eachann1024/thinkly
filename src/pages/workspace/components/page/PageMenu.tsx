@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { Popover, PopoverTrigger, PopoverContent, PopoverAction } from "@/components/ui/popover";
 import { FontSelector } from "@/pages/workspace/components/shared/FontSelector";
@@ -34,16 +36,14 @@ export function PageMenu() {
         }}
       >
         <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
+          <IconButton size="icon" tone="muted"
             aria-label="更多操作"
             onPointerDownCapture={captureSelectedBlocks}
-            className="h-8 w-8 rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] data-[state=open]:bg-[var(--goose-interactive-selected)] data-[state=open]:text-[var(--goose-interactive-selected-fg)]"
+            className="text-muted-foreground "
           >
             <GooseIcons.MoreHorizontal className="h-4 w-4" />
             <span className="sr-only">更多操作</span>
-          </Button>
+          </IconButton>
         </PopoverTrigger>
         {/*
           不要在定位外壳上挂 goose-editor-context-ui（CSS zoom）。
@@ -52,7 +52,7 @@ export function PageMenu() {
           页面更多菜单走 viewport 坐标系，尺寸用真实 px。
         */}
         <PopoverContent
-          className="goose-page-menu-surface goose-floating-surface max-h-[calc(100vh-24px)] w-[272px] max-w-[calc(100vw-16px)] overflow-y-auto p-1.5"
+          className="goose-page-menu-surface goose-floating-surface goose-list-layout max-h-[calc(100vh-24px)] w-[272px] max-w-[calc(100vw-16px)] overflow-y-auto p-1.5"
           align="end"
           sideOffset={6}
           style={{
@@ -75,7 +75,7 @@ export function PageMenu() {
                   ["standard", "标准"],
                   ["full", "全宽"],
                 ] as const).map(([value, label]) => (
-                  <button
+                  <Button contentStyle="preserve" variant="ghost" size={null}
                     key={value}
                     type="button"
                     aria-pressed={normalizePageLayout(page.pageLayout ?? defaultLayout) === value}
@@ -84,21 +84,21 @@ export function PageMenu() {
                       "rounded-lg border px-2 py-2 text-xs ",
                       normalizePageLayout(page.pageLayout ?? defaultLayout) === value
                         ? "border-[var(--goose-interactive-selected-border)] bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                        : "border-border hover:bg-[var(--goose-interactive-hover)]",
+                        : "border-border ",
                     )}
                   >
                     {label}
-                  </button>
+                  </Button>
                 ))}
               </div>
               {page.pageLayout !== undefined && (
-                <button
+                <Button contentStyle="preserve" variant="ghost" size={null}
                   type="button"
                   className="mt-2 px-1 text-xs text-muted-foreground hover:text-foreground"
                   onClick={() => updatePage(activePageId, { pageLayout: undefined })}
                 >
                   跟随默认宽度
-                </button>
+                </Button>
               )}
             </section>
           )}
@@ -118,18 +118,19 @@ export function PageMenu() {
           <div
             role="button"
             tabIndex={0}
-            className="group grid min-h-[32px] cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-[9px] px-2 text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] "
+            className="goose-list-row group grid min-h-[32px] cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-[var(--goose-control-radius)] px-2 text-xs "
             onClick={() =>
               updatePage(activePageId, { isLocked: !page.isLocked })
             }
             onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 updatePage(activePageId, { isLocked: !page.isLocked });
               }
             }}
           >
-            <GooseIcons.Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-[var(--goose-interactive-hover-fg)]" />
+            <GooseIcons.Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 truncate">锁定笔记</span>
             <Switch
               aria-label="锁定笔记"
@@ -192,7 +193,7 @@ export function PageMenu() {
           </PopoverAction>
 
           {/* Export submenu */}
-          <div className="w-full">
+          <div className="goose-list-group w-full">
             <PageExportSubmenu
               enabled={pageMenuOpen}
               viewportHeight={viewport.height}

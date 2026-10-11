@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 export function BootstrapScreen({
   lean,
   error,
@@ -25,9 +26,9 @@ export function BootstrapScreen({
               : "初始化没有完成，本地数据不会因此被清除。"}
           </p>
           {message && <code>{message}</code>}
-          <button type="button" onClick={() => window.location.reload()}>
+          <Button contentStyle="preserve" variant="secondary" type="button" onClick={() => window.location.reload()}>
             重新加载
-          </button>
+          </Button>
         </>
       ) : (
         <>

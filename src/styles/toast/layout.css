@@ -125,18 +125,5 @@
 [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover,
 .goose-toaster [data-sonner-toast] .goose-toast-close:hover,
 [data-sonner-toaster] [data-sonner-toast] .goose-toast-close:hover {
- background: rgba(15, 23, 42, 0.08) !important;
-}
-
-.dark .goose-toaster [data-sonner-toast] [data-close-button]:hover,
-.dark [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover,
-[data-sonner-toaster][data-sonner-theme="dark"]
- [data-sonner-toast]
- [data-close-button]:hover,
-.dark .goose-toaster [data-sonner-toast] .goose-toast-close:hover,
-.dark [data-sonner-toaster] [data-sonner-toast] .goose-toast-close:hover,
-[data-sonner-toaster][data-sonner-theme="dark"]
- [data-sonner-toast]
- .goose-toast-close:hover {
- background: rgba(255, 255, 255, 0.12) !important;
+ background: var(--goose-interactive-hover) !important;
 }

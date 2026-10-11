@@ -88,14 +88,9 @@
  opacity: 0;
  background: transparent;
  box-shadow: none;
- transition: opacity 150ms ease;
+ transition: opacity var(--goose-control-motion-duration) ease;
 }
 
-.notebook-ai-message-actions button:hover,
-.notebook-ai-message-actions button:focus-visible {
- background: var(--goose-interactive-hover);
- color: var(--goose-interactive-hover-fg);
-}
 
 .notebook-ai-message:hover > .notebook-ai-message-actions,
 .notebook-ai-message:focus-within > .notebook-ai-message-actions {
@@ -137,7 +132,7 @@
 .notebook-ai-messages [role="button"][aria-disabled="true"],
 .notebook-ai-messages .notebook-ai-artifact-actions button:disabled,
 .notebook-ai-messages .notebook-ai-artifact-panzoom-controls button:disabled {
- cursor: default;
+ cursor: not-allowed;
 }
 
 /* 图形视口：默认不拦截页面滚动、文字可选中；仅放大后进入拖拽/平移并禁止选中 */

@@ -1,7 +1,7 @@
 /* ===== 表格控件：尺寸来自实际 table border box，不裁成 viewport 尺寸 ===== */
 .goose-table-extend-button,
 .goose-table-handle-btn {
-  --radius-sm: 4px;
+  --radius-sm: var(--goose-control-radius);
 }
 .goose-table-extend-button {
   display: flex;
@@ -29,7 +29,7 @@
 .goose-table-extend-button.is-editing,
 .goose-table-extend-button:focus-visible,
 .goose-table-handle-btn:focus-visible {
-  background: var(--goose-table-control-hover);
+  background: var(--goose-interactive-hover);
   color: hsl(var(--foreground));
 }
 .goose-table-extend-button:focus-visible,
@@ -68,7 +68,7 @@
 }
 .goose-table-handle-btn:hover,
 .goose-table-handle-btn[aria-expanded="true"] {
-  background: var(--goose-table-control-hover);
+  background: var(--goose-interactive-hover);
   color: hsl(var(--foreground));
 }
 .goose-table-menu .goose-table-menu-note {
@@ -77,7 +77,7 @@
 .goose-table-color-menu .goose-table-color-group {
   display: grid;
   grid-template-columns: repeat(5, 32px);
-  gap: 4px;
+  gap: var(--goose-menu-row-gap);
   padding: 0 8px 8px;
 }
 .goose-table-color-group .goose-table-menu-heading {

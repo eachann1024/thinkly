@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 /**
  * FolderHomePage —— 本地文件夹「目录主页」（方案 B：Finder 式）。
  *
@@ -154,11 +155,11 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
             </span>
           </h2>
           <span className="flex-1" />
-          <button
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             onClick={() => void handleCreateFolder()}
             disabled={creating !== null}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
           >
             {creating === "folder" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -166,12 +167,12 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               <FolderPlus className="h-3.5 w-3.5" />
             )}
             新建子文件夹
-          </button>
-          <button
+          </Button>
+          <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             onClick={() => void handleCreateFile()}
             disabled={creating !== null}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
           >
             {creating === "file" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -179,12 +180,12 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               <FilePlus2 className="h-3.5 w-3.5" />
             )}
             新建文件
-          </button>
+          </Button>
         </div>
 
         {count === 0 ? (
           /* 空文件夹：居中空态，创建入口前置 */
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 rounded-[11px] border border-dashed border-border bg-background px-5 pb-10 pt-11 text-center dark:border-border dark:bg-transparent">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 rounded-[11px] border border-dashed border-border bg-background px-5 pb-10 pt-11 text-center ">
             <span className="mb-2 flex h-[46px] w-[46px] items-center justify-center rounded-[11px] bg-[hsl(var(--goose-selected-bg))] text-muted-foreground">
               <FolderOpen className="h-5 w-5" />
             </span>
@@ -195,35 +196,35 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               在「{folderName}」里创建第一个文件或子文件夹
             </p>
             <div className="flex gap-2">
-              <button
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 onClick={() => void handleCreateFile()}
                 disabled={creating !== null}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
               >
                 <FilePlus2 className="h-3.5 w-3.5" />
                 新建文件
-              </button>
-              <button
+              </Button>
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 onClick={() => void handleCreateFolder()}
                 disabled={creating !== null}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
               >
                 <FolderPlus className="h-3.5 w-3.5" />
                 新建子文件夹
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           /* 子项列表：撑满主区剩余高度，超出后内部滚动，头部与创建按钮始终可见 */
-          <div className="folder-home-list page-scroll-container min-h-0 flex-1 overflow-y-auto rounded-[11px] border border-border bg-background">
+          <div className="goose-list-layout folder-home-list page-scroll-container min-h-0 flex-1 overflow-y-auto rounded-[11px] border border-border bg-background">
             {children.map((child) => (
-              <button
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 key={child.id}
                 type="button"
                 onClick={() => handleOpenChild(child)}
-                className="flex w-full items-center gap-2.5 border-b border-border bg-background px-3.5 py-2.5 text-left text-[13px] text-foreground transition-colors last:border-b-0 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="goose-list-row flex w-full items-center justify-start gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-foreground"
               >
                 {child.isFolder ? (
                   <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -239,7 +240,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
                 <span className="shrink-0 text-[11px] text-muted-foreground">
                   {formatRelativeTime(child.updatedAt)}
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
         )}

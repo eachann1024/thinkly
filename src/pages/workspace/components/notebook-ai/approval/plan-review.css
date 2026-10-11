@@ -18,26 +18,14 @@
 }
 .notebook-ai-review-toolbar [role="group"] {
   display: flex;
-  gap: 2px;
+  gap: var(--goose-list-row-gap);
 }
 .notebook-ai-review-toolbar button,
 .notebook-ai-review-selection button {
-  border-radius: 6px;
+  border-radius: var(--goose-control-radius);
   padding: 4px 7px;
   color: hsl(var(--foreground));
   cursor: pointer;
-}
-.notebook-ai-review-toolbar button:hover,
-.notebook-ai-review-selection button:hover {
-  background: var(--goose-block-subtle-hover);
-}
-.notebook-ai-review-toolbar button[aria-pressed="true"] {
-  background: var(--goose-interactive-selected);
-  color: var(--goose-interactive-accent);
-}
-.notebook-ai-review-toolbar button:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 .notebook-ai-review-target {
   padding: 0;
@@ -51,7 +39,7 @@
 .notebook-ai-review-meta {
   align-items: flex-start;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--goose-list-row-gap);
   overflow-wrap: anywhere;
 }
 .notebook-ai-review-result {
@@ -71,18 +59,6 @@
 .notebook-ai-review-empty {
   font-size: 13px;
   color: hsl(var(--muted-foreground));
-}
-.notebook-ai-plan-file-bar input[type="checkbox"] {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  accent-color: var(--goose-interactive-accent);
-  cursor: pointer;
-}
-.notebook-ai-work-proposal button:focus-visible,
-.notebook-ai-work-proposal input:focus-visible {
-  outline: 2px solid var(--goose-interactive-accent);
-  outline-offset: 2px;
 }
 .notebook-ai-review-footer {
   display: grid;

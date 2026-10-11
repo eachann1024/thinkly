@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
 import { renderAppearanceTheme } from "./appearance-settings/renderAppearanceTheme";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
 import { AppearanceEditorPreview } from "./AppearanceEditorPreview";
@@ -66,16 +67,16 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
               <>
                 {defaultFontSettings}
                 {readingSettings}
-                <details className="setup-guide-advanced-settings border-t border-border/60 pt-3">
-                  <summary className="cursor-pointer rounded-md py-2 text-sm font-medium text-foreground">
+                <Disclosure className="setup-guide-advanced-settings border-t border-border/60 pt-3">
+                  <DisclosureSummary className="cursor-pointer rounded-md py-2 text-sm font-medium text-foreground">
                     界面与侧栏调节
-                  </summary>
+                  </DisclosureSummary>
                   <div className="mt-4 space-y-4">
                     {interfaceFontSettings}
                     {additionalFontSettings}
                     {uiFontSizeSettings}
                   </div>
-                </details>
+                </Disclosure>
               </>
             ) : (
               <>

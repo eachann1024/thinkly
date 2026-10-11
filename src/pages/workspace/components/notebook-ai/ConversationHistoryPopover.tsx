@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { PortalHoverTip } from "./history/PortalHoverTip";
 import { requestDeleteConversation } from "./history/historyActions";
 import { useMemo, type MouseEvent, useState } from "react";
@@ -118,7 +119,7 @@ export function ConversationHistoryList({
   }
 
   const list = (
-    <div className="min-w-0 max-w-full space-y-0.5 overflow-x-hidden pr-1">
+    <div className="goose-list-layout min-w-0 max-w-full overflow-x-hidden pr-1">
       {conversations.map((conversation) => {
         const isActive = conversation.id === activeConversationId;
         const summary = getConversationSummary(conversation.messages);
@@ -131,18 +132,20 @@ export function ConversationHistoryList({
                 tabIndex={0}
                 onClick={() => selectConversation(conversation.id)}
                 onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
                   if (event.key !== "Enter" && event.key !== " ") return;
                   event.preventDefault();
                   selectConversation(conversation.id);
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                className="group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[8px] px-2.5 py-2 text-left text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="goose-list-row group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
+                data-selected={isActive || undefined}
                 aria-current={isActive ? "true" : undefined}
               >
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <div className="block w-full truncate text-sm">{summary}</div>
-                  <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-[var(--goose-interactive-hover-fg)]">
+                  <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Clock3 className="h-3 w-3 shrink-0" strokeWidth={1.75} />
                     <span className="truncate">
                       {formatConversationTime(conversation.updatedAt)}
@@ -150,23 +153,23 @@ export function ConversationHistoryList({
                   </div>
                 </div>
                 {isActive ? (
-                  <span className="flex shrink-0 items-center gap-0.5 text-[11px] text-foreground group-hover:text-[var(--goose-interactive-hover-fg)]">
+                  <span className="flex shrink-0 items-center gap-0.5 text-[11px] text-foreground">
                     <Check className="h-3 w-3" strokeWidth={2} />
                     当前
                   </span>
                 ) : null}
                 {onDeleteConversation ? (
-                  <button
+                  <IconButton size="xs" tone="danger"
                     type="button"
                     aria-label="删除会话"
                     title="删除会话"
                     onClick={(event) =>
                       confirmDeleteConversation(event, conversation.id, summary)
                     }
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-muted-foreground opacity-0 outline-none transition-[opacity,color,background-color] hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger-focus)] focus-visible:opacity-100 group-hover:opacity-100"
+                    className="flex shrink-0 items-center justify-center text-muted-foreground opacity-0 transition-[opacity,color,background-color] focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  </button>
+                  </IconButton>
                 ) : null}
               </div>
             )}
@@ -208,15 +211,15 @@ export function ConversationHistoryPopover({
       }}
     >
       <PopoverTrigger asChild>
-        <button
+        <IconButton size="sm" tone="muted"
           type="button"
-          className="flex h-7 w-7 items-center justify-center rounded-[7px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] dark:hover:bg-[var(--goose-interactive-hover)] disabled:pointer-events-none disabled:text-disabled data-[state=open]:bg-[var(--goose-interactive-selected)] dark:data-[state=open]:bg-[var(--goose-interactive-selected)] data-[state=open]:text-[var(--goose-interactive-selected-fg)]"
+          className="flex items-center justify-center text-muted-foreground disabled:pointer-events-none disabled:text-disabled "
           aria-label="历史会话"
           title="历史会话"
           disabled={disabled}
         >
           <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-        </button>
+        </IconButton>
       </PopoverTrigger>
       <PopoverContent
         align="end"

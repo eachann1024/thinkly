@@ -12,37 +12,23 @@
 
 .goose-block-toolbar-control {
   display: inline-flex;
-  width: 26px;
-  min-width: 26px;
-  height: 26px;
-  flex: 0 0 26px;
+  width: var(--goose-editor-toolbar-control-size);
+  min-width: var(--goose-editor-toolbar-control-size);
+  height: var(--goose-editor-toolbar-control-size);
+  flex: 0 0 var(--goose-editor-toolbar-control-size);
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 6px;
-  background: transparent;
+  border-radius: var(--goose-control-radius);
   padding: 0;
-  color: hsl(var(--foreground));
   transition:
-    background-color 120ms ease-out,
-    color 120ms ease-out;
-}
-
-.goose-block-toolbar-control:not(:disabled):not([aria-disabled="true"]):hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-  outline: 1px solid var(--goose-interactive-hover-border);
-  outline-offset: -1px;
-}
-
-.goose-block-toolbar-control:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
+    background-color var(--goose-control-motion-duration) ease-out,
+    color var(--goose-control-motion-duration) ease-out;
 }
 
 .goose-block-toolbar-control svg {
-  width: 14px;
-  height: 14px;
+  width: var(--goose-control-icon-size);
+  height: var(--goose-control-icon-size);
 }
 
 .goose-block-toolbar-separator {
@@ -76,15 +62,13 @@
 
 .goose-link-toolbar-control {
   display: inline-flex;
-  height: calc(26px * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
   align-items: center;
   justify-content: center;
   gap: calc(4px * var(--editor-ui-scale, 1));
   border: 0;
-  border-radius: calc(6px * var(--editor-ui-scale, 1));
-  background: transparent;
+  border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
   padding: 0 calc(8px * var(--editor-ui-scale, 1));
-  color: hsl(var(--foreground));
   font-size: calc(12px * var(--editor-ui-scale, 1));
   font-weight: 500;
   line-height: 1;
@@ -92,44 +76,28 @@
   cursor: pointer;
   box-shadow: none;
   transition:
-    background-color 120ms ease-out,
-    color 120ms ease-out;
-}
-
-.goose-link-toolbar-control:not(:disabled):not([aria-disabled="true"]):hover {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-  outline: 1px solid var(--goose-interactive-hover-border);
-  outline-offset: -1px;
-}
-
-.goose-link-toolbar-control:focus-visible {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
+    background-color var(--goose-control-motion-duration) ease-out,
+    color var(--goose-control-motion-duration) ease-out;
 }
 
 .goose-link-toolbar-control svg {
-  width: calc(14px * var(--editor-ui-scale, 1));
-  height: calc(14px * var(--editor-ui-scale, 1));
+  width: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
 }
 
 .goose-link-toolbar-control-danger {
   color: var(--goose-color-danger);
 }
 
-.goose-link-toolbar-control-danger:hover {
-  background: var(--goose-color-danger-subtle-bg);
-  color: var(--goose-color-danger);
-}
-
 .goose-link-toolbar-input {
-  height: calc(28px * var(--editor-ui-scale, 1));
-  border-radius: calc(6px * var(--editor-ui-scale, 1));
+  --goose-control-radius: var(--goose-field-radius);
+  height: calc(var(--goose-editor-dock-control-size) * var(--editor-ui-scale, 1));
+  border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
   font-size: calc(12px * var(--editor-ui-scale, 1));
 }
 
 .goose-link-toolbar-form-button {
-  height: calc(28px * var(--editor-ui-scale, 1));
+  height: calc(var(--goose-editor-dock-control-size) * var(--editor-ui-scale, 1));
   padding-inline: calc(8px * var(--editor-ui-scale, 1));
   font-size: calc(12px * var(--editor-ui-scale, 1));
 }

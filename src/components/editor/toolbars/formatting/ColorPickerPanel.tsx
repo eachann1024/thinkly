@@ -48,15 +48,16 @@ export function ColorPickerPanel({
         <div className="goose-color-picker-title font-semibold text-muted-foreground">
           文本颜色
         </div>
-        <div className="goose-color-picker-grid grid">
+        <div className="goose-color-picker-grid goose-list-group grid" data-goose-layout="grid">
           {TEXT_COLORS.map((item, index) => (
             <Button
               key={item.color}
+              aria-pressed={isColorSwatchSelected(currentTextColor, item.color)}
               type="button"
               variant="ghost"
               size="icon"
               className={cn(
-                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0  ",
                 isColorSwatchSelected(currentTextColor, item.color)
                   ? "bg-accent border-primary/20 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.03)]"
                   : "",
@@ -90,15 +91,16 @@ export function ColorPickerPanel({
         <div className="goose-color-picker-title font-semibold text-muted-foreground">
           背景颜色
         </div>
-        <div className="goose-color-picker-grid goose-color-picker-grid-last grid">
+        <div className="goose-color-picker-grid goose-color-picker-grid-last goose-list-group grid" data-goose-layout="grid">
           {HIGHLIGHT_COLORS.map((item, index) => (
             <Button
               key={item.color}
+              aria-pressed={isColorSwatchSelected(currentBgColor, item.color)}
               type="button"
               variant="ghost"
               size="icon"
               className={cn(
-                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0 hover:border-border/80 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0 hover:border-border/80  ",
                 isColorSwatchSelected(currentBgColor, item.color)
                   ? "border-primary"
                   : "",

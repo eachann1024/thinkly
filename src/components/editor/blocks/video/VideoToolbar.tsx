@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import {
   AlignCenter,
   AlignLeft,
@@ -53,7 +54,7 @@ function VideoToolButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
+        <EditorAction
           type="button"
           aria-label={label}
           aria-pressed={pressed}
@@ -61,7 +62,7 @@ function VideoToolButton({
           className={cn(toolButtonClass, className)}
         >
           {children}
-        </button>
+        </EditorAction>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={tooltipSideOffset}>
         {label}

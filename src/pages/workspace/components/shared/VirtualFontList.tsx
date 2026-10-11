@@ -1,8 +1,8 @@
+import { ListRow } from "@/components/ui/list-row";
 import { useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import { Check } from "@/components/ui/icons";
 import { toCssFontFamily } from "@/lib/fontLoader";
-import { cn } from "@/lib/utils";
 
 export type FontListOption = { family: string | null; label: string };
 const ROW_HEIGHT = 34;
@@ -99,7 +99,7 @@ export function VirtualFontList({
       data-font-preview={options[activeIndex]?.family ?? ""}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="overflow-y-auto overscroll-contain outline-none"
+      className="goose-virtual-list overflow-y-auto overscroll-contain"
       style={{
         height: Math.min(options.length * ROW_HEIGHT, 320),
         maxHeight: "calc(var(--goose-popover-available-height, 332px) - 12px)",
@@ -110,12 +110,15 @@ export function VirtualFontList({
           const option = options[row.index];
           const selected = option.family === value;
           return (
-            <button
+            <ListRow
               key={option.family ?? "__system__"}
               id={`${id}-${row.index}`}
               type="button"
               role="option"
               aria-selected={selected}
+              data-selected={selected || undefined}
+              data-keyboard-active={row.index === activeIndex || undefined}
+              data-goose-row-inset=""
               aria-setsize={options.length}
               aria-posinset={row.index + 1}
               tabIndex={-1}
@@ -123,10 +126,7 @@ export function VirtualFontList({
               onPointerMove={() => setActiveFamily(option.family)}
               onPointerDown={(event) => event.preventDefault()}
               onClick={() => onConfirm(option.family)}
-              className={cn(
-                "absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 rounded-lg px-2 text-left text-[13px] outline-none",
-                row.index === activeIndex && "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]",
-              )}
+              className="goose-list-row absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 px-2 text-left text-[13px]"
               style={{
                 height: ROW_HEIGHT,
                 transform: `translateY(${row.start}px)`,
@@ -137,7 +137,7 @@ export function VirtualFontList({
             >
               <span className="min-w-0 flex-1 truncate">{option.label}</span>
               {selected && <Check aria-hidden="true" className="size-4 shrink-0" />}
-            </button>
+            </ListRow>
           );
         })}
       </div>

@@ -1,3 +1,4 @@
+import { ListRow } from "@/components/ui/list-row";
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { FileText } from "@/components/ui/icons";
@@ -113,8 +114,8 @@ function OutlineTreeNode({
   return (
     <div>
       <MainTreeRowShell
-        active={isActive || isEditorCollapsed}
-        hovered={!isActive && !isEditorCollapsed && hovered}
+        active={isActive}
+        hovered={!isActive && hovered}
         className="outline-heading-row text-foreground"
         data-collapsed={isEditorCollapsed ? "true" : undefined}
         style={
@@ -139,7 +140,8 @@ function OutlineTreeNode({
           expanded={!isOutlineCollapsed}
           onToggle={toggleOutline}
         />
-        <button
+        <ListRow
+          data-goose-row-hover="managed"
           type="button"
           onClick={() => onHeadingClick(heading.id)}
           aria-current={isActive ? "location" : undefined}
@@ -151,7 +153,7 @@ function OutlineTreeNode({
           )}
         >
           <span className="block truncate">{heading.text}</span>
-        </button>
+        </ListRow>
       </MainTreeRowShell>
       {heading.children.length > 0 && !isOutlineCollapsed ? (
         <div>

@@ -23,7 +23,7 @@ export function HistoryToolbar() {
         variant="secondary"
         size="sm"
         aria-label="返回编辑页面"
-        className="history-secondary-control h-8 px-3 text-xs gap-1.5 text-foreground shadow-none transition-[background-color,color,transform] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] active:translate-y-px active:bg-[var(--goose-interactive-selected)] active:text-[var(--goose-interactive-selected-fg)]"
+        className="history-secondary-control h-8 px-3 text-xs gap-1.5 shadow-none"
         onClick={exit}
       >
         <GooseIcons.ArrowLeft className="h-3.5 w-3.5" />
@@ -50,7 +50,7 @@ export function HistoryToolbar() {
                 : "还原此版本"
           }
           aria-busy={isRestoring || selectedStatus === "loading" || undefined}
-          className="history-primary-control h-7 shrink-0 px-3 text-xs transition-[background-color,box-shadow,transform] hover:bg-[var(--goose-primary-hover-bg)] active:translate-y-px active:bg-[var(--goose-primary-active-bg)] active:shadow-none"
+          className="history-primary-control h-7 shrink-0 px-3 text-xs"
           disabled={
             !selectedVersionId || selectedStatus !== "ready" || isRestoring
           }

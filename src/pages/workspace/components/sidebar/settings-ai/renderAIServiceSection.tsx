@@ -88,7 +88,7 @@ export function renderAIServiceSection(
                   variant="outline"
                   size="sm"
                   disabled={savingCustomConfig || testingConnection}
-                  className="min-w-[200px] justify-between rounded-[10px] px-2.5"
+                  className="min-w-[200px] justify-between rounded-[var(--goose-control-radius)] px-2.5"
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <ProviderIconTile providerId={providerId} size="sm" />
@@ -105,7 +105,7 @@ export function renderAIServiceSection(
                       key={option.id}
                       onSelect={() => handleProviderChange(option.id)}
                       className={cn(
-                        "cursor-pointer gap-2.5 rounded-[10px] px-2 py-2",
+                        "cursor-pointer gap-2.5 rounded-[var(--goose-control-radius)] px-2 py-2",
                         selected &&
                           "bg-[var(--goose-interactive-selected)] text-foreground",
                       )}

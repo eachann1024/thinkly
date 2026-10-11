@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isElectronHost } from "@/lib/local-vault";
 
@@ -55,7 +56,7 @@ export function PageEmptyState() {
               const Icon = action.icon;
               const isAi = action.variant === "ai";
               return (
-                <button
+                <Button contentStyle="preserve" variant="ghost" size={null}
                   key={action.key}
                   onClick={() => {
                     void action.onClick();
@@ -64,7 +65,7 @@ export function PageEmptyState() {
                   onPointerMove={isAi ? aiTilt.onPointerMove : undefined}
                   onPointerLeave={isAi ? aiTilt.onPointerLeave : undefined}
                   className={cn(
-                    "group relative cursor-pointer rounded-[12px] md:rounded-[14px] border border-transparent bg-[hsl(var(--goose-editor-bg))] p-4 sm:p-5 md:p-6 text-left shadow-[0_8px_22px_rgba(15,23,42,0.06)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:bg-[var(--goose-interactive-hover)] hover:border-[hsl(var(--border))] hover:shadow-[0_16px_36px_rgba(15,23,42,0.12)] dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--goose-selected-bg))] dark:shadow-[0_10px_28px_rgba(2,6,23,0.35)] dark:hover:bg-[var(--goose-interactive-hover)] dark:hover:border-[var(--goose-interactive-hover-border)] dark:hover:shadow-[0_16px_34px_rgba(2,6,23,0.55)]",
+                    "block goose-interactive group relative cursor-pointer rounded-[var(--goose-control-radius)] border border-border bg-background p-4 sm:p-5 md:p-6 text-left shadow-[var(--goose-menu-shadow)] transition-colors duration-[var(--goose-control-motion-duration)]",
                     isAi && "page-empty-ai-card",
                   )}
                   style={isAi ? aiTilt.tiltStyle : undefined}
@@ -74,28 +75,28 @@ export function PageEmptyState() {
                       "w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-[9px] md:rounded-[10px] flex items-center justify-center mb-3 sm:mb-4 transition-[background-color,box-shadow,transform] duration-200 ease-out",
                       isAi
                         ? "page-empty-ai-chip"
-                        : "bg-[hsl(var(--goose-selected-bg))] group-hover:scale-105 group-hover:bg-[var(--goose-interactive-selected)] group-hover:shadow-[0_8px_18px_rgba(15,23,42,0.08)] dark:bg-[var(--goose-interactive-selected)] dark:shadow-[0_8px_18px_rgba(37,99,235,0.18)] dark:group-hover:bg-[var(--goose-interactive-selected)] dark:group-hover:shadow-[0_10px_22px_rgba(37,99,235,0.28)]",
+                        : "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]",
                     )}
                   >
                     {isAi ? <AiCrystalFx /> : null}
                     <Icon
                       className={cn(
-                        "w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-muted-foreground transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] dark:text-[var(--goose-interactive-selected-fg)]",
+                        "w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-muted-foreground transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] group-focus-within:text-[var(--goose-interactive-hover-fg)]",
                         isAi && "page-empty-ai-icon",
                       )}
                     />
                   </div>
                   <h3
                     className={cn(
-                      "text-base sm:text-lg font-semibold text-foreground mb-1.5 sm:mb-2 text-left transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] dark:text-foreground",
+                      "text-base sm:text-lg font-semibold text-foreground mb-1.5 sm:mb-2 text-left transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] group-focus-within:text-[var(--goose-interactive-hover-fg)]",
                     )}
                   >
                     {action.title}
                   </h3>
-                  <p className="hidden min-[420px]:block text-xs sm:text-sm text-muted-foreground text-left leading-relaxed transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] dark:text-muted-foreground">
+                  <p className="hidden min-[420px]:block text-xs sm:text-sm text-muted-foreground text-left leading-relaxed transition-colors group-hover:text-[var(--goose-interactive-hover-fg)] group-focus-within:text-[var(--goose-interactive-hover-fg)]">
                     {action.description}
                   </p>
-                </button>
+                </Button>
               );
             })}
           </div>

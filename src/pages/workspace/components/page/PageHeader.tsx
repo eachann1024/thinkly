@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { Page } from "@/types";
 import type { NotebookAiLayoutMode } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
@@ -63,7 +64,7 @@ export function PageHeader({
     Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
 
   const actionButtonClass =
-    "inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] aria-pressed:bg-[var(--goose-interactive-selected)] aria-pressed:text-[var(--goose-interactive-selected-fg)] aria-pressed:hover:bg-[var(--goose-interactive-selected)] aria-pressed:hover:text-[var(--goose-interactive-hover-fg)]";
+    "inline-flex items-center justify-center text-muted-foreground ";
 
   return (
     <div
@@ -93,19 +94,17 @@ export function PageHeader({
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
+                <IconButton size="icon" tone="muted"
                   type="button"
-                  variant="ghost"
-                  size="icon"
                   className={cn(
-                    "h-8 w-8 shrink-0 rounded-[8px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                    "shrink-0 text-muted-foreground ",
                     "sidebar-toggle-button",
                   )}
                   onClick={toggleSidebarCollapsed}
                   aria-label="展开侧栏"
                 >
                   <GooseIcons.PanelLeftOpen className="h-4 w-4" />
-                </Button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
@@ -161,7 +160,7 @@ export function PageHeader({
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <IconButton size="icon" tone="muted"
                   type="button"
                   className={cn(
                     "ai-icon-button",
@@ -174,7 +173,7 @@ export function PageHeader({
                   aria-pressed={aiPanelOpen}
                 >
                   <Sparkles className="h-4 w-4" />
-                </button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
@@ -195,16 +194,14 @@ export function PageHeader({
             <TooltipProvider delayDuration={600}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <IconButton size="icon" tone="muted"
                     onClick={onRestore}
                     type="button"
                     aria-label="恢复页面"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-[8px] bg-[var(--goose-interactive-selected)] text-[hsl(var(--foreground))] transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                    className=""
                   >
                     <GooseIcons.RotateCcw className="h-4 w-4" />
-                  </Button>
+                  </IconButton>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">恢复页面</TooltipContent>
               </Tooltip>
@@ -212,15 +209,14 @@ export function PageHeader({
             <TooltipProvider delayDuration={600}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <IconButton size="icon" tone="danger"
                     onClick={onDelete}
                     type="button"
                     aria-label="永久删除页面"
-                    size="icon"
-                    className="h-8 w-8 rounded-[8px] bg-[var(--goose-interactive-selected)] text-[hsl(var(--foreground))] transition-colors hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger)]"
+                    className=""
                   >
                     <GooseIcons.Trash2 className="h-4 w-4" />
-                  </Button>
+                  </IconButton>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">永久删除</TooltipContent>
               </Tooltip>

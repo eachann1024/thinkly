@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import type { useAppearanceSettings } from "./useAppearanceSettings";
@@ -124,7 +125,7 @@ export function renderAppearanceTheme(
             };
 
             const optionButton = (
-              <button
+              <Button contentStyle="preserve" variant="ghost" size="sm"
                 key={option.value}
                 ref={(node) => {
                   accentRefs.current[index] = node;
@@ -178,7 +179,7 @@ export function renderAppearanceTheme(
                     selected ? "opacity-100" : "opacity-0",
                   )}
                 />
-              </button>
+              </Button>
             );
             return option.fullTheme ? (
               <Tooltip key={option.value}>

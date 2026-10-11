@@ -1,9 +1,10 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import type { LinkToolbarProps } from "@blocknote/react";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/editor/ui/input";
+import { Button } from "@/components/editor/ui/button";
 import { useEditorPlatform } from "@/components/editor/platform/context";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 
@@ -154,16 +155,16 @@ export function EditorLinkToolbar({
       }}
     >
       {editor.isEditable ? (
-        <button
+        <EditorAction
           type="button"
           onClick={startEditing}
           className="goose-link-toolbar-control"
         >
           <GooseIcons.Pencil />
           编辑
-        </button>
+        </EditorAction>
       ) : null}
-      <button
+      <EditorAction
         type="button"
         onMouseDown={(event) => {
           if (event.button !== 0) return;
@@ -181,16 +182,17 @@ export function EditorLinkToolbar({
       >
         <GooseIcons.ExternalLink />
         打开
-      </button>
+      </EditorAction>
       {editor.isEditable ? (
-        <button
+        <EditorAction
           type="button"
           onClick={handleDelete}
+          variant="destructive"
           className="goose-link-toolbar-control goose-link-toolbar-control-danger"
         >
           <GooseIcons.Unlink />
           移除
-        </button>
+        </EditorAction>
       ) : null}
     </div>
   );

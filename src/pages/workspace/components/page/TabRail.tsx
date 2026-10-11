@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { useTabs } from "@/stores/useTabs";
@@ -154,16 +155,14 @@ export function TabRail({
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
+                <IconButton size="icon" tone="muted"
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 rounded-[8px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                  className="shrink-0 text-muted-foreground "
                   onClick={onOpenSearch}
                   aria-label="新标签页"
                 >
                   <GooseIcons.Plus className="h-4 w-4" />
-                </Button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <span>新标签页</span>
@@ -173,16 +172,16 @@ export function TabRail({
           {isOverflowing && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
+                <IconButton size="sm" tone="muted"
                   type="button"
-                  className="outline-none inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] data-[state=open]:bg-[var(--goose-interactive-selected)] data-[state=open]:text-[var(--goose-interactive-selected-fg)]"
+                  className="inline-flex shrink-0 items-center justify-center text-muted-foreground "
                   aria-label="全部标签页"
                 >
                   <GooseIcons.ChevronDown
                     className="h-3.5 w-3.5"
                     strokeWidth={1.75}
                   />
-                </button>
+                </IconButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-[220px] outline-none"

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
 import { getQuickNoteSlotName, QUICKNOTE_SLOTS } from "@/stores/useQuickNote";
 import { type QuickNoteSlotSwitcherProps } from "./slot-switcher/shared";
@@ -25,6 +26,7 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
       className="quicknote-slot-switcher"
       data-scrubbing={scrubbing ? "true" : "false"}
       role="radiogroup"
+      data-goose-slot="choice-group"
       aria-label="切换便签"
       style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
       onMouseLeave={onRootPointerLeave}
@@ -35,24 +37,26 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
         const occupied = occupiedSlots[slot];
         const slotName = getQuickNoteSlotName(slot, slotNames);
         return (
-          <button
+          <Button contentStyle="preserve" variant="ghost"
             key={slot}
             type="button"
             role="radio"
+            data-goose-slot="choice-row"
             aria-checked={active}
             aria-label={`${slotName}${occupied ? "，有内容" : "，空白"}`}
             title={`${slotName}；再次点击可改名`}
             tabIndex={active ? 0 : -1}
             data-slot={slot}
             data-active={active ? "true" : "false"}
+            data-selected={active || undefined}
             data-occupied={occupied ? "true" : "false"}
-            className="quicknote-slot-btn"
+            className={`quicknote-slot-btn ${active ? "goose-interactive--selected" : ""}`}
             onPointerDown={(e) => onPointerDown(e, slot)}
             // 选择由 pointer 提交；避免 click 与拖动松手重复触发
             onClick={(e) => e.preventDefault()}
           >
             <span className="quicknote-slot-btn-label">{slot}</span>
-          </button>
+          </Button>
         );
       })}
     </div>

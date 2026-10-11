@@ -1,3 +1,5 @@
+import { IconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
 /** 消息列表：线程布局与时间分隔，渲染职责在 messages/。 */
 import { useMemo, useState } from "react";
 import { ArrowDown } from "@/components/ui/icons";
@@ -107,18 +109,18 @@ export function ChatMessages({
             <p className="notebook-ai-empty-description text-muted-foreground">
               选一段文字，或直接说说想怎么改。
             </p>
-            <div className="notebook-ai-empty-suggestions flex flex-col">
+            <div className="goose-list-layout notebook-ai-empty-suggestions flex flex-col">
               {["润色开头", "梳理结构"].map((text) => (
-                <button
+                <Button contentStyle="preserve" variant="ghost" size={null}
                   key={text}
                   type="button"
-                  className="notebook-ai-empty-suggestion"
+                  className="goose-list-row notebook-ai-empty-suggestion"
                   onClick={() => onEmptySuggestion?.(text)}
                   aria-label={`发送建议：${text}`}
                 >
                   <span>{text}</span>
                   <span aria-hidden="true">→</span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -164,8 +166,8 @@ export function ChatMessages({
               }}
             </ThreadPrimitive.Messages>
             <ThreadPrimitive.ViewportFooter className="pointer-events-none sticky bottom-[calc(var(--ai-composer-float-pad,7.5rem)+12px)] z-10 flex h-0 justify-center overflow-visible">
-              <ThreadPrimitive.ScrollToBottom
-                className="pointer-events-auto flex h-8 w-8 -translate-y-10 items-center justify-center rounded-control border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] dark:hover:bg-[var(--goose-interactive-hover)] disabled:hidden"
+              <ThreadPrimitive.ScrollToBottom render={<IconButton size="icon" tone="muted" />}
+                className="pointer-events-auto -translate-y-10 border border-border bg-background text-muted-foreground shadow-sm disabled:hidden"
                 aria-label="滚动到底部"
                 title="滚动到底部"
               >

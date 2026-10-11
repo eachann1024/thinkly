@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { Check } from "@/components/ui/icons";
 export function MdInput({
@@ -15,7 +16,7 @@ export function MdInput({
       </span>
     );
   }
-  return <input {...props} />;
+  return <input {...props} className={cn("goose-field", props.className)} />;
 }
 
 /**
