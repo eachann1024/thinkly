@@ -47,7 +47,7 @@ export function useComposerInputHandle(
       focus: () => {
         const el = editorRef.current;
         if (!el) return;
-        el.focus();
+        el.focus({ preventScroll: true });
         placeCaretInEditor(el, false);
       },
       clear: () => {
