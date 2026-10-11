@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { ArrowLeft, ChevronDown, ChevronUp, X } from "@/components/ui/icons";
 import type { EditorRef } from "@/components/editor/core/Editor";
@@ -12,7 +13,9 @@ import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
   pageId: string; focused: boolean; editorRef: RefObject<EditorRef | null>; scrollRef: RefObject<HTMLDivElement | null>;
 }) {
-  const session = useSearchSession();
+  const session = useSearchSession(useShallow(s => ({
+    open: s.open, query: s.query, scope: s.scope, requestNonce: s.requestNonce, originPageId: s.originPageId,
+  })));
   const page = usePages(s => s.pages[pageId]);
   const pages = usePages(s => s.pages);
   const notebooks = useNotebooks(s => s.notebooks);
@@ -22,10 +25,11 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
   const [pathOpen, setPathOpen] = useState(false);
   const frame = useRef(0);
   const handled = useRef(0);
+  const previousPage = useRef<string | null>(null);
   const visible = session.open && focused;
   const key = searchMemoryKey(pageId, session.query, session.scope);
   const close = () => {
-    session.closeSearch();
+    useSearchSession.getState().closeSearch();
     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.sidebar-mode-rail-button[aria-label="搜索"]')?.focus({ preventScroll: true }));
   };
   const locate = () => {
@@ -48,7 +52,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
     }
     cancelAnimationFrame(frame.current);
     frame.current = requestAnimationFrame(() => {
-      if (!useSearchSession.getState().open || editor._tiptapEditor.isDestroyed) return;
+      if (!useSearchSession.getState().open || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const scroller = scrollRef.current;
       const target = (editor.prosemirrorView.dom as HTMLElement).querySelector<HTMLElement>(".goose-search-session-match--current");
       if (!scroller || !target) return;
@@ -59,11 +63,16 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
   const step = (delta: number) => {
     const editor = editorRef.current?.editor;
     if (!editor) return;
+    const latest = useSearchSession.getState();
+    const latestKey = searchMemoryKey(pageId, latest.query, latest.scope);
+    if (getSearchSessionHighlightState(editor)?.query !== latest.query.trim()) {
+      setSearchSessionHighlightQuery(editor, latest.query, false, latest.memories[latestKey] ?? 0);
+    }
     const value = getSearchSessionHighlightState(editor);
     if (!value?.matches.length) return;
     const next = (value.current + delta + value.matches.length) % value.matches.length;
     selectSearchSessionHighlight(editor, next, false);
-    session.rememberMatch(key, next);
+    useSearchSession.getState().rememberMatch(latestKey, next);
     setMessage(delta > 0 && next === 0 ? "已回到第一处" : delta < 0 && next === value.matches.length - 1 ? "已回到最后一处" : "");
     locate();
   };
@@ -75,13 +84,13 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
       if (!editor || editor._tiptapEditor.isDestroyed) return;
       // Editor stamps this only after replacing the document for this page.
       if (editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
+      const latest = useSearchSession.getState();
+      if (latest.query !== session.query || latest.scope !== session.scope || latest.open !== session.open) return;
       const previous = getSearchSessionHighlightState(editor);
       const query = visible ? session.query.trim() : "";
       if (previous?.query !== query) {
-        setSearchSessionHighlightQuery(editor, query, false);
         const saved = useSearchSession.getState().memories[key] ?? 0;
-        const total = getSearchSessionHighlightState(editor)?.matches.length ?? 0;
-        if (total) selectSearchSessionHighlight(editor, Math.min(saved, total - 1), false);
+        setSearchSessionHighlightQuery(editor, query, false, saved);
       }
       const state = getSearchSessionHighlightState(editor);
       setCount(state?.matches.length ?? 0); setCurrent((state?.current ?? -1) + 1);
@@ -107,10 +116,16 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
     const unsubscribe = subscribeSearchSessionHighlight((_state, view) => {
       if (editorRef.current?.editor?.prosemirrorView === view) refresh();
     });
-    const start = requestAnimationFrame(apply);
-    window.addEventListener("goose-note:search-editor-ready", apply);
-    return () => { cancelled = true; cancelAnimationFrame(start); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", apply); };
-  }, [visible, pageId, session.query, session.requestNonce, key, editorRef, scrollRef]);
+    const navigation = useSearchSession.getState();
+    const immediate = !visible || !session.query.trim() || previousPage.current !== pageId ||
+      (navigation.targetPageId === pageId && navigation.requestNonce !== handled.current);
+    previousPage.current = pageId;
+    const timer = window.setTimeout(apply, immediate ? 0 : 120);
+    const ready = () => { window.clearTimeout(timer); apply(); };
+    if (immediate) { window.clearTimeout(timer); apply(); }
+    window.addEventListener("goose-note:search-editor-ready", ready);
+    return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };
+  }, [visible, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef]);
   useEffect(() => () => {
     const editor = editorRef.current?.editor;
     if (editor && !editor._tiptapEditor.isDestroyed) clearSearchSessionHighlight(editor);
@@ -139,7 +154,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
       <span role="status">{count ? `${current} / ${count} 处` : titleOnly ? "标题匹配" : "正文无匹配"}</span>
       <button aria-label="上一处匹配" disabled={!count} onClick={() => step(-1)}><ChevronUp size={16}/></button><button aria-label="下一处匹配" disabled={!count} onClick={() => step(1)}><ChevronDown size={16}/></button>
       <span className="search-match-message" aria-live="polite">{message}</span>
-      <button disabled={!session.originPageId || !pages[session.originPageId]} onClick={() => session.originPageId && session.targetPage(session.originPageId, true, session.originScrollTop)}>返回起始笔记</button>
+      <button disabled={!session.originPageId || !pages[session.originPageId]} onClick={() => session.originPageId && useSearchSession.getState().targetPage(session.originPageId, true, useSearchSession.getState().originScrollTop)}>返回起始笔记</button>
       <button aria-label="退出搜索" onClick={close}><X size={16}/></button>
     </div>
   </>;
