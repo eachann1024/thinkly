@@ -3,7 +3,6 @@ import { createImageBlockConfig, imageParse } from "@blocknote/core";
 import {
   createReactBlockSpec,
   useUploadLoading,
-  ImagePreview,
   ImageToExternalHTML,
   ResizableFileBlockWrapper,
 } from "@blocknote/react";
@@ -15,6 +14,7 @@ import {
   imageBlockWithoutGeneratedCaption,
   normalizeParsedImageProps,
 } from "./imageCaption";
+import { ResolvedImagePreview } from "./ResolvedImagePreview";
 
 function CustomImageBlockContent({
   block,
@@ -46,7 +46,7 @@ function CustomImageBlockContent({
 
   return (
     <ResizableFileBlockWrapper block={displayBlock} editor={editor}>
-      <ImagePreview block={displayBlock} editor={editor} />
+      <ResolvedImagePreview block={displayBlock} editor={editor} />
     </ResizableFileBlockWrapper>
   );
 }

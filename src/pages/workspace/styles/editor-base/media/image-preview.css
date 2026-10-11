@@ -1,0 +1,42 @@
+.goose-image-preview {
+  position: relative;
+  max-width: 100%;
+}
+
+.goose-image-preview__status {
+  display: flex;
+  min-height: 128px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 8px;
+  background: var(--goose-block-subtle-bg);
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+
+.goose-image-preview[data-image-state="loading"] > img {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.goose-image-preview__retry {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font: inherit;
+  cursor: pointer;
+}
+
+.goose-image-preview__retry:hover {
+  background: var(--goose-interactive-hover);
+}
+
+.goose-image-preview__retry:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
