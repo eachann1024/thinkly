@@ -76,6 +76,8 @@ function recomputeAfterDocChange(prev: FindState, doc: import("prosemirror-model
   return { ...prev, matches, current };
 }
 
+const decorationCache = new WeakMap<object, WeakMap<import("prosemirror-model").Node, DecorationSet>>();
+
 export const findInPagePlugin = new Plugin<FindState>({
   key: findInPageKey,
   state: {
@@ -112,16 +114,18 @@ export const findInPagePlugin = new Plugin<FindState>({
   props: {
     decorations(state) {
       const value = findInPageKey.getState(state);
-      if (!value || value.matches.length === 0) return null;
-      const decorations: Decoration[] = value.matches.map((match, idx) =>
+      if (!value?.matches.length) return null;
+      let documents = decorationCache.get(value);
+      if (!documents) { documents = new WeakMap(); decorationCache.set(value, documents); }
+      const cached = documents.get(state.doc);
+      if (cached) return cached;
+      const decorations = DecorationSet.create(state.doc, value.matches.map((match, idx) =>
         Decoration.inline(match.from, match.to, {
-          class:
-            idx === value.current
-              ? "goose-find-match goose-find-match--current"
-              : "goose-find-match",
+          class: idx === value.current ? "goose-find-match goose-find-match--current" : "goose-find-match",
         }),
-      );
-      return DecorationSet.create(state.doc, decorations);
+      ));
+      documents.set(state.doc, decorations);
+      return decorations;
     },
   },
 });

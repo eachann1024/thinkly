@@ -1,20 +1,16 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useNotebooks } from "@/stores/useNotebooks";
-import { isPinyinQuery, pinyinMatchIndices } from "@/lib/pinyin-search";
-import { compareTitleMatchRank } from "./commandSearchRank";
-import { searchIndex } from "./pageSearchIndex";
+import { computeCommandMatches, type CommandMatches } from "./cooperativeCommandSearch";
 import {
   filterCatalogByScope,
   getSearchCatalog,
   syncSearchCatalog,
 } from "./pageSearchCatalog";
 
-import { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 export { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 
-import { getSearchBodyText } from "./searchBodyCache";
 export { getCachedText, getSearchBodyText } from "./searchBodyCache";
 
 export interface SearchResultPage extends Page {
@@ -49,7 +45,8 @@ export function useCommandSearch({
   searchAllNotebooks,
 }: CommandSearchState) {
   const [searchQuery, setSearchQuery] = useState("");
-  const deferredQuery = useDeferredValue(searchQuery);
+  // Matching is scheduled outside render; this compatibility field follows input.
+  const deferredQuery = searchQuery;
   const notebooks = useNotebooks((state) => state.notebooks);
   const [displayLimit, setDisplayLimit] = useState(SEARCH_RESULT_PAGE_SIZE);
   const [removedRecentIds, setRemovedRecentIds] = useState<string[]>(() => {
@@ -121,100 +118,69 @@ export function useCommandSearch({
     [pages],
   );
 
-  const allMatches = useMemo(() => {
-    const query = deferredQuery.trim().toLowerCase();
+  const [completed, setCompleted] = useState<{
+    query: string;
+    pages: CommandSearchState["pages"];
+    scope: Page[];
+    matches: CommandMatches | null;
+    error: string | null;
+  } | null>(null);
+  const latest = useRef({ query: searchQuery, pages, scope: filteredPages });
+  useLayoutEffect(() => {
+    latest.current = { query: searchQuery, pages, scope: filteredPages };
+  }, [searchQuery, pages, filteredPages]);
 
-    if (!query) {
-      return { all: filteredPages as SearchResultPage[], recentCandidates: filteredPages as SearchResultPage[] };
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setCompleted(null);
+      return;
     }
+    const controller = new AbortController();
+    const snapshot = { query: searchQuery, pages, scope: filteredPages };
+    const isCurrent = () => {
+      const current = latest.current;
+      return !controller.signal.aborted && current.query === snapshot.query &&
+        current.pages === snapshot.pages && current.scope === snapshot.scope;
+    };
+    // Let the input paint before the first scan, including the index query.
+    const timer = setTimeout(() => {
+      void computeCommandMatches(filteredPages, searchQuery, controller.signal)
+        .then((matches) => {
+          if (!matches || !isCurrent()) return;
+          setCompleted({ ...snapshot, matches, error: null });
+        })
+        .catch((error: unknown) => {
+          if (!isCurrent()) return;
+          console.error("Command search failed", error);
+          setCompleted({ ...snapshot, matches: null, error: "搜索失败，请修改关键词后重试" });
+        });
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [filteredPages, pages, searchQuery]);
 
-    // 构建 filteredPages 的 id 集合（已按 notebook/trash 过滤）
-    const filteredSet = new Map<string, Page>();
-    for (const page of filteredPages) {
-      filteredSet.set(page.id, page);
-    }
-
-    // 倒排索引查询，返回按相关度排序的 id 列表
-    const indexHitOrder = searchIndex(deferredQuery.trim());
-    const exactHitIds = new Set<string>();
-    for (const [id, page] of filteredSet) {
-      const title = getPageTitle(page);
-      if (countLiteralMatches(title, query) > 0 || countLiteralMatches(getSearchBodyText(page), query) > 0) exactHitIds.add(id);
-    }
-    // Exact literal fallback preserves punctuation queries MiniSearch tokenization can discard.
-    const indexedIds = new Set(indexHitOrder);
-    const orderedHitIds: string[] = [...indexHitOrder, ...[...exactHitIds].filter((id) => !indexedIds.has(id))];
-    const indexHitIds = new Set<string>(orderedHitIds);
-
-    // pinyin 补充命中（倒排索引不含拼音，需额外一轮）
-    const pinyinHitIds = new Set<string>();
-    if (isPinyinQuery(deferredQuery.trim())) {
-      for (const [id, page] of filteredSet) {
-        if (!indexHitIds.has(id)) {
-          const title = getPageTitle(page);
-          if (pinyinMatchIndices(title, deferredQuery.trim()) !== null) {
-            pinyinHitIds.add(id);
-          }
-        }
-      }
-    }
-
-    // 合并命中集（索引在前，拼音补充在后）
-    const matched: SearchResultPage[] = [];
-
-    // 先按索引相关度顺序添加
-    for (const id of orderedHitIds) {
-      const page = filteredSet.get(id);
-      if (!page) continue;
-      const resultPage: SearchResultPage = { ...page };
-      const contentText = getSearchBodyText(page);
-      const title = getPageTitle(page);
-      const snippetResult = getContentSnippet(contentText, query);
-      const titleSnippet = getContentSnippet(title, query);
-      resultPage.literalBodyMatchCount = countLiteralMatches(contentText, query);
-      resultPage.titleMatchCount = countLiteralMatches(title, query);
-      resultPage.matchKind = snippetResult ? "literal" : titleSnippet ? "title" : "token";
-      if (snippetResult) {
-        resultPage.contentSnippet = snippetResult.snippet;
-        resultPage.snippetMatchIndex = snippetResult.matchIndex;
-      } else if (titleSnippet) {
-        resultPage.contentSnippet = titleSnippet.snippet;
-        resultPage.snippetMatchIndex = titleSnippet.matchIndex;
-      } else {
-        resultPage.contentSnippet = contentText.slice(0, 100);
-      }
-      matched.push(resultPage);
-    }
-
-    // 再追加 pinyin 专属命中
-    for (const id of pinyinHitIds) {
-      const page = filteredSet.get(id);
-      if (!page) continue;
-      const pageTitle = getPageTitle(page);
-      const contentText = getSearchBodyText(page);
-      const snippetResult = getContentSnippet(contentText, query);
-      matched.push({
-        ...page,
-        contentSnippet: snippetResult?.snippet ?? contentText.slice(0, 100),
-        snippetMatchIndex: snippetResult?.matchIndex,
-        literalBodyMatchCount: countLiteralMatches(contentText, query),
-        titleMatchCount: countLiteralMatches(pageTitle, query),
-        matchKind: snippetResult ? "literal" : "pinyin",
-      });
-    }
-
-    // 标题全匹配 / 前缀优先，同档保持 MiniSearch 相关度（不要按字母序重排）
-    const all = [...matched].sort((a, b) =>
-      compareTitleMatchRank(getPageTitle(a), getPageTitle(b), query),
-    );
-
-    return { all, recentCandidates: matched };
-  }, [filteredPages, deferredQuery]);
+  const hasQuery = Boolean(searchQuery.trim());
+  const currentCompletion = completed?.query === searchQuery &&
+    completed.pages === pages && completed.scope === filteredPages ? completed : null;
+  const isSearching = hasQuery && !currentCompletion;
+  const allMatches = useMemo<CommandMatches>(() => {
+    if (!hasQuery) return { all: filteredPages, recentCandidates: filteredPages };
+    return currentCompletion?.matches ?? { all: [], recentCandidates: [] };
+  }, [hasQuery, filteredPages, currentCompletion]);
 
   const recent = useMemo(() => {
     const excluded = new Set(removedRecentIds);
-    return allMatches.recentCandidates.filter(page => !excluded.has(page.id))
-      .sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
+    const latestRecent: SearchResultPage[] = [];
+    for (const page of allMatches.recentCandidates) {
+      if (excluded.has(page.id)) continue;
+      const index = latestRecent.findIndex(item => item.updatedAt < page.updatedAt);
+      if (index >= 0) latestRecent.splice(index, 0, page);
+      else if (latestRecent.length < 5) latestRecent.push(page);
+      if (latestRecent.length > 5) latestRecent.pop();
+    }
+    return latestRecent;
   }, [allMatches, removedRecentIds]);
   const searchResults: SearchResults = useMemo(() => {
     const allDisplay = allMatches.all.slice(0, displayLimit);
@@ -229,6 +195,9 @@ export function useCommandSearch({
     getPageBreadcrumb,
     searchQuery,
     deferredQuery,
+    completedQuery: currentCompletion?.matches ? currentCompletion.query : "",
+    searchError: currentCompletion?.error ?? null,
+    isSearching,
     setSearchQuery,
     removeRecent,
     loadMoreResults,

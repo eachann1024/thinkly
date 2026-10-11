@@ -11,7 +11,7 @@ export type SearchSessionHighlightState = {
 };
 
 type Meta =
-  | { type: "set"; query: string }
+  | { type: "set"; query: string; index: number }
   | { type: "select"; index: number }
   | { type: "step"; delta: number }
   | { type: "clear" };
@@ -19,6 +19,8 @@ type Meta =
 const emptyState: SearchSessionHighlightState = { query: "", matches: [], current: -1 };
 export const searchSessionHighlightKey = new PluginKey<SearchSessionHighlightState>("goose-search-session-highlight");
 const subscribers = new Set<(state: SearchSessionHighlightState, view: EditorView) => void>();
+
+const decorationCache = new WeakMap<object, WeakMap<import("prosemirror-model").Node, DecorationSet>>();
 
 export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightState>({
   key: searchSessionHighlightKey,
@@ -29,7 +31,7 @@ export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightSta
       if (meta?.type === "clear") return emptyState;
       if (meta?.type === "set") {
         const matches = collectMatches(nextState.doc, meta.query, false);
-        return { query: meta.query, matches, current: matches.length ? 0 : -1 };
+        return { query: meta.query, matches, current: matches.length ? Math.min(Math.max(meta.index, 0), matches.length - 1) : -1 };
       }
       if (meta?.type === "select") {
         return meta.index >= 0 && meta.index < state.matches.length ? { ...state, current: meta.index } : state;
@@ -49,14 +51,20 @@ export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightSta
     decorations(state) {
       const value = searchSessionHighlightKey.getState(state);
       if (!value?.matches.length) return null;
-      return DecorationSet.create(state.doc, value.matches.map((match, idx) =>
+      let documents = decorationCache.get(value);
+      if (!documents) { documents = new WeakMap(); decorationCache.set(value, documents); }
+      const cached = documents.get(state.doc);
+      if (cached) return cached;
+      const decorations = DecorationSet.create(state.doc, value.matches.map((match, idx) =>
         Decoration.inline(match.from, match.to, {
           class: idx === value.current ? "goose-search-session-match goose-search-session-match--current" : "goose-search-session-match",
         }),
       ));
+      documents.set(state.doc, decorations);
+      return decorations;
     },
   },
-  view(_view: EditorView) {
+  view() {
     let last: SearchSessionHighlightState | null = null;
     return {
       update(view) {
@@ -96,8 +104,8 @@ function dispatch(editor: BlockNoteEditor<any, any, any>, meta: Meta): EditorVie
   return view;
 }
 
-export function setSearchSessionHighlightQuery(editor: BlockNoteEditor<any, any, any>, query: string, scroll = false): void {
-  const view = dispatch(editor, query.trim() ? { type: "set", query: query.trim() } : { type: "clear" });
+export function setSearchSessionHighlightQuery(editor: BlockNoteEditor<any, any, any>, query: string, scroll = false, index = 0): void {
+  const view = dispatch(editor, query.trim() ? { type: "set", query: query.trim(), index } : { type: "clear" });
   if (scroll) scrollToCurrent(view);
 }
 
