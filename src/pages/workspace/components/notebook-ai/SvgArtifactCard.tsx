@@ -1,3 +1,5 @@
+import { Image } from "@/components/ui/icons";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useCallback, useMemo, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { sanitizeSvgMarkup } from "@/lib/notebook-ai/svgSanitizer";
@@ -33,12 +35,11 @@ export function CanvasLoadingCard({ title }: { title?: string }) {
     <div
       className="notebook-ai-canvas-card my-2"
       aria-busy="true"
-      aria-live="polite"
+      aria-label={title?.trim() || "图片生成中"}
     >
-      <div className="notebook-ai-canvas-card-header">
-        <div className="notebook-ai-canvas-card-title">{title?.trim() || "图片"}</div>
+      <div className="notebook-ai-canvas-card-loading">
+        <EmptyState icon={Image} title="正在生成图片" />
       </div>
-      <div className="notebook-ai-canvas-card-loading">正在生成图片</div>
     </div>
   );
 }
@@ -99,7 +100,7 @@ export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps)
         </ArtifactPanZoom>
       ) : (
         <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          图片无法显示
+          <EmptyState icon={Image} title="图片无法显示" />
         </div>
       )}
     </div>

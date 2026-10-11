@@ -9,45 +9,9 @@
   gap: 6px;
 }
 
-.bui-loader-grid {
-  display: grid;
-  flex-shrink: 0;
-  grid-template-columns: repeat(3, 4px);
-  gap: 1.5px;
-}
-
-.bui-loader-cell {
-  width: 4px;
-  height: 4px;
-  border-radius: 1px;
-  background: var(--bui-ink, hsl(var(--foreground)));
-  opacity: 0.15;
-}
-
-.bui-loader-cell--round {
-  border-radius: var(--radius-marker);
-}
-
-.bui-composer-send .bui-loader-grid {
-  grid-template-columns: repeat(3, 4px);
-  gap: 2.5px;
-}
-
-.bui-composer-send .bui-loader-cell {
-  width: 4px;
-  height: 4px;
-  border-radius: var(--radius-marker);
-  background: currentColor;
-}
-
-.bui-loader-cell--on {
-  animation: bui-pixel-on var(--bui-pixel-dur, 650ms) ease-in-out
-    var(--bui-pixel-delay, 0ms) infinite;
-}
-
 .bui-loader-label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--bui-ink-2);
 }
 
