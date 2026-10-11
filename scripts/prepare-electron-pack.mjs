@@ -41,6 +41,7 @@ for (const dir of ["main", "preload", "renderer"]) {
 cpSync(resolve(root, "electron/icons/icon.icns"), resolve(pack, "icon.icns"));
 cpSync(resolve(root, "electron/icons/icon.ico"), resolve(pack, "icon.ico"));
 cpSync(resolve(root, "electron/icons/icon.png"), resolve(pack, "icon.png"));
+cpSync(resolve(root, "electron/installer.nsh"), resolve(pack, "installer.nsh"));
 mkdirSync(resolve(pack, "node_modules"), { recursive: true });
 
 function stripPackJunk(dir) {
@@ -125,6 +126,7 @@ files:
   - "!icon.ico"
   # BrowserWindow 在 Linux/Windows 从 app.asar/icon.png 读取窗口图标，必须保留。
   - "!electron-builder.yml"
+  - "!installer.nsh"
 fileAssociations:
   - ext: md
     name: Markdown
@@ -162,6 +164,7 @@ win:
       arch:
         - x64
 nsis:
+  include: installer.nsh
   oneClick: false
   allowToChangeInstallationDirectory: true
   installerIcon: icon.ico
