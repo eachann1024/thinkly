@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { useCallback, useLayoutEffect, useRef } from "react";
@@ -104,7 +105,7 @@ export function SplitEditorPane({
           <p>找不到这篇笔记</p>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground "
+            className="rounded-lg px-2 py-1 text-xs text-foreground"
             onClick={() => closeSplitPaneFromUi(tabId, leaf.id)}
           >
             关闭此格
@@ -156,15 +157,15 @@ export function SplitEditorPane({
             <ErrorBoundary
               resetKey={leaf.pageId}
               fallback={(_, reset) => (
-                <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
-                  <p>当前格子渲染失败，已阻止整窗白屏。</p>
+                <div className="flex min-h-[260px] items-center justify-center">
+                  <EmptyState title="正文暂时无法显示" role="alert" action={
                   <Button contentStyle="preserve" variant="ghost" size={null}
                     type="button"
                     onClick={reset}
-                    className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground "
+                    className="rounded-lg px-2 py-1 text-xs text-foreground"
                   >
                     重试
-                  </Button>
+                  </Button>} />
                 </div>
               )}
             >
