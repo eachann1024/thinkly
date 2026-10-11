@@ -75,6 +75,11 @@ export function useEditorPresentation(
       onOpenPageRef.current(pageId, wikiTarget, options),
     );
     const rememberLiveSelection = () => {
+      const dom = editor.domElement;
+      // 输入框有自己的选区；不要在每次输入时重新克隆失焦正文留下的旧选区。
+      if (!dom?.contains(document.activeElement)) return;
+      const selection = document.getSelection();
+      if (!selection?.anchorNode || !dom.contains(selection.anchorNode)) return;
       rememberEditorSelectedBlocks(editor);
     };
     const syncSelectionCacheAfterPointer = (event: Event) => {
