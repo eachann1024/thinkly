@@ -82,6 +82,8 @@ export function useWorkspaceLayoutState({
     (s) => s.rightExpandOverride,
   );
 
+  const forceCollapseLeft = useWorkspaceViewport(s => s.forceCollapseLeft);
+
   const showSideAiPanel = isEffectiveRightSidePanelOpen(
     userSideAiPanel,
     forceCollapseRight,
@@ -167,6 +169,7 @@ export function useWorkspaceLayoutState({
     aiFullscreen,
     userSideAiPanel,
     forceCollapseRight,
+    forceCollapseLeft,
     rightExpandOverride,
     showSideAiPanel,
     showFullscreenAi,

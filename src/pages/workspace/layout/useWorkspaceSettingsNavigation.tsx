@@ -20,7 +20,7 @@ export function useWorkspaceSettingsNavigation(
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();
 
   const effectiveSidebarCollapsed = settingsOpen
-    ? !settingsSidebarExpanded
+    ? input.forceCollapseLeft || !settingsSidebarExpanded
     : workspaceSidebarCollapsed;
 
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("appearance");
