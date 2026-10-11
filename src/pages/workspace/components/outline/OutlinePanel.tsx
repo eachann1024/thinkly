@@ -2,6 +2,7 @@ import { ListRow } from "@/components/ui/list-row";
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { FileText } from "@/components/ui/icons";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MainTreeRowShell } from "../sidebar/main-tree/MainTreeRowShell";
 import {
   MAIN_TREE_INDENT,
@@ -27,7 +28,7 @@ export function OutlinePanel({
   onHeadingClick,
   onHeadingToggle,
   emptyMessage = "正文暂无标题",
-  emptyHint = "在正文输入 # 或 ## 即可生成大纲导航",
+  emptyHint = null,
 }: OutlinePanelProps) {
   const itemHeight = useSidebarItemHeight();
   const [locallyCollapsedIds, setLocallyCollapsedIds] = useState<Set<string>>(
@@ -46,17 +47,8 @@ export function OutlinePanel({
   if (headings.length === 0) {
     return (
       <div className="w-full h-full flex flex-col">
-        <div className="flex flex-col items-center gap-3 px-4 py-8 text-center">
-          <FileText className="h-6 w-6 shrink-0 text-muted-foreground" />
-          <div className="flex flex-col gap-1">
-            <p className="text-xs leading-5 text-muted-foreground">{emptyMessage}</p>
-            {emptyHint && (
-              <p className="text-[11px] leading-5 text-muted-foreground">
-                {emptyHint}
-              </p>
-            )}
-          </div>
-        </div>
+        <EmptyState icon={FileText} title={emptyMessage} details={emptyHint || undefined}
+          className="px-4 py-6" />
       </div>
     );
   }

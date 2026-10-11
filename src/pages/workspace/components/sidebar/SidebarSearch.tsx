@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -120,10 +121,10 @@ export function SidebarSearch() {
       <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
       {searchError && <div className="sidebar-search-empty" role="alert">{searchError}</div>}
-      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-empty"><strong>{hasQuery ? `未找到「${session.query.trim()}」相关内容` : "输入关键词开始搜索"}</strong>{hasQuery ? <><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}>清空搜索</Button>{session.scope.kind !== "all" && <Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => session.setScope({ kind: "all" })}>扩大到所有笔记本</Button>}</> : <p>输入标题或记得的内容。</p>}</div>}
+      {!searchError && !loading && !pending && !results.length && <EmptyState className="sidebar-search-empty" title={hasQuery ? "未找到相关笔记" : "输入关键词开始搜索"} action={hasQuery ? <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-1 py-1 text-xs" onClick={() => { if (session.scope.kind !== "all") session.setScope({ kind: "all" }); else { session.setQuery(""); inputRef.current?.focus(); } }}>{session.scope.kind !== "all" ? "搜索所有笔记" : "清空搜索"}</Button> : undefined} />}
       {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
       {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
-    <div className="sidebar-search-footer">↑ ↓ 预览 · Enter 阅读 · Esc 退出</div>
+    {results.length > 0 && <div className="sidebar-search-footer">↑ ↓ 预览 · Enter 阅读 · Esc 退出</div>}
   </section>;
 }
