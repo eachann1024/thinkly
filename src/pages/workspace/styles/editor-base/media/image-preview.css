@@ -5,7 +5,7 @@
 
 .goose-image-preview__status {
   display: flex;
-  min-height: 128px;
+  min-height: 86px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -39,4 +39,14 @@
 .goose-image-preview__retry:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+}
+
+.goose-image-preview[data-image-state="error"] .goose-image-preview__status {
+  min-height: 44px;
+  justify-content: flex-start;
+  padding: 6px 14px;
+}
+
+.goose-image-preview__retry {
+  margin-left: auto;
 }
