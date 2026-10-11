@@ -167,7 +167,7 @@ function CustomFileBlockContent({
         variant="file"
         blockId={block.id}
         editor={editor}
-        title="添加文件"
+        title="添加附件"
         hint="点击选择，或直接拖入编辑器"
         icon={<GooseIcons.FileUp size={18} strokeWidth={1.75} />}
       />
