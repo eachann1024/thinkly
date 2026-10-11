@@ -1,0 +1,78 @@
+import { useState } from "react";
+import { GitDetails } from "./GitDetails";
+import { CircleAlert } from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+export function GitFolderIssue({
+  name,
+  summary,
+  detail,
+  path,
+  actionLabel,
+  actionDisabled,
+  onAction,
+}: {
+  name: string;
+  summary: string;
+  detail: string;
+  path: string;
+  actionLabel?: string;
+  actionDisabled: boolean;
+  onAction: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const trigger = (
+    <Button
+      type="button"
+      variant="ghost"
+      contentStyle="preserve"
+      aria-label={`${name}：${summary}${actionLabel ? "，查看处理方式" : ""}`}
+      className="group relative flex size-8 items-center justify-center rounded-lg p-0 text-muted-foreground hover:text-foreground"
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-[2px] rounded-[inherit] border-2 border-primary opacity-0 group-focus-visible:opacity-100"
+      />
+      <CircleAlert aria-hidden="true" className="size-4" />
+    </Button>
+  );
+  return (
+    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+      <Popover open={open} onOpenChange={setOpen} openOnHover>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContent
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          side="bottom"
+          align="end"
+          className="w-80 space-y-3 p-3"
+        >
+          <p className="text-sm whitespace-pre-wrap break-words">{detail}</p>
+          <GitDetails
+            title="文件位置"
+            className="text-xs text-muted-foreground"
+          >
+            <p className="mt-1 break-all">{path}</p>
+          </GitDetails>
+          {actionLabel && (
+            <Button
+              variant="outline"
+              className="min-h-[44px] w-full"
+              disabled={actionDisabled}
+              onClick={() => {
+                setOpen(false);
+                onAction();
+              }}
+            >
+              {actionLabel}
+            </Button>
+          )}
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
