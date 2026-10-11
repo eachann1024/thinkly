@@ -37,8 +37,6 @@ export function useAiComposerController(
     disabled,
     variant = "compact",
     onIsEmptyChange,
-    onMultilineChange,
-    onLayoutMeasure,
   } = props;
   const state = useComposerContentState(props);
   const {
@@ -247,8 +245,6 @@ export function useAiComposerController(
     isEmptyRef,
     setIsEmpty,
     onIsEmptyChange,
-    onMultilineChange,
-    onLayoutMeasure,
   });
 
   return {

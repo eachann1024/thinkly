@@ -44,14 +44,6 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       seedContent,
       isEmpty,
       setIsEmpty,
-      multiline,
-      setMultiline,
-      expanded,
-      shellRef,
-      plusWrapRef,
-      modelWrapRef,
-      sendWrapRef,
-      recomputeExpanded,
     } = surface;
     const { cancelPendingDraftPersist, handleContentChange } =
       useComposerDraft(notebookId);
@@ -96,23 +88,20 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
         >
           <PromptBar
             streaming={isStreaming}
-            expanded={expanded}
             className={cn(
               "rounded-control",
               "shadow-[var(--goose-menu-shadow)]",
             )}
           >
             <div
-              ref={shellRef}
               className={cn(
                 "notebook-ai-composer-shell bui-root flex min-h-[44px] gap-2 overflow-hidden rounded-control",
-                expanded ? "flex-wrap items-end" : "flex-nowrap items-center",
+                "flex-wrap items-end",
                 "py-1.5 pl-2.5 pr-2",
                 dropActive &&
                   "ring-2 ring-[var(--goose-interactive-selected)] ring-offset-1 ring-offset-background",
               )}
-              data-expanded={expanded ? "true" : undefined}
-              data-multiline={multiline ? "true" : "false"}
+              data-expanded="true"
               data-drop-active={dropActive ? "true" : undefined}
               onPaste={handleDockPaste}
               onDragEnter={handleDockDragOver}
@@ -129,7 +118,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onChange={handleImageInput}
                 disabled={disabled || isStreaming}
               />
-              <span ref={plusWrapRef} className="flex shrink-0 items-center">
+              <span className="flex shrink-0 items-center">
                 <IconButton size="sm" tone="muted"
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -137,8 +126,6 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   className={cn(
                     "flex shrink-0 items-center justify-center ",
                     "text-muted-foreground",
-                    "",
-                    "",
                     "disabled:cursor-not-allowed disabled:text-disabled",
                     isStreaming && "invisible pointer-events-none",
                   )}
@@ -151,7 +138,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 </IconButton>
               </span>
 
-              {/* 始终挂在同一父级，只切 order/basis，不条件换位置（会丢 contenteditable 节点） */}
+              {/* 输入区域与底部工具栏始终固定，不按内容切换布局或重建节点。 */}
               <AiComposerInput
                 ref={inputRef}
                 placeholder={placeholder}
@@ -160,15 +147,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onContentChange={handleContentChange}
                 onSubmit={handleSubmit}
                 onEscape={handleEscape}
-                onIsEmptyChange={(empty) => {
-                  setIsEmpty(empty);
-                  if (empty) recomputeExpanded();
-                }}
-                onMultilineChange={setMultiline}
-                onLayoutMeasure={recomputeExpanded}
-                className={
-                  expanded ? "order-first w-full basis-full" : "flex-1"
-                }
+                onIsEmptyChange={setIsEmpty}
+                className="order-first w-full basis-full"
                 searchPages={searchPages}
                 referencePlacement="inline"
                 variant="panel"
@@ -180,14 +160,14 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onSlashCommand={onSlashCommand}
               />
 
-              <span ref={modelWrapRef} className="flex shrink-0 items-center">
+              <span className="flex shrink-0 items-center">
                 <ModelSelectorPopover disabled={disabled} />
               </span>
 
-              {/* 仅 spacer：两行时把发送按钮顶到最右，不是输入 */}
-              {expanded ? <div className="min-w-0 flex-1" aria-hidden /> : null}
+              {/* 工具栏中的留白把发送按钮推到最右。 */}
+              <div className="min-w-0 flex-1" aria-hidden />
 
-              <span ref={sendWrapRef} className="flex shrink-0 items-center">
+              <span className="flex shrink-0 items-center">
                 {isStreaming ? (
                   <ComposerPrimitive.Cancel render={<IconButton size="icon" tone="danger" />}
                     className="bui-composer-send flex shrink-0 items-center justify-center bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)] "
