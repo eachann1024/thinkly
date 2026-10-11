@@ -42,7 +42,7 @@ export function LocalFontSelect({
     available: boolean;
   } | null>(null);
   useEffect(() => {
-    if (fonts !== null) return;
+    if (!open && fonts !== null) return;
     let active = true;
     void getAvailableLocalFonts().then((available) => {
       if (active) {
