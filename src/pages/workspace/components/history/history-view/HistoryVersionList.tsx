@@ -109,6 +109,7 @@ function HistoryVersionList() {
                           onClick={() => {
                             closeNotebookAiIfFullscreen();
                             select(v.versionId);
+                            window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
                           }}
                           className="history-version-row flex min-h-8 w-full min-w-0 cursor-pointer items-start py-1.5 pl-8 pr-8 text-left transition-colors duration-150 "
                         >
