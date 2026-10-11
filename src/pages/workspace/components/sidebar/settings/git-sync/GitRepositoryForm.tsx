@@ -1,3 +1,5 @@
+import { GitDetails } from "./GitDetails";
+import type { ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -5,6 +7,16 @@ import type { GitRepositoryInput } from "@/lib/git-sync-contract";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 
 export type GitDraft = Pick<GitRepositoryInput, "provider" | "remoteUrl" | "branch" | "intervalMinutes" | "enabled">;
+function AdvancedSettings({ adding, saving, children }: { adding: boolean; saving: boolean; children: ReactNode }) {
+  return adding ? (
+    <GitDetails title="高级设置">{children}</GitDetails>
+  ) : (
+    <div>
+      {saving && <p className="text-xs text-muted-foreground">正在保存…</p>}
+      {children}
+    </div>
+  );
+}
 export function GitRepositoryForm({
   draft,
   adding,
@@ -34,11 +46,7 @@ export function GitRepositoryForm({
           <p className="text-xs text-muted-foreground">自动识别 GitHub 或 Gitee；在下方选择要同步的文件夹。</p>
         </div>
       )}
-      <details>
-        <summary className="cursor-pointer text-sm font-medium">
-          {adding ? "高级设置" : "自动同步设置"}
-          {saving ? " · 正在保存…" : ""}
-        </summary>
+      <AdvancedSettings adding={adding} saving={saving}>
         <div className="mt-3 space-y-4">
           {adding && (
             <div className="space-y-2">
@@ -80,7 +88,7 @@ export function GitRepositoryForm({
             <p className="text-xs text-danger">请输入 1–1440 分钟的整数，修正后自动保存。</p>
           ) : null}
         </div>
-      </details>
+      </AdvancedSettings>
     </SettingsSectionCard>
   );
 }
