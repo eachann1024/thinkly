@@ -24,8 +24,9 @@ export function renderAdditionalFontSettings(
             label={`${defaultLabels[type]}字体`}
             value={customFonts[type].font || null}
             onChange={(value) => setCustomFont(type, value)}
-            defaultLabel={`默认：${DEFAULT_FONT_NAMES[type]}`}
-            defaultFontFamily={getEditorFontFamilies(type, {
+            baseFont={DEFAULT_FONT_NAMES[type]}
+            baseFontLabel={DEFAULT_FONT_NAMES[type]}
+            fallbackFontFamily={getEditorFontFamilies(type, {
               ...customFonts,
               [type]: { label: null, font: null },
             })
