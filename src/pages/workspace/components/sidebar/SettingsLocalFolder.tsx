@@ -48,7 +48,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-file-manager"
                 title="文件管理器"
-                description="右键打开或显示本地文件时使用。"
+                description="右键文件选择「在文件浏览器中显示」时优先调用的程序。"
                 icon={GooseIcons.FolderOpen}
                 value={localFolderFileManager}
                 onChange={setLocalFolderFileManager}
@@ -60,7 +60,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-editor"
                 title="编辑器"
-                description="右键用外部应用打开文件或文件夹时使用。"
+                description="右键选择「用外部程序打开」时优先调用的默认程序。"
                 icon={GooseIcons.SquarePen}
                 value={localFolderExternalEditor}
                 onChange={setLocalFolderExternalEditor}
@@ -71,7 +71,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-terminal"
                 title="终端"
-                description="右键在终端中打开目录时使用。"
+                description="右键选择「在终端中打开」时优先调用的默认程序。"
                 icon={GooseIcons.Terminal}
                 value={localFolderTerminal}
                 onChange={setLocalFolderTerminal}
@@ -99,10 +99,10 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
                     className="h-4 w-4 text-muted-foreground"
                     strokeWidth={1.75}
                   />
-                  <Label>清理未引用图片与视频</Label>
+                  <Label>清理未引用的多媒体资源</Label>
                 </div>
                 <p className="mt-1 pl-7 text-xs text-muted-foreground">
-                  按笔记本扫描，确认后移入废纸篓。
+                  扫描笔记本中未被引用的图片与音视频，确认后安全移入废纸篓。
                 </p>
               </div>
               <Button
