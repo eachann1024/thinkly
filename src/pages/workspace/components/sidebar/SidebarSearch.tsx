@@ -1,8 +1,8 @@
 import { useShallow } from "zustand/react/shallow";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import { SidebarSearchResults } from "./SidebarSearchResults";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
@@ -12,16 +12,6 @@ import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
 import { useSearchSession } from "./useSearchSession";
 import "./sidebar-search.css";
 
-function Highlight({ text, query }: { text: string; query: string }) {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return <>{text}</>;
-  const parts = []; let cursor = 0, index = text.toLowerCase().indexOf(needle);
-  while (index >= 0) {
-    parts.push(<Fragment key={index}>{text.slice(cursor, index)}<mark>{text.slice(index, index + needle.length)}</mark></Fragment>);
-    cursor = index + needle.length; index = text.toLowerCase().indexOf(needle, cursor);
-  }
-  return <>{parts}{text.slice(cursor)}</>;
-}
 export function SidebarSearch() {
   const session = useSearchSession(useShallow(s => ({
     query: s.query, scope: s.scope, open: s.open, focusNonce: s.focusNonce,
@@ -41,7 +31,7 @@ export function SidebarSearch() {
   const showRecent = useSettings(s => s.showRecentInSearch);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
   const scopedId = session.scope.kind === "all" ? null : session.scope.notebookId;
-  const { searchResults, deferredQuery, setSearchQuery, loadMoreResults, removeRecent } = useCommandSearch({ pages, activeNotebookId: scopedId, searchAllNotebooks: session.scope.kind === "all" });
+  const { searchResults, deferredQuery, isSearching, searchError, setSearchQuery, loadMoreResults, removeRecent } = useCommandSearch({ pages, activeNotebookId: scopedId, searchAllNotebooks: session.scope.kind === "all" });
   useEffect(() => { setSearchQuery(session.query); if (!composing.current) setDraft(session.query); }, [session.query, setSearchQuery]);
   useEffect(() => {
     if (!session.open) return;
@@ -60,9 +50,11 @@ export function SidebarSearch() {
     return () => { cancelled = true; };
   }, [session.open, session.scope.kind, scopedId, retry]);
   const hasQuery = Boolean(session.query.trim());
-  const results = useMemo(() => hasQuery ? searchResults.allDisplay : showRecent ? searchResults.recent : [],
-    [hasQuery, showRecent, searchResults.allDisplay, searchResults.recent]);
-  const pending = session.query !== deferredQuery;
+  const notebookNames = useMemo(() => Object.fromEntries(Object.values(notebooks).map(n => [n.id, n.name])), [notebooks]);
+  const resultHasQuery = Boolean(deferredQuery.trim());
+  const results = useMemo(() => resultHasQuery ? searchResults.allDisplay : showRecent ? searchResults.recent : [],
+    [resultHasQuery, showRecent, searchResults.allDisplay, searchResults.recent]);
+  const pending = isSearching || draft !== session.query || session.query !== deferredQuery;
   const selected = results.find(p => p.id === session.selectedPageId) ?? results[0];
   const duplicates = useMemo(() => {
     const seen = new Set<string>(), repeated = new Set<string>();
@@ -78,11 +70,12 @@ export function SidebarSearch() {
     window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.sidebar-mode-rail-button[aria-label="搜索"]')?.focus({ preventScroll: true }));
   };
-  const openResult = (page: SearchResultPage, enter = false) => {
-    if (pending) return;
-    session.targetPage(page.id, enter);
+  const openResult = useCallback((page: SearchResultPage, enter = false) => {
+    const latest = useSearchSession.getState();
+    if (pending || inputRef.current?.value !== latest.query || composing.current || !latest.open || latest.query !== deferredQuery || latest.scope !== session.scope) return;
+    latest.targetPage(page.id, enter);
     if (enter) window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
-  };
+  }, [deferredQuery, session.scope, pending]);
   const reveal = (id: string) => {
     const list = listRef.current, row = document.getElementById(`search-result-${id}`);
     if (!list || !row) return;
@@ -95,6 +88,7 @@ export function SidebarSearch() {
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
     if ((event.key === "ArrowDown" || event.key === "ArrowUp") && results.length) {
       event.preventDefault();
+      if (pending || useSearchSession.getState().query !== deferredQuery) return;
       const index = results.findIndex(p => p.id === selected?.id);
       const next = Math.max(0, Math.min(results.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)));
       if (next >= results.length - 2 && searchResults.hasMore) loadMoreResults();
@@ -115,22 +109,15 @@ export function SidebarSearch() {
       <DropdownMenuContent align="start" className="w-64"><DropdownMenuRadioGroup value={scopeValue} onValueChange={value => session.setScope(value === "all" ? { kind: "all" } : value === "current" ? { kind: "current", notebookId: session.startingNotebookId } : { kind: "notebook", notebookId: value.slice(9) })}>
         <DropdownMenuRadioItem value="current">当前笔记本 · {currentName}</DropdownMenuRadioItem><DropdownMenuRadioItem value="all">所有笔记本</DropdownMenuRadioItem>
         {Object.values(notebooks).map(n => <DropdownMenuRadioItem key={n.id} value={`notebook:${n.id}`}>{n.name}</DropdownMenuRadioItem>)}
-      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<span role="status">{loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
+      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<span role="status">{searchError ? "" : loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
     {!hasQuery && showRecent && <button className="sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</button>}
     {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<button onClick={() => setRetry(n => n + 1)}>重试读取</button></div>}
     <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
       <div id="sidebar-search-results" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
-      {results.map(page => <div className="sidebar-search-result-wrap" key={page.id}>
-        <button id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selected?.id} className="sidebar-search-result rounded-lg" onClick={() => openResult(page, useWorkspaceViewport.getState().leftExpandOverride)}>
-          <span className="sidebar-search-result-title"><Highlight text={getPageTitle(page)} query={session.query}/></span>
-          <span className="sidebar-search-result-count">{hasQuery && (page.literalBodyMatchCount ? `${page.literalBodyMatchCount} 处` : page.matchKind === "title" ? "标题" : page.matchKind === "pinyin" ? "拼音" : "相关")}</span>
-          {duplicates.has(getPageTitle(page)) && <span className="sidebar-search-book">{notebooks[page.workspaceId]?.name}</span>}
-          {hasQuery && <span className="sidebar-search-snippet"><Highlight text={page.matchKind === "title" ? "标题匹配 · 正文无命中" : page.matchKind === "pinyin" ? "标题拼音匹配" : page.matchKind === "token" ? "相关词匹配 · 无连续词组" : page.contentSnippet ?? ""} query={session.query}/></span>}
-        </button>
-        {!hasQuery && <button className="sidebar-search-remove" aria-label={`从最近访问中移除 ${getPageTitle(page)}`} onClick={() => removeRecent(page.id)}><X size={14}/></button>}
-      </div>)}
+      <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
-      {!loading && !pending && !results.length && <div className="sidebar-search-empty"><strong>{hasQuery ? `未找到「${session.query.trim()}」相关内容` : "输入关键词开始搜索"}</strong>{hasQuery ? <><button onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}>清空搜索</button>{session.scope.kind !== "all" && <button onClick={() => session.setScope({ kind: "all" })}>扩大到所有笔记本</button>}</> : <p>输入标题或记得的内容。</p>}</div>}
+      {searchError && <div className="sidebar-search-empty" role="alert">{searchError}</div>}
+      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-empty"><strong>{hasQuery ? `未找到「${session.query.trim()}」相关内容` : "输入关键词开始搜索"}</strong>{hasQuery ? <><button onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}>清空搜索</button>{session.scope.kind !== "all" && <button onClick={() => session.setScope({ kind: "all" })}>扩大到所有笔记本</button>}</> : <p>输入标题或记得的内容。</p>}</div>}
       {hasQuery && searchResults.hasMore && <button className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</button>}
       {matchingSplitPaletteActions(session.query).map(action => <button key={action.id} className="sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</button>)}
     </div>
