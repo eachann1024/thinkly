@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import { mergeCSSClasses } from "@blocknote/core";
 import {
   type ChangeEvent,
@@ -170,7 +171,7 @@ export function GoosePromptSuggestionMenu(
             {props.icon}
           </div>
         )}
-        <textarea
+        <Textarea context="editor" variant="inline"
           ref={textareaRef}
           className="goose-ai-prompt-field__textarea bn-combobox-input"
           name="ai-prompt"

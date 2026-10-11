@@ -1,5 +1,5 @@
 import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/editor/ui/button";
 import {
   Tooltip,
   TooltipContent,

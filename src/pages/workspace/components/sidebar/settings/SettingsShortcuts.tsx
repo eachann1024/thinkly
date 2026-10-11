@@ -17,7 +17,7 @@ export function SettingsShortcuts(props: SettingsShortcutsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="shrink-0 rounded-[10px]"
+          className="shrink-0 rounded-[var(--goose-control-radius)]"
           onClick={handleReset}
           onBlur={() => setConfirmReset(false)}
         >

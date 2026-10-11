@@ -141,7 +141,7 @@ export function ReviewActions({
     });
   };
   const secondaryClass =
-    "h-[40px] rounded-[14px] bg-[var(--goose-block-subtle-bg)] text-[14px] text-foreground shadow-none hover:bg-[var(--goose-block-subtle-hover)]";
+    "h-[40px] text-[14px] text-foreground shadow-none";
   const detail = submitting
     ? approving
       ? "正在应用已选操作，请稍候。"
@@ -194,7 +194,7 @@ export function ReviewActions({
             </Button>
             <Button
               type="button"
-              className="goose-interactive-primary h-[40px] rounded-[14px] text-[14px] font-semibold shadow-none"
+              className="goose-interactive-primary h-[40px] text-[14px] font-semibold shadow-none"
               disabled={!canApprove}
               onClick={() => void respond(true)}
             >

@@ -5,7 +5,7 @@
   content: "";
   position: absolute;
   inset: -7px;
-  border-radius: var(--radius-control);
+  border-radius: var(--goose-control-radius);
   background: var(--goose-interactive-selected);
   transform: scale(0.72);
   opacity: 0.4;
@@ -34,28 +34,6 @@
   z-index: 1;
   transform-origin: 50% 50%;
   animation: goose-ai-sparkle-pulse 1.15s ease-in-out infinite;
-}
-
-.dark
-  .goose-ai-prompt-field--busy
-  .goose-ai-prompt-field__icon
-  .bn-combobox-icon::before,
-.bn-root[data-color-scheme="dark"]
-  .goose-ai-prompt-field--busy
-  .goose-ai-prompt-field__icon
-  .bn-combobox-icon::before {
-  background: var(--goose-interactive-selected);
-}
-
-.dark
-  .goose-ai-prompt-field--busy
-  .goose-ai-prompt-field__icon
-  .bn-combobox-icon::after,
-.bn-root[data-color-scheme="dark"]
-  .goose-ai-prompt-field--busy
-  .goose-ai-prompt-field__icon
-  .bn-combobox-icon::after {
-  background: var(--goose-interactive-hover);
 }
 
 .goose-ai-sparkle-bit {

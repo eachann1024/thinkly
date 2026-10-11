@@ -1,4 +1,4 @@
-import { Dropdown, Header } from "@heroui/react";
+import { EditorMenuSection, EditorMenuHeader, EditorSubmenuTrigger } from "@/components/editor/ui/vendor-menu";
 import * as GooseIcons from "@/components/ui/icons";
 import {
   DropdownMenuContent,
@@ -22,7 +22,7 @@ export function GooseTableColorMenu({
   onAction,
 }: GooseTableColorMenuProps) {
   return (
-    <Dropdown.SubmenuTrigger>
+    <EditorSubmenuTrigger>
       <DropdownMenuItem textValue="颜色">
         <GooseIcons.Palette /> 颜色{" "}
         <GooseIcons.ChevronRight className="ml-auto" />
@@ -42,18 +42,18 @@ export function GooseTableColorMenu({
             property,
           );
           return (
-            <Dropdown.Section
+            <EditorMenuSection data-goose-menu-slot="group" data-goose-layout="grid"
               key={property}
-              className="goose-table-color-group"
+              className="goose-table-color-group goose-list-group"
               aria-label={property === "textColor" ? "文字颜色" : "背景颜色"}
               selectionMode="single"
               selectedKeys={
                 selectedColor ? [`${property}:${selectedColor}`] : []
               }
             >
-              <Header className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
+              <EditorMenuHeader className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
                 {property === "textColor" ? "文字颜色" : "背景颜色"}
-              </Header>
+              </EditorMenuHeader>
               {(
                 [
                   ["default", "默认"],
@@ -96,10 +96,10 @@ export function GooseTableColorMenu({
                   <span aria-hidden="true">A</span>
                 </DropdownMenuItem>
               ))}
-            </Dropdown.Section>
+            </EditorMenuSection>
           );
         })}
       </DropdownMenuContent>
-    </Dropdown.SubmenuTrigger>
+    </EditorSubmenuTrigger>
   );
 }

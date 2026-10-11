@@ -1,8 +1,11 @@
+import { ListRow } from "@/components/ui/list-row";
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { triggerLabel, formatTime } from "./historyViewPresentation";
+import "./history-controls.css";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
 
 export /**
@@ -73,12 +76,7 @@ function HistoryVersionList() {
                       <div
                         key={v.versionId}
                         data-selected={isSelected ? "true" : "false"}
-                        className={cn(
-                          "history-version-item group relative flex items-center rounded-[10px] transition-colors duration-150",
-                          isSelected
-                            ? "bg-[var(--goose-interactive-selected)]"
-                            : "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
-                        )}
+                        className="history-version-item group relative flex items-center"
                       >
                         {/* 绝对定位轨道：覆盖整行高度（含 padding），相邻项首尾相接不断线 */}
                         <span
@@ -100,7 +98,7 @@ function HistoryVersionList() {
                             )}
                           />
                         </span>
-                        <button
+                        <ListRow
                           type="button"
                           title={detailTitle}
                           aria-current={isSelected ? "true" : undefined}
@@ -111,14 +109,15 @@ function HistoryVersionList() {
                             select(v.versionId);
                             window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
                           }}
-                          className="history-version-row flex min-h-8 w-full min-w-0 cursor-pointer items-start py-1.5 pl-8 pr-8 text-left transition-colors duration-150 "
+                          data-goose-row-inset=""
+                          className="goose-list-row history-version-row flex min-h-8 w-full min-w-0 cursor-pointer items-start justify-start pl-8 pr-8 text-left "
                         >
                           <span
                             className={cn(
                               "min-w-0 text-xs leading-snug",
                               isSelected
                                 ? "font-medium text-[var(--goose-interactive-selected-fg)]"
-                                : "text-foreground group-hover:text-[var(--goose-interactive-hover-fg)]",
+                                : "text-foreground",
                             )}
                           >
                             <span className="tabular-nums">
@@ -130,7 +129,7 @@ function HistoryVersionList() {
                                   "ml-1.5 font-normal",
                                   isSelected
                                     ? "text-[var(--goose-interactive-selected-fg)]"
-                                    : "text-muted-foreground group-hover:text-[var(--goose-interactive-hover-fg)]",
+                                    : "text-muted-foreground",
                                 )}
                               >
                                 {v.label}
@@ -142,15 +141,15 @@ function HistoryVersionList() {
                                   "ml-1.5 text-[10px] tabular-nums",
                                   isSelected
                                     ? "text-[var(--goose-interactive-selected-fg)]"
-                                    : "text-muted-foreground group-hover:text-[var(--goose-interactive-hover-fg)]",
+                                    : "text-muted-foreground",
                                 )}
                               >
                                 {deltaText}
                               </span>
                             ) : null}
                           </span>
-                        </button>
-                        <button
+                        </ListRow>
+                        <IconButton size="sm" tone="muted"
                           type="button"
                           data-marked={v.isMilestone ? "true" : "false"}
                           aria-busy={isMilestonePending || undefined}
@@ -175,20 +174,17 @@ function HistoryVersionList() {
                             if (event.detail !== 0) return;
                             handleToggleMilestone(v.versionId, !v.isMilestone);
                           }}
-                          className={cn(
-                            "history-star-control group/star absolute right-0.5 top-1/2 z-[2] flex h-7 w-7 -translate-y-1/2 cursor-pointer select-none items-center justify-center rounded-[8px] transition-[background-color,color] duration-150 hover:bg-[var(--goose-interactive-hover)] dark:hover:bg-[var(--goose-interactive-hover)] active:bg-[var(--goose-interactive-selected)]",
-                            "",
-                          )}
+                          className="history-star-control absolute right-0.5 top-1/2 z-[2] -translate-y-1/2 select-none"
                         >
                           <GooseIcons.Star
                             fill={v.isMilestone ? "currentColor" : undefined}
                             className={cn(
-                              "h-4 w-4 text-muted-foreground transition-colors group-hover/star:text-foreground",
+                              "h-4 w-4",
                               v.isMilestone &&
-                                "fill-[var(--goose-interactive-selected-fg)] text-[var(--goose-interactive-selected-fg)] group-hover/star:text-[var(--goose-interactive-selected-fg)]",
+                                "fill-[var(--goose-interactive-selected-fg)] text-[var(--goose-interactive-selected-fg)]",
                             )}
                           />
-                        </button>
+                        </IconButton>
                       </div>
                     );
                   })}

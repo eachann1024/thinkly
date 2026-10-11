@@ -1,3 +1,5 @@
+import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
+import { IconButton } from "@/components/ui/icon-button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,7 +59,7 @@ export function HiddenFoldersField({
         contentClassName="!space-y-0"
       >
         <div
-          className={`flex items-center gap-4 p-5 ${SETTINGS_OPTION_ROW_CLASS} !rounded-none`}
+          className={`flex items-center gap-4 p-5 ${SETTINGS_OPTION_ROW_CLASS} goose-settings-option-row--joined`}
         >
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]">
             <GooseIcons.EyeOff className="h-5 w-5" strokeWidth={1.75} />
@@ -110,23 +112,23 @@ export function HiddenFoldersField({
                     预置规则 · 始终隐藏
                   </span>
                 ) : (
-                  <button
+                  <IconButton size="xs"
                     type="button"
                     onClick={() => removeFolder(folder)}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] "
                     aria-label={`移除 ${folder}`}
                   >
                     <GooseIcons.X className="h-4 w-4" />
-                  </button>
+                  </IconButton>
                 )}
               </div>
             );
           })}
         </div>
-        <details className="group border-t border-border/70">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-5 text-sm font-medium text-link hover:bg-[var(--goose-interactive-hover)] [&::-webkit-details-marker]:hidden">
+        <Disclosure className="group border-t border-border/70">
+          <DisclosureSummary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-5 text-sm font-medium text-link hover:bg-[var(--goose-interactive-hover)] [&::-webkit-details-marker]:hidden">
             <GooseIcons.Plus className="h-4 w-4" /> 添加隐藏文件夹
-          </summary>
+          </DisclosureSummary>
           <form
             className="space-y-2 px-5 pb-5"
             onSubmit={(event) => {
@@ -161,7 +163,7 @@ export function HiddenFoldersField({
               </p>
             )}
           </form>
-        </details>
+        </Disclosure>
       </SettingsSectionCard>
     </div>
   );

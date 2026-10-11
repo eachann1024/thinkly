@@ -1,10 +1,11 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTabs } from "@/stores/useTabs";
 
 export const actionButtonClass =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] aria-pressed:bg-[var(--goose-interactive-selected)] aria-pressed:text-[var(--goose-interactive-selected-fg)] aria-pressed:hover:bg-[var(--goose-interactive-selected)] aria-pressed:hover:text-[var(--goose-interactive-hover-fg)]";
+  "inline-flex items-center justify-center text-muted-foreground ";
 
 export function DesktopWindowNavigation({
   canGoBack, canGoForward, onBeforeActivateTab, onToggleSidebar,
@@ -26,16 +27,16 @@ export function DesktopWindowNavigation({
         ].map(({ label, Icon, disabled, onClick }) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
-              <button type="button" className={cn(actionButtonClass, "disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
+              <IconButton size="icon" tone="muted" type="button" className={cn(actionButtonClass, "disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
                 <Icon className="h-4 w-4" />
-              </button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent side="bottom">{label}</TooltipContent>
           </Tooltip>
         ))}
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <IconButton size="icon" tone="muted"
               type="button"
               className={cn(actionButtonClass, "sidebar-toggle-button")}
               onClick={onToggleSidebar ?? toggleSidebarCollapsed}
@@ -44,7 +45,7 @@ export function DesktopWindowNavigation({
               aria-expanded={!sidebarCollapsed}
             >
               <GooseIcons.PanelLeft className="h-4 w-4" />
-            </button>
+            </IconButton>
           </TooltipTrigger>
           <TooltipContent side="bottom">
             <span>{sidebarCollapsed ? "展开侧栏" : "收起侧栏"}</span>

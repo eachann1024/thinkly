@@ -1,3 +1,5 @@
+import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
+import { EditorAction } from "@/components/editor/ui/button";
 import { ArrowUp, ChevronDown, Settings } from "@/components/ui/icons";
 import type { GoosePromptSuggestionMenuProps } from "./GoosePromptSuggestionMenu";
 
@@ -14,7 +16,7 @@ export function GoosePromptActions({
   return (
     <div className="goose-ai-tags" role="group" aria-label="AI 快捷操作">
       {tags.map((tag) => (
-        <button
+        <EditorAction
           key={tag.key}
           type="button"
           className={`goose-ai-tag${tag.key === "accept" ? " goose-inline-ai-primary" : ""}`}
@@ -29,10 +31,10 @@ export function GoosePromptActions({
           }}
         >
           {tag.label}
-        </button>
+        </EditorAction>
       ))}
       {props.actionMenus?.map((menu) => (
-        <details
+        <Disclosure
           className="goose-inline-ai-actions-menu"
           key={menu.label}
           onToggle={(event) => {
@@ -52,13 +54,15 @@ export function GoosePromptActions({
             }
           }}
         >
-          <summary>
+          <DisclosureSummary>
             {menu.label}
             <ChevronDown aria-hidden className="h-3 w-3" />
-          </summary>
-          <div className="goose-inline-ai-actions-list">
+          </DisclosureSummary>
+          <div className="goose-inline-ai-actions-list goose-list-layout" data-goose-menu-slot="root" data-goose-layout="grid">
             {menu.actions.map((action) => (
-              <button
+              <EditorAction
+                className="goose-list-row"
+                data-goose-menu-slot="row"
                 type="button"
                 key={action.key}
                 onClick={(event) => {
@@ -69,13 +73,13 @@ export function GoosePromptActions({
                 }}
               >
                 {action.label}
-              </button>
+              </EditorAction>
             ))}
           </div>
-        </details>
+        </Disclosure>
       ))}
       {props.showPlus && props.onOpenAiPanel && (
-        <button
+        <EditorAction
           type="button"
           className="goose-ai-tag goose-ai-tag--plus"
           aria-label="打开 AI 设置"
@@ -90,10 +94,10 @@ export function GoosePromptActions({
           }}
         >
           <Settings className="h-3.5 w-3.5" strokeWidth={1.75} />
-        </button>
+        </EditorAction>
       )}
       {props.showSubmit && (
-        <button
+        <EditorAction
           type="button"
           className={`goose-inline-ai-send${tags.some((tag) => tag.key === "accept") ? "" : " goose-inline-ai-primary"}`}
           disabled={disabled || !promptTextToUse.trim()}
@@ -106,7 +110,7 @@ export function GoosePromptActions({
         >
           发送
           <ArrowUp aria-hidden className="h-3.5 w-3.5" />
-        </button>
+        </EditorAction>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { getPageTitle, withInternalPageTitle } from "@/components/editor/utils/page-title";
 import { toast } from "@/components/ui/sonner";
@@ -99,13 +100,10 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
 
   return (
     <span className="relative z-20 flex h-full min-w-0 flex-1 items-center">
-    <input
+    <Input variant="inline" context="shell"
       ref={inputRef}
-      data-goose-inline-input=""
       className="relative z-20 h-full w-full min-w-0 flex-1 cursor-text select-text"
-      style={{ font: "inherit", lineHeight: "inherit", color: "inherit", caretColor: nativeCaret ? "var(--goose-accent-focus)" : "transparent",
-        background: "transparent", border: 0, borderRadius: 0, padding: 0, margin: 0,
-        outline: "none", boxShadow: "none" }}
+      style={{ caretColor: nativeCaret ? "var(--goose-accent-focus)" : "transparent" }}
       aria-label="重命名，Enter 确认，Escape 取消"
       aria-invalid={!!error}
       aria-description={error || "Tab 或点击其他位置保存；空名称保留原名"}

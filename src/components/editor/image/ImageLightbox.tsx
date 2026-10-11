@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { Zoom } from "yet-another-react-lightbox/plugins";
@@ -92,7 +93,7 @@ export function ImageLightbox({
               </div>,
               // Zoom 插件默认把按钮前置插入工具条；用占位符锁定它在右侧操作组的位置
               "zoom",
-              <button
+              <EditorAction
                 key="download"
                 type="button"
                 title="下载图片"
@@ -101,8 +102,8 @@ export function ImageLightbox({
                 className="yarl__button"
               >
                 <Download size={18} strokeWidth={1.75} />
-              </button>,
-              <button
+              </EditorAction>,
+              <EditorAction
                 key="copy"
                 type="button"
                 title="复制图片"
@@ -111,7 +112,7 @@ export function ImageLightbox({
                 className="yarl__button"
               >
                 <Copy size={18} strokeWidth={1.75} />
-              </button>,
+              </EditorAction>,
               "close",
             ],
           }}
@@ -123,7 +124,7 @@ export function ImageLightbox({
               <ZoomOut size={18} strokeWidth={1.75} aria-hidden="true" />
             ),
             buttonClose: () => (
-              <button
+              <EditorAction
                 key="close"
                 type="button"
                 title="关闭"
@@ -132,7 +133,7 @@ export function ImageLightbox({
                 className="yarl__button"
               >
                 <X size={18} strokeWidth={1.75} />
-              </button>
+              </EditorAction>
             ),
             buttonPrev: slides.length <= 1 ? () => null : undefined,
             buttonNext: slides.length <= 1 ? () => null : undefined,

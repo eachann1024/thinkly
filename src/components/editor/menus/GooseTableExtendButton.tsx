@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -190,7 +191,7 @@ export function GooseTableExtendButton({
   if (!editor.isEditable) return null;
 
   return (
-    <button
+    <EditorAction
       type="button"
       className={cn(
         "goose-editor-inline-context-ui goose-table-extend-button",
@@ -204,6 +205,6 @@ export function GooseTableExtendButton({
       onMouseDown={handleMouseDown}
     >
       <GooseIcons.Plus className="h-3.5 w-3.5" />
-    </button>
+    </EditorAction>
   );
 }

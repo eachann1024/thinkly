@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { type PointerEvent as ReactPointerEvent } from "react";
 import type { Page } from "@/types";
 import { isPageTitleFocusRequested } from "@/lib/page-title-focus";
@@ -13,7 +15,7 @@ interface SingleTabTitleProps {
   surface?: "page-header" | "tab-pill";
 }
 const TITLE_IDLE_CLASS =
-  "inline-flex h-8 items-center rounded-[7px] border border-transparent bg-transparent px-2 text-sm font-semibold leading-8 text-foreground no-underline outline-none transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]";
+  "inline-flex h-8 items-center rounded-[var(--goose-control-radius)] border border-transparent bg-transparent px-2 text-sm font-semibold leading-8 text-foreground no-underline transition-colors ";
 
 const TITLE_INPUT_CLASS = `${TITLE_IDLE_CLASS} focus:border-primary/45 focus:bg-[hsl(var(--goose-editor-bg))] focus:text-[var(--goose-interactive-selected-fg)] caret-[var(--goose-accent-focus)]`;
 
@@ -91,7 +93,7 @@ export function SingleTabTitle({
 
   if (idleWindowDrag && !editing) {
     return (
-      <button
+      <Button contentStyle="preserve" variant="ghost" size={null}
         type="button"
         data-electron-no-drag
         data-electron-option-drag
@@ -102,13 +104,13 @@ export function SingleTabTitle({
         onClick={beginEditing}
       >
         {value || currentTitle}
-      </button>
+      </Button>
     );
   }
 
   return (
     <span className="page-title-edit-shell">
-      <input
+      <Input variant="inline"
         ref={inputRef}
         data-goose-inline-input=""
         value={value}

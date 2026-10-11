@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { SettingsAppearance } from "../SettingsAppearance";
 import { SettingsGeneral } from "../SettingsGeneral";
 import { SettingsShortcuts } from "../settings/SettingsShortcuts";
@@ -90,15 +91,15 @@ export function renderSettingsScaffold(
       feedbackBanner={null}
       appsBanner={
         appsBannerVisible && !isElectronHost ? (
-          <div className="relative rounded-[10px] bg-[hsl(var(--goose-selected-bg)/0.62)] p-3">
-            <button
+          <div className="relative rounded-[var(--goose-control-radius)] bg-[hsl(var(--goose-selected-bg)/0.62)] p-3">
+            <Button contentStyle="preserve" variant="ghost" size="sm"
               type="button"
               onClick={handleCloseAppsBanner}
-              className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+              className="h-auto whitespace-normal border-0 px-0 py-0 absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
               aria-label="关闭 Goose 鹅系列工具"
             >
               <GooseIcons.X className="h-3 w-3" />
-            </button>
+            </Button>
             <p className="mb-2 pr-4 text-xs font-medium text-muted-foreground">
               Goose 鹅系列工具
             </p>
@@ -110,7 +111,7 @@ export function renderSettingsScaffold(
                   variant="ghost"
                   size="sm"
                   onClick={() => handleOpenApp(app)}
-                  className="h-auto w-full justify-start gap-2 rounded-[10px] px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                  className="h-auto w-full justify-start gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
                 >
                   <img
                     src={app.icon}

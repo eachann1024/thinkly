@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useEffect, useState } from "react";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -38,7 +39,7 @@ export function SidebarFooter({
   }, []);
 
   const btnClass =
-    "sidebar-footer-control inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md p-0 text-muted-foreground transition-[background-color,color,box-shadow,transform] hover:bg-[var(--goose-interactive-selected)] hover:text-[var(--goose-interactive-selected-fg)] active:translate-y-px active:bg-[var(--goose-interactive-selected)] active:text-[var(--goose-interactive-selected-fg)] [&_svg]:block";
+    "sidebar-footer-control inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg p-0 text-muted-foreground [&_svg]:block";
   const activeClass =
     "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]";
 
@@ -48,15 +49,16 @@ export function SidebarFooter({
         {readyVersion ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <IconButton size="xs"
                 type="button"
                 className={cn(btnClass, activeClass)}
+                data-active="true"
                 aria-label={`新版本 v${readyVersion} 已就绪，点击重启并更新`}
                 title={`新版本 v${readyVersion} 已就绪，点击重启并更新`}
                 onClick={() => void getGooseDesktop()?.installReadyUpdate()}
               >
                 <GooseIcons.RotateCw className="h-4 w-4" />
-              </button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent side="right">
               新版本 v{readyVersion} 已就绪，点击重启并更新
@@ -65,15 +67,16 @@ export function SidebarFooter({
         ) : availableVersion ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <IconButton size="xs"
                 type="button"
                 className={cn(btnClass, activeClass)}
+                data-active="true"
                 aria-label={`发现新版本 v${availableVersion}，查看更新说明`}
                 title={`发现新版本 v${availableVersion}，查看更新说明`}
                 onClick={() => openReleasePage()}
               >
                 <GooseIcons.Download className="h-4 w-4" />
-              </button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent side="right">
               发现新版本 v{availableVersion}，查看更新说明
@@ -83,7 +86,7 @@ export function SidebarFooter({
         <NotebookSwitcher variant="rail" onOpenSettings={onOpenSettings} />
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <IconButton size="xs"
               type="button"
               className={cn(btnClass, isSettingsOpen && activeClass)}
               aria-label="设置"
@@ -92,7 +95,7 @@ export function SidebarFooter({
               onClick={onOpenSettings}
             >
               <GooseIcons.Settings className="h-4 w-4" />
-            </button>
+            </IconButton>
           </TooltipTrigger>
           <TooltipContent side="right">设置</TooltipContent>
         </Tooltip>

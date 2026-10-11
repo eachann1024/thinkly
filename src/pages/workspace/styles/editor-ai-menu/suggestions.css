@@ -9,11 +9,6 @@
   border-top: 1px solid rgba(219, 219, 219, 0.5) !important;
 }
 
-.dark .bn-mantine .bn-combobox-items:not(:empty),
-.bn-root[data-color-scheme="dark"] .bn-mantine .bn-combobox-items:not(:empty) {
-  border-top-color: rgba(61, 61, 61, 0.5) !important;
-}
-
 /* 当列表为空（仅输入态），藏掉分隔线 */
 .bn-combobox-items:empty {
   border-top: 0;
@@ -34,11 +29,11 @@
   --bn-colors-menu-text: hsl(var(--popover-foreground));
   /* 与 22px 图标槽对齐：上下对称，单行时图标/文字视觉居中 */
   padding: 5px 8px !important;
-  border-radius: 8px !important;
+  border-radius: var(--goose-control-radius) !important;
   background: transparent !important;
   color: hsl(var(--popover-foreground));
   cursor: pointer;
-  transition: background-color 100ms ease-out;
+  transition: background-color var(--goose-control-motion-duration) ease-out;
   flex-wrap: nowrap !important;
   /* 单行项：图标与标题垂直居中（用户标注的问题） */
   align-items: center !important;
@@ -46,22 +41,7 @@
   min-height: 32px;
 }
 
-.dark .bn-mantine .bn-suggestion-menu-item,
-.bn-root[data-color-scheme="dark"] .bn-mantine .bn-suggestion-menu-item {
-  --menu-item-color: hsl(var(--popover-foreground));
-  --bn-colors-menu-text: hsl(var(--popover-foreground));
-  color: hsl(var(--popover-foreground));
-}
-
 .bn-mantine .bn-suggestion-menu-item:hover {
-  background: var(--goose-interactive-hover) !important;
-  color: var(--goose-interactive-hover-fg);
-  --menu-item-color: var(--goose-interactive-hover-fg);
-  --bn-colors-menu-text: var(--goose-interactive-hover-fg);
-}
-
-.dark .bn-mantine .bn-suggestion-menu-item:hover,
-.bn-root[data-color-scheme="dark"] .bn-mantine .bn-suggestion-menu-item:hover {
   background: var(--goose-interactive-hover) !important;
   color: var(--goose-interactive-hover-fg);
   --menu-item-color: var(--goose-interactive-hover-fg);
@@ -95,29 +75,7 @@
   color: hsl(var(--muted-foreground));
 }
 
-.dark
-  .bn-mantine
-  .bn-suggestion-menu-item
-  .bn-mt-suggestion-menu-item-section[data-position="left"],
-.bn-root[data-color-scheme="dark"]
-  .bn-mantine
-  .bn-suggestion-menu-item
-  .bn-mt-suggestion-menu-item-section[data-position="left"] {
-  color: hsl(var(--muted-foreground));
-}
-
 .bn-mantine
-  .bn-suggestion-menu-item:hover
-  .bn-mt-suggestion-menu-item-section[data-position="left"] {
-  color: var(--goose-interactive-hover-fg);
-}
-
-.dark
-  .bn-mantine
-  .bn-suggestion-menu-item:hover
-  .bn-mt-suggestion-menu-item-section[data-position="left"],
-.bn-root[data-color-scheme="dark"]
-  .bn-mantine
   .bn-suggestion-menu-item:hover
   .bn-mt-suggestion-menu-item-section[data-position="left"] {
   color: var(--goose-interactive-hover-fg);
@@ -164,14 +122,6 @@
   display: block;
 }
 
-.dark .bn-mantine .bn-suggestion-menu-item .bn-mt-suggestion-menu-item-title,
-.bn-root[data-color-scheme="dark"]
-  .bn-mantine
-  .bn-suggestion-menu-item
-  .bn-mt-suggestion-menu-item-title {
-  color: hsl(var(--popover-foreground));
-}
-
 /* small 项不展示副标题；若将来有副标题，整行改为顶对齐以免挤扁 */
 .bn-mantine
   .bn-suggestion-menu-item-small
@@ -180,17 +130,6 @@
 }
 
 .bn-mantine .bn-suggestion-menu-item:hover .bn-mt-suggestion-menu-item-title {
-  color: var(--goose-interactive-hover-fg);
-}
-
-.dark
-  .bn-mantine
-  .bn-suggestion-menu-item:hover
-  .bn-mt-suggestion-menu-item-title,
-.bn-root[data-color-scheme="dark"]
-  .bn-mantine
-  .bn-suggestion-menu-item:hover
-  .bn-mt-suggestion-menu-item-title {
   color: var(--goose-interactive-hover-fg);
 }
 
@@ -203,14 +142,6 @@
 .bn-mantine .bn-suggestion-menu-item .bn-mt-suggestion-menu-item-subtitle {
   font-size: 11px !important;
   line-height: 1.3 !important;
-  color: hsl(var(--muted-foreground));
-}
-
-.dark .bn-mantine .bn-suggestion-menu-item .bn-mt-suggestion-menu-item-subtitle,
-.bn-root[data-color-scheme="dark"]
-  .bn-mantine
-  .bn-suggestion-menu-item
-  .bn-mt-suggestion-menu-item-subtitle {
   color: hsl(var(--muted-foreground));
 }
 

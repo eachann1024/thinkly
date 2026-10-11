@@ -1,3 +1,5 @@
+import { Input } from "@/components/editor/ui/input";
+import { EditorAction } from "@/components/editor/ui/button";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
@@ -26,7 +28,7 @@ type FindInPageBarProps = {
 };
 
 const iconBtnClass =
-  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] disabled:text-disabled";
+  "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--goose-control-radius)] disabled:text-disabled";
 
 export function FindInPageBar({
   editor,
@@ -150,7 +152,7 @@ export function FindInPageBar({
       onMouseDown={(event) => event.stopPropagation()}
     >
       <div className="goose-editor-inline-context-ui flex max-w-full items-start gap-1 rounded-md border bg-background/95 px-1 py-1.5 shadow-md backdrop-blur">
-        <button
+        <EditorAction
           type="button"
           aria-expanded={replaceOpen}
           aria-controls={replaceOpen ? "goose-find-replace-row" : undefined}
@@ -164,11 +166,11 @@ export function FindInPageBar({
           ) : (
             <GooseIcons.ChevronRight className="h-3.5 w-3.5" />
           )}
-        </button>
+        </EditorAction>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex min-w-0 items-center gap-1">
             <GooseIcons.Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <input
+            <Input variant="inline"
               ref={inputRef}
               data-goose-inline-input=""
               value={query}
@@ -184,26 +186,26 @@ export function FindInPageBar({
               }}
               placeholder="页内查找"
               aria-label="页内查找"
-              className="min-w-0 w-44 flex-1 bg-transparent text-sm outline-none placeholder:text-placeholder"
+              className="h-auto min-w-0 w-44 flex-1 bg-transparent text-sm outline-none placeholder:text-placeholder"
             />
             <span className="w-14 shrink-0 text-center text-xs tabular-nums text-muted-foreground">
               {currentDisplay}/{total}
             </span>
-            <button
+            <EditorAction
               type="button"
               title={caseSensitive ? "区分大小写：开" : "区分大小写：关"}
               aria-label={caseSensitive ? "区分大小写：开" : "区分大小写：关"}
               aria-pressed={caseSensitive}
               className={cn(
-                "inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded px-1 text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                "inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded px-1 text-xs  ",
                 caseSensitive &&
                   "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]",
               )}
               onClick={() => setCaseSensitive((value) => !value)}
             >
               Aa
-            </button>
-            <button
+            </EditorAction>
+            <EditorAction
               type="button"
               title={`上一个（${formatShortcut("Shift+Enter")}）`}
               aria-label="上一个匹配"
@@ -212,8 +214,8 @@ export function FindInPageBar({
               onClick={() => handleStep(-1)}
             >
               <GooseIcons.ChevronUp className="h-3.5 w-3.5" />
-            </button>
-            <button
+            </EditorAction>
+            <EditorAction
               type="button"
               title={`下一个（${formatShortcut("Enter")}）`}
               aria-label="下一个匹配"
@@ -222,8 +224,8 @@ export function FindInPageBar({
               onClick={() => handleStep(1)}
             >
               <GooseIcons.ChevronDown className="h-3.5 w-3.5" />
-            </button>
-            <button
+            </EditorAction>
+            <EditorAction
               type="button"
               title={`关闭（${formatShortcut("Esc")}）`}
               aria-label="关闭查找"
@@ -231,7 +233,7 @@ export function FindInPageBar({
               onClick={onClose}
             >
               <GooseIcons.X className="h-3.5 w-3.5" />
-            </button>
+            </EditorAction>
           </div>
           {replaceOpen ? (
             <div
@@ -239,7 +241,7 @@ export function FindInPageBar({
               className="flex min-w-0 items-center gap-1"
             >
               <GooseIcons.Replace className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <input
+              <Input variant="inline"
                 ref={replaceInputRef}
                 data-goose-inline-input=""
                 value={replacement}
@@ -262,9 +264,9 @@ export function FindInPageBar({
                 }}
                 placeholder="替换"
                 aria-label="替换为"
-                className="min-w-0 w-44 flex-1 bg-transparent text-sm outline-none placeholder:text-placeholder"
+                className="h-auto min-w-0 w-44 flex-1 bg-transparent text-sm outline-none placeholder:text-placeholder"
               />
-              <button
+              <EditorAction
                 type="button"
                 title="替换"
                 aria-label="替换"
@@ -273,8 +275,8 @@ export function FindInPageBar({
                 onClick={handleReplace}
               >
                 <GooseIcons.Replace className="h-3.5 w-3.5" />
-              </button>
-              <button
+              </EditorAction>
+              <EditorAction
                 type="button"
                 title="全部替换"
                 aria-label="全部替换"
@@ -283,7 +285,7 @@ export function FindInPageBar({
                 onClick={handleReplaceAll}
               >
                 <GooseIcons.ReplaceAll className="h-3.5 w-3.5" />
-              </button>
+              </EditorAction>
             </div>
           ) : null}
         </div>

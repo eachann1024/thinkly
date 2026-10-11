@@ -1,6 +1,6 @@
 import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/editor/ui/button";
+import { Input } from "@/components/editor/ui/input";
 import { cn } from "@/lib/utils";
 import { CodeBlockToolbar } from "./CodeBlockToolbar";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
@@ -60,7 +60,7 @@ export function CodeBlockHeader({
             </Button>
             <Input
               ref={summaryInputRef}
-              data-goose-inline-input=""
+              variant="inline"
               value={isEditingSummary ? summaryDraft : summary}
               readOnly={!isEditable || !isEditingSummary}
               placeholder="添加代码说明"

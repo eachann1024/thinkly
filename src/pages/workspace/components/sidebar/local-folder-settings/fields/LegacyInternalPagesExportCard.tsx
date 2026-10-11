@@ -92,7 +92,7 @@ function LegacyInternalPagesExportCard() {
 
   return (
     <SettingsSectionCard title="旧数据迁移">
-      <div className="flex items-start justify-between gap-4 rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)] px-4 py-3">
+      <div className="flex items-start justify-between gap-4 goose-settings-option-row px-4 py-3">
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-medium text-foreground">
             检测到早期内置笔记 ({legacyCount} 篇)

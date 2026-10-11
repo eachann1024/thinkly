@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
 function LetterFoldChevron() {
   return (
@@ -23,7 +24,7 @@ export function AssistantLetterFold({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="notebook-ai-letter-fold">
-      <button
+      <Button contentStyle="preserve" variant="ghost" size={null}
         type="button"
         className="notebook-ai-letter-fold-toggle"
         aria-expanded={open}
@@ -31,7 +32,7 @@ export function AssistantLetterFold({ children }: { children: ReactNode }) {
       >
         <LetterFoldChevron />
         <span>思考</span>
-      </button>
+      </Button>
       {open ? (
         <div className="notebook-ai-letter-fold-body">{children}</div>
       ) : null}

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 /**
  * 侧边 AI 模型选择器 — 默认跟随设置里配置的模型，
  * 切换后写入 workspaceSelectedModelId 作为工作区级覆盖，
@@ -55,10 +56,10 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button contentStyle="preserve" variant="ghost" size={null}
           type="button"
           disabled={disabled}
-          className="flex h-7 max-w-[12.5rem] shrink-0 items-center gap-0.5 rounded-[7px] px-1 text-[11px] text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] data-[state=open]:bg-[var(--goose-interactive-hover)] data-[state=open]:text-[var(--goose-interactive-selected-fg)] disabled:cursor-not-allowed disabled:text-disabled"
+          className="flex h-7 max-w-[12.5rem] shrink-0 items-center gap-0.5 rounded-[var(--goose-control-radius)] px-1 text-[11px] text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
           aria-label="切换模型"
           title={`当前模型：${effectiveModel?.id ?? effectiveModelId}`}
         >
@@ -66,7 +67,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
             {effectiveModel?.label ?? effectiveModelId}
           </span>
           <ChevronDown className="h-3 w-3 shrink-0" strokeWidth={1.75} />
-        </button>
+        </Button>
       </PopoverTrigger>
       {/*
         触发器在输入条右侧、发送按钮左边：align="end" 让菜单贴右缘往左展，
@@ -82,17 +83,18 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         <div className="px-2 pb-1.5 pt-1 text-xs text-muted-foreground">
           选择模型
         </div>
-        <div className="space-y-0.5">
+        <div className="goose-list-layout">
           {customModelOptions.map((option) => {
             const isActive = option.id === effectiveModelId;
             const isDefault = option.id === selectedModelId;
             return (
-              <button
+              <Button contentStyle="preserve" variant="ghost" size={null}
                 key={option.id}
                 type="button"
                 onClick={() => selectModel(option.id)}
-                className="flex w-full items-center gap-2 rounded-[7px] px-2 py-1.5 text-left text-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                aria-current={isActive ? "true" : undefined}
+                className="goose-list-row flex w-full items-center gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-foreground transition-colors "
+                data-selected={isActive || undefined}
+                aria-pressed={isActive}
                 title={option.id}
               >
                 <span className="min-w-0 flex-1 truncate text-sm">
@@ -109,7 +111,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                     strokeWidth={2}
                   />
                 ) : null}
-              </button>
+              </Button>
             );
           })}
         </div>

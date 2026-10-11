@@ -1,3 +1,4 @@
+import { ListRow } from "@/components/ui/list-row";
 import * as GooseIcons from "@/components/ui/icons";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -131,7 +132,7 @@ export function PageExportSubmenu({
   };
 
   const itemClass =
-    "goose-interactive group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 text-left text-xs";
+    "goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 text-left text-xs";
 
   return (
     <Popover
@@ -145,7 +146,7 @@ export function PageExportSubmenu({
       }}
     >
       <PopoverTrigger asChild>
-        <button
+        <ListRow
           ref={triggerRef}
           type="button"
           data-state={open ? "open" : "closed"}
@@ -161,12 +162,12 @@ export function PageExportSubmenu({
               }, EXPORT_OPEN_DELAY_MS);
             }
           }}
-          className="goose-interactive group grid min-h-[32px] w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-lg px-2 text-left text-xs"
+          className="goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-lg px-2 text-left text-xs"
         >
           <GooseIcons.Export className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)] group-data-[state=open]:text-[var(--goose-interactive-selected-fg)]" />
           <span className="min-w-0 truncate">导出</span>
           <GooseIcons.ChevronRight className="ml-auto h-4 w-4" />
-        </button>
+        </ListRow>
       </PopoverTrigger>
       <PopoverContent
         ref={menuRef}
@@ -185,8 +186,8 @@ export function PageExportSubmenu({
               : `${Math.max(120, viewportHeight - 16)}px`,
         }}
       >
-        <div role="menu" aria-label="导出">
-          <button
+        <div role="menu" aria-label="导出" className="goose-list-layout">
+          <ListRow
             type="button"
             role="menuitem"
             className={itemClass}
@@ -194,8 +195,8 @@ export function PageExportSubmenu({
           >
             <GooseIcons.FileCode className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
             <span className="min-w-0 truncate">Markdown</span>
-          </button>
-          <button
+          </ListRow>
+          <ListRow
             type="button"
             role="menuitem"
             className={itemClass}
@@ -203,8 +204,8 @@ export function PageExportSubmenu({
           >
             <GooseIcons.FileType className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
             <span className="min-w-0 truncate">HTML</span>
-          </button>
-          <button
+          </ListRow>
+          <ListRow
             type="button"
             role="menuitem"
             className={itemClass}
@@ -212,8 +213,8 @@ export function PageExportSubmenu({
           >
             <GooseIcons.File className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
             <span className="min-w-0 truncate">Word</span>
-          </button>
-          <button
+          </ListRow>
+          <ListRow
             type="button"
             role="menuitem"
             className={itemClass}
@@ -221,7 +222,7 @@ export function PageExportSubmenu({
           >
             <GooseIcons.FileText className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
             <span className="min-w-0 truncate">PDF</span>
-          </button>
+          </ListRow>
         </div>
       </PopoverContent>
     </Popover>

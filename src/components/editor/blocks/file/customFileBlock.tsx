@@ -1,3 +1,5 @@
+import { Input } from "@/components/editor/ui/input";
+import { EditorAction } from "@/components/editor/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useCallback, useState } from "react";
 import { createFileBlockConfig, fileParse } from "@blocknote/core";
@@ -176,22 +178,22 @@ function CustomFileBlockContent({
     <div className="goose-file-block-content">
       <div className="goose-file-block-info">
         {editor.isEditable ? (
-          <button
+          <EditorAction
             type="button"
             className="goose-file-block-icon-btn"
             onClick={handleAddFile}
             title="更换文件"
           >
             <GooseIcons.FileText size={20} strokeWidth={1.75} />
-          </button>
+          </EditorAction>
         ) : (
           <span className="goose-file-block-icon-btn">
             <GooseIcons.FileText size={20} strokeWidth={1.75} />
           </span>
         )}
         {renaming && editor.isEditable ? (
-          <input
-            className="goose-file-block-name-input"
+          <Input variant="inline"
+            className="goose-file-block-name-input h-auto w-auto"
             value={draftName}
             autoFocus
             onFocus={(e) => e.target.select()}
@@ -201,54 +203,54 @@ function CustomFileBlockContent({
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <button
+          <EditorAction
             type="button"
             className="goose-file-block-name"
             onClick={handleOpen}
             title="使用系统默认应用打开"
           >
             {block.props.name}
-          </button>
+          </EditorAction>
         )}
       </div>
       <div className="goose-editor-inline-context-ui goose-file-block-actions">
         {features.openAttachmentsExternally && (
-          <button
+          <EditorAction
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleOpen}
             title="使用系统默认应用打开"
           >
             <GooseIcons.ExternalLink size={16} strokeWidth={1.75} />
-          </button>
+          </EditorAction>
         )}
         {editor.isEditable ? (
-          <button
+          <EditorAction
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleRenameStart}
             title="重命名"
           >
             <GooseIcons.Pencil size={16} strokeWidth={1.75} />
-          </button>
+          </EditorAction>
         ) : null}
-        <button
+        <EditorAction
           type="button"
           className="goose-file-block-action-btn"
           onClick={handleDownload}
           title="下载"
         >
           <GooseIcons.Download size={16} strokeWidth={1.75} />
-        </button>
+        </EditorAction>
         {editor.isEditable ? (
-          <button
+          <EditorAction
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleDelete}
             title="删除"
           >
             <GooseIcons.Trash2 size={16} strokeWidth={1.75} />
-          </button>
+          </EditorAction>
         ) : null}
       </div>
     </div>

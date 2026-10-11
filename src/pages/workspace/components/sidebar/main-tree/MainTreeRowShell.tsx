@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import type { HTMLAttributes, MouseEvent, PointerEvent } from "react";
 import { ChevronRight } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -12,8 +13,10 @@ export function MainTreeRowShell({
   return (
     <div
       {...props}
+      data-selected={active || undefined}
+      data-goose-row-hover="managed"
       className={cn(
-        "main-tree-row group/main-row relative z-10 flex items-center gap-1 rounded-lg pl-0 pr-2",
+        "goose-list-row main-tree-row group/main-row relative z-10 flex items-center gap-1 rounded-lg pl-0 pr-2",
         "text-[13px] font-medium leading-none cursor-pointer select-none transition-colors duration-150 outline-none",
         active && "main-tree-row--selected",
         !active && hovered && "main-tree-row--hovered",
@@ -49,11 +52,11 @@ export function MainTreeRowDisclosure({
     if (event.detail === 0) onToggle();
   };
   return (
-    <button
+    <IconButton size="xs"
       {...nativeProps}
       type="button"
       className={cn(
-        "main-tree-row-disclosure goose-tree-disclosure relative z-10 ml-1.5 inline-flex w-5 h-5 shrink-0 items-center justify-center rounded transition-colors duration-150 ease-out hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:[&_svg]:text-[var(--goose-interactive-hover-fg)] focus-visible:bg-[var(--goose-interactive-selected)] focus-visible:text-[var(--goose-interactive-selected-fg)] (var(--ring))]",
+        "main-tree-row-disclosure goose-tree-disclosure relative z-10 ml-1.5 inline-flex w-5 h-5 shrink-0 items-center justify-center rounded transition-colors duration-150 ease-out hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:[&_svg]:text-[var(--goose-interactive-hover-fg)] focus-visible:bg-[var(--goose-interactive-selected)] focus-visible:text-[var(--goose-interactive-selected-fg)]",
         revealOnRowHover &&
           "opacity-0 group-hover/main-row:opacity-100",
         className,
@@ -69,6 +72,6 @@ export function MainTreeRowDisclosure({
           expanded && "rotate-90",
         )}
       />
-    </button>
+    </IconButton>
   );
 }

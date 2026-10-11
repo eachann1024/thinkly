@@ -1,3 +1,4 @@
+import { ListRow } from "@/components/ui/list-row";
 import type { Page } from "@/types";
 import {
   DEFAULT_FONT_NAMES,
@@ -43,7 +44,7 @@ export function FontSelector({
   };
 
   return (
-    <div className={cn("flex gap-1", compact ? "p-0.5" : "p-1")}>
+    <div className={cn("flex gap-[var(--goose-list-row-gap)]", compact ? "p-0.5" : "p-1")}>
       {defaultFonts.map((font) => {
         const customFont = customFonts[font.value];
         const label = font.label;
@@ -51,10 +52,11 @@ export function FontSelector({
         const selected = (value ?? "default") === font.value;
 
         return (
-          <button
+          <ListRow
             key={font.value}
             type="button"
             aria-pressed={selected}
+            data-selected={selected || undefined}
             onPointerDown={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -66,11 +68,9 @@ export function FontSelector({
               selectFont(font.value);
             }}
             className={cn(
-              "flex-1 rounded-md shadow-none ",
+              "goose-list-row flex-1 shadow-none ",
               compact ? "px-2 py-1.5" : "px-3 py-2",
               "flex flex-col items-center justify-center border-2 border-transparent",
-              "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
-              selected && "border-primary bg-background text-link",
             )}
           >
             <span
@@ -88,7 +88,7 @@ export function FontSelector({
             >
               {label}
             </span>
-          </button>
+          </ListRow>
         );
       })}
     </div>

@@ -129,7 +129,7 @@ export type AccentOptionStyle = CSSProperties & {
 export const defaultLabels = { serif: "衬线体", mono: "等宽体" };
 
 export const APPEARANCE_OPTION_ROW_CLASS =
-  "rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)]";
+  "goose-settings-option-row";
 
 export function EditorLayoutSettings() {
   const layout = useSettings((state) => state.defaultPageLayout);
@@ -155,12 +155,7 @@ export function EditorLayoutSettings() {
             selected={layout === value}
             aria-pressed={layout === value}
             onClick={() => useSettings.setState({ defaultPageLayout: value })}
-            className={cn(
-              "flex flex-col gap-3 p-3",
-              layout === value
-                ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                : "bg-[hsl(var(--goose-selected-bg)/0.48)] hover:bg-[var(--goose-interactive-hover)] dark:bg-[hsl(var(--foreground)/0.08)]",
-            )}
+            className="flex flex-col gap-3 p-3"
           >
             <span
               aria-hidden="true"

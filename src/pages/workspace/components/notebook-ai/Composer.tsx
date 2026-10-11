@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 /** Notebook AI 输入条：草稿、附件、布局与原生引用动作各自维护。 */
 import { forwardRef, useCallback } from "react";
 import { ArrowUp, Plus } from "@/components/ui/icons";
@@ -98,7 +99,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
             expanded={expanded}
             className={cn(
               "rounded-control",
-              "shadow-[0_8px_22px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_22px_rgba(0,0,0,0.32)]",
+              "shadow-[var(--goose-menu-shadow)]",
             )}
           >
             <div
@@ -129,14 +130,14 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 disabled={disabled || isStreaming}
               />
               <span ref={plusWrapRef} className="flex shrink-0 items-center">
-                <button
+                <IconButton size="sm" tone="muted"
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={disabled || isStreaming}
                   className={cn(
-                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-control",
-                    "text-muted-foreground transition-colors duration-150",
-                    "hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                    "flex shrink-0 items-center justify-center ",
+                    "text-muted-foreground",
+                    "",
                     "",
                     "disabled:cursor-not-allowed disabled:text-disabled",
                     isStreaming && "invisible pointer-events-none",
@@ -147,7 +148,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   title="上传图片"
                 >
                   <Plus className="h-4 w-4" strokeWidth={1.75} />
-                </button>
+                </IconButton>
               </span>
 
               {/* 始终挂在同一父级，只切 order/basis，不条件换位置（会丢 contenteditable 节点） */}
@@ -188,8 +189,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
 
               <span ref={sendWrapRef} className="flex shrink-0 items-center">
                 {isStreaming ? (
-                  <ComposerPrimitive.Cancel
-                    className="bui-composer-send flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)] "
+                  <ComposerPrimitive.Cancel render={<IconButton size="icon" tone="danger" />}
+                    className="bui-composer-send flex shrink-0 items-center justify-center bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)] "
                     aria-label="停止生成"
                     title="停止生成"
                   >
@@ -201,17 +202,17 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     />
                   </ComposerPrimitive.Cancel>
                 ) : (
-                  <button
+                  <IconButton size="icon" tone="muted"
                     type="button"
                     onClick={handleSubmit}
                     disabled={!canClickSend}
-                    className="bui-composer-send notebook-ai-send-button flex h-8 w-8 shrink-0 items-center justify-center rounded-control"
+                    className={cn("bui-composer-send notebook-ai-send-button", sendLooksReady && "goose-interactive-primary")}
                     data-ready={sendLooksReady ? "true" : "false"}
                     aria-label="发送消息"
                     title="发送消息"
                   >
                     <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.2} />
-                  </button>
+                  </IconButton>
                 )}
               </span>
             </div>

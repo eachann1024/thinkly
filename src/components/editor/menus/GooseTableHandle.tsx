@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import { useId } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -7,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/editor/ui/dropdown-menu";
-import { Dropdown, Header } from "@heroui/react";
+import { EditorMenuSection, EditorMenuHeader, EditorSubmenuTrigger } from "@/components/editor/ui/vendor-menu";
 import { editTableDimension, hasMergedTableCells } from "./tableMenuActions";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { getTableDeletionLabel } from "./tableDeletion";
@@ -48,7 +49,7 @@ export function GooseTableHandle({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
-        <button
+        <EditorAction
           type="button"
           className="bn-table-handle goose-editor-position-safe-trigger goose-table-handle-btn"
           aria-label={isRow ? "行操作" : "列操作"}
@@ -58,7 +59,7 @@ export function GooseTableHandle({
           ) : (
             <GooseIcons.GripHorizontal className="h-4 w-4" />
           )}
-        </button>
+        </EditorAction>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         editorContext
@@ -67,10 +68,10 @@ export function GooseTableHandle({
         side={isRow ? "right" : "bottom"}
         align="start"
       >
-        <Dropdown.Section aria-label={`第 ${index + 1} ${isRow ? "行" : "列"}`}>
-          <Header className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
+        <EditorMenuSection data-goose-menu-slot="group" className="goose-list-group" aria-label={`第 ${index + 1} ${isRow ? "行" : "列"}`}>
+          <EditorMenuHeader className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
             第 {index + 1} {isRow ? "行" : "列"}
-          </Header>
+          </EditorMenuHeader>
           <DropdownMenuItem
             onSelect={() => runMenuAction(() => insertDimension(true))}
           >
@@ -83,7 +84,7 @@ export function GooseTableHandle({
             {isRow ? <GooseIcons.ArrowDown /> : <GooseIcons.ArrowRight />}{" "}
             {isRow ? "在下方插入行" : "在右侧插入列"}
           </DropdownMenuItem>
-        </Dropdown.Section>
+        </EditorMenuSection>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={hasMergedTableCells(state.block.content)}
@@ -139,7 +140,7 @@ export function GooseTableHandle({
         {features.tablePresentationControls && (
           <>
             <DropdownMenuSeparator />
-            <Dropdown.SubmenuTrigger>
+            <EditorSubmenuTrigger>
               <DropdownMenuItem textValue="表格选项">
                 <GooseIcons.Table2 /> 表格选项{" "}
                 <GooseIcons.ChevronRight className="ml-auto" />
@@ -176,7 +177,7 @@ export function GooseTableHandle({
                   <GooseIcons.AlignJustify /> 两端对齐
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </Dropdown.SubmenuTrigger>
+            </EditorSubmenuTrigger>
           </>
         )}
       </DropdownMenuContent>

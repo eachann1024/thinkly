@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import {
   AlignCenter,
   AlignLeft,
@@ -74,7 +75,7 @@ function ImageToolButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
+        <EditorAction
           type="button"
           aria-label={label}
           aria-pressed={pressed}
@@ -83,7 +84,7 @@ function ImageToolButton({
           className={cn(imageToolButtonClass, className)}
         >
           {children}
-        </button>
+        </EditorAction>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={tooltipSideOffset}>
         {label}

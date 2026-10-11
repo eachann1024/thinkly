@@ -35,7 +35,7 @@ export const CUSTOM_VALUE = "__custom__";
 export const DEFAULT_HIDDEN_FOLDERS = ["assets"];
 
 export const SETTINGS_OPTION_ROW_CLASS =
-  "rounded-[12px] bg-[hsl(var(--goose-selected-bg)/0.58)] dark:bg-[hsl(var(--foreground)/0.08)]";
+  "goose-settings-option-row";
 
 export const SYSTEM_FILE_MANAGER_IDS = new Set([
   "finder",

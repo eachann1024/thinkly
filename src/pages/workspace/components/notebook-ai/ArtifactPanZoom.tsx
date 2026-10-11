@@ -74,14 +74,14 @@ export function ArtifactPanZoom({
       </div>
 
       <TooltipProvider delayDuration={300}>
-        <div className="notebook-ai-artifact-panzoom-controls pointer-events-none absolute bottom-2 right-2 z-10 flex items-center gap-0.5 rounded-[8px] bg-background/95 p-0.5 shadow-[0_8px_22px_rgba(15,23,42,0.08)]">
+        <div className="notebook-ai-artifact-panzoom-controls pointer-events-none absolute bottom-2 right-2 z-10 flex items-center gap-0.5 rounded-[var(--goose-control-radius)] bg-background/95 p-0.5 shadow-[var(--goose-menu-shadow)]">
           <Tooltip>
             <TooltipTrigger asChild>
               <IconButton
                 type="button"
                 tone="muted"
                 size="sm"
-                className="pointer-events-auto cursor-pointer hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="pointer-events-auto cursor-pointer "
                 aria-label="缩小"
                 disabled={atMinZoom}
                 onClick={() => zoomByStep(-1)}
@@ -102,7 +102,7 @@ export function ArtifactPanZoom({
                 type="button"
                 tone="muted"
                 size="sm"
-                className="pointer-events-auto cursor-pointer hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="pointer-events-auto cursor-pointer "
                 aria-label="放大"
                 disabled={atMaxZoom}
                 onClick={() => zoomByStep(1)}
@@ -119,7 +119,7 @@ export function ArtifactPanZoom({
                 type="button"
                 tone="muted"
                 size="sm"
-                className="pointer-events-auto cursor-pointer hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="pointer-events-auto cursor-pointer "
                 aria-label="适配窗口"
                 disabled={atFitZoom}
                 onClick={() => fitToViewport()}

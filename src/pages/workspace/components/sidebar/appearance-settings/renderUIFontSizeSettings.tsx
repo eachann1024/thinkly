@@ -1,3 +1,4 @@
+import { Range } from "@/components/ui/range";
 import * as GooseIcons from "@/components/ui/icons";
 import {
   DEFAULT_UI_FONT_SIZE,
@@ -33,15 +34,14 @@ export function renderUIFontSizeSettings(
       <p className="text-xs text-muted-foreground">
         等比缩放标题栏、侧栏与设置面板；正文字号保持独立。
       </p>
-      <input
+      <Range
         id="interface-scale"
-        type="range"
         min={UI_SCALE_MIN}
         max={UI_SCALE_MAX}
         step={1}
         value={uiFontSize}
         aria-valuetext={`${uiFontSize}%`}
-        className="block h-6 w-full cursor-pointer accent-primary"
+        className="block h-6 cursor-pointer"
         onPointerDown={lockScaleDragLayout}
         onPointerUp={unlockScaleDragLayout}
         onPointerCancel={unlockScaleDragLayout}

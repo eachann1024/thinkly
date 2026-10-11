@@ -145,7 +145,7 @@ function DesktopGlobalHotkeysCard({
             type="button"
             variant="outline"
             size="sm"
-            className="shrink-0 rounded-[10px]"
+            className="shrink-0 rounded-[var(--goose-control-radius)]"
             onClick={() => {
               void getGooseDesktop()?.requestAccessibility?.();
             }}

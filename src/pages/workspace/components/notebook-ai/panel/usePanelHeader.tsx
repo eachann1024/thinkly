@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { useSettings } from "@/stores/useSettings";
 import { useNotebookAiSession } from "../NotebookAiSession";
 import { useEffect, useMemo } from "react";
@@ -61,7 +62,7 @@ export function usePanelHeader(
   // 全屏时工具栏上移到 PageHeader 右上角（顶替 PageMenu）
   const headerToolbar = useMemo(() => {
     const iconBtn =
-      "flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] dark:hover:bg-[var(--goose-interactive-hover)] disabled:pointer-events-none disabled:text-disabled data-[state=open]:bg-[var(--goose-interactive-selected)] dark:data-[state=open]:bg-[var(--goose-interactive-selected)] data-[state=open]:text-[var(--goose-interactive-selected-fg)]";
+      "flex items-center justify-center text-muted-foreground disabled:pointer-events-none disabled:text-disabled ";
     return (
       <TooltipProvider delayDuration={300}>
         <div
@@ -73,7 +74,7 @@ export function usePanelHeader(
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
+                  <IconButton size="icon" tone="muted"
                     type="button"
                     onClick={handleNewConversation}
                     className={iconBtn}
@@ -81,20 +82,20 @@ export function usePanelHeader(
                     disabled={isBusy}
                   >
                     <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  </button>
+                  </IconButton>
                 </TooltipTrigger>
                 <TooltipContent>新建会话</TooltipContent>
               </Tooltip>
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <button
+                  <IconButton size="icon" tone="muted"
                     type="button"
                     className={iconBtn}
                     aria-label="历史会话"
                   >
                     <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  </button>
+                  </IconButton>
                 </PopoverTrigger>
                 <PopoverContent
                   align="end"
@@ -112,20 +113,21 @@ export function usePanelHeader(
               {onLayoutModeChange ? (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button
+                    <IconButton size="icon" tone="muted"
                       type="button"
                       className={iconBtn}
                       aria-label="更多面板选项"
                     >
                       <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
-                    </button>
+                    </IconButton>
                   </PopoverTrigger>
                   <PopoverContent
                     align="end"
                     sideOffset={6}
-                    className="w-48 p-1"
+                    className="goose-list-layout w-48 p-1"
                   >
                     <PopoverAction
+                      aria-pressed={!layoutIsFullscreen}
                       onSelect={() => onLayoutModeChange("side-panel")}
                       className="gap-2"
                     >
@@ -136,6 +138,7 @@ export function usePanelHeader(
                       ) : null}
                     </PopoverAction>
                     <PopoverAction
+                      aria-pressed={layoutIsFullscreen}
                       onSelect={() => onLayoutModeChange("fullscreen")}
                       className="gap-2"
                     >
@@ -152,14 +155,14 @@ export function usePanelHeader(
           ) : null}
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <IconButton size="icon" tone="muted"
                 type="button"
                 onClick={onClose}
                 className={iconBtn}
                 aria-label="关闭 AI"
               >
                 <X className="h-4 w-4" strokeWidth={1.75} />
-              </button>
+              </IconButton>
             </TooltipTrigger>
             <TooltipContent>关闭 AI</TooltipContent>
           </Tooltip>

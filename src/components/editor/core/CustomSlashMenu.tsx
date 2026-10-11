@@ -1,3 +1,4 @@
+import { EditorAction } from "@/components/editor/ui/button";
 import React, { forwardRef } from "react";
 import { cn } from "@/components/editor/utils/cn";
 import {
@@ -39,7 +40,7 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
     );
 
     const list = (
-      <div className={cn("flex flex-col", lite ? "gap-0" : "gap-0.5")}>
+      <div className="goose-list-layout" data-goose-menu-slot="root">
         {items.map((item, index) => {
           if (isSlashMenuDivider(item)) {
             return (
@@ -55,18 +56,20 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
 
           const itemKey = item.title ?? index;
           const button = (
-            <button
+            <EditorAction
               type="button"
               data-index={index}
+              data-goose-menu-slot="row"
+              data-keyboard-active={index === selectedIndex || undefined}
               data-goose-slash-item={lite ? "" : undefined}
               data-goose-slash-selected={
                 lite && index === selectedIndex ? "true" : undefined
               }
               className={cn(
-                "relative flex h-auto w-full items-center justify-start text-left outline-none transition-colors whitespace-normal",
+                "goose-list-row relative flex h-auto w-full items-center justify-start text-left outline-none transition-colors whitespace-normal",
                 lite
-                  ? "min-h-[34px] rounded-lg px-2 py-1.5 shadow-none hover:bg-[var(--goose-interactive-hover)] hover:text-[hsl(var(--foreground))]"
-                  : "min-h-[40px] rounded-[var(--radius-notion-slash-item)] px-2.5 py-2 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:[&_*]:text-[var(--goose-interactive-hover-fg)]",
+                  ? "min-h-[34px] rounded-lg px-2 py-1.5 shadow-none  "
+                  : "min-h-[40px] rounded-[var(--radius-notion-slash-item)] px-2.5 py-2   ",
                 index === selectedIndex
                   ? lite
                     ? "bg-transparent text-[hsl(var(--foreground))]"
@@ -140,7 +143,7 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
                   className="ml-2 h-4 border-transparent bg-transparent px-0 text-[9px] text-muted-foreground shadow-none"
                 />
               )}
-            </button>
+            </EditorAction>
           );
 
           if (!item.disabled || !item.disabledReason) {

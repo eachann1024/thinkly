@@ -50,15 +50,15 @@
  * 输入条外壳：单行、多行复用通用控件圆角，
  * 边框与右键菜单 --goose-menu-border 一致，避免白底上看不见。
  * 高度与控件位移由 PromptBar 共用一次 180ms 布局过渡；编辑器立即完成重排。
- * 颜色过渡沿用原 150ms。
+ * 颜色过渡由共享控件动效变量控制。
  */
 .notebook-ai-composer-shell {
  border-radius: var(--radius-control);
  background: var(--goose-ai-composer-surface);
  transition:
-  color 150ms ease,
-  background-color 150ms ease,
-  border-color 150ms ease;
+  color var(--goose-control-motion-duration) ease,
+  background-color var(--goose-control-motion-duration) ease,
+  border-color var(--goose-control-motion-duration) ease;
 }
 .bui-prompt-bar {
  --goose-ai-composer-surface: color-mix(in srgb, var(--goose-input-surface) 86%, hsl(var(--primary)));
@@ -72,23 +72,14 @@
 }
 
 /* 空草稿也保留清晰的按钮底色；有内容时使用主题主色强调发送。 */
-.notebook-ai-send-button {
+.notebook-ai-send-button:not([data-ready="true"]) {
  background: color-mix(in srgb, var(--goose-ai-composer-surface) 85%, var(--goose-text-primary));
  color: var(--goose-text-primary);
  cursor: default;
- transition: background-color 150ms ease, color 150ms ease;
+ transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;
 }
 .notebook-ai-send-button[data-ready="true"] {
- background: hsl(var(--primary));
- color: hsl(var(--primary-foreground));
  cursor: pointer;
-}
-.notebook-ai-send-button[data-ready="true"]:hover {
- background: color-mix(in srgb, hsl(var(--primary)) 88%, hsl(var(--primary-foreground)));
-}
-.notebook-ai-send-button:focus-visible {
- outline: 2px solid hsl(var(--ring));
- outline-offset: 2px;
 }
 /* panel 输入区按正文字号与行高测量，4 行封顶，超出内部滚动。 */
 [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {

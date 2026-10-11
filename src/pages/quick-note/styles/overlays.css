@@ -46,12 +46,8 @@
 .quicknote-help-rename {
   flex: 0 0 auto;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--goose-control-radius);
   background: var(--goose-interactive-hover);
-}
-
-.quicknote-help-rename:hover {
-  background: var(--goose-interactive-selected);
 }
 
 .quicknote-help-list {
@@ -115,44 +111,7 @@
   }
 }
 
-/* 速记斜杠菜单：更紧凑行高；列表底部留白，避免滚到底最后一项贴边被裁切感 */
-.quicknote-root
-  [data-goose-slash-lite="true"]
-  [data-notion-slash-surface="true"] {
-  overflow: hidden;
-  /* Electron 旧内核会把大圆角外投影绘成直角灰块；小窗只留很轻的边界感。 */
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
-}
-
-.quicknote-root [data-goose-slash-lite="true"] [data-goose-slash-item] {
-  background: transparent !important;
-  border-left: 0 !important;
-  box-shadow: none !important;
-}
-
-.quicknote-root [data-goose-slash-lite="true"] [data-goose-slash-item]:active,
-.quicknote-root [data-goose-slash-lite="true"] [data-goose-slash-item]:focus,
-.quicknote-root
-  [data-goose-slash-lite="true"]
-  [data-goose-slash-selected="true"] {
-  background: transparent !important;
-  border-left: 0 !important;
-  box-shadow: none !important;
-}
-
-.quicknote-root
-  [data-goose-slash-lite="true"]
-  [data-goose-slash-item]:focus-visible {
-  background: var(--goose-interactive-hover) !important;
-  color: var(--goose-interactive-hover-fg) !important;
-}
-
-.quicknote-root
-  [data-goose-slash-lite="true"]
-  [data-goose-slash-selected="true"] {
-  background: transparent !important;
-}
-
+/* 速记只调整菜单滚动布局，条目状态由公共菜单配方维护。 */
 .quicknote-root [data-goose-slash-lite="true"] [data-notion-slash-scroll] {
   scroll-padding-bottom: 12px;
 }

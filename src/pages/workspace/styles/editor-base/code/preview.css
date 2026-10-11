@@ -77,12 +77,6 @@
   color: hsl(var(--muted-foreground));
 }
 
-.goose-code-preview-lightbox-close:hover,
-.goose-code-preview-lightbox-zoom button:hover:not(:disabled) {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-
 .goose-code-preview-lightbox-body {
   flex: 1;
   min-height: 0;

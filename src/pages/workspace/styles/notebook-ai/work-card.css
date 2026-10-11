@@ -72,7 +72,7 @@
  margin: 10px 0 2px;
  padding: 8px 10px 8px 0;
  border: 0;
- border-radius: 8px;
+ border-radius: var(--goose-control-radius);
  background: transparent;
  color: hsl(var(--muted-foreground));
  font-size: 12.5px;
@@ -81,11 +81,6 @@
  cursor: pointer;
 }
 
-.notebook-ai-work-toggle:hover,
-.notebook-ai-work-toggle:focus-visible {
- background: var(--goose-interactive-hover);
- color: var(--goose-interactive-hover-fg);
-}
 
 
 
@@ -255,7 +250,7 @@
  margin: 0 0 0 -8px;
  padding: 4px 8px;
  border: 0;
- border-radius: 8px;
+ border-radius: var(--goose-control-radius);
  background: transparent;
  color: hsl(var(--muted-foreground));
  font-size: 13px;
@@ -264,11 +259,6 @@
  cursor: pointer;
 }
 
-.notebook-ai-letter-fold-toggle:hover,
-.notebook-ai-letter-fold-toggle:focus-visible {
- background: var(--goose-interactive-hover);
- color: var(--goose-interactive-hover-fg);
-}
 
 
 

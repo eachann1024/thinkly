@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { useRef } from "react";
@@ -160,18 +161,16 @@ export function SortableTabItem({
           <TooltipProvider delayDuration={2000}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
+                <IconButton size="xs" tone="muted"
                   type="button"
-                  variant="ghost"
-                  size="icon"
                   className={cn(
-                    "h-5 w-5 shrink-0 rounded-md p-0 transition-colors",
+                    "h-5 w-5 shrink-0 p-0 ",
                     tabPage
-                      ? "hidden @[64px]:group-hover:flex"
+                      ? "hidden @[64px]:group-hover:flex @[64px]:group-focus-within:flex"
                       : "flex",
                     isActive
-                      ? "text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                      : "text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]",
+                      ? "text-muted-foreground "
+                      : "text-muted-foreground ",
                   )}
                   onPointerDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
@@ -181,7 +180,7 @@ export function SortableTabItem({
                   aria-label="关闭标签页"
                 >
                   <GooseIcons.X className="h-3.5 w-3.5" />
-                </Button>
+                </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">

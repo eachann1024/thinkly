@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { useLayoutEffect, useRef, useState } from "react";
 
 export function PendingCreateNameInput({
@@ -57,9 +58,9 @@ export function PendingCreateNameInput({
 
   return (
     <span className="relative z-20 flex min-w-0 flex-1 items-center">
-      <input
+      <Input context="shell"
         ref={inputRef}
-        className="h-[22px] w-full min-w-0 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-1.5 text-sm leading-5 text-foreground outline-none focus:border-[hsl(var(--ring))]"
+        className="h-[22px] min-w-0 px-1.5 py-0 text-sm leading-5"
         value={value}
         placeholder={defaultName}
         draggable={false}

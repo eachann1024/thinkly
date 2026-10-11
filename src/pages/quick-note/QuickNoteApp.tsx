@@ -62,7 +62,7 @@ export function QuickNoteApp() {
       {collectVariant && <QuickNoteCollectPreview variant={collectVariant} />}
       <Toaster
         className="quicknote-toaster"
-        position="bottom-center"
+        placement="center"
         offset={{ bottom: 30, left: 24, right: 24 }}
         mobileOffset={{ bottom: 30, left: 24, right: 24 }}
         toastOptions={{

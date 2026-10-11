@@ -1,3 +1,4 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { useSettings } from "@/stores/useSettings";
 import { AiUnavailableState } from "./AiUnavailableState";
 import { CircleAlert, X } from "@/components/ui/icons";
@@ -131,14 +132,14 @@ export function NotebookAiPanelBody({
                   {formatNotebookAiChatError(error)}
                 </div>
               </div>
-              <button
+              <IconButton size="xs" tone="muted"
                 type="button"
                 onClick={() => clearError()}
-                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] text-[var(--goose-color-danger-focus)] outline-none transition-colors hover:bg-[var(--goose-color-danger-subtle-bg)]"
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-[var(--goose-color-danger-focus)] outline-none hover:bg-[var(--goose-color-danger-subtle-bg)]"
                 aria-label="关闭错误提示"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
+              </IconButton>
             </div>
           </div>
         ) : null}

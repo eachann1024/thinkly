@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
 import { type SettingsAIProps } from "./settings-ai/shared";
 import { useAISettingsDraft } from "./settings-ai/useAISettingsDraft";
 import { useAIProviderConnection } from "./settings-ai/useAIProviderConnection";
@@ -34,12 +35,12 @@ export function SettingsAI(props: SettingsAIProps) {
         {serviceSection}
         {modelSection}
         {connectionTestSection}
-        <details className="rounded-lg border border-border bg-background/50 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground ">
+        <Disclosure className="rounded-lg border border-border bg-background/50 p-3">
+          <DisclosureSummary className="cursor-pointer text-sm font-medium text-foreground ">
             高级选项
-          </summary>
+          </DisclosureSummary>
           <div className="pt-3">{contextSection}</div>
-        </details>
+        </Disclosure>
       </div>
     );
   }
