@@ -17,11 +17,11 @@
 .settings-groups > div > * { min-width: 0; }
 .settings-groups > div > section { border: 1px solid hsl(var(--border) / .55); }
 .settings-groups > .settings-shortcuts { display: block; }
-/* 按内容区可用宽度排布，空间不足时优先保留每张卡片的可读性。 */
+/* 各设置页的内容栏统一等宽，空间不足时切换为单栏。 */
 .settings-card-columns,
 .settings-shortcuts-columns {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(26rem, 2fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   gap: 20px;
 }
@@ -33,7 +33,7 @@
 .settings-shortcuts-columns section { border: 1px solid hsl(var(--border) / .55); }
 .settings-data-grid {
   display: grid;
-  grid-template-columns: minmax(26rem, 2fr) minmax(0, 3fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px 20px;
   align-items: start;
 }
