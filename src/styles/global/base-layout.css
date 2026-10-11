@@ -127,6 +127,7 @@
   textarea::placeholder {
     color: hsl(var(--muted-foreground)) !important;
     opacity: 1;
+    font-size: 0.875em;
   }
 
   /* Prevent image dragging globally */
