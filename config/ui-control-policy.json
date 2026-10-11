@@ -1,0 +1,185 @@
+{
+  "sourceRoots": [
+    "src",
+    "electron"
+  ],
+  "excludeDirectories": [
+    "auto-imports",
+    "node_modules",
+    "dist"
+  ],
+  "rawElements": [
+    "button",
+    "input",
+    "select",
+    "textarea",
+    "summary",
+    "details",
+    "video",
+    "audio"
+  ],
+  "vendorPackages": [
+    "@heroui/",
+    "react-aria-components",
+    "@radix-ui/",
+    "cmdk",
+    "sonner",
+    "@mantine/"
+  ],
+  "allowedOwners": {
+    "raw": [
+      "src/components/ui/"
+    ],
+    "vendor": [
+      "src/components/ui/",
+      "src/components/editor/ui/vendor-menu.tsx"
+    ],
+    "imperative": [],
+    "native": [
+      "electron/",
+      "src/lib/editor-platform/electron.ts"
+    ],
+    "raw-color": [
+      "src/styles/",
+      "src/lib/accentColor.ts",
+      "src/lib/accentColor/"
+    ],
+    "local-dark": [
+      "src/styles/",
+      "src/stores/settings/theme.ts",
+      "src/lib/appearance.ts",
+      "src/lib/accentColor.ts",
+      "src/lib/accentColor/",
+      "src/hooks/useResolvedTheme.ts",
+      "electron/"
+    ],
+    "important": [
+      "src/styles/"
+    ],
+    "token-redefinition": [
+      "src/styles/"
+    ]
+  },
+  "exceptions": [
+    {
+      "file": "src/lib/export/index.ts",
+      "categories": [
+        "imperative"
+      ],
+      "reason": "隐藏文件输入调用操作系统选择器，保留accept/cancel/change手势契约，无可见控件外观",
+      "classification": "native"
+    },
+    {
+      "file": "src/pages/workspace/components/sidebar/settings-dialog/useSettingsImportExport.tsx",
+      "categories": [
+        "imperative"
+      ],
+      "reason": "隐藏文件输入用于导入，不提供可见表单外壳",
+      "classification": "native"
+    },
+    {
+      "file": "src/components/editor/ai/composer/composerImageChip.ts",
+      "categories": [
+        "imperative"
+      ],
+      "reason": "ProseMirror命令式节点无法直接使用React Button；必须消费公共控件CSS及aria-label",
+      "classification": "layout"
+    },
+    {
+      "file": "src/lib/export/markdown/serialize/block.ts",
+      "categories": [
+        "raw"
+      ],
+      "reason": "导出文档的原生媒体播放行为属于文档内容",
+      "classification": "content"
+    }
+  ],
+  "baseline": [
+    {
+      "id": "e33cde9c6a9a2acb",
+      "file": "src/asset-maintenance.tsx",
+      "category": "raw",
+      "classification": "content",
+      "reason": "资源预览原生video controls属于媒体内容，不是应用按钮；仅此原生媒体签名保留"
+    },
+    {
+      "id": "e49be605cf3b94df",
+      "file": "src/components/editor/blocks/video/GooseVideoPlayer.tsx",
+      "category": "raw",
+      "classification": "content",
+      "reason": "真实媒体元素承载播放画面；应用播放按钮已接公共Button，原生video不是表单控件"
+    },
+    {
+      "id": "4a8b715fb80844c8",
+      "file": "src/components/editor/blocks/video/videoBlock.tsx",
+      "category": "raw",
+      "classification": "content",
+      "reason": "toExternalHTML导出video controls属于文档内容，保留浏览器原生播放语义"
+    },
+    {
+      "id": "4220dfb941f63e60",
+      "file": "src/components/editor/menus/EditorFilePanel.tsx",
+      "category": "raw",
+      "classification": "native",
+      "reason": "隐藏file输入负责OS文件选择，保留accept/change和用户手势，无可见外壳"
+    },
+    {
+      "id": "98892294948848c4",
+      "file": "src/pages/workspace/components/notebook-ai/Composer.tsx",
+      "category": "raw",
+      "classification": "native",
+      "reason": "sr-only多文件图片输入负责OS文件选择，保留上传格式、多选和禁用条件"
+    },
+    {
+      "id": "9744110cd1145ff5",
+      "file": "src/pages/workspace/components/notebook-ai/PlanMarkdown.tsx",
+      "category": "raw",
+      "classification": "content",
+      "reason": "Markdown input渲染器接收文档props，保持任务列表checkbox内容语义；已有goose-field视觉入口"
+    },
+    {
+      "id": "f77f24c5da9c4616",
+      "file": "src/pages/workspace/components/notebook-ai/messages/MarkdownTable.tsx",
+      "category": "raw",
+      "classification": "content",
+      "reason": "Markdown文档input渲染器保留正文props及任务列表语义，非应用表单；已有goose-field视觉入口"
+    },
+    {
+      "id": "3936c19780ebbac1",
+      "file": "src/pages/workspace/components/page/WinWindowControls.tsx",
+      "category": "raw",
+      "classification": "native",
+      "reason": "Windows标题栏宿主动作有固定命中区和系统关闭按钮色，保留原生窗口minimize/maximize/close顺序"
+    },
+    {
+      "id": "41ccb6d999224a88",
+      "file": "src/pages/workspace/components/page/WinWindowControls.tsx",
+      "category": "raw",
+      "classification": "native",
+      "reason": "Windows标题栏宿主动作有固定命中区和系统关闭按钮色，保留原生窗口minimize/maximize/close顺序"
+    },
+    {
+      "id": "e8533aa782e3a6fa",
+      "file": "src/pages/workspace/components/page/WinWindowControls.tsx",
+      "category": "raw",
+      "classification": "native",
+      "reason": "Windows标题栏宿主动作有固定命中区和系统关闭按钮色，保留原生窗口minimize/maximize/close顺序"
+    }
+  ],
+  "baselinePolicy": {
+    "allowedClassifications": [
+      "content",
+      "native",
+      "layout"
+    ],
+    "requiredFields": [
+      "id",
+      "file",
+      "category",
+      "classification",
+      "reason"
+    ],
+    "refresh": "仅清除不再存在或缺少人工分类/原因的条目，不批量接纳旁路",
+    "remainingControls": "未经人工确认的raw/imperative/vendor保持new报告"
+  }
+}
