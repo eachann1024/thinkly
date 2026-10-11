@@ -7,6 +7,7 @@
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
+import { clearSearchBodyCache, pruneSearchBodyCache } from "./searchBodyCache";
 import { syncIndex } from "./pageSearchIndex";
 import {
   isCommandSearchablePage,
@@ -18,6 +19,24 @@ export interface SearchCatalog {
   pagesRef: Record<string, Page> | null;
   sortedByTitle: Page[];
   pageIdsWithChildren: Set<string>;
+}
+
+const pageMetadata = new WeakMap<Page, string>();
+let metadata = new Map<string, string>();
+let notebookKey = "";
+
+function notebookSignature(notebooks: Record<string, SearchNotebook | undefined>): string {
+  return JSON.stringify(Object.keys(notebooks).sort().map(id =>
+    [id, notebooks[id]?.source, notebooks[id]?.excludeFromGlobalSearch]));
+}
+
+function metadataSignature(page: Page): string {
+  const cached = pageMetadata.get(page);
+  if (cached !== undefined) return cached;
+  const signature = JSON.stringify([getPageTitle(page), page.workspaceId,
+    page.parentId, page.trashedAt, page.localUnsaved, page.isFolder]);
+  pageMetadata.set(page, signature);
+  return signature;
 }
 
 const EMPTY_CHILDREN = new Set<string>();
@@ -33,6 +52,9 @@ export function getSearchCatalog(): SearchCatalog {
 }
 
 export function resetSearchCatalog(): void {
+  metadata = new Map();
+  notebookKey = "";
+  clearSearchBodyCache();
   catalog = {
     pagesRef: null,
     sortedByTitle: [],
@@ -52,24 +74,37 @@ export function syncSearchCatalog(
   pages: Record<string, Page>,
   notebooks: Record<string, SearchNotebook | undefined>,
 ): SearchCatalog {
-  if (catalog.pagesRef === pages) return catalog;
+  const nextNotebookKey = notebookSignature(notebooks);
+  if (catalog.pagesRef === pages && nextNotebookKey === notebookKey) return catalog;
 
   // 面板关闭传入的空对象：保留上次预热结果
   if (Object.keys(pages).length === 0) return catalog;
 
-  const decorated: { page: Page; title: string }[] = [];
-  const pageIdsWithChildren = new Set<string>();
-
+  const nextMetadata = new Map<string, string>();
+  let metadataChanged = notebookKey !== nextNotebookKey || metadata.size !== Object.keys(pages).length;
   for (const page of Object.values(pages)) {
-    if (!page.trashedAt && page.parentId) {
-      pageIdsWithChildren.add(page.parentId);
-    }
-    if (!isCommandSearchablePage(page, notebooks)) continue;
-    decorated.push({ page, title: getPageTitle(page) });
+    const signature = metadataSignature(page);
+    nextMetadata.set(page.id, signature);
+    if (metadata.get(page.id) !== signature) metadataChanged = true;
   }
-
-  decorated.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
-  const sortedByTitle = decorated.map((item) => item.page);
+  let sortedByTitle: Page[];
+  let pageIdsWithChildren = catalog.pageIdsWithChildren;
+  if (metadataChanged) {
+    const decorated: { page: Page; title: string }[] = [];
+    pageIdsWithChildren = new Set<string>();
+    for (const page of Object.values(pages)) {
+      if (!page.trashedAt && page.parentId) pageIdsWithChildren.add(page.parentId);
+      if (isCommandSearchablePage(page, notebooks)) decorated.push({ page, title: getPageTitle(page) });
+    }
+    decorated.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
+    sortedByTitle = decorated.map(item => item.page);
+  } else {
+    // Order/structure are unchanged, but consumers must receive the latest content references.
+    sortedByTitle = catalog.sortedByTitle.map(page => pages[page.id]);
+  }
+  metadata = nextMetadata;
+  notebookKey = nextNotebookKey;
+  pruneSearchBodyCache(new Set(nextMetadata.keys()));
 
   catalog = {
     pagesRef: pages,
