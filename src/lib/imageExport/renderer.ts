@@ -77,7 +77,7 @@ export async function exportPageToImage(
   const content = cloneExportBlocks(page.content, {
     ensureFirstTitle: !page.localFilePath,
   });
-  await resolveImageUrls(content);
+  await resolveImageUrls(content, page.localFilePath);
   await renderMermaidBlocksAsImages(content, theme);
   await renderMathBlocksAsImages(content, theme);
 
@@ -122,7 +122,7 @@ export async function exportSelectionToImage(
   pageTitle?: string,
   themeId: CardThemeId = "notebook",
   watermarkConfig?: WatermarkConfig,
-  page?: Pick<Page, "fontFamily"> | null,
+  page?: Pick<Page, "fontFamily" | "localFilePath"> | null,
 ) {
   if (!Array.isArray(selectionBlocks) || selectionBlocks.length === 0) return;
 
@@ -133,7 +133,7 @@ export async function exportSelectionToImage(
   const clonedBlocks = cloneExportBlocks(selectionBlocks, {
     ensureFirstTitle: false,
   });
-  await resolveImageUrls(clonedBlocks);
+  await resolveImageUrls(clonedBlocks, page?.localFilePath);
   await renderMermaidBlocksAsImages(clonedBlocks, theme);
   await renderMathBlocksAsImages(clonedBlocks, theme);
 
