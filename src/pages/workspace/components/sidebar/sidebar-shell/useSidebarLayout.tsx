@@ -72,11 +72,11 @@ export function useSidebarLayout({
 
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();
 
-  const sidebarCollapsed = settingsOpen
-    ? !settingsSidebarExpanded
-    : workspaceSidebarCollapsed;
-
   const forceCollapseLeft = useWorkspaceViewport((s) => s.forceCollapseLeft);
+
+  const sidebarCollapsed = settingsOpen
+    ? forceCollapseLeft || !settingsSidebarExpanded
+    : workspaceSidebarCollapsed;
 
   const leftExpandOverride = useWorkspaceViewport((s) => s.leftExpandOverride);
 
