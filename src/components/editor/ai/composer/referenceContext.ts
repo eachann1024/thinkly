@@ -2,9 +2,9 @@ import type { Page } from "@/types";
 import type { Notebook } from "@/stores/useNotebooks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import {
-  extractStructureSummary,
-  extractTextFromContent,
-} from "@/components/editor/utils/content-text-extractor";
+  getContentStructureSummaryForPage,
+  getContentDerivationsForPage,
+} from "@/components/editor/utils/content-page-derivations-cache";
 import type {
   AiFileReferenceAttrs,
   ResolvedAiReferenceContext,
@@ -127,8 +127,8 @@ export function resolveAiReferenceContexts(
       sourceType: getSourceType(page),
       notebookName,
       location: resolveReferenceLocation(page, notebooks),
-      contentText: extractTextFromContent(page.content).trim(),
-      structureSummary: extractStructureSummary(page.content),
+      contentText: getContentDerivationsForPage(page).text.trim(),
+      structureSummary: getContentStructureSummaryForPage(page),
       readStatus: "ready",
     } satisfies ResolvedAiReferenceContext;
   });

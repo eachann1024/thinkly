@@ -3,7 +3,7 @@ import { z } from "zod";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { extractTextFromContent } from "@/components/editor/utils/content-text-extractor";
+import { getContentDerivationsForPage } from "@/components/editor/utils/content-page-derivations-cache";
 import { blocksToMarkdown } from "@/lib/export/blocknoteSerializer";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { NotebookAiAgentContext } from "../types";
@@ -130,7 +130,7 @@ export const searchNotes = tool({
       if (page.workspaceId !== boundNotebookId) continue;
 
       const title = getPageTitle(page);
-      const bodyText = extractTextFromContent(page.content);
+      const bodyText = getContentDerivationsForPage(page).text;
       // 用原始大小写文本，保留正文真实字符，分词匹配在内部 toLowerCase
       const rawCombined = `${title}\n${bodyText}`;
 
