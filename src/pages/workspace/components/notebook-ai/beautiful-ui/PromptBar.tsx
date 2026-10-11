@@ -2,24 +2,19 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { PROMPT_BAR_RADIUS, promptBarBeamRadius } from "./promptBarBeamRadius";
 
-import { usePromptBarLayoutMotion } from "./usePromptBarLayoutMotion";
 
 const BEAM_INSET = 1;
 
 export function PromptBar({
   streaming,
-  expanded,
   children,
   className,
 }: {
   streaming?: boolean;
-  /** 多行展开态：布局换行；beam 圆角始终与外壳实际圆角 对齐 */
-  expanded?: boolean;
   children: ReactNode;
   className?: string;
 }) {
   const barRef = useRef<HTMLDivElement>(null);
-  usePromptBarLayoutMotion(barRef);
   const [beamRadius, setBeamRadius] = useState(PROMPT_BAR_RADIUS - BEAM_INSET);
 
   useLayoutEffect(() => {
@@ -42,7 +37,7 @@ export function PromptBar({
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [expanded, streaming]);
+  }, [streaming]);
 
   return (
     <div
@@ -53,7 +48,6 @@ export function PromptBar({
         className,
       )}
       data-streaming={streaming ? "true" : undefined}
-      data-expanded={expanded ? "true" : undefined}
     >
       {streaming ? (
         <svg className="bui-prompt-bar-beam" aria-hidden focusable="false">

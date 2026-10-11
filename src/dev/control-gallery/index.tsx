@@ -4,9 +4,14 @@ import { Select as NativeSelect } from "@/components/ui/select";
 import { Field } from "@/components/ui/field";
 import { GalleryForms } from "./forms";
 import { GalleryMenus } from "./menus";
+import { GalleryComposer } from "./composer";
+import { useTextCaret } from "@/hooks/useTextCaret";
+import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 
 export function ControlGallery() {
+  useTextCaret();
   const settings = useSettings();
+  useResolvedTheme(settings.theme);
   return <main className="h-screen overflow-auto bg-background p-6 text-foreground">
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
       <header className="space-y-2"><h1 className="text-xl font-semibold">公共控件样本</h1>
@@ -24,7 +29,7 @@ export function ControlGallery() {
           {[85, 100, 114, 130].map(size => <option key={size} value={size}>{size}%</option>)}
         </NativeSelect></Field>
       </section>
-      <GalleryForms /><GalleryMenus />
+      <GalleryComposer /><GalleryForms /><GalleryMenus />
     </div>
   </main>;
 }
