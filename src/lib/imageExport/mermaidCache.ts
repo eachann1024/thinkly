@@ -19,16 +19,19 @@ function instantiate(svg: string): string {
     const id = element.getAttribute("id")!;
     ids.set(id, `${prefix}${ids.size}`);
   }
-  const replaceReferences = (text: string) => {
-    for (const [id, replacement] of [...ids].sort((a, b) => b[0].length - a[0].length)) {
-      const escaped = [...id].map(char =>
-        "^$.*+?()[]{}|".includes(char) || char.charCodeAt(0) === 92
-          ? String.fromCharCode(92) + char : char,
-      ).join("");
-      text = text.replace(new RegExp(`#${escaped}(?![A-Za-z0-9_-])`, "g"), `#${replacement}`);
-    }
-    return text;
-  };
+  // SVG 的每个属性都要处理引用；匹配器只构建一次，避免属性数 × ID 数重复排序和编译。
+  const alternatives = [...ids.keys()].sort((a, b) => b.length - a.length).map(id =>
+    [...id].map(char =>
+      "^$.*+?()[]{}|".includes(char) || char.charCodeAt(0) === 92
+        ? String.fromCharCode(92) + char : char,
+    ).join(""),
+  );
+  const references = alternatives.length
+    ? new RegExp(`#(${alternatives.join("|")})(?![A-Za-z0-9_-])`, "g")
+    : null;
+  const replaceReferences = (text: string) => references
+    ? text.replace(references, (_, id: string) => `#${ids.get(id)}`)
+    : text;
   for (const element of document.querySelectorAll("*")) {
     for (const attribute of [...element.attributes]) {
       if (attribute.name === "id") {
