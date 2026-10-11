@@ -49,19 +49,23 @@ export function GitFolderIssue({
           onOpenAutoFocus={(event) => event.preventDefault()}
           side="bottom"
           align="end"
-          className="w-80 space-y-3 p-3"
+          className="w-80 space-y-3 p-3 text-sm font-normal leading-relaxed"
         >
           <p className="text-sm whitespace-pre-wrap break-words">{detail}</p>
           <GitDetails
             title="文件位置"
-            className="text-xs text-muted-foreground"
+            compact
+            className="text-sm font-normal text-muted-foreground"
           >
-            <p className="mt-1 break-all">{path}</p>
+            <p className="mt-1 break-all text-sm font-normal leading-relaxed">
+              {path}
+            </p>
           </GitDetails>
           {actionLabel && (
             <Button
               variant="outline"
-              className="min-h-[44px] w-full"
+              size="sm"
+              className="w-full"
               disabled={actionDisabled}
               onClick={() => {
                 setOpen(false);
