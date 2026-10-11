@@ -193,7 +193,7 @@ export function useReferenceMentions({
           ensureComposerCaretAnchors(el);
           // Focus BEFORE placing the cursor — calling focus() after addRange()
           // resets the selection in some browsers.
-          el.focus();
+          el.focus({ preventScroll: true });
           placeCaretAfterNode(chip);
         } else {
           // Notebook AI keeps page context outside the editable prompt, so the
@@ -204,7 +204,7 @@ export function useReferenceMentions({
             detected.range.startOffset,
           );
           caretRange.collapse(true);
-          el.focus();
+          el.focus({ preventScroll: true });
           const sel = window.getSelection();
           if (sel) {
             sel.removeAllRanges();

@@ -121,7 +121,7 @@ export function useSkillCommands(options: {
             }
             pruneEmptyComposerTextNodes(editor);
             ensureComposerCaretAnchors(editor);
-            editor.focus();
+            editor.focus({ preventScroll: true });
           } catch {
             // 清掉 /query 失败也不阻断指令执行
           }
@@ -140,7 +140,7 @@ export function useSkillCommands(options: {
         detected.range.insertNode(chip);
         pruneEmptyComposerTextNodes(editor);
         ensureComposerCaretAnchors(editor);
-        editor.focus();
+        editor.focus({ preventScroll: true });
         placeCaretAfterNode(chip);
       } catch {
         return;

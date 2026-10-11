@@ -51,7 +51,7 @@ export function useComposerDraftSync(
     if (autoFocusToken <= 0) return;
     const el = editorRef.current;
     if (!el) return;
-    el.focus();
+    el.focus({ preventScroll: true });
     placeCaretInEditor(el, false);
   }, [autoFocusToken]);
 }
