@@ -1,3 +1,5 @@
+import { useSettings } from "@/stores/useSettings";
+import { useNotebookAiSession } from "../NotebookAiSession";
 import { useEffect, useMemo } from "react";
 import {
   Plus,
@@ -41,6 +43,9 @@ export function usePanelHeader(
   },
 ) {
   const { notebookId, onClose, onLayoutModeChange } = props;
+  const { unavailableReason } = useNotebookAiSession();
+  const hydrated = useSettings((state) => state._hasHydrated);
+  const unavailable = !hydrated || Boolean(unavailableReason);
   const {
     handleNewConversation,
     handleSelectConversation,
@@ -64,76 +69,87 @@ export function usePanelHeader(
           role="toolbar"
           aria-label="AI 工具栏"
         >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={handleNewConversation}
-                className={iconBtn}
-                aria-label="新建会话"
-                disabled={isBusy}
-              >
-                <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>新建会话</TooltipContent>
-          </Tooltip>
+          {!unavailable ? (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleNewConversation}
+                    className={iconBtn}
+                    aria-label="新建会话"
+                    disabled={isBusy}
+                  >
+                    <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>新建会话</TooltipContent>
+              </Tooltip>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <button type="button" className={iconBtn} aria-label="历史会话">
-                <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              sideOffset={6}
-              className="w-72 max-w-72 overflow-hidden p-0"
-            >
-              <ConversationHistoryList
-                notebookId={notebookId}
-                onSelectConversation={handleSelectConversation}
-                onDeleteConversation={handleDeleteConversation}
-              />
-            </PopoverContent>
-          </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={iconBtn}
+                    aria-label="历史会话"
+                  >
+                    <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  sideOffset={6}
+                  className="w-72 max-w-72 overflow-hidden p-0"
+                >
+                  <ConversationHistoryList
+                    notebookId={notebookId}
+                    onSelectConversation={handleSelectConversation}
+                    onDeleteConversation={handleDeleteConversation}
+                  />
+                </PopoverContent>
+              </Popover>
 
-          {onLayoutModeChange ? (
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={iconBtn}
-                  aria-label="更多面板选项"
-                >
-                  <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" sideOffset={6} className="w-48 p-1">
-                <PopoverAction
-                  onSelect={() => onLayoutModeChange("side-panel")}
-                  className="gap-2"
-                >
-                  <PanelRight className="h-4 w-4" strokeWidth={1.75} />
-                  <span className="flex-1">侧栏并排</span>
-                  {!layoutIsFullscreen ? (
-                    <Check className="h-3.5 w-3.5" />
-                  ) : null}
-                </PopoverAction>
-                <PopoverAction
-                  onSelect={() => onLayoutModeChange("fullscreen")}
-                  className="gap-2"
-                >
-                  <AppWindow className="h-4 w-4" strokeWidth={1.75} />
-                  <span className="flex-1">全屏</span>
-                  {layoutIsFullscreen ? (
-                    <Check className="h-3.5 w-3.5" />
-                  ) : null}
-                </PopoverAction>
-              </PopoverContent>
-            </Popover>
+              {onLayoutModeChange ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={iconBtn}
+                      aria-label="更多面板选项"
+                    >
+                      <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    sideOffset={6}
+                    className="w-48 p-1"
+                  >
+                    <PopoverAction
+                      onSelect={() => onLayoutModeChange("side-panel")}
+                      className="gap-2"
+                    >
+                      <PanelRight className="h-4 w-4" strokeWidth={1.75} />
+                      <span className="flex-1">侧栏并排</span>
+                      {!layoutIsFullscreen ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : null}
+                    </PopoverAction>
+                    <PopoverAction
+                      onSelect={() => onLayoutModeChange("fullscreen")}
+                      className="gap-2"
+                    >
+                      <AppWindow className="h-4 w-4" strokeWidth={1.75} />
+                      <span className="flex-1">全屏</span>
+                      {layoutIsFullscreen ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : null}
+                    </PopoverAction>
+                  </PopoverContent>
+                </Popover>
+              ) : null}
+            </>
           ) : null}
-
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -151,6 +167,7 @@ export function usePanelHeader(
       </TooltipProvider>
     );
   }, [
+    unavailable,
     onClose,
     handleNewConversation,
     isBusy,
@@ -169,12 +186,18 @@ export function usePanelHeader(
       return;
     }
     setAiHeaderActions(headerToolbar);
-    setAiHeaderTitle(conversationSummary);
+    setAiHeaderTitle(unavailable ? "AI 助手" : conversationSummary);
     return () => {
       clearAiHeaderActions();
       clearAiHeaderTitle();
     };
-  }, [isFullscreen, isElectronChrome, headerToolbar, conversationSummary]);
+  }, [
+    isFullscreen,
+    isElectronChrome,
+    headerToolbar,
+    conversationSummary,
+    unavailable,
+  ]);
 
   return headerToolbar;
 }
