@@ -1,8 +1,12 @@
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 
+const signatures = new WeakMap<Page, string>();
+
 function treeSignature(page: Page): string {
-  return [
+  const cached = signatures.get(page);
+  if (cached !== undefined) return cached;
+  const signature = [
     page.workspaceId,
     page.parentId ?? "",
     page.icon ?? "",
@@ -18,6 +22,8 @@ function treeSignature(page: Page): string {
     page.isFavorite ? "1" : "0",
     getPageTitle(page),
   ].join("\0");
+  signatures.set(page, signature);
+  return signature;
 }
 
 /** 侧栏树只关心标题和结构。正文编辑会换 pages 引用，不能因此重绘整棵树。 */

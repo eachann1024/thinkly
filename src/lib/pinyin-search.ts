@@ -1,5 +1,8 @@
 import { match } from "pinyin-pro";
 
+const matchCache = new Map<string, readonly number[] | null>();
+const MAX_MATCHES = 1024;
+
 const PINYIN_QUERY_RE = /^[a-zA-Z]+$/;
 const HAS_CJK_RE = /[一-鿿]/;
 
@@ -16,5 +19,15 @@ export function isPinyinQuery(query: string): boolean {
 export function pinyinMatchIndices(text: string, query: string): number[] | null {
   if (!query || !text) return null;
   if (!isPinyinQuery(query) || !HAS_CJK_RE.test(text)) return null;
-  return match(text, query, { continuous: true, precision: "start" }) ?? null;
+  const key = JSON.stringify([text, query]);
+  if (matchCache.has(key)) {
+    const cached = matchCache.get(key)!;
+    matchCache.delete(key);
+    matchCache.set(key, cached);
+    return cached ? [...cached] : null;
+  }
+  const result = match(text, query, { continuous: true, precision: "start" }) ?? null;
+  matchCache.set(key, result ? [...result] : null);
+  if (matchCache.size > MAX_MATCHES) matchCache.delete(matchCache.keys().next().value!);
+  return result;
 }
