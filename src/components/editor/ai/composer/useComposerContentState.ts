@@ -57,7 +57,8 @@ export function useComposerContentState(props: AiComposerInputProps) {
   const setPlaceholderVisible = useCallback((visible: boolean) => {
     const node = placeholderRef.current;
     if (!node) return;
-    node.style.display = visible ? "" : "none";
+    const display = visible ? "" : "none";
+    if (node.style.display !== display) node.style.display = display;
   }, []);
 
   const syncEmptyState = useCallback(
