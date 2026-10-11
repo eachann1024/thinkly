@@ -10,7 +10,7 @@ import {
 } from "./families";
 const persistentFontLoads = new Map<string, Promise<boolean>>();
 
-const withTimeout = <T,>(promise: Promise<T>, timeoutMs = 4000) => {
+const withTimeout = <T>(promise: Promise<T>, timeoutMs = 4000) => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<T>((_, reject) => {
     timer = setTimeout(
@@ -88,11 +88,16 @@ export function ensurePersistentRemoteFont(family: PersistentWoff2Family) {
   const existing = persistentFontLoads.get(family);
   if (existing) return existing;
 
-  const load = installRemoteFontFromUrls(family).catch((error) => {
-    console.warn(`[fontLoader] ${family} 远端加载失败`, error);
-    persistentFontLoads.delete(family);
-    return false;
-  });
+  const load = installRemoteFontFromUrls(family)
+    .then((loaded) => {
+      if (!loaded) persistentFontLoads.delete(family);
+      return loaded;
+    })
+    .catch((error) => {
+      console.warn(`[fontLoader] ${family} 远端加载失败`, error);
+      persistentFontLoads.delete(family);
+      return false;
+    });
   persistentFontLoads.set(family, load);
   return load;
 }
