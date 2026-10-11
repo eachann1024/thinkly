@@ -1,5 +1,46 @@
-/* 行布局、背景和箭头均复用本地主树；大纲只增加收起标记。
+/* 行布局、背景和箭头均复用本地主树；大纲增加标题级别与收起标记。
  * 绝对定位包含块已排除共享行的透明边框，虚线贴合整条背景。 */
+.outline-heading-marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+}
+
+.outline-heading-level {
+  font-size: 0.75em;
+  font-weight: 500;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.main-tree-row--selected .outline-heading-level {
+  opacity: 0.7;
+}
+
+.outline-heading-marker .outline-heading-disclosure {
+  position: absolute;
+  inset: 0;
+  margin-left: 0;
+  opacity: 0;
+}
+
+/* 父标题复用同一栏位显示箭头，避免再增加一列留白；键盘聚焦同样可见。 */
+.outline-heading-row:is(:hover, :focus-within)
+  .outline-heading-marker[data-expandable="true"] .outline-heading-level {
+  opacity: 0;
+}
+
+.outline-heading-row:is(:hover, :focus-within) .outline-heading-disclosure {
+  opacity: 1;
+}
+
 .outline-heading-row[data-collapsed="true"]::after {
   content: "";
   position: absolute;

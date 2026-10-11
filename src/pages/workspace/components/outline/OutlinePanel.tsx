@@ -1,16 +1,14 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { FileText } from "@/components/ui/icons";
-import {
-  MainTreeRowDisclosure,
-  MainTreeRowShell,
-} from "../sidebar/main-tree/MainTreeRowShell";
+import { MainTreeRowShell } from "../sidebar/main-tree/MainTreeRowShell";
 import {
   MAIN_TREE_INDENT,
   MAIN_TREE_ROW_PADDING_LEFT,
 } from "../sidebar/main-tree/mainTreeDragGeometry";
 import { useSidebarItemHeight } from "../sidebar/hooks/useSidebarItemHeight";
 import type { HeadingItem } from "./useHeadings";
+import { OutlineHeadingMarker } from "./OutlineHeadingMarker";
 import "./outline.css";
 
 interface OutlinePanelProps {
@@ -135,29 +133,18 @@ function OutlineTreeNode({
           onHeadingToggle(heading.id);
         }}
       >
-        {canToggleOutline ? (
-          <MainTreeRowDisclosure
-            expanded={!isOutlineCollapsed}
-            label={
-              isOutlineCollapsed
-                ? "展开子标题"
-                : "收起子标题"
-            }
-            onToggle={toggleOutline}
-            revealOnRowHover
-          />
-        ) : (
-          <span
-            className="main-tree-row-disclosure ml-1.5 w-5 h-5 shrink-0 pointer-events-none"
-            aria-hidden
-          />
-        )}
+        <OutlineHeadingMarker
+          level={heading.level}
+          expandable={canToggleOutline}
+          expanded={!isOutlineCollapsed}
+          onToggle={toggleOutline}
+        />
         <button
           type="button"
           onClick={() => onHeadingClick(heading.id)}
           aria-current={isActive ? "location" : undefined}
           aria-label={
-            isEditorCollapsed ? `${heading.text}，已收起` : heading.text
+            `H${heading.level} ${heading.text}${isEditorCollapsed ? "，已收起" : ""}`
           }
           className={cn(
             "outline-heading relative z-10 min-w-0 flex-1 truncate text-left leading-snug",
