@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSettings } from "@/stores/useSettings";
+import { getAiAvailabilityError } from "@/lib/notebook-ai/availabilityError";
 import { useChat } from "@ai-sdk/react";
 import type { ChatTransport } from "ai";
 import {
@@ -73,6 +75,7 @@ export function useSessionState(notebookId: string) {
     composerDraftHasContent(s.composerDrafts[notebookId]),
   );
 
+  const ai = useSettings((state) => state.ai);
   const modelCheck = buildLanguageModel();
 
   const persistedMessages = useMemo(
@@ -134,7 +137,18 @@ export function useSessionState(notebookId: string) {
 
   const isStreaming = status === "streaming" || status === "submitted";
   const isBusy = isStreaming || isCompacting;
-  const unavailableReason = !modelCheck.ok ? modelCheck.reason : undefined;
+  const unavailableReason = !modelCheck.ok
+    ? modelCheck.reason
+    : !isBusy
+      ? getAiAvailabilityError(error)
+      : undefined;
+  const previousAiRef = useRef(ai);
+  useEffect(() => {
+    if (previousAiRef.current === ai) return;
+    previousAiRef.current = ai;
+    // 配置更新后允许重新连接；不重发上一轮，避免重复执行笔记工具。
+    if (getAiAvailabilityError(error)) clearError();
+  }, [ai, error, clearError]);
   const aiStatusActiveRef = useRef(false);
   const messagesRef = useRef(messages);
   const committedStopRef = useRef(stop);
