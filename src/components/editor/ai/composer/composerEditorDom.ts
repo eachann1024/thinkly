@@ -105,7 +105,7 @@ export function insertComposerLineBreak(editor: HTMLElement): boolean {
       editor.contains(selection.anchorNode));
 
   if (!selectionInsideEditor) {
-    editor.focus();
+    editor.focus({ preventScroll: true });
     const endRange = document.createRange();
     endRange.selectNodeContents(editor);
     endRange.collapse(false);

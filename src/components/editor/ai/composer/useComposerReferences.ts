@@ -75,7 +75,7 @@ export function useComposerReferences(state: ComposerContentState) {
         selection.rangeCount > 0 &&
         (el === selection.anchorNode || el.contains(selection.anchorNode));
       if (!inside) {
-        el.focus();
+        el.focus({ preventScroll: true });
         const endRange = document.createRange();
         endRange.selectNodeContents(el);
         endRange.collapse(false);
