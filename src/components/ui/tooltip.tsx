@@ -139,6 +139,7 @@ type TooltipContentProps = React.HTMLAttributes<HTMLDivElement> & {
   align?: "start" | "center" | "end";
   sideOffset?: number;
   editorContext?: boolean;
+  variant?: "text" | "complex";
 };
 const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
   (
@@ -148,6 +149,7 @@ const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
       align = "center",
       sideOffset = 4,
       editorContext,
+      variant = "text",
       children,
       style,
       ...props
@@ -172,14 +174,16 @@ const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
           className={cn(
             "z-[21000]",
             !editorContext &&
-              "select-none overflow-hidden whitespace-nowrap rounded-control border border-border/80 bg-popover px-2.5 py-1.5 text-[12px] font-medium leading-none text-popover-foreground shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-[1px] dark:border-white/20",
+              "goose-tooltip-surface",
+            !editorContext && variant === "complex" && "goose-tooltip-complex",
             !editorContext && className,
           )}
         >
           {editorContext ? (
             <div
               className={cn(
-                "goose-editor-tooltip-surface select-none overflow-hidden whitespace-nowrap border border-border/80 bg-popover font-medium leading-none text-popover-foreground shadow-[0_8px_24px_rgba(15,23,42,0.12)] backdrop-blur-[1px] dark:border-white/20",
+                "goose-editor-context-ui goose-editor-tooltip-surface goose-tooltip-surface",
+                variant === "complex" && "goose-tooltip-complex",
                 className,
               )}
             >

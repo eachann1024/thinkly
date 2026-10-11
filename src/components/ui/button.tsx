@@ -1,54 +1,18 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "./control-recipes";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control border text-sm font-medium ring-offset-background transition-colors disabled:pointer-events-none disabled:text-disabled [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default: "goose-interactive goose-interactive-primary shadow-none",
-        destructive: "goose-interactive goose-interactive-danger",
-        outline:
-          "goose-interactive border-border bg-background",
-        secondary:
-          "goose-interactive bg-secondary text-secondary-foreground shadow-none",
-        ghost:
-          "goose-interactive border-transparent bg-transparent",
-        link: "text-link underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    compoundVariants: [
-      { variant: "ghost", size: "icon", className: "goose-toolbar-action" },
-    ],
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
-
-export interface ButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
-
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  busy?: boolean;
+}
+// The shared recipe keeps preserve controls free of implicit layout, border and size.
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
-    return (
-      <button
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
+  ({ className, variant, size, contentStyle = "default", context = "shell", busy, ...props }, ref) => (
+    <button ref={ref} data-slot="button" data-goose-control="button" data-goose-context={context} data-goose-content-style={contentStyle}
+      aria-busy={busy || undefined} data-busy={busy || undefined}
+      className={cn(buttonVariants({ variant, size, context, contentStyle, className }))} {...props} />
+  ),
 );
 Button.displayName = "Button";
-
 export { Button, buttonVariants };

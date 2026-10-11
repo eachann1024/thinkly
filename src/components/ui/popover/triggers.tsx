@@ -78,7 +78,7 @@ export function PopoverAction({
       {...props}
       type="button"
       className={cn(
-        "goose-interactive relative flex w-full cursor-default select-none items-center gap-2 rounded-lg border border-transparent px-2 py-1.5 text-left text-[13px] outline-none transition-colors disabled:pointer-events-none disabled:text-disabled",
+        "goose-interactive goose-list-row relative flex w-full cursor-default select-none items-center text-left outline-none disabled:pointer-events-none disabled:text-disabled",
         className,
       )}
       onClick={(event) => {

@@ -1,26 +1,16 @@
 import * as React from "react";
+import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-
-/**
- * 外壳基础控件：原生 input（避免 HeroUI/RAC 在 Electron 旧内核下受控输入失效）。
- * 业务契约：type/value/onChange(e)/placeholder/disabled/id/autoFocus/onKeyDown/autoComplete/ref…
- */
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        data-slot="input"
-        className={cn(
-          "goose-interactive flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled md:text-sm",
-          className,
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
+import { fieldVariants } from "./control-recipes";
+import { useFieldControl } from "./field";
+export interface InputProps extends React.ComponentPropsWithoutRef<"input">, VariantProps<typeof fieldVariants> {}
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, context = "shell", variant, controlSize, ...props }, ref) => {
+    const association = useFieldControl(props);
+    return <input ref={ref} {...props} {...association} data-slot="input" data-goose-control="input" data-goose-context={context}
+      data-goose-inline-input={variant === "inline" || undefined}
+      className={cn(fieldVariants({ context, variant, controlSize }), "flex file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground", className)} />;
   },
 );
 Input.displayName = "Input";
-
 export { Input };

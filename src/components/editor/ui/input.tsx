@@ -1,21 +1,8 @@
 import * as React from "react";
-import { cn } from "../utils/cn";
-
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-10 w-full rounded-[10px] border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled md:text-sm",
-          className,
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
+import { Input as SharedInput, type InputProps } from "@/components/ui/input";
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ context = "editor", ...props }, ref) => <SharedInput ref={ref} context={context} {...props} />,
 );
-Input.displayName = "Input";
-
+Input.displayName = "EditorInput";
 export { Input };
+export type { InputProps };

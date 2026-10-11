@@ -7,6 +7,11 @@ declare global {
   const BEAM_MIN_ACTIVE_MS: typeof import('../components/ui/ai-motion').BEAM_MIN_ACTIVE_MS
   const Badge: typeof import('../components/ui/badge').Badge
   const Button: typeof import('../components/ui/button').Button
+  const Checkbox: typeof import('../components/ui/checkbox').Checkbox
+  const CheckboxContent: typeof import('../components/ui/checkbox').CheckboxContent
+  const CheckboxControl: typeof import('../components/ui/checkbox').CheckboxControl
+  const CheckboxIndicator: typeof import('../components/ui/checkbox').CheckboxIndicator
+  const CheckboxRoot: typeof import('../components/ui/checkbox').CheckboxRoot
   const Command: typeof import('../components/ui/command').Command
   const CommandDialog: typeof import('../components/ui/command').CommandDialog
   const CommandEmpty: typeof import('../components/ui/command').CommandEmpty
@@ -36,6 +41,8 @@ declare global {
   const DialogShell: typeof import('../components/ui/dialog-shell').DialogShell
   const DialogTitle: typeof import('../components/ui/dialog').DialogTitle
   const DialogTrigger: typeof import('../components/ui/dialog').DialogTrigger
+  const Disclosure: typeof import('../components/ui/disclosure').Disclosure
+  const DisclosureSummary: typeof import('../components/ui/disclosure').DisclosureSummary
   const DropdownMenu: typeof import('../components/ui/dropdown-menu').DropdownMenu
   const DropdownMenuContent: typeof import('../components/ui/dropdown-menu').DropdownMenuContent
   const DropdownMenuIconSlot: typeof import('../components/ui/dropdown-menu').DropdownMenuIconSlot
@@ -51,13 +58,16 @@ declare global {
   const FLOATING_MENU_SCALE: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_SCALE
   const FLOATING_MENU_SHIFT_PX: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_SHIFT_PX
   const FeatureToastCard: typeof import('../components/ui/feature-toast-card').FeatureToastCard
+  const Field: typeof import('../components/ui/field').Field
   const IconButton: typeof import('../components/ui/icon-button').IconButton
   const ImageExportThemeSelector: typeof import('../components/ui/image-export-theme-selector').ImageExportThemeSelector
   const Input: typeof import('../components/ui/input').Input
   const Kbd: typeof import('../components/ui/kbd').Kbd
   const Label: typeof import('../components/ui/label').Label
+  const ListRow: typeof import('../components/ui/list-row').ListRow
   const NOTEBOOK_MENU_CLOSE_MS: typeof import('../components/ui/floating-menu-motion').NOTEBOOK_MENU_CLOSE_MS
   const NOTEBOOK_MENU_OPEN_MS: typeof import('../components/ui/floating-menu-motion').NOTEBOOK_MENU_OPEN_MS
+  const NativeSelect: typeof import('../components/ui/select').NativeSelect
   const ORB_PHASE_HOLD_MS: typeof import('../components/ui/ai-motion').ORB_PHASE_HOLD_MS
   const ORB_VISIBLE_MIN_MS: typeof import('../components/ui/ai-motion').ORB_VISIBLE_MIN_MS
   const Popover: typeof import('../components/ui/popover').Popover
@@ -65,14 +75,24 @@ declare global {
   const PopoverAnchor: typeof import('../components/ui/popover').PopoverAnchor
   const PopoverContent: typeof import('../components/ui/popover').PopoverContent
   const PopoverTrigger: typeof import('../components/ui/popover').PopoverTrigger
+  const Radio: typeof import('../components/ui/radio').Radio
+  const Range: typeof import('../components/ui/range').Range
   const ScrollArea: typeof import('../components/ui/scroll-area').ScrollArea
+  const SegmentedControl: typeof import('../components/ui/segmented-control').SegmentedControl
+  const Select: typeof import('../components/ui/select').Select
   const SelectableCard: typeof import('../components/ui/selectable-card').SelectableCard
   const Separator: typeof import('../components/ui/separator').Separator
   const SuccessToastIcon: typeof import('../components/ui/sonner').SuccessToastIcon
   const Switch: typeof import('../components/ui/switch').Switch
   const THINKING_PLACEHOLDER_MIN_MS: typeof import('../components/ui/ai-motion').THINKING_PLACEHOLDER_MIN_MS
   const TOOLTIP_DELAY_MS: typeof import('../components/ui/tooltip-delay').TOOLTIP_DELAY_MS
+  const Tabs: typeof import('../components/ui/tabs').Tabs
+  const TabsContent: typeof import('../components/ui/tabs').TabsContent
+  const TabsList: typeof import('../components/ui/tabs').TabsList
+  const TabsTrigger: typeof import('../components/ui/tabs').TabsTrigger
+  const Textarea: typeof import('../components/ui/textarea').Textarea
   const Toaster: typeof import('../components/ui/sonner').Toaster
+  const Toggle: typeof import('../components/ui/toggle').Toggle
   const Tooltip: typeof import('../components/ui/tooltip').Tooltip
   const TooltipContent: typeof import('../components/ui/tooltip').TooltipContent
   const TooltipProvider: typeof import('../components/ui/tooltip').TooltipProvider
@@ -83,9 +103,12 @@ declare global {
   const floatingMenuFromTransform: typeof import('../components/ui/floating-menu-motion').floatingMenuFromTransform
   const floatingMenuMotionStyle: typeof import('../components/ui/floating-menu-motion').floatingMenuMotionStyle
   const floatingMenuOrigin: typeof import('../components/ui/floating-menu-motion').floatingMenuOrigin
+  const iconButtonVariants: typeof import('../components/ui/icon-button').iconButtonVariants
   const resolveTooltipDelayDuration: typeof import('../components/ui/tooltip-delay').resolveTooltipDelayDuration
   const showDeleteReceipt: typeof import('../components/ui/delete-receipt').showDeleteReceipt
   const toast: typeof import('../components/ui/sonner').toast
+  const toggleVariants: typeof import('../components/ui/toggle').toggleVariants
+  const useFieldControl: typeof import('../components/ui/field').useFieldControl
   const useMinHoldActive: typeof import('../components/ui/ai-motion').useMinHoldActive
 }
 // for type re-export
@@ -97,8 +120,14 @@ declare global {
   export type { ButtonProps } from '../components/ui/button'
   import('../components/ui/button')
   // @ts-ignore
+  export type { CheckboxProps } from '../components/ui/checkbox'
+  import('../components/ui/checkbox')
+  // @ts-ignore
   export type { DialogProps } from '../components/ui/dialog'
   import('../components/ui/dialog')
+  // @ts-ignore
+  export type { FieldProps } from '../components/ui/field'
+  import('../components/ui/field')
   // @ts-ignore
   export type { FloatingMotionMode, FloatingMotionStatus } from '../components/ui/floating-menu-motion'
   import('../components/ui/floating-menu-motion')
@@ -106,6 +135,30 @@ declare global {
   export type { IconButtonProps } from '../components/ui/icon-button'
   import('../components/ui/icon-button')
   // @ts-ignore
+  export type { InputProps } from '../components/ui/input'
+  import('../components/ui/input')
+  // @ts-ignore
+  export type { KbdProps } from '../components/ui/kbd'
+  import('../components/ui/kbd')
+  // @ts-ignore
+  export type { RadioProps } from '../components/ui/radio'
+  import('../components/ui/radio')
+  // @ts-ignore
+  export type { RangeProps } from '../components/ui/range'
+  import('../components/ui/range')
+  // @ts-ignore
+  export type { SegmentedOption } from '../components/ui/segmented-control'
+  import('../components/ui/segmented-control')
+  // @ts-ignore
+  export type { NativeSelectProps, SelectProps } from '../components/ui/select'
+  import('../components/ui/select')
+  // @ts-ignore
   export type { SelectableCardProps } from '../components/ui/selectable-card'
   import('../components/ui/selectable-card')
+  // @ts-ignore
+  export type { SwitchProps } from '../components/ui/switch'
+  import('../components/ui/switch')
+  // @ts-ignore
+  export type { TextareaProps } from '../components/ui/textarea'
+  import('../components/ui/textarea')
 }
