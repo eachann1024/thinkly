@@ -17,6 +17,20 @@
 }
 
 .sidebar-design .sidebar-tree-heading { margin: 0 0.285714rem 0.714286rem; }
+.sidebar-design .sidebar-tree-heading .sidebar-search-heading {
+  padding: 0 0.428571rem 0;
+}
+.sidebar-design .sidebar-tree-heading:has(.sidebar-search-heading) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 0.75rem;
+}
+.sidebar-design .sidebar-tree-heading:has(.sidebar-search-heading) .sidebar-section-label {
+  width: auto;
+  height: auto;
+  margin-left: auto;
+}
 .workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-tree-heading .sidebar-section-label {
   height: 2rem;
   padding: 0;
