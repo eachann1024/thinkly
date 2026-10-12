@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { FilePlus2, FolderOpen, Search, Sparkles } from "@/components/ui/icons";
+import { FilePlus2, FolderOpen } from "@/components/ui/icons";
 import { isElectronHost } from "@/lib/local-vault";
 import { usePageEmptyState } from "./empty-state/usePageEmptyState";
 import "./empty-state/page-empty-state.css";
 
 function EmptyStateActionIcon({ actionKey }: { actionKey: string }) {
   if (actionKey === "create-page") return <FilePlus2 aria-hidden="true" />;
-  if (actionKey === "ai") return <Sparkles aria-hidden="true" />;
-  if (actionKey === "search") return <Search aria-hidden="true" />;
   return <FolderOpen aria-hidden="true" />;
 }
 
