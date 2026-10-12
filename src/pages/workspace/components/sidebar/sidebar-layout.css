@@ -17,19 +17,30 @@
 }
 
 .sidebar-design .sidebar-tree-heading { margin: 0 0.285714rem 0.714286rem; }
-.sidebar-design .sidebar-tree-heading .sidebar-search-heading {
-  padding: 0 0.428571rem 0;
+.sidebar-design:has(> div > div > .sidebar-tree-heading .sidebar-search-heading) {
+  padding-inline: 0;
 }
 .sidebar-design .sidebar-tree-heading:has(.sidebar-search-heading) {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 0.75rem;
+  margin: 0;
+}
+.sidebar-design .sidebar-tree-heading .sidebar-search-heading {
+  min-width: 0;
+  flex: 1;
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
 }
 .sidebar-design .sidebar-tree-heading:has(.sidebar-search-heading) .sidebar-section-label {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
   width: auto;
   height: auto;
-  margin-left: auto;
 }
 .workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-tree-heading .sidebar-section-label {
   height: 2rem;
@@ -70,6 +81,9 @@
 .sidebar-design .sidebar-tree-heading button[aria-label^="新建"] { width: 1.714286rem; height: 1.714286rem; min-width: 1.714286rem; }
 .sidebar-design[hidden],
 .sidebar-content-pane[hidden] { display: none !important; }
+.sidebar-design .sidebar-page-list {
+  margin: 0.75rem 1rem 0;
+}
 .workspace-shell .workspace-stage[data-sidebar-overlay] { position: relative; }
 .workspace-shell .workspace-stage[data-sidebar-overlay] > .sidebar-overlay-backdrop {
   position: absolute;
