@@ -62,9 +62,10 @@ export async function computeCommandMatches(
     const bodyCount = countLoweredMatches(body.toLocaleLowerCase(), needle);
     const literal = titleCount > 0 || bodyCount > 0;
     const indexed = indexedIds.has(page.id);
-    const pinyin = !literal && !indexed && usePinyin &&
+    const pinyin = !literal && usePinyin &&
       pinyinMatchIndices(title, rawQuery.trim()) !== null;
-    if (literal || indexed || pinyin) {
+    // Index tokens determine relevance, but cannot admit pages without a real match.
+    if (literal || pinyin) {
       // Only matched pages need snippet extraction and decoration.
       const snippet = bodyCount > 0 ? getContentSnippet(body, query) : undefined;
       const titleSnippet = !snippet && titleCount > 0
@@ -76,7 +77,7 @@ export async function computeCommandMatches(
         snippetMatchIndex: selectedSnippet?.matchIndex,
         literalBodyMatchCount: bodyCount,
         titleMatchCount: titleCount,
-        matchKind: snippet ? "literal" : titleSnippet ? "title" : pinyin ? "pinyin" : "token",
+        matchKind: bodyCount > 0 ? "literal" : titleCount > 0 ? "title" : "pinyin",
       };
       ranks.set(page.id, titleMatchRank(title, query));
       if (indexed) indexedResults.set(page.id, result);
