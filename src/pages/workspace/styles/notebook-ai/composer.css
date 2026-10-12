@@ -47,12 +47,14 @@
 }
 
 /*
- * 输入条外壳：默认多行，复用通用控件圆角，
- * 边框与右键菜单 --goose-menu-border 一致，避免白底上看不见。
+ * 输入条沿用应用的中性输入表面和控件圆角，不叠加菜单投影。
+ * 聚焦只加深已有边框，避免在面板底部形成第二层外框。
  * 高度和工具栏位置保持稳定；超出的输入内容在编辑器内滚动。
  * 颜色过渡由共享控件动效变量控制。
  */
 .notebook-ai-composer-shell {
+ --ai-composer-font-size: calc(var(--editor-font-size, 17px) * 0.85);
+ --ai-composer-line-height: calc(var(--ai-composer-font-size) * 1.45);
  border-radius: var(--radius-control);
  background: var(--goose-ai-composer-surface);
  transition:
@@ -60,21 +62,28 @@
   background-color var(--goose-control-motion-duration) ease,
   border-color var(--goose-control-motion-duration) ease;
 }
+.notebook-ai-composer-form {
+ outline: none;
+}
 .bui-prompt-bar {
- --goose-ai-composer-surface: color-mix(in srgb, var(--goose-input-surface) 86%, hsl(var(--primary)));
+ --goose-ai-composer-surface: var(--goose-input-surface);
  overflow: hidden;
- border: 1px solid hsl(var(--goose-menu-border));
+ border: 1px solid hsl(var(--input));
  border-radius: var(--radius-control);
  background: var(--goose-ai-composer-surface);
+ transition: border-color var(--goose-control-motion-duration) ease;
+}
+.bui-prompt-bar:focus-within {
+ border-color: color-mix(in srgb, hsl(var(--input)) 72%, var(--goose-text-primary));
 }
 .bui-prompt-bar > .notebook-ai-composer-shell {
  background: transparent;
 }
 
-/* 空草稿也保留清晰的按钮底色；有内容时使用主题主色强调发送。 */
+/* 空草稿使用轻量灰底；有内容时沿用共享控件的强调色。 */
 .notebook-ai-send-button:not([data-ready="true"]) {
- background: color-mix(in srgb, var(--goose-ai-composer-surface) 85%, var(--goose-text-primary));
- color: var(--goose-text-primary);
+ background: color-mix(in srgb, var(--goose-ai-composer-surface) 94%, var(--goose-text-primary));
+ color: var(--goose-text-secondary);
  cursor: default;
  transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;
 }
@@ -83,17 +92,25 @@
 }
 /* Stable two-line viewport: extra lines scroll inside, with no per-keystroke layout measurement. */
 [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
- --ai-composer-line-height: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.5));
+ font-family: var(--font-default);
+ font-size: var(--ai-composer-font-size);
+ line-height: var(--ai-composer-line-height);
  height: calc(var(--ai-composer-line-height) * 2);
  min-height: calc(var(--ai-composer-line-height) * 2);
  max-height: calc(var(--ai-composer-line-height) * 2);
  scrollbar-gutter: stable;
  overscroll-behavior: contain;
 }
+[data-input-placeholder][data-variant="panel"] {
+ font-family: var(--font-default);
+ font-size: var(--ai-composer-font-size);
+ line-height: var(--ai-composer-line-height);
+}
 @media (prefers-reduced-motion: reduce) {
  .notebook-ai-composer-shell,
  .notebook-ai-send-button,
  .bui-prompt-bar,
+ [data-input-placeholder][data-variant="panel"],
  [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
   transition: none;
  }
@@ -114,12 +131,6 @@
  line-height: 20px;
 }
 
-[data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
- font-family: var(--font-default);
- font-size: var(--editor-font-size, 17px);
- line-height: var(--editor-line-height, 1.5);
-}
-
 [data-ai-composer-editor="true"] .ai-composer-chip {
  display: inline-flex;
  align-items: center;
@@ -132,15 +143,15 @@
  line-height: 20px;
  font-size: 11px;
  max-width: 100%;
- margin-left: 4px;
- margin-right: 4px;
+ margin-left: 3px;
+ margin-right: 3px;
  margin-top: 0;
  margin-bottom: 0;
  padding-top: 0;
  padding-bottom: 0;
- padding-left: 6px;
- padding-right: 6px;
- border-radius: 6px;
+ padding-left: 5px;
+ padding-right: 5px;
+ border-radius: 5px;
  position: static;
  top: auto;
  /* 与 ZWSP 文本行盒底对齐；高度一致时顶/底/中线都齐 */
@@ -157,6 +168,7 @@
  min-height: var(--ai-composer-line-height);
  max-height: var(--ai-composer-line-height);
  line-height: var(--ai-composer-line-height);
+ font-size: calc(var(--ai-composer-font-size) * 0.78);
 }
 
 @keyframes goose-selection-quote-enter {

@@ -72,10 +72,11 @@ export const AiComposerInput = forwardRef<
         <div
           ref={placeholderRef}
           data-input-placeholder=""
+          data-variant={variant}
           className={cn(
             "pointer-events-none absolute left-0 right-0 z-[1] text-muted-foreground",
             variant === "panel"
-              ? "top-0 overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-default)] text-[length:calc(var(--editor-font-size)*0.875)] leading-[calc(var(--editor-font-size)*var(--editor-line-height))]"
+              ? "top-0 overflow-hidden text-ellipsis whitespace-nowrap"
               : "top-0 pr-8 text-[10.5px] leading-[20px]",
           )}
           style={isEmpty ? undefined : { display: "none" }}
