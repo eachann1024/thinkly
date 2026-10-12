@@ -161,17 +161,23 @@ async function main() {
     const cask = createCask(version, tag, hashes, REPO, signed);
     writeFileSync(join(stage, "SHA256SUMS.txt"), installers.map((name) => `${hashes.get(name)}  ${name}\n`).join(""));
     assert.deepEqual(readdirSync(stage).sort(), releaseAssets(version, signed));
+    const baseDownloadUrl = `https://github.com/${REPO}/releases/download/${tag}`;
     const notes = [
-      `Goose Note ${version}，构建对应提交：${sha}`,
+      `### 📥 安装包下载`,
       "",
-      "- macOS：Apple 芯片 `-arm64.dmg`，Intel `.dmg`",
-      "- Windows：x64 `-x64-setup.exe`，ARM64 `-arm64-setup.exe`",
-      "- Linux x64：`.AppImage`（通用）、`.deb`（Debian/Ubuntu）、`.pacman`（Arch / Omarchy 等 Arch 系：`sudo pacman -U ./goose-note-app-*.pacman`）",
-      "- `SHA256SUMS.txt`：以上安装包的 SHA-256 校验值",
+      "| 平台 | 安装包直接下载 | 架构与说明 |",
+      "| :--- | :--- | :--- |",
+      `| **macOS** | [Goose.Note-${version}-arm64.dmg](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
+      `| | [Goose.Note-${version}.dmg](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
+      `| **Windows** | [Goose.Note-${version}-x64-setup.exe](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
+      `| | [Goose.Note-${version}-arm64-setup.exe](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
+      `| **Linux** | [Goose.Note-${version}.AppImage](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
+      `| | [goose-note-app_${version}_amd64.deb](${baseDownloadUrl}/goose-note-app_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
+      `| | [goose-note-app-${version}.pacman](${baseDownloadUrl}/goose-note-app-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./goose-note-app-${version}.pacman\`） |`,
       "",
-      `${signed ? "macOS 已签名并公证" : "macOS 未签名、未公证"}；${windowsSigned ? "Windows 安装包与主程序已由 SignPath 签名" : "Windows 未做 Authenticode 签名"}。打包检查不代替桌面功能验收。`,
-      "许可证与第三方声明随安装包附带；对应源码为本 Release 下方 GitHub 自动附带的 Source code 归档，构建方法见仓库 SOURCE-CODE.md。",
-      `构建记录：https://github.com/${REPO}/actions/runs/${process.env.GITHUB_RUN_ID || ""}`,
+      `- [SHA256SUMS.txt](${baseDownloadUrl}/SHA256SUMS.txt)：安装包 SHA-256 校验和`,
+      "",
+      `${signed ? "macOS 安装包已完成代码签名与公证。" : "macOS 暂未公证（如提示「无法打开」或「未知开发者」，在「系统设置 → 隐私与安全性」中点击「仍要打开」即可）；"}${windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。"}`,
       "",
       codeSigningPolicy(windowsSigned),
     ].join("\n");
