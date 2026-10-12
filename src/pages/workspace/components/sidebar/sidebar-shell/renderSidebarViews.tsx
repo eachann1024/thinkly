@@ -70,7 +70,7 @@ export function renderSidebarViews(
               </div>
               <div
                 ref={setScrollAreaNode}
-                className="sidebar-content-pane flex min-h-0 flex-1 flex-col"
+                className="sidebar-content-pane sidebar-page-list flex min-h-0 flex-1 flex-col"
                 data-sidebar-page-list=""
                 hidden={currentView !== "pages"}
                 inert={currentView !== "pages"}
