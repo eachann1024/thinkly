@@ -20,13 +20,13 @@
 }
 [data-page-layout] .page-layout-document > .workspace-editor-surface { padding-block: 0; }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="paragraph"] {
-  padding-block: 0;
+  padding-block: 2px;
   margin-bottom: var(--page-paragraph-gap);
 }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="heading"]:not([data-is-toggleable="true"]) {
   --page-heading-gap: max(0px, calc(var(--page-title-gap) - var(--previous-prose-gap, 0px)));
-  --page-heading-padding: 0px;
-  padding-block: 0;
+  --page-heading-padding: 3px;
+  padding-block: 2px;
   margin-block: var(--page-heading-gap) 14px;
 }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="heading"]:not([data-is-toggleable="true"]):has(h1) {
@@ -50,7 +50,7 @@
 [data-page-layout] .bn-editor .bn-block-outer:has(> .bn-block > [data-content-type="quote"]:only-child) + .bn-block-outer { --previous-prose-gap: 16px; }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"] {
   margin-block: max(0px, calc(16px - var(--previous-prose-gap, 0px))) 16px;
-  padding-block: 0;
+  padding-block: 2px;
 }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"] > blockquote {
   border-left-width: 2px;

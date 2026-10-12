@@ -123,6 +123,10 @@
   margin-right: calc(-1 * var(--goose-active-line-outset, 8px));
   padding-left: var(--goose-active-line-outset, 8px);
   padding-right: var(--goose-active-line-outset, 8px);
+  padding-top: var(--goose-active-line-pad-y, 3px);
+  padding-bottom: var(--goose-active-line-pad-y, 3px);
+  margin-top: calc(-1 * var(--goose-active-line-pad-y, 3px));
+  margin-bottom: calc(-1 * var(--goose-active-line-pad-y, 3px));
   border-radius: 4px;
 }
 
@@ -136,6 +140,7 @@
   ) {
   margin-top: var(--page-heading-gap, 15px);
   padding-top: var(--page-heading-padding, 3px);
+  padding-bottom: var(--page-heading-padding, 3px);
   border-radius: 4px;
 }
 
