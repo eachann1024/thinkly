@@ -1,0 +1,80 @@
+.workspace-page-empty {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+}
+
+.page-empty-state {
+  display: flex;
+  width: 100%;
+  max-width: 28rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.page-empty-state-illustration {
+  display: block;
+  width: clamp(9rem, 24vh, 13.428571rem);
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 1.285714rem;
+  object-fit: contain;
+  user-select: none;
+}
+
+.page-empty-state-title {
+  margin: 0;
+  font-size: 1.571429rem;
+  font-weight: 600;
+  line-height: 2.142857rem;
+  text-wrap: balance;
+}
+
+.page-empty-state-description {
+  margin: 0.714286rem 0 1.857143rem;
+  font-size: 1rem;
+  line-height: 1.571429rem;
+  text-wrap: balance;
+}
+
+.page-empty-state .page-empty-state-primary {
+  min-height: 3rem;
+  max-width: 100%;
+  gap: 0.714286rem;
+  padding: 0.714286rem 1.714286rem;
+  border-radius: 0.714286rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.428571rem;
+}
+
+.page-empty-state .page-empty-state-primary svg {
+  width: 1.428571rem;
+  height: 1.428571rem;
+}
+
+.page-empty-state-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.285714rem 0.714286rem;
+  margin-top: 0.857143rem;
+}
+
+.page-empty-state .page-empty-state-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.571429rem;
+  min-height: 2.285714rem;
+  padding: 0.428571rem 0.571429rem;
+  font-size: 0.928571rem;
+  line-height: 1.428571rem;
+}
+
+.page-empty-state-link svg {
+  width: 1.142857rem;
+  height: 1.142857rem;
+  flex-shrink: 0;
+}
