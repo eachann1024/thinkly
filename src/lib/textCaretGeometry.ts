@@ -5,7 +5,7 @@ export type CaretBox = { left: number; top: number; height: number };
 export function editableTarget(): HTMLElement | null {
   const active = document.activeElement;
   if (!(active instanceof HTMLElement)) return null;
-  if (active.hasAttribute("data-page-title-field")) return null;
+  if (active.hasAttribute("data-page-title-field") || active.hasAttribute("data-sidebar-rename-field")) return null;
   if (active instanceof HTMLTextAreaElement) return active.disabled || active.readOnly ? null : active;
   if (active instanceof HTMLInputElement) {
     return active.selectionStart === null || active.disabled || active.readOnly ? null : active;
@@ -13,9 +13,9 @@ export function editableTarget(): HTMLElement | null {
   return active.isContentEditable ? active : null;
 }
 
-type EmptyLineMetrics = { top: number; height: number };
+const CARET_EM_RATIO = 1.15;
 
-function editableCaret(el: HTMLElement, emptyLine?: EmptyLineMetrics): CaretBox | null {
+function editableCaret(el: HTMLElement): CaretBox | null {
   const selection = window.getSelection();
   if (!selection?.isCollapsed || !selection.rangeCount) return null;
   const range = selection.getRangeAt(0);
@@ -30,19 +30,46 @@ function editableCaret(el: HTMLElement, emptyLine?: EmptyLineMetrics): CaretBox 
     probe.setStart(node, next ? offset : offset - 1);
     probe.setEnd(node, next ? offset + 1 : offset);
     rect = probe.getBoundingClientRect();
-    const rtl = getComputedStyle(node.parentElement ?? el).direction === "rtl";
-    return rect.height ? { left: next !== rtl ? rect.left : rect.right, top: rect.top, height: rect.height } : null;
+    if (rect.height) {
+      const anchor = node.parentElement ?? el;
+      const style = getComputedStyle(anchor);
+      const rtl = style.direction === "rtl";
+      const fontSize = parseFloat(style.fontSize) || 16;
+      const caretHeight = Math.round(fontSize * CARET_EM_RATIO);
+      const targetHeight = Math.min(rect.height, caretHeight);
+      const insetY = Math.max(0, (rect.height - targetHeight) / 2);
+      return { left: next !== rtl ? rect.left : rect.right, top: rect.top + insetY, height: targetHeight };
+    }
+    return null;
   }
-  if (rect.height) return { left: rect.left, top: rect.top, height: rect.height };
+  if (rect.height) {
+    const anchor = range.startContainer instanceof HTMLElement ? range.startContainer : range.startContainer.parentElement ?? el;
+    const style = getComputedStyle(anchor);
+    const fontSize = parseFloat(style.fontSize) || 16;
+    const caretHeight = Math.round(fontSize * CARET_EM_RATIO);
+    const targetHeight = Math.min(rect.height, caretHeight);
+    const insetY = Math.max(0, (rect.height - targetHeight) / 2);
+    return { left: rect.left, top: rect.top + insetY, height: targetHeight };
+  }
   // Empty paragraph / composer: its own line box supplies the native insertion point.
   const anchor = range.startContainer instanceof HTMLElement ? range.startContainer : range.startContainer.parentElement;
   if (!anchor || anchor.textContent?.replace(/\u200b/g, "").trim()) return null;
   const box = anchor.getBoundingClientRect();
   const style = getComputedStyle(anchor);
+  const fontSize = parseFloat(style.fontSize) || 16;
+  const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.2;
+  const padTop = parseFloat(style.paddingTop || "0");
+  const padBottom = parseFloat(style.paddingBottom || "0");
+  const contentHeight = Math.max(0, box.height - padTop - padBottom) || lineHeight;
+  const caretHeight = Math.min(contentHeight, Math.round(fontSize * CARET_EM_RATIO));
+  const insetY = Math.max(0, (contentHeight - caretHeight) / 2);
+  const rtl = style.direction === "rtl";
   return {
-    left: box.left + parseFloat(style.paddingLeft || "0"),
-    top: box.top + parseFloat(style.paddingTop || "0") + (emptyLine?.top ?? 0),
-    height: emptyLine?.height ?? (parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2),
+    left: rtl
+      ? box.right - parseFloat(style.paddingRight || "0") - 2
+      : box.left + parseFloat(style.paddingLeft || "0"),
+    top: box.top + padTop + insetY,
+    height: caretHeight,
   };
 }
 
@@ -56,35 +83,17 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
     const y = field || /(auto|scroll|hidden|clip)/.test(style.overflowY);
     if (x || y) clips.push({ node, x, y });
   }
-  // Empty composers have no text Range. Cache the same font box used by typed
-  // text rather than drawing a caret as tall as the composer's whole line.
-  let emptyLine: EmptyLineMetrics | undefined;
-  if (el.hasAttribute("data-ai-composer-editor")) {
-    const style = getComputedStyle(el);
-    mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;white-space:pre;";
-    for (const key of ["font", "line-height", "letter-spacing"]) {
-      mirror.style.setProperty(key, style.getPropertyValue(key));
-    }
-    const text = document.createTextNode("\u200b");
-    mirror.replaceChildren(text);
-    const range = document.createRange();
-    range.selectNodeContents(text);
-    const textBox = range.getBoundingClientRect();
-    const scale = el.getBoundingClientRect().width / el.offsetWidth || 1;
-    emptyLine = {
-      top: (textBox.top - mirror.getBoundingClientRect().top) * scale,
-      height: textBox.height * scale,
-    };
-  }
-  let measure: () => CaretBox | null = () => editableCaret(el, emptyLine);
+  let measure: () => CaretBox | null = () => editableCaret(el);
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     const style = getComputedStyle(el);
+    const fontSize = parseFloat(style.fontSize) || 14;
     const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
+    const isInput = el instanceof HTMLInputElement;
     mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;contain:layout style paint;";
     for (const key of ["font", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
       mirror.style.setProperty(key, style.getPropertyValue(key));
     }
-    mirror.style.whiteSpace = el instanceof HTMLInputElement ? "pre" : "pre-wrap";
+    mirror.style.whiteSpace = isInput ? "pre" : "pre-wrap";
     const prefix = document.createTextNode("");
     const marker = document.createElement("span");
     marker.textContent = "\u200b";
@@ -103,10 +112,29 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
       const rest = el.type === "password" ? "•".repeat(el.value.length - start) : el.value.slice(start);
       if (suffix.data !== rest) suffix.data = rest;
       const markerBox = marker.getBoundingClientRect();
+      const caretHeight = Math.round(fontSize * CARET_EM_RATIO * scale);
+
+      if (isInput) {
+        const borderTop = parseFloat(style.borderTopWidth || "0") * scale;
+        const borderBottom = parseFloat(style.borderBottomWidth || "0") * scale;
+        const innerHeight = Math.max(0, box.height - borderTop - borderBottom);
+        const targetHeight = Math.min(innerHeight, caretHeight);
+        const topInset = Math.max(0, (innerHeight - targetHeight) / 2);
+        return {
+          left: box.left + (markerBox.left - el.scrollLeft) * scale,
+          top: box.top + borderTop + topInset,
+          height: targetHeight,
+        };
+      }
+
+      const lineH = Math.max(markerBox.height * scale, lineHeight * scale);
+      const targetHeight = Math.min(lineH, caretHeight);
+      const lineTop = box.top + (markerBox.top - el.scrollTop) * scale;
+      const topInset = Math.max(0, (lineH - targetHeight) / 2);
       return {
         left: box.left + (markerBox.left - el.scrollLeft) * scale,
-        top: el instanceof HTMLInputElement ? box.top + (box.height - lineHeight * scale) / 2 : box.top + (markerBox.top - el.scrollTop) * scale,
-        height: lineHeight * scale,
+        top: lineTop + topInset,
+        height: targetHeight,
       };
     };
   }

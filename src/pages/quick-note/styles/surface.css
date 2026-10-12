@@ -78,7 +78,7 @@ body,
   color: var(--goose-interactive-selected-fg);
   font-size: 12px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: normal;
   box-shadow: none;
   pointer-events: auto;
 }

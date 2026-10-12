@@ -102,6 +102,7 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
     <span className="relative z-20 flex h-full min-w-0 flex-1 items-center">
     <Input variant="inline" context="shell"
       ref={inputRef}
+      data-sidebar-rename-field=""
       className="relative z-20 h-full w-full min-w-0 flex-1 cursor-text select-text"
       style={{ caretColor: nativeCaret ? "var(--goose-accent-focus)" : "transparent" }}
       aria-label="重命名，Enter 确认，Escape 取消"
