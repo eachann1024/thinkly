@@ -1,8 +1,6 @@
 import { ListRow } from "@/components/ui/list-row";
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
-import { FileText } from "@/components/ui/icons";
-import { EmptyState } from "@/components/ui/empty-state";
 import { MainTreeRowShell } from "../sidebar/main-tree/MainTreeRowShell";
 import {
   MAIN_TREE_INDENT,
@@ -46,9 +44,9 @@ export function OutlinePanel({
 
   if (headings.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col">
-        <EmptyState icon={FileText} title={emptyMessage} details={emptyHint || undefined}
-          className="px-4 py-6" />
+      <div className="outline-empty" role="status">
+        <p>{emptyMessage}</p>
+        {emptyHint ? <p className="outline-empty-hint">{emptyHint}</p> : null}
       </div>
     );
   }
