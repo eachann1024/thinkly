@@ -76,7 +76,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
           handleSubmit();
         }}
         className={cn(
-          "pointer-events-none",
+          "notebook-ai-composer-form pointer-events-none",
           isFullscreen ? "px-6 pb-5" : "px-0 pb-2",
         )}
       >
@@ -86,18 +86,12 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
             isFullscreen ? "max-w-[720px]" : "max-w-none",
           )}
         >
-          <PromptBar
-            streaming={isStreaming}
-            className={cn(
-              "rounded-control",
-              "shadow-[var(--goose-menu-shadow)]",
-            )}
-          >
+          <PromptBar streaming={isStreaming}>
             <div
               className={cn(
-                "notebook-ai-composer-shell bui-root flex min-h-[44px] gap-2 overflow-hidden rounded-control",
+                "notebook-ai-composer-shell bui-root flex min-h-[38px] gap-1.5 overflow-hidden rounded-control",
                 "flex-wrap items-end",
-                "py-1.5 pl-2.5 pr-2",
+                "px-2.5 pb-1.5 pt-2",
                 dropActive &&
                   "ring-2 ring-[var(--goose-interactive-selected)] ring-offset-1 ring-offset-background",
               )}
@@ -134,7 +128,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   aria-label="上传图片"
                   title="上传图片"
                 >
-                  <Plus className="h-4 w-4" strokeWidth={1.75} />
+                  <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </IconButton>
               </span>
 
@@ -169,7 +163,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
 
               <span className="flex shrink-0 items-center">
                 {isStreaming ? (
-                  <ComposerPrimitive.Cancel render={<IconButton size="icon" tone="danger" />}
+                  <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="danger" />}
                     className="bui-composer-send flex shrink-0 items-center justify-center bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)] "
                     aria-label="停止生成"
                     title="停止生成"
@@ -182,7 +176,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     />
                   </ComposerPrimitive.Cancel>
                 ) : (
-                  <IconButton size="icon" tone="muted"
+                  <IconButton size="sm" tone="muted"
                     type="button"
                     onClick={handleSubmit}
                     disabled={!canClickSend}

@@ -75,7 +75,7 @@ export function useComposerEditor(options: {
       "block w-full bg-transparent p-0 text-foreground outline-none",
       "overflow-y-auto break-words whitespace-pre-wrap",
       variant === "panel"
-        ? "min-h-[24px] max-h-[96px] text-[13px] leading-6"
+        ? "min-h-[20px] max-h-[80px]"
         : "min-h-[20px] max-h-[88px] text-[12px] leading-[20px]",
     ].join(" ");
     el.contentEditable = "true";
