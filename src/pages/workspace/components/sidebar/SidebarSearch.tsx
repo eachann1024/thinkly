@@ -1,10 +1,9 @@
-import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Search, X } from "@/components/ui/icons";
+import { ChevronDown, FolderOpen, Search, X } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarSearchResults } from "./SidebarSearchResults";
 import { usePages } from "@/stores/usePages";
@@ -14,6 +13,7 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useCommandSearch, type SearchResultPage } from "../command/useCommandSearch";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
 import { useSearchSession } from "./useSearchSession";
+import { useSearchScopeHint } from "./useSearchScopeHint";
 import "./sidebar-search.css";
 
 export function SidebarSearch() {
@@ -23,6 +23,7 @@ export function SidebarSearch() {
     closeSearch: s.closeSearch, targetPage: s.targetPage, setQuery: s.setQuery,
     setScope: s.setScope,
   })));
+  const showScopeHint = useSearchScopeHint(s => s.visible);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const composing = useRef(false);
@@ -89,6 +90,12 @@ export function SidebarSearch() {
   };
   const keydown = (event: React.KeyboardEvent) => {
     if (composing.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    if (event.key === "Tab" && event.currentTarget === inputRef.current && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault();
+      const latest = useSearchSession.getState();
+      latest.setScope(latest.scope.kind === "all" ? { kind: "current", notebookId: latest.startingNotebookId } : { kind: "all" });
+      return;
+    }
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
     if ((event.key === "ArrowDown" || event.key === "ArrowUp") && results.length) {
       event.preventDefault();
@@ -101,19 +108,21 @@ export function SidebarSearch() {
     if (event.key === "Enter" && selected && !pending) { event.preventDefault(); openResult(selected, true); }
   };
   const scopeValue = session.scope.kind === "notebook" ? `notebook:${scopedId}` : session.scope.kind;
-  const currentName = notebooks[session.startingNotebookId ?? ""]?.name ?? "当前笔记本";
-  const scopeLabel = session.scope.kind === "all" ? "所有笔记本" : session.scope.kind === "current" ? `当前笔记本 · ${notebooks[scopedId ?? ""]?.name ?? currentName}` : notebooks[scopedId ?? ""]?.name ?? "笔记本已移除";
+  const currentName = notebooks[session.startingNotebookId ?? ""]?.name ?? "当前记事本";
+  const scopeLabel = session.scope.kind === "all" ? "所有记事本" : session.scope.kind === "current" ? "当前记事本" : notebooks[scopedId ?? ""]?.name ?? "记事本已移除";
   return <section className="sidebar-search" aria-label="全局搜索" hidden={!session.open}>
     <div className="sidebar-search-heading"><strong>搜索笔记</strong></div>
-    <div className="sidebar-search-input-wrap"><Search size={16} aria-hidden="true"/><Input variant="inline" context="shell" ref={inputRef} role="combobox" aria-label="搜索笔记" aria-controls="sidebar-search-results" aria-expanded={session.open} aria-autocomplete="list" aria-activedescendant={selected ? `search-result-${selected.id}` : undefined} value={draft} placeholder="搜索笔记内容…" autoComplete="off" spellCheck={false}
+    <div className="sidebar-search-focus-box"><div className="sidebar-search-input-wrap"><Search size={16} aria-hidden="true"/><Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label="搜索笔记" aria-describedby={showScopeHint ? "sidebar-search-scope-hint" : undefined} aria-controls="sidebar-search-results" aria-expanded={session.open} aria-autocomplete="list" aria-activedescendant={selected ? `search-result-${selected.id}` : undefined} value={draft} placeholder="搜索笔记内容…" autoComplete="off" spellCheck={false}
       onChange={e => { setDraft(e.target.value); if (!composing.current) session.setQuery(e.target.value); }}
       onCompositionStart={() => { composing.current = true; }} onCompositionEnd={e => { composing.current = false; session.setQuery(e.currentTarget.value); }} onKeyDown={keydown}/>
       {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={() => { session.setQuery(""); inputRef.current?.focus(); }}><X size={16}/></IconButton> : null}</div>
-    <div className="sidebar-search-filters">{session.open && <DropdownMenu><DropdownMenuTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-scope" aria-label="搜索范围"><span>{scopeLabel}</span><ChevronDown size={14}/></Button></DropdownMenuTrigger>
+    <div className="sidebar-search-scope-row">{session.open && <DropdownMenu><DropdownMenuTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-scope" aria-label={`搜索范围：${scopeLabel}`}><FolderOpen size={14} aria-hidden="true"/><span>{scopeLabel}</span><ChevronDown size={14}/></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64"><DropdownMenuRadioGroup value={scopeValue} onValueChange={value => session.setScope(value === "all" ? { kind: "all" } : value === "current" ? { kind: "current", notebookId: session.startingNotebookId } : { kind: "notebook", notebookId: value.slice(9) })}>
-        <DropdownMenuRadioItem value="current">当前笔记本 · {currentName}</DropdownMenuRadioItem><DropdownMenuRadioItem value="all">所有笔记本</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="current">当前记事本 · {currentName}</DropdownMenuRadioItem><DropdownMenuRadioItem value="all">所有记事本</DropdownMenuRadioItem>
         {Object.values(notebooks).map(n => <DropdownMenuRadioItem key={n.id} value={`notebook:${n.id}`}>{n.name}</DropdownMenuRadioItem>)}
-      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<span role="status">{searchError ? "" : loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
+      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<kbd className="sidebar-search-key" aria-hidden="true">Tab</kbd></div></div>
+    {showScopeHint && <p id="sidebar-search-scope-hint" className="sidebar-search-scope-hint">按 Tab 切换到{session.scope.kind === "all" ? "当前记事本" : "所有记事本"}</p>}
+    <div className="sidebar-search-filters"><span role="status">{searchError ? "" : loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
     {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
     {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setRetry(n => n + 1)}>重试读取</Button></div>}
     <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
@@ -121,10 +130,15 @@ export function SidebarSearch() {
       <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
       {searchError && <div className="sidebar-search-empty" role="alert">{searchError}</div>}
-      {!searchError && !loading && !pending && !results.length && <EmptyState className="sidebar-search-empty" title={hasQuery ? "未找到相关笔记" : "输入关键词开始搜索"} action={hasQuery ? <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-1 py-1 text-xs" onClick={() => { if (session.scope.kind !== "all") session.setScope({ kind: "all" }); else { session.setQuery(""); inputRef.current?.focus(); } }}>{session.scope.kind !== "all" ? "搜索所有笔记" : "清空搜索"}</Button> : undefined} />}
+      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-placeholder" role="status">
+        <Search size={32} aria-hidden="true"/>
+        <strong>{hasQuery ? "未找到相关笔记" : session.scope.kind === "all" ? "搜索所有记事本" : session.scope.kind === "current" ? "搜索当前记事本" : `搜索 ${scopeLabel}`}</strong>
+        <p>{hasQuery ? "试试其他关键词，或调整搜索范围" : "输入关键词，查找标题与正文"}</p>
+        {hasQuery && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-1 py-1 text-xs" onClick={() => { if (session.scope.kind !== "all") session.setScope({ kind: "all" }); else { session.setQuery(""); inputRef.current?.focus(); } }}>{session.scope.kind !== "all" ? "搜索所有记事本" : "清空搜索"}</Button>}
+      </div>}
       {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
       {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
-    {results.length > 0 && <div className="sidebar-search-footer">↑ ↓ 预览 · Enter 阅读 · Esc 退出</div>}
+    <div className="sidebar-search-footer"><span><kbd className="sidebar-search-key">↑</kbd><kbd className="sidebar-search-key">↓</kbd>预览</span><span><kbd className="sidebar-search-key">Enter</kbd>打开</span><span><kbd className="sidebar-search-key">Esc</kbd>退出</span></div>
   </section>;
 }
