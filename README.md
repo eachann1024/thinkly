@@ -11,17 +11,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/eachann1024/goose-notes/releases/latest">下载安装包</a> ·
+  <a href="#下载安装">下载安装</a> ·
   <a href="#开始记录">开始记录</a> ·
   <a href="DEVELOP.md">开发文档</a> ·
   <a href="SECURITY.md">安全说明</a>
-</p>
-
-<p align="center">
-  macOS 可用 Homebrew 安装：<code>brew trust --cask eachann1024/goose-notes/goose-note</code><br />
-  <code>brew tap eachann1024/goose-notes https://github.com/eachann1024/goose-notes</code><br />
-  <code>brew install --cask eachann1024/goose-notes/goose-note</code><br />
-  升级：<code>brew upgrade --cask goose-note</code>
 </p>
 
 <br />
@@ -56,9 +49,37 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 <br />
 
-## 开始记录
+## 下载安装
 
-Windows：Intel / AMD 电脑请选择文件名以 `x64-setup.exe` 结尾的安装包；基于 ARM 的电脑请选择 `arm64-setup.exe`。可在「设置 → 系统 → 关于 → 系统类型」中确认。
+前往 [GitHub Releases](https://github.com/eachann1024/goose-notes/releases/latest) 下载最新版本安装包：
+
+| 系统平台 | 安装包名称 | 架构说明与推荐 |
+| :--- | :--- | :--- |
+| **macOS** | `Goose.Note-*-arm64.dmg` | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选此项）** |
+| | `Goose.Note-*.dmg` | Intel 芯片老款 Mac（文件名无 arm64 标识） |
+| **Windows** | `Goose.Note-*-x64-setup.exe` | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选此项）** |
+| | `Goose.Note-*-arm64-setup.exe` | 骁龙 / ARM 架构 Windows 设备 |
+| **Linux** | `Goose.Note-*.AppImage` | 免安装通用版（双击运行，部分发行版需 FUSE） |
+| | `goose-note-app_*_amd64.deb` | Debian / Ubuntu 等系统 |
+| | `goose-note-app-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+
+> **提示**：安装包暂未公证/签名。macOS 首次打开如遇「无法打开」或「未知开发者」提示，在「系统设置 → 隐私与安全性」中点击「仍要打开」；Windows 如遇 SmartScreen 提示，点击「更多信息 → 仍要运行」。
+
+<details>
+<summary>macOS 亦可通过 Homebrew 安装</summary>
+
+```bash
+brew tap eachann1024/goose-notes https://github.com/eachann1024/goose-notes
+brew install --cask eachann1024/goose-notes/goose-note
+# 升级
+brew upgrade --cask goose-note
+```
+
+</details>
+
+<br />
+
+## 开始记录
 
 1. 启动 Goose Note，选择「打开本地文件夹」。
 2. 打开已有 Markdown 文件，或新建一页，写下第一个想法。
@@ -112,10 +133,3 @@ Free code signing provided by SignPath.io, certificate by SignPath Foundation �
 AI 菜单与 PDF 导出使用项目独立实现，已移除 BlockNote XL AI/PDF 包。BlockNote core/react/mantine 保留 MPL-2.0，其他第三方部分沿用各自许可，详见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。原有 MIT 来源与贡献者署名均保留。
 
 </details>
-
-
-## 贡献者
-
-感谢以下贡献者：
-
-<a href="https://github.com/eachann1024"><img src="https://github.com/eachann1024.png?size=64" width="40" height="40" alt="eachann1024" title="eachann1024" /></a> <a href="https://github.com/xdd666t"><img src="https://github.com/xdd666t.png?size=64" width="40" height="40" alt="xdd666t" title="xdd666t" /></a> <a href="https://github.com/gjxwxt"><img src="https://github.com/gjxwxt.png?size=64" width="40" height="40" alt="gjxwxt" title="gjxwxt" /></a>
