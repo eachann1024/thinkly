@@ -50,6 +50,7 @@
   .bn-block-content[data-content-type="numberedListItem"]::before {
   box-sizing: border-box;
   flex: 0 0 auto;
+  align-self: flex-start;
   min-width: 1.5em;
   padding-left: 0.0625em;
   padding-right: 0.1875em;

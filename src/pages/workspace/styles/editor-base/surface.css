@@ -78,6 +78,11 @@
   border-left-color: hsl(var(--muted-foreground));
 }
 
+/* 统一行块 flex 对齐，确保空行光标与占位符在行盒内垂直居中。 */
+.bn-block-content {
+  align-items: center;
+}
+
 /*
  * 点击行尾空白时光标跳到行首。
  * Chromium（含 Electron）对 flex 容器的 caretRangeFromPoint 会落到第一个子节点；
@@ -123,10 +128,6 @@
   margin-right: calc(-1 * var(--goose-active-line-outset, 8px));
   padding-left: var(--goose-active-line-outset, 8px);
   padding-right: var(--goose-active-line-outset, 8px);
-  padding-top: var(--goose-active-line-pad-y, 3px);
-  padding-bottom: var(--goose-active-line-pad-y, 3px);
-  margin-top: calc(-1 * var(--goose-active-line-pad-y, 3px));
-  margin-bottom: calc(-1 * var(--goose-active-line-pad-y, 3px));
   border-radius: 4px;
 }
 
@@ -138,9 +139,6 @@
   > .bn-block-content[data-content-type="heading"]:not(
     [data-background-color]
   ) {
-  margin-top: var(--page-heading-gap, 15px);
-  padding-top: var(--page-heading-padding, 3px);
-  padding-bottom: var(--page-heading-padding, 3px);
   border-radius: 4px;
 }
 
