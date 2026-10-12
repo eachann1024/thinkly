@@ -62,13 +62,16 @@ function editableCaret(el: HTMLElement): CaretBox | null {
   const padBottom = parseFloat(style.paddingBottom || "0");
   const contentHeight = Math.max(0, box.height - padTop - padBottom) || lineHeight;
   const caretHeight = Math.min(contentHeight, Math.round(fontSize * CARET_EM_RATIO));
-  const insetY = Math.max(0, (contentHeight - caretHeight) / 2);
   const rtl = style.direction === "rtl";
+  const blockContent = anchor.closest<HTMLElement>(".bn-block-content");
+  const caretTop = blockContent
+    ? blockContent.getBoundingClientRect().top + Math.max(0, (blockContent.getBoundingClientRect().height - caretHeight) / 2)
+    : box.top + padTop + Math.max(0, (contentHeight - caretHeight) / 2);
   return {
     left: rtl
       ? box.right - parseFloat(style.paddingRight || "0") - 2
       : box.left + parseFloat(style.paddingLeft || "0"),
-    top: box.top + padTop + insetY,
+    top: caretTop,
     height: caretHeight,
   };
 }
