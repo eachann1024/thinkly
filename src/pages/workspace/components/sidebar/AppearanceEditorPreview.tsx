@@ -79,11 +79,15 @@ function EditorSample({
               </p>
               <ul aria-label="提醒事项" className="mb-3 list-none space-y-1 pl-0">
                 <li className="flex items-start gap-2">
-                  <span aria-hidden="true" className="mt-2 size-4 shrink-0 rounded border border-current" />
+                  <span className="flex h-[1lh] shrink-0 items-center">
+                    <span aria-hidden="true" className="size-4 rounded border border-current" />
+                  </span>
                   给妈妈打个电话，问问她最近睡得好不好
                 </li>
                 <li className="flex items-start gap-2">
-                  <span aria-hidden="true" className="mt-2 size-4 shrink-0 rounded border border-current" />
+                  <span className="flex h-[1lh] shrink-0 items-center">
+                    <span aria-hidden="true" className="size-4 rounded border border-current" />
+                  </span>
                   把散步时拍的照片整理进相册
                 </li>
               </ul>

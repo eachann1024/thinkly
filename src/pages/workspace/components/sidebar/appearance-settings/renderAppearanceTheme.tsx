@@ -98,9 +98,9 @@ export function renderAppearanceTheme(
       </div>
 
       <div className={`p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
-        <div className="mb-3 flex items-start gap-3">
+        <div className="mb-3 flex items-center gap-3">
           <GooseIcons.Palette
-            className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+            className="h-4 w-4 shrink-0 self-center text-muted-foreground"
             strokeWidth={1.75}
           />
           <div
