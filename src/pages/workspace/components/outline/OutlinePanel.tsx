@@ -44,16 +44,20 @@ export function OutlinePanel({
 
   if (headings.length === 0) {
     return (
-      <div className="outline-empty" role="status">
-        <p>{emptyMessage}</p>
-        {emptyHint ? <p className="outline-empty-hint">{emptyHint}</p> : null}
-      </div>
+      <section className="outline-panel" aria-label="文档大纲">
+        <div className="sidebar-search-heading"><strong>文档大纲</strong></div>
+        <div className="outline-empty" role="status">
+          <p>{emptyMessage}</p>
+          {emptyHint ? <p className="outline-empty-hint">{emptyHint}</p> : null}
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto py-2 px-2">
+    <section className="outline-panel" aria-label="文档大纲">
+      <div className="sidebar-search-heading"><strong>文档大纲</strong></div>
+      <div className="outline-body">
         <nav>
           {headings.map((heading) => (
             <OutlineTreeNode
@@ -70,7 +74,7 @@ export function OutlinePanel({
           ))}
         </nav>
       </div>
-    </div>
+    </section>
   );
 }
 
