@@ -76,13 +76,13 @@ export function NotebookSwitcher(
                 <span aria-hidden="true" className="goose-notebook-monogram">
                   {Array.from(activeNotebook?.name.trim() || "")[0] || "N"}
                 </span>
-                <span
-                  className="min-w-0 truncate leading-5"
-                  title={activeNotebook?.name}
-                  hidden={isRail}
-                >
-                  {activeNotebookLabel}
-                </span>
+                {isRail ? (
+                  <span className="sidebar-rail-control-label">记事本</span>
+                ) : (
+                  <span className="min-w-0 truncate leading-5" title={activeNotebook?.name}>
+                    {activeNotebookLabel}
+                  </span>
+                )}
                 <GooseIcons.ChevronDown
                   className="goose-notebook-chevron"
                   aria-hidden="true"

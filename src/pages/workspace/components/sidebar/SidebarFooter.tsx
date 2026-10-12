@@ -5,6 +5,7 @@ import { getGooseDesktop } from "@/lib/electron/runtime";
 import { checkAppUpdate, openReleasePage } from "@/lib/electron/appUpdate";
 import { cn } from "@/lib/utils";
 import { NotebookSwitcher } from "./NotebookSwitcher";
+import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
   isSettingsOpen: boolean;
@@ -88,13 +89,14 @@ export function SidebarFooter({
           <TooltipTrigger asChild>
             <IconButton size="xs"
               type="button"
-              className={cn(btnClass, isSettingsOpen && activeClass)}
+              className={cn(btnClass, "sidebar-footer-control--labeled", isSettingsOpen && activeClass)}
               aria-label="设置"
               title="设置"
               aria-pressed={isSettingsOpen}
               onClick={onOpenSettings}
             >
-              <GooseIcons.Settings className="h-4 w-4" />
+              <GooseIcons.Settings aria-hidden="true" className="h-4 w-4" />
+              <span className="sidebar-rail-control-label">设置</span>
             </IconButton>
           </TooltipTrigger>
           <TooltipContent side="right">设置</TooltipContent>
