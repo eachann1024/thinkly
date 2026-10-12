@@ -8,6 +8,7 @@ import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortabl
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { cn } from "@/lib/utils";
 import { tabRailListClassName } from "./tabRailLayout";
+import { useFolderToolbarActions } from "./useFolderToolbarActions";
 
 import { useTabRail } from "./tab-rail/useTabRail";
 import { SortableTabItem } from "./tab-rail/SortableTabItem";
@@ -24,6 +25,7 @@ export function TabRail({
   aiPanelOpen,
   aiLayoutMode = "fullscreen",
 }: TabRailProps) {
+  const folderActionsAvailable = useFolderToolbarActions();
   const {
     visibleTabs, focusedPageByTabId, getPage,
     activeTabId, isOverflowing, tabsScrollerRef,
@@ -152,7 +154,7 @@ export function TabRail({
             variant === "electron-titlebar" ? "" : undefined
           }
         >
-          <TooltipProvider delayDuration={600}>
+          {folderActionsAvailable && <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <IconButton size="icon" tone="muted"
@@ -168,7 +170,7 @@ export function TabRail({
                 <span>新标签页</span>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider>}
           {isOverflowing && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

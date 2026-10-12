@@ -15,6 +15,7 @@ import { SingleTabTitle } from "./SingleTabTitle";
 import { TabRail } from "./TabRail";
 import { useEffectiveSingleTabMode } from "@/lib/tabMode";
 import { cn, formatShortcut } from "@/lib/utils";
+import { useFolderToolbarActions } from "./useFolderToolbarActions";
 
 interface PageHeaderProps {
   page?: Page;
@@ -45,6 +46,7 @@ export function PageHeader({
   hideDocumentTitle = false,
 }: PageHeaderProps) {
   const aiPhase = useAiStatus((state) => state.phase);
+  const folderActionsAvailable = useFolderToolbarActions();
   const { appShortcuts } = useSettings();
   const singleTabMode = useEffectiveSingleTabMode();
   const aiHeaderActions = useAiHeaderActions();
@@ -59,9 +61,9 @@ export function PageHeader({
   const toggleAiPanelShortcutLabel = appShortcuts.toggleAIPanel
     ? formatShortcut(appShortcuts.toggleAIPanel)
     : "";
-  const showAiOnActions = Boolean(onToggleAiPanel);
+  const showAiOnActions = folderActionsAvailable && Boolean(onToggleAiPanel);
   const aiFullscreenOpen =
-    Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
+    folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
 
   const actionButtonClass =
     "inline-flex items-center justify-center text-muted-foreground ";
