@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
 import { IconButton } from "@/components/ui/icon-button";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -122,22 +122,22 @@ export function SidebarSearch() {
         {Object.values(notebooks).map(n => <DropdownMenuRadioItem key={n.id} value={`notebook:${n.id}`}>{n.name}</DropdownMenuRadioItem>)}
       </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<kbd className="sidebar-search-key" aria-hidden="true">Tab</kbd></div></div>
     {showScopeHint && <p id="sidebar-search-scope-hint" className="sidebar-search-scope-hint">按 Tab 切换到{session.scope.kind === "all" ? "当前记事本" : "所有记事本"}</p>}
-    <div className="sidebar-search-filters"><span role="status">{searchError ? "" : loading || pending ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
-    {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
-    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setRetry(n => n + 1)}>重试读取</Button></div>}
+    <div className="sidebar-search-filters"><span role="status">{searchError ? "" : hasQuery && (loading || pending) ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
+    {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
+    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" onClick={() => setRetry(n => n + 1)}>重试读取</Button></div>}
     <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
       <div id="sidebar-search-results" className="goose-list-layout" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
       <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
       {searchError && <div className="sidebar-search-empty" role="alert">{searchError}</div>}
-      {!searchError && !loading && !pending && !results.length && <div className="sidebar-search-placeholder" role="status">
+      {!searchError && !(hasQuery && (loading || pending)) && !results.length && <div className="sidebar-search-placeholder" role="status">
         <Search size={32} aria-hidden="true"/>
         <strong>{hasQuery ? "未找到相关笔记" : session.scope.kind === "all" ? "搜索所有记事本" : session.scope.kind === "current" ? "搜索当前记事本" : `搜索 ${scopeLabel}`}</strong>
         <p>{hasQuery ? "试试其他关键词，或调整搜索范围" : "输入关键词，查找标题与正文"}</p>
         {hasQuery && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-1 py-1 text-xs" onClick={() => { if (session.scope.kind !== "all") session.setScope({ kind: "all" }); else { session.setQuery(""); inputRef.current?.focus(); } }}>{session.scope.kind !== "all" ? "搜索所有记事本" : "清空搜索"}</Button>}
       </div>}
-      {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
-      {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
+      {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
+      {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="h-auto whitespace-normal border-0 px-0 py-0 goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
     <div className="sidebar-search-footer"><span><kbd className="sidebar-search-key">↑</kbd><kbd className="sidebar-search-key">↓</kbd>预览</span><span><kbd className="sidebar-search-key">Enter</kbd>打开</span><span><kbd className="sidebar-search-key">Esc</kbd>退出</span></div>
   </section>;
