@@ -60,8 +60,8 @@ export function TreeRowIcon({
 
   return (
     <span
-      className="main-tree-row-icon-group pointer-events-none relative z-10 flex h-[18px] shrink-0 items-center gap-0"
-      style={{ width: isFolderRow ? INDENT * 2 : INDENT, height: INDENT }}
+      className="main-tree-row-icon-group pointer-events-none relative z-10 flex shrink-0 items-center self-center gap-0"
+      style={{ width: isFolderRow ? INDENT * 2 : INDENT }}
     >
       {isFolderRow && !isRenaming ? (
         <MainTreeRowDisclosure
@@ -71,7 +71,7 @@ export function TreeRowIcon({
           className="ml-0 rounded-md pointer-events-auto"
           nativeProps={{
             draggable: false,
-            style: { width: INDENT, height: INDENT },
+            style: { width: INDENT },
             onDoubleClick: stopDoubleClick,
             onDragStart: blockDragStart,
           }}
@@ -79,11 +79,11 @@ export function TreeRowIcon({
       ) : isFolderRow ? (
         <span
           className="main-tree-row-disclosure-placeholder shrink-0"
-          style={{ width: INDENT, height: INDENT }}
+          style={{ width: INDENT }}
           aria-hidden="true"
         />
       ) : null}
-      <span className="main-tree-row-icon-slot pointer-events-none flex shrink-0 items-center justify-center">
+      <span className="main-tree-row-icon-slot pointer-events-none flex shrink-0 items-center justify-center self-center">
         {renderedIcon}
       </span>
     </span>
