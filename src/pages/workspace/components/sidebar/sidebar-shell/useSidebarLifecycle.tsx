@@ -1,4 +1,3 @@
-import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useSearchSession } from "../useSearchSession";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { activateWorkspace } from "@/lib/settings-navigation";
@@ -18,7 +17,6 @@ export function useSidebarLifecycle(
     setExpandPageId,
     activeNotebookId,
     openInCurrentTab,
-    outlinePage,
     sidebarCollapsed,
     sidebarOverlay,
     setViewportWidth,
@@ -176,9 +174,7 @@ export function useSidebarLifecycle(
     currentView === "search"
       ? "搜索"
       : currentView === "outline"
-        ? outlinePage
-          ? getPageTitle(outlinePage)
-          : "大纲"
+        ? "文档大纲"
         : isLocalFolder
           ? "本地"
           : electronNoVault
