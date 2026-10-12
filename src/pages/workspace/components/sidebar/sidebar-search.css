@@ -21,7 +21,7 @@
 .sidebar-search-results { display:flex; flex-direction:column; flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:0 .5rem .75rem; }
 .sidebar-search-result-wrap { position:relative; }
 .sidebar-search-result { display:grid; width:100%; grid-template-columns:minmax(0,1fr) auto; gap:.25rem .5rem; padding:.75rem; text-align:left; color:hsl(var(--foreground)); }
-.sidebar-search-result-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.875rem; font-weight:500; }
+.sidebar-search-result-title { display:flex; align-items:center; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.875rem; line-height:1.375; font-weight:500; }
 .sidebar-search-result-count,.sidebar-search-book { font-size:.75rem; color:hsl(var(--muted-foreground)); }
 .sidebar-search-snippet { grid-column:1/-1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; font-size:.875rem; line-height:1.6; color:hsl(var(--muted-foreground)); }
 .sidebar-search-book { grid-column:1/-1; }
@@ -30,7 +30,8 @@
 .sidebar-search-empty button { margin:0; border:0; padding:.25rem; font-size:.75rem; }
 .sidebar-search-hide-recent,.sidebar-search-more,.sidebar-search-command { padding:.5rem 1rem; text-align:left; font-size:.75rem; color:hsl(var(--muted-foreground)); }
 .sidebar-search-command { display:block; width:100%; }
-.sidebar-search-remove { position:absolute; right:.25rem; top:.75rem; display:flex; opacity:0; background:var(--goose-editor-surface); }
+/* 相对标题行中心定位，不跟结果卡片的固定上边距。 */
+.sidebar-search-remove { position:absolute; right:.25rem; top:calc(.75rem + .875rem * 1.375 / 2); display:flex; align-items:center; opacity:0; background:var(--goose-editor-surface); transform:translateY(-50%); }
 .sidebar-search-result-wrap:hover .sidebar-search-remove,.sidebar-search-remove:focus-visible { opacity:1; }
 .sidebar-search-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; flex:1; min-height:12rem; padding:2rem .75rem; text-align:center; color:hsl(var(--muted-foreground)); }
 .sidebar-search-placeholder strong { max-width:100%; overflow-wrap:anywhere; color:hsl(var(--foreground)); font-size:1rem; font-weight:600; }
