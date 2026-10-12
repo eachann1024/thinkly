@@ -32,7 +32,7 @@ export function renderUIFontSizeSettings(
         </output>
       </div>
       <p className="text-xs text-muted-foreground">
-        等比缩放标题栏、侧栏与设置面板；正文字号保持独立。
+        缩放标题栏、侧栏与设置面板；图标大小固定，正文字号保持独立。
       </p>
       <Range
         id="interface-scale"
