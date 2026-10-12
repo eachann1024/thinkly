@@ -158,6 +158,7 @@ export function SortableTabItem({
               {title}
             </span>
           )}
+          {tab.type !== "welcome" && (
           <TooltipProvider delayDuration={2000}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -194,6 +195,7 @@ export function SortableTabItem({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          )}
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-[200px]">
