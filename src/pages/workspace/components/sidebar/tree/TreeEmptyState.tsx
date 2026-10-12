@@ -16,12 +16,12 @@ export function TreeEmptyState({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-center px-4",
-        !hasMeasuredHeight && "h-full min-h-0 flex-1",
+        "box-border w-full px-4 pt-3 text-left",
+        !hasMeasuredHeight && "min-h-0",
       )}
-      style={hasMeasuredHeight ? { height, minHeight: height } : undefined}
+      style={undefined}
     >
-      <p className="text-center text-xs font-normal text-muted-foreground">
+      <p className="text-sm font-normal leading-relaxed text-muted-foreground">
         {isLocalNotebook
           ? "暂无笔记，点击上方 ＋ 新建"
           : isElectronHost
