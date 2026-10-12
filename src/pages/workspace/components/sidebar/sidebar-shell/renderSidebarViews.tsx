@@ -49,7 +49,7 @@ export function renderSidebarViews(
             <div className="flex min-h-0 flex-1 flex-col">
               <div
                 className="sidebar-tree-heading shrink-0"
-                hidden={currentView === "search"}
+                hidden={currentView !== "pages"}
               >
                 <SidebarSectionHeader
                   title={currentView === "search" ? "搜索" : headerTitle}
@@ -85,7 +85,7 @@ export function renderSidebarViews(
               </div>
               <SidebarSearch />
               {currentView === "outline" && (
-                <div className="flex min-h-0 flex-1 overflow-hidden pr-2">
+                <div className="flex min-h-0 flex-1 overflow-hidden">
                   <SidebarOutline
                     scrollContainerRef={scrollContainerRef}
                     pageId={outlinePageId}

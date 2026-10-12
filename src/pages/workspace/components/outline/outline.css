@@ -1,5 +1,26 @@
 /* 行布局、背景和箭头均复用本地主树；大纲增加标题级别与收起标记。
  * 绝对定位包含块已排除共享行的透明边框，虚线贴合整条背景。 */
+.outline-panel {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.outline-body {
+  flex: 1;
+  min-height: 0;
+  margin-top: 0.75rem;
+  padding: 0 1rem 0.75rem;
+  overflow-y: auto;
+}
+
+.workspace-shell .workspace-sidebar-pane .outline-panel .main-tree-row.outline-heading-row {
+  font-size: 0.875rem;
+}
+
 .outline-heading-marker {
   position: relative;
   display: inline-flex;
@@ -51,24 +72,17 @@
   pointer-events: none;
 }
 
-/* 句子落在标题下方剩余空白里，底部多留一截，略高于几何中心。 */
+/* 空态跟随标题下方的内容区，不占满整个侧栏。 */
 .outline-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   box-sizing: border-box;
   width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0 20px 28px;
-  text-align: center;
+  margin: 0.75rem 1rem 0;
+  text-align: left;
 }
 
 .outline-empty p {
-  max-width: 12em;
   margin: 0;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.55;
   color: hsl(var(--muted-foreground));
