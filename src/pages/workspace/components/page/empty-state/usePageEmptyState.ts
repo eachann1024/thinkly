@@ -9,7 +9,6 @@ import { requestPageTitleFocus } from "@/lib/page-title-focus";
 import { DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { dialogs } from "@/lib/electron-platform/dialogs";
 import { useTabs } from "@/stores/useTabs";
-import { useSettings } from "@/stores/useSettings";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { isElectronHost } from "@/lib/local-vault";
 
@@ -54,7 +53,6 @@ export function usePageEmptyState() {
     createLocalFolderNotebook,
   } = useNotebooks();
   const openInCurrentTab = useTabs((state) => state.openInCurrentTab);
-  const aiEnabled = useSettings((s) => s.ai.enabled);
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
   const isLocalFolder = activeNotebook?.source === "local-folder";
 
@@ -125,14 +123,6 @@ export function usePageEmptyState() {
     await activateOrCreatePage();
   }, [activateOrCreatePage]);
 
-  const onSearch = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("goose-note:open-search"));
-  }, []);
-
-  const onOpenAi = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("goose-note:open-ai-panel"));
-  }, []);
-
   const onOpenLocalFolder = useCallback(async () => {
     try {
       const path = await dialogs.selectDirectory();
@@ -189,28 +179,11 @@ export function usePageEmptyState() {
       onClick: onOpenLocalFolder,
     });
 
-    if (aiEnabled) {
-      list.push({
-        key: "ai",
-        title: "AI 助手",
-        onClick: onOpenAi,
-      });
-    }
-
-    list.push({
-      key: "search",
-      title: "全文搜索",
-      onClick: onSearch,
-    });
-
     return list;
   }, [
-    aiEnabled,
     isLocalFolder,
     onCreatePage,
     onOpenLocalFolder,
-    onOpenAi,
-    onSearch,
   ]);
 
   return { isLocalFolder, actions };
