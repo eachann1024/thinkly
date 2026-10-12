@@ -51,8 +51,10 @@ export function renderSidebarViews(
                 className="sidebar-tree-heading shrink-0"
                 hidden={currentView !== "pages"}
               >
+                <div className="sidebar-search-heading">
+                  <strong>{headerTitle}</strong>
+                </div>
                 <SidebarSectionHeader
-                  title={currentView === "search" ? "搜索" : headerTitle}
                   onCreate={
                     currentView === "pages" && !electronNoVault
                       ? handleCreatePage

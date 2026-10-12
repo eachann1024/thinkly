@@ -1,6 +1,6 @@
 import * as GooseIcons from "@/components/ui/icons";
 interface SidebarSectionHeaderProps {
-  title: string;
+  title?: string;
   eyebrow?: string;
   /** 不传则不渲染「新建」按钮（如 Electron 无仓库时） */
   onCreate?: () => void;
@@ -22,12 +22,14 @@ export function SidebarSectionHeader({
       className="sidebar-section-label flex min-w-0 items-center gap-2 text-xs font-medium text-[hsl(var(--goose-nav-title))]"
       data-outline-header={eyebrow ? "true" : undefined}
     >
-      <span className="sidebar-heading-copy">
-        {eyebrow && <span className="sidebar-heading-eyebrow">{eyebrow}</span>}
-        <span className="sidebar-heading-title" title={title}>
-          {title}
+      {title ? (
+        <span className="sidebar-heading-copy">
+          {eyebrow && <span className="sidebar-heading-eyebrow">{eyebrow}</span>}
+          <span className="sidebar-heading-title" title={title}>
+            {title}
+          </span>
         </span>
-      </span>
+      ) : null}
       {(onCreate || onCollapseAll) && <TooltipProvider delayDuration={600}>
         <div className="flex shrink-0 items-center gap-0.5 text-muted-foreground">
           {onCollapseAll && (
