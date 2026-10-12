@@ -18,7 +18,7 @@ export interface SearchResultPage extends Page {
   snippetMatchIndex?: number;
   literalBodyMatchCount?: number;
   titleMatchCount?: number;
-  matchKind?: "literal" | "token" | "pinyin" | "title";
+  matchKind?: "literal" | "pinyin" | "title";
 }
 
 export interface SearchResults {

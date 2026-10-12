@@ -26,9 +26,9 @@ export const SidebarSearchResults = memo(function SidebarSearchResults({ results
   return <>{results.map(page => <div className="sidebar-search-result-wrap" key={page.id}>
         <Button contentStyle="preserve" variant="ghost" size="sm" id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selectedId} className="h-auto whitespace-normal border-0 px-0 py-0 goose-list-row sidebar-search-result rounded-lg" onClick={() => openResult(page, useWorkspaceViewport.getState().leftExpandOverride)}>
           <span className="sidebar-search-result-title"><Highlight text={getPageTitle(page)} query={query}/></span>
-          <span className="sidebar-search-result-count">{hasQuery && (page.literalBodyMatchCount ? `${page.literalBodyMatchCount} 处` : page.matchKind === "title" ? "标题" : page.matchKind === "pinyin" ? "拼音" : "相关")}</span>
+          <span className="sidebar-search-result-count">{hasQuery && (page.literalBodyMatchCount ? `${page.literalBodyMatchCount} 处` : page.matchKind === "title" ? "标题" : page.matchKind === "pinyin" ? "拼音" : "")}</span>
           {duplicates.has(getPageTitle(page)) && <span className="sidebar-search-book">{notebookNames[page.workspaceId]}</span>}
-          {hasQuery && <span className="sidebar-search-snippet"><Highlight text={page.matchKind === "title" ? "标题匹配 · 正文无命中" : page.matchKind === "pinyin" ? "标题拼音匹配" : page.matchKind === "token" ? "相关词匹配 · 无连续词组" : page.contentSnippet ?? ""} query={query}/></span>}
+          {hasQuery && <span className="sidebar-search-snippet"><Highlight text={page.matchKind === "title" ? "标题匹配 · 正文无命中" : page.matchKind === "pinyin" ? "标题拼音匹配" : page.contentSnippet ?? ""} query={query}/></span>}
         </Button>
         {!hasQuery && <IconButton size="xs" className="p-0 sidebar-search-remove" aria-label={`从最近访问中移除 ${getPageTitle(page)}`} onClick={() => removeRecent(page.id)}><X size={14}/></IconButton>}
       </div>)}</>;
