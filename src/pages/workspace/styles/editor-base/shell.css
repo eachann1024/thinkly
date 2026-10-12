@@ -30,6 +30,9 @@
 .goose-blocknote-editor .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after,
 .bn-editor .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after {
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  line-height: inherit;
 }
 
 /*
