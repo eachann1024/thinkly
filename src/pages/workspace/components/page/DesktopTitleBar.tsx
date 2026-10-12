@@ -21,6 +21,7 @@ import { ConversationTitle } from "../notebook-ai/ConversationTitle";
 import { HistoryToolbar } from "../history/HistoryView";
 import { PageMenu } from "./PageMenu";
 import { TabRail } from "./TabRail";
+import { useFolderToolbarActions } from "./useFolderToolbarActions";
 
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 
@@ -56,6 +57,7 @@ export function DesktopTitleBar({
   onToggleAiPanel,
 }: DesktopTitleBarProps) {
   const activePageId = usePages((s) => s.activePageId);
+  const folderActionsAvailable = useFolderToolbarActions();
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();
   const sidebarCollapsed = sidebarCollapsedOverride ?? workspaceSidebarCollapsed;
   const toggleSidebarCollapsed = useSidebarView(
@@ -76,8 +78,8 @@ export function DesktopTitleBar({
     : "";
 
   const aiFullscreenOpen =
-    Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
-  const aiSidePanelOpen = Boolean(aiPanelOpen) && !aiFullscreenOpen;
+    folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
+  const aiSidePanelOpen = folderActionsAvailable && Boolean(aiPanelOpen) && !aiFullscreenOpen;
 
   // Win/Linux 均为 frameless：右侧渲染自定义 min/max/close 窗控。
   const isFramelessElectron =
@@ -183,7 +185,7 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {onToggleAiPanel && !page?.trashedAt && (
+        {folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
