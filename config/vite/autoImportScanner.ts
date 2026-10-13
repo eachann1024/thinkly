@@ -13,7 +13,8 @@ export async function scanPublicImports(
     imports.map((item) => `${item.from}:${item.name}:${Boolean(item.type)}`),
   );
   for (const entry of entries) {
-    const from = path.resolve(root, entry);
+    // 与 unimport 的正斜杠路径保持一致，避免 Windows 同一入口重复判重。
+    const from = path.resolve(root, entry).replaceAll("\\", "/");
     const source = ts.createSourceFile(
       from,
       await readFile(from, "utf8"),
