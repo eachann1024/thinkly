@@ -29,7 +29,7 @@ bun run lint        # eslint .
 bun run build       # full production build
 ```
 
-Product acceptance uses actual interaction: quickly exercise ordinary pages in the browser; have a `use-browser` subagent complete complex flows through the visible UI; use `use-compute` only for affected native controls and necessary system interactions. Build a macOS package only when the native change needs it. Record the actions, visible results and host behavior that the browser cannot verify.
+Before verification, understand the affected entry points, call chain, state and persistence flows, consumers, and the before/after behavior. Verify only affected paths and necessary failure or boundary cases, choosing the smallest sufficient static, build, API or interaction checks. Use browser or native interaction only when the changed behavior needs it; build and install a macOS package only when the native change needs it. Reuse passed checks unaffected by later edits. Documentation-only or rule-only changes need wording, reference, consistency and diff checks, without building or launching the app. Record actual results and unverified host boundaries.
 
 Do not add or run TDD, ERE, unit or E2E cases, fixtures, test bridges, automated assertion/recording pipelines or coverage gates. Static diagnostics and successful compilation do not replace interaction acceptance. Resolve affected compilation failures before shipping.
 
@@ -41,6 +41,8 @@ Do not add or run TDD, ERE, unit or E2E cases, fixtures, test bridges, automated
   style, e.g. `feat: add word-count footer`, `fix: prevent cursor jump on toggle`.
 - Commit messages and PR descriptions may use English or Simplified Chinese; keep each
   pull request internally consistent.
+
+For maintainer tasks, commit and push each completed functional or documentation change to its task branch after the minimum necessary verification. Keep unrelated work uncommitted and do not wait for another confirmation or batch multiple completed tasks.
 
 ## Code style
 
@@ -63,7 +65,7 @@ Use this when reviewing internal pull requests.
 2. **Acceptance** — Actual affected user paths, using the browser or native-control route above. Compilation commands are diagnostics, not a test gate.
 3. **Scope** — One logical change; Conventional Commits; no `tasks/`, `.env*`, or AI-only tooling artifacts.
 4. **Editor** — Changes under `src/components/editor/` must not break **title block one** (first block is always H1; see `src/components/editor/inputrules/firstTitleGuard.ts`).
-5. **UI** — Preserve theme tokens, hover/selected states and sidebar rounded corners. Ordinary page changes use quick browser acceptance; native controls use the native route.
+5. **UI** — Preserve theme tokens, hover/selected states and sidebar rounded corners. Use browser or native acceptance only for affected behavior that needs that route.
 6. **Dual plugin** — Shared code must still build for both the main app and `GOOSE_BUILD_TARGET=quicknote` / `__GOOSE_LITE__`.
 7. **Data** — Persistence and local-folder sync changes must not lose or silently overwrite notes.
 8. **Security** — No hardcoded secrets or personal paths in defaults; see [SECURITY.md](./SECURITY.md).
