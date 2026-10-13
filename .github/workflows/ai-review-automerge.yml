@@ -1,4 +1,5 @@
 # AI 审核 + 无致命问题自动合并
+# workflow_dispatch 只读验收审核结果，不触发合并、评论或标签。
 # 审核：Codex CLI，使用仓库 Secret CODEX_AUTH_JSON（本机 codex 的 ChatGPT 登录）。
 # 合并：gate job 读取 steps.pragent.outputs.review 的 JSON，
 #       只在“同仓库分支 + 带 bot-automerge 标签 + 作者在白名单 + 审核结论安全 + 其他检查全绿”时 squash 合并；
@@ -17,13 +18,19 @@
 name: AI review & auto-merge
 
 on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: '同仓库 PR 编号（只读验收，可选已关闭 PR）'
+        required: true
+        type: string
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, labeled]
 
 permissions: {}
 
 concurrency:
-  group: ai-review-${{ github.event.pull_request.number }}
+  group: ai-review-${{ github.event.pull_request.number || format('validation-{0}', inputs.pr_number) }}
   cancel-in-progress: true
 
 env:
@@ -41,6 +48,7 @@ jobs:
     name: ai-review
     # 只审同仓库分支、作者是仓库主人的非草稿 PR（作者名与 env.ALLOWED_AUTHORS 保持一致）；labeled 事件只在加的是自动合并标签时才触发
     if: >-
+      github.event_name == 'pull_request_target' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.login == 'eachann1024' &&
       github.event.pull_request.draft == false &&
@@ -75,6 +83,66 @@ jobs:
             printf '%s\n' "$json"
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: ai-review-validation
+    # 手动验收仅生成审核结果；不调用合并闸门、不写评论或标签。
+    if: github.event_name == 'workflow_dispatch' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout trusted review script
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Resolve owned same-repository PR
+        id: target
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ inputs.pr_number }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          pr, repo = os.environ['PR'], os.environ['REPO']
+          if not re.fullmatch(r'[1-9][0-9]*', pr):
+              raise SystemExit('PR 编号不合法')
+          info = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/pulls/{pr}'], text=True))
+          if info['user']['login'] != 'eachann1024' or (info['head'].get('repo') or {}).get('full_name') != repo:
+              raise SystemExit('只允许仓库主人的同仓库 PR')
+          sha = info['head']['sha']
+          if not re.fullmatch(r'[0-9a-f]{40}', sha):
+              raise SystemExit('PR 提交不合法')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'sha={sha}\n')
+          PY
+      - name: Validate Codex review (read-only)
+        env:
+          CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ inputs.pr_number }}
+          HEAD_SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          bash .github/codex-review/run.sh > "$RUNNER_TEMP/validated-review.json"
+          {
+            echo '## Codex 审核验收'
+            echo
+            echo '```json'
+            cat "$RUNNER_TEMP/validated-review.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload review result
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-review-validation
+          path: ${{ runner.temp }}/validated-review.json
+          if-no-files-found: error
+          retention-days: 7
 
   gate:
     name: ai-merge-gate
