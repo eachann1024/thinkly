@@ -1,3 +1,4 @@
+import { isGitNotebookDirectory } from "./git-notebook-directory";
 export type GitSyncProvider = "github" | "gitee";
 
 export interface GitSyncConfig {
@@ -136,7 +137,7 @@ export function validateGitRepository(value: GitRepositoryInput): GitRepositoryI
     if (!folder || typeof folder.notebookId !== "string" || !folder.notebookId.trim() || folder.notebookId.length > 200) throw new Error("笔记本标识无效");
     if (typeof folder.name !== "string" || !folder.name.trim() || folder.name.length > 200) throw new Error("文件夹名称无效");
     if (typeof folder.localPath !== "string" || !/^(?:\/|[A-Za-z]:[\\/])/.test(folder.localPath) || /[\0\r\n]/.test(folder.localPath) || folder.localPath.split(/[\\/]/).includes("..")) throw new Error("本地文件夹路径无效");
-    if (typeof folder.remotePath !== "string" || (value.layout === "legacy-root" ? folder.remotePath !== "" : !/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(folder.remotePath))) throw new Error("远端子目录须为稳定的字母、数字、下划线或连字符名称");
+    if (typeof folder.remotePath !== "string" || (value.layout === "legacy-root" ? folder.remotePath !== "" : !isGitNotebookDirectory(folder.remotePath))) throw new Error("远端子目录须为有效的本地文件夹名称");
     if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(folder.remotePath)) throw new Error("远端子目录名称是系统保留名称");
     return { notebookId: folder.notebookId, name: folder.name.trim(), localPath: folder.localPath, remotePath: folder.remotePath };
   });
