@@ -151,7 +151,7 @@ export function GitSyncContent({
                     variant={config?.id === item.id ? "secondary" : "outline"}
                     aria-pressed={config?.id === item.id}
                     onClick={() => onSelect(item.id)}
-                    className="h-auto min-h-[44px] w-full min-w-0 justify-start gap-2 rounded-lg p-3 text-left"
+                    className="goose-accent-selection h-auto min-h-[44px] w-full min-w-0 justify-start gap-2 rounded-lg p-3 text-left"
                   >
                     <span className="min-w-0 flex-1 truncate" title={item.remoteUrl}>
                       {name}

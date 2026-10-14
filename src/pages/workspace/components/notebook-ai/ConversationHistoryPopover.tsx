@@ -139,7 +139,7 @@ export function ConversationHistoryList({
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                className="goose-list-row group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
+                className="goose-list-row goose-accent-selection group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
                 data-selected={isActive || undefined}
                 aria-current={isActive ? "true" : undefined}
               >

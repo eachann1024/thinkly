@@ -43,7 +43,7 @@ export function SortableNotebookItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "goose-list-row goose-notebook-row relative flex select-none items-center rounded-lg outline-none",
+        "goose-list-row goose-accent-selection goose-notebook-row relative flex select-none items-center rounded-lg outline-none",
         "justify-between gap-2 group",
         "min-h-9 px-2 py-1 text-xs font-normal",
         notebook.localPathMissing && "text-disabled",
