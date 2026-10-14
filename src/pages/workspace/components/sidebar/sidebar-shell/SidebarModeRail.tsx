@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { SidebarFooter } from "../SidebarFooter";
+import { readSearchSelection } from "../readSearchSelection";
+import { useSearchSession } from "../useSearchSession";
 import type { useSidebarHover } from "./useSidebarHover";
 
 export function SidebarModeRail({
@@ -8,6 +11,7 @@ export function SidebarModeRail({
 }: {
   context: ReturnType<typeof useSidebarHover>;
 }) {
+  const searchSelectionRef = useRef("");
   const {
     sidebarModeRailRef,
     settingsOpen,
@@ -69,7 +73,21 @@ export function SidebarModeRail({
                   onPointerEnter={(event) => {
                     if (event.pointerType === "mouse") hoverSidebarView(view);
                   }}
-                  onClick={() => openSidebarView(view)}
+                  onPointerDownCapture={(event) => {
+                    if (view === "search" && event.button === 0)
+                      searchSelectionRef.current = readSearchSelection();
+                  }}
+                  onClick={(event) => {
+                    if (view === "search") {
+                      // 鼠标点击先保存正文选区，按钮拿到焦点后再消费。
+                      const query = event.detail
+                        ? searchSelectionRef.current
+                        : readSearchSelection();
+                      searchSelectionRef.current = "";
+                      if (query) useSearchSession.getState().setQuery(query);
+                    }
+                    openSidebarView(view);
+                  }}
                 >
                   <Icon aria-hidden="true" className="h-4 w-4" />
                   <span className="sidebar-mode-rail-label">{label}</span>
