@@ -74,6 +74,7 @@ export type GitRepositoryInput = GitRepositoryConfig;
 export interface GitSyncState {
   configs: GitRepositoryConfig[];
   statuses: GitSyncStatus[];
+  mappingHistory?: Record<string, GitRepositoryFolder[]>;
 }
 
 export interface GitSyncBridge {

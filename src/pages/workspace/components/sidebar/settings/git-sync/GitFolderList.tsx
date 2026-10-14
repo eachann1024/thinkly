@@ -93,7 +93,8 @@ export function GitFolderList({
           const shortPath = distinguishingPath(folder, rows);
           const blocked =
             disabled ||
-            (!checked && (!available || !check || Boolean(error))) ||
+            (!checked && !error && !check) ||
+            (!checked && needsRecovery && recoveryDisabled) ||
             (legacy && !checked && selected.length > 0);
           return (
             <div
@@ -120,7 +121,12 @@ export function GitFolderList({
                 }
                 aria-label={`同步 ${folder.name} ${folder.localPath}${error ? `，${shortFolderReason(error)}` : ""}`}
                 disabled={blocked}
-                onClick={() => onToggle(folder, !checked)}
+                onClick={() => {
+                  if (!checked && error) {
+                    if (needsRecovery) onRecover(folder, true);
+                    else onLocate(folder);
+                  } else onToggle(folder, !checked);
+                }}
               >
                 <span
                   aria-hidden="true"
@@ -156,9 +162,7 @@ export function GitFolderList({
                   actionLabel={
                     needsRecovery
                       ? "重新选择文件夹"
-                      : checked
-                        ? "定位问题"
-                        : undefined
+                      : "定位问题"
                   }
                   actionDisabled={needsRecovery ? recoveryDisabled : disabled}
                   onAction={() =>
