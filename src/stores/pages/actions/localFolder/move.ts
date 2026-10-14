@@ -1,3 +1,4 @@
+import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import { useNotebooks } from "../../../useNotebooks";
 import { migrateLocalPageIdMapEntry, toRelativePath } from "@/lib/local-page-idmap";
 import {
@@ -214,6 +215,11 @@ export async function moveLocalPageAction(
       return { pages: nextPages };
     });
   }
+
+  const historyPaths = Object.fromEntries(Object.values(get().pages)
+    .filter((p) => p.workspaceId === page.workspaceId && p.localFilePath && (p.localFilePath === newPath || p.localFilePath.startsWith(newPath + "/")))
+    .map((p) => [p.id, toRelativePath(basePath, p.localFilePath!)]));
+  await migrateNotebookHistory(basePath, historyPaths);
 
   // 移动成功后才更新手动顺序：清源目录旧槽位、追加目标目录末尾。
   // 目录自身移动时，其孩子的手动顺序以目录 pageId 为键，不受影响。

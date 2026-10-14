@@ -33,4 +33,6 @@ export interface HistoryVersion {
   content: BlockNoteContent;
   /** 本地文件夹页面的 frontmatter 原文（恢复时一并还原） */
   localFrontmatter?: string;
+  /** 快照创建时的笔记相对路径，用于历史资源定位。 */
+  relativePath?: string;
 }

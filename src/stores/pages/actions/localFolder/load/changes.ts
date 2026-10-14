@@ -3,7 +3,6 @@ import {
   deleteLocalMdSnapshot,
   setLocalMdSnapshot,
 } from "@/lib/local-md-snapshot";
-import { resolveHistoryBackend } from "@/lib/history/backend";
 import { useTabs } from "../../../../useTabs";
 import {
   localFileTitleFromPath,
@@ -44,9 +43,7 @@ export const removeSingleLocalPageAction = (
   // 清除快照
   deleteLocalMdSnapshot(filePath);
 
-  // 清理历史快照（.goose/history/ 下的孤儿数据）：必须在 store 记录删除前
-  // 调用，删后 resolveHistoryBackend 解析不到 notebook.localPath。
-  void resolveHistoryBackend(pageId).dropAll(pageId);
+  // 外部删除或移走仅移除当前页面；隐藏历史保留，供恢复及再次打开使用。
 
   set((state) => {
     const newPages = { ...state.pages };

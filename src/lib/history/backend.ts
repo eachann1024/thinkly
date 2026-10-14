@@ -7,27 +7,12 @@
  * resolveHistoryBackend：根据 pageId 对应的页面类型自动路由。
  */
 
-import { parseHistoryVersion, invalidateHistoryVersion } from "./versionReadCache";
 import { historyRepository } from "./repository";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import type { HistoryIndex, HistoryVersion } from "./types";
-import { normalizeHistoryIndex } from "./guards";
-import {
-  consumeDiskWriteFailure,
-  DiskWriteError,
-} from "@/lib/diskWriteError";
-
-// ── 简单 FNV-1a (32-bit) ─────────────────────────────────────────────────────
-
-function fnv1a32(str: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h.toString(16).padStart(8, "0");
-}
+import { makeLocalFolderHistoryBackend } from "./localBackend";
+import { canonicalRelativePath } from "../canonicalLocalPath";
 
 // ── 接口定义 ──────────────────────────────────────────────────────────────────
 
@@ -63,178 +48,6 @@ export const dbBackend: HistoryBackend = {
   },
 };
 
-// ── localFolderBackend ────────────────────────────────────────────────────────
-
-// 真机 preload 只有同步 readFile/exists（无 *Async 变体），裸调 async 方法会
-// TypeError。统一走 helper：优先 async 变体，缺失时回落同步实现。
-async function fsRead(fs: GooseFs, path: string): Promise<string | null> {
-  return fs.readFileAsync ? await fs.readFileAsync(path) : fs.readFile(path);
-}
-
-async function fsExists(fs: GooseFs, path: string): Promise<boolean> {
-  return fs.existsAsync ? await fs.existsAsync(path) : fs.exists(path);
-}
-
-async function fsWrite(fs: GooseFs, path: string, content: string): Promise<boolean> {
-  return fs.writeFileAsync
-    ? await fs.writeFileAsync(path, content)
-    : fs.writeFile(path, content);
-}
-
-/** 按 pageId 串行化写操作，避免 index 读改写竞争 */
-const writeChains = new Map<string, Promise<void>>();
-
-function chainWrite(pageId: string, fn: () => Promise<void>): Promise<void> {
-  const prev = writeChains.get(pageId) ?? Promise.resolve();
-  const next = prev.catch(() => {}).then(fn);
-  writeChains.set(pageId, next);
-  void next
-    .finally(() => {
-      if (writeChains.get(pageId) === next) writeChains.delete(pageId);
-    })
-    .catch(() => {
-      // 调用方已经处理拒绝；这里只避免 finally 派生的 Promise 变成未处理拒绝。
-    });
-  return next;
-}
-
-function makeLocalFolderBackend(basePath: string): HistoryBackend {
-  const histDir = `${basePath}/.goose/history`;
-
-  async function ensureDir(): Promise<void> {
-    if (typeof window === "undefined" || !window.gooseFs) return;
-    const fs = window.gooseFs;
-    // 逐级确保：basePath/.goose 再 basePath/.goose/history
-    const gooseDir = `${basePath}/.goose`;
-    if (!(await fsExists(fs, gooseDir))) {
-      const created = await fs.mkdir(gooseDir);
-      if (created === false) {
-        throw (
-          consumeDiskWriteFailure() ??
-          new DiskWriteError(`无法创建历史目录：${gooseDir}`, { path: gooseDir })
-        );
-      }
-    }
-    if (!(await fsExists(fs, histDir))) {
-      const created = await fs.mkdir(histDir);
-      if (created === false) {
-        throw (
-          consumeDiskWriteFailure() ??
-          new DiskWriteError(`无法创建历史目录：${histDir}`, { path: histDir })
-        );
-      }
-    }
-  }
-
-  function indexPath(pageId: string): string {
-    const h = fnv1a32(pageId);
-    return `${histDir}/${h}.index.json`;
-  }
-
-  function versionPath(pageId: string, versionId: string): string {
-    const h = fnv1a32(pageId);
-    return `${histDir}/${h}.${versionId}.json`;
-  }
-
-  async function readJson<T>(path: string): Promise<T | null> {
-    if (typeof window === "undefined" || !window.gooseFs) return null;
-    try {
-      const text = await fsRead(window.gooseFs, path);
-      if (!text) return null;
-      return JSON.parse(text) as T;
-    } catch {
-      return null;
-    }
-  }
-
-  async function writeJson(path: string, data: unknown): Promise<void> {
-    if (typeof window === "undefined" || !window.gooseFs) return;
-    const ok = await fsWrite(window.gooseFs, path, JSON.stringify(data));
-    if (!ok) {
-      throw (
-        consumeDiskWriteFailure() ??
-        new DiskWriteError(`无法写入历史文件：${path}`, { path })
-      );
-    }
-  }
-
-  return {
-    async loadIndex(pageId) {
-      const data = await readJson<HistoryIndex>(indexPath(pageId));
-      if (data && data.pageId !== pageId) {
-        return { pageId, versions: [], lastVersionCharCount: 0 };
-      }
-      return normalizeHistoryIndex(data, pageId);
-    },
-
-    saveIndex(index) {
-      return chainWrite(index.pageId, async () => {
-        await ensureDir();
-        await writeJson(indexPath(index.pageId), index);
-      });
-    },
-
-    async loadVersion(pageId, versionId) {
-      if (typeof window === "undefined" || !window.gooseFs) return null;
-      const path = versionPath(pageId, versionId);
-      try {
-        return parseHistoryVersion(path, await fsRead(window.gooseFs, path), pageId, versionId);
-      } catch {
-        invalidateHistoryVersion(path);
-        return null;
-      }
-    },
-
-    saveVersion(version) {
-      return chainWrite(version.pageId, async () => {
-        await ensureDir();
-        const path = versionPath(version.pageId, version.versionId);
-        invalidateHistoryVersion(path);
-        await writeJson(path, version);
-      });
-    },
-
-    removeVersion(pageId, versionId) {
-      return chainWrite(pageId, async () => {
-        if (typeof window === "undefined" || !window.gooseFs) return;
-        try {
-          const path = versionPath(pageId, versionId);
-          invalidateHistoryVersion(path);
-          await window.gooseFs.deleteFile(path);
-        } catch {
-          // 不存在时忽略
-        }
-      });
-    },
-
-    async dropAll(pageId) {
-      if (typeof window === "undefined" || !window.gooseFs) return;
-      const fs = window.gooseFs;
-      const h = fnv1a32(pageId);
-      // 读 index 拿所有 versionId，删版本文件，再删 index
-      const idx = await this.loadIndex(pageId);
-      await Promise.all(
-        idx.versions.map((v) => {
-          try {
-            const path = versionPath(pageId, v.versionId);
-            invalidateHistoryVersion(path);
-            return fs.deleteFile(path);
-          } catch {
-            return Promise.resolve();
-          }
-        }),
-      );
-      try {
-        await fs.deleteFile(`${histDir}/${h}.index.json`);
-      } catch {
-        // 忽略
-      }
-    },
-  };
-}
-
-// ── 路由函数 ──────────────────────────────────────────────────────────────────
-
 export function resolveHistoryBackend(pageId: string): HistoryBackend {
   const page = usePages.getState().pages[pageId];
   if (!page?.localFilePath) return dbBackend;
@@ -242,5 +55,8 @@ export function resolveHistoryBackend(pageId: string): HistoryBackend {
   const notebook = useNotebooks.getState().notebooks[page.workspaceId];
   if (!notebook?.localPath) return dbBackend;
 
-  return makeLocalFolderBackend(notebook.localPath);
+  return makeLocalFolderHistoryBackend(notebook.localPath, (id) => {
+    const path = usePages.getState().pages[id]?.localFilePath;
+    return path ? canonicalRelativePath(notebook.localPath!, path) : null;
+  });
 }

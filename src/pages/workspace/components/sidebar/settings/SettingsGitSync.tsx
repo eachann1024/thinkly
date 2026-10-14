@@ -2,7 +2,7 @@ import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
   gitSyncSummary,
-  
+
   availableFolderIds,
   emptyDraft,
   messageOf,
