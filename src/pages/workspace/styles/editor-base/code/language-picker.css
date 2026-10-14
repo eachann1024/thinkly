@@ -1,0 +1,67 @@
+/* Portal 菜单只随 editor-ui-scale 缩放，避免 rem 再叠加外壳字号。 */
+.goose-code-language-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 220px;
+  max-width: calc((100vw - 16px) / var(--editor-ui-scale, 1));
+  max-height: min(320px, calc((100dvh - 24px) / var(--editor-ui-scale, 1)));
+  padding: var(--goose-menu-surface-inset);
+  overflow: hidden;
+  font-size: var(--goose-menu-item-font-size);
+  line-height: var(--goose-menu-item-line-height);
+}
+
+.goose-code-language-search,
+.goose-code-language-label {
+  flex-shrink: 0;
+}
+
+.goose-code-language-picker .goose-code-language-input {
+  height: 32px;
+  min-width: 0;
+  border-radius: var(--goose-control-radius);
+  padding: 0 8px;
+  font-size: var(--goose-menu-item-font-size);
+  line-height: var(--goose-menu-item-line-height);
+}
+
+.goose-code-language-label {
+  padding: 2px 8px 0;
+  color: var(--goose-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.goose-code-language-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.goose-code-language-option {
+  flex-shrink: 0;
+  padding-inline: 8px;
+  font-weight: 400;
+}
+
+.goose-code-language-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goose-code-language-check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.goose-code-language-empty {
+  padding: 8px;
+  color: var(--goose-text-secondary);
+}
