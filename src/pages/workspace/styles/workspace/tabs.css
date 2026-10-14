@@ -49,7 +49,7 @@
 .workspace-shell .page-title-edit-shell [data-page-title-field]:focus {
   background: transparent;
 }
-/* 闲置按钮和编辑输入使用相同字形与单行盒，切换时只改变颜色。 */
+/* 原生 input 内部单行编辑器使用 normal，展示文字同用 normal 避免子像素基线偏移。 */
 .tab-rail-item .page-title-edit-shell {
   height: 2rem;
 }
@@ -59,7 +59,7 @@
   padding: 0;
   border: 0;
   font: inherit;
-  line-height: 1.25rem;
+  line-height: normal;
   letter-spacing: inherit;
   text-align: left;
   color: inherit;
