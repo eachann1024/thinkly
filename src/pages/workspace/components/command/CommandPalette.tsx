@@ -495,9 +495,9 @@ export function CommandPalette() {
             )}
           </Command.List>
           </Panel>
-          <Separator className="goose-search-separator" aria-label="调整搜索结果与预览宽度" onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)} onKeyDown={(event) => event.stopPropagation()} />
+          <Separator className="goose-search-separator" aria-label="调整搜索结果与预览宽度" onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)} onKeyDown={(event) => { if (event.key !== "Escape") event.stopPropagation(); }} />
           <Panel id="search-preview-panel" className="goose-search-preview-panel" minSize="35%">
-          <section className="goose-search-preview" aria-label="笔记内容预览" onKeyDown={(event) => event.stopPropagation()}>
+          <section className="goose-search-preview" aria-label="笔记内容预览" onKeyDown={(event) => { if (event.key !== "Escape") event.stopPropagation(); }}>
             {previewPage ? (
               <>
                 <header className="goose-search-preview-heading">

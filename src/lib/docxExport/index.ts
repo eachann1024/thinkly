@@ -1,4 +1,5 @@
 import type { Page } from "@/types";
+import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { CustomFonts } from "@/stores/useSettings";
 import {
   AlignmentType,
@@ -65,11 +66,16 @@ function numberingLevels(
   }));
 }
 
-async function buildDocxDocument(page: Page): Promise<Document> {
+async function buildDocxDocument(
+  page: Page,
+  selectedBlocks?: BlockNoteContent,
+): Promise<Document> {
   const customFonts = await readExportCustomFonts();
   const font = resolveDocxFonts(page.fontFamily, customFonts);
-  const blocks = await prepareExportBlocks(page);
-  const bodyBlocks = page.localFilePath ? blocks : stripFirstH1(blocks);
+  const blocks = await prepareExportBlocks(
+    selectedBlocks ? { ...page, content: selectedBlocks } : page,
+  );
+  const bodyBlocks = selectedBlocks || page.localFilePath ? blocks : stripFirstH1(blocks);
   const title = getPageTitle(page);
 
   const ctx: DocxExportContext = {
@@ -79,7 +85,7 @@ async function buildDocxDocument(page: Page): Promise<Document> {
   };
   const children = await processBlockChildren(bodyBlocks, 0, ctx);
 
-  const titleParagraph = page.localFilePath
+  const titleParagraph = selectedBlocks || page.localFilePath
     ? null
     : new Paragraph({
         heading: HeadingLevel.HEADING_1,
@@ -162,8 +168,11 @@ async function buildDocxDocument(page: Page): Promise<Document> {
   });
 }
 
-export async function renderPageToDocxBlob(page: Page): Promise<Blob> {
-  const doc = await buildDocxDocument(page);
+export async function renderPageToDocxBlob(
+  page: Page,
+  selectedBlocks?: BlockNoteContent,
+): Promise<Blob> {
+  const doc = await buildDocxDocument(page, selectedBlocks);
   const blob = await Packer.toBlob(doc);
   if (!blob || blob.size < 80) {
     throw new Error("生成了空的 Word 文档");
@@ -176,9 +185,11 @@ export async function generateDocxBuffer(page: Page): Promise<ArrayBuffer> {
   return blob.arrayBuffer();
 }
 
-export async function exportToWord(page: Page) {
-  const blob = await renderPageToDocxBlob(page);
+export async function exportToWord(page: Page, selectedBlocks?: BlockNoteContent) {
+  const blob = await renderPageToDocxBlob(page, selectedBlocks);
   const filename = `${sanitizeFileName(getPageTitle(page) || "untitled")}.docx`;
   const { saveBlobAndReveal } = await import("@/lib/export/fileSave");
-  await saveBlobAndReveal(blob, filename);
+  if (!(await saveBlobAndReveal(blob, filename))) {
+    throw new Error("无法通过 Electron 保存文件");
+  }
 }

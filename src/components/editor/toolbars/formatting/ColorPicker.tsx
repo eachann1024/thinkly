@@ -8,6 +8,7 @@ import { cn } from "@/components/editor/utils/cn";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { setFakeSelection } from "@/components/editor/extensions/fakeSelectionExtension";
 import {
+  resolveFormattingRange,
   restoreTextSelectionRange,
   withPreservedSelection,
 } from "@/components/editor/toolbars/formatting/helpers";
@@ -312,10 +313,9 @@ function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
       );
       const textColors = new Set<string>();
       const bgColors = new Set<string>();
-      const from = selection.from;
-      const to = selection.to;
+      const range = resolveFormattingRange(editor.prosemirrorState);
 
-      if (from === to) {
+      if (!range) {
         const marks = selection.$to.marks();
         const tc = marks.find((m: any) => m.type.name === "textColor");
         const bc = marks.find((m: any) => m.type.name === "backgroundColor");
@@ -327,7 +327,7 @@ function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
         };
       }
 
-      doc.nodesBetween(from, to, (node: any) => {
+      doc.nodesBetween(range.from, range.to, (node: any) => {
         if (!node.isText) return true;
         const tc = node.marks.find((m: any) => m.type.name === "textColor");
         const bc = node.marks.find(

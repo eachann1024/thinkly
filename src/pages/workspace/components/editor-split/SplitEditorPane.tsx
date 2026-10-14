@@ -12,6 +12,10 @@ import { usePages } from "@/stores/usePages";
 import { useEditorPaneRegistry } from "./editorPaneRegistry";
 import { useSettings } from "@/stores/useSettings";
 import { PageContents } from "./PageContents";
+import {
+  FIXED_TOOLBAR_PANE_ATTR,
+  FIXED_TOOLBAR_SLOT_ATTR,
+} from "@/components/editor/toolbars/formatting/toolbarMode";
 
 function SplitPaneCloseButton({
   tabId,
@@ -115,6 +119,7 @@ export function SplitEditorPane({
   return (
     <div
       className="flex h-full min-h-0 min-w-0 flex-col"
+      {...{ [FIXED_TOOLBAR_PANE_ATTR]: "" }}
       data-font-family={page.fontFamily ?? "default"}
       data-page-layout={page.pageLayout ?? defaultLayout}
       data-local-file-page={isLocalFilePage ? "true" : undefined}
@@ -138,6 +143,10 @@ export function SplitEditorPane({
         </div>
       ) : null}
       <EditorHostBridge page={page} isEditorFullWidth>
+        <div
+          {...{ [FIXED_TOOLBAR_SLOT_ATTR]: "" }}
+          className="goose-fixed-top-toolbar-slot shrink-0"
+        />
         <div className="page-layout-body flex min-h-0 min-w-0 flex-1">
         {(page.pageLayout ?? defaultLayout) === "compact" && (
           <PageContents editor={editor} pageId={page.id} scrollRef={scrollElRef} />

@@ -12,6 +12,10 @@
 
 export const PDF_FONT_FAMILY = "NotoSansSC";
 export const PDF_DM_MONO_FAMILY = "DM Mono";
+export const PDF_INLINE_CODE_FONT_FAMILIES = [
+  PDF_DM_MONO_FAMILY,
+  PDF_FONT_FAMILY,
+] as const;
 
 export type PdfPageFontFamily = "default" | "serif" | "mono";
 

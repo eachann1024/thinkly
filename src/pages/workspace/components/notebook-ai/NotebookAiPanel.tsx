@@ -31,8 +31,6 @@ import {
 } from "lucide-react";
 import type { RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
-import { useNotebooks } from "@/stores/useNotebooks";
-import { usePages } from "@/stores/usePages";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { ChatChrome } from "./beautiful-ui/ChatChrome";
 import { ChatMessages } from "./ChatMessages";
@@ -57,24 +55,17 @@ import {
   isEmptyConversationSummary,
 } from "@/lib/notebook-ai/conversationSummary";
 import type { AiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
-import { buildAiFileReferenceAttrs } from "@/components/editor/ai/composer/referenceLookup";
 import {
   formatNotebookAiChatError,
   NOTEBOOK_AI_PLACEHOLDER_HINTS,
   useNotebookAiSession,
 } from "./NotebookAiSession";
 import type { NotebookAiImageAttachment } from "./Composer";
-import { getCurrentNotebookAiPageId } from "@/lib/notebook-ai/context";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import { cn } from "@/lib/utils";
 import { readEditorScale } from "./artifactPanZoomScale";
 import { FOCUS_AI_COMPOSER_EVENT } from "@/components/editor/ai/composer/selectionQuote";
-import {
-  buildComposerDraftFromReference,
-  resolveEmptySessionComposerSeed,
-  shouldSeedCurrentPageReference,
-} from "./defaultComposerReference";
 import {
   clearAiPanelSurface,
   dismissAiFloatingLayers,
@@ -195,16 +186,6 @@ export function NotebookAiPanel({
       panel.style.removeProperty("--ai-composer-float-pad");
     };
   }, []);
-  // 只订当前活动页是否属于本笔记本（字符串），任意页自动保存不会重渲染面板。
-  const fallbackPageId = usePages((state) => {
-    const activeId = state.activePageId;
-    if (activeId && state.pages[activeId]?.workspaceId === notebookId) {
-      return activeId;
-    }
-    return null;
-  });
-  const notebooks = useNotebooks((state) => state.notebooks);
-
   const {
     conversationId,
     messages,
@@ -215,7 +196,6 @@ export function NotebookAiPanel({
     unavailableReason,
     placeholderIndex,
     composerRevision,
-    suppressDefaultPageSeed,
     send,
     newConversation,
     ensureFreshConversation,
@@ -232,67 +212,6 @@ export function NotebookAiPanel({
   useEffect(() => {
     ensureFreshOnOpenRef.current();
   }, []);
-
-  // 空会话默认 @ 跟随当前页：切笔记本 / 切页后再打开面板时换成最新笔记。
-  // 用户已打字、加过其他 chip，或会话里已有消息，都保持原样。
-  const currentPageId =
-    getCurrentNotebookAiPageId(notebookId) ?? fallbackPageId;
-  const initialReference = useMemo(() => {
-    const page = currentPageId
-      ? usePages.getState().pages[currentPageId]
-      : undefined;
-    return page ? buildAiFileReferenceAttrs(page, notebooks) : null;
-  }, [currentPageId, notebooks]);
-  const composerSeedContent = useMemo(
-    () =>
-      resolveEmptySessionComposerSeed(
-        messages.length,
-        useNotebookAiChats.getState().getComposerDraft(notebookId),
-        initialReference,
-        { suppress: suppressDefaultPageSeed },
-      ),
-    [
-      initialReference,
-      messages.length,
-      notebookId,
-      composerRevision,
-      suppressDefaultPageSeed,
-    ],
-  );
-
-  // Composer 挂载（或 key 重挂载）后：空会话且输入区仍是默认 @ 时跟到当前页。
-  // /new 后 suppress：空输入 replaceable，不走这里，否则会把刚清掉的 tag 种回去。
-  useEffect(() => {
-    if (!bodyReady || !initialReference) return;
-    const draft = useNotebookAiChats.getState().getComposerDraft(notebookId);
-    if (
-      !shouldSeedCurrentPageReference(messages.length, draft, currentPageId, {
-        suppress: suppressDefaultPageSeed,
-      })
-    ) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      const result =
-        composerRef.current?.replaceDefaultPageReference(initialReference);
-      if (result === "skipped") return;
-      useNotebookAiChats
-        .getState()
-        .setComposerDraft(
-          notebookId,
-          buildComposerDraftFromReference(initialReference),
-        );
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [
-    bodyReady,
-    currentPageId,
-    initialReference,
-    messages.length,
-    composerRevision,
-    notebookId,
-    suppressDefaultPageSeed,
-  ]);
 
   // 面板打开即聚焦输入框；/new 重挂 Composer 后同样拉回焦点。
   // 已打开时重复触发「打开」走 goose-note:focus-ai-composer
@@ -641,7 +560,7 @@ export function NotebookAiPanel({
               key={`${notebookId}-${composerRevision}`}
               notebookId={notebookId}
               conversationId={conversationId}
-              initialContent={composerSeedContent}
+              initialContent={useNotebookAiChats.getState().getComposerDraft(notebookId)}
               onSend={handleSend}
               onSlashCommand={handleSlashCommand}
               isStreaming={isBusy}

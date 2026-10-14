@@ -28,6 +28,9 @@ import { setFakeSelection } from "@/components/editor/extensions/fakeSelectionEx
 import {
   applySelectionTextAlignment,
   clearSelectionFormatting,
+  expandCollapsedSelectionToLine,
+  getCollapsedLineRange,
+  getFixedFormattingToolbarCapabilities,
   getFormattingToolbarCapabilities,
   resolveFormattingToolbarAiBlockId,
   selectionDisallowsFormattingToolbar,
@@ -64,7 +67,40 @@ function ToolbarSectionSeparator() {
   );
 }
 
+/** 固定工具栏不隐藏分组，不可用时整组置灰，避免按钮随光标跳位。 */
+function ToolbarSection({
+  disabled,
+  children,
+}: {
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <fieldset
+      disabled={disabled}
+      aria-disabled={disabled || undefined}
+      className="goose-formatting-toolbar-section"
+    >
+      {children}
+    </fieldset>
+  );
+}
+
 export function EditorFormattingToolbar() {
+  return <FormattingToolbarView variant="floating" />;
+}
+
+/** 常驻顶部的格式工具栏：折叠光标按整行处理，不可用分组置灰。 */
+export function FixedEditorFormattingToolbar() {
+  return <FormattingToolbarView variant="fixed" />;
+}
+
+function FormattingToolbarView({
+  variant,
+}: {
+  variant: "floating" | "fixed";
+}) {
+  const fixed = variant === "fixed";
   const editor = useBlockNoteEditor();
   // 未启用 AI 的构建跳过 useExtension；编译期分支在同一构建内保持稳定。
 
@@ -95,8 +131,13 @@ export function EditorFormattingToolbar() {
       } catch {
         quoteText = selectedText;
       }
+      const lineRange = getCollapsedLineRange(editor.prosemirrorState);
+      const lineText = lineRange
+        ? doc.textBetween(lineRange.from, lineRange.to, "\n", "\n").trim()
+        : "";
 
       return {
+        lineText,
         hasTextSelection:
           (!selection.empty && selectedText.length > 0) ||
           shouldRenderFormattingToolbar(editor),
@@ -118,7 +159,9 @@ export function EditorFormattingToolbar() {
   const caps = useEditorState({
     editor,
     selector: ({ editor }) =>
-      getFormattingToolbarCapabilities(editor, {
+      (fixed
+        ? getFixedFormattingToolbarCapabilities
+        : getFormattingToolbarCapabilities)(editor, {
         isInHeading: selectionIsInsideHeadingBlock(editor),
       }),
   });
@@ -165,8 +208,12 @@ export function EditorFormattingToolbar() {
   // 保存 selection 作为 AI 浮层锚点，并在菜单生命周期内隐藏格式工具栏。
   const handleAiActivate = useCallback(() => {
     try {
-      const { selection } = editor.prosemirrorState;
-      if (selection.empty) return;
+      if (
+        editor.prosemirrorState.selection.empty &&
+        !(fixed && getCollapsedLineRange(editor.prosemirrorState))
+      ) {
+        return;
+      }
 
       if (!aiSettings.enabled) {
         toast.error("AI 助手尚未开启，请先到设置中打开");
@@ -187,6 +234,9 @@ export function EditorFormattingToolbar() {
         return;
       }
 
+      // 固定工具栏在折叠光标下按整行交给 AI。
+      if (fixed) expandCollapsedSelectionToLine(editor);
+      const { selection } = editor.prosemirrorState;
       const saved = { from: selection.from, to: selection.to };
       setFakeSelection(editor, saved);
       activateFormattingToolbarAi(saved);
@@ -213,6 +263,7 @@ export function EditorFormattingToolbar() {
     aiExtension,
     aiSettings,
     editor,
+    fixed,
     resetFormattingToolbarAi,
   ]);
 
@@ -245,7 +296,7 @@ export function EditorFormattingToolbar() {
   // 小窗的格式栏是固定底栏，滚动不会遮挡选区，也不应闪烁隐藏；
   // 常规笔记本的浮动栏仍在滚动时收起，避免与正文一起漂移。
   const shouldHideForScroll =
-    (!isQuickNoteSurface && isScrolling) || isContextMenuOpen;
+    !fixed && ((!isQuickNoteSurface && isScrolling) || isContextMenuOpen);
   // While AI is active we keep the toolbar visible regardless of scroll/menu.
   const shouldHide = !aiActive && !colorPickerOpen && shouldHideForScroll;
 
@@ -254,6 +305,7 @@ export function EditorFormattingToolbar() {
   // Selection-based gating only matters when AI mode isn't already active.
   // 拖选按住期间选区会先塌成空：不要卸掉工具栏，否则被挡住的上一行会闪一下。
   if (
+    !fixed &&
     !aiActive &&
     !colorPickerOpen &&
     !holdDuringPointerSelect &&
@@ -264,69 +316,94 @@ export function EditorFormattingToolbar() {
     return null;
   }
 
-  const showAiButton =
-    __GOOSE_EDITOR_AI__ &&
-    aiSettings.enabled &&
-    caps.showAi &&
-    !isQuickNoteSurface;
+  // 固定工具栏：受保护标题内整条置灰；其余按能力逐组置灰。
+  const lockAll = fixed && isInTitleOne;
+  const sectionFor = (key: string, enabled: boolean, node: ReactNode) =>
+    fixed ? (
+      <ToolbarSection key={key} disabled={lockAll || !enabled}>
+        {node}
+      </ToolbarSection>
+    ) : (
+      <Fragment key={key}>{node}</Fragment>
+    );
+
+  const aiAvailable =
+    __GOOSE_EDITOR_AI__ && aiSettings.enabled && !isQuickNoteSurface;
+  const showAiButton = aiAvailable && caps.showAi;
 
   // 分节渲染：仅在「相邻两节都可见」时插入 Separator，避免双分隔线 / 尾随分隔线。
   const sections: ReactNode[] = [];
 
-  if (showAiButton) {
+  if (fixed ? aiAvailable : showAiButton) {
     sections.push(
-      <AiButton
-        key="ai"
-        onActivate={handleAiActivate}
-        bindTooltip={bindTooltip}
-      />,
+      sectionFor(
+        "ai",
+        caps.showAi,
+        <AiButton onActivate={handleAiActivate} bindTooltip={bindTooltip} />,
+      ),
     );
   }
 
-  if (caps.showMarks || caps.showColors) {
+  const markNodes = (
+    <>
+      <MarkGroup
+        isBold={isBold}
+        isItalic={isItalic}
+        isStrike={isStrike}
+        bindTooltip={bindTooltip}
+      />
+      <InlineGroup
+        isUnderline={isUnderline}
+        isCode={isCode}
+        bindTooltip={bindTooltip}
+      />
+    </>
+  );
+  const colorNode = (
+    <FormattingToolbarColorPicker onOpenChange={setColorPickerOpen} />
+  );
+
+  if (fixed) {
     sections.push(
       <Fragment key="styles">
-        {caps.showMarks && (
-          <MarkGroup
-            isBold={isBold}
-            isItalic={isItalic}
-            isStrike={isStrike}
-            bindTooltip={bindTooltip}
-          />
-        )}
-        {caps.showMarks && (
-          <InlineGroup
-            isUnderline={isUnderline}
-            isCode={isCode}
-            bindTooltip={bindTooltip}
-          />
-        )}
-        {caps.showColors && (
-          <FormattingToolbarColorPicker onOpenChange={setColorPickerOpen} />
-        )}
+        {sectionFor("marks", caps.showMarks, markNodes)}
+        {sectionFor("colors", caps.showColors, colorNode)}
+      </Fragment>,
+    );
+  } else if (caps.showMarks || caps.showColors) {
+    sections.push(
+      <Fragment key="styles">
+        {caps.showMarks && markNodes}
+        {caps.showColors && colorNode}
       </Fragment>,
     );
   }
 
-  if (caps.showLink) {
+  if (fixed || caps.showLink) {
     sections.push(
-      <LinkButton
-        key="link"
-        isLinkActive={isLinkActive}
-        linkUrl={linkUrl}
-        bindTooltip={bindTooltip}
-      />,
+      sectionFor(
+        "link",
+        caps.showLink,
+        <LinkButton
+          isLinkActive={isLinkActive}
+          linkUrl={linkUrl}
+          bindTooltip={bindTooltip}
+        />,
+      ),
     );
   }
 
-  if (caps.showAlign) {
+  if (fixed || caps.showAlign) {
     sections.push(
-      <AlignGroup
-        key="align"
-        textAlignment={textAlignment}
-        setTextAlignment={setTextAlignment}
-        bindTooltip={bindTooltip}
-      />,
+      sectionFor(
+        "align",
+        caps.showAlign,
+        <AlignGroup
+          textAlignment={textAlignment}
+          setTextAlignment={setTextAlignment}
+          bindTooltip={bindTooltip}
+        />,
+      ),
     );
   }
 
@@ -336,37 +413,46 @@ export function EditorFormattingToolbar() {
     caps.mode !== "cellText" &&
     caps.mode !== "cellGrid";
 
-  if (showList) {
+  if (fixed || showList) {
     sections.push(
-      <ListTypeGroup key="list-type" bindTooltip={bindTooltip} />,
+      sectionFor(
+        "list-type",
+        showList,
+        <ListTypeGroup bindTooltip={bindTooltip} />,
+      ),
     );
   }
 
-  if (caps.showClear) {
+  if (fixed || caps.showClear) {
     sections.push(
-      <ClearFormatButton
-        key="clear"
-        onClear={clearFormatting}
-        bindTooltip={bindTooltip}
-      />,
+      sectionFor(
+        "clear",
+        caps.showClear,
+        <ClearFormatButton onClear={clearFormatting} bindTooltip={bindTooltip} />,
+      ),
     );
   }
 
+  const quoteText =
+    selectionState.selectedQuoteText || (fixed ? selectionState.lineText : "");
   const showAddToChat = canShowAddToChatButton({
     aiEnabled: aiSettings.enabled,
     isCompact: isQuickNoteSurface,
-    selectedText: selectionState.selectedQuoteText,
+    selectedText: quoteText,
     isImageNodeSelection: selectionState.isImageNodeSelection,
   });
 
-  if (showAddToChat) {
+  if (fixed ? aiAvailable : showAddToChat) {
     sections.push(
-      <AddToChatButton
-        key="add-to-chat"
-        selectedText={selectionState.selectedQuoteText}
-        pageId={page.id}
-        pageTitle={getPageTitle(page)}
-      />,
+      sectionFor(
+        "add-to-chat",
+        showAddToChat,
+        <AddToChatButton
+          selectedText={quoteText}
+          pageId={page.id}
+          pageTitle={getPageTitle(page)}
+        />,
+      ),
     );
   }
 
@@ -388,8 +474,9 @@ export function EditorFormattingToolbar() {
         data-formatting-toolbar
         data-selection-mode={caps.mode}
         data-goose-floating-toolbar={
-          !isQuickNoteSurface ? "true" : undefined
+          !fixed && !isQuickNoteSurface ? "true" : undefined
         }
+        data-goose-fixed-toolbar={fixed ? "true" : undefined}
         onMouseDown={(e) => {
           // Allow native focus on the AI textarea; everything else uses onClick.
           const target = e.target as HTMLElement | null;
@@ -409,16 +496,24 @@ export function EditorFormattingToolbar() {
           // 小窗底栏已用固定 px 尺寸，禁止再套 CSS zoom：
           // Electron 旧内核会放大 zoom 祖先的 getBoundingClientRect，
           // 导致 Portal 色板 / tooltip 错位（只露出「文本颜色」标题）。
-          !isQuickNoteSurface && "goose-formatting-toolbar-scaled",
+          !fixed && !isQuickNoteSurface && "goose-formatting-toolbar-scaled",
           selectionModeClass,
-          "z-[20000] transition-[opacity,transform,width] duration-150 ease-out",
-          aiActive ? "w-[520px] max-w-[calc(100vw-24px)]" : "w-auto",
+          fixed
+            ? "w-full"
+            : cn(
+                "z-[20000] transition-[opacity,transform,width] duration-150 ease-out",
+                aiActive ? "w-[520px] max-w-[calc(100vw-24px)]" : "w-auto",
+              ),
         )}
-        style={{
-          opacity: shouldHide ? 0 : 1,
-          transform: shouldHide ? "scale(0.96)" : "scale(1)",
-          pointerEvents: shouldHide ? "none" : "auto",
-        }}
+        style={
+          fixed
+            ? undefined
+            : {
+                opacity: shouldHide ? 0 : 1,
+                transform: shouldHide ? "scale(0.96)" : "scale(1)",
+                pointerEvents: shouldHide ? "none" : "auto",
+              }
+        }
       >
         <div className="goose-formatting-toolbar-row">
           {sections.map((section, index) => (

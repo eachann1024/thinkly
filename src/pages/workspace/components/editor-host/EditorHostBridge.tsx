@@ -74,6 +74,7 @@ export function EditorHostBridge({
   const ai = useSettings((s) => s.ai);
   const searchProviders = useSettings((s) => s.searchProviders);
   const customActions = useSettings((s) => s.customActions);
+  const formattingToolbarMode = useSettings((s) => s.formattingToolbarMode);
 
   const settings = useMemo<EditorSettings>(
     () => {
@@ -97,6 +98,7 @@ export function EditorHostBridge({
         openAttachmentsExternally: true,
         localFolderNotebook: notebook?.source === "local-folder",
       },
+      formattingToolbarMode,
       redirectAction: undefined,
     };
     },
@@ -109,6 +111,7 @@ export function EditorHostBridge({
       ai,
       searchProviders,
       customActions,
+      formattingToolbarMode,
       page.workspaceId,
     ],
   );

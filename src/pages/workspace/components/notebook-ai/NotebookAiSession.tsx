@@ -105,8 +105,6 @@ export interface NotebookAiSessionValue {
   unavailableReason: string | undefined;
   placeholderIndex: number;
   composerRevision: number;
-  /** 用户显式新建空白会话后，不要再种默认 @ 当前页 */
-  suppressDefaultPageSeed: boolean;
   send: (
     payload: AiComposerPayload,
     imageAttachments: NotebookAiImageAttachment[],
@@ -181,7 +179,6 @@ export function NotebookAiSessionProvider({
   }));
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [composerRevision, setComposerRevision] = useState(0);
-  const [suppressDefaultPageSeed, setSuppressDefaultPageSeed] = useState(false);
   const [isCompacting, setIsCompacting] = useState(false);
 
   // WorkspaceLayout 不再用 key 重挂整个 Provider。这里在 render 期间把新笔记本
@@ -197,7 +194,6 @@ export function NotebookAiSessionProvider({
       generation: session.generation + 1,
     });
     setPlaceholderIndex(0);
-    setSuppressDefaultPageSeed(false);
     setIsCompacting(false);
   }
   const { conversationId, generation: sessionGeneration } = session;
@@ -545,7 +541,6 @@ export function NotebookAiSessionProvider({
       const nextConversationId = useNotebookAiChats
         .getState()
         .createConversation(notebookId);
-      setSuppressDefaultPageSeed(true);
       setComposerRevision((revision) => revision + 1);
       setConversationId(nextConversationId);
       setMessages([]);
@@ -571,7 +566,6 @@ export function NotebookAiSessionProvider({
     clearError();
     requestCurrentPageIdRef.current = null;
     useNotebookAiChats.getState().clearComposerDraft(notebookId);
-    setSuppressDefaultPageSeed(true);
     setComposerRevision((revision) => revision + 1);
     setConversationId(nextConversationId);
     setMessages([]);
@@ -672,7 +666,6 @@ export function NotebookAiSessionProvider({
       clearError();
       requestCurrentPageIdRef.current = null;
       options?.onConsumeCapturedSelection?.();
-      setSuppressDefaultPageSeed(false);
       setConversationId(nextConversationId);
       setMessages(nextMessages);
     },
@@ -714,7 +707,6 @@ export function NotebookAiSessionProvider({
         const nextMessages = useNotebookAiChats
           .getState()
           .getConversationMessages(notebookId, nextActiveConversationId);
-        setSuppressDefaultPageSeed(false);
         setConversationId(nextActiveConversationId);
         setMessages(nextMessages);
         return true;
@@ -725,7 +717,6 @@ export function NotebookAiSessionProvider({
       const freshConversationId = useNotebookAiChats
         .getState()
         .createConversation(notebookId);
-      setSuppressDefaultPageSeed(true);
       setComposerRevision((revision) => revision + 1);
       setConversationId(freshConversationId);
       setMessages([]);
@@ -944,7 +935,6 @@ export function NotebookAiSessionProvider({
       unavailableReason,
       placeholderIndex,
       composerRevision,
-      suppressDefaultPageSeed,
       send,
       newConversation,
       ensureFreshConversation,
@@ -968,7 +958,6 @@ export function NotebookAiSessionProvider({
       unavailableReason,
       placeholderIndex,
       composerRevision,
-      suppressDefaultPageSeed,
       send,
       newConversation,
       ensureFreshConversation,

@@ -15,6 +15,7 @@ html body .workspace-shell.goose-search-panel {
   color-scheme: dark;
 }
 .goose-search-backdrop { background: var(--goose-search-overlay); }
+.goose-search-backdrop[data-exiting="true"] { visibility: hidden; transition: none; }
 .goose-search-panel [cmdk-input-wrapper] {
   min-height: 64px;
   padding: 0 22px;

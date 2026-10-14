@@ -215,6 +215,75 @@
   border-radius: 7px;
 }
 
+/* 顶部固定格式工具栏：挂在编辑窗格顶部插槽，样式由设置切换。
+   分组用 display: contents 的 fieldset 包裹，不可用时整组置灰但不移位。 */
+.goose-formatting-toolbar-section {
+  display: contents;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.goose-formatting-toolbar-section:disabled
+  :is(.goose-formatting-toolbar-control, .goose-formatting-toolbar-add-to-chat) {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.goose-formatting-toolbar-section:disabled * {
+  pointer-events: none;
+}
+
+.goose-fixed-top-toolbar:not(:has([data-formatting-toolbar])) {
+  display: none;
+}
+
+.goose-fixed-top-toolbar [data-formatting-toolbar] {
+  background: transparent;
+}
+
+.goose-fixed-top-toolbar[data-variant="top-bar"] .goose-fixed-top-toolbar-inner {
+  width: 100%;
+}
+
+.goose-fixed-top-toolbar[data-variant="top-bar"] .goose-formatting-toolbar-row {
+  justify-content: space-between;
+  gap: 0;
+  padding: 0;
+}
+
+/* 通栏：铺满窗格宽度，左对齐，底部细分隔线。 */
+.goose-fixed-top-toolbar[data-variant="top-bar"] {
+  border-bottom: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--goose-editor-bg));
+  padding: 4px 0;
+}
+
+/* 极简：无底无框，图标弱化，与正文左缘对齐；悬停时恢复正常对比度。 */
+.goose-fixed-top-toolbar[data-variant="top-minimal"] {
+  background: hsl(var(--goose-editor-bg));
+  /* 标题背景外扩 8px，工具行另有 4px 内边距；首按钮边界与色块对齐。 */
+  width: 100%;
+  max-width: var(--page-layout-width, none);
+  margin-inline: auto;
+  padding: 6px calc(var(--page-layout-gutter, 48px) - 12px) 2px;
+}
+
+.goose-fixed-top-toolbar[data-variant="top-minimal"] .goose-formatting-toolbar-control:not([data-state="on"]):not([aria-pressed="true"]),
+.goose-fixed-top-toolbar[data-variant="top-minimal"] .goose-formatting-toolbar-add-to-chat {
+  color: hsl(var(--muted-foreground));
+}
+
+.goose-fixed-top-toolbar[data-variant="top-minimal"]:hover .goose-formatting-toolbar-control:not([data-state="on"]):not([aria-pressed="true"]),
+.goose-fixed-top-toolbar[data-variant="top-minimal"]:hover .goose-formatting-toolbar-add-to-chat {
+  color: hsl(var(--foreground));
+}
+
+.goose-fixed-top-toolbar[data-variant="top-minimal"] .goose-formatting-toolbar-separator {
+  opacity: 0.45;
+}
+
 /* 图片、视频等块级浮层共用同一密度；外层 goose-editor-context-ui 负责等比缩放。 */
 .goose-block-toolbar-surface {
   display: flex;

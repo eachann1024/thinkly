@@ -12,7 +12,10 @@ import type { CustomFonts } from "@/stores/useSettings";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { createElement } from "react";
 import { prepareExportBlocks } from "@/lib/export/prepareExportBlocks";
-import { registerPdfFonts } from "./fontConfig";
+import {
+  PDF_INLINE_CODE_FONT_FAMILIES,
+  registerPdfFonts,
+} from "./fontConfig";
 import { createPdfBlockMappings } from "./blockMappings";
 import { canPrintToPdf, exportPageViaPrintToPdf } from "./printPdf";
 
@@ -51,6 +54,7 @@ async function exportViaReactPdf(
     blockMapping: blockMapping as unknown as typeof pdfDefaultSchemaMappings.blockMapping,
     inlineContentMapping: {
       ...pdfDefaultSchemaMappings.inlineContentMapping,
+      hardBreak: () => createElement(ReactPDF.Text, null, "\n"),
       pageMention: (ic: { props?: { title?: string } }) => {
         const title =
           typeof ic?.props?.title === "string" && ic.props.title.trim()
@@ -60,7 +64,11 @@ async function exportViaReactPdf(
         return createElement(ReactPDF.Text, { key: `pageMention-${label}` }, label);
       },
     },
-    styleMapping: pdfDefaultSchemaMappings.styleMapping,
+    styleMapping: {
+      ...pdfDefaultSchemaMappings.styleMapping,
+      code: (enabled: boolean) =>
+        enabled ? { fontFamily: [...PDF_INLINE_CODE_FONT_FAMILIES] } : {},
+    },
   };
 
   // emojiSource:false —— 不要去拉 twemoji CDN（插件离线 / file:// 会 Failed to fetch）
@@ -89,15 +97,18 @@ async function exportViaReactPdf(
 export async function renderPageToPdfBlob(
   page: Page,
   customFonts?: CustomFonts,
+  selectedBlocks?: BlockNoteContent,
 ): Promise<Blob> {
-  const blocks = await prepareExportBlocks(page);
+  const blocks = await prepareExportBlocks(
+    selectedBlocks ? { ...page, content: selectedBlocks } : page,
+  );
 
   let blob: Blob | null = null;
   let lastError: unknown;
 
   if (canPrintToPdf()) {
     try {
-      blob = await exportPageViaPrintToPdf(page, blocks);
+      blob = await exportPageViaPrintToPdf(page, blocks, Boolean(selectedBlocks));
     } catch (error) {
       lastError = error;
       console.warn("[pdfExport] printToPDF 失败，降级 react-pdf:", error);

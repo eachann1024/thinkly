@@ -74,6 +74,17 @@ test("输入草稿按笔记本读写，空内容会清除", () => {
   expect(store.getComposerDraft("nb-draft")).toBeNull();
 });
 
+test("手动 @ 引用删除后不会从草稿恢复", () => {
+  const store = useNotebookAiChats.getState();
+  store.setComposerDraft("nb-ref", {
+    type: "doc",
+    content: [{ type: "paragraph", content: [{ type: "aiFileReference", attrs: { pageId: "linux", titleSnapshot: "linux" } }] }],
+  });
+  expect(store.getComposerDraft("nb-ref")).not.toBeNull();
+  store.setComposerDraft("nb-ref", null);
+  expect(store.getComposerDraft("nb-ref")).toBeNull();
+});
+
 test("草稿有文本、引用或 Skill 时视为有内容", () => {
   expect(composerDraftHasContent(null)).toBe(false);
   expect(

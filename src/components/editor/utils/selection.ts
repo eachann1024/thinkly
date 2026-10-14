@@ -51,11 +51,10 @@ export function readLiveEditorSelectedBlocks(
   if (!editor) return [];
   try {
     if (editor.prosemirrorState?.selection?.empty) return [];
-    const selected = editor.getSelection?.();
-    const selectedBlocks = asSelectedBlocks(selected?.blocks);
-    if (selectedBlocks.length > 0) return selectedBlocks;
     const cut = editor.getSelectionCutBlocks?.(false);
-    return asSelectedBlocks(cut?.blocks);
+    const cutBlocks = asSelectedBlocks(cut?.blocks);
+    if (cutBlocks.length > 0) return cutBlocks;
+    return asSelectedBlocks(editor.getSelection?.()?.blocks);
   } catch {
     return [];
   }

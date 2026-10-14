@@ -11,6 +11,7 @@ import {
 } from "@/components/editor/ui/popover";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { withPreservedSelection } from "../helpers";
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -38,7 +39,7 @@ export function LinkButton({
   const handleSubmit = useCallback(() => {
     const trimmed = url.trim();
     if (trimmed) {
-      editor.createLink(trimmed);
+      withPreservedSelection(editor, () => editor.createLink(trimmed));
     }
     setOpen(false);
     setUrl("");
@@ -64,7 +65,9 @@ export function LinkButton({
           <Toggle
             size="sm"
             pressed={true}
-            onPressedChange={() => editor.deleteLink()}
+            onPressedChange={() =>
+              withPreservedSelection(editor, () => editor.deleteLink())
+            }
             aria-label="移除链接"
             className={ITEM_CLASS}
           >

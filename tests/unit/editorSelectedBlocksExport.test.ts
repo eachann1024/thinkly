@@ -3,6 +3,8 @@ import { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection } from "@tiptap/pm/state";
 import { expect, test } from "playwright/test";
 import { editorSchema } from "../../src/components/editor/core/schema";
+import { buildSinglePageExport } from "../../src/lib/export/pageWithAttachments";
+import type { Page } from "../../src/types";
 import {
   clearEditorSelectedBlocksCache,
   getEditorSelectedBlocksForExport,
@@ -92,4 +94,25 @@ test("页面菜单确认主题时使用打开菜单时的选区快照", () => {
   expect(pageMenu).not.toContain(
     "const blocks = getEditorSelectedBlocks();",
   );
+});
+
+test("导出仅包含精确选中的文字，不附加整页标题或未选内容", async () => {
+  const editor = createEditor([
+    { id: "body", type: "paragraph", content: "前缀选中内容后缀" },
+  ]);
+  const range = findTextRange(editor, "前缀选中内容后缀");
+  editor.transact((tr) => {
+    tr.setSelection(TextSelection.create(tr.doc, range.from + 2, range.to - 2));
+  });
+  const selected = getEditorSelectedBlocksForExport(editor);
+  const page = {
+    id: "example",
+    content: [{ type: "heading", props: { level: 1 }, content: "原页面标题" }],
+  } as Page;
+
+  const { blob, filename } = await buildSinglePageExport(page, "md", undefined, selected);
+  const markdown = await blob.text();
+  expect(filename).toBe("原页面标题.md");
+  expect(markdown).toContain("选中内容");
+  expect(markdown).not.toMatch(/前缀|后缀|原页面标题/);
 });

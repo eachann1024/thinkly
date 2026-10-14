@@ -79,10 +79,6 @@ export interface ComposerHandle {
   focus: () => void;
   /** 打开面板后立即给输入框植入初始引用（当前页上下文） */
   insertReference: (reference: AiFileReferenceAttrs) => void;
-  /** 空会话默认 @ 仍可替换时，改成最新当前页 */
-  replaceDefaultPageReference: (
-    reference: AiFileReferenceAttrs,
-  ) => "applied" | "already" | "skipped";
   /** 把选区引用 chip 追加到输入框末尾；加入对话路径由外层聚焦 */
   appendSelectionQuote: (
     quote: AiSelectionQuoteAttrs,
@@ -228,6 +224,11 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
 
     const handleContentChange = useCallback(
       (content: JSONContent | null) => {
+        if (content === null) {
+          cancelPendingDraftPersist();
+          useNotebookAiChats.getState().setComposerDraft(notebookId, null);
+          return;
+        }
         // 防抖写 Electron：英文快打也会打到同步 dbStorage；拼音中间态已在 input 层跳过
         const seq = ++draftSeqRef.current;
         if (draftTimerRef.current != null) {
@@ -239,7 +240,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
           useNotebookAiChats.getState().setComposerDraft(notebookId, content);
         }, COMPOSER_DRAFT_PERSIST_MS);
       },
-      [notebookId],
+      [notebookId, cancelPendingDraftPersist],
     );
 
     const handleSubmit = useCallback(() => {
@@ -432,8 +433,6 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
         insertReference: (reference: AiFileReferenceAttrs) => {
           inputRef.current?.insertReference(reference);
         },
-        replaceDefaultPageReference: (reference: AiFileReferenceAttrs) =>
-          inputRef.current?.replaceDefaultPageReference(reference) ?? "skipped",
         appendSelectionQuote: (quote, options) =>
           inputRef.current?.appendSelectionQuote(quote, options) ?? "skipped",
       }),

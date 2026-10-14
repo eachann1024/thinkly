@@ -1,4 +1,17 @@
+import {
+  Bold,
+  Code,
+  Italic,
+  Link,
+  List,
+  Sparkles,
+  Strikethrough,
+  Underline,
+  type LucideIcon,
+} from "lucide-react";
 import { useSettings } from "@/stores/useSettings";
+import { cn } from "@/lib/utils";
+import type { FormattingToolbarMode } from "@/components/editor/toolbars/formatting/toolbarMode";
 
 interface Props {
   sidebarFontSize: number;
@@ -6,6 +19,84 @@ interface Props {
   editorLineHeight: number;
   uiFontSize: "small" | "normal";
   randomIconOnCreate: boolean;
+}
+
+const PREVIEW_TOOLBAR_GROUPS: { icon: LucideIcon; pressed?: boolean }[][] = [
+  [{ icon: Sparkles }],
+  [
+    { icon: Bold, pressed: true },
+    { icon: Italic },
+    { icon: Strikethrough },
+    { icon: Underline },
+    { icon: Code },
+  ],
+  [{ icon: Link }],
+  [{ icon: List }],
+];
+
+/** 设置预览里的格式工具栏，只展示样式，不响应点击。 */
+function PreviewFormattingToolbar({
+  mode,
+}: {
+  mode: FormattingToolbarMode;
+}) {
+  const floating = mode === "floating";
+  const buttons = (
+    <span className={cn("flex items-center gap-px", mode === "top-bar" && "w-full justify-between")}>
+      {PREVIEW_TOOLBAR_GROUPS.map((group, groupIndex) => (
+        <span key={groupIndex} className="flex items-center">
+          {groupIndex > 0 && (
+            <span className="mx-1 h-3 w-px bg-border" aria-hidden="true" />
+          )}
+          {group.map(({ icon: Icon, pressed }, index) => (
+            <span
+              key={index}
+              className={cn(
+                "inline-flex size-5 items-center justify-center rounded-[5px]",
+                pressed
+                  ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                  : mode === "top-minimal"
+                    ? "text-muted-foreground"
+                    : "text-foreground",
+              )}
+            >
+              <Icon className="size-3" strokeWidth={1.75} />
+            </span>
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+
+  if (floating) {
+    return (
+      <span
+        aria-hidden="true"
+        className="pointer-events-none inline-flex rounded-lg border border-border bg-popover p-0.5 shadow-sm"
+      >
+        {buttons}
+      </span>
+    );
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none bg-[hsl(var(--goose-editor-bg))]",
+        mode === "top-bar"
+          ? "border-b border-border/80 py-1"
+          : "pb-0.5 pt-1.5",
+      )}
+      style={
+        mode === "top-minimal"
+          ? { paddingInline: "var(--page-layout-gutter)" }
+          : undefined
+      }
+    >
+      {buttons}
+    </div>
+  );
 }
 
 function EditorSample({
@@ -16,6 +107,7 @@ function EditorSample({
   randomIconOnCreate,
 }: Props) {
   const layout = useSettings((state) => state.defaultPageLayout);
+  const toolbarMode = useSettings((state) => state.formattingToolbarMode);
   return (
     <div
       data-page-layout={layout}
@@ -58,7 +150,11 @@ function EditorSample({
               <p>周末的小计划</p>
             </nav>
           )}
-          <div className="min-w-0 flex-1 overflow-y-auto">
+          <div className="flex min-w-0 flex-1 flex-col">
+            {toolbarMode !== "floating" && (
+              <PreviewFormattingToolbar mode={toolbarMode} />
+            )}
+            <div className="min-h-0 flex-1 overflow-y-auto">
             <div
               className="page-layout-document"
               style={{
@@ -70,8 +166,25 @@ function EditorSample({
               <h3 className="mb-4 text-[1.5em] font-semibold tracking-tight">
                 雨停后的星期三
               </h3>
+              {toolbarMode === "floating" && (
+                <div className="mb-3 flex justify-center">
+                  <PreviewFormattingToolbar mode="floating" />
+                </div>
+              )}
               <p className="mb-3">
-                傍晚下班时，雨刚好停了。街角的面包店还亮着灯，我买了一只热乎的可颂，绕着小公园慢慢走回家。
+                傍晚下班时，
+                <span className="font-semibold">
+                  <span
+                    className={
+                      toolbarMode === "floating"
+                        ? "rounded-sm bg-[var(--goose-interactive-selected)]/35"
+                        : undefined
+                    }
+                  >
+                    雨刚好停了
+                  </span>
+                </span>
+                。街角的面包店还亮着灯，我买了一只热乎的可颂，绕着小公园慢慢走回家。
               </p>
               <ul className="mb-3 list-disc pl-6">
                 <li>路灯下的树影拉得很长，长椅上还留着细小的水珠</li>
@@ -118,6 +231,7 @@ function EditorSample({
               <p>
                 也想给自己留一段不赶时间的午后：翻到书签夹着的那一页，读完它，再把喜欢的句子记下来。
               </p>
+            </div>
             </div>
           </div>
         </div>
