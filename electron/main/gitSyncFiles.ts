@@ -82,4 +82,3 @@ export async function safeTarget(root: string, name: string) {
   }
   return target;
 }
-
