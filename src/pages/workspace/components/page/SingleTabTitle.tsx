@@ -50,7 +50,7 @@ export function SingleTabTitle({
 
   if (locked) {
     return (
-      <span className={lockedClass} title={currentTitle}>
+      <span data-page-title-surface={surface} className={lockedClass} title={currentTitle}>
         {currentTitle}
       </span>
     );
@@ -97,6 +97,7 @@ export function SingleTabTitle({
         type="button"
         data-electron-no-drag
         data-electron-option-drag
+        data-page-title-surface={surface}
         aria-label="笔记标题"
         title="点击编辑笔记标题"
         className={`${idleClass} ${sizeClass} truncate text-left cursor-pointer`}
@@ -117,6 +118,7 @@ export function SingleTabTitle({
         {...imeInputProps}
         size={1}
         data-page-title-field
+        data-page-title-surface={surface}
         autoFocus={idleWindowDrag}
         onFocus={syncCaret}
         onSelect={syncCaret}

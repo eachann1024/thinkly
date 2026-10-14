@@ -17,10 +17,19 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* 输入标题时仍保留所属标签的选中表面，光标和关闭按钮行为不变。 */
+/* 单文档名称栏默认中性；只有实际进入改名输入时才使用强调色。 */
+:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]) {
+  background: transparent;
+  color: var(--goose-text-primary);
+  box-shadow: none;
+}
+:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):is(:hover, :active) {
+  background: color-mix(in srgb, var(--goose-text-primary) 6%, transparent);
+}
 :root .workspace-shell .tab-rail-item[data-tab-active="true"]:has([data-page-title-field]:focus) {
   background: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
 /* 与全局 focus reset 同层，内置轮廓避免滚动容器裁切，也不覆盖选中描边。
@@ -38,6 +47,12 @@
     :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
   ) {
     outline: 2px solid var(--goose-accent-outline-focus) !important;
+    outline-offset: -4px;
+  }
+  /* Tab 到闲置名称仍可辨认；Enter/Space 进入原有编辑流程后才强调。 */
+  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):focus-visible,
+  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"] button[data-page-title-surface="tab-pill"]:focus-visible {
+    outline: 2px solid var(--goose-text-primary) !important;
     outline-offset: -4px;
   }
 }

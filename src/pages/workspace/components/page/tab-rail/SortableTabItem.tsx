@@ -99,6 +99,7 @@ export function SortableTabItem({
           tabIndex={isActive ? 0 : -1}
           aria-selected={isActive}
           data-tab-id={tab.id}
+          data-tab-count={tabCount}
           data-tab-active={isActive || undefined}
           data-tab-page-id={tab.pageId}
           data-tab-preview={tab.preview || undefined}
