@@ -1,0 +1,81 @@
+/* 精准轮廓只消费真实选中状态，不改变标签、轨道或列表的几何与事件。 */
+/* 链接从信息色独立出来，嵌套编辑器/浮层沿用当前主题的可读强调文字。 */
+:root, .light, .default, .dark, [data-theme], [data-sonner-theme] {
+  --goose-text-link: var(--goose-accent-text, var(--goose-text-info));
+}
+
+:root .workspace-shell .tab-rail-item[data-tab-active="true"]:where(:not([aria-disabled="true"])),
+:root .workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
+  .sidebar-mode-rail-button,
+  .sidebar-footer-control,
+  .sidebar-notebook-trigger--rail
+):is([aria-pressed="true"], [data-state="open"], [data-active="true"]):where(
+  :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
+) {
+  background: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
+}
+
+/* 单文档名称栏默认中性；只有实际进入改名输入时才使用强调色。 */
+:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]) {
+  background: transparent;
+  color: var(--goose-text-primary);
+  box-shadow: none;
+}
+:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):is(:hover, :active) {
+  background: color-mix(in srgb, var(--goose-text-primary) 6%, transparent);
+}
+:root .workspace-shell .tab-rail-item[data-tab-active="true"]:has([data-page-title-field]:focus) {
+  background: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
+}
+
+/* 与全局 focus reset 同层，内置轮廓避免滚动容器裁切，也不覆盖选中描边。
+ * 鼠标焦点继续遵循现有 pointer-focus 标记，列表 hover 仍由原有类管理。 */
+@layer properties {
+  :root:not([data-goose-pointer-focus="true"]) .workspace-shell :is(
+    .tab-rail-item,
+    .sidebar-mode-rail-button,
+    .sidebar-footer-control,
+    .sidebar-notebook-trigger--rail,
+    .main-tree-row,
+    .main-tree-row > [data-rct-item-interactive],
+    .sidebar-tree-row
+  ):is(:focus-visible, [data-focus-visible="true"]):where(
+    :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
+  ) {
+    outline: 2px solid var(--goose-accent-outline-focus) !important;
+    outline-offset: -4px;
+  }
+  /* Tab 到闲置名称仍可辨认；Enter/Space 进入原有编辑流程后才强调。 */
+  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):focus-visible,
+  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"] button[data-page-title-surface="tab-pill"]:focus-visible {
+    outline: 2px solid var(--goose-text-primary) !important;
+    outline-offset: -4px;
+  }
+}
+
+/* RCT 的 focus 背景不能覆盖已选中的行；行距、圆角、原有描边保持不变。 */
+:root .workspace-shell :is(.main-tree-row--selected, .sidebar-tree-row--selected):focus-visible,
+:root .workspace-shell .main-tree-row--selected > [data-rct-item-interactive]:focus-visible {
+  background-color: var(--goose-interactive-selected) !important;
+  color: var(--goose-interactive-selected-fg) !important;
+}
+
+/* 开关的 checked 保持优先于 enabled:hover，焦点边框另用可读色。 */
+[data-goose-control="switch"]:checked:not(:disabled):where(
+  :not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"])
+) {
+  background-color: var(--goose-interactive-selected);
+  border-color: var(--goose-interactive-selected-border);
+}
+[data-goose-control="switch"]:focus-visible:not(:disabled):where(
+  :not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"])
+) {
+  border-color: var(--goose-text-primary);
+}
+.goose-field:focus-visible:where(:not([aria-invalid="true"]):not(:disabled)) {
+  border-color: var(--goose-accent-outline-focus);
+}

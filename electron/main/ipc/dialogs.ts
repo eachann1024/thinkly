@@ -1,37 +1,47 @@
 import { dialog, ipcMain } from "electron";
+import path from "node:path";
+import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../../src/lib/native-dialog-contract";
 import { addSessionAllowed, addVaultRoot } from "../allowlist";
 import { getMainWindow } from "../windows";
+import { dialogDirectory, rememberDialogDirectory, saveDialogPath } from "../dialogHistory";
+import { withWindowDialog } from "../dialogSession";
 import { senderWindow } from "./common";
 
 export function registerDialogsIpc(): void {
-  ipcMain.handle("desktop:selectDirectory", async (event) => {
-    const win = senderWindow(event);
-    const result = await dialog.showOpenDialog(win ?? getMainWindow()!, {
-      properties: ["openDirectory"],
-      title: "选择 Markdown 文件夹",
+  ipcMain.handle("desktop:selectDirectory", async (event, opts: DirectoryDialogOptions = {}) => {
+    return withWindowDialog<string | null>(senderWindow(event) ?? getMainWindow(), null, async (win) => {
+      const purpose = opts.purpose === "recovery" ? "recovery" : "notebook";
+      const defaultPath = await dialogDirectory(purpose, opts.defaultPath, opts.fallbackPath);
+      if (win.isDestroyed()) return null;
+      const result = await dialog.showOpenDialog(win, {
+        properties: ["openDirectory"],
+        title: "选择 Markdown 文件夹",
+        defaultPath,
+      });
+      if (result.canceled || result.filePaths.length === 0) return null;
+      const selected = addVaultRoot(result.filePaths[0]);
+      await rememberDialogDirectory(purpose, selected);
+      return selected;
     });
-    if (result.canceled || result.filePaths.length === 0) return null;
-    return addVaultRoot(result.filePaths[0]);
   });
 
   ipcMain.handle(
     "desktop:showOpenDialog",
     async (
       event,
-      opts: {
-        filters?: { name: string; extensions: string[] }[];
-        multiple?: boolean;
-      } = {},
+      opts: OpenFileDialogOptions = {},
     ) => {
-      const win = senderWindow(event);
-      const properties: Array<"openFile" | "multiSelections"> = ["openFile"];
-      if (opts.multiple) properties.push("multiSelections");
-      const result = await dialog.showOpenDialog(win ?? getMainWindow()!, {
-        properties,
-        filters: opts.filters,
+      return withWindowDialog<string[] | null>(senderWindow(event) ?? getMainWindow(), null, async (win) => {
+        const defaultPath = await dialogDirectory("import", opts.defaultPath);
+        if (win.isDestroyed()) return null;
+        const properties: Array<"openFile" | "multiSelections"> = ["openFile"];
+        if (opts.multiple) properties.push("multiSelections");
+        const result = await dialog.showOpenDialog(win, { properties, filters: opts.filters, defaultPath });
+        if (result.canceled || result.filePaths.length === 0) return null;
+        const selected = result.filePaths.map((p) => addSessionAllowed(p));
+        await rememberDialogDirectory("import", path.dirname(selected[0]));
+        return selected;
       });
-      if (result.canceled || result.filePaths.length === 0) return null;
-      return result.filePaths.map((p) => addSessionAllowed(p));
     },
   );
 
@@ -39,18 +49,17 @@ export function registerDialogsIpc(): void {
     "desktop:showSaveDialog",
     async (
       event,
-      opts: {
-        defaultPath?: string;
-        filters?: { name: string; extensions: string[] }[];
-      } = {},
+      opts: SaveFileDialogOptions = {},
     ) => {
-      const win = senderWindow(event);
-      const result = await dialog.showSaveDialog(win ?? getMainWindow()!, {
-        defaultPath: opts.defaultPath,
-        filters: opts.filters,
+      return withWindowDialog<string | null>(senderWindow(event) ?? getMainWindow(), null, async (win) => {
+        const defaultPath = await saveDialogPath(opts.defaultPath);
+        if (win.isDestroyed()) return null;
+        const result = await dialog.showSaveDialog(win, { defaultPath, filters: opts.filters });
+        if (result.canceled || !result.filePath) return null;
+        const selected = addSessionAllowed(result.filePath);
+        await rememberDialogDirectory("export", path.dirname(selected));
+        return selected;
       });
-      if (result.canceled || !result.filePath) return null;
-      return addSessionAllowed(result.filePath);
     },
   );
 }

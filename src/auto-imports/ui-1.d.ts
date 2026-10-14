@@ -5,7 +5,6 @@
 export {}
 declare global {
   const BEAM_MIN_ACTIVE_MS: typeof import('../components/ui/ai-motion').BEAM_MIN_ACTIVE_MS
-  const Badge: typeof import('../components/ui/badge').Badge
   const Button: typeof import('../components/ui/button').Button
   const Checkbox: typeof import('../components/ui/checkbox').Checkbox
   const CheckboxContent: typeof import('../components/ui/checkbox').CheckboxContent
@@ -98,7 +97,6 @@ declare global {
   const TooltipProvider: typeof import('../components/ui/tooltip').TooltipProvider
   const TooltipTrigger: typeof import('../components/ui/tooltip').TooltipTrigger
   const TriggerChild: typeof import('../components/ui/trigger-child').TriggerChild
-  const badgeVariants: typeof import('../components/ui/badge').badgeVariants
   const buttonVariants: typeof import('../components/ui/button').buttonVariants
   const floatingMenuFromTransform: typeof import('../components/ui/floating-menu-motion').floatingMenuFromTransform
   const floatingMenuMotionStyle: typeof import('../components/ui/floating-menu-motion').floatingMenuMotionStyle
@@ -113,9 +111,6 @@ declare global {
 }
 // for type re-export
 declare global {
-  // @ts-ignore
-  export type { BadgeProps } from '../components/ui/badge'
-  import('../components/ui/badge')
   // @ts-ignore
   export type { ButtonProps } from '../components/ui/button'
   import('../components/ui/button')
