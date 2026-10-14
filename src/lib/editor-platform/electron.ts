@@ -166,6 +166,7 @@ const dialog: EditorPlatformDialog = {
     if (!api) return null;
     try {
       return await api.showOpenDialog({
+        defaultPath: options?.defaultPath,
         filters: options?.filters,
         multiple: options?.multiSelections ?? false,
       });

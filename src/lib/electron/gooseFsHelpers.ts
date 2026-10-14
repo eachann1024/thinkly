@@ -190,7 +190,13 @@ export const selectDirectoryImpl = async (): Promise<string | null> => {
   const api = getGooseDesktop();
   if (!api) return null;
   try {
-    const dir = await api.selectDirectory();
+    let fallbackPath: string | undefined;
+    try {
+      fallbackPath = window.localStorage.getItem(LAST_DIRECTORY_KEY) || undefined;
+    } catch {
+      // 主进程保存的目录记忆不依赖浏览器存储可用。
+    }
+    const dir = await api.selectDirectory({ purpose: "notebook", fallbackPath });
     if (!dir) return null;
     try {
       window.localStorage.setItem(LAST_DIRECTORY_KEY, dir);

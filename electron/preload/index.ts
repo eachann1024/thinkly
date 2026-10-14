@@ -1,5 +1,6 @@
 import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync } from "./services";
+import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";
 import type {
   FsChange,
   WindowTabSnapshot,
@@ -22,16 +23,10 @@ const gooseDesktop = {
   appearance,
   gitSync,
   assetMaintenance,
-  selectDirectory: () =>
-    invoke("desktop:selectDirectory") as Promise<string | null>,
-  showOpenDialog: (opts: {
-    filters?: { name: string; extensions: string[] }[];
-    multiple?: boolean;
-  }) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,
-  showSaveDialog: (opts: {
-    defaultPath?: string;
-    filters?: { name: string; extensions: string[] }[];
-  }) => invoke("desktop:showSaveDialog", opts) as Promise<string | null>,
+  selectDirectory: (opts?: DirectoryDialogOptions) =>
+    invoke("desktop:selectDirectory", opts) as Promise<string | null>,
+  showOpenDialog: (opts?: OpenFileDialogOptions) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,
+  showSaveDialog: (opts?: SaveFileDialogOptions) => invoke("desktop:showSaveDialog", opts) as Promise<string | null>,
   fsReadText: (p: string) => invoke("desktop:fsReadText", p) as Promise<string>,
   fsWriteText: (p: string, data: string) =>
     invoke("desktop:fsWriteText", p, data) as Promise<void>,
