@@ -26,15 +26,6 @@ export function gitSyncSummary(
   return enabled ? "同步正常" : "自动同步已关闭";
 }
 
-export function newRemotePath(name: string) {
-  const slug =
-    name
-      .normalize("NFKD")
-      .replace(/[^A-Za-z0-9_-]+/g, "-")
-      .replace(/^[^A-Za-z0-9]+|[-_]+$/g, "")
-      .slice(0, 50) || "notebook";
-  return `${slug}-${crypto.randomUUID()}`;
-}
 
 export function availableFolderIds(
   notebooks: { id: string; localPath?: string; localPathMissing?: boolean }[],
