@@ -115,6 +115,8 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     }
     // AI 侧栏或独立全屏面板已打开：Cmd+W 只收起面板，不关 Tab / 分屏格 / 窗口，也不 stop 会话。
     if (closeNotebookAiPanel()) return;
+    // Esc 只退出临时界面；关闭分屏、标签或窗口必须使用 Cmd/Ctrl+W。
+    if (fromEscape) return;
     // 已分屏时先关当前格；最后一格才走原来的关 Tab。
     if (closePaneOrTab() === "closed-pane") return;
     if (!isElectronRuntime() && effectiveSingleTabMode()) return;

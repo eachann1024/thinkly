@@ -17,6 +17,7 @@ declare global {
   const ELECTRON_MAX_FILE_ATTACHMENT_SIZE: typeof import('../lib/fileStorage').ELECTRON_MAX_FILE_ATTACHMENT_SIZE
   const FIXED_APP_SHORTCUT_IDS: typeof import('../lib/fixed-app-shortcuts').FIXED_APP_SHORTCUT_IDS
   const FIXED_CLOSE_SHORTCUT: typeof import('../lib/fixed-app-shortcuts').FIXED_CLOSE_SHORTCUT
+  const FIXED_ESCAPE_SHORTCUT: typeof import('../lib/fixed-app-shortcuts').FIXED_ESCAPE_SHORTCUT
   const FIXED_SPLIT_SHORTCUTS: typeof import('../lib/fixed-app-shortcuts').FIXED_SPLIT_SHORTCUTS
   const GLM_BASE_URL: typeof import('../lib/ai-provider/index').GLM_BASE_URL
   const GOOSE_FAVORITE_KEY: typeof import('../lib/local-frontmatter').GOOSE_FAVORITE_KEY
