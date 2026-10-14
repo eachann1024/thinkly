@@ -1,3 +1,4 @@
+import { rebaseMarkdownResources, rebaseResourceContent } from "@/lib/local-resource-paths";
 import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import { useNotebooks } from "../../../useNotebooks";
 import { migrateLocalPageIdMapEntry, toRelativePath } from "@/lib/local-page-idmap";
@@ -6,7 +7,7 @@ import {
   setLocalMdSnapshot,
   deleteLocalMdSnapshot,
 } from "@/lib/local-md-snapshot";
-import { flushPendingLocalSaveByPageIdInternal } from "../../folderSync";
+import { acquireLocalPageFileOperation, flushPendingLocalSaveByPageIdInternal } from "../../folderSync";
 import { reassignLocalFolderOrder } from "@/stores/localFolderOrder";
 import type { StoreSet, StoreGet } from "../hydrate";
 
@@ -120,6 +121,12 @@ export async function moveLocalPageAction(
   // flush 待写防抖内容，避免 mv 后计时器把内容写回旧路径重建文件
   await flushPendingLocalSaveByPageIdInternal(pageId, get);
 
+  const release = page.isFolder ? () => {} : await acquireLocalPageFileOperation(pageId);
+  try {
+  const markdown = page.isFolder ? null : await (fs.readFileAsync ? fs.readFileAsync(oldPath) : fs.readFile(oldPath));
+  if (!page.isFolder && markdown === null) throw new Error("无法读取笔记，已停止移动");
+  const relocatedMarkdown = markdown === null ? null : rebaseMarkdownResources(markdown, oldPath, newPath);
+
   // 执行文件系统移动
   let renamed: boolean;
   try {
@@ -131,6 +138,13 @@ export async function moveLocalPageAction(
     throw new Error("移动操作未成功");
   }
 
+  if (relocatedMarkdown !== null && relocatedMarkdown !== markdown) {
+    const written = fs.writeFileAsync ? await fs.writeFileAsync(newPath, relocatedMarkdown) : await fs.writeFile(newPath, relocatedMarkdown);
+    if (!written) {
+      if (!await fs.rename(newPath, oldPath)) throw new Error("资源路径更新失败，笔记保留在新位置，请重新载入");
+      throw new Error("资源路径更新失败，已恢复原笔记位置");
+    }
+  }
   const basePath = notebook.localPath;
 
   if (!page.isFolder) {
@@ -138,7 +152,7 @@ export async function moveLocalPageAction(
     // 迁移 md 快照
     const snapshot = getLocalMdSnapshot(oldPath);
     if (snapshot !== undefined) {
-      setLocalMdSnapshot(newPath, snapshot);
+      setLocalMdSnapshot(newPath, relocatedMarkdown ?? snapshot);
       deleteLocalMdSnapshot(oldPath);
     }
 
@@ -157,6 +171,7 @@ export async function moveLocalPageAction(
           [pageId]: {
             ...current,
             localFilePath: newPath,
+            content: rebaseResourceContent(current.content, oldPath, newPath),
             parentId: targetFolderId,
           },
         },
@@ -229,4 +244,5 @@ export async function moveLocalPageAction(
     page.parentId,
     targetFolderId,
   );
+  } finally { release(); }
 }
