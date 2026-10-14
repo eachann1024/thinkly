@@ -40,7 +40,7 @@
   --goose-input-surface: #363636;
   --goose-settings-bg: var(--goose-editor-bg);
 
-  /* 运行时强调色映射也消费这些角色，切换主题后仍保持灰阶。 */
+  /* 深色交互表面保持灰阶，选中描边沿用当前强调色。 */
   --goose-dark-selected-bg: #343434;
   --goose-dark-hover-bg: #2c2c2c;
   --goose-dark-interactive-border: #4a4a4a;
@@ -48,10 +48,10 @@
   --goose-dark-selection-bg: #444444;
   --goose-interactive-selected: var(--goose-dark-selected-bg);
   --goose-interactive-selected-fg: var(--goose-text-primary);
-  --goose-interactive-selected-border: var(--goose-dark-interactive-border);
+  --goose-interactive-selected-border: var(--goose-accent-solid, var(--goose-dark-interactive-border));
   --goose-interactive-hover: var(--goose-dark-hover-bg);
   --goose-interactive-hover-fg: var(--goose-text-primary);
-  --goose-interactive-hover-border: var(--goose-dark-interactive-border);
+  --goose-interactive-hover-border: var(--goose-accent-solid, var(--goose-dark-interactive-border));
   --goose-sidebar-hover: var(--goose-interactive-hover);
   --goose-control-hover-bg: var(--goose-interactive-hover);
   --goose-primary-hover-bg: var(--goose-interactive-hover);
