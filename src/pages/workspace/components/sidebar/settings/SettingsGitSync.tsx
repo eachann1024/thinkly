@@ -1,7 +1,8 @@
+import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
   gitSyncSummary,
-  newRemotePath,
+  
   availableFolderIds,
   emptyDraft,
   messageOf,
@@ -171,7 +172,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     setErrors((current) => ({ ...current, [id]: "" }));
     const mapping = {
       ...folder,
-      remotePath: config?.layout === "legacy-root" ? "" : folder.remotePath || newRemotePath(folder.name),
+      remotePath: config?.layout === "legacy-root" ? "" : folder.remotePath || gitNotebookDirectory(folder.localPath),
     };
     setFolderDrafts((current) => {
       const latest = reconcileFolderSelection(current[id] ?? config?.folders ?? [], localNotebooks);

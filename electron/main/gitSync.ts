@@ -102,7 +102,10 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
     const failure = results.find((result) => result.status === "rejected");
     if (failure?.status === "rejected") throw failure.reason;
     for (const root of roots) unlocks.push(lockGitSyncPath(root));
-    await syncGitRepository(config, { storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), verifyRoot: async (root) => { await checkedRoot(root); } });
+    const synchronized = await syncGitRepository(config, { storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), verifyRoot: async (root) => { await checkedRoot(root); } });
+    configs.set(repositoryId, synchronized);
+    const selected = new Set(synchronized.folders.map((folder) => folder.notebookId));
+    mappingHistory[repositoryId] = [...(mappingHistory[repositoryId] ?? []).filter((folder) => !selected.has(folder.notebookId)), ...synchronized.folders];
     statuses.set(repositoryId, { repositoryId, phase: "idle", lastSyncedAt: new Date().toISOString(), error: null });
     await persist(); notifications.delete(repositoryId);
   } catch (error) {
