@@ -242,10 +242,11 @@ function DropdownMenuRadioItem({
   iconLoading = false,
   ...props
 }: Omit<ItemProps, "value"> & { value: string; hideIndicator?: boolean; icon?: React.ReactNode; iconLoading?: boolean }) {
+  const variant = React.useContext(DropdownVariantContext);
   return (
-    <DropdownMenuItem {...props} id={value} className={cn("ps-2", className)} style={{ ...props.style, paddingInlineStart: "0.5rem" }}>
+    <DropdownMenuItem {...props} id={value} data-goose-setting-choice={variant === "dropdown" || undefined} className={cn("ps-2", className)} style={{ ...props.style, paddingInlineStart: "0.5rem" }}>
       <span className="flex min-w-0 flex-1 items-center gap-2 [&>svg]:shrink-0"><DropdownMenuIconSlot icon={icon} loading={iconLoading} />{children}</span>
-      {!hideIndicator && <Dropdown.ItemIndicator className="ms-auto shrink-0" style={{ position: "static", transform: "none", translate: "none", color: "currentColor" }} />}
+      {!hideIndicator && <Dropdown.ItemIndicator data-goose-selection-indicator={variant === "dropdown" || undefined} className="ms-auto shrink-0" style={{ position: "static", transform: "none", translate: "none" }} />}
     </DropdownMenuItem>
   );
 }

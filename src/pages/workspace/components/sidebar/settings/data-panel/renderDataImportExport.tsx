@@ -87,10 +87,10 @@ export function renderDataImportExport(
                   data-selected={isSelected || undefined}
                   onClick={() => onToggleNotebook(notebook.id)}
                   className={cn(
-                    "h-auto border-0 flex items-center gap-2 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2.5 text-left transition-all duration-200",
+                    "goose-accent-selection h-auto border-0 flex items-center gap-2 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2.5 text-left transition-all duration-200",
                     "",
                     isSelected
-                      ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                      ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                       : DATA_UNSELECTED_CARD_CLASS,
                   )}
                 >
@@ -118,7 +118,7 @@ export function renderDataImportExport(
               className={cn(
                 "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
                 format === "md"
-                  ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                  ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                   : DATA_UNSELECTED_CARD_CLASS,
               )}
             >
@@ -134,7 +134,7 @@ export function renderDataImportExport(
               className={cn(
                 "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
                 format === "html"
-                  ? "border-transparent bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                  ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                   : DATA_UNSELECTED_CARD_CLASS,
               )}
             >

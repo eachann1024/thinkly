@@ -93,7 +93,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 "flex-wrap items-end",
                 "px-2.5 pb-1.5 pt-2",
                 dropActive &&
-                  "ring-2 ring-[var(--goose-interactive-selected)] ring-offset-1 ring-offset-background",
+                  "ring-1 ring-inset ring-[var(--goose-accent-solid)]",
               )}
               data-expanded="true"
               data-drop-active={dropActive ? "true" : undefined}
