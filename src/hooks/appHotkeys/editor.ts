@@ -4,6 +4,7 @@ import { closeAllOverlays } from "@/lib/closeAllOverlays";
 import { matchShortcut } from "@/lib/shortcut-match";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
+import { readSearchSelection } from "@/pages/workspace/components/sidebar/readSearchSelection";
 import type { HotkeyEntry } from "./types";
 import type { AppHotkeyActions } from "./actions";
 
@@ -67,11 +68,14 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
       },
       handler: (event) => {
         event.preventDefault();
+        const selectionQuery = readSearchSelection();
         closeAllOverlays();
         if (useSidebarView.getState().sidebarCollapsed) {
           useSidebarView.getState().setSidebarCollapsed(false);
         }
-        window.dispatchEvent(new CustomEvent("goose-note:open-search"));
+        window.dispatchEvent(new CustomEvent("goose-note:open-search", {
+          detail: { selectionQuery },
+        }));
       },
     },
     // Mod+J 开关 AI 面板 —— 对齐 Notion（mac ⌘J / win ctrl J），跨平台用 Mod 自动转
