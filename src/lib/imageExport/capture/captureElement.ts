@@ -3,8 +3,6 @@ import { withTimeout } from "./timeout";
 import { renderPngBlobWithFallback } from "./pngCapture";
 import { createLoadingOverlay, removeLoadingOverlay } from "./loadingOverlay";
 
-const SAVE_TIMEOUT_MS = 30_000;
-
 let isCapturingImage = false;
 
 function getExportErrorMessage(error: unknown): string {
@@ -57,17 +55,12 @@ export async function captureElementToPng(element: HTMLElement, filename: string
     );
 
     const blob = await renderPngBlobWithFallback(element);
+    removeLoadingOverlay(overlay);
 
-    const { saveBlobAndReveal } = await import("../../export");
-    const saved = await withTimeout(
-      saveBlobAndReveal(blob, filename),
-      SAVE_TIMEOUT_MS,
-      "保存图片超时",
-    );
+    const { saveDocumentBlobAndReveal } = await import("../../export/documentFileDialogs");
+    const saved = await saveDocumentBlobAndReveal(blob, filename);
     if (saved) {
-      toast.success("图片已保存到下载文件夹");
-    } else {
-      throw new Error("保存图片失败");
+      toast.success("图片已保存");
     }
   } catch (error) {
     toast.error(getExportErrorMessage(error));

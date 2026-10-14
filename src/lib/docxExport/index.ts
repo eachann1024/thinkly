@@ -179,6 +179,6 @@ export async function generateDocxBuffer(page: Page): Promise<ArrayBuffer> {
 export async function exportToWord(page: Page) {
   const blob = await renderPageToDocxBlob(page);
   const filename = `${sanitizeFileName(getPageTitle(page) || "untitled")}.docx`;
-  const { saveBlobAndReveal } = await import("@/lib/export/fileSave");
-  await saveBlobAndReveal(blob, filename);
+  const { saveDocumentBlobAndReveal } = await import("@/lib/export/documentFileDialogs");
+  return saveDocumentBlobAndReveal(blob, filename);
 }

@@ -74,9 +74,9 @@ declare global {
     appearance: import("./lib/appearance-contract").AppearanceBridge;
     gitSync: import("./lib/git-sync-contract").GitSyncBridge;
     assetMaintenance: import("./lib/asset-maintenance-contract").AssetMaintenanceBridge;
-    selectDirectory: () => Promise<string | null>
-    showOpenDialog: (opts: { filters?: {name:string;extensions:string[]}[]; multiple?: boolean }) => Promise<string[] | null>
-    showSaveDialog: (opts: { defaultPath?: string; filters?: {name:string;extensions:string[]}[] }) => Promise<string | null>
+    selectDirectory: (opts?: import("./lib/native-dialog-contract").DirectoryDialogOptions) => Promise<string | null>
+    showOpenDialog: (opts?: import("./lib/native-dialog-contract").OpenFileDialogOptions) => Promise<string[] | null>
+    showSaveDialog: (opts?: import("./lib/native-dialog-contract").SaveFileDialogOptions) => Promise<string | null>
     fsReadText: (p: string) => Promise<string>
     fsWriteText: (p: string, data: string) => Promise<void>
     fsRead: (p: string) => Promise<Uint8Array>

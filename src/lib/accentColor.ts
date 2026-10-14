@@ -1,15 +1,15 @@
 import { DEFAULT_ACCENT_COLOR, type AccentColor } from "@/stores/settings/types";
+import { resolveAccentOutlineTokens } from "./accentOutlineTokens";
 
 type AccentRuntimeTokens = {
   light: Record<string, string>;
   dark: Record<string, string>;
 };
 
-// 深色交互表面与 CSS 的中性灰角色同步，强调色仅控制其余强调元素。
+// 深色交互表面保持中性灰，选中描边在输出时跟随所选强调色。
 const NEUTRAL_DARK_RUNTIME_TOKENS: Record<string, string> = {
   "--goose-interactive-selected": "var(--goose-dark-selected-bg, #343434)",
   "--goose-interactive-selected-fg": "var(--goose-text-primary)",
-  "--goose-interactive-selected-border": "var(--goose-dark-interactive-border, #4a4a4a)",
   "--goose-sidebar-hover": "var(--goose-dark-hover-bg, #2c2c2c)",
   "--goose-interactive-hover": "var(--goose-dark-hover-bg, #2c2c2c)",
   "--goose-interactive-hover-fg": "var(--goose-text-primary)",
@@ -180,12 +180,19 @@ export function resolveAccentRuntimeTokens(
   accentColor: AccentColor,
   isDark: boolean,
 ): Record<string, string> {
-  const tokens =
-    ACCENT_RUNTIME_TOKENS[accentColor] ?? ACCENT_RUNTIME_TOKENS[DEFAULT_ACCENT_COLOR];
+  const resolvedAccent = Object.hasOwn(ACCENT_RUNTIME_TOKENS, accentColor)
+    ? accentColor
+    : DEFAULT_ACCENT_COLOR;
+  const tokens = ACCENT_RUNTIME_TOKENS[resolvedAccent];
   const theme = isDark ? tokens.dark : tokens.light;
   const selected = theme["--goose-interactive-selected"];
   return {
     ...theme,
+    ...resolveAccentOutlineTokens(
+      resolvedAccent,
+      isDark,
+      tokens.light["--goose-interactive-selected-border"],
+    ),
     "--goose-icon-chip-on-selected": selected,
   };
 }
