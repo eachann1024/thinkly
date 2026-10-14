@@ -1,3 +1,4 @@
+import { isGitNotebookDirectory } from "./git-notebook-directory";
 export type GitSyncProvider = "github" | "gitee";
 
 export interface GitSyncConfig {
@@ -136,7 +137,7 @@ export function validateGitRepository(value: GitRepositoryInput): GitRepositoryI
     if (!folder || typeof folder.notebookId !== "string" || !folder.notebookId.trim() || folder.notebookId.length > 200) throw new Error("笔记本标识无效");
     if (typeof folder.name !== "string" || !folder.name.trim() || folder.name.length > 200) throw new Error("文件夹名称无效");
     if (typeof folder.localPath !== "string" || !/^(?:\/|[A-Za-z]:[\\/])/.test(folder.localPath) || /[\0\r\n]/.test(folder.localPath) || folder.localPath.split(/[\\/]/).includes("..")) throw new Error("本地文件夹路径无效");
-    if (typeof folder.remotePath !== "string" || (value.layout === "legacy-root" ? folder.remotePath !== "" : !/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(folder.remotePath))) throw new Error("远端子目录须为稳定的字母、数字、下划线或连字符名称");
+    if (typeof folder.remotePath !== "string" || (value.layout === "legacy-root" ? folder.remotePath !== "" : !isGitNotebookDirectory(folder.remotePath))) throw new Error("远端子目录须为有效的本地文件夹名称");
     if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(folder.remotePath)) throw new Error("远端子目录名称是系统保留名称");
     return { notebookId: folder.notebookId, name: folder.name.trim(), localPath: folder.localPath, remotePath: folder.remotePath };
   });
@@ -144,7 +145,7 @@ export function validateGitRepository(value: GitRepositoryInput): GitRepositoryI
     const a = folders[i]!, b = folders[j]!;
     const local = (p: string) => p.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
     const x = local(a.localPath), y = local(b.localPath);
-    if (a.notebookId === b.notebookId || a.remotePath.toLowerCase() === b.remotePath.toLowerCase() || x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`)) throw new Error("仓库内的文件夹映射重复或重叠");
+    if (a.notebookId === b.notebookId || a.remotePath.normalize("NFC").toLowerCase() === b.remotePath.normalize("NFC").toLowerCase() || x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`)) throw new Error("仓库内的文件夹映射重复或重叠");
   }
   return { id, provider: shared.provider, remoteUrl: shared.remoteUrl, branch: shared.branch, intervalMinutes: shared.intervalMinutes, enabled: shared.enabled, layout: value.layout, folders };
 }
