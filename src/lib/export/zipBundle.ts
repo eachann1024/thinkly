@@ -1,5 +1,5 @@
 import type { Page } from "@/types";
-import { saveBlobAndReveal } from "./fileSave";
+import { saveDocumentBlobAndReveal } from "./documentFileDialogs";
 import { generateExportZip } from "./zip/generateNotebookZip";
 import { loadAssetsFromFolder, createBundledAssetRestorer } from "./zip/importAssets";
 import { importMetadataZip } from "./zip/importMetadata";
@@ -19,39 +19,7 @@ export async function exportNotebooks(
   const now = new Date();
   const pad = (n: number) => n.toString().padStart(2, "0");
   const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-  await downloadBlob(content, `goose-note-export-${timestamp}.zip`);
-}
-
-async function downloadBlob(blob: Blob, filename: string) {
-  try {
-    const saved = await saveBlobAndReveal(blob, filename);
-    if (saved) return;
-  } catch (error) {
-    console.error("[export] saveBlobAndReveal 失败，尝试浏览器下载:", error);
-  }
-
-  if (triggerBrowserDownload(blob, filename)) return;
-
-  throw new Error("导出失败：无法保存文件");
-}
-
-function triggerBrowserDownload(blob: Blob, filename: string): boolean {
-  try {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    requestAnimationFrame(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  return saveDocumentBlobAndReveal(content, `goose-note-export-${timestamp}.zip`);
 }
 
 export async function importNotebooksFromZip(

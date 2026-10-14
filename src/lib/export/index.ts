@@ -7,7 +7,7 @@ import {
   createEmptyBlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { importFromMarkdown, type ImportResult } from "./markdown/parse";
-import { saveBlobAndReveal } from "./fileSave";
+import { pickImportFile, saveDocumentBlobAndReveal } from "./documentFileDialogs";
 import {
   buildSinglePageExport,
   type SinglePageExportFormat,
@@ -32,44 +32,31 @@ export {
   buildSinglePageExport,
   pageHasLocalSidecarAttachments,
 } from "./pageWithAttachments";
-
-
-async function downloadBlob(blob: Blob, filename: string) {
-  try {
-    const saved = await saveBlobAndReveal(blob, filename);
-    if (saved) return;
-  } catch (error) {
-    console.error("[export] saveBlobAndReveal 失败:", error);
-  }
-
-  throw new Error("导出失败：无法通过 Electron 保存文件");
-}
-
 async function exportPage(
   page: Page,
   format: SinglePageExportFormat,
   pdfBlob?: Blob,
 ) {
   const { blob, filename } = await buildSinglePageExport(page, format, pdfBlob);
-  await downloadBlob(blob, filename);
+  return saveDocumentBlobAndReveal(blob, filename);
 }
 
 export async function exportToJSON(page: Page) {
-  await exportPage(page, "json");
+  return exportPage(page, "json");
 }
 
 export async function exportToMarkdown(page: Page) {
-  await exportPage(page, "md");
+  return exportPage(page, "md");
 }
 
 export async function exportToHTML(page: Page) {
-  await exportPage(page, "html");
+  return exportPage(page, "html");
 }
 
 export async function exportToPDF(page: Page, customFonts?: CustomFonts) {
   const { renderPageToPdfBlob } = await import("@/lib/pdfExport");
   const pdfBlob = await renderPageToPdfBlob(page, customFonts);
-  await exportPage(page, "pdf", pdfBlob);
+  return exportPage(page, "pdf", pdfBlob);
 }
 
 export { renderExportHtml } from "./exportHtmlDocument";
@@ -123,70 +110,32 @@ export function importFromJSON(
   }
 }
 
-export function importFile(options?: {
+export async function importFile(options?: {
   preserveStructure?: boolean;
 }): Promise<ImportResult> {
-  return new Promise((resolve) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json,.md,.markdown,.txt";
-
-    let settled = false;
-    const finish = (result: ImportResult) => {
-      if (settled) return;
-      settled = true;
-      resolve(result);
-    };
-    const cancelled = () =>
-      finish({
-        title: "",
-        content: createEmptyBlockNoteContent(),
-        success: false,
-        error: "未选择文件",
-      });
-
-    input.addEventListener("cancel", cancelled, { once: true });
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) {
-        cancelled();
-        return;
-      }
-
-      try {
-        const text = await file.text();
-        const ext = file.name.split(".").pop()?.toLowerCase();
-        const filename = file.name.replace(/\.[^/.]+$/, "");
-
-        if (ext === "json") {
-          finish(importFromJSON(text, filename));
-        } else if (ext === "md" || ext === "markdown" || ext === "txt") {
-          finish(
-            importFromMarkdown(text, filename, {
-              preserveStructure: options?.preserveStructure === true,
-            }),
-          );
-        } else {
-          finish({
-            title: "",
-            content: createEmptyBlockNoteContent(),
-            success: false,
-            error: "不支持的文件格式",
-          });
-        }
-      } catch (error) {
-        finish({
-          title: "",
-          content: createEmptyBlockNoteContent(),
-          success: false,
-          error:
-            error instanceof Error && error.message
-              ? `读取文件失败：${error.message}`
-              : "读取文件失败",
-        });
-      }
-    };
-
-    input.click();
+  const failed = (error: string): ImportResult => ({
+    title: "",
+    content: createEmptyBlockNoteContent(),
+    success: false,
+    error,
   });
+  try {
+    const file = await pickImportFile([
+      { name: "笔记文件", extensions: ["json", "md", "markdown", "txt"] },
+    ]);
+    if (!file) return failed("未选择文件");
+    const text = await file.text();
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    const filename = file.name.replace(/\.[^/.]+$/, "");
+    if (ext === "json") return importFromJSON(text, filename);
+    if (ext === "md" || ext === "markdown" || ext === "txt") {
+      return importFromMarkdown(text, filename, {
+        preserveStructure: options?.preserveStructure === true,
+      });
+    }
+    return failed("不支持的文件格式");
+  } catch (error) {
+    return failed(error instanceof Error && error.message
+      ? `读取文件失败：${error.message}` : "读取文件失败");
+  }
 }
