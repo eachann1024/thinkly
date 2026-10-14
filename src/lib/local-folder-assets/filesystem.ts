@@ -1,3 +1,4 @@
+import { originalHistoryPath } from "../history/localPaths";
 import type { JSONContent } from "@/types";
 import { getLocalMdSnapshot } from "../local-md-snapshot";
 import type {
@@ -59,6 +60,7 @@ export async function collectNotebookFiles(
 ) {
   const markdown: string[] = [];
   const assets: LocalFolderEntry[] = [];
+  const history: string[] = [];
   const seen = new Set<string>();
   const walk = async (directory: string) => {
     if (seen.has(directory)) throw new Error(`目录循环：${directory}`);
@@ -74,6 +76,7 @@ export async function collectNotebookFiles(
       if (entry.isDirectory) await walk(entry.path);
       if (!entry.isFile) continue;
       if (/\.(md|markdown)$/i.test(entry.name)) markdown.push(entry.path);
+      if (/\.json$/i.test(entry.name) && relativePath(basePath, entry.path).startsWith(".goose/history/")) history.push(entry.path);
       if (
         getLocalAssetKind(entry.name) &&
         /(?:^|\/)assets\//i.test(relativePath(basePath, entry.path))
@@ -83,7 +86,7 @@ export async function collectNotebookFiles(
     }
   };
   await walk(normalizePath(basePath));
-  return { markdown, assets };
+  return { markdown, assets, history };
 }
 
 export function relativePath(basePath: string, targetPath: string): string {
@@ -165,5 +168,15 @@ export async function collectReferenceIndex(
     await ingestMarkdown(filePath);
   }
 
+  // Historical snapshots also keep resources alive, including deleted notes.
+  for (const file of (await collectNotebookFiles(gooseFs, normalizedBasePath)).history) {
+    const text = await readTextFile(gooseFs, file);
+    const version = JSON.parse(text!);
+    if (!version.content) continue;
+    const mirror = relativePath(basePath, file).slice(".goose/history/".length).split("/").slice(0, -1).join("/");
+    const relative = version.relativePath || mirror || originalHistoryPath(version.pageId, version.workspaceId);
+    const notePath = relative ? `${normalizedBasePath}/${relative}` : `${normalizedBasePath}/history.md`;
+    collectReferencesFromJson(version.content, notePath, normalizedBasePath, index, new WeakSet());
+  }
   return index;
 }

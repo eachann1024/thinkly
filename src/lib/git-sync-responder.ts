@@ -1,3 +1,5 @@
+import { migrateNotebookHistory } from "./history/localDisk";
+import { canonicalRelativePath } from "./canonicalLocalPath";
 import { acquireLocalPageFileOperation } from "@/stores/pages/folderSync";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -40,6 +42,12 @@ export function installGitSyncResponder() {
           holdGitSyncWrites(key, value);
           request.addRelease(() => releaseGitSyncWrites(key));
         }
+      }
+      for (const notebook of selected) {
+        const paths = Object.fromEntries(pages.filter((page) => page.workspaceId === notebook.id && page.localFilePath && !page.isFolder)
+          .map((page) => [page.id, canonicalRelativePath(notebook.localPath!, page.localFilePath!)!]).filter(([, path]) => path));
+        await migrateNotebookHistory(notebook.localPath!, paths);
+        if (request.finished) return;
       }
       for (const page of pages) {
         const release = await acquireLocalPageFileOperation(page.id);
