@@ -1,7 +1,8 @@
+import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
   gitSyncSummary,
-  newRemotePath,
+
   availableFolderIds,
   emptyDraft,
   messageOf,
@@ -20,6 +21,7 @@ import { selectRecoveryPath, rebindOpenedFolder } from "./git-sync/folderRecover
 import { useGitFolderChecks } from "./git-sync/useGitFolderChecks";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { type GitDraft } from "./git-sync/GitRepositoryForm";
+import { folderPathKey, gitFolderRows, reconcileFolderSelection } from "./git-sync/gitFolderRows";
 
 export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const notebooks = useNotebooks((store) => store.notebooks);
@@ -38,28 +40,26 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const [folderDrafts, setFolderDrafts] = useState<Record<string, GitRepositoryFolder[]>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, string>>({});
+  const notebookRevision = JSON.stringify(localNotebooks.map(({ id, localPath, localPathMissing }) => [id, localPath, localPathMissing]));
+  useEffect(() => setErrors({}), [notebookRevision]);
   const locks = useRef(new Set<string>());
   const saveTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   useEffect(() => {
     const timers = saveTimers.current;
     return () => timers.forEach(clearTimeout);
   }, []);
-  const mappings = useRef(new Map<string, GitRepositoryFolder>());
   const [removeConfirmation, setRemoveConfirmation] = useState("");
-
-  useEffect(() => {
-    for (const config of state.configs)
-      for (const folder of config.folders) mappings.current.set(`${config.id}:${folder.notebookId}`, folder);
-  }, [state.configs]);
   const config = adding ? undefined : (state.configs.find((item) => item.id === selectedId) ?? state.configs[0]);
   const { checks: folderChecks, recheck } = useGitFolderChecks(bridge, visible && Boolean(config || adding), [
     ...localNotebooks.map((notebook) => notebook.localPath!),
     ...(config?.folders ?? []).map((folder) => folder.localPath),
-  ]);
+  ], notebookRevision);
 
   const id = config?.id ?? newId;
   const draft = drafts[id] ?? config ?? emptyDraft();
-  const folders = folderDrafts[id] ?? config?.folders ?? [];
+  const sourceFolders = folderDrafts[id] ?? config?.folders;
+  const folders = useMemo(() => reconcileFolderSelection(sourceFolders ?? [], localNotebooks), [sourceFolders, localNotebooks]);
+  const reconciledFolders = Boolean(sourceFolders && folders !== sourceFolders);
   const status = state.statuses.find((item) => item.repositoryId === id);
   const pending = busy[id];
   const syncing = status?.phase === "syncing";
@@ -104,7 +104,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   // Snapshot identity prevents an older save from discarding a newer selection.
   useEffect(() => {
     clearTimeout(saveTimers.current.get(id));
-    if (!bridge || !config || (!drafts[id] && !folderDrafts[id]) || locks.current.has(id) || syncing || errors[id])
+    if (!bridge || !config || (!drafts[id] && !folderDrafts[id] && !reconciledFolders) || locks.current.has(id) || syncing || errors[id])
       return;
     if (!Number.isInteger(draft.intervalMinutes) || draft.intervalMinutes < 1 || draft.intervalMinutes > 1440) return;
     const draftSnapshot = drafts[id];
@@ -112,7 +112,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     const timer = setTimeout(() => {
       void run(
         id,
-        folderSnapshot ? "保存选择并同步" : "自动保存设置",
+        folderSnapshot || reconciledFolders ? "保存选择并同步" : "自动保存设置",
         () => bridge.save(validate({ ...config, ...draft, folders })),
         () => {
           setDrafts((current) => {
@@ -133,7 +133,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     saveTimers.current.set(id, timer);
     // Derived snapshots update together; per-repository timers survive switching repositories.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridge, config, id, drafts, folderDrafts, busy, syncing, errors]);
+  }, [bridge, config, id, drafts, folderDrafts, folders, reconciledFolders, busy, syncing, errors]);
 
   function connect() {
     if (!bridge || disabled) return;
@@ -170,14 +170,12 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     )
       return;
     setErrors((current) => ({ ...current, [id]: "" }));
-    const key = `${id}:${folder.notebookId}`;
-    const mapping = mappings.current.get(key) ?? {
+    const mapping = {
       ...folder,
-      remotePath: config?.layout === "legacy-root" ? "" : newRemotePath(folder.name),
+      remotePath: config?.layout === "legacy-root" ? "" : folder.remotePath || gitNotebookDirectory(folder.localPath),
     };
-    mappings.current.set(key, mapping);
     setFolderDrafts((current) => {
-      const latest = current[id] ?? config?.folders ?? [];
+      const latest = reconcileFolderSelection(current[id] ?? config?.folders ?? [], localNotebooks);
       return {
         ...current,
         [id]: checked
@@ -187,24 +185,23 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     });
   }
   async function recoverFolder(folder: GitRepositoryFolder, relocate: boolean) {
-    if (!bridge || disabled || (config && (folderDrafts[id] || drafts[id]))) return;
-    const localPath = await selectRecoveryPath(folder, relocate).catch((error) => {
-      setErrors((current) => ({ ...current, [id]: messageOf(error) }));
-      return null;
-    });
-    if (!localPath) return;
+    if (!bridge || disabled) return;
     void run(
       id,
       "恢复文件夹",
-      () =>
-        rebindOpenedFolder(
-          bridge,
-          id,
-          folder,
-          localPath,
-          relocate,
-          Boolean(config?.folders.some((item) => item.notebookId === folder.notebookId)),
-        ),
+      async () => {
+        const localPath = await selectRecoveryPath(folder, relocate);
+        if (!localPath) return bridge.getState();
+        const original = config?.folders.find((item) => item.notebookId === folder.notebookId
+          || folderPathKey(item.localPath) === folderPathKey(folder.localPath));
+        const next = await rebindOpenedFolder(bridge, id, original ?? folder, localPath, relocate, Boolean(original));
+        const replacement = next.configs.find((item) => item.id === id)?.folders.find((item) => item.remotePath === original?.remotePath);
+        if (replacement) setFolderDrafts((current) => current[id] ? {
+          ...current,
+          [id]: current[id].map((item) => item.notebookId === folder.notebookId || item.notebookId === original?.notebookId ? replacement : item),
+        } : current);
+        return next;
+      },
       recheck,
     );
   }
@@ -216,18 +213,8 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       setErrors((current) => ({ ...current, [id]: messageOf(error) }));
     }
   }
-  const rows: GitRepositoryFolder[] = localNotebooks.map(
-    (notebook) =>
-      config?.folders.find((folder) => folder.notebookId === notebook.id) ?? {
-        notebookId: notebook.id,
-        localPath: notebook.localPath!,
-        name: notebook.name,
-        remotePath: "",
-      },
-  );
-  for (const folder of config?.folders ?? [])
-    if (!rows.some((row) => row.notebookId === folder.notebookId)) rows.push(folder);
-  const availableIds = availableFolderIds(localNotebooks, config?.folders ?? []);
+  const rows = gitFolderRows(localNotebooks, folders, state.mappingHistory?.[id] ?? config?.folders ?? []);
+  const availableIds = availableFolderIds(localNotebooks, folders);
   const selectedFolderError = folders.filter(
     (folder) => !availableIds.has(folder.notebookId) || Boolean(folderChecks[folder.localPath]?.error),
   ).length;
@@ -252,7 +239,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       folderChecks={folderChecks}
       draft={draft}
       error={errors[id] ?? ""}
-      unsavedFolders={Boolean(folderDrafts[id])}
+      unsavedFolders={Boolean(folderDrafts[id]) || reconciledFolders}
       unsavedSettings={Boolean(drafts[id])}
       removeConfirmation={removeConfirmation}
       setRemoveConfirmation={setRemoveConfirmation}

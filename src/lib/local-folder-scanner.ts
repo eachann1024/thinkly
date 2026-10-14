@@ -1,3 +1,4 @@
+import { portableHistoryIds } from "./history/localDisk";
 import { pruneParsedMarkdown } from "./local-folder-scanner/parsed-cache";
 import {
   type LocalPageIdMap,
@@ -42,6 +43,10 @@ export async function scanLocalFolderPages({
   // 读取一次映射表，整个扫描过程共享（避免逐文件 IO）。
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
   let idMapDirty = false;
+  const portable = await portableHistoryIds(basePath);
+  for (const [path, id] of Object.entries(portable)) {
+    if (!idMap[path] && !Object.values(idMap).includes(id)) { idMap[path] = id; idMapDirty = true; }
+  }
   // 记录本次扫描实际存在的相对路径，用于扫描结束后剪枝。
   const liveRelativePaths = new Set<string>();
   const hiddenFoldersSet = new Set(hiddenFolders);

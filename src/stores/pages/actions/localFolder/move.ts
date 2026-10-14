@@ -1,11 +1,22 @@
+import {
+  rebaseMarkdownResources,
+  rebaseResourceContent,
+} from "@/lib/local-resource-paths";
+import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import { useNotebooks } from "../../../useNotebooks";
-import { migrateLocalPageIdMapEntry, toRelativePath } from "@/lib/local-page-idmap";
+import {
+  migrateLocalPageIdMapEntry,
+  toRelativePath,
+} from "@/lib/local-page-idmap";
 import {
   getLocalMdSnapshot,
   setLocalMdSnapshot,
   deleteLocalMdSnapshot,
 } from "@/lib/local-md-snapshot";
-import { flushPendingLocalSaveByPageIdInternal } from "../../folderSync";
+import {
+  acquireLocalPageFileOperation,
+  flushPendingLocalSaveByPageIdInternal,
+} from "../../folderSync";
 import { reassignLocalFolderOrder } from "@/stores/localFolderOrder";
 import type { StoreSet, StoreGet } from "../hydrate";
 
@@ -112,6 +123,20 @@ export async function moveLocalPageAction(
     throw new Error(`目标目录下已存在同名文件：${fileName}`);
   }
 
+  if (page.isFolder) {
+    const { relocateLocalDirectory } = await import("./rename/directory");
+    await relocateLocalDirectory(set, get, pageId, newPath, {
+      parentId: targetFolderId,
+    });
+    reassignLocalFolderOrder(
+      page.workspaceId,
+      pageId,
+      page.parentId,
+      targetFolderId,
+    );
+    return;
+  }
+
   // 登记自移路径（旧 + 新），抑制 watcher 回声
   markSelfMoved(oldPath.replace(/\\/g, "/"));
   markSelfMoved(newPath);
@@ -119,108 +144,108 @@ export async function moveLocalPageAction(
   // flush 待写防抖内容，避免 mv 后计时器把内容写回旧路径重建文件
   await flushPendingLocalSaveByPageIdInternal(pageId, get);
 
-  // 执行文件系统移动
-  let renamed: boolean;
+  const release = page.isFolder
+    ? () => {}
+    : await acquireLocalPageFileOperation(pageId);
   try {
-    renamed = Boolean(await Promise.resolve(fs.rename(oldPath, newPath)));
-  } catch (err) {
-    throw new Error(`移动失败：${(err as Error).message ?? String(err)}`, { cause: err });
-  }
-  if (!renamed) {
-    throw new Error("移动操作未成功");
-  }
+    const markdown = page.isFolder
+      ? null
+      : await (fs.readFileAsync
+          ? fs.readFileAsync(oldPath)
+          : fs.readFile(oldPath));
+    if (!page.isFolder && markdown === null)
+      throw new Error("无法读取笔记，已停止移动");
+    const relocatedMarkdown =
+      markdown === null
+        ? null
+        : rebaseMarkdownResources(markdown, oldPath, newPath);
 
-  const basePath = notebook.localPath;
-
-  if (!page.isFolder) {
-    // ── 文件页面移动 ──────────────────────────────────────────────────────────
-    // 迁移 md 快照
-    const snapshot = getLocalMdSnapshot(oldPath);
-    if (snapshot !== undefined) {
-      setLocalMdSnapshot(newPath, snapshot);
-      deleteLocalMdSnapshot(oldPath);
+    // 执行文件系统移动
+    let renamed: boolean;
+    try {
+      renamed = Boolean(await Promise.resolve(fs.rename(oldPath, newPath)));
+    } catch (err) {
+      throw new Error(`移动失败：${(err as Error).message ?? String(err)}`, {
+        cause: err,
+      });
+    }
+    if (!renamed) {
+      throw new Error("移动操作未成功");
     }
 
-    // 迁移 idMap
-    const oldRel = toRelativePath(basePath, oldPath);
-    const newRel = toRelativePath(basePath, newPath);
-    migrateLocalPageIdMapEntry(page.workspaceId, oldRel, newRel, pageId);
+    if (relocatedMarkdown !== null && relocatedMarkdown !== markdown) {
+      try {
+        const written = fs.writeFileAsync
+          ? await fs.writeFileAsync(newPath, relocatedMarkdown)
+          : await fs.writeFile(newPath, relocatedMarkdown);
+        if (!written) throw new Error("资源路径写入失败");
+      } catch (error) {
+        const restored = await (fs.writeFileAsync
+          ? fs.writeFileAsync(newPath, markdown!)
+          : fs.writeFile(newPath, markdown!));
+        if (!restored || !(await fs.rename(newPath, oldPath)))
+          throw new Error("资源路径更新失败，笔记保留在新位置，请重新载入", {
+            cause: error,
+          });
+        throw new Error("资源路径更新失败，已恢复原笔记位置", { cause: error });
+      }
+    }
+    const basePath = notebook.localPath;
 
-    // 更新 store
-    set((state) => {
-      const current = state.pages[pageId];
-      if (!current) return state;
-      return {
-        pages: {
-          ...state.pages,
-          [pageId]: {
-            ...current,
-            localFilePath: newPath,
-            parentId: targetFolderId,
+    if (!page.isFolder) {
+      // ── 文件页面移动 ──────────────────────────────────────────────────────────
+      // 迁移 md 快照
+      const snapshot = getLocalMdSnapshot(oldPath);
+      if (snapshot !== undefined) {
+        setLocalMdSnapshot(newPath, relocatedMarkdown ?? snapshot);
+        deleteLocalMdSnapshot(oldPath);
+      }
+
+      // 迁移 idMap
+      const oldRel = toRelativePath(basePath, oldPath);
+      const newRel = toRelativePath(basePath, newPath);
+      migrateLocalPageIdMapEntry(page.workspaceId, oldRel, newRel, pageId);
+
+      // 更新 store
+      set((state) => {
+        const current = state.pages[pageId];
+        if (!current) return state;
+        return {
+          pages: {
+            ...state.pages,
+            [pageId]: {
+              ...current,
+              localFilePath: newPath,
+              content: rebaseResourceContent(current.content, oldPath, newPath),
+              parentId: targetFolderId,
+            },
           },
-        },
-      };
-    });
-  } else {
-    // ── 目录页面移动 ──────────────────────────────────────────────────────────
-    const normalizedOldPath = oldPath.replace(/\\/g, "/");
-    const normalizedNewPath = newPath;
-
-    // 收集同笔记本中所有路径前缀匹配的子页面（含目录自身）
-    const allPages = get().pages;
-    const affectedIds: string[] = [];
-    for (const p of Object.values(allPages)) {
-      if (p.workspaceId !== page.workspaceId) continue;
-      const pPath = p.localFilePath?.replace(/\\/g, "/");
-      if (!pPath) continue;
-      if (pPath === normalizedOldPath || pPath.startsWith(normalizedOldPath + "/")) {
-        affectedIds.push(p.id);
-      }
-    }
-
-    // 迁移每个受影响页面的 snapshot 和 idMap，然后更新 store
-    for (const aid of affectedIds) {
-      const ap = get().pages[aid];
-      if (!ap?.localFilePath) continue;
-      const apOld = ap.localFilePath.replace(/\\/g, "/");
-      const apNew = normalizedNewPath + apOld.slice(normalizedOldPath.length);
-
-      const snap = getLocalMdSnapshot(apOld);
-      if (snap !== undefined) {
-        setLocalMdSnapshot(apNew, snap);
-        deleteLocalMdSnapshot(apOld);
-      }
-
-      const oldRel = toRelativePath(basePath, apOld);
-      const newRel = toRelativePath(basePath, apNew);
-      migrateLocalPageIdMapEntry(page.workspaceId, oldRel, newRel, aid);
-    }
-
-    // 批量更新 store：所有受影响页面的 localFilePath；目录自身还要更新 parentId
-    set((state) => {
-      const nextPages = { ...state.pages };
-      for (const aid of affectedIds) {
-        const ap = nextPages[aid];
-        if (!ap?.localFilePath) continue;
-        const apOld = ap.localFilePath.replace(/\\/g, "/");
-        const apNew = normalizedNewPath + apOld.slice(normalizedOldPath.length);
-        const isRoot = apOld === normalizedOldPath;
-        nextPages[aid] = {
-          ...ap,
-          localFilePath: apNew,
-          ...(isRoot ? { parentId: targetFolderId } : {}),
         };
-      }
-      return { pages: nextPages };
-    });
-  }
+      });
+    }
 
-  // 移动成功后才更新手动顺序：清源目录旧槽位、追加目标目录末尾。
-  // 目录自身移动时，其孩子的手动顺序以目录 pageId 为键，不受影响。
-  reassignLocalFolderOrder(
-    page.workspaceId,
-    pageId,
-    page.parentId,
-    targetFolderId,
-  );
+    const historyPaths = Object.fromEntries(
+      Object.values(get().pages)
+        .filter(
+          (p) =>
+            p.workspaceId === page.workspaceId &&
+            p.localFilePath &&
+            (p.localFilePath === newPath ||
+              p.localFilePath.startsWith(newPath + "/")),
+        )
+        .map((p) => [p.id, toRelativePath(basePath, p.localFilePath!)]),
+    );
+    await migrateNotebookHistory(basePath, historyPaths);
+
+    // 移动成功后才更新手动顺序：清源目录旧槽位、追加目标目录末尾。
+    // 目录自身移动时，其孩子的手动顺序以目录 pageId 为键，不受影响。
+    reassignLocalFolderOrder(
+      page.workspaceId,
+      pageId,
+      page.parentId,
+      targetFolderId,
+    );
+  } finally {
+    release();
+  }
 }
