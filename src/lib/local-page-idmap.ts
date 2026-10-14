@@ -23,6 +23,7 @@ import {
 } from "./storage/localDbStorage";
 
 const IDMAP_KEY_PREFIX = "gn:local-idmap:";
+const TRANSFERRED_IDS_KEY = "gn:local-transferred-page-ids";
 
 export type LocalPageIdMap = Record<string, string>; // relativePath → stableId
 
@@ -82,13 +83,17 @@ function generateAvailableStableId(
 ): string {
   const baseId = generateStableId(notebookId, relativePath);
   const existingRelative = findRelativePathById(map, baseId);
-  if (!existingRelative || existingRelative === relativePath) {
+  const transferred = readDbStorageJSON<string[]>(TRANSFERRED_IDS_KEY, []);
+  if (
+    (!existingRelative || existingRelative === relativePath) &&
+    !transferred.includes(baseId)
+  ) {
     return baseId;
   }
 
   let suffix = 2;
   let candidate = `${baseId}--${suffix}`;
-  const usedIds = new Set(Object.values(map));
+  const usedIds = new Set([...Object.values(map), ...transferred]);
   while (usedIds.has(candidate)) {
     suffix++;
     candidate = `${baseId}--${suffix}`;
@@ -99,6 +104,35 @@ function generateAvailableStableId(
     { baseId, existingRelative, relativePath, candidate },
   );
   return candidate;
+}
+
+/** 跨本移动仍沿用原 ID；源路径再次创建时不能抢走已移出页面的 ID。 */
+export function transferLocalPageIdMapTree(
+  sourceNotebookId: string,
+  targetNotebookId: string,
+  oldRelativePath: string,
+  newRelativePath: string,
+  knownEntries: Array<{ id: string; relativePath: string }>,
+): void {
+  const source = readLocalPageIdMap(sourceNotebookId);
+  const target = readLocalPageIdMap(targetNotebookId);
+  for (const entry of knownEntries) source[entry.relativePath] = entry.id;
+  const transferred = new Set(
+    readDbStorageJSON<string[]>(TRANSFERRED_IDS_KEY, []),
+  );
+  for (const [relativePath, id] of Object.entries(source)) {
+    if (
+      relativePath !== oldRelativePath &&
+      !relativePath.startsWith(oldRelativePath + "/")
+    )
+      continue;
+    target[newRelativePath + relativePath.slice(oldRelativePath.length)] = id;
+    transferred.add(id);
+    delete source[relativePath];
+  }
+  writeLocalPageIdMap(targetNotebookId, target);
+  writeDbStorageJSON(TRANSFERRED_IDS_KEY, [...transferred]);
+  writeLocalPageIdMap(sourceNotebookId, source);
 }
 
 /**

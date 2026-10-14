@@ -17,6 +17,7 @@ import {
   replaceBlockRangeAction,
 } from "../actions/localFolder";
 import type { JSONContent } from "@/types";
+import { moveLocalPageToNotebookAction } from "../actions/localFolder/moveToNotebook";
 
 export function createLocalFolderPageSlice(
   set: import("zustand").StoreApi<PagesState>["setState"],
@@ -35,6 +36,7 @@ export function createLocalFolderPageSlice(
   | "saveDirtyLocalPage"
   | "renameLocalPageFile"
   | "moveLocalPage"
+  | "moveLocalPageToNotebook"
   | "writePageContent"
   | "appendPageContent"
   | "replaceBlockRange"
@@ -81,6 +83,9 @@ export function createLocalFolderPageSlice(
 
     moveLocalPage: (pageId, targetFolderId) =>
       moveLocalPageAction(set, get, pageId, targetFolderId),
+
+    moveLocalPageToNotebook: (pageId, targetNotebookId) =>
+      moveLocalPageToNotebookAction(set, get, pageId, targetNotebookId),
 
     writePageContent: (pageId, content, mode) =>
       writePageContentAction(set, get, pageId, content, mode),

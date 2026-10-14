@@ -21,21 +21,18 @@ import { useLocalFolderTargetPicker } from "@/stores/useLocalFolderTargetPicker"
 import { usePages } from "@/stores/usePages";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useTabs } from "@/stores/useTabs";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { getNotebookMoveTargets } from "@/lib/notebook-move-targets";
+import { movePageToNotebook } from "@/lib/move-page-to-notebook";
+import { renderNotebookIcon } from "./notebookUtils";
 
 export function LocalFolderTargetPicker() {
-  const {
-    open,
-    mode,
-    workspaceId,
-    pageId,
-    importFiles,
-    closePicker,
-  } = useLocalFolderTargetPicker();
+  const { open, mode, workspaceId, pageId, importFiles, closePicker } =
+    useLocalFolderTargetPicker();
   const pages = usePages((s) => s.pages);
-  const moveLocalPage = usePages((s) => s.moveLocalPage);
+  const notebooks = useNotebooks((s) => s.notebooks);
   const setExpandPageId = usePages((s) => s.setExpandPageId);
   const expandView = useSidebarView((s) => s.expand);
-  const setSelectedView = useSidebarView((s) => s.setSelected);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,49 +46,35 @@ export function LocalFolderTargetPicker() {
   }, [open]);
 
   const recentKeys = useMemo(
-    () => (workspaceId ? readRecentLocalFolderTargets(workspaceId) : []),
+    () =>
+      workspaceId && open ? readRecentLocalFolderTargets(workspaceId) : [],
     [workspaceId, open],
   );
 
   const items = useMemo(
     () =>
-      workspaceId
+      workspaceId && mode === "import"
         ? buildLocalFolderPickerItems(pages, workspaceId, {
             query,
-            excludePageId: mode === "move" ? pageId : undefined,
             recentKeys,
           })
         : [],
-    [pages, workspaceId, query, mode, pageId, recentKeys],
+    [pages, workspaceId, query, mode, recentKeys],
   );
+
+  const moveTargets = getNotebookMoveTargets(
+    pageId ? pages[pageId] : undefined,
+    notebooks,
+  ).filter((notebook) =>
+    notebook.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
+  );
+
+  const handleMove = async (notebookId: string) => {
+    if (pageId && (await movePageToNotebook(pageId, notebookId))) closePicker();
+  };
 
   const handleSelect = async (folderId: string | undefined) => {
     if (!workspaceId) return;
-
-    if (mode === "move") {
-      if (!pageId) return;
-      try {
-        await moveLocalPage(pageId, folderId);
-        rememberLocalFolderTarget(workspaceId, folderId);
-        toast.success("已移动");
-        closePicker();
-        if (folderId) {
-          expandView(workspaceId, folderId);
-          setExpandPageId(folderId);
-        }
-        setSelectedView(workspaceId, pageId);
-        requestAnimationFrame(() => {
-          document
-            .querySelector(`[data-rct-item-id="${pageId}"]`)
-            ?.scrollIntoView({ block: "nearest" });
-        });
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "移动失败，请重试",
-        );
-      }
-      return;
-    }
 
     const { importedIds, failedCount } = await importTextFilesToLocalFolder({
       workspaceId,
@@ -132,28 +115,54 @@ export function LocalFolderTargetPicker() {
     <CommandDialog
       open={open}
       onOpenChange={(next) => !next && closePicker()}
-      commandProps={{ value: query, onValueChange: setQuery }}
+      commandProps={{ shouldFilter: false }}
     >
-      <CommandInput ref={inputRef} placeholder="搜索文件夹或路径…" />
+      <CommandInput
+        ref={inputRef}
+        value={query}
+        onValueChange={setQuery}
+        placeholder={mode === "move" ? "搜索其他记事本…" : "搜索文件夹或路径…"}
+      />
       <CommandList>
-        <CommandEmpty>没有匹配的文件夹</CommandEmpty>
-        <CommandGroup heading={mode === "move" ? "移动到" : "导入到"}>
-          {items.map((item) => (
-            <CommandItem
-              key={item.key}
-              value={`${item.label} ${item.pathLabel}`}
-              onSelect={() => void handleSelect(item.folderId)}
-            >
-              <GooseIcons.Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm">{item.label}</div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {item.pathLabel}
+        <CommandEmpty>
+          {mode === "move" ? "没有可移动的其他记事本" : "没有匹配的文件夹"}
+        </CommandEmpty>
+        {mode === "move" ? (
+          <CommandGroup heading="移动到">
+            {moveTargets.map((notebook) => (
+              <CommandItem
+                key={notebook.id}
+                value={notebook.id}
+                disabled={notebook.localPathMissing}
+                onSelect={() => void handleMove(notebook.id)}
+              >
+                {renderNotebookIcon(
+                  notebook.icon || "BookOpen",
+                  "h-4 w-4 shrink-0",
+                )}
+                <span className="min-w-0 truncate">{notebook.name}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ) : (
+          <CommandGroup heading="导入到">
+            {items.map((item) => (
+              <CommandItem
+                key={item.key}
+                value={`${item.label} ${item.pathLabel}`}
+                onSelect={() => void handleSelect(item.folderId)}
+              >
+                <GooseIcons.Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm">{item.label}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {item.pathLabel}
+                  </div>
                 </div>
-              </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
       </CommandList>
     </CommandDialog>
   );

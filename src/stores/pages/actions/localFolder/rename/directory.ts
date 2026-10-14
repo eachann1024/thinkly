@@ -17,15 +17,18 @@ import {
 import { markSelfMoved } from "../move";
 import {
   migrateLocalPageIdMapEntry,
+  transferLocalPageIdMapTree,
   toRelativePath,
 } from "@/lib/local-page-idmap";
+import { persistPageSnapshots } from "../../../persistence";
+import { withNotebookHistoryTransfer } from "@/lib/history/transfer";
 
-export async function relocateLocalDirectory(
+export async function relocateLocalPageTree(
   set: StoreSet,
   get: StoreGet,
   pageId: string,
   nextPath: string,
-  target?: { parentId: string | undefined },
+  target?: { parentId: string | undefined; workspaceId?: string },
 ): Promise<string> {
   const page = get().pages[pageId];
   const fs = window.gooseFs;
@@ -34,6 +37,11 @@ export async function relocateLocalDirectory(
   if (!fs || !basePath || !page.localFilePath)
     throw new Error("文件系统不可用");
   const oldPath = page.localFilePath.replace(/\\/g, "/");
+  const targetNotebookId = target?.workspaceId ?? page.workspaceId;
+  const targetBasePath =
+    useNotebooks.getState().notebooks[targetNotebookId]?.localPath;
+  if (!targetBasePath) throw new Error("目标记事本不存在");
+  const acrossNotebooks = targetNotebookId !== page.workspaceId;
   if (oldPath === nextPath) return pageId;
   const inside = (path: string) =>
     path === oldPath || path.startsWith(oldPath + "/");
@@ -95,8 +103,34 @@ export async function relocateLocalDirectory(
         written.push(entry);
         await write(entry.path, entry.after);
       }
-      if (!(await fs.rename(oldPath, nextPath)))
-        throw new Error("目录移动未成功");
+      markSelfMoved(oldPath);
+      markSelfMoved(nextPath);
+      const rename = async () => {
+        if (!(await fs.rename(oldPath, nextPath)))
+          throw new Error("移动未成功");
+      };
+      if (acrossNotebooks) {
+        await withNotebookHistoryTransfer(
+          basePath,
+          targetBasePath,
+          targetNotebookId,
+          [
+            {
+              id: page.id,
+              from: toRelativePath(basePath, oldPath),
+              to: toRelativePath(targetBasePath, nextPath),
+            },
+            ...related
+              .filter((p) => inside(p.localFilePath!))
+              .map((p) => ({
+                id: p.id,
+                from: toRelativePath(basePath, p.localFilePath!),
+                to: toRelativePath(targetBasePath, nextFile(p.localFilePath!)),
+              })),
+          ],
+          rename,
+        );
+      } else await rename();
     } catch (error) {
       const restored = await Promise.allSettled(
         written.map((entry) => write(entry.path, entry.before)),
@@ -120,6 +154,9 @@ export async function relocateLocalDirectory(
         pages[p.id] = {
           ...current,
           localFilePath: next,
+          ...(acrossNotebooks && inside(previous)
+            ? { workspaceId: targetNotebookId }
+            : {}),
           content: p.isFolder
             ? current.content
             : rebaseResourceContent(current.content, previous, next, moved),
@@ -128,6 +165,25 @@ export async function relocateLocalDirectory(
       }
       return { pages };
     });
+    const movedPages = related.filter((p) =>
+      inside(p.localFilePath!.replace(/\\/g, "/")),
+    );
+    if (acrossNotebooks) {
+      transferLocalPageIdMapTree(
+        page.workspaceId,
+        targetNotebookId,
+        toRelativePath(basePath, oldPath),
+        toRelativePath(targetBasePath, nextPath),
+        movedPages.map((p) => ({
+          id: p.id,
+          relativePath: toRelativePath(basePath, p.localFilePath!),
+        })),
+      );
+      persistPageSnapshots(
+        get().pages,
+        movedPages.map((p) => p.id),
+      );
+    }
     for (const p of related) {
       const previous = p.localFilePath!.replace(/\\/g, "/"),
         next = nextFile(previous);
@@ -137,28 +193,30 @@ export async function relocateLocalDirectory(
         setLocalMdSnapshot(next, rewritten?.after ?? snapshot!);
       if (previous !== next) {
         deleteLocalMdSnapshot(previous);
-        migrateLocalPageIdMapEntry(
-          page.workspaceId,
-          toRelativePath(basePath, previous),
-          toRelativePath(basePath, next),
-          p.id,
-        );
+        if (!acrossNotebooks)
+          migrateLocalPageIdMapEntry(
+            page.workspaceId,
+            toRelativePath(basePath, previous),
+            toRelativePath(basePath, next),
+            p.id,
+          );
       }
     }
-    await migrateNotebookHistory(
-      basePath,
-      Object.fromEntries(
-        related
-          .filter((p) => inside(p.localFilePath!.replace(/\\/g, "/")))
-          .map((p) => [
-            p.id,
-            toRelativePath(
-              basePath,
-              nextFile(p.localFilePath!.replace(/\\/g, "/")),
-            ),
-          ]),
-      ),
-    );
+    if (!acrossNotebooks)
+      await migrateNotebookHistory(
+        basePath,
+        Object.fromEntries(
+          related
+            .filter((p) => inside(p.localFilePath!.replace(/\\/g, "/")))
+            .map((p) => [
+              p.id,
+              toRelativePath(
+                basePath,
+                nextFile(p.localFilePath!.replace(/\\/g, "/")),
+              ),
+            ]),
+        ),
+      );
     return pageId;
   } finally {
     releases.reverse().forEach((release) => release());
@@ -174,7 +232,7 @@ export async function renameLocalDirectory(
   const path = get().pages[pageId]?.localFilePath;
   if (!path) throw new Error("目录不存在");
   const normalized = path.replace(/\\/g, "/");
-  return relocateLocalDirectory(
+  return relocateLocalPageTree(
     set,
     get,
     pageId,

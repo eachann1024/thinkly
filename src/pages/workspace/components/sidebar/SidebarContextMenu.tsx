@@ -2,6 +2,7 @@ import { renderSidebarContextGroups } from "./sidebar-context-menu/renderSidebar
 import { SidebarRenameContext } from "./SidebarInlineRename";
 import { type SidebarContextMenuProps } from "./sidebar-context-menu/shared";
 import { useSidebarContextMenu } from "./sidebar-context-menu/useSidebarContextMenu";
+import "./sidebar-context-menu.css";
 
 export function SidebarContextMenu(props: SidebarContextMenuProps) {
   const sidebarContextMenuContext = useSidebarContextMenu(props);

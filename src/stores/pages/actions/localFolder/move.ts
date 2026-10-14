@@ -124,8 +124,8 @@ export async function moveLocalPageAction(
   }
 
   if (page.isFolder) {
-    const { relocateLocalDirectory } = await import("./rename/directory");
-    await relocateLocalDirectory(set, get, pageId, newPath, {
+    const { relocateLocalPageTree } = await import("./rename/directory");
+    await relocateLocalPageTree(set, get, pageId, newPath, {
       parentId: targetFolderId,
     });
     reassignLocalFolderOrder(
