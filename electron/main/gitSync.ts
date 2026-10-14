@@ -51,12 +51,16 @@ async function load() {
       for (const status of saved.statuses) statuses.set(status.repositoryId, status);
       await persist();
     } catch (error) {
-      configs.clear(); statuses.clear();
+      configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取 Git 同步配置，已停止同步以保护现有文件"), { cause: error });
     }
     // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
     await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
-  })();
+  })().catch((error) => {
+    // Cache successful loads only; the retry button must read the disk again.
+    loadPromise = undefined;
+    throw error;
+  });
   return loadPromise;
 }
 

@@ -34,7 +34,7 @@ export async function prepareGitFolderMappings(
     } else if (input.layout === "legacy-root") {
       throw new Error("旧布局只能重新选择原文件夹");
     }
-    if (history.some((entry) => entry !== old && entry.remotePath.toLowerCase() === folder.remotePath.toLowerCase())) {
+    if (history.some((entry) => entry !== old && entry.remotePath.normalize("NFC").toLowerCase() === folder.remotePath.normalize("NFC").toLowerCase())) {
       throw new Error("此远端子目录已保留给其他笔记本，请使用新名称");
     }
   }

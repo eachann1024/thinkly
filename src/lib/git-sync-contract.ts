@@ -145,7 +145,7 @@ export function validateGitRepository(value: GitRepositoryInput): GitRepositoryI
     const a = folders[i]!, b = folders[j]!;
     const local = (p: string) => p.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
     const x = local(a.localPath), y = local(b.localPath);
-    if (a.notebookId === b.notebookId || a.remotePath.toLowerCase() === b.remotePath.toLowerCase() || x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`)) throw new Error("仓库内的文件夹映射重复或重叠");
+    if (a.notebookId === b.notebookId || a.remotePath.normalize("NFC").toLowerCase() === b.remotePath.normalize("NFC").toLowerCase() || x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`)) throw new Error("仓库内的文件夹映射重复或重叠");
   }
   return { id, provider: shared.provider, remoteUrl: shared.remoteUrl, branch: shared.branch, intervalMinutes: shared.intervalMinutes, enabled: shared.enabled, layout: value.layout, folders };
 }
