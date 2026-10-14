@@ -77,7 +77,6 @@ scripts/*
 !scripts/signpath-config.mjs
 # stray verification screenshots in repo root
 /*.png
-!series-features.png
 
 未命名/
 
