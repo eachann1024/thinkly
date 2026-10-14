@@ -5,6 +5,7 @@ import { SettingsSectionCard } from "../SettingsSectionCard";
 import { ShortcutField } from "../ShortcutField";
 import {
   FIXED_CLOSE_SHORTCUT,
+  FIXED_ESCAPE_SHORTCUT,
   FIXED_SPLIT_SHORTCUTS,
 } from "@/lib/fixed-app-shortcuts";
 import type { useShortcutSettings } from "./useShortcutSettings";
@@ -156,18 +157,17 @@ export function renderShortcutSettingsColumns(
       <div className="space-y-5">
         <SettingsSectionCard title="关闭行为（固定）">
           <p className="mb-3 text-xs text-muted-foreground">
-            按 Esc 依次关闭：通知 → 弹窗 → 当前分屏 → 当前标签页。
-            正在编辑正文或搜索时优先退出当前焦点；桌面端快捷键遵循相同退出层级。
+            Esc 退出编辑、搜索或弹窗；Cmd/Ctrl+W 关闭当前分屏或标签页。
           </p>
           <div className="space-y-1">
             <FixedShortcutRow
-              label="关闭当前内容"
+              label="关闭当前分屏 / 标签页"
               shortcut={FIXED_CLOSE_SHORTCUT}
               platform={getPlatformKind()}
             />
             <FixedShortcutRow
               label="关闭搜索面板"
-              shortcut={FIXED_CLOSE_SHORTCUT}
+              shortcut={FIXED_ESCAPE_SHORTCUT}
               platform={getPlatformKind()}
             />
           </div>

@@ -1,4 +1,4 @@
-import { FIXED_CLOSE_SHORTCUT } from "@/lib/fixed-app-shortcuts";
+import { FIXED_CLOSE_SHORTCUT, FIXED_ESCAPE_SHORTCUT } from "@/lib/fixed-app-shortcuts";
 
 export type DesktopHotkeyStatusState =
   | "idle"
@@ -43,7 +43,7 @@ export const LEGACY_DEFAULT_QUICKNOTE_HOTKEY = "CmdOrCtrl+Alt+Q";
 
 export const DEFAULT_CLOSE_TAB_SHORTCUT = FIXED_CLOSE_SHORTCUT;
 
-export const DEFAULT_SEARCH_PANEL_CLOSE_SHORTCUT = FIXED_CLOSE_SHORTCUT;
+export const DEFAULT_SEARCH_PANEL_CLOSE_SHORTCUT = FIXED_ESCAPE_SHORTCUT;
 
 export const ELECTRON_WINDOW_HEIGHT_MIN = 600;
 

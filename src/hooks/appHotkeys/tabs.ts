@@ -55,7 +55,7 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         void createDesktopWindow({ mode: "blank" });
       },
     },
-    // Escape is routed after local handlers; desktop Mod+W retains ordered close.
+    // Escape only dismisses transient UI; desktop Mod+W retains ordered close.
     {
       id: "unified-close",
       match: (event) =>
