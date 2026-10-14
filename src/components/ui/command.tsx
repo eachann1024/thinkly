@@ -3,6 +3,7 @@ import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { type DialogProps } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { fieldVariants } from "./control-recipes";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +40,8 @@ const CommandInput = React.forwardRef<
       data-goose-inline-input=""
       data-goose-control="command-input"
       className={cn(
-        "goose-inline-field flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled",
+        fieldVariants({ variant: "inline", controlSize: null }),
+        "flex h-11 py-3 text-sm",
         className,
       )}
       {...props}

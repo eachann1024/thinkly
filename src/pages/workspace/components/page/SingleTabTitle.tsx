@@ -15,12 +15,12 @@ interface SingleTabTitleProps {
   surface?: "page-header" | "tab-pill";
 }
 const TITLE_IDLE_CLASS =
-  "inline-flex h-8 items-center rounded-[var(--goose-control-radius)] border border-transparent bg-transparent px-2 text-sm font-semibold leading-8 text-foreground no-underline transition-colors ";
+  "inline-flex h-8 items-center rounded-[var(--goose-control-radius)] border-0 bg-transparent px-2 text-sm font-semibold leading-normal text-foreground no-underline transition-colors ";
 
-const TITLE_INPUT_CLASS = `${TITLE_IDLE_CLASS} focus:border-primary/45 focus:bg-[hsl(var(--goose-editor-bg))] focus:text-[var(--goose-interactive-selected-fg)] caret-[var(--goose-accent-focus)]`;
+const TITLE_INPUT_CLASS = `${TITLE_IDLE_CLASS} focus:text-[var(--goose-interactive-selected-fg)] caret-[var(--goose-accent-focus)]`;
 
 const TITLE_TAB_IDLE_CLASS =
-  "inline-flex h-8 min-w-0 w-full flex-1 items-center truncate bg-transparent px-0 text-sm leading-8 text-inherit no-underline outline-none";
+  "inline-flex h-8 min-w-0 w-full flex-1 items-center truncate bg-transparent px-0 text-sm leading-normal text-inherit no-underline outline-none";
 
 const TITLE_TAB_INPUT_CLASS = `${TITLE_TAB_IDLE_CLASS} caret-[var(--goose-accent-focus)] focus:text-[var(--goose-interactive-selected-fg)]`;
 
@@ -36,8 +36,8 @@ export function SingleTabTitle({
     currentTitle, locked, editing,
     setEditing, windowDragStartedRef, value,
     setValue, isComposing, imeInputProps,
-    inputRef, caretRef, skipNextBlurCommitRef,
-    newTitleRequestedRef, syncCaret, commit,
+    inputRef, skipNextBlurCommitRef,
+    newTitleRequestedRef, commit,
   } = useSingleTabTitle(page, idleWindowDrag);
 
   const sizeClass = TITLE_SIZE_FILL;
@@ -45,8 +45,8 @@ export function SingleTabTitle({
   const idleClass = inTab ? TITLE_TAB_IDLE_CLASS : TITLE_IDLE_CLASS;
   const inputClass = inTab ? TITLE_TAB_INPUT_CLASS : TITLE_INPUT_CLASS;
   const lockedClass = inTab
-    ? `${sizeClass} inline-flex h-8 items-center truncate px-0 text-sm leading-8 text-inherit no-underline`
-    : `${sizeClass} inline-flex h-8 items-center truncate px-2 text-sm font-semibold leading-8 text-foreground no-underline`;
+    ? `${sizeClass} inline-flex h-8 items-center truncate px-0 text-sm leading-normal text-inherit no-underline`
+    : `${sizeClass} inline-flex h-8 items-center truncate px-2 text-sm font-semibold leading-normal text-foreground no-underline`;
 
   if (locked) {
     return (
@@ -113,19 +113,13 @@ export function SingleTabTitle({
     <span className="page-title-edit-shell">
       <Input variant="inline"
         ref={inputRef}
-        data-goose-inline-input=""
         value={value}
         {...imeInputProps}
         size={1}
         data-page-title-field
         data-page-title-surface={surface}
         autoFocus={idleWindowDrag}
-        onFocus={syncCaret}
-        onSelect={syncCaret}
-        onKeyUp={syncCaret}
-        onScroll={syncCaret}
         onBlur={() => {
-          if (caretRef.current) caretRef.current.hidden = true;
           if (isComposing()) return;
           // 新建页切换期间编辑器会短暂抢焦；聚焦请求尚未完成时忽略这次
           // 程序性 blur，避免把空输入提前恢复为“未命名”。
@@ -165,12 +159,6 @@ export function SingleTabTitle({
         spellCheck={false}
         autoComplete="off"
         className={`${inputClass} ${sizeClass} box-border`}
-      />
-      <span
-        ref={caretRef}
-        className="page-title-caret"
-        aria-hidden="true"
-        hidden
       />
     </span>
   );

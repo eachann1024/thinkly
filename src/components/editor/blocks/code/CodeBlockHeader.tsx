@@ -102,9 +102,7 @@ export function CodeBlockHeader({
                 e.stopPropagation();
               }}
               className={cn(
-                "h-6 w-full min-w-0 rounded-md border-0 bg-transparent px-1.5 text-xs shadow-none",
-                "placeholder:text-placeholder",
-                "",
+                "h-6 w-full min-w-0 px-1.5 text-xs",
                 !isEditingSummary && !summary && "text-muted-foreground",
                 !isEditingSummary && summary && "text-muted-foreground",
               )}

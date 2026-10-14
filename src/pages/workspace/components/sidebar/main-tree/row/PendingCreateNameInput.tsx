@@ -57,10 +57,10 @@ export function PendingCreateNameInput({
   };
 
   return (
-    <span className="relative z-20 flex min-w-0 flex-1 items-center">
-      <Input context="shell"
+    <span className="relative z-20 flex min-w-0 flex-1 items-center leading-snug">
+      <Input variant="inline" context="shell"
         ref={inputRef}
-        className="h-[22px] min-w-0 px-1.5 py-0 text-sm leading-5"
+        className="min-w-0 flex-1 cursor-text select-text"
         value={value}
         placeholder={defaultName}
         draggable={false}

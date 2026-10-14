@@ -31,7 +31,7 @@ const iconBtnClass =
   "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--goose-control-radius)] disabled:text-disabled";
 const iconClass = "block size-[14px] shrink-0";
 const inputClass =
-  "h-6 min-w-0 w-44 flex-1 border-0 bg-transparent p-0 text-sm leading-6 outline-none placeholder:text-placeholder";
+  "h-6 min-w-0 w-44 flex-1 text-sm leading-6";
 
 export function FindInPageBar({
   editor,
@@ -175,7 +175,6 @@ export function FindInPageBar({
             <GooseIcons.Search className={cn(iconClass, "text-muted-foreground")} />
             <Input variant="inline"
               ref={inputRef}
-              data-goose-inline-input=""
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => {
@@ -246,7 +245,6 @@ export function FindInPageBar({
               <GooseIcons.Replace className={cn(iconClass, "text-muted-foreground")} />
               <Input variant="inline"
                 ref={replaceInputRef}
-                data-goose-inline-input=""
                 value={replacement}
                 onChange={(event) => setReplacement(event.target.value)}
                 onKeyDown={(event) => {

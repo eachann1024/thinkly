@@ -48,7 +48,7 @@ body,
   color: hsl(var(--foreground));
   font-size: 12px;
   font-weight: 500;
-  line-height: 1;
+  line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -64,22 +64,17 @@ body,
 .quicknote-slot-name-input {
   position: absolute;
   z-index: 22;
-  box-sizing: border-box;
-  top: 3px;
-  left: 6px;
-  width: calc(100% - 12px);
-  height: 24px;
-  margin: 0;
-  padding: 0 8px;
-  border: 0;
-  border-radius: var(--goose-field-radius);
-  outline: none;
-  background: var(--goose-interactive-selected);
+  /* 与名称按钮共用起点和 22px 高度；底部 1px 是标题栏分隔线。 */
+  top: 0;
+  bottom: 1px;
+  left: 10px;
+  width: calc(100% - 20px);
+  height: 22px;
+  margin-block: auto;
   color: var(--goose-interactive-selected-fg);
   font-size: 12px;
   font-weight: 500;
   line-height: normal;
-  box-shadow: none;
   pointer-events: auto;
 }
 
