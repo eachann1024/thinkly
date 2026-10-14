@@ -18,8 +18,8 @@
     document.body.dataset.mode = state.dark ? "dark" : "light";
     $("#mode-toggle").setAttribute("aria-pressed", state.dark);
     $("#mode-toggle span").textContent = state.dark ? "浅色" : "深色";
-    $("#preview-state").textContent = `${state.theme.name} / ${state.dark ? "深色候选" : "浅色"} / ${tokens.accent.toUpperCase()}`;
-    $("#token-summary").textContent = `${state.theme.name} · ${state.dark ? "深色恢复候选" : "浅色现行值"}：强调实色固定来自列表边框；文字与焦点单独适配，不反向改动原色。`;
+    $("#preview-state").textContent = `${state.theme.name} / ${state.dark ? "深色" : "浅色"} / ${tokens.accent.toUpperCase()}`;
+    $("#token-summary").textContent = `${state.theme.name} · ${state.dark ? "深色" : "浅色"}应用现行值：强调实色固定来自列表边框；文字与焦点单独适配，不反向改动原色。`;
     const roles = [
       ["accent", "强调实色 / 选中边框", "顶部、导航、列表边框"],
       ["on-accent", "实色前景", "实色背景上的文字与图标，按对比度选深浅"],
@@ -29,8 +29,8 @@
     ];
     $("#token-list").innerHTML = roles.map(([key, label, detail]) => `<div class="token-row"><span class="color-chip" style="background:${tokens[key]}"></span><div><strong>${label}</strong><small>${detail}</small></div><code>${tokens[key].toUpperCase()}</code></div>`).join("");
     const { contrast } = window.accentColorMath;
-    const rows = [["实色上的文字", contrast(tokens.accent, tokens["on-accent"]), 4.5], ["强调文字 / 最不利背景", Math.min(...tokens.surfaces.map((surface) => contrast(tokens["accent-text"], surface))), 4.5], ["原色边框 / 列表浅底", contrast(tokens.accent, tokens.selected), 3], ["焦点环 / 最不利背景", Math.min(...tokens.surfaces.map((surface) => contrast(tokens.focus, surface))), 3]];
-    $("#contrast-results").innerHTML = rows.map(([label, ratio, target]) => `<div class="contrast-row" data-pass="${ratio >= target}"><span>${label}</span><strong>${ratio.toFixed(2)}:1 ${ratio >= target ? "✓" : "待补偿"}</strong></div>`).join("") + (rows.some((row) => row[1] < row[2]) ? '<div class="contrast-alert">这个主题的原色边框对比不足。预览保留你指定的原色；正式实现需补足独立可辨识边界，不把弱色误报为通过。</div>' : "");
+    const rows = [["实色上的文字", contrast(tokens.accent, tokens["on-accent"]), 4.5], ["强调文字 / 最不利背景", Math.min(...tokens.textSurfaces.map((surface) => contrast(tokens["accent-text"], surface))), 4.5], ["原色边框 / 列表浅底", contrast(tokens.accent, tokens.selected), 3], ["焦点环 / 最不利背景", Math.min(...tokens.surfaces.map((surface) => contrast(tokens.focus, surface))), 3]];
+    $("#contrast-results").innerHTML = rows.map(([label, ratio, target]) => `<div class="contrast-row" data-pass="${ratio >= target}"><span>${label}</span><strong>${ratio.toFixed(2)}:1 ${ratio >= target ? "✓" : "待补偿"}</strong></div>`).join("") + (rows.some((row) => row[1] < row[2]) ? '<div class="contrast-alert">这个主题的原色边框对比不足。预览与应用保留指定原色，焦点另行校验，不把选中边框误报为通过。</div>' : "");
     syncURL();
     requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("theme-changing")));
   }

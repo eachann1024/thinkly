@@ -28,14 +28,14 @@ python3 -m http.server 4178 --bind 127.0.0.1 --directory docs/design/accent-them
 
 - 浅色选中底/边框：`src/lib/accentColor.ts`；主题名称：`src/pages/workspace/components/sidebar/appearance-settings/shared.tsx`。
 - 常规与纸色表面：`src/styles/global/theme-tokens.css`、`src/styles/accent/options-and-paper-surfaces.css`、`src/styles/accent/paper-presets.css`。
-- 审计时深色被 `src/styles/goose-dark-theme.css` 覆盖为统一灰阶。预览的彩色值取 `cool-presets.css`、`warm-presets.css`、`paper-presets.css` 中恢复候选；叶脉采用暖橄榄 `#b3a575` 候选，避免丢失色相。
-- 强调文字与焦点针对 shell/sidebar/editor 全部渐变端点派生；强调色锚点不变。深色候选不是应用验收结果。
+- 明暗强调实色、强调文字与焦点同步应用 `1.7.205` 的 `src/lib/accentOutlineTokens.ts`（提交 `78db53e1`）；深色采用主题色相，叶脉为暖橄榄 `#b3a575`。
+- 对比计算覆盖 shell/sidebar/editor 全部渐变端点、选中底及应用主题 hover 底；焦点还覆盖预览原有中性 hover 底。预览中强调文字仅用于选中导航图标，不用于中性 hover 项；强调色锚点与 B 交互不变。
 
 ## 验证边界
 
 本轮 B 收敛已完成 JS 语法、差异范围和静态独立审阅；Ego 浏览器实际核对旧方案链接归一、选中导航/列表 hover 与 mouseleave、标签键盘焦点/Delete 恢复/Tab 顺序、主题明暗及系统减弱动态效果（过渡为 0s）。标签焦点实际计算为 2px 环、-4px 内偏移；截图接口超时，未将本轮截图检查计为通过。
 
-前一轮独立只读审阅已核对全部 9×明暗色值与真实背景端点；本轮未修改主题数据及派生逻辑。实色前景最低 5.22:1、强调文字最低 4.61:1、焦点最低 3.11:1。
+本次数值同步独立对比全部 9×明暗组合：强调实色、强调文字、焦点与选中底共 72 项与生产一致，JS 语法及差异检查通过。实色前景最低 5.22:1、强调文字最低 4.60:1；焦点对应用表面最低 3.13:1，纳入预览中性 hover 底后最低 3.03:1。本次未重跑既有交互验收。
 
 浅秋/麦笺原列表边框对弱底约 1.92:1 / 2.13:1，未达到必要非文字边界 3:1 目标；预览保留指定原色并明确显示待补偿。整页无障碍认证、真实 Electron 持久化/跨窗口/系统主题行为不属于此静态预览的验证结论。
 
