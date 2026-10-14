@@ -5,7 +5,6 @@ export type CaretBox = { left: number; top: number; height: number };
 export function editableTarget(): HTMLElement | null {
   const active = document.activeElement;
   if (!(active instanceof HTMLElement)) return null;
-  if (active.hasAttribute("data-page-title-field") || active.hasAttribute("data-sidebar-rename-field")) return null;
   if (active instanceof HTMLTextAreaElement) return active.disabled || active.readOnly ? null : active;
   if (active instanceof HTMLInputElement) {
     return active.selectionStart === null || active.disabled || active.readOnly ? null : active;
@@ -14,6 +13,8 @@ export function editableTarget(): HTMLElement | null {
 }
 
 const CARET_EM_RATIO = 1.15;
+// 双向文本的视觉插入点由浏览器处理，避免镜像扰动 Unicode bidi 排序。
+const BIDI_TEXT = /[\u0590-\u08ff\u200e-\u200f\u202a-\u202e\u2066-\u2069\ufb1d-\ufeff]/;
 
 function editableCaret(el: HTMLElement): CaretBox | null {
   const selection = window.getSelection();
@@ -106,6 +107,7 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
     measure = () => {
       const start = el.selectionStart;
       if (start === null || start !== el.selectionEnd) return null;
+      if (style.direction === "rtl" || BIDI_TEXT.test(el.value)) return null;
       const box = el.getBoundingClientRect();
       const nextWidth = el.offsetWidth;
       const scale = box.width / nextWidth || 1;

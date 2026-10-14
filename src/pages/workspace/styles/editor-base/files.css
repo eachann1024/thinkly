@@ -83,12 +83,7 @@
   line-height: 1.4;
   flex: 1;
   min-width: 0;
-  background: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
-  border: none;
-  outline: none;
-  border-radius: var(--goose-field-radius);
-  padding: 1px 4px;
 }
 
 .goose-file-block-actions {

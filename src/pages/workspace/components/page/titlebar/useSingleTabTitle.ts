@@ -28,44 +28,8 @@ export function useSingleTabTitle(page: Page, idleWindowDrag: boolean) {
     inputProps: imeInputProps,
   } = useImeInput(initiallyFocused ? "" : currentTitle);
   const inputRef = useRef<HTMLInputElement>(null);
-  const caretRef = useRef<HTMLSpanElement>(null);
-  const measureRef = useRef<CanvasRenderingContext2D | null>(null);
   const committingRef = useRef(false);
   const skipNextBlurCommitRef = useRef(false);
-
-  const syncCaret = useCallback(() => {
-    const input = inputRef.current;
-    const caret = caretRef.current;
-    if (!input || !caret) return;
-    const position = input.selectionStart;
-    if (
-      document.activeElement !== input ||
-      position === null ||
-      position !== input.selectionEnd
-    ) {
-      caret.hidden = true;
-      return;
-    }
-    const measure =
-      measureRef.current ?? document.createElement("canvas").getContext("2d");
-    if (!measure) return; // Canvas 不可用时保留原生光标。
-    measureRef.current = measure;
-    // ponytail: 当前只测单行 LTR 文件名；支持双向文本时改用 DOM 镜像定位。
-    const style = getComputedStyle(input);
-    measure.font = style.font;
-    const tracking = parseFloat(style.letterSpacing) || 0;
-    const offset =
-      input.offsetLeft +
-      parseFloat(style.paddingLeft) +
-      measure.measureText(input.value.slice(0, position)).width +
-      tracking * position -
-      input.scrollLeft;
-    caret.style.left = `${Math.max(input.offsetLeft, Math.min(offset, input.offsetLeft + input.clientWidth - 5))}px`;
-    input.style.caretColor = "transparent";
-    caret.hidden = false;
-  }, []);
-
-  useLayoutEffect(syncCaret, [syncCaret, value, editing]);
 
   const focusAsNewPage = useCallback(() => {
     setValue("");
@@ -241,7 +205,7 @@ export function useSingleTabTitle(page: Page, idleWindowDrag: boolean) {
     currentTitle, locked, editing,
     setEditing, windowDragStartedRef, value,
     setValue, isComposing, imeInputProps,
-    inputRef, caretRef, skipNextBlurCommitRef,
-    newTitleRequestedRef, syncCaret, commit,
+    inputRef, skipNextBlurCommitRef,
+    newTitleRequestedRef, commit,
   };
 }

@@ -39,11 +39,21 @@ export function buttonVariants(props?: Parameters<typeof buttonRecipe>[0]) {
   const size = props?.size === undefined && props?.contentStyle === "preserve" ? null : props?.size;
   return buttonRecipe({ ...props, size });
 }
-export const fieldVariants = cva("goose-field w-full rounded-[var(--goose-field-radius,8px)] border border-input bg-background px-3 py-2 placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled", {
+// 表单与行内编辑分别拥有几何，inline 不再继承表单的边框、留白或固定高度。
+const formField = "rounded-[var(--goose-field-radius,8px)] border border-input bg-background px-3 py-2 text-base md:text-sm";
+export const fieldVariants = cva("goose-field w-full placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled", {
   variants: {
-    context: { shell: "", editor: "goose-field-editor rounded-[var(--goose-editor-field-radius,10px)]", media: "goose-field-media" },
-    variant: { default: "text-base md:text-sm", inline: "goose-inline-field border-transparent bg-transparent p-0 rounded-none", search: "goose-search-field text-base md:text-sm" },
-    controlSize: { default: "h-[var(--goose-field-height,40px)]", compact: "h-[var(--goose-control-height-compact,36px)]", small: "h-[var(--goose-control-height-small,28px)]" },
+    context: { shell: "", editor: "goose-field-editor", media: "goose-field-media" },
+    variant: {
+      default: formField,
+      inline: "goose-inline-field h-auto border-0 bg-transparent p-0 rounded-none shadow-none",
+      search: `goose-search-field ${formField}`,
+    },
+    controlSize: { default: "", compact: "h-[var(--goose-control-height-compact,36px)]", small: "h-[var(--goose-control-height-small,28px)]" },
   },
+  compoundVariants: [
+    { variant: ["default", "search"], controlSize: "default", className: "h-[var(--goose-field-height,40px)]" },
+    { variant: ["default", "search"], context: "editor", className: "rounded-[var(--goose-editor-field-radius,10px)]" },
+  ],
   defaultVariants: { context: "shell", variant: "default", controlSize: "default" },
 });

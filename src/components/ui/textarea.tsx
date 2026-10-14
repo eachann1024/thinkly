@@ -9,7 +9,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const association = useFieldControl(props);
     return <textarea ref={ref} {...props} {...association} data-slot="textarea" data-goose-control="textarea" data-goose-context={context}
       data-goose-inline-input={variant === "inline" || undefined}
-      className={cn(fieldVariants({ context, variant, controlSize }), "min-h-20 h-auto", className)} />;
+      className={cn(fieldVariants({ context, variant, controlSize }), "h-auto", variant === "inline" ? "min-h-0" : "min-h-20", className)} />;
   },
 );
 Textarea.displayName = "Textarea";

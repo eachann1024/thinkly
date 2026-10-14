@@ -4,7 +4,6 @@ import { getPageTitle, withInternalPageTitle } from "@/components/editor/utils/p
 import { toast } from "@/components/ui/sonner";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
-import "./sidebar-inline-rename.css";
 
 export const SidebarRenameContext = createContext<{
   page: Page;
@@ -27,18 +26,6 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [caret, setCaret] = useState({ position: original.length, scroll: 0, visible: true });
-  const [imeActive, setImeActive] = useState(false);
-  // ponytail: mirror handles left-to-right names; bidi and IME keep the native caret.
-  const nativeCaret = imeActive || /[\u0590-\u08ff\u200e-\u200f\u202a-\u202e\u2066-\u2069\ufb1d-\ufeff]/.test(value);
-  const syncCaret = () => {
-    const input = inputRef.current;
-    if (input) setCaret({
-      position: input.selectionStart ?? input.value.length,
-      scroll: input.scrollLeft,
-      visible: document.activeElement === input && input.selectionStart === input.selectionEnd,
-    });
-  };
   const committing = useRef(false);
   const finished = useRef(false);
   const composing = useRef(false);
@@ -46,10 +33,10 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
   useLayoutEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-    input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
-    input.scrollLeft = input.scrollWidth;
-    syncCaret();
+    input.focus({ preventScroll: true });
+    // 保持截断标题原有的首部视野，避免切换编辑时长名称突然跳到末尾。
+    input.setSelectionRange(0, 0);
+    input.scrollLeft = 0;
   }, []);
 
   const finish = (restoreFocus: boolean) => {
@@ -99,12 +86,11 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
   };
 
   return (
-    <span className="relative z-20 flex h-full min-w-0 flex-1 items-center">
+    <span className="relative z-20 flex min-w-0 flex-1 items-center leading-snug">
     <Input variant="inline" context="shell"
       ref={inputRef}
       data-sidebar-rename-field=""
-      className="relative z-20 h-full w-full min-w-0 flex-1 cursor-text select-text"
-      style={{ caretColor: nativeCaret ? "var(--goose-accent-focus)" : "transparent" }}
+      className="relative z-20 min-w-0 flex-1 cursor-text select-text"
       aria-label="重命名，Enter 确认，Escape 取消"
       aria-invalid={!!error}
       aria-description={error || "Tab 或点击其他位置保存；空名称保留原名"}
@@ -114,13 +100,10 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
       spellCheck={false}
       autoComplete="off"
       draggable={false}
-      onChange={(event) => { setValue(event.target.value); setError(""); syncCaret(); }}
-      onSelect={syncCaret}
-      onScroll={syncCaret}
-      onFocus={syncCaret}
-      onCompositionStart={() => { composing.current = true; setImeActive(true); }}
-      onCompositionEnd={() => { composing.current = false; setImeActive(false); syncCaret(); }}
-      onBlur={() => { syncCaret(); void commit(); }}
+      onChange={(event) => { setValue(event.target.value); setError(""); }}
+      onCompositionStart={() => { composing.current = true; }}
+      onCompositionEnd={() => { composing.current = false; }}
+      onBlur={() => { void commit(); }}
       onKeyDown={(event) => {
         event.stopPropagation();
         if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || composing.current) return;
@@ -140,14 +123,6 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
       onContextMenu={(event) => event.stopPropagation()}
       onDragStart={(event) => event.preventDefault()}
     />
-    {!nativeCaret && !busy && caret.visible && (
-      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center overflow-hidden whitespace-pre">
-        <span className="flex items-center" style={{ transform: `translateX(-${caret.scroll}px)` }}>
-          <span style={{ color: "transparent" }}>{value.slice(0, caret.position)}</span>
-          <span key={`${value}:${caret.position}`} className="sidebar-rename-caret" />
-        </span>
-      </span>
-    )}
     </span>
   );
 }

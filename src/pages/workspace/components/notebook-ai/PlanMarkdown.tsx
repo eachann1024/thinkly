@@ -1,26 +1,7 @@
-import { cn } from "@/lib/utils";
-import { memo, type ComponentProps } from "react";
+import { memo } from "react";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
-import { Check } from "@/components/ui/icons";
-
-function MdInput({
-  node,
-  ...props
-}: ComponentProps<"input"> & { node?: unknown }) {
-  void node;
-  if (props.type === "checkbox") {
-    return (
-      <span
-        className="ai-md-checkbox"
-        data-checked={props.checked ? "true" : "false"}
-      >
-        {props.checked ? <Check strokeWidth={2.5} /> : null}
-      </span>
-    );
-  }
-  return <input {...props} className={cn("goose-field", props.className)} />;
-}
+import { MdInput } from "./markdown-input";
 
 const PLAN_MD_COMPONENTS = {
   input: MdInput,

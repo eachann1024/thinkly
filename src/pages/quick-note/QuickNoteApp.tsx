@@ -1,4 +1,5 @@
 import { type CSSProperties } from "react";
+import { useTextCaret } from "@/hooks/useTextCaret";
 import "@/components/ui/sonner";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { Editor } from "@/components/editor/core/Editor";
@@ -12,6 +13,7 @@ import { useQuickNoteWindowPlacement } from "./quick-note-app/useQuickNoteWindow
 import { renderQuickNoteHeader } from "./quick-note-app/renderQuickNoteHeader";
 
 export function QuickNoteApp() {
+  useTextCaret();
   const draft = useQuickNoteDraftState();
   const editor = useQuickNoteEditorActions(draft);
   const save = useQuickNoteSaveActions(editor);

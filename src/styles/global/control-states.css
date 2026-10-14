@@ -60,20 +60,18 @@
 }
 .goose-field-error { color: var(--goose-text-danger); }
 .goose-field { caret-color: var(--goose-text-link); }
-.goose-field:is(:focus-visible, [aria-invalid="true"]) {
+.goose-field:not([data-goose-inline-input]):is(:focus-visible, [aria-invalid="true"]) {
   border-color: var(--goose-interactive-selected-border);
 }
-.goose-field[aria-invalid="true"] { border-color: var(--goose-text-danger); }
+.goose-field:not([data-goose-inline-input])[aria-invalid="true"] { border-color: var(--goose-text-danger); }
 @layer components {
 .goose-inline-field {
   font: inherit;
   color: inherit;
   line-height: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
   margin: 0;
-  border: 0;
-  background: transparent;
-  outline: none;
-  box-shadow: none;
 }
 }
 
