@@ -227,7 +227,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
       const mode = match[1]!, type = match[2]!, oid = match[3]!, name = match[4]!;
       for (const folder of config.folders) {
         if (folder.remotePath && name !== folder.remotePath && !name.startsWith(`${folder.remotePath}/`)) {
-          const folded = name.normalize("NFC").toLowerCase(), prefix = folder.remotePath.toLowerCase();
+          const folded = name.normalize("NFC").toLowerCase(), prefix = folder.remotePath.normalize("NFC").toLowerCase();
           if (folded === prefix || folded.startsWith(`${prefix}/`)) throw new Error("远端目录名称存在大小写冲突，已停止同步");
           continue;
         }
