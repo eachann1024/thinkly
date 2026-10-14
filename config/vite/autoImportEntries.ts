@@ -28,7 +28,6 @@ export const autoImportEntries = [
   "src/components/editor/utils/softWrapPaste.ts",
   "src/components/editor/utils/uploadEditorFile.ts",
   "src/components/ui/ai-motion.tsx",
-  "src/components/ui/badge.tsx",
   "src/components/ui/button.tsx",
   "src/components/ui/checkbox.tsx",
   "src/components/ui/disclosure.tsx",
