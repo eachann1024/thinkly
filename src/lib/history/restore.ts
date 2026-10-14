@@ -21,7 +21,7 @@ export async function materializeVersion(
   if (basePath && page?.localFilePath && fs) {
     const location = (await readHistoryLocations(basePath, fs)).pages[pageId];
     const from = version.relativePath ?? location?.previousPaths.at(-1) ?? location?.relativePath;
-    if (validHistoryRelativePath(from)) content = await rebaseHistoricalResources(content, `${basePath}/${from}`, page.localFilePath, (path) => fs.exists(path));
+    if (validHistoryRelativePath(from)) content = await rebaseHistoricalResources(content, `${basePath}/${from}`, page.localFilePath, (path) => fs.exists(path), basePath);
   }
   return {
     content,
