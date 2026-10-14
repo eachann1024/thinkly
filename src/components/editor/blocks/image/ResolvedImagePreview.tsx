@@ -64,12 +64,11 @@ export function ResolvedImagePreview({
         <div className="goose-image-preview__status" role="status" aria-live="polite"
           aria-label={phase === "error" ? "图片无法加载" : "图片加载中"}>
           <GooseIcons.Image size={20} strokeWidth={1.5} aria-hidden="true" />
-          {phase === "error" && <>
-            <span>图片无法加载</span>
-            <EditorAction type="button" className="goose-image-preview__retry"
-              onMouseDown={event => event.preventDefault()}
-              onClick={() => setAttempt(value => value + 1)}>重试</EditorAction>
-          </>}
+          <span>{phase === "error" ? "图片无法加载" : "图片加载中"}</span>
+          <EditorAction type="button" className="goose-image-preview__retry"
+            disabled={phase === "loading"}
+            onMouseDown={event => event.preventDefault()}
+            onClick={() => setAttempt(value => value + 1)}>重试</EditorAction>
         </div>
       )}
       {current?.src && phase !== "error" && (

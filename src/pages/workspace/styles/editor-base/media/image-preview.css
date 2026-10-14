@@ -5,9 +5,10 @@
 
 .goose-image-preview__status {
   display: flex;
-  min-height: 86px;
+  min-height: 44px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 6px 14px;
   gap: 10px;
   border-radius: 8px;
   background: var(--goose-block-subtle-bg);
@@ -39,12 +40,6 @@
 .goose-image-preview__retry:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
-}
-
-.goose-image-preview[data-image-state="error"] .goose-image-preview__status {
-  min-height: 44px;
-  justify-content: flex-start;
-  padding: 6px 14px;
 }
 
 .goose-image-preview__retry {
