@@ -1,7 +1,8 @@
 import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 import { normalizeShortcutForConflict } from "@/lib/shortcut-platform";
 
-export const FIXED_CLOSE_SHORTCUT = "Escape";
+export const FIXED_CLOSE_SHORTCUT = "Mod+W";
+export const FIXED_ESCAPE_SHORTCUT = "Escape";
 
 export const FIXED_SPLIT_SHORTCUTS = {
   splitRight: "Mod+D",
@@ -13,7 +14,7 @@ export const FIXED_SPLIT_SHORTCUTS = {
   splitFocusPrevious: "Mod+Alt+[",
   splitFocusNext: "Mod+Alt+]",
   splitZoom: "Mod+Shift+Enter",
-  // 关闭分屏统一交给 Escape / 桌面 Mod+W 的分层关闭，不注册独立动作。
+  // 关闭分屏统一交给 Mod+W 的分层关闭，不注册独立动作。
   closeSplitPane: "",
 } as const;
 
@@ -23,7 +24,7 @@ export function isReservedCloseOrSplitShortcut(
   platform: PlatformKind = getPlatformKind(),
 ): boolean {
   const normalized = normalizeShortcutForConflict(shortcut, platform);
-  return !!normalized && [FIXED_CLOSE_SHORTCUT, "Mod+W", ...Object.values(FIXED_SPLIT_SHORTCUTS)]
+  return !!normalized && [FIXED_CLOSE_SHORTCUT, FIXED_ESCAPE_SHORTCUT, ...Object.values(FIXED_SPLIT_SHORTCUTS)]
     .some((value) => normalizeShortcutForConflict(value, platform) === normalized);
 }
 

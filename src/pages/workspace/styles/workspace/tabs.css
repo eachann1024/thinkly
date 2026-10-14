@@ -6,7 +6,7 @@
 .tab-rail-item {
   height: 36px;
   border-radius: var(--goose-control-radius);
-  border-bottom: none;
+  border: 0;
   text-decoration: none;
   transition:
     flex-basis 220ms ease-in-out,
@@ -53,6 +53,7 @@
 .tab-rail-item .page-title-edit-shell {
   height: 2rem;
 }
+:root .workspace-shell .tab-rail-item .tab-rail-title,
 :root .workspace-shell .tab-rail-item [data-page-title-surface="tab-pill"] {
   box-sizing: border-box;
   height: 2rem;
@@ -71,7 +72,8 @@
   color: var(--goose-interactive-hover-fg);
 }
 .tab-rail-item:has([data-page-title-field]:focus) [aria-label="关闭标签页"] {
-  display: none;
+  visibility: hidden;
+  pointer-events: none;
 }
 .page-title-caret {
   position: absolute;

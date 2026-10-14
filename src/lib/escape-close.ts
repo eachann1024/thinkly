@@ -1,5 +1,5 @@
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
-import { FIXED_CLOSE_SHORTCUT } from "@/lib/fixed-app-shortcuts";
+import { FIXED_ESCAPE_SHORTCUT } from "@/lib/fixed-app-shortcuts";
 import { matchShortcut } from "@/lib/shortcut-match";
 
 export const OPEN_DIALOG_SELECTOR =
@@ -21,7 +21,7 @@ export function registerEscapeClose(options: {
   const blocked = new WeakSet<KeyboardEvent>();
   let disposed = false;
   const capture = (event: KeyboardEvent) => {
-    if (!matchShortcut(event, FIXED_CLOSE_SHORTCUT)) return;
+    if (!matchShortcut(event, FIXED_ESCAPE_SHORTCUT)) return;
     const target = event.target as HTMLElement | null;
     if (!options.enabled() || event.defaultPrevented || target?.closest?.('[data-shortcut-recorder]')) {
       blocked.add(event);
@@ -50,7 +50,7 @@ export function registerEscapeClose(options: {
     if (event.target === root || root.querySelector(OPEN_ESCAPE_LAYER_SELECTOR)) blocked.add(event);
   };
   const bubble = (event: KeyboardEvent) => {
-    if (!matchShortcut(event, FIXED_CLOSE_SHORTCUT) || blocked.has(event)) return;
+    if (!matchShortcut(event, FIXED_ESCAPE_SHORTCUT) || blocked.has(event)) return;
     // Window listeners (e.g. fullscreen AI) must finish before the fallback runs.
     queueMicrotask(() => {
       if (disposed || event.defaultPrevented || isImeKeyboardEvent(event) || event.repeat || !options.enabled()) return;

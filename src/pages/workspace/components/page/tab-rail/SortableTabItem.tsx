@@ -152,11 +152,11 @@ export function SortableTabItem({
           ) : (
             <span
               className={cn(
-                "min-w-0 flex-1 truncate no-underline",
+                "tab-rail-title inline-flex min-w-0 flex-1 items-center overflow-hidden no-underline",
                 tab.preview && "italic text-muted-foreground",
               )}
             >
-              {title}
+              <span className="truncate">{title}</span>
             </span>
           )}
           {tab.type !== "welcome" && (
@@ -168,7 +168,7 @@ export function SortableTabItem({
                   className={cn(
                     "h-5 w-5 shrink-0 p-0 ",
                     tabPage
-                      ? "hidden @[64px]:group-hover:flex @[64px]:group-focus-within:flex"
+                      ? "invisible @[64px]:group-hover:visible @[64px]:group-focus-within:visible"
                       : "flex",
                     isActive
                       ? "text-muted-foreground "
