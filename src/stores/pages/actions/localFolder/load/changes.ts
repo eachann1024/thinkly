@@ -3,7 +3,6 @@ import {
   deleteLocalMdSnapshot,
   setLocalMdSnapshot,
 } from "@/lib/local-md-snapshot";
-import { resolveHistoryBackend } from "@/lib/history/backend";
 import { useTabs } from "../../../../useTabs";
 import {
   localFileTitleFromPath,
@@ -20,6 +19,7 @@ import {
 import { localPageMetadataCache } from "../../../persistence";
 import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
+import { portableHistoryIds } from "@/lib/history/localDisk";
 
 // ── 增量 watch 辅助：单页从 store 移除 ────────────────────────────────────────
 /**
@@ -44,9 +44,7 @@ export const removeSingleLocalPageAction = (
   // 清除快照
   deleteLocalMdSnapshot(filePath);
 
-  // 清理历史快照（.goose/history/ 下的孤儿数据）：必须在 store 记录删除前
-  // 调用，删后 resolveHistoryBackend 解析不到 notebook.localPath。
-  void resolveHistoryBackend(pageId).dropAll(pageId);
+  // 外部删除或移走仅移除当前页面；隐藏历史保留，供恢复及再次打开使用。
 
   set((state) => {
     const newPages = { ...state.pages };
@@ -103,12 +101,15 @@ export const addSingleLocalPageAction = async (
     return;
   }
   const idMap = readLocalPageIdMap(notebookId);
+  const historicalId = !idMap[relativePath] ? (await portableHistoryIds(basePath))[relativePath] : undefined;
+  const adopted = historicalId && !Object.values(idMap).includes(historicalId);
+  if (adopted) idMap[relativePath] = historicalId;
   const { id: pageId, dirty } = resolveOrCreateStableId(
     notebookId,
     relativePath,
     idMap,
   );
-  if (dirty) {
+  if (dirty || adopted) {
     writeLocalPageIdMap(notebookId, idMap);
   }
 

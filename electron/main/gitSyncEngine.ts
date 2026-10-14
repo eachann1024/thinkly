@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { lstat, realpath } from "node:fs/promises";
 import { type GitSyncConfig, validateGitSyncConfig } from "../../src/lib/git-sync-contract";
 import { gitFailureMessage } from "./gitSyncErrors";
+import { describeGitSyncChanges } from "./gitSyncCommit";
 
 const execFile = promisify(nodeExecFile);
 const REMOTE = "goose-sync";
@@ -138,7 +139,10 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
   // Stage notebook content while excluding common machine/cache files.
   await git(root, ["add", "-A", "--", ".", ":(exclude,glob)**/.DS_Store", ":(exclude,glob)**/Thumbs.db", ":(exclude,glob)**/desktop.ini"]);
   const staged = Boolean(await git(root, ["diff", "--cached", "--name-only"]));
-  if (staged) await git(root, ["commit", "-m", "同步笔记"]);
+  if (staged) {
+    const changes = await gitBytes(root, ["diff", "--cached", "--name-status", "-z", "-M", "--"]);
+    await git(root, ["commit", "-m", describeGitSyncChanges(changes.toString("utf8"))]);
+  }
 
   const remoteBranch = `refs/heads/${config.branch}`;
   const remoteExists = Boolean(await git(root, ["ls-remote", "--heads", url, remoteBranch]));

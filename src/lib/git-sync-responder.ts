@@ -1,8 +1,10 @@
+import { migrateNotebookHistory } from "./history/localDisk";
+import { canonicalRelativePath } from "./canonicalLocalPath";
 import { acquireLocalPageFileOperation } from "@/stores/pages/folderSync";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { holdGitSyncWrites, releaseGitSyncWrites } from "./git-sync-write-barrier";
-import { GitSyncPreparation } from "./git-sync-preparation";
+import { GitSyncPreparation, gitSyncPreparationFailure } from "./git-sync-preparation";
 
 let installed = false;
 export function installGitSyncResponder() {
@@ -41,13 +43,20 @@ export function installGitSyncResponder() {
           request.addRelease(() => releaseGitSyncWrites(key));
         }
       }
+      for (const notebook of selected) {
+        const paths = Object.fromEntries(pages.filter((page) => page.workspaceId === notebook.id && page.localFilePath && !page.isFolder)
+          .map((page) => [page.id, canonicalRelativePath(notebook.localPath!, page.localFilePath!)!]).filter(([, path]) => path));
+        await migrateNotebookHistory(notebook.localPath!, paths);
+        if (request.finished) return;
+      }
       for (const page of pages) {
         const release = await acquireLocalPageFileOperation(page.id);
         request.addRelease(release);
         if (request.finished) return;
       }
     }).then((ready) => { if (ready) bridge.replyPrepare(requestId, null); }).catch((error) => {
-      bridge.replyPrepare(requestId, error instanceof Error ? error.message : "工作区无法保存");
+      console.error("[git-sync] workspace preparation failed", error);
+      bridge.replyPrepare(requestId, gitSyncPreparationFailure(error));
     });
   });
 }
