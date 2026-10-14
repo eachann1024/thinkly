@@ -3,15 +3,15 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
-import { normalizePath } from "./allowlist";
 import { broadcast, lookupWindowContext } from "./windows";
-import { syncGitRepository, validateGitSyncFolder, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
+import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
 import { retainGitConflicts } from "./gitSyncConflict";
 import { checkedGitRoot as checkedRoot, checkGitFolder } from "./gitSyncFolders";
 import { rebindGitFolder } from "./gitSyncRebind";
 import { lockGitSyncPath } from "./gitSyncLock";
 import { GitSyncSerialQueue, migrateGitSyncState, type GitMappingHistory } from "./gitSyncStore";
 import { durableAtomicWrite } from "./gitSyncDisk";
+import { prepareGitFolderMappings, sameGitFolderTargets } from "./gitSyncMappings";
 
 const configs = new Map<string, GitRepositoryConfig>();
 const statuses = new Map<string, GitSyncStatus>();
@@ -26,7 +26,7 @@ let timer: NodeJS.Timeout | undefined;
 let loadPromise: Promise<void> | undefined;
 const configFile = () => path.join(app.getPath("userData"), "git-sync.json");
 const idle = (repositoryId: string): GitSyncStatus => ({ repositoryId, phase: "idle", lastSyncedAt: null, error: null });
-const state = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()] });
+const state = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory });
 const publish = () => broadcast("git-sync:state", state());
 const messageOf = (error: unknown) => error instanceof Error && /^[\u3400-\u9fff]/.test(error.message) ? error.message.slice(0, 500) : "同步操作失败，请检查文件夹、SSH 权限和网络后重试";
 
@@ -142,34 +142,20 @@ async function save(raw: GitRepositoryInput) {
   const previous = configs.get(input.id);
   if (previous) {
     const manifest = await readFile(path.join(app.getPath("userData"), "git-sync-repositories", input.id, "manifest.json"), "utf8").then((value) => JSON.parse(value)).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw new Error("无法读取同步恢复记录"); });
-    if (manifest?.pending && JSON.stringify(input.folders.map((folder) => [folder.notebookId, folder.localPath])) !== JSON.stringify(previous.folders.map((folder) => [folder.notebookId, folder.localPath]))) throw new Error("上次同步尚未恢复完成，请先同步原文件夹再修改选择");
+    if (manifest?.pending && !sameGitFolderTargets(input.folders, previous.folders)) throw new Error("上次同步尚未恢复完成，请先同步原文件夹再修改选择");
   }
   if (previous && (normalizedGitRemote(input) !== normalizedGitRemote(previous) || input.branch !== previous.branch || input.layout !== previous.layout)) throw new Error("已保存仓库的地址、分支和布局不可修改；请新建配置");
   if (!previous && input.layout === "legacy-root") throw new Error("新仓库必须使用子目录布局");
   if ([...configs.values()].some((other) => other.id !== input.id && normalizedGitRemote(other) === normalizedGitRemote(input) && other.branch === input.branch)) throw new Error("此仓库分支已有同步配置");
-  const addsFolder = input.folders.some((folder) => !previous?.folders.some((old) => old.notebookId === folder.notebookId));
   const history = mappingHistory[input.id] ?? [];
-  for (const folder of input.folders) {
-    if (addsFolder) {
-      folder.localPath = await checkedRoot(folder.localPath);
-      await validateGitSyncFolder(folder.localPath);
-    }
-    const old = history.find((entry) => entry.notebookId === folder.notebookId || normalizePath(entry.localPath).toLowerCase() === normalizePath(folder.localPath).toLowerCase());
-    if (old) {
-      if (old.notebookId !== folder.notebookId || normalizePath(old.localPath) !== normalizePath(folder.localPath)) throw new Error("原文件夹身份或路径已变化，请创建新的映射");
-      folder.remotePath = old.remotePath;
-    }
-    if (history.some((entry) => entry.notebookId !== folder.notebookId && entry.remotePath.toLowerCase() === folder.remotePath.toLowerCase())) throw new Error("此远端子目录已保留给其他笔记本，请使用新名称");
-  }
-  input = validateGitRepository(input);
-  if (input.layout === "legacy-root" && input.folders.some((folder) => !history.some((old) => old.notebookId === folder.notebookId && old.localPath === folder.localPath))) throw new Error("旧布局只能重新选择原文件夹");
+  input = await prepareGitFolderMappings(input, previous, history, path.join(app.getPath("userData"), "git-sync-repositories"));
   input = { ...input, remoteUrl: previous?.remoteUrl ?? input.remoteUrl };
   const added = input.folders.some((folder) => !previous?.folders.some((old) => old.notebookId === folder.notebookId));
   const config: GitRepositoryConfig = input;
   const previousHistory = mappingHistory[input.id];
   const previousStatus = statuses.get(input.id);
   configs.set(input.id, config);
-  mappingHistory[input.id] = [...history.filter((old) => !input.folders.some((folder) => folder.notebookId === old.notebookId)), ...input.folders];
+  mappingHistory[input.id] = [...history.filter((old) => !input.folders.some((folder) => folder.notebookId === old.notebookId || folder.remotePath === old.remotePath)), ...input.folders];
   statuses.set(input.id, previousStatus ?? idle(input.id));
   try { await persist(); }
   catch (error) {
