@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
+import { gitSyncPreparationFailure } from "../../src/lib/git-sync-preparation";
 import { broadcast, lookupWindowContext } from "./windows";
 import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
 import { retainGitConflicts } from "./gitSyncConflict";
@@ -69,11 +70,12 @@ function assertWorkspace(event: Electron.IpcMainInvokeEvent) {
 
 function prepareWindow(win: BrowserWindow, roots: string[], requestId: string) {
   return new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => finish("工作区未响应，已跳过同步；请等待窗口加载完成后重试"), 20_000);
+    // Cold iCloud histories may need hundreds of verified file copies before locking roots.
+    const timeout = setTimeout(() => finish("整理历史或保存笔记超时，已停止同步；原文件已保留，请稍后重试"), 120_000);
     const finish = (error: string | null) => {
       clearTimeout(timeout); pendingReplies.delete(requestId);
       win.webContents.removeListener("destroyed", destroyed);
-      if (error) reject(new Error("工作区未能保存全部笔记，已停止同步；请检查未保存内容后重试")); else resolve();
+      if (error) reject(new Error(error)); else resolve();
     };
     const destroyed = () => finish("工作区已关闭");
     win.webContents.once("destroyed", destroyed);
@@ -182,7 +184,7 @@ export function registerGitSyncIpc() {
     if (typeof requestId !== "string") return;
     const pending = pendingReplies.get(requestId);
     if (!pending || event.sender.id !== pending.senderId || event.senderFrame !== event.sender.mainFrame) return;
-    pending.finish(error === null ? null : "工作区无法保存，已停止同步");
+    pending.finish(error === null ? null : gitSyncPreparationFailure(error));
   });
   const handle = (channel: string, operation: (value: never) => Promise<unknown>) => {
     ipcMain.handle(channel, async (event, value) => {
