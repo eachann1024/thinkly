@@ -185,8 +185,6 @@ declare global {
   const normalizePageLayout: typeof import('../lib/local-frontmatter').normalizePageLayout
   const normalizeWatermarkConfig: typeof import('../lib/imageExport/index').normalizeWatermarkConfig
   const normalizedGitRemote: typeof import('../lib/git-sync-contract').normalizedGitRemote
-  const onboardingChildPageContent: typeof import('../lib/onboardingContent').onboardingChildPageContent
-  const onboardingPageContent: typeof import('../lib/onboardingContent').onboardingPageContent
   const openLocalFolderPageInExternalApp: typeof import('../lib/local-folder-file-actions').openLocalFolderPageInExternalApp
   const openLocalFolderPageInTerminal: typeof import('../lib/local-folder-file-actions').openLocalFolderPageInTerminal
   const pageDirectory: typeof import('../lib/currentLocalPagePath').pageDirectory
@@ -239,6 +237,7 @@ declare global {
   const toCssFontFamily: typeof import('../lib/fontLoader').toCssFontFamily
   const toDiskWriteError: typeof import('../lib/diskWriteError').toDiskWriteError
   const toRelativePath: typeof import('../lib/local-page-idmap').toRelativePath
+  const transferLocalPageIdMapTree: typeof import('../lib/local-page-idmap').transferLocalPageIdMapTree
   const updateSnapshotAfterWrite: typeof import('../lib/local-md-snapshot').updateSnapshotAfterWrite
   const updateSnapshotStat: typeof import('../lib/local-md-snapshot').updateSnapshotStat
   const validateGitRepository: typeof import('../lib/git-sync-contract').validateGitRepository

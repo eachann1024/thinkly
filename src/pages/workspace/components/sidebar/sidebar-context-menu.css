@@ -1,0 +1,16 @@
+.goose-sidebar-context-menu .goose-menu-item {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+}
+
+.goose-sidebar-context-menu .goose-menu-item > svg {
+  display: block;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.goose-sidebar-context-menu .goose-menu-item > span {
+  align-self: center;
+  line-height: var(--goose-menu-item-line-height);
+}

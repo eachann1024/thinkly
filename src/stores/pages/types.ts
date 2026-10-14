@@ -169,6 +169,11 @@ export interface PagesState {
     pageId: string,
     targetFolderId: string | undefined,
   ) => Promise<void>;
+  /** 跨记事本移动到目标根目录，保留页面 ID 与子目录结构。 */
+  moveLocalPageToNotebook: (
+    pageId: string,
+    targetNotebookId: string,
+  ) => Promise<void>;
   getLocalFilePath: (pageId: string) => string | null;
   createLocalPage: (
     parentId?: string,
