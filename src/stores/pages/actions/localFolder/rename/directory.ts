@@ -1,3 +1,4 @@
+import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import { useNotebooks } from "../../../../useNotebooks";
 import {
@@ -93,6 +94,7 @@ export async function renameLocalDirectory(
         p.id,
       );
     }
+    await migrateNotebookHistory(basePath, Object.fromEntries(affected.map((p) => [p.id, toRelativePath(basePath, get().pages[p.id].localFilePath!)])));
     return pageId;
   } finally {
     releases.reverse().forEach((release) => release());
