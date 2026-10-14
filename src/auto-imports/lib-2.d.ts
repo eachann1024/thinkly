@@ -84,6 +84,7 @@ declare global {
   const normalizeShortcutForConflict: typeof import('../lib/shortcut-platform').normalizeShortcutForConflict
   const normalizeShortcutToken: typeof import('../lib/shortcut-platform').normalizeShortcutToken
   const normalizeWikiPath: typeof import('../lib/wikiLink').normalizeWikiPath
+  const onboardingSecondChildContent: typeof import('../lib/onboardingContent').onboardingSecondChildContent
   const onboardingThirdChildContent: typeof import('../lib/onboardingContent').onboardingThirdChildContent
   const openAssociatedMarkdownFile: typeof import('../lib/openAssociatedMarkdown').openAssociatedMarkdownFile
   const openAssociatedMarkdownFiles: typeof import('../lib/openAssociatedMarkdown').openAssociatedMarkdownFiles
