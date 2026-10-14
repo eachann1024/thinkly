@@ -4,7 +4,9 @@ import { usePages } from "@/stores/usePages";
 import type { GitRepositoryFolder, GitSyncBridge } from "@/lib/git-sync-contract";
 
 export async function selectRecoveryPath(folder: GitRepositoryFolder, relocate: boolean) {
-  return relocate ? getGooseDesktop()?.selectDirectory() : folder.localPath;
+  const desktop = getGooseDesktop();
+  if (!desktop) throw new Error("无法打开文件夹选择器，请重新启动桌面应用");
+  return relocate ? desktop.selectDirectory() : folder.localPath;
 }
 
 export async function rebindOpenedFolder(
