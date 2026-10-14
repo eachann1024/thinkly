@@ -99,7 +99,7 @@ export function SettingsScaffold({
                     data-selected={activeTab === tab.id || undefined}
                     onClick={() => handleTabChange(tab.id)}
                     className={cn(
-                      "goose-list-row h-auto border-0 inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-left text-sm",
+                      "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-left text-sm",
                       activeTab !== tab.id && "text-muted-foreground",
                     )}
                   >

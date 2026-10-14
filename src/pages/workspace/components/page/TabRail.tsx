@@ -135,7 +135,7 @@ export function TabRail({
       {insertLeft != null && (
         <div
           aria-hidden
-          className="pointer-events-none absolute top-1 bottom-1 z-20 w-0.5 rounded-marker bg-primary motion-reduce:transition-none"
+          className="pointer-events-none absolute top-1 bottom-1 z-20 w-0.5 rounded-marker bg-[var(--goose-accent-solid)] motion-reduce:transition-none"
           style={{ left: insertLeft }}
         />
       )}

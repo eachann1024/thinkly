@@ -3,6 +3,8 @@ import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import type { ExternalToast } from "sonner";
 import { CircleCheck, X } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { useResolvedTheme } from "@/hooks/useResolvedTheme";
+import { useSettings } from "@/stores/useSettings";
 import { buttonVariants } from "./button";
 import { iconButtonVariants } from "./icon-button";
 
@@ -72,6 +74,7 @@ const Toaster = ({
   placement = "edge",
   ...props
 }: ToasterProps) => {
+  const theme = useResolvedTheme(useSettings((state) => state.theme));
   useEffect(() => {
     const handler = (e: PointerEvent) => {
       const target = e.target as HTMLElement | null;
@@ -89,7 +92,7 @@ const Toaster = ({
 
   return (
     <Sonner
-      theme="system"
+      theme={theme}
       position="top-right"
       offset={22}
       mobileOffset={22}

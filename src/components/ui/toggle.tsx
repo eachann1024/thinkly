@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { controlFrame, buttonContent, toggleSizes, type ControlContext } from "./control-recipes";
 
 const toggleVariants = cva(
-  `${controlFrame} ${buttonContent} rounded-[var(--goose-toggle-radius,var(--radius-md))] goose-interactive`,
+  `${controlFrame} ${buttonContent} rounded-[var(--goose-toggle-radius,var(--radius-md))] goose-interactive goose-accent-selection`,
   {
     variants: {
       variant: {
