@@ -119,6 +119,7 @@ export async function rebaseHistoricalResources<T>(
   fromFile: string,
   toFile: string,
   exists: (path: string) => boolean | Promise<boolean>,
+  notebookRoot?: string,
 ): Promise<T> {
   async function walk(value: unknown, key?: string): Promise<unknown> {
     if (
@@ -129,9 +130,12 @@ export async function rebaseHistoricalResources<T>(
       const target = normalizePath(
         `${dirname(fromFile)}/${cleanAssetDestination(value)}`,
       );
-      return (await exists(target))
-        ? rebaseLocalResource(value, fromFile, toFile)
-        : value;
+      if (await exists(target)) return rebaseLocalResource(value, fromFile, toFile);
+      if (await exists(normalizePath(`${dirname(toFile)}/${cleanAssetDestination(value)}`))) return value;
+      if (notebookRoot && await exists(normalizePath(`${notebookRoot}/${cleanAssetDestination(value)}`))) {
+        return rebaseLocalResource(value, `${notebookRoot}/_history.md`, toFile);
+      }
+      return value;
     }
     if (Array.isArray(value))
       return Promise.all(value.map((item) => walk(item)));
