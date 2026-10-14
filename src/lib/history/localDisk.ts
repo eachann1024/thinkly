@@ -91,6 +91,14 @@ export async function migrateNotebookHistory(basePath: string, knownPaths: Recor
     if (!await fs.exists(root)) return;
     const locations = await readHistoryLocations(basePath, fs);
     const paths: Record<string, string | null> = { ...Object.fromEntries(Object.entries(locations.pages).map(([id, entry]) => [id, entry.relativePath])), ...knownPaths };
+    // Reopened notebooks may have a new page ID for the same note. Move their shared timeline together.
+    for (const [id, next] of Object.entries(knownPaths)) {
+      const previous = locations.pages[id]?.relativePath;
+      if (!previous || previous === next) continue;
+      for (const [alias, entry] of Object.entries(locations.pages)) {
+        if (entry.relativePath === previous && !Object.hasOwn(knownPaths, alias)) paths[alias] = next;
+      }
+    }
     for (const entry of await fs.readDir(root)) {
       if (!entry.isFile || !/^[a-f0-9]{8}\..+\.json$/.test(entry.name)) continue;
       const text = await fs.readFile(`${root}/${entry.name}`);
