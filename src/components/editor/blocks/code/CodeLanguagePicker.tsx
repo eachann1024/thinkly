@@ -223,11 +223,13 @@ export function CodeLanguagePicker({
                   data-goose-menu-slot="row"
                   data-keyboard-active={index === safeHighlightedIndex || undefined}
                   aria-selected={index === safeHighlightedIndex}
+                  data-goose-selected={lang.toLowerCase() === language.toLowerCase()}
                   data-goose-lang-highlighted={
                     index === safeHighlightedIndex ? "true" : undefined
                   }
                   onPointerMove={(event) => {
                     event.preventDefault();
+                    document.documentElement.dataset.goosePointerFocus = "true";
                     setHighlightedIndex(index);
                   }}
                   onSelect={() => {

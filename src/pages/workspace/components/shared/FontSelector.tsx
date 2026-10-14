@@ -68,7 +68,7 @@ export function FontSelector({
               selectFont(font.value);
             }}
             className={cn(
-              "goose-list-row flex-1 shadow-none ",
+              "goose-list-row goose-accent-selection flex-1 shadow-none ",
               compact ? "px-2 py-1.5" : "px-3 py-2",
               "flex flex-col items-center justify-center border-2 border-transparent",
             )}

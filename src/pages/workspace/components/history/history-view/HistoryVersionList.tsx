@@ -110,7 +110,7 @@ function HistoryVersionList() {
                             window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
                           }}
                           data-goose-row-inset=""
-                          className="goose-list-row history-version-row flex min-h-8 w-full min-w-0 cursor-pointer items-center justify-start pl-8 pr-8 text-left "
+                          className="goose-list-row goose-accent-selection history-version-row flex min-h-8 w-full min-w-0 cursor-pointer items-center justify-start pl-8 pr-8 text-left "
                         >
                           <span
                             className={cn(
