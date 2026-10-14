@@ -8,13 +8,12 @@ import {
   revealLocalFolderPageInFileManager,
 } from "@/lib/local-folder-file-actions";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
-import { useLocalFolderTargetPicker } from "@/stores/useLocalFolderTargetPicker";
+import { SidebarMoveSubmenu } from "../SidebarMoveSubmenu";
 import {
   MenuShortcut,
   getExternalAppLabel,
   getFileManagerLabel,
   getTerminalLabel,
-  scheduleAfterMenuClose,
 } from "../shared";
 import type { buildSidebarCreateGroups } from "./buildSidebarCreateGroups";
 
@@ -25,7 +24,6 @@ export function appendSidebarOpenMoveGroups(
     page,
     isTrashed,
     movableNotebooks,
-    handleMoveToTopLevel,
     handleDuplicatePage,
     handleMoveToNotebook,
     localFolderFileManager,
@@ -35,9 +33,6 @@ export function appendSidebarOpenMoveGroups(
     showLocalOpen,
     showOpen,
     showOrganize,
-    showMoveTop,
-    showMoveNotebook,
-    showMoveLocal,
     showMove,
     sections,
   } = input;
@@ -123,52 +118,10 @@ export function appendSidebarOpenMoveGroups(
         key="move"
         className={showOrganize ? undefined : "mt-2"}
       >
-        {showMoveTop ? (
-          <ContextMenuItem onSelect={handleMoveToTopLevel}>
-            <GooseIcons.ArrowUpToLine className="h-4 w-4" />
-            <span>移至顶层</span>
-          </ContextMenuItem>
-        ) : null}
-        {showMoveNotebook ? (
-          <ContextMenuSub>
-            <ContextMenuSubTrigger>
-              <GooseIcons.FolderOutput className="h-4 w-4" />
-              <span>移动到笔记本</span>
-            </ContextMenuSubTrigger>
-            <ContextMenuPortal>
-              <ContextMenuSubContent
-                sideOffset={8}
-                alignOffset={-4}
-                collisionPadding={12}
-                className="w-56 max-h-[min(18rem,calc(100dvh-16px))]"
-              >
-                {movableNotebooks.map((item) => (
-                  <ContextMenuItem
-                    key={item.id}
-                    onSelect={() => handleMoveToNotebook(item.id)}
-                  >
-                    <span className="truncate">{item.name}</span>
-                  </ContextMenuItem>
-                ))}
-              </ContextMenuSubContent>
-            </ContextMenuPortal>
-          </ContextMenuSub>
-        ) : null}
-        {showMoveLocal ? (
-          <ContextMenuItem
-            onSelect={() =>
-              scheduleAfterMenuClose(() =>
-                useLocalFolderTargetPicker
-                  .getState()
-                  .openMovePicker(page.workspaceId, page.id),
-              )
-            }
-          >
-            <GooseIcons.FolderInput className="h-4 w-4" />
-            <span className="min-w-0 truncate">移动到…</span>
-            <MenuShortcut shortcut={LOCAL_FOLDER_FILE_SHORTCUTS.moveItem} />
-          </ContextMenuItem>
-        ) : null}
+        <SidebarMoveSubmenu
+          notebooks={movableNotebooks}
+          onMove={handleMoveToNotebook}
+        />
       </ContextMenuGroup>,
     );
   }

@@ -18,7 +18,6 @@ export function buildSidebarCreateGroups(
     isTrashed,
     folderHasManualOrder,
     movableNotebooks,
-    handleMoveToTopLevel,
     handleDuplicatePage,
     handleRestore,
     handleMoveToNotebook,
@@ -27,7 +26,6 @@ export function buildSidebarCreateGroups(
     localFolderTerminal,
     singleTabMode,
     setRenaming,
-    hasParent,
     createParentId,
   } = context;
 
@@ -46,14 +44,11 @@ export function buildSidebarCreateGroups(
 
   const showOrganize = !isTrashed && !page.isFolder;
 
-  const showMoveTop = hasParent && !isTrashed && !isLocalFolder;
-
-  const showMoveNotebook =
-    !isTrashed && !isLocalFolder && movableNotebooks.length > 0;
-
-  const showMoveLocal = isLocalFolder && !isTrashed && !!page.localFilePath;
-
-  const showMove = showMoveTop || showMoveNotebook || showMoveLocal;
+  const showMove =
+    !isTrashed &&
+    !page.localPendingCreate &&
+    !page.localUnsaved &&
+    (!isLocalFolder || !!page.localFilePath);
 
   const showRestoreOrder =
     isLocalFolder && !isTrashed && !!page.isFolder && folderHasManualOrder;
@@ -132,7 +127,6 @@ export function buildSidebarCreateGroups(
     isTrashed,
     folderHasManualOrder,
     movableNotebooks,
-    handleMoveToTopLevel,
     handleDuplicatePage,
     handleRestore,
     handleMoveToNotebook,
@@ -141,16 +135,12 @@ export function buildSidebarCreateGroups(
     localFolderTerminal,
     singleTabMode,
     setRenaming,
-    hasParent,
     createParentId,
     showCreate,
     showOpenTab,
     showLocalOpen,
     showOpen,
     showOrganize,
-    showMoveTop,
-    showMoveNotebook,
-    showMoveLocal,
     showMove,
     showRestoreOrder,
     showCopy,
