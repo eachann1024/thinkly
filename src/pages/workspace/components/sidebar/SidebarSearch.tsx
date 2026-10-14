@@ -139,6 +139,5 @@ export function SidebarSearch() {
       {hasQuery && searchResults.hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-more" onClick={loadMoreResults}>加载更多结果</Button>}
       {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="h-auto whitespace-normal border-0 px-0 py-0 goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
-    <div className="sidebar-search-footer"><span><kbd className="sidebar-search-key">↑</kbd><kbd className="sidebar-search-key">↓</kbd>预览</span><span><kbd className="sidebar-search-key">Enter</kbd>打开</span><span><kbd className="sidebar-search-key">Esc</kbd>退出</span></div>
   </section>;
 }
