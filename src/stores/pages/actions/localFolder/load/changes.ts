@@ -19,6 +19,7 @@ import {
 import { localPageMetadataCache } from "../../../persistence";
 import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
+import { portableHistoryIds } from "@/lib/history/localDisk";
 
 // ── 增量 watch 辅助：单页从 store 移除 ────────────────────────────────────────
 /**
@@ -100,12 +101,15 @@ export const addSingleLocalPageAction = async (
     return;
   }
   const idMap = readLocalPageIdMap(notebookId);
+  const historicalId = !idMap[relativePath] ? (await portableHistoryIds(basePath))[relativePath] : undefined;
+  const adopted = historicalId && !Object.values(idMap).includes(historicalId);
+  if (adopted) idMap[relativePath] = historicalId;
   const { id: pageId, dirty } = resolveOrCreateStableId(
     notebookId,
     relativePath,
     idMap,
   );
-  if (dirty) {
+  if (dirty || adopted) {
     writeLocalPageIdMap(notebookId, idMap);
   }
 
