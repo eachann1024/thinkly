@@ -160,7 +160,7 @@
 
 .main-tree-drop-between-line {
   position: relative;
-  background: var(--sidebar-dnd-accent);
+  background: var(--goose-accent-solid);
   box-shadow: 0 0 7px var(--sidebar-dnd-accent-medium);
 }
 
@@ -172,7 +172,7 @@
   width: 7px;
   height: 7px;
   border-radius: var(--radius-marker);
-  background: var(--sidebar-dnd-accent);
+  background: var(--goose-accent-solid);
   box-shadow: 0 0 0 2px var(--sidebar-dnd-overlay-bg);
   transform: translate(-50%, -50%);
 }

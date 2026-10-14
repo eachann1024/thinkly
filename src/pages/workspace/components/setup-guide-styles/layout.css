@@ -94,7 +94,7 @@
 
 .setup-guide-steps li[aria-current="step"] .setup-guide-step-marker,
 .setup-guide-steps li[data-complete="true"] .setup-guide-step-marker {
-  border-color: var(--goose-interactive-selected);
+  border-color: var(--goose-interactive-selected-border);
   background: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
 }

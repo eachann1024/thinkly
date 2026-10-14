@@ -199,35 +199,3 @@
  position: relative;
  z-index: 1;
 }
-
-/* 错误消息保持错误语义；其中的恢复/重试操作跟随产品强调色。 */
-.goose-toaster [data-sonner-toast].goose-toast-error [data-button][data-action],
-.goose-toaster
- [data-sonner-toast][data-type="error"]
- [data-button][data-action],
-[data-sonner-toaster]
- [data-sonner-toast].goose-toast-error
- [data-button][data-action],
-[data-sonner-toaster]
- [data-sonner-toast][data-type="error"]
- [data-button][data-action] {
- background: var(--goose-interactive-hover) !important;
- border-color: var(--goose-interactive-hover-border) !important;
- color: var(--goose-interactive-hover-fg) !important;
-}
-
-.goose-toaster
- [data-sonner-toast].goose-toast-error
- [data-button][data-action]:hover,
-.goose-toaster
- [data-sonner-toast][data-type="error"]
- [data-button][data-action]:hover,
-[data-sonner-toaster]
- [data-sonner-toast].goose-toast-error
- [data-button][data-action]:hover,
-[data-sonner-toaster]
- [data-sonner-toast][data-type="error"]
- [data-button][data-action]:hover {
- background: var(--goose-interactive-selected) !important;
- color: var(--goose-interactive-selected-fg) !important;
-}

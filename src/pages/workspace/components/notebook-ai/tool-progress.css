@@ -6,7 +6,7 @@
 }
 
 .notebook-ai-work-status {
-  --notebook-ai-status-color: hsl(var(--primary));
+  --notebook-ai-status-color: var(--goose-accent-solid);
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -17,14 +17,14 @@
   padding: 8px 20px;
   border: 1px solid transparent;
   border-radius: 12px;
-  color: hsl(var(--primary));
+  color: var(--goose-accent-text);
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
   letter-spacing: 0;
 }
 
-/* 分层透明度保留现有 HSL 通道兼容性，文字与图标保持不透明。 */
+/* 结果状态保留原有分层透明度；处理中使用统一的弱底与实色轮廓。 */
 .notebook-ai-work-status::before,
 .notebook-ai-work-status::after {
   position: absolute;
@@ -45,42 +45,12 @@
   opacity: 0.36;
 }
 
-/* 浅色蓝紫文字降低明度，深色文字提高明度，保持小字号状态的对比度。 */
-:root:not(.dark)[data-goose-accent="ocean"] .notebook-ai-work-status--accent {
-  color: #1d4ed8;
+.notebook-ai-work-status--accent::before {
+  background: var(--goose-interactive-selected);
+  opacity: 1;
 }
-:root:not(.dark)[data-goose-accent="iris"] .notebook-ai-work-status--accent {
-  color: #4338ca;
-}
-:root:not(.dark)[data-goose-accent="grape"] .notebook-ai-work-status--accent {
-  color: #7e22ce;
-}
-.dark .notebook-ai-work-status--accent {
-  color: #93c5fd;
-}
-.dark[data-goose-accent="iris"] .notebook-ai-work-status--accent {
-  color: #a5b4fc;
-}
-.dark[data-goose-accent="mono"] .notebook-ai-work-status--accent {
-  color: #e5e5e5;
-}
-.dark[data-goose-accent="pine"] .notebook-ai-work-status--accent {
-  color: #86efac;
-}
-.dark[data-goose-accent="amber"] .notebook-ai-work-status--accent {
-  color: #e0c39a;
-}
-.dark[data-goose-accent="wheat"] .notebook-ai-work-status--accent {
-  color: #d7dbb8;
-}
-.dark[data-goose-accent="coral"] .notebook-ai-work-status--accent {
-  color: #fdba74;
-}
-.dark[data-goose-accent="rose"] .notebook-ai-work-status--accent {
-  color: #fda4af;
-}
-.dark[data-goose-accent="grape"] .notebook-ai-work-status--accent {
-  color: #d8b4fe;
+.notebook-ai-work-status--accent::after {
+  opacity: 1;
 }
 
 .notebook-ai-work-status.notebook-ai-work-status--success {
@@ -108,7 +78,7 @@
 }
 
 .notebook-ai-work-status-spinner {
-  color: var(--notebook-ai-status-color);
+  color: inherit;
   animation: bui-spin 900ms linear infinite;
 }
 

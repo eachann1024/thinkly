@@ -190,7 +190,7 @@ export function renderShortcutSettingsColumns(
                 size="sm"
                 aria-pressed={selectedPlatform === item.id}
                 onClick={() => setSelectedPlatform(item.id)}
-                className={`h-8 rounded-lg px-3 text-xs ${selectedPlatform === item.id ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]" : "text-muted-foreground"}`}
+                className={`goose-accent-selection h-8 rounded-lg px-3 text-xs ${selectedPlatform === item.id ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]" : "text-muted-foreground"}`}
               >
                 {item.label}
               </Button>

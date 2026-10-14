@@ -103,9 +103,10 @@ export function renderAIServiceSection(
                   return (
                     <DropdownMenuItem
                       key={option.id}
+                      data-goose-selected={selected || undefined}
                       onSelect={() => handleProviderChange(option.id)}
                       className={cn(
-                        "cursor-pointer gap-2.5 rounded-[var(--goose-control-radius)] px-2 py-2",
+                        "goose-accent-selection cursor-pointer gap-2.5 rounded-[var(--goose-control-radius)] px-2 py-2",
                         selected &&
                           "bg-[var(--goose-interactive-selected)] text-foreground",
                       )}
@@ -120,6 +121,7 @@ export function renderAIServiceSection(
                         </div>
                       </div>
                       <GooseIcons.Check
+                        data-goose-selection-indicator="true"
                         className={cn(
                           "h-4 w-4 shrink-0 text-foreground",
                           selected ? "opacity-100" : "opacity-0",

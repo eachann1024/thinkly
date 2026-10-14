@@ -61,6 +61,7 @@ export function permanentlyDeletePageWithCleanup(pageId: string) {
   toast.warning(`彻底删除「${title}」？`, {
     id: toastId,
     duration: 8000,
+    classNames: { actionButton: "goose-toast-action-danger" },
     description: page.isFolder
       ? "删除后将连同全部子项一并移除，且无法恢复。"
       : "删除后无法恢复。",

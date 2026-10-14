@@ -13,7 +13,7 @@ export function SegmentedControl({ options, value, onValueChange, disabled, clas
   const enabled = options.filter(option => !disabled && !option.disabled);
   const tabStop = enabled.some(option => option.value === value) ? value : enabled[0]?.value;
   return <div {...props} role="radiogroup" data-goose-control="segmented-control" className={cn("flex gap-2", className)}>
-    {options.map(option => <Button key={option.value} type="button" role="radio" aria-checked={value === option.value}
+    {options.map(option => <Button key={option.value} type="button" role="radio" aria-checked={value === option.value} className="goose-accent-selection"
       disabled={disabled || option.disabled} tabIndex={tabStop === option.value ? 0 : -1}
       variant={value === option.value ? "secondary" : "ghost"} onClick={() => onValueChange(option.value)}
       onKeyDown={event => {

@@ -1,0 +1,32 @@
+/* Sonner 自带无边框实色按钮；内描边保留它的现有尺寸与文字位置。 */
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action] {
+  --goose-toast-action-bg: var(--goose-interactive-hover);
+  --goose-toast-action-active: var(--goose-interactive-selected);
+  --goose-toast-action-fg: var(--goose-interactive-selected-fg);
+  --goose-toast-action-border: var(--goose-accent-solid);
+  --goose-toast-action-focus: var(--goose-accent-outline-focus);
+  background: var(--goose-toast-action-bg);
+  color: var(--goose-toast-action-fg);
+  box-shadow: inset 0 0 0 1px var(--goose-toast-action-border);
+}
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:where(:not(:disabled)):is(:hover, :active) {
+  background: var(--goose-toast-action-active);
+}
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action].goose-toast-action-danger {
+  --goose-toast-action-bg: var(--goose-interactive-danger);
+  --goose-toast-action-active: var(--goose-color-danger-subtle-bg);
+  --goose-toast-action-fg: var(--goose-interactive-danger-fg);
+  --goose-toast-action-border: var(--goose-interactive-danger-border);
+  --goose-toast-action-focus: var(--goose-text-danger);
+}
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:disabled {
+  background: hsl(var(--muted));
+  color: var(--goose-text-disabled);
+  box-shadow: none;
+}
+@layer properties {
+  :root:not([data-goose-pointer-focus="true"]) .goose-toaster [data-sonner-toast] [data-button][data-action]:focus-visible:not(:disabled) {
+    outline: 2px solid var(--goose-toast-action-focus) !important;
+    outline-offset: -4px;
+  }
+}
