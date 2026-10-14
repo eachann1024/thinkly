@@ -4,6 +4,7 @@ import { type CSSProperties } from "react";
 import type { UIFontSize } from "@/stores/settings/types";
 import type { AccentColor } from "@/stores/useSettings";
 import { SelectableCard } from "@/components/ui/selectable-card";
+import { resolveAccentRuntimeTokens } from "@/lib/accentColor";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 
 export interface SettingsAppearanceProps {
@@ -35,95 +36,77 @@ export type AccentOption = {
   previewDark: string;
   lightSurface: string;
   darkSurface: string;
+  lightFocus: string;
+  darkFocus: string;
   fullTheme?: string;
   pro?: boolean;
 };
 
-export const accentOptions: AccentOption[] = [
+const accentOptionDefinitions: Pick<AccentOption, "value" | "label" | "fullTheme" | "pro">[] = [
   {
     value: "ocean",
     label: "海蓝",
-    previewLight: "#3b82f6",
-    previewDark: "#93c5fd",
-    lightSurface: "#dbeafe",
-    darkSurface: "rgba(59, 130, 246, 0.2)",
   },
   {
     value: "iris",
     label: "鸢尾",
-    previewLight: "#6366f1",
-    previewDark: "#a5b4fc",
-    lightSurface: "#e0e7ff",
-    darkSurface: "rgba(99, 102, 241, 0.2)",
   },
   {
     value: "pine",
     label: "松绿",
-    previewLight: "#15803d",
-    previewDark: "#86efac",
-    lightSurface: "#dcfce7",
-    darkSurface: "rgba(34, 197, 94, 0.2)",
   },
   {
     value: "coral",
     label: "朱砂",
-    previewLight: "#c2410c",
-    previewDark: "#fdba74",
-    lightSurface: "#ffedd5",
-    darkSurface: "rgba(249, 115, 22, 0.2)",
   },
   {
     value: "rose",
     label: "莓红",
-    previewLight: "#be123c",
-    previewDark: "#fda4af",
-    lightSurface: "#ffe4e6",
-    darkSurface: "rgba(244, 63, 94, 0.2)",
   },
   {
     value: "grape",
     label: "葡萄",
-    previewLight: "#7e22ce",
-    previewDark: "#d8b4fe",
-    lightSurface: "#f3e8ff",
-    darkSurface: "rgba(168, 85, 247, 0.2)",
   },
   {
     value: "mono",
     label: "叶脉",
-    previewLight: "#756b42",
-    previewDark: "#f5f5f5",
-    lightSurface: "#eeebde",
-    darkSurface: "rgba(255, 255, 255, 0.16)",
     pro: true,
   },
   {
     value: "amber",
     label: "浅秋",
-    previewLight: "#e9dcb8",
-    previewDark: "#c8b889",
-    lightSurface: "#e9dfc7",
-    darkSurface: "#39352a",
     fullTheme: "浅奶油黄与暖白纸面，像秋日里的一点淡淡日光。",
     pro: true,
   },
   {
     value: "wheat",
     label: "麦笺",
-    previewLight: "#d9d7bd",
-    previewDark: "#b8b99a",
-    lightSurface: "#e0ddc8",
-    darkSurface: "#33382a",
     fullTheme: "灰麦黄与米白纸面，像铅笔画在一张安静的素描纸上。",
     pro: true,
   },
 ];
+
+export const accentOptions: AccentOption[] = accentOptionDefinitions.map((option) => {
+  const light = resolveAccentRuntimeTokens(option.value, false);
+  const dark = resolveAccentRuntimeTokens(option.value, true);
+  return {
+    ...option,
+    previewLight: light["--goose-accent-solid"],
+    previewDark: dark["--goose-accent-solid"],
+    lightSurface: light["--goose-interactive-selected"],
+    darkSurface: dark["--goose-interactive-selected"],
+    lightFocus: light["--goose-accent-outline-focus"],
+    darkFocus: dark["--goose-accent-outline-focus"],
+  };
+});
 
 export type AccentOptionStyle = CSSProperties & {
   "--goose-accent-option-light-surface": string;
   "--goose-accent-option-light-fg": string;
   "--goose-accent-option-dark-surface": string;
   "--goose-accent-option-dark-fg": string;
+  "--goose-accent-option-light-focus": string;
+  "--goose-accent-option-dark-focus": string;
 };
 
 export const defaultLabels = { serif: "衬线体", mono: "等宽体" };

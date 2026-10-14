@@ -116,57 +116,6 @@
  stroke: var(--goose-color-success) !important;
 }
 
-/* 成功操作（如「撤回」）：浅底与选中态一致。 */
-.goose-toaster
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action,
-[data-sonner-toaster]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action {
- background: var(--goose-interactive-selected) !important;
- border-color: var(--goose-inline-code-border-hover) !important;
- color: var(--goose-interactive-selected-fg) !important;
-}
-
-.goose-toaster
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action:hover,
-[data-sonner-toaster]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action:hover {
- background: var(--goose-inline-code-border-hover) !important;
-}
-
-.dark
- .goose-toaster
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action,
-.dark
- [data-sonner-toaster]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action,
-[data-sonner-toaster][data-sonner-theme="dark"]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action {
- background: var(--goose-interactive-selected) !important;
- border-color: var(--goose-inline-code-border-hover) !important;
- color: var(--goose-interactive-selected-fg) !important;
-}
-
-.dark
- .goose-toaster
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action:hover,
-.dark
- [data-sonner-toaster]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action:hover,
-[data-sonner-toaster][data-sonner-theme="dark"]
- [data-sonner-toast].goose-toast-success
- .goose-toast-success-action:hover {
- background: var(--goose-inline-code-border-hover) !important;
-}
-
 /* 语义 toast 收敛到浅染、描边、同色文图；放在 Sonner 兼容规则之后覆盖旧实色。 */
 .goose-toaster [data-sonner-toast].goose-toast-error,
 .goose-toaster [data-sonner-toast][data-type="error"],
@@ -181,15 +130,6 @@
 .goose-toaster [data-sonner-toast][data-type="error"] :is([data-title], [data-description], [data-icon]),
 [data-sonner-toaster] [data-sonner-toast].goose-toast-error :is([data-title], [data-description], [data-icon]),
 [data-sonner-toaster] [data-sonner-toast][data-type="error"] :is([data-title], [data-description], [data-icon]) {
-  color: var(--goose-interactive-danger-fg) !important;
-}
-
-.goose-toaster [data-sonner-toast].goose-toast-error [data-button][data-action],
-.goose-toaster [data-sonner-toast][data-type="error"] [data-button][data-action],
-[data-sonner-toaster] [data-sonner-toast].goose-toast-error [data-button][data-action],
-[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-button][data-action] {
-  background: var(--goose-interactive-danger) !important;
-  border-color: var(--goose-interactive-danger-border) !important;
   color: var(--goose-interactive-danger-fg) !important;
 }
 

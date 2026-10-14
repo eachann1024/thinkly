@@ -21,6 +21,7 @@ export function requestDeleteConversation(
   toast.warning(`删除会话「${displaySummary}」？`, {
     id: toastId,
     duration: 8000,
+    classNames: { actionButton: "goose-toast-action-danger" },
     onDismiss: () => {
       conversationDeleteInFlight.delete(conversationId);
     },
