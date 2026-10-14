@@ -136,6 +136,7 @@ declare global {
   const getProviderFixedBaseURL: typeof import('../lib/ai-provider/index').getProviderFixedBaseURL
   const getSettingsProviderId: typeof import('../lib/ai-provider/index').getSettingsProviderId
   const getStoredAIModelOptions: typeof import('../lib/ai-provider/index').getStoredAIModelOptions
+  const gitSyncPreparationFailure: typeof import('../lib/git-sync-preparation').gitSyncPreparationFailure
   const hasCurrentLocalFolderPage: typeof import('../lib/local-folder-file-actions').hasCurrentLocalFolderPage
   const holdGitSyncWrites: typeof import('../lib/git-sync-write-barrier').holdGitSyncWrites
   const importFile: typeof import('../lib/export/index').importFile
@@ -185,7 +186,6 @@ declare global {
   const normalizedGitRemote: typeof import('../lib/git-sync-contract').normalizedGitRemote
   const onboardingChildPageContent: typeof import('../lib/onboardingContent').onboardingChildPageContent
   const onboardingPageContent: typeof import('../lib/onboardingContent').onboardingPageContent
-  const onboardingSecondChildContent: typeof import('../lib/onboardingContent').onboardingSecondChildContent
   const openLocalFolderPageInExternalApp: typeof import('../lib/local-folder-file-actions').openLocalFolderPageInExternalApp
   const openLocalFolderPageInTerminal: typeof import('../lib/local-folder-file-actions').openLocalFolderPageInTerminal
   const pageDirectory: typeof import('../lib/currentLocalPagePath').pageDirectory
