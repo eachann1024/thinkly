@@ -36,9 +36,12 @@ export function aliasGitLayout(snapshots: Snapshots | undefined, moves: GitLayou
 export function gitLayoutMetadata(previous: string | null, config: GitRepositoryInput, moves: GitLayoutMove[]): string {
   const saved = previous ? JSON.parse(previous) : { version: 1, folders: [] };
   if (saved.version !== 1 || !Array.isArray(saved.folders)) throw new Error("远端目录映射记录无法读取，已停止迁移");
-  const folders = saved.folders.filter((entry: { notebookId: string }) => !config.folders.some((folder) => folder.notebookId === entry.notebookId));
+  const matches = (entry: { notebookId: string; path: string }, folder: GitRepositoryInput["folders"][number]) =>
+    entry.notebookId === folder.notebookId || entry.path?.normalize("NFC").toLowerCase() === folder.remotePath.normalize("NFC").toLowerCase();
+  // Explicitly associating an existing backup on another device changes its local notebook ID.
+  const folders = saved.folders.filter((entry: { notebookId: string; path: string }) => !config.folders.some((folder) => matches(entry, folder)));
   for (const folder of config.folders) {
-    const old = saved.folders.find((entry: { notebookId: string }) => entry.notebookId === folder.notebookId);
+    const old = saved.folders.find((entry: { notebookId: string; path: string }) => matches(entry, folder));
     if (folders.some((entry: { path: string }) => entry.path?.normalize("NFC").toLowerCase() === folder.remotePath.normalize("NFC").toLowerCase())) throw new Error("远端目录已由其他笔记本占用，已停止迁移");
     folders.push({ notebookId: folder.notebookId, name: folder.name, path: folder.remotePath,
       previousPaths: [...new Set([...(Array.isArray(old?.previousPaths) ? old.previousPaths : []), ...moves.filter((move) => move.notebookId === folder.notebookId).map((move) => move.from)])] });
@@ -52,7 +55,7 @@ export function assertGitLayoutTargets(names: string[], metadata: string | null,
   for (const move of moves) {
     if (!names.some((name) => name === move.to || name.startsWith(`${move.to}/`))) continue;
     if (!Array.isArray(folders) || !folders.some((folder: { notebookId: string; path: string; previousPaths?: string[] }) =>
-      folder.notebookId === move.notebookId && folder.path === move.to && folder.previousPaths?.includes(move.from))) {
+      folder.path === move.to && folder.previousPaths?.includes(move.from))) {
       throw new Error(`远端目录「${move.to}」已存在，已停止迁移并保留原目录`);
     }
   }
