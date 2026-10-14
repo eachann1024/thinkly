@@ -92,7 +92,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                 key={option.id}
                 type="button"
                 onClick={() => selectModel(option.id)}
-                className="goose-list-row flex w-full items-center gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-foreground transition-colors "
+                className="goose-list-row goose-accent-selection flex w-full items-center gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-foreground transition-colors "
                 data-selected={isActive || undefined}
                 aria-pressed={isActive}
                 title={option.id}

@@ -193,6 +193,7 @@ export function ReviewOperation({
               <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 aria-pressed={view === "diff"}
+                className="goose-accent-selection"
                 onClick={() => setView("diff")}
               >
                 差异
@@ -200,6 +201,7 @@ export function ReviewOperation({
               <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 aria-pressed={view === "new"}
+                className="goose-accent-selection"
                 onClick={() => setView("new")}
               >
                 {operation.type === "search_replace" ? "新片段" : "最终正文"}

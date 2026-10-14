@@ -1,5 +1,4 @@
 import { Button } from "@/components/editor/ui/button";
-import { cn } from "@/components/editor/utils/cn";
 import { colorPanelBoxStyle } from "./colorPanelGeometry";
 import {
   TEXT_COLORS,
@@ -56,12 +55,7 @@ export function ColorPickerPanel({
               type="button"
               variant="ghost"
               size="icon"
-              className={cn(
-                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0  ",
-                isColorSwatchSelected(currentTextColor, item.color)
-                  ? "bg-accent border-primary/20 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.03)]"
-                  : "",
-              )}
+              className="goose-color-picker-swatch goose-accent-selection h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0"
               onClick={() => {
                 applyTextColor(item.color);
               }}
@@ -99,12 +93,7 @@ export function ColorPickerPanel({
               type="button"
               variant="ghost"
               size="icon"
-              className={cn(
-                "goose-color-picker-swatch h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0 hover:border-border/80  ",
-                isColorSwatchSelected(currentBgColor, item.color)
-                  ? "border-primary"
-                  : "",
-              )}
+              className="goose-color-picker-swatch goose-accent-selection h-7 w-7 min-h-7 min-w-7 shrink-0 border border-transparent p-0 hover:border-border/80"
               onClick={() => {
                 applyBackgroundColor(item.color);
               }}

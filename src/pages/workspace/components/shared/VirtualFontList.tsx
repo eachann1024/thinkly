@@ -123,10 +123,13 @@ export function VirtualFontList({
               aria-posinset={row.index + 1}
               tabIndex={-1}
               data-font-preview={option.family ?? ""}
-              onPointerMove={() => setActiveFamily(option.family)}
+              onPointerMove={() => {
+                document.documentElement.dataset.goosePointerFocus = "true";
+                setActiveFamily(option.family);
+              }}
               onPointerDown={(event) => event.preventDefault()}
               onClick={() => onConfirm(option.family)}
-              className="goose-list-row absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 px-2 text-left text-[13px]"
+              className="goose-list-row goose-accent-selection absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 px-2 text-left text-[13px]"
               style={{
                 height: ROW_HEIGHT,
                 transform: `translateY(${row.start}px)`,

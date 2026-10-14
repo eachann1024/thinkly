@@ -11,12 +11,12 @@
 .dark .goose-accent-option {
   --goose-selection-focus: var(--goose-accent-option-dark-focus, var(--goose-accent-outline-focus));
 }
-.goose-accent-selection.goose-interactive-danger {
+.goose-accent-selection:is(.goose-interactive-danger, .goose-menu-item-danger) {
   --goose-selection-border: var(--goose-interactive-danger-border);
   --goose-selection-focus: var(--goose-text-danger);
 }
 :root .goose-accent-selection:where(
-  :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"]):not([data-goose-context="media"])
+  :not([data-goose-selected="false"]):not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"]):not([data-goose-context="media"])
 ):is([data-goose-selected="true"], [data-selected="true"], [aria-selected="true"], [aria-pressed="true"],
   [aria-checked="true"], [data-state="checked"], [data-state="on"], [aria-current="true"], [aria-current="page"]) {
   background-color: var(--goose-interactive-selected);
@@ -26,7 +26,7 @@
 
 /* 选中与键盘焦点分开绘制，内轮廓不改变尺寸，也不会被滚动容器裁掉。 */
 @layer properties {
-  :root:not([data-goose-pointer-focus="true"]) :is(.goose-accent-selection, [data-goose-control="theme-preview-card"], [data-goose-setting-choice="true"]):is(:focus-visible, [data-focus-visible="true"]):where(
+  :root:not([data-goose-pointer-focus="true"]) :is(.goose-accent-selection, [data-goose-control="theme-preview-card"], [data-goose-setting-choice="true"]):is(:focus-visible:not([data-rac]), [data-focus-visible="true"], [data-keyboard-active="true"]):where(
     :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"]):not([data-goose-context="media"])
   ) {
     outline: 2px solid var(--goose-selection-focus) !important;

@@ -37,7 +37,7 @@ export const bootstrap = async (
   // 仍保留：initHostFs（编辑器文件能力）、设置/字体（主题）、保存守卫（关窗 flush 草稿）。
   const { lean = false, beforeInit } = options;
   // Chromium also matches text inputs clicked by a pointer as :focus-visible.
-  // Track pointer entry globally so both windows keep Tab focus without click rings.
+  // Track input modality so both windows show keyboard focus without click rings.
   document.addEventListener(
     "pointerdown",
     () => {
@@ -48,7 +48,7 @@ export const bootstrap = async (
   document.addEventListener(
     "keydown",
     (event) => {
-      if (event.key === "Tab")
+      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " ", "Escape"].includes(event.key))
         delete document.documentElement.dataset.goosePointerFocus;
     },
     true,

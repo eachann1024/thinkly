@@ -129,9 +129,9 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
   },
 );
 const itemClass =
-  "goose-interactive goose-list-row relative flex cursor-default select-none items-center gap-2 rounded-lg pe-2 ps-2 py-1.5 text-[13px] outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:text-disabled [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
+  "goose-interactive goose-list-row goose-accent-selection relative flex cursor-default select-none items-center gap-2 rounded-lg pe-2 ps-2 py-1.5 text-[13px] outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:text-disabled [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 const menuItemClass =
-  "goose-interactive goose-menu-item goose-list-row relative flex w-full cursor-default select-none items-center gap-2 px-2 py-0 text-left text-sm leading-5 outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:text-disabled [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
+  "goose-interactive goose-menu-item goose-list-row goose-accent-selection relative flex w-full cursor-default select-none items-center gap-2 px-2 py-0 text-left text-sm leading-5 outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:text-disabled [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 type ItemProps = Omit<
   React.ComponentPropsWithoutRef<typeof Dropdown.Item>,
   "onSelect" | "children" | "onClick"
