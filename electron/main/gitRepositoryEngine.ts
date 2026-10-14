@@ -7,6 +7,7 @@ import { gitBytes } from "./gitSyncEngine";
 import { durableAtomicWrite } from "./gitSyncDisk";
 import { GitConflictError, retainGitConflicts, type GitSyncConflict } from "./gitSyncConflict";
 import { reconcileFiles } from "./gitSyncReconcile";
+import { describeGitSyncChanges } from "./gitSyncCommit";
 export { GitConflictError, getGitConflict, resolveGitConflict } from "./gitSyncConflict";
 
 type Files = Record<string, string>; // base64 bytes; snapshots are also recovery backups.
@@ -274,7 +275,8 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   await rm(blobFile, { force: true });
   const tree = await git(work, ["write-tree"]);
   const unchanged = remoteHead && await git(work, ["rev-parse", `${remoteHead}^{tree}`]) === tree;
-  const commit = unchanged ? remoteHead! : await git(work, ["commit-tree", tree, ...(remoteHead ? ["-p", remoteHead] : []), "-m", "同步笔记"]);
+  const description = unchanged ? "" : describeGitSyncChanges((await gitBytes(work, ["diff", "--cached", "--name-status", "-z", "-M", ...(remoteHead ? [remoteHead] : []), "--"])).toString("utf8"));
+  const commit = unchanged ? remoteHead! : await git(work, ["commit-tree", tree, ...(remoteHead ? ["-p", remoteHead] : []), "-m", description]);
   await git(work, ["update-ref", "refs/heads/goose-local", commit]);
   manifest.pending = { commit, before: local, after };
   await atomicJson(manifestFile, manifest);
