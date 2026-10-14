@@ -1,3 +1,4 @@
+import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {
   sanitizeFilenameSegment,
@@ -138,6 +139,7 @@ export async function renameLocalPageFileAction(
       pageId,
     );
 
+    if (basePath) await migrateNotebookHistory(basePath, { [pageId]: newRelativePath });
     return pageId;
   } catch (error) {
     if (error instanceof Error && error.message === "重命名操作未成功") {

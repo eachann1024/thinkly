@@ -136,6 +136,7 @@ declare global {
   const getProviderFixedBaseURL: typeof import('../lib/ai-provider/index').getProviderFixedBaseURL
   const getSettingsProviderId: typeof import('../lib/ai-provider/index').getSettingsProviderId
   const getStoredAIModelOptions: typeof import('../lib/ai-provider/index').getStoredAIModelOptions
+  const gitSyncPreparationFailure: typeof import('../lib/git-sync-preparation').gitSyncPreparationFailure
   const hasCurrentLocalFolderPage: typeof import('../lib/local-folder-file-actions').hasCurrentLocalFolderPage
   const holdGitSyncWrites: typeof import('../lib/git-sync-write-barrier').holdGitSyncWrites
   const importFile: typeof import('../lib/export/index').importFile
@@ -237,7 +238,6 @@ declare global {
   const toCssFontFamily: typeof import('../lib/fontLoader').toCssFontFamily
   const toDiskWriteError: typeof import('../lib/diskWriteError').toDiskWriteError
   const toRelativePath: typeof import('../lib/local-page-idmap').toRelativePath
-  const unknownGitVisibility: typeof import('../lib/git-sync-contract').unknownGitVisibility
   const updateSnapshotAfterWrite: typeof import('../lib/local-md-snapshot').updateSnapshotAfterWrite
   const updateSnapshotStat: typeof import('../lib/local-md-snapshot').updateSnapshotStat
   const validateGitRepository: typeof import('../lib/git-sync-contract').validateGitRepository
@@ -268,7 +268,7 @@ declare global {
   export type { FixedAppShortcutId } from '../lib/fixed-app-shortcuts'
   import('../lib/fixed-app-shortcuts')
   // @ts-ignore
-  export type { GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitRepositoryVisibility, GitSyncBridge, GitSyncConfig, GitSyncProvider, GitSyncState, GitSyncStatus, GitVisibilityCheck } from '../lib/git-sync-contract'
+  export type { GitConflictResolution, GitFolderCheck, GitFolderRebind, GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitSyncBridge, GitSyncConfig, GitSyncConflict, GitSyncConflictDetail, GitSyncProvider, GitSyncState, GitSyncStatus } from '../lib/git-sync-contract'
   import('../lib/git-sync-contract')
   // @ts-ignore
   export type { GitSyncPreparation, GitSyncPreparationRequest } from '../lib/git-sync-preparation'
