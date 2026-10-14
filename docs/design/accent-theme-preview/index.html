@@ -3,35 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>鹅笔记 · 强调色设计对照</title>
+  <title>鹅笔记 · 精准轮廓</title>
   <link rel="stylesheet" href="prototype.css">
-  <link rel="stylesheet" href="controls.css">
+  <link rel="stylesheet" href="review.css">
   <script defer src="icons.js"></script>
   <script defer src="themes.js"></script>
   <script defer src="prototype.js"></script>
 </head>
-<body data-variant="A" data-mode="light">
+<body data-mode="light">
   <a class="skip-link" href="#workspace">跳到交互预览</a>
   <header class="review-header">
     <a class="wordmark" href="#top"><i data-icon="feather"></i>鹅笔记 <span>设计预览</span></a>
     <div class="preview-settings">
       <label>主题 <select id="theme-select" aria-label="选择主题"></select></label>
       <button id="mode-toggle" class="review-button" aria-label="深色模式" aria-pressed="false"><i data-icon="moon"></i><span>深色</span></button>
-      <label class="reduce-label"><input id="reduce-motion" type="checkbox">减弱动态效果</label>
     </div>
   </header>
   <main id="top">
     <section class="intro">
-      <div><p class="eyebrow">ACCENT / 01 — 03</p><h1>强调色，应该一眼认得出。</h1><p class="lead">沿用列表选中边框的实色。保留你喜欢的列表，只比较顶部与导航的表达。</p></div>
+      <div><h1>B · 精准轮廓</h1></div>
       <a href="#decisions" class="text-link">查看完整落地方案 <i data-icon="arrow-down"></i></a>
     </section>
-    <nav class="variant-cards" aria-label="三个设计版本">
-      <button data-variant-choice="A" aria-pressed="true"><span class="variant-number">01</span><span><strong>A · 实色焦点 <em>推荐</em></strong><small>实色标签与导航，明确当前工作位置</small></span><i data-icon="arrow-up-right"></i></button>
-      <button data-variant-choice="B" aria-pressed="false"><span class="variant-number">02</span><span><strong>B · 精准轮廓</strong><small>用熟悉的边框，延续列表的选中语言</small></span><i data-icon="arrow-up-right"></i></button>
-      <button data-variant-choice="C" aria-pressed="false"><span class="variant-number">03</span><span><strong>C · 轻量标记</strong><small>实色指示线与图标，让正文更安静</small></span><i data-icon="arrow-up-right"></i></button>
-    </nav>
     <section class="preview-section" aria-label="交互预览">
-      <div class="preview-caption"><span id="variant-description">A · 让顶部与导航，使用真正的强调实色。</span><span id="preview-state" aria-live="polite"></span></div>
+      <div class="preview-caption"><span>列表边框与现有交互保持一致</span><span id="preview-state" aria-live="polite"></span></div>
       <div class="workspace-scroll">
         <div id="workspace" class="workspace" tabindex="-1">
           <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span><i data-icon="arrow-left"></i><i data-icon="arrow-right"></i><i data-icon="panel-left"></i></div>
@@ -50,7 +44,7 @@
             </div>
             <div id="outline-panel" class="sidebar-panel" hidden><button class="outline-row" data-jump="document-title">设计备忘录</button><button class="outline-row" data-jump="document-table">工作台记录</button><button class="outline-row" data-jump="document-callout">下一步</button></div>
             <div id="search-panel" class="sidebar-panel" hidden><label class="search-field"><i data-icon="search"></i><input id="search-input" placeholder="搜索示例笔记" aria-label="搜索示例笔记"></label><div id="search-results"></div></div>
-            <div id="settings-panel" class="sidebar-panel" hidden><p class="panel-label">外观</p><button class="settings-row" id="jump-theme"><i data-icon="palette"></i>主题颜色</button><button class="settings-row" id="jump-controls"><i data-icon="sliders-horizontal"></i>交互状态</button></div>
+            <div id="settings-panel" class="sidebar-panel" hidden><p class="panel-label">外观</p><button class="settings-row" id="jump-theme"><i data-icon="palette"></i>主题颜色</button></div>
             <div class="sidebar-footer"><i data-icon="hard-drive"></i> 本地工作区<span>示例</span></div>
           </aside>
           <article class="editor" id="document-panel" role="tabpanel" tabindex="0">
@@ -60,19 +54,9 @@
             <h3 id="document-table">工作台记录</h3>
             <table class="note-table"><thead><tr><th>项目</th><th>内容</th><th>状态</th></tr></thead><tbody><tr><td>阅读清单</td><td>整理本周值得留存的文章</td><td><span class="status-tag done">已整理</span></td></tr><tr><td>灵感手册</td><td>收集新的设计想法</td><td><span class="status-tag pending">进行中</span></td></tr><tr><td>项目归档</td><td>把完成的工作放回原位</td><td><span class="status-tag">待处理</span></td></tr></tbody></table>
             <div id="document-callout" class="document-callout"><i data-icon="bookmark"></i><div><strong>下周再回看一次</strong><p>把值得留下的想法，整理成下一篇笔记。</p></div></div>
-            <div class="document-actions"><button id="primary-action" class="primary-action"><i data-icon="check"></i><span>完成整理</span></button><a href="#controls" class="accent-link">查看交互状态 <i data-icon="arrow-right"></i></a><span id="action-status" aria-live="polite"></span></div>
           </article>
         </div>
       </div>
-    </section>
-    <section id="controls" class="review-section control-review">
-      <div class="section-title"><span>01 / 交互状态</span><h2>同一种颜色，不同的职责。</h2><p>顶部与导航随方案改变。控件各用所需的强调程度，状态色保持独立。</p></div>
-      <div class="control-grid">
-        <div class="control-example"><h3>动作</h3><div class="control-line"><button class="primary-action" id="save-example">保存示例</button><button class="secondary-action" id="secondary-example">预览</button><button class="primary-action" disabled>不可用</button></div><p id="save-status" aria-live="polite">可点击，状态只保存在此页面。</p></div>
-        <div class="control-example"><h3>开关与选择</h3><div class="control-line"><label class="switch-label"><button id="sync-switch" class="switch" role="switch" aria-checked="true" aria-label="自动保存示例"><span></span></button>自动保存</label><label class="checkbox-label"><input id="show-example-mark" type="checkbox" checked>显示示例标记</label></div><fieldset><legend>排序</legend><label><input type="radio" name="sort" checked value="recent">最近编辑</label><label><input type="radio" name="sort" value="name">名称</label></fieldset></div>
-        <div class="control-example"><h3>焦点与语义状态</h3><input class="focus-input" aria-label="键盘焦点示例" placeholder="点这里，再按 Tab 查看焦点环"><div class="status-line"><span class="semantic-success">已同步</span><span class="semantic-warning">待确认</span><span class="semantic-danger">连接失败</span><a href="#tokens" class="accent-link">色值对照</a></div></div>
-      </div>
-      <p class="selection-note" id="interaction-state" aria-live="polite"></p>
     </section>
     <details class="decision-details"><summary>完整落地方案、色值与研究 <span>8 个步骤 · 9 个主题 · 原始来源</span></summary>
     <section id="tokens" class="review-section token-review">
@@ -81,29 +65,28 @@
       <p class="baseline-note">浅色取自当前列表真实色值；深色是恢复各主题色的设计候选（叶脉为新增暖橄榄候选），列表仍保留原有圆角、浅底与布局。最终深色值须在真实应用背景上复核。</p>
     </section>
     <section id="decisions" class="review-section">
-      <div class="section-title"><span>03 / 完整实施路径</span><h2>一次覆盖所有消费者，不留“第二期”。</h2><p>下面是选定方案后的完整工作范围；此页面仅做设计对照，尚未修改真实应用。</p></div>
+      <div class="section-title"><span>03 / 完整实施路径</span><h2>沿现有结构完善状态。</h2><p>此页面仅用于核对视觉与状态；真实应用的实施与验收单独记录。</p></div>
       <ol class="implementation-steps">
-        <li><span>01</span><div><h3>确认视觉方案</h3><p>A 实色填充是推荐；B 延续边框；C 保持轻量。以这三个可操作版本选择，也可指定组合。现有列表结构、圆角、密度已确定保留。</p></div></li>
+        <li><span>01</span><div><h3>落实已选精准轮廓</h3><p>已确定精准轮廓：顶部与导航沿用列表边框的强调实色。保留现有结构、圆角、密度、状态归属与流程，不增加产品控件或入口。</p></div></li>
         <li><span>02</span><div><h3>清点真实入口与消费者</h3><p>沿主题设置 → 偏好状态 → CSS token → 标签/导航/列表/按钮/选择控件/链接/编辑器检查。区分全局控件、局部样式、动态内联值与第三方组件，逐一映射。</p></div></li>
         <li><span>03</span><div><h3>拆分颜色职责</h3><p>定义强调实色、实色前景、强调文字、弱背景、选中边框和焦点环。保留现有 --accent 作为交互弱表面的兼容语义，避免一次全局替换改变菜单与编辑器。</p></div></li>
         <li><span>04</span><div><h3>贯通九主题与明暗模式</h3><p>浅色以现有列表边框为真值。深色解除统一灰阶覆盖，恢复所选主题强调色并调整明度；海蓝、鸢尾、松绿、朱砂、莓红、葡萄、叶脉、浅秋、麦笺逐一核对。</p></div></li>
         <li><span>05</span><div><h3>保留状态归属与持久化顺序</h3><p>沿用现有主题键、存储及事件顺序，不新增第二套偏好源。核对旧设置、启动恢复、明暗跟随系统、跨窗口同步、设置导入与未知值回退；如需迁移只在原状态所有者处理。</p></div></li>
         <li><span>06</span><div><h3>分组替换交互样式</h3><p>选定的顶部/导航表达与列表同色；按钮区分主要/次要动作；开关、单选、链接使用各自语义。hover、pressed、selected、focus-visible、disabled 不混用，成功/警告/错误保持独立。</p></div></li>
-        <li><span>07</span><div><h3>处理键盘、对比度与动效</h3><p>校验普通文字、实色前景、控件边界和外置焦点环；低对比纸色保留锚点并补足可辨识边界。标签键盘导航、关闭后的焦点恢复、降低动态效果全部涵盖，仅使用 120–180ms 轻过渡。</p></div></li>
+        <li><span>07</span><div><h3>处理键盘、对比度与动效</h3><p>校验普通文字、实色前景、控件边界和独立焦点提示；低对比纸色保留锚点并补足可辨识边界。标签键盘导航、关闭后的焦点恢复、降低动态效果全部涵盖，仅使用 120–180ms 轻过渡。</p></div></li>
         <li><span>08</span><div><h3>最小必要验收与交付</h3><p>逐一覆盖 9×明暗色值和受影响状态，再核对主题持久化/跨窗口的相关步骤。按仓库规则不写、不跑测试用例；选择必要类型/构建或交互检查，若触及桌面宿主再安装核验。版本补丁加一，仅提交本任务并推送；涉及 CI 的必要远端步骤实际成功后才宣称通过。</p></div></li>
       </ol>
     </section>
     <section class="review-section research-section">
       <div class="section-title"><span>04 / 研究与取舍</span><h2>保留现有技术，修正颜色语义。</h2><p>不新增依赖。实现阶段可复用现有 Motion，普通颜色状态使用 CSS；不引入弹跳、流光或持续动画。</p></div>
       <div class="research-grid">
-        <article><h3>为什么推荐 A</h3><p>最直接消除“浅蓝底被当作强调色”的误解。顶部与导航明确呈现列表边框的真实实色；列表仍然柔和。代价是色彩占比更大，因此保留 B、C 供并排判断。</p><p><a href="https://ui.shadcn.com/docs/theming" target="_blank" rel="noreferrer">shadcn 的语义分工</a> · <a href="https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale" target="_blank" rel="noreferrer">Radix 的色阶职责</a></p></article>
+        <article><h3>已确定精准轮廓</h3><p>顶部与导航直接沿用列表选中边框。未选中的 hover 保持中性；selected 轮廓在 hover、按下和移出时保持。键盘焦点独立绘制，不冒充选中，也不改动事件链路。</p><p><a href="https://ui.shadcn.com/docs/theming" target="_blank" rel="noreferrer">shadcn 的语义分工</a> · <a href="https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale" target="_blank" rel="noreferrer">Radix 的色阶职责</a></p></article>
         <article><h3>X 原帖与评论替代</h3><p>已阅读 <a href="https://x.com/Ibelick/status/1810317369975189722" target="_blank" rel="noreferrer">Motion Primitives 作者原帖</a>及评论；评论中有 <a href="https://x.com/harimanok_/status/1810495157328113794" target="_blank" rel="noreferrer">Animata 作者的替代推荐</a>。这证明有可比较方案，不意味着某个库全面更强。</p><p><a href="https://github.com/ibelick/motion-primitives" target="_blank" rel="noreferrer">Motion Primitives</a> · <a href="https://github.com/codse/animata" target="_blank" rel="noreferrer">Animata</a> · <a href="https://github.com/imskyleen/animate-ui" target="_blank" rel="noreferrer">Animate UI</a>（均 MIT）</p></article>
-        <article><h3>可用性有明确边界</h3><p>只借鉴轻量选中反馈。焦点不是选中；状态不能只靠颜色。减弱动态效果随系统，页面也提供即时开关。</p><p><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" target="_blank" rel="noreferrer">文字对比度</a> · <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html" target="_blank" rel="noreferrer">非文字对比度</a> · <a href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/" target="_blank" rel="noreferrer">Tabs 键盘规范</a> · <a href="https://motion.dev/docs/react-accessibility" target="_blank" rel="noreferrer">Motion 减弱动态效果</a></p></article>
+        <article><h3>可用性有明确边界</h3><p>只借鉴轻量选中反馈。焦点不是选中；状态不能只靠颜色。减弱动态效果随系统。</p><p><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" target="_blank" rel="noreferrer">文字对比度</a> · <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html" target="_blank" rel="noreferrer">非文字对比度</a> · <a href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/" target="_blank" rel="noreferrer">Tabs 键盘规范</a> · <a href="https://motion.dev/docs/react-accessibility" target="_blank" rel="noreferrer">Motion 减弱动态效果</a></p></article>
       </div>
     </section>
     </details>
-    <footer class="review-footer"><strong>设计演示，等待选择。</strong><span>示例内容 · 不连接笔记数据 · 不保存设置 · 不等同于应用已完成</span></footer>
+    <footer class="review-footer"><strong>精准轮廓 · 设计核对</strong><span>示例内容 · 不连接笔记数据 · 不保存设置 · 不等同于应用已完成</span></footer>
   </main>
-  <div class="prototype-switcher" role="group" aria-label="方案切换"><button id="previous-variant" aria-label="上一个方案"><i data-icon="arrow-left"></i></button><span id="current-variant">A · 实色焦点</span><button id="next-variant" aria-label="下一个方案"><i data-icon="arrow-right"></i></button><span class="switcher-hint">← →</span></div>
 </body>
 </html>
