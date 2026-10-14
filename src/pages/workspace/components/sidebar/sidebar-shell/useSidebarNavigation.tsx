@@ -3,6 +3,7 @@ import { useSidebarView } from "@/stores/useSidebarView";
 import { useSidebarEffects } from "../hooks/useSidebarEffects";
 import { shouldDismissSidebarOverlay } from "../sidebarOverlayEscape";
 import { useSearchSession } from "../useSearchSession";
+import { readSearchSelection } from "../readSearchSelection";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { activateWorkspace } from "@/lib/settings-navigation";
@@ -90,9 +91,16 @@ export function useSidebarNavigation(
 
   useEffect(() => {
     const onOpen = (event: Event) => {
-      activateWorkspace();
-      const detail = (event as CustomEvent<{ resetQuery?: boolean }>).detail;
+      const detail = (event as CustomEvent<{
+        resetQuery?: boolean;
+        selectionQuery?: string;
+      }>).detail;
       if (detail?.resetQuery) useSearchSession.getState().setQuery("");
+      else {
+        const query = detail?.selectionQuery ?? readSearchSelection();
+        if (query) useSearchSession.getState().setQuery(query);
+      }
+      activateWorkspace();
       setCurrentView("search");
       if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
       if (inHistoryMode) exitHistoryView();
