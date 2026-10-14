@@ -107,6 +107,11 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   aliasGitLayout(manifest.baseline, moves);
   aliasGitLayout(manifest.pending?.before, moves);
   aliasGitLayout(manifest.pending?.after, moves);
+  // Keep conservative reattachment semantics when the same operation renames its remote directory.
+  manifest.reboundKeys = manifest.reboundKeys?.map((key) => {
+    const move = moves.find((entry) => key === `${entry.notebookId}:${entry.from}`);
+    return move ? `${move.notebookId}:${move.to}` : key;
+  });
   const local: Snapshots = {};
   for (const folder of config.folders) {
     await options.verifyRoot?.(folder.localPath);
