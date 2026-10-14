@@ -49,8 +49,9 @@ async function exportPage(
   page: Page,
   format: SinglePageExportFormat,
   pdfBlob?: Blob,
+  selectedBlocks?: BlockNoteContent,
 ) {
-  const { blob, filename } = await buildSinglePageExport(page, format, pdfBlob);
+  const { blob, filename } = await buildSinglePageExport(page, format, pdfBlob, selectedBlocks);
   await downloadBlob(blob, filename);
 }
 
@@ -58,18 +59,18 @@ export async function exportToJSON(page: Page) {
   await exportPage(page, "json");
 }
 
-export async function exportToMarkdown(page: Page) {
-  await exportPage(page, "md");
+export async function exportToMarkdown(page: Page, selectedBlocks?: BlockNoteContent) {
+  await exportPage(page, "md", undefined, selectedBlocks);
 }
 
-export async function exportToHTML(page: Page) {
-  await exportPage(page, "html");
+export async function exportToHTML(page: Page, selectedBlocks?: BlockNoteContent) {
+  await exportPage(page, "html", undefined, selectedBlocks);
 }
 
-export async function exportToPDF(page: Page, customFonts?: CustomFonts) {
+export async function exportToPDF(page: Page, customFonts?: CustomFonts, selectedBlocks?: BlockNoteContent) {
   const { renderPageToPdfBlob } = await import("@/lib/pdfExport");
-  const pdfBlob = await renderPageToPdfBlob(page, customFonts);
-  await exportPage(page, "pdf", pdfBlob);
+  const pdfBlob = await renderPageToPdfBlob(page, customFonts, selectedBlocks);
+  await exportPage(page, "pdf", pdfBlob, selectedBlocks);
 }
 
 export { renderExportHtml } from "./exportHtmlDocument";

@@ -3,6 +3,7 @@ import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { toggleSelectionMark } from "../helpers";
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -28,7 +29,7 @@ export function InlineGroup({
           <Toggle
             size="sm"
             pressed={isUnderline}
-            onPressedChange={() => editor.toggleStyles({ underline: true })}
+            onPressedChange={() => toggleSelectionMark(editor, "underline")}
             aria-label="下划线"
             className={ITEM_CLASS}
           >
@@ -43,7 +44,7 @@ export function InlineGroup({
           <Toggle
             size="sm"
             pressed={isCode}
-            onPressedChange={() => editor.toggleStyles({ code: true })}
+            onPressedChange={() => toggleSelectionMark(editor, "code")}
             aria-label="行内代码"
             className={ITEM_CLASS}
           >

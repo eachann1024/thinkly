@@ -4,6 +4,9 @@ import { cloneExportBlocks, prepareExportBlocks } from "./prepareExportBlocks";
 import { buildExportMarkdown, buildExportHtmlBody } from "./pageMarkdown";
 import { renderExportHtml } from "./exportHtmlDocument";
 import { extractImagesFromContent } from "./zipBundle";
+import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { blocksToMarkdown } from "./blocknoteSerializer";
+import { blocksToEditorHtml } from "./blocksToEditorHtml";
 
 const SIDECAR_BLOCK_TYPES = new Set(["file", "audio", "video"]);
 
@@ -53,6 +56,7 @@ async function buildPlainExport(
   format: SinglePageExportFormat,
   rawTitle: string,
   pdfBlob?: Blob,
+  selectedBlocks?: BlockNoteContent,
 ): Promise<{ blob: Blob; filename: string }> {
   if (format === "pdf") {
     if (!pdfBlob) throw new Error("PDF 导出缺少已渲染的文件");
@@ -67,17 +71,23 @@ async function buildPlainExport(
     };
   }
 
-  const blocks = await prepareExportBlocks(page);
+  const blocks = await prepareExportBlocks(
+    selectedBlocks ? { ...page, content: selectedBlocks } : page,
+  );
   if (format === "md") {
-    const markdown = await buildExportMarkdown(page, blocks);
+    const markdown = selectedBlocks
+      ? await blocksToMarkdown(blocks)
+      : await buildExportMarkdown(page, blocks);
     return {
       blob: new Blob([markdown], { type: "text/markdown" }),
       filename: `${rawTitle}.md`,
     };
   }
 
-  const bodyHtml = await buildExportHtmlBody(page, blocks);
-  const html = await renderExportHtml(rawTitle, bodyHtml, !page.localFilePath);
+  const bodyHtml = selectedBlocks
+    ? blocksToEditorHtml(blocks)
+    : await buildExportHtmlBody(page, blocks);
+  const html = await renderExportHtml(rawTitle, bodyHtml, !selectedBlocks && !page.localFilePath);
   return {
     blob: new Blob([html], { type: "text/html" }),
     filename: `${rawTitle}.html`,
@@ -89,6 +99,7 @@ async function buildMainFile(
   format: SinglePageExportFormat,
   safeTitle: string,
   pdfBlob?: Blob,
+  selectedOnly = false,
 ): Promise<{ filename: string; content: Blob | string }> {
   if (format === "pdf") {
     if (!pdfBlob) throw new Error("PDF 导出缺少已渲染的文件");
@@ -103,13 +114,17 @@ async function buildMainFile(
   if (format === "md") {
     return {
       filename: `${safeTitle}.md`,
-      content: await buildExportMarkdown(page, page.content),
+      content: selectedOnly
+        ? await blocksToMarkdown(page.content)
+        : await buildExportMarkdown(page, page.content),
     };
   }
-  const bodyHtml = await buildExportHtmlBody(page, page.content);
+  const bodyHtml = selectedOnly
+    ? blocksToEditorHtml(page.content)
+    : await buildExportHtmlBody(page, page.content);
   return {
     filename: `${safeTitle}.html`,
-    content: await renderExportHtml(safeTitle, bodyHtml, !page.localFilePath),
+    content: await renderExportHtml(safeTitle, bodyHtml, !selectedOnly && !page.localFilePath),
   };
 }
 
@@ -121,12 +136,13 @@ export async function buildSinglePageExport(
   page: Page,
   format: SinglePageExportFormat,
   pdfBlob?: Blob,
+  selectedBlocks?: BlockNoteContent,
 ): Promise<{ blob: Blob; filename: string }> {
   const rawTitle = getPageTitle(page) || "untitled";
   const safeTitle = sanitizeFileName(rawTitle);
 
-  if (!pageHasLocalSidecarAttachments(page.content)) {
-    return buildPlainExport(page, format, rawTitle, pdfBlob);
+  if (!pageHasLocalSidecarAttachments(selectedBlocks ?? page.content)) {
+    return buildPlainExport(page, format, rawTitle, pdfBlob, selectedBlocks);
   }
 
   const { default: JSZip } = await import("jszip");
@@ -135,7 +151,7 @@ export async function buildSinglePageExport(
   if (!assetsFolder) throw new Error("无法创建附件目录");
 
   const pageClone = structuredClone(page) as Page;
-  pageClone.content = cloneExportBlocks(pageClone.content, {
+  pageClone.content = cloneExportBlocks(selectedBlocks ?? pageClone.content, {
     ensureFirstTitle: !page.localFilePath,
   });
   await extractImagesFromContent(
@@ -148,7 +164,9 @@ export async function buildSinglePageExport(
     page.localFilePath,
   );
 
-  const main = await buildMainFile(pageClone, format, safeTitle, pdfBlob);
+  const main = await buildMainFile(
+    pageClone, format, safeTitle, pdfBlob, Boolean(selectedBlocks),
+  );
   zip.file(main.filename, main.content);
   return {
     blob: await zip.generateAsync({ type: "blob" }),

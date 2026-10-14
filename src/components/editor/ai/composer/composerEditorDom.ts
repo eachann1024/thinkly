@@ -163,3 +163,33 @@ export function insertComposerLineBreak(editor: HTMLElement): boolean {
   selection.addRange(nextRange);
   return finish(true);
 }
+
+/** Paste as one text node: Chromium's rich HTML paste can replace adjacent chip text. */
+export function insertComposerPlainText(editor: HTMLElement, text: string): boolean {
+  const selection = window.getSelection();
+  if (!selection) return false;
+  const current = selection.rangeCount ? selection.getRangeAt(0) : null;
+  const inside = current &&
+    editor.contains(current.startContainer) &&
+    editor.contains(current.endContainer);
+  const range = inside ? current : document.createRange();
+  const startElement = range.startContainer.nodeType === Node.ELEMENT_NODE
+    ? range.startContainer as Element
+    : range.startContainer.parentElement;
+  const chip = startElement?.closest('[contenteditable="false"]');
+  if (inside && range.collapsed && chip && editor.contains(chip)) {
+    range.setStartAfter(chip);
+    range.collapse(true);
+  } else if (!inside) {
+    range.selectNodeContents(editor);
+    range.collapse(false);
+  }
+  range.deleteContents();
+  const node = document.createTextNode(text);
+  range.insertNode(node);
+  range.setStartAfter(node);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  return true;
+}

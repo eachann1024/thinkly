@@ -31,6 +31,97 @@ export const BOOLEAN_MARK_NAMES = [
 ] as const;
 export type BooleanMarkName = (typeof BOOLEAN_MARK_NAMES)[number];
 
+export type TextRange = { from: number; to: number };
+
+/**
+ * 折叠光标所在文本行（文本块）的内容区间。
+ * 空行、代码块 / 媒体等不可格式化块返回 null，调用方回退到光标处的存储样式。
+ */
+export function getCollapsedLineRange(state: {
+  selection: Selection;
+}): TextRange | null {
+  const { selection } = state;
+  if (!selection.empty || !(selection instanceof TextSelection)) return null;
+  const $pos = selection.$from;
+  const parent = $pos.parent;
+  if (!parent.isTextblock || parent.content.size === 0) return null;
+  for (let d = $pos.depth; d > 0; d -= 1) {
+    if (NON_FORMATTABLE_TYPES.has($pos.node(d).type.name)) return null;
+  }
+  return { from: $pos.start(), to: $pos.end() };
+}
+
+/** 格式操作的目标区间：有选区用选区，折叠光标用整行。 */
+export function resolveFormattingRange(state: {
+  selection: Selection;
+}): TextRange | null {
+  const { selection } = state;
+  if (!selection.empty) return { from: selection.from, to: selection.to };
+  return getCollapsedLineRange(state);
+}
+
+/** 折叠光标时把选区扩到整行；返回是否发生了扩展。 */
+export function expandCollapsedSelectionToLine(
+  editor: BlockNoteEditor<any, any, any>,
+): boolean {
+  const range = getCollapsedLineRange(editor.prosemirrorState);
+  if (!range) return false;
+  return restoreTextSelectionRange(editor, range);
+}
+
+function readRangeMarkStates(
+  doc: any,
+  range: TextRange,
+): Record<BooleanMarkName, boolean> {
+  const counts: Record<BooleanMarkName, { with: number; total: number }> = {
+    bold: { with: 0, total: 0 },
+    italic: { with: 0, total: 0 },
+    strike: { with: 0, total: 0 },
+    underline: { with: 0, total: 0 },
+    code: { with: 0, total: 0 },
+  };
+
+  doc.nodesBetween(range.from, range.to, (node: any) => {
+    if (!node.isText) return true;
+    for (const name of BOOLEAN_MARK_NAMES) {
+      counts[name].total += 1;
+      if (node.marks.some((m: any) => m.type.name === name)) {
+        counts[name].with += 1;
+      }
+    }
+    return false;
+  });
+
+  const result = {} as Record<BooleanMarkName, boolean>;
+  for (const name of BOOLEAN_MARK_NAMES) {
+    result[name] =
+      counts[name].total > 0 && counts[name].with === counts[name].total;
+  }
+  return result;
+}
+
+/**
+ * 选区（折叠光标时为整行）上各行内样式是否全覆盖。
+ * 光标带存储样式（刚按 Mod+B 还没输入）时以存储样式为准。
+ */
+export function getSelectionMarkStates(state: {
+  selection: Selection;
+  doc: any;
+  storedMarks?: readonly any[] | null;
+}): Record<BooleanMarkName, boolean> {
+  const { selection, doc } = state;
+  const storedMarks = selection.empty ? state.storedMarks : null;
+  const range = storedMarks ? null : resolveFormattingRange(state);
+  if (range) return readRangeMarkStates(doc, range);
+
+  const marks = storedMarks ?? selection.$to.marks();
+  const result = {} as Record<BooleanMarkName, boolean>;
+  for (const name of BOOLEAN_MARK_NAMES) {
+    result[name] = marks.some((m: any) => m.type.name === name);
+  }
+  return result;
+}
+
 /**
  * Walk the selection so partial-coverage marks register as inactive.
  * BlockNote's useActiveStyles() only inspects selection.$to which misses ranges.
@@ -38,52 +129,28 @@ export type BooleanMarkName = (typeof BOOLEAN_MARK_NAMES)[number];
 export function useSelectionMarkStates(editor: BlockNoteEditor<any, any, any>) {
   return useEditorState({
     editor,
-    selector: ({ editor }) => {
-      const { selection, doc } = editor.prosemirrorState;
-      const from = selection.from;
-      const to = selection.to;
+    selector: ({ editor }) => getSelectionMarkStates(editor.prosemirrorState),
+  });
+}
 
-      const result: Record<BooleanMarkName, boolean> = {
-        bold: false,
-        italic: false,
-        strike: false,
-        underline: false,
-        code: false,
-      };
-
-      if (from === to) {
-        const marks = selection.$to.marks();
-        for (const name of BOOLEAN_MARK_NAMES) {
-          result[name] = marks.some((m: any) => m.type.name === name);
-        }
-        return result;
-      }
-
-      const counts: Record<BooleanMarkName, { with: number; total: number }> = {
-        bold: { with: 0, total: 0 },
-        italic: { with: 0, total: 0 },
-        strike: { with: 0, total: 0 },
-        underline: { with: 0, total: 0 },
-        code: { with: 0, total: 0 },
-      };
-
-      doc.nodesBetween(from, to, (node: any) => {
-        if (!node.isText) return true;
-        for (const name of BOOLEAN_MARK_NAMES) {
-          counts[name].total += 1;
-          if (node.marks.some((m: any) => m.type.name === name)) {
-            counts[name].with += 1;
-          }
-        }
-        return false;
-      });
-
-      for (const name of BOOLEAN_MARK_NAMES) {
-        result[name] =
-          counts[name].total > 0 && counts[name].with === counts[name].total;
-      }
-      return result;
-    },
+/**
+ * 按工具栏显示的按下态切换行内样式：部分覆盖视为未开启，点击后整段补齐。
+ * 折叠光标落在有字的行内时作用于整行，光标位置保持不变。
+ */
+export function toggleSelectionMark(
+  editor: BlockNoteEditor<any, any, any>,
+  name: BooleanMarkName,
+): void {
+  const state = editor.prosemirrorState;
+  const range = resolveFormattingRange(state);
+  if (!range) {
+    editor.toggleStyles({ [name]: true } as any);
+    return;
+  }
+  const active = readRangeMarkStates(state.doc, range)[name];
+  withPreservedSelection(editor, () => {
+    if (active) editor.removeStyles({ [name]: true } as any);
+    else editor.addStyles({ [name]: true } as any);
   });
 }
 
@@ -791,6 +858,40 @@ export function getFormattingToolbarCapabilities(
 }
 
 /**
+ * 固定工具栏常驻显示：折叠光标也视为「当前行」选区，按光标所在块决定可用项。
+ * 代码块、媒体等不可格式化块内全部返回不可用，由工具栏置灰而非隐藏。
+ */
+export function getFixedFormattingToolbarCapabilities(
+  editor: BlockNoteEditor<any, any, any>,
+  options?: { isInHeading?: boolean },
+): FormattingToolbarCapabilities {
+  const caps = getFormattingToolbarCapabilities(editor, options);
+  if (caps.mode !== "none") return caps;
+
+  const state = editor.prosemirrorState;
+  const { selection } = state;
+  if (
+    !selection.empty ||
+    !selection.$from.parent.isTextblock ||
+    selectionHasNonFormattableBlock(editor)
+  ) {
+    return caps;
+  }
+
+  const hasLineText = getCollapsedLineRange(state) != null;
+  return {
+    mode: selectionTouchesTable(selection) ? "cellText" : "singleBlock",
+    showMarks: !options?.isInHeading,
+    showColors: true,
+    showLink: hasLineText,
+    showAlign: canShowAlign(editor),
+    showAi: hasLineText,
+    showClear: true,
+    textAlignment: caps.textAlignment,
+  };
+}
+
+/**
  * Apply text alignment to the current selection.
  * Follows BlockNote TextAlignButton: block props for paragraphs, cell props for tables.
  */
@@ -902,6 +1003,7 @@ export function withPreservedSelection(
   } catch {
     /* ignore */
   }
+  expandCollapsedSelectionToLine(editor);
   apply();
   restoreSelectionAfterFormat(editor, snapshot);
 }

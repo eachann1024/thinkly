@@ -3,6 +3,7 @@ import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { toggleSelectionMark } from "../helpers";
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -30,7 +31,7 @@ export function MarkGroup({
           <Toggle
             size="sm"
             pressed={isBold}
-            onPressedChange={() => editor.toggleStyles({ bold: true })}
+            onPressedChange={() => toggleSelectionMark(editor, "bold")}
             aria-label="粗体"
             className={ITEM_CLASS}
           >
@@ -45,7 +46,7 @@ export function MarkGroup({
           <Toggle
             size="sm"
             pressed={isItalic}
-            onPressedChange={() => editor.toggleStyles({ italic: true })}
+            onPressedChange={() => toggleSelectionMark(editor, "italic")}
             aria-label="斜体"
             className={ITEM_CLASS}
           >
@@ -60,7 +61,7 @@ export function MarkGroup({
           <Toggle
             size="sm"
             pressed={isStrike}
-            onPressedChange={() => editor.toggleStyles({ strike: true })}
+            onPressedChange={() => toggleSelectionMark(editor, "strike")}
             aria-label="删除线"
             className={ITEM_CLASS}
           >

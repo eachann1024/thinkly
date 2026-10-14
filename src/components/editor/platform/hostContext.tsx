@@ -20,6 +20,7 @@ import type {
 } from "@/components/editor/ai/composer/referenceLookup";
 import type { EditorPlatform } from "./types";
 import type { OpenExternalResourceResult } from "@/components/editor/utils/openResourceExternally";
+import type { FormattingToolbarMode } from "@/components/editor/toolbars/formatting/toolbarMode";
 
 export interface EditorFontConfig {
   label: string | null;
@@ -98,6 +99,8 @@ export interface EditorSettings {
   /** true 使用应用内灯箱；false 优先调用系统默认图片查看器。 */
   useInternalImageViewer: boolean;
   features: EditorFeaturePolicy;
+  /** 格式工具栏：跟随选区浮动，或固定在窗格顶部（需宿主提供顶部插槽）。 */
+  formattingToolbarMode?: FormattingToolbarMode;
   /** 宿主提供的自定义动作跳转能力；不支持的宿主可不传。 */
   redirectAction?: (
     label: string | [string, string],

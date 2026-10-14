@@ -54,6 +54,9 @@ function pointInElement(
 function PageExportSubmenu({
   enabled,
   viewportHeight,
+  hasSelection,
+  selectedOnly,
+  onSelectedOnlyChange,
   onExportMarkdown,
   onExportHtml,
   onExportWord,
@@ -61,6 +64,9 @@ function PageExportSubmenu({
 }: {
   enabled: boolean;
   viewportHeight: number;
+  hasSelection: boolean;
+  selectedOnly: boolean;
+  onSelectedOnlyChange: (checked: boolean) => void;
   onExportMarkdown: () => void;
   onExportHtml: () => void;
   onExportWord: () => void;
@@ -213,6 +219,18 @@ function PageExportSubmenu({
         }}
       >
         <div role="menu" aria-label="导出">
+          {hasSelection && (
+            <button
+              type="button"
+              role="menuitemcheckbox"
+              aria-checked={selectedOnly}
+              className={itemClass}
+              onClick={() => onSelectedOnlyChange(!selectedOnly)}
+            >
+              {selectedOnly ? <LucideIcons.Check className="h-3.5 w-3.5" /> : <span />}
+              <span className="min-w-0 truncate">仅导出选中内容</span>
+            </button>
+          )}
           <button
             type="button"
             role="menuitem"
@@ -278,6 +296,7 @@ export function PageMenu() {
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
+  const [selectedOnly, setSelectedOnly] = useState(false);
   const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const isLocalItem = Boolean(page?.localFilePath);
   const { openTabs, activeTabId } = useTabs();
@@ -402,7 +421,7 @@ export function PageMenu() {
       <Popover
         onOpenChange={(open) => {
           setPageMenuOpen(open);
-          if (open) captureSelectedBlocks();
+          if (open) setSelectedOnly(captureSelectedBlocks().length > 0);
         }}
       >
         <PopoverTrigger asChild>
@@ -488,7 +507,7 @@ export function PageMenu() {
             <div className="px-2 pb-1 text-[10px] font-medium tracking-[0.08em] text-muted-foreground">
               页面状态
             </div>
-            <div className="grid grid-cols-3 gap-1 px-1 pb-0.5">
+            <div className="grid grid-cols-2 gap-1 px-1 pb-0.5">
               <button
                 type="button"
                 aria-pressed={page.isFavorite}
@@ -645,12 +664,15 @@ export function PageMenu() {
             <PageExportSubmenu
               enabled={pageMenuOpen}
               viewportHeight={viewport.height}
+              hasSelection={selectedBlocks.length > 0}
+              selectedOnly={selectedOnly}
+              onSelectedOnlyChange={setSelectedOnly}
               onExportMarkdown={() =>
-                runExport("Markdown", () => exportToMarkdown(page))
+                runExport("Markdown", () => exportToMarkdown(page, selectedOnly ? selectedBlocksRef.current : undefined))
               }
-              onExportHtml={() => runExport("HTML", () => exportToHTML(page))}
-              onExportWord={() => runExport("Word", () => exportToWord(page))}
-              onExportPdf={() => runExport("PDF", () => exportToPDF(page))}
+              onExportHtml={() => runExport("HTML", () => exportToHTML(page, selectedOnly ? selectedBlocksRef.current : undefined))}
+              onExportWord={() => runExport("Word", () => exportToWord(page, selectedOnly ? selectedBlocksRef.current : undefined))}
+              onExportPdf={() => runExport("PDF", () => exportToPDF(page, undefined, selectedOnly ? selectedBlocksRef.current : undefined))}
             />
 
             <PopoverAction

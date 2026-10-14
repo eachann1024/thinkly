@@ -1,4 +1,5 @@
 import { expect, test } from "playwright/test";
+import { parseHTML } from "linkedom";
 import {
   isDuplicateCompositionEndChange,
   isImeKeyboardEvent,
@@ -10,6 +11,20 @@ import {
   shouldProcessComposerInput,
 } from "../../src/components/editor/ai/composer/AiComposerInput";
 import { parseSlashCommandBeforeCaret } from "../../src/components/editor/ai/composer/useSkillCommands";
+import { createChipElement } from "../../src/components/editor/ai/composer/useReferenceMentions";
+
+test("AI 引用标签有可操作的移除按钮", () => {
+  const original = globalThis.document;
+  Object.assign(globalThis, { document: parseHTML("<html><body></body></html>").document });
+  try {
+    const chip = createChipElement({ pageId: "linux", titleSnapshot: "linux" } as Parameters<typeof createChipElement>[0]);
+    const remove = chip.querySelector<HTMLButtonElement>("[data-ai-mention-remove]");
+    expect(remove?.getAttribute("aria-label")).toBe("移除引用 linux");
+    expect(remove?.type).toBe("button");
+  } finally {
+    Object.assign(globalThis, { document: original });
+  }
+});
 
 test("IME keyboard detection covers modern and legacy Chromium events", () => {
   expect(isImeKeyboardEvent({ isComposing: true })).toBe(true);

@@ -19,6 +19,11 @@ import type { CardThemeId } from "@/lib/imageExport/themes";
 import { normalizeLocalFontName } from "@/lib/fontLoader";
 import type { WatermarkConfig } from "@/lib/imageExport/watermark";
 import {
+  DEFAULT_FORMATTING_TOOLBAR_MODE,
+  normalizeFormattingToolbarMode,
+  type FormattingToolbarMode,
+} from "@/components/editor/toolbars/formatting/toolbarMode";
+import {
   DEFAULT_WATERMARK_CONFIG,
   normalizeWatermarkConfig,
 } from "@/lib/imageExport/watermark";
@@ -28,6 +33,8 @@ export interface AppearanceSliceState {
   accentColor: AccentColor;
   codeStyle: CodeStyle;
   defaultCodeBlockWrap: boolean;
+  /** 格式工具栏：跟随选区浮动，或固定在编辑区顶部的三种样式之一。 */
+  formattingToolbarMode: FormattingToolbarMode;
   customFonts: CustomFonts;
   uiFontFamily: string | null;
   sidebarFontFamily: string | null;
@@ -55,6 +62,7 @@ export interface AppearanceSliceActions {
   toggleDarkMode: () => void;
   setCodeStyle: (style: CodeStyle) => void;
   setDefaultCodeBlockWrap: (enabled: boolean) => void;
+  setFormattingToolbarMode: (mode: FormattingToolbarMode) => void;
   setCustomLabel: (
     type: "default" | "serif" | "mono",
     label: string | null,
@@ -92,6 +100,7 @@ export const APPEARANCE_INITIAL_STATE: AppearanceSliceState = {
   accentColor: DEFAULT_ACCENT_COLOR,
   codeStyle: "github",
   defaultCodeBlockWrap: false,
+  formattingToolbarMode: DEFAULT_FORMATTING_TOOLBAR_MODE,
   customFonts: {
     default: { label: null, font: null },
     serif: { label: null, font: null },
@@ -155,6 +164,8 @@ export function createAppearanceSlice(
     },
     setDefaultCodeBlockWrap: (defaultCodeBlockWrap) =>
       set({ defaultCodeBlockWrap }),
+    setFormattingToolbarMode: (mode) =>
+      set({ formattingToolbarMode: normalizeFormattingToolbarMode(mode) }),
     setCustomLabel: (type, label) =>
       set((state) => ({
         customFonts: {

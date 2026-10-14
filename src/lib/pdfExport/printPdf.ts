@@ -166,11 +166,14 @@ done();
 export async function buildPagePrintHtml(
   page: Page,
   blocks: BlockNoteContent,
+  selectedOnly = false,
 ): Promise<string> {
   const titled = getPageTitle(page) || "untitled";
   const printBlocks = toPrintMediaPlaceholders(blocks);
-  const bodyHtml = await buildExportHtmlBody(page, printBlocks);
-  return renderPrintHtml(titled, bodyHtml, !page.localFilePath);
+  const bodyHtml = selectedOnly
+    ? (await import("@/lib/export/blocksToEditorHtml")).blocksToEditorHtml(printBlocks)
+    : await buildExportHtmlBody(page, printBlocks);
+  return renderPrintHtml(titled, bodyHtml, !selectedOnly && !page.localFilePath);
 }
 
 function pdfBase64ToBlob(base64: string): Blob {
@@ -188,11 +191,12 @@ function pdfBase64ToBlob(base64: string): Blob {
 export async function exportPageViaPrintToPdf(
   page: Page,
   blocks: BlockNoteContent,
+  selectedOnly = false,
 ): Promise<Blob> {
   if (!canPrintToPdf()) {
     throw new Error("printToPDF 不可用");
   }
-  const html = await buildPagePrintHtml(page, blocks);
+  const html = await buildPagePrintHtml(page, blocks, selectedOnly);
   const gfs = window.gooseFs as (GooseFs & {
     printHtmlToPdf?: (html: string) => Promise<string | null>;
   }) | undefined;

@@ -37,6 +37,11 @@ import {
 } from "@/components/editor/toolbars/formatting";
 import { FixedFormattingToolbarController } from "@/components/editor/toolbars/formatting/FixedFormattingToolbarController";
 import { GooseFormattingToolbarController } from "@/components/editor/toolbars/formatting/GooseFormattingToolbarController";
+import { TopFormattingToolbarController } from "@/components/editor/toolbars/formatting/TopFormattingToolbarController";
+import {
+  DEFAULT_FORMATTING_TOOLBAR_MODE,
+  isFixedFormattingToolbarMode,
+} from "@/components/editor/toolbars/formatting/toolbarMode";
 import {
   getFormattingSelectionMode,
   isFormattingToolbarOpen,
@@ -186,7 +191,10 @@ export function EditorComposer({
   const [findSeedQuery, setFindSeedQuery] = useState("");
   const [findOpenNonce, setFindOpenNonce] = useState(0);
   const [findOpenReplace, setFindOpenReplace] = useState(false);
-  const { ai: aiSettings } = useEditorSettings();
+  const {
+    ai: aiSettings,
+    formattingToolbarMode = DEFAULT_FORMATTING_TOOLBAR_MODE,
+  } = useEditorSettings();
   const { onPromotePreview, searchPages } = useEditorPageContext();
   const getMentionItems = useCallback(
     async (query: string) =>
@@ -656,6 +664,11 @@ export function EditorComposer({
             <FixedFormattingToolbarController
               formattingToolbar={EditorFormattingToolbar}
               open={formattingToolbarOpen}
+            />
+          ) : isFixedFormattingToolbarMode(formattingToolbarMode) ? (
+            <TopFormattingToolbarController
+              variant={formattingToolbarMode}
+              editorContainerRef={editorContainerRef}
             />
           ) : (
             <GooseFormattingToolbarController

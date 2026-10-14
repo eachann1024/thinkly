@@ -15,6 +15,7 @@ import { SettingsSectionCard } from "./settings/SettingsSectionCard";
 import { isLocalFontAvailable } from "@/lib/fontLoader";
 import { ReadingPreferences } from "../ReadingPreferences";
 import { AppearanceEditorPreview } from "./AppearanceEditorPreview";
+import type { FormattingToolbarMode } from "@/components/editor/toolbars/formatting/toolbarMode";
 
 interface SettingsAppearanceProps {
   theme: "light" | "dark" | "system";
@@ -755,8 +756,117 @@ export function SettingsAppearance({
         </SettingsSectionCard>
 
         <EditorLayoutSettings />
+        <FormattingToolbarSettings />
       </div>
     </div>
+  );
+}
+
+const FORMATTING_TOOLBAR_OPTIONS: {
+  value: FormattingToolbarMode;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "top-bar",
+    label: "顶部通栏",
+    description: "铺满编辑区顶部，带分隔线",
+  },
+  {
+    value: "floating",
+    label: "跟随选区",
+    description: "选中文字时在上方浮出",
+  },
+  {
+    value: "top-minimal",
+    label: "顶部极简",
+    description: "无底无框的图标行",
+  },
+];
+
+function ToolbarPreviewIcons({ count = 6 }: { count?: number }) {
+  return (
+    <>
+      {Array.from({ length: count }, (_, index) => (
+        <span key={index} className="h-1.5 w-1.5 shrink-0 rounded-[2px] bg-current/45" />
+      ))}
+    </>
+  );
+}
+
+function FormattingToolbarPreview({ mode }: { mode: FormattingToolbarMode }) {
+  const lines = (
+    <span className="flex flex-col gap-1.5 px-2 pt-1.5">
+      <span className="h-1 w-1/2 rounded bg-current/30" />
+      <span className="h-1 w-full rounded bg-current/20" />
+      <span className="h-1 w-4/5 rounded bg-current/20" />
+    </span>
+  );
+  return (
+    <span
+      aria-hidden="true"
+      className="relative flex h-16 w-full flex-col overflow-hidden rounded-md border border-current/20 bg-background/50"
+    >
+      {mode === "top-bar" && (
+        <span className="flex h-3.5 shrink-0 items-center gap-1 border-b border-current/20 px-1.5">
+          <ToolbarPreviewIcons count={8} />
+        </span>
+      )}
+      {mode === "top-minimal" && (
+        <span className="flex h-3 shrink-0 items-center gap-1 px-2 pt-1 opacity-70">
+          <ToolbarPreviewIcons count={7} />
+        </span>
+      )}
+      {lines}
+      {mode === "floating" && (
+        <span className="absolute left-1/2 top-[22px] flex h-3 -translate-x-1/2 items-center gap-1 rounded-[4px] border border-current/25 bg-background px-1">
+          <ToolbarPreviewIcons count={5} />
+        </span>
+      )}
+    </span>
+  );
+}
+
+function FormattingToolbarSettings() {
+  const mode = useSettings((state) => state.formattingToolbarMode);
+  const setMode = useSettings((state) => state.setFormattingToolbarMode);
+  return (
+    <SettingsSectionCard
+      title="格式工具栏"
+      description="固定在顶部时常驻显示并随光标高亮当前格式；不选中文字直接点按，会作用于光标所在整行。"
+    >
+      <div
+        role="radiogroup"
+        aria-label="格式工具栏位置"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+      >
+        {FORMATTING_TOOLBAR_OPTIONS.map(({ value, label, description }) => (
+          <SelectableCard
+            key={value}
+            type="button"
+            role="radio"
+            selected={mode === value}
+            aria-checked={mode === value}
+            onClick={() => setMode(value)}
+            className={cn(
+              "flex flex-col gap-3 p-3",
+              mode === value
+                ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                : "bg-[hsl(var(--goose-selected-bg)/0.48)] hover:bg-[var(--goose-interactive-hover)] dark:bg-[hsl(var(--foreground)/0.08)]",
+            )}
+          >
+            <FormattingToolbarPreview mode={value} />
+            <span className="flex w-full items-center justify-between text-sm font-medium">
+              {label}
+              {mode === value && (
+                <LucideIcons.Check className="h-4 w-4" aria-hidden="true" />
+              )}
+            </span>
+            <span className="text-xs text-muted-foreground">{description}</span>
+          </SelectableCard>
+        ))}
+      </div>
+    </SettingsSectionCard>
   );
 }
 

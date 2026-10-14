@@ -5,6 +5,7 @@ import { localStorageAdapter } from "@/lib/storage";
 import { applyAccentColor, syncAccentColorCssVars } from "@/lib/accentColor";
 import { normalizeCardThemeId } from "@/lib/imageExport/themes";
 import { normalizeLocalFontName } from "@/lib/fontLoader";
+import { normalizeFormattingToolbarMode } from "@/components/editor/toolbars/formatting/toolbarMode";
 
 import type {
   Theme,
@@ -180,6 +181,14 @@ export const useSettings = create<SettingsState>()(
         }
         if (state && typeof state.defaultCodeBlockWrap !== "boolean") {
           useSettings.setState({ defaultCodeBlockWrap: false });
+        }
+        if (state) {
+          const formattingToolbarMode = normalizeFormattingToolbarMode(
+            state.formattingToolbarMode,
+          );
+          if (state.formattingToolbarMode !== formattingToolbarMode) {
+            useSettings.setState({ formattingToolbarMode });
+          }
         }
         if (state && typeof state.randomIconOnCreate !== "boolean") {
           useSettings.setState({ randomIconOnCreate: false });

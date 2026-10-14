@@ -113,7 +113,22 @@ export function createChipElement(
     "ai-composer-chip inline-flex items-center justify-center rounded text-[11px] font-medium" +
     " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +
     " cursor-pointer hover:bg-[var(--goose-interactive-hover)] select-none";
-  span.textContent = `@${attrs.titleSnapshot}`;
+  const label = document.createElement("span");
+  label.dataset.aiMentionLabel = "true";
+  label.textContent = `@${attrs.titleSnapshot}`;
+  span.appendChild(label);
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.dataset.aiMentionRemove = "true";
+  remove.setAttribute("aria-label", `移除引用 ${attrs.titleSnapshot}`);
+  remove.title = `移除 ${attrs.titleSnapshot}`;
+  remove.className =
+    "ai-composer-chip-remove ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] cursor-pointer" +
+    " text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] focus-visible:outline focus-visible:outline-2";
+  remove.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  span.appendChild(remove);
   return span;
 }
 

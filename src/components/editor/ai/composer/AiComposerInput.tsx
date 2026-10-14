@@ -53,6 +53,7 @@ import {
   shouldProcessComposerInput,
 } from "./composerInputGuards";
 import {
+  COMPOSER_CHIP_SELECTOR,
   cleanupOrphanComposerZwspNodes,
   editorHasComposerChips,
   getComposerChipAfterCaret,
@@ -75,12 +76,9 @@ import {
   buildJsonContentFromTokens,
   buildPayloadFromTokens,
   isComposerPayloadEmpty,
-  inspectDefaultComposerTokens,
-  buildComposerDraftFromReference,
   readTokensFromDom,
-  setDomFromJsonContent,
 } from "./composerTokens";
-import { insertComposerLineBreak } from "./composerEditorDom";
+import { insertComposerLineBreak, insertComposerPlainText } from "./composerEditorDom";
 import {
   type AiComposerInputHandle,
   type AiComposerInputProps,
@@ -159,9 +157,7 @@ export const AiComposerInput = forwardRef<
     /** 标准 composition 标记 */
     const isComposingRef = useRef(false);
     const isEmptyRef = useRef(!composerDraftHasContent(initialContent));
-    // Track the most recent content we emitted upward so we can ignore the echo
-    // back via `initialContent` — otherwise the sync useEffect rebuilds the DOM
-    // on every keystroke, invalidating the live selection and any cached ranges.
+    // ponytail: seed 只在挂载时水合；若需外部替换草稿，用 Composer 的 key 重挂，不能在输入中途回灌。
     const lastEmittedContentRef = useRef<JSONContent | null | undefined>(
       initialContent,
     );
@@ -265,6 +261,22 @@ export const AiComposerInput = forwardRef<
       lastEmittedContentRef.current = nextContent;
       onContentChange?.(nextContent);
     }, [onContentChange, syncEmptyState, gcStaleImages]);
+
+    const removeChip = useCallback((chip: HTMLElement) => {
+      const el = editorRef.current;
+      if (!el?.contains(chip)) return;
+      const caret = document.createRange();
+      caret.setStartBefore(chip);
+      caret.collapse(true);
+      chip.remove();
+      cleanupOrphanComposerZwspNodes(el);
+      el.focus();
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(caret);
+      setPlaceholderVisible(isEditorDomEmpty(el));
+      emitCurrentContent();
+    }, [emitCurrentContent, setPlaceholderVisible]);
 
     const {
       mention,
@@ -379,7 +391,11 @@ export const AiComposerInput = forwardRef<
               attrs.localFilePath === current.localFilePath) continue;
           const next = { ...attrs, ...current };
           chip.dataset.aiMentionAttrs = JSON.stringify(next);
-          chip.textContent = `@${next.titleSnapshot}`;
+          const label = chip.querySelector<HTMLElement>("[data-ai-mention-label]");
+          if (label) label.textContent = `@${next.titleSnapshot}`;
+          const remove = chip.querySelector<HTMLElement>("[data-ai-mention-remove]");
+          remove?.setAttribute("aria-label", `移除引用 ${next.titleSnapshot}`);
+          if (remove) remove.title = `移除 ${next.titleSnapshot}`;
           changed = true;
         } catch {
           // 破损的旧 chip 交由原有解析逻辑处理。
@@ -450,27 +466,6 @@ export const AiComposerInput = forwardRef<
       [emitCurrentContent],
     );
 
-    const replaceDefaultPageReference = useCallback(
-      (reference: AiFileReferenceAttrs): "applied" | "already" | "skipped" => {
-        const el = editorRef.current;
-        if (!el) return "skipped";
-
-        const { replaceable, solePageId } = inspectDefaultComposerTokens(
-          readTokensFromDom(el),
-        );
-        if (!replaceable) return "skipped";
-        if (solePageId === reference.pageId) return "already";
-
-        const next = buildComposerDraftFromReference(reference);
-        setDomFromJsonContent(el, next, imageRegistryRef.current);
-        const chip = el.querySelector("[data-ai-mention-attrs]");
-        if (chip) placeCaretAfterNode(chip);
-        emitCurrentContent();
-        return "applied";
-      },
-      [emitCurrentContent],
-    );
-
     useImperativeHandle(
       ref,
       () => ({
@@ -528,7 +523,6 @@ export const AiComposerInput = forwardRef<
         insertImages,
         insertReference,
         appendSelectionQuote,
-        replaceDefaultPageReference,
       }),
       [
         clearMentionState,
@@ -541,30 +535,10 @@ export const AiComposerInput = forwardRef<
         insertImages,
         insertReference,
         appendSelectionQuote,
-        replaceDefaultPageReference,
         syncReferenceTitles,
         setPlaceholderVisible,
       ],
     );
-
-    // ── sync initialContent → DOM ────────────────────────────────────────────
-
-    useEffect(() => {
-      // Skip the echo of our own emission — the DOM is already up to date and
-      // rebuilding it would wipe the live text node our cached range points at.
-      if (initialContent === lastEmittedContentRef.current) return;
-      lastEmittedContentRef.current = initialContent;
-      const el = editorRef.current;
-      if (!el) return;
-      setDomFromJsonContent(el, initialContent, imageRegistryRef.current);
-      syncReferenceTitles();
-      const tokens = readTokensFromDom(el);
-      const empty = isComposerPayloadEmpty(buildPayloadFromTokens(tokens));
-      isEmptyRef.current = empty;
-      setIsEmpty(empty);
-      onIsEmptyChange?.(empty);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialContent, syncReferenceTitles]);
 
     // ── auto-focus ───────────────────────────────────────────────────────────
 
@@ -634,6 +608,7 @@ export const AiComposerInput = forwardRef<
           el.innerHTML = "";
           placeCaretInEditor(el, true);
           setPlaceholderVisible(true);
+          emitCurrentContent();
           scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
           return;
         }
@@ -648,26 +623,21 @@ export const AiComposerInput = forwardRef<
           }
           cleanupOrphanComposerZwspNodes(el);
           setPlaceholderVisible(isEditorDomEmpty(el));
+          if (isEditorDomEmpty(el)) emitCurrentContent();
           scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
           return;
         }
 
         if (action === "remove-chip-before" && chipBefore) {
-          chipBefore.remove();
-          cleanupOrphanComposerZwspNodes(el);
-          setPlaceholderVisible(isEditorDomEmpty(el));
-          scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
+          removeChip(chipBefore);
           return;
         }
 
         if (action === "remove-chip-after" && chipAfter) {
-          chipAfter.remove();
-          cleanupOrphanComposerZwspNodes(el);
-          setPlaceholderVisible(isEditorDomEmpty(el));
-          scheduleFlush(COMPOSER_CHIP_DELETE_FLUSH_MS);
+          removeChip(chipAfter);
         }
       },
-      [imeSessionRef, scheduleFlush, setPlaceholderVisible],
+      [imeSessionRef, scheduleFlush, setPlaceholderVisible, emitCurrentContent, removeChip],
     );
 
     const handleInputNative = useCallback(
@@ -704,7 +674,7 @@ export const AiComposerInput = forwardRef<
           setPlaceholderVisible(true);
           clearMentionState();
           clearCommandState();
-          scheduleFlush(COMPOSER_DELETE_FLUSH_MS);
+          emitCurrentContent();
           return;
         }
         setPlaceholderVisible(false);
@@ -728,6 +698,7 @@ export const AiComposerInput = forwardRef<
         touchImeSession,
         clearMentionState,
         clearCommandState,
+        emitCurrentContent,
       ],
     );
 
@@ -749,6 +720,38 @@ export const AiComposerInput = forwardRef<
             event.preventDefault();
             onSubmit();
             return;
+          }
+        }
+
+        if (event.key === "Backspace" || event.key === "Delete") {
+          const el = editorRef.current;
+          const selection = window.getSelection();
+          const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+          if (el && range && editorHasComposerChips(el)) {
+            if (selectionCoversEntireEditor(el, range)) {
+              event.preventDefault();
+              el.replaceChildren();
+              placeCaretInEditor(el, true);
+              emitCurrentContent();
+              return;
+            }
+            const node = range.startContainer;
+            const element = node.nodeType === Node.ELEMENT_NODE
+              ? node as Element
+              : node.parentElement;
+            const selectedChip = range.collapsed
+              ? element?.closest<HTMLElement>(COMPOSER_CHIP_SELECTOR)
+              : null;
+            const chip = selectedChip && el.contains(selectedChip)
+              ? selectedChip
+              : event.key === "Backspace"
+                ? getComposerChipBeforeCaret(el, range)
+                : getComposerChipAfterCaret(el, range);
+            if (chip) {
+              event.preventDefault();
+              removeChip(chip);
+              return;
+            }
           }
         }
 
@@ -826,12 +829,22 @@ export const AiComposerInput = forwardRef<
         scheduleFlush,
         cancelFlushTimer,
         flushComposerSideEffects,
+        emitCurrentContent,
+        removeChip,
       ],
     );
 
     const handleClickNative = useCallback(
       (event: MouseEvent) => {
         const target = event.target as HTMLElement;
+        const removeMention = target.closest<HTMLElement>("[data-ai-mention-remove]");
+        if (removeMention) {
+          event.preventDefault();
+          event.stopPropagation();
+          const chip = removeMention.closest<HTMLElement>("[data-ai-mention-attrs]");
+          if (chip) removeChip(chip);
+          return;
+        }
         const removeBtn = target.closest<HTMLElement>("[data-ai-image-remove]");
         if (removeBtn) {
           event.preventDefault();
@@ -865,7 +878,7 @@ export const AiComposerInput = forwardRef<
           onOpenPage(mentionId);
         }
       },
-      [hideImagePreview, onOpenPage, removeImageChip, setImagePreviewContent],
+      [hideImagePreview, onOpenPage, removeImageChip, removeChip, setImagePreviewContent],
     );
 
     const handleBlurNative = useCallback(() => {
@@ -876,20 +889,28 @@ export const AiComposerInput = forwardRef<
       hideImagePreview();
     }, [endImeSession, handleMentionBlur, clearCommandState, hideImagePreview]);
 
-    /**
-     * 焦点在 contenteditable 内时粘贴：命令式节点不走 React 冒泡时 dock onPaste 可能丢。
-     * Mac 截图常只有 clipboardData.items，此处与 dock 共用 extractClipboardImageFiles。
-     */
+    /** 图片优先；文本只取纯文本，避免富文本默认插入改写 chip/已有草稿。 */
     const handlePasteNative = useCallback(
       (event: ClipboardEvent) => {
         if (disabled) return;
         const imageFiles = extractClipboardImageFiles(event.clipboardData);
-        if (imageFiles.length === 0) return;
+        if (imageFiles.length > 0) {
+          event.preventDefault();
+          event.stopPropagation();
+          insertImages(imageFiles);
+          return;
+        }
+        const text = event.clipboardData?.getData("text/plain");
+        const el = editorRef.current;
+        if (!text || !el) return;
+        // ponytail: 只处理带纯文本的剪贴板；HTML-only 留给浏览器，需富文本时另做归一化。
+        if (!insertComposerPlainText(el, text)) return;
         event.preventDefault();
         event.stopPropagation();
-        insertImages(imageFiles);
+        setPlaceholderVisible(false);
+        scheduleFlush(0);
       },
-      [disabled, insertImages],
+      [disabled, insertImages, scheduleFlush, setPlaceholderVisible],
     );
 
     // 始终指向最新 handler，mount 时只绑一次原生监听
