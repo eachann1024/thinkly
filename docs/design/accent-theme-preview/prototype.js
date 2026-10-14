@@ -4,7 +4,7 @@
   const all = (selector) => [...document.querySelectorAll(selector)];
   const query = new URLSearchParams(location.search);
   const notes = ["项目归档", "阅读笔记", "灵感手册", "今天的想法", "设计备忘录", "每周回顾", "工作记录"];
-  const state = { theme: window.accentThemes.find((theme) => theme.id === query.get("theme")) || window.accentThemes[0], dark: query.get("mode") === "dark", active: "设计备忘录", tabs: ["灵感手册", "阅读笔记", "设计备忘录"], nav: "local", count: 0 };
+  const state = { theme: window.accentThemes.find((theme) => theme.id === query.get("theme")) || window.accentThemes[0], dark: query.get("mode") === "dark", active: "设计备忘录", tabs: ["设计备忘录"], editingTitle: null, composing: false, nav: "local", count: 0 };
   const escape = (text) => text.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   const icon = (name) => `<i data-icon="${name}"></i>`;
   function syncURL() {
@@ -21,7 +21,7 @@
     $("#preview-state").textContent = `${state.theme.name} / ${state.dark ? "深色" : "浅色"} / ${tokens.accent.toUpperCase()}`;
     $("#token-summary").textContent = `${state.theme.name} · ${state.dark ? "深色" : "浅色"}应用现行值：强调实色固定来自列表边框；文字与焦点单独适配，不反向改动原色。`;
     const roles = [
-      ["accent", "强调实色 / 选中边框", "顶部、导航、列表边框"],
+      ["accent", "强调实色 / 选中边框", "多标签选中、名称编辑、导航与列表边框"],
       ["on-accent", "实色前景", "实色背景上的文字与图标，按对比度选深浅"],
       ["accent-text", "强调文字", "链接与弱背景上的图标，保持可读性"],
       ["selected", "选中弱背景", "保留原列表的柔和底色，不当作强调实色"],
@@ -36,13 +36,38 @@
   }
   function renderTabs(focusTitle) {
     $("#tabs").dataset.layout = state.tabs.length >= 4 ? "scroll" : state.tabs.length === 1 ? "fill" : "split";
-    $("#tabs").innerHTML = state.tabs.map((title, index) => `<div class="tab-slot" data-selected="${title === state.active}"><button id="note-tab-${index}" class="workspace-tab" role="tab" aria-controls="document-panel" aria-selected="${title === state.active}" tabindex="${title === state.active ? 0 : -1}" data-tab="${escape(title)}">${escape(title)}</button><button class="tab-close" tabindex="-1" aria-label="关闭${escape(title)}" data-close="${escape(title)}">${icon("x")}</button></div>`).join("");
+    const single = state.tabs.length === 1;
+    $("#tabs").innerHTML = state.tabs.map((title, index) => {
+      const editing = single && state.editingTitle === title;
+      const titleControl = editing
+        ? `<input id="note-tab-${index}" class="workspace-title-input" data-title-input aria-label="笔记标题" value="${escape(title)}" autocomplete="off" spellcheck="false">`
+        : `<button id="note-tab-${index}" class="workspace-tab" role="tab" aria-controls="document-panel" aria-selected="${title === state.active}" tabindex="${title === state.active ? 0 : -1}" data-tab="${escape(title)}" ${single ? 'aria-label="笔记标题" title="点击编辑笔记标题"' : ""}>${escape(title)}</button>`;
+      return `<div class="tab-slot" data-selected="${title === state.active}" ${single ? 'data-name-bar' : ""}>${titleControl}<button class="tab-close" tabindex="-1" aria-label="关闭${escape(title)}" data-close="${escape(title)}" ${editing ? "hidden" : ""}>${icon("x")}</button></div>`;
+    }).join("");
     const activeIndex = state.tabs.indexOf(state.active);
     $("#document-panel").setAttribute("aria-labelledby", `note-tab-${activeIndex}`);
     $("#document-title").textContent = state.active;
     $("#document-location").textContent = state.active;
     window.renderPreviewIcons();
     if (focusTitle) all("[data-tab]").find((tab) => tab.dataset.tab === focusTitle)?.focus();
+  }
+  function beginTitleEditing() {
+    state.editingTitle = state.active;
+    renderTabs();
+    $("[data-title-input]").focus();
+  }
+  function finishTitleEditing(save, moveToBody = false) {
+    const oldTitle = state.editingTitle;
+    if (oldTitle === null) return;
+    const nextTitle = save ? $("[data-title-input]").value.trim() || "未命名" : oldTitle;
+    state.editingTitle = null;
+    state.tabs = state.tabs.map((title) => title === oldTitle ? nextTitle : title);
+    const index = notes.indexOf(oldTitle);
+    if (index !== -1) notes[index] = nextTitle;
+    state.active = nextTitle;
+    renderTabs();
+    renderNotes();
+    if (moveToBody) $("#document-panel").focus();
   }
   function noteButton(title) {
     return `<button class="tree-row" data-note="${escape(title)}" ${title === state.active ? 'aria-current="page"' : ""}>${icon("file-text")}<span>${escape(title)}</span></button>`;
@@ -96,10 +121,18 @@
   $("#tabs").addEventListener("click", (event) => {
     const tab = event.target.closest("[data-tab]");
     const close = event.target.closest("[data-close]");
-    if (tab) openNote(tab.dataset.tab, true);
+    if (tab) { if (state.tabs.length === 1) beginTitleEditing(); else openNote(tab.dataset.tab, true); }
     if (close) closeNote(close.dataset.close);
   });
   $("#tabs").addEventListener("keydown", (event) => {
+    if (event.target.matches("[data-title-input]")) {
+      if (event.isComposing || state.composing) return;
+      if (event.key === "Enter" || event.key === "Escape") {
+        event.preventDefault();
+        finishTitleEditing(event.key === "Enter", event.key === "Enter");
+      }
+      return;
+    }
     if (!event.target.matches("[role=tab]")) return;
     if (event.key === "Delete") { event.preventDefault(); closeNote(event.target.dataset.tab); return; }
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -108,6 +141,11 @@
     const index = state.tabs.indexOf(event.target.dataset.tab);
     const next = event.key === "Home" ? 0 : event.key === "End" ? state.tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + state.tabs.length) % state.tabs.length;
     openNote(state.tabs[next], true);
+  });
+  $("#tabs").addEventListener("compositionstart", () => { state.composing = true; });
+  $("#tabs").addEventListener("compositionend", () => { state.composing = false; });
+  $("#tabs").addEventListener("focusout", (event) => {
+    if (event.target.matches("[data-title-input]") && !state.composing) finishTitleEditing(true);
   });
   document.addEventListener("click", (event) => {
     const note = event.target.closest("[data-note]");
