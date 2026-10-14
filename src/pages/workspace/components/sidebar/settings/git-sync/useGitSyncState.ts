@@ -10,7 +10,10 @@ export function useGitSyncState(bridge: GitSyncBridge | undefined, visible: bool
     if (!bridge || !visible) return;
     let mounted = true;
     const apply = (next: GitSyncState) => {
-      if (mounted) setState(next);
+      if (mounted) {
+        setState(next);
+        setLoadError("");
+      }
     };
     const unsubscribe = bridge.onState(apply);
     bridge
