@@ -9,6 +9,10 @@ import { toast } from "@/components/ui/sonner";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
+import { usePages } from "@/stores/usePages";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { DEFAULT_NOTEBOOK } from "@/stores/notebooks/types";
+import { importFile } from "@/lib/export";
 
 function captureEditorSelectedBlocks(): BlockNoteContent {
   return getEditorSelectedBlocksForExport(getActiveGooseNoteEditor());
@@ -38,6 +42,8 @@ export function usePageMenu() {
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
   const selectedBlocksRef = useRef<BlockNoteContent>([]);
+  const importPending = useRef(false);
+  const exportPending = useRef(false);
   const isLocalItem = Boolean(page?.localFilePath);
   const { openTabs, activeTabId } = useTabs();
   const activeTab = openTabs.find((tab) => tab.id === activeTabId);
@@ -58,6 +64,8 @@ export function usePageMenu() {
   }, []);
 
   const handleImport = async () => {
+    if (importPending.current) return;
+    importPending.current = true;
     try {
       const result = await importFile({
         preserveStructure: isLocalFolderNotebook,
@@ -114,17 +122,24 @@ export function usePageMenu() {
     } catch (error) {
       console.error("导入失败:", error);
       toast.error("导入失败，请检查文件后重试");
+    } finally {
+      importPending.current = false;
     }
   };
 
-  const runExport = (label: string, task: () => Promise<unknown>) => {
+  const runExport = (label: string, task: () => Promise<boolean>) => {
+    if (exportPending.current) return;
     if (page?.isFolder) {
       toast.error("暂不支持整夹导出，请打开具体笔记后再执行导出");
       return;
     }
+    exportPending.current = true;
     const toastId = toast.loading(`正在导出 ${label}…`);
-    void task()
-      .then(() => toast.success(`${label} 已导出`, { id: toastId }))
+    void Promise.resolve().then(task)
+      .then((saved) => {
+        if (saved) toast.success(`${label} 已导出`, { id: toastId });
+        else toast.dismiss(toastId);
+      })
       .catch((error) => {
         console.error(`[export] ${label} 失败:`, error);
         const message = error instanceof Error ? error.message : "";
@@ -132,7 +147,8 @@ export function usePageMenu() {
           message ? `${label} 导出失败：${message}` : `${label} 导出失败`,
           { id: toastId },
         );
-      });
+      })
+      .finally(() => { exportPending.current = false; });
   };
 
   const handleThemeConfirm = (
