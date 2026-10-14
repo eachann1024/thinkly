@@ -9,6 +9,7 @@ import { durableAtomicWrite } from "./gitSyncDisk";
 import { GitConflictError, retainGitConflicts, type GitSyncConflict } from "./gitSyncConflict";
 import { reconcileFiles } from "./gitSyncReconcile";
 import { describeGitSyncChanges } from "./gitSyncCommit";
+import { retainDeletedGitFiles } from "./gitSyncRecovery";
 export { validateGitSyncFolder } from "./gitSyncFiles";
 export { GitConflictError, getGitConflict, resolveGitConflict } from "./gitSyncConflict";
 
@@ -186,6 +187,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
     after[key] = reconcileFiles(manifest.reboundKeys?.includes(key) ? undefined : manifest.baseline[key], local[key]!, remote[key]!, {
       repositoryId: config.id, identity, folder, active: activeConflicts, unresolved: conflicts,
     });
+    after[key] = retainDeletedGitFiles(manifest.baseline[key], local[key]!, remote[key]!, after[key]!);
   }
   retainGitConflicts(config.id, activeConflicts);
   if (conflicts.length) throw new GitConflictError(conflicts);
