@@ -1,3 +1,11 @@
+/* 行内改名沿用原行底色与文字位置，编辑焦点由光标表达。 */
+input[data-sidebar-rename-field] {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
 .sidebar-rename-caret {
   display: inline-block;
   width: 4px;
