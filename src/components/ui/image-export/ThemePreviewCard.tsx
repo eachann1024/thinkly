@@ -43,7 +43,7 @@ export function ThemePreviewCard({
       ? "box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1)"
       : "transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1)",
     boxShadow: selected
-      ? "0 0 0 2px hsl(var(--primary)), 0 10px 22px rgba(15,23,42,0.12)"
+      ? "0 0 0 1px var(--goose-interactive-selected-border), 0 10px 22px rgba(15,23,42,0.12)"
       : "0 1px 2px rgba(15,23,42,0.04), inset 0 0 0 1px rgba(15,23,42,0.06)",
     minHeight: 152,
     display: "flex",
@@ -98,7 +98,7 @@ export function ThemePreviewCard({
       aria-pressed={selected}
       aria-label={theme.name}
       onClick={onClick}
-      className="group flex flex-col gap-2.5 text-left outline-none "
+      className="group flex flex-col gap-2.5 text-left"
     >
       <div
         style={cardStyle}
@@ -124,9 +124,9 @@ export function ThemePreviewCard({
           </div>
         )}
         {selected && (
-          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-control bg-primary shadow-[0_2px_6px_rgba(15,23,42,0.18)]">
+          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-control border border-[var(--goose-interactive-selected-border)] bg-[var(--goose-interactive-selected)] shadow-[0_2px_6px_rgba(15,23,42,0.18)]">
             <GooseIcons.Check
-              className="h-3 w-3 text-primary-foreground"
+              className="h-3 w-3 text-[var(--goose-accent-text)]"
               strokeWidth={3}
             />
           </div>

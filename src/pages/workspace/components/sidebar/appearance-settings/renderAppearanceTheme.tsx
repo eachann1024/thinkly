@@ -41,7 +41,7 @@ export function renderAppearanceTheme(
                   aria-label="自动"
                   aria-pressed={theme === "system"}
                   className={cn(
-                    "h-7 w-7 rounded-control transition-all duration-200",
+                    "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
                     theme !== "system" && "text-foreground",
                     theme === "system" &&
                       "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] shadow-sm",
@@ -61,7 +61,7 @@ export function renderAppearanceTheme(
                   aria-label="浅色模式"
                   aria-pressed={theme === "light"}
                   className={cn(
-                    "h-7 w-7 rounded-control transition-all duration-200",
+                    "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
                     theme !== "light" && "text-foreground",
                     theme === "light" &&
                       "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] shadow-sm",
@@ -81,7 +81,7 @@ export function renderAppearanceTheme(
                   aria-label="深色模式"
                   aria-pressed={theme === "dark"}
                   className={cn(
-                    "h-7 w-7 rounded-control transition-all duration-200",
+                    "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
                     theme !== "dark" && "text-foreground",
                     theme === "dark" &&
                       "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] shadow-sm",
@@ -122,6 +122,8 @@ export function renderAppearanceTheme(
               "--goose-accent-option-light-fg": "var(--goose-text-primary)",
               "--goose-accent-option-dark-surface": option.darkSurface,
               "--goose-accent-option-dark-fg": "var(--goose-text-primary)",
+              "--goose-accent-option-light-focus": option.lightFocus,
+              "--goose-accent-option-dark-focus": option.darkFocus,
             };
 
             const optionButton = (
@@ -143,7 +145,7 @@ export function renderAppearanceTheme(
                   setFocusedAccentIndex(index);
                   setAccentColor(option.value);
                 }}
-                className="goose-accent-option flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
+                className="goose-accent-option goose-accent-selection flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
               >
                 <span
                   aria-hidden="true"

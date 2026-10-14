@@ -33,7 +33,7 @@ export function GitFolderIssue({
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-[2px] rounded-[inherit] border-2 border-primary opacity-0 group-focus-visible:opacity-100"
+        className="pointer-events-none absolute inset-[2px] rounded-[inherit] border-2 border-[var(--goose-accent-outline-focus)] opacity-0 group-focus-visible:opacity-100"
       />
       <CircleAlert aria-hidden="true" className="size-4" />
     </Button>

@@ -10,7 +10,7 @@
 .sidebar-search-input-wrap>svg { flex:none; }
 .sidebar-search-input-wrap input { min-width:0; flex:1; height:1.75rem; min-height:0; padding:.25rem 0; border:0; font-size:.875rem; line-height:1.25rem; }
 .sidebar-search-scope-row { display:flex; align-items:center; justify-content:space-between; gap:.25rem; margin-top:.25rem; }
-.sidebar-search .sidebar-search-scope { display:flex; align-items:center; gap:.2rem; flex:0 1 auto; min-width:0; max-width:none; height:auto; min-height:0; padding:.25rem .375rem; line-height:1.25rem; border:0; border-radius:999px; background:var(--goose-interactive-selected); color:var(--goose-accent-focus); font-size:.75rem; }
+.sidebar-search .sidebar-search-scope { display:flex; align-items:center; gap:.2rem; flex:0 1 auto; min-width:0; max-width:none; height:auto; min-height:0; padding:.25rem .375rem; line-height:1.25rem; border:0; border-radius:999px; background:var(--goose-interactive-selected); color:var(--goose-accent-text); font-size:.75rem; }
 .sidebar-search-scope span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sidebar-search-scope svg { flex:none; }
 .sidebar-search-scope-row>.sidebar-search-key { flex:none; min-width:0; padding:.15rem .35rem; line-height:1.25rem; }

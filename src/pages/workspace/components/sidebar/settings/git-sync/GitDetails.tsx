@@ -40,7 +40,7 @@ export function GitDetails({
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-primary opacity-0 group-focus-visible:opacity-100"
+          className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-[var(--goose-accent-outline-focus)] opacity-0 group-focus-visible:opacity-100"
         />
         <span className="min-w-0 flex-1">
           <span

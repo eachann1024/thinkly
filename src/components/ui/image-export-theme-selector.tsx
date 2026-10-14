@@ -142,7 +142,7 @@ export function ImageExportThemeSelector({
             {notebookTheme && (
               <section className="mb-5">
                 <header className="flex items-center gap-2 mb-2.5 px-0.5">
-                  <span className="inline-block h-1.5 w-1.5 rounded-marker bg-primary" />
+                  <span className="inline-block h-1.5 w-1.5 rounded-marker bg-[var(--goose-accent-solid)]" />
                   <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
                     当前
                   </span>
