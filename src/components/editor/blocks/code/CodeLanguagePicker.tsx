@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
+import { Check } from "@/components/ui/icons";
 import {
   Popover,
   PopoverContent,
@@ -142,9 +143,13 @@ export function CodeLanguagePicker({
 
   useLayoutEffect(() => {
     if (!isOpen) return;
-    document
-      .getElementById(`${languageListId}-opt-${safeHighlightedIndex}`)
-      ?.scrollIntoView({ block: "nearest" });
+    // Portal 可能在本轮 layout effect 之后挂载，下一帧再定位当前语言。
+    const frame = window.requestAnimationFrame(() => {
+      document
+        .getElementById(`${languageListId}-opt-${safeHighlightedIndex}`)
+        ?.scrollIntoView({ block: "nearest" });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [isOpen, languageListId, safeHighlightedIndex]);
 
   return (
@@ -184,15 +189,16 @@ export function CodeLanguagePicker({
           <PopoverContent
             align="end"
             editorContext
-            className="w-48 max-h-64 overflow-y-auto text-xs"
+            className="goose-code-language-picker"
             onCloseAutoFocus={(event) => {
               event.preventDefault();
             }}
           >
-            <div className="pb-2">
+            <div className="goose-code-language-search">
               <Input
                 ref={inputRef}
                 role="combobox"
+                aria-label="搜索代码语言"
                 aria-autocomplete="list"
                 aria-expanded={isOpen}
                 aria-controls={languageListId}
@@ -205,15 +211,21 @@ export function CodeLanguagePicker({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="h-7 text-xs"
+                className="goose-code-language-input"
               />
             </div>
-            {!search && <div className="text-xs">常用语言</div>}
-            <div id={languageListId} className="goose-list-layout" data-goose-menu-slot="root" role="listbox" aria-label="代码语言">
+            {!search && (
+              <div className="goose-code-language-label">常用语言</div>
+            )}
+            <div
+              id={languageListId}
+              className="goose-code-language-list goose-list-layout"
+              data-goose-menu-slot="root"
+              role="listbox"
+              aria-label="代码语言"
+            >
               {filteredLanguages.length === 0 ? (
-                <div className="px-2 py-2 text-xs text-muted-foreground">
-                  未找到语言
-                </div>
+                <div className="goose-code-language-empty">未找到语言</div>
               ) : null}
               {filteredLanguages.map((lang, index) => (
                 <PopoverAction
@@ -221,9 +233,13 @@ export function CodeLanguagePicker({
                   id={`${languageListId}-opt-${index}`}
                   role="option"
                   data-goose-menu-slot="row"
-                  data-keyboard-active={index === safeHighlightedIndex || undefined}
+                  data-keyboard-active={
+                    index === safeHighlightedIndex || undefined
+                  }
                   aria-selected={index === safeHighlightedIndex}
-                  data-goose-selected={lang.toLowerCase() === language.toLowerCase()}
+                  data-goose-selected={
+                    lang.toLowerCase() === language.toLowerCase()
+                  }
                   data-goose-lang-highlighted={
                     index === safeHighlightedIndex ? "true" : undefined
                   }
@@ -235,13 +251,16 @@ export function CodeLanguagePicker({
                   onSelect={() => {
                     selectLanguage(lang);
                   }}
-                  className={cn(
-                    "goose-list-row text-xs",
-                  )}
+                  className="goose-code-language-option goose-menu-item"
                 >
-                  {LANGUAGE_DISPLAY_NAMES[lang] || lang}
+                  <span className="goose-code-language-name">
+                    {LANGUAGE_DISPLAY_NAMES[lang] || lang}
+                  </span>
                   {lang.toLowerCase() === language.toLowerCase() && (
-                    <span className="ml-auto">✓</span>
+                    <Check
+                      className="goose-code-language-check"
+                      aria-hidden="true"
+                    />
                   )}
                 </PopoverAction>
               ))}

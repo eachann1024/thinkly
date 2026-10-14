@@ -1,5 +1,6 @@
 /* Preserve the original cascade through ordered domain imports. */
 @import "./code/shell.css";
 @import "./code/toolbar.css";
+@import "./code/language-picker.css";
 @import "./code/content.css";
 @import "./code/preview.css";
