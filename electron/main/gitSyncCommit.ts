@@ -21,7 +21,7 @@ const printable = (path: string) => path.replace(/[\r\n\t]/g, " ");
 /** Only file names and counts enter the message; never include note contents. */
 export function describeGitSyncChanges(output: string): string {
   const changes = readChanges(output);
-  const notes = changes.filter((change) => !hidden(change.path) && /\.(?:md|markdown)$/i.test(change.path));
+  const notes = changes.filter((change) => !hidden(change.path) && !asset(change.path) && /\.(?:md|markdown)$/i.test(change.path));
   const resources = changes.filter((change) => !hidden(change.path) && asset(change.path));
   const internal = changes.filter((change) => hidden(change.path));
   const other = changes.filter((change) => !hidden(change.path) && !notes.includes(change) && !resources.includes(change));
