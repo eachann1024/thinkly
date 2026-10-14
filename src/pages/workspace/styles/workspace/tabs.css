@@ -49,6 +49,23 @@
 .workspace-shell .page-title-edit-shell [data-page-title-field]:focus {
   background: transparent;
 }
+/* 闲置按钮和编辑输入使用相同字形与单行盒，切换时只改变颜色。 */
+.tab-rail-item .page-title-edit-shell {
+  height: 2rem;
+}
+:root .workspace-shell .tab-rail-item [data-page-title-surface="tab-pill"] {
+  box-sizing: border-box;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  line-height: 1.25rem;
+  letter-spacing: inherit;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
 .tab-rail-item:has([data-page-title-field]:focus) {
   background-color: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
