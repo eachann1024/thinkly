@@ -1,5 +1,6 @@
 import { DEFAULT_GIT_SYNC_INTERVAL, validateGitRepository, normalizedGitRemote } from "@/lib/git-sync-contract";
 import type { GitDraft } from "./GitRepositoryForm";
+import { folderPathKey } from "./gitFolderRows";
 import type {
   GitSyncStatus,
   GitRepositoryFolder,
@@ -43,7 +44,7 @@ export function availableFolderIds(
     notebooks
       .filter((notebook) => {
         const mapping = folders.find((folder) => folder.notebookId === notebook.id);
-        return !notebook.localPathMissing && (!mapping || mapping.localPath === notebook.localPath);
+        return !notebook.localPathMissing && (!mapping || (notebook.localPath && folderPathKey(mapping.localPath) === folderPathKey(notebook.localPath)));
       })
       .map((notebook) => notebook.id),
   );

@@ -220,7 +220,7 @@ export function GitSyncContent({
                 availableIds={availableIds}
                 checks={folderChecks}
                 disabled={selectionDisabled}
-                recoveryDisabled={disabled || Boolean(config && (unsavedFolders || unsavedSettings))}
+                recoveryDisabled={disabled}
                 legacy={config?.layout === "legacy-root"}
                 onToggle={toggleFolder}
                 onRecover={(folder, relocate) => void recoverFolder(folder, relocate)}
