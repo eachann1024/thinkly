@@ -130,14 +130,14 @@ export function GitFolderList({
               >
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-primary opacity-0 group-focus-visible:opacity-100"
+                  className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-[var(--goose-accent-outline-focus)] opacity-0 group-focus-visible:opacity-100"
                 />
                 <span
                   aria-hidden="true"
                   className={
                     "flex size-5 shrink-0 items-center justify-center rounded-md border " +
                     (checked
-                      ? "border-primary/40 bg-primary/15 text-primary"
+                      ? "border-[var(--goose-interactive-selected-border)] bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
                       : "border-border bg-background")
                   }
                 >
