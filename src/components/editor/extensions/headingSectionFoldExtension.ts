@@ -162,37 +162,52 @@ export function collectSectionFoldDecorations(
   return DecorationSet.create(doc, decorations);
 }
 
-const headingSectionFoldPluginKey = new PluginKey<FoldSnapshots>(
+type FoldState = {
+  document: SectionFoldBlock[];
+  snapshots: FoldSnapshots;
+  decorations: DecorationSet;
+};
+
+const headingSectionFoldPluginKey = new PluginKey<FoldState>(
   "goose-heading-section-fold",
 );
 
-const headingSectionFoldPlugin = new Plugin<FoldSnapshots>({
+const headingSectionFoldPlugin = new Plugin<FoldState>({
   key: headingSectionFoldPluginKey,
   state: {
     init(_, state) {
-      return updateFoldSnapshots(
+      const document = sectionTreeFromDoc(state.doc);
+      const snapshots = updateFoldSnapshots(
         new Map(),
         null,
-        sectionTreeFromDoc(state.doc),
+        document,
         firstContainerId(state.doc),
       );
+      return {
+        document,
+        snapshots,
+        decorations: collectSectionFoldDecorations(state.doc, snapshots),
+      };
     },
-    apply(tr, value, oldState, newState) {
+    apply(tr, value, _oldState, newState) {
       if (!tr.docChanged) return value;
-      return updateFoldSnapshots(
-        value,
-        sectionTreeFromDoc(oldState.doc),
-        sectionTreeFromDoc(newState.doc),
+      const document = sectionTreeFromDoc(newState.doc);
+      const snapshots = updateFoldSnapshots(
+        value.snapshots,
+        value.document,
+        document,
         firstContainerId(newState.doc),
       );
+      return {
+        document,
+        snapshots,
+        decorations: collectSectionFoldDecorations(newState.doc, snapshots),
+      };
     },
   },
   props: {
     decorations(state): DecorationSet {
-      return collectSectionFoldDecorations(
-        state.doc,
-        headingSectionFoldPluginKey.getState(state) ?? new Map(),
-      );
+      return headingSectionFoldPluginKey.getState(state)?.decorations ?? DecorationSet.empty;
     },
   },
 });

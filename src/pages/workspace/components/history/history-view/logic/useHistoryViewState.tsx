@@ -29,11 +29,15 @@ export function useHistoryViewState() {
 
   const bumpRefresh = useHistoryView((s) => s.bumpRefresh);
 
-  const { getPage, updatePage } = usePages();
+  const getPage = usePages((s) => s.getPage);
 
-  const pageId = active;
+  const updatePage = usePages((s) => s.updatePage);
 
-  const page = pageId ? getPage(pageId) : undefined;
+  const activePageId = usePages((s) => s.activePageId);
+
+  const pageId = active === activePageId ? active : null;
+
+  const page = usePages((s) => pageId ? s.pages[pageId] : undefined);
 
   const pageTitle = page ? extractBlockNoteTitle(page.content) || "无标题" : "";
 
@@ -52,6 +56,9 @@ export function useHistoryViewState() {
   const [pendingMilestoneVersionId, setPendingMilestoneVersionId] = useState<
     string | null
   >(null);
+
+  // Provider 常驻；离开历史或切到另一笔记时不复用前一页的索引。
+  const visibleIndex = index?.pageId === pageId ? index : null;
 
   // 加载版本索引
   useEffect(() => {
@@ -123,15 +130,15 @@ export function useHistoryViewState() {
   }, [pageId, selectedVersionId]);
 
   useEffect(() => {
-    if (!index || index.versions.length === 0) return;
+    if (!visibleIndex || visibleIndex.versions.length === 0) return;
     if (selectedVersionId) {
-      if (index.versions.some((v) => v.versionId === selectedVersionId)) return;
+      if (visibleIndex.versions.some((v) => v.versionId === selectedVersionId)) return;
     }
-    const sorted = [...index.versions].sort(
+    const sorted = [...visibleIndex.versions].sort(
       (a, b) => b.createdAt - a.createdAt,
     );
     select(sorted[0].versionId);
-  }, [index, selectedVersionId, select]);
+  }, [visibleIndex, selectedVersionId, select]);
 
   useEffect(() => {
     if (pageId && !page) {
@@ -140,6 +147,7 @@ export function useHistoryViewState() {
   }, [pageId, page, exit]);
 
   useEffect(() => {
+    if (!pageId) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -148,11 +156,11 @@ export function useHistoryViewState() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [exit]);
+  }, [pageId, exit]);
 
   const groups = useMemo(() => {
-    if (!index || index.versions.length === 0) return [];
-    const sorted = [...index.versions].sort(
+    if (!visibleIndex || visibleIndex.versions.length === 0) return [];
+    const sorted = [...visibleIndex.versions].sort(
       (a, b) => b.createdAt - a.createdAt,
     );
     const now = Date.now();
@@ -167,12 +175,12 @@ export function useHistoryViewState() {
       result[result.length - 1].items.push(v);
     }
     return result;
-  }, [index]);
+  }, [visibleIndex]);
 
   const selectedEntry = useMemo(
     () =>
-      index?.versions.find((v) => v.versionId === selectedVersionId) ?? null,
-    [index, selectedVersionId],
+      visibleIndex?.versions.find((v) => v.versionId === selectedVersionId) ?? null,
+    [visibleIndex, selectedVersionId],
   );
   return {
     active,

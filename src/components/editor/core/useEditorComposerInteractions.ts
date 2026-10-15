@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
-import { readEditorFindSeed } from "@/components/editor/find/findSeed";
 import {
   isLinkShortcutClaimedByApp,
   isPrimaryLinkShortcutEvent,
 } from "@/components/editor/extensions/linkKeyboardExtension";
-import { closeAllOverlays } from "@/lib/closeAllOverlays";
 import { matchShortcut } from "@/lib/shortcut-match";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getSelectedImageUrl } from "@/components/editor/utils/selection";
@@ -26,15 +24,17 @@ import {
   useEditorPageContext,
 } from "@/components/editor/platform/hostContext";
 import type { EditorComposerProps } from "./editorComposerTypes";
+import { useEditorOverlayEvents } from "./useEditorOverlayEvents";
 
 export function useEditorComposerInteractions({
   editor,
   editable,
+  isActiveEditor,
   page,
   editorContainerRef,
 }: Pick<
   EditorComposerProps,
-  "editor" | "editable" | "page" | "editorContainerRef"
+  "editor" | "editable" | "isActiveEditor" | "page" | "editorContainerRef"
 >) {
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
   const [linkPopoverUrl, setLinkPopoverUrl] = useState("");
@@ -139,44 +139,11 @@ export function useEditorComposerInteractions({
     }
   };
 
-  useEffect(() => {
-    const handleOpenFind = (event: Event) => {
-      if (isWorkspaceSettingsOpen()) return;
-      const findInputFocused = Boolean(
-        document.activeElement?.closest?.("[data-goose-find-in-page]"),
-      );
-      const seed = findInputFocused
-        ? ""
-        : readEditorFindSeed(editor, editorContainerRef.current);
-      const openReplace =
-        (event as CustomEvent<{ replace?: unknown }>).detail?.replace === true;
-      // 先关其它弹层，再开查找栏。setTimeout 让 Escape 引发的 commit 先跑完，
-      // 避免被同步的 close 路径反吃掉。
-      closeAllOverlays();
-      setFindSeedQuery(seed);
-      setFindOpenReplace(openReplace);
-      setFindOpenNonce((value) => value + 1);
-      setTimeout(() => setFindBarOpen(true), 0);
-    };
-    window.addEventListener("goose-note:editor-find-open", handleOpenFind);
-    return () =>
-      window.removeEventListener("goose-note:editor-find-open", handleOpenFind);
-  }, [editor, editorContainerRef]);
-
-  useEffect(() => {
-    const handleOpen = () => {
-      if (isWorkspaceSettingsOpen()) return;
-      setLinkPopoverUrl("");
-      setLinkPopoverOpen(true);
-    };
-    const handleClose = () => setLinkPopoverOpen(false);
-    document.addEventListener("goose-open-link-popover", handleOpen);
-    document.addEventListener("goose-close-link-popover", handleClose);
-    return () => {
-      document.removeEventListener("goose-open-link-popover", handleOpen);
-      document.removeEventListener("goose-close-link-popover", handleClose);
-    };
-  }, []);
+  useEditorOverlayEvents({
+    editor, editorContainerRef, isActiveEditor, pageId: page.id,
+    setFindSeedQuery, setFindOpenReplace, setFindOpenNonce, setFindBarOpen,
+    setLinkPopoverUrl, setLinkPopoverOpen,
+  });
 
   useEffect(() => {
     if (!linkPopoverOpen) return;
@@ -208,7 +175,7 @@ export function useEditorComposerInteractions({
   }, [linkPopoverOpen]);
 
   useEffect(() => {
-    if (__GOOSE_EDITOR_COMPACT__ || __GOOSE_LITE__) return;
+    if (!isActiveEditor || __GOOSE_EDITOR_COMPACT__ || __GOOSE_LITE__) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (
@@ -255,7 +222,7 @@ export function useEditorComposerInteractions({
 
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [aiSettings.enabled, editor, page]);
+  }, [aiSettings.enabled, editor, isActiveEditor, page]);
 
   const handleLinkPopoverSubmit = () => {
     const trimmed = linkPopoverUrl.trim();

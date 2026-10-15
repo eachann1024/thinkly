@@ -63,6 +63,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   const { handleEditorBlankMouseDown, focusEditorSafely } = useEditorFocus(
     runtime,
     editable,
+    isActiveEditor,
   );
   const { handleEditorPasteCapture } = useEditorPaste({
     editor,
@@ -109,6 +110,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     <EditorComposer
       editor={editor}
       editable={editable}
+      isActiveEditor={isActiveEditor}
       page={page}
       editorContainerRef={editorContainerRef}
       handleEditorBlankMouseDown={handleEditorBlankMouseDown}

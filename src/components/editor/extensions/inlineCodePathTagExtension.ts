@@ -22,6 +22,7 @@ import {
   resolveCandidatePath,
   toMarkdownTarget,
 } from "@/components/editor/inline-code/localPathTarget";
+import { subscribeModifierClass } from "./modifierClassSubscription";
 
 export type InlineCodePathTagDeps = {
   getPageLocalFilePath: () => string | null;
@@ -157,20 +158,7 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
       // 首次挂载异步扫一次（init 不同步遍历文档）。
       scheduleRescan();
 
-      const syncArmed = (event: KeyboardEvent) => {
-        view.dom.classList.toggle(
-          ARMED_CLASS,
-          event.metaKey || event.ctrlKey,
-        );
-      };
-      const disarm = () => view.dom.classList.remove(ARMED_CLASS);
-      const onVisibility = () => {
-        if (document.hidden) disarm();
-      };
-      window.addEventListener("keydown", syncArmed);
-      window.addEventListener("keyup", syncArmed);
-      window.addEventListener("blur", disarm);
-      document.addEventListener("visibilitychange", onVisibility);
+      const unsubscribeModifierClass = subscribeModifierClass(view.dom, ARMED_CLASS);
 
       return {
         update(view: EditorView, prevState: EditorState) {
@@ -190,11 +178,7 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
         destroy() {
           destroyed = true;
           if (timer !== null) clearTimeout(timer);
-          window.removeEventListener("keydown", syncArmed);
-          window.removeEventListener("keyup", syncArmed);
-          window.removeEventListener("blur", disarm);
-          document.removeEventListener("visibilitychange", onVisibility);
-          view.dom.classList.remove(ARMED_CLASS);
+          unsubscribeModifierClass();
         },
       };
     },

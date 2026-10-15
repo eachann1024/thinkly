@@ -12,6 +12,7 @@ import { getContentSignature } from "@/components/editor/utils/blocknote-content
 import { WorkspaceLayout } from "./WorkspaceLayout";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { bindOptionWindowDrag } from "@/lib/electron/windowDrag";
+import { HistoryViewProvider } from "./components/history/history-view/HistoryViewProvider";
 import {
   EditorPaneRegistryProvider,
   createEditorPaneRegistry,
@@ -78,16 +79,18 @@ export function WorkspacePage() {
     <>
       <PageHistoryBinder />
       <EditorPaneRegistryProvider value={paneRegistry}>
-        <WorkspaceLayout
-          isDragging={isDragging}
-          dragIntent={dragIntent}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          editorRef={editorRef}
-          scrollContainerRef={scrollContainerRef}
-        />
+        <HistoryViewProvider>
+          <WorkspaceLayout
+            isDragging={isDragging}
+            dragIntent={dragIntent}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            editorRef={editorRef}
+            scrollContainerRef={scrollContainerRef}
+          />
+        </HistoryViewProvider>
       </EditorPaneRegistryProvider>
     </>
   );

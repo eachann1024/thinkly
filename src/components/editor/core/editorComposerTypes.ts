@@ -3,6 +3,7 @@ import type { BlockNoteContent } from "@/components/editor/utils/blocknote-conte
 export type EditorComposerProps = {
   editor: any;
   editable: boolean;
+  isActiveEditor: boolean;
   page: any;
   editorContainerRef: RefObject<HTMLDivElement | null>;
   handleEditorBlankMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
