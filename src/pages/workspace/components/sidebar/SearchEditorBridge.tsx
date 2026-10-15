@@ -12,8 +12,9 @@ import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/compo
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 
-export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
+export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, cancelPendingRestoration }: {
   pageId: string; focused: boolean; editorRef: RefObject<EditorRef | null>; scrollRef: RefObject<HTMLDivElement | null>;
+  cancelPendingRestoration: () => void;
 }) {
   const session = useSearchSession(useShallow(s => ({
     open: s.open, query: s.query, scope: s.scope, requestNonce: s.requestNonce, originPageId: s.originPageId,
@@ -99,6 +100,9 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
       const request = useSearchSession.getState();
       if (visible && request.targetPageId === pageId && request.requestNonce !== handled.current) {
         handled.current = request.requestNonce;
+        // Explicit search navigation takes priority over the page's saved scroll position.
+        const titleMatch = query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
+        if (request.restoreTop !== null || state?.matches.length || titleMatch) cancelPendingRestoration();
         if (request.restoreTop !== null && scrollRef.current) scrollRef.current.scrollTop = request.restoreTop;
         else locate();
         if (request.enterReader) {
@@ -127,7 +131,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef }: {
     if (immediate) { window.clearTimeout(timer); apply(); }
     window.addEventListener("goose-note:search-editor-ready", ready);
     return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };
-  }, [visible, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef]);
+  }, [visible, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration]);
   useEffect(() => () => {
     const editor = editorRef.current?.editor;
     if (editor && !editor._tiptapEditor.isDestroyed) clearSearchSessionHighlight(editor);
