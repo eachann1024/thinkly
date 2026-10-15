@@ -2,15 +2,17 @@ import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
 import { cn } from "@/lib/utils";
+import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { updatePercent, updateStatusLabel } from "./updatePresentation";
 
 export function AppUpdateButton({ className }: { className?: string }) {
-  const { state, open, setOpen, installing, installError } = useAppUpdate();
+  const { currentVersion, state, open, setOpen, installing, installError } = useAppUpdate();
   const busy = installing || state.status === "checking" || state.status === "downloading";
   const ready = state.status === "ready";
   const percent = updatePercent(state);
   const label = state.status === "downloading" && percent !== undefined ? `${percent}%` : "更新";
-  const tooltip = updateStatusLabel(state, installing, installError) || "更新日志";
+  const tooltip = updateStatusLabel(state, installing, installError) || "更新";
+  if (!hasNewAppUpdate(currentVersion, state)) return null;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
