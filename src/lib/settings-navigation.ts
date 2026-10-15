@@ -1,4 +1,5 @@
 import type { SettingsTab } from "@/pages/workspace/components/sidebar/settings/types";
+import { deferWorkspaceMaintenance } from "./workspace-navigation-timing";
 
 export function isWorkspaceSettingsOpen(root: Pick<Document, "body"> = document): boolean {
   return root.body.hasAttribute("data-goose-settings-open");
@@ -6,6 +7,7 @@ export function isWorkspaceSettingsOpen(root: Pick<Document, "body"> = document)
 
 /** Only explicit user navigation emits this event; hydration and focus do not. */
 export function activateWorkspace(host: Window = window): void {
+  deferWorkspaceMaintenance();
   host.dispatchEvent(new CustomEvent("goose-note:workspace-activate"));
 }
 

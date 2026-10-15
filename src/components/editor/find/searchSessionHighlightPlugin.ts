@@ -1,8 +1,9 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin, PluginKey } from "prosemirror-state";
-import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
+import type { EditorView } from "prosemirror-view";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { collectMatches, type FindMatch } from "./findInPagePlugin";
+import type { FindMatch } from "./findInPagePlugin";
+import { getCachedSearchSessionDecorations, getCachedSearchSessionMatches } from "./searchSessionHighlightCache";
 
 export type SearchSessionHighlightState = {
   query: string;
@@ -20,8 +21,6 @@ const emptyState: SearchSessionHighlightState = { query: "", matches: [], curren
 export const searchSessionHighlightKey = new PluginKey<SearchSessionHighlightState>("goose-search-session-highlight");
 const subscribers = new Set<(state: SearchSessionHighlightState, view: EditorView) => void>();
 
-const decorationCache = new WeakMap<object, WeakMap<import("prosemirror-model").Node, DecorationSet>>();
-
 export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightState>({
   key: searchSessionHighlightKey,
   state: {
@@ -30,7 +29,7 @@ export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightSta
       const meta = tr.getMeta(searchSessionHighlightKey) as Meta | undefined;
       if (meta?.type === "clear") return emptyState;
       if (meta?.type === "set") {
-        const matches = collectMatches(nextState.doc, meta.query, false);
+        const matches = getCachedSearchSessionMatches(nextState.doc, meta.query);
         return { query: meta.query, matches, current: matches.length ? Math.min(Math.max(meta.index, 0), matches.length - 1) : -1 };
       }
       if (meta?.type === "select") {
@@ -41,7 +40,7 @@ export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightSta
         return { ...state, current: ((state.current + meta.delta) % state.matches.length + state.matches.length) % state.matches.length };
       }
       if (tr.docChanged && state.query) {
-        const matches = collectMatches(nextState.doc, state.query, false);
+        const matches = getCachedSearchSessionMatches(nextState.doc, state.query);
         return { ...state, matches, current: matches.length ? Math.min(Math.max(state.current, 0), matches.length - 1) : -1 };
       }
       return state;
@@ -51,17 +50,7 @@ export const searchSessionHighlightPlugin = new Plugin<SearchSessionHighlightSta
     decorations(state) {
       const value = searchSessionHighlightKey.getState(state);
       if (!value?.matches.length) return null;
-      let documents = decorationCache.get(value);
-      if (!documents) { documents = new WeakMap(); decorationCache.set(value, documents); }
-      const cached = documents.get(state.doc);
-      if (cached) return cached;
-      const decorations = DecorationSet.create(state.doc, value.matches.map((match, idx) =>
-        Decoration.inline(match.from, match.to, {
-          class: idx === value.current ? "goose-search-session-match goose-search-session-match--current" : "goose-search-session-match",
-        }),
-      ));
-      documents.set(state.doc, decorations);
-      return decorations;
+      return getCachedSearchSessionDecorations(state.doc, value.query, value.current);
     },
   },
   view() {

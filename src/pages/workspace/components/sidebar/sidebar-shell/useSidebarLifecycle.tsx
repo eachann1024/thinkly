@@ -110,7 +110,8 @@ export function useSidebarLifecycle(
     let lastHeight = -1;
     const updateHeight = () => {
       const height = scrollAreaNode.clientHeight;
-      if (height === lastHeight) return;
+      // 隐藏列表会报告 0；保留有效高度，避免切换视图时重绘整棵树。
+      if (height <= 0 || height === lastHeight) return;
       lastHeight = height;
       setScrollAreaHeight(height);
     };

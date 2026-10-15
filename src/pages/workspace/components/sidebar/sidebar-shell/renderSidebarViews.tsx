@@ -4,6 +4,7 @@ import { SidebarSectionHeader } from "../SidebarSectionHeader";
 import { SidebarOutline } from "../SidebarOutline";
 import { SidebarSearch } from "../SidebarSearch";
 import { HistoryVersionList } from "../../history/HistoryView";
+import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
 import type { useSidebarHover } from "./useSidebarHover";
 
 export function renderSidebarViews(
@@ -83,23 +84,22 @@ export function renderSidebarViews(
                   <SidebarMainTree
                     activeNotebookId={activeNotebookId}
                     selectedPageId={selectedPageId}
-                    rowHeight={rowHeight}
                     itemHeight={rowHeight}
                     viewportHeight={scrollAreaHeight}
-                    onCreatePage={handleCreatePage}
                   />
                 </div>
                 <SidebarSearch />
-                {currentView === "outline" && (
-                  <div className="flex min-h-0 flex-1 overflow-hidden">
+                <WorkspaceViewActivity
+                  visible={currentView === "outline" && !settingsOpen && !inHistoryMode}
+                  className="sidebar-outline-pane flex min-h-0 flex-1 overflow-hidden"
+                >
                     <SidebarOutline
                       scrollContainerRef={scrollContainerRef}
                       pageId={outlinePageId}
                       focusKey={outlineTarget.focusKey}
                       paneId={outlineTarget.paneId}
                     />
-                  </div>
-                )}
+                </WorkspaceViewActivity>
               </div>
             </div>
           </div>

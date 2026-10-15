@@ -3,14 +3,12 @@ import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { computeCommandMatches, type CommandMatches } from "./cooperativeCommandSearch";
-import {
-  filterCatalogByScope,
-  getSearchCatalog,
-  syncSearchCatalog,
-} from "./pageSearchCatalog";
+import type { SearchNotebooks } from "./pageSearchCatalog";
+import { syncIndex } from "./pageSearchIndex";
+import { useCommandSearchScope } from "./useCommandSearchScope";
+import { useCommandSearchRecent } from "./useCommandSearchRecent";
 
 export { getContentSnippet, countLiteralMatches } from "./commandSearchText";
-
 export { getCachedText, getSearchBodyText } from "./searchBodyCache";
 
 export interface SearchResultPage extends Page {
@@ -30,26 +28,36 @@ export interface SearchResults {
   hasMore: boolean;
 }
 
-/** 首屏与每次追加加载条数 */
 export const SEARCH_RESULT_PAGE_SIZE = 30;
+const EMPTY_NOTEBOOKS: SearchNotebooks = {};
+const EMPTY_CHILDREN = new Set<string>();
+const EMPTY_MATCHES: CommandMatches = { all: [], recentCandidates: [] };
 
 interface CommandSearchState {
   searchQuery: string;
   pages: Record<string, Page>;
   activeNotebookId: string | null;
   searchAllNotebooks: boolean;
+  enabled?: boolean;
 }
 
 export function useCommandSearch({
-  searchQuery,
-  pages,
-  activeNotebookId,
-  searchAllNotebooks,
+  searchQuery, pages, activeNotebookId, searchAllNotebooks, enabled = true,
 }: CommandSearchState) {
-  // Matching is scheduled outside render; this compatibility field follows input.
   const deferredQuery = searchQuery;
-  const notebooks = useNotebooks((state) => state.notebooks);
-  const [displayLimit, setDisplayLimit] = useState(SEARCH_RESULT_PAGE_SIZE);
+  const notebooks = useNotebooks((state) => enabled ? state.notebooks : EMPTY_NOTEBOOKS);
+  const [pagination, setPagination] = useState(() => ({
+    query: searchQuery, searchAllNotebooks, activeNotebookId, limit: SEARCH_RESULT_PAGE_SIZE,
+  }));
+  const scopeChanged = pagination.query !== searchQuery ||
+    pagination.searchAllNotebooks !== searchAllNotebooks ||
+    pagination.activeNotebookId !== activeNotebookId;
+  // Reset before children commit, so a new query never paints the old page limit.
+  if (scopeChanged) {
+    setPagination({ query: searchQuery, searchAllNotebooks, activeNotebookId,
+      limit: SEARCH_RESULT_PAGE_SIZE });
+  }
+  const displayLimit = scopeChanged ? SEARCH_RESULT_PAGE_SIZE : pagination.limit;
   const [removedRecentIds, setRemovedRecentIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("goose-recent-excludes");
@@ -59,147 +67,112 @@ export function useCommandSearch({
     }
   });
 
-  // 查询 / 范围变化时重置分页，避免旧 limit 挂在新结果上
-  useEffect(() => {
-    setDisplayLimit(SEARCH_RESULT_PAGE_SIZE);
-  }, [deferredQuery, searchAllNotebooks, activeNotebookId]);
-
   const loadMoreResults = useCallback(() => {
-    setDisplayLimit((prev) => prev + SEARCH_RESULT_PAGE_SIZE);
+    setPagination((previous) => ({ ...previous, limit: previous.limit + SEARCH_RESULT_PAGE_SIZE }));
   }, []);
-
   const removeRecent = useCallback((id: string) => {
-    const newIds = [...removedRecentIds, id];
-    setRemovedRecentIds(newIds);
-    localStorage.setItem("goose-recent-excludes", JSON.stringify(newIds));
+    const nextIds = [...removedRecentIds, id];
+    setRemovedRecentIds(nextIds);
+    localStorage.setItem("goose-recent-excludes", JSON.stringify(nextIds));
   }, [removedRecentIds]);
 
-  const catalog = useMemo(() => {
-    if (Object.keys(pages).length === 0) return getSearchCatalog();
-    return syncSearchCatalog(pages, notebooks);
-  }, [pages, notebooks]);
-
-  const filteredPages = useMemo(
-    () =>
-      Object.keys(pages).length === 0
-        ? []
-        : filterCatalogByScope(
-            catalog.sortedByTitle,
-            notebooks,
-            searchAllNotebooks,
-            activeNotebookId,
-          ),
-    [pages, catalog, notebooks, searchAllNotebooks, activeNotebookId],
+  const prepared = useCommandSearchScope(
+    pages, notebooks, searchAllNotebooks, activeNotebookId, enabled,
   );
-
-  const getPageBreadcrumb = useCallback(
-    (page: Page): string[] => {
-      const breadcrumb: string[] = [];
-      let currentPage = page;
-
-      while (currentPage) {
-        const title = getPageTitle(currentPage);
-        if (title && title !== "无标题") {
-          breadcrumb.unshift(title);
-        }
-        if (!currentPage.parentId) {
-          break;
-        }
-        currentPage = pages[currentPage.parentId];
-      }
-
-      const notebookId = page.workspaceId || "default";
-      const notebook = useNotebooks.getState().notebooks[notebookId];
-      if (notebook) {
-        breadcrumb.unshift(notebook.name);
-      }
-
-      return breadcrumb;
-    },
-    [pages],
-  );
+  const { scope: filteredPages, catalog, ready } = prepared;
+  const getPageBreadcrumb = useCallback((page: Page): string[] => {
+    const breadcrumb: string[] = [];
+    let currentPage = page;
+    while (currentPage) {
+      const title = getPageTitle(currentPage);
+      if (title && title !== "无标题") breadcrumb.unshift(title);
+      if (!currentPage.parentId) break;
+      currentPage = pages[currentPage.parentId];
+    }
+    const notebook = useNotebooks.getState().notebooks[page.workspaceId || "default"];
+    if (notebook) breadcrumb.unshift(notebook.name);
+    return breadcrumb;
+  }, [pages]);
 
   const [completed, setCompleted] = useState<{
     query: string;
     pages: CommandSearchState["pages"];
+    notebooks: SearchNotebooks;
     scope: Page[];
     matches: CommandMatches | null;
     error: string | null;
   } | null>(null);
-  const latest = useRef({ query: searchQuery, pages, scope: filteredPages });
+  const latest = useRef({ query: searchQuery, pages, notebooks, scope: filteredPages, enabled });
   useLayoutEffect(() => {
-    latest.current = { query: searchQuery, pages, scope: filteredPages };
-  }, [searchQuery, pages, filteredPages]);
+    latest.current = { query: searchQuery, pages, notebooks, scope: filteredPages, enabled };
+  }, [searchQuery, pages, notebooks, filteredPages, enabled]);
+  const currentCompletion = enabled && completed?.query === searchQuery &&
+    completed.pages === pages && completed.notebooks === notebooks &&
+    completed.scope === filteredPages ? completed : null;
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setCompleted(null);
-      return;
-    }
+    if (!enabled || !searchQuery.trim() || !ready || !catalog || prepared.error || currentCompletion) return;
     const controller = new AbortController();
-    const snapshot = { query: searchQuery, pages, scope: filteredPages };
+    const snapshot = { query: searchQuery, pages, notebooks, scope: filteredPages };
     const isCurrent = () => {
       const current = latest.current;
-      return !controller.signal.aborted && current.query === snapshot.query &&
-        current.pages === snapshot.pages && current.scope === snapshot.scope;
+      return !controller.signal.aborted && current.enabled && current.query === snapshot.query &&
+        current.pages === snapshot.pages && current.notebooks === snapshot.notebooks &&
+        current.scope === snapshot.scope;
     };
-    // Let the input paint before the first scan, including the index query.
-    const timer = setTimeout(() => {
-      void computeCommandMatches(filteredPages, searchQuery, controller.signal)
-        .then((matches) => {
-          if (!matches || !isCurrent()) return;
-          setCompleted({ ...snapshot, matches, error: null });
-        })
-        .catch((error: unknown) => {
-          if (!isCurrent()) return;
-          console.error("Command search failed", error);
-          setCompleted({ ...snapshot, matches: null, error: "搜索失败，请修改关键词后重试" });
-        });
-    }, 0);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [filteredPages, pages, searchQuery]);
+    void (async () => {
+      if (!await syncIndex(catalog) || !isCurrent()) return;
+      const matches = await computeCommandMatches(
+        filteredPages, searchQuery, controller.signal, catalog,
+      );
+      if (matches && isCurrent()) setCompleted({ ...snapshot, matches, error: null });
+    })().catch((error: unknown) => {
+      if (!isCurrent()) return;
+      console.error("Command search failed", error);
+      setCompleted({ ...snapshot, matches: null, error: "搜索失败，请修改关键词后重试" });
+    });
+    return () => { controller.abort(); };
+  }, [enabled, ready, catalog, prepared.error, filteredPages, pages, notebooks, searchQuery, currentCompletion]);
 
   const hasQuery = Boolean(searchQuery.trim());
-  const currentCompletion = completed?.query === searchQuery &&
-    completed.pages === pages && completed.scope === filteredPages ? completed : null;
-  const isSearching = hasQuery && !currentCompletion;
-  const allMatches = useMemo<CommandMatches>(() => {
+  const searchError = prepared.error ?? currentCompletion?.error ?? null;
+  const preparing = enabled && !searchError && (!ready || (hasQuery && !currentCompletion));
+  const liveMatches = useMemo<CommandMatches>(() => {
+    if (!enabled || !ready || searchError) return EMPTY_MATCHES;
     if (!hasQuery) return { all: filteredPages, recentCandidates: filteredPages };
-    return currentCompletion?.matches ?? { all: [], recentCandidates: [] };
-  }, [hasQuery, filteredPages, currentCompletion]);
-
-  const recent = useMemo(() => {
-    const excluded = new Set(removedRecentIds);
-    const latestRecent: SearchResultPage[] = [];
-    for (const page of allMatches.recentCandidates) {
-      if (excluded.has(page.id)) continue;
-      const index = latestRecent.findIndex(item => item.updatedAt < page.updatedAt);
-      if (index >= 0) latestRecent.splice(index, 0, page);
-      else if (latestRecent.length < 5) latestRecent.push(page);
-      if (latestRecent.length > 5) latestRecent.pop();
-    }
-    return latestRecent;
-  }, [allMatches, removedRecentIds]);
+    return currentCompletion?.matches ?? EMPTY_MATCHES;
+  }, [enabled, ready, hasQuery, filteredPages, currentCompletion, searchError]);
+  const [retained, setRetained] = useState<{
+    query: string; all: boolean; activeId: string | null; matches: CommandMatches;
+  } | null>(null);
+  const sameSession = retained?.query === searchQuery &&
+    retained.all === searchAllNotebooks && retained.activeId === activeNotebookId;
+  // Retain rows while refreshing the same session, with interaction blocked until ready.
+  if (enabled && ready && !prepared.error && (!hasQuery || currentCompletion?.matches) &&
+      (!sameSession || retained.matches.all !== liveMatches.all ||
+        retained.matches.recentCandidates !== liveMatches.recentCandidates)) {
+    setRetained({ query: searchQuery, all: searchAllNotebooks,
+      activeId: activeNotebookId, matches: liveMatches });
+  }
+  const allMatches = sameSession && (!enabled || preparing) ? retained.matches : liveMatches;
+  const recentState = useCommandSearchRecent(allMatches.recentCandidates, removedRecentIds,
+    enabled && !preparing && !searchError,
+    JSON.stringify([searchQuery, searchAllNotebooks, activeNotebookId]));
+  const recent = searchError ? EMPTY_MATCHES.recentCandidates : recentState.recent;
+  const isSearching = enabled && !searchError && (preparing || (!hasQuery && recentState.pending));
+  const allDisplay = useMemo(() => allMatches.all.slice(0, displayLimit),
+    [allMatches.all, displayLimit]);
   const searchResults: SearchResults = useMemo(() => {
-    const allDisplay = allMatches.all.slice(0, displayLimit);
-    return { recent, all: allMatches.all, allDisplay,
-      hasQuery: Boolean(deferredQuery.trim()), hasMore: allDisplay.length < allMatches.all.length };
-  }, [allMatches, recent, displayLimit, deferredQuery]);
+    return { recent, all: allMatches.all, allDisplay, hasQuery,
+      hasMore: allDisplay.length < allMatches.all.length };
+  }, [allMatches.all, allDisplay, recent, hasQuery]);
 
   return {
-    filteredPages,
-    searchResults,
-    pageIdsWithChildren: catalog.pageIdsWithChildren,
-    getPageBreadcrumb,
-    searchQuery,
-    deferredQuery,
+    filteredPages, searchResults,
+    pageIdsWithChildren: catalog?.pageIdsWithChildren ?? EMPTY_CHILDREN,
+    getPageBreadcrumb, searchQuery, deferredQuery,
     completedQuery: currentCompletion?.matches ? currentCompletion.query : "",
-    searchError: currentCompletion?.error ?? null,
-    isSearching,
-    removeRecent,
-    loadMoreResults,
+    searchError,
+    isSearching, removeRecent, loadMoreResults,
   };
 }

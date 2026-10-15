@@ -1,5 +1,5 @@
 import * as GooseIcons from "@/components/ui/icons";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Page } from "@/types";
 import { toast } from "@/components/ui/sonner";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -109,7 +109,7 @@ export function useMainTreeState({
   // 已经加载过的本地库会在激活时后台重扫。保留这份树，既避免侧栏
   // 从完整内容闪成骨架屏，也让用户仍可在扫描期间看到上一次成功结果。
   // 首次载入没有缓存页面时仍完整展示 loading；真正失败则走下方错误态。
-  const hasCachedLocalTree = Boolean(
+  const hasCachedLocalTree = useMemo(() => Boolean(
     activeNotebookId &&
     Object.values(pages).some(
       (page) =>
@@ -117,7 +117,7 @@ export function useMainTreeState({
         !page.trashedAt &&
         !page.localUnsaved,
     ),
-  );
+  ), [activeNotebookId, pages]);
 
   const shouldShowLocalSkeleton =
     isLocalFolder && localLoadStatus === "loading" && !hasCachedLocalTree;

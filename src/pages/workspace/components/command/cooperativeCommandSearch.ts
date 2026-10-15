@@ -5,6 +5,8 @@ import { titleMatchRank } from "./commandSearchRank";
 import { getContentSnippet } from "./commandSearchText";
 import { getSearchBodyText } from "./searchBodyCache";
 import { searchIndex } from "./pageSearchIndex";
+import type { SearchCatalog } from "./pageSearchCatalog";
+import { createSearchTaskBudget, yieldSearchTask } from "./searchTaskScheduling";
 import type { SearchResultPage } from "./useCommandSearch";
 
 export interface CommandMatches {
@@ -22,37 +24,33 @@ function countLoweredMatches(text: string, needle: string): number {
   return count;
 }
 
-/** Yield between pages; abortable waits also release cancelled scans promptly. */
-function yieldToInput(signal: AbortSignal): Promise<void> {
-  return new Promise((resolve) => {
-    const finish = () => {
-      clearTimeout(timer);
-      signal.removeEventListener("abort", finish);
-      resolve();
-    };
-    const timer = setTimeout(finish, 0);
-    signal.addEventListener("abort", finish, { once: true });
-    if (signal.aborted) finish();
-  });
-}
-
 /** Keep only one scan's data; no persistent query or body cache is introduced. */
 export async function computeCommandMatches(
   pages: Page[],
   rawQuery: string,
   signal: AbortSignal,
+  catalog: SearchCatalog,
 ): Promise<CommandMatches | null> {
   const query = rawQuery.trim().toLowerCase();
   const needle = query.toLocaleLowerCase();
   if (!needle || signal.aborted) return null;
-  const indexOrder = searchIndex(rawQuery.trim());
-  const indexedIds = new Set(indexOrder);
+  await yieldSearchTask(signal);
+  if (signal.aborted) return null;
+  const indexOrder = searchIndex(rawQuery.trim(), catalog);
+  if (!indexOrder) return null;
+  const indexedIds = new Set<string>();
   const indexedResults = new Map<string, SearchResultPage>();
   const literalResults: SearchResultPage[] = [];
   const pinyinResults: SearchResultPage[] = [];
   const ranks = new Map<string, number>();
   const usePinyin = isPinyinQuery(rawQuery.trim());
-  let batchStarted = performance.now();
+  const pause = createSearchTaskBudget(signal);
+  for (const id of indexOrder) {
+    if (signal.aborted) return null;
+    indexedIds.add(id);
+    const wait = pause();
+    if (wait) await wait;
+  }
 
   for (const page of pages) {
     if (signal.aborted) return null;
@@ -84,10 +82,8 @@ export async function computeCommandMatches(
       else if (literal) literalResults.push(result);
       else pinyinResults.push(result);
     }
-    if (performance.now() - batchStarted >= 6) {
-      await yieldToInput(signal);
-      batchStarted = performance.now();
-    }
+    const wait = pause();
+    if (wait) await wait;
   }
   if (signal.aborted) return null;
 
@@ -98,10 +94,8 @@ export async function computeCommandMatches(
   const append = async (result: SearchResultPage) => {
     matched.push(result);
     buckets[ranks.get(result.id) ?? 3].push(result);
-    if (performance.now() - batchStarted >= 6) {
-      await yieldToInput(signal);
-      batchStarted = performance.now();
-    }
+    const wait = pause();
+    if (wait) await wait;
   };
   for (const id of indexOrder) {
     if (signal.aborted) return null;
@@ -115,5 +109,14 @@ export async function computeCommandMatches(
     }
   }
   if (signal.aborted) return null;
-  return { all: buckets.flat(), recentCandidates: matched };
+  const all: SearchResultPage[] = [];
+  for (const bucket of buckets) {
+    for (const result of bucket) {
+      if (signal.aborted) return null;
+      all.push(result);
+      const wait = pause();
+      if (wait) await wait;
+    }
+  }
+  return signal.aborted ? null : { all, recentCandidates: matched };
 }
