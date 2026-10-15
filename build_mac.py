@@ -14,6 +14,29 @@ APP_NAME = "Goose Note"
 ROOT = Path(__file__).resolve().parent
 BUILT_APP = ROOT / "dist-desktop" / f"{APP_NAME}.app"
 INSTALLED_APP = Path("/Applications") / f"{APP_NAME}.app"
+LSREGISTER = Path(
+    "/System/Library/Frameworks/CoreServices.framework/Frameworks/"
+    "LaunchServices.framework/Support/lsregister"
+)
+
+
+def refresh_app_registration() -> None:
+    """Remove duplicate handlers without deleting builds, backups or user data."""
+    dump = subprocess.run(
+        [str(LSREGISTER), "-dump"], check=True, capture_output=True, text=True
+    ).stdout
+    paths = set()
+    # Each LaunchServices bundle record starts with its own bundle id.
+    for record in re.split(r"(?m)^bundle id:", dump):
+        if not re.search(r"(?m)^identifier:\s+com\.goosenote\.desktop\s*$", record):
+            continue
+        match = re.search(r"(?m)^path:\s+(.+?)\s+\(0x[0-9a-f]+\)\s*$", record)
+        if match and Path(match[1]) != INSTALLED_APP:
+            paths.add(match[1])
+    for path in sorted(paths):
+        subprocess.run([str(LSREGISTER), "-u", path], check=True)
+    subprocess.run([str(LSREGISTER), "-f", str(INSTALLED_APP)], check=True)
+    print(f"[mac] 已清理 {len(paths)} 个重复注册，仅注册正式安装位置")
 
 
 def is_app_running() -> bool:
@@ -57,15 +80,15 @@ def run_build() -> None:
 def install_copy() -> None:
     if not BUILT_APP.is_dir():
         raise FileNotFoundError(f"未找到构建产物：{BUILT_APP}")
-    was_running = quit_running_app()
+    quit_running_app()
     if INSTALLED_APP.exists():
         print(f"[mac] 删除旧副本：{INSTALLED_APP}")
         shutil.rmtree(INSTALLED_APP)
     print(f"[mac] 复制到：{INSTALLED_APP}")
     shutil.copytree(BUILT_APP, INSTALLED_APP, symlinks=True)
-    if was_running:
-        print(f"[mac] 重新打开：{INSTALLED_APP}")
-        subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
+    refresh_app_registration()
+    print(f"[mac] 打开：{INSTALLED_APP}")
+    subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
 
 
 def main() -> int:
