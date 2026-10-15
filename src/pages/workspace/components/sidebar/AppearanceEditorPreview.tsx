@@ -42,7 +42,7 @@ function EditorSample({
           className="appearance-preview-sidebar w-44 shrink-0 border-r border-border/70 p-3"
           style={{
             background: "var(--goose-shell-surface)",
-            fontFamily: "var(--font-sidebar)",
+            fontFamily: "var(--font-ui)",
             fontSize: computeSidebarFontSize(uiFontSize),
           }}
         >

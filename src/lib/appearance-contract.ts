@@ -6,4 +6,4 @@ export interface AppearanceBridge {
   publish: (snapshot: AppearanceSnapshot) => void;
   onChanged: (callback: (snapshot: AppearanceSnapshot) => void) => () => void;
 }
-export const APPEARANCE_KEYS = ["theme", "accentColor", "customFonts", "uiFontSize", "editorFontSize", "editorLineHeight", "sidebarFontSize", "uiFontFamily", "sidebarFontFamily"] as const;
+export const APPEARANCE_KEYS = ["theme", "accentColor", "customFonts", "uiFontSize", "editorFontSize", "editorLineHeight", "sidebarFontSize", "uiFontFamily"] as const;

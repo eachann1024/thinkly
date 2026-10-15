@@ -2,7 +2,7 @@ import type { SettingsState } from "@/stores/settings";
 import type { Page } from "@/types";
 import type { UnreferencedLocalAsset } from "./local-folder-asset-maintenance";
 
-export type AssetAppearance = Pick<SettingsState, "theme" | "accentColor" | "customFonts" | "uiFontSize" | "editorFontSize" | "editorLineHeight" | "sidebarFontSize" | "uiFontFamily" | "sidebarFontFamily">;
+export type AssetAppearance = Pick<SettingsState, "theme" | "accentColor" | "customFonts" | "uiFontSize" | "editorFontSize" | "editorLineHeight" | "sidebarFontSize" | "uiFontFamily">;
 
 export type AssetNotebook = { id: string; name: string; localPath: string };
 export type AssetWorkspaceSnapshot = {
