@@ -104,6 +104,7 @@ export function SidebarModeRail({
       </TooltipProvider>
       <SidebarFooter
         notebookFooterHost={notebookFooterHost}
+        showNotebookSwitcher={currentView === "pages" && !settingsOpen && !inHistoryMode}
         isSettingsOpen={settingsOpen}
         onOpenSettings={() => {
           if (inHistoryMode) exitHistoryView();

@@ -108,7 +108,7 @@ export function renderSidebarViews(
       <div
         ref={setNotebookFooterHost}
         className="sidebar-notebook-footer"
-        hidden={settingsOpen}
+        hidden={settingsOpen || inHistoryMode || currentView !== "pages"}
       />
     </>
   );
