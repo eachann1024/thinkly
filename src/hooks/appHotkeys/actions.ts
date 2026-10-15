@@ -1,3 +1,4 @@
+import { createNamedPage } from "@/lib/create-named-page";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { toast } from "@/components/ui/sonner";
 import { useSettings } from "@/stores/useSettings";
@@ -142,16 +143,12 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     activateWorkspace();
     closeNotebookAiIfFullscreen();
     void (async () => {
-      const pagesStore = usePages.getState();
       const notebooksStore = useNotebooks.getState();
       const { activeNotebookId, notebooks } = notebooksStore;
       if (!activeNotebookId) return;
 
       const notebook = notebooks[activeNotebookId];
-      const newPageId =
-        notebook?.source === "local-folder"
-          ? await pagesStore.createLocalPage(undefined, activeNotebookId)
-          : pagesStore.createPage(undefined, activeNotebookId);
+      const newPageId = await createNamedPage(undefined, activeNotebookId);
       if (!newPageId) return;
       useTabs.getState().openTab(newPageId);
       toast.success(

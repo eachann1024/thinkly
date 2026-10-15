@@ -28,7 +28,7 @@ export interface RenderItemArgs {
   info: TreeInformation;
   onCreateLocalFile?: (parentId?: string) => void;
   onCreateLocalFolder?: (parentId?: string) => void;
-  onCommitPendingCreate?: (id: string, name: string) => void;
+  onCommitPendingCreate?: (id: string, name: string) => Promise<boolean>;
   onCancelPendingCreate?: (id: string) => void;
   onItemDragStart?: (id: string) => void;
   onItemDragEnd?: () => void;

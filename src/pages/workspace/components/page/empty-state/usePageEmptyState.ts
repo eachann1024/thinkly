@@ -1,48 +1,16 @@
+import { createNamedPage } from "@/lib/create-named-page";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useEffect, useCallback, useMemo } from "react";
 import { toast } from "@/components/ui/sonner";
-import { getPageTitle } from "@/components/editor/utils/page-title";
-import { requestPageTitleFocus } from "@/lib/page-title-focus";
-import { DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { dialogs } from "@/lib/electron-platform/dialogs";
 import { useTabs } from "@/stores/useTabs";
-import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { isElectronHost } from "@/lib/local-vault";
-
-const isEmptyContent = (
-  content:
-    | {
-        type?: string;
-        content?: Array<{
-          type?: string;
-          content?: unknown[];
-        }>;
-      }
-    | null
-    | undefined,
-) => {
-  if (!content || content.type !== "doc") return true;
-  if (!content.content || content.content.length === 0) return true;
-  if (content.content.length === 1) {
-    const first = content.content[0];
-    if (
-      first.type === "paragraph" &&
-      (!first.content || first.content.length === 0)
-    ) {
-      return true;
-    }
-  }
-  return false;
-};
 
 export function usePageEmptyState() {
   const {
-    createPage,
-    createLocalPage,
-    pages,
     loadLocalFolderPages,
   } = usePages();
   const {
@@ -72,40 +40,8 @@ export function usePageEmptyState() {
       }
     }
 
-    const notebook = notebookId ? notebooks[notebookId] : undefined;
-    const isLocalFolder = notebook?.source === "local-folder";
-
-    if (isLocalFolder) {
-      const localPageId = await createLocalPage(undefined, notebookId || undefined);
-      if (localPageId) openInCurrentTab(localPageId);
-      return localPageId;
-    }
-
-    const matchWorkspaceId = notebookId || DEFAULT_NOTEBOOK;
-    const existingBlankPage = Object.values(pages).find((p) => {
-      const matchWorkspace = p.workspaceId === matchWorkspaceId;
-      const notTrashed = !p.trashedAt;
-      const title = getPageTitle(p);
-      const isBlankTitle = !title || title === "无标题" || title.trim() === "";
-      const isBlankContent = isEmptyContent(p.content);
-      return matchWorkspace && notTrashed && isBlankTitle && isBlankContent;
-    });
-
-    if (existingBlankPage) {
-      openInCurrentTab(existingBlankPage.id);
-      requestPageTitleFocus(existingBlankPage.id);
-      if (!effectiveSingleTabMode()) {
-        window.setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent("goose-note:focus-editor-start"),
-          );
-        }, 100);
-      }
-      return existingBlankPage.id;
-    }
-
-    const newPageId = createPage(undefined, matchWorkspaceId);
-    openInCurrentTab(newPageId);
+    const newPageId = await createNamedPage(undefined, notebookId);
+    if (newPageId) openInCurrentTab(newPageId);
     return newPageId;
   }, [
     activeNotebook,
@@ -113,10 +49,7 @@ export function usePageEmptyState() {
     notebooks,
     createNotebook,
     setActiveNotebook,
-    createLocalPage,
     openInCurrentTab,
-    pages,
-    createPage,
   ]);
 
   const onCreatePage = useCallback(async () => {

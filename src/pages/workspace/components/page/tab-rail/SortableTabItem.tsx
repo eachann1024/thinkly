@@ -217,6 +217,15 @@ export function SortableTabItem({
           {tab.pinned ? "取消固定" : "固定标签"}
         </ContextMenuItem>
         <ContextMenuSeparator />
+        {hasOtherTabs && <ContextMenuItem onSelect={onCloseOthers}>
+          关闭其他标签页
+        </ContextMenuItem>}
+        {hasLeftTabs && <ContextMenuItem onSelect={onCloseLeft}>
+          关闭左侧标签页
+        </ContextMenuItem>}
+        {hasRightTabs && <ContextMenuItem onSelect={onCloseRight}>
+          关闭右侧标签页
+        </ContextMenuItem>}
         <ContextMenuItem onSelect={onClose}>
           关闭
           {closeTabShortcutLabel && (
@@ -224,15 +233,6 @@ export function SortableTabItem({
               {closeTabShortcutLabel}
             </span>
           )}
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={onCloseOthers} disabled={!hasOtherTabs}>
-          关闭其他标签页
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={onCloseLeft} disabled={!hasLeftTabs}>
-          关闭左侧标签页
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={onCloseRight} disabled={!hasRightTabs}>
-          关闭右侧标签页
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

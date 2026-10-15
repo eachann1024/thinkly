@@ -7,26 +7,13 @@ import {
 } from "@/components/editor/utils/blocknote-content";
 import { UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
 import { requestPageTitleFocus } from "@/lib/page-title-focus";
-import { effectiveSingleTabMode } from "@/lib/tabMode";
 
 export const initialContent: JSONContent =
   createEmptyBlockNoteContent(UNTITLED_PAGE_TITLE);
 
-/**
- * 新建页聚焦策略：
- * - 单标签 / 本地文件：页头或标签 pill 上的 SingleTabTitle 响应 requestPageTitleFocus
- * - 多个文档标签 + 内部页：focus-editor-start 把光标放到首块 H1 标题末尾
- */
-export function focusNewPage(pageId: string, focusEditorStart = false) {
+/** 新建后由活动编辑器消费请求，等待编辑器挂载后再聚焦正文。 */
+export function focusNewPage(pageId: string) {
   requestPageTitleFocus(pageId);
-  if (!focusEditorStart || effectiveSingleTabMode()) {
-    return;
-  }
-  if (typeof window !== "undefined") {
-    window.setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("goose-note:focus-editor-start"));
-    }, 100);
-  }
 }
 
 export function createDefaultPageContent(

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   completePageTitleFocus,
+  subscribePageTitleFocus,
   isPageTitleFocusRequested,
 } from "@/lib/page-title-focus";
 import {
@@ -111,6 +112,20 @@ export function useEditorHostEvents(
       };
       if (!focusBody()) requestAnimationFrame(() => focusBody());
     };
+
+    let focusFrame: number | null = null;
+    const focusCreatedPage = () => {
+      const pageId = pageRef.current?.id;
+      if (!isActiveEditor || !pageId || !isPageTitleFocusRequested(pageId)) return;
+      if (focusFrame !== null) cancelAnimationFrame(focusFrame);
+      focusFrame = requestAnimationFrame(() => {
+        if (pageRef.current?.id !== pageId || !isPageTitleFocusRequested(pageId)) return;
+        handleFocusBody();
+        completePageTitleFocus(pageId);
+      });
+    };
+    const unsubscribeTitleFocus = subscribePageTitleFocus(focusCreatedPage);
+    focusCreatedPage();
 
     const handlePluginEnter = () => {
       if (!isActiveEditor) return;
@@ -223,6 +238,8 @@ export function useEditorHostEvents(
     );
 
     return () => {
+      unsubscribeTitleFocus();
+      if (focusFrame !== null) cancelAnimationFrame(focusFrame);
       window.removeEventListener(
         "goose-note:asset-references",
         handleAssetReferences,

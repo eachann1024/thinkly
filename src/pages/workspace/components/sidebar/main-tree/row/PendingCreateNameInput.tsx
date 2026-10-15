@@ -1,99 +1,64 @@
 import { Input } from "@/components/ui/input";
 import { useLayoutEffect, useRef, useState } from "react";
+import { useImeInput } from "@/hooks/useImeInput";
+import { toast } from "@/components/ui/sonner";
+import { normalizeNewFileName } from "@/lib/new-page-name";
 
-export function PendingCreateNameInput({
-  id,
-  kind,
-  onCommit,
-  onCancel,
-}: {
+export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
   id: string;
   kind: "folder" | "file";
-  onCommit?: (id: string, name: string) => void;
+  onCommit?: (id: string, name: string) => Promise<boolean>;
   onCancel?: (id: string) => void;
 }) {
-  const defaultName = kind === "folder" ? "新建文件夹" : "未命名";
-  const [value, setValue] = useState(defaultName);
+  const { value, valueRef, inputProps, isComposing } = useImeInput(kind === "folder" ? "新建文件夹" : "");
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const committedRef = useRef(false);
-  const readyToCommitBlurRef = useRef(false);
-
+  const finishedRef = useRef(false);
+  const [busy, setBusy] = useState(false);
   useLayoutEffect(() => {
-    const focusInput = (shouldSelect: boolean) => {
-      const input = inputRef.current;
-      if (!input) return;
-      input.focus();
-      if (shouldSelect) input.select();
-    };
-
-    focusInput(true);
-    const raf = window.requestAnimationFrame(() => {
-      if (document.activeElement !== inputRef.current) {
-        focusInput(true);
-      }
-    });
-    const timer = window.setTimeout(() => {
-      readyToCommitBlurRef.current = true;
-      if (document.activeElement !== inputRef.current) {
-        focusInput(true);
-      }
-    }, 280);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(timer);
-    };
+    inputRef.current?.focus();
+    inputRef.current?.select();
   }, []);
 
-  const commit = () => {
-    if (committedRef.current) return;
-    const next = value.trim();
-    if (!next) {
-      committedRef.current = true;
-      onCancel?.(id);
-      return;
+  const cancel = () => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    onCancel?.(id);
+  };
+  const commit = async () => {
+    if (finishedRef.current) return;
+    try {
+      const name = kind === "file" ? normalizeNewFileName(valueRef.current) : valueRef.current.trim();
+      if (!name) { cancel(); return; }
+      finishedRef.current = true;
+      setBusy(true);
+      if (await onCommit?.(id, name)) return;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "创建失败，请重试");
     }
-    committedRef.current = true;
-    onCommit?.(id, next);
+    finishedRef.current = false;
+    setBusy(false);
+    inputRef.current?.focus();
   };
 
   return (
     <span className="relative z-20 flex min-w-0 flex-1 items-center leading-snug">
-      <Input variant="inline" context="shell"
-        ref={inputRef}
+      <Input variant="inline" context="shell" ref={inputRef}
         className="min-w-0 flex-1 cursor-text select-text"
-        value={value}
-        placeholder={defaultName}
-        draggable={false}
-        onChange={(e) => {
-          setValue(e.target.value);
-        }}
-        onBlur={() => {
-          if (!readyToCommitBlurRef.current) {
-            window.requestAnimationFrame(() => {
-              inputRef.current?.focus();
-              inputRef.current?.select();
-            });
-            return;
-          }
-          commit();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            if (committedRef.current) return;
-            committedRef.current = true;
-            onCancel?.(id);
+        value={value} {...inputProps} readOnly={busy} draggable={false}
+        onBlur={() => { if (kind === "file") cancel(); else void commit(); }}
+        onKeyDown={(event) => {
+          if (isComposing(event)) return;
+          if (event.key === "Enter") {
+            event.preventDefault(); event.stopPropagation(); void commit();
+          } else if (event.key === "Escape") {
+            event.preventDefault(); event.stopPropagation(); cancel();
           }
         }}
         onClick={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
-        aria-label={kind === "folder" ? "文件夹名称" : "文件名称"}
-      />
+        aria-label={kind === "folder" ? "文件夹名称" : "文件名称"} />
     </span>
   );
 }

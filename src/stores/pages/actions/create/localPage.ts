@@ -1,3 +1,5 @@
+import { flushEditorContent } from "../flushEditor";
+import { requestNewPageName } from "@/lib/new-page-name";
 import type { StoreSet, StoreGet } from "../hydrate";
 import { UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
 import { createEmptyLocalPageContent } from "@/components/editor/utils/blocknote-content";
@@ -21,11 +23,15 @@ export const createLocalPageAction = async (
   workspaceId?: string,
 ): Promise<string | null> => {
   if (!workspaceId) return null;
-  const id = await get().createLocalPageRecord({
-    workspaceId,
-    parentId,
-    title: UNTITLED_PAGE_TITLE,
-    content: createEmptyLocalPageContent(),
+  const id = await requestNewPageName(workspaceId, async (title) => {
+    const parent = parentId ? get().pages[parentId] : undefined;
+    if (parentId && (!parent || parent.workspaceId !== workspaceId || parent.trashedAt)) {
+      throw new Error("目标文件夹已不存在，请重新选择位置");
+    }
+    flushEditorContent();
+    return get().createLocalPageRecord({
+      workspaceId, parentId, title, content: createEmptyLocalPageContent(),
+    });
   });
   if (!id) return null;
   set({ activePageId: id });

@@ -1,11 +1,10 @@
 import { toast } from "@/components/ui/sonner";
 import { useNotebooks } from "@/stores/useNotebooks";
-import { usePages } from "@/stores/usePages";
+import { createNamedPage } from "@/lib/create-named-page";
 
 /**
  * 分屏前创建同本空白页。
- * 内置笔记本走 createPage；本地文件夹优先 unsaved local page，
- * Electron 本地文件夹没有 unsaved 通道时回退 createLocalPage。
+ * 所有手动新建均先命名；取消时不创建分屏。
  */
 export async function createSplitBlankPage(): Promise<string | null> {
   const notebooks = useNotebooks.getState();
@@ -17,20 +16,5 @@ export async function createSplitBlankPage(): Promise<string | null> {
     return null;
   }
 
-  const notebook = notebooks.notebooks[workspaceId];
-  const pages = usePages.getState();
-
-  if (notebook?.source === "local-folder") {
-    const unsavedId = pages.createUnsavedLocalPage(workspaceId);
-    if (unsavedId) return unsavedId;
-    const localId = await pages.createLocalPage(undefined, workspaceId);
-    if (localId) return localId;
-    toast.error("无法创建分屏页面");
-    return null;
-  }
-
-  const pageId = pages.createPage(undefined, workspaceId);
-  if (pageId) return pageId;
-  toast.error("无法创建分屏页面");
-  return null;
+  return createNamedPage(undefined, workspaceId);
 }
