@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import * as GooseIcons from "@/components/ui/icons";
 import { SidebarFooter } from "../SidebarFooter";
+import { SidebarRailIcon } from "../SidebarRailIcon";
 import { readSearchSelection } from "../readSearchSelection";
 import { useSearchSession } from "../useSearchSession";
 import type { useSidebarHover } from "./useSidebarHover";
@@ -32,19 +32,19 @@ export function SidebarModeRail({
     {
       view: "pages" as const,
       label: "本地",
-      Icon: GooseIcons.FolderOpen,
+      icon: "folder" as const,
       digit: 1 as const,
     },
     {
       view: "outline" as const,
       label: "大纲",
-      Icon: GooseIcons.ListTree,
+      icon: "outline" as const,
       digit: 2 as const,
     },
     {
       view: "search" as const,
       label: "搜索",
-      Icon: GooseIcons.Search,
+      icon: "search" as const,
       digit: 3 as const,
     },
   ];
@@ -60,7 +60,7 @@ export function SidebarModeRail({
           className="sidebar-mode-rail"
           aria-label="侧栏视图"
         >
-          {views.map(({ view, label, Icon, digit }) => (
+          {views.map(({ view, label, icon, digit }) => (
             <Tooltip key={view}>
               <TooltipTrigger asChild>
                 <Button contentStyle="preserve" variant="ghost" size="sm"
@@ -91,8 +91,10 @@ export function SidebarModeRail({
                     openSidebarView(view);
                   }}
                 >
-                  <Icon aria-hidden="true" className="h-4 w-4" />
-                  <span className="sidebar-mode-rail-label">{label}</span>
+                  <SidebarRailIcon
+                    name={icon}
+                    selected={!settingsOpen && currentView === view}
+                  />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">

@@ -1,8 +1,8 @@
 import { IconButton } from "@/components/ui/icon-button";
-import * as GooseIcons from "@/components/ui/icons";
 import { AppUpdateButton } from "@/components/app-update/AppUpdateButton";
 import { cn } from "@/lib/utils";
 import { NotebookSwitcher } from "./NotebookSwitcher";
+import { SidebarRailIcon } from "./SidebarRailIcon";
 import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
@@ -38,14 +38,13 @@ export function SidebarFooter({
           <TooltipTrigger asChild>
             <IconButton size="xs"
               type="button"
-              className={cn(btnClass, "sidebar-footer-control--labeled", isSettingsOpen && activeClass)}
+              className={cn(btnClass, isSettingsOpen && activeClass)}
               aria-label="设置"
               title="设置"
               aria-pressed={isSettingsOpen}
               onClick={onOpenSettings}
             >
-              <GooseIcons.Settings aria-hidden="true" className="h-4 w-4" />
-              <span className="sidebar-rail-control-label">设置</span>
+              <SidebarRailIcon name="settings" selected={isSettingsOpen} />
             </IconButton>
           </TooltipTrigger>
           <TooltipContent side="right">设置</TooltipContent>
