@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { FilePlus2, FolderOpen } from "@/components/ui/icons";
-import { isElectronHost } from "@/lib/local-vault";
 import { usePageEmptyState } from "./empty-state/usePageEmptyState";
 import "./empty-state/page-empty-state.css";
 
@@ -11,7 +10,7 @@ function EmptyStateActionIcon({ actionKey }: { actionKey: string }) {
 
 export function PageEmptyState() {
   const { isLocalFolder, actions } = usePageEmptyState();
-  const needsFolder = isElectronHost && !isLocalFolder;
+  const needsFolder = !isLocalFolder;
   const [primary, ...secondary] = actions;
 
   return (

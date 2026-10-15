@@ -1,5 +1,4 @@
 import { HostAdapter } from "@/lib/host/adapter";
-import { hostRuntime } from "@/lib/host";
 import { fs } from "@/lib/electron-platform/fs";
 import {
   currentLocalNotebookRoot,
@@ -14,15 +13,12 @@ import {
 import { isInternalAssetRef } from "@/lib/internalAssetRef";
 import type { FileAttachmentAttrs } from "@/types";
 
-export const MAX_FILE_ATTACHMENT_SIZE = 10 * 1024 * 1024;
-export const ELECTRON_MAX_FILE_ATTACHMENT_SIZE = 50 * 1024 * 1024;
+export const MAX_FILE_ATTACHMENT_SIZE = 50 * 1024 * 1024;
 
-/** 附件上限：Electron 10MB，Electron 桌面端 50MB。 */
 export function getMaxFileAttachmentSize(): number {
-  return hostRuntime.kind === "electron" ? ELECTRON_MAX_FILE_ATTACHMENT_SIZE : MAX_FILE_ATTACHMENT_SIZE;
+  return MAX_FILE_ATTACHMENT_SIZE;
 }
 const FILE_ATTACHMENT_PREFIX = "att-file:";
-const FILE_ID_PREFIX = "goose-file/";
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
 export function sanitizeFileName(fileName: string): string {
@@ -96,68 +92,42 @@ export const fileStorage = {
     const localPagePath = await currentLocalPagePath();
 
     // Electron 仅本地文件夹模式：无仓库（当前页非本地文件）时禁止附件写入内置 db
-    if (!localPagePath && hostRuntime.kind === "electron") {
+    if (!localPagePath) {
       throw new Error("请先打开文件夹仓库，再插入附件");
     }
 
-    if (localPagePath) {
-      if (!fs.isAvailable()) {
-        throw new Error("本地文件服务未就绪，无法保存附件");
-      }
-
-      const assetsDirectory = `${pageDirectory(localPagePath)}/assets`;
-      const ext = resolveStorageExtension(file.name);
-      const filename = `file_${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
-      const fullPath = `${assetsDirectory}/${filename}`;
-      const notebookRoot = await currentLocalNotebookRoot();
-      if (notebookRoot && !isPathInsideNotebookRoot(fullPath, notebookRoot)) {
-        throw new Error("附件保存路径超出笔记本目录");
-      }
-
-      if (
-        !(await fs.existsAsync(assetsDirectory)) &&
-        !(await fs.mkdir(assetsDirectory))
-      ) {
-        throw new Error("附件资源目录创建失败");
-      }
-
-      const buffer = new Uint8Array(await file.arrayBuffer());
-      const saved = await fs.writeFileAsync(
-        fullPath,
-        uint8ArrayToBase64(buffer),
-        "base64",
-      );
-      if (!saved) {
-        throw new Error("附件写入本地文件夹失败");
-      }
-
-      return {
-        storageRef: `./assets/${filename}`,
-        fileName: sanitizeFileName(file.name),
-        mimeType,
-        size: file.size,
-        uploadedAt: Date.now(),
-      };
+    if (!fs.isAvailable()) {
+      throw new Error("本地文件服务未就绪，无法保存附件");
     }
 
-    const attachmentId = `${FILE_ID_PREFIX}${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
-    const buffer = new Uint8Array(await file.arrayBuffer());
-    const result = await HostAdapter.db.postAttachment(attachmentId, buffer, mimeType);
+    const assetsDirectory = `${pageDirectory(localPagePath)}/assets`;
+    const ext = resolveStorageExtension(file.name);
+    const filename = `file_${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+    const fullPath = `${assetsDirectory}/${filename}`;
+    const notebookRoot = await currentLocalNotebookRoot();
+    if (notebookRoot && !isPathInsideNotebookRoot(fullPath, notebookRoot)) {
+      throw new Error("附件保存路径超出笔记本目录");
+    }
 
-    if (!result || result.ok === false) {
-      const detail = typeof result?.error === "string" ? result.error : "";
-      if (detail.includes("上限")) {
-        throw new Error(detail);
-      }
-      throw new Error(
-        hostRuntime.kind === "electron"
-          ? detail || "附件写入磁盘失败"
-          : "附件上传失败，请检查存储空间",
-      );
+    if (
+      !(await fs.existsAsync(assetsDirectory)) &&
+      !(await fs.mkdir(assetsDirectory))
+    ) {
+      throw new Error("附件资源目录创建失败");
+    }
+
+    const buffer = new Uint8Array(await file.arrayBuffer());
+    const saved = await fs.writeFileAsync(
+      fullPath,
+      uint8ArrayToBase64(buffer),
+      "base64",
+    );
+    if (!saved) {
+      throw new Error("附件写入本地文件夹失败");
     }
 
     return {
-      storageRef: `${FILE_ATTACHMENT_PREFIX}${attachmentId}`,
+      storageRef: `./assets/${filename}`,
       fileName: sanitizeFileName(file.name),
       mimeType,
       size: file.size,

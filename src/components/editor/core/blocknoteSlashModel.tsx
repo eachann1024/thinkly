@@ -80,11 +80,15 @@ export function isSlashMenuDivider(item: SlashMenuItem): boolean {
 
 /** 速记小窗 / 紧凑构建只保留常用输入块。 */
 export const COMPACT_SLASH_MENU_TITLES = new Set([
+  "文本",
   "一级标题",
   "二级标题",
   "待办事项",
   "无序列表",
   "有序列表",
+  "折叠列表",
+  "折叠一级标题",
+  "折叠二级标题",
   "引用",
   "标注",
   "分隔线",

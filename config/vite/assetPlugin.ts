@@ -7,14 +7,11 @@ import {
   rmSync,
 } from "node:fs";
 import type { Plugin } from "vite";
-import { isQuicknoteBuild } from "./targets";
 export function createAssetPlugin(root: string): Plugin {
   return {
     name: "exclude-guide-assets-from-electron",
     closeBundle() {
-      const outDir = isQuicknoteBuild
-        ? "dist-quicknote"
-        : "dist-electron/renderer";
+      const outDir = "dist-electron/renderer";
       rmSync(path.resolve(root, outDir, "guide"), {
         recursive: true,
         force: true,

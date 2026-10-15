@@ -1,10 +1,10 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin } from "@tiptap/pm/state";
-import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import { selectionTouchesProtectedTitle } from "../utils/documentTitlePolicy";
 
 /**
- * 在 heading 块（任意 level 1-6）内禁用全部字符级样式快捷键：
+ * 仅在 normalized 页面首标题内禁用字符级样式快捷键；普通 heading 与 raw 首标题放行：
  * bold (Mod+B) / italic (Mod+I) / underline (Mod+U) / code (Mod+E) / strike (Mod+Shift+S)。
  *
  * 为什么用 ProseMirror handleKeyDown 而非 tiptap keymap：
@@ -15,31 +15,11 @@ import type { EditorView } from "@tiptap/pm/view";
  * true（吞掉事件），tiptap 内置快捷键永远收不到该按键，拦截确定性最强。
  */
 
-/**
- * 从 ProseMirror selection 向上找最近的 blockContainer，返回其内容块类型名。
- * 与 suppressMarkdownInSpecialBlocks.ts 中同名函数保持一致写法。
- */
-function getCurrentBlockTypeName(state: EditorState): string | null {
-  const $from = state.selection.$from;
-  for (let d = $from.depth; d >= 1; d--) {
-    const node = $from.node(d);
-    if (node.type.name === "blockContainer") {
-      const contentNode = d + 1 <= $from.depth ? $from.node(d + 1) : null;
-      return contentNode?.type.name ?? null;
-    }
-  }
-  return null;
-}
-
-function isInHeadingBlock(state: EditorState): boolean {
-  return getCurrentBlockTypeName(state) === "heading";
-}
-
 function headingMarkSuppressPlugin() {
   return new Plugin({
     props: {
       handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
-        if (!isInHeadingBlock(view.state)) return false;
+        if (!selectionTouchesProtectedTitle(view.state)) return false;
 
         const mod = event.metaKey || event.ctrlKey;
         if (!mod) return false;

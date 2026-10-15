@@ -35,7 +35,6 @@ if (!Object.hasOwn(tasks, task)) {
 }
 
 const env = { ...process.env };
-if (task !== "dev") env.GOOSE_BUILD_TARGET = "electron";
 
 for (const command of tasks[task]) {
   const result = spawnSync(process.execPath, command, {

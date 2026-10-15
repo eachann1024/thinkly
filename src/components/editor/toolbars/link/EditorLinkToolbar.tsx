@@ -6,7 +6,6 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Input } from "@/components/editor/ui/input";
 import { Button } from "@/components/editor/ui/button";
 import { useEditorPlatform } from "@/components/editor/platform/context";
-import { useEditorSettings } from "@/components/editor/platform/hostContext";
 
 function normalizeExternalUrl(url: string): string {
   const trimmed = url.trim();
@@ -24,7 +23,6 @@ export function EditorLinkToolbar({
 }: LinkToolbarProps) {
   const editor = useBlockNoteEditor();
   const platform = useEditorPlatform();
-  const { openLinksInHost } = useEditorSettings();
   const [editing, setEditing] = useState(false);
   const [editUrl, setEditUrl] = useState(url);
   const [editText, setEditText] = useState(text);
@@ -58,9 +56,9 @@ export function EditorLinkToolbar({
   const handleOpen = useCallback(() => {
     const target = normalizeExternalUrl(url);
     if (target) {
-      void platform.shell.openUrl(target, openLinksInHost);
+      void platform.shell.openUrl(target);
     }
-  }, [url, platform, openLinksInHost]);
+  }, [url, platform]);
 
   const startEditing = useCallback(() => {
     if (!editor.isEditable) return;

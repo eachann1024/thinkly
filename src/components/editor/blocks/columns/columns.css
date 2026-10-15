@@ -1,0 +1,74 @@
+.bn-block:has(> .bn-block-content[data-content-type="columnLayout"]) {
+  position: relative;
+  min-width: 0;
+  margin: 8px 0;
+}
+.bn-block-content[data-content-type="columnLayout"] {
+  position: static;
+  height: 4px;
+  min-height: 4px;
+  padding: 0;
+}
+.bn-block:has(> .bn-block-content[data-content-type="columnLayout"]) > .bn-block-group {
+  display: grid;
+  grid-template-columns: var(--goose-column-template, repeat(2, minmax(0, 1fr)));
+  gap: 28px;
+  margin-left: 0;
+}
+.bn-block:has(> .bn-block-content[data-content-type="columnLayout"]) > .bn-block-group > .bn-block-outer {
+  min-width: 0;
+}
+.bn-block:has(> .bn-block-content[data-content-type="columnLayout"]) > .bn-block-group > .bn-block-outer::before,
+.bn-block:has(> .bn-block-content[data-content-type="columnSection"]) > .bn-block-group > .bn-block-outer::before {
+  display: none;
+}
+.bn-block-content[data-content-type="columnSection"] {
+  display: none;
+}
+.bn-block:has(> .bn-block-content[data-content-type="columnSection"]) > .bn-block-group {
+  margin-left: 0;
+  min-width: 0;
+}
+.goose-columns-chrome {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.goose-column-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  margin-left: -8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 2;
+}
+.goose-column-resizer::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--color-border, currentColor);
+  opacity: 0;
+}
+.goose-column-resizer:hover::after,
+.goose-column-resizer:focus-visible::after,
+.goose-columns-chrome[data-columns-resizing="true"] .goose-column-resizer::after {
+  opacity: 0.65;
+}
+.bn-block:has(> .bn-block-content > .goose-columns-chrome[data-columns-stacked="true"]) > .bn-block-group {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+.goose-columns-chrome[data-columns-stacked="true"] .goose-column-resizer,
+.goose-column-resizer:disabled {
+  display: none;
+}

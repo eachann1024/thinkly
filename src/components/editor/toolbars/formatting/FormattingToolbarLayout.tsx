@@ -12,6 +12,7 @@ import { useToolbarDensity } from "./useToolbarDensity";
 import { canShowAddToChatButton } from "@/components/editor/ai/composer/selectionQuote";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
+import { hasTableMergeAction, TableMergeControls } from "./TableMergeControls";
 
 function ToolbarSectionSeparator() {
   return (
@@ -56,6 +57,10 @@ export function FormattingToolbarLayout({
     sections.push(
       <SelectionSummary key="selection" label={selectionSummary} />,
     );
+  }
+
+  if (isTableSelection && hasTableMergeAction(state.editor)) {
+    sections.push(<TableMergeControls key="table-merge" editor={state.editor} />);
   }
 
   if (showAiButton) {

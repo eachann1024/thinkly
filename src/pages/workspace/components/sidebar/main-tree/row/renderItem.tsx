@@ -9,7 +9,6 @@ import {
 import { useNotebooks } from "@/stores/useNotebooks";
 import { toggleSidebarFolder } from "@/stores/useSidebarView";
 import { openPageFromSidebar } from "@/lib/sidebarPageNavigation";
-import { isElectronHost } from "@/lib/local-vault";
 import {
   INDENT,
   ROW_PADDING_LEFT,
@@ -33,7 +32,6 @@ export function renderItem({
   onCancelPendingCreate,
   onItemDragStart,
   onItemDragEnd,
-  onActivateLocalDirectory,
 }: RenderItemArgs) {
   const page = item.data;
   if (item.index === "root") {
@@ -156,16 +154,6 @@ export function renderItem({
     if (isLocalDirectory) {
       e.preventDefault();
       e.stopPropagation();
-      // Electron：点击文件夹只展开/收起，不打开目录详情页。
-      if (!isElectronHost) {
-        const pageId = String(item.index);
-        if (pageId && pageId !== "root") {
-          onActivateLocalDirectory?.(
-            pageId,
-            e.metaKey || e.ctrlKey ? "permanent" : "preview",
-          );
-        }
-      }
       // 指针已在 pointerdown 翻转；键盘（detail=0）在 click 补一次。
       if (e.detail === 0) toggleLocalDirectory();
       return;
@@ -206,12 +194,7 @@ export function renderItem({
         onDoubleClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (isLocalDirectory) {
-            if (isElectronHost) return;
-            // Electron：双击文件夹晋升永久标签（目录主页）
-            onActivateLocalDirectory?.(String(item.index), "permanent");
-            return;
-          }
+          if (isLocalDirectory) return;
           openPageFromSidebar(String(item.index), "permanent");
         }}
         aria-label={title}

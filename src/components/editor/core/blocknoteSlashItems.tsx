@@ -1,7 +1,9 @@
 import type { BlockNoteEditor } from "@blocknote/core";
-import { FilePanelExtension } from "@blocknote/core/extensions";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import { createSlashBlockInsertion } from "./blocknoteSlashActions";
+import { getColumnSlashMenuItems } from "./blocknoteColumnSlashItems";
+import { getToggleSlashMenuItems } from "./blocknoteToggleSlashItems";
+import { getMediaSlashMenuItems } from "./blocknoteMediaSlashItems";
 import {
   SLASH_ICONS,
   filterCompactSlashMenuItems,
@@ -27,9 +29,9 @@ export function getBlockNoteSlashMenuItems(
     transcodeVideoUploads: true,
     openAttachmentsExternally: true,
   },
-  options?: { compact?: boolean },
+  options?: { compact?: boolean; defaultCodeBlockWrap?: boolean },
 ): SlashMenuItem[] {
-  const insertOrUpdate = createSlashBlockInsertion(editor);
+  const insertOrUpdate = createSlashBlockInsertion(editor, options?.defaultCodeBlockWrap);
 
   const items: SlashMenuItem[] = [];
 
@@ -76,6 +78,7 @@ export function getBlockNoteSlashMenuItems(
   }
 
   items.push(
+    { title: "文本", aliases: ["text", "paragraph", "wenben"], onItemClick: () => insertOrUpdate({ type: "paragraph" }) },
     {
       title: "一级标题",
       description: "大标题",
@@ -85,7 +88,7 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 1 },
+          props: { level: 1, isToggleable: false, collapsed: false },
         }),
     },
     {
@@ -97,7 +100,7 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 2 },
+          props: { level: 2, isToggleable: false, collapsed: false },
         }),
     },
     {
@@ -109,9 +112,10 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 3 },
+          props: { level: 3, isToggleable: false, collapsed: false },
         }),
     },
+    ...getToggleSlashMenuItems(insertOrUpdate),
     { type: "divider" } as any,
     {
       title: "待办事项",
@@ -150,7 +154,7 @@ export function getBlockNoteSlashMenuItems(
       description: "插入一段引用文字",
       icon: SLASH_ICONS.quote,
       aliases: ["quote", "blockquote", "yinyong"],
-      badge: "| ",
+      badge: '" ',
       onItemClick: () => insertOrUpdate({ type: "quote" }),
     },
     {
@@ -191,7 +195,7 @@ export function getBlockNoteSlashMenuItems(
       aliases: ["code", "block", "daima"],
       badge: "```",
       onItemClick: () =>
-        insertOrUpdate({ type: "codeBlock", props: { language: "markdown" } }),
+        insertOrUpdate({ type: "codeBlock", props: { language: "text" } }),
     },
     {
       title: "数学公式",
@@ -209,54 +213,8 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({ type: "codeBlock", props: { language: "mermaid" } }),
     },
-    {
-      title: "图片",
-      description: "插入图片选择器模块",
-      icon: SLASH_ICONS.image,
-      aliases: ["image", "photo", "tupian", "img"],
-      onItemClick: () => {
-        const inserted = insertOrUpdate({ type: "image" });
-        editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
-      },
-    },
-    {
-      title: "视频",
-      description: features.transcodeVideoUploads
-        ? "上传视频并自动压缩为可播放的 MP4"
-        : "上传视频并保存为 Markdown 相对资源",
-      icon: SLASH_ICONS.video,
-      aliases: ["video", "movie", "shipin", "luping"],
-      onItemClick: () => {
-        const inserted = insertOrUpdate({ type: "video" });
-        // 视频为 void 块，末尾补空行便于继续书写
-        try {
-          const last = editor.document.at(-1);
-          if (last?.id === inserted?.id) {
-            editor.insertBlocks(
-              [{ type: "paragraph", content: "" }],
-              inserted,
-              "after",
-            );
-          }
-        } catch {
-          // ignore
-        }
-        editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
-      },
-    },
-    {
-      title: "文件",
-      description:
-        features.localFolderNotebook || !features.openAttachmentsExternally
-          ? "上传附件并保存为 Markdown 相对资源"
-          : "上传附件并直接调用系统默认应用打开",
-      icon: SLASH_ICONS.file,
-      aliases: ["file", "attachment", "pdf", "wenjian", "fujian"],
-      onItemClick: () => {
-        const inserted = insertOrUpdate({ type: "file" });
-        editor.getExtension(FilePanelExtension)?.showMenu(inserted.id);
-      },
-    },
+    ...getColumnSlashMenuItems(editor),
+    ...getMediaSlashMenuItems(editor, insertOrUpdate),
   );
 
   let menuItems = items;

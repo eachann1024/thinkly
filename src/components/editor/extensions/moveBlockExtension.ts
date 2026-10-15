@@ -1,4 +1,6 @@
 import { createExtension, type BlockNoteEditor } from "@blocknote/core";
+import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
+import { currentBlockNode, GooseBlockSelection, isBlockNodeSelection, selectedBlockRoots } from "./blockSelectionModel";
 
 type MoveDirection = "up" | "down";
 
@@ -15,13 +17,20 @@ type MovePlacement = {
 };
 
 function getDocumentTitleId(editor: AnyEditor): string | undefined {
-  return editor.document[0]?.id;
+  return getProtectedTitleBlockId(editor);
 }
 
 /**
  * 当前需要移动的 blocks：有多选时用选区，否则用光标所在块。
  */
 export function getBlocksToMove(editor: AnyEditor): AnyBlock[] {
+  if (isBlockNodeSelection(editor.prosemirrorState)) {
+    const roots = selectedBlockRoots(editor.prosemirrorState);
+    const current = currentBlockNode(editor.prosemirrorState);
+    return (roots.length > 0 ? roots : current ? [current] : [])
+      .map(({ node }) => editor.getBlock(String(node.attrs.id)))
+      .filter(Boolean) as AnyBlock[];
+  }
   return (
     (editor.getSelection()?.blocks as AnyBlock[] | undefined) ?? [
       editor.getTextCursorPosition().block as AnyBlock,
@@ -101,6 +110,7 @@ export function moveSelectedBlocksByShortcut(
   direction: MoveDirection,
 ): boolean {
   try {
+    if (editor.prosemirrorView.composing) return false;
     const blocks = getBlocksToMove(editor);
     if (blocks.length === 0) return true;
 
@@ -113,11 +123,34 @@ export function moveSelectedBlocksByShortcut(
       return true;
     }
 
-    if (direction === "up") {
-      editor.moveBlocksUp();
-    } else {
-      editor.moveBlocksDown();
-    }
+    if (editor.prosemirrorState.selection instanceof GooseBlockSelection) {
+      const first = blocks[0];
+      const last = blocks[blocks.length - 1];
+      const next = editor.getNextBlock(last);
+      const parent = editor.getParentBlock(last);
+      const placement = direction === "up"
+        ? getMoveUpPlacement(editor, editor.getPrevBlock(first) as AnyBlock | undefined,
+            editor.getParentBlock(first) as AnyBlock | undefined)
+        : next
+          ? next.children.length > 0
+            ? { referenceBlock: next.children[0], placement: "before" as const }
+            : { referenceBlock: next, placement: "after" as const }
+          : parent ? { referenceBlock: parent, placement: "after" as const } : undefined;
+      if (!placement) return true;
+      editor.transact((tr) => {
+        editor.removeBlocks(blocks);
+        editor.insertBlocks(blocks, placement.referenceBlock, placement.placement);
+        const positions = new Map<string, number>();
+        tr.doc.descendants((node, pos) => {
+          if (node.type.name === "blockContainer") positions.set(String(node.attrs.id), pos);
+        });
+        const start = positions.get(first.id), end = positions.get(last.id);
+        if (start !== undefined && end !== undefined) {
+          tr.setSelection(GooseBlockSelection.create(tr.doc, start, end));
+        }
+      });
+    } else if (direction === "up") editor.moveBlocksUp();
+    else editor.moveBlocksDown();
   } catch {
     // 吞掉异常，保证快捷键始终被消费
   }
@@ -128,6 +161,8 @@ export function moveSelectedBlocksByShortcut(
 export const gooseMoveBlockExtension = createExtension({
   key: "goose-move-block",
   keyboardShortcuts: {
+    "Mod-Shift-ArrowUp": ({ editor }) => moveSelectedBlocksByShortcut(editor, "up"),
+    "Mod-Shift-ArrowDown": ({ editor }) => moveSelectedBlocksByShortcut(editor, "down"),
     "Alt-ArrowUp": ({ editor }) => moveSelectedBlocksByShortcut(editor, "up"),
     "Alt-ArrowDown": ({ editor }) =>
       moveSelectedBlocksByShortcut(editor, "down"),

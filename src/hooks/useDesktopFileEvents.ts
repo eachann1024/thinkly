@@ -6,7 +6,7 @@ import { fs } from "@/lib/electron-platform/fs";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { restoreLastNoteIfNeeded, clearWorkspaceStartupSelection } from "@/lib/workspaceStartup";
 
-export function usePluginEvents() {
+export function useDesktopFileEvents() {
   useEffect(() => {
     const api = getGooseDesktop();
     if (!api?.onOpenMarkdownFiles) return;

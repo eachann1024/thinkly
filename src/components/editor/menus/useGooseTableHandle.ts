@@ -200,7 +200,7 @@ export function useGooseTableHandle(
     const columnCount = getTableColumnCount(content);
     const columnWidths = getEvenColumnWidths(
       columnCount,
-      getBlockElementWidth(state.block.id),
+      getBlockElementWidth(state.block.id, editor.prosemirrorView.dom),
     );
     if (!columnWidths) return;
 
@@ -213,6 +213,20 @@ export function useGooseTableHandle(
     });
     editor.setTextCursorPosition(state.block);
   }, [editor, state?.block]);
+
+  const handleFitPageWidth = () => {
+    if (!state?.block) return;
+    const content = state.block.content as PartialTableContent<any, any>;
+    const count = getTableColumnCount(content);
+    const width = getBlockElementWidth(state.block.id, editor.prosemirrorView.dom);
+    if (!count || width <= 0) return;
+    const previous = Array.from({ length: count }, (_, index) => content.columnWidths?.[index] || 120);
+    const total = previous.reduce((sum, value) => sum + value, 0);
+    const columnWidths = previous.map((value) => Math.max(35, Math.floor(width * value / total)));
+    const remainder = width - columnWidths.reduce((sum, value) => sum + value, 0);
+    if (remainder > 0) columnWidths[columnWidths.length - 1] += remainder;
+    editor.updateBlock(state.block, { type: "table", content: { ...content, columnWidths } });
+  };
 
   const runMenuAction = useCallback(
     (action: () => void) => {
@@ -248,6 +262,7 @@ export function useGooseTableHandle(
     handleDelete,
     toggleHeader,
     handleEvenColumnWidth,
+    handleFitPageWidth,
     runMenuAction,
     handleOpenChange,
   };

@@ -5,8 +5,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { PopoverContent, PopoverAction } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { isElectronHost } from "@/lib/local-vault";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import type { useNotebookSwitcherActions } from "./useNotebookSwitcherActions";
@@ -16,10 +14,6 @@ export function renderNotebookMenu(
   context: ReturnType<typeof useNotebookSwitcherActions>,
 ) {
   const {
-    onOpenSettings,
-    variant,
-    toggleDarkMode,
-    toggleSidebarCollapsed,
     activeNotebookId,
     deleteNotebook,
     setIsOpen,
@@ -30,7 +24,6 @@ export function renderNotebookMenu(
     notebookKind,
     notebookList,
     canDeleteNotebook,
-    handleCreate,
     handleOpenLocalFolder,
     handleEdit,
     handleDragStart,
@@ -119,7 +112,6 @@ export function renderNotebookMenu(
         </DndContext>
       </div>
       <div className="mx-1 my-1 h-px bg-border" />
-      {isElectronHost ? (
         <PopoverAction
           className="min-h-9 w-full justify-start gap-1.5 rounded-lg px-2 py-1.5 text-xs whitespace-nowrap"
           onClick={handleOpenLocalFolder}
@@ -127,59 +119,6 @@ export function renderNotebookMenu(
           <GooseIcons.FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
           打开文件夹
         </PopoverAction>
-      ) : (
-        <div className="grid grid-cols-2 gap-1">
-          <PopoverAction
-            className="min-h-9 w-full justify-start gap-1.5 rounded-lg px-2 py-1.5 text-xs whitespace-nowrap"
-            onClick={handleCreate}
-          >
-            <GooseIcons.BookPlus className="h-3.5 w-3.5 text-muted-foreground" />
-            新建笔记本
-          </PopoverAction>
-          <PopoverAction
-            className="min-h-9 w-full justify-start gap-1.5 rounded-lg px-2 py-1.5 text-xs whitespace-nowrap"
-            onClick={handleOpenLocalFolder}
-          >
-            <GooseIcons.FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
-            打开文件夹
-          </PopoverAction>
-        </div>
-      )}
-
-      {!isElectronHost && (
-        <div className="flex justify-end gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="切换外观"
-            onClick={toggleDarkMode}
-          >
-            <GooseIcons.Sun className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="设置"
-            onClick={() => {
-              setIsOpen(false);
-              onOpenSettings?.();
-            }}
-          >
-            <GooseIcons.Settings className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      {!isElectronHost && (
-        <PopoverAction
-          onClick={() => {
-            setIsOpen(false);
-            toggleSidebarCollapsed();
-          }}
-        >
-          <GooseIcons.PanelLeft className="h-4 w-4 text-muted-foreground" />
-          收起侧栏
-        </PopoverAction>
-      )}
     </PopoverContent>
   );
 }

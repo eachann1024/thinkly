@@ -1,32 +1,39 @@
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
-import { requestOpenPageMention } from "./pageMentionBridge";
+import { useEditorPageContext } from "../platform/hostContext";
+import { usePageMentionTitle } from "./usePageMentionTitle";
 import {
   PAGE_MENTION_TYPE,
   mentionOpenPayload,
   pageMentionLabel,
+  pageMentionFromMarkdownLink,
+  sanitizePageMentionProps,
+  serializePageMentionHref,
   type PageMentionProps,
 } from "./pageMention";
 
 function PageMentionTag({ props }: { props: PageMentionProps }) {
-  const label = pageMentionLabel(props);
+  const { onOpenPage } = useEditorPageContext();
+  const live = usePageMentionTitle(props);
+  const label = pageMentionLabel(live);
   const open = mentionOpenPayload(props);
   return (
     <span
       className="goose-page-mention"
       data-page-id={open.pageId}
       data-wiki-target={open.wikiTarget}
-      title={props.notebookName ? `${label} · ${props.notebookName}` : label}
+      role="link"
+      title={live.notebookName ? `${label} · ${live.notebookName}` : label}
       onMouseDown={(event) => {
         if (event.button !== 0) return;
         if (!open.pageId && !open.wikiTarget) return;
         const newTab = isPlatformPrimaryModifierEvent(event);
-        const opened = requestOpenPageMention(
+        const opened = onOpenPage(
           open.pageId,
           open.wikiTarget,
-          newTab ? { newTab: true } : { splitOnly: true },
+          newTab ? { newTab: true } : undefined,
         );
-        if (!newTab && !opened) return;
+        if (opened === false) return;
         event.preventDefault();
         event.stopPropagation();
       }}
@@ -49,11 +56,25 @@ export const pageMentionSpec = createReactInlineContentSpec(
     content: "none",
   },
   {
+    parse: (element) => {
+      const encoded = element.getAttribute("data-goose-page-mention");
+      if (encoded) {
+        try {
+          const props = sanitizePageMentionProps(JSON.parse(decodeURIComponent(encoded)));
+          if (props) return props;
+        } catch { /* 无效标记继续按 href 或可见文字导入。 */ }
+      }
+      const href = element.tagName === "A" ? element.getAttribute("href") : null;
+      return href ? pageMentionFromMarkdownLink(element.textContent || "", href) ?? undefined : undefined;
+    },
     render: (props) => (
       <PageMentionTag props={props.inlineContent.props as PageMentionProps} />
     ),
     toExternalHTML: (props) => (
-      <span>{pageMentionLabel(props.inlineContent.props as PageMentionProps)}</span>
+      <a
+        href={serializePageMentionHref(props.inlineContent.props as PageMentionProps)}
+        data-goose-page-mention={encodeURIComponent(JSON.stringify(props.inlineContent.props))}
+      >{pageMentionLabel(props.inlineContent.props as PageMentionProps)}</a>
     ),
   },
 );

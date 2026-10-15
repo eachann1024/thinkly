@@ -32,7 +32,7 @@ user agent). All network activity is listed below.
 - **Error reporting**: disabled by default. It is only enabled if you create `~/.config/goose/error-reporting.json`
   with `enabled: true` and your own Sentry DSN; reports then go to that DSN.
 - **Remote images, videos and files in your notes**: content you embed by URL is loaded from that URL.
-- **Links** (feedback form, plugin pages, search shortcuts) open in your browser only when you click them.
+- **Links** (feedback form, search shortcuts) open in your browser only when you click them.
 
 ## Your choices
 

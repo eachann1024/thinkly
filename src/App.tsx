@@ -11,7 +11,7 @@ import { useSettings } from "@/stores/useSettings";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { useAppHotkeys } from "./hooks/useAppHotkeys";
 import { useDesktopHotkeys } from "./hooks/useDesktopHotkeys";
-import { usePluginEvents } from "./hooks/usePluginEvents";
+import { useDesktopFileEvents } from "./hooks/useDesktopFileEvents";
 import { useNativeContextMenuGuard } from "./hooks/useNativeContextMenuGuard";
 import {
   applyAppearanceScaleVariables,
@@ -68,19 +68,14 @@ function App() {
   // 全局兜底：禁止未被 Radix / A1 处理的原生浏览器右键菜单
   useNativeContextMenuGuard();
 
-  // 订阅插件/本地关联事件
-  const { restoreLastNoteIfNeeded, clearActivePageForBlankEntry } = usePluginEvents();
+  // 订阅桌面文件关联和文件夹加载事件
+  const { restoreLastNoteIfNeeded, clearActivePageForBlankEntry } = useDesktopFileEvents();
 
   // 首帧稳定后解除启动过渡禁用（bootstrap 在渲染前已打上标记；
   // 若未标记则该调用是无副作用的清理）。
   useEffect(() => {
     releaseStartupSettlingAfterPaint();
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    (window as any).__gooseNoteAutoOpenLastNote = privacy.autoOpenLastNote;
-  }, [privacy.autoOpenLastNote]);
 
   // 同步 tab 状态：清理已删除页面的 tab（保留尚未加载的本地文件夹标签）
   useEffect(() => {

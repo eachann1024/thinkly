@@ -75,8 +75,8 @@ export interface EditorPlatformFs {
 export interface EditorPlatformShell {
   openPath(targetPath: string): Promise<boolean>;
   showItemInFolder(targetPath: string): Promise<boolean>;
-  /** Electron 无内置浏览器，忽略 useInternalBrowser 走系统浏览器 */
-  openUrl(url: string, useInternalBrowser?: boolean): Promise<void>;
+  /** 使用系统默认浏览器打开链接。 */
+  openUrl(url: string): Promise<void>;
   showNotification(body: string): void;
   getDownloadsPath(): Promise<string | null>;
 }

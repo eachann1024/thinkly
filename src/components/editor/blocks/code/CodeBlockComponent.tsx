@@ -36,7 +36,7 @@ export function CodeBlockComponent({
       editor={editor}
       language={language}
       wrap={wrap}
-      collapsed={collapsed}
+      collapsed={edit.collapsed}
       summary={summary}
       isEditable={isEditable}
       edit={edit}

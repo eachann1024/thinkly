@@ -1,6 +1,4 @@
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { useSidebarView } from "@/stores/useSidebarView";
-import { isElectronHost } from "@/lib/local-vault";
 import { sortNotebooksByOrder, useNotebooks } from "@/stores/useNotebooks";
 
 export function useNotebookSwitcherState({
@@ -10,16 +8,9 @@ export function useNotebookSwitcherState({
   onOpenSettings?: () => void;
   variant?: "default" | "rail";
 } = {}) {
-  const toggleDarkMode = useSettings((s) => s.toggleDarkMode);
-
-  const toggleSidebarCollapsed = useSidebarView(
-    (s) => s.toggleSidebarCollapsed,
-  );
-
   const {
     notebooks,
     activeNotebookId,
-    createNotebook,
     createLocalFolderNotebook,
     updateNotebook,
     deleteNotebook,
@@ -63,36 +54,24 @@ export function useNotebookSwitcherState({
     isLocalFolder: false,
   });
 
-  const [createDialog, setCreateDialog] = useState({
-    open: false,
-    name: "",
-    icon: "BookOpen",
-    error: "",
-  });
-
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
 
   const isRail = variant === "rail";
 
-  const notebookKind = isElectronHost ? "文件夹" : "笔记本";
+  const notebookKind = "文件夹";
 
   const activeNotebookLabel =
-    activeNotebook?.name || (isElectronHost ? "打开文件夹" : "选择笔记本");
+    activeNotebook?.name || "打开文件夹";
 
   const notebookList = sortNotebooksByOrder(notebooks);
 
   // Electron 仅本地文件夹模式：最后一个文件夹也允许移除（回到空态）
-  const canDeleteNotebook = isElectronHost
-    ? notebookList.length > 0
-    : notebookList.length > 1;
+  const canDeleteNotebook = notebookList.length > 0;
   return {
     onOpenSettings,
     variant,
-    toggleDarkMode,
-    toggleSidebarCollapsed,
     notebooks,
     activeNotebookId,
-    createNotebook,
     createLocalFolderNotebook,
     updateNotebook,
     deleteNotebook,
@@ -105,8 +84,6 @@ export function useNotebookSwitcherState({
     sensors,
     editDialog,
     setEditDialog,
-    createDialog,
-    setCreateDialog,
     activeNotebook,
     isRail,
     notebookKind,

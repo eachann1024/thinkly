@@ -29,11 +29,11 @@ export function createEditorOptions(
     editorInstanceRef,
     getActivePageLocalFilePathRef,
     onOpenPageRef,
-    openLinksInHostRef,
   } = session;
   return {
     initialContent: initialContent as any,
     schema: editorSchema,
+    tables: { splitCells: true, cellBackgroundColor: true, cellTextColor: true },
     // 原生 quote-block-shortcuts 仍禁用；引用由 markdownInputRules 认 >／＞／|／｜ + 半角空格。
     // 同时禁用 toggle-list-item-shortcuts：Enter 对非空 toggleListItem 无条件分裂，
     // 顺序先于自定义扩展；行为在 collapsedToggleEnterExtension 中按收起态重实现。
@@ -49,7 +49,7 @@ export function createEditorOptions(
         // 速记小窗打开即可输入，不用长提示抢占空白草稿的视觉焦点。
         // 常规笔记本仍保留菜单入口提示。
         default:
-          __GOOSE_LITE__ || isQuickNoteEditorPage(page)
+          isQuickNoteEditorPage(page)
             ? ""
             : "输入 / 选择内容",
         quote: "引用",
@@ -108,7 +108,7 @@ export function createEditorOptions(
           const handled = onOpenPageRef.current(
             mentionPageId,
             mentionWikiTarget,
-            newTab ? { newTab: true } : { splitOnly: true },
+            newTab ? { newTab: true } : undefined,
           );
           if (!newTab && handled === false) return false;
           return true;
@@ -126,7 +126,6 @@ export function createEditorOptions(
             if (normalizedHref) {
               platformRef.current.shell.openUrl(
                 normalizedHref,
-                openLinksInHostRef.current,
               );
             }
           }

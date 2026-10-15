@@ -1,3 +1,5 @@
+import { snapshotEditorSelection, restoreEditorSelection } from "../utils/editorSelectionSnapshot";
+import { toast } from "@/components/ui/sonner";
 import { normalizeBlockNoteClipboardHtml } from "../extensions/copyCurrentBlockExtension";
 import { htmlLooksLikeBlockNoteClipboard } from "../utils/multilinePaste";
 import { looksLikeBlockStructure } from "../utils/clipboard";
@@ -42,6 +44,7 @@ export function handleEditorStructurePaste(
     ) {
       event.preventDefault();
       event.stopPropagation();
+      const titleSelection = snapshotEditorSelection(editor.prosemirrorState);
       void (async () => {
         let blocks: any[] = [];
         try {
@@ -58,6 +61,10 @@ export function handleEditorStructurePaste(
           blocks = [];
         }
         if (!blocks || blocks.length === 0) return true;
+        if (!restoreEditorSelection(editor.prosemirrorView, titleSelection)) {
+          toast.error("笔记内容已变化，请重新粘贴");
+          return true;
+        }
         const titleBlock = editor.document[0];
         if (!titleBlock) return true;
         // 直接插到标题之后；原有正文顺移，不覆盖标题。

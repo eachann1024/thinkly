@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { NotebooksState, Notebook } from "./notebooks/types";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { isElectronHost, DEFAULT_NOTEBOOK_ID } from "./notebooks/types";
+import { DEFAULT_NOTEBOOK_ID } from "./notebooks/types";
 import { createCreateNotebookActions } from "./notebooks/createActions";
 import { createDeleteNotebookActions } from "./notebooks/deleteActions";
 import { createActiveNotebookActions } from "./notebooks/activeActions";
@@ -11,19 +11,8 @@ import { localStorageAdapter } from "@/lib/storage";
 export const useNotebooks = create<NotebooksState>()(
   persist(
     (set, get) => ({
-      notebooks: isElectronHost
-        ? ({} as Record<string, Notebook>)
-        : {
-            [DEFAULT_NOTEBOOK_ID]: {
-              id: DEFAULT_NOTEBOOK_ID,
-              name: "Note",
-              icon: "BookOpen",
-              order: 0,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            },
-          },
-      activeNotebookId: isElectronHost ? null : DEFAULT_NOTEBOOK_ID,
+      notebooks: {} as Record<string, Notebook>,
+      activeNotebookId: null,
       lastActivePageByNotebook: {},
       localFolderLoadStates: {},
       ...createCreateNotebookActions(set, get),
@@ -44,7 +33,7 @@ export const useNotebooks = create<NotebooksState>()(
       onRehydrateStorage: () => (state) => {
         // Electron 仅本地文件夹模式：水合后立刻丢掉内置本（含历史 default-notebook），
         // 绝不回种；activeNotebookId 失效时回空态。
-        if (!isElectronHost || !state) return;
+        if (!state) return;
         const localOnly = Object.fromEntries(
           Object.entries(state.notebooks).filter(
             ([, notebook]) => notebook.source === "local-folder",

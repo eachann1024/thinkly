@@ -1,5 +1,4 @@
 import type { StoreSet, StoreGet } from "../hydrate";
-import { isElectronHostTarget } from "./onboarding";
 import { useNotebooks } from "../../../useNotebooks";
 import { flushEditorContent } from "../flushEditor";
 import { useSettings } from "@/stores/useSettings";
@@ -17,12 +16,8 @@ export const createUnsavedLocalPageAction = (
   workspaceId: string,
   parentId?: string,
 ): string => {
-  if (isElectronHostTarget()) {
-    const target = useNotebooks.getState().notebooks[workspaceId];
-    if (target?.source !== "local-folder") return "";
-  } else {
-    return "";
-  }
+  const target = useNotebooks.getState().notebooks[workspaceId];
+  if (target?.source !== "local-folder") return "";
   flushEditorContent();
 
   const icon = useSettings.getState().randomIconOnCreate

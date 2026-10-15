@@ -107,15 +107,18 @@ export function getSelectedImageUrl(state: EditorState): string | null {
   };
 
   const selectedNodeUrl = readImageUrl(selection.node);
-  if (selectedNodeUrl) return selectedNodeUrl;
+  if (selectedNodeUrl) {
+    for (let depth = selection.$from.depth; depth > 0; depth -= 1) {
+      const parent = selection.$from.node(depth);
+      if (parent.type.name === "blockContainer") return parent.childCount === 1 ? selectedNodeUrl : null;
+    }
+    return selectedNodeUrl;
+  }
 
-  let imageUrl: string | null = null;
-  selection.node.descendants((node) => {
-    if (imageUrl) return false;
-    imageUrl = readImageUrl(node);
-    return !imageUrl;
-  });
-  return imageUrl;
+  // 父块携带图片子树时仍是整块复制，不能误当成单张图片。
+  return selection.node.type.name === "blockContainer" && selection.node.childCount === 1 && selection.node.firstChild
+    ? readImageUrl(selection.node.firstChild)
+    : null;
 }
 
 /**

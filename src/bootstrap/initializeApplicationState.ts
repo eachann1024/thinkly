@@ -29,9 +29,7 @@ export async function initializeApplicationState(
     // Electron 仅本地文件夹模式不会恢复旧内置记事本，因此这些页面不会进入
     // 侧栏或成为活动页；但必须保留在 state 中，供备份链路和「设置 → 本地文件夹」
     // 的显式 Markdown 导出读取。不得在启动时过滤或清除这批升级数据。
-    if (__HOST_TARGET__ === "electron") {
-      usePages.setState({ activePageId: null, onboardingCompleted: true });
-    }
+    usePages.setState({ activePageId: null, onboardingCompleted: true });
   }
   if (!lean) {
     const nextNotebooksStore = useNotebooks.getState();

@@ -10,7 +10,6 @@ import {
 } from "@/lib/fixed-app-shortcuts";
 import type { useShortcutSettings } from "./useShortcutSettings";
 import {
-  isElectronHost,
   FIXED_SHORTCUTS,
   FIXED_SHORTCUT_PLATFORMS,
   FixedShortcutRow,
@@ -32,14 +31,12 @@ export function renderShortcutSettingsColumns(
   return (
     <div className="settings-shortcuts-columns">
       <div className="space-y-5">
-        {isElectronHost && (
-          <DesktopGlobalHotkeysCard
+        <DesktopGlobalHotkeysCard
             appShortcuts={appShortcuts}
             closeTabShortcut={closeTabShortcut}
             searchPanelCloseShortcut={searchPanelCloseShortcut}
             singleTabMode={singleTabMode}
-          />
-        )}
+        />
 
         <SettingsSectionCard title="应用内动作">
           <ShortcutField
@@ -204,7 +201,6 @@ export function renderShortcutSettingsColumns(
             {FIXED_SHORTCUTS.filter(
               (item) =>
                 (!singleTabMode || !item.tabOnly) &&
-                (!item.desktopOnly || isElectronHost) &&
                 (!item.platforms || item.platforms.includes(selectedPlatform)),
             ).map((item) => (
               <FixedShortcutRow

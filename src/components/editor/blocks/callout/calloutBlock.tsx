@@ -2,6 +2,10 @@ import { createReactBlockSpec } from "@blocknote/react";
 import { defaultProps, type BlockNoteEditor } from "@blocknote/core";
 import { resolvePageIcon } from "@/lib/resolvePageIcon";
 import { cn } from "@/components/editor/utils/cn";
+import { NotebookIconSelector } from "@/pages/workspace/components/sidebar/NotebookIconSelector";
+import { BG_PREVIEW, COLOR_PREVIEW } from "../../toolbars/formatting/colorPalette";
+import { sanitizeCssColor } from "@/lib/export/markdown/blockPropsProperties";
+import type { CSSProperties } from "react";
 import {
   DEFAULT_CALLOUT_ICON,
   LUCIDE_ICON_TO_EMOJI,
@@ -24,9 +28,21 @@ function renderCalloutIcon(iconStr: string, className?: string) {
   );
 }
 
+function calloutStyle(props: Record<string, unknown>): CSSProperties {
+  const background = sanitizeCssColor(props.backgroundColor);
+  const text = sanitizeCssColor(props.textColor);
+  return {
+    ...(background && background !== "default"
+      ? { backgroundColor: BG_PREVIEW[background] ?? background }
+      : {}),
+    ...(text && text !== "default" ? { color: COLOR_PREVIEW[text] ?? text } : {}),
+  };
+}
+
 function CalloutBlockView({
   block,
   contentRef,
+  editor,
 }: {
   block: any;
   contentRef: (node: HTMLElement | null) => void;
@@ -38,9 +54,17 @@ function CalloutBlockView({
     <div
       className="callout-block group flex w-full items-start gap-3 rounded-lg border border-[var(--goose-callout-border)] bg-[var(--goose-callout-bg)] px-3 py-2 text-[length:var(--editor-module-sm-font-size)] leading-[1.5]"
       data-callout="true"
+      style={calloutStyle(block.props)}
     >
       <div contentEditable={false} className="callout-icon-slot shrink-0">
-        {renderCalloutIcon(icon)}
+        {editor.isEditable ? (
+          <NotebookIconSelector value={icon} defaultIcon={DEFAULT_CALLOUT_ICON}
+            label="提示块图标" container={null} compact
+            onChange={(value) => {
+              if (!editor.isEditable) return;
+              editor.updateBlock(block, { props: { icon: value } });
+            }} />
+        ) : renderCalloutIcon(icon)}
       </div>
       <div
         ref={contentRef}
@@ -75,6 +99,7 @@ export const calloutBlock = createReactBlockSpec(
         <div
           className="flex items-start gap-3 rounded-lg border border-[var(--goose-callout-border)] bg-[var(--goose-callout-bg)] px-3 py-2 text-[length:var(--editor-module-sm-font-size)] leading-[1.5]"
           data-callout="true"
+          style={calloutStyle(block.props)}
         >
           <span className="callout-icon-slot shrink-0">
             {renderCalloutIcon(

@@ -1,6 +1,8 @@
 import { createExtension } from "@blocknote/core";
 import { addRowAfter, goToNextCell, isInTable } from "prosemirror-tables";
 import type { EditorView } from "prosemirror-view";
+import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
+import type { EditorState } from "prosemirror-state";
 
 const handleTableTab = (view: EditorView, direction: 1 | -1): boolean => {
   if (!isInTable(view.state)) return false;
@@ -61,6 +63,7 @@ function findBlockLocation(
 }
 
 function hasValidNestTarget(editor: {
+  prosemirrorState?: EditorState;
   document?: readonly HierarchyBlock[];
   getSelection?: () => { blocks: HierarchyBlock[] } | undefined;
 }): boolean {
@@ -91,9 +94,8 @@ function hasValidNestTarget(editor: {
   const previousSibling = first.siblings[first.index - 1];
   const isPageTitle =
     first.parentId === null &&
-    previousSibling.id === document[0]?.id &&
-    previousSibling.type === "heading" &&
-    previousSibling.props?.level === 1;
+    !!editor.prosemirrorState &&
+    previousSibling.id === getProtectedTitleBlockId(editor as { prosemirrorState: EditorState });
 
   // 分级全选正文会排除 H1；页面标题不是正文块的合法缩进父级。
   return !isPageTitle;
@@ -106,6 +108,7 @@ function hasValidNestTarget(editor: {
  */
 export function adjustSelectedBlockHierarchy(
   editor: {
+    prosemirrorState?: EditorState;
     document?: readonly HierarchyBlock[];
     getSelection?: () => { blocks: HierarchyBlock[] } | undefined;
     canNestBlock: () => boolean;

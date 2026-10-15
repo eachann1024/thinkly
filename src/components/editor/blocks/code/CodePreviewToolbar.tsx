@@ -25,6 +25,15 @@ export function CodePreviewToolbar({
   copyingImage,
   handleCopy,
 }: CodeBlockToolbarProps & CodeCopyState & { chipClass: string }) {
+  const copiesImage = previewMode === "preview" && Boolean(onCopyPreview);
+  const isCopyingImage = copiesImage && copyingImage;
+  const copyLabel = copied
+    ? copiesImage
+      ? "已复制图片"
+      : "已复制代码"
+    : copiesImage
+      ? "复制图片"
+      : "复制代码";
   return (
     <>
       <Tooltip>
@@ -71,13 +80,11 @@ export function CodePreviewToolbar({
             variant="ghost"
             size="sm"
             onClick={() => void handleCopy()}
-            disabled={copyingImage || (Boolean(onCopyPreview) && !canPreview)}
+            disabled={isCopyingImage || (copiesImage && !canPreview)}
             className={cn("h-7 w-7 p-0", chipClass)}
-            aria-label={
-              copied ? "已复制" : onCopyPreview ? "复制图片" : "复制代码"
-            }
+            aria-label={copyLabel}
           >
-            {copyingImage ? (
+            {isCopyingImage ? (
               <GooseIcons.Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : copied ? (
               <GooseIcons.Check
@@ -91,9 +98,7 @@ export function CodePreviewToolbar({
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          {copied ? "已复制" : onCopyPreview ? "复制图片" : "复制代码"}
-        </TooltipContent>
+        <TooltipContent>{copyLabel}</TooltipContent>
       </Tooltip>
 
       <div

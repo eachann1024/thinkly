@@ -18,6 +18,7 @@ function isCollapsedHeadingContent(
   container?: Node,
 ): boolean {
   if (content?.type.name !== "heading") return false;
+  if (content.attrs.isToggleable === true) return false;
   return (
     isCollapsedProp(content.attrs.collapsed) ||
     isCollapsedProp(container?.attrs.collapsed)

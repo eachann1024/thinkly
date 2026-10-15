@@ -53,6 +53,7 @@ function shouldEmitPlainTextBlock(node: PMNode): boolean {
 export type SerializePlainTextOptions = {
   /** 多块格式复制时带上 1. / - / # ，方便系统剪贴板丢掉内部 MIME 后仍能还原。 */
   includeBlockMarkers?: boolean;
+  preserveWhitespace?: boolean;
 };
 
 function blockClipboardMarker(
@@ -121,7 +122,7 @@ export function serializeDocRangePlainText(
 
   if ($from.sameParent($to) && $from.parent.isTextblock) {
     const text = doc.textBetween(from, to, "\n", "\n");
-    if (isCodePreservingBlock($from.parent)) {
+    if (isCodePreservingBlock($from.parent) || options?.preserveWhitespace) {
       return normalizeClipboardLineEndings(text);
     }
     return trimPlainTextLines(text);
@@ -178,7 +179,7 @@ export function serializeDocRangePlainText(
   }
 
   const hasCode = segments.some((segment) => segment.type === "codeBlock");
-  return hasCode
+  return hasCode || options?.preserveWhitespace
     ? normalizeClipboardLineEndings(result)
     : trimPlainTextLines(result);
 }

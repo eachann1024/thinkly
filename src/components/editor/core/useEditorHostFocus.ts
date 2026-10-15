@@ -80,18 +80,15 @@ export function useEditorHostFocus(
         completePageTitleFocus(pageId);
       });
     };
-    const handlePluginEnter = () => tasks.timeout(focusEditorSafely);
     const unsubscribeTitleFocus = subscribePageTitleFocus(focusCreatedPage);
     focusCreatedPage();
     window.addEventListener("goose-note:focus-editor-start", handleFocusStart);
     window.addEventListener("goose-note:focus-editor-body", handleFocusBody);
-    window.addEventListener("goose-note:plugin-enter", handlePluginEnter);
     return () => {
       unsubscribeTitleFocus();
       cancelCreatedPageFocus?.();
       window.removeEventListener("goose-note:focus-editor-start", handleFocusStart);
       window.removeEventListener("goose-note:focus-editor-body", handleFocusBody);
-      window.removeEventListener("goose-note:plugin-enter", handlePluginEnter);
     };
   }, [activePageId, editor, focusEditorSafely, isActiveEditor, pageRef, tasks, usesRawEditorContentRef]);
 }

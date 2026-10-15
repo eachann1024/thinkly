@@ -26,6 +26,9 @@ export function serializeCodeFenceInfo(
   if (collapsed) {
     metadata.collapsed = true;
   }
+  if (attrs?.wrap === true) {
+    metadata.wrap = true;
+  }
 
   if (Object.keys(metadata).length > 0) {
     tokens.push(
@@ -34,4 +37,14 @@ export function serializeCodeFenceInfo(
   }
 
   return tokens.join(" ");
+}
+
+/** 代码中本来就可以包含 Markdown 围栏，外层必须比内容里的连续标记更长。 */
+export function serializeFencedCode(text: string, language: string, attrs?: Record<string, unknown>): string {
+  const info = serializeCodeFenceInfo(language, attrs);
+  const char = info.includes("`") ? "~" : "`";
+  const runs = text.match(char === "`" ? /`+/g : /~+/g) ?? [];
+  const length = Math.max(3, ...runs.map((run) => run.length + 1));
+  const fence = char.repeat(length);
+  return `${fence}${info}\n${text}\n${fence}`;
 }

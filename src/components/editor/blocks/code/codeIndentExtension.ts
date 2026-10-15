@@ -1,126 +1,78 @@
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { createExtension } from "@blocknote/core";
-import { Fragment } from "prosemirror-model";
-import { Plugin, TextSelection } from "prosemirror-state";
+import { closeHistory } from "@tiptap/pm/history";
+import { Plugin } from "prosemirror-state";
 import { indentCodeSelection } from "./codeBlockIndent";
-import { getCodeDomSelection } from "./codeDomSelection";
+import {
+  getCodeBlockSelection,
+  getCodeBlockText,
+  insertCodeBlockText,
+  replaceCodeBlockText,
+} from "./codeBlockTransactions";
 
-function codeTextToInlineFragment(schema: any, text: string) {
-  if (!text) return Fragment.empty;
-  const hardBreakType = schema.nodes.hardBreak;
-  const nodes: any[] = [];
-
-  text.split("\n").forEach((line, index) => {
-    if (index > 0 && hardBreakType) nodes.push(hardBreakType.create());
-    if (line) nodes.push(schema.text(line));
-  });
-
-  return nodes.length > 0 ? Fragment.fromArray(nodes) : Fragment.empty;
-}
-function findCodeBlockDepth($pos: any) {
-  for (let depth = $pos.depth; depth >= 0; depth -= 1) {
-    if ($pos.node(depth)?.type?.name === "codeBlock") return depth;
-  }
-  return null;
-}
-
-function applyCodeBlockIndentTransaction(tr: any, outdent: boolean) {
-  const { $from, $to } = tr.selection;
-  const fromCodeDepth = findCodeBlockDepth($from);
-  const toCodeDepth = findCodeBlockDepth($to);
-  if (
-    fromCodeDepth == null ||
-    toCodeDepth == null ||
-    $from.before(fromCodeDepth) !== $to.before(toCodeDepth)
-  ) {
-    return false;
-  }
-
-  const codeBlockNode = $from.node(fromCodeDepth);
-  const contentStart = $from.start(fromCodeDepth);
-  const domSelection = getCodeDomSelection();
-  const currentText =
-    domSelection?.text ??
-    codeBlockNode.textBetween(0, codeBlockNode.content.size, "\n", "\n");
-  const selectionStart = domSelection?.start ?? $from.pos - contentStart;
-  const selectionEnd = domSelection?.end ?? $to.pos - contentStart;
-  const next = indentCodeSelection(currentText, selectionStart, selectionEnd, {
-    outdent,
-  });
-  const replacement = codeTextToInlineFragment(tr.doc.type.schema, next.text);
-
-  tr.replaceWith(
-    contentStart,
-    contentStart + codeBlockNode.content.size,
-    replacement,
-  );
-  tr.setSelection(
-    TextSelection.create(
-      tr.doc,
-      contentStart + next.selectionStart,
-      contentStart + next.selectionEnd,
-    ),
-  );
-  return true;
-}
-
-export const codeBlockTabIndentExtension = createExtension(({ editor }) => ({
+export const codeBlockTabIndentExtension = createExtension({
   key: "goose-code-block-tab-indent",
-  runsBefore: ["code-block-keyboard-shortcuts"],
-  mount: ({ dom, root, signal }) => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isWorkspaceSettingsOpen()) return;
-      if (event.key !== "Tab" || event.isComposing) return;
-      const domSelection = getCodeDomSelection();
-      if (!domSelection) return;
-      const { block } = editor.getTextCursorPosition();
-      if (block.type !== "codeBlock") return;
-
-      const next = indentCodeSelection(
-        domSelection.text,
-        domSelection.start,
-        domSelection.end,
-        {
-          outdent: event.shiftKey,
-        },
-      );
-      editor.updateBlock(block.id, { content: next.text } as any);
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    };
-
-    const target = root instanceof Document ? root : dom.ownerDocument;
-    target.addEventListener("keydown", handleKeyDown, {
-      capture: true,
-      signal,
-    });
-  },
-  keyboardShortcuts: {
-    Tab: ({ editor }) =>
-      editor.transact((tr) => applyCodeBlockIndentTransaction(tr, false)),
-    "Shift-Tab": ({ editor }) =>
-      editor.transact((tr) => applyCodeBlockIndentTransaction(tr, true)),
-  },
+  runsBefore: ["goose-tab-behavior"],
   prosemirrorPlugins: [
     new Plugin({
       props: {
         handleKeyDown(view, event) {
-          if (event.key !== "Tab" || event.isComposing || !view.editable) {
+          if (
+            event.key !== "Tab" ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.isComposing ||
+            event.keyCode === 229 ||
+            view.composing ||
+            !view.editable ||
+            isWorkspaceSettingsOpen()
+          ) {
             return false;
           }
-
-          const { state, dispatch } = view;
-          const tr = state.tr;
-          if (!applyCodeBlockIndentTransaction(tr, event.shiftKey)) {
+          const code = getCodeBlockSelection(view.state.selection);
+          if (!code) return false;
+          const currentText = getCodeBlockText(code.node);
+          const next = indentCodeSelection(
+            currentText,
+            code.anchor,
+            code.head,
+            { outdent: event.shiftKey },
+          );
+          if (
+            next.text === currentText &&
+            code.node.textContent === currentText &&
+            next.selectionStart === code.anchor &&
+            next.selectionEnd === code.head
+          )
+            return true;
+          const tr = closeHistory(view.state.tr);
+          replaceCodeBlockText(
+            tr,
+            next.text,
+            next.selectionStart,
+            next.selectionEnd,
+          );
+          view.dispatch(tr.scrollIntoView());
+          return true;
+        },
+        handlePaste(view, event) {
+          if (!view.editable || view.composing || isWorkspaceSettingsOpen())
             return false;
-          }
-
-          event.preventDefault();
-          dispatch(tr);
+          if (!getCodeBlockSelection(view.state.selection)) return false;
+          const text = event.clipboardData?.getData("text/plain");
+          if (text == null || text === "") return false;
+          const tr = closeHistory(view.state.tr);
+          insertCodeBlockText(tr, text.replace(/\r\n?/g, "\n"));
+          view.dispatch(
+            tr
+              .setMeta("paste", true)
+              .setMeta("uiEvent", "paste")
+              .scrollIntoView(),
+          );
           return true;
         },
       },
     }),
   ],
-}))();
+});

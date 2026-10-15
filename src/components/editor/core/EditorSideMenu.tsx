@@ -2,7 +2,7 @@ import { EditorAction } from "@/components/editor/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBlockNoteEditor, useExtension } from "@blocknote/react";
-import { SideMenuExtension } from "@blocknote/core/extensions";
+import { SideMenuExtension, SuggestionMenu } from "@blocknote/core/extensions";
 import { Plus, GripVertical, ChevronRight } from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { ensureBlockMoveDragging } from "@/components/editor/core/ensureBlockMoveDragging";
@@ -19,6 +19,8 @@ import {
 } from "@/components/editor/core/toggleHeadingGutter";
 import { getSectionInsertAnchorId } from "@/components/editor/core/headingSectionFold";
 import { useEditorSideMenuTarget } from "./useEditorSideMenuTarget";
+import { requestBlockMenu } from "../menus/blockMenuActions";
+import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 
 const isMac = /Mac/i.test(navigator.platform);
 const altKeyLabel = isMac ? "⌥" : "Alt";
@@ -83,18 +85,20 @@ export function EditorSideMenu() {
     (e: React.MouseEvent) => {
       setAddTipOpen(false);
       if (!block) return;
+      const titleId = getProtectedTitleBlockId(editor);
       const placement: "before" | "after" =
-        e.altKey || e.ctrlKey || e.metaKey ? "before" : "after";
+        block.id !== titleId && (e.altKey || e.ctrlKey || e.metaKey) ? "before" : "after";
       const current = editor.getBlock(block.id) ?? block;
       // 折叠中的 heading 点加号：插到 section 尾部，否则新块会立刻被快照外隐藏规则波及。
       const collapsedHeadingAfter =
         placement === "after" &&
         current.type === "heading" &&
+        !(current.props as { isToggleable?: boolean }).isToggleable &&
         readHeadingCollapsed(current);
       const content = current.content;
       const isEmpty =
         content !== undefined && Array.isArray(content) && content.length === 0;
-      if (isEmpty && placement === "after" && !collapsedHeadingAfter) {
+      if (isEmpty && current.type === "paragraph" && placement === "after" && !collapsedHeadingAfter) {
         editor.setTextCursorPosition(current);
       } else {
         const anchor = collapsedHeadingAfter
@@ -110,6 +114,7 @@ export function EditorSideMenu() {
         editor.setTextCursorPosition(inserted);
       }
       editor.focus();
+      editor.getExtension(SuggestionMenu)?.openSuggestionMenu("/", { ignoreQueryLength: true });
     },
     [block, editor],
   );
@@ -233,6 +238,11 @@ export function EditorSideMenu() {
           }}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onClick={(event) => {
+            if (isDragging) return;
+            pressedHandle.current = false;
+            requestBlockMenu(editor, block.id, event.clientX, event.clientY);
+          }}
           className={cn(
             "relative flex h-6 w-[22px] cursor-grab items-center justify-center rounded-[7px] text-muted-foreground",
             "before:absolute before:-left-0.5 before:top-1 before:bottom-1 before:w-px before:bg-border/55 before:content-['']",

@@ -10,7 +10,6 @@ export function useNotebookSwitcherActions(
 ) {
   const {
     notebooks,
-    createNotebook,
     createLocalFolderNotebook,
     updateNotebook,
     deleteNotebook,
@@ -19,38 +18,8 @@ export function useNotebookSwitcherActions(
     isDraggingRef,
     editDialog,
     setEditDialog,
-    createDialog,
-    setCreateDialog,
     notebookList,
   } = input;
-
-  const handleCreate = () => {
-    setCreateDialog({ open: true, name: "", icon: "BookOpen", error: "" });
-    setIsOpen(false);
-  };
-
-  const handleConfirmCreate = () => {
-    if (!createDialog.name.trim()) {
-      setCreateDialog({ ...createDialog, error: "请输入笔记本名称" });
-      return;
-    }
-
-    const nameExists = Object.values(notebooks).some(
-      (nb) => nb.name.toLowerCase() === createDialog.name.trim().toLowerCase(),
-    );
-    if (nameExists) {
-      setCreateDialog({ ...createDialog, error: "笔记本名称已存在" });
-      return;
-    }
-
-    const notebookId = createNotebook(
-      createDialog.name.trim(),
-      createDialog.icon,
-    );
-    activateWorkspace();
-    void activateNotebook(notebookId);
-    setCreateDialog({ open: false, name: "", icon: "BookOpen", error: "" });
-  };
 
   const handleOpenLocalFolder = async () => {
     try {
@@ -129,8 +98,6 @@ export function useNotebookSwitcherActions(
   };
   return {
     ...input,
-    handleCreate,
-    handleConfirmCreate,
     handleOpenLocalFolder,
     handleEdit,
     handleSaveEdit,

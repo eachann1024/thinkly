@@ -45,10 +45,16 @@ export function wikiPathKey(value: string): string {
 function lastUnescapedPipeIndex(value: string): number {
   for (let i = value.length - 1; i >= 0; i--) {
     if (value[i] !== "|") continue;
-    if (i > 0 && value[i - 1] === "\\") continue;
+    let slashes = 0;
+    for (let j = i - 1; j >= 0 && value[j] === "\\"; j--) slashes += 1;
+    if (slashes % 2 !== 0) continue;
     return i;
   }
   return -1;
+}
+
+function unescapeWikiText(value: string): string {
+  return value.replace(/\\([\\[\]|])/g, "$1");
 }
 
 function cutHeadingOrBlock(target: string): string {
@@ -73,8 +79,8 @@ export function parseWikiLinkInner(inner: string): ParsedWikiLink | null {
   if (!trimmed) return null;
   const pipe = lastUnescapedPipeIndex(trimmed);
   const targetPart = (pipe === -1 ? trimmed : trimmed.slice(0, pipe)).trim();
-  const alias = (pipe === -1 ? "" : trimmed.slice(pipe + 1)).trim();
-  const target = normalizeWikiPath(cutHeadingOrBlock(targetPart));
+  const alias = unescapeWikiText((pipe === -1 ? "" : trimmed.slice(pipe + 1)).trim());
+  const target = normalizeWikiPath(unescapeWikiText(cutHeadingOrBlock(targetPart)));
   if (!target || isWikiMediaTarget(target)) return null;
   return { target, alias };
 }
@@ -89,11 +95,12 @@ export function serializeWikiLinkMarkdown(
   target: string,
   alias?: string,
 ): string {
-  const safeTarget = target.replace(/\]/g, "\\]");
+  const escape = (value: string) => value.replace(/([\\[\]|])/g, "\\$1");
+  const safeTarget = escape(target);
   const trimmedAlias = alias?.trim() ?? "";
   const targetBase = wikiLinkDisplayTitle({ target, alias: "" });
   if (trimmedAlias && wikiPathKey(trimmedAlias) !== wikiPathKey(targetBase)) {
-    return `[[${safeTarget}|${trimmedAlias.replace(/\]/g, "\\]")}]]`;
+    return `[[${safeTarget}|${escape(trimmedAlias)}]]`;
   }
   return `[[${safeTarget}]]`;
 }

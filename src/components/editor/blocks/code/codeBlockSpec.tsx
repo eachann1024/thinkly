@@ -19,7 +19,7 @@ export const codeBlockSpec = createReactBlockSpec(
     content: "inline",
   },
   {
-    meta: { isolating: false },
+    meta: { code: true, isolating: false },
     render: ({ block, contentRef, editor }) => (
       <CodeBlockComponent
         block={block}

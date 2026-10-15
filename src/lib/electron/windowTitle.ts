@@ -25,7 +25,7 @@ export function resolveWindowTitle(
 
 /** 同步 document.title 与系统窗口标题；非 Electron 构建/调用失败时静默。 */
 export async function syncDesktopWindowTitle(title: string): Promise<void> {
-  if (__HOST_TARGET__ !== "electron") return;
+
   try {
     document.title = title;
     const api = getGooseDesktop();

@@ -6,9 +6,6 @@ import { useSettings } from "@/stores/useSettings";
 import { useTabs } from "@/stores/useTabs";
 import type { Page } from "@/types";
 
-const isElectronHost =
-  typeof __HOST_TARGET__ !== "undefined" && __HOST_TARGET__ === "electron";
-
 export type LastNoteRestoreResult =
   | "restored"
   | "already-active"
@@ -59,7 +56,7 @@ const isVisiblePageInNotebook = (page: Page | undefined, notebookId: string) =>
   !!page &&
   page.workspaceId === notebookId &&
   !page.trashedAt &&
-  !(isElectronHost && page.isFolder);
+  !page.isFolder;
 
 const resolveWorkspaceStartupPageId = (
   notebookId: string | null,
@@ -107,7 +104,7 @@ export function restoreLastNoteIfNeeded(): LastNoteRestoreResult {
   if (pagesStore.activePageId) {
     const current = pagesStore.pages[pagesStore.activePageId];
     // 桌面端文件夹不是可打开页面：清掉水合残留后再走普通恢复。
-    if (!(isElectronHost && current?.isFolder)) return "already-active";
+    if (!current?.isFolder) return "already-active";
     pagesStore.setActivePage(null);
   }
   if (!useSettings.getState().privacy.autoOpenLastNote) return "disabled";
@@ -134,15 +131,13 @@ export async function prepareWorkspaceStartup(): Promise<LastNoteRestoreResult> 
   const pagesStore = usePages.getState();
   if (!pagesStore.hydrated) return "not-ready";
 
-  if (isElectronHost) {
-    const { consumePendingAssociatedMarkdownFiles } = await import(
-      "@/lib/openAssociatedMarkdown"
-    );
-    const opened = await consumePendingAssociatedMarkdownFiles();
-    if (opened > 0) {
-      preserveStartupSelection = true;
-      return "opened-associated-file";
-    }
+  const { consumePendingAssociatedMarkdownFiles } = await import(
+    "@/lib/openAssociatedMarkdown"
+  );
+  const opened = await consumePendingAssociatedMarkdownFiles();
+  if (opened > 0) {
+    preserveStartupSelection = true;
+    return "opened-associated-file";
   }
 
   if (!useSettings.getState().privacy.autoOpenLastNote) {

@@ -4,6 +4,7 @@ import type { MarkType, Node as PMNode } from "@tiptap/pm/model";
 import { Plugin } from "@tiptap/pm/state";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import { selectionTouchesProtectedTitle } from "../utils/documentTitlePolicy";
 
 /**
  * 选中非空文本后按 `` ` ``：切换行内 code mark（Notion 风格），不插入反引号字符。
@@ -14,8 +15,8 @@ import type { EditorView } from "@tiptap/pm/view";
  * 不处理空选区：空选区仍走默认输入 / markdown input rule（`` `text` ``）。
  */
 
-/** 不允许切换行内 code 的内容块（与 heading 禁 mark、codeBlock 无 inline mark 一致） */
-const BLOCKED_CONTENT_TYPES = new Set(["heading", "codeBlock"]);
+/** 代码块无行内样式；页面首标题另按当前 raw/normalized 模式判断。 */
+const BLOCKED_CONTENT_TYPES = new Set(["codeBlock"]);
 
 type BacktickKeyEvent = Pick<
   KeyboardEvent,
@@ -44,7 +45,7 @@ export function isInlineCodeBacktickKeyEvent(event: BacktickKeyEvent): boolean {
 
 /**
  * 从 $pos 向上找最近的 blockContainer，返回其内容块类型名。
- * 与 headingMarkSuppressExtension / suppressMarkdownInSpecialBlocks 写法一致。
+ * 普通 heading 与其他支持 inline 的内容块采用相同行内 code 行为。
  */
 function getContentBlockTypeName($pos: EditorState["selection"]["$from"]): string | null {
   for (let d = $pos.depth; d >= 1; d--) {
@@ -58,12 +59,13 @@ function getContentBlockTypeName($pos: EditorState["selection"]["$from"]): strin
 }
 
 /**
- * 选区是否落在禁止行内 code 的块内（heading / codeBlock）。
+ * 选区是否落在禁止行内 code 的块内（受保护的首标题 / codeBlock）。
  * 多块选区时任一端点或覆盖文本落在 blocked 块即拒绝。
  */
 export function selectionTouchesBlockedInlineCodeBlock(
   state: EditorState,
 ): boolean {
+  if (selectionTouchesProtectedTitle(state)) return true;
   const { selection, doc } = state;
   const fromType = getContentBlockTypeName(selection.$from);
   if (fromType && BLOCKED_CONTENT_TYPES.has(fromType)) return true;

@@ -2,7 +2,6 @@ import * as GooseIcons from "@/components/ui/icons";
 import type { ReactNode } from "react";
 import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
 import { toast } from "@/components/ui/sonner";
-import { isElectronHost } from "@/lib/local-vault";
 import { clearLocalFolderOrder } from "@/stores/localFolderOrder";
 import { MenuShortcut, scheduleAfterMenuClose } from "../shared";
 import { useSidebarContextMenu } from "../useSidebarContextMenu";
@@ -36,7 +35,7 @@ export function buildSidebarCreateGroups(
     (!!onCreateLocalFile || !!onCreateLocalFolder);
 
   const showOpenTab =
-    !singleTabMode && !(isElectronHost && isLocalFolder && page.isFolder);
+    !singleTabMode && !(isLocalFolder && page.isFolder);
 
   const showLocalOpen = isLocalFolder && !isTrashed && !!page.localFilePath;
 

@@ -22,7 +22,7 @@ macOS 应用 `.zip` 仍会构建（Actions 附件），只在两个 macOS 包均
 
 Arch 指 Linux 发行版，Omarchy（Arch + Hyprland）同样使用 `.pacman` 包：执行 `sudo pacman -U ./goose-note-app-*.pacman`，包管理器解析并安装依赖（gtk3、nss、alsa-lib 等）。CI 在 Arch 官方容器中实际安装包、检查安装记录、应用资源和 `ldd` 无缺失库。此检查不代替图形桌面启动和功能验收。AppImage 可作为另一种 Linux 分发方式，部分系统需安装 FUSE。
 
-这些是未签名的开发测试构建；macOS 未公证，Windows 未做 Authenticode 签名。系统可能提示未知开发者。只对确认来源的构建按操作系统提示操作。应用版本来自 package.json；提交 SHA 和运行 ID 用于区分同版本不同构建，不应当作新的稳定发布版本。
+未配置签名的开发构建未签名、未公证，系统可能提示未知开发者；签名支持不代表某次构建已获批或已启用。只对确认来源的构建按操作系统提示操作。应用版本来自 package.json；提交 SHA 和运行 ID 用于区分同版本不同构建，不应当作新的稳定发布版本。
 
 每个平台的 Actions 附件包含安装包、`BUILD.json` 和 `SHA256SUMS.txt`。同一运行的 `source-<SHA>` 包含 `git archive` 生成的准确项目源码、锁文件、构建脚本及声明，不包含未提交的本地工作。项目源码归档不等同于已完成全部依赖的对应源码交付；公开分发前仍须按 SOURCE-CODE.md 补齐必要的依赖源码、核对第三方声明和字体来源。
 
@@ -37,4 +37,12 @@ node scripts/build-ci-installers.mjs mac arm64
 # 其他组合：mac x64、win x64、win arm64、linux x64
 ```
 
-安装包和校验清单位于 `dist-desktop/ci/`。CI 使用冻结锁文件，不依赖本机未提交修改。macOS arm64 还执行 `bun run mac` 验证原生应用构建和安装；打包检查包括所需格式是否齐全、Arch 包可安装。不表示所有桌面交互已经验收。现有 `aiPanelFocus.ts` 类型检查问题不作为此打包流水线的通过依据，类型检查需单独处理。
+安装包和校验清单位于 `dist-desktop/ci/`。CI 使用冻结锁文件，不依赖本机未提交修改。macOS arm64 还执行 `bun run mac` 验证原生应用构建和安装；打包检查包括所需格式是否齐全、Arch 包可安装。不表示所有桌面交互已经验收。类型检查需单独执行。
+
+## Windows SignPath 维护
+
+仅 Windows 发布运行（`PUBLISH=true`）且已配置 secret `SIGNPATH_API_TOKEN` 和 variable `SIGNPATH_ORGANIZATION_ID` 时启用签名；推送与 PR 构建不签名。缺少配置时沿用未签名路径，实际决策见 `scripts/signpath-config.mjs`。
+
+默认项目 slug 为 `goose-notes`，策略为 `release-signing`，主程序与安装包配置分别为 `app-exe`、`installer`。可分别通过 `SIGNPATH_PROJECT_SLUG`、`SIGNPATH_SIGNING_POLICY_SLUG`、`SIGNPATH_APP_ARTIFACT_CONFIGURATION_SLUG` 和 `SIGNPATH_INSTALLER_ARTIFACT_CONFIGURATION_SLUG` 覆盖；历史项目 slug 不随仓库更名修改。
+
+工作流先签 `Goose Note.exe`，再打 NSIS 安装包并签 installer；两个架构各提交两次请求。每次请求均需维护者在 SignPath 人工批准，任务最多等待 60 分钟。SignPath 账号、可信 GitHub 构建系统、签名策略和 artifact configuration 需按实际上传的 ZIP 内容配置；文档中的支持流程不代表服务审批或正式签名已完成。

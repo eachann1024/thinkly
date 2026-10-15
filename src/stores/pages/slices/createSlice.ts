@@ -2,7 +2,6 @@ import type { PagesState } from "../types";
 import { hydrateFromStorageAction } from "../actions/hydrate";
 import { loadInternalPage } from "@/lib/storage/pageRepository";
 import {
-  createOnboardingPagesAction,
   createPageAction,
   createPageRecordAction,
   createLocalPageAction,
@@ -22,7 +21,6 @@ export function createCreatePageSlice(
   PagesState,
   | "hydrateFromStorage"
   | "reloadPageFromStorage"
-  | "createOnboardingPages"
   | "createPage"
   | "createPageRecord"
   | "createLocalPage"
@@ -48,8 +46,6 @@ export function createCreatePageSlice(
       }));
       return true;
     },
-
-    createOnboardingPages: () => createOnboardingPagesAction(set, get),
 
     createPage: (parentId, workspaceId = DEFAULT_NOTEBOOK) =>
       createPageAction(set, get, parentId, workspaceId),

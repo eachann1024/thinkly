@@ -15,7 +15,6 @@ export const localStorageAdapter: StateStorage = {
   setItem: writeStorageValue,
   removeItem: deleteStorageValue,
 };
-export const flushLocalStorageWrites = async (): Promise<void> => {};
 export const getDbStorageItem = readStorageValue;
 export const setDbStorageItem = writeStorageValue;
 export const removeDbStorageItem = deleteStorageValue;

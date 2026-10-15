@@ -27,16 +27,15 @@ import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/
 import { EditorFilePanel } from "@/components/editor/menus/EditorFilePanel";
 import { GooseTableHandlesController } from "@/components/editor/menus/GooseTableHandlesController";
 import { EditorContextMenu } from "@/components/editor/menus/EditorContextMenu";
-import {
-  shouldOpenPageMentionSuggestionMenu,
-  shouldOpenSlashSuggestionMenu,
-} from "@/components/editor/utils/slashMenuPolicy";
+import { shouldOpenSlashSuggestionMenu } from "@/components/editor/utils/slashMenuPolicy";
+import { PageMentionControllers } from "../inline/PageMentionControllers";
 import { getCompactSlashMenuFloatingOptions } from "@/components/editor/utils/compactSlashMenuFloating";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { useEditorComposerInteractions } from "./useEditorComposerInteractions";
 import { useEditorComposerToolbar } from "./useEditorComposerToolbar";
 import { EditorLinkPopover } from "./EditorLinkPopover";
 import type { EditorComposerProps } from "./editorComposerTypes";
+import { EditorBlockMenu } from "../menus/EditorBlockMenu";
 
 export {
   normalizeClipboardLineEndings,
@@ -185,6 +184,7 @@ export function EditorComposer({
         }}
       >
         {showSideMenu && editable ? <EditorSideMenu /> : null}
+        {editable ? <EditorBlockMenu /> : null}
         {editable ? <GooseTableHandlesController /> : null}
         <FormattingToolbarHoldContext.Provider value={holdFormattingToolbar}>
           {__GOOSE_EDITOR_COMPACT__ || isQuickNoteEditorPage(page) ? (
@@ -240,20 +240,11 @@ export function EditorComposer({
                 }
               }}
             />
-            {__GOOSE_LITE__ || isQuickNoteEditorPage(page) ? null : (
-              <SuggestionMenuController
-                triggerCharacter="@"
+            {isQuickNoteEditorPage(page) ? null : (
+              <PageMentionControllers
+                editor={editor}
                 getItems={getMentionItems}
                 floatingUIOptions={slashMenuFloatingOptions}
-                shouldOpen={(event) =>
-                  shouldOpenPageMentionSuggestionMenu(event, editor)
-                }
-                suggestionMenuComponent={CustomSlashMenu as any}
-                onItemClick={(item) => {
-                  if (item && "onItemClick" in item) {
-                    (item as any).onItemClick();
-                  }
-                }}
               />
             )}
           </>

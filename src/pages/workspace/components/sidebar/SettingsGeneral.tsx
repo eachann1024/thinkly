@@ -42,7 +42,6 @@ export function SettingsGeneral({
             </div>
             <Switch id="notebook-hover-expand" checked={notebookDropdownHoverExpand} onCheckedChange={setNotebookDropdownHoverExpand} className={SWITCH_CLASS} />
           </div>
-          {__HOST_TARGET__ === "electron" && (
             <div className={`mt-2 flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
               <div>
                 <div className="flex items-center gap-3"><GooseIcons.Pin className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} /><Label htmlFor="window-always-on-top" className="cursor-pointer">窗口置顶</Label></div>
@@ -50,7 +49,6 @@ export function SettingsGeneral({
               </div>
               <Switch id="window-always-on-top" checked={alwaysOnTop} onCheckedChange={toggleAlwaysOnTop} className={SWITCH_CLASS} />
             </div>
-          )}
         </SettingsSectionCard>
         <SettingsSectionCard title="搜索设置">
           <div className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
@@ -61,7 +59,7 @@ export function SettingsGeneral({
             <Switch id="show-recent-in-search" checked={showRecentInSearch} onCheckedChange={setShowRecentInSearch} className={SWITCH_CLASS} />
           </div>
         </SettingsSectionCard>
-        {__HOST_TARGET__ === "electron" && <SettingsAppUpdate />}
+        <SettingsAppUpdate />
       </div>
     </div>
   );

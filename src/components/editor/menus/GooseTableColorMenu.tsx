@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
 } from "@/components/editor/ui/dropdown-menu";
 import { editTableDimension, tableDimensionColor } from "./tableMenuActions";
+import { TEXT_COLORS } from "../toolbars/formatting/colorPalette";
 
 interface GooseTableColorMenuProps {
   editor: any;
@@ -54,15 +55,7 @@ export function GooseTableColorMenu({
               <EditorMenuHeader className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
                 {property === "textColor" ? "文字颜色" : "背景颜色"}
               </EditorMenuHeader>
-              {(
-                [
-                  ["default", "默认"],
-                  ["gray", "灰色"],
-                  ["brown", "褐色"],
-                  ["green", "绿色"],
-                  ["blue", "蓝色"],
-                ] as const
-              ).map(([color, label]) => (
+              {TEXT_COLORS.map(({ color, name: label }) => (
                 <DropdownMenuItem
                   key={color}
                   id={`${property}:${color}`}

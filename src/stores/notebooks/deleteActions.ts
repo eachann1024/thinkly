@@ -1,5 +1,4 @@
 import type { NotebooksState } from "./types";
-import { isElectronHost } from "./types";
 import { usePages } from "../usePages";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { removeLocalPageMetaByWorkspaceId } from "@/lib/storage/pageRepository";
@@ -12,9 +11,6 @@ export function createDeleteNotebookActions(
   return {
     deleteNotebook: (id) => {
       const state = get();
-      const notebookCount = Object.keys(state.notebooks).length;
-      // 桌面端允许移除最后一个文件夹（回到空态）；Electron 至少保留一本。
-      if (!isElectronHost && notebookCount <= 1) return;
       const deletedNotebook = state.notebooks[id];
 
       const pagesStore = usePages.getState();

@@ -8,21 +8,11 @@ interface ImportMetaEnv {
   readonly VITE_TINYFISH_API_KEY_B?: string;
 }
 declare global {
-  const __HOST_TARGET__: "electron";
-
-  /**
-   * 速记小窗（plugin B / dist-quicknote）精简构建标志。
-   * GOOSE_BUILD_TARGET=quicknote 的构建里为 true（见 vite.config.ts define），
-   * 编辑器据此把 math/mermaid 退化为纯代码块、隐藏代码格式化按钮，
-   * 配合 alias 把 katex/mermaid/prettier 等重型依赖排除出小窗包。
-   * 主应用（plugin A）构建恒为 false，行为完全不变。
-   */
-  const __GOOSE_LITE__: boolean;
   const __GOOSE_EDITOR_COMPACT__: boolean;
 
   /**
    * 编辑器 AI 能力编译开关。主笔记本为 true；速记和原生 macOS 编辑器产物为 false。
-   * 与 __GOOSE_LITE__ 分离，确保原生编辑器保留数学、Mermaid、视频和代码格式化，
+   * 原生编辑器保留数学、Mermaid、视频和代码格式化，
    * 同时不会把 AI SDK 或 AI 菜单带入生产包。
    */
   const __GOOSE_EDITOR_AI__: boolean;
@@ -205,7 +195,5 @@ declare global {
       error: unknown,
       extra?: Record<string, unknown>,
     ) => void;
-    /** B 插件（独立速记）preload 注入的标志，子窗 web 侧据此区分 redirect vs 本地落库。 */
-    __GOOSE_QUICKNOTE_STANDALONE__?: boolean;
   }
 }

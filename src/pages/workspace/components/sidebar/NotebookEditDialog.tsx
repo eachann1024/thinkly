@@ -188,10 +188,8 @@ export function NotebookEditDialog({
         {/* 操作按钮 - 编辑模式 */}
         {!showDeleteConfirm && (
           <div className="flex flex-col gap-4 mt-6">
-            {/* 删除按钮（Electron 允许移除最后一个文件夹；Electron 至少保留一本） */}
-            {notebookId &&
-              (__HOST_TARGET__ === "electron" ||
-                Object.keys(useNotebooks.getState().notebooks).length > 1) && (
+            {/* 允许移除最后一个文件夹并回到空态。 */}
+            {notebookId && (
                 <Button
                   variant="ghost"
                   size="lg"

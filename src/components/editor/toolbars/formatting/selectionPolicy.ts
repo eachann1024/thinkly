@@ -1,5 +1,6 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { CellSelection } from "prosemirror-tables";
+import { getProtectedTitle } from "../../utils/documentTitlePolicy";
 
 export const NON_FORMATTABLE_TYPES = new Set([
   "image",
@@ -116,9 +117,8 @@ export function selectionDisallowsFormattingToolbar(
 export function selectionIsInsideFirstTitleBlock(
   editor: BlockNoteEditor<any, any, any>,
 ): boolean {
-  const { selection, doc } = editor.prosemirrorState;
-  // doc > blockGroup > blockContainer
-  const firstContainer = doc.firstChild?.firstChild ?? null;
+  const { selection } = editor.prosemirrorState;
+  const firstContainer = getProtectedTitle(editor.prosemirrorState)?.node ?? null;
   if (!firstContainer) return false;
 
   const nearestContainer = ($pos: any) => {
@@ -137,30 +137,6 @@ export function selectionIsInsideFirstTitleBlock(
 
   const contentNode = fromContainer.firstChild;
   return contentNode?.type.name === "heading" && contentNode.attrs?.level === 1;
-}
-
-/**
- * 选区是否完全落在 heading 块内部（任意 level 1-6，文档任意位置）。
- * 跨块混合选区（含 Cmd+A 全选）返回 false，保证全选时不误伤。
- * 用于禁用 heading 内的字符级样式（bold/italic/underline/strike/code）。
- */
-export function selectionIsInsideHeadingBlock(
-  editor: BlockNoteEditor<any, any, any>,
-): boolean {
-  const { selection } = editor.prosemirrorState;
-  const nearestContainer = ($pos: any) => {
-    for (let d = $pos.depth; d > 0; d -= 1) {
-      const node = $pos.node(d);
-      if (node.type.name === "blockContainer") return node;
-    }
-    return null;
-  };
-  const fromContainer = nearestContainer(selection.$from);
-  if (!fromContainer || fromContainer !== nearestContainer(selection.$to)) {
-    return false;
-  }
-  const contentNode = fromContainer.firstChild;
-  return contentNode?.type.name === "heading";
 }
 
 export function shouldRenderFormattingToolbar(

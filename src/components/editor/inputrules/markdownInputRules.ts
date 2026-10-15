@@ -1,6 +1,8 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin } from "@tiptap/pm/state";
 import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
+import type { RefObject } from "react";
+import type { EditorSettings } from "../platform/hostContext";
 
 type BlockTrigger = {
   type: string;
@@ -26,13 +28,13 @@ export function matchCheckListTrigger(
 }
 
 /**
- * 行首引用触发匹配：`>` / `＞` / `|` / `｜`。
+ * 行首引用触发匹配：双引号或竖线；大于号用于折叠列表。
  * 转换使用同一规则。
  */
 export function matchQuoteTrigger(
   textBefore: string,
 ): { triggerText: string } | null {
-  const matched = /^[>|｜＞]$/u.exec(textBefore);
+  const matched = /^["“|｜]$/u.exec(textBefore);
   if (!matched) return null;
   return { triggerText: matched[0] };
 }
@@ -65,9 +67,9 @@ function getBlockTrigger(
     };
   }
 
-  const ordered = /^\s?(\d+)([.。])$/u.exec(textBefore);
+  const ordered = /^\s?(\d+|[ai])([.。])$/iu.exec(textBefore);
   if (ordered) {
-    const start = Number.parseInt(ordered[1], 10);
+    const start = /^\d+$/u.test(ordered[1]) ? Number.parseInt(ordered[1], 10) : 1;
     return {
       type: "numberedListItem",
       props: start === 1 ? {} : { start },
@@ -90,13 +92,17 @@ function getBlockTrigger(
     };
   }
 
-  const heading = /^(#{1,6})$/u.exec(textBefore);
+  const heading = /^(#{1,3})$/u.exec(textBefore);
   if (heading) {
     return {
       type: "heading",
-      props: { level: heading[1].length },
+      props: { level: heading[1].length, isToggleable: false, collapsed: false },
       triggerText: heading[0],
     };
+  }
+
+  if (/^[>＞]$/u.test(textBefore)) {
+    return { type: "toggleListItem", props: { collapsed: false }, triggerText: textBefore };
   }
 
   const quote = matchQuoteTrigger(textBefore);
@@ -107,7 +113,7 @@ function getBlockTrigger(
   return null;
 }
 
-function createMarkdownBlockTrigger(editor: any) {
+function createMarkdownBlockTrigger(editor: any, settingsRef: RefObject<EditorSettings>) {
   return new Plugin({
     props: {
       handleTextInput(view, from, to, text) {
@@ -129,6 +135,7 @@ function createMarkdownBlockTrigger(editor: any) {
         const currentBlock = editor.getTextCursorPosition().block;
         const trigger = getBlockTrigger(textBefore, editor, currentBlock);
         if (!trigger) return false;
+        if (trigger.type === "codeBlock") trigger.props.wrap = settingsRef.current.defaultCodeBlockWrap;
 
         // 所有 markdown 触发只允许从普通段落开始。
         if (parent.type.name !== "paragraph") {
@@ -187,7 +194,9 @@ function createMarkdownBlockTrigger(editor: any) {
   });
 }
 
-export const gooseMarkdownInputRulesExtension = createExtension(({ editor }) => ({
+export function gooseMarkdownInputRulesExtension(settingsRef: RefObject<EditorSettings>) {
+  return createExtension(({ editor }) => ({
   key: "goose-markdown-input-rules",
-  prosemirrorPlugins: [createMarkdownBlockTrigger(editor)],
-}));
+  prosemirrorPlugins: [createMarkdownBlockTrigger(editor, settingsRef)],
+  }))();
+}

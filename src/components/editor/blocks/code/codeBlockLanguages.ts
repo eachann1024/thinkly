@@ -1,4 +1,5 @@
 export const POPULAR_LANGUAGES = [
+  "text",
   "javascript",
   "typescript",
   "python",

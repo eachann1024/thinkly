@@ -9,6 +9,11 @@ import {
   addDefaultPropsExternalHTML,
   parseDefaultProps,
 } from "@blocknote/core/blocks";
+import {
+  createPersistentToggleWrapper,
+  createToggleExternalHTML,
+  parseToggleDetailsContent,
+} from "../toggle/toggleBlockHelpers";
 
 const HEADING_LEVELS = [1, 2, 3] as const;
 
@@ -23,18 +28,19 @@ const createHeadingKeyboardShortcut =
     }
     editor.updateBlock(cursorPosition.block, {
       type: "heading",
-      props: { level },
+      props: { level, isToggleable: false },
     });
     return true;
   };
 
-/** 普通 heading：不用 BlockNote toggle children；折叠态由 props.collapsed + 区块隐藏扩展负责。 */
+/** 普通 heading 折叠后续 section，显式 toggle heading 仅折叠自己的 children。 */
 export const gooseHeadingBlockConfig = createBlockConfig(() => ({
   type: "heading" as const,
   propSchema: {
     ...defaultProps,
     level: { default: 1 as const, values: HEADING_LEVELS },
     collapsed: { default: false },
+    isToggleable: { default: false },
   },
   content: "inline" as const,
 }));
@@ -46,6 +52,16 @@ export const createGooseHeadingBlockSpec = createBlockSpec(
       isolating: false,
     },
     parse(e: HTMLElement) {
+      if (e.tagName === "DETAILS") {
+        const heading = e.querySelector(":scope > summary > h1, :scope > summary > h2, :scope > summary > h3");
+        if (!heading) return undefined;
+        return {
+          ...parseDefaultProps(heading as HTMLElement),
+          level: Number(heading.tagName[1]),
+          isToggleable: true,
+          collapsed: !e.hasAttribute("open"),
+        };
+      }
       let level: number | undefined;
       switch (e.tagName) {
         case "H1":
@@ -69,9 +85,15 @@ export const createGooseHeadingBlockSpec = createBlockSpec(
       }
       return props;
     },
+    parseContent: ({ el, schema }) => el.tagName === "DETAILS"
+      ? parseToggleDetailsContent(el, schema, "heading")
+      : undefined,
     runsBefore: ["toggleListItem"],
-    render(block) {
+    render(block, editor) {
       const dom = document.createElement(`h${block.props.level}`);
+      if (block.props.isToggleable) {
+        return { ...createPersistentToggleWrapper(block, editor, dom), contentDOM: dom };
+      }
       if (block.props.collapsed === true) {
         dom.setAttribute("data-collapsed", "true");
       }
@@ -80,6 +102,9 @@ export const createGooseHeadingBlockSpec = createBlockSpec(
     toExternalHTML(block) {
       const dom = document.createElement(`h${block.props.level}`);
       addDefaultPropsExternalHTML(block.props, dom);
+      if (block.props.isToggleable) {
+        return createToggleExternalHTML(dom, block.props.collapsed);
+      }
       if (block.props.collapsed) {
         dom.setAttribute("data-collapsed", "true");
       }

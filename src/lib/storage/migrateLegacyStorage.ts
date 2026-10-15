@@ -59,12 +59,9 @@ const readLegacyRawFromDb = (key: string): string | null => {
 };
 
 const readLegacyRawFromLocalStorage = (key: string): string | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
+  if (typeof window === "undefined") throw new Error("legacy-storage-unavailable");
+  // 只有 key 确实不存在才可按空处理；读取失败必须中止，避免覆盖旧本或设置。
+  return window.localStorage.getItem(key);
 };
 
 const readLegacyRaw = (key: string): string | null =>

@@ -54,46 +54,46 @@ export function pageMentionLabel(props: Pick<PageMentionProps, "title">): string
 }
 
 function escapeMarkdownLinkText(text: string): string {
-  return text.replace(/\\/g, "\\\\").replace(/]/g, "\\]");
+  return text.replace(/([\\[\]])/g, "\\$1");
 }
 
 export function serializePageMentionHref(props: PageMentionProps): string {
-  const pageId = encodeURIComponent(props.pageId);
-  const notebook = props.workspaceId
-    ? `?nb=${encodeURIComponent(props.workspaceId)}`
-    : "";
-  return `${PAGE_MENTION_HREF_SCHEME}//${pageId}${notebook}`;
+  const pageId = encodeURIComponent(props.pageId).replace(/[()]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+  const query = new URLSearchParams();
+  if (props.workspaceId) query.set("nb", props.workspaceId);
+  if (props.wikiTarget) query.set("target", props.wikiTarget);
+  return `${PAGE_MENTION_HREF_SCHEME}//${pageId}${query.size ? `?${query}` : ""}`;
 }
 
 export function parsePageMentionHref(href: string): Pick<
   PageMentionProps,
-  "pageId" | "workspaceId"
+  "pageId" | "workspaceId" | "wikiTarget"
 > | null {
   const trimmed = href.trim();
   if (!trimmed.toLowerCase().startsWith(PAGE_MENTION_HREF_SCHEME)) return null;
   const rest = trimmed.slice(PAGE_MENTION_HREF_SCHEME.length).replace(/^\/\//, "");
   const queryIndex = rest.indexOf("?");
   const encodedId = (queryIndex === -1 ? rest : rest.slice(0, queryIndex)).trim();
-  if (!encodedId) return null;
   let pageId: string;
   try {
     pageId = decodeURIComponent(encodedId);
   } catch {
     return null;
   }
-  if (!pageId) return null;
   let workspaceId = "";
+  let wikiTarget = "";
   if (queryIndex !== -1) {
     const params = new URLSearchParams(rest.slice(queryIndex + 1));
     workspaceId = params.get("nb")?.trim() || "";
+    wikiTarget = params.get("target")?.trim() || "";
   }
-  return { pageId, workspaceId };
+  return pageId || wikiTarget ? { pageId, workspaceId, wikiTarget } : null;
 }
 
 export function serializePageMentionMarkdown(props: PageMentionProps): string {
   const title = props.title.trim() || EMPTY_MENTION.title;
   const wikiTarget = (props.wikiTarget ?? "").trim();
-  if (wikiTarget) {
+  if (!props.pageId.trim() && wikiTarget) {
     return serializeWikiLinkMarkdown(wikiTarget, title);
   }
   if (!props.pageId.trim()) {
@@ -115,7 +115,7 @@ export function pageMentionFromMarkdownLink(
     workspaceId: parsed.workspaceId,
     title: stripped || EMPTY_MENTION.title,
     notebookName: "",
-    wikiTarget: "",
+    wikiTarget: parsed.wikiTarget,
   };
 }
 

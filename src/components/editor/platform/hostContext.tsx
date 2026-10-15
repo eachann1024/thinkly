@@ -20,6 +20,7 @@ import type {
 } from "@/components/editor/ai/composer/referenceLookup";
 import type { EditorPlatform } from "./types";
 import type { OpenExternalResourceResult } from "@/components/editor/utils/openResourceExternally";
+import type { PageMentionProps } from "../inline/pageMention";
 
 export interface EditorFontConfig {
   label: string | null;
@@ -93,8 +94,6 @@ export interface EditorSettings {
   ai: EditorAISettings;
   searchProviders: EditorSearchProvider[];
   customActions: EditorCustomAction[];
-  /** 链接是否交给宿主内置浏览能力；编辑器不识别具体宿主。 */
-  openLinksInHost: boolean;
   /** true 使用应用内灯箱；false 优先调用系统默认图片查看器。 */
   useInternalImageViewer: boolean;
   features: EditorFeaturePolicy;
@@ -149,6 +148,11 @@ export interface EditorPageContext {
   ) => ResolvedAiReferenceContext[];
   /** 外部重载时取得宿主最新页面；未提供时沿用当前 page。 */
   getLatestPage?: (pageId: string) => Page | null;
+  /** 页面引用显示读取最新元数据，不改写文档内保存的标题快照。 */
+  resolvePageMention?: (target: PageMentionProps) => { title: string; notebookName: string } | null;
+  subscribePageMetadata?: (listener: () => void) => () => void;
+  /** 在宿主定义的当前目录创建并完成真实保存，不导航、不修改原笔记。 */
+  createPageMentionTarget?: (title: string) => Promise<AiReferenceSuggestionItem | null>;
   /** 编辑后把预览标签提升为正式标签；无标签宿主可不提供。 */
   onPromotePreview?: () => void;
 }

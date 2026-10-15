@@ -7,12 +7,13 @@ import {
 
 const pluginKey = new PluginKey("goose-wiki-link-input");
 
-export const gooseWikiLinkInputExtension = createExtension({
+export const gooseWikiLinkInputExtension = createExtension(({ editor }) => ({
   key: "goose-wiki-link-input",
   prosemirrorPlugins: [
     new Plugin({
       key: pluginKey,
       appendTransaction(transactions, _oldState, newState) {
+        if (editor.prosemirrorView.composing) return null;
         if (!transactions.some((tr) => tr.docChanged)) return null;
         const { selection } = newState;
         if (!selection.empty) return null;
@@ -32,7 +33,7 @@ export const gooseWikiLinkInputExtension = createExtension({
           undefined,
           "\ufffc",
         );
-        const match = /\[\[([^\]\n]+?)\]\]$/.exec(textBefore);
+        const match = /\[\[((?:\\.|[^\]\\\n])+?)\]\]$/.exec(textBefore);
         if (!match) return null;
         const mention = pageMentionFromWikiLink(match[1] ?? "");
         if (!mention) return null;
@@ -51,4 +52,4 @@ export const gooseWikiLinkInputExtension = createExtension({
       },
     }),
   ],
-});
+}))();

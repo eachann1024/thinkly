@@ -5,6 +5,8 @@ import {
   isFoldableHeadingBlock,
   readHeadingCollapsed,
 } from "@/components/editor/core/headingSectionFold";
+import { isToggleBlock } from "../core/toggleBlocks";
+import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 
 const EMPTY_PARAGRAPH = { type: "paragraph" as const, content: [] };
 
@@ -66,12 +68,13 @@ function applyHeadingEnter(
     }
   }
   if (!headingBlock || headingBlock.type !== "heading") return false;
+  if (isToggleBlock(headingBlock)) return false;
 
   const offset = $from.parentOffset;
   const contentSize = $from.parent.content.size;
   const atStart = offset === 0;
   const atEnd = offset >= contentSize;
-  const firstBlockId = editor.document[0]?.id;
+  const firstBlockId = getProtectedTitleBlockId(editor);
   const isFirstTitle = headingBlock.id === firstBlockId;
 
   // 非空标题行首：在前面插空段落，原内容下移；空标题仍走下方插入。

@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import { isDebugBuild } from "./vite.debug";
-import { isQuicknoteBuild, hostTarget } from "./config/vite/targets";
 import { createResolveOptions } from "./config/vite/resolution";
 import { createAppLogger } from "./config/vite/logger";
 import { createAssetPlugin } from "./config/vite/assetPlugin";
@@ -16,10 +15,8 @@ export default defineConfig(({ command, mode }) => ({
   customLogger: createAppLogger(),
   base: "./",
   define: {
-    __HOST_TARGET__: JSON.stringify(hostTarget),
-    __GOOSE_LITE__: JSON.stringify(isQuicknoteBuild),
-    __GOOSE_EDITOR_COMPACT__: JSON.stringify(isQuicknoteBuild),
-    __GOOSE_EDITOR_AI__: JSON.stringify(!isQuicknoteBuild),
+    __GOOSE_EDITOR_COMPACT__: false,
+    __GOOSE_EDITOR_AI__: true,
     "import.meta.env.VITE_APP_VERSION": JSON.stringify(
       command === "serve"
         ? JSON.parse(

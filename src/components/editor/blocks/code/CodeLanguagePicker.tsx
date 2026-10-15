@@ -26,18 +26,21 @@ import {
   moveLanguageHighlightIndex,
 } from "./codeBlockLanguageNav";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
+import { useCodeLanguageFocus } from "./useCodeLanguageFocus";
 
 export function CodeLanguagePicker({
   language,
   onLanguageChange,
   editable,
   isMathOrMermaid,
+  sourceMode = false,
   hasVisualPreview,
   displayLanguage,
   chipClass,
   chipActiveClass,
 }: Pick<CodeBlockToolbarProps, "language" | "onLanguageChange" | "editable"> & {
   isMathOrMermaid: boolean;
+  sourceMode?: boolean;
   hasVisualPreview: boolean;
   displayLanguage: string;
   chipClass: string;
@@ -48,6 +51,7 @@ export function CodeLanguagePicker({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const languageListId = useId();
+  const menuFocus = useCodeLanguageFocus();
 
   const filteredLanguages = useMemo(() => {
     if (!search) return POPULAR_LANGUAGES;
@@ -154,12 +158,13 @@ export function CodeLanguagePicker({
 
   return (
     <>
-      {editable && !isMathOrMermaid ? (
+      {editable && (!isMathOrMermaid || sourceMode) ? (
         <Popover
           open={isOpen}
           onOpenChange={(open) => {
             setIsOpen(open);
             if (open) {
+              menuFocus.capture();
               setHighlightedIndex(
                 defaultLanguageHighlightIndex(
                   filteredLanguages,
@@ -192,7 +197,9 @@ export function CodeLanguagePicker({
             className="goose-code-language-picker"
             onCloseAutoFocus={(event) => {
               event.preventDefault();
+              menuFocus.restore();
             }}
+            onInteractOutside={() => menuFocus.cancel()}
           >
             <div className="goose-code-language-search">
               <Input

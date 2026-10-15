@@ -4,7 +4,7 @@
 import { getGooseDesktop } from "./runtime";
 
 export async function getDesktopAlwaysOnTop(): Promise<boolean> {
-  if (__HOST_TARGET__ !== "electron") return false;
+
   try {
     return Boolean(await getGooseDesktop()?.getAlwaysOnTop());
   } catch (error) {
@@ -14,7 +14,7 @@ export async function getDesktopAlwaysOnTop(): Promise<boolean> {
 }
 
 export async function setDesktopAlwaysOnTop(on: boolean): Promise<boolean> {
-  if (__HOST_TARGET__ !== "electron") return false;
+
   try {
     return Boolean(await getGooseDesktop()?.setAlwaysOnTop(on));
   } catch (error) {
