@@ -34,17 +34,18 @@ export interface SearchResults {
 export const SEARCH_RESULT_PAGE_SIZE = 30;
 
 interface CommandSearchState {
+  searchQuery: string;
   pages: Record<string, Page>;
   activeNotebookId: string | null;
   searchAllNotebooks: boolean;
 }
 
 export function useCommandSearch({
+  searchQuery,
   pages,
   activeNotebookId,
   searchAllNotebooks,
 }: CommandSearchState) {
-  const [searchQuery, setSearchQuery] = useState("");
   // Matching is scheduled outside render; this compatibility field follows input.
   const deferredQuery = searchQuery;
   const notebooks = useNotebooks((state) => state.notebooks);
@@ -198,7 +199,6 @@ export function useCommandSearch({
     completedQuery: currentCompletion?.matches ? currentCompletion.query : "",
     searchError: currentCompletion?.error ?? null,
     isSearching,
-    setSearchQuery,
     removeRecent,
     loadMoreResults,
   };
