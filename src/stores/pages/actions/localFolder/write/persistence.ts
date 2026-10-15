@@ -9,6 +9,7 @@ import {
 } from "../../../folderSync";
 import { saveLocalPageContentUnlocked } from "./save";
 import { toast } from "@/components/ui/sonner";
+import { describeDiskWriteError } from "@/lib/diskWriteError";
 
 export async function refreshSnapshotFingerprint(
   filePath: string,
@@ -48,7 +49,7 @@ export const saveLocalPageContentAction = async (
     );
   } catch (error) {
     toast.error("笔记尚未保存到磁盘", {
-      description: "文件可能处于只读或被占用状态，请检查后重试，建议先保留当前窗口。",
+      description: describeDiskWriteError(error),
     });
     throw error;
   } finally {
