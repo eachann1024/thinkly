@@ -18,6 +18,7 @@
 - 未验证项及原因：
 
 <!-- 不要求编写或运行测试用例；浏览器演示不能证明 Electron 原生能力或真实服务可用。 -->
+<!-- 云端界面预览会记录默认笔记与设置流程；额外交互可添加 ui-preview JSON 操作块，参见 .github/ui-preview/README.md。 -->
 
 ## Merge Danger
 
