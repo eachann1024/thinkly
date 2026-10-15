@@ -1,6 +1,6 @@
 ## 验收与交付
 
-- 默认不操作电脑验收；需要验收素材时可使用 `/Users/eachann/Library/Mobile Documents/com~apple~CloudDocs/0Markdown/测试验收/鸿蒙 App.md`。
+- 按影响面做最小必要验收，默认不操作电脑；未验证项如实记录，不编写、不运行测试用例。
 - 功能、修复或优化验收通过后执行 `bun run mac`：打包 macOS 应用，关闭正在运行的 Goose Note，安装最新版并打开。
 
 ## 版本与代码组织
@@ -10,5 +10,5 @@
 
 ## 贡献与 PR
 
-- 提交与审查遵循 [贡献指南](CONTRIBUTING.md)，PR 使用 [提交模板](.github/pull_request_template.md) 说明前后行为、最新提交的验收证据和合并风险。
-- 外部 Fork PR 由维护者人工审核；自动检查跳过不表示通过，未验证项必须如实记录。
+- 贡献者与 AI 在修改、提交或审查前必须阅读 [贡献指南](CONTRIBUTING.md)；截图要求、验收红线与人工审核规则以该文件为准，PR 使用 [提交模板](.github/pull_request_template.md)。
+- 仅文档、规则或 CI 配置改动无需递增应用版本或打包；按实际影响检查内容、引用与配置。
