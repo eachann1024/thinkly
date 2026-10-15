@@ -8,8 +8,10 @@ import type { useSidebarHover } from "./useSidebarHover";
 
 export function SidebarModeRail({
   context,
+  notebookFooterHost,
 }: {
   context: ReturnType<typeof useSidebarHover>;
+  notebookFooterHost: HTMLDivElement | null;
 }) {
   const searchSelectionRef = useRef("");
   const {
@@ -101,6 +103,7 @@ export function SidebarModeRail({
         </nav>
       </TooltipProvider>
       <SidebarFooter
+        notebookFooterHost={notebookFooterHost}
         isSettingsOpen={settingsOpen}
         onOpenSettings={() => {
           if (inHistoryMode) exitHistoryView();
