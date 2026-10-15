@@ -7,6 +7,7 @@ import {
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { restorePendingLocalSave } from "../../../folderSync";
 import { toast } from "@/components/ui/sonner";
+import { recoverEditorDraft } from "../../recoverEditorDraft";
 
 export function recoverScannedLocalPages(
   set: StoreSet,
@@ -17,11 +18,23 @@ export function recoverScannedLocalPages(
   let conflictCount = 0;
   for (const entry of listRecoveryEntries("local-file")) {
     const current = get().pages[entry.id];
+    if (!current) {
+      const draft = recoverEditorDraft(entry);
+      if (draft?.workspaceId === notebookId && entry.content) {
+        restorePendingLocalSave(entry.id, entry.content, entry.revision);
+        set((state) => ({
+          pages: { ...state.pages, [entry.id]: draft },
+          dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [entry.id]: true },
+        }));
+        recoveredCount += 1;
+      }
+      continue;
+    }
     if (!current || current.workspaceId !== notebookId || current.isFolder)
       continue;
     const currentSignature = getContentSignature(current.content);
     if (currentSignature === getContentSignature(entry.content)) {
-      acknowledgeRecoveryEntry("local-file", entry.id, entry.revision);
+      if (!current.editorDraft) acknowledgeRecoveryEntry("local-file", entry.id, entry.revision);
       continue;
     }
     if (

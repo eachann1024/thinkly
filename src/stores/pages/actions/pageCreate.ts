@@ -5,6 +5,7 @@ export {
 } from "./create/content";
 export { createOnboardingPagesAction } from "./create/onboarding";
 export { createPageAction, createPageRecordAction } from "./create/internal";
+export { createEditorDraftPageAction } from "./create/editorDraft";
 export {
   createUnsavedLocalPageAction,
   discardUnsavedLocalPageAction,

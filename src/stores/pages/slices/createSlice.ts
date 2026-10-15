@@ -9,6 +9,7 @@ import {
   createLocalPageRecordAction,
   createLocalFolderRecordAction,
   createUnsavedLocalPageAction,
+  createEditorDraftPageAction,
   discardUnsavedLocalPageAction,
   materializeUnsavedLocalPageAction,
 } from "../actions/pageCreate";
@@ -28,6 +29,8 @@ export function createCreatePageSlice(
   | "createLocalPageRecord"
   | "createLocalFolderRecord"
   | "createUnsavedLocalPage"
+  | "createEditorDraftPage"
+  | "discardEditorDraftPage"
   | "discardUnsavedLocalPage"
   | "materializeUnsavedLocalPage"
 > {
@@ -64,6 +67,12 @@ export function createCreatePageSlice(
 
     createUnsavedLocalPage: (workspaceId, parentId) =>
       createUnsavedLocalPageAction(set, get, workspaceId, parentId),
+
+    createEditorDraftPage: (sourcePageId) =>
+      createEditorDraftPageAction(set, get, sourcePageId),
+
+    discardEditorDraftPage: (pageId) =>
+      discardUnsavedLocalPageAction(set, get, pageId),
 
     discardUnsavedLocalPage: (pageId) =>
       discardUnsavedLocalPageAction(set, get, pageId),

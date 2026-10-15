@@ -1,20 +1,10 @@
 import { toast } from "@/components/ui/sonner";
-import { useNotebooks } from "@/stores/useNotebooks";
-import { createNamedPage } from "@/lib/create-named-page";
+import { usePages } from "@/stores/usePages";
 
-/**
- * 分屏前创建同本空白页。
- * 所有手动新建均先命名；取消时不创建分屏。
- */
-export async function createSplitBlankPage(): Promise<string | null> {
-  const notebooks = useNotebooks.getState();
-  const workspaceId = notebooks.activeNotebookId;
-  if (!workspaceId) {
-    toast.error("无法创建分屏页面", {
-      description: "当前没有打开的笔记本",
-    });
-    return null;
-  }
-
-  return createNamedPage(undefined, workspaceId);
+/** 分屏先打开内存草稿；首次实际编辑保存后才创建源文件的同级文件。 */
+export async function createSplitBlankPage(sourcePageId: string): Promise<string | null> {
+  const id = usePages.getState().createEditorDraftPage(sourcePageId);
+  if (id) return id;
+  toast.error("无法创建分屏页面", { description: "来源笔记或所属笔记本已不存在" });
+  return null;
 }

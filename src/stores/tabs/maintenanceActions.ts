@@ -7,6 +7,7 @@ import { useSettings } from "../useSettings";
 import { normalizeAutoCloseInactiveTabsHours } from "../settings/types";
 import { isSpecialTab, WELCOME_TAB_PAGE_ID } from "./types";
 import { useFileNavHistory } from "../useFileNavHistory";
+import { reconcileSplitTabPage } from "./reconcileSplitPage";
 import {
   findTabByPageId,
   createTabId,
@@ -41,7 +42,7 @@ export function createMaintenanceTabActions(
         loadedWorkspaceIds.add(page.workspaceId);
       }
 
-      let nextTabs = openTabs.filter((tab) => {
+      let nextTabs = openTabs.map(reconcileSplitTabPage).filter((tab) => {
         // 欢迎 tab 不关联真实页面，始终保留。
         if (tab.type === "welcome") return true;
         // AI 标签按笔记本存活：笔记本还在就保留。
@@ -67,7 +68,7 @@ export function createMaintenanceTabActions(
         nextTabs = active ? [active] : [nextTabs[nextTabs.length - 1]];
       }
 
-      if (nextTabs.length === openTabs.length) return;
+      if (nextTabs.length === openTabs.length && nextTabs.every((tab, index) => tab === openTabs[index])) return;
       const nextActiveValid = nextTabs.some((tab) => tab.id === activeTabId);
       const historyState = syncHistoryWithOpenTabs(nextTabs);
       set({
@@ -77,6 +78,10 @@ export function createMaintenanceTabActions(
           : (nextTabs[nextTabs.length - 1]?.id ?? null),
         ...historyState,
       });
+      const active = nextTabs.find((tab) => tab.id === activeTabId);
+      if (active && !isSpecialTab(active) && active.pageId !== openTabs.find((tab) => tab.id === activeTabId)?.pageId) {
+        void scheduleSetActivePage(active.pageId);
+      }
     },
 
     closeExpiredTabs: (now = Date.now()) => {

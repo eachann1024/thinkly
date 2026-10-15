@@ -34,3 +34,9 @@ export function isUnsavedLocalPage(
 ): page is Page & { localUnsaved: true } {
   return Boolean(page?.localUnsaved && !page.localFilePath && !page.isFolder);
 }
+
+export function isUnsavedEditorPage(
+  page: Page | null | undefined,
+): page is Page {
+  return Boolean(page?.editorDraft || isUnsavedLocalPage(page));
+}

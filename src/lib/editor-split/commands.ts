@@ -1,14 +1,12 @@
 /**
- * 常规笔记本分屏命令。快捷键代理只应调用这里，不要改 WorkspaceLayout。
- *
+ * 常规笔记本分屏命令。快捷键代理只应调用这里。
  * - splitRight() / splitDown()
  * - closePaneOrTab() → "closed-pane" | "close-tab"
- * - focusNeighbor("left" | "right" | "up" | "down")
- * - toggleZoom()
+ * - focusNeighbor(...) / toggleZoom()
  */
 import { toast } from "@/components/ui/sonner";
 import {
-  isUnsavedLocalPage,
+  isUnsavedEditorPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import { countLeaves, MAX_SPLIT_LEAVES, findLeaf, walkLeaves } from "@/lib/editor-split/tree";
@@ -20,9 +18,9 @@ import { useEditorSplit } from "@/stores/useEditorSplit";
 import { flushEditorContent, usePages } from "@/stores/usePages";
 import { isSpecialTab, useTabs } from "@/stores/useTabs";
 import { createSplitBlankPage } from "./createBlankPage";
+import { focusNewPage } from "@/stores/pages/actions/create/content";
 
 export type ClosePaneOrTabResult = "close-tab" | "closed-pane";
-
 import {
   activeWorkspaceTab,
   focusActiveSplitEditor,
@@ -39,10 +37,10 @@ function discardFailedSplitPage(pageId: string) {
   const pages = usePages.getState();
   const page = pages.getPage(pageId);
   if (
-    isUnsavedLocalPage(page) &&
+    isUnsavedEditorPage(page) &&
     !localPageHasPersistableContent(page.content)
   ) {
-    pages.discardUnsavedLocalPage(pageId);
+    pages.discardEditorDraftPage(pageId);
   }
 }
 
@@ -68,14 +66,9 @@ async function splitInDirection(direction: SplitDirection): Promise<boolean> {
   const previousFocused = split.focusedPageId(tab.id);
   const sourcePageId = previousFocused ?? tab.pageId;
 
-  const newPageId = await createSplitBlankPage();
+  flushEditorContent(true);
+  const newPageId = await createSplitBlankPage(sourcePageId);
   if (!newPageId) return false;
-
-  // createPage 会把 activePage 切到新页；未分屏时 ensureTab 会跟着改左叶。
-  // 分屏前把源叶钉回原页，保证左边不变、右边才是新空页。
-  if (!split.isSplit(tab.id)) {
-    split.ensureTab(tab.id, sourcePageId);
-  }
 
   const result = split.splitFocused({
     tabId: tab.id,
@@ -93,6 +86,7 @@ async function splitInDirection(direction: SplitDirection): Promise<boolean> {
 
   useTabs.getState().syncTabPageId(tab.id, newPageId);
   void usePages.getState().setActivePage(newPageId);
+  focusNewPage(newPageId);
   return true;
 }
 
@@ -121,7 +115,7 @@ export function closeSplitPaneById(
   if (closedPageId) {
     const page = usePages.getState().getPage(closedPageId);
     const emptyUnsaved =
-      isUnsavedLocalPage(page) && !localPageHasPersistableContent(page.content);
+      isUnsavedEditorPage(page) && !localPageHasPersistableContent(page.content);
     if (!emptyUnsaved) {
       void usePages.getState().flushPendingLocalSaveByPageId(closedPageId);
     }
@@ -299,6 +293,8 @@ export function tryShowPageInFocusedSplit(pageId: string): boolean {
   // 只替换“发起时当前 tab 的聚焦叶”。不能因目标已在另一标签页出现就切走，
   // 否则 Cmd+K 看起来会随机新增/跳转顶层标签，也会失去用户刚刚选中的分栏。
   flushEditorContent(true);
+  const previousPageId = findLeaf(state.root, state.focusedLeafId)?.pageId;
   split.setPanePage(tab.id, state.focusedLeafId, pageId);
+  if (previousPageId && previousPageId !== pageId) discardFailedSplitPage(previousPageId);
   return focusSplitPane(tab.id, state.focusedLeafId) !== null;
 }

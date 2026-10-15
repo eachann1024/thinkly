@@ -25,6 +25,9 @@ import {
 import { hasExternalDiskChange } from "./conflict";
 import { consumeDiskWriteFailure, DiskWriteError } from "@/lib/diskWriteError";
 import { refreshSnapshotFingerprint } from "./persistence";
+import { persistPageSnapshot } from "../../../persistence";
+import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
+import { validateEditorDraftTarget } from "../../create/validateEditorDraftTarget";
 
 export const saveLocalPageContentUnlocked = async (
   set: StoreSet,
@@ -38,9 +41,11 @@ export const saveLocalPageContentUnlocked = async (
   if (!page) return false;
 
   let filePath = get().getLocalFilePath(pageId);
+  if (page.editorDraft && filePath) await validateEditorDraftTarget(get, pageId, filePath);
   if (!filePath) {
     if (!page.localUnsaved) return false;
     if (!localPageHasPersistableContent(content) && !options?.force) {
+      set((state) => ({ dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [pageId]: false } }));
       return true;
     }
     filePath = await assignUnsavedLocalFilePathAction(set, get, pageId);
@@ -179,6 +184,7 @@ export const saveLocalPageContentUnlocked = async (
   // ────────────────────────────────────────────────────────────────────────────
 
   if (pendingImageWrites.length > 0) {
+    if (page.editorDraft) await validateEditorDraftTarget(get, pageId, filePath);
     try {
       if (gooseFs.mkdir) {
         await gooseFs.mkdir(assetsDir);
@@ -206,6 +212,7 @@ export const saveLocalPageContentUnlocked = async (
 
   // 写盘前标记自写：fs.watch 对本次写入触发的 change 事件（自写回声）
   // 由 useLocalFolderWatch 据此忽略，不会误判成外部修改弹冲突提示。
+  if (page.editorDraft) await validateEditorDraftTarget(get, pageId, filePath);
   markSelfWrite(filePath);
   let result: boolean;
   try {
@@ -251,12 +258,13 @@ export const saveLocalPageContentUnlocked = async (
       return {
         lastSavedAt: Date.now(),
         dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
-        ...(frontmatterChanged
+        ...(frontmatterChanged || current.editorDraft
           ? {
               pages: {
                 ...s.pages,
                 [pageId]: {
                   ...current,
+                  editorDraft: undefined,
                   localFrontmatter: nextFrontmatter || undefined,
                 },
               },
@@ -264,6 +272,11 @@ export const saveLocalPageContentUnlocked = async (
           : {}),
       };
     });
+    if (page.editorDraft) {
+      const materialized = get().pages[pageId];
+      persistPageSnapshot(materialized);
+      if (materialized) appendLocalFolderOrderEntries(materialized.workspaceId, [materialized]);
+    }
     // 写盘成功后更新快照为实际写入磁盘的内容，并补齐 mtime+size 指纹。
     updateSnapshotAfterWrite(filePath, diskContent);
     await refreshSnapshotFingerprint(filePath);
