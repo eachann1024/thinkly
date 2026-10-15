@@ -54,15 +54,3 @@ export function isReusableEmptyWorkspaceTab(
       !localPageHasPersistableContent(page.content),
   );
 }
-
-/** 只有一个文档标签时，普通页面标题可直接在标签 pill 上修改。 */
-export function shouldEditTitleInTabPill(visibleTabs: TabItem[]): boolean {
-  return visibleTabs.length === 1 && visibleTabs[0]?.type !== "welcome";
-}
-
-export function shouldEditTitleInTab(
-  page: Pick<Page, "localFilePath" | "localUnsaved"> | null | undefined,
-  editTitleInTabPill: boolean,
-): boolean {
-  return Boolean(page?.localFilePath || page?.localUnsaved) || editTitleInTabPill;
-}

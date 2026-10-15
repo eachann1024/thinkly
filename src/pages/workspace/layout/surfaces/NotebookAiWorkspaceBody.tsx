@@ -73,7 +73,6 @@ function NotebookAiWorkspaceBody({
         openNewTabHandler();
       }
     : openNewTabHandler;
-  const handleBeforeActivateTab = showFullscreenAi ? closeAiPanel : undefined;
   const hideFolderHome =
     isElectronChrome && Boolean(page?.isFolder) && isLocalFolderPage;
 
@@ -89,7 +88,6 @@ function NotebookAiWorkspaceBody({
             {!isElectronChrome && (
               <PageHeader
                 onOpenSearch={handleOpenSearch}
-                onBeforeActivateTab={handleBeforeActivateTab}
                 aiPanelOpen={aiAvailableForNotebook && aiPanelOpen}
                 aiLayoutMode={aiLayoutMode}
                 onToggleAiPanel={
@@ -147,7 +145,6 @@ function NotebookAiWorkspaceBody({
                     <PageHeader
                       page={page}
                       onOpenSearch={handleOpenSearch}
-                      onBeforeActivateTab={handleBeforeActivateTab}
                       onRestore={() => restorePageWithToast(activePageId)}
                       onDelete={() =>
                         void permanentlyDeletePageWithCleanup(activePageId)
@@ -186,7 +183,6 @@ function NotebookAiWorkspaceBody({
               activePageId={activePageId}
               isLocalFolderPage={isLocalFolderPage}
               handleOpenSearch={handleOpenSearch}
-              handleBeforeActivateTab={handleBeforeActivateTab}
               aiAvailableForNotebook={aiAvailableForNotebook}
               aiPanelOpen={aiPanelOpen}
               aiLayoutMode={aiLayoutMode}
