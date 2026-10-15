@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 
 type SidebarRailIconName = "folder" | "outline" | "search" | "settings";
 
-// Vector redraw of the user-selected ChatGPT concept 07 (book pages).
-const bookPath =
-  "M7 4.1Q7 2.5 8.6 2.85L18.2 5Q19.3 5.25 19.3 6.55V19Q19.3 20.3 18 20L8.2 17.85Q7 17.6 7 16.3Z";
-const pagePath =
-  "M6.2 2.8H14.3L18.8 7.3V19.3Q18.8 20.8 17.3 20.8H6.2Q4.7 20.8 4.7 19.3V4.3Q4.7 2.8 6.2 2.8Z";
-const contentsPath = [9.2, 12.6, 16].map((y) =>
-  `M9.1 ${y}a.95 .95 0 1 0 -1.9 0a.95 .95 0 1 0 1.9 0Z ` +
-  `M11 ${y - 0.6}h4.8a.6 .6 0 0 1 0 1.2H11a.6 .6 0 0 1 0 -1.2Z`
-).join(" ");
+// Vector redraw of the user-selected ChatGPT concept 04 (Swiss Minimal).
+// Pages: back sheet + front dog-eared document.
+const backSheetPath =
+  "M5.2 3.2H13.6Q14.8 3.2 14.8 4.4V6H7.4Q5.6 6 5.6 7.8V17.6H5.2Q4 17.6 4 16.4V4.4Q4 3.2 5.2 3.2Z";
+const frontPagePath =
+  "M8.5 6.2H15.1L19.4 10.5V19.6Q19.4 20.8 18.2 20.8H8.5Q7.3 20.8 7.3 19.6V7.4Q7.3 6.2 8.5 6.2Z";
+const frontFoldPath = "M14.6 6.5V11H19.1";
+const solidBackSheetPath =
+  "M4 4.4Q4 3.2 5.2 3.2H13.6Q14.8 3.2 14.8 4.4V6.2H7.3V16.4Q7.3 17.6 6.1 17.6H5.2Q4 17.6 4 16.4Z";
 const settingsPath = [
   "M8.81 5.71 Q9.23 5.46 9.48 4.83 L9.88 3.83 Q10.13 3.2 11.18 3.2",
   "L12.82 3.2 Q13.87 3.2 14.12 3.83 L14.52 4.83 Q14.77 5.46 15.19 5.71",
@@ -29,20 +29,23 @@ const settingsPath = [
 const outlineIcons: Record<SidebarRailIconName, ReactNode> = {
   folder: (
     <>
-      <path d="M5.1 5.5H4.7Q3.9 5.5 3.9 6.5V18.7Q3.9 19.6 4.9 19.8L13.3 21.6Q14.2 21.8 14.3 21.1" />
-      <path d={bookPath} />
+      <path d={backSheetPath} />
+      <path d={frontPagePath} />
+      <path d={frontFoldPath} />
     </>
   ),
   outline: (
     <>
-      <path d={pagePath} />
-      <path d={contentsPath} fill="currentColor" stroke="none" />
+      <path d="M4.5 4.5V19.5" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M8.5 7.5H19.5" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M8.5 12H15.2" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M8.5 16.5H19.5" strokeWidth="1.8" strokeLinecap="round" />
     </>
   ),
   search: (
     <>
-      <circle cx="10.3" cy="10.2" r="6.3" />
-      <path d="M14.8 14.7L20 20" strokeWidth="2" />
+      <circle cx="10.5" cy="10.5" r="6.6" strokeWidth="1.5" />
+      <path d="M15.4 15.4L20.2 20.2" strokeWidth="1.8" strokeLinecap="round" />
     </>
   ),
   settings: (
@@ -56,18 +59,28 @@ const outlineIcons: Record<SidebarRailIconName, ReactNode> = {
 const solidIcons: Record<SidebarRailIconName, ReactNode> = {
   folder: (
     <>
-      <path d="M5.5 5.4H4.9Q3.3 5.4 3.3 7V19Q3.3 20.5 4.8 20.8L13.4 22.6Q14.7 22.9 15 21.5L7.2 19.8Q5.5 19.45 5.5 17.7Z" />
-      <path d={bookPath} />
+      <path d={solidBackSheetPath} />
+      <path
+        d={`${frontPagePath} M14.6 6.2V11H19.4Z`}
+        fillRule="evenodd"
+      />
     </>
   ),
-  outline: <path d={`${pagePath} ${contentsPath}`} fillRule="evenodd" />,
+  outline: (
+    <>
+      <rect x="3.1" y="3.6" width="2.8" height="16.8" rx="1.4" />
+      <rect x="7.3" y="5.8" width="12.7" height="3.4" rx="1.7" />
+      <rect x="7.3" y="10.3" width="8.4" height="3.4" rx="1.7" />
+      <rect x="7.3" y="14.8" width="12.7" height="3.4" rx="1.7" />
+    </>
+  ),
   search: (
     <>
       <path
-        d="M3.3 10.2a7 7 0 1 0 14 0a7 7 0 1 0 -14 0Z M5.55 10.2a4.75 4.75 0 1 0 9.5 0a4.75 4.75 0 1 0 -9.5 0Z"
+        d="M3.5 10.5a7 7 0 1 0 14 0a7 7 0 1 0 -14 0Z M5.7 10.5a4.8 4.8 0 1 0 9.6 0a4.8 4.8 0 1 0 -9.6 0Z"
         fillRule="evenodd"
       />
-      <path d="M13.8 15.6L19.1 20.9A1.3 1.3 0 0 0 20.9 19.1L15.6 13.8Z" />
+      <path d="M14.2 16L18.8 20.6A1.3 1.3 0 0 0 20.6 18.8L16 14.2Z" />
     </>
   ),
   settings: (
