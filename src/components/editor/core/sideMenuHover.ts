@@ -21,13 +21,67 @@ export function isPointerInRects(
   );
 }
 
-/** Full-width block rows are not content: only text, controls or media can reveal the handle. */
+type LineBox = { left: number; right: number; top: number; bottom: number };
+
+/** 同一行的文字碎片并成一条；行与行之间的半行距留到后面补。 */
+function wrappedLineBoxes(
+  rects: Iterable<Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "height">>,
+): LineBox[] {
+  const lines: LineBox[] = [];
+  for (const rect of rects) {
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    const line = lines.find(
+      (item) => rect.top < item.bottom - 0.5 && rect.bottom > item.top + 0.5,
+    );
+    if (!line) {
+      lines.push({
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+      });
+      continue;
+    }
+    line.left = Math.min(line.left, rect.left);
+    line.right = Math.max(line.right, rect.right);
+    line.top = Math.min(line.top, rect.top);
+    line.bottom = Math.max(line.bottom, rect.bottom);
+  }
+  lines.sort((a, b) => a.top - b.top || a.left - b.left);
+  return lines;
+}
+
+/**
+ * 行高大于字面时，Range 矩形之间有空隙。指针在段落里移动会反复离开这些空隙，把手跟着闪。
+ * 空隙按中线分给相邻行；左右仍只用该行文字宽度，短行右侧空白不显示把手。
+ */
+function hitsWrappedText(
+  rects: Iterable<Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "height">>,
+  bounds: Pick<DOMRect, "top" | "bottom">,
+  x: number,
+  y: number,
+): boolean {
+  const lines = wrappedLineBoxes(rects);
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const previous = lines[index - 1];
+    const next = lines[index + 1];
+    const top = previous ? (previous.bottom + line.top) / 2 : Math.min(line.top, bounds.top);
+    const bottom = next ? (line.bottom + next.top) / 2 : Math.max(line.bottom, bounds.bottom);
+    if (x >= line.left && x <= line.right && y >= top && y <= bottom) return true;
+  }
+  return false;
+}
+
+/** 整行空白不算内容：只有文字、控件或媒体才显示把手。 */
 export function isPointerOverBlockContent(content: HTMLElement, x: number, y: number): boolean {
-  const inline = content.querySelector(".bn-inline-content");
+  const inline = content.querySelector<HTMLElement>(".bn-inline-content");
   if (!inline) return isPointerInRects([content.getBoundingClientRect()], x, y);
   const range = document.createRange();
   range.selectNodeContents(inline);
-  if (range.toString().trim() && isPointerInRects(range.getClientRects(), x, y)) return true;
+  if (range.toString().trim() && hitsWrappedText(range.getClientRects(), inline.getBoundingClientRect(), x, y)) {
+    return true;
+  }
   return isPointerInRects(
     Array.from(content.querySelectorAll("input, img, video, canvas"), (element) => element.getBoundingClientRect()),
     x,
