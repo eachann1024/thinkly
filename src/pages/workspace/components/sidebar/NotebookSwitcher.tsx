@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { createPortal } from "react-dom";
+import { useLayoutEffect, useRef } from "react";
 import { renderNotebookMenu } from "./notebook-switcher/renderNotebookMenu";
 import * as GooseIcons from "@/components/ui/icons";
 import "./notebook-switcher.css";
@@ -13,13 +15,13 @@ export function NotebookSwitcher(
   props: {
     onOpenSettings?: () => void;
     variant?: "default" | "rail";
+    triggerContainer?: HTMLElement | null;
   } = {},
 ) {
   const switcher = useNotebookSwitcherState(props);
   const notebookSwitcherActionsContext = useNotebookSwitcherActions(switcher);
   const context = notebookSwitcherActionsContext;
   const {
-    variant,
     notebookDropdownHoverExpand,
     isOpen,
     setIsOpen,
@@ -37,9 +39,21 @@ export function NotebookSwitcher(
     handleSaveEdit,
     handleDelete,
   } = context;
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const restoreTriggerFocus = useRef(false);
 
-  return (
-    <>
+  // 移动入口时关闭旧锚点菜单，编辑/新建对话框仍由同一个组件持有。
+  useLayoutEffect(() => {
+    const trigger = triggerRef.current;
+    isDraggingRef.current = false;
+    setIsOpen(false);
+    if (restoreTriggerFocus.current) trigger?.focus({ preventScroll: true });
+    return () => {
+      restoreTriggerFocus.current = document.activeElement === trigger;
+    };
+  }, [props.triggerContainer, setIsOpen, isDraggingRef]);
+
+  const switcherPopover = (
       <Popover
         open={isOpen}
         onOpenChange={(open) => {
@@ -52,6 +66,7 @@ export function NotebookSwitcher(
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
               <Button contentStyle="preserve" variant="ghost" size="sm"
+                ref={triggerRef}
                 type="button"
                 aria-label={`当前${notebookKind} ${activeNotebookLabel}，点击切换`}
                 title={
@@ -83,7 +98,7 @@ export function NotebookSwitcher(
                     {activeNotebookLabel}
                   </span>
                 )}
-                <GooseIcons.ChevronDown
+                <GooseIcons.ChevronUp
                   className="goose-notebook-chevron"
                   aria-hidden="true"
                 />
@@ -96,7 +111,13 @@ export function NotebookSwitcher(
         </Tooltip>
         {renderNotebookMenu(context)}
       </Popover>
+  );
 
+  return (
+    <>
+      {props.triggerContainer
+        ? createPortal(switcherPopover, props.triggerContainer)
+        : switcherPopover}
       {editDialog.open && (
         <NotebookEditDialog
           open={editDialog.open}

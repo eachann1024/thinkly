@@ -9,8 +9,10 @@ import { type SidebarProps } from "./sidebar-shell/shared";
 import { useSidebarLayout } from "./sidebar-shell/useSidebarLayout";
 import { useSidebarNavigation } from "./sidebar-shell/useSidebarNavigation";
 import { useSidebarLifecycle } from "./sidebar-shell/useSidebarLifecycle";
+import { useState } from "react";
 
 export function Sidebar(props: SidebarProps) {
+  const [notebookFooterHost, setNotebookFooterHost] = useState<HTMLDivElement | null>(null);
   const layout = useSidebarLayout(props);
   const navigation = useSidebarNavigation(layout);
   const sidebarLifecycleContext = useSidebarLifecycle(navigation);
@@ -39,7 +41,10 @@ export function Sidebar(props: SidebarProps) {
 
   return (
     <>
-      <SidebarModeRail context={context} />
+      <SidebarModeRail
+        context={context}
+        notebookFooterHost={settingsOpen || sidebarCollapsed ? null : notebookFooterHost}
+      />
       <div
         ref={sidebarRef}
         id="workspace-sidebar-content"
@@ -81,7 +86,7 @@ export function Sidebar(props: SidebarProps) {
             minWidth: sidebarFloating ? 0 : "var(--sidebar-configured-width)",
           }}
         >
-          {renderSidebarViews(context)}
+          {renderSidebarViews(context, setNotebookFooterHost)}
           <SettingsDialog
             open={settingsOpen}
             onOpenChange={onSettingsOpenChange}

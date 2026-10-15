@@ -8,6 +8,7 @@ import type { useSidebarHover } from "./useSidebarHover";
 
 export function renderSidebarViews(
   context: ReturnType<typeof useSidebarHover>,
+  setNotebookFooterHost: (node: HTMLDivElement | null) => void,
 ) {
   const {
     selectedPageId,
@@ -99,6 +100,11 @@ export function renderSidebarViews(
             </div>
           </div>
         </div>
+        <div
+          ref={setNotebookFooterHost}
+          className="sidebar-notebook-footer"
+          hidden={settingsOpen}
+        />
       </div>
     </div>
   );
