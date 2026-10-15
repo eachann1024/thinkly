@@ -1,7 +1,4 @@
-.workspace-shell .workspace-stage .sidebar-rail-shell > .sidebar-rail-footer :is(
-  .sidebar-footer-control--labeled,
-  .sidebar-notebook-trigger--rail
-) {
+.workspace-shell .workspace-stage .sidebar-rail-shell > .sidebar-rail-footer .sidebar-notebook-trigger--rail {
   display: flex;
   width: calc(var(--workspace-rail-width) - 0.571429rem);
   min-width: calc(var(--workspace-rail-width) - 0.571429rem);

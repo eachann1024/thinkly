@@ -16,8 +16,8 @@
 }
 .workspace-shell .sidebar-mode-rail-button {
   width: 40px;
-  min-height: 52px;
-  font-size: 11px;
+  height: 40px;
+  min-height: 40px;
 }
 .workspace-shell .sidebar-rail-footer .sidebar-footer-control {
   width: 40px;
