@@ -13,7 +13,8 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertPublishVersion, getReleases, gh, publishMetadata, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
-import { downloadMetadata, publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
+import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
+import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -60,6 +61,7 @@ async function main() {
     return;
   }
   assertPublishVersion(version, tag, releases);
+  const releaseNotes = versionReleaseNotes(readFileSync(join(ROOT, "CHANGELOG.md"), "utf8"), version);
   const input = join(ROOT, "artifacts");
   const stage = mkdtempSync(join(tmpdir(), "goose-release-"));
   try {
@@ -82,6 +84,8 @@ async function main() {
     assert.deepEqual(readdirSync(stage).sort(), releaseAssets(version));
     const baseDownloadUrl = `https://github.com/${REPO}/releases/download/${tag}`;
     const notes = [
+      markedReleaseNotes(releaseNotes),
+      "",
       `### 📥 安装包下载`,
       "",
       "| 平台 | 安装包直接下载 | 架构与说明 |",
@@ -104,6 +108,8 @@ async function main() {
     if (!existing) {
       gh(["release", "create", tag, "--repo", REPO, "--target", sha,
         "--title", `Goose Note ${version}`, "--notes", notes, "--draft"]);
+    } else if (existing.draft) {
+      gh(["release", "edit", tag, "--repo", REPO, "--notes", notes]);
     }
     if (!existing || existing.draft) {
       gh(["release", "upload", tag, "--repo", REPO, "--clobber",
@@ -128,7 +134,7 @@ async function main() {
     if (uploaded.draft) gh(["release", "edit", tag, "--repo", REPO, "--draft=false", "--latest"]);
     const published = findRelease(tag);
     verifyReleaseSource(published, tag, sha);
-    publishMetadata(downloadMetadata(version, tag, hashes, signed, published.published_at), tag);
+    publishMetadata(publishedDownloadMetadata(published), tag);
     console.log(`Published and verified ${tag} in ${REPO}.`);
   } finally {
     rmSync(stage, { recursive: true, force: true });

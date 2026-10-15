@@ -19,6 +19,7 @@ import {
 } from "@/lib/appearance";
 import { shouldPreserveStartupSelection } from "@/lib/workspaceStartup";
 import { PencilIconDefinitions } from "@/components/theme/PencilIconDefinitions";
+import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
 
 // Appearance changes update CSS without re-rendering the whole workspace.
 function AppearanceSync() {
@@ -151,6 +152,7 @@ function App() {
         </div>
       )}
       <SetupGuide />
+      <AppUpdateDialog />
       <Toaster />
     </>
   );
