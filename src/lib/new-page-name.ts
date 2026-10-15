@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useSidebarView } from "@/stores/useSidebarView";
 
 export function normalizeNewFileName(value: string): string {
   const name = value.trim().replace(/\.(md|markdown)$/i, "").trim();
@@ -10,7 +11,9 @@ export function normalizeNewFileName(value: string): string {
 }
 
 type NameRequest = {
+  id: string;
   workspaceId: string;
+  parentId?: string;
   create: (name: string) => Promise<string | null>;
   resolve: (id: string | null) => void;
 };
@@ -21,10 +24,19 @@ export const useNewPageName = create<{ request: NameRequest | null }>(() => ({ r
 export function requestNewPageName(
   workspaceId: string,
   createPage: NameRequest["create"],
+  parentId?: string,
 ): Promise<string | null> {
-  if (useNewPageName.getState().request) return Promise.resolve(null);
+  window.dispatchEvent(new CustomEvent("goose-note:switch-sidebar-view", { detail: { view: "pages" } }));
+  useSidebarView.getState().openSidebarPanel("engaged");
+  if (useNewPageName.getState().request) {
+    document.querySelector<HTMLInputElement>('input[data-pending-create]')?.focus();
+    return Promise.resolve(null);
+  }
   return new Promise((resolve) => {
-    useNewPageName.setState({ request: { workspaceId, create: createPage, resolve } });
+    useNewPageName.setState({ request: {
+      id: `local-pending-file-${crypto.randomUUID()}`,
+      workspaceId, parentId, create: createPage, resolve,
+    } });
   });
 }
 
