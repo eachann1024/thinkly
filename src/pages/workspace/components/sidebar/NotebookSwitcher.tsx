@@ -10,6 +10,7 @@ import { NotebookEditDialog } from "./NotebookEditDialog";
 import { isElectronHost } from "@/lib/local-vault";
 import { useNotebookSwitcherState } from "./notebook-switcher/useNotebookSwitcherState";
 import { useNotebookSwitcherActions } from "./notebook-switcher/useNotebookSwitcherActions";
+import { renderNotebookIcon } from "./notebookUtils";
 
 export function NotebookSwitcher(
   props: {
@@ -41,6 +42,9 @@ export function NotebookSwitcher(
   } = context;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const restoreTriggerFocus = useRef(false);
+  const defaultNotebookIcon = activeNotebook
+    ? (activeNotebook.source === "local-folder" ? "FolderOpen" : "BookOpen")
+    : (isElectronHost ? "FolderOpen" : "BookOpen");
 
   // 移动入口时关闭旧锚点菜单，编辑/新建对话框仍由同一个组件持有。
   useLayoutEffect(() => {
@@ -88,8 +92,8 @@ export function NotebookSwitcher(
                     ?.focus();
                 }}
               >
-                <span aria-hidden="true" className="goose-notebook-monogram">
-                  {Array.from(activeNotebook?.name.trim() || "")[0] || "N"}
+                <span aria-hidden="true" className="goose-notebook-monogram goose-notebook-icon">
+                  {renderNotebookIcon(activeNotebook?.icon || defaultNotebookIcon)}
                 </span>
                 {isRail ? (
                   <span className="sidebar-rail-control-label">记事本</span>
@@ -123,12 +127,14 @@ export function NotebookSwitcher(
           open={editDialog.open}
           notebookId={editDialog.id}
           name={editDialog.name}
+          icon={editDialog.icon}
           confirmName={editDialog.confirmName}
           excludeFromGlobalSearch={editDialog.excludeFromGlobalSearch}
           openDeleteConfirm={editDialog.openDeleteConfirm}
           isLocalFolder={editDialog.isLocalFolder}
           onOpenChange={(open) => setEditDialog({ ...editDialog, open })}
           onNameChange={(name) => setEditDialog({ ...editDialog, name })}
+          onIconChange={(icon) => setEditDialog({ ...editDialog, icon })}
           onExcludeFromGlobalSearchChange={(excludeFromGlobalSearch) =>
             setEditDialog({ ...editDialog, excludeFromGlobalSearch })
           }

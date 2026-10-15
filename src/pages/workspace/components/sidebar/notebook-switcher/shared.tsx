@@ -3,6 +3,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type Notebook } from "@/stores/useNotebooks";
+import { renderNotebookIcon } from "../notebookUtils";
 
 export interface SortableNotebookItemProps {
   notebook: Notebook;
@@ -79,8 +80,8 @@ export function SortableNotebookItem({
       }}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="goose-notebook-monogram" aria-hidden="true">
-          {Array.from(notebook.name.trim())[0] || "N"}
+        <span className="goose-notebook-monogram goose-notebook-icon" aria-hidden="true">
+          {renderNotebookIcon(notebook.icon || (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"))}
         </span>
         <span className="truncate leading-snug" title={notebook.name}>
           {notebook.name}

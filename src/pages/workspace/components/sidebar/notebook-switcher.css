@@ -55,6 +55,12 @@
   font-weight: 400;
   line-height: 14px;
 }
+.goose-notebook-icon {
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+.goose-notebook-icon > span { max-width: 100%; overflow: hidden; white-space: nowrap; }
 .sidebar-notebook-trigger > .goose-notebook-monogram,
 .sidebar-notebook-trigger > .goose-notebook-chevron {
   transition: transform var(--notebook-motion);

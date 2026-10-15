@@ -1,17 +1,20 @@
 import * as GooseIcons from "@/components/ui/icons";
 import { AlertTriangle, Save } from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
+import { NotebookIconSelector } from "./NotebookIconSelector";
 
 interface NotebookEditDialogProps {
   open: boolean;
   notebookId: string;
   name: string;
+  icon: string;
   confirmName: string;
   excludeFromGlobalSearch?: boolean;
   openDeleteConfirm?: boolean;
   isLocalFolder?: boolean;
   onOpenChange: (open: boolean) => void;
   onNameChange: (name: string) => void;
+  onIconChange: (icon: string) => void;
   onExcludeFromGlobalSearchChange: (value: boolean) => void;
   onSave: () => void;
   onDelete: () => void;
@@ -21,18 +24,21 @@ export function NotebookEditDialog({
   open,
   notebookId,
   name,
+  icon,
   confirmName,
   excludeFromGlobalSearch = false,
   openDeleteConfirm = false,
   isLocalFolder = false,
   onOpenChange,
   onNameChange,
+  onIconChange,
   onExcludeFromGlobalSearchChange,
   onSave,
   onDelete,
 }: NotebookEditDialogProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
+  const [iconContainer, setIconContainer] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -58,7 +64,7 @@ export function NotebookEditDialog({
       bodyClassName="relative h-full overflow-y-auto p-6 animate-in fade-in duration-200"
     >
       {/* 内容卡片 */}
-      <div className="relative mx-auto w-full max-w-md py-6">
+      <div ref={setIconContainer} className="relative mx-auto w-full max-w-md py-6">
         {/* 标题 */}
         <div className="text-center mb-8">
           {showDeleteConfirm && (
@@ -74,7 +80,7 @@ export function NotebookEditDialog({
           <p className="text-muted-foreground">
             {showDeleteConfirm
               ? (isLocalFolder ? "仅移除挂载，不会删除磁盘上的文件" : "此操作无法撤销，请谨慎操作")
-              : "修改笔记本的名称与搜索设置"}
+              : "修改笔记本的名称、图标与搜索设置"}
           </p>
         </div>
 
@@ -131,10 +137,21 @@ export function NotebookEditDialog({
           </div>
         ) : (
           <div className="bg-card backdrop-blur-[1px] border-0 rounded-[14px] p-6 shadow-[0_12px_26px_rgba(15,23,42,0.1)] space-y-4">
-            <div className="space-y-3">
+            <div className="flex flex-col items-center gap-3">
+              <Label className="text-center text-sm font-medium text-muted-foreground">
+                笔记本图标
+              </Label>
+              <NotebookIconSelector
+                value={icon}
+                defaultIcon={isLocalFolder ? "FolderOpen" : "BookOpen"}
+                onChange={onIconChange}
+                container={iconContainer}
+              />
+            </div>
+            <div className="flex flex-col items-center gap-3">
               <Label
                 htmlFor="notebook-name"
-                className="text-sm font-medium text-muted-foreground"
+                className="text-center text-sm font-medium text-muted-foreground"
               >
                 笔记本名称
               </Label>
@@ -143,7 +160,7 @@ export function NotebookEditDialog({
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
                 placeholder="输入笔记本名称"
-                className="h-12 text-base"
+                className="h-12 text-center text-base"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -154,7 +171,7 @@ export function NotebookEditDialog({
               />
             </div>
 
-            <div className="flex items-start justify-between gap-4 rounded-[var(--goose-control-radius)] border border-border/60 bg-muted/20 px-4 py-3">
+            <div className="flex flex-col items-center gap-3 rounded-[var(--goose-control-radius)] border border-border/60 bg-muted/20 px-4 py-3 text-center">
               <div className="min-w-0 space-y-1">
                 <Label
                   htmlFor="exclude-from-global-search"
@@ -170,7 +187,7 @@ export function NotebookEditDialog({
                 id="exclude-from-global-search"
                 checked={excludeFromGlobalSearch}
                 onCheckedChange={onExcludeFromGlobalSearchChange}
-                className="mt-0.5 shrink-0"
+                className="shrink-0"
               />
             </div>
           </div>
