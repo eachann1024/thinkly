@@ -47,7 +47,7 @@ export function DesktopTitleBar({
   settingsOpen = false,
   sidebarCollapsedOverride,
   onToggleSidebar,
-  isWelcomeTab: _isWelcomeTab,
+  isWelcomeTab,
   inHistoryMode,
   onOpenSearch,
   onBeforeActivateTab,
@@ -136,6 +136,8 @@ export function DesktopTitleBar({
   }
 
   const showPageActions = Boolean(page) && !page?.trashedAt;
+  const showWorkspaceActions =
+    (!isWelcomeTab && Boolean(page)) || Boolean(aiPanelOpen);
   const titleBarRow = (
     <div className="electron-document-header relative flex min-w-0 w-full flex-1 items-center justify-between">
       <div
@@ -177,10 +179,10 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {!aiFullscreenOpen && folderActionsAvailable && !page?.trashedAt && (
+        {showWorkspaceActions && !aiFullscreenOpen && folderActionsAvailable && !page?.trashedAt && (
           <NewTabButton onClick={onOpenSearch} />
         )}
-        {folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
+        {showWorkspaceActions && folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>
               <TooltipTrigger asChild>
