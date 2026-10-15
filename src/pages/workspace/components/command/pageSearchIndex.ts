@@ -1,19 +1,13 @@
 /**
- * 全局搜索倒排索引 —— 模块级单例，不进 zustand store
- *
- * 中文分词策略：
- *   - 每个 CJK 字符单独作为 token（索引 + 搜索时相同处理）
- *   - 非 CJK 段落按空格/标点切分
- *   - 搜索时 prefix: true，使「笔」能命中「笔记」
- *   - 同时保留 fuzzy: 0.1 兜底英文拼写容错，但中文基本靠 prefix 覆盖
+ * Shared incremental MiniSearch index. Every complete index is tied to one
+ * immutable catalog; partially maintained versions are never queried.
  */
 import MiniSearch from "minisearch";
 import type { Page } from "@/types";
-import {
-  getPageTitle,
-  UNTITLED_PAGE_TITLE,
-} from "@/components/editor/utils/page-title";
+import { getPageTitle, UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
 import { getContentDerivationsForPage } from "@/components/editor/utils/content-page-derivations-cache";
+import type { SearchCatalog } from "./pageSearchCatalog";
+import { createSearchTaskBudget, yieldSearchTask } from "./searchTaskScheduling";
 
 function isPlaceholderTitle(title: string): boolean {
   return title === UNTITLED_PAGE_TITLE || title === "无标题";
@@ -25,36 +19,29 @@ function bodyForSearchIndex(page: Page, title: string): string {
   return body.replace(/^(?:未命名|无标题)\s*/, "").trim();
 }
 
-// ——— 中文分词 ———
-
-/** 将文本拆成 token：CJK 字逐一分出，其余按空白/标点切割 */
+/** CJK characters remain individual tokens; other runs preserve existing matching. */
 function tokenize(text: string): string[] {
   const tokens: string[] = [];
-  // 匹配一个 CJK 字符，或者一段非 CJK 的连续字母/数字
   const re = /[一-鿿㐀-䶿豈-﫿぀-ヿ]|[^\s一-鿿㐀-䶿豈-﫿぀-ヿ]+/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    const t = m[0].trim();
-    if (t) tokens.push(t);
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(text)) !== null) {
+    const token = match[0].trim();
+    if (token) tokens.push(token);
   }
   return tokens;
 }
 
-// ——— MiniSearch 单例 ———
-
-interface IndexDoc {
-  id: string;
-  title: string;
-  body: string;
-}
-
+interface IndexDoc { id: string; title: string; body: string }
 let miniSearch: MiniSearch<IndexDoc> | null = null;
-
-/** key=pageId：正文版本和展示标题共同决定索引版本（文件改名不一定更换正文）。 */
+let indexedCatalog: SearchCatalog | null = null;
 const indexedVersions = new Map<
-  string,
-  { updatedAt: number; content: Page["content"]; title: string }
+  string, { updatedAt: number; content: Page["content"]; title: string }
 >();
+let pending: {
+  catalog: SearchCatalog;
+  controller: AbortController;
+  promise: Promise<boolean>;
+} | null = null;
 
 function getInstance(): MiniSearch<IndexDoc> {
   if (!miniSearch) {
@@ -62,100 +49,86 @@ function getInstance(): MiniSearch<IndexDoc> {
       fields: ["title", "body"],
       storeFields: ["id"],
       tokenize,
+      autoVacuum: { batchSize: 64, batchWait: 8 },
       searchOptions: {
-        tokenize,
-        prefix: true,
-        boost: { title: 2 },
-        fuzzy: 0.1,
-        combineWith: "AND",
+        tokenize, prefix: true, boost: { title: 2 }, fuzzy: 0.1, combineWith: "AND",
       },
     });
   }
   return miniSearch;
 }
 
-// ——— 公开 API ———
-
-/**
- * 增量同步索引：
- * - 已删除的页从索引移除
- * - updatedAt 变了的页重新索引
- * - 新增页加入
- *
- * @param pages 当前全量 pages map（含已筛好的范围）
- */
-export function syncIndex(pages: Record<string, Page>): void {
+async function maintainIndex(catalog: SearchCatalog, signal: AbortSignal): Promise<boolean> {
+  await yieldSearchTask(signal, true);
+  if (signal.aborted) return false;
   const ms = getInstance();
-  const pageIds = new Set(Object.keys(pages));
-
-  // 1. 移除已删除/不在范围内的页
-  for (const [id] of indexedVersions) {
+  const pageIds = new Set<string>();
+  const pause = createSearchTaskBudget(signal, true);
+  for (const page of catalog.sortedByTitle) {
+    if (signal.aborted) return false;
+    pageIds.add(page.id);
+    const wait = pause();
+    if (wait) await wait;
+  }
+  for (const id of indexedVersions.keys()) {
+    if (signal.aborted) return false;
     if (!pageIds.has(id)) {
-      try { ms.discard(id); } catch { /* ignore */ }
+      if (ms.has(id)) ms.discard(id);
       indexedVersions.delete(id);
     }
+    const wait = pause();
+    if (wait) await wait;
   }
-
-  // 2. 新增 / 更新
-  const toAdd: IndexDoc[] = [];
-  const toUpdate: IndexDoc[] = [];
-
-  for (const page of Object.values(pages)) {
+  for (const page of catalog.sortedByTitle) {
+    if (signal.aborted) return false;
     const current = indexedVersions.get(page.id);
     const title = getPageTitle(page);
-    if (
-      current &&
-      current.updatedAt === page.updatedAt &&
-      current.content === page.content &&
-      current.title === title
-    ) {
-      continue;
+    if (!current || current.updatedAt !== page.updatedAt ||
+      current.content !== page.content || current.title !== title) {
+      const doc: IndexDoc = {
+        id: page.id, title: isPlaceholderTitle(title) ? "" : title,
+        body: bodyForSearchIndex(page, title),
+      };
+      // Publish the version only after MiniSearch accepted the complete page.
+      if (ms.has(page.id)) ms.replace(doc);
+      else ms.add(doc);
+      indexedVersions.set(page.id, { updatedAt: page.updatedAt, content: page.content, title });
     }
-
-    const body = bodyForSearchIndex(page, title);
-    const doc: IndexDoc = {
-      id: page.id,
-      title: isPlaceholderTitle(title) ? "" : title,
-      body,
-    };
-
-    if (current === undefined) {
-      toAdd.push(doc);
-    } else {
-      toUpdate.push(doc);
-    }
-    indexedVersions.set(page.id, {
-      updatedAt: page.updatedAt,
-      content: page.content,
-      title,
-    });
+    const wait = pause();
+    if (wait) await wait;
   }
-
-  if (toAdd.length > 0) ms.addAll(toAdd);
-  for (const doc of toUpdate) {
-    try {
-      // replace 原子替换（MiniSearch 7.x 支持），比 discard+add 更安全
-      ms.replace(doc);
-    } catch {
-      // replace 不存在时降级：确保 id 不重复再 add
-      try { ms.discard(doc.id); } catch { /* ignore */ }
-      try { ms.add(doc); } catch { /* ignore */ }
-    }
-  }
+  if (signal.aborted) return false;
+  indexedCatalog = catalog;
+  return true;
 }
 
-/**
- * 全文搜索，返回按 MiniSearch 分数排序的 page id 列表
- * prefix 已在 searchOptions 中默认开启
- */
-export function searchIndex(query: string): string[] {
-  if (!miniSearch) return [];
-  const results = miniSearch.search(query);
-  return results.map((r) => r.id as string);
+export function cancelIndexSync(): void {
+  pending?.controller.abort();
+  pending = null;
+  indexedCatalog = null;
 }
 
-/** 重置索引（切换笔记本时调用，可选） */
+/** Cancel superseded work, but retain successfully indexed pages for the next pass. */
+export function syncIndex(catalog: SearchCatalog): Promise<boolean> {
+  if (indexedCatalog === catalog) return Promise.resolve(true);
+  if (pending?.catalog === catalog) return pending.promise;
+  cancelIndexSync();
+  const controller = new AbortController();
+  const promise = maintainIndex(catalog, controller.signal).finally(() => {
+    if (pending?.controller === controller) pending = null;
+  });
+  pending = { catalog, controller, promise };
+  return promise;
+}
+
+/** A caller cannot accidentally search a partially updated or older index. */
+export function searchIndex(query: string, catalog: SearchCatalog): string[] | null {
+  if (!miniSearch || indexedCatalog !== catalog) return null;
+  return miniSearch.search(query).map(result => result.id as string);
+}
+
 export function resetIndex(): void {
+  cancelIndexSync();
   miniSearch = null;
   indexedVersions.clear();
 }

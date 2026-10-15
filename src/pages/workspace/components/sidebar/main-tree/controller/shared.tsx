@@ -3,10 +3,8 @@ import { formatShortcut } from "@/lib/utils";
 export interface SidebarMainTreeProps {
   activeNotebookId: string | null;
   selectedPageId?: string | null;
-  rowHeight: number;
   itemHeight: number;
   viewportHeight: number;
-  onCreatePage: () => void;
 }
 
 export const PENDING_CREATE_ID_PREFIX = "local-pending-";

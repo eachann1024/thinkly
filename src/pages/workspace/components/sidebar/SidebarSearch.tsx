@@ -2,7 +2,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, FolderOpen, Search, X } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarSearchResults } from "./SidebarSearchResults";
@@ -14,9 +14,13 @@ import { useCommandSearch, type SearchResultPage } from "../command/useCommandSe
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
 import { useSearchSession } from "./useSearchSession";
 import { useSearchScopeHint } from "./useSearchScopeHint";
+import { useSearchFolderRefresh } from "./useSearchFolderRefresh";
+import type { Page } from "@/types";
 import "./sidebar-search.css";
 
-export function SidebarSearch() {
+const EMPTY_PAGES: Record<string, Page> = {};
+
+export const SidebarSearch = memo(function SidebarSearch() {
   const session = useSearchSession(useShallow(s => ({
     query: s.query, scope: s.scope, open: s.open, focusNonce: s.focusNonce,
     selectedPageId: s.selectedPageId, startingNotebookId: s.startingNotebookId,
@@ -26,40 +30,40 @@ export function SidebarSearch() {
   const showScopeHint = useSearchScopeHint(s => s.visible);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const scrollRestore = useRef<{ query: string; scope: typeof session.scope; top: number } | null>(null);
   const composing = useRef(false);
   const [draft, setDraft] = useState(session.query);
-  const [loadError, setLoadError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [retry, setRetry] = useState(0);
+  const { loading, loadError, retryLoad } = useSearchFolderRefresh(session.open, session.scope);
   const notebooks = useNotebooks(s => s.notebooks);
-  const pages = usePages(s => s.pages);
+  const pages = usePages(s => session.open ? s.pages : EMPTY_PAGES);
   const showRecent = useSettings(s => s.showRecentInSearch);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
   const scopedId = session.scope.kind === "all" ? null : session.scope.notebookId;
-  const { searchResults, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent } = useCommandSearch({ searchQuery: session.query, pages, activeNotebookId: scopedId, searchAllNotebooks: session.scope.kind === "all" });
+  const { searchResults, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent } = useCommandSearch({ enabled: session.open, searchQuery: session.query, pages, activeNotebookId: scopedId, searchAllNotebooks: session.scope.kind === "all" });
   useEffect(() => { if (!composing.current) setDraft(session.query); }, [session.query]);
   useEffect(() => {
     if (!session.open) return;
     inputRef.current?.focus({ preventScroll: true });
-    if (listRef.current) listRef.current.scrollTop = useSearchSession.getState().listScrollTop;
+    const latest = useSearchSession.getState();
+    scrollRestore.current = { query: latest.query, scope: latest.scope, top: latest.listScrollTop };
   }, [session.open, session.focusNonce]);
-  useEffect(() => {
-    if (!session.open) return;
-    let cancelled = false;
-    const targets = Object.values(useNotebooks.getState().notebooks).filter(n =>
-      (session.scope.kind === "all" || n.id === scopedId) && n.source === "local-folder" && n.localPath);
-    setLoading(true); setLoadError(false);
-    Promise.all(targets.map(n => usePages.getState().loadLocalFolderPages(n.id, n.localPath!)))
-      .catch(() => { if (!cancelled) setLoadError(true); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [session.open, session.scope.kind, scopedId, retry]);
   const hasQuery = Boolean(session.query.trim());
   const notebookNames = useMemo(() => Object.fromEntries(Object.values(notebooks).map(n => [n.id, n.name])), [notebooks]);
   const resultHasQuery = Boolean(deferredQuery.trim());
   const results = useMemo(() => resultHasQuery ? searchResults.allDisplay : showRecent ? searchResults.recent : [],
     [resultHasQuery, showRecent, searchResults.allDisplay, searchResults.recent]);
   const pending = isSearching || draft !== session.query || session.query !== deferredQuery;
+  useEffect(() => {
+    const restore = scrollRestore.current;
+    if (!session.open || !restore) return;
+    if (restore.query !== session.query || restore.scope !== session.scope) {
+      scrollRestore.current = null;
+      return;
+    }
+    if (pending || !results.length || !listRef.current) return;
+    listRef.current.scrollTop = restore.top;
+    scrollRestore.current = null;
+  }, [session.open, session.query, session.scope, pending, results]);
   const selected = results.find(p => p.id === session.selectedPageId) ?? results[0];
   const duplicates = useMemo(() => {
     const seen = new Set<string>(), repeated = new Set<string>();
@@ -133,8 +137,8 @@ export function SidebarSearch() {
     {showScopeHint && <p id="sidebar-search-scope-hint" className="sidebar-search-scope-hint">按 Tab 切换到{session.scope.kind === "all" ? "当前记事本" : "所有记事本"}</p>}
     <div className="sidebar-search-filters"><span role="status">{searchError ? "" : hasQuery && (loading || pending) ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
     {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
-    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" onClick={() => setRetry(n => n + 1)}>重试读取</Button></div>}
-    <div ref={listRef} className="sidebar-search-results" onScroll={e => { const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
+    {loadError && <div className="sidebar-search-empty" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" onClick={retryLoad}>重试读取</Button></div>}
+    <div ref={listRef} className="sidebar-search-results" onScroll={e => { if (!useSearchSession.getState().open || scrollRestore.current) return; const el = e.currentTarget; useSearchSession.setState({ listScrollTop: el.scrollTop }); if (hasQuery && searchResults.hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
       <div id="sidebar-search-results" className="goose-list-layout" role="listbox" aria-label="搜索结果" tabIndex={0} onKeyDown={keydown} aria-activedescendant={selected ? `search-result-${selected.id}` : undefined}>
       <SidebarSearchResults results={results} query={deferredQuery} selectedId={selected?.id} duplicates={duplicates} notebookNames={notebookNames} openResult={openResult} removeRecent={removeRecent}/>
       </div>
@@ -149,4 +153,4 @@ export function SidebarSearch() {
       {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="h-auto whitespace-normal border-0 px-0 py-0 goose-list-row sidebar-search-command rounded-lg" onClick={() => { action.run(); session.closeSearch(); }}>{action.label}</Button>)}
     </div>
   </section>;
-}
+});

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { memo } from "react";
 import { renderMainTreeSurface } from "./controller/renderMainTreeSurface";
 import * as GooseIcons from "@/components/ui/icons";
 import { LocalFolderLoadingSkeleton } from "../LocalFolderLoadingSkeleton";
@@ -15,7 +16,7 @@ import { useMainTreeLocalCreation } from "./controller/useMainTreeLocalCreation"
 import { useMainTreeView } from "./controller/useMainTreeView";
 import { useMainTreeDragActions } from "./controller/useMainTreeDragActions";
 
-export function SidebarMainTree(props: SidebarMainTreeProps) {
+export const SidebarMainTree = memo(function SidebarMainTree(props: SidebarMainTreeProps) {
   const tree = useMainTreeState(props);
   const creation = useMainTreeLocalCreation(tree);
   const view = useMainTreeView(creation);
@@ -161,4 +162,4 @@ export function SidebarMainTree(props: SidebarMainTreeProps) {
       </ContextMenu>
     </>
   );
-}
+});

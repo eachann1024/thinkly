@@ -13,6 +13,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { ExternalLink } from "@/components/ui/icons";
 import type { useSettingsResetActions } from "./useSettingsResetActions";
 import { SETTINGS_TABS, GOOSE_APPS, isElectronHost } from "./shared";
+import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
 
 export function renderSettingsScaffold(
   context: ReturnType<typeof useSettingsResetActions>,
@@ -127,7 +128,7 @@ export function renderSettingsScaffold(
         ) : null
       }
     >
-      {activeTab === "general" && (
+      <WorkspaceViewActivity visible={open && activeTab === "general"}>
         <div className="settings-groups">
           <SettingsGeneral
             autoOpenLastNote={privacy.autoOpenLastNote}
@@ -138,9 +139,9 @@ export function renderSettingsScaffold(
             setNotebookDropdownHoverExpand={setNotebookDropdownHoverExpand}
           />
         </div>
-      )}
+      </WorkspaceViewActivity>
 
-      {activeTab === "shortcuts" && (
+      <WorkspaceViewActivity visible={open && activeTab === "shortcuts"}>
         <div className="settings-groups">
           <SettingsShortcuts
             closeTabShortcut={closeTabShortcut}
@@ -153,12 +154,12 @@ export function renderSettingsScaffold(
             singleTabMode={effectiveSingleTabMode(singleTabMode)}
           />
         </div>
-      )}
+      </WorkspaceViewActivity>
 
-      {activeTab === "local-folder" && (
+      <WorkspaceViewActivity visible={open && activeTab === "local-folder"}>
         <div className="settings-groups">
           <SettingsLocalFolder
-            visible={open}
+            visible={open && activeTab === "local-folder"}
             localFolderFileManager={localFolderFileManager}
             setLocalFolderFileManager={setLocalFolderFileManager}
             localFolderExternalEditor={localFolderExternalEditor}
@@ -169,9 +170,9 @@ export function renderSettingsScaffold(
             setLocalFolderHiddenFolders={setLocalFolderHiddenFolders}
           />
         </div>
-      )}
+      </WorkspaceViewActivity>
 
-      {activeTab === "appearance" && (
+      <WorkspaceViewActivity visible={open && activeTab === "appearance"}>
         <SettingsAppearance
           theme={theme}
           setTheme={setTheme}
@@ -185,12 +186,12 @@ export function renderSettingsScaffold(
           increaseEditorFontSize={increaseEditorFontSize}
           decreaseEditorFontSize={decreaseEditorFontSize}
         />
-      )}
+      </WorkspaceViewActivity>
 
-      {activeTab === "ai" && (
+      <WorkspaceViewActivity visible={open && activeTab === "ai"}>
         <div className="settings-groups">
           <SettingsAI
-            visible={open}
+            visible={open && activeTab === "ai"}
             ai={ai}
             enabled={ai.enabled}
             setEnabled={setAIEnabled}
@@ -201,14 +202,16 @@ export function renderSettingsScaffold(
             saveCustomConfig={saveAICustomConfig}
           />
         </div>
-      )}
+      </WorkspaceViewActivity>
 
-      {activeTab === "git-sync" && <SettingsGitSync visible={open} />}
+      <WorkspaceViewActivity visible={open && activeTab === "git-sync"}>
+        <SettingsGitSync visible={open && activeTab === "git-sync"} />
+      </WorkspaceViewActivity>
 
-      {activeTab === "data" && (
+      <WorkspaceViewActivity visible={open && activeTab === "data"}>
         <div className="settings-groups">
           <SettingsDataPanel
-            active={open}
+            active={open && activeTab === "data"}
             importing={importing}
             onImport={handleImport}
             selectedIds={selectedIds}
@@ -227,7 +230,7 @@ export function renderSettingsScaffold(
             onResetAndImport={handleReset}
           />
         </div>
-      )}
+      </WorkspaceViewActivity>
     </SettingsScaffold>
   );
 }

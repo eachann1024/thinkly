@@ -1,31 +1,37 @@
-/**
- * 全局搜索目录：空闲时预热 MiniSearch 索引 + 按标题排好的可搜页。
- *
- * CommandPalette 关闭时用空 pages 退订 store，避免侧栏/编辑改动拖着面板重渲染。
- * 空快照不得清掉已预热的目录和索引，否则每次 ⌘K 都要全量抽文本、重建倒排。
- */
+/** Shared immutable search snapshots, maintained outside React render. */
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { clearSearchBodyCache, pruneSearchBodyCache } from "./searchBodyCache";
-import { syncIndex } from "./pageSearchIndex";
+import { cancelIndexSync, resetIndex } from "./pageSearchIndex";
+import { createSearchTaskBudget, sortSearchCatalog, yieldSearchTask } from "./searchTaskScheduling";
 import {
   isCommandSearchablePage,
   shouldIncludePageInCommandScope,
   type SearchNotebook,
 } from "./searchPageFilter";
 
+export type SearchNotebooks = Record<string, SearchNotebook | undefined>;
 export interface SearchCatalog {
   pagesRef: Record<string, Page> | null;
+  notebooksRef: SearchNotebooks | null;
   sortedByTitle: Page[];
   pageIdsWithChildren: Set<string>;
 }
 
 const pageMetadata = new WeakMap<Page, string>();
+const titleCollator = new Intl.Collator("zh-CN");
 let metadata = new Map<string, string>();
+const scopeCache = new WeakMap<Page[], Map<string, Page[]>>();
 let notebookKey = "";
+let pending: {
+  pages: Record<string, Page>;
+  notebooks: SearchNotebooks;
+  controller: AbortController;
+  promise: Promise<SearchCatalog | null>;
+} | null = null;
 
-function notebookSignature(notebooks: Record<string, SearchNotebook | undefined>): string {
+function notebookSignature(notebooks: SearchNotebooks): string {
   return JSON.stringify(Object.keys(notebooks).sort().map(id =>
     [id, notebooks[id]?.source, notebooks[id]?.excludeFromGlobalSearch]));
 }
@@ -39,12 +45,8 @@ function metadataSignature(page: Page): string {
   return signature;
 }
 
-const EMPTY_CHILDREN = new Set<string>();
-
 let catalog: SearchCatalog = {
-  pagesRef: null,
-  sortedByTitle: [],
-  pageIdsWithChildren: EMPTY_CHILDREN,
+  pagesRef: null, notebooksRef: null, sortedByTitle: [], pageIdsWithChildren: new Set(),
 };
 
 export function getSearchCatalog(): SearchCatalog {
@@ -52,97 +54,120 @@ export function getSearchCatalog(): SearchCatalog {
 }
 
 export function resetSearchCatalog(): void {
+  pending?.controller.abort();
+  pending = null;
   metadata = new Map();
   notebookKey = "";
   clearSearchBodyCache();
+  resetIndex();
   catalog = {
-    pagesRef: null,
-    sortedByTitle: [],
-    pageIdsWithChildren: EMPTY_CHILDREN,
+    pagesRef: null, notebooksRef: null, sortedByTitle: [], pageIdsWithChildren: new Set(),
   };
 }
 
-function toPagesRecord(pages: Page[]): Record<string, Page> {
-  const record: Record<string, Page> = {};
-  for (const page of pages) {
-    record[page.id] = page;
-  }
-  return record;
-}
-
-export function syncSearchCatalog(
+async function buildCatalog(
   pages: Record<string, Page>,
-  notebooks: Record<string, SearchNotebook | undefined>,
-): SearchCatalog {
+  notebooks: SearchNotebooks,
+  signal: AbortSignal,
+): Promise<SearchCatalog | null> {
+  await yieldSearchTask(signal, true);
+  if (signal.aborted) return null;
+  const previous = catalog;
   const nextNotebookKey = notebookSignature(notebooks);
-  if (catalog.pagesRef === pages && nextNotebookKey === notebookKey) return catalog;
-
-  // 面板关闭传入的空对象：保留上次预热结果
-  if (Object.keys(pages).length === 0) return catalog;
-
   const nextMetadata = new Map<string, string>();
-  let metadataChanged = notebookKey !== nextNotebookKey || metadata.size !== Object.keys(pages).length;
-  for (const page of Object.values(pages)) {
-    const signature = metadataSignature(page);
-    nextMetadata.set(page.id, signature);
-    if (metadata.get(page.id) !== signature) metadataChanged = true;
+  let metadataChanged = notebookKey !== nextNotebookKey;
+  const pause = createSearchTaskBudget(signal, true);
+  for (const id in pages) {
+    if (signal.aborted) return null;
+    const signature = metadataSignature(pages[id]);
+    nextMetadata.set(id, signature);
+    if (metadata.get(id) !== signature) metadataChanged = true;
+    const wait = pause();
+    if (wait) await wait;
   }
-  let sortedByTitle: Page[];
-  let pageIdsWithChildren = catalog.pageIdsWithChildren;
+  metadataChanged ||= metadata.size !== nextMetadata.size;
+  const sortedByTitle: Page[] = [];
+  let pageIdsWithChildren = previous.pageIdsWithChildren;
   if (metadataChanged) {
     const decorated: { page: Page; title: string }[] = [];
-    pageIdsWithChildren = new Set<string>();
-    for (const page of Object.values(pages)) {
+    pageIdsWithChildren = new Set();
+    for (const id in pages) {
+      if (signal.aborted) return null;
+      const page = pages[id];
       if (!page.trashedAt && page.parentId) pageIdsWithChildren.add(page.parentId);
       if (isCommandSearchablePage(page, notebooks)) decorated.push({ page, title: getPageTitle(page) });
+      const wait = pause();
+      if (wait) await wait;
     }
-    decorated.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
-    sortedByTitle = decorated.map(item => item.page);
+    const sorted = await sortSearchCatalog(decorated,
+      (a, b) => titleCollator.compare(a.title, b.title), signal);
+    if (!sorted) return null;
+    for (const item of sorted) {
+      if (signal.aborted) return null;
+      sortedByTitle.push(item.page);
+      const wait = pause();
+      if (wait) await wait;
+    }
   } else {
-    // Order/structure are unchanged, but consumers must receive the latest content references.
-    sortedByTitle = catalog.sortedByTitle.map(page => pages[page.id]);
+    for (const page of previous.sortedByTitle) {
+      if (signal.aborted) return null;
+      sortedByTitle.push(pages[page.id]);
+      const wait = pause();
+      if (wait) await wait;
+    }
   }
+  if (signal.aborted) return null;
   metadata = nextMetadata;
   notebookKey = nextNotebookKey;
-  pruneSearchBodyCache(new Set(nextMetadata.keys()));
-
-  catalog = {
-    pagesRef: pages,
-    sortedByTitle,
-    pageIdsWithChildren,
-  };
-  syncIndex(toPagesRecord(sortedByTitle));
+  pruneSearchBodyCache(nextMetadata);
+  catalog = { pagesRef: pages, notebooksRef: notebooks, sortedByTitle, pageIdsWithChildren };
   return catalog;
 }
 
-export function filterCatalogByScope(
+/** Share identical work; a newer pages/notebooks snapshot cancels the previous build. */
+export function syncSearchCatalog(
+  pages: Record<string, Page>, notebooks: SearchNotebooks,
+): Promise<SearchCatalog | null> {
+  if (catalog.pagesRef === pages && catalog.notebooksRef === notebooks) return Promise.resolve(catalog);
+  if (pending?.pages === pages && pending.notebooks === notebooks) return pending.promise;
+  pending?.controller.abort();
+  cancelIndexSync();
+  const controller = new AbortController();
+  const promise = buildCatalog(pages, notebooks, controller.signal).finally(() => {
+    if (pending?.controller === controller) pending = null;
+  });
+  pending = { pages, notebooks, controller, promise };
+  return promise;
+}
+
+export async function filterCatalogByScope(
   sortedByTitle: Page[],
-  notebooks: Record<string, SearchNotebook | undefined>,
+  notebooks: SearchNotebooks,
   searchAllNotebooks: boolean,
   activeNotebookId: string | null,
-): Page[] {
-  const currentNotebookId =
-    activeNotebookId ||
+  signal: AbortSignal,
+): Promise<Page[] | null> {
+  if (signal.aborted) return null;
+  const scopeKey = JSON.stringify([searchAllNotebooks, activeNotebookId]);
+  const cachedScopes = scopeCache.get(sortedByTitle);
+  const cached = cachedScopes?.get(scopeKey);
+  if (cached) return cached;
+  const currentNotebookId = activeNotebookId ||
     (typeof __HOST_TARGET__ !== "undefined" && __HOST_TARGET__ === "electron"
-      ? "__no-notebook__"
-      : DEFAULT_NOTEBOOK);
-
+      ? "__no-notebook__" : DEFAULT_NOTEBOOK);
   const result: Page[] = [];
+  const pause = createSearchTaskBudget(signal);
   for (const page of sortedByTitle) {
-    if (
-      !shouldIncludePageInCommandScope(
-        page,
-        notebooks,
-        searchAllNotebooks,
-        currentNotebookId,
-      )
-    ) {
-      continue;
-    }
-    if (!searchAllNotebooks && page.workspaceId !== currentNotebookId) {
-      continue;
-    }
-    result.push(page);
+    if (signal.aborted) return null;
+    if (shouldIncludePageInCommandScope(page, notebooks, searchAllNotebooks, currentNotebookId) &&
+      (searchAllNotebooks || page.workspaceId === currentNotebookId)) result.push(page);
+    const wait = pause();
+    if (wait) await wait;
   }
+  if (signal.aborted) return null;
+  const scopes = cachedScopes ?? new Map<string, Page[]>();
+  scopes.set(scopeKey, result);
+  if (scopes.size > 4) scopes.delete(scopes.keys().next().value!);
+  scopeCache.set(sortedByTitle, scopes);
   return result;
 }

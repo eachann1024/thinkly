@@ -28,7 +28,8 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   const [pathOpen, setPathOpen] = useState(false);
   const frame = useRef(0);
   const handled = useRef(0);
-  const previousPage = useRef<string | null>(null);
+  const previouslyVisible = useRef(false);
+  const navigationReadyAt = useRef(0);
   const visible = session.open && focused;
   const key = searchMemoryKey(pageId, session.query, session.scope);
   const close = () => {
@@ -81,6 +82,8 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   };
   useEffect(() => {
     let cancelled = false;
+    if (visible && !previouslyVisible.current) navigationReadyAt.current = performance.now() + 200;
+    previouslyVisible.current = visible;
     const apply = () => {
       if (cancelled) return;
       const editor = editorRef.current?.editor;
@@ -123,12 +126,18 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       if (editorRef.current?.editor?.prosemirrorView === view) refresh();
     });
     const navigation = useSearchSession.getState();
-    const immediate = !visible || !session.query.trim() || previousPage.current !== pageId ||
+    const immediate = !visible || !session.query.trim() ||
       (navigation.targetPageId === pageId && navigation.requestNonce !== handled.current);
-    previousPage.current = pageId;
-    const timer = window.setTimeout(apply, immediate ? 0 : 120);
-    const ready = () => { window.clearTimeout(timer); apply(); };
-    if (immediate) { window.clearTimeout(timer); apply(); }
+    const applyAfter = performance.now() + (immediate ? 0 : Math.max(120, navigationReadyAt.current - performance.now()));
+    let timer = 0;
+    const ready = () => {
+      window.clearTimeout(timer);
+      const remaining = applyAfter - performance.now();
+      if (remaining <= 0) apply();
+      else timer = window.setTimeout(apply, remaining);
+    };
+    // Editor readiness may arrive during navigation; it must retain the same deadline.
+    ready();
     window.addEventListener("goose-note:search-editor-ready", ready);
     return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };
   }, [visible, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration]);

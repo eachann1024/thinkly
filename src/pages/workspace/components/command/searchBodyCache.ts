@@ -16,7 +16,7 @@ function removeEntry(id: string): void {
   textCache.delete(id);
 }
 
-export function pruneSearchBodyCache(pageIds: Set<string>): void {
+export function pruneSearchBodyCache(pageIds: { has(id: string): boolean }): void {
   for (const id of textCache.keys()) if (!pageIds.has(id)) removeEntry(id);
 }
 
