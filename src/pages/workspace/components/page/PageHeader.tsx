@@ -14,6 +14,7 @@ import { NewTabButton } from "./NewTabButton";
 import { useEffectiveSingleTabMode } from "@/lib/tabMode";
 import { cn, formatShortcut } from "@/lib/utils";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
+import { PageFileTitle } from "./titlebar/PageFileTitle";
 
 interface PageHeaderProps {
   page?: Page;
@@ -114,6 +115,8 @@ export function PageHeader({
             </Tooltip>
           </TooltipProvider>
         ) : null}
+
+        {!aiFullscreenOpen && page && <PageFileTitle page={page} />}
 
         {page?.isLocked && (
           <span className="text-xs bg-[var(--goose-color-lock-bg)] text-[var(--goose-color-lock-text)] px-1.5 py-0.5 rounded">
