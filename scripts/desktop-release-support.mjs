@@ -60,14 +60,18 @@ export function verifyBuildRecords(input, version, sha) {
 
 export function verifyReleaseSource(release, tag, sha) {
   assert.ok(release, `Release ${tag} does not exist`);
-  if (release.draft) assert.equal(release.target_commitish, sha, "Draft must target the exact source commit");
-  try {
-    assert.equal(gh(["api", `repos/${REPO}/commits/${tag}`, "--jq", ".sha"]).trim(), sha,
-      "Release tag must point to the selected source commit");
-  } catch (error) {
-    // GitHub creates a new draft's tag only when the release is published.
-    if (!release.draft || !String(error.stderr).includes("404")) throw error;
+  if (release.draft) {
+    assert.equal(release.target_commitish, sha, "Draft must target the exact source commit");
+    try {
+      gh(["api", `repos/${REPO}/git/ref/tags/${tag}`]);
+    } catch (error) {
+      // A draft may have no tag yet. The refs API reports this specifically as 404.
+      if (String(error.stderr).includes("HTTP 404")) return;
+      throw error;
+    }
   }
+  assert.equal(gh(["api", `repos/${REPO}/commits/${tag}`, "--jq", ".sha"]).trim(), sha,
+    "Release tag must point to the selected source commit");
 }
 
 // Commit the download manifests together; a concurrent main push is retried without overwriting it.
