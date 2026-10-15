@@ -5,7 +5,7 @@ import { useAppUpdate } from "@/hooks/useAppUpdate";
 import { SettingsSectionCard } from "./SettingsSectionCard";
 
 export function SettingsAppUpdate() {
-  const { currentVersion, state, installing, installError, setOpen } = useAppUpdate();
+  const { currentVersion, state, installing, installError, setOpen, check } = useAppUpdate();
   const busy = state.status === "checking" || state.status === "downloading" || installing;
   const statusLabel = updateStatusLabel(state, installing, installError);
   return (
@@ -15,10 +15,13 @@ export function SettingsAppUpdate() {
           <GooseIcons.Download aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
           <span>当前版本 v{currentVersion}</span>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
-          {busy && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
-          更新日志
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>更新日志</Button>
+          <Button type="button" variant="outline" size="sm" disabled={busy || state.status === "ready"} onClick={() => void check()}>
+            {state.status === "checking" && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
+            {state.status === "checking" ? "检查中…" : "检查更新"}
+          </Button>
+        </div>
       </div>
       {statusLabel && (
         <p role="status" aria-live="polite" className={`text-sm ${installError || state.status === "error" || (state.status === "ready" && state.message) ? "text-destructive" : "text-muted-foreground"}`}>
