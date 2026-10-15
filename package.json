@@ -1,7 +1,7 @@
 {
   "name": "goose-note-app",
   "private": true,
-  "version": "1.7.228",
+  "version": "1.7.230",
   "type": "module",
   "packageManager": "bun@1.3.14",
   "description": "A local-first, Notion-style Electron desktop note-taking app built on the BlockNote block editor with built-in AI.",
@@ -15,6 +15,7 @@
     "build": "node scripts/generate-text-colors.mjs && node src/lib/vite-stubs/assert-present.mjs && vite build && node scripts/compile-electron.mjs && node scripts/prepare-electron-pack.mjs",
     "build:debug": "node scripts/generate-text-colors.mjs && GOOSE_DEBUG=1 vite build && GOOSE_DEBUG=1 node scripts/compile-electron.mjs && GOOSE_DEBUG=1 node scripts/prepare-electron-pack.mjs",
     "mac": "python3 build_mac.py",
+    "release:desktop": "node scripts/release-desktop.mjs",
     "win": "bun run build:electron && node scripts/electron-build-win.mjs && node scripts/collect-desktop-artifacts.mjs",
     "build:win": "bun run win",
     "linux": "bun run build:electron && node scripts/electron-build-linux.mjs && node scripts/collect-desktop-artifacts.mjs",

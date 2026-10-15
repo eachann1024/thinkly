@@ -1,4 +1,5 @@
 import { IconButton } from "@/components/ui/icon-button";
+import { toast } from "@/components/ui/sonner";
 import * as GooseIcons from "@/components/ui/icons";
 import { useEffect, useState } from "react";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -56,7 +57,9 @@ export function SidebarFooter({
                 data-active="true"
                 aria-label={`新版本 v${readyVersion} 已就绪，点击重启并更新`}
                 title={`新版本 v${readyVersion} 已就绪，点击重启并更新`}
-                onClick={() => void getGooseDesktop()?.installReadyUpdate()}
+                onClick={() => void getGooseDesktop()?.installReadyUpdate().catch((error: unknown) => {
+                  toast.error(error instanceof Error ? error.message : "安装更新失败，请重试");
+                })}
               >
                 <GooseIcons.RotateCw className="h-4 w-4" />
               </IconButton>

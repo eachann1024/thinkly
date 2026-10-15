@@ -1,6 +1,7 @@
 import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync } from "./services";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";
+import type { AppUpdateCheckResult, AppUpdateState } from "../../src/lib/appUpdateTypes";
 import type {
   FsChange,
   WindowTabSnapshot,
@@ -84,31 +85,23 @@ const gooseDesktop = {
     invoke("desktop:openTerminalAtPath", p, terminal) as Promise<void>,
   getAppVersion: () => invoke("desktop:getAppVersion") as Promise<string>,
   checkForUpdate: () =>
-    invoke("desktop:checkForUpdate") as Promise<
-      | {
-          status: "up-to-date";
-          currentVersion: string;
-          latestVersion: string;
-          releaseUrl: string;
-        }
-      | {
-          status: "available";
-          currentVersion: string;
-          latestVersion: string;
-          assetName: string;
-          downloadUrl: string;
-          releaseUrl: string;
-        }
-      | {
-          status: "unavailable";
-          currentVersion: string;
-          reason: string;
-          releaseUrl: string;
-        }
-    >,
+    invoke("desktop:checkForUpdate") as Promise<AppUpdateCheckResult>,
+  getUpdateState: () => invoke("desktop:getUpdateState") as Promise<AppUpdateState>,
+  onUpdateState: (cb: (state: AppUpdateState) => void) => {
+    const listener = (_event: unknown, state: AppUpdateState) => cb(state);
+    ipcRenderer.on("desktop:update-state", listener);
+    return () => ipcRenderer.removeListener("desktop:update-state", listener);
+  },
   getReadyUpdate: () => invoke("desktop:getReadyUpdate") as Promise<string>,
   installReadyUpdate: () =>
     invoke("desktop:installReadyUpdate") as Promise<void>,
+  onBeforeUpdate: (cb: (requestId: string) => void) => {
+    const listener = (_event: unknown, requestId: string) => cb(requestId);
+    ipcRenderer.on("desktop:before-update", listener);
+    return () => ipcRenderer.removeListener("desktop:before-update", listener);
+  },
+  replyBeforeUpdate: (requestId: string, error: string | null) =>
+    ipcRenderer.send("desktop:before-update-reply", requestId, error),
   onUpdateReady: (cb: (version: string) => void) => {
     const listener = (_event: unknown, version: string) => cb(version);
     ipcRenderer.on("desktop:update-ready", listener);

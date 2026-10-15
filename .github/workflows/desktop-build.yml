@@ -2,16 +2,25 @@ name: Desktop installers
 
 on:
   schedule:
-    # 每天北京时间 8 点（UTC 0 点）用 main 最新提交构建一次；无源码变化时 prepare 会跳过。
+    # 每天北京时间 8 点仅在 package.json 有新版本时自动发布。
     - cron: '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish installers and update feed after building
+        type: boolean
+        default: false
+      expected_sha:
+        description: Exact main commit checked by the release CLI
+        type: string
+        default: ''
 
 permissions:
   contents: read
 
 concurrency:
   group: desktop-installers-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -24,35 +33,20 @@ jobs:
     outputs:
       build: ${{ steps.check.outputs.build }}
       publish: ${{ steps.check.outputs.publish }}
+      repair: ${{ steps.check.outputs.repair }}
+      release_tag: ${{ steps.check.outputs.release_tag }}
     steps:
-      - name: Skip unchanged scheduled builds
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - name: Check version and choose publication
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          if [[ "$GITHUB_EVENT_NAME" == schedule ]]; then
-            latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName 2>/dev/null || true)
-            previous="${latest##*-}"
-            if [[ "$previous" =~ ^[0-9a-f]{7}$ ]]; then
-              changed=$(gh api "repos/$GITHUB_REPOSITORY/compare/$previous...$GITHUB_SHA" --jq '[.files[].filename | select(startswith("updates/") or startswith("Casks/") | not)] | length')
-              if [[ "$changed" == 0 ]]; then
-                echo 'build=false' >> "$GITHUB_OUTPUT"
-                echo 'publish=false' >> "$GITHUB_OUTPUT"
-                exit 0
-              fi
-            fi
-            if [[ "$latest" == *"-${GITHUB_SHA:0:7}" ]]; then
-              echo 'build=false' >> "$GITHUB_OUTPUT"
-              echo 'publish=false' >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          fi
-          echo 'build=true' >> "$GITHUB_OUTPUT"
-          if [[ "$GITHUB_REF" == refs/heads/main && ( "$GITHUB_EVENT_NAME" == schedule || "$GITHUB_EVENT_NAME" == workflow_dispatch ) ]]; then
-            echo 'publish=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'publish=false' >> "$GITHUB_OUTPUT"
-          fi
+          PUBLISH: ${{ inputs.publish == true }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: node scripts/select-desktop-release.mjs
 
   source:
     name: Source archive
@@ -258,29 +252,35 @@ jobs:
         with:
           path: downloaded-artifacts/
       - name: Collect exact build assets for publication
-        run: |
-          python3 - <<'PYTHON'
-          import os, pathlib, shutil
-          sha = os.environ['SOURCE_SHA']
-          dest = pathlib.Path('artifacts')
-          dest.mkdir()
-          for prefix in ('source', 'goose-note-win-x64', 'goose-note-win-arm64', 'goose-note-mac-arm64', 'goose-note-mac-x64', 'goose-note-linux-x64'):
-              src = pathlib.Path('downloaded-artifacts') / f'{prefix}-{sha}'
-              if not src.is_dir():
-                  raise SystemExit(f'Missing artifact: {src}')
-              for file in src.iterdir():
-                  if not file.is_file():
-                      raise SystemExit(f'Unexpected directory: {file}')
-                  name = file.name.replace(' ', '.')
-                  if name in {'SHA256SUMS.txt', 'BUILD.json', 'COMMIT.txt'}:
-                      name = f'{prefix}-{name}'
-                  target = dest / name
-                  if target.exists() and target.read_bytes() != file.read_bytes():
-                      raise SystemExit(f'Conflicting asset: {name}')
-                  shutil.copyfile(file, target)
-          PYTHON
+        run: node scripts/collect-release-assets.mjs
       - name: Publish installers, source and update feeds
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: node scripts/publish-release.mjs
+
+  repair:
+    name: Repair published download metadata
+    needs: [prepare]
+    if: needs.prepare.outputs.repair == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: goose-notes-publish-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Restore manifests from verified published asset digests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+        run: node scripts/repair-desktop-metadata.mjs "$RELEASE_TAG"

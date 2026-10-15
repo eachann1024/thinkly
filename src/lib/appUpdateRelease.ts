@@ -14,7 +14,7 @@ export type ParsedReleaseVersion = {
   tag: string;
 };
 
-const SEMVER_RE = /(\d+)\.(\d+)\.(\d+)/;
+const SEMVER_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-[a-f0-9]{7,40})?$/i;
 
 export function parseReleaseTag(tag: string): ParsedReleaseVersion | null {
   const trimmed = tag.trim();
@@ -48,23 +48,10 @@ export function pickUpdateAsset(
 
   const isArm = arch === "arm64";
   if (platform === "darwin") {
-    const dmgs = names.filter((asset) => asset.name.toLowerCase().endsWith(".dmg"));
-    if (isArm) {
-      return (
-        dmgs.find((asset) => asset.name.toLowerCase().includes("arm64")) ??
-        names.find((asset) => asset.name.toLowerCase().includes("arm64")) ??
-        null
-      );
-    }
-    return (
-      dmgs.find((asset) => !asset.name.toLowerCase().includes("arm64")) ??
-      names.find(
-        (asset) =>
-          asset.name.toLowerCase().endsWith(".zip") &&
-          !asset.name.toLowerCase().includes("arm64"),
-      ) ??
-      null
-    );
+    if (arch !== "arm64" && arch !== "x64") return null;
+    const native = names.filter((asset) => asset.name.toLowerCase().includes("arm64") === isArm);
+    return native.find((asset) => asset.name.toLowerCase().endsWith("-mac.zip")) ??
+      native.find((asset) => asset.name.toLowerCase().endsWith(".dmg")) ?? null;
   }
 
   if (platform === "win32") {
@@ -74,6 +61,7 @@ export function pickUpdateAsset(
     return native ?? (isArm ? exes[0] : null) ?? null;
   }
 
+  if (platform !== "linux" || arch !== "x64") return null;
   const linux = names.filter((asset) => {
     const lower = asset.name.toLowerCase();
     return (
