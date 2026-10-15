@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { zh } from "./report-zh.mjs";
 
 const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, "utf8"));
 const run = event.workflow_run;
@@ -42,7 +43,7 @@ if (after) {
         `- ${match[2] === "before" ? "改前" : "改后"}截图与操作记录：` +
         `[下载报告](${run.html_url}/artifacts/${artifact.id}) · \`${match[3].slice(0, 8)}\``);
     const body = `${marker}\n### 界面预览\n\n` +
-      `云端运行：**${run.conclusion}** · 当前 PR 提交：\`${pr.head.sha.slice(0, 8)}\`\n\n` +
+      `云端运行：**${zh(run.conclusion)}** · 当前 PR 提交：\`${pr.head.sha.slice(0, 8)}\`\n\n` +
       `${links.join("\n")}\n\n` +
       `解压后打开 \`index.html\` 查看截图、逐步结果和未覆盖项；` +
       `运行成功仅表示列出的操作完成，仍需人工核对改动效果。\n\n[构建与运行日志](${run.html_url})`;
