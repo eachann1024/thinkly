@@ -1,4 +1,5 @@
-export const PUBLIC_RELEASES_REPO = "eachann1024/goose-notes";
+export const PUBLIC_RELEASES_REPO = "eachann1024/goose-note";
+export const LEGACY_RELEASES_REPO = "eachann1024/goose-notes";
 export const PUBLIC_RELEASES_LATEST_URL = `https://github.com/${PUBLIC_RELEASES_REPO}/releases/latest`;
 export const PUBLIC_RELEASES_API_URL = `https://api.github.com/repos/${PUBLIC_RELEASES_REPO}/releases/latest`;
 export const PUBLIC_UPDATE_URL = `https://raw.githubusercontent.com/${PUBLIC_RELEASES_REPO}/main/updates/latest.json`;
@@ -93,4 +94,13 @@ export function isGithubDownloadUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function isTrustedUpdateAsset(asset: GithubReleaseAsset, tag: string): boolean {
+  if (typeof asset.name !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(asset.name) ||
+    !/^[a-f0-9]{64}$/i.test(asset.sha256 ?? "")) return false;
+  const suffix = `${encodeURIComponent(tag)}/${encodeURIComponent(asset.name)}`;
+  const github = [PUBLIC_RELEASES_REPO, LEGACY_RELEASES_REPO].some((repo) =>
+    asset.browser_download_url === `https://github.com/${repo}/releases/download/${suffix}`);
+  return github;
 }

@@ -17,11 +17,13 @@ export function releaseAssets(version) {
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
+  // Published clients require the legacy prefix; GitHub redirects it to the renamed repository.
+  const downloadRepo = repo === "eachann1024/goose-note" ? "eachann1024/goose-notes" : repo;
   return {
     tag_name: tag, html_url: `https://github.com/${repo}/releases/tag/${tag}`,
     releaseNotes, publishedAt,
     assets: assets.map((name) => ({ name,
-      browser_download_url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name)}`,
+      browser_download_url: `https://github.com/${downloadRepo}/releases/download/${tag}/${encodeURIComponent(name)}`,
       sha256: hashes.get(name),
     })),
   };

@@ -21,8 +21,7 @@ try {
   throw new Error(`Failed to parse root package.json: ${err.message}`);
 }
 
-// Linux deb/pacman 需要 maintainer（要求邮箱格式）。优先取环境变量，其次取 package.json 的 author，
-// 最后给一个 GitHub-style no-reply 兜底，避免 deb/pacman 因缺 author 邮箱直接失败。
+// Linux 包要求邮箱格式；默认使用非联系地址占位，不向公开作者字段补入私人邮箱。
 const linuxMaintainer =
   process.env.LINUX_MAINTAINER ||
   (typeof pkg.author === "string" && pkg.author.includes("@") ? pkg.author : undefined) ||
@@ -85,7 +84,9 @@ writeFileSync(
       version: pkg.version,
       description: pkg.description,
       author: pkg.author,
-      homepage: pkg.homepage || "https://github.com/eachann1024/goose-notes",
+      repository: pkg.repository,
+      homepage: pkg.homepage || "https://github.com/eachann1024/goose-note",
+      bugs: pkg.bugs,
       license: pkg.license,
       private: true,
       type: "module",
@@ -101,7 +102,7 @@ writeFileSync(
   resolve(pack, "electron-builder.yml"),
   `appId: com.goosenote.desktop
 productName: Goose Note
-copyright: Copyright © Goose Note
+copyright: Copyright © 2026 eachann1024
 directories:
   output: ../packaged
 asar: true
@@ -173,8 +174,9 @@ nsis:
   artifactName: \${productName}-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
+  executableName: goose-note-app
   category: Utility
-  vendor: ${pkg.productName || "goose-note"}
+  vendor: ${pkg.author?.name || "Goose Note"}
   synopsis: ${pkg.description || "Local-first note taking app"}
   maintainer: ${linuxMaintainer}
   target:
@@ -188,10 +190,14 @@ linux:
       Categories: Office;Note;
       MimeType: text/markdown;text/x-markdown;
       # 打包版 WM_CLASS 是 productName 的小写中划线形式 "goose-note"（实测 AppImage/deb）；
-      # 开发实例（electron .）才是 package.json name "goose-note-app"，
-      # 开发机图标匹配请在 ~/.local/share/applications 放 goose-note-app.desktop。
+      # 开发实例使用 package.json name "goose-note"；保留旧可执行文件名以兼容已安装包。
       StartupWMClass: goose-note
+deb:
+  packageName: goose-note-app
+  artifactName: goose-note-app_\${version}_\${arch}.\${ext}
 pacman:
+  packageName: goose-note-app
+  artifactName: goose-note-app-\${version}.\${ext}
   depends:
     - gtk3
     - nss

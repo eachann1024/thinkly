@@ -6,7 +6,7 @@ import { assertPublishVersion, getReleases, gh, REPO, ROOT } from "./desktop-rel
 
 // Publishes the committed and pushed main revision. Unrelated local edits are never uploaded.
 const args = process.argv.slice(2);
-assert.ok(args.every((arg) => arg === "--watch"), "Usage: bun run release:desktop [--watch]");
+assert.ok(args.every((arg) => arg === "--watch"), "Usage: node scripts/release-desktop.mjs [--watch]");
 const git = (...values) => execFileSync("git", values, { cwd: ROOT, encoding: "utf8" }).trim();
 assert.equal(git("branch", "--show-current"), "main", "Desktop releases must use main");
 const sha = git("rev-parse", "HEAD");

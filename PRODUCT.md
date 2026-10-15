@@ -1,7 +1,7 @@
 # 鹅的笔记 (Goose Note)
 
 ## Product Purpose
-Electron 插件，Notion 风格的本地化笔记应用。BlockNote 编辑器驱动，支持 Markdown 导入导出、AI 写作辅助、多记事本管理、标签页、收藏、置顶。桌面端单页应用。
+Goose Note（鹅的笔记）是本地优先的 Markdown 桌面笔记应用。BlockNote 编辑器驱动，支持 Markdown 导入导出、AI 写作辅助、多记事本管理、标签页、收藏、置顶，使用 Electron 提供桌面能力。
 
 ## Users
 中文用户，使用 Electron 效率工具链的知识工作者、开发者、学生。重视本地数据隐私和快速访问。

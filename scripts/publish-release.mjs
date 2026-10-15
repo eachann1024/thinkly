@@ -18,7 +18,7 @@ import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/goose-notes";
+const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/goose-note";
 
 // SignPath Foundation requires a "Code signing policy" section on download/release pages.
 export function codeSigningPolicy(windowsSigned) {

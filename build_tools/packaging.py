@@ -12,7 +12,7 @@ def cmd_build(args: argparse.Namespace) -> None:
     bun = require_tool("bun", "参考 DEVELOP.md 安装 Bun 1.3.14。")
     if not args.no_install:
         run([bun, "install", "--frozen-lockfile"], tag="build")
-    run([bun, "run", "build:electron"], tag="build")
+    run(["node", "scripts/run-task.mjs", "build"], cwd=ROOT, tag="build")
     log("build", f"编译完成：dist-electron/（renderer + main + preload + app-pack），版本 {read_version()}")
 
 

@@ -1,5 +1,5 @@
 import { app, net } from "electron";
-import { PUBLIC_UPDATE_URL, PUBLIC_RELEASES_REPO, parseReleaseTag, isGithubDownloadUrl,
+import { PUBLIC_UPDATE_URL, PUBLIC_RELEASES_REPO, parseReleaseTag, isTrustedUpdateAsset,
   type GithubReleaseAsset } from "../../../src/lib/appUpdateRelease";
 import type { AppReleaseDetails } from "../../../src/lib/appUpdateTypes";
 
@@ -16,12 +16,7 @@ export async function fetchRelease(): Promise<ReleaseDetails & { version: string
   };
   const parsed = parseReleaseTag(String(payload.tag_name ?? ""));
   if (!parsed || !Array.isArray(payload.assets)) throw new Error("更新信息无效");
-  const prefix = `https://github.com/${PUBLIC_RELEASES_REPO}/releases/download/${encodeURIComponent(parsed.tag)}/`;
-  const assets = payload.assets.filter((asset) => typeof asset.name === "string" &&
-    asset.name.length > 0 && asset.name !== "." && asset.name !== ".." &&
-    asset.name === asset.name.split(/[\\/]/).pop() && /^[a-f0-9]{64}$/i.test(asset.sha256 ?? "") &&
-    isGithubDownloadUrl(asset.browser_download_url) && asset.browser_download_url.startsWith(prefix) &&
-    decodeURIComponent(asset.browser_download_url.slice(prefix.length)) === asset.name);
+  const assets = payload.assets.filter((asset) => asset && isTrustedUpdateAsset(asset, parsed.tag));
   const releaseNotes = typeof payload.releaseNotes === "string" ? payload.releaseNotes.slice(0, 100_000).trim() : "";
   const publishedAt = typeof payload.publishedAt === "string" && Number.isFinite(Date.parse(payload.publishedAt))
     ? new Date(payload.publishedAt).toISOString() : undefined;

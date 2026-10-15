@@ -71,7 +71,7 @@ def quit_running_app() -> bool:
 
 def run_build() -> None:
     commands = [
-        ["bun", "run", "build:electron"],
+        ["node", "scripts/run-task.mjs", "build"],
         ["node", "scripts/electron-build-mac.mjs"],
         ["node", "scripts/collect-desktop-artifacts.mjs"],
     ]
