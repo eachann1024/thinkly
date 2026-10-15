@@ -48,7 +48,7 @@ export function renderItem({
   const withoutChildren =
     context.itemContainerWithoutChildrenProps as HTMLProps<HTMLDivElement>;
 
-  const title = getPageTitle(page);
+  const title = page.localPendingCreate === "file" ? "文件名称" : getPageTitle(page);
   const notebook = page?.workspaceId
     ? useNotebooks.getState().notebooks[page.workspaceId]
     : undefined;
@@ -225,6 +225,7 @@ export function renderItem({
           会把 g/y/p 等字母的降部裁掉 */}
       {isPendingCreate ? (
         <PendingCreateNameInput
+          key={page.id}
           id={String(item.index)}
           kind={page.localPendingCreate === "file" ? "file" : "folder"}
           onCommit={onCommitPendingCreate}

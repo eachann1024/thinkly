@@ -1,3 +1,4 @@
+import { createNamedPage } from "@/lib/create-named-page";
 import { useSearchSession } from "../useSearchSession";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { activateWorkspace } from "@/lib/settings-navigation";
@@ -11,8 +12,6 @@ export function useSidebarLifecycle(
     selectedPageId,
     scrollContainerRef,
     activePageId,
-    createPage,
-    createLocalPage,
     getPage,
     setExpandPageId,
     activeNotebookId,
@@ -121,7 +120,7 @@ export function useSidebarLifecycle(
     return () => observer.disconnect();
   }, [scrollAreaNode, setScrollAreaHeight]);
 
-  const handleCreatePage = () => {
+  const handleCreatePage = async () => {
     if (!activeNotebookId) return;
     activateWorkspace();
     closeNotebookAiIfFullscreen();
@@ -132,18 +131,8 @@ export function useSidebarLifecycle(
       basePage && basePage.workspaceId === activeNotebookId
         ? basePage.parentId
         : undefined;
-    if (isLocalFolder) {
-      void Promise.resolve(
-        createLocalPage(siblingParentId, activeNotebookId),
-      ).then((newPageId) => {
-        if (newPageId) {
-          openInCurrentTab(newPageId);
-          window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
-        }
-      });
-      return;
-    }
-    const newPageId = createPage(siblingParentId, activeNotebookId);
+    const newPageId = await createNamedPage(siblingParentId, activeNotebookId);
+    if (!newPageId) return;
     openInCurrentTab(newPageId);
     window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     // 新页若落在折叠的父级下，展开祖先并聚焦使其可见

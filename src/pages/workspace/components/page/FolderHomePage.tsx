@@ -89,10 +89,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
     setCreating("file");
     try {
       const newId = await createLocalPage(page.id, page.workspaceId);
-      if (!newId) {
-        toast.error("新建文件失败，请重试");
-        return;
-      }
+      if (!newId) return;
       // createLocalPage 内部已激活新页；确保父文件夹在侧栏展开可见
       expandView(page.workspaceId, page.id);
     } finally {

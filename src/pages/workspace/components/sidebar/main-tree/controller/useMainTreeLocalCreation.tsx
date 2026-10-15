@@ -1,7 +1,9 @@
-import { useCallback } from "react";
+import { normalizeNewFileName } from "@/lib/new-page-name";
+import { focusNewPage } from "@/stores/pages/actions/create/content";
+import { useCallback, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
 import { openPageFromSidebar } from "@/lib/sidebarPageNavigation";
-import { PENDING_CREATE_ID_PREFIX, normalizePendingFileTitle } from "./shared";
+import { PENDING_CREATE_ID_PREFIX } from "./shared";
 import type { useMainTreeState } from "./useMainTreeState";
 
 export function useMainTreeLocalCreation(
@@ -25,6 +27,10 @@ export function useMainTreeLocalCreation(
     highlightedPageId,
   } = input;
 
+  useEffect(() => {
+    setPendingCreate((current) => current && current.workspaceId !== activeNotebookId ? null : current);
+  }, [activeNotebookId, setPendingCreate]);
+
   const startCreateLocalItem = useCallback(
     (kind: "folder" | "file", parentId?: string) => {
       if (!activeNotebookId || !isLocalFolder) return;
@@ -32,7 +38,7 @@ export function useMainTreeLocalCreation(
       const safeParentId = parentPage?.isFolder ? parentId : undefined;
       const pendingId = `${PENDING_CREATE_ID_PREFIX}${kind}-${Date.now()}`;
       const now = Date.now();
-      const defaultTitle = kind === "folder" ? "新建文件夹" : "未命名";
+      const defaultTitle = kind === "folder" ? "新建文件夹" : "";
       setPendingCreate({
         id: pendingId,
         workspaceId: activeNotebookId,
@@ -43,7 +49,7 @@ export function useMainTreeLocalCreation(
             {
               type: "heading",
               attrs: { level: 1 },
-              content: [{ type: "text", text: defaultTitle }],
+              content: defaultTitle ? [{ type: "text", text: defaultTitle }] : [],
             },
           ],
         },
@@ -60,7 +66,7 @@ export function useMainTreeLocalCreation(
         expandView(activeNotebookId, safeParentId);
       }
     },
-    [activeNotebookId, expandedIds, expandView, isLocalFolder, pages],
+    [activeNotebookId, expandedIds, expandView, isLocalFolder, pages, setPendingCreate],
   );
 
   const startCreateLocalFolder = useCallback(
@@ -75,61 +81,33 @@ export function useMainTreeLocalCreation(
 
   const cancelPendingCreate = useCallback((id: string) => {
     setPendingCreate((current) => (current?.id === id ? null : current));
-  }, []);
+  }, [setPendingCreate]);
 
   const commitPendingCreate = useCallback(
-    (id: string, name: string) => {
+    async (id: string, name: string): Promise<boolean> => {
       const current = pendingCreate;
-      if (!current || current.id !== id || !activeNotebookId) return;
-      const kind = current.localPendingCreate === "file" ? "file" : "folder";
-      void (async () => {
-        if (kind === "folder") {
-          const createdId = await createLocalFolderRecord({
-            workspaceId: activeNotebookId,
-            parentId: current.parentId,
-            title: name,
-          });
-          if (!createdId) {
-            setPendingCreate((latest) => (latest?.id === id ? null : latest));
-            toast.error("新建文件夹失败：名称已存在或无写入权限");
-            return;
-          }
-          setPendingCreate((latest) => (latest?.id === id ? null : latest));
-          if (current.parentId) {
-            expandView(activeNotebookId, current.parentId);
-          }
-          setExpandPageId(createdId);
-          toast.success("已新建文件夹");
-          return;
-        }
-
-        const createdId = await createLocalPageRecord({
-          workspaceId: activeNotebookId,
-          parentId: current.parentId,
-          title: normalizePendingFileTitle(name) || "未命名",
-        });
-        if (!createdId) {
-          setPendingCreate((latest) => (latest?.id === id ? null : latest));
-          toast.error("新建文件失败：名称已存在或无写入权限");
-          return;
-        }
-        setPendingCreate((latest) => (latest?.id === id ? null : latest));
-        if (current.parentId) {
-          expandView(activeNotebookId, current.parentId);
-        }
+      if (!current || current.id !== id || current.workspaceId !== activeNotebookId) return false;
+      const workspaceId = current.workspaceId;
+      if (current.parentId && !usePages.getState().pages[current.parentId]?.isFolder) {
+        throw new Error("目标文件夹已不存在，请重新选择位置");
+      }
+      const folder = current.localPendingCreate === "folder";
+      const createdId = folder
+        ? await createLocalFolderRecord({ workspaceId, parentId: current.parentId, title: name })
+        : await createLocalPageRecord({ workspaceId, parentId: current.parentId, title: normalizeNewFileName(name) });
+      if (!createdId) throw new Error("创建失败：名称已存在或无写入权限，请修改后重试");
+      setPendingCreate((latest) => latest?.id === id ? null : latest);
+      if (current.parentId) expandView(workspaceId, current.parentId);
+      setExpandPageId(createdId);
+      if (folder) toast.success("已新建文件夹");
+      else {
+        focusNewPage(createdId);
         usePages.getState().setActivePage(createdId);
-        setExpandPageId(createdId);
         openPageFromSidebar(createdId, "preview");
-      })();
+      }
+      return true;
     },
-    [
-      activeNotebookId,
-      createLocalFolderRecord,
-      createLocalPageRecord,
-      expandView,
-      pendingCreate,
-      setExpandPageId,
-    ],
+    [activeNotebookId, createLocalFolderRecord, createLocalPageRecord, expandView, pendingCreate, setExpandPageId, setPendingCreate],
   );
 
   const handleItemDragStart = useCallback(

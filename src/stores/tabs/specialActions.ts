@@ -11,11 +11,7 @@ import {
 import { WELCOME_TAB_PAGE_ID, getNotebookAiTabPageId } from "./types";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { useNotebooks } from "../useNotebooks";
-import { usePages } from "../usePages";
-import {
-  isUnsavedLocalPage,
-  localPageHasPersistableContent,
-} from "@/lib/unsavedLocalPage";
+import { createNamedPage } from "@/lib/create-named-page";
 
 export function createSpecialTabActions(
   set: TabSet,
@@ -80,23 +76,9 @@ export function createSpecialTabActions(
         get().openWelcomeTab();
         return;
       }
-      const pages = usePages.getState().pages;
-      const existingEmpty = Object.values(pages).find(
-        (page) =>
-          page.workspaceId === workspaceId &&
-          isUnsavedLocalPage(page) &&
-          !localPageHasPersistableContent(page.content),
-      );
-      if (existingEmpty) {
-        get().openPermanentTab(existingEmpty.id, { reuseEmpty: false });
-        return;
-      }
-      const pageId = usePages.getState().createUnsavedLocalPage(workspaceId);
-      if (!pageId) {
-        get().openWelcomeTab();
-        return;
-      }
-      get().openPermanentTab(pageId, { reuseEmpty: false });
+      void createNamedPage(undefined, workspaceId).then((pageId) => {
+        if (pageId) get().openPermanentTab(pageId, { reuseEmpty: false });
+      });
     },
 
     findNotebookAiTab: (notebookId: string) =>

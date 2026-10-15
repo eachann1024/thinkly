@@ -11,7 +11,7 @@ import {
   isUnsavedLocalPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
-import { findLeaf, walkLeaves } from "@/lib/editor-split/tree";
+import { countLeaves, MAX_SPLIT_LEAVES, findLeaf, walkLeaves } from "@/lib/editor-split/tree";
 import type {
   SplitDirection,
   SplitNeighborDirection,
@@ -60,6 +60,11 @@ async function splitInDirection(direction: SplitDirection): Promise<boolean> {
 
   const split = useEditorSplit.getState();
   split.ensureTab(tab.id, tab.pageId);
+  const currentState = split.getStateForTab(tab.id);
+  if (currentState && countLeaves(currentState.root) >= MAX_SPLIT_LEAVES) {
+    toast.error("最多只能分成 4 格");
+    return false;
+  }
   const previousFocused = split.focusedPageId(tab.id);
   const sourcePageId = previousFocused ?? tab.pageId;
 

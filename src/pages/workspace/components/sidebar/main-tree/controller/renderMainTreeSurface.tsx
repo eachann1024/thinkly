@@ -116,7 +116,7 @@ export function renderMainTreeSurface(
         <ControlledTreeEnvironment<Page>
           items={items}
           getItemTitle={(item) =>
-            item.index === "root" ? "" : getPageTitle(item.data)
+            item.index === "root" ? "" : item.data.localPendingCreate === "file" ? "文件名称" : getPageTitle(item.data)
           }
           viewState={viewState}
           defaultInteractionMode={InteractionMode.ClickArrowToExpand}

@@ -36,7 +36,7 @@ export const createPageAction = (
   });
   set({ activePageId: finalId });
   useNotebooks.getState().setLastActivePage(workspaceId, finalId);
-  focusNewPage(finalId, true);
+  focusNewPage(finalId);
 
   return finalId;
 };
