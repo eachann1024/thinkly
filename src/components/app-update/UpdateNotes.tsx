@@ -30,7 +30,7 @@ function inlineText(text: string): ReactNode[] {
 }
 
 export function UpdateNotes({ markdown }: { markdown: string }) {
-  if (!markdown.trim()) return <p className="text-muted-foreground">此版本暂无更新日志</p>;
+  if (!markdown.trim()) return null;
   const lines = markdown.replace(/\r/g, "").split("\n");
   const content: ReactNode[] = [];
   const isList = (line: string) => /^\s*(?:[-*+•]|\d+\.)\s+/.test(line);
