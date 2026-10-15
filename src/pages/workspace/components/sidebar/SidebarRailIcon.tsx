@@ -2,15 +2,20 @@ import type { ReactNode } from "react";
 
 type SidebarRailIconName = "folder" | "outline" | "search" | "settings";
 
-// Vector redraw of the user-selected ChatGPT concept 04 (Swiss Minimal).
-// Pages: back sheet + front dog-eared document.
+// Geometry follows concept 04's 246px preview crops, normalized to 24px.
+// The back sheet is open so no hidden edges show through the front page.
 const backSheetPath =
-  "M5.2 3.2H13.6Q14.8 3.2 14.8 4.4V6H7.4Q5.6 6 5.6 7.8V17.6H5.2Q4 17.6 4 16.4V4.4Q4 3.2 5.2 3.2Z";
+  "M14.1 3.9Q14.1 2.1 12.3 2.1H4.5Q2.8 2.1 2.8 3.9V16.4Q2.8 18.2 4.5 18.2H6.2";
 const frontPagePath =
-  "M8.5 6.2H15.1L19.4 10.5V19.6Q19.4 20.8 18.2 20.8H8.5Q7.3 20.8 7.3 19.6V7.4Q7.3 6.2 8.5 6.2Z";
-const frontFoldPath = "M14.6 6.5V11H19.1";
+  "M9.8 5.85H16.65Q17.5 5.85 18.1 6.45L20.65 9Q21.2 9.55 21.2 10.4V20.1Q21.2 21.85 19.45 21.85H9.8Q8.05 21.85 8.05 20.1V7.6Q8.05 5.85 9.8 5.85Z";
+const frontFoldPath = "M16.85 6V9.1Q16.85 10.35 18.1 10.35H21.05";
 const solidBackSheetPath =
-  "M4 4.4Q4 3.2 5.2 3.2H13.6Q14.8 3.2 14.8 4.4V6.2H7.3V16.4Q7.3 17.6 6.1 17.6H5.2Q4 17.6 4 16.4Z";
+  "M2.45 3.6Q2.45 1.55 4.5 1.55H12.3Q14.4 1.55 14.4 3.6V4.2H10.1Q6.85 4.2 6.85 7.45V18.5H4.5Q2.45 18.5 2.45 16.5Z";
+const solidFrontPagePath =
+  "M9.8 5.55H16.4V9.15Q16.4 11 18.2 11H21.5V20.45Q21.5 22.4 19.5 22.4H9.8Q8.05 22.4 8.05 20.55V7.3Q8.05 5.55 9.8 5.55Z";
+const outlineSpinePath = "M2.25 3.95V19.95";
+const outlineLinesPath = "M6.85 7H21.5M6.85 12.05H15.2M6.85 17.05H21.5";
+const searchHandlePath = "M15.4 15.3L20.9 21";
 const settingsPath = [
   "M8.81 5.71 Q9.23 5.46 9.48 4.83 L9.88 3.83 Q10.13 3.2 11.18 3.2",
   "L12.82 3.2 Q13.87 3.2 14.12 3.83 L14.52 4.83 Q14.77 5.46 15.19 5.71",
@@ -28,25 +33,23 @@ const settingsPath = [
 
 const outlineIcons: Record<SidebarRailIconName, ReactNode> = {
   folder: (
-    <>
-      <path d={backSheetPath} />
+    <g strokeWidth="1.2">
+      <path d={backSheetPath} strokeLinecap="butt" />
       <path d={frontPagePath} />
       <path d={frontFoldPath} />
-    </>
+    </g>
   ),
   outline: (
     <>
-      <path d="M4.5 4.5V19.5" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M8.5 7.5H19.5" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M8.5 12H15.2" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M8.5 16.5H19.5" strokeWidth="1.8" strokeLinecap="round" />
+      <path d={outlineSpinePath} strokeWidth="1.4" />
+      <path d={outlineLinesPath} strokeWidth="1.45" />
     </>
   ),
   search: (
-    <>
-      <circle cx="10.5" cy="10.5" r="6.6" strokeWidth="1.5" />
-      <path d="M15.4 15.4L20.2 20.2" strokeWidth="1.8" strokeLinecap="round" />
-    </>
+    <g strokeWidth="1.2">
+      <circle cx="10.3" cy="10.1" r="7.2" />
+      <path d={searchHandlePath} />
+    </g>
   ),
   settings: (
     <>
@@ -60,28 +63,21 @@ const solidIcons: Record<SidebarRailIconName, ReactNode> = {
   folder: (
     <>
       <path d={solidBackSheetPath} />
-      <path
-        d={`${frontPagePath} M14.6 6.2V11H19.4Z`}
-        fillRule="evenodd"
-      />
+      <path d={solidFrontPagePath} />
+      <path d="M17.65 5.65L21.3 9.65H17.65Z" />
     </>
   ),
   outline: (
-    <>
-      <rect x="3.1" y="3.6" width="2.8" height="16.8" rx="1.4" />
-      <rect x="7.3" y="5.8" width="12.7" height="3.4" rx="1.7" />
-      <rect x="7.3" y="10.3" width="8.4" height="3.4" rx="1.7" />
-      <rect x="7.3" y="14.8" width="12.7" height="3.4" rx="1.7" />
-    </>
+    <g fill="none" stroke="currentColor" strokeWidth="2.1">
+      <path d={outlineSpinePath} />
+      <path d={outlineLinesPath} />
+    </g>
   ),
   search: (
-    <>
-      <path
-        d="M3.5 10.5a7 7 0 1 0 14 0a7 7 0 1 0 -14 0Z M5.7 10.5a4.8 4.8 0 1 0 9.6 0a4.8 4.8 0 1 0 -9.6 0Z"
-        fillRule="evenodd"
-      />
-      <path d="M14.2 16L18.8 20.6A1.3 1.3 0 0 0 20.6 18.8L16 14.2Z" />
-    </>
+    <g fill="none" stroke="currentColor" strokeWidth="2.2">
+      <circle cx="10.3" cy="10.1" r="6.7" />
+      <path d={searchHandlePath} />
+    </g>
   ),
   settings: (
     <path
