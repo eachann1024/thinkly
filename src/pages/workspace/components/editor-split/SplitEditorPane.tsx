@@ -70,7 +70,7 @@ export function SplitEditorPane({
     },
     [leaf.id, leaf.pageId, registry],
   );
-  useScrollRestoration(leaf.pageId, scrollElRef);
+  const { cancelPendingRestoration } = useScrollRestoration(leaf.pageId, scrollElRef);
   const page = usePages((state) => state.pages[leaf.pageId]);
   const title = page ? getPageTitle(page) : (leaf.title ?? "页面已不存在");
 
@@ -151,7 +151,7 @@ export function SplitEditorPane({
             if (el) registry.register(leaf.id, leaf.pageId, editorRef, el);
           }}
           tabIndex={-1}
-          className="page-scroll-container h-full min-h-0 min-w-0 flex-1 overflow-y-auto [background:var(--goose-editor-surface)]"
+          className="page-scroll-container h-full min-h-0 min-w-0 flex-1 overflow-y-auto outline-none [background:var(--goose-editor-surface)]"
         >
           <div className="page-layout-document flex min-h-full flex-col">
             <ErrorBoundary
@@ -179,7 +179,7 @@ export function SplitEditorPane({
         </div>
         </div>
       </EditorHostBridge>
-      <SearchEditorBridge pageId={leaf.pageId} focused={focused} editorRef={editorRef} scrollRef={scrollElRef} />
+      <SearchEditorBridge pageId={leaf.pageId} focused={focused} editorRef={editorRef} scrollRef={scrollElRef} cancelPendingRestoration={cancelPendingRestoration} />
     </div>
   );
 }
