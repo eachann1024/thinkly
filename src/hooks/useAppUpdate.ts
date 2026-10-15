@@ -81,7 +81,7 @@ export function useAppUpdate() {
       if (!downloadPath) throw new Error("当前环境不支持下载更新");
       await readLatestState({ ...state, status: "idle", downloadPath, message: "安装包已下载" });
     } catch (error) {
-      setState({ ...state, status: "error", message: errorMessage(error) });
+      setState({ status: "error", message: errorMessage(error), releaseUrl: state.releaseUrl });
     }
   };
 
