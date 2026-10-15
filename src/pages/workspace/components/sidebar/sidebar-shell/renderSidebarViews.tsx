@@ -29,83 +29,87 @@ export function renderSidebarViews(
     headerTitle,
   } = context;
   return (
-    <div className="flex min-h-0 flex-1">
-      <div
-        ref={setSettingsSidebarHost}
-        className="sidebar-content-surface relative flex min-h-0 min-w-0 flex-1 flex-col"
-      >
-        {!settingsOpen && context.forceCollapseLeft && <SidebarPanelControls context={context} />}
-        {inHistoryMode && !settingsOpen && (
-          <div className="min-h-0 flex-1 overflow-hidden rounded-[inherit]">
-            <HistoryVersionList />
-          </div>
-        )}
+    <>
+      <div className="flex min-h-0 flex-1">
         <div
-          className="sidebar-design flex min-h-0 flex-1 flex-col"
-          hidden={inHistoryMode || settingsOpen}
-          inert={inHistoryMode || settingsOpen}
-          aria-hidden={inHistoryMode || settingsOpen}
+          ref={setSettingsSidebarHost}
+          className="sidebar-content-surface relative flex min-h-0 min-w-0 flex-1 flex-col"
         >
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[inherit]">
-            <div className="flex min-h-0 flex-1 flex-col">
-              <div
-                className="sidebar-tree-heading shrink-0"
-                hidden={currentView !== "pages"}
-              >
-                <div className="sidebar-search-heading">
-                  <strong>{headerTitle}</strong>
-                </div>
-                <SidebarSectionHeader
-                  onCreate={
-                    currentView === "pages" && !electronNoVault
-                      ? handleCreatePage
-                      : undefined
-                  }
-                  createTitle="新建笔记"
-                  onCollapseAll={
-                    currentView === "pages" && activeNotebookId
-                      ? () => setExpanded(activeNotebookId, [])
-                      : undefined
-                  }
-                />
-              </div>
-              <div
-                ref={setScrollAreaNode}
-                className="sidebar-content-pane sidebar-page-list flex min-h-0 flex-1 flex-col"
-                data-sidebar-page-list=""
-                hidden={currentView !== "pages"}
-                inert={currentView !== "pages"}
-                aria-hidden={currentView !== "pages"}
-              >
-                <SidebarMainTree
-                  activeNotebookId={activeNotebookId}
-                  selectedPageId={selectedPageId}
-                  rowHeight={rowHeight}
-                  itemHeight={rowHeight}
-                  viewportHeight={scrollAreaHeight}
-                  onCreatePage={handleCreatePage}
-                />
-              </div>
-              <SidebarSearch />
-              {currentView === "outline" && (
-                <div className="flex min-h-0 flex-1 overflow-hidden">
-                  <SidebarOutline
-                    scrollContainerRef={scrollContainerRef}
-                    pageId={outlinePageId}
-                    focusKey={outlineTarget.focusKey}
-                    paneId={outlineTarget.paneId}
+          {!settingsOpen && context.forceCollapseLeft && (
+            <SidebarPanelControls context={context} />
+          )}
+          {inHistoryMode && !settingsOpen && (
+            <div className="min-h-0 flex-1 overflow-hidden rounded-[inherit]">
+              <HistoryVersionList />
+            </div>
+          )}
+          <div
+            className="sidebar-design flex min-h-0 flex-1 flex-col"
+            hidden={inHistoryMode || settingsOpen}
+            inert={inHistoryMode || settingsOpen}
+            aria-hidden={inHistoryMode || settingsOpen}
+          >
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[inherit]">
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div
+                  className="sidebar-tree-heading shrink-0"
+                  hidden={currentView !== "pages"}
+                >
+                  <div className="sidebar-search-heading">
+                    <strong>{headerTitle}</strong>
+                  </div>
+                  <SidebarSectionHeader
+                    onCreate={
+                      currentView === "pages" && !electronNoVault
+                        ? handleCreatePage
+                        : undefined
+                    }
+                    createTitle="新建笔记"
+                    onCollapseAll={
+                      currentView === "pages" && activeNotebookId
+                        ? () => setExpanded(activeNotebookId, [])
+                        : undefined
+                    }
                   />
                 </div>
-              )}
+                <div
+                  ref={setScrollAreaNode}
+                  className="sidebar-content-pane sidebar-page-list flex min-h-0 flex-1 flex-col"
+                  data-sidebar-page-list=""
+                  hidden={currentView !== "pages"}
+                  inert={currentView !== "pages"}
+                  aria-hidden={currentView !== "pages"}
+                >
+                  <SidebarMainTree
+                    activeNotebookId={activeNotebookId}
+                    selectedPageId={selectedPageId}
+                    rowHeight={rowHeight}
+                    itemHeight={rowHeight}
+                    viewportHeight={scrollAreaHeight}
+                    onCreatePage={handleCreatePage}
+                  />
+                </div>
+                <SidebarSearch />
+                {currentView === "outline" && (
+                  <div className="flex min-h-0 flex-1 overflow-hidden">
+                    <SidebarOutline
+                      scrollContainerRef={scrollContainerRef}
+                      pageId={outlinePageId}
+                      focusKey={outlineTarget.focusKey}
+                      paneId={outlineTarget.paneId}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-        <div
-          ref={setNotebookFooterHost}
-          className="sidebar-notebook-footer"
-          hidden={settingsOpen}
-        />
       </div>
-    </div>
+      <div
+        ref={setNotebookFooterHost}
+        className="sidebar-notebook-footer"
+        hidden={settingsOpen}
+      />
+    </>
   );
 }
