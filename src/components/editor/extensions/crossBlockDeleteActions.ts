@@ -9,7 +9,7 @@ export function deleteSelectedBlocks(editor: {
   if (!deletion) return false;
   editor.transact((tr) => {
     for (const step of deletion.steps) tr.step(step);
-    tr.setSelection(deletion.selection);
+    tr.setSelection(deletion.selection.getBookmark().resolve(tr.doc));
   });
   return true;
 }

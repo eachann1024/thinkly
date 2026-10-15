@@ -13,7 +13,6 @@ import {
   mergeLocalPageSettingsIntoFrontmatter,
 } from "@/lib/local-frontmatter";
 import {
-  extractFrontmatter,
   decodeUnsupportedMarkdownForDisk,
 } from "@/lib/markdown-raw-guard";
 import {
@@ -28,6 +27,10 @@ import { refreshSnapshotFingerprint } from "./persistence";
 import { persistPageSnapshot } from "../../../persistence";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { validateEditorDraftTarget } from "../../create/validateEditorDraftTarget";
+import {
+  prepareEmptyLocalWrite, assertEmptySerializationIsExpected,
+  assertLocalPageReadable, isEmptyParagraphDocument,
+} from "./emptySaveGuard";
 
 export const saveLocalPageContentUnlocked = async (
   set: StoreSet,
@@ -39,6 +42,7 @@ export const saveLocalPageContentUnlocked = async (
 ): Promise<boolean> => {
   const page = get().pages[pageId];
   if (!page) return false;
+  assertLocalPageReadable(page, page.localFilePath ?? "");
 
   let filePath = get().getLocalFilePath(pageId);
   if (page.editorDraft && filePath) await validateEditorDraftTarget(get, pageId, filePath);
@@ -75,6 +79,7 @@ export const saveLocalPageContentUnlocked = async (
     return false;
   }
 
+  const sourceIsEmpty = isEmptyParagraphDocument(content);
   const processedContent = cloneLocalPageContent(content);
 
   const assetsDir = filePath.replace(/[^\/\\]+$/, "") + "assets";
@@ -92,6 +97,7 @@ export const saveLocalPageContentUnlocked = async (
   const markdownContent = await blocksToMarkdown(
     encodeLocalBlockPropsWrappers(processedContent as any),
   );
+  assertEmptySerializationIsExpected(sourceIsEmpty, processedContent, markdownContent, filePath);
 
   // 写盘前 merge 当前设置；YAML 异常抛错，由现有队列保留待写内容。
   // 首块已有 YAML 时就地合并，只有没有首块 YAML 才 prepend 独立 blob。
@@ -128,31 +134,6 @@ export const saveLocalPageContentUnlocked = async (
     finalContent = frontmatterBlob
       ? `${frontmatterBlob}\n\n${markdownContent}`
       : markdownContent;
-  }
-
-  if (!markdownContent.trim()) {
-    let exists = false;
-    try {
-      exists = window.gooseFs?.exists(filePath) ?? false;
-    } catch {
-      // ignore fs check error
-    }
-
-    if (exists) {
-      let oldContent: string;
-      if (window.gooseFs?.readFileAsync) {
-        oldContent = (await window.gooseFs.readFileAsync(filePath)) || "";
-      } else {
-        oldContent = window.gooseFs?.readFile(filePath) || "";
-      }
-
-      // 判断旧文件是否还有实质 body（去掉 frontmatter 后），避免误判 frontmatter 自身为有效内容
-      const { body: oldBody } = extractFrontmatter(oldContent);
-      if (oldBody && oldBody.trim().length > 10) {
-        console.error("[Data Integrity] Refusing to save empty content.");
-        return false;
-      }
-    }
   }
 
   // 编辑器表示 → 磁盘表示：解包 goose-raw fence（encodeUnsupportedMarkdownForEditor
@@ -213,6 +194,11 @@ export const saveLocalPageContentUnlocked = async (
   // 写盘前标记自写：fs.watch 对本次写入触发的 change 事件（自写回声）
   // 由 useLocalFolderWatch 据此忽略，不会误判成外部修改弹冲突提示。
   if (page.editorDraft) await validateEditorDraftTarget(get, pageId, filePath);
+  const validateEmptyWrite = await prepareEmptyLocalWrite(
+    get, gooseFs, page, filePath, content, markdownContent, options?.force,
+  );
+  validateEmptyWrite();
+  assertLocalPageReadable(get().pages[pageId], filePath);
   markSelfWrite(filePath);
   let result: boolean;
   try {
