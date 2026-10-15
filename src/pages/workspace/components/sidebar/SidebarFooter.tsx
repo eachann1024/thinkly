@@ -9,11 +9,13 @@ import { NotebookSwitcher } from "./NotebookSwitcher";
 import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
+  notebookFooterHost: HTMLDivElement | null;
   isSettingsOpen: boolean;
   onOpenSettings: () => void;
 }
 
 export function SidebarFooter({
+  notebookFooterHost,
   isSettingsOpen,
   onOpenSettings,
 }: SidebarFooterProps) {
@@ -87,7 +89,11 @@ export function SidebarFooter({
             </TooltipContent>
           </Tooltip>
         ) : null}
-        <NotebookSwitcher variant="rail" onOpenSettings={onOpenSettings} />
+        <NotebookSwitcher
+          variant={notebookFooterHost ? "default" : "rail"}
+          triggerContainer={notebookFooterHost}
+          onOpenSettings={onOpenSettings}
+        />
         <Tooltip>
           <TooltipTrigger asChild>
             <IconButton size="xs"

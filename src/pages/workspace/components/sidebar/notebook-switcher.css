@@ -81,10 +81,33 @@
   background: hsl(var(--goose-menu-surface));
   box-shadow: var(--goose-menu-shadow);
 }
-.goose-notebook-menu-surface--rail {
+.goose-notebook-menu-surface {
   max-height: var(--goose-popover-available-height, calc(100vh - 16px));
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+.sidebar-notebook-footer {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 0.571429rem 1rem;
+  border-top: 1px solid var(--workspace-divider);
+}
+.sidebar-notebook-footer[hidden] { display: none; }
+.workspace-shell .workspace-sidebar-pane .sidebar-notebook-footer .sidebar-notebook-trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  min-height: 2.285714rem;
+  padding: 0.428571rem 0.571429rem;
+  border: 0;
+  background: transparent;
+  font-size: var(--sidebar-font-size, 13px);
+}
+.sidebar-notebook-footer .sidebar-notebook-trigger > .truncate { flex: 1; }
+.sidebar-notebook-footer .sidebar-notebook-trigger > .goose-notebook-monogram {
+  flex-shrink: 0;
 }
 .goose-notebook-menu-surface .goose-notebook-row { font-size: 12px; font-weight: 400; }
 @media (prefers-reduced-motion: reduce) {
