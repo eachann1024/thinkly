@@ -6,7 +6,7 @@
   --sidebar-foreground: hsl(var(--foreground));
   --sidebar-muted: hsl(var(--muted-foreground));
   padding: 1.142857rem 0.571429rem 0;
-  font-family: var(--font-sidebar, -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif);
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif);
   font-size: var(--sidebar-body-size);
   line-height: 1.5;
 }

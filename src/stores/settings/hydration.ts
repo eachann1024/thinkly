@@ -74,10 +74,8 @@ export function hydrateSettings(state?: SettingsState) {
   if (state && state.sidebarFontSize !== normalizedSidebarFontSize) {
     useSettings.setState({ sidebarFontSize: normalizedSidebarFontSize });
   }
-  for (const key of ["uiFontFamily", "sidebarFontFamily"] as const) {
-    const font = normalizeLocalFontName(state?.[key]);
-    if (state && state[key] !== font) useSettings.setState({ [key]: font });
-  }
+  const font = normalizeLocalFontName(state?.uiFontFamily);
+  if (state && state.uiFontFamily !== font) useSettings.setState({ uiFontFamily: font });
 
   const normalizedAI = normalizeAISettings(
     state?.ai as Partial<AISettings> | undefined,

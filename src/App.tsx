@@ -25,22 +25,21 @@ import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
 function AppearanceSync() {
   const {
     uiFontSize, editorFontSize, editorLineHeight,
-    customFonts, uiFontFamily, sidebarFontFamily,
+    customFonts, uiFontFamily,
   } = useSettings(useShallow((state) => ({
       uiFontSize: state.uiFontSize,
       editorFontSize: state.editorFontSize,
       editorLineHeight: state.editorLineHeight,
       customFonts: state.customFonts,
       uiFontFamily: state.uiFontFamily,
-      sidebarFontFamily: state.sidebarFontFamily,
     })));
   useEffect(() => {
     applyAppearanceScaleVariables({ uiFontSize, editorFontSize, editorLineHeight });
   }, [uiFontSize, editorFontSize, editorLineHeight]);
 
   useEffect(() => {
-    applyFontVariables(customFonts, { uiFontFamily, sidebarFontFamily });
-  }, [customFonts, uiFontFamily, sidebarFontFamily]);
+    applyFontVariables(customFonts, { uiFontFamily });
+  }, [customFonts, uiFontFamily]);
 
   return null;
 }

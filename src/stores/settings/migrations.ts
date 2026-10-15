@@ -72,6 +72,12 @@ export function migrateSettingsPersistedState(
   // v9 removes only the retired system-font selection; preserve every other saved family.
   if (version < 9) migrateLegacyHarmonyFonts(state);
 
+  // 侧栏与界面共用同一字体；界面未指定时沿用旧侧栏字体。
+  if (version < 12 && state.uiFontFamily == null && state.sidebarFontFamily != null) {
+    state.uiFontFamily = state.sidebarFontFamily;
+  }
+  delete state.sidebarFontFamily;
+
   // 旧版只有「界面字号」两档，且侧栏树写死 13px。缺省时从界面档位推断侧栏字号。
   if (
     typeof state.sidebarFontSize !== "number" ||

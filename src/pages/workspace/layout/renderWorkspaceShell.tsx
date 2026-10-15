@@ -139,7 +139,7 @@ export function renderWorkspaceShell(
         <SearchSessionController />
         <LocalFolderTargetPicker />
         <AIFeatureNotice />
-        <div className="workspace-stage">
+        <div ref={context.workspaceStageRef} className="workspace-stage">
           <Sidebar
             className="workspace-sidebar-pane"
             disableResize={false}

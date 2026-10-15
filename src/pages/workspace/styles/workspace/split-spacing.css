@@ -1,0 +1,41 @@
+/* 多分屏共用外侧留白，单页、设置和全屏 AI 沿用原布局。 */
+.workspace-shell:not([data-settings]) > .workspace-stage[data-split-spacing] {
+  --workspace-stage-pad-top: 8px;
+  --workspace-stage-pad-right: 8px;
+  --workspace-stage-pad-bottom: 8px;
+  padding-top: 8px;
+  padding-right: 8px;
+  padding-bottom: 8px;
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] > .workspace-main-sheet {
+  margin-left: 8px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] .workspace-content-columns {
+  gap: 8px;
+  background: transparent;
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] .workspace-sidebar-pane .sidebar-content-surface {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] > .workspace-sidebar-pane > .sidebar-size-container {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] .sidebar-notebook-footer {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] > .workspace-sidebar-pane::after {
+  content: none;
+}
+
+.workspace-shell .workspace-stage[data-split-spacing] > .workspace-sidebar-pane[data-sidebar-overlay] {
+  inset-block: 8px;
+}

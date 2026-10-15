@@ -46,7 +46,7 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "goose-note-settings",
-      version: 11,
+      version: 12,
       merge: (persisted, current) =>
         ({
           ...current,

@@ -28,26 +28,16 @@ export function applyFontVariables(
   customFonts: CustomFonts,
   fonts: {
     uiFontFamily?: string | null;
-    sidebarFontFamily?: string | null;
   } = {},
 ) {
   if (typeof document === "undefined") return;
   const fallbacks = getPlatformFallbacks();
   const root = document.documentElement;
   const uiFont = normalizeLocalFontName(fonts.uiFontFamily);
-  const sidebarFont = normalizeLocalFontName(fonts.sidebarFontFamily);
-  root.style.setProperty(
-    "--font-ui",
-    uiFont
-      ? `${toCssFontFamily(uiFont)}, ${SYSTEM_FONT_STACK}`
-      : SYSTEM_FONT_STACK,
-  );
-  root.style.setProperty(
-    "--font-sidebar",
-    sidebarFont
-      ? `${toCssFontFamily(sidebarFont)}, ${SYSTEM_FONT_STACK}`
-      : SYSTEM_FONT_STACK,
-  );
+  const uiStack = uiFont
+    ? `${toCssFontFamily(uiFont)}, ${SYSTEM_FONT_STACK}`
+    : SYSTEM_FONT_STACK;
+  root.style.setProperty("--font-ui", uiStack);
   const customDefaultList = splitFontList(customFonts.default.font);
   const customSerifList = splitFontList(customFonts.serif.font);
   const customMonoList = splitFontList(customFonts.mono.font);

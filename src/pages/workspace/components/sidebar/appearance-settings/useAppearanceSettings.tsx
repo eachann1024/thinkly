@@ -79,11 +79,7 @@ export function useAppearanceSettings({
 
   const uiFontFamily = useSettings((s) => s.uiFontFamily);
 
-  const sidebarFontFamily = useSettings((s) => s.sidebarFontFamily);
-
   const setUIFontFamily = useSettings((s) => s.setUIFontFamily);
-
-  const setSidebarFontFamily = useSettings((s) => s.setSidebarFontFamily);
 
   const accentRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -158,9 +154,7 @@ export function useAppearanceSettings({
     setEditorLineHeight,
     setEditorFontSize,
     uiFontFamily,
-    sidebarFontFamily,
     setUIFontFamily,
-    setSidebarFontFamily,
     accentRefs,
     focusedAccentIndex,
     setFocusedAccentIndex,
