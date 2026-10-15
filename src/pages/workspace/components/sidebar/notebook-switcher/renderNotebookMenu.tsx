@@ -41,8 +41,8 @@ export function renderNotebookMenu(
     <PopoverContent
       aria-label={`切换${notebookKind}`}
       className={cn(
-        "goose-notebook-menu-surface goose-floating-surface w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
-        isRail && "goose-notebook-menu-surface--rail",
+        "goose-notebook-menu-surface goose-floating-surface w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
+        isRail && "goose-notebook-menu-surface--rail w-56",
       )}
       side={isRail ? "right" : "top"}
       align={isRail ? "end" : "start"}

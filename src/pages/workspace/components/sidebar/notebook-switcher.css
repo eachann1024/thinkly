@@ -86,11 +86,17 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.workspace-shell .workspace-sidebar-pane .sidebar-size-container:has(> .sidebar-notebook-footer:not([hidden])) > div > .sidebar-content-surface {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
 .sidebar-notebook-footer {
   flex: 0 0 auto;
   min-width: 0;
-  padding: 0.142857rem 1rem;
+  overflow: hidden;
   border-top: 1px solid var(--workspace-divider);
+  border-bottom-left-radius: var(--radius-lg);
+  background: var(--workspace-sidebar-surface);
 }
 .sidebar-notebook-footer[hidden] { display: none; }
 .workspace-shell .workspace-sidebar-pane .sidebar-notebook-footer .sidebar-notebook-trigger {
@@ -99,9 +105,10 @@
   min-width: 0;
   max-width: 100%;
   height: auto;
-  min-height: 2rem;
-  padding: 0.285714rem 0.571429rem;
+  min-height: 2.571429rem;
+  padding: 0.428571rem 1rem;
   border: 0;
+  border-radius: 0;
   background: transparent;
   font-size: var(--sidebar-font-size, 13px);
 }
