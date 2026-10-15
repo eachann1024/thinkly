@@ -137,10 +137,7 @@ export function NotebookEditDialog({
           </div>
         ) : (
           <div className="bg-card backdrop-blur-[1px] border-0 rounded-[14px] p-6 shadow-[0_12px_26px_rgba(15,23,42,0.1)] space-y-4">
-            <div className="flex flex-col items-center gap-3">
-              <Label className="text-center text-sm font-medium text-muted-foreground">
-                笔记本图标
-              </Label>
+            <div className="flex justify-center">
               <NotebookIconSelector
                 value={icon}
                 defaultIcon={isLocalFolder ? "FolderOpen" : "BookOpen"}
@@ -149,14 +146,9 @@ export function NotebookEditDialog({
               />
             </div>
             <div className="flex flex-col items-center gap-3">
-              <Label
-                htmlFor="notebook-name"
-                className="text-center text-sm font-medium text-muted-foreground"
-              >
-                笔记本名称
-              </Label>
               <Input
                 id="notebook-name"
+                aria-label="笔记本名称"
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
                 placeholder="输入笔记本名称"
