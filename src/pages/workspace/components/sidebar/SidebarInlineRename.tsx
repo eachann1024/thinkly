@@ -4,6 +4,7 @@ import { getPageTitle, withInternalPageTitle } from "@/components/editor/utils/p
 import { toast } from "@/components/ui/sonner";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
+import "./sidebar-inline-rename.css";
 
 export const SidebarRenameContext = createContext<{
   page: Page;
