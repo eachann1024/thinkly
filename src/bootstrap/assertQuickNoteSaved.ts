@@ -1,0 +1,32 @@
+import type { JSONContent } from "@/types";
+import type { QuickNoteSlot } from "@/stores/quicknote/types";
+
+export async function assertQuickNoteSaved(): Promise<void> {
+  if (!window.location.pathname.endsWith("/quicknote.html")) return;
+  const [quickNote, recovery, storage, content] = await Promise.all([
+    import("@/stores/useQuickNote"),
+    import("@/stores/quicknote/recovery"),
+    import("@/lib/storage"),
+    import("@/components/editor/utils/blocknote-content"),
+  ]);
+  const current = quickNote.useQuickNote.getState().drafts;
+  let persisted: Partial<Record<QuickNoteSlot, JSONContent | null>> = {};
+  try {
+    const raw = storage.getDbStorageItem("goose-note:quicknote");
+    if (raw) persisted = JSON.parse(raw)?.state?.drafts ?? {};
+  } catch {
+    // 下方只对真正非空或有删除变更的草稿阻止重启。
+  }
+  const slots = new Set([
+    ...quickNote.QUICKNOTE_SLOTS,
+    ...recovery.pendingQuickNoteRecoveryRevisions.keys(),
+  ]);
+  for (const slot of slots) {
+    const draft = current[slot] ?? null;
+    const saved = persisted[slot] ?? null;
+    if (quickNote.isQuickNoteDraftEmpty(draft) && quickNote.isQuickNoteDraftEmpty(saved)) continue;
+    if (content.getContentSignature(draft) !== content.getContentSignature(saved)) {
+      throw new Error("速记草稿尚未保存，请在小窗重试保存后更新");
+    }
+  }
+}

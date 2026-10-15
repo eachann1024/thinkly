@@ -1,7 +1,9 @@
 import { toast } from "@/components/ui/sonner";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
+import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
+import { assertQuickNoteSaved } from "./assertQuickNoteSaved";
 
 let flushInFlight: Promise<void> | null = null;
 
@@ -53,6 +55,21 @@ export const setupSaveGuards = () => {
   };
   if (hostWindow.__gooseNoteSaveGuardInstalled) return;
   hostWindow.__gooseNoteSaveGuardInstalled = true;
+
+  const desktop = getGooseDesktop();
+  desktop?.onBeforeUpdate(async (requestId) => {
+    try {
+      await runFlushOnce();
+      if (Object.values(usePages.getState().dirtyLocalPageIds).some(Boolean)) {
+        throw new Error("仍有笔记未保存，请保存后重试更新");
+      }
+      await assertQuickNoteSaved();
+      desktop.replyBeforeUpdate(requestId, null);
+    } catch (error) {
+      reportFlushFailure(error);
+      desktop.replyBeforeUpdate(requestId, describeDiskWriteError(error));
+    }
+  });
 
   const handleManualSave = (event: KeyboardEvent) => {
     if (event.defaultPrevented) return;

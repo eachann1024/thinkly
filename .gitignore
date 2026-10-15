@@ -102,6 +102,12 @@ public/fonts/*.otf
 !/.github/workflows/desktop-build.yml
 !scripts/build-ci-installers.mjs
 !scripts/publish-release.mjs
+!scripts/desktop-release-support.mjs
+!scripts/select-desktop-release.mjs
+!scripts/release-desktop.mjs
+!scripts/desktop-download-metadata.mjs
+!scripts/repair-desktop-metadata.mjs
+!scripts/collect-release-assets.mjs
 
 
 __pycache__/
