@@ -7,23 +7,26 @@
 使用 `package.json` 指定的 Bun 版本；Node.js 需要 20 或以上。
 
 ```bash
+git clone https://github.com/eachann1024/goose-note.git
+cd goose-note
 bun install --frozen-lockfile
 bun run dev          # 浏览器开发，端口 6001
 bun run typecheck
-bun run lint
-bun run build
 ```
 
-`build` 编译两个 renderer、Electron main/preload，并准备 `dist-electron/app-pack`。`typecheck`、`lint` 和 `build` 用于静态排错或打包，不是产品验收标准，也不代替界面操作。
+`package.json` 只保留 `dev`、`linux`、`mac`、`window`、`typecheck` 五个入口。`typecheck` 用于静态排错，不是产品验收标准，也不代替界面操作。
 
 ## 构建与分发
 
 ```bash
 bun run mac          # macOS 应用
-bun run win          # Windows NSIS，跨平台构建要求以构建脚本为准
+bun run window       # Windows NSIS，跨平台构建要求以构建脚本为准
 bun run linux        # Linux 包
-bun run build:debug  # 保留调试信息
 ```
+
+各平台命令自动编译 renderer、Electron main/preload，准备 `dist-electron/app-pack` 后打包。CI 和 Python 构建脚本通过 `node scripts/run-task.mjs build` 调用公共编译流程；需要调试信息时设置环境变量 `GOOSE_DEBUG=1`。
+
+仓库与源码目录统一为 `goose-note`，应用展示名为 `Goose Note`（鹅的笔记）。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、应用数据目录、Linux 包名及可执行文件名 `goose-note-app`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单中的安装包继续使用旧仓库下载别名，由 GitHub 重定向；客户端同时校验新旧仓库地址。请勿复用旧仓库名，以免中断旧版更新。
 
 跨平台单入口脚本（参考 1Panel build.py 思路，三平台通用）：
 

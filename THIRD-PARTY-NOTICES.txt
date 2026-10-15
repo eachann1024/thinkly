@@ -1,5 +1,5 @@
 Goose Note — Copyright (c) 2026 eachann1024
-Project: https://github.com/eachann1024/goose-notes
+Project: https://github.com/eachann1024/goose-note
 Current project license: MIT (see LICENSE).
 No warranty. Third-party portions retain their original notices and licenses.
 This inventory includes installed production dependencies and their dependency declarations; not every entry is necessarily included in every build.

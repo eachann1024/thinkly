@@ -12,22 +12,22 @@ Goose Note
 
 **Repository URL**
 ```
-https://github.com/eachann1024/goose-notes
+https://github.com/eachann1024/goose-note
 ```
 
 **Homepage URL**
 ```
-https://github.com/eachann1024/goose-notes
+https://github.com/eachann1024/goose-note
 ```
 
 **Download URL** (the page contains the "Code signing policy" section)
 ```
-https://github.com/eachann1024/goose-notes/releases/latest
+https://github.com/eachann1024/goose-note/releases/latest
 ```
 
 **Privacy Policy URL**
 ```
-https://github.com/eachann1024/goose-notes/blob/main/PRIVACY.md
+https://github.com/eachann1024/goose-note/blob/main/PRIVACY.md
 ```
 
 **Wikipedia URL** — leave blank.
@@ -54,12 +54,12 @@ Windows NSIS installers (.exe) for x64 and ARM64, and the main application execu
 
 **Reputation** (factual; do not inflate)
 ```
-Goose Note grew out of the "鹅的笔记" (Goose Note) plugin on the uTools plugin store (https://www.u-tools.cn/plugins/detail/%E9%B9%85%E7%9A%84%E7%AC%94%E8%AE%B0/), which shows 24 user ratings averaging 4.6 and roughly 3,100 users. The standalone desktop app is developed in the open at github.com/eachann1024/goose-notes with public CI builds and GitHub Releases for Windows, macOS and Linux; its git history includes contributions from more than 20 people, including the upstream projects it was merged from. The GitHub repository itself is young (created June 2026) and has few stars so far.
+Goose Note grew out of the "鹅的笔记" (Goose Note) plugin on the uTools plugin store (https://www.u-tools.cn/plugins/detail/%E9%B9%85%E7%9A%84%E7%AC%94%E8%AE%B0/), which shows 24 user ratings averaging 4.6 and roughly 3,100 users. The standalone desktop app is developed in the open at github.com/eachann1024/goose-note with public CI builds and GitHub Releases for Windows, macOS and Linux; its git history includes contributions from more than 20 people, including the upstream projects it was merged from. The GitHub repository itself is young (created June 2026) and has few stars so far.
 ```
 
 **Privacy statement** (if asked)
 ```
-No accounts, analytics or telemetry. Notes stay local. Data is sent only to services the user configures (AI provider, Git sync, optional self-configured Sentry error reporting). Automatic requests without user data: update check against GitHub (startup and every 4 hours), on-demand font downloads from jsDelivr, and the welcome note image. Full policy: https://github.com/eachann1024/goose-notes/blob/main/PRIVACY.md
+No accounts, analytics or telemetry. Notes stay local. Data is sent only to services the user configures (AI provider, Git sync, optional self-configured Sentry error reporting). Automatic requests without user data: update check against GitHub (startup and every 4 hours), on-demand font downloads from jsDelivr, and the welcome note image. Full policy: https://github.com/eachann1024/goose-note/blob/main/PRIVACY.md
 ```
 
 **Uninstallation** (if asked)

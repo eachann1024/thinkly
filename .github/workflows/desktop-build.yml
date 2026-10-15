@@ -126,7 +126,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Compile renderer, main and preload
         if: matrix.platform != 'mac' || matrix.arch != 'arm64'
-        run: bun run build:electron
+        run: node scripts/run-task.mjs build
       - name: Verify native macOS build and installation
         if: matrix.platform == 'mac' && matrix.arch == 'arm64'
         run: bun run mac
@@ -236,7 +236,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     concurrency:
-      group: goose-notes-publish-${{ github.ref }}
+      group: goose-note-publish-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: write
@@ -266,7 +266,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     concurrency:
-      group: goose-notes-publish-${{ github.ref }}
+      group: goose-note-publish-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: write

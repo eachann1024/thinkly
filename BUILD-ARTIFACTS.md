@@ -2,9 +2,9 @@
 
 **Desktop installers** 按工作流配置定时检查 `main`，或由维护者手动触发，生成 Windows x64/arm64、macOS arm64/x64、Linux x64 安装包和对应源码归档。所有任务共用固定提交；提交 PR 不会触发界面截图或预览报告。
 
-每天北京时间 08:00（UTC 00:00）会检查 `main`，有新提交时构建并发布；也可在 Actions 中手动运行 **Desktop installers**。只有 `main` 的定时或手动运行在全部平台和源码归档成功后，才将安装包及校验值发布到 [goose-notes Releases](https://github.com/eachann1024/goose-notes/releases/latest)，并维护 Homebrew Cask 和更新信息。推送和 PR 运行只生成 Actions 附件，不使用签名凭证或发布权限。已发布的同一提交保持原附件；只改变更新信息或 Cask 的提交不会触发下一次定时重建。不向 AUR 发布。
+每天北京时间 08:00（UTC 00:00）会检查 `main`，有新提交时构建并发布；也可在 Actions 中手动运行 **Desktop installers**。只有 `main` 的定时或手动运行在全部平台和源码归档成功后，才将安装包及校验值发布到 [goose-note Releases](https://github.com/eachann1024/goose-note/releases/latest)，并维护 Homebrew Cask 和更新信息。推送和 PR 运行只生成 Actions 附件，不使用签名凭证或发布权限。已发布的同一提交保持原附件；只改变更新信息或 Cask 的提交不会触发下一次定时重建。不向 AUR 发布。
 
-发布的安装包可在 https://github.com/eachann1024/goose-notes/releases 的 **Assets** 下载。每次提交的安装包位于 https://github.com/eachann1024/goose-notes/actions/workflows/desktop-build.yml ：打开对应提交的成功运行，在 **Artifacts** 下载 `goose-note-<平台>-<架构>-<完整 SHA>`；源码附件为 `source-<完整 SHA>`。Actions 附件下载需要登录 GitHub；产物保留 30 天，Release 附件不使用此到期策略；过期后可从固定提交重新构建。下载的 Actions ZIP 是外层归档，请先解压；macOS 包内的应用 `.zip` 解压后是 `Goose Note.app`。
+发布的安装包可在 https://github.com/eachann1024/goose-note/releases 的 **Assets** 下载。每次提交的安装包位于 https://github.com/eachann1024/goose-note/actions/workflows/desktop-build.yml ：打开对应提交的成功运行，在 **Artifacts** 下载 `goose-note-<平台>-<架构>-<完整 SHA>`；源码附件为 `source-<完整 SHA>`。Actions 附件下载需要登录 GitHub；产物保留 30 天，Release 附件不使用此到期策略；过期后可从固定提交重新构建。下载的 Actions ZIP 是外层归档，请先解压；macOS 包内的应用 `.zip` 解压后是 `Goose Note.app`。
 
 Release 附件只包含下列安装包和一份 `SHA256SUMS.txt`（全部安装包的 SHA-256，便于下载后校验）：
 
@@ -32,7 +32,7 @@ Arch 指 Linux 发行版，Omarchy（Arch + Hyprland）同样使用 `.pacman` �
 
 ```sh
 bun install --frozen-lockfile
-bun run build:electron
+node scripts/run-task.mjs build
 node scripts/build-ci-installers.mjs mac arm64
 # 其他组合：mac x64、win x64、win arm64、linux x64
 ```

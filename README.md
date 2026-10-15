@@ -52,7 +52,7 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 ## 下载安装
 
-前往 [GitHub Releases](https://github.com/eachann1024/goose-notes/releases/latest) 下载最新版本安装包：
+前往 [GitHub Releases](https://github.com/eachann1024/goose-note/releases/latest) 下载最新版本安装包：
 
 | 系统平台 | 安装包名称 | 架构说明与推荐 |
 | :--- | :--- | :--- |
@@ -70,8 +70,8 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 <summary>macOS 亦可通过 Homebrew 安装</summary>
 
 ```bash
-brew tap eachann1024/goose-notes https://github.com/eachann1024/goose-notes
-brew install --cask eachann1024/goose-notes/goose-note
+brew tap eachann1024/goose-note https://github.com/eachann1024/goose-note
+brew install --cask eachann1024/goose-note/goose-note
 # 升级
 brew upgrade --cask goose-note
 ```
@@ -102,6 +102,8 @@ bun run mac
 
 
 ---
+
+作者与维护者：[eachann1024](https://github.com/eachann1024)。
 
 **同系列**　[鹅的书签](https://github.com/eachann1024/goose-mark) · [鹅的监控](https://github.com/eachann1024/goose-monitor) · [鹅的验证](https://github.com/eachann1024/goose-2fa) · [鹅的 Agent](https://github.com/eachann1024/eachann1024)
 
