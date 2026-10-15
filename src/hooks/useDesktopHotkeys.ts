@@ -49,7 +49,7 @@ export function useDesktopHotkeys(): void {
   const searchHotkeyEnabled = useSettings((s) => s.desktop.searchHotkeyEnabled);
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron" || !hydrated) return;
+    if (!hydrated) return;
     const api = getGooseDesktop();
     if (!api?.onOpenSearch) return;
     return api.onOpenSearch(() => {
@@ -59,7 +59,7 @@ export function useDesktopHotkeys(): void {
   }, [hydrated]);
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron" || !hydrated) return;
+    if (!hydrated) return;
     const api = getGooseDesktop();
     if (!api?.onWorkspaceAction) return;
     return api.onWorkspaceAction((action) => {
@@ -83,7 +83,7 @@ export function useDesktopHotkeys(): void {
   }, [hydrated]);
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron" || !hydrated) return;
+    if (!hydrated) return;
     let cancelled = false;
 
     void (async () => {
@@ -151,7 +151,7 @@ export function useDesktopHotkeys(): void {
   ]);
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron" || !hydrated) return;
+    if (!hydrated) return;
     const api = getGooseDesktop();
     if (!api?.pauseHotkeys || !api?.resumeHotkeys) return;
 

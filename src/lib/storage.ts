@@ -1,5 +1,4 @@
 export {
-  flushLocalStorageWrites,
   getDbStorageItem,
   readDbStorageJSON,
   removeDbStorageItem,

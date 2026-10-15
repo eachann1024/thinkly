@@ -51,7 +51,6 @@ export interface PagesState {
    */
   reloadPageFromStorage: (pageId: string) => boolean;
 
-  createOnboardingPages: () => void;
   createPage: (parentId?: string, workspaceId?: string, id?: string) => string;
   createPageRecord: (
     options: {

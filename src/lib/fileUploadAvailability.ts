@@ -1,4 +1,3 @@
-import { hostRuntime } from "@/lib/host";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 
@@ -23,10 +22,7 @@ export function getFileUploadAvailability(): {
     if (!activePage?.localFilePath) {
       return {
         enabled: false,
-        reason:
-          hostRuntime.kind === "electron"
-            ? "请先打开文件夹仓库，再插入附件"
-            : "请先打开本地文件页面，再插入附件",
+        reason: "请先打开文件夹仓库，再插入附件",
       };
     }
     return { enabled: true };

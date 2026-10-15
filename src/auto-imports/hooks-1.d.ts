@@ -9,6 +9,7 @@ declare global {
   const resolveTheme: typeof import('../hooks/useResolvedTheme').resolveTheme
   const shouldSkipAppHotkeyEvent: typeof import('../hooks/useImeInput').shouldSkipAppHotkeyEvent
   const useAppHotkeys: typeof import('../hooks/useAppHotkeys').useAppHotkeys
+  const useDesktopFileEvents: typeof import('../hooks/useDesktopFileEvents').useDesktopFileEvents
   const useDesktopHotkeys: typeof import('../hooks/useDesktopHotkeys').useDesktopHotkeys
   const useDesktopWindowTitleSync: typeof import('../hooks/useDesktopWindowTitle').useDesktopWindowTitleSync
   const useEffectiveSidebarCollapsed: typeof import('../hooks/useWorkspaceViewportCollapse').useEffectiveSidebarCollapsed
@@ -16,7 +17,6 @@ declare global {
   const useImeInput: typeof import('../hooks/useImeInput').useImeInput
   const useNativeContextMenuGuard: typeof import('../hooks/useNativeContextMenuGuard').useNativeContextMenuGuard
   const usePersistentDismissState: typeof import('../hooks/usePersistentDismissState').usePersistentDismissState
-  const usePluginEvents: typeof import('../hooks/usePluginEvents').usePluginEvents
   const useResolvedTheme: typeof import('../hooks/useResolvedTheme').useResolvedTheme
   const useWindowAlwaysOnTop: typeof import('../hooks/useWindowAlwaysOnTop').useWindowAlwaysOnTop
   const useWorkspaceViewportCollapse: typeof import('../hooks/useWorkspaceViewportCollapse').useWorkspaceViewportCollapse

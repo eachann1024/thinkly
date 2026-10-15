@@ -19,12 +19,12 @@ export function getTableColumnCount(content: PartialTableContent<any, any>) {
   );
 }
 
-export function getBlockElementWidth(blockId: string | undefined) {
+export function getBlockElementWidth(blockId: string | undefined, root: ParentNode = document) {
   if (!blockId) return 0;
-  const blockElement = document.querySelector<HTMLElement>(
+  const blockElement = root.querySelector<HTMLElement>(
     `.bn-block[data-id="${blockId}"]`,
   );
-  return blockElement?.getBoundingClientRect().width ?? 0;
+  return blockElement?.clientWidth ?? 0;
 }
 
 export function getEvenColumnWidths(columnCount: number, tableWidth: number) {

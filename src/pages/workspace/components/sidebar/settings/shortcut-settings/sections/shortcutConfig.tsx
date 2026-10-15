@@ -6,11 +6,6 @@ import {
 } from "@/lib/fixed-app-shortcuts";
 import { LOCAL_FOLDER_FILE_SHORTCUTS } from "@/lib/local-folder-file-actions";
 
-export // Electron 桌面端（仅本地模式）：设置-快捷键页多出「桌面全局快捷键」分区；Electron 不出现。
-// 单元测试没有 vite define，用 typeof 兜底避免模块加载即 ReferenceError。
-const isElectronHost =
-  typeof __HOST_TARGET__ !== "undefined" && __HOST_TARGET__ === "electron";
-
 export interface SettingsShortcutsProps {
   closeTabShortcut: string;
   setCloseTabShortcut: (shortcut: string) => void;
@@ -58,8 +53,9 @@ export const ALWAYS_FIXED_SHORTCUT_VALUES = [
   LOCAL_FOLDER_FILE_SHORTCUTS.revealInFileManager,
   LOCAL_FOLDER_FILE_SHORTCUTS.openInTerminal,
   LOCAL_FOLDER_FILE_SHORTCUTS.copyFilePath,
-  ...(isElectronHost ? ["Mod+Shift+N", "Mod+W"] : []),
-  ...(isElectronHost && isMacPlatform() ? ["Mod+Shift+W"] : []),
+  "Mod+Shift+N",
+  "Mod+W",
+  ...(isMacPlatform() ? ["Mod+Shift+W"] : []),
 ];
 
 export /** 仅多标签模式生效的固定快捷键。 */
@@ -80,11 +76,10 @@ export const FIXED_SHORTCUTS: Array<{
   label: string;
   shortcut: string;
   tabOnly?: boolean;
-  desktopOnly?: boolean;
   platforms?: PlatformKind[];
 }> = [
   { label: "新建笔记", shortcut: FIXED_APP_SHORTCUTS.newNote },
-  { label: "新建窗口", shortcut: "Mod+Shift+N", desktopOnly: true },
+  { label: "新建窗口", shortcut: "Mod+Shift+N" },
   { label: "页内查找", shortcut: FIXED_APP_SHORTCUTS.editorFindOpen },
   { label: "页内替换", shortcut: "Mod+Alt+F" },
   { label: "侧栏聚焦时收起其它文件夹（优先于关闭笔记）", shortcut: "Escape" },
@@ -96,12 +91,10 @@ export const FIXED_SHORTCUTS: Array<{
   {
     label: "按关闭顺序关闭当前内容（桌面）",
     shortcut: "Mod+W",
-    desktopOnly: true,
   },
   {
     label: "关闭窗口（macOS）",
     shortcut: "Mod+Shift+W",
-    desktopOnly: true,
     platforms: ["mac"],
   },
   { label: "打开设置", shortcut: FIXED_APP_SHORTCUTS.openSettings },

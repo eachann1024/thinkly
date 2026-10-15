@@ -19,8 +19,9 @@ import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard
 import { useEditorContextClipboard } from "./useEditorContextClipboard";
 import { getEditorSelectedBlocksForExport } from "@/components/editor/utils/selection";
 import { cn, formatShortcut } from "@/lib/utils";
+import { requestBlockMenu } from "./blockMenuActions";
 
-// 展示型块在这些类型上右键无意义，阻断编辑器右键菜单（含浏览器默认菜单）
+// 展示型块的右键直接进入块操作，文字选区继续使用剪贴板菜单。
 // math/mermaid 是 codeBlock 的 language 变体，其 data-content-type 为 "codeBlock"，
 // 但需通过父块的 data-language 属性区分；image/file/audio/video/divider/imageResize 直接匹配
 const CONTEXT_MENU_EXCLUDED_BLOCK_TYPES = new Set([
@@ -82,14 +83,14 @@ export function EditorContextMenu({
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const selectedTextRef = useRef("");
-  const { handleContextPaste, handleCopySelection, handleCutSelection } =
+  const { handleContextPaste, handleCopySelection, handleCutSelection, rememberContextSelection } =
     useEditorContextClipboard(editor, editable, selectedTextRef);
-  // 速记小窗不展示「生成选中图片」：生产包靠 __GOOSE_LITE__ 裁掉；
-  // 开发态 / Electron 小窗靠草稿页 id 运行时隐藏。
+  // 速记小窗根据草稿页隐藏「生成选中图片」。
   const showSelectionImageExport =
-    !__GOOSE_LITE__ && page?.id !== "__quicknote_draft__";
+    page?.id !== "__quicknote_draft__";
 
   const handleContextMenuOpen = () => {
+    rememberContextSelection();
     let text = "";
     try {
       text = getEditorSelectionPlainText(editor.prosemirrorState);
@@ -148,9 +149,12 @@ export function EditorContextMenu({
             onPasteCapture={handleEditorPasteCapture}
             onKeyDownCapture={handleEditorKeyDownCapture}
             onContextMenuCapture={(e) => {
+              rememberContextSelection();
               if (isExcludedBlockTarget(e.target as HTMLElement)) {
                 e.preventDefault();
                 e.stopPropagation();
+                const container = (e.target as HTMLElement).closest<HTMLElement>('[data-node-type="blockContainer"][data-id]');
+                if (editable && container?.dataset.id) requestBlockMenu(editor, container.dataset.id, e.clientX, e.clientY);
               }
             }}
             data-font-family={page.fontFamily ?? "default"}
@@ -166,6 +170,7 @@ export function EditorContextMenu({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent editorContext className="w-[180px]">
+          {editable && <ContextMenuItem onSelect={() => requestBlockMenu(editor, editor.getTextCursorPosition().block.id)}>块操作…</ContextMenuItem>}
           {editable && (
             <ContextMenuItem disabled={!canCopy} onSelect={handleCutSelection}>
               <GooseIcons.Scissors className="mr-2 h-4 w-4" />

@@ -12,7 +12,7 @@ export function useWindowAlwaysOnTop(): {
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron") return;
+
     let cancelled = false;
     void getDesktopAlwaysOnTop().then((value) => {
       if (!cancelled) setAlwaysOnTop(value);
@@ -23,7 +23,7 @@ export function useWindowAlwaysOnTop(): {
   }, []);
 
   const toggleAlwaysOnTop = useCallback(() => {
-    if (__HOST_TARGET__ !== "electron") return;
+
     const next = !alwaysOnTop;
     setAlwaysOnTop(next);
     void setDesktopAlwaysOnTop(next).then(

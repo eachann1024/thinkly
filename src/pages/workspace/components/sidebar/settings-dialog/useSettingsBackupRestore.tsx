@@ -1,4 +1,4 @@
-import { useNotebooks, DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
+import { useNotebooks } from "@/stores/useNotebooks";
 import { clearLocalPageMetadataCache, usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
@@ -14,7 +14,6 @@ import { removeLocalPageIdMap } from "@/lib/local-page-idmap";
 import { removeLocalFolderOrders } from "@/stores/localFolderOrder";
 import { localStorageAdapter as dataStorage } from "@/lib/storage";
 import { toast } from "@/components/ui/sonner";
-import { isElectronHost } from "./shared";
 import type { useSettingsImportExport } from "./useSettingsImportExport";
 
 export function useSettingsBackupRestore(
@@ -90,34 +89,14 @@ export function useSettingsBackupRestore(
   };
 
   const createDefaultNotebook = () => {
-    const now = Date.now();
     const localNotebooks = Object.fromEntries(
       Object.entries(useNotebooks.getState().notebooks).filter(
         ([, notebook]) => notebook.source === "local-folder",
       ),
     );
-    // Electron 仅本地文件夹模式：重置后不种回内置本，保持空态
-    if (isElectronHost) {
-      useNotebooks.setState({
-        notebooks: localNotebooks,
-        activeNotebookId: Object.keys(localNotebooks)[0] ?? null,
-        lastActivePageByNotebook: {},
-        localFolderLoadStates: {},
-      });
-      return;
-    }
     useNotebooks.setState({
-      notebooks: {
-        ...localNotebooks,
-        [DEFAULT_NOTEBOOK]: {
-          id: DEFAULT_NOTEBOOK,
-          name: "Note",
-          icon: "BookOpen",
-          createdAt: now,
-          updatedAt: now,
-        },
-      },
-      activeNotebookId: DEFAULT_NOTEBOOK,
+      notebooks: localNotebooks,
+      activeNotebookId: Object.keys(localNotebooks)[0] ?? null,
       lastActivePageByNotebook: {},
       localFolderLoadStates: {},
     });

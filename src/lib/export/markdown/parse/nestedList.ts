@@ -25,6 +25,7 @@ export function parseNestedList(
   startI: number,
   baseIndent: number,
   parseInline: (t: string) => any[],
+  parseMarkdown?: (markdown: string) => any[],
 ): { items: any[]; nextIndex: number } {
   const items: any[] = [];
   let i = startI;
@@ -69,7 +70,7 @@ export function parseNestedList(
     }
     i++;
 
-    const sub = collectChildren(lines, i, lvl + 1, parseInline);
+    const sub = collectChildren(lines, i, lvl + 1, parseInline, parseMarkdown);
     if (sub.items.length) {
       item.children = sub.items;
       i = sub.nextIndex;
@@ -87,11 +88,27 @@ function collectChildren(
   startI: number,
   minIndent: number,
   parseInline: (t: string) => any[],
+  parseMarkdown?: (markdown: string) => any[],
 ): { items: any[]; nextIndex: number } {
   const i = startI;
   if (i >= lines.length || !lines[i].trim())
     return { items: [], nextIndex: startI };
   const childIndent = indentLevel(lines[i]);
   if (childIndent < minIndent) return { items: [], nextIndex: startI };
-  return parseNestedList(lines, i, childIndent, parseInline);
+  if (!parseMarkdown) return parseNestedList(lines, i, childIndent, parseInline);
+  // 子树可包含段落、分栏、toggle、媒体和表格；统一交回完整块解析器。
+  const body: string[] = [];
+  let end = i;
+  while (end < lines.length) {
+    const line = lines[end];
+    if (line.trim() && indentLevel(line) < childIndent) break;
+    if (!line.trim()) {
+      let next = end + 1;
+      while (next < lines.length && !lines[next].trim()) next += 1;
+      if (next >= lines.length || indentLevel(lines[next]) < childIndent) break;
+    }
+    body.push(line.slice(Math.min(childIndent, indentLevel(line))));
+    end += 1;
+  }
+  return { items: parseMarkdown(body.join("\n")), nextIndex: end };
 }

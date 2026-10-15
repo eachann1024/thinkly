@@ -136,14 +136,9 @@ export const setupSaveGuards = () => {
     flushFromLifecycle();
   };
 
-  const handlePluginOut = () => {
-    flushFromLifecycle();
-  };
-
   document.addEventListener("keydown", handleManualSave, { capture: true });
   document.addEventListener("visibilitychange", handleVisibilityChange);
   window.addEventListener("blur", handleWindowBlur);
   window.addEventListener("pagehide", handlePageHide);
   window.addEventListener("beforeunload", handleBeforeUnload);
-  window.addEventListener("goose-note:plugin-out", handlePluginOut);
 };

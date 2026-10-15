@@ -1,15 +1,9 @@
 import { useEffect } from "react";
-import {
-  getSelectedImageUrl,
-  getSelectedCellPlainText,
-  isWholeTableCellSelection,
-} from "@/components/editor/utils/selection";
-import {
-  GOOSE_BLOCKNOTE_BLOCK_COPY_MIME,
-  shouldCopyClipboardWithFormatting,
-} from "@/components/editor/extensions/copyCurrentBlockExtension";
-import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard";
+import { getSelectedImageUrl } from "@/components/editor/utils/selection";
 import { copyImageSrcToClipboard } from "@/components/editor/image/imageUtils";
+import { snapshotEditorSelection, restoreEditorSelection } from "../utils/editorSelectionSnapshot";
+import { deleteCutSelection } from "../extensions/copyBlockClipboard";
+import { toast } from "@/components/ui/sonner";
 import {
   reconcileSlashSuggestionMenu,
   reconcilePageMentionSuggestionMenu,
@@ -28,68 +22,40 @@ export function useEditorClipboard(runtime: EditorRuntime) {
     const container = editorContainerRef.current;
     if (!container) return;
 
-    const patchClipboardPlainText = (event: ClipboardEvent) => {
-      const clipboardData = event.clipboardData;
-      if (!clipboardData) return;
-
-      // BlockNote 默认会把 NodeSelection 图片块复制成 Markdown：
-      // ![name](att:...)。复制 / 剪切都应给系统剪贴板写入真正的图片数据。
-      const selectedImageUrl = getSelectedImageUrl(editor.prosemirrorState);
-      if (selectedImageUrl) {
-        event.preventDefault();
-        void copyImageSrcToClipboard(
-          selectedImageUrl,
-          platformRef.current,
-          getActivePageLocalFilePathRef.current(),
-        ).catch((error) => {
-          console.error("[editor] Failed to copy selected image", error);
-        });
-        if (event.type === "cut") {
-          const view = editor.prosemirrorView;
-          if (view && !view.state.selection.empty) {
-            view.dispatch(view.state.tr.deleteSelection());
-          }
-        }
-        return;
-      }
-
-      const cellText = getSelectedCellPlainText(editor.prosemirrorState);
-      if (
-        cellText != null &&
-        !isWholeTableCellSelection(editor.prosemirrorState)
-      ) {
-        event.preventDefault();
-        clipboardData.setData("text/plain", cellText);
-        clipboardData.setData("text/html", "");
-        clipboardData.setData("blocknote/html", "");
-        return;
-      }
-
-      // 插件已 preventDefault 并写入权威 MIME，冒泡阶段不要再清 HTML。
+    const copyImage = (event: ClipboardEvent) => {
       if (event.defaultPrevented) return;
-      // 多块格式复制不要再用无编号纯文本覆盖，否则粘贴只会剩下 123/333。
-      if (shouldCopyClipboardWithFormatting(editor.prosemirrorState)) return;
-
-      const { selection } = editor.prosemirrorState;
-      if (!selection.empty) {
-        clipboardData.setData(
-          "text/plain",
-          getEditorSelectionPlainText(editor.prosemirrorState),
-        );
-      }
-      clipboardData.setData("text/html", "");
-      clipboardData.setData("blocknote/html", "");
-      clipboardData.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "");
+      const view = editor.prosemirrorView;
+      if (!(event.target instanceof Node) || !view.dom.contains(event.target)) return;
+      const image = getSelectedImageUrl(view.state);
+      if (!image) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const snapshot = snapshotEditorSelection(view.state);
+      void (async () => {
+        try {
+          await copyImageSrcToClipboard(
+            image, platformRef.current, getActivePageLocalFilePathRef.current(),
+          );
+          if (event.type !== "cut" || !view.editable) return;
+          if (!restoreEditorSelection(view, snapshot)) {
+            toast.error("图片已复制；笔记内容已变化，原图片已保留");
+            return;
+          }
+          deleteCutSelection(view);
+        } catch (error) {
+          console.error("[editor] Failed to copy selected image", error);
+          toast.error("无法写入图片剪贴板，原图片已保留");
+        }
+      })();
     };
-
-    container.addEventListener("copy", patchClipboardPlainText);
-    container.addEventListener("cut", patchClipboardPlainText);
-
+    // 先于 BlockNote 原生 cut handler，防止其在异步位图写入前删除图片。
+    container.addEventListener("copy", copyImage, true);
+    container.addEventListener("cut", copyImage, true);
     return () => {
-      container.removeEventListener("copy", patchClipboardPlainText);
-      container.removeEventListener("cut", patchClipboardPlainText);
+      container.removeEventListener("copy", copyImage, true);
+      container.removeEventListener("cut", copyImage, true);
     };
-  }, []);
+  }, [editor]);
 
   useEffect(() => {
     const container = editorContainerRef.current;

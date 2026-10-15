@@ -11,7 +11,6 @@ import uiControls from './config/ui-control-eslint.mjs'
 export default defineConfig([
   globalIgnores([
     'dist',
-    'dist-quicknote',
     'dist-electron',
     'dist-desktop',
     'dist-signpath',

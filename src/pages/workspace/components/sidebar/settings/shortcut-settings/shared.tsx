@@ -1,5 +1,4 @@
 export {
-  isElectronHost,
   type SettingsShortcutsProps,
   SETTINGS_OPTION_ROW_CLASS,
   FIXED_APP_SHORTCUTS,

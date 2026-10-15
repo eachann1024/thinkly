@@ -16,6 +16,8 @@ export const VALID_BLOCK_TYPES = new Set([
   "link",
   "embed",
   "toggleListItem",
+  "columnLayout",
+  "columnSection",
   "divider",
 ]);
 

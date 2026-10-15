@@ -34,12 +34,11 @@ function sanitizeTableContent(
     const cells = (row as { cells?: unknown } | undefined)?.cells;
     if (!Array.isArray(cells)) continue;
     const sanitizedCells = cells.map(sanitizeTableCell);
-    if (sanitizedCells.length > 0) {
-      sanitizedRows.push({ cells: sanitizedCells });
-    }
+    // rowspan 可能覆盖整行，不能删除没有起始单元格的合法覆盖行。
+    sanitizedRows.push({ cells: sanitizedCells });
   }
 
-  if (sanitizedRows.length === 0) return null;
+  if (!sanitizedRows.some((row) => row.cells.length > 0)) return null;
 
   const tableContent = content as {
     columnWidths?: unknown;

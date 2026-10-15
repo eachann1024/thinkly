@@ -14,7 +14,6 @@ declare global {
   const DEFAULT_WATERMARK_CONFIG: typeof import('../lib/imageExport/index').DEFAULT_WATERMARK_CONFIG
   const DiskWriteError: typeof import('../lib/diskWriteError').DiskWriteError
   const EDITOR_UI_SCALE_CHANGE_EVENT: typeof import('../lib/appearance').EDITOR_UI_SCALE_CHANGE_EVENT
-  const ELECTRON_MAX_FILE_ATTACHMENT_SIZE: typeof import('../lib/fileStorage').ELECTRON_MAX_FILE_ATTACHMENT_SIZE
   const FIXED_APP_SHORTCUT_IDS: typeof import('../lib/fixed-app-shortcuts').FIXED_APP_SHORTCUT_IDS
   const FIXED_CLOSE_SHORTCUT: typeof import('../lib/fixed-app-shortcuts').FIXED_CLOSE_SHORTCUT
   const FIXED_ESCAPE_SHORTCUT: typeof import('../lib/fixed-app-shortcuts').FIXED_ESCAPE_SHORTCUT
@@ -155,7 +154,6 @@ declare global {
   const isDeepSeekProModel: typeof import('../lib/ai-provider/index').isDeepSeekProModel
   const isDescendantPage: typeof import('../lib/local-folder-target').isDescendantPage
   const isDiskContentMatchingSnapshot: typeof import('../lib/local-md-snapshot').isDiskContentMatchingSnapshot
-  const isElectronHost: typeof import('../lib/local-vault').isElectronHost
   const isExternalFileDrag: typeof import('../lib/local-folder-target').isExternalFileDrag
   const isGithubDownloadUrl: typeof import('../lib/appUpdateRelease').isGithubDownloadUrl
   const isGooseFrontmatterKey: typeof import('../lib/local-frontmatter').isGooseFrontmatterKey

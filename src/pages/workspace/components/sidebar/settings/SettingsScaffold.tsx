@@ -20,7 +20,6 @@ interface SettingsScaffoldProps {
   visible: boolean;
   children: ReactNode;
   feedbackBanner?: ReactNode;
-  appsBanner?: ReactNode;
 }
 
 export function SettingsScaffold({
@@ -33,7 +32,6 @@ export function SettingsScaffold({
   visible,
   children,
   feedbackBanner,
-  appsBanner,
 }: SettingsScaffoldProps) {
   const compact = useWorkspaceViewport((s) => s.forceCollapseLeft);
   const compactNavigationRef = useRef<HTMLSelectElement>(null);
@@ -161,10 +159,9 @@ export function SettingsScaffold({
                     <h2 className="text-3xl font-semibold tracking-tight">
                       {tabs.find((tab) => tab.id === activeTab)?.label}
                     </h2>
-                    {feedbackBanner || appsBanner ? (
+                    {feedbackBanner ? (
                       <div className="mt-6">
                         {feedbackBanner}
-                        {appsBanner}
                       </div>
                     ) : null}
                   </header>

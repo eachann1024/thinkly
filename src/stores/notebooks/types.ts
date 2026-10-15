@@ -82,9 +82,4 @@ export function generateId() {
 // 默认记事本
 export const DEFAULT_NOTEBOOK_ID = "default-notebook";
 
-// Electron 桌面端为「仅本地文件夹」模式：无内置笔记本，数据层不种 default-notebook。
-// 宿主标记未注入时保留浏览器默认行为。
-export const isElectronHost =
-  typeof __HOST_TARGET__ !== "undefined" && __HOST_TARGET__ === "electron";
-
 export const DEFAULT_NOTEBOOK = DEFAULT_NOTEBOOK_ID;

@@ -24,11 +24,11 @@ export const gooseCopyCurrentBlockExtension = createExtension({
       props: {
         handleDOMEvents: {
           copy(view, event) {
-            return writeSelectionClipboard(view, event);
+            return writeSelectionClipboard(view, event) || event.defaultPrevented;
           },
           cut(view, event) {
             if (view.state.selection.empty) return false;
-            if (!writeSelectionClipboard(view, event)) return false;
+            if (!writeSelectionClipboard(view, event)) return event.defaultPrevented;
             deleteCutSelection(view);
             return true;
           },

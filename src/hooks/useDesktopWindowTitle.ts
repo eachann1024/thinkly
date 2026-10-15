@@ -26,7 +26,7 @@ export function useDesktopWindowTitleSync(): void {
   );
 
   useEffect(() => {
-    if (__HOST_TARGET__ !== "electron") return;
+
     const title =
       pageTitle ?? (isWelcomeTab ? WELCOME_WINDOW_TITLE : DEFAULT_WINDOW_TITLE);
     const timer = window.setTimeout(() => {

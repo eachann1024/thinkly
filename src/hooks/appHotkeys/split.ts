@@ -13,10 +13,12 @@ import type { AppHotkeyActions } from "./actions";
 export function createSplitHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
   const { matchesConfiguredShortcut } = actions;
   return [
-    // 分屏：capture 阶段拦截，编辑器内 Mod+D 仍分屏而不是浏览器收藏。
+    // 编辑器内 Mod+D 用于复制块；其他位置仍保留应用分屏快捷键。
     {
       id: "split-right",
       shortcutId: "splitRight",
+      when: (event) => !(event.target instanceof Element &&
+        event.target.closest(".bn-editor, .tiptap, [contenteditable='true']")),
       match: (event) => {
         const s = FIXED_SPLIT_SHORTCUTS.splitRight;
         return !!s && matchesConfiguredShortcut(event, s);

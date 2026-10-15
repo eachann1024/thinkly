@@ -2,6 +2,7 @@ import { createExtension } from "@blocknote/core";
 import { Plugin } from "@tiptap/pm/state";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { Node as PMNode } from "@tiptap/pm/model";
+import { createDocumentTitlePolicyPlugin } from "../utils/documentTitlePolicy";
 
 /**
  * 「文档第一行恒为标题一(H1)」的确定性防线。
@@ -78,7 +79,10 @@ function firstTitleGuardPlugin(
       const level = (content.attrs?.level as number | undefined) ?? null;
 
       // 已经是 H1：无需处理。
-      if (contentTypeName === "heading" && level === TITLE_LEVEL) return null;
+      if (
+        contentTypeName === "heading" && level === TITLE_LEVEL &&
+        content.attrs.isToggleable !== true && content.attrs.collapsed !== true
+      ) return null;
 
       const headingType = newState.schema.nodes.heading;
       if (!headingType) return null;
@@ -93,6 +97,8 @@ function firstTitleGuardPlugin(
         tr.setNodeMarkup(contentPos, headingType, {
           ...content.attrs,
           level: TITLE_LEVEL,
+          isToggleable: false,
+          collapsed: false,
         });
         return tr.steps.length > 0 ? tr : null;
       }
@@ -121,7 +127,10 @@ export function createGooseFirstTitleGuardExtension(
 ) {
   return createExtension({
     key: "goose-first-title-guard",
-    prosemirrorPlugins: [firstTitleGuardPlugin(usesRawContentRef)],
+    prosemirrorPlugins: [
+      createDocumentTitlePolicyPlugin(usesRawContentRef),
+      firstTitleGuardPlugin(usesRawContentRef),
+    ],
   });
 }
 

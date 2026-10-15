@@ -1,5 +1,6 @@
 import { indentLevel, parseNestedList } from "./nestedList";
 import { parseHtmlBlock } from "./htmlBlocks";
+import { parseTableHtmlBlock } from "./table";
 import { parseCodeBlock } from "./codeBlocks";
 import { parseFileBlock, parseImageBlock } from "./mediaBlocks";
 import { frontmatterBodyHasUserVisibleKeys } from "@/lib/local-frontmatter";
@@ -64,7 +65,7 @@ export function markdownToJsonContent(markdown: string): any {
       continue;
     }
 
-    const parseHtmlBlockResult = parseHtmlBlock(lines, i, markdownToJsonContent);
+    const parseHtmlBlockResult = parseTableHtmlBlock(lines, i) ?? parseHtmlBlock(lines, i, markdownToJsonContent);
     if (parseHtmlBlockResult) {
       content.push(parseHtmlBlockResult.block);
       i = parseHtmlBlockResult.nextIndex;
@@ -130,11 +131,17 @@ export function markdownToJsonContent(markdown: string): any {
       const firstLine = trimmedLine.slice(1).trim();
 
       const calloutMatch = firstLine.match(
-        /^\[!INFO\]\s+(?:([\uD800-\uDBFF][\uDC00-\uDFFF]|\S))\s+(.+)$/i,
+        /^\[!INFO\]\s+(\S+)\s+(.*)$/i,
       );
 
       if (calloutMatch) {
-        const calloutLines: string[] = [calloutMatch[2]];
+        let icon = calloutMatch[1];
+        let firstContent = calloutMatch[2];
+        const iconMarker = firstContent.match(/^<!-- goose-note:callout-icon=([^\s]+) -->/);
+        if (iconMarker) {
+          try { icon = decodeURIComponent(iconMarker[1]); firstContent = firstContent.slice(iconMarker[0].length); } catch { /* 保留原文。 */ }
+        }
+        const calloutLines: string[] = [firstContent];
         i++;
         // 本地文件夹的块级 wrapper 会让多行 callout 的后续行保持 `> ` 前缀；
         // 与普通多行引用一致地合并，避免第二行被拆成独立 quote 块。
@@ -144,7 +151,7 @@ export function markdownToJsonContent(markdown: string): any {
         }
         content.push({
           type: "callout",
-          props: { icon: calloutMatch[1] },
+          props: { icon },
           content: parseInlineMarkdown(calloutLines.join("\n")),
         });
         continue;
@@ -192,6 +199,7 @@ export function markdownToJsonContent(markdown: string): any {
         i,
         baseIndent,
         parseInlineMarkdown,
+        markdownToJsonContent,
       );
       if (items.length) {
         content.push(...items);
@@ -220,8 +228,7 @@ export function markdownToJsonContent(markdown: string): any {
           if (
             currentLine.startsWith("#") ||
             currentLine.startsWith(">") ||
-            currentLine.startsWith("```") ||
-            currentLine.startsWith("~~~") ||
+            /^ {0,3}(?:`{3,}|~{3,})/.test(currentLine) ||
             currentLine.startsWith("$$") ||
             currentLine.match(/^-\s+\[[ xX]\]/) ||
             currentLine.match(/^[-*+]\s+/) ||
@@ -230,7 +237,10 @@ export function markdownToJsonContent(markdown: string): any {
             currentLine.match(/^\|/) ||
             currentLine.match(/^\[📎/) ||
             trimmed.match(/^<video\s+src=/) ||
-            trimmed.startsWith("<details>")
+            /^<details(?:\s|>)/i.test(trimmed) ||
+            /^<!--\s*goose-note:(?:columns|column)\b/i.test(trimmed) ||
+            /^<table\s+data-goose-table="v1"(?:\s|>)/i.test(trimmed) ||
+            /^<audio\s+src=/i.test(trimmed)
           ) {
             break;
           }

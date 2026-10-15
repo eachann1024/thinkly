@@ -135,7 +135,7 @@ export function useFileDrop() {
       : null;
     const isLocalFolder = currentNotebook?.source === "local-folder";
 
-    if (__HOST_TARGET__ === "electron" && !isLocalFolder) {
+    if (!isLocalFolder) {
       toast.error("请先关联本地文件夹", {
         description: "导入前请先在左侧栏打开或关联一个本地文件夹。",
       });

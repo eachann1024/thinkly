@@ -70,9 +70,9 @@ export function wrapLocalBlockPropsMarkdown(block: MarkdownBlock, markdown: stri
   const style = block.props?.[LOCAL_BLOCK_PROPS_WRAPPER_STYLE];
   if (typeof style !== "string" || !parseLocalWrapperStyle(style)) return markdown;
   const open = `<span data-goose-note-block-props="v1" style="${style}">`;
-  if (block.type === "toggleListItem") {
+  if (block.type === "toggleListItem" || (block.type === "heading" && block.props?.isToggleable)) {
     return markdown.replace(
-      /^(<summary>)([\s\S]*)(<\/summary>)$/m,
+      /^(<summary>(?:<h[1-3]>)?)([^\n]*?)((?:<\/h[1-3]>)?<\/summary>)$/m,
       (_source, start: string, inner: string, end: string) => `${start}${open}${inner}</span>${end}`,
     );
   }
@@ -125,7 +125,7 @@ export function unwrapLocalBlockPropsWrappers(markdown: string): string {
   const output: string[] = [];
   const prefix = "\\s*(?:(?:#{1,6}\\s+)|(?:[-*+]\\s+(?:\\[[ xX]\\]\\s+)?|\\d+\\.\\s+)|(?:>\\s+(?:\\[![A-Z]+\\]\\s+\\S+\\s+)?))?";
   const openPattern = new RegExp(`^(${prefix})(<span data-goose-note-block-props="v1" style="([^"]+)">)(.*)$`);
-  const blockBoundary = /^(?:\s*$|\s*#{1,6}\s+|\s*>|\s*(?:[-*+]\s+|\d+\.\s+)|\s*(?:`{3,}|~{3,})|\s*<details>)/;
+  const blockBoundary = /^(?:\s*$|\s*#{1,6}\s+|\s*>|\s*(?:[-*+]\s+|\d+\.\s+)|\s*(?:`{3,}|~{3,})|\s*<details(?:\s|>)|\s*<!--\s*goose-note:columns\b)/;
   const marker = (metadata: PersistedBlockProps) =>
     `<!-- goose-note:block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))} -->`;
   let fence: { char: "`" | "~"; length: number } | null = null;
@@ -148,7 +148,7 @@ export function unwrapLocalBlockPropsWrappers(markdown: string): string {
       continue;
     }
 
-    const summary = line.match(/^(<summary>)<span data-goose-note-block-props="v1" style="([^"]+)">(.*)<\/span>(<\/summary>)$/);
+    const summary = line.match(/^(<summary>(?:<h[1-3]>)?)<span data-goose-note-block-props="v1" style="([^"]+)">(.*)<\/span>((?:<\/h[1-3]>)?<\/summary>)$/);
     if (summary) {
       const metadata = parseLocalWrapperStyle(summary[2]);
       output.push(metadata ? `${summary[1]}${marker(metadata)}${summary[3]}${summary[4]}` : line);

@@ -5,9 +5,7 @@ import { renderNotebookMenu } from "./notebook-switcher/renderNotebookMenu";
 import * as GooseIcons from "@/components/ui/icons";
 import "./notebook-switcher.css";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { NotebookCreateDialog } from "./NotebookCreateDialog";
 import { NotebookEditDialog } from "./NotebookEditDialog";
-import { isElectronHost } from "@/lib/local-vault";
 import { useNotebookSwitcherState } from "./notebook-switcher/useNotebookSwitcherState";
 import { useNotebookSwitcherActions } from "./notebook-switcher/useNotebookSwitcherActions";
 import { renderNotebookIcon } from "./notebookUtils";
@@ -30,13 +28,10 @@ export function NotebookSwitcher(
     menuRef,
     editDialog,
     setEditDialog,
-    createDialog,
-    setCreateDialog,
     activeNotebook,
     isRail,
     notebookKind,
     activeNotebookLabel,
-    handleConfirmCreate,
     handleSaveEdit,
     handleDelete,
   } = context;
@@ -44,7 +39,7 @@ export function NotebookSwitcher(
   const restoreTriggerFocus = useRef(false);
   const defaultNotebookIcon = activeNotebook
     ? (activeNotebook.source === "local-folder" ? "FolderOpen" : "BookOpen")
-    : (isElectronHost ? "FolderOpen" : "BookOpen");
+    : "FolderOpen";
 
   // 移动入口时关闭旧锚点菜单，编辑/新建对话框仍由同一个组件持有。
   useLayoutEffect(() => {
@@ -143,22 +138,7 @@ export function NotebookSwitcher(
         />
       )}
 
-      {createDialog.open && !isElectronHost && (
-        <NotebookCreateDialog
-          open={createDialog.open}
-          name={createDialog.name}
-          error={createDialog.error}
-          onOpenChange={(open) =>
-            setCreateDialog({ ...createDialog, open, error: "" })
-          }
-          onNameChange={(name) => setCreateDialog({ ...createDialog, name })}
-          onCreate={handleConfirmCreate}
-          onClearError={() =>
-            createDialog.error &&
-            setCreateDialog({ ...createDialog, error: "" })
-          }
-        />
-      )}
+
     </>
   );
 }

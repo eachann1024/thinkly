@@ -10,6 +10,12 @@ const versionKey = (pageId: string, versionId: string) =>
   `${VERSION_PREFIX}${pageId}:${versionId}`;
 const indexKey = (pageId: string) => `${INDEX_PREFIX}${pageId}`;
 
+const assertStorageOperation = (result: { ok: boolean; error?: unknown }): void => {
+  if (!result.ok) {
+    throw new Error(`history-storage-operation-failed: ${String(result.error ?? "unknown")}`);
+  }
+};
+
 export const historyRepository = {
   loadIndex(pageId: string): HistoryIndex {
     const doc = HostAdapter.db.get<HistoryIndex>(indexKey(pageId));
@@ -19,7 +25,7 @@ export const historyRepository = {
   saveIndex(index: HistoryIndex): void {
     const key = indexKey(index.pageId);
     const existing = HostAdapter.db.get<HistoryIndex>(key);
-    HostAdapter.db.put(key, index, existing?._rev);
+    assertStorageOperation(HostAdapter.db.put(key, index, existing?._rev));
   },
 
   loadVersion(pageId: string, versionId: string): HistoryVersion | null {
@@ -31,12 +37,12 @@ export const historyRepository = {
     const key = versionKey(version.pageId, version.versionId);
     const existing = HostAdapter.db.get<HistoryVersion>(key);
     invalidateHistoryVersion(key);
-    HostAdapter.db.put(key, version, existing?._rev);
+    assertStorageOperation(HostAdapter.db.put(key, version, existing?._rev));
   },
 
   removeVersion(pageId: string, versionId: string): void {
     invalidateHistoryVersion(versionKey(pageId, versionId));
-    HostAdapter.db.remove(versionKey(pageId, versionId));
+    assertStorageOperation(HostAdapter.db.remove(versionKey(pageId, versionId)));
   },
 
   /** 级联删除某个 page 的所有历史 */
@@ -46,9 +52,9 @@ export const historyRepository = {
     );
     versions.forEach((doc) => {
       invalidateHistoryVersion(doc._id);
-      HostAdapter.db.remove(doc._id);
+      assertStorageOperation(HostAdapter.db.remove(doc._id));
     });
-    HostAdapter.db.remove(indexKey(pageId));
+    assertStorageOperation(HostAdapter.db.remove(indexKey(pageId)));
   },
 
   /** 清理内部页面历史；本地文件夹的 .goose/history 不在该数据库中，不受影响。 */
@@ -57,13 +63,13 @@ export const historyRepository = {
       .allDocs<HistoryVersion>(VERSION_PREFIX)
       .forEach((doc) => {
         invalidateHistoryVersion(doc._id);
-        HostAdapter.db.remove(doc._id);
+        assertStorageOperation(HostAdapter.db.remove(doc._id));
       });
     HostAdapter.db
       .allDocs<HistoryIndex>(INDEX_PREFIX)
       .forEach((doc) => {
         invalidateHistoryVersion(doc._id);
-        HostAdapter.db.remove(doc._id);
+        assertStorageOperation(HostAdapter.db.remove(doc._id));
       });
   },
 };

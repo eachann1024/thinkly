@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import { toast } from "@/components/ui/sonner";
 import type { EditorSession } from "./useEditorSession";
+import { gooseBlockSelectionExtension } from "@/components/editor/extensions/blockSelectionExtension";
 import { gooseSelectAllExtension } from "@/components/editor/extensions/selectAllExtension";
 import { gooseTableCellSelectionExtension } from "@/components/editor/extensions/tableCellSelectionExtension";
 import { gooseCopyCurrentBlockExtension } from "@/components/editor/extensions/copyCurrentBlockExtension";
@@ -41,6 +42,8 @@ import { ArrowInputRuleExtension } from "@/components/editor/inputrules/arrowInp
 import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlugin";
 import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
+import { gooseColumnLayoutExtension } from "../extensions/columnLayoutExtension";
+import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
 
 export function useEditorExtensions(session: EditorSession) {
   const {
@@ -101,13 +104,16 @@ export function useEditorExtensions(session: EditorSession) {
     gooseActiveListMarkerExtension,
     gooseActiveHeadingCaretExtension,
     gooseActiveLineExtension,
+    gooseColumnLayoutExtension(),
+    createGooseBlockTypeKeyboardExtension(() => settingsRef.current.defaultCodeBlockWrap)(),
     gooseTabBehaviorExtension,
     gooseTableEnterExtension,
+    gooseBlockSelectionExtension(),
     gooseSelectAllExtension,
     gooseTableCellSelectionExtension,
     gooseCopyCurrentBlockExtension,
     gooseMoveBlockExtension,
-    createGooseLinkKeyboardExtension(settingsRef),
+    createGooseLinkKeyboardExtension(),
     gooseCodeBlockKeyboardExtension,
     gooseCodeTextDropExtension(),
     gooseCodeBlockLinkStripExtension,
@@ -123,7 +129,7 @@ export function useEditorExtensions(session: EditorSession) {
       usesRawEditorContentRef,
       editorInstanceRef,
     ),
-    gooseMarkdownInputRulesExtension(),
+    gooseMarkdownInputRulesExtension(settingsRef),
     gooseFakeSelectionExtension,
     ArrowInputRuleExtension,
     gooseFindInPageExtension,

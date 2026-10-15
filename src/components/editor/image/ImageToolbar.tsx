@@ -1,4 +1,6 @@
 import { EditorAction } from "@/components/editor/ui/button";
+import type { BlockNoteEditor } from "@blocknote/core";
+import { ImageEditControls } from "./ImageEditControls";
 import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import {
   AlignCenter,
@@ -43,6 +45,7 @@ export interface SelectedImageState {
 }
 
 interface ImageToolbarProps {
+  editor: BlockNoteEditor<any, any, any>;
   selectedImage: SelectedImageState;
   applyImageAlignment: (alignment: ImageAlignment) => void;
   handleSelectedImageZoom: () => void;
@@ -95,6 +98,7 @@ function ImageToolButton({
 }
 
 export function ImageToolbar({
+  editor,
   selectedImage,
   applyImageAlignment,
   handleSelectedImageZoom,
@@ -193,6 +197,7 @@ export function ImageToolbar({
           ))}
 
           <div className="goose-block-toolbar-separator" />
+          <ImageEditControls editor={editor} blockId={selectedImage.blockId} />
 
           <ImageToolButton
             label={openImageLabel}

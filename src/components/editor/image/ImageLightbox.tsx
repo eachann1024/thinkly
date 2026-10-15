@@ -44,6 +44,7 @@ export function ImageLightbox({
     <>
       {selectedImage && !open && editable && (
         <ImageToolbar
+          editor={editor}
           selectedImage={selectedImage}
           applyImageAlignment={applyImageAlignment}
           handleSelectedImageZoom={handleSelectedImageZoom}

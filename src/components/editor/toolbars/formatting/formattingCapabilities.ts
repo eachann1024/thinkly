@@ -6,6 +6,7 @@ import {
   type TableContent,
 } from "@blocknote/core";
 import { CellSelection } from "prosemirror-tables";
+import { selectionTouchesProtectedTitle } from "../../utils/documentTitlePolicy";
 import {
   getSelectedBlocksSafe,
   dropBlocksWithoutSelectedContent,
@@ -178,10 +179,9 @@ export function getSelectionTextAlignment(
 
 export function getFormattingToolbarCapabilities(
   editor: BlockNoteEditor<any, any, any>,
-  options?: { isInHeading?: boolean },
 ): FormattingToolbarCapabilities {
   const mode = getFormattingSelectionMode(editor);
-  const isInHeading = Boolean(options?.isInHeading);
+  const protectsTitle = selectionTouchesProtectedTitle(editor.prosemirrorState);
   const textAlignment = getSelectionTextAlignment(editor);
 
   if (mode === "none") {
@@ -200,7 +200,7 @@ export function getFormattingToolbarCapabilities(
   if (mode === "cellText") {
     return {
       mode,
-      showMarks: !isInHeading,
+      showMarks: !protectsTitle,
       showColors: true,
       showLink: true,
       showAlign: true,
@@ -213,7 +213,7 @@ export function getFormattingToolbarCapabilities(
   if (mode === "cellGrid") {
     return {
       mode,
-      showMarks: !isInHeading,
+      showMarks: !protectsTitle,
       showColors: true,
       showLink: false,
       showAlign: true,
@@ -226,7 +226,7 @@ export function getFormattingToolbarCapabilities(
   if (mode === "singleBlock") {
     return {
       mode,
-      showMarks: !isInHeading,
+      showMarks: !protectsTitle,
       showColors: true,
       showLink: true,
       showAlign: canShowAlign(editor),
@@ -239,7 +239,7 @@ export function getFormattingToolbarCapabilities(
   // multiBlock
   return {
     mode,
-    showMarks: !isInHeading,
+    showMarks: !protectsTitle,
     showColors: true,
     showLink: false,
     showAlign: canShowAlign(editor),

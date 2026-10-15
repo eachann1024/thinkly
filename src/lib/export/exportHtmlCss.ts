@@ -208,9 +208,6 @@ async function loadViteVendorCss(): Promise<string> {
 export async function getExportHtmlCss(): Promise<string> {
   const fromFs = tryLoadVendorCssFromFs();
   if (fromFs) return assembleExportCss(fromFs);
-  if (typeof __GOOSE_LITE__ !== "undefined" && __GOOSE_LITE__) {
-    throw new Error("速记小窗不支持 BlockNote HTML 导出");
-  }
   return assembleExportCss(await loadViteVendorCss());
 }
 

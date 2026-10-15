@@ -67,18 +67,12 @@ export function computeWindowDragOrigin(
   };
 }
 
-function isElectronHost(): boolean {
-  return typeof __HOST_TARGET__ === "undefined" || __HOST_TARGET__ === "electron";
-}
-
 export async function startWindowDragging(): Promise<void> {
-  if (!isElectronHost()) return;
   setWindowDraggingCursor(true);
   await getGooseDesktop()?.startWindowDrag?.();
 }
 
 export async function endWindowDragging(): Promise<void> {
-  if (!isElectronHost()) return;
   setWindowDraggingCursor(false);
   await getGooseDesktop()?.endWindowDrag?.();
 }

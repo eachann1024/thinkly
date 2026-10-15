@@ -47,7 +47,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     const blockId = element?.closest("[data-id]")?.getAttribute("data-id");
     if (blockId) {
       const ids = findCollapsedHeadingsHidingBlock(editor.document as SectionFoldBlock[], blockId, editor.document[0]?.id);
-      for (const id of ids) { const block = editor.getBlock(id); if (block?.type === "heading") editor.updateBlock(block, { props: { collapsed: false } }); }
+      for (const id of ids) { const block = editor.getBlock(id); if (block?.type === "heading" || block?.type === "toggleListItem") editor.updateBlock(block, { props: { collapsed: false } }); }
       let ancestor = element?.parentElement;
       while (ancestor && ancestor !== editor.prosemirrorView.dom) {
         if (ancestor instanceof HTMLDetailsElement) ancestor.open = true;

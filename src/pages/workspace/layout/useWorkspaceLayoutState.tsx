@@ -115,7 +115,6 @@ export function useWorkspaceLayoutState({
   const isLocalFolderRepo = activeNotebook?.source === "local-folder";
 
   const showElectronLocalImportHint =
-    __HOST_TARGET__ === "electron" &&
     isLocalFolderRepo &&
     dragIntent === "text-file";
 

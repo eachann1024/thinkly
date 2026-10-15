@@ -2,6 +2,8 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import type { Transaction } from "@tiptap/pm/state";
 import { TextSelection } from "@tiptap/pm/state";
+import { findActivePageMentionQuery, isPageMentionBoundaryChar } from "./pageMentionQuery";
+export { findActivePageMentionQuery, isPageMentionBoundaryChar, mentionTriggerDeleteRange } from "./pageMentionQuery";
 
 const SLASH_TRIGGERS = ["/", "、"] as const;
 
@@ -21,39 +23,6 @@ export function isSuggestionMenuAcceptKey(event: {
   if (event.key === "Enter") return !event.shiftKey;
   if (event.key !== "Tab") return false;
   return !event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey;
-}
-
-/** `@` 前面是邮箱/标识符内部时不弹；中文、空白、标点都算边界。 */
-export function isPageMentionBoundaryChar(charBefore: string): boolean {
-  if (!charBefore) return true;
-  if (charBefore === "@") return false;
-  return !/[A-Za-z0-9._-]/.test(charBefore);
-}
-
-export function findActivePageMentionQuery(textBefore: string): {
-  atIndex: number;
-  query: string;
-} | null {
-  const atIndex = textBefore.lastIndexOf("@");
-  if (atIndex < 0) return null;
-  const charBefore = atIndex === 0 ? "" : textBefore.charAt(atIndex - 1);
-  if (!isPageMentionBoundaryChar(charBefore)) return null;
-  const query = textBefore.slice(atIndex + 1);
-  if (/[\s\u00a0\u200b]/.test(query) || query.includes("\ufffc")) return null;
-  return { atIndex, query };
-}
-
-/** 选中 @ 建议前要删掉的 `@query` 范围（含触发符）。 */
-export function mentionTriggerDeleteRange(
-  blockStart: number,
-  textBefore: string,
-  caret: number,
-): { from: number; to: number } | null {
-  const active = findActivePageMentionQuery(textBefore);
-  if (!active) return null;
-  const from = blockStart + active.atIndex;
-  if (from >= caret) return null;
-  return { from, to: caret };
 }
 
 function isCodeTextblockParent(parent: {
@@ -95,7 +64,9 @@ export function shouldOpenSlashSuggestionMenu(
     const cursorBlock = editor.getTextCursorPosition().block;
     if (cursorBlock && cursorBlock.id === editor.document[0]?.id) return false;
   }
-  if ($from.parentOffset !== 0) return false;
+  const prefix = $from.parent.textBetween(0, $from.parentOffset, undefined, "\ufffc");
+  if (prefix && !/\s$/u.test(prefix)) return false;
+  if (hasCodeMark($from)) return false;
   if (isCodeTextblockParent($from.parent)) return false;
   return !$from.parent.type.isInGroup("tableContent");
 }
@@ -220,13 +191,13 @@ export function reconcilePageMentionSuggestionMenu(
 
   const blockStart = $from.start();
   const caret = selection.from;
-  const triggerPos = blockStart + active.atIndex + 1;
+  const triggerPos = blockStart + active.atIndex + active.trigger.length;
   if (caret < triggerPos) return;
 
   view.dispatch(
     view.state.tr.setSelection(TextSelection.create(view.state.doc, triggerPos)),
   );
-  sug.openSuggestionMenu("@");
+  sug.openSuggestionMenu(active.trigger);
   view.dispatch(
     view.state.tr.setSelection(TextSelection.create(view.state.doc, caret)),
   );

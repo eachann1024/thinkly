@@ -20,7 +20,6 @@ export function useEditorSession(editable: boolean) {
     searchProviders,
     customActions,
     ai: aiSettings,
-    openLinksInHost,
   } = settings;
   const {
     page,
@@ -95,8 +94,6 @@ export function useEditorSession(editable: boolean) {
   // 同 aiSettingsRef 模式，避免闭包捕获旧 platform 引用。
   const platformRef = useRef(platform);
   platformRef.current = platform;
-  const openLinksInHostRef = useRef(openLinksInHost);
-  openLinksInHostRef.current = openLinksInHost;
   // settingsRef 供 useCreateBlockNote 闭包（deps=[]）调用平台设置，避免闭包捕获旧配置
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -157,7 +154,6 @@ export function useEditorSession(editable: boolean) {
     searchProviders,
     customActions,
     aiSettings,
-    openLinksInHost,
     page,
     contentMode,
     isEditorFullWidth,
@@ -189,7 +185,6 @@ export function useEditorSession(editable: boolean) {
     contentModeRef,
     inlineAiScopeRef,
     platformRef,
-    openLinksInHostRef,
     settingsRef,
     editorInstanceRef,
     usesRawEditorContent,

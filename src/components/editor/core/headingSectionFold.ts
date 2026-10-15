@@ -1,4 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
+import { isToggleBlock } from "./toggleBlocks";
 
 export type SectionFoldBlock = {
   id: string;
@@ -39,6 +40,14 @@ export function isFoldableHeadingBlock(
   if (block?.type !== "heading" || !block.id) return false;
   if (!firstBlockId) return true;
   return block.id !== firstBlockId;
+}
+
+/** 显式 toggle heading 只折叠 children，不参与后续兄弟 section 的隐藏。 */
+export function isSectionFoldHeadingBlock(
+  block: SectionFoldBlock,
+  firstBlockId: string | undefined,
+): boolean {
+  return isFoldableHeadingBlock(block, firstBlockId) && !isToggleBlock(block);
 }
 
 /** 从 heading 后扫同级兄弟，遇 level <= 当前 heading 则停。 */
@@ -116,7 +125,7 @@ export function updateFoldSnapshots(
       if (
         block.type === "heading" &&
         isCollapsedProp(block.props?.collapsed) &&
-        isFoldableHeadingBlock(block, firstBlockId)
+        isSectionFoldHeadingBlock(block, firstBlockId)
       ) {
         const keep =
           prevDocument !== null && prevCollapsed.get(block.id) === true
@@ -146,7 +155,7 @@ export function collectAllHiddenSectionBlockIds(
       if (
         block.type === "heading" &&
         isCollapsedProp(block.props?.collapsed) &&
-        isFoldableHeadingBlock(block, firstBlockId)
+        isSectionFoldHeadingBlock(block, firstBlockId)
       ) {
         collectSectionBlockIds(blocks, block.id).forEach((id) => hidden.add(id));
         collectDescendantIds(block.children, hidden);
@@ -172,11 +181,11 @@ export function findCollapsedHeadingsHidingBlock(
   const walk = (blocks: SectionFoldBlock[]) => {
     for (const block of blocks) {
       if (
-        block.type === "heading" &&
+        (block.type === "heading" || isToggleBlock(block)) &&
         isCollapsedProp(block.props?.collapsed) &&
-        isFoldableHeadingBlock(block, firstBlockId)
+        (isToggleBlock(block) || isSectionFoldHeadingBlock(block, firstBlockId))
       ) {
-        const sectionIds = collectSectionBlockIds(blocks, block.id);
+        const sectionIds = isToggleBlock(block) ? [] : collectSectionBlockIds(blocks, block.id);
         const nested = new Set<string>();
         collectDescendantIds(block.children, nested);
         if (sectionIds.includes(targetBlockId) || nested.has(targetBlockId)) {
@@ -211,7 +220,7 @@ export function toggleHeadingCollapsed(
     const collect = (blocks: SectionFoldBlock[]) => {
       for (const heading of blocks) {
         if (heading.id === headingId) {
-          const sectionIds = new Set(collectSectionBlockIds(blocks, headingId));
+          const sectionIds = new Set(isToggleBlock(heading) ? [] : collectSectionBlockIds(blocks, headingId));
           collectDescendantIds(
             blocks.filter((item) => sectionIds.has(item.id)),
             hiddenIds,

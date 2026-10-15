@@ -69,9 +69,10 @@ const dialog: EditorPlatformDialog = {
 
 const clipboard: EditorPlatformClipboard = {
   copyText: async (text) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
+    if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
+      throw new Error("当前环境不支持复制文字。");
     }
+    await navigator.clipboard.writeText(text);
   },
   copyImage: async (dataUrl) => {
     if (
@@ -79,7 +80,7 @@ const clipboard: EditorPlatformClipboard = {
       !navigator.clipboard ||
       typeof ClipboardItem === "undefined"
     ) {
-      return;
+      throw new Error("当前环境不支持复制图片。");
     }
     const response = await fetch(dataUrl);
     const blob = await response.blob();

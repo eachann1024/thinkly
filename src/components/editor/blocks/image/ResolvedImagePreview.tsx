@@ -4,7 +4,7 @@ import { EditorAction } from "@/components/editor/ui/button";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 
 type ImageBlock = {
-  props: { url: string; name?: string; previewWidth?: number };
+  props: { url: string; name?: string; alt?: string; previewWidth?: number };
 };
 type ImageEditor = { resolveFileUrl?: (url: string) => Promise<string> };
 type ImageResource = {
@@ -77,7 +77,7 @@ export function ResolvedImagePreview({
             // 缓存命中或节点复用时 load 可能已发生，仍需确认实际解码结果。
             if (element?.complete) finish(element.naturalWidth > 0 ? "loaded" : "error");
           }}
-          src={current.src} alt={block.props.name || ""}
+          src={current.src} alt={typeof block.props.alt === "string" ? block.props.alt : block.props.name || ""}
           width={block.props.previewWidth} draggable={false}
           onLoad={() => finish("loaded")} onError={() => finish("error")} />
       )}

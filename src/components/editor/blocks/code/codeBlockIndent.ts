@@ -7,7 +7,7 @@ export type CodeIndentResult = {
 const DEFAULT_INDENT = "  ";
 
 function getLineStart(text: string, offset: number) {
-  return text.lastIndexOf("\n", Math.max(0, offset - 1)) + 1;
+  return offset <= 0 ? 0 : text.lastIndexOf("\n", offset - 1) + 1;
 }
 
 function getSelectedLineRange(text: string, selectionStart: number, selectionEnd: number) {

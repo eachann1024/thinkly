@@ -35,7 +35,9 @@ export function CodeBlockToolbar({
   onCopyPreview,
   canPreview = false,
 }: CodeBlockToolbarProps) {
-  const [copied, setCopied] = useState(false);
+  const [copiedKind, setCopiedKind] = useState<"code" | "image" | null>(null);
+  const copyKind = previewMode === "preview" && onCopyPreview ? "image" : "code";
+  const copied = copiedKind === copyKind;
   const [copyingImage, setCopyingImage] = useState(false);
   const { format, isLoading } = useFormatCode();
   const platform = useEditorPlatform();
@@ -50,18 +52,18 @@ export function CodeBlockToolbar({
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(content).catch(() => undefined);
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedKind("code");
+    setTimeout(() => setCopiedKind(null), 2000);
   };
 
   const handleCopy = async () => {
-    if (onCopyPreview) {
+    if (previewMode === "preview" && onCopyPreview) {
       if (copyingImage) return;
       setCopyingImage(true);
       try {
         await onCopyPreview();
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setCopiedKind("image");
+        setTimeout(() => setCopiedKind(null), 2000);
       } catch {
         // 失败 toast 由 onCopyPreview 负责
       } finally {
@@ -107,6 +109,7 @@ export function CodeBlockToolbar({
             onLanguageChange={onLanguageChange}
             editable={editable}
             isMathOrMermaid={isMathOrMermaid}
+            sourceMode={previewMode === "code"}
             hasVisualPreview={hasVisualPreview}
             displayLanguage={displayLanguage}
             chipClass={chipClass}
@@ -188,6 +191,7 @@ export function CodeBlockToolbar({
                   variant="ghost"
                   size="sm"
                   onClick={() => void handleCopyCode()}
+                  aria-label={copied ? "已复制代码" : "复制代码"}
                   className={cn("h-6 w-6 p-0", chipClass)}
                 >
                   {copied ? (

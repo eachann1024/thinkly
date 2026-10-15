@@ -1,34 +1,29 @@
-/**
- * Electron 桌面端（仅本地模式）的 HostRuntime 实现。
- *
- * 数据只落本机：db / dbStorage 走 localStorage；附件走
- * userData/attachments 磁盘（@/lib/electron/attachments，
- * 上限 50MB）。无账号、无 sublist、无 redirect。全局热键走
- * @/lib/electron/globalHotkeys。本地文件夹能力由 ensureGooseFs 注入的
- * window.gooseFs（@/lib/electron/gooseFs，基于 window.gooseDesktop）提供。
- *
- * 仅在 GOOSE_BUILD_TARGET=electron 构建里经 @host-runtime alias 进入依赖图。
- */
+/** Electron 本地文档、磁盘附件和 gooseFs 初始化。 */
 import type {
   HostDoc,
   HostRuntime,
   HostPutResult,
   HostRemoveResult,
 } from "./types";
-import { getGooseDesktop } from "@/lib/electron/runtime";
 
 const WEB_DB_STORAGE_KEY = "goose-note:web-db";
 
 const readWebDb = (): Record<string, HostDoc<unknown>> => {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(WEB_DB_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
+  if (typeof window === "undefined") throw new Error("local-storage-unavailable");
+  const raw = window.localStorage.getItem(WEB_DB_STORAGE_KEY);
+  if (raw === null) return {};
+  const parsed: unknown = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("local-storage-invalid-document-map");
   }
+  for (const [id, value] of Object.entries(parsed)) {
+    if (!value || typeof value !== "object" || Array.isArray(value) ||
+      !("_id" in value) || value._id !== id || !("data" in value) ||
+      ("_rev" in value && value._rev !== undefined && typeof value._rev !== "string")) {
+      throw new Error("local-storage-invalid-document");
+    }
+  }
+  return parsed as Record<string, HostDoc<unknown>>;
 };
 
 const writeWebDb = (db: Record<string, HostDoc<unknown>>): boolean => {
@@ -49,9 +44,6 @@ const nextWebRev = (current?: string): string => {
 const electronAttachments = () => import("@/lib/electron/attachments");
 
 export const hostRuntime: HostRuntime = {
-  kind: "electron",
-  supportsSublist: false,
-  supportsWakeHotkey: true,
   ensureGooseFs: async () => {
     if (typeof window === "undefined" || window.gooseFs) return;
     try {
@@ -63,32 +55,11 @@ export const hostRuntime: HostRuntime = {
       console.warn("[runtime.electron] gooseFs 注入失败", err);
     }
   },
-  dbStorage: {
-    getItem: (key: string) => {
-      try {
-        return window.localStorage.getItem(key);
-      } catch {
-        return null;
-      }
-    },
-    setItem: (key: string, value: string) => {
-      try {
-        window.localStorage.setItem(key, value);
-      } catch {
-        // ignore
-      }
-    },
-    removeItem: (key: string) => {
-      try {
-        window.localStorage.removeItem(key);
-      } catch {
-        // ignore
-      }
-    },
-  },
   db: {
     put: <T>(id: string, data: T, rev?: string): HostPutResult => {
-      const db = readWebDb();
+      let db: Record<string, HostDoc<unknown>>;
+      try { db = readWebDb(); }
+      catch { return { id, ok: false, error: "local-storage-read-failed" }; }
       const nextRev = nextWebRev(rev || db[id]?._rev);
       db[id] = { _id: id, _rev: nextRev, data };
       if (!writeWebDb(db)) {
@@ -97,10 +68,13 @@ export const hostRuntime: HostRuntime = {
       return { id, ok: true, rev: nextRev };
     },
     get: <T>(id: string): HostDoc<T> | null => {
-      return (readWebDb()[id] as HostDoc<T> | undefined) ?? null;
+      const db = readWebDb();
+      return Object.hasOwn(db, id) ? db[id] as HostDoc<T> : null;
     },
     remove: (id: string): HostRemoveResult => {
-      const db = readWebDb();
+      let db: Record<string, HostDoc<unknown>>;
+      try { db = readWebDb(); }
+      catch { return { id, ok: false, error: "local-storage-read-failed" }; }
       delete db[id];
       if (!writeWebDb(db)) {
         return { id, ok: false, error: "local-storage-write-failed" };
@@ -127,100 +101,5 @@ export const hostRuntime: HostRuntime = {
       const mod = await electronAttachments();
       return mod.getAttachmentType(id);
     },
-  },
-  getUser: () => null,
-  copyToClipboard: (text: string) => {
-    const api = getGooseDesktop();
-    if (api) {
-      void api.writeText(text).catch(() => {});
-      return;
-    }
-    void navigator.clipboard?.writeText(text).catch(() => {});
-  },
-  showNotification: (body: string) => {
-    const api = getGooseDesktop();
-    if (api) {
-      void api.notify({ title: "Goose Note", body }).catch(() => {});
-      return;
-    }
-    try {
-      if (typeof Notification === "undefined") return;
-      if (Notification.permission === "granted") {
-        new Notification(body);
-        return;
-      }
-      if (Notification.permission !== "denied") {
-        void Notification.requestPermission().then((permission) => {
-          if (permission === "granted") new Notification(body);
-        });
-      }
-    } catch {
-      // noop
-    }
-  },
-  openUrl: async (url: string) => {
-    const api = getGooseDesktop();
-    if (api) {
-      try {
-        await api.openUrl(url);
-        return;
-      } catch {
-        // fall through
-      }
-    }
-    try {
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch {
-      // noop
-    }
-  },
-  openPath: async (targetPath: string) => {
-    const api = getGooseDesktop();
-    if (!api) return false;
-    try {
-      await api.openPath(targetPath);
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  setSublistFn: () => {},
-  setExpendHeight: () => false,
-  redirect: () => false,
-  registerWakeHotkey: async (shortcut: string) => {
-    const { registerDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    return registerDesktopGlobalHotkey("wake", shortcut);
-  },
-  unregisterWakeHotkey: async () => {
-    const { unregisterDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    await unregisterDesktopGlobalHotkey("wake");
-  },
-  registerSearchHotkey: async (shortcut: string) => {
-    const { registerDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    return registerDesktopGlobalHotkey("search", shortcut);
-  },
-  unregisterSearchHotkey: async () => {
-    const { unregisterDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    await unregisterDesktopGlobalHotkey("search");
-  },
-  registerQuicknoteHotkey: async (shortcut: string) => {
-    const { registerDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    return registerDesktopGlobalHotkey("quicknote", shortcut);
-  },
-  unregisterQuicknoteHotkey: async () => {
-    const { unregisterDesktopGlobalHotkey } = await import(
-      "@/lib/electron/globalHotkeys"
-    );
-    await unregisterDesktopGlobalHotkey("quicknote");
   },
 };

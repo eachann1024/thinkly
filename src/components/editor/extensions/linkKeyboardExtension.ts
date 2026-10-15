@@ -1,8 +1,6 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { EditorSettings } from "@/components/editor/platform/hostContext";
-import type { MutableRefObject } from "react";
 import { getEditorPlatform } from "@/components/editor/platform/context";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import {
@@ -86,9 +84,7 @@ function createLinkArmedPlugin() {
   });
 }
 
-export const createGooseLinkKeyboardExtension = (
-  settingsRef: MutableRefObject<EditorSettings>,
-) =>
+export const createGooseLinkKeyboardExtension = () =>
   createExtension({
     key: "goose-link-keyboard",
     prosemirrorPlugins: [createLinkArmedPlugin()],
@@ -124,7 +120,6 @@ export const createGooseLinkKeyboardExtension = (
             // 动态读取 React Ref 里的最新设置，避免闭包捕获陈旧状态
             void getEditorPlatform().shell.openUrl(
               target,
-              settingsRef.current.openLinksInHost,
             );
           }
           return true;

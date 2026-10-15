@@ -2,6 +2,7 @@ import type { BlockNoteEditor } from "@blocknote/core";
 
 export function createSlashBlockInsertion(
   editor: BlockNoteEditor<any, any, any>,
+  defaultCodeBlockWrap = false,
 ) {
   // 插入完成后：把光标移到新块、把视图滚动到新块、把焦点交回编辑器
   const focusAndScrollTo = (block: { id: string }) => {
@@ -33,6 +34,9 @@ export function createSlashBlockInsertion(
   };
 
   return (block: any): any => {
+    if (block.type === "codeBlock" && block.props?.wrap == null) {
+      block = { ...block, props: { ...block.props, wrap: defaultCodeBlockWrap } };
+    }
     // 必须在点击执行时实时读取当前块：BlockNote 在调用 onItemClick 之前已先跑过
     // closeMenu() → clearQuery()（删掉触发字符 / 或 、）。若沿用菜单构建时捕获的旧
     // 快照，content 仍带着 /，会误判 hasTrigger 并对陈旧 block 引用做二次清空，

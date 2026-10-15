@@ -20,6 +20,8 @@ interface NotebookIconSelectorProps {
   defaultIcon: string;
   onChange: (value: string) => void;
   container: HTMLElement | null;
+  label?: string;
+  compact?: boolean;
 }
 
 const categories: ReadonlyArray<{ id: NotebookIconFilter; label: string }> = [
@@ -32,6 +34,8 @@ export function NotebookIconSelector({
   defaultIcon,
   onChange,
   container,
+  label = "笔记本图标",
+  compact = false,
 }: NotebookIconSelectorProps) {
   const savedValue = typeof value === "string" ? value : "";
   const [open, setOpen] = useState(false);
@@ -114,20 +118,22 @@ export function NotebookIconSelector({
           variant="outline"
           contentStyle="preserve"
           className="notebook-icon-selector-trigger"
-          aria-label="选择笔记本图标"
+          aria-label={`选择${label}`}
           title={currentValue}
+          style={compact ? { width: "1.5em", height: "1.5em", minWidth: "1.5em", padding: 0, border: 0, borderRadius: 4, background: "transparent", color: "inherit" } : undefined}
         >
           <span
             aria-hidden="true"
             className={`notebook-icon-selector-preview ${CurrentIcon ? "" : textPreviewClass}`}
+            style={compact ? { width: "1em", height: "1em", fontSize: "1em" } : undefined}
           >
-            {CurrentIcon ? createElement(CurrentIcon) : currentValue}
+            {CurrentIcon ? createElement(CurrentIcon, compact ? { style: { width: "1em", height: "1em" } } : {}) : currentValue}
           </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
         className="notebook-icon-selector"
-        aria-label="选择笔记本图标"
+        aria-label={`选择${label}`}
         align="start"
         side="bottom"
         collisionPadding={12}
@@ -143,7 +149,7 @@ export function NotebookIconSelector({
             ref={searchRef}
             value={query}
             maxLength={100}
-            aria-label="搜索笔记本图标"
+            aria-label={`搜索${label}`}
             aria-controls={resultsId}
             placeholder="搜索图标"
             onChange={(event) => {
@@ -210,7 +216,7 @@ export function NotebookIconSelector({
           )}
         </div>
         <div className="notebook-icon-selector-actions">
-          <Button type="button" variant="ghost" contentStyle="preserve" onClick={handleRandom} aria-label="随机选择笔记本图标">
+          <Button type="button" variant="ghost" contentStyle="preserve" onClick={handleRandom} aria-label={`随机选择${label}`}>
             <Shuffle aria-hidden="true" />
             随机
           </Button>
@@ -220,7 +226,7 @@ export function NotebookIconSelector({
             contentStyle="preserve"
             onClick={() => selectIcon(defaultIcon)}
             disabled={currentValue === defaultIcon}
-            aria-label="恢复笔记本默认图标"
+            aria-label={`恢复默认${label}`}
           >
             <RotateCcw aria-hidden="true" />
             恢复默认

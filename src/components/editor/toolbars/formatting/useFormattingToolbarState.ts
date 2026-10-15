@@ -19,7 +19,6 @@ import {
   getFormattingToolbarCapabilities,
   selectionDisallowsFormattingToolbar,
   selectionIsInsideFirstTitleBlock,
-  selectionIsInsideHeadingBlock,
   shouldRenderFormattingToolbar,
   useSelectionMarkStates,
 } from "./helpers";
@@ -39,9 +38,9 @@ export function useFormattingToolbarState() {
   const { ai: aiSettings } = useEditorSettings();
   const { contentMode, page } = useEditorPageContext();
   const protectsFirstTitle = contentMode === "normalized";
-  // Electron 桌面端与主窗共用构建，COMPACT / LITE 恒为 false，必须看运行时草稿页。
+  // Electron 桌面端与主窗共用构建，COMPACT 恒为 false，必须看运行时草稿页。
   const isQuickNoteSurface =
-    __GOOSE_EDITOR_COMPACT__ || __GOOSE_LITE__ || isQuickNoteEditorPage(page);
+    __GOOSE_EDITOR_COMPACT__ || isQuickNoteEditorPage(page);
   const markStates = useSelectionMarkStates(editor);
 
   const selectionState = useEditorState({
@@ -80,10 +79,7 @@ export function useFormattingToolbarState() {
 
   const caps = useEditorState({
     editor,
-    selector: ({ editor }) =>
-      getFormattingToolbarCapabilities(editor, {
-        isInHeading: selectionIsInsideHeadingBlock(editor),
-      }),
+    selector: ({ editor }) => getFormattingToolbarCapabilities(editor),
   });
 
   const holdDuringPointerSelect = useFormattingToolbarHold();

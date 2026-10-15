@@ -7,7 +7,6 @@ import { useEffect, useCallback, useMemo } from "react";
 import { toast } from "@/components/ui/sonner";
 import { dialogs } from "@/lib/electron-platform/dialogs";
 import { useTabs } from "@/stores/useTabs";
-import { isElectronHost } from "@/lib/local-vault";
 
 export function usePageEmptyState() {
   const {
@@ -26,7 +25,7 @@ export function usePageEmptyState() {
 
   const activateOrCreatePage = useCallback(async () => {
     // Electron 仅本地文件夹模式：无仓库时禁止建页，也绝不自动创建内置笔记本
-    if (isElectronHost && activeNotebook?.source !== "local-folder") return null;
+    if (activeNotebook?.source !== "local-folder") return null;
     // 如果没有活跃笔记本，创建一个默认笔记本
     let notebookId = activeNotebookId;
     if (!notebookId) {
@@ -97,7 +96,7 @@ export function usePageEmptyState() {
     }> = [];
 
     // Electron 无仓库空态：只有「打开文件夹」，不展示新建页面
-    const showCreatePage = !isElectronHost || isLocalFolder;
+    const showCreatePage = isLocalFolder;
     if (showCreatePage) {
       list.push({
         key: "create-page",

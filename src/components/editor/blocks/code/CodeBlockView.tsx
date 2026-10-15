@@ -9,7 +9,7 @@ import type { CodeBlockViewProps } from "./codeBlockViewTypes";
 export function CodeBlockView(props: CodeBlockViewProps) {
   const { language, wrap, collapsed, contentRef, isEditable, edit, preview } =
     props;
-  const { rootRef, handleCodeKeyDownCapture, handlePaste } = edit;
+  const { rootRef } = edit;
   const {
     previewRef,
     isVisualBlock,
@@ -29,7 +29,6 @@ export function CodeBlockView(props: CodeBlockViewProps) {
       className="goose-code-block-node relative"
       data-collapsed={collapsed ? "true" : "false"}
       data-visual-preview={isVisualBlock ? "true" : undefined}
-      onKeyDownCapture={handleCodeKeyDownCapture}
     >
       <CodeBlockHeader {...props} />
 
@@ -51,7 +50,6 @@ export function CodeBlockView(props: CodeBlockViewProps) {
               !shouldShowSource && "goose-code-pre-hidden",
             )}
             aria-hidden={!shouldShowSource}
-            onPaste={handlePaste}
           >
             <code
               ref={contentRef}

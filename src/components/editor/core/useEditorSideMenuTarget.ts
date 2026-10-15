@@ -57,9 +57,10 @@ export function useEditorSideMenuTarget(
     const update = () => {
       const rect = content.getBoundingClientRect();
       const column = element.closest('[data-node-type="column"]');
+      const section = element.parentElement?.closest<HTMLElement>('.bn-block:has(> .bn-block-content[data-content-type="columnSection"])');
       const left =
         (
-          column?.firstElementChild ??
+          section ?? column?.firstElementChild ??
           editor.prosemirrorView.dom.firstElementChild
         )?.getBoundingClientRect().left ?? rect.left;
       setReferencePos(new DOMRect(left, rect.top, rect.width, rect.height));
@@ -77,7 +78,8 @@ export function useEditorSideMenuTarget(
   }, [editor, blockId, foldTick]);
 
   const firstBlockId = editor.document[0]?.id as string | undefined;
-  const showHeadingToggle = isFoldableHeadingBlock(block, firstBlockId);
+  const showHeadingToggle = isFoldableHeadingBlock(block, firstBlockId) &&
+    !(block?.props as { isToggleable?: boolean } | undefined)?.isToggleable;
   const liveHeading = block ? (editor.getBlock(block.id) ?? block) : undefined;
   const headingExpanded = liveHeading
     ? !readHeadingCollapsed(liveHeading)

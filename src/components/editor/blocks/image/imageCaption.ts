@@ -4,9 +4,8 @@ const GENERATED_HASH_IMAGE_NAME_RE =
   /^(?:file|image|clipboard|pasted-image)[-_](?:[a-f0-9]{16,64}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\.(?:png|jpe?g|gif|webp|svg|avif|bmp)$/i;
 
 /**
- * 浏览器复制位图时通常写入 image.png，导入工具也会生成 file-<hash>.png。
- * 这不是用户填写的说明。url 仅保留兼容旧调用，判断只看文件名本身：
- * 上传后的 att: 图在 Markdown 往返里同样会带上这个默认名。
+ * 识别自动文件名的形状；仅凭名字不能断定它是自动生成的 caption。
+ * 清理调用方还必须验证 captionSource，未知来源与用户说明均保留。
  */
 export function isGeneratedDataImageName(
   value: unknown,
@@ -18,19 +17,18 @@ export function isGeneratedDataImageName(
 }
 
 /**
- * BlockNote 会把 figure 的 figcaption 直接写回 props.caption。剪贴板默认
- * 文件名不能当作用户说明；文件名仍存在 name，供 img alt 使用。
+ * 只清除已有明确自动来源标记的占位说明；普通 figure/Markdown 导入保留原文。
  */
 export function normalizeParsedImageProps(
   parsed: Record<string, unknown>,
 ): Record<string, unknown> {
-  if (!isGeneratedDataImageName(parsed.caption, parsed.url)) return parsed;
+  if (parsed.captionSource !== "generated" || !isGeneratedDataImageName(parsed.caption, parsed.url)) return parsed;
   const caption = String(parsed.caption).trim();
   const name = typeof parsed.name === "string" ? parsed.name.trim() : "";
   return { ...parsed, name: name || caption, caption: "" };
 }
 
-/** 渲染/导出时去掉可见的剪贴板默认 caption，不改动原始 block 引用（无 caption 时）。 */
+/** 渲染/导出时去掉明确自动来源的占位 caption，不改动用户说明。 */
 export function imageBlockWithoutGeneratedCaption<T extends { props?: unknown }>(
   block: T,
 ): T {

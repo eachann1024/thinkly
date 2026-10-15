@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import {
@@ -18,10 +18,9 @@ import {
   shouldOpenInlineAiOnEmptyParagraph,
 } from "@/components/editor/ai/emptyParagraphAiShortcut";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
-import { getPageMentionMenuItems } from "@/components/editor/inline/pageMentionMenuItems";
+import { usePageMentionItems } from "@/components/editor/inline/usePageMentionItems";
 import {
   useEditorSettings,
-  useEditorPageContext,
 } from "@/components/editor/platform/hostContext";
 import type { EditorComposerProps } from "./editorComposerTypes";
 import { useEditorOverlayEvents } from "./useEditorOverlayEvents";
@@ -44,15 +43,7 @@ export function useEditorComposerInteractions({
   const [findOpenNonce, setFindOpenNonce] = useState(0);
   const [findOpenReplace, setFindOpenReplace] = useState(false);
   const { ai: aiSettings } = useEditorSettings();
-  const { searchPages } = useEditorPageContext();
-  const getMentionItems = useCallback(
-    async (query: string) =>
-      getPageMentionMenuItems(
-        editor,
-        searchPages(query).filter((item) => !item.isFolder),
-      ),
-    [editor, searchPages],
-  );
+  const getMentionItems = usePageMentionItems(editor);
 
   const handleEditorKeyDownCapture = (
     event: React.KeyboardEvent<HTMLDivElement>,
@@ -175,7 +166,7 @@ export function useEditorComposerInteractions({
   }, [linkPopoverOpen]);
 
   useEffect(() => {
-    if (!isActiveEditor || __GOOSE_EDITOR_COMPACT__ || __GOOSE_LITE__) return;
+    if (!isActiveEditor || __GOOSE_EDITOR_COMPACT__) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (

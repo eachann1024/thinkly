@@ -25,11 +25,13 @@ export function parseCodeFenceInfo(infoLine: string): {
   language: string;
   summary: string;
   collapsed: boolean;
+  wrap: boolean;
 } {
   const tokens = infoLine.trim().split(/\s+/).filter(Boolean);
   let language = "";
   let summary = "";
   let collapsed = false;
+  let wrap = false;
 
   for (const token of tokens) {
     if (token.startsWith(CODE_BLOCK_META_PREFIX)) {
@@ -48,6 +50,7 @@ export function parseCodeFenceInfo(infoLine: string): {
           if ((parsed as Record<string, unknown>).collapsed === true) {
             collapsed = true;
           }
+          wrap = (parsed as Record<string, unknown>).wrap === true;
         }
       } catch {}
       continue;
@@ -62,6 +65,7 @@ export function parseCodeFenceInfo(infoLine: string): {
     language,
     summary,
     collapsed,
+    wrap,
   };
 }
 
@@ -153,6 +157,7 @@ export function parseTableBlock(
         type: "table",
         content: {
           type: "tableContent",
+          headerRows: 1,
           rows: [
             { cells: headerCells.map(toCellContent) },
             ...bodyRows.map((row) => ({ cells: row.map(toCellContent) })),

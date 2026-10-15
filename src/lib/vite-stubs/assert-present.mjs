@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const required = [
   "src/lib/vite-stubs/node-fs-stub.ts",
-  "src/lib/vite-stubs/lite-empty.ts",
   "src/lib/vite-stubs/pdf-font-empty.ts",
   "src/lib/vite-stubs/assert-present.mjs",
   "scripts/compile-electron.mjs",

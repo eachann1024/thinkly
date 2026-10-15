@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
 import {
-  isElectronHost,
   type SettingsLocalFolderProps,
   SETTINGS_OPTION_ROW_CLASS,
   SYSTEM_FILE_MANAGER_IDS,
@@ -41,7 +40,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
 
       <div className="settings-card-columns">
         <div className="space-y-5">
-          {isElectronHost && <LegacyInternalPagesExportCard />}
+          <LegacyInternalPagesExportCard />
 
           <SettingsSectionCard title="打开方式">
             <div className="space-y-3">

@@ -13,9 +13,7 @@ import { LOCAL_FOLDER_INITIAL_STATE } from "@/stores/settings/slices/localFolder
 import { SEARCH_PROVIDERS_INITIAL_STATE } from "@/stores/settings/slices/searchProvidersSlice";
 import { SHORTCUTS_INITIAL_STATE } from "@/stores/settings/slices/shortcutsSlice";
 import { WEBDAV_INITIAL_STATE } from "@/stores/settings/slices/webdavSlice";
-import { HostAdapter } from "@/lib/host/adapter";
 import { toast } from "@/components/ui/sonner";
-import { GOOSE_APPS } from "./shared";
 import type { useSettingsBackupRestore } from "./useSettingsBackupRestore";
 
 export function useSettingsResetActions(
@@ -29,8 +27,6 @@ export function useSettingsResetActions(
     setResetDialogOpen,
     resetting,
     setResetting,
-    dismissAppsBanner,
-    resetAppsBanner,
     canReset,
     clearCurrentContent,
     createDefaultNotebook,
@@ -50,7 +46,6 @@ export function useSettingsResetActions(
     });
     useSettings.getState().setTheme("system");
     useSettings.getState().setAccentColor(APPEARANCE_INITIAL_STATE.accentColor);
-    resetAppsBanner();
   };
 
   const resetAuxiliaryAppState = () => {
@@ -116,20 +111,11 @@ export function useSettingsResetActions(
     }
   };
 
-  const handleCloseAppsBanner = () => {
-    dismissAppsBanner();
-  };
-
-  const handleOpenApp = (app: (typeof GOOSE_APPS)[number]) => {
-    HostAdapter.openUrl(app.url, false);
-  };
   return {
     ...input,
     resetSettingsToDefaults,
     resetAuxiliaryAppState,
     handleReset,
     handleManualReset,
-    handleCloseAppsBanner,
-    handleOpenApp,
   };
 }

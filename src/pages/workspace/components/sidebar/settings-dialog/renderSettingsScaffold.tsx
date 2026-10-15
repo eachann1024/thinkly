@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { SettingsAppearance } from "../SettingsAppearance";
 import { SettingsGeneral } from "../SettingsGeneral";
 import { SettingsShortcuts } from "../settings/SettingsShortcuts";
@@ -9,10 +8,8 @@ import { SettingsAI } from "../SettingsAI";
 import { SettingsScaffold } from "../settings/SettingsScaffold";
 import { useSettings } from "@/stores/useSettings";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
-import * as GooseIcons from "@/components/ui/icons";
-import { ExternalLink } from "@/components/ui/icons";
 import type { useSettingsResetActions } from "./useSettingsResetActions";
-import { SETTINGS_TABS, GOOSE_APPS, isElectronHost } from "./shared";
+import { SETTINGS_TABS } from "./shared";
 import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
 
 export function renderSettingsScaffold(
@@ -70,15 +67,12 @@ export function renderSettingsScaffold(
     exporting,
     importing,
     setResetDialogOpen,
-    appsBannerVisible,
     notebookList,
     toggleNotebook,
     selectAll,
     handleExport,
     handleImport,
     handleReset,
-    handleCloseAppsBanner,
-    handleOpenApp,
   } = context;
   return (
     <SettingsScaffold
@@ -90,43 +84,7 @@ export function renderSettingsScaffold(
       mainContainer={mainContainer}
       visible={open}
       feedbackBanner={null}
-      appsBanner={
-        appsBannerVisible && !isElectronHost ? (
-          <div className="relative rounded-[var(--goose-control-radius)] bg-[hsl(var(--goose-selected-bg)/0.62)] p-3">
-            <Button contentStyle="preserve" variant="ghost" size="sm"
-              type="button"
-              onClick={handleCloseAppsBanner}
-              className="h-auto whitespace-normal border-0 px-0 py-0 absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-              aria-label="关闭 Goose 鹅系列工具"
-            >
-              <GooseIcons.X className="h-3 w-3" />
-            </Button>
-            <p className="mb-2 pr-4 text-xs font-medium text-muted-foreground">
-              Goose 鹅系列工具
-            </p>
-            <div className="space-y-1">
-              {GOOSE_APPS.map((app) => (
-                <Button
-                  key={app.id}
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleOpenApp(app)}
-                  className="h-auto w-full justify-start gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                >
-                  <img
-                    src={app.icon}
-                    alt=""
-                    className="h-4 w-4 shrink-0 rounded-[4px] object-cover"
-                  />
-                  <span className="flex-1 truncate">{app.name}</span>
-                  <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null
-      }
+
     >
       <WorkspaceViewActivity visible={open && activeTab === "general"}>
         <div className="settings-groups">

@@ -1,4 +1,6 @@
-import { parseInlineMarkdown } from "./inline";
+import { parseAudioBlock } from "./audio";
+import { parseColumnsBlock } from "./columnsBlock";
+import { parseDetailsBlock } from "./detailsBlock";
 
 function decodeHtmlAttribute(value: string): string {
   return value
@@ -10,6 +12,8 @@ function decodeHtmlAttribute(value: string): string {
 
 
 export function parseHtmlBlock(lines: string[], startIndex: number, parseMarkdown: (markdown: string) => any[]) {
+  const structured = parseColumnsBlock(lines, startIndex, parseMarkdown) ?? parseAudioBlock(lines, startIndex);
+  if (structured) return structured;
   const content: any[] = [];
   let i = startIndex;
   const line = lines[i];
@@ -28,31 +32,8 @@ export function parseHtmlBlock(lines: string[], startIndex: number, parseMarkdow
       return { block: content[0], nextIndex: i };
     }
 
-    // ── details 折叠块 → BlockNote toggleListItem（editor schema 没有 details 块，
-    // toggleListItem 是「可折叠 + summary 行 + 子块」的对称表示）
-    if (trimmedLine.startsWith("<details>")) {
-      const detailsLines: string[] = [];
-      let summaryText = "详情";
-      i++;
-      while (i < lines.length && !lines[i].trim().includes("</details>")) {
-        const l = lines[i].trim();
-        if (l.startsWith("<summary>") && l.endsWith("</summary>")) {
-          summaryText = l.replace("<summary>", "").replace("</summary>", "");
-        } else {
-          detailsLines.push(lines[i]);
-        }
-        i++;
-      }
-
-      const childBlocks = parseMarkdown(detailsLines.join("\n"));
-      content.push({
-        type: "toggleListItem",
-        content: parseInlineMarkdown(summaryText),
-        ...(childBlocks.length ? { children: childBlocks } : {}),
-      });
-      i++;
-      return { block: content[0], nextIndex: i };
-    }
+    const details = parseDetailsBlock(lines, startIndex, parseMarkdown);
+    if (details) return details;
 
   return null;
 }

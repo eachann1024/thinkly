@@ -1,186 +1,77 @@
-import { createExtension } from "@blocknote/core";
-import { AllSelection, NodeSelection, TextSelection } from "prosemirror-state";
+import { createExtension, type BlockNoteEditor } from "@blocknote/core";
+import { AllSelection, NodeSelection, TextSelection, type EditorState } from "prosemirror-state";
 import { CellSelection } from "prosemirror-tables";
+import { getProtectedTitle } from "../utils/documentTitlePolicy";
+import { GooseBlockSelection, currentBlockNode, isBlockNodeSelection } from "./blockSelectionModel";
 
-const findAncestorDepthByTableRole = ($pos: any, roles: string[]) => {
-  for (let depth = $pos.depth; depth >= 0; depth -= 1) {
-    const tableRole = $pos.node(depth).type.spec?.tableRole;
-    if (tableRole && roles.includes(tableRole)) {
-      return depth;
+type Editor = BlockNoteEditor<any, any, any>;
+
+function selectBodyOrAll(editor: Editor, state: EditorState, startedInTitle: boolean): boolean {
+  const title = getProtectedTitle(state);
+  const group = state.doc.firstChild;
+  const afterTitle = title ? title.pos + title.node.nodeSize : 0;
+  const groupEnd = state.doc.content.size - 1;
+  if (title && group && !startedInTitle && afterTitle < groupEnd) {
+    const { selection } = state;
+    if (!(selection.from <= afterTitle && selection.to >= groupEnd)) {
+      const lastPos = groupEnd - group.lastChild!.nodeSize;
+      editor.prosemirrorView.dispatch(state.tr.setSelection(
+        GooseBlockSelection.create(state.doc, afterTitle, lastPos),
+      ));
+      return true;
     }
   }
+  editor.prosemirrorView.dispatch(state.tr.setSelection(new AllSelection(state.doc)));
+  return true;
+}
+
+function tableCellDepth(state: EditorState): number {
+  const $from = state.selection.$from;
+  for (let depth = $from.depth; depth > 0; depth -= 1) {
+    if (["cell", "header_cell"].includes($from.node(depth).type.spec.tableRole ?? "")) return depth;
+  }
   return -1;
-};
+}
 
 export const gooseSelectAllExtension = createExtension({
   key: "goose-select-all",
   keyboardShortcuts: {
     "Mod-a": ({ editor }) => {
+      if (editor.prosemirrorView.composing) return false;
       const state = editor.prosemirrorState;
-      const selection = state.selection;
-
+      const { selection } = state;
+      if (selection instanceof AllSelection) return true;
+      const block = currentBlockNode(state);
+      if (!block) return false;
+      const title = getProtectedTitle(state);
+      if (isBlockNodeSelection(state)) {
+        return selectBodyOrAll(editor, state, block.pos === title?.pos);
+      }
       const $from = selection.$from;
-      let blockContainerDepth = -1;
-      for (let d = $from.depth; d >= 0; d--) {
-        if ($from.node(d).type.name === "blockContainer") {
-          blockContainerDepth = d;
-          break;
-        }
-      }
-
-      if (blockContainerDepth < 0) {
-        return false;
-      }
-
-      const cellDepth = findAncestorDepthByTableRole($from, ["cell", "header_cell"]);
+      const cellDepth = tableCellDepth(state);
       if (cellDepth >= 0) {
         const cellPos = $from.before(cellDepth);
-        const blockPos = $from.before(blockContainerDepth);
-        const cellStart = $from.start(cellDepth);
-        const cellEnd = $from.end(cellDepth);
-        const isCellTextFullySelected =
-          selection instanceof TextSelection &&
-          selection.from <= cellStart &&
-          selection.to >= cellEnd;
-        const isSingleCellSelection =
-          selection instanceof CellSelection &&
-          selection.$anchorCell.pos === cellPos &&
-          selection.$headCell.pos === cellPos;
-        const isTableBlockSelected =
-          selection instanceof NodeSelection && selection.from === blockPos;
-
-        if (isTableBlockSelected || selection instanceof AllSelection) {
-          const allSel = new AllSelection(state.doc);
-          editor.prosemirrorView.dispatch(state.tr.setSelection(allSel));
-          return true;
+        const cellFullySelected = selection instanceof TextSelection &&
+          selection.from <= $from.start(cellDepth) && selection.to >= $from.end(cellDepth);
+        if (cellFullySelected || selection instanceof CellSelection) {
+          editor.prosemirrorView.dispatch(state.tr.setSelection(NodeSelection.create(state.doc, block.pos)));
+        } else {
+          editor.prosemirrorView.dispatch(state.tr.setSelection(CellSelection.create(state.doc, cellPos)));
         }
-
-        if (isCellTextFullySelected || selection instanceof CellSelection) {
-          const nodeSel = NodeSelection.create(state.doc, blockPos);
-          editor.prosemirrorView.dispatch(state.tr.setSelection(nodeSel));
-          return true;
-        }
-
-        if (!isSingleCellSelection) {
-          const cellSel = CellSelection.create(state.doc, cellPos);
-          editor.prosemirrorView.dispatch(state.tr.setSelection(cellSel));
-          return true;
-        }
-      }
-
-      const blockContentDepth = blockContainerDepth + 1;
-      const blockContentNode =
-        blockContentDepth <= $from.depth ? $from.node(blockContentDepth) : null;
-      const isCodeBlock =
-        blockContentNode?.type?.name === "codeBlock" ||
-        (blockContentNode?.attrs as { type?: string } | undefined)?.type ===
-          "codeBlock";
-
-      if (isCodeBlock) {
-        const codeStart = $from.start(blockContentDepth);
-        const codeEnd = $from.end(blockContentDepth);
-        const isCodeFullySelected =
-          selection instanceof TextSelection &&
-          selection.from <= codeStart &&
-          selection.to >= codeEnd;
-
-        if (isCodeFullySelected || selection instanceof AllSelection) {
-          const allSel = new AllSelection(state.doc);
-          editor.prosemirrorView.dispatch(state.tr.setSelection(allSel));
-          return true;
-        }
-
-        const tr = state.tr.setSelection(
-          TextSelection.create(state.doc, codeStart, codeEnd),
-        );
-        editor.prosemirrorView.dispatch(tr);
         return true;
       }
-
-      // 选区范围必须限定在「块的内容节点」(heading/paragraph 的 inline 内容)，
-      // 不能用 blockContainerDepth——后者的 start/end 是 blockContainer 的边界位置，
-      // 会把块结构边界(含与下一块的边界)圈进选区。一旦删除，相邻块会被合并，
-      // 下一块内容继承本块类型(标题块场景下：下一行正文被升成 H1，严重 bug)。
-      // 用 blockContentDepth 的 start/end 精确取 inline 文字范围，删除只清文字、保留块本身。
-      const hasInlineContent =
-        blockContentNode != null && blockContentDepth <= $from.depth;
-      const blockStart = hasInlineContent
-        ? $from.start(blockContentDepth)
-        : $from.start(blockContainerDepth);
-      const blockEnd = hasInlineContent
-        ? $from.end(blockContentDepth)
-        : $from.end(blockContainerDepth);
-
-      let isBlockFullySelected = false;
-
-      if (selection instanceof AllSelection) {
-        isBlockFullySelected = true;
-      } else if (selection instanceof NodeSelection) {
-        const blockPos = $from.before(blockContainerDepth);
-        isBlockFullySelected = selection.from === blockPos;
-      } else if (selection instanceof TextSelection) {
-        isBlockFullySelected =
-          selection.from <= blockStart && selection.to >= blockEnd;
-      }
-
-      const blockGroup = state.doc.firstChild;
-      const titleBlock = blockGroup?.firstChild;
-      const titleContent = titleBlock?.firstChild;
-      const hasTitleHeading =
-        blockGroup?.type.name === "blockGroup" &&
-        !!titleBlock &&
-        titleContent?.type.name === "heading" &&
-        Number((titleContent as any).attrs?.level) === 1;
-
-      const startedInTitle =
-        hasTitleHeading && $from.before(blockContainerDepth) === 1;
-
-      let bodyRange: { from: number; to: number } | null = null;
-      if (hasTitleHeading && titleBlock && blockGroup) {
-        const afterTitle = 1 + titleBlock.nodeSize;
-        const blockGroupEnd = state.doc.content.size - 1;
-        if (afterTitle < blockGroupEnd) {
-          bodyRange = { from: afterTitle, to: blockGroupEnd };
-        }
-      }
-
-      const isBodyRangeSelected =
-        !!bodyRange &&
-        selection instanceof TextSelection &&
-        selection.from <= bodyRange.from + 1 &&
-        selection.to >= bodyRange.to - 1;
-
-      if (isBlockFullySelected) {
-        if (bodyRange && !startedInTitle && !isBodyRangeSelected) {
-          const bodySel = TextSelection.create(
-            state.doc,
-            bodyRange.from,
-            bodyRange.to,
-          );
-          editor.prosemirrorView.dispatch(state.tr.setSelection(bodySel));
-          return true;
-        }
-        const allSel = new AllSelection(state.doc);
-        editor.prosemirrorView.dispatch(state.tr.setSelection(allSel));
+      const content = block.node.firstChild;
+      if (!content?.isTextblock) {
+        editor.prosemirrorView.dispatch(state.tr.setSelection(GooseBlockSelection.create(state.doc, block.pos)));
         return true;
       }
-
-      if (isBodyRangeSelected) {
-        const allSel = new AllSelection(state.doc);
-        editor.prosemirrorView.dispatch(state.tr.setSelection(allSel));
-        return true;
-      }
-
-      const tr = state.tr;
-      if (blockStart === blockEnd) {
-        const blockPos = $from.before(blockContainerDepth);
-        const nodeSel = NodeSelection.create(state.doc, blockPos);
-        tr.setSelection(nodeSel);
-      } else {
-        const textSel = TextSelection.create(state.doc, blockStart, blockEnd);
-        tr.setSelection(textSel);
-      }
-      editor.prosemirrorView.dispatch(tr);
+      const start = block.pos + 2;
+      const end = start + content.content.size;
+      const fullySelected = selection instanceof TextSelection && selection.from <= start && selection.to >= end;
+      if (fullySelected) return selectBodyOrAll(editor, state, block.pos === title?.pos);
+      editor.prosemirrorView.dispatch(state.tr.setSelection(
+        start === end ? GooseBlockSelection.create(state.doc, block.pos) : TextSelection.create(state.doc, start, end),
+      ));
       return true;
     },
   },

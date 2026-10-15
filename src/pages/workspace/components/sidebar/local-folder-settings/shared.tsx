@@ -1,5 +1,4 @@
 export {
-  isElectronHost,
   type SettingsLocalFolderProps,
   type OpenAppFieldProps,
   SYSTEM_VALUE,

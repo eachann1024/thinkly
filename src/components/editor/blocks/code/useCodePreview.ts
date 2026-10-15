@@ -11,7 +11,13 @@ export function useCodePreview(
   theme: string | undefined,
 ) {
   const previewRef = useRef<HTMLDivElement>(null);
-  const [previewMode, setPreviewMode] = useState<"code" | "preview">("code");
+  const [previewMode, setPreviewMode] = useState<"code" | "preview">(() =>
+    !__GOOSE_EDITOR_COMPACT__ &&
+    (language === "math" || language === "mermaid") &&
+    getCodeContent().trim()
+      ? "preview"
+      : "code",
+  );
   const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
     null,
   );
@@ -73,19 +79,11 @@ export function useCodePreview(
   const visualTitle = language === "math" ? "Math" : "Mermaid";
 
   useEffect(() => {
-    // yaml-frontmatter 是普通可编辑代码块，不支持预览，永远是源码态。
-    // 仅 math/mermaid 这类以渲染图为主的块自动切到预览。
-    if (!isVisualBlock) {
+    // 首次输入形成可预览内容时保留源码焦点；预览切换由用户决定。
+    if (!isVisualBlock || !canPreview) {
       setPreviewMode("code");
       setPreviewContent(null);
-      return;
     }
-    if (!canPreview) {
-      setPreviewMode("code");
-      setPreviewContent(null);
-      return;
-    }
-    setPreviewMode((current) => (current === "code" ? "preview" : current));
   }, [isVisualBlock, canPreview]);
 
   return {

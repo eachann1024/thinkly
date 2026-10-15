@@ -1,7 +1,6 @@
 /** Shared immutable search snapshots, maintained outside React render. */
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { clearSearchBodyCache, pruneSearchBodyCache } from "./searchBodyCache";
 import { cancelIndexSync, resetIndex } from "./pageSearchIndex";
 import { createSearchTaskBudget, sortSearchCatalog, yieldSearchTask } from "./searchTaskScheduling";
@@ -152,9 +151,7 @@ export async function filterCatalogByScope(
   const cachedScopes = scopeCache.get(sortedByTitle);
   const cached = cachedScopes?.get(scopeKey);
   if (cached) return cached;
-  const currentNotebookId = activeNotebookId ||
-    (typeof __HOST_TARGET__ !== "undefined" && __HOST_TARGET__ === "electron"
-      ? "__no-notebook__" : DEFAULT_NOTEBOOK);
+  const currentNotebookId = activeNotebookId || "__no-notebook__";
   const result: Page[] = [];
   const pause = createSearchTaskBudget(signal);
   for (const page of sortedByTitle) {

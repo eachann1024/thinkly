@@ -12,6 +12,8 @@ import {
   warmupSlashMenuIcons,
 } from "./blocknoteSlashItems";
 import type { EditorRuntime } from "./useEditorSession";
+import { getCommandSlashItems } from "./blocknoteCommandSlashItems";
+import { getPageLinkSlashItems } from "../inline/pageLinkSlashItems";
 
 export function useEditorPresentation(
   runtime: EditorRuntime,
@@ -22,12 +24,15 @@ export function useEditorPresentation(
     runtime;
   const getSlashItems = useCallback(
     async (query: string) => {
+      const commands = getCommandSlashItems(editor, query, settingsRef.current.defaultCodeBlockWrap);
+      if (commands) return commands;
       let items = getBlockNoteSlashMenuItems(
         editor,
         aiSettingsRef.current.enabled,
         settingsRef.current.features,
-        { compact: isQuickNoteEditorPage(page) },
+        { compact: isQuickNoteEditorPage(page), defaultCodeBlockWrap: settingsRef.current.defaultCodeBlockWrap },
       );
+      if (!isQuickNoteEditorPage(page)) items.push(...getPageLinkSlashItems(editor));
       if (hiddenSlashItemTitles && hiddenSlashItemTitles.length > 0) {
         const hidden = new Set(hiddenSlashItemTitles);
         const isDivider = (it: (typeof items)[number]) =>

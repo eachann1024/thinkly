@@ -1,7 +1,13 @@
 import { resolveCalloutIcon } from "@/components/editor/blocks/callout/calloutIcons";
 import { wrapLocalBlockPropsMarkdown } from "../localBlockPropsWrappers";
-import { blockNoteInlineToText, escapePipeInCell, escapeHtmlAttribute } from "./inline";
-import { serializeCodeFenceInfo } from "./codeFence";
+import { blockNoteInlineToText } from "./inline";
+import { serializeAudio, serializeVideo } from "./audio";
+import { serializeColumns } from "./columns";
+import { serializeTable } from "./table";
+import { serializeImage } from "./image";
+import { serializeFile } from "./file";
+import { serializeFencedCode } from "./codeFence";
+import { serializeToggleDetails } from "./toggleDetails";
 import { CHILDREN_CONSUMED_TYPES } from "./lists";
 import { legacyItemInline, serializeLegacyListItem } from "./legacyLists";
 
@@ -14,7 +20,9 @@ export function blockNoteBlockToMarkdown(
 
   switch (block.type) {
     case "heading":
-      result = `${"#".repeat(block.props?.level || block.attrs?.level || 1)} ${text}`;
+      result = block.props?.isToggleable
+        ? serializeToggleDetails(block, text, serializeBlocks)
+        : `${"#".repeat(block.props?.level || block.attrs?.level || 1)} ${text}`;
       break;
 
     case "quote": {
@@ -36,31 +44,14 @@ export function blockNoteBlockToMarkdown(
       } else if (lang === "math" || lang === "latex") {
         result = `$$\n${text}\n$$`;
       } else {
-        result = `\`\`\`${serializeCodeFenceInfo(lang, codeProps)}\n${text}\n\`\`\``;
+        result = serializeFencedCode(text, lang, codeProps);
       }
       break;
     }
 
-    case "image": {
-      // BlockNote image：props { url, caption, previewWidth, textAlignment }
-      // previewWidth → {width=N}，textAlignment(≠left) → {align=X}
-      const p = block.props ?? block.attrs ?? {};
-      const url = p.url || p.src || "";
-      // name 是 BlockNote 图片的替代文本。无 caption 时也写入 Markdown alt，
-      // 才能让复制后的 data 图片在下一次解析时保留该字段。
-      const caption = p.caption || p.alt || p.name || "";
-      const meta: string[] = [];
-      const width = p.previewWidth ?? p.width;
-      if (width != null && Number.isFinite(Number(width))) {
-        meta.push(`width=${width}`);
-      }
-      const align = p.textAlignment;
-      if (typeof align === "string" && align && align !== "left") {
-        meta.push(`align=${align}`);
-      }
-      result = `![${caption}](${url})${meta.length ? `{${meta.join(" ")}}` : ""}`;
+    case "image":
+      result = serializeImage(block);
       break;
-    }
 
     case "imageResize": {
       // 极旧存量格式：attrs { src, alt, width, height, containerStyle }
@@ -84,54 +75,19 @@ export function blockNoteBlockToMarkdown(
       break;
     }
 
-    case "table": {
-      // BlockNote 格式：content = { type:"tableContent", rows:[{cells:[…]}] }
-      // 极旧 parse 格式：content = [tableRow, …]
-      let tableRows: any[][];
-      const rawContent = block.content;
-      if (
-        rawContent &&
-        typeof rawContent === "object" &&
-        !Array.isArray(rawContent) &&
-        Array.isArray(rawContent.rows)
-      ) {
-        tableRows = rawContent.rows.map((row: any) =>
-          Array.isArray(row?.cells) ? row.cells : [],
-        );
-      } else if (Array.isArray(rawContent)) {
-        tableRows = rawContent.map((row: any) =>
-          Array.isArray(row?.content) ? row.content : [],
-        );
-      } else {
-        return "";
-      }
-      if (!tableRows.length) return "";
-      const colCount = Math.max(...tableRows.map((r) => r.length), 1);
-      const padRow = (cells: any[]) => {
-        const out = cells.map((cell) =>
-          escapePipeInCell(blockNoteInlineToText(cell)),
-        );
-        while (out.length < colCount) out.push("");
-        return out;
-      };
-      const header = padRow(tableRows[0]);
-      const separator = new Array(colCount).fill("---");
-      const body = tableRows.slice(1).map(padRow);
-      result = [
-        `| ${header.join(" | ")} |`,
-        `| ${separator.join(" | ")} |`,
-        ...body.map((row: string[]) => `| ${row.join(" | ")} |`),
-      ].join("\n");
+    case "table":
+      result = serializeTable(block);
       break;
-    }
 
     case "callout": {
       const icon = block.props?.icon ?? block.attrs?.emoji;
+      const iconMarker = typeof icon === "string" ? `<!-- goose-note:callout-icon=${encodeURIComponent(icon)} -->` : "";
+      const emoji = resolveCalloutIcon(icon);
       result = text
         .split("\n")
         .map((line, index) => (
           index === 0
-            ? `> [!INFO] ${resolveCalloutIcon(icon)} ${line}`
+            ? `> [!INFO] ${/^[A-Z][A-Za-z0-9]*$/.test(emoji) ? "💡" : emoji} ${iconMarker}${line}`
             : `> ${line}`
         ))
         .join("\n");
@@ -143,34 +99,26 @@ export function blockNoteBlockToMarkdown(
       result = "---";
       break;
 
-    case "file": {
-      const p = block.props ?? block.attrs ?? {};
-      result = `[📎 ${p.name || "文件"}](${p.url || ""})`;
+    case "file":
+      result = serializeFile(block);
       break;
-    }
 
-    case "video": {
-      const p = block.props ?? block.attrs ?? {};
-      const src = p.url || p.src || "";
-      result = `<video src="${escapeHtmlAttribute(src)}" controls preload="metadata"></video>`;
+    case "video":
+      result = serializeVideo(block);
       break;
-    }
 
-    case "audio": {
-      const p = block.props ?? block.attrs ?? {};
-      result = `[📎 ${p.name || "音频"}](${p.url || ""})`;
+    case "audio":
+      result = serializeAudio(block);
       break;
-    }
+
+    case "columnLayout":
+      return serializeColumns(block, serializeBlocks, indent);
+
+    case "columnSection":
+      return serializeBlocks(block.children ?? [], indent);
 
     case "toggleListItem": {
-      // BlockNote 折叠块 ↔ <details><summary>…</summary>…</details>
-      const children: any[] = Array.isArray(block.children)
-        ? block.children
-        : [];
-      const innerMd = children.length ? serializeBlocks(children, "") : "";
-      result = innerMd
-        ? `<details>\n<summary>${text}</summary>\n\n${innerMd}\n\n</details>`
-        : `<details>\n<summary>${text}</summary>\n\n</details>`;
+      result = serializeToggleDetails(block, text, serializeBlocks);
       break;
     }
 
@@ -257,6 +205,7 @@ export function blockNoteBlockToMarkdown(
   // 用空行分隔保证 md → blocks → md 二轮收敛（子块重读后成为兄弟块，输出不再变化）
   if (
     !CHILDREN_CONSUMED_TYPES.has(block.type) &&
+    !(block.type === "heading" && block.props?.isToggleable) &&
     Array.isArray(block.children) &&
     block.children.length > 0
   ) {

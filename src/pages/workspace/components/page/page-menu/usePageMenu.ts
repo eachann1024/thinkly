@@ -78,7 +78,7 @@ export function usePageMenu() {
       }
 
       closeNotebookAiIfFullscreen();
-      if (__HOST_TARGET__ === "electron" && !activeNotebookId) {
+      if (!activeNotebookId) {
         toast.error("请先关联本地文件夹", {
           description: "导入前请先在左侧栏打开或新建一个本地文件夹作为存储位置。",
         });

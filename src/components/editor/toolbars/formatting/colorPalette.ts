@@ -32,9 +32,7 @@ export const HIGHLIGHT_COLORS = [
  * 文字预览在笔记本和速记中共用全局色表；背景预览保留各入口现有色带。
  */
 const previewColor = (token: string, fallback: string) =>
-  typeof __GOOSE_LITE__ !== "undefined" && __GOOSE_LITE__
-    ? fallback
-    : `var(${token}, ${fallback})`;
+  `var(${token}, ${fallback})`;
 
 export const COLOR_PREVIEW: Record<string, string> = Object.fromEntries(
   Object.entries(documentTextColors("light")).map(([name, fallback]) => [

@@ -1,50 +1,27 @@
 import { Slice } from "prosemirror-model";
-import { NodeSelection, type EditorState } from "prosemirror-state";
+import { NodeSelection, TextSelection, type EditorState } from "prosemirror-state";
 import type { EditorView } from "@tiptap/pm/view";
 import { CellSelection } from "prosemirror-tables";
+import { toast } from "@/components/ui/sonner";
 import { isGeneratedDataImageName } from "../blocks/image/imageCaption";
-import {
-  getEditorSelectionPlainText,
-  serializeDocRangePlainText,
-  serializeSlicePlainText,
-} from "../utils/clipboard";
-import {
-  getSelectedCellPlainText,
-  getSelectedImageUrl,
-  isWholeTableCellSelection,
-} from "../utils/selection";
-import {
-  getCurrentBlockNodeSelection,
-  shouldCopyClipboardWithFormatting,
-  resolveCopyBlockSelection,
-  getTableBlockContainerSelection,
-} from "./copyBlockSelection";
-/**
- * 块级复制写入的自定义剪贴板标记。
- * 仅作为旧剪贴板/右键粘贴的兼容回退。正常复制同时写入 `blocknote/html`，
- * 由 BlockNote 原生粘贴保留完整嵌套结构和所有 block props。
- */
-export const GOOSE_BLOCKNOTE_BLOCK_COPY_MIME =
-  "application/x-goose-blocknote-block";
+import { serializeDocRangePlainText, serializeSlicePlainText } from "../utils/clipboard";
+import { getSelectedCellPlainText, getSelectedImageUrl, isWholeTableCellSelection } from "../utils/selection";
+import { resolveCopyBlockSelection, getTableBlockContainerSelection } from "./copyBlockSelection";
+import { deleteSelectionSafely } from "./selectionDelete";
+
+export const GOOSE_BLOCKNOTE_BLOCK_COPY_MIME = "application/x-goose-blocknote-block";
+
 function normalizeDataImageCaptionInClipboardDom(dom: HTMLElement): void {
-  for (const image of dom.querySelectorAll<HTMLElement>(
-    '[data-content-type="image"]',
-  )) {
+  for (const image of dom.querySelectorAll<HTMLElement>('[data-content-type="image"]')) {
+    if (image.getAttribute("data-caption-source") !== "generated") continue;
     const url = image.getAttribute("data-url");
     const caption = image.getAttribute("data-caption");
     if (!isGeneratedDataImageName(caption, url)) continue;
-    if (!image.getAttribute("data-name")) {
-      image.setAttribute("data-name", caption!.trim());
-    }
+    if (!image.getAttribute("data-name")) image.setAttribute("data-name", caption!.trim());
     image.removeAttribute("data-caption");
   }
 }
 
-/**
- * 接收端也会遇到未被本扩展接管的部分文本选区，此时 BlockNote 默认 copy 仍会
- * 产生 `blocknote/html`。只改内部 HTML 的默认 data-image caption，保留原 slice
- * 的所有结构和其他属性。
- */
 export function normalizeBlockNoteClipboardHtml(html: string): string {
   if (!html || typeof DOMParser === "undefined") return html;
   const document = new DOMParser().parseFromString(html, "text/html");
@@ -53,110 +30,56 @@ export function normalizeBlockNoteClipboardHtml(html: string): string {
   return document.body.innerHTML === before ? html : document.body.innerHTML;
 }
 
-function copySelectionPlainText(
-  state: EditorState,
-  blockSelection: NodeSelection | Slice,
-  includeBlockMarkers = false,
-): string {
-  const options = includeBlockMarkers
-    ? { includeBlockMarkers: true }
-    : undefined;
-  if (blockSelection instanceof NodeSelection) {
-    return serializeDocRangePlainText(
-      state.doc,
-      blockSelection.from,
-      blockSelection.to,
-      options,
-    );
+function copySelectionPlainText(state: EditorState, selection: NodeSelection | Slice): string {
+  const cells = getSelectedCellPlainText(state);
+  if (cells !== null && !isWholeTableCellSelection(state)) return cells;
+  if (state.selection instanceof TextSelection && !state.selection.empty) {
+    return serializeDocRangePlainText(state.doc, state.selection.from, state.selection.to, { preserveWhitespace: true });
   }
-  return serializeSlicePlainText(blockSelection, options);
+  return selection instanceof NodeSelection
+    ? serializeDocRangePlainText(state.doc, selection.from, selection.to, { includeBlockMarkers: true })
+    : serializeSlicePlainText(selection, { includeBlockMarkers: true });
 }
 
-function writePlainClipboard(clipboard: DataTransfer, plain: string): void {
-  clipboard.clearData();
-  clipboard.setData("text/plain", plain);
-}
-
-function writeFormattedClipboard(
-  clipboard: DataTransfer,
-  html: string,
-  plain: string,
-): void {
-  clipboard.clearData();
-  // 这是 BlockNote 的内部 HTML（含 blockContainer / blockGroup）。
-  // 粘贴端优先读取它，UniqueID 扩展会在 paste transaction 中为父子块
-  // 分别生成新 ID；不能只靠 text/html 再解析，否则会丢掉结构化 props。
-  clipboard.setData("blocknote/html", html);
-  clipboard.setData("text/html", html);
-  clipboard.setData("text/plain", plain);
-  clipboard.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "1");
-}
-
-/**
- * 把当前选区写入剪贴板。图片 / 部分单元格交给 Editor 容器监听器。
- * 折叠光标复制当前块；剪切空选区不处理，避免 Cmd+X 变成复制。
- */
-export function writeSelectionClipboard(
-  view: EditorView,
-  event: ClipboardEvent,
-): boolean {
-  if (event.defaultPrevented) return false;
-  const clipboard = event.clipboardData;
-  if (!clipboard) return false;
-
-  const { state } = view;
-  if (getSelectedImageUrl(state)) return false;
-  if (
-    getSelectedCellPlainText(state) != null &&
-    !isWholeTableCellSelection(state)
-  ) {
-    return false;
-  }
-
-  if (!shouldCopyClipboardWithFormatting(state)) {
-    let plain: string;
-    if (state.selection.empty) {
-      const current = getCurrentBlockNodeSelection(state);
-      if (!current) return false;
-      plain = copySelectionPlainText(state, current);
-    } else {
-      plain = getEditorSelectionPlainText(state);
-    }
-    event.preventDefault();
-    writePlainClipboard(clipboard, plain);
-    return true;
-  }
-
-  const resolved = resolveCopyBlockSelection(state);
-  const blockSelection = resolved ?? state.selection.content();
-  const slice =
-    blockSelection instanceof NodeSelection
-      ? blockSelection.content()
-      : blockSelection;
-  if (slice.size === 0) return false;
+export function getSelectionClipboardPayload(view: EditorView): { html: string; plain: string } | null {
+  const selection = resolveCopyBlockSelection(view.state);
+  if (!selection) return null;
+  const slice = selection instanceof NodeSelection ? selection.content() : selection;
+  if (slice.size === 0) return null;
   const { dom } = view.serializeForClipboard(slice);
   normalizeDataImageCaptionInClipboardDom(dom);
-  event.preventDefault();
-  writeFormattedClipboard(
-    clipboard,
-    dom.innerHTML,
-    copySelectionPlainText(state, blockSelection, true),
-  );
-  return true;
+  return { html: dom.innerHTML, plain: copySelectionPlainText(view.state, selection) };
+}
+
+/** 同步事件剪贴板写入失败时接管事件但不剪切，避免原生 handler 继续删除原文。 */
+export function writeSelectionClipboard(view: EditorView, event: ClipboardEvent): boolean {
+  if (event.defaultPrevented || !event.clipboardData) return false;
+  // 单张图片由容器 capture handler 等待系统位图写入完成。
+  if (getSelectedImageUrl(view.state)) return false;
+  try {
+    const payload = getSelectionClipboardPayload(view);
+    if (!payload) return false;
+    event.preventDefault();
+    const clipboard = event.clipboardData;
+    clipboard.clearData();
+    clipboard.setData("blocknote/html", payload.html);
+    clipboard.setData("text/html", payload.html);
+    clipboard.setData("text/plain", payload.plain);
+    clipboard.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "1");
+    return true;
+  } catch (error) {
+    event.preventDefault();
+    console.error("[editor] Failed to write selection clipboard", error);
+    toast.error("无法写入剪贴板，原内容已保留");
+    return false;
+  }
 }
 
 export function deleteCutSelection(view: EditorView): void {
-  const { state } = view;
-  if (state.selection.empty) return;
-  if (
-    state.selection instanceof CellSelection &&
-    isWholeTableCellSelection(state)
-  ) {
-    const tableSel = getTableBlockContainerSelection(state);
-    if (tableSel) {
-      view.dispatch(state.tr.setSelection(tableSel).deleteSelection());
-      return;
-    }
+  if (!view.editable || view.state.selection.empty) return;
+  if (view.state.selection instanceof CellSelection && isWholeTableCellSelection(view.state)) {
+    const table = getTableBlockContainerSelection(view.state);
+    if (table) view.dispatch(view.state.tr.setSelection(table));
   }
-  view.dispatch(state.tr.deleteSelection());
+  deleteSelectionSafely(view);
 }

@@ -1,3 +1,5 @@
+import { serializeFencedCode } from "./export/markdown/serialize/codeFence";
+
 const RAW_BLOCK_LANGUAGE = "goose-raw-block";
 const RAW_BLOCK_MARKER = "<!-- goose-note:raw-block -->";
 
@@ -12,6 +14,7 @@ const INLINE_HTML_ALLOWLIST = new Set([
   "img",
   "br",
   "video",
+  "audio",
 ]);
 
 function normalizeMarkdownLineBreaks(markdown: string): string {
@@ -50,47 +53,42 @@ function isHtmlCommentLine(trimmedLine: string): boolean {
 }
 
 function getHtmlTagName(trimmedLine: string): string | null {
-  const singleLineMatch = trimmedLine.match(/^<([a-zA-Z][\w-]*)(\s[^>]*)?>.*<\/\1>\s*$/);
-  if (singleLineMatch) {
-    return singleLineMatch[1].toLowerCase();
-  }
-
-  const blockMatch = trimmedLine.match(/^<([a-zA-Z][\w-]*)(\s[^>]*)?>\s*$/);
-  if (!blockMatch) return null;
-  if (trimmedLine.startsWith("</")) return null;
-  if (trimmedLine.endsWith("/>")) return null;
-
-  return blockMatch[1].toLowerCase();
+  return trimmedLine.match(/^<\/?([a-zA-Z][\w-]*)(?=[\s/>])/)?.[1].toLowerCase() ?? null;
 }
 
 function collectHtmlBlock(lines: string[], startIndex: number, tagName: string) {
-  const blockLines = [lines[startIndex]];
-  let index = startIndex + 1;
-
-  const closeTagPattern = new RegExp(`^</${tagName}>\\s*$`, "i");
-  while (index < lines.length) {
-    const currentLine = lines[index];
-    const trimmed = currentLine.trim();
-    blockLines.push(currentLine);
-    index += 1;
-
-    if (closeTagPattern.test(trimmed)) break;
-    if (trimmed === "") break;
+  const first = lines[startIndex].trim();
+  const voidElement = /^(?:area|base|embed|hr|input|link|meta|param|source|track|wbr)$/i.test(tagName);
+  if (voidElement || /^<\//.test(first) || /\/>\s*$/.test(first)) {
+    return { nextIndex: startIndex + 1, rawBlock: lines[startIndex] };
   }
+  const tags = new RegExp(`<(/?)${tagName}\\b[^>]*>`, "gi");
+  let depth = 0;
+  let index = startIndex;
+  for (; index < lines.length; index += 1) {
+    for (const match of lines[index].matchAll(tags)) {
+      if (/\/>$/.test(match[0])) continue;
+      depth += match[1] ? -1 : 1;
+    }
+    if (depth <= 0) { index += 1; break; }
+  }
+  return { nextIndex: index, rawBlock: lines.slice(startIndex, index).join("\n") };
+}
 
-  return {
-    nextIndex: index,
-    rawBlock: blockLines.join("\n"),
-  };
+function fenceOpening(line: string) {
+  const match = line.match(/^[ \t]*(`{3,}|~{3,})(.*)$/);
+  return match && !(match[1][0] === "`" && match[2].includes("`")) ? match : null;
+}
+
+function fenceEnd(lines: string[], start: number, fence: string): number {
+  const closing = new RegExp(`^[ \\t]*${fence[0]}{${fence.length},}[ \\t]*$`);
+  let end = start + 1;
+  while (end < lines.length && !closing.test(lines[end])) end += 1;
+  return end;
 }
 
 function wrapRawBlock(rawBlock: string): string {
-  return [
-    `\`\`\`${RAW_BLOCK_LANGUAGE}`,
-    RAW_BLOCK_MARKER,
-    rawBlock,
-    "```",
-  ].join("\n");
+  return serializeFencedCode(`${RAW_BLOCK_MARKER}\n${rawBlock}`, RAW_BLOCK_LANGUAGE);
 }
 
 export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
@@ -102,6 +100,20 @@ export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
   while (index < lines.length) {
     const line = lines[index];
     const trimmed = line.trim();
+    const fence = fenceOpening(line);
+    if (fence) {
+      const end = fenceEnd(lines, index, fence[1]);
+      output.push(...lines.slice(index, end < lines.length ? end + 1 : end));
+      index = end < lines.length ? end + 1 : end;
+      continue;
+    }
+    if (trimmed === "$$") {
+      let end = index + 1;
+      while (end < lines.length && lines[end].trim() !== "$$") end += 1;
+      output.push(...lines.slice(index, end < lines.length ? end + 1 : end));
+      index = end < lines.length ? end + 1 : end;
+      continue;
+    }
 
     if (!trimmed.startsWith("<") || isHtmlCommentLine(trimmed)) {
       output.push(line);
@@ -110,6 +122,16 @@ export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
     }
 
     const tagName = getHtmlTagName(trimmed);
+    // 仅放行本应用可无损解析的表格，整段跳过，避免 tbody/tr 被逐行包成 raw。
+    if (tagName === "table" && /^<table\s+data-goose-table="v1"(?:\s|>)/i.test(trimmed)) {
+      let end = index;
+      while (end < lines.length && !/<\/table>\s*$/i.test(lines[end].trim())) end += 1;
+      if (end < lines.length) {
+        output.push(...lines.slice(index, end + 1));
+        index = end + 1;
+        continue;
+      }
+    }
     if (!tagName || INLINE_HTML_ALLOWLIST.has(tagName)) {
       output.push(line);
       index += 1;
@@ -125,13 +147,29 @@ export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
 }
 
 export function decodeUnsupportedMarkdownForDisk(markdown: string): string {
-  const normalized = normalizeMarkdownLineBreaks(markdown);
-  const pattern = new RegExp(
-    "```" +
-      RAW_BLOCK_LANGUAGE +
-      "[^\\n]*\\n(?:<!--\\s*goose-note:raw-block\\s*-->\\n)?([\\s\\S]*?)\\n```",
-    "g",
-  );
-
-  return normalized.replace(pattern, (_full, rawBlock: string) => rawBlock);
+  const lines = normalizeMarkdownLineBreaks(markdown).split("\n");
+  const output: string[] = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (lines[index].trim() === "$$") {
+      let end = index + 1;
+      while (end < lines.length && lines[end].trim() !== "$$") end += 1;
+      output.push(...lines.slice(index, end < lines.length ? end + 1 : end));
+      index = end;
+      continue;
+    }
+    const fence = fenceOpening(lines[index]);
+    if (!fence) { output.push(lines[index]); continue; }
+    const end = fenceEnd(lines, index, fence[1]);
+    if (end >= lines.length) { output.push(...lines.slice(index)); break; }
+    if (fence[2].trim().split(/\s+/)[0] === RAW_BLOCK_LANGUAGE) {
+      const body = lines.slice(index + 1, end);
+      if (/^\s*<!--\s*goose-note:raw-block\s*-->$/.test(body[0] || "")) body.shift();
+      output.push(...body);
+    } else {
+      // 其他围栏中的 raw 示例仍然是代码，不能递归解包。
+      output.push(...lines.slice(index, end + 1));
+    }
+    index = end;
+  }
+  return output.join("\n");
 }

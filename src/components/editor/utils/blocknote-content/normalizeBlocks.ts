@@ -1,3 +1,4 @@
+import { normalizeColumnLayout } from "../../blocks/columns/columnModel";
 import type { PartialBlock } from "@blocknote/core";
 import { normalizeParsedImageProps } from "@/components/editor/blocks/image/imageCaption";
 import {
@@ -59,6 +60,8 @@ function hasInlineText(content: unknown): boolean {
 }
 
 function isEmptyWrapperBlock(type: string, block: any): boolean {
+  // 空折叠标题仍是子树的可编辑 summary，不能把 wrapper 当作冗余空行剥掉。
+  if (type === "heading" && block.props?.isToggleable === true) return false;
   if (
     ![
       "paragraph",
@@ -227,6 +230,12 @@ function normalizeBlock(block: any): PartialBlock[] {
   }
 
   const children = normalizeBlocks(block.children);
+  if (type === "columnLayout") {
+    return [normalizeColumnLayout({ type, props: block.props ?? block.attrs }, children as any[]) as PartialBlock];
+  }
+  if (type === "columnSection") {
+    return [{ type, children: children.length ? children : [{ type: "paragraph" }] } as PartialBlock];
+  }
 
   // 所有 heading 都保留 children；物理首块拍平由 ensureFirstTitleHeading 负责。
   if (children.length > 0 && isEmptyWrapperBlock(type, block)) {

@@ -2,9 +2,8 @@ import { useShallow } from "zustand/react/shallow";
 import { useNotebooks, sortNotebooksByOrder } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
-import { usePersistentDismissState } from "@/hooks/usePersistentDismissState";
 import type { ExportOptions } from "@/lib/export";
-import { type SettingsDialogProps, SETTINGS_APPS_BANNER_ID } from "./shared";
+import type { SettingsDialogProps } from "./shared";
 
 export function useSettingsDialogState({
   open,
@@ -125,12 +124,6 @@ export function useSettingsDialogState({
 
   const [resetting, setResetting] = useState(false);
 
-  const {
-    visible: appsBannerVisible,
-    dismiss: dismissAppsBanner,
-    reset: resetAppsBanner,
-  } = usePersistentDismissState(SETTINGS_APPS_BANNER_ID);
-
   const notebookList = sortNotebooksByOrder(notebooks).filter(
     (n) => n.source !== "local-folder",
   );
@@ -220,9 +213,6 @@ export function useSettingsDialogState({
     setResetInput,
     resetting,
     setResetting,
-    appsBannerVisible,
-    dismissAppsBanner,
-    resetAppsBanner,
     notebookList,
     createNotebook,
     resetPhrase,

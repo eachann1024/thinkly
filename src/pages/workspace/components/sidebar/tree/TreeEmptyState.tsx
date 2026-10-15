@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { isElectronHost } from "@/lib/local-vault";
 
 interface TreeEmptyStateProps {
   isLocalNotebook: boolean;
@@ -24,9 +23,7 @@ export function TreeEmptyState({
       <p className="text-sm font-normal leading-relaxed text-muted-foreground">
         {isLocalNotebook
           ? "暂无笔记，点击上方 ＋ 新建"
-          : isElectronHost
-            ? "请先关联本地文件夹"
-            : "暂无笔记，点击上方 ＋ 新建"}
+          : "请先关联本地文件夹"}
       </p>
     </div>
   );

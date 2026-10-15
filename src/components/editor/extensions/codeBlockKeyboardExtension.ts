@@ -1,49 +1,111 @@
-import { createExtension } from "@blocknote/core";
+import { createExtension, type BlockNoteEditor } from "@blocknote/core";
+import { closeHistory } from "@tiptap/pm/history";
+import { Plugin, Selection, TextSelection } from "prosemirror-state";
+import type { EditorView } from "prosemirror-view";
+import {
+  getCodeBlockSelection,
+  insertCodeBlockText,
+} from "../blocks/code/codeBlockTransactions";
 
-export const gooseCodeBlockKeyboardExtension = createExtension({
-  key: "goose-code-block-keyboard",
-  keyboardShortcuts: {
-    Enter: ({ editor }) => {
-      const pmState = editor.prosemirrorState;
-      const $from = pmState.selection.$from;
+function exitCodeBlock(editor: BlockNoteEditor) {
+  const code = getCodeBlockSelection(editor.prosemirrorState.selection);
+  if (!code) return false;
+  editor.transact((tr) => {
+    closeHistory(tr);
+    const { block } = editor.getTextCursorPosition();
+    const [inserted] = editor.insertBlocks(
+      [{ type: "paragraph", content: "" }],
+      block,
+      "after",
+    );
+    if (inserted) editor.setTextCursorPosition(inserted, "start");
+    tr.scrollIntoView();
+  });
+  return true;
+}
 
-      // Walk up the node tree to find if we're inside a codeBlock
-      for (let d = $from.depth; d >= 1; d--) {
-        const node = $from.node(d);
-        if (node.type.name === "blockContainer") {
-          const contentNode = d + 1 <= $from.depth ? $from.node(d + 1) : null;
-          if (contentNode?.type.name === "codeBlock") {
-            // Inside code block: insert newline instead of creating new block
-            const tr = pmState.tr.insertText("\n");
-            editor.prosemirrorView.dispatch(tr);
-            return true;
-          }
-        }
-      }
-      return false;
-    },
-    "Shift-Enter": ({ editor }) => {
-      const pmState = editor.prosemirrorState;
-      const $from = pmState.selection.$from;
+function moveAcrossCodeBoundary(
+  editor: BlockNoteEditor,
+  view: EditorView,
+  event: KeyboardEvent,
+) {
+  const directions = {
+    ArrowUp: "up",
+    ArrowDown: "down",
+    ArrowLeft: "left",
+    ArrowRight: "right",
+  } as const;
+  const direction = directions[event.key as keyof typeof directions];
+  if (
+    !direction ||
+    event.shiftKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.metaKey
+  ) {
+    return false;
+  }
+  const { selection, doc } = view.state;
+  const code = getCodeBlockSelection(selection);
+  if (!code || !selection.empty || !view.endOfTextblock(direction))
+    return false;
 
-      for (let d = $from.depth; d >= 1; d--) {
-        const node = $from.node(d);
-        if (node.type.name === "blockContainer") {
-          const contentNode = d + 1 <= $from.depth ? $from.node(d + 1) : null;
-          if (contentNode?.type.name === "codeBlock") {
-            // Shift+Enter in code block: exit and create new paragraph
-            const block = editor.getTextCursorPosition().block;
-            const [inserted] = editor.insertBlocks(
-              [{ type: "paragraph", content: "" }],
-              block,
-              "after",
-            );
-            if (inserted) editor.setTextCursorPosition(inserted);
-            return true;
-          }
-        }
-      }
-      return false;
-    },
-  },
-});
+  const backward = direction === "up" || direction === "left";
+  const boundary = backward
+    ? selection.$head.before(code.depth)
+    : selection.$head.after(code.depth);
+  let target = Selection.findFrom(doc.resolve(boundary), backward ? -1 : 1);
+  if (!target) return direction === "down" ? exitCodeBlock(editor) : true;
+
+  if (
+    (direction === "up" || direction === "down") &&
+    target instanceof TextSelection
+  ) {
+    // Keep the visual column when entering the adjacent text block.
+    const from = view.coordsAtPos(selection.head);
+    const edge = view.coordsAtPos(target.head);
+    const hit = view.posAtCoords({
+      left: from.left,
+      top: (edge.top + edge.bottom) / 2,
+    });
+    if (hit) {
+      const $hit = doc.resolve(hit.pos);
+      if ($hit.sameParent(target.$head))
+        target = TextSelection.create(doc, hit.pos);
+    }
+  }
+  view.dispatch(view.state.tr.setSelection(target).scrollIntoView());
+  return true;
+}
+
+export const gooseCodeBlockKeyboardExtension = createExtension(
+  ({ editor }) => ({
+    key: "goose-code-block-keyboard",
+    prosemirrorPlugins: [
+      new Plugin({
+        props: {
+          handleKeyDown(view, event) {
+            if (
+              !view.editable ||
+              view.composing ||
+              event.isComposing ||
+              event.keyCode === 229
+            ) {
+              return false;
+            }
+            if (!getCodeBlockSelection(view.state.selection)) return false;
+            if (event.key === "Enter" && !event.altKey) {
+              if (event.metaKey || event.ctrlKey || event.shiftKey)
+                return exitCodeBlock(editor);
+              const tr = view.state.tr;
+              insertCodeBlockText(tr, "\n");
+              view.dispatch(tr.scrollIntoView());
+              return true;
+            }
+            return moveAcrossCodeBoundary(editor, view, event);
+          },
+        },
+      }),
+    ],
+  }),
+)();

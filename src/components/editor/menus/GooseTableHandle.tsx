@@ -39,6 +39,7 @@ export function GooseTableHandle({
     handleDelete,
     toggleHeader,
     handleEvenColumnWidth,
+    handleFitPageWidth,
     runMenuAction,
     handleOpenChange,
   } = useGooseTableHandle(orientation, hideOtherElements);
@@ -174,7 +175,10 @@ export function GooseTableHandle({
                 <DropdownMenuItem
                   onSelect={() => runMenuAction(handleEvenColumnWidth)}
                 >
-                  <GooseIcons.AlignJustify /> 两端对齐
+                  <GooseIcons.AlignJustify /> 列宽均分
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => runMenuAction(handleFitPageWidth)}>
+                  <GooseIcons.Maximize2 /> 适应页面宽度
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </EditorSubmenuTrigger>

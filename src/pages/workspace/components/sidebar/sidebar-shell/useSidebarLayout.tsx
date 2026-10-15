@@ -10,7 +10,6 @@ import {
   useSidebarResize,
 } from "../hooks/useSidebarResize";
 import { useSidebarItemHeight } from "../hooks/useSidebarItemHeight";
-import { isElectronHost } from "@/lib/local-vault";
 import { type SidebarView, type SidebarProps } from "./shared";
 
 export function useSidebarLayout({
@@ -98,7 +97,7 @@ export function useSidebarLayout({
   const isLocalFolder = activeNotebook?.source === "local-folder";
 
   // Electron 仅本地模式：没有仓库时不露出「新建页面」入口与内置本语义
-  const electronNoVault = isElectronHost && !activeNotebookId;
+  const electronNoVault = !activeNotebookId;
 
   const itemHeight = useSidebarItemHeight() + 4;
 

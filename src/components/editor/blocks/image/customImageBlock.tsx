@@ -3,7 +3,6 @@ import { createImageBlockConfig, imageParse } from "@blocknote/core";
 import {
   createReactBlockSpec,
   useUploadLoading,
-  ImageToExternalHTML,
   ResizableFileBlockWrapper,
 } from "@blocknote/react";
 import {
@@ -51,8 +50,13 @@ function CustomImageBlockContent({
   );
 }
 
+const imageConfig = createImageBlockConfig({});
 export const customImageBlock = createReactBlockSpec(
-  createImageBlockConfig({}),
+  { ...imageConfig, propSchema: {
+    ...imageConfig.propSchema,
+    alt: { default: undefined, type: "string" as const },
+    captionSource: { default: "" },
+  } },
   {
     meta: {
       fileBlockAccept: ["image/*"],
@@ -62,14 +66,24 @@ export const customImageBlock = createReactBlockSpec(
     ),
     parse: (element) => {
       const parsed = imageParse()(element);
-      return parsed ? normalizeParsedImageProps(parsed) : undefined;
+      if (!parsed) return undefined;
+      const image = element.tagName === "IMG" ? element : element.querySelector("img");
+      return normalizeParsedImageProps({ ...parsed,
+        ...(image?.hasAttribute("alt") ? { alt: image.getAttribute("alt") ?? "" } : {}),
+        ...(image?.hasAttribute("data-goose-image-name") ? { name: image.getAttribute("data-goose-image-name") ?? "" } : {}),
+        ...(element.hasAttribute("data-caption-source") ? { captionSource: element.getAttribute("data-caption-source") } : {}),
+      });
     },
-    toExternalHTML: (props) => (
-      <ImageToExternalHTML
-        {...props}
-        block={imageBlockWithoutGeneratedCaption(props.block)}
-      />
-    ),
+    toExternalHTML: ({ block }) => {
+      const props = imageBlockWithoutGeneratedCaption(block).props;
+      if (props.showPreview === false) {
+        const link = <a href={props.url}>{props.name || props.url}</a>;
+        return props.caption ? <div data-caption-source={props.captionSource}>{link}<p>{props.caption}</p></div> : link;
+      }
+      const image = <img src={props.url} alt={typeof props.alt === "string" ? props.alt : props.name}
+        data-goose-image-name={props.name} width={props.previewWidth} />;
+      return props.caption ? <figure data-caption-source={props.captionSource}>{image}<figcaption>{props.caption}</figcaption></figure> : image;
+    },
     runsBefore: ["file"],
   },
 )();

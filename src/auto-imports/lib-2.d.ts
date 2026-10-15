@@ -5,8 +5,6 @@
 export {}
 declare global {
   const EDITOR_ONLY_FIXED_SHORTCUTS: typeof import('../lib/shortcut-platform').EDITOR_ONLY_FIXED_SHORTCUTS
-  const ELECTRON_MAX_VIDEO_ATTACHMENT_SIZE: typeof import('../lib/videoStorage').ELECTRON_MAX_VIDEO_ATTACHMENT_SIZE
-  const MAX_VIDEO_ATTACHMENT_SIZE: typeof import('../lib/videoStorage').MAX_VIDEO_ATTACHMENT_SIZE
   const SIDEBAR_PAGE_LIST_SELECTOR: typeof import('../lib/sidebarListCollapse').SIDEBAR_PAGE_LIST_SELECTOR
   const TEXT_COLORS: typeof import('../lib/textColors').TEXT_COLORS
   const VIDEO_OUTPUT_MIME: typeof import('../lib/videoProcessor').VIDEO_OUTPUT_MIME
@@ -35,7 +33,6 @@ declare global {
   const downloadWebdavBackup: typeof import('../lib/webdavSync').downloadWebdavBackup
   const effectiveSingleTabMode: typeof import('../lib/tabMode').effectiveSingleTabMode
   const findContainingLocalFolderNotebook: typeof import('../lib/openAssociatedMarkdown').findContainingLocalFolderNotebook
-  const flushLocalStorageWrites: typeof import('../lib/storage').flushLocalStorageWrites
   const formatShortcut: typeof import('../lib/utils').formatShortcut
   const formatShortcutToken: typeof import('../lib/shortcut-platform').formatShortcutToken
   const formatSystemModifier: typeof import('../lib/shortcut-platform').formatSystemModifier

@@ -182,9 +182,6 @@ async function recordHistorySnapshotUnlocked(
   const evictedVersionIds = selectEvictedVersionIds(nextVersions);
   if (evictedVersionIds.length > 0) {
     const evictedSet = new Set(evictedVersionIds);
-    for (const versionId of evictedVersionIds) {
-      await backend.removeVersion(pageId, versionId);
-    }
     nextVersions = nextVersions.filter((v) => !evictedSet.has(v.versionId));
   }
 
@@ -193,6 +190,11 @@ async function recordHistorySnapshotUnlocked(
     versions: nextVersions,
     lastVersionCharCount: charCount,
   });
+
+  // 索引发布成功后再清理旧版本；索引读写失败时保留全部旧快照。
+  for (const versionId of evictedVersionIds) {
+    await backend.removeVersion(pageId, versionId);
+  }
 
   return { status: "created", entry };
 }
@@ -263,7 +265,7 @@ export async function deleteVersion(
     const nextVersions = index.versions.filter(
       (v) => v.versionId !== versionId,
     );
-    await backend.removeVersion(pageId, versionId);
     await backend.saveIndex({ ...index, versions: nextVersions });
+    await backend.removeVersion(pageId, versionId);
   });
 }

@@ -42,7 +42,7 @@ function handleMentionOpen(
   const handled = deps.openPage(
     open.pageId,
     open.wikiTarget,
-    newTab ? { newTab: true } : { splitOnly: true },
+    newTab ? { newTab: true } : undefined,
   );
   if (!newTab && handled === false) return false;
   event.preventDefault();

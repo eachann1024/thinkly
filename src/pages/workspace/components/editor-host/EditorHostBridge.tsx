@@ -45,6 +45,7 @@ import { openAssociatedMarkdownFile } from "@/lib/openAssociatedMarkdown";
 import { tryShowPageInFocusedSplit } from "@/lib/editor-split/commands";
 import { resolvePageMentionNavigation } from "@/lib/pageMentionNavigation";
 import { toast } from "@/components/ui/sonner";
+import { createEditorPageLinkCapabilities } from "./editorPageLinks";
 
 interface EditorHostBridgeProps {
   /** 当前被编辑的页（替换编辑器内核对 usePages.activePageId/getPage 的直读）。 */
@@ -92,7 +93,6 @@ export function EditorHostBridge({
       ai,
       searchProviders,
       customActions,
-      openLinksInHost: false,
       useInternalImageViewer: false,
       features: {
         tablePresentationControls: true,
@@ -121,6 +121,7 @@ export function EditorHostBridge({
   const pageContext = useMemo<EditorPageContext>(
     () => ({
       page,
+      ...createEditorPageLinkCapabilities(page),
       contentMode,
       isEditorFullWidth,
       onContentChange: (

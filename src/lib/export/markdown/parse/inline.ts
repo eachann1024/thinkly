@@ -63,7 +63,7 @@ export function parseInlineMarkdown(text: string): any[] {
   // 优先级：$math$ > <u>underline</u> > <span style>…</span> > ==highlight== >
   //         **bold** > *italic* > ~~strike~~ > `code` > [[wiki]] > [link](url)
   const regex =
-    /(\$((?:\\\$|[^\$])+?)\$|<u>(.+?)<\/u>|<span\b([^>]*)>(.+?)<\/span>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[([^\]\n]+?)\]\]|\[([^\]]+)\]\(([^)]+)\))/gi;
+    /(\$((?:\\\$|[^\$])+?)\$|<u>(.+?)<\/u>|<span\b([^>]*)>(.+?)<\/span>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[((?:\\.|[^\]\\\n])+?)\]\]|\[((?:\\.|[^\]\\])+)\]\(([^)]+)\))/gi;
   let lastIndex = 0;
   let match;
 
@@ -123,7 +123,8 @@ export function parseInlineMarkdown(text: string): any[] {
         pushPlain(match[0]);
       }
     } else if (match[12] !== undefined && match[13] !== undefined) {
-      const mention = pageMentionFromMarkdownLink(match[12], match[13]);
+      const label = match[12].replace(/\\([\\[\]])/g, "$1");
+      const mention = pageMentionFromMarkdownLink(label, match[13]);
       if (mention) {
         result.push({
           type: "pageMention",

@@ -1,8 +1,6 @@
 import { type ComponentType } from "react";
 import { type LocalFolderOpenAppCandidate } from "@/lib/local-folder-open-apps";
 
-export const isElectronHost = __HOST_TARGET__ === "electron";
-
 export interface SettingsLocalFolderProps {
   visible?: boolean;
   localFolderFileManager: string;
