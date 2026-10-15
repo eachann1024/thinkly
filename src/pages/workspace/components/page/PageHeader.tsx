@@ -53,7 +53,8 @@ export function PageHeader({
   const toggleAiPanelShortcutLabel = appShortcuts.toggleAIPanel
     ? formatShortcut(appShortcuts.toggleAIPanel)
     : "";
-  const showAiOnActions = folderActionsAvailable && Boolean(onToggleAiPanel);
+  const showWorkspaceActions = Boolean(page) || Boolean(aiPanelOpen);
+  const showAiOnActions = showWorkspaceActions && folderActionsAvailable && Boolean(onToggleAiPanel);
   const aiFullscreenOpen =
     folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
 
@@ -126,7 +127,7 @@ export function PageHeader({
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
-        {!singleTabMode && folderActionsAvailable && !page?.trashedAt && (
+        {showWorkspaceActions && !singleTabMode && folderActionsAvailable && !page?.trashedAt && (
           <NewTabButton onClick={onOpenSearch} />
         )}
         {showAiOnActions && !page?.trashedAt && (
