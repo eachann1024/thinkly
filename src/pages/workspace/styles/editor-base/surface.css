@@ -1,12 +1,16 @@
-/* 独立于 Cmd+F 的工作区全局搜索标记，不使用定时淡出；强调色由当前 accent token 提供。 */
+/* 正文控件会把 focus token 改为中性色；搜索标记使用主题实色，不随焦点变灰。 */
 .goose-search-session-match {
-  background-color: color-mix(in srgb, var(--goose-accent-focus) 16%, transparent);
+  background-color: color-mix(in srgb, var(--goose-accent-solid) 16%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--goose-accent-solid) 65%, transparent);
   border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: inherit;
 }
 
 .goose-search-session-match--current {
-  background-color: color-mix(in srgb, var(--goose-accent-focus) 28%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--goose-accent-focus) 72%, transparent);
+  background-color: color-mix(in srgb, var(--goose-accent-solid) 28%, transparent);
+  box-shadow: 0 0 0 2px var(--goose-accent-solid);
 }
 
 .goose-find-match {
