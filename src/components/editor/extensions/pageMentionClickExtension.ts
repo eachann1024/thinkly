@@ -4,6 +4,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import type { OpenPageOptions } from "@/components/editor/platform/hostContext";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { PAGE_MENTION_TYPE } from "@/components/editor/inline/pageMention";
+import { subscribeModifierClass } from "./modifierClassSubscription";
 
 export type PageMentionClickDeps = {
   openPage: (
@@ -78,29 +79,12 @@ export const createPageMentionClickExtension = (deps: PageMentionClickDeps) =>
           },
         },
         view(view: EditorView) {
-          const syncArmed = (event: KeyboardEvent) => {
-            view.dom.classList.toggle(
-              "goose-page-mention-armed",
-              isPlatformPrimaryModifierEvent(event),
-            );
-          };
-          const disarm = () =>
-            view.dom.classList.remove("goose-page-mention-armed");
-          const onVisibility = () => {
-            if (document.hidden) disarm();
-          };
-          window.addEventListener("keydown", syncArmed);
-          window.addEventListener("keyup", syncArmed);
-          window.addEventListener("blur", disarm);
-          document.addEventListener("visibilitychange", onVisibility);
           return {
-            destroy() {
-              window.removeEventListener("keydown", syncArmed);
-              window.removeEventListener("keyup", syncArmed);
-              window.removeEventListener("blur", disarm);
-              document.removeEventListener("visibilitychange", onVisibility);
-              disarm();
-            },
+            destroy: subscribeModifierClass(
+              view.dom,
+              "goose-page-mention-armed",
+              isPlatformPrimaryModifierEvent,
+            ),
           };
         },
       }),

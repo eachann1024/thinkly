@@ -100,7 +100,7 @@ export function useHistoryRestoreActions(
 
   const applyMilestoneLocally = (versionId: string, willBe: boolean) => {
     setIndex((prev) => {
-      if (!prev) return prev;
+      if (!prev || prev.pageId !== pageId) return prev;
       return {
         ...prev,
         versions: prev.versions.map((entry) =>

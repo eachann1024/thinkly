@@ -1,44 +1,16 @@
-import { useHistoryViewState } from "./logic/useHistoryViewState";
-import { useHistoryRestoreActions } from "./logic/useHistoryRestoreActions";
+import { createContext, useContext } from "react";
+import type { useHistoryRestoreActions } from "./logic/useHistoryRestoreActions";
+
+type HistoryViewLogic = ReturnType<typeof useHistoryRestoreActions> & {
+  isEmpty: boolean;
+};
+
+export const HistoryViewContext = createContext<HistoryViewLogic | null>(null);
 
 export function useHistoryViewLogic() {
-  const history = useHistoryViewState();
-  const historyRestoreActionsContext = useHistoryRestoreActions(history);
-  const context = historyRestoreActionsContext;
-  const {
-    selectedVersionId,
-    exit,
-    select,
-    pageId,
-    page,
-    pageTitle,
-    indexError,
-    selectedContent,
-    selectedStatus,
-    isRestoring,
-    pendingMilestoneVersionId,
-    groups,
-    selectedEntry,
-    handleRestore,
-    handleToggleMilestone,
-  } = context;
-
-  return {
-    pageId,
-    page,
-    pageTitle,
-    groups,
-    isEmpty: groups.length === 0,
-    indexError,
-    selectedVersionId,
-    selectedEntry,
-    selectedContent,
-    selectedStatus,
-    isRestoring,
-    pendingMilestoneVersionId,
-    exit,
-    select,
-    handleRestore,
-    handleToggleMilestone,
-  };
+  const history = useContext(HistoryViewContext);
+  if (!history) {
+    throw new Error("历史视图必须在 HistoryViewProvider 内使用");
+  }
+  return history;
 }

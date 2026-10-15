@@ -41,9 +41,10 @@ export function HistoryReadOnlyEditor({
   versionKey,
   sourcePage,
 }: HistoryReadOnlyEditorProps) {
-  const { theme } = useSettings();
-  const { activePageId } = usePages();
-  const activePage = sourcePage ?? (activePageId ? usePages.getState().pages[activePageId] : null);
+  const theme = useSettings((s) => s.theme);
+  const activePage = usePages((s) =>
+    sourcePage ?? (s.activePageId ? s.pages[s.activePageId] : null),
+  );
   const previewPage = useMemo(
     () => activePage ? { ...activePage, content, isLocked: true } : null,
     [activePage, content],

@@ -1,10 +1,5 @@
 import { useEffect } from "react";
 import {
-  completePageTitleFocus,
-  subscribePageTitleFocus,
-  isPageTitleFocusRequested,
-} from "@/lib/page-title-focus";
-import {
   clonePageContent,
   createEditorSafeContent,
   getContentSignature,
@@ -12,6 +7,8 @@ import {
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { toEditorBlocks } from "./editorContentPolicy";
+import { useEditorHostFocus } from "./useEditorHostFocus";
+import { useEditorPageTasks } from "./useEditorPageTasks";
 import type { EditorRuntime } from "./useEditorSession";
 import type { EditorContentCommit } from "./useEditorContentCommit";
 
@@ -24,7 +21,6 @@ export function useEditorHostEvents(
   const {
     editor,
     pageRef,
-    usesRawEditorContentRef,
     pageIdForUpdateRef,
     getLatestPage,
     contentModeRef,
@@ -33,6 +29,8 @@ export function useEditorHostEvents(
     syncedContentSignatureRef,
     userInteractedRef,
   } = runtime;
+  useEditorHostFocus(runtime, focusEditorSafely, isActiveEditor);
+  const tasks = useEditorPageTasks(runtime);
   useEffect(() => {
     const handleFlush = (event: Event) => {
       const customEvent = event as CustomEvent<{ immediate?: boolean }>;
@@ -41,97 +39,6 @@ export function useEditorHostEvents(
         return;
       }
       commitEditorContent();
-    };
-
-    const handleFocusStart = () => {
-      if (!isActiveEditor) return;
-      const pageId = pageRef.current?.id;
-      // 本地文件标题由标签栏承担；新建页标题聚焦请求未完成时不抢焦到正文。
-      if (
-        pageId &&
-        isPageTitleFocusRequested(pageId) &&
-        usesRawEditorContentRef.current
-      ) {
-        return;
-      }
-
-      // 多标签新建内部页：光标落到首块 H1 标题末尾（与截图中的标题位置一致）。
-      const focusTitleEnd = () => {
-        const blocks = editor.document;
-        if (blocks.length === 0) return false;
-        try {
-          editor.setTextCursorPosition(blocks[0], "end");
-          editor.focus();
-          if (pageId && isPageTitleFocusRequested(pageId)) {
-            completePageTitleFocus(pageId);
-          }
-          return true;
-        } catch {
-          return false;
-        }
-      };
-      if (!focusTitleEnd()) {
-        requestAnimationFrame(() => {
-          if (!focusTitleEnd()) focusEditorSafely();
-        });
-      }
-    };
-
-    const handleFocusBody = () => {
-      if (!isActiveEditor) return;
-      const focusBody = () => {
-        const blocks = editor.document;
-        if (blocks.length === 0) return false;
-        const target = blocks[blocks.length - 1];
-        try {
-          if (!usesRawEditorContentRef.current && blocks.length === 1) {
-            const [inserted] = editor.insertBlocks(
-              [{ type: "paragraph", content: "" }],
-              blocks[0],
-              "after",
-            );
-            if (inserted) editor.setTextCursorPosition(inserted, "start");
-          } else {
-            try {
-              editor.setTextCursorPosition(target, "end");
-            } catch {
-              const [inserted] = editor.insertBlocks(
-                [{ type: "paragraph", content: "" }],
-                target,
-                "after",
-              );
-              if (!inserted) return false;
-              editor.setTextCursorPosition(inserted, "start");
-            }
-          }
-          editor.focus();
-          return true;
-        } catch {
-          return false;
-        }
-      };
-      if (!focusBody()) requestAnimationFrame(() => focusBody());
-    };
-
-    let focusFrame: number | null = null;
-    const focusCreatedPage = () => {
-      const pageId = pageRef.current?.id;
-      if (!isActiveEditor || !pageId || !isPageTitleFocusRequested(pageId)) return;
-      if (focusFrame !== null) cancelAnimationFrame(focusFrame);
-      focusFrame = requestAnimationFrame(() => {
-        if (pageRef.current?.id !== pageId || !isPageTitleFocusRequested(pageId)) return;
-        handleFocusBody();
-        completePageTitleFocus(pageId);
-      });
-    };
-    const unsubscribeTitleFocus = subscribePageTitleFocus(focusCreatedPage);
-    focusCreatedPage();
-
-    const handlePluginEnter = () => {
-      if (!isActiveEditor) return;
-      window.setTimeout(() => {
-        focusEditorSafely();
-      }, 0);
     };
 
     // 文件被外部修改后由宿主派发：把当前激活页最新内容刷进编辑器。
@@ -200,7 +107,7 @@ export function useEditorHostEvents(
       // 外部重载 = 程序化同步，重置用户交互标记（同切页 effect）。
       userInteractedRef.current = false;
       if (scrollContainer && typeof scrollTop === "number") {
-        requestAnimationFrame(() => {
+        tasks.frame(() => {
           scrollContainer.scrollTop = scrollTop;
         });
       }
@@ -229,31 +136,17 @@ export function useEditorHostEvents(
       handleAssetReferences,
     );
     window.addEventListener("goose-note:flush-editor", handleFlush);
-    window.addEventListener("goose-note:focus-editor-start", handleFocusStart);
-    window.addEventListener("goose-note:focus-editor-body", handleFocusBody);
-    window.addEventListener("goose-note:plugin-enter", handlePluginEnter);
     window.addEventListener(
       "goose-note:reload-active-editor",
       handleReloadActiveEditor,
     );
 
     return () => {
-      unsubscribeTitleFocus();
-      if (focusFrame !== null) cancelAnimationFrame(focusFrame);
       window.removeEventListener(
         "goose-note:asset-references",
         handleAssetReferences,
       );
       window.removeEventListener("goose-note:flush-editor", handleFlush);
-      window.removeEventListener(
-        "goose-note:focus-editor-start",
-        handleFocusStart,
-      );
-      window.removeEventListener(
-        "goose-note:focus-editor-body",
-        handleFocusBody,
-      );
-      window.removeEventListener("goose-note:plugin-enter", handlePluginEnter);
       window.removeEventListener(
         "goose-note:reload-active-editor",
         handleReloadActiveEditor,
@@ -264,6 +157,13 @@ export function useEditorHostEvents(
     debouncedUpdate,
     editor,
     getLatestPage,
-    isActiveEditor,
+    contentModeRef,
+    editorContainerRef,
+    pageIdForUpdateRef,
+    pageRef,
+    pendingEditorChangeRef,
+    syncedContentSignatureRef,
+    userInteractedRef,
+    tasks,
   ]);
 }

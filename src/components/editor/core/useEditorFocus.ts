@@ -1,9 +1,14 @@
 import { useCallback, useEffect } from "react";
 import { needsBodyParagraphAfterTitle } from "@/components/editor/utils/blocknote-content";
 import { isBottomEditorBlankClick } from "@/components/editor/utils/selection";
+import { useEditorPageTasks } from "./useEditorPageTasks";
 import type { EditorRuntime } from "./useEditorSession";
 
-export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
+export function useEditorFocus(
+  runtime: EditorRuntime,
+  editable: boolean,
+  isActiveEditor: boolean,
+) {
   const {
     editor,
     usesRawEditorContentRef,
@@ -11,12 +16,14 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
     suppressFormattingToolbarRef,
     setSuppressFormattingToolbar,
   } = runtime;
+  const tasks = useEditorPageTasks(runtime, isActiveEditor);
   // 冷加载时 BlockNoteView 尚未完全挂定，editor.focus() 会落到 view.dom，
   // 但此时 contentEditable 还未稳定，焦点会「漏」到侧栏页面重命名输入框等
   // 下一个可聚焦元素。guard：view 存在、dom 已连入文档且 doc 非空才聚焦；
   // 否则用 rAF 延后到下一帧（挂载完成）再试，避免冷加载点编辑器丢焦点。
   const focusEditorSafely = useCallback(() => {
     const tryFocus = () => {
+      if (editor._tiptapEditor.isDestroyed) return false;
       const view = editor.prosemirrorView;
       const dom = view?.dom as HTMLElement | undefined;
       if (view && dom && dom.isConnected && view.state.doc.content.size > 0) {
@@ -26,11 +33,11 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
       return false;
     };
     if (!tryFocus()) {
-      requestAnimationFrame(() => {
+      tasks.frame(() => {
         tryFocus();
       });
     }
-  }, [editor]);
+  }, [editor, tasks]);
 
   const focusEditorEnd = useCallback(() => {
     // 标题一独占文档时（删光正文后）：补空正文并聚焦它，而不是把光标钉回标题末尾。
@@ -77,7 +84,7 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
       }
     }
     focusEditorSafely();
-  }, [editor, focusEditorSafely]);
+  }, [editor, focusEditorSafely, usesRawEditorContentRef]);
 
   const handleEditorBlankMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -90,7 +97,7 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
       event.preventDefault();
       focusEditorEnd();
     },
-    [editable, focusEditorEnd],
+    [editable, editorContainerRef, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef],
   );
 
   // 补丁：EditorContextMenu 容器高度 = 内容高度（flex-1 min-h-0），
@@ -130,7 +137,7 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
     return () => {
       document.removeEventListener("mousedown", handleDocMouseDown, true);
     };
-  }, [editable, focusEditorEnd]);
+  }, [editable, editorContainerRef, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef]);
 
   // 消闪 mouseup 清理：空白区域 mousedown 后抑制格式化工具栏，mouseup 时恢复。
   // 兜底 blur：鼠标拖出窗口松开时 document mouseup 不触发，window blur 覆盖此场景。
@@ -146,7 +153,7 @@ export function useEditorFocus(runtime: EditorRuntime, editable: boolean) {
       document.removeEventListener("mouseup", clearSuppress, true);
       window.removeEventListener("blur", clearSuppress);
     };
-  }, []);
+  }, [setSuppressFormattingToolbar, suppressFormattingToolbarRef]);
 
   return { focusEditorSafely, handleEditorBlankMouseDown };
 }

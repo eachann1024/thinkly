@@ -67,6 +67,7 @@ export { editorSchema } from "@/components/editor/core/schema";
 export function EditorComposer({
   editor,
   editable,
+  isActiveEditor,
   page,
   editorContainerRef,
   handleEditorBlankMouseDown,
@@ -89,6 +90,7 @@ export function EditorComposer({
   const interactions = useEditorComposerInteractions({
     editor,
     editable,
+    isActiveEditor,
     page,
     editorContainerRef,
   });
