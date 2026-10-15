@@ -27,7 +27,6 @@
     if (name === "alt") return `<form data-form="alt" aria-label="图片说明">${input("图片说明", "value", D.selectedBlocks()[0]?.querySelector("svg")?.getAttribute("aria-label") || "湖畔山色")}${formEnd()}`;
     if (name === "rename") return `<form data-form="rename" aria-label="文件名称">${input("文件名称", "value", D.stage.querySelector("[data-filename]").textContent)}${formEnd()}`;
     if (name === "editCode") return `<form data-form="editCode" aria-label="编辑代码"><label>编辑代码<textarea name="value" rows="7" spellcheck="false">${D.escape(D.stage.querySelector("code").textContent)}</textarea></label>${formEnd()}`;
-    if (name === "ai") return `<form data-form="ai" aria-label="加入对话"><div class="popover-heading">加入对话<span class="connection-state">未连接 AI</span></div><blockquote class="selection-excerpt">${D.escape(D.selectionText().slice(0, 280))}</blockquote><label>指令<textarea name="prompt" rows="2" placeholder="例如：整理成一份检查清单"></textarea></label><p class="ai-boundary">原型可复制选区和指令，不会发送或生成内容。</p>${formEnd("复制到对话")}`;
     return "";
   };
   D.positionPopover = () => {

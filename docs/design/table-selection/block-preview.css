@@ -50,8 +50,6 @@
 .attachment-preview { max-width: 100%; max-height: 60dvh; }
 .block-stage.inactive .is-block-selected { background: var(--neutral-inactive); border-color: var(--inactive-edge); border-style: dashed; }
 .block-stage.without-selection .is-block-selected { border-color: transparent; background: none; }
-[data-design="frame"] .block-stage { border: 1px solid var(--line); border-top: 0; padding: 18px; border-radius: 0 0 8px 8px; }
-[data-design="frame"] .sample-block.is-block-selected { background: var(--selection-fill); }
 .workspace[data-readonly="true"] .sample-block { cursor: default; }
 @media (max-width: 1150px) {
   .context-controls { padding-inline: 24px; }
@@ -71,5 +69,4 @@
   .sample-image { width: 100%; }
   .sample-file { gap: 10px; flex-wrap: wrap; }
   .sample-file > div { flex-basis: 70%; }
-  [data-design="frame"] .block-stage { padding: 12px; }
 }

@@ -8,9 +8,10 @@ if (!process.argv[2]) throw new Error("Specify an output directory for the stand
 const output = resolve(process.argv[2]);
 if (output === source) throw new Error("The output directory must differ from the source directory.");
 const read = (name) => readFile(resolve(source, name), "utf8");
-const styleFiles = ["tokens.css", "layout.css", "table.css", "toolbar.css", "block-preview.css"];
+const styleFiles = ["tokens.css", "layout.css", "table.css", "toolbar.css", "block-preview.css", "ai-chat.css"];
 const scriptFiles = ["icons.js", "content.js", "prototype.js", "block-preview.js", "toolbar-model.js", "toolbar.js",
-  "toolbar-popover.js", "toolbar-actions.js", "toolbar-assets.js", "selection.js", "controls.js"];
+  "toolbar-popover.js", "toolbar-actions.js", "toolbar-assets.js", "selection.js",
+  "ai-source.js", "ai-response.js", "ai-view.js", "ai-menu.js", "ai-chat.js", "controls.js"];
 const [styles, scripts, license] = await Promise.all([
   Promise.all(styleFiles.map(read)),
   Promise.all(scriptFiles.map(read)),
@@ -21,7 +22,7 @@ const [css, js] = await Promise.all([
   transform(scripts.join("\n"), { loader: "js", minify: true }),
 ]);
 await mkdir(output, { recursive: true });
-for (const name of ["theme-tint.html", "quiet-frame.html"]) {
+for (const name of ["theme-tint.html"]) {
   const template = await read(name);
   const html = template
     .replace(/  <link rel="stylesheet"[^>]+>\n/g, "")

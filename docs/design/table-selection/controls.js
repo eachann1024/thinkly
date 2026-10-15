@@ -24,8 +24,6 @@
     document.querySelector("#dark-policy").disabled = !dark;
     document.querySelector(".dark-policy").dataset.disabled = String(!dark);
     document.querySelector("#dark-policy").value = S.policy;
-    const query = new URLSearchParams({ mode: S.mode, accent: S.accent, policy: S.policy, context: S.context });
-    document.querySelectorAll(".versions a").forEach((link) => { link.search = query.toString(); });
   };
   const query = new URLSearchParams(location.search);
   if (["dark", "light", "auto"].includes(query.get("mode"))) S.mode = query.get("mode");
@@ -59,6 +57,8 @@
     editing = null; D.updateGeometry(); D.focusSelection();
   });
   document.querySelector("#reset").addEventListener("click", () => {
+    D.ai.reset();
+    document.querySelector(".ai-insertions").replaceChildren();
     D.closePopover(false); D.clearNativeRange(); D.nativeTarget = null;
     D.sampleCache = {}; D.stage.replaceChildren(); D.history = []; D.resetAssets();
     D.rows = structuredClone(D.originalRows); S.custom = false; S.inactive = false;
@@ -69,4 +69,5 @@
   D.applyTheme();
   D.setContext(Object.hasOwn(D.contexts, query.get("context")) ? query.get("context") : "grid");
   D.update();
+  if (query.get("chat") === "1") D.ai.open();
 })();

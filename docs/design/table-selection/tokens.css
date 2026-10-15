@@ -9,7 +9,6 @@
   --grid: #e3e4de;
   --header: #f7f8f5;
   --hover: #f0f2ed;
-  --neutral-fill: rgba(50, 61, 48, .035);
   --neutral-inactive: rgba(82, 88, 79, .07);
   --inactive-edge: #94998f;
   --custom-cell: #f3ebd1;
@@ -35,17 +34,12 @@
   --grid: #373d37;
   --header: #252925;
   --hover: #2b302a;
-  --neutral-fill: rgba(144, 168, 194, .055);
   --neutral-inactive: rgba(179, 187, 179, .055);
   --inactive-edge: #737b73;
   --custom-cell: #48412b;
   --shadow: 0 7px 24px #00000035, 0 1px 3px #00000024;
   --selection-fill: rgba(var(--selection-rgb), .14);
   --selection-anchor: rgba(var(--selection-rgb), .07);
-}
-:root[data-design="frame"] {
-  --selection-fill: var(--neutral-fill);
-  --selection-anchor: rgba(var(--selection-rgb), .09);
 }
 * { box-sizing: border-box; }
 body { margin: 0; font: 14px/1.5 var(--font); color: var(--ink); background: var(--canvas); }

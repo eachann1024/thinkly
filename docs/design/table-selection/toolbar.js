@@ -16,10 +16,11 @@
       ${menu ? `role="${def.toggle ? "menuitemcheckbox" : "menuitem"}"` : ""}
       ${state !== null ? `aria-${menu ? "checked" : "pressed"}="${state}"` : ""}
       ${disabled ? `aria-disabled="true" data-reason="${D.escape(disabled)}"` : ""}
-      ${def.menu ? `aria-haspopup="${["link", "color", "ai", "alt", "rename"].includes(def.menu) ? "dialog" : "menu"}" aria-expanded="${Boolean(expanded)}" aria-controls="toolbar-popover"` : ""}
+      ${def.menu ? `aria-haspopup="${["link", "color", "alt", "rename"].includes(def.menu) ? "dialog" : "menu"}" aria-expanded="${Boolean(expanded)}" aria-controls="toolbar-popover"` : ""}
+      ${key === "ai" ? 'aria-controls="ai-panel" aria-keyshortcuts="Control+Shift+U Meta+Shift+U"' : ""}
       ${busy ? 'aria-busy="true"' : ""} ${state === "mixed" ? 'data-mixed="true"' : ""}>
       ${busy ? '<span class="copy-spinner" aria-hidden="true"></span>' : D.icon(icon)}
-      ${menu || ["type", "language"].includes(key) ? `<span class="${menu ? "menu-label" : "tool-label"}">${D.escape(label)}</span>` : ""}
+      ${menu || def.text ? `<span class="${menu ? "menu-label" : "tool-label"}">${D.escape(label)}</span>` : ""}
       ${menu && def.shortcut ? `<kbd>${def.shortcut}</kbd>` : ""}
       ${def.menu ? D.icon(menu ? "CaretRight" : "CaretDown") : ""}</button>`;
   };
@@ -48,6 +49,7 @@
     slot.dataset.empty = String(!has); bar.hidden = !has;
     document.querySelector(".selection-idle").hidden = has;
     D.syncPreviewState();
+    D.ai?.refreshControls?.();
     if (!has) { D.closePopover?.(false); return; }
     const focused = bar.contains(document.activeElement) ? document.activeElement.dataset.tool || "more" : null;
     const kind = D.activeContext(), keys = D.contextActions[kind] || D.contextActions.text;
@@ -129,7 +131,8 @@
       event.preventDefault(); D.clearSelection();
     }
     if (!(event.metaKey || event.ctrlKey) || !D.hasSelection() || !document.querySelector(".document").contains(event.target)) return;
-    const key = { b: "bold", i: "italic", u: "underline", k: "link", c: "copy" }[event.key.toLowerCase()];
+    const key = event.shiftKey && event.key.toLowerCase() === "u" ? "ai"
+      : { b: "bold", i: "italic", u: "underline", k: "link", c: "copy" }[event.key.toLowerCase()];
     if (key && (D.contextActions[D.activeContext()] || []).includes(key)) {
       if (key === "copy" && D.isTable()) return;
       event.preventDefault();

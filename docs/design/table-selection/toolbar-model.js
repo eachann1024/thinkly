@@ -16,7 +16,7 @@
     right: action("右对齐", "TextAlignRight", 2, 50, { toggle: true, mutate: true }),
     outdent: action("减少缩进", "TextIndent", 2, 35, { mutate: true }),
     indent: action("增加缩进", "TextIndent", 2, 40, { mutate: true }),
-    ai: action("加入对话", "Sparkle", 3, 45, { menu: "ai" }),
+    ai: action("加入对话", "Sparkle", 3, 90, { text: true, shortcut: "⌘ ⇧ U" }),
     copy: action("复制选中内容", "Copy", 3, 100, { shortcut: "⌘ C" }),
     clear: action("清除格式", "Eraser", 4, 10, { mutate: true }),
     undo: action("撤销上次操作", "ArrowCounterClockwise", 4, 0, { mutate: true }),
@@ -39,10 +39,10 @@
     heading: ["type", "color", "align", "ai", "copy", "clear", "undo", "cancel"],
     list: ["type", ...marks, "link", "outdent", "indent", "ai", "copy", "clear", "undo", "cancel"],
     quote: ["type", ...marks, "link", "align", "ai", "copy", "clear", "undo", "cancel"],
-    grid: ["bold", "italic", "underline", "color", "left", "center", "right", "ai", "copy", "edit", "clear", "undo", "cancel"],
-    cell: [...marks, "link", "align", "ai", "copy", "edit", "clear", "undo", "cancel"],
+    grid: ["bold", "italic", "underline", "color", "left", "center", "right", "ai", "copy", "clear", "undo", "cancel"],
+    cell: [...marks, "link", "align", "ai", "copy", "clear", "undo", "cancel"],
     image: ["left", "center", "right", "zoom", "alt", "copy", "download", "undo", "cancel"],
-    code: ["language", "wrap", "format", "copy", "download", "edit", "undo", "cancel"],
+    code: ["language", "wrap", "format", "ai", "copy", "download", "edit", "undo", "cancel"],
     link: ["open", "editLink", "unlink", "copy", "undo", "cancel"],
     file: ["zoom", "rename", "copy", "download", "undo", "cancel"],
     mixed: ["left", "center", "right", "copy", "undo", "cancel"],
@@ -69,7 +69,7 @@
     if (D.actions[key].mutate && S.condition === "readonly") return "只读内容，无法修改";
     if (key === "undo" && !D.history.length) return "还没有可撤销的操作";
     if (key === "format" && D.currentLanguage() !== "JSON") return "原型仅支持 JSON 格式化";
-    if (key === "edit" && D.isTable() && D.cells().length !== 1) return "请先选择一个单元格";
+    if (key === "ai" && !D.selectionText().trim()) return "选区没有可引用的文字";
     if (key === "outdent" && !Number(D.selectedBlocks()[0]?.dataset.indent)) return "已在最外层";
     if (key === "indent" && Number(D.selectedBlocks()[0]?.dataset.indent) >= 3) return "已达到三级缩进";
     if (key === "copy" && (D.copyStatus === "busy" || S.condition === "busy")) return "正在复制";
@@ -108,7 +108,7 @@
     if (kind === "code") return D.stage.querySelector("code").textContent;
     if (kind === "link") return D.stage.querySelector("[data-link]")?.getAttribute("href") || "";
     if (kind === "file") return D.stage.querySelector("[data-filename]")?.textContent || "";
-    return D.selectedBlocks().map(node => node.textContent.trim()).join("\n");
+    return D.selectedBlocks().map(node => node.innerText.trim()).join("\n");
   };
   document.querySelector("#toolbar-plan").innerHTML = `
     <div class="finding"><strong>统一组件</strong><p>文字、图片、链接与代码当前分开渲染，控件尺寸与定位规则各有差异。</p><p>同一外壳 + 选区能力 + 动作配置。桌面 46px 高 / 32px 控件 / 18px 图标；触屏统一扩大命中区。</p></div>

@@ -42,17 +42,11 @@
 .toolbar[data-inactive="true"] { box-shadow: none; }
 .toolbar[data-inactive="true"] .selection-label { color: var(--secondary); }
 .selection-idle { display: flex; align-items: center; color: var(--secondary); min-height: var(--toolbar-height); padding-left: 2px; }
-[data-design="frame"] .toolbar-slot { min-height: var(--toolbar-height); margin-bottom: 0; }
-[data-design="frame"] .toolbar {
-  width: max-content; width: 100%; height: var(--toolbar-height); padding: 6px; border: 1px solid var(--line); border-radius: 8px 8px 0 0; box-shadow: none; background: var(--bar); }
-[data-design="frame"] .toolbar .selection-label { margin-right: auto; }
-[data-design="frame"] .toolbar-slot[data-empty="true"] { margin-bottom: 10px; }
-[data-design="frame"] .workspace:not([data-context="grid"]):not([data-context="cell"]) .toolbar-slot { margin-bottom: 0; }
 .toolbar-popover {
   position: fixed; z-index: 30; width: 238px; max-width: calc(100vw - 20px); padding: 6px;
   background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow-y: auto;
 }
-.toolbar-popover[data-kind="link"], .toolbar-popover[data-kind="ai"], .toolbar-popover[data-kind="editCode"],
+.toolbar-popover[data-kind="link"], .toolbar-popover[data-kind="editCode"],
 .toolbar-popover[data-kind="alt"], .toolbar-popover[data-kind="rename"] { width: 330px; padding: 16px; }
 .toolbar-popover [role^="menuitem"], .toolbar-popover .popover-back {
   width: 100%; min-height: 36px; padding: 8px 9px; display: flex; align-items: center; gap: 10px; text-align: left; border-radius: 5px;
@@ -81,9 +75,6 @@
 .color-options button:hover { border-color: var(--selection-edge); }
 .color-letter { color: var(--chip-color); font: 18px Georgia, serif; display: block; border-bottom: 2px solid var(--chip-color); }
 .color-fill { color: var(--ink); display: grid; place-items: center; height: 24px; border-radius: 3px; background: color-mix(in srgb, var(--chip-color) 20%, var(--paper)); }
-.connection-state { font-weight: 400; }
-.selection-excerpt { margin: 5px 0 14px; padding: 10px 12px; border-left: 2px solid var(--selection-edge); background: rgba(var(--selection-rgb), .06); max-height: 125px; overflow: auto; white-space: pre-wrap; font-size: 13px; }
-.ai-boundary { font-size: 13px; color: var(--secondary); margin: 0; line-height: 1.7; }
 .toolbar-tooltip {
   position: fixed; display: flex; align-items: center; gap: 10px; z-index: 40;
   padding: 7px 10px; background: var(--ink); color: var(--paper); border-radius: 6px; font-size: 12px;
@@ -94,14 +85,12 @@
 @keyframes copy-spin { to { transform: rotate(360deg); } }
 @media (max-width: 600px) {
   :root { --toolbar-height: 54px; --tool-size: 40px; --tool-icon: 19px; }
-  .toolbar-slot, [data-design="frame"] .toolbar-slot { padding-left: 0; min-height: 68px; }
-  .toolbar, [data-design="frame"] .toolbar {
-  width: max-content; gap: 0; padding: 6px; overflow: visible; border-radius: 8px; width: 100%; }
+  .toolbar-slot { padding-left: 0; min-height: 68px; }
+  .toolbar { width: 100%; gap: 0; padding: 6px; overflow: visible; border-radius: 8px; }
   .toolbar .tool-label { display: inline; }
   .toolbar .selection-label { font-size: 12px; max-width: 120px; padding-inline: 7px; }
   .toolbar .tool-group:not([hidden]) ~ .tool-group:not([hidden]) { margin-left: 4px; padding-left: 4px; }
   .toolbar-popover [role^="menuitem"] { min-height: 42px; }
-  [data-design="frame"] .toolbar-slot { margin-bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .copy-spinner { animation: none; border-right-color: currentColor; } }
 @media (forced-colors: active) {

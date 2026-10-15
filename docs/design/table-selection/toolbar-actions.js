@@ -1,11 +1,12 @@
 (() => {
   const D = window.TableDesign, S = D.state;
-  D.remember = () => {
+  D.remember = (aiTurnId = null) => {
     D.history.push({
       context: S.context, anchor: S.anchor?.slice(), head: S.head?.slice(), custom: S.custom,
       rows: structuredClone(D.rows), body: D.table.querySelector("tbody").innerHTML,
       gutter: D.wrap.querySelector(".row-gutter").innerHTML, stage: D.stage.innerHTML,
-      cache: { ...D.sampleCache }, file: D.fileAsset,
+      cache: { ...D.sampleCache }, file: D.fileAsset, aiTurnId,
+      insertions: document.querySelector(".ai-insertions").innerHTML,
     });
     if (D.history.length > 30) D.history.shift();
   };
@@ -15,8 +16,10 @@
     D.stage.innerHTML = previous.stage; D.rows = previous.rows; D.fileAsset = previous.file;
     D.table.querySelector("tbody").innerHTML = previous.body;
     D.wrap.querySelector(".row-gutter").innerHTML = previous.gutter;
+    document.querySelector(".ai-insertions").innerHTML = previous.insertions;
     S.anchor = previous.anchor; S.head = previous.head; S.custom = previous.custom;
-    D.clearNativeRange(); D.nativeTarget = null; D.update(); D.toast("已撤销上次操作");
+    D.clearNativeRange(); D.nativeTarget = null; D.ai?.didUndo(previous.aiTurnId);
+    D.update(); D.toast("已撤销上次操作");
   };
   D.copyText = async (text) => {
     if (D.copyStatus === "busy") return;
@@ -80,6 +83,7 @@
     if (S.condition === "inactive") S.condition = "normal";
     const kind = D.activeContext();
     if (key === "copy") return D.copy();
+    if (key === "ai") return D.ai.addSelection();
     if (key === "undo") return D.undo();
     if (key === "cancel") return D.clearSelection();
     if (key === "download") return D.downloadSelection();
@@ -90,8 +94,7 @@
       return;
     }
     if (key === "edit") {
-      if (D.isTable()) D.editCell(D.cells()[0]);
-      else if (kind === "code") D.openPopover("editCode", D.bar.querySelector("[data-more]"));
+      if (kind === "code") D.openPopover("editCode", D.bar.querySelector("[data-more]"));
       return;
     }
     if (key === "format") {
@@ -145,10 +148,6 @@
   D.submitPopover = (form) => {
     const data = new FormData(form), name = form.dataset.form;
     const error = (message) => { const node = form.querySelector(".field-error"); node.hidden = false; node.textContent = message; };
-    if (name === "ai") {
-      const text = [D.selectionText(), data.get("prompt")?.trim()].filter(Boolean).join("\n\n");
-      D.closePopover(true); D.copyText(text); return;
-    }
     if (S.condition === "readonly") return error("只读内容，无法修改");
     if (name === "link") {
       const url = D.safeUrl(String(data.get("url")).trim());
