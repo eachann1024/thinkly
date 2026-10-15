@@ -1,8 +1,8 @@
 cask "goose-note" do
   arch arm: "-arm64", intel: ""
-  version "1.7.189,9f98be7"
-  sha256 arm: "e736d1ae2ce3c999dfe297231d3798fdeaabae89dbff4aec7a3298321f7f976c",
-         intel: "bb045e84d80ce4330f09cff17d3bcff918f30c3b5b796553e38f40a1c4fe3c03"
+  version "1.7.228,93fb7fa"
+  sha256 arm: "9320183627e4124aae5f1bca248205b52d1454a336b77e01b1aaf603a09f3ec6",
+         intel: "927d3f12121d6ef338014464ccf8271d05d1a0252e48f5726d05e5d70be57cd3"
   url "https://github.com/eachann1024/goose-notes/releases/download/v#{version.csv.first}-#{version.csv.second}/Goose.Note-#{version.csv.first}#{arch}.dmg"
   name "Goose Note"
   desc "Local-first Markdown notes with AI"
