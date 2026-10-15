@@ -17,9 +17,6 @@ import { dirname, join, resolve } from "node:path";
 import { platform } from "node:process";
 import { fileURLToPath } from "node:url";
 
-const LSREGISTER =
-  "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
-
 const MARKDOWN_DOCUMENT_TYPE = {
   CFBundleTypeName: "Markdown",
   CFBundleTypeExtensions: ["md", "markdown"],
@@ -48,11 +45,6 @@ function patchMacAppInfoPlist(appPath) {
   } finally {
     rmSync(tmpJson, { force: true });
   }
-}
-
-function registerMacAppWithLaunchServices(appPath) {
-  if (!existsSync(LSREGISTER)) return;
-  execSync(`"${LSREGISTER}" -f "${appPath}"`, { stdio: "inherit" });
 }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -91,7 +83,6 @@ function collectMac() {
       cpSync(join(entry.src, app), dest, { recursive: true, verbatimSymlinks: true });
       if (platform === "darwin") {
         patchMacAppInfoPlist(dest);
-        registerMacAppWithLaunchServices(dest);
       }
     }
     console.log(`  mac ${entry.label} → dist-desktop/${entry.apps.join(", ")}`);
