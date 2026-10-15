@@ -25,6 +25,7 @@ import { useFolderToolbarActions } from "./useFolderToolbarActions";
 import { useIncomingWorkspaceTabs } from "./useIncomingWorkspaceTabs";
 
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
+import { PageFileTitle } from "./titlebar/PageFileTitle";
 
 interface DesktopTitleBarProps {
   page?: Page;
@@ -164,7 +165,7 @@ export function DesktopTitleBar({
               />
             </div>
           </div>
-        ) : null}
+        ) : !isWelcomeTab && page ? <PageFileTitle page={page} /> : null}
 
         {!aiFullscreenOpen && page?.isLocked && (
           <span className="rounded bg-[var(--goose-color-lock-bg)] px-1.5 py-0.5 text-xs text-[var(--goose-color-lock-text)]">
