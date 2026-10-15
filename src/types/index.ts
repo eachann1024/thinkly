@@ -60,6 +60,8 @@ export interface Page {
   pinnedAt?: number;
   trashedAt?: number; // Soft delete
   trashBatchId?: string; // Soft delete 批次标识，restore 精确匹配同批
+  /** 分屏先编辑的内存草稿；首次内容保存成功后才进入文件列表。 */
+  editorDraft?: boolean;
 
   // Local file system (for local-folder mode)
   localFilePath?: string;

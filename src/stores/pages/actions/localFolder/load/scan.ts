@@ -87,8 +87,7 @@ export const loadLocalFolderPagesOnce = async (
         Object.entries(state.pages).filter(
           ([, page]) =>
             page.workspaceId === notebookId &&
-            page.localUnsaved &&
-            !page.localFilePath,
+            (page.editorDraft || (page.localUnsaved && !page.localFilePath)),
         ),
       );
       const updated = {

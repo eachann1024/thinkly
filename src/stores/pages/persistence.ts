@@ -65,6 +65,7 @@ export const isLocalFolderPage = (page: Page | undefined): boolean => {
 
 export const persistPageSnapshot = (page: Page | undefined): boolean => {
   if (!page) return false;
+  if (page.editorDraft) return true;
 
   if (isLocalFolderPage(page)) {
     syncLocalPageMetadataCache(page.id, page);

@@ -7,7 +7,9 @@ import { pickRandomPageIcon } from "@/lib/randomPageIcon";
 import { v4 as uuidv4 } from "uuid";
 import type { Page } from "@/types";
 import { cloneLocalPageContent, focusNewPage } from "./content";
-import { isUnsavedLocalPage } from "@/lib/unsavedLocalPage";
+import { isUnsavedEditorPage, localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
+import { discardPendingLocalSave, localSaveWriteChains } from "../../folderSync";
+import { acknowledgeRecoveryEntry, getRecoveryEntry } from "@/lib/storage/recoveryJournal";
 
 export const createUnsavedLocalPageAction = (
   set: StoreSet,
@@ -59,7 +61,13 @@ export const discardUnsavedLocalPageAction = (
   pageId: string,
 ): void => {
   const page = get().pages[pageId];
-  if (!isUnsavedLocalPage(page)) return;
+  if (!isUnsavedEditorPage(page) || localPageHasPersistableContent(page.content)) return;
+  if (page.editorDraft && (page.localFilePath || localSaveWriteChains.has(pageId))) return;
+  discardPendingLocalSave(pageId);
+  const source = useNotebooks.getState().notebooks[page.workspaceId]?.source === "local-folder"
+    ? "local-file" : "internal-page";
+  const recovery = getRecoveryEntry(source, pageId);
+  if (recovery) acknowledgeRecoveryEntry(source, pageId, recovery.revision);
   set((state) => {
     const nextPages = { ...state.pages };
     delete nextPages[pageId];

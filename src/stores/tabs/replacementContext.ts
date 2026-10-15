@@ -1,7 +1,7 @@
 import type { TabSet, TabGet, TabItem } from "./types";
 import { usePages } from "../usePages";
 import {
-  isUnsavedLocalPage,
+  isUnsavedEditorPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import { useEditorSplit } from "../useEditorSplit";
@@ -41,10 +41,10 @@ export function createTabReplacementContext(
     if (!previousPageId || previousPageId === nextPageId) return;
     const previousPage = usePages.getState().getPage(previousPageId);
     if (
-      isUnsavedLocalPage(previousPage) &&
+      isUnsavedEditorPage(previousPage) &&
       !localPageHasPersistableContent(previousPage.content)
     ) {
-      usePages.getState().discardUnsavedLocalPage(previousPageId);
+      usePages.getState().discardEditorDraftPage(previousPageId);
     }
   };
 

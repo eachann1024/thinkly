@@ -15,6 +15,7 @@ import {
 import { markSelfWrite } from "@/lib/local-md-snapshot";
 import { cloneLocalPageContent } from "./content";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
+import { validateEditorDraftTarget } from "./validateEditorDraftTarget";
 
 export const assignUnsavedLocalFilePathAction = async (
   set: StoreSet,
@@ -23,11 +24,11 @@ export const assignUnsavedLocalFilePathAction = async (
   options?: { title?: string },
 ): Promise<string | null> => {
   const page = get().pages[pageId];
+  if (page?.editorDraft) await validateEditorDraftTarget(get, pageId);
   if (page?.localFilePath) return page.localFilePath;
   if (!isUnsavedLocalPage(page)) return null;
   const notebook = useNotebooks.getState().notebooks[page.workspaceId];
   if (!notebook?.localPath) return null;
-
   const filePath = await allocateLocalMarkdownFilePath(
     get,
     page.workspaceId,
@@ -35,6 +36,7 @@ export const assignUnsavedLocalFilePathAction = async (
     options?.title,
   );
   if (!filePath) return null;
+  if (page.editorDraft) await validateEditorDraftTarget(get, pageId, filePath);
 
   const idMap = readLocalPageIdMap(page.workspaceId);
   const relativePath = toRelativePath(notebook.localPath, filePath);

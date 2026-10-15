@@ -1,4 +1,4 @@
-import type { JSONContent } from "@/types";
+import type { JSONContent, Page } from "@/types";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { HostAdapter } from "@/lib/host/adapter";
 import {
@@ -17,6 +17,8 @@ export interface RecoveryJournalEntry {
   /** 首次未 ACK 编辑时的持久化基线；连续编辑期间保持不变。 */
   baseSignature?: string;
   baseUpdatedAt?: number;
+  /** 尚未创建文件的编辑器草稿身份；恢复时无需依赖磁盘已存在该页。 */
+  draftPage?: Page;
 }
 
 interface LegacyRecoveryJournalState {
@@ -114,6 +116,7 @@ export const recordRecoveryEntry = (input: {
   content: JSONContent | null;
   baseSignature?: string | (() => string);
   baseUpdatedAt?: number;
+  draftPage?: Page;
   now?: number;
 }): RecoveryJournalEntry | null => {
   migrateLegacyEntries();
@@ -132,6 +135,9 @@ export const recordRecoveryEntry = (input: {
       content: input.content,
       revision: lastRevision + 1,
       updatedAt: input.now ?? Date.now(),
+      ...(input.draftPage || previous?.draftPage
+        ? { draftPage: input.draftPage ?? previous?.draftPage }
+        : {}),
       // WAL 未 ACK 前始终沿用首次持久化基线，不能随内存连续编辑漂移。
       ...(previous?.baseSignature || baseSignature
         ? { baseSignature: previous?.baseSignature ?? baseSignature }

@@ -20,6 +20,7 @@ import { toast } from "@/components/ui/sonner";
 import { useNotebooks } from "../../useNotebooks";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
 import { queueLocalPageSave } from "../folderSync";
+import { clonePageContent } from "../actions/create/content";
 
 export function createUpdatePageSlice(
   set: import("zustand").StoreApi<PagesState>["setState"],
@@ -37,12 +38,17 @@ export function createUpdatePageSlice(
         };
       }
       const page = get().pages[id];
+      if (page?.editorDraft && !isLocalFolderPage(page) && "content" in updates) {
+        updates = { ...updates, content: clonePageContent(updates.content) };
+      }
       const shouldPersistLocalMeta =
         isLocalFolderPage(page) && shouldPersistLocalPageMetaUpdate(updates);
       const silent = options?.silent === true;
       const isLocal = isLocalFolderPage(page);
       const isDurableContentEdit =
-        Boolean(page) && "content" in updates && !silent;
+        Boolean(page) && "content" in updates && !silent &&
+        (!page?.editorDraft || localPageHasPersistableContent(updates.content) ||
+          localPageHasPersistableContent(page.content));
       const recoveryEntry = isDurableContentEdit
         ? recordRecoveryEntry({
             source: isLocal ? "local-file" : "internal-page",
@@ -50,6 +56,11 @@ export function createUpdatePageSlice(
             content: updates.content ?? null,
             baseSignature: () => getContentSignature(page?.content ?? null),
             baseUpdatedAt: page?.updatedAt,
+            ...(page?.editorDraft ? { draftPage: {
+              ...page,
+              content: updates.content ?? page.content,
+              ...(isLocal ? { localFilePath: undefined, localUnsaved: true } : {}),
+            } } : {}),
           })
         : null;
       if (isDurableContentEdit && !recoveryEntry) {
@@ -62,7 +73,7 @@ export function createUpdatePageSlice(
         isLocal && !silent && isLocalPageFrontmatterSettingsUpdate(updates);
       // 仅改字体/锁定也要落盘；读失败页不写，避免覆盖坏文件
       const shouldQueueLocalSettingsSave =
-        shouldMergeFrontmatterSettings && page?.localReadState !== "error";
+        shouldMergeFrontmatterSettings && page?.localReadState !== "error" && !page?.editorDraft;
 
       if (shouldMergeFrontmatterSettings && page?.localReadState === "error") {
         toast.error("页面读取失败，未更改设置");
@@ -153,9 +164,11 @@ export function createUpdatePageSlice(
           useNotebooks.getState().notebooks[page.workspaceId]?.source ===
             "local-folder" &&
           page.localReadState !== "error" &&
+          (!page.editorDraft || localPageHasPersistableContent(updates.content) ||
+            state.dirtyLocalPageIds[id]) &&
           !(
             page.localUnsaved &&
-            !localPageHasPersistableContent(updates.content)
+            !localPageHasPersistableContent(updates.content) && !state.dirtyLocalPageIds[id]
           );
 
         // 内容编辑 或 仅改 frontmatter 设置：标脏并入防抖写盘队列
@@ -198,7 +211,16 @@ export function createUpdatePageSlice(
         return;
       }
 
-      const persisted = persistPageSnapshot(updatedPage);
+      if (updatedPage.editorDraft && !isDurableContentEdit) return;
+
+      const persisted = persistPageSnapshot(
+        updatedPage.editorDraft ? { ...updatedPage, editorDraft: undefined } : updatedPage,
+      );
+      if (persisted && updatedPage.editorDraft) {
+        set((state) => ({ pages: {
+          ...state.pages, [id]: { ...state.pages[id], editorDraft: undefined },
+        } }));
+      }
       if (persisted && recoveryEntry) {
         acknowledgeRecoveryEntry("internal-page", id, recoveryEntry.revision);
       } else if (!persisted) {

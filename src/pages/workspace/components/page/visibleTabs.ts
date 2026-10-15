@@ -1,5 +1,5 @@
 import {
-  isUnsavedLocalPage,
+  isUnsavedEditorPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import type { Page } from "@/types";
@@ -50,7 +50,7 @@ export function isReusableEmptyWorkspaceTab(
   const page = getPage(tab.pageId);
   return Boolean(
     page &&
-      isUnsavedLocalPage(page) &&
+      isUnsavedEditorPage(page) &&
       !localPageHasPersistableContent(page.content),
   );
 }

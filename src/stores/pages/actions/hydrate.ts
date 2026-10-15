@@ -18,6 +18,7 @@ import {
 } from "@/lib/storage/recoveryJournal";
 import { toast } from "@/components/ui/sonner";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
+import { recoverEditorDraft } from "./recoverEditorDraft";
 import {
   repairLegacyTitleChildrenInPages,
   repairNormalizedContentInPages,
@@ -101,7 +102,14 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
   let conflictCount = 0;
   for (const entry of listRecoveryEntries("internal-page")) {
     const current = recoveredPages[entry.id];
-    if (!current) continue;
+    if (!current) {
+      const draft = recoverEditorDraft(entry);
+      if (draft) {
+        recoveredPages[entry.id] = draft;
+        recoveredCount += 1;
+      }
+      continue;
+    }
     const currentSignature = getContentSignature(current.content);
     if (
       currentSignature === getContentSignature(entry.content)

@@ -13,7 +13,7 @@ import {
 } from "./helpers";
 import { usePages } from "../usePages";
 import {
-  isUnsavedLocalPage,
+  isUnsavedEditorPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import { useNotebooks } from "../useNotebooks";
@@ -44,10 +44,10 @@ export function createClosingTabActions(
         for (const pageId of closedPageIds) {
           const closedPage = usePages.getState().getPage(pageId);
           if (
-            isUnsavedLocalPage(closedPage) &&
+            isUnsavedEditorPage(closedPage) &&
             !localPageHasPersistableContent(closedPage.content)
           ) {
-            usePages.getState().discardUnsavedLocalPage(pageId);
+            usePages.getState().discardEditorDraftPage(pageId);
           } else {
             toFlush.push(pageId);
           }

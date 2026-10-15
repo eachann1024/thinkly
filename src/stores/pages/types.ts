@@ -194,6 +194,8 @@ export interface PagesState {
   }) => Promise<string | null>;
   /** Electron 新标签：内存页，输入内容后再写盘。 */
   createUnsavedLocalPage: (workspaceId: string, parentId?: string) => string;
+  createEditorDraftPage: (sourcePageId: string) => string;
+  discardEditorDraftPage: (pageId: string) => void;
   discardUnsavedLocalPage: (pageId: string) => void;
   materializeUnsavedLocalPage: (
     pageId: string,

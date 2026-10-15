@@ -134,7 +134,7 @@ export function EditorHostBridge({
         const pagesStore = usePages.getState();
         const livePage = pagesStore.pages[page.id] ?? page;
         const contentToSave =
-          contentMode === "normalized" && effectiveSingleTabMode()
+          contentMode === "normalized" && effectiveSingleTabMode() && !livePage.editorDraft
             ? withInternalPageTitle(content, getPageTitle(livePage))
             : content;
         pagesStore.updatePage(

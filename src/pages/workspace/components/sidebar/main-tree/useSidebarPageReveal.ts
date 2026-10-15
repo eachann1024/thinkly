@@ -1,7 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Page } from "@/types";
 
-type RevealPage = Pick<Page, "id" | "workspaceId" | "parentId" | "trashedAt" | "localUnsaved">;
+type RevealPage = Pick<Page, "id" | "workspaceId" | "parentId" | "trashedAt" | "localUnsaved" | "editorDraft">;
 
 interface SidebarPageRevealOptions {
   activeNotebookId: string | null;
@@ -60,7 +60,7 @@ export function useSidebarPageReveal({
     const intent = pending.current;
     if (!intent || !activeNotebookId || !treeReady) return;
     const page = pages[intent.pageId];
-    if (!page || page.workspaceId !== activeNotebookId || page.trashedAt || page.localUnsaved) return;
+    if (!page || page.workspaceId !== activeNotebookId || page.trashedAt || page.localUnsaved || page.editorDraft) return;
 
     const ancestors: string[] = [];
     const seen = new Set([page.id]);
