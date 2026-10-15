@@ -103,6 +103,7 @@ public/fonts/*.otf
 !scripts/build-ci-installers.mjs
 !scripts/publish-release.mjs
 !scripts/desktop-release-support.mjs
+!scripts/desktop-release-notes.mjs
 !scripts/select-desktop-release.mjs
 !scripts/release-desktop.mjs
 !scripts/desktop-download-metadata.mjs

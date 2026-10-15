@@ -1,4 +1,9 @@
-export type AppUpdateCheckResult =
+export type AppReleaseDetails = {
+  releaseNotes?: string;
+  publishedAt?: string;
+};
+
+export type AppUpdateCheckResult = AppReleaseDetails & (
   | {
       status: "up-to-date";
       currentVersion: string;
@@ -18,9 +23,9 @@ export type AppUpdateCheckResult =
       currentVersion: string;
       reason: string;
       releaseUrl: string;
-    };
+    });
 
-export type AppUpdateState = {
+export type AppUpdateState = AppReleaseDetails & {
   status: "idle" | "checking" | "up-to-date" | "available" | "downloading" | "ready" | "error";
   version?: string;
   percent?: number;

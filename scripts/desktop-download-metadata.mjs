@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { REPO, versionFromTag } from "./desktop-release-support.mjs";
+import { publishedReleaseNotes } from "./desktop-release-notes.mjs";
 
 export function releaseInstallers(version) {
   return [
@@ -15,9 +16,10 @@ export function releaseAssets(version) {
   return [...releaseInstallers(version), "SHA256SUMS.txt"].sort();
 }
 
-export function createUpdateFeed(tag, assets, hashes, repo = REPO) {
+export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
   return {
     tag_name: tag, html_url: `https://github.com/${repo}/releases/tag/${tag}`,
+    releaseNotes, publishedAt,
     assets: assets.map((name) => ({ name,
       browser_download_url: `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name)}`,
       sha256: hashes.get(name),
@@ -55,11 +57,11 @@ end
 `;
 }
 
-export function downloadMetadata(version, tag, hashes, signed, publishedAt) {
+export function downloadMetadata(version, tag, hashes, signed, publishedAt, releaseNotes = "") {
   const installers = releaseInstallers(version);
   const files = {
     "Casks/goose-note.rb": createCask(version, tag, hashes, REPO, signed),
-    "updates/latest.json": JSON.stringify(createUpdateFeed(tag, installers, hashes)) + "\n",
+    "updates/latest.json": JSON.stringify(createUpdateFeed(tag, installers, hashes, REPO, releaseNotes, publishedAt)) + "\n",
   };
   if (signed) {
     for (const arch of ["arm64", "x64"]) {
@@ -89,5 +91,6 @@ export function publishedDownloadMetadata(release) {
   }
   // This sentence is emitted only after both macOS build records report signing and notarization.
   const signed = (release.body ?? "").includes("macOS 安装包已完成代码签名与公证。");
-  return downloadMetadata(version, release.tag_name, hashes, signed, release.published_at);
+  return downloadMetadata(version, release.tag_name, hashes, signed, release.published_at,
+    publishedReleaseNotes(release.body));
 }
