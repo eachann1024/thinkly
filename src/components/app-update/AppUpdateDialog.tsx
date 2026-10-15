@@ -9,17 +9,16 @@ import { updatePercent, updateStatusLabel } from "./updatePresentation";
 export function AppUpdateDialog() {
   const { open, setOpen, currentVersion, state, installing, installError, check, download, install, revealDownload } = useAppUpdate();
   const notes = selectUpdateNotes(currentVersion, state);
-  const busy = installing || state.status === "checking" || state.status === "downloading";
   const percent = updatePercent(state);
-  const statusLabel = updateStatusLabel(state, installing, installError);
+  const statusLabel = state.status === "up-to-date" && !installError
+    ? "" : updateStatusLabel(state, installing, installError);
   const failed = Boolean(installError || state.status === "error" || (state.status === "ready" && state.message));
   const actionLabel = installing ? "正在重启…"
     : state.status === "ready" ? "重启并更新"
-      : state.status === "checking" ? "检查中…"
-        : state.status === "downloading" ? `下载中${percent === undefined ? "…" : ` · ${percent}%`}`
-          : state.downloadPath ? "查看安装包"
-            : state.status === "available" && state.downloadUrl ? "下载更新"
-              : state.status === "error" ? "重试" : "检查更新";
+      : state.status === "checking" || state.status === "downloading" ? undefined
+        : state.downloadPath ? "查看安装包"
+          : state.status === "available" && state.downloadUrl && state.assetName ? "下载更新"
+            : state.status === "error" ? "重试" : undefined;
   const handleAction = () => {
     if (state.status === "ready") void install();
     else if (state.downloadPath) void revealDownload();
@@ -33,23 +32,22 @@ export function AppUpdateDialog() {
     <DialogShell
       open={open}
       onOpenChange={setOpen}
-      title="更新日志"
+      title={`v${notes.version} 更新日志`}
       contentClassName="max-h-[calc(100dvh-64px)] w-[calc(100%-32px)] sm:max-w-[560px]"
-      bodyClassName="space-y-5"
+      bodyClassName="space-y-4"
       footer={(
         <>
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>稍后</Button>
-          <Button type="button" disabled={busy} busy={busy} onClick={handleAction}>
-            {busy && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
-            {actionLabel}
-          </Button>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>{state.status === "ready" ? "稍后" : "关闭"}</Button>
+          {actionLabel && (
+            <Button type="button" disabled={installing} busy={installing} onClick={handleAction}>
+              {installing && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
+              {actionLabel}
+            </Button>
+          )}
         </>
       )}
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-base font-medium">鹅的笔记 v{notes.version}</h2>
-        {publishedAt && <span className="text-sm text-muted-foreground">{publishedAt}</span>}
-      </div>
+      {publishedAt && <p className="text-sm text-muted-foreground">{publishedAt}</p>}
       <UpdateNotes markdown={notes.notes} />
       {statusLabel && <p role="status" aria-live="polite" className={`text-sm ${failed ? "text-destructive" : "text-muted-foreground"}`}>{statusLabel}</p>}
       {state.status === "downloading" && (
