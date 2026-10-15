@@ -133,7 +133,7 @@ export const SidebarSearch = memo(function SidebarSearch() {
       <DropdownMenuContent align="start" className="w-64"><DropdownMenuRadioGroup value={scopeValue} onValueChange={value => session.setScope(value === "all" ? { kind: "all" } : value === "current" ? { kind: "current", notebookId: session.startingNotebookId } : { kind: "notebook", notebookId: value.slice(9) })}>
         <DropdownMenuRadioItem value="current">当前记事本 · {currentName}</DropdownMenuRadioItem><DropdownMenuRadioItem value="all">所有记事本</DropdownMenuRadioItem>
         {Object.values(notebooks).map(n => <DropdownMenuRadioItem key={n.id} value={`notebook:${n.id}`}>{n.name}</DropdownMenuRadioItem>)}
-      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<kbd className="sidebar-search-key" aria-hidden="true">Tab</kbd></div></div>
+      </DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>}<kbd className="sidebar-search-key" aria-hidden="true"><span>Tab</span></kbd></div></div>
     {showScopeHint && <p id="sidebar-search-scope-hint" className="sidebar-search-scope-hint">按 Tab 切换到{session.scope.kind === "all" ? "当前记事本" : "所有记事本"}</p>}
     <div className="sidebar-search-filters"><span role="status">{searchError ? "" : hasQuery && (loading || pending) ? "搜索中…" : hasQuery ? `${searchResults.all.length} 篇` : ""}</span></div>
     {!hasQuery && showRecent && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-search-hide-recent" onClick={() => setShowRecent(false)}>隐藏最近访问</Button>}
