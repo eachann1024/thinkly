@@ -4,7 +4,9 @@ const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, "utf8"));
 const repo = process.env.GITHUB_REPOSITORY;
 const input = process.env.INPUT_PR?.trim() || String(event.pull_request?.number || "");
 if (input && !/^[1-9]\d*$/.test(input)) throw new Error("Invalid PR number");
-if (!input && process.env.GITHUB_REF !== "refs/heads/main") throw new Error("Select main for a standalone recording");
+if (!event.pull_request && process.env.GITHUB_REF !== "refs/heads/main") {
+  throw new Error("Select main when manually starting a recording");
+}
 
 async function api(route) {
   const response = await fetch(`https://api.github.com/repos/${repo}/${route}`, {

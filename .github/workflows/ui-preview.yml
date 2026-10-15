@@ -1,4 +1,5 @@
 name: PR UI preview
+run-name: "PR UI preview #${{ github.event.pull_request.number || inputs.pr || '0' }}"
 
 on:
   pull_request:
