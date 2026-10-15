@@ -11,6 +11,10 @@ import {
 } from "@/components/editor/ui/popover";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import {
+  useSelectionMenu,
+  type SelectionMenuChange,
+} from "../useSelectionMenu";
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -18,31 +22,36 @@ export function LinkButton({
   isLinkActive,
   linkUrl,
   bindTooltip,
+  onOpenChange,
 }: {
   isLinkActive: boolean;
   linkUrl: string | undefined;
   bindTooltip: BindTooltip;
+  onOpenChange?: SelectionMenuChange;
 }) {
   const editor = useBlockNoteEditor();
-  const [open, setOpen] = useState(false);
+  const { open, setOpen, runAction } = useSelectionMenu(
+    editor,
+    "link",
+    onOpenChange,
+  );
   const [url, setUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setUrl(linkUrl || "");
-      requestAnimationFrame(() => inputRef.current?.focus());
-    }
-  }, [open, linkUrl]);
+    if (!open) return;
+    const frame = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
 
   const handleSubmit = useCallback(() => {
     const trimmed = url.trim();
     if (trimmed) {
-      editor.createLink(trimmed);
+      runAction(() => editor.createLink(trimmed));
     }
     setOpen(false);
     setUrl("");
-  }, [url, editor]);
+  }, [url, editor, runAction, setOpen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -54,7 +63,7 @@ export function LinkButton({
         setOpen(false);
       }
     },
-    [handleSubmit],
+    [handleSubmit, setOpen],
   );
 
   if (isLinkActive) {
@@ -64,7 +73,7 @@ export function LinkButton({
           <Toggle
             size="sm"
             pressed={true}
-            onPressedChange={() => editor.deleteLink()}
+            onPressedChange={() => runAction(() => editor.deleteLink())}
             aria-label="移除链接"
             className={ITEM_CLASS}
           >
@@ -77,7 +86,13 @@ export function LinkButton({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setUrl(linkUrl || "");
+        setOpen(next);
+      }}
+    >
       <Tooltip {...bindTooltip("link")}>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
@@ -107,6 +122,7 @@ export function LinkButton({
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="https://..."
+            aria-label="链接地址"
             className="h-8 text-sm"
           />
           <div className="flex justify-end gap-1">

@@ -1,4 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { parseSelectionQuoteAttrs, type AiSelectionQuoteAttrs } from "./selectionQuoteData";
+import { cleanupOrphanComposerZwspNodes, placeCaretInEditor } from "./composerChipDom";
 import { extractClipboardImageFiles } from "@/components/editor/utils/pasteClipboardImage";
 import {
   getPreviewableImageChip,
@@ -18,7 +20,8 @@ export function useComposerInteractions(
   clearCommandState: () => void,
 ) {
   const { disabled } = props;
-  const { imageRegistryRef } = state;
+  const { imageRegistryRef, editorRef, emitCurrentContent } = state;
+  const [quotePreview, setQuotePreview] = useState<AiSelectionQuoteAttrs | null>(null);
   const {
     hideImagePreview,
     removeImageChip,
@@ -28,6 +31,24 @@ export function useComposerInteractions(
   const handleClickNative = useCallback(
     (event: MouseEvent) => {
       const target = event.target as HTMLElement;
+      const quoteChip = target.closest<HTMLElement>("[data-ai-selection-quote-attrs]");
+      if (quoteChip) {
+        event.preventDefault();
+        if (target.closest("[data-ai-quote-remove]")) {
+          if (disabled) return;
+          quoteChip.remove();
+          const editor = editorRef.current;
+          if (editor) {
+            cleanupOrphanComposerZwspNodes(editor);
+            editor.focus();
+            placeCaretInEditor(editor, false);
+          }
+          emitCurrentContent();
+        } else {
+          setQuotePreview(parseSelectionQuoteAttrs(quoteChip.dataset.aiSelectionQuoteAttrs));
+        }
+        return;
+      }
       const removeBtn = target.closest<HTMLElement>("[data-ai-image-remove]");
       if (removeBtn) {
         event.preventDefault();
@@ -61,7 +82,7 @@ export function useComposerInteractions(
         onOpenPage(mentionId);
       }
     },
-    [hideImagePreview, onOpenPage, removeImageChip, setImagePreviewContent],
+    [disabled, editorRef, emitCurrentContent, hideImagePreview, onOpenPage, removeImageChip, setImagePreviewContent],
   );
 
   const handleBlurNative = useCallback(() => {
@@ -88,5 +109,5 @@ export function useComposerInteractions(
     [disabled, insertImages],
   );
 
-  return { handleClickNative, handleBlurNative, handlePasteNative };
+  return { handleClickNative, handleBlurNative, handlePasteNative, quotePreview, setQuotePreview };
 }

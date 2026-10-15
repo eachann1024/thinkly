@@ -1,5 +1,5 @@
 import { EditorAction } from "@/components/editor/ui/button";
-import { type CSSProperties, type ComponentType } from "react";
+import { type ComponentType, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { FoldVertical, Plus, WandSparkles } from "@/components/ui/icons";
 import {
@@ -10,15 +10,7 @@ import {
 } from "@/lib/notebook-ai/composerSlashCommands";
 import { useCenteredActiveItemScroll } from "@/components/editor/hooks/useCenteredActiveItemScroll";
 import { cn } from "@/lib/utils";
-import { EDITOR_FONT_SIZE_DEFAULT, useSettings } from "@/stores/useSettings";
-
-const POPOVER_MAX_HEIGHT = 280;
-const POPOVER_EMPTY_HEIGHT = 40;
-const POPOVER_WIDTH = 340;
-const VIEWPORT_PADDING = 8;
-const GAP = 4;
-const ITEM_HEIGHT = 48;
-const LIST_PADDING = 12;
+import { useComposerSuggestionsPosition } from "./useComposerSuggestionsPosition";
 
 const getSkillItemSelector = (index: number) => `[data-skill-index="${index}"]`;
 
@@ -37,10 +29,14 @@ export function SkillSuggestionsList(props: {
   activeIndex: number;
   listKey?: string;
   anchorRect: DOMRect;
+  composerRef: RefObject<HTMLDivElement | null>;
   onSelect: (item: ComposerSlashItem) => void;
 }) {
-  const editorUiScale =
-    useSettings((state) => state.editorFontSize) / EDITOR_FONT_SIZE_DEFAULT;
+  const { floatingRef, style, maxWidth, maxHeight } = useComposerSuggestionsPosition(
+    props.composerRef,
+    props.anchorRect,
+    "/",
+  );
   const listRef = useCenteredActiveItemScroll<HTMLDivElement>({
     activeIndex: props.activeIndex,
     itemCount: props.items.length,
@@ -48,58 +44,10 @@ export function SkillSuggestionsList(props: {
     itemSelector: getSkillItemSelector,
   });
 
-  const estimatedHeight =
-    props.items.length === 0
-      ? POPOVER_EMPTY_HEIGHT
-      : Math.min(
-          POPOVER_MAX_HEIGHT,
-          props.items.length * ITEM_HEIGHT + LIST_PADDING,
-        );
-
-  const spaceBelow =
-    window.innerHeight - props.anchorRect.bottom - GAP - VIEWPORT_PADDING;
-  const spaceAbove = props.anchorRect.top - GAP - VIEWPORT_PADDING;
-  const canFitAbove = spaceAbove >= estimatedHeight;
-  const canFitBelow = spaceBelow >= estimatedHeight;
-  const placeAbove = canFitAbove
-    ? true
-    : !canFitBelow && spaceAbove > spaceBelow;
-
-  const available =
-    Math.max(0, placeAbove ? spaceAbove : spaceBelow) / editorUiScale;
-  const maxHeight = Math.min(
-    POPOVER_MAX_HEIGHT,
-    Math.max(
-      props.items.length === 0
-        ? POPOVER_EMPTY_HEIGHT
-        : ITEM_HEIGHT + LIST_PADDING,
-      available,
-    ),
-  );
-
-  const anchorLeft =
-    Number.isFinite(props.anchorRect.left) &&
-    (props.anchorRect.width > 0 || props.anchorRect.height > 0)
-      ? props.anchorRect.left
-      : VIEWPORT_PADDING;
-  const maxLeft =
-    window.innerWidth - POPOVER_WIDTH * editorUiScale - VIEWPORT_PADDING;
-  const left = Math.max(VIEWPORT_PADDING, Math.min(anchorLeft, maxLeft));
-
-  const style: CSSProperties = {
-    position: "fixed",
-    left,
-    zIndex: 9999,
-    ...(placeAbove
-      ? {
-          bottom:
-            window.innerHeight - props.anchorRect.top + GAP * editorUiScale,
-        }
-      : { top: props.anchorRect.bottom + GAP * editorUiScale }),
-  };
-
   return createPortal(
     <div
+      ref={floatingRef}
+      data-ai-composer-suggestions="command"
       style={style}
       onMouseDown={(event) => event.preventDefault()}
     >
@@ -107,7 +55,7 @@ export function SkillSuggestionsList(props: {
         ref={listRef}
         data-goose-menu-slot="root"
         className="goose-editor-context-ui goose-floating-surface goose-list-layout w-[340px] overflow-y-auto p-1.5"
-        style={{ maxHeight }}
+        style={{ maxWidth, maxHeight }}
       >
         {props.items.length === 0 ? (
           <div className="px-3 py-2 text-[12px] text-muted-foreground">

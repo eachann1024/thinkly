@@ -59,26 +59,22 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         <Button contentStyle="preserve" variant="ghost" size={null}
           type="button"
           disabled={disabled}
-          className="flex h-7 max-w-[12.5rem] shrink-0 items-center gap-0.5 rounded-[var(--goose-control-radius)] px-1 text-[11px] text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
+          className="flex h-7 min-w-0 max-w-full shrink items-center gap-1 rounded-[var(--goose-control-radius)] px-1 text-xs text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
           aria-label="切换模型"
           title={`当前模型：${effectiveModel?.id ?? effectiveModelId}`}
         >
-          <span className="min-w-0 truncate">
+          <span className="min-w-0 max-w-[12.5rem] truncate">
             {effectiveModel?.label ?? effectiveModelId}
           </span>
           <ChevronDown className="h-3 w-3 shrink-0" strokeWidth={1.75} />
         </Button>
       </PopoverTrigger>
-      {/*
-        触发器在输入条右侧、发送按钮左边：align="end" 让菜单贴右缘往左展，
-        窄侧栏里不会把宽菜单甩出面板。
-      */}
       <PopoverContent
         side="top"
         align="end"
         sideOffset={6}
         collisionPadding={12}
-        className="w-56 p-1.5"
+        className="notebook-ai-model-menu w-56 max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-1.5"
       >
         <div className="px-2 pb-1.5 pt-1 text-xs text-muted-foreground">
           选择模型

@@ -1,4 +1,5 @@
 import { EditorAction } from "@/components/editor/ui/button";
+import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import {
   AlignCenter,
   AlignLeft,
@@ -171,10 +172,8 @@ export function ImageToolbar({
           e.preventDefault();
           e.stopPropagation();
         }}
-        role="toolbar"
-        aria-label="图片操作"
       >
-        <div className="goose-editor-context-ui goose-block-toolbar-surface animate-in fade-in-0 zoom-in-95 duration-150">
+        <SelectionToolbarSurface context="image" aria-label="图片操作" className="goose-editor-context-ui goose-block-toolbar-surface animate-in fade-in-0 zoom-in-95 duration-150">
           {(
             [
               ["left", "左对齐", AlignLeft],
@@ -221,7 +220,7 @@ export function ImageToolbar({
           >
             <Download className="h-[15px] w-[15px]" />
           </ImageToolButton>
-        </div>
+        </SelectionToolbarSurface>
       </div>
     </TooltipProvider>
   );

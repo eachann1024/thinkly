@@ -3,8 +3,21 @@ import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { withPreservedSelection } from "../selectionRestore";
+import type { RunToolbarAction } from "../useSelectionMenu";
+import type { BooleanMarkState } from "../selectionMarkStates";
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
+const MARKS = [
+  { key: "bold", label: "粗体", icon: GooseIcons.Bold, shortcut: "Mod+B" },
+  { key: "italic", label: "斜体", icon: GooseIcons.Italic, shortcut: "Mod+I" },
+  {
+    key: "strike",
+    label: "删除线",
+    icon: GooseIcons.Strikethrough,
+    shortcut: "Mod+Shift+S",
+  },
+] as const;
 
 export function MarkGroup({
   isBold,
@@ -12,63 +25,50 @@ export function MarkGroup({
   isStrike,
   bindTooltip,
   hideMarks,
+  items = ["bold", "italic", "strike"],
+  runAction,
 }: {
-  isBold: boolean;
-  isItalic: boolean;
-  isStrike: boolean;
+  isBold: BooleanMarkState;
+  isItalic: BooleanMarkState;
+  isStrike: BooleanMarkState;
   bindTooltip: BindTooltip;
   hideMarks?: boolean;
+  items?: readonly ("bold" | "italic" | "strike")[];
+  runAction?: RunToolbarAction;
 }) {
   const editor = useBlockNoteEditor();
 
   if (hideMarks) return null;
 
+  const active = { bold: isBold, italic: isItalic, strike: isStrike };
+  const run = runAction ?? ((apply) => withPreservedSelection(editor, apply));
+
   return (
     <>
-      <Tooltip {...bindTooltip("bold")}>
-        <TooltipTrigger asChild>
-          <Toggle
-            size="sm"
-            pressed={isBold}
-            onPressedChange={() => editor.toggleStyles({ bold: true })}
-            aria-label="粗体"
-            className={ITEM_CLASS}
-          >
-            <GooseIcons.Bold className="h-[15px] w-[15px]" />
-          </Toggle>
-        </TooltipTrigger>
-        <ToolbarTooltip label="粗体" shortcut="Mod+B" />
-      </Tooltip>
-
-      <Tooltip {...bindTooltip("italic")}>
-        <TooltipTrigger asChild>
-          <Toggle
-            size="sm"
-            pressed={isItalic}
-            onPressedChange={() => editor.toggleStyles({ italic: true })}
-            aria-label="斜体"
-            className={ITEM_CLASS}
-          >
-            <GooseIcons.Italic className="h-[15px] w-[15px]" />
-          </Toggle>
-        </TooltipTrigger>
-        <ToolbarTooltip label="斜体" shortcut="Mod+I" />
-      </Tooltip>
-
-      <Tooltip {...bindTooltip("strike")}>
-        <TooltipTrigger asChild>
-          <Toggle
-            size="sm"
-            pressed={isStrike}
-            onPressedChange={() => editor.toggleStyles({ strike: true })}
-            aria-label="删除线"
-            className={ITEM_CLASS}
-          >
-            <GooseIcons.Strikethrough className="h-[15px] w-[15px]" />
-          </Toggle>
-        </TooltipTrigger>
-        <ToolbarTooltip label="删除线" shortcut="Mod+Shift+S" />
-      </Tooltip>
+      {MARKS.filter(({ key }) => items.includes(key)).map(
+        ({ key, label, icon: Icon, shortcut }) => (
+          <Tooltip key={key} {...bindTooltip(key)}>
+            <TooltipTrigger asChild>
+              <Toggle
+                size="sm"
+                pressed={active[key] === true}
+                aria-pressed={active[key]}
+                data-format-state={active[key] === "mixed" ? "mixed" : undefined}
+                className={ITEM_CLASS}
+                onPressedChange={() =>
+                  run(() => active[key] === true
+                    ? editor.removeStyles({ [key]: true })
+                    : editor.addStyles({ [key]: true }))
+                }
+                aria-label={active[key] === "mixed" ? `${label}（混合格式）` : label}
+              >
+                <Icon className="h-[15px] w-[15px]" />
+              </Toggle>
+            </TooltipTrigger>
+            <ToolbarTooltip label={active[key] === "mixed" ? `${label}（混合格式）` : label} shortcut={shortcut} />
+          </Tooltip>
+        ),
+      )}
     </>
   );
 }

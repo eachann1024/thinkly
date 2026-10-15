@@ -33,6 +33,7 @@ export function useComposerKeyboard(
   } = flush;
   const handleKeyDownNative = useCallback(
     (event: KeyboardEvent) => {
+      if ((event.target as HTMLElement | null)?.closest("[data-ai-selection-quote-attrs] button")) return;
       if (isImeKeyboardEvent(event)) {
         touchImeSession();
         return;

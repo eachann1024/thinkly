@@ -106,12 +106,11 @@ export function getFormattingSelectionMode(
   const { selection, doc } = editor.prosemirrorState;
 
   if (selection.empty) return "none";
-  if (doc.textBetween(selection.from, selection.to).length === 0) {
-    return "none";
-  }
-
   if (selection instanceof CellSelection) {
     return "cellGrid";
+  }
+  if (doc.textBetween(selection.from, selection.to).length === 0) {
+    return "none";
   }
 
   if (selectionTouchesTable(selection)) {

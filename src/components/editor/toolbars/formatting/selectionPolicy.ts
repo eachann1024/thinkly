@@ -1,4 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
+import { CellSelection } from "prosemirror-tables";
 
 export const NON_FORMATTABLE_TYPES = new Set([
   "image",
@@ -170,6 +171,8 @@ export function shouldRenderFormattingToolbar(
   const { selection, doc } = editor.prosemirrorState;
 
   if (selection.empty) return false;
+  // A grid remains actionable when its selected cells contain no text.
+  if (selection instanceof CellSelection) return true;
   // 单单元格文字选区：覆盖到实际文字才允许工具栏（含 AI）。
   if (doc.textBetween(selection.from, selection.to).length === 0) return false;
   // 代码块、媒体块等非格式化块不触发格式工具栏。

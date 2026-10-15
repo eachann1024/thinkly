@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
 import {
@@ -90,7 +91,10 @@ export function CodeBlockToolbar({
 
   return (
     <TooltipProvider delayDuration={600}>
-      <div
+      <SelectionToolbarSurface
+        context="code"
+        variant="embedded"
+        aria-label="代码操作"
         contentEditable={false}
         className={cn(
           "goose-editor-position-safe-trigger goose-code-toolbar-actions inline-flex items-center",
@@ -202,7 +206,7 @@ export function CodeBlockToolbar({
             </Tooltip>
           )}
         </div>
-      </div>
+      </SelectionToolbarSurface>
     </TooltipProvider>
   );
 }

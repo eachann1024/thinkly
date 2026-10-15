@@ -5,7 +5,6 @@ import { ArrowUp, Plus } from "@/components/ui/icons";
 import { ComposerPrimitive } from "@assistant-ui/react";
 import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
-import { LoadingState } from "./beautiful-ui/LoadingState";
 import { PromptBar } from "./beautiful-ui/PromptBar";
 import { AiComposerInput } from "@/components/editor/ai/composer/AiComposerInput";
 import { ModelSelectorPopover } from "./ModelSelectorPopover";
@@ -77,7 +76,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
         }}
         className={cn(
           "notebook-ai-composer-form pointer-events-none",
-          isFullscreen ? "px-6 pb-5" : "px-0 pb-2",
+          isFullscreen ? "px-6 pb-5" : "px-0 pb-[12px]",
         )}
       >
         <div
@@ -89,9 +88,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
           <PromptBar streaming={isStreaming}>
             <div
               className={cn(
-                "notebook-ai-composer-shell bui-root flex min-h-[38px] gap-1.5 overflow-hidden rounded-control",
-                "flex-wrap items-end",
-                "px-2.5 pb-1.5 pt-2",
+                "notebook-ai-composer-shell bui-root",
                 dropActive &&
                   "ring-1 ring-inset ring-[var(--goose-accent-solid)]",
               )}
@@ -132,7 +129,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 </IconButton>
               </span>
 
-              {/* 输入区域与底部工具栏始终固定，不按内容切换布局或重建节点。 */}
+              {/* 输入区域与工具栏保持同一节点，内容增高只由 CSS 处理。 */}
               <AiComposerInput
                 ref={inputRef}
                 placeholder={placeholder}
@@ -142,7 +139,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onSubmit={handleSubmit}
                 onEscape={handleEscape}
                 onIsEmptyChange={setIsEmpty}
-                className="order-first w-full basis-full"
+                className="notebook-ai-composer-input order-first col-span-full w-full"
                 searchPages={searchPages}
                 referencePlacement="inline"
                 variant="panel"
@@ -154,7 +151,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onSlashCommand={onSlashCommand}
               />
 
-              <span className="flex shrink-0 items-center">
+              <span className="flex min-w-0 items-center">
                 <ModelSelectorPopover disabled={disabled} />
               </span>
 
@@ -163,17 +160,12 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
 
               <span className="flex shrink-0 items-center">
                 {isStreaming ? (
-                  <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="danger" />}
-                    className="bui-composer-send flex shrink-0 items-center justify-center bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)] "
+                  <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="muted" />}
+                    className="bui-composer-send goose-interactive-primary"
                     aria-label="停止生成"
                     title="停止生成"
                   >
-                    <LoadingState
-                      variant="Dots"
-                      compact
-                      label=""
-                      showElapsed={false}
-                    />
+                    <span className="notebook-ai-stop-square" aria-hidden="true" />
                   </ComposerPrimitive.Cancel>
                 ) : (
                   <IconButton size="sm" tone="muted"

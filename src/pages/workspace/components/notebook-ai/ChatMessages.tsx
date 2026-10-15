@@ -2,7 +2,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 /** 消息列表：线程布局与时间分隔，渲染职责在 messages/。 */
 import { useMemo, useState } from "react";
-import { ArrowDown } from "@/components/ui/icons";
+import { ArrowDown, Quote } from "@/components/ui/icons";
 import { ThreadPrimitive } from "@assistant-ui/react";
 import {
   formatChatMessageTime,
@@ -103,15 +103,18 @@ export function ChatMessages({
               isFullscreen && "notebook-ai-empty-state-fullscreen",
             )}
           >
+            <div className="notebook-ai-empty-mark" aria-hidden="true">
+              <Quote size={26} fill="currentColor" />
+            </div>
             <h2 className="notebook-ai-empty-title text-foreground">
               想怎么修改这篇笔记？
             </h2>
-            <div className="goose-list-layout notebook-ai-empty-suggestions flex flex-col">
-              {["润色这段文字"].map((text) => (
+            <div className="notebook-ai-empty-suggestions">
+              {["润色这段文字", "整理成清单", "提炼要点"].map((text) => (
                 <Button contentStyle="preserve" variant="ghost" size={null}
                   key={text}
                   type="button"
-                  className="goose-list-row notebook-ai-empty-suggestion"
+                  className="notebook-ai-empty-suggestion"
                   onClick={() => onEmptySuggestion?.(text)}
                   aria-label={`发送建议：${text}`}
                 >

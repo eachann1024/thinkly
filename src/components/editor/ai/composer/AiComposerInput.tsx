@@ -1,5 +1,5 @@
 /** AI 输入框 React 空壳；命令式编辑器与输入流程由 controller 组装。 */
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ComposerSuggestionsList } from "./ComposerSuggestionsList";
 import { SkillSuggestionsList } from "./SkillSuggestionsList";
@@ -9,6 +9,7 @@ import type {
   AiComposerInputProps,
 } from "./composerInputTypes";
 import { useAiComposerController } from "./useAiComposerController";
+import { SelectionQuotePreview } from "./SelectionQuotePreview";
 
 export {
   COMPOSER_CHIP_DELETE_FLUSH_MS,
@@ -45,6 +46,7 @@ export const AiComposerInput = forwardRef<
     variant = "compact",
     compactWidthClass,
   } = props;
+  const composerRef = useRef<HTMLDivElement>(null);
   const {
     editorHostRef,
     placeholderRef,
@@ -59,9 +61,12 @@ export const AiComposerInput = forwardRef<
     insertCommand,
     imagePreviewContent,
     setImagePreviewContent,
+    quotePreview,
+    setQuotePreview,
   } = useAiComposerController(props, ref);
   return (
     <div
+      ref={composerRef}
       className={cn(
         "relative min-w-0",
         className ?? "flex-1",
@@ -101,6 +106,7 @@ export const AiComposerInput = forwardRef<
           activeIndex={mention.activeIndex}
           listKey={mention.query}
           anchorRect={mention.anchorRect}
+          composerRef={composerRef}
           onSelect={insertMention}
           onMouseDownCapture={cancelMentionBlurTimer}
         />
@@ -112,6 +118,7 @@ export const AiComposerInput = forwardRef<
           activeIndex={command.activeIndex}
           listKey={command.query}
           anchorRect={command.anchorRect}
+          composerRef={composerRef}
           onSelect={insertCommand}
         />
       ) : null}
@@ -122,6 +129,7 @@ export const AiComposerInput = forwardRef<
         title={imagePreviewContent?.fileName}
         onClose={() => setImagePreviewContent(null)}
       />
+      <SelectionQuotePreview quote={quotePreview} onClose={() => setQuotePreview(null)} />
     </div>
   );
 });

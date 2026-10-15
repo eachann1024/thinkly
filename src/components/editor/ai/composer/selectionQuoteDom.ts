@@ -36,7 +36,19 @@ export function createSelectionQuoteChipElement(
     " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +
     " select-none";
   const label = formatSelectionQuotePromptLabel(attrs);
-  span.textContent = label;
+  const preview = document.createElement("button");
+  preview.type = "button";
+  preview.dataset.aiQuotePreview = "";
+  preview.className = "ai-selection-quote-preview";
+  preview.textContent = label;
+  preview.setAttribute("aria-label", `预览选区引用，来自${attrs.pageTitle}`);
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.dataset.aiQuoteRemove = "";
+  remove.className = "ai-selection-quote-remove";
+  remove.textContent = "×";
+  remove.setAttribute("aria-label", "移除选区引用");
+  span.append(preview, remove);
   span.title = attrs.text;
   span.setAttribute("aria-label", `选区引用，来自${attrs.pageTitle}`);
   if (options?.animate) {

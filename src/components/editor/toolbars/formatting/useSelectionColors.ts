@@ -5,6 +5,7 @@ import {
   getToolbarTargetBlocks,
 } from "./headingBlockBackground";
 import { MIXED } from "./colorPalette";
+import { forEachSelectedTextNode } from "./selectedTextNodes";
 
 /**
  * Walks the current selection and returns the textColor / backgroundColor
@@ -16,7 +17,7 @@ export function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
   return useEditorState({
     editor,
     selector: ({ editor }) => {
-      const { selection, doc } = editor.prosemirrorState;
+      const { selection } = editor.prosemirrorState;
       const headingBackground = getHeadingBackgroundSelectionState(
         getToolbarTargetBlocks(editor),
       );
@@ -37,8 +38,7 @@ export function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
         };
       }
 
-      doc.nodesBetween(from, to, (node: any) => {
-        if (!node.isText) return true;
+      forEachSelectedTextNode(editor.prosemirrorState, (node) => {
         const tc = node.marks.find((m: any) => m.type.name === "textColor");
         const bc = node.marks.find(
           (m: any) => m.type.name === "backgroundColor",
@@ -49,7 +49,6 @@ export function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
         bgColors.add(
           (bc?.attrs.stringValue as string | undefined) ?? "default",
         );
-        return false;
       });
 
       return {

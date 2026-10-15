@@ -39,23 +39,30 @@
  pointer-events: none;
 }
 
-/* 侧栏输入条保留独立内边距，随应用字号缩放。 */
+/* 底部 12px 留白由 form 提供，计入已有 dock 高度观察，避免遮住末条消息。 */
 [data-ai-panel-layout="side-panel"] .notebook-ai-composer-dock {
- left: 1rem;
- right: 1rem;
- bottom: 12px;
+ left: 12px;
+ right: 12px;
+ bottom: 0;
 }
 
 /*
  * 输入条沿用应用的中性输入表面和控件圆角，不叠加菜单投影。
  * 聚焦只加深已有边框，避免在面板底部形成第二层外框。
- * 高度和工具栏位置保持稳定；超出的输入内容在编辑器内滚动。
+ * 输入区域自然增高，超出上限后在编辑器内滚动。
  * 颜色过渡由共享控件动效变量控制。
  */
 .notebook-ai-composer-shell {
  --ai-composer-font-size: calc(var(--editor-font-size, 17px) * 0.85);
  --ai-composer-line-height: calc(var(--ai-composer-font-size) * 1.45);
- border-radius: var(--radius-control);
+ display: grid;
+ grid-template-columns: 28px minmax(0, auto) minmax(0, 1fr) 30px;
+ align-items: center;
+ gap: 4px;
+ min-width: 0;
+ overflow: hidden;
+ padding: 8px;
+ border-radius: 9px;
  background: var(--goose-ai-composer-surface);
  transition:
   color var(--goose-control-motion-duration) ease,
@@ -69,7 +76,7 @@
  --goose-ai-composer-surface: var(--goose-input-surface);
  overflow: hidden;
  border: 1px solid hsl(var(--input));
- border-radius: var(--radius-control);
+ border-radius: 9px;
  background: var(--goose-ai-composer-surface);
  transition: border-color var(--goose-control-motion-duration) ease;
 }
@@ -90,18 +97,49 @@
 .notebook-ai-send-button[data-ready="true"] {
  cursor: pointer;
 }
-/* Stable two-line viewport: extra lines scroll inside, with no per-keystroke layout measurement. */
-[data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
+
+.notebook-ai-composer-shell .bui-composer-send {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 30px;
+ height: 30px;
+ padding: 0;
+ border-radius: 50%;
+}
+
+.notebook-ai-stop-square {
+ width: 10px;
+ height: 10px;
+ border-radius: 2px;
+ background: currentColor;
+}
+
+.notebook-ai-model-menu {
+ max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
+ overscroll-behavior: contain;
+ scrollbar-width: thin;
+}
+
+/* 只放开面板输入高度，不改变共享 compact 输入或重建原生编辑节点。 */
+.notebook-ai-composer-shell [data-ai-composer-editor="true"][data-ai-composer-variant="panel"] {
+ box-sizing: border-box;
  font-family: var(--font-default);
  font-size: var(--ai-composer-font-size);
  line-height: var(--ai-composer-line-height);
- height: calc(var(--ai-composer-line-height) * 2);
- min-height: calc(var(--ai-composer-line-height) * 2);
- max-height: calc(var(--ai-composer-line-height) * 2);
- scrollbar-gutter: stable;
+ height: auto;
+ min-height: calc(var(--ai-composer-line-height) * 2 + 12px);
+ max-height: 120px;
+ padding: 6px 4px;
+ overflow-y: auto;
+ overflow-wrap: anywhere;
+ scrollbar-width: thin;
  overscroll-behavior: contain;
 }
-[data-input-placeholder][data-variant="panel"] {
+.notebook-ai-composer-shell [data-input-placeholder][data-variant="panel"] {
+ top: 6px;
+ left: 4px;
+ right: 4px;
  font-family: var(--font-default);
  font-size: var(--ai-composer-font-size);
  line-height: var(--ai-composer-line-height);

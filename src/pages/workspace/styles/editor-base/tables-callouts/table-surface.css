@@ -8,10 +8,11 @@
 .workspace-editor-surface {
   --goose-table-grid: hsl(var(--goose-menu-border));
   --goose-table-header: var(--goose-block-subtle-bg);
-  --goose-table-selection: var(--goose-accent-focus);
+  --goose-table-selection: var(--goose-table-selection-border, var(--goose-accent-focus));
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] .tableWrapper {
-  padding: calc(28px * var(--editor-scale, 1));
+  padding: calc(56px * var(--editor-scale, 1))
+    calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1));
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] table {
   table-layout: fixed;
@@ -87,22 +88,28 @@
   .bn-editor.goose-table-span-select
   [data-content-type="table"]
   td {
-  background-color: var(
-    --goose-editor-selection-bg,
-    var(--goose-interactive-selected)
+  background-image: linear-gradient(
+    var(--goose-table-selection-fill),
+    var(--goose-table-selection-fill)
   );
 }
 
 /* 只叠加选区底，不改保存的标题/自定义底色；取消选择立即恢复。 */
 :root .workspace-editor-surface .bn-editor .selectedCell {
-  --goose-table-selection-bg: var(
-    --goose-editor-selection-bg,
-    var(--goose-interactive-selected)
-  );
+  --goose-table-selection-bg: var(--goose-table-selection-fill);
   background-image: linear-gradient(
     var(--goose-table-selection-bg),
     var(--goose-table-selection-bg)
   );
+}
+
+:root .workspace-editor-surface .bn-editor .selectedCell.goose-table-selection-anchor {
+  box-shadow: inset 0 0 0 1px var(--goose-table-selection-active);
+}
+
+:root .workspace-editor-surface .bn-editor:not(.ProseMirror-focused) .selectedCell::after {
+  border-color: var(--goose-table-selection-inactive);
+  border-style: dashed;
 }
 
 /* 相邻格不描边；跨过原网格边缘接合外轮廓，不改变布局盒或文字。 */
@@ -123,6 +130,18 @@
 }
 :root .workspace-editor-surface .bn-editor .selectedCell.goose-table-selection-left::after {
   border-left-width: 2px;
+}
+
+@media (forced-colors: active) {
+  :root .workspace-editor-surface .bn-editor .selectedCell::after,
+  :root .workspace-editor-surface .bn-editor:not(.ProseMirror-focused) .selectedCell::after {
+    border-color: Highlight;
+    forced-color-adjust: none;
+  }
+  :root .workspace-editor-surface .bn-editor .selectedCell.goose-table-selection-anchor {
+    outline: 1px solid Highlight;
+    outline-offset: -3px;
+  }
 }
 
 /* 跨表格文档选区用单元格背景连成一片；同时压住文字级
