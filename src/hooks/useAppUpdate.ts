@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import type { AppUpdateCheckResult, AppUpdateState } from "@/lib/appUpdateTypes";
-import { checkAppUpdate, downloadAppUpdate, readAppVersion } from "@/lib/electron/appUpdate";
+import type { AppUpdateState } from "@/lib/appUpdateTypes";
+import { downloadAppUpdate, readAppVersion } from "@/lib/electron/appUpdate";
+import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useAppUpdateUi } from "@/stores/useAppUpdateUi";
 
@@ -8,25 +9,8 @@ let subscribers = 0;
 let generation = 0;
 let eventRevision = 0;
 let unsubscribe: (() => void) | undefined;
-let checkTask: Promise<void> | undefined;
 let downloadTask: Promise<void> | undefined;
 let installTask: Promise<void> | undefined;
-
-function stateFromCheck(result: AppUpdateCheckResult): AppUpdateState {
-  if (result.status === "unavailable") {
-    return { status: "error", message: result.reason, releaseUrl: result.releaseUrl };
-  }
-  return {
-    status: result.status,
-    version: result.latestVersion,
-    releaseUrl: result.releaseUrl,
-    releaseNotes: result.releaseNotes,
-    publishedAt: result.publishedAt,
-    ...(result.status === "available"
-      ? { downloadUrl: result.downloadUrl, assetName: result.assetName }
-      : {}),
-  };
-}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "更新失败，请重试";
@@ -34,7 +18,7 @@ function errorMessage(error: unknown): string {
 
 function setUpdateState(state: AppUpdateState) {
   eventRevision += 1;
-  useAppUpdateUi.setState({ state });
+  useAppUpdateUi.setState((ui) => ({ state, open: ui.open && hasNewAppUpdate(ui.currentVersion, state) }));
 }
 
 function subscribeUpdates() {
@@ -73,30 +57,6 @@ async function readLatestState(fallback: AppUpdateState) {
   if (eventRevision === revision) setUpdateState(next ?? fallback);
 }
 
-function check(): Promise<void> {
-  if (checkTask) return checkTask;
-  const { state, installing } = useAppUpdateUi.getState();
-  if (installing || state.status === "downloading" || state.status === "ready") return Promise.resolve();
-  useAppUpdateUi.setState({ installError: "" });
-  setUpdateState({ ...state, status: "checking", message: undefined });
-  checkTask = (async () => {
-    try {
-      const result = await checkAppUpdate();
-      if (!result) throw new Error("当前环境不支持应用更新");
-      useAppUpdateUi.setState({ currentVersion: result.currentVersion });
-      await readLatestState(stateFromCheck(result));
-      const latest = useAppUpdateUi.getState().state;
-      if (latest.status === "available" && !latest.downloadPath) void download();
-    } catch (error) {
-      const latest = useAppUpdateUi.getState().state;
-      if (latest.status !== "ready" && latest.status !== "downloading") {
-        setUpdateState({ ...latest, status: "error", message: errorMessage(error) });
-      }
-    }
-  })().finally(() => { checkTask = undefined; });
-  return checkTask;
-}
-
 function download(): Promise<void> {
   if (downloadTask) return downloadTask;
   const { state, installing } = useAppUpdateUi.getState();
@@ -117,8 +77,6 @@ function download(): Promise<void> {
           ...latest,
           status: "error",
           message: errorMessage(error),
-          downloadUrl: undefined,
-          assetName: undefined,
           percent: undefined,
         });
       }
@@ -152,5 +110,5 @@ async function revealDownload() {
 export function useAppUpdate() {
   const ui = useAppUpdateUi();
   useEffect(subscribeUpdates, []);
-  return { ...ui, check, download, install, revealDownload };
+  return { ...ui, download, install, revealDownload };
 }

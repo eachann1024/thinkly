@@ -2,12 +2,13 @@ import { DialogShell } from "@/components/ui/dialog-shell";
 import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
+import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { selectUpdateNotes } from "./releaseNotes";
 import { UpdateNotes } from "./UpdateNotes";
 import { updatePercent, updateStatusLabel } from "./updatePresentation";
 
 export function AppUpdateDialog() {
-  const { open, setOpen, currentVersion, state, installing, installError, check, download, install, revealDownload } = useAppUpdate();
+  const { open, setOpen, currentVersion, state, installing, installError, download, install, revealDownload } = useAppUpdate();
   const notes = selectUpdateNotes(currentVersion, state);
   const percent = updatePercent(state);
   const statusLabel = state.status === "up-to-date" && !installError
@@ -17,35 +18,29 @@ export function AppUpdateDialog() {
     : state.status === "ready" ? "重启并更新"
       : state.status === "checking" || state.status === "downloading" ? undefined
         : state.downloadPath ? "查看安装包"
-          : state.status === "available" && state.downloadUrl && state.assetName ? "下载更新"
-            : state.status === "error" ? "重试" : undefined;
+          : (state.status === "available" || state.status === "error") && state.downloadUrl && state.assetName ? "立即更新"
+            : undefined;
   const handleAction = () => {
     if (state.status === "ready") void install();
     else if (state.downloadPath) void revealDownload();
-    else if (state.status === "available" && state.downloadUrl) void download();
-    else void check();
+    else if (state.downloadUrl && state.assetName) void download();
   };
   const publishedAt = notes.publishedAt && !Number.isNaN(Date.parse(notes.publishedAt))
     ? new Date(notes.publishedAt).toLocaleDateString("zh-CN") : "";
 
   return (
     <DialogShell
-      open={open}
+      open={open && hasNewAppUpdate(currentVersion, state)}
       onOpenChange={setOpen}
       title={`v${notes.version} 更新日志`}
       contentClassName="max-h-[calc(100dvh-64px)] w-[calc(100%-32px)] sm:max-w-[560px]"
       bodyClassName="space-y-4"
-      footer={(
-        <>
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>{state.status === "ready" ? "稍后" : "关闭"}</Button>
-          {actionLabel && (
-            <Button type="button" disabled={installing} busy={installing} onClick={handleAction}>
-              {installing && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
-              {actionLabel}
-            </Button>
-          )}
-        </>
-      )}
+      footer={actionLabel ? (
+        <Button type="button" disabled={installing} busy={installing} onClick={handleAction}>
+          {installing && <GooseIcons.Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />}
+          {actionLabel}
+        </Button>
+      ) : undefined}
     >
       {publishedAt && <p className="text-sm text-muted-foreground">{publishedAt}</p>}
       <UpdateNotes markdown={notes.notes} />

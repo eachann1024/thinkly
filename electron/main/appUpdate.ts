@@ -1,8 +1,8 @@
 import { app, BrowserWindow, shell } from "electron";
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { compareSemver, pickUpdateAsset, PUBLIC_RELEASES_LATEST_URL } from "../../src/lib/appUpdateRelease";
-import type { AppUpdateCheckResult } from "../../src/lib/appUpdateTypes";
+import { compareSemver, pickUpdateAsset, PUBLIC_RELEASES_LATEST_URL, type GithubReleaseAsset } from "../../src/lib/appUpdateRelease";
+import type { AppUpdateCheckResult, AppUpdateState } from "../../src/lib/appUpdateTypes";
 import { getUpdateState, setUpdateState } from "./updates/state";
 import { fetchRelease, type ReleaseDetails, type VerifiedUpdate } from "./updates/release";
 import { downloadVerifiedUpdate, verifyUpdateFile } from "./updates/download";
@@ -19,6 +19,9 @@ const recordPath = () => path.join(app.getPath("userData"), "app-updates", "read
 const releaseDetails = (release: ReleaseDetails): ReleaseDetails => ({
   releaseNotes: release.releaseNotes, publishedAt: release.publishedAt, releaseUrl: release.releaseUrl,
 });
+const updateTarget = (version: string, asset: GithubReleaseAsset, details: ReleaseDetails) => ({
+  ...releaseDetails(details), version, assetName: asset.name, downloadUrl: asset.browser_download_url,
+});
 
 export const getAppVersion = () => app.getVersion();
 export const getReadyUpdate = () => getUpdateState().status === "ready" ? getUpdateState().version || "" : "";
@@ -26,8 +29,10 @@ export const getReadyUpdate = () => getUpdateState().status === "ready" ? getUpd
 async function check(): Promise<AppUpdateCheckResult> {
   const currentVersion = getAppVersion();
   const releaseUrl = PUBLIC_RELEASES_LATEST_URL;
+  const known = getUpdateState();
+  const hasKnownUpdate = Boolean(known.version && compareSemver(known.version, currentVersion) > 0);
   const canShowCheck = () => !downloadTask && !pending && !installing;
-  if (canShowCheck()) setUpdateState({ status: "checking" });
+  if (canShowCheck() && !hasKnownUpdate) setUpdateState({ status: "checking" });
   try {
     const release = await fetchRelease();
     const details = releaseDetails(release);
@@ -43,7 +48,7 @@ async function check(): Promise<AppUpdateCheckResult> {
     return result;
   } catch (error) {
     const reason = error instanceof Error ? error.message : "检查更新失败";
-    if (canShowCheck()) setUpdateState({ status: "error", message: reason });
+    if (canShowCheck()) setUpdateState({ ...(hasKnownUpdate ? known : {}), status: "error", message: reason });
     return { status: "unavailable", currentVersion, reason, releaseUrl };
   }
 }
@@ -54,22 +59,30 @@ export function checkForAppUpdate(): Promise<AppUpdateCheckResult> {
 }
 
 async function download(downloadUrl: string, filename: string): Promise<{ path: string }> {
+  const known = getUpdateState();
+  let target: Partial<AppUpdateState> = { ...releaseDetails(known), version: known.version,
+    assetName: known.assetName, downloadUrl: known.downloadUrl };
   try {
     const release = await fetchRelease();
     const asset = pickUpdateAsset(release.assets, process.platform, process.arch);
-    if (compareSemver(release.version, getAppVersion()) <= 0) throw new Error("当前已是最新版本");
-    if (!asset || asset.name !== filename || asset.browser_download_url !== downloadUrl) {
-      throw new Error("版本已变化，请重新检查更新");
+    if (compareSemver(release.version, getAppVersion()) <= 0) {
+      target = { version: getAppVersion() };
+      throw new Error("当前已是最新版本");
     }
+    if (!asset) throw new Error("已有新版本，但没有适合当前系统的安装包");
     const details = releaseDetails(release);
-    setUpdateState({ ...details, status: "downloading", version: release.version, percent: 0 });
+    target = updateTarget(release.version, asset, details);
+    if (asset.name !== filename || asset.browser_download_url !== downloadUrl) {
+      throw new Error("版本已变化，请重试更新");
+    }
+    setUpdateState({ ...target, status: "downloading", percent: 0 });
     const update = await downloadVerifiedUpdate(release.version, asset, details);
     if (process.platform === "darwin" && filename.endsWith(".zip")) {
       await prepareMacUpdate(update);
     } else if (process.platform !== "win32") {
       shell.showItemInFolder(update.path);
-      setUpdateState({ ...details, status: "available", version: update.version, downloadPath: update.path,
-        message: "安装包已下载，请打开安装", assetName: filename, downloadUrl });
+      setUpdateState({ ...target, status: "available", downloadPath: update.path,
+        message: "安装包已下载，请打开安装" });
       return { path: update.path };
     }
     await writeFile(recordPath(), JSON.stringify(update), { mode: 0o600 });
@@ -77,7 +90,7 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
     notifyReady(update);
     return { path: update.path };
   } catch (error) {
-    setUpdateState({ status: "error", message: error instanceof Error ? error.message : "下载更新失败" });
+    setUpdateState({ ...target, status: "error", message: error instanceof Error ? error.message : "下载更新失败" });
     throw error;
   }
 }
@@ -89,24 +102,25 @@ export function downloadAppUpdate(downloadUrl: string, filename: string): Promis
 }
 
 function notifyReady(update: VerifiedUpdate): void {
-  setUpdateState({ ...releaseDetails(update), status: "ready", version: update.version, downloadPath: update.path });
+  setUpdateState({ ...updateTarget(update.version, update.asset, update), status: "ready", downloadPath: update.path });
   for (const win of BrowserWindow.getAllWindows()) win.webContents.send("desktop:update-ready", update.version);
 }
 
 export async function installReadyUpdate(): Promise<void> {
   if (installing) return;
   if (!pending || !app.isPackaged) throw new Error("没有可安装的更新");
+  const update = pending;
   installing = true;
   try {
-    try { await verifyUpdateFile(pending); }
+    try { await verifyUpdateFile(update); }
     catch (error) {
       pending = null;
       await rm(recordPath(), { force: true });
       throw error;
     }
-    await installUpdate(pending);
+    await installUpdate(update);
   } catch (error) {
-    setUpdateState({ ...(pending ? releaseDetails(pending) : {}), status: pending ? "ready" : "error", version: pending?.version,
+    setUpdateState({ ...updateTarget(update.version, update.asset, update), status: pending ? "ready" : "error", downloadPath: pending?.path,
       message: error instanceof Error ? error.message : "安装更新失败" });
     throw error;
   } finally { installing = false; }

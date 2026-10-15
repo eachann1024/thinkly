@@ -18,6 +18,7 @@ export async function verifyUpdateFile(update: VerifiedUpdate): Promise<void> {
 }
 
 export async function downloadVerifiedUpdate(version: string, asset: GithubReleaseAsset, details: ReleaseDetails): Promise<VerifiedUpdate> {
+  const targetDetails = { ...details, version, assetName: asset.name, downloadUrl: asset.browser_download_url };
   const directory = path.join(app.getPath("userData"), "app-updates", version);
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const target = path.join(directory, asset.name);
@@ -31,7 +32,7 @@ export async function downloadVerifiedUpdate(version: string, asset: GithubRelea
     const percent = total > 0 ? Math.min(99, Math.floor(received * 100 / total)) : 0;
     if (percent !== lastPercent) {
       lastPercent = percent;
-      setUpdateState({ ...details, status: "downloading", version, percent });
+      setUpdateState({ ...targetDetails, status: "downloading", percent });
     }
     callback(null, chunk);
   } });
@@ -42,7 +43,7 @@ export async function downloadVerifiedUpdate(version: string, asset: GithubRelea
     await verifyUpdateFile(update);
     await rename(partial, target);
     addSessionAllowed(target);
-    setUpdateState({ ...details, status: "downloading", version, percent: 100, message: "正在准备安装" });
+    setUpdateState({ ...targetDetails, status: "downloading", percent: 100, message: "正在准备安装" });
     return { ...update, path: target };
   } catch (error) {
     await rm(partial, { force: true });
