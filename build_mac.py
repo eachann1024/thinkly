@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import plistlib
 import re
 import shutil
 import subprocess
 import sys
 import time
+import tempfile
 from pathlib import Path
 
 APP_NAME = "Goose Note"
@@ -77,18 +79,58 @@ def run_build() -> None:
         subprocess.run(command, cwd=ROOT, check=True)
 
 
+def archive_build() -> Path:
+    """Keep one replaceable archive, which LaunchServices cannot index as an app."""
+    archive = BUILT_APP.with_suffix(".zip")
+    with tempfile.TemporaryDirectory(prefix="goose-archive-", dir=archive.parent) as directory:
+        temporary = Path(directory) / archive.name
+        subprocess.run(
+            ["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent",
+             str(BUILT_APP), str(temporary)], check=True
+        )
+        temporary.replace(archive)
+    return archive
+
+
+def remove_build_copies() -> None:
+    # Only generated bundles owned by this project, never arbitrary registered apps.
+    candidates = [
+        BUILT_APP,
+        ROOT / "dist-electron/packaged/mac-arm64" / f"{APP_NAME}.app",
+        ROOT / "dist-electron/packaged/mac/arm64" / f"{APP_NAME}.app",
+    ]
+    for candidate in candidates:
+        if not candidate.exists():
+            continue
+        if candidate.is_symlink():
+            raise RuntimeError(f"拒绝清理符号链接：{candidate}")
+        with (candidate / "Contents/Info.plist").open("rb") as source:
+            info = plistlib.load(source)
+        if info.get("CFBundleIdentifier") != "com.goosenote.desktop":
+            raise RuntimeError(f"构建产物标识不匹配，保留：{candidate}")
+        # A never-registered intermediate bundle returns -10814; removal is still valid.
+        subprocess.run(
+            [str(LSREGISTER), "-u", str(candidate)], check=False,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        shutil.rmtree(candidate)
+
+
 def install_copy() -> None:
     if not BUILT_APP.is_dir():
         raise FileNotFoundError(f"未找到构建产物：{BUILT_APP}")
+    archive = archive_build()
     quit_running_app()
     if INSTALLED_APP.exists():
         print(f"[mac] 删除旧副本：{INSTALLED_APP}")
         shutil.rmtree(INSTALLED_APP)
     print(f"[mac] 复制到：{INSTALLED_APP}")
     shutil.copytree(BUILT_APP, INSTALLED_APP, symlinks=True)
-    refresh_app_registration()
     print(f"[mac] 打开：{INSTALLED_APP}")
     subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
+    remove_build_copies()
+    refresh_app_registration()
+    print(f"[mac] 构建副本已清理，仅保留最新压缩包：{archive}")
 
 
 def main() -> int:
@@ -101,7 +143,7 @@ def main() -> int:
     except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
         print(f"[mac] 失败：{error}", file=sys.stderr)
         return 1
-    print(f"[mac] 已复制安装（原产物仍保留）：{INSTALLED_APP}")
+    print(f"[mac] 已安装（构建产物以单个 ZIP 保留）：{INSTALLED_APP}")
     return 0
 
 
