@@ -1,78 +1,90 @@
-# Goose Note contribution guide
+# 贡献与 PR 指南
 
-Goose Note is licensed under the MIT License. Contributions must be compatible with that license and preserve third-party notices. Submit only work you own or are authorized to contribute, and identify imported code and its license. Contributing does not transfer your copyright. See [LICENSE](./LICENSE) and [THIRD-PARTY-NOTICES.txt](./THIRD-PARTY-NOTICES.txt).
+欢迎通过 Fork 修改 Goose Note，并向本仓库提交 Pull Request（PR）。一个 PR 解决一个明确问题，让维护者能看懂为什么改、行为如何变化，以及实际验证了什么。
 
-## Development setup
+贡献须兼容本项目的 [MIT 许可](LICENSE)，保留 [第三方许可声明](THIRD-PARTY-NOTICES.txt)，并注明引入代码的来源与许可；只提交自己拥有或获授权贡献的内容，贡献不转移作者版权。
 
-This project uses [Bun](https://bun.sh/) as the primary package manager and runtime.
+## 开始之前
+
+- 修复问题时，提供触发步骤、实际结果和预期结果；已有 Issue 请直接关联。
+- 新功能、架构调整、数据格式或产品行为的大幅变化，先开 Issue 讨论范围，避免完成后才发现方向不一致。
+- 阅读 [开发说明](DEVELOP.md) 和 [仓库执行规则](AGENTS.md)，再查看相关源码；文档与实现不一致时，在 PR 中指出。
+- 安全漏洞按 [安全报告流程](SECURITY.md) 私下反馈，不在公开 Issue 或 PR 中披露细节。
+
+## 从 Fork 到提交
+
+1. 在 GitHub Fork `eachann1024/goose-notes`，将自己的 Fork 克隆到本地。
+2. 开始修改前，将 Fork 的 `main` 同步到上游最新 `main`；本项目在 `main` 上开发。
+3. 按 `package.json` 指定的 Bun 版本安装依赖，使用 `bun run dev` 启动浏览器开发环境。
+4. 完成修改和必要验收，只提交本次任务涉及的文件，并推送到自己的 Fork。
+5. 在 GitHub 创建 PR：目标仓库选 `eachann1024/goose-notes`、目标分支选 `main`，来源选自己的 Fork 和 `main`。
+6. 按自动出现的 PR 模板填写说明；尚未完成或缺少关键验收时，先设为 Draft。
 
 ```bash
-# Install dependencies
-bun install
-
-# Start the dev server (http://localhost:6001)
+bun install --frozen-lockfile
 bun run dev
-
-# Build the Electron desktop bundle
-bun run build
 ```
 
-Node.js `>=20` is required if you run the toolchain without Bun.
+PR 标题描述具体变化，例如 `fix: 修复跨记事本移动后的图片路径`，避免只写“修复问题”或“优化代码”。评审期间继续向同一个来源分支推送即可更新 PR，不必重复开单。
 
-## Before opening a pull request
+提交信息使用 `feat:`、`fix:`、`docs:` 等 Conventional Commits 前缀；提交信息和 PR 说明可以用简体中文或英文，同一 PR 内保持一致。
 
-Use the relevant commands to diagnose syntax, type or packaging problems:
+## 改动范围与实现
+
+- 修改前了解入口、调用链、状态、持久化流程和直接消费者，说明触发条件及改前、改后的行为；共享逻辑需要检查其他使用入口。
+- 保持改动聚焦，不夹带无关重构、全仓格式化或依赖升级；必要的关联调整说明原因。
+- 复用现有公共组件和交互方式，非必要不添加小字描述；手写文件不超过 300 行，按独立职责拆分。
+- 遵循相邻 TypeScript、React 代码的命名与格式约定，以及 `eslint.config.js` 的规则；有合理类型时不要用 `any` 代替。
+- 涉及笔记、资源路径、迁移、备份或恢复时，说明旧数据兼容与失败处理；读取或解析失败不能当成空数据覆盖。
+- 新增依赖、网络请求、权限、遥测、二进制文件，或修改工作流、发布配置时，说明必要性、数据去向和影响范围。
+- 不提交密钥、真实用户笔记、本机路径配置、临时产物或与任务无关的文件；一次性截图、原型和操作记录放在仓库外，证据可通过 GitHub 附件提供。
+- AI 辅助生成的代码和说明仍由提交者负责理解、核对与验收，不提交虚构的验证记录。
+
+功能、修复和优化的补丁版本按 [AGENTS.md](AGENTS.md) 递增，提交前核对上游版本，避免复用已发布号；仅文档改动无需修改应用版本或打包。
+
+## 如何提供验收证据
+
+先确定影响面，再选择足够证明改动正确的最小检查。本项目不要求编写或运行测试用例，不采用 TDD，不增加单元、E2E 用例或覆盖率门槛。
+
+| 改动 | 需要的证据 |
+| --- | --- |
+| 文档或模板 | 链接、示例、命令与仓库实际内容一致，差异检查通过 |
+| 页面或交互 | 从正常入口操作受影响流程，提供改前／改后截图；动态行为补充短视频或逐步操作记录 |
+| 共享逻辑或类型 | 必要的类型、规范或构建检查，以及受影响入口的实际操作结果 |
+| 文件、系统或桌面能力 | 在对应平台和真实宿主验证，记录保存、重开或失败场景中与改动相关的结果 |
+
+按影响面选择开发说明中的检查命令，并在 PR 中列出实际运行的命令及结果：
 
 ```bash
-bun run typecheck   # tsc -b --noEmit
-bun run lint        # eslint .
-bun run build       # full production build
+bun run typecheck
+bun run lint
+bun run build
+git diff --check
 ```
 
-Before verification, understand the affected entry points, call chain, state and persistence flows, consumers, and the before/after behavior. Verify only affected paths and necessary failure or boundary cases, choosing the smallest sufficient static, build, API or interaction checks. Use browser or native interaction only when the changed behavior needs it; build and install a macOS package only when the native change needs it. Reuse passed checks unaffected by later edits. Documentation-only or rule-only changes need wording, reference, consistency and diff checks, without building or launching the app. Record actual results and unverified host boundaries.
+静态检查或构建成功不等于产品验收通过。浏览器没有 Electron 宿主桥，不能证明真实磁盘保存、系统剪贴板或全局快捷键可用；模拟数据和本地演示不能作为真实服务接入成功的证据。
 
-Do not add or run TDD, ERE, unit or E2E cases, fixtures, test bridges, automated assertion/recording pipelines or coverage gates. Static diagnostics and successful compilation do not replace interaction acceptance. Resolve affected compilation failures before shipping.
+桌面交付遵循 [AGENTS.md](AGENTS.md)；`bun run mac` 会关闭正在运行的 Goose Note、替换安装并打开本机应用。没有对应平台或环境时，在 PR 中明确写“未验证”和原因，不将其记为通过。
 
-## Branching & commits
+验收记录应包含系统与运行环境、对应提交 SHA、操作步骤、实际结果和未覆盖项。后续修改影响已有结论时，补做相关验收并更新证据，不能沿用旧提交的结果。
 
-- Branch off **`main`**. The repository currently uses `main` as its pull-request base.
-- Keep pull requests focused — one logical change per PR.
-- Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org/)
-  style, e.g. `feat: add word-count footer`, `fix: prevent cursor jump on toggle`.
-- Commit messages and PR descriptions may use English or Simplified Chinese; keep each
-  pull request internally consistent.
+## PR 说明与维护者审核
 
-For maintainer tasks, commit and push each completed functional or documentation change to its task branch after the minimum necessary verification. Keep unrelated work uncommitted and do not wait for another confirmation or batch multiple completed tasks.
+[PR 模板](.github/pull_request_template.md) 分为三部分，可用简短文字、前后对照或小段流程描述：
 
-## Code style
+- **Summary（改动）**：解决什么问题，触发条件是什么，改前与改后如何变化，影响哪些入口或模块。
+- **Evidence（证据）**：针对哪个提交，在什么环境下做了哪些检查和操作，结果与未验证项是什么。
+- **Merge Danger（合并风险）**：影响范围、旧数据兼容性及能否直接回退；没有相关风险时明确写“无”，不要留空。
 
-- TypeScript + React. ESLint config lives in `eslint.config.js`.
-- Match the conventions of the surrounding code (naming, formatting, comment density).
-- Avoid `any` where a real type is reasonable — `@typescript-eslint/no-explicit-any`
-  is enabled as a warning.
+维护者会对照实际 diff 检查范围、前后行为、数据安全、兼容性和验证证据，必要时要求缩小范围或补充信息。新增提交后，以最新提交重新确认相关结论；作者自述和 AI 结论都不能代替审查。
 
-## Reporting bugs & requesting features
+- 核对远端 PR 最新提交的真实差异，不能只看同名本地分支。
+- 编辑器改动保留首块 H1 规则及 raw 文档例外，参见 [firstTitleGuard.ts](src/components/editor/inputrules/firstTitleGuard.ts)。
+- 界面改动保留主题变量、悬停与选中状态、侧栏圆角；共享代码兼顾主窗口与独立速记入口。
+- 持久化和本地文件同步不能丢失或静默覆盖笔记，未验证的宿主能力必须列出。
 
-Use the project tracker and include
-reproduction steps, the environment (OS, Electron version or browser), and
-expected versus actual behavior.
+外部 Fork PR 由维护者人工审核。当前内部 AI 审核与自动合并工作流不适用于外部 Fork；桌面构建工作流也不会因提交 PR 自动运行。检查跳过或没有检查不代表已通过，合并也不等于安装包已经发布。
 
-## Maintainer review checklist
+## 参考
 
-Use this when reviewing internal pull requests.
-
-1. **Correct diff** — Review the PR’s real remote head (not a stale local branch with the same name).
-2. **Acceptance** — Actual affected user paths, using the browser or native-control route above. Compilation commands are diagnostics, not a test gate.
-3. **Scope** — One logical change; Conventional Commits; no `tasks/`, `.env*`, or AI-only tooling artifacts.
-4. **Editor** — Changes under `src/components/editor/` must not break **title block one** (first block is always H1; see `src/components/editor/inputrules/firstTitleGuard.ts`).
-5. **UI** — Preserve theme tokens, hover/selected states and sidebar rounded corners. Use browser or native acceptance only for affected behavior that needs that route.
-6. **Dual plugin** — Shared code must still build for both the main app and `GOOSE_BUILD_TARGET=quicknote` / `__GOOSE_LITE__`.
-7. **Data** — Persistence and local-folder sync changes must not lose or silently overwrite notes.
-8. **Security** — No hardcoded secrets or personal paths in defaults; see [SECURITY.md](./SECURITY.md).
-9. **Verification** — Record actual interaction and unverified host boundaries. Do not infer CI results from local success.
-
-Keep handwritten implementation files at or below 300 lines, grouped by responsibility. Main modules usually have 200–300 lines; entry points and focused helpers may be shorter. Split generated declarations through their generator, without mechanically splitting lockfiles or license data.
-
-## Security
-
-Do not open public issues for security vulnerabilities. See [SECURITY.md](./SECURITY.md).
+本指南借鉴 Magpie 的 [代码规范](https://github.com/yetone/magpie/blob/main/docs/code-standards.md)、[子系统变更说明](https://github.com/yetone/magpie/blob/main/docs/subsystems/README.md) 和 [贡献审核规则](https://github.com/yetone/magpie/blob/main/docs/contributors.md) 中对改动范围、行为变化和证据的要求；贡献方式与验收要求以 Goose Note 本仓库规则为准。
