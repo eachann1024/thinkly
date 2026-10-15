@@ -17,13 +17,13 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* 单文档名称栏默认中性；只有实际进入改名输入时才使用强调色。 */
-:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]) {
+/* 单个标签的名称栏默认中性。新标签页没有标题输入，关闭最后一个文档后也不描边。 */
+:root .workspace-shell .tab-rail-item[data-tab-count="1"] {
   background: transparent;
   color: var(--goose-text-primary);
   box-shadow: none;
 }
-:root .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):is(:hover, :active) {
+:root .workspace-shell .tab-rail-item[data-tab-count="1"]:is(:hover, :active) {
   background: color-mix(in srgb, var(--goose-text-primary) 6%, transparent);
 }
 :root .workspace-shell .tab-rail-item[data-tab-active="true"]:has([data-page-title-field]:focus) {
