@@ -14,6 +14,7 @@
   <a href="#下载安装">下载安装</a> ·
   <a href="#开始记录">开始记录</a> ·
   <a href="DEVELOP.md">开发文档</a> ·
+  <a href="CONTRIBUTING.md">贡献与 PR 指南</a> ·
   <a href="SECURITY.md">安全说明</a>
 </p>
 
