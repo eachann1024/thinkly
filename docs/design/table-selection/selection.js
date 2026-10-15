@@ -2,12 +2,13 @@
   const D = window.TableDesign;
   const S = D.state;
   const cellAt = (r, c) => D.table.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-  D.bounds = () => S.anchor && S.head ? {
+  D.bounds = () => S.condition !== "empty" && S.anchor && S.head ? {
     top: Math.min(S.anchor[0], S.head[0]), bottom: Math.max(S.anchor[0], S.head[0]),
     left: Math.min(S.anchor[1], S.head[1]), right: Math.max(S.anchor[1], S.head[1]),
   } : null;
   D.cells = () => [...D.table.querySelectorAll("td.is-selected")];
   D.updateGeometry = () => {
+    if (D.isTable && !D.isTable()) return;
     const bounds = D.bounds();
     const base = D.wrap.getBoundingClientRect();
     const border = D.wrap.querySelector(".range-border");
@@ -38,9 +39,6 @@
     D.table.querySelectorAll("thead th").forEach((th, index) => th.classList.toggle("selected-column", Boolean(b && index >= b.left && index <= b.right)));
     D.wrap.querySelectorAll(".row-handle").forEach((button, index) => button.setAttribute("aria-pressed", String(Boolean(b && index >= b.top && index <= b.bottom))));
     D.wrap.classList.toggle("inactive", S.inactive);
-    document.querySelector(".selection-label").textContent = b ? `${b.bottom - b.top + 1} 行 × ${b.right - b.left + 1} 列` : "未选择";
-    document.querySelector(".toolbar-slot").dataset.empty = String(!b);
-    document.querySelectorAll("[data-action]").forEach((button) => { button.disabled = !b; });
     document.querySelector("#focus-toggle").setAttribute("aria-pressed", String(S.inactive));
     document.querySelector("#focus-toggle").textContent = S.inactive ? "恢复聚焦" : "预览失焦";
     document.querySelector("#custom-background").setAttribute("aria-pressed", String(S.custom));
@@ -50,13 +48,17 @@
           b.top === 0 && b.bottom === D.rows.length - 1 && b.left === b.right ? "column" : "range";
       button.setAttribute("aria-pressed", String(button.dataset.preset === mode));
     });
-    D.syncFormat?.();
+    D.updateToolbar?.();
     D.updateGeometry();
   };
   D.select = (anchor, head = anchor, focus = false) => {
+    D.closePopover?.(false);
+    D.clearNativeRange?.(); D.nativeTarget = null;
     S.anchor = anchor ? [...anchor] : null;
     S.head = head ? [...head] : null;
     S.inactive = false;
+    if (["empty", "inactive"].includes(S.condition)) S.condition = "normal";
+    document.querySelector("#selection-state").value = anchor ? S.condition : "empty";
     D.update();
     if (focus && S.anchor) cellAt(...S.anchor).focus({ preventScroll: true });
   };
@@ -65,9 +67,9 @@
   D.table.addEventListener("pointerdown", (event) => {
     const cell = event.target.closest("td");
     if (!cell || event.button !== 0) return;
-    if (event.pointerType !== "touch") event.preventDefault();
+    if (event.pointerType !== "touch" && S.context !== "cell") event.preventDefault();
     D.select(event.shiftKey && S.anchor ? S.anchor : coords(cell), coords(cell), true);
-    dragging = event.pointerType !== "touch";
+    dragging = event.pointerType !== "touch" && S.context !== "cell";
     D.wrap.classList.toggle("dragging", dragging);
   });
   document.addEventListener("pointermove", (event) => {
@@ -85,6 +87,7 @@
     if (!event.target.matches("td")) return;
     const current = S.head || coords(event.target);
     const moves = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
+    if (S.context === "cell" && D.savedRange && moves[event.key]) return;
     if (moves[event.key]) {
       event.preventDefault();
       const [dr, dc] = moves[event.key];
@@ -101,7 +104,7 @@
     }
   });
   D.table.addEventListener("dblclick", (event) => {
-    const cell = event.target.closest("td"); if (cell) D.editCell(cell);
+    const cell = event.target.closest("td"); if (cell && S.context !== "cell") D.editCell(cell);
   });
   D.wrap.addEventListener("click", (event) => {
     const row = event.target.closest("[data-select-row]");
@@ -113,9 +116,11 @@
     const presets = { single: [[0, 0], [0, 0]], range: [[0, 1], [2, 2]], rows: [[0, 0], [1, 3]], column: [[0, 1], [D.rows.length - 1, 1]], none: [null, null] };
     D.select(...presets[button.dataset.preset]);
   }));
-  document.querySelector("#focus-toggle").addEventListener("click", () => { S.inactive = !S.inactive; D.update(); });
-  document.querySelector("#custom-background").addEventListener("click", () => { S.custom = !S.custom; D.update(); });
+  document.querySelector("#focus-toggle").addEventListener("click", () => D.setCondition(S.inactive ? "normal" : "inactive"));
+  document.querySelector("#custom-background").addEventListener("click", () => { D.remember?.(); S.custom = !S.custom; D.update(); });
   document.querySelector("#append-row").addEventListener("click", () => {
+    if (S.condition === "readonly") return;
+    D.remember?.();
     const row = document.createElement("tr"); row.setAttribute("role", "row");
     const index = D.rows.length;
     D.rows.push(["新条目", "—", "—", "—"]);
@@ -124,8 +129,8 @@
     D.wrap.querySelector(".row-gutter").insertAdjacentHTML("beforeend", `<button class="row-handle" data-select-row="${index}" aria-label="选择第 ${index + 1} 行" aria-pressed="false">${D.icon("DotsSixVertical")}</button>`);
     D.select([index, 0]); cellAt(index, 0).scrollIntoView({ block: "nearest" });
   });
-  window.addEventListener("blur", () => { stopDrag(); S.inactive = true; D.update(); });
-  window.addEventListener("focus", () => { S.inactive = false; D.update(); });
+  window.addEventListener("blur", () => { stopDrag(); D.closePopover?.(false); S.inactive = true; D.update(); });
+  window.addEventListener("focus", () => { S.inactive = S.condition === "inactive"; D.update(); });
   new ResizeObserver(() => D.updateGeometry()).observe(D.table);
   D.update();
 })();

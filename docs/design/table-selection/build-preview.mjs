@@ -8,8 +8,9 @@ if (!process.argv[2]) throw new Error("Specify an output directory for the stand
 const output = resolve(process.argv[2]);
 if (output === source) throw new Error("The output directory must differ from the source directory.");
 const read = (name) => readFile(resolve(source, name), "utf8");
-const styleFiles = ["tokens.css", "layout.css", "table.css"];
-const scriptFiles = ["icons.js", "content.js", "prototype.js", "selection.js", "controls.js"];
+const styleFiles = ["tokens.css", "layout.css", "table.css", "toolbar.css", "block-preview.css"];
+const scriptFiles = ["icons.js", "content.js", "prototype.js", "block-preview.js", "toolbar-model.js", "toolbar.js",
+  "toolbar-popover.js", "toolbar-actions.js", "toolbar-assets.js", "selection.js", "controls.js"];
 const [styles, scripts, license] = await Promise.all([
   Promise.all(styleFiles.map(read)),
   Promise.all(scriptFiles.map(read)),
