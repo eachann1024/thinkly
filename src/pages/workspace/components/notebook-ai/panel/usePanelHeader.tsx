@@ -66,7 +66,7 @@ export function usePanelHeader(
     return (
       <TooltipProvider delayDuration={300}>
         <div
-          className="flex items-center gap-0.5"
+          className="notebook-ai-header-toolbar flex shrink-0 items-center gap-0.5"
           role="toolbar"
           aria-label="AI 工具栏"
         >
@@ -74,7 +74,7 @@ export function usePanelHeader(
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <IconButton size="icon" tone="muted"
+                  <IconButton size="sm" tone="muted"
                     type="button"
                     onClick={handleNewConversation}
                     className={iconBtn}
@@ -89,7 +89,7 @@ export function usePanelHeader(
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <IconButton size="icon" tone="muted"
+                  <IconButton size="sm" tone="muted"
                     type="button"
                     className={iconBtn}
                     aria-label="历史会话"
@@ -100,9 +100,11 @@ export function usePanelHeader(
                 <PopoverContent
                   align="end"
                   sideOffset={6}
-                  className="w-72 max-w-72 overflow-hidden p-0"
+                  collisionPadding={12}
+                  className="notebook-ai-header-menu w-[248px] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-1.5"
                 >
                   <ConversationHistoryList
+                    compact
                     notebookId={notebookId}
                     onSelectConversation={handleSelectConversation}
                     onDeleteConversation={handleDeleteConversation}
@@ -113,7 +115,7 @@ export function usePanelHeader(
               {onLayoutModeChange ? (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <IconButton size="icon" tone="muted"
+                    <IconButton size="sm" tone="muted"
                       type="button"
                       className={iconBtn}
                       aria-label="更多面板选项"
@@ -124,7 +126,8 @@ export function usePanelHeader(
                   <PopoverContent
                     align="end"
                     sideOffset={6}
-                    className="goose-list-layout w-48 p-1"
+                    collisionPadding={12}
+                    className="notebook-ai-header-menu goose-list-layout w-48 max-w-[calc(100vw-24px)] overflow-y-auto p-1"
                   >
                     <PopoverAction
                       aria-pressed={!layoutIsFullscreen}
@@ -155,7 +158,7 @@ export function usePanelHeader(
           ) : null}
           <Tooltip>
             <TooltipTrigger asChild>
-              <IconButton size="icon" tone="muted"
+              <IconButton size="sm" tone="muted"
                 type="button"
                 onClick={onClose}
                 className={iconBtn}

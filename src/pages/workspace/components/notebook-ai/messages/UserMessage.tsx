@@ -1,4 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { SelectionQuotePreview } from "@/components/editor/ai/composer/SelectionQuotePreview";
+import type { AiSelectionQuoteAttrs } from "@/components/editor/ai/composer/selectionQuote";
 import { MessagePrimitive, AttachmentPrimitive } from "@assistant-ui/react";
 import { Image as ImageIcon } from "@/components/ui/icons";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
@@ -19,6 +22,7 @@ export function UserMessage({
   setPreviewContent: (content: PreviewContent) => void;
 }) {
   const { onOpenPage } = useEditorPageContext();
+  const [quotePreview, setQuotePreview] = useState<AiSelectionQuoteAttrs | null>(null);
   const text = getUserDisplayText(msg);
   const hasLiveImages = getUserImageParts(msg).length > 0;
   const persistedImages = msg.metadata?.imageAttachments ?? [];
@@ -109,15 +113,17 @@ export function UserMessage({
                 }
                 if (segment.type === "selectionQuote") {
                   return (
-                    <span
+                    <button
+                      type="button"
                       key={segment.key}
                       data-ai-selection-quote-chip=""
                       className="ai-composer-chip inline-flex max-w-full min-w-0 items-center align-middle mx-1 truncate rounded-[6px] px-1.5 text-[11px] font-medium leading-none"
                       title={segment.quote.text}
                       aria-label={`选区引用，来自${segment.quote.pageTitle}`}
+                      onClick={() => setQuotePreview(segment.quote)}
                     >
                       {formatSelectionQuotePromptLabel(segment.quote)}
-                    </span>
+                    </button>
                   );
                 }
                 const page =
@@ -148,6 +154,7 @@ export function UserMessage({
           ) : null}
         </div>
         <MessageActionBar />
+        <SelectionQuotePreview quote={quotePreview} onClose={() => setQuotePreview(null)} />
       </div>
     </MessagePrimitive.Root>
   );

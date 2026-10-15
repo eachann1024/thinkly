@@ -18,45 +18,74 @@
 
 .notebook-ai-panel-header {
  min-width: 0;
+ height: 44px;
+}
+
+.notebook-ai-header-toolbar [data-goose-control="icon-button"] {
+ width: 28px;
+ height: 28px;
+}
+
+.notebook-ai-header-menu {
+ max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
+ overscroll-behavior: contain;
+ scrollbar-width: thin;
 }
 
 .notebook-ai-empty-state {
+ display: flex;
+ flex-direction: column;
+ align-items: flex-start;
+ align-self: stretch;
+ justify-content: center;
  max-width: 100%;
- padding: 24px 20px 0;
+ padding: 24px 16px 28px;
 }
 
 .notebook-ai-empty-state-fullscreen {
+ align-self: flex-start;
  max-width: 720px;
  padding: 2rem 0 0;
+}
+
+.notebook-ai-empty-mark {
+ display: flex;
+ margin-bottom: 12px;
+ color: var(--goose-color-success);
 }
 
 .notebook-ai-empty-title {
  margin: 0;
  font-family: var(--font-default);
- font-size: 13px;
- font-weight: 400;
+ font-size: 14px;
+ font-weight: 550;
  line-height: 1.5;
  letter-spacing: 0;
  -webkit-font-smoothing: auto;
 }
 
 .notebook-ai-empty-suggestions {
- margin-top: 12px;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 6px;
+ margin-top: 14px;
 }
 
 .notebook-ai-empty-suggestion {
- display: flex;
- min-height: 28px;
+ display: inline-flex;
+ min-width: 0;
+ max-width: 100%;
+ min-height: 30px;
  align-items: center;
- justify-content: space-between;
- gap: 0.5rem;
- border: 0;
- align-self: flex-start;
- border-radius: 8px;
- padding: 0 0.375rem;
+ border: 1px solid hsl(var(--input));
+ border-radius: var(--goose-control-radius);
+ padding: 5px 8px;
+ background: var(--goose-input-surface);
  color: hsl(var(--muted-foreground));
  text-align: left;
- font-size: 12px;
+ font-family: var(--font-default);
+ font-size: 13px;
+ line-height: 1.5;
 }
 
 

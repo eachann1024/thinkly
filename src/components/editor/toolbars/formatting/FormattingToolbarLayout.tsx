@@ -2,15 +2,13 @@ import { Fragment, type ReactNode } from "react";
 import { TooltipProvider } from "@/components/editor/ui/tooltip";
 import { Separator } from "@/components/editor/ui/separator";
 import { cn } from "@/components/editor/utils/cn";
-import { FormattingToolbarColorPicker } from "./ColorPicker";
+import { SelectionToolbarSurface } from "../SelectionToolbarSurface";
 import { AiButton } from "./groups/AiButton";
 import { AddToChatButton } from "./groups/AddToChatButton";
-import { MarkGroup } from "./groups/MarkGroup";
-import { InlineGroup } from "./groups/InlineGroup";
-import { LinkButton } from "./groups/LinkButton";
-import { AlignGroup } from "./groups/AlignGroup";
-import { ListTypeGroup } from "./groups/ListTypeGroup";
-import { ClearFormatButton } from "./groups/ClearFormatButton";
+import { SelectionActions } from "./groups/SelectionActions";
+import { SelectionSummary, useSelectionSummary } from "./SelectionSummary";
+import { CompactToolbarGroups } from "./CompactToolbarGroups";
+import { useToolbarDensity } from "./useToolbarDensity";
 import { canShowAddToChatButton } from "@/components/editor/ai/composer/selectionQuote";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
@@ -39,28 +37,26 @@ export function FormattingToolbarLayout({
     bindTooltip,
     menuRef,
     handleAiActivate,
-    isBold,
-    isItalic,
-    isStrike,
-    isUnderline,
-    isCode,
-    textAlignment,
-    listState,
-    linkUrl,
-    isLinkActive,
-    setTextAlignment,
-    clearFormatting,
     shouldHide,
-    setColorPickerOpen,
   } = state;
+  const density = useToolbarDensity(state.editor, menuRef, isQuickNoteSurface);
+  const selectionSummary = useSelectionSummary(caps.mode);
+  const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
   const showAiButton =
     __GOOSE_EDITOR_AI__ &&
     aiSettings.enabled &&
     caps.showAi &&
+    !isTableSelection &&
     !isQuickNoteSurface;
 
   // 分节渲染：仅在「相邻两节都可见」时插入 Separator，避免双分隔线 / 尾随分隔线。
   const sections: ReactNode[] = [];
+
+  if (selectionSummary) {
+    sections.push(
+      <SelectionSummary key="selection" label={selectionSummary} />,
+    );
+  }
 
   if (showAiButton) {
     sections.push(
@@ -72,70 +68,16 @@ export function FormattingToolbarLayout({
     );
   }
 
-  if (caps.showMarks || caps.showColors) {
+  if (
+    caps.showMarks ||
+    caps.showColors ||
+    caps.showLink ||
+    caps.showAlign ||
+    caps.showClear ||
+    (state.listState.show && caps.mode !== "none")
+  ) {
     sections.push(
-      <Fragment key="styles">
-        {caps.showMarks && (
-          <MarkGroup
-            isBold={isBold}
-            isItalic={isItalic}
-            isStrike={isStrike}
-            bindTooltip={bindTooltip}
-          />
-        )}
-        {caps.showMarks && (
-          <InlineGroup
-            isUnderline={isUnderline}
-            isCode={isCode}
-            bindTooltip={bindTooltip}
-          />
-        )}
-        {caps.showColors && (
-          <FormattingToolbarColorPicker onOpenChange={setColorPickerOpen} />
-        )}
-      </Fragment>,
-    );
-  }
-
-  if (caps.showLink) {
-    sections.push(
-      <LinkButton
-        key="link"
-        isLinkActive={isLinkActive}
-        linkUrl={linkUrl}
-        bindTooltip={bindTooltip}
-      />,
-    );
-  }
-
-  if (caps.showAlign) {
-    sections.push(
-      <AlignGroup
-        key="align"
-        textAlignment={textAlignment}
-        setTextAlignment={setTextAlignment}
-        bindTooltip={bindTooltip}
-      />,
-    );
-  }
-
-  const showList =
-    listState.show &&
-    caps.mode !== "none" &&
-    caps.mode !== "cellText" &&
-    caps.mode !== "cellGrid";
-
-  if (showList) {
-    sections.push(<ListTypeGroup key="list-type" bindTooltip={bindTooltip} />);
-  }
-
-  if (caps.showClear) {
-    sections.push(
-      <ClearFormatButton
-        key="clear"
-        onClear={clearFormatting}
-        bindTooltip={bindTooltip}
-      />,
+      <CompactToolbarGroups key="formatting" state={state} density={density} />,
     );
   }
 
@@ -153,7 +95,14 @@ export function FormattingToolbarLayout({
         selectedText={selectionState.selectedQuoteText}
         pageId={page.id}
         pageTitle={getPageTitle(page)}
+        compact={density === "narrow" || density === "minimal"}
       />,
+    );
+  }
+
+  if (!state.editor.prosemirrorState.selection.empty) {
+    sections.push(
+      <SelectionActions key="selection-actions" bindTooltip={bindTooltip} />,
     );
   }
 
@@ -170,10 +119,13 @@ export function FormattingToolbarLayout({
       skipDelayDuration={0}
       disableHoverableContent
     >
-      <div
+      <SelectionToolbarSurface
         ref={menuRef}
+        context={caps.mode}
+        variant={isQuickNoteSurface ? "embedded" : "floating"}
         data-formatting-toolbar
         data-selection-mode={caps.mode}
+        data-toolbar-density={density}
         data-goose-floating-toolbar={!isQuickNoteSurface ? "true" : undefined}
         onMouseDown={(e) => {
           // Allow native focus on the AI textarea; everything else uses onClick.
@@ -213,7 +165,7 @@ export function FormattingToolbarLayout({
             </Fragment>
           ))}
         </div>
-      </div>
+      </SelectionToolbarSurface>
     </TooltipProvider>
   );
 }

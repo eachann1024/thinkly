@@ -1,31 +1,23 @@
 import { EditorAction } from "@/components/editor/ui/button";
-import { type CSSProperties } from "react";
+import { type RefObject } from "react";
 import { createPortal } from "react-dom";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import type { AiReferenceSuggestionItem } from "@/components/editor/ai/composer/referenceLookup";
 import { useCenteredActiveItemScroll } from "@/components/editor/hooks/useCenteredActiveItemScroll";
-import { EDITOR_FONT_SIZE_DEFAULT, useSettings } from "@/stores/useSettings";
+import { useComposerSuggestionsPosition } from "./useComposerSuggestionsPosition";
 
 interface ComposerSuggestionsListProps {
   items: AiReferenceSuggestionItem[];
   activeIndex: number;
   listKey?: string;
   anchorRect: DOMRect;
+  composerRef: RefObject<HTMLDivElement | null>;
   onSelect: (item: AiReferenceSuggestionItem) => void;
   onMouseDownCapture?: () => void;
 }
 
-const POPOVER_MAX_HEIGHT = 280;
-const POPOVER_EMPTY_HEIGHT = 40;
 const POPOVER_MIN_WIDTH = 240;
-const POPOVER_MAX_WIDTH = 340;
-const VIEWPORT_PADDING = 8;
-const GAP = 4;
-/** 双行项（标题 + 路径）估算高度，需与下方 py/gap 保持同步 */
-const ITEM_HEIGHT = 44;
-const ITEM_GAP = 4;
-const LIST_PADDING = 12;
 const getMentionItemSelector = (index: number) =>
   `[data-mention-index="${index}"]`;
 
@@ -34,59 +26,15 @@ export function ComposerSuggestionsList({
   activeIndex,
   listKey,
   anchorRect,
+  composerRef,
   onSelect,
   onMouseDownCapture,
 }: ComposerSuggestionsListProps) {
-  const editorUiScale =
-    useSettings((state) => state.editorFontSize) / EDITOR_FONT_SIZE_DEFAULT;
-  // AI composer 固定在面板底部：优先向上展开，避免盖住模型选择 / 发送按钮。
-  // 仅当上方空间明显不够、下方更充裕时才翻到下方。
-  const estimatedHeight =
-    items.length === 0
-      ? POPOVER_EMPTY_HEIGHT
-      : Math.min(
-          POPOVER_MAX_HEIGHT,
-          items.length * ITEM_HEIGHT +
-            Math.max(0, items.length - 1) * ITEM_GAP +
-            LIST_PADDING,
-        );
-
-  const spaceBelow =
-    window.innerHeight - anchorRect.bottom - GAP - VIEWPORT_PADDING;
-  const spaceAbove = anchorRect.top - GAP - VIEWPORT_PADDING;
-  const canFitAbove = spaceAbove >= estimatedHeight;
-  const canFitBelow = spaceBelow >= estimatedHeight;
-  const placeAbove = canFitAbove
-    ? true
-    : !canFitBelow && spaceAbove > spaceBelow;
-
-  const available =
-    Math.max(0, placeAbove ? spaceAbove : spaceBelow) / editorUiScale;
-  const maxHeight = Math.min(
-    POPOVER_MAX_HEIGHT,
-    Math.max(
-      items.length === 0 ? POPOVER_EMPTY_HEIGHT : ITEM_HEIGHT + LIST_PADDING,
-      available,
-    ),
+  const { floatingRef, style, maxWidth, maxHeight } = useComposerSuggestionsPosition(
+    composerRef,
+    anchorRect,
+    "@",
   );
-
-  // 空 range / 异常 rect 时退回到视口安全区，避免 left/top 落到 0 把菜单甩到左上角
-  const anchorLeft =
-    Number.isFinite(anchorRect.left) &&
-    (anchorRect.width > 0 || anchorRect.height > 0)
-      ? anchorRect.left
-      : VIEWPORT_PADDING;
-  const maxLeft =
-    window.innerWidth - POPOVER_MAX_WIDTH * editorUiScale - VIEWPORT_PADDING;
-
-  const style: CSSProperties = {
-    position: "fixed",
-    left: Math.max(VIEWPORT_PADDING, Math.min(anchorLeft, maxLeft)),
-    zIndex: 9999,
-    ...(placeAbove
-      ? { bottom: window.innerHeight - anchorRect.top + GAP * editorUiScale }
-      : { top: anchorRect.bottom + GAP * editorUiScale }),
-  };
 
   const listRef = useCenteredActiveItemScroll<HTMLUListElement>({
     activeIndex,
@@ -97,6 +45,8 @@ export function ComposerSuggestionsList({
 
   const popover = (
     <div
+      ref={floatingRef}
+      data-ai-composer-suggestions="mention"
       style={style}
       onMouseDownCapture={(e) => {
         e.preventDefault();
@@ -106,8 +56,8 @@ export function ComposerSuggestionsList({
       <div
         className="goose-editor-context-ui goose-floating-surface overflow-hidden"
         style={{
-          minWidth: POPOVER_MIN_WIDTH,
-          maxWidth: POPOVER_MAX_WIDTH,
+          minWidth: Math.min(POPOVER_MIN_WIDTH, maxWidth),
+          maxWidth,
           maxHeight,
         }}
       >
@@ -120,7 +70,7 @@ export function ComposerSuggestionsList({
             ref={listRef}
             className="goose-list-layout overflow-y-auto p-1.5"
             data-goose-menu-slot="root"
-            style={{ maxHeight }}
+            style={{ maxHeight: Math.max(0, maxHeight - 2) }}
           >
             {items.map((item, index) => (
               <li key={item.pageId} data-mention-index={index}>

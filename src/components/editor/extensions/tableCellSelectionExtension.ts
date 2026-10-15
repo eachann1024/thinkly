@@ -29,6 +29,7 @@ function tableCellSelectionDecorations(state: EditorState) {
     cells.push({ pos, size: node.nodeSize });
   });
   const selected = new Set(cells.map(({ pos }) => pos - tableStart));
+  const anchorPos = state.selection.$anchorCell.pos;
   const decorations = cells.map(({ pos, size }) => {
     const { top, right, bottom, left } = map.findCell(pos - tableStart);
     const outside = (row: number, col: number) =>
@@ -48,7 +49,10 @@ function tableCellSelectionDecorations(state: EditorState) {
       rows.every((row) => outside(row, left - 1)) && "left",
     ].filter(Boolean);
     return Decoration.node(pos, pos + size, {
-      class: edges.map((edge) => `goose-table-selection-${edge}`).join(" "),
+      class: [
+        ...edges.map((edge) => `goose-table-selection-${edge}`),
+        pos === anchorPos && "goose-table-selection-anchor",
+      ].filter(Boolean).join(" "),
     });
   });
   return DecorationSet.create(state.doc, decorations);

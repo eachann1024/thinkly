@@ -3,6 +3,8 @@ import { useBlockNoteEditor, useEditorState } from "@blocknote/react";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { withPreservedSelection } from "../selectionRestore";
+import type { RunToolbarAction } from "../useSelectionMenu";
 import {
   applySelectedListType,
   getListTypeToolbarState,
@@ -21,8 +23,15 @@ const LIST_TYPE_ITEMS: {
   { type: "numberedListItem", label: "有序列表", icon: ListOrdered },
 ];
 
-export function ListTypeGroup({ bindTooltip }: { bindTooltip: BindTooltip }) {
+export function ListTypeGroup({
+  bindTooltip,
+  runAction,
+}: {
+  bindTooltip: BindTooltip;
+  runAction?: RunToolbarAction;
+}) {
   const editor = useBlockNoteEditor();
+  const run = runAction ?? ((apply) => withPreservedSelection(editor, apply));
   const active = useEditorState({
     editor,
     selector: ({ editor }) => getListTypeToolbarState(editor).active,
@@ -36,7 +45,11 @@ export function ListTypeGroup({ bindTooltip }: { bindTooltip: BindTooltip }) {
             <Toggle
               size="sm"
               pressed={active === type}
-              onPressedChange={() => applySelectedListType(editor, type)}
+              onPressedChange={() =>
+                run(() => {
+                  applySelectedListType(editor, type);
+                })
+              }
               aria-label={label}
               className={ITEM_CLASS}
             >

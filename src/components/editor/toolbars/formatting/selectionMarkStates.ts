@@ -1,5 +1,6 @@
 import { useEditorState } from "@blocknote/react";
 import type { BlockNoteEditor } from "@blocknote/core";
+import { forEachSelectedTextNode } from "./selectedTextNodes";
 
 export const BOOLEAN_MARK_NAMES = [
   "bold",
@@ -9,20 +10,21 @@ export const BOOLEAN_MARK_NAMES = [
   "code",
 ] as const;
 export type BooleanMarkName = (typeof BOOLEAN_MARK_NAMES)[number];
+export type BooleanMarkState = boolean | "mixed";
 
 /**
- * Walk the selection so partial-coverage marks register as inactive.
+ * Walk each selected range so partial coverage remains visible as mixed.
  * BlockNote's useActiveStyles() only inspects selection.$to which misses ranges.
  */
 export function useSelectionMarkStates(editor: BlockNoteEditor<any, any, any>) {
   return useEditorState({
     editor,
     selector: ({ editor }) => {
-      const { selection, doc } = editor.prosemirrorState;
+      const { selection } = editor.prosemirrorState;
       const from = selection.from;
       const to = selection.to;
 
-      const result: Record<BooleanMarkName, boolean> = {
+      const result: Record<BooleanMarkName, BooleanMarkState> = {
         bold: false,
         italic: false,
         strike: false,
@@ -46,20 +48,19 @@ export function useSelectionMarkStates(editor: BlockNoteEditor<any, any, any>) {
         code: { with: 0, total: 0 },
       };
 
-      doc.nodesBetween(from, to, (node: any) => {
-        if (!node.isText) return true;
+      forEachSelectedTextNode(editor.prosemirrorState, (node) => {
         for (const name of BOOLEAN_MARK_NAMES) {
           counts[name].total += 1;
-          if (node.marks.some((m: any) => m.type.name === name)) {
+          if (node.marks.some((mark) => mark.type.name === name)) {
             counts[name].with += 1;
           }
         }
-        return false;
       });
 
       for (const name of BOOLEAN_MARK_NAMES) {
-        result[name] =
-          counts[name].total > 0 && counts[name].with === counts[name].total;
+        const count = counts[name];
+        result[name] = count.with === 0 ? false
+          : count.with === count.total ? true : "mixed";
       }
       return result;
     },

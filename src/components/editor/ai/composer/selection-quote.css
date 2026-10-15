@@ -1,0 +1,46 @@
+[data-ai-composer-editor] .ai-composer-chip[data-ai-selection-quote-chip] {
+  gap: 4px;
+  justify-content: flex-start;
+  border-color: transparent;
+  color: var(--goose-accent-text);
+  background: color-mix(in srgb, var(--goose-accent-solid) 10%, transparent);
+}
+.ai-selection-quote-preview,
+.ai-selection-quote-remove {
+  appearance: none;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ai-selection-quote-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+.ai-selection-quote-preview::before {
+  content: "❞";
+  margin-right: 5px;
+}
+.ai-selection-quote-remove {
+  flex: 0 0 18px;
+  margin-left: auto;
+  border-radius: 3px;
+  font-size: 15px;
+}
+.ai-selection-quote-remove:hover {
+  background: var(--goose-interactive-hover);
+}
+.ai-selection-quote-preview:focus-visible,
+.ai-selection-quote-remove:focus-visible {
+  outline: 1px solid var(--goose-accent-focus);
+  outline-offset: -1px;
+}
+[data-ai-composer-editor][aria-disabled="true"] .ai-selection-quote-remove {
+  display: none;
+}

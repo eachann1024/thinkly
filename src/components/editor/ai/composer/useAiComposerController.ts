@@ -201,7 +201,7 @@ export function useAiComposerController(
     handleMentionKeyDown,
     handleCommandKeyDown,
   );
-  const { handleClickNative, handleBlurNative, handlePasteNative } =
+  const { handleClickNative, handleBlurNative, handlePasteNative, quotePreview, setQuotePreview } =
     useComposerInteractions(
       props,
       state,
@@ -261,5 +261,7 @@ export function useAiComposerController(
     insertCommand,
     imagePreviewContent,
     setImagePreviewContent,
+    quotePreview,
+    setQuotePreview,
   };
 }

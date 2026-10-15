@@ -1,0 +1,37 @@
+.goose-selection-toolbar {
+  --selection-control-size: calc(32px * var(--editor-ui-scale, 1));
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+  color: hsl(var(--popover-foreground));
+}
+.goose-selection-toolbar[data-toolbar-variant="floating"] {
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(10px * var(--editor-ui-scale, 1));
+  background: hsl(var(--popover));
+}
+.goose-selection-toolbar :is(button, [role="button"]):focus-visible {
+  outline: 2px solid var(--goose-accent-focus);
+  outline-offset: -2px;
+}
+.goose-selection-toolbar .goose-block-toolbar-control {
+  width: var(--selection-control-size);
+  height: var(--selection-control-size);
+  flex-basis: var(--selection-control-size);
+}
+.goose-selection-toolbar[data-selection-toolbar="code"] {
+  border-radius: var(--goose-control-radius);
+}
+.goose-selection-toolbar[data-selection-toolbar="code"] > div {
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 4px;
+}
+.goose-selection-toolbar[data-selection-toolbar="code"] button:not([role="tab"]) {
+  min-height: 28px;
+}
+.goose-selection-toolbar[data-selection-toolbar="code"] button:not([role="combobox"]):has(> svg:only-child) {
+  width: 28px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .goose-selection-toolbar, .goose-selection-toolbar button { transition: none; }
+}

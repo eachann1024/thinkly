@@ -186,13 +186,19 @@ export function resolveAccentRuntimeTokens(
   const tokens = ACCENT_RUNTIME_TOKENS[resolvedAccent];
   const theme = isDark ? tokens.dark : tokens.light;
   const selected = theme["--goose-interactive-selected"];
+  const outline = resolveAccentOutlineTokens(
+    resolvedAccent,
+    isDark,
+    tokens.light["--goose-interactive-selected-border"],
+  );
+  const tableAccent = isDark ? "#8caedc" : outline["--goose-accent-focus"];
   return {
     ...theme,
-    ...resolveAccentOutlineTokens(
-      resolvedAccent,
-      isDark,
-      tokens.light["--goose-interactive-selected-border"],
-    ),
+    ...outline,
+    "--goose-table-selection-border": tableAccent,
+    "--goose-table-selection-fill": `color-mix(in srgb, ${tableAccent} ${isDark ? 14 : 11}%, transparent)`,
+    "--goose-table-selection-active": tableAccent,
+    "--goose-table-selection-inactive": `color-mix(in srgb, ${tableAccent} 55%, transparent)`,
     "--goose-icon-chip-on-selected": selected,
   };
 }

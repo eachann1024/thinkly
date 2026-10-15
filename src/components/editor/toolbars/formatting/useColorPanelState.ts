@@ -6,10 +6,12 @@ import {
   useState,
 } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
+import { TextSelection } from "prosemirror-state";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { setFakeSelection } from "@/components/editor/extensions/fakeSelectionExtension";
 import {
-  restoreTextSelectionRange,
+  restoreSelectionAfterFormat,
+  snapshotCurrentSelection,
   withPreservedSelection,
 } from "./selectionRestore";
 import {
@@ -17,7 +19,6 @@ import {
   type PositionState,
 } from "./colorPanelGeometry";
 import {
-  resolveHeldTextSelection,
   resolveOpenColorState,
   applyHeldColorPatch,
 } from "./heldColorSelection";
@@ -40,7 +41,9 @@ export function useColorPanelState(
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const sideLockRef = useRef<boolean | null>(null);
-  const heldSelectionRef = useRef<{ from: number; to: number } | null>(null);
+  const heldSelectionRef = useRef<ReturnType<
+    typeof snapshotCurrentSelection
+  > | null>(null);
   const selectionColorsRef = useRef(selectionColors);
   selectionColorsRef.current = selectionColors;
   const [heldColors, setHeldColors] = useState(selectionColors);
@@ -77,10 +80,12 @@ export function useColorPanelState(
 
   const holdCurrentSelection = useCallback(() => {
     const { selection } = editor.prosemirrorState;
-    const next = resolveHeldTextSelection(selection, heldSelectionRef.current);
-    heldSelectionRef.current = next;
-    if (next) setFakeSelection(editor, next);
-    return next;
+    if (!selection.empty)
+      heldSelectionRef.current = snapshotCurrentSelection(editor);
+    if (selection instanceof TextSelection && !selection.empty) {
+      setFakeSelection(editor, { from: selection.from, to: selection.to });
+    }
+    return heldSelectionRef.current;
   }, [editor]);
 
   const applyWithHeldSelection = useCallback(
@@ -88,7 +93,9 @@ export function useColorPanelState(
       apply: () => void,
       patch?: Partial<Pick<typeof heldColors, "textColor" | "backgroundColor">>,
     ) => {
-      restoreTextSelectionRange(editor, heldSelectionRef.current);
+      if (heldSelectionRef.current) {
+        restoreSelectionAfterFormat(editor, heldSelectionRef.current);
+      }
       withPreservedSelection(editor, apply);
       if (patch) {
         setHeldColors((prev) => applyHeldColorPatch(prev, patch));

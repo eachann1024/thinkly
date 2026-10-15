@@ -46,6 +46,7 @@ export function FormattingToolbarColorPicker({
         type="button"
         ref={buttonRef}
         data-goose-preserve-icon-color="true"
+        data-format-state={isTextMixed || isBgMixed ? "mixed" : undefined}
         aria-pressed={
           isMounted ||
           isTextColorActive ||
@@ -54,7 +55,9 @@ export function FormattingToolbarColorPicker({
           isBgMixed
         }
         className={cn("goose-formatting-toolbar-control")}
-        aria-label="颜色选择；点击应用上次颜色"
+        aria-label={isTextMixed || isBgMixed
+          ? "颜色选择（混合格式）；点击应用上次颜色"
+          : "颜色选择；点击应用上次颜色"}
         onClick={() => {
           applyLastFormatColors();
         }}

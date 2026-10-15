@@ -72,11 +72,25 @@ export function getFormattingToolbarReferenceRect(
 
   if (resolvedMode === "cellGrid") {
     return (
+      getSelectedTableRect(editor) ??
       getSelectedCellsUnionRect(editor) ?? editor.getSelectionBoundingBox()
     );
   }
 
   return editor.getSelectionBoundingBox();
+}
+
+/** The table's reserved top gutter keeps the cell toolbar off column headings. */
+function getSelectedTableRect(
+  editor: BlockNoteEditor<any, any, any>,
+): DOMRect | undefined {
+  const cells = editor.domElement?.querySelectorAll(".selectedCell");
+  if (!cells?.length) return undefined;
+  const table = cells[0].closest("table");
+  if (!table || Array.from(cells).some((cell) => cell.closest("table") !== table)) {
+    return undefined;
+  }
+  return table.getBoundingClientRect();
 }
 
 function isUsableToolbarRect<T extends { width: number; height: number }>(

@@ -1,26 +1,13 @@
-/* 格式工具栏、块工具栏、选中节点去描边、极简工作区隐藏首个 H1。
- * 被 editor-base.css 按序 @import。
- * 依赖 --editor-ui-scale / --goose-interactive-selected / --goose-icon-chip-on-selected / --goose-color-danger / --popover / --border / --ring。
- */
-
-/* 共享格式工具栏
-   浮动外壳、固定底栏和按钮状态各自只在这里定义一次。浮动外壳不使用外投影：
-   Electron 旧内核会把「圆角元素 + 外投影 + 浮动层裁切」栅格化成直角灰块。
-   以清晰边框建立层级，避免用遮片修补渲染伪影。 */
+/* Formatting uses the shared selection surface; dock and portal menus keep the same controls. */
 [data-formatting-toolbar] {
+  --formatting-control-size: var(--selection-control-size, 32px);
   min-width: 0;
   max-width: 100%;
   color: hsl(var(--popover-foreground));
 }
 
-[data-formatting-toolbar][data-goose-floating-toolbar="true"] {
-  border: 1px solid hsl(var(--border));
-  border-radius: calc(10px * var(--editor-ui-scale, 1));
-  background: hsl(var(--popover));
-  box-shadow: none;
-}
-
 .goose-formatting-toolbar-dock [data-formatting-toolbar] {
+  --selection-control-size: 32px;
   border: 1px solid hsl(var(--border));
   background: hsl(var(--popover));
 }
@@ -30,23 +17,17 @@
   width: 100%;
   min-width: 0;
   align-items: center;
+  flex-wrap: wrap;
   gap: 2px;
   padding: 4px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-}
-
-.goose-formatting-toolbar-row::-webkit-scrollbar {
-  display: none;
 }
 
 [data-formatting-toolbar] .goose-formatting-toolbar-control {
   display: inline-flex;
-  width: var(--goose-editor-dock-control-size);
-  min-width: var(--goose-editor-dock-control-size);
-  height: var(--goose-editor-dock-control-size);
-  flex: 0 0 var(--goose-editor-dock-control-size);
+  width: var(--formatting-control-size);
+  min-width: var(--formatting-control-size);
+  height: var(--formatting-control-size);
+  flex: 0 0 var(--formatting-control-size);
   align-items: center;
   justify-content: center;
   border: 0;
@@ -58,7 +39,16 @@
     color var(--goose-control-motion-duration) ease-out;
 }
 
-/* 颜色按钮的图标显示最近一次文档颜色；容器状态仍由共享 token 控制。 */
+[data-formatting-toolbar] .goose-formatting-toolbar-control svg {
+  width: var(--goose-control-icon-size);
+  height: var(--goose-control-icon-size);
+}
+
+[data-formatting-toolbar] .goose-formatting-toolbar-control[data-format-state="mixed"] {
+  background-image: linear-gradient(135deg, var(--goose-interactive-selected) 50%, transparent 50%);
+  box-shadow: inset 0 0 0 1px var(--goose-interactive-selected-border);
+}
+
 [data-formatting-toolbar]
   .goose-formatting-toolbar-control[data-goose-preserve-icon-color="true"] {
   color: hsl(var(--foreground)) !important;
@@ -73,45 +63,52 @@
   opacity: 0.8;
 }
 
+.goose-formatting-toolbar-summary {
+  display: inline-flex;
+  height: var(--formatting-control-size);
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 [data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat {
   display: inline-flex;
+  height: var(--formatting-control-size);
+  min-height: var(--formatting-control-size);
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 24px;
-  min-height: 24px;
-  height: var(--goose-editor-dock-control-size);
-  flex: 0 0 auto;
   padding: 0 8px;
   border: 0;
   border-radius: var(--goose-control-radius);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   box-shadow: none;
-  transition:
-    background-color var(--goose-control-motion-duration) ease-out,
-    color var(--goose-control-motion-duration) ease-out;
 }
 
-/* 选区模式由 [data-selection-mode] / .goose-formatting-toolbar--cell|--multi 挂载，供后续轻量样式区分 */
+[data-toolbar-density="compact"] .goose-formatting-toolbar-add-to-chat-kbd {
+  display: none;
+}
 
-/* 常规笔记本的选区浮层默认更轻巧；Cmd+- 仍在这个基准上继续缩放。
-   速记小窗使用底部停靠栏，命中区保持原尺寸。 */
+/* Floating controls use layout sizes, avoiding CSS zoom on their measured anchors. */
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-row {
-  gap: calc(1px * var(--editor-ui-scale, 1));
-  padding: calc(3px * var(--editor-ui-scale, 1));
+  gap: calc(2px * var(--editor-ui-scale, 1));
+  padding: calc(4px * var(--editor-ui-scale, 1));
 }
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
-  .goose-formatting-toolbar-control {
-  width: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
-  min-width: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
-  height: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
-  flex-basis: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
+  .goose-formatting-toolbar-control,
+[data-formatting-toolbar][data-goose-floating-toolbar="true"]
+  .goose-formatting-toolbar-add-to-chat {
   border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
 }
 
@@ -124,45 +121,28 @@
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-separator {
-  height: calc(16px * var(--editor-ui-scale, 1));
-  margin: 0 calc(1px * var(--editor-ui-scale, 1));
+  height: calc(18px * var(--editor-ui-scale, 1));
+  margin: 0 calc(2px * var(--editor-ui-scale, 1));
 }
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
+  .goose-formatting-toolbar-summary,
+[data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-add-to-chat {
-  height: calc(var(--goose-editor-toolbar-control-size) * var(--editor-ui-scale, 1));
-  min-height: 24px;
-  padding: 0 calc(8px * var(--editor-ui-scale, 1));
-  border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
-  font-size: calc(12px * var(--editor-ui-scale, 1));
-  gap: calc(6px * var(--editor-ui-scale, 1));
+  font-size: calc(13px * var(--editor-ui-scale, 1));
+  padding-inline: calc(6px * var(--editor-ui-scale, 1));
 }
 
-.goose-formatting-toolbar-dock .goose-formatting-toolbar-row {
+.goose-formatting-toolbar-overflow {
+  max-width: min(264px, calc(100vw - 24px));
+}
+
+.goose-formatting-toolbar-menu {
+  --selection-control-size: 32px;
+  display: flex;
+  width: max-content;
+  max-width: 256px;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 2px;
-  padding: 4px;
-}
-
-.goose-formatting-toolbar-dock .goose-formatting-toolbar-control {
-  width: var(--goose-editor-dock-control-size);
-  min-width: var(--goose-editor-dock-control-size);
-  height: var(--goose-editor-dock-control-size);
-  flex-basis: var(--goose-editor-dock-control-size);
-  border-radius: var(--goose-control-radius);
-}
-
-.goose-formatting-toolbar-dock .goose-formatting-toolbar-control svg {
-  width: var(--goose-control-icon-size);
-  height: var(--goose-control-icon-size);
-}
-
-.goose-formatting-toolbar-dock .goose-formatting-toolbar-separator {
-  height: 18px;
-  margin: 0 2px;
-}
-
-.goose-formatting-toolbar-dock .goose-formatting-toolbar-add-to-chat {
-  height: var(--goose-editor-dock-control-size);
-  min-height: var(--goose-editor-dock-control-size);
-  border-radius: var(--goose-control-radius);
 }

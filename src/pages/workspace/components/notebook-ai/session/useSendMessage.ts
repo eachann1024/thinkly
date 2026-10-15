@@ -40,11 +40,14 @@ export function useSendMessage(state: SessionState) {
         payload.tokens.some((token) => token.type === "selectionQuote");
       if (!displayText && imageAttachments.length === 0 && !hasQuotes)
         return false;
+      const implicitPrompt = hasQuotes
+        ? "请根据选区引用总结要点。"
+        : "请分析用户上传的图片。";
       const requestPayload = displayText
         ? payload
         : {
             ...payload,
-            promptText: "请分析用户上传的图片。",
+            promptText: implicitPrompt,
             freeformText: "",
           };
 
@@ -55,7 +58,7 @@ export function useSendMessage(state: SessionState) {
         currentPageId,
         useImplicitPage: false,
       });
-      metadata.displayText = displayText || "已上传图片";
+      metadata.displayText = displayText || (hasQuotes ? "总结选区内容" : "已上传图片");
       metadata.createdAt = Date.now();
       metadata.imageAttachments = imageAttachments.map(({ file }) => ({
         filename: file.name,

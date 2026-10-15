@@ -104,6 +104,14 @@ export function useFormattingToolbarState() {
 
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [selectionMenus, setSelectionMenus] = useState<string[]>([]);
+  const handleSelectionMenuOpen = useCallback((id: string, open: boolean) => {
+    setSelectionMenus((previous) => {
+      if (previous.includes(id) === open) return previous;
+      return open ? [...previous, id] : previous.filter((item) => item !== id);
+    });
+  }, []);
+  const selectionMenuOpen = selectionMenus.length > 0;
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const bindTooltip = useCallback<BindTooltip>(
@@ -166,12 +174,14 @@ export function useFormattingToolbarState() {
   const shouldHideForScroll =
     (!isQuickNoteSurface && isScrolling) || isContextMenuOpen;
   // While AI is active we keep the toolbar visible regardless of scroll/menu.
-  const shouldHide = !aiActive && !colorPickerOpen && shouldHideForScroll;
+  const shouldHide =
+    !aiActive && !colorPickerOpen && !selectionMenuOpen && shouldHideForScroll;
 
   const visible =
     editor.isEditable &&
     (aiActive ||
       colorPickerOpen ||
+      selectionMenuOpen ||
       holdDuringPointerSelect ||
       (selectionState.hasTextSelection &&
         !selectionState.disallowsFormattingToolbar &&
@@ -202,5 +212,8 @@ export function useFormattingToolbarState() {
     clearFormatting,
     shouldHide,
     setColorPickerOpen,
+    handleSelectionMenuOpen,
+    childSelectionMenuOpen:
+      colorPickerOpen || selectionMenus.some((id) => id !== "more"),
   };
 }
