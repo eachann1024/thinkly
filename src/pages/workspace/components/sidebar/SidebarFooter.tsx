@@ -7,12 +7,14 @@ import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
   notebookFooterHost: HTMLDivElement | null;
+  showNotebookSwitcher: boolean;
   isSettingsOpen: boolean;
   onOpenSettings: () => void;
 }
 
 export function SidebarFooter({
   notebookFooterHost,
+  showNotebookSwitcher,
   isSettingsOpen,
   onOpenSettings,
 }: SidebarFooterProps) {
@@ -24,11 +26,13 @@ export function SidebarFooter({
   return (
     <TooltipProvider delayDuration={600}>
       <div className="sidebar-rail-footer">
-        <NotebookSwitcher
-          variant={notebookFooterHost ? "default" : "rail"}
-          triggerContainer={notebookFooterHost}
-          onOpenSettings={onOpenSettings}
-        />
+        {showNotebookSwitcher && (
+          <NotebookSwitcher
+            variant={notebookFooterHost ? "default" : "rail"}
+            triggerContainer={notebookFooterHost}
+            onOpenSettings={onOpenSettings}
+          />
+        )}
         <AppUpdateButton className={btnClass} />
         <Tooltip>
           <TooltipTrigger asChild>
