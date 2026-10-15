@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import type { AppUpdateCheckResult, AppUpdateState } from "./lib/appUpdateTypes";
 export {}
 
 interface ImportMetaEnv {
@@ -105,31 +106,14 @@ declare global {
     openWithApp: (app: string, p: string) => Promise<void>
     openTerminalAtPath: (p: string, terminal?: string) => Promise<void>
     getAppVersion: () => Promise<string>
-    checkForUpdate: () => Promise<
-      | {
-          status: "up-to-date"
-          currentVersion: string
-          latestVersion: string
-          releaseUrl: string
-        }
-      | {
-          status: "available"
-          currentVersion: string
-          latestVersion: string
-          assetName: string
-          downloadUrl: string
-          releaseUrl: string
-        }
-      | {
-          status: "unavailable"
-          currentVersion: string
-          reason: string
-          releaseUrl: string
-        }
-    >
+    checkForUpdate: () => Promise<AppUpdateCheckResult>
+    getUpdateState: () => Promise<AppUpdateState>
+    onUpdateState: (cb: (state: AppUpdateState) => void) => () => void
     downloadUpdate: (downloadUrl: string, filename: string) => Promise<{ path: string }>
     getReadyUpdate: () => Promise<string>
     installReadyUpdate: () => Promise<void>
+    onBeforeUpdate: (cb: (requestId: string) => void) => () => void
+    replyBeforeUpdate: (requestId: string, error: string | null) => void
     onUpdateReady: (cb: (version: string) => void) => () => void
     writeText: (t: string) => Promise<void>
     writeImage: (dataUrl: string) => Promise<void>

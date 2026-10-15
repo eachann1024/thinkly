@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
 import { useWindowAlwaysOnTop } from "@/hooks/useWindowAlwaysOnTop";
+import { SettingsAppUpdate } from "./settings/SettingsAppUpdate";
 
 interface SettingsGeneralProps {
   autoOpenLastNote: boolean;
@@ -60,6 +61,7 @@ export function SettingsGeneral({
             <Switch id="show-recent-in-search" checked={showRecentInSearch} onCheckedChange={setShowRecentInSearch} className={SWITCH_CLASS} />
           </div>
         </SettingsSectionCard>
+        {__HOST_TARGET__ === "electron" && <SettingsAppUpdate />}
       </div>
     </div>
   );

@@ -1,214 +1,145 @@
-import { app, autoUpdater, BrowserWindow, shell } from "electron";
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
-import { mkdir, open, rm } from "node:fs/promises";
+import { app, BrowserWindow, shell } from "electron";
+import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { pipeline } from "node:stream/promises";
-import { Readable } from "node:stream";
-import { addSessionAllowed } from "./allowlist";
-import { markQuitting } from "./windows";
-import {
-  nextAvailableDownloadName,
-  sanitizeDownloadFilename,
-} from "./saveToDownloads";
-import {
-  PUBLIC_UPDATE_URL,
-  PUBLIC_RELEASES_LATEST_URL,
-  PUBLIC_RELEASES_REPO,
-  compareSemver,
-  isGithubDownloadUrl,
-  parseReleaseTag,
-  pickUpdateAsset,
-  type GithubReleaseAsset,
-} from "../../src/lib/appUpdateRelease";
+import { compareSemver, pickUpdateAsset, PUBLIC_RELEASES_LATEST_URL } from "../../src/lib/appUpdateRelease";
+import type { AppUpdateCheckResult } from "../../src/lib/appUpdateTypes";
+import { getUpdateState, setUpdateState } from "./updates/state";
+import { fetchRelease, type VerifiedUpdate } from "./updates/release";
+import { downloadVerifiedUpdate, verifyUpdateFile } from "./updates/download";
+import { installUpdate, prepareMacUpdate, cleanInstalledUpdate } from "./updates/install";
 
-export type UpdateCheckResult =
-  | {
-      status: "up-to-date";
-      currentVersion: string;
-      latestVersion: string;
-      releaseUrl: string;
+export { getUpdateState } from "./updates/state";
+export type UpdateCheckResult = AppUpdateCheckResult;
+let pending: VerifiedUpdate | null = null;
+let checkTask: Promise<AppUpdateCheckResult> | null = null;
+let downloadTask: Promise<{ path: string }> | null = null;
+let installing = false;
+let started = false;
+const recordPath = () => path.join(app.getPath("userData"), "app-updates", "ready.json");
+
+export const getAppVersion = () => app.getVersion();
+export const getReadyUpdate = () => getUpdateState().status === "ready" ? getUpdateState().version || "" : "";
+
+async function check(): Promise<AppUpdateCheckResult> {
+  const currentVersion = getAppVersion();
+  const releaseUrl = PUBLIC_RELEASES_LATEST_URL;
+  const canShowCheck = () => !downloadTask && !pending && !installing;
+  if (canShowCheck()) setUpdateState({ status: "checking" });
+  try {
+    const release = await fetchRelease();
+    if (compareSemver(currentVersion, release.version) >= 0) {
+      if (canShowCheck()) setUpdateState({ status: "up-to-date", version: currentVersion });
+      return { status: "up-to-date", currentVersion, latestVersion: release.version, releaseUrl };
     }
-  | {
-      status: "available";
-      currentVersion: string;
-      latestVersion: string;
-      assetName: string;
-      downloadUrl: string;
-      releaseUrl: string;
-    }
-  | {
-      status: "unavailable";
-      currentVersion: string;
-      reason: string;
-      releaseUrl: string;
-    };
-
-type GithubLatestRelease = {
-  tag_name?: string;
-  html_url?: string;
-  assets?: GithubReleaseAsset[];
-};
-
-let readyVersion = "";
-let updaterStarted = false;
-let updateChecking = false;
-
-export function getReadyUpdate(): string {
-  return readyVersion;
+    const asset = pickUpdateAsset(release.assets, process.platform, process.arch);
+    if (!asset) throw new Error("已有新版本，但没有适合当前系统的安装包");
+    const result = { status: "available" as const, currentVersion, latestVersion: release.version,
+      assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl };
+    if (canShowCheck()) setUpdateState({ ...result, status: "available", version: release.version });
+    return result;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "检查更新失败";
+    if (canShowCheck()) setUpdateState({ status: "error", message: reason });
+    return { status: "unavailable", currentVersion, reason, releaseUrl };
+  }
 }
 
-export function installReadyUpdate(): void {
-  if (!readyVersion) throw new Error("没有已下载的更新");
-  markQuitting();
-  autoUpdater.quitAndInstall();
+export function checkForAppUpdate(): Promise<AppUpdateCheckResult> {
+  if (!checkTask) checkTask = check().finally(() => { checkTask = null; });
+  return checkTask;
+}
+
+async function download(downloadUrl: string, filename: string): Promise<{ path: string }> {
+  try {
+    const release = await fetchRelease();
+    const asset = pickUpdateAsset(release.assets, process.platform, process.arch);
+    if (compareSemver(release.version, getAppVersion()) <= 0) throw new Error("当前已是最新版本");
+    if (!asset || asset.name !== filename || asset.browser_download_url !== downloadUrl) {
+      throw new Error("版本已变化，请重新检查更新");
+    }
+    setUpdateState({ status: "downloading", version: release.version, percent: 0 });
+    const update = await downloadVerifiedUpdate(release.version, asset);
+    if (process.platform === "darwin" && filename.endsWith(".zip")) {
+      await prepareMacUpdate(update);
+    } else if (process.platform !== "win32") {
+      shell.showItemInFolder(update.path);
+      setUpdateState({ status: "available", version: update.version, downloadPath: update.path,
+        message: "安装包已下载，请打开安装", assetName: filename, downloadUrl });
+      return { path: update.path };
+    }
+    await writeFile(recordPath(), JSON.stringify(update), { mode: 0o600 });
+    pending = update;
+    notifyReady(update);
+    return { path: update.path };
+  } catch (error) {
+    setUpdateState({ status: "error", message: error instanceof Error ? error.message : "下载更新失败" });
+    throw error;
+  }
+}
+
+export function downloadAppUpdate(downloadUrl: string, filename: string): Promise<{ path: string }> {
+  if (pending) return Promise.resolve({ path: pending.path });
+  if (!downloadTask) downloadTask = download(downloadUrl, filename).finally(() => { downloadTask = null; });
+  return downloadTask;
+}
+
+function notifyReady(update: VerifiedUpdate): void {
+  setUpdateState({ status: "ready", version: update.version, downloadPath: update.path });
+  for (const win of BrowserWindow.getAllWindows()) win.webContents.send("desktop:update-ready", update.version);
+}
+
+export async function installReadyUpdate(): Promise<void> {
+  if (installing) return;
+  if (!pending || !app.isPackaged) throw new Error("没有可安装的更新");
+  installing = true;
+  try {
+    try { await verifyUpdateFile(pending); }
+    catch (error) {
+      pending = null;
+      await rm(recordPath(), { force: true });
+      throw error;
+    }
+    await installUpdate(pending);
+  } catch (error) {
+    setUpdateState({ status: pending ? "ready" : "error", version: pending?.version,
+      message: error instanceof Error ? error.message : "安装更新失败" });
+    throw error;
+  } finally { installing = false; }
+}
+
+async function restoreReady(): Promise<void> {
+  await mkdir(path.dirname(recordPath()), { recursive: true });
+  try {
+    const update = JSON.parse(await readFile(recordPath(), "utf8")) as VerifiedUpdate;
+    if (!/^\d+\.\d+\.\d+$/.test(update.version)) return;
+    const expectedDir = path.join(path.dirname(recordPath()), update.version);
+    if (path.dirname(update.path) !== expectedDir || path.basename(update.path) !== update.asset.name) return;
+    if (compareSemver(update.version, getAppVersion()) <= 0) {
+      await cleanInstalledUpdate(update);
+      await rm(expectedDir, { recursive: true, force: true });
+      await rm(recordPath(), { force: true });
+      return;
+    }
+    await verifyUpdateFile(update);
+    pending = update;
+    notifyReady(update);
+  } catch { /* An incomplete or deleted download is fetched again on the next check. */ }
 }
 
 export function startAutomaticUpdates(): void {
-  if (updaterStarted || !app.isPackaged || process.platform !== "darwin") return;
-  // ponytail: only Developer ID signed macOS bundles use Squirrel.Mac; unsigned builds keep manual installation.
-  // Enable this path for unsigned builds only after a platform-supported, verified installer exists.
-  const signature = spawnSync("/usr/bin/codesign", ["-dv", "--verbose=2", process.execPath], { encoding: "utf8" });
-  if (signature.status !== 0 || !/^Authority=Developer ID Application/m.test(signature.stderr)) return;
-  updaterStarted = true;
-  const arch = process.arch === "arm64" ? "arm64" : "x64";
-  autoUpdater.setFeedURL({ url: `https://raw.githubusercontent.com/${PUBLIC_RELEASES_REPO}/main/updates/mac-${arch}.json`, serverType: "json" });
-  autoUpdater.on("update-downloaded", (_event, _notes, version) => {
-    updateChecking = false;
-    readyVersion = version;
-    for (const win of BrowserWindow.getAllWindows()) win.webContents.send("desktop:update-ready", version);
-  });
-  autoUpdater.on("update-not-available", () => { updateChecking = false; });
-  autoUpdater.on("error", (error) => {
-    updateChecking = false;
-    console.error("[update] 自动更新失败:", error.message);
-  });
-  const check = () => {
-    if (updateChecking || readyVersion) return;
-    updateChecking = true;
-    try { autoUpdater.checkForUpdates(); }
-    catch (error) { updateChecking = false; console.error("[update] 检查失败:", error); }
+  if (started || !app.isPackaged) return;
+  started = true;
+  const run = async () => {
+    if (pending || downloadTask || installing) return;
+    const result = await checkForAppUpdate();
+    if (result.status === "available" && ((process.platform === "darwin" && result.assetName.endsWith("-mac.zip")) || process.platform === "win32")) {
+      await downloadAppUpdate(result.downloadUrl, result.assetName).catch((error) => console.error("[update]", error));
+    }
   };
-  setTimeout(check, 15_000);
-  setInterval(check, 4 * 60 * 60 * 1000);
+  void restoreReady().then(() => {
+    setTimeout(() => void run(), 15_000).unref();
+    setInterval(() => void run(), 4 * 60 * 60 * 1000).unref();
+  }).catch((error) => console.error("[update]", error));
 }
 
-function userAgent(): string {
-  return `Goose-Note/${app.getVersion()}`;
-}
-
-export function getAppVersion(): string {
-  return app.getVersion();
-}
-
-export async function checkForAppUpdate(): Promise<UpdateCheckResult> {
-  const currentVersion = getAppVersion();
-  const releaseUrl = PUBLIC_RELEASES_LATEST_URL;
-  try {
-    const response = await fetch(`${PUBLIC_UPDATE_URL}?t=${Date.now()}`, {
-      headers: {
-        "User-Agent": userAgent(),
-      },
-    });
-    if (!response.ok) {
-      return {
-        status: "unavailable",
-        currentVersion,
-        reason: `无法读取更新信息（${response.status}）`,
-        releaseUrl,
-      };
-    }
-    const payload = (await response.json()) as GithubLatestRelease;
-    const parsed = parseReleaseTag(String(payload.tag_name ?? ""));
-    if (!parsed) {
-      return {
-        status: "unavailable",
-        currentVersion,
-        reason: "更新信息无法识别版本号",
-        releaseUrl,
-      };
-    }
-    const asset = pickUpdateAsset(
-      payload.assets ?? [],
-      process.platform,
-      process.arch,
-    );
-    if (compareSemver(currentVersion, parsed.version) >= 0) {
-      return {
-        status: "up-to-date",
-        currentVersion,
-        latestVersion: parsed.version,
-        releaseUrl: payload.html_url || releaseUrl,
-      };
-    }
-    if (!asset) {
-      return {
-        status: "unavailable",
-        currentVersion,
-        reason: "已有新版本，但没有适合当前系统的安装包",
-        releaseUrl: payload.html_url || releaseUrl,
-      };
-    }
-    return {
-      status: "available",
-      currentVersion,
-      latestVersion: parsed.version,
-      assetName: asset.name,
-      downloadUrl: asset.browser_download_url,
-      releaseUrl: payload.html_url || releaseUrl,
-    };
-  } catch (error) {
-    return {
-      status: "unavailable",
-      currentVersion,
-      reason: error instanceof Error ? error.message : "检查更新失败",
-      releaseUrl,
-    };
-  }
-}
-
-export async function downloadAppUpdate(
-  downloadUrl: string,
-  filename: string,
-): Promise<{ path: string }> {
-  const latest = await fetch(`${PUBLIC_UPDATE_URL}?t=${Date.now()}`);
-  if (!latest.ok) throw new Error(`无法校验更新信息（${latest.status}）`);
-  const manifest = (await latest.json()) as GithubLatestRelease;
-  const asset = manifest.assets?.find((item) => item.name === filename && item.browser_download_url === downloadUrl);
-  if (!asset?.sha256 || !/^[a-f0-9]{64}$/i.test(asset.sha256) || !isGithubDownloadUrl(downloadUrl)) {
-    throw new Error("更新地址不受信任");
-  }
-  const response = await fetch(downloadUrl, {
-    headers: { "User-Agent": userAgent() },
-    redirect: "follow",
-  });
-  if (!response.ok || !response.body) {
-    throw new Error(`下载失败（${response.status}）`);
-  }
-
-  const downloads = app.getPath("downloads");
-  await mkdir(downloads, { recursive: true });
-  const safeName = sanitizeDownloadFilename(filename);
-  const uniqueName = nextAvailableDownloadName(safeName, (candidate) =>
-    existsSync(path.join(downloads, candidate)),
-  );
-  const target = path.join(downloads, uniqueName);
-  const nodeStream = Readable.fromWeb(response.body as never);
-  const file = await open(target, "wx");
-  try {
-    const digest = createHash("sha256");
-    nodeStream.on("data", (chunk: Buffer) => digest.update(chunk));
-    await pipeline(nodeStream, file.createWriteStream());
-    if (digest.digest("hex").toLowerCase() !== asset.sha256.toLowerCase()) throw new Error("安装包校验失败");
-  } catch (error) {
-    await rm(target, { force: true });
-    throw error;
-  }
-  addSessionAllowed(target);
-  return { path: target };
-}
-
-export function revealDownloadedUpdate(filePath: string): void {
-  shell.showItemInFolder(filePath);
-}
+export function revealDownloadedUpdate(filePath: string): void { shell.showItemInFolder(filePath); }

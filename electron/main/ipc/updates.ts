@@ -1,12 +1,11 @@
 import { ipcMain } from "electron";
-import "node:path";
 import {
   checkForAppUpdate,
   downloadAppUpdate,
   getReadyUpdate,
   installReadyUpdate,
   getAppVersion,
-  revealDownloadedUpdate,
+  getUpdateState,
 } from "../appUpdate";
 
 export function registerUpdatesIpc(): void {
@@ -15,6 +14,8 @@ export function registerUpdatesIpc(): void {
   ipcMain.handle("desktop:checkForUpdate", async () => checkForAppUpdate());
 
   ipcMain.handle("desktop:getReadyUpdate", () => getReadyUpdate());
+
+  ipcMain.handle("desktop:getUpdateState", () => getUpdateState());
 
   ipcMain.handle("desktop:installReadyUpdate", () => installReadyUpdate());
 
@@ -25,7 +26,6 @@ export function registerUpdatesIpc(): void {
         String(downloadUrl ?? ""),
         String(filename ?? ""),
       );
-      revealDownloadedUpdate(result.path);
       return result;
     },
   );

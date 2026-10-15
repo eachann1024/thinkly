@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const [platform, arch] = process.argv.slice(2);
 const stage = process.argv.find(arg => arg.startsWith('--stage='))?.slice('--stage='.length) ?? 'all';
-// mac ZIPs feed Squirrel.Mac auto-update for signed builds; publish-release.mjs drops them otherwise.
+// mac ZIPs feed the app's verified download-and-install flow, including unsigned builds.
 const targets = { win: ['nsis'], mac: ['dmg', 'zip'], linux: ['AppImage', 'deb', 'pacman'] };
 const host = { win: 'win32', mac: 'darwin', linux: 'linux' };
 if (process.platform !== host[platform] || !['x64', 'arm64'].includes(arch) || (platform === 'linux' && arch !== 'x64')) {
