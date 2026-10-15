@@ -26,7 +26,6 @@ export function NotebookEditorSplitColumn({
   activePageId,
   isLocalFolderPage,
   handleOpenSearch,
-  handleBeforeActivateTab,
   aiAvailableForNotebook,
   aiPanelOpen,
   aiLayoutMode,
@@ -43,7 +42,6 @@ export function NotebookEditorSplitColumn({
   activePageId: string;
   isLocalFolderPage: boolean;
   handleOpenSearch: () => void;
-  handleBeforeActivateTab?: () => void;
   aiAvailableForNotebook: boolean;
   aiPanelOpen: boolean;
   aiLayoutMode: ReturnType<typeof useNotebookAiPanel>["layoutMode"];
@@ -111,13 +109,11 @@ export function NotebookEditorSplitColumn({
           <PageHeader
             page={page}
             onOpenSearch={handleOpenSearch}
-            onBeforeActivateTab={handleBeforeActivateTab}
             onRestore={() => restorePageWithToast(activePageId)}
             onDelete={() => void permanentlyDeletePageWithCleanup(activePageId)}
             aiPanelOpen={aiAvailableForNotebook && aiPanelOpen}
             aiLayoutMode={aiLayoutMode}
             onToggleAiPanel={aiAvailableForNotebook ? toggleAiPanel : undefined}
-            hideDocumentTitle={isSplit}
           />
         )}
         <div className="min-h-0 flex-1">

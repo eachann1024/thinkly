@@ -10,9 +10,7 @@ import { useAiStatus } from "@/stores/useAiStatus";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { PageMenu } from "./PageMenu";
-import { getPageTitle } from "@/components/editor/utils/page-title";
-import { SingleTabTitle } from "./SingleTabTitle";
-import { TabRail } from "./TabRail";
+import { NewTabButton } from "./NewTabButton";
 import { useEffectiveSingleTabMode } from "@/lib/tabMode";
 import { cn, formatShortcut } from "@/lib/utils";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
@@ -28,10 +26,6 @@ interface PageHeaderProps {
   aiLayoutMode?: NotebookAiLayoutMode;
   /** 切换 AI 面板（传入时显示按钮，不传则不渲染） */
   onToggleAiPanel?: () => void;
-  /** 激活普通标签前回调（全屏 AI 下点标签可退出全屏） */
-  onBeforeActivateTab?: () => void;
-  /** 分屏时隐藏单标签大标题，改用每格 chrome */
-  hideDocumentTitle?: boolean;
 }
 
 export function PageHeader({
@@ -42,8 +36,6 @@ export function PageHeader({
   aiPanelOpen,
   aiLayoutMode = "fullscreen",
   onToggleAiPanel,
-  onBeforeActivateTab,
-  hideDocumentTitle = false,
 }: PageHeaderProps) {
   const aiPhase = useAiStatus((state) => state.phase);
   const folderActionsAvailable = useFolderToolbarActions();
@@ -122,30 +114,6 @@ export function PageHeader({
           </TooltipProvider>
         ) : null}
 
-        {singleTabMode ? (
-          page && !hideDocumentTitle ? (
-            <>
-              <SingleTabTitle
-                key={`${page.id}:${getPageTitle(page)}`}
-                page={page}
-              />
-            </>
-          ) : hideDocumentTitle ? null : (
-            <span className="min-w-0 flex-1 truncate px-2 text-sm font-semibold text-foreground">
-              开始
-            </span>
-          )
-        ) : (
-          <TabRail
-            variant="page-header"
-            page={page}
-            onOpenSearch={onOpenSearch}
-            onBeforeActivateTab={onBeforeActivateTab}
-            aiPanelOpen={aiPanelOpen}
-            aiLayoutMode={aiLayoutMode}
-          />
-        )}
-
         {page?.isLocked && (
           <span className="text-xs bg-[var(--goose-color-lock-bg)] text-[var(--goose-color-lock-text)] px-1.5 py-0.5 rounded">
             已锁定
@@ -158,6 +126,9 @@ export function PageHeader({
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
+        {!singleTabMode && folderActionsAvailable && !page?.trashedAt && (
+          <NewTabButton onClick={onOpenSearch} />
+        )}
         {showAiOnActions && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>

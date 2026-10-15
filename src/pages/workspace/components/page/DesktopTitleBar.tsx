@@ -20,8 +20,9 @@ import { useAiHeaderActions, useAiHeaderTitle } from "../notebook-ai/aiHeaderSlo
 import { ConversationTitle } from "../notebook-ai/ConversationTitle";
 import { HistoryToolbar } from "../history/HistoryView";
 import { PageMenu } from "./PageMenu";
-import { TabRail } from "./TabRail";
+import { NewTabButton } from "./NewTabButton";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
+import { useIncomingWorkspaceTabs } from "./useIncomingWorkspaceTabs";
 
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 
@@ -56,6 +57,7 @@ export function DesktopTitleBar({
   aiLayoutMode = "fullscreen",
   onToggleAiPanel,
 }: DesktopTitleBarProps) {
+  useIncomingWorkspaceTabs();
   const activePageId = usePages((s) => s.activePageId);
   const folderActionsAvailable = useFolderToolbarActions();
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();
@@ -160,17 +162,7 @@ export function DesktopTitleBar({
               />
             </div>
           </div>
-        ) : (
-          <TabRail
-            variant="electron-titlebar"
-            settingsOpen={settingsOpen}
-            page={page}
-            onOpenSearch={onOpenSearch}
-            onBeforeActivateTab={onBeforeActivateTab}
-            aiPanelOpen={aiPanelOpen}
-            aiLayoutMode={aiLayoutMode}
-          />
-        )}
+        ) : null}
 
         {!aiFullscreenOpen && page?.isLocked && (
           <span className="rounded bg-[var(--goose-color-lock-bg)] px-1.5 py-0.5 text-xs text-[var(--goose-color-lock-text)]">
@@ -185,6 +177,9 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        {!aiFullscreenOpen && folderActionsAvailable && !page?.trashedAt && (
+          <NewTabButton onClick={onOpenSearch} />
+        )}
         {folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>
