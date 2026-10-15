@@ -1,8 +1,0 @@
-{
-  "name": "goose-note-ui-preview",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "playwright": "1.61.1"
-  }
-}

@@ -1,6 +1,6 @@
 # 自动构建与下载
 
-每次推送到代码分支、以及面向 `main` 的 PR 创建或更新，都会自动运行 **Desktop installers**，生成 Windows x64/arm64、macOS arm64/x64、Linux x64 安装包和对应源码归档。生成预览媒体的孤儿分支 `ui-previews` 不包含应用源码，因此不触发打包。所有任务共用固定提交；PR 打包的是 PR 的 head SHA，推送打包的是该次推送的 SHA。流程不取消较早提交的构建。
+**Desktop installers** 按工作流配置定时检查 `main`，或由维护者手动触发，生成 Windows x64/arm64、macOS arm64/x64、Linux x64 安装包和对应源码归档。所有任务共用固定提交；提交 PR 不会触发界面截图或预览报告。
 
 每天北京时间 08:00（UTC 00:00）会检查 `main`，有新提交时构建并发布；也可在 Actions 中手动运行 **Desktop installers**。只有 `main` 的定时或手动运行在全部平台和源码归档成功后，才将安装包及校验值发布到 [goose-notes Releases](https://github.com/eachann1024/goose-notes/releases/latest)，并维护 Homebrew Cask 和更新信息。推送和 PR 运行只生成 Actions 附件，不使用签名凭证或发布权限。已发布的同一提交保持原附件；只改变更新信息或 Cask 的提交不会触发下一次定时重建。不向 AUR 发布。
 
