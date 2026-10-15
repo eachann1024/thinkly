@@ -30,8 +30,10 @@ const after = parsed.find((item) => item.match[2] === "after");
 if (after) {
   const number = Number(after.match[1]);
   const pr = await api(`pulls/${number}`);
-  const matchesRun = [pr.head.sha, pr.merge_commit_sha].includes(run.head_sha) &&
-    run.head_branch === pr.head.ref;
+  const matchesRun = run.display_title === `PR UI preview #${number}` &&
+    (run.event === "workflow_dispatch"
+      ? run.head_branch === "main"
+      : [pr.head.sha, pr.merge_commit_sha].includes(run.head_sha) && run.head_branch === pr.head.ref);
   if (pr.state !== "open" || pr.head.sha !== after.match[3] || !matchesRun) {
     console.log("No comment: evidence belongs to an old or unrelated PR revision");
   } else {
