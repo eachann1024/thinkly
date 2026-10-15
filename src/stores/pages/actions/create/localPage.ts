@@ -32,7 +32,7 @@ export const createLocalPageAction = async (
     return get().createLocalPageRecord({
       workspaceId, parentId, title, content: createEmptyLocalPageContent(),
     });
-  });
+  }, parentId);
   if (!id) return null;
   set({ activePageId: id });
   useNotebooks.getState().setLastActivePage(workspaceId, id);

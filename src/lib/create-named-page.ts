@@ -18,7 +18,7 @@ export async function createNamedPage(parentId: string | undefined, workspaceId:
       workspaceId, parentId, content: createDefaultPageContent(title),
       ...(useSettings.getState().randomIconOnCreate ? { icon: pickRandomPageIcon() } : {}),
     }) || null;
-  });
+  }, parentId);
   if (!id) return null;
   usePages.getState().setActivePage(id);
   useNotebooks.getState().setLastActivePage(workspaceId, id);

@@ -15,6 +15,7 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
   const finishedRef = useRef(false);
   const [busy, setBusy] = useState(false);
   useLayoutEffect(() => {
+    inputRef.current?.scrollIntoView({ block: "nearest" });
     inputRef.current?.focus();
     inputRef.current?.select();
   }, []);
@@ -45,11 +46,13 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
       <Input variant="inline" context="shell" ref={inputRef}
         className="min-w-0 flex-1 cursor-text select-text"
         value={value} {...inputProps} readOnly={busy} draggable={false}
+        data-pending-create=""
         onBlur={() => { if (kind === "file") cancel(); else void commit(); }}
         onKeyDown={(event) => {
-          if (isComposing(event)) return;
+          if (isComposing(event)) { event.stopPropagation(); return; }
           if (event.key === "Enter") {
-            event.preventDefault(); event.stopPropagation(); void commit();
+            event.preventDefault(); event.stopPropagation();
+            if (!event.repeat) void commit();
           } else if (event.key === "Escape") {
             event.preventDefault(); event.stopPropagation(); cancel();
           }

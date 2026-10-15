@@ -1,4 +1,3 @@
-import { NewPageNameDialog } from "@/pages/workspace/components/page/NewPageNameDialog";
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
 import { useEffect, useState } from "react";
 import { useTextCaret } from "@/hooks/useTextCaret";
@@ -153,7 +152,6 @@ function App() {
       )}
       <SetupGuide />
       <AppUpdateDialog />
-      <NewPageNameDialog />
       <Toaster />
     </>
   );
