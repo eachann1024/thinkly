@@ -55,6 +55,7 @@ export function FormattingToolbarColorPicker({
           isBgMixed
         }
         className={cn("goose-formatting-toolbar-control")}
+        title="选择文本或背景颜色；点击应用上次颜色"
         aria-label={isTextMixed || isBgMixed
           ? "颜色选择（混合格式）；点击应用上次颜色"
           : "颜色选择；点击应用上次颜色"}

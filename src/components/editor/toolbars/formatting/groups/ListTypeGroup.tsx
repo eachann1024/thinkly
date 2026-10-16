@@ -16,11 +16,12 @@ const ITEM_CLASS = "goose-formatting-toolbar-control";
 const LIST_TYPE_ITEMS: {
   type: ListBlockType;
   label: string;
+  shortcut: string;
   icon: typeof List;
 }[] = [
-  { type: "checkListItem", label: "提醒事项", icon: CheckSquare },
-  { type: "bulletListItem", label: "无序列表", icon: List },
-  { type: "numberedListItem", label: "有序列表", icon: ListOrdered },
+  { type: "checkListItem", label: "提醒事项", shortcut: "Mod+Shift+9", icon: CheckSquare },
+  { type: "bulletListItem", label: "无序列表", shortcut: "Mod+Shift+8", icon: List },
+  { type: "numberedListItem", label: "有序列表", shortcut: "Mod+Shift+7", icon: ListOrdered },
 ];
 
 export function ListTypeGroup({
@@ -39,7 +40,7 @@ export function ListTypeGroup({
 
   return (
     <>
-      {LIST_TYPE_ITEMS.map(({ type, label, icon: Icon }) => (
+      {LIST_TYPE_ITEMS.map(({ type, label, shortcut, icon: Icon }) => (
         <Tooltip key={type} {...bindTooltip(`list-${type}`)}>
           <TooltipTrigger asChild>
             <Toggle
@@ -56,7 +57,7 @@ export function ListTypeGroup({
               <Icon className="h-[15px] w-[15px]" />
             </Toggle>
           </TooltipTrigger>
-          <ToolbarTooltip label={label} />
+          <ToolbarTooltip label={label} shortcut={shortcut} />
         </Tooltip>
       ))}
     </>

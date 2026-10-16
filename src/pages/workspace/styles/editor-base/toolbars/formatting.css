@@ -18,7 +18,7 @@
   min-width: 0;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: 2px;
   padding: 4px;
 }
 
@@ -95,21 +95,15 @@
   box-shadow: none;
 }
 
-/* Groups stay together where possible; even a very narrow pane can wrap their buttons. */
+/* Keep semantic groups without forcing whole groups onto the next row. */
 .goose-formatting-toolbar-group {
-  display: flex;
-  flex: 0 1 auto;
-  flex-wrap: wrap;
-  max-width: 100%;
-  min-width: 0;
-  align-items: center;
-  gap: 2px;
+  display: contents;
 }
 
 /* Floating controls use layout sizes, avoiding CSS zoom on their measured anchors. */
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-row {
-  gap: calc(4px * var(--editor-ui-scale, 1)) calc(8px * var(--editor-ui-scale, 1));
+  gap: calc(2px * var(--editor-ui-scale, 1));
   padding: calc(4px * var(--editor-ui-scale, 1));
 }
 
@@ -157,7 +151,6 @@
   gap: 2px;
 }
 
-[data-formatting-toolbar][data-goose-floating-toolbar="true"]
-  .goose-formatting-toolbar-group {
-  gap: calc(2px * var(--editor-ui-scale, 1));
+[data-formatting-toolbar][data-goose-floating-toolbar="true"] {
+  width: max-content;
 }

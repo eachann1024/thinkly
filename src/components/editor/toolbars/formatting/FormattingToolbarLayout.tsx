@@ -56,6 +56,7 @@ export function FormattingToolbarLayout({
     sections.push(
       <AddToChatButton
         key="add-to-chat"
+        bindTooltip={state.bindTooltip}
         selectedText={selectionState.selectedQuoteText}
         pageId={page.id}
         pageTitle={getPageTitle(page)}

@@ -16,6 +16,9 @@ import {
   type SelectionMenuChange,
 } from "../useSelectionMenu";
 
+import { useSettings } from "@/stores/useSettings";
+import { isLinkShortcutClaimedByApp } from "@/components/editor/extensions/linkKeyboardExtension";
+
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
 export function LinkButton({
@@ -30,6 +33,14 @@ export function LinkButton({
   onOpenChange?: SelectionMenuChange;
 }) {
   const editor = useBlockNoteEditor();
+  const linkShortcutClaimed = useSettings((settings) =>
+    isLinkShortcutClaimedByApp([
+      ...Object.values(settings.appShortcuts),
+      settings.closeTabShortcut,
+      settings.searchPanelCloseShortcut,
+    ]),
+  );
+  const shortcut = linkShortcutClaimed ? undefined : "Mod+K";
   const { open, setOpen, runAction } = useSelectionMenu(
     editor,
     "link",
@@ -80,7 +91,7 @@ export function LinkButton({
             <GooseIcons.Link className="h-[15px] w-[15px]" />
           </Toggle>
         </TooltipTrigger>
-        <ToolbarTooltip label="移除链接" />
+        <ToolbarTooltip label="移除链接" shortcut={shortcut} />
       </Tooltip>
     );
   }
@@ -106,7 +117,7 @@ export function LinkButton({
             </Toggle>
           </PopoverTrigger>
         </TooltipTrigger>
-        <ToolbarTooltip label="添加链接" />
+        <ToolbarTooltip label="添加链接" shortcut={shortcut} />
       </Tooltip>
       <PopoverContent
         align="center"
