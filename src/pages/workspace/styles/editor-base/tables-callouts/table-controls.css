@@ -74,7 +74,7 @@
 .goose-table-menu .goose-table-menu-note {
   white-space: normal;
 }
-.goose-table-color-menu .goose-table-color-group {
+.goose-table-menu.goose-table-color-menu .goose-table-color-group {
   display: grid;
   grid-template-columns: repeat(5, 32px);
   gap: var(--goose-menu-row-gap);
