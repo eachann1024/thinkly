@@ -7,7 +7,7 @@ import {
 import { resolveHistoryBackend } from "../../../../lib/history/backend";
 import {
   clearLocalSaveTimers,
-  pendingLocalSaveContents,
+  clearPendingLocalSaveContent,
 } from "../../folderSync";
 
 export const permanentlyDeletePageAction = async (
@@ -69,7 +69,7 @@ export const permanentlyDeletePageAction = async (
     // 拒绝加载磁盘内容，也避免计时器到期后对已不存在的页面执行写盘。
     removedIds.forEach((pid) => {
       clearLocalSaveTimers(pid);
-      pendingLocalSaveContents.delete(pid);
+      clearPendingLocalSaveContent(pid);
     });
 
     set((state) => {
@@ -104,7 +104,7 @@ export const permanentlyDeletePageAction = async (
   }
   // 清理自动保存计时器与待写队列（对非本地页面无害，统一处理）。
   clearLocalSaveTimers(id);
-  pendingLocalSaveContents.delete(id);
+  clearPendingLocalSaveContent(id);
   set((state) => {
     const page = state.pages[id];
     if (!page) return state;

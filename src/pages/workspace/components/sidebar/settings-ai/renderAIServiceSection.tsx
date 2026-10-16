@@ -35,7 +35,7 @@ export function renderAIServiceSection(
     apiKeyDraft,
     setApiKeyDraft,
     savingCustomConfig,
-    setCustomSaveError,
+    dismissModelError,
     apiKeyVisible,
     setApiKeyVisible,
     testingConnection,
@@ -150,7 +150,7 @@ export function renderAIServiceSection(
                     cancelModelRefresh();
                     cancelConnectionTest();
                   }
-                  setCustomSaveError(null);
+                  dismissModelError();
                   setCustomBaseURL(event.target.value);
                 }}
                 placeholder={
@@ -187,7 +187,7 @@ export function renderAIServiceSection(
                     cancelModelRefresh();
                     cancelConnectionTest();
                   }
-                  setCustomSaveError(null);
+                  dismissModelError();
                   setApiKeyDraft(event.target.value);
                 }}
                 placeholder="输入 API Key"

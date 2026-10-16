@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useReducer } from "react";
 import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useIntroVideo } from "@/stores/introVideo";
 import "./intro-video.css";
+import { introVideoReducer } from "./introVideoState";
 
 const EXIT_MS = 360;
 const POSTER_FALLBACK_MS = 600;
@@ -11,15 +12,16 @@ const base = import.meta.env.BASE_URL;
 function IntroVideoLayer() {
   const hide = useIntroVideo((state) => state.hide);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [ready, setReady] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [state, dispatch] = useReducer(introVideoReducer, { status: "loading" });
+  const ready = state.status === "ready" || (state.status === "closing" && state.ready);
+  const closing = state.status === "closing";
   const exitTimer = useRef<number | undefined>(undefined);
 
-  const markReady = useCallback(() => setReady(true), []);
+  const markReady = useCallback(() => dispatch({ type: "ready" }), []);
 
   const close = useCallback(() => {
     if (exitTimer.current !== undefined) return;
-    setClosing(true);
+    dispatch({ type: "close" });
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     exitTimer.current = window.setTimeout(hide, reduced ? 0 : EXIT_MS);
   }, [hide]);

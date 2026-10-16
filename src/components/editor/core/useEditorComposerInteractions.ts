@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useReducer } from "react";
+import { useSettings } from "@/stores/useSettings";
+import { editorOverlayReducer, initialEditorOverlays } from "./editorOverlayState";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import {
@@ -35,13 +37,13 @@ export function useEditorComposerInteractions({
   EditorComposerProps,
   "editor" | "editable" | "isActiveEditor" | "page" | "editorContainerRef"
 >) {
-  const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
-  const [linkPopoverUrl, setLinkPopoverUrl] = useState("");
+  const [overlays, dispatch] = useReducer(editorOverlayReducer, initialEditorOverlays);
   const linkPopoverRef = useRef<HTMLDivElement | null>(null);
-  const [findBarOpen, setFindBarOpen] = useState(false);
-  const [findSeedQuery, setFindSeedQuery] = useState("");
-  const [findOpenNonce, setFindOpenNonce] = useState(0);
-  const [findOpenReplace, setFindOpenReplace] = useState(false);
+  const linkPopoverOpen = overlays.link.phase === "open";
+  const linkPopoverUrl = overlays.link.phase === "open" ? overlays.link.url : "";
+  const closeLinkPopover = useCallback(() => dispatch({ type: "link-closed" }), []);
+  const editLinkPopover = (url: string) => dispatch({ type: "link-edited", url });
+  const closeFindBar = () => dispatch({ type: "find-closed" });
   const { ai: aiSettings } = useEditorSettings();
   const getMentionItems = usePageMentionItems(editor);
 
@@ -132,8 +134,7 @@ export function useEditorComposerInteractions({
 
   useEditorOverlayEvents({
     editor, editorContainerRef, isActiveEditor, pageId: page.id,
-    setFindSeedQuery, setFindOpenReplace, setFindOpenNonce, setFindBarOpen,
-    setLinkPopoverUrl, setLinkPopoverOpen,
+    dispatch,
   });
 
   useEffect(() => {
@@ -142,7 +143,7 @@ export function useEditorComposerInteractions({
       const target = event.target as HTMLElement | null;
       if (!target) return;
       if (linkPopoverRef.current?.contains(target)) return;
-      setLinkPopoverOpen(false);
+      closeLinkPopover();
     };
     const handleEscape = (event: KeyboardEvent) => {
       if (isWorkspaceSettingsOpen()) return;
@@ -154,7 +155,7 @@ export function useEditorComposerInteractions({
       ) {
         event.preventDefault();
         event.stopPropagation();
-        setLinkPopoverOpen(false);
+        closeLinkPopover();
       }
     };
     window.addEventListener("pointerdown", handlePointerDown, true);
@@ -163,7 +164,7 @@ export function useEditorComposerInteractions({
       window.removeEventListener("pointerdown", handlePointerDown, true);
       window.removeEventListener("keydown", handleEscape, true);
     };
-  }, [linkPopoverOpen]);
+  }, [linkPopoverOpen, closeLinkPopover]);
 
   useEffect(() => {
     if (!isActiveEditor || __GOOSE_EDITOR_COMPACT__) return;
@@ -220,8 +221,7 @@ export function useEditorComposerInteractions({
     if (trimmed) {
       editor.createLink(trimmed);
     }
-    setLinkPopoverOpen(false);
-    setLinkPopoverUrl("");
+    closeLinkPopover();
   };
 
   return {
@@ -229,15 +229,12 @@ export function useEditorComposerInteractions({
     getMentionItems,
     handleEditorKeyDownCapture,
     linkPopoverOpen,
-    setLinkPopoverOpen,
+    closeLinkPopover,
     linkPopoverUrl,
-    setLinkPopoverUrl,
+    editLinkPopover,
     linkPopoverRef,
     handleLinkPopoverSubmit,
-    findBarOpen,
-    setFindBarOpen,
-    findSeedQuery,
-    findOpenNonce,
-    findOpenReplace,
+    find: overlays.find,
+    closeFindBar,
   };
 }

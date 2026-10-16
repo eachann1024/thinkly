@@ -1,31 +1,27 @@
-import { useEffect, useLayoutEffect, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useEffect, useLayoutEffect, useRef, type Dispatch, type RefObject } from "react";
 import { readEditorFindSeed } from "@/components/editor/find/findSeed";
 import { closeAllOverlays } from "@/lib/closeAllOverlays";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
+
+import type { EditorOverlayEvent } from "./editorOverlayState";
 
 type OverlayEvents = {
   editor: Parameters<typeof readEditorFindSeed>[0];
   editorContainerRef: RefObject<HTMLDivElement | null>;
   isActiveEditor: boolean;
   pageId: string;
-  setFindSeedQuery: Dispatch<SetStateAction<string>>;
-  setFindOpenReplace: Dispatch<SetStateAction<boolean>>;
-  setFindOpenNonce: Dispatch<SetStateAction<number>>;
-  setFindBarOpen: Dispatch<SetStateAction<boolean>>;
-  setLinkPopoverUrl: Dispatch<SetStateAction<string>>;
-  setLinkPopoverOpen: Dispatch<SetStateAction<boolean>>;
+  dispatch: Dispatch<EditorOverlayEvent>;
 };
 
 /** Global commands belong to the focused pane; pending opens belong to its page. */
 export function useEditorOverlayEvents({
   editor, editorContainerRef, isActiveEditor, pageId,
-  setFindSeedQuery, setFindOpenReplace, setFindOpenNonce, setFindBarOpen,
-  setLinkPopoverUrl, setLinkPopoverOpen,
+  dispatch,
 }: OverlayEvents) {
+  const requestNonce = useRef(0);
   useLayoutEffect(() => {
-    setFindBarOpen(false);
-    setLinkPopoverOpen(false);
-  }, [isActiveEditor, pageId, setFindBarOpen, setLinkPopoverOpen]);
+    dispatch({ type: "owner-changed" });
+  }, [isActiveEditor, pageId, dispatch]);
 
   useEffect(() => {
     if (!isActiveEditor) return;
@@ -39,21 +35,19 @@ export function useEditorOverlayEvents({
         ? ""
         : readEditorFindSeed(editor, editorContainerRef.current);
       closeAllOverlays();
-      setFindSeedQuery(seed);
-      setFindOpenReplace(
-        (event as CustomEvent<{ replace?: unknown }>).detail?.replace === true,
-      );
-      setFindOpenNonce((value) => value + 1);
+      const nonce = ++requestNonce.current;
+      dispatch({ type: "find-requested", request: {
+        seed, replace: (event as CustomEvent<{ replace?: unknown }>).detail?.replace === true, nonce,
+      } });
       // Let overlay dismissal finish before opening the find bar.
       window.clearTimeout(pendingOpen);
-      pendingOpen = window.setTimeout(() => setFindBarOpen(true), 0);
+      pendingOpen = window.setTimeout(() => dispatch({ type: "find-opened", nonce }), 0);
     };
     const handleOpenLink = () => {
       if (isWorkspaceSettingsOpen()) return;
-      setLinkPopoverUrl("");
-      setLinkPopoverOpen(true);
+      dispatch({ type: "link-opened" });
     };
-    const handleCloseLink = () => setLinkPopoverOpen(false);
+    const handleCloseLink = () => dispatch({ type: "link-closed" });
     window.addEventListener("goose-note:editor-find-open", handleOpenFind);
     document.addEventListener("goose-open-link-popover", handleOpenLink);
     document.addEventListener("goose-close-link-popover", handleCloseLink);
@@ -65,7 +59,6 @@ export function useEditorOverlayEvents({
     };
   }, [
     editor, editorContainerRef, isActiveEditor, pageId,
-    setFindSeedQuery, setFindOpenReplace, setFindOpenNonce, setFindBarOpen,
-    setLinkPopoverUrl, setLinkPopoverOpen,
+    dispatch,
   ]);
 }

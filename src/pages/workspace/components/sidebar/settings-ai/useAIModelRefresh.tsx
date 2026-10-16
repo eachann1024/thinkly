@@ -1,3 +1,4 @@
+import { isModelRequestBusy } from "./aiRequestState";
 import { toast } from "@/components/ui/sonner";
 import {
   DEFAULT_CLAUDE_BASE_URL,
@@ -34,12 +35,12 @@ export function useAIModelRefresh(
     setCustomBaseURL,
     apiKeyDraft,
     setApiKeyDraft,
-    setSavingCustomConfig,
-    setCustomSaveError,
+    sendRequestEvent,
+    requestStateRef,
+    dismissModelError,
     modelRequestIdRef,
     modelAbortControllerRef,
     modelTimeoutRef,
-    modelTimedOutRequestIdRef,
     isMountedRef,
     cancelModelRefresh,
     cancelConnectionTest,
@@ -55,6 +56,7 @@ export function useAIModelRefresh(
     connection: ProviderConnection,
     action: "save" | "switch" | "refresh",
   ) => {
+    if (isModelRequestBusy(requestStateRef.current.models) || requestStateRef.current.test.status === "testing") return;
     const apiKey = connection.apiKey.trim();
     if (!apiKey) {
       toast.error(CUSTOM_AI_KEY_HINT);
@@ -67,33 +69,39 @@ export function useAIModelRefresh(
     const controller = isOnboarding ? new AbortController() : null;
     if (controller) {
       modelAbortControllerRef.current = controller;
-      modelTimedOutRequestIdRef.current = null;
       modelTimeoutRef.current = setTimeout(() => {
         if (requestId !== modelRequestIdRef.current || !isMountedRef.current) {
           return;
         }
-        modelTimedOutRequestIdRef.current = requestId;
+        const message = "获取模型列表超时（30 秒），配置已保存，可重试。";
+        sendRequestEvent({ type: "models.failed", requestId, message });
+        modelRequestIdRef.current += 1;
+        modelAbortControllerRef.current = null;
+        modelTimeoutRef.current = null;
         controller.abort();
+        toast.error(message, {
+          description: action === "refresh" ? "模型列表未更新，已保留当前配置。" : "API Key 已保存，模型列表未能更新。",
+        });
       }, 30_000);
     }
-    setSavingCustomConfig(true);
-    setCustomSaveError(null);
-
-    // 先持久化供应商 / Key / Base URL，避免拉模型失败时配置丢失。
-    const sameSavedConnection = areSetupGuideAIConnectionsEqual(
-      { ...connection, apiKey },
-      savedConnection,
-    );
-    const previousModelOptions = sameSavedConnection ? storedCustomModels : [];
-    saveCustomConfig({
-      providerId: connection.providerId,
-      protocol: connection.protocol,
-      baseURL: connection.baseURL,
-      apiKey,
-      modelOptions: previousModelOptions,
-    });
+    sendRequestEvent({ type: "models.started", requestId, action });
 
     try {
+      // 先持久化供应商 / Key / Base URL，避免拉模型失败时配置丢失。
+      const sameSavedConnection = areSetupGuideAIConnectionsEqual(
+        { ...connection, apiKey },
+        savedConnection,
+      );
+      const previousModelOptions = sameSavedConnection ? storedCustomModels : [];
+      saveCustomConfig({
+        providerId: connection.providerId,
+        protocol: connection.protocol,
+        baseURL: connection.baseURL,
+        apiKey,
+        modelOptions: previousModelOptions,
+      });
+
+      sendRequestEvent({ type: "models.configSaved", requestId });
       // DeepSeek 模型列表走兼容 /models；协议按模型在请求时分支。
       const listProtocol: CustomAIProtocol =
         connection.providerId === "deepseek" ? "openai" : connection.protocol;
@@ -130,6 +138,7 @@ export function useAIModelRefresh(
         modelOptions,
       });
 
+      sendRequestEvent({ type: "models.loaded", requestId, count: modelOptions.length });
       setSelectedModelId(nextModel?.id ?? null);
       scrollToModelSection();
 
@@ -152,16 +161,14 @@ export function useAIModelRefresh(
       if (!isMountedRef.current || requestId !== modelRequestIdRef.current) {
         return;
       }
-      const timedOut = modelTimedOutRequestIdRef.current === requestId;
-      if (controller?.signal.aborted && !timedOut) return;
+      if (controller?.signal.aborted) return;
       const rawMessage =
         error instanceof Error ? error.message : "获取模型列表失败";
-      const message = timedOut
-        ? "获取模型列表超时（30 秒），配置已保存，可重试。"
-        : redactSetupGuideAIError(rawMessage, apiKey) || "获取模型列表失败";
-      setCustomSaveError(message);
+      const message = redactSetupGuideAIError(rawMessage, apiKey) || "获取模型列表失败";
+      const configSaved = requestStateRef.current.models.status === "loading";
+      sendRequestEvent({ type: "models.failed", requestId, message });
       toast.error(message, {
-        description:
+        description: !configSaved ? "服务配置未能保存。" :
           action === "refresh"
             ? "模型列表未更新，已保留当前配置。"
             : "API Key 已保存，模型列表未能更新。",
@@ -170,9 +177,7 @@ export function useAIModelRefresh(
       if (requestId === modelRequestIdRef.current) {
         if (modelTimeoutRef.current) clearTimeout(modelTimeoutRef.current);
         modelTimeoutRef.current = null;
-        modelTimedOutRequestIdRef.current = null;
         modelAbortControllerRef.current = null;
-        if (isMountedRef.current) setSavingCustomConfig(false);
       }
     }
   };
@@ -186,8 +191,9 @@ export function useAIModelRefresh(
   };
 
   const handleProviderChange = (value: string) => {
-    if (!isAIProviderId(value) || value === providerId) return;
-    setCustomSaveError(null);
+    if (!isAIProviderId(value) || value === providerId ||
+      isModelRequestBusy(requestStateRef.current.models) || requestStateRef.current.test.status === "testing") return;
+    dismissModelError();
     if (isOnboarding) {
       cancelModelRefresh();
       cancelConnectionTest();
@@ -237,8 +243,9 @@ export function useAIModelRefresh(
   };
 
   const handleModelChange = (modelId: string) => {
+    if (isModelRequestBusy(requestStateRef.current.models)) return;
     if (isOnboarding) cancelConnectionTest();
-    setCustomSaveError(null);
+    dismissModelError();
     setSelectedModelId(modelId);
     // DeepSeek 选 Pro/Flash 时协议会变；若已有 Key，同步持久化协议槽位。
     if (providerId !== "deepseek" || !apiKeyDraft.trim()) return;

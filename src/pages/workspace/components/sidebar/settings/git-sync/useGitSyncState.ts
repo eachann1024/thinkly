@@ -1,39 +1,37 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import type { GitSyncBridge, GitSyncState } from "@/lib/git-sync-contract";
+import { gitSyncLoadReducer } from "./gitSyncLoadState";
 
+const EMPTY_STATE: GitSyncState = { configs: [], statuses: [] };
 export function useGitSyncState(bridge: GitSyncBridge | undefined, visible: boolean) {
-  const [state, setState] = useState<GitSyncState>({ configs: [], statuses: [] });
-  const [loading, setLoading] = useState(Boolean(bridge));
-  const [loadError, setLoadError] = useState("");
+  const [request, dispatch] = useReducer(gitSyncLoadReducer, bridge
+    ? { status: "loading", snapshot: null } : { status: "unavailable" });
   const [revision, setRevision] = useState(0);
+  const applyState = useCallback((snapshot: GitSyncState) => dispatch({ type: "received", snapshot }), []);
   useEffect(() => {
     if (!bridge || !visible) return;
     let mounted = true;
-    const apply = (next: GitSyncState) => {
-      if (mounted) {
-        setState(next);
-        setLoadError("");
-      }
-    };
-    const unsubscribe = bridge.onState(apply);
-    bridge
-      .getState()
-      .then(apply)
-      .catch((error: unknown) => {
-        if (mounted) setLoadError(error instanceof Error ? error.message : "读取配置失败");
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-      unsubscribe();
-    };
-  }, [bridge, visible, revision]);
+    let pushed = false;
+    dispatch({ type: "load" });
+    const unsubscribe = bridge.onState(next => {
+      if (!mounted) return;
+      pushed = true;
+      applyState(next);
+    });
+    bridge.getState().then(next => {
+      if (mounted && !pushed) applyState(next);
+    }).catch((error: unknown) => {
+      if (mounted && !pushed) dispatch({ type: "failed", error: error instanceof Error ? error.message : "读取配置失败" });
+    });
+    return () => { mounted = false; unsubscribe(); };
+  }, [bridge, visible, revision, applyState]);
   const reload = () => {
-    setLoadError("");
-    setLoading(true);
-    setRevision((value) => value + 1);
+    dispatch({ type: "load" });
+    setRevision(value => value + 1);
   };
-  return { state, setState, loading, loadError, reload };
+  return {
+    state: request.status === "unavailable" ? EMPTY_STATE : request.snapshot ?? EMPTY_STATE,
+    applyState, loading: request.status === "loading",
+    loadError: request.status === "error" ? request.error : "", reload,
+  };
 }

@@ -11,13 +11,11 @@ export interface GitSyncConfig {
   enabled: boolean;
 }
 
-export interface GitSyncStatus {
-  repositoryId: string;
-  phase: "idle" | "syncing" | "error";
-  lastSyncedAt: string | null;
-  error: string | null;
-  conflicts?: GitSyncConflict[];
-}
+export type GitSyncStatus = { repositoryId: string; lastSyncedAt: string | null } & (
+  | { phase: "idle"; error: null; conflicts?: never }
+  | { phase: "syncing"; error: null; conflicts?: GitSyncConflict[] }
+  | { phase: "error"; error: string; conflicts?: GitSyncConflict[] }
+);
 
 export interface GitSyncConflict {
   id: string;

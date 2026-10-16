@@ -98,11 +98,8 @@ export function EditorComposer({
     aiSettings,
     getMentionItems,
     handleEditorKeyDownCapture,
-    findBarOpen,
-    setFindBarOpen,
-    findSeedQuery,
-    findOpenNonce,
-    findOpenReplace,
+    find,
+    closeFindBar,
   } = interactions;
   const { onPromotePreview } = useEditorPageContext();
   const {
@@ -111,7 +108,7 @@ export function EditorComposer({
     holdFormattingToolbar,
   } = useEditorComposerToolbar(
     { editor, editable, editorContainerRef, suppressFormattingToolbar },
-    interactions.setLinkPopoverOpen,
+    interactions.closeLinkPopover,
   );
 
   const slashMenuFloatingOptions = useMemo(
@@ -265,12 +262,12 @@ export function EditorComposer({
       />
       <FindInPageBar
         editor={editor}
-        open={findBarOpen}
-        seedQuery={findSeedQuery}
-        openNonce={findOpenNonce}
-        openReplace={findOpenReplace}
+        open={find.phase === "open" || find.phase === "reopening"}
+        seedQuery={find.phase === "closed" ? "" : find.request.seed}
+        openNonce={find.phase === "closed" ? 0 : find.request.nonce}
+        openReplace={find.phase !== "closed" && find.request.replace}
         editable={editable}
-        onClose={() => setFindBarOpen(false)}
+        onClose={closeFindBar}
       />
     </EditorContextMenu>
   );

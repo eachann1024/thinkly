@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useReducer,
 } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection } from "prosemirror-state";
@@ -16,12 +17,12 @@ import {
 } from "./selectionRestore";
 import {
   measureColorPanelPosition,
-  type PositionState,
 } from "./colorPanelGeometry";
 import {
   resolveOpenColorState,
   applyHeldColorPatch,
 } from "./heldColorSelection";
+import { colorPanelReducer } from "./colorPanelState";
 import { MIXED } from "./colorPalette";
 import type { useSelectionColorState } from "./useSelectionColors";
 
@@ -30,9 +31,10 @@ export function useColorPanelState(
   selectionColors: ReturnType<typeof useSelectionColorState>,
   onOpenChange?: (open: boolean) => void,
 ) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [position, setPosition] = useState<PositionState | null>(null);
+  const [panelState, dispatch] = useReducer(colorPanelReducer, { phase: "unmounted" });
+  const isMounted = panelState.phase !== "unmounted";
+  const isOpen = panelState.phase === "open";
+  const position = panelState.phase === "unmounted" ? null : panelState.position;
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeAnimTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -56,7 +58,7 @@ export function useColorPanelState(
       allowFlip ? undefined : (sideLockRef.current ?? undefined),
     );
     sideLockRef.current = next.showAbove;
-    setPosition(next);
+    dispatch({ type: "position-measured", position: next });
   }, []);
 
   useEffect(() => {
@@ -116,23 +118,9 @@ export function useColorPanelState(
     }
     holdCurrentSelection();
 
-    if (isMounted) {
-      setIsOpen(true);
-      return;
-    }
-
-    const next = measureColorPanelPosition(buttonRef.current, panelRef.current);
+    const next = position ?? measureColorPanelPosition(buttonRef.current, panelRef.current);
     sideLockRef.current = next.showAbove;
-    setPosition(next);
-    setIsMounted(true);
-    if (openFrameRef.current != null)
-      cancelAnimationFrame(openFrameRef.current);
-    openFrameRef.current = requestAnimationFrame(() => {
-      openFrameRef.current = requestAnimationFrame(() => {
-        setIsOpen(true);
-        openFrameRef.current = null;
-      });
-    });
+    dispatch({ type: "pointer-entered", position: next });
   };
 
   useLayoutEffect(() => {
@@ -152,25 +140,40 @@ export function useColorPanelState(
   }, [isMounted, updatePanelPosition]);
 
   const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
+      dispatch({ type: "leave-delay-completed" });
     }, 150);
   };
 
   useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      return;
+    if (panelState.phase === "entering") {
+      openFrameRef.current = requestAnimationFrame(() => {
+        openFrameRef.current = requestAnimationFrame(() => {
+          dispatch({ type: "entry-completed" });
+          openFrameRef.current = null;
+        });
+      });
+      return () => {
+        if (openFrameRef.current != null) cancelAnimationFrame(openFrameRef.current);
+        openFrameRef.current = null;
+      };
     }
-    if (closeAnimTimeoutRef.current) clearTimeout(closeAnimTimeoutRef.current);
-    closeAnimTimeoutRef.current = setTimeout(() => {
+    if (panelState.phase === "leaving") {
+      closeAnimTimeoutRef.current = setTimeout(() => {
+        dispatch({ type: "exit-completed" });
+      }, 180);
+      return () => {
+        if (closeAnimTimeoutRef.current) clearTimeout(closeAnimTimeoutRef.current);
+        closeAnimTimeoutRef.current = null;
+      };
+    }
+    if (panelState.phase === "unmounted") {
       sideLockRef.current = null;
       heldSelectionRef.current = null;
       setFakeSelection(editor, null);
-      setIsMounted(false);
-      setPosition(null);
-    }, 180);
-  }, [editor, isOpen]);
+    }
+  }, [editor, panelState.phase]);
 
   useEffect(() => {
     if (!isMounted) return;

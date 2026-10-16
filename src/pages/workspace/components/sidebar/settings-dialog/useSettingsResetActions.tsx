@@ -24,9 +24,8 @@ export function useSettingsResetActions(
     setTheme,
     accentColor,
     setAccentColor,
-    setResetDialogOpen,
-    resetting,
-    setResetting,
+    sendDataEvent,
+    beginDataOperation,
     canReset,
     clearCurrentContent,
     createDefaultNotebook,
@@ -81,33 +80,36 @@ export function useSettingsResetActions(
     ].forEach((key) => window.localStorage.removeItem(key));
   };
 
-  const handleReset = async (zipBlob?: Blob) => {
-    if (zipBlob) {
-      await restoreBackupWithRollback(zipBlob);
-      return;
-    }
-    if (!canReset) return;
-    await clearCurrentContent();
-    createDefaultNotebook();
-    await resetSettingsToDefaults();
-    resetAuxiliaryAppState();
-    setResetDialogOpen(false);
-    onOpenChange(false);
-    toast.success("重置成功");
-  };
-
   const handleManualReset = async () => {
-    if (resetting) return;
-    setResetting(true);
+    if (!canReset) return;
+    const id = beginDataOperation("reset");
+    if (id === null) return;
     try {
-      await handleReset();
+      await clearCurrentContent();
+      createDefaultNotebook();
+      await resetSettingsToDefaults();
+      resetAuxiliaryAppState();
+      sendDataEvent({ type: "reset.closed" });
+      onOpenChange(false);
+      toast.success("重置成功");
     } catch (error) {
       console.error("Reset failed", error);
       toast.error("重置失败", {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
-      setResetting(false);
+      sendDataEvent({ type: "reset.finished", id });
+    }
+  };
+
+  const handleReset = async (zipBlob?: Blob) => {
+    if (!zipBlob) return handleManualReset();
+    const id = beginDataOperation("restore");
+    if (id === null) throw new Error("正在重置或恢复数据，请稍后重试");
+    try {
+      await restoreBackupWithRollback(zipBlob);
+    } finally {
+      sendDataEvent({ type: "restore.finished", id });
     }
   };
 

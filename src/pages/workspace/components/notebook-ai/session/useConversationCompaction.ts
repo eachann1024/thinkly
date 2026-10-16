@@ -18,7 +18,8 @@ export function useConversationCompaction(state: SessionState) {
     messagesRef,
     compactAbortRef,
     currentSessionScope,
-    setIsCompacting,
+    beginCompaction,
+    finishCompaction,
     clearError,
     isCurrentSession,
     setMessages,
@@ -26,7 +27,7 @@ export function useConversationCompaction(state: SessionState) {
     conversationId,
   } = state;
   const compactConversation = useCallback(() => {
-    if (isBusy) {
+    if (isBusy || (compactAbortRef.current && !compactAbortRef.current.signal.aborted)) {
       toast.warning("AI 正在回复中，请待生成结束后再压缩上下文");
       return;
     }
@@ -44,7 +45,7 @@ export function useConversationCompaction(state: SessionState) {
     const scope = currentSessionScope;
     const abort = new AbortController();
     compactAbortRef.current = abort;
-    setIsCompacting(true);
+    const requestId = beginCompaction(scope);
     clearError();
 
     void generateConversationCompactSummary(currentMessages, abort.signal)
@@ -73,7 +74,7 @@ export function useConversationCompaction(state: SessionState) {
           compactAbortRef.current = null;
         }
         if (isCurrentSession(scope)) {
-          setIsCompacting(false);
+          finishCompaction(scope, requestId);
         }
       });
   }, [
@@ -82,7 +83,8 @@ export function useConversationCompaction(state: SessionState) {
     messagesRef,
     compactAbortRef,
     currentSessionScope,
-    setIsCompacting,
+    beginCompaction,
+    finishCompaction,
     clearError,
     isCurrentSession,
     setMessages,

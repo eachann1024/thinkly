@@ -1,17 +1,33 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useReducer, useLayoutEffect } from "react";
 import { useEditorPlatform } from "@/components/editor/platform/context";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { getImageElements, resolveImageSrc } from "./imageUtils";
 import type { ImageLightboxProps, SlideInfo } from "./lightboxTypes";
 
+import { lightboxSlideReducer } from "./lightboxSlideState";
+
 export function useLightboxSlides(
   editorContainerRef: ImageLightboxProps["editorContainerRef"],
 ) {
   const platform = useEditorPlatform();
-  const { getActivePageLocalFilePath } = useEditorPageContext();
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [slides, setSlides] = useState<SlideInfo[]>([]);
+  const { page, getActivePageLocalFilePath } = useEditorPageContext();
+  const pagePath = getActivePageLocalFilePath();
+  const [state, dispatch] = useReducer(lightboxSlideReducer, { phase: "closed" });
+  const requestRef = useRef(0);
+  const snapshot = "snapshot" in state ? state.snapshot : undefined;
+  const open = state.phase === "open" || state.phase === "refreshing";
+  const slides = snapshot?.slides ?? [];
+  const index = snapshot?.index ?? 0;
+  const closeLightbox = useCallback(() => {
+    requestRef.current += 1;
+    dispatch({ type: "closed" });
+  }, []);
+  // The editor is reused across pages; invalidate work before new-page events.
+  useLayoutEffect(() => {
+    closeLightbox();
+    return () => { requestRef.current += 1; };
+  }, [page.id, pagePath, closeLightbox]);
+  const viewSlide = (index: number) => dispatch({ type: "slide-viewed", index });
   const resolvedUrlsRef = useRef<Map<string, string>>(new Map());
   const objectUrlsRef = useRef<Set<string>>(new Set());
   const cleanupObjectUrls = useCallback(() => {
@@ -28,12 +44,12 @@ export function useLightboxSlides(
 
   useEffect(() => {
     return () => {
+      requestRef.current += 1;
       cleanupObjectUrls();
     };
   }, [cleanupObjectUrls]);
   const buildSlides = useCallback(
-    async (container: HTMLElement): Promise<SlideInfo[]> => {
-      const images = getImageElements(container);
+    async (images: HTMLImageElement[], request: number, pagePath: string | null): Promise<SlideInfo[]> => {
       const slides: SlideInfo[] = [];
 
       for (const img of images) {
@@ -42,15 +58,21 @@ export function useLightboxSlides(
 
         if (!src) continue;
 
-        let resolved = resolvedUrlsRef.current.get(src);
+        const cacheKey = JSON.stringify([pagePath, src]);
+        let resolved = resolvedUrlsRef.current.get(cacheKey);
         if (!resolved) {
           resolved = await resolveImageSrc(
             src,
             platform,
-            getActivePageLocalFilePath(),
+            pagePath,
           );
-          resolvedUrlsRef.current.set(src, resolved);
-          if (resolved.startsWith("blob:")) {
+          // A blob already used by the editor is borrowed, not ours to revoke.
+          if (requestRef.current !== request) {
+            if (resolved.startsWith("blob:") && resolved !== src) URL.revokeObjectURL(resolved);
+            return [];
+          }
+          resolvedUrlsRef.current.set(cacheKey, resolved);
+          if (resolved.startsWith("blob:") && resolved !== src) {
             objectUrlsRef.current.add(resolved);
           }
         }
@@ -60,7 +82,7 @@ export function useLightboxSlides(
 
       return slides;
     },
-    [platform, getActivePageLocalFilePath],
+    [platform],
   );
 
   const openLightboxAtImage = useCallback(
@@ -68,18 +90,26 @@ export function useLightboxSlides(
       const container = editorContainerRef.current;
       if (!container) return;
 
-      const images = getImageElements(container);
+      const images = getImageElements(container).filter((image) => Boolean(image.src || image.getAttribute("src")));
       const clickedIndex = images.indexOf(img);
       if (clickedIndex < 0) return;
 
-      const newSlides = await buildSlides(container);
-      if (newSlides.length === 0) return;
-
-      setSlides(newSlides);
-      setIndex(clickedIndex);
-      setOpen(true);
+      const pagePath = getActivePageLocalFilePath();
+      const request = ++requestRef.current;
+      dispatch({ type: "open-requested", request });
+      try {
+        const newSlides = await buildSlides(images, request, pagePath);
+        if (requestRef.current !== request) return;
+        if (editorContainerRef.current !== container || getActivePageLocalFilePath() !== pagePath) {
+          closeLightbox();
+          return;
+        }
+        dispatch({ type: "prepared", request, slides: newSlides, index: clickedIndex });
+      } catch {
+        if (requestRef.current === request) dispatch({ type: "failed", request });
+      }
     },
-    [editorContainerRef, buildSlides],
+    [editorContainerRef, buildSlides, getActivePageLocalFilePath, closeLightbox],
   );
   const handleImageDoubleClick = useCallback(
     async (event: MouseEvent) => {
@@ -109,9 +139,9 @@ export function useLightboxSlides(
 
   return {
     open,
-    setOpen,
+    closeLightbox,
     index,
-    setIndex,
+    viewSlide,
     slides,
     currentSlide: slides[index],
     openLightboxAtImage,

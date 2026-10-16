@@ -1,7 +1,7 @@
 import type { NotebooksState } from "./types";
 import { usePages } from "../usePages";
 import { fs } from "@/lib/electron-platform/fs";
-import { IDLE_LOCAL_FOLDER_LOAD_STATE } from "./types";
+import { IDLE_LOCAL_FOLDER_LOAD_STATE, transitionLocalFolderLoad } from "./localFolderLoadState";
 
 export function createActiveNotebookActions(
   set: import("zustand").StoreApi<NotebooksState>["setState"],
@@ -12,7 +12,7 @@ export function createActiveNotebookActions(
   | "getNotebook"
   | "setLastActivePage"
   | "getLastActivePage"
-  | "setLocalFolderLoadState"
+  | "dispatchLocalFolderLoadEvent"
   | "getLocalFolderLoadState"
 > {
   return {
@@ -107,13 +107,15 @@ export function createActiveNotebookActions(
       return get().lastActivePageByNotebook[notebookId] || null;
     },
 
-    setLocalFolderLoadState: (notebookId, loadState) => {
-      set((state) => ({
-        localFolderLoadStates: {
-          ...state.localFolderLoadStates,
-          [notebookId]: loadState,
-        },
-      }));
+    dispatchLocalFolderLoadEvent: (notebookId, event) => {
+      set((state) => {
+        if (!state.notebooks[notebookId]) return state;
+        const previous = state.localFolderLoadStates[notebookId] ?? IDLE_LOCAL_FOLDER_LOAD_STATE;
+        const next = transitionLocalFolderLoad(previous, event);
+        return previous === next ? state : {
+          localFolderLoadStates: { ...state.localFolderLoadStates, [notebookId]: next },
+        };
+      });
     },
 
     getLocalFolderLoadState: (notebookId) => {

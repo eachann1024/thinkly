@@ -41,7 +41,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   const openSidebarView = (view: SidebarView, keyboard = false) => {
     keepSidebarOpen();
     if (view === "search") {
-      if (useSearchSession.getState().sheetOpen) useSearchSession.getState().closeSearch();
+      if (useSearchSession.getState().view.phase === "sheet") useSearchSession.getState().closeSearch();
       else handleOpenSearch();
       return;
     }

@@ -16,15 +16,13 @@ export function VideoControls({
   playback: ReturnType<typeof useVideoPlayback>;
 }) {
   const {
-    videoRef,
     playing,
     current,
-    setCurrent,
+    seekBy,
     duration,
     muted,
     volume,
     isFullscreen,
-    revealControls,
     togglePlay,
     toggleMute,
     toggleFullscreen,
@@ -46,19 +44,14 @@ export function VideoControls({
         tabIndex={0}
         onPointerDown={onProgressPointerDown}
         onKeyDown={(e) => {
-          const video = videoRef.current;
-          if (!video || !duration) return;
+          if (!duration) return;
           const step = e.shiftKey ? 10 : 5;
           if (e.key === "ArrowLeft") {
             e.preventDefault();
-            video.currentTime = Math.max(0, video.currentTime - step);
-            setCurrent(video.currentTime);
-            revealControls();
+            seekBy(-step);
           } else if (e.key === "ArrowRight") {
             e.preventDefault();
-            video.currentTime = Math.min(duration, video.currentTime + step);
-            setCurrent(video.currentTime);
-            revealControls();
+            seekBy(step);
           }
         }}
       >

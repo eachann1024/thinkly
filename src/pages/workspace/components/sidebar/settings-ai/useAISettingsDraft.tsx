@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { aiRequestReducer, initialAIRequestState, isModelRequestBusy, type AIRequestEvent } from "./aiRequestState";
 import { isAIProviderId, type AIProviderId } from "@/lib/ai-provider";
 import {
   type SettingsAIProps,
@@ -35,19 +36,19 @@ export function useAISettingsDraft({
     readStoredApiKey(ai, initialProviderId, ai.customProtocol),
   );
 
-  const [savingCustomConfig, setSavingCustomConfig] = useState(false);
-
-  const [customSaveError, setCustomSaveError] = useState<string | null>(null);
-
+  const [requests, dispatchRequests] = useReducer(aiRequestReducer, initialAIRequestState);
+  const requestStateRef = useRef(requests);
+  const sendRequestEvent = useCallback((event: AIRequestEvent) => {
+    requestStateRef.current = aiRequestReducer(requestStateRef.current, event);
+    dispatchRequests(event);
+  }, []);
+  const savingCustomConfig = isModelRequestBusy(requests.models);
+  const customSaveError = requests.models.status === "failed" ? requests.models.message : null;
+  const testingConnection = requests.test.status === "testing";
+  const connectionTestResult = requests.test.status === "testing" ? "idle" : requests.test.status;
+  const connectionTestMessage = "message" in requests.test ? requests.test.message : "";
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
-
-  const [testingConnection, setTestingConnection] = useState(false);
-
-  const [connectionTestResult, setConnectionTestResult] = useState<
-    "idle" | "success" | "failed" | "timeout"
-  >("idle");
-
-  const [connectionTestMessage, setConnectionTestMessage] = useState("");
+  const dismissModelError = () => sendRequestEvent({ type: "models.errorDismissed" });
 
   const modelSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,8 +57,6 @@ export function useAISettingsDraft({
   const modelAbortControllerRef = useRef<AbortController | null>(null);
 
   const modelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const modelTimedOutRequestIdRef = useRef<number | null>(null);
 
   const connectionTestRequestIdRef = useRef(0);
 
@@ -77,16 +76,14 @@ export function useAISettingsDraft({
 
   const cancelModelRefresh = useCallback(() => {
     const controller = modelAbortControllerRef.current;
-    if (!controller) return;
 
     modelRequestIdRef.current += 1;
-    controller.abort();
+    controller?.abort();
     modelAbortControllerRef.current = null;
-    modelTimedOutRequestIdRef.current = null;
     if (modelTimeoutRef.current) clearTimeout(modelTimeoutRef.current);
     modelTimeoutRef.current = null;
-    if (isMountedRef.current) setSavingCustomConfig(false);
-  }, []);
+    if (isMountedRef.current) sendRequestEvent({ type: "models.cancelled" });
+  }, [sendRequestEvent]);
 
   const cancelConnectionTest = useCallback(() => {
     connectionTestRequestIdRef.current += 1;
@@ -97,11 +94,9 @@ export function useAISettingsDraft({
     }
     connectionTestTimeoutRef.current = null;
     if (isMountedRef.current) {
-      setTestingConnection(false);
-      setConnectionTestResult("idle");
-      setConnectionTestMessage("");
+      sendRequestEvent({ type: "test.cancelled" });
     }
-  }, []);
+  }, [sendRequestEvent]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -171,23 +166,20 @@ export function useAISettingsDraft({
     setCustomBaseURL,
     apiKeyDraft,
     setApiKeyDraft,
+    requestStateRef,
+    sendRequestEvent,
+    dismissModelError,
     savingCustomConfig,
-    setSavingCustomConfig,
     customSaveError,
-    setCustomSaveError,
     apiKeyVisible,
     setApiKeyVisible,
     testingConnection,
-    setTestingConnection,
     connectionTestResult,
-    setConnectionTestResult,
     connectionTestMessage,
-    setConnectionTestMessage,
     modelSectionRef,
     modelRequestIdRef,
     modelAbortControllerRef,
     modelTimeoutRef,
-    modelTimedOutRequestIdRef,
     connectionTestRequestIdRef,
     connectionTestControllerRef,
     connectionTestTimeoutRef,

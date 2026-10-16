@@ -27,8 +27,11 @@ import { movePageToNotebook } from "@/lib/move-page-to-notebook";
 import { renderNotebookIcon } from "./notebookUtils";
 
 export function LocalFolderTargetPicker() {
-  const { open, mode, workspaceId, pageId, importFiles, closePicker } =
-    useLocalFolderTargetPicker();
+  const { picker, closePicker } = useLocalFolderTargetPicker();
+  const open = picker.phase !== "closed";
+  const mode = picker.phase;
+  const workspaceId = picker.phase !== "closed" ? picker.workspaceId : "";
+  const pageId = picker.phase === "move" ? picker.pageId : undefined;
   const pages = usePages((s) => s.pages);
   const notebooks = useNotebooks((s) => s.notebooks);
   const setExpandPageId = usePages((s) => s.setExpandPageId);
@@ -74,11 +77,11 @@ export function LocalFolderTargetPicker() {
   };
 
   const handleSelect = async (folderId: string | undefined) => {
-    if (!workspaceId) return;
+    if (picker.phase !== "import") return;
 
     const { importedIds, failedCount } = await importTextFilesToLocalFolder({
       workspaceId,
-      files: importFiles,
+      files: picker.files,
       parentId: folderId,
     });
     rememberLocalFolderTarget(workspaceId, folderId);

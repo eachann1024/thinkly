@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useReducer } from "react";
 import { useEditorPageContext, useEditorSettings } from "@/components/editor/platform/hostContext";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
@@ -9,20 +9,24 @@ import {
   instantiateMermaidPreview, rememberMermaidHeight,
 } from "./mermaidPreviewCache";
 
+import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
+
 interface MermaidViewProps {
   value: string;
 }
 
 export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
-  const [svg, setSvg] = useState<string>("");
-  const [failed, setFailed] = useState(false);
+  const [renderState, dispatch] = useReducer(previewRenderReducer, { phase: "idle" });
+  const renderStateRef = useRef(renderState);
+  renderStateRef.current = renderState;
+  const svg = previewRenderHTML(renderState);
+  const failed = renderState.phase === "error";
   const { previewRef, activated, near } = usePreviewVisibility(false, true);
   const { theme, features, customFonts } = useEditorSettings();
   const { page } = useEditorPageContext();
   const fontIdentity = JSON.stringify([page?.fontFamily, customFonts]);
   const resolvedTheme = useResolvedTheme(theme);
   const sourceRef = useRef(value);
-  const renderedRef = useRef("");
   const identity = JSON.stringify([value, resolvedTheme, features.mermaidUnsafeHTML, fontIdentity]);
   const cachedHeight = readMermaidPreview(identity)?.height ?? 160;
 
@@ -38,7 +42,9 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
 
   useEffect(() => {
     if (!activated || !near) return;
-    if (renderedRef.current === identity) return;
+    const completed = renderStateRef.current;
+    if ((completed.phase === "success" || completed.phase === "empty") && completed.identity === identity) return;
+    dispatch({ type: "render-requested", identity });
     const controller = new AbortController();
     let active = true;
     let idle: number | null = null;
@@ -49,9 +55,7 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       // A warm return skips IPC, the serial worker queue, source debounce and idle scheduling.
       cancelCommit = schedulePreviewCommit(() => {
         if (active) {
-          renderedRef.current = identity;
-          setFailed(false);
-          setSvg(instantiateMermaidPreview(cached));
+          dispatch({ type: "rendered", identity, html: instantiateMermaidPreview(cached) });
         }
       });
       return () => { active = false; cancelCommit?.(); };
@@ -59,9 +63,8 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
 
     const renderMermaid = async () => {
       if (!active) return;
-      setFailed(false);
       if (!value) {
-        setSvg("");
+        dispatch({ type: "empty", identity });
         return;
       }
       try {
@@ -73,12 +76,11 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         }, "editor", fontIdentity, controller.signal);
         if (!active) return;
         cancelCommit = schedulePreviewCommit(() => {
-          if (active) { renderedRef.current = identity; rememberMermaidPreview(identity, svg); setSvg(svg); }
+          if (active) { rememberMermaidPreview(identity, svg); dispatch({ type: "rendered", identity, html: svg }); }
         });
       } catch {
         if (active) {
-          setSvg("");
-          setFailed(true);
+          dispatch({ type: "failed", identity });
         }
       }
     };

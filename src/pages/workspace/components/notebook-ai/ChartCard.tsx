@@ -189,6 +189,7 @@ export function ChartCard(props: ChartCardProps) {
       <div className="notebook-ai-canvas-card-header">
         <div className="notebook-ai-canvas-card-title">{props.title?.trim() || "图表"}</div>
         <ArtifactActions
+          previewIdentity={JSON.stringify([props.type, props.categories, props.series, resolvedTheme, themeSurface])}
           onCopyImage={capturePngDataUrl}
           onDownloadImage={capturePngBlob}
           downloadImageFilename="chart.png"

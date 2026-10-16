@@ -1,20 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { usePages } from "@/stores/usePages";
 import { resolveHistoryBackend } from "@/lib/history/backend";
 import { filterAdjacentDuplicateHistoryEntries } from "@/lib/history/dedupe";
 import { materializeVersion } from "@/lib/history/restore";
-import type { HistoryIndex, HistoryIndexEntry } from "@/lib/history/types";
+import type { HistoryIndexEntry } from "@/lib/history/types";
 import {
   extractBlockNoteTitle,
-  type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import {
-  type SelectedHistoryStatus,
   createSafeHistoryContent,
   formatGroupLabel,
 } from "../historyViewPresentation";
+
+import { historyIndexReducer, historySelectionReducer } from "./historyRequestState";
 
 export function useHistoryViewState() {
   const active = useHistoryView((s) => s.active);
@@ -41,15 +41,16 @@ export function useHistoryViewState() {
 
   const pageTitle = page ? extractBlockNoteTitle(page.content) || "无标题" : "";
 
-  const [index, setIndex] = useState<HistoryIndex | null>(null);
-
-  const [indexError, setIndexError] = useState<string | null>(null);
-
-  const [selectedContent, setSelectedContent] =
-    useState<BlockNoteContent | null>(null);
-
-  const [selectedStatus, setSelectedStatus] =
-    useState<SelectedHistoryStatus>("idle");
+  const [indexState, dispatchIndex] = useReducer(historyIndexReducer, { status: "idle" });
+  const [selectionState, dispatchSelection] = useReducer(historySelectionReducer, { status: "idle" });
+  const index = "data" in indexState ? indexState.data : null;
+  const indexError = indexState.status === "error" && indexState.pageId === pageId ? indexState.error : null;
+  const visibleSelection = selectionState.status !== "idle" && selectionState.pageId === pageId &&
+    selectionState.versionId === selectedVersionId ? selectionState : null;
+  const selectedContent = visibleSelection?.status === "ready" ? visibleSelection.content : null;
+  const selectedStatus = visibleSelection?.status ?? "idle";
+  const applyMilestone = (targetPageId: string, versionId: string, value: boolean) =>
+    dispatchIndex({ type: "milestone", pageId: targetPageId, versionId, value });
 
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -63,12 +64,11 @@ export function useHistoryViewState() {
   // 加载版本索引
   useEffect(() => {
     if (!pageId) {
-      setIndex(null);
-      setIndexError(null);
+      dispatchIndex({ type: "reset" });
       return;
     }
     let cancelled = false;
-    setIndexError(null);
+    dispatchIndex({ type: "load", pageId });
     const backend = resolveHistoryBackend(pageId);
     backend
       .loadIndex(pageId)
@@ -78,12 +78,11 @@ export function useHistoryViewState() {
           idx.versions,
           backend,
         );
-        if (!cancelled) setIndex({ ...idx, versions });
+        if (!cancelled) dispatchIndex({ type: "loaded", data: { ...idx, versions } });
       })
       .catch((error) => {
         if (!cancelled) {
-          setIndex({ pageId, versions: [], lastVersionCharCount: 0 });
-          setIndexError(describeDiskWriteError(error));
+          dispatchIndex({ type: "failed", pageId, error: describeDiskWriteError(error) });
         }
       });
     return () => {
@@ -94,34 +93,28 @@ export function useHistoryViewState() {
   // 加载选中版本内容
   useEffect(() => {
     if (!pageId || !selectedVersionId) {
-      setSelectedContent(null);
-      setSelectedStatus("idle");
+      dispatchSelection({ type: "reset" });
       return;
     }
     let cancelled = false;
-    setSelectedContent(null);
-    setSelectedStatus("loading");
+    dispatchSelection({ type: "load", pageId, versionId: selectedVersionId });
     materializeVersion(pageId, selectedVersionId)
       .then((result) => {
         if (cancelled) return;
         if (!result || result.content == null) {
-          setSelectedContent(null);
-          setSelectedStatus("missing");
+          dispatchSelection({ type: "missing", pageId, versionId: selectedVersionId });
           return;
         }
         const safeContent = createSafeHistoryContent(result.content);
         if (!safeContent) {
-          setSelectedContent(null);
-          setSelectedStatus("error");
+          dispatchSelection({ type: "failed", pageId, versionId: selectedVersionId });
           return;
         }
-        setSelectedContent(safeContent);
-        setSelectedStatus("ready");
+        dispatchSelection({ type: "loaded", pageId, versionId: selectedVersionId, content: safeContent });
       })
       .catch(() => {
         if (!cancelled) {
-          setSelectedContent(null);
-          setSelectedStatus("error");
+          dispatchSelection({ type: "failed", pageId, versionId: selectedVersionId });
         }
       });
     return () => {
@@ -195,13 +188,10 @@ export function useHistoryViewState() {
     page,
     pageTitle,
     index,
-    setIndex,
+    applyMilestone,
     indexError,
-    setIndexError,
     selectedContent,
-    setSelectedContent,
     selectedStatus,
-    setSelectedStatus,
     isRestoring,
     setIsRestoring,
     pendingMilestoneVersionId,

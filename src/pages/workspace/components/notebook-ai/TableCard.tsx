@@ -55,6 +55,7 @@ export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
         <div className="notebook-ai-canvas-card-title">{title?.trim() || "表格"}</div>
         {markdown ? (
           <ArtifactActions
+            previewIdentity={JSON.stringify([markdown, title])}
             copySource={markdown}
             downloadSource={markdown}
             filename={tableFilename(title)}

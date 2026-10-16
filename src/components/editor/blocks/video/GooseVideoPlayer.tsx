@@ -15,14 +15,11 @@ export function GooseVideoPlayer({
     rootRef,
     videoRef,
     playing,
-    setPlaying,
     controlsVisible,
     setControlsVisible,
     isFullscreen,
     ready,
-    setReady,
     loadError,
-    setLoadError,
     revealControls,
     togglePlay,
     toggleMute,
@@ -77,16 +74,12 @@ export function GooseVideoPlayer({
       }}
     >
       <video
+        key={src}
         ref={videoRef}
         src={src}
         className="goose-video-player__video"
         playsInline
         preload="metadata"
-        onError={() => {
-          setLoadError(true);
-          setReady(false);
-          setPlaying(false);
-        }}
         // 不使用原生 controls；避免抢焦点与丑陋默认条
         tabIndex={-1}
         onClick={(e) => {

@@ -21,7 +21,7 @@ import "./search-sheet.css";
 
 export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNotebookId: string | null }) {
   const session = useSearchSession(useShallow(s => ({
-    open: s.open, sheetOpen: s.sheetOpen, query: s.query, scope: s.scope, titleOnly: s.titleOnly, sort: s.sort,
+    open: s.view.phase !== "closed", sheetOpen: s.view.phase === "sheet", query: s.query, scope: s.scope, titleOnly: s.titleOnly, sort: s.sort,
     focusNonce: s.focusNonce, closeSearch: s.closeSearch, setQuery: s.setQuery, setScope: s.setScope,
   })));
   const visible = session.open && session.sheetOpen;
@@ -79,14 +79,12 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     returnFocus.current = null;
     const latest = useSearchSession.getState();
     latest.targetPage(id, true);
-    latest.hideSheet();
   };
   const openResult = useCallback((page: SearchResultPage) => {
     const latest = useSearchSession.getState();
-    if (pending || composing.current || !latest.open || latest.query !== deferredQuery || latest.scope !== session.scope) return;
+    if (pending || composing.current || latest.view.phase === "closed" || latest.query !== deferredQuery || latest.scope !== session.scope) return;
     returnFocus.current = null;
     latest.targetPage(page.id, true);
-    latest.hideSheet();
   }, [deferredQuery, session.scope, pending]);
   const clearSearch = () => {
     if (composing.current) inputRef.current?.blur();
@@ -104,7 +102,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     if (event.key === "Tab" && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       const latest = useSearchSession.getState();
-      latest.setScope(latest.scope.kind === "all" ? { kind: "current", notebookId: latest.startingNotebookId } : { kind: "all" });
+      latest.setScope(latest.scope.kind === "all" ? { kind: "current", notebookId: latest.view.phase !== "closed" ? latest.view.context.startingNotebookId : null } : { kind: "all" });
       return;
     }
     if ((event.key === "ArrowDown" || event.key === "ArrowUp") && optionIds.length && !answer) {

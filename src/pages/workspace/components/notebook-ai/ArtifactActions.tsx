@@ -21,10 +21,8 @@ import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import {
   PREVIEW_ACTION_TOOLTIP,
-  openPreviewInSystem,
-  previewPointerHandlers,
-  type PreviewContent,
 } from "@/lib/preview/previewAction";
+import { useArtifactPreview } from "./useArtifactPreview";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
 
 const iconBtnClass = "cursor-pointer";
@@ -40,14 +38,15 @@ export function ArtifactActions({
   onPreview,
   onPreviewImage,
   previewFilename = "preview.png",
+  previewIdentity,
   onInsert,
 }: ArtifactActionsProps) {
   const [copyingImage, setCopyingImage] = useState(false);
   const [downloadingImage, setDownloadingImage] = useState(false);
-  const [previewing, setPreviewing] = useState(false);
-  const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
-    null,
-  );
+  const { previewing, previewContent, closePreview, previewHandlers } = useArtifactPreview({
+    onPreview, onPreviewImage, previewFilename,
+    identity: previewIdentity ?? JSON.stringify([copySource, downloadSource, filename, previewFilename]),
+  });
 
   const hasSourceCopy = Boolean(copySource?.trim());
   const hasImageCopy = Boolean(onCopyImage);
@@ -66,18 +65,6 @@ export function ArtifactActions({
   ) {
     return null;
   }
-
-  const resolvePreview = async (): Promise<PreviewContent> => {
-    if (onPreview) return onPreview();
-    if (onPreviewImage) {
-      return {
-        kind: "image",
-        data: await onPreviewImage(),
-        fileName: previewFilename,
-      };
-    }
-    throw new Error("预览不可用");
-  };
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -161,39 +148,7 @@ export function ArtifactActions({
               <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
                 disabled={previewing}
-                {...previewPointerHandlers({
-                  disabled: previewing,
-                  onInternal: () => {
-                    if (previewing) return;
-                    setPreviewing(true);
-                    void (async () => {
-                      try {
-                        setPreviewContent(await resolvePreview());
-                      } catch (err) {
-                        toast.error(
-                          `预览失败：${err instanceof Error ? err.message : "未知错误"}`,
-                        );
-                      } finally {
-                        setPreviewing(false);
-                      }
-                    })();
-                  },
-                  onSystem: () => {
-                    if (previewing) return;
-                    setPreviewing(true);
-                    void (async () => {
-                      try {
-                        await openPreviewInSystem(await resolvePreview());
-                      } catch (err) {
-                        toast.error(
-                          `系统预览失败：${err instanceof Error ? err.message : "未知错误"}`,
-                        );
-                      } finally {
-                        setPreviewing(false);
-                      }
-                    })();
-                  },
-                })}
+                {...previewHandlers}
               >
                 {previewing ? (
                   <Loader2
@@ -264,7 +219,7 @@ export function ArtifactActions({
       <FullscreenPreview
         open={Boolean(previewContent)}
         content={previewContent}
-        onClose={() => setPreviewContent(null)}
+        onClose={closePreview}
       />
     </TooltipProvider>
   );
