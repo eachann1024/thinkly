@@ -32,14 +32,15 @@ let pending: {
 
 function notebookSignature(notebooks: SearchNotebooks): string {
   return JSON.stringify(Object.keys(notebooks).sort().map(id =>
-    [id, notebooks[id]?.source, notebooks[id]?.excludeFromGlobalSearch]));
+    [id, notebooks[id]?.source, notebooks[id]?.localPath,
+      notebooks[id]?.localPathMissing, notebooks[id]?.excludeFromGlobalSearch]));
 }
 
 function metadataSignature(page: Page): string {
   const cached = pageMetadata.get(page);
   if (cached !== undefined) return cached;
   const signature = JSON.stringify([getPageTitle(page), page.workspaceId,
-    page.parentId, page.trashedAt, page.localUnsaved, page.isFolder]);
+    page.parentId, page.trashedAt, page.localUnsaved, page.isFolder, page.localFilePath]);
   pageMetadata.set(page, signature);
   return signature;
 }

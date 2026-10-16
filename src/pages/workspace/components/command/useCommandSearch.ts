@@ -7,6 +7,7 @@ import type { SearchNotebooks } from "./pageSearchCatalog";
 import { syncIndex } from "./pageSearchIndex";
 import { useCommandSearchScope } from "./useCommandSearchScope";
 import { useCommandSearchRecent } from "./useCommandSearchRecent";
+import { isCommandSearchablePage, shouldIncludePageInCommandScope } from "./searchPageFilter";
 
 export { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 export { getCachedText, getSearchBodyText } from "./searchBodyCache";
@@ -143,22 +144,27 @@ export function useCommandSearch({
     return currentCompletion?.matches ?? EMPTY_MATCHES;
   }, [enabled, ready, hasQuery, filteredPages, currentCompletion, searchError]);
   const [retained, setRetained] = useState<{
-    query: string; all: boolean; activeId: string | null; matches: CommandMatches;
+    query: string; all: boolean; activeId: string | null;
+    notebooks: SearchNotebooks; matches: CommandMatches;
   } | null>(null);
   const sameSession = retained?.query === searchQuery &&
-    retained.all === searchAllNotebooks && retained.activeId === activeNotebookId;
+    retained.all === searchAllNotebooks && retained.activeId === activeNotebookId &&
+    retained.notebooks === notebooks;
   // Retain rows while refreshing the same session, with interaction blocked until ready.
   if (enabled && ready && !prepared.error && (!hasQuery || currentCompletion?.matches) &&
       (!sameSession || retained.matches.all !== liveMatches.all ||
         retained.matches.recentCandidates !== liveMatches.recentCandidates)) {
     setRetained({ query: searchQuery, all: searchAllNotebooks,
-      activeId: activeNotebookId, matches: liveMatches });
+      activeId: activeNotebookId, notebooks, matches: liveMatches });
   }
   const allMatches = sameSession && (!enabled || preparing) ? retained.matches : liveMatches;
   const recentState = useCommandSearchRecent(allMatches.recentCandidates, removedRecentIds,
     enabled && !preparing && !searchError,
     JSON.stringify([searchQuery, searchAllNotebooks, activeNotebookId]));
-  const recent = searchError ? EMPTY_MATCHES.recentCandidates : recentState.recent;
+  const recent = useMemo(() => searchError ? EMPTY_MATCHES.recentCandidates :
+    recentState.recent.filter(page => isCommandSearchablePage(page, notebooks) &&
+      shouldIncludePageInCommandScope(page, notebooks, searchAllNotebooks, activeNotebookId)),
+  [searchError, recentState.recent, notebooks, searchAllNotebooks, activeNotebookId]);
   const isSearching = enabled && !searchError && (preparing || (!hasQuery && recentState.pending));
   const allDisplay = useMemo(() => allMatches.all.slice(0, displayLimit),
     [allMatches.all, displayLimit]);
