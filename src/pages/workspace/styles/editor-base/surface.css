@@ -115,6 +115,21 @@
   flex-grow: 0;
 }
 
+/* BlockNote 保留上次选区的空块标记；同时核对真实焦点，失焦立即隐藏提示。 */
+.goose-blocknote-editor
+  .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after {
+  font-style: normal;
+}
+
+.goose-blocknote-editor:not(:focus)
+  .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after,
+.goose-blocknote-editor
+  .bn-block-content:not([data-is-empty-and-focused]):has(
+    .ProseMirror-trailingBreak:only-child
+  )::after {
+  display: none;
+}
+
 /* 光标所在文本行：Zed 式浅底，只盖当前块内容、不含子块。
  * 左右外扩与标题色条对齐，再用等量 padding 把文字/光标放回原基线。
  * 标题本身已外扩 8px，不再叠一次。 */
