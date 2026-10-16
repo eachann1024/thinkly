@@ -18,6 +18,9 @@ export type SplitDirection = "right" | "down";
 /** 焦点邻格方向（几何邻接，不是创建顺序）。 */
 export type SplitNeighborDirection = "left" | "right" | "up" | "down";
 
+/** 拖放到目标叶的边缘或中心。 */
+export type SplitDropPlacement = "left" | "right" | "top" | "bottom" | "center";
+
 export type SplitLeaf = {
   kind: "leaf";
   id: string;

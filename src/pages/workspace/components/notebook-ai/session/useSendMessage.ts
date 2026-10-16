@@ -91,11 +91,12 @@ export function useSendMessage(state: SessionState) {
       isBusy,
       unavailableReason,
       notebookId,
-      conversationId,
       messages,
-      setMessages,
+      requestCurrentPageIdRef,
       clearError,
       sendMessage,
+      setMessages,
+      conversationId,
     ],
   );
 

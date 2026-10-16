@@ -58,21 +58,14 @@ export function renderAIModelSection(
           </span>
         }
         description={
-          <span className="block">
-            选择全局默认模型
-            <span
-              className="mt-1 block font-medium text-muted-foreground"
-              role="status"
-              aria-live="polite"
-            >
-              {savingCustomConfig
-                ? "正在获取模型列表…"
-                : customSaveError
-                  ? `获取失败：${customSaveError}`
-                  : customModels.length > 0
-                    ? `已获取 ${customModels.length} 个${currentModel ? ` · ${currentModel.label}` : ""}`
-                    : "尚未获取到模型"}
-            </span>
+          <span role="status" aria-live="polite">
+            {savingCustomConfig
+              ? "正在获取模型…"
+              : customSaveError
+                ? `获取失败：${customSaveError}`
+                : customModels.length > 0
+                  ? `${customModels.length} 个可用模型`
+                  : "请先保存服务配置以获取模型"}
           </span>
         }
         actions={

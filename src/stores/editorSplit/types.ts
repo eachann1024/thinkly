@@ -4,6 +4,7 @@ import type {
   SplitFocusedResult,
   CloseFocusedResult,
   SplitNeighborDirection,
+  SplitDropPlacement,
 } from "@/lib/editor-split/types";
 
 export const EDITOR_SPLIT_PERSIST_KEY_PREFIX = "goose-note:editor-split:v1";
@@ -22,6 +23,12 @@ export type EditorSplitStore = {
   splitFocused: (input: SplitFocusedInput) => SplitFocusedResult;
   closeFocused: (tabId: string) => CloseFocusedResult;
   closePane: (tabId: string, leafId: string) => CloseFocusedResult;
+  movePane: (
+    tabId: string,
+    sourceId: string,
+    targetId: string,
+    placement: SplitDropPlacement,
+  ) => boolean;
   focusPane: (tabId: string, paneId: string) => void;
   focusNeighbor: (tabId: string, dir: SplitNeighborDirection) => string | null;
   setGroupSizes: (tabId: string, groupId: string, sizes: number[]) => void;

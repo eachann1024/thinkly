@@ -118,9 +118,9 @@ declare global {
     showMainWindow: (action?: "none" | "search" | "settings" | "ai-panel" | "new-note") => Promise<void>
     toggleQuicknote: () => Promise<void>
     closeQuicknote: () => Promise<void>
-    registerHotkeys: (k: { wake: string; quicknote: string; search: string }) => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean }>
+    registerHotkeys: (k: { wake: string; quicknote: string; search: string }) => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean; paused?: boolean }>
     pauseHotkeys: () => Promise<void>
-    resumeHotkeys: () => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean }>
+    resumeHotkeys: () => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean; paused?: boolean }>
     getAccessibilityStatus: () => Promise<{ platform: string; trusted: boolean }>
     requestAccessibility: () => Promise<boolean>
     onOpenSearch: (cb: () => void) => () => void

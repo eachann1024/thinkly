@@ -20,7 +20,6 @@ import {
 export function OpenAppField({
   id,
   title,
-  description,
   icon: Icon,
   value,
   onChange,
@@ -89,7 +88,7 @@ export function OpenAppField({
 
   return (
     <div className={`space-y-3 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}>
-      <div className="flex items-start justify-between gap-4">
+      <div className="settings-local-folder-pick-row flex items-center justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             <Icon
@@ -100,9 +99,6 @@ export function OpenAppField({
               {title}
             </Label>
           </div>
-          <p className="mt-1 pl-7 text-xs text-muted-foreground">
-            {description}
-          </p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

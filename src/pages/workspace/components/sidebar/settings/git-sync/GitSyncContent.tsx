@@ -192,7 +192,7 @@ export function GitSyncContent({
               {syncError && !conflicts.length && !folderError && (
                 <div className="space-y-2 text-sm">
                   <p className="text-danger">{shortSyncError(syncError)}</p>
-                  <GitDetails className="text-xs text-muted-foreground" title="错误详情">
+                  <GitDetails className="text-sm text-muted-foreground" title="错误详情">
                     <p className="mt-2 whitespace-pre-wrap break-words">{syncError}</p>
                   </GitDetails>
                 </div>
@@ -246,7 +246,7 @@ export function GitSyncContent({
           {error && (
             <div role="alert" className="space-y-2 text-sm">
               <p className="text-danger">{shortSyncError(error)}</p>
-              <GitDetails className="text-xs text-muted-foreground" title="错误详情">
+              <GitDetails className="text-sm text-muted-foreground" title="错误详情">
                 <p className="mt-2 whitespace-pre-wrap break-words">{error}</p>
               </GitDetails>
             </div>

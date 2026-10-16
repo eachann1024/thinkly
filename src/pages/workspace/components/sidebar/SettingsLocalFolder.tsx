@@ -47,7 +47,6 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-file-manager"
                 title="文件管理器"
-                description="右键文件选择「在文件浏览器中显示」时优先调用的程序。"
                 icon={GooseIcons.FolderOpen}
                 value={localFolderFileManager}
                 onChange={setLocalFolderFileManager}
@@ -59,7 +58,6 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-editor"
                 title="编辑器"
-                description="右键选择「用外部程序打开」时优先调用的默认程序。"
                 icon={GooseIcons.SquarePen}
                 value={localFolderExternalEditor}
                 onChange={setLocalFolderExternalEditor}
@@ -70,7 +68,6 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
               <OpenAppField
                 id="local-folder-terminal"
                 title="终端"
-                description="右键选择「在终端中打开」时优先调用的默认程序。"
                 icon={GooseIcons.Terminal}
                 value={localFolderTerminal}
                 onChange={setLocalFolderTerminal}
@@ -90,7 +87,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
 
           <SettingsSectionCard title="存储维护">
             <div
-              className={`flex items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
+              className={`settings-local-folder-pick-row flex items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
             >
               <div>
                 <div className="flex items-center gap-3">
@@ -98,19 +95,20 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
                     className="h-4 w-4 text-muted-foreground"
                     strokeWidth={1.75}
                   />
-                  <Label>清理未引用的多媒体资源</Label>
+                  <Label>清理未使用的附件</Label>
                 </div>
-                <p className="mt-1 pl-7 text-xs text-muted-foreground">
-                  扫描笔记本中未被引用的图片与音视频，确认后安全移入废纸篓。
+                <p className="mt-1 pl-7 text-sm leading-relaxed text-muted-foreground">
+                  确认后将未引用的图片、音视频移入废纸篓。
                 </p>
               </div>
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
+                size="sm"
                 className="shrink-0"
                 onClick={() => void openAssetMaintenance()}
               >
-                打开资源清理
+                打开清理
               </Button>
             </div>
           </SettingsSectionCard>

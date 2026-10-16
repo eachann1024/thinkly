@@ -19,10 +19,10 @@ export function renderAIContextSection(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          本地上下文与技能扩展
+          提示词与技能
         </span>
       }
-      description="开启后，全局提示词与本地技能 (Skills) 将注入 AI 对话上下文。"
+      description="开启后，相关本地内容会随对话发送给 AI 服务商。"
     >
       <div className="space-y-2">
         <div
@@ -38,9 +38,6 @@ export function renderAIContextSection(
             >
               读取全局提示词
             </Label>
-            <div className="text-xs leading-5 text-muted-foreground">
-              作为预设指令 (System Prompt) 注入对话
-            </div>
           </div>
           <Switch
             id="ai-read-global-prompt"
@@ -61,9 +58,6 @@ export function renderAIContextSection(
             >
               读取本地技能 (Skills)
             </Label>
-            <div className="text-xs leading-5 text-muted-foreground">
-              支持在对话框中输入 / 快速调用
-            </div>
           </div>
           <Switch
             id="ai-read-local-skills"

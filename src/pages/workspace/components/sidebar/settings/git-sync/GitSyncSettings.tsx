@@ -29,7 +29,7 @@ export function GitSyncSettings({
   if (!config) return null;
   return (
     <SettingsSectionCard className="overflow-hidden p-2">
-      <GitDetails title="同步设置" description="自动同步与仓库信息" spacious>
+      <GitDetails title="同步设置" spacious>
         <div className="px-3 pb-1">
           <div className="max-w-[740px] divide-y divide-border">
             <div className="py-5">

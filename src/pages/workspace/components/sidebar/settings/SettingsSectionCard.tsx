@@ -45,7 +45,7 @@ export function SettingsSectionCard({
               </h4>
             ) : null}
             {description ? (
-              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
             ) : null}
           </div>
           {actions ? <div className="shrink-0">{actions}</div> : null}

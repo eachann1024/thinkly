@@ -234,7 +234,7 @@ jobs:
     needs: [prepare, source, build]
     if: needs.prepare.outputs.publish == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     concurrency:
       group: goose-note-publish-${{ github.ref }}
       cancel-in-progress: false
@@ -257,14 +257,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: node scripts/publish-release.mjs
+          OSS_BUCKET: ${{ vars.OSS_BUCKET }}
+          OSS_REGION: ${{ vars.OSS_REGION }}
+          OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+        run: |
+          node scripts/distribution/setup.mjs
+          node scripts/publish-release.mjs
 
   repair:
     name: Repair published download metadata
     needs: [prepare]
     if: needs.prepare.outputs.repair == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 30
     concurrency:
       group: goose-note-publish-${{ github.ref }}
       cancel-in-progress: false
@@ -283,4 +289,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
-        run: node scripts/repair-desktop-metadata.mjs "$RELEASE_TAG"
+          OSS_BUCKET: ${{ vars.OSS_BUCKET }}
+          OSS_REGION: ${{ vars.OSS_REGION }}
+          OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+        run: |
+          node scripts/distribution/setup.mjs
+          node scripts/repair-desktop-metadata.mjs "$RELEASE_TAG"

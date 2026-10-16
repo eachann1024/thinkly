@@ -226,10 +226,13 @@ export function registerHotkeys(keys: HotkeyRequest): {
   wakeOk: boolean;
   quicknoteOk: boolean;
   searchOk: boolean;
+  paused?: boolean;
 } {
   Object.assign(lastRequested, copyHotkeyRequest(keys));
+  // 录制框仍聚焦时系统热键已卸载。这里只缓存配置，
+  // 不能把“已接收”伪装成“已注册”，否则设置页会误报生效。
   if (paused) {
-    return { wakeOk: true, quicknoteOk: true, searchOk: true };
+    return { wakeOk: false, quicknoteOk: false, searchOk: false, paused: true };
   }
   return applyRegistration(lastRequested);
 }

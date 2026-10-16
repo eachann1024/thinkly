@@ -60,11 +60,6 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
         {section !== "appearance" && (
           <SettingsSectionCard
             title="字体与阅读"
-            description={
-              section === "all"
-                ? "可独立设置界面、侧栏与正文字体；支持键盘方向键即时预览。"
-                : undefined
-            }
             className="border border-border/60"
           >
             {section === "reading" ? (

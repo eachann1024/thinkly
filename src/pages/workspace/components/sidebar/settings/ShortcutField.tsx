@@ -77,7 +77,7 @@ export function getShortcutFromKeyEvent(event: ShortcutInputEvent) {
 export interface ShortcutFieldProps {
   id: string
   title: string
-  description: string
+  description?: string
   value: string
   onChange: (shortcut: string) => void
   resetValue?: string
@@ -95,9 +95,11 @@ export function ShortcutField({
   const pendingModifierRef = useRef("")
   const modifierUsedInChordRef = useRef(false)
   const displayValue = value ? formatShortcut(value) : ""
-  const hintText = isCapturing
-    ? "正在录制，请按下按键（支持组合键）…"
-    : "点击输入框后，按下键盘快捷键或鼠标侧键"
+  const finishCapture = (input: HTMLInputElement) => {
+    resetPendingModifier()
+    setIsCapturing(false)
+    input.blur()
+  }
   const resetPendingModifier = () => {
     pendingModifierRef.current = ""
     modifierUsedInChordRef.current = false
@@ -112,7 +114,9 @@ export function ShortcutField({
             {title}
           </Label>
         </div>
-        <p className="mt-1 pl-7 text-xs text-muted-foreground">{description}</p>
+        {description ? (
+          <p className="mt-1 pl-7 text-sm leading-relaxed text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       <div className="flex items-center gap-2">
         <Input
@@ -120,7 +124,7 @@ export function ShortcutField({
           value={displayValue}
           readOnly
           data-shortcut-recorder
-          placeholder={isCapturing ? "请按下组合键（按 Esc 取消）…" : "点击此处录制快捷键"}
+          placeholder={isCapturing ? "按下快捷键，Esc 取消" : "点击后按下快捷键"}
           className={cn(
             "h-9 text-sm transition-colors",
             isCapturing && "placeholder:text-[var(--goose-color-capture-hint)]",
@@ -141,6 +145,7 @@ export function ShortcutField({
             event.currentTarget.focus()
             setIsCapturing(true)
             onChange(canonicalizeRecordedShortcut(shortcut, getPlatformKind()))
+            finishCapture(event.currentTarget)
           }}
           onAuxClick={(event) => {
             if (!getShortcutFromMouseEvent(event.nativeEvent)) return
@@ -159,6 +164,19 @@ export function ShortcutField({
             }
 
             if (
+              event.key === "Escape" &&
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey &&
+              !event.shiftKey
+            ) {
+              event.preventDefault()
+              event.stopPropagation()
+              finishCapture(event.currentTarget)
+              return
+            }
+
+            if (
               (event.key === "Backspace" || event.key === "Delete") &&
               !event.ctrlKey &&
               !event.metaKey &&
@@ -168,6 +186,7 @@ export function ShortcutField({
               event.preventDefault()
               event.stopPropagation()
               onChange("")
+              finishCapture(event.currentTarget)
               return
             }
 
@@ -192,6 +211,7 @@ export function ShortcutField({
             const shortcut = getShortcutFromKeyEvent(event)
             if (shortcut) {
               onChange(canonicalizeRecordedShortcut(shortcut, getPlatformKind()))
+              finishCapture(event.currentTarget)
             }
           }}
           onKeyUp={(event) => {
@@ -205,6 +225,7 @@ export function ShortcutField({
               !modifierUsedInChordRef.current
             ) {
               onChange(canonicalizeRecordedShortcut(modifier, getPlatformKind()))
+              finishCapture(event.currentTarget)
             }
             if (pendingModifierRef.current === modifier) {
               resetPendingModifier()
@@ -232,16 +253,6 @@ export function ShortcutField({
           清空
         </Button>
       </div>
-      <p
-        className={cn(
-          "text-[11px] transition-colors",
-          isCapturing
-            ? "shortcut-capture-hint font-medium"
-            : "text-muted-foreground",
-        )}
-      >
-        {hintText}
-      </p>
     </div>
   )
 }

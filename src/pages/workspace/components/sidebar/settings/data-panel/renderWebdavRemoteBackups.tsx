@@ -47,7 +47,6 @@ export function renderWebdavRemoteBackups(
           <span>远端备份</span>
         </Button>
       }
-      description="管理云盘中的打包备份文件。"
       actions={
         isRemoteListOpen && (
           <Button
@@ -67,7 +66,7 @@ export function renderWebdavRemoteBackups(
       {isRemoteListOpen && (
         <div className="space-y-3 pt-2">
           {remoteLoading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
               <span>正在加载远端备份</span>
             </div>
@@ -77,11 +76,8 @@ export function renderWebdavRemoteBackups(
                 className="h-6 w-6 text-muted-foreground"
                 strokeWidth={1.75}
               />
-              <p className="text-xs font-medium text-foreground">
+              <p className="text-sm font-medium text-foreground">
                 暂无远端备份
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                保存连接配置后，点击「立即备份到云端」即可创建云端备份
               </p>
             </div>
           ) : (
@@ -110,7 +106,7 @@ export function renderWebdavRemoteBackups(
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-8 rounded-[var(--goose-control-radius)] text-xs flex items-center gap-1"
+                        className="h-8 rounded-[var(--goose-control-radius)] text-sm flex items-center gap-1"
                         disabled={busy}
                         onClick={() => handleRestore(file)}
                       >
@@ -124,7 +120,7 @@ export function renderWebdavRemoteBackups(
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="h-8 rounded-[var(--goose-control-radius)] text-xs flex items-center gap-1"
+                        className="h-8 rounded-[var(--goose-control-radius)] text-sm flex items-center gap-1"
                         disabled={busy}
                         onClick={() => handleDelete(file)}
                       >
@@ -146,7 +142,7 @@ export function renderWebdavRemoteBackups(
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowAllRemote((prev) => !prev)}
-                    className="text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                    className="text-sm hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
                   >
                     {showAllRemote
                       ? "收起备份"

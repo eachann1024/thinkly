@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePanelWidth } from "../usePanelWidth";
 import type { ComposerHandle } from "../Composer";
 import { readEditorScale } from "../artifactPanZoomScale";
@@ -12,9 +12,21 @@ export function usePanelSurface(
   isFullscreen: boolean,
   isElectronChrome: boolean,
 ) {
-  const { width, isResizing, onDragHandleMouseDown, onDragHandlePointerDown } =
-    usePanelWidth();
   const panelRootRef = useRef<HTMLDivElement | null>(null);
+  const previewWidth = useCallback((nextWidth: number) => {
+    const root = panelRootRef.current;
+    const parentWidth = root?.parentElement?.clientWidth ?? nextWidth;
+    const availableRoom = parentWidth > 200 ? parentWidth - 200 : Math.max(0, parentWidth);
+    const next = Math.min(nextWidth, availableRoom);
+    if (root) {
+      root.style.width = `${next}px`;
+      root.closest<HTMLElement>(".workspace-shell")?.style.setProperty("--workspace-ai-width", `${next}px`);
+    }
+    return next;
+  }, []);
+  const { width, isResizing, onDragHandlePointerDown, onDragHandleKeyDown } =
+    usePanelWidth(previewWidth, isFullscreen);
+  const [maxWidth, setMaxWidth] = useState(width);
   const composerDockRef = useRef<HTMLDivElement | null>(null);
   // 展示宽度：随父级 flex 行可用空间收缩，避免 minWidth=stored 把面板裁出视口
   const [effectiveWidth, setEffectiveWidth] = useState(width);
@@ -23,9 +35,9 @@ export function usePanelSurface(
 
   // 面板挂载=AI 任务面；卸载/切走时清 body 标记并收起残留浮层
   useEffect(() => {
+    const root = panelRootRef.current;
     setAiPanelSurface({ active: true, fullscreen: isFullscreen });
     return () => {
-      const root = panelRootRef.current;
       clearAiPanelSurface();
       dismissAiFloatingLayers(root);
     };
@@ -45,7 +57,7 @@ export function usePanelSurface(
   }, []);
 
   // 侧栏：观察父级（.workspace-editor-surface）宽度，计算不挤爆编辑区的 effectiveWidth
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isFullscreen) return;
     const root = panelRootRef.current;
     const parent = root?.parentElement;
@@ -58,6 +70,7 @@ export function usePanelSurface(
       // room 足够时：不超过 stored，且留给编辑区至少 EDITOR_MIN
       // 极窄时使用父级可用宽度，避免右侧裁切。
       const availableRoom = room > 0 ? room : Math.max(0, parentW);
+      setMaxWidth(availableRoom);
       const next = Math.min(width, availableRoom);
       setEffectiveWidth(next);
     };
@@ -110,7 +123,8 @@ export function usePanelSurface(
   return {
     width,
     isResizing,
-    onDragHandleMouseDown,
+    maxWidth,
+    onDragHandleKeyDown,
     onDragHandlePointerDown,
     panelRootRef,
     composerDockRef,

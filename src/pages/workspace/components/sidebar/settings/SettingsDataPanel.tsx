@@ -30,7 +30,6 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
 
       <SettingsSectionCard
         title="新手引导"
-        description="重新选择书写布局与阅读偏好，已有笔记保持不变。"
         actions={
           <Button variant="outline" onClick={onRestartGuide}>
             重新开始引导

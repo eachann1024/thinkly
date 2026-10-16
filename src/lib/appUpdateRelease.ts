@@ -1,8 +1,25 @@
+import distribution from "../../config/desktop-distribution.json";
+
+function distributionBaseUrl(): string {
+  const base = distribution.baseUrl;
+  if (!base) return "";
+  try {
+    const url = new URL(base);
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.port ||
+      url.href.replace(/\/$/, "") !== base || !/^\/[a-z0-9/_-]*$/i.test(url.pathname)) return "";
+    return base;
+  } catch { return ""; }
+}
+
+export const PUBLIC_DISTRIBUTION_BASE_URL = distributionBaseUrl();
 export const PUBLIC_RELEASES_REPO = "eachann1024/goose-note";
 export const LEGACY_RELEASES_REPO = "eachann1024/goose-notes";
-export const PUBLIC_RELEASES_LATEST_URL = `https://github.com/${PUBLIC_RELEASES_REPO}/releases/latest`;
+export const PUBLIC_RELEASES_LATEST_URL = PUBLIC_DISTRIBUTION_BASE_URL
+  ? `${PUBLIC_DISTRIBUTION_BASE_URL}/index.html` : `https://github.com/${PUBLIC_RELEASES_REPO}/releases/latest`;
 export const PUBLIC_RELEASES_API_URL = `https://api.github.com/repos/${PUBLIC_RELEASES_REPO}/releases/latest`;
-export const PUBLIC_UPDATE_URL = `https://raw.githubusercontent.com/${PUBLIC_RELEASES_REPO}/main/updates/latest.json`;
+export const PUBLIC_GITHUB_UPDATE_URL = `https://raw.githubusercontent.com/${PUBLIC_RELEASES_REPO}/main/updates/latest.json`;
+export const PUBLIC_UPDATE_URL = PUBLIC_DISTRIBUTION_BASE_URL
+  ? `${PUBLIC_DISTRIBUTION_BASE_URL}/updates/latest.json` : PUBLIC_GITHUB_UPDATE_URL;
 
 export type GithubReleaseAsset = {
   name: string;
@@ -102,5 +119,6 @@ export function isTrustedUpdateAsset(asset: GithubReleaseAsset, tag: string): bo
   const suffix = `${encodeURIComponent(tag)}/${encodeURIComponent(asset.name)}`;
   const github = [PUBLIC_RELEASES_REPO, LEGACY_RELEASES_REPO].some((repo) =>
     asset.browser_download_url === `https://github.com/${repo}/releases/download/${suffix}`);
-  return github;
+  const domestic = PUBLIC_DISTRIBUTION_BASE_URL && `${PUBLIC_DISTRIBUTION_BASE_URL}/releases/${suffix}`;
+  return github || Boolean(domestic && asset.browser_download_url === domestic);
 }

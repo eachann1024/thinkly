@@ -1,13 +1,11 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
-import type { SetupGuideAIStatus } from "@/lib/setupGuideAI";
 import { useSettings } from "@/stores/useSettings";
 import { AppearanceEditorPreview } from "./sidebar/AppearanceEditorPreview";
-import { SettingsAI } from "./sidebar/SettingsAI";
 import { SettingsAppearance } from "./sidebar/SettingsAppearance";
 import { WinWindowControls } from "./page/WinWindowControls";
 import "./setup-guide.css";
@@ -16,23 +14,9 @@ import { useIntroVideo } from "@/stores/introVideo";
 const STEPS = [
   { label: "外观", title: "设置外观" },
   { label: "阅读", title: "调整阅读体验" },
-  { label: "AI", title: "配置 AI 助手" },
 ] as const;
 
-type SetupStep = 0 | 1 | 2;
-
-const INITIAL_AI_STATUS: SetupGuideAIStatus = {
-  busy: false,
-  dirty: false,
-  ready: false,
-};
-
-export function canFinishSetupGuideAI(
-  aiEnabled: boolean,
-  status: SetupGuideAIStatus,
-): boolean {
-  return !aiEnabled || (!status.busy && !status.dirty && status.ready);
-}
+type SetupStep = 0 | 1;
 
 function getNativePlatform(): "mac" | "win" | "linux" | "web" {
   if (!isElectronRuntime() || typeof navigator === "undefined") return "web";
@@ -64,36 +48,10 @@ function SetupGuideFlow() {
       decreaseEditorFontSize: settings.decreaseEditorFontSize,
     })),
   );
-  const aiSettings = useSettings(
-    useShallow((settings) => ({
-      ai: settings.ai,
-      setAIEnabled: settings.setAIEnabled,
-      setAIReadGlobalPrompt: settings.setAIReadGlobalPrompt,
-      setAIReadLocalSkills: settings.setAIReadLocalSkills,
-      setAISelectedModelId: settings.setAISelectedModelId,
-      saveAICustomConfig: settings.saveAICustomConfig,
-    })),
-  );
   const [step, setStep] = useState<SetupStep>(0);
-  const [hasVisitedAI, setHasVisitedAI] = useState(false);
-  const [aiStatus, setAIStatus] = useState(INITIAL_AI_STATUS);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const controlsRef = useRef<HTMLElement | null>(null);
-  const onAISetupStateChange = useCallback((status: SetupGuideAIStatus) => {
-    setAIStatus(status);
-  }, []);
   const nativePlatform = getNativePlatform();
-  const aiEnabled = aiSettings.ai.enabled;
-  const canFinish = canFinishSetupGuideAI(aiEnabled, aiStatus);
-  const statusMessage = aiEnabled
-    ? aiStatus.busy
-      ? "AI 配置正在处理中，请稍候。"
-      : aiStatus.dirty
-        ? "AI 配置有未保存的修改，请保存后再完成。"
-        : !aiStatus.ready
-          ? "请完成并保存 AI 配置后再完成引导。"
-          : ""
-    : "";
 
   useLayoutEffect(() => {
     headingRef.current?.focus();
@@ -107,12 +65,8 @@ function SetupGuideFlow() {
   };
 
   const moveToStep = (nextStep: SetupStep) => {
-    if (step === 2 && aiStatus.busy) return;
-    if (nextStep === 2) setHasVisitedAI(true);
     setStep(nextStep);
   };
-
-  const skipAI = () => closeGuide();
 
   return (
     <main
@@ -147,7 +101,7 @@ function SetupGuideFlow() {
           })}
         </ol>
         <div className="setup-guide-heading">
-          <p className="text-xs text-muted-foreground">第 {step + 1} 步，共 3 步</p>
+          <p className="text-xs text-muted-foreground">第 {step + 1} 步，共 {STEPS.length} 步</p>
           <h1 id="setup-guide-title" ref={headingRef} tabIndex={-1}>
             {STEPS[step].title}
           </h1>
@@ -193,36 +147,11 @@ function SetupGuideFlow() {
               showPreview={false}
             />
           </div>
-          {hasVisitedAI && (
-            <div
-              className="setup-guide-control-step setup-guide-ai-settings"
-              hidden={step !== 2}
-              inert={step !== 2 ? true : undefined}
-              aria-hidden={step !== 2}
-            >
-              <div className="settings-groups">
-                <div>
-                  <SettingsAI
-                    mode="onboarding"
-                    onSetupStateChange={onAISetupStateChange}
-                    ai={aiSettings.ai}
-                    enabled={aiEnabled}
-                    setEnabled={aiSettings.setAIEnabled}
-                    setReadGlobalPrompt={aiSettings.setAIReadGlobalPrompt}
-                    setReadLocalSkills={aiSettings.setAIReadLocalSkills}
-                    selectedModelId={aiSettings.ai.selectedModelId}
-                    setSelectedModelId={aiSettings.setAISelectedModelId}
-                    saveCustomConfig={aiSettings.saveAICustomConfig}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </section>
       </div>
 
       <footer className="setup-guide-footer">
-        {step < 2 && (
+        {step < 1 && (
           <Button type="button" variant="ghost" onClick={closeGuide}>
             退出引导
           </Button>
@@ -230,39 +159,22 @@ function SetupGuideFlow() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => moveToStep(step === 0 ? 0 : (step - 1) as SetupStep)}
-          disabled={step === 0 || (step === 2 && aiStatus.busy)}
+          onClick={() => moveToStep(0)}
+          disabled={step === 0}
         >
           上一步
         </Button>
         <div className="setup-guide-footer-actions">
-          {step < 2 ? (
-            <Button
-              type="button"
-              onClick={() => moveToStep((step + 1) as SetupStep)}
-            >
+          {step < 1 ? (
+            <Button type="button" onClick={() => moveToStep(1)}>
               下一步
             </Button>
           ) : (
-            <>
-              <Button type="button" variant="ghost" onClick={skipAI}>
-                跳过 AI
-              </Button>
-              <Button
-                type="button"
-                onClick={closeGuide}
-                disabled={!canFinish}
-              >
-                完成设置
-              </Button>
-            </>
+            <Button type="button" onClick={closeGuide}>
+              完成设置
+            </Button>
           )}
         </div>
-        {step === 2 && statusMessage && (
-          <p className="setup-guide-status" role="status" aria-live="polite">
-            {statusMessage}
-          </p>
-        )}
       </footer>
     </main>
   );
