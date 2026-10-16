@@ -11,7 +11,10 @@ import {
 import { WELCOME_TAB_PAGE_ID, getNotebookAiTabPageId } from "./types";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { useNotebooks } from "../useNotebooks";
-import { createNamedPage } from "@/lib/create-named-page";
+import { usePages } from "../usePages";
+import { useEditorSplit } from "../useEditorSplit";
+import { focusNewPage } from "../pages/actions/create/content";
+import { toast } from "@/components/ui/sonner";
 
 export function createSpecialTabActions(
   set: TabSet,
@@ -76,9 +79,22 @@ export function createSpecialTabActions(
         get().openWelcomeTab();
         return;
       }
-      void createNamedPage(undefined, workspaceId).then((pageId) => {
-        if (pageId) get().openPermanentTab(pageId, { reuseEmpty: false });
-      });
+      const { activeTabId, openTabs } = get();
+      const activeTab = openTabs.find((tab) => tab.id === activeTabId);
+      const sourcePageId = activeTab && !activeTab.type
+        ? useEditorSplit.getState().focusedPageId(activeTab.id) ?? activeTab.pageId
+        : null;
+      const source = sourcePageId ? usePages.getState().getPage(sourcePageId) : undefined;
+      const siblingSource = source?.workspaceId === workspaceId && !source.isFolder && !source.trashedAt
+        ? source.id
+        : null;
+      const pageId = usePages.getState().createEditorDraftPage(siblingSource, workspaceId);
+      if (!pageId) {
+        toast.error("无法打开空白标签页");
+        return;
+      }
+      get().openPermanentTab(pageId, { reuseEmpty: false });
+      focusNewPage(pageId);
     },
 
     findNotebookAiTab: (notebookId: string) =>
