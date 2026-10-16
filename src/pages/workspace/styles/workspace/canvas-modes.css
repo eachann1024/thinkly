@@ -3,14 +3,15 @@
   --goose-editor-grid-size: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.5));
   --goose-editor-grid-line: hsl(var(--foreground) / 0.07);
   --goose-editor-grid-dot: hsl(var(--foreground) / 0.16);
+  /* 网格居中于每格并按整格铺满，四周首尾留半格，不贴边。 */
   --goose-editor-grid-layers:
-    linear-gradient(var(--goose-editor-grid-line) 1px, transparent 1px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local,
-    linear-gradient(90deg, var(--goose-editor-grid-line) 1px, transparent 1px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local;
+    linear-gradient(transparent calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) round local,
+    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) round local;
 }
 
 :root[data-goose-editor-grid="dots"] {
   --goose-editor-grid-layers:
-    radial-gradient(circle at 1px 1px, var(--goose-editor-grid-dot) 1px, transparent 1.5px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local;
+    radial-gradient(circle at 50% 50%, var(--goose-editor-grid-dot) 1px, transparent 1.5px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) round local;
 }
 
 :root[data-goose-editor-grid] .workspace-shell .page-scroll-container {
