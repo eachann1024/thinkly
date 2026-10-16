@@ -11,7 +11,6 @@ export function useIncomingWorkspaceTabs(enabled = true) {
         id: tab.id,
         pageId: tab.pageId,
         type: tab.type as TabItem["type"],
-        pinned: tab.pinned,
         workspaceId: tab.workspaceId,
       });
     });

@@ -23,7 +23,7 @@ export function isElectronLocalFolderDirectory(pageId: string): boolean {
 export function openPageFromSidebar(
   pageId: string,
   mode: "preview" | "permanent",
-  options?: { pin?: boolean; newTab?: boolean },
+  options?: { newTab?: boolean },
 ) {
   // 文件夹只在侧栏展开，不打开内容页。
   if (isElectronLocalFolderDirectory(pageId)) return;
@@ -45,7 +45,7 @@ export function openPageFromSidebar(
       suppressNextSidebarSelect = false;
       suppressTimer = null;
     }, 400);
-    tabs.openPermanentTab(pageId, { pin: options.pin });
+    tabs.openPermanentTab(pageId);
     notifySidebarNavigation(pageId);
     return;
   }

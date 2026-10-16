@@ -7,7 +7,6 @@ import {
   commitActiveEditor,
   ensureSplitForWorkspaceTab,
   scheduleSetActivePage,
-  applyPinnedOrder,
   flushClosedPageSaves,
   collectTabPageIds,
   workspaceTabPageId,
@@ -45,7 +44,6 @@ export function createTransferTabActions(
         id: incoming.id,
         pageId: incoming.pageId,
         type: incoming.type,
-        pinned: incoming.pinned,
         preview: incoming.preview,
         workspaceId: incoming.workspaceId,
       });
@@ -74,13 +72,12 @@ export function createTransferTabActions(
           ? Math.min(Math.max(0, Math.floor(insertIndex)), maxIndex)
           : maxIndex;
       nextTabs.splice(index, 0, adopted);
-      const ordered = applyPinnedOrder(nextTabs);
-      const orderedHistory = syncHistoryWithOpenTabs(ordered);
+      const historyState = syncHistoryWithOpenTabs(nextTabs);
       if (activeTabId) commitActiveEditor();
       set({
-        openTabs: ordered,
+        openTabs: nextTabs,
         activeTabId: adopted.id,
-        ...orderedHistory,
+        ...historyState,
       });
       ensureSplitForWorkspaceTab(adopted);
       pushTabHistory(adopted.id);

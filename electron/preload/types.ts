@@ -4,7 +4,6 @@ export type WindowTabSnapshot = {
   id: string;
   pageId: string;
   type?: string;
-  pinned?: boolean;
   workspaceId?: string;
 };
 

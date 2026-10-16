@@ -132,7 +132,7 @@ declare global {
     getWindowContext: () => Promise<{ windowId: string; kind: "workspace" | "quicknote" }>
     createWindow: (opts: {
       mode: "blank" | "currentTab"
-      tab?: { id: string; pageId: string; type?: string; pinned?: boolean; workspaceId?: string }
+      tab?: { id: string; pageId: string; type?: string; workspaceId?: string }
       bounds?: { x: number; y: number; width: number; height: number }
     }) => Promise<{ windowId: string }>
     closeWindow: (windowId?: string) => Promise<void>
@@ -141,7 +141,7 @@ declare global {
     toggleMaximizeWindow: () => Promise<boolean>
     isWindowMaximized: () => Promise<boolean>
     finishTabDrag: (opts: {
-      tab: { id: string; pageId: string; type?: string; pinned?: boolean; workspaceId?: string }
+      tab: { id: string; pageId: string; type?: string; workspaceId?: string }
       cursor: { x: number; y: number }
       sourceTabCount: number
       grabOffsetX?: number
@@ -156,14 +156,14 @@ declare global {
     endWindowDrag: () => Promise<void>
     onAcceptTab: (
       cb: (payload: {
-        tab: { id: string; pageId: string; type?: string; pinned?: boolean; workspaceId?: string }
+        tab: { id: string; pageId: string; type?: string; workspaceId?: string }
         contentX: number
       }) => void,
     ) => () => void
     onTabDockPreview: (cb: (payload: { contentX: number | null }) => void) => () => void
     onWindowInit: (cb: (payload: {
-      takeTab?: { id: string; pageId: string; type?: string; pinned?: boolean; workspaceId?: string }
-      restoredTabs?: Array<{ id: string; pageId: string; type?: string; pinned?: boolean; workspaceId?: string }>
+      takeTab?: { id: string; pageId: string; type?: string; workspaceId?: string }
+      restoredTabs?: Array<{ id: string; pageId: string; type?: string; workspaceId?: string }>
     }) => void) => () => void
   }
 

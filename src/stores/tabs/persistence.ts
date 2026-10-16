@@ -46,7 +46,8 @@ export const readPersistedTabsRaw = (key: string): PersistedTabs | null => {
         .filter(
           (t) => t && typeof t.id === "string" && typeof t.pageId === "string",
         )
-        .map((t) => ({
+        // 兼容旧固定标签：只丢弃固定标记，保留标签、顺序和其他状态。
+        .map(({ pinned: _legacyPinned, ...t }: TabItem & { pinned?: unknown }) => ({
           ...t,
           lastAccessedAt:
             typeof t.lastAccessedAt === "number" &&
@@ -137,7 +138,6 @@ export function startTabsPersistence(
         id: tab.id,
         pageId: tab.pageId,
         type: tab.type as TabItem["type"],
-        pinned: tab.pinned,
         workspaceId: tab.workspaceId,
         lastAccessedAt: now,
       }));

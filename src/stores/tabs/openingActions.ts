@@ -7,7 +7,6 @@ import {
   focusTabLeafForPage,
   createTabId,
   getWorkspaceIdForPage,
-  orderTabs,
   stampTabAccess,
   ensureSplitForWorkspaceTab,
   scheduleSetActivePage,
@@ -39,7 +38,7 @@ export function createOpeningTabActions(
 
     openPermanentTab: (
       pageId: string,
-      options?: { pin?: boolean; reuseEmpty?: boolean },
+      options?: { reuseEmpty?: boolean },
     ) => {
       if (effectiveSingleTabMode()) {
         void replaceWithSinglePage(pageId);
@@ -52,9 +51,6 @@ export function createOpeningTabActions(
         if (existingTab.preview) {
           get().promotePreviewTab(existingTab.id);
         }
-        if (options?.pin && !existingTab.pinned) {
-          get().togglePinTab(existingTab.id);
-        }
         focusTabLeafForPage(existingTab.id, pageId);
         get().setActiveTab(existingTab.id);
         return;
@@ -64,10 +60,6 @@ export function createOpeningTabActions(
         options?.reuseEmpty !== false &&
         adoptActiveEmptyWorkspaceTab(pageId, false)
       ) {
-        if (options?.pin) {
-          const adoptedId = get().activeTabId;
-          if (adoptedId) get().togglePinTab(adoptedId);
-        }
         return;
       }
 
@@ -77,16 +69,15 @@ export function createOpeningTabActions(
         id: createTabId(pageId),
         pageId,
         workspaceId: getWorkspaceIdForPage(pageId),
-        pinned: options?.pin ? true : undefined,
         preview: false,
         lastAccessedAt: now,
       };
-      const nextOpenTabs = orderTabs([
+      const nextOpenTabs = [
         ...openTabs.map((tab) =>
           tab.id === activeTabId ? stampTabAccess(tab, now) : tab,
         ),
         newTab,
-      ]);
+      ];
       set({
         openTabs: nextOpenTabs,
         activeTabId: newTab.id,
@@ -107,10 +98,8 @@ export function createOpeningTabActions(
       if (!targetId) return;
       const target = openTabs.find((tab) => tab.id === targetId);
       if (!target?.preview) return;
-      const nextTabs = orderTabs(
-        openTabs.map((tab) =>
-          tab.id === targetId ? { ...tab, preview: false } : tab,
-        ),
+      const nextTabs = openTabs.map((tab) =>
+        tab.id === targetId ? { ...tab, preview: false } : tab,
       );
       set({ openTabs: nextTabs });
     },

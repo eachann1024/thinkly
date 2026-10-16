@@ -99,7 +99,6 @@ export function createMaintenanceTabActions(
       const { openTabs, activeTabId } = get();
       const expiredTabs = openTabs.filter((tab) => {
         if (isSpecialTab(tab)) return false;
-        if (tab.pinned) return false;
         if (tab.id === activeTabId) return false;
         const lastAccessedAt = tab.lastAccessedAt ?? now;
         return now - lastAccessedAt >= maxIdleMs;

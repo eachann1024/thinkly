@@ -8,7 +8,6 @@ import {
   flushClosedPageSaves,
   workspaceTabPageId,
   scheduleSetActivePage,
-  applyPinnedOrder,
   collectTabsPageIds,
 } from "./helpers";
 import { usePages } from "../usePages";
@@ -113,11 +112,7 @@ export function createClosingTabActions(
       const currentTab = openTabs.find((tab) => tab.id === tabId);
       if (!currentTab) return;
 
-      // 固定标签不被「关闭其他」关掉。
-      const nextTabs = applyPinnedOrder([
-        ...openTabs.filter((tab) => tab.pinned && tab.id !== tabId),
-        currentTab,
-      ]);
+      const nextTabs = [currentTab];
 
       // 计算被关闭的 tab 集合，flush 落盘并在失败时 toast 警告。
       const nextTabIds = new Set(nextTabs.map((t) => t.id));
@@ -141,12 +136,7 @@ export function createClosingTabActions(
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
       if (currentIndex <= 0) return;
 
-      // 保留固定标签 + 当前标签及其右侧。
-      const keep = openTabs.slice(currentIndex);
-      const pinnedLeft = openTabs
-        .slice(0, currentIndex)
-        .filter((tab) => tab.pinned);
-      const nextTabs = applyPinnedOrder([...pinnedLeft, ...keep]);
+      const nextTabs = openTabs.slice(currentIndex);
       const nextActiveId = nextTabs.some((tab) => tab.id === activeTabId)
         ? activeTabId
         : tabId;
@@ -180,12 +170,7 @@ export function createClosingTabActions(
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
       if (currentIndex === -1 || currentIndex >= openTabs.length - 1) return;
 
-      // 保留固定标签 + 当前标签及其左侧。
-      const keep = openTabs.slice(0, currentIndex + 1);
-      const pinnedRight = openTabs
-        .slice(currentIndex + 1)
-        .filter((tab) => tab.pinned);
-      const nextTabs = applyPinnedOrder([...keep, ...pinnedRight]);
+      const nextTabs = openTabs.slice(0, currentIndex + 1);
       const nextActiveId = nextTabs.some((tab) => tab.id === activeTabId)
         ? activeTabId
         : tabId;

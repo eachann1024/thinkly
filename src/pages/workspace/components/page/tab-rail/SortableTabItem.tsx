@@ -30,7 +30,6 @@ interface SortableTabItemProps {
   onCloseOthers: () => void;
   onCloseLeft: () => void;
   onCloseRight: () => void;
-  onTogglePin: () => void;
   onPromotePreview: () => void;
   onLocateInTree?: () => void;
   onOpenInNewWindow?: () => void;
@@ -52,7 +51,6 @@ export function SortableTabItem({
   onCloseOthers,
   onCloseLeft,
   onCloseRight,
-  onTogglePin,
   onPromotePreview,
   onLocateInTree,
   onOpenInNewWindow,
@@ -101,7 +99,6 @@ export function SortableTabItem({
           data-tab-active={isActive || undefined}
           data-tab-page-id={tab.pageId}
           data-tab-preview={tab.preview || undefined}
-          data-tab-pinned={tab.pinned || undefined}
           data-electron-no-drag={electronNoDrag ? "" : undefined}
           data-electron-option-drag={windowDragEnabled ? "" : undefined}
           onPointerDown={onWindowDragPointerDown}
@@ -134,12 +131,6 @@ export function SortableTabItem({
             tabRailSelectionClassName(tabCount, isActive),
           )}
         >
-          {tab.pinned && (
-            <GooseIcons.Pin
-              aria-label="已固定"
-              className="h-3 w-3 shrink-0 text-link"
-            />
-          )}
           <span
             className={cn(
               "tab-rail-title inline-flex min-w-0 flex-1 items-center overflow-hidden no-underline",
@@ -202,10 +193,6 @@ export function SortableTabItem({
             在新窗口打开
           </ContextMenuItem>
         ) : null}
-        <ContextMenuItem onSelect={onTogglePin}>
-          {tab.pinned ? "取消固定" : "固定标签"}
-        </ContextMenuItem>
-
         {hasOtherTabs && <ContextMenuItem onSelect={onCloseOthers}>
           关闭其他标签页
         </ContextMenuItem>}
