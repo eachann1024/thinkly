@@ -93,6 +93,14 @@ export function tryDispatchCellSelection(
   headPos: number,
 ): boolean {
   try {
+    const current = view.state.selection;
+    if (
+      current instanceof CellSelection &&
+      current.$anchorCell.pos === anchorPos &&
+      current.$headCell.pos === headPos
+    ) {
+      return true;
+    }
     const selection = CellSelection.create(view.state.doc, anchorPos, headPos);
     if (!view.state.selection.eq(selection)) {
       view.dispatch(view.state.tr.setSelection(selection));
