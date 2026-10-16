@@ -86,7 +86,8 @@ export function createQuicknoteWindow(): BrowserWindow {
     minWidth: MIN_QUICKNOTE_WIDTH,
     minHeight: MIN_QUICKNOTE_HEIGHT,
     show: false,
-    frame: false,
+    // 与主窗口共用 macOS 原生窗口框架，避免无框 panel 的圆角差异。
+    frame: isMac,
     alwaysOnTop: true,
     skipTaskbar: true,
     backgroundColor: appearanceBackgroundColor(),
@@ -96,6 +97,8 @@ export function createQuicknoteWindow(): BrowserWindow {
     ...(isMac
       ? {
           type: "panel" as const,
+          titleBarStyle: "hidden" as const,
+          roundedCorners: true,
           hiddenInMissionControl: true,
         }
       : {}),
@@ -107,6 +110,7 @@ export function createQuicknoteWindow(): BrowserWindow {
 
   bindWindowAppearance(win);
   if (isMac) {
+    win.setWindowButtonVisibility(false);
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     win.setAlwaysOnTop(true, "floating");
   }

@@ -1,6 +1,5 @@
 /* ── 1–5 便签切换器 ─────────────────────────────────────────────
- * 顶栏显示时绝对居中；浅灰分段器内，当前槽位使用白底高亮。
- * 使用静态 rgba / hex，避免 Electron 旧内核解析 alpha 变量异常。
+ * 顶栏绝对居中；默认无底色和描边，仅悬停、拖动和键盘交互时强调。
  */
 .quicknote-slot-switcher {
   position: relative;
@@ -10,9 +9,9 @@
   width: 104px;
   height: 22px;
   padding: 1px;
-  border: 1px solid var(--goose-interactive-hover-border);
+  border: 0;
   border-radius: var(--goose-control-radius);
-  background: var(--goose-interactive-hover);
+  background: transparent;
   box-shadow: none;
 }
 
@@ -75,9 +74,22 @@
 }
 
 
-/* 活跃槽位保留原分段器字重，颜色与背景由公共选中态维护。 */
-.quicknote-slot-btn[data-active="true"] {
+/* 保留当前槽位语义与字重，覆盖公共 radio 的常显选中底色。 */
+.quicknote-slot-switcher .quicknote-slot-btn[aria-checked] {
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  box-shadow: none;
+}
+
+.quicknote-slot-switcher .quicknote-slot-btn[data-active="true"] {
+  color: hsl(var(--foreground));
   font-weight: 600;
+}
+
+.quicknote-slot-switcher .quicknote-slot-btn:is(:hover, :focus-visible),
+.quicknote-slot-switcher[data-scrubbing="true"] .quicknote-slot-btn[data-active="true"] {
+  background: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
 }
 
 @media (prefers-reduced-motion: reduce) {
