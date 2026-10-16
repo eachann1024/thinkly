@@ -14,6 +14,7 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
     slotNames,
     rootRef,
     scrubbing,
+    held,
     visualSlot,
     onKeyDown,
     onPointerDown,
@@ -25,6 +26,7 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
       ref={rootRef}
       className="quicknote-slot-switcher"
       data-scrubbing={scrubbing ? "true" : "false"}
+      data-held={held ? "true" : "false"}
       role="radiogroup"
       data-goose-slot="choice-group"
       aria-label="切换便签"

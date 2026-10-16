@@ -1,5 +1,5 @@
 /* ── 1–5 便签切换器 ─────────────────────────────────────────────
- * 顶栏绝对居中；默认无底色和描边，仅悬停、拖动和键盘交互时强调。
+ * 顶栏绝对居中；悬停时整栏显示底色，当前槽位使用强调色。
  */
 .quicknote-slot-switcher {
   position: relative;
@@ -13,6 +13,10 @@
   border-radius: var(--goose-control-radius);
   background: transparent;
   box-shadow: none;
+}
+
+.quicknote-slot-switcher:is(:hover, :focus-within, [data-scrubbing="true"]) {
+  background: var(--goose-interactive-hover);
 }
 
 .quicknote-slot-btn {
@@ -34,7 +38,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   line-height: 1;
-  cursor: pointer;
+  cursor: default;
   overflow: hidden;
   opacity: 1;
   box-shadow: none;
@@ -44,8 +48,8 @@
     box-shadow var(--goose-control-motion-duration) ease;
 }
 
-.quicknote-slot-switcher[data-scrubbing="true"],
-.quicknote-slot-switcher[data-scrubbing="true"] .quicknote-slot-btn {
+.quicknote-slot-switcher[data-held="true"],
+.quicknote-slot-switcher[data-held="true"] .quicknote-slot-btn {
   cursor: ew-resize;
   user-select: none;
   touch-action: none;
@@ -74,7 +78,7 @@
 }
 
 
-/* 保留当前槽位语义与字重，覆盖公共 radio 的常显选中底色。 */
+/* 选中底色留在数字按钮，悬停底色留在整条切换栏。 */
 .quicknote-slot-switcher .quicknote-slot-btn[aria-checked] {
   background: transparent;
   color: hsl(var(--muted-foreground));
@@ -82,14 +86,10 @@
 }
 
 .quicknote-slot-switcher .quicknote-slot-btn[data-active="true"] {
-  color: hsl(var(--foreground));
+  background: var(--goose-interactive-selected);
+  color: var(--goose-accent-text);
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
   font-weight: 600;
-}
-
-.quicknote-slot-switcher .quicknote-slot-btn:is(:hover, :focus-visible),
-.quicknote-slot-switcher[data-scrubbing="true"] .quicknote-slot-btn[data-active="true"] {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
 }
 
 @media (prefers-reduced-motion: reduce) {
