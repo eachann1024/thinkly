@@ -77,7 +77,7 @@
 }
 
 /* 完整主题：正文使用暖纸色，次级页面略暖，布局不变。 */
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) :is(
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) :is(
   .workspace-page-empty,
   .workspace-folder-home,
   .notebook-ai-shell,
@@ -90,7 +90,7 @@
   background: var(--goose-secondary-surface);
 }
 
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .settings-shell :is([data-slot="input"], textarea, select) {
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .settings-shell :is([data-slot="input"], textarea, select) {
   background: var(--goose-input-surface);
 }
 

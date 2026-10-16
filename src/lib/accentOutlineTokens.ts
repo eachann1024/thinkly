@@ -11,6 +11,7 @@ const DARK_ACCENT: Record<AccentColor, string> = {
   mono: "#b3a575",
   amber: "#928365",
   wheat: "#838d69",
+  claude: "#e08b6e",
 };
 
 // 键盘轮廓独立于选中描边；覆盖画布、纸色渐变及选中/hover 表面。
@@ -24,6 +25,7 @@ const LIGHT_FOCUS: Record<AccentColor, string> = {
   mono: "#756b42",
   amber: "#877b63",
   wheat: "#7a7c63",
+  claude: "#c15f3e",
 };
 
 // 链接保持同一色相，文字明度覆盖选中、hover 和纸色渐变表面。
@@ -37,6 +39,7 @@ const ACCENT_TEXT: Record<AccentColor, [string, string]> = {
   mono: ["#6c623d", "#b3a575"],
   amber: ["#69604d", "#a99d85"],
   wheat: ["#60614e", "#99a284"],
+  claude: ["#af4e30", "#e08b6e"],
 };
 
 export function resolveAccentOutlineTokens(

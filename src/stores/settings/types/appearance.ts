@@ -10,6 +10,7 @@ export const ACCENT_COLORS = [
   "coral",
   "rose",
   "grape",
+  "claude",
 ] as const;
 
 export type AccentColor = (typeof ACCENT_COLORS)[number];

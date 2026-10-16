@@ -1,17 +1,19 @@
 /* Each pane owns its measure; explicit document and code formatting stay intact. */
 [data-page-layout] {
-  container: page-layout / inline-size;
   /* 标准正文最大净宽 720px，窄编辑区通过自适应留白保留输入空间。 */
   --page-layout-gutter: 96px;
   --page-layout-width: calc(720px + 2 * var(--page-layout-gutter));
-  --page-layout-top: 80px;
+  --page-layout-top: 24px;
   --page-paragraph-gap: 4px;
   --page-title-gap: 37px;
+}
+/* 预览含模拟侧栏，留白断点只看正文的可用宽度。 */
+[data-page-layout] .page-layout-body {
+  container: page-layout / inline-size;
 }
 [data-page-layout="full"] {
   --page-layout-width: none;
   --page-layout-gutter: 48px;
-  --page-layout-top: 24px;
 }
 [data-page-layout] .page-layout-document {
   width: 100%;
@@ -69,8 +71,7 @@
   --page-paragraph-gap: 0px;
 }
 @container page-layout (max-width: 680px) {
-  [data-page-layout="full"] .page-layout-document { padding: 48px 32px 80px; }
-  [data-page-layout="full"] .page-layout-document { padding-top: var(--page-layout-top); }
+  [data-page-layout="full"] .page-layout-document { padding: var(--page-layout-top) 32px 80px; }
 }
 @container page-layout (max-width: 400px) {
   [data-page-layout="full"] .page-layout-document { padding-inline: 24px; }
@@ -85,11 +86,11 @@
   letter-spacing: normal;
 }
 /* Only the two approved light palettes replace BlockNote's independent ink. */
-:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="mono"]) [data-page-layout] .bn-editor {
+:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="mono"], [data-goose-accent="claude"]) [data-page-layout] .bn-editor {
   --bn-colors-editor-text: hsl(var(--foreground));
   --goose-accent-focus: hsl(var(--primary));
 }
-:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="mono"]) [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"]:not([data-text-color]) > blockquote {
+:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="mono"], [data-goose-accent="claude"]) [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"]:not([data-text-color]) > blockquote {
   color: hsl(var(--muted-foreground));
   border-left-color: hsl(var(--primary));
 }
