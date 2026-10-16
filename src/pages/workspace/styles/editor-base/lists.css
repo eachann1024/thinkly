@@ -60,8 +60,8 @@
    锯齿明显），改用 border-radius 几何圆。圆心仍固定在 center-x、首行
    垂直中心随正文行高变化；默认 16px 正文下一级圆点直径 6.75px，随字号缩放。
    marker 槽总占位仍为 1.5em（左右 margin 补齐），避免正文起点偏移。 */
-.workspace-shell
-  .workspace-editor-surface
+.workspace-editor-surface
+  .bn-editor
   .bn-block-content[data-content-type="bulletListItem"]::before {
   content: "" !important;
   box-sizing: border-box;
@@ -80,7 +80,7 @@
   );
   padding: 0;
   border: none;
-  border-radius: var(--radius-marker);
+  border-radius: 50%;
   background-color: currentColor;
   background-image: none;
   line-height: 0;
@@ -89,8 +89,7 @@
 
 /* 光标所在列表行的 marker 使用产品现有强调前景色。强调色令牌为实色，
    避免 Electron 旧 Chromium 对 hsl(var(...)/alpha) 的错误回退。 */
-.workspace-shell
-  .workspace-editor-surface
+.workspace-editor-surface
   .bn-editor:focus-within
   .bn-block-outer.goose-active-list-marker
   > .bn-block
@@ -101,8 +100,7 @@
   color: var(--goose-interactive-selected-fg);
 }
 
-.workspace-shell
-  .workspace-editor-surface
+.workspace-editor-surface
   .bn-editor:focus-within
   .bn-block-outer.goose-active-list-marker
   > .bn-block
@@ -127,7 +125,7 @@
   content: "" !important;
   width: calc(2 * var(--goose-bullet-marker-radius-nested));
   height: calc(2 * var(--goose-bullet-marker-radius-nested));
-  margin-top: calc(0.75em - var(--goose-bullet-marker-radius-nested));
+  margin-top: calc(var(--editor-line-height, 1.5) * 0.5em - var(--goose-bullet-marker-radius-nested));
   margin-left: calc(
     var(--goose-bullet-marker-center-x) - var(--goose-bullet-marker-radius-nested)
   );
@@ -136,7 +134,7 @@
       var(--goose-bullet-marker-radius-nested)
   );
   border: var(--goose-bullet-marker-ring) solid currentColor;
-  border-radius: var(--radius-marker);
+  border-radius: 50%;
   background-color: transparent;
   background-image: none;
   transform: none;
@@ -158,7 +156,7 @@
   content: "" !important;
   width: var(--goose-bullet-marker-square);
   height: var(--goose-bullet-marker-square);
-  margin-top: calc(0.75em - var(--goose-bullet-marker-square) / 2);
+  margin-top: calc(var(--editor-line-height, 1.5) * 0.5em - var(--goose-bullet-marker-square) / 2);
   margin-left: calc(
     var(--goose-bullet-marker-center-x) - var(--goose-bullet-marker-square) / 2
   );
