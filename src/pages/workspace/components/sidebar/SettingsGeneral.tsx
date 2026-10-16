@@ -1,3 +1,4 @@
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import * as GooseIcons from "@/components/ui/icons";
@@ -22,6 +23,7 @@ export function SettingsGeneral({
   showRecentInSearch, setShowRecentInSearch,
   notebookDropdownHoverExpand, setNotebookDropdownHoverExpand,
 }: SettingsGeneralProps) {
+  const forceCollapseLeft = useWorkspaceViewport((state) => state.forceCollapseLeft);
   const { alwaysOnTop, toggleAlwaysOnTop } = useWindowAlwaysOnTop();
   return (
     <div className="space-y-6">
@@ -40,7 +42,7 @@ export function SettingsGeneral({
               <div className="flex items-center gap-3"><GooseIcons.MousePointer2 className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} /><Label htmlFor="notebook-hover-expand" className="cursor-pointer">悬停展开笔记本菜单</Label></div>
               <p className="mt-1 pl-7 text-xs text-muted-foreground">鼠标悬停在笔记本切换栏时自动展开列表。</p>
             </div>
-            <Switch id="notebook-hover-expand" checked={notebookDropdownHoverExpand} onCheckedChange={setNotebookDropdownHoverExpand} className={SWITCH_CLASS} />
+            <Switch id="notebook-hover-expand" disabled={forceCollapseLeft} checked={notebookDropdownHoverExpand && !forceCollapseLeft} onCheckedChange={setNotebookDropdownHoverExpand} className={SWITCH_CLASS} />
           </div>
             <div className={`mt-2 flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
               <div>
