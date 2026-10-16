@@ -128,7 +128,7 @@
 }
 
 .notebook-ai-model-menu {
- width: 22rem;
+ width: min(16rem, calc(100vw - 24px));
  max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
  overscroll-behavior: contain;
  scrollbar-width: thin;
