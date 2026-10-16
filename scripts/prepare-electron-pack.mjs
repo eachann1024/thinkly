@@ -21,22 +21,10 @@ try {
   throw new Error(`Failed to parse root package.json: ${err.message}`);
 }
 
-function installedElectronVersion() {
-  let meta;
-  try {
-    meta = JSON.parse(readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8"));
-  } catch (err) {
-    throw new Error(`Failed to read installed Electron version: ${err.message}`);
-  }
-  const version = meta?.version;
-  if (typeof version !== "string" || !/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) {
-    throw new Error("Installed Electron package.json has no usable version");
-  }
-  return version;
-}
-
-// 在清理打包目录之前读取，避免版本无效时已经删掉上一次产物。
-const electronVersion = installedElectronVersion();
+// Use the exact installed version, including lockfile resolutions, for release packaging.
+const electronVersion = JSON.parse(
+  readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8"),
+).version;
 
 // Linux 包要求邮箱格式；默认使用非联系地址占位，不向公开作者字段补入私人邮箱。
 const linuxMaintainer =
@@ -124,7 +112,7 @@ directories:
   output: ../packaged
 asar: true
 npmRebuild: false
-electronVersion: ${JSON.stringify(electronVersion)}
+electronVersion: ${electronVersion}
 compression: maximum
 # mac 上 Chromium 语言包是 zh_CN.lproj（下划线）。必须带 zh_CN，否则 zh-CN 匹配不到。
 electronLanguages:
