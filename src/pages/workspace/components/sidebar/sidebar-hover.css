@@ -34,9 +34,9 @@
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] {
   position: absolute;
   z-index: 30;
-  inset: 8px auto auto calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
+  inset: 8px auto 8px calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
   width: min(280px, calc(100% - 84px)) !important;
-  height: min(480px, calc(100% - 16px)) !important;
+  height: auto !important;
   overflow: hidden;
   border: 1px solid var(--workspace-divider-strong);
   border-radius: var(--goose-floating-radius, 12px);
@@ -45,33 +45,9 @@
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating][data-sidebar-view="search"] {
   width: min(340px, calc(100% - 84px)) !important;
-  height: min(600px, calc(100% - 16px)) !important;
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-overlay] .sidebar-content-surface {
   border-radius: inherit;
-}
-.sidebar-panel-controls {
-  display: flex;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  gap: 2px;
-  padding: 6px 8px 0;
-}
-.sidebar-panel-controls button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--goose-control-radius, 8px);
-  color: hsl(var(--muted-foreground));
-}
-.sidebar-panel-controls button:is(:hover, :focus-visible) {
-  background: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-}
-.sidebar-panel-controls button[aria-pressed="true"] {
-  color: var(--goose-interactive-selected-fg);
 }
 .workspace-shell .workspace-sidebar-pane .sidebar-design {
   padding-top: 4px;

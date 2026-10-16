@@ -1,0 +1,64 @@
+/* 方案一：切本与树操作共用标题行，列表底部不再保留整行入口。 */
+.workspace-shell .workspace-sidebar-pane .sidebar-design:has(.sidebar-navigation-heading) {
+  padding-inline: 0;
+}
+.workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-navigation-heading {
+  display: flex;
+  min-width: 0;
+  min-height: 3.714286rem;
+  align-items: center;
+  gap: 0.142857rem;
+  margin: 0;
+  padding: 0.714286rem 0.714286rem 0.428571rem;
+}
+.sidebar-design .sidebar-navigation-heading[hidden] {
+  display: none !important;
+}
+.workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-navigation-heading .sidebar-section-label {
+  position: static;
+  flex: 0 0 auto;
+  width: auto;
+  height: 2rem;
+  padding: 0;
+}
+.workspace-shell .workspace-sidebar-pane .sidebar-navigation-heading .sidebar-notebook-trigger--header {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  height: 2.285714rem;
+  min-height: 2.285714rem;
+  gap: 0.571429rem;
+  padding: 0 0.428571rem;
+  border: 0;
+  border-radius: var(--goose-control-radius, 0.428571rem);
+  background: transparent;
+  font-size: var(--sidebar-font-size, 13px);
+  font-weight: 500;
+}
+.sidebar-navigation-heading .sidebar-notebook-trigger--header > .truncate {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.sidebar-navigation-heading .sidebar-notebook-trigger--header > .goose-notebook-monogram {
+  flex-shrink: 0;
+}
+.sidebar-navigation-heading .sidebar-notebook-trigger--header > .goose-notebook-chevron {
+  flex-shrink: 0;
+}
+/* 菜单仍通过 portal 挂到 body；列表单独滚动，底部操作始终可达。 */
+.goose-notebook-menu-surface.goose-notebook-menu-surface--header {
+  display: flex;
+  flex-direction: column;
+  width: max(18rem, var(--goose-popover-trigger-width));
+  max-height: min(32rem, var(--goose-popover-available-height, calc(100vh - 16px)));
+  overflow: hidden;
+}
+.goose-notebook-menu-surface--header > .goose-notebook-menu-list {
+  flex: 0 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+.goose-notebook-menu-surface--header > :not(.goose-notebook-menu-list) {
+  flex-shrink: 0;
+}

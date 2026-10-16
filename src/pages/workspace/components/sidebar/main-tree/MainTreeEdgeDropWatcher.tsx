@@ -68,10 +68,10 @@ export function MainTreeEdgeDropWatcher({
 
     const readEdge = (event: DragEvent) => {
       const viewportRect = container.getBoundingClientRect();
-      // 底栏及其菜单属于记事本切换操作，不能被树的越界置底逻辑接管。
+      // 切本入口、标题操作及菜单不能被树的越界首/末落点接管。
       const overNotebookControl =
         event.target instanceof Element &&
-        event.target.closest(".sidebar-notebook-footer, .goose-notebook-menu-surface");
+        event.target.closest(".sidebar-navigation-heading, .sidebar-notebook-footer, .goose-notebook-menu-surface");
       const rows = container.querySelectorAll(
         "[data-rct-item-container='true']",
       );

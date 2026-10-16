@@ -8,10 +8,8 @@ import type { useSidebarHover } from "./useSidebarHover";
 
 export function SidebarModeRail({
   context,
-  notebookFooterHost,
 }: {
   context: ReturnType<typeof useSidebarHover>;
-  notebookFooterHost: HTMLDivElement | null;
 }) {
   const searchSelectionRef = useRef("");
   const {
@@ -88,7 +86,7 @@ export function SidebarModeRail({
                       searchSelectionRef.current = "";
                       if (query) useSearchSession.getState().setQuery(query);
                     }
-                    openSidebarView(view);
+                    openSidebarView(view, event.detail === 0);
                   }}
                 >
                   <SidebarRailIcon
@@ -105,8 +103,6 @@ export function SidebarModeRail({
         </nav>
       </TooltipProvider>
       <SidebarFooter
-        notebookFooterHost={notebookFooterHost}
-        showNotebookSwitcher={currentView === "pages" && !settingsOpen && !inHistoryMode}
         isSettingsOpen={settingsOpen}
         onOpenSettings={() => {
           if (inHistoryMode) exitHistoryView();

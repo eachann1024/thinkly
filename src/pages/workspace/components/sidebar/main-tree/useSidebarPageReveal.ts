@@ -10,6 +10,7 @@ interface SidebarPageRevealOptions {
   pages: Record<string, RevealPage>;
   expandedIds: string[];
   treeReady: boolean;
+  preserveNotebookScroll?: boolean;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   setExpanded: (notebookId: string, ids: string[]) => void;
   consumeRequest: (pageId: string) => void;
@@ -23,6 +24,7 @@ export function useSidebarPageReveal({
   pages,
   expandedIds,
   treeReady,
+  preserveNotebookScroll = false,
   scrollContainerRef,
   setExpanded,
   consumeRequest,
@@ -33,12 +35,14 @@ export function useSidebarPageReveal({
     requestedId: string | null;
   } | null>(null);
   const pending = useRef<{ pageId: string; explicit: boolean } | null>(null);
+  const restoringNotebook = useRef(false);
 
   useEffect(() => {
     const previous = observed.current;
     const pageChanged = !previous || previous.highlightedId !== highlightedPageId;
     const notebookChanged = !previous || previous.notebookId !== activeNotebookId;
     const requestChanged = !previous || previous.requestedId !== expandPageId;
+    if (notebookChanged) restoringNotebook.current = preserveNotebookScroll;
     observed.current = {
       notebookId: activeNotebookId,
       highlightedId: highlightedPageId,
@@ -46,7 +50,16 @@ export function useSidebarPageReveal({
     };
 
     if (requestChanged && expandPageId) {
+      restoringNotebook.current = false;
       pending.current = { pageId: expandPageId, explicit: true };
+    } else if (restoringNotebook.current && pending.current?.explicit &&
+      pages[pending.current.pageId]?.workspaceId === activeNotebookId) {
+      restoringNotebook.current = false;
+    } else if (restoringNotebook.current) {
+      pending.current = null;
+      // 切本的首个有效选中页只恢复高亮，不覆盖该本已记住的列表位置。
+      if (treeReady && highlightedPageId && pages[highlightedPageId]?.workspaceId === activeNotebookId)
+        restoringNotebook.current = false;
     } else if (pageChanged || notebookChanged) {
       // A notebook can switch before its page is hydrated. Keep an explicit request
       // across that intermediate render, but a newer displayed page supersedes it.
@@ -121,5 +134,5 @@ export function useSidebarPageReveal({
     resize?.observe(container);
     schedule();
     return stop;
-  }, [activeNotebookId, highlightedPageId, expandPageId, pages, expandedIds, treeReady, scrollContainerRef, setExpanded, consumeRequest]);
+  }, [activeNotebookId, highlightedPageId, expandPageId, pages, expandedIds, treeReady, preserveNotebookScroll, scrollContainerRef, setExpanded, consumeRequest]);
 }

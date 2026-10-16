@@ -4,9 +4,11 @@ import { sortNotebooksByOrder, useNotebooks } from "@/stores/useNotebooks";
 export function useNotebookSwitcherState({
   onOpenSettings,
   variant = "default",
+  active = true,
 }: {
   onOpenSettings?: () => void;
-  variant?: "default" | "rail";
+  variant?: "default" | "rail" | "header";
+  active?: boolean;
 } = {}) {
   const {
     notebooks,
@@ -57,6 +59,7 @@ export function useNotebookSwitcherState({
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
 
   const isRail = variant === "rail";
+  const isHeader = variant === "header";
 
   const notebookKind = "文件夹";
 
@@ -70,6 +73,7 @@ export function useNotebookSwitcherState({
   return {
     onOpenSettings,
     variant,
+    active,
     notebooks,
     activeNotebookId,
     createLocalFolderNotebook,
@@ -86,6 +90,7 @@ export function useNotebookSwitcherState({
     setEditDialog,
     activeNotebook,
     isRail,
+    isHeader,
     notebookKind,
     activeNotebookLabel,
     notebookList,

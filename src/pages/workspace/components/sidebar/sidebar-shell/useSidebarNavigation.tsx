@@ -68,7 +68,7 @@ export function useSidebarNavigation(
   const inHistoryMode =
     !!historyActivePageId && historyActivePageId === activePageId;
 
-  const restoreSidebarFocusRef = useRef(false);
+  const restoreSidebarFocusRef = useRef<SidebarView | null>(null);
 
   const [scrollAreaNode, setScrollAreaNode] = useState<HTMLDivElement | null>(
     null,
@@ -78,16 +78,17 @@ export function useSidebarNavigation(
 
   const closeSidebarOverlay = useCallback(() => {
     const active = document.activeElement;
-    restoreSidebarFocusRef.current =
+    const restoreFocus =
       !!active &&
       (!!sidebarRef.current?.contains(active) ||
         active === sidebarRef.current?.previousElementSibling);
+    restoreSidebarFocusRef.current = restoreFocus ? currentView : null;
     if (settingsOpen) onSettingsSidebarExpandedChange(false);
     else {
       setLeftExpandOverride(false);
       if (!useWorkspaceViewport.getState().forceCollapseLeft) useSidebarView.getState().setSidebarCollapsed(true);
     }
-  }, [settingsOpen, onSettingsSidebarExpandedChange, setLeftExpandOverride, sidebarRef]);
+  }, [settingsOpen, onSettingsSidebarExpandedChange, setLeftExpandOverride, sidebarRef, currentView]);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -170,8 +171,9 @@ export function useSidebarNavigation(
       event.stopPropagation();
       closeSidebarOverlay();
     };
-    document.addEventListener("keydown", onEscape);
-    return () => document.removeEventListener("keydown", onEscape);
+    // 菜单与输入框仍先处理；仅提示气泡不应吞掉关闭面板的 Esc。
+    document.addEventListener("keydown", onEscape, true);
+    return () => document.removeEventListener("keydown", onEscape, true);
   }, [sidebarOverlay, settingsOpen, closeSidebarOverlay]);
 
   useSidebarEffects({
