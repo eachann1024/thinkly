@@ -10,7 +10,7 @@ import { useAiStatus } from "@/stores/useAiStatus";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { PageMenu } from "./PageMenu";
-import { NewTabButton } from "./NewTabButton";
+import { TabRail } from "./TabRail";
 import { useEffectiveSingleTabMode } from "@/lib/tabMode";
 import { cn, formatShortcut } from "@/lib/utils";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
@@ -116,7 +116,9 @@ export function PageHeader({
           </TooltipProvider>
         ) : null}
 
-        {!aiFullscreenOpen && page && <PageFileTitle page={page} />}
+        {!aiFullscreenOpen && (singleTabMode || !folderActionsAvailable
+          ? page && <PageFileTitle page={page} />
+          : <TabRail variant="page-header" page={page} onOpenSearch={onOpenSearch} />)}
 
         {page?.isLocked && (
           <span className="text-xs bg-[var(--goose-color-lock-bg)] text-[var(--goose-color-lock-text)] px-1.5 py-0.5 rounded">
@@ -130,9 +132,6 @@ export function PageHeader({
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
-        {showWorkspaceActions && !singleTabMode && folderActionsAvailable && !page?.trashedAt && (
-          <NewTabButton onClick={onOpenSearch} />
-        )}
         {showAiOnActions && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>

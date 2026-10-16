@@ -20,7 +20,7 @@ import { useAiHeaderActions, useAiHeaderTitle } from "../notebook-ai/aiHeaderSlo
 import { ConversationTitle } from "../notebook-ai/ConversationTitle";
 import { HistoryToolbar } from "../history/HistoryView";
 import { PageMenu } from "./PageMenu";
-import { NewTabButton } from "./NewTabButton";
+import { TabRail } from "./TabRail";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
 import { useIncomingWorkspaceTabs } from "./useIncomingWorkspaceTabs";
 
@@ -58,7 +58,6 @@ export function DesktopTitleBar({
   aiLayoutMode = "fullscreen",
   onToggleAiPanel,
 }: DesktopTitleBarProps) {
-  useIncomingWorkspaceTabs();
   const activePageId = usePages((s) => s.activePageId);
   const folderActionsAvailable = useFolderToolbarActions();
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();
@@ -83,6 +82,8 @@ export function DesktopTitleBar({
   const aiFullscreenOpen =
     folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
   const aiSidePanelOpen = folderActionsAvailable && Boolean(aiPanelOpen) && !aiFullscreenOpen;
+  const showTabRail = folderActionsAvailable && !settingsOpen && !inHistoryMode && !aiFullscreenOpen;
+  useIncomingWorkspaceTabs(!showTabRail);
 
   // Win/Linux 均为 frameless：右侧渲染自定义 min/max/close 窗控。
   const isFramelessElectron =
@@ -165,6 +166,9 @@ export function DesktopTitleBar({
               />
             </div>
           </div>
+        ) : showTabRail ? (
+          <TabRail variant="electron-titlebar" page={page} onOpenSearch={onOpenSearch}
+            onBeforeActivateTab={onBeforeActivateTab} />
         ) : !isWelcomeTab && page ? <PageFileTitle page={page} /> : null}
 
         {!aiFullscreenOpen && page?.isLocked && (
@@ -180,9 +184,6 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {showWorkspaceActions && !aiFullscreenOpen && folderActionsAvailable && !page?.trashedAt && (
-          <NewTabButton onClick={onOpenSearch} />
-        )}
         {showWorkspaceActions && folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>
