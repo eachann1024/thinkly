@@ -64,7 +64,16 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 | | `goose-note-app_*_amd64.deb` | Debian / Ubuntu 等系统 |
 | | `goose-note-app-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
 
-> **提示**：安装包暂未公证/签名。macOS 首次打开如遇「无法打开」或「未知开发者」提示，在「系统设置 → 隐私与安全性」中点击「仍要打开」；Windows 如遇 SmartScreen 提示，点击「更多信息 → 仍要运行」。
+### macOS 首次安装
+
+为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。
+
+1. 打开 DMG，将 Goose Note 拖入「应用程序」，等待复制完成。
+2. 如果 DMG 中有「安装指令.command」，双击它并在 macOS 系统授权窗口输入密码。终端会自动打开，无需手动输入命令。
+
+指令被拦截、旧版安装包没有指令，或使用 ZIP / Homebrew 时，请查看[完整安装说明](docs/macos-installation.md)。不要依赖右键「打开」绕过验证，新版 macOS 不再支持这种方式。
+
+Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「更多信息 → 仍要运行」。
 
 <details>
 <summary>macOS 亦可通过 Homebrew 安装</summary>

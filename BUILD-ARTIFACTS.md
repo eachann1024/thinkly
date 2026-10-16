@@ -18,11 +18,11 @@ Release 附件只包含下列安装包和一份 `SHA256SUMS.txt`（全部安装�
 | Debian / Ubuntu | x64 | `goose-note-app_<版本>_amd64.deb` | Debian / Ubuntu 安装包 |
 | Arch Linux / Omarchy 等 Arch 系 | x86_64 | `goose-note-app-<版本>.pacman` | Arch 系安装包 |
 
-macOS 应用 `.zip` 仍会构建（Actions 附件），只在两个 macOS 包均已签名并公证时才随 Release 发布，供应用内 Squirrel.Mac 自动更新（`updates/mac-*.json`）使用；未签名构建不发布 zip。不再构建 rpm。BUILD.json、源码归档、LICENSE 等构建记录只保留在 Actions 附件；许可与第三方声明随安装包附带，对应源码见 Release 页 GitHub 自动附带的 Source code 归档。发布脚本按固定清单核对 Release 附件，多一个或少一个都会失败。
+macOS 应用 `.zip` 同时随 Actions 和 Release 分发，用于应用下载更新；仅在两个 macOS 包均完成 Developer ID 签名与公证时生成 Squirrel.Mac 更新源（`updates/mac-*.json`）。ZIP 不包含 DMG 安装指令。不再构建 rpm。BUILD.json、源码归档、LICENSE 等构建记录只保留在 Actions 附件；许可与第三方声明随安装包附带，对应源码见 Release 页 GitHub 自动附带的 Source code 归档。发布脚本按固定清单核对 Release 附件，多一个或少一个都会失败。
 
 Arch 指 Linux 发行版，Omarchy（Arch + Hyprland）同样使用 `.pacman` 包：执行 `sudo pacman -U ./goose-note-app-*.pacman`，包管理器解析并安装依赖（gtk3、nss、alsa-lib 等）。CI 在 Arch 官方容器中实际安装包、检查安装记录、应用资源和 `ldd` 无缺失库。此检查不代替图形桌面启动和功能验收。AppImage 可作为另一种 Linux 分发方式，部分系统需安装 FUSE。
 
-未配置签名的开发构建未签名、未公证，系统可能提示未知开发者；签名支持不代表某次构建已获批或已启用。只对确认来源的构建按操作系统提示操作。应用版本来自 package.json；提交 SHA 和运行 ID 用于区分同版本不同构建，不应当作新的稳定发布版本。
+未配置 Apple 证书时，macOS 构建使用免费 ad-hoc 签名，未进行 Developer ID 签名与公证，首次安装需要额外授权（见 [macOS 安装说明](docs/macos-installation.md)）；签名支持不代表某次构建已获批或已启用。只对确认来源的构建按操作系统提示操作。应用版本来自 package.json；提交 SHA 和运行 ID 用于区分同版本不同构建，不应当作新的稳定发布版本。
 
 每个平台的 Actions 附件包含安装包、`BUILD.json` 和 `SHA256SUMS.txt`。同一运行的 `source-<SHA>` 包含 `git archive` 生成的准确项目源码、锁文件、构建脚本及声明，不包含未提交的本地工作。项目源码归档不等同于已完成全部依赖的对应源码交付；公开分发前仍须按 SOURCE-CODE.md 补齐必要的依赖源码、核对第三方声明和字体来源。
 
@@ -46,3 +46,7 @@ node scripts/build-ci-installers.mjs mac arm64
 默认项目 slug 为 `goose-notes`，策略为 `release-signing`，主程序与安装包配置分别为 `app-exe`、`installer`。可分别通过 `SIGNPATH_PROJECT_SLUG`、`SIGNPATH_SIGNING_POLICY_SLUG`、`SIGNPATH_APP_ARTIFACT_CONFIGURATION_SLUG` 和 `SIGNPATH_INSTALLER_ARTIFACT_CONFIGURATION_SLUG` 覆盖；历史项目 slug 不随仓库更名修改。
 
 工作流先签 `Goose Note.exe`，再打 NSIS 安装包并签 installer；两个架构各提交两次请求。每次请求均需维护者在 SignPath 人工批准，任务最多等待 60 分钟。SignPath 账号、可信 GitHub 构建系统、签名策略和 artifact configuration 需按实际上传的 ZIP 内容配置；文档中的支持流程不代表服务审批或正式签名已完成。
+
+## macOS 安装引导链路
+
+Actions 的两个 macOS 架构均通过 `prepare-electron-pack.mjs` 复制 DMG 背景、安装指令和帮助，随后由 `build-ci-installers.mjs` 打包，并在 BUILD.json 写入 `macInstallHelper: 1`。Release 只有在两个架构均声明此能力时才介绍安装指令；下载页读取 Release 中的能力标记，旧版未标记的包仍使用手动授权说明。Release 与下载页共用 `scripts/macos-install-copy.mjs` 文案。Homebrew 只安装应用，单独给出手动授权路径。

@@ -68,6 +68,17 @@ if (stage === 'installer') {
   console.log(`Unsigned installer staged for SignPath: ${resolve(signDir, 'installer')}`);
   process.exit(0);
 }
+if (platform === 'mac') {
+  for (const name of ['background.png', '安装指令.command', '安装帮助.txt']) {
+    const asset = resolve(pack, 'dmg-assets', name);
+    if (!existsSync(asset) || !readFileSync(asset).equals(readFileSync(resolve(root, 'electron/installer', name)))) {
+      throw new Error(`DMG installation asset missing or outdated: ${name}`);
+    }
+  }
+  if (!(statSync(resolve(pack, 'dmg-assets/安装指令.command')).mode & 0o111)) {
+    throw new Error('DMG installation command must be executable');
+  }
+}
 if (stage === 'all') builder(`--${platform}`, ...targets[platform]);
 const signed = stage === 'collect';
 if (signed) {
@@ -107,6 +118,7 @@ writeFileSync(resolve(output, 'BUILD.json'), JSON.stringify({
   commit, version: pkg.version, platform, arch,
   signed: platform === 'mac' ? Boolean(process.env.CSC_LINK) : signed,
   notarized: platform === 'mac' && Boolean(process.env.CSC_LINK && process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID),
+  macInstallHelper: platform === 'mac' ? 1 : undefined,
   run: process.env.GITHUB_RUN_ID || null,
   sourceArtifact: `source-${commit}`, files,
 }, null, 2) + '\n');

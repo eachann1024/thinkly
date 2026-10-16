@@ -1,3 +1,4 @@
+import { MAC_SIGNED, MAC_HELPER_MARKER, MAC_INSTALL_GUIDE, macInstallParagraphs } from "./macos-install-copy.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -70,6 +71,7 @@ async function main() {
     const builds = verifyBuildRecords(input, version, sha);
     const signed = ["arm64", "x64"].every((arch) =>
       builds.get(`mac-${arch}`).signed === true && builds.get(`mac-${arch}`).notarized === true);
+    const macHelper = ["arm64", "x64"].every((arch) => builds.get(`mac-${arch}`).macInstallHelper === 1);
     const windowsSigned = ["arm64", "x64"].every((arch) =>
       builds.get(`win-${arch}`).signed === true);
     const installers = releaseInstallers(version);
@@ -102,7 +104,13 @@ async function main() {
       "",
       `- [SHA256SUMS.txt](${baseDownloadUrl}/SHA256SUMS.txt)：安装包 SHA-256 校验和`,
       "",
-      `${signed ? "macOS 安装包已完成代码签名与公证。" : "macOS 暂未公证（如提示「无法打开」或「未知开发者」，在「系统设置 → 隐私与安全性」中点击「仍要打开」即可）；"}${windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。"}`,
+      "### macOS 安装说明",
+      "",
+      ...(signed ? [MAC_SIGNED] : macInstallParagraphs(macHelper)),
+      ...(macHelper ? [MAC_HELPER_MARKER] : []),
+      `[完整安装说明（含旧版 DMG、ZIP 与 Homebrew）](${MAC_INSTALL_GUIDE})`,
+      "",
+      windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。",
       "",
       codeSigningPolicy(windowsSigned),
     ].join("\n");

@@ -1,3 +1,4 @@
+import { MAC_SIGNED, MAC_HELPER_MARKER, MAC_INSTALL_GUIDE, macInstallParagraphs } from "../macos-install-copy.mjs";
 const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[char]);
@@ -42,9 +43,12 @@ ${asset(`Goose.Note-${version}.AppImage`, "AppImage")}
 ${asset(`goose-note-app_${version}_amd64.deb`, "Debian / Ubuntu")}
 ${asset(`goose-note-app-${version}.pacman`, "Arch Linux")}</section>
 </div>
+<section class="changelog" aria-labelledby="mac-install"><h2 id="mac-install">macOS 安装说明</h2>
+${(release.body?.includes(MAC_SIGNED) ? [MAC_SIGNED] : macInstallParagraphs(release.body?.includes(MAC_HELPER_MARKER))).map(text => `<p>${escape(text)}</p>`).join("\n")}
+<p><a href="${MAC_INSTALL_GUIDE}">完整安装说明（含旧版 DMG、ZIP 与 Homebrew）</a></p></section>
 <section class="changelog" aria-labelledby="changes"><h2 id="changes">更新日志</h2>${notes || "<p>暂无更新日志。</p>"}</section>
 <section class="changelog" aria-labelledby="signing"><h2 id="signing">Code signing policy</h2>
-<p>${release.body?.includes("macOS 安装包已完成代码签名与公证。") ? "macOS 安装包已签名并公证。" : "macOS 安装包暂未公证。"} ${release.body?.includes("Windows 安装包已由 SignPath 签名。") ? "Windows 安装包已由 SignPath 签名。" : "Windows 安装包暂未签名。"}</p>
+<p>${release.body?.includes("macOS 安装包已完成代码签名与公证。") ? "macOS 安装包已签名并公证。" : "macOS 未进行 Developer ID 签名与 Apple 公证。"} ${release.body?.includes("Windows 安装包已由 SignPath 签名。") ? "Windows 安装包已由 SignPath 签名。" : "Windows 安装包暂未签名。"}</p>
 <p>Free code signing provided by <a href="https://signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>${release.body?.includes("Windows 安装包已由 SignPath 签名。") ? "." : " — application pending; this release is not signed yet."}</p>
 <p>Committers, reviewers and approvers: <a href="https://github.com/eachann1024">eachann1024</a></p></section>
 <footer><a href="${escape(release.html_url)}">GitHub Release</a><a href="${escape(feed.assets[0].browser_download_url.replace(/[^/]+$/, "SHA256SUMS.txt"))}">SHA-256 校验文件</a><a href="https://github.com/eachann1024/goose-note/blob/main/PRIVACY.md">隐私政策</a></footer>

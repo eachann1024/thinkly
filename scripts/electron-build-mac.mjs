@@ -17,7 +17,7 @@ const env = {
   PATH: `${resolve(root, "node_modules/.bin")}${delimiter}${process.env.PATH ?? ""}`,
   CSC_IDENTITY_AUTO_DISCOVERY: "false",
 };
-console.log("[mac] electron-builder --mac --arm64（dir 目标，未签名）");
+console.log("[mac] electron-builder --mac --arm64（dir 目标；无证书时使用免费 ad-hoc 签名，未经 Apple 公证）");
 execSync("electron-builder --mac --arm64 --config.mac.target=dir", {
   stdio: "inherit",
   env,
