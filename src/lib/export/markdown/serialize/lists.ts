@@ -29,7 +29,7 @@ export function serializeListItemBlock(
   num: number | null,
   serializeBlocks: (blocks: any[], indent: string) => string,
 ): string {
-  const text = blockNoteInlineToText(item.content);
+  const text = blockNoteInlineToText(item.content, true);
   let marker: string;
   let childIndentWidth: number;
   if (item.type === "checkListItem") {
@@ -44,11 +44,22 @@ export function serializeListItemBlock(
   }
   let line = wrapLocalBlockPropsMarkdown(item, `${indent}${marker}${text}`);
   if (Array.isArray(item.children) && item.children.length > 0) {
+    const allListChildren = item.children.every((child: any) =>
+      LIST_ITEM_TYPES.has(child?.type),
+    );
+    const childPrefix = indent + " ".repeat(childIndentWidth);
     const childMd = serializeBlocks(
       item.children,
-      indent + " ".repeat(childIndentWidth),
+      allListChildren ? childPrefix : "",
     );
-    if (childMd) line += "\n" + childMd;
+    if (childMd) {
+      line += "\n" + (allListChildren
+        ? childMd
+        : childMd
+            .split("\n")
+            .map((childLine) => childLine ? childPrefix + childLine : "")
+            .join("\n"));
+    }
   }
   return line;
 }

@@ -1,3 +1,4 @@
+import { insertParagraphAfterBlock } from "../extensions/containedBlockKeyboard";
 import { useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -80,6 +81,7 @@ export function EditorContextMenu({
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
   const [canCopy, setCanCopy] = useState(false);
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
+  const contextBlockIdRef = useRef<string | null>(null);
   const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const selectedTextRef = useRef("");
   const { handleContextPaste, handleCopySelection, handleCutSelection, rememberContextSelection } =
@@ -149,6 +151,8 @@ export function EditorContextMenu({
             onPasteCapture={handleEditorPasteCapture}
             onKeyDownCapture={handleEditorKeyDownCapture}
             onContextMenuCapture={(e) => {
+              contextBlockIdRef.current = (e.target as HTMLElement)
+                .closest(".bn-block-outer[data-id]")?.getAttribute("data-id") ?? null;
               rememberContextSelection();
               if (isExcludedBlockTarget(e.target as HTMLElement)) {
                 e.preventDefault();
@@ -191,6 +195,12 @@ export function EditorContextMenu({
               <span className="goose-menu-shortcut">
                 {formatShortcut("Mod+V")}
               </span>
+            </ContextMenuItem>
+          )}
+          {editable && contextBlockIdRef.current && (
+            <ContextMenuItem onSelect={() => insertParagraphAfterBlock(editor, contextBlockIdRef.current!)}>
+              <GooseIcons.Plus className="size-4" />
+              在块下方插入段落
             </ContextMenuItem>
           )}
           {showSelectionImageExport && selectedBlocks.length > 0 && (

@@ -62,6 +62,15 @@ function hasInlineText(content: unknown): boolean {
 function isEmptyWrapperBlock(type: string, block: any): boolean {
   // 空折叠标题仍是子树的可编辑 summary，不能把 wrapper 当作冗余空行剥掉。
   if (type === "heading" && block.props?.isToggleable === true) return false;
+  // Modern BlockNote inline containers can have an intentionally empty head
+  // followed by child blocks (for example a paste at the start of a paragraph).
+  // Keep that parent; legacy wrappers that embed blocks in `content` still flatten.
+  if (
+    type !== "heading" &&
+    Array.isArray(block.children) &&
+    block.children.length > 0 &&
+    !hasStructuredBlocks(block.content)
+  ) return false;
   if (
     ![
       "paragraph",
@@ -162,6 +171,23 @@ function normalizeRedundantNumberedListStarts(
 }
 
 function normalizeQuoteBlock(block: any): PartialBlock[] {
+  // Modern BlockNote quote blocks can own a real child blockGroup. Preserve that
+  // tree; the legacy `blockquote` migration below still flattens its old shape.
+  if (
+    block.type === "quote" &&
+    block.children?.length > 0 &&
+    !hasStructuredBlocks(block.content)
+  ) {
+    const children = normalizeBlocks(block.children);
+    return [{
+      type: "quote",
+      content: normalizeInlineContent(block.content),
+      ...((block.props || block.attrs)
+        ? { props: block.props ?? block.attrs }
+        : {}),
+      ...(children.length > 0 ? { children } : {}),
+    } as PartialBlock];
+  }
   const contentChildren = hasStructuredBlocks(block.content)
     ? block.content
     : [];
@@ -207,7 +233,12 @@ function normalizeBlock(block: any): PartialBlock[] {
   }
   if (type === "quote" || type === "blockquote") {
     const flattened = normalizeQuoteBlock(block);
-    // 引用块不允许有 children，剥离并展平
+    // Legacy blockquote/content trees retain their historical flattening behavior.
+    if (
+      type === "quote" &&
+      block.children?.length > 0 &&
+      !hasStructuredBlocks(block.content)
+    ) return flattened;
     return flattened.flatMap((b) => {
       const children = (b as any).children;
       if (!children?.length) return [b];

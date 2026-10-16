@@ -10,12 +10,13 @@ import { serializeFencedCode } from "./codeFence";
 import { serializeToggleDetails } from "./toggleDetails";
 import { CHILDREN_CONSUMED_TYPES } from "./lists";
 import { legacyItemInline, serializeLegacyListItem } from "./legacyLists";
+import { wrapBlockChildrenMarkdown } from "../blockChildrenWrapper";
 
 export function blockNoteBlockToMarkdown(
   block: any, indent: string,
   serializeBlocks: (blocks: any[], indent: string) => string,
 ): string {
-  const text = blockNoteInlineToText(block.content);
+  const text = blockNoteInlineToText(block.content, ["paragraph", "heading"].includes(block.type));
   let result: string;
 
   switch (block.type) {
@@ -201,8 +202,7 @@ export function blockNoteBlockToMarkdown(
 
   result = wrapLocalBlockPropsMarkdown(block, result);
 
-  // 通用 children 追加（如 isToggleable 折叠标题的子块）：
-  // 用空行分隔保证 md → blocks → md 二轮收敛（子块重读后成为兄弟块，输出不再变化）
+  // Markdown 无原生容器语法的子树使用显式边界，重新打开仍属于原父块。
   if (
     !CHILDREN_CONSUMED_TYPES.has(block.type) &&
     !(block.type === "heading" && block.props?.isToggleable) &&
@@ -211,7 +211,10 @@ export function blockNoteBlockToMarkdown(
   ) {
     const childMd = serializeBlocks(block.children, indent);
     if (childMd) {
-      result += (result ? "\n\n" : "") + childMd;
+      if (!result && block.type === "paragraph") {
+        result = "<!-- goose-note:empty-block=paragraph -->";
+      }
+      result += (result ? "\n\n" : "") + wrapBlockChildrenMarkdown(childMd);
     }
   }
 

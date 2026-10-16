@@ -28,6 +28,7 @@ function toLinkContent(nodes: any[]): any[] {
     if (node?.type === "text") {
       return [{ ...node, styles: node.styles || {} }];
     }
+    if (node?.type === "hardBreak") return [{ type: "text", text: "\n", styles: {} }];
     if (node?.type === "link" && Array.isArray(node.content)) {
       return toLinkContent(node.content);
     }
@@ -56,7 +57,7 @@ function parseSpanColorStyles(style: string): Record<string, string> {
   return styles;
 }
 
-export function parseInlineMarkdown(text: string): any[] {
+function parseInlineMarkdownChunk(text: string): any[] {
   const result: any[] = [];
   if (!text) return result;
 
@@ -66,13 +67,27 @@ export function parseInlineMarkdown(text: string): any[] {
     /(\$((?:\\\$|[^\$])+?)\$|<u>(.+?)<\/u>|<span\b([^>]*)>(.+?)<\/span>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[((?:\\.|[^\]\\\n])+?)\]\]|\[((?:\\.|[^\]\\])+)\]\(([^)]+)\))/gi;
   let lastIndex = 0;
   let match;
+  const breakRegex = /<br\s*\/?>/gi;
 
   function pushPlain(t: string) {
     if (!t) return;
     result.push(t);
   }
 
-  while ((match = regex.exec(text)) !== null) {
+  while (true) {
+    match = regex.exec(text);
+    breakRegex.lastIndex = lastIndex;
+    const breakMatch = breakRegex.exec(text);
+    if (breakMatch && (!match || breakMatch.index < match.index)) {
+      if (breakMatch.index > lastIndex) {
+        pushPlain(text.slice(lastIndex, breakMatch.index));
+      }
+      result.push({ type: "hardBreak" });
+      lastIndex = breakMatch.index + breakMatch[0].length;
+      regex.lastIndex = lastIndex;
+      continue;
+    }
+    if (!match) break;
     if (match.index > lastIndex) {
       pushPlain(text.slice(lastIndex, match.index));
     }
@@ -99,17 +114,13 @@ export function parseInlineMarkdown(text: string): any[] {
       }
     } else if (match[6] !== undefined) {
       // ==highlight== → yellow
-      result.push({
-        type: "text",
-        text: match[6],
-        styles: { backgroundColor: "yellow" },
-      });
+      result.push(...applyStyles(parseInlineMarkdown(match[6]), { backgroundColor: "yellow" }));
     } else if (match[7] !== undefined) {
-      result.push({ type: "text", text: match[7], styles: { bold: true } });
+      result.push(...applyStyles(parseInlineMarkdown(match[7]), { bold: true }));
     } else if (match[8] !== undefined) {
-      result.push({ type: "text", text: match[8], styles: { italic: true } });
+      result.push(...applyStyles(parseInlineMarkdown(match[8]), { italic: true }));
     } else if (match[9] !== undefined) {
-      result.push({ type: "text", text: match[9], styles: { strike: true } });
+      result.push(...applyStyles(parseInlineMarkdown(match[9]), { strike: true }));
     } else if (match[10] !== undefined) {
       result.push({ type: "text", text: match[10], styles: { code: true } });
     } else if (match[11] !== undefined) {
@@ -147,4 +158,8 @@ export function parseInlineMarkdown(text: string): any[] {
   }
 
   return result.length > 0 ? result : [text];
+}
+
+export function parseInlineMarkdown(text: string): any[] {
+  return parseInlineMarkdownChunk(text);
 }

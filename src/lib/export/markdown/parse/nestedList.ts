@@ -43,8 +43,8 @@ export function parseNestedList(
     const stripped = line.slice(lvl);
 
     const taskM = stripped.match(/^-\s+\[([ xX])\](?:\s+(.*))?$/);
-    const orderedM = !taskM && stripped.match(/^(\d+)\.\s+(.+)$/);
-    const bulletM = !taskM && !orderedM && stripped.match(/^[-*+]\s+(.+)$/);
+    const orderedM = !taskM && stripped.match(/^(\d+)\.(?:\s+(.*)|\s*)$/);
+    const bulletM = !taskM && !orderedM && stripped.match(/^[-*+](?:\s+(.*)|\s*)$/);
 
     if (!taskM && !orderedM && !bulletM) break;
 
@@ -57,7 +57,7 @@ export function parseNestedList(
       };
     } else if (orderedM) {
       const num = parseInt(orderedM[1], 10);
-      item = { type: "numberedListItem", content: parseInline(orderedM[2]) };
+      item = { type: "numberedListItem", content: parseInline(orderedM[2] ?? "") };
       const prevType = items[items.length - 1]?.type;
       if (num !== 1 && prevType !== "numberedListItem") {
         item.props = { start: num };
@@ -65,7 +65,7 @@ export function parseNestedList(
     } else {
       item = {
         type: "bulletListItem",
-        content: parseInline((bulletM as RegExpMatchArray)[1]),
+        content: parseInline((bulletM as RegExpMatchArray)[1] ?? ""),
       };
     }
     i++;

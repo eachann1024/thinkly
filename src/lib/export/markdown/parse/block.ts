@@ -10,6 +10,11 @@ import {
   isThematicBreakLine,
   parseTableBlock,
 } from "./blockHelpers";
+import {
+  isBlockChildrenMarker,
+  shouldSkipListSpacer,
+  tryAttachBlockChildren,
+} from "./blockChildren";
 
 /**
  * markdownToJsonContent 输出 **BlockNote PartialBlock[]**（数组，非 {type:"doc"}）。
@@ -59,6 +64,18 @@ export function markdownToJsonContent(markdown: string): any {
   while (i < lines.length) {
     const line = lines[i];
     const trimmedLine = line.trim();
+
+    if (trimmedLine === "<!-- goose-note:empty-block=paragraph -->") {
+      content.push({ type: "paragraph" });
+      i++;
+      continue;
+    }
+
+    const childWrapper = tryAttachBlockChildren(lines, i, content, markdownToJsonContent);
+    if (childWrapper) {
+      i = childWrapper.nextIndex;
+      continue;
+    }
 
     if (isLegacyCodeBlockMetaComment(trimmedLine)) {
       i++;
@@ -191,8 +208,8 @@ export function markdownToJsonContent(markdown: string): any {
     const stripped = line.slice(baseIndent);
     if (
       stripped.match(/^-\s+\[[ xX]\](?:\s+.*)?$/) ||
-      stripped.match(/^[-*+]\s+\S/) ||
-      stripped.match(/^\d+\.\s+\S/)
+      stripped.match(/^[-*+](?:\s+\S|\s*$)/) ||
+      stripped.match(/^\d+\.(?:\s+\S|\s*$)/)
     ) {
       const { items, nextIndex } = parseNestedList(
         lines,
@@ -226,6 +243,7 @@ export function markdownToJsonContent(markdown: string): any {
 
         if (paragraphLines.length > 0) {
           if (
+            isBlockChildrenMarker(currentLine) ||
             currentLine.startsWith("#") ||
             currentLine.startsWith(">") ||
             /^ {0,3}(?:`{3,}|~{3,})/.test(currentLine) ||
@@ -267,6 +285,7 @@ export function markdownToJsonContent(markdown: string): any {
         continue;
       }
     } else if (
+      !shouldSkipListSpacer(lines, i) &&
       content.length > 0 &&
       ["bulletListItem", "numberedListItem", "checkListItem"].includes(
         content[content.length - 1].type,
