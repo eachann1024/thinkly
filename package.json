@@ -46,8 +46,6 @@
     "@handlewithcare/prosemirror-inputrules": "^0.1.4",
     "@heroui/react": "^3",
     "@heroui/styles": "^3",
-    "@huggingface/transformers": "^4.3.1",
-    "@phosphor-icons/react": "2.1.10",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/browser": "^10.70.0",
     "@streamdown/cjk": "^1.0.3",
@@ -104,7 +102,8 @@
     "yaml": "^2.9.0",
     "yet-another-react-lightbox": "3.32.0",
     "zod": "^4.3.6",
-    "zustand": "5.0.14"
+    "zustand": "5.0.14",
+    "@phosphor-icons/react": "2.1.10"
   },
   "overrides": {
     "zod": "4.4.3",

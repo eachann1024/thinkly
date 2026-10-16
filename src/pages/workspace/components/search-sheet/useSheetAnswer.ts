@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAIAvailability, runAITextStream } from "@/lib/ai-provider";
 import { useSettings } from "@/stores/useSettings";
 import type { Page } from "@/types";
+import { expandQuery } from "./expandQuery";
 import { buildAnswerPrompt, retrieveNotes, type NoteSource } from "./retrieveNotes";
 
 export interface SheetAnswer {
@@ -33,8 +34,9 @@ export function useSheetAnswer() {
     const abort = new AbortController();
     controller.current = abort;
     setAnswer({ question, sources: [], text: "", status: "loading" });
-    const sources = await retrieveNotes(question, candidates, ranked).catch(() => [] as NoteSource[]);
+    const extraTerms = await expandQuery(question, abort.signal);
     if (abort.signal.aborted) return;
+    const sources = retrieveNotes(question, candidates, ranked, extraTerms);
     setAnswer({ question, sources, text: "", status: "loading" });
     const ai = useSettings.getState().ai;
     const modelId = ai.workspaceSelectedModelId?.trim() || ai.selectedModelId;

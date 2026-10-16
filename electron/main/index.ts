@@ -1,7 +1,6 @@
 import { registerAppearanceIpc } from "./appearance";
 import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
 import { app, Menu, protocol } from "electron";
-import { bundledModelScheme, registerBundledModelProtocol } from "./bundledModels";
 import { loadVaultRoots } from "./allowlist";
 import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
 import { closeAllWatchers, registerIpcHandlers } from "./ipc";
@@ -22,7 +21,7 @@ import { createWorkspaceWindow, getMainWindow, markQuitting, requestCloseActiveT
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
 const DEFAULT_QUICKNOTE = "Alt+N";
 
-protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }, bundledModelScheme]);
+protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 
 app.setName("Goose Note");
 // 禁止触控板捏合缩放整页；键盘 Cmd/Ctrl+/- 由渲染进程改编辑器字号。
@@ -149,7 +148,6 @@ function startApp(): void {
   }
 
   app.whenReady().then(() => {
-    registerBundledModelProtocol();
     installMenu();
     loadVaultRoots();
     enqueueMarkdownPathsFromArgv(process.argv);
