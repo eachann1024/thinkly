@@ -3,7 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "@/components/ui/icons";
+import { CircleAlert, FileX, Search, X } from "@/components/ui/icons";
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
@@ -124,6 +124,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
 
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
+  const statusKind = searchError ? "error" : busy || results.length ? null : hasQuery ? "none" : "empty";
+  const resultsKey = `${deferredQuery}|${session.scope.kind}|${session.titleOnly}|${session.sort}`;
   const count = searchError || !hasQuery ? "" : busy ? "搜索中…" : `${total} 篇`;
   return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
     <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>
@@ -141,19 +143,18 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
       <SearchSheetFilters count={count}/>
       {answer ? <div className="search-sheet-list" data-answer="true">
         <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
-      </div> : <div ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
-        <div id="search-sheet-results" role="listbox" aria-label="搜索结果">
+      </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
+        <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label="搜索结果">
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}
           {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>最近访问</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>隐藏</Button></div>}
           {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>笔记</span></div>}
           <SearchSheetResults results={results} query={deferredQuery} selectedId={selectedId} notebookNames={notebookNames} pages={pages} openResult={openResult} removeRecent={removeRecent}/>
         </div>
         {loadError && <div className="search-sheet-status" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>重试读取</Button></div>}
-        {searchError && <div className="search-sheet-status" role="alert">{searchError}</div>}
-        {!searchError && !busy && !results.length && <div className="search-sheet-status" role="status" data-empty={!hasQuery || undefined}>
-          {!hasQuery && <span className="search-sheet-status-glyph" aria-hidden="true"><Search size={20}/></span>}
-          <strong>{hasQuery ? "未找到相关笔记" : scopeAll ? "搜索所有记事本" : "搜索当前记事本"}</strong>
-          {hasQuery && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>}
+        {statusKind && <div key={statusKind} className="search-sheet-status" role={statusKind === "error" ? "alert" : "status"} data-state={statusKind}>
+          <span className="search-sheet-status-glyph" aria-hidden="true">{statusKind === "error" ? <CircleAlert size={20}/> : statusKind === "none" ? <FileX size={20}/> : <Search size={20}/>}</span>
+          <strong>{statusKind === "error" ? searchError : statusKind === "none" ? "未找到相关笔记" : scopeAll ? "搜索所有记事本" : "搜索当前记事本"}</strong>
+          {statusKind === "none" && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>}
         </div>}
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>加载更多结果</Button>}
         {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}

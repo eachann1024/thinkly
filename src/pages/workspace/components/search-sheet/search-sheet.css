@@ -42,7 +42,7 @@
 .search-sheet-status { display:flex; flex-direction:column; align-items:center; gap:.625rem; padding:3rem .75rem; text-align:center; font-size:.8125rem; color:var(--goose-text-secondary); overflow-wrap:anywhere; }
 .search-sheet-status strong { font-size:.9375rem; font-weight:500; color:var(--goose-text-primary); }
 .search-sheet .search-sheet-link { height:auto; min-height:0; padding:.375rem .625rem; border:0; text-align:left; font-size:.75rem; color:var(--goose-text-secondary); }
-.search-sheet-footer { display:flex; flex:none; align-items:center; gap:1rem; height:2.25rem; padding:0 1.125rem; overflow:hidden; border-top:1px solid hsl(var(--border)); white-space:nowrap; font-size:.75rem; color:var(--goose-text-secondary); }
+.search-sheet-footer { display:flex; flex:none; align-items:center; gap:1rem; height:2.25rem; padding:0 1.125rem; overflow:hidden; white-space:nowrap; font-size:.75rem; color:var(--goose-text-secondary); }
 .search-sheet-footer span { display:inline-flex; align-items:center; gap:.375rem; }
 .search-sheet-answer { display:flex; flex-direction:column; gap:.75rem; padding:.5rem .625rem 1rem; }
 .search-sheet-answer-head { display:flex; align-items:flex-start; gap:.625rem; font-size:.9375rem; font-weight:500; line-height:1.375rem; color:var(--goose-text-primary); }
@@ -60,18 +60,23 @@
 @media (max-width:600px) { .search-sheet-footer { display:none; } .search-sheet { width:100%; height:calc(100vh - 2.5rem); } }
 /* 质感：极淡纸纹颗粒，只铺在表面底色之上、内容之下。 */
 .search-sheet-layer { --search-sheet-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-/* 空状态：图形与标题一同浮起，居于列表视觉中心。 */
-.search-sheet-status[data-empty] { flex:1; justify-content:center; min-height:100%; padding:0 .75rem 2.5rem; gap:.875rem; }
-.search-sheet-list:has(> .search-sheet-status[data-empty]) { display:flex; flex-direction:column; }
+/* 空、无结果与错误状态：图形与标题一同浮起，居于列表剩余空间中心。 */
+.search-sheet-list:has(> .search-sheet-status[data-state]) { display:flex; flex-direction:column; }
+.search-sheet-status[data-state] { flex:1; justify-content:center; padding:1.5rem .75rem 3rem; gap:.875rem; }
 .search-sheet-status-glyph { display:flex; align-items:center; justify-content:center; width:2.75rem; height:2.75rem; border:1px solid hsl(var(--border)); border-radius:var(--goose-floating-radius); background:var(--goose-interactive-hover); color:var(--goose-text-secondary); }
-.search-sheet-status[data-empty] > * { animation:search-sheet-rise 320ms cubic-bezier(.22,1,.36,1) both; }
-.search-sheet-status[data-empty] > strong { animation-delay:40ms; letter-spacing:.02em; }
+.search-sheet-status[data-state="error"] .search-sheet-status-glyph { color:hsl(var(--destructive)); }
+.search-sheet-status[data-state] > strong { letter-spacing:.02em; }
+.search-sheet-status[data-state] > * { animation:search-sheet-settle 420ms cubic-bezier(.22,1,.36,1) 80ms both; }
+.search-sheet-status[data-state] > .search-sheet-status-glyph { animation-name:search-sheet-pop; animation-delay:0ms; }
+.search-sheet-status[data-state] > .search-sheet-action { margin-top:.25rem; animation-delay:140ms; }
+/* 结果：每次查询整体淡入，不做逐行级联。 */
+.search-sheet-results { animation:search-sheet-rise 240ms cubic-bezier(.22,1,.36,1) both; }
 /* AI 回答：问题→正文→来源依次落定，操作栏常驻底部。 */
 .search-sheet-list[data-answer] { display:flex; flex-direction:column; padding-bottom:0; }
 .search-sheet-list[data-answer] .search-sheet-answer { flex:1; padding-bottom:0; }
-.search-sheet-answer > * { animation:search-sheet-rise 260ms cubic-bezier(.22,1,.36,1) both; }
+.search-sheet-answer > * { animation:search-sheet-settle 380ms cubic-bezier(.22,1,.36,1) both; }
 .search-sheet-answer-md { animation-delay:60ms !important; }
-.search-sheet-answer-hint[data-pending] { animation:search-sheet-rise 260ms cubic-bezier(.22,1,.36,1) both, search-sheet-wait 1.4s cubic-bezier(.45,0,.55,1) 260ms infinite alternate; }
+.search-sheet-answer-hint[data-pending] { animation:search-sheet-settle 380ms cubic-bezier(.22,1,.36,1) both, search-sheet-wait 1.4s cubic-bezier(.45,0,.55,1) 260ms infinite alternate; }
 .search-sheet-answer-actions { position:sticky; bottom:0; display:flex; align-items:center; gap:.5rem; margin:auto -.625rem 0; padding:.625rem .625rem .75rem 1.625rem; border-top:1px solid hsl(var(--border)); background-color:hsl(var(--goose-menu-surface)); background-image:var(--search-sheet-grain); animation-delay:120ms !important; }
 .search-sheet .search-sheet-action { display:inline-flex; align-items:center; gap:.375rem; height:2rem; min-height:0; padding:0 .75rem; border:1px solid hsl(var(--border)); border-radius:var(--goose-control-radius); font-size:.8125rem; font-weight:500; color:var(--goose-text-primary); transition:background-color var(--goose-control-motion-duration), box-shadow var(--goose-control-motion-duration); }
 .search-sheet .search-sheet-action:hover { background:var(--goose-interactive-hover); }
@@ -84,6 +89,8 @@
 .search-sheet .search-sheet-action[data-primary]:hover > svg:last-child { transform:translateX(2px); }
 .search-sheet .search-sheet-source { transition:background-color var(--goose-control-motion-duration), border-color var(--goose-control-motion-duration); }
 .search-sheet .search-sheet-source:hover { border-color:color-mix(in srgb, var(--goose-accent-solid) 55%, hsl(var(--border))); }
-@keyframes search-sheet-rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes search-sheet-rise { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+@keyframes search-sheet-settle { from { opacity:0; transform:translateY(10px); filter:blur(3px); } to { opacity:1; transform:none; filter:none; } }
+@keyframes search-sheet-pop { from { opacity:0; transform:translateY(8px) scale(.9); } 60% { opacity:1; } to { opacity:1; transform:none; } }
 @keyframes search-sheet-wait { from { opacity:1; } to { opacity:.45; } }
 @media (prefers-reduced-motion:reduce) { .search-sheet,.search-sheet-scrim { transition-duration:0s !important; } .search-sheet *,.search-sheet *::before { animation:none !important; transition-duration:0s !important; } }
