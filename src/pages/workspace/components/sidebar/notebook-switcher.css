@@ -142,9 +142,20 @@
   line-height: 20px;
 }
 .goose-notebook-menu-surface .goose-notebook-row {
-  min-height: 36px;
+  height: calc(var(--goose-notebook-row-height, 38px) - 0.142857rem);
+  min-height: calc(var(--goose-notebook-row-height, 38px) - 0.142857rem);
+  margin-bottom: 0.142857rem;
+  border-block: 0;
+  font-size: calc(var(--sidebar-font-size, 13px) + 0.071429rem);
+  line-height: 1.5rem;
   padding-block: 4px;
 }
+.goose-notebook-row .goose-notebook-monogram {
+  flex-basis: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.goose-notebook-row .goose-notebook-monogram svg { width: 100%; height: 100%; }
 .goose-notebook-menu-surface .goose-notebook-menu-action {
   min-height: 30px;
   padding-block: 4px;
@@ -153,10 +164,4 @@
   .sidebar-notebook-trigger > .goose-notebook-monogram,
   .sidebar-notebook-trigger > .goose-notebook-chevron { transform: none !important; transition: none; }
   .sidebar-notebook-trigger:not(.sidebar-notebook-trigger--rail)::before { transition: opacity 120ms ease; }
-}
-
-/* 拖拽列表保留连续命中与测量外框，高亮在行内留白。 */
-.goose-notebook-menu-surface .goose-notebook-row {
-  border-block: calc(var(--goose-menu-row-gap) / 2) solid transparent;
-  background-clip: padding-box;
 }

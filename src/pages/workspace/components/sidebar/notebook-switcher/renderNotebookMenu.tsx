@@ -1,4 +1,5 @@
 import * as GooseIcons from "@/components/ui/icons";
+import type { CSSProperties } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -25,6 +26,7 @@ export function renderNotebookMenu(
     active,
     notebookKind,
     notebookList,
+    notebookRowHeight,
     canDeleteNotebook,
     handleOpenLocalFolder,
     handleEdit,
@@ -35,6 +37,7 @@ export function renderNotebookMenu(
   return (
     <PopoverContent
       aria-label={`切换${notebookKind}`}
+      style={{ "--goose-notebook-row-height": `${notebookRowHeight}px` } as CSSProperties}
       className={cn(
         "goose-notebook-menu-surface goose-floating-surface w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
         isRail && "goose-notebook-menu-surface--rail w-56",

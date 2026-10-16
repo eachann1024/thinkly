@@ -1,5 +1,6 @@
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortNotebooksByOrder, useNotebooks } from "@/stores/useNotebooks";
+import { useSidebarItemHeight } from "../hooks/useSidebarItemHeight";
 
 export function useNotebookSwitcherState({
   onOpenSettings,
@@ -67,6 +68,8 @@ export function useNotebookSwitcherState({
     activeNotebook?.name || "打开文件夹";
 
   const notebookList = sortNotebooksByOrder(notebooks);
+  // Match the main tree's base row plus its 4px padding and 2px row gap.
+  const notebookRowHeight = useSidebarItemHeight() + 6;
 
   // Electron 仅本地文件夹模式：最后一个文件夹也允许移除（回到空态）
   const canDeleteNotebook = notebookList.length > 0;
@@ -94,6 +97,7 @@ export function useNotebookSwitcherState({
     notebookKind,
     activeNotebookLabel,
     notebookList,
+    notebookRowHeight,
     canDeleteNotebook,
   };
 }
