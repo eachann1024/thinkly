@@ -1,5 +1,5 @@
 import { activateWorkspace } from "@/lib/settings-navigation";
-import type { KeyboardEvent as ReactKeyboardEvent, WheelEvent as ReactWheelEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTabs, type TabItem } from "@/stores/useTabs";
 import { PointerSensor, useSensor, useSensors, type DragEndEvent, type DragMoveEvent, type DragStartEvent } from "@dnd-kit/core";
@@ -14,12 +14,23 @@ import { listVisibleWorkspaceTabs } from "../visibleTabs";
 import { useEditorSplitSelector } from "@/stores/useEditorSplit";
 import { focusedPageIdOf } from "@/lib/editor-split/tree";
 import { detachTabFromThisWindow } from "@/lib/electron/detachTab";
+import { collectTabPageIds } from "@/stores/tabs/helpers";
+import { isUnsavedEditorPage } from "@/lib/unsavedLocalPage";
 
 import type { TabRailProps } from "./types";
-import { sameFocusedPageMap, readDragPointer, dragDelta } from "./model";
+import { sameFocusedPageMap, readDragPointer } from "./model";
+
+function cursorFromEvent(event: Event | undefined) {
+  const pointer = readDragPointer(event);
+  return pointer ? {
+    x: pointer.screenX, y: pointer.screenY,
+    clientX: pointer.clientX, clientY: pointer.clientY,
+  } : null;
+}
 
 export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, "variant" | "onBeforeActivateTab">) {
-  const getPage = usePages((s) => s.getPage);
+  const pages = usePages((s) => s.pages);
+  const getPage = (id: string) => pages[id];
   const activeNotebookId = useNotebooks((state) => state.activeNotebookId);
   const {
     openTabs,
@@ -63,12 +74,21 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     clientX: number;
     clientY: number;
   } | null>(null);
+  const nativePointerRef = useRef<PointerEvent | null>(null);
+  const activePointerIdRef = useRef<number | null>(null);
   const grabOffsetXRef = useRef(80);
   const previewFrameRef = useRef(0);
   const canDockTabs = canDragTabBetweenWindows({
     isElectron: isElectronRuntime(),
     variant,
   });
+  // 跨窗快照只携带页面 ID；尚未落盘的草稿必须留在源窗口。
+  const canTransferTab = (tab: TabItem) =>
+    tab.type === "welcome" || tab.type === "notebook-ai" ||
+    collectTabPageIds(tab).every((id) => {
+      const page = usePages.getState().getPage(id);
+      return Boolean(page && !isUnsavedEditorPage(page));
+    });
   const dragEnabled = tabDragEnabled({
     isElectron: isElectronRuntime(),
     variant,
@@ -81,17 +101,21 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
-  const updateDragCursor = (event: DragStartEvent | DragMoveEvent) => {
-    const pointer = readDragPointer(event.activatorEvent);
-    if (!pointer) return;
-    const delta = dragDelta(event);
-    lastCursorRef.current = {
-      x: pointer.screenX + delta.x,
-      y: pointer.screenY + delta.y,
-      clientX: pointer.clientX + delta.x,
-      clientY: pointer.clientY + delta.y,
+  useEffect(() => {
+    // DnD delta 包含自动滚动偏移，跨窗判断必须使用真实指针位置。
+    const trackPointer = (event: PointerEvent) => {
+      nativePointerRef.current = event;
+      if (lastCursorRef.current && event.pointerId === activePointerIdRef.current) {
+        lastCursorRef.current = cursorFromEvent(event);
+      }
     };
-  };
+    document.addEventListener("pointermove", trackPointer, true);
+    document.addEventListener("pointerup", trackPointer, true);
+    return () => {
+      document.removeEventListener("pointermove", trackPointer, true);
+      document.removeEventListener("pointerup", trackPointer, true);
+    };
+  }, []);
   const pointerInsideSourceWindow = (cursor: {
     clientX: number;
     clientY: number;
@@ -102,7 +126,10 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     cursor.clientY <= window.innerHeight + 8;
   const handleTabDragStart = (event: DragStartEvent) => {
     activateWorkspace();
-    updateDragCursor(event);
+    const latest = nativePointerRef.current;
+    const activator = event.activatorEvent as PointerEvent;
+    activePointerIdRef.current = activator.pointerId;
+    lastCursorRef.current = cursorFromEvent(latest?.pointerId === activator.pointerId ? latest : activator);
     const pointer = readDragPointer(event.activatorEvent);
     const el = document.querySelector<HTMLElement>(
       `[data-tab-id="${String(event.active.id)}"]`,
@@ -112,9 +139,9 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     }
   };
   const handleTabDragMove = (event: DragMoveEvent) => {
-    updateDragCursor(event);
     const cursor = lastCursorRef.current;
-    if (!canDockTabs || !cursor || pointerInsideSourceWindow(cursor)) return;
+    const tab = openTabs.find((item) => item.id === event.active.id);
+    if (!canDockTabs || !tab || !canTransferTab(tab) || !cursor || pointerInsideSourceWindow(cursor)) return;
     if (previewFrameRef.current) return;
     previewFrameRef.current = window.requestAnimationFrame(() => {
       previewFrameRef.current = 0;
@@ -124,6 +151,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     });
   };
   const handleTabDragCancel = () => {
+    activePointerIdRef.current = null;
     lastCursorRef.current = null;
     if (previewFrameRef.current) {
       window.cancelAnimationFrame(previewFrameRef.current);
@@ -140,6 +168,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     reorderTabs(from, to);
   };
   const handleTabDragEnd = (event: DragEndEvent) => {
+    activePointerIdRef.current = null;
     const cursor = lastCursorRef.current;
     lastCursorRef.current = null;
     if (previewFrameRef.current) {
@@ -150,6 +179,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     const stayInside =
       !canDockTabs ||
       !tab ||
+      !canTransferTab(tab) ||
       !cursor ||
       pointerInsideSourceWindow(cursor);
     if (stayInside) {
@@ -176,7 +206,8 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     : isElectronRuntime()
       ? formatShortcut("Mod+W")
       : "";
-  const canOpenInNewWindow = isElectronRuntime();
+  const canOpenInNewWindow = (tab: TabItem) => isElectronRuntime() && canTransferTab(tab);
+  const visibleTabOrder = JSON.stringify(visibleTabs.map((tab) => tab.id));
 
   useEffect(() => {
     const scroller = tabsScrollerRef.current;
@@ -190,16 +221,22 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     scrollActiveIntoView();
     const observer = new ResizeObserver(scrollActiveIntoView);
     observer.observe(scroller);
+    scroller.querySelectorAll<HTMLElement>("[data-tab-id]").forEach((tab) => observer.observe(tab));
     return () => observer.disconnect();
-  }, [activeTabId, visibleTabs.length]);
+  }, [activeTabId, visibleTabOrder]);
 
-  const handleTabsWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
+  useEffect(() => {
     const scroller = tabsScrollerRef.current;
     if (!scroller) return;
-    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-    scroller.scrollLeft += event.deltaY;
-    event.preventDefault();
-  };
+    const handleWheel = (event: WheelEvent) => {
+      if (scroller.scrollWidth <= scroller.clientWidth || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientWidth : 1);
+      scroller.scrollLeft += delta;
+      event.preventDefault();
+    };
+    scroller.addEventListener("wheel", handleWheel, { passive: false });
+    return () => scroller.removeEventListener("wheel", handleWheel);
+  }, []);
 
   const handleTabListKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -223,6 +260,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
   };
 
   const openTabInNewWindow = async (tab: TabItem) => {
+    if (!canOpenInNewWindow(tab)) return;
     activateWorkspace();
     const created = await createDesktopWindow({
       mode: "currentTab",
@@ -245,7 +283,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     handleTabDragEnd, closeTabShortcutLabel,
     canOpenInNewWindow, setActiveTab, closeTab,
     togglePinTab, promotePreviewTab, locateInTree,
-    openTabInNewWindow, handleTabsWheel, handleTabListKeyDown,
+    openTabInNewWindow, handleTabListKeyDown,
     openTabs,
   };
 }

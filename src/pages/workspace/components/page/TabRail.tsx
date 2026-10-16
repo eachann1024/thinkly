@@ -34,17 +34,19 @@ export function TabRail({
     handleTabDragEnd, closeTabShortcutLabel,
     canOpenInNewWindow, setActiveTab, closeTab,
     togglePinTab, promotePreviewTab, locateInTree,
-    openTabInNewWindow, handleTabsWheel, handleTabListKeyDown,
+    openTabInNewWindow, handleTabListKeyDown,
     openTabs,
   } = useTabRail({ variant, onBeforeActivateTab });
 
   const tabItems = (
     <>
-      {visibleTabs.map((tab) => {
+      {visibleTabs.map((tab, visibleIndex) => {
         const displayPageId = tabRailPageId(tab, focusedPageByTabId);
         const tabPage =
           tab.type === "welcome" ? undefined : getPage(displayPageId);
-        const visibleIndex = visibleTabs.findIndex((t) => t.id === tab.id);
+        const closableOtherTabs = visibleTabs.filter((item) => item.id !== tab.id && !item.pinned);
+        const closableLeftTabs = visibleTabs.slice(0, visibleIndex).filter((item) => !item.pinned);
+        const closableRightTabs = visibleTabs.slice(visibleIndex + 1).filter((item) => !item.pinned);
         return (
           <SortableTabItem
             key={tab.id}
@@ -56,9 +58,9 @@ export function TabRail({
               activeTabId === tab.id &&
               !(aiPanelOpen && isFullscreenAiLayout(aiLayoutMode))
             }
-            hasLeftTabs={visibleIndex > 0}
-            hasRightTabs={visibleIndex < visibleTabs.length - 1}
-            hasOtherTabs={visibleTabs.length > 1}
+            hasLeftTabs={closableLeftTabs.length > 0}
+            hasRightTabs={closableRightTabs.length > 0}
+            hasOtherTabs={closableOtherTabs.length > 0}
             closeTabShortcutLabel={closeTabShortcutLabel}
             dragEnabled={dragEnabled}
             onActivate={() => {
@@ -68,27 +70,21 @@ export function TabRail({
             onClose={() => { activateWorkspace(); closeTab(tab.id); }}
             onCloseOthers={() => {
               activateWorkspace();
-              visibleTabs
-                .filter((item) => item.id !== tab.id)
-                .forEach((item) => closeTab(item.id));
+              closableOtherTabs.forEach((item) => closeTab(item.id));
             }}
             onCloseLeft={() => {
               activateWorkspace();
-              visibleTabs
-                .slice(0, visibleIndex)
-                .forEach((item) => closeTab(item.id));
+              closableLeftTabs.forEach((item) => closeTab(item.id));
             }}
             onCloseRight={() => {
               activateWorkspace();
-              visibleTabs
-                .slice(visibleIndex + 1)
-                .forEach((item) => closeTab(item.id));
+              closableRightTabs.forEach((item) => closeTab(item.id));
             }}
             onTogglePin={() => togglePinTab(tab.id)}
             onPromotePreview={() => promotePreviewTab(tab.id)}
             onLocateInTree={() => locateInTree(displayPageId)}
             onOpenInNewWindow={
-              canOpenInNewWindow ? () => void openTabInNewWindow(tab) : undefined
+              canOpenInNewWindow(tab) ? () => void openTabInNewWindow(tab) : undefined
             }
           />
         );
@@ -106,7 +102,6 @@ export function TabRail({
           "relative @container min-w-0 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           tabRailListClassName(visibleTabs.length),
         )}
-        onWheel={handleTabsWheel}
         onKeyDown={handleTabListKeyDown}
         onDoubleClick={(e) => {
           if (variant === "electron-titlebar") return;
