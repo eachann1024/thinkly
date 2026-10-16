@@ -85,9 +85,7 @@ export function renderItem({
     />
   );
 
-  // 默认拖拽快照是整行 DOM（带选中背景的大块），跟随鼠标时会盖住目标行的
-  // 拖入高亮，让人误以为不能拖成子页面。换成紧凑的"图标+标题"小胶囊，
-  // 并弱化源行，让落点反馈始终可见。
+  // 文件不显示跟随鼠标的标签，仅由目标区域提示落点；文件夹保留目录拖动快照。
   const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
     if (!e.dataTransfer) return;
     // startDragging 会同步选中源行；先标记拖拽，避免选中回调打开笔记。
@@ -110,20 +108,26 @@ export function renderItem({
       e.dataTransfer.effectAllowed = "copyMove";
     }
 
-    const ghost = document.createElement("div");
-    ghost.className = "main-tree-drag-ghost";
     const rowEl = (e.currentTarget as HTMLElement)
       .closest("li")
       ?.querySelector(".main-tree-row");
-    // 跳过折叠箭头，取页面图标本体
-    const iconSvg = rowEl?.querySelector(".main-tree-row-icon-slot svg");
-    if (iconSvg) ghost.appendChild(iconSvg.cloneNode(true));
-    const label = document.createElement("span");
-    label.textContent = title || "无标题";
-    ghost.appendChild(label);
-    document.body.appendChild(ghost);
-    e.dataTransfer.setDragImage(ghost, 18, 17);
-    window.setTimeout(() => ghost.remove(), 0);
+    const ghost = document.createElement("canvas");
+    ghost.width = ghost.height = 1;
+    const folderGhost = page.isFolder ? document.createElement("div") : null;
+    if (folderGhost) {
+      folderGhost.className = "main-tree-drag-ghost";
+      const iconSvg = rowEl?.querySelector(".main-tree-row-icon-slot svg");
+      if (iconSvg) folderGhost.appendChild(iconSvg.cloneNode(true));
+      const label = document.createElement("span");
+      label.textContent = title || "无标题";
+      folderGhost.appendChild(label);
+    }
+    const dragImage = folderGhost ?? ghost;
+    dragImage.style.position = "fixed";
+    dragImage.style.top = "-1000px";
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, folderGhost ? 18 : 0, folderGhost ? 17 : 0);
+    window.setTimeout(() => dragImage.remove(), 0);
 
     if (rowEl instanceof HTMLElement) {
       rowEl.classList.add("main-tree-row--dragging", "main-tree-row--selected");
