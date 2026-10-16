@@ -71,7 +71,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
       </PopoverTrigger>
       <PopoverContent
         side="top"
-        align="end"
+        align="center"
         sideOffset={6}
         collisionPadding={12}
         className="notebook-ai-model-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-2"
