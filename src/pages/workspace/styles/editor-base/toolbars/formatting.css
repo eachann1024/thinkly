@@ -39,7 +39,8 @@
     color var(--goose-control-motion-duration) ease-out;
 }
 
-[data-formatting-toolbar] .goose-formatting-toolbar-control svg {
+[data-formatting-toolbar] .goose-formatting-toolbar-control svg,
+[data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat svg {
   width: var(--goose-control-icon-size);
   height: var(--goose-control-icon-size);
 }
@@ -121,7 +122,9 @@
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-control
-  svg {
+  svg,
+[data-formatting-toolbar][data-goose-floating-toolbar="true"]
+  .goose-formatting-toolbar-add-to-chat svg {
   width: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
   height: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
 }
