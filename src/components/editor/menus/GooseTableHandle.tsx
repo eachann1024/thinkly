@@ -5,10 +5,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/editor/ui/dropdown-menu";
-import { EditorMenuSection, EditorMenuHeader, EditorSubmenuTrigger } from "@/components/editor/ui/vendor-menu";
+import { EditorSubmenuTrigger } from "@/components/editor/ui/vendor-menu";
 import { editTableDimension, hasMergedTableCells } from "./tableMenuActions";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { getTableDeletionLabel } from "./tableDeletion";
@@ -63,30 +62,23 @@ export function GooseTableHandle({
         </EditorAction>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        editorContext
         variant="menu"
         className="goose-table-menu"
         side={isRow ? "right" : "bottom"}
         align="start"
       >
-        <EditorMenuSection data-goose-menu-slot="group" className="goose-list-group" aria-label={`第 ${index + 1} ${isRow ? "行" : "列"}`}>
-          <EditorMenuHeader className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
-            第 {index + 1} {isRow ? "行" : "列"}
-          </EditorMenuHeader>
-          <DropdownMenuItem
-            onSelect={() => runMenuAction(() => insertDimension(true))}
-          >
-            {isRow ? <GooseIcons.ArrowUp /> : <GooseIcons.ArrowLeft />}{" "}
-            {isRow ? "在上方插入行" : "在左侧插入列"}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => runMenuAction(() => insertDimension(false))}
-          >
-            {isRow ? <GooseIcons.ArrowDown /> : <GooseIcons.ArrowRight />}{" "}
-            {isRow ? "在下方插入行" : "在右侧插入列"}
-          </DropdownMenuItem>
-        </EditorMenuSection>
-        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => runMenuAction(() => insertDimension(true))}
+        >
+          {isRow ? <GooseIcons.ArrowUp /> : <GooseIcons.ArrowLeft />}{" "}
+          {isRow ? "在上方插入行" : "在左侧插入列"}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => runMenuAction(() => insertDimension(false))}
+        >
+          {isRow ? <GooseIcons.ArrowDown /> : <GooseIcons.ArrowRight />}{" "}
+          {isRow ? "在下方插入行" : "在右侧插入列"}
+        </DropdownMenuItem>
         <DropdownMenuItem
           disabled={hasMergedTableCells(state.block.content)}
           aria-describedby={
@@ -118,7 +110,6 @@ export function GooseTableHandle({
         >
           <GooseIcons.Eraser /> 清空内容
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <GooseTableColorMenu
           editor={editor}
           blockId={state.block.id}
@@ -126,31 +117,18 @@ export function GooseTableHandle({
           index={index}
           onAction={runMenuAction}
         />
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="goose-menu-item-danger"
-          onSelect={handleDelete}
-        >
-          <GooseIcons.Trash2 />{" "}
-          {deletionSnapshot
-            ? getTableDeletionLabel(deletionSnapshot.plan)
-            : isRow
-              ? "删除行"
-              : "删除列"}
-        </DropdownMenuItem>
         {features.tablePresentationControls && (
           <>
-            <DropdownMenuSeparator />
             <EditorSubmenuTrigger>
               <DropdownMenuItem textValue="表格选项">
                 <GooseIcons.Table2 /> 表格选项{" "}
                 <GooseIcons.ChevronRight className="ml-auto" />
               </DropdownMenuItem>
               <DropdownMenuContent
-                editorContext
                 variant="menu"
                 className="goose-table-menu"
                 side="right"
+                sideOffset={2}
               >
                 {(["headerRows", "headerCols"] as const).map((key) => (
                   <DropdownMenuItem
@@ -184,6 +162,17 @@ export function GooseTableHandle({
             </EditorSubmenuTrigger>
           </>
         )}
+        <DropdownMenuItem
+          className="text-foreground dark:text-foreground focus:text-[var(--goose-color-danger-focus)] focus:bg-[var(--goose-color-danger-subtle-bg)]"
+          onSelect={handleDelete}
+        >
+          <GooseIcons.Trash2 />{" "}
+          {deletionSnapshot
+            ? getTableDeletionLabel(deletionSnapshot.plan)
+            : isRow
+              ? "删除行"
+              : "删除列"}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

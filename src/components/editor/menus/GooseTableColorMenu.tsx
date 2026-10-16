@@ -29,10 +29,10 @@ export function GooseTableColorMenu({
         <GooseIcons.ChevronRight className="ml-auto" />
       </DropdownMenuItem>
       <DropdownMenuContent
-        editorContext
         variant="menu"
         className="goose-table-menu goose-table-color-menu"
         side="right"
+        sideOffset={2}
       >
         {(["textColor", "backgroundColor"] as const).map((property) => {
           const selectedColor = tableDimensionColor(
