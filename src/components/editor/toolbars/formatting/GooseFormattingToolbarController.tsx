@@ -16,6 +16,7 @@ import {
   rememberFormattingToolbarRect,
 } from "@/components/editor/utils/formattingToolbarReference";
 import { getFormattingSelectionMode } from "./helpers";
+import { OverlayLayerProvider, useOverlayLayer } from "@/components/ui/overlay-layer";
 
 type GooseFormattingToolbarControllerProps = {
   formattingToolbar: FC<FormattingToolbarProps>;
@@ -40,6 +41,7 @@ export function GooseFormattingToolbarController({
   open: openProp,
 }: GooseFormattingToolbarControllerProps) {
   const editor = useBlockNoteEditor();
+  const layer = useOverlayLayer("toolbar");
   const formattingToolbar = useExtension(FormattingToolbarExtension, {
     editor,
   });
@@ -122,15 +124,17 @@ export function GooseFormattingToolbarController({
         ...propsFloatingUIOptions?.focusManagerProps,
       },
       elementProps: {
-        style: {
-          zIndex: 40,
-        },
         ...propsFloatingUIOptions?.elementProps,
+        style: {
+          ...propsFloatingUIOptions?.elementProps?.style,
+          zIndex: layer,
+        },
       },
     };
-  }, [show, propsFloatingUIOptions, formattingToolbar.store, editor]);
+  }, [show, propsFloatingUIOptions, formattingToolbar.store, editor, layer]);
 
   return (
+    <OverlayLayerProvider layer={layer}>
     <GenericPopover
       reference={reference}
       portalElement={portalElement}
@@ -138,5 +142,6 @@ export function GooseFormattingToolbarController({
     >
       {show ? <Component /> : null}
     </GenericPopover>
+    </OverlayLayerProvider>
   );
 }

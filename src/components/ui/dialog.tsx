@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { Button } from "./button";
 import { IconButton } from "./icon-button";
+import { OverlayLayerProvider, useModalLayer } from "./overlay-layer";
 
 type DialogProps = React.PropsWithChildren<{
   open?: boolean;
@@ -91,18 +92,23 @@ const DialogOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ModalOverlay>
 >(({ className, ...props }, ref) => {
   const { open, setOpen } = useDialogState();
+  const layer = useModalLayer(open);
   return (
+    <OverlayLayerProvider layer={layer}>
     <ModalOverlay
       {...props}
       ref={ref}
       isOpen={open}
       isDismissable
       onOpenChange={setOpen}
+      data-goose-layer={layer}
+      style={{ ...props.style, zIndex: layer }}
       className={cn(
-        "fixed inset-0 z-[100] bg-black/30 backdrop-blur-[1px]",
+        "fixed inset-0 bg-black/30 backdrop-blur-[1px]",
         className,
       )}
     />
+    </OverlayLayerProvider>
   );
 });
 interface DialogContentProps extends Omit<
@@ -124,7 +130,7 @@ const DialogContent = React.forwardRef<HTMLElement, DialogContentProps>(
           ref={ref}
           aria-describedby={props["aria-describedby"] ?? descriptionId}
           className={cn(
-            "fixed left-[50%] top-[50%] z-[100] goose-dialog-surface grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] outline-none",
+            "fixed left-[50%] top-[50%] z-0 goose-dialog-surface grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] outline-none",
             className,
           )}
         >

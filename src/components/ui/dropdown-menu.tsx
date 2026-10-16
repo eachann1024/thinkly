@@ -2,6 +2,7 @@ import * as React from "react";
 import { Dropdown, Popover as HeroPopover, Separator } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
+import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
 
 type DropdownVariant = "dropdown" | "menu";
 const DropdownVariantContext = React.createContext<DropdownVariant>("dropdown");
@@ -80,8 +81,11 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
     ref,
   ) => {
     const isMenu = variant === "menu";
+    const layer = useOverlayLayer("menu");
+    const topLayer = useOverlayTopLayer(layer);
     const surfaceOnInner = Boolean(editorContext && isMenu);
     return (
+      <OverlayLayerProvider layer={layer}>
       <DropdownVariantContext.Provider value={variant}>
         <Dropdown.Popover
           {...props}
@@ -97,8 +101,10 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
                 : `${side} ${align === "start" ? "top" : "bottom"}`
           }
           data-goose-floating-content=""
+          data-goose-layer={layer}
+          data-react-aria-top-layer={topLayer || undefined}
           className={cn(
-            "z-[20000] min-w-[9.5rem] outline-none",
+            "min-w-[9.5rem] outline-none",
             !surfaceOnInner && "max-h-[var(--available-height)] overflow-y-auto",
             surfaceOnInner
               ? "goose-dropdown-host"
@@ -107,7 +113,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
                 : "goose-floating-surface p-1.5 text-popover-foreground",
             !editorContext && className,
           )}
-          style={props.style}
+          style={{ ...props.style, zIndex: layer }}
         >
           <Dropdown.Menu
             data-goose-menu-slot="root"
@@ -125,6 +131,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
           </Dropdown.Menu>
         </Dropdown.Popover>
       </DropdownVariantContext.Provider>
+      </OverlayLayerProvider>
     );
   },
 );

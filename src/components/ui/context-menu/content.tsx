@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { floatingMenuMotionStyle } from "../floating-menu-motion";
 
 import { useMenu } from "./state";
+import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "../overlay-layer";
 
 type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   editorContext?: boolean;
@@ -28,6 +29,8 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
     forwardedRef,
   ) => {
     const state = useMenu();
+    const layer = useOverlayLayer("menu");
+    const topLayer = useOverlayTopLayer(layer);
     const ref = useMergeRefs([forwardedRef, state.refs.setFloating]);
     const callback = React.useRef(onCloseAutoFocus);
     callback.current = onCloseAutoFocus;
@@ -47,6 +50,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
     const surface =
       "goose-menu-surface min-w-[9.5rem] max-h-[calc(100dvh-16px)] overflow-y-auto overscroll-contain p-1 text-popover-foreground";
     return (
+      <OverlayLayerProvider layer={layer}>
       <FloatingPortal>
         <FloatingFocusManager
           context={state.context}
@@ -71,15 +75,18 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             data-side={state.placement.split("-")[0]}
             data-motion={state.motionMode}
             data-goose-floating-content=""
+            data-goose-layer={layer}
+            data-react-aria-top-layer={topLayer || undefined}
             data-goose-menu-slot={!editorContext ? "root" : undefined}
             className={cn(
-              "z-[20000] outline-none",
+              "outline-none",
               !editorContext && surface,
               !editorContext && className,
             )}
             style={{
               ...state.floatingStyles,
               ...style,
+              zIndex: layer,
               ...floatingMenuMotionStyle(
                 state.status,
                 state.placement,
@@ -104,6 +111,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
           </div>
         </FloatingFocusManager>
       </FloatingPortal>
+      </OverlayLayerProvider>
     );
   },
 );

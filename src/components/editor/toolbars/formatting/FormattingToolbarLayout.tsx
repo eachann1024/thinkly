@@ -105,7 +105,7 @@ export function FormattingToolbarLayout({
           // 导致 Portal 色板 / tooltip 错位（只露出「文本颜色」标题）。
           !isQuickNoteSurface && "goose-formatting-toolbar-scaled",
           selectionModeClass,
-          "z-[20000] transition-[opacity,transform,width] duration-150 ease-out",
+          "transition-[opacity,transform,width] duration-150 ease-out",
           aiActive ? "w-[520px] max-w-[calc(100vw-24px)]" : "w-auto",
         )}
         style={{

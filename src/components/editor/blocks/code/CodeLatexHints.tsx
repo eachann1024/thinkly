@@ -3,6 +3,7 @@ import { useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const LATEX_SNIPPETS = [
   { label: "分数", code: "\\frac{a}{b}" },
@@ -39,23 +40,36 @@ export function CodeLatexHints({
     <>
       {/* LaTeX hint panel */}
       {!collapsed && language === "math" && isEditable && (
-        <div className="absolute bottom-2 right-2 z-20">
-          <Button
-            aria-label="LaTeX 语法参考"
-            aria-expanded={showLatexHint}
-            data-state={showLatexHint ? "open" : "closed"}
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowLatexHint(!showLatexHint)}
-            className={cn(
-              "h-6 w-6 p-0 rounded-md",
-              "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)]",
-            )}
-          >
-            <GooseIcons.HelpCircle className="h-3.5 w-3.5" />
-          </Button>
-          {showLatexHint && (
-            <div className="absolute bottom-8 right-0 z-30 w-[420px] max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-3 shadow-lg">
+        <div
+          className="absolute bottom-2 right-2 z-20"
+          contentEditable={false}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <Popover open={showLatexHint} onOpenChange={setShowLatexHint}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                aria-label="LaTeX 语法参考"
+                aria-expanded={showLatexHint}
+                data-state={showLatexHint ? "open" : "closed"}
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-6 w-6 p-0 rounded-md",
+                  "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)]",
+                )}
+              >
+                <GooseIcons.HelpCircle className="h-3.5 w-3.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              editorContext
+              side="top"
+              align="end"
+              className="w-[420px] max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-3 shadow-lg"
+              aria-label="LaTeX 语法参考"
+              manageFocus={false}
+            >
               <div className="flex items-center justify-between border-b pb-2 mb-2">
                 <span className="text-xs font-semibold">LaTeX 语法参考</span>
                 <EditorAction
@@ -85,8 +99,8 @@ export function CodeLatexHints({
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            </PopoverContent>
+          </Popover>
         </div>
       )}
     </>

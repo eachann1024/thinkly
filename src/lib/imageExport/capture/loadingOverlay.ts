@@ -1,3 +1,5 @@
+import { UI_LAYERS } from "@/lib/uiLayers";
+
 // ── Loading Overlay ────────────────────────────────────────────
 export function createLoadingOverlay(): HTMLElement {
   document
@@ -6,8 +8,10 @@ export function createLoadingOverlay(): HTMLElement {
 
   const overlay = document.createElement("div");
   overlay.id = "goose-image-export-loading";
+  overlay.dataset.reactAriaTopLayer = "";
+  overlay.dataset.gooseLayer = String(UI_LAYERS.busy);
   overlay.style.cssText = `
-    position:fixed;inset:0;z-index:9999;
+    position:fixed;inset:0;z-index:${UI_LAYERS.busy};
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:rgba(8,8,14,0.6);
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);

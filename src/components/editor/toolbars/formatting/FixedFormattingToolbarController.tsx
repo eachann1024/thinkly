@@ -1,6 +1,7 @@
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { type FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { OverlayLayerProvider, useOverlayLayer } from "@/components/ui/overlay-layer";
 import { useFormattingToolbarAi } from "@/components/editor/state/formattingToolbarAi";
 import { FormattingToolbarExtension } from "@blocknote/core/extensions";
 import {
@@ -23,6 +24,7 @@ export function FixedFormattingToolbarController({
   open,
 }: FixedFormattingToolbarControllerProps) {
   const editor = useBlockNoteEditor();
+  const layer = useOverlayLayer("toolbar");
   const inlineAiActive = useFormattingToolbarAi((state) => state.active && state.owner === editor);
   const formattingToolbar = useExtension(FormattingToolbarExtension, {
     editor,
@@ -89,10 +91,12 @@ export function FixedFormattingToolbarController({
   if (!visible || typeof document === "undefined") return null;
 
   return createPortal(
+    <OverlayLayerProvider layer={layer}>
     <div
       data-goose-formatting-toolbar-dock
-      className="goose-formatting-toolbar-dock pointer-events-none fixed inset-x-0 z-[20000] flex transition-[opacity,transform,bottom] duration-150 ease-out"
+      className="goose-formatting-toolbar-dock pointer-events-none fixed inset-x-0 flex transition-[opacity,transform,bottom] duration-150 ease-out"
       style={{
+        zIndex: layer,
         bottom: `calc(${keyboardOffset}px + env(safe-area-inset-bottom, 0px))`,
       }}
       onPointerEnter={() => setHovered(true)}
@@ -101,7 +105,8 @@ export function FixedFormattingToolbarController({
       <div className="pointer-events-auto w-full min-w-0">
         <Component />
       </div>
-    </div>,
+    </div>
+    </OverlayLayerProvider>,
     document.body,
   );
 }

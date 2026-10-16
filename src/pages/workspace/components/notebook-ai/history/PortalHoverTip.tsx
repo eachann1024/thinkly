@@ -7,6 +7,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { TOOLTIP_DELAY_MS } from "@/components/ui/tooltip-delay";
+import { useOverlayLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
 /**
  * Dropdown / 溢出容器内 Radix Tooltip 常被 pointer 捕获拦掉。
  * 用 body portal + 固定定位，延迟与全局 Tooltip 一致。
@@ -21,6 +22,8 @@ export function PortalHoverTip({
     onMouseLeave: () => void;
   }) => ReactNode;
 }) {
+  const layer = useOverlayLayer("tooltip");
+  const topLayer = useOverlayTopLayer(layer);
   const [tip, setTip] = useState<{ top: number; left: number } | null>(null);
   const showTimerRef = useRef<number>(0);
 
@@ -58,8 +61,10 @@ export function PortalHoverTip({
         ? createPortal(
             <div
               role="tooltip"
-              className="pointer-events-none fixed z-[30000] max-w-xs select-none whitespace-normal break-words rounded-control border border-border/80 bg-popover px-2.5 py-1.5 text-[12px] font-medium leading-snug text-popover-foreground shadow-[var(--goose-menu-shadow)]"
-              style={{ top: tip.top, left: tip.left }}
+              data-goose-layer={layer}
+              data-react-aria-top-layer={topLayer || undefined}
+              className="pointer-events-none fixed max-w-xs select-none whitespace-normal break-words rounded-control border border-border/80 bg-popover px-2.5 py-1.5 text-[12px] font-medium leading-snug text-popover-foreground shadow-[var(--goose-menu-shadow)]"
+              style={{ top: tip.top, left: tip.left, zIndex: layer }}
             >
               {content}
             </div>,

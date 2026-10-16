@@ -9,6 +9,7 @@ import { useLightboxSlides } from "./useLightboxSlides";
 import { useLightboxActions } from "./useLightboxActions";
 import { useSelectedImage } from "./useSelectedImage";
 import type { ImageLightboxProps } from "./lightboxTypes";
+import { OverlayLayerProvider, useModalLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
 
 export function ImageLightbox({
   editor,
@@ -24,6 +25,13 @@ export function ImageLightbox({
     currentSlide,
     openLightboxAtImage,
   } = useLightboxSlides(editorContainerRef);
+  const layer = useModalLayer(open);
+  const topLayer = useOverlayTopLayer(layer);
+  const portalContainer = {
+    style: { zIndex: layer },
+    "data-react-aria-top-layer": topLayer || undefined,
+    "data-goose-layer": layer,
+  };
   const actions = useLightboxActions(editor, editorContainerRef, currentSlide);
   const { handleDownload, handleCopy } = actions;
   const {
@@ -61,6 +69,7 @@ export function ImageLightbox({
         />
       )}
       {slides.length > 0 && (
+        <OverlayLayerProvider layer={layer}>
         <Lightbox
           open={open}
           close={() => setOpen(false)}
@@ -87,6 +96,7 @@ export function ImageLightbox({
           controller={{ closeOnBackdropClick: true, closeOnPullDown: true }}
           animation={{ fade: 220, swipe: 280 }}
           className="goose-image-lightbox"
+          portal={{ container: portalContainer }}
           toolbar={{
             buttons: [
               <div key="title" className="goose-image-lightbox-title">
@@ -141,6 +151,7 @@ export function ImageLightbox({
           }}
           on={{ view: ({ index: newIndex }) => setIndex(newIndex) }}
         />
+        </OverlayLayerProvider>
       )}
     </>
   );

@@ -40,8 +40,8 @@ function ActiveFullscreenPreview({
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
-    <DialogContent hideClose overlayClassName="goose-code-preview-modal-overlay !z-[22000] !bg-transparent !backdrop-blur-none"
-      style={{ position: "fixed", inset: 0, transform: "none", maxWidth: "none", padding: 0, display: "flex", borderRadius: 0 }}
+    <DialogContent hideClose overlayClassName="goose-code-preview-modal-overlay !bg-transparent !backdrop-blur-none"
+      style={{ position: "fixed", inset: 0, transform: "none", translate: "none", maxWidth: "none", padding: 0, display: "flex", borderRadius: 0 }}
       className="goose-code-preview-lightbox"
       aria-label={title}
     >
