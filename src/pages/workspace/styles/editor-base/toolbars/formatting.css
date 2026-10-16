@@ -40,7 +40,7 @@
 }
 
 [data-formatting-toolbar] .goose-formatting-toolbar-control svg,
-[data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat svg {
+[data-formatting-toolbar] :is(.goose-formatting-toolbar-add-to-chat, .goose-formatting-toolbar-text-control) svg {
   width: var(--goose-control-icon-size);
   height: var(--goose-control-icon-size);
 }
@@ -76,7 +76,7 @@
   white-space: nowrap;
 }
 
-[data-formatting-toolbar] .goose-formatting-toolbar-add-to-chat {
+[data-formatting-toolbar] :is(.goose-formatting-toolbar-add-to-chat, .goose-formatting-toolbar-text-control) {
   display: inline-flex;
   height: var(--formatting-control-size);
   min-height: var(--formatting-control-size);
@@ -110,7 +110,7 @@
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-control,
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
-  .goose-formatting-toolbar-add-to-chat {
+  :is(.goose-formatting-toolbar-add-to-chat, .goose-formatting-toolbar-text-control) {
   border-radius: calc(var(--goose-control-radius) * var(--editor-ui-scale, 1));
 }
 
@@ -118,7 +118,7 @@
   .goose-formatting-toolbar-control
   svg,
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
-  .goose-formatting-toolbar-add-to-chat svg {
+  :is(.goose-formatting-toolbar-add-to-chat, .goose-formatting-toolbar-text-control) svg {
   width: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
   height: calc(var(--goose-control-icon-size) * var(--editor-ui-scale, 1));
 }
@@ -132,7 +132,7 @@
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-summary,
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
-  .goose-formatting-toolbar-add-to-chat {
+  :is(.goose-formatting-toolbar-add-to-chat, .goose-formatting-toolbar-text-control) {
   font-size: calc(13px * var(--editor-ui-scale, 1));
   padding-inline: calc(6px * var(--editor-ui-scale, 1));
 }

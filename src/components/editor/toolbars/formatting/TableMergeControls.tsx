@@ -14,9 +14,9 @@ export function TableMergeControls({ editor }: { editor: BlockNoteEditor<any, an
   const split = splitCell(state);
   if (!merge && !split) return null;
   const label = merge ? "合并单元格" : "拆分单元格";
-  return <EditorAction type="button" className="goose-formatting-toolbar-button px-2"
+  return <EditorAction type="button" className="goose-formatting-toolbar-text-control"
     aria-label={label} title={label}
     onClick={() => { editor.exec(merge ? mergeCells : splitCell); editor.focus(); }}>
-    <Table2 className="h-4 w-4" /><span className="ml-1 text-sm">{label}</span>
+    <Table2 aria-hidden="true" /><span>{label}</span>
   </EditorAction>;
 }
