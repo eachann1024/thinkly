@@ -1,0 +1,139 @@
+/* Claude：平涂暖纸面 + 陶土强调，只覆盖颜色。 */
+:root[data-goose-accent="claude"] {
+  --goose-callout-accent: #c6613f;
+  --goose-ai-approval-check-bg: #c6613f;
+  --goose-accent-link: var(--goose-text-link);
+  --goose-accent-link-hover: var(--goose-text-link);
+  --goose-accent-focus: #c6613f;
+  --goose-accent-drag-line: #c6613f;
+  --goose-accent-drag-glow: none;
+  --goose-primary-hover-bg: var(--goose-interactive-hover);
+  --goose-primary-active-bg: var(--goose-interactive-selected);
+  --goose-icon-chip-on-selected: var(--goose-interactive-selected);
+}
+
+html:root:not(.dark)[data-goose-accent="claude"] {
+  --primary: 15.111 54.217% 51.176%;
+  --primary-foreground: var(--goose-text-on-dark-channels);
+  --ring: 15.111 54.217% 51.176%;
+  --goose-text-primary: #1f1e1d;
+  --goose-text-secondary: #6b6a64;
+  --goose-text-disabled: #9c9a92;
+  --goose-text-placeholder: #9c9a92;
+  --goose-text-link: #3f6d88;
+  --goose-text-primary-channels: 30 3.333% 11.765%;
+  --goose-text-secondary-channels: 51.429 3.382% 40.588%;
+  --foreground: var(--goose-text-primary-channels);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --secondary-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+  --muted-foreground: var(--goose-text-secondary-channels);
+  --goose-nav-title: var(--muted-foreground);
+  --goose-shell-bg: 48 25% 92.157%;
+  --goose-editor-bg: 48 33.333% 97.059%;
+  --popover: 45 50% 98.431%;
+  --border: 47.143 20.588% 86.667%;
+  --goose-menu-surface: var(--popover);
+  --goose-menu-border: var(--border);
+  --goose-menu-shadow: 0 8px 24px rgba(60, 45, 30, 0.1), 0 1px 3px rgba(60, 45, 30, 0.08);
+  --goose-selected-bg: 47.143 20.588% 86.667%;
+  --goose-shell-surface: #f0eee6;
+  --goose-sidebar-surface: #f5f4ee;
+  --goose-editor-surface: #faf9f5;
+  --goose-ai-surface: #f5f4ee;
+  --goose-secondary-surface: var(--goose-ai-surface);
+  --goose-input-surface: #faf9f5;
+  --goose-interactive-selected: #f4e6dd;
+  --goose-interactive-hover: #ebe8df;
+  --goose-sidebar-hover: #ebe8df;
+  --goose-inline-code-fg: #a4492b;
+  --goose-accent-link: #3f6d88;
+  --goose-accent-link-hover: #3f6d88;
+  --goose-search-hit-bg: #f9e3d7;
+  --goose-block-subtle-bg: #f3f1ea;
+  --goose-block-subtle-border: #e4e1d6;
+  --goose-block-subtle-hover: #ebe8df;
+  --goose-block-subtle-inset: #f7f5ef;
+  --goose-active-line-bg: #f5f3ec;
+  --goose-callout-bg: #f6efe7;
+  --goose-callout-border: #eadfd2;
+}
+
+html:root.dark[data-goose-accent="claude"],
+html:root.dark[data-goose-accent="claude"] .dark:not(:root) {
+  --primary: 14.769 63.107% 59.608%;
+  --primary-foreground: var(--goose-text-on-light-channels);
+  --ring: 14.769 63.107% 59.608%;
+  --goose-text-primary: #f2f0e8;
+  --goose-text-secondary: #a8a59c;
+  --goose-text-disabled: #7c7a73;
+  --goose-text-placeholder: #7c7a73;
+  --goose-text-link: #8ab8d4;
+  --goose-text-primary-channels: 48 27.778% 92.941%;
+  --goose-text-secondary-channels: 45 6.452% 63.529%;
+  --foreground: var(--goose-text-primary-channels);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --secondary-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+  --muted-foreground: var(--goose-text-secondary-channels);
+  --goose-nav-title: var(--muted-foreground);
+  --goose-shell-bg: 30 4% 9.804%;
+  --goose-editor-bg: 60 2.703% 14.51%;
+  --goose-raised-bg: 60 2.128% 18.431%;
+  --popover: 60 2.128% 18.431%;
+  --border: 45 3.571% 21.961%;
+  --goose-menu-surface: var(--popover);
+  --goose-menu-border: var(--border);
+  --goose-menu-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --goose-selected-bg: 45 3.571% 21.961%;
+  --goose-shell-surface: #1a1918;
+  --goose-sidebar-surface: #1f1e1d;
+  --goose-editor-surface: #262624;
+  --goose-ai-surface: #1f1e1d;
+  --goose-secondary-surface: var(--goose-ai-surface);
+  --goose-input-surface: #262624;
+  --goose-interactive-selected: #3a2d27;
+  --goose-interactive-selected-border: #d97757;
+  --goose-interactive-hover: #2d2c2a;
+  --goose-interactive-hover-border: #d97757;
+  --goose-sidebar-hover: #2d2c2a;
+  --goose-control-hover-bg: #2d2c2a;
+  --goose-inline-code-bg: #34322e;
+  --goose-inline-code-fg: #eaa184;
+  --goose-inline-code-border-hover: #d97757;
+  --goose-editor-selection-bg: #5b3b2d;
+  --goose-callout-accent: #d97757;
+  --goose-ai-approval-check-bg: #d97757;
+  --goose-accent-focus: #d97757;
+  --goose-accent-drag-line: #d97757;
+  --goose-accent-link: #8ab8d4;
+  --goose-accent-link-hover: #8ab8d4;
+  --goose-search-hit-bg: #4a3127;
+  --goose-block-subtle-bg: #2d2c29;
+  --goose-block-subtle-border: #3a3936;
+  --goose-block-subtle-hover: #2d2c2a;
+  --goose-block-subtle-inset: #262522;
+  --goose-table-control-hover: #34322e;
+  --goose-active-line-bg: #2a2927;
+  --goose-callout-bg: #2f2925;
+  --goose-callout-border: #3d332c;
+}
+
+/* 搜索命中：浅色底 + 强调描边，与文字选区区分。 */
+:root[data-goose-accent="claude"] .goose-search-session-match,
+:root[data-goose-accent="claude"] .goose-find-match {
+  background-color: var(--goose-search-hit-bg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--goose-accent-solid) 65%, transparent);
+}
+:root[data-goose-accent="claude"] .goose-search-session-match--current,
+:root[data-goose-accent="claude"] .goose-find-match--current {
+  background-color: var(--goose-search-hit-bg);
+  box-shadow: 0 0 0 2px var(--goose-accent-solid);
+}
+:root[data-goose-accent="claude"] .goose-find-match--fading,
+:root[data-goose-accent="claude"] .goose-find-match--fading.goose-find-match--current {
+  background-color: transparent;
+  box-shadow: 0 0 0 1px transparent;
+}
