@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
@@ -8,6 +8,7 @@ import { useCommandSearch, type SearchResultPage } from "../command/useCommandSe
 import { useSearchSession } from "../sidebar/useSearchSession";
 import { useSearchFolderRefresh } from "../sidebar/useSearchFolderRefresh";
 import type { Page } from "@/types";
+import { armSemanticIndexing, kickSemanticIndexing } from "./embedding/semanticIndex";
 
 const EMPTY_PAGES: Record<string, Page> = {};
 
@@ -17,6 +18,8 @@ const isTitleMatch = (page: SearchResultPage) =>
 /** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
 export function useSheetResults() {
   const s = useSearchSession(useShallow(state => ({ open: state.open, query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort })));
+  useEffect(armSemanticIndexing, []);
+  useEffect(() => { if (s.open) kickSemanticIndexing(); }, [s.open]);
   const pages = usePages(state => s.open ? state.pages : EMPTY_PAGES);
   const showRecent = useSettings(state => state.showRecentInSearch);
   const { loading, loadError, retryLoad } = useSearchFolderRefresh(s.open, s.scope);

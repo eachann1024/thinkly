@@ -1,6 +1,7 @@
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getCachedText } from "../command/searchBodyCache";
 import type { Page } from "@/types";
+import { semanticSearch } from "./embedding/semanticSearch";
 
 export interface NoteSource { id: string; title: string; excerpt: string }
 
@@ -28,11 +29,11 @@ function countOf(haystack: string, needle: string) {
 }
 
 /** 取命中最密集的几个窗口拼成摘录，没有命中就取开头。 */
-function excerptOf(text: string, terms: string[]) {
+function excerptOf(text: string, terms: string[], fallback = true) {
   const lower = text.toLowerCase();
   const hits: number[] = [];
   for (const term of terms) for (let i = lower.indexOf(term); i >= 0 && hits.length < 40; i = lower.indexOf(term, i + term.length)) hits.push(i);
-  if (!hits.length) return text.slice(0, EXCERPT_CHARS);
+  if (!hits.length) return fallback ? text.slice(0, EXCERPT_CHARS) : "";
   hits.sort((a, b) => a - b);
   const parts: string[] = [];
   let end = -1, used = 0;
@@ -46,17 +47,17 @@ function excerptOf(text: string, terms: string[]) {
   return parts.join(" … ");
 }
 
+const RRF_K = 60;
+
 /**
  * 参照 Notion Q&A 的检索增强做法：先检索、再只把相关片段交给模型，而不是塞入全部笔记。
- * 关键词搜索的命中排在前面，再用问句拆词对候选页打分补足。
+ * 关键词搜索命中、问句拆词打分、本地向量检索三路结果用 RRF 融合；向量部分不可用时自动退回前两路。
  */
-export function retrieveNotes(question: string, candidates: Page[], ranked: Page[]): NoteSource[] {
+export async function retrieveNotes(question: string, candidates: Page[], ranked: Page[]): Promise<NoteSource[]> {
   const terms = questionTerms(question);
-  const scored = new Map<string, { page: Page; score: number }>();
-  ranked.slice(0, MAX_SOURCES).forEach((page, index) => scored.set(page.id, { page, score: 1000 - index }));
+  const termScores = new Map<string, number>();
   if (terms.length) {
     for (const page of candidates) {
-      if (scored.has(page.id)) continue;
       const title = getPageTitle(page).toLowerCase();
       const body = getCachedText(page).toLowerCase();
       let score = 0, matched = 0;
@@ -64,11 +65,28 @@ export function retrieveNotes(question: string, candidates: Page[], ranked: Page
         const hit = countOf(title, term) * 6 + Math.min(countOf(body, term), 10);
         if (hit) { matched++; score += hit * term.length; }
       }
-      if (matched) scored.set(page.id, { page, score: score * matched / terms.length });
+      if (matched) termScores.set(page.id, score * matched / terms.length);
     }
   }
-  return [...scored.values()].sort((a, b) => b.score - a.score).slice(0, MAX_SOURCES)
-    .map(({ page }) => ({ id: page.id, title: getPageTitle(page), excerpt: excerptOf(getCachedText(page), terms) }));
+  const byId = new Map(candidates.map(page => [page.id, page]));
+  for (const page of ranked) byId.set(page.id, page);
+  const termRank = [...termScores.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+  const vectorHits = await semanticSearch(question, candidates);
+  const fused = new Map<string, number>();
+  const addList = (ids: string[]) => ids.forEach((id, index) => fused.set(id, (fused.get(id) ?? 0) + 1 / (RRF_K + index + 1)));
+  addList(ranked.slice(0, MAX_SOURCES * 2).map(page => page.id));
+  addList(termRank.slice(0, MAX_SOURCES * 2));
+  addList(vectorHits.map(hit => hit.id));
+  const chunkOf = new Map(vectorHits.map(hit => [hit.id, hit.text]));
+  return [...fused.entries()].sort((a, b) => b[1] - a[1])
+    .map(([id]) => byId.get(id)).filter((page): page is Page => Boolean(page)).slice(0, MAX_SOURCES)
+    .map(page => ({ id: page.id, title: getPageTitle(page), excerpt: composeExcerpt(chunkOf.get(page.id), getCachedText(page), terms) }));
+}
+
+function composeExcerpt(chunk: string | undefined, text: string, terms: string[]) {
+  if (!chunk) return excerptOf(text, terms);
+  const extra = excerptOf(text, terms, false);
+  return (extra && !chunk.includes(extra) ? `${chunk} … ${extra}` : chunk).slice(0, EXCERPT_CHARS);
 }
 
 export function buildAnswerPrompt(question: string, sources: NoteSource[]) {

@@ -32,7 +32,9 @@ export function useSheetAnswer() {
     controller.current?.abort();
     const abort = new AbortController();
     controller.current = abort;
-    const sources = retrieveNotes(question, candidates, ranked);
+    setAnswer({ question, sources: [], text: "", status: "loading" });
+    const sources = await retrieveNotes(question, candidates, ranked).catch(() => [] as NoteSource[]);
+    if (abort.signal.aborted) return;
     setAnswer({ question, sources, text: "", status: "loading" });
     const ai = useSettings.getState().ai;
     const modelId = ai.workspaceSelectedModelId?.trim() || ai.selectedModelId;
