@@ -6,15 +6,13 @@ export function normalizeEditorGridMode(value: unknown): EditorGridMode {
   return EDITOR_GRID_MODES.includes(value as EditorGridMode) ? (value as EditorGridMode) : "off";
 }
 
-/** 画布网格与彩色侧栏只写根节点属性，具体绘制由主题变量完成。 */
+/** 画布网格只写根节点属性，具体绘制由主题变量完成。 */
 export function applyEditorCanvasAttributes(options: {
   editorGridMode?: EditorGridMode;
-  sidebarTint?: boolean;
 }): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   const gridMode = normalizeEditorGridMode(options.editorGridMode);
   if (gridMode === "off") root.removeAttribute("data-goose-editor-grid");
   else root.setAttribute("data-goose-editor-grid", gridMode);
-  root.toggleAttribute("data-goose-sidebar-tint", options.sidebarTint === true);
 }

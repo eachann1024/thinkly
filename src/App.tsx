@@ -26,7 +26,7 @@ import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
 function AppearanceSync() {
   const {
     uiFontSize, editorFontSize, editorLineHeight,
-    customFonts, uiFontFamily, editorGridMode, sidebarTint,
+    customFonts, uiFontFamily, editorGridMode,
   } = useSettings(useShallow((state) => ({
       uiFontSize: state.uiFontSize,
       editorFontSize: state.editorFontSize,
@@ -34,7 +34,6 @@ function AppearanceSync() {
       customFonts: state.customFonts,
       uiFontFamily: state.uiFontFamily,
       editorGridMode: state.editorGridMode,
-      sidebarTint: state.sidebarTint,
     })));
   useEffect(() => {
     applyAppearanceScaleVariables({ uiFontSize, editorFontSize, editorLineHeight });
@@ -45,8 +44,8 @@ function AppearanceSync() {
   }, [customFonts, uiFontFamily]);
 
   useEffect(() => {
-    applyEditorCanvasAttributes({ editorGridMode, sidebarTint });
-  }, [editorGridMode, sidebarTint]);
+    applyEditorCanvasAttributes({ editorGridMode });
+  }, [editorGridMode]);
 
   return null;
 }
