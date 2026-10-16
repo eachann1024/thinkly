@@ -231,10 +231,10 @@ export function renderWorkspaceShell(
                 />
               )}
             </div>
-            <SearchSheet aiNotebookId={aiAvailableForNotebook ? aiNotebookId : null} />
           </main>
         </div>
       </div>
+      <SearchSheet aiNotebookId={aiAvailableForNotebook ? aiNotebookId : null} />
     </>
   );
 }

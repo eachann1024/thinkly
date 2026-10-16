@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "@/components/ui/icons";
+import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
@@ -14,6 +15,8 @@ import { AI_ROW_ID, AskAiRow, SearchSheetResults } from "./SearchSheetResults";
 import { SearchSheetFilters } from "./SearchSheetFilters";
 import { useSheetResults } from "./useSheetResults";
 import { useSheetDrag } from "./useSheetDrag";
+import { useSearchAiAvailable, useSheetAnswer } from "./useSheetAnswer";
+import { SearchSheetAnswer } from "./SearchSheetAnswer";
 import "./search-sheet.css";
 
 export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNotebookId: string | null }) {
@@ -32,11 +35,16 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const [activeId, setActiveId] = useState<string | null>(null);
   const notebooks = useNotebooks(s => s.notebooks);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
-  const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent } = useSheetResults();
+  const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults();
+  const aiReady = useSearchAiAvailable();
+  const { answer, ask, reset: resetAnswer } = useSheetAnswer();
+  const layer = useModalLayer(visible);
   const close = useCallback(() => useSearchSession.getState().closeSearch(), []);
   const drag = useSheetDrag(sheetRef, close);
 
   useEffect(() => { if (!composing.current) setDraft(session.query); }, [session.query]);
+  useEffect(() => { if (!visible) resetAnswer(); }, [visible, resetAnswer]);
+  useEffect(() => { if (answer && answer.question !== session.query.trim()) resetAnswer(); }, [answer, session.query, resetAnswer]);
   useEffect(() => { setActiveId(null); listRef.current?.scrollTo({ top: 0 }); }, [deferredQuery, session.scope, session.titleOnly, session.sort]);
   useEffect(() => {
     if (!visible) return;
@@ -56,16 +64,22 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
 
   const hasQuery = Boolean(session.query.trim());
   const pending = isSearching || draft !== session.query || session.query !== deferredQuery;
-  const aiQuery = aiNotebookId ? session.query.trim() : "";
+  const aiQuery = aiReady ? session.query.trim() : "";
   const notebookNames = useMemo(() => Object.fromEntries(Object.values(notebooks).map(n => [n.id, n.name])), [notebooks]);
   const optionIds = useMemo(() => [...(aiQuery ? [AI_ROW_ID] : []), ...results.map(p => p.id)], [aiQuery, results]);
   const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
 
-  const askAi = () => {
-    if (!aiNotebookId || !aiQuery) return;
+  const askAi = () => { if (aiQuery) void ask(aiQuery, getCandidates(), searchResults.all); };
+  const continueInPanel = aiNotebookId && answer ? () => {
     skipRestore.current = true;
     session.closeSearch();
-    askNotebookAi({ notebookId: aiNotebookId, text: aiQuery });
+    askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
+  } : undefined;
+  const openSource = (id: string) => {
+    returnFocus.current = null;
+    const latest = useSearchSession.getState();
+    latest.targetPage(id, true);
+    latest.hideSheet();
   };
   const openResult = useCallback((page: SearchResultPage) => {
     const latest = useSearchSession.getState();
@@ -85,7 +99,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const keydown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!sheetRef.current?.contains(event.target as Node)) return;
     if (composing.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
-    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (answer) resetAnswer(); else close(); return; }
     if (event.target !== inputRef.current) return;
     if (event.key === "Tab" && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
@@ -93,7 +107,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
       latest.setScope(latest.scope.kind === "all" ? { kind: "current", notebookId: latest.startingNotebookId } : { kind: "all" });
       return;
     }
-    if ((event.key === "ArrowDown" || event.key === "ArrowUp") && optionIds.length) {
+    if ((event.key === "ArrowDown" || event.key === "ArrowUp") && optionIds.length && !answer) {
       event.preventDefault();
       const index = optionIds.indexOf(selectedId ?? "");
       const next = Math.max(0, Math.min(optionIds.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)));
@@ -104,6 +118,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     }
     if (event.key !== "Enter") return;
     event.preventDefault();
+    if (answer) return;
     if (event.shiftKey || selectedId === AI_ROW_ID) { askAi(); return; }
     const page = results.find(p => p.id === selectedId);
     if (page) openResult(page);
@@ -112,7 +127,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
   const count = searchError || !hasQuery ? "" : busy ? "搜索中…" : `${total} 篇`;
-  return <div className="search-sheet-layer" data-open={visible} onKeyDown={keydown}>
+  return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
     <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>
     <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label="搜索笔记" inert={!visible} data-dragging={drag.dragging}
       style={drag.offset ? { "--search-sheet-drag": `${drag.offset}px` } as CSSProperties : undefined}>
@@ -126,7 +141,9 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
       </div>
       <SearchSheetFilters count={count}/>
-      <div ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
+      {answer ? <div className="search-sheet-list">
+        <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
+      </div> : <div ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
         <div id="search-sheet-results" role="listbox" aria-label="搜索结果">
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}
           {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>最近访问</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>隐藏</Button></div>}
@@ -141,13 +158,13 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         </div>}
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>加载更多结果</Button>}
         {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}
-      </div>
+      </div>}
       <div className="search-sheet-footer" aria-hidden="true">
         <span><kbd className="search-sheet-kbd">↑↓</kbd>选择</span>
         <span><kbd className="search-sheet-kbd">↵</kbd>打开</span>
-        {aiNotebookId && <span><kbd className="search-sheet-kbd">⇧↵</kbd>询问 AI</span>}
+        {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>询问 AI</span>}
         <span><kbd className="search-sheet-kbd">Tab</kbd>切换范围</span>
       </div>
     </div>
-  </div>;
+  </div></OverlayLayerProvider>;
 });

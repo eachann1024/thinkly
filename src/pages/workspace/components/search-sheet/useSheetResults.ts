@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { isCommandSearchablePage, shouldIncludePageInCommandScope } from "../command/searchPageFilter";
 import { useCommandSearch, type SearchResultPage } from "../command/useCommandSearch";
 import { useSearchSession } from "../sidebar/useSearchSession";
 import { useSearchFolderRefresh } from "../sidebar/useSearchFolderRefresh";
@@ -32,8 +34,11 @@ export function useSheetResults() {
   const results = useMemo(() => !hasResultQuery ? (showRecent ? searchResults.recent : [])
     : filtered ? filtered.slice(0, limit) : searchResults.allDisplay,
   [hasResultQuery, showRecent, searchResults.recent, searchResults.allDisplay, filtered, limit]);
+  const notebooks = useNotebooks(state => state.notebooks);
+  const getCandidates = useCallback(() => Object.values(pages).filter(page => isCommandSearchablePage(page, notebooks) &&
+    (scopedId ? page.workspaceId === scopedId : shouldIncludePageInCommandScope(page, notebooks, true, null))), [pages, notebooks, scopedId]);
   return {
-    ...search, pages, loading, loadError, retryLoad, results, showRecent,
+    ...search, getCandidates, pages, loading, loadError, retryLoad, results, showRecent,
     total: filtered ? filtered.length : searchResults.all.length,
     hasMore: hasResultQuery && (filtered ? filtered.length > limit : searchResults.hasMore),
   };
