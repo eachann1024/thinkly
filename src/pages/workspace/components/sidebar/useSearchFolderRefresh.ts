@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useReducer } from "react";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { yieldSearchTask } from "../command/searchTaskScheduling";
+import { folderRefreshReducer } from "./searchFolderRefreshState";
 import type { SearchScope } from "./useSearchSession";
 
 /** Wait until the navigation animation has finished, then refresh while idle. */
@@ -14,14 +15,15 @@ function scheduleRefresh(run: () => void): () => void {
 }
 
 export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+  const [refresh, dispatch] = useReducer(folderRefreshReducer, { status: "idle" });
+  const loading = refresh.status === "refreshing" && refresh.blocking;
+  const loadError = refresh.status !== "idle" && refresh.failedIds.length > 0;
   const [retry, setRetry] = useState(0);
   const handledRetry = useRef(0);
   const scopedId = scope.kind === "all" ? null : scope.notebookId;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) { dispatch({ type: "reset" }); return; }
     let cancelled = false;
     let cancelScheduled = () => {};
     const forceReload = retry !== handledRetry.current;
@@ -35,15 +37,14 @@ export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
       return forceReload || notebook.id !== state.activeNotebookId ||
         state.localFolderLoadStates[notebook.id]?.status !== "ready";
     });
-    setLoading(targets.some(notebook => forceReload ||
-      state.localFolderLoadStates[notebook.id]?.status !== "ready"));
-    setLoadError(false);
+    dispatch({ type: "start", blocking: targets.some(notebook => forceReload ||
+      state.localFolderLoadStates[notebook.id]?.status !== "ready") });
 
     const refreshNext = (index: number) => {
       if (cancelled) return;
       const notebook = targets[index];
       if (!notebook) {
-        setLoading(false);
+        dispatch({ type: "complete" });
         return;
       }
       cancelScheduled = scheduleRefresh(() => {
@@ -60,7 +61,7 @@ export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
           return;
         }
         void usePages.getState().loadLocalFolderPages(notebook.id, notebook.localPath!)
-          .catch(() => { if (!cancelled) setLoadError(true); })
+          .catch(() => { if (!cancelled) dispatch({ type: "failed", notebookId: notebook.id }); })
           .finally(() => refreshNext(index + 1));
       });
     };

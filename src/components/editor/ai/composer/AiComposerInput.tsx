@@ -100,7 +100,7 @@ export const AiComposerInput = forwardRef<
         data-ai-composer-live=""
       />
 
-      {mention.active && mention.anchorRect ? (
+      {mention.phase === "active" ? (
         <ComposerSuggestionsList
           items={mentionItems}
           activeIndex={mention.activeIndex}
@@ -112,7 +112,7 @@ export const AiComposerInput = forwardRef<
         />
       ) : null}
 
-      {command.active && command.anchorRect ? (
+      {command.phase === "active" ? (
         <SkillSuggestionsList
           items={commandItems}
           activeIndex={command.activeIndex}

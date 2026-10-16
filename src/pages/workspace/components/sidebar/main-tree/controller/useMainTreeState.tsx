@@ -123,7 +123,7 @@ export function useMainTreeState({
     isLocalFolder && localLoadStatus === "loading" && !hasCachedLocalTree;
 
   const localLoadError =
-    isLocalFolder && localLoadStatus === "error"
+    isLocalFolder && localLoadState?.status === "error"
       ? localLoadState?.error || "无法读取本地文件夹"
       : null;
 

@@ -6,7 +6,7 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { GithubReleaseAsset } from "../../../src/lib/appUpdateRelease";
-import { setUpdateState } from "./state";
+import { sendUpdateEvent } from "./state";
 import type { ReleaseDetails, VerifiedUpdate } from "./release";
 import { addSessionAllowed } from "../allowlist";
 
@@ -32,7 +32,7 @@ export async function downloadVerifiedUpdate(version: string, asset: GithubRelea
     const percent = total > 0 ? Math.min(99, Math.floor(received * 100 / total)) : 0;
     if (percent !== lastPercent) {
       lastPercent = percent;
-      setUpdateState({ ...targetDetails, status: "downloading", percent });
+      sendUpdateEvent({ type: "download.progress", target: targetDetails, percent });
     }
     callback(null, chunk);
   } });
@@ -43,7 +43,7 @@ export async function downloadVerifiedUpdate(version: string, asset: GithubRelea
     await verifyUpdateFile(update);
     await rename(partial, target);
     addSessionAllowed(target);
-    setUpdateState({ ...targetDetails, status: "downloading", percent: 100, message: "正在准备安装" });
+    sendUpdateEvent({ type: "download.progress", target: targetDetails, percent: 100, message: "正在准备安装" });
     return { ...update, path: target };
   } catch (error) {
     await rm(partial, { force: true });

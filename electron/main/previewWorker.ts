@@ -3,9 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { MermaidPreviewRequest, MermaidPreviewReply } from "../../src/lib/preview-renderer/contract";
 
+import { previewWorkerTransition, type PreviewWorkerState } from "./previewWorkerState";
+
 const root = path.dirname(fileURLToPath(import.meta.url));
-let worker: BrowserWindow | null = null;
-let opening: Promise<void> | null = null;
+let lifecycle: PreviewWorkerState<BrowserWindow> = { status: "closed" };
+const getWorker = () => lifecycle.status === "closed" ? null : lifecycle.worker;
 let nextId = 0;
 const waiting = new Map<string, { cancelled: boolean }>();
 const jobs = new Map<number, {
@@ -17,9 +19,8 @@ const jobs = new Map<number, {
 }>();
 
 function closeWorker(reason = "预览渲染进程已关闭") {
-  const old = worker;
-  worker = null;
-  opening = null;
+  const old = getWorker();
+  lifecycle = previewWorkerTransition(lifecycle, { type: "close" });
   for (const job of jobs.values()) {
     clearTimeout(job.timer);
     job.reject(new Error(reason));
@@ -29,8 +30,10 @@ function closeWorker(reason = "预览渲染进程已关闭") {
 }
 
 function ensureWorker(): Promise<void> {
-  if (opening) return opening;
-  worker = new BrowserWindow({
+  if (lifecycle.status === "opening") return lifecycle.opening;
+  if (lifecycle.status === "ready" && !lifecycle.worker.isDestroyed()) return Promise.resolve();
+  if (lifecycle.status !== "closed") closeWorker();
+  const current = new BrowserWindow({
     show: false, width: 1400, height: 1000,
     skipTaskbar: true, focusable: false,
     webPreferences: {
@@ -40,19 +43,21 @@ function ensureWorker(): Promise<void> {
       spellcheck: false, backgroundThrottling: false,
     },
   });
-  const current = worker;
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   current.webContents.on("will-navigate", event => event.preventDefault());
   current.webContents.on("render-process-gone", () => {
-    if (worker === current) closeWorker("预览渲染进程异常退出，请重试");
+    if (getWorker() === current) closeWorker("预览渲染进程异常退出，请重试");
   });
-  opening = new Promise<void>((resolve, reject) => {
+  const opening = new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {
       cleanup(); reject(new Error("预览渲染进程启动超时")); closeWorker();
     }, 20000);
     const ready = (event: Electron.IpcMainEvent) => {
       if (event.sender !== current.webContents) return;
-      cleanup(); resolve();
+      cleanup();
+      if (getWorker() !== current) { reject(new Error("预览渲染进程已关闭")); return; }
+      lifecycle = previewWorkerTransition(lifecycle, { type: "ready", worker: current });
+      resolve();
     };
     const cleanup = () => { clearTimeout(timer); ipcMain.removeListener("preview-worker:ready", ready); };
     ipcMain.on("preview-worker:ready", ready);
@@ -60,12 +65,13 @@ function ensureWorker(): Promise<void> {
     const load = dev
       ? current.loadURL(new URL("preview-renderer.html", dev.endsWith("/") ? dev : dev + "/").href)
       : current.loadFile(path.join(root, "../renderer/preview-renderer.html"));
-    void load.catch(error => { cleanup(); reject(error); if (worker === current) closeWorker(); });
+    void load.catch(error => { cleanup(); reject(error); if (getWorker() === current) closeWorker(); });
     current.once("closed", () => {
       cleanup(); reject(new Error("预览渲染进程已关闭"));
-      if (worker === current) closeWorker();
+      if (getWorker() === current) closeWorker();
     });
   });
+  lifecycle = previewWorkerTransition(lifecycle, { type: "open", worker: current, opening });
   return opening;
 }
 
@@ -93,6 +99,7 @@ export function registerPreviewWorkerIpc() {
       await ensureWorker();
       if (state.cancelled) throw new Error("预览任务已取消");
       if (event.sender.isDestroyed()) throw new Error("请求窗口已关闭");
+      const worker = getWorker();
       if (!worker || worker.isDestroyed()) throw new Error("预览渲染进程不可用");
       if (jobs.size >= 64) throw new Error("预览队列已满，请稍后重试");
       const id = ++nextId;
@@ -111,10 +118,12 @@ export function registerPreviewWorkerIpc() {
     for (const [id, job] of jobs) {
       if (job.owner !== event.sender.id || job.requestId !== requestId) continue;
       jobs.delete(id); clearTimeout(job.timer); job.reject(new Error("预览任务已取消"));
+      const worker = getWorker();
       if (worker && !worker.isDestroyed()) worker.webContents.send("preview-worker:cancel", id);
     }
   });
   ipcMain.on("preview-worker:reply", (event, reply: MermaidPreviewReply) => {
+    const worker = getWorker();
     if (!worker || event.sender !== worker.webContents || !reply || !Number.isInteger(reply.id)) return;
     const job = jobs.get(reply.id);
     if (!job) return;
@@ -125,6 +134,7 @@ export function registerPreviewWorkerIpc() {
   app.on("before-quit", () => closeWorker());
   app.on("browser-window-created", (_event, win) => {
     win.on("closed", () => {
+      const worker = getWorker();
       if (worker && !BrowserWindow.getAllWindows().some(candidate => candidate !== worker)) closeWorker();
     });
   });

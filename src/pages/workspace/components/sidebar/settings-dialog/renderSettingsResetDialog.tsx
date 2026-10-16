@@ -8,7 +8,7 @@ export function renderSettingsResetDialog(
     open,
     onOpenChange,
     resetDialogOpen,
-    setResetDialogOpen,
+    onResetDialogOpenChange,
     resetInput,
     setResetInput,
     resetting,
@@ -19,7 +19,7 @@ export function renderSettingsResetDialog(
   return (
     <DialogShell
       open={open && resetDialogOpen}
-      onOpenChange={setResetDialogOpen}
+      onOpenChange={onResetDialogOpenChange}
       layout="fullscreen"
       contentClassName="bg-[hsl(var(--goose-shell-bg))]"
       bodyClassName="relative h-full overflow-y-auto p-6 animate-in fade-in duration-200"
@@ -65,7 +65,7 @@ export function renderSettingsResetDialog(
             <Button
               variant="outline"
               size="lg"
-              onClick={() => setResetDialogOpen(false)}
+              onClick={() => onResetDialogOpenChange(false)}
               className="flex-1"
             >
               取消

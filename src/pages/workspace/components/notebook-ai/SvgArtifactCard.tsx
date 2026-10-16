@@ -65,6 +65,7 @@ export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps)
         <div className="notebook-ai-canvas-card-title">{title?.trim() || "图片"}</div>
         {sanitizedSvg ? (
           <ArtifactActions
+            previewIdentity={JSON.stringify([sanitizedSvg, isDark, filename])}
             copySource={sanitizedSvg}
             onCopyImage={async () => capturePng()}
             onDownloadImage={capturePng}

@@ -20,7 +20,7 @@ export function useHistoryRestoreActions(
     getPage,
     updatePage,
     pageId,
-    setIndex,
+    applyMilestone,
     isRestoring,
     setIsRestoring,
     pendingMilestoneVersionId,
@@ -99,17 +99,7 @@ export function useHistoryRestoreActions(
   };
 
   const applyMilestoneLocally = (versionId: string, willBe: boolean) => {
-    setIndex((prev) => {
-      if (!prev || prev.pageId !== pageId) return prev;
-      return {
-        ...prev,
-        versions: prev.versions.map((entry) =>
-          entry.versionId === versionId
-            ? { ...entry, isMilestone: willBe }
-            : entry,
-        ),
-      };
-    });
+    if (pageId) applyMilestone(pageId, versionId, willBe);
   };
 
   const handleToggleMilestone = (versionId: string, willBe: boolean) => {

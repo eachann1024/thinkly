@@ -8,16 +8,16 @@ import { useCommandSearchIndexWarmup } from "../command/useCommandSearchIndexWar
 
 export function SearchSessionController() {
   useCommandSearchIndexWarmup();
-  const nonce = useSearchSession(s => s.requestNonce);
+  const nonce = useSearchSession(s => s.navigation.phase === "target" ? s.navigation.id : 0);
   const handled = useRef(0);
   useEffect(() => {
     if (!nonce || nonce === handled.current) return;
     handled.current = nonce;
-    const session = useSearchSession.getState();
-    if (!session.targetPageId || !usePages.getState().pages[session.targetPageId]) return;
+    const navigation = useSearchSession.getState().navigation;
+    if (navigation.phase !== "target" || !usePages.getState().pages[navigation.pageId]) return;
     closeNotebookAiIfFullscreen();
-    if (!tryShowPageInFocusedSplit(session.targetPageId)) useTabs.getState().openPreviewTab(session.targetPageId);
-    usePages.getState().setExpandPageId(session.targetPageId);
+    if (!tryShowPageInFocusedSplit(navigation.pageId)) useTabs.getState().openPreviewTab(navigation.pageId);
+    usePages.getState().setExpandPageId(navigation.pageId);
   }, [nonce]);
   return null;
 }

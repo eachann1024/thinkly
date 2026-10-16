@@ -53,7 +53,7 @@ export function renderWebdavRemoteBackups(
             variant="ghost"
             size="sm"
             disabled={busy || !hasSavedConfig}
-            onClick={fetchRemoteList}
+            onClick={() => void fetchRemoteList()}
             className="h-8 rounded-[var(--goose-control-radius)] px-2 text-xs hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
           >
             <RefreshCw

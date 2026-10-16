@@ -43,6 +43,7 @@ export const loadLocalFolderPagesAction = (
     options,
     hiddenFolders,
     requestId,
+    fingerprint,
   ).finally(() => {
     const current = localFolderLoadTasks.get(notebookId);
     if (current?.requestId === requestId) {

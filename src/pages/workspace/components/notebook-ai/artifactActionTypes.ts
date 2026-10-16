@@ -17,5 +17,7 @@ export interface ArtifactActionsProps {
   /** 生成预览图（data URL 或 Blob）；没有 onPreview 时作为图片预览 */
   onPreviewImage?: () => Promise<string | Blob>;
   previewFilename?: string;
+  /** 预览源的语义标识，避免 inline 回调重建取消同一预览请求。 */
+  previewIdentity?: string;
   onInsert?: () => Promise<ArtifactInsertResult> | ArtifactInsertResult;
 }

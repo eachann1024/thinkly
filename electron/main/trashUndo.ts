@@ -4,7 +4,24 @@ import { constants } from "node:fs";
 import { copyFile, cp, lstat, mkdir, readdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
-const pending = new Map<string, { original: string; backup: string; timer: NodeJS.Timeout }>();
+import { trashUndoTransition, type TrashUndoState, type TrashUndoEvent } from "./trashUndoState";
+
+const pending = new Map<string, Exclude<TrashUndoState, { status: "missing" }>>();
+function transition(token: string, event: TrashUndoEvent) {
+  const previous: TrashUndoState = pending.get(token) ?? { status: "missing" };
+  const next = trashUndoTransition(previous, event);
+  if (next.status === "missing") pending.delete(token); else pending.set(token, next);
+  return next !== previous;
+}
+function retentionTimer(token: string, backup: string) {
+  const timer = setTimeout(() => {
+    if (transition(token, { type: "expire", timer })) {
+      void rm(path.dirname(backup), { recursive: true, force: true });
+    }
+  }, RETAIN_MS);
+  timer.unref();
+  return timer;
+}
 const RETAIN_MS = 10 * 60_000;
 
 /** Keep an exact, short-lived copy because Electron's trashItem does not return a restore URL. */
@@ -25,20 +42,18 @@ export async function trashWithUndo(
     throw error;
   }
   // ponytail: an undo copy is retained for 10 minutes; a native trash URL would avoid duplicate disk use.
-  const timer = setTimeout(() => {
-    pending.delete(token);
-    void rm(backupDir, { recursive: true, force: true });
-  }, RETAIN_MS);
-  timer.unref();
-  pending.set(token, { original, backup, timer });
+  const timer = retentionTimer(token, backup);
+  transition(token, { type: "retain", original, backup, timer });
   return token;
 }
 
 export async function undoTrash(token: string): Promise<string> {
   const item = pending.get(token);
   if (!item) throw new Error("撤回已过期，请从系统废纸篓恢复");
+  if (item.status === "restoring") throw new Error("正在撤回此文件，请稍候");
   const { original, backup, timer } = item;
   assertGitSyncWritable(original);
+  transition(token, { type: "restore" });
   clearTimeout(timer);
   // Keep the backup if restoration fails, so a conflict can be resolved and retried.
   try {
@@ -64,15 +79,11 @@ export async function undoTrash(token: string): Promise<string> {
         await copyFile(backup, original, constants.COPYFILE_EXCL);
       }
     }
-    pending.delete(token);
+    transition(token, { type: "restored" });
     void rm(path.dirname(backup), { recursive: true, force: true });
     return original;
   } catch (error) {
-    item.timer = setTimeout(() => {
-      pending.delete(token);
-      void rm(path.dirname(backup), { recursive: true, force: true });
-    }, RETAIN_MS);
-    item.timer.unref();
+    transition(token, { type: "retry", timer: retentionTimer(token, backup) });
     throw error;
   }
 }

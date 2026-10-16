@@ -31,18 +31,9 @@ export function nextNotebookOrder(notebooks: Record<string, Notebook>): number {
   return Math.max(...list.map((n) => n.order ?? n.createdAt)) + 1;
 }
 
-export type LocalFolderLoadStatus = "idle" | "loading" | "ready" | "error";
-
-export interface LocalFolderLoadState {
-  status: LocalFolderLoadStatus;
-  startedAt?: number;
-  finishedAt?: number;
-  error?: string;
-}
-
-export const IDLE_LOCAL_FOLDER_LOAD_STATE: LocalFolderLoadState = {
-  status: "idle",
-};
+export { IDLE_LOCAL_FOLDER_LOAD_STATE } from "./localFolderLoadState";
+export type { LocalFolderLoadState, LocalFolderLoadStatus } from "./localFolderLoadState";
+import type { LocalFolderLoadState, LocalFolderLoadEvent } from "./localFolderLoadState";
 
 export interface NotebooksState {
   notebooks: Record<string, Notebook>;
@@ -67,9 +58,9 @@ export interface NotebooksState {
   getNotebook: (id: string) => Notebook | undefined;
   setLastActivePage: (notebookId: string, pageId: string | null) => void;
   getLastActivePage: (notebookId: string) => string | null;
-  setLocalFolderLoadState: (
+  dispatchLocalFolderLoadEvent: (
     notebookId: string,
-    state: LocalFolderLoadState,
+    event: LocalFolderLoadEvent,
   ) => void;
   getLocalFolderLoadState: (notebookId: string) => LocalFolderLoadState;
 }

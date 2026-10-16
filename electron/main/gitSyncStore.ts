@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { idleGitSyncStatus, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
 import { normalizedGitRemote, validateGitRepository, validateGitSyncConfig, type GitRepositoryConfig, type GitSyncState } from "../../src/lib/git-sync-contract";
 
 export interface GitMappingHistory { [repositoryId: string]: GitRepositoryConfig["folders"] }
@@ -25,7 +26,9 @@ export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
     const previous = raw.statuses?.find((status) => raw.version === 2 ? status.repositoryId === config.id : (status as unknown as { notebookId: string }).notebookId === config.folders[0]?.notebookId);
     const duplicate = configs.some((other) => other.id !== config.id && normalizedGitRemote(other) === normalizedGitRemote(config) && other.branch === config.branch);
     if (duplicate) config.enabled = false;
-    return { repositoryId: config.id, phase: duplicate ? "error" as const : "idle" as const, lastSyncedAt: typeof previous?.lastSyncedAt === "string" ? previous.lastSyncedAt : null, error: duplicate ? "多个旧配置指向同一仓库分支，已停用；请保留一个配置或改用独立仓库，原文件未改变" : null };
+    const initial = idleGitSyncStatus(config.id, typeof previous?.lastSyncedAt === "string" ? previous.lastSyncedAt : null);
+    return duplicate ? gitSyncStatusTransition(initial, { type: "sync.failed",
+      message: "多个旧配置指向同一仓库分支，已停用；请保留一个配置或改用独立仓库，原文件未改变" }) : initial;
   });
   const mappingHistory: GitMappingHistory = Object.create(null);
   if (raw.version === 2 && raw.mappingHistory && typeof raw.mappingHistory === "object") {

@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useSettings } from "@/stores/settings";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
-import { type WebdavBackupFile } from "@/lib/webdavSync";
+import { useWebdavOperationState } from "./useWebdavOperationState";
 import { type SettingsDataPanelProps, formatRemoteTime } from "./shared";
 
 export function useDataPanelState({
@@ -58,32 +58,10 @@ export function useDataPanelState({
     webdavAutoBackupEnabled,
   );
 
-  const [testing, setTesting] = useState(false);
-
-  const [uploading, setUploading] = useState(false);
-
-  const [syncingLatest, setSyncingLatest] = useState(false);
-
-  const [remoteLoading, setRemoteLoading] = useState(false);
-
+  const operationState = useWebdavOperationState();
+  const { sendWebdavEvent } = operationState;
   const [isRemoteListOpen, setIsRemoteListOpen] = useState(false);
-
   const [showAllRemote, setShowAllRemote] = useState(false);
-
-  const [remoteFiles, setRemoteFiles] = useState<WebdavBackupFile[]>([]);
-
-  const [restoringFile, setRestoringFile] = useState<string | null>(null);
-
-  const [deletingFile, setDeletingFile] = useState<string | null>(null);
-
-  const [confirmConfig, setConfirmConfig] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-    isDestructive?: boolean;
-    onConfirm: () => void | Promise<void>;
-    onCancel?: () => void;
-  } | null>(null);
 
   const activationRef = useRef({ active, epoch: 0 });
 
@@ -92,14 +70,13 @@ export function useDataPanelState({
     activation.active = active;
     activation.epoch += 1;
     if (!active) {
-      setConfirmConfig(null);
-      setSyncingLatest(false);
+      sendWebdavEvent({ type: "panel.deactivated" });
     }
     return () => {
       activation.active = false;
       activation.epoch += 1;
     };
-  }, [active]);
+  }, [active, sendWebdavEvent]);
 
   const isCurrentActivation = (epoch: number) =>
     activationRef.current.active && activationRef.current.epoch === epoch;
@@ -117,14 +94,6 @@ export function useDataPanelState({
     webdavRetentionDays,
     webdavAutoBackupEnabled,
   ]);
-
-  const busy =
-    testing ||
-    uploading ||
-    syncingLatest ||
-    remoteLoading ||
-    restoringFile !== null ||
-    deletingFile !== null;
 
   const hasSavedConfig = Boolean(webdavUrl && webdavUsername && webdavPassword);
 
@@ -183,29 +152,13 @@ export function useDataPanelState({
     setTempRetentionDays,
     tempAutoBackupEnabled,
     setTempAutoBackupEnabled,
-    testing,
-    setTesting,
-    uploading,
-    setUploading,
-    syncingLatest,
-    setSyncingLatest,
-    remoteLoading,
-    setRemoteLoading,
+    ...operationState,
     isRemoteListOpen,
     setIsRemoteListOpen,
     showAllRemote,
     setShowAllRemote,
-    remoteFiles,
-    setRemoteFiles,
-    restoringFile,
-    setRestoringFile,
-    deletingFile,
-    setDeletingFile,
-    confirmConfig,
-    setConfirmConfig,
     activationRef,
     isCurrentActivation,
-    busy,
     hasSavedConfig,
     lastUploadText,
     lastDownloadText,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import { ChevronDown } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +10,9 @@ import { SYSTEM_FONT_STACK, toCssFontFamily } from "@/lib/fontLoader";
 import {
   getAvailableLocalFonts,
   probeLocalFont,
-  type LocalFontOption,
 } from "@/lib/localFontOptions";
 
+import { localFontLoadReducer, fontProbeReducer } from "./localFontLoadState";
 import { useFontSelectionPreview } from "./useFontSelectionPreview";
 import { VirtualFontList, type FontListOption } from "./VirtualFontList";
 
@@ -35,32 +35,35 @@ export function LocalFontSelect({
 }) {
   const { open, onOpenChange, contentRef, confirmFont, previewFont } =
     useFontSelectionPreview(value, onChange);
-  const [fonts, setFonts] = useState<LocalFontOption[] | null>(null);
-  const [fontAccessFailed, setFontAccessFailed] = useState(false);
-  const [savedFont, setSavedFont] = useState<{
-    family: string;
-    available: boolean;
-  } | null>(null);
+  const [fontLoad, dispatchFonts] = useReducer(localFontLoadReducer, { status: "idle" });
+  const fonts = fontLoad.status === "idle" ? null : fontLoad.fonts;
+  const fontAccessFailed = fontLoad.status === "error";
+  const [fontProbe, dispatchProbe] = useReducer(fontProbeReducer, { status: "idle" });
+  const savedFont = fontProbe.status === "ready" ? fontProbe : null;
   useEffect(() => {
     if (!open && fonts !== null) return;
     let active = true;
+    dispatchFonts({ type: "load" });
     void getAvailableLocalFonts().then((available) => {
       if (active) {
-        setFonts(available);
-        setFontAccessFailed(false);
+        dispatchFonts({ type: "loaded", fonts: available });
       }
     }).catch(() => {
-      if (active) setFontAccessFailed(true);
+      if (active) dispatchFonts({ type: "failed" });
     });
     return () => {
       active = false;
     };
   }, [open, fonts]);
   useEffect(() => {
-    if (!value || value === baseFont || fonts?.some((font) => font.family === value)) return;
+    if (!value || value === baseFont || fonts?.some((font) => font.family === value)) {
+      dispatchProbe({ type: "reset" });
+      return;
+    }
     let active = true;
+    dispatchProbe({ type: "probe", family: value });
     void probeLocalFont(value).then((available) => {
-      if (active) setSavedFont({ family: value, available });
+      if (active) dispatchProbe({ type: "probed", family: value, available });
     });
     return () => {
       active = false;

@@ -1,3 +1,4 @@
+import { useSettingsDataOperation } from "./useSettingsDataOperation";
 import { useShallow } from "zustand/react/shallow";
 import { useNotebooks, sortNotebooksByOrder } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
@@ -114,15 +115,8 @@ export function useSettingsDialogState({
 
   const [format, setFormat] = useState<ExportOptions["format"]>("md");
 
-  const [exporting, setExporting] = useState(false);
-
-  const [importing, setImporting] = useState(false);
-
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
-
+  const dataOperation = useSettingsDataOperation();
   const [resetInput, setResetInput] = useState("");
-
-  const [resetting, setResetting] = useState(false);
 
   const notebookList = sortNotebooksByOrder(notebooks).filter(
     (n) => n.source !== "local-folder",
@@ -203,16 +197,9 @@ export function useSettingsDialogState({
     setSelectedIds,
     format,
     setFormat,
-    exporting,
-    setExporting,
-    importing,
-    setImporting,
-    resetDialogOpen,
-    setResetDialogOpen,
+    ...dataOperation,
     resetInput,
     setResetInput,
-    resetting,
-    setResetting,
     notebookList,
     createNotebook,
     resetPhrase,

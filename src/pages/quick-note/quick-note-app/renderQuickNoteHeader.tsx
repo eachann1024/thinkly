@@ -23,9 +23,8 @@ export function renderQuickNoteHeader(
     activeSlot,
     helpOpen,
     savingToNote,
-    renamingSlot,
-    renameValue,
-    setRenameValue,
+    rename,
+    editRename,
     renameInputRef,
     slotNames,
     zoom,
@@ -45,18 +44,18 @@ export function renderQuickNoteHeader(
   return (
     <div
       className="quicknote-titlebar-reveal-zone"
-      data-renaming={renamingSlot === null ? "false" : "true"}
+      data-renaming={rename.phase === "editing" ? "true" : "false"}
     >
-      {renamingSlot !== null && (
+      {rename.phase === "editing" && (
         <Input variant="inline" controlSize={null}
           ref={renameInputRef}
-          value={renameValue}
+          value={rename.value}
           maxLength={24}
-          aria-label={`重命名便签 ${renamingSlot}`}
+          aria-label={`重命名便签 ${rename.slot}`}
           className="quicknote-slot-name-input"
           style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-          onChange={(event) => setRenameValue(event.target.value)}
-          onBlur={() => finishRename(true)}
+          onChange={(event) => editRename(rename.id, event.target.value)}
+          onBlur={() => finishRename(true, rename.id)}
           onKeyDown={(event) => {
             // 中文输入法按 Enter 确认候选词时不能提前提交；keyCode 229 兼容旧 Chromium。
             if (
@@ -68,11 +67,11 @@ export function renderQuickNoteHeader(
             if (event.key === "Enter") {
               event.preventDefault();
               event.stopPropagation();
-              finishRename(true);
+              finishRename(true, rename.id);
             } else if (event.key === "Escape") {
               event.preventDefault();
               event.stopPropagation();
-              finishRename(false);
+              finishRename(false, rename.id);
             }
           }}
         />

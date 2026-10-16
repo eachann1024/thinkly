@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { type QuickNoteSlot } from "@/stores/useQuickNote";
 import { type QuickNoteSlotSwitcherProps, isQuickNoteSlot } from "./shared";
+import { reduceQuickNoteSlot, transitionQuickNoteSlot, type QuickNoteSlotState, type QuickNoteSlotEvent } from "./quickNoteSlotState";
 
 export function useQuickNoteSlotPreview({
   activeSlot,
@@ -12,63 +13,27 @@ export function useQuickNoteSlotPreview({
 }: QuickNoteSlotSwitcherProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const scrubbingRef = useRef(false);
-
-  const previewSlotRef = useRef<QuickNoteSlot | null>(null);
-
+  const [scrub, dispatch] = useReducer(reduceQuickNoteSlot, { phase: "idle" });
+  const scrubRef = useRef<QuickNoteSlotState>(scrub);
   const onChangeRef = useRef(onChange);
-
   const onPreviewChangeRef = useRef(onPreviewChange);
-
+  const onRenameRequestRef = useRef(onRenameRequest);
   const activeSlotRef = useRef(activeSlot);
-
-  const pointerStartSlotRef = useRef<QuickNoteSlot | null>(null);
-
-  const pointerMovedAcrossSlotsRef = useRef(false);
-
-  const [scrubbing, setScrubbing] = useState(false);
-
-  const [previewSlot, setPreviewSlot] = useState<QuickNoteSlot | null>(null);
-
-  const visualSlot = previewSlot ?? activeSlot;
-
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
-
-  useEffect(() => {
-    onPreviewChangeRef.current = onPreviewChange;
-  }, [onPreviewChange]);
-
-  useEffect(() => {
-    activeSlotRef.current = activeSlot;
-  }, [activeSlot]);
-
-  const updatePreview = (slot: QuickNoteSlot) => {
-    if (previewSlotRef.current === slot) return;
-    previewSlotRef.current = slot;
-    setPreviewSlot(slot);
-    onPreviewChangeRef.current?.(slot);
-  };
-
-  const commitAndEnd = (slot: QuickNoteSlot) => {
-    if (!scrubbingRef.current) return;
-    scrubbingRef.current = false;
-    previewSlotRef.current = null;
-    setScrubbing(false);
-    setPreviewSlot(null);
-    onPreviewChangeRef.current?.(null);
-    onChangeRef.current(slot, "pointer");
-  };
-
-  const endScrubWithoutCommit = () => {
-    if (!scrubbingRef.current) return;
-    scrubbingRef.current = false;
-    previewSlotRef.current = null;
-    setScrubbing(false);
-    setPreviewSlot(null);
-    onPreviewChangeRef.current?.(null);
-  };
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => { onPreviewChangeRef.current = onPreviewChange; }, [onPreviewChange]);
+  useEffect(() => { onRenameRequestRef.current = onRenameRequest; }, [onRenameRequest]);
+  useEffect(() => { activeSlotRef.current = activeSlot; }, [activeSlot]);
+  const sendScrub = useCallback((event: QuickNoteSlotEvent) => {
+    const result = transitionQuickNoteSlot(scrubRef.current, event);
+    scrubRef.current = result.state;
+    dispatch(event);
+    for (const command of result.commands) {
+      if (command.type === "preview") onPreviewChangeRef.current?.(command.slot);
+      else if (command.type === "commit") onChangeRef.current(command.slot, "pointer");
+      else onRenameRequestRef.current(command.slot);
+    }
+  }, []);
+  const visualSlot = scrub.phase === "idle" ? activeSlot : scrub.previewSlot;
 
   const slotFromPoint = (
     clientX: number,
@@ -122,21 +87,13 @@ export function useQuickNoteSlotPreview({
     onPreviewChange,
     onRenameRequest,
     rootRef,
-    scrubbingRef,
-    previewSlotRef,
-    onChangeRef,
-    onPreviewChangeRef,
+    scrub,
+    scrubRef,
+    sendScrub,
     activeSlotRef,
-    pointerStartSlotRef,
-    pointerMovedAcrossSlotsRef,
-    scrubbing,
-    setScrubbing,
-    previewSlot,
-    setPreviewSlot,
+    scrubbing: scrub.phase !== "idle",
+    held: scrub.phase === "held",
     visualSlot,
-    updatePreview,
-    commitAndEnd,
-    endScrubWithoutCommit,
     slotFromPoint,
   };
 }

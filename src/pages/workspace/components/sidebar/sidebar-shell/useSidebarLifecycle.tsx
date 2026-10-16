@@ -49,7 +49,7 @@ export function useSidebarLifecycle(
     previousNotebookIdRef.current = activeNotebookId;
     if (previousNotebookId === activeNotebookId) return;
     if (previousNotebookId === undefined && !isLocalFolder) return;
-    if (useSearchSession.getState().open) return;
+    if (useSearchSession.getState().view.phase !== "closed") return;
 
     resetSidebarAfterNotebookChange({
       exitHistory: inHistoryMode,

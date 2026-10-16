@@ -12,7 +12,7 @@ export function SidebarModeRail({
   context: ReturnType<typeof useSidebarHover>;
 }) {
   const searchSelectionRef = useRef("");
-  const searchSheetOpen = useSearchSession((s) => s.sheetOpen);
+  const searchSheetOpen = useSearchSession((s) => s.view.phase === "sheet");
   const {
     sidebarModeRailRef,
     settingsOpen,
