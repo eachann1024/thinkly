@@ -113,7 +113,7 @@ export function renderAppearanceTheme(
         <div
           role="radiogroup"
           aria-labelledby="appearance-accent-color-label"
-          className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-2"
+          className="flex flex-wrap gap-2"
         >
           {accentOptions.map((option, index) => {
             const selected = accentColor === option.value;
@@ -145,7 +145,7 @@ export function renderAppearanceTheme(
                   setFocusedAccentIndex(index);
                   setAccentColor(option.value);
                 }}
-                className="goose-accent-option goose-accent-selection flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
+                className="goose-accent-option goose-accent-selection flex h-11 min-w-[7rem] shrink-0 items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
               >
                 <span
                   aria-hidden="true"
@@ -167,20 +167,7 @@ export function renderAppearanceTheme(
                       Pro
                     </span>
                   )}
-                  {option.fullTheme && (
-                    <GooseIcons.Pencil
-                      aria-hidden="true"
-                      className="h-3 w-3 shrink-0"
-                    />
-                  )}
                 </span>
-                <GooseIcons.Check
-                  aria-hidden="true"
-                  className={cn(
-                    "h-3.5 w-3.5 shrink-0",
-                    selected ? "opacity-100" : "opacity-0",
-                  )}
-                />
               </Button>
             );
             return option.fullTheme ? (
