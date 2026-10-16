@@ -14,6 +14,7 @@ export function GenerationOptionsPanel({
   variant: "toolbar" | "drawer";
 }) {
   const labelPrefix = useId();
+  const disabledSwitchClass = "disabled:border-input disabled:bg-input disabled:before:bg-muted-foreground disabled:before:shadow-none disabled:opacity-50";
   const rows: Array<{
     key: keyof WatermarkConfig;
     label: string;
@@ -49,7 +50,7 @@ export function GenerationOptionsPanel({
             key={row.key}
             className={cn(
               "flex items-center gap-2",
-              row.disabled && "text-disabled",
+              row.disabled && "opacity-50",
             )}
           >
             <span id={`${labelPrefix}-${row.key}`} className="text-xs text-muted-foreground whitespace-nowrap">
@@ -61,6 +62,7 @@ export function GenerationOptionsPanel({
               checked={wm[row.key]}
               onCheckedChange={() => onToggle(row.key)}
               disabled={row.disabled}
+              className={disabledSwitchClass}
             />
           </div>
         ))}
@@ -77,6 +79,7 @@ export function GenerationOptionsPanel({
             className={cn(
               "flex items-center justify-between",
               row.indent && "pl-3",
+              row.disabled && "opacity-50",
             )}
           >
             <span
@@ -94,6 +97,7 @@ export function GenerationOptionsPanel({
               checked={wm[row.key]}
               onCheckedChange={() => onToggle(row.key)}
               disabled={row.disabled}
+              className={disabledSwitchClass}
             />
           </div>
         ))}
