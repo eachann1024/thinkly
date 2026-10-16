@@ -44,10 +44,13 @@ export function useComposerSubmission(
   }, [
     disabled,
     isStreaming,
+    inputRef,
     onSend,
-    onSlashCommand,
-    notebookId,
     cancelPendingDraftPersist,
+    notebookId,
+    setIsEmpty,
+    setAutoFocusToken,
+    onSlashCommand,
   ]);
 
   return handleSubmit;

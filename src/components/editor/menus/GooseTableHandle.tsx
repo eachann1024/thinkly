@@ -12,6 +12,7 @@ import { editTableDimension, hasMergedTableCells } from "./tableMenuActions";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { getTableDeletionLabel } from "./tableDeletion";
 import { GooseTableColorMenu } from "./GooseTableColorMenu";
+import { useTableHandleDrag } from "./useTableHandleDrag";
 import { useGooseTableHandle } from "./useGooseTableHandle";
 export { GooseTableExtendButton } from "./GooseTableExtendButton";
 
@@ -26,6 +27,7 @@ export function GooseTableHandle({
 }: TableHandleProps) {
   const { features } = useEditorSettings();
   const mergeNoteId = useId();
+  const { isDragging, ...dragProps } = useTableHandleDrag(orientation, hideOtherElements);
   const {
     editor,
     state,
@@ -47,9 +49,13 @@ export function GooseTableHandle({
   if (!state || index === undefined) return null;
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+    <DropdownMenu open={open && !isDragging} onOpenChange={(next) => {
+      if (!isDragging) handleOpenChange(next);
+    }}>
       <DropdownMenuTrigger asChild>
         <EditorAction
+          {...dragProps}
+          data-dragging={isDragging || undefined}
           type="button"
           className="bn-table-handle goose-editor-position-safe-trigger goose-table-handle-btn"
           aria-label={isRow ? "行操作" : "列操作"}

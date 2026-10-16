@@ -129,3 +129,10 @@
   .bn-block-outer:has(.bn-block-content[data-content-type="video"]) {
   margin-bottom: 0.5em;
 }
+
+.goose-table-handle-btn[data-dragging="true"] {
+  cursor: grabbing;
+}
+.goose-table-handle-btn[draggable="false"] {
+  cursor: pointer;
+}

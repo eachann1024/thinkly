@@ -1,0 +1,192 @@
+/* 分屏标题栏：中线上的八点把手，强调色只用于交互状态。 */
+.editor-split-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  gap: 8px;
+  border-bottom: 1px solid hsl(var(--border));
+  -webkit-app-region: no-drag;
+}
+
+.editor-split-header-title {
+  min-width: 0;
+  max-width: calc(50% - 34px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.editor-split-header[data-missing] .editor-split-header-title {
+  color: hsl(var(--muted-foreground));
+}
+
+.editor-split-drag-handle {
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: hsl(var(--muted-foreground) / 0.62);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.editor-split-grip {
+  display: grid;
+  grid-template-columns: repeat(4, 2.5px);
+  gap: 3px;
+  pointer-events: none;
+}
+
+.editor-split-grip i {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.editor-split-pane[data-focused="true"] .editor-split-drag-handle {
+  color: var(--goose-accent-text);
+  background: color-mix(in srgb, var(--goose-accent-solid) 7%, transparent);
+}
+
+.editor-split-header:hover .editor-split-drag-handle,
+.editor-split-drag-handle:focus-visible {
+  color: var(--goose-accent-text);
+  background: color-mix(in srgb, var(--goose-accent-solid) 13%, transparent);
+  border-color: color-mix(in srgb, var(--goose-accent-solid) 28%, transparent);
+}
+
+.editor-split-header .editor-split-drag-handle:hover,
+.editor-split-header .editor-split-drag-handle:active {
+  color: var(--goose-accent-text);
+  background: color-mix(in srgb, var(--goose-accent-solid) 21%, transparent);
+  border-color: color-mix(in srgb, var(--goose-accent-solid) 52%, transparent);
+  box-shadow: inset 0 1px 0 hsl(var(--background) / 0.5), 0 2px 5px color-mix(in srgb, var(--goose-accent-solid) 14%, transparent);
+}
+
+.editor-split-drag-handle:focus-visible {
+  outline: 2px solid var(--goose-accent-outline-focus);
+  outline-offset: 2px;
+}
+
+.editor-split-close {
+  margin-left: auto;
+  opacity: 0;
+}
+
+.editor-split-header:hover .editor-split-close,
+.editor-split-header:focus-within .editor-split-close,
+.editor-split-header[data-missing] .editor-split-close {
+  opacity: 1;
+}
+
+.editor-split-surface--zoomed .editor-split-drag-handle {
+  visibility: hidden;
+}
+
+.editor-split-rearranging,
+.editor-split-rearranging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.editor-split-surface[data-pane-dragging] .editor-split-pane-body {
+  pointer-events: none;
+}
+
+.editor-split-drag-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.editor-split-drop-preview {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 2px solid var(--goose-accent-solid);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--goose-accent-solid) 19%, transparent);
+  box-shadow: inset 0 0 0 1px hsl(var(--background) / 0.45);
+  animation: split-drop-appear 120ms ease-out;
+}
+
+.editor-split-drop-label {
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 11px;
+  border: 1px solid color-mix(in srgb, var(--goose-accent-solid) 42%, transparent);
+  border-radius: 7px;
+  background: hsl(var(--background) / 0.94);
+  color: var(--goose-accent-text);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 3px 12px hsl(var(--foreground) / 0.06);
+}
+
+.editor-split-drag-ghost {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 240px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--goose-accent-solid) 55%, transparent);
+  border-radius: 9px;
+  background: hsl(var(--background) / 0.96);
+  color: hsl(var(--foreground));
+  box-shadow: 0 7px 24px hsl(var(--foreground) / 0.13), 0 1px 3px hsl(var(--foreground) / 0.06);
+  font-size: 12px;
+}
+
+.editor-split-drag-ghost > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-split-ghost-grip {
+  flex: none;
+  width: 9px;
+  height: 13px;
+  color: var(--goose-accent-text);
+  background: radial-gradient(circle, currentColor 1px, transparent 1.5px) 0 0 / 5px 5px;
+}
+
+@keyframes split-drop-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (hover: none) {
+  .editor-split-close { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-split-drag-handle { transition: none; }
+  .editor-split-drop-preview { animation: none; }
+}

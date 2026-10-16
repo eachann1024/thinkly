@@ -10,6 +10,42 @@ import type { AssetAppearance } from "./asset-maintenance-contract";
 let receiving = false;
 let started = false;
 let last = "";
+let publishPending = false;
+
+function appearanceChanged(
+  state: AssetAppearance,
+  previous: AssetAppearance,
+  key: typeof APPEARANCE_KEYS[number],
+): boolean {
+  if (state[key] === previous[key]) return false;
+  return key !== "customFonts" ||
+    JSON.stringify(state.customFonts) !== JSON.stringify(previous.customFonts);
+}
+
+function applyAppearanceChanges(
+  state: AssetAppearance,
+  previous?: AssetAppearance,
+): void {
+  const changed = (key: typeof APPEARANCE_KEYS[number]) =>
+    !previous || appearanceChanged(state, previous, key);
+  if (changed("theme")) applyTheme(state.theme);
+  else if (changed("accentColor")) applyAccentColor(state.accentColor);
+  if (changed("uiFontSize") || changed("editorFontSize") || changed("editorLineHeight")) {
+    applyAppearanceScaleVariables(state);
+  }
+  if (changed("customFonts") || changed("uiFontFamily")) {
+    applyFontVariables(state.customFonts, state);
+  }
+}
+
+function appearanceSignature(): string {
+  const state = useSettings.getState();
+  return JSON.stringify([
+    ...APPEARANCE_KEYS.map((key) => state[key]),
+    resolveTheme(state.theme),
+  ]);
+}
+
 export function getAppearanceSnapshot(): AppearanceSnapshot {
   const state = useSettings.getState();
   const fields = Object.fromEntries(APPEARANCE_KEYS.map((key) => [key, state[key]])) as AssetAppearance;
@@ -23,24 +59,29 @@ export function getAppearanceSnapshot(): AppearanceSnapshot {
 }
 /** 接收时不重水合、不回写持久状态，避免覆盖其他窗口的业务设置。 */
 export function applyAppearanceSnapshot(snapshot: AssetAppearance): void {
+  const previous = useSettings.getState();
+  if (!APPEARANCE_KEYS.some((key) => key in snapshot && appearanceChanged(snapshot, previous, key))) return;
   receiving = true;
   try {
     const fields = Object.fromEntries(APPEARANCE_KEYS.filter((key) => key in snapshot).map((key) => [key, snapshot[key]]));
     useSettings.setState(fields);
-    applyTheme(snapshot.theme);
-    applyAccentColor(snapshot.accentColor);
-    applyAppearanceScaleVariables(snapshot);
-    applyFontVariables(snapshot.customFonts, snapshot);
-    last = JSON.stringify(getAppearanceSnapshot());
+    applyAppearanceChanges(useSettings.getState(), previous);
+    last = appearanceSignature();
   } finally { receiving = false; }
 }
 export function publishAppearanceSnapshot(): void {
-  if (receiving || !useSettings.getState()._hasHydrated) return;
-  const snapshot = getAppearanceSnapshot();
-  const serialized = JSON.stringify(snapshot);
-  if (serialized === last) return;
-  last = serialized;
-  window.gooseDesktop?.appearance?.publish(snapshot);
+  if (receiving || publishPending || !useSettings.getState()._hasHydrated ||
+    !window.gooseDesktop?.appearance) return;
+  publishPending = true;
+  // 等本轮设置与 DOM 写入结束后再采样，避免在每次 setState 中强制重算样式。
+  queueMicrotask(() => {
+    publishPending = false;
+    const signature = appearanceSignature();
+    if (signature === last) return;
+    const snapshot = getAppearanceSnapshot();
+    last = signature;
+    window.gooseDesktop?.appearance?.publish(snapshot);
+  });
 }
 export function startAppearanceSync(): void {
   if (started || typeof window === "undefined") return;
@@ -52,14 +93,11 @@ export function startAppearanceSync(): void {
     removeItem: (key) => storage.removeItem(key),
     setItem: (key, value) => { if (!receiving) return storage.setItem(key, value); },
   } });
-  useSettings.subscribe(() => {
-    const state = useSettings.getState();
+  useSettings.subscribe((state, previous) => {
     if (!state._hasHydrated || receiving) return;
-    if (JSON.stringify(getAppearanceSnapshot()) === last) return;
-    applyTheme(state.theme);
-    applyAccentColor(state.accentColor);
-    applyAppearanceScaleVariables(state);
-    applyFontVariables(state.customFonts, state);
+    if (previous._hasHydrated &&
+      !APPEARANCE_KEYS.some((key) => appearanceChanged(state, previous, key))) return;
+    applyAppearanceChanges(state, previous._hasHydrated ? previous : undefined);
     publishAppearanceSnapshot();
   });
   window.gooseDesktop?.appearance?.onChanged(applyAppearanceSnapshot);

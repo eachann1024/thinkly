@@ -55,7 +55,7 @@ export function GitConflicts({
           {detail?.id === conflict.id && (
             <div className="space-y-3">
               {detail.binary ? (
-                <p className="text-xs text-muted-foreground">此文件无法显示文字预览，可以选择保留版本。</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">此文件无法显示文字预览，可以选择保留版本。</p>
               ) : (
                 <div className="grid gap-2 md:grid-cols-2">
                   {(
@@ -74,9 +74,9 @@ export function GitConflicts({
                 </div>
               )}
               {detail.truncated && (
-                <p className="text-xs text-muted-foreground">内容过长，预览仅显示开头；选择会保留完整文件。</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">内容过长，预览仅显示开头；选择会保留完整文件。</p>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 保留本地将覆盖远端{!conflict.localExists ? "并删除文件" : "内容"}；保留远端将覆盖本地
                 {!conflict.remoteExists ? "并删除文件" : "内容"}。保留两份会另存远端版本。
               </p>

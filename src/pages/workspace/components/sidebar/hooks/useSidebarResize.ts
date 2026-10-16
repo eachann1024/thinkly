@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 
 export const SIDEBAR_MIN_WIDTH = 160;
 const SIDEBAR_DEFAULT_WIDTH = SIDEBAR_MIN_WIDTH;
@@ -118,75 +119,32 @@ export function useSidebarResize({
     return () => clearTimeout(timer);
   }, [preferredWidth, storageKey]);
 
-  const startResizing = (startX: number, pointerId: number) => {
-    if (disableResize || activeCleanupRef.current) return;
-    setIsResizing(true);
-
-    const startWidth = width;
-    let pendingWidth = startWidth;
-    let frame: number | null = null;
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    // 高频移动只写布局变量；整棵侧栏仅在手势开始和结束时更新 React。
-    const flushPreview = () => {
-      frame = null;
-      previewRef.current(pendingWidth);
-    };
-    const updateWidth = (clientX: number) => {
-      pendingWidth = clampSidebarResizeWidth(startWidth + clientX - startX, maxWidth, minWidth);
-      if (frame === null) frame = requestAnimationFrame(flushPreview);
-    };
-    const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerId === pointerId) updateWidth(event.clientX);
-    };
-    const onPointerUp = (event: PointerEvent) => {
-      if (event.pointerId !== pointerId) return;
-      updateWidth(event.clientX);
-      stopResizing();
-    };
-    const onPointerCancel = (event: PointerEvent) => {
-      if (event.pointerId === pointerId) stopResizing();
-    };
-
-    let active = true;
-    const cleanup = () => {
-      if (!active) return;
-      active = false;
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = null;
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
-      window.removeEventListener("blur", stopResizing);
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-      activeCleanupRef.current = null;
-      activeStopRef.current = null;
-    };
-    const stopResizing = () => {
-      if (!active) return;
-      cleanup();
-      flushPreview();
-      setWidth(pendingWidth);
-      setIsResizing(false);
-    };
-
-    activeCleanupRef.current = cleanup;
-    activeStopRef.current = stopResizing;
-    document.addEventListener("pointermove", onPointerMove);
-    document.addEventListener("pointerup", onPointerUp);
-    document.addEventListener("pointercancel", onPointerCancel);
-    window.addEventListener("blur", stopResizing);
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-  };
-
   const handleResizePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (disableResize || event.button !== 0 || !event.isPrimary) return;
+    if (disableResize || event.button !== 0 || !event.isPrimary || activeCleanupRef.current) return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    startResizing(event.clientX, event.pointerId);
+    event.stopPropagation();
+    setIsResizing(true);
+    const startX = event.clientX;
+    const startWidth = width;
+    let pendingWidth = width;
+    const gesture = startPointerDrag({
+      target: event.currentTarget,
+      pointerId: event.pointerId,
+      startX,
+      cursor: "col-resize",
+      onMove: (clientX) => {
+        pendingWidth = clampSidebarResizeWidth(startWidth + clientX - startX, maxWidth, minWidth);
+        previewRef.current(pendingWidth);
+      },
+      onEnd: () => {
+        activeCleanupRef.current = null;
+        activeStopRef.current = null;
+        setWidth(pendingWidth);
+        setIsResizing(false);
+      },
+    });
+    activeCleanupRef.current = gesture.dispose;
+    activeStopRef.current = gesture.finish;
   };
 
   const handleResizeKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {

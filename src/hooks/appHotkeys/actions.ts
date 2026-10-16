@@ -83,7 +83,7 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
   const runUnifiedClose = (fromEscape = false) => {
     if (document.activeElement?.closest("[data-shortcut-recorder]")) return;
     if (isSetupGuideVisible(useSettings.getState())) {
-      void getGooseDesktop()?.closeWindow?.();
+      if (!fromEscape) void getGooseDesktop()?.closeWindow?.();
       return;
     }
     const toastEl = document.querySelector(OPEN_TOAST_SELECTOR);
@@ -128,7 +128,8 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
       useNotebooks.getState().activeNotebookId,
     );
     if (isElectronRuntime() && loneVisibleTab?.id === activeId) {
-      void getGooseDesktop()?.closeWindow?.();
+      // Escape stops at the last visible tab; only Cmd/Ctrl+W may close the window.
+      if (!fromEscape) void getGooseDesktop()?.closeWindow?.();
       return;
     }
     if (activeId) {

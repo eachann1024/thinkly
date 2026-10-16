@@ -67,7 +67,7 @@ export function GitFolderList({
       contentClassName="space-y-2"
     >
       {legacy && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           旧版仓库仅支持一个文件夹。
         </p>
       )}

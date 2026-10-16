@@ -40,7 +40,7 @@ export function useArtifactInteractions({
 
     viewport.addEventListener("wheel", onWheel, { passive: false });
     return () => viewport.removeEventListener("wheel", onWheel);
-  }, [applyTransform, isZoomedIn]);
+  }, [applyTransform, isZoomedIn, transformRef, viewportRef]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!isZoomedIn) return;

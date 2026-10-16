@@ -28,6 +28,7 @@ declare global {
   const IMAGE_EXPORT_LIVE_PREVIEW_MIN_WIDTH: typeof import('../lib/imageExport/index').IMAGE_EXPORT_LIVE_PREVIEW_MIN_WIDTH
   const IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH: typeof import('../lib/imageExport/index').IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH
   const INTERNAL_ASSET_REF_PREFIXES: typeof import('../lib/internalAssetRef').INTERNAL_ASSET_REF_PREFIXES
+  const LEGACY_RELEASES_REPO: typeof import('../lib/appUpdateRelease').LEGACY_RELEASES_REPO
   const LOCAL_FOLDER_EDITOR_CANDIDATES: typeof import('../lib/local-folder-open-apps').LOCAL_FOLDER_EDITOR_CANDIDATES
   const LOCAL_FOLDER_FILE_MANAGER_CANDIDATES: typeof import('../lib/local-folder-open-apps').LOCAL_FOLDER_FILE_MANAGER_CANDIDATES
   const LOCAL_FOLDER_FILE_SHORTCUTS: typeof import('../lib/local-folder-file-actions').LOCAL_FOLDER_FILE_SHORTCUTS
@@ -44,6 +45,8 @@ declare global {
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
+  const PUBLIC_DISTRIBUTION_BASE_URL: typeof import('../lib/appUpdateRelease').PUBLIC_DISTRIBUTION_BASE_URL
+  const PUBLIC_GITHUB_UPDATE_URL: typeof import('../lib/appUpdateRelease').PUBLIC_GITHUB_UPDATE_URL
   const PUBLIC_RELEASES_API_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_API_URL
   const PUBLIC_RELEASES_LATEST_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_LATEST_URL
   const PUBLIC_RELEASES_REPO: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_REPO
@@ -107,8 +110,6 @@ declare global {
   const fetchCustomAIModels: typeof import('../lib/ai-provider/index').fetchCustomAIModels
   const fileStorage: typeof import('../lib/fileStorage').fileStorage
   const formatAttachmentSize: typeof import('../lib/fileStorage').formatAttachmentSize
-  const formatDualShortcut: typeof import('../lib/onboardingContent').formatDualShortcut
-  const formatDualShortcutGroup: typeof import('../lib/onboardingContent').formatDualShortcutGroup
   const formatLocalFolderOpenAppName: typeof import('../lib/local-folder-open-apps').formatLocalFolderOpenAppName
   const frontmatterBodyHasUserVisibleKeys: typeof import('../lib/local-frontmatter').frontmatterBodyHasUserVisibleKeys
   const generateDocxBuffer: typeof import('../lib/docxExport/index').generateDocxBuffer
@@ -165,6 +166,7 @@ declare global {
   const isReservedCloseOrSplitShortcut: typeof import('../lib/fixed-app-shortcuts').isReservedCloseOrSplitShortcut
   const isStatMatchingSnapshot: typeof import('../lib/local-md-snapshot').isStatMatchingSnapshot
   const isSupportedTextImportFile: typeof import('../lib/local-folder-import').isSupportedTextImportFile
+  const isTrustedUpdateAsset: typeof import('../lib/appUpdateRelease').isTrustedUpdateAsset
   const isValidImageUrl: typeof import('../lib/imageProcessor').isValidImageUrl
   const jsonContentToMarkdown: typeof import('../lib/export/index').jsonContentToMarkdown
   const localAssetPaths: typeof import('../lib/local-folder-asset-maintenance').localAssetPaths

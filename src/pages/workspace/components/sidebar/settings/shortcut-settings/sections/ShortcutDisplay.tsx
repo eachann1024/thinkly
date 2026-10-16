@@ -44,9 +44,9 @@ export function FixedShortcutRow({
 }) {
   return (
     <div
-      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 ${SETTINGS_OPTION_ROW_CLASS}`}
+      className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 px-4 py-3 ${SETTINGS_OPTION_ROW_CLASS}`}
     >
-      <span className="min-w-0 text-sm text-muted-foreground">{label}</span>
+      <span className="min-w-0 text-sm leading-6 text-foreground">{label}</span>
       <span className="justify-self-end whitespace-nowrap">
         <KbdShortcut shortcut={shortcut} platform={platform} />
       </span>

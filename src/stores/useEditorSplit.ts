@@ -1,4 +1,5 @@
 import type { SplitState } from "@/lib/editor-split/types";
+import { moveLeaf } from "@/lib/editor-split/move";
 import {
   loadPersisted,
   startEditorSplitPersistence,
@@ -83,6 +84,16 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
     const current = get().byTabId[tabId];
     if (!current) return { kind: "last-pane" };
     return get().closePane(tabId, current.focusedLeafId);
+  },
+
+  movePane: (tabId, sourceId, targetId, placement) => {
+    const { byTabId } = get();
+    const current = byTabId[tabId];
+    if (!current) return false;
+    const next = moveLeaf(current, sourceId, targetId, placement);
+    if (next === current) return false;
+    set({ byTabId: patchTab(byTabId, tabId, next) });
+    return true;
   },
 
   focusPane: (tabId, paneId) => {

@@ -137,6 +137,8 @@ export function useSidebarLayout({
   const settingsResize = useSidebarResize({
     disableResize: disableResize || sidebarCollapsed || !settingsOpen,
     storageKey: "settings-sidebar-width",
+    defaultWidth: 298,
+    minWidth: 232,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
   });

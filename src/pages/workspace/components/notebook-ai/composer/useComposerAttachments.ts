@@ -28,31 +28,34 @@ export function useComposerAttachments(
       document.removeEventListener("dragend", clear, true);
     };
   }, []);
-  const addImageFiles = useCallback((selectedFiles: File[]) => {
-    if (selectedFiles.length === 0) return;
+  const addImageFiles = useCallback(
+    (selectedFiles: File[]) => {
+      if (selectedFiles.length === 0) return;
 
-    const accepted = selectedFiles
-      .filter(isImageUploadFile)
-      .filter((file) =>
-        SUPPORTED_IMAGE_MEDIA_TYPES.has(resolveImageMimeForUpload(file)),
-      )
-      .map((file) => {
-        const mediaType = resolveImageMimeForUpload(file);
-        return file.type === mediaType
-          ? file
-          : new File([file], file.name, {
-              type: mediaType,
-              lastModified: file.lastModified,
-            });
-      });
+      const accepted = selectedFiles
+        .filter(isImageUploadFile)
+        .filter((file) =>
+          SUPPORTED_IMAGE_MEDIA_TYPES.has(resolveImageMimeForUpload(file)),
+        )
+        .map((file) => {
+          const mediaType = resolveImageMimeForUpload(file);
+          return file.type === mediaType
+            ? file
+            : new File([file], file.name, {
+                type: mediaType,
+                lastModified: file.lastModified,
+              });
+        });
 
-    if (accepted.length === 0) {
-      toast.error("请选择 PNG、JPEG、WebP 或 GIF 图片。");
-      return;
-    }
+      if (accepted.length === 0) {
+        toast.error("请选择 PNG、JPEG、WebP 或 GIF 图片。");
+        return;
+      }
 
-    inputRef.current?.insertImages(accepted);
-  }, []);
+      inputRef.current?.insertImages(accepted);
+    },
+    [inputRef],
+  );
 
   const handleImageInput = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

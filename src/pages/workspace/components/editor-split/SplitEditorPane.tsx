@@ -1,54 +1,21 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
 import { useCallback, useLayoutEffect, useRef } from "react";
-import { X } from "@/components/ui/icons";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Editor, type EditorRef } from "@/components/editor/core/Editor";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { closeSplitPaneFromUi } from "@/lib/editor-split/commands";
 import type { SplitLeaf } from "@/lib/editor-split/types";
-import { cn } from "@/lib/utils";
-import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
+import { SplitPaneHeader } from "./SplitPaneHeader";
 import { PageDocumentTitle } from "@/pages/workspace/components/page/PageDocumentTitle";
 import { hasDocumentTitle } from "@/lib/page-title-focus";
+import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { useScrollRestoration } from "@/pages/workspace/hooks/useScrollRestoration";
 import { usePages } from "@/stores/usePages";
 import { useEditorPaneRegistry } from "./editorPaneRegistry";
 import { useSettings } from "@/stores/useSettings";
 import { SearchEditorBridge } from "../sidebar/SearchEditorBridge";
 import { normalizePageLayout } from "@/lib/local-frontmatter";
-
-function SplitPaneCloseButton({
-  tabId,
-  leafId,
-  alwaysVisible,
-}: {
-  tabId: string;
-  leafId: string;
-  alwaysVisible: boolean;
-}) {
-  return (
-    <IconButton size="xs" tone="muted"
-      type="button"
-      aria-label="关闭此格"
-      className={cn(
-        "inline-flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground ",
-        alwaysVisible
-          ? "opacity-100"
-          : "opacity-0 group-hover/split-chrome:opacity-100 group-focus-within/split-chrome:opacity-100",
-      )}
-      onPointerDown={(event) => event.stopPropagation()}
-      onClick={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        closeSplitPaneFromUi(tabId, leafId);
-      }}
-    >
-      <X className="h-3.5 w-3.5" />
-    </IconButton>
-  );
-}
 
 export function SplitEditorPane({
   tabId,
@@ -89,19 +56,7 @@ export function SplitEditorPane({
     return (
       <div className="flex h-full min-h-0 flex-col">
         {showChrome ? (
-          <div
-            data-split-chrome
-            className="group/split-chrome flex h-8 shrink-0 items-center gap-1 border-b border-border px-3"
-          >
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">
-              {title}
-            </span>
-            <SplitPaneCloseButton
-              tabId={tabId}
-              leafId={leaf.id}
-              alwaysVisible
-            />
-          </div>
+          <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} missing />
         ) : null}
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-sm text-muted-foreground">
           <p>找不到这篇笔记</p>
@@ -128,22 +83,7 @@ export function SplitEditorPane({
       data-local-file-page={isLocalFilePage ? "true" : undefined}
     >
       {showChrome ? (
-        <div
-          data-split-chrome
-          className="group/split-chrome flex h-8 shrink-0 items-center gap-1 border-b border-border px-3"
-        >
-          <span
-            className="min-w-0 flex-1 truncate text-sm font-medium text-foreground"
-            title={title}
-          >
-            {title}
-          </span>
-          <SplitPaneCloseButton
-            tabId={tabId}
-            leafId={leaf.id}
-            alwaysVisible={false}
-          />
-        </div>
+        <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} />
       ) : null}
       <EditorHostBridge page={page} isEditorFullWidth>
         <div className="page-layout-body flex min-h-0 min-w-0 flex-1">

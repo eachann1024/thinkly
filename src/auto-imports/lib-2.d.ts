@@ -33,6 +33,8 @@ declare global {
   const downloadWebdavBackup: typeof import('../lib/webdavSync').downloadWebdavBackup
   const effectiveSingleTabMode: typeof import('../lib/tabMode').effectiveSingleTabMode
   const findContainingLocalFolderNotebook: typeof import('../lib/openAssociatedMarkdown').findContainingLocalFolderNotebook
+  const formatDualShortcut: typeof import('../lib/onboardingContent').formatDualShortcut
+  const formatDualShortcutGroup: typeof import('../lib/onboardingContent').formatDualShortcutGroup
   const formatShortcut: typeof import('../lib/utils').formatShortcut
   const formatShortcutToken: typeof import('../lib/shortcut-platform').formatShortcutToken
   const formatSystemModifier: typeof import('../lib/shortcut-platform').formatSystemModifier
@@ -43,6 +45,7 @@ declare global {
   const getPrimaryModifierKeyLabel: typeof import('../lib/utils').getPrimaryModifierKeyLabel
   const getSetupGuideAIStatus: typeof import('../lib/setupGuideAI').getSetupGuideAIStatus
   const getShortcutFromMouseEvent: typeof import('../lib/shortcut-match').getShortcutFromMouseEvent
+  const hasDocumentTitle: typeof import('../lib/page-title-focus').hasDocumentTitle
   const hasSidebarListEscapeOverlay: typeof import('../lib/sidebarListCollapse').hasSidebarListEscapeOverlay
   const hasValidSetupGuideAIResponse: typeof import('../lib/setupGuideAI').hasValidSetupGuideAIResponse
   const isBackupFileName: typeof import('../lib/webdavSync').isBackupFileName
@@ -62,6 +65,7 @@ declare global {
   const isSetupGuideVisible: typeof import('../lib/setupGuide').isSetupGuideVisible
   const isSidebarListCollapseArmed: typeof import('../lib/sidebarListCollapse').isSidebarListCollapseArmed
   const isSidebarPageListTarget: typeof import('../lib/sidebarListCollapse').isSidebarPageListTarget
+  const isUnsavedEditorPage: typeof import('../lib/unsavedLocalPage').isUnsavedEditorPage
   const isUnsavedLocalPage: typeof import('../lib/unsavedLocalPage').isUnsavedLocalPage
   const isVideoUploadFile: typeof import('../lib/videoProcessor').isVideoUploadFile
   const isWikiMediaTarget: typeof import('../lib/wikiLink').isWikiMediaTarget

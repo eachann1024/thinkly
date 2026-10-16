@@ -7,7 +7,6 @@ export {
   TAB_ONLY_FIXED_SHORTCUT_VALUES,
   FIXED_SHORTCUT_VALUES,
   FIXED_SHORTCUTS,
-  FIXED_SHORTCUT_PLATFORMS,
 } from "./sections/shortcutConfig";
 
 export {
@@ -18,6 +17,5 @@ export {
 export { KbdShortcut, FixedShortcutRow } from "./sections/ShortcutDisplay";
 
 export {
-  desktopHotkeyStatusText,
   DesktopGlobalHotkeysCard,
 } from "./sections/DesktopGlobalHotkeysCard";

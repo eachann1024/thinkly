@@ -28,7 +28,6 @@ export function renderAIServiceSection(
   context: ReturnType<typeof useAIModelRefresh>,
 ) {
   const {
-    visible,
     isOnboarding,
     providerId,
     customBaseURL,
@@ -61,7 +60,6 @@ export function renderAIServiceSection(
           AI 服务
         </span>
       }
-      description="选择模型供应商并填写对应 API Key。"
     >
       <div className="space-y-3">
         <div className="space-y-3">
@@ -77,9 +75,6 @@ export function renderAIServiceSection(
                 <Label className="text-sm font-medium text-foreground">
                   供应商
                 </Label>
-                <p className="text-xs text-muted-foreground">
-                  {selectedProvider.description}
-                </p>
               </div>
             </div>
             <DropdownMenu>
@@ -115,9 +110,6 @@ export function renderAIServiceSection(
                       <div className="min-w-0 flex-1">
                         <div className="truncate goose-menu-title">
                           {option.label}
-                        </div>
-                        <div className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
-                          {option.description}
                         </div>
                       </div>
                       <GooseIcons.Check
@@ -198,7 +190,7 @@ export function renderAIServiceSection(
                   setCustomSaveError(null);
                   setApiKeyDraft(event.target.value);
                 }}
-                placeholder="输入 API Key（保存后自动获取可用模型）"
+                placeholder="输入 API Key"
                 autoComplete="off"
                 spellCheck={false}
                 className="pr-10"
@@ -236,11 +228,6 @@ export function renderAIServiceSection(
                 <Label className="text-sm font-medium text-foreground">
                   保存配置
                 </Label>
-                <p className="text-xs text-muted-foreground">
-                  {allowCustomBaseURL
-                    ? "保存 Base URL 与 API Key，并自动获取可用模型列表。"
-                    : "保存连接凭据并自动获取可用模型列表。"}
-                </p>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -263,11 +250,7 @@ export function renderAIServiceSection(
                         {!savingCustomConfig && (
                           <GooseIcons.Save className="h-4 w-4" />
                         )}
-                        {savingCustomConfig
-                          ? "获取模型中…"
-                          : isOnboarding
-                            ? "保存并获取模型"
-                            : "保存"}
+                        {savingCustomConfig ? "获取模型中…" : "保存并获取模型"}
                       </Button>
                     </div>
                   </TooltipTrigger>
