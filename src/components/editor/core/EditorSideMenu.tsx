@@ -19,7 +19,6 @@ import {
 } from "@/components/editor/core/toggleHeadingGutter";
 import { getSectionInsertAnchorId } from "@/components/editor/core/headingSectionFold";
 import { useEditorSideMenuTarget } from "./useEditorSideMenuTarget";
-import { requestBlockMenu } from "../menus/blockMenuActions";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 
 const isMac = /Mac/i.test(navigator.platform);
@@ -238,10 +237,8 @@ export function EditorSideMenu() {
           }}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          onClick={(event) => {
-            if (isDragging) return;
+          onPointerUp={() => {
             pressedHandle.current = false;
-            requestBlockMenu(editor, block.id, event.clientX, event.clientY);
           }}
           className={cn(
             "relative flex h-6 w-[22px] cursor-grab items-center justify-center rounded-[7px] text-muted-foreground",

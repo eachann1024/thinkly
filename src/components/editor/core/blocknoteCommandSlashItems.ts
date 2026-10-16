@@ -1,8 +1,24 @@
 import type { BlockNoteEditor } from "@blocknote/core";
-import { BLOCK_CONVERSIONS } from "../menus/blockMenuActions";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from "../toolbars/formatting/colorPalette";
 import type { SlashMenuItem } from "./blocknoteSlashModel";
+
+const BLOCK_CONVERSIONS = [
+  { label: "文本", type: "paragraph" },
+  { label: "一级标题", type: "heading", props: { level: 1, isToggleable: false, collapsed: false } },
+  { label: "二级标题", type: "heading", props: { level: 2, isToggleable: false, collapsed: false } },
+  { label: "三级标题", type: "heading", props: { level: 3, isToggleable: false, collapsed: false } },
+  { label: "待办事项", type: "checkListItem" },
+  { label: "无序列表", type: "bulletListItem" },
+  { label: "有序列表", type: "numberedListItem" },
+  { label: "折叠列表", type: "toggleListItem", props: { collapsed: false } },
+  { label: "折叠一级标题", type: "heading", props: { level: 1, isToggleable: true, collapsed: false } },
+  { label: "折叠二级标题", type: "heading", props: { level: 2, isToggleable: true, collapsed: false } },
+  { label: "折叠三级标题", type: "heading", props: { level: 3, isToggleable: true, collapsed: false } },
+  { label: "引用", type: "quote" },
+  { label: "标注", type: "callout" },
+  { label: "代码块", type: "codeBlock", props: { language: "text" } },
+] as const;
 
 const aliases: Record<string, string> = {
   paragraph: "text paragraph 文本", heading: "heading title 标题", checkListItem: "todo task 待办",

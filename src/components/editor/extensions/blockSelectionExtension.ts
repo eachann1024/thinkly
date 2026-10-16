@@ -3,7 +3,6 @@ import { SuggestionMenu } from "@blocknote/core/extensions";
 import { Plugin, PluginKey, TextSelection } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { GooseBlockSelection, currentBlockNode, selectedBlockRoots, isBlockNodeSelection } from "./blockSelectionModel";
-import { duplicateSelectedBlocks } from "./duplicateBlocks";
 import { deleteSelectionSafely } from "./selectionDelete";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 
@@ -21,17 +20,6 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
       handleKeyDown(view, event) {
         if (view.composing || event.isComposing || event.keyCode === 229) return false;
         const primary = isPlatformPrimaryModifierEvent(event);
-        if (primary && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "d") {
-          return duplicateSelectedBlocks(editor);
-        }
-        if (primary && !event.shiftKey && !event.altKey && event.key === "/") {
-          const block = currentBlockNode(view.state);
-          if (!block) return false;
-          view.dom.dispatchEvent(new CustomEvent("goose-open-block-menu", {
-            bubbles: true, detail: { blockId: String(block.node.attrs.id) },
-          }));
-          return true;
-        }
         if (primary || event.altKey || event.ctrlKey || event.metaKey) return false;
         if (editor.getExtension(SuggestionMenu)?.shown()) return false;
         const state = view.state;
