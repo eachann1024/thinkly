@@ -233,3 +233,19 @@
 .main-tree-row--hovered svg:not([class*="text-danger"]) {
   color: var(--goose-interactive-hover-fg);
 }
+
+/* 文件夹数量胶囊：底色取当前文字色的浅透明，悬停与选中行同样可辨。 */
+.main-tree-row-count {
+  flex: none;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+  color: var(--goose-text-secondary, hsl(var(--muted-foreground)));
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

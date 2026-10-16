@@ -50,6 +50,9 @@ export function hydrateSettings(state?: SettingsState) {
   if (state && typeof state.randomIconOnCreate !== "boolean") {
     useSettings.setState({ randomIconOnCreate: false });
   }
+  if (state && typeof state.showSidebarFolderCount !== "boolean") {
+    useSettings.setState({ showSidebarFolderCount: false });
+  }
   if (state && state.singleTabMode !== true) {
     useSettings.setState({ singleTabMode: true });
   }
