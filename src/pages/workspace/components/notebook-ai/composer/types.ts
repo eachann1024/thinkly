@@ -14,12 +14,8 @@ export interface NotebookAiImageAttachment {
 export interface ComposerHandle {
   /** 聚焦输入框 */
   focus: () => void;
-  /** 打开面板后立即给输入框植入初始引用（当前页上下文） */
+  /** 按用户操作插入文件引用 */
   insertReference: (reference: AiFileReferenceAttrs) => void;
-  /** 空会话默认 @ 仍可替换时，改成最新当前页 */
-  replaceDefaultPageReference: (
-    reference: AiFileReferenceAttrs,
-  ) => "applied" | "already" | "skipped";
   /** 把选区引用 chip 追加到输入框末尾；加入对话路径由外层聚焦 */
   appendSelectionQuote: (
     quote: AiSelectionQuoteAttrs,

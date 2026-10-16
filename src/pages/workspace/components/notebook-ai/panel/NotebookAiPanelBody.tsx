@@ -46,7 +46,7 @@ export function NotebookAiPanelBody({
   } = session;
   const hydrated = useSettings((state) => state._hasHydrated);
   const unavailable = !hydrated || Boolean(unavailableReason);
-  const { initialReference, composerSeedContent } = seed;
+  const { composerSeedContent } = seed;
   const { handleSend, handleSlashCommand, composerPlaceholder } = commands;
   return (
     <>
@@ -56,27 +56,14 @@ export function NotebookAiPanelBody({
             <ChatMessages
               messages={messages}
               onEmptySuggestion={(text) => {
-                const reference = initialReference
-                  ? { ...initialReference, role: "target" as const }
-                  : null;
-                const tokens = reference
-                  ? [
-                      {
-                        type: "reference" as const,
-                        reference,
-                        role: "target" as const,
-                      },
-                      { type: "text" as const, text: `\n${text}` },
-                    ]
-                  : [{ type: "text" as const, text }];
                 void handleSend(
                   {
                     promptText: text,
                     freeformText: text,
-                    references: reference ? [reference] : [],
+                    references: [],
                     images: [],
                     skills: [],
-                    tokens,
+                    tokens: [{ type: "text", text }],
                   },
                   [],
                 );

@@ -20,8 +20,6 @@ export interface NotebookAiSessionValue {
   unavailableReason: string | undefined;
   placeholderIndex: number;
   composerRevision: number;
-  /** 用户显式新建空白会话后，不要再种默认 @ 当前页 */
-  suppressDefaultPageSeed: boolean;
   send: (
     payload: AiComposerPayload,
     imageAttachments: NotebookAiImageAttachment[],

@@ -67,7 +67,7 @@ export function useComposerSelectionHandle(
       cancelled = true;
       window.removeEventListener(APPEND_COMPOSER_SELECTION_EVENT, flushPending);
     };
-  }, [conversationId, notebookId]);
+  }, [conversationId, inputRef, notebookId]);
 
   useImperativeHandle(
     ref,
@@ -78,11 +78,9 @@ export function useComposerSelectionHandle(
       insertReference: (reference: AiFileReferenceAttrs) => {
         inputRef.current?.insertReference(reference);
       },
-      replaceDefaultPageReference: (reference: AiFileReferenceAttrs) =>
-        inputRef.current?.replaceDefaultPageReference(reference) ?? "skipped",
       appendSelectionQuote: (quote, options) =>
         inputRef.current?.appendSelectionQuote(quote, options) ?? "skipped",
     }),
-    [],
+    [inputRef],
   );
 }

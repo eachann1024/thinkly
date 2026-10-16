@@ -15,16 +15,10 @@ import {
   pruneEmptyComposerTextNodes,
   placeCaretAfterNode,
 } from "./composerCaret";
-import {
-  inspectDefaultComposerTokens,
-  buildComposerDraftFromReference,
-  readTokensFromDom,
-  setDomFromJsonContent,
-} from "./composerTokens";
 import type { ComposerContentState } from "./useComposerContentState";
 
 export function useComposerReferences(state: ComposerContentState) {
-  const { editorRef, liveRegionRef, imageRegistryRef, emitCurrentContent } =
+  const { editorRef, liveRegionRef, emitCurrentContent } =
     state;
   // 引用以稳定 pageId 为准；更名后同步更新 chip、草稿和发送内容，不重建编辑器选区。
   const syncReferenceTitles = useCallback(() => {
@@ -124,32 +118,10 @@ export function useComposerReferences(state: ComposerContentState) {
     [emitCurrentContent],
   );
 
-  const replaceDefaultPageReference = useCallback(
-    (reference: AiFileReferenceAttrs): "applied" | "already" | "skipped" => {
-      const el = editorRef.current;
-      if (!el) return "skipped";
-
-      const { replaceable, solePageId } = inspectDefaultComposerTokens(
-        readTokensFromDom(el),
-      );
-      if (!replaceable) return "skipped";
-      if (solePageId === reference.pageId) return "already";
-
-      const next = buildComposerDraftFromReference(reference);
-      setDomFromJsonContent(el, next, imageRegistryRef.current);
-      const chip = el.querySelector("[data-ai-mention-attrs]");
-      if (chip) placeCaretAfterNode(chip);
-      emitCurrentContent();
-      return "applied";
-    },
-    [emitCurrentContent],
-  );
-
   return {
     syncReferenceTitles,
     insertReference,
     appendSelectionQuote,
-    replaceDefaultPageReference,
   };
 }
 

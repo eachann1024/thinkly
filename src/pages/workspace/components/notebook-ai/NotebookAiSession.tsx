@@ -39,7 +39,6 @@ export function NotebookAiSessionProvider({
     unavailableReason,
     placeholderIndex,
     composerRevision,
-    suppressDefaultPageSeed,
   } = state;
   const stopAll = useStreamLifecycle(state);
   const send = useSendMessage(state);
@@ -66,7 +65,6 @@ export function NotebookAiSessionProvider({
       unavailableReason,
       placeholderIndex,
       composerRevision,
-      suppressDefaultPageSeed,
       send,
       newConversation,
       ensureFreshConversation,
@@ -90,7 +88,6 @@ export function NotebookAiSessionProvider({
       unavailableReason,
       placeholderIndex,
       composerRevision,
-      suppressDefaultPageSeed,
       send,
       newConversation,
       ensureFreshConversation,
