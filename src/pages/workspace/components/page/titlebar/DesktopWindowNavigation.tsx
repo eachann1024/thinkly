@@ -27,7 +27,7 @@ export function DesktopWindowNavigation({
         ].map(({ label, Icon, disabled, onClick }) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
-              <IconButton size="icon" tone="muted" type="button" className={cn(actionButtonClass, "disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
+              <IconButton size="icon" tone="muted" type="button" className={cn(actionButtonClass, "electron-history-button disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
                 <Icon className="h-4 w-4" />
               </IconButton>
             </TooltipTrigger>
