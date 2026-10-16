@@ -3,10 +3,11 @@
   --goose-editor-grid-size: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.5));
   --goose-editor-grid-line: hsl(var(--foreground) / 0.07);
   --goose-editor-grid-dot: hsl(var(--foreground) / 0.16);
-  /* 网格居中于每格并按整格铺满，四周首尾留半格，不贴边。 */
+  /* 网格只画在内缩半格的整格区域里，四边首层线与点都不贴边。 */
+  --goose-editor-grid-area: calc(round(down, calc(100% - var(--goose-editor-grid-size)), var(--goose-editor-grid-size)) + 1px);
   --goose-editor-grid-layers:
-    linear-gradient(transparent calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) round local,
-    linear-gradient(90deg, transparent calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% - 0.5px), var(--goose-editor-grid-line) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) round local;
+    repeating-linear-gradient(to bottom, var(--goose-editor-grid-line) 0 1px, transparent 1px var(--goose-editor-grid-size)) center / var(--goose-editor-grid-area) var(--goose-editor-grid-area) no-repeat local,
+    repeating-linear-gradient(to right, var(--goose-editor-grid-line) 0 1px, transparent 1px var(--goose-editor-grid-size)) center / var(--goose-editor-grid-area) var(--goose-editor-grid-area) no-repeat local;
 }
 
 :root[data-goose-editor-grid="dots"] {
