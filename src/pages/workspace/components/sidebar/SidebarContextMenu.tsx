@@ -63,7 +63,7 @@ export function SidebarContextMenu(props: SidebarContextMenuProps) {
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent
-          className="goose-sidebar-context-menu w-60"
+          className="goose-sidebar-context-menu w-[var(--goose-menu-min-width)]"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           {renderSidebarContextGroups(context)}

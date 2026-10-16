@@ -3,6 +3,7 @@ import { formatShortcut } from "@/lib/utils";
 import { useTabs } from "@/stores/useTabs";
 import {
   LOCAL_FOLDER_FILE_SHORTCUTS,
+  copyLocalFolderPagePath,
   openLocalFolderPageInExternalApp,
   openLocalFolderPageInTerminal,
   revealLocalFolderPageInFileManager,
@@ -34,12 +35,13 @@ export function appendSidebarOpenMoveGroups(
     showOpen,
     showOrganize,
     showMove,
+    showCopy,
     sections,
   } = input;
 
   if (showOpen) {
     sections.push(
-      <ContextMenuGroup key="open" className="mt-2">
+      <ContextMenuGroup key="open">
         <ContextMenuLabel>打开</ContextMenuLabel>
         {showOpenTab ? (
           <ContextMenuItem
@@ -100,28 +102,31 @@ export function appendSidebarOpenMoveGroups(
     );
   }
 
-  if (showOrganize) {
+  if (showOrganize || showMove || showCopy) {
     sections.push(
-      <ContextMenuGroup key="organize" className="mt-2">
+      <ContextMenuGroup key="organize">
         <ContextMenuLabel>整理</ContextMenuLabel>
-        <ContextMenuItem onSelect={handleDuplicatePage}>
-          <GooseIcons.Copy className="h-4 w-4" />
-          <span>创建副本</span>
-        </ContextMenuItem>
-      </ContextMenuGroup>,
-    );
-  }
-
-  if (showMove) {
-    sections.push(
-      <ContextMenuGroup
-        key="move"
-        className={showOrganize ? undefined : "mt-2"}
-      >
-        <SidebarMoveSubmenu
-          notebooks={movableNotebooks}
-          onMove={handleMoveToNotebook}
-        />
+        {showOrganize ? (
+          <ContextMenuItem onSelect={handleDuplicatePage}>
+            <GooseIcons.Copy className="h-4 w-4" />
+            <span>创建副本</span>
+          </ContextMenuItem>
+        ) : null}
+        {showMove ? (
+          <SidebarMoveSubmenu
+            notebooks={movableNotebooks}
+            onMove={handleMoveToNotebook}
+          />
+        ) : null}
+        {showCopy ? (
+          <ContextMenuItem onSelect={() => void copyLocalFolderPagePath(page)}>
+            <GooseIcons.ClipboardCopy className="h-4 w-4" />
+            <span className="min-w-0 truncate">
+              {page.isFolder ? "复制文件夹路径" : "复制文件路径"}
+            </span>
+            <MenuShortcut shortcut={LOCAL_FOLDER_FILE_SHORTCUTS.copyFilePath} />
+          </ContextMenuItem>
+        ) : null}
       </ContextMenuGroup>,
     );
   }
