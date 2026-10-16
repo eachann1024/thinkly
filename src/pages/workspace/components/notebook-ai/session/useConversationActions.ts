@@ -14,7 +14,6 @@ export function useConversationActions(state: SessionState) {
     messages,
     clearError,
     requestCurrentPageIdRef,
-    setSuppressDefaultPageSeed,
     setComposerRevision,
     setConversationId,
     setMessages,
@@ -41,7 +40,6 @@ export function useConversationActions(state: SessionState) {
       const nextConversationId = useNotebookAiChats
         .getState()
         .createConversation(notebookId);
-      setSuppressDefaultPageSeed(true);
       setComposerRevision((revision) => revision + 1);
       setConversationId(nextConversationId);
       setMessages([]);
@@ -50,7 +48,9 @@ export function useConversationActions(state: SessionState) {
       isBusy,
       persistCurrentConversation,
       clearError,
+      requestCurrentPageIdRef,
       notebookId,
+      setComposerRevision,
       setConversationId,
       setMessages,
     ],
@@ -67,7 +67,6 @@ export function useConversationActions(state: SessionState) {
     clearError();
     requestCurrentPageIdRef.current = null;
     useNotebookAiChats.getState().clearComposerDraft(notebookId);
-    setSuppressDefaultPageSeed(true);
     setComposerRevision((revision) => revision + 1);
     setConversationId(nextConversationId);
     setMessages([]);
@@ -78,6 +77,8 @@ export function useConversationActions(state: SessionState) {
     notebookId,
     persistCurrentConversation,
     clearError,
+    requestCurrentPageIdRef,
+    setComposerRevision,
     setConversationId,
     setMessages,
   ]);
@@ -106,18 +107,18 @@ export function useConversationActions(state: SessionState) {
       clearError();
       requestCurrentPageIdRef.current = null;
       options?.onConsumeCapturedSelection?.();
-      setSuppressDefaultPageSeed(false);
       setConversationId(nextConversationId);
       setMessages(nextMessages);
     },
     [
       isBusy,
       conversationId,
+      persistCurrentConversation,
       notebookId,
       clearError,
+      requestCurrentPageIdRef,
       setConversationId,
       setMessages,
-      persistCurrentConversation,
     ],
   );
 
@@ -148,7 +149,6 @@ export function useConversationActions(state: SessionState) {
         const nextMessages = useNotebookAiChats
           .getState()
           .getConversationMessages(notebookId, nextActiveConversationId);
-        setSuppressDefaultPageSeed(false);
         setConversationId(nextActiveConversationId);
         setMessages(nextMessages);
         return true;
@@ -159,7 +159,6 @@ export function useConversationActions(state: SessionState) {
       const freshConversationId = useNotebookAiChats
         .getState()
         .createConversation(notebookId);
-      setSuppressDefaultPageSeed(true);
       setComposerRevision((revision) => revision + 1);
       setConversationId(freshConversationId);
       setMessages([]);
@@ -170,6 +169,8 @@ export function useConversationActions(state: SessionState) {
       conversationId,
       notebookId,
       clearError,
+      requestCurrentPageIdRef,
+      setComposerRevision,
       setConversationId,
       setMessages,
     ],

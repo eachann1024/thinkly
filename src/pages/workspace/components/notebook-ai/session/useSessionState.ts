@@ -26,7 +26,6 @@ export function useSessionState(notebookId: string) {
   }));
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [composerRevision, setComposerRevision] = useState(0);
-  const [suppressDefaultPageSeed, setSuppressDefaultPageSeed] = useState(false);
   const [isCompacting, setIsCompacting] = useState(false);
 
   // WorkspaceLayout 不再用 key 重挂整个 Provider。这里在 render 期间把新笔记本
@@ -42,7 +41,6 @@ export function useSessionState(notebookId: string) {
       generation: session.generation + 1,
     });
     setPlaceholderIndex(0);
-    setSuppressDefaultPageSeed(false);
     setIsCompacting(false);
   }
   const { conversationId, generation: sessionGeneration } = session;
@@ -167,8 +165,6 @@ export function useSessionState(notebookId: string) {
     setPlaceholderIndex,
     composerRevision,
     setComposerRevision,
-    suppressDefaultPageSeed,
-    setSuppressDefaultPageSeed,
     isCompacting,
     setIsCompacting,
     composerHasContent,

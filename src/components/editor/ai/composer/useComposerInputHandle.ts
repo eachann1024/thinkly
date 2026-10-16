@@ -35,7 +35,6 @@ export function useComposerInputHandle(
     syncReferenceTitles,
     insertReference,
     appendSelectionQuote,
-    replaceDefaultPageReference,
   } = references;
   const { releaseAllImages, insertImages } = images;
   useImperativeHandle(
@@ -90,7 +89,6 @@ export function useComposerInputHandle(
       insertImages,
       insertReference,
       appendSelectionQuote,
-      replaceDefaultPageReference,
     }),
     [
       clearMentionState,
@@ -101,7 +99,6 @@ export function useComposerInputHandle(
       insertImages,
       insertReference,
       appendSelectionQuote,
-      replaceDefaultPageReference,
       syncReferenceTitles,
       setPlaceholderVisible,
     ],

@@ -35,13 +35,6 @@ export interface AiComposerInputHandle {
   quote: AiSelectionQuoteAttrs,
   options?: { restoreCaret?: boolean; animate?: boolean },
  ) => "appended" | "duplicate" | "skipped";
- /**
-  * 空会话默认 @ 当前页：输入区仍是「空 / 仅一条文件引用」时替换为最新页。
-  * 用户已打字或加入其他 chip 时跳过。
-  */
- replaceDefaultPageReference: (
-  reference: AiFileReferenceAttrs,
- ) => "applied" | "already" | "skipped";
 }
 
 export interface AiComposerInputProps {
