@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useRef, useReducer } from "react";
+import { useCallback, useEffect, useRef, useReducer, useState } from "react";
+import { createPortal } from "react-dom";
+import { getGooseDesktop } from "@/lib/electron/runtime";
+import { startIntroMusic } from "./introMusic";
 import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useIntroVideo } from "@/stores/introVideo";
@@ -11,6 +14,8 @@ const base = import.meta.env.BASE_URL;
 
 function IntroVideoLayer() {
   const hide = useIntroVideo((state) => state.hide);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const stopMusic = useRef<(() => void) | undefined>(undefined);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [state, dispatch] = useReducer(introVideoReducer, { status: "loading" });
   const ready = state.status === "ready" || (state.status === "closing" && state.ready);
@@ -21,12 +26,16 @@ function IntroVideoLayer() {
 
   const close = useCallback(() => {
     if (exitTimer.current !== undefined) return;
+    stopMusic.current?.();
+    videoRef.current?.pause();
     dispatch({ type: "close" });
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     exitTimer.current = window.setTimeout(hide, reduced ? 0 : EXIT_MS);
   }, [hide]);
 
   useEffect(() => {
+    const previousFocus = document.activeElement;
+    if (videoRef.current) stopMusic.current = startIntroMusic(videoRef.current);
     closeRef.current?.focus();
     const fallback = window.setTimeout(markReady, POSTER_FALLBACK_MS);
     const onKeyDown = (event: KeyboardEvent) => {
@@ -37,6 +46,8 @@ function IntroVideoLayer() {
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => {
+      stopMusic.current?.();
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
       window.clearTimeout(fallback);
       window.clearTimeout(exitTimer.current);
       window.removeEventListener("keydown", onKeyDown, true);
@@ -53,6 +64,7 @@ function IntroVideoLayer() {
       data-closing={closing}
     >
       <video
+        ref={videoRef}
         className="intro-video-media"
         src={`${base}intro/goose-intro.mp4`}
         poster={`${base}intro/goose-intro-poster.jpg`}
@@ -64,22 +76,45 @@ function IntroVideoLayer() {
         onEnded={close}
         onError={hide}
       />
-      <Button
-        ref={closeRef}
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label="关闭"
-        className="intro-video-close"
-        onClick={close}
-      >
-        <GooseIcons.X className="h-4 w-4" />
-      </Button>
+      <div className="intro-video-controls">
+        <Button
+          ref={closeRef}
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="关闭欢迎动画"
+          title="关闭欢迎动画（Esc）"
+          className="intro-video-close"
+          onClick={close}
+        >
+          <GooseIcons.X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
 
+function IntroVideoSequence() {
+  const [prepared, setPrepared] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      void (async () => {
+        try {
+          await getGooseDesktop()?.prepareWelcomeWindow(reduced);
+        } catch (error) {
+          console.warn("Welcome window preparation failed", error);
+        }
+        if (!cancelled) setPrepared(true);
+      })();
+    }, 1000);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, []);
+  return prepared ? <IntroVideoLayer /> : null;
+}
+
 export function IntroVideoOverlay() {
   const open = useIntroVideo((state) => state.open);
-  return open ? <IntroVideoLayer /> : null;
+  return open ? createPortal(<IntroVideoSequence />, document.body) : null;
 }

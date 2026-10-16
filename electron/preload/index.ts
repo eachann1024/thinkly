@@ -215,6 +215,8 @@ const gooseDesktop = {
     invoke("desktop:toggleMaximizeWindow") as Promise<boolean>,
   isWindowMaximized: () =>
     invoke("desktop:isWindowMaximized") as Promise<boolean>,
+  prepareWelcomeWindow: (reducedMotion?: boolean) =>
+    invoke("desktop:prepareWelcomeWindow", reducedMotion) as Promise<void>,
   finishTabDrag: (opts: {
     tab: WindowTabSnapshot;
     cursor: { x: number; y: number };

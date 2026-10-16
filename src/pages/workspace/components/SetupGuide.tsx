@@ -58,10 +58,10 @@ function SetupGuideFlow() {
     if (controlsRef.current) controlsRef.current.scrollTop = 0;
   }, [step]);
 
-  const closeGuide = () => {
+  const closeGuide = (playIntro = false) => {
     const firstRun = !useSettings.getState().setupGuideSeen;
     useSettings.setState({ setupGuideSeen: true, setupGuideOpen: false });
-    if (firstRun) useIntroVideo.getState().show();
+    if (firstRun && playIntro) useIntroVideo.getState().show();
   };
 
   const moveToStep = (nextStep: SetupStep) => {
@@ -152,7 +152,7 @@ function SetupGuideFlow() {
 
       <footer className="setup-guide-footer">
         {step < 1 && (
-          <Button type="button" variant="ghost" onClick={closeGuide}>
+          <Button type="button" variant="ghost" onClick={() => closeGuide()}>
             退出引导
           </Button>
         )}
@@ -170,7 +170,7 @@ function SetupGuideFlow() {
               下一步
             </Button>
           ) : (
-            <Button type="button" onClick={closeGuide}>
+            <Button type="button" onClick={() => closeGuide(true)}>
               完成设置
             </Button>
           )}

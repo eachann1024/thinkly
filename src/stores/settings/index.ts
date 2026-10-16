@@ -53,6 +53,8 @@ export const useSettings = create<SettingsState>()(
         return {
           ...current,
           ...normalizeFixedShortcutSettings(saved),
+          // Existing installations predate the first-run flag.
+          setupGuideSeen: saved.setupGuideSeen ?? (persisted != null),
         } as SettingsState;
       },
       migrate: (persistedState, version) =>
