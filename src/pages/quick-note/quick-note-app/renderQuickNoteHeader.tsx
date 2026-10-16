@@ -2,7 +2,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
 import { CircleAlert, FilePlus2, X, Pencil } from "@/components/ui/icons";
-import { getQuickNoteSlotName } from "@/stores/useQuickNote";
+import {
+  getQuickNoteSlotName,
+  QUICKNOTE_ZOOM_MIN,
+  QUICKNOTE_ZOOM_MAX,
+} from "@/stores/useQuickNote";
 import {
   Popover,
   PopoverContent,
@@ -10,7 +14,6 @@ import {
 } from "@/components/ui/popover";
 import { QuickNoteSlotSwitcher } from "../QuickNoteSlotSwitcher";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
-import { formatShortcut, getPlatformKind } from "@/lib/utils";
 import type { useQuickNoteWindowPlacement } from "./useQuickNoteWindowPlacement";
 
 export function renderQuickNoteHeader(
@@ -25,7 +28,9 @@ export function renderQuickNoteHeader(
     setRenameValue,
     renameInputRef,
     slotNames,
-    helpShortcuts,
+    zoom,
+    setEditorZoom,
+    editorFontSize,
     displaySlot,
     displaySlotName,
     occupiedSlots,
@@ -131,8 +136,8 @@ export function renderQuickNoteHeader(
             <PopoverTrigger asChild>
               <Button contentStyle="preserve" variant="ghost"
                 type="button"
-                aria-label="使用说明"
-                title="使用说明"
+                aria-label="便签设置"
+                title="便签设置"
                 className={`quicknote-titlebar-btn quicknote-help-trigger ${helpOpen ? "goose-interactive--selected" : ""}`}
                 style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
               >
@@ -140,62 +145,46 @@ export function renderQuickNoteHeader(
               </Button>
             </PopoverTrigger>
             <PopoverContent
+              variant="menu"
               align="end"
               side="bottom"
               collisionPadding={8}
               className="quicknote-help-popover w-72 text-xs"
               onCloseAutoFocus={(event) => event.preventDefault()}
             >
-              <div className="quicknote-help-heading">
-                <div className="text-sm font-medium">速记便签</div>
-                <p>
-                  内容默认只留在当前便签。点「保存到笔记」会在当前笔记本新建一篇，并清空这张便签。
-                </p>
-              </div>
               <Button contentStyle="preserve" variant="ghost"
                 type="button"
-                className="quicknote-help-rename flex w-full items-center gap-2 text-left text-xs text-foreground"
+                className="goose-menu-item quicknote-help-rename flex w-full items-center gap-2 text-left text-xs text-foreground"
                 onClick={() => startRename(activeSlot)}
               >
                 <Pencil className="h-3.5 w-3.5 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">重命名当前便签</span>
+                <span className="min-w-0 flex-1 truncate">重命名</span>
                 <span className="max-w-24 truncate text-muted-foreground">
                   {getQuickNoteSlotName(activeSlot, slotNames)}
                 </span>
               </Button>
-              <ul className="quicknote-help-list text-muted-foreground">
-                <li>
-                  <b className="text-foreground">切换</b>
-                  ：顶部 1–5 是五个独立便签。点击或拖动切换；也可按
-                  {helpShortcuts.switchSlots}
-                  {helpShortcuts.alternateSwitchSlots
-                    ? `，或 ${helpShortcuts.alternateSwitchSlots}`
-                    : ""}
-                  。
-                </li>
-                <li>
-                  <b className="text-foreground">编辑</b>：
-                  {helpShortcuts.zoomIn} / {helpShortcuts.zoomOut} 缩放，
-                  {helpShortcuts.zoomReset} 复位；{helpShortcuts.undo} 撤销，
-                  {helpShortcuts.redo} 或 {helpShortcuts.alternateRedo} 重做。
-                </li>
-                <li>
-                  <b className="text-foreground">保存</b>
-                  ：点右上角
-                  <FilePlus2 className="mx-0.5 inline h-3 w-3 align-text-bottom" />
-                  把当前便签写入当前笔记本，保存后清空并回到空白。
-                </li>
-                <li>
-                  <b className="text-foreground">收起</b>
-                  ：小窗始终置顶；按 {formatShortcut(
-                    "Esc",
-                    getPlatformKind(),
-                  )}{" "}
-                  或点右上角
-                  <X className="mx-0.5 inline h-3 w-3 align-text-bottom" />
-                  收起。草稿、位置、尺寸和缩放都会保留。
-                </li>
-              </ul>
+              <div className="quicknote-font-control">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="quicknote-font-size">字号</label>
+                  <span className="tabular-nums text-muted-foreground">
+                    {Math.round(editorFontSize * zoom * 10) / 10} px
+                  </span>
+                </div>
+                <input
+                  id="quicknote-font-size"
+                  type="range"
+                  aria-label="字号"
+                  aria-valuetext={`${Math.round(editorFontSize * zoom * 10) / 10} 像素`}
+                  min={QUICKNOTE_ZOOM_MIN}
+                  max={QUICKNOTE_ZOOM_MAX}
+                  step={0.01}
+                  value={zoom}
+                  onChange={(event) => setEditorZoom(Number(event.target.value))}
+                />
+              </div>
+              <p className="quicknote-save-hint text-muted-foreground">
+                保存到笔记后，当前便签会清空。
+              </p>
             </PopoverContent>
           </Popover>
           <Button contentStyle="preserve" variant="ghost"
