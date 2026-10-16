@@ -62,12 +62,14 @@ function editableCaret(el: HTMLElement): CaretBox | null {
   const padTop = parseFloat(style.paddingTop || "0");
   const padBottom = parseFloat(style.paddingBottom || "0");
   const contentHeight = Math.max(0, box.height - padTop - padBottom) || lineHeight;
-  const caretHeight = Math.min(contentHeight, Math.round(fontSize * CARET_EM_RATIO));
-  const rtl = style.direction === "rtl";
   const blockContent = anchor.closest<HTMLElement>(".bn-block-content");
+  // A multiline empty editor starts on its first line, regardless of its min-height.
+  const caretLineHeight = blockContent ? contentHeight : Math.min(contentHeight, lineHeight);
+  const caretHeight = Math.min(caretLineHeight, Math.round(fontSize * CARET_EM_RATIO));
+  const rtl = style.direction === "rtl";
   const caretTop = blockContent
     ? blockContent.getBoundingClientRect().top + Math.max(0, (blockContent.getBoundingClientRect().height - caretHeight) / 2)
-    : box.top + padTop + Math.max(0, (contentHeight - caretHeight) / 2);
+    : box.top + padTop + Math.max(0, (caretLineHeight - caretHeight) / 2);
   return {
     left: rtl
       ? box.right - parseFloat(style.paddingRight || "0") - 2
