@@ -21,3 +21,20 @@
 :root[data-goose-editor-grid] .appearance-preview-editor {
   background: var(--goose-editor-grid-layers);
 }
+
+/* 彩色侧栏：在原侧栏表面上叠一层当前强调色，纸色渐变同样保留。 */
+:root[data-goose-sidebar-tint] {
+  --goose-sidebar-tint: color-mix(in srgb, var(--goose-accent-solid) 10%, transparent);
+  --goose-sidebar-tint-layer: linear-gradient(var(--goose-sidebar-tint), var(--goose-sidebar-tint));
+  --appearance-preview-sidebar-surface: var(--goose-sidebar-tint-layer), var(--goose-shell-surface);
+}
+
+:root.dark[data-goose-sidebar-tint] {
+  --goose-sidebar-tint: color-mix(in srgb, var(--goose-accent-solid) 12%, transparent);
+}
+
+:root[data-goose-sidebar-tint] .workspace-shell {
+  --workspace-sidebar-surface:
+    var(--goose-sidebar-tint-layer),
+    var(--goose-sidebar-surface, color-mix(in srgb, hsl(var(--goose-shell-bg)) 60%, hsl(var(--goose-editor-bg))));
+}
