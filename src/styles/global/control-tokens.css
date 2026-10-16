@@ -3,8 +3,8 @@
   --goose-control-radius: 8px;
   --goose-menu-radius: 8px;
   --goose-menu-item-radius: 4px;
-  --goose-menu-item-height: 36px;
-  --goose-menu-min-width: 208px;
+  --goose-menu-item-height: 32px;
+  --goose-menu-min-width: 224px;
   --goose-menu-item-font-size: 14px;
   --goose-menu-item-line-height: 20px;
   --goose-field-radius: var(--radius, 0.75rem);
@@ -31,8 +31,9 @@
   --goose-icon-button-height-compact: 1.75rem;
   --goose-icon-button-height: 2rem;
   --goose-control-motion-duration: 150ms;
-  --goose-menu-row-gap: 4px;
-  --goose-list-row-gap: var(--goose-menu-row-gap);
+  --goose-menu-row-gap: 2px;
+  --goose-menu-group-gap: 6px;
+  --goose-list-row-gap: 4px;
   --goose-menu-content-gap: 8px;
   --goose-menu-surface-inset: 6px;
   --goose-editor-toolbar-control-size: 26px;

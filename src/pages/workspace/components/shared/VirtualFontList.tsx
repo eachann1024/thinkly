@@ -5,7 +5,7 @@ import { Check } from "@/components/ui/icons";
 import { toCssFontFamily } from "@/lib/fontLoader";
 
 export type FontListOption = { family: string | null; label: string };
-const ROW_HEIGHT = 40;
+const ROW_HEIGHT = 34; // 32px 菜单行 + 2px 背景间隙。
 
 export function VirtualFontList({
   label,

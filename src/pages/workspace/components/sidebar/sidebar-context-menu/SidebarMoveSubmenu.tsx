@@ -18,7 +18,7 @@ export function SidebarMoveSubmenu({
       </ContextMenuSubTrigger>
       <ContextMenuSubContent
         aria-label="移动到其他记事本"
-        className="goose-sidebar-context-menu w-56 max-h-[min(18rem,calc(100dvh-16px))]"
+        className="goose-sidebar-context-menu w-[var(--goose-menu-min-width)] max-h-[min(18rem,calc(100dvh-16px))]"
       >
         {notebooks.map((notebook) => (
           <ContextMenuItem

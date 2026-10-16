@@ -3,32 +3,14 @@ import {
   deletePageWithUndo,
   permanentlyDeletePageWithCleanup,
 } from "@/lib/page-delete-actions";
-import {
-  LOCAL_FOLDER_FILE_SHORTCUTS,
-  copyLocalFolderPagePath,
-} from "@/lib/local-folder-file-actions";
 import { MenuShortcut } from "../shared";
 import type { appendSidebarOpenMoveGroups } from "./appendSidebarOpenMoveGroups";
 
 export function appendSidebarDeleteGroups(
   input: ReturnType<typeof appendSidebarOpenMoveGroups>,
 ) {
-  const { page, isLocalFolder, isTrashed, handleRestore, showCopy, sections } =
+  const { page, isLocalFolder, isTrashed, handleRestore, sections } =
     input;
-
-  if (showCopy) {
-    sections.push(
-      <ContextMenuGroup key="clipboard">
-        <ContextMenuItem onSelect={() => void copyLocalFolderPagePath(page)}>
-          <GooseIcons.ClipboardCopy className="h-4 w-4" />
-          <span className="min-w-0 truncate">
-            {page.isFolder ? "复制文件夹路径" : "复制文件路径"}
-          </span>
-          <MenuShortcut shortcut={LOCAL_FOLDER_FILE_SHORTCUTS.copyFilePath} />
-        </ContextMenuItem>
-      </ContextMenuGroup>,
-    );
-  }
 
   sections.push(
     <ContextMenuGroup key="danger">

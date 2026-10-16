@@ -11,6 +11,7 @@
 .goose-menu-surface,
 .goose-floating-surface:has([data-goose-menu-slot="row"]) {
   --goose-floating-radius: var(--goose-menu-radius);
+  --goose-list-row-gap: var(--goose-menu-row-gap);
   font-size: var(--goose-menu-item-font-size);
   line-height: var(--goose-menu-item-line-height);
   max-width: calc(100vw - 16px);

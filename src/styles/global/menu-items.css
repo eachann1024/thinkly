@@ -42,15 +42,15 @@
 .goose-menu-label,
 .goose-menu-command-group [cmdk-group-heading],
 .goose-menu-surface :is(.menu-section__header, [data-slot="header"]) {
-  padding: 8px 8px 4px;
+  padding: 2px 8px;
   color: hsl(var(--muted-foreground));
   font-size: 12px;
   line-height: 18px;
   font-weight: 600;
   letter-spacing: normal;
 }
-[data-goose-menu-slot="root"] > [data-goose-menu-slot="group"] ~ [data-goose-menu-slot="group"] {
-  margin-block-start: 8px;
+[data-goose-menu-slot="root"]:not([data-goose-layout="grid"]):has(> [data-goose-menu-slot="group"]) {
+  row-gap: var(--goose-menu-group-gap);
 }
 .goose-menu-item :where(svg) {
   width: 16px;
