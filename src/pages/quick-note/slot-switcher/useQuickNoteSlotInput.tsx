@@ -1,6 +1,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -60,10 +61,12 @@ export function useQuickNoteSlotInput(
   };
 
   const stopWindowScrubListeners = useRef<(() => void) | null>(null);
+  const [held, setHeld] = useState(false);
 
   const detachWindowScrubListeners = () => {
     stopWindowScrubListeners.current?.();
     stopWindowScrubListeners.current = null;
+    setHeld(false);
   };
 
   useEffect(() => () => detachWindowScrubListeners(), []);
@@ -82,6 +85,8 @@ export function useQuickNoteSlotInput(
     pointerMovedAcrossSlotsRef.current = false;
     setScrubbing(true);
     updatePreview(slot);
+    // 普通点击不闪变拖动指针；持续按住后才显示横向切换提示。
+    const holdTimer = window.setTimeout(() => setHeld(true), 180);
 
     const onMove = (ev: PointerEvent) => {
       if (!scrubbingRef.current) return;
@@ -128,10 +133,13 @@ export function useQuickNoteSlotInput(
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", finish);
     window.addEventListener("pointercancel", cancel);
+    window.addEventListener("blur", cancel);
     stopWindowScrubListeners.current = () => {
+      window.clearTimeout(holdTimer);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", finish);
       window.removeEventListener("pointercancel", cancel);
+      window.removeEventListener("blur", cancel);
     };
   };
 
@@ -144,6 +152,7 @@ export function useQuickNoteSlotInput(
   };
   return {
     ...input,
+    held,
     onKeyDown,
     stopWindowScrubListeners,
     detachWindowScrubListeners,
