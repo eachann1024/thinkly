@@ -1,9 +1,9 @@
 import { IconButton } from "@/components/ui/icon-button";
-import { NativeSelect } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { X } from "@/components/ui/icons";
+import { X, ChevronDown } from "@/components/ui/icons";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import type { SettingsTab, SettingsTabConfig } from "./types";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,7 @@ export function SettingsScaffold({
   feedbackBanner,
 }: SettingsScaffoldProps) {
   const compact = useWorkspaceViewport((s) => s.forceCollapseLeft);
-  const compactNavigationRef = useRef<HTMLSelectElement>(null);
+  const compactNavigationRef = useRef<HTMLButtonElement>(null);
   const navigationRef = useRef<HTMLDivElement | null>(null);
   const wasVisibleRef = useRef(false);
   useLayoutEffect(() => {
@@ -122,20 +122,19 @@ export function SettingsScaffold({
           >
             <nav className="settings-compact-navigation" aria-label="设置分类">
               <span className="text-sm font-medium">设置</span>
-              <NativeSelect controlSize="compact"
-                ref={compactNavigationRef}
-                aria-label="设置分类"
-                value={activeTab}
-                onChange={(event) =>
-                  handleTabChange(event.target.value as SettingsTab)
-                }
-              >
-                {tabs.map((tab) => (
-                  <option key={tab.id} value={tab.id}>
-                    {tab.label}
-                  </option>
-                ))}
-              </NativeSelect>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button ref={compactNavigationRef} variant="outline" size="sm" aria-label="设置分类" className="min-w-0 flex-1 justify-between">
+                    <span className="truncate">{tabs.find((tab) => tab.id === activeTab)?.label}</span>
+                    <ChevronDown aria-hidden="true" className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuRadioGroup value={activeTab} onValueChange={(value) => handleTabChange(value as SettingsTab)}>
+                    {tabs.map((tab) => <DropdownMenuRadioItem key={tab.id} value={tab.id}>{tab.label}</DropdownMenuRadioItem>)}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
             <IconButton size="xs"
               type="button"

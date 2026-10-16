@@ -46,32 +46,14 @@
 }
 
 .notebook-ai-header-menu {
- --goose-menu-item-font-size: 1rem;
- --goose-menu-item-line-height: 1.5;
- --goose-menu-item-height: 2.75rem;
  max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
  overscroll-behavior: contain;
  scrollbar-width: thin;
 }
 
-.notebook-ai-header-menu .goose-list-row {
- min-height: 2.75rem;
- padding: 0.625rem 0.75rem;
-}
-
 .notebook-ai-history-menu {
  width: 22rem;
- padding: 0.5rem;
-}
-
-.notebook-ai-history-menu .text-sm {
- font-size: 1rem;
- line-height: 1.5;
-}
-
-.notebook-ai-history-menu .text-xs,
-.notebook-ai-history-menu [class~="text-[11px]"] {
- font-size: 0.875rem;
+ padding: var(--goose-menu-surface-inset);
 }
 
 .notebook-ai-empty-state {

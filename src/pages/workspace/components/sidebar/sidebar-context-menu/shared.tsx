@@ -18,7 +18,7 @@ export function getFinderLabel(isFolder: boolean) {
 
 export function MenuShortcut({ shortcut }: { shortcut: string }) {
   return (
-    <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+    <span className="goose-menu-shortcut">
       {formatShortcut(shortcut)}
     </span>
   );

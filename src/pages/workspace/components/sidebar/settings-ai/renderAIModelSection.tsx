@@ -152,13 +152,13 @@ export function renderAIModelSection(
                             <DropdownMenuRadioItem
                               key={model.id}
                               value={model.id}
-                              className="items-start gap-2"
+                              className="goose-menu-item-multiline items-start"
                             >
                               <div className="min-w-0 flex-1">
-                                <div className="truncate text-sm font-medium text-foreground">
+                                <div className="truncate goose-menu-title">
                                   {model.label}
                                 </div>
-                                <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                                <div className="line-clamp-2 goose-menu-description">
                                   {model.description || model.id}
                                 </div>
                               </div>

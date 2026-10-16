@@ -54,7 +54,7 @@ export function SkillSuggestionsList(props: {
       <div
         ref={listRef}
         data-goose-menu-slot="root"
-        className="goose-editor-context-ui goose-floating-surface goose-list-layout w-[340px] overflow-y-auto p-1.5"
+        className="goose-menu-surface goose-list-layout w-[340px] overflow-y-auto p-1.5"
         style={{ maxWidth, maxHeight }}
       >
         {props.items.length === 0 ? (
@@ -73,22 +73,22 @@ export function SkillSuggestionsList(props: {
                 data-keyboard-active={index === props.activeIndex || undefined}
                 className={cn(
                   // items-start：多行描述时图标与标题首行并排，首行通过等高容器绝对居中
-                  "goose-list-row flex w-full flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left",
+                  "goose-menu-item goose-menu-item-multiline goose-list-row flex w-full flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left",
                 )}
                 onMouseDown={(event) => {
                   event.preventDefault();
                   props.onSelect(item);
                 }}
               >
-                <span className="flex h-[18px] w-3.5 shrink-0 items-center justify-center">
+                <span className="flex h-[20px] w-4 shrink-0 items-center justify-center">
                   <SlashItemIcon item={item} />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col justify-start gap-0.5">
-                  <span className="block truncate text-[12px] font-medium leading-[18px] text-foreground">
+                  <span className="block truncate goose-menu-title">
                     {slashItemTitle(item)}
                   </span>
                   {description ? (
-                    <span className="line-clamp-2 text-[10.5px] leading-[14px] text-muted-foreground">
+                    <span className="line-clamp-2 goose-menu-description">
                       {description}
                     </span>
                   ) : null}

@@ -1,5 +1,4 @@
 import * as GooseIcons from "@/components/ui/icons";
-import type { CSSProperties } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -27,7 +26,6 @@ export function renderNotebookMenu(
     active,
     notebookKind,
     notebookList,
-    notebookRowHeight,
     canDeleteNotebook,
     handleOpenLocalFolder,
     handleEdit,
@@ -37,17 +35,17 @@ export function renderNotebookMenu(
   } = context;
   return (
     <PopoverContent
+      variant="menu"
       aria-label={`切换${notebookKind}`}
-      style={{ "--goose-notebook-row-height": `${notebookRowHeight}px` } as CSSProperties}
       className={cn(
-        "goose-notebook-menu-surface goose-floating-surface w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
+        "goose-notebook-menu-surface goose-list-layout w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
         isRail && "goose-notebook-menu-surface--rail w-56",
         isHeader && "goose-notebook-menu-surface--header",
       )}
       side={isRail ? "right" : isHeader ? "bottom" : "top"}
       align={isRail ? "end" : "start"}
       alignOffset={0}
-      sideOffset={8}
+      sideOffset={6}
       collisionPadding={8}
       ref={menuRef}
       onKeyDownCapture={(event) => {
@@ -99,9 +97,6 @@ export function renderNotebookMenu(
         if (isDraggingRef.current) e.preventDefault();
       }}
     >
-      {!isHeader && <div className="px-2 pt-2 pb-1 text-[11px] text-muted-foreground">
-        切换{notebookKind}
-      </div>}
       <div className={cn(
         "goose-notebook-menu-list overflow-y-auto",
         !isHeader && "max-h-[max(4rem,calc(var(--goose-popover-available-height,80vh)-15rem))]",
@@ -135,13 +130,13 @@ export function renderNotebookMenu(
           </SortableContext>
         </DndContext>
       </div>
-      <div className="mx-1 my-1 h-px bg-border" />
-        <PopoverAction
-          className={notebookMenuRowClassName}
-          onClick={handleOpenLocalFolder}
-        >
-          <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name="打开文件夹" />
-        </PopoverAction>
+
+      <PopoverAction
+        className={notebookMenuRowClassName}
+        onClick={handleOpenLocalFolder}
+      >
+        <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name="打开文件夹" />
+      </PopoverAction>
     </PopoverContent>
   );
 }

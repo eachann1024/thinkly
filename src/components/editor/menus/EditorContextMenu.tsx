@@ -167,28 +167,28 @@ export function EditorContextMenu({
             {children}
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent editorContext className="w-[180px]">
+        <ContextMenuContent>
           {editable && (
             <ContextMenuItem disabled={!canCopy} onSelect={handleCutSelection}>
-              <GooseIcons.Scissors className="mr-2 h-4 w-4" />
+              <GooseIcons.Scissors className="size-4" />
               剪切
-              <span className="ml-auto text-xs tracking-widest text-muted-foreground">
+              <span className="goose-menu-shortcut">
                 {formatShortcut("Mod+X")}
               </span>
             </ContextMenuItem>
           )}
           <ContextMenuItem disabled={!canCopy} onSelect={handleCopySelection}>
-            <GooseIcons.Copy className="mr-2 h-4 w-4" />
+            <GooseIcons.Copy className="size-4" />
             复制
-            <span className="ml-auto text-xs tracking-widest text-muted-foreground">
+            <span className="goose-menu-shortcut">
               {formatShortcut("Mod+C")}
             </span>
           </ContextMenuItem>
           {editable && (
             <ContextMenuItem onSelect={handleContextPaste}>
-              <GooseIcons.Clipboard className="mr-2 h-4 w-4" />
+              <GooseIcons.Clipboard className="size-4" />
               粘贴
-              <span className="ml-auto text-xs tracking-widest text-muted-foreground">
+              <span className="goose-menu-shortcut">
                 {formatShortcut("Mod+V")}
               </span>
             </ContextMenuItem>
@@ -200,7 +200,7 @@ export function EditorContextMenu({
                 setThemeSelectorOpen(true);
               }}
             >
-              <GooseIcons.Image className="mr-2 h-4 w-4" />
+              <GooseIcons.Image className="size-4" />
               导出所选内容为图片
             </ContextMenuItem>
           )}

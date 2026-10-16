@@ -60,7 +60,7 @@ export function useMainTreeState({
   // 根目录进入手动排序后给个恢复入口（树容器与空状态两个右键菜单共用）
   const rootOrderMenuGroup = rootHasManualOrder ? (
     <ContextMenuGroup>
-      <ContextMenuSeparator />
+
       <ContextMenuItem
         onSelect={() =>
           scheduleAfterMenuClose(() => {

@@ -58,7 +58,7 @@ export function ProviderIconTile({
   size = "md",
 }: {
   providerId: AIProviderId;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "menu";
 }) {
   const Icon = PROVIDER_ICONS[providerId] ?? GooseIcons.Server;
   const isSm = size === "sm";
@@ -66,7 +66,7 @@ export function ProviderIconTile({
     <span
       className={cn(
         "inline-flex shrink-0 items-center justify-center rounded-[8px] bg-[var(--goose-block-subtle-bg)] text-muted-foreground",
-        isSm ? "h-6 w-6 rounded-[7px]" : "h-8 w-8",
+        size === "menu" ? "goose-menu-icon rounded-none bg-transparent" : isSm ? "h-6 w-6 rounded-[7px]" : "h-8 w-8",
       )}
       aria-hidden
     >

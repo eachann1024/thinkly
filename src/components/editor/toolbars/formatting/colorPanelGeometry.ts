@@ -23,8 +23,8 @@ export function colorPanelBoxStyle(position: PositionState): {
   };
 }
 
-const PANEL_BASE_WIDTH = 172;
-const PANEL_BASE_HEIGHT = 190;
+const PANEL_BASE_WIDTH = 208;
+const PANEL_BASE_HEIGHT = 222;
 const PANEL_VIEWPORT_PADDING = 8;
 
 export function getColorPanelPosition({
@@ -73,28 +73,18 @@ export function getColorPanelPosition({
   };
 }
 
-function readEditorUiScale(): number {
-  const scale = Number.parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--editor-ui-scale",
-    ),
-  );
-  return Number.isFinite(scale) && scale > 0 ? scale : 1;
-}
-
 export function measureColorPanelPosition(
   button: HTMLElement,
   panel: HTMLElement | null,
   forceShowAbove?: boolean,
 ): PositionState {
-  const scale = readEditorUiScale();
   return getColorPanelPosition({
     trigger: button.getBoundingClientRect(),
-    panelWidth: panel?.offsetWidth ?? PANEL_BASE_WIDTH * scale,
-    panelHeight: panel?.offsetHeight ?? PANEL_BASE_HEIGHT * scale,
+    panelWidth: panel?.offsetWidth ?? PANEL_BASE_WIDTH,
+    panelHeight: panel?.offsetHeight ?? PANEL_BASE_HEIGHT,
     viewportWidth: document.documentElement.clientWidth,
     viewportHeight: document.documentElement.clientHeight,
-    gap: 8 * scale,
+    gap: 6,
     forceShowAbove,
   });
 }

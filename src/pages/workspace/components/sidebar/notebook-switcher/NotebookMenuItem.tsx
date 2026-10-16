@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { NotebookName } from "./NotebookName";
 
 export const notebookMenuRowClassName =
-  "goose-list-row goose-accent-selection goose-notebook-row relative flex w-full cursor-pointer select-none items-center outline-none";
+  "goose-menu-item goose-list-row goose-accent-selection goose-notebook-row relative flex w-full cursor-pointer select-none items-center outline-none";
 
 export function NotebookMenuItemContent({
   icon,

@@ -166,7 +166,7 @@ export function TabRail({
               <DropdownMenuContent
                 className="w-[220px] outline-none"
                 align="end"
-                sideOffset={4}
+                sideOffset={6}
               >
                 {visibleTabs.map((tab) => {
                   const displayPageId = tabRailPageId(tab, focusedPageByTabId);

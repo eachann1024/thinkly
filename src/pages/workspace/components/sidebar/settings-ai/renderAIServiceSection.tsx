@@ -106,14 +106,14 @@ export function renderAIServiceSection(
                       data-goose-selected={selected || undefined}
                       onSelect={() => handleProviderChange(option.id)}
                       className={cn(
-                        "goose-accent-selection cursor-pointer gap-2.5 rounded-[var(--goose-control-radius)] px-2 py-2",
+                        "goose-accent-selection goose-menu-item-multiline cursor-default",
                         selected &&
                           "bg-[var(--goose-interactive-selected)] text-foreground",
                       )}
                     >
-                      <ProviderIconTile providerId={option.id} />
+                      <ProviderIconTile providerId={option.id} size="menu" />
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium leading-5 text-foreground">
+                        <div className="truncate goose-menu-title">
                           {option.label}
                         </div>
                         <div className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">

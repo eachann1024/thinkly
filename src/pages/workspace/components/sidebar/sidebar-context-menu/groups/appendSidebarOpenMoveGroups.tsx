@@ -52,7 +52,7 @@ export function appendSidebarOpenMoveGroups(
           >
             <GooseIcons.PanelTopOpen className="h-4 w-4" />
             <span className="min-w-0 truncate">在新标签页打开</span>
-            <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+            <span className="goose-menu-shortcut">
               {formatShortcut("Mod")}+点击
             </span>
           </ContextMenuItem>

@@ -1,12 +1,12 @@
-/* Portal 菜单只随 editor-ui-scale 缩放，避免 rem 再叠加外壳字号。 */
+/* 语言选择与其他菜单共用实际像素尺寸，不随正文字号缩放。 */
 .goose-code-language-picker {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--goose-menu-row-gap);
   box-sizing: border-box;
-  width: 220px;
-  max-width: calc((100vw - 16px) / var(--editor-ui-scale, 1));
-  max-height: min(320px, calc((100dvh - 24px) / var(--editor-ui-scale, 1)));
+  width: var(--goose-menu-min-width);
+  max-width: calc(100vw - 16px);
+  max-height: min(320px, calc(100dvh - 24px));
   padding: var(--goose-menu-surface-inset);
   overflow: hidden;
   font-size: var(--goose-menu-item-font-size);
@@ -25,14 +25,6 @@
   padding: 0 8px;
   font-size: var(--goose-menu-item-font-size);
   line-height: var(--goose-menu-item-line-height);
-}
-
-.goose-code-language-label {
-  padding: 2px 8px 0;
-  color: var(--goose-text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
 }
 
 .goose-code-language-list {

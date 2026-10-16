@@ -59,11 +59,11 @@ type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   alignOffset?: number;
   collisionPadding?: number;
   editorContext?: boolean;
-  /** 操作列表：与右键菜单共用灰底高亮；设置类下拉保持强调色。 */
+  /** 设置选项保留选择指示；所有菜单共用同一套外观。 */
   variant?: DropdownVariant;
 };
 const menuSurfaceClass =
-  "goose-menu-surface p-1 text-popover-foreground";
+  "goose-menu-surface text-popover-foreground";
 const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
   (
     {
@@ -74,16 +74,14 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       sideOffset = 6,
       alignOffset = 0,
       collisionPadding = 8,
-      editorContext,
+      editorContext: _editorContext,
       variant = "dropdown",
       ...props
     },
     ref,
   ) => {
-    const isMenu = variant === "menu";
     const layer = useOverlayLayer("menu");
     const topLayer = useOverlayTopLayer(layer);
-    const surfaceOnInner = Boolean(editorContext && isMenu);
     return (
       <OverlayLayerProvider layer={layer}>
       <DropdownVariantContext.Provider value={variant}>
@@ -104,28 +102,16 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
           data-goose-layer={layer}
           data-react-aria-top-layer={topLayer || undefined}
           className={cn(
-            "min-w-[9.5rem] outline-none",
-            !surfaceOnInner && "max-h-[var(--available-height)] overflow-y-auto",
-            surfaceOnInner
-              ? "goose-dropdown-host"
-              : isMenu
-                ? menuSurfaceClass
-                : "goose-floating-surface p-1.5 text-popover-foreground",
-            !editorContext && className,
+            "outline-none max-h-[var(--available-height)] overflow-y-auto",
+            menuSurfaceClass,
+            className,
           )}
           style={{ ...props.style, zIndex: layer }}
         >
           <Dropdown.Menu
             data-goose-menu-slot="root"
             aria-label="操作"
-            className={cn(
-              "outline-none",
-              editorContext && "goose-editor-context-ui",
-              surfaceOnInner && menuSurfaceClass,
-              surfaceOnInner &&
-                "max-h-[var(--available-height)] overflow-y-auto",
-              editorContext && className,
-            )}
+            className="outline-none"
           >
             {children}
           </Dropdown.Menu>
@@ -181,7 +167,7 @@ function DropdownMenuSeparator({
   return (
     <Separator
       {...props}
-      className={cn("goose-menu-separator h-px", className)}
+      className={cn("goose-menu-separator", className)}
     />
   );
 }
@@ -231,7 +217,7 @@ export function DropdownMenuIconSlot({
   }, [icon, loading]);
   if (!loading && !shown) return null;
   return (
-    <span className="relative inline-flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
+    <span className="goose-menu-icon relative inline-flex shrink-0 items-center justify-center" aria-hidden="true">
       {loading && <span className="absolute inset-0 animate-pulse rounded-sm bg-muted-foreground/25 motion-reduce:animate-none" />}
       {shown && <span className={cn("inline-flex transition-opacity duration-150 ease-out motion-reduce:transition-none", visible ? "opacity-100" : "opacity-0")}>{shown}</span>}
     </span>
@@ -248,8 +234,8 @@ function DropdownMenuRadioItem({
 }: Omit<ItemProps, "value"> & { value: string; hideIndicator?: boolean; icon?: React.ReactNode; iconLoading?: boolean }) {
   const variant = React.useContext(DropdownVariantContext);
   return (
-    <DropdownMenuItem {...props} id={value} data-goose-setting-choice={variant === "dropdown" || undefined} className={cn("ps-2", className)} style={{ ...props.style, paddingInlineStart: "0.5rem" }}>
-      <span className="flex min-w-0 flex-1 items-center gap-2 [&>svg]:shrink-0"><DropdownMenuIconSlot icon={icon} loading={iconLoading} />{children}</span>
+    <DropdownMenuItem {...props} id={value} data-goose-setting-choice={variant === "dropdown" || undefined} className={cn("ps-2", className)} style={props.style}>
+      <span className="goose-menu-item-content flex min-w-0 flex-1 items-center"><DropdownMenuIconSlot icon={icon} loading={iconLoading} />{children}</span>
       {!hideIndicator && <Dropdown.ItemIndicator data-goose-selection-indicator={variant === "dropdown" || undefined} className="ms-auto shrink-0" style={{ position: "static", transform: "none", translate: "none" }} />}
     </DropdownMenuItem>
   );

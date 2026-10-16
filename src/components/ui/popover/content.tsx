@@ -15,6 +15,7 @@ type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   collisionPadding?: number;
   container?: HTMLElement | null;
   editorContext?: boolean;
+  variant?: "popover" | "menu";
   /** NodeView controls must not insert focus guards into ProseMirror's DOM. */
   manageFocus?: boolean;
   forceMount?: boolean;
@@ -34,7 +35,8 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
       alignOffset = 0,
       collisionPadding = 8,
       container,
-      editorContext,
+      editorContext: requestedEditorContext,
+      variant = "popover",
       manageFocus = true,
       children,
       forceMount,
@@ -48,6 +50,10 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
     },
     forwardedRef,
   ) => {
+    const editorContext = requestedEditorContext && variant !== "menu";
+    const surface = variant === "menu"
+      ? "goose-menu-surface w-auto text-popover-foreground"
+      : "goose-floating-surface goose-popover-surface w-64 text-popover-foreground";
     const state = usePopoverContext();
     const layer = useOverlayLayer("menu");
     const topLayer = useOverlayTopLayer(layer);
@@ -188,7 +194,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
             className={cn(
               "outline-none",
               !editorContext &&
-                "goose-floating-surface goose-popover-surface w-64 text-popover-foreground",
+                surface,
               !editorContext && className,
             )}
             style={{

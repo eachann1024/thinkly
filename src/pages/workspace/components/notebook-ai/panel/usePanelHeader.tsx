@@ -98,6 +98,7 @@ export function usePanelHeader(
                   </IconButton>
                 </PopoverTrigger>
                 <PopoverContent
+                  variant="menu"
                   align="end"
                   sideOffset={6}
                   collisionPadding={12}
@@ -124,6 +125,7 @@ export function usePanelHeader(
                     </IconButton>
                   </PopoverTrigger>
                   <PopoverContent
+                    variant="menu"
                     align="end"
                     sideOffset={6}
                     collisionPadding={12}

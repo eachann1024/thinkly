@@ -42,17 +42,7 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
     const list = (
       <div className="goose-list-layout" data-goose-menu-slot="root">
         {items.map((item, index) => {
-          if (isSlashMenuDivider(item)) {
-            return (
-              <div
-                key={`divider-${index}`}
-                className={cn(
-                  "mx-2 h-px bg-border/60",
-                  lite ? "my-0.5" : "my-1",
-                )}
-              />
-            );
-          }
+          if (isSlashMenuDivider(item)) return null;
 
           const itemKey = item.title ?? index;
           const button = (
@@ -65,17 +55,8 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
               data-goose-slash-selected={
                 lite && index === selectedIndex ? "true" : undefined
               }
-              className={cn(
-                "goose-list-row relative flex h-auto w-full items-center justify-start text-left outline-none transition-colors whitespace-normal",
-                lite
-                  ? "min-h-[34px] rounded-lg px-2 py-1.5 shadow-none  "
-                  : "min-h-[40px] rounded-[var(--radius-notion-slash-item)] px-2.5 py-2   ",
-                index === selectedIndex
-                  ? lite
-                    ? "bg-transparent text-[hsl(var(--foreground))]"
-                    : "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                  : "bg-transparent",
-              )}
+              disabled={item.disabled}
+              className="goose-menu-item goose-list-row goose-accent-selection flex w-full items-center text-left"
               onMouseEnter={() => {
                 if (suppressItemHover) return;
                 if (Date.now() < ignoreMouseEnterUntilRef.current) return;
@@ -83,64 +64,15 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
               }}
               onClick={() => selectItem(index)}
             >
-              <div
-                className={cn(
-                  "flex shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-notion-slash-icon)] bg-[var(--goose-block-subtle-bg)]",
-                  lite ? "mr-2 h-6 w-6" : "mr-2.5 h-7 w-7",
-                )}
-              >
-                {item.icon ? (
-                  <span
-                    className={cn(
-                      "text-xs",
-                      index === selectedIndex
-                        ? lite
-                          ? "text-[hsl(var(--foreground))]"
-                          : "text-[var(--goose-interactive-selected-fg)]"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {item.icon}
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    T
-                  </span>
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div
-                  className={cn(
-                    "truncate font-medium",
-                    lite ? "text-[11px]" : "text-[12px]",
-                    item.disabled
-                      ? "text-muted-foreground"
-                      : index === selectedIndex
-                        ? lite
-                          ? "text-[hsl(var(--foreground))]"
-                          : "text-[var(--goose-interactive-selected-fg)]"
-                        : "text-foreground",
-                  )}
-                >
-                  {item.title}
-                </div>
-                {item.description && (
-                  <div
-                    className={cn(
-                      "mt-0.5 truncate text-muted-foreground",
-                      lite ? "text-[9px]" : "text-[10px]",
-                    )}
-                  >
-                    {item.description}
-                  </div>
-                )}
-              </div>
+              <span className="inline-flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
+                {item.icon ?? <span>T</span>}
+              </span>
+              <span className="min-w-0 flex-1 truncate">{item.title}</span>
 
               {item.badge && (
                 <Kbd
                   shortcut={item.badge}
-                  className="ml-2 h-4 border-transparent bg-transparent px-0 text-[9px] text-muted-foreground shadow-none"
+                  className="ml-2 h-4 border-transparent bg-transparent px-0 text-[12px] text-muted-foreground shadow-none"
                 />
               )}
             </EditorAction>
@@ -173,21 +105,14 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
       >
         <div
           data-notion-slash-surface="true"
-          className={cn(
-            "goose-editor-inline-context-ui z-50 flex h-auto min-h-0 min-w-0 flex-col overflow-hidden border border-[hsl(var(--goose-menu-border))] bg-[hsl(var(--goose-menu-surface))] text-popover-foreground",
-            !lite &&
-              "shadow-[0_14px_34px_rgba(15,23,42,0.16),0_2px_8px_rgba(15,23,42,0.08)]",
-            lite
-              ? "max-h-[inherit] w-[248px] rounded-xl p-1"
-              : "max-h-[20rem] w-[280px] rounded-[var(--radius-notion-slash)] p-1.5",
-          )}
+          className="goose-menu-surface z-50 flex h-auto max-h-[inherit] min-h-0 w-[280px] flex-col overflow-hidden text-popover-foreground"
         >
           <div
             ref={containerRef}
             data-notion-slash-scroll={lite ? "" : undefined}
             className={cn(
               "min-h-0 overflow-y-auto overscroll-contain",
-              lite ? "max-h-[inherit] pb-2" : "max-h-[20rem] pb-1",
+              "max-h-[inherit]",
               suppressItemHover && "pointer-events-none",
             )}
           >

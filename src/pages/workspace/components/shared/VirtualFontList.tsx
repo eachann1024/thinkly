@@ -5,7 +5,7 @@ import { Check } from "@/components/ui/icons";
 import { toCssFontFamily } from "@/lib/fontLoader";
 
 export type FontListOption = { family: string | null; label: string };
-const ROW_HEIGHT = 34;
+const ROW_HEIGHT = 40;
 
 export function VirtualFontList({
   label,
@@ -129,7 +129,7 @@ export function VirtualFontList({
               }}
               onPointerDown={(event) => event.preventDefault()}
               onClick={() => onConfirm(option.family)}
-              className="goose-list-row goose-accent-selection absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 px-2 text-left text-[13px]"
+              className="goose-menu-item goose-list-row goose-accent-selection absolute inset-x-0 top-0 flex w-full cursor-default items-center gap-2 px-2 text-left"
               style={{
                 height: ROW_HEIGHT,
                 transform: `translateY(${row.start}px)`,
