@@ -133,10 +133,12 @@ export function renderNotebookMenu(
       </div>
       <div className="mx-1 my-1 h-px bg-border" />
         <PopoverAction
-          className="min-h-9 w-full justify-start gap-1.5 rounded-lg px-2 py-1.5 text-xs whitespace-nowrap"
+          className="goose-notebook-menu-action w-full justify-start whitespace-nowrap"
           onClick={handleOpenLocalFolder}
         >
-          <GooseIcons.FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="goose-notebook-monogram goose-notebook-icon" aria-hidden="true">
+            <GooseIcons.FolderOpen className="h-3.5 w-3.5" />
+          </span>
           打开文件夹
         </PopoverAction>
     </PopoverContent>

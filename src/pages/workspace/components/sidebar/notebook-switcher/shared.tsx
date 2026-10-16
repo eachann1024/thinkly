@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type Notebook } from "@/stores/useNotebooks";
 import { renderNotebookIcon } from "../notebookUtils";
+import { NotebookName } from "./NotebookName";
 
 export interface SortableNotebookItemProps {
   notebook: Notebook;
@@ -83,11 +84,9 @@ export function SortableNotebookItem({
         <span className="goose-notebook-monogram goose-notebook-icon" aria-hidden="true">
           {renderNotebookIcon(notebook.icon || (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"))}
         </span>
-        <span className="truncate leading-snug" title={notebook.name}>
-          {notebook.name}
-        </span>
+        <NotebookName name={notebook.name} />
         {notebook.localPathMissing && (
-          <span className="text-xs text-danger">路径失效</span>
+          <span className="shrink-0 whitespace-nowrap text-xs text-danger">路径失效</span>
         )}
       </div>
       <div
