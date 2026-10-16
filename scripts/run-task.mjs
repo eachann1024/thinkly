@@ -5,10 +5,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const [task, ...args] = process.argv.slice(2);
 const generateColors = ["scripts/generate-text-colors.mjs"];
-const fetchModel = ["scripts/fetch-embedding-model.mjs"];
 const vite = "node_modules/vite/bin/vite.js";
 const build = [
-  fetchModel,
   generateColors,
   ["src/lib/vite-stubs/assert-present.mjs"],
   [vite, "build", ...args],
@@ -17,7 +15,7 @@ const build = [
 ];
 
 const tasks = {
-  dev: [fetchModel, generateColors, [vite, ...args]],
+  dev: [generateColors, [vite, ...args]],
   build,
   window: [
     ...build,
