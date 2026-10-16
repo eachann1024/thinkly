@@ -1,10 +1,14 @@
 /* 重命名的文字选区独立于正文选区和整行选中底色。 */
-:is(.dark, [data-theme="dark"]) [data-sidebar-rename-field] {
-  --goose-rename-selection-bg: #1d4ed8;
+[data-sidebar-rename-field] {
+  --goose-rename-selection-bg: var(--goose-accent-text, #1d4ed8);
   --goose-rename-selection-fg: #ffffff;
 }
 
-:is(.dark, [data-theme="dark"]) [data-sidebar-rename-field]::selection {
+:is(.dark, [data-theme="dark"]) [data-sidebar-rename-field] {
+  --goose-rename-selection-bg: #1d4ed8;
+}
+
+[data-sidebar-rename-field]::selection {
   background-color: var(--goose-rename-selection-bg);
   color: var(--goose-rename-selection-fg);
   -webkit-text-fill-color: var(--goose-rename-selection-fg);
