@@ -30,7 +30,7 @@ export function ImageExportThemeSelector({
   const editorFontSize = useSettings((s) => s.editorFontSize);
   const settingsTheme = useSettings((s) => s.theme);
   const resolvedTheme = resolveTheme(settingsTheme);
-  const wm = normalizeWatermarkConfig(storedWatermark);
+  const wm = useMemo(() => normalizeWatermarkConfig(storedWatermark), [storedWatermark]);
   const [configOpen, setConfigOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() =>
     typeof window === "undefined" ? 0 : window.innerWidth,
@@ -71,6 +71,10 @@ export function ImageExportThemeSelector({
     [notebookContext],
   );
   const notebookTheme = displayThemes.find((theme) => theme.id === "notebook");
+  const previewTheme = useMemo(
+    () => resolveCardTheme(selectedId, notebookContext),
+    [selectedId, notebookContext],
+  );
   const groupedThemes = useMemo(
     () =>
       (["light", "dark"] as const).map((group) => ({
@@ -133,7 +137,7 @@ export function ImageExportThemeSelector({
               mode={mode}
               page={page}
               blocks={blocks}
-              theme={resolveCardTheme(selectedId, notebookContext)}
+              theme={previewTheme}
               watermarkConfig={wm}
             />
           )}

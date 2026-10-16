@@ -4,6 +4,7 @@ import { buildImageExportPreviewHtml, getImageExportPreviewSource } from "@/lib/
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 
 import type { ImageExportThemeSelectorProps } from "./theme-model";
+import { PreviewFrame } from "./PreviewFrame";
 
 export function LivePreviewPane({
   open,
@@ -21,7 +22,6 @@ export function LivePreviewPane({
   watermarkConfig: WatermarkConfig;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [scale, setScale] = useState(0.42);
   const [frameHeight, setFrameHeight] = useState(900);
 
@@ -45,37 +45,18 @@ export function LivePreviewPane({
     if (!open) return;
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const updateScale = () => {
-      const next =
-        viewport.clientWidth > 0 ? Math.min(1, viewport.clientWidth / 680) : 0.42;
+    const updateScale = (width: number) => {
+      const next = width > 0 ? Math.min(1, width / 680) : 0.42;
       setScale(Number.isFinite(next) && next > 0 ? next : 0.42);
     };
-    updateScale();
-    const observer = new ResizeObserver(updateScale);
+    const style = getComputedStyle(viewport);
+    updateScale(viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) updateScale(entry.contentRect.width);
+    });
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [open, html]);
-
-  useEffect(() => {
-    if (!open) return;
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    const measure = () => {
-      const card = iframe.contentDocument?.querySelector(
-        ".gooseshot-container",
-      ) as HTMLElement | null;
-      if (!card) return;
-      const next = Math.ceil(Math.max(card.scrollHeight, card.offsetHeight));
-      if (next > 0) setFrameHeight(next);
-    };
-    iframe.addEventListener("load", measure);
-    measure();
-    const retry = window.setTimeout(measure, 80);
-    return () => {
-      iframe.removeEventListener("load", measure);
-      window.clearTimeout(retry);
-    };
-  }, [open, html]);
+  }, [open]);
 
   return (
     <aside
@@ -90,7 +71,7 @@ export function LivePreviewPane({
           {theme.name}
         </span>
       </div>
-      <div ref={viewportRef} className="min-h-0 flex-1 overflow-auto p-3">
+      <div ref={viewportRef} className="min-h-0 flex-1 overflow-auto p-3 [scrollbar-gutter:stable]">
         <div
           style={{
             width: 680 * scale,
@@ -98,11 +79,10 @@ export function LivePreviewPane({
             position: "relative",
           }}
         >
-          <iframe
-            ref={iframeRef}
+          <PreviewFrame
             title="图片导出预览"
-            srcDoc={html}
-            sandbox="allow-same-origin"
+            html={html}
+            onHeightChange={setFrameHeight}
             style={{
               width: 680,
               height: frameHeight,

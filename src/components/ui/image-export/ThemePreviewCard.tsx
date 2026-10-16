@@ -4,6 +4,7 @@ import { type CardTheme, type WatermarkConfig } from "@/lib/imageExport";
 import { buildImageExportPreviewHtml } from "@/lib/imageExport/livePreview";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { cn } from "@/lib/utils";
+import { PreviewFrame } from "./PreviewFrame";
 
 export function ThemePreviewCard({
   theme,
@@ -109,10 +110,9 @@ export function ThemePreviewCard({
       >
         {sampleHtml ? (
           <div className="relative h-[124px] overflow-hidden rounded-[6px]">
-            <iframe
+            <PreviewFrame
               title={theme.name}
-              srcDoc={sampleHtml}
-              sandbox="allow-same-origin"
+              html={sampleHtml}
               className="pointer-events-none origin-top-left border-0"
               style={{ width: 680, height: 560, transform: "scale(0.22)" }}
             />
