@@ -24,21 +24,6 @@
   box-shadow: inset 0 0 0 1px var(--goose-selection-border);
 }
 
-/* 选中与键盘焦点分开绘制，内轮廓不改变尺寸，也不会被滚动容器裁掉。 */
-@layer properties {
-  :root:not([data-goose-pointer-focus="true"]) :is(.goose-accent-selection, [data-goose-control="theme-preview-card"], [data-goose-setting-choice="true"]):is(:focus-visible:not([data-rac]), [data-focus-visible="true"], [data-keyboard-active="true"]):where(
-    :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"]):not([data-goose-context="media"])
-  ) {
-    outline: 2px solid var(--goose-selection-focus) !important;
-    outline-offset: -4px;
-  }
-
-  /* 当前页面导航的焦点加粗原有轮廓，避免自动聚焦时出现双框。 */
-  :root:not([data-goose-pointer-focus="true"]) .goose-accent-selection[aria-current="page"]:focus-visible {
-    outline-offset: -2px;
-  }
-}
-
 /* 设置选择器的勾号使用可读强调文字；操作菜单和禁用项仍继承正文。 */
 .goose-floating-surface [data-goose-menu-slot="row"]:is([data-selected="true"], [data-goose-selected="true"]):where(
   :not([data-disabled="true"]):not([aria-disabled="true"]):not(.goose-accent-option)

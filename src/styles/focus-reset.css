@@ -1,14 +1,7 @@
-/* 控件焦点不额外绘制外圈；只清 ring 变量，保留单层边框和真实投影。
-   properties 是最早的 layer，!important 可覆盖供应商的焦点 ring。 */
-@layer properties {
-  :where(
-    a[href], button, input, textarea, select, summary,
-    [role="button"], [role="tab"], [role="menuitem"], [role="option"],
-    [role="menuitemcheckbox"], [role="menuitemradio"], [role="switch"],
-    [role="checkbox"], [role="radio"], [role="slider"],
-    .checkbox, .radio, .switch, [data-focus-visible="true"]
-  ):is(:focus, [data-focus-visible="true"]),
-  /* HeroUI 把键盘焦点标在 label 上，ring 则画在其 control 子元素上。 */
+/* 控件焦点不额外绘制外圈；清除 outline 与 ring，保留单层边框和真实投影。
+   properties 的首个子层统一压住后续焦点描边，包括同层的旧样式。 */
+@layer properties.goose-focus-policy {
+  :is(:focus, :focus-visible, [data-focus-visible="true"], [data-keyboard-active="true"]),
   :is(.checkbox, .radio, .switch, [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"]):is(:focus-visible, [data-focus-visible="true"])
     :is(.checkbox__control, .radio__control, .switch__control, [data-slot="checkbox-control"], [data-slot="radio-control"], [data-slot="switch-control"]) {
     outline: none !important;
