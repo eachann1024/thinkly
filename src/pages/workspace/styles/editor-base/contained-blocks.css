@@ -1,0 +1,27 @@
+/* Children remain within the same visual boundary in both shared editor hosts. */
+.bn-editor .goose-content-container > .bn-block {
+  background: var(--goose-container-bg, transparent);
+  border-radius: 4px;
+}
+.bn-editor:focus-within .goose-content-container-active > .bn-block {
+  background: var(--goose-container-bg, var(--goose-active-line-bg));
+}
+.bn-editor .goose-content-container[data-container-type="callout"] > .bn-block {
+  background: var(--goose-container-bg, var(--goose-callout-bg));
+  border: 1px solid var(--goose-callout-border);
+  border-radius: 8px;
+}
+.bn-editor .goose-content-container[data-container-type="callout"] > .bn-block > .bn-react-node-view-renderer > .bn-block-content > [data-callout="true"] {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+.bn-editor .goose-content-container[data-container-type="quote"] > .bn-block {
+  border-left: 3px solid hsl(var(--muted-foreground));
+}
+.bn-editor .goose-content-container[data-container-type="quote"] > .bn-block > .bn-block-content > blockquote {
+  border-left-color: transparent;
+}
+.bn-editor .goose-content-container > .bn-block > .bn-block-group {
+  margin-bottom: 0;
+  padding-bottom: 3px;
+}

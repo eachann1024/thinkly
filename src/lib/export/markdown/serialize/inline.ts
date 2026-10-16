@@ -27,46 +27,54 @@ function serializeInlineText(
   return hasUnderline ? `<u>${text}</u>` : text;
 }
 
-function extractLinkText(linkContent: any): string {
-  if (typeof linkContent === "string") return linkContent;
+function extractLinkText(linkContent: any, preserveHardBreaks = false): string {
+  if (typeof linkContent === "string") return preserveHardBreaks ? linkContent.replace(/\n/g, "<br>") : linkContent;
   if (!Array.isArray(linkContent)) return "";
   return linkContent
     .map((child: any) => {
-      if (typeof child === "string") return child;
-      return serializeInlineText(child?.text || "", child?.styles || {});
+      if (typeof child === "string") return preserveHardBreaks ? child.replace(/\n/g, "<br>") : child;
+      if (child?.type === "hardBreak") return preserveHardBreaks ? "<br>" : "\n";
+      return serializeTextWithBreaks(child?.text || "", child?.styles || {}, preserveHardBreaks);
     })
     .join("");
 }
 
-export function blockNoteInlineToText(content: any): string {
+function serializeTextWithBreaks(text: string, styles: Record<string, unknown>, preserve: boolean): string {
+  return preserve
+    ? text.split("\n").map((line) => line ? serializeInlineText(line, styles) : "").join("<br>")
+    : serializeInlineText(text, styles);
+}
+
+export function blockNoteInlineToText(content: any, preserveHardBreaks = false): string {
   if (content == null) return "";
-  if (typeof content === "string") return content;
+  if (typeof content === "string") return preserveHardBreaks ? content.replace(/\n/g, "<br>") : content;
   // BlockNote 0.50 TableCell 对象形态: { type: "tableCell", content: InlineContent[] | [Paragraph] }
   if (
     typeof content === "object" &&
     !Array.isArray(content) &&
     Array.isArray(content.content)
   ) {
-    return blockNoteInlineToText(content.content);
+    return blockNoteInlineToText(content.content, preserveHardBreaks);
   }
   if (!Array.isArray(content)) return "";
   return content
     .map((item: any) => {
-      if (typeof item === "string") return item;
+      if (typeof item === "string") return preserveHardBreaks ? item.replace(/\n/g, "<br>") : item;
       if (item == null) return "";
+      if (item.type === "hardBreak") return preserveHardBreaks ? "<br>" : "\n";
       // 嵌套 paragraph（markdown 导入时表格 cell 会包一层 paragraph）
       if (item.type === "paragraph" && Array.isArray(item.content)) {
-        return blockNoteInlineToText(item.content);
+        return blockNoteInlineToText(item.content, preserveHardBreaks);
       }
       if (item.type === "link") {
-        const linkText = extractLinkText(item.content);
+        const linkText = extractLinkText(item.content, preserveHardBreaks);
         return `[${linkText}](${item.href || ""})`;
       }
       if (item.type === "pageMention") {
         const mention = sanitizePageMentionProps(item);
         return mention ? serializePageMentionMarkdown(mention) : "";
       }
-      return serializeInlineText(item.text || "", item.styles || {});
+      return serializeTextWithBreaks(item.text || "", item.styles || {}, preserveHardBreaks);
     })
     .join("");
 }

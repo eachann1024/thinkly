@@ -1,3 +1,4 @@
+import { insertContainedBlocks } from "./containedPaste";
 import type { BlockNoteEditor } from "@blocknote/core";
 import type { PartialBlock } from "@blocknote/core/blocks";
 import { materializeImageBlob } from "@/lib/imageProcessor";
@@ -14,6 +15,8 @@ function insertOrUpdateBlock(
   newBlock: PartialBlock<any, any, any>,
   placement: "before" | "after" = "after",
 ): string {
+  const contained = insertContainedBlocks(editor, [newBlock]);
+  if (contained?.length) return contained[0];
   const ref = referenceBlock as Parameters<typeof editor.updateBlock>[0];
   if (
     Array.isArray(referenceBlock.content) &&
@@ -88,20 +91,30 @@ export async function pasteClipboardFilesFromClipboard(
 
   event.preventDefault();
 
-  const currentBlock = editor.getTextCursorPosition().block;
-
+  const files: { file: File; mime: string }[] = [];
   for (let i = 0; i < data.items.length; i++) {
     const item = data.items[i];
     if (item.kind !== "file") continue;
     const file = item.getAsFile();
-    if (!file) continue;
+    if (file) files.push({ file, mime: item.type });
+  }
+  await pasteClipboardMedia(editor, files);
+}
 
-    const isImage = isPasteableClipboardImageFile(file, item.type);
+export async function pasteClipboardMedia(
+  editor: BlockNoteEditor<any, any, any>,
+  files: { file: File; mime: string }[],
+): Promise<void> {
+  if (!editor.uploadFile) return;
+  let currentBlock = editor.getTextCursorPosition().block;
+  const uploads: { file: File; mime: string; isVideo: boolean; insertedBlockId: string }[] = [];
+  for (const { file, mime } of files) {
+    const isImage = isPasteableClipboardImageFile(file, mime);
     const editorCompact =
       typeof __GOOSE_EDITOR_COMPACT__ !== "undefined" &&
       __GOOSE_EDITOR_COMPACT__;
     const isVideo =
-      !editorCompact && isPasteableClipboardVideoFile(file, item.type);
+      !editorCompact && isPasteableClipboardVideoFile(file, mime);
     if (!isImage && !isVideo) continue;
 
     const type = isVideo ? "video" : resolveImageBlockType(editor);
@@ -117,6 +130,12 @@ export async function pasteClipboardFilesFromClipboard(
       fileBlock,
     );
 
+    currentBlock = editor.getBlock(insertedBlockId)!;
+    editor.setTextCursorPosition(currentBlock, "end");
+    uploads.push({ file, mime, isVideo, insertedBlockId });
+  }
+
+  for (const { file, mime, isVideo, insertedBlockId } of uploads) {
     try {
       // 图片需先固化字节并修正 MIME；视频直接交给 FFmpeg 转码。
       const uploadFile = isVideo
@@ -125,23 +144,23 @@ export async function pasteClipboardFilesFromClipboard(
             [
               await materializeImageBlob(
                 file,
-                resolveImageMimeForUpload(file) || item.type || "image/png",
+                resolveImageMimeForUpload(file) || mime || "image/png",
               ),
             ],
             file.name || `paste-${Date.now()}.png`,
             {
-              type: resolveImageMimeForUpload(file) || item.type || "image/png",
+              type: resolveImageMimeForUpload(file) || mime || "image/png",
             },
           );
       const updateData = await editor.uploadFile(uploadFile, insertedBlockId);
-      if (!editor.getBlock(insertedBlockId)) return;
+      if (!editor.getBlock(insertedBlockId)) continue;
       const updatedFileBlock =
         typeof updateData === "string"
           ? ({ props: { url: updateData } } as PartialBlock<any, any, any>)
           : { ...updateData };
       commitPastedMediaWithoutHistory(editor, insertedBlockId, updatedFileBlock);
     } catch (err) {
-      if (!editor.getBlock(insertedBlockId)) return;
+      if (!editor.getBlock(insertedBlockId)) continue;
       console.error("[pasteClipboardFiles] upload failed", err);
       editor.removeBlocks([insertedBlockId]);
       const message =

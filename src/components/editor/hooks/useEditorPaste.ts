@@ -1,3 +1,4 @@
+import { pasteInsideCurrentBlock } from "../utils/containedPaste";
 import { useCallback, type MutableRefObject } from "react";
 import {
   normalizeMarkdownPasteText,
@@ -36,7 +37,6 @@ export function useEditorPaste({
       if (!editable) return;
       if (clipboardHasPasteableImage(event.clipboardData)) return;
       if (event.defaultPrevented) return;
-      if (shiftPressedRef.current) return;
       if (
         (event.target as HTMLElement | null)?.closest(".goose-code-block-node")
       )
@@ -47,6 +47,12 @@ export function useEditorPaste({
         clipboard.getData("text/plain"),
       );
       const htmlText = clipboard.getData("text/html");
+      if (pasteInsideCurrentBlock(editor, plainText, htmlText, clipboard.getData("blocknote/html"), shiftPressedRef.current)) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if (shiftPressedRef.current) return;
       if (looksLikeMermaidDiagram(plainText)) {
         event.preventDefault();
         event.stopPropagation();

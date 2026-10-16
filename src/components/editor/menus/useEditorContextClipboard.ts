@@ -1,3 +1,5 @@
+import { pasteClipboardMedia } from "../utils/pasteClipboardFilesFromClipboard";
+import { pasteInsideCurrentBlock } from "../utils/containedPaste";
 import { useCallback, useRef, type RefObject } from "react";
 import { toast } from "@/components/ui/sonner";
 import { useEditorPlatform } from "../platform/context";
@@ -32,8 +34,14 @@ export function useEditorContextClipboard(
     const snapshot = snapshotRef.current ?? snapshotEditorSelection(editor.prosemirrorState);
     try {
       let html = "", nativeHtml = "", plain = "";
+      const media: { file: File; mime: string }[] = [];
       try {
         for (const item of await navigator.clipboard.read()) {
+          const mime = item.types.find((type) => type.startsWith("image/"));
+          if (mime) {
+            const blob = await item.getType(mime);
+            media.push({ file: new File([blob], "clipboard-image", { type: mime }), mime });
+          }
           for (const type of ["blocknote/html", "text/html", "text/plain"]) {
             if (!item.types.includes(type)) continue;
             const value = await (await item.getType(type)).text();
@@ -46,9 +54,15 @@ export function useEditorContextClipboard(
         // 系统未提供多格式读取时继续尝试文本，不更改原选区或原内容。
       }
       if (!nativeHtml && htmlLooksLikeBlockNoteClipboard(html)) nativeHtml = html;
-      if (!plain && !html && !nativeHtml) plain = await platform.clipboard.readText();
+      if (!media.length && !plain && !html && !nativeHtml) plain = await platform.clipboard.readText();
       plain = normalizeMarkdownPasteText(plain);
       if (!restore(snapshot)) return;
+      if (media.length) {
+        await pasteClipboardMedia(editor, media);
+        editor.focus();
+        return;
+      }
+      if (pasteInsideCurrentBlock(editor, plain, html, nativeHtml)) return;
       const internal = normalizeBlockNoteClipboardHtml(nativeHtml);
       if (shouldIsolateTitleStructurePaste(editor) && looksLikeBlockStructure(plain, internal || html)) {
         const blocks = internal || html

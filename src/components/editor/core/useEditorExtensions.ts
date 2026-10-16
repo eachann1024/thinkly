@@ -1,3 +1,5 @@
+import { gooseContainedBlockSurface } from "../extensions/containedBlockSurface";
+import { gooseContainedBlockKeyboard } from "../extensions/containedBlockKeyboard";
 import { useMemo } from "react";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import { toast } from "@/components/ui/sonner";
@@ -104,6 +106,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseActiveListMarkerExtension,
     gooseActiveHeadingCaretExtension,
     gooseActiveLineExtension,
+    gooseContainedBlockSurface,
     gooseColumnLayoutExtension(),
     createGooseBlockTypeKeyboardExtension(() => settingsRef.current.defaultCodeBlockWrap)(),
     gooseTabBehaviorExtension,
@@ -119,6 +122,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseCodeBlockLinkStripExtension,
     gooseFirstTitleEnterExtension,
     gooseMediaBlockEnterExtension,
+    gooseContainedBlockKeyboard,
     gooseEmptyNestedListEnterExtension,
     gooseCollapsedToggleEnterExtension,
     gooseHeadingSectionFoldExtension,

@@ -1,3 +1,4 @@
+@import "./contained-blocks.css";
 /* 正文控件会把 focus token 改为中性色；搜索标记使用主题实色，不随焦点变灰。 */
 .goose-search-session-match {
   background-color: color-mix(in srgb, var(--goose-accent-solid) 16%, transparent);
