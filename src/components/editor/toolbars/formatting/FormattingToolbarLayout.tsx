@@ -8,6 +8,7 @@ import { canShowAddToChatButton } from "@/components/editor/ai/composer/selectio
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
 import { hasTableMergeAction, TableMergeControls } from "./TableMergeControls";
+import { useToolbarHorizontalScroll } from "./useToolbarHorizontalScroll";
 
 export function FormattingToolbarLayout({
   state,
@@ -24,6 +25,7 @@ export function FormattingToolbarLayout({
     menuRef,
     shouldHide,
   } = state;
+  const rowRef = useToolbarHorizontalScroll(isQuickNoteSurface);
   const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
   // 选区 AI 润色入口暂时停用；加入对话继续使用独立入口。
   const sections: ReactNode[] = [];
@@ -114,7 +116,7 @@ export function FormattingToolbarLayout({
           pointerEvents: shouldHide ? "none" : "auto",
         }}
       >
-        <div className="goose-formatting-toolbar-row">
+        <div ref={rowRef} className="goose-formatting-toolbar-row">
           {sections}
         </div>
       </SelectionToolbarSurface>
