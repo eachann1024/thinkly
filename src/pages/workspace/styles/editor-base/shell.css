@@ -66,10 +66,11 @@
 }
 
 .goose-editor-tooltip-surface kbd {
-  height: calc(20px * var(--editor-ui-scale, 1));
+  height: calc(24px * var(--editor-ui-scale, 1));
+  gap: calc(3px * var(--editor-ui-scale, 1));
   border-radius: calc(6px * var(--editor-ui-scale, 1));
   padding-inline: calc(6px * var(--editor-ui-scale, 1));
-  font-size: calc(10px * var(--editor-ui-scale, 1));
+  font-size: calc(13px * var(--editor-ui-scale, 1));
 }
 
 .goose-color-picker-panel {
