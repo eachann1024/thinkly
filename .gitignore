@@ -121,3 +121,6 @@ public/fonts/*.otf
 
 __pycache__/
 dist-signpath/
+
+!scripts/macos-install-copy.mjs
+!docs/macos-installation.md

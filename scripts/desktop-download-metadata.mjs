@@ -51,9 +51,13 @@ export function createCask(version, tag, hashes, repo = REPO, signed = false) {
     "~/Library/Saved Application State/com.goosenote.desktop.savedState",
   ]${signed ? "" : `
   caveats <<~EOS
-    Goose Note is currently unsigned and not notarized.
-    After installing, allow it in System Settings → Privacy & Security.
-    If needed, run: xattr -cr "/Applications/Goose Note.app"
+    Goose Note has no Developer ID signature or Apple notarization.
+    The independent author has not enrolled in Apple's paid developer program.
+    Try opening the app, then allow it in System Settings → Privacy & Security.
+    Homebrew installs the app only; it does not install the DMG's command helper.
+    For the trusted official app, a manual fallback in Terminal is:
+      sudo xattr -r -s -d com.apple.quarantine "/Applications/Goose Note.app"
+    Guide: https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md
   EOS`}
 end
 `;
