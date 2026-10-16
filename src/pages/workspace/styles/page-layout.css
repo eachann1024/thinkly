@@ -1,14 +1,16 @@
 /* Each pane owns its measure; explicit document and code formatting stay intact. */
 [data-page-layout] {
   container: page-layout / inline-size;
-  --page-layout-width: 800px;
-  --page-layout-gutter: 48px;
+  /* Notion 桌面标准布局：正文净宽 720px，两侧至少留白 96px。 */
+  --page-layout-gutter: 96px;
+  --page-layout-width: calc(720px + 2 * var(--page-layout-gutter));
   --page-layout-top: 80px;
   --page-paragraph-gap: 4px;
   --page-title-gap: 37px;
 }
 [data-page-layout="full"] {
   --page-layout-width: none;
+  --page-layout-gutter: 48px;
   --page-layout-top: 24px;
 }
 [data-page-layout] .page-layout-document {
@@ -64,11 +66,11 @@
   --page-paragraph-gap: 0px;
 }
 @container page-layout (max-width: 680px) {
-  [data-page-layout] .page-layout-document { padding: 48px 32px 80px; }
+  [data-page-layout="full"] .page-layout-document { padding: 48px 32px 80px; }
   [data-page-layout="full"] .page-layout-document { padding-top: var(--page-layout-top); }
 }
 @container page-layout (max-width: 400px) {
-  [data-page-layout] .page-layout-document { padding-inline: 24px; }
+  [data-page-layout="full"] .page-layout-document { padding-inline: 24px; }
 }
 
 [data-page-layout][data-font-family="default"] { --goose-document-font: var(--font-default); }
