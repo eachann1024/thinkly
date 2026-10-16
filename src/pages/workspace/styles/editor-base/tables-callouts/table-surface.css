@@ -12,7 +12,7 @@
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] .tableWrapper {
   /* The left border shares the prose baseline; portals own the row-handle gutter. */
-  padding: calc(24px * var(--editor-scale, 1))
+  padding: 0
     calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1)) 0;
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] table {

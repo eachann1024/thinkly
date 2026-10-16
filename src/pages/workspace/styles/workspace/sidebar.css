@@ -35,11 +35,6 @@
   background: var(--workspace-top-edge);
 }
 
-/* 侧栏收起时把手仍可能由 BlockNote 挂到 portal；用根属性藏掉，不让编辑器订侧栏 store。 */
-html[data-sidebar-collapsed] .bn-side-menu {
-  display: none;
-}
-
 .workspace-shell .workspace-sidebar-pane {
   background: transparent;
   border: 0;
