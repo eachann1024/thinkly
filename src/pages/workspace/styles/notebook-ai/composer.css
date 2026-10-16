@@ -39,10 +39,10 @@
  pointer-events: none;
 }
 
-/* 底部 12px 留白由 form 提供，计入已有 dock 高度观察，避免遮住末条消息。 */
+/* 底部留白由 form 提供，计入已有 dock 高度观察，避免遮住末条消息。 */
 [data-ai-panel-layout="side-panel"] .notebook-ai-composer-dock {
- left: 12px;
- right: 12px;
+ left: 1rem;
+ right: 1rem;
  bottom: 0;
 }
 
@@ -53,16 +53,17 @@
  * 颜色过渡由共享控件动效变量控制。
  */
 .notebook-ai-composer-shell {
- --ai-composer-font-size: calc(var(--editor-font-size, 17px) * 0.85);
- --ai-composer-line-height: calc(var(--ai-composer-font-size) * 1.45);
+ --ai-composer-font-size: max(1rem, calc(var(--editor-font-size, 17px) * 0.92));
+ --ai-composer-line-height: calc(var(--ai-composer-font-size) * 1.5);
+ --ai-composer-action-size: 2.5rem;
  display: grid;
- grid-template-columns: 28px minmax(0, auto) minmax(0, 1fr) 30px;
+ grid-template-columns: var(--ai-composer-action-size) minmax(0, 1fr) var(--ai-composer-action-size);
  align-items: center;
- gap: 4px;
+ gap: 0.5rem;
  min-width: 0;
  overflow: hidden;
- padding: 8px;
- border-radius: 9px;
+ padding: 0.75rem;
+ border-radius: 0.875rem;
  background: var(--goose-ai-composer-surface);
  transition:
   color var(--goose-control-motion-duration) ease,
@@ -70,13 +71,14 @@
   border-color var(--goose-control-motion-duration) ease;
 }
 .notebook-ai-composer-form {
+ padding-bottom: 1rem;
  outline: none;
 }
 .bui-prompt-bar {
  --goose-ai-composer-surface: var(--goose-input-surface);
  overflow: hidden;
  border: 1px solid hsl(var(--input));
- border-radius: 9px;
+ border-radius: 0.875rem;
  background: var(--goose-ai-composer-surface);
  transition: border-color var(--goose-control-motion-duration) ease;
 }
@@ -102,23 +104,50 @@
  display: inline-flex;
  align-items: center;
  justify-content: center;
- width: 30px;
- height: 30px;
+ width: var(--ai-composer-action-size);
+ height: var(--ai-composer-action-size);
  padding: 0;
  border-radius: 50%;
 }
 
+.notebook-ai-composer-shell [data-goose-control="icon-button"] {
+ width: var(--ai-composer-action-size);
+ height: var(--ai-composer-action-size);
+}
+
+.notebook-ai-composer-shell [data-goose-control="icon-button"] > svg {
+ width: 1.125rem;
+ height: 1.125rem;
+}
+
 .notebook-ai-stop-square {
- width: 10px;
- height: 10px;
+ width: 0.75rem;
+ height: 0.75rem;
  border-radius: 2px;
  background: currentColor;
 }
 
 .notebook-ai-model-menu {
+ width: 22rem;
  max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
  overscroll-behavior: contain;
  scrollbar-width: thin;
+}
+
+.notebook-ai-model-trigger {
+ height: var(--ai-composer-action-size);
+ min-width: 0;
+ max-width: 100%;
+ gap: 0.375rem;
+ padding-inline: 0.5rem;
+ font-size: 1rem;
+ line-height: 1.5;
+}
+
+.notebook-ai-model-menu .goose-list-row {
+ min-height: 2.75rem;
+ gap: 0.625rem;
+ padding: 0.625rem 0.75rem;
 }
 
 /* 只放开面板输入高度，不改变共享 compact 输入或重建原生编辑节点。 */
@@ -128,18 +157,20 @@
  font-size: var(--ai-composer-font-size);
  line-height: var(--ai-composer-line-height);
  height: auto;
- min-height: calc(var(--ai-composer-line-height) * 2 + 12px);
- max-height: 120px;
- padding: 6px 4px;
+ min-height: calc(var(--ai-composer-line-height) * 2 + 1rem);
+ max-height: min(14rem, 30dvh);
+ padding: 0.5rem 0.25rem;
  overflow-y: auto;
  overflow-wrap: anywhere;
  scrollbar-width: thin;
  overscroll-behavior: contain;
 }
 .notebook-ai-composer-shell [data-input-placeholder][data-variant="panel"] {
- top: 6px;
- left: 4px;
- right: 4px;
+ top: 0.5rem;
+ left: 0.25rem;
+ right: 0.25rem;
+ max-height: calc(var(--ai-composer-line-height) * 2);
+ overflow: hidden;
  font-family: var(--font-default);
  font-size: var(--ai-composer-font-size);
  line-height: var(--ai-composer-line-height);

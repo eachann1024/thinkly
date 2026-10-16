@@ -155,10 +155,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 <ModelSelectorPopover disabled={disabled} />
               </span>
 
-              {/* 工具栏中的留白把发送按钮推到最右。 */}
-              <div className="min-w-0 flex-1" aria-hidden />
-
-              <span className="flex shrink-0 items-center">
+              <span className="flex shrink-0 items-center justify-self-end">
                 {isStreaming ? (
                   <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="muted" />}
                     className="bui-composer-send goose-interactive-primary"

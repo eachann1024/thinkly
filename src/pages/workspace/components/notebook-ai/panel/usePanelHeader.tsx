@@ -101,7 +101,7 @@ export function usePanelHeader(
                   align="end"
                   sideOffset={6}
                   collisionPadding={12}
-                  className="notebook-ai-header-menu w-[248px] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-1.5"
+                  className="notebook-ai-header-menu notebook-ai-history-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto"
                 >
                   <ConversationHistoryList
                     compact

@@ -1,61 +1,58 @@
-/* One compact surface for every inline AI state. All overrides stay local. */
+/* The positioning shell owns width; the existing context zoom scales this surface once. */
 .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface {
+  --inline-ai-control-height: 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: .875rem;
+  box-sizing: border-box;
   height: auto;
   width: 100%;
   min-width: 0;
-  padding: 12px;
+  padding: 1.125rem;
   border: 1px solid hsl(var(--border));
-  border-radius: 12px;
+  border-radius: 1rem;
   background: hsl(var(--popover));
   color: hsl(var(--popover-foreground));
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.04);
+  font-size: 1rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
   animation: goose-inline-ai-appear var(--goose-control-motion-duration) ease-out;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-header {
+.goose-inline-ai-surface .goose-inline-ai-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: .75rem;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-header
-  > span {
+.goose-inline-ai-surface .goose-inline-ai-header > span {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
+  gap: .65rem;
+  font-size: 1rem;
   font-weight: 600;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-header
-  svg {
+.goose-inline-ai-surface .goose-inline-ai-header svg {
+  width: 1.2em;
+  height: 1.2em;
   flex-shrink: 0;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-close {
+.goose-inline-ai-surface .goose-inline-ai-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
   border: 0;
   border-radius: var(--goose-control-radius);
   background: transparent;
   color: hsl(var(--muted-foreground));
   cursor: pointer;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-menu.bn-combobox {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-prompt-menu.bn-combobox {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: .875rem;
   min-width: 0;
   width: 100%;
   padding: 0;
@@ -64,205 +61,192 @@
   background: transparent;
   box-shadow: none;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-field {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-prompt-field {
+  --goose-ai-line: 1.65rem;
+  --goose-ai-pad-y: .25rem;
+  --goose-ai-row: 4.5rem;
   border-radius: var(--goose-control-radius);
   background: transparent;
   box-shadow: none;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-field:focus-within,
-.goose-inline-ai-surface
-  .goose-ai-prompt-field:not(.goose-ai-prompt-field--disabled):hover {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-prompt-field:focus-within,
+.goose-inline-ai-surface .goose-ai-prompt-field:not(.goose-ai-prompt-field--disabled):hover {
   background: transparent;
   box-shadow: none;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-field__textarea {
-  padding: 6px 2px !important;
-  font-size: 13px !important;
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-prompt-field__textarea {
+  max-height: 12rem;
+  padding: .25rem 0 !important;
+  font-size: 1rem !important;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-think-ticker {
-  left: 0;
-  padding: 8px 2px;
+.goose-inline-ai-surface .goose-ai-prompt-field__textarea::placeholder {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-think-ticker {
+  inset: 0;
+  padding: .25rem 0;
   color: hsl(var(--muted-foreground));
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-think-ticker__scroller {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-think-ticker__scroller {
+  height: 100%;
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   animation: none;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-tags {
-  gap: 2px;
+.goose-inline-ai-surface .goose-inline-ai-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: .6rem;
+  min-width: 0;
+}
+.goose-inline-ai-surface .goose-inline-ai-submit-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .3rem;
+  margin-inline-start: auto;
+}
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-tags {
+  display: flex;
+  flex: 1 1 15rem;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: .2rem;
   margin: 0;
   padding: 0;
   border: 0;
-  flex-wrap: wrap;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-tag,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-send,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-menu-stop,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-menu
-  summary,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-list
-  button {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface :where(.goose-ai-tag, .goose-inline-ai-send, .goose-ai-menu-stop, .goose-inline-ai-actions-menu summary, .goose-inline-ai-actions-list button) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  min-height: 30px;
-  padding: 4px 8px;
+  gap: .3rem;
+  min-height: var(--inline-ai-control-height);
+  height: auto;
+  padding: .4rem .45rem;
   border: 0;
   border-radius: var(--goose-control-radius);
   background: transparent;
   color: hsl(var(--popover-foreground));
   font-family: inherit;
-  font-size: 12px;
-  line-height: 20px;
+  font-size: .9rem;
+  line-height: 1.5;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--goose-control-motion-duration) ease,
-    color var(--goose-control-motion-duration) ease;
+  transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-tag--plus {
-  width: 30px;
+.goose-inline-ai-surface :is(.goose-inline-ai-footer, .goose-ai-tags) svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-tag--plus {
+  width: var(--inline-ai-control-height);
   padding: 0;
-  border: 0;
   color: hsl(var(--muted-foreground));
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-send {
-  margin-inline-start: auto;
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-inline-ai-send {
+  margin: 0;
+  padding-inline: .7rem;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-primary {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-inline-ai-primary {
   background: hsl(var(--foreground));
   color: hsl(var(--background));
-  padding-inline: 12px;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-primary:disabled {
-  opacity: 0.35;
-  cursor: default;
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface :is(.goose-inline-ai-primary, .goose-inline-ai-send):disabled {
+  background: hsl(var(--muted));
+  color: var(--goose-text-disabled);
+  cursor: not-allowed;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-menu-stop {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-menu-stop {
   width: auto;
-  height: 30px;
-  margin: 3px 0;
+  margin: 0;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-field__right {
-  align-items: center;
-}
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-menu {
+.goose-inline-ai-surface .goose-inline-ai-actions-menu {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-menu
-  summary {
+.goose-inline-ai-surface .goose-inline-ai-actions-menu summary {
   list-style: none;
 }
-.goose-inline-ai-surface
-  .goose-inline-ai-actions-menu
-  summary::-webkit-details-marker {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-tags :is(button, summary) {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.goose-inline-ai-surface .goose-inline-ai-actions-menu summary::-webkit-details-marker {
   display: none;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-list {
+.goose-inline-ai-surface .goose-inline-ai-actions-menu[open] {
+  flex-basis: 100%;
+  order: 2;
+  min-width: 0;
+}
+.goose-inline-ai-surface .goose-inline-ai-actions-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--goose-menu-row-gap);
-  margin-block-start: 4px;
-  padding: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
+  gap: .25rem;
+  margin-block-start: .4rem;
+  padding: .4rem;
   background: hsl(var(--muted));
   border-radius: var(--goose-control-radius);
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-menu[open] {
-  flex-basis: 100%;
-  order: 2;
-}
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-actions-list
-  button {
-  display: flex;
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-inline-ai-actions-list button {
   justify-content: flex-start;
   width: 100%;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: start;
+  overflow-wrap: anywhere;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-preview-summary {
+.goose-inline-ai-surface .goose-ai-preview-summary,
+.goose-inline-ai-surface .goose-inline-ai-error {
   margin: 0;
-  padding: 0 2px;
-  font-size: 12px;
-  line-height: 20px;
+  font-size: .95rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.goose-inline-ai-surface .goose-ai-preview-summary {
   color: hsl(var(--muted-foreground));
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-preview-summary
-  del {
-  padding: 1px 3px;
+.goose-inline-ai-surface .goose-ai-preview-summary :is(del, ins) {
+  padding: .1rem .25rem;
+}
+.goose-inline-ai-surface .goose-ai-preview-summary del {
   background: var(--goose-interactive-danger);
   color: var(--goose-interactive-danger-fg);
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-preview-summary
-  ins {
-  padding: 1px 3px;
+.goose-inline-ai-surface .goose-ai-preview-summary ins {
   background: var(--goose-interactive-success);
   color: var(--goose-interactive-success-fg);
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-inline-ai-error {
-  margin: 0;
-  padding: 0 2px;
-  font-size: 13px;
-  line-height: 20px;
+.goose-inline-ai-surface .goose-inline-ai-error {
   color: var(--goose-interactive-danger-fg);
-  overflow-wrap: anywhere;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  button:focus-visible,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  summary:focus-visible,
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-  .goose-ai-prompt-field__textarea:focus-visible {
+.goose-inline-ai-surface :is(button, summary, .goose-ai-prompt-field__textarea):focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
 }
 @media (hover: hover) and (pointer: fine) {
-  .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-    button:not(:disabled):hover,
-  .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-    summary:hover {
+  .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface :is(button:not(:disabled), summary):hover {
     background: var(--goose-interactive-hover);
     color: var(--goose-interactive-hover-fg);
   }
-  .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface
-    .goose-inline-ai-primary:not(:disabled):hover {
+  .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-inline-ai-primary:not(:disabled):hover {
     background: var(--goose-interactive-selected);
     color: var(--goose-interactive-selected-fg);
   }
 }
 @keyframes goose-inline-ai-appear {
-  from {
-    opacity: 0;
-    transform: translateY(-3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .goose-inline-ai-surface,

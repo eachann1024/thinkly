@@ -1,11 +1,20 @@
-import { useEffect } from "react";
-import * as GooseIcons from "@/components/ui/icons";
-import { FeatureToastCard } from "@/components/ui/feature-toast-card";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { isSetupGuideVisible } from "@/lib/setupGuide";
+import type { SetupGuideAIStatus } from "@/lib/setupGuideAI";
 import { useSettings } from "@/stores/useSettings";
-import { toast } from "@/components/ui/sonner";
+import { SettingsAI } from "./sidebar/SettingsAI";
+import { readStoredApiKey } from "./sidebar/settings-ai/shared";
+import { resolveProtocolForProvider } from "@/lib/ai-provider";
+import "./writing-setup-prompt.css";
 
 const NOTICE_ID = "ai-writing-assistant";
-const NOTICE_TOAST_ID = "ai-feature-notice";
 
 function openAISettings() {
   window.dispatchEvent(
@@ -15,61 +24,97 @@ function openAISettings() {
   );
 }
 
-function createNoticeContent(handleClose: () => void) {
-  const settingsRef = { current: false };
-  const closeRef = { current: false };
-  return (
-    <FeatureToastCard
-      icon={<GooseIcons.Sparkles className="h-5 w-5" />}
-      title="✨ AI 写作助手已就绪"
-      actions={[
-        {
-          label: "去配置",
-          onPointerDown: (e) => { e.preventDefault(); settingsRef.current = true; openAISettings(); handleClose(); },
-          onClick: () => { if (settingsRef.current) { settingsRef.current = false; return; } openAISettings(); handleClose(); },
-        },
-        {
-          label: "知道了",
-          onPointerDown: (e) => { e.preventDefault(); closeRef.current = true; handleClose(); },
-          onClick: () => { if (closeRef.current) { closeRef.current = false; return; } handleClose(); },
-          variant: "ghost",
-          className: "text-muted-foreground hover:text-[var(--goose-interactive-hover-fg)]",
-        },
-      ]}
-    >
-      <p>· 空白行按空格或输入 / 即可唤起 AI 续写</p>
-      <p>· 选中文字即可进行润色、精简或翻译</p>
-      <p>支持 DeepSeek、Claude、OpenAI 等主流模型，配置 API Key 即可开启体验。</p>
-    </FeatureToastCard>
-  );
-}
-
+/** 复用设置表单与保存流程，首次配置在独立对话框内完成。 */
 export function AIFeatureNotice() {
-  const dismissed = useSettings(
-    (s) => s.dismissedNotices[NOTICE_ID] === true,
-  );
+  const dismissed = useSettings((s) => s.dismissedNotices[NOTICE_ID] === true);
   const hydrated = useSettings((s) => s._hasHydrated === true);
+  const guideVisible = useSettings((s) => isSetupGuideVisible(s));
   const dismissNotice = useSettings((s) => s.dismissNotice);
+  const ai = useSettings((s) => s.ai);
+  const setAIEnabled = useSettings((s) => s.setAIEnabled);
+  const setAIReadGlobalPrompt = useSettings((s) => s.setAIReadGlobalPrompt);
+  const setAIReadLocalSkills = useSettings((s) => s.setAIReadLocalSkills);
+  const setAISelectedModelId = useSettings((s) => s.setAISelectedModelId);
+  const saveAICustomConfig = useSettings((s) => s.saveAICustomConfig);
+  const [open, setOpen] = useState(false);
+  const [setupStatus, setSetupStatus] = useState<SetupGuideAIStatus | null>(null);
 
   useEffect(() => {
-    // 等 hydration 完成后再决定是否弹窗，避免读到默认值
-    if (!hydrated || dismissed) return;
+    if (!hydrated || dismissed || guideVisible) return;
+    setOpen(true);
+  }, [dismissed, guideVisible, hydrated]);
 
-    const handleClose = () => {
-      dismissNotice(NOTICE_ID);
-      toast.dismiss(NOTICE_TOAST_ID);
-    };
+  const configured = Boolean(
+    readStoredApiKey(
+      ai,
+      ai.customProviderId,
+      resolveProtocolForProvider(ai.customProviderId, ai.customProtocol),
+    ).trim() &&
+      ai.selectedModelId &&
+      ai.customModelOptions.some((model) => model.id === ai.selectedModelId),
+  );
 
-    toast.custom(() => createNoticeContent(handleClose), {
-      id: NOTICE_TOAST_ID,
-      duration: Infinity,
-      dismissible: false,
-    });
+  useEffect(() => {
+    if (
+      !open ||
+      !configured ||
+      !setupStatus?.ready ||
+      setupStatus.busy ||
+      setupStatus.dirty
+    ) return;
+    setOpen(false);
+    dismissNotice(NOTICE_ID);
+  }, [configured, dismissNotice, open, setupStatus]);
 
-    return () => {
-      toast.dismiss(NOTICE_TOAST_ID);
-    };
-  }, [dismissed, hydrated, dismissNotice]);
+  if (!open || !hydrated || guideVisible || dismissed) return null;
 
-  return null;
+  const close = () => {
+    setOpen(false);
+    dismissNotice(NOTICE_ID);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) close();
+      }}
+    >
+      <DialogContent className="writing-setup-prompt">
+        <header className="writing-setup-prompt-header">
+          <DialogTitle>配置 AI 写作助手</DialogTitle>
+          <DialogDescription>选择服务商，保存配置并选择模型。</DialogDescription>
+        </header>
+        <div className="writing-setup-prompt-form">
+          <SettingsAI
+            mode="onboarding"
+            ai={ai}
+            enabled={ai.enabled}
+            setEnabled={setAIEnabled}
+            setReadGlobalPrompt={setAIReadGlobalPrompt}
+            setReadLocalSkills={setAIReadLocalSkills}
+            selectedModelId={ai.selectedModelId}
+            setSelectedModelId={setAISelectedModelId}
+            saveCustomConfig={saveAICustomConfig}
+            onSetupStateChange={setSetupStatus}
+          />
+        </div>
+        <footer className="writing-setup-prompt-actions">
+          <Button type="button" variant="ghost" onClick={close}>
+            稍后配置
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              close();
+              openAISettings();
+            }}
+          >
+            打开完整设置
+          </Button>
+        </footer>
+      </DialogContent>
+    </Dialog>
+  );
 }
