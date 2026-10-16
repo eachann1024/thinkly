@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-accent="ocean">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>窗口置顶 · 三款图标预览 | 鹅笔记</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --goose-shell-bg: #f1f1f1; --goose-sidebar-surface: #fafafa; --goose-editor-bg: #fff;
+      --goose-text-primary: #20242c; --goose-text-secondary: #526071; --goose-accent-solid: #547dd0;
+      --goose-interactive-hover: #eef3fc; --goose-interactive-selected: #e5edfc;
+      --border: #dedfe2; --canvas: #f6f6f5; --dot: #dedfe1; --shadow: 0 12px 38px #20242c0d;
+      --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --goose-shell-bg: #343434; --goose-sidebar-surface: #222; --goose-editor-bg: #181818;
+      --goose-text-primary: #ececec; --goose-text-secondary: #b4b4b4; --goose-accent-solid: #779de8;
+      --goose-interactive-hover: #2c2c2c; --goose-interactive-selected: #343434;
+      --border: #414141; --canvas: #242424; --dot: #363636; --shadow: 0 12px 38px #0002;
+    }
+    :root[data-accent="clay"] { --goose-accent-solid: #bc684c; --goose-interactive-selected: #f4e8e1; --goose-interactive-hover: #f5efeb; }
+    :root[data-accent="clay"][data-theme="dark"] { --goose-accent-solid: #e2a08a; --goose-interactive-selected: #39302d; --goose-interactive-hover: #302b28; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--goose-text-primary); background: var(--canvas); font: 14px/1.5 var(--font-ui); }
+    button, textarea { font: inherit; }
+    button { color: inherit; cursor: pointer; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, summary:focus-visible, textarea:focus-visible { outline: 2px solid var(--goose-accent-solid); outline-offset: 4px; }
+    button { transition: background-color 150ms, color 150ms, border-color 150ms; }
+    svg { display: block; flex-shrink: 0; overflow: visible; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 30px 36px 24px; }
+    .page-header, .tools, .segment, .section-head, .toolbar, .nav, .state-switch, .size-sample, .footer { display: flex; align-items: center; }
+    .page-header { justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+    .brand { color: var(--goose-text-secondary); font-size: 13px; margin-bottom: 3px; }
+    h1 { font-size: 27px; font-weight: 600; letter-spacing: -.8px; margin: 0; }
+    h2 { font-size: 15px; font-weight: 600; margin: 0; }
+    .tools { gap: 16px; flex-wrap: wrap; }
+    .segment { border: 1px solid var(--border); padding: 3px; border-radius: 9px; gap: 2px; background: var(--goose-sidebar-surface); }
+    .segment button { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 5px 12px; font-size: 13px; }
+    .segment button[aria-pressed="true"] { background: var(--goose-interactive-selected); border-color: var(--goose-accent-solid); }
+    .swatches { display: flex; gap: 8px; }
+    .swatch { width: 28px; height: 28px; padding: 5px; border: 1px solid transparent; border-radius: 50%; background: transparent; }
+    .swatch::after { content: ""; display: block; width: 16px; height: 16px; background: var(--swatch); border-radius: 50%; }
+    .swatch[aria-pressed="true"] { border-color: var(--goose-text-secondary); }
+    .options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--goose-editor-bg); margin-bottom: 25px; }
+    .option { position: relative; padding: 19px 22px 16px; text-align: left; background: transparent; border: 0; border-right: 1px solid var(--border); min-width: 0; }
+    .option:last-child { border-right: 0; }
+    .option:hover { background: var(--goose-interactive-hover); }
+    .option[aria-pressed="true"] { background: var(--goose-interactive-selected); box-shadow: inset 0 -2px var(--goose-accent-solid); }
+    .option:focus-visible { outline-offset: -4px; }
+    .option-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+    .number { color: var(--goose-text-secondary); font: 12px ui-monospace, monospace; font-weight: 400; }
+    .check { color: var(--goose-accent-solid); margin-left: auto; visibility: hidden; font-size: 16px; }
+    .option[aria-pressed="true"] .check { visibility: visible; }
+    .icon-pair { display: flex; align-items: center; justify-content: center; gap: 40px; margin: 21px 0 13px; }
+    .state-example { display: grid; justify-items: center; gap: 10px; color: var(--goose-text-secondary); font-size: 12px; }
+    .state-example.on svg { color: var(--goose-accent-solid); }
+    .intent { color: var(--goose-text-secondary); font-size: 13px; text-align: center; display: block; }
+    .section-head { justify-content: space-between; gap: 12px; margin: 0 0 12px; min-height: 30px; }
+    .state-switch { gap: 9px; border: 0; background: transparent; padding: 4px 0 4px 8px; font-size: 13px; }
+    .switch-track { width: 30px; height: 18px; padding: 3px; border-radius: 12px; background: var(--goose-text-secondary); }
+    .switch-thumb { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--goose-editor-bg); transition: transform 150ms; }
+    .state-switch[aria-pressed="true"] .switch-track { background: var(--goose-accent-solid); }
+    .state-switch[aria-pressed="true"] .switch-thumb { transform: translateX(12px); }
+    .window { overflow: hidden; border: 1px solid var(--border); border-radius: 13px; background: var(--goose-shell-bg); box-shadow: var(--shadow); }
+    .toolbar { height: 48px; padding: 0 17px; gap: 22px; }
+    .traffic { display: flex; gap: 8px; padding-right: 8px; }
+    .traffic i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #0001; background: #ff6058; }
+    .traffic i:nth-child(2) { background: #ffbd2e; } .traffic i:nth-child(3) { background: #29c941; }
+    .nav { gap: 5px; }
+    .tool-icon { width: 30px; height: 30px; display: grid; place-items: center; color: var(--goose-text-secondary); }
+    .tool-icon svg { width: 18px; height: 18px; }
+    .pin-button { border: 1px solid transparent; border-radius: 6px; padding: 0; background: transparent; }
+    .pin-button:hover { background: var(--goose-interactive-hover); }
+    .pin-button[aria-pressed="true"] { color: var(--goose-accent-solid); background: var(--goose-interactive-selected); border-color: var(--goose-accent-solid); }
+    .window-title { margin: 0 auto; color: var(--goose-text-secondary); font-size: 12px; }
+    .right-nav { margin-left: auto; }
+    .workspace { display: grid; grid-template-columns: 49px 218px minmax(0, 1fr); height: 315px; padding: 0 6px 6px 0; }
+    .rail { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 10px 0; color: var(--goose-text-secondary); }
+    .rail .tool-icon:first-child { color: var(--goose-accent-solid); background: var(--goose-interactive-selected); border: 1px solid var(--goose-accent-solid); border-radius: 8px; }
+    .rail .tool-icon:last-child { margin-top: auto; }
+    .sidebar { padding: 18px 12px; background: var(--goose-sidebar-surface); border-radius: 10px 0 0 10px; border-right: 1px solid var(--border); }
+    .notebook { display: flex; gap: 10px; align-items: center; padding: 0 8px 15px; font-weight: 600; }
+    .notebook .more { margin-left: auto; color: var(--goose-text-secondary); font-weight: 400; }
+    .note { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 9px; margin: 3px 0; border: 1px solid transparent; border-radius: 7px; white-space: nowrap; }
+    .note.selected { border-color: var(--goose-accent-solid); background: var(--goose-interactive-selected); }
+    .note svg, .notebook svg { color: var(--goose-text-secondary); width: 15px; height: 15px; }
+    .paper { padding: 27px 34px; border-radius: 0 10px 10px 0; overflow: hidden; background-color: var(--goose-editor-bg); background-image: radial-gradient(var(--dot) .75px, transparent .75px); background-size: 24px 24px; }
+    .paper h3 { margin: 0 0 17px; font-size: 23px; letter-spacing: -.4px; }
+    .paper p { margin: 0 0 17px; font-size: 14px; line-height: 1.8; }
+    table { width: 100%; border-collapse: collapse; background: var(--goose-editor-bg); text-align: left; font-size: 13px; }
+    th, td { border: 1px solid var(--border); padding: 9px 13px; font-weight: 400; } th { background: var(--goose-sidebar-surface); font-weight: 500; }
+    .detail { display: grid; grid-template-columns: 220px 1fr auto; gap: 26px; align-items: center; padding: 25px 0 22px; border-bottom: 1px solid var(--border); }
+    .detail-title { font-size: 15px; font-weight: 600; }
+    .detail-state { color: var(--goose-text-secondary); margin-top: 3px; font-size: 13px; }
+    .sizes { display: flex; align-items: flex-end; justify-content: space-around; gap: 14px; }
+    .size-sample { flex-direction: column; gap: 9px; }
+    .size-icon { height: 96px; display: flex; align-items: center; justify-content: center; }
+    .size-sample span { font: 12px ui-monospace, monospace; color: var(--goose-text-secondary); }
+    .sizes.pinned { color: var(--goose-accent-solid); }
+    .plain-button { background: var(--goose-editor-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; white-space: nowrap; }
+    .plain-button:hover { border-color: var(--goose-accent-solid); background: var(--goose-interactive-hover); }
+    details { margin-top: 17px; }
+    summary { color: var(--goose-text-secondary); cursor: pointer; width: fit-content; font-size: 13px; }
+    textarea { margin-top: 12px; display: block; width: 100%; height: 170px; resize: vertical; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--goose-editor-bg); color: var(--goose-text-primary); font: 12px/1.6 ui-monospace, monospace; }
+    .footer { justify-content: space-between; margin-top: 18px; gap: 14px; color: var(--goose-text-secondary); font-size: 12px; }
+    @media (max-width: 850px) { .wrap { padding: 24px; } .workspace { grid-template-columns: 44px 170px minmax(0, 1fr); } .paper { padding: 26px 23px; } .detail { grid-template-columns: 160px 1fr; } .detail > button { grid-column: 1 / -1; justify-self: end; } .icon-pair { gap: 26px; } .option { padding: 16px; } }
+    @media (max-width: 600px) {
+      .wrap { padding: 20px 16px; } .page-header { align-items: flex-start; gap: 14px; flex-direction: column; margin-bottom: 20px; }
+      .tools { width: 100%; justify-content: space-between; } .options { grid-template-columns: 1fr; }
+      .option { display: grid; grid-template-columns: 1fr 142px; align-items: center; border-right: 0; border-bottom: 1px solid var(--border); gap: 5px 12px; padding: 16px; }
+      .option:last-child { border-bottom: 0; } .option[aria-pressed="true"] { box-shadow: inset 3px 0 var(--goose-accent-solid); }
+      .option-title { font-size: 14px; gap: 7px; } .check { display: none; } .intent { grid-column: 1; text-align: left; font-size: 12px; }
+      .icon-pair { grid-column: 2; grid-row: 1 / 3; gap: 28px; margin: 0; } .icon-pair svg { width: 30px; height: 30px; } .state-example { gap: 6px; }
+      .toolbar { padding: 0 12px; gap: 12px; } .traffic { gap: 6px; padding: 0; } .traffic i { width: 10px; height: 10px; }
+      .window-title, .right-nav, .sidebar { display: none; } .workspace { grid-template-columns: 39px minmax(0, 1fr); height: 290px; }
+      .paper { padding: 22px 16px; border-radius: 8px; } .paper h3 { font-size: 20px; } .paper p { font-size: 13px; } th, td { padding: 8px; font-size: 12px; }
+      .detail { grid-template-columns: 1fr; gap: 12px; padding-top: 20px; } .detail > button { grid-column: 1; } .sizes { gap: 8px; }
+      .footer { align-items: flex-start; flex-direction: column; gap: 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="page-header">
+      <div><div class="brand">鹅笔记 / 图标提案</div><h1>窗口置顶</h1></div>
+      <div class="tools">
+        <div class="swatches" role="group" aria-label="强调色">
+          <button class="swatch" data-accent="ocean" style="--swatch:#547dd0" aria-label="海洋蓝" aria-pressed="true" title="海洋蓝"></button>
+          <button class="swatch" data-accent="clay" style="--swatch:#bc684c" aria-label="陶土色" aria-pressed="false" title="陶土色"></button>
+        </div>
+        <div class="segment" role="group" aria-label="外观">
+          <button data-theme="light" aria-pressed="true">浅色</button><button data-theme="dark" aria-pressed="false">深色</button>
+        </div>
+      </div>
+    </header>
+    <section class="options" aria-label="选择图标方案" id="options"></section>
+    <section aria-labelledby="context-title">
+      <div class="section-head">
+        <h2 id="context-title">顶栏效果</h2>
+        <button class="state-switch" id="state-toggle" aria-label="窗口置顶" aria-pressed="false"><span id="state-label">未置顶</span><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span></button>
+      </div>
+      <div class="window">
+        <div class="toolbar">
+          <div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="nav">
+            <span class="tool-icon" data-ui="back" aria-hidden="true"></span><span class="tool-icon" data-ui="forward" aria-hidden="true"></span><span class="tool-icon" data-ui="panel" aria-hidden="true"></span>
+            <button class="tool-icon pin-button" id="toolbar-pin" aria-label="窗口置顶" aria-pressed="false" title="置顶窗口"></button>
+          </div>
+          <span class="window-title">鹅笔记</span>
+          <div class="nav right-nav" aria-hidden="true"><span class="tool-icon" data-ui="plus"></span><span class="tool-icon" data-ui="spark"></span><span class="tool-icon" data-ui="more"></span></div>
+        </div>
+        <div class="workspace">
+          <div class="rail" aria-hidden="true"><span class="tool-icon" data-ui="notes"></span><span class="tool-icon" data-ui="list"></span><span class="tool-icon" data-ui="search"></span><span class="tool-icon" data-ui="settings"></span></div>
+          <aside class="sidebar" aria-label="示例文件列表">
+            <div class="notebook"><span data-ui="folder"></span>Note<span class="more">＋</span></div>
+            <div class="note"><span data-ui="folder"></span>灵感归档</div><div class="note"><span data-ui="folder"></span>项目记录</div>
+            <div class="note selected"><span data-ui="file"></span>工作台</div><div class="note"><span data-ui="file"></span>阅读笔记</div><div class="note"><span data-ui="file"></span>随手记</div>
+          </aside>
+          <article class="paper" aria-label="示例笔记">
+            <h3>我的工作台</h3><p>把想法留在眼前，慢慢写成自己的答案。</p>
+            <table><thead><tr><th>笔记</th><th>内容</th></tr></thead><tbody><tr><td>灵感收集</td><td>随时记录，一个念头也不落下</td></tr><tr><td>阅读摘录</td><td>留下值得回看的句子</td></tr><tr><td>今日计划</td><td>专注手边正在做的事</td></tr></tbody></table>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="detail" aria-label="图标尺寸预览">
+      <div><div class="detail-title" id="detail-title"></div><div class="detail-state" id="detail-state">未置顶 · 原尺寸显示</div></div>
+      <div class="sizes" id="sizes"></div><button class="plain-button" id="copy-svg">复制当前 SVG</button>
+    </section>
+    <details id="source"><summary>查看 SVG 源码</summary><textarea id="svg-source" aria-label="当前图标 SVG 源码" readonly spellcheck="false"></textarea></details>
+    <footer class="footer"><span>点击方案切换 · 点击顶栏图标预览置顶状态</span><span id="status" role="status" aria-live="polite">设计预览 · 不改变实际窗口状态</span></footer>
+    <noscript>请启用 JavaScript 查看图标与切换效果。</noscript>
+  </main>
+  <script>
+    const designs = [
+      { name: '悬浮叠窗', intent: '前后层次，突出窗口的置顶关系' },
+      { name: '精密图钉', intent: '斜放到锁定，保留熟悉的图钉语义' },
+      { name: '天顶视窗', intent: '向上冠标，与窗口轮廓扣合' }
+    ];
+    let selected = 0, pinned = false;
+    const $ = (selector) => document.querySelector(selector);
+    function icon(index, on, size = 24) {
+      const tint = on ? '.15' : '0';
+      const fine = size > 20;
+      const shapes = [
+        `<path d="M3.5 10v8.5a2 2 0 0 0 2 2H16" opacity=".45"/>
+         <rect x="6.5" y="4" width="14" height="11" rx="2" fill="currentColor" fill-opacity="${tint}"/>
+         <path d="M6.5 7.75h14" stroke-width="1.2"/>
+         ${fine ? '<circle cx="9.1" cy="5.9" r=".6" fill="currentColor" stroke="none"/>' : ''}
+         ${on ? '<circle cx="18" cy="5.9" r=".85" fill="currentColor" stroke="none"/><path d="M8 18h11" opacity=".5" stroke-width="1.2"/>' : ''}`,
+        `<g transform="rotate(${on ? 0 : 40} 12 12)">
+           <path d="M7.5 3.5h9" stroke-width="2"/>
+           <path d="M9 3.5v4.2c0 1-.4 1.8-1.1 2.5L6.5 12v1.5h11V12l-1.4-1.8c-.7-.7-1.1-1.5-1.1-2.5V3.5" fill="currentColor" fill-opacity="${tint}"/>
+           ${fine ? '<path d="M9.5 6h5" stroke-width="1" opacity=".45"/>' : ''}
+           <path d="M12 13.5V21" stroke-width="${on ? 1.9 : 1.6}"/>
+         </g>${on ? '<path d="M8.5 21h7" opacity=".5" stroke-width="1.2"/>' : ''}`,
+        `<rect x="3.5" y="8" width="17" height="12" rx="2" fill="currentColor" fill-opacity="${tint}"/>
+         <path d="M3.5 12h17" stroke-width="1.2"/>
+         ${fine ? '<circle cx="6" cy="10" r=".65" fill="currentColor" stroke="none"/>' : ''}
+         <g transform="translate(0 ${on ? 2 : 0})"><path d="m8.5 6 3.5-3.5L15.5 6"/><path d="M12 3v5" stroke-width="1.4"/></g>
+         ${on ? '<circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"/>' : ''}`
+      ];
+      return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[index]}</svg>`;
+    }
+    const ui = {
+      back: '<path d="m14 5-7 7 7 7M7 12h14"/>', forward: '<path d="m10 5 7 7-7 7M3 12h14"/>',
+      panel: '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M9 4v16"/>',
+      plus: '<path d="M12 3v18M3 12h18"/>', spark: '<path d="m12 3 2.7 6.3L21 12l-6.3 2.7L12 21l-2.7-6.3L3 12l6.3-2.7ZM20 2v4m-2-2h4"/>',
+      more: '<path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/>',
+      notes: '<path d="M14 4H5v15h4M10 8h6l4 4v9H10Z"/><path d="M16 8v4h4"/>',
+      list: '<path d="M4 4v16M9 6h12M9 12h9M9 18h12"/>',
+      search: '<circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/>',
+      settings: '<path d="m9 3-1 3-3 1v4l-2 2 2 3 3 1 1 4h6l1-4 3-1 2-3-2-2V7l-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/>',
+      folder: '<path d="M3 5h6l2 3h10v12H3Z"/>',
+      file: '<path d="M5 3h9l5 5v13H5Z"/><path d="M14 3v5h5M8 12h8M8 16h6"/>'
+    };
+    document.querySelectorAll('[data-ui]').forEach(el => { el.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ui[el.dataset.ui]}</svg>`; });
+    $('#options').innerHTML = designs.map((d, i) => `<button class="option" data-index="${i}" aria-pressed="${i === 0}" aria-label="方案${i + 1}：${d.name}">
+      <span class="option-title"><span class="number">0${i + 1}</span>${d.name}<span class="check" aria-hidden="true">✓</span></span>
+      <span class="icon-pair"><span class="state-example">${icon(i, false, 40)}<span>未置顶</span></span><span class="state-example on">${icon(i, true, 40)}<span>置顶中</span></span></span>
+      <span class="intent">${d.intent}</span></button>`).join('');
+    function render() {
+      document.querySelectorAll('.option').forEach((el, i) => el.setAttribute('aria-pressed', String(i === selected)));
+      $('#toolbar-pin').innerHTML = icon(selected, pinned, 18);
+      $('#toolbar-pin').setAttribute('aria-pressed', String(pinned));
+      $('#toolbar-pin').title = pinned ? '取消窗口置顶' : '置顶窗口';
+      $('#state-toggle').setAttribute('aria-pressed', String(pinned));
+      $('#state-label').textContent = pinned ? '置顶中' : '未置顶';
+      $('#detail-title').textContent = `0${selected + 1} / ${designs[selected].name}`;
+      $('#detail-state').textContent = `${pinned ? '置顶中' : '未置顶'} · 原尺寸显示`;
+      $('#sizes').classList.toggle('pinned', pinned);
+      $('#sizes').innerHTML = [16, 24, 48, 96].map(size => `<div class="size-sample"><div class="size-icon">${icon(selected, pinned, size)}</div><span>${size} px</span></div>`).join('');
+      $('#svg-source').value = icon(selected, pinned).replaceAll(' aria-hidden="true"', '');
+      $('#copy-svg').textContent = '复制当前 SVG';
+      $('#status').textContent = `设计预览 · ${designs[selected].name} · ${pinned ? '置顶中' : '未置顶'}`;
+    }
+    document.querySelectorAll('.option').forEach(el => el.addEventListener('click', () => { selected = Number(el.dataset.index); render(); }));
+    [$('#toolbar-pin'), $('#state-toggle')].forEach(el => el.addEventListener('click', () => { pinned = !pinned; render(); }));
+    document.querySelectorAll('button[data-theme], button[data-accent]').forEach(el => el.addEventListener('click', () => {
+      const key = el.hasAttribute('data-theme') ? 'theme' : 'accent';
+      document.documentElement.dataset[key] = el.dataset[key];
+      document.querySelectorAll(`button[data-${key}]`).forEach(btn => btn.setAttribute('aria-pressed', String(btn === el)));
+    }));
+    $('#copy-svg').addEventListener('click', async () => {
+      const content = $('#svg-source').value;
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(content);
+        $('#copy-svg').textContent = '已复制';
+        $('#status').textContent = '当前 SVG 已复制';
+      } catch {
+        $('#source').open = true; $('#svg-source').focus(); $('#svg-source').select();
+        $('#status').textContent = '源码已选中，请按 ⌘C 或 Ctrl+C 复制';
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
