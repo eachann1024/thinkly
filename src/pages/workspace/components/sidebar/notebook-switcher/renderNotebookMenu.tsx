@@ -21,6 +21,8 @@ export function renderNotebookMenu(
     menuRef,
     sensors,
     isRail,
+    isHeader,
+    active,
     notebookKind,
     notebookList,
     canDeleteNotebook,
@@ -36,14 +38,29 @@ export function renderNotebookMenu(
       className={cn(
         "goose-notebook-menu-surface goose-floating-surface w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
         isRail && "goose-notebook-menu-surface--rail w-56",
+        isHeader && "goose-notebook-menu-surface--header",
       )}
-      side={isRail ? "right" : "top"}
+      side={isRail ? "right" : isHeader ? "bottom" : "top"}
       align={isRail ? "end" : "start"}
       alignOffset={0}
       sideOffset={8}
       collisionPadding={8}
       ref={menuRef}
+      onKeyDownCapture={(event) => {
+        if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) {
+          event.stopPropagation();
+          return;
+        }
+        if (event.key === "Escape" && !event.altKey && !event.ctrlKey &&
+          !event.metaKey && !isDraggingRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+          setIsOpen(false);
+        }
+      }}
       onKeyDown={(event) => {
+        if (event.defaultPrevented || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || event.altKey || event.ctrlKey || event.metaKey)
+          return;
         if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key))
           return;
         const rows = Array.from(
@@ -69,7 +86,7 @@ export function renderNotebookMenu(
         rows[next].focus();
       }}
       onCloseAutoFocus={(e) => {
-        if (isDraggingRef.current) e.preventDefault();
+        if (!active || isDraggingRef.current) e.preventDefault();
       }}
       onInteractOutside={(e) => {
         if (isDraggingRef.current) e.preventDefault();
@@ -78,10 +95,13 @@ export function renderNotebookMenu(
         if (isDraggingRef.current) e.preventDefault();
       }}
     >
-      <div className="px-2 pt-2 pb-1 text-[11px] text-muted-foreground">
+      {!isHeader && <div className="px-2 pt-2 pb-1 text-[11px] text-muted-foreground">
         切换{notebookKind}
-      </div>
-      <div className="max-h-[max(4rem,calc(var(--goose-popover-available-height,80vh)-15rem))] overflow-y-auto">
+      </div>}
+      <div className={cn(
+        "goose-notebook-menu-list overflow-y-auto",
+        !isHeader && "max-h-[max(4rem,calc(var(--goose-popover-available-height,80vh)-15rem))]",
+      )}>
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

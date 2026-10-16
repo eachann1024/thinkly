@@ -1,4 +1,4 @@
-import { SidebarPanelControls } from "./SidebarPanelControls";
+import { NotebookSwitcher } from "../NotebookSwitcher";
 import { SidebarMainTree } from "../main-tree/SidebarMainTree";
 import { SidebarSectionHeader } from "../SidebarSectionHeader";
 import { SidebarOutline } from "../SidebarOutline";
@@ -9,7 +9,6 @@ import type { useSidebarHover } from "./useSidebarHover";
 
 export function renderSidebarViews(
   context: ReturnType<typeof useSidebarHover>,
-  setNotebookFooterHost: (node: HTMLDivElement | null) => void,
 ) {
   const {
     selectedPageId,
@@ -27,7 +26,7 @@ export function renderSidebarViews(
     setScrollAreaNode,
     scrollAreaHeight,
     handleCreatePage,
-    headerTitle,
+    sidebarCollapsed,
   } = context;
   return (
     <>
@@ -36,9 +35,6 @@ export function renderSidebarViews(
           ref={setSettingsSidebarHost}
           className="sidebar-content-surface relative flex min-h-0 min-w-0 flex-1 flex-col"
         >
-          {!settingsOpen && context.forceCollapseLeft && (
-            <SidebarPanelControls context={context} />
-          )}
           {inHistoryMode && !settingsOpen && (
             <div className="min-h-0 flex-1 overflow-hidden rounded-[inherit]">
               <HistoryVersionList />
@@ -53,12 +49,13 @@ export function renderSidebarViews(
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[inherit]">
               <div className="flex min-h-0 flex-1 flex-col">
                 <div
-                  className="sidebar-tree-heading shrink-0"
+                  className="sidebar-tree-heading sidebar-navigation-heading shrink-0"
                   hidden={currentView !== "pages"}
                 >
-                  <div className="sidebar-search-heading">
-                    <strong>{headerTitle}</strong>
-                  </div>
+                  <NotebookSwitcher
+                    variant="header"
+                    active={!sidebarCollapsed && !settingsOpen && !inHistoryMode && currentView === "pages"}
+                  />
                   <SidebarSectionHeader
                     onCreate={
                       currentView === "pages" && !electronNoVault
@@ -105,11 +102,6 @@ export function renderSidebarViews(
           </div>
         </div>
       </div>
-      <div
-        ref={setNotebookFooterHost}
-        className="sidebar-notebook-footer"
-        hidden={settingsOpen || inHistoryMode || currentView !== "pages"}
-      />
     </>
   );
 }

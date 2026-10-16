@@ -35,7 +35,7 @@ export function openPageFromSidebar(
   const tabs = useTabs.getState();
   if (!options?.newTab && tryShowPageInFocusedSplit(pageId)) {
     usePages.getState().setExpandPageId(pageId);
-    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+    notifySidebarNavigation(pageId);
     return;
   }
   if (!effectiveSingleTabMode() && mode === "permanent" && options?.newTab) {
@@ -46,11 +46,17 @@ export function openPageFromSidebar(
       suppressTimer = null;
     }, 400);
     tabs.openPermanentTab(pageId, { pin: options.pin });
-    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+    notifySidebarNavigation(pageId);
     return;
   }
   tabs.openPreviewTab(pageId);
-  window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+  notifySidebarNavigation(pageId);
+}
+
+function notifySidebarNavigation(pageId: string) {
+  window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete", {
+    detail: { pageId },
+  }));
 }
 
 export function shouldSuppressSidebarSelect(): boolean {

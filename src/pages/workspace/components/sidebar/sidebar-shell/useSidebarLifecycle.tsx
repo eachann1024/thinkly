@@ -87,12 +87,13 @@ export function useSidebarLifecycle(
 
   useLayoutEffect(() => {
     if (sidebarOverlay || !restoreSidebarFocusRef.current) return;
-    restoreSidebarFocusRef.current = false;
+    const view = restoreSidebarFocusRef.current;
+    restoreSidebarFocusRef.current = null;
     sidebarRef.current
       ?.closest(".workspace-shell")
-      ?.querySelector<HTMLButtonElement>('button[aria-label="展开侧栏"]')
+      ?.querySelector<HTMLButtonElement>(`.sidebar-mode-rail-button[aria-label="${view === "pages" ? "本地" : view === "outline" ? "大纲" : "搜索"}"]`)
       ?.focus({ preventScroll: true });
-  }, [sidebarOverlay, sidebarRef, restoreSidebarFocusRef]);
+  }, [sidebarOverlay, sidebarRef, restoreSidebarFocusRef, currentView]);
 
   useEffect(() => {
     const observer = new ResizeObserver(() => {
@@ -135,7 +136,7 @@ export function useSidebarLifecycle(
     const newPageId = await createNamedPage(siblingParentId, activeNotebookId);
     if (!newPageId) return;
     openInCurrentTab(newPageId);
-    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+    window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete", { detail: { pageId: newPageId } }));
     // 新页若落在折叠的父级下，展开祖先并聚焦使其可见
     if (siblingParentId) setExpandPageId(newPageId);
   };

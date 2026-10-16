@@ -92,7 +92,6 @@ export const SidebarSearch = memo(function SidebarSearch() {
     const latest = useSearchSession.getState();
     if (pending || inputRef.current?.value !== latest.query || composing.current || !latest.open || latest.query !== deferredQuery || latest.scope !== session.scope) return;
     latest.targetPage(page.id, enter);
-    if (enter) window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
   }, [deferredQuery, session.scope, pending]);
   const reveal = (id: string) => {
     const list = listRef.current, row = document.getElementById(`search-result-${id}`);

@@ -8,6 +8,7 @@ import {
   openPageFromSidebar,
 } from "@/lib/sidebarPageNavigation";
 import { useSidebarPageReveal } from "../useSidebarPageReveal";
+import { hasNotebookTreeScroll, useNotebookTreeScroll } from "../useNotebookTreeScroll";
 import type { useMainTreeLocalCreation } from "./useMainTreeLocalCreation";
 
 export function useMainTreeView(
@@ -82,6 +83,8 @@ export function useMainTreeView(
   };
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const restoreNotebookScroll = hasNotebookTreeScroll(activeNotebookId);
+  useNotebookTreeScroll(activeNotebookId, scrollContainerRef, hasPages && !shouldShowLocalSkeleton);
 
   const lastClickModRef = useRef({ meta: false, ctrl: false });
 
@@ -146,6 +149,7 @@ export function useMainTreeView(
 
   useSidebarPageReveal({
     activeNotebookId,
+    preserveNotebookScroll: restoreNotebookScroll,
     highlightedPageId,
     expandPageId,
     pages,

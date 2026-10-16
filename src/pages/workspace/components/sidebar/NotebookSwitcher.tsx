@@ -13,8 +13,9 @@ import { renderNotebookIcon } from "./notebookUtils";
 export function NotebookSwitcher(
   props: {
     onOpenSettings?: () => void;
-    variant?: "default" | "rail";
+    variant?: "default" | "rail" | "header";
     triggerContainer?: HTMLElement | null;
+    active?: boolean;
   } = {},
 ) {
   const switcher = useNotebookSwitcherState(props);
@@ -30,6 +31,8 @@ export function NotebookSwitcher(
     setEditDialog,
     activeNotebook,
     isRail,
+    isHeader,
+    active,
     notebookKind,
     activeNotebookLabel,
     handleSaveEdit,
@@ -40,26 +43,27 @@ export function NotebookSwitcher(
   const defaultNotebookIcon = activeNotebook
     ? (activeNotebook.source === "local-folder" ? "FolderOpen" : "BookOpen")
     : "FolderOpen";
+  const NotebookChevron = isHeader ? GooseIcons.ChevronDown : GooseIcons.ChevronUp;
 
-  // 移动入口时关闭旧锚点菜单，编辑/新建对话框仍由同一个组件持有。
+  // 隐藏或移动入口时关闭旧菜单；编辑对话框仍由同一个组件持有。
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
     isDraggingRef.current = false;
     setIsOpen(false);
-    if (restoreTriggerFocus.current) trigger?.focus({ preventScroll: true });
+    if (active && restoreTriggerFocus.current) trigger?.focus({ preventScroll: true });
     return () => {
       restoreTriggerFocus.current = document.activeElement === trigger;
     };
-  }, [props.triggerContainer, setIsOpen, isDraggingRef]);
+  }, [props.triggerContainer, active, setIsOpen, isDraggingRef]);
 
   const switcherPopover = (
       <Popover
-        open={isOpen}
+        open={active && isOpen}
         onOpenChange={(open) => {
-          if (!isDraggingRef.current) setIsOpen(open);
+          if (!isDraggingRef.current && (!open || active)) setIsOpen(open);
         }}
         variant="notebook"
-        openOnHover={notebookDropdownHoverExpand}
+        openOnHover={active && notebookDropdownHoverExpand}
       >
         <Tooltip>
           <TooltipTrigger asChild>
@@ -67,6 +71,7 @@ export function NotebookSwitcher(
               <Button contentStyle="preserve" variant="ghost" size="sm"
                 ref={triggerRef}
                 type="button"
+                disabled={!active}
                 aria-label={`当前${notebookKind} ${activeNotebookLabel}，点击切换`}
                 title={
                   isRail
@@ -76,8 +81,15 @@ export function NotebookSwitcher(
                 className={cn(
                   "h-auto border-0 py-0 sidebar-notebook-trigger group text-foreground outline-none",
                   isRail && "sidebar-notebook-trigger--rail",
+                  isHeader && "sidebar-notebook-trigger--header",
                 )}
+                onKeyDownCapture={(event) => {
+                  if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229)
+                    event.stopPropagation();
+                }}
                 onKeyDown={(event) => {
+                  if (event.defaultPrevented || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || event.altKey || event.ctrlKey || event.metaKey)
+                    return;
                   if (event.key !== "ArrowDown" && event.key !== "ArrowUp")
                     return;
                   event.preventDefault();
@@ -97,14 +109,14 @@ export function NotebookSwitcher(
                     {activeNotebookLabel}
                   </span>
                 )}
-                <GooseIcons.ChevronUp
+                <NotebookChevron
                   className="goose-notebook-chevron"
                   aria-hidden="true"
                 />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent side={isRail ? "right" : "top"}>
+          <TooltipContent side={isRail ? "right" : isHeader ? "bottom" : "top"}>
             {activeNotebookLabel} · 点击切换{notebookKind}
           </TooltipContent>
         </Tooltip>
@@ -137,8 +149,6 @@ export function NotebookSwitcher(
           onDelete={handleDelete}
         />
       )}
-
-
     </>
   );
 }

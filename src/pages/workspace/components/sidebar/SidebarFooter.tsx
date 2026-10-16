@@ -1,20 +1,15 @@
 import { IconButton } from "@/components/ui/icon-button";
 import { AppUpdateButton } from "@/components/app-update/AppUpdateButton";
 import { cn } from "@/lib/utils";
-import { NotebookSwitcher } from "./NotebookSwitcher";
 import { SidebarRailIcon } from "./SidebarRailIcon";
 import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
-  notebookFooterHost: HTMLDivElement | null;
-  showNotebookSwitcher: boolean;
   isSettingsOpen: boolean;
   onOpenSettings: () => void;
 }
 
 export function SidebarFooter({
-  notebookFooterHost,
-  showNotebookSwitcher,
   isSettingsOpen,
   onOpenSettings,
 }: SidebarFooterProps) {
@@ -26,13 +21,6 @@ export function SidebarFooter({
   return (
     <TooltipProvider delayDuration={600}>
       <div className="sidebar-rail-footer">
-        {showNotebookSwitcher && (
-          <NotebookSwitcher
-            variant={notebookFooterHost ? "default" : "rail"}
-            triggerContainer={notebookFooterHost}
-            onOpenSettings={onOpenSettings}
-          />
-        )}
         <AppUpdateButton className={btnClass} />
         <Tooltip>
           <TooltipTrigger asChild>

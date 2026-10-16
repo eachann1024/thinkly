@@ -10,6 +10,7 @@ import {
   useSidebarResize,
 } from "../hooks/useSidebarResize";
 import { useSidebarItemHeight } from "../hooks/useSidebarItemHeight";
+import { useSidebarAvailableWidth } from "./useSidebarAvailableWidth";
 import { type SidebarView, type SidebarProps } from "./shared";
 
 export function useSidebarLayout({
@@ -121,12 +122,14 @@ export function useSidebarLayout({
     [sidebarCollapsed, sidebarOverlay],
   );
 
+  const availableSidebarWidth = useSidebarAvailableWidth(sidebarRef);
   const sidebarMaxWidth = sidebarOverlay
     ? resolveSidebarOverlayWidth(SIDEBAR_MAX_WIDTH, viewportWidth)
-    : SIDEBAR_MAX_WIDTH;
+    : availableSidebarWidth;
 
   const workspaceResize = useSidebarResize({
-    disableResize: disableResize || sidebarCollapsed || settingsOpen,
+    disableResize: disableResize || sidebarCollapsed || settingsOpen || sidebarOverlay,
+    defaultWidth: 256,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
   });

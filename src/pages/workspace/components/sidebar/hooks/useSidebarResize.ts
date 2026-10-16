@@ -93,6 +93,21 @@ export function useSidebarResize({
   );
 
   useEffect(() => {
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.isComposing || event.keyCode === 229 ||
+        event.altKey || event.ctrlKey || event.metaKey || !activeCleanupRef.current) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      activeCleanupRef.current();
+      activeCleanupRef.current = activeStopRef.current = null;
+      previewRef.current(width);
+      setIsResizing(false);
+    };
+    document.addEventListener("keydown", cancel, true);
+    return () => document.removeEventListener("keydown", cancel, true);
+  }, [width]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       try {
         localStorage.setItem(storageKey, String(preferredWidth));
