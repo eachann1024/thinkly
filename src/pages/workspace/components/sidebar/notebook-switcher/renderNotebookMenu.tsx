@@ -35,6 +35,7 @@ export function renderNotebookMenu(
   } = context;
   return (
     <PopoverContent
+      data-goose-menu-slot="root"
       variant="menu"
       aria-label={`切换${notebookKind}`}
       className={cn(
@@ -97,9 +98,17 @@ export function renderNotebookMenu(
         if (isDraggingRef.current) e.preventDefault();
       }}
     >
+      {notebookList.length > 0 && (
+        <div
+          role="group"
+          aria-label={`现有${notebookKind}列表`}
+          data-goose-menu-slot="group"
+          className="goose-list-group min-w-0"
+        >
       <div className={cn(
         "goose-notebook-menu-list overflow-y-auto",
         !isHeader && "max-h-[max(4rem,calc(var(--goose-popover-available-height,80vh)-15rem))]",
+        isHeader && "max-h-[min(20rem,calc(var(--goose-popover-available-height,80vh)-4rem))]",
       )}>
         <DndContext
           sensors={sensors}
@@ -130,13 +139,22 @@ export function renderNotebookMenu(
           </SortableContext>
         </DndContext>
       </div>
+        </div>
+      )}
 
+      <div
+        role="group"
+        aria-label="操作"
+        data-goose-menu-slot="group"
+        className="goose-list-group goose-notebook-menu-actions min-w-0"
+      >
       <PopoverAction
         className={notebookMenuRowClassName}
         onClick={handleOpenLocalFolder}
       >
         <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name="打开文件夹" />
       </PopoverAction>
+      </div>
     </PopoverContent>
   );
 }

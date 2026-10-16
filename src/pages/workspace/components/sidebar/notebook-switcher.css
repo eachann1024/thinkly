@@ -167,3 +167,4 @@
 }
 
 .goose-notebook-menu-list { display: flex; flex-direction: column; gap: var(--goose-menu-row-gap); }
+.goose-notebook-menu-actions { display: flex; flex-direction: column; gap: var(--goose-menu-row-gap); }
