@@ -8,7 +8,6 @@ import {
 import type { ComposerProps } from "./types";
 import type { ComposerSurfaceState } from "./useComposerSurface";
 import { GOOSE_FOLDER_MIME, hasWorkspaceDrag } from "@/lib/workspace-drag";
-import { insertWorkspaceDragIntoAi } from "./workspaceDragToAi";
 const SUPPORTED_IMAGE_MEDIA_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -77,20 +76,19 @@ export function useComposerAttachments(
     [addImageFiles, disabled, isStreaming],
   );
 
-  /** 文件引用、选区和图片共用落点反馈。 */
+  /** 图片提供落点反馈，工作区内容拒绝拖入。 */
   const handleDockDragOver = useCallback(
     (event: React.DragEvent) => {
-      if (disabled || isStreaming) return;
       const types = Array.from(event.dataTransfer?.types ?? []);
-      if (types.includes(GOOSE_FOLDER_MIME)) {
+      if (types.includes(GOOSE_FOLDER_MIME) || hasWorkspaceDrag(event.dataTransfer)) {
         event.preventDefault();
         event.stopPropagation();
         event.dataTransfer.dropEffect = "none";
         setDropActive(false);
         return;
       }
+      if (disabled || isStreaming) return;
       if (
-        !hasWorkspaceDrag(event.dataTransfer) &&
         !types.includes("Files") &&
         !types.some((t) => t.startsWith("image/"))
       ) {
@@ -113,20 +111,20 @@ export function useComposerAttachments(
   const handleDockDrop = useCallback(
     (event: React.DragEvent) => {
       setDropActive(false);
-      if (disabled || isStreaming) return;
       if (hasWorkspaceDrag(event.dataTransfer) || Array.from(event.dataTransfer.types).includes(GOOSE_FOLDER_MIME)) {
         event.preventDefault();
         event.stopPropagation();
-        insertWorkspaceDragIntoAi(event.dataTransfer, inputRef.current);
+        event.dataTransfer.dropEffect = "none";
         return;
       }
+      if (disabled || isStreaming) return;
       const imageFiles = extractClipboardImageFiles(event.dataTransfer);
       if (imageFiles.length === 0) return;
       event.preventDefault();
       event.stopPropagation();
       addImageFiles(imageFiles);
     },
-    [addImageFiles, disabled, inputRef, isStreaming],
+    [addImageFiles, disabled, isStreaming],
   );
 
   return {
