@@ -27,6 +27,7 @@ import "./inlinePreview.css";
 
 type GooseAIMenuControllerProps = {
   aiMenu?: FC;
+  isActiveEditor?: boolean;
 };
 
 type BnColorScheme = "light" | "dark";
@@ -53,6 +54,7 @@ function resolveBnColorScheme(
  */
 export function GooseAIMenuController({
   aiMenu: Component = GooseAIMenu,
+  isActiveEditor = true,
 }: GooseAIMenuControllerProps) {
   const editor = useBlockNoteEditor();
   const { page } = useEditorPageContext();
@@ -61,7 +63,6 @@ export function GooseAIMenuController({
     editor,
     selector: (state) => state.aiMenuState,
   });
-  const selection = aiMenuState === "closed" ? undefined : ai.getSelectionAnchor();
   const resetFormattingToolbarAi = useFormattingToolbarAi(
     (state) => state.reset,
   );
@@ -70,8 +71,10 @@ export function GooseAIMenuController({
     resolveBnColorScheme(editor.domElement),
   );
 
-  const blockId = aiMenuState === "closed" ? undefined : aiMenuState.blockId;
-  const open = aiMenuState !== "closed";
+  // 同页分屏共享生成会话，只让活动编辑器提供输入浮层，避免争抢焦点。
+  const open = isActiveEditor && aiMenuState !== "closed";
+  const blockId = open ? aiMenuState.blockId : undefined;
+  const selection = open ? ai.getSelectionAnchor() : undefined;
 
   // 空行没有可保留的文字选区；输入框获得焦点后仍标明 AI 作用的行。
   useEffect(() => {
@@ -158,7 +161,7 @@ export function GooseAIMenuController({
         placement: "bottom-start",
         middleware: sharedMiddleware,
         onOpenChange: (nextOpen) => {
-          if (nextOpen || aiMenuState === "closed") return;
+          if (nextOpen || !open) return;
           ai.closeAIMenu();
         },
         whileElementsMounted(reference, floating, update) {
@@ -168,8 +171,7 @@ export function GooseAIMenuController({
         },
       },
       useDismissProps: {
-        enabled:
-          aiMenuState === "closed" || aiMenuState.status === "user-input",
+        enabled: open,
         outsidePress: false,
       },
       elementProps: {

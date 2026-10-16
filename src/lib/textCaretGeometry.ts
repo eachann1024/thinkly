@@ -120,12 +120,12 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     const style = getComputedStyle(el);
     const fontSize = parseFloat(style.fontSize) || 14;
-    const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
     const isInput = el instanceof HTMLInputElement;
     mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;contain:layout style paint;";
     for (const key of ["font", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
       mirror.style.setProperty(key, style.getPropertyValue(key));
     }
+    mirror.style.boxSizing = "border-box";
     mirror.style.whiteSpace = isInput ? "pre" : "pre-wrap";
     const prefix = document.createTextNode("");
     const marker = document.createElement("span");
@@ -138,36 +138,41 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
       if (start === null || start !== el.selectionEnd) return null;
       if (style.direction === "rtl" || BIDI_TEXT.test(el.value)) return null;
       const box = el.getBoundingClientRect();
-      const nextWidth = el.offsetWidth;
-      const scale = box.width / nextWidth || 1;
+      const borderX = parseFloat(style.borderLeftWidth || "0") + parseFloat(style.borderRightWidth || "0");
+      // 排除滚动条占宽，镜像与实际输入框必须在同一位置软换行。
+      const nextWidth = el.clientWidth + borderX;
+      const scaleX = box.width / el.offsetWidth || 1;
+      const scaleY = box.height / el.offsetHeight || 1;
       if (width !== nextWidth) { width = nextWidth; mirror.style.width = `${width}px`; }
       const value = el.type === "password" ? "•".repeat(start) : el.value.slice(0, start);
       if (prefix.data !== value) prefix.data = value;
       const rest = el.type === "password" ? "•".repeat(el.value.length - start) : el.value.slice(start);
       if (suffix.data !== rest) suffix.data = rest;
       const markerBox = marker.getBoundingClientRect();
-      const caretHeight = Math.round(fontSize * CARET_EM_RATIO * scale);
+      const mirrorBox = mirror.getBoundingClientRect();
+      const caretHeight = Math.round(fontSize * CARET_EM_RATIO * scaleY);
+      const left = box.left + (markerBox.left - mirrorBox.left - el.scrollLeft) * scaleX;
 
       if (isInput) {
-        const borderTop = parseFloat(style.borderTopWidth || "0") * scale;
-        const borderBottom = parseFloat(style.borderBottomWidth || "0") * scale;
+        const borderTop = parseFloat(style.borderTopWidth || "0") * scaleY;
+        const borderBottom = parseFloat(style.borderBottomWidth || "0") * scaleY;
         const innerHeight = Math.max(0, box.height - borderTop - borderBottom);
         const targetHeight = Math.min(innerHeight, caretHeight);
         const topInset = Math.max(0, (innerHeight - targetHeight) / 2);
         return {
-          left: box.left + (markerBox.left - el.scrollLeft) * scale,
+          left,
           top: box.top + borderTop + topInset,
           height: targetHeight,
         };
       }
 
-      const lineH = Math.max(markerBox.height * scale, lineHeight * scale);
-      const targetHeight = Math.min(lineH, caretHeight);
-      const lineTop = box.top + (markerBox.top - el.scrollTop) * scale;
-      const topInset = Math.max(0, (lineH - targetHeight) / 2);
+      // marker 已在字形盒内，不能再次添加行高的半行距，否则光标会偏下。
+      const glyphHeight = markerBox.height * scaleY;
+      const targetHeight = Math.min(glyphHeight, caretHeight);
+      const glyphTop = box.top + (markerBox.top - mirrorBox.top - el.scrollTop) * scaleY;
       return {
-        left: box.left + (markerBox.left - el.scrollLeft) * scale,
-        top: lineTop + topInset,
+        left,
+        top: glyphTop + Math.max(0, (glyphHeight - targetHeight) / 2),
         height: targetHeight,
       };
     };

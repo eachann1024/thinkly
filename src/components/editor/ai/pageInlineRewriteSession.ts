@@ -9,6 +9,7 @@ export function createPageInlineRewriteSession(pageId: string) {
   let state: PageInlineState = "closed";
   let target: PrivateInlineTarget | undefined;
   let drafts: string[] = [];
+  let lastRequestSource: string[] | undefined;
   let generation = 0;
   let controller: AbortController | undefined;
   const listeners = new Set<() => void>();
@@ -17,7 +18,13 @@ export function createPageInlineRewriteSession(pageId: string) {
     for (const listener of listeners) listener();
   };
   const cancel = () => { generation++; controller?.abort(); controller = undefined; };
-  const close = () => { cancel(); target = undefined; drafts = []; publish("closed"); };
+  const requestSource = (retry: boolean) => retry && lastRequestSource
+    ? lastRequestSource
+    : target?.parts.map((part, index) => drafts[index] ?? part.oldMarkdown) ?? [];
+  const close = () => {
+    cancel(); target = undefined; drafts = []; lastRequestSource = undefined;
+    publish("closed");
+  };
   return {
     pageId,
     get state() { return state; },
@@ -28,6 +35,7 @@ export function createPageInlineRewriteSession(pageId: string) {
       cancel();
       target = next;
       drafts = [];
+      lastRequestSource = undefined;
       publish({ blockId: next.sourceBlockIds[0], status: "user-input", prompt: "", draft: "", ticker: "" });
     },
     close,
@@ -36,32 +44,41 @@ export function createPageInlineRewriteSession(pageId: string) {
     },
     stop() {
       cancel();
-      drafts = [];
-      if (state !== "closed") publish({ ...state, status: "user-input", ticker: "", draft: "", error: undefined });
+      if (state !== "closed") publish({
+        ...state,
+        status: drafts.length ? "user-reviewing" : "user-input",
+        input: state.prompt,
+        ticker: "", draft: drafts.join("\n\n"), error: undefined,
+      });
     },
-    fail(error: unknown, blockId?: string) {
+    fail(error: unknown, blockId?: string, request?: { prompt: string; retry: boolean }) {
       cancel();
+      if (request) lastRequestSource = requestSource(request.retry);
       publish({ blockId: blockId ?? (state === "closed" ? "" : state.blockId),
-        prompt: state === "closed" ? "" : state.prompt, draft: "", ticker: "", status: "error", error });
+        prompt: request?.prompt ?? (state === "closed" ? "" : state.prompt),
+        input: request?.prompt ?? (state === "closed" ? "" : state.input || state.prompt),
+        draft: "", ticker: "", status: "error", error });
     },
-    async submit(prompt: string, rewrite: RewritePart) {
-      if (!target || state === "closed" || !prompt.trim()) return;
+    async submit(prompt: string, rewrite: RewritePart, retry = false) {
+      if (!target || state === "closed" || state.status === "thinking" || !prompt.trim()) return;
       cancel();
       const request = generation;
       const captured = target;
+      // 追加要求基于上一版完整建议；重试复用同一次请求的输入，避免重复缩短等操作。
+      const source = requestSource(retry);
+      lastRequestSource = source;
       const abort = new AbortController();
       controller = abort;
-      drafts = [];
       const pending = { blockId: captured.sourceBlockIds[0], prompt, input: "", draft: "", ticker: "", error: undefined };
       const owns = () => generation === request && !abort.signal.aborted && target === captured;
       publish({ ...pending, status: "thinking" });
       try {
         const results: string[] = [];
-        for (const [index, part] of captured.parts.entries()) {
+        for (let index = 0; index < captured.parts.length; index++) {
           if (!owns()) return;
           const prefix = captured.parts.length > 1 ? `${index + 1}/${captured.parts.length} · ` : "";
           publish({ ...pending, status: "thinking", ticker: `${prefix}正在生成建议` });
-          const result = await rewrite(part.oldMarkdown, prompt, abort.signal, (ticker) => {
+          const result = await rewrite(source[index], prompt, abort.signal, (ticker) => {
             if (owns()) publish({ ...pending, status: "thinking", ticker: prefix + ticker });
           });
           if (!owns()) return;
@@ -72,7 +89,7 @@ export function createPageInlineRewriteSession(pageId: string) {
         drafts = results;
         publish({ ...pending, status: "user-reviewing", draft: results.join("\n\n") });
       } catch (error) {
-        if (owns()) publish({ ...pending, status: "error", error });
+        if (owns()) publish({ ...pending, input: prompt, status: "error", error });
       } finally {
         if (controller === abort) controller = undefined;
       }

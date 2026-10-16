@@ -84,9 +84,9 @@ export const GooseAIExtension = createExtension(
       unsubscribe = session.subscribe(refresh);
       refresh();
     };
-    const submit = async (prompt: string) => {
+    const submit = async (prompt: string, retry = false) => {
       const owned = current();
-      if (!owned) return;
+      if (!owned || owned.state === "closed" || owned.state.status === "thinking" || !prompt.trim()) return;
       try {
         validate(owned);
         // Capture only provider options, never a page/editor closure, for the in-flight request.
@@ -99,8 +99,8 @@ export const GooseAIExtension = createExtension(
         await owned.submit(prompt, (oldMarkdown, userPrompt, abortSignal, update) => runInlineMarkdownRewrite({
           settings, modelId, userPrompt, oldMarkdown, abortSignal,
           onUpdate: (value) => update(composeInlineBusyTicker(value)),
-        }));
-      } catch (error) { owned.fail(error); }
+        }), retry);
+      } catch (error) { owned.fail(error, undefined, { prompt, retry }); }
     };
     const dismiss = () => {
       const owned = current();
@@ -156,7 +156,7 @@ export const GooseAIExtension = createExtension(
       setInput(input: string) { current()?.setInput(input); },
       abort() { current()?.stop(); },
       submit,
-      retry() { const owned = current(); if (owned && owned.state !== "closed") return submit(owned.state.prompt); },
+      retry() { const owned = current(); if (owned && owned.state !== "closed") return submit(owned.state.prompt, true); },
       acceptChanges() {
         const owned = current();
         if (!owned || owned.state === "closed" || owned.state.status !== "user-reviewing" || !owned.target) return;

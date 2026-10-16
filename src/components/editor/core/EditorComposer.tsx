@@ -254,7 +254,7 @@ export function EditorComposer({
           aiSettings.enabled &&
           editable &&
           !isQuickNoteEditorPage(page) && (
-            <GooseAIMenuController aiMenu={GooseAIMenu} />
+            <GooseAIMenuController aiMenu={GooseAIMenu} isActiveEditor={isActiveEditor} />
           )}
       </BlockNoteView>
       <EditorLinkPopover {...interactions} />

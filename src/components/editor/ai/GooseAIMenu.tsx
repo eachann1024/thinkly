@@ -129,7 +129,7 @@ export function GooseAIMenu() {
         busy={busy}
         busyTickerText={state.ticker}
         tags={tags}
-        showSubmit={!busy && state.status !== "error"}
+        showSubmit={!busy}
         actionMenus={
           state.status === "user-input"
             ? [
