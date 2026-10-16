@@ -18,7 +18,9 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   cancelPendingRestoration: () => void;
 }) {
   const session = useSearchSession(useShallow(s => ({
-    open: s.open, query: s.query, scope: s.scope, requestNonce: s.requestNonce, originPageId: s.originPageId,
+    open: s.view.phase !== "closed", query: s.query, scope: s.scope,
+    requestNonce: s.navigation.phase === "target" ? s.navigation.id : 0,
+    origin: s.view.phase !== "closed" ? s.view.context : null,
   })));
   const page = usePages(s => s.pages[pageId]);
   const pages = usePages(s => s.pages);
@@ -57,7 +59,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     }
     cancelAnimationFrame(frame.current);
     frame.current = requestAnimationFrame(() => {
-      if (!useSearchSession.getState().open || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
+      if (useSearchSession.getState().view.phase === "closed" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const scroller = scrollRef.current;
       const target = (editor.prosemirrorView.dom as HTMLElement).querySelector<HTMLElement>(".goose-search-session-match--current");
       if (!scroller || !target) return;
@@ -92,7 +94,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       // Editor stamps this only after replacing the document for this page.
       if (editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const latest = useSearchSession.getState();
-      if (latest.query !== session.query || latest.scope !== session.scope || latest.open !== session.open) return;
+      if (latest.query !== session.query || latest.scope !== session.scope || (latest.view.phase !== "closed") !== session.open) return;
       const previous = getSearchSessionHighlightState(editor);
       const query = visible ? session.query.trim() : "";
       if (previous?.query !== query) {
@@ -101,9 +103,9 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       }
       const state = getSearchSessionHighlightState(editor);
       setCount(state?.matches.length ?? 0); setCurrent((state?.current ?? -1) + 1);
-      const request = useSearchSession.getState();
-      if (visible && request.targetPageId === pageId && request.requestNonce !== handled.current) {
-        handled.current = request.requestNonce;
+      const request = useSearchSession.getState().navigation;
+      if (visible && request.phase === "target" && request.pageId === pageId && request.id !== handled.current) {
+        handled.current = request.id;
         // Explicit search navigation takes priority over the page's saved scroll position.
         const titleMatch = query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
         if (request.restoreTop !== null || state?.matches.length || titleMatch) cancelPendingRestoration();
@@ -126,9 +128,9 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     const unsubscribe = subscribeSearchSessionHighlight((_state, view) => {
       if (editorRef.current?.editor?.prosemirrorView === view) refresh();
     });
-    const navigation = useSearchSession.getState();
+    const navigation = useSearchSession.getState().navigation;
     const immediate = !visible || !session.query.trim() ||
-      (navigation.targetPageId === pageId && navigation.requestNonce !== handled.current);
+      (navigation.phase === "target" && navigation.pageId === pageId && navigation.id !== handled.current);
     const applyAfter = performance.now() + (immediate ? 0 : Math.max(120, navigationReadyAt.current - performance.now()));
     let timer = 0;
     const ready = () => {
@@ -170,7 +172,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       <span role="status">{count ? `${current} / ${count} 处` : titleOnly ? "标题匹配" : "正文无匹配"}</span>
       <IconButton size="xs" className="p-0" aria-label="上一处匹配" disabled={!count} onClick={() => step(-1)}><ChevronUp size={16}/></IconButton><IconButton size="xs" className="p-0" aria-label="下一处匹配" disabled={!count} onClick={() => step(1)}><ChevronDown size={16}/></IconButton>
       <span className="search-match-message" aria-live="polite">{message}</span>
-      <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" disabled={!session.originPageId || !pages[session.originPageId]} onClick={() => session.originPageId && useSearchSession.getState().targetPage(session.originPageId, true, useSearchSession.getState().originScrollTop)}>返回起始笔记</Button>
+      <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" disabled={!session.origin?.originPageId || !pages[session.origin?.originPageId]} onClick={() => session.origin?.originPageId && useSearchSession.getState().targetPage(session.origin?.originPageId, true, session.origin.originScrollTop)}>返回起始笔记</Button>
       <IconButton size="xs" className="p-0" aria-label="退出搜索" onClick={close}><X size={16}/></IconButton>
     </div>
   </>;

@@ -16,7 +16,7 @@ const isTitleMatch = (page: SearchResultPage) =>
 
 /** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
 export function useSheetResults() {
-  const s = useSearchSession(useShallow(state => ({ open: state.open, query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort })));
+  const s = useSearchSession(useShallow(state => ({ open: state.view.phase !== "closed", query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort })));
   const pages = usePages(state => s.open ? state.pages : EMPTY_PAGES);
   const showRecent = useSettings(state => state.showRecentInSearch);
   const { loading, loadError, retryLoad } = useSearchFolderRefresh(s.open, s.scope);

@@ -3,42 +3,43 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
+  useReducer,
 } from "react";
+
+import { fontSelectionReducer, type FontSelectionEvent } from "./fontSelectionState";
 
 /** Menu session only: preview uses the owning settings value and setter. */
 export function useFontSelectionPreview(
   value: string | null,
   onChange: (value: string | null) => void,
 ) {
-  const [open, setOpen] = useState(false);
+  const [state, dispatch] = useReducer(fontSelectionReducer, { status: "closed" });
+  const session = useRef(state);
+  const send = useCallback((event: FontSelectionEvent) => {
+    session.current = fontSelectionReducer(session.current, event);
+    dispatch(event);
+  }, []);
+  const open = state.status !== "closed";
   const current = useRef({ value, onChange });
   useLayoutEffect(() => {
     current.current = { value, onChange };
   }, [value, onChange]);
-  const session = useRef<{
-    original: string | null;
-    confirmed: boolean;
-    previewed: boolean;
-  } | null>(null);
   const keyboardNavigation = useRef(false);
   const removeListeners = useRef<(() => void) | null>(null);
   const removeConfirmationKeyUp = useRef<(() => void) | null>(null);
   const confirmFont = useCallback((font: string | null) => {
-    if (!session.current) return;
-    session.current.confirmed = true;
+    if (session.current.status === "closed") return;
+    send({ type: "confirm", font });
     // An action must confirm even if selection already equals the preview.
     current.current.onChange(font);
-    session.current = null;
     keyboardNavigation.current = false;
     removeConfirmationKeyUp.current?.();
-    setOpen(false);
-  }, []);
+  }, [send]);
   const previewFont = useCallback((font: string | null) => {
-    if (!session.current) return;
-    session.current.previewed = true;
+    if (session.current.status === "closed") return;
+    send({ type: "preview", font });
     current.current.onChange(font);
-  }, []);
+  }, [send]);
 
   // React Aria filters capture props on Popover. Attach to its real DOM node,
   // so navigation is observed before the menu moves focus to the next item.
@@ -96,14 +97,13 @@ export function useFontSelectionPreview(
         keyboardNavigation.current = false;
       };
       const onFocus = (event: FocusEvent) => {
-        if (!keyboardNavigation.current || !session.current) return;
+        if (!keyboardNavigation.current || session.current.status === "closed") return;
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
         const item = target.closest<HTMLElement>("[data-font-preview]");
         if (!item || !node.contains(item)) return;
         keyboardNavigation.current = false;
-        session.current.previewed = true;
-        current.current.onChange(item.dataset.fontPreview || null);
+        previewFont(item.dataset.fontPreview || null);
       };
       node.addEventListener("keydown", onKeyDown, true);
       node.addEventListener("focusin", onFocus, true);
@@ -116,15 +116,15 @@ export function useFontSelectionPreview(
         node.removeEventListener("pointerdown", onPointerMove, true);
       };
     },
-    [confirmFont],
+    [confirmFont, previewFont],
   );
 
   const cancelSession = () => {
     removeConfirmationKeyUp.current?.();
     const previous = session.current;
-    session.current = null;
+    send({ type: "cancel" });
     keyboardNavigation.current = false;
-    if (previous?.previewed && !previous.confirmed) {
+    if (previous.status === "previewing") {
       current.current.onChange(previous.original);
     }
   };
@@ -133,8 +133,8 @@ export function useFontSelectionPreview(
       removeListeners.current?.();
       removeConfirmationKeyUp.current?.();
       const previous = session.current;
-      session.current = null;
-      if (previous?.previewed && !previous.confirmed) {
+      session.current = { status: "closed" };
+      if (previous.status === "previewing") {
         current.current.onChange(previous.original);
       }
     },
@@ -142,17 +142,12 @@ export function useFontSelectionPreview(
   );
 
   const onOpenChange = (nextOpen: boolean) => {
-    if (nextOpen && !session.current) {
-      session.current = {
-        original: current.current.value,
-        confirmed: false,
-        previewed: false,
-      };
+    if (nextOpen) {
+      send({ type: "open", original: current.current.value });
       keyboardNavigation.current = false;
-    } else if (!nextOpen) {
+    } else {
       cancelSession();
     }
-    setOpen(nextOpen);
   };
 
   return { open, onOpenChange, contentRef, confirmFont, previewFont };

@@ -32,7 +32,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const [bridge] = useState(
     () => (window as Window & { gooseDesktop?: { gitSync?: GitSyncBridge } }).gooseDesktop?.gitSync,
   );
-  const { state, setState, loading, loadError, reload } = useGitSyncState(bridge, visible);
+  const { state, applyState, loading, loadError, reload } = useGitSyncState(bridge, visible);
   const [selectedId, setSelectedId] = useState("");
   const [newId, setNewId] = useState(() => crypto.randomUUID());
   const [adding, setAdding] = useState(false);
@@ -91,7 +91,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     setBusy((current) => ({ ...current, [repositoryId]: label }));
     setErrors((current) => ({ ...current, [repositoryId]: "" }));
     try {
-      setState(await operation());
+      applyState(await operation());
       onSuccess?.();
     } catch (error) {
       setErrors((current) => ({ ...current, [repositoryId]: `${label}失败：${messageOf(error)}` }));

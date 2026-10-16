@@ -1,10 +1,12 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useReducer, useLayoutEffect } from "react";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { FilePanelExtension } from "@blocknote/core/extensions";
 import { Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
 import { Link, Upload } from "@/components/ui/icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { filePanelReducer } from "./filePanelState";
 
 /** 远程媒体只保存地址，沿用浏览器正常加载。 */
 function remoteMediaUrl(value: string): URL | null {
@@ -20,12 +22,19 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [tab, setTab] = useState<"upload" | "url">("upload");
   const [urlInput, setUrlInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [state, dispatch] = useReducer(filePanelReducer, { phase: "idle" });
+  const requestRef = useRef(0);
+  const loading = state.phase === "uploading";
+  const error = state.phase === "error" ? state.message : "";
+  useLayoutEffect(() => {
+    dispatch({ type: "owner-changed" });
+    return () => { requestRef.current += 1; };
+  }, [blockId, editor]);
   const block = editor.getBlock(blockId);
   const accept = block?.type === "image" ? "image/*"
     : block?.type === "video" ? "video/*" : block?.type === "audio" ? "audio/*" : undefined;
   const close = () => {
+    requestRef.current += 1;
     editor.getExtension(FilePanelExtension)?.closeMenu();
     editor.focus();
   };
@@ -38,19 +47,22 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file || !editor.uploadFile || !editor.isEditable) return;
-    setLoading(true);
-    setError("");
+    const request = ++requestRef.current;
+    dispatch({ type: "upload-started", request });
     try {
       const url = await editor.uploadFile(file, blockId);
+      if (requestRef.current !== request) return;
       update(typeof url === "string" ? url : url.url, file.name);
+      dispatch({ type: "upload-completed", request });
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : "附件上传失败");
-    } finally { setLoading(false); }
+      if (requestRef.current === request) dispatch({ type: "upload-failed", request,
+        message: failure instanceof Error ? failure.message : "附件上传失败" });
+    }
   };
   const embed = (event: React.FormEvent) => {
     event.preventDefault();
     const url = remoteMediaUrl(urlInput);
-    if (!url) { setError("请输入有效的 http 或 https 链接"); return; }
+    if (!url) { dispatch({ type: "url-invalid", message: "请输入有效的 http 或 https 链接" }); return; }
     let name = "";
     try { name = decodeURIComponent(url.pathname.split("/").pop() || ""); } catch { /* 地址仍可用。 */ }
     update(url.href, name || url.hostname);
@@ -62,7 +74,7 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
         event.stopPropagation();
         if (event.key === "Escape") { event.preventDefault(); close(); }
       }}>
-      <Tabs value={tab} onValueChange={(value) => { setTab(value as "upload" | "url"); setError(""); }}>
+      <Tabs value={tab} onValueChange={(value) => { setTab(value as "upload" | "url"); dispatch({ type: "form-edited" }); }}>
       <TabsList className="mb-3" aria-label="媒体来源">
         <TabsTrigger value="upload" disabled={loading}>
           <Upload className="h-4 w-4" /> 上传
@@ -80,7 +92,7 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
       ) : (
         <TabsContent value="url"><form onSubmit={embed} className="flex flex-col gap-2">
           <Input autoFocus type="url" value={urlInput} placeholder="https://…" aria-label="媒体链接"
-            onChange={(event) => { setUrlInput(event.target.value); setError(""); }} />
+            onChange={(event) => { setUrlInput(event.target.value); dispatch({ type: "form-edited" }); }} />
           <Button type="submit" disabled={!urlInput.trim()}>嵌入</Button>
         </form></TabsContent>
       )}

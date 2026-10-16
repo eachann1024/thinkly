@@ -1,33 +1,35 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useReducer,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { videoPlaybackReducer } from "./videoPlaybackState";
+
 export function useVideoPlayback(src: string) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hideTimerRef = useRef<number | null>(null);
+  const pointerCleanupRef = useRef<(() => void) | null>(null);
+  const soundRef = useRef({ muted: false, volume: 1 });
 
-  const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [media, dispatch] = useReducer(videoPlaybackReducer, { phase: "loading", source: src });
+  const sourceRef = useRef(src);
+  sourceRef.current = src;
+  const ready = media.source === src && media.phase === "ready";
+  const playing = ready && media.playback === "playing";
+  const current = ready ? media.current : 0;
+  const duration = ready ? media.duration : 0;
+  const loadError = media.source === src && media.phase === "error";
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.9);
   const [seeking, setSeeking] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    setReady(false);
-    setLoadError(false);
-    setCurrent(0);
-    setDuration(0);
-  }, [src]);
 
   const clearHideTimer = useCallback(() => {
     if (hideTimerRef.current != null) {
@@ -35,6 +37,20 @@ export function useVideoPlayback(src: string) {
       hideTimerRef.current = null;
     }
   }, []);
+
+  useLayoutEffect(() => {
+    dispatch({ type: "source-changed", source: src });
+    clearHideTimer();
+    pointerCleanupRef.current?.();
+    setSeeking(false);
+    setControlsVisible(true);
+    const video = videoRef.current;
+    if (video) {
+      video.muted = soundRef.current.muted;
+      video.volume = soundRef.current.volume;
+    }
+    return () => pointerCleanupRef.current?.();
+  }, [src, clearHideTimer]);
 
   const scheduleHide = useCallback(() => {
     clearHideTimer();
@@ -53,47 +69,50 @@ export function useVideoPlayback(src: string) {
     return () => clearHideTimer();
   }, [clearHideTimer]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const onPlay = () => setPlaying(true);
+    const isCurrent = () => videoRef.current === video && sourceRef.current === src;
+    const onPlay = () => {
+      if (isCurrent() && !video.error && !video.paused) dispatch({ type: "played", source: src });
+    };
     const onPause = () => {
-      setPlaying(false);
+      if (!isCurrent()) return;
+      dispatch({ type: "paused", source: src });
       setControlsVisible(true);
       clearHideTimer();
     };
     const onTime = () => {
-      if (!seeking) setCurrent(video.currentTime);
+      if (isCurrent() && !seeking) dispatch({ type: "time-updated", source: src, current: video.currentTime });
     };
     const onMeta = () => {
-      setDuration(video.duration || 0);
-      setReady(true);
-      setLoadError(false);
+      if (!isCurrent() || video.error || video.readyState < 1) return;
+      dispatch({ type: "metadata-loaded", source: src, duration: video.duration || 0,
+        current: video.currentTime, playing: !video.paused });
     };
     const onVolume = () => {
+      if (!isCurrent()) return;
+      soundRef.current = { muted: video.muted, volume: video.volume };
       setMuted(video.muted);
       setVolume(video.volume);
     };
     const onEnded = () => {
-      setPlaying(false);
+      if (!isCurrent()) return;
+      dispatch({ type: "ended", source: src });
       setControlsVisible(true);
+      clearHideTimer();
     };
-
-    video.addEventListener("play", onPlay);
-    video.addEventListener("pause", onPause);
-    video.addEventListener("timeupdate", onTime);
-    video.addEventListener("loadedmetadata", onMeta);
-    video.addEventListener("volumechange", onVolume);
-    video.addEventListener("ended", onEnded);
-
+    const onError = () => {
+      if (!isCurrent()) return;
+      dispatch({ type: "failed", source: src });
+      setControlsVisible(true);
+      clearHideTimer();
+    };
+    const listeners = { play: onPlay, pause: onPause, timeupdate: onTime,
+      loadedmetadata: onMeta, volumechange: onVolume, ended: onEnded, error: onError };
+    for (const [event, handler] of Object.entries(listeners)) video.addEventListener(event, handler);
     return () => {
-      video.removeEventListener("play", onPlay);
-      video.removeEventListener("pause", onPause);
-      video.removeEventListener("timeupdate", onTime);
-      video.removeEventListener("loadedmetadata", onMeta);
-      video.removeEventListener("volumechange", onVolume);
-      video.removeEventListener("ended", onEnded);
+      for (const [event, handler] of Object.entries(listeners)) video.removeEventListener(event, handler);
     };
   }, [clearHideTimer, seeking, src]);
 
@@ -146,7 +165,7 @@ export function useVideoPlayback(src: string) {
   const seekToClientX = useCallback(
     (clientX: number, target: HTMLElement) => {
       const video = videoRef.current;
-      if (!video || !duration) return;
+      if (!video || !duration || sourceRef.current !== src) return;
       const rect = target.getBoundingClientRect();
       const ratio = Math.min(
         1,
@@ -154,15 +173,16 @@ export function useVideoPlayback(src: string) {
       );
       const next = ratio * duration;
       video.currentTime = next;
-      setCurrent(next);
+      dispatch({ type: "time-updated", source: src, current: next });
     },
-    [duration],
+    [duration, src],
   );
 
   const onProgressPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      pointerCleanupRef.current?.();
       const track = event.currentTarget;
       setSeeking(true);
       seekToClientX(event.clientX, track);
@@ -172,12 +192,18 @@ export function useVideoPlayback(src: string) {
       const onUp = (e: PointerEvent) => {
         setSeeking(false);
         seekToClientX(e.clientX, track);
-        track.releasePointerCapture(e.pointerId);
+        cleanup();
+        revealControls();
+      };
+      const pointerId = event.pointerId;
+      const cleanup = () => {
+        if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
         track.removeEventListener("pointermove", onMove);
         track.removeEventListener("pointerup", onUp);
         track.removeEventListener("pointercancel", onUp);
-        revealControls();
+        pointerCleanupRef.current = null;
       };
+      pointerCleanupRef.current = cleanup;
       track.addEventListener("pointermove", onMove);
       track.addEventListener("pointerup", onUp);
       track.addEventListener("pointercancel", onUp);
@@ -185,15 +211,22 @@ export function useVideoPlayback(src: string) {
     [revealControls, seekToClientX],
   );
 
+  const seekBy = useCallback((delta: number) => {
+    const video = videoRef.current;
+    if (!video || !duration || sourceRef.current !== src) return;
+    video.currentTime = Math.max(0, Math.min(duration, video.currentTime + delta));
+    dispatch({ type: "time-updated", source: src, current: video.currentTime });
+    revealControls();
+  }, [duration, revealControls, src]);
+
   const progress = duration > 0 ? (current / duration) * 100 : 0;
 
   return {
     rootRef,
     videoRef,
     playing,
-    setPlaying,
     current,
-    setCurrent,
+    seekBy,
     duration,
     muted,
     volume,
@@ -201,9 +234,7 @@ export function useVideoPlayback(src: string) {
     setControlsVisible,
     isFullscreen,
     ready,
-    setReady,
     loadError,
-    setLoadError,
     revealControls,
     togglePlay,
     toggleMute,

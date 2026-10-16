@@ -1,7 +1,6 @@
 import {
   useEffect,
   useRef,
-  useState,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -14,22 +13,15 @@ export function useQuickNoteSlotInput(
   const {
     activeSlot,
     onChange,
-    onRenameRequest,
     rootRef,
-    scrubbingRef,
-    previewSlotRef,
+    scrubRef,
+    sendScrub,
     activeSlotRef,
-    pointerStartSlotRef,
-    pointerMovedAcrossSlotsRef,
-    setScrubbing,
-    updatePreview,
-    commitAndEnd,
-    endScrubWithoutCommit,
     slotFromPoint,
   } = input;
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (scrubbingRef.current) return;
+    if (scrubRef.current.phase !== "idle") return;
     const idx = QUICKNOTE_SLOTS.indexOf(activeSlot);
     let targetSlot: QuickNoteSlot | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -61,12 +53,11 @@ export function useQuickNoteSlotInput(
   };
 
   const stopWindowScrubListeners = useRef<(() => void) | null>(null);
-  const [held, setHeld] = useState(false);
+  const sequence = useRef(0);
 
   const detachWindowScrubListeners = () => {
     stopWindowScrubListeners.current?.();
     stopWindowScrubListeners.current = null;
-    setHeld(false);
   };
 
   useEffect(() => () => detachWindowScrubListeners(), []);
@@ -80,54 +71,27 @@ export function useQuickNoteSlotInput(
     e.stopPropagation();
 
     detachWindowScrubListeners();
-    scrubbingRef.current = true;
-    pointerStartSlotRef.current = slot;
-    pointerMovedAcrossSlotsRef.current = false;
-    setScrubbing(true);
-    updatePreview(slot);
+    const id = ++sequence.current;
+    sendScrub({ type: "pressed", id, slot });
     // 普通点击不闪变拖动指针；持续按住后才显示横向切换提示。
-    const holdTimer = window.setTimeout(() => setHeld(true), 180);
-
+    const holdTimer = window.setTimeout(() => sendScrub({ type: "hold-elapsed", id }), 180);
     const onMove = (ev: PointerEvent) => {
-      if (!scrubbingRef.current) return;
+      if (ev.pointerId !== e.pointerId) return;
       const next = slotFromPoint(ev.clientX, ev.clientY);
-      if (next != null) {
-        if (next !== pointerStartSlotRef.current) {
-          pointerMovedAcrossSlotsRef.current = true;
-        }
-        updatePreview(next);
-      }
+      if (next != null) sendScrub({ type: "moved", id, slot: next });
     };
-
     const finish = (ev: PointerEvent) => {
-      if (!scrubbingRef.current) {
-        detachWindowScrubListeners();
-        return;
-      }
-      const next =
-        slotFromPoint(ev.clientX, ev.clientY) ??
-        previewSlotRef.current ??
-        activeSlotRef.current;
-      const shouldRename =
-        pointerStartSlotRef.current === activeSlotRef.current &&
-        next === activeSlotRef.current &&
-        !pointerMovedAcrossSlotsRef.current;
+      if (ev.pointerId !== e.pointerId) return;
+      const transaction = scrubRef.current;
+      if (transaction.phase === "idle" || transaction.id !== id) return;
       detachWindowScrubListeners();
-      if (shouldRename) {
-        endScrubWithoutCommit();
-        onRenameRequest(activeSlotRef.current);
-      } else {
-        commitAndEnd(next);
-      }
-      pointerStartSlotRef.current = null;
-      pointerMovedAcrossSlotsRef.current = false;
+      const next = slotFromPoint(ev.clientX, ev.clientY) ?? transaction.previewSlot;
+      sendScrub({ type: "released", id, slot: next, activeSlot: activeSlotRef.current });
     };
-
     const cancel = () => {
+      if (scrubRef.current.phase === "idle" || scrubRef.current.id !== id) return;
       detachWindowScrubListeners();
-      endScrubWithoutCommit();
-      pointerStartSlotRef.current = null;
-      pointerMovedAcrossSlotsRef.current = false;
+      sendScrub({ type: "cancelled", id });
     };
 
     window.addEventListener("pointermove", onMove);
@@ -145,14 +109,13 @@ export function useQuickNoteSlotInput(
 
   const onRootPointerLeave = () => {
     // 「移走就生效」：拖动中指针离开切换器时提交当前预览槽
-    if (!scrubbingRef.current) return;
-    const slot = previewSlotRef.current ?? activeSlotRef.current;
+    const transaction = scrubRef.current;
+    if (transaction.phase === "idle") return;
     detachWindowScrubListeners();
-    commitAndEnd(slot);
+    sendScrub({ type: "left", id: transaction.id });
   };
   return {
     ...input,
-    held,
     onKeyDown,
     stopWindowScrubListeners,
     detachWindowScrubListeners,

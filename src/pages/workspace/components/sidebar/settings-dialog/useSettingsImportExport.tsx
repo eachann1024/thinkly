@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { pickImportFile } from "@/lib/export/documentFileDialogs";
@@ -16,20 +16,17 @@ export function useSettingsImportExport(
     pages,
     selectedIds,
     format,
-    setExporting,
-    setImporting,
+    sendDataEvent,
+    beginDataOperation,
     resetDialogOpen,
-    setResetDialogOpen,
     setResetInput,
     createNotebook,
   } = input;
-  const exportPending = useRef(false);
-  const importPending = useRef(false);
 
   const handleExport = async () => {
-    if (selectedIds.length === 0 || exportPending.current) return;
-    exportPending.current = true;
-    setExporting(true);
+    if (selectedIds.length === 0) return;
+    const id = beginDataOperation("export");
+    if (id === null) return;
     try {
       const { exportNotebooks } = await import("@/lib/export");
       const saved = await exportNotebooks(
@@ -47,20 +44,19 @@ export function useSettingsImportExport(
         description: err instanceof Error ? err.message : "请稍后重试。",
       });
     } finally {
-      exportPending.current = false;
-      setExporting(false);
+      sendDataEvent({ type: "export.finished", id });
     }
   };
 
   const handleImport = async () => {
-    if (importPending.current) return;
-    importPending.current = true;
-    setImporting(true);
+    const id = beginDataOperation("import");
+    if (id === null) return;
     try {
       const file = await pickImportFile([
         { name: "笔记备份", extensions: ["zip", "mdzip"] },
       ]);
       if (!file) return;
+      sendDataEvent({ type: "import.fileChosen", id });
 
       let firstWorkspaceId: string | null = null;
       let firstPageId: string | null = null;
@@ -108,16 +104,15 @@ export function useSettingsImportExport(
         description: err instanceof Error ? err.message : "请确保文件是有效的导出 ZIP 包",
       });
     } finally {
-      importPending.current = false;
-      setImporting(false);
+      sendDataEvent({ type: "import.finished", id });
     }
   };
 
   useEffect(() => {
-    if (!open) setResetDialogOpen(false);
+    if (!open) sendDataEvent({ type: "settings.closed" });
     if (!open || !resetDialogOpen) {
       setResetInput("");
     }
-  }, [open, resetDialogOpen]);
+  }, [open, resetDialogOpen, sendDataEvent, setResetInput]);
   return { ...input, handleExport, handleImport };
 }

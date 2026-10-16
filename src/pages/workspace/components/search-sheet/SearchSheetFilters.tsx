@@ -9,7 +9,7 @@ const SORT_LABELS: Record<SearchSort, string> = { best: "最佳匹配", recent: 
 
 export function SearchSheetFilters({ count }: { count: string }) {
   const s = useSearchSession(useShallow(state => ({
-    scope: state.scope, startingNotebookId: state.startingNotebookId, titleOnly: state.titleOnly, sort: state.sort,
+    scope: state.scope, startingNotebookId: state.view.phase !== "closed" ? state.view.context.startingNotebookId : null, titleOnly: state.titleOnly, sort: state.sort,
     setScope: state.setScope, setTitleOnly: state.setTitleOnly, setSort: state.setSort,
   })));
   const notebooks = useNotebooks(state => state.notebooks);

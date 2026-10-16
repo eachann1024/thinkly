@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useReducer } from "react";
 import { useSettings } from "@/stores/useSettings";
 import { getAiAvailabilityError } from "@/lib/notebook-ai/availabilityError";
 import { useChat } from "@ai-sdk/react";
@@ -14,19 +14,28 @@ import { prepareNotebookAiMessagesForModel } from "@/lib/notebook-ai/messageUtil
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import type { NotebookAiSessionScope } from "./types";
 
+import { sessionScopeReducer, type SessionScopeState } from "./sessionScopeState";
+
 export function useSessionState(notebookId: string) {
   const requestCurrentPageIdRef = useRef<string | null>(null);
   const compactAbortRef = useRef<AbortController | null>(null);
-  const [session, setSession] = useState<NotebookAiSessionScope>(() => ({
-    notebookId,
-    conversationId: useNotebookAiChats
-      .getState()
-      .ensureFreshActiveConversation(notebookId),
-    generation: 0,
+  const [scopeState, dispatchScope] = useReducer(sessionScopeReducer, notebookId, (id): SessionScopeState => ({
+    status: "idle",
+    scope: { notebookId: id, conversationId: useNotebookAiChats.getState().ensureFreshActiveConversation(id), generation: 0 },
   }));
+  const session = scopeState.scope;
+  const isCompacting = scopeState.status === "compacting";
+  const compactSequence = useRef(0);
+  const beginCompaction = useCallback((scope: NotebookAiSessionScope) => {
+    const requestId = ++compactSequence.current;
+    dispatchScope({ type: "compact", scope, requestId });
+    return requestId;
+  }, []);
+  const finishCompaction = useCallback((scope: NotebookAiSessionScope, requestId: number) => {
+    dispatchScope({ type: "compaction-finished", scope, requestId });
+  }, []);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [composerRevision, setComposerRevision] = useState(0);
-  const [isCompacting, setIsCompacting] = useState(false);
 
   // WorkspaceLayout 不再用 key 重挂整个 Provider。这里在 render 期间把新笔记本
   // 的会话状态一次性换好，React 会立即重渲染，子节点不会拿到旧 notebook 的消息。
@@ -35,13 +44,8 @@ export function useSessionState(notebookId: string) {
     const nextConversationId = useNotebookAiChats
       .getState()
       .ensureFreshActiveConversation(notebookId);
-    setSession({
-      notebookId,
-      conversationId: nextConversationId,
-      generation: session.generation + 1,
-    });
+    dispatchScope({ type: "notebook-changed", notebookId, conversationId: nextConversationId });
     setPlaceholderIndex(0);
-    setIsCompacting(false);
   }
   const { conversationId, generation: sessionGeneration } = session;
   const currentSessionScope = useMemo<NotebookAiSessionScope>(
@@ -62,10 +66,7 @@ export function useSessionState(notebookId: string) {
   );
   const setConversationId = useCallback(
     (nextConversationId: string) =>
-      setSession((current) => ({
-        ...current,
-        conversationId: nextConversationId,
-      })),
+      dispatchScope({ type: "conversation-changed", conversationId: nextConversationId }),
     [],
   );
 
@@ -166,7 +167,8 @@ export function useSessionState(notebookId: string) {
     composerRevision,
     setComposerRevision,
     isCompacting,
-    setIsCompacting,
+    beginCompaction,
+    finishCompaction,
     composerHasContent,
     messages,
     sendMessage,

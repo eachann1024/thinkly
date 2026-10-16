@@ -92,14 +92,6 @@ export function useQuickNoteDraftState() {
 
   const [savingToNote, setSavingToNote] = useState(false);
 
-  const [renamingSlot, setRenamingSlot] = useState<QuickNoteSlot | null>(null);
-
-  const [renameValue, setRenameValue] = useState("");
-
-  const renameInputRef = useRef<HTMLInputElement>(null);
-
-  const renameFinishingRef = useRef(false);
-
   const [slotNames, setSlotNames] = useState(() =>
     loadQuickNoteSlotNames(useQuickNote.getState().slotNames),
   );
@@ -159,12 +151,6 @@ export function useQuickNoteDraftState() {
     setHelpOpen,
     savingToNote,
     setSavingToNote,
-    renamingSlot,
-    setRenamingSlot,
-    renameValue,
-    setRenameValue,
-    renameInputRef,
-    renameFinishingRef,
     slotNames,
     setSlotNames,
     slotNamesRef,

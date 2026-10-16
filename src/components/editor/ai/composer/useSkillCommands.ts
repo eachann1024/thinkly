@@ -3,7 +3,7 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useReducer,
   type RefObject,
 } from "react";
 import type { LocalSkill } from "@/lib/notebook-ai/localContext";
@@ -32,12 +32,7 @@ export {
 } from "./composerCommandDetection";
 export { createSkillChipElement } from "./composerSkillChip";
 
-const INACTIVE = {
-  active: false,
-  query: "",
-  anchorRect: null as DOMRect | null,
-  activeIndex: 0,
-};
+import { composerSuggestionReducer, inactiveSuggestion } from "./composerSuggestionState";
 
 function toSkillAttrs(skill: LocalSkill): AiSkillCommandAttrs {
   return {
@@ -66,16 +61,17 @@ export function useSkillCommands(options: {
     onBuiltinCommand,
   } = options;
   const lastDetectedRef = useRef<DetectedCommand | null>(null);
-  const [command, setCommand] = useState(INACTIVE);
+  const [command, dispatch] = useReducer(composerSuggestionReducer, inactiveSuggestion);
+  const commandQuery = command.phase === "active" ? command.query : "";
   const items = useMemo(
     () =>
-      enabled && command.active
+      enabled && command.phase === "active"
         ? searchComposerSlashItems(command.query, {
             notebookId,
             includeSkills,
           })
         : [],
-    [command.active, command.query, enabled, includeSkills, notebookId],
+    [command.phase, commandQuery, enabled, includeSkills, notebookId],
   );
   const itemsRef = useRef(items);
   useEffect(() => {
@@ -84,7 +80,7 @@ export function useSkillCommands(options: {
 
   const clearCommandState = useCallback(() => {
     lastDetectedRef.current = null;
-    setCommand(INACTIVE);
+    dispatch({ type: "cleared" });
   }, []);
 
   const detectCommand = useCallback(() => {
@@ -95,13 +91,8 @@ export function useSkillCommands(options: {
     if (!detected) return clearCommandState();
     lastDetectedRef.current = detected;
     const rect = detected.range.getBoundingClientRect();
-    setCommand((previous) => ({
-      active: true,
-      query: detected.query,
-      anchorRect:
-        rect.width || rect.height ? rect : editor.getBoundingClientRect(),
-      activeIndex: detected.query === previous.query ? previous.activeIndex : 0,
-    }));
+    dispatch({ type: "detected", query: detected.query,
+      anchorRect: rect.width || rect.height ? rect : editor.getBoundingClientRect() });
   }, [clearCommandState, editorRef, enabled, isComposingRef]);
 
   const insertCommand = useCallback(
@@ -153,16 +144,13 @@ export function useSkillCommands(options: {
 
   const handleCommandKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!command.active) return false;
+      if (command.phase !== "active") return false;
       const currentItems = itemsRef.current;
       const count = Math.max(1, currentItems.length);
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         const delta = event.key === "ArrowDown" ? 1 : -1;
-        setCommand((previous) => ({
-          ...previous,
-          activeIndex: (previous.activeIndex + delta + count) % count,
-        }));
+        dispatch({ type: "navigated", delta, count });
         return true;
       }
       if (isSuggestionMenuAcceptKey(event)) {
@@ -186,7 +174,7 @@ export function useSkillCommands(options: {
       }
       return false;
     },
-    [clearCommandState, command.active, command.activeIndex, insertCommand],
+    [clearCommandState, command, insertCommand],
   );
 
   return {

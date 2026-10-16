@@ -33,7 +33,7 @@ export function useSidebarNavigation(
   const [settingsSidebarHost, setSettingsSidebarHost] =
     useState<HTMLDivElement | null>(null);
 
-  const searchSessionOpen = useSearchSession((state) => state.open);
+  const searchSessionOpen = useSearchSession((state) => state.view.phase !== "closed");
 
   // 搜索改为主区底部面板，侧栏不再保留搜索视图。
   useEffect(() => {
@@ -161,7 +161,7 @@ export function useSidebarNavigation(
   useEffect(() => {
     if (!sidebarOverlay) return;
     const onEscape = (event: KeyboardEvent) => {
-      if (settingsOpen || useSearchSession.getState().sheetOpen) return;
+      if (settingsOpen || useSearchSession.getState().view.phase === "sheet") return;
       if (!shouldDismissSidebarOverlay(event, document)) return;
       event.preventDefault();
       event.stopPropagation();

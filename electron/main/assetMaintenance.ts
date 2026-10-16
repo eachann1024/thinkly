@@ -10,9 +10,10 @@ import { assertAllowed } from "./allowlist";
 import { assetFingerprint, assertNotebookPath, isInsideNotebook, notebookScanFs } from "./assetMaintenanceFiles";
 import { createAssetMaintenanceWindow, getAssetMaintenanceWindow, lookupWindowContext } from "./windows";
 
-type ScanRecord = { result: AssetScan; root: string; fingerprints: Map<string, string>; created: number };
-let scanRecord: ScanRecord | null = null;
-let busy = false;
+import { assetMaintenanceTransition, activeAssetScan, assetMaintenanceBusy, type AssetMaintenanceLifecycle } from "./assetMaintenanceState";
+
+let lifecycle: AssetMaintenanceLifecycle = { status: "idle" };
+let nextOperationId = 0;
 const requests = new Map<string, { senderId: number; resolve: (snapshot: AssetWorkspaceSnapshot) => void; reject: (error: Error) => void }>();
 
 function workspaces() {
@@ -62,10 +63,8 @@ function assertMaintenanceSender(event: Electron.IpcMainInvokeEvent) {
   }
 }
 
-async function exclusive<T>(operation: () => Promise<T>): Promise<T> {
-  if (busy) throw new Error("资源清理正在执行，请稍候");
-  busy = true;
-  try { return await operation(); } finally { busy = false; }
+function assertIdle() {
+  if (assetMaintenanceBusy(lifecycle)) throw new Error("资源清理正在执行，请稍候");
 }
 
 export function registerAssetMaintenanceIpc(): void {
@@ -80,12 +79,12 @@ export function registerAssetMaintenanceIpc(): void {
     const existing = getAssetMaintenanceWindow();
     const win = createAssetMaintenanceWindow();
     if (existing) return;
-    scanRecord = null;
+    lifecycle = assetMaintenanceTransition(lifecycle, { type: "close" });
     // 专用 session + 不透明扫描令牌：预览协议没有任意路径读取入口。
     const previewSession = win.webContents.session;
     previewSession.protocol.handle("goose-asset", async (request) => {
       const url = new URL(request.url);
-      const record = scanRecord;
+      const record = activeAssetScan(lifecycle);
       const indexText = url.pathname.slice(1);
       const asset = /^\d+$/.test(indexText) ? record?.result.assets[Number(indexText)] : undefined;
       if (!record || url.hostname !== record.result.token || !asset || Date.now() - record.created > 10 * 60_000) return new Response(null, { status: 404 });
@@ -95,7 +94,7 @@ export function registerAssetMaintenanceIpc(): void {
       } catch { return new Response(null, { status: 404 }); }
     });
     win.once("closed", () => {
-      scanRecord = null;
+      lifecycle = assetMaintenanceTransition(lifecycle, { type: "close" });
       previewSession.protocol.unhandle("goose-asset");
     });
   });
@@ -109,8 +108,10 @@ export function registerAssetMaintenanceIpc(): void {
   });
   ipcMain.handle("asset-maintenance:scan", async (event, notebookId: string) => {
     assertMaintenanceSender(event);
-    return exclusive(async () => {
-      scanRecord = null;
+    assertIdle();
+    const operationId = ++nextOperationId;
+    lifecycle = assetMaintenanceTransition(lifecycle, { type: "scan", operationId });
+    try {
       const snapshots = await workspaceSnapshots();
       const notebook = notebooksFrom(snapshots).find((item) => item.id === notebookId);
       if (!notebook) throw new Error("请先选择本地文件夹笔记本");
@@ -122,24 +123,30 @@ export function registerAssetMaintenanceIpc(): void {
       const token = randomUUID();
       const result: AssetScan = { token, notebook, assets: assets.map((asset, index) => ({ ...asset, previewUrl: `goose-asset://${token}/${index}` })) };
       if (event.sender.isDestroyed()) throw new Error("资源清理窗口已关闭");
-      scanRecord = { result, root, fingerprints, created: Date.now() };
+      lifecycle = assetMaintenanceTransition(lifecycle, { type: "scanned", operationId, record: { result, root, fingerprints, created: Date.now() } });
       return result;
-    });
+    } finally { lifecycle = assetMaintenanceTransition(lifecycle, { type: "finish", operationId }); }
   });
   ipcMain.handle("asset-maintenance:trash", async (event, token: string, paths: string[]) => {
     assertMaintenanceSender(event);
-    return exclusive(async () => {
-      const record = scanRecord;
-      if (!record || record.result.token !== token || Date.now() - record.created > 10 * 60_000) throw new Error("扫描结果已过期，请重新扫描");
-      if (!Array.isArray(paths) || !paths.length || paths.some((p) => !record.fingerprints.has(p))) throw new Error("只能删除本次扫描中的图片和视频");
+    assertIdle();
+    const record = activeAssetScan(lifecycle);
+    if (!record || record.result.token !== token || Date.now() - record.created > 10 * 60_000) throw new Error("扫描结果已过期，请重新扫描");
+    if (!Array.isArray(paths) || !paths.length || paths.some((p) => !record.fingerprints.has(p))) throw new Error("只能删除本次扫描中的图片和视频");
+    const operationId = ++nextOperationId;
+    lifecycle = assetMaintenanceTransition(lifecycle, { type: "confirm", operationId });
+    try {
       const selected = [...new Set(paths)];
       const confirmation = await dialog.showMessageBox(getAssetMaintenanceWindow()!, {
         type: "warning", title: "移入系统废纸篓", message: `将 ${selected.length} 个图片或视频移入系统废纸篓？`,
         detail: "确认后会重新读取 Markdown 和所有工作区的当前编辑内容。结果发生变化时会停止删除。", buttons: ["取消", "移入废纸篓"], defaultId: 0, cancelId: 0, noLink: true,
       });
-      if (confirmation.response !== 1) return { deleted: 0, canceled: true };
+      if (confirmation.response !== 1) {
+        lifecycle = assetMaintenanceTransition(lifecycle, { type: "cancel", operationId });
+        return { deleted: 0, canceled: true };
+      }
       // 一次性令牌；任何失败、部分完成或再次点击均须重新扫描。
-      scanRecord = null;
+      lifecycle = assetMaintenanceTransition(lifecycle, { type: "consume", operationId });
       if (event.sender.isDestroyed()) throw new Error("资源清理窗口已关闭");
       if (Date.now() - record.created > 10 * 60_000) throw new Error("扫描结果已过期，请重新扫描");
       const snapshots = await workspaceSnapshots();
@@ -162,6 +169,6 @@ export function registerAssetMaintenanceIpc(): void {
         }
       } catch (error) { throw new Error(`已移入废纸篓 ${deleted} 个，其余未完成。请重新扫描。${String(error)}`, { cause: error }); }
       return { deleted, canceled: false };
-    });
+    } finally { lifecycle = assetMaintenanceTransition(lifecycle, { type: "finish", operationId }); }
   });
 }

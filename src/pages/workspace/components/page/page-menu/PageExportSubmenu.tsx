@@ -2,7 +2,9 @@ import { ListRow } from "@/components/ui/list-row";
 import * as GooseIcons from "@/components/ui/icons";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useReducer } from "react";
+
+import { exportSubmenuReducer, exportSubmenuIsOpen, type ExportSubmenuEvent } from "./exportSubmenuState";
 
 const EXPORT_OPEN_DELAY_MS = 80;
 const EXPORT_CLOSE_DELAY_MS = 150;
@@ -39,14 +41,18 @@ export function PageExportSubmenu({
   onExportWord: () => void;
   onExportPdf: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const openRef = useRef(false);
-  const suppressHoverOpen = useRef(false);
+  const [state, dispatch] = useReducer(exportSubmenuReducer, { status: "closed" });
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const send = (event: ExportSubmenuEvent) => {
+    stateRef.current = exportSubmenuReducer(stateRef.current, event);
+    dispatch(event);
+  };
+  const open = exportSubmenuIsOpen(state);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
-  openRef.current = open;
 
   const clearTimers = () => {
     if (openTimer.current != null) {
@@ -60,9 +66,8 @@ export function PageExportSubmenu({
   };
 
   const closeNow = () => {
-    suppressHoverOpen.current = true;
+    send({ type: "dismiss" });
     clearTimers();
-    setOpen(false);
   };
 
   const pointerInHoverZone = (x: number, y: number) =>
@@ -80,34 +85,32 @@ export function PageExportSubmenu({
   }, [open]);
   useEffect(() => {
     if (!enabled) {
-      suppressHoverOpen.current = false;
       clearTimers();
-      setOpen(false);
+      send({ type: "disable" });
       return;
     }
     const onMove = (event: PointerEvent) => {
       if (pointerInHoverZone(event.clientX, event.clientY)) {
-        if (suppressHoverOpen.current) return;
-        if (closeTimer.current != null) {
-          window.clearTimeout(closeTimer.current);
+        send({ type: "enter" });
+        if (stateRef.current.status !== "opening") {
+          if (closeTimer.current != null) window.clearTimeout(closeTimer.current);
           closeTimer.current = null;
+          return;
         }
-        if (openRef.current || openTimer.current != null) return;
+        if (openTimer.current != null) return;
         openTimer.current = window.setTimeout(() => {
           openTimer.current = null;
-          setOpen(true);
+          send({ type: "open-delay" });
         }, EXPORT_OPEN_DELAY_MS);
         return;
       }
-      suppressHoverOpen.current = false;
-      if (openTimer.current != null) {
-        window.clearTimeout(openTimer.current);
-        openTimer.current = null;
-      }
-      if (!openRef.current || closeTimer.current != null) return;
+      send({ type: "leave" });
+      if (openTimer.current != null) window.clearTimeout(openTimer.current);
+      openTimer.current = null;
+      if (stateRef.current.status !== "closing" || closeTimer.current != null) return;
       closeTimer.current = window.setTimeout(() => {
         closeTimer.current = null;
-        setOpen(false);
+        send({ type: "close-delay" });
       }, EXPORT_CLOSE_DELAY_MS);
     };
     document.addEventListener("pointermove", onMove);
@@ -141,7 +144,7 @@ export function PageExportSubmenu({
       onOpenChange={(next) => {
         if (next) {
           clearTimers();
-          setOpen(true);
+          send({ type: "activate" });
         }
       }}
     >
@@ -153,14 +156,13 @@ export function PageExportSubmenu({
           aria-haspopup="menu"
           aria-expanded={open}
           onPointerEnter={(event) => {
-            if (suppressHoverOpen.current) return;
-            if (pointerInHoverZone(event.clientX, event.clientY) && !open) {
-              if (openTimer.current != null) return;
-              openTimer.current = window.setTimeout(() => {
-                openTimer.current = null;
-                setOpen(true);
-              }, EXPORT_OPEN_DELAY_MS);
-            }
+            if (!enabled || !pointerInHoverZone(event.clientX, event.clientY)) return;
+            send({ type: "enter" });
+            if (stateRef.current.status !== "opening" || openTimer.current != null) return;
+            openTimer.current = window.setTimeout(() => {
+              openTimer.current = null;
+              send({ type: "open-delay" });
+            }, EXPORT_OPEN_DELAY_MS);
           }}
           className="goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-lg px-2 text-left text-xs"
         >

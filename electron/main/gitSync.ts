@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
+import { idleGitSyncStatus as idle, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
+import { gitSchedulerTransition, gitLoadTransition, type GitSchedulerState, type GitLoadState } from "./gitSyncLifecycle";
 import { gitSyncPreparationFailure } from "../../src/lib/git-sync-preparation";
 import { broadcast, lookupWindowContext } from "./windows";
 import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
@@ -21,12 +23,11 @@ const notifications = new Map<string, string>();
 const queue = new GitSyncSerialQueue();
 let mappingHistory: GitMappingHistory = Object.create(null);
 const pendingReplies = new Map<string, { senderId: number; finish: (error: string | null) => void }>();
-let stopped = false;
-let ticking = false;
+let scheduler: GitSchedulerState = { phase: "stopped" };
+let loading: GitLoadState = { phase: "unread" };
 let timer: NodeJS.Timeout | undefined;
 let loadPromise: Promise<void> | undefined;
 const configFile = () => path.join(app.getPath("userData"), "git-sync.json");
-const idle = (repositoryId: string): GitSyncStatus => ({ repositoryId, phase: "idle", lastSyncedAt: null, error: null });
 const state = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory });
 const publish = () => broadcast("git-sync:state", state());
 const messageOf = (error: unknown) => error instanceof Error && /^[\u3400-\u9fff]/.test(error.message) ? error.message.slice(0, 500) : "同步操作失败，请检查文件夹、SSH 权限和网络后重试";
@@ -43,24 +44,30 @@ async function atomic(file: string, value: unknown) {
 }
 
 async function load() {
-  if (!loadPromise) loadPromise = (async () => {
-    try {
-      const saved = migrateGitSyncState(JSON.parse(await readFile(configFile(), "utf8")));
-      mappingHistory = saved.mappingHistory;
-      for (const config of saved.configs) { configs.set(config.id, config); nextRun.set(config.id, Date.now() + config.intervalMinutes * 60_000); }
-      for (const status of saved.statuses) statuses.set(status.repositoryId, status);
-      await persist();
-    } catch (error) {
-      configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取 Git 同步配置，已停止同步以保护现有文件"), { cause: error });
-    }
-    // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
-    await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
-  })().catch((error) => {
-    // Cache successful loads only; the retry button must read the disk again.
-    loadPromise = undefined;
-    throw error;
-  });
+  if (loading.phase === "ready") return;
+  if (!loadPromise) {
+    loading = gitLoadTransition(loading, "load.started");
+    loadPromise = (async () => {
+      try {
+        const saved = migrateGitSyncState(JSON.parse(await readFile(configFile(), "utf8")));
+        mappingHistory = saved.mappingHistory;
+        for (const config of saved.configs) { configs.set(config.id, config); nextRun.set(config.id, Date.now() + config.intervalMinutes * 60_000); }
+        for (const status of saved.statuses) statuses.set(status.repositoryId, status);
+        await persist();
+      } catch (error) {
+        configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取 Git 同步配置，已停止同步以保护现有文件"), { cause: error });
+      }
+      // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
+      await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
+      loading = gitLoadTransition(loading, "load.succeeded");
+    })().catch((error) => {
+      // Cache successful loads only; the retry button must read the disk again.
+      loadPromise = undefined;
+      loading = gitLoadTransition(loading, "load.failed");
+      throw error;
+    });
+  }
   return loadPromise;
 }
 
@@ -94,7 +101,7 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
   if (!found) throw new Error("请先保存同步配置");
   const config = structuredClone(found);
   if ([...configs.values()].some((other) => other.id !== config.id && normalizedGitRemote(other) === normalizedGitRemote(config) && other.branch === config.branch)) throw new Error("多个配置指向同一仓库分支，请先移除重复配置");
-  statuses.set(repositoryId, { ...(statuses.get(repositoryId) ?? idle(repositoryId)), phase: "syncing", error: null }); publish();
+  statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.started" })); publish();
   const unlocks: (() => void)[] = [];
   const roots: string[] = [];
   const prepared: { win: BrowserWindow; requestId: string }[] = [];
@@ -112,11 +119,11 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
     configs.set(repositoryId, synchronized);
     const selected = new Set(synchronized.folders.map((folder) => folder.notebookId));
     mappingHistory[repositoryId] = [...(mappingHistory[repositoryId] ?? []).filter((folder) => !selected.has(folder.notebookId)), ...synchronized.folders];
-    statuses.set(repositoryId, { repositoryId, phase: "idle", lastSyncedAt: new Date().toISOString(), error: null });
+    statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.succeeded", at: new Date().toISOString() }));
     await persist(); notifications.delete(repositoryId);
   } catch (error) {
     const message = messageOf(error);
-    statuses.set(repositoryId, { ...(statuses.get(repositoryId) ?? idle(repositoryId)), phase: "error", error: message, conflicts: error instanceof GitConflictError ? [...error.conflicts] : undefined });
+    statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.failed", message, conflicts: error instanceof GitConflictError ? [...error.conflicts] : undefined }));
     notifyFailure(repositoryId, message);
   } finally {
     unlocks.reverse().forEach((unlock) => unlock());
@@ -128,23 +135,28 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
 }
 
 async function tick() {
-  if (ticking || stopped) return;
-  ticking = true;
+  if (scheduler.phase !== "running") return;
+  scheduler = gitSchedulerTransition(scheduler, "tick.started");
   try {
     await queue.run(async () => {
-      await load(); if (stopped) return;
+      await load(); if (scheduler.phase === "stopped" || scheduler.phase === "stopping") return;
       const due = [...configs.values()].find((config) => config.enabled && config.folders.length && (nextRun.get(config.id) ?? 0) <= Date.now());
       if (due) await sync(due.id);
     });
   } catch (error) { notifyFailure("scheduler", messageOf(error)); }
-  finally { ticking = false; }
+  finally { scheduler = gitSchedulerTransition(scheduler, "tick.finished"); }
 }
 
 export function startGitSync() {
-  stopped = false; timer = setInterval(() => { void tick(); }, 5000); timer.unref();
+  scheduler = gitSchedulerTransition(scheduler, "scheduler.started");
+  if (timer) return;
+  timer = setInterval(() => { void tick(); }, 5000); timer.unref();
   void queue.run(load).catch((error) => notifyFailure("scheduler", messageOf(error)));
 }
-export function stopGitSync() { stopped = true; clearInterval(timer); }
+export function stopGitSync() {
+  scheduler = gitSchedulerTransition(scheduler, "scheduler.stopped");
+  clearInterval(timer); timer = undefined;
+}
 
 async function save(raw: GitRepositoryInput) {
   let input = validateGitRepository(raw);

@@ -66,7 +66,7 @@ export function renderSettingsScaffold(
     setFormat,
     exporting,
     importing,
-    setResetDialogOpen,
+    onResetDialogOpenChange,
     notebookList,
     toggleNotebook,
     selectAll,
@@ -180,7 +180,7 @@ export function renderSettingsScaffold(
             onFormatChange={setFormat}
             exporting={exporting}
             onExport={handleExport}
-            onOpenResetDialog={() => setResetDialogOpen(true)}
+            onOpenResetDialog={() => onResetDialogOpenChange(true)}
             onRestartGuide={() => {
               onOpenChange(false);
               useSettings.setState({ setupGuideOpen: true });

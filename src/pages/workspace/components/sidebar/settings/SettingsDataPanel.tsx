@@ -20,8 +20,8 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
     active,
     onRestartGuide,
     confirmConfig,
-    setConfirmConfig,
-    activationRef,
+    cancelConfirmation,
+    confirmRemoteAction,
   } = context;
 
   return (
@@ -55,11 +55,10 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
       </div>
 
       <DialogShell
-        open={active && (confirmConfig?.open || false)}
+        open={active && Boolean(confirmConfig)}
         onOpenChange={(open) => {
           if (!open) {
-            confirmConfig?.onCancel?.();
-            setConfirmConfig(null);
+            cancelConfirmation();
           }
         }}
         title={confirmConfig?.title}
@@ -73,23 +72,15 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
               variant="outline"
               className="rounded-[var(--goose-control-radius)]"
               onClick={() => {
-                confirmConfig?.onCancel?.();
-                setConfirmConfig(null);
+                cancelConfirmation();
               }}
             >
               取消
             </Button>
             <Button
-              variant={confirmConfig?.isDestructive ? "destructive" : "default"}
+              variant="destructive"
               className="rounded-[var(--goose-control-radius)]"
-              onClick={async () => {
-                if (!activationRef.current.active) return;
-                const onConfirm = confirmConfig?.onConfirm;
-                setConfirmConfig(null);
-                if (onConfirm) {
-                  await onConfirm();
-                }
-              }}
+              onClick={() => void confirmRemoteAction()}
             >
               确定
             </Button>

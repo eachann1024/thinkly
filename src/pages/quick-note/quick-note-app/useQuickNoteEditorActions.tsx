@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   useQuickNote,
   buildQuickNoteDraftPage,
-  getQuickNoteSlotName,
-  persistQuickNoteSlotNames,
-  updateQuickNoteSlotName,
   type QuickNoteSlot,
 } from "@/stores/useQuickNote";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
+import { useQuickNoteRename } from "./useQuickNoteRename";
 import type { useQuickNoteDraftState } from "./useQuickNoteDraftState";
 
 export function useQuickNoteEditorActions(
@@ -17,7 +15,6 @@ export function useQuickNoteEditorActions(
   const {
     editorRef,
     restoredContentSignatureRef,
-    activeSlot,
     setActiveSlot,
     setDraftContent,
     undoDraft,
@@ -25,15 +22,6 @@ export function useQuickNoteEditorActions(
     setHistoryEpoch,
     setPreviewSlot,
     setHelpOpen,
-    renamingSlot,
-    setRenamingSlot,
-    renameValue,
-    setRenameValue,
-    renameInputRef,
-    renameFinishingRef,
-    slotNames,
-    setSlotNames,
-    slotNamesRef,
     displaySlot,
   } = input;
 
@@ -63,50 +51,7 @@ export function useQuickNoteEditorActions(
     );
   }, []);
 
-  const startRename = useCallback(
-    (slot: QuickNoteSlot) => {
-      flushEditor();
-      renameFinishingRef.current = false;
-      setHelpOpen(false);
-      setRenameValue(getQuickNoteSlotName(slot, slotNames));
-      setRenamingSlot(slot);
-    },
-    [flushEditor, slotNames],
-  );
-
-  const finishRename = useCallback(
-    (save: boolean) => {
-      if (renamingSlot === null || renameFinishingRef.current) return;
-      renameFinishingRef.current = true;
-      if (save) {
-        const next = updateQuickNoteSlotName(
-          slotNamesRef.current,
-          renamingSlot,
-          renameValue,
-        );
-        if (next !== slotNamesRef.current) {
-          slotNamesRef.current = next;
-          setSlotNames(next);
-          persistQuickNoteSlotNames(next);
-        }
-      }
-      setRenamingSlot(null);
-      requestAnimationFrame(() => {
-        renameFinishingRef.current = false;
-        editorRef.current?.editor?.focus?.();
-      });
-    },
-    [renameValue, renamingSlot],
-  );
-
-  useEffect(() => {
-    if (renamingSlot === null) return;
-    const frame = requestAnimationFrame(() => {
-      renameInputRef.current?.focus();
-      renameInputRef.current?.select();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [renamingSlot]);
+  const rename = useQuickNoteRename(input, flushEditor);
 
   const applyHistoryContentToEditor = useCallback(
     (content: BlockNoteContent | null) => {
@@ -165,8 +110,7 @@ export function useQuickNoteEditorActions(
     ...input,
     onDraftChange,
     flushEditor,
-    startRename,
-    finishRename,
+    ...rename,
     applyHistoryContentToEditor,
     handleUndo,
     handleRedo,

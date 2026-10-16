@@ -17,6 +17,7 @@ import {
 } from "./helpers";
 import { usePages } from "../usePages";
 import { applyPersistedTabSplit } from "../useEditorSplit";
+import { transitionTabsStartup, type TabsStartupState, type TabsStartupEvent } from "./startupState";
 
 export const LEGACY_TABS_PERSIST_KEY = "goose-note:open-tabs:v1";
 
@@ -155,29 +156,43 @@ export function startTabsPersistence(
       void usePages.getState().setActivePage(active.pageId);
     };
 
-    let appliedTakeTab = false;
-    let pendingRestoredTabs: GooseWindowTabSnapshot[] | null = null;
-
-    const applyWindowInit = (payload: GooseWindowInitPayload) => {
-      if (payload.takeTab) {
-        appliedTakeTab = true;
-        pendingRestoredTabs = null;
-        applyTabSnapshots([payload.takeTab], payload.takeTab.id);
-        applyPersistedTabSplit(payload.takeTab.id, tabsWindowId);
-        persistTabs(useTabs.getState());
-        return;
-      }
-      if (payload.restoredTabs && payload.restoredTabs.length > 0) {
-        if (appliedTakeTab) return;
-        if (!persistReady) {
-          pendingRestoredTabs = payload.restoredTabs;
-          return;
+    let startup: TabsStartupState = persistReady
+      ? { phase: "ready-default", windowId: tabsWindowId }
+      : { phase: "awaiting-window", pending: { source: "default" } };
+    const sendStartup = (event: TabsStartupEvent, previousWindowId?: string) => {
+      const result = transitionTabsStartup(startup, event);
+      startup = result.state;
+      for (const command of result.commands) {
+        switch (command.type) {
+          case "apply-snapshots":
+            applyTabSnapshots(command.tabs, command.activeId);
+            break;
+          case "apply-destination":
+            useTabs.setState(command.tabs);
+            break;
+          case "restore-taken-split": {
+            const id = command.tabId ?? useTabs.getState().activeTabId;
+            if (id) applyPersistedTabSplit(id, tabsWindowId);
+            break;
+          }
+          case "persist":
+            persistTabs(useTabs.getState());
+            break;
+          case "clean-fallback":
+            if (previousWindowId === FALLBACK_WINDOW_ID && tabsWindowId !== FALLBACK_WINDOW_ID) {
+              try { window.localStorage.removeItem(tabsPersistKey(previousWindowId)); }
+              catch { /* 忽略存储异常 */ }
+            }
+            break;
         }
-        const dest = readPersistedTabsRaw(tabsPersistKey(tabsWindowId));
-        if (dest?.openTabs.length) return;
-        applyTabSnapshots(payload.restoredTabs);
-        persistTabs(useTabs.getState());
       }
+    };
+    const applyWindowInit = (payload: GooseWindowInitPayload) => {
+      if (payload.takeTab) sendStartup({ type: "tab-taken", tab: payload.takeTab });
+      else if (payload.restoredTabs?.length) sendStartup({
+        type: "tabs-restored", tabs: payload.restoredTabs,
+        destinationHasTabs: persistReady && Boolean(readPersistedTabsRaw(tabsPersistKey(tabsWindowId))?.openTabs.length),
+      });
     };
 
     window.gooseDesktop?.onWindowInit?.(applyWindowInit);
@@ -200,37 +215,9 @@ export function startTabsPersistence(
       persistReady = true;
       const prevId = tabsWindowId;
       tabsWindowId = ctx.windowId;
-      if (appliedTakeTab) {
-        persistTabs(useTabs.getState());
-        const takeId = useTabs.getState().activeTabId;
-        if (takeId) applyPersistedTabSplit(takeId, ctx.windowId);
-        return;
-      }
-      const dest = readPersistedTabsRaw(tabsPersistKey(ctx.windowId));
-      if (dest) {
-        useTabs.setState({
-          openTabs: dest.openTabs,
-          activeTabId: dest.activeTabId,
-          recentlyClosedPageIds: dest.recentlyClosedPageIds,
-        });
-        pendingRestoredTabs = null;
-        return;
-      }
-      if (pendingRestoredTabs && pendingRestoredTabs.length > 0) {
-        applyTabSnapshots(pendingRestoredTabs);
-        pendingRestoredTabs = null;
-      }
-      persistTabs(useTabs.getState());
-      if (
-        prevId === FALLBACK_WINDOW_ID &&
-        ctx.windowId !== FALLBACK_WINDOW_ID
-      ) {
-        try {
-          window.localStorage.removeItem(tabsPersistKey(prevId));
-        } catch {
-          // 忽略存储异常
-        }
-      }
+      sendStartup({ type: "context-resolved", windowId: ctx.windowId,
+        destination: readPersistedTabsRaw(tabsPersistKey(ctx.windowId)),
+      }, prevId);
     });
   }
 }

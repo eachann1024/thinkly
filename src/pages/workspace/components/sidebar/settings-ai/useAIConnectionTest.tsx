@@ -1,3 +1,4 @@
+import { isModelRequestBusy } from "./aiRequestState";
 import { useEffect } from "react";
 import { runAIText } from "@/lib/ai-provider";
 import {
@@ -21,9 +22,8 @@ export function useAIConnectionTest(
     apiKeyDraft,
     savingCustomConfig,
     customSaveError,
-    setTestingConnection,
-    setConnectionTestResult,
-    setConnectionTestMessage,
+    sendRequestEvent,
+    requestStateRef,
     modelSectionRef,
     connectionTestRequestIdRef,
     connectionTestControllerRef,
@@ -42,16 +42,16 @@ export function useAIConnectionTest(
   } = input;
 
   const handleTestConnection = async () => {
-    if (!canTestConnection || !selectedModelId) return;
+    if (!canTestConnection || !selectedModelId ||
+      requestStateRef.current.test.status === "testing" ||
+      isModelRequestBusy(requestStateRef.current.models)) return;
 
     cancelConnectionTest();
     const controller = new AbortController();
     const requestId = connectionTestRequestIdRef.current + 1;
     connectionTestRequestIdRef.current = requestId;
     connectionTestControllerRef.current = controller;
-    setTestingConnection(true);
-    setConnectionTestResult("idle");
-    setConnectionTestMessage("");
+    sendRequestEvent({ type: "test.started", requestId });
 
     const timeoutId = setTimeout(() => {
       if (
@@ -64,9 +64,8 @@ export function useAIConnectionTest(
       connectionTestRequestIdRef.current += 1;
       connectionTestControllerRef.current = null;
       connectionTestTimeoutRef.current = null;
-      setTestingConnection(false);
-      setConnectionTestResult("timeout");
-      setConnectionTestMessage("连接测试超时（30 秒），请检查配置后重试。");
+      sendRequestEvent({ type: "test.resolved", requestId, result: "timeout",
+        message: "连接测试超时（30 秒），请检查配置后重试。" });
     }, 30_000);
     connectionTestTimeoutRef.current = timeoutId;
 
@@ -100,11 +99,9 @@ export function useAIConnectionTest(
       }
 
       if (hasValidSetupGuideAIResponse(response)) {
-        setConnectionTestResult("success");
-        setConnectionTestMessage("连接成功。");
+        sendRequestEvent({ type: "test.resolved", requestId, result: "success", message: "连接成功。" });
       } else {
-        setConnectionTestResult("failed");
-        setConnectionTestMessage("连接失败：服务未返回有效文本。");
+        sendRequestEvent({ type: "test.resolved", requestId, result: "failed", message: "连接失败：服务未返回有效文本。" });
       }
     } catch (error) {
       if (
@@ -120,8 +117,8 @@ export function useAIConnectionTest(
         rawMessage,
         savedConnection.apiKey,
       );
-      setConnectionTestResult("failed");
-      setConnectionTestMessage(safeMessage || "连接失败，请检查配置后重试。");
+      sendRequestEvent({ type: "test.resolved", requestId, result: "failed",
+        message: safeMessage || "连接失败，请检查配置后重试。" });
     } finally {
       if (requestId === connectionTestRequestIdRef.current) {
         clearTimeout(timeoutId);
@@ -129,7 +126,6 @@ export function useAIConnectionTest(
           connectionTestTimeoutRef.current = null;
         }
         connectionTestControllerRef.current = null;
-        if (isMountedRef.current) setTestingConnection(false);
       }
     }
   };

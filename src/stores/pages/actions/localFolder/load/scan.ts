@@ -17,8 +17,14 @@ export const loadLocalFolderPagesOnce = async (
   options: { showWelcome?: boolean; forceRead?: boolean } | undefined,
   hiddenFolders: string[],
   requestId: number,
+  fingerprint: string,
 ) => {
   if (typeof window === "undefined" || !window.gooseFs) return;
+
+  const isCurrentRequest = () =>
+    latestLocalFolderLoadRequest.get(notebookId) === requestId &&
+    useNotebooks.getState().notebooks[notebookId]?.localPath === basePath;
+  if (!isCurrentRequest()) return;
 
   const previousActivePageId = get().activePageId;
   const previousActivePage = previousActivePageId
@@ -38,8 +44,8 @@ export const loadLocalFolderPagesOnce = async (
       .filter((page) => page.workspaceId === notebookId)
       .map((page) => [page.id, getContentSignature(page.content)]),
   );
-  useNotebooks.getState().setLocalFolderLoadState(notebookId, {
-    status: "loading",
+  useNotebooks.getState().dispatchLocalFolderLoadEvent(notebookId, {
+    type: "started", requestId, fingerprint,
     startedAt: Date.now(),
   });
 
@@ -75,7 +81,7 @@ export const loadLocalFolderPagesOnce = async (
 
     // 同一记事本可能在启动恢复、点击切换和 watch 兜底中同时发起刷新。
     // 只允许最新请求提交，避免较慢的旧扫描反向覆盖新目录状态。
-    if (latestLocalFolderLoadRequest.get(notebookId) !== requestId) return;
+    if (!isCurrentRequest()) return;
 
     set((state) => {
       const pagesOutsideNotebook = Object.fromEntries(
@@ -230,8 +236,8 @@ export const loadLocalFolderPagesOnce = async (
     appendLocalFolderOrderEntries(notebookId, localPages);
 
     recoverScannedLocalPages(set, get, notebookId);
-    useNotebooks.getState().setLocalFolderLoadState(notebookId, {
-      status: "ready",
+    useNotebooks.getState().dispatchLocalFolderLoadEvent(notebookId, {
+      type: "succeeded", requestId, fingerprint,
       finishedAt: Date.now(),
     });
     // 该笔记本页面已就绪：清理指向已不存在文件的持久化标签。
@@ -242,13 +248,13 @@ export const loadLocalFolderPagesOnce = async (
       // ignore tabs reconcile error
     }
   } catch (error) {
-    if (latestLocalFolderLoadRequest.get(notebookId) !== requestId) return;
+    if (!isCurrentRequest()) return;
     const message =
       error instanceof Error && error.message
         ? error.message
         : "无法读取本地文件夹";
-    useNotebooks.getState().setLocalFolderLoadState(notebookId, {
-      status: "error",
+    useNotebooks.getState().dispatchLocalFolderLoadEvent(notebookId, {
+      type: "failed", requestId, fingerprint,
       finishedAt: Date.now(),
       error: message,
     });

@@ -42,7 +42,7 @@ export function useEditorComposerToolbar(
     EditorComposerProps,
     "editor" | "editable" | "editorContainerRef" | "suppressFormattingToolbar"
   >,
-  setLinkPopoverOpen: (open: boolean) => void,
+  closeLinkPopover: () => void,
 ) {
   const formattingToolbarStoreOpen = useExtensionState(
     FormattingToolbarExtension,
@@ -62,10 +62,10 @@ export function useEditorComposerToolbar(
   const toolbarOpenForHoldRef = useRef(false);
   useEffect(() => {
     if (!editable) {
-      setLinkPopoverOpen(false);
+      closeLinkPopover();
       resetFormattingToolbarAi(editor);
     }
-  }, [editable, editor, resetFormattingToolbarAi]);
+  }, [editable, editor, resetFormattingToolbarAi, closeLinkPopover]);
 
   const formattingToolbarOpen = isFormattingToolbarOpen({
     editable,

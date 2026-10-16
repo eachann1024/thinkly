@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useReducer } from "react";
 import { Loader2, RotateCcw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -8,12 +8,13 @@ import {
   useEmbeddedWorkCardStatus,
   type WorkCardStatusData,
 } from "../workCardStatusContext";
-import type { ApprovalPlanCardProps, BatchUndoResult } from "./types";
+import type { ApprovalPlanCardProps } from "./types";
 import { readReviewPlan } from "./planReviewData";
 import { usePlanReviewSelection } from "./PlanReviewContext";
 import { planReviewState, reviewOutput } from "./reviewState";
 import { requestPlanRefinement } from "./refinePlan";
 import "./plan-review.css";
+import { reviewActionReducer } from "./reviewActionState";
 
 export function ReviewActions({
   part,
@@ -30,11 +31,13 @@ export function ReviewActions({
     operationIds,
     journal?.selectedOperationIds,
   );
-  const [submitting, setSubmitting] = useState(false);
-  const [approving, setApproving] = useState(true);
-  const [undoing, setUndoing] = useState(false);
-  const [undoResult, setUndoResult] = useState<BatchUndoResult | null>(null);
-  const [actionError, setActionError] = useState("");
+  const [action, dispatch] = useReducer(reviewActionReducer, { status: "idle" });
+  const submitting = action.status === "responding";
+  const approving = action.status === "responding" && action.approved;
+  const undoing = action.status === "undoing";
+  const undoResult = action.status === "undo-finished" ? action.result : action.status === "undoing" ? action.previousResult : null;
+  const actionError = action.status === "response-failed" ? action.error :
+    action.status === "undoing" || action.status === "undo-finished" ? action.responseError ?? "" : "";
   const busyRef = useRef(false);
   const review = planReviewState(part, journal);
   const canApprove =
@@ -89,10 +92,8 @@ export function ReviewActions({
     )
       return;
     busyRef.current = true;
-    setApproving(approved);
-    setSubmitting(true);
+    dispatch({ type: "respond", approved });
     setLocked(true);
-    setActionError("");
     try {
       await onApprovalResponse({
         approvalId: part.approval?.id ?? `batch-approval-${part.toolCallId}`,
@@ -101,11 +102,11 @@ export function ReviewActions({
         approved,
         selectedOperationIds: approved ? selectedIds : [],
       });
+      dispatch({ type: "responded" });
     } catch (error) {
-      setActionError(formatNotebookAiError(error, { phase: "execute" }));
+      dispatch({ type: "response-failed", error: formatNotebookAiError(error, { phase: "execute" }) });
     } finally {
       busyRef.current = false;
-      setSubmitting(false);
       setLocked(false);
     }
   };
@@ -118,17 +119,16 @@ export function ReviewActions({
       typeof output.runId === "string" ? output.runId : input?.runId;
     if (!toolCallId || !runId || busyRef.current) return;
     busyRef.current = true;
-    setUndoing(true);
+    dispatch({ type: "undo" });
     try {
-      setUndoResult(await onUndo(toolCallId, runId));
+      dispatch({ type: "undo-finished", result: await onUndo(toolCallId, runId) });
     } catch (error) {
-      setUndoResult({
+      dispatch({ type: "undo-finished", result: {
         ok: false,
         error: formatNotebookAiError(error, { phase: "undo" }),
-      });
+      } });
     } finally {
       busyRef.current = false;
-      setUndoing(false);
     }
   };
   const regenerate = () => {

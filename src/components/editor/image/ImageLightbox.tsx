@@ -18,9 +18,9 @@ export function ImageLightbox({
 }: ImageLightboxProps) {
   const {
     open,
-    setOpen,
+    closeLightbox,
     index,
-    setIndex,
+    viewSlide,
     slides,
     currentSlide,
     openLightboxAtImage,
@@ -72,7 +72,7 @@ export function ImageLightbox({
         <OverlayLayerProvider layer={layer}>
         <Lightbox
           open={open}
-          close={() => setOpen(false)}
+          close={closeLightbox}
           index={index}
           slides={slides.map((s) => ({
             src: s.src,
@@ -140,7 +140,7 @@ export function ImageLightbox({
                 type="button"
                 title="关闭"
                 aria-label="关闭"
-                onClick={() => setOpen(false)}
+                onClick={closeLightbox}
                 className="yarl__button"
               >
                 <X size={18} strokeWidth={1.75} />
@@ -149,7 +149,7 @@ export function ImageLightbox({
             buttonPrev: slides.length <= 1 ? () => null : undefined,
             buttonNext: slides.length <= 1 ? () => null : undefined,
           }}
-          on={{ view: ({ index: newIndex }) => setIndex(newIndex) }}
+          on={{ view: ({ index: newIndex }) => viewSlide(newIndex) }}
         />
         </OverlayLayerProvider>
       )}

@@ -84,6 +84,7 @@ declare global {
   const sortNotebooksByOrder: typeof import('../stores/useNotebooks').sortNotebooksByOrder
   const stripComposerDraftImages: typeof import('../stores/useNotebookAiChats').stripComposerDraftImages
   const toggleSidebarFolder: typeof import('../stores/useSidebarView').toggleSidebarFolder
+  const transitionLocalFolderTargetPicker: typeof import('../stores/useLocalFolderTargetPicker').transitionLocalFolderTargetPicker
   const updateQuickNoteSlotName: typeof import('../stores/useQuickNote').updateQuickNoteSlotName
   const useAiStatus: typeof import('../stores/useAiStatus').useAiStatus
   const useEditorSplit: typeof import('../stores/useEditorSplit').useEditorSplit
@@ -121,7 +122,7 @@ declare global {
   export type { FileNavLocation } from '../stores/useFileNavHistory'
   import('../stores/useFileNavHistory')
   // @ts-ignore
-  export type { LocalFolderTargetPickerMode } from '../stores/useLocalFolderTargetPicker'
+  export type { LocalFolderTargetPickerMode, LocalFolderTargetPickerState } from '../stores/useLocalFolderTargetPicker'
   import('../stores/useLocalFolderTargetPicker')
   // @ts-ignore
   export type { NotebookAiChatsState, NotebookAiConversation, NotebookAiNotebookChatState } from '../stores/useNotebookAiChats'

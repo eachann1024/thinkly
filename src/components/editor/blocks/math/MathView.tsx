@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 import { renderMathPreview } from "./mathPreviewCache";
+
+import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
 
 interface MathViewProps {
   value: string;
@@ -12,29 +14,33 @@ export const MathView: React.FC<MathViewProps> = ({
   displayMode = false,
 }) => {
   const { previewRef, activated } = usePreviewVisibility<HTMLSpanElement>(!displayMode);
-  const [ready, setReady] = useState(false);
+  const [renderState, dispatch] = useReducer(previewRenderReducer, { phase: "idle" });
+  const identity = JSON.stringify([value, displayMode]);
+  const html = previewRenderHTML(renderState);
+  const result = renderState.phase === "loading" ? renderState.previous : renderState;
+  const ready = result !== undefined && result.phase !== "idle";
+  const placeholder = result?.phase === "empty" ? "添加公式"
+    : result?.phase === "error" ? "公式无法显示，请查看源码" : undefined;
 
   useEffect(() => {
     if (!activated) return;
+    dispatch({ type: "render-requested", identity });
     let active = true;
     let idle: number | null = null;
     const renderMath = async () => {
       try {
         if (!value.trim()) {
           if (previewRef.current && active) {
-            previewRef.current.textContent = "添加公式";
-            setReady(true);
+            dispatch({ type: "empty", identity });
           }
           return;
         }
         const html = await renderMathPreview(value, displayMode);
         if (!previewRef.current || !active) return;
-        previewRef.current.innerHTML = html;
-        setReady(true);
+        dispatch({ type: "rendered", identity, html });
       } catch {
         if (!previewRef.current || !active) return;
-        previewRef.current.textContent = "公式无法显示，请查看源码";
-        setReady(true);
+        dispatch({ type: "failed", identity });
       }
     };
     if (displayMode && typeof requestIdleCallback === "function") {
@@ -46,12 +52,13 @@ export const MathView: React.FC<MathViewProps> = ({
       active = false;
       if (idle !== null) cancelIdleCallback(idle);
     };
-  }, [activated, value, displayMode, previewRef]);
+  }, [activated, value, displayMode, previewRef, identity]);
 
   return (
     <span
       ref={previewRef}
       aria-busy={!ready || undefined}
+      dangerouslySetInnerHTML={html ? { __html: html } : undefined}
       className={`${displayMode ? "block" : "inline-block"}${value.trim() ? "" : " text-xs text-muted-foreground"}`}
       style={
         displayMode
@@ -63,6 +70,8 @@ export const MathView: React.FC<MathViewProps> = ({
             }
           : { padding: "0 calc(4px * var(--editor-scale, 1))" }
       }
-    />
+    >
+      {html ? null : placeholder}
+    </span>
   );
 };

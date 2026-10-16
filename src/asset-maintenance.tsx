@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ChevronDown, Film, Image as ImageIcon, ScanSearch, Trash2 } from "@/components/ui/icons";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +15,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSettings } from "@/stores/useSettings";
 import { applyAppearanceSnapshot } from "@/lib/appearanceSync";
 import { getLocalAssetKind } from "@/lib/local-folder-asset-maintenance";
-import type { AssetNotebook, AssetScan } from "@/lib/asset-maintenance-contract";
+import type { AssetScan } from "@/lib/asset-maintenance-contract";
+import { useAssetMaintenanceState } from "@/hooks/useAssetMaintenanceState";
 import "./index.css";
 import "./fonts.css";
 
@@ -38,48 +39,12 @@ function Preview({ asset, thumbnail = false }: { asset: Asset; thumbnail?: boole
 }
 
 function AssetMaintenanceApp() {
-  const [notebooks, setNotebooks] = useState<AssetNotebook[]>([]);
-  const [notebookId, setNotebookId] = useState("");
-  const [scan, setScan] = useState<AssetScan | null>(null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [previewPath, setPreviewPath] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const { notebooks, notebookId, scan, selected, previewPath, busy, loading, message, error,
+    loadNotebooks, runScan, trash, toggle, selectNotebook, selectAll } = useAssetMaintenanceState(bridge);
   const preview = scan?.assets.find((asset) => asset.path === previewPath);
   const selectedNotebook = notebooks.find((notebook) => notebook.id === notebookId);
   const allSelected = !!scan?.assets.length && selected.size === scan.assets.length;
   const partiallySelected = selected.size > 0 && !allSelected;
-  const loadNotebooks = async () => {
-    setLoading(true); setError("");
-    try { setNotebooks(await bridge.notebooks()); }
-    catch (error) { setError(String(error)); }
-    finally { setLoading(false); }
-  };
-  useEffect(() => { void loadNotebooks(); }, []);
-  const clearScan = () => { setScan(null); setSelected(new Set()); setPreviewPath(null); };
-  const runScan = async () => {
-    if (!notebookId || busy) return;
-    setBusy(true); setError(""); setMessage(""); clearScan();
-    try { setScan(await bridge.scan(notebookId)); }
-    catch (error) { setError(String(error)); }
-    finally { setBusy(false); }
-  };
-  const trash = async () => {
-    if (!scan || !selected.size || busy) return;
-    setBusy(true); setError(""); setMessage("");
-    try {
-      const result = await bridge.trash(scan.token, [...selected]);
-      if (!result.canceled) { clearScan(); setMessage(`已将 ${result.deleted} 个文件移入废纸篓。继续清理请重新扫描。`); }
-    } catch (error) { clearScan(); setError(String(error)); }
-    finally { setBusy(false); }
-  };
-  const toggle = (path: string) => setSelected((previous) => {
-    const next = new Set(previous);
-    if (next.has(path)) next.delete(path); else next.add(path);
-    return next;
-  });
   return <main className="flex h-screen flex-col gap-4 bg-background p-6 text-foreground">
     <header className="space-y-2">
       <h1 className="text-xl font-semibold">清理未引用图片与视频</h1>
@@ -108,7 +73,7 @@ function AssetMaintenanceApp() {
           <DropdownMenuContent align="start" className="w-96 max-w-full">
             <DropdownMenuRadioGroup
               value={notebookId}
-              onValueChange={(value) => { setNotebookId(value); clearScan(); setError(""); setMessage(""); }}
+              onValueChange={selectNotebook}
             >
               <DropdownMenuRadioItem value="" textValue="选择笔记本">选择笔记本</DropdownMenuRadioItem>
               {notebooks.map((notebook) => (
@@ -123,7 +88,7 @@ function AssetMaintenanceApp() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Button variant="secondary" disabled={busy || loading} onClick={() => { clearScan(); setNotebookId(""); void loadNotebooks(); }}>刷新列表</Button>
+      <Button variant="secondary" disabled={busy || loading} onClick={() => void loadNotebooks()}>刷新列表</Button>
       <Button disabled={!notebookId || busy || loading} onClick={() => void runScan()}><ScanSearch />{busy ? "正在处理…" : "扫描资源"}</Button>
     </div>
     {error && <p role="alert" className="rounded-lg bg-muted p-3 text-sm text-danger">{error}</p>}
@@ -136,7 +101,7 @@ function AssetMaintenanceApp() {
             isDisabled={busy || !scan?.assets.length}
             isSelected={allSelected}
             isIndeterminate={partiallySelected}
-            onChange={(checked) => setSelected(checked ? new Set(scan?.assets.map((asset) => asset.path)) : new Set())}
+            onChange={selectAll}
             className="min-h-6 gap-2"
           >
             <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
@@ -152,7 +117,7 @@ function AssetMaintenanceApp() {
               <Checkbox aria-label={`选择 ${asset.name}`} isSelected={selected.has(asset.path)} isDisabled={busy} onChange={() => toggle(asset.path)} className="min-h-6 min-w-6 shrink-0 justify-center">
                 <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
               </Checkbox>
-              <Button type="button" variant="ghost" disabled={busy} onClick={() => { toggle(asset.path); setPreviewPath(asset.path); }} aria-label={`选择并预览 ${asset.name}`} aria-pressed={selected.has(asset.path)} className="h-auto min-w-0 flex-1 justify-start gap-3 p-2 text-left">
+              <Button type="button" variant="ghost" disabled={busy} onClick={() => toggle(asset.path, true)} aria-label={`选择并预览 ${asset.name}`} aria-pressed={selected.has(asset.path)} className="h-auto min-w-0 flex-1 justify-start gap-3 p-2 text-left">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted"><Preview key={`${scan.token}:${asset.path}`} asset={asset} thumbnail /></span>
                 <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{asset.name}</span><span className="block truncate text-xs text-muted-foreground" title={asset.path}>{asset.relativePath}</span><span className="text-xs text-muted-foreground">{getLocalAssetKind(asset.name) === "video" ? "视频" : "图片"} · {formatSize(asset.size)}</span></span>
                 <AssetIcon asset={asset} />

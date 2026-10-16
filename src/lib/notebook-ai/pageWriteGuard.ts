@@ -3,7 +3,8 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import {
   clearLocalSaveTimers,
-  pendingLocalSaveContents,
+  getPendingLocalSaveContent,
+  clearPendingLocalSaveContent,
 } from "@/stores/pages/folderSync";
 
 export type PageWriteGuardCode =
@@ -183,9 +184,9 @@ async function runSafePageWrite(
     attemptedContent !== undefined &&
     getPageContentSignature(current.content) === attemptedSignature
   ) {
-    const pending = pendingLocalSaveContents.get(pageId);
+    const pending = getPendingLocalSaveContent(pageId);
     if (getPageContentSignature(pending) === attemptedSignature) {
-      pendingLocalSaveContents.delete(pageId);
+      clearPendingLocalSaveContent(pageId, pending);
       clearLocalSaveTimers(pageId);
     }
     usePages

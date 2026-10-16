@@ -3,7 +3,7 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useReducer,
   type RefObject,
 } from "react";
 import {
@@ -13,23 +13,14 @@ import {
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import {
   ensureComposerCaretAnchors,
-  getComposerCaretTextContext,
   placeCaretAfterNode,
   pruneEmptyComposerTextNodes,
 } from "./useSkillCommands";
 import { isSuggestionMenuAcceptKey } from "@/components/editor/utils/slashMenuPolicy";
 
-interface DetectedMention {
-  query: string;
-  range: Range;
-}
-
-interface MentionState {
-  active: boolean;
-  query: string;
-  anchorRect: DOMRect | null;
-  activeIndex: number;
-}
+import { composerSuggestionReducer, inactiveSuggestion } from "./composerSuggestionState";
+import { detectMentionAtCaret, resolveMentionAnchorRect, createChipElement, type DetectedMention } from "./composerMentionDom";
+export { createChipElement } from "./composerMentionDom";
 
 interface UseReferenceMentionsOptions {
   editorRef: RefObject<HTMLDivElement | null>;
@@ -38,83 +29,6 @@ interface UseReferenceMentionsOptions {
   onReferenceAdded?: (reference: AiFileReferenceAttrs) => void;
   searchPages?: (query: string) => AiReferenceSuggestionItem[];
   referencePlacement?: "inline" | "external";
-}
-
-const INACTIVE_MENTION: MentionState = {
-  active: false,
-  query: "",
-  anchorRect: null,
-  activeIndex: 0,
-};
-
-function detectMentionAtCaret(container: HTMLElement): DetectedMention | null {
-  const caret = getComposerCaretTextContext(container);
-  if (!caret) return null;
-
-  const atIndex = caret.beforeCaret.lastIndexOf("@");
-  if (atIndex === -1) return null;
-  if (atIndex > 0) {
-    const prevChar = caret.beforeCaret[atIndex - 1];
-    if (!/[\s\n\u200B\uFEFF]/.test(prevChar)) {
-      const textBefore = caret.beforeCaret.slice(0, atIndex);
-      if (textBefore.replace(/[\u200B\uFEFF]/g, "").length > 0) {
-        return null;
-      }
-    }
-  }
-
-  const rawQuery = caret.beforeCaret.slice(atIndex + 1);
-  if (/[\s\n]/.test(rawQuery)) return null;
-  const query = rawQuery.replace(/[\u200B\uFEFF]/g, "");
-
-  const range = document.createRange();
-  range.setStart(caret.textNode, atIndex);
-  range.setEnd(caret.textNode, caret.beforeCaret.length);
-
-  return { query, range };
-}
-
-/** 解析 @ 菜单锚点；range 为空时退到 caret / 编辑器矩形，避免菜单飞到左上角。 */
-function resolveMentionAnchorRect(range: Range, editor: HTMLElement): DOMRect {
-  const rect = range.getBoundingClientRect();
-  if (rect.width > 0 || rect.height > 0) {
-    return rect;
-  }
-
-  const clientRects = range.getClientRects();
-  if (clientRects.length > 0) {
-    const first = clientRects[0];
-    if (first.width > 0 || first.height > 0) {
-      return first;
-    }
-  }
-
-  const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    const caretRect = selection.getRangeAt(0).getBoundingClientRect();
-    if (caretRect.width > 0 || caretRect.height > 0) {
-      return caretRect;
-    }
-  }
-
-  return editor.getBoundingClientRect();
-}
-
-export function createChipElement(
-  attrs: AiFileReferenceAttrs,
-): HTMLSpanElement {
-  const span = document.createElement("span");
-  span.contentEditable = "false";
-  span.dataset.aiMentionId = attrs.pageId;
-  span.dataset.aiMentionAttrs = JSON.stringify(attrs);
-  // 垂直对齐：chip 用 inline-flex + items-center；高度与行高由 notebook-ai.css 统一。
-  // 高度/行高/垂直对齐由 notebook-ai.css 与编辑器行高对齐；勿加 leading-none/h-*
-  span.className =
-    "ai-composer-chip inline-flex items-center justify-center rounded text-[11px] font-medium" +
-    " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +
-    " cursor-pointer hover:bg-[var(--goose-interactive-hover)] select-none";
-  span.textContent = `@${attrs.titleSnapshot}`;
-  return span;
 }
 
 export function useReferenceMentions({
@@ -128,12 +42,13 @@ export function useReferenceMentions({
   const { searchPages } = useEditorPageContext();
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDetectedRef = useRef<DetectedMention | null>(null);
-  const [mention, setMention] = useState<MentionState>(INACTIVE_MENTION);
+  const [mention, dispatch] = useReducer(composerSuggestionReducer, inactiveSuggestion);
 
+  const mentionQuery = mention.phase === "active" ? mention.query : "";
   const mentionItems = useMemo(
     () =>
-      mention.active ? (searchPagesOverride ?? searchPages)(mention.query) : [],
-    [mention.active, mention.query, searchPages, searchPagesOverride],
+      mention.phase === "active" ? (searchPagesOverride ?? searchPages)(mention.query) : [],
+    [mention.phase, mentionQuery, searchPages, searchPagesOverride],
   );
 
   // Keep a ref so keyboard handler always sees current items without stale closure
@@ -144,7 +59,9 @@ export function useReferenceMentions({
 
   const clearMentionState = useCallback(() => {
     lastDetectedRef.current = null;
-    setMention(INACTIVE_MENTION);
+    if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
+    blurTimerRef.current = null;
+    dispatch({ type: "cleared" });
   }, []);
 
   const detectMention = useCallback(() => {
@@ -154,17 +71,14 @@ export function useReferenceMentions({
 
     const detected = detectMentionAtCaret(el);
     if (detected) {
+      if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
+      blurTimerRef.current = null;
       lastDetectedRef.current = detected;
       const rect = resolveMentionAnchorRect(detected.range, el);
-      setMention((prev) => ({
-        active: true,
-        query: detected.query,
-        anchorRect: rect,
-        activeIndex: detected.query !== prev.query ? 0 : prev.activeIndex,
-      }));
+      dispatch({ type: "detected", query: detected.query, anchorRect: rect });
     } else {
       lastDetectedRef.current = null;
-      setMention((prev) => (prev.active ? INACTIVE_MENTION : prev));
+      dispatch({ type: "cleared" });
     }
   }, [editorRef, isComposingRef]);
 
@@ -173,7 +87,7 @@ export function useReferenceMentions({
       const el = editorRef.current;
       if (!el) return;
 
-      setMention(INACTIVE_MENTION);
+      dispatch({ type: "cleared" });
 
       // Prefer the range captured at detection time — by the time we get here,
       // React may have re-rendered (popover mounting) and Chromium can reset the
@@ -223,25 +137,19 @@ export function useReferenceMentions({
 
   const handleMentionKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!mention.active) return false;
+      if (mention.phase !== "active") return false;
 
       const items = mentionItemsRef.current;
       const count = Math.max(1, items.length);
 
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        setMention((prev) => ({
-          ...prev,
-          activeIndex: (prev.activeIndex + 1) % count,
-        }));
+        dispatch({ type: "navigated", delta: 1, count });
         return true;
       }
       if (event.key === "ArrowUp") {
         event.preventDefault();
-        setMention((prev) => ({
-          ...prev,
-          activeIndex: (prev.activeIndex - 1 + count) % count,
-        }));
+        dispatch({ type: "navigated", delta: -1, count });
         return true;
       }
       // Shift+Enter 留给 composer 做换行；Enter / Tab 确认 @ 引用
@@ -255,26 +163,29 @@ export function useReferenceMentions({
       }
       if (event.key === "Escape") {
         event.preventDefault();
-        setMention(INACTIVE_MENTION);
+        clearMentionState();
         return true;
       }
 
       return false;
     },
-    [mention.active, mention.activeIndex, insertMention],
+    [mention, insertMention, clearMentionState],
   );
 
   const handleMentionBlur = useCallback(() => {
-    blurTimerRef.current = setTimeout(() => {
-      setMention(INACTIVE_MENTION);
-    }, 150);
-  }, []);
+    if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
+    blurTimerRef.current = setTimeout(clearMentionState, 150);
+  }, [clearMentionState]);
 
   const cancelMentionBlurTimer = useCallback(() => {
     if (blurTimerRef.current !== null) {
       clearTimeout(blurTimerRef.current);
       blurTimerRef.current = null;
     }
+  }, []);
+
+  useEffect(() => () => {
+    if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
   }, []);
 
   return {
