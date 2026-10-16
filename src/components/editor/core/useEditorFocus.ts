@@ -63,21 +63,24 @@ export function useEditorFocus(
 
     const lastBlock = editor.document.at(-1);
     if (lastBlock) {
-      // 末块 content 为 "none"（image / divider / video / file 等无光标控件）时，
-      // 无法直接聚焦末块末尾，在文档末尾插入一个空 paragraph 再聚焦它。
+      // 表格、代码及无光标块之后补正文，让下方空白点击退出这些块。
+      // 已有末尾正文时直接复用，连续点击不会再追加空行。
       const blockSpecs = editor.schema.blockSpecs as
         | Record<string, { config?: { content?: string } }>
         | undefined;
       const contentType = blockSpecs?.[lastBlock.type]?.config?.content;
-      if (contentType === "none") {
-        editor.insertBlocks(
+      if (
+        contentType === "none" ||
+        contentType === "table" ||
+        lastBlock.type === "codeBlock"
+      ) {
+        const [inserted] = editor.insertBlocks(
           [{ type: "paragraph", content: [] }],
           lastBlock,
           "after",
         );
-        const newLast = editor.document.at(-1);
-        if (newLast) {
-          editor.setTextCursorPosition(newLast, "end");
+        if (inserted) {
+          editor.setTextCursorPosition(inserted, "start");
         }
       } else {
         editor.setTextCursorPosition(lastBlock, "end");
