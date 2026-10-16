@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from "react";
 import type { AiComposerInputHandle } from "@/components/editor/ai/composer/AiComposerInput";
 import { toast } from "@/components/ui/sonner";
-import { REFINE_PLAN_EVENT, type RefinePlanRequest } from "./refinePlan";
+import { REFINE_PLAN_EVENT, takePendingRefinement, type RefinePlanRequest } from "./refinePlan";
 
 /** 追加到现有草稿，保留引用和附件；由用户补充要求后发送。 */
 export function usePlanRefinementInput(
@@ -10,8 +10,7 @@ export function usePlanRefinementInput(
   disabled?: boolean,
 ) {
   useEffect(() => {
-    const handleRefine = (event: Event) => {
-      const request = (event as CustomEvent<RefinePlanRequest>).detail;
+    const insert = (request: RefinePlanRequest | null | undefined) => {
       if (request?.notebookId !== notebookId || !request.text) return;
       const input = inputRef.current;
       const el = input?.getEditorEl();
@@ -38,7 +37,18 @@ export function usePlanRefinementInput(
       }
       input.focus();
     };
+    const handleRefine = (event: Event) => {
+      const request = (event as CustomEvent<RefinePlanRequest>).detail;
+      // 面板刚打开、输入框未就绪时保留暂存，由挂载后的下一帧写入。
+      if (!disabled && !inputRef.current?.getEditorEl()) return;
+      takePendingRefinement(notebookId, request);
+      insert(request);
+    };
+    const frame = window.requestAnimationFrame(() => insert(takePendingRefinement(notebookId)));
     window.addEventListener(REFINE_PLAN_EVENT, handleRefine);
-    return () => window.removeEventListener(REFINE_PLAN_EVENT, handleRefine);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener(REFINE_PLAN_EVENT, handleRefine);
+    };
   }, [disabled, inputRef, notebookId]);
 }

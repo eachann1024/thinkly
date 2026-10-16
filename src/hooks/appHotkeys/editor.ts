@@ -70,9 +70,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         event.preventDefault();
         const selectionQuery = readSearchSelection();
         closeAllOverlays();
-        if (useSidebarView.getState().sidebarCollapsed) {
-          useSidebarView.getState().setSidebarCollapsed(false);
-        }
         window.dispatchEvent(new CustomEvent("goose-note:open-search", {
           detail: { selectionQuery },
         }));

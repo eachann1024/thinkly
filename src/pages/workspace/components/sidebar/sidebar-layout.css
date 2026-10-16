@@ -220,3 +220,4 @@
 .sidebar-design :is(.main-tree-row-disclosure, .goose-hidden-expand-icon) > svg { width: 12px; height: 12px; translate: -0.285714rem 0; }
 .sidebar-design .sidebar-tree-row > div:first-child > .pointer-events-none { width: 1.125rem; height: auto; align-self: center; margin-right: 0; }
 .sidebar-design .sidebar-tree-row > div:first-child .goose-hidden-expand-icon { width: 1.5rem; height: auto; align-self: center; margin-right: 0; }
+.sidebar-search-heading { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem .25rem; font-size:.875rem; }

@@ -143,7 +143,6 @@ export function useSidebarLifecycle(
 
   const handleOpenSearch = () => {
     activateWorkspace();
-    setCurrentView("search");
     if (inHistoryMode) exitHistoryView();
     closeNotebookAiIfFullscreen();
     openSearchSession(
@@ -156,7 +155,6 @@ export function useSidebarLifecycle(
   const switchSidebarView = (view: SidebarView) => {
     activateWorkspace();
     if (inHistoryMode) exitHistoryView();
-    if (view !== "search") useSearchSession.getState().closeSearch();
     if (view === "outline") closeNotebookAiIfFullscreen();
     setCurrentView(view);
   };

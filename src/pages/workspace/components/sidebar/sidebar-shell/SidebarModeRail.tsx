@@ -12,6 +12,7 @@ export function SidebarModeRail({
   context: ReturnType<typeof useSidebarHover>;
 }) {
   const searchSelectionRef = useRef("");
+  const searchSheetOpen = useSearchSession((s) => s.sheetOpen);
   const {
     sidebarModeRailRef,
     settingsOpen,
@@ -65,11 +66,11 @@ export function SidebarModeRail({
                   type="button"
                   className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-mode-rail-button rounded-lg"
                   aria-label={label}
-                  aria-pressed={!settingsOpen && currentView === view}
+                  aria-pressed={view === "search" ? searchSheetOpen : !settingsOpen && currentView === view}
                   aria-expanded={
-                    !settingsOpen && !sidebarCollapsed && currentView === view
+                    view === "search" ? undefined : !settingsOpen && !sidebarCollapsed && currentView === view
                   }
-                  aria-controls="workspace-sidebar-content"
+                  aria-controls={view === "search" ? undefined : "workspace-sidebar-content"}
                   onPointerEnter={(event) => {
                     if (event.pointerType === "mouse") hoverSidebarView(view);
                   }}
@@ -91,7 +92,7 @@ export function SidebarModeRail({
                 >
                   <SidebarRailIcon
                     name={icon}
-                    selected={!settingsOpen && currentView === view}
+                    selected={view === "search" ? searchSheetOpen : !settingsOpen && currentView === view}
                   />
                 </Button>
               </TooltipTrigger>

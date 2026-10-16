@@ -35,10 +35,10 @@ export function useSidebarNavigation(
 
   const searchSessionOpen = useSearchSession((state) => state.open);
 
+  // 搜索改为主区底部面板，侧栏不再保留搜索视图。
   useEffect(() => {
-    if (searchSessionOpen) setCurrentView("search");
-    else if (currentView === "search") setCurrentView("pages");
-  }, [searchSessionOpen, currentView, setCurrentView]);
+    if (currentView === "search") setCurrentView("pages");
+  }, [currentView, setCurrentView]);
 
   useLayoutEffect(() => {
     const rail = sidebarModeRailRef.current;
@@ -102,8 +102,6 @@ export function useSidebarNavigation(
         if (query) useSearchSession.getState().setQuery(query);
       }
       activateWorkspace();
-      setCurrentView("search");
-      if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
       if (inHistoryMode) exitHistoryView();
       closeNotebookAiIfFullscreen();
       openSearchSession(
@@ -117,8 +115,6 @@ export function useSidebarNavigation(
       if (view === "search") onOpen(event);
       else if (view === "pages" || view === "outline") {
         activateWorkspace();
-        if (useSearchSession.getState().open)
-          useSearchSession.getState().closeSearch();
         if (view === "outline") closeNotebookAiIfFullscreen();
         setCurrentView(view);
         if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
@@ -165,7 +161,7 @@ export function useSidebarNavigation(
   useEffect(() => {
     if (!sidebarOverlay) return;
     const onEscape = (event: KeyboardEvent) => {
-      if (settingsOpen || useSearchSession.getState().open) return;
+      if (settingsOpen || useSearchSession.getState().sheetOpen) return;
       if (!shouldDismissSidebarOverlay(event, document)) return;
       event.preventDefault();
       event.stopPropagation();
