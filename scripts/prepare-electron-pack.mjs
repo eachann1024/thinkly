@@ -46,6 +46,7 @@ cpSync(resolve(root, "electron/icons/icon.icns"), resolve(pack, "icon.icns"));
 cpSync(resolve(root, "electron/icons/icon.ico"), resolve(pack, "icon.ico"));
 cpSync(resolve(root, "electron/icons/icon.png"), resolve(pack, "icon.png"));
 cpSync(resolve(root, "electron/installer.nsh"), resolve(pack, "installer.nsh"));
+cpSync(resolve(root, "scripts/mac-adhoc-sign.cjs"), resolve(pack, "mac-adhoc-sign.cjs"));
 cpSync(resolve(root, "electron/installer"), resolve(pack, "dmg-assets"), { recursive: true });
 mkdirSync(resolve(pack, "node_modules"), { recursive: true });
 
@@ -112,6 +113,7 @@ copyright: Copyright © 2026 eachann1024
 directories:
   output: ../packaged
 asar: true
+afterPack: ./mac-adhoc-sign.cjs
 npmRebuild: false
 electronVersion: ${electronVersion}
 compression: maximum
@@ -135,6 +137,7 @@ files:
   - "!electron-builder.yml"
   - "!installer.nsh"
   - "!dmg-assets/**"
+  - "!mac-adhoc-sign.cjs"
 fileAssociations:
   - ext: md
     name: Markdown
@@ -151,7 +154,7 @@ fileAssociations:
 mac:
   icon: icon.icns
   category: public.app-category.productivity
-  ${process.env.CSC_LINK ? '# CI Developer ID signing via CSC_LINK' : 'identity: null'}
+  ${process.env.CSC_LINK ? '# CI Developer ID signing via CSC_LINK' : 'identity: null # afterPack applies a free ad-hoc signature'}
   hardenedRuntime: ${Boolean(process.env.CSC_LINK)}
   gatekeeperAssess: false
   extendInfo:
