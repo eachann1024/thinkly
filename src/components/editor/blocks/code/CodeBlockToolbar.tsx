@@ -18,9 +18,6 @@ import {
 import { CodeLanguagePicker } from "./CodeLanguagePicker";
 import { CodePreviewToolbar } from "./CodePreviewToolbar";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
-import { useEditorPageContext } from "@/components/editor/platform/hostContext";
-import { getPageTitle } from "@/components/editor/utils/page-title";
-import { writeTextDrag } from "@/lib/workspace-drag";
 
 export function CodeBlockToolbar({
   language,
@@ -44,7 +41,6 @@ export function CodeBlockToolbar({
   const [copyingImage, setCopyingImage] = useState(false);
   const { format, isLoading } = useFormatCode();
   const platform = useEditorPlatform();
-  const { page } = useEditorPageContext();
 
   const displayLanguage = language
     ? LANGUAGE_DISPLAY_NAMES[language.toLowerCase()] || language
@@ -108,32 +104,6 @@ export function CodeBlockToolbar({
         )}
       >
         <div className="flex shrink-0 items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                draggable
-                data-workspace-drag-source="code"
-                aria-label="拖动代码到分屏或 AI"
-                onDragStartCapture={(event) => {
-                  const text = getCodeContent();
-                  if (!text.trim()) { event.preventDefault(); return; }
-                  event.stopPropagation();
-                  writeTextDrag(event.dataTransfer, {
-                    kind: "text", text, language: language || "text",
-                    pageId: page.id, pageTitle: getPageTitle(page),
-                  });
-                  event.dataTransfer.effectAllowed = "copy";
-                }}
-                className={cn("h-6 w-6 cursor-grab p-0 active:cursor-grabbing", chipClass)}
-              >
-                <GooseIcons.GripVertical className={iconSize} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>拖到边缘分屏，或加入 AI</TooltipContent>
-          </Tooltip>
           <CodeLanguagePicker
             language={language}
             onLanguageChange={onLanguageChange}

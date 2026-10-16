@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
-import { GOOSE_FOLDER_MIME, GOOSE_PAGE_MIME, hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
+import { GOOSE_FOLDER_MIME, GOOSE_PAGE_MIME, GOOSE_TEXT_MIME, hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
 import { dropWorkspaceContent, type SplitContentPlacement } from "@/lib/editor-split/drop";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { countLeaves, MAX_SPLIT_LEAVES } from "@/lib/editor-split/tree";
@@ -17,6 +17,10 @@ const labels: Record<SplitContentPlacement, string> = {
 
 function isFileDrag(data: DataTransfer): boolean {
   return Array.from(data.types).some((type) => type === GOOSE_PAGE_MIME || type === GOOSE_FOLDER_MIME);
+}
+
+function isEditorDrag(data: DataTransfer): boolean {
+  return Array.from(data.types).some((type) => type === "blocknote/html" || type === GOOSE_TEXT_MIME);
 }
 
 function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDropTarget | null {
@@ -59,6 +63,7 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
     const over = (event: DragEvent) => {
       const data = event.dataTransfer;
       if (!data || !(event.target instanceof Node) || !surface.contains(event.target)) return;
+      if (isEditorDrag(data)) { reset(); return; }
       const canSplit = hasWorkspaceDrag(data);
       if (!canSplit && !isFileDrag(data)) return;
       const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
@@ -78,7 +83,7 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       reset();
       if (!(event.target instanceof Node) || !surface.contains(event.target)) return;
       const data = event.dataTransfer;
-      if (!data) return;
+      if (!data || isEditorDrag(data)) return;
       const canSplit = hasWorkspaceDrag(data);
       if (!canSplit && !isFileDrag(data)) return;
       const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
