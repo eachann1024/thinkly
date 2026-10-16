@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { editableTarget, prepareTextCaret, type CaretBox } from "@/lib/textCaretGeometry";
+import { textCaretLayer } from "@/lib/textCaretLayer";
 import "@/styles/global/text-caret.css";
 
 /** One caret overlay for inputs and editors, with native IME fallback. */
@@ -29,7 +30,11 @@ export function useTextCaret() {
       frame = null;
       const el = editableTarget();
       if (!el || composing || !document.hasFocus()) { hide(); return; }
-      if (owner !== el) { hide(); owner = el; }
+      if (owner !== el) {
+        hide();
+        owner = el;
+        caret.style.zIndex = String(textCaretLayer(el));
+      }
       measure ??= prepareTextCaret(el, mirror);
       const box = measure();
       // 浮层入场动画和 Floating UI 定位会在 focus 之后继续改变屏幕坐标。
