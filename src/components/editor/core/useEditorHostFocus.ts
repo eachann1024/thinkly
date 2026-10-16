@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   completePageTitleFocus,
+  hasDocumentTitle,
   subscribePageTitleFocus,
   isPageTitleFocusRequested,
 } from "@/lib/page-title-focus";
@@ -73,8 +74,8 @@ export function useEditorHostFocus(
     const focusCreatedPage = () => {
       const pageId = pageRef.current?.id;
       if (!pageId || !isPageTitleFocusRequested(pageId)) return;
-      // 本地文件由正文顶部的大标题接管新建聚焦。
-      if (pageRef.current?.localFilePath) return;
+      // 本地文件与草稿由正文顶部的大标题接管新建聚焦。
+      if (hasDocumentTitle(pageRef.current)) return;
       cancelCreatedPageFocus?.();
       cancelCreatedPageFocus = tasks.frame(() => {
         if (!isPageTitleFocusRequested(pageId)) return;

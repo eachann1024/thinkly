@@ -1,3 +1,5 @@
+import type { Page } from "@/types";
+
 const FOCUS_PAGE_TITLE_EVENT = "goose-note:focus-page-title";
 
 let pendingPageId: string | null = null;
@@ -52,4 +54,10 @@ export function subscribePageTitleFocus(
   };
   window.addEventListener(FOCUS_PAGE_TITLE_EVENT, handle);
   return () => window.removeEventListener(FOCUS_PAGE_TITLE_EVENT, handle);
+}
+
+/** 本地文件与未落盘草稿使用正文大标题；文件夹与速记草稿除外。 */
+export function hasDocumentTitle(page: Page | null | undefined): boolean {
+  if (!page || page.isFolder || page.id === "__quicknote_draft__") return false;
+  return Boolean(page.localFilePath || page.localUnsaved);
 }
