@@ -3,7 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
-import { CircleAlert, FileX, Search, X } from "@/components/ui/icons";
+import { CircleAlert, FileX, Search, Sparkles, X } from "@/components/ui/icons";
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
@@ -69,6 +69,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const optionIds = useMemo(() => [...(aiQuery ? [AI_ROW_ID] : []), ...results.map(p => p.id)], [aiQuery, results]);
   const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
 
+  const openAiSettings = () => { close(); window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } })); };
   const askAi = () => { if (aiQuery) void ask(aiQuery, getCandidates(), searchResults.all); };
   const continueInPanel = aiNotebookId && answer ? () => {
     skipRestore.current = true;
@@ -117,7 +118,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     if (event.key !== "Enter") return;
     event.preventDefault();
     if (answer) return;
-    if (event.shiftKey || selectedId === AI_ROW_ID) { askAi(); return; }
+    if ((event.shiftKey && aiQuery) || selectedId === AI_ROW_ID) { askAi(); return; }
     const page = results.find(p => p.id === selectedId);
     if (page) openResult(page);
   };
@@ -135,7 +136,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
       <div className="search-sheet-query">
         <Search size={20} aria-hidden="true"/>
         <Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label="搜索笔记" aria-controls="search-sheet-results" aria-expanded={visible} aria-autocomplete="list" aria-activedescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
-          value={draft} placeholder="搜索笔记、提问 AI…" autoComplete="off" spellCheck={false}
+          value={draft} placeholder={aiReady ? "搜索笔记、提问 AI…" : "搜索笔记…"} autoComplete="off" spellCheck={false}
           onChange={e => { setDraft(e.target.value); if (!composing.current) session.setQuery(e.target.value); }}
           onCompositionStart={() => { composing.current = true; }} onCompositionEnd={e => { composing.current = false; session.setQuery(e.currentTarget.value); }}/>
         {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
@@ -154,7 +155,10 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {statusKind && <div key={statusKind} className="search-sheet-status" role={statusKind === "error" ? "alert" : "status"} data-state={statusKind}>
           <span className="search-sheet-status-glyph" aria-hidden="true">{statusKind === "error" ? <CircleAlert size={20}/> : statusKind === "none" ? <FileX size={20}/> : <Search size={20}/>}</span>
           <strong>{statusKind === "error" ? searchError : statusKind === "none" ? "未找到相关笔记" : scopeAll ? "搜索所有记事本" : "搜索当前记事本"}</strong>
-          {statusKind === "none" && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>}
+          {statusKind === "none" && <div className="search-sheet-status-actions">
+            <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>
+            {!aiReady && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>启用 AI 问答</Button>}
+          </div>}
         </div>}
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>加载更多结果</Button>}
         {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}

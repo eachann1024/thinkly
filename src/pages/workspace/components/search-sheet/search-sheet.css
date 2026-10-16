@@ -68,7 +68,10 @@
 .search-sheet-status[data-state] > strong { letter-spacing:.02em; }
 .search-sheet-status[data-state] > * { animation:search-sheet-settle 420ms cubic-bezier(.22,1,.36,1) 80ms both; }
 .search-sheet-status[data-state] > .search-sheet-status-glyph { animation-name:search-sheet-pop; animation-delay:0ms; }
-.search-sheet-status[data-state] > .search-sheet-action { margin-top:.25rem; animation-delay:140ms; }
+.search-sheet-status[data-state] > .search-sheet-status-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin-top:.25rem; animation-delay:140ms; }
+.search-sheet .search-sheet-action[data-quiet="true"] { border-color:transparent; background:transparent; color:var(--goose-text-secondary); }
+.search-sheet .search-sheet-action[data-quiet="true"]:hover > svg:first-child { transform:none; }
+.search-sheet .search-sheet-action[data-quiet="true"]:hover { color:var(--goose-text-primary); }
 /* 结果：每次查询整体淡入，不做逐行级联。 */
 .search-sheet-results { animation:search-sheet-rise 240ms cubic-bezier(.22,1,.36,1) both; }
 /* AI 回答：问题→正文→来源依次落定，操作栏常驻底部。 */
