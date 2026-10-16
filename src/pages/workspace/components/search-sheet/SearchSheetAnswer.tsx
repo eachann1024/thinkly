@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Sparkles } from "@/components/ui/icons";
+import { ArrowLeft, ArrowRight, FileText, MessageSquare, Sparkles } from "@/components/ui/icons";
 import type { SheetAnswer } from "./useSheetAnswer";
 
 const MD_PLUGINS = { cjk };
@@ -20,7 +20,7 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
       <Sparkles size={16} aria-hidden="true"/>
       <span className="search-sheet-answer-question">{answer.question}</span>
     </div>
-    {waiting && <p className="search-sheet-answer-hint">{answer.sources.length ? `正在阅读 ${answer.sources.length} 篇相关笔记…` : "正在思考…"}</p>}
+    {waiting && <p className="search-sheet-answer-hint" data-pending="true">{answer.sources.length ? `正在阅读 ${answer.sources.length} 篇相关笔记…` : "正在思考…"}</p>}
     {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
     {answer.status === "error" && <p className="search-sheet-answer-hint" role="alert">{answer.error}</p>}
     {answer.sources.length > 0 && <div className="search-sheet-answer-sources">
@@ -30,8 +30,12 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
       </Button>)}
     </div>}
     <div className="search-sheet-answer-actions">
-      <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={onBack}><ArrowLeft size={14} aria-hidden="true"/>返回结果</Button>
-      {onContinue && answer.status !== "loading" && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={onContinue}>在 AI 面板继续</Button>}
+      <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={onBack}>
+        <ArrowLeft size={14} aria-hidden="true"/>返回结果<kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>
+      </Button>
+      {onContinue && answer.status !== "loading" && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-primary="true" onClick={onContinue}>
+        <MessageSquare size={14} aria-hidden="true"/>在 AI 面板继续<ArrowRight size={14} aria-hidden="true"/>
+      </Button>}
     </div>
   </section>;
 });
