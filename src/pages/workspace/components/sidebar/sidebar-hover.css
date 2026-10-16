@@ -34,14 +34,24 @@
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] {
   position: absolute;
   z-index: 30;
-  inset: var(--workspace-stage-pad-top) var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
-  width: auto !important;
+  inset: var(--workspace-stage-pad-top) auto var(--workspace-stage-pad-bottom) calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
+  width: min(var(--sidebar-configured-width), calc(100% - var(--workspace-stage-pad-left) - var(--workspace-rail-width) - var(--workspace-stage-pad-right))) !important;
   height: auto !important;
   overflow: hidden;
   border: 1px solid var(--workspace-divider-strong);
   border-radius: var(--radius-lg);
   background: var(--workspace-sidebar-surface);
   box-shadow: 0 12px 32px hsl(var(--foreground) / 0.12);
+}
+/* 浮层边缘的拖动热区放在内部，避免被圆角容器裁掉。 */
+.workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] > [role="separator"] {
+  right: 0 !important;
+  width: 8px !important;
+}
+.workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] > [role="separator"] > div {
+  left: auto;
+  right: 0;
+  transform: translateY(-50%);
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-overlay] .sidebar-content-surface {
   border-radius: inherit;

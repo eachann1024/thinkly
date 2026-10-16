@@ -11,6 +11,10 @@
   margin: 0;
   padding: 0.714286rem 0.714286rem 0.428571rem;
 }
+/* 标题下只保留紧凑间距，与正常侧栏共用列表布局。 */
+.workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-page-list {
+  margin-top: 0.25rem;
+}
 .sidebar-design .sidebar-navigation-heading[hidden] {
   display: none !important;
 }

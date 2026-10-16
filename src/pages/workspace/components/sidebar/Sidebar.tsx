@@ -64,7 +64,7 @@ export function Sidebar(props: SidebarProps) {
         aria-hidden={sidebarCollapsed}
         inert={sidebarCollapsed}
       >
-        {!disableResize && !sidebarCollapsed && !sidebarOverlay && (
+        {!disableResize && !sidebarCollapsed && (
           <SidebarResizeEdge
             width={width}
             minWidth={minWidth}
