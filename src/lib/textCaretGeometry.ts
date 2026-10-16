@@ -16,6 +16,26 @@ const CARET_EM_RATIO = 1.15;
 // 双向文本的视觉插入点由浏览器处理，避免镜像扰动 Unicode bidi 排序。
 const BIDI_TEXT = /[\u0590-\u08ff\u200e-\u200f\u202a-\u202e\u2066-\u2069\ufb1d-\ufeff]/;
 
+function trailingNewlineRect(node: Text, el: HTMLElement): DOMRect | null {
+  const anchor = node.parentElement;
+  if (
+    !anchor ||
+    !/^(pre|pre-wrap|pre-line|break-spaces)$/.test(getComputedStyle(anchor).whiteSpace)
+  ) return null;
+  // ProseMirror 用尾部 BR 撑出换行后的空行；换行字符本身的矩形仍在上一行。
+  // 高亮 span 可能包住末尾文本，沿祖先找紧随其后的 BR，不越出编辑器。
+  let current: Node | null = node;
+  while (current && current !== el) {
+    if (current.nextSibling) {
+      return current.nextSibling instanceof HTMLBRElement
+        ? current.nextSibling.getBoundingClientRect()
+        : null;
+    }
+    current = current.parentNode;
+  }
+  return null;
+}
+
 function editableCaret(el: HTMLElement): CaretBox | null {
   const selection = window.getSelection();
   if (!selection?.isCollapsed || !selection.rangeCount) return null;
@@ -30,7 +50,14 @@ function editableCaret(el: HTMLElement): CaretBox | null {
     if (!next && offset === 0) return null;
     probe.setStart(node, next ? offset : offset - 1);
     probe.setEnd(node, next ? offset + 1 : offset);
-    rect = probe.getBoundingClientRect();
+    if (!next && node.data.endsWith("\n")) {
+      const trailing = trailingNewlineRect(node, el);
+      // 无可靠空行矩形时交回原生光标，不能用上一行换行符的矩形冒充。
+      if (!trailing?.height) return null;
+      rect = trailing;
+    } else {
+      rect = probe.getBoundingClientRect();
+    }
     if (rect.height) {
       const anchor = node.parentElement ?? el;
       const style = getComputedStyle(anchor);
