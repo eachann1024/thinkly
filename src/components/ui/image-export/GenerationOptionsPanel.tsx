@@ -1,107 +1,100 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { Toggle } from "@/components/ui/toggle";
 import { type WatermarkConfig } from "@/lib/imageExport";
 import { cn } from "@/lib/utils";
 
 export function GenerationOptionsPanel({
   wm,
   onToggle,
-  variant,
 }: {
   wm: WatermarkConfig;
   onToggle: (key: keyof WatermarkConfig) => void;
-  variant: "toolbar" | "drawer";
 }) {
   const labelPrefix = useId();
-  const disabledSwitchClass = "disabled:border-input disabled:bg-input disabled:before:bg-muted-foreground disabled:before:shadow-none disabled:opacity-50";
+  const [open, setOpen] = useState(false);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const rows: Array<{
     key: keyof WatermarkConfig;
     label: string;
-    shortLabel?: string;
     disabled?: boolean;
-    indent?: boolean;
   }> = [
-    { key: "showTitle", label: "显示标题", shortLabel: "标题" },
-    { key: "showWatermark", label: "显示底部信息栏", shortLabel: "底部栏" },
-    { key: "showBrand", label: "显示品牌名", shortLabel: "品牌", disabled: !wm.showWatermark, indent: true },
-    { key: "showDate", label: "显示日期", shortLabel: "日期", disabled: !wm.showWatermark, indent: true },
-    {
-      key: "showTime",
-      label: "追加时分秒",
-      shortLabel: "时分秒",
-      disabled: !wm.showWatermark || !wm.showDate,
-      indent: true,
-    },
+    { key: "showBrand", label: "品牌", disabled: !wm.showWatermark },
+    { key: "showDate", label: "日期", disabled: !wm.showWatermark },
+    { key: "showTime", label: "时分秒", disabled: !wm.showWatermark || !wm.showDate },
   ];
-
-  if (variant === "toolbar") {
-    return (
-      <section
-        aria-label="生成选项"
-        className="flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0 rounded-lg border bg-muted/20 px-3 py-2"
-      >
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <GooseIcons.Settings className="h-3 w-3" />
-          生成选项
-        </span>
-        {rows.map((row) => (
-          <div
-            key={row.key}
-            className={cn(
-              "flex items-center gap-2",
-              row.disabled && "opacity-50",
-            )}
-          >
-            <span id={`${labelPrefix}-${row.key}`} className="text-xs text-muted-foreground whitespace-nowrap">
-              {row.shortLabel ?? row.label}
-            </span>
-            <Switch
-              aria-labelledby={`${labelPrefix}-${row.key}`}
-              controlSize="small"
-              checked={wm[row.key]}
-              onCheckedChange={() => onToggle(row.key)}
-              disabled={row.disabled}
-              className={disabledSwitchClass}
-            />
-          </div>
-        ))}
-      </section>
-    );
-  }
+  const renderRow = (key: keyof WatermarkConfig, label: string, disabled = false, child = false) => (
+    <label
+      key={key}
+      htmlFor={`${labelPrefix}-${key}`}
+      className={cn(
+        "flex min-h-10 items-center justify-between gap-6 rounded-md px-3 py-2 text-xs cursor-pointer hover:bg-[var(--goose-interactive-hover)]",
+        child && "pl-6",
+        disabled && "cursor-not-allowed text-muted-foreground opacity-50 hover:bg-transparent",
+      )}
+    >
+      <span>{label}</span>
+      <Switch
+        id={`${labelPrefix}-${key}`}
+        controlSize="small"
+        checked={wm[key]}
+        onCheckedChange={() => onToggle(key)}
+        disabled={disabled}
+        className="disabled:border-input disabled:bg-input disabled:before:bg-muted-foreground disabled:before:shadow-none disabled:opacity-50"
+      />
+    </label>
+  );
 
   return (
-    <section aria-label="生成选项" className="mt-3">
-      <div className="space-y-2">
-        {rows.map((row) => (
-          <div
-            key={row.key}
-            className={cn(
-              "flex items-center justify-between",
-              row.indent && "pl-3",
-              row.disabled && "opacity-50",
-            )}
-          >
+    <div ref={setContainer} role="group" aria-label="生成选项" className="ml-auto flex shrink-0 items-center gap-2">
+      <Toggle
+        variant="outline"
+        size="sm"
+        pressed={wm.showTitle}
+        onPressedChange={() => onToggle("showTitle")}
+        className="h-8 gap-1.5 text-xs"
+        aria-label="标题"
+      >
+        <GooseIcons.Type className="h-3.5 w-3.5" />
+        标题
+      </Toggle>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" aria-label="底部栏选项">
             <span
-              id={`${labelPrefix}-${row.key}`}
+              aria-hidden="true"
               className={cn(
-                "text-xs",
-                row.indent ? "text-muted-foreground" : "text-foreground",
+                "h-1.5 w-1.5 rounded-full",
+                wm.showWatermark ? "bg-[var(--goose-accent-solid)]" : "bg-muted-foreground/50",
               )}
-            >
-              {row.label}
-            </span>
-            <Switch
-              aria-labelledby={`${labelPrefix}-${row.key}`}
-              controlSize="small"
-              checked={wm[row.key]}
-              onCheckedChange={() => onToggle(row.key)}
-              disabled={row.disabled}
-              className={disabledSwitchClass}
             />
-          </div>
-        ))}
-      </div>
-    </section>
+            底部栏
+            <GooseIcons.ChevronDown className={cn("h-3.5 w-3.5 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          container={container}
+          align="end"
+          side="bottom"
+          sideOffset={8}
+          collisionPadding={12}
+          aria-label="底部栏选项"
+          className="w-60 max-w-[calc(100vw-24px)] p-1.5"
+          onKeyDownCapture={(event) => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+          }}
+        >
+          {renderRow("showWatermark", "底部栏")}
+          <div className="mx-3 my-1 h-px bg-border" />
+          {rows.map((row) => renderRow(row.key, row.label, row.disabled, true))}
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

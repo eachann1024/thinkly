@@ -2,7 +2,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CARD_THEMES, normalizeCardThemeId, resolveCardTheme, shouldShowImageExportLivePreview, shouldShowImageExportOptionsCorner, type WatermarkConfig, normalizeWatermarkConfig } from "@/lib/imageExport";
+import { CARD_THEMES, normalizeCardThemeId, resolveCardTheme, shouldShowImageExportLivePreview, type WatermarkConfig, normalizeWatermarkConfig } from "@/lib/imageExport";
 import { useSettings } from "@/stores/settings";
 import { resolveTheme } from "@/hooks/useResolvedTheme";
 import { cn } from "@/lib/utils";
@@ -31,13 +31,11 @@ export function ImageExportThemeSelector({
   const settingsTheme = useSettings((s) => s.theme);
   const resolvedTheme = resolveTheme(settingsTheme);
   const wm = useMemo(() => normalizeWatermarkConfig(storedWatermark), [storedWatermark]);
-  const [configOpen, setConfigOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() =>
     typeof window === "undefined" ? 0 : window.innerWidth,
   );
   const reducedMotion = usePrefersReducedMotion();
   const showLivePreview = shouldShowImageExportLivePreview(viewportWidth);
-  const showOptionsCorner = shouldShowImageExportOptionsCorner(viewportWidth);
 
   useEffect(() => {
     const update = () => setViewportWidth(window.innerWidth);
@@ -102,13 +100,8 @@ export function ImageExportThemeSelector({
             : "max-w-[760px]",
         )}
       >
-        <div
-          className={cn(
-            "px-6 pt-6 pb-3 shrink-0",
-            showOptionsCorner && "flex items-center justify-between gap-4 pr-12",
-          )}
-        >
-          <DialogHeader className={cn("space-y-1", showOptionsCorner && "min-w-0 flex-1")}>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 px-6 pt-6 pb-3 pr-12 shrink-0">
+          <DialogHeader className="min-w-0 flex-1 space-y-1 text-left">
             <DialogTitle className="text-sm font-semibold tracking-tight">
               选择卡片主题
             </DialogTitle>
@@ -116,19 +109,13 @@ export function ImageExportThemeSelector({
               为「{modeText}」选择一种视觉风格，共 {CARD_THEMES.length} 种主题可选
             </DialogDescription>
           </DialogHeader>
-          {showOptionsCorner && (
-            <GenerationOptionsPanel
-              wm={wm}
-              onToggle={toggleConfig}
-              variant="toolbar"
-            />
-          )}
+          <GenerationOptionsPanel wm={wm} onToggle={toggleConfig} />
         </div>
 
         <div
           className={cn(
             "flex-1 min-h-0 px-6 pb-3",
-            showLivePreview ? "grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-5" : "",
+            showLivePreview ? "grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-5" : "flex flex-col",
           )}
         >
           {open && showLivePreview && (
@@ -142,7 +129,7 @@ export function ImageExportThemeSelector({
             />
           )}
 
-          <div className="min-h-0 overflow-y-auto p-1 [scrollbar-width:thin]">
+          <div className="min-h-0 flex-1 overflow-y-auto p-1 [scrollbar-width:thin]">
             {notebookTheme && (
               <section className="mb-5">
                 <header className="flex items-center gap-2 mb-2.5 px-0.5">
@@ -206,28 +193,7 @@ export function ImageExportThemeSelector({
           </div>
         </div>
 
-        {!showOptionsCorner && (
-          <div className="px-6 py-3 border-t bg-muted/20 shrink-0 max-h-[40vh] overflow-y-auto [scrollbar-width:thin]">
-            <button
-              type="button"
-              onClick={() => setConfigOpen((v) => !v)}
-              className="flex items-center justify-between w-full text-xs text-muted-foreground hover:text-[var(--goose-interactive-selected-fg)] transition-colors"
-            >
-              <span className="flex items-center gap-1.5">
-                <GooseIcons.Settings className="h-3 w-3" />
-                生成选项
-              </span>
-              <GooseIcons.ChevronDown
-                className={`h-3.5 w-3.5 transition-transform duration-200 ${configOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {configOpen && (
-              <GenerationOptionsPanel wm={wm} onToggle={toggleConfig} variant="drawer" />
-            )}
-          </div>
-        )}
-
-        <DialogFooter className="p-4 pt-3 shrink-0 border-t">
+        <DialogFooter className="flex-row justify-end gap-2 sm:space-x-0 p-4 pt-3 shrink-0 border-t">
           <Button
             variant="ghost"
             size="sm"
