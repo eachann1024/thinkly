@@ -30,6 +30,9 @@ export function createTableCellSelectionView(view: EditorView) {
   let draggingCells = false;
   let draggingDoc = false;
   let mouseDown = false;
+  let moveFrame: number | null = null;
+  let pendingMove: Event | null = null;
+  const frameWindow = view.dom.ownerDocument.defaultView ?? window;
 
   const eventRoot: EventTarget =
     (view.root as Document | ShadowRoot | null) ?? window;
@@ -54,8 +57,10 @@ export function createTableCellSelectionView(view: EditorView) {
     const mouse = event as MouseEvent;
     mouse.preventDefault();
     mouse.stopPropagation();
-    clearNativeSelection(view);
-    markCellDragging();
+    if (!draggingCells) {
+      clearNativeSelection(view);
+      markCellDragging();
+    }
     const startPos = cellPosFromDom(view, startCell);
     const currentPos = cellPosFromDom(view, currentCell);
     if (startPos != null && currentPos != null) {
@@ -77,6 +82,16 @@ export function createTableCellSelectionView(view: EditorView) {
   const handlePointerMove = (event: Event) => {
     if (!mouseDown || startDocPos == null) return;
     const mouse = event as MouseEvent;
+    const targetCell = tableCellFromTarget(mouse.target, view.dom);
+    if (
+      startCell && !draggingDoc && targetCell &&
+      closestTable(targetCell) === closestTable(startCell)
+    ) {
+      if (draggingCells || targetCell !== startCell) {
+        takeOverCellDrag(event, targetCell);
+      }
+      return;
+    }
     const headDocPos = coordsPos(view, mouse);
 
     if (!startCell) {
@@ -143,7 +158,41 @@ export function createTableCellSelectionView(view: EditorView) {
     if (currentCell) takeOverCellDrag(event, currentCell);
   };
 
+  const queuePointerMove = (event: Event) => {
+    if (!mouseDown) return;
+    const cell = tableCellFromTarget(event.target, view.dom);
+    // Boundary transitions must stay synchronous: leaving and returning within
+    // one frame still switches to the document-selection gesture.
+    if (
+      !startCell || draggingDoc || !cell ||
+      closestTable(cell) !== closestTable(startCell)
+    ) {
+      cancelMove();
+      handlePointerMove(event);
+      return;
+    }
+    if (draggingCells || cell !== startCell) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    pendingMove = event;
+    if (moveFrame !== null) return;
+    moveFrame = frameWindow.requestAnimationFrame(() => {
+      moveFrame = null;
+      const move = pendingMove;
+      pendingMove = null;
+      if (move) handlePointerMove(move);
+    });
+  };
+
+  const cancelMove = () => {
+    if (moveFrame !== null) frameWindow.cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    pendingMove = null;
+  };
+
   const onMouseDown = (event: Event) => {
+    cancelMove();
     const mouse = event as MouseEvent;
     if (mouse.button !== 0 || mouse.ctrlKey || mouse.metaKey) return;
     const cell = tableCellFromTarget(mouse.target, view.dom);
@@ -194,7 +243,9 @@ export function createTableCellSelectionView(view: EditorView) {
     event.preventDefault();
   };
 
-  const onMouseUp = () => {
+  const onMouseUp = (event: Event) => {
+    if (pendingMove) handlePointerMove(event);
+    cancelMove();
     mouseDown = false;
     startCell = null;
     startDocPos = null;
@@ -208,8 +259,8 @@ export function createTableCellSelectionView(view: EditorView) {
   view.dom.addEventListener("mousedown", onMouseDown, true);
   view.dom.addEventListener("dragstart", onDragStart, true);
   view.dom.addEventListener("selectstart", onSelectStart, true);
-  eventRoot.addEventListener("mousemove", handlePointerMove, true);
-  eventRoot.addEventListener("dragover", handlePointerMove, true);
+  eventRoot.addEventListener("mousemove", queuePointerMove, true);
+  eventRoot.addEventListener("dragover", queuePointerMove, true);
   eventRoot.addEventListener("dragstart", onDragStart, true);
   eventRoot.addEventListener("mouseup", onMouseUp, true);
   window.addEventListener("mouseup", onMouseUp, true);
@@ -220,11 +271,12 @@ export function createTableCellSelectionView(view: EditorView) {
       syncSelectionClasses(view, draggingCells, draggingDoc);
     },
     destroy() {
+      cancelMove();
       view.dom.removeEventListener("mousedown", onMouseDown, true);
       view.dom.removeEventListener("dragstart", onDragStart, true);
       view.dom.removeEventListener("selectstart", onSelectStart, true);
-      eventRoot.removeEventListener("mousemove", handlePointerMove, true);
-      eventRoot.removeEventListener("dragover", handlePointerMove, true);
+      eventRoot.removeEventListener("mousemove", queuePointerMove, true);
+      eventRoot.removeEventListener("dragover", queuePointerMove, true);
       eventRoot.removeEventListener("dragstart", onDragStart, true);
       eventRoot.removeEventListener("mouseup", onMouseUp, true);
       window.removeEventListener("mouseup", onMouseUp, true);
