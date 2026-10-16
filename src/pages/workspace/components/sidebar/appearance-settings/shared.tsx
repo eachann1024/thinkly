@@ -84,6 +84,12 @@ const accentOptionDefinitions: Pick<AccentOption, "value" | "label" | "fullTheme
     fullTheme: "灰麦黄与米白纸面，像铅笔画在一张安静的素描纸上。",
     pro: true,
   },
+  {
+    value: "claude",
+    label: "Claude",
+    fullTheme: "暖陶色与暖羊皮纸面，温润典雅的 Claude 风格。",
+    pro: true,
+  },
 ];
 
 export const accentOptions: AccentOption[] = accentOptionDefinitions.map((option) => {
@@ -118,8 +124,7 @@ export function EditorLayoutSettings() {
   const layout = useSettings((state) => state.defaultPageLayout);
   return (
     <SettingsSectionCard
-      title="编辑布局"
-      description="新笔记的默认排版宽度；单篇笔记可在右上角菜单单独调整。"
+      title="新笔记默认布局"
     >
       <div
         role="group"
@@ -128,10 +133,10 @@ export function EditorLayoutSettings() {
       >
         {(
           [
-            ["full", "全宽", "铺满编辑窗口，适合长表格与宽文档"],
-            ["standard", "标准", "居中自适应留白，提供舒适阅读节奏"],
+            ["full", "全宽"],
+            ["standard", "标准"],
           ] as const
-        ).map(([value, label, description]) => (
+        ).map(([value, label]) => (
           <SelectableCard
             key={value}
             type="button"
@@ -161,7 +166,6 @@ export function EditorLayoutSettings() {
                 <GooseIcons.Check className="h-4 w-4" aria-hidden="true" />
               )}
             </span>
-            <span className="text-xs text-muted-foreground">{description}</span>
           </SelectableCard>
         ))}
       </div>

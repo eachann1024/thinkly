@@ -170,6 +170,22 @@ const ACCENT_RUNTIME_TOKENS: Record<AccentColor, AccentRuntimeTokens> = {
     },
     dark: NEUTRAL_DARK_RUNTIME_TOKENS,
   },
+  claude: {
+    light: {
+      "--goose-interactive-selected": "#faf4ef",
+      "--goose-interactive-selected-fg": "var(--goose-text-primary)",
+      "--goose-interactive-selected-border": "#c15f3e",
+      "--goose-sidebar-hover": "#f0e4dc",
+      "--goose-interactive-hover": "#f0e4dc",
+      "--goose-interactive-hover-fg": "var(--goose-text-primary)",
+      "--goose-interactive-hover-border": "#c15f3e",
+      "--goose-inline-code-bg": "#f4e7e0",
+      "--goose-inline-code-fg": "var(--goose-text-info)",
+      "--goose-inline-code-border-hover": "#c15f3e",
+      "--goose-editor-selection-bg": "#f2dbcf",
+    },
+    dark: NEUTRAL_DARK_RUNTIME_TOKENS,
+  },
 };
 
 function isDarkDocument(root: Element): boolean {
@@ -213,7 +229,9 @@ function writeAccentRuntimeTokens(
   const tokens = resolveAccentRuntimeTokens(accentColor, isDarkDocument(root));
   for (const [name, value] of Object.entries(tokens)) {
     // 保留旧变量名，静态适配层负责具体控件颜色。
-    root.style.setProperty(name, value);
+    if (root.style.getPropertyValue(name) !== value) {
+      root.style.setProperty(name, value);
+    }
   }
 
   // 清除旧版本热更新遗留的页面选择器；运行时只输出变量。
@@ -227,7 +245,9 @@ function writeAccentRuntimeTokens(
 export function applyAccentColor(accentColor: AccentColor): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.setAttribute("data-goose-accent", accentColor);
+  if (root.getAttribute("data-goose-accent") !== accentColor) {
+    root.setAttribute("data-goose-accent", accentColor);
+  }
   writeAccentRuntimeTokens(root, accentColor);
 }
 

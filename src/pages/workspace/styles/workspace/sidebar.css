@@ -61,7 +61,7 @@ html[data-sidebar-collapsed] .bn-side-menu {
   background: var(--goose-shell-surface);
 }
 
-:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .workspace-shell {
+:root:not(.dark):is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .workspace-shell {
   --workspace-top-edge: color-mix(in srgb, hsl(var(--foreground)) 4.5%, color-mix(in srgb, hsl(var(--goose-shell-bg)) 60%, hsl(var(--goose-editor-bg))));
 }
 
@@ -96,14 +96,18 @@ html[data-sidebar-collapsed] .bn-side-menu {
   border: 0;
   border-radius: var(--radius-lg);
   margin-left: 0;
-  overflow: hidden;
+  overflow: clip;
+  min-width: 0;
   position: relative;
   z-index: 1;
 }
 
-/* 隐藏编辑器的选区更新仍可能滚动祖先。设置使用主区门户，外层必须
-   禁止程序化滚动，避免整页被推离视口；滚动只交给 settings-scroll。 */
-.workspace-shell[data-settings] .workspace-main-sheet {
+/* 缩放与拖宽后，焦点/选区不能把整张面板横向滚离接缝。
+   滚动由正文、设置、搜索等内部滚动区处理。 */
+.workspace-shell,
+.workspace-shell .workspace-editor-host,
+.workspace-shell .workspace-editor-surface {
+  min-width: 0;
   overflow: clip;
 }
 

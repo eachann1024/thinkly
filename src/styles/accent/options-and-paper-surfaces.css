@@ -47,7 +47,7 @@
 
 /* BlockNote adds its own .dark class. Inherit the selected ink instead of
  * letting that nested class restore the application's blue fallback tokens. */
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .bn-root {
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-root {
   --foreground: inherit;
   --muted-foreground: inherit;
   --primary: inherit;
@@ -66,21 +66,21 @@
 }
 
 /* Explicit document colors take precedence over the default active-title ink. */
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"])
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"])
   .workspace-editor-surface
   .bn-block-content[data-content-type="heading"][data-text-color]:not([data-text-color="default"])
   .bn-inline-content {
   color: inherit;
 }
 
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .bn-inline-content::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .bn-inline-content *::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .goose-code-pre::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .goose-code-pre *::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .bn-block-content[data-content-type="codeBlock"] pre::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .bn-block-content[data-content-type="codeBlock"] pre *::selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .goose-fake-selection,
-:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) [data-show-selection] {
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-inline-content::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-inline-content *::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .goose-code-pre::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .goose-code-pre *::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-block-content[data-content-type="codeBlock"] pre::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-block-content[data-content-type="codeBlock"] pre *::selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .goose-fake-selection,
+:root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) [data-show-selection] {
   background-color: var(--goose-editor-selection-bg) !important;
   color: inherit;
 }
