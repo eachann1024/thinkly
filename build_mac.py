@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the macOS app and install a copy into /Applications."""
+"""Build and install the macOS app, reopening it only if it was running."""
 
 from __future__ import annotations
 
@@ -116,7 +116,7 @@ def remove_build_copies() -> None:
         shutil.rmtree(candidate)
 
 
-def install_copy() -> None:
+def install_copy(*, reopen: bool) -> None:
     if not BUILT_APP.is_dir():
         raise FileNotFoundError(f"未找到构建产物：{BUILT_APP}")
     archive = archive_build()
@@ -126,11 +126,12 @@ def install_copy() -> None:
         shutil.rmtree(INSTALLED_APP)
     print(f"[mac] 复制到：{INSTALLED_APP}")
     shutil.copytree(BUILT_APP, INSTALLED_APP, symlinks=True)
-    print(f"[mac] 打开：{INSTALLED_APP}")
-    subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
     remove_build_copies()
     refresh_app_registration()
     print(f"[mac] 构建副本已清理，仅保留最新压缩包：{archive}")
+    if reopen:
+        print(f"[mac] 重新打开：{INSTALLED_APP}")
+        subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
 
 
 def main() -> int:
@@ -138,8 +139,11 @@ def main() -> int:
         print("[mac] 此脚本仅支持 macOS", file=sys.stderr)
         return 1
     try:
+        was_running = quit_running_app()
+        if not was_running:
+            print(f"[mac] {APP_NAME} 未运行，安装完成后保持关闭")
         run_build()
-        install_copy()
+        install_copy(reopen=was_running)
     except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
         print(f"[mac] 失败：{error}", file=sys.stderr)
         return 1
