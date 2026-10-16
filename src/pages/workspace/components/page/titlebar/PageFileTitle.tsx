@@ -20,7 +20,7 @@ export function PageFileTitle({ page }: { page: Page }) {
   }));
   const FileIcon = isFolder ? FolderOpen : FileText;
   const fileManager = /Mac/i.test(navigator.platform) ? "访达" : "文件管理器";
-  const titleClassName = "inline-flex min-w-0 max-w-full items-center gap-1 px-1 text-sm font-medium";
+  const titleClassName = "page-file-title inline-flex min-w-0 max-w-full items-center gap-1 px-1 text-sm font-medium";
   const icon = <FileIcon className="h-4 w-4" aria-hidden="true" />;
   const name = <span className="truncate">{fileName}</span>;
 
