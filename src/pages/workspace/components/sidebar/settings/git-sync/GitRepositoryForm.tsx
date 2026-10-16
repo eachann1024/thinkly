@@ -37,14 +37,11 @@ function AutomaticSync({
               draft.intervalMinutes <= 1440 && (
                 <span
                   role="status"
-                  className="text-xs font-normal text-muted-foreground"
+                  className="text-sm font-normal text-muted-foreground"
                 >
                   正在保存…
                 </span>
               )}
-          </span>
-          <span className="mt-1 text-sm font-normal text-muted-foreground">
-            关闭后仍可手动同步
           </span>
         </span>
         <Switch
@@ -79,7 +76,7 @@ function AutomaticSync({
       draft.intervalMinutes < 1 ||
       draft.intervalMinutes > 1440 ? (
         <p className="text-sm text-danger">
-          请输入 1–1440 分钟的整数，修正后自动保存。
+          请输入 1–1440 之间的整数。
         </p>
       ) : null}
     </section>
@@ -101,9 +98,6 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
           placeholder={"git" + "@github.com:用户名/仓库.git"}
           autoComplete="off"
         />
-        <p className="text-sm text-muted-foreground">
-          自动识别 GitHub 或 Gitee；在下方选择要同步的文件夹。
-        </p>
       </div>
       <GitDetails title="高级设置">
         <div className="space-y-4 px-3 pb-3">

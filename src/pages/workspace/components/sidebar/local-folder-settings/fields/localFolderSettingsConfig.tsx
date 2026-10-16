@@ -16,7 +16,6 @@ export interface SettingsLocalFolderProps {
 export interface OpenAppFieldProps {
   id: string;
   title: string;
-  description: string;
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   value: string;
   onChange: (value: string) => void;

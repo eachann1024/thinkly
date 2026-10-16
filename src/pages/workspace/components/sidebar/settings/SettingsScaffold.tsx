@@ -74,7 +74,7 @@ export function SettingsScaffold({
         createPortal(
           <div
             ref={navigationRef}
-            className="settings-sidebar-navigation flex h-full min-h-0 flex-col px-1.5 py-4 text-foreground"
+            className="settings-sidebar-navigation flex h-full min-h-0 flex-col px-3 py-5 text-foreground"
             data-settings-navigation=""
             hidden={!visible}
             inert={!visible}
@@ -97,7 +97,7 @@ export function SettingsScaffold({
                     data-selected={activeTab === tab.id || undefined}
                     onClick={() => handleTabChange(tab.id)}
                     className={cn(
-                      "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-left text-sm",
+                      "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm",
                       activeTab !== tab.id && "text-muted-foreground",
                     )}
                   >

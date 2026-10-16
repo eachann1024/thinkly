@@ -143,6 +143,7 @@ const gooseDesktop = {
       wakeOk: boolean;
       quicknoteOk: boolean;
       searchOk: boolean;
+      paused?: boolean;
     }>,
   pauseHotkeys: () => invoke("desktop:pauseHotkeys") as Promise<void>,
   resumeHotkeys: () =>
@@ -150,6 +151,7 @@ const gooseDesktop = {
       wakeOk: boolean;
       quicknoteOk: boolean;
       searchOk: boolean;
+      paused?: boolean;
     }>,
   getAccessibilityStatus: () =>
     invoke("desktop:getAccessibilityStatus") as Promise<{

@@ -42,12 +42,11 @@ export function renderWebdavConfiguration(
           WebDAV 配置
         </span>
       }
-      description="配置 WebDAV 服务以同步并自动管理云端备份。"
       className="pb-3"
     >
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-foreground">
+          <Label className="text-sm font-medium text-foreground">
             服务地址
           </Label>
           <Input
@@ -57,14 +56,11 @@ export function renderWebdavConfiguration(
             onChange={(e) => setTempUrl(e.target.value)}
             placeholder="例如 https://example.com/dav/"
           />
-          <p className="text-[11px] text-muted-foreground">
-            示例地址：https://example.com/dav/
-          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">账号</Label>
+            <Label className="text-sm font-medium text-foreground">账号</Label>
             <Input
               className="h-9 bg-transparent py-1 text-sm"
               value={tempUsername}
@@ -74,7 +70,7 @@ export function renderWebdavConfiguration(
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-sm font-medium text-foreground">
               远端目录
             </Label>
             <Input
@@ -89,7 +85,7 @@ export function renderWebdavConfiguration(
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-sm font-medium text-foreground">
               应用密码
             </Label>
             <Input
@@ -104,7 +100,7 @@ export function renderWebdavConfiguration(
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-sm font-medium text-foreground">
               云端保留天数
             </Label>
             <Input
@@ -118,16 +114,19 @@ export function renderWebdavConfiguration(
                 setTempRetentionDays(parseInt(e.target.value) || 30)
               }
             />
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              上传备份后，将删除超过保留天数的云端备份。
+            </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
           <div className="space-y-0.5 pr-4">
-            <Label className="text-xs font-medium text-foreground">
+            <Label className="text-sm font-medium text-foreground">
               自动云备份
             </Label>
-            <p className="text-[11px] text-muted-foreground">
-              应用启动且闲置时，若距离上次备份已超过 24 小时，将自动在后台打包并上传最新备份。
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              距上次备份超过 24 小时后，在应用空闲时备份。
             </p>
           </div>
           <Switch
@@ -161,7 +160,7 @@ export function renderWebdavConfiguration(
             ) : (
               <Cloud className="h-4 w-4" />
             )}
-            保存并测试连接
+            保存并测试
           </Button>
           <Button
             variant="secondary"
@@ -174,7 +173,7 @@ export function renderWebdavConfiguration(
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            立即备份到云端
+            立即备份
           </Button>
           <Button
             variant="secondary"
@@ -187,7 +186,7 @@ export function renderWebdavConfiguration(
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            从云端拉取恢复
+            恢复最新备份
           </Button>
         </div>
       </div>

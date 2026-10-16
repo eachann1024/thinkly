@@ -151,7 +151,7 @@ const gotWin = collectWin();
 const gotLinux = collectLinux();
 
 if (!gotMac && !gotWin && !gotLinux) {
-  console.error("[collect] 未找到任何桌面端产物（请先执行 bun run mac / bun run win / bun run linux）");
+  console.error("[collect] 未找到任何桌面端产物（请先执行 bun run mac / bun run window / bun run linux）");
   process.exit(1);
 }
 console.log(`[collect] 产物已收集到 ${outRoot}/`);

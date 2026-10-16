@@ -7,7 +7,6 @@ export function renderReadingSettings(
 ) {
   const {
     editorFontSize,
-    showPreview,
     editorLineHeight,
     setEditorLineHeight,
     setEditorFontSize,
@@ -21,7 +20,6 @@ export function renderReadingSettings(
         onFontSizeChange={setEditorFontSize}
         onLineHeightChange={setEditorLineHeight}
       />
-      <p className="mt-4 text-xs text-muted-foreground">代码块保留独立行高。</p>
     </div>
   );
 }

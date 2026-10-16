@@ -97,9 +97,8 @@ function LegacyInternalPagesExportCard() {
           <p className="text-sm font-medium text-foreground">
             检测到早期内置笔记 ({legacyCount} 篇)
           </p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            这些笔记保存在旧版本的内部数据库中，未显示在文件侧栏中。可将其批量导出为
-            Markdown 格式存入当前本地文件夹；导出操作不会删除原始数据。
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            导出为 Markdown 到当前文件夹，原始笔记会保留。
           </p>
         </div>
         <Button

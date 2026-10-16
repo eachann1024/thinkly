@@ -1,0 +1,61 @@
+/* 上下导航按钮共用状态色，不依赖轨道位于侧栏内部还是独立于侧栏。 */
+.workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
+  .sidebar-mode-rail-button,
+  .sidebar-footer-control,
+  .sidebar-notebook-trigger--rail
+) {
+  box-sizing: border-box;
+  width: calc(var(--workspace-rail-width) - 0.571429rem);
+  min-width: calc(var(--workspace-rail-width) - 0.571429rem);
+  max-width: calc(var(--workspace-rail-width) - 0.571429rem);
+  border: 0;
+  border-radius: 0.571429rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  box-shadow: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
+  .sidebar-footer-control,
+  .sidebar-notebook-trigger--rail
+) {
+  height: calc(var(--workspace-rail-width) - 0.571429rem);
+  min-height: calc(var(--workspace-rail-width) - 0.571429rem);
+  justify-content: center;
+  padding: 0;
+}
+
+.workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
+  .sidebar-mode-rail-button,
+  .sidebar-footer-control,
+  .sidebar-notebook-trigger--rail
+):is(:hover, :focus-visible) {
+  background: hsl(var(--foreground) / 0.06);
+  color: hsl(var(--foreground));
+}
+
+/* 选中或菜单展开时，hover 保持同一底色，不再额外提亮。 */
+.workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
+  .sidebar-mode-rail-button,
+  .sidebar-footer-control,
+  .sidebar-notebook-trigger--rail
+):is([aria-pressed="true"], [data-state="open"], [data-active="true"]) {
+  background: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+}
+
+.workspace-shell .sidebar-rail-shell .sidebar-notebook-trigger--rail::before {
+  content: none;
+}
+.workspace-shell .sidebar-rail-shell .sidebar-notebook-trigger--rail > .goose-notebook-monogram {
+  color: inherit;
+}
+
+/* 窄窗口的旧 padding/inset 也服从轨道宽度，避免重新出现空白条。 */
+.workspace-shell .workspace-stage:has(> .sidebar-rail-shell) {
+  padding-left: var(--workspace-stage-pad-left);
+}
+.workspace-shell .workspace-stage:has(> .sidebar-rail-shell) > .workspace-content-frame {
+  left: calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
+}

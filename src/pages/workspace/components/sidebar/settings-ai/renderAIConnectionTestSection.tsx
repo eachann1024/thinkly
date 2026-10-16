@@ -22,7 +22,7 @@ export function renderAIConnectionTestSection(
     <SettingsSectionCard
       className="p-4"
       title="连接测试"
-      description="仅发送测试请求以验证接口连通性，不会读取任何笔记或本地配置。"
+      description="测试不会读取笔记或本地上下文。"
     >
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -73,7 +73,7 @@ export function renderAIConnectionTestSection(
                 ? "请先保存当前服务商配置。"
                 : !setupAIStatus.ready
                   ? "请先保存配置并获取可用模型。"
-                  : "测试不会读取笔记或本地上下文。"}
+                  : "可以开始测试。"}
       </p>
     </SettingsSectionCard>
   ) : null;

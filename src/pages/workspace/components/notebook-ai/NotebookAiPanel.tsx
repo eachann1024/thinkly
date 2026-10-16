@@ -32,7 +32,8 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
     panelRootRef,
     effectiveWidth,
     isResizing,
-    onDragHandleMouseDown,
+    maxWidth,
+    onDragHandleKeyDown,
     onDragHandlePointerDown,
   } = surface;
   const session = useNotebookAiSession();
@@ -75,7 +76,9 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
       {!isFullscreen ? (
         <AiPanelResizeEdge
           isResizing={isResizing}
-          onMouseDown={(event) => onDragHandleMouseDown(event, effectiveWidth)}
+          width={effectiveWidth}
+          maxWidth={maxWidth}
+          onKeyDown={(event) => onDragHandleKeyDown(event, effectiveWidth, maxWidth)}
           onPointerDown={(event) =>
             onDragHandlePointerDown(event, effectiveWidth)
           }

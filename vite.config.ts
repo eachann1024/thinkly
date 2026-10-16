@@ -1,5 +1,4 @@
-import { defineConfig, loadEnv } from "vite";
-import { readFileSync } from "node:fs";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import { isDebugBuild } from "./vite.debug";
@@ -11,19 +10,12 @@ import { createAutoImportPlugins } from "./config/vite/autoImportPlugin";
 import { createBuildOptions } from "./config/vite/buildOptions";
 import { optimizeDeps } from "./config/vite/optimizeDeps";
 
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig({
   customLogger: createAppLogger(),
   base: "./",
   define: {
     __GOOSE_EDITOR_COMPACT__: false,
     __GOOSE_EDITOR_AI__: true,
-    "import.meta.env.VITE_APP_VERSION": JSON.stringify(
-      command === "serve"
-        ? JSON.parse(
-            readFileSync(new URL("./package.json", import.meta.url), "utf8"),
-          ).version
-        : loadEnv(mode, __dirname, "").VITE_APP_VERSION,
-    ),
   },
   plugins: [
     createAssetPlugin(__dirname),
@@ -41,4 +33,4 @@ export default defineConfig(({ command, mode }) => ({
   server: { host: "0.0.0.0", port: 6001, sourcemapIgnoreList: false },
   build: createBuildOptions(__dirname),
   logLevel: isDebugBuild ? "info" : "warn",
-}));
+});

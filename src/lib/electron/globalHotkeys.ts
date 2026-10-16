@@ -1,10 +1,4 @@
-/**
- * Electron 桌面端全局热键注册（经 window.gooseDesktop.registerHotkeys）。
- *
- * 设置页存的快捷键格式是应用内通用格式（Mod/CmdOrCtrl/Meta/Ctrl…），
- * 主进程会转成 Electron accelerator。同一组合重复提交时主进程会保留已注册的键，
- * 避免 macOS 上立刻卸掉再挂导致默认快捷键失效。
- */
+/** Electron 全局热键 IPC；注册、暂停、恢复共用队列，结果只对应提交时的快照。 */
 import type { HostHotkeyRegisterResult } from "@/lib/host/types";
 import { toElectronAccelerator } from "./accelerator";
 import { getGooseDesktop } from "./runtime";
@@ -12,38 +6,35 @@ import { getGooseDesktop } from "./runtime";
 export { toElectronAccelerator };
 
 export type DesktopGlobalHotkeyId = "wake" | "quicknote" | "search";
+export type DesktopGlobalHotkeySlot = { shortcut: string; enabled: boolean };
+export type DesktopGlobalHotkeyInput = Record<
+  DesktopGlobalHotkeyId,
+  DesktopGlobalHotkeySlot
+>;
+export type DesktopGlobalHotkeyResults = Record<
+  DesktopGlobalHotkeyId,
+  HostHotkeyRegisterResult
+> & { deferred?: boolean };
 
-const current = {
-  wake: "",
-  quicknote: "",
-  search: "",
+type HotkeyRequest = Record<DesktopGlobalHotkeyId, string>;
+type RegistrationReply = {
+  wakeOk: boolean;
+  quicknoteOk: boolean;
+  searchOk: boolean;
+  paused?: boolean;
 };
 
+const current: HotkeyRequest = { wake: "", quicknote: "", search: "" };
 let queue: Promise<unknown> = Promise.resolve();
+let needsResume = false;
 
 function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   const next = queue.then(fn, fn);
-  queue = next.then(
-    () => undefined,
-    () => undefined,
-  );
+  queue = next.then(() => undefined, () => undefined);
   return next;
 }
 
-function classify(ok: boolean): HostHotkeyRegisterResult {
-  if (ok) return { ok: true };
-  return { ok: false, state: "occupied", error: "快捷键已被其他应用占用或无效" };
-}
-
-export type DesktopGlobalHotkeySlot = {
-  shortcut: string;
-  enabled: boolean;
-};
-
-function resolvedShortcut(
-  shortcut: string,
-  enabled: boolean,
-): { value: string; invalid: boolean } {
+function resolvedShortcut(shortcut: string, enabled: boolean) {
   if (!enabled || !shortcut.trim()) return { value: "", invalid: false };
   if (!toElectronAccelerator(shortcut)) return { value: "", invalid: true };
   return { value: shortcut, invalid: false };
@@ -53,55 +44,77 @@ function resultForSlot(
   slot: { value: string; invalid: boolean },
   ok: boolean,
   bridgeMissing: boolean,
+  deferred = false,
 ): HostHotkeyRegisterResult {
   if (bridgeMissing) {
     return { ok: false, state: "error", error: "桌面桥不可用" };
   }
-  if (!slot.value) {
-    return slot.invalid
-      ? { ok: false, state: "invalid", error: "快捷键无效" }
-      : { ok: true };
+  if (deferred) {
+    return { ok: false, state: "error", error: "录制结束后才能注册全局快捷键" };
   }
-  return classify(ok);
+  if (slot.invalid) {
+    return { ok: false, state: "invalid", error: "快捷键无效，请重新录制" };
+  }
+  if (ok) return { ok: true };
+  return slot.value
+    ? { ok: false, state: "occupied", error: "快捷键已被其他应用占用或无效" }
+    : { ok: false, state: "error", error: "停用快捷键失败，请重试" };
 }
 
-/**
- * 三条全局热键一次提交。分三次 IPC 时，后开的窗口会带着空的另外两槽
- * 覆盖主进程，把已经注册好的小窗热键卸掉。
- */
-export async function syncAllDesktopGlobalHotkeys(input: {
-  wake: DesktopGlobalHotkeySlot;
-  quicknote: DesktopGlobalHotkeySlot;
-  search: DesktopGlobalHotkeySlot;
-}): Promise<{
-  wake: HostHotkeyRegisterResult;
-  quicknote: HostHotkeyRegisterResult;
-  search: HostHotkeyRegisterResult;
-}> {
-  const wake = resolvedShortcut(input.wake.shortcut, input.wake.enabled);
-  const quicknote = resolvedShortcut(
-    input.quicknote.shortcut,
-    input.quicknote.enabled,
-  );
-  const search = resolvedShortcut(input.search.shortcut, input.search.enabled);
-  current.wake = wake.value;
-  current.quicknote = quicknote.value;
-  current.search = search.value;
-
+async function submitSnapshot(
+  request: HotkeyRequest,
+  resume = false,
+): Promise<RegistrationReply | null> {
   const api = getGooseDesktop();
-  if (!api) {
-    return {
-      wake: resultForSlot(wake, false, true),
-      quicknote: resultForSlot(quicknote, false, true),
-      search: resultForSlot(search, false, true),
-    };
-  }
+  if (!api) return null;
+  return enqueue(async () => {
+    let result: RegistrationReply;
+    try {
+      result = await api.registerHotkeys(request);
+    } catch (error) {
+      // 即使新配置提交失败，离开录制框也要尝试恢复之前的热键。
+      if (resume && needsResume) {
+        await api.resumeHotkeys();
+        needsResume = false;
+      }
+      throw error;
+    }
+    if (resume && (needsResume || result.paused)) {
+      result = await api.resumeHotkeys();
+      needsResume = false;
+    }
+    // 兼容旧主进程：暂停时返回的 true 只是接收配置，不能视为注册成功。
+    return needsResume ? { ...result, paused: true } : result;
+  });
+}
 
-  const result = await enqueue(async () => api.registerHotkeys({ ...current }));
+export async function pauseDesktopGlobalHotkeys(): Promise<void> {
+  const api = getGooseDesktop();
+  if (!api) throw new Error("桌面桥不可用");
+  await enqueue(async () => {
+    needsResume = true;
+    await api.pauseHotkeys();
+  });
+}
+
+/** 三条热键一起提交，避免用空槽覆盖其它热键；resume 仅在离开录制时使用。 */
+export async function syncAllDesktopGlobalHotkeys(
+  input: DesktopGlobalHotkeyInput,
+  options: { resume?: boolean } = {},
+): Promise<DesktopGlobalHotkeyResults> {
+  const wake = resolvedShortcut(input.wake.shortcut, input.wake.enabled);
+  const quicknote = resolvedShortcut(input.quicknote.shortcut, input.quicknote.enabled);
+  const search = resolvedShortcut(input.search.shortcut, input.search.enabled);
+  const request = { wake: wake.value, quicknote: quicknote.value, search: search.value };
+  Object.assign(current, request);
+
+  const result = await submitSnapshot(request, options.resume);
+  const deferred = result?.paused === true;
   return {
-    wake: resultForSlot(wake, result.wakeOk, false),
-    quicknote: resultForSlot(quicknote, result.quicknoteOk, false),
-    search: resultForSlot(search, result.searchOk, false),
+    deferred,
+    wake: resultForSlot(wake, result?.wakeOk === true, !result, deferred),
+    quicknote: resultForSlot(quicknote, result?.quicknoteOk === true, !result, deferred),
+    search: resultForSlot(search, result?.searchOk === true, !result, deferred),
   };
 }
 
@@ -109,39 +122,25 @@ export async function registerDesktopGlobalHotkey(
   id: DesktopGlobalHotkeyId,
   shortcut: string,
 ): Promise<HostHotkeyRegisterResult> {
-  const accelerator = toElectronAccelerator(shortcut);
-  if (!accelerator) {
-    current[id] = "";
-    const api = getGooseDesktop();
-    if (api) {
-      await enqueue(async () => {
-        await api.registerHotkeys({ ...current });
-      });
-    }
-    return { ok: false, state: "invalid", error: "快捷键无效" };
-  }
-  current[id] = shortcut;
-  const api = getGooseDesktop();
-  if (!api) {
-    return { ok: false, state: "error", error: "桌面桥不可用" };
-  }
-  const result = await enqueue(async () => api.registerHotkeys({ ...current }));
-  const ok =
-    id === "wake"
-      ? result.wakeOk
-      : id === "quicknote"
-        ? result.quicknoteOk
-        : result.searchOk;
-  return classify(ok);
+  const slot = resolvedShortcut(shortcut, true);
+  current[id] = slot.value;
+  const result = await submitSnapshot({ ...current });
+  const ok = id === "wake" ? result?.wakeOk : id === "quicknote" ? result?.quicknoteOk : result?.searchOk;
+  // 单槽注册仍把空字符串视为无效；清空停用走 unregister 或批量同步。
+  return resultForSlot(
+    { ...slot, invalid: slot.invalid || !shortcut.trim() },
+    ok === true,
+    !result,
+    result?.paused,
+  );
 }
 
 export async function unregisterDesktopGlobalHotkey(
   id: DesktopGlobalHotkeyId,
 ): Promise<void> {
   current[id] = "";
-  const api = getGooseDesktop();
-  if (!api) return;
-  await enqueue(async () => {
-    await api.registerHotkeys({ ...current });
-  });
+  const result = await submitSnapshot({ ...current });
+  if (!result) return;
+  const ok = id === "wake" ? result.wakeOk : id === "quicknote" ? result.quicknoteOk : result.searchOk;
+  if (!ok) throw new Error("停用快捷键失败，请重试");
 }

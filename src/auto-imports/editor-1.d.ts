@@ -98,6 +98,7 @@ declare global {
   const pasteBlocksAtCursor: typeof import('../components/editor/utils/pasteAtCursor').pasteBlocksAtCursor
   const pasteClipboardFilesFromClipboard: typeof import('../components/editor/utils/pasteClipboardFilesFromClipboard').pasteClipboardFilesFromClipboard
   const pasteClipboardHtmlAsBlocks: typeof import('../components/editor/hooks/useEditorPaste').pasteClipboardHtmlAsBlocks
+  const pasteClipboardMedia: typeof import('../components/editor/utils/pasteClipboardFilesFromClipboard').pasteClipboardMedia
   const pasteLinesAsBlocks: typeof import('../components/editor/hooks/useEditorPaste').pasteLinesAsBlocks
   const plainHasGooseMarkdownMarkers: typeof import('../components/editor/hooks/useEditorPaste').plainHasGooseMarkdownMarkers
   const planMultilinePaste: typeof import('../components/editor/utils/multilinePaste').planMultilinePaste

@@ -1,113 +1,76 @@
-/**
- * 持久化 AI 面板宽度（至少 320px，展示上限由可用空间决定）
- */
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
+import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 
 const STORAGE_KEY = "goose-note-ai-panel-width";
-/** 用户拖拽与持久化的合法区间（展示宽度可能因父级极窄而低于 MIN） */
 export const PANEL_WIDTH_MIN = 320;
-const MIN_WIDTH = PANEL_WIDTH_MIN;
 const DEFAULT_WIDTH = 338;
 
-function clamp(v: number) {
-  return Number.isFinite(v) ? Math.max(MIN_WIDTH, v) : DEFAULT_WIDTH;
+function clamp(value: number) {
+  return Number.isFinite(value) ? Math.max(PANEL_WIDTH_MIN, value) : DEFAULT_WIDTH;
 }
 
 function readStoredWidth(): number {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const n = parseInt(raw, 10);
-      if (!isNaN(n)) return clamp(n);
-    }
-  } catch {}
+    if (raw?.trim()) return clamp(Number(raw));
+  } catch { /* Keep the session usable when storage is unavailable. */ }
   return DEFAULT_WIDTH;
 }
 
-export function usePanelWidth() {
-  const [width, setWidth] = useState<number>(readStoredWidth);
+export function usePanelWidth(onWidthPreview: (width: number) => number, disabled = false) {
+  const [width, setWidth] = useState(readStoredWidth);
   const [isResizing, setIsResizing] = useState(false);
+  const gestureRef = useRef<ReturnType<typeof startPointerDrag> | null>(null);
+  const previewRef = useRef(onWidthPreview);
+  useLayoutEffect(() => { previewRef.current = onWidthPreview; }, [onWidthPreview]);
 
-  const setAndPersist = useCallback((w: number) => {
-    const clamped = clamp(w);
-    setWidth(clamped);
-    try {
-      localStorage.setItem(STORAGE_KEY, String(clamped));
-    } catch {}
+  useEffect(() => () => gestureRef.current?.dispose(), []);
+  useEffect(() => {
+    if (disabled) gestureRef.current?.finish();
+  }, [disabled]);
+
+  const setAndPersist = useCallback((next: number) => {
+    const value = clamp(next);
+    setWidth(value);
+    try { localStorage.setItem(STORAGE_KEY, String(value)); } catch { /* Session only. */ }
   }, []);
 
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(0);
-
-  const beginDrag = useCallback(
-    (clientX: number, displayedWidth: number) => {
-      if (isDragging.current) return;
-      isDragging.current = true;
-      setIsResizing(true);
-      startX.current = clientX;
-      // 从当前展示宽度起算：stored 可能大于父级可用宽度，否则要拖很久才有反馈
-      startWidth.current = displayedWidth;
-      document.body.style.cursor = "col-resize";
-
-      const applyDelta = (nextClientX: number) => {
-        if (!isDragging.current) return;
-        const delta = startX.current - nextClientX;
-        setWidth(clamp(startWidth.current + delta));
-      };
-
-      const onMouseMove = (ev: MouseEvent) => applyDelta(ev.clientX);
-      const onPointerMove = (ev: PointerEvent) => applyDelta(ev.clientX);
-
-      const endDrag = (nextClientX: number) => {
-        if (!isDragging.current) return;
-        isDragging.current = false;
+  const onDragHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>, displayedWidth: number) => {
+    if (disabled || event.button !== 0 || !event.isPrimary || gestureRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const startX = event.clientX;
+    let pendingWidth = displayedWidth;
+    setIsResizing(true);
+    gestureRef.current = startPointerDrag({
+      target: event.currentTarget,
+      pointerId: event.pointerId,
+      startX,
+      cursor: "col-resize",
+      onMove: (clientX) => {
+        pendingWidth = previewRef.current(clamp(displayedWidth + startX - clientX));
+      },
+      onEnd: () => {
+        gestureRef.current = null;
+        setAndPersist(pendingWidth);
         setIsResizing(false);
-        document.body.style.cursor = "";
-        const delta = startX.current - nextClientX;
-        setAndPersist(startWidth.current + delta);
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-        window.removeEventListener("pointermove", onPointerMove);
-        window.removeEventListener("pointerup", onPointerUp);
-        window.removeEventListener("pointercancel", onPointerUp);
-      };
-
-      const onMouseUp = (ev: MouseEvent) => endDrag(ev.clientX);
-      const onPointerUp = (ev: PointerEvent) => endDrag(ev.clientX);
-
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-      window.addEventListener("pointercancel", onPointerUp);
-    },
-    [setAndPersist],
-  );
-
-  const onDragHandleMouseDown = useCallback(
-    (e: React.MouseEvent, displayedWidth: number) => {
-      e.preventDefault();
-      beginDrag(e.clientX, displayedWidth);
-    },
-    [beginDrag],
-  );
-
-  const onDragHandlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>, displayedWidth: number) => {
-      if (e.button !== 0) return;
-      e.preventDefault();
-      e.currentTarget.setPointerCapture?.(e.pointerId);
-      beginDrag(e.clientX, displayedWidth);
-    },
-    [beginDrag],
-  );
-
-  return {
-    width,
-    isResizing,
-    setWidth: setAndPersist,
-    onDragHandleMouseDown,
-    onDragHandlePointerDown,
+      },
+    });
   };
+
+  const onDragHandleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, displayedWidth: number, maxWidth: number) => {
+    if (disabled || event.nativeEvent.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
+    const minWidth = Math.min(PANEL_WIDTH_MIN, maxWidth);
+    let next: number;
+    if (event.key === "Home") next = minWidth;
+    else if (event.key === "End") next = maxWidth;
+    else if (event.key === "ArrowLeft") next = displayedWidth + 16;
+    else if (event.key === "ArrowRight") next = displayedWidth - 16;
+    else return;
+    event.preventDefault();
+    event.stopPropagation();
+    setAndPersist(Math.max(minWidth, Math.min(maxWidth, next)));
+  };
+
+  return { width, isResizing, setWidth: setAndPersist, onDragHandlePointerDown, onDragHandleKeyDown };
 }

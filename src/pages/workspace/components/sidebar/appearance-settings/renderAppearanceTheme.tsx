@@ -51,7 +51,7 @@ export function renderAppearanceTheme(
                   <GooseIcons.Laptop className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">自动（跟随外观）</TooltipContent>
+              <TooltipContent side="bottom">跟随系统</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -175,17 +175,11 @@ export function renderAppearanceTheme(
                 <TooltipTrigger asChild>{optionButton}</TooltipTrigger>
                 <TooltipContent
                   side="bottom"
-                  className="max-w-64 whitespace-normal p-3 text-xs leading-relaxed"
+                  className="max-w-64 whitespace-normal p-3 text-sm leading-relaxed"
                 >
                   <p className="font-semibold">{option.label} · 完整主题</p>
                   <p className="mt-1 text-muted-foreground">
                     {option.fullTheme}
-                  </p>
-                  <p className="mt-2">
-                    包含完整的纸面底色、侧栏、文字高亮与手绘铅笔质感图标。支持浅色与深色模式。
-                  </p>
-                  <p className="mt-1 text-muted-foreground">
-                    现有布局、字体与自定义图标均不受影响。
                   </p>
                 </TooltipContent>
               </Tooltip>

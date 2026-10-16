@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
-import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 import {
   DEFAULT_CLOSE_TAB_SHORTCUT,
   DEFAULT_SEARCH_PANEL_CLOSE_SHORTCUT,
@@ -25,11 +24,6 @@ export function useShortcutSettings({
   singleTabMode,
 }: SettingsShortcutsProps) {
   const [confirmReset, setConfirmReset] = useState(false);
-
-  const [selectedPlatform, setSelectedPlatform] = useState<PlatformKind>(() => {
-    const platform = getPlatformKind();
-    return platform === "other" ? "windows" : platform;
-  });
 
   // zustand v5 忽略第二个 equalityFn 参数，对象选择器会导致重复渲染，故拆成原始值。
   const wakeHotkey = useSettings((s) => s.desktop.wakeHotkey);
@@ -57,7 +51,7 @@ export function useShortcutSettings({
     settings.setSearchHotkey(DEFAULT_SEARCH_HOTKEY);
     settings.setSearchHotkeyEnabled(true);
     setConfirmReset(false);
-    toast.success("已恢复全部快捷键默认值");
+    toast.success("已恢复默认快捷键");
   };
 
   const safeSetAppShortcut = (id: string) =>
@@ -81,8 +75,6 @@ export function useShortcutSettings({
     singleTabMode,
     confirmReset,
     setConfirmReset,
-    selectedPlatform,
-    setSelectedPlatform,
     wakeHotkey,
     quicknoteHotkey,
     searchHotkey,

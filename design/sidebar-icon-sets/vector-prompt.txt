@@ -1,7 +1,0 @@
-接下来请将以上四套图标整理成网页能实际使用的 SVG 源码，保留各自风格，不要再生成位图。
-
-只返回一个 JSON 代码块，JSON 顶层为四个对象组成的数组。每个对象包含 id（1–4）、name（分别为「舒展圆角」「柔圆粗线」「紧凑利落」「轻盈细线」）、strokeWidth（数字）、icons（对象）。icons 的键为 folder、outline、search、settings；每个键对应 {"outline":"SVG 内部元素字符串","solid":"SVG 内部元素字符串"}。一共 32 个状态，必须完整提供，不能引用未给出的符号或以同上省略。
-
-所有图标 viewBox="0 0 24 24"，居中且视觉大小一致，显示在 20px、24px 均清晰。只用 path、rect、circle、line、polyline 等标准 SVG 元素。描边/填色用 currentColor，无外链、style、script、事件处理器。每条空心图形显式 fill="none"、stroke="currentColor"、stroke-width，并用 round 的线帽/接合（第三套允许更利落的接合）。实心图形显式 fill="currentColor"，必要时用 fill-rule="evenodd" 保留功能所需孔洞。
-
-同一套同一语义的空心/实心必须共用外轮廓和占位；只改变内部填充。特别修正原图中列表两个状态几乎一样的问题：空心状态的列表圆点及横条有清晰内孔，实心状态把圆点和横条填满。放大镜选中时可以用厚实镜框并保留镜片孔洞，不能只靠整体加粗；齿轮选中时保留中间轴孔。每套的 4 种语义要能直接辨认，4 套的圆角与线宽应明显可比。

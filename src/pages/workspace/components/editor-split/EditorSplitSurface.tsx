@@ -23,6 +23,7 @@ import {
 import type { SplitGroup, SplitLeaf, SplitState } from "@/lib/editor-split/types";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
+import { SplitPaneDragSurface } from "./SplitPaneDragSurface";
 import { SplitContentDropSurface } from "./SplitContentDropSurface";
 
 export type EditorSplitPaneRenderContext = {
@@ -279,7 +280,7 @@ function EditorSplitLayout({
   }
 
   return (
-    <div className="editor-split-surface" data-editor-split="true">
+    <SplitPaneDragSurface key={tabId} tabId={tabId}>
       <SplitGroupView
         key={`${splitState.root.id}:${splitState.root.children.map((child) => child.id).join(",")}`}
         tabId={tabId}
@@ -288,7 +289,7 @@ function EditorSplitLayout({
         renderPane={renderPane}
         onContextMenu={onContextMenu}
       />
-    </div>
+    </SplitPaneDragSurface>
   );
 }
 

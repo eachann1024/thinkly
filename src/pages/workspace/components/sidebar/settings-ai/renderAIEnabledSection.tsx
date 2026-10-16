@@ -31,8 +31,8 @@ export function renderAIEnabledSection(
               启用 AI 助手
             </Label>
           </div>
-          <div className="text-xs leading-5 text-muted-foreground">
-            关闭后隐藏所有 AI 功能入口，并终止正在生成的任务。
+          <div className="text-sm leading-relaxed text-muted-foreground">
+            关闭会停止正在生成的回答。
           </div>
         </div>
         <Switch

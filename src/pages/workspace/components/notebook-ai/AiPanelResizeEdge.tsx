@@ -2,21 +2,31 @@ import { cn } from "@/lib/utils";
 
 interface AiPanelResizeEdgeProps {
   isResizing: boolean;
-  onMouseDown: (event: React.MouseEvent) => void;
+  width: number;
+  maxWidth: number;
+  onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
 }
 
 /** 命中区居中跨过两栏共用的分隔线，不额外占用布局宽度。 */
 export function AiPanelResizeEdge({
   isResizing,
-  onMouseDown,
+  width,
+  maxWidth,
+  onKeyDown,
   onPointerDown,
 }: AiPanelResizeEdgeProps) {
   return (
     <div
-      className="absolute top-0 z-[60] h-full cursor-col-resize group/resize"
+      className="absolute top-0 z-[60] h-full cursor-col-resize touch-none group/resize"
       style={{ left: "-8px", width: "16px" }}
-      onMouseDown={onMouseDown}
+      onKeyDown={onKeyDown}
+      tabIndex={0}
+      aria-valuemin={Math.min(320, maxWidth)}
+      aria-valuemax={maxWidth}
+      aria-valuenow={width}
+      aria-valuetext={`${Math.round(width)} 像素`}
+      title="调整 AI 面板宽度：左右方向键；Home 最窄，End 最宽"
       onPointerDown={onPointerDown}
       role="separator"
       aria-orientation="vertical"
@@ -27,7 +37,7 @@ export function AiPanelResizeEdge({
           "absolute left-1/2 top-1/2 h-full -translate-x-1/2 -translate-y-1/2 transition-opacity duration-150",
           isResizing
             ? "opacity-100"
-            : "opacity-0 group-hover/resize:opacity-100",
+            : "opacity-0 group-hover/resize:opacity-100 group-focus-visible/resize:opacity-100",
         )}
         style={{
           width: "1px",
