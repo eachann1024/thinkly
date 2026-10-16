@@ -53,7 +53,11 @@
 .electron-ai-header {
   width: calc(var(--workspace-ai-width, 338px) + var(--workspace-stage-pad-right) - var(--electron-titlebar-end-inset, 8px) - var(--electron-window-controls-width, 0px));
 }
-/* 同一桌面顶栏的文件、标签与 AI 标题共用界面字号及字重。 */
+/* 对齐原生工具栏的文字/图标比例，并随界面缩放保持一致。 */
+html.is-electron .electron-titlebar {
+  --titlebar-label-size: 0.875rem;
+  --titlebar-icon-size: 1.125rem;
+}
 html.is-electron .electron-titlebar :is(
   .page-file-title,
   .tab-rail-item,
@@ -62,9 +66,16 @@ html.is-electron .electron-titlebar :is(
   .notebook-ai-conversation-title
 ) {
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--titlebar-label-size);
   font-weight: 500;
   line-height: 1.4;
+}
+/* 同时覆盖已保存文件的按钮与未保存文件的静态图标；保留原点击区域。 */
+html.is-electron .electron-titlebar .page-file-title svg,
+html.is-electron .electron-titlebar .electron-document-header [data-goose-control="icon-button"]:not([aria-label="关闭标签页"]) > svg,
+html.is-electron .electron-titlebar .notebook-ai-header-toolbar [data-goose-control="icon-button"] > svg {
+  width: var(--titlebar-icon-size);
+  height: var(--titlebar-icon-size);
 }
 .workspace-shell:has(.workspace-sidebar-pane[data-sidebar-resizing]) .electron-titlebar {
   transition: none;
