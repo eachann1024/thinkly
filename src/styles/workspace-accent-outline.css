@@ -29,32 +29,6 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* 与全局 focus reset 同层，内置轮廓避免滚动容器裁切，也不覆盖选中描边。
- * 鼠标焦点继续遵循现有 pointer-focus 标记，列表 hover 仍由原有类管理。 */
-@layer properties {
-  :root:not([data-goose-pointer-focus="true"]) .workspace-shell :is(
-    .tab-rail-item,
-    .window-always-on-top-button,
-    .sidebar-mode-rail-button,
-    .sidebar-footer-control,
-    .sidebar-notebook-trigger--rail,
-    .main-tree-row,
-    .main-tree-row > [data-rct-item-interactive],
-    .sidebar-tree-row
-  ):is(:focus-visible, [data-focus-visible="true"]):where(
-    :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
-  ) {
-    outline: 2px solid var(--goose-accent-outline-focus) !important;
-    outline-offset: -4px;
-  }
-  /* Tab 到闲置名称仍可辨认；Enter/Space 进入原有编辑流程后才强调。 */
-  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"]:has([data-page-title-surface="tab-pill"]):focus-visible,
-  :root:not([data-goose-pointer-focus="true"]) .workspace-shell .tab-rail-item[data-tab-count="1"] button[data-page-title-surface="tab-pill"]:focus-visible {
-    outline: 2px solid var(--goose-text-primary) !important;
-    outline-offset: -4px;
-  }
-}
-
 /* RCT 的 focus 背景不能覆盖已选中的行；行距、圆角、原有描边保持不变。 */
 :root .workspace-shell :is(.main-tree-row--selected, .sidebar-tree-row--selected):focus-visible,
 :root .workspace-shell .main-tree-row--selected > [data-rct-item-interactive]:focus-visible {

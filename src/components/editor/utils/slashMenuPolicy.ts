@@ -64,10 +64,11 @@ export function shouldOpenSlashSuggestionMenu(
     const cursorBlock = editor.getTextCursorPosition().block;
     if (cursorBlock && cursorBlock.id === editor.document[0]?.id) return false;
   }
-  const prefix = $from.parent.textBetween(0, $from.parentOffset, undefined, "\ufffc");
-  if (prefix && !/\s$/u.test(prefix)) return false;
+  // Only the first character of a text block can start a slash command.
+  // Offsets also count hard breaks and inline atoms, unlike textContent.
+  if (!tr.selection.empty || !$from.parent.isTextblock || $from.parentOffset !== 0) return false;
   if (hasCodeMark($from)) return false;
-  if (isCodeTextblockParent($from.parent)) return false;
+  if (isCodeTextblockParent($from.parent) || isInsideCodeBlock($from) || isCodeLikeEditorBlock(editor)) return false;
   return !$from.parent.type.isInGroup("tableContent");
 }
 
@@ -123,6 +124,7 @@ export function reconcileSlashSuggestionMenu(
   const $from = selection.$from;
   const parent = $from.parent;
   if (!parent.isTextblock || isCodeTextblockParent(parent)) return;
+  if (isInsideCodeBlock($from) || isCodeLikeEditorBlock(editor) || hasCodeMark($from)) return;
   if (parent.type.isInGroup("tableContent")) return;
 
   if (!policy.allowSlashMenuOnFirstBlock) {
@@ -130,13 +132,15 @@ export function reconcileSlashSuggestionMenu(
     if (cursorBlock && cursorBlock.id === editor.document[0]?.id) return;
   }
 
-  const trigger = SLASH_TRIGGERS.find((t) => parent.textContent.startsWith(t));
+  // Preserve hard breaks and inline atoms so a later line cannot look like block start.
+  const textBefore = parent.textBetween(0, $from.parentOffset, "\n", "\ufffc");
+  const trigger = SLASH_TRIGGERS.find((t) => textBefore.startsWith(t));
   if (!trigger) return;
-  const query = parent.textContent.slice(trigger.length);
+  const query = textBefore.slice(trigger.length);
   // Local paths such as `/Users/name/project` also start with `/`, but they
   // are content, not slash-command queries. Touching selection while IME is
   // settling can make those long path lines visually flicker.
-  if (query.includes("/") || query.includes("\\")) return;
+  if (/[\/\\\n\ufffc、]/u.test(query)) return;
 
   const blockStart = $from.start();
   const caret = selection.from;

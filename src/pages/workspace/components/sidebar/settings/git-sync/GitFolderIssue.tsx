@@ -31,10 +31,6 @@ export function GitFolderIssue({
       aria-label={`${name}：${summary}${actionLabel ? "，查看处理方式" : ""}`}
       className="group relative flex size-8 items-center justify-center rounded-lg p-0 text-muted-foreground hover:text-foreground"
     >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-[2px] rounded-[inherit] border-2 border-[var(--goose-accent-outline-focus)] opacity-0 group-focus-visible:opacity-100"
-      />
       <CircleAlert aria-hidden="true" className="size-4" />
     </Button>
   );
