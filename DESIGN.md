@@ -1,284 +1,152 @@
----
-name: 鹅的笔记
-description: Electron 本地化笔记应用，BlockNote 驱动，Notion 风格
+# Goose Notes 设计规范
 
-colors:
-  shell-bg: "#f7f7f7"
-  editor-bg: "#ffffff"
-  selected-bg: "#f1f1ef"
-  primary: "#6366f1"
-  foreground: "#1e1e1e"
-  muted-foreground: "#6d6d6d"
-  border: "#dbdbdb"
-  destructive: "#ee4444"
-  notion-blue: "#2383e2"
-  ai-teal: "#58d7b8"
-  ai-amber: "#ffb56a"
+> 内容优先、紧凑克制、严格对齐、精准轮廓、全局一致。本文是本项目样式修改的强制约束。
 
-typography:
-  title:
-    fontFamily: "var(--font-default)"
-    fontSize: "1.5rem"
-    fontWeight: 600
-    lineHeight: 1.25
-    letterSpacing: "-0.01em"
-  body:
-    fontFamily: "var(--font-default)"
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.7
-    letterSpacing: "0.01em"
-  label:
-    fontFamily: "var(--font-default)"
-    fontSize: "0.75rem"
-    fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: "0.02em"
-  serif:
-    fontFamily: "var(--font-serif)"
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.7
-    letterSpacing: "normal"
-  mono:
-    fontFamily: "var(--font-mono)"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.6
-    letterSpacing: "normal"
+适用于主窗口、独立速记、侧栏、设置、搜索、编辑器工具栏、菜单、弹窗和 AI 面板；不限制用户笔记正文的内容格式，也不套用到官网或其他项目。
 
-rounded:
-  sm: "8px"
-  md: "10px"
-  lg: "12px"
-  xl: "14px"
-  slash: "18px"
+## 在提示词中引用
 
-spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "12px"
-  lg: "16px"
-  xl: "24px"
+```text
+@DESIGN.md
+本次涉及界面、样式或视觉交互的修改，必须遵循此文件。先定位现有共享组件与主题变量，再实施；不得自行改变整体风格、布局密度或业务流程。完成后说明遵循了哪些规则、检查结果及未验证项。
 
-components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.editor-bg}"
-    rounded: "{rounded.md}"
-    padding: "10px 16px"
-  button-outline:
-    backgroundColor: "{colors.shell-bg}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.md}"
-    padding: "10px 16px"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.md}"
-    padding: "10px 16px"
-  card:
-    backgroundColor: "{colors.editor-bg}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.xl}"
-    padding: "24px"
-  input:
-    backgroundColor: "{colors.shell-bg}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.md}"
-    padding: "8px 12px"
-  dialog:
-    backgroundColor: "{colors.shell-bg}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.xl}"
-    padding: "24px"
-  chip:
-    backgroundColor: "{colors.selected-bg}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
-    padding: "6px 12px"
----
+本次需求：……
+```
 
-# Design System: 鹅的笔记
+- 修改颜色、字体、尺寸、间距、圆角、图标、布局、浮层或交互状态前，必须完整阅读本文件；不得把它当作可选灵感。
+- 用户当次明确要求优先；例外仅限本次指定范围，不能顺带改掉其他页面的约定，也不能把未选中的方案当成新规范。
+- 通用设计技能、组件库默认样式与本文冲突时，以本项目约定为准；保留已有结构、密度、功能入口及流程。
+- 同类问题先修共享组件、样式或语义变量，并检查直接消费者；禁止在不同页面复制近似样式，或只给截图中的一个实例打补丁。
 
-## 1. Overview
+## 1. 简洁来自减少干扰
 
-**Creative North Star: "The Quiet Study"**
+- 保留编辑器和内容的主导地位；导航、底部区、工具栏紧凑，不以更大的卡片、更厚的边框或更多留白充当优化。
+- 默认不添加小字说明、常识介绍、副标题和重复提示；文案用用户能理解的动作与结果，不展示无助于决策的实现细节。
+- 悬停提示简洁说明操作结果，按需提供快捷键；不要用本机路径替代动作说明，也不把所有说明都常驻在页面上。
+- 不存在或不适用的菜单操作应隐藏；暂时不可用但有必要让用户知道的操作可保留禁用状态，不把所有禁用项一概删除。
+- 沿用现有表面层级与圆角；清除重复外框、重命名套框和无意义的装饰，保留浮层边界、内容语义及真实交互反馈。
+- 不擅自新增渐变、发光、彩色阴影或独立视觉体系；已有主题材质与特定 AI 视觉只在原适用范围保留，普通 AI 控件仍遵守共享规范。
 
-鹅的笔记的界面像一间空书房。大面积留白，没有装饰性元素干扰视线。用户坐下来，面前只有纸和笔——编辑器就是全部。侧边栏缩在边缘， barely 可见的分割线界定了空间，但不争夺注意力。暗色模式不是"夜间主题"的噱头，而是同一间书房在傍晚灯光下的自然延续：墙色深了，纸色暖了，但空间感不变。
+## 2. 强调色表达真实状态
 
-这种设计系统刻意回避 SaaS 工具常见的视觉噪音：没有品牌色 banner，没有渐变按钮，没有悬浮 action button。色彩被极度克制地使用，以至于当 AI 区域的彩虹渐变出现时，它的出现本身就成为一种信号——"这里有别的东西"。
+强调色采用用户选定的「精准轮廓」方向：以当前主题的列表选中边框为基准，深色也随所选配色变化。禁止把固定蓝色、浅蓝底或靛蓝色当成所有主题的强调色。
 
-**Key Characteristics:**
-- 暖调中性灰，不是冷白也不是工业灰。壳色 (shell-bg) 略带 60° 暖色相，像宣纸的底色。
-- 投影是"耳语"级的存在感，统一使用 slate 色系 (rgba(15,23,42))，从不抢戏。
-- 圆角是软陶质感而非锐利切割，10–14px 的温和弧度让元素感觉可以被触摸。
-- 衬线模式使用 Georgia 与本机宋体，为长文阅读提供清晰的笔画层次，无需下载字体。
-- 全局移除 focus ring，操作反馈靠颜色变化和微投影，而非边框闪烁。
-- 编辑器选择高亮使用 Notion 蓝 (#2383e2)，是界面中唯一固定的彩色锚点。
+| 状态 | 必须遵循的表现 |
+| --- | --- |
+| 默认 | 使用所在区域的中性表面；闲置名称、小窗外壳不常驻强调描边。 |
+| 悬停 | 使用共享悬停底色，整行命中范围一致；移出后恢复正确状态，不残留描边。 |
+| 选中／开启 | 对可选择的列表、下拉选项和弹窗选项使用主题强调轮廓与适量底色；保持文字、图标清楚。 |
+| 键盘焦点 | 保留可辨认的焦点反馈，与鼠标悬停、选中区分；不能为去掉多余框而清空全部 `focus-visible`。 |
+| 搜索命中 | 保留用户要求的强调色边框与少量底色；不能改成难以辨认的黑块或过浅底色。 |
+| 重命名选区 | 浅色、深色下选中文字均须清晰，沿用主题选区配色及配套文字色；不再套一层输入框装饰。 |
+| 错误／警告／成功 | 保留各自语义色，不为「统一强调色」全部改成同一色相。 |
 
-## 2. Colors
+- 单标签仅展示名称，不套用多标签的鼠标悬停／选中底色；保留必要的键盘焦点与既有点击行为。
+- 多标签或小窗切换栏的悬停、点击选中有反馈；「默认不显示强调色」不等于点击选中后也没有反馈。
+- 关闭按钮或菜单操作结束后，不得把高亮遗留到标题栏外框、整页容器等无关区域。
 
-鹅的笔记以中性色为基底，依靠明度差异构建层次；唯一的 UI 强调色是鸢尾靛蓝。AI 区域是唯一的多彩例外。
+## 3. 所有菜单使用同一套设计
 
-### Primary
-- **Iris Indigo** (#6366f1 / hsl 239 84% 67%): 主色调，用于主按钮填充、开关 ON、focus 指示。激活导航/选中项用浅底 #e0e7ff + 强调文字 #4f46e5，图标徽章底 #eef2ff；暗色对应：填充 #6366f1、强调文字 #a5b4fc、浅底 rgba(99,102,241,0.20)、徽章底 rgba(99,102,241,0.14)。克制、单一色相，让内容本身成为焦点。
+- 右键、下拉、二级菜单、编辑器菜单及第三方生成的菜单行，都接入共享菜单外壳与状态；颜色网格等特殊内容保留必要结构。
+- 菜单内不使用分割线，分组靠紧凑留白；没有分组就直接展示菜单项，不生成空组或装饰标题。
+- 菜单图标、文字、快捷键和子菜单箭头垂直居中；同层级字号、字重、图标尺度及左右起点一致。
+- 菜单宽度按内容与视口确定，不为了「大气」留下大块空白；长内容沿用对应控件的换行或截断策略，不在仍有空间时提前隐藏。
+- 下表是已选菜单 A 版的当前基线，必须消费共享变量，禁止在业务组件里重复写死。
 
-### Secondary
-- *(无独立 secondary accent。层次由明度差异承担)*
+| 项目 | 当前基线 | 共享定义 |
+| --- | --- | --- |
+| 单行菜单项 | 最小高度 32px；正文 14px／行高 20px，常规字重 | `--goose-menu-item-height`、`--goose-menu-item-font-size`、`--goose-menu-item-line-height` |
+| 间距 | 行间 2px；组间 6px；外沿 6px；内容间距 8px | `--goose-menu-row-gap`、`--goose-menu-group-gap`、`--goose-menu-surface-inset`、`--goose-menu-content-gap` |
+| 圆角 | 外壳 8px；菜单项 4px | `--goose-menu-radius`、`--goose-menu-item-radius` |
+| 图标 | 菜单图标 16px，不能被长文字挤小 | `.goose-menu-icon`、`.goose-menu-item` |
 
-### Tertiary
-- *(无独立 tertiary accent)*
+这些数值属于菜单，不应强加给正文、主导航图标或所有按钮；多行内容、缩放与窄视口按共享组件处理。
 
-### Neutral
-- **Warm Shell** (#f7f7f7 / 暗色 #202020): 应用壳层背景，侧边栏底色。比纯白暖一点，像宣纸的米白。暗色变为深石墨。
-- **Pure Paper** (#ffffff / 暗色 #2e2e2c): 编辑器主画布，内容区。始终纯白（亮色模式），提供最高对比度的阅读面。暗色是暖深灰，像傍晚灯光下的纸。
-- **Selected Parchment** (#f1f1ef / 暗色 #2a2a28): 选中/悬停状态背景，暖灰带微黄相。列表项 hover、菜单高亮、次级按钮底色。暗色保持暖调。
-- **Ink** (#1e1e1e / 暗色 #e5e5e5): 前景文字，近黑但不纯黑。带 0.005 chroma 的暖色 tint。暗色反转为暖白。
-- **Faded Ink** (#6d6d6d / 暗色 #a8a8a8): 辅助文字、占位符、图标默认色。Muted foreground。暗色亮度提升以保可读性。
-- **Hairline** (#dbdbdb / 暗色 #3d3d3d): 分割线、输入框 inset shadow、表框。几乎不可见。
-- **Alert Red** (#ee4444 / 暗色 #7f1d1d): 破坏性操作、错误提示。仅用于需要立即注意的反馈。暗色饱和度降低避免刺眼。
-- **Notion Blue** (#2383e2): 编辑器内文本选择高亮（28% 透明度亮色 / 40% 暗色）。不用于 UI 元素，专属于编辑体验。唯一不随模式改变色相的颜色。
+## 4. 字体、图标与对齐
 
-### AI Signature Colors
-- **AI Teal** (#58d7b8) to **AI Amber** (#ffb56a): 仅用于 AI 相关区域（LingCai 卡片、流式加载指示器、AI 工作区）。彩虹渐变从青绿到紫到粉到橙，是冷静界面中唯一的情绪出口。
+- UI 使用现有系统字体与 `--font-ui`；正文使用 `--font-default`、`--font-serif`、`--font-mono`，尊重用户已有字体和缩放设置。
+- 已确认的默认衬线为 Georgia＋系统宋体，默认等宽为内置 JetBrains Mono；不把商业字体或新下载字体重新设为默认。
+- 同一行中的图标、文字、展开箭头和按钮严格垂直居中；用布局与统一行高解决，不靠逐个元素的临时偏移凑齐。
+- 同一工具栏的图标视觉大小、线条重量和点击区域一致；菜单图标与主导航图标各用自己的共享规格。
+- 主导航沿用已选定的 04 图标体系，未选空心、选中使用对应实心／加重版本；复用 `SidebarRailIcon`，不重新生成近似替代品。
+- 图标导航不恢复常驻文字标签；仍须有可访问名称及必要的悬停提示。删除说明小字不能连带删除按钮名称。
+- 不为小窗新增一套独立字号入口；已有字体、界面缩放与跨窗口同步从外观设置链路处理。
 
-### Named Rules
+## 5. 起点对齐，状态切换不挤动内容
 
-**The One Color Rule.** 任何非 AI 区域，屏幕上同时出现的彩色应只有鸢尾靛蓝一种色相。灰色是默认，白色是画布，黑色是文字，靛蓝只承担强调角色（主按钮、开关 ON、激活项、focus）。AI 区域的多彩是刻意打破规则的信号——它告诉用户"这里发生了不同的事"。
+- 标准宽度与全宽保持相同的正文顶部起点；标准宽度沿用统一布局，不按页面各自设置。当前标准正文净宽基线为 720px，窄窗按现有规则收缩。
+- 表格与正文左边缘对齐，行列把手放到表格外侧；块把手与行把手错开，不再用大块顶部空白或内缩表格为控件让位。
+- 输入态与展示态保持字形位置、行高和占位尺寸一致；点击、选中、添加描边、切换标签、展开底栏均不得导致文字或图标跳动。
+- 描边不改变盒子尺寸；复用现有轮廓实现或稳定的边框占位，不在状态切换时临时增加宽高。
+- 未显示的附加按钮不能无故挤掉名称；按钮出现时合理分配空间，名称、按钮均不得被遮挡或裁切。
+- 笔记本切换区域的长名称单行渐隐，不换行、不显示省略号；这项约定只用于该区域，不能替换所有文件名的既有截断策略。
+- 底部固定区域与滚动列表分开占位；长列表的末项、滚动条和操作按钮必须可达。
 
-**The Warmth-Not-Color Rule.** 层次由明度和极微的暖色 tint 区分，不是由色相。goose-selected-bg 比 shell-bg 暗 3%，暖 6°，这个差异几乎无法被有意识察觉，但手指能"感觉"到。
+## 6. 窄窗口与浮层有明确边界
 
-**The Notion Blue Reservation Rule.** #2383e2 仅用于编辑器文本选择高亮和 BlockNote 相关交互。禁止用于按钮、链接、图标或任何 UI chrome。
+- 正常宽度不激进地自动收起侧栏；响应式收栏只影响当前有效布局，不覆盖用户持久化偏好，拉宽后恢复。
+- 主窗口最小视图中的浮动侧栏／搜索面板、应用弹窗贴合主编辑器外框，边界和圆角一致；独立速记等没有主编辑面板的入口保留自身布局。
+- 普通右键、下拉和二级菜单仍按触发对象定位、避让视口；不能把「贴合编辑器」扩大为所有菜单都铺满编辑器。
+- 最小视图禁用笔记本 Hover 自动展开，隐藏相应的顶栏侧栏入口及分割线；拉宽后按原偏好恢复。
+- 小窗圆角与主界面一致，不额外套边框，不默认显示蓝色强调外框。
+- 浮层必须在正确层级，不能被输入框或父容器裁切，也不能挡住正在输入的区域；不要靠无限增加 `z-index` 修补局部问题。
+- 表格把手、拖拽提示及宽内容须兼顾窄窗边缘与滚动，不因对齐而移出可操作区域。
 
-## 3. Typography
+## 7. 主题、平台与动效
 
-**Display/Title Font:** DM Sans + HarmonyOS Sans SC（系统 fallback）
-**Body Font:** 同上
-**Serif/阅读 Font:** Georgia + 系统宋体（Songti SC / SimSun）
-**Mono Font:** JetBrains Mono + HarmonyOS Sans SC
+- 背景、前景、描边、选区统一消费语义变量；深色和纸色主题保持原有表面关系，不硬编码「编辑器永远纯白」。
+- 菜单、标签容器、弹窗等必须有可靠的背景色；不能依赖 macOS 毛玻璃或父层巧合，在 Windows／其他环境下意外透明。
+- 保留已限定范围的 macOS 窗口材质；新增普通卡片不自行套用毛玻璃，内部列表和正文按现有不透明表面处理。
+- 深色的选区、次级文字和禁用文字仍可读；不通过整层降低透明度把文字一起淡到看不清。
+- 交互反馈短促、连贯，沿用共享动效变量并支持减少动态效果；不因按下而缩放菜单行，不让把手在同一块内闪烁。
+- 界面切换、焦点移动和拖拽不增加明显卡顿；鼠标指针与真实能力一致，拖动中的指针不应常驻。
 
-**Character:** DM Sans 的现代几何骨架提供清晰的功能性，HarmonyOS Sans SC 确保中文排版的中性专业感。Georgia 与系统宋体作为可选衬线字体，为中英文长文提供清晰的阅读层次。三套字体在用户设置中自由切换，UI 始终跟随。
+## 8. 必须保护的交互边界
 
-### Hierarchy
-- **Title** (600, 1.5rem/24px, line-height 1.25, tracking -0.01em): 对话框标题、AI 面板标题。紧凑有力，不喧宾夺主。
-- **Settings Page Title** (600, 1.875rem/30px, tracking -0.025em): 所有设置分类统一在正文区显示大标题，左侧「设置」标题为 1.25rem/20px。设置打开时隐藏窗口顶栏的笔记标题、标签与新增/AI 操作，保留窗口导航与拖动区；不再显示带齿轮的横向设置标题栏，关闭入口独立位于右上角。现有设置项、文案及功能保持不变，外观页保留即时预览与独立滚动。
-- **Body** (400, 16px, line-height 1.7, tracking 0.01em): 编辑器正文、笔记内容、列表项。65–75ch 的最大行宽。这是整个系统的核心——所有其他层级都服务于让正文可读。
-- **Label** (500, 12px, line-height 1.4, tracking 0.02em): 按钮文字、小标签、辅助说明、时间戳。稍宽的字距让短文本在小型尺寸下保持清晰。
-- **Serif Body** (400, 16px, line-height 1.7): 当用户选择衬线模式时，英文优先使用 Georgia，中文回退到系统宋体（macOS 为 Songti SC，Windows 为 SimSun）；字体缺失时继续使用本机衬线回退，不下载字体。
-- **Mono Body** (400, 14px, line-height 1.6): 代码块、行内代码。JetBrains Mono 的字宽和标点设计适合代码阅读。
+- 样式修改不能偷偷改事件、快捷键、创建流程或持久化行为；确需调整时，限于本次明确需求。
+- 普通列表新建与重命名沿用列表内编辑，不恢复命名弹窗；分屏先编辑后创建等入口保留自身已确认流程。
+- 点击输入入口应正确聚焦与定位光标；不得用新增透明遮罩、覆盖层或错误命中区域换取视觉对齐。
+- 关闭、取消、失效内容等边界状态需恢复正确布局和焦点，不留下幽灵按钮、外框高亮或位置跳动。
 
-### Named Rules
+## 实现入口：先复用，再修改
 
-**The Editor-First Rule.** 正文 (Body) 的样式是系统的锚点。所有其他层级的尺寸和字重选择都基于"不干扰正文阅读"这一原则。对话框标题再大也不超过 24px。
+下表是定位入口，不是另一份独立主题配置。数值变动应在对应源文件统一维护；如果行为与上面的用户约定冲突，应修实现，不能以旧代码为由绕过规范。
 
-**The No-Bold-Without-Reason Rule.** 加粗 (600+) 仅用于标题层级和极少数强调。正文不使用 bold 做强调——依靠字色对比和留白替代。
+| 职责 | 直接来源 |
+| --- | --- |
+| 主题与强调色 | [主题变量](src/styles/global/theme-tokens.css)、[深色覆盖](src/styles/goose-dark-theme.css)、[配色应用](src/lib/accentColor.ts)、[精准轮廓变量](src/lib/accentOutlineTokens.ts) |
+| 文字与语义颜色 | [色表源](text-colors.json)、[文字色板](src/styles/goose-text-palette.css)；生成文件不手工改色 |
+| 控件几何与状态 | [控件变量](src/styles/global/control-tokens.css)、[共享样式配方](src/components/ui/control-recipes.ts)、[控件状态](src/styles/global/control-states.css)、[工作区选中与焦点](src/styles/workspace-accent-outline.css) |
+| 菜单与浮层 | [菜单行](src/styles/global/menu-items.css)、[浮层外壳](src/styles/global/floating-surfaces.css)、[右键菜单](src/components/ui/context-menu/)、[下拉菜单](src/components/ui/dropdown-menu.tsx) |
+| 字体与外观同步 | [字体定义](src/lib/fonts/families.ts)、[字体应用](src/lib/fontLoader.ts)、[缩放应用](src/lib/appearance.ts)、[外观设置](src/stores/settings/slices/appearanceSlice.ts)、[跨窗同步](src/lib/appearanceSync.ts) |
+| 导航图标与设置 | [导航图标](src/pages/workspace/components/sidebar/SidebarRailIcon.tsx)、[设置框架](src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx)、[设置布局](src/pages/workspace/components/sidebar/settings/settings-layout.css) |
+| 编辑区与窄窗 | [页面布局](src/pages/workspace/styles/page-layout.css)、[表格控件](src/pages/workspace/styles/editor-base/tables-callouts/table-controls.css)、[响应式边界](src/lib/workspaceViewport.ts)、[弹窗边界](src/components/ui/useEditorDialogBounds.ts) |
 
-## 4. Elevation
+## 修改后的最小检查
 
-几乎扁平，投影只是耳语。深度不是靠元素"浮起来"，而是靠颜色的冷暖层叠。鹅的笔记的层级系统更像纸张堆叠：不同明度的纸叠在一起，最上面的纸（编辑器）最白最亮，下面的纸（侧边栏/壳层）略暖略暗。
+- 先明确入口、调用链、状态、持久化和直接消费者，按本次影响选择必要检查；执行规则以 [AGENTS.md](AGENTS.md) 与 [贡献指南](CONTRIBUTING.md) 为准。
+- 对受影响控件核对默认、悬停、选中、键盘焦点及退出状态；涉及共享颜色、布局或字体时，再覆盖相应主题、窄窗、缩放及独立速记消费者。
+- 检查对齐、可读性、层级、命中范围、滚动边缘，以及切换前后的几何稳定；不扩大成每次重跑全应用。
+- 不编写、不运行测试用例，不操作桌面 UI；需要的真实运行截图按贡献指南提供，无法完成的验收明确记录，不以构建成功或静态检查代替视觉验收。
+- 交付说明本次遵循的规则、最小检查结果及未验证项；只有文档或规则变化时检查内容、链接和差异，无需改版本、构建安装。
 
-投影只在需要暗示"这个动作会产生结果"时出现——按钮 hover、卡片浮现、对话框弹出。即使是这些时刻，投影也保持克制：统一的 slate 色系，小半径，低透明度。
+## 本次提炼依据
 
-### Shadow Vocabulary
-- **Ambient** (`box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04)`): 卡片默认状态。存在感极低，只是让卡片从背景中轻微分离。
-- **Lifted** (`box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.08)`): 对话框、模态框。表示"这是一层新的空间"。
-- **Button Press** (`box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12)`): 主按钮默认状态。暗示可点击性，但不夸张。
-- **Workspace Frame** (`box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.03), 0 0 8px rgba(15, 23, 42, 0.05)`): 编辑器主工作区的外框。1px 的 hairline 外描边 + 极微弱的弥散投影，定义了"这是内容区"的边界。
-- **Inset Border** (`box-shadow: inset 0 0 0 1px hsl(var(--input) / 0.8)`): 输入框的边框。不用真 border，用 inset shadow 模拟压痕感。hover/focus 时 shadow 加深或变色。
-- **Dark Ambient** (`box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 12px rgba(0, 0, 0, 0.32)`): 暗色模式下的 Workspace Frame。暗色模式下投影反而更明显，因为需要对抗纯黑背景的吞噬感。
+整理日期：2026-10-16。扫描范围为北京时间 2026-10-13 14:29 至 2026-10-16 14:29 的本地可读会话，包含已归档记录；77 个项目相关候选中排除其他项目、发布和纯流程内容，以用户明确要求、后续纠正及最终选版为依据。下列短摘只保留设计决策，不包含会话日志、私人路径或账号信息。
 
-### Named Rules
+| 日期／主题 | 明确要求或最终选择 | 对应约束 |
+| --- | --- | --- |
+| 10-14 强调色 | 「跟随各主题的选中边框」「深色也跟随所选强调色」；选择 B「精准轮廓」 | 主题色与精准轮廓，不锁死蓝色 |
+| 10-14 修改范围 | 「遵循我现有的结构、样式和交互」「不要修改我的流程链路」 | 保持整体风格与流程 |
+| 10-15 搜索／菜单／重命名 | 「多出的框」「图标和文字没有绝对垂直居中」「不要有这个框框」 | 去重框、统一基线，保留真实状态 |
+| 10-15 正文与动效 | 「全宽和标准的开始位置不一致」「点击标签栏文字会抖动」 | 统一顶部起点，状态切换不位移 |
+| 10-15 导航图标 | 「未选中时是空心的，选中后是实心的」；最终「改为 04 吧」 | 沿用成套导航图标 |
+| 10-16 菜单 | 「所有菜单都是这样」「不要有分割线」；收紧间距后选择 A | 全局共享的紧凑无分割线菜单 |
+| 10-16 搜索与选区 | 「强调色边框……并且要有一点背景色」「太浅了也看不出」 | 搜索命中与文字选区必须可读 |
+| 10-16 复用与文案 | 「不要独立实现，复用就好了」「常识类的介绍不要有」「太啰嗦了」 | 共享控件，减少说明 |
+| 10-16 字体 | 默认等宽 JetBrains Mono；衬线比较后「改为候选版」 | Georgia＋系统宋体，保留自定义 |
+| 10-16 小窗与标签 | 「小窗的圆角对齐主界面」「点击选中时要有强调色」「单标签不需要有交互选中效果」 | 区分默认、选中与单标签例外 |
+| 10-16 表格 | 「跟文字一样在同个地方开始」；选择把手外置 A 版 | 表格左齐正文，收紧顶部空白 |
+| 10-16 最小窗口／平台 | 「菜单高宽……跟编辑器贴合」「弹窗也要完全贴合编辑器」「确保它有背景色」 | 窄窗边界一致，背景跨平台可靠 |
 
-**The Flat-By-Default Rule.** 表面在静止时是平的。投影只作为响应出现：hover、elevation、focus。如果一个元素不需要用户操作，它就不应该有投影。
-
-**The Slate-Only Rule.** 所有投影的颜色基准统一为 slate (rgba(15, 23, 42)) 或暗色反色 (rgba(255,255,255,0.05))。禁止彩色投影、暖色投影、或任何带色相的阴影。
-
-## 5. Components
-
-整体性格：软陶质感。元素边缘圆润、无锋利感，像可以被捏动的软泥块。
-
-### Buttons
-- **Shape:** 温和圆角 (10px radius)，内边距紧凑 (10px 纵向，16px 横向)。
-- **Primary:** 鸢尾靛蓝填充 (#6366f1)，白色文字。默认状态带 Button Press 投影。Hover 时背景色轻微加深 (bg-primary/90)。
-- **Outline:** 透明填充，用 Inset Border 模拟细边框。Hover 时背景转为 Selected Parchment。
-- **Ghost:** 完全透明，无投影。Hover 时同 Outline。
-- **Secondary:** Selected Parchment 底色，带更弱的 inset border。用于非主要操作。
-- **Focus:** 全局无 focus ring。Focus 状态通过颜色变化表示（按钮 hover 色即 focus 色）。
-- **Disabled:** opacity-50，pointer-events-none。
-
-### Inputs / Fields
-- **Style:** 圆角 10px，透明边框，用 Inset Border 创造压痕感。背景同 Shell。
-- **Focus:** ring-2 ring-ring (鸢尾靛蓝 focus 指示)，ring-offset-1。这是极少数使用 ring 的场景。
-- **Placeholder:** Faded Ink 色。
-- **Disabled:** cursor-not-allowed，opacity-50。
-
-### Cards / Containers
-- **Corner Style:** 较大圆角 (14px)，让卡片感觉友好、无威胁。
-- **Background:** Pure Paper (#ffffff)。
-- **Border:** 无。卡片不靠边框定义边界，靠 Ambient 投影和背景色差异。
-- **Internal Padding:** 24px 统一内边距。
-
-### Dialogs / Modals
-- **Overlay:** 黑色 30% 透明度 + 2px backdrop blur。足够暗以聚焦注意力，但不至于完全隔绝上下文。
-- **Container:** 圆角 14px，Lifted 投影，背景 Shell。居中定位，最大宽度 512px。
-- **Animation:** 200ms 缩放+淡入 (zoom-in-95, fade-in)，ease-out。
-
-### Navigation / Sidebar
-- **Style:** 无 border，无 shadow。背景 Shell。项目之间靠 1px hairline 分隔。
-- **Hover:** 背景变为 Selected Parchment，文字保持 Ink。
-- **Active/Selected:** 同 Hover 色，无额外指示器（无左侧彩条、无 bold、无 icon 变色）。选中和 hover 的视觉差异极小，靠上下文推断。
-- **Divider:** 1px hairline (#dbdbdb / 暗色 #3d3d3d)，opacity 极低。
-
-### Scrollbars
-- **全局隐藏**（除编辑器和页面滚动容器外）。
-- **编辑器内:** 6px 宽，透明 track，hover 时显示 15% 透明度的 thumb。暗色模式反色。
-
-### BlockNote Editor Blocks
-编辑器块级组件是鹅的笔记的视觉核心。所有块样式服务于"内容即界面"的原则——块本身不装饰，只通过微妙的边界和背景暗示其语义角色。
-
-- **Callout:** `rounded-md` (6px)，`border border-border/60`，`bg-muted/40`，左侧 emoji 图标 + 正文行内内容。像一张贴在页面边缘的淡色便利贴，不抢正文风头。
-- **Code Block:** `rounded-lg` (8px) 外层 + `rounded-xl` (12px) 代码节点内层，monospace 字体 (JetBrains Mono)。深色背景在暗色模式下更暗。边框使用 `workspace-divider`（比 hairline 更隐晦）。顶部有语言选择和复制工具栏。
-- **Table:** 单元格 `border border-border/50`，表头 `bg-muted/40`，内边距 `py-2 px-3`（`8px 12px`）。无斑马纹，无 hover 高亮——表格是数据的容器，不是交互对象。
-- **Image / Video:** `rounded-md` (6px)，`max-width: 100%`。视频有原生 controls。图像无圆角阴影或边框装饰。
-- **Details / Toggle List:** `rounded-lg border border-border/40`，summary 行可点击，左侧 ▶ arrow，`rotate-90` 动画展开。内容区 `border-t border-border/20 bg-muted/5`。
-- **Blockquote:** `border-l-2 border-border/60 pl-3 text-muted-foreground`。左侧 2px 竖线引用标记，无额外背景或斜体——克制到近乎隐形。
-- **Divider (HR):** `border-border/40`，1px 水平线。编辑器和 AI markdown 中统一。
-- **Inline Code:** `rounded` (4px)，`bg-muted/30 border border-transparent hover:border-border`，monospace 字号 0.85em，padding `1px 4px`。深色模式下反转为 `bg-[hsl(220,6%,18%)] text-[hsl(220,6%,88%)]`。
-- **Inline Math (KaTeX):** 同 inline code 基础样式，额外 `inline-flex align-middle vertical-align: middle`。
-- **Link:** `text-foreground underline underline-offset-2 opacity-80 hover:opacity-100`。无颜色变化，仅靠下划线和不透明度变化标识可点击性。
-- **Heading (H1–H3):** H1 首元素 `margin-top: 0`（紧邻编辑器顶部时）。行高紧凑 (1.3–1.4)，字重 600。无额外装饰线或背景。
-- **Bullet / Ordered List:** `list-disc pl-5 space-y-0.5` / `list-decimal pl-5 space-y-0.5`。列表标记是标准浏览器默认，无自定义图标。
-- **Editor Side Menu (Drag Handle):** 块左侧，`h-6 w-6 rounded-md text-muted-foreground/70 hover:bg-muted hover:text-foreground`。仅在 hover 块时出现，平时完全隐形。
-- **Formatting Toolbar:** `rounded-[10px] border border-border/75 bg-popover p-1`，shadow 同 Card Ambient 但更弱。深色模式 border 变为 `white/15`，背景 `#2f3437`。
-- **Slash Command Menu:** `rounded-[18px]` 大圆角菜单，`rounded-[12px]` 菜单项，`rounded-[10px]` 图标容器。这是编辑器中圆角最大的 UI 元素，暗示其"浮层"身份。
-
-### AI Signature Card (LingCai)
-- **Background:** 彩色模糊渐变（青绿→蓝→紫→粉→橙）+ 毛玻璃覆盖层 (backdrop-filter: blur(14px))。
-- **Icon:** 径向渐变光晕 + 白色/暗色渐变覆盖。
-- **Text:** 彩虹渐变文字 (background-clip: text)。
-- **Animation:** 28s 循环 pan + 24s orb 浮动。支持 prefers-reduced-motion。
-
-## 6. Do's and Don'ts
-
-### Do:
-- **Do** 保持大面积留白。侧边栏、编辑器、对话框之间留出呼吸空间。
-- **Do** 使用暖调中性灰（带 60° hue tint）作为一切非内容区域的底色。
-- **Do** 让编辑器区域始终是最白的表面，形成自然的阅读焦点。
-- **Do** 在需要用户操作的元素上使用 10px 圆角和轻微投影。
-- **Do** 用 inset shadow 替代 input 和 outline 按钮的真边框，保持表面的连续性。
-- **Do** 为 AI 区域保留彩虹渐变的"特权"——它是系统中唯一允许多彩的地方。
-- **Do** 使用 prefers-reduced-motion 为所有 AI 动画提供降级。
-- **Do** 确保暗色模式不是"反色"，而是同一空间的傍晚版本：壳色变深、纸色变暗、文字变亮，但空间关系不变。
-
-### Don't:
-- **Don't** 使用 border-left 或 border-right 大于 1px 的彩色条纹作为列表项、卡片或提示的 accent。这是被明确禁止的 anti-pattern。
-- **Don't** 使用 gradient text 作为 UI 元素的装饰。唯一允许的 gradient text 是 AI 区域的 LingCai 品牌文字。
-- **Don't** 使用 glassmorphism 作为默认卡片样式。毛玻璃仅用于 AI 卡片。
-- **Don't** 使用 hero-metric 模板（大数字+小标签+支持数据+渐变 accent）。这不是仪表盘。
-- **Don't** 创建相同大小的 icon + heading + text 卡片网格并重复。笔记应用的内容区不是功能展示墙。
-- **Don't** 将模态框作为第一选择。优先使用 inline、渐进式的交互替代方案。
-- **Don't** 在按钮或 UI chrome 上使用 Notion Blue (#2383e2)。它是编辑器选择的专属颜色。
-- **Don't** 使用纯黑 (#000000) 或纯白 (#ffffff) 作为任何元素的颜色。即使前景色接近黑，也使用带暖 tint 的 Ink (#1e1e1e)。
-- **Don't** 做 Notion 全功能克隆的视觉风格。学习 Notion 的克制和留白，但不复制它的具体色彩值和组件形状。
-- **Don't** 做 Web-first SaaS 布局。这是 Electron 桌面应用，界面应感觉像原生桌面应用的一部分。
+这些是后续修改必须维持的设计要求，不代表本次已对所有现有界面完成实机验收。
