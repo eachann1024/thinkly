@@ -135,6 +135,14 @@ html.is-electron.os-linux {
 }
 
 @media (max-width: 719px) {
+  /* macOS 窄窗导航已隐藏，只保留原生窗控安全区，回收叠加的标题留白。 */
+  html.is-electron:not(.is-win):not(.os-linux) .workspace-shell[data-electron-chrome] .electron-titlebar {
+    --electron-traffic-inset: 78px;
+    padding-left: var(--electron-traffic-inset);
+  }
+  html.is-electron:not(.is-win):not(.os-linux) .workspace-shell[data-electron-chrome] .electron-document-header {
+    padding-left: 0;
+  }
   .electron-document-header::before,
   .electron-ai-header::before {
     display: none;
