@@ -49,52 +49,55 @@ export function GenerationOptionsPanel({
   );
 
   return (
-    <div ref={setContainer} role="group" aria-label="生成选项" className="ml-auto flex shrink-0 items-center gap-2">
-      <Toggle
-        variant="outline"
-        size="sm"
-        pressed={wm.showTitle}
-        onPressedChange={() => onToggle("showTitle")}
-        className="h-8 gap-1.5 text-xs"
-        aria-label="标题"
-      >
-        <GooseIcons.Type className="h-3.5 w-3.5" />
-        标题
-      </Toggle>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" aria-label="底部栏选项">
-            <span
-              aria-hidden="true"
-              className={cn(
-                "h-1.5 w-1.5 rounded-full",
-                wm.showWatermark ? "bg-[var(--goose-accent-solid)]" : "bg-muted-foreground/50",
-              )}
-            />
-            底部栏
-            <GooseIcons.ChevronDown className={cn("h-3.5 w-3.5 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          container={container}
-          align="end"
-          side="bottom"
-          sideOffset={8}
-          collisionPadding={12}
-          aria-label="底部栏选项"
-          className="w-60 max-w-[calc(100vw-24px)] p-1.5"
-          onKeyDownCapture={(event) => {
-            if (event.key !== "Escape") return;
-            event.preventDefault();
-            event.stopPropagation();
-            setOpen(false);
-          }}
+    <div ref={setContainer} role="group" aria-label="生成选项" className="ml-auto shrink-0">
+      {/* Keep the portal host outside the button row so mounting it cannot add a flex gap. */}
+      <div className="flex items-center gap-2">
+        <Toggle
+          variant="outline"
+          size="sm"
+          pressed={wm.showTitle}
+          onPressedChange={() => onToggle("showTitle")}
+          className="h-8 gap-1.5 text-xs"
+          aria-label="标题"
         >
-          {renderRow("showWatermark", "底部栏")}
-          <div className="mx-3 my-1 h-px bg-border" />
-          {rows.map((row) => renderRow(row.key, row.label, row.disabled, true))}
-        </PopoverContent>
-      </Popover>
+          <GooseIcons.Type className="h-3.5 w-3.5" />
+          标题
+        </Toggle>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" aria-label="底部栏选项">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  wm.showWatermark ? "bg-[var(--goose-accent-solid)]" : "bg-muted-foreground/50",
+                )}
+              />
+              底部栏
+              <GooseIcons.ChevronDown className={cn("h-3.5 w-3.5 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            container={container}
+            align="end"
+            side="bottom"
+            sideOffset={8}
+            collisionPadding={12}
+            aria-label="底部栏选项"
+            className="w-60 max-w-[calc(100vw-24px)] p-1.5"
+            onKeyDownCapture={(event) => {
+              if (event.key !== "Escape") return;
+              event.preventDefault();
+              event.stopPropagation();
+              setOpen(false);
+            }}
+          >
+            {renderRow("showWatermark", "底部栏")}
+            <div className="mx-3 my-1 h-px bg-border" />
+            {rows.map((row) => renderRow(row.key, row.label, row.disabled, true))}
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }
