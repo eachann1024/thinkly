@@ -37,7 +37,7 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
   } = surface;
   const session = useNotebookAiSession();
   const { messages, isStreaming, isBusy } = session;
-  const drag = usePanelWorkspaceDrag(panelRootRef, surface.composerRef, isBusy || Boolean(session.unavailableReason));
+  const drag = usePanelWorkspaceDrag(panelRootRef);
   const seed = usePanelComposerSeed(notebookId, session, surface);
   const commands = usePanelCommands(props, session, isFullscreen);
   const { handlePanelKeyDown } = commands;
@@ -63,12 +63,10 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
       ref={panelRootRef}
       onDragEnter={drag.onDragOver}
       onDragOver={drag.onDragOver}
-      onDragLeave={drag.onDragLeave}
       data-ai-panel-layout={isFullscreen ? "fullscreen" : "side-panel"}
       className={cn(
         "relative flex h-full min-h-0 flex-col",
         isFullscreen ? "min-w-0 w-full flex-1" : "z-[50] shrink-0",
-        drag.dropActive && "ring-1 ring-inset ring-[var(--goose-accent-solid)]",
       )}
       style={
         isFullscreen ? undefined : { width: effectiveWidth, maxWidth: "100%" }

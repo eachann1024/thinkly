@@ -19,12 +19,16 @@ function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDro
   for (const pane of surface.querySelectorAll<HTMLElement>(".editor-split-pane[data-pane-id]")) {
     const rect = pane.getBoundingClientRect();
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue;
+    const horizontalZone = rect.width * 0.3;
+    const verticalZone = Math.min(90, Math.max(28, rect.height * 0.22));
     const edges: [SplitContentPlacement, number, number][] = [
-      ["left", x - rect.left, rect.width], ["right", rect.right - x, rect.width],
-      ["top", y - rect.top, rect.height], ["bottom", rect.bottom - y, rect.height],
+      ["left", x - rect.left, horizontalZone], ["right", rect.right - x, horizontalZone],
+      ["top", y - rect.top, verticalZone], ["bottom", rect.bottom - y, verticalZone],
     ];
-    const nearest = edges.reduce((best, edge) => edge[1] < best[1] ? edge : best);
-    if (nearest[1] > Math.min(90, Math.max(28, nearest[2] * 0.22))) return null;
+    // 左右各覆盖 30%，分别判断热区后再选择最近边缘。
+    const candidates = edges.filter((edge) => edge[1] <= edge[2]);
+    if (!candidates.length) return null;
+    const nearest = candidates.reduce((best, edge) => edge[1] < best[1] ? edge : best);
     const placement = nearest[0];
     const origin = surface.getBoundingClientRect();
     const width = placement === "left" || placement === "right" ? rect.width / 2 : rect.width;
