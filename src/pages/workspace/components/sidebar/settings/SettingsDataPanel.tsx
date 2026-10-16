@@ -7,8 +7,10 @@ import { useDataPanelState } from "./data-panel/useDataPanelState";
 import { useWebdavConfiguration } from "./data-panel/useWebdavConfiguration";
 import { useWebdavSyncActions } from "./data-panel/useWebdavSyncActions";
 import { useWebdavRemoteActions } from "./data-panel/useWebdavRemoteActions";
+import { useIntroVideo } from "@/stores/introVideo";
 
 export function SettingsDataPanel(props: SettingsDataPanelProps) {
+  const replayIntro = useIntroVideo((state) => state.show);
   const data = useDataPanelState(props);
   const configuration = useWebdavConfiguration(data);
   const sync = useWebdavSyncActions(configuration);
@@ -31,9 +33,14 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
       <SettingsSectionCard
         title="新手引导"
         actions={
-          <Button variant="outline" onClick={onRestartGuide}>
-            重新开始引导
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={replayIntro}>
+              重播动画
+            </Button>
+            <Button variant="outline" onClick={onRestartGuide}>
+              重新开始引导
+            </Button>
+          </div>
         }
       />
 
