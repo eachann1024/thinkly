@@ -1,5 +1,7 @@
 鹅的笔记 · macOS 安装
 
+为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。
+
 1. 将 Goose Note 拖入「应用程序」，等待复制完成。
 2. 双击「安装指令.command」，在 macOS 授权窗口中输入密码。
 
