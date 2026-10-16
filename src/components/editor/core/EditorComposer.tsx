@@ -35,6 +35,7 @@ import { useEditorComposerInteractions } from "./useEditorComposerInteractions";
 import { useEditorComposerToolbar } from "./useEditorComposerToolbar";
 import { EditorLinkPopover } from "./EditorLinkPopover";
 import type { EditorComposerProps } from "./editorComposerTypes";
+import { useEditorDragSource } from "./useEditorDragSource";
 
 export {
   normalizeClipboardLineEndings,
@@ -85,6 +86,7 @@ export function EditorComposer({
   suppressFormattingToolbar = false,
   usesRawEditorContent,
 }: EditorComposerProps) {
+  useEditorDragSource(editor, page, editorContainerRef);
   const interactions = useEditorComposerInteractions({
     editor,
     editable,

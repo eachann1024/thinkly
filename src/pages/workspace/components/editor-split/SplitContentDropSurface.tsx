@@ -1,0 +1,115 @@
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { toast } from "@/components/ui/sonner";
+import { hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
+import { dropWorkspaceContent, type SplitContentPlacement } from "@/lib/editor-split/drop";
+import { useEditorSplit } from "@/stores/useEditorSplit";
+import { countLeaves, MAX_SPLIT_LEAVES } from "@/lib/editor-split/tree";
+import "./split-content-drop.css";
+
+type SplitDropTarget = {
+  paneId: string; placement: SplitContentPlacement;
+  left: number; top: number; width: number; height: number;
+};
+
+const labels: Record<SplitContentPlacement, string> = {
+  left: "在左侧分屏", right: "在右侧分屏", top: "在上方分屏", bottom: "在下方分屏",
+};
+
+function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDropTarget | null {
+  for (const pane of surface.querySelectorAll<HTMLElement>(".editor-split-pane[data-pane-id]")) {
+    const rect = pane.getBoundingClientRect();
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue;
+    const edges: [SplitContentPlacement, number, number][] = [
+      ["left", x - rect.left, rect.width], ["right", rect.right - x, rect.width],
+      ["top", y - rect.top, rect.height], ["bottom", rect.bottom - y, rect.height],
+    ];
+    const nearest = edges.reduce((best, edge) => edge[1] < best[1] ? edge : best);
+    if (nearest[1] > Math.min(90, Math.max(28, nearest[2] * 0.22))) return null;
+    const placement = nearest[0];
+    const origin = surface.getBoundingClientRect();
+    const width = placement === "left" || placement === "right" ? rect.width / 2 : rect.width;
+    const height = placement === "top" || placement === "bottom" ? rect.height / 2 : rect.height;
+    return {
+      paneId: pane.dataset.paneId!, placement,
+      left: rect.left - origin.left + (placement === "right" ? width : 0) + 5,
+      top: rect.top - origin.top + (placement === "bottom" ? height : 0) + 5,
+      width: Math.max(0, width - 10), height: Math.max(0, height - 10),
+    };
+  }
+  return null;
+}
+
+/** Captures edge drops before BlockNote, leaving normal in-document drops intact. */
+export function SplitContentDropSurface({ tabId, children }: { tabId: string; children: ReactNode }) {
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const [preview, setPreview] = useState<SplitDropTarget | null>(null);
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const reset = () => setPreview(null);
+    const over = (event: DragEvent) => {
+      if (!event.dataTransfer || !hasWorkspaceDrag(event.dataTransfer)) return;
+      const target = contentDropTarget(surface, event.clientX, event.clientY);
+      if (!target) { reset(); return; }
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "copy";
+      const state = useEditorSplit.getState().getStateForTab(tabId);
+      setFull(Boolean(state && countLeaves(state.root) >= MAX_SPLIT_LEAVES));
+      setPreview((old) => old?.paneId === target.paneId && old.placement === target.placement &&
+        old.left === target.left && old.top === target.top && old.width === target.width &&
+        old.height === target.height ? old : target);
+    };
+    const drop = (event: DragEvent) => {
+      reset();
+      if (!(event.target instanceof Node) || !surface.contains(event.target)) return;
+      if (!event.dataTransfer || !hasWorkspaceDrag(event.dataTransfer)) return;
+      const target = contentDropTarget(surface, event.clientX, event.clientY);
+      if (!target) return;
+      // BlockNote also moves/deletes selections from document capture, so consume
+      // edge drops at window capture before either editor can handle this copy.
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "copy";
+      const payload = readWorkspaceDrag(event.dataTransfer);
+      if (!payload) return;
+      void dropWorkspaceContent(tabId, target.paneId, target.placement as SplitContentPlacement, payload)
+        .catch(() => toast.error("无法打开拖入内容，请重试"));
+    };
+    const leave = (event: DragEvent) => {
+      if (!(event.relatedTarget instanceof Node) || !surface.contains(event.relatedTarget)) reset();
+    };
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") reset(); };
+    surface.addEventListener("dragover", over, true);
+    window.addEventListener("drop", drop, true);
+    surface.addEventListener("dragleave", leave);
+    window.addEventListener("dragend", reset);
+    window.addEventListener("drop", reset);
+    window.addEventListener("keydown", escape);
+    return () => {
+      surface.removeEventListener("dragover", over, true);
+      window.removeEventListener("drop", drop, true);
+      surface.removeEventListener("dragleave", leave);
+      window.removeEventListener("dragend", reset);
+      window.removeEventListener("drop", reset);
+      window.removeEventListener("keydown", escape);
+    };
+  }, [tabId]);
+  return (
+    <div ref={surfaceRef} className="relative h-full min-h-0" data-split-content-drop="">
+      {children}
+      {preview ? (
+        <div className="split-content-drop-layer" aria-hidden="true">
+          <div className="split-content-drop-preview" data-placement={preview.placement}
+            style={{ left: preview.left, top: preview.top, width: preview.width, height: preview.height }}>
+            <span className="split-content-drop-label">{full ? "最多只能分成 4 格" : labels[preview.placement]}</span>
+          </div>
+        </div>
+      ) : null}
+      <span className="sr-only" role="status" aria-live="polite">
+        {preview ? full ? "最多只能分成 4 格" : labels[preview.placement as SplitContentPlacement] : ""}
+      </span>
+    </div>
+  );
+}

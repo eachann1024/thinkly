@@ -1,0 +1,32 @@
+.split-content-drop-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.split-content-drop-preview {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 2px solid var(--goose-accent-solid);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--goose-accent-solid) 19%, transparent);
+}
+
+.split-content-drop-label {
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 11px;
+  border: 1px solid color-mix(in srgb, var(--goose-accent-solid) 42%, transparent);
+  border-radius: 7px;
+  background: hsl(var(--background) / 0.94);
+  color: var(--goose-accent-text);
+  font-size: 12px;
+  font-weight: 500;
+}

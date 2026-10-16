@@ -23,6 +23,7 @@ import {
 import type { SplitGroup, SplitLeaf, SplitState } from "@/lib/editor-split/types";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
+import { SplitContentDropSurface } from "./SplitContentDropSurface";
 
 export type EditorSplitPaneRenderContext = {
   focused: boolean;
@@ -231,7 +232,7 @@ function SplitGroupView({
   );
 }
 
-export function EditorSplitSurface({
+function EditorSplitLayout({
   tabId,
   renderPane,
   onContextMenu,
@@ -289,4 +290,10 @@ export function EditorSplitSurface({
       />
     </div>
   );
+}
+
+export function EditorSplitSurface(props: EditorSplitSurfaceProps) {
+  return <SplitContentDropSurface key={props.tabId} tabId={props.tabId}>
+      <EditorSplitLayout {...props} />
+    </SplitContentDropSurface>;
 }
