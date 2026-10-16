@@ -15,6 +15,7 @@ import {
   SIDE_MENU_CONTENT_GAP,
   isPointerInSideMenuCorridor,
   isPointerOverBlockContent,
+  isPointerInRects,
 } from "./sideMenuHover";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 
@@ -36,7 +37,7 @@ export function useEditorSideMenuTarget(
   const blockId = isDragging ? dragBlockId.current : hoveredBlockId;
   const block = blockId ? editor.getBlock(blockId) : undefined;
   const [referencePos, setReferencePos] = useState<DOMRect | null>(null);
-  const [tablePlacement, setTablePlacement] = useState<{ top: number; gap: number }>();
+  const [tablePlacement, setTablePlacement] = useState<{ top: number; gap: number; corridorTop: number }>();
   const corridor = useRef<{ rect: DOMRect | null; gap: number }>({
     rect: null,
     gap: 0,
@@ -74,21 +75,18 @@ export function useEditorSideMenuTarget(
       }
       const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;
       const tableRect = table.getBoundingClientRect();
-      const firstRow = table.rows[0]?.getBoundingClientRect();
-      const gap = 28 * scale + SIDE_MENU_CONTENT_GAP;
-      const boundary = content.closest(".workspace-main-sheet")?.getBoundingClientRect().left ?? 0;
-      const fitsGutter = left - boundary >= gap + 56 * scale + 4;
       setTablePlacement({
-        // Wide gutters keep block and row grips side by side; narrow ones stagger them.
-        top: fitsGutter
-          ? tableRect.top + (firstRow?.height ?? 44 * scale) / 2
-          : tableRect.top - 16 * scale - 4,
-        gap: fitsGutter ? gap : SIDE_MENU_CONTENT_GAP,
+        // Keep block controls above the row grip, independent of sidebar width.
+        top: tableRect.top - 16 * scale - 4,
+        gap: SIDE_MENU_CONTENT_GAP,
+        corridorTop: tableRect.top - 32 * scale - 6,
       });
     };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(content);
+    const sheet = content.closest(".workspace-main-sheet");
+    if (sheet) observer.observe(sheet);
     window.addEventListener("resize", update);
     window.addEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
     document.addEventListener("scroll", update, true);
@@ -113,7 +111,15 @@ export function useEditorSideMenuTarget(
     block?.type === "table"
       ? (tablePlacement?.gap ?? SIDE_MENU_CONTENT_GAP)
       : SIDE_MENU_CONTENT_GAP + HEADING_SIDE_MENU_EXTRA_GAP;
-  corridor.current = { rect: referencePos, gap: sideMenuGap };
+  const corridorTop = tablePlacement && referencePos
+    ? Math.min(referencePos.top, tablePlacement.corridorTop)
+    : referencePos?.top;
+  corridor.current = {
+    rect: referencePos && corridorTop !== undefined
+      ? new DOMRect(referencePos.left, corridorTop, referencePos.width, referencePos.bottom - corridorTop)
+      : referencePos,
+    gap: sideMenuGap,
+  };
   useEffect(() => {
     const updateSidebarInteracting = (
       target: EventTarget | null = document.activeElement,
@@ -146,7 +152,9 @@ export function useEditorSideMenuTarget(
       if (
         content &&
         editor.prosemirrorView.dom.contains(content) &&
-        isPointerOverBlockContent(content, event.clientX, event.clientY)
+        (content.dataset.contentType === "table"
+          ? isPointerInRects([content.getBoundingClientRect()], event.clientX, event.clientY)
+          : isPointerOverBlockContent(content, event.clientX, event.clientY))
       ) {
         setHoveredBlockId(
           content.closest<HTMLElement>('[data-node-type="blockContainer"]')

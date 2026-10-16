@@ -3,7 +3,6 @@ import { getNodeById } from "@blocknote/core";
 import { TableHandlesExtension } from "@blocknote/core/extensions";
 import {
   GenericPopover,
-  TableCellButton,
   useBlockNoteEditor,
   useExtensionState,
 } from "@blocknote/react";
@@ -15,7 +14,6 @@ import { tableHandleRect, releaseTableChrome } from "./tableHandleGeometry";
 type Chrome =
   | "row"
   | "column"
-  | "cell"
   | "addOrRemoveRows"
   | "addOrRemoveColumns";
 
@@ -55,15 +53,14 @@ function TableChrome({
         placement,
         whileElementsMounted: onMount,
         middleware: [
-          offset(({ rects }) => placement === "left"
-            ? Math.min(gap, rects.reference.x - rects.floating.width - 4)
-            : gap),
+          offset(gap),
           ...(placement === "left" ? [size({
-            apply({ rects, elements }) {
-              // Quick note has a narrow gutter: keep the grip inside the viewport.
+            apply({ elements }) {
+              // Floating UI rects are offset-parent relative; gutter space is viewport relative.
+              const left = (getRect?.() ?? element.getBoundingClientRect()).left;
               elements.floating.style.setProperty(
                 "--goose-table-handle-max-width",
-                `${Math.max(12, rects.reference.x - 8)}px`,
+                `${Math.max(4, left - gap)}px`,
               );
             },
           })] : []),
@@ -101,7 +98,6 @@ export function GooseTableHandlesController() {
           [
             "row",
             "column",
-            "cell",
             "addOrRemoveRows",
             "addOrRemoveColumns",
           ] as Chrome[]
@@ -162,11 +158,6 @@ export function GooseTableHandlesController() {
             orientation="column"
             hideOtherElements={hide.column}
           />
-        </TableChrome>
-      )}
-      {cell && visible("cell") && (
-        <TableChrome element={cell} placement="top-end" gap={-15}>
-          <TableCellButton hideOtherElements={hide.cell} />
         </TableChrome>
       )}
       {visible("addOrRemoveRows") && (
