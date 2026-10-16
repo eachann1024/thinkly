@@ -53,6 +53,19 @@
 .electron-ai-header {
   width: calc(var(--workspace-ai-width, 338px) + var(--workspace-stage-pad-right) - var(--electron-titlebar-end-inset, 8px) - var(--electron-window-controls-width, 0px));
 }
+/* 同一桌面顶栏的文件、标签与 AI 标题共用界面字号及字重。 */
+html.is-electron .electron-titlebar :is(
+  .page-file-title,
+  .tab-rail-item,
+  .tab-rail > span,
+  .electron-ai-header > span,
+  .notebook-ai-conversation-title
+) {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
 .workspace-shell:has(.workspace-sidebar-pane[data-sidebar-resizing]) .electron-titlebar {
   transition: none;
 }
