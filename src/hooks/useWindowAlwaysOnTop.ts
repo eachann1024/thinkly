@@ -1,36 +1,58 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   getDesktopAlwaysOnTop,
   setDesktopAlwaysOnTop,
 } from "@/lib/electron/alwaysOnTop";
 
-/** 仅 Electron 有效；Electron 构建里始终为 false。 */
+/** 读取当前窗口的真实置顶状态；不写入全局设置或影响速记窗口。 */
 export function useWindowAlwaysOnTop(): {
   alwaysOnTop: boolean;
-  toggleAlwaysOnTop: () => void;
+  isPending: boolean;
+  toggleAlwaysOnTop: () => Promise<void>;
 } {
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
+  const [isPending, setIsPending] = useState(true);
+  const pendingRef = useRef(true);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-
+    mountedRef.current = true;
     let cancelled = false;
     void getDesktopAlwaysOnTop().then((value) => {
       if (!cancelled) setAlwaysOnTop(value);
+    }).catch(() => {
+      if (!cancelled) toast.error("无法读取窗口置顶状态，请重试");
+    }).finally(() => {
+      if (!cancelled) {
+        pendingRef.current = false;
+        setIsPending(false);
+      }
     });
     return () => {
       cancelled = true;
+      mountedRef.current = false;
     };
   }, []);
 
-  const toggleAlwaysOnTop = useCallback(() => {
+  const toggleAlwaysOnTop = useCallback(async () => {
+    if (pendingRef.current || !mountedRef.current) return;
+    pendingRef.current = true;
+    setIsPending(true);
+    try {
+      // 切换前再读一次，避免顶栏重挂载或宿主状态变化时反转旧值。
+      const current = await getDesktopAlwaysOnTop();
+      if (!mountedRef.current) return;
+      setAlwaysOnTop(current);
+      const next = await setDesktopAlwaysOnTop(!current);
+      if (mountedRef.current) setAlwaysOnTop(next);
+    } catch {
+      if (mountedRef.current) toast.error("窗口置顶切换失败，请重试");
+    } finally {
+      pendingRef.current = false;
+      if (mountedRef.current) setIsPending(false);
+    }
+  }, []);
 
-    const next = !alwaysOnTop;
-    setAlwaysOnTop(next);
-    void setDesktopAlwaysOnTop(next).then(
-      (value) => setAlwaysOnTop(value),
-      () => setAlwaysOnTop(!next),
-    );
-  }, [alwaysOnTop]);
-
-  return { alwaysOnTop, toggleAlwaysOnTop };
+  return { alwaysOnTop, isPending, toggleAlwaysOnTop };
 }
