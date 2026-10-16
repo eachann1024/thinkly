@@ -139,7 +139,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
       </div>
       <SearchSheetFilters count={count}/>
-      {answer ? <div className="search-sheet-list">
+      {answer ? <div className="search-sheet-list" data-answer="true">
         <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
       </div> : <div ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
         <div id="search-sheet-results" role="listbox" aria-label="搜索结果">
@@ -150,7 +150,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         </div>
         {loadError && <div className="search-sheet-status" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>重试读取</Button></div>}
         {searchError && <div className="search-sheet-status" role="alert">{searchError}</div>}
-        {!searchError && !busy && !results.length && <div className="search-sheet-status" role="status">
+        {!searchError && !busy && !results.length && <div className="search-sheet-status" role="status" data-empty={!hasQuery || undefined}>
+          {!hasQuery && <span className="search-sheet-status-glyph" aria-hidden="true"><Search size={20}/></span>}
           <strong>{hasQuery ? "未找到相关笔记" : scopeAll ? "搜索所有记事本" : "搜索当前记事本"}</strong>
           {hasQuery && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>}
         </div>}
