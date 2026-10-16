@@ -10,6 +10,7 @@ import { closeSplitPaneFromUi } from "@/lib/editor-split/commands";
 import type { SplitLeaf } from "@/lib/editor-split/types";
 import { cn } from "@/lib/utils";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
+import { PageDocumentTitle } from "@/pages/workspace/components/page/PageDocumentTitle";
 import { useScrollRestoration } from "@/pages/workspace/hooks/useScrollRestoration";
 import { usePages } from "@/stores/usePages";
 import { useEditorPaneRegistry } from "./editorPaneRegistry";
@@ -154,6 +155,9 @@ export function SplitEditorPane({
           className="page-scroll-container h-full min-h-0 min-w-0 flex-1 overflow-y-auto outline-none [background:var(--goose-editor-surface)]"
         >
           <div className="page-layout-document flex min-h-full flex-col">
+            {isLocalFilePage && !page.isFolder ? (
+              <PageDocumentTitle page={page} focused={focused} editable={editable} />
+            ) : null}
             <ErrorBoundary
               resetKey={leaf.pageId}
               fallback={(_, reset) => (

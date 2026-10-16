@@ -47,6 +47,23 @@
 [data-page-layout] .bn-editor :is(h1, [data-content-type="heading"]:has(h1)) { --level: calc(34px * var(--editor-scale, 1)); font-size: var(--level); line-height: 1.6; font-weight: 700; letter-spacing: -0.5px; }
 [data-page-layout] .bn-editor :is(h2, [data-content-type="heading"]:has(h2)) { --level: calc(21px * var(--editor-scale, 1)); font-size: var(--level); line-height: 1.6; font-weight: 600; letter-spacing: -0.25px; }
 [data-page-layout] .bn-editor :is(h3, [data-content-type="heading"]:has(h3)) { --level: calc(19px * var(--editor-scale, 1)); font-size: var(--level); line-height: 1.6; }
+/* 本地文件的正文大标题：与 H1 同级字号，左缘对齐正文块文字。 */
+[data-page-layout] .page-document-title {
+  display: block;
+  width: 100%;
+  field-sizing: content;
+  min-height: 0;
+  margin: 0 0 14px;
+  resize: none;
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-family: var(--goose-document-font, inherit);
+  font-size: calc(40px * var(--editor-scale, 1));
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  overflow-wrap: anywhere;
+}
 /* BlockNote wraps blocks in flex columns, so the HTML reference's prose margins
  * cannot collapse naturally. Subtract the previous leaf block's trailing gap.
  * ponytail: nested structures keep their own rhythm; extend their last-block rule if needed. */
