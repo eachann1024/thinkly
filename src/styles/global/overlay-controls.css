@@ -33,7 +33,7 @@
     box-shadow: var(--goose-tooltip-shadow);
     font-size: var(--goose-tooltip-font-size);
     font-weight: 500;
-    line-height: 1;
+    line-height: 1.5;
     user-select: none;
     overflow: hidden;
     backdrop-filter: blur(1px);
