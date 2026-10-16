@@ -17,6 +17,7 @@ import {
 } from "./mainTreeRowConfig";
 import { TreeRowIcon, MainTreeRow } from "./MainTreeRow";
 import { PendingCreateNameInput } from "./PendingCreateNameInput";
+import { MainTreeRowTitle } from "./MainTreeRowTitle";
 import { writeFolderDrag, writePageDrag } from "@/lib/workspace-drag";
 
 export let activeMainTreeDragId: string | null = null;
@@ -216,8 +217,6 @@ export function renderItem({
         )}
       />
       {iconNode}
-      {/* leading-snug 抵消行容器的 leading-none：truncate(overflow hidden) 配 1 倍行高
-          会把 g/y/p 等字母的降部裁掉 */}
       {isPendingCreate ? (
         <PendingCreateNameInput
           key={page.id}
@@ -228,9 +227,10 @@ export function renderItem({
         />
       ) : (
         <SidebarInlineRename>
-          <span className="relative z-10 truncate flex-1 min-w-0 pointer-events-none leading-snug">
-            {title}
-          </span>
+          <MainTreeRowTitle
+            title={title}
+            count={isFolderRow ? item.children?.length ?? 0 : 0}
+          />
         </SidebarInlineRename>
       )}
     </MainTreeRow>

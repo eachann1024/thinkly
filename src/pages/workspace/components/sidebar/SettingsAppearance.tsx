@@ -13,6 +13,7 @@ import { renderAdditionalFontSettings } from "./appearance-settings/renderAdditi
 import { renderReadingSettings } from "./appearance-settings/renderReadingSettings";
 import { renderUIFontSizeSettings } from "./appearance-settings/renderUIFontSizeSettings";
 import { CanvasSettings } from "./appearance-settings/CanvasSettings";
+import { SidebarDisplaySettings } from "./appearance-settings/SidebarDisplaySettings";
 
 export function SettingsAppearance(props: SettingsAppearanceProps) {
   const appearanceSettingsContext = useAppearanceSettings(props);
@@ -55,6 +56,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
       <div className="settings-appearance-options min-w-0 space-y-8">
         {section !== "reading" && renderAppearanceTheme(context)}
         {section !== "reading" && <CanvasSettings />}
+        {section !== "reading" && <SidebarDisplaySettings />}
         {section !== "appearance" && (
           <SettingsSectionCard
             title="字体与阅读"
