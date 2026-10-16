@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import {
   extractClipboardImageFiles,
@@ -7,6 +7,8 @@ import {
 } from "@/components/editor/utils/pasteClipboardImage";
 import type { ComposerProps } from "./types";
 import type { ComposerSurfaceState } from "./useComposerSurface";
+import { GOOSE_FOLDER_MIME, hasWorkspaceDrag } from "@/lib/workspace-drag";
+import { insertWorkspaceDragIntoAi } from "./workspaceDragToAi";
 const SUPPORTED_IMAGE_MEDIA_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -18,6 +20,15 @@ export function useComposerAttachments(
   { inputRef }: ComposerSurfaceState,
 ) {
   const [dropActive, setDropActive] = useState(false);
+  useEffect(() => {
+    const clear = () => setDropActive(false);
+    window.addEventListener("drop", clear, true);
+    document.addEventListener("dragend", clear, true);
+    return () => {
+      window.removeEventListener("drop", clear, true);
+      document.removeEventListener("dragend", clear, true);
+    };
+  }, []);
   const addImageFiles = useCallback((selectedFiles: File[]) => {
     if (selectedFiles.length === 0) return;
 
@@ -66,18 +77,27 @@ export function useComposerAttachments(
     [addImageFiles, disabled, isStreaming],
   );
 
-  /** 拖入图片：允许 drop + 轻量高亮 */
+  /** 文件引用、选区和图片共用落点反馈。 */
   const handleDockDragOver = useCallback(
     (event: React.DragEvent) => {
       if (disabled || isStreaming) return;
       const types = Array.from(event.dataTransfer?.types ?? []);
+      if (types.includes(GOOSE_FOLDER_MIME)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = "none";
+        setDropActive(false);
+        return;
+      }
       if (
+        !hasWorkspaceDrag(event.dataTransfer) &&
         !types.includes("Files") &&
         !types.some((t) => t.startsWith("image/"))
       ) {
         return;
       }
       event.preventDefault();
+      event.stopPropagation();
       event.dataTransfer.dropEffect = "copy";
       setDropActive(true);
     },
@@ -94,13 +114,19 @@ export function useComposerAttachments(
     (event: React.DragEvent) => {
       setDropActive(false);
       if (disabled || isStreaming) return;
+      if (hasWorkspaceDrag(event.dataTransfer) || Array.from(event.dataTransfer.types).includes(GOOSE_FOLDER_MIME)) {
+        event.preventDefault();
+        event.stopPropagation();
+        insertWorkspaceDragIntoAi(event.dataTransfer, inputRef.current);
+        return;
+      }
       const imageFiles = extractClipboardImageFiles(event.dataTransfer);
       if (imageFiles.length === 0) return;
       event.preventDefault();
       event.stopPropagation();
       addImageFiles(imageFiles);
     },
-    [addImageFiles, disabled, isStreaming],
+    [addImageFiles, disabled, inputRef, isStreaming],
   );
 
   return {

@@ -136,6 +136,7 @@ export function EditorContextMenu({
             ref={editorContainerRef}
             onDragStartCapture={(event) => {
               if (
+                !(event.target as Element).closest("[data-workspace-drag-source]") &&
                 !(event.target as Element).closest(".bn-side-menu") &&
                 !(
                   (event.target as Element).closest(".bn-inline-content") &&

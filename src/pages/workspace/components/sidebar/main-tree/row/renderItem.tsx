@@ -17,6 +17,7 @@ import {
 } from "./mainTreeRowConfig";
 import { TreeRowIcon, MainTreeRow } from "./MainTreeRow";
 import { PendingCreateNameInput } from "./PendingCreateNameInput";
+import { writeFolderDrag, writePageDrag } from "@/lib/workspace-drag";
 
 export let activeMainTreeDragId: string | null = null;
 
@@ -88,19 +89,26 @@ export function renderItem({
   // 拖入高亮，让人误以为不能拖成子页面。换成紧凑的"图标+标题"小胶囊，
   // 并弱化源行，让落点反馈始终可见。
   const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
+    if (!e.dataTransfer) return;
+    // startDragging 会同步选中源行；先标记拖拽，避免选中回调打开笔记。
+    activeMainTreeDragId = String(item.index);
+    onItemDragStart?.(String(item.index));
     (
       interactive.onDragStart as
         | React.DragEventHandler<HTMLDivElement>
         | undefined
     )?.(e);
-    if (!e.dataTransfer) return;
+    if (!isPendingCreate && page.isFolder) {
+      writeFolderDrag(e.dataTransfer, page.id);
+    }
+    if (!isPendingCreate && !page.isFolder) {
+      writePageDrag(e.dataTransfer, page.id);
+    }
     if (page.localFilePath && !isPendingCreate && !page.localUnsaved) {
       e.dataTransfer.setData("text/plain", page.localFilePath);
       // 外部软件复制路径文本；应用内仍允许移动节点。
       e.dataTransfer.effectAllowed = "copyMove";
     }
-    activeMainTreeDragId = String(item.index);
-    onItemDragStart?.(String(item.index));
 
     const ghost = document.createElement("div");
     ghost.className = "main-tree-drag-ghost";

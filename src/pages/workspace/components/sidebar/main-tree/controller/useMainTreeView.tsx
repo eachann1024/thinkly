@@ -90,13 +90,16 @@ export function useMainTreeView(
   const verticalKeyboardNavigationRef = useRef(false);
 
   const viewState = useMemo(() => {
+    const creatingInCurrentNotebook = pendingCreate?.workspaceId === activeNotebookId;
     const highlightSelection =
-      draggingItemId && items[draggingItemId]
+      creatingInCurrentNotebook
+        ? []
+        : draggingItemId && items[draggingItemId]
         ? [draggingItemId]
         : pendingSelectedId && items[pendingSelectedId]
           ? [pendingSelectedId]
-          : highlightedPageId && items[highlightedPageId]
-            ? [highlightedPageId]
+          : highlightedPageId
+            ? items[highlightedPageId] ? [highlightedPageId] : []
             : selectedId
               ? [selectedId]
               : [];
@@ -104,7 +107,7 @@ export function useMainTreeView(
       main: {
         expandedItems: expandedIds,
         selectedItems: highlightSelection as TreeItemIndex[],
-        focusedItem: (focusedId ?? undefined) as TreeItemIndex | undefined,
+        focusedItem: (creatingInCurrentNotebook ? undefined : focusedId ?? undefined) as TreeItemIndex | undefined,
       },
     };
   }, [
@@ -114,6 +117,8 @@ export function useMainTreeView(
     selectedId,
     highlightedPageId,
     pendingSelectedId,
+    pendingCreate,
+    activeNotebookId,
     items,
   ]);
 
