@@ -1,0 +1,151 @@
+/* 配置表单使用不透明表面，兼容没有 under-window 材质的桌面窗口。 */
+.writing-setup-prompt {
+  --goose-control-font-size: 1rem;
+  --goose-control-height: 2.75rem;
+  --goose-control-height-compact: 2.5rem;
+  --goose-field-height: 2.75rem;
+  --goose-control-icon-size: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: min(64rem, calc(100vw - 3rem));
+  max-width: none;
+  max-height: calc(100dvh - 3rem);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  background: #fff;
+  color: hsl(var(--foreground));
+  box-shadow: 0 24px 64px rgb(0 0 0 / 20%);
+}
+
+.writing-setup-prompt-header {
+  flex-shrink: 0;
+  padding: 2rem 4rem 1.5rem 2rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.writing-setup-prompt-header h2 {
+  font-size: 1.65rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.writing-setup-prompt-header p {
+  margin-top: .5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.writing-setup-prompt > [aria-label="关闭"] {
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.writing-setup-prompt-form {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 1.5rem 2rem;
+}
+
+.writing-setup-prompt-form > .mx-auto {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.25rem;
+  max-width: none;
+  margin: 0;
+}
+
+.writing-setup-prompt-form > .mx-auto > * {
+  min-width: 0;
+  margin: 0;
+}
+
+.writing-setup-prompt-form > .mx-auto > :first-child {
+  grid-column: 1 / -1;
+}
+
+.writing-setup-prompt-form > .mx-auto > :nth-child(2) {
+  grid-row: span 3;
+}
+
+.writing-setup-prompt-form section {
+  padding: 1.25rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: .75rem;
+  container-type: inline-size;
+  container-name: writing-setup-card;
+}
+
+.writing-setup-prompt-form h4,
+.writing-setup-prompt-form summary {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.writing-setup-prompt-form :is(label, input, .text-sm) {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.writing-setup-prompt-form .goose-settings-option-row {
+  padding: .85rem 0;
+  background: transparent;
+}
+
+.writing-setup-prompt-form .settings-ai-pick-row {
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.writing-setup-prompt-form .settings-ai-pick-row > :last-child {
+  width: 100%;
+  min-width: 0;
+}
+
+.writing-setup-prompt-form .settings-ai-pick-row button {
+  width: 100%;
+  min-width: 0;
+}
+
+.writing-setup-prompt-actions {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding: 1rem 2rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+@container writing-setup-card (max-width: 25rem) {
+  .goose-settings-option-row:has(> div > div > button) {
+    flex-wrap: wrap;
+  }
+  .goose-settings-option-row > .shrink-0 {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+html.dark .writing-setup-prompt {
+  background: #1c1c1a;
+}
+
+@media (max-width: 52rem) {
+  .writing-setup-prompt {
+    width: calc(100vw - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+  }
+  .writing-setup-prompt-header { padding: 1.5rem 4rem 1.25rem 1.25rem; }
+  .writing-setup-prompt-form { padding: 1.25rem; }
+  .writing-setup-prompt-form > .mx-auto { grid-template-columns: minmax(0, 1fr); }
+  .writing-setup-prompt-form > .mx-auto > :nth-child(2) { grid-row: auto; }
+  .writing-setup-prompt-actions { padding: 1rem 1.25rem; }
+}

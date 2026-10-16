@@ -26,7 +26,7 @@ export type GoosePromptSuggestionMenuProps = {
   placeholder?: string;
   disabled?: boolean;
   busy?: boolean;
-  /** 忙态时在输入槽里单行展示思考/生成文本，不撑开高度。 */
+  /** 忙态时在输入槽里展示思考/生成文本，不撑开高度。 */
   busyTickerText?: string;
   /** 可换行 tag 行；为空则不渲染。 */
   tags?: GooseAiMenuTag[];
@@ -40,17 +40,6 @@ export type GoosePromptSuggestionMenuProps = {
 };
 
 /**
- * 与 editor-ai-menu.css 对齐：
- * --goose-ai-line 20 + --goose-ai-pad-y 8*2 = 36 首行总高
- * 多行上限 ≈ 6 行内容 + 上下 padding
- */
-const DEFAULT_LINE_HEIGHT_PX = 20;
-const DEFAULT_PAD_Y_PX = 8;
-const DEFAULT_MIN_HEIGHT_PX = DEFAULT_PAD_Y_PX * 2 + DEFAULT_LINE_HEIGHT_PX; // 36
-const DEFAULT_MAX_AUTO_HEIGHT_PX =
-  DEFAULT_LINE_HEIGHT_PX * 6 + DEFAULT_PAD_Y_PX * 2; // 136
-
-/**
  * 行内 AI 提示菜单：多行 textarea + 高度随内容增长 + 可换行 tag 行。
  * 键盘：Enter 提交自由提示；Shift+Enter 换行。tag 是原生 button，Enter 由浏览器处理。
  */
@@ -62,7 +51,7 @@ export function GoosePromptSuggestionMenu(
     promptText,
     onPromptTextChange,
     disabled,
-    maxAutoHeightPx = DEFAULT_MAX_AUTO_HEIGHT_PX,
+    maxAutoHeightPx,
   } = props;
 
   const [internalPromptText, setInternalPromptText] = useState("");
@@ -114,30 +103,42 @@ export function GoosePromptSuggestionMenu(
     if (!input || disabled) return;
     const active = document.activeElement;
     // 首次打开立即输入；生成结束时不抢走用户已移到其他区域的焦点。
-    if (wasDisabled && active !== document.body &&
-      !input.closest(".goose-ai-prompt-menu")?.parentElement?.contains(active)) return;
+    if (
+      wasDisabled &&
+      active !== document.body &&
+      !input.closest(".goose-ai-prompt-menu")?.parentElement?.contains(active)
+    )
+      return;
     input.focus({ preventScroll: true });
     input.setSelectionRange(input.value.length, input.value.length);
   }, [disabled]);
 
-  // 高度随内容增长（border-box 含 padding）；最小值 = 图标槽，保证首行中线对齐
+  // 从实际排版读取高度，跟随界面字号；窄窗换行后重新量高。
   useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
-    el.style.boxSizing = "border-box";
-    if (props.busy) {
-      el.style.height = `${DEFAULT_MIN_HEIGHT_PX}px`;
-      el.style.overflowY = "hidden";
-      return;
-    }
-    el.style.height = "0px";
-    const measured = el.scrollHeight;
-    const next = Math.min(
-      Math.max(measured, DEFAULT_MIN_HEIGHT_PX),
-      maxAutoHeightPx,
-    );
-    el.style.height = `${next}px`;
-    el.style.overflowY = measured > maxAutoHeightPx ? "auto" : "hidden";
+    const resize = () => {
+      const style = getComputedStyle(el);
+      const minHeight = Number.parseFloat(style.minHeight) || 36;
+      const maxHeight = Math.max(
+        minHeight,
+        maxAutoHeightPx ??
+          (Number.parseFloat(style.maxHeight) || minHeight * 3),
+      );
+      el.style.height = "0px";
+      const measured = props.busy ? minHeight : el.scrollHeight;
+      el.style.height = `${Math.min(Math.max(measured, minHeight), maxHeight)}px`;
+      el.style.overflowY = measured > maxHeight ? "auto" : "hidden";
+    };
+    resize();
+    let lastWidth = el.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === lastWidth) return;
+      lastWidth = el.clientWidth;
+      resize();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [
     promptTextToUse,
     disabled,
@@ -147,12 +148,12 @@ export function GoosePromptSuggestionMenu(
     props.busyTickerText,
   ]);
 
-  const hasRightSection = props.rightSection != null;
   const tags = props.tags ?? [];
   const showTagRow =
     tags.length > 0 ||
     props.actionMenus?.length ||
     props.showSubmit ||
+    props.rightSection ||
     (props.showPlus && props.onOpenAiPanel);
 
   return (
@@ -160,7 +161,6 @@ export function GoosePromptSuggestionMenu(
       <div
         className={mergeCSSClasses(
           "goose-ai-prompt-field",
-          hasRightSection ? "goose-ai-prompt-field--with-right" : "",
           disabled ? "goose-ai-prompt-field--disabled" : "",
           props.busy ? "goose-ai-prompt-field--busy" : "",
         )}
@@ -171,7 +171,9 @@ export function GoosePromptSuggestionMenu(
             {props.icon}
           </div>
         )}
-        <Textarea context="editor" variant="inline"
+        <Textarea
+          context="editor"
+          variant="inline"
           ref={textareaRef}
           className="goose-ai-prompt-field__textarea bn-combobox-input"
           name="ai-prompt"
@@ -181,9 +183,15 @@ export function GoosePromptSuggestionMenu(
           placeholder={props.busy ? "" : props.placeholder}
           disabled={props.disabled}
           onKeyDown={handleKeyDown}
-          onCompositionStart={() => { isComposingRef.current = true; }}
-          onCompositionEnd={() => { isComposingRef.current = false; }}
-          onBlur={() => { isComposingRef.current = false; }}
+          onCompositionStart={() => {
+            isComposingRef.current = true;
+          }}
+          onCompositionEnd={() => {
+            isComposingRef.current = false;
+          }}
+          onBlur={() => {
+            isComposingRef.current = false;
+          }}
           onChange={handleChange}
           autoComplete="off"
           aria-multiline="true"
@@ -202,11 +210,6 @@ export function GoosePromptSuggestionMenu(
             </div>
           </div>
         ) : null}
-        {hasRightSection && (
-          <div className="goose-ai-prompt-field__right">
-            {props.rightSection}
-          </div>
-        )}
       </div>
       {showTagRow && (
         <GoosePromptActions props={props} promptTextToUse={promptTextToUse} />

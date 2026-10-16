@@ -124,24 +124,35 @@ export function GooseAIMenuController({
 
   const floatingUIOptions = useMemo<FloatingUIOptions>(() => {
     const pad = AI_MENU_VIEWPORT_PAD_PX;
+    const boundary =
+      editor.domElement?.closest<HTMLElement>(".page-scroll-container") ??
+      undefined;
 
     const sharedMiddleware = [
       offset(() => getScaledEditorUiPx(10)),
       flip({
+        boundary,
         fallbackPlacements: ["top-start", "bottom-end", "top-end"],
         padding: pad,
       }),
       shift({
+        boundary,
         padding: pad,
         crossAxis: false,
       }),
       size({
         apply({ availableWidth, availableHeight, elements }) {
+          const scale = getEditorUiScale();
           const maxW = computeAiMenuFloatingWidth({
             viewportWidth:
               typeof window !== "undefined" ? window.innerWidth : 1248,
             availableWidth,
-            scale: getEditorUiScale(),
+            scale,
+            preferredWidth:
+              36 *
+              (Number.parseFloat(
+                getComputedStyle(document.documentElement).fontSize,
+              ) || 16),
           });
           Object.assign(elements.floating.style, {
             width: `${maxW}px`,
@@ -149,8 +160,14 @@ export function GooseAIMenuController({
             maxHeight: `${Math.max(100, availableHeight)}px`,
             overflowY: "auto",
           });
+          // 内层 zoom 的布局宽度需反算，避免 flex 固有宽度随输入内容变化。
+          elements.floating.style.setProperty(
+            "--goose-inline-ai-layout-width",
+            `${maxW / scale}px`,
+          );
         },
         padding: pad,
+        boundary,
       }),
     ];
 
@@ -165,9 +182,15 @@ export function GooseAIMenuController({
           ai.closeAIMenu();
         },
         whileElementsMounted(reference, floating, update) {
-          return autoUpdate(reference, floating, update, {
+          const stop = autoUpdate(reference, floating, update, {
             animationFrame: true,
           });
+          const observer = new ResizeObserver(update);
+          if (boundary) observer.observe(boundary);
+          return () => {
+            stop();
+            observer.disconnect();
+          };
         },
       },
       useDismissProps: {
@@ -194,6 +217,11 @@ export function GooseAIMenuController({
     <div
       className="goose-editor-context-ui bn-root bn-mantine"
       data-color-scheme={colorScheme}
+      style={{
+        width: "var(--goose-inline-ai-layout-width, 100%)",
+        minWidth: 0,
+        flexShrink: 0,
+      }}
     >
       <Component />
     </div>

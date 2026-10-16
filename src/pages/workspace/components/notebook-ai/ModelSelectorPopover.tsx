@@ -59,14 +59,14 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         <Button contentStyle="preserve" variant="ghost" size={null}
           type="button"
           disabled={disabled}
-          className="flex h-7 min-w-0 max-w-full shrink items-center gap-1 rounded-[var(--goose-control-radius)] px-1 text-xs text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
+          className="notebook-ai-model-trigger flex shrink items-center rounded-[var(--goose-control-radius)] text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
           aria-label="切换模型"
           title={`当前模型：${effectiveModel?.id ?? effectiveModelId}`}
         >
           <span className="min-w-0 max-w-[12.5rem] truncate">
             {effectiveModel?.label ?? effectiveModelId}
           </span>
-          <ChevronDown className="h-3 w-3 shrink-0" strokeWidth={1.75} />
+          <ChevronDown className="h-4 w-4 shrink-0" strokeWidth={1.75} />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -74,9 +74,9 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         align="end"
         sideOffset={6}
         collisionPadding={12}
-        className="notebook-ai-model-menu w-56 max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-1.5"
+        className="notebook-ai-model-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-2"
       >
-        <div className="px-2 pb-1.5 pt-1 text-xs text-muted-foreground">
+        <div className="px-3 pb-2 pt-1 text-[0.875rem] text-muted-foreground">
           选择模型
         </div>
         <div className="goose-list-layout">
@@ -93,11 +93,11 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                 aria-pressed={isActive}
                 title={option.id}
               >
-                <span className="min-w-0 flex-1 truncate text-sm">
+                <span className="min-w-0 flex-1 whitespace-normal break-words text-[1rem] leading-normal [overflow-wrap:anywhere]">
                   {option.label}
                 </span>
                 {isDefault ? (
-                  <span className="shrink-0 rounded-[4px] bg-[var(--goose-interactive-selected)] px-1 py-px text-[10px] text-[var(--goose-interactive-selected-fg)]">
+                  <span className="shrink-0 rounded-[4px] bg-[var(--goose-interactive-selected)] px-1.5 py-px text-[0.75rem] text-[var(--goose-interactive-selected-fg)]">
                     默认
                   </span>
                 ) : null}
