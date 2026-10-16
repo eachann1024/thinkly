@@ -91,7 +91,7 @@
   transition: none;
 }
 @media (max-width: 719px) {
-  .workspace-shell .sidebar-toggle-button { opacity: 0; }
+  .workspace-shell .sidebar-toggle-button { display: none; }
   .workspace-shell .workspace-stage {
     padding: 0 var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) var(--workspace-stage-pad-left);
   }

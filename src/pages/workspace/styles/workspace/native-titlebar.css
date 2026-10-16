@@ -110,13 +110,13 @@ html.is-electron.os-linux {
   --electron-window-controls-width: 8.5rem;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 719px) {
   .electron-window-controls button:is([aria-label="后退"], [aria-label="前进"]) {
     display: none;
   }
   .workspace-shell[data-electron-chrome] .electron-titlebar[data-sidebar-collapsed="true"],
   .workspace-shell[data-electron-chrome]:has(> .workspace-stage[data-sidebar-overlay]) .electron-titlebar {
-    padding-left: calc(var(--electron-traffic-inset, 78px) + 40px);
+    padding-left: calc(var(--electron-traffic-inset, 78px) + 8px);
   }
 }
 
