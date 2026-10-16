@@ -46,6 +46,7 @@ cpSync(resolve(root, "electron/icons/icon.icns"), resolve(pack, "icon.icns"));
 cpSync(resolve(root, "electron/icons/icon.ico"), resolve(pack, "icon.ico"));
 cpSync(resolve(root, "electron/icons/icon.png"), resolve(pack, "icon.png"));
 cpSync(resolve(root, "electron/installer.nsh"), resolve(pack, "installer.nsh"));
+cpSync(resolve(root, "electron/installer"), resolve(pack, "dmg-assets"), { recursive: true });
 mkdirSync(resolve(pack, "node_modules"), { recursive: true });
 
 function stripPackJunk(dir) {
@@ -133,6 +134,7 @@ files:
   # BrowserWindow 在 Linux/Windows 从 app.asar/icon.png 读取窗口图标，必须保留。
   - "!electron-builder.yml"
   - "!installer.nsh"
+  - "!dmg-assets/**"
 fileAssociations:
   - ext: md
     name: Markdown
@@ -161,6 +163,29 @@ mac:
       arch:
         - arm64
         - x64
+dmg:
+  background: dmg-assets/background.png
+  window:
+    width: 960
+    height: 640
+  iconSize: 88
+  iconTextSize: 16
+  contents:
+    - x: 240
+      y: 270
+      type: file
+    - x: 720
+      y: 270
+      type: link
+      path: /Applications
+    - x: 480
+      y: 455
+      type: file
+      path: dmg-assets/安装指令.command
+    - x: 140
+      y: 545
+      type: file
+      path: dmg-assets/安装帮助.txt
 win:
   icon: icon.ico
   # true：把 icon/版本信息写入 exe；CI 已关 CSC_IDENTITY_AUTO_DISCOVERY，不会真签名
