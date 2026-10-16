@@ -1,3 +1,4 @@
+import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortNotebooksByOrder, useNotebooks } from "@/stores/useNotebooks";
 
@@ -19,6 +20,7 @@ export function useNotebookSwitcherState({
     reorderNotebooks,
   } = useNotebooks();
 
+  const forceCollapseLeft = useWorkspaceViewport((state) => state.forceCollapseLeft);
   const notebookDropdownHoverExpand = useSettings(
     (state) => state.notebookDropdownHoverExpand,
   );
@@ -79,7 +81,7 @@ export function useNotebookSwitcherState({
     updateNotebook,
     deleteNotebook,
     reorderNotebooks,
-    notebookDropdownHoverExpand,
+    notebookDropdownHoverExpand: notebookDropdownHoverExpand && !forceCollapseLeft,
     isOpen,
     setIsOpen,
     isDraggingRef,

@@ -1,6 +1,7 @@
 import * as GooseIcons from "@/components/ui/icons";
 import * as React from "react";
 import { Dialog as AriaDialog, Heading, Modal as AriaModal, ModalOverlay } from "react-aria-components";
+import { useEditorDialogBounds } from "./useEditorDialogBounds";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { Button } from "./button";
@@ -122,12 +123,16 @@ interface DialogContentProps extends Omit<
 const DialogContent = React.forwardRef<HTMLElement, DialogContentProps>(
   ({ className, children, hideClose, overlayClassName, ...props }, ref) => {
     const descriptionId = React.useContext(DialogDescriptionId);
+    const { open } = useDialogState();
+    const editorBounds = useEditorDialogBounds(open);
     return (
       <DialogOverlay className={overlayClassName}>
         <AriaModal className="contents">
         <AriaDialog
           {...props}
           ref={ref}
+          data-editor-dialog={editorBounds ? "true" : undefined}
+          style={{ ...props.style, ...editorBounds }}
           aria-describedby={props["aria-describedby"] ?? descriptionId}
           className={cn(
             "fixed left-[50%] top-[50%] z-0 goose-dialog-surface grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] outline-none",

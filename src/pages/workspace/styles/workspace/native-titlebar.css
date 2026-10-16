@@ -135,6 +135,10 @@ html.is-electron.os-linux {
 }
 
 @media (max-width: 719px) {
+  .electron-document-header::before,
+  .electron-ai-header::before {
+    display: none;
+  }
   .electron-window-controls button:is([aria-label="后退"], [aria-label="前进"]) {
     display: none;
   }

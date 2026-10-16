@@ -34,17 +34,14 @@
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] {
   position: absolute;
   z-index: 30;
-  inset: 8px auto 8px calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
-  width: min(280px, calc(100% - 84px)) !important;
+  inset: var(--workspace-stage-pad-top) var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
+  width: auto !important;
   height: auto !important;
   overflow: hidden;
   border: 1px solid var(--workspace-divider-strong);
-  border-radius: var(--goose-floating-radius, 12px);
+  border-radius: var(--radius-lg);
   background: var(--workspace-sidebar-surface);
   box-shadow: 0 12px 32px hsl(var(--foreground) / 0.12);
-}
-.workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating][data-sidebar-view="search"] {
-  width: min(340px, calc(100% - 84px)) !important;
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-overlay] .sidebar-content-surface {
   border-radius: inherit;
@@ -69,6 +66,7 @@
 @media (max-width: 719px) {
   .workspace-shell .sidebar-toggle-button { display: none; }
   .workspace-shell .workspace-stage {
+    --workspace-stage-pad-top: 0px;
     padding: 0 var(--workspace-stage-pad-right) var(--workspace-stage-pad-bottom) var(--workspace-stage-pad-left);
   }
   .workspace-shell .workspace-main-sheet {

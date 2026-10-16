@@ -54,3 +54,26 @@
   position: relative !important;
   right: auto !important;
 }
+
+/* Portal 中的弹窗使用主编辑面板的实际边界，不受调用方尺寸类影响。 */
+.goose-dialog-surface[data-editor-dialog="true"] {
+  left: var(--editor-dialog-left) !important;
+  top: var(--editor-dialog-top) !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: var(--editor-dialog-width) !important;
+  height: var(--editor-dialog-height) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  translate: none !important;
+  border-radius: var(--editor-dialog-radius) !important;
+  overflow: auto;
+  align-content: start;
+}
+.goose-dialog-shell[data-editor-dialog="true"] {
+  align-content: normal;
+}
