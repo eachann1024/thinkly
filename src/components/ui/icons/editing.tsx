@@ -25,6 +25,7 @@ import { TextHThreeIcon } from "@phosphor-icons/react/dist/csr/TextHThree";
 import { TextHTwoIcon } from "@phosphor-icons/react/dist/csr/TextHTwo";
 import { TextItalicIcon } from "@phosphor-icons/react/dist/csr/TextItalic";
 import { TextStrikethroughIcon } from "@phosphor-icons/react/dist/csr/TextStrikethrough";
+import { TextTIcon } from "@phosphor-icons/react/dist/csr/TextT";
 import { TextUnderlineIcon } from "@phosphor-icons/react/dist/csr/TextUnderline";
 import { TreeStructureIcon } from "@phosphor-icons/react/dist/csr/TreeStructure";
 
@@ -59,6 +60,7 @@ export const Strikethrough = createIcon(TextStrikethroughIcon, "TextStrikethroug
 export const Table = createIcon(TableIcon, "Table");
 export const Table2 = createIcon(TableIcon, "Table");
 export const Terminal = createIcon(TerminalWindowIcon, "TerminalWindow");
+export const Type = createIcon(TextTIcon, "TextT");
 export const Underline = createIcon(TextUnderlineIcon, "TextUnderline");
 export const Unlink = createIcon(LinkBreakIcon, "LinkBreak");
 export const WrapText = createIcon(TextAlignLeftIcon, "TextAlignLeft");
