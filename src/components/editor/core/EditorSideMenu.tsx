@@ -39,6 +39,7 @@ export function EditorSideMenu() {
     showHeadingToggle,
     headingExpanded,
     sideMenuGap,
+    tableMenuTop,
     setFoldTick,
   } = useEditorSideMenuTarget(editor, isDragging, menuRef, pressedHandle);
 
@@ -123,9 +124,9 @@ export function EditorSideMenu() {
 
   const textRect =
     block.type === "heading" ? queryHeadingTextRect(block.id) : null;
-  const top = textRect
+  const top = tableMenuTop ?? (textRect
     ? textRect.top + textRect.height / 2
-    : referencePos.top + referencePos.height / 2;
+    : referencePos.top + referencePos.height / 2);
   const anchorLeft = referencePos.left - sideMenuGap;
   // Workspace sidebar and main sheet have separate stacking contexts; escape the main sheet.
   const portalTarget = editor.prosemirrorView.dom.closest(

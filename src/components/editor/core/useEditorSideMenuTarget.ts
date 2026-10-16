@@ -16,6 +16,7 @@ import {
   isPointerInSideMenuCorridor,
   isPointerOverBlockContent,
 } from "./sideMenuHover";
+import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 
 const SIDEBAR_INTERACTION_SELECTOR = ".workspace-sidebar-pane, .rct-main-tree";
 const SIDEBAR_HOVER_SELECTOR =
@@ -35,6 +36,7 @@ export function useEditorSideMenuTarget(
   const blockId = isDragging ? dragBlockId.current : hoveredBlockId;
   const block = blockId ? editor.getBlock(blockId) : undefined;
   const [referencePos, setReferencePos] = useState<DOMRect | null>(null);
+  const [tablePlacement, setTablePlacement] = useState<{ top: number; gap: number }>();
   const corridor = useRef<{ rect: DOMRect | null; gap: number }>({
     rect: null,
     gap: 0,
@@ -49,6 +51,7 @@ export function useEditorSideMenuTarget(
       );
     if (!element) {
       setReferencePos(null);
+      setTablePlacement(undefined);
       return;
     }
     const content =
@@ -64,15 +67,35 @@ export function useEditorSideMenuTarget(
           editor.prosemirrorView.dom.firstElementChild
         )?.getBoundingClientRect().left ?? rect.left;
       setReferencePos(new DOMRect(left, rect.top, rect.width, rect.height));
+      const table = content.querySelector<HTMLTableElement>(":scope > .tableWrapper table");
+      if (!table) {
+        setTablePlacement(undefined);
+        return;
+      }
+      const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;
+      const tableRect = table.getBoundingClientRect();
+      const firstRow = table.rows[0]?.getBoundingClientRect();
+      const gap = 28 * scale + SIDE_MENU_CONTENT_GAP;
+      const boundary = content.closest(".workspace-main-sheet")?.getBoundingClientRect().left ?? 0;
+      const fitsGutter = left - boundary >= gap + 56 * scale + 4;
+      setTablePlacement({
+        // Wide gutters keep block and row grips side by side; narrow ones stagger them.
+        top: fitsGutter
+          ? tableRect.top + (firstRow?.height ?? 44 * scale) / 2
+          : tableRect.top - 16 * scale - 4,
+        gap: fitsGutter ? gap : SIDE_MENU_CONTENT_GAP,
+      });
     };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(content);
     window.addEventListener("resize", update);
+    window.addEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
     document.addEventListener("scroll", update, true);
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", update);
+      window.removeEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
       document.removeEventListener("scroll", update, true);
     };
   }, [editor, blockId, foldTick]);
@@ -87,8 +110,9 @@ export function useEditorSideMenuTarget(
   void foldTick;
 
   const sideMenuGap =
-    SIDE_MENU_CONTENT_GAP +
-    (block?.type === "table" ? 0 : HEADING_SIDE_MENU_EXTRA_GAP);
+    block?.type === "table"
+      ? (tablePlacement?.gap ?? SIDE_MENU_CONTENT_GAP)
+      : SIDE_MENU_CONTENT_GAP + HEADING_SIDE_MENU_EXTRA_GAP;
   corridor.current = { rect: referencePos, gap: sideMenuGap };
   useEffect(() => {
     const updateSidebarInteracting = (
@@ -170,6 +194,7 @@ export function useEditorSideMenuTarget(
     showHeadingToggle,
     headingExpanded,
     sideMenuGap,
+    tableMenuTop: block?.type === "table" ? tablePlacement?.top : undefined,
     setFoldTick,
   };
 }
