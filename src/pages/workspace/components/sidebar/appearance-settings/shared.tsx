@@ -87,7 +87,7 @@ const accentOptionDefinitions: Pick<AccentOption, "value" | "label" | "fullTheme
   {
     value: "claude",
     label: "Claude",
-    fullTheme: "暖陶色与暖羊皮纸面，温润典雅的 Claude 风格。",
+    fullTheme: "暖陶色点缀的平涂暖纸面，克制的 Claude 风格。",
     pro: true,
   },
 ];
