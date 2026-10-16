@@ -1,7 +1,7 @@
 /* Each pane owns its measure; explicit document and code formatting stay intact. */
 [data-page-layout] {
   container: page-layout / inline-size;
-  /* Notion 桌面标准布局：正文净宽 720px，两侧至少留白 96px。 */
+  /* 标准正文最大净宽 720px，窄编辑区通过自适应留白保留输入空间。 */
   --page-layout-gutter: 96px;
   --page-layout-width: calc(720px + 2 * var(--page-layout-gutter));
   --page-layout-top: 80px;
@@ -19,6 +19,9 @@
   min-height: 100%;
   margin-inline: auto;
   padding: var(--page-layout-top) var(--page-layout-gutter) 100px;
+}
+[data-page-layout="standard"] .page-layout-document {
+  padding-inline: clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter));
 }
 [data-page-layout] .page-layout-document > .workspace-editor-surface { padding-block: 0; }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="paragraph"] {
