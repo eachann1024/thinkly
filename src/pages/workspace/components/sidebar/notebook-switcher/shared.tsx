@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type Notebook } from "@/stores/useNotebooks";
 import { renderNotebookIcon } from "../notebookUtils";
-import { NotebookName } from "./NotebookName";
+import { NotebookMenuItemContent, notebookMenuRowClassName } from "./NotebookMenuItem";
 
 export interface SortableNotebookItemProps {
   notebook: Notebook;
@@ -45,9 +45,7 @@ export function SortableNotebookItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "goose-list-row goose-accent-selection goose-notebook-row relative flex select-none items-center rounded-lg outline-none",
-        "justify-between gap-2 group",
-        "min-h-9 px-2 py-1 text-xs font-normal",
+        notebookMenuRowClassName,
         notebook.localPathMissing && "text-disabled",
         isDragging && "cursor-grabbing z-10",
         !isDragging && "cursor-pointer",
@@ -80,17 +78,16 @@ export function SortableNotebookItem({
         onActivate(notebook.id);
       }}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="goose-notebook-monogram goose-notebook-icon" aria-hidden="true">
-          {renderNotebookIcon(notebook.icon || (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"))}
-        </span>
-        <NotebookName name={notebook.name} />
+      <NotebookMenuItemContent
+        icon={renderNotebookIcon(notebook.icon || (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"))}
+        name={notebook.name}
+      >
         {notebook.localPathMissing && (
           <span className="shrink-0 whitespace-nowrap text-xs text-danger">路径失效</span>
         )}
-      </div>
+      </NotebookMenuItemContent>
       <div
-        className="flex items-center gap-1 shrink-0 justify-end"
+        className="goose-notebook-row-actions items-center gap-1 shrink-0"
         onPointerDown={(e) => e.stopPropagation()}
       >
         {notebook.source === "local-folder" && canDeleteNotebook && (
@@ -99,7 +96,7 @@ export function SortableNotebookItem({
               <TooltipTrigger asChild>
                 <IconButton size="xs"
                   type="button"
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-md opacity-0 overflow-hidden px-0 text-muted-foreground transition-all duration-120 pointer-events-none hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger)] group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto motion-reduce:transition-none"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md overflow-hidden px-0 text-muted-foreground hover:bg-[var(--goose-color-danger-subtle-bg)] hover:text-[var(--goose-color-danger)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteLocal(notebook.id);
@@ -118,7 +115,7 @@ export function SortableNotebookItem({
             <TooltipTrigger asChild>
               <IconButton size="xs"
                 type="button"
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md opacity-0 overflow-hidden px-0 text-muted-foreground transition-all duration-120 pointer-events-none hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto motion-reduce:transition-none"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md overflow-hidden px-0 text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
                 aria-label="编辑笔记本"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -131,8 +128,8 @@ export function SortableNotebookItem({
             <TooltipContent side="bottom">编辑笔记本</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        {isActive && <GooseIcons.Check className="h-4 w-4" />}
       </div>
+      {isActive && <GooseIcons.Check className="h-4 w-4 shrink-0" />}
     </div>
   );
 }
