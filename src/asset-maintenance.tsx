@@ -152,7 +152,7 @@ function AssetMaintenanceApp() {
               <Checkbox aria-label={`选择 ${asset.name}`} isSelected={selected.has(asset.path)} isDisabled={busy} onChange={() => toggle(asset.path)} className="min-h-6 min-w-6 shrink-0 justify-center">
                 <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
               </Checkbox>
-              <Button type="button" variant="ghost" disabled={busy} onClick={() => setPreviewPath(asset.path)} aria-label={`预览 ${asset.name}`} aria-pressed={previewPath === asset.path} className="h-auto min-w-0 flex-1 justify-start gap-3 p-2 text-left">
+              <Button type="button" variant="ghost" disabled={busy} onClick={() => { toggle(asset.path); setPreviewPath(asset.path); }} aria-label={`选择并预览 ${asset.name}`} aria-pressed={selected.has(asset.path)} className="h-auto min-w-0 flex-1 justify-start gap-3 p-2 text-left">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted"><Preview key={`${scan.token}:${asset.path}`} asset={asset} thumbnail /></span>
                 <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{asset.name}</span><span className="block truncate text-xs text-muted-foreground" title={asset.path}>{asset.relativePath}</span><span className="text-xs text-muted-foreground">{getLocalAssetKind(asset.name) === "video" ? "视频" : "图片"} · {formatSize(asset.size)}</span></span>
                 <AssetIcon asset={asset} />
