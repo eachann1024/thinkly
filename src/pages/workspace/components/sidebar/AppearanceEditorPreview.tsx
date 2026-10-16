@@ -41,7 +41,7 @@ function EditorSample({
         {!editorOnly && <div
           className="appearance-preview-sidebar w-44 shrink-0 border-r border-border/70 p-3"
           style={{
-            background: "var(--goose-shell-surface)",
+            background: "var(--appearance-preview-sidebar-surface, var(--goose-shell-surface))",
             fontFamily: "var(--font-ui)",
             fontSize: computeSidebarFontSize(uiFontSize),
           }}
@@ -53,7 +53,7 @@ function EditorSample({
           <p className="mt-2 truncate px-2">▤ 项目计划</p>
         </div>}
         <div className="page-layout-body flex min-w-0 flex-1">
-          <div className="min-w-0 flex-1 overflow-y-auto">
+          <div className="appearance-preview-editor min-w-0 flex-1 overflow-y-auto">
             <div
               className="page-layout-document"
               style={{

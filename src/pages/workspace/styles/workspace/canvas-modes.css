@@ -1,0 +1,39 @@
+/* 编辑器网格：线条叠在当前纸面之上，随正文滚动，格距对齐正文行高。 */
+:root[data-goose-editor-grid] {
+  --goose-editor-grid-size: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.5));
+  --goose-editor-grid-line: hsl(var(--foreground) / 0.07);
+  --goose-editor-grid-dot: hsl(var(--foreground) / 0.16);
+  --goose-editor-grid-layers:
+    linear-gradient(var(--goose-editor-grid-line) 1px, transparent 1px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local,
+    linear-gradient(90deg, var(--goose-editor-grid-line) 1px, transparent 1px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local;
+}
+
+:root[data-goose-editor-grid="dots"] {
+  --goose-editor-grid-layers:
+    radial-gradient(circle at 1px 1px, var(--goose-editor-grid-dot) 1px, transparent 1.5px) 0 0 / var(--goose-editor-grid-size) var(--goose-editor-grid-size) local;
+}
+
+:root[data-goose-editor-grid] .workspace-shell .page-scroll-container {
+  background: var(--goose-editor-grid-layers), var(--goose-editor-surface);
+}
+
+:root[data-goose-editor-grid] .appearance-preview-editor {
+  background: var(--goose-editor-grid-layers);
+}
+
+/* 彩色侧栏：在原侧栏表面上叠一层当前强调色，纸色渐变同样保留。 */
+:root[data-goose-sidebar-tint] {
+  --goose-sidebar-tint: color-mix(in srgb, var(--goose-accent-solid) 10%, transparent);
+  --goose-sidebar-tint-layer: linear-gradient(var(--goose-sidebar-tint), var(--goose-sidebar-tint));
+  --appearance-preview-sidebar-surface: var(--goose-sidebar-tint-layer), var(--goose-shell-surface);
+}
+
+:root.dark[data-goose-sidebar-tint] {
+  --goose-sidebar-tint: color-mix(in srgb, var(--goose-accent-solid) 12%, transparent);
+}
+
+:root[data-goose-sidebar-tint] .workspace-shell {
+  --workspace-sidebar-surface:
+    var(--goose-sidebar-tint-layer),
+    var(--goose-sidebar-surface, color-mix(in srgb, hsl(var(--goose-shell-bg)) 60%, hsl(var(--goose-editor-bg))));
+}

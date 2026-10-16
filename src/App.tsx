@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTextCaret } from "@/hooks/useTextCaret";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { useShallow } from "zustand/react/shallow";
+import { applyEditorCanvasAttributes } from "@/lib/editorCanvas";
 import { WorkspacePage } from "./pages/workspace/WorkspacePage";
 import { Toaster } from "@/components/ui/sonner";
 import { usePages } from "./stores/usePages";
@@ -25,13 +26,15 @@ import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
 function AppearanceSync() {
   const {
     uiFontSize, editorFontSize, editorLineHeight,
-    customFonts, uiFontFamily,
+    customFonts, uiFontFamily, editorGridMode, sidebarTint,
   } = useSettings(useShallow((state) => ({
       uiFontSize: state.uiFontSize,
       editorFontSize: state.editorFontSize,
       editorLineHeight: state.editorLineHeight,
       customFonts: state.customFonts,
       uiFontFamily: state.uiFontFamily,
+      editorGridMode: state.editorGridMode,
+      sidebarTint: state.sidebarTint,
     })));
   useEffect(() => {
     applyAppearanceScaleVariables({ uiFontSize, editorFontSize, editorLineHeight });
@@ -40,6 +43,10 @@ function AppearanceSync() {
   useEffect(() => {
     applyFontVariables(customFonts, { uiFontFamily });
   }, [customFonts, uiFontFamily]);
+
+  useEffect(() => {
+    applyEditorCanvasAttributes({ editorGridMode, sidebarTint });
+  }, [editorGridMode, sidebarTint]);
 
   return null;
 }
