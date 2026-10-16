@@ -1,5 +1,4 @@
-/* 弹出层外壳：右键菜单、下拉、Popover 共用边框/圆角/阴影。
- * goose-menu-surface 额外管菜单项 hover；下拉仍走强调色 hover，只用 floating。 */
+/* 右键、下拉和自定义菜单共用外壳；表单浮层共用表面颜色。 */
 .goose-floating-surface,
 .goose-menu-surface {
   border: 1px solid hsl(var(--goose-menu-border));
@@ -12,6 +11,9 @@
 .goose-menu-surface,
 .goose-floating-surface:has([data-goose-menu-slot="row"]) {
   --goose-floating-radius: var(--goose-menu-radius);
+  font-size: var(--goose-menu-item-font-size);
+  line-height: var(--goose-menu-item-line-height);
+  max-width: calc(100vw - 16px);
   min-width: min(var(--goose-menu-min-width), calc(100vw - 24px));
   padding: var(--goose-menu-surface-inset);
 }
@@ -51,15 +53,6 @@
   .goose-menu-surface:focus-visible {
     box-shadow: var(--goose-menu-shadow) !important;
   }
-}
-
-.goose-dropdown-host {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  overflow: visible;
-  padding: 0;
 }
 
 /* HeroUI 下拉默认 zoom-in-90 过猛，且从中心放大。

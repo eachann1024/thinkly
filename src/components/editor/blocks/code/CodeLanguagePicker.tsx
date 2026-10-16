@@ -192,8 +192,8 @@ export function CodeLanguagePicker({
             </Button>
           </PopoverTrigger>
           <PopoverContent
+            variant="menu"
             align="end"
-            editorContext
             className="goose-code-language-picker"
             onCloseAutoFocus={(event) => {
               event.preventDefault();
@@ -222,7 +222,7 @@ export function CodeLanguagePicker({
               />
             </div>
             {!search && (
-              <div className="goose-code-language-label">常用语言</div>
+              <div className="goose-code-language-label goose-menu-label">常用语言</div>
             )}
             <div
               id={languageListId}

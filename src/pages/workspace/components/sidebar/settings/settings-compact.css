@@ -8,15 +8,6 @@
     flex-shrink: 0;
     background: hsl(var(--goose-settings-bg));
   }
-  .settings-compact-navigation select {
-    min-width: 0;
-    flex: 1;
-    height: 36px;
-    padding-inline: 8px;
-    border: 1px solid var(--workspace-divider-strong);
-    border-radius: 8px;
-    background: var(--goose-input-surface);
-  }
   .settings-sidebar-navigation { display: none; }
   .workspace-shell[data-settings] .sidebar-toggle-button { visibility: hidden; }
 }

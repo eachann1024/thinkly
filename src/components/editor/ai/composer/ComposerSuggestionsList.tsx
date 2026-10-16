@@ -54,7 +54,7 @@ export function ComposerSuggestionsList({
       }}
     >
       <div
-        className="goose-editor-context-ui goose-floating-surface overflow-hidden"
+        className="goose-menu-surface overflow-hidden"
         style={{
           minWidth: Math.min(POPOVER_MIN_WIDTH, maxWidth),
           maxWidth,
@@ -68,9 +68,9 @@ export function ComposerSuggestionsList({
         ) : (
           <ul
             ref={listRef}
-            className="goose-list-layout overflow-y-auto p-1.5"
+            className="goose-list-layout overflow-y-auto"
             data-goose-menu-slot="root"
-            style={{ maxHeight: Math.max(0, maxHeight - 2) }}
+            style={{ maxHeight: Math.max(0, maxHeight - 14) }}
           >
             {items.map((item, index) => (
               <li key={item.pageId} data-mention-index={index}>
@@ -79,14 +79,14 @@ export function ComposerSuggestionsList({
                   data-goose-menu-slot="row"
                   data-keyboard-active={index === activeIndex || undefined}
                   className={cn(
-                    "goose-list-row flex w-full cursor-pointer flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors",
+                    "goose-menu-item goose-menu-item-multiline goose-list-row flex w-full cursor-pointer flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors",
                   )}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     onSelect(item);
                   }}
                 >
-                  <span className="flex h-[18px] w-3.5 shrink-0 items-center justify-center">
+                  <span className="flex h-[20px] w-4 shrink-0 items-center justify-center">
                     {item.isFolder ? (
                       <GooseIcons.Folder className="h-3.5 w-3.5 text-muted-foreground" />
                     ) : (
@@ -94,11 +94,11 @@ export function ComposerSuggestionsList({
                     )}
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col justify-start gap-0.5">
-                    <div className="truncate text-[12px] font-medium leading-[18px] text-foreground">
+                    <div className="truncate goose-menu-title">
                       {item.title}
                     </div>
                     {item.description ? (
-                      <div className="truncate text-[10.5px] leading-[14px] text-muted-foreground">
+                      <div className="truncate goose-menu-description">
                         {item.description}
                       </div>
                     ) : null}

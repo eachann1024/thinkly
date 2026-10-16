@@ -188,13 +188,13 @@ export function SortableTabItem({
           )}
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-[200px]">
+      <ContextMenuContent>
         {tab.type !== "welcome" && onLocateInTree && (
           <>
             <ContextMenuItem onSelect={onLocateInTree}>
               在文件树中定位
             </ContextMenuItem>
-            <ContextMenuSeparator />
+
           </>
         )}
         {onOpenInNewWindow ? (
@@ -205,7 +205,7 @@ export function SortableTabItem({
         <ContextMenuItem onSelect={onTogglePin}>
           {tab.pinned ? "取消固定" : "固定标签"}
         </ContextMenuItem>
-        <ContextMenuSeparator />
+
         {hasOtherTabs && <ContextMenuItem onSelect={onCloseOthers}>
           关闭其他标签页
         </ContextMenuItem>}
@@ -218,7 +218,7 @@ export function SortableTabItem({
         <ContextMenuItem onSelect={onClose}>
           关闭
           {closeTabShortcutLabel && (
-            <span className="ml-auto text-xs text-muted-foreground">
+            <span className="goose-menu-shortcut">
               {closeTabShortcutLabel}
             </span>
           )}

@@ -70,15 +70,13 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
+        variant="menu"
         side="top"
         align="center"
         sideOffset={6}
         collisionPadding={12}
         className="notebook-ai-model-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-2"
       >
-        <div className="px-3 pb-2 pt-1 text-[0.875rem] text-muted-foreground">
-          选择模型
-        </div>
         <div className="goose-list-layout">
           {customModelOptions.map((option) => {
             const isActive = option.id === effectiveModelId;
@@ -88,12 +86,12 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                 key={option.id}
                 type="button"
                 onClick={() => selectModel(option.id)}
-                className="goose-list-row goose-accent-selection flex w-full items-center gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-foreground transition-colors "
+                className="goose-menu-item goose-list-row goose-accent-selection flex w-full items-center gap-2 rounded-[var(--goose-control-radius)] px-2 py-1.5 text-left text-foreground transition-colors "
                 data-selected={isActive || undefined}
                 aria-pressed={isActive}
                 title={option.id}
               >
-                <span className="min-w-0 flex-1 whitespace-normal break-words text-[1rem] leading-normal [overflow-wrap:anywhere]">
+                <span className="min-w-0 flex-1 truncate goose-menu-title [overflow-wrap:anywhere]">
                   {option.label}
                 </span>
                 {isDefault ? (

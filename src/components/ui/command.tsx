@@ -31,7 +31,7 @@ const CommandInput = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
   <div
-    className="flex items-center border-b border-border px-3"
+    className="flex items-center px-3"
     cmdk-input-wrapper=""
   >
     <GooseIcons.Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -81,7 +81,7 @@ const CommandGroup = React.forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground",
+      "goose-menu-command-group overflow-hidden p-[6px] text-foreground",
       className,
     )}
     {...props}
@@ -96,7 +96,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "goose-interactive goose-list-row goose-accent-selection relative flex cursor-default select-none items-center gap-2 rounded-md border border-transparent px-2 py-2 text-sm outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:text-disabled",
+      "goose-interactive goose-menu-item goose-list-row goose-accent-selection relative flex cursor-default select-none items-center gap-2 rounded-md border border-transparent px-2 py-2 text-sm outline-none data-[disabled=true]:pointer-events-none data-[disabled=true]:text-disabled",
       className,
     )}
     {...props}

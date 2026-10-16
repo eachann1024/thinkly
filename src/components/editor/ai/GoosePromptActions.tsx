@@ -1,4 +1,4 @@
-import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { EditorAction } from "@/components/editor/ui/button";
 import { ArrowUp, ChevronDown, Settings } from "@/components/ui/icons";
 import type { GoosePromptSuggestionMenuProps } from "./GoosePromptSuggestionMenu";
@@ -35,53 +35,21 @@ export function GoosePromptActions({
           </EditorAction>
         ))}
         {props.actionMenus?.map((menu) => (
-          <Disclosure
-            className="goose-inline-ai-actions-menu"
-            key={menu.label}
-            onToggle={(event) => {
-              if (!event.currentTarget.open) return;
-              event.currentTarget.parentElement
-                ?.querySelectorAll<HTMLDetailsElement>("details[open]")
-                .forEach((other) => {
-                  if (other !== event.currentTarget) other.open = false;
-                });
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.preventDefault();
-                event.stopPropagation();
-                event.currentTarget.removeAttribute("open");
-                event.currentTarget.querySelector("summary")?.focus();
-              }
-            }}
-          >
-            <DisclosureSummary>
-              {menu.label}
-              <ChevronDown aria-hidden className="h-3 w-3" />
-            </DisclosureSummary>
-            <div
-              className="goose-inline-ai-actions-list goose-list-layout"
-              data-goose-menu-slot="root"
-              data-goose-layout="grid"
-            >
+          <DropdownMenu key={menu.label}>
+            <DropdownMenuTrigger asChild>
+              <EditorAction className="goose-ai-tag inline-flex items-center gap-1">
+                {menu.label}
+                <ChevronDown aria-hidden className="h-3 w-3" />
+              </EditorAction>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent variant="menu">
               {menu.actions.map((action) => (
-                <EditorAction
-                  className="goose-list-row"
-                  data-goose-menu-slot="row"
-                  type="button"
-                  key={action.key}
-                  onClick={(event) => {
-                    event.currentTarget
-                      .closest("details")
-                      ?.removeAttribute("open");
-                    action.onClick();
-                  }}
-                >
+                <DropdownMenuItem key={action.key} onSelect={action.onClick}>
                   {action.label}
-                </EditorAction>
+                </DropdownMenuItem>
               ))}
-            </div>
-          </Disclosure>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ))}
       </div>
       <div className="goose-inline-ai-submit-actions">

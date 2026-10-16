@@ -125,10 +125,11 @@ export function LocalFontSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent
+          variant="menu"
           align="start"
           aria-label={label}
           ref={contentRef}
-          className="goose-floating-surface min-w-[var(--goose-popover-trigger-width)] p-1.5 text-popover-foreground"
+          className="min-w-[var(--goose-popover-trigger-width)] p-1.5 text-popover-foreground"
         >
           <VirtualFontList
             label={label}

@@ -52,6 +52,7 @@ export function PageMenu() {
           页面更多菜单走 viewport 坐标系，尺寸用真实 px。
         */}
         <PopoverContent
+          variant="menu"
           className="goose-page-menu-surface goose-floating-surface goose-list-layout max-h-[calc(100vh-24px)] w-[272px] max-w-[calc(100vw-16px)] overflow-y-auto p-1.5"
           align="end"
           sideOffset={6}
@@ -113,12 +114,11 @@ export function PageMenu() {
             />
           </div>
 
-          <div className="mx-1 my-1 h-px bg-border" />
 
           <div
             role="button"
             tabIndex={0}
-            className="goose-menu-item goose-list-row group grid min-h-[32px] cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-[var(--goose-control-radius)] px-2 text-xs "
+            className="goose-menu-item goose-list-row group grid min-h-[32px] cursor-pointer grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-[var(--goose-control-radius)] px-2 text-xs "
             onClick={() =>
               updatePage(activePageId, { isLocked: !page.isLocked })
             }
@@ -144,7 +144,7 @@ export function PageMenu() {
 
           {canOpenInNewWindow && activeTab ? (
             <PopoverAction
-              className="group grid min-h-[32px] grid-cols-[18px_minmax(0,1fr)] gap-x-1.5 px-2 text-xs"
+              className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
               onSelect={() => {
                 void (async () => {
                   const created = await createDesktopWindow({
@@ -171,7 +171,7 @@ export function PageMenu() {
           {/* Import */}
           <div>
             <PopoverAction
-              className="group grid min-h-[32px] grid-cols-[18px_minmax(0,1fr)] gap-x-1.5 px-2 text-xs"
+              className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
               onSelect={handleImport}
             >
               <GooseIcons.Upload className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
@@ -181,7 +181,7 @@ export function PageMenu() {
 
           {/* Generate Image — standalone, before Export */}
           <PopoverAction
-            className="page-menu-generate-image grid min-h-[32px] grid-cols-[18px_minmax(0,1fr)] gap-x-1.5 px-2 text-xs text-foreground"
+            className="page-menu-generate-image grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs text-foreground"
             onSelect={() => {
               setThemeSelectorOpen(true);
             }}
@@ -206,7 +206,7 @@ export function PageMenu() {
             />
 
             <PopoverAction
-              className="group grid min-h-[32px] grid-cols-[18px_minmax(0,1fr)] gap-x-1.5 px-2 text-xs"
+              className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
               disabled={page?.isFolder}
               onSelect={() => {
                 const pid = activePageId;
@@ -227,7 +227,7 @@ export function PageMenu() {
           </div>
 
           <PopoverAction
-            className="group grid min-h-[32px] grid-cols-[18px_minmax(0,1fr)] gap-x-1.5 px-2 text-xs text-foreground hover:text-[var(--goose-color-danger-focus)] focus:text-[var(--goose-color-danger-focus)]"
+            className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs text-foreground hover:text-[var(--goose-color-danger-focus)] focus:text-[var(--goose-color-danger-focus)]"
             onClick={() => void deletePageWithUndo(activePageId)}
           >
             {isLocalItem ? (
@@ -240,7 +240,6 @@ export function PageMenu() {
             </span>
           </PopoverAction>
 
-          <div className="mx-1 mt-1 h-px bg-border" />
 
           <div className="flex items-center justify-between gap-3 px-2 py-1 text-[10px] text-muted-foreground">
             <span>{countWords(page.content)} 字</span>

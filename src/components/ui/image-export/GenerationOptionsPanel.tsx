@@ -29,10 +29,11 @@ export function GenerationOptionsPanel({
   const renderRow = (key: keyof WatermarkConfig, label: string, disabled = false, child = false) => (
     <label
       key={key}
+      style={child ? { paddingInlineStart: 24 } : undefined}
       htmlFor={`${labelPrefix}-${key}`}
       className={cn(
-        "flex min-h-10 items-center justify-between gap-6 rounded-md px-3 py-2 text-xs cursor-pointer hover:bg-[var(--goose-interactive-hover)]",
-        child && "pl-6",
+        "goose-menu-item flex items-center justify-between cursor-pointer hover:bg-[var(--goose-interactive-hover)]",
+
         disabled && "cursor-not-allowed text-muted-foreground opacity-50 hover:bg-transparent",
       )}
     >
@@ -78,13 +79,14 @@ export function GenerationOptionsPanel({
             </Button>
           </PopoverTrigger>
           <PopoverContent
+            variant="menu"
             container={container}
             align="end"
             side="bottom"
-            sideOffset={8}
+            sideOffset={6}
             collisionPadding={12}
             aria-label="底部栏选项"
-            className="w-60 max-w-[calc(100vw-24px)] p-1.5"
+            className="goose-list-layout w-60 max-w-[calc(100vw-24px)]"
             onKeyDownCapture={(event) => {
               if (event.key !== "Escape") return;
               event.preventDefault();
@@ -93,7 +95,6 @@ export function GenerationOptionsPanel({
             }}
           >
             {renderRow("showWatermark", "底部栏")}
-            <div className="mx-3 my-1 h-px bg-border" />
             {rows.map((row) => renderRow(row.key, row.label, row.disabled, true))}
           </PopoverContent>
         </Popover>

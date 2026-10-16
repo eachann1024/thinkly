@@ -74,46 +74,23 @@
 }
 
 .goose-color-picker-panel {
-  gap: calc(4px * var(--editor-ui-scale, 1));
-  border-radius: calc(10px * var(--editor-ui-scale, 1));
-  padding: calc(4px * var(--editor-ui-scale, 1));
+  gap: var(--goose-menu-row-gap);
 }
-
-.goose-color-picker-title {
-  padding-inline: calc(4px * var(--editor-ui-scale, 1));
-  padding-top: calc(2px * var(--editor-ui-scale, 1));
-  font-size: calc(12px * var(--editor-ui-scale, 1));
-}
-
 .goose-color-picker-grid {
-  grid-template-columns: repeat(5, calc(28px * var(--editor-ui-scale, 1)));
-  gap: calc(4px * var(--editor-ui-scale, 1));
-  padding-inline: calc(4px * var(--editor-ui-scale, 1));
+  grid-template-columns: repeat(5, 32px);
+  gap: var(--goose-menu-row-gap);
+  padding-inline: 8px;
 }
-
-.goose-color-picker-grid-last {
-  padding-bottom: calc(2px * var(--editor-ui-scale, 1));
-}
-
 .goose-color-picker-swatch {
-  width: calc(28px * var(--editor-ui-scale, 1));
-  height: calc(28px * var(--editor-ui-scale, 1));
-  border-radius: calc(6px * var(--editor-ui-scale, 1));
+  width: 32px;
+  height: 32px;
+  border-radius: var(--goose-menu-item-radius);
 }
-
-.goose-color-picker-letter {
-  font-size: calc(34px * var(--editor-ui-scale, 1));
-  transform: scale(0.56);
-}
-
-.goose-color-picker-divider {
-  margin-block: calc(4px * var(--editor-ui-scale, 1));
-}
-
+.goose-color-picker-letter { font-size: 20px; }
 .goose-color-picker-background-swatch {
-  width: calc(20px * var(--editor-ui-scale, 1));
-  height: calc(20px * var(--editor-ui-scale, 1));
-  border-radius: calc(4px * var(--editor-ui-scale, 1));
+  width: 24px;
+  height: 24px;
+  border-radius: var(--goose-menu-item-radius);
 }
 
 .goose-color-picker-float {

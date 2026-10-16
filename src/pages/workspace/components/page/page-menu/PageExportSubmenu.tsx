@@ -162,7 +162,7 @@ export function PageExportSubmenu({
               }, EXPORT_OPEN_DELAY_MS);
             }
           }}
-          className="goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-lg px-2 text-left text-xs"
+          className="goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-lg px-2 text-left text-xs"
         >
           <GooseIcons.Export className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)] group-data-[state=open]:text-[var(--goose-interactive-selected-fg)]" />
           <span className="min-w-0 truncate">导出</span>
@@ -170,15 +170,16 @@ export function PageExportSubmenu({
         </ListRow>
       </PopoverTrigger>
       <PopoverContent
+        variant="menu"
         ref={menuRef}
         side="right"
         align="start"
-        sideOffset={4}
-        alignOffset={-4}
+        sideOffset={2}
+        alignOffset={-6}
         collisionPadding={8}
         onOpenAutoFocus={(event) => event.preventDefault()}
         onCloseAutoFocus={(event) => event.preventDefault()}
-        className="goose-page-menu-export goose-page-menu-surface min-w-[144px] w-auto rounded-[12px] p-1"
+        className="goose-page-menu-export goose-page-menu-surface w-auto"
         style={{
           maxHeight:
             viewportHeight <= 0

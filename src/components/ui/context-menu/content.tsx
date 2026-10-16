@@ -18,7 +18,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
     {
       className,
       children,
-      editorContext,
+      editorContext: _editorContext,
       onCloseAutoFocus,
       sideOffset,
       alignOffset,
@@ -48,7 +48,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
     );
     if (!state.isMounted) return null;
     const surface =
-      "goose-menu-surface min-w-[9.5rem] max-h-[calc(100dvh-16px)] overflow-y-auto overscroll-contain p-1 text-popover-foreground";
+      "goose-menu-surface max-h-[calc(100dvh-16px)] overflow-y-auto overscroll-contain text-popover-foreground";
     return (
       <OverlayLayerProvider layer={layer}>
       <FloatingPortal>
@@ -77,11 +77,11 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             data-goose-floating-content=""
             data-goose-layer={layer}
             data-react-aria-top-layer={topLayer || undefined}
-            data-goose-menu-slot={!editorContext ? "root" : undefined}
+            data-goose-menu-slot="root"
             className={cn(
               "outline-none",
-              !editorContext && surface,
-              !editorContext && className,
+              surface,
+              className,
             )}
             style={{
               ...state.floatingStyles,
@@ -97,16 +97,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             }}
           >
             <FloatingList elementsRef={state.elements} labelsRef={state.labels}>
-              {editorContext ? (
-                <div
-                  data-goose-menu-slot="root"
-                  className={cn("goose-editor-context-ui", surface, className)}
-                >
-                  {children}
-                </div>
-              ) : (
-                children
-              )}
+              {children}
             </FloatingList>
           </div>
         </FloatingFocusManager>

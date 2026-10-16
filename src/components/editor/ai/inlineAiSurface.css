@@ -121,7 +121,7 @@
   padding: 0;
   border: 0;
 }
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface :where(.goose-ai-tag, .goose-inline-ai-send, .goose-ai-menu-stop, .goose-inline-ai-actions-menu summary, .goose-inline-ai-actions-list button) {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface :where(.goose-ai-tag, .goose-inline-ai-send, .goose-ai-menu-stop) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -168,42 +168,10 @@
   width: auto;
   margin: 0;
 }
-.goose-inline-ai-surface .goose-inline-ai-actions-menu {
-  position: relative;
-  min-width: 0;
-  max-width: 100%;
-}
-.goose-inline-ai-surface .goose-inline-ai-actions-menu summary {
-  list-style: none;
-}
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-tags :is(button, summary) {
+.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-ai-tags button {
   min-width: 0;
   max-width: 100%;
   white-space: normal;
-  overflow-wrap: anywhere;
-}
-.goose-inline-ai-surface .goose-inline-ai-actions-menu summary::-webkit-details-marker {
-  display: none;
-}
-.goose-inline-ai-surface .goose-inline-ai-actions-menu[open] {
-  flex-basis: 100%;
-  order: 2;
-  min-width: 0;
-}
-.goose-inline-ai-surface .goose-inline-ai-actions-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
-  gap: .25rem;
-  margin-block-start: .4rem;
-  padding: .4rem;
-  background: hsl(var(--muted));
-  border-radius: var(--goose-control-radius);
-}
-.goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface .goose-inline-ai-actions-list button {
-  justify-content: flex-start;
-  width: 100%;
-  white-space: normal;
-  text-align: start;
   overflow-wrap: anywhere;
 }
 .goose-inline-ai-surface .goose-ai-preview-summary,

@@ -97,7 +97,7 @@ export function ContextMenuLabel({
     <div
       {...props}
       className={cn(
-        "px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground",
+        "goose-menu-label",
         inset && "pl-8",
         className,
       )}
@@ -112,7 +112,7 @@ export function ContextMenuSeparator({
     <div
       {...props}
       role="separator"
-      className={cn("goose-menu-separator h-px", className)}
+      className={cn("goose-menu-separator", className)}
     />
   );
 }
@@ -124,7 +124,7 @@ export function ContextMenuShortcut({
     <span
       {...props}
       className={cn(
-        "ml-auto text-xs tracking-wide text-muted-foreground",
+        "goose-menu-shortcut",
         className,
       )}
     />

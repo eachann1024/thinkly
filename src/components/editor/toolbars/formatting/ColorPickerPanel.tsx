@@ -45,8 +45,8 @@ export function ColorPickerPanel({
         e.stopPropagation();
       }}
     >
-      <div className="goose-color-picker-panel flex flex-col border border-border bg-popover shadow-md">
-        <div className="goose-color-picker-title font-semibold text-muted-foreground">
+      <div className="goose-color-picker-panel goose-menu-surface flex flex-col">
+        <div className="goose-color-picker-title goose-menu-label">
           文本颜色
         </div>
         <div className="goose-color-picker-grid goose-list-group grid" data-goose-layout="grid">
@@ -82,9 +82,7 @@ export function ColorPickerPanel({
           ))}
         </div>
 
-        <div className="goose-color-picker-divider border-t border-border/60" />
-
-        <div className="goose-color-picker-title font-semibold text-muted-foreground">
+        <div className="goose-color-picker-title goose-menu-label">
           背景颜色
         </div>
         <div className="goose-color-picker-grid goose-color-picker-grid-last goose-list-group grid" data-goose-layout="grid">

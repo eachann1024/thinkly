@@ -132,6 +132,7 @@ export function NotebookIconSelector({
         </Button>
       </PopoverTrigger>
       <PopoverContent
+        variant="menu"
         className="notebook-icon-selector"
         aria-label={`选择${label}`}
         align="start"

@@ -119,7 +119,7 @@ export function ConversationHistoryList({
   }
 
   const list = (
-    <div className="goose-list-layout min-w-0 max-w-full overflow-x-hidden pr-1">
+    <div className="goose-list-layout min-w-0 max-w-full overflow-x-hidden">
       {conversations.map((conversation) => {
         const isActive = conversation.id === activeConversationId;
         const summary = getConversationSummary(conversation.messages);
@@ -139,13 +139,13 @@ export function ConversationHistoryList({
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                className="goose-list-row goose-accent-selection group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
+                className="goose-menu-item goose-menu-item-multiline goose-list-row goose-accent-selection group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
                 data-selected={isActive || undefined}
                 aria-current={isActive ? "true" : undefined}
               >
                 <div className="min-w-0 flex-1 overflow-hidden">
-                  <div className="block w-full truncate text-sm">{summary}</div>
-                  <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <div className="block w-full truncate goose-menu-title">{summary}</div>
+                  <div className="flex items-center gap-1 goose-menu-description">
                     <Clock3 className="h-3 w-3 shrink-0" strokeWidth={1.75} />
                     <span className="truncate">
                       {formatConversationTime(conversation.updatedAt)}
@@ -186,7 +186,7 @@ export function ConversationHistoryList({
   return (
     <div
       className={cn(
-        "min-w-0 max-w-full overflow-x-hidden overflow-y-auto p-1.5",
+        "min-w-0 max-w-full overflow-x-hidden overflow-y-auto",
         className,
       )}
       style={{ maxHeight: Math.min(conversations.length * 58 + 12, 300) }}
@@ -222,6 +222,7 @@ export function ConversationHistoryPopover({
         </IconButton>
       </PopoverTrigger>
       <PopoverContent
+        variant="menu"
         align="end"
         sideOffset={6}
         className="w-72 max-w-72 overflow-hidden p-0"
