@@ -35,7 +35,6 @@ import { useEditorComposerInteractions } from "./useEditorComposerInteractions";
 import { useEditorComposerToolbar } from "./useEditorComposerToolbar";
 import { EditorLinkPopover } from "./EditorLinkPopover";
 import type { EditorComposerProps } from "./editorComposerTypes";
-import { EditorBlockMenu } from "../menus/EditorBlockMenu";
 
 export {
   normalizeClipboardLineEndings,
@@ -184,7 +183,6 @@ export function EditorComposer({
         }}
       >
         {showSideMenu && editable ? <EditorSideMenu /> : null}
-        {editable ? <EditorBlockMenu /> : null}
         {editable ? <GooseTableHandlesController /> : null}
         <FormattingToolbarHoldContext.Provider value={holdFormattingToolbar}>
           {__GOOSE_EDITOR_COMPACT__ || isQuickNoteEditorPage(page) ? (

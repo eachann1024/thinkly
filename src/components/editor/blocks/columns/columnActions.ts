@@ -51,21 +51,6 @@ export function convertBlocksToColumns(editor: Editor, count: 2 | 3, blocks = ge
   return true;
 }
 
-/** 拆除整组布局，按栏顺序还原完整块及其 children。 */
-export function moveColumnsToBody(editor: Editor, blockId?: string): boolean {
-  const id = blockId ?? (getBlocksToMove(editor)[0] as any)?.id;
-  const context = id ? findColumnsContext(editor, id) : undefined;
-  if (!context || !editor.isEditable) return false;
-  const blocks = context.layout.children.flatMap((section: any) => section.type === COLUMN_SECTION ? section.children : [section]);
-  editor.transact(() => {
-    const { insertedBlocks } = editor.replaceBlocks([context.layout], blocks.length ? blocks : [{ type: "paragraph" }]);
-    const target = firstColumnBlock(insertedBlocks[0]);
-    if (target) editor.setTextCursorPosition(target, "start");
-  });
-  editor.focus();
-  return true;
-}
-
 export function insertColumnsFromSlash(editor: Editor, count: 2 | 3): void {
   const block = editor.getTextCursorPosition().block;
   // clearQuery 已移除斜杠文本；真实内容或子树通过同一原子替换完整移入第一栏。
