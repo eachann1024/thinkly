@@ -32,6 +32,11 @@
     outline: 2px solid var(--goose-selection-focus) !important;
     outline-offset: -4px;
   }
+
+  /* 当前页面导航的焦点加粗原有轮廓，避免自动聚焦时出现双框。 */
+  :root:not([data-goose-pointer-focus="true"]) .goose-accent-selection[aria-current="page"]:focus-visible {
+    outline-offset: -2px;
+  }
 }
 
 /* 设置选择器的勾号使用可读强调文字；操作菜单和禁用项仍继承正文。 */
