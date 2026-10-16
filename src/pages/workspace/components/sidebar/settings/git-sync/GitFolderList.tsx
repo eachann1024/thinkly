@@ -130,10 +130,6 @@ export function GitFolderList({
               >
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-[3px] rounded-[inherit] border-2 border-[var(--goose-accent-outline-focus)] opacity-0 group-focus-visible:opacity-100"
-                />
-                <span
-                  aria-hidden="true"
                   className={
                     "flex size-5 shrink-0 items-center justify-center rounded-md border " +
                     (checked
