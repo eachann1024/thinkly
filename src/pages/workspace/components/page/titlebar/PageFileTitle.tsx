@@ -14,7 +14,7 @@ export function PageFileTitle({ page }: { page: Page }) {
     return {
       filePath: current.localUnsaved || ("editorDraft" in current && current.editorDraft) || current.trashedAt
         ? undefined : current.localFilePath,
-      fileName: current.localFilePath?.split(/[\\/]/).pop() || getPageTitle(current),
+      fileName: getPageTitle(current),
       isFolder: Boolean(current.isFolder),
     };
   }));
