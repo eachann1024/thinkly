@@ -18,6 +18,7 @@
 .workspace-editor-surface .bn-editor [data-content-type="table"] table {
   table-layout: fixed;
   border-collapse: collapse;
+  background-color: hsl(var(--goose-editor-bg));
 }
 .workspace-editor-surface
   .bn-editor
