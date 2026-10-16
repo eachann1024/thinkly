@@ -3,7 +3,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
-import { useWindowAlwaysOnTop } from "@/hooks/useWindowAlwaysOnTop";
 import { SettingsAppUpdate } from "./settings/SettingsAppUpdate";
 
 interface SettingsGeneralProps {
@@ -24,7 +23,6 @@ export function SettingsGeneral({
   notebookDropdownHoverExpand, setNotebookDropdownHoverExpand,
 }: SettingsGeneralProps) {
   const forceCollapseLeft = useWorkspaceViewport((state) => state.forceCollapseLeft);
-  const { alwaysOnTop, toggleAlwaysOnTop } = useWindowAlwaysOnTop();
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold tracking-tight text-foreground">通用</h3>
@@ -44,13 +42,6 @@ export function SettingsGeneral({
             </div>
             <Switch id="notebook-hover-expand" disabled={forceCollapseLeft} checked={notebookDropdownHoverExpand && !forceCollapseLeft} onCheckedChange={setNotebookDropdownHoverExpand} className={SWITCH_CLASS} />
           </div>
-            <div className={`mt-2 flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
-              <div>
-                <div className="flex items-center gap-3"><GooseIcons.Pin className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} /><Label htmlFor="window-always-on-top" className="cursor-pointer">窗口置顶</Label></div>
-                <p className="mt-1 pl-7 text-xs text-muted-foreground">主窗口始终悬浮在其他应用上方。</p>
-              </div>
-              <Switch id="window-always-on-top" checked={alwaysOnTop} onCheckedChange={toggleAlwaysOnTop} className={SWITCH_CLASS} />
-            </div>
         </SettingsSectionCard>
         <SettingsSectionCard title="搜索设置">
           <div className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>

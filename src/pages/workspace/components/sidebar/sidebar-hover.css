@@ -68,7 +68,7 @@
   opacity: 1;
 }
 .workspace-shell[data-electron-chrome] .electron-titlebar:not([data-sidebar-collapsed="true"]) {
-  padding-left: max(calc(var(--electron-traffic-inset, 78px) + 7rem + 8px), calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width) + var(--workspace-sidebar-width)));
+  padding-left: max(calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px), calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width) + var(--workspace-sidebar-width)));
 }
 .workspace-shell[data-electron-chrome] .electron-titlebar {
   transition: none;

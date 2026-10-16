@@ -3,6 +3,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTabs } from "@/stores/useTabs";
+import { WindowAlwaysOnTopButton } from "./WindowAlwaysOnTopButton";
 
 export const actionButtonClass =
   "inline-flex items-center justify-center text-muted-foreground ";
@@ -56,6 +57,7 @@ export function DesktopWindowNavigation({
             )}
           </TooltipContent>
         </Tooltip>
+        <WindowAlwaysOnTopButton />
       </TooltipProvider>
     </div>
   );

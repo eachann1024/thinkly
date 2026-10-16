@@ -2,6 +2,7 @@
    shell 改纵向布局，stage 占满剩余高度。仅 Electron 构建渲染该顶栏。
    标题输入左缘对齐主栏（stage 左垫 + 侧栏宽 + gap），且不小于红绿灯占位。 */
 .workspace-shell[data-electron-chrome] {
+  --electron-navigation-width: calc(4 * var(--goose-icon-button-height, 2rem) + 0.75rem);
   flex-direction: column;
 }
 .workspace-shell[data-electron-chrome] .workspace-stage,
@@ -16,7 +17,7 @@
   position: relative;
   background: transparent;
   padding-left: max(
-    calc(var(--electron-traffic-inset, 78px) + 7rem + 8px),
+    calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px),
     calc(
       var(--workspace-stage-pad-left) + var(--workspace-sidebar-width) +
         var(--workspace-sidebar-gap)
@@ -97,10 +98,15 @@ html.is-electron .electron-titlebar .notebook-ai-header-toolbar [data-goose-cont
   background-color: transparent;
 }
 /* 收起态需独立于 hover；深色选中底色与外壳相同，用抬升表面区分。 */
-.sidebar-toggle-button[aria-pressed="true"] {
+.sidebar-toggle-button[aria-pressed="true"],
+.window-always-on-top-button[aria-pressed="true"] {
   box-shadow: inset 0 0 0 1px var(--goose-interactive-selected-border);
 }
-.dark .sidebar-toggle-button {
+.window-always-on-top-button {
+  --goose-interactive-selected-fg: var(--goose-accent-solid);
+}
+.dark .sidebar-toggle-button,
+.dark .window-always-on-top-button {
   --goose-interactive-selected: hsl(var(--goose-raised-bg));
 }
 .goose-dev-version {
@@ -115,7 +121,7 @@ html.is-electron .electron-titlebar .notebook-ai-header-toolbar [data-goose-cont
 }
 .workspace-shell[data-electron-chrome] .electron-titlebar[data-sidebar-collapsed="true"],
 .workspace-shell[data-electron-chrome]:has(> .workspace-stage[data-sidebar-overlay]) .electron-titlebar {
-  padding-left: calc(var(--electron-traffic-inset, 78px) + 7rem + 8px);
+  padding-left: calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px);
 }
 
 html.is-electron {
@@ -135,10 +141,13 @@ html.is-electron.os-linux {
 }
 
 @media (max-width: 719px) {
-  /* macOS 窄窗导航已隐藏，只保留原生窗控安全区，回收叠加的标题留白。 */
+  /* 窄窗只保留置顶按钮，仍需在原生窗控之后为它预留完整点击区域。 */
+  .workspace-shell[data-electron-chrome] {
+    --electron-navigation-width: var(--goose-icon-button-height, 2rem);
+  }
   html.is-electron:not(.is-win):not(.os-linux) .workspace-shell[data-electron-chrome] .electron-titlebar {
     --electron-traffic-inset: 78px;
-    padding-left: var(--electron-traffic-inset);
+    padding-left: calc(var(--electron-traffic-inset) + var(--electron-navigation-width) + 8px);
   }
   html.is-electron:not(.is-win):not(.os-linux) .workspace-shell[data-electron-chrome] .electron-document-header {
     padding-left: 0;
@@ -152,7 +161,7 @@ html.is-electron.os-linux {
   }
   .workspace-shell[data-electron-chrome] .electron-titlebar[data-sidebar-collapsed="true"],
   .workspace-shell[data-electron-chrome]:has(> .workspace-stage[data-sidebar-overlay]) .electron-titlebar {
-    padding-left: calc(var(--electron-traffic-inset, 78px) + 8px);
+    padding-left: calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px);
   }
 }
 

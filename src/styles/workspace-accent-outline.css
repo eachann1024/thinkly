@@ -34,6 +34,7 @@
 @layer properties {
   :root:not([data-goose-pointer-focus="true"]) .workspace-shell :is(
     .tab-rail-item,
+    .window-always-on-top-button,
     .sidebar-mode-rail-button,
     .sidebar-footer-control,
     .sidebar-notebook-trigger--rail,
