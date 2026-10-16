@@ -12,7 +12,7 @@
   flex-direction: column;
   gap: var(--goose-menu-row-gap);
 }
-.goose-list-row {
+.goose-list-row:not(.goose-menu-item) {
   border-radius: var(--goose-control-radius);
 }
 /* 虚拟列表与时间线保留行高、坐标；透明边框只给背景留空隙。 */

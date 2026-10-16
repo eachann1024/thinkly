@@ -1,9 +1,10 @@
-/* 控件共用几何。初值沿用迁移前尺寸；主题只改变语义颜色。 */
+/* 控件共用几何；菜单独立于普通控件，主题只改变语义颜色。 */
 :root {
   --goose-control-radius: 8px;
-  --goose-menu-radius: 16px;
-  --goose-menu-item-radius: var(--goose-control-radius);
-  --goose-menu-item-height: 30px;
+  --goose-menu-radius: 8px;
+  --goose-menu-item-radius: 4px;
+  --goose-menu-item-height: 36px;
+  --goose-menu-min-width: 208px;
   --goose-menu-item-font-size: 14px;
   --goose-menu-item-line-height: 20px;
   --goose-field-radius: var(--radius, 0.75rem);

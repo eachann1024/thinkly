@@ -132,7 +132,7 @@ export function PageExportSubmenu({
   };
 
   const itemClass =
-    "goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 text-left text-xs";
+    "goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)] items-center gap-x-2 rounded-lg px-2 text-left text-xs";
 
   return (
     <Popover
@@ -162,7 +162,7 @@ export function PageExportSubmenu({
               }, EXPORT_OPEN_DELAY_MS);
             }
           }}
-          className="goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-lg px-2 text-left text-xs"
+          className="goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-lg px-2 text-left text-xs"
         >
           <GooseIcons.Export className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)] group-data-[state=open]:text-[var(--goose-interactive-selected-fg)]" />
           <span className="min-w-0 truncate">导出</span>
