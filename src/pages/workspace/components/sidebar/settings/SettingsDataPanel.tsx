@@ -41,7 +41,7 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
       <div className="settings-data-grid">
         {renderDataImportExport(context)}
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           {renderWebdavConfiguration(context)}
 
           {renderWebdavRemoteBackups(context)}

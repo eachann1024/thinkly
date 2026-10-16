@@ -31,7 +31,13 @@ export function SettingsSectionCard({
       )}
     >
       {title || description || actions ? (
-        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <header
+          className={cn(
+            "flex flex-wrap justify-between gap-3",
+            description ? "items-start" : "items-center",
+            children ? "mb-4" : "",
+          )}
+        >
           <div className="min-w-0 flex-1 basis-40">
             {title ? (
               <h4 className="text-base font-semibold tracking-tight text-foreground">

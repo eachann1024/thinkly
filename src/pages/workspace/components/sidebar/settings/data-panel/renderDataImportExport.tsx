@@ -31,7 +31,7 @@ export function renderDataImportExport(
     totalCount,
   } = context;
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <SettingsSectionCard
         title={
           <span className="flex items-center gap-2">
@@ -42,8 +42,6 @@ export function renderDataImportExport(
             导入与导出
           </span>
         }
-        description="支持导入与导出标准 ZIP 备份包；导出时可自定义文件保存位置与格式。"
-        className="pb-3"
         actions={
           <Button
             variant="secondary"
@@ -58,8 +56,8 @@ export function renderDataImportExport(
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-foreground">
-              选择笔记本 ({selectedCount})
+            <Label className="text-sm font-medium text-foreground">
+              选择笔记本
             </Label>
             <div className="flex items-center gap-2">
               <span className={DATA_BADGE_CLASS}>
@@ -69,7 +67,7 @@ export function renderDataImportExport(
                 variant="ghost"
                 size="sm"
                 onClick={onSelectAll}
-                className="h-8 rounded-[var(--goose-control-radius)] px-2 text-xs text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                className="h-8 rounded-[var(--goose-control-radius)] px-2 text-sm text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
               >
                 {selectedCount === totalCount ? "取消全选" : "全选"}
               </Button>
@@ -108,7 +106,7 @@ export function renderDataImportExport(
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-medium text-foreground">
+          <Label className="text-sm font-medium text-foreground">
             导出格式
           </Label>
           <div className="grid grid-cols-2 gap-2">
@@ -116,33 +114,23 @@ export function renderDataImportExport(
               selected={format === "md"}
               onClick={() => onFormatChange("md")}
               className={cn(
-                "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
-                format === "md"
-                  ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                  : DATA_UNSELECTED_CARD_CLASS,
+                "flex h-[var(--goose-control-height)] items-center gap-2 rounded-[var(--goose-control-radius)] px-3 text-sm",
+                format !== "md" && DATA_UNSELECTED_CARD_CLASS,
               )}
             >
-              <FileText className="h-5 w-5 shrink-0" />
-              <div className="text-left">
-                <div className="text-sm font-medium">Markdown (.md)</div>
-                <div className="text-xs text-muted-foreground">通用纯文本格式，包含独立资源文件</div>
-              </div>
+              <FileText className="h-4 w-4 shrink-0" />
+              <span className="truncate">Markdown (.md)</span>
             </SelectableCard>
             <SelectableCard
               selected={format === "html"}
               onClick={() => onFormatChange("html")}
               className={cn(
-                "flex h-16 items-center gap-3 rounded-[var(--goose-choice-card-radius,12px)] border px-3 py-2 transition-all duration-200",
-                format === "html"
-                  ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                  : DATA_UNSELECTED_CARD_CLASS,
+                "flex h-[var(--goose-control-height)] items-center gap-2 rounded-[var(--goose-control-radius)] px-3 text-sm",
+                format !== "html" && DATA_UNSELECTED_CARD_CLASS,
               )}
             >
-              <Globe className="h-5 w-5 shrink-0" />
-              <div className="text-left">
-                <div className="text-sm font-medium">HTML (.html)</div>
-                <div className="text-xs text-muted-foreground">富文本网页格式，完整保留排版与样式</div>
-              </div>
+              <Globe className="h-4 w-4 shrink-0" />
+              <span className="truncate">HTML (.html)</span>
             </SelectableCard>
           </div>
         </div>
@@ -155,14 +143,10 @@ export function renderDataImportExport(
           {exporting ? "正在导出…" : "开始导出"}
           {!exporting && <Download className="ml-2 h-4 w-4" />}
         </Button>
-        <p className="text-xs text-muted-foreground">
-          建议在重置前先导出备份，避免误删造成数据丢失。
-        </p>
       </SettingsSectionCard>
 
       <SettingsSectionCard
         tone="danger"
-        className="pt-3"
         title={
           <span className="flex items-center gap-2">
             <RotateCcw
@@ -172,7 +156,6 @@ export function renderDataImportExport(
             重置所有数据
           </span>
         }
-        description="此操作将清空内部笔记本、页面、编辑历史、AI 对话及偏好设置；本地文件夹中的物理文件不受影响。操作前建议先导出备份。"
         actions={
           <Button variant="destructive" size="sm" onClick={onOpenResetDialog}>
             重置所有数据
