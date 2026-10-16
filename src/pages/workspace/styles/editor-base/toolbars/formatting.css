@@ -18,7 +18,7 @@
   min-width: 0;
   align-items: center;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 4px 8px;
   padding: 4px;
 }
 
@@ -94,14 +94,21 @@
   box-shadow: none;
 }
 
-[data-toolbar-density="compact"] .goose-formatting-toolbar-add-to-chat-kbd {
-  display: none;
+/* Groups stay together where possible; even a very narrow pane can wrap their buttons. */
+.goose-formatting-toolbar-group {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
 }
 
 /* Floating controls use layout sizes, avoiding CSS zoom on their measured anchors. */
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-row {
-  gap: calc(2px * var(--editor-ui-scale, 1));
+  gap: calc(4px * var(--editor-ui-scale, 1)) calc(8px * var(--editor-ui-scale, 1));
   padding: calc(4px * var(--editor-ui-scale, 1));
 }
 
@@ -145,4 +152,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
+}
+
+[data-formatting-toolbar][data-goose-floating-toolbar="true"]
+  .goose-formatting-toolbar-group {
+  gap: calc(2px * var(--editor-ui-scale, 1));
 }

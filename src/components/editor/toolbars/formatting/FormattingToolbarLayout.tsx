@@ -1,27 +1,15 @@
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { TooltipProvider } from "@/components/editor/ui/tooltip";
-import { Separator } from "@/components/editor/ui/separator";
 import { cn } from "@/components/editor/utils/cn";
 import { SelectionToolbarSurface } from "../SelectionToolbarSurface";
-import { AiButton } from "./groups/AiButton";
 import { AddToChatButton } from "./groups/AddToChatButton";
 import { SelectionActions } from "./groups/SelectionActions";
 import { SelectionSummary, useSelectionSummary } from "./SelectionSummary";
-import { CompactToolbarGroups } from "./CompactToolbarGroups";
-import { useToolbarDensity } from "./useToolbarDensity";
+import { FormattingToolbarGroups } from "./FormattingToolbarGroups";
 import { canShowAddToChatButton } from "@/components/editor/ai/composer/selectionQuote";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
 import { hasTableMergeAction, TableMergeControls } from "./TableMergeControls";
-
-function ToolbarSectionSeparator() {
-  return (
-    <Separator
-      orientation="vertical"
-      className="goose-formatting-toolbar-separator"
-    />
-  );
-}
 
 export function FormattingToolbarLayout({
   state,
@@ -37,20 +25,11 @@ export function FormattingToolbarLayout({
     aiActive,
     bindTooltip,
     menuRef,
-    handleAiActivate,
     shouldHide,
   } = state;
-  const density = useToolbarDensity(state.editor, menuRef, isQuickNoteSurface);
   const selectionSummary = useSelectionSummary(caps.mode);
   const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
-  const showAiButton =
-    __GOOSE_EDITOR_AI__ &&
-    aiSettings.enabled &&
-    caps.showAi &&
-    !isTableSelection &&
-    !isQuickNoteSurface;
-
-  // 分节渲染：仅在「相邻两节都可见」时插入 Separator，避免双分隔线 / 尾随分隔线。
+  // 选区 AI 润色入口暂时停用；加入对话继续使用独立入口。
   const sections: ReactNode[] = [];
 
   if (selectionSummary) {
@@ -63,16 +42,6 @@ export function FormattingToolbarLayout({
     sections.push(<TableMergeControls key="table-merge" editor={state.editor} />);
   }
 
-  if (showAiButton) {
-    sections.push(
-      <AiButton
-        key="ai"
-        onActivate={handleAiActivate}
-        bindTooltip={bindTooltip}
-      />,
-    );
-  }
-
   if (
     caps.showMarks ||
     caps.showColors ||
@@ -82,7 +51,7 @@ export function FormattingToolbarLayout({
     (state.listState.show && caps.mode !== "none")
   ) {
     sections.push(
-      <CompactToolbarGroups key="formatting" state={state} density={density} />,
+      <FormattingToolbarGroups key="formatting" state={state} />,
     );
   }
 
@@ -100,14 +69,15 @@ export function FormattingToolbarLayout({
         selectedText={selectionState.selectedQuoteText}
         pageId={page.id}
         pageTitle={getPageTitle(page)}
-        compact={density === "narrow" || density === "minimal"}
       />,
     );
   }
 
   if (!state.editor.prosemirrorState.selection.empty) {
     sections.push(
-      <SelectionActions key="selection-actions" bindTooltip={bindTooltip} />,
+      <div key="selection-actions" className="goose-formatting-toolbar-group">
+        <SelectionActions bindTooltip={bindTooltip} />
+      </div>,
     );
   }
 
@@ -130,7 +100,6 @@ export function FormattingToolbarLayout({
         variant={isQuickNoteSurface ? "embedded" : "floating"}
         data-formatting-toolbar
         data-selection-mode={caps.mode}
-        data-toolbar-density={density}
         data-goose-floating-toolbar={!isQuickNoteSurface ? "true" : undefined}
         onMouseDown={(e) => {
           // Allow native focus on the AI textarea; everything else uses onClick.
@@ -163,12 +132,7 @@ export function FormattingToolbarLayout({
         }}
       >
         <div className="goose-formatting-toolbar-row">
-          {sections.map((section, index) => (
-            <Fragment key={index}>
-              {index > 0 && <ToolbarSectionSeparator />}
-              {section}
-            </Fragment>
-          ))}
+          {sections}
         </div>
       </SelectionToolbarSurface>
     </TooltipProvider>
