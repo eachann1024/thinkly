@@ -64,8 +64,8 @@ export function createCreatePageSlice(
     createUnsavedLocalPage: (workspaceId, parentId) =>
       createUnsavedLocalPageAction(set, get, workspaceId, parentId),
 
-    createEditorDraftPage: (sourcePageId) =>
-      createEditorDraftPageAction(set, get, sourcePageId),
+    createEditorDraftPage: (sourcePageId, workspaceId) =>
+      createEditorDraftPageAction(set, get, sourcePageId, workspaceId),
 
     discardEditorDraftPage: (pageId) =>
       discardUnsavedLocalPageAction(set, get, pageId),

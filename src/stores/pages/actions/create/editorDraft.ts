@@ -6,22 +6,25 @@ import { useSettings } from "@/stores/useSettings";
 import { pickRandomPageIcon } from "@/lib/randomPageIcon";
 import { cloneLocalPageContent } from "./content";
 
-/** 只登记编辑器草稿；不落库、不切页，调用方成功放入分屏后再激活。 */
+/** 只登记编辑器草稿；不落库、不切页，调用方打开标签或分屏后再激活。 */
 export function createEditorDraftPageAction(
   set: StoreSet,
   get: StoreGet,
-  sourcePageId: string,
+  sourcePageId: string | null,
+  workspaceId?: string,
 ): string {
-  const source = get().pages[sourcePageId];
-  if (!source || source.isFolder || source.trashedAt) return "";
-  const notebook = useNotebooks.getState().notebooks[source.workspaceId];
+  const source = sourcePageId ? get().pages[sourcePageId] : undefined;
+  if (sourcePageId && (!source || source.isFolder || source.trashedAt)) return "";
+  const targetWorkspaceId = source?.workspaceId ?? workspaceId;
+  if (!targetWorkspaceId) return "";
+  const notebook = useNotebooks.getState().notebooks[targetWorkspaceId];
   if (notebook?.source !== "local-folder") return "";
   const now = Date.now();
   const id = uuidv4();
   const page: Page = {
     id,
-    workspaceId: source.workspaceId,
-    parentId: source.parentId,
+    workspaceId: targetWorkspaceId,
+    parentId: source?.parentId,
     content: cloneLocalPageContent(),
     editorDraft: true,
     localUnsaved: true,
