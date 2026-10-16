@@ -113,7 +113,7 @@ components:
 - 暖调中性灰，不是冷白也不是工业灰。壳色 (shell-bg) 略带 60° 暖色相，像宣纸的底色。
 - 投影是"耳语"级的存在感，统一使用 slate 色系 (rgba(15,23,42))，从不抢戏。
 - 圆角是软陶质感而非锐利切割，10–14px 的温和弧度让元素感觉可以被触摸。
-- 中文书法字体（仓耳今楷）作为可选衬线，为长文阅读提供人文温度。
+- 衬线模式使用 Georgia 与本机宋体，为长文阅读提供清晰的笔画层次，无需下载字体。
 - 全局移除 focus ring，操作反馈靠颜色变化和微投影，而非边框闪烁。
 - 编辑器选择高亮使用 Notion 蓝 (#2383e2)，是界面中唯一固定的彩色锚点。
 
@@ -155,18 +155,18 @@ components:
 
 **Display/Title Font:** DM Sans + HarmonyOS Sans SC（系统 fallback）
 **Body Font:** 同上
-**Serif/阅读 Font:** 仓耳今楷 + Georgia/Cambria
-**Mono Font:** DM Mono + HarmonyOS Sans SC
+**Serif/阅读 Font:** Georgia + 系统宋体（Songti SC / SimSun）
+**Mono Font:** JetBrains Mono + HarmonyOS Sans SC
 
-**Character:** DM Sans 的现代几何骨架提供清晰的功能性，HarmonyOS Sans SC 确保中文排版的中性专业感。仓耳今楷作为可选衬线字体，为长文阅读注入书法的人文温度——像是手写在宣纸上的批注。三套字体在用户设置中自由切换，UI 始终跟随。
+**Character:** DM Sans 的现代几何骨架提供清晰的功能性，HarmonyOS Sans SC 确保中文排版的中性专业感。Georgia 与系统宋体作为可选衬线字体，为中英文长文提供清晰的阅读层次。三套字体在用户设置中自由切换，UI 始终跟随。
 
 ### Hierarchy
 - **Title** (600, 1.5rem/24px, line-height 1.25, tracking -0.01em): 对话框标题、AI 面板标题。紧凑有力，不喧宾夺主。
 - **Settings Page Title** (600, 1.875rem/30px, tracking -0.025em): 所有设置分类统一在正文区显示大标题，左侧「设置」标题为 1.25rem/20px。设置打开时隐藏窗口顶栏的笔记标题、标签与新增/AI 操作，保留窗口导航与拖动区；不再显示带齿轮的横向设置标题栏，关闭入口独立位于右上角。现有设置项、文案及功能保持不变，外观页保留即时预览与独立滚动。
 - **Body** (400, 16px, line-height 1.7, tracking 0.01em): 编辑器正文、笔记内容、列表项。65–75ch 的最大行宽。这是整个系统的核心——所有其他层级都服务于让正文可读。
 - **Label** (500, 12px, line-height 1.4, tracking 0.02em): 按钮文字、小标签、辅助说明、时间戳。稍宽的字距让短文本在小型尺寸下保持清晰。
-- **Serif Body** (400, 16px, line-height 1.7): 当用户选择衬线模式时，编辑器正文切换为仓耳今楷。 Georgia 作为 fallback，确保在任何系统上都有可读的衬线回退。
-- **Mono Body** (400, 14px, line-height 1.6): 代码块、行内代码。DM Mono 的字宽和标点设计适合代码阅读。
+- **Serif Body** (400, 16px, line-height 1.7): 当用户选择衬线模式时，英文优先使用 Georgia，中文回退到系统宋体（macOS 为 Songti SC，Windows 为 SimSun）；字体缺失时继续使用本机衬线回退，不下载字体。
+- **Mono Body** (400, 14px, line-height 1.6): 代码块、行内代码。JetBrains Mono 的字宽和标点设计适合代码阅读。
 
 ### Named Rules
 
@@ -238,7 +238,7 @@ components:
 编辑器块级组件是鹅的笔记的视觉核心。所有块样式服务于"内容即界面"的原则——块本身不装饰，只通过微妙的边界和背景暗示其语义角色。
 
 - **Callout:** `rounded-md` (6px)，`border border-border/60`，`bg-muted/40`，左侧 emoji 图标 + 正文行内内容。像一张贴在页面边缘的淡色便利贴，不抢正文风头。
-- **Code Block:** `rounded-lg` (8px) 外层 + `rounded-xl` (12px) 代码节点内层，monospace 字体 (DM Mono)。深色背景在暗色模式下更暗。边框使用 `workspace-divider`（比 hairline 更隐晦）。顶部有语言选择和复制工具栏。
+- **Code Block:** `rounded-lg` (8px) 外层 + `rounded-xl` (12px) 代码节点内层，monospace 字体 (JetBrains Mono)。深色背景在暗色模式下更暗。边框使用 `workspace-divider`（比 hairline 更隐晦）。顶部有语言选择和复制工具栏。
 - **Table:** 单元格 `border border-border/50`，表头 `bg-muted/40`，内边距 `py-2 px-3`（`8px 12px`）。无斑马纹，无 hover 高亮——表格是数据的容器，不是交互对象。
 - **Image / Video:** `rounded-md` (6px)，`max-width: 100%`。视频有原生 controls。图像无圆角阴影或边框装饰。
 - **Details / Toggle List:** `rounded-lg border border-border/40`，summary 行可点击，左侧 ▶ arrow，`rotate-90` 动画展开。内容区 `border-t border-border/20 bg-muted/5`。

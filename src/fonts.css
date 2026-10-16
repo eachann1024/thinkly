@@ -1,3 +1,12 @@
+/* 随 App 打包，离线使用；保留下方 DM Mono 供显式自定义选择。 */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
 /* DM Mono remains lazy: it loads only when a mono/code style actually uses it. */
 @font-face {
   font-family: "DM Mono";
@@ -10,7 +19,7 @@
       format("woff2");
 }
 
-/* 仓耳今楷按 CSS 实际使用懒加载；本机 family 优先。 */
+/* 兼容显式自定义的旧字体；默认衬线不再加载仓耳今楷。 */
 @font-face {
   font-family: "仓耳今楷";
   font-style: normal;

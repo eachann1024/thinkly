@@ -114,17 +114,16 @@ export async function ensureEditorFontAvailable(
       (localName) => localName.toLowerCase() === family.toLowerCase(),
     ),
   );
-  const usesBuiltInSerif =
-    category === "serif" &&
-    (selectedFamilies.length === 0 ||
-      selectedFamilies.includes(DEFAULT_FONT_NAMES.serif));
-
-  if (selectsJinKai || usesBuiltInSerif) {
-    void ensurePersistentRemoteFont(DEFAULT_FONT_NAMES.serif);
+  if (selectsJinKai) {
+    void ensurePersistentRemoteFont("仓耳今楷");
     return;
   }
 
-  void waitForFonts(selectedFamilies);
+  void waitForFonts(
+    selectedFamilies.length
+      ? selectedFamilies
+      : splitFontList(DEFAULT_FONT_NAMES[category]),
+  );
 }
 
 export async function waitForFonts(families: string[]) {
@@ -137,7 +136,7 @@ export async function waitForFonts(families: string[]) {
   await Promise.allSettled(
     uniqueFamilies.map((family) =>
       withTimeout(
-        document.fonts.load(`400 1em ${toCssFontFamily(family)}`, "中文"),
+        document.fonts.load(`400 1em ${toCssFontFamily(family)}`, "Ag中文"),
       ),
     ),
   );

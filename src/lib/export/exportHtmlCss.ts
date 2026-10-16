@@ -27,7 +27,9 @@ const EXPORT_LIGHT_TOKENS = `
   --editor-scale: 1;
   --editor-module-sm-font-size: 14px;
   --font-default: ${SYSTEM_FONT_STACK};
-  --font-mono: ui-monospace, "DM Mono", Menlo, Consolas,
+  --font-serif: Georgia, "Songti SC", "STSong", "SimSun", Cambria,
+    "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
     monospace;
   --foreground: var(--goose-text-primary-channels);

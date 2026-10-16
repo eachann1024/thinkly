@@ -3,8 +3,8 @@ export const SYSTEM_FONT_STACK =
 
 export const DEFAULT_FONT_NAMES = {
   default: SYSTEM_FONT_STACK,
-  serif: "仓耳今楷",
-  mono: "DM Mono",
+  serif: "Georgia",
+  mono: "JetBrains Mono",
 } as const;
 
 /** 本机安装时的常见 family / 文件名，先于远端。 */
@@ -20,6 +20,8 @@ export const SERIF_LOCAL_FALLBACKS = [
   "STSong",
   "SimSun",
   "Cambria",
+  "Times New Roman",
+  "Times",
 ];
 
 /** 钉 commit 的仓耳今楷 woff2：国内镜像优先，再 jsDelivr / GitHub raw。不要拷进项目。 */
@@ -29,7 +31,7 @@ const CANGER_JINKAI_WOFF2_URLS = [
   "https://raw.githubusercontent.com/eachann1024/Resources/d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
 ] as const;
 
-/** 仓耳今楷仅在用户选择衬线体时按需加载。 */
+/** 兼容用户显式选择的旧字体；默认衬线只使用本机字体。 */
 export const REMOTE_FONT_SOURCES = {
   仓耳今楷: CANGER_JINKAI_WOFF2_URLS,
 } as const;

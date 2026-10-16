@@ -7,6 +7,8 @@ BlockNote XL AI/PDF packages have been removed; AI menus and PDF mappings are in
 BlockNote core/react/mantine retain MPL-2.0; keep their notices and make modifications to covered files available under MPL-2.0.
 DOMPurify: Apache-2.0 option. JSZip: MIT option.
 
+Bundled font: JetBrains Mono 2.304 (SIL OFL-1.1). Source: https://github.com/JetBrains/JetBrainsMono. Full license: public/legal/JetBrainsMono-OFL.txt.
+
 Historical source and contributions
 Goose Note historical MIT: Copyright (c) 2026 eachann.
 Markdown Preview: https://github.com/pluk-inc/markdown-preview
