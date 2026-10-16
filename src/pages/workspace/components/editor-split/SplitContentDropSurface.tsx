@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
-import { hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
+import { GOOSE_FOLDER_MIME, GOOSE_PAGE_MIME, hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
 import { dropWorkspaceContent, type SplitContentPlacement } from "@/lib/editor-split/drop";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { countLeaves, MAX_SPLIT_LEAVES } from "@/lib/editor-split/tree";
@@ -14,6 +14,10 @@ type SplitDropTarget = {
 const labels: Record<SplitContentPlacement, string> = {
   left: "在左侧分屏", right: "在右侧分屏", top: "在上方分屏", bottom: "在下方分屏",
 };
+
+function isFileDrag(data: DataTransfer): boolean {
+  return Array.from(data.types).some((type) => type === GOOSE_PAGE_MIME || type === GOOSE_FOLDER_MIME);
+}
 
 function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDropTarget | null {
   for (const pane of surface.querySelectorAll<HTMLElement>(".editor-split-pane[data-pane-id]")) {
@@ -43,7 +47,7 @@ function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDro
   return null;
 }
 
-/** Captures edge drops before BlockNote, leaving normal in-document drops intact. */
+/** 文件只允许落在分屏边缘；正文选区仍保留原有的文内拖动行为。 */
 export function SplitContentDropSurface({ tabId, children }: { tabId: string; children: ReactNode }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [preview, setPreview] = useState<SplitDropTarget | null>(null);
@@ -53,12 +57,17 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
     if (!surface) return;
     const reset = () => setPreview(null);
     const over = (event: DragEvent) => {
-      if (!event.dataTransfer || !hasWorkspaceDrag(event.dataTransfer)) return;
-      const target = contentDropTarget(surface, event.clientX, event.clientY);
-      if (!target) { reset(); return; }
+      const data = event.dataTransfer;
+      if (!data || !(event.target instanceof Node) || !surface.contains(event.target)) return;
+      const canSplit = hasWorkspaceDrag(data);
+      if (!canSplit && !isFileDrag(data)) return;
+      const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
+      if (!target && !isFileDrag(data)) { reset(); return; }
       event.preventDefault();
       event.stopPropagation();
-      event.dataTransfer.dropEffect = "copy";
+      // 只拒绝当前位置的落下，保留原生拖拽，继续移到边缘即可分屏。
+      data.dropEffect = target ? "copy" : "none";
+      if (!target) { reset(); return; }
       const state = useEditorSplit.getState().getStateForTab(tabId);
       setFull(Boolean(state && countLeaves(state.root) >= MAX_SPLIT_LEAVES));
       setPreview((old) => old?.paneId === target.paneId && old.placement === target.placement &&
@@ -68,15 +77,19 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
     const drop = (event: DragEvent) => {
       reset();
       if (!(event.target instanceof Node) || !surface.contains(event.target)) return;
-      if (!event.dataTransfer || !hasWorkspaceDrag(event.dataTransfer)) return;
-      const target = contentDropTarget(surface, event.clientX, event.clientY);
-      if (!target) return;
+      const data = event.dataTransfer;
+      if (!data) return;
+      const canSplit = hasWorkspaceDrag(data);
+      if (!canSplit && !isFileDrag(data)) return;
+      const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
+      if (!target && !isFileDrag(data)) return;
       // BlockNote also moves/deletes selections from document capture, so consume
       // edge drops at window capture before either editor can handle this copy.
       event.preventDefault();
       event.stopPropagation();
-      event.dataTransfer.dropEffect = "copy";
-      const payload = readWorkspaceDrag(event.dataTransfer);
+      data.dropEffect = target ? "copy" : "none";
+      if (!target) return;
+      const payload = readWorkspaceDrag(data);
       if (!payload) return;
       void dropWorkspaceContent(tabId, target.paneId, target.placement as SplitContentPlacement, payload)
         .catch(() => toast.error("无法打开拖入内容，请重试"));
@@ -85,14 +98,14 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       if (!(event.relatedTarget instanceof Node) || !surface.contains(event.relatedTarget)) reset();
     };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") reset(); };
-    surface.addEventListener("dragover", over, true);
+    window.addEventListener("dragover", over, true);
     window.addEventListener("drop", drop, true);
     surface.addEventListener("dragleave", leave);
     window.addEventListener("dragend", reset);
     window.addEventListener("drop", reset);
     window.addEventListener("keydown", escape);
     return () => {
-      surface.removeEventListener("dragover", over, true);
+      window.removeEventListener("dragover", over, true);
       window.removeEventListener("drop", drop, true);
       surface.removeEventListener("dragleave", leave);
       window.removeEventListener("dragend", reset);
