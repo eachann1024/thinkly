@@ -22,6 +22,15 @@
   padding: 0;
 }
 
+/* 行间距止于最后一行，菜单底部只保留与顶部相同的外壳内边距。 */
+:is(.goose-menu-surface, .goose-floating-surface)
+  > :is(.goose-list-row, [data-goose-menu-slot="row"]):last-child,
+:is(.goose-menu-surface, .goose-floating-surface)
+  [data-goose-menu-slot="root"]
+  > :is(.goose-list-row, [data-goose-menu-slot="row"]):last-child {
+  margin-block-end: 0;
+}
+
 /* HeroUI 的 .dropdown__popover 在 @layer 里用 bg-overlay。
  * 深色只挂 .dark，:root 的 --overlay 仍是白色，layer 规则会盖掉上面的背景。
  * 无 layer 才能压过它，把下拉底色锁回菜单表面。 */
