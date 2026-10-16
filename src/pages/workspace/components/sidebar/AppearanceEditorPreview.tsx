@@ -41,7 +41,7 @@ function EditorSample({
         {!editorOnly && <div
           className="appearance-preview-sidebar w-44 shrink-0 border-r border-border/70 p-3"
           style={{
-            background: "var(--appearance-preview-sidebar-surface, var(--goose-shell-surface))",
+            background: "var(--goose-shell-surface)",
             fontFamily: "var(--font-ui)",
             fontSize: computeSidebarFontSize(uiFontSize),
           }}

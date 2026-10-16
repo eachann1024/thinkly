@@ -47,13 +47,14 @@ export const useSettings = create<SettingsState>()(
     {
       name: "goose-note-settings",
       version: 12,
-      merge: (persisted, current) =>
-        ({
+      merge: (persisted, current) => {
+        const { sidebarTint: _removedSidebarTint, ...saved } =
+          (persisted ?? {}) as Partial<SettingsState> & { sidebarTint?: unknown };
+        return {
           ...current,
-          ...normalizeFixedShortcutSettings(
-            (persisted ?? {}) as Partial<SettingsState>,
-          ),
-        }) as SettingsState,
+          ...normalizeFixedShortcutSettings(saved),
+        } as SettingsState;
+      },
       migrate: (persistedState, version) =>
         migrateSettingsPersistedState(persistedState, version),
       storage: createJSONStorage(() => localStorageAdapter),

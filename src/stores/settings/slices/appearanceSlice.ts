@@ -45,8 +45,6 @@ export interface AppearanceSliceState {
   randomIconOnCreate: boolean;
   /** 编辑器画布背景：无、方格或点阵。 */
   editorGridMode: EditorGridMode;
-  /** 侧栏表面叠加当前强调色。 */
-  sidebarTint: boolean;
 
   /** 极简工作区：所有页面在当前标签中切换。产品固定开启，设置里不再提供开关。 */
   singleTabMode: boolean;
@@ -83,7 +81,6 @@ export interface AppearanceSliceActions {
   setImageExportThemeId: (id: CardThemeId) => void;
   setRandomIconOnCreate: (enabled: boolean) => void;
   setEditorGridMode: (mode: EditorGridMode) => void;
-  setSidebarTint: (enabled: boolean) => void;
 
   setSingleTabMode: (enabled: boolean) => void;
 }
@@ -109,7 +106,6 @@ export const APPEARANCE_INITIAL_STATE: AppearanceSliceState = {
   imageExportThemeId: "notebook",
   randomIconOnCreate: false,
   editorGridMode: "off",
-  sidebarTint: false,
 
   singleTabMode: true,
 };
@@ -226,7 +222,6 @@ export function createAppearanceSlice(
     setImageExportThemeId: (imageExportThemeId) => set({ imageExportThemeId }),
     setRandomIconOnCreate: (randomIconOnCreate) => set({ randomIconOnCreate }),
     setEditorGridMode: (mode) => set({ editorGridMode: normalizeEditorGridMode(mode) }),
-    setSidebarTint: (sidebarTint) => set({ sidebarTint }),
 
     setSingleTabMode: (singleTabMode) => set({ singleTabMode }),
   };
