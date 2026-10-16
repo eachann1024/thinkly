@@ -10,6 +10,7 @@ import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import type { useNotebookSwitcherActions } from "./useNotebookSwitcherActions";
 import { SortableNotebookItem } from "./shared";
+import { NotebookMenuItemContent, notebookMenuRowClassName } from "./NotebookMenuItem";
 
 export function renderNotebookMenu(
   context: ReturnType<typeof useNotebookSwitcherActions>,
@@ -136,13 +137,10 @@ export function renderNotebookMenu(
       </div>
       <div className="mx-1 my-1 h-px bg-border" />
         <PopoverAction
-          className="goose-notebook-menu-action w-full justify-start whitespace-nowrap"
+          className={notebookMenuRowClassName}
           onClick={handleOpenLocalFolder}
         >
-          <span className="goose-notebook-monogram goose-notebook-icon" aria-hidden="true">
-            <GooseIcons.FolderOpen className="h-3.5 w-3.5" />
-          </span>
-          打开文件夹
+          <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name="打开文件夹" />
         </PopoverAction>
     </PopoverContent>
   );

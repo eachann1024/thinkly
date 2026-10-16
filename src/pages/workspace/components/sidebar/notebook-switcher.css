@@ -132,16 +132,12 @@
 .sidebar-notebook-footer .sidebar-notebook-trigger > .goose-notebook-monogram {
   flex-shrink: 0;
 }
-.goose-notebook-menu-surface .goose-notebook-row,
-.goose-notebook-menu-surface .goose-notebook-menu-action {
+.goose-notebook-menu-surface .goose-notebook-row {
   gap: 8px;
   padding-inline: 10px;
   border-radius: var(--goose-control-radius, 8px);
-  font-size: var(--sidebar-font-size, 13px);
+  font-family: inherit;
   font-weight: 400;
-  line-height: 20px;
-}
-.goose-notebook-menu-surface .goose-notebook-row {
   height: calc(var(--goose-notebook-row-height, 38px) - 0.142857rem);
   min-height: calc(var(--goose-notebook-row-height, 38px) - 0.142857rem);
   margin-bottom: 0.142857rem;
@@ -156,9 +152,14 @@
   height: 1.125rem;
 }
 .goose-notebook-row .goose-notebook-monogram svg { width: 100%; height: 100%; }
-.goose-notebook-menu-surface .goose-notebook-menu-action {
-  min-height: 30px;
-  padding-block: 4px;
+.goose-notebook-row-actions {
+  display: none;
+}
+.goose-notebook-row:is(:hover, :focus-within) > .goose-notebook-row-actions {
+  display: flex;
+}
+@media (hover: none) {
+  .goose-notebook-row-actions { display: flex; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sidebar-notebook-trigger > .goose-notebook-monogram,
