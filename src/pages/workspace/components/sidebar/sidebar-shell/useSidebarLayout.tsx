@@ -128,7 +128,7 @@ export function useSidebarLayout({
     : availableSidebarWidth;
 
   const workspaceResize = useSidebarResize({
-    disableResize: disableResize || sidebarCollapsed || settingsOpen || sidebarOverlay,
+    disableResize: disableResize || sidebarCollapsed || settingsOpen,
     defaultWidth: 256,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
