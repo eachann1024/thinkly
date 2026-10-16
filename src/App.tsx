@@ -1,4 +1,6 @@
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
+import { IntroVideoOverlay } from "@/pages/workspace/components/intro-video/IntroVideoOverlay";
+import { useIntroVideo } from "@/stores/introVideo";
 import { useEffect, useState } from "react";
 import { useTextCaret } from "@/hooks/useTextCaret";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
@@ -54,6 +56,7 @@ function App() {
   useTextCaret();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
   const showSetupGuide = useSettings(isSetupGuideVisible);
+  const introVideoOpen = useIntroVideo((state) => state.open);
   const [workspaceOpened, setWorkspaceOpened] = useState(false);
   const mountWorkspace = workspaceOpened || (settingsHydrated && !showSetupGuide);
 
@@ -146,12 +149,13 @@ function App() {
       <AppearanceSync />
       <PencilIconDefinitions />
       {mountWorkspace && (
-        <div hidden={showSetupGuide} inert={showSetupGuide} className="h-full">
+        <div hidden={showSetupGuide} inert={showSetupGuide || introVideoOpen} className="h-full">
           {/* Keep an existing editor mounted when reopening the guide. */}
           <WorkspacePage />
         </div>
       )}
       <SetupGuide />
+      <IntroVideoOverlay />
       <AppUpdateDialog />
       <Toaster />
     </>
