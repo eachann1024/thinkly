@@ -66,19 +66,12 @@ export function NotebookSwitcher(
         variant="notebook"
         openOnHover={active && notebookDropdownHoverExpand}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button contentStyle="preserve" variant="ghost" size="sm"
+        <PopoverTrigger asChild>
+            <Button contentStyle="preserve" variant="ghost" size="sm"
                 ref={triggerRef}
                 type="button"
                 disabled={!active}
                 aria-label={`当前${notebookKind} ${activeNotebookLabel}，点击切换`}
-                title={
-                  isRail
-                    ? `${activeNotebookLabel} · 点击切换${notebookKind}`
-                    : undefined
-                }
                 className={cn(
                   "h-auto border-0 py-0 sidebar-notebook-trigger group text-foreground outline-none",
                   isRail && "sidebar-notebook-trigger--rail",
@@ -112,13 +105,8 @@ export function NotebookSwitcher(
                   className="goose-notebook-chevron"
                   aria-hidden="true"
                 />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent side={isRail ? "right" : isHeader ? "bottom" : "top"}>
-            {activeNotebookLabel} · 点击切换{notebookKind}
-          </TooltipContent>
-        </Tooltip>
+            </Button>
+        </PopoverTrigger>
         {renderNotebookMenu(context)}
       </Popover>
   );
