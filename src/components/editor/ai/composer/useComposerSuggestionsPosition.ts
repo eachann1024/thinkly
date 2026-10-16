@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject }
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { getEditorUiScale } from "@/components/editor/utils/editorContextUi";
 import { getComposerCaretTextContext } from "./composerCommandDetection";
+import { useOverlayLayer } from "@/components/ui/overlay-layer";
+import { elementRootLayer, overlayLayer } from "@/lib/uiLayers";
 
 const MAX_HEIGHT = 280;
 const MAX_WIDTH = 340;
@@ -39,6 +41,7 @@ export function useComposerSuggestionsPosition(
   anchorRect: DOMRect,
   trigger: "@" | "/",
 ) {
+  const contextLayer = useOverlayLayer("menu");
   const floatingRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<SuggestionPosition | null>(null);
 
@@ -113,7 +116,9 @@ export function useComposerSuggestionsPosition(
     position: "fixed",
     width: "max-content",
     left: position?.left,
-    zIndex: 9999,
+    zIndex: Math.max(contextLayer, composerRef.current
+      ? overlayLayer("menu", elementRootLayer(composerRef.current))
+      : 0),
     visibility: position && position.maxHeight >= 2 && position.maxWidth >= 2 ? "visible" : "hidden",
     ...(position?.above ? { bottom: position.edge } : { top: position?.edge }),
   };

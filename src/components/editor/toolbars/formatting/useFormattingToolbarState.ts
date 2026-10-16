@@ -121,11 +121,6 @@ export function useFormattingToolbarState() {
   );
 
   useEffect(() => {
-    if (!menuRef.current) return;
-    menuRef.current.style.zIndex = "20000";
-  }, []);
-
-  useEffect(() => {
     if (!isScrolling && !isContextMenuOpen) return;
     setActiveTooltip(null);
   }, [isScrolling, isContextMenuOpen]);

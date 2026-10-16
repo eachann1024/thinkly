@@ -14,7 +14,6 @@
   --goose-preview-toolbar-height: 48px;
   position: fixed;
   inset: 0;
-  z-index: 22000;
   background: hsl(var(--background));
 }
 

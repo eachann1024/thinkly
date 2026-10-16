@@ -5,6 +5,7 @@
  */
 import type { AiImageAttachmentAttrs } from "./referenceLookup";
 import type { ImageDedupTracker } from "./imageDedup";
+import { elementRootLayer, overlayLayer } from "@/lib/uiLayers";
 
 /**
  * 内联图片的实体：chip 只携带可序列化 attrs，
@@ -53,6 +54,7 @@ export function createImagePreviewPortal(): HTMLDivElement {
 }
 
 export function positionImagePreview(preview: HTMLElement, chip: HTMLElement) {
+  preview.style.zIndex = String(overlayLayer("tooltip", elementRootLayer(chip)));
   const rect = chip.getBoundingClientRect();
   const gap = 8;
   const pw = preview.offsetWidth;

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { FLOATING_MENU_CLOSE_MS, FLOATING_MENU_OPEN_MS, floatingMenuMotionStyle } from "../floating-menu-motion";
 
 import { usePopoverContext } from "./state";
+import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "../overlay-layer";
 
 type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   side?: "top" | "bottom" | "left" | "right";
@@ -14,6 +15,8 @@ type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   collisionPadding?: number;
   container?: HTMLElement | null;
   editorContext?: boolean;
+  /** NodeView controls must not insert focus guards into ProseMirror's DOM. */
+  manageFocus?: boolean;
   forceMount?: boolean;
   animation?: "fade" | "reveal";
   onOpenAutoFocus?: (event: Event) => void;
@@ -32,6 +35,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
       collisionPadding = 8,
       container,
       editorContext,
+      manageFocus = true,
       children,
       forceMount,
       animation = "fade",
@@ -45,6 +49,8 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
     forwardedRef,
   ) => {
     const state = usePopoverContext();
+    const layer = useOverlayLayer("menu");
+    const topLayer = useOverlayTopLayer(layer);
     const [scope, animate] = useAnimate<HTMLDivElement>();
     const [mountedNode, setMountedNode] = React.useState<HTMLDivElement | null>(null);
     const ref = useMergeRefs([
@@ -147,10 +153,11 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
     ]);
     if (!state.isMounted && !forceMount) return null;
     return (
+      <OverlayLayerProvider layer={layer}>
       <FloatingPortal root={container}>
         <FloatingFocusManager
           context={state.context}
-          disabled={!state.open}
+          disabled={!state.open || !manageFocus}
           modal={state.modal}
           initialFocus={notebookMenu && !state.keyboard.current ? -1 : focus.initial}
           returnFocus={focus.restore}
@@ -176,8 +183,10 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
             data-motion={state.motionMode}
             data-side={actualSide}
             data-goose-floating-content=""
+            data-goose-layer={layer}
+            data-react-aria-top-layer={topLayer || undefined}
             className={cn(
-              "z-[20000] outline-none",
+              "outline-none",
               !editorContext &&
                 "goose-floating-surface goose-popover-surface w-64 text-popover-foreground",
               !editorContext && className,
@@ -185,6 +194,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
             style={{
               ...state.floatingStyles,
               ...style,
+              zIndex: layer,
               ...menuMotion,
               ...(animation === "reveal"
                 ? {
@@ -212,6 +222,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
           </div>
         </FloatingFocusManager>
       </FloatingPortal>
+      </OverlayLayerProvider>
     );
   },
 );

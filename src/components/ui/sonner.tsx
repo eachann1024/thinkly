@@ -7,6 +7,8 @@ import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { useSettings } from "@/stores/useSettings";
 import { buttonVariants } from "./button";
 import { iconButtonVariants } from "./icon-button";
+import { createPortal } from "react-dom";
+import { UI_LAYERS } from "@/lib/uiLayers";
 
 type ToasterProps = React.ComponentProps<typeof Sonner> & {
   placement?: "edge" | "center";
@@ -72,6 +74,7 @@ const Toaster = ({
   toastOptions,
   icons,
   placement = "edge",
+  style,
   ...props
 }: ToasterProps) => {
   const theme = useResolvedTheme(useSettings((state) => state.theme));
@@ -90,7 +93,8 @@ const Toaster = ({
     return () => document.removeEventListener("pointerdown", handler, true);
   }, []);
 
-  return (
+  return createPortal(
+    <div data-react-aria-top-layer="">
     <Sonner
       theme={theme}
       position="top-right"
@@ -98,7 +102,8 @@ const Toaster = ({
       mobileOffset={22}
       closeButton
       swipeDirections={["left", "right", "top"]}
-      className={cn("toaster group goose-toaster z-[22000]", placement === "center" && "goose-toaster-center", className)}
+      className={cn("toaster group goose-toaster", placement === "center" && "goose-toaster-center", className)}
+      style={{ ...style, zIndex: UI_LAYERS.toast }}
       // 关闭 sonner 默认 richColors，错误视觉完全由全局 goose-toast-error 接管
       richColors={false}
       icons={{
@@ -150,6 +155,8 @@ const Toaster = ({
       {...props}
       visibleToasts={placement === "center" ? 1 : props.visibleToasts}
     />
+    </div>,
+    document.body,
   );
 };
 

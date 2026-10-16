@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { editableTarget, prepareTextCaret, type CaretBox } from "@/lib/textCaretGeometry";
 import { textCaretLayer } from "@/lib/textCaretLayer";
+import { isTextCaretExposed } from "@/lib/textCaretVisibility";
 import "@/styles/global/text-caret.css";
 
 /** One caret overlay for inputs and editors, with native IME fallback. */
@@ -33,13 +34,18 @@ export function useTextCaret() {
       if (owner !== el) {
         hide();
         owner = el;
-        caret.style.zIndex = String(textCaretLayer(el));
       }
       measure ??= prepareTextCaret(el, mirror);
       const box = measure();
       // 浮层入场动画和 Floating UI 定位会在 focus 之后继续改变屏幕坐标。
       if (el.closest(".goose-editor-context-ui")) schedule();
       if (!box) { owner.removeAttribute("data-goose-caret-active"); caret.hidden = true; return; }
+      if (!isTextCaretExposed(el, box)) {
+        owner.removeAttribute("data-goose-caret-active");
+        caret.hidden = true;
+        return;
+      }
+      caret.style.zIndex = String(textCaretLayer(el));
       if (!el.hasAttribute("data-goose-caret-active")) el.setAttribute("data-goose-caret-active", "true");
       const next = `${box.left}:${box.top}:${box.height}`;
       if (next !== geometry) {
@@ -56,7 +62,7 @@ export function useTextCaret() {
     const compositionStart = () => { composing = true; hide(); };
     const compositionEnd = () => { composing = false; schedule(); };
     const focusOut = () => { composing = false; hide(); schedule(); };
-    const events = ["focusin", "input", "selectionchange", "keyup", "pointerup", "scroll"];
+    const events = ["focusin", "input", "selectionchange", "keyup", "pointerup", "pointermove", "scroll"];
     for (const event of events) document.addEventListener(event, schedule, true);
     document.addEventListener("focusout", focusOut, true);
     document.addEventListener("compositionstart", compositionStart, true);
@@ -67,6 +73,10 @@ export function useTextCaret() {
     window.addEventListener("focus", schedule);
     const appearance = new MutationObserver(invalidate);
     appearance.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-goose-accent"] });
+    const layers = new MutationObserver((records) => {
+      if (records.some((record) => record.target !== caret && !mirror.contains(record.target))) schedule();
+    });
+    layers.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-goose-layer", "inert", "hidden"] });
     schedule();
     return () => {
       hide();
@@ -79,6 +89,7 @@ export function useTextCaret() {
       window.removeEventListener("blur", hide);
       window.removeEventListener("focus", schedule);
       appearance.disconnect();
+      layers.disconnect();
       caret.remove();
       mirror.remove();
     };

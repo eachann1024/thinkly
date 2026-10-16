@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { TOOLTIP_DELAY_MS, resolveTooltipDelayDuration } from "./tooltip-delay";
+import { useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
 
 const TooltipOptions = React.createContext({
   delay: TOOLTIP_DELAY_MS,
@@ -157,6 +158,8 @@ const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
     forwardedRef,
   ) => {
     const state = useTooltipContext();
+    const layer = useOverlayLayer("tooltip");
+    const topLayer = useOverlayTopLayer(layer);
     const ref = useMergeRefs([forwardedRef, state.refs.setFloating]);
     React.useLayoutEffect(() => {
       state.setPlacement(align === "center" ? side : `${side}-${align}`);
@@ -170,9 +173,10 @@ const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
           ref={ref}
           data-state="open"
           data-side={state.placement.split("-")[0]}
-          style={{ ...state.floatingStyles, ...style }}
+          data-goose-layer={layer}
+          data-react-aria-top-layer={topLayer || undefined}
+          style={{ ...state.floatingStyles, ...style, zIndex: layer }}
           className={cn(
-            "z-[21000]",
             !editorContext &&
               "goose-tooltip-surface",
             !editorContext && variant === "complex" && "goose-tooltip-complex",

@@ -9,6 +9,7 @@ import {
 import { isColorSwatchSelected } from "./heldColorSelection";
 import type { useColorPanelState } from "./useColorPanelState";
 import type { useColorActions } from "./useColorActions";
+import { useOverlayLayer } from "@/components/ui/overlay-layer";
 
 export function ColorPickerPanel({
   panel,
@@ -17,6 +18,7 @@ export function ColorPickerPanel({
   panel: ReturnType<typeof useColorPanelState>;
   actions: ReturnType<typeof useColorActions>;
 }) {
+  const layer = useOverlayLayer("menu");
   const {
     isMounted,
     position,
@@ -35,7 +37,7 @@ export function ColorPickerPanel({
       data-open={isOpen ? "true" : "false"}
       data-side={position.showAbove ? "above" : "below"}
       onMouseDown={(e) => e.preventDefault()}
-      style={colorPanelBoxStyle(position)}
+      style={{ ...colorPanelBoxStyle(position), zIndex: layer }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={(e) => {
