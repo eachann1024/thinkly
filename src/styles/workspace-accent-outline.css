@@ -4,7 +4,7 @@
   --goose-text-link: var(--goose-accent-text, var(--goose-text-info));
 }
 
-:root .workspace-shell .tab-rail-item[data-tab-active="true"]:where(:not([aria-disabled="true"])),
+:root .workspace-shell .tab-rail-item[data-tab-active="true"]:not([data-tab-count="1"]):where(:not([aria-disabled="true"])),
 :root .workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
   .sidebar-mode-rail-button,
   .sidebar-footer-control,
@@ -17,16 +17,13 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* 单个标签的名称栏默认中性。新标签页没有标题输入，关闭最后一个文档后也不描边。 */
+/* 单标签只展示名称，悬停和按下均不出现选择底色；键盘焦点仍可辨认。 */
 :root .workspace-shell .tab-rail-item[data-tab-count="1"] {
   background: transparent;
   color: var(--goose-text-primary);
   box-shadow: none;
 }
-:root .workspace-shell .tab-rail-item[data-tab-count="1"]:is(:hover, :active) {
-  background: color-mix(in srgb, var(--goose-text-primary) 6%, transparent);
-}
-:root .workspace-shell .tab-rail-item[data-tab-active="true"]:has([data-page-title-field]:focus) {
+:root .workspace-shell .tab-rail-item[data-tab-active="true"]:not([data-tab-count="1"]):has([data-page-title-field]:focus) {
   background: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);

@@ -50,7 +50,7 @@
   background: transparent;
   box-shadow: none;
 }
-.tab-rail-item:has([data-page-title-field]:focus) {
+.tab-rail-item:not([data-tab-count="1"]):has([data-page-title-field]:focus) {
   background-color: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
 }
