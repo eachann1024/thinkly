@@ -20,6 +20,7 @@ export default defineConfig([
     'plans',
     'node_modules',
     'scripts',
+    'video',
     '.claude',
     '.delta',
     '.treehouse',

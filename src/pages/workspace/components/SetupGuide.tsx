@@ -11,6 +11,7 @@ import { SettingsAI } from "./sidebar/SettingsAI";
 import { SettingsAppearance } from "./sidebar/SettingsAppearance";
 import { WinWindowControls } from "./page/WinWindowControls";
 import "./setup-guide.css";
+import { useIntroVideo } from "@/stores/introVideo";
 
 const STEPS = [
   { label: "外观", title: "设置外观" },
@@ -100,7 +101,9 @@ function SetupGuideFlow() {
   }, [step]);
 
   const closeGuide = () => {
+    const firstRun = !useSettings.getState().setupGuideSeen;
     useSettings.setState({ setupGuideSeen: true, setupGuideOpen: false });
+    if (firstRun) useIntroVideo.getState().show();
   };
 
   const moveToStep = (nextStep: SetupStep) => {
