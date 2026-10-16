@@ -2,7 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { PdfBlockMapping } from "./blockTypes";
 import { blockTextStyle, splitPdfWord } from "./pdfTextStyle";
-import { PDF_DM_MONO_FAMILY, PDF_FONT_FAMILY } from "./fontConfig";
+import { PDF_MONO_FAMILY, PDF_FONT_FAMILY } from "./fontConfig";
 import { tablePdfMapping } from "./pdfTable";
 
 export function createDefaultPdfBlockMappings(): Record<
@@ -66,7 +66,7 @@ export function createDefaultPdfBlockMappings(): Record<
         <Text
           hyphenationCallback={splitPdfWord}
           style={{
-            fontFamily: [PDF_DM_MONO_FAMILY, PDF_FONT_FAMILY],
+            fontFamily: [PDF_MONO_FAMILY, PDF_FONT_FAMILY],
             fontSize: 11,
           }}
         >

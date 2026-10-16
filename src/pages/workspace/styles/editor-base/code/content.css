@@ -25,7 +25,7 @@
     var(--editor-code-block-padding-x, 16px);
   font-family: var(
     --font-mono,
-    "DM Mono",
+    "JetBrains Mono",
     "SF Mono",
     Menlo,
     Monaco,
@@ -86,7 +86,7 @@
   text-align: right;
   font-family: var(
     --font-mono,
-    "DM Mono",
+    "JetBrains Mono",
     "SF Mono",
     Menlo,
     Monaco,

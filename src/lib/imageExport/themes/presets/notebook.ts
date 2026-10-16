@@ -23,7 +23,7 @@ const DEFAULT_CUSTOM_FONTS: CustomFonts = {
 
 const LIGHT_PAGE_FONT = SYSTEM_FONT_STACK;
 const LIGHT_CODE_FONT =
-  'ui-monospace, "DM Mono", Menlo, Consolas, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", monospace';
+  '"JetBrains Mono", ui-monospace, Menlo, Consolas, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", monospace';
 
 function readCssVar(name: string, fallback: string): string {
   if (typeof document === "undefined") return fallback;

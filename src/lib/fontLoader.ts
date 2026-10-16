@@ -57,7 +57,7 @@ export function applyFontVariables(
     buildFontStack(
       customSerifList,
       DEFAULT_FONT_NAMES.serif,
-      ["仓耳今楷", ...SERIF_LOCAL_FALLBACKS],
+      SERIF_LOCAL_FALLBACKS,
       fallbacks.serif,
       "serif",
     ),
@@ -86,7 +86,7 @@ export function getEditorFontFamilies(
   };
   const fallbackMap = {
     default: splitFontList(SYSTEM_FONT_STACK),
-    serif: ["仓耳今楷", ...SERIF_LOCAL_FALLBACKS],
+    serif: SERIF_LOCAL_FALLBACKS,
     mono: UI_MONO_FALLBACKS,
   };
 

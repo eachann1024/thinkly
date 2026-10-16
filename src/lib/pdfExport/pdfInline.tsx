@@ -1,7 +1,7 @@
 import { Text, Link } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { Style } from "@react-pdf/types";
-import { PDF_DM_MONO_FAMILY, PDF_FONT_FAMILY } from "./fontConfig";
+import { PDF_MONO_FAMILY, PDF_FONT_FAMILY } from "./fontConfig";
 import { pdfColor } from "./pdfTextStyle";
 
 export function renderPdfInline(content: unknown): ReactNode {
@@ -48,7 +48,7 @@ export function renderPdfInline(content: unknown): ReactNode {
         pdfColor(styles.backgroundColor, true) ??
         (styles.code ? "#f3f4f6" : undefined),
       fontFamily: styles.code
-        ? [PDF_DM_MONO_FAMILY, PDF_FONT_FAMILY]
+        ? [PDF_MONO_FAMILY, PDF_FONT_FAMILY]
         : undefined,
     };
     return (

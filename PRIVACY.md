@@ -13,8 +13,8 @@ user agent). All network activity is listed below.
 | When | Destination | Purpose |
 | --- | --- | --- |
 | At startup and every 4 hours | `raw.githubusercontent.com` (GitHub) | Read `updates/latest.json` to show whether a newer version exists. Installers are downloaded from GitHub Releases only after you click download. Signed macOS builds also read `updates/mac-<arch>.json` for automatic updates. |
-| When text uses the built-in monospace font "DM Mono" and it is not installed locally | `cdn.jsdelivr.net` | Download the font file. |
-| When you choose the serif font "仓耳今楷" and it is not installed locally | `cdn.jsdmirror.com`, `cdn.jsdelivr.net`, `raw.githubusercontent.com` | Download the font file. |
+| When you explicitly select the legacy monospace font "DM Mono" and it is not installed locally | `cdn.jsdelivr.net` | Download the font file. |
+| When you explicitly select the legacy serif font "仓耳今楷" and it is not installed locally | `cdn.jsdmirror.com`, `cdn.jsdelivr.net`, `raw.githubusercontent.com` | Download the font file. |
 | When the built-in welcome note is displayed | `goose-notion-1257312034.cos.ap-guangzhou.myqcloud.com` (Tencent Cloud COS, operated by the maintainer) | Load the welcome cover image. |
 
 ## Features that send data only when you use or configure them
@@ -41,4 +41,4 @@ Uninstalling the app removes the program; your note folders are never deleted au
 
 ---
 
-**中文摘要**：Goose Note 无账号、无统计、无遥测，笔记保存在本地。除你主动配置的 AI 服务、联网搜索、Git 同步、错误上报以及导出功能外，不会发送笔记或个人数据。自动发生、且不含笔记内容的请求只有：启动时及每 4 小时从 GitHub 读取更新信息；按需从 CDN 下载 DM Mono / 仓耳今楷字体；显示内置欢迎页时从维护者的腾讯云 COS 加载封面图。
+**中文摘要**：Goose Note 无账号、无统计、无遥测，笔记保存在本地。除你主动配置的 AI 服务、联网搜索、Git 同步、错误上报以及导出功能外，不会发送笔记或个人数据。自动发生、且不含笔记内容的请求只有：启动时及每 4 小时从 GitHub 读取更新信息；默认等宽字体 JetBrains Mono 随 App 内置，默认衬线使用 Georgia 和系统宋体，无需联网；显式选择旧字体 DM Mono 或仓耳今楷时按需从 CDN 下载字体；显示内置欢迎页时从维护者的腾讯云 COS 加载封面图。
