@@ -36,7 +36,6 @@ export type GooseWindowTabSnapshot = {
   id: string;
   pageId: string;
   type?: string;
-  pinned?: boolean;
   workspaceId?: string;
 };
 
@@ -191,7 +190,6 @@ export function tabToSnapshot(
     pageId: tab.pageId,
   };
   if (tab.type) snapshot.type = tab.type;
-  if (tab.pinned) snapshot.pinned = true;
   if (tab.workspaceId) snapshot.workspaceId = tab.workspaceId;
   return snapshot;
 }

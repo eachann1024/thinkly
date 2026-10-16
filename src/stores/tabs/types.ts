@@ -8,7 +8,6 @@ export interface TabItem {
   id: string;
   pageId: string;
   type?: TabType;
-  pinned?: boolean;
   /** 预览/临时标签：侧栏单击打开，可被下一个预览替换；编辑后晋升永久 */
   preview?: boolean;
   workspaceId?: string;
@@ -49,7 +48,7 @@ export interface TabsState {
   openPreviewTab: (pageId: string) => void;
   openPermanentTab: (
     pageId: string,
-    options?: { pin?: boolean; reuseEmpty?: boolean },
+    options?: { reuseEmpty?: boolean },
   ) => void;
   promotePreviewTab: (tabId?: string) => void;
   openInCurrentTab: (pageId: string) => void;
@@ -60,7 +59,6 @@ export interface TabsState {
   closeTabsToLeft: (tabId: string) => void;
   closeTabsToRight: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
-  togglePinTab: (tabId: string) => void;
   goBackTabHistory: () => void;
   goForwardTabHistory: () => void;
   canGoBackTabHistory: () => boolean;

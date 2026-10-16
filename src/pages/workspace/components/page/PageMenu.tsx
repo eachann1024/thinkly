@@ -153,7 +153,6 @@ export function PageMenu() {
                       id: activeTab.id,
                       pageId: activeTab.pageId,
                       type: activeTab.type,
-                      pinned: activeTab.pinned,
                       workspaceId: activeTab.workspaceId,
                     },
                   });

@@ -28,7 +28,6 @@ export type TabDragResolution =
 export type TabRailRect = {
   left: number;
   width: number;
-  pinned?: boolean;
 };
 
 /** 必须超出源窗外框这么多才撕成新窗，避免擦边误开。 */
@@ -112,29 +111,17 @@ export function resolveTabDrag(opts: {
   return { action: "none" };
 }
 
-/**
- * 按指针落在标签中线左/右决定插入下标。
- * 固定标签只在左侧区段内插入，非固定只在右侧。
- */
+/** 按指针落在标签中线左/右决定插入下标。 */
 export function insertIndexFromTabRects(
   rects: TabRailRect[],
   pointerX: number,
-  incomingPinned = false,
 ): number {
-  const pinnedCount = rects.filter((rect) => rect.pinned).length;
-  const zone = incomingPinned
-    ? rects.filter((rect) => rect.pinned)
-    : rects.filter((rect) => !rect.pinned);
-  const base = incomingPinned ? 0 : pinnedCount;
-  if (zone.length === 0) {
-    return incomingPinned ? 0 : rects.length;
-  }
-  for (let i = 0; i < zone.length; i += 1) {
-    const tab = zone[i];
+  for (let i = 0; i < rects.length; i += 1) {
+    const tab = rects[i];
     if (!tab) continue;
-    if (pointerX < tab.left + tab.width / 2) return base + i;
+    if (pointerX < tab.left + tab.width / 2) return i;
   }
-  return base + zone.length;
+  return rects.length;
 }
 
 /** 插入线 X，与 `tab.left` 同一坐标系（通常是 viewport）。 */

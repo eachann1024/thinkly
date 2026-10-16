@@ -33,7 +33,7 @@ export function TabRail({
     handleTabDragStart, handleTabDragMove, handleTabDragCancel,
     handleTabDragEnd, closeTabShortcutLabel,
     canOpenInNewWindow, setActiveTab, closeTab,
-    togglePinTab, promotePreviewTab, locateInTree,
+    promotePreviewTab, locateInTree,
     openTabInNewWindow, handleTabListKeyDown,
     openTabs,
   } = useTabRail({ variant, onBeforeActivateTab });
@@ -44,9 +44,9 @@ export function TabRail({
         const displayPageId = tabRailPageId(tab, focusedPageByTabId);
         const tabPage =
           tab.type === "welcome" ? undefined : getPage(displayPageId);
-        const closableOtherTabs = visibleTabs.filter((item) => item.id !== tab.id && !item.pinned);
-        const closableLeftTabs = visibleTabs.slice(0, visibleIndex).filter((item) => !item.pinned);
-        const closableRightTabs = visibleTabs.slice(visibleIndex + 1).filter((item) => !item.pinned);
+        const closableOtherTabs = visibleTabs.filter((item) => item.id !== tab.id);
+        const closableLeftTabs = visibleTabs.slice(0, visibleIndex);
+        const closableRightTabs = visibleTabs.slice(visibleIndex + 1);
         return (
           <SortableTabItem
             key={tab.id}
@@ -80,7 +80,6 @@ export function TabRail({
               activateWorkspace();
               closableRightTabs.forEach((item) => closeTab(item.id));
             }}
-            onTogglePin={() => togglePinTab(tab.id)}
             onPromotePreview={() => promotePreviewTab(tab.id)}
             onLocateInTree={() => locateInTree(displayPageId)}
             onOpenInNewWindow={
@@ -206,12 +205,6 @@ export function TabRail({
                         }, 0);
                       }}
                     >
-                      {tab.pinned && (
-                        <GooseIcons.Pin
-                          className="h-3 w-3 shrink-0 text-link"
-                          strokeWidth={1.75}
-                        />
-                      )}
                       <span
                         className={cn(
                           "min-w-0 flex-1 truncate",

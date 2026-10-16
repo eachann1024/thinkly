@@ -4,7 +4,6 @@ import { effectiveSingleTabMode } from "@/lib/tabMode";
 import {
   commitActiveEditor,
   createTabId,
-  applyPinnedOrder,
   stampTabAccess,
   findNotebookAiTabInList,
 } from "./helpers";
@@ -51,12 +50,12 @@ export function createSpecialTabActions(
         type: "welcome",
         lastAccessedAt: now,
       };
-      const nextOpenTabs = applyPinnedOrder([
+      const nextOpenTabs = [
         ...openTabs.map((tab) =>
           tab.id === get().activeTabId ? stampTabAccess(tab, now) : tab,
         ),
         newTab,
-      ]);
+      ];
       set({
         openTabs: nextOpenTabs,
         activeTabId: newTab.id,
@@ -122,15 +121,10 @@ export function createSpecialTabActions(
         workspaceId: notebookId,
         lastAccessedAt: now,
       };
-      // 独立 AI 标签默认插到固定标签之后、普通标签最前，贴近「标签栏最左入口」。
-      const pinned = openTabs.filter((tab) => tab.pinned);
-      const rest = openTabs.filter((tab) => !tab.pinned);
+      // 独立 AI 标签放在最前，贴近「标签栏最左入口」。
       const nextOpenTabs = [
-        ...pinned.map((tab) =>
-          tab.id === activeTabId ? stampTabAccess(tab, now) : tab,
-        ),
         newTab,
-        ...rest.map((tab) =>
+        ...openTabs.map((tab) =>
           tab.id === activeTabId ? stampTabAccess(tab, now) : tab,
         ),
       ];

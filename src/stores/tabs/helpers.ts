@@ -14,16 +14,6 @@ export const createTabId = (pageId: string) =>
 export const getWorkspaceIdForPage = (pageId: string): string | undefined =>
   usePages.getState().getPage(pageId)?.workspaceId;
 
-// 固定标签恒在最左；其余（预览/普通）一律保持插入顺序追加到右侧。
-// 新建/新打开的标签因此始终落在最右边。
-export const orderTabs = (tabs: TabItem[]): TabItem[] => {
-  const pinned = tabs.filter((t) => t.pinned);
-  const rest = tabs.filter((t) => !t.pinned);
-  return [...pinned, ...rest];
-};
-
-export const applyPinnedOrder = orderTabs;
-
 export function tabShowsPageId(tab: TabItem, pageId: string): boolean {
   if (tab.type === "welcome" || tab.type === "notebook-ai") return false;
   if (tab.pageId === pageId) return true;

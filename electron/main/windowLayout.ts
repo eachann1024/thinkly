@@ -26,7 +26,6 @@ export type WindowTabSnapshot = {
   id: string;
   pageId: string;
   type?: string;
-  pinned?: boolean;
   workspaceId?: string;
 };
 
@@ -76,7 +75,6 @@ export function parseTabSnapshot(value: unknown): WindowTabSnapshot | null {
   if (typeof rec.pageId !== "string" || !rec.pageId.trim()) return null;
   const tab: WindowTabSnapshot = { id: rec.id, pageId: rec.pageId };
   if (typeof rec.type === "string") tab.type = rec.type;
-  if (typeof rec.pinned === "boolean") tab.pinned = rec.pinned;
   if (typeof rec.workspaceId === "string") tab.workspaceId = rec.workspaceId;
   return tab;
 }

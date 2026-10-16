@@ -73,7 +73,6 @@ export function createTabReplacementContext(
       id: activeTab.id,
       pageId,
       workspaceId: getWorkspaceIdForPage(pageId),
-      pinned: activeTab.pinned,
       preview,
       lastAccessedAt: now,
     };
@@ -159,7 +158,6 @@ export function createTabReplacementContext(
       id: preserveOtherTabs && activeTab ? activeTab.id : createTabId(pageId),
       pageId,
       workspaceId: getWorkspaceIdForPage(pageId),
-      pinned: preserveOtherTabs ? activeTab?.pinned : undefined,
       preview: false,
       lastAccessedAt: now,
     };

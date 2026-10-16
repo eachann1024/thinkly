@@ -44,7 +44,7 @@ export function isReusableEmptyWorkspaceTab(
   tab: TabItem | null | undefined,
   getPage: (id: string) => Page | undefined,
 ): boolean {
-  if (!tab || tab.pinned) return false;
+  if (!tab) return false;
   if (tab.type === "notebook-ai") return false;
   if (tab.type === "welcome") return true;
   const page = getPage(tab.pageId);

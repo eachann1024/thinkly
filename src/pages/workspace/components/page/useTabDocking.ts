@@ -14,7 +14,6 @@ function readTabRects(scroller: HTMLElement): TabRailRect[] {
       return {
         left: box.left,
         width: box.width,
-        pinned: el.hasAttribute("data-tab-pinned"),
       };
     },
   );
@@ -23,10 +22,9 @@ function readTabRects(scroller: HTMLElement): TabRailRect[] {
 function indicatorLeftForContentX(
   scroller: HTMLElement,
   contentX: number,
-  incomingPinned: boolean,
 ): number | null {
   const rects = readTabRects(scroller);
-  const index = insertIndexFromTabRects(rects, contentX, incomingPinned);
+  const index = insertIndexFromTabRects(rects, contentX);
   const viewportX = insertLineLeft(rects, index);
   if (viewportX == null) return null;
   const rail = scroller.getBoundingClientRect();
@@ -48,16 +46,11 @@ export function useTabDocking(opts: {
     const unsubAccept = desktop.onAcceptTab((payload) => {
       const scroller = scrollerRef.current;
       const rects = scroller ? readTabRects(scroller) : [];
-      const index = insertIndexFromTabRects(
-        rects,
-        payload.contentX,
-        Boolean(payload.tab.pinned),
-      );
+      const index = insertIndexFromTabRects(rects, payload.contentX);
       const incoming: TabItem = {
         id: payload.tab.id,
         pageId: payload.tab.pageId,
         type: payload.tab.type as TabItem["type"],
-        pinned: payload.tab.pinned,
         workspaceId: payload.tab.workspaceId,
       };
       useTabs.getState().adoptTab(incoming, index);
@@ -69,7 +62,7 @@ export function useTabDocking(opts: {
         setInsertLeft(null);
         return;
       }
-      setInsertLeft(indicatorLeftForContentX(scroller, payload.contentX, false));
+      setInsertLeft(indicatorLeftForContentX(scroller, payload.contentX));
     });
     return () => {
       unsubAccept();
