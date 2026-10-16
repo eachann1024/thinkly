@@ -3,8 +3,6 @@ import { TooltipProvider } from "@/components/editor/ui/tooltip";
 import { cn } from "@/components/editor/utils/cn";
 import { SelectionToolbarSurface } from "../SelectionToolbarSurface";
 import { AddToChatButton } from "./groups/AddToChatButton";
-import { SelectionActions } from "./groups/SelectionActions";
-import { SelectionSummary, useSelectionSummary } from "./SelectionSummary";
 import { FormattingToolbarGroups } from "./FormattingToolbarGroups";
 import { canShowAddToChatButton } from "@/components/editor/ai/composer/selectionQuote";
 import { getPageTitle } from "@/components/editor/utils/page-title";
@@ -23,20 +21,12 @@ export function FormattingToolbarLayout({
     selectionState,
     caps,
     aiActive,
-    bindTooltip,
     menuRef,
     shouldHide,
   } = state;
-  const selectionSummary = useSelectionSummary(caps.mode);
   const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
   // 选区 AI 润色入口暂时停用；加入对话继续使用独立入口。
   const sections: ReactNode[] = [];
-
-  if (selectionSummary) {
-    sections.push(
-      <SelectionSummary key="selection" label={selectionSummary} />,
-    );
-  }
 
   if (isTableSelection && hasTableMergeAction(state.editor)) {
     sections.push(<TableMergeControls key="table-merge" editor={state.editor} />);
@@ -70,14 +60,6 @@ export function FormattingToolbarLayout({
         pageId={page.id}
         pageTitle={getPageTitle(page)}
       />,
-    );
-  }
-
-  if (!state.editor.prosemirrorState.selection.empty) {
-    sections.push(
-      <div key="selection-actions" className="goose-formatting-toolbar-group">
-        <SelectionActions bindTooltip={bindTooltip} />
-      </div>,
     );
   }
 
