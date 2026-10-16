@@ -9,6 +9,7 @@ import { NotebookEditDialog } from "./NotebookEditDialog";
 import { useNotebookSwitcherState } from "./notebook-switcher/useNotebookSwitcherState";
 import { useNotebookSwitcherActions } from "./notebook-switcher/useNotebookSwitcherActions";
 import { renderNotebookIcon } from "./notebookUtils";
+import { NotebookName } from "./notebook-switcher/NotebookName";
 
 export function NotebookSwitcher(
   props: {
@@ -105,9 +106,7 @@ export function NotebookSwitcher(
                 {isRail ? (
                   <span className="sidebar-rail-control-label">记事本</span>
                 ) : (
-                  <span className="min-w-0 truncate leading-5" title={activeNotebook?.name}>
-                    {activeNotebookLabel}
-                  </span>
+                  <NotebookName name={activeNotebookLabel} />
                 )}
                 <NotebookChevron
                   className="goose-notebook-chevron"

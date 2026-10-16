@@ -26,19 +26,15 @@
   flex: 1 1 0;
   min-width: 0;
   max-width: 100%;
-  height: 2.285714rem;
-  min-height: 2.285714rem;
+  height: 2.571429rem;
+  min-height: 2.571429rem;
   gap: 0.571429rem;
-  padding: 0 0.428571rem;
+  padding: 0 0.571429rem;
   border: 0;
   border-radius: var(--goose-control-radius, 0.428571rem);
   background: transparent;
-  font-size: var(--sidebar-font-size, 13px);
+  font-size: calc(var(--sidebar-font-size, 13px) + 1px);
   font-weight: 500;
-}
-.sidebar-navigation-heading .sidebar-notebook-trigger--header > .truncate {
-  flex: 0 1 auto;
-  min-width: 0;
 }
 .sidebar-navigation-heading .sidebar-notebook-trigger--header > .goose-notebook-monogram {
   flex-shrink: 0;
