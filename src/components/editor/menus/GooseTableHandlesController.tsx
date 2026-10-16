@@ -55,7 +55,18 @@ function TableChrome({
         placement,
         whileElementsMounted: onMount,
         middleware: [
-          offset(gap),
+          offset(({ rects }) => placement === "left"
+            ? Math.min(gap, rects.reference.x - rects.floating.width - 4)
+            : gap),
+          ...(placement === "left" ? [size({
+            apply({ rects, elements }) {
+              // Quick note has a narrow gutter: keep the grip inside the viewport.
+              elements.floating.style.setProperty(
+                "--goose-table-handle-max-width",
+                `${Math.max(12, rects.reference.x - 8)}px`,
+              );
+            },
+          })] : []),
           ...(stretch
             ? [
                 size({
@@ -71,7 +82,7 @@ function TableChrome({
       }}
       focusManagerProps={{ disabled: true }}
       useTransitionStylesProps={{ duration: 0 }}
-      elementProps={{ style: { zIndex: 10 } }}
+      elementProps={{ className: `goose-table-chrome-${placement}`, style: { zIndex: 10 } }}
     >
       {children}
     </GenericPopover>

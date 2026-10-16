@@ -43,7 +43,7 @@
 }
 .goose-table-extend-button-rows {
   inline-size: 100%;
-  block-size: calc(32px * var(--editor-scale, 1));
+  block-size: calc(24px * var(--editor-scale, 1));
   cursor: row-resize;
 }
 .workspace-editor-surface .bn-table-drop-cursor {
@@ -70,6 +70,26 @@
 .goose-table-handle-btn[aria-expanded="true"] {
   background: var(--goose-interactive-hover);
   color: hsl(var(--foreground));
+}
+.goose-table-chrome-left .goose-table-handle-btn {
+  max-width: var(--goose-table-handle-max-width, none);
+}
+.goose-table-chrome-left .goose-table-handle-btn > svg {
+  max-width: 100%;
+}
+.goose-table-chrome-top .goose-table-handle-btn {
+  width: calc(28px * var(--editor-scale, 1));
+  height: calc(20px * var(--editor-scale, 1));
+}
+.goose-table-chrome-left .goose-table-handle-btn,
+.goose-table-chrome-top .goose-table-handle-btn {
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--goose-menu-border));
+  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.06);
+}
+.goose-table-chrome-left .goose-table-handle-btn:is(:hover, [aria-expanded="true"]),
+.goose-table-chrome-top .goose-table-handle-btn:is(:hover, [aria-expanded="true"]) {
+  background: var(--goose-interactive-hover);
 }
 .goose-table-menu .goose-table-menu-note {
   white-space: normal;

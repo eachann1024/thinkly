@@ -11,8 +11,9 @@
   --goose-table-selection: var(--goose-table-selection-border, var(--goose-accent-focus));
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] .tableWrapper {
-  padding: calc(56px * var(--editor-scale, 1))
-    calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1));
+  /* The left border shares the prose baseline; portals own the row-handle gutter. */
+  padding: calc(24px * var(--editor-scale, 1))
+    calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1)) 0;
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] table {
   table-layout: fixed;
