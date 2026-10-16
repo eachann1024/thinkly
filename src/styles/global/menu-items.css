@@ -8,6 +8,10 @@
   gap: var(--goose-menu-content-gap);
   padding-block: 0;
 }
+/* 明确使用网格的色块保留自有方形尺寸。 */
+[data-goose-layout="grid"] > .goose-menu-item {
+  min-height: 0;
+}
 /* 保持按下时的几何，防止相邻高亮的视觉间隙变化。 */
 :is(.goose-menu-surface, .goose-floating-surface, .dropdown__popover)
   :is(.menu-item, .list-box-item, [data-slot="menu-item"]):is(:active, [data-pressed="true"]) {

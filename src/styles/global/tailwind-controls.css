@@ -43,8 +43,8 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  /* Compact controls reuse the existing menu-row corner shape. */
-  --radius-control: var(--goose-menu-item-radius);
+  /* 普通控件不跟随菜单项圆角变化。 */
+  --radius-control: var(--goose-control-radius);
   --radius-thumb: 4px;
   --radius-marker: 1px;
 

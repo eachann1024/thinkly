@@ -118,7 +118,7 @@ export function PageMenu() {
           <div
             role="button"
             tabIndex={0}
-            className="goose-list-row group grid min-h-[32px] cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-[var(--goose-control-radius)] px-2 text-xs "
+            className="goose-menu-item goose-list-row group grid min-h-[32px] cursor-pointer grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-x-1.5 rounded-[var(--goose-control-radius)] px-2 text-xs "
             onClick={() =>
               updatePage(activePageId, { isLocked: !page.isLocked })
             }

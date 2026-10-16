@@ -8,6 +8,20 @@
   box-shadow: var(--goose-menu-shadow);
 }
 
+/* 菜单统一外沿；表单浮层保留自己的尺寸和内容布局。 */
+.goose-menu-surface,
+.goose-floating-surface:has([data-goose-menu-slot="row"]) {
+  --goose-floating-radius: var(--goose-menu-radius);
+  min-width: min(var(--goose-menu-min-width), calc(100vw - 24px));
+  padding: var(--goose-menu-surface-inset);
+}
+
+/* 外壳已承担内边距，避免供应商菜单根节点再叠一层。 */
+:is(.goose-menu-surface, .goose-floating-surface)
+  [data-goose-menu-slot="root"]:not(.goose-menu-surface) {
+  padding: 0;
+}
+
 /* HeroUI 的 .dropdown__popover 在 @layer 里用 bg-overlay。
  * 深色只挂 .dark，:root 的 --overlay 仍是白色，layer 规则会盖掉上面的背景。
  * 无 layer 才能压过它，把下拉底色锁回菜单表面。 */
