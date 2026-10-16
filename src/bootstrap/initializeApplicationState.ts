@@ -6,6 +6,7 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { setupSaveGuards } from "./saveGuards";
+import { applyEditorCanvasAttributes } from "@/lib/editorCanvas";
 
 export async function initializeApplicationState(
   lean: boolean,
@@ -60,4 +61,5 @@ export async function initializeApplicationState(
     editorFontSize: settings.editorFontSize,
     editorLineHeight: settings.editorLineHeight,
   });
+  applyEditorCanvasAttributes(settings);
 }
