@@ -2,7 +2,6 @@ import { NotebookSwitcher } from "../NotebookSwitcher";
 import { SidebarMainTree } from "../main-tree/SidebarMainTree";
 import { SidebarSectionHeader } from "../SidebarSectionHeader";
 import { SidebarOutline } from "../SidebarOutline";
-import { SidebarSearch } from "../SidebarSearch";
 import { HistoryVersionList } from "../../history/HistoryView";
 import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
 import type { useSidebarHover } from "./useSidebarHover";
@@ -85,7 +84,6 @@ export function renderSidebarViews(
                     viewportHeight={scrollAreaHeight}
                   />
                 </div>
-                <SidebarSearch />
                 <WorkspaceViewActivity
                   visible={currentView === "outline" && !settingsOpen && !inHistoryMode}
                   className="sidebar-outline-pane flex min-h-0 flex-1 overflow-hidden"

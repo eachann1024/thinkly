@@ -11,6 +11,7 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/components/editor/core/headingSectionFold";
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
+import "./search-editor-bridge.css";
 
 export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, cancelPendingRestoration }: {
   pageId: string; focused: boolean; editorRef: RefObject<EditorRef | null>; scrollRef: RefObject<HTMLDivElement | null>;

@@ -1,9 +1,13 @@
 import { create } from "zustand";
 
+export type SearchSort = "best" | "recent";
 export type SearchScope = { kind: "current"; notebookId: string | null } | { kind: "all" } | { kind: "notebook"; notebookId: string };
 type SearchSession = {
   open: boolean;
+  sheetOpen: boolean;
   query: string;
+  titleOnly: boolean;
+  sort: SearchSort;
   scope: SearchScope;
   startingNotebookId: string | null;
   initialized: boolean;
@@ -19,6 +23,9 @@ type SearchSession = {
   memories: Record<string, number>;
   openSearch: (notebookId: string | null, pageId: string | null, scrollTop: number) => void;
   closeSearch: () => void;
+  hideSheet: () => void;
+  setTitleOnly: (titleOnly: boolean) => void;
+  setSort: (sort: SearchSort) => void;
   setQuery: (query: string) => void;
   setScope: (scope: SearchScope) => void;
   selectResult: (pageId: string | null) => void;
@@ -29,18 +36,21 @@ export function searchMemoryKey(pageId: string, query: string, scope: SearchScop
   return JSON.stringify([pageId, query.trim().toLowerCase(), scope]);
 }
 export const useSearchSession = create<SearchSession>((set) => ({
-  open: false, query: "", scope: { kind: "current", notebookId: null },
+  open: false, sheetOpen: false, query: "", titleOnly: false, sort: "best", scope: { kind: "current", notebookId: null },
   initialized: false, startingNotebookId: null, originPageId: null, originScrollTop: 0,
   targetPageId: null, selectedPageId: null, requestNonce: 0, focusNonce: 0,
   enterReader: false, restoreTop: null, listScrollTop: 0, memories: {},
   openSearch: (notebookId, pageId, scrollTop) => set(s => ({
-    open: true, initialized: true, focusNonce: s.focusNonce + 1,
+    open: true, sheetOpen: true, initialized: true, focusNonce: s.focusNonce + 1,
     scope: s.initialized ? s.scope : { kind: "current", notebookId },
     startingNotebookId: s.open ? s.startingNotebookId : notebookId,
     originPageId: s.open ? s.originPageId : pageId,
     originScrollTop: s.open ? s.originScrollTop : scrollTop,
   })),
-  closeSearch: () => set({ open: false, enterReader: false }),
+  closeSearch: () => set({ open: false, sheetOpen: false, enterReader: false }),
+  hideSheet: () => set({ sheetOpen: false }),
+  setTitleOnly: titleOnly => set({ titleOnly, selectedPageId: null, listScrollTop: 0 }),
+  setSort: sort => set({ sort, selectedPageId: null, listScrollTop: 0 }),
   setQuery: query => set({ query, selectedPageId: null, listScrollTop: 0 }),
   setScope: scope => set({ scope, selectedPageId: null, listScrollTop: 0 }),
   selectResult: selectedPageId => set({ selectedPageId }),

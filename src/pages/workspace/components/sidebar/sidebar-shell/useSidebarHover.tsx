@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import { useSearchSession } from "../useSearchSession";
 import { hasSidebarInteraction } from "./sidebarInteraction";
 import { useSidebarNavigationDismiss } from "./useSidebarNavigationDismiss";
 import type { SidebarView } from "./shared";
@@ -39,14 +40,18 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   };
   const openSidebarView = (view: SidebarView, keyboard = false) => {
     keepSidebarOpen();
+    if (view === "search") {
+      if (useSearchSession.getState().sheetOpen) useSearchSession.getState().closeSearch();
+      else handleOpenSearch();
+      return;
+    }
     const preview = forceCollapseLeft && mode === "preview";
     if (!sidebarCollapsed && currentView === view && !settingsOpen && !inHistoryMode && !preview) {
       closeSidebarOverlay();
       return;
     }
     useSidebarView.getState().openSidebarPanel("engaged");
-    if (view === "search") handleOpenSearch();
-    else switchSidebarView(view);
+    switchSidebarView(view);
     if (keyboard) focusSidebar(view);
   };
   const hoverSidebarView = (view: SidebarView) => {

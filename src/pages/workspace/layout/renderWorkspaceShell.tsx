@@ -2,6 +2,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SearchSessionController } from "../components/sidebar/SearchSessionController";
 import { Sidebar } from "../components/sidebar/Sidebar";
+import { SearchSheet } from "../components/search-sheet/SearchSheet";
 import { DesktopTitleBar } from "../components/page/DesktopTitleBar";
 import { LocalFolderTargetPicker } from "../components/sidebar/LocalFolderTargetPicker";
 import { AIFeatureNotice } from "../components/AIFeatureNotice";
@@ -230,6 +231,7 @@ export function renderWorkspaceShell(
                 />
               )}
             </div>
+            <SearchSheet aiNotebookId={aiAvailableForNotebook ? aiNotebookId : null} />
           </main>
         </div>
       </div>
