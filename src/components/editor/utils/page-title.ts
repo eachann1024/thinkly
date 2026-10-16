@@ -1,7 +1,7 @@
 import type { JSONContent, Page } from "@/types";
 import { extractTitleFromContent } from "./content-text-extractor";
 
-export const UNTITLED_PAGE_TITLE = "未命名";
+export const UNTITLED_PAGE_TITLE = "新页面";
 
 export function normalizePageTitle(title: string | null | undefined): string {
   const trimmed = title?.trim() ?? "";

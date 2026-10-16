@@ -16,7 +16,7 @@ function isPlaceholderTitle(title: string): boolean {
 function bodyForSearchIndex(page: Page, title: string): string {
   const body = getContentDerivationsForPage(page).text;
   if (!isPlaceholderTitle(title)) return body;
-  return body.replace(/^(?:未命名|无标题)\s*/, "").trim();
+  return body.replace(/^(?:新页面|未命名|无标题)\s*/, "").trim();
 }
 
 /** CJK characters remain individual tokens; other runs preserve existing matching. */

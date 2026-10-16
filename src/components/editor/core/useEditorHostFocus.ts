@@ -73,6 +73,8 @@ export function useEditorHostFocus(
     const focusCreatedPage = () => {
       const pageId = pageRef.current?.id;
       if (!pageId || !isPageTitleFocusRequested(pageId)) return;
+      // 本地文件由正文顶部的大标题接管新建聚焦。
+      if (pageRef.current?.localFilePath) return;
       cancelCreatedPageFocus?.();
       cancelCreatedPageFocus = tasks.frame(() => {
         if (!isPageTitleFocusRequested(pageId)) return;
