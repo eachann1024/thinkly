@@ -1,6 +1,12 @@
-import bundledChangelog from "../../../CHANGELOG.md?raw";
 import { compareSemver, parseReleaseTag } from "@/lib/appUpdateRelease";
 import type { AppUpdateState } from "@/lib/appUpdateTypes";
+
+const bundledChangelogs = import.meta.glob<string>("../../../CHANGELOG.md", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+const bundledChangelog = bundledChangelogs["../../../CHANGELOG.md"] ?? "";
 
 function versionNotes(markdown: string, version: string): string {
   const lines = markdown.replace(/\r/g, "").split("\n");
