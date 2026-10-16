@@ -5,7 +5,6 @@ import {
   type KeyboardEvent,
   type ReactNode,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -68,6 +67,7 @@ export function GoosePromptSuggestionMenu(
 
   const [internalPromptText, setInternalPromptText] = useState("");
   const promptTextToUse = promptText ?? internalPromptText;
+  const isComposingRef = useRef(false);
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -84,40 +84,40 @@ export function GoosePromptSuggestionMenu(
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      // 换行：Shift+Enter（或 IME 组合中不处理）
       if (
-        event.key === "Enter" &&
-        event.shiftKey &&
-        !event.nativeEvent.isComposing
+        isComposingRef.current ||
+        event.nativeEvent.isComposing ||
+        event.nativeEvent.keyCode === 229
       ) {
-        // 允许默认插入换行
+        // 确认候选词的 Enter / Escape 不得发送或关闭浮层。
+        event.stopPropagation();
         return;
       }
-
-      if (event.key === "Enter" && !event.nativeEvent.isComposing) {
-        event.preventDefault();
-        const trimmed = promptTextToUse.trim();
-        if (trimmed) {
-          onManualPromptSubmit(promptTextToUse);
-        }
-        return;
-      }
+      if (event.key !== "Enter") return;
+      event.stopPropagation();
+      if (event.shiftKey) return;
+      event.preventDefault();
+      if (disabled || event.repeat) return;
+      const value = event.currentTarget.value;
+      if (value.trim()) onManualPromptSubmit(value);
     },
-    [onManualPromptSubmit, promptTextToUse],
+    [disabled, onManualPromptSubmit],
   );
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const hasBeenDisabled = useRef(disabled);
+  const wasDisabledRef = useRef(disabled);
 
-  useEffect(() => {
-    if (textareaRef.current && hasBeenDisabled.current && !disabled) {
-      textareaRef.current.focus();
-      const len = textareaRef.current.value.length;
-      textareaRef.current.setSelectionRange(len, len);
-    }
-    if (disabled) {
-      hasBeenDisabled.current = true;
-    }
+  useLayoutEffect(() => {
+    const input = textareaRef.current;
+    const wasDisabled = wasDisabledRef.current;
+    wasDisabledRef.current = disabled;
+    if (!input || disabled) return;
+    const active = document.activeElement;
+    // 首次打开立即输入；生成结束时不抢走用户已移到其他区域的焦点。
+    if (wasDisabled && active !== document.body &&
+      !input.closest(".goose-ai-prompt-menu")?.parentElement?.contains(active)) return;
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(input.value.length, input.value.length);
   }, [disabled]);
 
   // 高度随内容增长（border-box 含 padding）；最小值 = 图标槽，保证首行中线对齐
@@ -181,6 +181,9 @@ export function GoosePromptSuggestionMenu(
           placeholder={props.busy ? "" : props.placeholder}
           disabled={props.disabled}
           onKeyDown={handleKeyDown}
+          onCompositionStart={() => { isComposingRef.current = true; }}
+          onCompositionEnd={() => { isComposingRef.current = false; }}
+          onBlur={() => { isComposingRef.current = false; }}
           onChange={handleChange}
           autoComplete="off"
           aria-multiline="true"

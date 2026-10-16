@@ -32,6 +32,8 @@ export function useTextCaret() {
       if (owner !== el) { hide(); owner = el; }
       measure ??= prepareTextCaret(el, mirror);
       const box = measure();
+      // 浮层入场动画和 Floating UI 定位会在 focus 之后继续改变屏幕坐标。
+      if (el.closest(".goose-editor-context-ui")) schedule();
       if (!box) { owner.removeAttribute("data-goose-caret-active"); caret.hidden = true; return; }
       if (!el.hasAttribute("data-goose-caret-active")) el.setAttribute("data-goose-caret-active", "true");
       const next = `${box.left}:${box.top}:${box.height}`;
