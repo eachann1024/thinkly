@@ -31,11 +31,13 @@ body,
   height: 30px;
 }
 
-/* 当前便签名常驻左侧，同时作为改名入口。 */
+/* 改名入口仅随标题文字撑宽，不继承按钮的默认最小宽度。 */
 .quicknote-slot-name-display {
   display: flex;
   align-items: center;
   flex: 0 1 auto;
+  width: fit-content;
+  min-width: 0;
   max-width: min(88px, calc(50vw - 94px));
   height: 22px;
   margin: 0;
