@@ -72,8 +72,12 @@
 [data-page-layout] .bn-editor .bn-block-outer:has(> .bn-block > [data-content-type="heading"]:not([data-is-toggleable="true"]):only-child) + .bn-block-outer { --previous-prose-gap: 14px; }
 [data-page-layout] .bn-editor .bn-block-outer:has(> .bn-block > [data-content-type="heading"]:has(h1):not([data-is-toggleable="true"]):only-child) + .bn-block-outer { --previous-prose-gap: var(--page-title-gap); }
 [data-page-layout] .bn-editor .bn-block-outer:has(> .bn-block > [data-content-type="quote"]:only-child) + .bn-block-outer { --previous-prose-gap: 16px; }
-[data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"] {
+/* 引用段间距放在块外，避免容器背景/竖线把上下留白也包成空行。 */
+[data-page-layout] .workspace-editor-surface .bn-editor .bn-block-outer:has(> .bn-block > [data-content-type="quote"]) {
   margin-block: max(0px, calc(16px - var(--previous-prose-gap, 0px))) 16px;
+}
+[data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"] {
+  margin-block: 0;
   padding-block: 2px;
 }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="quote"] > blockquote {
