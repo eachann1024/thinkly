@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useEffect } from "react";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
@@ -9,6 +10,7 @@ import { syncIndex } from "./pageSearchIndex";
  * 只订 pages / notebooks 引用变化，不驱动 CommandPalette 重渲染。
  */
 export function useCommandSearchIndexWarmup(): void {
+  useLocale();
   useEffect(() => {
     let idleId = 0;
     let timeoutId = 0;

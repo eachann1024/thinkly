@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { memo, useMemo, type RefObject } from "react";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
@@ -63,6 +64,7 @@ export const AssistantStreamdownText = memo(function AssistantStreamdownText({
   isStreaming: boolean;
   editorRef?: RefObject<EditorRef | null>;
 }) {
+  useLocale();
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);
   const mermaid =

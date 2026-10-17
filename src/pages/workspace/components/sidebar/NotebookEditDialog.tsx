@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookEditDialog.tsx#localMessages:1">`
@@ -75,6 +76,7 @@ export function NotebookEditDialog({
   onSave,
   onDelete,
 }: NotebookEditDialogProps) {
+  useLocale();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [iconContainer, setIconContainer] = useState<HTMLDivElement | null>(null);

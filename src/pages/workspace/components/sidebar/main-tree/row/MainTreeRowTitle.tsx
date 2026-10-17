@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1">`
@@ -23,6 +24,7 @@ export function MainTreeRowTitle({
   title: string;
   count: number;
 }) {
+  useLocale();
   const enabled = useSettings((state) => state.showSidebarFolderCount);
   // leading-snug 抵消行容器的 leading-none，避免降部被裁。
   if (!enabled || count <= 0) return <span className={TITLE_CLASS}>{title}</span>;

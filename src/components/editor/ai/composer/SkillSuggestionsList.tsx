@@ -11,7 +11,7 @@ import {
 import { useCenteredActiveItemScroll } from "@/components/editor/hooks/useCenteredActiveItemScroll";
 import { cn } from "@/lib/utils";
 import { useComposerSuggestionsPosition } from "./useComposerSuggestionsPosition";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/SkillSuggestionsList.tsx#messages:1">`
 zh-Hans:
   noMatchingCommandsOrSkills: "没有匹配的指令或 Skill"
@@ -24,6 +24,7 @@ const t = createTranslator(messages);
 const getSkillItemSelector = (index: number) => `[data-skill-index="${index}"]`;
 
 function SlashItemIcon({ item }: { item: ComposerSlashItem }) {
+  useLocale();
   const Icon: ComponentType<{ className?: string }> =
     item.kind === "skill"
       ? WandSparkles
@@ -41,6 +42,7 @@ export function SkillSuggestionsList(props: {
   composerRef: RefObject<HTMLDivElement | null>;
   onSelect: (item: ComposerSlashItem) => void;
 }) {
+  useLocale();
   const { floatingRef, style, maxWidth, maxHeight } = useComposerSuggestionsPosition(
     props.composerRef,
     props.anchorRect,

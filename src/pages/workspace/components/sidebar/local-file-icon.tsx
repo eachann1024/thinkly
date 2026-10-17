@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-file-icon.tsx#localMessages:1">`
@@ -120,6 +121,7 @@ export function LocalFileIcon({
   hasChildren,
   isExpanded,
 }: LocalFileIconProps) {
+  useLocale();
   const SelectedIcon = resolvePageIcon(iconName);
 
   if (page.localReadState === "error") {

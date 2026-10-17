@@ -34,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/editor/ui/tooltip";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/image/ImageToolbar.tsx#messages:1">`
 zh-Hans:
   imageActions: "图片操作"
@@ -95,6 +95,7 @@ function ImageToolButton({
   tooltipSideOffset: number;
   children: ReactNode;
 }) {
+  useLocale();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -128,6 +129,7 @@ export function ImageToolbar({
   floatingBoundary,
   getReferenceRect,
 }: ImageToolbarProps) {
+  useLocale();
   const editorUiScale = useEditorUiScale();
   const usesFloatingPosition = Boolean(getReferenceRect);
   const overflowOptions = {

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/app-update/AppUpdateButton.tsx#localMessages:1">`
@@ -17,6 +18,7 @@ import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { updatePercent, updateStatusLabel } from "./updatePresentation";
 
 export function AppUpdateButton({ className }: { className?: string }) {
+  useLocale();
   const { currentVersion, state, open, setOpen, installing, installError } = useAppUpdate();
   const busy = installing || state.status === "checking" || state.status === "downloading";
   const ready = state.status === "ready";

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/WinWindowControls.tsx#localMessages:1">`
@@ -28,6 +29,7 @@ const btnClass =
   "electron-win-chrome-btn inline-flex h-8 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] ";
 
 export function WinWindowControls() {
+  useLocale();
   const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {

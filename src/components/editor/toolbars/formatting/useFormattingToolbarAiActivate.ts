@@ -7,7 +7,7 @@ import { resolveFormattingToolbarAiBlockId } from "./selectionBlocks";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { toast } from "@/components/ui/sonner";
 import { getCustomAIApiKey } from "@/lib/ai-provider";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/useFormattingToolbarAiActivate.ts#messages:1">`
 zh-Hans:
   thisPageCannotBeEdited: "当前页面不可编辑。"
@@ -45,6 +45,7 @@ export function useFormattingToolbarAiActivate({
   resetFormattingToolbarAi: (owner?: object) => void;
   setActiveTooltip: Dispatch<SetStateAction<string | null>>;
 }) {
+  useLocale();
   // AI 按钮打开自有菜单，冻结当前字符选区。
   // 保存 selection 作为 AI 浮层锚点，并在菜单生命周期内隐藏格式工具栏。
   const handleAiActivate = useCallback(() => {

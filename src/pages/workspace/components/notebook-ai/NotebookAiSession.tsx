@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 /** AI 会话在 Workspace 常驻，面板开关不改变请求生命周期。 */
 import { useMemo, type ReactNode, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
@@ -12,7 +13,7 @@ import { useConversationCompaction } from "./session/useConversationCompaction";
 import { useBatchApprovalActions } from "./session/useBatchApprovalActions";
 export { useNotebookAiSession } from "./session/context";
 export {
-  NOTEBOOK_AI_PLACEHOLDER_HINTS,
+  getNotebookAiPlaceholderHints,
   formatNotebookAiChatError,
 } from "./session/helpers";
 export type { NotebookAiSessionValue } from "./session/types";
@@ -27,6 +28,7 @@ export function NotebookAiSessionProvider({
   notebookId,
   children,
 }: NotebookAiSessionProviderProps) {
+  useLocale();
   const state = useSessionState(notebookId);
   const {
     conversationId,
@@ -75,29 +77,7 @@ export function NotebookAiSessionProvider({
       onBatchApproval,
       onBatchUndo,
     }),
-    [
-      notebookId,
-      conversationId,
-      messages,
-      status,
-      error,
-      clearError,
-      stopAll,
-      isStreaming,
-      isBusy,
-      unavailableReason,
-      placeholderIndex,
-      composerRevision,
-      send,
-      newConversation,
-      ensureFreshConversation,
-      compactConversation,
-      selectConversation,
-      deleteConversation,
-      searchPages,
-      onBatchApproval,
-      onBatchUndo,
-    ],
+    [notebookId, conversationId, messages, status, error, clearError, stopAll, isStreaming, isBusy, unavailableReason, placeholderIndex, composerRevision, send, newConversation, ensureFreshConversation, compactConversation, selectConversation, deleteConversation, searchPages, onBatchApproval, onBatchUndo],
   );
 
   return (

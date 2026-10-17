@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/useShortcutSettings.tsx#localMessages:1">`
@@ -32,6 +33,7 @@ export function useShortcutSettings({
   resetAppShortcuts,
   singleTabMode,
 }: SettingsShortcutsProps) {
+  useLocale();
   const [confirmReset, setConfirmReset] = useState(false);
 
   // zustand v5 忽略第二个 equalityFn 参数，对象选择器会导致重复渲染，故拆成原始值。

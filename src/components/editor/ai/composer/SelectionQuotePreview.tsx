@@ -6,7 +6,7 @@ import { usePages } from "@/stores/usePages";
 import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
 import type { AiSelectionQuoteAttrs } from "./selectionQuoteData";
 import "./selection-quote.css";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/SelectionQuotePreview.tsx#messages:1">`
 zh-Hans:
   selectionReference: "选区引用"
@@ -24,6 +24,7 @@ export function SelectionQuotePreview({ quote, onClose }: {
   quote: AiSelectionQuoteAttrs | null;
   onClose: () => void;
 }) {
+  useLocale();
   const { onOpenPage } = useEditorPageContext();
   const sourceExists = usePages((state) => Boolean(quote && state.pages[quote.pageId] && !state.pages[quote.pageId].trashedAt));
   return (

@@ -1,4 +1,4 @@
-import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
+import { useLocale, createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/page/PageMenu.tsx#localMessages:1">`
 zh-Hans:
   wordCount: "字数：{{count}}"
@@ -56,6 +56,7 @@ import { detachTabFromThisWindow } from "@/lib/electron/detachTab";
 import { PageExportSubmenu } from "./page-menu/PageExportSubmenu";
 import { usePageMenu } from "./page-menu/usePageMenu";
 export function PageMenu() {
+  useLocale();
   const {
     page, activePageId, viewport,
     defaultLayout, themeSelectorOpen, setThemeSelectorOpen,

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { type ReactNode } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import type { GooseIcon } from "@/components/ui/icons";
@@ -55,6 +56,7 @@ export /**
  * 复用与主 Editor 完全一致的滚动容器和 max-w-4xl 包裹。
  */
 function HistoryReader() {
+  useLocale();
   const {
     selectedContent,
     selectedVersionId,

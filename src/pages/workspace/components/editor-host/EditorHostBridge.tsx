@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1">`
@@ -83,6 +84,7 @@ export function EditorHostBridge({
   contentMode = shouldUseRawEditorContent(page) ? "raw" : "normalized",
   children,
 }: EditorHostBridgeProps) {
+  useLocale();
   const theme = useSettings((s) => s.theme);
   const editorFontSize = useSettings((s) => s.editorFontSize);
   const customFonts = useSettings((s) => s.customFonts);

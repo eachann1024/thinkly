@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsResetActions.tsx#localMessages:1">`
@@ -35,6 +36,7 @@ import type { useSettingsBackupRestore } from "./useSettingsBackupRestore";
 export function useSettingsResetActions(
   input: ReturnType<typeof useSettingsBackupRestore>,
 ) {
+  useLocale();
   const {
     onOpenChange,
     setTheme,

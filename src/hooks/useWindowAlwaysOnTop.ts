@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/hooks/useWindowAlwaysOnTop.ts#block1:1">`
 zh-Hans:
@@ -20,6 +21,7 @@ export function useWindowAlwaysOnTop(): {
   isPending: boolean;
   toggleAlwaysOnTop: () => Promise<void>;
 } {
+  useLocale();
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [isPending, setIsPending] = useState(true);
   const pendingRef = useRef(true);

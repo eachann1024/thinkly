@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useWebdavConfiguration.tsx#localMessages:1">`
@@ -31,6 +32,7 @@ import type { useDataPanelState } from "./useDataPanelState";
 export function useWebdavConfiguration(
   input: ReturnType<typeof useDataPanelState>,
 ) {
+  useLocale();
   const {
     webdavUrl,
     webdavUsername,

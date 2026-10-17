@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 /**
  * 处理进度：所有阶段共用紧凑状态标签，步骤与具体原因保留在正文。
@@ -153,9 +154,10 @@ export function ToolProgressCard({
   children,
   footer,
 }: ToolProgressCardProps) {
+  const locale = useLocale();
   const steps = useMemo(
     () => buildToolProgressSteps(parts, isMessageStreaming),
-    [parts, isMessageStreaming],
+    [parts, isMessageStreaming, locale],
   );
   const thinkingLine = visibleBusyTickerLine(thinkingText ?? "");
   const hasThinking = thinkingLine.length > 0;

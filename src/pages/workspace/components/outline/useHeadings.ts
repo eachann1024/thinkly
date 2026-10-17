@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/outline/useHeadings.ts#localMessages:1">`
@@ -98,6 +99,7 @@ export function useHeadings(
   editor: BlockNoteEditor | null,
   pageId?: string | null,
 ) {
+  const locale = useLocale();
   const [headings, setHeadings] = useState<HeadingItem[]>([]);
 
   const refresh = useCallback(() => {
@@ -116,7 +118,7 @@ export function useHeadings(
 
   useEffect(() => {
     refresh();
-  }, [refresh, pageId]);
+  }, [refresh, pageId, locale]);
 
   useEffect(() => {
     if (!editor) return;

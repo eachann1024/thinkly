@@ -17,7 +17,7 @@ import {
   MediaPlaceholder,
 } from "@/components/editor/blocks/shared/MediaPlaceholder";
 import messages from "./customFileBlock.messages.yaml";
-import { createTranslator } from "@/i18n";
+import { createTranslator, useLocale } from "@/i18n";
 const t = createTranslator(messages);
 
 
@@ -57,6 +57,7 @@ function CustomFileBlockContent({
   block: any;
   editor: any;
 }) {
+  useLocale();
   const showLoader = useUploadLoading(block.id);
   const platform = useEditorPlatform();
   const { onOpenAttachment } = useEditorPageContext();

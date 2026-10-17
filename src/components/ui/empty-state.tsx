@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/empty-state.tsx#localMessages:1">`
@@ -27,6 +28,7 @@ export function EmptyState({
   className?: string;
   role?: "status" | "alert";
 }) {
+  useLocale();
   return (
     <div className={cn("goose-empty-state max-w-full text-xs text-muted-foreground", className)} role={role}>
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">

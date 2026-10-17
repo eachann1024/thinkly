@@ -14,7 +14,7 @@ import {
   type RunToolbarAction,
   type SelectionMenuChange,
 } from "./useSelectionMenu";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/ToolbarMoreMenu.tsx#messages:1">`
 zh-Hans:
   moreFormatting: "更多格式"
@@ -35,6 +35,7 @@ export function ToolbarMoreMenu({
   onOpenChange: SelectionMenuChange;
   childMenuOpen: boolean;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const menu = useSelectionMenu(editor, "more", onOpenChange);
   return (

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/quick-note/QuickNoteSlotSwitcher.tsx#localMessages:1">`
@@ -21,6 +22,7 @@ import { useQuickNoteSlotPreview } from "./slot-switcher/useQuickNoteSlotPreview
 import { useQuickNoteSlotInput } from "./slot-switcher/useQuickNoteSlotInput";
 
 export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
+  useLocale();
   const preview = useQuickNoteSlotPreview(props);
   const quickNoteSlotInputContext = useQuickNoteSlotInput(preview);
   const context = quickNoteSlotInputContext;

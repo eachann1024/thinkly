@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect } from "react";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { toast } from "@/components/ui/sonner";
@@ -16,6 +17,7 @@ const t = createTranslator(messages);
 
 
 export function useConversationActions(state: SessionState) {
+  useLocale();
   const {
     isBusy,
     notebookId,
@@ -173,16 +175,7 @@ export function useConversationActions(state: SessionState) {
       setMessages([]);
       return true;
     },
-    [
-      isBusy,
-      conversationId,
-      notebookId,
-      clearError,
-      requestCurrentPageIdRef,
-      setComposerRevision,
-      setConversationId,
-      setMessages,
-    ],
+    [isBusy, conversationId, notebookId, clearError, requestCurrentPageIdRef, setComposerRevision, setConversationId, setMessages],
   );
 
   const searchPages = useCallback(

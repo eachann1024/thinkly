@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/tab-rail/SortableTabItem.tsx#localMessages:1">`
@@ -80,6 +81,7 @@ export function SortableTabItem({
   onLocateInTree,
   onOpenInNewWindow,
 }: SortableTabItemProps) {
+  useLocale();
   const {
     attributes,
     listeners,

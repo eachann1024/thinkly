@@ -8,6 +8,8 @@ import { EditorComposer } from "./EditorComposer";
 import { editorSchema } from "./schema";
 import { useEditorSession } from "./useEditorSession";
 import { useEditorExtensions } from "./useEditorExtensions";
+import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
+import { useEditorLocale } from "./useEditorLocale";
 import { createEditorOptions } from "./createEditorOptions";
 import { getCachedContentSignature } from "./editorContentPolicy";
 import { useEditorContentCommit } from "./useEditorContentCommit";
@@ -56,6 +58,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     ),
     [],
   );
+  useEditorLocale(editor, isQuickNoteEditorPage(page) ? "quicknote" : "note");
   editorInstanceRef.current = editor;
   const runtime = { ...session, editor };
   const contentCommit = useEditorContentCommit(runtime);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Sparkles } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export function AiUnavailableState({
   onRetry: () => void;
   compact?: boolean;
 }) {
+  useLocale();
   const hydrated = useSettings((state) => state._hasHydrated);
   const enabled = useSettings((state) => state.ai.enabled);
   const retryable = isRetryableAvailabilityError(error);

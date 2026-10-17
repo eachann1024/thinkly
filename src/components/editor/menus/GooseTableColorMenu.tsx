@@ -6,7 +6,7 @@ import {
 } from "@/components/editor/ui/dropdown-menu";
 import { editTableDimension, tableDimensionColor } from "./tableMenuActions";
 import { TEXT_COLORS } from "../toolbars/formatting/colorPalette";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/GooseTableColorMenu.tsx#messages:1">`
 zh-Hans:
   color: "颜色"
@@ -39,6 +39,7 @@ export function GooseTableColorMenu({
   index,
   onAction,
 }: GooseTableColorMenuProps) {
+  useLocale();
   return (
     <EditorSubmenuTrigger>
       <DropdownMenuItem textValue={t("color")}>

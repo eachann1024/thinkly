@@ -16,8 +16,8 @@ export const OPEN_AI_PANEL_EVENT = "goose-note:open-ai-panel";
 export const FOCUS_AI_COMPOSER_EVENT = "goose-note:focus-ai-composer";
 
 export const SELECTION_QUOTE_SUMMARY_MAX = 16;
-export const SELECTION_QUOTE_DUPLICATE_TOAST = t("thisSelectionIsAlreadyInTheInput");
-export const SELECTION_QUOTE_LIVE_ANNOUNCEMENT = t("selectionReferenceAdded");
+export const getSelectionQuoteDuplicateToast = () => t("thisSelectionIsAlreadyInTheInput");
+export const getSelectionQuoteLiveAnnouncement = () => t("selectionReferenceAdded");
 export const SELECTION_QUOTE_ADD_SHORTCUT = "Mod+Shift+U";
 export const AI_PANEL_ACTIVE_ATTR = "data-goose-ai-panel-active";
 

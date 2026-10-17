@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { i18nYaml, useMessages } from "@/i18n";
 import { SettingsLanguage } from "./settings/SettingsLanguage";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
@@ -40,6 +41,7 @@ export function SettingsGeneral({
   showRecentInSearch, setShowRecentInSearch,
   notebookDropdownHoverExpand, setNotebookDropdownHoverExpand,
 }: SettingsGeneralProps) {
+  useLocale();
   const t = useMessages(messages);
   const forceCollapseLeft = useWorkspaceViewport((state) => state.forceCollapseLeft);
   return (

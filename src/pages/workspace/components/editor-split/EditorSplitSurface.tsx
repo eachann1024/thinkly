@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import {
   Fragment,
   useCallback,
@@ -16,10 +17,7 @@ import {
   type Layout,
 } from "react-resizable-panels";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import {
-  findLeaf,
-  normalizeSizes,
-} from "@/lib/editor-split/tree";
+import { findLeaf, normalizeSizes } from "@/lib/editor-split/tree";
 import type { SplitGroup, SplitLeaf, SplitState } from "@/lib/editor-split/types";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
@@ -238,6 +236,7 @@ function EditorSplitLayout({
   renderPane,
   onContextMenu,
 }: EditorSplitSurfaceProps) {
+  useLocale();
   const splitState = useStoreWithEqualityFn(
     useEditorSplit,
     (state) => state.byTabId[tabId] ?? null,
@@ -292,7 +291,6 @@ function EditorSplitLayout({
     </SplitPaneDragSurface>
   );
 }
-
 export function EditorSplitSurface(props: EditorSplitSurfaceProps) {
   return <SplitContentDropSurface key={props.tabId} tabId={props.tabId}>
       <EditorSplitLayout {...props} />

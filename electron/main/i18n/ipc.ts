@@ -1,6 +1,9 @@
-import { lookupWindowContext } from "../windows";
+import { getAssetMaintenanceWindow, getQuicknoteWindow, lookupWindowContext } from "../windows";
 import { BrowserWindow, ipcMain } from "electron";
 import { getLanguageSnapshot, saveLanguagePreference } from "./store";
+import { setLanguageSnapshot } from "../../../src/i18n/core";
+import { installMenu } from "./menu";
+import { t as attachmentText } from "./attachments";
 
 export function registerLanguageIpc(): void {
   ipcMain.on("desktop:language-initial", (event) => {
@@ -9,9 +12,19 @@ export function registerLanguageIpc(): void {
   ipcMain.handle("desktop:language-get", () => getLanguageSnapshot());
   const save = async (preference: unknown) => {
     const snapshot = await saveLanguagePreference(preference);
+    setLanguageSnapshot(snapshot);
+    // Persistence has succeeded: a closed window or a native menu failure must
+    // not report a failed save or prevent other windows receiving the snapshot.
+    try { installMenu(); }
+    catch (error) { console.error("[i18n] Could not refresh application menu", error); }
     for (const win of BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
-        win.webContents.send("desktop:language-changed", snapshot);
+        try {
+          if (win === getQuicknoteWindow()) win.setTitle(attachmentText("quicknoteTitle"));
+          if (win === getAssetMaintenanceWindow()) win.setTitle(attachmentText("cleanupTitle"));
+        } catch (error) { console.error("[i18n] Could not refresh window title", error); }
+        try { win.webContents.send("desktop:language-changed", snapshot); }
+        catch (error) { console.error("[i18n] Could not refresh window language", error); }
       }
     }
     return snapshot;

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useReducer, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
@@ -32,6 +33,7 @@ interface DiagramCardProps {
 }
 
 export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
+  useLocale();
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);
   const [renderState, dispatch] = useReducer(diagramRenderReducer, { status: "empty" });

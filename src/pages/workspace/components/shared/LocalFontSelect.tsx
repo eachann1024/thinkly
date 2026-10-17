@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/shared/LocalFontSelect.tsx#localMessages:1">`
@@ -58,6 +59,7 @@ export function LocalFontSelect({
   baseFontLabel?: string;
   fallbackFontFamily?: string;
 }) {
+  useLocale();
   const { open, onOpenChange, contentRef, confirmFont, previewFont } =
     useFontSelectionPreview(value, onChange);
   const [fontLoad, dispatchFonts] = useReducer(localFontLoadReducer, { status: "idle" });

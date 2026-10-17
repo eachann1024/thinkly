@@ -18,6 +18,11 @@ async function readSource(): Promise<string | null> {
   }
 }
 
+function systemLanguages(): string[] {
+  try { return app.getPreferredSystemLanguages(); }
+  catch { return []; }
+}
+
 export async function initializeLanguage(): Promise<void> {
   let preference: LanguagePreference = "system";
   let error: string | undefined;
@@ -34,11 +39,9 @@ export async function initializeLanguage(): Promise<void> {
     readError = true;
     error = "language.readFailed";
   }
-  let languages: string[] = [];
   let region = "en-US";
-  try { languages = app.getPreferredSystemLanguages(); } catch { /* Unsupported OS locale: English fallback. */ }
   try { region = normalizeSystemLocale(app.getSystemLocale()) ?? region; } catch { /* Keep a valid Intl locale. */ }
-  snapshot = { preference, effectiveLocale: resolveLocale(preference, languages), formatLocale: region, revision: 0, ...(error ? { error } : {}) };
+  snapshot = { preference, effectiveLocale: resolveLocale(preference, systemLanguages()), formatLocale: region, revision: 0, ...(error ? { error } : {}) };
 }
 
 export function getLanguageSnapshot(): LanguageSnapshot {
@@ -54,7 +57,13 @@ export function saveLanguagePreference(preference: unknown): Promise<LanguageSna
     // A damaged or unreadable source is never replaced with defaults.
     if (readError) throw new Error("language.readFailed");
     if (await readSource() !== source) throw new Error("language.conflict");
-    if (snapshot.preference === preference && !snapshot.error) return getLanguageSnapshot();
+    const effectiveLocale = resolveLocale(preference, systemLanguages());
+    if (snapshot.preference === preference && !snapshot.error) {
+      if (snapshot.effectiveLocale !== effectiveLocale) {
+        snapshot = { ...snapshot, effectiveLocale, revision: snapshot.revision + 1 };
+      }
+      return getLanguageSnapshot();
+    }
     const nextSource = `${JSON.stringify({ version: 1, preference })}\n`;
     const target = preferencePath();
     const temporary = `${target}.${randomUUID()}.tmp`;
@@ -66,7 +75,7 @@ export function saveLanguagePreference(preference: unknown): Promise<LanguageSna
       if (await readSource() !== source) throw new Error("language.conflict");
       await fs.rename(temporary, target);
       source = nextSource;
-      snapshot = { ...snapshot, preference, revision: snapshot.revision + 1 };
+      snapshot = { ...snapshot, preference, effectiveLocale, revision: snapshot.revision + 1 };
       delete snapshot.error;
       return getLanguageSnapshot();
     } catch (error) {

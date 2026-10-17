@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/useLocalFolderSettings.tsx#localMessages:1">`
@@ -32,6 +33,11 @@ import {
   getSystemDefaultLabels,
 } from "./shared";
 
+// IPC results contain copied strings; keep availability data and read labels from current resources.
+function localizeOptions(items: LocalFolderOpenAppCandidate[], candidates: LocalFolderOpenAppCandidate[]) {
+  return items.map((item) => ({ ...item, label: candidates.find((candidate) => candidate.id === item.id)?.label ?? item.label }));
+}
+
 export function useLocalFolderSettings({
   visible = true,
   localFolderFileManager,
@@ -43,6 +49,7 @@ export function useLocalFolderSettings({
   localFolderHiddenFolders,
   setLocalFolderHiddenFolders,
 }: SettingsLocalFolderProps) {
+  const locale = useLocale();
   const [fileManagerOptions, setFileManagerOptions] = useState<
     LocalFolderOpenAppCandidate[]
   >(
@@ -58,7 +65,7 @@ export function useLocalFolderSettings({
     LocalFolderOpenAppCandidate[]
   >(() => getCachedAvailableOpenApps(LOCAL_FOLDER_TERMINAL_CANDIDATES) ?? []);
 
-  const systemDefaultLabels = useMemo(() => getSystemDefaultLabels(), []);
+  const systemDefaultLabels = useMemo(() => getSystemDefaultLabels(), [locale]);
 
   const hiddenFoldersRefreshNonceRef = useRef(0);
 
@@ -196,11 +203,11 @@ export function useLocalFolderSettings({
     setLocalFolderTerminal,
     localFolderHiddenFolders,
     setLocalFolderHiddenFolders,
-    fileManagerOptions,
+    fileManagerOptions: localizeOptions(fileManagerOptions, LOCAL_FOLDER_FILE_MANAGER_CANDIDATES),
     setFileManagerOptions,
-    editorOptions,
+    editorOptions: localizeOptions(editorOptions, LOCAL_FOLDER_EDITOR_CANDIDATES),
     setEditorOptions,
-    terminalOptions,
+    terminalOptions: localizeOptions(terminalOptions, LOCAL_FOLDER_TERMINAL_CANDIDATES),
     setTerminalOptions,
     systemDefaultLabels,
     hiddenFoldersRefreshNonceRef,

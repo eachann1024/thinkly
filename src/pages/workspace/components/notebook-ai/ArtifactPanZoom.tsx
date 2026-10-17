@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import type { ReactNode } from "react";
 import { Minus, Plus, RotateCcw } from "@/components/ui/icons";
 import { IconButton } from "@/components/ui/icon-button";
@@ -44,6 +45,7 @@ export function ArtifactPanZoom({
   className,
   minHeight = 220,
 }: ArtifactPanZoomProps) {
+  useLocale();
   const transform = useArtifactTransform(contentKey);
   const {
     viewportRef,

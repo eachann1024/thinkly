@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/PageDocumentTitle.tsx#localMessages:1">`
@@ -36,6 +37,7 @@ export function PageDocumentTitle({ page, focused, editable }: {
   focused: boolean;
   editable: boolean;
 }) {
+  useLocale();
   const committed = displayTitle(page);
   const [value, setValue] = useState(committed);
   const editingRef = useRef(false);

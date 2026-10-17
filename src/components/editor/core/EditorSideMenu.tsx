@@ -20,7 +20,7 @@ import {
 import { getSectionInsertAnchorId } from "@/components/editor/core/headingSectionFold";
 import { useEditorSideMenuTarget } from "./useEditorSideMenuTarget";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/EditorSideMenu.tsx#messages:1">`
 zh-Hans:
   addBlock: "添加块"
@@ -46,6 +46,7 @@ const isMac = /Mac/i.test(navigator.platform);
 const altKeyLabel = isMac ? "⌥" : "Alt";
 
 export function EditorSideMenu() {
+  useLocale();
   const editor = useBlockNoteEditor<any, any, any>();
   const sideMenu = useExtension(SideMenuExtension);
   const menuRef = useRef<HTMLDivElement>(null);

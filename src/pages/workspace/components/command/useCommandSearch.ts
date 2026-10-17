@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/command/useCommandSearch.ts#localMessages:1">`
@@ -56,6 +57,7 @@ interface CommandSearchState {
 export function useCommandSearch({
   searchQuery, pages, activeNotebookId, searchAllNotebooks, enabled = true,
 }: CommandSearchState) {
+  useLocale();
   const deferredQuery = searchQuery;
   const notebooks = useNotebooks((state) => enabled ? state.notebooks : EMPTY_NOTEBOOKS);
   const [pagination, setPagination] = useState(() => ({
@@ -112,7 +114,7 @@ export function useCommandSearch({
     notebooks: SearchNotebooks;
     scope: Page[];
     matches: CommandMatches | null;
-    error: string | null;
+    error: "search-failed" | null;
   } | null>(null);
   const latest = useRef({ query: searchQuery, pages, notebooks, scope: filteredPages, enabled });
   useLayoutEffect(() => {
@@ -141,13 +143,13 @@ export function useCommandSearch({
     })().catch((error: unknown) => {
       if (!isCurrent()) return;
       console.error("Command search failed", error);
-      setCompleted({ ...snapshot, matches: null, error: uiText("searchFailedTryDifferentKeywords") });
+      setCompleted({ ...snapshot, matches: null, error: "search-failed" });
     });
     return () => { controller.abort(); };
   }, [enabled, ready, catalog, prepared.error, filteredPages, pages, notebooks, searchQuery, currentCompletion]);
 
   const hasQuery = Boolean(searchQuery.trim());
-  const searchError = prepared.error ?? currentCompletion?.error ?? null;
+  const searchError = prepared.error ?? (currentCompletion?.error ? uiText("searchFailedTryDifferentKeywords") : null);
   const preparing = enabled && !searchError && (!ready || (hasQuery && !currentCompletion));
   const liveMatches = useMemo<CommandMatches>(() => {
     if (!enabled || !ready || searchError) return EMPTY_MATCHES;

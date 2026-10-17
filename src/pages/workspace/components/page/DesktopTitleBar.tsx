@@ -1,4 +1,4 @@
-import { createTranslator, i18nYaml } from "@/i18n";
+import { useLocale, createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/DesktopTitleBar.tsx#localMessages:1">`
 zh-Hans:
@@ -71,6 +71,7 @@ export function DesktopTitleBar({
   aiLayoutMode = "fullscreen",
   onToggleAiPanel,
 }: DesktopTitleBarProps) {
+  useLocale();
   const activePageId = usePages((s) => s.activePageId);
   const folderActionsAvailable = useFolderToolbarActions();
   const workspaceSidebarCollapsed = useEffectiveSidebarCollapsed();

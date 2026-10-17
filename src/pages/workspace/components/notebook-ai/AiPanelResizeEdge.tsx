@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/AiPanelResizeEdge.tsx#messages:1">`
@@ -29,6 +30,7 @@ export function AiPanelResizeEdge({
   onKeyDown,
   onPointerDown,
 }: AiPanelResizeEdgeProps) {
+  useLocale();
   return (
     <div
       className="absolute top-0 z-[60] h-full cursor-col-resize touch-none group/resize"

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarInlineRename.tsx#localMessages:1">`
@@ -31,11 +32,13 @@ export const SidebarRenameContext = createContext<{
 } | null>(null);
 
 export function SidebarInlineRename({ children }: { children: ReactNode }) {
+  useLocale();
   const context = useContext(SidebarRenameContext);
   return context?.renaming ? <RenameInput context={context} /> : children;
 }
 
 function RenameInput({ context }: { context: NonNullable<React.ContextType<typeof SidebarRenameContext>> }) {
+  useLocale();
   const { page, setRenaming, rowRef } = context;
   const original = page.isFolder && page.localFilePath
     ? page.localFilePath.split(/[\\/]/).pop() || ""

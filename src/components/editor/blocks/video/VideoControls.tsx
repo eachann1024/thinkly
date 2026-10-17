@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/icons";
 import { formatTime } from "./videoTime";
 import type { useVideoPlayback } from "./useVideoPlayback";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/video/VideoControls.tsx#messages:1">`
 zh-Hans:
   playbackProgress: "播放进度"
@@ -36,6 +36,7 @@ export function VideoControls({
 }: {
   playback: ReturnType<typeof useVideoPlayback>;
 }) {
+  useLocale();
   const {
     playing,
     current,

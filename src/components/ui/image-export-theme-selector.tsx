@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { common } from "@/i18n/common";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -44,6 +45,7 @@ export function ImageExportThemeSelector({
   page,
   blocks,
 }: ImageExportThemeSelectorProps) {
+  const locale = useLocale();
   const selectedId = normalizeCardThemeId(
     useSettings((s) => s.imageExportThemeId),
   );
@@ -90,12 +92,12 @@ export function ImageExportThemeSelector({
           ? resolveCardTheme("notebook", notebookContext)
           : theme,
       ),
-    [notebookContext],
+    [notebookContext, locale],
   );
   const notebookTheme = displayThemes.find((theme) => theme.id === "notebook");
   const previewTheme = useMemo(
     () => resolveCardTheme(selectedId, notebookContext),
-    [selectedId, notebookContext],
+    [selectedId, notebookContext, locale],
   );
   const groupedThemes = useMemo(
     () =>

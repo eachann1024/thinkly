@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1">`
@@ -19,6 +20,7 @@ export function DefaultFontSelect({
   value: string | null;
   onChange: (value: string | null) => void;
 }) {
+  useLocale();
   return (
     <div className="default-font-select space-y-3">
       <div className="flex flex-col gap-3">

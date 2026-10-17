@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/ShortcutField.tsx#localMessages:1">`
@@ -106,6 +107,7 @@ export function ShortcutField({
   onChange,
   resetValue,
 }: ShortcutFieldProps) {
+  useLocale();
   const [isCapturing, setIsCapturing] = useState(false)
   const pendingModifierRef = useRef("")
   const modifierUsedInChordRef = useRef(false)

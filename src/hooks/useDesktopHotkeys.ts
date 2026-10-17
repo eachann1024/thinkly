@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/hooks/useDesktopHotkeys.ts#block1:1">`
 zh-Hans:
@@ -53,6 +54,7 @@ function statusFromRegisterResult(
 }
 
 export function useDesktopHotkeys(): void {
+  useLocale();
   const hydrated = useSettings((s) => s._hasHydrated);
   const wakeHotkey = useSettings((s) => s.desktop.wakeHotkey);
   const wakeHotkeyEnabled = useSettings((s) => s.desktop.wakeHotkeyEnabled);

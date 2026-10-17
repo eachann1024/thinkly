@@ -14,7 +14,7 @@ import {
   getImageSrc,
 } from "./imageUtils";
 import type { ImageLightboxProps, SlideInfo } from "./lightboxTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/image/useLightboxActions.ts#messages:1">`
 zh-Hans:
   couldNotOpenInTheSystemImageViewer: "无法使用系统图片查看器打开"
@@ -41,6 +41,7 @@ export function useLightboxActions(
   editorContainerRef: ImageLightboxProps["editorContainerRef"],
   currentSlide: SlideInfo | undefined,
 ) {
+  useLocale();
   const platform = useEditorPlatform();
   const { getActivePageLocalFilePath } = useEditorPageContext();
   const openImageInSystemViewer = useCallback(

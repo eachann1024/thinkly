@@ -6,7 +6,7 @@ import {
   dispatchAppendComposerSelection,
   SELECTION_QUOTE_ADD_SHORTCUT,
 } from "@/components/editor/ai/composer/selectionQuote";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AddToChatButton.tsx#messages:1">`
 zh-Hans:
   addSelectionToChat: "将选区加入对话"
@@ -29,6 +29,7 @@ export function AddToChatButton({
   pageTitle: string;
   bindTooltip: BindTooltip;
 }) {
+  useLocale();
   return (
     <Tooltip {...bindTooltip("add-to-chat")}>
       <TooltipTrigger asChild>

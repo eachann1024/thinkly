@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/titlebar/PageFileTitle.tsx#localMessages:1">`
@@ -34,6 +35,7 @@ import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
 
 export function PageFileTitle({ page }: { page: Page }) {
+  useLocale();
   const { filePath, fileName, isFolder } = usePages(useShallow((state) => {
     const current = state.pages[page.id] ?? page;
     return {

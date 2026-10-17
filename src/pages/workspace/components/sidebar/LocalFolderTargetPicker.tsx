@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/LocalFolderTargetPicker.tsx#localMessages:1">`
@@ -56,6 +57,7 @@ import { movePageToNotebook } from "@/lib/move-page-to-notebook";
 import { renderNotebookIcon } from "./notebookUtils";
 
 export function LocalFolderTargetPicker() {
+  const locale = useLocale();
   const { picker, closePicker } = useLocalFolderTargetPicker();
   const open = picker.phase !== "closed";
   const mode = picker.phase;
@@ -91,7 +93,7 @@ export function LocalFolderTargetPicker() {
             recentKeys,
           })
         : [],
-    [pages, workspaceId, query, mode, recentKeys],
+    [pages, workspaceId, query, mode, recentKeys, locale],
   );
 
   const moveTargets = getNotebookMoveTargets(

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1">`
@@ -50,6 +51,7 @@ type DragSession = {
 };
 
 export function useSplitPaneDrag(tabId: string) {
+  useLocale();
   const surfaceRef = useRef<HTMLDivElement>(null);
   const registry = useOptionalEditorPaneRegistry();
   const [preview, setPreview] = useState<PaneDragPreview | null>(null);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsDialogState.tsx#localMessages:1">`
@@ -23,6 +24,7 @@ export function useSettingsDialogState({
   sidebarContainer,
   mainContainer,
 }: SettingsDialogProps) {
+  useLocale();
   const [hasOpened, setHasOpened] = useState(open);
 
   useEffect(() => {

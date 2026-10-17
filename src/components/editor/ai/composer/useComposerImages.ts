@@ -17,7 +17,7 @@ import {
 
 import type { ComposerImagesOptions } from "./composerImageTypes";
 import { useComposerImagePreview } from "./useComposerImagePreview";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/useComposerImages.ts#messages:1">`
 zh-Hans:
   image: "图片"
@@ -39,6 +39,7 @@ const t = createTranslator(messages);
 
 
 export function useComposerImages(options: ComposerImagesOptions) {
+  useLocale();
   const {
     editorRef,
     imageRegistryRef,

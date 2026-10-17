@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1">`
@@ -40,6 +41,7 @@ export function TreeRowIcon({
   isExpanded: boolean;
   onToggleExpanded: () => void;
 }) {
+  useLocale();
   const iconName = usePages((s) => {
     const live = s.pages[page.id];
     return live ? live.icon : page?.icon;

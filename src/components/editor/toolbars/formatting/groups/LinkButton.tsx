@@ -18,7 +18,7 @@ import {
 
 import { useSettings } from "@/stores/useSettings";
 import { isLinkShortcutClaimedByApp } from "@/components/editor/extensions/linkKeyboardExtension";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/LinkButton.tsx#messages:1">`
 zh-Hans:
   removeLink: "移除链接"
@@ -49,6 +49,7 @@ export function LinkButton({
   bindTooltip: BindTooltip;
   onOpenChange?: SelectionMenuChange;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const linkShortcutClaimed = useSettings((settings) =>
     isLinkShortcutClaimedByApp([

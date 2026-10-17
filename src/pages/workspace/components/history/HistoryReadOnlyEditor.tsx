@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCreateBlockNote, BlockNoteViewRaw as BlockNoteView } from "@blocknote/react";
-import { en, zh } from "@blocknote/core/locales";
+import { createLiveEditorDictionary } from "@/components/editor/core/editorLocale";
+import { useEditorLocale } from "@/components/editor/core/useEditorLocale";
 import * as GooseIcons from "@/components/ui/icons";
 import "@blocknote/react/style.css";
 import { useSettings } from "@/stores/useSettings";
@@ -15,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import type { Page } from "@/types";
 import { EditorHostBridge } from "../editor-host/EditorHostBridge";
-import { i18nYaml, createTranslator, getLocale } from "@/i18n";
+import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1">`
 zh-Hans:
   thisNoteCannotBePreviewed: "此笔记无法预览"
@@ -77,7 +78,7 @@ export function HistoryReadOnlyEditor({
   const editor = useCreateBlockNote({
     initialContent: normalized as any,
     schema: editorSchema,
-    dictionary: getLocale() === "zh-Hans" ? zh : en,
+    dictionary: createLiveEditorDictionary("history"),
     domAttributes: {
       editor: {
         class: "goose-blocknote-editor",
@@ -93,6 +94,8 @@ export function HistoryReadOnlyEditor({
       return resolveImageRefToUrl(url, activePage?.localFilePath ?? null);
     },
   });
+
+  useEditorLocale(editor, "history");
 
   // 同步 isEditable（BlockNote 的 editable 在 view 上是 prop，editor 实例上也维护一份）
   useEffect(() => {

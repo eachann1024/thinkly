@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { useSettings } from "@/stores/useSettings";
 import { useNotebookAiSession } from "../NotebookAiSession";
@@ -66,6 +67,7 @@ export function usePanelHeader(
     conversationSummary: string;
   },
 ) {
+  const locale = useLocale();
   const { notebookId, onClose, onLayoutModeChange } = props;
   const { unavailableReason } = useNotebookAiSession();
   const hydrated = useSettings((state) => state._hasHydrated);
@@ -207,6 +209,7 @@ export function usePanelHeader(
     handleDeleteConversation,
     onLayoutModeChange,
     layoutIsFullscreen,
+  locale,
   ]);
 
   // 桌面两种布局都把工具栏交给顶栏；网页侧栏仍保留面板内标题。

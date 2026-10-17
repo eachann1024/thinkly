@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitConflicts.tsx#localMessages:1">`
@@ -44,6 +45,7 @@ en:
   keepBothDetails: "Keeping both saves the remote version as a separate file."
 `;
 const uiText = createTranslator(localMessages);
+import { localizeGitUiReason } from "./gitSyncUiState";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type {
@@ -66,16 +68,17 @@ export function GitConflicts({
   disabled: boolean;
   onResolve: (request: GitConflictResolution) => void;
 }) {
+  useLocale();
   const [detail, setDetail] = useState<GitSyncConflictDetail | null>(null);
   const [loadingId, setLoadingId] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null | undefined>(undefined);
   async function inspect(conflictId: string) {
     setLoadingId(conflictId);
-    setError("");
+    setError(undefined);
     try {
       setDetail(await bridge.getConflict(repositoryId, conflictId));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : uiText("couldNotReadConflictingContent_1b17"));
+      setError(reason instanceof Error ? reason.message : null);
     } finally {
       setLoadingId("");
     }
@@ -155,9 +158,9 @@ export function GitConflicts({
           )}
         </div>
       ))}
-      {error && (
+      {error !== undefined && (
         <p role="alert" className="text-sm text-danger">
-          {error}
+          {error ? localizeGitUiReason(error) : uiText("couldNotReadConflictingContent_1b17")}
         </p>
       )}
     </div>

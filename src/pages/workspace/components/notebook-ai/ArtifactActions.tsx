@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { IconButton } from "@/components/ui/icon-button";
 import { copyText, downloadText, copyImagePayload } from "./artifactClipboard";
@@ -21,7 +22,7 @@ import {
 import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import {
-  PREVIEW_ACTION_TOOLTIP,
+  getPreviewActionTooltip,
 } from "@/lib/preview/previewAction";
 import { useArtifactPreview } from "./useArtifactPreview";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
@@ -69,6 +70,7 @@ export function ArtifactActions({
   previewIdentity,
   onInsert,
 }: ArtifactActionsProps) {
+  useLocale();
   const [copyingImage, setCopyingImage] = useState(false);
   const [downloadingImage, setDownloadingImage] = useState(false);
   const { previewing, previewContent, closePreview, previewHandlers } = useArtifactPreview({
@@ -188,7 +190,7 @@ export function ArtifactActions({
                 )}
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent>{PREVIEW_ACTION_TOOLTIP}</TooltipContent>
+            <TooltipContent>{getPreviewActionTooltip()}</TooltipContent>
           </Tooltip>
         ) : null}
 

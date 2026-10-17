@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { SidebarModeRail } from "./sidebar-shell/SidebarModeRail";
 import { useSidebarHover } from "./sidebar-shell/useSidebarHover";
 import { renderSidebarViews } from "./sidebar-shell/renderSidebarViews";
@@ -12,6 +13,7 @@ import { useSidebarNavigation } from "./sidebar-shell/useSidebarNavigation";
 import { useSidebarLifecycle } from "./sidebar-shell/useSidebarLifecycle";
 
 export function Sidebar(props: SidebarProps) {
+  useLocale();
   const layout = useSidebarLayout(props);
   const navigation = useSidebarNavigation(layout);
   const sidebarLifecycleContext = useSidebarLifecycle(navigation);

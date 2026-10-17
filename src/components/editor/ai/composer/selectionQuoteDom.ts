@@ -15,7 +15,7 @@ import {
   parseSelectionQuoteAttrs,
   formatSelectionQuotePromptLabel,
   hasDuplicateSelectionQuote,
-  SELECTION_QUOTE_LIVE_ANNOUNCEMENT,
+  getSelectionQuoteLiveAnnouncement,
   type AiSelectionQuoteAttrs,
   type AppendSelectionQuoteResult,
 } from "./selectionQuoteData";
@@ -131,8 +131,21 @@ export function appendSelectionQuoteToDom(
   const live = options?.liveRegion;
   if (live) {
     live.textContent = "";
-    live.textContent = SELECTION_QUOTE_LIVE_ANNOUNCEMENT;
+    live.textContent = getSelectionQuoteLiveAnnouncement();
   }
 
   return "appended";
+}
+
+/** Language updates touch only existing chip accessibility attributes. */
+export function refreshSelectionQuoteLabels(container: HTMLElement) {
+  container.querySelectorAll<HTMLElement>("[data-ai-selection-quote-attrs]").forEach((chip) => {
+    const attrs = parseSelectionQuoteAttrs(chip.dataset.aiSelectionQuoteAttrs);
+    if (!attrs) return;
+    chip.setAttribute("aria-label", t("selectionFromSource", { title: attrs.pageTitle }));
+    chip.querySelector("[data-ai-quote-preview]")?.setAttribute(
+      "aria-label", t("previewSourceSelection", { title: attrs.pageTitle }),
+    );
+    chip.querySelector("[data-ai-quote-remove]")?.setAttribute("aria-label", t("removeSelectionReference"));
+  });
 }

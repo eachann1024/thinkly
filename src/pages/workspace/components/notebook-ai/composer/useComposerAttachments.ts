@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -27,6 +28,7 @@ export function useComposerAttachments(
   { disabled, isStreaming }: ComposerProps,
   { inputRef }: ComposerSurfaceState,
 ) {
+  useLocale();
   const [dropActive, setDropActive] = useState(false);
   useEffect(() => {
     const clear = () => setDropActive(false);

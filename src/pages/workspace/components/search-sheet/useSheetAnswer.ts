@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1">`
@@ -29,6 +30,7 @@ function readPageSource(result: unknown): NoteSource | null {
 
 /** 搜索面板内的就地问答：先本地预检索笔记，再用只读 Pi Agent 多步调用工具，流式生成回答。 */
 export function useSheetAnswer() {
+  useLocale();
   const [state, dispatch] = useReducer(sheetAnswerReducer, { status: "idle" });
   const answer = state.status === "idle" ? null : state;
   const sequence = useRef(0);

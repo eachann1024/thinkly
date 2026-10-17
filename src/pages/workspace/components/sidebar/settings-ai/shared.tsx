@@ -44,7 +44,7 @@ export interface SettingsAIProps {
 export const SETTINGS_OPTION_ROW_CLASS =
   "goose-settings-option-row";
 
-export const CUSTOM_AI_KEY_HINT =
+export const getCustomAiKeyHint = () =>
   uiText("addAnApiKeyInSettings_4457");
 
 export const EMPTY_AI_MODEL_OPTIONS: AIModelOption[] = [];

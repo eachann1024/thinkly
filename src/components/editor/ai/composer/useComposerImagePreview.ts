@@ -6,7 +6,7 @@ import {
   positionImagePreview,
 } from "./composerImageChip";
 import type { ComposerImagesOptions } from "./composerImageTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/useComposerImagePreview.ts#messages:1">`
 zh-Hans:
   imagePreview: "图片预览"
@@ -21,6 +21,7 @@ const t = createTranslator(messages);
 
 
 export function useComposerImagePreview(options: ComposerImagesOptions) {
+  useLocale();
   const {
     imageRegistryRef,
     imagePreviewElRef,

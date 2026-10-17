@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "@/components/ui/icons";
 import { formatLoaderElapsed } from "../beautifulUiMap";
@@ -26,6 +27,7 @@ export function LoadingState({
   compact?: boolean;
   showElapsed?: boolean;
 }) {
+  useLocale();
   const [tickMs, setTickMs] = useState(0);
   const controlled = typeof elapsedMs === "number";
   const needsTimer = showElapsed && !compact && !controlled;

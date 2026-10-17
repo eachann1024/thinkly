@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { EditorAction } from "@/components/editor/ui/button";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/image/ResolvedImagePreview.tsx#messages:1">`
 zh-Hans:
   imageReferenceUnresolved: "图片引用未解析"
@@ -38,6 +38,7 @@ export function ResolvedImagePreview({
   block: ImageBlock;
   editor: ImageEditor;
 }) {
+  useLocale();
   const source = block.props.url;
   const pagePath = useEditorPageContext().getActivePageLocalFilePath();
   const [attempt, setAttempt] = useState(0);

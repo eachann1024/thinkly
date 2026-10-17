@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/useGitFolderChecks.ts#localMessages:1">`
@@ -7,13 +8,15 @@ en:
   couldNotCheckFolder_5d5e: "Could not check folder"
 `;
 const uiText = createTranslator(localMessages);
+import { localizeGitUiReason } from "./gitSyncUiState";
 import { useCallback, useEffect, useState } from "react";
 import type { GitFolderCheck, GitSyncBridge } from "@/lib/git-sync-contract";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { isCanonicalPathInside } from "@/lib/canonicalLocalPath";
 
 export function useGitFolderChecks(bridge: GitSyncBridge | undefined, active: boolean, paths: string[], notebookRevision: string) {
-  const [checks, setChecks] = useState<Record<string, GitFolderCheck>>({});
+  useLocale();
+  const [checks, setChecks] = useState<Record<string, GitFolderCheck & { failed?: boolean }>>({});
   const [revision, setRevision] = useState(0);
   const pathsKey = JSON.stringify([...new Set(paths)].sort());
   useEffect(() => {
@@ -31,7 +34,7 @@ export function useGitFolderChecks(bridge: GitSyncBridge | undefined, active: bo
       running = true;
       const results = await Promise.all(roots.map(async (path) => {
         const result = await bridge.checkFolder(path).catch((error: unknown) => ({
-          error: error instanceof Error ? error.message : uiText("couldNotCheckFolder_5d5e"),
+          failed: true, error: error instanceof Error ? error.message : null,
         }));
         return [path, result] as const;
       }));
@@ -55,5 +58,5 @@ export function useGitFolderChecks(bridge: GitSyncBridge | undefined, active: bo
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [bridge, active, pathsKey, revision, notebookRevision]);
-  return { checks, recheck: useCallback(() => setRevision((value) => value + 1), []) };
+  return { checks: Object.fromEntries(Object.entries(checks).map(([path, check]) => [path, { ...check, error: check.error ? localizeGitUiReason(check.error) : check.failed ? uiText("couldNotCheckFolder_5d5e") : null }])), recheck: useCallback(() => setRevision((value) => value + 1), []) };
 }

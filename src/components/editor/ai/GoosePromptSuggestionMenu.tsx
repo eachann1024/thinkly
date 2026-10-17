@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { GoosePromptActions } from "./GoosePromptActions";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/GoosePromptSuggestionMenu.tsx#messages:1">`
 zh-Hans:
   aiRewriteInstructions: "AI 改写要求"
@@ -57,6 +57,7 @@ export type GoosePromptSuggestionMenuProps = {
 export function GoosePromptSuggestionMenu(
   props: GoosePromptSuggestionMenuProps,
 ) {
+  useLocale();
   const {
     onManualPromptSubmit,
     promptText,

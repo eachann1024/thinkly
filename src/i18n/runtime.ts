@@ -27,6 +27,9 @@ export function subscribeLanguage(listener: () => void) {
 }
 export function setLanguageSnapshot(next: LanguageSnapshot) {
   if (next.revision < snapshot.revision) return;
+  if (next.revision === snapshot.revision && next.preference === snapshot.preference &&
+      next.effectiveLocale === snapshot.effectiveLocale && next.formatLocale === snapshot.formatLocale &&
+      next.error === snapshot.error) return;
   snapshot = next;
   if (typeof document !== "undefined") document.documentElement.lang = next.effectiveLocale;
   for (const listener of listeners) listener();

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { formatDecimal, formatNumber } from "@/i18n/format";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -45,6 +46,7 @@ export function ReadingPreferences({ showPreview = true, fontSize, lineHeight, o
   onFontSizeChange: (value: number) => void;
   onLineHeightChange: (value: number) => void;
 }) {
+  useLocale();
   const id = useId();
   const fields = [
     { key: "size", label: uiText("textSize"), value: fontSize, min: EDITOR_FONT_SIZE_MIN, max: EDITOR_FONT_SIZE_MAX, step: 1, unit: "px", change: onFontSizeChange },

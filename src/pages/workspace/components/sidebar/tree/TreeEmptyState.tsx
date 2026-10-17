@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/tree/TreeEmptyState.tsx#localMessages:1">`
@@ -21,6 +22,7 @@ export function TreeEmptyState({
   isLocalNotebook,
   height = 0,
 }: TreeEmptyStateProps) {
+  useLocale();
   const hasMeasuredHeight = height > 0;
 
   return (

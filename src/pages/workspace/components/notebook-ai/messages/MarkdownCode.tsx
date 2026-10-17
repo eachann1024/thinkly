@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import {
   cloneElement,
   isValidElement,
@@ -35,6 +36,7 @@ function reactNodeToText(node: ReactNode): string {
 export function MdPre({
   children,
 }: ComponentProps<"pre"> & { node?: unknown }) {
+  useLocale();
   const ctx = useContext(AssistantToolRenderContext);
   const language = languageFromCodeChild(children);
   const source = reactNodeToText(children);

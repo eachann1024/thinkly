@@ -19,14 +19,14 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getGooseDesktop } from "./runtime";
 
 export const DEFAULT_WINDOW_TITLE = "Goose Note";
-export const WELCOME_WINDOW_TITLE = uiText("start");
+export const getWelcomeWindowTitle = () => uiText("start");
 export const TITLE_SYNC_DEBOUNCE_MS = 300;
 
 export function resolveWindowTitle(
   page: Page | null | undefined,
   options?: { isWelcomeTab?: boolean },
 ): string {
-  if (options?.isWelcomeTab) return WELCOME_WINDOW_TITLE;
+  if (options?.isWelcomeTab) return getWelcomeWindowTitle();
   if (!page) return DEFAULT_WINDOW_TITLE;
   const title = getPageTitle(page).trim();
   return title || DEFAULT_WINDOW_TITLE;

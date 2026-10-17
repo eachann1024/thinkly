@@ -38,9 +38,9 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 8. Stationery ────────────────────────────────────────────
   {
     id: "stationery",
-    name: uiText("journalNotes"),
+    get name() { return uiText("journalNotes"); },
     nameEn: "Stationery",
-    description: uiText("warmHandwritingWithAPersonalTouch"),
+    get description() { return uiText("warmHandwritingWithAPersonalTouch"); },
     tags: [uiText("handwritten"), uiText("cozy")],
     mode: "light",
     titleFont: "'Ma Shan Zheng', 'ZCOOL XiaoWei', 'Noto Sans SC', 'PingFang SC', sans-serif",
@@ -85,9 +85,9 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 17. Mocha Mousse (Pantone-inspired) ──────────────────────
   {
     id: "mocha-mousse",
-    name: uiText("mochaMousse"),
+    get name() { return uiText("mochaMousse"); },
     nameEn: "Mocha Mousse",
-    description: uiText("warmEarthyBrownsInspiredByTheColorOfThe"),
+    get description() { return uiText("warmEarthyBrownsInspiredByTheColorOfThe"); },
     tags: [uiText("light"), uiText("warm")],
     mode: "light",
     titleFont: "'Fraunces', 'Noto Serif SC', Georgia, serif",
@@ -132,9 +132,9 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 19. Brutalist ────────────────────────────────────────────
   {
     id: "brutalist",
-    name: uiText("boldPrint"),
+    get name() { return uiText("boldPrint"); },
     nameEn: "Brutalist",
-    description: uiText("boldTypeSharpEdgesAndSolidShadows"),
+    get description() { return uiText("boldTypeSharpEdgesAndSolidShadows"); },
     tags: [uiText("light"), uiText("unconventional")],
     mode: "light",
     titleFont: "'Space Grotesk', 'Inter', 'Noto Sans SC', sans-serif",
@@ -182,7 +182,7 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     id: "risograph",
     name: "Risograph",
     nameEn: "Risograph",
-    description: uiText("risographTextureWithFluorescentInkColors"),
+    get description() { return uiText("risographTextureWithFluorescentInkColors"); },
     tags: [uiText("light"), uiText("print")],
     mode: "light",
     titleFont: "'Fraunces', 'Noto Serif SC', Georgia, serif",

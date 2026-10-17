@@ -7,7 +7,7 @@ import { useSelectionColorState } from "./useSelectionColors";
 import { useColorPanelState } from "./useColorPanelState";
 import { useColorActions } from "./useColorActions";
 import { ColorPickerPanel } from "./ColorPickerPanel";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/ColorPicker.tsx#messages:1">`
 zh-Hans:
   chooseATextOrBackgroundColorClickTo: "选择文本或背景颜色；点击应用上次颜色"
@@ -34,6 +34,7 @@ export { selectionUsesLastFormatColors } from "./lastFormatColors";
 export function FormattingToolbarColorPicker({
   onOpenChange,
 }: { onOpenChange?: (open: boolean) => void } = {}) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const selectionColors = useSelectionColorState(editor);
   const panel = useColorPanelState(editor, selectionColors, onOpenChange);

@@ -4,7 +4,7 @@ import { cn } from "@/components/editor/utils/cn";
 import { useVideoPlayback } from "./useVideoPlayback";
 import { VideoControls } from "./VideoControls";
 import type { GooseVideoPlayerProps } from "./videoPlayerTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/video/GooseVideoPlayer.tsx#messages:1">`
 zh-Hans:
   videoPlayer: "视频播放器"
@@ -25,6 +25,7 @@ export function GooseVideoPlayer({
   className,
   onEnterBelow,
 }: GooseVideoPlayerProps) {
+  useLocale();
   const playback = useVideoPlayback(src);
   const {
     rootRef,

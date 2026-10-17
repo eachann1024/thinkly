@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1">`
@@ -14,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useWindowAlwaysOnTop } from "@/hooks/useWindowAlwaysOnTop";
 
 export function WindowAlwaysOnTopButton() {
+  useLocale();
   const { alwaysOnTop, isPending, toggleAlwaysOnTop } = useWindowAlwaysOnTop();
   const label = alwaysOnTop ? uiText("unpinWindow") : uiText("pinWindow");
 

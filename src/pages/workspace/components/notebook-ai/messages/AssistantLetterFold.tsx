@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -30,6 +31,7 @@ function LetterFoldChevron() {
 
 /** 有变更计划时，把说明收进折叠，默认收起，把版面让给整页改动。 */
 export function AssistantLetterFold({ children }: { children: ReactNode }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   return (
     <div className="notebook-ai-letter-fold">

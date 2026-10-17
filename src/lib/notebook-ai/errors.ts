@@ -1,6 +1,6 @@
 import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, subscribeLanguage } from "@/i18n";
 const messages = i18nYaml<"src/lib/notebook-ai/errors.ts#messages:1">`
 zh-Hans:
   aiStoppedBecauseItCouldNotGenerateA: "计划格式生成失败，AI 已停止执行。已执行 0 项，且没有写入。请重试，或切换模型后再试。"
@@ -36,14 +36,14 @@ en:
   theCurrentAiProtocolCannotAccessTheResponses: "The current AI protocol cannot access the Responses API. Check that the server supports /v1/responses."
 `;
 const t = createTranslator(messages);
-const BATCH_PLAN_SCHEMA_ERROR =
+let BATCH_PLAN_SCHEMA_ERROR =
   t("aiStoppedBecauseItCouldNotGenerateA");
-const BATCH_PLAN_BUSINESS_ERROR =
+let BATCH_PLAN_BUSINESS_ERROR =
   t("thisPlanCannotBeAppliedNoOperationsWere");
-const BATCH_PLAN_EXECUTION_ERROR =
+let BATCH_PLAN_EXECUTION_ERROR =
   t("thePlanDidNotFinishRecoveryWasAttempted");
-const UNDO_ERROR = t("undoFailedThePagesMayHaveChangedCheck");
-const DEFAULT_ERROR = t("thisRequestFailedPleaseTryAgainLater");
+let UNDO_ERROR = t("undoFailedThePagesMayHaveChangedCheck");
+let DEFAULT_ERROR = t("thisRequestFailedPleaseTryAgainLater");
 
 function toText(error: unknown): string {
   if (error instanceof Error) return error.message.trim();
@@ -188,7 +188,18 @@ export function formatNotebookAiError(
   return localized !== message ? localized : DEFAULT_ERROR;
 }
 
-export const NOTEBOOK_AI_BATCH_PLAN_SCHEMA_ERROR = BATCH_PLAN_SCHEMA_ERROR;
-export const NOTEBOOK_AI_BATCH_PLAN_BUSINESS_ERROR = BATCH_PLAN_BUSINESS_ERROR;
-export const NOTEBOOK_AI_BATCH_PLAN_EXECUTION_ERROR =
+export let NOTEBOOK_AI_BATCH_PLAN_SCHEMA_ERROR = BATCH_PLAN_SCHEMA_ERROR;
+export let NOTEBOOK_AI_BATCH_PLAN_BUSINESS_ERROR = BATCH_PLAN_BUSINESS_ERROR;
+export let NOTEBOOK_AI_BATCH_PLAN_EXECUTION_ERROR =
   BATCH_PLAN_EXECUTION_ERROR;
+
+subscribeLanguage(() => {
+  BATCH_PLAN_SCHEMA_ERROR = t("aiStoppedBecauseItCouldNotGenerateA");
+  BATCH_PLAN_BUSINESS_ERROR = t("thisPlanCannotBeAppliedNoOperationsWere");
+  BATCH_PLAN_EXECUTION_ERROR = t("thePlanDidNotFinishRecoveryWasAttempted");
+  UNDO_ERROR = t("undoFailedThePagesMayHaveChangedCheck");
+  DEFAULT_ERROR = t("thisRequestFailedPleaseTryAgainLater");
+  NOTEBOOK_AI_BATCH_PLAN_SCHEMA_ERROR = BATCH_PLAN_SCHEMA_ERROR;
+  NOTEBOOK_AI_BATCH_PLAN_BUSINESS_ERROR = BATCH_PLAN_BUSINESS_ERROR;
+  NOTEBOOK_AI_BATCH_PLAN_EXECUTION_ERROR = BATCH_PLAN_EXECUTION_ERROR;
+});

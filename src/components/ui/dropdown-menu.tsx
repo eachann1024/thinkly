@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/dropdown-menu.tsx#localMessages:1">`
@@ -89,6 +90,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
     },
     ref,
   ) => {
+  useLocale();
     const layer = useOverlayLayer("menu");
     const topLayer = useOverlayTopLayer(layer);
     return (

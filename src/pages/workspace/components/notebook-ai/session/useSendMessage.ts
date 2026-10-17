@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback } from "react";
 import {
   buildNotebookAiUserMessage,
@@ -23,6 +24,7 @@ const t = createTranslator(messages);
 
 
 export function useSendMessage(state: SessionState) {
+  useLocale();
   const {
     isBusy,
     unavailableReason,
@@ -98,17 +100,7 @@ export function useSendMessage(state: SessionState) {
       onConsumeCapturedSelection?.();
       return true;
     },
-    [
-      isBusy,
-      unavailableReason,
-      notebookId,
-      messages,
-      requestCurrentPageIdRef,
-      clearError,
-      sendMessage,
-      setMessages,
-      conversationId,
-    ],
+    [isBusy, unavailableReason, notebookId, messages, requestCurrentPageIdRef, clearError, sendMessage, setMessages, conversationId],
   );
 
   return send;

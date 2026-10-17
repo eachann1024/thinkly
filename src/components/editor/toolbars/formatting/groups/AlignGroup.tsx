@@ -2,7 +2,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AlignGroup.tsx#messages:1">`
 zh-Hans:
   alignLeft: "左对齐"
@@ -27,6 +27,7 @@ export function AlignGroup({
   setTextAlignment: (alignment: "left" | "center" | "right") => void;
   bindTooltip: BindTooltip;
 }) {
+  useLocale();
   return (
     <>
       <Tooltip {...bindTooltip("align-left")}>

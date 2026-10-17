@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitFolderList.tsx#localMessages:1">`
@@ -39,11 +40,11 @@ import type {
 import { SettingsSectionCard } from "../SettingsSectionCard";
 
 function shortFolderReason(error: string) {
-  if (/符号链接/.test(error)) return uiText("containsSymbolicLinksCannotSync_a3fb");
-  if (/不存在/.test(error)) return uiText("theOriginalFolderNoLongerExists_9875");
-  if (/未打开|无法匹配|身份|路径已变化/.test(error))
+  if (/符号链接|symbolic link|symlink/i.test(error)) return uiText("containsSymbolicLinksCannotSync_a3fb");
+  if (/不存在|no longer exists|does not exist|not found|missing/i.test(error)) return uiText("theOriginalFolderNoLongerExists_9875");
+  if (/未打开|无法匹配|身份|路径已变化|not open|not.*match|identity|path.*changed/i.test(error))
     return uiText("theNotebookIsNotOpenOr_a185");
-  if (/权限/.test(error)) return uiText("cannotReadFolderCheckItsPermissions_7101");
+  if (/权限|permission/i.test(error)) return uiText("cannotReadFolderCheckItsPermissions_7101");
   return error.split(/[\n，。；]/)[0].slice(0, 60);
 }
 
@@ -91,6 +92,7 @@ export function GitFolderList({
   onRecover: (folder: GitRepositoryFolder, relocate: boolean) => void;
   onLocate: (folder: GitRepositoryFolder) => void;
 }) {
+  useLocale();
   return (
     <SettingsSectionCard
       title={uiText("foldersToSync_19ed")}
@@ -118,7 +120,7 @@ export function GitFolderList({
             "",
           );
           const needsRecovery =
-            !available || /不存在|无法匹配|身份|路径已变化/.test(error ?? "");
+            !available || /不存在|无法匹配|身份|路径已变化|no longer exists|does not exist|not found|missing|not.*match|identity|path.*changed/i.test(error ?? "");
           const shortPath = distinguishingPath(folder, rows);
           const blocked =
             disabled ||

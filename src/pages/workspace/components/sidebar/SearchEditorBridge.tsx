@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SearchEditorBridge.tsx#localMessages:1">`
@@ -52,6 +53,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   pageId: string; focused: boolean; editorRef: RefObject<EditorRef | null>; scrollRef: RefObject<HTMLDivElement | null>;
   cancelPendingRestoration: () => void;
 }) {
+  useLocale();
   const session = useSearchSession(useShallow(s => ({
     open: s.view.phase !== "closed", query: s.query, scope: s.scope,
     requestNonce: s.navigation.phase === "target" ? s.navigation.id : 0,
