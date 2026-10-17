@@ -144,7 +144,7 @@ export function PageMenu() {
             </section>
           )}
           {/* Font Selector */}
-          <div className="px-0.5 py-1">
+          <div className="pb-1.5">
             <FontSelector
               value={page.fontFamily}
               compact

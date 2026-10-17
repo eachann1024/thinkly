@@ -18,7 +18,7 @@
   min-width: 0;
   align-items: center;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 6px;
   padding: 4px;
 }
 
@@ -95,15 +95,34 @@
   box-shadow: none;
 }
 
-/* Keep semantic groups without forcing whole groups onto the next row. */
+/* 语义分组呈现为分段托盘；宽度不足时按组换行。 */
 .goose-formatting-toolbar-group {
-  display: contents;
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border-radius: calc(var(--goose-control-radius) + 2px);
+  background: var(--goose-segmented-tray-bg);
+}
+
+[data-formatting-toolbar] .goose-formatting-toolbar-group {
+  --formatting-control-size: calc(var(--selection-control-size, 32px) - 4px);
+}
+
+[data-formatting-toolbar]
+  .goose-formatting-toolbar-group
+  .goose-formatting-toolbar-control:is([aria-pressed="true"], [data-selected="true"]) {
+  background-color: var(--goose-segmented-raised-bg);
+  color: var(--goose-interactive-selected-fg);
+  box-shadow: var(--goose-segmented-raised-shadow), inset 0 0 0 1px var(--goose-accent-solid);
 }
 
 /* Floating controls use layout sizes, avoiding CSS zoom on their measured anchors. */
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-row {
-  gap: calc(2px * var(--editor-ui-scale, 1));
+  gap: calc(6px * var(--editor-ui-scale, 1));
   padding: calc(4px * var(--editor-ui-scale, 1));
 }
 
