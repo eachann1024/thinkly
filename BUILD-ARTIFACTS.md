@@ -39,7 +39,7 @@ node scripts/build-ci-installers.mjs mac arm64
 
 安装包和校验清单位于 `dist-desktop/ci/`。CI 使用冻结锁文件，不依赖本机未提交修改。macOS arm64 还执行 `bun run mac` 验证原生应用构建和安装；打包检查包括所需格式是否齐全、Arch 包可安装。不表示所有桌面交互已经验收。类型检查需单独执行。
 
-在 macOS 27 本地已构建应用时，也可用 `python3 scripts/build-local-dmg.py --output ~/Downloads/Goose-Note-local.dmg` 直接生成 DMG 和 SHA-256 文件。脚本复用 electron-builder 缓存的 Python 依赖，通过 `diskutil` 打包；卷名限制为短 ASCII，避免背景图片的旧式别名记录截断，并在最终 DMG 中用 macOS 原生接口解析背景路径、校验应用签名。此检查不等同于 Finder 界面验收。
+在 macOS 27 本地已构建应用时，也可用 `python3 scripts/build-local-dmg.py --output ~/Downloads/Goose-Note-local.dmg` 直接生成 DMG 和 SHA-256 文件。脚本复用 electron-builder 缓存的 Python 依赖，通过 `diskutil` 打包；卷名限制为短 ASCII，避免背景图片的旧式别名记录截断，同时写入完整 Finder 视图配置（包括 `vSrn` 版本标记与背景颜色字段），并在最终 DMG 中用 macOS 原生接口解析背景路径、校验应用签名。此检查不等同于 Finder 界面验收。
 
 ## Windows SignPath 维护
 
