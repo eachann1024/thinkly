@@ -47,6 +47,7 @@ cpSync(resolve(root, "electron/icons/icon.ico"), resolve(pack, "icon.ico"));
 cpSync(resolve(root, "electron/icons/icon.png"), resolve(pack, "icon.png"));
 cpSync(resolve(root, "electron/installer.nsh"), resolve(pack, "installer.nsh"));
 cpSync(resolve(root, "scripts/mac-adhoc-sign.cjs"), resolve(pack, "mac-adhoc-sign.cjs"));
+cpSync(resolve(root, "scripts/set-file-icon.swift"), resolve(pack, "set-file-icon.swift"));
 cpSync(resolve(root, "electron/macos-l10n"), resolve(pack, "macos-l10n"), { recursive: true });
 cpSync(resolve(root, "electron/installer"), resolve(pack, "dmg-assets"), { recursive: true });
 mkdirSync(resolve(pack, "node_modules"), { recursive: true });
@@ -139,6 +140,7 @@ files:
   - "!installer.nsh"
   - "!dmg-assets/**"
   - "!mac-adhoc-sign.cjs"
+  - "!set-file-icon.swift"
 fileAssociations:
   - ext: md
     name: Markdown

@@ -26,6 +26,11 @@ function installLocalizedDisplayName(app) {
 // Developer ID builds retain electron-builder's normal signing/notarization flow.
 module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
   if (electronPlatformName !== 'darwin') return;
+  execFileSync('/usr/bin/swift', [
+    join(__dirname, 'set-file-icon.swift'),
+    join(__dirname, 'dmg-assets', 'authorization-icon.png'),
+    join(__dirname, 'dmg-assets', '安装指令.command'),
+  ], { stdio: 'inherit' });
   installLocalizedDisplayName(join(appOutDir, `${packager.appInfo.productFilename}.app`));
   // dmgbuild supports position-only entries, but electron-builder 26's schema
   // omits that type. Add them after config validation, before DMG construction.

@@ -69,7 +69,7 @@ if (stage === 'installer') {
   process.exit(0);
 }
 if (platform === 'mac') {
-  for (const name of ['background.png', 'background-2x.png', 'background.tiff', '安装指令.command']) {
+  for (const name of ['background.png', 'background-2x.png', 'background.tiff', 'authorization-icon.png', '安装指令.command']) {
     const asset = resolve(pack, 'dmg-assets', name);
     if (!existsSync(asset) || !readFileSync(asset).equals(readFileSync(resolve(root, 'electron/installer', name)))) {
       throw new Error(`DMG installation asset missing or outdated: ${name}`);
