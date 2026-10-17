@@ -51,7 +51,7 @@ export function hydrateSettings(state?: SettingsState) {
     useSettings.setState({ randomIconOnCreate: false });
   }
   if (state && typeof state.showSidebarFolderCount !== "boolean") {
-    useSettings.setState({ showSidebarFolderCount: false });
+    useSettings.setState({ showSidebarFolderCount: true });
   }
   if (state && state.singleTabMode !== true) {
     useSettings.setState({ singleTabMode: true });

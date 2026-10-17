@@ -268,7 +268,7 @@ declare global {
   export type { FixedAppShortcutId } from '../lib/fixed-app-shortcuts'
   import('../lib/fixed-app-shortcuts')
   // @ts-ignore
-  export type { GitConflictResolution, GitFolderCheck, GitFolderRebind, GitNotebookFolderRename, GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitSyncBridge, GitSyncConfig, GitSyncConflict, GitSyncConflictDetail, GitSyncProvider, GitSyncState, GitSyncStatus } from '../lib/git-sync-contract'
+  export type { GitConflictResolution, GitFolderCheck, GitFolderRebind, GitNotebookFolderAdopt, GitNotebookFolderRename, GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitSyncBridge, GitSyncConfig, GitSyncConflict, GitSyncConflictDetail, GitSyncProvider, GitSyncState, GitSyncStatus } from '../lib/git-sync-contract'
   import('../lib/git-sync-contract')
   // @ts-ignore
   export type { GitSyncPreparation, GitSyncPreparationRequest } from '../lib/git-sync-preparation'

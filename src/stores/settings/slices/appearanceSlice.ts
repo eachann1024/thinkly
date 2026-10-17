@@ -109,7 +109,7 @@ export const APPEARANCE_INITIAL_STATE: AppearanceSliceState = {
   imageExportThemeId: "notebook",
   randomIconOnCreate: false,
   editorGridMode: "off",
-  showSidebarFolderCount: false,
+  showSidebarFolderCount: true,
 
   singleTabMode: true,
 };

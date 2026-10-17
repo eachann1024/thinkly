@@ -8,7 +8,7 @@
 
 import { resolvePhysicalResourcePath } from "@/components/editor/utils/openResourceExternally";
 
-const MAX_PATH_LENGTH = 512;
+const MAX_PATH_LENGTH = 1024;
 const PROBE_TTL_MS = 5000;
 const PROBE_CACHE_MAX = 300;
 
@@ -27,6 +27,19 @@ function hasExtension(segment: string): boolean {
   return dot > 0 && dot < segment.length - 1;
 }
 
+function hasUnsafePathChars(text: string): boolean {
+  return text.includes("://") || /[\n\r\0|*?<>"]/.test(text);
+}
+
+/** 以 / 或盘符开头的本机绝对路径（含目录）。 */
+export function isAbsoluteLocalPath(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 2 || trimmed.length > MAX_PATH_LENGTH) return false;
+  if (hasUnsafePathChars(trimmed)) return false;
+  if (trimmed.startsWith("//")) return false;
+  return trimmed.startsWith("/") || /^[A-Za-z]:[\\/]/.test(trimmed);
+}
+
 /**
  * 行内代码文本是否形似指向 Markdown 笔记的显式相对路径。
  * 只认 ./ 与 ../ 前缀；以 / 或 \ 结尾视为目录意图，不算候选；
@@ -36,9 +49,7 @@ export function isRelativePathCandidate(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length <= 2 || trimmed.length > MAX_PATH_LENGTH) return false;
   if (!trimmed.startsWith("./") && !trimmed.startsWith("../")) return false;
-  // 挡 URL、非法字符与控制字符
-  if (trimmed.includes("://")) return false;
-  if (/[\n\r\0|*?<>"]/.test(trimmed)) return false;
+  if (hasUnsafePathChars(trimmed)) return false;
   // 前缀之后必须还有实际内容（"./" / "../" 本身不算）
   const rest = trimmed.startsWith("../") ? trimmed.slice(3) : trimmed.slice(2);
   if (rest.length === 0) return false;
@@ -47,6 +58,26 @@ export function isRelativePathCandidate(text: string): boolean {
   const segment = lastSegment(trimmed);
   if (!hasExtension(segment)) return true;
   return segment.slice(segment.lastIndexOf(".")).toLowerCase() === ".md";
+}
+
+/** ./ 或 ../ 且以斜杠结尾，表示要打开的文件夹。 */
+export function isRelativeDirectoryCandidate(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length <= 3 || trimmed.length > MAX_PATH_LENGTH) return false;
+  if (!trimmed.startsWith("./") && !trimmed.startsWith("../")) return false;
+  if (hasUnsafePathChars(trimmed)) return false;
+  if (!trimmed.endsWith("/") && !trimmed.endsWith("\\")) return false;
+  const rest = trimmed.startsWith("../") ? trimmed.slice(3) : trimmed.slice(2);
+  return rest.length > 1;
+}
+
+/** 绝对路径与文件夹按原文返回；相对笔记路径补 .md。都不是候选则返回 null。 */
+export function toOpenTarget(text: string): string | null {
+  const trimmed = text.trim();
+  if (isAbsoluteLocalPath(trimmed) || isRelativeDirectoryCandidate(trimmed)) {
+    return trimmed;
+  }
+  return toMarkdownTarget(trimmed);
 }
 
 /**
@@ -70,7 +101,12 @@ export function resolveCandidatePath(
   pageLocalFilePath: string,
 ): string | null {
   const trimmed = text.trim();
-  if (!isRelativePathCandidate(trimmed)) return null;
+  if (isAbsoluteLocalPath(trimmed)) {
+    return resolvePhysicalResourcePath(trimmed, pageLocalFilePath);
+  }
+  if (!isRelativePathCandidate(trimmed) && !isRelativeDirectoryCandidate(trimmed)) {
+    return null;
+  }
   const resolved = resolvePhysicalResourcePath(trimmed, pageLocalFilePath);
   if (!resolved) return null;
   // 弹栈越界（如 ../../../../x）会得到一个语义上不可信的结果：

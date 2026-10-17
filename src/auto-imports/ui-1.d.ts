@@ -83,6 +83,7 @@ declare global {
   const Separator: typeof import('../components/ui/separator').Separator
   const SuccessToastIcon: typeof import('../components/ui/sonner').SuccessToastIcon
   const Switch: typeof import('../components/ui/switch').Switch
+  const SwitchRow: typeof import('../components/ui/switch').SwitchRow
   const THINKING_PLACEHOLDER_MIN_MS: typeof import('../components/ui/ai-motion').THINKING_PLACEHOLDER_MIN_MS
   const TOOLTIP_DELAY_MS: typeof import('../components/ui/tooltip-delay').TOOLTIP_DELAY_MS
   const Tabs: typeof import('../components/ui/tabs').Tabs

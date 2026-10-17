@@ -5,6 +5,7 @@ const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/Sear
 zh-Hans:
   readingNotes: "正在阅读 {{count}} 篇相关笔记…"
   thinking: "正在思考…"
+  tool_understand: "正在理解问题…"
   tool_searchNotes: "正在搜索笔记…"
   tool_readPage: "正在阅读笔记…"
   tool_listPages: "正在查看页面列表…"
@@ -16,6 +17,7 @@ zh-Hans:
 en:
   readingNotes: "Reading related notes ({{count}})…"
   thinking: "Thinking…"
+  tool_understand: "Understanding the question…"
   tool_searchNotes: "Searching notes…"
   tool_readPage: "Reading a note…"
   tool_listPages: "Listing notes…"
@@ -27,13 +29,16 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import { memo } from "react";
+import { formatShortcutToken } from "@/lib/shortcut-platform";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, FileText, MessageSquare, Sparkles } from "@/components/ui/icons";
 import type { SheetAnswer } from "./useSheetAnswer";
+import { visibleSources } from "./sheetAnswerState";
 
 const TOOL_HINTS = {
+  understand: "tool_understand",
   searchNotes: "tool_searchNotes", readPage: "tool_readPage", listPages: "tool_listPages", searchWeb: "tool_searchWeb", readWebPage: "tool_readWebPage",
 } as const;
 
@@ -56,6 +61,7 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
   useLocale();
   const waiting = answer.status === "loading";
   const hint = pendingHint(answer);
+  const sources = visibleSources(answer);
   return <section className="search-sheet-answer" aria-live="polite" aria-busy={waiting || answer.status === "streaming"}>
     <div className="search-sheet-answer-head">
       <Sparkles size={16} aria-hidden="true"/>
@@ -64,10 +70,10 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
     {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
     {hint && <p className="search-sheet-answer-hint" data-pending="true">{hint}</p>}
     {answer.status === "error" && <p className="search-sheet-answer-hint" role="alert">{answer.error}</p>}
-    {answer.sources.length > 0 && <div className="search-sheet-answer-sources">
+    {sources.length > 0 && <div className="search-sheet-answer-sources">
       <span className="search-sheet-label">{uiText("sources")}</span>
-      {answer.sources.map((source, index) => <Button contentStyle="preserve" variant="ghost" size="sm" key={source.id} className="search-sheet-source" onClick={() => onOpenSource(source.id)}>
-        <span className="search-sheet-source-index">{index + 1}</span><FileText size={14} aria-hidden="true"/><span className="search-sheet-source-title">{source.title}</span>
+      {sources.map(({ index, source }) => <Button contentStyle="preserve" variant="ghost" size="sm" key={source.id} className="search-sheet-source" onClick={() => onOpenSource(source.id)}>
+        {index && <span className="search-sheet-source-index">{index}</span>}<FileText size={14} aria-hidden="true"/><span className="search-sheet-source-title">{source.title}</span>
       </Button>)}
     </div>}
     <div className="search-sheet-answer-actions">
@@ -75,7 +81,7 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
         <ArrowLeft size={14} aria-hidden="true"/>{uiText("backToResults")}<kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>
       </Button>
       {onContinue && answer.status !== "loading" && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-primary="true" onClick={onContinue}>
-        <MessageSquare size={14} aria-hidden="true"/>{uiText("continueInAiPanel")}<ArrowRight size={14} aria-hidden="true"/>
+        <MessageSquare size={14} aria-hidden="true"/>{uiText("continueInAiPanel")}<kbd className="search-sheet-kbd" aria-hidden="true">{formatShortcutToken("mod")}{formatShortcutToken("enter")}</kbd><ArrowRight size={14} aria-hidden="true"/>
       </Button>}
     </div>
   </section>;

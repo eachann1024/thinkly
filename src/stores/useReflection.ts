@@ -16,6 +16,8 @@ interface ReflectionState {
   lastSeenWeekKey: string | null;
   /** 用户已同意把笔记标题和摘要发给当前 AI。 */
   aiConsent: boolean;
+  /** 用户手动开关过反思授权。未手动时，AI 启用即视为打开。 */
+  aiConsentChosen: boolean;
   /** 上周有编辑时为上周 weekKey（仅内存，由历史记录计算）。 */
   lastWeekEditedKey: string | null;
   generatingKey: string | null;
@@ -35,6 +37,7 @@ export const useReflection = create<ReflectionState>()(
       reports: {},
       lastSeenWeekKey: null,
       aiConsent: false,
+      aiConsentChosen: false,
       lastWeekEditedKey: null,
       generatingKey: null,
       failure: null,
@@ -48,7 +51,7 @@ export const useReflection = create<ReflectionState>()(
         }),
       markSeen: (weekKey) =>
         set((s) => (s.lastSeenWeekKey === weekKey ? s : { lastSeenWeekKey: weekKey })),
-      setAiConsent: (aiConsent) => set({ aiConsent }),
+      setAiConsent: (aiConsent) => set({ aiConsent, aiConsentChosen: true }),
       setLastWeekEditedKey: (lastWeekEditedKey) => set({ lastWeekEditedKey }),
       setGenerating: (generatingKey) =>
         set((s) => ({
@@ -59,13 +62,14 @@ export const useReflection = create<ReflectionState>()(
     }),
     {
       name: "goose-note-reflection",
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorageAdapter),
       skipHydration: true,
       partialize: (s) => ({
         reports: s.reports,
         lastSeenWeekKey: s.lastSeenWeekKey,
         aiConsent: s.aiConsent,
+        aiConsentChosen: s.aiConsentChosen,
       }),
       // v1 的 activity 分桶已废弃（改读版本历史），旧周报缺少范围键与主题，一并丢弃；授权与已读保留。
       migrate: (persisted, version) => {
@@ -74,6 +78,8 @@ export const useReflection = create<ReflectionState>()(
           reports: version < 2 ? {} : (p.reports ?? {}),
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
+          // v3 前的 false 是默认未授权。只有当时已打开，才算用户选过。
+          aiConsentChosen: version >= 3 ? p.aiConsentChosen === true : p.aiConsent === true,
         };
       },
       merge: (persisted, current) => {
@@ -83,11 +89,20 @@ export const useReflection = create<ReflectionState>()(
           reports: p.reports ?? current.reports,
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
+          aiConsentChosen: p.aiConsentChosen === true,
         };
       },
     },
   ),
 );
+
+/** 未手动选择时，AI 已启用则反思默认打开。 */
+export function isReflectionAiConsented(
+  state: Pick<ReflectionState, "aiConsent" | "aiConsentChosen">,
+  aiEnabled: boolean,
+) {
+  return state.aiConsentChosen ? state.aiConsent : aiEnabled;
+}
 
 /** 红点：上周有编辑，且还没打开过弹窗。 */
 export const selectHasUnseenReflection = (weekKey: string) => (s: ReflectionState) =>

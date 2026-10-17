@@ -165,6 +165,6 @@
 /* 正文行高跟随阅读设置，块间距保留 BlockNote 默认 3px padding，
  * 不再额外加 0.5em 底边距（那会把回车后的「行」撑得比 Notion 松一截）。 */
 .workspace-editor-surface .bn-block-outer {
-  line-height: var(--editor-line-height, 1.5);
+  line-height: var(--editor-line-height, 1.75);
   margin-bottom: 0;
 }

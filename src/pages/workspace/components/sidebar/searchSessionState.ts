@@ -22,7 +22,6 @@ export type SearchSessionState = {
   titleOnly: boolean;
   sort: SearchSort;
   scope: SearchScope;
-  initialized: boolean;
   requestSequence: number;
   focusNonce: number;
   memories: Record<string, number>;
@@ -38,15 +37,14 @@ export type SearchSessionEvent =
   | { type: "match-remembered"; key: string; index: number };
 export const initialSearchSession: SearchSessionState = {
   view: { phase: "closed" }, navigation: { phase: "none" }, query: "",
-  titleOnly: false, sort: "best", scope: { kind: "current", notebookId: null },
-  initialized: false, requestSequence: 0,
+  titleOnly: false, sort: "best", scope: { kind: "all" },
+  requestSequence: 0,
   focusNonce: 0, memories: {},
 };
 export function transitionSearchSession(s: SearchSessionState, event: SearchSessionEvent): SearchSessionState {
   switch (event.type) {
     case "opened":
-      return { ...s, initialized: true, focusNonce: s.focusNonce + 1,
-        scope: s.initialized ? s.scope : { kind: "current", notebookId: event.notebookId },
+      return { ...s, focusNonce: s.focusNonce + 1, scope: { kind: "all" },
         view: { phase: "sheet", context: s.view.phase !== "closed" ? s.view.context : {
           startingNotebookId: event.notebookId, originPageId: event.pageId, originScrollTop: event.scrollTop,
         } } };

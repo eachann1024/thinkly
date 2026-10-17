@@ -7,8 +7,6 @@ zh-Hans:
   showSidebar: "展开侧栏"
   locked: "已锁定"
   deleted: "页面已被删除"
-  closeAi: "关闭 AI 面板"
-  openAi: "打开 AI 面板"
   restore: "恢复页面"
   deletePermanently: "永久删除页面"
   permanentDelete: "永久删除"
@@ -17,8 +15,6 @@ en:
   showSidebar: "Show sidebar"
   locked: "Locked"
   deleted: "This note has been deleted"
-  closeAi: "Close AI panel"
-  openAi: "Open AI panel"
   restore: "Restore note"
   deletePermanently: "Delete note permanently"
   permanentDelete: "Delete permanently"
@@ -31,7 +27,6 @@ import type { NotebookAiLayoutMode } from "@/pages/workspace/components/notebook
 import { isFullscreenAiLayout } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import { useAiHeaderActions, useAiHeaderTitle } from "@/pages/workspace/components/notebook-ai/aiHeaderSlot";
 import { ConversationTitle } from "@/pages/workspace/components/notebook-ai/ConversationTitle";
-import { Sparkles } from "@/components/ui/icons";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
@@ -49,10 +44,7 @@ interface PageHeaderProps {
   onDelete?: () => void;
   /** AI 面板当前是否打开 */
   aiPanelOpen?: boolean;
-  /** AI 打开方式：入口统一位于标题栏右侧 */
   aiLayoutMode?: NotebookAiLayoutMode;
-  /** 切换 AI 面板（传入时显示按钮，不传则不渲染） */
-  onToggleAiPanel?: () => void;
 }
 
 export function PageHeader({
@@ -62,7 +54,6 @@ export function PageHeader({
   onDelete,
   aiPanelOpen,
   aiLayoutMode = "fullscreen",
-  onToggleAiPanel,
 }: PageHeaderProps) {
   useLocale();
   const aiPhase = useAiStatus((state) => state.phase);
@@ -78,16 +69,9 @@ export function PageHeader({
   const toggleSidebarShortcutLabel = appShortcuts.toggleSidebar
     ? formatShortcut(appShortcuts.toggleSidebar)
     : "";
-  const toggleAiPanelShortcutLabel = appShortcuts.toggleAIPanel
-    ? formatShortcut(appShortcuts.toggleAIPanel)
-    : "";
   const showWorkspaceActions = Boolean(page) || Boolean(aiPanelOpen);
-  const showAiOnActions = showWorkspaceActions && folderActionsAvailable && Boolean(onToggleAiPanel);
   const aiFullscreenOpen =
     folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
-
-  const actionButtonClass =
-    "inline-flex items-center justify-center text-muted-foreground ";
 
   return (
     <div
@@ -157,39 +141,6 @@ export function PageHeader({
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
-        {showAiOnActions && !page?.trashedAt && (
-          <TooltipProvider delayDuration={600}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <IconButton size="icon" tone="muted"
-                  type="button"
-                  className={cn(
-                    "ai-icon-button",
-                    actionButtonClass,
-                    "text-foreground",
-                  )}
-                  data-ai-state={aiPhase}
-                  onClick={onToggleAiPanel}
-                  aria-label={aiPanelOpen ? uiText("closeAi") : uiText("openAi")}
-                  aria-pressed={aiPanelOpen}
-                >
-                  <Sparkles className="h-4 w-4" />
-                </IconButton>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <div className="flex items-center gap-2">
-                  <span>{aiPanelOpen ? uiText("closeAi") : uiText("openAi")}</span>
-                  {toggleAiPanelShortcutLabel && (
-                    <span className="text-[11px] text-muted-foreground">
-                      {toggleAiPanelShortcutLabel}
-                    </span>
-                  )}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
         {page?.trashedAt && onRestore && onDelete && (
           <>
             <TooltipProvider delayDuration={600}>

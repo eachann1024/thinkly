@@ -8,6 +8,11 @@ import { blocksToMarkdown } from "@/lib/export/blocknoteSerializer";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { NotebookAiAgentContext } from "../types";
 
+/** 有 notebookIds 时按允许列表放行（搜索面板「所有笔记本」），否则只放行绑定笔记本。 */
+function canAccessNotebook(context: NotebookAiAgentContext, notebookId: string) {
+  return context.notebookIds ? context.notebookIds.includes(notebookId) : notebookId === context.notebookId;
+}
+
 // ----------------------------------------------------------------
 // listNotebooks
 // ----------------------------------------------------------------
@@ -38,19 +43,20 @@ export const listPages = tool({
       .describe("指定笔记本 id；省略则使用当前绑定笔记本"),
   }),
   execute: async (input, { experimental_context }) => {
-    const { notebookId: boundNotebookId } =
-      experimental_context as NotebookAiAgentContext;
-    const targetId = input.notebookId ?? boundNotebookId;
-    if (targetId !== boundNotebookId) {
+    const context = experimental_context as NotebookAiAgentContext;
+    // 多笔记本范围下省略 notebookId 表示列出全部允许的笔记本
+    const targetId = input.notebookId ?? (context.notebookIds ? null : context.notebookId);
+    if (targetId !== null && !canAccessNotebook(context, targetId)) {
       return { error: "AI 只能访问当前绑定笔记本" };
     }
     const pages = usePages.getState().pages;
     return Object.values(pages)
-      .filter((p) => p.workspaceId === targetId && !p.trashedAt)
+      .filter((p) => !p.trashedAt && (targetId === null ? canAccessNotebook(context, p.workspaceId) : p.workspaceId === targetId))
       .sort((a, b) => b.updatedAt - a.updatedAt)
       .map((p) => ({
         pageId: p.id,
         title: getPageTitle(p),
+        ...(context.notebookIds ? { notebookId: p.workspaceId } : {}),
         parentId: p.parentId,
         isFolder: !!p.isFolder,
         updatedAt: p.updatedAt,
@@ -68,8 +74,7 @@ export const searchNotes = tool({
     query: z.string().optional().default("").describe("搜索关键词"),
   }),
   execute: async (input, { experimental_context }) => {
-    const { notebookId: boundNotebookId } =
-      experimental_context as NotebookAiAgentContext;
+    const context = experimental_context as NotebookAiAgentContext;
     const query = input.query.trim();
     if (!query) return [];
 
@@ -127,7 +132,7 @@ export const searchNotes = tool({
 
     for (const page of Object.values(pages)) {
       if (page.trashedAt) continue;
-      if (page.workspaceId !== boundNotebookId) continue;
+      if (!canAccessNotebook(context, page.workspaceId)) continue;
 
       const title = getPageTitle(page);
       const bodyText = getContentDerivationsForPage(page).text;
@@ -179,15 +184,15 @@ export const readPage = tool({
     pageId: z.string().optional().describe("页面 id；省略则读取当前打开页面"),
   }),
   execute: async (input, { experimental_context }) => {
-    const { currentPageId, notebookId } =
-      experimental_context as NotebookAiAgentContext;
+    const context = experimental_context as NotebookAiAgentContext;
+    const { currentPageId } = context;
     const pageId =
       input.pageId ?? currentPageId ?? usePages.getState().activePageId ?? "";
     const page = usePages.getState().pages[pageId];
     if (!page) {
       return { error: pageId ? `页面 ${pageId} 不存在` : "当前没有打开页面" };
     }
-    if (page.workspaceId !== notebookId) {
+    if (!canAccessNotebook(context, page.workspaceId)) {
       return { error: "AI 只能读取当前绑定笔记本中的页面" };
     }
     const title = getPageTitle(page);

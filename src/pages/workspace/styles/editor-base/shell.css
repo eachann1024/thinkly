@@ -16,13 +16,13 @@
   -webkit-user-select: text;
   overflow-anchor: none;
   font-size: var(--editor-font-size);
-  line-height: var(--editor-line-height, 1.5);
+  line-height: var(--editor-line-height, 1.75);
   caret-color: var(--goose-accent-focus);
 }
 
 /* BlockNote 每个块自带固定行高，正文块需显式覆盖；代码块保留独立排版。 */
 .bn-editor .bn-block-outer {
-  line-height: var(--editor-line-height, 1.5);
+  line-height: var(--editor-line-height, 1.75);
 }
 
 /* 空块占位（BlockNote 用 ::after content 渲染）默认跟随段落换行，窄窗时会折到第二行。

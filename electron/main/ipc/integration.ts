@@ -1,7 +1,7 @@
 import { t } from "../i18n/nativeServices";
 import { app, ipcMain, shell } from "electron";
 import path from "node:path";
-import { assertAllowed, userDataRoot } from "../allowlist";
+import { assertAllowed, assertExistingOpenPath, userDataRoot } from "../allowlist";
 import { listOpenApps, openTerminalAtPath, openWithApp } from "../apps";
 import { withAppIcons } from "../appIcons";
 import { saveToDownloads } from "../saveToDownloads";
@@ -33,7 +33,7 @@ export function registerIntegrationIpc(): void {
   });
 
   ipcMain.handle("desktop:openPath", async (_event, p: string) => {
-    const target = assertAllowed(p);
+    const target = assertExistingOpenPath(p);
     const err = await shell.openPath(target);
     if (err) throw new Error(err);
   });

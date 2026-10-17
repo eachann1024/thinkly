@@ -1,3 +1,5 @@
+import { fieldCaretLeft } from "./textCaretField";
+
 /** Non-mutating caret geometry; never insert probes into the live editor. */
 export type TextField = HTMLInputElement | HTMLTextAreaElement;
 export type CaretBox = { left: number; top: number; height: number };
@@ -77,7 +79,11 @@ function editableCaret(el: HTMLElement): CaretBox | null {
     const caretHeight = Math.round(fontSize * CARET_EM_RATIO);
     const targetHeight = Math.min(rect.height, caretHeight);
     const insetY = Math.max(0, (rect.height - targetHeight) / 2);
-    return { left: rect.left, top: rect.top + insetY, height: targetHeight };
+    const atEnd = range.startContainer.nodeType === Node.TEXT_NODE
+      && range.startOffset === (range.startContainer as Text).length;
+    // 折叠选区有时返回末字整格，左缘会把光标画进字里。
+    const left = style.direction !== "rtl" && atEnd && rect.width > 0 ? rect.right : rect.left;
+    return { left, top: rect.top + insetY, height: targetHeight };
   }
   // Empty paragraph / composer: its own line box supplies the native insertion point.
   const anchor = range.startContainer instanceof HTMLElement ? range.startContainer : range.startContainer.parentElement;
@@ -133,6 +139,8 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
     const suffix = document.createTextNode("");
     mirror.replaceChildren(prefix, marker, suffix);
     let width = 0;
+    let hitKey = "";
+    let hitDx: number | null = null;
     measure = () => {
       const start = el.selectionStart;
       if (start === null || start !== el.selectionEnd) return null;
@@ -151,7 +159,18 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
       const markerBox = marker.getBoundingClientRect();
       const mirrorBox = mirror.getBoundingClientRect();
       const caretHeight = Math.round(fontSize * CARET_EM_RATIO * scaleY);
-      const left = box.left + (markerBox.left - mirrorBox.left - el.scrollLeft) * scaleX;
+      let left = box.left + (markerBox.left - mirrorBox.left - el.scrollLeft) * scaleX;
+      const probeY = isInput
+        ? box.top + box.height / 2
+        : box.top + (markerBox.top - mirrorBox.top - el.scrollTop + markerBox.height / 2) * scaleY;
+      const key = `${start}\0${el.value}\0${el.scrollLeft}\0${el.scrollTop}\0${el.clientWidth}\0${el.clientHeight}\0${Math.round(box.width)}\0${Math.round(box.height)}`;
+      // 命中失败不缓存，浮层还在移动时下一帧再量；成功结果只随内容变化重算。
+      if (hitDx === null || key !== hitKey) {
+        const hit = fieldCaretLeft(el, style, probeY);
+        if (hit === null) hitDx = null;
+        else { hitKey = key; hitDx = hit - box.left; }
+      }
+      if (hitDx !== null) left = box.left + hitDx;
 
       if (isInput) {
         const borderTop = parseFloat(style.borderTopWidth || "0") * scaleY;

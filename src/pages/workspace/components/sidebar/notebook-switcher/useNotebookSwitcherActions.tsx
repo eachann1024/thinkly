@@ -5,9 +5,11 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-
 zh-Hans:
   enterANotebookName_648e: "请输入笔记本名称"
   renameFailed_37ba: "重命名失败"
+  pickerUnavailable: "无法打开文件夹选择器"
 en:
   enterANotebookName_648e: "Enter a notebook name"
   renameFailed_37ba: "Rename failed"
+  pickerUnavailable: "The folder picker is unavailable"
 `;
 const uiText = createTranslator(localMessages);
 import { type DragEndEvent } from "@dnd-kit/core";
@@ -15,7 +17,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { toast } from "@/components/ui/sonner";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
-import { dialogs } from "@/lib/electron-platform/dialogs";
+import { getGooseDesktop } from "@/lib/electron/runtime";
 import { renameLocalNotebookFolder } from "@/lib/rename-notebook-folder";
 import type { useNotebookSwitcherState } from "./useNotebookSwitcherState";
 
@@ -38,8 +40,14 @@ export function useNotebookSwitcherActions(
   const savingRef = useRef(false);
 
   const handleOpenLocalFolder = async () => {
+    const desktop = getGooseDesktop();
+    if (!desktop) {
+      toast.error(uiText("pickerUnavailable"));
+      setIsOpen(false);
+      return;
+    }
     try {
-      const path = await dialogs.selectDirectory();
+      const path = await desktop.selectDirectory({ purpose: "notebook" });
       if (path) {
         activateWorkspace();
         const folderName = path.split(/[\\/]/).pop() || "Unknown";
@@ -51,6 +59,7 @@ export function useNotebookSwitcherActions(
       }
     } catch (e) {
       console.error(e);
+      toast.error(uiText("pickerUnavailable"));
     } finally {
       setIsOpen(false);
     }

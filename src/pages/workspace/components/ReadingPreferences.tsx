@@ -37,6 +37,7 @@ import {
   EDITOR_FONT_SIZE_MAX,
   EDITOR_LINE_HEIGHT_MIN,
   EDITOR_LINE_HEIGHT_MAX,
+  EDITOR_LINE_HEIGHT_DEFAULT,
 } from "@/stores/settings/types";
 
 export function ReadingPreferences({ showPreview = true, fontSize, lineHeight, onFontSizeChange, onLineHeightChange }: {
@@ -76,7 +77,7 @@ export function ReadingPreferences({ showPreview = true, fontSize, lineHeight, o
       </div>)}
     </div>
     <div className="flex flex-wrap gap-2" role="group" aria-label={uiText("lineSpacingPresets")}>
-      {([[1.5, uiText("standard")], [2, uiText("relaxed")]] as const).map(([value, label]) =>
+      {([[1.5, uiText("standard")], [EDITOR_LINE_HEIGHT_DEFAULT, uiText("relaxed")]] as const).map(([value, label]) =>
         <Button key={value} type="button" variant="outline" size="sm" aria-pressed={lineHeight === value}
           className="goose-accent-selection border-border text-xs"
           onClick={() => onLineHeightChange(value)}>{label} {formatDecimal(value, 2)}</Button>)}

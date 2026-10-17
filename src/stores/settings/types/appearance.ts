@@ -60,7 +60,7 @@ export const EDITOR_LINE_HEIGHT_MIN = 1.2;
 
 export const EDITOR_LINE_HEIGHT_MAX = 2.4;
 
-export const EDITOR_LINE_HEIGHT_DEFAULT = 1.5;
+export const EDITOR_LINE_HEIGHT_DEFAULT = 1.75;
 
 export function normalizeEditorLineHeight(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value))

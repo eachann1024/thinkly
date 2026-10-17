@@ -20,12 +20,49 @@ export function useTextCaret() {
     let composing = false;
     let frame: number | null = null;
     let geometry = "";
+    let anchorLeft = Number.NaN;
+    let anchorTop = Number.NaN;
+    let anchorWidth = Number.NaN;
+    let anchorHeight = Number.NaN;
+    let followUntil = 0;
     const hide = () => {
       owner?.removeAttribute("data-goose-caret-active");
       owner = null;
       measure = null;
       caret.hidden = true;
       geometry = "";
+      anchorLeft = anchorTop = anchorWidth = anchorHeight = Number.NaN;
+      followUntil = 0;
+    };
+    const ancestorAnimating = (el: HTMLElement) => {
+      for (let node: HTMLElement | null = el; node; node = node.parentElement) {
+        for (const animation of node.getAnimations()) {
+          if (animation.playState === "finished") continue;
+          const effect = animation.effect;
+          if (!(effect instanceof KeyframeEffect) || effect.getComputedTiming().iterations !== Infinity) return true;
+          const moves = effect.getKeyframes().some((frame) =>
+            Object.keys(frame).some((key) => /^(transform|translate|top|left|right|bottom|margin|padding|width|height|inset|scale|rotate)/.test(key)),
+          );
+          if (moves) return true;
+        }
+      }
+      return false;
+    };
+    // 浮层 transform 和延迟定位发生在 focus 之后，屏幕坐标还会变。
+    const follow = (el: HTMLElement) => {
+      const rect = el.getBoundingClientRect();
+      const shifted = !(
+        Math.abs(rect.left - anchorLeft) <= 0.5 &&
+        Math.abs(rect.top - anchorTop) <= 0.5 &&
+        Math.abs(rect.width - anchorWidth) <= 0.5 &&
+        Math.abs(rect.height - anchorHeight) <= 0.5
+      );
+      anchorLeft = rect.left;
+      anchorTop = rect.top;
+      anchorWidth = rect.width;
+      anchorHeight = rect.height;
+      if (shifted) followUntil = Math.max(followUntil, performance.now() + 80);
+      if (shifted || ancestorAnimating(el) || performance.now() < followUntil) schedule();
     };
     const update = () => {
       frame = null;
@@ -34,11 +71,10 @@ export function useTextCaret() {
       if (owner !== el) {
         hide();
         owner = el;
+        followUntil = performance.now() + 480;
       }
       measure ??= prepareTextCaret(el, mirror);
       const box = measure();
-      // 浮层入场动画和 Floating UI 定位会在 focus 之后继续改变屏幕坐标。
-      if (el.closest(".goose-editor-context-ui")) schedule();
       if (!box) { owner.removeAttribute("data-goose-caret-active"); caret.hidden = true; return; }
       if (!isTextCaretExposed(el, box)) {
         owner.removeAttribute("data-goose-caret-active");
@@ -56,8 +92,13 @@ export function useTextCaret() {
       }
       caret.hidden = false;
     };
+    const place = () => {
+      const el = editableTarget();
+      update();
+      if (!composing && document.hasFocus() && el && editableTarget() === el) follow(el);
+    };
     const schedule = () => {
-      if (frame === null) frame = requestAnimationFrame(update);
+      if (frame === null) frame = requestAnimationFrame(place);
     };
     const compositionStart = () => { composing = true; hide(); };
     const compositionEnd = () => { composing = false; schedule(); };
@@ -74,9 +115,9 @@ export function useTextCaret() {
     const appearance = new MutationObserver(invalidate);
     appearance.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-goose-accent"] });
     const layers = new MutationObserver((records) => {
-      if (records.some((record) => record.target !== caret && !mirror.contains(record.target))) schedule();
+      if (records.some((record) => record.target !== caret && record.target !== mirror && !mirror.contains(record.target))) schedule();
     });
-    layers.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-goose-layer", "inert", "hidden"] });
+    layers.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "data-goose-layer", "inert", "hidden"] });
     schedule();
     return () => {
       hide();

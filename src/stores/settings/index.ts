@@ -50,7 +50,7 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "goose-note-settings",
-      version: 12,
+      version: 14,
       merge: (persisted, current) => {
         const { sidebarTint: _removedSidebarTint, ...saved } =
           (persisted ?? {}) as Partial<SettingsState> & { sidebarTint?: unknown };

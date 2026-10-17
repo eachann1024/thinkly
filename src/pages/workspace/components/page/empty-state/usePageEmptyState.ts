@@ -5,11 +5,13 @@ const localMessages = i18nYaml<"src/pages/workspace/components/page/empty-state/
 zh-Hans:
   notebookCreated: "已自动创建笔记本"
   openFailed: "打开文件夹失败："
+  pickerUnavailable: "无法打开文件夹选择器"
   newNote: "新建笔记"
   openLocalFolder: "打开本地文件夹"
 en:
   notebookCreated: "Notebook created"
   openFailed: "Couldn’t open folder: "
+  pickerUnavailable: "The folder picker is unavailable"
   newNote: "New note"
   openLocalFolder: "Open local folder"
 `;
@@ -21,7 +23,7 @@ import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useEffect, useCallback, useMemo } from "react";
 import { toast } from "@/components/ui/sonner";
-import { dialogs } from "@/lib/electron-platform/dialogs";
+import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
 
 export function usePageEmptyState() {
@@ -66,13 +68,17 @@ export function usePageEmptyState() {
   }, [activateOrCreatePage]);
 
   const onOpenLocalFolder = useCallback(async () => {
+    const desktop = getGooseDesktop();
+    if (!desktop) {
+      toast.error(uiText("openFailed") + uiText("pickerUnavailable"));
+      return;
+    }
     try {
-      const path = await dialogs.selectDirectory();
-      if (path) {
-        const folderName = path.split(/[\\/]/).pop() || "Unknown";
-        const notebookId = createLocalFolderNotebook(folderName, path);
-        await loadLocalFolderPages(notebookId, path, { showWelcome: true });
-      }
+      const path = await desktop.selectDirectory({ purpose: "notebook" });
+      if (!path) return;
+      const folderName = path.split(/[\\/]/).pop() || "Unknown";
+      const notebookId = createLocalFolderNotebook(folderName, path);
+      await loadLocalFolderPages(notebookId, path, { showWelcome: true });
     } catch (e) {
       console.error(e);
       toast.error(uiText("openFailed") + String(e));

@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 interface DialogShellProps {
@@ -29,6 +28,7 @@ interface DialogShellProps {
   layout?: "center" | "fullscreen";
   title?: React.ReactNode;
   description?: React.ReactNode;
+  actions?: React.ReactNode;
   hideClose?: boolean;
   contentClassName?: string;
   overlayClassName?: string;
@@ -43,6 +43,7 @@ export function DialogShell({
   layout = "center",
   title,
   description,
+  actions,
   hideClose = false,
   contentClassName,
   overlayClassName,
@@ -57,6 +58,8 @@ export function DialogShell({
     (isFullscreen ? "bg-transparent backdrop-blur-0" : undefined);
   const hasTitle = Boolean(title);
   const hasDescription = Boolean(description);
+  const hasActions = actions != null && actions !== false;
+  const showHeader = hasTitle || hasDescription || hasActions;
   const accessibleTitle = hasTitle ? title : uiText("dialog");
   const accessibleDescription = hasDescription ? description : uiText("dialogContent");
 
@@ -73,30 +76,42 @@ export function DialogShell({
           contentClassName,
         )}
       >
-        {!hideClose && (
+        {!hideClose && !showHeader && (
           <DialogClose
             icon
             type="button"
-            className={cn(
-              "absolute z-10 text-muted-foreground",
-              isFullscreen ? "top-4 right-4" : "top-4 right-4",
-            )}
+            className="absolute top-4 right-4 z-10 text-muted-foreground"
             aria-label={common("close")}
           >
-            <GooseIcons.X className="h-7 w-7" />
+            <GooseIcons.X className="h-4 w-4" />
           </DialogClose>
         )}
 
-        <DialogHeader
-          className={cn(hasTitle || hasDescription ? "goose-dialog-shell-header" : "sr-only")}
-        >
-          <DialogTitle className={hasTitle ? undefined : "sr-only"}>
-            {accessibleTitle}
-          </DialogTitle>
-          <DialogDescription className={hasDescription ? undefined : "sr-only"}>
-            {accessibleDescription}
-          </DialogDescription>
-        </DialogHeader>
+        <div className={cn(showHeader ? "goose-dialog-shell-header" : "sr-only")}>
+          <div className="goose-dialog-shell-heading">
+            <DialogTitle className={hasTitle ? undefined : "sr-only"}>
+              {accessibleTitle}
+            </DialogTitle>
+            <DialogDescription className={hasDescription ? undefined : "sr-only"}>
+              {accessibleDescription}
+            </DialogDescription>
+          </div>
+          {showHeader && (hasActions || !hideClose) ? (
+            <div className="goose-dialog-shell-tools">
+              {actions}
+              {!hideClose && (
+                <DialogClose
+                  icon
+                  type="button"
+                  className="text-muted-foreground"
+                  aria-label={common("close")}
+                >
+                  <GooseIcons.X className="h-4 w-4" />
+                </DialogClose>
+              )}
+            </div>
+          ) : null}
+        </div>
 
         <div className={cn("goose-dialog-shell-body", bodyClassName)}>{children}</div>
 

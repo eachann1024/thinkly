@@ -50,6 +50,7 @@ import "@/lib/host/adapter";
 import { fileStorage } from "@/lib/fileStorage";
 import { openResourceExternally } from "@/components/editor/utils/openResourceExternally";
 import {
+  isAbsoluteLocalPath,
   isInsideRoot,
   resolveCandidatePath,
 } from "@/components/editor/inline-code/localPathTarget";
@@ -201,11 +202,17 @@ export function EditorHostBridge({
         const livePage = usePages.getState().pages[page.id] ?? page;
         const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];
         const root = notebook?.source === "local-folder" ? notebook.localPath : null;
-        if (!root || !livePage.localFilePath) return false;
-        const target = resolveCandidatePath(source, livePage.localFilePath);
-        if (!target || !isInsideRoot(target, root)) return false;
+        const basePath = livePage.localFilePath;
+        if (!basePath && !isAbsoluteLocalPath(source)) return false;
+        const target = resolveCandidatePath(source, basePath ?? "/");
+        if (!target) return false;
+        const inside = Boolean(root && isInsideRoot(target, root));
+        const directory = target.endsWith("/") || target.endsWith("\\");
         try {
           if (!(await editorPlatform.fs.existsAsync(target))) return false;
+          if (!inside || directory || !/\.md$/i.test(target)) {
+            return editorPlatform.shell.openPath(target);
+          }
           return await openAssociatedMarkdownFile(target);
         } catch {
           return false;

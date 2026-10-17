@@ -5,11 +5,11 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/renderNotebookMenu.tsx#localMessages:1": { "actions_2b6b": {  }; "addNotebook": { "kind": string | number }; "notebookList": { "kind": string | number }; "switchNotebook": { "kind": string | number } };
     "src/pages/workspace/components/sidebar/notebook-switcher/shared.tsx#localMessages:1": { "editNotebook_ed4e": {  }; "pathUnavailable_ddd1": {  }; "removeLocalFolder_505d": {  } };
-    "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "renameFailed_37ba": {  } };
+    "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "pickerUnavailable": {  }; "renameFailed_37ba": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1": { "folder": {  }; "openFolder": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionButton.tsx#localMessages:1": { "reflection": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1": { "empty": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1": { "basis": {  }; "range": {  }; "refresh": {  }; "scope30d": {  }; "scope7d": {  }; "scope90d": {  }; "title": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1": { "basis": {  }; "empty": {  }; "title": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1": { "range": {  }; "refresh": {  }; "scope30d": {  }; "scope7d": {  }; "scope90d": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionMetrics.tsx#localMessages:1": { "busiestDay": {  }; "charsAdded": {  }; "notesEdited": {  }; "peakHour": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "nextStep": {  }; "notConfigured": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNoteList.tsx#localMessages:1": { "lastEdit": { "date": string | number }; "meta": { "added": string | number; "edits": string | number }; "stalled": {  }; "topNotes": {  } };
