@@ -1,0 +1,27 @@
+{
+  "name": "goose-search-ai-intro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "audio": "node scripts/gen-audio.mjs",
+    "render": "npm run audio && remotion render src/index.ts GooseSearchAi out/search-ai-intro.mp4 --codec h264 --pixel-format yuv420p --crf 18",
+    "faststart": "ffmpeg -y -loglevel error -i out/search-ai-intro.mp4 -c copy -movflags +faststart out/search-ai-intro.faststart.mp4 && mv out/search-ai-intro.faststart.mp4 out/search-ai-intro.mp4",
+    "stills": "node scripts/stills.mjs",
+    "contact-sheet": "node scripts/contact-sheet.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.536",
+    "@remotion/cli": "4.0.536",
+    "@remotion/renderer": "4.0.536",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
