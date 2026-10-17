@@ -44,10 +44,10 @@ def resolve_alias(data):
 
 
 def write_layout(mount, alias_type, store_type):
-    alias = alias_type.for_file(str(mount / '.background.png')).to_bytes()
+    alias = alias_type.for_file(str(mount / '.background.tiff')).to_bytes()
     # Long/non-ASCII volume names can be truncated in the legacy alias header.
     alias_type.from_bytes(alias)
-    if resolve_alias(alias).resolve() != (mount / '.background.png').resolve():
+    if resolve_alias(alias).resolve() != (mount / '.background.tiff').resolve():
         raise RuntimeError('Background alias resolved outside this image')
     with store_type.open(str(mount / '.DS_Store'), 'w+') as store:
         # Match dmgbuild's complete Finder view schema, including its version.
@@ -64,19 +64,23 @@ def write_layout(mount, alias_type, store_type):
                                  iconSize=88., scrollPositionX=0., scrollPositionY=0.)
         store['.']['icvl'] = ('type', b'icnv')
         for name, position in {'Goose Note.app': (240, 270), 'Applications': (720, 270),
-                               '安装指令.command': (480, 470), '.background.png': (1200, 100),
-                               '.VolumeIcon.icns': (1380, 100), '.DS_Store': (1560, 100)}.items():
+                               '安装指令.command': (480, 520), '.background.tiff': (10000, 10000),
+                               '.VolumeIcon.icns': (10180, 10000), '.DS_Store': (10360, 10000)}.items():
             store[name]['Iloc'] = position
 
 
 @contextmanager
-def attach(image):
+def attach(image, readonly=False):
     # A dedicated mount path lets us detach even if plist parsing fails.
     mount = Path(tempfile.mkdtemp(prefix='goose-dmg-mount-'))
     device = None
     try:
-        result = run('diskutil', 'image', 'attach', '--nobrowse', '--mountPoint', mount,
-                     '--plist', image, capture_output=True, timeout=180)
+        flags = ['--readOnly'] if readonly else []
+        try:
+            result = run('diskutil', 'image', 'attach', '--nobrowse', *flags, '--mountPoint', mount,
+                         '--plist', image, capture_output=True, timeout=180)
+        except subprocess.CalledProcessError as error:
+            raise RuntimeError(f'DMG mount failed: {os.fsdecode(error.stderr or error.stdout)}') from error
         entities = plistlib.loads(result.stdout)['system-entities']
         device = entities[0]['dev-entry']
         actual_mount = Path(next(x['mount-point'] for x in entities if 'mount-point' in x))
@@ -97,7 +101,7 @@ def main():
     info = plistlib.loads((args.app / 'Contents/Info.plist').read_bytes())
     if info.get('CFBundleIdentifier') != 'com.goosenote.desktop':
         raise RuntimeError('Unexpected application bundle')
-    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' Setup'
+    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' HiDPI'
     if not title.isascii() or len(title.encode()) > 27:
         raise RuntimeError('DMG volume title must be ASCII and at most 27 bytes')
     modules = sorted(glob.glob(str(Path.home() / 'Library/Caches/electron-builder/dmg-builder@*/*/python/lib/python*/site-packages')))
@@ -119,7 +123,7 @@ def main():
             '--volumeName', title, '--fs', 'APFS', raw, timeout=240)
         with attach(raw) as mount:
             run('ditto', args.app, mount / 'Goose Note.app')
-            for source, name in [('electron/installer/background.png', '.background.png'),
+            for source, name in [('electron/installer/background.tiff', '.background.tiff'),
                                  ('electron/icons/icon.icns', '.VolumeIcon.icns'),
                                  ('electron/installer/安装指令.command', '安装指令.command')]:
                 shutil.copy2(ROOT / source, mount / name)
@@ -129,7 +133,7 @@ def main():
             run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
         run('diskutil', 'image', 'create', 'from', '--format', 'UDZO', raw, result, timeout=180)
         run('hdiutil', 'verify', result, timeout=60)
-        with attach(result) as mount:
+        with attach(result, readonly=True) as mount:
             with DSStore.open(str(mount / '.DS_Store'), 'r') as store:
                 if store['.']['vSrn'] != (b'long', 1):
                     raise RuntimeError('Final DMG is missing the Finder view version')
@@ -139,7 +143,7 @@ def main():
                 if options['backgroundType'] != 2 or options['iconSize'] != 88.:
                     raise RuntimeError('Final DMG icon view settings are invalid')
                 resolved = resolve_alias(store['.']['icvp']['backgroundImageAlias'])
-            if resolved.resolve() != (mount / '.background.png').resolve():
+            if resolved.resolve() != (mount / '.background.tiff').resolve():
                 raise RuntimeError('Final DMG background reference is invalid')
             run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
         hasher = hashlib.sha256()

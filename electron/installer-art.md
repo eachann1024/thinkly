@@ -1,13 +1,7 @@
 # macOS 安装背景
 
-`installer/background.png` 由内置 imagegen 生成，交付尺寸为 960×640；画面铺满 Finder 安装窗口，背景本身不播放动画。真实可操作图标由 electron-builder 的 DMG contents 配置覆盖。
+`installer/artwork.png` 是 imagegen 生成的无字插画；文字与箭头由 `scripts/render-installer-background.swift` 使用系统字体独立绘制。运行 `swift scripts/render-installer-background.swift` 可重新生成 `background.png`（960×640）、`background-2x.png`（1920×1280，144 DPI）和包含两种分辨率的 `background.tiff`。本地打包与 GitHub Actions 均使用 TIFF，在 Retina 屏幕上保留清晰文字；逻辑窗口仍为 960×640。Finder 的背景不会随窗口大小动态铺满。
 
-生成提示词：
+画面保留柔和田园插画与右下角白鹅；真实可操作图标由 DMG 配置覆盖。步骤、括号说明、字体和排版以渲染脚本为准；修改文案应在脚本中完成，不把文字交给图片模型生成。安装指令图标中心位于 (480, 520)，避免与第二步文字重叠。隐藏背景、卷图标和 DS_Store 的位置在本地打包与 afterPack 中设为 10000 以上，减少放大窗口时露出的情况；不改用户 Finder 偏好。
 
-> Create a polished macOS DMG installer background illustration for Goose Note, landscape 3:2. Full bleed original hand painted Japanese animated fantasy film aesthetic, gentle pastoral watercolor, airy cream sky, soft sage grass at bottom, distant clouds, small charming white goose at lower right with orange bill. Extremely restrained uncluttered scene. It will sit behind real Finder icons, so do NOT draw any app icons or folders or buttons. Leave large quiet pale cream areas around x=25% y=43%, x=75% y=43%, x=50% y=77% for actual icons. Integrated typography exactly: top left '鹅的笔记', underneath 'Goose Note'. At y=25% centered '01  拖入应用程序'; a thin hand drawn arrow at center x=50% y=43% pointing right. At y=63% centered '02  打开安装指令，按提示输入密码'. Text must be clearly legible dark forest green, modern understated typography, not brush lettering. No other text, no window chrome, no mockup, no busy forest, no copyrighted characters. Artwork fills entire background edge to edge. Professional warm charming design.
-
-安装指令是可阅读的本地 shell 脚本，使用 macOS 系统授权；不联网，不保存密码，不改动笔记。未签名指令自身仍可能需要在系统设置手动放行，说明见 [macOS 安装说明](../docs/macos-installation.md)。实际下载后的 Gatekeeper、Finder 排版和授权交互须在目标 macOS 上另行验证，不能用本地打包结果替代。
-
-本次背景修订：第二步改为“双击下方「安装指令」，按提示输入密码”，下方增加括号小字“暂未加入每年 99 美元的 Apple 开发者计划 🥺 首次打开请手动授权”。不承诺更新或重新下载后无需再次授权。DMG 不再展示安装帮助文件；隐藏背景、卷图标与 DS_Store 在 afterPack 阶段通过 dmgbuild 的 position 条目移到窗口右侧之外，不改用户 Finder 偏好。
-
-括号文案由 Gemini `gemini-3.8-flash` 校正，经核对后用于背景；仅调整文案，保持布局与安装流程。
+安装指令是可阅读的本地 shell 脚本，使用 macOS 系统授权；不联网，不保存密码，不改动笔记。未签名指令自身仍可能需要在系统设置手动放行，说明见 [macOS 安装说明](../docs/macos-installation.md)。首次打开请手动授权；不承诺更新或重新下载后永远无需再次授权。实际下载后的 Gatekeeper、Finder 排版和授权交互须在目标 macOS 上另行验证，不能用本地打包结果替代。
