@@ -1,3 +1,4 @@
+import { common } from "@/i18n/common";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/docxExport/index.ts#localMessages:1">`
@@ -105,7 +106,7 @@ async function buildDocxDocument(page: Page): Promise<Document> {
       });
 
   return new Document({
-    creator: "Goose Note App",
+    creator: common("productName"),
     title,
     styles: {
       default: {

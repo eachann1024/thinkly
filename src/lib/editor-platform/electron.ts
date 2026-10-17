@@ -1,3 +1,4 @@
+import { common } from "@/i18n/common";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/editor-platform/electron.ts#localMessages:1">`
@@ -119,7 +120,7 @@ const shell: EditorPlatformShell = {
   showNotification: (body) => {
     const api = getGooseDesktop();
     if (api) {
-      void api.notify({ title: "Goose Note", body }).catch(() => {});
+      void api.notify({ title: common("productName"), body }).catch(() => {});
       return;
     }
     try {

@@ -3,10 +3,10 @@ import { createTranslator, i18nYaml } from "@/i18n/core";
 const localMessages = i18nYaml<"src/lib/webdavSync.ts#localMessages:1">`
 zh-Hans:
   connected: "连接成功"
-  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV 只允许操作 Goose Note 备份文件"
+  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV 只允许操作思绪 · Thinkly 备份文件"
 en:
   connected: "Connected"
-  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV can only access Goose Note backup files"
+  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV can only access Thinkly backup files"
 `;
 const uiText = createTranslator(localMessages);
 import { createClient } from "webdav";
