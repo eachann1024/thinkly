@@ -7,10 +7,13 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "renameFailed_37ba": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1": { "folder": {  }; "openFolder": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionButton.tsx#localMessages:1": { "reflection": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionChart.tsx#localMessages:1": { "trend": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1": { "title": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "notConfigured": {  }; "refresh": {  }; "tooFew": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionStats.tsx#localMessages:1": { "busiestDay": {  }; "notesEdited": {  }; "notesUnit": { "count": string | number }; "peakHour": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1": { "empty": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1": { "basis": {  }; "range": {  }; "refresh": {  }; "scope30d": {  }; "scope7d": {  }; "scope90d": {  }; "title": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionMetrics.tsx#localMessages:1": { "busiestDay": {  }; "charsAdded": {  }; "notesEdited": {  }; "peakHour": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "notConfigured": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionNoteList.tsx#localMessages:1": { "lastEdit": { "date": string | number }; "meta": { "added": string | number; "edits": string | number }; "stalled": {  }; "topNotes": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionTopics.tsx#localMessages:1": { "topics": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionTrend.tsx#localMessages:1": { "added": {  }; "edits": {  }; "trend": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIConnectionTestSection.tsx#localMessages:1": { "cancelCheck_ca80": {  }; "checkConnection_69e7": {  }; "checkingConnection_3d70": {  }; "checking_2ff3": {  }; "connectionCheck_58bb": {  }; "enableTheAiAssistantSaveA_9011": {  }; "readyToCheckTheConnection_542d": {  }; "saveTheConfigurationAndFetchAvailable_11da": {  }; "saveTheCurrentProviderConfigurationFirst_3c68": {  }; "thisCheckDoesNotReadNotes_a76b": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIContextSection.tsx#localMessages:1": { "promptsAndSkills_aace": {  }; "readGlobalPrompts_1b07": {  }; "readLocalSkills_b400": {  }; "whenEnabledRelevantLocalContentIs_8628": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIEnabledSection.tsx#localMessages:1": { "enableAiAssistant_c698": {  }; "turningThisOffStopsAnyResponse_42a7": {  } };
@@ -29,7 +32,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/settings/SettingsAppUpdate.tsx#localMessages:1": { "appUpdates_3f91": {  }; "currentVersion": { "version": string | number }; "updateVersion": { "version": string | number } };
     "src/pages/workspace/components/sidebar/settings/SettingsDataPanel.tsx#localMessages:1": { "cancel_625f": {  }; "confirm_38cf": {  }; "dataManagement_2d71": {  }; "gettingStarted_9a32": {  }; "replayAnimation_b9c4": {  }; "restartSetupGuide_8ab0": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsGitSync.tsx#localMessages:1": { "connectAndSync_9751": {  }; "operationFailed": { "action": string | number; "error": string | number }; "restoreFolder_5b9e": {  }; "saveSelectionAndSync_e9da": {  }; "savingSettingsAutomatically_a7dc": {  }; "selectAtLeastOneFolderTo_0e62": {  } };
-    "src/pages/workspace/components/sidebar/settings/SettingsLanguage.tsx#messages:1": { "conflict": {  }; "language": {  }; "readFailed": {  }; "restart": {  }; "saveFailed": {  }; "system": {  } };
+    "src/pages/workspace/components/sidebar/settings/SettingsLanguage.tsx#messages:1": { "conflict": {  }; "language": {  }; "readFailed": {  }; "saveFailed": {  }; "system": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx#localMessages:1": { "closeSettings_c252": {  }; "settingsCategories_2590": {  }; "settings_e366": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsShortcuts.tsx#localMessages:1": { "clickAgainToConfirmReset_50cc": {  }; "keyboardShortcuts_f7d2": {  }; "resetToDefaults_7468": {  } };
     "src/pages/workspace/components/sidebar/settings/ShortcutField.tsx#localMessages:1": { "clear_288f": {  }; "clickThenPressAShortcut_b24f": {  }; "pressAShortcutEscToCancel_f78c": {  }; "resetToDefaults_7468": {  } };

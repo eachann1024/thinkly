@@ -4,12 +4,22 @@ const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/Sear
 zh-Hans:
   readingNotes: "正在阅读 {{count}} 篇相关笔记…"
   thinking: "正在思考…"
+  tool_searchNotes: "正在搜索笔记…"
+  tool_readPage: "正在阅读笔记…"
+  tool_listPages: "正在查看页面列表…"
+  tool_searchWeb: "正在联网搜索…"
+  tool_readWebPage: "正在读取网页…"
   sources: "来源"
   backToResults: "返回结果"
   continueInAiPanel: "在 AI 面板继续"
 en:
   readingNotes: "Reading related notes ({{count}})…"
   thinking: "Thinking…"
+  tool_searchNotes: "Searching notes…"
+  tool_readPage: "Reading a note…"
+  tool_listPages: "Listing notes…"
+  tool_searchWeb: "Searching the web…"
+  tool_readWebPage: "Reading a web page…"
   sources: "Sources"
   backToResults: "Back to results"
   continueInAiPanel: "Continue in AI panel"
@@ -22,6 +32,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, FileText, MessageSquare, Sparkles } from "@/components/ui/icons";
 import type { SheetAnswer } from "./useSheetAnswer";
 
+const TOOL_HINTS = {
+  searchNotes: "tool_searchNotes", readPage: "tool_readPage", listPages: "tool_listPages", searchWeb: "tool_searchWeb", readWebPage: "tool_readWebPage",
+} as const;
+
+function pendingHint(answer: SheetAnswer) {
+  const toolKey = answer.tool ? TOOL_HINTS[answer.tool as keyof typeof TOOL_HINTS] : undefined;
+  if (toolKey) return uiText(toolKey);
+  if (answer.status !== "loading") return null;
+  return answer.sources.length ? uiText("readingNotes", {count: answer.sources.length}) : uiText("thinking");
+}
+
 const MD_PLUGINS = { cjk };
 const MD_CONTROLS = { table: false, code: true, mermaid: false } as const;
 
@@ -32,13 +53,14 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
   onContinue?: () => void;
 }) {
   const waiting = answer.status === "loading";
+  const hint = pendingHint(answer);
   return <section className="search-sheet-answer" aria-live="polite" aria-busy={waiting || answer.status === "streaming"}>
     <div className="search-sheet-answer-head">
       <Sparkles size={16} aria-hidden="true"/>
       <span className="search-sheet-answer-question">{answer.question}</span>
     </div>
-    {waiting && <p className="search-sheet-answer-hint" data-pending="true">{answer.sources.length ? uiText("readingNotes", {count: answer.sources.length}) : uiText("thinking")}</p>}
     {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
+    {hint && <p className="search-sheet-answer-hint" data-pending="true">{hint}</p>}
     {answer.status === "error" && <p className="search-sheet-answer-hint" role="alert">{answer.error}</p>}
     {answer.sources.length > 0 && <div className="search-sheet-answer-sources">
       <span className="search-sheet-label">{uiText("sources")}</span>

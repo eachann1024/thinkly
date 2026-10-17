@@ -117,7 +117,12 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
 
   const openAiSettings = () => { close(); window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } })); };
-  const askAi = () => { if (aiQuery) void ask(aiQuery, getCandidates(), searchResults.all); };
+  const askAi = () => {
+    if (!aiQuery) return;
+    const latest = useSearchSession.getState();
+    const scopeNotebookId = latest.scope.kind === "current" ? latest.scope.notebookId : null;
+    void ask(aiQuery, getCandidates(), searchResults.all, scopeNotebookId ?? aiNotebookId);
+  };
   const continueInPanel = aiNotebookId && answer ? () => {
     skipRestore.current = true;
     session.closeSearch();
