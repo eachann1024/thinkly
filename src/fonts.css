@@ -1,3 +1,6 @@
+/* Inter 可变字体（OFL）随包内置，unicode-range 子集按需加载；中文走系统字体。 */
+@import "@fontsource-variable/inter";
+
 /* 随 App 打包，离线使用；保留下方 DM Mono 供显式自定义选择。 */
 @font-face {
   font-family: "JetBrains Mono";

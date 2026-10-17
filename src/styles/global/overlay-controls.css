@@ -32,13 +32,14 @@
     color: hsl(var(--popover-foreground));
     box-shadow: var(--goose-tooltip-shadow);
     font-size: var(--goose-tooltip-font-size);
-    font-weight: 500;
-    line-height: 1.5;
+    font-weight: var(--font-weight-medium);
+    line-height: 16px;
     user-select: none;
     overflow: hidden;
     backdrop-filter: blur(1px);
     white-space: nowrap;
   }
+  .goose-tooltip-surface kbd { font-size: 12px; font-variant-numeric: tabular-nums; }
   .goose-tooltip-complex { white-space: normal; max-width: min(360px, calc(100vw - 24px)); }
 }
 .goose-toaster.goose-toaster-center[data-sonner-toaster] {

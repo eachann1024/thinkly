@@ -13,6 +13,18 @@ zh-Hans:
   pixels: "{{size}} 像素"
   clearAfterSave: "保存到笔记后，当前速记会清空。"
   close: "关闭"
+  helpLabel: "使用说明"
+  helpTitle: "速记"
+  helpIntro: "内容默认只留在当前速记。点「保存到笔记」会在当前笔记本新建一篇，并清空这张速记。"
+  helpSwitch: "切换"
+  helpSwitchBody: "顶部 1–5 是五个独立速记。点击或拖动切换；也可按 {{shortcuts}}。"
+  helpSwitchAlternate: "{{primary}}，或 {{alternate}}"
+  helpEdit: "编辑"
+  helpEditBody: "{{zoomIn}} / {{zoomOut}} 缩放，{{zoomReset}} 复位；{{undo}} 撤销，{{redo}} 或 {{alternateRedo}} 重做。"
+  helpSave: "保存"
+  helpSaveBody: "点右上角把当前速记写入当前笔记本，保存后清空并回到空白。"
+  helpDismiss: "收起"
+  helpDismissBody: "小窗始终置顶；按 {{dismiss}} 或点右上角收起。草稿、位置、尺寸和缩放都会保留。"
 en:
   renameSlot: "Rename Quick Note {{slot}}"
   renameLabel: "Rename Quick Note"
@@ -25,14 +37,25 @@ en:
   pixels: "{{size}} pixels"
   clearAfterSave: "This Quick Note will be cleared after you save it to notes."
   close: "Close"
+  helpLabel: "How to use"
+  helpTitle: "Quick Note"
+  helpIntro: "Text stays in this Quick Note until you save it. Save to notes creates a page in the current notebook and clears this Quick Note."
+  helpSwitch: "Switch"
+  helpSwitchBody: "The numbers 1–5 are five separate notes. Click or drag to switch, or press {{shortcuts}}."
+  helpSwitchAlternate: "{{primary}}, or {{alternate}}"
+  helpEdit: "Edit"
+  helpEditBody: "{{zoomIn}} / {{zoomOut}} zoom, {{zoomReset}} resets. {{undo}} undoes, {{redo}} or {{alternateRedo}} redoes."
+  helpSave: "Save"
+  helpSaveBody: "Use the button at the top right to write this note into the current notebook. It is cleared afterward."
+  helpDismiss: "Hide"
+  helpDismissBody: "The window stays on top. Press {{dismiss}} or the close button to hide it. The draft, position, size, and zoom are kept."
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
-import { CircleAlert, FilePlus2, X, Pencil } from "@/components/ui/icons";
+import { CircleAlert, FilePlus2, X } from "@/components/ui/icons";
 import {
-  getQuickNoteSlotName,
   QUICKNOTE_ZOOM_MIN,
   QUICKNOTE_ZOOM_MAX,
 } from "@/stores/useQuickNote";
@@ -56,6 +79,7 @@ export function renderQuickNoteHeader(
     editRename,
     renameInputRef,
     slotNames,
+    helpShortcuts,
     zoom,
     setEditorZoom,
     editorFontSize,
@@ -158,18 +182,18 @@ export function renderQuickNoteHeader(
               void handleSaveToNote();
             }}
           >
-            <FilePlus2 className="h-3 w-3" />
+            <FilePlus2 className="h-3.5 w-3.5" />
           </Button>
           <Popover open={helpOpen} onOpenChange={handleHelpOpenChange}>
             <PopoverTrigger asChild>
               <Button contentStyle="preserve" variant="ghost"
                 type="button"
-                aria-label={uiText("quickNoteSettings")}
-                title={uiText("quickNoteSettings")}
+                aria-label={uiText("helpLabel")}
+                title={uiText("helpLabel")}
                 className={`quicknote-titlebar-btn quicknote-help-trigger ${helpOpen ? "goose-interactive--selected" : ""}`}
                 style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
               >
-                <CircleAlert className="h-3 w-3" />
+                <CircleAlert className="h-3.5 w-3.5" />
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -180,17 +204,44 @@ export function renderQuickNoteHeader(
               className="quicknote-help-popover w-72 text-xs"
               onCloseAutoFocus={(event) => event.preventDefault()}
             >
-              <Button contentStyle="preserve" variant="ghost"
-                type="button"
-                className="goose-menu-item quicknote-help-rename flex w-full items-center gap-2 text-left text-xs text-foreground"
-                onClick={() => startRename(activeSlot)}
-              >
-                <Pencil className="h-3.5 w-3.5 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">{uiText("rename")}</span>
-                <span className="max-w-24 truncate text-muted-foreground">
-                  {getQuickNoteSlotName(activeSlot, slotNames)}
-                </span>
-              </Button>
+              <div className="quicknote-help-heading">
+                <div className="text-sm font-medium">{uiText("helpTitle")}</div>
+                <p>{uiText("helpIntro")}</p>
+              </div>
+              <ul className="quicknote-help-list text-muted-foreground">
+                <li>
+                  <b className="text-foreground">{uiText("helpSwitch")}</b>
+                  ：{uiText("helpSwitchBody", {
+                    shortcuts: helpShortcuts.alternateSwitchSlots
+                      ? uiText("helpSwitchAlternate", {
+                          primary: helpShortcuts.switchSlots,
+                          alternate: helpShortcuts.alternateSwitchSlots,
+                        })
+                      : helpShortcuts.switchSlots,
+                  })}
+                </li>
+                <li>
+                  <b className="text-foreground">{uiText("helpEdit")}</b>
+                  ：{uiText("helpEditBody", {
+                    zoomIn: helpShortcuts.zoomIn,
+                    zoomOut: helpShortcuts.zoomOut,
+                    zoomReset: helpShortcuts.zoomReset,
+                    undo: helpShortcuts.undo,
+                    redo: helpShortcuts.redo,
+                    alternateRedo: helpShortcuts.alternateRedo,
+                  })}
+                </li>
+                <li>
+                  <b className="text-foreground">{uiText("helpSave")}</b>
+                  ：{uiText("helpSaveBody")}
+                  <FilePlus2 className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" />
+                </li>
+                <li>
+                  <b className="text-foreground">{uiText("helpDismiss")}</b>
+                  ：{uiText("helpDismissBody", { dismiss: helpShortcuts.dismiss })}
+                  <X className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" />
+                </li>
+              </ul>
               <div className="quicknote-font-control">
                 <div className="flex items-center justify-between gap-2">
                   <label htmlFor="quicknote-font-size">{uiText("fontSize")}</label>
@@ -221,7 +272,7 @@ export function renderQuickNoteHeader(
             style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
             onClick={() => persistPlacementThenClose()}
           >
-            <X className="h-3 w-3" />
+            <X className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

@@ -13,10 +13,10 @@
 
   /* 标题 */
   & h1 {
-    @apply mt-4 mb-2 text-base font-bold;
+    @apply mt-4 mb-2 text-base font-semibold tracking-[-0.02em];
   }
   & h2 {
-    @apply mt-3 mb-2 text-sm  font-bold;
+    @apply mt-3 mb-2 text-sm font-semibold tracking-[-0.01em];
   }
   & h3 {
     @apply mt-2 mb-1 text-sm  font-semibold;

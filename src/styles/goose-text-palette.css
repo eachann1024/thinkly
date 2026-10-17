@@ -1,8 +1,9 @@
 /* Generated from text-colors.json by scripts/generate-text-colors.mjs. */
 :root, .light, .default, [data-theme="light"], [data-theme="default"] {
-  --goose-text-primary: #20242c;
-  --goose-text-secondary: #526071;
-  --goose-text-disabled: #526071;
+  --goose-text-primary: #1f1e1d;
+  --goose-text-secondary: #5e5d59;
+  --goose-text-disabled: #8a8983;
+  --goose-text-placeholder: #85847e;
   --goose-text-danger: #b42318;
   --goose-text-warning: #855600;
   --goose-text-success: #086b42;
@@ -19,8 +20,8 @@
   --goose-editor-highlight-blue-text: var(--goose-text-info);
   --goose-editor-highlight-purple-text: #6940a5;
   --goose-editor-highlight-pink-text: #ad1a72;
-  --goose-text-primary-channels: 220.0000 15.7895% 14.9020%;
-  --goose-text-secondary-channels: 212.9032 15.8974% 38.2353%;
+  --goose-text-primary-channels: 30.0000 3.3333% 11.7647%;
+  --goose-text-secondary-channels: 48.0000 2.7322% 35.8824%;
   --goose-text-on-dark-channels: 0.0000 0.0000% 100.0000%;
   --goose-text-on-light-channels: 0.0000 0.0000% 0.0000%;
   --foreground: var(--goose-text-primary-channels);
@@ -30,16 +31,16 @@
   --accent-foreground: var(--goose-text-primary-channels);
   --muted-foreground: var(--goose-text-secondary-channels);
   --goose-nav-title: var(--goose-text-secondary-channels);
-  --goose-text-placeholder: var(--goose-text-secondary);
   --goose-text-link: var(--goose-text-info);
   --goose-interactive-danger-fg: var(--goose-text-danger);
   --goose-interactive-success-fg: var(--goose-text-success);
   --goose-interactive-warning-fg: var(--goose-text-warning);
 }
 .dark, [data-theme="dark"], [data-sonner-theme="dark"] {
-  --goose-text-primary: #ececec;
-  --goose-text-secondary: #b4b4b4;
-  --goose-text-disabled: #999999;
+  --goose-text-primary: #f0efec;
+  --goose-text-secondary: #c3c2b7;
+  --goose-text-disabled: #8f8e88;
+  --goose-text-placeholder: #9a9992;
   --goose-text-danger: #ffb4ab;
   --goose-text-warning: #f3d17c;
   --goose-text-success: #8ce0b1;
@@ -56,8 +57,8 @@
   --goose-editor-highlight-blue-text: var(--goose-text-info);
   --goose-editor-highlight-purple-text: #d0baf8;
   --goose-editor-highlight-pink-text: #f1b6d7;
-  --goose-text-primary-channels: 0.0000 0.0000% 92.5490%;
-  --goose-text-secondary-channels: 0.0000 0.0000% 70.5882%;
+  --goose-text-primary-channels: 45.0000 11.7647% 93.3333%;
+  --goose-text-secondary-channels: 55.0000 9.0909% 74.1176%;
   --goose-text-on-dark-channels: 0.0000 0.0000% 100.0000%;
   --goose-text-on-light-channels: 0.0000 0.0000% 0.0000%;
   --foreground: var(--goose-text-primary-channels);
@@ -67,7 +68,6 @@
   --accent-foreground: var(--goose-text-primary-channels);
   --muted-foreground: var(--goose-text-secondary-channels);
   --goose-nav-title: var(--goose-text-secondary-channels);
-  --goose-text-placeholder: var(--goose-text-secondary);
   --goose-text-link: var(--goose-text-info);
   --goose-interactive-danger-fg: var(--goose-text-danger);
   --goose-interactive-success-fg: var(--goose-text-success);

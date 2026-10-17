@@ -91,7 +91,7 @@ export function renderWebdavConfiguration(
     >
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-foreground">
+          <Label className="text-sm font-normal leading-5 text-foreground">
             {uiText("serverUrl_f562")}</Label>
           <Input
             className="h-9 bg-transparent py-1 text-sm"
@@ -104,7 +104,7 @@ export function renderWebdavConfiguration(
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-foreground">{uiText("account_7035")}</Label>
+            <Label className="text-sm font-normal leading-5 text-foreground">{uiText("account_7035")}</Label>
             <Input
               className="h-9 bg-transparent py-1 text-sm"
               value={tempUsername}
@@ -114,7 +114,7 @@ export function renderWebdavConfiguration(
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-foreground">
+            <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("remoteFolder_98d0")}</Label>
             <Input
               className="h-9 bg-transparent py-1 text-sm"
@@ -128,7 +128,7 @@ export function renderWebdavConfiguration(
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-foreground">
+            <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("appPassword_1976")}</Label>
             <Input
               type="password"
@@ -142,7 +142,7 @@ export function renderWebdavConfiguration(
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-foreground">
+            <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("cloudBackupRetentionDays_54eb")}</Label>
             <Input
               type="number"

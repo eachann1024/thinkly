@@ -187,7 +187,7 @@ export function ImageExportThemeSelector({
                     <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
                       {group === "light" ? uiText("light") : uiText("dark")}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       {themes.length}
                     </span>
                     <span className="ml-1 flex-1 h-px bg-border/70" />

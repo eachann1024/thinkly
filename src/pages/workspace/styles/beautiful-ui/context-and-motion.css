@@ -33,7 +33,7 @@
   border-bottom: 1px solid
     var(--goose-block-subtle-border, var(--bui-line, hsl(var(--border))));
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .bui-context-body {

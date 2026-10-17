@@ -40,12 +40,12 @@ export function SettingsSectionCard({
         >
           <div className="min-w-0 flex-1 basis-40">
             {title ? (
-              <h4 className="text-base font-semibold tracking-tight text-foreground">
+              <h4 className="text-[15px] font-semibold leading-[22px] text-foreground">
                 {title}
               </h4>
             ) : null}
             {description ? (
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{description}</p>
             ) : null}
           </div>
           {actions ? <div className="shrink-0">{actions}</div> : null}
