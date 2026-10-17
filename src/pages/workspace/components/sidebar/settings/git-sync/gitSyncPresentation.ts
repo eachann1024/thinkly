@@ -33,6 +33,22 @@ en:
   networkConnectionFailedPleaseTryAgain_9bb3: "Network connection failed. Please try again."
   sshConnectionFailedCheckYourConnection_9f5b: "SSH connection failed. Check your connection settings."
   resolveTheFolderIssuesBelowThen_4974: "Resolve the folder issues below, then try again"
+ja:
+  syncing_a270: "同期中…"
+  restoringFolder_6233: "フォルダを復元中…"
+  saving_9b80: "保存中…"
+  folderIssueCount: "対応が必要なフォルダ：{{count}} 件"
+  noFoldersSelectedForSync_2971: "同期するフォルダが選択されていません"
+  contentConflicts_66cf: "内容の競合があります"
+  syncFailed_d610: "同期に失敗しました"
+  initialSyncNotComplete_7378: "初回同期が完了していません"
+  upToDate_ed28: "最新の状態です"
+  automaticSyncIsOff_e5e2: "自動同期はオフです"
+  operationFailedPleaseTryAgain_9155: "操作に失敗しました。もう一度お試しください。"
+  thisRepositoryBranchAlreadyHasA_08df: "このリポジトリのブランチには既に同期設定があります。既存のリポジトリを選択してください"
+  networkConnectionFailedPleaseTryAgain_9bb3: "ネットワーク接続に失敗しました。もう一度お試しください"
+  sshConnectionFailedCheckYourConnection_9f5b: "SSH 接続に失敗しました。接続設定を確認してください"
+  resolveTheFolderIssuesBelowThen_4974: "下記のフォルダの問題を解決してから、もう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 import { gitSyncActionLabel, type GitSyncAction } from "./gitSyncUiState";

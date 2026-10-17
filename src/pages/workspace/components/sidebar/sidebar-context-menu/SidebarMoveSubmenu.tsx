@@ -8,6 +8,9 @@ zh-Hans:
 en:
   moveTo_86ed: "Move to"
   moveToAnotherNotebook_da86: "Move to another notebook"
+ja:
+  moveTo_86ed: "移動先"
+  moveToAnotherNotebook_da86: "別のノートブックへ移動"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

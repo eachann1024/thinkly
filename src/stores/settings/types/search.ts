@@ -10,6 +10,11 @@ en:
   searchPlaceholder: "The search URL must contain exactly one %s placeholder."
   searchProtocol: "The search URL must use HTTP or HTTPS."
   invalidUrl: "Enter a valid URL."
+ja:
+  enterSearchUrl: "検索 URL を入力してください"
+  searchPlaceholder: "検索 URL には %s を 1 つ含める必要があります"
+  searchProtocol: "検索 URL は http または https のみ使用できます"
+  invalidUrl: "有効な URL を入力してください"
 `);
 export interface SearchProvider {
   id: string;

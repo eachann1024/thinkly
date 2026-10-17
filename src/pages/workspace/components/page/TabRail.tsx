@@ -12,6 +12,11 @@ en:
   allTabs: "All tabs"
   newTab: "New tab"
   missingPage: "This note no longer exists"
+ja:
+  openTabs: "開いているタブ"
+  allTabs: "すべてのタブ"
+  newTab: "新しいタブ"
+  missingPage: "このノートは存在しません"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

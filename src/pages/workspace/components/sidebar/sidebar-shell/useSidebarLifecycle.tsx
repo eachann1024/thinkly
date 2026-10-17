@@ -14,6 +14,12 @@ en:
   local_8e7e: "Local"
   repository_c270: "Repository"
   page_59ce: "Page"
+ja:
+  search_e5f7: "検索"
+  documentOutline_081c: "ドキュメントのアウトライン"
+  local_8e7e: "ローカル"
+  repository_c270: "リポジトリ"
+  page_59ce: "ページ"
 `;
 const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";

@@ -6,6 +6,8 @@ zh-Hans:
   textFont: "正文字体"
 en:
   textFont: "Text font"
+ja:
+  textFont: "本文フォント"
 `;
 const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";

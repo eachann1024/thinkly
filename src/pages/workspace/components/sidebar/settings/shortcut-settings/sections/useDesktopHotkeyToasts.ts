@@ -20,6 +20,15 @@ en:
   invalidShortcut_b55e: "Invalid shortcut"
   registrationFailed_1c56: "Registration failed"
   shortcutFailed: "{{label}} could not be enabled"
+ja:
+  mainWindowShortcut_8e10: "メインウィンドウのショートカット"
+  quickNoteShortcut_7505: "クイックノートウィンドウのショートカット"
+  globalSearchShortcut_18d6: "グローバル検索のショートカット"
+  shortcutEnabled: "{{label}}を有効にしました"
+  shortcutDisabled: "{{label}}を無効にしました"
+  invalidShortcut_b55e: "ショートカットが無効です"
+  registrationFailed_1c56: "登録に失敗しました"
+  shortcutFailed: "{{label}}を有効にできませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useRef } from "react";

@@ -4,6 +4,8 @@ zh-Hans:
   savingBeforeMove: "页面正在保存，请完成保存后再迁移"
 en:
   savingBeforeMove: "The page is being saved. Wait for saving to finish before moving it."
+ja:
+  savingBeforeMove: "ページを保存中です。保存の完了後に移動してください"
 `);
 import type { JSONContent } from "@/types";
 import type { PagesState } from "./types";

@@ -13,6 +13,12 @@ en:
   theFolderHasChangedChooseALocation: "The folder has changed. Choose a location again."
   couldnTCreateThePageYourOriginal: "Couldn’t create the page. Your original content has been kept."
   pageCreatedOpenItFromTheSidebar: "Page created. Open it from the sidebar."
+ja:
+  thisNoteIsnTEditableNoPage: "現在のノートは編集できないため、ページは作成されませんでした"
+  thisNotebookDoesnTSupportCreatingLocal: "このノートブックはローカルページの作成に対応していません"
+  theFolderHasChangedChooseALocation: "現在のフォルダが変更されました。場所を選択し直してください"
+  couldnTCreateThePageYourOriginal: "ページを作成できませんでした。元の内容は保持されています"
+  pageCreatedOpenItFromTheSidebar: "新しいページを作成しました。サイドバーから開いてください"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

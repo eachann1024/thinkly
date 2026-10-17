@@ -21,6 +21,15 @@ en:
   light: "Light"
   dark: "Dark"
   generateImage: "Generate image"
+ja:
+  description: "「{{mode}}」のビジュアルスタイルを選択してください（全 {{count}} 種類のテーマ）"
+  wholePage: "ページ全体"
+  selection: "選択範囲"
+  chooseTheme: "カードのテーマを選択"
+  current: "現在"
+  light: "ライト"
+  dark: "ダーク"
+  generateImage: "画像を生成"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

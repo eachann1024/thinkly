@@ -2,8 +2,6 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
-    "src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1": { "theContentMayUseAnOlderFormatOr": {  }; "thisNoteCannotBePreviewed": {  }; "thisNoteCouldNotBeFoundSoIts": {  }; "thisVersionCannotBeDisplayed": {  } };
-    "src/pages/workspace/components/history/history-view/HistoryReader.tsx#messages:1": { "ifYouUseCloudStorageSignInAnd": {  }; "loadingVersion": {  }; "noVersionHistory": {  }; "retry": {  }; "selectAVersionOnTheLeft": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormat": {  }; "thisVersionIsTemporarilyUnavailable": {  }; "versionHistoryCouldNotBeLoaded": {  } };
     "src/pages/workspace/components/history/history-view/HistoryToolbar.tsx#messages:1": { "back": {  }; "backToEditor": {  }; "loading": {  }; "loadingVersion": {  }; "restoreThisVersion": {  }; "restoring": {  }; "restoringVersion": {  }; "selectAVersion": {  }; "version": {  } };
     "src/pages/workspace/components/history/history-view/HistoryVersionList.tsx#messages:1": { "changeCount": { "count": string | number }; "characterCount": { "count": number }; "markAsMilestone": {  }; "markingMilestone": {  }; "milestone": {  }; "noVersionHistory": {  }; "removeMilestone": {  }; "removingMilestone": {  }; "selectAVersionToPreviewAndRestore": {  }; "versionHistory": {  }; "viewVersionAt": { "date": string | number; "time": string | number } };
     "src/pages/workspace/components/history/history-view/historyViewPresentation.tsx#messages:1": { "automatic": {  }; "beforeChanges": {  }; "daysAgo": { "count": string | number }; "manual": {  }; "today": {  }; "yesterday": {  } };
@@ -122,5 +120,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1": { "itemCount": { "count": string | number } };
+    "src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1": { "couldNotCreateItemPleaseTry_db8e": {  }; "fileName_d2e2": {  }; "folderName_a984": {  }; "newFolder_f3a4": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };
   }
 }

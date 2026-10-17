@@ -5,6 +5,8 @@ zh-Hans:
   desktopIntegrationIsUnavailable: "window.gooseDesktop 不可用"
 en:
   desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
+ja:
+  desktopIntegrationIsUnavailable: "デスクトップ連携を利用できません"
 `;
 const uiText = createTranslator(localMessages);
 /** 检测 Electron preload 提供的原生桥接。 */

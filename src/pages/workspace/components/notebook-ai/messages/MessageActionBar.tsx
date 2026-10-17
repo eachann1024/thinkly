@@ -14,6 +14,11 @@ en:
   copy: "Copy"
   previousResponseBranch: "Previous response branch"
   nextResponseBranch: "Next response branch"
+ja:
+  copyMessage: "メッセージをコピー"
+  copy: "コピー"
+  previousResponseBranch: "前の回答ブランチ"
+  nextResponseBranch: "次の回答ブランチ"
 `;
 const t = createTranslator(messages);
 

@@ -4,6 +4,8 @@ zh-Hans:
   resizeColumns: "调整第 {{first}}、{{second}} 栏宽度"
 en:
   resizeColumns: "Resize columns {{first}} and {{second}}"
+ja:
+  resizeColumns: "第 {{first}}・{{second}} 列の幅を調整"
 `;
 const t = createTranslator(messages);
 import type { BlockNoteEditor } from "@blocknote/core";

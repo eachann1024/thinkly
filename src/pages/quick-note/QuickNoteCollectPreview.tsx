@@ -28,6 +28,19 @@ en:
   stopCollect: "Stop collecting"
   collectionStatus: "Auto-collecting · {{count}} collected · Latest: {{recent}}"
   stop: "Stop"
+ja:
+  emptyCollection: "収集した内容はまだありません"
+  sampleClip: "疑似クリップボード断片 {{number}}"
+  collected: "収集済み"
+  collectingCount: "自動収集中、{{count}} 件収集済み"
+  collecting: "収集中"
+  itemCount: "{{count}} 件"
+  simulateOne: "1 件を疑似収集"
+  simulate: "疑似収集"
+  stopAutoCollect: "自動収集を停止"
+  stopCollect: "収集を停止"
+  collectionStatus: "自動収集中、{{count}} 件収集済み、最新：{{recent}}"
+  stop: "停止"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

@@ -17,6 +17,9 @@ zh-Hans:
 en:
   imageCopiedTheNoteHasChangedSoThe: "Image copied. The note has changed, so the original image was preserved."
   couldNotCopyTheImageToTheClipboard: "Could not copy the image to the clipboard. The original image was preserved."
+ja:
+  imageCopiedTheNoteHasChangedSoThe: "画像をコピーしました。ノートの内容が変更されたため、元の画像は残されています"
+  couldNotCopyTheImageToTheClipboard: "画像をクリップボードに書き込めませんでした。元の画像は残されています"
 `;
 const t = createTranslator(messages);
 

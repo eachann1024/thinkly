@@ -18,6 +18,11 @@ en:
   italic: "Italic"
   strikethrough: "Strikethrough"
   mixedFormatting: "{{label}} (mixed formatting)"
+ja:
+  bold: "太字"
+  italic: "斜体"
+  strikethrough: "取り消し線"
+  mixedFormatting: "{{label}}（書式が混在）"
 `;
 const t = createTranslator(messages);
 

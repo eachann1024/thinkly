@@ -5,6 +5,8 @@ zh-Hans:
   newConversation: "新会话"
 en:
   newConversation: "New conversation"
+ja:
+  newConversation: "新規会話"
 `;
 const t = createTranslator(messages);
 

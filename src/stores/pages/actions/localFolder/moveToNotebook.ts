@@ -4,6 +4,8 @@ zh-Hans:
   nameExists: "目标笔记本已存在同名文件：{{name}}"
 en:
   nameExists: "A file named {{name}} already exists in the destination notebook."
+ja:
+  nameExists: "移動先のノートブックに同名のファイルが既にあります：{{name}}"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/moveToNotebook.ts#block2:2">`
@@ -21,6 +23,13 @@ en:
   sameFolder: "The destination and current notebooks use the same folder."
   moveIntoSelf: "A folder can’t be moved into one of its own subfolders."
   targetNotebookFolderMissing: "The destination notebook’s folder does not exist."
+ja:
+  cannotMove: "このファイルは移動できません"
+  sameNotebook: "ファイルは既にこのノートブックにあります"
+  targetUnavailable: "移動先のノートブックを利用できません"
+  sameFolder: "移動先のノートブックは現在のノートブックと同じフォルダを使用しています"
+  moveIntoSelf: "フォルダを自身のサブフォルダに移動することはできません"
+  targetNotebookFolderMissing: "移動先ノートブックのフォルダが存在しません"
 `);
 import { useNotebooks } from "../../../useNotebooks";
 import { useTabs } from "../../../useTabs";

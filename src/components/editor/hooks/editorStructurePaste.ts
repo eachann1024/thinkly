@@ -19,6 +19,8 @@ zh-Hans:
   theNoteHasChangedPleasePasteAgain: "笔记内容已变化，请重新粘贴"
 en:
   theNoteHasChangedPleasePasteAgain: "The note has changed. Please paste again."
+ja:
+  theNoteHasChangedPleasePasteAgain: "ノートの内容が変更されました。もう一度貼り付けてください"
 `;
 const t = createTranslator(messages);
 

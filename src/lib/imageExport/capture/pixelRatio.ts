@@ -5,6 +5,8 @@ zh-Hans:
   theContentIsTooLongToExportAsOne: "内容过长，无法导出为单张图片，请缩小内容范围后重试"
 en:
   theContentIsTooLongToExportAsOne: "The content is too long to export as one image. Select a smaller range and try again."
+ja:
+  theContentIsTooLongToExportAsOne: "内容が長すぎて 1 枚の画像として書き出せません。範囲を狭めてからやり直してください"
 `;
 const uiText = createTranslator(localMessages);
 const MAX_CAPTURE_PIXEL_RATIO = 3;

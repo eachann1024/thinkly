@@ -13,6 +13,11 @@ en:
   startABlankConversationAndKeepThisOne: "Start a blank conversation and keep this one in history"
   compact: "compact"
   summarizeThisConversationToFreeUpContextSpace: "Summarize this conversation to free up context space"
+ja:
+  newConversation: "新規会話"
+  startABlankConversationAndKeepThisOne: "新しい会話を開始します。現在の会話は履歴に残ります"
+  compact: "圧縮"
+  summarizeThisConversationToFreeUpContextSpace: "この会話を要約して、コンテキストの空きを確保します"
 `;
 const t = createTranslator(messages);
 

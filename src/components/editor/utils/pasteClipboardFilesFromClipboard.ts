@@ -16,6 +16,9 @@ zh-Hans:
 en:
   couldNotPasteTheVideoPleaseTryAgain: "Could not paste the video. Please try again later."
   couldNotPasteTheImagePleaseTryAgain: "Could not paste the image. Please try again later."
+ja:
+  couldNotPasteTheVideoPleaseTryAgain: "ビデオを貼り付けられませんでした。しばらくしてからもう一度お試しください"
+  couldNotPasteTheImagePleaseTryAgain: "画像を貼り付けられませんでした。しばらくしてからもう一度お試しください"
 `;
 const t = createTranslator(messages);
 

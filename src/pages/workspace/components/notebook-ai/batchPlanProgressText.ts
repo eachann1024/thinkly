@@ -27,6 +27,18 @@ en:
   detailChangesCompleted: "Changes completed: {{value1}}"
   detailOperationsPreparedAwaitingApproval: "Operations prepared: {{value1}}. Awaiting approval."
   detailGenerating: "Generating “{{value1}}”"
+ja:
+  generateBatchPlan: "一括プランを生成"
+  theseChangesWereCanceled: "今回の変更をキャンセルしました"
+  applyBatchPlan: "一括プランを実行"
+  changesInThisBatchUndone: "この一括変更を取り消しました"
+  applyingApprovedChanges: "承認済みの変更を実行中"
+  thisBatchOfChangesIsComplete: "この一括変更は完了しました"
+  planGeneratedAwaitingApproval: "プランを生成しました。承認待ちです"
+  preparingBatchOperationsForReview: "一括操作と承認内容を整理しています"
+  detailChangesCompleted: "{{value1}} 件の変更が完了しました"
+  detailOperationsPreparedAwaitingApproval: "{{value1}} 件の操作を生成しました。承認待ちです"
+  detailGenerating: "「{{value1}}」を生成中"
 `;
 const t = createTranslator(messages);
 

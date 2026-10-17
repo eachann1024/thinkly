@@ -7,6 +7,9 @@ zh-Hans:
 en:
   thisSelectionIsAlreadyInTheInput: "This selection is already in the input"
   selectionReferenceAdded: "Selection reference added"
+ja:
+  thisSelectionIsAlreadyInTheInput: "この選択範囲はすでに入力欄にあります"
+  selectionReferenceAdded: "選択範囲の引用を追加しました"
 `;
 const t = createTranslator(messages);
 /** 可序列化选区引用及去重、标签和展示策略。 */

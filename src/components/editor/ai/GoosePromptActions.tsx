@@ -16,6 +16,12 @@ en:
   sendRewriteInstructions: "Send rewrite instructions"
   sendEnter: "Send (Enter)"
   send: "Send"
+ja:
+  aiQuickActions: "AI クイックアクション"
+  openAiSettings: "AI 設定を開く"
+  sendRewriteInstructions: "書き換えの指示を送信"
+  sendEnter: "送信（Enter）"
+  send: "送信"
 `;
 const t = createTranslator(messages);
 

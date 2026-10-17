@@ -27,6 +27,19 @@ en:
   helpTitle: "Quick Note"
   helpIntro: "Saving opens the main window and focuses that note. The sidebar selects it, and the folder count updates with it. This Quick Note is cleared."
   helpSlots: "The numbers 1–5 are five separate notes."
+ja:
+  renameSlot: "クイックノート {{slot}} の名前を変更"
+  renameLabel: "クイックノートの名前を変更"
+  renameNamedLabel: "{{name}} · クイックノートの名前を変更"
+  saveToNotes: "ノートに保存"
+  emptyNote: "クイックノートが空のため、保存できません"
+  fontSize: "文字サイズ"
+  pixels: "{{size}} ピクセル"
+  close: "閉じる"
+  helpLabel: "使い方"
+  helpTitle: "クイックノート"
+  helpIntro: "保存するとメインウィンドウが開き、このノートが表示されます。サイドバーの選択もそのノートに切り替わり、フォルダの件数にも加算されます。このクイックノートは空になります。"
+  helpSlots: "上部の 1〜5 は、それぞれ独立した 5 つのクイックノートです。"
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";

@@ -19,6 +19,15 @@ en:
   deletePermanently: "Delete note permanently"
   permanentDelete: "Delete permanently"
   aiAssistant: "AI assistant"
+ja:
+  aiConversation: "AI との会話"
+  newConversation: "新しい会話"
+  locked: "ロック中"
+  deleted: "このノートは削除されました"
+  restore: "ノートを復元"
+  deletePermanently: "ノートを完全に削除"
+  permanentDelete: "完全に削除"
+  aiAssistant: "AI アシスタント"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

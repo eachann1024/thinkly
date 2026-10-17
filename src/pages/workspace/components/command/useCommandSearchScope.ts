@@ -6,6 +6,8 @@ zh-Hans:
   couldnTReadTheSearchFolderClose: "搜索目录读取失败，请关闭搜索后重试"
 en:
   couldnTReadTheSearchFolderClose: "Couldn’t read the search folder. Close search and try again."
+ja:
+  couldnTReadTheSearchFolderClose: "検索対象のフォルダを読み込めませんでした。検索を閉じてからもう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";

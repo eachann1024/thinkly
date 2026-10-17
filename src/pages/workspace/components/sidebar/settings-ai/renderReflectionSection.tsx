@@ -14,6 +14,9 @@ zh-Hans:
 en:
   weeklyReflection: "Reflection"
   sendLastWeekNotes: "Allow sending the titles and excerpts of the notes in the reflection range to the AI to write the reflection"
+ja:
+  weeklyReflection: "振り返り"
+  sendLastWeekNotes: "振り返り期間内のノートのタイトルと要約を、振り返りの生成のために AI へ送信することを許可します"
 `;
 const uiText = createTranslator(localMessages);
 

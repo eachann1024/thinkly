@@ -17,6 +17,11 @@ en:
   unknownError: "Unknown error"
   previewError: "Preview failed: {{error}}"
   systemPreviewError: "System preview failed: {{error}}"
+ja:
+  previewUnavailable: "プレビューを利用できません"
+  unknownError: "不明なエラー"
+  previewError: "プレビューに失敗しました：{{error}}"
+  systemPreviewError: "システムプレビューに失敗しました：{{error}}"
 `;
 const t = createTranslator(messages);
 

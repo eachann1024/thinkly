@@ -12,6 +12,11 @@ en:
   empty: "{{name}}, empty"
   switchNote: "Switch Quick Note"
   renameHint: "{{name}}; click again to rename"
+ja:
+  occupied: "{{name}}、内容あり"
+  empty: "{{name}}、空"
+  switchNote: "クイックノートを切り替え"
+  renameHint: "{{name}}、もう一度クリックすると名前を変更できます"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

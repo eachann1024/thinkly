@@ -15,6 +15,13 @@ en:
   equationPreview: "Equation preview"
   systemPreviewIsnTSupportedInThisEnvironment: "System preview isn’t supported in this environment"
   couldnTOpenTheSystemPreview: "Couldn’t open the system preview"
+ja:
+  previewClickForFullScreenRightClickForSystem: "プレビュー（左クリックで全画面 / 右クリックでシステム）"
+  invalidPreviewData: "プレビューデータが無効です"
+  preview: "プレビュー"
+  equationPreview: "数式プレビュー"
+  systemPreviewIsnTSupportedInThisEnvironment: "現在の環境ではシステムプレビューに対応していません"
+  couldnTOpenTheSystemPreview: "システムプレビューを開けませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";

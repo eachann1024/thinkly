@@ -11,6 +11,10 @@ en:
   readOnlyAiChangePreview: "Read-only AI change preview"
   addedText: "Added text"
   formattingStructureChanges: "Formatting / structure changes"
+ja:
+  readOnlyAiChangePreview: "AI による変更の読み取り専用プレビュー"
+  addedText: "追加されたテキスト"
+  formattingStructureChanges: "書式 / 構造の変更"
 `;
 const t = createTranslator(messages);
 

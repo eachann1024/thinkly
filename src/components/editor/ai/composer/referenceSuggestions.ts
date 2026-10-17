@@ -18,6 +18,10 @@ en:
   unknownNotebook: "Unknown notebook"
   appPage: "App page"
   appPageNotebook: "App page · {{notebookName}}"
+ja:
+  unknownNotebook: "不明なノートブック"
+  appPage: "アプリのページ"
+  appPageNotebook: "アプリのページ · {{notebookName}}"
 `;
 const t = createTranslator(messages);
 

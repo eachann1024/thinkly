@@ -28,6 +28,16 @@ en:
   fileName: "File name"
   imageFileName: "Image file name"
   save: "Save"
+ja:
+  replaceImage: "画像を置き換え"
+  captionAndAltText: "キャプションと代替テキスト"
+  caption: "キャプション"
+  imageCaption: "画像のキャプション"
+  altText: "代替テキスト"
+  imageAltText: "画像の代替テキスト"
+  fileName: "ファイル名"
+  imageFileName: "画像のファイル名"
+  save: "保存"
 `;
 const t = createTranslator(messages);
 

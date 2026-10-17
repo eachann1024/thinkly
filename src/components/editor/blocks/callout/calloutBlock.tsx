@@ -17,6 +17,8 @@ zh-Hans:
   calloutIcon: "提示块图标"
 en:
   calloutIcon: "Callout icon"
+ja:
+  calloutIcon: "コールアウトのアイコン"
 `;
 const t = createTranslator(messages);
 

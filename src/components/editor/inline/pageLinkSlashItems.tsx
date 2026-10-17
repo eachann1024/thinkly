@@ -10,6 +10,9 @@ zh-Hans:
 en:
   page: "Page"
   linkToPage: "Link to page"
+ja:
+  page: "ページ"
+  linkToPage: "ページへのリンク"
 `;
 const t = createTranslator(messages);
 

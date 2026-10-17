@@ -6,6 +6,8 @@ zh-Hans:
   moveFailed: "移动失败：{{error}}"
 en:
   moveFailed: "Move failed: {{error}}"
+ja:
+  moveFailed: "移動に失敗しました：{{error}}"
 `;
 const uiText = createTranslator(localMessages);
 import { type DraggingPosition, type TreeItem } from "react-complex-tree";

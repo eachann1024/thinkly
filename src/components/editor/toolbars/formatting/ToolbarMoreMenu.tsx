@@ -20,6 +20,8 @@ zh-Hans:
   moreFormatting: "更多格式"
 en:
   moreFormatting: "More formatting"
+ja:
+  moreFormatting: "その他の書式"
 `;
 const t = createTranslator(messages);
 

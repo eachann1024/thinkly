@@ -16,6 +16,12 @@ en:
   saveFailed: "Save failed"
   imageEncodingFailed: "Image encoding failed"
   copiedToClipboard: "Copied to clipboard"
+ja:
+  copied: "コピーしました"
+  saved: "保存しました"
+  saveFailed: "保存に失敗しました"
+  imageEncodingFailed: "画像のエンコードに失敗しました"
+  copiedToClipboard: "クリップボードにコピーしました"
 `;
 const t = createTranslator(messages);
 

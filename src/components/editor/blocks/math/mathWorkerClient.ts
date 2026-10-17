@@ -11,6 +11,11 @@ en:
   backgroundFormulaRenderingFailedPleaseRetry: "Background formula rendering failed. Please retry."
   couldNotCommunicateWithTheFormulaRendererPlease: "Could not communicate with the formula renderer. Please retry."
   formulaRenderingTimedOutPleaseRetry: "Formula rendering timed out. Please retry."
+ja:
+  formulaRenderingFailed: "数式のレンダリングに失敗しました"
+  backgroundFormulaRenderingFailedPleaseRetry: "数式のバックグラウンドレンダリングに失敗しました。もう一度お試しください"
+  couldNotCommunicateWithTheFormulaRendererPlease: "数式レンダラーとの通信に失敗しました。もう一度お試しください"
+  formulaRenderingTimedOutPleaseRetry: "数式のレンダリングがタイムアウトしました。もう一度お試しください"
 `;
 const t = createTranslator(messages);
 let worker: Worker | null = null;

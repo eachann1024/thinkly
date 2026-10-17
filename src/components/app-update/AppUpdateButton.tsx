@@ -8,6 +8,9 @@ zh-Hans:
 en:
   update: "Update"
   updateStatus: "Update, {{status}}"
+ja:
+  update: "アップデート"
+  updateStatus: "アップデート、{{status}}"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

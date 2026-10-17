@@ -5,6 +5,8 @@ zh-Hans:
   untitled: "未命名"
 en:
   untitled: "Untitled"
+ja:
+  untitled: "無題"
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "../themes";

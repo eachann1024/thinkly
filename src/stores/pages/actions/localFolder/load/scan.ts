@@ -4,6 +4,8 @@ zh-Hans:
   readFolderFailed: "无法读取本地文件夹"
 en:
   readFolderFailed: "Couldn’t read the local folder."
+ja:
+  readFolderFailed: "ローカルフォルダを読み込めません"
 `);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";

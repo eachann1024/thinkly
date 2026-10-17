@@ -32,6 +32,14 @@ en:
   copiedToClipboard: "Copied to clipboard"
   downloadFailed: "Download failed: {{error}}"
   copyFailed: "Copy failed: {{error}}"
+ja:
+  couldNotOpenInTheSystemImageViewer: "システムの画像ビューアで開けませんでした"
+  unknownError: "不明なエラー"
+  imageSavedToDownloads: "画像をダウンロードフォルダに保存しました"
+  saveFailed: "保存に失敗しました"
+  copiedToClipboard: "クリップボードにコピーしました"
+  downloadFailed: "ダウンロードに失敗しました：{{error}}"
+  copyFailed: "コピーに失敗しました：{{error}}"
 `;
 const t = createTranslator(messages);
 

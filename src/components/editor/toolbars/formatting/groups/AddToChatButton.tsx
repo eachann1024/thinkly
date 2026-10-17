@@ -14,6 +14,9 @@ zh-Hans:
 en:
   addSelectionToChat: "Add selection to chat"
   addToChat: "Add to chat"
+ja:
+  addSelectionToChat: "選択範囲をチャットに追加"
+  addToChat: "チャットに追加"
 `;
 const t = createTranslator(messages);
 

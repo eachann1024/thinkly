@@ -27,6 +27,19 @@ en:
   keyboardShortcuts_f7d2: "Keyboard shortcuts"
   shortcutUpdated: "{{label}} updated"
   shortcutDisabled: "{{label}} disabled"
+ja:
+  sidebarShortcut_2aa4: "サイドバーのショートカット"
+  aiAssistantShortcut_8ea1: "AI アシスタントのショートカット"
+  searchShortcut_3580: "検索のショートカット"
+  appearanceShortcut_d567: "外観のショートカット"
+  backShortcut_47b7: "戻るのショートカット"
+  forwardShortcut_d31e: "進むのショートカット"
+  newTabShortcut_b5a7: "新規タブのショートカット"
+  shortcutConflict_3ff0: "ショートカットの競合"
+  shortcutInUse: "{{shortcut}} は他の操作で使用されています。"
+  keyboardShortcuts_f7d2: "ショートカット"
+  shortcutUpdated: "{{label}}を更新しました"
+  shortcutDisabled: "{{label}}を無効にしました"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

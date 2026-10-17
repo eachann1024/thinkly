@@ -53,6 +53,15 @@ en:
   fullScreen: "Full screen"
   closeAi: "Close AI"
   aiAssistant: "AI assistant"
+ja:
+  aiToolbar: "AI ツールバー"
+  newConversation: "新しい会話"
+  conversationHistory: "会話履歴"
+  morePanelOptions: "パネルのその他のオプション"
+  sideBySide: "サイドバイサイド"
+  fullScreen: "全画面"
+  closeAi: "AI を閉じる"
+  aiAssistant: "AI アシスタント"
 `;
 const t = createTranslator(messages);
 

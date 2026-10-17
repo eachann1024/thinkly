@@ -8,6 +8,10 @@ en:
   detailAiGeneratedPlainParagraphsThatLookLikeThe: "AI generated plain paragraphs that look like {{value1}}. The changes were rolled back."
   detailAiDidNotGenerateActualBlocksTheChanges: "AI did not generate actual {{value1}} blocks. The changes were rolled back."
   detailTheAiResponseIncludedBlocksThatDoNot: "The AI response included blocks that do not match {{value1}}. The changes were rolled back."
+ja:
+  detailAiGeneratedPlainParagraphsThatLookLikeThe: "AI が{{value1}}のように見える通常の段落を生成したため、変更を取り消しました。"
+  detailAiDidNotGenerateActualBlocksTheChanges: "AI が実際の{{value1}}ブロックを生成しなかったため、変更を取り消しました。"
+  detailTheAiResponseIncludedBlocksThatDoNot: "AI の生成結果に{{value1}}と一致しないブロック構造が含まれていたため、変更を取り消しました。"
 `;
 const t = createTranslator(messages);
 import {

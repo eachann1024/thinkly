@@ -20,6 +20,15 @@ en:
   webpEncodingFailed: "WebP encoding failed"
   couldnTCreateACanvasToConvertTheImage: "Couldn’t create a canvas to convert the image to PNG"
   couldnTConvertTheImageToPng: "Couldn’t convert the image to PNG"
+ja:
+  imageDecodeFailed: "画像をデコードできませんでした（{{type}}、{{size}}MB）。ファイルが破損していないか確認してください"
+  imageTooLarge: "画像が大きすぎます（約 {{size}}MB）。上限の {{limit}}MB を超えています"
+  compressedImageTooLarge: "画像が大きすぎます（約 {{size}}MB）。圧縮後も上限の {{limit}}MB を超えています"
+  imageDecodingIsUnavailableCreateimagebitmapIsMissing: "この環境では画像のデコードに対応していません（createImageBitmap がありません）"
+  couldnTCreateACanvasToProcessTheImage: "キャンバスを作成できず、画像を処理できませんでした"
+  webpEncodingFailed: "WebP のエンコードに失敗しました"
+  couldnTCreateACanvasToConvertTheImage: "キャンバスを作成できず、PNG に変換できませんでした"
+  couldnTConvertTheImageToPng: "PNG に変換できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 /**

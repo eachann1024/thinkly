@@ -6,6 +6,9 @@ zh-Hans:
 en:
   saveOrderFailed: "Couldn’t save the sort order"
   saveOrderDetail: "Local storage couldn’t be updated. The sort order was not changed."
+ja:
+  saveOrderFailed: "並び順を保存できませんでした"
+  saveOrderDetail: "ローカルストレージへの書き込みに失敗したため、今回の並べ替えは反映されませんでした。"
 `);
 import { create } from "zustand";
 import {

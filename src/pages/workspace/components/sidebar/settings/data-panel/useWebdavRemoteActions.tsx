@@ -24,6 +24,17 @@ en:
   confirmDeleteBackup: "Delete cloud backup “{{name}}”? It cannot be recovered from the cloud."
   confirmRestoreLatest: "Restore the latest cloud backup “{{name}}”? This replaces current local data. The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
   confirmRestoreBackup: "Restore cloud backup “{{name}}”? The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
+ja:
+  cloudBackupDeleted_5e7b: "クラウドバックアップを削除しました"
+  couldNotDeleteBackup_31a4: "バックアップを削除できませんでした"
+  syncFailed_d610: "同期に失敗しました"
+  couldNotRestoreBackup_f06d: "バックアップを復元できませんでした"
+  deleteCloudBackup_6352: "クラウドバックアップを削除"
+  restoreFromCloud_6e37: "クラウドから復元"
+  restoreCloudBackup_bfc3: "クラウドバックアップを復元"
+  confirmDeleteBackup: "クラウドバックアップ「{{name}}」を削除しますか？削除後はクラウドから復元できません。"
+  confirmRestoreLatest: "クラウドの最新バックアップ「{{name}}」から復元しますか？現在のローカルデータは上書きされます。復元前に整合性を確認し、復元が中断された場合は現在のローカルデータを自動的に元に戻します。"
+  confirmRestoreBackup: "クラウドバックアップ「{{name}}」でデータを復元しますか？復元前に整合性を確認し、復元が中断された場合は現在のローカルデータを自動的に元に戻します。"
 `;
 const uiText = createTranslator(localMessages);
 import {

@@ -22,6 +22,13 @@ en:
   edit: "Edit"
   open: "Open"
   remove: "Remove"
+ja:
+  linkText: "リンクのテキスト"
+  save: "保存"
+  cancel: "キャンセル"
+  edit: "編集"
+  open: "開く"
+  remove: "削除"
 `;
 const t = createTranslator(messages);
 

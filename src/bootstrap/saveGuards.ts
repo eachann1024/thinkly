@@ -11,6 +11,11 @@ en:
   retry: "Retry"
   unsavedNotes: "Some notes haven’t been saved. Save them before updating."
   parseFailed: "This file couldn’t be read. Saving is disabled."
+ja:
+  saveFailed: "ノートをディスクに保存できませんでした"
+  retry: "再試行"
+  unsavedNotes: "保存されていないノートがあります。保存してからアップデートをやり直してください"
+  parseFailed: "このファイルは解析できないため、保存が無効になっています"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

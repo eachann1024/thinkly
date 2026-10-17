@@ -20,6 +20,16 @@ en:
   moveIncomplete: "The move did not complete."
   moveRollbackPartial: "The move did not complete, and some attachment references couldn’t be restored. Please reload. The note content remains in its original location."
   folderMissing: "The folder does not exist."
+ja:
+  fsUnavailable: "ファイルシステムを利用できません"
+  targetNotebookMissing: "移動先のノートブックが存在しません"
+  pathChanged: "パスが変更されました。もう一度お試しください"
+  nameExists: "移動先に同じ名前が既にあります"
+  readStoppedFolderMove: "ノートを読み込めないため、フォルダの移動を中止しました"
+  resourceRefsFailed: "リソース参照の更新に失敗しました"
+  moveIncomplete: "移動できませんでした"
+  moveRollbackPartial: "移動が完了せず、一部のリソース参照を元に戻せませんでした。再読み込みしてください。本文は元の場所にあります"
+  folderMissing: "フォルダが存在しません"
 `);
 import { migrateNotebookHistory } from "@/lib/history/notebookHistory";
 import {

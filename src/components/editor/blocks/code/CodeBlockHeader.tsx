@@ -14,6 +14,10 @@ en:
   expandCodeBlock: "Expand code block"
   collapseCodeBlock: "Collapse code block"
   addCodeCaption: "Add code caption"
+ja:
+  expandCodeBlock: "コードブロックを展開"
+  collapseCodeBlock: "コードブロックを折りたたむ"
+  addCodeCaption: "コードの説明を追加"
 `;
 const t = createTranslator(messages);
 

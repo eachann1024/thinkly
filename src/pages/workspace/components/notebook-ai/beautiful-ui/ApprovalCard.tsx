@@ -9,6 +9,8 @@ zh-Hans:
   aiNoteChangePlan: "AI 笔记变更计划"
 en:
   aiNoteChangePlan: "AI note change plan"
+ja:
+  aiNoteChangePlan: "AI ノート変更プラン"
 `;
 const t = createTranslator(messages);
 

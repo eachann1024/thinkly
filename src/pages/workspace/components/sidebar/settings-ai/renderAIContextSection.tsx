@@ -11,6 +11,11 @@ en:
   whenEnabledRelevantLocalContentIs_8628: "When enabled, relevant local content is sent to the AI provider with your conversation."
   readGlobalPrompts_1b07: "Read global prompts"
   readLocalSkills_b400: "Read local skills"
+ja:
+  promptsAndSkills_aace: "プロンプトとスキル"
+  whenEnabledRelevantLocalContentIs_8628: "オンにすると、関連するローカルの内容が会話とともに AI プロバイダに送信されます。"
+  readGlobalPrompts_1b07: "グローバルプロンプトを読み込む"
+  readLocalSkills_b400: "ローカルスキル (Skills) を読み込む"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

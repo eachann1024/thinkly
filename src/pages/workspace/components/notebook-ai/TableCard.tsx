@@ -16,6 +16,8 @@ zh-Hans:
   table: "表格"
 en:
   table: "Table"
+ja:
+  table: "表"
 `;
 const t = createTranslator(messages);
 

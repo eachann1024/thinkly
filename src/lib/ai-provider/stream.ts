@@ -5,6 +5,8 @@ zh-Hans:
   couldnTReadTheResponseStream: "无法读取底层数据流"
 en:
   couldnTReadTheResponseStream: "Couldn’t read the response stream"
+ja:
+  couldnTReadTheResponseStream: "レスポンスストリームを読み取れませんでした"
 `;
 const uiText = createTranslator(localMessages);
 // --- Native SSE Parser Utilities ---

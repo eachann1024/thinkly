@@ -4,6 +4,8 @@ zh-Hans:
   redacted: "[已隐藏]"
 en:
   redacted: "[redacted]"
+ja:
+  redacted: "[非表示]"
 `;
 const t = createTranslator(messages);
 

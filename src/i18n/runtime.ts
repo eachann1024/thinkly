@@ -64,7 +64,7 @@ function formatInterpolation(value: unknown): string {
 
 const engine = createInstance();
 void engine.init({
-  lng: getLocale(), fallbackLng: "en", supportedLngs: ["zh-Hans", "en"],
+  lng: getLocale(), fallbackLng: "en", supportedLngs: ["zh-Hans", "en", "ja"],
   load: "currentOnly", initAsync: false, keySeparator: false, nsSeparator: false,
   interpolation: { escapeValue: false }, returnNull: false, returnEmptyString: false,
   resources: {}, ns: [],
@@ -77,6 +77,7 @@ function namespaceFor(messages: CompiledMessages): string {
   const namespace = `messages-${++nextNamespace}`;
   engine.addResourceBundle("zh-Hans", namespace, messages["zh-Hans"]);
   engine.addResourceBundle("en", namespace, messages.en);
+  engine.addResourceBundle("ja", namespace, messages.ja);
   namespaces.set(messages, namespace);
   return namespace;
 }
@@ -94,7 +95,7 @@ export function createTranslator<Schema extends MessageSchema>(messages: Compile
     };
     if (!engine.exists(key, options)) {
       console.error(`[i18n] Missing translation: ${key}`);
-      return getLocale() === "zh-Hans" ? "暂不可用" : "Unavailable";
+      return ({ "zh-Hans": "暂不可用", en: "Unavailable", ja: "利用できません" } as const)[getLocale()];
     }
     return String(engine.t(key, options));
   }) as Translator<Schema>;

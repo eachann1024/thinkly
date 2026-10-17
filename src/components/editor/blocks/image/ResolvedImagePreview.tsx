@@ -14,6 +14,11 @@ en:
   couldNotLoadImage: "Could not load image"
   loadingImage: "Loading image"
   retry: "Retry"
+ja:
+  imageReferenceUnresolved: "画像の参照を解決できません"
+  couldNotLoadImage: "画像を読み込めません"
+  loadingImage: "画像を読み込み中"
+  retry: "再試行"
 `;
 const t = createTranslator(messages);
 

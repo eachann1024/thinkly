@@ -13,6 +13,8 @@ zh-Hans:
   markdownFolder: 选择 Markdown 文件夹
 en:
   markdownFolder: Choose a Markdown folder
+ja:
+  markdownFolder: "Markdown フォルダを選択"
 `);
 
 export function registerDialogsIpc(): void {

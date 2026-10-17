@@ -24,6 +24,17 @@ en:
   enableTheAiAssistantBeforeSelecting_ff9e: "Enable the AI assistant before selecting a model"
   fetchingTheModelListPleaseWait_e1a9: "Fetching the model list. Please wait."
   enterAnApiKeyAndSave_d9dc: "Enter an API key and save the configuration first"
+ja:
+  theConnectionCheckTimedOutAfter_46bf: "接続テストがタイムアウトしました (30 秒)。設定を確認して、もう一度お試しください。"
+  connectionSuccessful_517b: "接続に成功しました。"
+  connectionFailedTheServiceDidNot_b320: "接続に失敗しました。サービスから有効なテキストが返されませんでした。"
+  connectionFailedCheckTheConfigurationAnd_9da2: "接続に失敗しました。設定を確認して、もう一度お試しください。"
+  savingAndFetchingTheModelList_8623: "モデル一覧を保存して取得しています"
+  enterABaseUrl_463f: "Base URL を入力してください"
+  saveTheCurrentServiceConfigurationFirst_6e1e: "先に現在のサービス設定を保存してください"
+  enableTheAiAssistantBeforeSelecting_ff9e: "モデルを選択するには、先に AI アシスタントをオンにしてください"
+  fetchingTheModelListPleaseWait_e1a9: "モデル一覧を取得中です。しばらくお待ちください"
+  enterAnApiKeyAndSave_d9dc: "先に API Key を入力し、設定を保存してください"
 `;
 const uiText = createTranslator(localMessages);
 import { isModelRequestBusy } from "./aiRequestState";

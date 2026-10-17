@@ -10,6 +10,10 @@ en:
   resizeAiPanelLeftAndRightArrowsHome: "Resize AI panel: Left and Right arrows; Home for minimum, End for maximum"
   resizeAiPanel: "Resize AI panel"
   detailPixels: "{{value1}} pixels"
+ja:
+  resizeAiPanelLeftAndRightArrowsHome: "AI パネルの幅を調整：左右の矢印キー、Home で最小、End で最大"
+  resizeAiPanel: "AI パネルの幅を調整"
+  detailPixels: "{{value1}} ピクセル"
 `;
 const t = createTranslator(messages);
 

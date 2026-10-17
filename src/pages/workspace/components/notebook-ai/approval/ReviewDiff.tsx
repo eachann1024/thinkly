@@ -6,6 +6,8 @@ zh-Hans:
   changeDiff: "变更差异"
 en:
   changeDiff: "Change diff"
+ja:
+  changeDiff: "変更の差分"
 `;
 const t = createTranslator(messages);
 

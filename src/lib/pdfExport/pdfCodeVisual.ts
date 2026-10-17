@@ -7,6 +7,9 @@ zh-Hans:
 en:
   exportingEquationsAsImagesIsnTSupportedInThis: "Exporting equations as images isn’t supported in this environment"
   theEquationImageIsnTAPngDataUrl: "The equation image isn’t a PNG data URL"
+ja:
+  exportingEquationsAsImagesIsnTSupportedInThis: "現在の環境では数式の画像書き出しに対応していません"
+  theEquationImageIsnTAPngDataUrl: "数式のスクリーンショットが PNG data URL ではありません"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

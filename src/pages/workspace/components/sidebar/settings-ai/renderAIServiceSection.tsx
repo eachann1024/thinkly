@@ -1,26 +1,5 @@
-import { createTranslator, i18nYaml } from "@/i18n";
-const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIServiceSection.tsx#localMessages:1">`
-zh-Hans:
-  aiService_783b: "AI 服务"
-  provider_bab2: "服务商"
-  enterApiKey_0d3a: "输入 API Key"
-  hideApiKey_f087: "隐藏 API Key"
-  showApiKey_f07e: "显示 API Key"
-  saveConfiguration_ed75: "保存配置"
-  fetchingModels_d0ad: "获取模型中…"
-  saveAndFetchModels_dced: "保存并获取模型"
-  cancelFetch_de4a: "取消获取"
-en:
-  aiService_783b: "AI service"
-  provider_bab2: "Provider"
-  enterApiKey_0d3a: "Enter API key"
-  hideApiKey_f087: "Hide API key"
-  showApiKey_f07e: "Show API key"
-  saveConfiguration_ed75: "Save configuration"
-  fetchingModels_d0ad: "Fetching models…"
-  saveAndFetchModels_dced: "Save and fetch models"
-  cancelFetch_de4a: "Cancel fetch"
-`;
+import { createTranslator } from "@/i18n";
+import localMessages from "./renderAIServiceSection.messages.yaml";
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";

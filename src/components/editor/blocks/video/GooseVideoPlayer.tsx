@@ -16,6 +16,11 @@ en:
   theVideoCouldNotBeReadReplaceIt: "The video could not be read. Replace it using the toolbar above."
   pause: "Pause"
   play: "Play"
+ja:
+  videoPlayer: "ビデオプレーヤー"
+  theVideoCouldNotBeReadReplaceIt: "ビデオを読み込めません。上部のツールバーから置き換えてください"
+  pause: "一時停止"
+  play: "再生"
 `;
 const t = createTranslator(messages);
 

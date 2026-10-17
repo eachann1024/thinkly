@@ -9,6 +9,10 @@ en:
   couldnTLoadTheChineseFontRequiredToGenerate: "Couldn’t load the Chinese font required to generate the PDF"
   theGeneratedPdfIsEmpty: "The generated PDF is empty"
   pdfExportFailed: "PDF export failed"
+ja:
+  couldnTLoadTheChineseFontRequiredToGenerate: "中国語フォントを読み込めないため、PDF を生成できません"
+  theGeneratedPdfIsEmpty: "react-pdf が空の PDF を生成しました"
+  pdfExportFailed: "PDF の書き出しに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 /**

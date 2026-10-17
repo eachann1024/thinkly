@@ -17,6 +17,14 @@ en:
   customAnthropicProvider: "Custom Anthropic provider"
   customOpenaiResponsesProvider: "Custom OpenAI Responses provider"
   customOpenaiCompatibleProvider: "Custom OpenAI-compatible provider"
+ja:
+  missingApiKey: "API キーが入力されていません。{{hint}}"
+  authenticationFailed: "{{provider}} の認証に失敗しました。{{hint}}"
+  enableTheAiAssistantInSettingsFirst: "AI アシスタントがオフです。先に設定でオンにしてください"
+  saveYourCustomAiConfigurationAndLoadTheModel: "先にカスタム AI の設定を保存し、モデル一覧を取得してください"
+  customAnthropicProvider: "カスタム Anthropic プロバイダ"
+  customOpenaiResponsesProvider: "カスタム OpenAI Responses プロバイダ"
+  customOpenaiCompatibleProvider: "カスタム OpenAI 互換プロバイダ"
 `;
 const uiText = createTranslator(localMessages);
 import type {

@@ -9,6 +9,8 @@ zh-Hans:
   uploading: "上传中…"
 en:
   uploading: "Uploading…"
+ja:
+  uploading: "アップロード中…"
 `;
 const t = createTranslator(messages);
 

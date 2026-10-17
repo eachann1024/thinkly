@@ -6,6 +6,8 @@ zh-Hans:
   defaultShortcutsRestored_9e68: "已恢复默认快捷键"
 en:
   defaultShortcutsRestored_9e68: "Default shortcuts restored"
+ja:
+  defaultShortcutsRestored_9e68: "デフォルトのショートカットに戻しました"
 `;
 const uiText = createTranslator(localMessages);
 import { useState } from "react";

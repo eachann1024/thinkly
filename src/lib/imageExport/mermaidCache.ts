@@ -5,6 +5,8 @@ zh-Hans:
   theChartPreviewIsnTAValidSvg: "图表预览不是有效的 SVG"
 en:
   theChartPreviewIsnTAValidSvg: "The chart preview isn’t a valid SVG"
+ja:
+  theChartPreviewIsnTAValidSvg: "図表のプレビューが有効な SVG ではありません"
 `;
 const uiText = createTranslator(localMessages);
 import { loadMermaid } from "./loadMermaid";

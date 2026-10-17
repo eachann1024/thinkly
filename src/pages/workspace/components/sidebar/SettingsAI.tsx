@@ -8,6 +8,9 @@ zh-Hans:
 en:
   advancedOptions_1083: "Advanced options"
   aiAssistant_318e: "AI assistant"
+ja:
+  advancedOptions_1083: "詳細オプション"
+  aiAssistant_318e: "AI アシスタント"
 `;
 const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";

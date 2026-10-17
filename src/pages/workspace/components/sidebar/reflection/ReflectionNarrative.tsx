@@ -19,6 +19,13 @@ en:
   consent: "When enabled, the titles and excerpts of the notes in this range are sent to your configured AI to write the reflection."
   enable: "Enable"
   notConfigured: "AI is not configured. Set it up in Settings to generate a reflection."
+ja:
+  nextStep: "次のステップ"
+  generating: "生成中…"
+  failed: "生成に失敗しました。右上のボタンから再生成できます。"
+  consent: "オンにすると、期間内のノートのタイトルと要約が、設定済みの AI に送信され、振り返りの生成に使用されます。"
+  enable: "オンにする"
+  notConfigured: "AI が設定されていません。設定で AI を構成すると、振り返りを生成できます。"
 `;
 const uiText = createTranslator(localMessages);
 

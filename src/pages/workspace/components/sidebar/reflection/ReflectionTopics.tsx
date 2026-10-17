@@ -7,6 +7,8 @@ zh-Hans:
   topics: "主题分布"
 en:
   topics: "Topics"
+ja:
+  topics: "トピックの分布"
 `;
 const uiText = createTranslator(localMessages);
 

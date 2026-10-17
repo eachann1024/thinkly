@@ -40,6 +40,25 @@ en:
   defaultLayout_64ce: "Default layout"
   fullWidth_dc39: "Full width"
   standard_544f: "Standard"
+ja:
+  ocean_212e: "オーシャン"
+  iris_8a32: "アイリス"
+  pine_3fa7: "パイン"
+  vermilion_2107: "バーミリオン"
+  berry_10a3: "ベリー"
+  grape_05b1: "グレープ"
+  leaf_461c: "リーフ"
+  earlyAutumn_c4e4: "初秋"
+  paleCreamAndWarmWhiteLike_7eae: "淡いクリームイエローと温かみのある白い紙面。秋のやわらかな日差しのような配色です。"
+  wheatPaper_013e: "麦紙"
+  softWheatGrayAndIvoryLike_a5bb: "グレーがかった麦色とアイボリーの紙面。静かなスケッチブックに描いた鉛筆画のような配色です。"
+  flatWarmPaperWithTerracottaAccents_b6c6: "テラコッタをアクセントにした、フラットで温かみのある紙面。控えめな Claude 風のスタイルです。"
+  serif_11e5: "明朝体"
+  monospace_5226: "等幅"
+  defaultLayoutForNewNotes_3db8: "新規ノートのデフォルトレイアウト"
+  defaultLayout_64ce: "デフォルトレイアウト"
+  fullWidth_dc39: "全幅"
+  standard_544f: "標準"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

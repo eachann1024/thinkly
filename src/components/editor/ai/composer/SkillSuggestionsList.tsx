@@ -17,6 +17,8 @@ zh-Hans:
   noMatchingCommandsOrSkills: "没有匹配的指令或 Skill"
 en:
   noMatchingCommandsOrSkills: "No matching commands or skills"
+ja:
+  noMatchingCommandsOrSkills: "一致するコマンドまたは Skill がありません"
 `;
 const t = createTranslator(messages);
 

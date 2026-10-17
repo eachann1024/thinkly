@@ -8,6 +8,9 @@ zh-Hans:
 en:
   custom_f1d4: "Custom"
   applicationName: "{{title}} name"
+ja:
+  custom_f1d4: "カスタム"
+  applicationName: "{{title}}の名前"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useState } from "react";

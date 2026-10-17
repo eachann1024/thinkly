@@ -6,6 +6,8 @@ zh-Hans:
   couldNotReadConfiguration_a6ab: "读取配置失败"
 en:
   couldNotReadConfiguration_a6ab: "Could not read configuration"
+ja:
+  couldNotReadConfiguration_a6ab: "設定を読み込めませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { localizeGitUiReason } from "./gitSyncUiState";

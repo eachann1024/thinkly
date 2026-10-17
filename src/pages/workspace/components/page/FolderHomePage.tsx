@@ -23,6 +23,16 @@ en:
   newSubfolder: "New subfolder"
   newFile: "New file"
   emptyFolder: "This folder is empty"
+ja:
+  itemCount: "{{count}} 個の項目"
+  createFirst: "「{{folder}}」に最初のファイルまたはサブフォルダを作成"
+  local: "ローカル"
+  folderFailed: "フォルダを作成できませんでした：名前がすでに使われているか、書き込み権限がありません"
+  folderCreated: "フォルダを作成しました"
+  contents: "内容"
+  newSubfolder: "新規サブフォルダ"
+  newFile: "新規ファイル"
+  emptyFolder: "このフォルダは空です"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

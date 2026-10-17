@@ -8,6 +8,9 @@ zh-Hans:
 en:
   noNotesYetClickAboveTo_6d5a: "No notes yet. Click + above to create one."
   linkALocalFolderFirst_909e: "Link a local folder first"
+ja:
+  noNotesYetClickAboveTo_6d5a: "ノートがありません。上の ＋ で新規作成してください"
+  linkALocalFolderFirst_909e: "先にローカルフォルダを関連付けてください"
 `;
 const uiText = createTranslator(localMessages);
 import { cn } from "@/lib/utils";

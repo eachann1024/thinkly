@@ -9,6 +9,9 @@ zh-Hans:
 en:
   newConversation: "New conversation"
   detailConversationTitle: "Conversation title: {{value1}}"
+ja:
+  newConversation: "新しい会話"
+  detailConversationTitle: "会話のタイトル：{{value1}}"
 `;
 const t = createTranslator(messages);
 

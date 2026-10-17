@@ -41,6 +41,26 @@ en:
   saveAndCheck_8840: "Save and check"
   backUpNow_68c4: "Back up now"
   restoreLatestBackup_31a8: "Restore latest backup"
+ja:
+  webdavConfiguration_0e03: "WebDAV の設定"
+  serverUrl_f562: "サーバー URL"
+  eGHttpsExampleComDav_f2d9: "例: https://example.com/dav/"
+  account_7035: "アカウント"
+  emailOrUsername_515b: "メールアドレスまたはユーザー名"
+  remoteFolder_98d0: "リモートフォルダ"
+  backupFolder_534c: "バックアップフォルダ"
+  appPassword_1976: "アプリパスワード"
+  savedLeaveBlankToKeepIt_7b29: "保存済みです。空欄のままにすると変更されません"
+  thirdPartyAppPassword_8d0a: "サードパーティ製アプリのパスワード"
+  cloudBackupRetentionDays_54eb: "クラウドバックアップの保持日数"
+  afterUploadingABackupCloudBackups_2113: "バックアップのアップロード後、保持日数を超えたクラウドバックアップは削除されます。"
+  automaticCloudBackups_c110: "自動クラウドバックアップ"
+  backUpWhileTheAppIs_48b5: "前回のバックアップから 24 時間以上経過している場合、アプリのアイドル時にバックアップします。"
+  lastUpload_65db: "最終アップロード:"
+  lastRestore_cc8b: "最終復元:"
+  saveAndCheck_8840: "保存してテスト"
+  backUpNow_68c4: "今すぐバックアップ"
+  restoreLatestBackup_31a8: "最新のバックアップを復元"
 `;
 const uiText = createTranslator(localMessages);
 import { Switch, SwitchRow } from "@/components/ui/switch";

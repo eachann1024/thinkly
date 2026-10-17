@@ -15,6 +15,11 @@ en:
   thisCodeBlockDoesNotSupportPreview: "This code block does not support preview"
   unknownError: "Unknown error"
   previewFailed: "Preview failed: {{error}}"
+ja:
+  nothingToPreview: "プレビューできる内容がありません"
+  thisCodeBlockDoesNotSupportPreview: "このコードブロックはプレビューに対応していません"
+  unknownError: "不明なエラー"
+  previewFailed: "プレビューに失敗しました：{{error}}"
 `;
 const t = createTranslator(messages);
 

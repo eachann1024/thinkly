@@ -14,6 +14,10 @@ en:
   pageCreatedTheOriginalNoteHasChangedOpen: "Page created. The original note has changed; open the new page from the sidebar."
   couldNotCreateThePageYourOriginalContent: "Could not create the page. Your original content was preserved."
   createPageHere: "Create “{{title}}” in this folder"
+ja:
+  pageCreatedTheOriginalNoteHasChangedOpen: "新しいページを作成しました。元のノートの内容が変更されたため、サイドバーから開いてください"
+  couldNotCreateThePageYourOriginalContent: "ページを作成できませんでした。元の内容は残されています"
+  createPageHere: "現在のフォルダに「{{title}}」を新規作成"
 `;
 const t = createTranslator(messages);
 

@@ -22,6 +22,16 @@ en:
   revealFailed: "Couldn’t reveal this file in {{app}}"
   copyFilePath: "{{name}}: copy full path"
   copyPathHint: "Click to copy the full path"
+ja:
+  revealHint: "右クリックで{{app}}に表示"
+  finder: "Finder"
+  fileManager: "ファイルマネージャー"
+  pathCopied: "フルパスをコピーしました"
+  copyPathFailed: "パスをコピーできませんでした"
+  desktopUnavailable: "デスクトップ連携を利用できません"
+  revealFailed: "{{app}}に表示できませんでした"
+  copyFilePath: "{{name}}：フルパスをコピー"
+  copyPathHint: "クリックしてフルパスをコピー"
 `;
 const uiText = createTranslator(localMessages);
 import { useShallow } from "zustand/react/shallow";

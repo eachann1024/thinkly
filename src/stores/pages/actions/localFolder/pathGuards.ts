@@ -4,6 +4,8 @@ zh-Hans:
   nameUnavailable: "无法生成可用名称，请手动修改"
 en:
   nameUnavailable: "Couldn’t generate an available name. Enter one manually."
+ja:
+  nameUnavailable: "使用可能な名前を生成できません。手動で変更してください"
 `);
 import type { Page } from "@/types";
 

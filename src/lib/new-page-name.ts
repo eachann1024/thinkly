@@ -7,6 +7,9 @@ zh-Hans:
 en:
   enterAFileName: "Enter a file name"
   theFileNameContainsUnsupportedCharacters: "The file name contains unsupported characters"
+ja:
+  enterAFileName: "ファイル名を入力してください"
+  theFileNameContainsUnsupportedCharacters: "ファイル名に使用できない文字が含まれています"
 `;
 const uiText = createTranslator(localMessages);
 export function normalizeNewFileName(value: string): string {

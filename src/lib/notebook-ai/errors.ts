@@ -34,6 +34,22 @@ en:
   couldNotAuthenticateWithTheAiServiceCheck: "Could not authenticate with the AI service. Check the API key and Base URL in Settings → AI assistant."
   couldNotConnectToTheAiServiceCheck: "Could not connect to the AI service. Check the Base URL, connection, or proxy."
   theCurrentAiProtocolCannotAccessTheResponses: "The current AI protocol cannot access the Responses API. Check that the server supports /v1/responses."
+ja:
+  aiStoppedBecauseItCouldNotGenerateA: "プランの形式を生成できなかったため、AI は実行を停止しました。実行済みは 0 件で、書き込みも行われていません。もう一度お試しいただくか、モデルを切り替えてからやり直してください。"
+  thisPlanCannotBeAppliedNoOperationsWere: "プランを実行できません。実行済みは 0 件で、書き込みも行われていません。対象を調整してからもう一度お試しください。"
+  thePlanDidNotFinishRecoveryWasAttempted: "実行が完了しなかったため、復元を試みました。関連するページを確認してから、もう一度お試しください。"
+  undoFailedThePagesMayHaveChangedCheck: "元に戻せませんでした。ページが変更されている可能性があります。ページを確認してから、もう一度お試しください。"
+  thisRequestFailedPleaseTryAgainLater: "今回のリクエストに失敗しました。しばらくしてからもう一度お試しください。"
+  thisBatchPlanDoesNotSupportThatOperation: "このバッチプランは、ローカルフォルダのページに対するその操作に対応していません。実行済みは 0 件で、書き込みも行われていません。"
+  theNewPageSParentIsUnavailableNo: "新しいページの親を利用できません。実行済みは 0 件で、書き込みも行われていません。有効な親ページに変更してからもう一度お試しください。"
+  aPlanTargetIsUnavailableOrBelongsTo: "プランの対象を利用できないか、現在のノートブックに属していません。実行済みは 0 件で、書き込みも行われていません。対象を確認してからもう一度お試しください。"
+  selectAtLeastOneOperationAndRetryNothing: "操作を 1 件以上選択してから、もう一度お試しください。現在、書き込みは行われていません。"
+  thePlanIsIncompleteNoOperationsWereApplied: "プランの内容が不完全です。実行済みは 0 件で、書き込みも行われていません。AI にプランを作り直させてください。"
+  theLocalFileCouldNotBeCreatedNo: "ローカルファイルを作成できませんでした。実行済みは 0 件で、書き込みも行われていません。同名のファイルがないか確認してからもう一度お試しください。"
+  thePageContentHasChangedThisWriteWas: "ページの内容が変更されたため、新しい編集を上書きしないよう今回の書き込みをキャンセルしました"
+  couldNotAuthenticateWithTheAiServiceCheck: "AI サービスの認証に失敗しました。「設定 → AI アシスタント」で API キーと Base URL を確認してください。"
+  couldNotConnectToTheAiServiceCheck: "AI サービスに接続できません。Base URL、ネットワーク、プロキシに到達できるか確認してください。"
+  theCurrentAiProtocolCannotAccessTheResponses: "現在の AI プロトコルでは Responses API にアクセスできません。サーバーが /v1/responses に対応しているか確認してください。"
 `;
 const t = createTranslator(messages);
 let BATCH_PLAN_SCHEMA_ERROR =

@@ -36,6 +36,18 @@ en:
   couldNotRemoveMilestone: "Could not remove milestone"
   confirmRestore: "Restore this version?\\nThe current content will be saved as a snapshot that you can restore at any time."
   confirmRemoveMilestone: "Remove this milestone?\\nThis version will become a regular snapshot and may be deleted automatically when the snapshot limit is exceeded."
+ja:
+  thisVersionCouldNotBeRead: "このバージョンを読み込めません"
+  theVersionFileIsEmptyOrUnreadableIf: "バージョンファイルが空か、読み込めません。リポジトリがクラウドストレージ上にある場合は、先にクラウドストレージへのサインインを復旧してください。"
+  thisVersionHasAnInvalidFormatAndCannot: "この履歴バージョンの形式が正しくないため、復元できません"
+  thisVersionHasDamagedMetadataAndCannotBe: "この履歴バージョンのヘッダー情報が破損しているため、復元できません"
+  versionRestoredThePreviousContentWasSavedAs: "選択したバージョンに復元しました。元の内容はスナップショットとして保存されています"
+  milestoneMarkedThisVersionWillBeKeptIndefinitely: "マイルストーンに設定しました。このバージョンは長期間保持されます"
+  milestoneRemoved: "マイルストーンを解除しました"
+  couldNotMarkMilestone: "マークに失敗しました"
+  couldNotRemoveMilestone: "マークの解除に失敗しました"
+  confirmRestore: "この履歴バージョンに復元しますか？\\n現在の本文は「復元前のスナップショット」として自動的に保持されるため、いつでも元に戻せます。"
+  confirmRemoveMilestone: "マイルストーンのマークを解除しますか？\\n解除すると、このバージョンは通常のスナップショットに戻り、上限を超えた場合は自動的に削除されることがあります。"
 `;
 const t = createTranslator(messages);
 

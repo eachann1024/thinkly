@@ -19,6 +19,15 @@ en:
   aiAssistant_318e: "AI assistant"
   dataAndBackups_e963: "Data and backups"
   localVersionBeforeBackupRestore_8346: "Local version before backup restore"
+ja:
+  appearanceAndThemes_6902: "外観とテーマ"
+  general_aa05: "一般"
+  keyboardShortcuts_f7d2: "ショートカット"
+  localFolders_497e: "ローカルフォルダ"
+  gitSync_fcb0: "Git 同期"
+  aiAssistant_318e: "AI アシスタント"
+  dataAndBackups_e963: "データとバックアップ"
+  localVersionBeforeBackupRestore_8346: "バックアップ復元前のローカルバージョン"
 `;
 const uiText = createTranslator(localMessages);
 import type { SettingsTab, SettingsTabConfig } from "../settings/types";

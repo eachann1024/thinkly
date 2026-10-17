@@ -5,6 +5,8 @@ zh-Hans:
   toggleHeading: "折叠{{level}}级标题"
 en:
   toggleHeading: "Toggle heading {{level}}"
+ja:
+  toggleHeading: "トグル見出し {{level}}"
 `;
 const t = createTranslator(messages);
 

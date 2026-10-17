@@ -8,6 +8,9 @@ zh-Hans:
 en:
   currentNotebook: "Current {{kind}}: {{name}}. Click to switch."
   notebook_0021: "Notebook"
+ja:
+  currentNotebook: "現在の{{kind}}：{{name}}（クリックで切り替え）"
+  notebook_0021: "ノートブック"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

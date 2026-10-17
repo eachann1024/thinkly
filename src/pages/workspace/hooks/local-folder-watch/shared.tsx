@@ -11,6 +11,11 @@ en:
   chooseHowToResolveTheConflict: "Choose how to resolve the conflict"
   keepMyEdits: "Keep my edits"
   loadDiskVersion: "Load disk version"
+ja:
+  externalChange: "「{{name}}」が外部で変更されました"
+  chooseHowToResolveTheConflict: "競合の解決方法を選択してください"
+  keepMyEdits: "自分の編集を保持"
+  loadDiskVersion: "ディスク上の版を読み込む"
 `;
 const uiText = createTranslator(localMessages);
 import { readMarkdownFile } from "@/lib/local-folder-scanner/entries";

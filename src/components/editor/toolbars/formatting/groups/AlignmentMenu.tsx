@@ -19,6 +19,8 @@ zh-Hans:
   alignment: "对齐方式"
 en:
   alignment: "Alignment"
+ja:
+  alignment: "配置"
 `;
 const t = createTranslator(messages);
 

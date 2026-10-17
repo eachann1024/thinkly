@@ -30,6 +30,19 @@ en:
   checklist: "Checklist"
   quoteBlock: "Quote block"
   codeBlock: "Code block"
+ja:
+  thisTargetBlockTypeIsNotSupported: "この変換先のブロックタイプには対応していません。"
+  chooseHeadingLevel12Or3For: "見出しへの変換では、見出し 1、2、3 のいずれかを指定してください。"
+  headingLevelsCanOnlyBeSetForHeading: "見出し以外のブロックには見出しレベルを指定できません。"
+  heading1: "見出し 1"
+  heading2: "見出し 2"
+  heading3: "見出し 3"
+  paragraph: "段落"
+  bulletedList: "箇条書きリスト"
+  numberedList: "番号付きリスト"
+  checklist: "チェックリスト"
+  quoteBlock: "引用ブロック"
+  codeBlock: "コードブロック"
 `;
 const t = createTranslator(messages);
 

@@ -6,6 +6,8 @@ zh-Hans:
   newTab: "新标签页"
 en:
   newTab: "New tab"
+ja:
+  newTab: "新しいタブ"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

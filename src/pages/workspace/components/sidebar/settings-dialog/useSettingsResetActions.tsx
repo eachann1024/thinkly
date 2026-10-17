@@ -12,6 +12,11 @@ en:
   resetFailed_4d71: "Reset failed"
   languageResetFailed: "Other settings were reset, but the language setting could not be changed to Follow system. Restart the app and try again."
   dataIsBeingResetOrRestored_eec4: "Data is being reset or restored. Please try again later."
+ja:
+  resetComplete_faa3: "リセットが完了しました"
+  resetFailed_4d71: "リセットに失敗しました"
+  languageResetFailed: "その他の設定はリセットされましたが、言語設定を「システムに従う」に戻せませんでした。アプリを再起動して、もう一度お試しください。"
+  dataIsBeingResetOrRestored_eec4: "データのリセットまたは復元中です。しばらくしてからもう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 import { resetLanguagePreference } from "@/i18n";

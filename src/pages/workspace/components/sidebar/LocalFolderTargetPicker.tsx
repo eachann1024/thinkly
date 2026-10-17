@@ -26,6 +26,18 @@ en:
   noMatchingFolders_6b46: "No matching folders"
   moveTo_86ed: "Move to"
   importTo_5a85: "Import to"
+ja:
+  importFailed_fddc: "インポートに失敗しました"
+  theFileCouldNotBeParsed_8954: "ファイルの内容をノートとして解析できませんでした。"
+  textFileImported_376b: "テキストファイルをインポートしました"
+  filesImported: "{{count}} 件のファイルをインポートしました"
+  filesSkipped: "{{count}} 件のファイルはインポートに失敗したためスキップしました"
+  searchOtherNotebooks_c47c: "他のノートブックを検索…"
+  searchFoldersOrPaths_40c6: "フォルダまたはパスを検索…"
+  noOtherNotebooksAvailable_35ba: "移動先にできる他のノートブックがありません"
+  noMatchingFolders_6b46: "一致するフォルダがありません"
+  moveTo_86ed: "移動先"
+  importTo_5a85: "インポート先"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";

@@ -20,6 +20,15 @@ en:
   notebooksRestored: "Restore complete. Notebooks: {{notebooks}}; pages: {{pages}}."
   importFailed_fddc: "Import failed"
   chooseAValidExportedZipBackup_0933: "Choose a valid exported ZIP backup"
+ja:
+  exportComplete_105c: "エクスポートが完了しました"
+  exportFailed_dd51: "エクスポートに失敗しました"
+  pleaseTryAgainLater_d610: "しばらくしてからもう一度お試しください。"
+  noteBackup_fbdd: "ノートのバックアップ"
+  importComplete_b6d1: "インポートが完了しました"
+  notebooksRestored: "ノートブック {{notebooks}} 冊、ページ {{pages}} 件を復元しました"
+  importFailed_fddc: "インポートに失敗しました"
+  chooseAValidExportedZipBackup_0933: "有効なエクスポート済み ZIP バックアップを選択してください"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect } from "react";

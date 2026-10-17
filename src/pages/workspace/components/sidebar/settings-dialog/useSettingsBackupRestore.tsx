@@ -12,6 +12,11 @@ en:
   restoreFailedAndAutomaticRollbackDid_84d4: "Restore failed and automatic rollback did not finish. Restore from a local exported backup."
   restoreFailedYourPreviousDataWas_dcd9: "Restore failed. Your previous data was restored automatically."
   restoredAndSynced_ea35: "Restored and synced"
+ja:
+  theBackupContainsNoNotebooksTo_ad6c: "バックアップに復元できるノートブックがありません"
+  restoreFailedAndAutomaticRollbackDid_84d4: "復元に失敗し、自動ロールバックも完了しませんでした。ローカルにエクスポートしたバックアップから復元してください。"
+  restoreFailedYourPreviousDataWas_dcd9: "復元に失敗したため、復元前のデータを自動的に元に戻しました。"
+  restoredAndSynced_ea35: "復元と同期が完了しました"
 `;
 const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";

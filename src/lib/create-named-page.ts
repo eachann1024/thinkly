@@ -5,6 +5,8 @@ zh-Hans:
   couldnTCreateTheNoteTheDestinationIsUnavailable: "新建失败：目标位置不可用或无写入权限"
 en:
   couldnTCreateTheNoteTheDestinationIsUnavailable: "Couldn’t create the note: the destination is unavailable or you don’t have write permission"
+ja:
+  couldnTCreateTheNoteTheDestinationIsUnavailable: "ノートを作成できませんでした。保存先が利用できないか、書き込み権限がありません"
 `;
 const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";

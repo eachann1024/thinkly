@@ -13,6 +13,12 @@ en:
   defaultFinder_1bce: "Default (Finder)"
   defaultTerminal_6a94: "Default (Terminal)"
   defaultFileManager_77ea: "Default (file manager)"
+ja:
+  defaultFileExplorer_3dda: "デフォルト（エクスプローラー）"
+  defaultCommandPrompt_6c00: "デフォルト（コマンドプロンプト）"
+  defaultFinder_1bce: "デフォルト（Finder）"
+  defaultTerminal_6a94: "デフォルト（ターミナル）"
+  defaultFileManager_77ea: "デフォルト（ファイルマネージャ）"
 `;
 const uiText = createTranslator(localMessages);
 import { type ComponentType } from "react";

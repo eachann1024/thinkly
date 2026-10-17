@@ -10,6 +10,11 @@ en:
   detailTheTargetBlocksForConversionToHaveChanged: "The target blocks for conversion to {{value1}} have changed. Select them again and retry."
   detailTheTargetContentForConversionToHasChanged: "The target content for conversion to {{value1}} has changed. Select it again and retry."
   detailThereIsNoNonEmptyContentToConvert: "There is no non-empty content to convert to {{value1}}."
+ja:
+  detailToConvertToSelectCompleteBlocksFromThe: "{{value1}}に変換するには、ブロック全体を行頭から行末まで選択してください。"
+  detailTheTargetBlocksForConversionToHaveChanged: "{{value1}}への変換対象のブロックが変更されました。選択し直してからやり直してください。"
+  detailTheTargetContentForConversionToHasChanged: "{{value1}}への変換対象の内容が変更されました。選択し直してからやり直してください。"
+  detailThereIsNoNonEmptyContentToConvert: "{{value1}}に変換できる空でない内容がありません。"
 `;
 const t = createTranslator(messages);
 import {

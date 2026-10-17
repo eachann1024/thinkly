@@ -58,6 +58,27 @@ en:
   deleteColumn: "Delete column"
   duplicateRow: "Duplicate row"
   duplicateColumn: "Duplicate column"
+ja:
+  rowActions: "行の操作"
+  columnActions: "列の操作"
+  insertRowAbove: "上に行を挿入"
+  insertColumnLeft: "左に列を挿入"
+  insertRowBelow: "下に行を挿入"
+  insertColumnRight: "右に列を挿入"
+  copy: "コピー"
+  rowsAndColumnsWithMergedCellsCannotBe: "結合されたセルを含むため、行・列のコピーには対応していません"
+  clearContents: "内容を消去"
+  tableOptions: "表のオプション"
+  headerRow: "ヘッダー行"
+  headerColumn: "ヘッダー列"
+  enabled: "オン"
+  disabled: "オフ"
+  distributeColumnsEvenly: "列の幅を均等にする"
+  fitToPageWidth: "ページ幅に合わせる"
+  deleteRow: "行を削除"
+  deleteColumn: "列を削除"
+  duplicateRow: "行を複製"
+  duplicateColumn: "列を複製"
 `;
 const t = createTranslator(messages);
 

@@ -7,6 +7,9 @@ zh-Hans:
 en:
   fileName_d2e2: "File name"
   page_59ce: "Page"
+ja:
+  fileName_d2e2: "ファイル名"
+  page_59ce: "ページ"
 `;
 const uiText = createTranslator(localMessages);
 import { type CSSProperties } from "react";

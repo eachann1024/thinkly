@@ -24,6 +24,10 @@ en:
   enableTheAiAssistantInSettingsToUse: "Enable the AI assistant in Settings to use this feature."
   chooseAModelInSettingsBeforeUsingThe: "Choose a model in Settings before using the AI notebook."
   detailCouldNotCreatePiModel: "Could not create Pi model: {{value1}}"
+ja:
+  enableTheAiAssistantInSettingsToUse: "AI 機能が無効です。設定で AI アシスタントを有効にしてください。"
+  chooseAModelInSettingsBeforeUsingThe: "AI ノートブック機能を使う前に、設定でモデルを選択してください。"
+  detailCouldNotCreatePiModel: "Pi モデルの構築に失敗しました：{{value1}}"
 `;
 const t = createTranslator(messages);
 

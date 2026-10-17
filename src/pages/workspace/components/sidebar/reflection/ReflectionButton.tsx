@@ -12,6 +12,8 @@ zh-Hans:
   reflection: "反思"
 en:
   reflection: "Reflection"
+ja:
+  reflection: "振り返り"
 `;
 const uiText = createTranslator(localMessages);
 

@@ -14,6 +14,12 @@ en:
   zoomIn: "Zoom in"
   resetZoom: "Reset to 100%"
   closePreview: "Close preview"
+ja:
+  preview: "プレビュー"
+  zoomOut: "縮小"
+  zoomIn: "拡大"
+  resetZoom: "100% にリセット"
+  closePreview: "プレビューを閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";

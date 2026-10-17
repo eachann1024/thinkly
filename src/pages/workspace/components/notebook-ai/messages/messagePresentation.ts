@@ -4,6 +4,8 @@ zh-Hans:
   compactCommand: "/压缩"
 en:
   compactCommand: "/compact"
+ja:
+  compactCommand: "/圧縮"
 `;
 const t = createTranslator(messages);
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";

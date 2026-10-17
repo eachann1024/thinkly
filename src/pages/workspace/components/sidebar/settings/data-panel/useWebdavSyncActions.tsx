@@ -16,6 +16,13 @@ en:
   couldNotUploadBackup_7240: "Could not upload backup"
   noUsableBackupsFoundInThe_3663: "No usable backups found in the cloud"
   syncFailed_d610: "Sync failed"
+ja:
+  noNotebookDataToExport_03e2: "エクスポートできるノートブックデータがありません"
+  backupSynced_dea7: "バックアップを同期しました"
+  backupsCleaned: "期限切れのクラウドバックアップを {{count}} 件削除しました"
+  couldNotUploadBackup_7240: "バックアップをアップロードできませんでした"
+  noUsableBackupsFoundInThe_3663: "クラウドに使用可能なバックアップファイルが見つかりません"
+  syncFailed_d610: "同期に失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import { generateExportZip } from "@/lib/export";

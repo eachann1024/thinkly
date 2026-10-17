@@ -37,6 +37,13 @@ en:
   chartDataIsIncomplete: "Chart data is incomplete"
   theChartIsNotReadyYet: "The chart is not ready yet"
   chart: "Chart"
+ja:
+  chartExportFailed: "グラフの書き出しに失敗しました"
+  chartExportIsEmpty: "グラフの書き出し結果が空です"
+  imageEncodingFailed: "画像のエンコードに失敗しました"
+  chartDataIsIncomplete: "グラフのデータが不完全です"
+  theChartIsNotReadyYet: "グラフの準備ができていません"
+  chart: "グラフ"
 `;
 const t = createTranslator(messages);
 

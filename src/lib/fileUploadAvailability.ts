@@ -5,6 +5,8 @@ zh-Hans:
   openALocalFolderNotebookBeforeInsertingAttachments: "请先打开本地文件夹笔记本，再插入附件"
 en:
   openALocalFolderNotebookBeforeInsertingAttachments: "Open a local folder notebook before inserting attachments"
+ja:
+  openALocalFolderNotebookBeforeInsertingAttachments: "添付ファイルを挿入するには、先にローカルフォルダのノートブックを開いてください"
 `;
 const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";

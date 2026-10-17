@@ -10,69 +10,8 @@ import {
   type SlashMenuItem,
   type SlashMenuFeaturePolicy,
 } from "./blocknoteSlashModel";
-import { i18nYaml, createTranslator } from "@/i18n";
-const messages = i18nYaml<"src/components/editor/core/blocknoteSlashItems.tsx#messages:1">`
-zh-Hans:
-  generate: "生成"
-  continueWriting: "接着写点内容…"
-  text: "文本"
-  heading1: "一级标题"
-  largeHeading: "大标题"
-  heading2: "二级标题"
-  mediumHeading: "中标题"
-  heading3: "三级标题"
-  smallHeading: "小标题"
-  checklist: "待办事项"
-  aListOfTasksWithCheckboxes: "带有复选框的任务列表"
-  bulletedList: "无序列表"
-  createABulletedList: "创建普通的项目符号列表"
-  numberedList: "有序列表"
-  createANumberedList: "创建带有数字的列表"
-  quote: "引用"
-  insertAQuote: "插入一段引用文字"
-  callout: "标注"
-  insertACalloutWithAnIcon: "插入带图标的重点标注块"
-  divider: "分隔线"
-  insertAHorizontalDivider: "插入一条水平分割线"
-  table: "表格"
-  insertASimpleTable: "插入一个简单的表格"
-  codeBlock: "代码块"
-  insertACodeBlockWithSyntaxHighlighting: "插入带语法高亮的代码块"
-  mathFormula: "数学公式"
-  insertAMathFormulaKatex: "插入数学公式块 (KaTeX)"
-  mermaidDiagram: "Mermaid 图表"
-  insertAFlowchartSequenceDiagramAndMoreMermaid: "插入流程图、时序图等 (Mermaid)"
-en:
-  generate: "Generate"
-  continueWriting: "Continue writing…"
-  text: "Text"
-  heading1: "Heading 1"
-  largeHeading: "Large heading"
-  heading2: "Heading 2"
-  mediumHeading: "Medium heading"
-  heading3: "Heading 3"
-  smallHeading: "Small heading"
-  checklist: "Checklist"
-  aListOfTasksWithCheckboxes: "A list of tasks with checkboxes"
-  bulletedList: "Bulleted list"
-  createABulletedList: "Create a bulleted list"
-  numberedList: "Numbered list"
-  createANumberedList: "Create a numbered list"
-  quote: "Quote"
-  insertAQuote: "Insert a quote"
-  callout: "Callout"
-  insertACalloutWithAnIcon: "Insert a callout with an icon"
-  divider: "Divider"
-  insertAHorizontalDivider: "Insert a horizontal divider"
-  table: "Table"
-  insertASimpleTable: "Insert a simple table"
-  codeBlock: "Code block"
-  insertACodeBlockWithSyntaxHighlighting: "Insert a code block with syntax highlighting"
-  mathFormula: "Math formula"
-  insertAMathFormulaKatex: "Insert a math formula (KaTeX)"
-  mermaidDiagram: "Mermaid diagram"
-  insertAFlowchartSequenceDiagramAndMoreMermaid: "Insert a flowchart, sequence diagram, and more (Mermaid)"
-`;
+import { createTranslator } from "@/i18n";
+import messages from "./blocknoteSlashItems.messages.yaml";
 const t = createTranslator(messages);
 
 export {

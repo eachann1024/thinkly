@@ -22,6 +22,16 @@ en:
   closeLeftTabs: "Close tabs to the left"
   closeRightTabs: "Close tabs to the right"
   close: "Close"
+ja:
+  newTab: "新しいタブ"
+  missingPage: "このノートは存在しません"
+  closeTab: "タブを閉じる"
+  revealInTree: "ファイルツリーで表示"
+  newWindow: "新しいウィンドウで開く"
+  closeOtherTabs: "他のタブを閉じる"
+  closeLeftTabs: "左側のタブを閉じる"
+  closeRightTabs: "右側のタブを閉じる"
+  close: "閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

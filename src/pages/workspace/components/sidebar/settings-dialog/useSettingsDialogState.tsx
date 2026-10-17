@@ -6,6 +6,8 @@ zh-Hans:
   iUnderstandTheRisks_438d: "我已知晓风险"
 en:
   iUnderstandTheRisks_438d: "I understand the risks"
+ja:
+  iUnderstandTheRisks_438d: "リスクを理解しました"
 `;
 const uiText = createTranslator(localMessages);
 import { useSettingsDataOperation } from "./useSettingsDataOperation";

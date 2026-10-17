@@ -9,6 +9,10 @@ en:
   theYamlFrontmatterIsNotClosed: "The YAML frontmatter is not closed"
   theFrontmatterRootMustBeAnObject: "The frontmatter root must be an object"
   couldnTParseYaml: "Couldn’t parse YAML"
+ja:
+  theYamlFrontmatterIsNotClosed: "YAML フロントマターが閉じられていません"
+  theFrontmatterRootMustBeAnObject: "フロントマターのルートはオブジェクトである必要があります"
+  couldnTParseYaml: "YAML を解析できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { isMap, parseDocument } from "yaml";

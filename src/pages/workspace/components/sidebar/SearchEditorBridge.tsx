@@ -32,6 +32,21 @@ en:
   nextMatch_98c3: "Next match"
   backToOriginalNote_7521: "Back to original note"
   exitSearch_3633: "Exit search"
+ja:
+  backToTheFirstMatch_2870: "最初の一致に戻りました"
+  backToTheLastMatch_e02d: "最後の一致に戻りました"
+  notebook_1873: "ノートブック"
+  showFullNotePath_cbcb: "ノートの完全なパスを表示"
+  searchMatchNavigation_00ab: "検索一致のナビゲーション"
+  backToSearchResults_69e3: "検索結果に戻る"
+  searchResults_098f: "検索結果"
+  matchPosition: "{{current}} / {{count}} 件目"
+  titleMatch_92f9: "タイトルに一致"
+  noMatchesInNoteContent_997e: "本文に一致なし"
+  previousMatch_cd54: "前の一致"
+  nextMatch_98c3: "次の一致"
+  backToOriginalNote_7521: "元のノートに戻る"
+  exitSearch_3633: "検索を終了"
 `;
 const uiText = createTranslator(localMessages);
 import { useShallow } from "zustand/react/shallow";

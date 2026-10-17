@@ -35,6 +35,13 @@ en:
   extractKeyPoints: "Extract key points"
   scrollToBottom: "Scroll to bottom"
   detailSendSuggestion: "Send suggestion: {{value1}}"
+ja:
+  howWouldYouLikeToEditThisNote: "このノートをどう編集しますか？"
+  polishThisText: "文章を推敲"
+  turnIntoAChecklist: "チェックリストにまとめる"
+  extractKeyPoints: "要点を抽出"
+  scrollToBottom: "一番下へスクロール"
+  detailSendSuggestion: "提案を送信：{{value1}}"
 `;
 const t = createTranslator(messages);
 

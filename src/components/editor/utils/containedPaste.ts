@@ -15,6 +15,9 @@ zh-Hans:
 en:
   theClipboardContentCouldNotBeRead: "The clipboard content could not be read"
   pasteFailedYourOriginalContentHasBeenPreserved: "Paste failed. Your original content has been preserved."
+ja:
+  theClipboardContentCouldNotBeRead: "クリップボードの内容を解析できません"
+  pasteFailedYourOriginalContentHasBeenPreserved: "貼り付けに失敗しました。元の内容は残されています"
 `;
 const t = createTranslator(messages);
 

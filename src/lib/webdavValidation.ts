@@ -23,6 +23,17 @@ en:
   theRemoteWebdavFolderHasInvalidEncoding: "The remote WebDAV folder has invalid encoding"
   theRemoteWebdavFolderCanTContainParentDirectory: "The remote WebDAV folder can’t contain parent-directory traversal segments"
   theParentFolderDoesnTExistMakeSureThe: "The parent folder doesn’t exist. Make sure the remote folder points to an existing path on the server. Some WebDAV services, including Nextcloud, ownCloud, Nutstore, and some NAS setups, require you to create the sync folder on the server first, then enter its path here (for example, backups/goose-note-app)."
+ja:
+  enterAWebdavUrl: "WebDAV の URL を入力してください"
+  theWebdavUrlMustStartWithHttpOrHttps: "WebDAV の URL は http または https で始まる必要があります"
+  publicWebdavServicesMustUseASecureHttpsConnection: "公開された WebDAV サービスでは、安全な https 接続を使用する必要があります"
+  invalidWebdavUrl: "WebDAV の URL の形式が無効です"
+  enterARemoteWebdavFolder: "WebDAV のリモートフォルダを入力してください"
+  theRemoteWebdavFolderCanTContainBackslashes: "WebDAV のリモートフォルダにバックスラッシュは使用できません"
+  theRemoteWebdavFolderCanTContainEmptyPath: "WebDAV のリモートフォルダに空のパスセグメントは使用できません"
+  theRemoteWebdavFolderHasInvalidEncoding: "WebDAV のリモートフォルダのエンコードが無効です"
+  theRemoteWebdavFolderCanTContainParentDirectory: "WebDAV のリモートフォルダに親ディレクトリへの移動を含むパスは使用できません"
+  theParentFolderDoesnTExistMakeSureThe: "親フォルダが存在しません。「リモートフォルダ」に、サーバー上に実在するパスを入力しているか確認してください。WebDAV サービスによっては、ルートに直接フォルダを作成できません。Nextcloud、ownCloud、Jianguoyun（坚果云）、一部の NAS などでは、先にサーバー側で同期用フォルダを作成してから、ここに対応するパス（例：「backups/goose-note-app」）を入力する必要があります。"
 `;
 const uiText = createTranslator(localMessages);
 export function normalizeBaseUrl(raw: string): string {

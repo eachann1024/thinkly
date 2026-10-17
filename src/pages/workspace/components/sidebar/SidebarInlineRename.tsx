@@ -14,6 +14,12 @@ en:
   renameFailed_37ba: "Rename failed"
   renameEnterToConfirmEscapeTo_4d0a: "Rename: Enter to confirm, Escape to cancel"
   pressTabOrClickElsewhereTo_7735: "Press Tab or click elsewhere to save. Leave empty to keep the current name."
+ja:
+  namesCannotContainPathSeparatorsOr_26f3: "名前にパス区切り文字や使用できない文字は含められません"
+  thisItemNoLongerExists_0117: "この項目は存在しません"
+  renameFailed_37ba: "名前を変更できませんでした"
+  renameEnterToConfirmEscapeTo_4d0a: "名前を変更：Enter で確定、Escape でキャンセル"
+  pressTabOrClickElsewhereTo_7735: "Tab キーまたは他の場所をクリックして保存します。空欄の場合は現在の名前のままになります。"
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";

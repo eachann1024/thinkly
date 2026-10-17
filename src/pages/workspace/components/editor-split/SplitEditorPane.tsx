@@ -14,6 +14,12 @@ en:
   closeThisPane: "Close this pane"
   theNoteCouldnTBeDisplayed: "The note couldn’t be displayed"
   retry: "Retry"
+ja:
+  thisNoteNoLongerExists: "ページは存在しなくなりました"
+  noteNotFound: "このノートが見つかりません"
+  closeThisPane: "このペインを閉じる"
+  theNoteCouldnTBeDisplayed: "本文を一時的に表示できません"
+  retry: "再試行"
 `;
 const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";

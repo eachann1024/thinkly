@@ -8,6 +8,10 @@ en:
   previewSourceSelection: "Preview selection from {{title}}"
   removeSelectionReference: "Remove selection reference"
   selectionFromSource: "Selection from {{title}}"
+ja:
+  previewSourceSelection: "{{title}}からの選択範囲の引用をプレビュー"
+  removeSelectionReference: "選択範囲の引用を削除"
+  selectionFromSource: "{{title}}からの選択範囲の引用"
 `;
 const t = createTranslator(messages);
 import { ensureComposerCaretAnchors } from "./composerCaret";

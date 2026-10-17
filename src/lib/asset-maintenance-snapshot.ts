@@ -5,6 +5,8 @@ zh-Hans:
   couldnTReadTheEditor: "无法读取编辑器"
 en:
   couldnTReadTheEditor: "Couldn’t read the editor"
+ja:
+  couldnTReadTheEditor: "エディタを読み取れませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";

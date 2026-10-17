@@ -8,6 +8,8 @@ zh-Hans:
   clearFormatting: "清除格式"
 en:
   clearFormatting: "Clear formatting"
+ja:
+  clearFormatting: "書式をクリア"
 `;
 const t = createTranslator(messages);
 

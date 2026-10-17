@@ -22,6 +22,16 @@ en:
   searchScope: "Search scope: {{scope}}"
   searchTitlesOnly: "Search titles only"
   sortBy: "Sort: {{sort}}"
+ja:
+  currentNamed: "現在のノートブック · {{name}}"
+  bestMatch: "関連度順"
+  recentlyEdited: "最近編集した順"
+  currentNotebook: "現在のノートブック"
+  allNotebooks: "すべてのノートブック"
+  notebookRemoved: "ノートブックは削除されました"
+  searchScope: "検索範囲：{{scope}}"
+  searchTitlesOnly: "タイトルのみ検索"
+  sortBy: "並べ替え：{{sort}}"
 `;
 const uiText = createTranslator(localMessages);
 import { useShallow } from "zustand/react/shallow";

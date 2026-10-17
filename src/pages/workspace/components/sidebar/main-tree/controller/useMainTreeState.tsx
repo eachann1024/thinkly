@@ -10,6 +10,10 @@ en:
   nameSortingRestored_df43: "Name sorting restored"
   sortByName_5b70: "Sort by name"
   couldNotReadLocalFolder_198b: "Could not read local folder"
+ja:
+  nameSortingRestored_df43: "名前順に戻しました"
+  sortByName_5b70: "名前順に戻す"
+  couldNotReadLocalFolder_198b: "ローカルフォルダを読み込めませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

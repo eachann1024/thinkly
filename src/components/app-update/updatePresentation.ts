@@ -15,6 +15,13 @@ en:
   ready: "Update{{version}} is ready"
   available: "Update{{version}} is available"
   upToDate: "You’re up to date"
+ja:
+  savingRestarting: "ノートを保存して再起動しています…"
+  checking: "アップデートを確認しています…"
+  downloading: "{{version}}をダウンロード中{{progress}}"
+  ready: "新バージョン{{version}}の準備ができました"
+  available: "新バージョン{{version}}があります"
+  upToDate: "最新バージョンです"
 `;
 const uiText = createTranslator(localMessages);
 import type { AppUpdateState } from "@/lib/appUpdateTypes";

@@ -8,6 +8,9 @@ zh-Hans:
 en:
   collapseSubheadings: "Collapse subheadings"
   expandSubheadings: "Expand subheadings"
+ja:
+  collapseSubheadings: "サブ見出しを折りたたむ"
+  expandSubheadings: "サブ見出しを展開"
 `;
 const uiText = createTranslator(localMessages);
 import { MainTreeRowDisclosure } from "../sidebar/main-tree/MainTreeRowShell";

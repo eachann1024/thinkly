@@ -6,6 +6,8 @@ zh-Hans:
   collapseAllPages_a4fb: "收起全部页面"
 en:
   collapseAllPages_a4fb: "Collapse all pages"
+ja:
+  collapseAllPages_a4fb: "すべてのページを折りたたむ"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

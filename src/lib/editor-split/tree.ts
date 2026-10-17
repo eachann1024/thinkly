@@ -7,6 +7,9 @@ zh-Hans:
 en:
   theCurrentPaneCouldnTBeFound: "The current pane couldn’t be found"
   youCanOpenUpToPanes: "You can open up to 4 panes"
+ja:
+  theCurrentPaneCouldnTBeFound: "現在の分割ペインが見つかりません"
+  youCanOpenUpToPanes: "分割は最大 4 つまでです"
 `;
 const uiText = createTranslator(localMessages);
 import {

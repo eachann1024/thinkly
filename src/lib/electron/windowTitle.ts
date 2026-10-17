@@ -6,6 +6,8 @@ zh-Hans:
   start: "开始"
 en:
   start: "Start"
+ja:
+  start: "開始"
 `;
 const uiText = createTranslator(localMessages);
 /**

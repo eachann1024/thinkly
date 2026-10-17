@@ -7,6 +7,9 @@ zh-Hans:
 en:
   theRenderedFileRequiredForPdfExportIsMissing: "The rendered file required for PDF export is missing"
   couldnTCreateTheAttachmentsFolder: "Couldn’t create the attachments folder"
+ja:
+  theRenderedFileRequiredForPdfExportIsMissing: "PDF のエクスポートに必要なレンダリング済みファイルがありません"
+  couldnTCreateTheAttachmentsFolder: "添付ファイルフォルダを作成できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

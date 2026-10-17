@@ -12,6 +12,11 @@ en:
   clickThenPressAShortcut_b24f: "Click, then press a shortcut"
   resetToDefaults_7468: "Reset to defaults"
   clear_288f: "Clear"
+ja:
+  pressAShortcutEscToCancel_f78c: "ショートカットを押してください (Esc でキャンセル)"
+  clickThenPressAShortcut_b24f: "クリックしてからショートカットを押してください"
+  resetToDefaults_7468: "初期設定に戻す"
+  clear_288f: "クリア"
 `;
 const uiText = createTranslator(localMessages);
 import { useRef, useState } from "react"

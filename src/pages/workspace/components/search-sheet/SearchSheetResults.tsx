@@ -14,6 +14,12 @@ en:
   pinyin: "Pinyin"
   askAi: "Ask AI: "
   removeRecent: "Remove {{title}} from recently opened"
+ja:
+  matchCount: "{{count}} 件"
+  title: "タイトル"
+  pinyin: "ピンイン"
+  askAi: "AI に質問："
+  removeRecent: "{{title}}を最近開いた項目から削除"
 `;
 const uiText = createTranslator(localMessages);
 import { Fragment, memo } from "react";

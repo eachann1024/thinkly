@@ -36,6 +36,13 @@ en:
   paste: "Paste"
   insertParagraphBelow: "Insert paragraph below"
   exportSelectionAsImage: "Export selection as image"
+ja:
+  selectedContent: "選択した内容"
+  cut: "切り取り"
+  copy: "コピー"
+  paste: "貼り付け"
+  insertParagraphBelow: "ブロックの下に段落を挿入"
+  exportSelectionAsImage: "選択範囲を画像として書き出す"
 `;
 const t = createTranslator(messages);
 

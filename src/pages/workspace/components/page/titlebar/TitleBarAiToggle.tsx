@@ -8,6 +8,9 @@ zh-Hans:
 en:
   closeAi: "Close AI panel"
   openAi: "Open AI panel"
+ja:
+  closeAi: "AI パネルを閉じる"
+  openAi: "AI パネルを開く"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

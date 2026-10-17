@@ -6,6 +6,8 @@ zh-Hans:
   couldNotCheckFolder_5d5e: "无法检查文件夹"
 en:
   couldNotCheckFolder_5d5e: "Could not check folder"
+ja:
+  couldNotCheckFolder_5d5e: "フォルダを確認できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { localizeGitUiReason } from "./gitSyncUiState";

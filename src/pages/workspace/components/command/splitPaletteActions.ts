@@ -11,6 +11,11 @@ en:
   splitDown: "Split down"
   maximizePane: "Maximize pane"
   closePane: "Close pane"
+ja:
+  splitRight: "右に分割"
+  splitDown: "下に分割"
+  maximizePane: "ペインを最大化"
+  closePane: "ペインを閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import {

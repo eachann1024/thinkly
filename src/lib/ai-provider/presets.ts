@@ -23,6 +23,17 @@ en:
   chatCompletionsCompatible: "Chat Completions compatible"
   customAnthropic: "Custom Anthropic"
   claudeMessagesCompatible: "Claude Messages compatible"
+ja:
+  officialApiEnterYourApiKey: "公式 API（キーを入力するだけで使えます）"
+  glmZhipu: "GLM (Zhipu)"
+  zhipuBigmodelPlatform: "Zhipu BigModel プラットフォーム"
+  officialApiPlatform: "公式プラットフォーム"
+  customOpenaiResponses: "カスタム OpenAI Responses"
+  openaiResponsesCompatible: "OpenAI Responses 互換"
+  customOpenaiCompatible: "カスタム OpenAI 互換"
+  chatCompletionsCompatible: "Chat Completions 互換"
+  customAnthropic: "カスタム Anthropic"
+  claudeMessagesCompatible: "Claude Messages 互換"
 `;
 const uiText = createTranslator(localMessages);
 import type { AIModelOption, CustomAIProtocol } from "./types";

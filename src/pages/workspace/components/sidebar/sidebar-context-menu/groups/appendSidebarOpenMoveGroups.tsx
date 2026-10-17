@@ -17,6 +17,14 @@ en:
   duplicate_afb9: "Duplicate"
   copyFolderPath_95ae: "Copy folder path"
   copyFilePath_87f5: "Copy file path"
+ja:
+  open_d709: "開く"
+  openInNewTab_7e9c: "新規タブで開く"
+  click_b1f2: "+クリック"
+  organize_1b6c: "整理"
+  duplicate_afb9: "複製を作成"
+  copyFolderPath_95ae: "フォルダパスをコピー"
+  copyFilePath_87f5: "ファイルパスをコピー"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

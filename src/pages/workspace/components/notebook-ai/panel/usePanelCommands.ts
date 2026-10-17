@@ -18,6 +18,9 @@ zh-Hans:
 en:
   configureAnAiModelInSettingsFirst: "Configure an AI model in Settings first"
   generating: "Generating…"
+ja:
+  configureAnAiModelInSettingsFirst: "先に設定で AI モデルを構成してください"
+  generating: "結果を生成中…"
 `;
 const t = createTranslator(messages);
 

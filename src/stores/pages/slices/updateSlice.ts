@@ -16,6 +16,14 @@ en:
   fixYaml: "The original content was preserved. Fix the YAML and try again."
   notSaved: "Content has not been saved"
   recoverySaved: "The latest content was saved to a recovery backup and can be recovered the next time you open the app."
+ja:
+  recoveryWriteFailed: "復元用バックアップを書き込めませんでした"
+  keepWindowOpen: "ウインドウを閉じずに、重要な内容をコピーしてからもう一度お試しください。"
+  readSettingsUnchanged: "ページを読み込めなかったため、設定は変更されていません"
+  yamlSettingsUnchanged: "YAML フロントマターの形式が正しくないため、設定は変更されていません"
+  fixYaml: "元の内容は保持されています。YAML を修正してからもう一度お試しください。"
+  notSaved: "内容は未保存です"
+  recoverySaved: "最新の内容を復元用バックアップに保存しました。次回起動時に復元できます。"
 `);
 import type { PagesState } from "../types";
 import {

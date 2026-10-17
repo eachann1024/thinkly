@@ -34,6 +34,13 @@ en:
   duplicateImages: "Duplicate images skipped: {{count}}."
   imagesAdded: "Images added: {{count}}."
   duplicateRemoved: "Duplicate images detected. The copies added later were removed."
+ja:
+  image: "画像"
+  imageLimit_other: "一度に追加できる画像は最大 {{count}} 枚です。"
+  oversizedImages: "{{count}} 枚の画像が {{limit}}MB を超えているため、追加されませんでした。"
+  duplicateImages: "{{count}} 枚の画像が重複しているため、追加されませんでした。"
+  imagesAdded: "{{count}} 枚の画像を追加しました。"
+  duplicateRemoved: "重複した画像が検出されたため、後から追加した画像を削除しました。"
 `;
 const t = createTranslator(messages);
 

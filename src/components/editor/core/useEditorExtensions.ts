@@ -52,6 +52,8 @@ zh-Hans:
   couldNotOpenThisPath: "无法打开该文件或文件夹"
 en:
   couldNotOpenThisPath: "Could not open this file or folder"
+ja:
+  couldNotOpenThisPath: "このファイルまたはフォルダを開けませんでした"
 `;
 const t = createTranslator(messages);
 

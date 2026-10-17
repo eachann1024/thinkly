@@ -8,6 +8,9 @@ zh-Hans:
 en:
   chooseFolder: "Choose a destination folder"
   findFolder: "Find and select a destination folder in the local repository"
+ja:
+  chooseFolder: "移動先のフォルダを選択"
+  findFolder: "ローカルリポジトリ内の移動先フォルダを検索して選択"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

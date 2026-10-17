@@ -18,6 +18,15 @@ en:
   emptyNewerContent: "The page has newer content. The empty content was not written to disk. Save again."
   emptyRecoveryFailed: "The recovery record couldn’t be read. Clearing the original file was blocked. Please try again."
   emptyUnconfirmed: "Clearing this note hasn’t been confirmed. The original content on disk was preserved. Edit and save again."
+ja:
+  serializeBlocked: "ノートの内容を完全にシリアライズできなかったため、保存を中止しました。元のファイルは変更されていません。"
+  readBlocked: "このファイルの読み込みまたは解析に失敗したため、保存を中止しました。再読み込みしてからもう一度お試しください。"
+  emptyReadBlocked: "ディスク上の元の内容を読み込めないため、空にする保存を中止しました。再読み込みしてからもう一度お試しください。"
+  emptyPathChanged: "ページまたは保存先のパスが変更されたため、今回の空にする操作はディスクに書き込まれていません。もう一度お試しください。"
+  emptyExternalConflict: "ディスク上の元の内容が外部で変更されたため、空にする操作を中止しました。先にファイルの競合を解決してください。"
+  emptyNewerContent: "ページにより新しい内容があるため、今回の空にする操作はディスクに書き込まれていません。もう一度保存してください。"
+  emptyRecoveryFailed: "編集の復元記録を読み込めないため、元のファイルを空にする操作を中止しました。もう一度お試しください。"
+  emptyUnconfirmed: "今回の空にする編集は確認されていないため、ディスク上の元の内容を保持しました。もう一度編集してから保存してください。"
 `);
 import type { JSONContent, Page } from "@/types";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";

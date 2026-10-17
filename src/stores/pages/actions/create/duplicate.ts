@@ -4,6 +4,8 @@ zh-Hans:
   invalidFrontmatterCopy: "YAML 前置区格式异常，未创建副本"
 en:
   invalidFrontmatterCopy: "The YAML frontmatter is invalid. No copy was created."
+ja:
+  invalidFrontmatterCopy: "YAML フロントマターの形式が正しくないため、複製を作成できませんでした"
 `);
 import type { StoreSet, StoreGet } from "../hydrate";
 import { flushEditorContent } from "../flushEditor";

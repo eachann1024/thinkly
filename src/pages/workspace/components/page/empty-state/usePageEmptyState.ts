@@ -14,6 +14,12 @@ en:
   pickerUnavailable: "The folder picker is unavailable"
   newNote: "New note"
   openLocalFolder: "Open local folder"
+ja:
+  notebookCreated: "ノートブックを自動的に作成しました"
+  openFailed: "フォルダを開けませんでした："
+  pickerUnavailable: "フォルダ選択ダイアログを開けません"
+  newNote: "ノートを新規作成"
+  openLocalFolder: "ローカルフォルダを開く"
 `;
 const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";

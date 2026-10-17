@@ -1,44 +1,7 @@
 import { useLocale } from "@/i18n";
+import localMessages from "./GitSyncContent.messages.yaml";
 import { createTranslator, i18nYaml, getFormatLocale } from "@/i18n";
 
-const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitSyncContent.tsx#localMessages:1">`
-zh-Hans:
-  removeConfiguration_9285: "移除配置"
-  gitSyncIsAvailableInThe_bf2b: "Git 同步仅在桌面版应用中可用。"
-  loadingSyncConfiguration_41ae: "正在读取同步配置…"
-  reload_9e56: "重新读取"
-  repository_c270: "仓库"
-  addRepository_7135: "添加仓库"
-  addARepositoryChooseFoldersThen_a359: "添加仓库，选择文件夹后连接并同步。"
-  lastSuccessfulSync_28c1: "上次同步成功："
-  noHistoryYet_5dbb: "尚无记录"
-  sync_6a62: "同步"
-  retry_132c: "重试"
-  syncNow_5f71: "立即同步"
-  errorDetails_71f6: "错误详情"
-  resolveConflictsAndResumeSync_6864: "解决冲突并继续同步"
-  connectAndSync_9751: "连接并同步"
-  cancel_625f: "取消"
-  readFailed: "读取配置失败：{{error}}"
-en:
-  removeConfiguration_9285: "Remove configuration"
-  gitSyncIsAvailableInThe_bf2b: "Git sync is available in the desktop app only."
-  loadingSyncConfiguration_41ae: "Loading sync configuration…"
-  reload_9e56: "Reload"
-  repository_c270: "Repository"
-  addRepository_7135: "Add repository"
-  addARepositoryChooseFoldersThen_a359: "Add a repository, choose folders, then connect and sync."
-  lastSuccessfulSync_28c1: "Last successful sync:"
-  noHistoryYet_5dbb: "No history yet"
-  sync_6a62: "Sync"
-  retry_132c: "Retry"
-  syncNow_5f71: "Sync now"
-  errorDetails_71f6: "Error details"
-  resolveConflictsAndResumeSync_6864: "Resolve conflicts and resume sync"
-  connectAndSync_9751: "Connect and sync"
-  cancel_625f: "Cancel"
-  readFailed: "Could not read configuration: {{error}}"
-`;
 const uiText = createTranslator(localMessages);
 import { localizeGitUiReason, type GitSyncAction } from "./gitSyncUiState";
 import { GitDetails } from "./GitDetails";

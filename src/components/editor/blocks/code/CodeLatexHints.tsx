@@ -40,6 +40,23 @@ en:
   matrix: "Matrix"
   nthRoot: "Nth root"
   latexSyntaxReference: "LaTeX syntax reference"
+ja:
+  fraction: "分数"
+  superscript: "上付き文字"
+  subscript: "下付き文字"
+  squareRoot: "平方根"
+  sum: "総和"
+  integral: "積分"
+  limit: "極限"
+  infinity: "無限大"
+  notEqual: "等しくない"
+  lessThanOrEqualTo: "以下"
+  greaterThanOrEqualTo: "以上"
+  arrow: "矢印"
+  vector: "ベクトル"
+  matrix: "行列"
+  nthRoot: "n 乗根"
+  latexSyntaxReference: "LaTeX 構文リファレンス"
 `;
 const t = createTranslator(messages);
 

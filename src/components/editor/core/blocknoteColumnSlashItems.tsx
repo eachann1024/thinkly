@@ -4,6 +4,8 @@ zh-Hans:
   columns: "{{count}} 栏"
 en:
   columns: "{{count}} columns"
+ja:
+  columns: "{{count}} 列"
 `;
 const t = createTranslator(messages);
 import type { BlockNoteEditor } from "@blocknote/core";

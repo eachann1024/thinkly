@@ -5,6 +5,8 @@ zh-Hans:
   exportStylesAreMissingFromThisBuild: "导出样式未打包"
 en:
   exportStylesAreMissingFromThisBuild: "Export styles are missing from this build"
+ja:
+  exportStylesAreMissingFromThisBuild: "このビルドにはエクスポート用スタイルが含まれていません"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS, textColorVariables } from "@/lib/textColors";

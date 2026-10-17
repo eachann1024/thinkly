@@ -22,6 +22,16 @@ en:
   couldnTReadInstalledFontsReopenThe: "Couldn’t read installed fonts. Reopen the menu to try again."
   loadingInstalledFonts: "Loading installed fonts…"
   noInstalledFontsFound: "No installed fonts found."
+ja:
+  selected: "{{label}}：{{name}}"
+  selectedFallback: "{{label}}：{{name}}（未インストールのため代替フォントを使用）"
+  systemFont: "システムフォント"
+  fontNotInstalledUsingAFallback: "このデバイスに見つからないため、代替フォントを使用しています"
+  checkingInstalledFonts: "インストール済みフォントを確認しています…"
+  fontMissing: "{{name}}（未インストール、代替フォントを使用）"
+  couldnTReadInstalledFontsReopenThe: "インストール済みフォントを読み込めませんでした。メニューを開き直してもう一度お試しください。"
+  loadingInstalledFonts: "インストール済みフォントを読み込んでいます…"
+  noInstalledFontsFound: "インストール済みフォントが見つかりません。"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useReducer } from "react";

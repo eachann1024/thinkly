@@ -16,6 +16,13 @@ en:
   splitBelow: "Split below"
   couldnTOpenTheDroppedContentTry: "Couldn’t open the dropped content. Try again."
   youCanOpenUpToPanes: "You can open up to 4 panes"
+ja:
+  splitToTheLeft: "左に分割"
+  splitToTheRight: "右に分割"
+  splitAbove: "上に分割"
+  splitBelow: "下に分割"
+  couldnTOpenTheDroppedContentTry: "ドロップした内容を開けません。もう一度お試しください"
+  youCanOpenUpToPanes: "分割は最大 4 つまでです"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState, type ReactNode } from "react";

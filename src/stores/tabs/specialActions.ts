@@ -4,6 +4,8 @@ zh-Hans:
   blankTabFailed: "无法打开空白标签页"
 en:
   blankTabFailed: "Couldn’t open a blank tab."
+ja:
+  blankTabFailed: "空白のタブを開けませんでした"
 `);
 import type { TabSet, TabGet, TabsState, TabItem } from "./types";
 import type { TabsActionContext } from "./context";

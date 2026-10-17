@@ -5,6 +5,8 @@ zh-Hans:
   cleanupDone: "已将 {{count}} 个文件移入废纸篓。继续清理请重新扫描。"
 en:
   cleanupDone: "Files moved to system trash: {{count}}. Scan again to continue cleanup."
+ja:
+  cleanupDone: "{{count}} 個のファイルをゴミ箱に移動しました。クリーンアップを続けるには、もう一度スキャンしてください。"
 `;
 const uiText = createTranslator(localMessages);
 import type { AssetNotebook, AssetScan } from "./asset-maintenance-contract";
