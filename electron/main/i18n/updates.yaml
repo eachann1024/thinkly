@@ -16,7 +16,7 @@ zh-Hans:
   invalidBundle: "更新应用目录无效"
   identityMismatch: "更新应用的身份或版本不匹配"
   architectureMismatch: "更新应用的架构不匹配"
-  moveToApplications: "请先将思绪 · Thinkly移到应用程序文件夹，再安装更新"
+  moveToApplications: "请先将思绪 · Thinkly 移到应用程序文件夹，再安装更新"
   finishInstaller: "请打开已下载的安装包完成更新"
   checksumMissing: "安装包缺少校验信息"
   checksumFailed: "安装包校验失败，请重新下载"
