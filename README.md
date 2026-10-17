@@ -73,7 +73,7 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 指令被拦截、旧版安装包没有指令，或使用 ZIP / Homebrew 时，请查看[完整安装说明](docs/macos-installation.md)。不要依赖右键「打开」绕过验证，新版 macOS 不再支持这种方式。
 
-Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「更多信息 → 仍要运行」。
+Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「更多信息 → 仍要运行」。代码签名政策见 [CODE_SIGNING.md](CODE_SIGNING.md)。
 
 <details>
 <summary>macOS 亦可通过 Homebrew 安装</summary>

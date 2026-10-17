@@ -22,21 +22,6 @@ export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/goose-note";
 
-// SignPath Foundation requires a "Code signing policy" section on download/release pages.
-export function codeSigningPolicy(windowsSigned) {
-  return [
-    "## Code signing policy",
-    "",
-    windowsSigned
-      ? "Free code signing provided by SignPath.io, certificate by SignPath Foundation."
-      : "Free code signing provided by SignPath.io, certificate by SignPath Foundation — application pending; this release is not signed yet.",
-    "",
-    "- Committers and reviewers: [eachann1024](https://github.com/eachann1024)",
-    "- Approvers: [eachann1024](https://github.com/eachann1024)",
-    `- Privacy policy: https://github.com/${REPO}/blob/main/PRIVACY.md`,
-  ].join("\n");
-}
-
 // The get-release-by-tag endpoint never returns drafts, so look releases up in the full list.
 export function pickRelease(lines, tag) {
   const found = lines.split("\n").filter(Boolean).map((line) => JSON.parse(line)).filter((release) => release.tag_name === tag);
@@ -102,8 +87,6 @@ async function main() {
       `| | [goose-note-app_${version}_amd64.deb](${baseDownloadUrl}/goose-note-app_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
       `| | [goose-note-app-${version}.pacman](${baseDownloadUrl}/goose-note-app-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./goose-note-app-${version}.pacman\`） |`,
       "",
-      `- [SHA256SUMS.txt](${baseDownloadUrl}/SHA256SUMS.txt)：安装包 SHA-256 校验和`,
-      "",
       "### macOS 安装说明",
       "",
       ...(signed ? [MAC_SIGNED] : macInstallParagraphs(macHelper)),
@@ -111,8 +94,6 @@ async function main() {
       `[完整安装说明（含旧版 DMG、ZIP 与 Homebrew）](${MAC_INSTALL_GUIDE})`,
       "",
       windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。",
-      "",
-      codeSigningPolicy(windowsSigned),
     ].join("\n");
     const existing = findRelease(tag);
     if (!existing) {
