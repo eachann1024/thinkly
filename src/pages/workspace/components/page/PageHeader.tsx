@@ -36,6 +36,7 @@ import { useEffectiveSingleTabMode } from "@/lib/tabMode";
 import { cn, formatShortcut } from "@/lib/utils";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
+import { TitleBarAiToggle } from "./titlebar/TitleBarAiToggle";
 
 interface PageHeaderProps {
   page?: Page;
@@ -141,6 +142,10 @@ export function PageHeader({
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
+        {showWorkspaceActions && folderActionsAvailable && !page?.trashedAt && (
+          <TitleBarAiToggle pressed={Boolean(aiPanelOpen)} className={"inline-flex items-center justify-center text-muted-foreground"} />
+        )}
+
         {page?.trashedAt && onRestore && onDelete && (
           <>
             <TooltipProvider delayDuration={600}>

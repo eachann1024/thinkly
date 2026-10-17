@@ -76,6 +76,7 @@ declare module "../types" {
     "src/pages/workspace/components/page/tab-rail/SortableTabItem.tsx#localMessages:1": { "close": {  }; "closeLeftTabs": {  }; "closeOtherTabs": {  }; "closeRightTabs": {  }; "closeTab": {  }; "missingPage": {  }; "newTab": {  }; "newWindow": {  }; "revealInTree": {  } };
     "src/pages/workspace/components/page/titlebar/DesktopWindowNavigation.tsx#localMessages:1": { "back": {  }; "forward": {  }; "hideSidebar": {  }; "showSidebar": {  } };
     "src/pages/workspace/components/page/titlebar/PageFileTitle.tsx#localMessages:1": { "copyFilePath": { "name": string | number }; "copyPathFailed": {  }; "copyPathHint": {  }; "desktopUnavailable": {  }; "fileManager": {  }; "finder": {  }; "pathCopied": {  }; "revealFailed": { "app": string | number }; "revealHint": { "app": string | number } };
+    "src/pages/workspace/components/page/titlebar/TitleBarAiToggle.tsx#localMessages:1": { "closeAi": {  }; "openAi": {  } };
     "src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1": { "pinWindow": {  }; "unpinWindow": {  } };
     "src/pages/workspace/components/search-sheet/SearchSheet.tsx#localMessages:1": { "allNotebooks": {  }; "askAi": {  }; "clearSearch": {  }; "currentNotebook": {  }; "enableAiAnswers": {  }; "hide": {  }; "loadMoreResults": {  }; "noMatchingNotes": {  }; "noteCount": { "count": string | number }; "notes": {  }; "open": {  }; "recentlyOpened": {  }; "searchAllNotebooks": {  }; "searchCurrentNotebook": {  }; "searchNotes": {  }; "searchNotesOrAskAi": {  }; "searchResults": {  }; "searching": {  }; "select": {  }; "someNotebooksCouldnTBeRead": {  }; "switchScope": {  }; "switchScopeHint": { "name": string | number }; "tryAgain": {  } };
     "src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1": { "backToResults": {  }; "continueInAiPanel": {  }; "readingNotes": { "count": string | number }; "sources": {  }; "thinking": {  }; "tool_listPages": {  }; "tool_readPage": {  }; "tool_readWebPage": {  }; "tool_searchNotes": {  }; "tool_searchWeb": {  }; "tool_understand": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1": { "itemCount": { "count": string | number } };
-    "src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1": { "couldNotCreateItemPleaseTry_db8e": {  }; "fileName_d2e2": {  }; "folderName_a984": {  }; "newFolder_f3a4": {  } };
   }
 }

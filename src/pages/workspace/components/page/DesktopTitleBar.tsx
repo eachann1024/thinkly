@@ -44,6 +44,7 @@ import { PageMenu } from "./PageMenu";
 import { TabRail } from "./TabRail";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
 import { useIncomingWorkspaceTabs } from "./useIncomingWorkspaceTabs";
+import { TitleBarAiToggle } from "./titlebar/TitleBarAiToggle";
 
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
@@ -186,6 +187,10 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        {showWorkspaceActions && folderActionsAvailable && !page?.trashedAt && (
+          <TitleBarAiToggle pressed={Boolean(aiPanelOpen)} className={actionButtonClass} />
+        )}
+
         {page?.trashedAt && onRestore && onDelete && (
           <>
             <TooltipProvider delayDuration={600}>
