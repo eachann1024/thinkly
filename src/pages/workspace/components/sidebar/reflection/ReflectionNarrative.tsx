@@ -43,7 +43,23 @@ export function ReflectionNarrative({ state, report, onEnable }: Props) {
     return (
       <div>
         <h3 className="text-xl font-semibold leading-snug text-foreground">{report.title}</h3>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{report.body}</p>
+        {report.themes?.length ? (
+          <>
+            <ul className="mt-3 space-y-2.5">
+              {report.themes.map((theme) => (
+                <li key={theme.name} className="text-sm leading-relaxed text-foreground">
+                  <span className="mr-2 font-medium text-muted-foreground">{theme.name}</span>
+                  {theme.point}
+                </li>
+              ))}
+            </ul>
+            {report.suggestion ? (
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{report.suggestion}</p>
+            ) : null}
+          </>
+        ) : (
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{report.body}</p>
+        )}
       </div>
     );
   }
