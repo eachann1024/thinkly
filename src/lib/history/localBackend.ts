@@ -1,195 +1,89 @@
 import { historyText as uiText } from "./messages";
 
 import type { HistoryBackend } from "./backend";
-import type { HistoryIndex, HistoryIndexEntry } from "./types";
-import { normalizeHistoryIndex } from "./guards";
-import {
-  parseHistoryVersion,
-  invalidateHistoryVersion,
-} from "./versionReadCache";
-import { historyHash } from "./localPaths";
-import {
-  bindHistoryLocation,
-  historyDiskOperation,
-  readHistoryLocations,
-  rendererHistoryDisk,
-  writeHistoryJson,
-} from "./localDisk";
+import { emptyHistoryMeta, findHistoryEntry, invalidatePortableIds, isSafeVersionId, withHistoryPath, writeHistoryMeta, type HistoryMeta } from "./layout";
+import { ensureHistoryLayoutOnce } from "./legacyMigration";
+import { historyDiskOperation, rendererHistoryDisk, writeHistoryJson, type HistoryDisk } from "./localDisk";
+import { originalHistoryPath, validHistoryRelativePath } from "./localPaths";
+import { invalidateHistoryVersion, parseHistoryVersion } from "./versionReadCache";
 
 export function makeLocalFolderHistoryBackend(
   basePath: string,
   relativePath: (pageId: string) => string | null,
 ): HistoryBackend {
-  async function operation<T>(
-    pageId: string,
-    run: (
-      directory: string,
-      fs: NonNullable<ReturnType<typeof rendererHistoryDisk>>,
-    ) => Promise<T>,
-    unavailable: T,
-  ) {
+  function operation<T>(run: (fs: HistoryDisk) => Promise<T>, unavailable: T): Promise<T> {
     const fs = rendererHistoryDisk();
-    if (!fs) return unavailable;
-    return historyDiskOperation(basePath, async () =>
-      run(
-        await bindHistoryLocation(basePath, pageId, relativePath(pageId), fs),
-        fs,
-      ),
-    );
+    if (!fs) return Promise.resolve(unavailable);
+    return historyDiskOperation(basePath, async () => {
+      await ensureHistoryLayoutOnce(basePath, fs);
+      return run(fs);
+    });
   }
-  async function sources(
-    pageId: string,
-    fs: NonNullable<ReturnType<typeof rendererHistoryDisk>>,
-  ) {
-    const locations = await readHistoryLocations(basePath, fs);
-    const relative = locations.pages[pageId]?.relativePath;
-    return [
-      pageId,
-      ...Object.entries(locations.pages)
-        .filter(
-          ([id, entry]) => id !== pageId && entry.relativePath === relative,
-        )
-        .map(([id]) => id),
-    ];
+  /** 定位页面的历史目录；笔记在笔记本内改名后，只刷新 meta.json 里的路径。 */
+  async function locate(pageId: string, fs: HistoryDisk) {
+    const found = await findHistoryEntry(basePath, pageId, fs);
+    const current = relativePath(pageId);
+    let meta = found.meta;
+    if (meta && validHistoryRelativePath(current) && meta.relativePath !== current) {
+      meta = withHistoryPath(meta, current);
+      await writeHistoryMeta(basePath, found.dir, meta, fs);
+    }
+    return { dir: found.dir, meta, current: validHistoryRelativePath(current) ? current : (meta?.relativePath ?? originalHistoryPath(pageId)) };
   }
-  const file = (directory: string, id: string, version: string) => {
-    if (!/^[a-zA-Z0-9_-]+$/.test(version)) throw new Error(uiText("invalidVersionHistoryIdentifier"));
-    return `${directory}/${historyHash(id)}.${version}.json`;
+  const file = (dir: string, versionId: string) => {
+    if (!isSafeVersionId(versionId)) throw new Error(uiText("invalidVersionHistoryIdentifier"));
+    return `${dir}/${versionId}.json`;
   };
   return {
     loadIndex(pageId) {
-      return operation(
-        pageId,
-        async (directory, fs) => {
-          const entries = new Map<string, HistoryIndexEntry>();
-          for (const id of await sources(pageId, fs)) {
-            const path = file(directory, id, "index");
-            const text = (await fs.exists(path))
-              ? await fs.readFile(path)
-              : null;
-            const data = text ? (JSON.parse(text) as HistoryIndex) : null;
-            if (data && data.pageId !== id)
-              throw new Error(uiText("versionHistoryIndexIdentifiersDonTMatch"));
-            for (const entry of normalizeHistoryIndex(data, id).versions) {
-              if (
-                !entries.has(entry.versionId) &&
-                (await fs.exists(file(directory, id, entry.versionId)))
-              )
-                entries.set(entry.versionId, entry);
-            }
-          }
-          const versions = [...entries.values()].sort(
-            (a, b) =>
-              a.createdAt - b.createdAt ||
-              a.versionId.localeCompare(b.versionId),
-          );
-          return {
-            pageId,
-            versions,
-            lastVersionCharCount: versions.at(-1)?.charCount ?? 0,
-          };
-        },
-        { pageId, versions: [], lastVersionCharCount: 0 },
-      );
+      return operation(async (fs) => {
+        const { dir, meta } = await locate(pageId, fs);
+        const present = await Promise.all((meta?.versions ?? []).map(async (entry) => (await fs.exists(file(dir, entry.versionId))) ? entry : null));
+        const versions = present
+          .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+          .sort((a, b) => a.createdAt - b.createdAt || a.versionId.localeCompare(b.versionId));
+        return { pageId, versions, lastVersionCharCount: versions.at(-1)?.charCount ?? 0 };
+      }, { pageId, versions: [], lastVersionCharCount: 0 });
     },
     saveIndex(index) {
-      return operation(
-        index.pageId,
-        async (directory, fs) => {
-          await writeHistoryJson(
-            file(directory, index.pageId, "index"),
-            {
-              ...index,
-              relativePath: directory.slice(
-                `${basePath}/.goose/history/`.length,
-              ),
-            },
-            fs,
-          );
-        },
-        undefined,
-      );
+      return operation(async (fs) => {
+        const { dir, meta, current } = await locate(index.pageId, fs);
+        const next: HistoryMeta = { ...(meta ?? emptyHistoryMeta(index.pageId, current)), versions: index.versions, lastVersionCharCount: index.lastVersionCharCount };
+        await writeHistoryMeta(basePath, dir, next, fs);
+      }, undefined);
     },
     loadVersion(pageId, versionId) {
-      return operation(
-        pageId,
-        async (directory, fs) => {
-          for (const id of await sources(pageId, fs)) {
-            const path = file(directory, id, versionId);
-            const version = parseHistoryVersion(
-              path,
-              (await fs.exists(path)) ? await fs.readFile(path) : null,
-              id,
-              versionId,
-            );
-            if (version)
-              return id === pageId ? version : { ...version, pageId };
-          }
-          return null;
-        },
-        null,
-      );
+      return operation(async (fs) => {
+        const { dir } = await locate(pageId, fs);
+        const path = file(dir, versionId);
+        return parseHistoryVersion(path, (await fs.exists(path)) ? await fs.readFile(path) : null, pageId, versionId);
+      }, null);
     },
     saveVersion(version) {
-      return operation(
-        version.pageId,
-        async (directory, fs) => {
-          const path = file(directory, version.pageId, version.versionId);
-          invalidateHistoryVersion(path);
-          await writeHistoryJson(
-            path,
-            {
-              ...version,
-              relativePath: directory.slice(
-                `${basePath}/.goose/history/`.length,
-              ),
-            },
-            fs,
-          );
-        },
-        undefined,
-      );
+      return operation(async (fs) => {
+        const { dir, current } = await locate(version.pageId, fs);
+        const path = file(dir, version.versionId);
+        invalidateHistoryVersion(path);
+        if (!await fs.exists(dir) && !await fs.mkdir(dir)) throw new Error(uiText("couldnTCreateTheDestinationHistoryFolder"));
+        await writeHistoryJson(path, { ...version, relativePath: current ?? undefined }, fs);
+      }, undefined);
     },
     removeVersion(pageId, versionId) {
-      return operation(
-        pageId,
-        async (directory, fs) => {
-          for (const id of await sources(pageId, fs)) {
-            const path = file(directory, id, versionId);
-            invalidateHistoryVersion(path);
-            if ((await fs.exists(path)) && !(await fs.deleteFile(path)))
-              throw new Error(uiText("couldnTClearVersionHistory"));
-          }
-        },
-        undefined,
-      );
+      return operation(async (fs) => {
+        const { dir } = await locate(pageId, fs);
+        const path = file(dir, versionId);
+        invalidateHistoryVersion(path);
+        if ((await fs.exists(path)) && !(await fs.deleteFile(path))) throw new Error(uiText("couldnTClearVersionHistory"));
+      }, undefined);
     },
     dropAll(pageId) {
-      return operation(
-        pageId,
-        async (directory, fs) => {
-          const ids = await sources(pageId, fs);
-          for (const entry of await fs.readDir(directory)) {
-            if (
-              !entry.isFile ||
-              !ids.some((id) => entry.name.startsWith(`${historyHash(id)}.`))
-            )
-              continue;
-            const path = `${directory}/${entry.name}`;
-            invalidateHistoryVersion(path);
-            if (!(await fs.deleteFile(path)))
-              throw new Error(uiText("couldnTPermanentlyClearVersionHistory"));
-          }
-          const locations = await readHistoryLocations(basePath, fs);
-          for (const id of ids) delete locations.pages[id];
-          await writeHistoryJson(
-            `${basePath}/.goose/history-map.json`,
-            locations,
-            fs,
-          );
-        },
-        undefined,
-      );
+      return operation(async (fs) => {
+        const { dir, meta } = await locate(pageId, fs);
+        if (!meta) return;
+        for (const entry of meta.versions) invalidateHistoryVersion(file(dir, entry.versionId));
+        if (!await fs.deleteDir(dir)) throw new Error(uiText("couldnTPermanentlyClearVersionHistory"));
+        invalidatePortableIds(basePath);
+      }, undefined);
     },
   };
 }

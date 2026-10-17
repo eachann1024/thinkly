@@ -19,8 +19,10 @@ import {
 import { restoreFileFromTrash } from "../trashRestore";
 import { trashWithUndo, undoTrash } from "../trashUndo";
 import { markRecentWrite, withSelfWriteMark } from "./watchEvents";
+import { hideGooseDirectory, registerGooseInternalIpc } from "./gooseInternal";
 
 export function registerFilesystemIpc(undoRoot: string): void {
+  registerGooseInternalIpc();
   ipcMain.handle("desktop:fsReadText", async (_event, p: string) => {
     const target = assertAllowed(p);
     await waitForGitSyncRead(target);
@@ -68,6 +70,7 @@ export function registerFilesystemIpc(undoRoot: string): void {
   ipcMain.handle("desktop:fsMkdir", async (_event, p: string) => {
     const target = assertAllowed(p);
     await withSelfWriteMark([target], () => mkdir(target, { recursive: true }));
+    await hideGooseDirectory(target);
   });
 
   ipcMain.handle("desktop:fsRealpath", async (_event, p: string) => {

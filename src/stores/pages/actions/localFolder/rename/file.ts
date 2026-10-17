@@ -22,7 +22,7 @@ en:
   renamePathChanged: "The path has changed. Rename the file again."
   renameFailed: "The rename did not complete."
 `);
-import { migrateNotebookHistory } from "@/lib/history/localDisk";
+import { migrateNotebookHistory } from "@/lib/history/notebookHistory";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {
   sanitizeFilenameSegment,
