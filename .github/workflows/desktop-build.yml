@@ -284,3 +284,43 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
         run: node scripts/repair-desktop-metadata.mjs "$RELEASE_TAG"
+
+  quark:
+    name: Upload installers to Quark
+    needs: [prepare, release]
+    if: needs.prepare.outputs.publish == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    concurrency:
+      group: goose-note-publish-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Upload published installers to Quark
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          QUARK_COOKIE: ${{ secrets.QUARK_COOKIE }}
+        run: |
+          set -euo pipefail
+          version="$(node -p 'require("./package.json").version')"
+          tag="v${version}-${SOURCE_SHA:0:7}"
+          mkdir -p quark-assets
+          downloaded=0
+          for _ in 1 2 3 4 5; do
+            if gh release download "$tag" --repo "$GH_REPO" --dir quark-assets --clobber; then
+              downloaded=1
+              break
+            fi
+            sleep 5
+          done
+          test "$downloaded" = 1
+          node scripts/quark-upload.mjs quark-assets "$version"
