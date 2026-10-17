@@ -34,3 +34,19 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
 );
 Switch.displayName = "Switch";
 export { Switch };
+
+/** Wrap one Switch and non-interactive content to make its entire row clickable. */
+export const SwitchRow = React.forwardRef<
+  HTMLLabelElement,
+  React.ComponentPropsWithoutRef<"label">
+>(({ className, ...props }, ref) => (
+  <label
+    {...props}
+    ref={ref}
+    className={cn(
+      "cursor-pointer has-[:enabled]:hover:bg-[var(--goose-interactive-hover)] has-[:disabled]:cursor-not-allowed",
+      className,
+    )}
+  />
+));
+SwitchRow.displayName = "SwitchRow";
