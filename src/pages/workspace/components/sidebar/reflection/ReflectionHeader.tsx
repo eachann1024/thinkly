@@ -2,7 +2,8 @@ import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 import * as GooseIcons from "@/components/ui/icons";
 import { IconButton } from "@/components/ui/icon-button";
-import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { REFLECTION_SCOPES, type ReflectionScope } from "@/lib/reflection/scopeRange";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1">`
@@ -41,19 +42,24 @@ export function ReflectionHeader({ scope, busy, onScopeChange, onRefresh }: Prop
         <p className="mt-1 text-xs text-muted-foreground">{uiText("basis")}</p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Select
-          controlSize="compact"
-          className="w-auto"
-          aria-label={uiText("range")}
-          value={scope}
-          onChange={(event) => onScopeChange(event.target.value as ReflectionScope)}
-        >
-          {REFLECTION_SCOPES.map((value) => (
-            <option key={value} value={value}>
-              {uiText(`scope${value}` as "scope7d")}
-            </option>
-          ))}
-        </Select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline" size="sm" aria-label={uiText("range")}
+              className="min-w-32 justify-between font-normal">
+              <span className="truncate">{uiText(`scope${scope}` as "scope7d")}</span>
+              <GooseIcons.ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-32">
+            <DropdownMenuRadioGroup value={scope} onValueChange={(value) => onScopeChange(value as ReflectionScope)}>
+              {REFLECTION_SCOPES.map((value) => (
+                <DropdownMenuRadioItem key={value} value={value}>
+                  {uiText(`scope${value}` as "scope7d")}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <IconButton
           type="button"
           size="sm"
