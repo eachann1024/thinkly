@@ -1,0 +1,52 @@
+name: Upload installers to Quark
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published release tag; latest uses the newest stable release
+        type: string
+        default: latest
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    concurrency:
+      group: goose-note-publish-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Download a published release and upload to Quark
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          QUARK_COOKIE: ${{ secrets.QUARK_COOKIE }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          if [ -z "$tag" ] || [ "$tag" = "latest" ]; then
+            tag="$(gh release view --repo "$GH_REPO" --json tagName --jq .tagName)"
+          fi
+          mkdir -p quark-assets
+          downloaded=0
+          for _ in 1 2 3 4 5; do
+            if gh release download "$tag" --repo "$GH_REPO" --dir quark-assets --clobber; then
+              downloaded=1
+              break
+            fi
+            sleep 5
+          done
+          test "$downloaded" = 1
+          version="$(node --input-type=module -e 'const match=/^v(\d+\.\d+\.\d+)(?:-|$)/.exec(process.argv[1] ?? ""); if (!match) process.exit(1); console.log(match[1])' "$tag")"
+          node scripts/quark-upload.mjs quark-assets "$version"
