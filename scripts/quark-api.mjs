@@ -3,9 +3,10 @@ const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 
 export class QuarkFailure extends Error {}
 
-function cookieFailure(message) {
+function cookieFailure(message, reason) {
   const error = new QuarkFailure(message);
   error.cookie = true;
+  error.reason = reason;
   return error;
 }
 
@@ -39,7 +40,7 @@ async function readJson(response) {
 
 function assertApi(response, payload) {
   if (response.status === 401 || payload.code === 31001 || payload.status === 401) {
-    throw cookieFailure("夸克 Cookie 失效");
+    throw cookieFailure("夸克 Cookie 失效", "cookie_invalid");
   }
   if (response.status >= 300 || (payload.code && payload.code !== 0) || (typeof payload.status === "number" && payload.status >= 400)) {
     const message = typeof payload.message === "string" && !/https?:|cookie|token|auth/i.test(payload.message)
@@ -68,7 +69,7 @@ export async function api(cookie, method, path, { query, body, timeoutMs = 30_00
 
 export function readCookie() {
   const cookie = process.env.QUARK_COOKIE?.trim() ?? "";
-  if (!cookie) throw cookieFailure("夸克 Cookie 未配置（QUARK_COOKIE）");
+  if (!cookie) throw cookieFailure("夸克 Cookie 未配置（QUARK_COOKIE）", "not_configured");
   return cookie;
 }
 
