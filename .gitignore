@@ -132,3 +132,6 @@ dist-signpath/
 !scripts/macos-install-copy.mjs
 !docs/macos-installation.md
 .goose/
+
+# 本地设计草稿
+/design-drafts/

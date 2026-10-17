@@ -1,5 +1,6 @@
 zh-Hans:
   parentPath: "路径不允许包含 .."
+  pathMissing: "文件或文件夹不存在"
   outsideAllowed: "路径不在允许的仓库或应用数据目录内"
   httpOnly: "只允许打开 http/https 链接"
   invalidApps: "无效的应用列表"
@@ -23,6 +24,7 @@ zh-Hans:
   notebookSymlink: "笔记本包含符号链接：{{path}}"
 en:
   parentPath: "Paths can’t contain .."
+  pathMissing: "The file or folder does not exist."
   outsideAllowed: "The path is outside the allowed repositories and app data directory."
   httpOnly: "Only HTTP and HTTPS links can be opened."
   invalidApps: "The app list is invalid."

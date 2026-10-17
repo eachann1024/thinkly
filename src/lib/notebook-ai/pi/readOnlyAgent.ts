@@ -21,16 +21,18 @@ export type ReadOnlyAgentHandlers = {
  */
 export async function runPiReadOnlyAgent(options: {
   notebookId: string;
+  /** 跨笔记本检索的允许范围，见 NotebookAiAgentContext.notebookIds */
+  notebookIds?: string[];
   systemPrompt: string;
   prompt: string;
   signal: AbortSignal;
   handlers: ReadOnlyAgentHandlers;
 }): Promise<string> {
-  const { notebookId, systemPrompt, prompt, signal, handlers } = options;
+  const { notebookId, notebookIds, systemPrompt, prompt, signal, handlers } = options;
   const modelResult = buildPiLanguageModel();
   if (!modelResult.ok) throw new Error(modelResult.reason);
 
-  const agentContext: NotebookAiAgentContext = { notebookId, currentPageId: null, loadedSkills: new Set() };
+  const agentContext: NotebookAiAgentContext = { notebookId, notebookIds, currentPageId: null, loadedSkills: new Set() };
   const allowed = new Set<string>(READ_ONLY_TOOL_NAMES);
   const tools = buildPiDomainTools(agentContext).filter(tool => allowed.has(tool.name));
 

@@ -1,7 +1,8 @@
 import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { Switch, SwitchRow } from "@/components/ui/switch";
-import { useReflection } from "@/stores/useReflection";
+import { isReflectionAiConsented, useReflection } from "@/stores/useReflection";
+import { useSettings } from "@/stores/useSettings";
 import { cn } from "@/lib/utils";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
@@ -18,7 +19,8 @@ const uiText = createTranslator(localMessages);
 
 export function ReflectionAISection() {
   useLocale();
-  const aiConsent = useReflection((s) => s.aiConsent);
+  const aiEnabled = useSettings((s) => s.ai.enabled);
+  const aiConsent = useReflection((s) => isReflectionAiConsented(s, aiEnabled));
   const setAiConsent = useReflection((s) => s.setAiConsent);
   return (
     <SettingsSectionCard title={uiText("weeklyReflection")}>

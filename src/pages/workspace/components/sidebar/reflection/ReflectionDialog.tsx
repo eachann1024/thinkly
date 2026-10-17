@@ -5,7 +5,7 @@ import { DialogShell } from "@/components/ui/dialog-shell";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { useSettings } from "@/stores/useSettings";
-import { useReflection } from "@/stores/useReflection";
+import { isReflectionAiConsented, useReflection } from "@/stores/useReflection";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import { ensureReflection, isReflectionAIReady } from "@/lib/reflection/reflectionRunner";
 import { DEFAULT_SCOPE, type ReflectionScope } from "@/lib/reflection/scopeRange";
@@ -21,8 +21,12 @@ import { useReflectionData } from "./useReflectionData";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1">`
 zh-Hans:
+  title: "反思"
+  basis: "基于你的笔记编辑历史"
   empty: "这段时间没有编辑记录"
 en:
+  title: "Reflection"
+  basis: "Based on your note edit history"
   empty: "No edits in this period"
 `;
 const uiText = createTranslator(localMessages);
@@ -37,7 +41,7 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
   const [scope, setScope] = useState<ReflectionScope>(DEFAULT_SCOPE);
   const ai = useSettings((s) => s.ai);
   const reports = useReflection((s) => s.reports);
-  const aiConsent = useReflection((s) => s.aiConsent);
+  const aiConsent = useReflection((s) => isReflectionAiConsented(s, ai.enabled));
   const generatingKey = useReflection((s) => s.generatingKey);
   const failure = useReflection((s) => s.failure);
   const markSeen = useReflection((s) => s.markSeen);
@@ -84,18 +88,19 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      contentClassName="max-h-[calc(100dvh-64px)] w-[min(calc(100vw-32px),max(640px,68vw))] max-w-[1080px] sm:max-w-[1080px]"
-      bodyClassName="flex flex-col overflow-hidden p-0"
-    >
-      <div className="shrink-0 px-8 pb-5 pt-8">
+      title={uiText("title")}
+      description={uiText("basis")}
+      actions={(
         <ReflectionHeader
           scope={scope}
           busy={loading || generating}
           onScopeChange={setScope}
           onRefresh={() => void refresh()}
         />
-      </div>
-      <div className="min-h-0 flex-1 space-y-10 overflow-y-auto px-8 pb-8">
+      )}
+      contentClassName="max-h-[calc(100dvh-64px)] w-[min(calc(100vw-32px),max(640px,68vw))] max-w-[1080px] sm:max-w-[1080px]"
+      bodyClassName="space-y-10"
+    >
       {data && !hasEdits ? <p className="text-sm text-muted-foreground">{uiText("empty")}</p> : null}
       {data && hasEdits ? (
         <>
@@ -114,7 +119,6 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
           <ReflectionNoteList variant="stalled" notes={data.stats.stalled} pages={pages} onOpen={(id) => void openNote(id)} />
         </>
       ) : null}
-      </div>
     </DialogShell>
   );
 }

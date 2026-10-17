@@ -6,8 +6,6 @@ zh-Hans:
   newConversation: "新会话"
   locked: "已锁定"
   deleted: "页面已被删除"
-  closeAi: "关闭 AI 面板"
-  openAi: "打开 AI 面板"
   restore: "恢复笔记"
   deletePermanently: "彻底删除笔记"
   permanentDelete: "彻底删除"
@@ -17,8 +15,6 @@ en:
   newConversation: "New conversation"
   locked: "Locked"
   deleted: "This note has been deleted"
-  closeAi: "Close AI panel"
-  openAi: "Open AI panel"
   restore: "Restore note"
   deletePermanently: "Delete note permanently"
   permanentDelete: "Delete permanently"
@@ -35,13 +31,11 @@ import { cn, formatShortcut } from "@/lib/utils";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { bindIdleWindowDrag } from "@/lib/electron/windowDrag";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Sparkles } from "@/components/ui/icons";
 import { usePages } from "@/stores/usePages";
 import { useFileNavHistory } from "@/stores/useFileNavHistory";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { useSettings } from "@/stores/useSettings";
-import { useAiStatus } from "@/stores/useAiStatus";
 import { isFullscreenAiLayout } from "../notebook-ai/useNotebookAiPanel";
 import { useAiHeaderActions, useAiHeaderTitle } from "../notebook-ai/aiHeaderSlot";
 import { ConversationTitle } from "../notebook-ai/ConversationTitle";
@@ -69,7 +63,6 @@ export function DesktopTitleBar({
   onDelete,
   aiPanelOpen,
   aiLayoutMode = "fullscreen",
-  onToggleAiPanel,
 }: DesktopTitleBarProps) {
   useLocale();
   const activePageId = usePages((s) => s.activePageId);
@@ -80,7 +73,6 @@ export function DesktopTitleBar({
     (s) => s.toggleSidebarCollapsed,
   );
   const appShortcuts = useSettings((s) => s.appShortcuts);
-  const aiPhase = useAiStatus((s) => s.phase);
   const aiHeaderActions = useAiHeaderActions();
   const aiHeaderTitle = useAiHeaderTitle();
   const canGoBack = useFileNavHistory((s) => s.index > 0);
@@ -88,9 +80,6 @@ export function DesktopTitleBar({
 
   const toggleSidebarShortcutLabel = appShortcuts.toggleSidebar
     ? formatShortcut(appShortcuts.toggleSidebar)
-    : "";
-  const toggleAiPanelShortcutLabel = appShortcuts.toggleAIPanel
-    ? formatShortcut(appShortcuts.toggleAIPanel)
     : "";
 
   const aiFullscreenOpen =
@@ -197,39 +186,6 @@ export function DesktopTitleBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {showWorkspaceActions && folderActionsAvailable && onToggleAiPanel && !page?.trashedAt && (
-          <TooltipProvider delayDuration={600}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <IconButton size="icon" tone="muted"
-                  type="button"
-                  className={cn(
-                    "ai-icon-button shrink-0",
-                    actionButtonClass,
-                    "text-foreground",
-                  )}
-                  data-ai-state={aiPhase}
-                  onClick={onToggleAiPanel}
-                  aria-label={aiPanelOpen ? uiText("closeAi") : uiText("openAi")}
-                  aria-pressed={aiPanelOpen}
-                >
-                  <Sparkles className="h-4 w-4" />
-                </IconButton>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <div className="flex items-center gap-2">
-                  <span>{aiPanelOpen ? uiText("closeAi") : uiText("openAi")}</span>
-                  {toggleAiPanelShortcutLabel && (
-                    <span className="text-[11px] text-muted-foreground">
-                      {toggleAiPanelShortcutLabel}
-                    </span>
-                  )}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
         {page?.trashedAt && onRestore && onDelete && (
           <>
             <TooltipProvider delayDuration={600}>

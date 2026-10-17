@@ -13,6 +13,7 @@ import {
   toggleWindow,
   type CreateWorkspaceWindowOpts,
 } from "../windows";
+import { revealSavedMarkdownInWorkspace } from "../openMarkdownFiles";
 import { senderWindow } from "./common";
 import { prepareWelcomeWindow } from "../windows/welcome";
 
@@ -147,6 +148,17 @@ export function registerWindowsIpc(): void {
       win.webContents.send("desktop:workspace-action", action);
     },
   );
+
+  ipcMain.handle("desktop:revealSavedNote", async (_event, filePath: unknown) => {
+    if (typeof filePath !== "string") return false;
+    if (!revealSavedMarkdownInWorkspace(filePath)) return false;
+    // 先把结果回给小窗，再收起置顶 panel，避免关窗把这次调用变成失败。
+    setImmediate(() => {
+      closeQuicknote();
+      showOrCreateMainWindow();
+    });
+    return true;
+  });
 
   ipcMain.handle("desktop:toggleQuicknote", async () => {
     await toggleQuicknoteWindow();

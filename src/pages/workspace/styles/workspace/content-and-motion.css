@@ -20,11 +20,6 @@
   overflow-anchor: none;
 }
 
-/* 文案装饰不再拥有彩虹/红色渐变，跟随控件与强调色。 */
-.page-menu-generate-image .page-menu-shimmer-text {
-  color: inherit;
-}
-
 .shortcut-capture-hint {
   color: var(--goose-interactive-selected-fg);
 }

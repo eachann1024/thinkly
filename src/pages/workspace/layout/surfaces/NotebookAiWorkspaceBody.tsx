@@ -29,7 +29,6 @@ function NotebookAiWorkspaceBody({
   openNewTabHandler,
   aiPanelOpen,
   aiLayoutMode,
-  toggleAiPanel,
   showSideAiPanel,
   closeAiPanel,
   editorRef,
@@ -51,7 +50,6 @@ function NotebookAiWorkspaceBody({
   openNewTabHandler: () => void;
   aiPanelOpen: boolean;
   aiLayoutMode: ReturnType<typeof useNotebookAiPanel>["layoutMode"];
-  toggleAiPanel: () => void;
   showSideAiPanel: boolean;
   closeAiPanel: () => void;
   editorRef: RefObject<EditorRef | null>;
@@ -92,9 +90,6 @@ function NotebookAiWorkspaceBody({
                 onOpenSearch={handleOpenSearch}
                 aiPanelOpen={aiAvailableForNotebook && aiPanelOpen}
                 aiLayoutMode={aiLayoutMode}
-                onToggleAiPanel={
-                  aiAvailableForNotebook ? toggleAiPanel : undefined
-                }
               />
             )}
             <div className="workspace-content-columns relative ml-0 mt-0 flex min-h-0 flex-1 flex-row gap-2 overflow-hidden">
@@ -153,9 +148,6 @@ function NotebookAiWorkspaceBody({
                       }
                       aiPanelOpen={aiAvailableForNotebook && aiPanelOpen}
                       aiLayoutMode={aiLayoutMode}
-                      onToggleAiPanel={
-                        aiAvailableForNotebook ? toggleAiPanel : undefined
-                      }
                     />
                   )}
                   <FolderHomePage page={page} />
@@ -188,7 +180,6 @@ function NotebookAiWorkspaceBody({
               aiAvailableForNotebook={aiAvailableForNotebook}
               aiPanelOpen={aiPanelOpen}
               aiLayoutMode={aiLayoutMode}
-              toggleAiPanel={toggleAiPanel}
               showSideAiPanel={showSideAiPanel}
               aiNotebookId={aiNotebookId}
               editorRef={editorRef}

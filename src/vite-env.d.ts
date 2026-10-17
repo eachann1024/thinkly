@@ -119,6 +119,7 @@ declare global {
     syncTitleBarHeight: (height: number) => Promise<void>
     toggleMainWindow: () => Promise<void>
     showMainWindow: (action?: "none" | "search" | "settings" | "ai-panel" | "new-note") => Promise<void>
+    revealSavedNote: (filePath: string) => Promise<boolean>
     toggleQuicknote: () => Promise<void>
     closeQuicknote: () => Promise<void>
     registerHotkeys: (k: { wake: string; quicknote: string; search: string }) => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean; paused?: boolean }>

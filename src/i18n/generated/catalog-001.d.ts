@@ -61,7 +61,7 @@ declare module "../types" {
     "src/components/editor/core/blocknoteToggleSlashItems.tsx#messages:1": { "toggleHeading": { "level": string | number }; "toggleList": {  } };
     "src/components/editor/core/editorLocale.ts#messages:1": { "quote": {  }; "typeToInsertABlock": {  } };
     "src/components/editor/core/useEditorClipboard.ts#messages:1": { "couldNotCopyTheImageToTheClipboard": {  }; "imageCopiedTheNoteHasChangedSoThe": {  } };
-    "src/components/editor/core/useEditorExtensions.ts#messages:1": { "couldNotOpenThisMarkdownNote": {  } };
+    "src/components/editor/core/useEditorExtensions.ts#messages:1": { "couldNotOpenThisPath": {  } };
     "src/components/editor/extensions/copyBlockClipboard.ts#messages:1": { "couldNotWriteToTheClipboardYourOriginal": {  } };
     "src/components/editor/hooks/editorPasteBlocks.ts#messages:1": { "theNoteHasChangedPleasePasteAgain": {  } };
     "src/components/editor/hooks/editorStructurePaste.ts#messages:1": { "theNoteHasChangedPleasePasteAgain": {  } };

@@ -23,6 +23,7 @@
   --goose-control-height-compact: 2.25rem;
   --goose-control-height-small: 1.75rem;
   --goose-field-height: 2.5rem;
+  --goose-field-label-gap: 10px;
   --goose-control-icon-size: 14px;
   --goose-checkbox-size: 1rem;
   --goose-checkbox-radius: 4px;

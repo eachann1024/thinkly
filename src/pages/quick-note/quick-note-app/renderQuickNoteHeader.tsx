@@ -7,48 +7,26 @@ zh-Hans:
   renameNamedLabel: "{{name}} · 重命名速记"
   saveToNotes: "保存到笔记"
   emptyNote: "速记内容为空，无法保存"
-  quickNoteSettings: "速记设置"
-  rename: "重命名"
   fontSize: "字号"
   pixels: "{{size}} 像素"
-  clearAfterSave: "保存到笔记后，当前速记会清空。"
   close: "关闭"
   helpLabel: "使用说明"
   helpTitle: "速记"
-  helpIntro: "内容默认只留在当前速记。点「保存到笔记」会在当前笔记本新建一篇，并清空这张速记。"
-  helpSwitch: "切换"
-  helpSwitchBody: "顶部 1–5 是五个独立速记。点击或拖动切换；也可按 {{shortcuts}}。"
-  helpSwitchAlternate: "{{primary}}，或 {{alternate}}"
-  helpEdit: "编辑"
-  helpEditBody: "{{zoomIn}} / {{zoomOut}} 缩放，{{zoomReset}} 复位；{{undo}} 撤销，{{redo}} 或 {{alternateRedo}} 重做。"
-  helpSave: "保存"
-  helpSaveBody: "点右上角把当前速记写入当前笔记本，保存后清空并回到空白。"
-  helpDismiss: "收起"
-  helpDismissBody: "小窗始终置顶；按 {{dismiss}} 或点右上角收起。草稿、位置、尺寸和缩放都会保留。"
+  helpIntro: "保存后会打开主窗口，定位到这篇笔记。侧栏选中会切过去，文件夹件数一并算上它。这张速记会清空。"
+  helpSlots: "顶部 1–5 是五张各自独立的速记。"
 en:
   renameSlot: "Rename Quick Note {{slot}}"
   renameLabel: "Rename Quick Note"
   renameNamedLabel: "{{name}} · Rename Quick Note"
   saveToNotes: "Save to notes"
   emptyNote: "This Quick Note is empty"
-  quickNoteSettings: "Quick Note settings"
-  rename: "Rename"
   fontSize: "Font size"
   pixels: "{{size}} pixels"
-  clearAfterSave: "This Quick Note will be cleared after you save it to notes."
   close: "Close"
   helpLabel: "How to use"
   helpTitle: "Quick Note"
-  helpIntro: "Text stays in this Quick Note until you save it. Save to notes creates a page in the current notebook and clears this Quick Note."
-  helpSwitch: "Switch"
-  helpSwitchBody: "The numbers 1–5 are five separate notes. Click or drag to switch, or press {{shortcuts}}."
-  helpSwitchAlternate: "{{primary}}, or {{alternate}}"
-  helpEdit: "Edit"
-  helpEditBody: "{{zoomIn}} / {{zoomOut}} zoom, {{zoomReset}} resets. {{undo}} undoes, {{redo}} or {{alternateRedo}} redoes."
-  helpSave: "Save"
-  helpSaveBody: "Use the button at the top right to write this note into the current notebook. It is cleared afterward."
-  helpDismiss: "Hide"
-  helpDismissBody: "The window stays on top. Press {{dismiss}} or the close button to hide it. The draft, position, size, and zoom are kept."
+  helpIntro: "Saving opens the main window and focuses that note. The sidebar selects it, and the folder count updates with it. This Quick Note is cleared."
+  helpSlots: "The numbers 1–5 are five separate notes."
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
@@ -79,7 +57,6 @@ export function renderQuickNoteHeader(
     editRename,
     renameInputRef,
     slotNames,
-    helpShortcuts,
     zoom,
     setEditorZoom,
     editorFontSize,
@@ -207,41 +184,8 @@ export function renderQuickNoteHeader(
               <div className="quicknote-help-heading">
                 <div className="text-sm font-medium">{uiText("helpTitle")}</div>
                 <p>{uiText("helpIntro")}</p>
+                <p>{uiText("helpSlots")}</p>
               </div>
-              <ul className="quicknote-help-list text-muted-foreground">
-                <li>
-                  <b className="text-foreground">{uiText("helpSwitch")}</b>
-                  ：{uiText("helpSwitchBody", {
-                    shortcuts: helpShortcuts.alternateSwitchSlots
-                      ? uiText("helpSwitchAlternate", {
-                          primary: helpShortcuts.switchSlots,
-                          alternate: helpShortcuts.alternateSwitchSlots,
-                        })
-                      : helpShortcuts.switchSlots,
-                  })}
-                </li>
-                <li>
-                  <b className="text-foreground">{uiText("helpEdit")}</b>
-                  ：{uiText("helpEditBody", {
-                    zoomIn: helpShortcuts.zoomIn,
-                    zoomOut: helpShortcuts.zoomOut,
-                    zoomReset: helpShortcuts.zoomReset,
-                    undo: helpShortcuts.undo,
-                    redo: helpShortcuts.redo,
-                    alternateRedo: helpShortcuts.alternateRedo,
-                  })}
-                </li>
-                <li>
-                  <b className="text-foreground">{uiText("helpSave")}</b>
-                  ：{uiText("helpSaveBody")}
-                  <FilePlus2 className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" />
-                </li>
-                <li>
-                  <b className="text-foreground">{uiText("helpDismiss")}</b>
-                  ：{uiText("helpDismissBody", { dismiss: helpShortcuts.dismiss })}
-                  <X className="mx-0.5 inline h-3.5 w-3.5 align-text-bottom" />
-                </li>
-              </ul>
               <div className="quicknote-font-control">
                 <div className="flex items-center justify-between gap-2">
                   <label htmlFor="quicknote-font-size">{uiText("fontSize")}</label>
@@ -261,8 +205,6 @@ export function renderQuickNoteHeader(
                   onChange={(event) => setEditorZoom(Number(event.target.value))}
                 />
               </div>
-              <p className="quicknote-save-hint text-muted-foreground">
-                {uiText("clearAfterSave")}</p>
             </PopoverContent>
           </Popover>
           <Button contentStyle="preserve" variant="ghost"

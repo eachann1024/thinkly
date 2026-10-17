@@ -55,6 +55,8 @@ export type NotebookAiMessage = UIMessage<
 
 export interface NotebookAiAgentContext {
   notebookId: string;
+  /** 跨笔记本只读检索的允许范围；缺省时只能访问 notebookId */
+  notebookIds?: string[];
   currentPageId?: string | null;
   loadedSkills: Set<NotebookSkillId>;
 }

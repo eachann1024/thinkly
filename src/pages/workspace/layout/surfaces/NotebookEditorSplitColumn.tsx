@@ -30,7 +30,6 @@ export function NotebookEditorSplitColumn({
   aiAvailableForNotebook,
   aiPanelOpen,
   aiLayoutMode,
-  toggleAiPanel,
   showSideAiPanel,
   aiNotebookId,
   editorRef,
@@ -46,7 +45,6 @@ export function NotebookEditorSplitColumn({
   aiAvailableForNotebook: boolean;
   aiPanelOpen: boolean;
   aiLayoutMode: ReturnType<typeof useNotebookAiPanel>["layoutMode"];
-  toggleAiPanel: () => void;
   showSideAiPanel: boolean;
   aiNotebookId: string | null;
   editorRef: RefObject<EditorRef | null>;
@@ -115,7 +113,6 @@ export function NotebookEditorSplitColumn({
             onDelete={() => void permanentlyDeletePageWithCleanup(activePageId)}
             aiPanelOpen={aiAvailableForNotebook && aiPanelOpen}
             aiLayoutMode={aiLayoutMode}
-            onToggleAiPanel={aiAvailableForNotebook ? toggleAiPanel : undefined}
           />
         )}
         <div className="min-h-0 flex-1">

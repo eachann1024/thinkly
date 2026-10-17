@@ -182,13 +182,13 @@ export function PageMenu() {
 
           {/* Generate Image — standalone, before Export */}
           <PopoverAction
-            className="page-menu-generate-image grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs text-foreground"
+            className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
             onSelect={() => {
               setThemeSelectorOpen(true);
             }}
           >
-            <GooseIcons.Image className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="page-menu-shimmer-text min-w-0 truncate font-medium text-foreground">
+            <GooseIcons.Image className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
+            <span className="min-w-0 truncate">
               {selectedBlocks.length > 0 ? uiText("exportSelectionImage") : uiText("exportImage")}
             </span>
           </PopoverAction>

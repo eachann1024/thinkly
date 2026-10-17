@@ -18,12 +18,18 @@ const isTitleMatch = (page: SearchResultPage) =>
 /** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
 export function useSheetResults() {
   useLocale();
-  const s = useSearchSession(useShallow(state => ({ open: state.view.phase !== "closed", query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort })));
+  const s = useSearchSession(useShallow(state => ({
+    open: state.view.phase !== "closed", query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort,
+    startingNotebookId: state.view.phase !== "closed" ? state.view.context.startingNotebookId : null,
+  })));
   const pages = usePages(state => s.open ? state.pages : EMPTY_PAGES);
   const showRecent = useSettings(state => state.showRecentInSearch);
   const { loading, loadError, retryLoad } = useSearchFolderRefresh(s.open, s.scope);
   const scopedId = s.scope.kind === "all" ? null : s.scope.notebookId;
-  const search = useCommandSearch({ enabled: s.open, searchQuery: s.query, pages, activeNotebookId: scopedId, searchAllNotebooks: s.scope.kind === "all" });
+  const search = useCommandSearch({
+    enabled: s.open, searchQuery: s.query, pages, searchAllNotebooks: s.scope.kind === "all",
+    activeNotebookId: s.scope.kind === "all" ? s.startingNotebookId : scopedId,
+  });
   const { searchResults, deferredQuery } = search;
   const hasResultQuery = Boolean(deferredQuery.trim());
   const filtered = useMemo(() => {
@@ -38,7 +44,7 @@ export function useSheetResults() {
   [hasResultQuery, showRecent, searchResults.recent, searchResults.allDisplay, filtered, limit]);
   const notebooks = useNotebooks(state => state.notebooks);
   const getCandidates = useCallback(() => Object.values(pages).filter(page => isCommandSearchablePage(page, notebooks) &&
-    (scopedId ? page.workspaceId === scopedId : shouldIncludePageInCommandScope(page, notebooks, true, null))), [pages, notebooks, scopedId]);
+    (scopedId ? page.workspaceId === scopedId : shouldIncludePageInCommandScope(page, notebooks, true, s.startingNotebookId))), [pages, notebooks, scopedId, s.startingNotebookId]);
   return {
     ...search, getCandidates, pages, loading, loadError, retryLoad, results, showRecent,
     total: filtered ? filtered.length : searchResults.all.length,
