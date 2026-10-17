@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 
-const KEY = [120, 340, 520, 760, 1050, 1300, 1650, 1800, 1919];
+const KEY = [120, 500, 760, 1120, 1540, 1900, 2370, 2640, 2879];
 const frames = KEY.map((n) => `f${String(n).padStart(4, "0")}.jpg`);
 
 const inputs = frames.flatMap((file) => ["-i", `qa/stills/${file}`]);
