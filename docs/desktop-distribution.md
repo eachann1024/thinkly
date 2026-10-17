@@ -4,4 +4,4 @@
 
 国内下载走夸克网盘。阿里云 OSS 国内同步已停用，不再读取 OSS 配置，也不再维护独立下载域名。
 
-Desktop installers 每小时检查一次。`package.json` 版本号没有变高时只跑判断，不构建、不发布，夸克任务也不启动。版本变高并发布后，才把面向用户的安装包上传到夸克文件夹「鹅的笔记安装包」，只保留最新版和上一版；云端已有同名且大小相同的文件则跳过。手动想忽略版本判断时勾选 `force`。不重新编译时，在 Actions 运行 **Upload installers to Quark**，输入 `release_tag`（默认 `latest`）。
+Desktop installers 每小时第 17 分检查一次。`package.json` 已有同版本 `v<版本>-*` 发布时，判断任务输出 `should_build=false`，编译、签名、上传和夸克任务全部跳过。版本变高并发布后，才把面向用户的安装包上传到夸克文件夹「鹅的笔记安装包」，只保留最新版和上一版；云端已有同名且大小相同的文件则跳过。手动想忽略版本判断时勾选 `force`。不重新编译时，在 Actions 运行 **Upload installers to Quark**，输入 `release_tag`（默认 `latest`）。
