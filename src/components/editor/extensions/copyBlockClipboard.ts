@@ -14,6 +14,8 @@ zh-Hans:
   couldNotWriteToTheClipboardYourOriginal: "无法写入剪贴板，原内容已保留"
 en:
   couldNotWriteToTheClipboardYourOriginal: "Could not write to the clipboard. Your original content was preserved."
+ja:
+  couldNotWriteToTheClipboardYourOriginal: "クリップボードに書き込めませんでした。元の内容は残されています"
 `;
 const t = createTranslator(messages);
 

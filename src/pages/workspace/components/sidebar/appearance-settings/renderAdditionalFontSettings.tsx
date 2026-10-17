@@ -5,6 +5,8 @@ zh-Hans:
   fontCategory: "{{category}}字体"
 en:
   fontCategory: "{{category}} font"
+ja:
+  fontCategory: "{{category}}フォント"
 `;
 const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";

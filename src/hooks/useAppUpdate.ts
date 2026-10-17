@@ -9,6 +9,10 @@ en:
   updateFailed: "Update failed. Please try again."
   downloadUnavailable: "Downloading updates is not supported in this environment."
   downloaded: "Installer downloaded"
+ja:
+  updateFailed: "アップデートに失敗しました。もう一度お試しください"
+  downloadUnavailable: "この環境ではアップデートのダウンロードに対応していません"
+  downloaded: "インストーラをダウンロードしました"
 `);
 import { useEffect } from "react";
 import type { AppUpdateState } from "@/lib/appUpdateTypes";

@@ -24,6 +24,17 @@ en:
   pending: "Pending"
   complete: "Complete"
   detailSteps: "{{value1}} steps{{value2}}"
+ja:
+  thePageContentHasChanged: "ページの内容が変更されました"
+  writeCanceled: "書き込みをキャンセルしました"
+  failed: "処理に失敗しました"
+  processing: "処理中"
+  awaitingApproval: "承認待ち"
+  canceled: "キャンセル済み"
+  undone: "取り消し済み"
+  pending: "保留中"
+  complete: "処理完了"
+  detailSteps: "{{value1}} ステップ{{value2}}"
 `;
 const t = createTranslator(messages);
 

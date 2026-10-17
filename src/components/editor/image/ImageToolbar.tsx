@@ -50,6 +50,13 @@ en:
   alignRight: "Align right"
   copyImage: "Copy image"
   downloadImage: "Download image"
+ja:
+  imageActions: "画像の操作"
+  alignLeft: "左揃え"
+  alignCenter: "中央揃え"
+  alignRight: "右揃え"
+  copyImage: "画像をコピー"
+  downloadImage: "画像をダウンロード"
 `;
 const t = createTranslator(messages);
 

@@ -19,6 +19,10 @@ en:
   image: "Image"
   noPageIsOpen: "No page is open"
   nothingToInsert: "Nothing to insert"
+ja:
+  image: "画像"
+  noPageIsOpen: "開いているページがありません"
+  nothingToInsert: "挿入できる内容がありません"
 `;
 const t = createTranslator(messages);
 

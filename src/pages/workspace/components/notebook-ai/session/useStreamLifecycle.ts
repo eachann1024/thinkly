@@ -16,6 +16,9 @@ zh-Hans:
 en:
   aiResponseTimedOutThisTaskWasPaused: "AI response timed out. This task was paused."
   completedContentWasPreservedYouCanRetryAt: "Completed content was preserved. You can retry at any time."
+ja:
+  aiResponseTimedOutThisTaskWasPaused: "AI の応答がタイムアウトしたため、このタスクを一時停止しました"
+  completedContentWasPreservedYouCanRetryAt: "完了した内容は保持されています。いつでも再試行できます。"
 `;
 const t = createTranslator(messages);
 

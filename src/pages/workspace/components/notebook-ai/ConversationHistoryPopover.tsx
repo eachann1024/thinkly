@@ -30,6 +30,11 @@ en:
   current: "Current"
   deleteConversation: "Delete conversation"
   conversationHistory: "Conversation history"
+ja:
+  noPreviousConversations: "過去の会話はありません"
+  current: "現在"
+  deleteConversation: "会話を削除"
+  conversationHistory: "会話履歴"
 `;
 const t = createTranslator(messages);
 

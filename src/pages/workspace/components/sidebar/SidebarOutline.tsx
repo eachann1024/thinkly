@@ -14,6 +14,12 @@ en:
   foldersDoNotHaveAnOutline_45b6: "Folders do not have an outline"
   loadingOutline_1285: "Loading outline…"
   noteContentIsTemporarilyUnavailable_0257: "Note content is temporarily unavailable"
+ja:
+  selectANoteToViewIts_13a8: "ノートを選択するとアウトラインを表示します"
+  thisNoteIsUnavailable_0618: "このノートは利用できません"
+  foldersDoNotHaveAnOutline_45b6: "フォルダにはアウトラインがありません"
+  loadingOutline_1285: "アウトラインを読み込んでいます…"
+  noteContentIsTemporarilyUnavailable_0257: "ノートの本文は現在利用できません"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useMemo, useSyncExternalStore } from "react";

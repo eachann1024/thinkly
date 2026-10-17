@@ -23,6 +23,13 @@ en:
   saveTheAiServiceSettingsAndLoadThe: "Save the AI service settings and load the model list first"
   theSelectionCouldNotBeLocatedSelectThe: "The selection could not be located. Select the body text again and retry."
   thisSelectionDoesNotSupportInlineRewritingSelect: "This selection does not support inline rewriting. Select body text and try again."
+ja:
+  thisPageCannotBeEdited: "このページは編集できません。"
+  enableTheAiAssistantInSettingsFirst: "AI アシスタントがオフです。先に設定でオンにしてください"
+  noApiKeyIsConfiguredCheckSettingsAi: "API キーが入力されていません。「設定 › AI アシスタント › AI サービス」で設定を確認してください。"
+  saveTheAiServiceSettingsAndLoadThe: "先に AI サービスの設定を保存し、モデル一覧を取得してください"
+  theSelectionCouldNotBeLocatedSelectThe: "現在の選択範囲を特定できません。本文のテキストを選択し直してからお試しください"
+  thisSelectionDoesNotSupportInlineRewritingSelect: "この選択範囲はインラインでの書き換えに対応していません。本文のテキストを選択し直してください。"
 `;
 const t = createTranslator(messages);
 

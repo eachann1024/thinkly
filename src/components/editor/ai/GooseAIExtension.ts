@@ -24,6 +24,12 @@ en:
   pageTitlesDoNotSupportInlineAiRewriting: "Page titles do not support inline AI rewriting. Select body text instead."
   selectAModelBeforeUsingInlineAi: "Select a model before using inline AI."
   thisPageIsNotEditableOrAiIs: "This page is not editable or AI is not enabled."
+ja:
+  thisPageWasDeletedLockedOrIsNot: "このページは削除、ロックされているか、編集できません。元のテキストは変更されていません。"
+  selectTheBodyTextAgain: "本文をもう一度選択してください。"
+  pageTitlesDoNotSupportInlineAiRewriting: "ページタイトルはインライン AI での書き換えに対応していません。本文を選択してください。"
+  selectAModelBeforeUsingInlineAi: "インライン AI を使用する前に、モデルを選択してください。"
+  thisPageIsNotEditableOrAiIs: "このページは編集できないか、AI がオンになっていません。"
 `;
 const t = createTranslator(messages);
 

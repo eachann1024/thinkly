@@ -5,6 +5,8 @@ zh-Hans:
   newNote_e82d: "新建笔记"
 en:
   newNote_e82d: "New note"
+ja:
+  newNote_e82d: "新規ノート"
 `;
 const uiText = createTranslator(localMessages);
 import { NotebookSwitcher } from "../NotebookSwitcher";

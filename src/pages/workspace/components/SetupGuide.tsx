@@ -28,6 +28,19 @@ en:
   back: "Back"
   next: "Next"
   finishSetup: "Finish setup"
+ja:
+  progress: "ステップ {{step}} / {{total}}"
+  appearance: "外観"
+  customizeAppearance: "外観を設定"
+  reading: "読みやすさ"
+  adjustReadingPreferences: "閲覧設定を調整"
+  setupGuide: "セットアップガイド"
+  setupSteps: "セットアップの手順"
+  appearancePreview: "外観のリアルタイムプレビュー"
+  exitSetup: "ガイドを終了"
+  back: "戻る"
+  next: "次へ"
+  finishSetup: "設定を完了"
 `;
 const uiText = createTranslator(localMessages);
 import { useLayoutEffect, useRef, useState } from "react";

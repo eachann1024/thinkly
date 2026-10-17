@@ -12,6 +12,11 @@ en:
   restoring: "Restoring Quick Note"
   opening: "Opening Thinkly"
   reload: "Reload"
+ja:
+  openFailed: "Thinkly を開けません"
+  restoring: "クイックノートを復元しています"
+  opening: "Thinkly を開いています"
+  reload: "再読み込み"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

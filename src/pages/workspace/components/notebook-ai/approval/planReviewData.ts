@@ -18,6 +18,8 @@ zh-Hans:
   noteChangePlan: "笔记变更计划"
 en:
   noteChangePlan: "Note change plan"
+ja:
+  noteChangePlan: "ノート変更プラン"
 `;
 const t = createTranslator(messages);
 

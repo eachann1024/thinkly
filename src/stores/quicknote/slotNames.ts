@@ -5,6 +5,8 @@ zh-Hans:
   defaultName: "速记 {{slot}}"
 en:
   defaultName: "Quick Note {{slot}}"
+ja:
+  defaultName: "クイックノート {{slot}}"
 `;
 const uiText = createTranslator(localMessages);
 import type { QuickNoteSlotNames, QuickNoteSlot } from "./types";

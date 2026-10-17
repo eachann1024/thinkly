@@ -10,3 +10,9 @@ en:
   commonLanguages: "Common languages"
   codeLanguage: "Code language"
   noLanguagesFound: "No languages found"
+ja:
+  searchCodeLanguages: "コードの言語を検索"
+  searchLanguages: "言語を検索…"
+  commonLanguages: "よく使う言語"
+  codeLanguage: "コードの言語"
+  noLanguagesFound: "言語が見つかりません"

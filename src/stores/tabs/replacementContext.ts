@@ -4,6 +4,8 @@ zh-Hans:
   saveIncomplete: "本地页面保存未完成：{{id}}"
 en:
   saveIncomplete: "The local page has not finished saving: {{id}}"
+ja:
+  saveIncomplete: "ローカルページの保存が完了していません：{{id}}"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/tabs/replacementContext.ts#block2:2">`
@@ -13,6 +15,9 @@ zh-Hans:
 en:
   currentSaveFailed: "The current note couldn’t be saved. The tab was not switched."
   resolveSaveFirst: "Resolve the current file’s save issue first."
+ja:
+  currentSaveFailed: "現在のノートを保存できなかったため、切り替えませんでした"
+  resolveSaveFirst: "先に現在のファイルの保存状態を解決してください。"
 `);
 import type { TabSet, TabGet, TabItem } from "./types";
 import { usePages } from "../usePages";

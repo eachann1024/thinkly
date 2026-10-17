@@ -36,6 +36,17 @@ en:
   thisPageCannotBeEdited: "This page cannot be edited."
   theAiSuggestionIsIncompletePleaseRetry: "The AI suggestion is incomplete. Please retry."
   theTargetBlockIsNoLongerInThe9: "The target block is no longer in the document."
+ja:
+  thisBlockDoesNotSupportInlineTextRewriting: "このブロックはインラインテキストの書き換えに対応していません。"
+  theTargetBlockIsNoLongerInThe: "対象のブロックがドキュメント内にありません。選択し直してください。"
+  theAiSuggestionDoesNotMatchTheNumber: "AI の提案が選択したブロック数と一致しません。もう一度お試しください。"
+  aiDidNotReturnAnyContentThatCould: "AI から書き込み可能な内容が返されませんでした。"
+  aiReturnedATableOrNonTextBlocks: "AI が表またはテキスト以外のブロックを返しました。もう一度お試しください。"
+  theOriginalBlocksHaveDuplicateIdsSelectThe: "元のブロックの ID が重複しています。選択し直してください。"
+  theTextChangedOrTheBlocksMovedSelect: "元のテキストが変更されたか、ブロックが移動しました。選択し直してから生成してください。元のテキストは変更されていません。"
+  thisPageCannotBeEdited: "このページは編集できません。"
+  theAiSuggestionIsIncompletePleaseRetry: "AI の提案が不完全です。もう一度お試しください。"
+  theTargetBlockIsNoLongerInThe9: "対象のブロックがドキュメント内にありません。"
 `;
 const t = createTranslator(messages);
 

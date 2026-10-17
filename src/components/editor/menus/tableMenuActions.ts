@@ -7,6 +7,8 @@ zh-Hans:
   rowsAndColumnsWithMergedCellsCannotBe: "含合并单元格，暂不支持复制行列"
 en:
   rowsAndColumnsWithMergedCellsCannotBe: "Rows and columns with merged cells cannot be duplicated yet"
+ja:
+  rowsAndColumnsWithMergedCellsCannotBe: "結合されたセルを含むため、行・列のコピーには対応していません"
 `;
 const t = createTranslator(messages);
 

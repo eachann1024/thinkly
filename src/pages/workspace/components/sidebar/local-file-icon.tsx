@@ -6,6 +6,8 @@ zh-Hans:
   couldNotReadMarkdownFile_6724: "Markdown 文件读取失败"
 en:
   couldNotReadMarkdownFile_6724: "Could not read Markdown file"
+ja:
+  couldNotReadMarkdownFile_6724: "Markdown ファイルを読み込めませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

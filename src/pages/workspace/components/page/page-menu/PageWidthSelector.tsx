@@ -14,6 +14,11 @@ en:
   standard: "Standard"
   fullWidth: "Full width"
   withDefault: "{{label}} (Default)"
+ja:
+  contentWidth: "本文の幅"
+  standard: "標準"
+  fullWidth: "全幅"
+  withDefault: "{{label}}（デフォルト）"
 `;
 const t = createTranslator(messages);
 

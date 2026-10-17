@@ -5,6 +5,8 @@ zh-Hans:
   theCustomOpenaiModelRequestFailed: "请求自定义 OpenAI 模型失败"
 en:
   theCustomOpenaiModelRequestFailed: "The custom OpenAI model request failed"
+ja:
+  theCustomOpenaiModelRequestFailed: "カスタム OpenAI モデルへのリクエストに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";

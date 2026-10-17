@@ -31,6 +31,21 @@ en:
   externalApp: "external app"
   fileManager: "file manager"
   terminal: "terminal"
+ja:
+  open_d709: "開く"
+  openWithDefaultApp_8869: "デフォルトのアプリで開く"
+  openInTerminal_004c: "ターミナルで開く"
+  openFinder: "Finder で開く"
+  showFinder: "Finder で表示"
+  openExplorer: "エクスプローラーで開く"
+  showExplorer: "エクスプローラーで表示"
+  openManager: "ファイルマネージャで開く"
+  showManager: "ファイルマネージャで表示"
+  openApp: "{{app}} で開く"
+  openTerminal: "{{app}} で開く"
+  externalApp: "外部アプリ"
+  fileManager: "ファイルマネージャ"
+  terminal: "ターミナル"
 `;
 const uiText = createTranslator(localMessages);
 

@@ -9,6 +9,10 @@ en:
   thePdfPrintingServiceReturnedEmptyContent: "The PDF printing service returned empty content"
   thePdfPrintingServiceIsUnavailable: "The PDF printing service is unavailable"
   theDesktopPdfPrintingServiceIsUnavailable: "The desktop PDF printing service is unavailable"
+ja:
+  thePdfPrintingServiceReturnedEmptyContent: "printToPDF が空の内容を返しました"
+  thePdfPrintingServiceIsUnavailable: "printToPDF は利用できません"
+  theDesktopPdfPrintingServiceIsUnavailable: "Electron の PDF 印刷サービスを利用できません"
 `;
 const uiText = createTranslator(localMessages);
 /**

@@ -22,6 +22,9 @@ zh-Hans:
 en:
   addImage: "Add image"
   clickToChooseOrDragIntoTheEditor: "Click to choose or drag into the editor"
+ja:
+  addImage: "画像を追加"
+  clickToChooseOrDragIntoTheEditor: "クリックして選択、またはエディタにドラッグ"
 `;
 const t = createTranslator(messages);
 

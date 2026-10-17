@@ -12,6 +12,11 @@ en:
   startNote: "Start with a note"
   connectFolder: "Connect a local folder to start taking notes."
   chooseNote: "Select a note in the sidebar or create a new one."
+ja:
+  openFolder: "ノートフォルダを開く"
+  startNote: "ノートを書き始める"
+  connectFolder: "ローカルフォルダを関連付けて、記録を始めましょう。"
+  chooseNote: "サイドバーでノートを選択するか、新規作成してください。"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

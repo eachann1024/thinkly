@@ -9,6 +9,10 @@ en:
   couldnTReadTheMarkdownFile: "Couldn’t read the Markdown file"
   theYamlFrontmatterIsNotClosedTheOriginalFile: "The YAML frontmatter is not closed. The original file has been kept. Fix it and reload."
   couldnTParseMarkdown: "Couldn’t parse Markdown"
+ja:
+  couldnTReadTheMarkdownFile: "Markdown ファイルを読み込めませんでした"
+  theYamlFrontmatterIsNotClosedTheOriginalFile: "YAML フロントマターが閉じられていません。元のファイルは保持されています。修正してから再読み込みしてください"
+  couldnTParseMarkdown: "Markdown を解析できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { getParsedMarkdown, cacheParsedMarkdown } from "./parsed-cache";

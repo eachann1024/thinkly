@@ -1,0 +1,9 @@
+zh-Hans:
+  noNoteIsAvailableToOpenInSplitView: "当前没有可分屏的笔记"
+  youCanOpenUpToPanes: "最多只能分成 4 格"
+en:
+  noNoteIsAvailableToOpenInSplitView: "No note is available to open in split view"
+  youCanOpenUpToPanes: "You can open up to 4 panes"
+ja:
+  noNoteIsAvailableToOpenInSplitView: "分割表示で開けるノートがありません"
+  youCanOpenUpToPanes: "分割は最大 4 つまでです"

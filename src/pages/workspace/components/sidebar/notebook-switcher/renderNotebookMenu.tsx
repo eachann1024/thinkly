@@ -11,6 +11,11 @@ en:
   notebookList: "Available {{kind}} list"
   actions_2b6b: "Actions"
   addNotebook: "Add {{kind}}"
+ja:
+  switchNotebook: "{{kind}}を切り替え"
+  notebookList: "{{kind}}の一覧"
+  actions_2b6b: "操作"
+  addNotebook: "{{kind}}を追加"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

@@ -26,6 +26,19 @@ en:
   showChart: "Chart"
   showDiagram: "Diagram"
   showSvg: "Image"
+ja:
+  loadSkill: "Skill を読み込む"
+  searchWeb: "Web 検索"
+  readWebPage: "Web ページを読み取る"
+  listNotebooks: "ノートブック一覧"
+  listPages: "ページ一覧"
+  searchNotes: "ノートを検索"
+  readPage: "ページを読み取る"
+  executeBatchPlan: "変更プラン"
+  showTable: "表"
+  showChart: "グラフ"
+  showDiagram: "フローチャート"
+  showSvg: "画像"
 `;
 const t = createTranslator(messages);
 import { Type, type Static, type TSchema } from "@earendil-works/pi-ai";

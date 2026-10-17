@@ -43,6 +43,27 @@ en:
   blueBackground: "Blue background"
   purpleBackground: "Purple background"
   pinkBackground: "Pink background"
+ja:
+  default: "デフォルト"
+  gray: "グレー"
+  brown: "ブラウン"
+  red: "レッド"
+  orange: "オレンジ"
+  yellow: "イエロー"
+  green: "グリーン"
+  blue: "ブルー"
+  purple: "パープル"
+  pink: "ピンク"
+  noBackground: "背景なし"
+  grayBackground: "グレーの背景"
+  brownBackground: "ブラウンの背景"
+  redBackground: "レッドの背景"
+  orangeBackground: "オレンジの背景"
+  yellowBackground: "イエローの背景"
+  greenBackground: "グリーンの背景"
+  blueBackground: "ブルーの背景"
+  purpleBackground: "パープルの背景"
+  pinkBackground: "ピンクの背景"
 `;
 const t = createTranslator(messages);
 

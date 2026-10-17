@@ -7,6 +7,8 @@ zh-Hans:
   confirm: "确认"
 en:
   confirm: "Confirm"
+ja:
+  confirm: "OK"
 `;
 const t = createTranslator(messages);
 

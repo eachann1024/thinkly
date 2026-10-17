@@ -14,6 +14,10 @@ en:
   edits: "Edits"
   added: "Characters added"
   trend: "Edit trend"
+ja:
+  edits: "編集回数"
+  added: "追加した文字数"
+  trend: "編集の推移"
 `;
 const uiText = createTranslator(localMessages);
 

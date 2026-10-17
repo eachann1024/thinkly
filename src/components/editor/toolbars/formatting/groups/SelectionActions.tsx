@@ -26,6 +26,11 @@ en:
   copying: "Copying"
   copySelection: "Copy selection"
   clearSelection: "Clear selection"
+ja:
+  couldNotCopyPleaseTryAgain: "コピーに失敗しました。もう一度お試しください"
+  copying: "コピー中"
+  copySelection: "選択内容をコピー"
+  clearSelection: "選択を解除"
 `;
 const t = createTranslator(messages);
 

@@ -12,6 +12,8 @@ zh-Hans:
   waitForTheResponseToFinishBeforeDeleting: "正在生成回复，请稍后再删除当前会话"
 en:
   waitForTheResponseToFinishBeforeDeleting: "Wait for the response to finish before deleting this conversation"
+ja:
+  waitForTheResponseToFinishBeforeDeleting: "回答の生成中です。完了してからこの会話を削除してください"
 `;
 const t = createTranslator(messages);
 

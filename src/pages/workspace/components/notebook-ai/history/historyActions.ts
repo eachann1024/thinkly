@@ -11,6 +11,11 @@ en:
   confirmDeletion: "Confirm deletion"
   conversationDeleted: "Conversation deleted"
   detailDeleteConversation: "Delete conversation “{{value1}}”?"
+ja:
+  newConversation: "新しい会話"
+  confirmDeletion: "削除の確認"
+  conversationDeleted: "会話を削除しました"
+  detailDeleteConversation: "会話「{{value1}}」を削除しますか？"
 `;
 const t = createTranslator(messages);
 

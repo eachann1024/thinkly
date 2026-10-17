@@ -5,6 +5,8 @@ zh-Hans:
   checkYourConfigurationInSettingsAiAssistantAiService: "请前往「设置 › AI 助手 › AI 服务」检查配置。"
 en:
   checkYourConfigurationInSettingsAiAssistantAiService: "Check your configuration in Settings › AI assistant › AI service."
+ja:
+  checkYourConfigurationInSettingsAiAssistantAiService: "「設定 › AI アシスタント › AI サービス」で設定を確認してください。"
 `;
 const uiText = createTranslator(localMessages);
 import type {

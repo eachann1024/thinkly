@@ -16,6 +16,10 @@ en:
   imagePreview: "Image preview"
   image: "Image"
   previewNamedImage: "Preview {{name}}"
+ja:
+  imagePreview: "画像のプレビュー"
+  image: "画像"
+  previewNamedImage: "{{name}} をプレビュー"
 `;
 const t = createTranslator(messages);
 

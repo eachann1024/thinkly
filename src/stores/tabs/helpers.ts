@@ -6,6 +6,9 @@ zh-Hans:
 en:
   saveFailed: "“{{title}}” couldn’t be saved to disk"
   saveIncomplete: "The local page has not finished saving: {{id}}"
+ja:
+  saveFailed: "「{{title}}」をディスクに保存できませんでした"
+  saveIncomplete: "ローカルページの保存が完了していません：{{id}}"
 `);
 import { usePages } from "../usePages";
 import type { TabItem } from "./types";

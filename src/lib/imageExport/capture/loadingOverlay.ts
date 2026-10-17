@@ -5,6 +5,8 @@ zh-Hans:
   generating: "正在生成图片"
 en:
   generating: "Generating image"
+ja:
+  generating: "画像を生成中"
 `;
 const uiText = createTranslator(localMessages);
 import { UI_LAYERS } from "@/lib/uiLayers";

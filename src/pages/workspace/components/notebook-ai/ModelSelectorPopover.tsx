@@ -23,6 +23,10 @@ en:
   switchModel: "Switch model"
   default: "Default"
   detailCurrentModel: "Current model: {{value1}}"
+ja:
+  switchModel: "モデルを切り替え"
+  default: "デフォルト"
+  detailCurrentModel: "現在のモデル：{{value1}}"
 `;
 const t = createTranslator(messages);
 

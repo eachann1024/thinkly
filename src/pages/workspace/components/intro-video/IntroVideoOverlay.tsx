@@ -10,6 +10,10 @@ en:
   welcomeVideo: "Welcome video"
   closeWelcomeAnimation: "Close welcome animation"
   closeWelcomeAnimationEsc: "Close welcome animation (Esc)"
+ja:
+  welcomeVideo: "ウェルカムビデオ"
+  closeWelcomeAnimation: "ウェルカムアニメーションを閉じる"
+  closeWelcomeAnimationEsc: "ウェルカムアニメーションを閉じる（Esc）"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer, useState } from "react";

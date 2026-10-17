@@ -15,6 +15,13 @@ en:
   cancel_625f: "Cancel"
   resetting_567f: "Resetting…"
   reset_80cf: "Reset"
+ja:
+  resetAppData_266d: "アプリのデータをリセットしますか？"
+  thisWillClearAllInApp_45b2: "この操作により、アプリ内のすべてのノートブック、バージョン履歴、AI との会話、環境設定が消去されます (ディスク上のローカルフォルダのファイルは影響を受けません)。"
+  typeTheFollowingPhraseToConfirm_a667: "リセットを確定するには、次のフレーズを入力してください:"
+  cancel_625f: "キャンセル"
+  resetting_567f: "リセット中…"
+  reset_80cf: "リセットする"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

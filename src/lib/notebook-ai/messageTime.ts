@@ -4,6 +4,8 @@ zh-Hans:
   yesterday: "昨天 {{time}}"
 en:
   yesterday: "Yesterday {{time}}"
+ja:
+  yesterday: "昨日 {{time}}"
 `;
 const t = createTranslator(messages);
 

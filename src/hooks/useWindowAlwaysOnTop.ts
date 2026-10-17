@@ -7,6 +7,9 @@ zh-Hans:
 en:
   readPinFailed: "Couldn’t read the window’s always-on-top setting. Please try again."
   togglePinFailed: "Couldn’t change the window’s always-on-top setting. Please try again."
+ja:
+  readPinFailed: "ウィンドウの最前面表示の状態を取得できませんでした。もう一度お試しください"
+  togglePinFailed: "ウィンドウの最前面表示を切り替えられませんでした。もう一度お試しください"
 `);
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

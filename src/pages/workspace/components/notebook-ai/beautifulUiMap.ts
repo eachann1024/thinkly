@@ -27,6 +27,16 @@ en:
   detailToolsRun: "Tools run: {{value1}}"
   detailThoughtFor: "Thought for {{value1}}"
   detailProcessedFor: "Processed for {{value1}}"
+ja:
+  thisStepWasNotCompletedAndMayHave: "このステップは完了しておらず、今回の生成でスキップされた可能性があります。"
+  searching: "検索中"
+  runningTools: "ツールを実行中"
+  thinking: "思考中"
+  processing: "処理中"
+  searchComplete: "検索完了"
+  detailToolsRun: "{{value1}} 個のツールを実行しました"
+  detailThoughtFor: "{{value1}}思考しました"
+  detailProcessedFor: "{{value1}}処理しました"
 `;
 const t = createTranslator(messages);
 

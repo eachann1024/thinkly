@@ -7,6 +7,9 @@ zh-Hans:
 en:
   theCustomOpenaiResponsesModelRequestFailed: "The custom OpenAI Responses model request failed"
   theOpenaiResponsesStreamingRequestFailed: "The OpenAI Responses streaming request failed"
+ja:
+  theCustomOpenaiResponsesModelRequestFailed: "カスタム OpenAI Responses モデルへのリクエストに失敗しました"
+  theOpenaiResponsesStreamingRequestFailed: "OpenAI Responses のストリーミングリクエストに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";

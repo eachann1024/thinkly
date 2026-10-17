@@ -8,6 +8,9 @@ zh-Hans:
 en:
   collapseChildren_2995: "Collapse children"
   expandChildren_62f2: "Expand children"
+ja:
+  collapseChildren_2995: "子項目を折りたたむ"
+  expandChildren_62f2: "子項目を展開"
 `;
 const uiText = createTranslator(localMessages);
 import {

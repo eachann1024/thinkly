@@ -8,6 +8,9 @@ zh-Hans:
 en:
   couldnTCreateANoteInSplitView: "Couldn’t create a note in split view"
   theSourceNoteOrItsNotebookNoLongerExists: "The source note or its notebook no longer exists"
+ja:
+  couldnTCreateANoteInSplitView: "分割表示用のページを作成できませんでした"
+  theSourceNoteOrItsNotebookNoLongerExists: "元のノートまたはノートブックが存在しません"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

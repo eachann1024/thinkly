@@ -4,6 +4,8 @@ zh-Hans:
   title: 速记
 en:
   title: Quick Note
+ja:
+  title: "クイックノート"
 `);
 const updateTitle = () => { document.title = entryText("title"); };
 updateTitle();

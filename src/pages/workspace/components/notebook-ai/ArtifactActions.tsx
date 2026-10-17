@@ -50,6 +50,17 @@ en:
   download: "Download"
   detailCopyFailed: "Copy failed: {{value1}}"
   detailDownloadFailed: "Download failed: {{value1}}"
+ja:
+  copyImage: "画像をコピー"
+  unknownError: "不明なエラー"
+  copySource: "ソースをコピー"
+  insertIntoCurrentNote: "現在のノートに挿入"
+  insertedIntoCurrentNote: "現在のノートに挿入しました"
+  downloadImage: "画像をダウンロード"
+  saved: "保存しました"
+  download: "ダウンロード"
+  detailCopyFailed: "コピーに失敗しました：{{value1}}"
+  detailDownloadFailed: "ダウンロードに失敗しました：{{value1}}"
 `;
 const t = createTranslator(messages);
 

@@ -9,6 +9,10 @@ en:
   detailLocalSkill: "Local skill: /{{value1}}"
   detailSelectionFrom: "Selection from {{value1}}"
   detailOpen: "Open: {{value1}}"
+ja:
+  detailLocalSkill: "ローカルスキル：/{{value1}}"
+  detailSelectionFrom: "{{value1}}からの選択範囲の引用"
+  detailOpen: "開く：{{value1}}"
 `;
 const t = createTranslator(messages);
 import { Button } from "@/components/ui/button";

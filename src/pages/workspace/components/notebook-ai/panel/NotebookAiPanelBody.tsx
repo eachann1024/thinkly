@@ -22,6 +22,9 @@ zh-Hans:
 en:
   whyThisResponseFailed: "Why this response failed"
   dismissError: "Dismiss error"
+ja:
+  whyThisResponseFailed: "今回失敗した理由"
+  dismissError: "エラー表示を閉じる"
 `;
 const t = createTranslator(messages);
 

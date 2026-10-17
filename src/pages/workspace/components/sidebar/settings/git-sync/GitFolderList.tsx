@@ -28,6 +28,19 @@ en:
   syncFolderLabel: "Sync {{name}} {{path}}{{error}}"
   chooseFolderAgain_b01b: "Choose folder again"
   locateIssue_f93a: "Locate issue"
+ja:
+  containsSymbolicLinksCannotSync_a3fb: "シンボリックリンクが含まれているため同期できません"
+  theOriginalFolderNoLongerExists_9875: "元のフォルダが存在しません"
+  theNotebookIsNotOpenOr_a185: "ノートブックが開かれていないか、照合できません"
+  cannotReadFolderCheckItsPermissions_7101: "フォルダを読み込めません。権限を確認してください"
+  foldersToSync_19ed: "同期するフォルダ"
+  deselectingAFolderDoesNotDelete_4773: "選択を解除してもファイルは削除されません。"
+  legacyRepositoriesSupportOnlyOneFolder_76b4: "旧バージョンのリポジトリは1つのフォルダのみ対応しています。"
+  noLocalFoldersAddALocal_8faf: "ローカルフォルダがありません。先にサイドバーでローカルノートブックを追加してください。"
+  theOriginalNotebookIsNotOpen_5ea0: "元のノートブックが開かれていないか、照合できません"
+  syncFolderLabel: "{{name}} {{path}}{{error}} を同期"
+  chooseFolderAgain_b01b: "フォルダを選択し直す"
+  locateIssue_f93a: "問題の箇所を表示"
 `;
 const uiText = createTranslator(localMessages);
 import { GitFolderIssue } from "./GitFolderIssue";

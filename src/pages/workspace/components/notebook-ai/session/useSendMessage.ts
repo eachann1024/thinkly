@@ -19,6 +19,9 @@ zh-Hans:
 en:
   summarizeSelection: "Summarize selection"
   imagesUploaded: "Images uploaded"
+ja:
+  summarizeSelection: "選択範囲を要約"
+  imagesUploaded: "画像をアップロードしました"
 `;
 const t = createTranslator(messages);
 

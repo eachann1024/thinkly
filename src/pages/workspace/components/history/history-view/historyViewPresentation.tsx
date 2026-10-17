@@ -21,6 +21,13 @@ en:
   today: "Today"
   yesterday: "Yesterday"
   daysAgo: "{{count}} days ago"
+ja:
+  automatic: "自動"
+  manual: "手動"
+  beforeChanges: "操作前"
+  today: "今日"
+  yesterday: "昨日"
+  daysAgo: "{{count}} 日前"
 `;
 const t = createTranslator(messages);
 

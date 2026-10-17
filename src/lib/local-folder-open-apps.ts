@@ -13,6 +13,12 @@ en:
   notepad: "Notepad"
   terminal: "Terminal"
   commandPrompt: "Command Prompt"
+ja:
+  finder: "Finder"
+  fileExplorer: "エクスプローラー"
+  notepad: "メモ帳"
+  terminal: "ターミナル"
+  commandPrompt: "コマンドプロンプト"
 `;
 const uiText = createTranslator(localMessages);
 export type LocalFolderOpenAppKind = "file-manager" | "editor" | "terminal";

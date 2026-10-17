@@ -30,6 +30,20 @@ en:
   exportError: "Couldn’t export {{format}}: {{error}}"
   exportFailed: "Couldn’t export {{format}}"
   selection: "Selected content"
+ja:
+  noFile: "ファイルが選択されていません"
+  importFailed: "インポートに失敗しました"
+  needFolder: "先にローカルフォルダを関連付けてください"
+  chooseImportFolder: "インポートする前に、サイドバーで保存先となるローカルフォルダを開くか新規作成してください。"
+  retryImport: "インポートに失敗しました。もう一度お試しください"
+  imported: "新しいノートとしてインポートしました"
+  checkImportFile: "インポートに失敗しました。ファイルを確認してからもう一度お試しください"
+  exportSingleNote: "フォルダ単位の書き出しにはまだ対応していません。ノートを開いてから書き出してください"
+  exporting: "{{format}} を書き出し中…"
+  exported: "{{format}} を書き出しました"
+  exportError: "{{format}} を書き出せませんでした：{{error}}"
+  exportFailed: "{{format}} を書き出せませんでした"
+  selection: "選択した内容"
 `;
 const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";

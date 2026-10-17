@@ -1,4 +1,4 @@
-import { en, zh } from "@blocknote/core/locales";
+import { en, ja, zh } from "@blocknote/core/locales";
 import { getLocale, i18nYaml, createTranslator } from "@/i18n";
 
 const messages = i18nYaml<"src/components/editor/core/editorLocale.ts#messages:1">`
@@ -8,12 +8,16 @@ zh-Hans:
 en:
   typeToInsertABlock: "Type / to insert a block"
   quote: "Quote"
+ja:
+  typeToInsertABlock: "/ を入力してブロックを挿入"
+  quote: "引用"
 `;
 const t = createTranslator(messages);
+const blockNoteDictionary = () => ({ "zh-Hans": zh, en, ja })[getLocale()];
 export type EditorPlaceholderProfile = "note" | "quicknote" | "history";
 
 export function getEditorPlaceholders(profile: EditorPlaceholderProfile) {
-  const dictionary = getLocale() === "zh-Hans" ? zh : en;
+  const dictionary = blockNoteDictionary();
   if (profile === "history") return dictionary.placeholders;
   return {
     ...dictionary.placeholders,
@@ -26,7 +30,7 @@ export function getEditorPlaceholders(profile: EditorPlaceholderProfile) {
 /** BlockNote retains this object for its lifetime; translate leaf reads on demand. */
 export function createLiveEditorDictionary(profile: EditorPlaceholderProfile) {
   const at = (path: string[]) => {
-    let value: any = getLocale() === "zh-Hans" ? zh : en;
+    let value: any = blockNoteDictionary();
     for (const part of path) value = value[part];
     return value;
   };

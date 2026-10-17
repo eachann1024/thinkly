@@ -16,6 +16,13 @@ en:
   theRequestFailedCheckYourConnectionOrBase: "The request failed. Check your connection or Base URL."
   stopped: "Stopped"
   theModelReturnedAnInvalidResponseTryAnother: "The model returned an invalid response. Try another model or retry later."
+ja:
+  theTargetBlockHasChangedTheOriginalText: "対象のブロックが変更されました。元のテキストは変更されていません。選択し直してからもう一度お試しください"
+  thisModelSThinkingModeDoesNotSupport: "現在のモデルの思考モードは、ツール呼び出しの強制に対応していません。思考なしのモデルに切り替えるか、思考をオフにしてからもう一度お試しください"
+  theApiKeyIsInvalidOrMissing: "キーが無効か、設定されていません"
+  theRequestFailedCheckYourConnectionOrBase: "ネットワークリクエストに失敗しました。ネットワークまたは Base URL を確認してください"
+  stopped: "停止しました"
+  theModelReturnedAnInvalidResponseTryAnother: "モデルが返した形式が正しくありません。別のモデルを使うか、しばらくしてからもう一度お試しください"
 `;
 const t = createTranslator(messages);
 /**

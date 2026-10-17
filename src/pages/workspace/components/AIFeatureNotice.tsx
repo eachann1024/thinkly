@@ -12,6 +12,11 @@ en:
   chooseAProviderSaveYourSettingsAnd: "Choose a provider, save your settings, and select a model."
   setUpLater: "Set up later"
   openSettings: "Open settings"
+ja:
+  setUpTheAiWritingAssistant: "AI ライティングアシスタントを設定"
+  chooseAProviderSaveYourSettingsAnd: "プロバイダを選択し、設定を保存してモデルを選択します。"
+  setUpLater: "あとで設定"
+  openSettings: "すべての設定を開く"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";

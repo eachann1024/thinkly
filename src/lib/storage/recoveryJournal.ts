@@ -7,6 +7,9 @@ zh-Hans:
 en:
   couldnTWriteTheDestinationRecoveryJournal: "Couldn’t write the destination recovery journal"
   couldnTAcknowledgeTheOriginalRecoveryJournal: "Couldn’t acknowledge the original recovery journal"
+ja:
+  couldnTWriteTheDestinationRecoveryJournal: "保存先の復元ジャーナルを書き込めませんでした"
+  couldnTAcknowledgeTheOriginalRecoveryJournal: "元の復元ジャーナルの確認に失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import type { JSONContent, Page } from "@/types";

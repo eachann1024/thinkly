@@ -7,6 +7,9 @@ zh-Hans:
 en:
   couldnTOpenTheFilePickerRestartTheDesktop: "Couldn’t open the file picker. Restart the desktop app."
   couldnTOpenTheSaveDialogRestartTheDesktop: "Couldn’t open the save dialog. Restart the desktop app."
+ja:
+  couldnTOpenTheFilePickerRestartTheDesktop: "ファイル選択ダイアログを開けませんでした。デスクトップアプリを再起動してください"
+  couldnTOpenTheSaveDialogRestartTheDesktop: "保存ダイアログを開けませんでした。デスクトップアプリを再起動してください"
 `;
 const uiText = createTranslator(localMessages);
 import { getGooseDesktop, isElectronRuntime } from "@/lib/electron/runtime";

@@ -7,6 +7,9 @@ zh-Hans:
 en:
   couldnTEncodeTheEquationImage: "Couldn’t encode the equation image"
   equation: "Equation"
+ja:
+  couldnTEncodeTheEquationImage: "数式画像をエンコードできませんでした"
+  equation: "数式"
 `;
 const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";

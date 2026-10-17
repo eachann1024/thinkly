@@ -11,6 +11,11 @@ en:
   matchesYourEditor: "Matches your editor"
   current: "Current"
   editor: "Editor"
+ja:
+  notebook: "ノートブック"
+  matchesYourEditor: "エディタと同じ表示"
+  current: "現在"
+  editor: "エディタ"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

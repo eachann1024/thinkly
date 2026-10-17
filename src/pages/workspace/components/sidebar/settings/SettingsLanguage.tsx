@@ -18,6 +18,12 @@ en:
   saveFailed: Couldn't save the language setting. Please try again.
   readFailed: Couldn't read the language settings file. The original file has been preserved. Repair the file and restart the app.
   conflict: The language settings file was changed outside the app. Restart the app and try again.
+ja:
+  language: "アプリの言語"
+  system: "システムに従う"
+  saveFailed: "言語設定を保存できませんでした。もう一度お試しください。"
+  readFailed: "言語設定ファイルを読み込めませんでした。元のファイルは保持されています。ファイルを修復してからアプリを再起動してください。"
+  conflict: "言語設定ファイルが外部で変更されました。アプリを再起動して、もう一度お試しください。"
 `;
 
 export function SettingsLanguage() {
@@ -32,6 +38,7 @@ export function SettingsLanguage() {
     { value: "system", label: t("system") },
     { value: "zh-Hans", label: "简体中文", lang: "zh-Hans" },
     { value: "en", label: "English", lang: "en" },
+    { value: "ja", label: "日本語", lang: "ja" },
   ];
   const change = async (value: LanguagePreference) => {
     setSaving(true);

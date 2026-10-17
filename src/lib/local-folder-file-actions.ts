@@ -15,6 +15,13 @@ en:
   folderPathCopied: "Folder path copied"
   filePathCopied: "File path copied"
   copyFailed: "Copy failed"
+ja:
+  couldnTOpenTheFileCheckYourExternalApp: "ファイルを開けませんでした。外部アプリの設定を確認してください"
+  couldnTOpenTheFolderCheckYourFileManager: "フォルダを開けませんでした。ファイルマネージャの設定を確認してください"
+  couldnTOpenTheTerminalCheckYourTerminalSettings: "ターミナルを開けませんでした。ターミナルの設定を確認してください"
+  folderPathCopied: "フォルダのパスをコピーしました"
+  filePathCopied: "ファイルのパスをコピーしました"
+  copyFailed: "コピーに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

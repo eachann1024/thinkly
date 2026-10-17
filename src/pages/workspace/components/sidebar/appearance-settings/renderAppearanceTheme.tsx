@@ -19,6 +19,15 @@ en:
   darkMode_18d1: "Dark mode"
   colorsAndThemes_05fe: "Colors and themes"
   fullTheme: "{{theme}} · Full theme"
+ja:
+  theme_9970: "テーマ"
+  themeMode_b0bb: "テーマモード"
+  automatic_3aed: "自動"
+  useSystemSetting_71bb: "システム設定に従う"
+  lightMode_8755: "ライトモード"
+  darkMode_18d1: "ダークモード"
+  colorsAndThemes_05fe: "カラーとテーマ"
+  fullTheme: "{{theme}} · フルテーマ"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

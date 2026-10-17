@@ -12,6 +12,11 @@ en:
   forward: "Forward"
   showSidebar: "Show sidebar"
   hideSidebar: "Hide sidebar"
+ja:
+  back: "戻る"
+  forward: "進む"
+  showSidebar: "サイドバーを表示"
+  hideSidebar: "サイドバーを隠す"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

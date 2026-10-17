@@ -23,6 +23,11 @@ en:
   thereIsNoHistoryToCompactInThis: "There is no history to compact in this conversation"
   conversationContextCompacted: "Conversation context compacted"
   compactionFailed: "Compaction failed"
+ja:
+  waitForAiToFinishRespondingBeforeCompacting: "AI が回答中です。生成が終わってからコンテキストを圧縮してください"
+  thereIsNoHistoryToCompactInThis: "この会話には圧縮する履歴がありません"
+  conversationContextCompacted: "会話のコンテキストを圧縮しました"
+  compactionFailed: "圧縮に失敗しました"
 `;
 const t = createTranslator(messages);
 

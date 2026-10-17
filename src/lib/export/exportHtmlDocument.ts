@@ -9,6 +9,10 @@ en:
   contents: "Contents"
   outline: "Document outline"
   collapse: "Collapse"
+ja:
+  contents: "目次"
+  outline: "ドキュメントの目次"
+  collapse: "折りたたむ"
 `;
 const uiText = createTranslator(localMessages);
 import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";

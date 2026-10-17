@@ -7,7 +7,7 @@ import { historyMessages } from "./history/messages";
 
 const catalogs: CompiledMessages[] = [gitErrors, gitSyncMessages, nativeServices, gitMessages, historyMessages];
 const escapePattern = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const patterns = catalogs.flatMap((catalog) => (["zh-Hans", "en"] as const).flatMap((locale) =>
+const patterns = catalogs.flatMap((catalog) => (["zh-Hans", "en", "ja"] as const).flatMap((locale) =>
   Object.entries(catalog[locale]).map(([key, source]) => {
     const names: string[] = [];
     let cursor = 0;

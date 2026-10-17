@@ -22,6 +22,13 @@ en:
   hover: Open the notebook menu on hover
   search: Search
   recent: Show recent notes in search
+ja:
+  general: "一般"
+  common: "よく使う設定"
+  autoOpen: "起動時に前回のノートを開く"
+  hover: "ホバーでノートブックメニューを開く"
+  search: "検索"
+  recent: "検索時に最近開いたノートを表示"
 `;
 
 interface SettingsGeneralProps {

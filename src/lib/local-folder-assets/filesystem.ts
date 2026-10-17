@@ -11,6 +11,11 @@ en:
   readMarkdownFailed: "Couldn’t read Markdown: {{path}}"
   directoryCycle: "Folder cycle detected: {{path}}"
   pathOutsideNotebook: "Scan path is outside the notebook: {{path}}"
+ja:
+  readDirectoryFailed: "フォルダを読み込めませんでした: {{path}}"
+  readMarkdownFailed: "Markdown を読み込めませんでした: {{path}}"
+  directoryCycle: "フォルダの循環を検出しました: {{path}}"
+  pathOutsideNotebook: "スキャンパスがノートブックの外にあります: {{path}}"
 `;
 const uiText = createTranslator(localMessages);
 import { originalHistoryPath } from "../history/localPaths";

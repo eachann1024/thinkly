@@ -1,12 +1,5 @@
-import { createTranslator, i18nYaml } from "@/i18n/core";
-const localMessages = i18nYaml<"src/lib/editor-split/commands.ts#localMessages:1">`
-zh-Hans:
-  noNoteIsAvailableToOpenInSplitView: "当前没有可分屏的笔记"
-  youCanOpenUpToPanes: "最多只能分成 4 格"
-en:
-  noNoteIsAvailableToOpenInSplitView: "No note is available to open in split view"
-  youCanOpenUpToPanes: "You can open up to 4 panes"
-`;
+import { createTranslator } from "@/i18n/core";
+import localMessages from "./commands.messages.yaml";
 const uiText = createTranslator(localMessages);
 /**
  * 常规笔记本分屏命令。快捷键代理只应调用这里。

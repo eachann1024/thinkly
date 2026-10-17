@@ -35,6 +35,17 @@ en:
   code: "Code"
   showPreview: "Show preview"
   preview: "Preview"
+ja:
+  imageCopied: "画像をコピーしました"
+  codeCopied: "コードをコピーしました"
+  copyImage: "画像をコピー"
+  copyCode: "コードをコピー"
+  downloadImage: "画像をダウンロード"
+  codeBlockDisplayMode: "コードブロックの表示モード"
+  showCode: "コードを表示"
+  code: "コード"
+  showPreview: "プレビューを表示"
+  preview: "プレビュー"
 `;
 const t = createTranslator(messages);
 

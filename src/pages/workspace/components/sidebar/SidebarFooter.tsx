@@ -6,6 +6,8 @@ zh-Hans:
   settings_e366: "设置"
 en:
   settings_e366: "Settings"
+ja:
+  settings_e366: "設定"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

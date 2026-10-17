@@ -10,6 +10,10 @@ en:
   createFailed: "Couldn’t create the note: the destination is unavailable or you don’t have write permission"
   renameFailed: "Couldn’t rename the note. Try again."
   noteTitle: "Note title"
+ja:
+  createFailed: "ノートを作成できませんでした：保存先を利用できないか、書き込み権限がありません"
+  renameFailed: "名前を変更できませんでした。もう一度お試しください。"
+  noteTitle: "ノートのタイトル"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState } from "react";

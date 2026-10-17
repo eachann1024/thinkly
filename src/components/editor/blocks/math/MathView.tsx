@@ -11,6 +11,9 @@ zh-Hans:
 en:
   addFormula: "Add formula"
   thisFormulaCannotBeDisplayedCheckTheSource: "This formula cannot be displayed. Check the source."
+ja:
+  addFormula: "数式を追加"
+  thisFormulaCannotBeDisplayedCheckTheSource: "数式を表示できません。ソースを確認してください"
 `;
 const t = createTranslator(messages);
 

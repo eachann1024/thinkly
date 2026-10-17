@@ -8,6 +8,9 @@ zh-Hans:
 en:
   folderIssue: "{{name}}: {{summary}}{{action}}"
   viewResolution: ", view resolution"
+ja:
+  folderIssue: "{{name}}：{{summary}}{{action}}"
+  viewResolution: "（対処方法を表示）"
 `;
 const uiText = createTranslator(localMessages);
 import { useState } from "react";

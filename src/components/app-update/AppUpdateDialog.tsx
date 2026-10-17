@@ -16,6 +16,13 @@ en:
   updateNow: "Update now"
   releaseNotes: "What’s new in v{{version}}"
   downloadProgress: "Update download progress"
+ja:
+  restarting: "再起動中…"
+  restartUpdate: "再起動してアップデート"
+  showInstaller: "インストーラを表示"
+  updateNow: "今すぐアップデート"
+  releaseNotes: "v{{version}} のリリースノート"
+  downloadProgress: "アップデートのダウンロード進捗"
 `;
 const uiText = createTranslator(localMessages);
 import { DialogShell } from "@/components/ui/dialog-shell";

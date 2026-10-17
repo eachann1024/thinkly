@@ -8,6 +8,9 @@ zh-Hans:
 en:
   unknownImageFormat: "Unrecognized image format ({{type}}, {{size}} MB)"
   theClipboardImageIsEmptyCopyItAgainBefore: "The clipboard image is empty. Copy it again before pasting."
+ja:
+  unknownImageFormat: "認識できない画像形式です（{{type}}、{{size}}MB）"
+  theClipboardImageIsEmptyCopyItAgainBefore: "クリップボードの画像が空です。もう一度コピーしてから貼り付けてください"
 `;
 const uiText = createTranslator(localMessages);
 export const WEBP_MIME = "image/webp";

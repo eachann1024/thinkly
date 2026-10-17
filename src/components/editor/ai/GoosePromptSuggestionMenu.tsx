@@ -18,6 +18,9 @@ zh-Hans:
 en:
   aiRewriteInstructions: "AI rewrite instructions"
   thinking: "Thinking"
+ja:
+  aiRewriteInstructions: "AI 書き換えの指示"
+  thinking: "考え中"
 `;
 const t = createTranslator(messages);
 

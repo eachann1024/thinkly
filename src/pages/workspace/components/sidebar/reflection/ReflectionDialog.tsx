@@ -28,6 +28,10 @@ en:
   title: "Reflection"
   basis: "Based on your note edit history"
   empty: "No edits in this period"
+ja:
+  title: "振り返り"
+  basis: "ノートの編集履歴に基づいています"
+  empty: "この期間の編集履歴はありません"
 `;
 const uiText = createTranslator(localMessages);
 

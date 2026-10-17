@@ -29,6 +29,20 @@ en:
   unconventional: "Unconventional"
   risographTextureWithFluorescentInkColors: "Risograph texture with fluorescent ink colors"
   print: "Print"
+ja:
+  journalNotes: "ジャーナルノート"
+  warmHandwritingWithAPersonalTouch: "温かみのある手書き風"
+  handwritten: "手書き"
+  cozy: "あたたかい"
+  mochaMousse: "モカムース"
+  warmEarthyBrownsInspiredByTheColorOfThe: "温かみのあるアースブラウン、2025 年のトレンドカラー"
+  light: "ライト"
+  warm: "ウォーム"
+  boldPrint: "ボールドプリント"
+  boldTypeSharpEdgesAndSolidShadows: "力強い書体、シャープな輪郭、ソリッドシャドウ"
+  unconventional: "個性的"
+  risographTextureWithFluorescentInkColors: "蛍光インクのリソグラフ風テクスチャ"
+  print: "印刷"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

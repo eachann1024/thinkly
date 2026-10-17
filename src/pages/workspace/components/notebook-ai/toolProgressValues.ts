@@ -17,6 +17,14 @@ en:
   chat: "Chat"
   visualization: "Visualization"
   webResearch: "Web research"
+ja:
+  createNote: "ノートを新規作成"
+  editNotes: "ノートを編集"
+  deleteNotes: "ノートを削除"
+  searchNotes: "ノートを検索"
+  chat: "チャット"
+  visualization: "可視化"
+  webResearch: "Web リサーチ"
 `;
 const t = createTranslator(messages);
 export function readObject(value: unknown): Record<string, unknown> | null {

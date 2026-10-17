@@ -18,6 +18,14 @@ en:
   configurationSavedAndConnectionVerified_c7f1: "Configuration saved and connection verified"
   connectionCheckFailed_f917: "Connection check failed"
   operationFailed_5fa8: "Operation failed"
+ja:
+  couldNotLoadRemoteBackups_f7ce: "リモート一覧を読み込めませんでした"
+  saveFailed_6de9: "保存に失敗しました"
+  invalidServerUrl_dedc: "サーバー URL の形式が正しくありません"
+  invalidRemoteFolder_5a1d: "リモートフォルダの形式が正しくありません"
+  configurationSavedAndConnectionVerified_c7f1: "設定を保存し、接続テストに成功しました"
+  connectionCheckFailed_f917: "接続テストに失敗しました"
+  operationFailed_5fa8: "操作に失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import {

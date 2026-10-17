@@ -15,6 +15,13 @@ en:
   undo: "Undo"
   couldnTUndoTheMoveTheOriginalNotebookNo: "Couldn’t undo the move: the original notebook no longer exists"
   moveFailedTryAgain: "Move failed. Try again."
+ja:
+  movedToNotebook: "「{{name}}」に移動しました"
+  destinationNotebook: "移動先のノートブック"
+  couldnTMoveTheNoteToTheDestinationNotebook: "移動先のノートブックに移動できませんでした"
+  undo: "元に戻す"
+  couldnTUndoTheMoveTheOriginalNotebookNo: "元に戻せませんでした。元のノートブックが存在しません"
+  moveFailedTryAgain: "移動に失敗しました。もう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

@@ -9,6 +9,10 @@ en:
   sampleFile: "2026-05-15-manual-update"
   sampleHeading: "Manual update process"
   sampleEdition: "(raven / ERP Standard)"
+ja:
+  sampleFile: "2026-05-15-手動アップデート"
+  sampleHeading: "手動アップデートの手順"
+  sampleEdition: "（raven / ERP スタンダード版）"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";

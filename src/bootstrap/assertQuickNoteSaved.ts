@@ -5,6 +5,8 @@ zh-Hans:
   unsavedQuickNote: "速记草稿尚未保存，请在小窗重试保存后更新"
 en:
   unsavedQuickNote: "Your Quick Note draft hasn’t been saved. Try saving it in the Quick Note window before updating."
+ja:
+  unsavedQuickNote: "クイックノートの下書きが保存されていません。ミニウィンドウで保存をやり直してからアップデートしてください"
 `;
 const uiText = createTranslator(localMessages);
 import type { JSONContent } from "@/types";

@@ -27,6 +27,14 @@ en:
   mute: "Mute"
   exitFullScreen: "Exit full screen"
   fullScreen: "Full screen"
+ja:
+  playbackProgress: "再生位置"
+  pause: "一時停止"
+  play: "再生"
+  unmute: "ミュート解除"
+  mute: "ミュート"
+  exitFullScreen: "全画面を終了"
+  fullScreen: "全画面"
 `;
 const t = createTranslator(messages);
 

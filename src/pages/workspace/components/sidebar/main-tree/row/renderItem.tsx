@@ -9,6 +9,10 @@ en:
   fileName_d2e2: "File name"
   untitled_44a7: "Untitled"
   noFilesYet_4b78: "No files yet"
+ja:
+  fileName_d2e2: "ファイル名"
+  untitled_44a7: "無題"
+  noFilesYet_4b78: "ファイルはまだありません"
 `;
 const uiText = createTranslator(localMessages);
 import { TreeBranch } from "../TreeBranch";

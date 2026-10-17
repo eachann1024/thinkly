@@ -7,6 +7,9 @@ zh-Hans:
 en:
   theBackupMetadataIsDamagedImportStopped: "The backup metadata is damaged. Import stopped."
   theBackupMetadataFormatIsInvalidImportStopped: "The backup metadata format is invalid. Import stopped."
+ja:
+  theBackupMetadataIsDamagedImportStopped: "バックアップのメタデータが破損しているため、インポートを中止しました"
+  theBackupMetadataFormatIsInvalidImportStopped: "バックアップのメタデータの形式が無効なため、インポートを中止しました"
 `;
 const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";

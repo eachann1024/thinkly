@@ -7,6 +7,9 @@ zh-Hans:
 en:
   mathFormula: "Math formula ($$)"
   documentMetadataYaml: "Document metadata (YAML)"
+ja:
+  mathFormula: "数式 ($$)"
+  documentMetadataYaml: "ドキュメントのメタデータ (YAML)"
 `;
 const t = createTranslator(messages);
 export const POPULAR_LANGUAGES = [

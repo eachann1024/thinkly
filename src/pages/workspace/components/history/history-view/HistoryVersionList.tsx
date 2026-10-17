@@ -35,6 +35,18 @@ en:
   characterCount_other: "{{count}} characters"
   changeCount: "Change: {{count}}"
   viewVersionAt: "View version from {{date}}, {{time}}"
+ja:
+  versionHistory: "ページ履歴"
+  selectAVersionToPreviewAndRestore: "時点を選んでプレビューし、復元します"
+  noVersionHistory: "履歴バージョンはまだありません"
+  milestone: "マイルストーン"
+  removingMilestone: "このバージョンのマークを解除中"
+  markingMilestone: "このバージョンをマーク中"
+  removeMilestone: "このバージョンのマークを解除"
+  markAsMilestone: "このバージョンをマーク"
+  characterCount_other: "{{count}} 文字"
+  changeCount: "変更 {{count}}"
+  viewVersionAt: "{{date}} {{time}} の履歴バージョンを表示"
 `;
 const t = createTranslator(messages);
 

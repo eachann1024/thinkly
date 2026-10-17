@@ -8,6 +8,9 @@ zh-Hans:
 en:
   nothingToCopy: "Nothing to copy"
   richTextClipboardIsNotSupportedInThis: "Rich text clipboard is not supported in this environment"
+ja:
+  nothingToCopy: "コピーする内容がありません"
+  richTextClipboardIsNotSupportedInThis: "この環境ではリッチテキストのクリップボードに対応していません"
 `;
 const t = createTranslator(messages);
 

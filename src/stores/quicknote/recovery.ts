@@ -12,6 +12,12 @@ en:
   quicknoteNotSaved: "Quick Note has not been saved"
   quicknoteRetry: "The current draft was saved to a recovery backup. Click Retry to try saving again."
   retry: "Retry"
+ja:
+  quicknoteRecoveryFailed: "クイックノートの復元用バックアップを書き込めませんでした"
+  keepQuicknoteOpen: "ミニウインドウを閉じずに、重要な内容をコピーしてからもう一度お試しください。"
+  quicknoteNotSaved: "クイックノートは未保存です"
+  quicknoteRetry: "現在の下書きは復元用バックアップに保存されています。「再試行」をクリックしてください。"
+  retry: "再試行"
 `);
 import type { QuickNoteSlot, QuickNoteDrafts } from "./types";
 import type { JSONContent } from "@/types";

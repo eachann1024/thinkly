@@ -12,6 +12,11 @@ en:
   heading: "H{{level}} {{text}}"
   noHeadingsInThisNote: "No headings in this note"
   documentOutline: "Document outline"
+ja:
+  collapsedHeading: "H{{level}} {{text}}、折りたたみ済み"
+  heading: "H{{level}} {{text}}"
+  noHeadingsInThisNote: "本文に見出しがありません"
+  documentOutline: "ドキュメントのアウトライン"
 `;
 const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";

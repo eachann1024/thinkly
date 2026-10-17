@@ -6,6 +6,8 @@ zh-Hans:
   unknown_1622: "未知"
 en:
   unknown_1622: "Unknown"
+ja:
+  unknown_1622: "不明"
 `;
 const uiText = createTranslator(localMessages);
 import type { ExportOptions } from "@/lib/export";

@@ -30,6 +30,20 @@ en:
   duplicateRepository: "This repository branch already has a sync configuration. Select the existing repository."
   openPicker: "Could not open the folder picker. Restart the desktop app."
   readFolder: "Could not read folder"
+ja:
+  "save-selection": "選択を保存して同期"
+  "save-settings": "設定を自動保存"
+  connect: "接続して同期"
+  restore: "フォルダを復元"
+  remove: "設定を削除"
+  sync: "同期"
+  resolve: "競合を解決して同期を再開"
+  failed: "{{action}}に失敗しました：{{error}}"
+  selectFolders: "同期するフォルダを1つ以上選択してください"
+  unknown: "操作に失敗しました。もう一度お試しください"
+  duplicateRepository: "このリポジトリのブランチには既に同期設定があります。既存のリポジトリを選択してください"
+  openPicker: "フォルダ選択ダイアログを開けませんでした。デスクトップアプリを再起動してください"
+  readFolder: "フォルダを読み込めませんでした"
 `;
 const t = createTranslator(messages);
 export type GitSyncAction = "save-selection" | "save-settings" | "connect" | "restore" | "remove" | "sync" | "resolve";
@@ -40,7 +54,7 @@ export type GitSyncUiFailure =
 
 export function localizeGitUiReason(reason: string) {
   for (const key of ["unknown", "duplicateRepository", "openPicker", "readFolder"] as const) {
-    if (reason === messages.en[key] || reason === messages["zh-Hans"][key]) return messages[getLocale()][key];
+    if (reason === messages.en[key] || reason === messages["zh-Hans"][key] || reason === messages.ja[key]) return messages[getLocale()][key];
   }
   return localizeSavedGitError(reason);
 }

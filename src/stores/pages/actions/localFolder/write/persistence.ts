@@ -4,6 +4,8 @@ zh-Hans:
   notSavedDisk: "笔记尚未保存到磁盘"
 en:
   notSavedDisk: "The note has not been saved to disk"
+ja:
+  notSavedDisk: "ノートはまだディスクに保存されていません"
 `);
 import { updateSnapshotStat } from "@/lib/local-md-snapshot";
 import type { StoreSet, StoreGet } from "../../hydrate";

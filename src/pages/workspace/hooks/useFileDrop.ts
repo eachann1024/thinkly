@@ -30,6 +30,20 @@ en:
   importFailed: "Import failed"
   couldnTLoadTheImporterTryAgain: "Couldn’t load the importer. Try again."
   theFileCouldnTBeReadAs: "The file couldn’t be read as a note."
+ja:
+  textFileImported: "テキストファイルを読み込みました"
+  filesImported: "{{count}} 件のファイルを読み込みました"
+  folderOpened: "フォルダを開きました"
+  thisFileFormatIsnTSupportedYet: "このファイル形式にはまだ対応していません"
+  dropAPlainTextFileInMd: ".md、.markdown、.txt のプレーンテキストファイルをドロップしてください。"
+  connectALocalFolderFirst: "先にローカルフォルダを関連付けてください"
+  openOrConnectALocalFolderIn: "読み込む前に、左のサイドバーでローカルフォルダを開くか関連付けてください。"
+  couldnTImportThisFile: "このファイルを読み込めません"
+  theFileMayBeDamagedOrUse: "ファイルが破損しているか、文字コードが不正なため、ノートとして解析できません。"
+  filesSkipped: "{{count}} 件のファイルの読み込みに失敗したため、スキップしました"
+  importFailed: "読み込みに失敗しました"
+  couldnTLoadTheImporterTryAgain: "インポート機能を読み込めませんでした。もう一度お試しください。"
+  theFileCouldnTBeReadAs: "ファイルの内容をノートとして解析できません。"
 `;
 const uiText = createTranslator(localMessages);
 import { useState, useRef } from "react";

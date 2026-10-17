@@ -11,6 +11,8 @@ zh-Hans:
   thisNotebookDoesNotSupportUploadingAttachments: "当前笔记本不支持附件上传"
 en:
   thisNotebookDoesNotSupportUploadingAttachments: "This notebook does not support uploading attachments"
+ja:
+  thisNotebookDoesNotSupportUploadingAttachments: "このノートブックは添付ファイルのアップロードに対応していません"
 `;
 const t = createTranslator(messages);
 

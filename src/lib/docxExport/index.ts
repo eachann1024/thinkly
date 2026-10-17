@@ -6,6 +6,8 @@ zh-Hans:
   theGeneratedWordDocumentIsEmpty: "生成了空的 Word 文档"
 en:
   theGeneratedWordDocumentIsEmpty: "The generated Word document is empty"
+ja:
+  theGeneratedWordDocumentIsEmpty: "生成された Word ドキュメントが空です"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

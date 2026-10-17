@@ -5,6 +5,8 @@ zh-Hans:
   timeline: "时间线"
 en:
   timeline: "Timeline"
+ja:
+  timeline: "タイムライン"
 `;
 const uiText = createTranslator(localMessages);
 /**

@@ -34,6 +34,14 @@ en:
   couldNotUndoAllChangesInThisBatch: "Could not undo all changes in this batch"
   changesInThisBatchUndone: "Changes in this batch undone"
   undoFailed: "Undo failed"
+ja:
+  theUserCanceledTheEntirePlan: "ユーザーが一括プラン全体をキャンセルしました"
+  thisPlanHasExpiredAskAiToGenerate: "このプランは有効期限が切れました。AI にもう一度指示して新しいプランを生成してください"
+  couldNotApplyTheBatchPlan: "一括プランを実行できませんでした"
+  conversationChangedOutdatedResultsWereIgnored: "会話が切り替わったため、古い結果は無視されました"
+  couldNotUndoAllChangesInThisBatch: "この一括変更をすべて取り消すことができませんでした"
+  changesInThisBatchUndone: "この一括変更を取り消しました"
+  undoFailed: "取り消しに失敗しました"
 `;
 const t = createTranslator(messages);
 

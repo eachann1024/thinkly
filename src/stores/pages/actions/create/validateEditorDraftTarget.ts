@@ -10,6 +10,11 @@ en:
   draftFolderMissing: "The original folder no longer exists. Your draft was preserved."
   draftFolderUnavailable: "The original folder is no longer available. Your draft was preserved."
   draftFolderChanged: "The original folder has changed. Your draft was preserved."
+ja:
+  draftNotebookUnavailable: "元のファイルのノートブックが利用できなくなりましたが、下書きの内容は保持されています"
+  draftFolderMissing: "元のファイルのフォルダが存在しなくなりましたが、下書きの内容は保持されています"
+  draftFolderUnavailable: "元のファイルのフォルダが利用できなくなりましたが、下書きの内容は保持されています"
+  draftFolderChanged: "元のファイルのフォルダが変更されましたが、下書きの内容は保持されています"
 `);
 import type { StoreGet } from "../hydrate";
 import { useNotebooks } from "../../../useNotebooks";

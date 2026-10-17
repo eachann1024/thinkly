@@ -8,6 +8,9 @@ zh-Hans:
 en:
   saveFailed: "Couldn’t save {{name}}"
   anotherPagePointsToTheSameLocal: "Another page points to the same local file. Reload the local folder and try again."
+ja:
+  saveFailed: "「{{name}}」を保存できませんでした"
+  anotherPagePointsToTheSameLocal: "別のページが同じローカルファイルを参照しています。ローカルフォルダを再読み込みしてから、もう一度お試しください。"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect } from "react";

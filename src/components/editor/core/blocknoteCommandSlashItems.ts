@@ -34,6 +34,21 @@ en:
   callout: "Callout"
   codeBlock: "Code block"
   turnIntoBlock: "Turn into {{label}}"
+ja:
+  text: "テキスト"
+  heading1: "見出し 1"
+  heading2: "見出し 2"
+  heading3: "見出し 3"
+  checklist: "ToDo リスト"
+  bulletedList: "箇条書きリスト"
+  numberedList: "番号付きリスト"
+  toggleHeading1: "トグル見出し 1"
+  toggleHeading2: "トグル見出し 2"
+  toggleHeading3: "トグル見出し 3"
+  quote: "引用"
+  callout: "コールアウト"
+  codeBlock: "コードブロック"
+  turnIntoBlock: "{{label}}に変換"
 `;
 const t = createTranslator(messages);
 

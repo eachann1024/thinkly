@@ -7,6 +7,9 @@ zh-Hans:
 en:
   selectedContent: "Selected content"
   selection: "Selection"
+ja:
+  selectedContent: "選択した内容"
+  selection: "選択範囲"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

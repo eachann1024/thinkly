@@ -20,6 +20,15 @@ en:
   movingPane: "Moving {{title}}. Drop at an edge to rearrange or in the center to swap. Escape to cancel."
   untitled: "Untitled"
   swapPositions: "Swap positions"
+ja:
+  pane: "ペイン"
+  edgeTarget: "{{name}}、端へ移動、Enter で確定"
+  swapTarget: "{{name}}、位置を入れ替え、Enter で確定"
+  panesRearranged: "ペインの位置を更新しました"
+  moveCanceled: "移動をキャンセルしました"
+  movingPane: "{{title}} を移動中。端にドラッグして並べ替え、中央にドラッグして入れ替え、Escape でキャンセル"
+  untitled: "名称未設定"
+  swapPositions: "位置を入れ替え"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState } from "react";

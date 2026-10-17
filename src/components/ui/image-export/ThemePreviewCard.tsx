@@ -10,6 +10,10 @@ en:
   sampleFile: "2026-05-15-manual-update"
   sampleTitle: "Design is life"
   sampleBody: "Thoughtful typography makes reading a pleasure. Every detail reflects the care behind the design."
+ja:
+  sampleFile: "2026-05-15-手動アップデート"
+  sampleTitle: "デザインは暮らしの一部"
+  sampleBody: "優れたタイポグラフィは読むことを楽しみに変え、細部のひとつひとつにデザイナーの想いが宿ります。"
 `;
 const uiText = createTranslator(localMessages);
 

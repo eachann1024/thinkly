@@ -38,6 +38,19 @@ en:
   downloadFailed: "Download failed: {{error}}"
   copyFailed: "Copy failed: {{error}}"
   systemPreviewFailed: "System preview failed: {{error}}"
+ja:
+  nothingToExport: "書き出す内容がありません"
+  thisTypeDoesNotSupportExportingImages: "この種類は画像の書き出しに対応していません"
+  imageSavedToDownloads: "画像をダウンロードフォルダに保存しました"
+  saveFailed: "保存に失敗しました"
+  savedToDownloads: "ダウンロードフォルダに保存しました"
+  unknownError: "不明なエラー"
+  copiedToClipboard: "クリップボードにコピーしました"
+  nothingToPreview: "プレビューする内容がありません"
+  thisCodeBlockDoesNotSupportSystemPreview: "このコードブロックはシステムプレビューに対応していません"
+  downloadFailed: "ダウンロードに失敗しました：{{error}}"
+  copyFailed: "コピーに失敗しました：{{error}}"
+  systemPreviewFailed: "システムプレビューに失敗しました：{{error}}"
 `;
 const t = createTranslator(messages);
 

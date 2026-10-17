@@ -5,6 +5,8 @@ zh-Hans:
 en:
   recovered_other: "Recovered {{count}} unsaved notes"
   recovered_one: "Recovered {{count}} unsaved note"
+ja:
+  recovered_other: "保存が完了していなかったノートを {{count}} 件復元しました"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/hydrate.ts#block2:2">`
@@ -16,6 +18,10 @@ en:
   recoveredEditor: "The content is back in the editor. Review it before continuing to edit or save."
   recoveryKept: "A recovery draft was preserved separately"
   newerStored: "Storage contains a newer version. The recovery draft has been preserved."
+ja:
+  recoveredEditor: "内容をエディタに戻しました。確認のうえ、編集または保存を続けてください。"
+  recoveryKept: "自動で上書きされていない復元データが見つかりました"
+  newerStored: "メインストレージに新しいバージョンがあるため、復元データを保持しています。"
 `);
 import {
   loadPagesFromStorage,

@@ -5,6 +5,8 @@ zh-Hans:
   addAnApiKeyInSettings_4457: "请前往「设置 › AI 助手 › AI 服务」补充 API Key"
 en:
   addAnApiKeyInSettings_4457: "Add an API key in Settings › AI assistant › AI service"
+ja:
+  addAnApiKeyInSettings_4457: "「設定 › AI アシスタント › AI サービス」で API Key を追加してください"
 `;
 const uiText = createTranslator(localMessages);
 import { type ComponentType } from "react";

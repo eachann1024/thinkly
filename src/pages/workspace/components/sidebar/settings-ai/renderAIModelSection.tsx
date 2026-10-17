@@ -21,6 +21,16 @@ en:
   refreshModels_3d7d: "Refresh models"
   defaultModel_b11d: "Default model"
   selectAModel_0e34: "Select a model"
+ja:
+  aiModels_a342: "AI モデル"
+  fetchingModels_e925: "モデルを取得しています…"
+  fetchError: "取得に失敗しました: {{error}}"
+  availableModels: "利用可能なモデル: {{count}} 件"
+  saveTheServiceConfigurationToFetch_d515: "モデルを取得するには、先にサービス設定を保存してください"
+  fetching_43c6: "取得中…"
+  refreshModels_3d7d: "モデルを再取得"
+  defaultModel_b11d: "デフォルトモデル"
+  selectAModel_0e34: "モデルを選択してください"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

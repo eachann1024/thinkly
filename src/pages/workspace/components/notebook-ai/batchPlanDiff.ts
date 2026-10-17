@@ -11,6 +11,11 @@ en:
   delete: "Delete"
   replace: "Replace"
   edit: "Edit"
+ja:
+  create: "新規作成"
+  delete: "削除"
+  replace: "置換"
+  edit: "編集"
 `;
 const t = createTranslator(messages);
 export type PlanDiffLine = {

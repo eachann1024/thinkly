@@ -8,6 +8,9 @@ zh-Hans:
 en:
   sidebar_63f4: "Sidebar"
   showFolderCounts_f654: "Show folder counts"
+ja:
+  sidebar_63f4: "サイドバー"
+  showFolderCounts_f654: "フォルダ内の項目数を表示"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

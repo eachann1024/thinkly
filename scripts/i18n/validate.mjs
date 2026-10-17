@@ -1,6 +1,6 @@
 import { parseDocument, isAlias, visit } from "yaml";
 
-const locales = ["zh-Hans", "en"];
+const locales = ["zh-Hans", "en", "ja"];
 const unsafe = new Set(["__proto__", "constructor", "prototype"]);
 const plural = /_(zero|one|two|few|many|other)$/;
 const parameter = /{{\s*([A-Za-z_][\w]*)(?:\s*,\s*[^{}]+)?\s*}}/g;
@@ -59,7 +59,7 @@ export function parseMessages(text, source, startLine = 1) {
   });
   const value = document.toJS({ maxAliasCount: 0 });
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).sort().join() !== [...locales].sort().join()) {
-    fail(source, startLine, "Translation resources must contain exactly zh-Hans and en mappings.");
+    fail(source, startLine, "Translation resources must contain exactly zh-Hans, en and ja mappings.");
   }
   const resources = {};
   const logical = {};
@@ -70,16 +70,17 @@ export function parseMessages(text, source, startLine = 1) {
   }
   const english = [...logical.en.keys()].sort();
   if (!english.length) fail(source, startLine, "Empty translation resource.");
-  if (english.join("\n") !== [...logical["zh-Hans"].keys()].sort().join("\n")) {
-    const difference = [...new Set([...english, ...logical["zh-Hans"].keys()])].filter((key) => !logical.en.has(key) || !logical["zh-Hans"].has(key));
-    fail(source, startLine, `Language key coverage differs: ${difference.join(", ")}`);
+  for (const locale of locales.filter((name) => name !== "en")) {
+    if (english.join("\n") === [...logical[locale].keys()].sort().join("\n")) continue;
+    const difference = [...new Set([...english, ...logical[locale].keys()])].filter((key) => !logical.en.has(key) || !logical[locale].has(key));
+    fail(source, startLine, `${locale}: language key coverage differs: ${difference.join(", ")}`);
   }
   const schema = {};
   for (const key of english) {
-    const en = logical.en.get(key), zh = logical["zh-Hans"].get(key);
-    if (JSON.stringify(en.parameters) !== JSON.stringify(zh.parameters)) fail(source, startLine, `${key}: language interpolation parameters differ.`);
+    const en = logical.en.get(key), zh = logical["zh-Hans"].get(key), ja = logical.ja.get(key);
+    if (JSON.stringify(en.parameters) !== JSON.stringify(zh.parameters) || JSON.stringify(en.parameters) !== JSON.stringify(ja.parameters)) fail(source, startLine, `${key}: language interpolation parameters differ.`);
     schema[key] = Object.fromEntries(en.parameters.map((name) => [name, "string | number"]));
-    if (en.count || zh.count) schema[key].count = en.plural || zh.plural ? "number" : "string | number";
+    if (en.count || zh.count || ja.count) schema[key].count = en.plural || zh.plural || ja.plural ? "number" : "string | number";
   }
   return { resources, schema };
 }

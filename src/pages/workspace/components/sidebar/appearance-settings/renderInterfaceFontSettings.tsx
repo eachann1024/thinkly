@@ -5,6 +5,8 @@ zh-Hans:
   interfaceFont_5f15: "界面字体"
 en:
   interfaceFont_5f15: "Interface font"
+ja:
+  interfaceFont_5f15: "インターフェイスのフォント"
 `;
 const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";

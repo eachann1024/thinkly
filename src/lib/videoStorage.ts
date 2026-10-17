@@ -11,6 +11,11 @@ en:
   localFileServicesArenTReadyTheVideoCouldn: "Local file services aren’t ready. The video couldn’t be saved."
   couldnTCreateTheVideoFolder: "Couldn’t create the video folder"
   couldnTSaveTheCompressedVideo: "Couldn’t save the compressed video"
+ja:
+  openALocalFolderNotebookBeforeInsertingAVideo: "動画を挿入する前に、ローカルフォルダのノートブックを開いてください"
+  localFileServicesArenTReadyTheVideoCouldn: "ローカルファイルサービスの準備ができていないため、動画を保存できません"
+  couldnTCreateTheVideoFolder: "動画リソースのフォルダを作成できませんでした"
+  couldnTSaveTheCompressedVideo: "圧縮後の動画を保存できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { HostAdapter } from "@/lib/host/adapter";

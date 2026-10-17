@@ -26,6 +26,18 @@ en:
   exporting_86f9: "Exporting…"
   exportToCurrentFolder_958f: "Export to current folder"
   legacyFound: "Legacy built-in notes found: {{count}}"
+ja:
+  openALocalFolderFirst_f657: "先にローカルフォルダを開いてください"
+  switchToTheDestinationFolderBefore_69bc: "データをエクスポートする前に、保存先のフォルダに切り替えてください。"
+  untitled_44a7: "無題"
+  legacyNotesExported: "旧形式の内蔵ノート {{count}} 件をエクスポートしました"
+  exportDestination: "ファイルを {{path}} に書き出しました。元のデータはすべて保持されています。"
+  exportFailedPleaseTryAgain_28ce: "エクスポートに失敗しました。もう一度お試しください"
+  legacyDataMigration_20ff: "旧データの移行"
+  exportAsMarkdownToTheCurrent_f443: "現在のフォルダに Markdown としてエクスポートします。元のノートは保持されます。"
+  exporting_86f9: "エクスポート中…"
+  exportToCurrentFolder_958f: "現在のフォルダにエクスポート"
+  legacyFound: "旧形式の内蔵ノートが見つかりました ({{count}} 件)"
 `;
 const uiText = createTranslator(localMessages);
 import { useState } from "react";

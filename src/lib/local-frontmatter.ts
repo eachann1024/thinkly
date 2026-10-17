@@ -9,6 +9,10 @@ en:
   theYamlFrontmatterIsNotClosedSavingHasBeen: "The YAML frontmatter is not closed. Saving has been blocked."
   theYamlFrontmatterIsInvalidSavingHasBeenBlocked: "The YAML frontmatter is invalid. Saving has been blocked."
   couldnTSerializeYaml: "Couldn’t serialize YAML"
+ja:
+  theYamlFrontmatterIsNotClosedSavingHasBeen: "YAML フロントマターが閉じられていないため、保存をブロックしました"
+  theYamlFrontmatterIsInvalidSavingHasBeenBlocked: "YAML フロントマターの形式が正しくないため、保存をブロックしました"
+  couldnTSerializeYaml: "YAML をシリアライズできませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { parseLocalFrontmatterBlob } from "./local-frontmatter/parser";

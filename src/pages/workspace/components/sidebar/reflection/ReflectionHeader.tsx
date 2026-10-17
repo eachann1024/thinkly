@@ -19,6 +19,12 @@ en:
   scope7d: "Past 7 days"
   scope30d: "Past 1 month"
   scope90d: "Past 3 months"
+ja:
+  range: "期間"
+  refresh: "再読み込みして再生成"
+  scope7d: "過去 7 日間"
+  scope30d: "過去 1 か月"
+  scope90d: "過去 3 か月"
 `;
 const uiText = createTranslator(localMessages);
 

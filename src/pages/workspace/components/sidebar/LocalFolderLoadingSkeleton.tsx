@@ -6,6 +6,8 @@ zh-Hans:
   loadingFolder_c7a5: "正在读取文件夹"
 en:
   loadingFolder_c7a5: "Loading folder"
+ja:
+  loadingFolder_c7a5: "フォルダを読み込んでいます"
 `;
 const uiText = createTranslator(localMessages);
 import { Folder } from "@/components/ui/icons";

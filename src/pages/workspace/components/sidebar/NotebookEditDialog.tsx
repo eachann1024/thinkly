@@ -36,6 +36,23 @@ en:
   removeThisNotebook_54d3: "Remove this notebook"
   deleteThisNotebook_8601: "Delete this notebook"
   save_be5f: "Save"
+ja:
+  removeLocalFolder_505d: "ローカルフォルダを削除"
+  permanentlyDeleteNotebook_f65f: "ノートブックを完全に削除"
+  editNotebook_ed4e: "ノートブックを編集"
+  thisOnlyRemovesTheFolderFrom_f45b: "アプリから削除されるだけで、ディスク上のファイルは削除されません"
+  thisActionCannotBeUndone_a002: "この操作は元に戻せません。慎重に操作してください"
+  changeTheNotebookNameIconAnd_0816: "ノートブックの名前、アイコン、検索設定を変更します"
+  remove_e2cf: "削除する"
+  delete_631c: "削除する"
+  cancel_625f: "キャンセル"
+  notebookName_1be5: "ノートブック名"
+  enterANotebookName_9843: "ノートブック名を入力"
+  excludeFromGlobalSearch_0025: "全体検索に表示しない"
+  excludeThisNotebookWhenSearchingAll_add2: "オンにすると、他のノートブックから「すべてのノートブック」を検索する際にこのノートブックが除外されます。このノートブック内の検索には影響しません。"
+  removeThisNotebook_54d3: "このノートブックを削除"
+  deleteThisNotebook_8601: "このノートブックを削除"
+  save_be5f: "保存"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

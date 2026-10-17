@@ -6,6 +6,8 @@ zh-Hans:
   notSyncedYet_e1d9: "尚未同步"
 en:
   notSyncedYet_e1d9: "Not synced yet"
+ja:
+  notSyncedYet_e1d9: "未同期"
 `;
 const uiText = createTranslator(localMessages);
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";

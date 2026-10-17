@@ -8,6 +8,9 @@ zh-Hans:
 en:
   detailImage: "Image {{value1}}"
   compactedSummary: "Conversation compacted. Future replies will use this summary as context."
+ja:
+  detailImage: "画像 {{value1}}"
+  compactedSummary: "会話を圧縮しました。以降の質問は、この要約をもとに続行されます。"
 `;
 const t = createTranslator(messages);
 /**

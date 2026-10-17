@@ -7,6 +7,9 @@ zh-Hans:
 en:
   selectedContent: "Selected content"
   untitled: "Untitled"
+ja:
+  selectedContent: "選択した内容"
+  untitled: "無題"
 `;
 const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";

@@ -12,6 +12,11 @@ en:
   selectTextFromBodyBlocksAtTheSame: "Select text from body blocks at the same level. Tables and selections across nested levels do not support inline rewriting yet."
   theSelectionContainsNonTextBlocksSelectA: "The selection contains non-text blocks. Select a smaller range and retry."
   aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+ja:
+  theSelectionContainsATableOrNonText: "選択範囲に表またはテキスト以外のブロックが含まれています。本文のテキストだけを選択してから、もう一度お試しください。"
+  selectTextFromBodyBlocksAtTheSame: "同じ階層の本文ブロック内でテキストを選択してから、もう一度お試しください。表や階層をまたぐ選択範囲は、インラインでの書き換えにまだ対応していません。"
+  theSelectionContainsNonTextBlocksSelectA: "選択範囲にテキスト以外のブロックが含まれています。範囲を狭めてから、もう一度お試しください。"
+  aiDidNotReturnAnyContentThatCould: "AI が書き込める内容を返しませんでした。"
 `;
 const t = createTranslator(messages);
 

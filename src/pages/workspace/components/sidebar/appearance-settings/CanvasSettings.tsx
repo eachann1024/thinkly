@@ -14,6 +14,12 @@ en:
   dots_f4a6: "Dots"
   canvas_4d7f: "Canvas"
   editorGrid_47a6: "Editor grid"
+ja:
+  none_d81b: "なし"
+  grid_5340: "グリッド"
+  dots_f4a6: "ドット"
+  canvas_4d7f: "キャンバス"
+  editorGrid_47a6: "エディタのグリッド"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

@@ -29,6 +29,16 @@ en:
   chooseFile: "Choose file"
   mediaUrl: "Media URL"
   embed: "Embed"
+ja:
+  attachmentUploadFailed: "添付ファイルのアップロードに失敗しました"
+  enterAValidHttpOrHttpsUrl: "有効な http または https の URL を入力してください"
+  mediaSource: "メディアのソース"
+  upload: "アップロード"
+  embedLink: "リンクを埋め込む"
+  uploading: "アップロード中…"
+  chooseFile: "ファイルを選択"
+  mediaUrl: "メディアの URL"
+  embed: "埋め込む"
 `;
 const t = createTranslator(messages);
 

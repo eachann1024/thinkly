@@ -30,6 +30,20 @@ en:
   cleanUpUnusedAttachments_4503: "Clean up unused attachments"
   afterConfirmationUnusedImagesAudioAnd_e2b6: "After confirmation, unused images, audio, and video will be moved to the system trash."
   openCleanup_9813: "Open cleanup"
+ja:
+  localFolders_497e: "ローカルフォルダ"
+  openWith_14ae: "開き方"
+  fileManager_7d1d: "ファイルマネージャ"
+  eGPathFinder_d4e9: "例：Path Finder"
+  editor_5373: "エディタ"
+  default_18c6: "デフォルト"
+  eGCursorZedCodeR_de88: "例：Cursor、Zed、code -r"
+  terminal_4722: "ターミナル"
+  eGGhosttyItermWezterm_1db3: "例：Ghostty、iTerm、wezterm"
+  storageMaintenance_aa18: "ストレージのメンテナンス"
+  cleanUpUnusedAttachments_4503: "未使用の添付ファイルを整理"
+  afterConfirmationUnusedImagesAudioAnd_e2b6: "確認後、参照されていない画像、音声、動画をゴミ箱に移動します。"
+  openCleanup_9813: "整理を開く"
 `;
 const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";

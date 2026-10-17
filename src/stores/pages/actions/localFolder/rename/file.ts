@@ -4,6 +4,8 @@ zh-Hans:
   renameFailed: "重命名失败：{{reason}}"
 en:
   renameFailed: "Rename failed: {{reason}}"
+ja:
+  renameFailed: "名前を変更できませんでした：{{reason}}"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/file.ts#block2:2">`
@@ -21,6 +23,13 @@ en:
   fsUnavailable: "The file system is unavailable."
   renamePathChanged: "The path has changed. Rename the file again."
   renameFailed: "The rename did not complete."
+ja:
+  pageUnavailable: "ページが存在しないか、ローカルフォルダのページではありません"
+  invalidName: "名前にパス区切り文字や使用できない文字を含めることはできません"
+  emptyName: "ファイル名を空にすることはできません"
+  fsUnavailable: "ファイルシステムを利用できません"
+  renamePathChanged: "パスが変更されました。もう一度名前を変更してください"
+  renameFailed: "名前を変更できませんでした"
 `);
 import { migrateNotebookHistory } from "@/lib/history/notebookHistory";
 import type { StoreSet, StoreGet } from "../../hydrate";

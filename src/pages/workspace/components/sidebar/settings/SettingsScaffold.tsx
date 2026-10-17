@@ -10,6 +10,10 @@ en:
   settings_e366: "Settings"
   settingsCategories_2590: "Settings categories"
   closeSettings_c252: "Close settings"
+ja:
+  settings_e366: "設定"
+  settingsCategories_2590: "設定カテゴリ"
+  closeSettings_c252: "設定を閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

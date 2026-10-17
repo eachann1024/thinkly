@@ -6,6 +6,9 @@ zh-Hans:
 en:
   nameExists: "A file named {{name}} already exists in the destination folder."
   moveFailed: "Move failed: {{reason}}"
+ja:
+  nameExists: "移動先に同名のファイルが既にあります：{{name}}"
+  moveFailed: "移動に失敗しました：{{reason}}"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/move.ts#block2:2">`
@@ -31,6 +34,17 @@ en:
   writeResourceFailed: "Couldn’t write the attachment paths."
   resourceMoved: "Attachment paths couldn’t be updated. The note remains in its new location. Please reload."
   resourceRolledBack: "Attachment paths couldn’t be updated. The note was moved back to its original location."
+ja:
+  fsUnavailable: "ファイルシステムを利用できません"
+  pageUnavailable: "ページが存在しないか、ローカルフォルダのページではありません"
+  notebookMissing: "所属するノートブックが存在しません"
+  targetFolderMissing: "移動先のフォルダが存在しません"
+  moveIntoSelf: "フォルダを自身のサブフォルダに移動することはできません"
+  readStoppedMove: "ノートを読み込めないため、移動を中止しました"
+  moveFailed: "移動できませんでした"
+  writeResourceFailed: "リソースパスの書き込みに失敗しました"
+  resourceMoved: "リソースパスの更新に失敗しました。ノートは新しい場所に保持されています。再読み込みしてください"
+  resourceRolledBack: "リソースパスの更新に失敗したため、ノートを元の場所に戻しました"
 `);
 import {
   rebaseMarkdownResources,

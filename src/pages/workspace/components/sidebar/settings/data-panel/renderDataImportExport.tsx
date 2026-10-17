@@ -25,6 +25,18 @@ en:
   export_c9e7: "Export"
   resetAllData_b749: "Reset all data"
   selectedCount: "Selected: {{selected}}/{{total}}"
+ja:
+  importAndExport_3a3a: "インポートとエクスポート"
+  importing_d2b5: "インポート中…"
+  importZip_b770: "ZIP をインポート"
+  selectNotebooks_d119: "ノートブックを選択"
+  deselectAll_a041: "すべて選択解除"
+  selectAll_66ee: "すべて選択"
+  exportFormat_230a: "エクスポート形式"
+  exporting_caeb: "エクスポート中…"
+  export_c9e7: "エクスポート"
+  resetAllData_b749: "すべてのデータをリセット"
+  selectedCount: "{{selected}}/{{total}} 件選択中"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

@@ -15,6 +15,8 @@ zh-Hans:
   textFormatting: "文字格式"
 en:
   textFormatting: "Text formatting"
+ja:
+  textFormatting: "文字書式"
 `;
 const t = createTranslator(messages);
 

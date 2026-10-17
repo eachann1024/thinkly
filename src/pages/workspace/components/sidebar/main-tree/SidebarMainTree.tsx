@@ -18,6 +18,14 @@ en:
   newFolder_f3a4: "New folder"
   folderRefreshFailedShowingThePrevious_ed5e: "Folder refresh failed. Showing the previous contents."
   retry_132c: "Retry"
+ja:
+  couldNotLoadLocalFolder_538d: "ローカルフォルダを読み込めませんでした"
+  reload_64ca: "再読み込み"
+  new_26bb: "新規"
+  newFile_e48a: "新規ファイル"
+  newFolder_f3a4: "新規フォルダ"
+  folderRefreshFailedShowingThePrevious_ed5e: "フォルダを更新できなかったため、前回の内容を表示しています"
+  retry_132c: "再試行"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

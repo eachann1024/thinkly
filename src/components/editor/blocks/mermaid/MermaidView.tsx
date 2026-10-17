@@ -18,6 +18,9 @@ zh-Hans:
 en:
   previewUnavailableCheckTheSource: "Preview unavailable. Check the source."
   loadingDiagram: "Loading diagram…"
+ja:
+  previewUnavailableCheckTheSource: "プレビューできません。ソースを確認してください"
+  loadingDiagram: "図を読み込み中…"
 `;
 const t = createTranslator(messages);
 

@@ -6,6 +6,8 @@ zh-Hans:
   aiCouldnTAnswer: "AI 回答失败"
 en:
   aiCouldnTAnswer: "AI couldn’t answer"
+ja:
+  aiCouldnTAnswer: "AI が回答できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer } from "react";

@@ -9,6 +9,10 @@ en:
   interfaceScale_b560: "Interface scale"
   scaleTheTitleBarSidebarAnd_4d3f: "Scale the title bar, sidebar, and settings. Icon size stays fixed; note text size is controlled separately."
   resetToDefault100_b566: "Reset to default (100%)"
+ja:
+  interfaceScale_b560: "インターフェイスの拡大率"
+  scaleTheTitleBarSidebarAnd_4d3f: "タイトルバー、サイドバー、設定パネルを拡大・縮小します。アイコンのサイズは固定で、本文の文字サイズとは別に設定されます。"
+  resetToDefault100_b566: "デフォルトに戻す (100%)"
 `;
 const uiText = createTranslator(localMessages);
 import { Range } from "@/components/ui/range";

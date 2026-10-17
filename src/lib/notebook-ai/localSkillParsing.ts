@@ -5,6 +5,8 @@ zh-Hans:
   localSkill: "本地 Skill"
 en:
   localSkill: "Local skill"
+ja:
+  localSkill: "ローカル Skill"
 `;
 const t = createTranslator(messages);
 const MAX_LOCAL_SKILL_CHARACTERS = 32_000;

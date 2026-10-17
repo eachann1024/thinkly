@@ -16,6 +16,13 @@ en:
   restartSetupGuide_8ab0: "Restart setup guide"
   cancel_625f: "Cancel"
   confirm_38cf: "Confirm"
+ja:
+  dataManagement_2d71: "データ管理"
+  gettingStarted_9a32: "はじめに"
+  replayAnimation_b9c4: "アニメーションを再生"
+  restartSetupGuide_8ab0: "ガイドを最初からやり直す"
+  cancel_625f: "キャンセル"
+  confirm_38cf: "OK"
 `;
 const uiText = createTranslator(localMessages);
 import { renderWebdavRemoteBackups } from "./data-panel/renderWebdavRemoteBackups";

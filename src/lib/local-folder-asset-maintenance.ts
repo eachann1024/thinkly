@@ -5,6 +5,8 @@ zh-Hans:
   chooseALocalFolderNotebook: "请选择本地文件夹笔记本"
 en:
   chooseALocalFolderNotebook: "Choose a local folder notebook"
+ja:
+  chooseALocalFolderNotebook: "ローカルフォルダのノートブックを選択してください"
 `;
 const uiText = createTranslator(localMessages);
 import type {

@@ -14,6 +14,12 @@ en:
   restoreWindow: "Restore"
   maximize: "Maximize"
   close: "Close"
+ja:
+  windowControls: "ウィンドウ操作"
+  minimize: "最小化"
+  restoreWindow: "元に戻す"
+  maximize: "最大化"
+  close: "閉じる"
 `;
 const uiText = createTranslator(localMessages);
 /**

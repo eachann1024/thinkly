@@ -10,6 +10,9 @@ zh-Hans:
 en:
   mergeCells: "Merge cells"
   splitCells: "Split cells"
+ja:
+  mergeCells: "セルを結合"
+  splitCells: "セルを分割"
 `;
 const t = createTranslator(messages);
 

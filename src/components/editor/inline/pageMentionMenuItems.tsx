@@ -16,6 +16,9 @@ zh-Hans:
 en:
   noMatchingNotes: "No matching notes"
   tryAnotherKeyword: "Try another keyword"
+ja:
+  noMatchingNotes: "一致するノートが見つかりません"
+  tryAnotherKeyword: "別のキーワードをお試しください"
 `;
 const t = createTranslator(messages);
 

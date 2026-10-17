@@ -8,6 +8,9 @@ zh-Hans:
 en:
   aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
   generatingWithPrefix: "{{prefix}}Generating suggestions"
+ja:
+  aiDidNotReturnAnyContentThatCould: "AI が書き込める内容を返しませんでした。"
+  generatingWithPrefix: "{{prefix}}提案を生成しています"
 `;
 const t = createTranslator(messages);
 
