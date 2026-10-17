@@ -1,87 +1,85 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { localStorageAdapter } from "@/lib/storage";
-import {
-  EMPTY_ACTIVITY,
-  appendEdit,
-  mergeActivity,
-  pruneActivity,
-  type ActivityLog,
-} from "@/lib/reflection/activityLog";
+import type { ReflectionNarrative } from "@/lib/reflection/generateReflection";
 
-export interface ReflectionReport {
-  title: string;
-  body: string;
+export interface ReflectionReport extends ReflectionNarrative {
   generatedAt: number;
 }
 
 const MAX_REPORTS = 12;
 
 interface ReflectionState {
-  activity: ActivityLog;
-  /** weekKey -> 报告 */
+  /** 「范围:结束日期」-> 报告 */
   reports: Record<string, ReflectionReport>;
+  /** 已读红点的上周 weekKey。 */
   lastSeenWeekKey: string | null;
-  /** 用户已同意把上周笔记标题和摘要发给当前 AI。 */
+  /** 用户已同意把笔记标题和摘要发给当前 AI。 */
   aiConsent: boolean;
+  /** 上周有编辑时为上周 weekKey（仅内存，由历史记录计算）。 */
+  lastWeekEditedKey: string | null;
   generatingKey: string | null;
-  /** 最近一次失败，按周记录，避免误伤其它周。 */
-  failure: { weekKey: string; message: string } | null;
-  recordEdit: (pageId: string, now: number) => void;
-  saveReport: (weekKey: string, report: ReflectionReport) => void;
+  /** 最近一次失败，按报告键记录，避免误伤其它范围。 */
+  failure: { key: string; message: string } | null;
+  saveReport: (key: string, report: ReflectionReport) => void;
   markSeen: (weekKey: string) => void;
   setAiConsent: (value: boolean) => void;
-  setGenerating: (weekKey: string | null) => void;
-  setFailed: (weekKey: string, message: string) => void;
+  setLastWeekEditedKey: (weekKey: string | null) => void;
+  setGenerating: (key: string | null) => void;
+  setFailed: (key: string, message: string) => void;
 }
 
 export const useReflection = create<ReflectionState>()(
   persist(
     (set) => ({
-      activity: EMPTY_ACTIVITY,
       reports: {},
       lastSeenWeekKey: null,
       aiConsent: false,
+      lastWeekEditedKey: null,
       generatingKey: null,
       failure: null,
-      recordEdit: (pageId, now) =>
-        set((s) => ({ activity: appendEdit(s.activity, pageId, now) })),
-      saveReport: (weekKey, report) =>
+      saveReport: (key, report) =>
         set((s) => {
-          const reports = { ...s.reports, [weekKey]: report };
-          const keys = Object.keys(reports).sort().slice(-MAX_REPORTS);
+          const reports = { ...s.reports, [key]: report };
+          const keys = Object.keys(reports)
+            .sort((a, b) => reports[a].generatedAt - reports[b].generatedAt)
+            .slice(-MAX_REPORTS);
           return { reports: Object.fromEntries(keys.map((k) => [k, reports[k]])) };
         }),
       markSeen: (weekKey) =>
         set((s) => (s.lastSeenWeekKey === weekKey ? s : { lastSeenWeekKey: weekKey })),
       setAiConsent: (aiConsent) => set({ aiConsent }),
+      setLastWeekEditedKey: (lastWeekEditedKey) => set({ lastWeekEditedKey }),
       setGenerating: (generatingKey) =>
         set((s) => ({
           generatingKey,
           failure: generatingKey ? null : s.failure,
         })),
-      setFailed: (weekKey, message) =>
-        set({ generatingKey: null, failure: { weekKey, message } }),
+      setFailed: (key, message) => set({ generatingKey: null, failure: { key, message } }),
     }),
     {
       name: "goose-note-reflection",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorageAdapter),
       skipHydration: true,
       partialize: (s) => ({
-        activity: s.activity,
         reports: s.reports,
         lastSeenWeekKey: s.lastSeenWeekKey,
         aiConsent: s.aiConsent,
       }),
+      // v1 的 activity 分桶已废弃（改读版本历史），旧周报缺少范围键与主题，一并丢弃；授权与已读保留。
+      migrate: (persisted, version) => {
+        const p = (persisted ?? {}) as Partial<ReflectionState>;
+        return {
+          reports: version < 2 ? {} : (p.reports ?? {}),
+          lastSeenWeekKey: p.lastSeenWeekKey ?? null,
+          aiConsent: p.aiConsent === true,
+        };
+      },
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<ReflectionState>;
         return {
           ...current,
-          activity:
-            p.activity?.buckets && p.activity.pages
-              ? pruneActivity(mergeActivity(p.activity, current.activity), Date.now())
-              : current.activity,
           reports: p.reports ?? current.reports,
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
@@ -91,6 +89,6 @@ export const useReflection = create<ReflectionState>()(
   ),
 );
 
-/** 红点：上一周的报告已生成但还没打开过。 */
+/** 红点：上周有编辑，且还没打开过弹窗。 */
 export const selectHasUnseenReflection = (weekKey: string) => (s: ReflectionState) =>
-  Boolean(s.reports[weekKey]) && s.lastSeenWeekKey !== weekKey;
+  s.lastWeekEditedKey === weekKey && s.lastSeenWeekKey !== weekKey;

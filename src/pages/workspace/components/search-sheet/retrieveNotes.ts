@@ -71,16 +71,16 @@ export function retrieveNotes(question: string, candidates: Page[], ranked: Page
     .map(({ page }) => ({ id: page.id, title: getPageTitle(page), excerpt: excerptOf(getCachedText(page), terms) }));
 }
 
-export function buildAnswerPrompt(question: string, sources: NoteSource[]) {
+/** 预检索的笔记摘录作为起点，其余信息交给只读工具按需获取。 */
+export function buildAgentPrompt(question: string, sources: NoteSource[]) {
   const context = sources.length
-    ? sources.map((s, i) => `[${i + 1}] 《${s.title}》\n${s.excerpt}`).join("\n\n")
-    : "（没有检索到相关笔记）";
-  return [
-    { role: "system" as const, content: [
-      "你是笔记搜索里的问答助手，只根据给出的笔记摘录回答。",
-      "用简体中文，先给结论，简洁分点；引用时在句末标注来源编号，如 [1]。",
-      "摘录里找不到答案就直接说明没有找到，不要编造。",
-    ].join("\n") },
-    { role: "user" as const, content: `【笔记摘录】\n${context}\n\n【问题】\n${question}` },
-  ];
+    ? sources.map((s, i) => `[${i + 1}] 《${s.title}》（pageId: ${s.id}）\n${s.excerpt}`).join("\n\n")
+    : "（没有预检索到相关笔记）";
+  const system = [
+    "你是笔记搜索面板里的问答助手，可以多步调用只读工具完成回答，不能修改笔记。",
+    "先看给出的笔记摘录；不够时用 searchNotes / readPage / listPages 查当前笔记本，问题涉及笔记以外的事实（天气、新闻、资料等）时用 searchWeb，必要时 readWebPage 读原文。",
+    "回答用用户提问的语言，先给结论，简洁分点；引用笔记摘录时在句末标注来源编号如 [1]，引用网页时附上链接。",
+    "确实查不到就直接说明，不要编造。",
+  ].join("\n");
+  return { system, prompt: `【笔记摘录】\n${context}\n\n【问题】\n${question}` };
 }

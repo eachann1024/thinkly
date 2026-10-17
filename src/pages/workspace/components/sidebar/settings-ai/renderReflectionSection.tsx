@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { Switch, SwitchRow } from "@/components/ui/switch";
 import { useReflection } from "@/stores/useReflection";
@@ -7,15 +8,16 @@ import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderReflectionSection.tsx#localMessages:1">`
 zh-Hans:
-  weeklyReflection: "每周反思"
-  sendLastWeekNotes: "允许把上周笔记的标题和摘要发送给 AI，用于生成每周反思"
+  weeklyReflection: "反思"
+  sendLastWeekNotes: "允许把反思范围内笔记的标题和摘要发送给 AI，用于生成反思"
 en:
-  weeklyReflection: "Weekly reflection"
-  sendLastWeekNotes: "Allow sending the titles and excerpts of last week's notes to the AI to write the weekly reflection"
+  weeklyReflection: "Reflection"
+  sendLastWeekNotes: "Allow sending the titles and excerpts of the notes in the reflection range to the AI to write the reflection"
 `;
 const uiText = createTranslator(localMessages);
 
 export function ReflectionAISection() {
+  useLocale();
   const aiConsent = useReflection((s) => s.aiConsent);
   const setAiConsent = useReflection((s) => s.setAiConsent);
   return (
