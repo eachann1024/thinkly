@@ -43,6 +43,7 @@ en:
   restoreLatestBackup_31a8: "Restore latest backup"
 `;
 const uiText = createTranslator(localMessages);
+import { Switch, SwitchRow } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Upload, Cloud, RefreshCw } from "@/components/ui/icons";
 import { SettingsSectionCard } from "../SettingsSectionCard";
@@ -159,19 +160,19 @@ export function renderWebdavConfiguration(
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
-          <div className="space-y-0.5 pr-4">
-            <Label className="text-sm font-medium text-foreground">
-              {uiText("automaticCloudBackups_c110")}</Label>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {uiText("backUpWhileTheAppIs_48b5")}</p>
-          </div>
+        <SwitchRow className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
+          <span className="block space-y-0.5 pr-4">
+            <span className="text-sm font-medium leading-none text-foreground">
+              {uiText("automaticCloudBackups_c110")}</span>
+            <span className="block text-sm leading-relaxed text-muted-foreground">
+              {uiText("backUpWhileTheAppIs_48b5")}</span>
+          </span>
           <Switch
             checked={tempAutoBackupEnabled}
             onCheckedChange={setTempAutoBackupEnabled}
             disabled={busy}
           />
-        </div>
+        </SwitchRow>
 
         <div className="rounded-[var(--goose-control-radius)] border border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] p-3 text-xs text-foreground dark:bg-[hsl(var(--foreground)/0.08)]">
           <div className="flex flex-col gap-1.5">

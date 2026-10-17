@@ -14,8 +14,7 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Switch, SwitchRow } from "@/components/ui/switch";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
@@ -44,48 +43,46 @@ export function renderAIContextSection(
     >
       <div className="space-y-2">
         {hasGlobalPrompt && (
-          <div
+          <SwitchRow
             className={cn(
               "flex items-center justify-between gap-4 p-4",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
-            <div className="space-y-1">
-              <Label
-                htmlFor="ai-read-global-prompt"
-                className="cursor-pointer text-sm font-medium text-foreground"
+            <span className="block space-y-1">
+              <span
+                className="text-sm font-medium leading-none text-foreground"
               >
                 {uiText("readGlobalPrompts_1b07")}
-              </Label>
-            </div>
+              </span>
+            </span>
             <Switch
               id="ai-read-global-prompt"
               checked={ai.readGlobalPrompt}
               onCheckedChange={setReadGlobalPrompt}
             />
-          </div>
+          </SwitchRow>
         )}
         {hasLocalSkills && (
-          <div
+          <SwitchRow
             className={cn(
               "flex items-center justify-between gap-4 p-4",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
-            <div className="space-y-1">
-              <Label
-                htmlFor="ai-read-local-skills"
-                className="cursor-pointer text-sm font-medium text-foreground"
+            <span className="block space-y-1">
+              <span
+                className="text-sm font-medium leading-none text-foreground"
               >
                 {uiText("readLocalSkills_b400")}
-              </Label>
-            </div>
+              </span>
+            </span>
             <Switch
               id="ai-read-local-skills"
               checked={ai.readLocalSkills}
               onCheckedChange={setReadLocalSkills}
             />
-          </div>
+          </SwitchRow>
         )}
       </div>
     </SettingsSectionCard>

@@ -39,7 +39,7 @@ en:
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { AlertTriangle, Save } from "@/components/ui/icons";
-import { Switch } from "@/components/ui/switch";
+import { Switch, SwitchRow } from "@/components/ui/switch";
 import { NotebookIconSelector } from "./NotebookIconSelector";
 
 interface NotebookEditDialogProps {
@@ -201,23 +201,22 @@ export function NotebookEditDialog({
               />
             </div>
 
-            <div className="flex flex-col items-center gap-3 rounded-[var(--goose-control-radius)] border border-border/60 bg-muted/20 px-4 py-3 text-center">
-              <div className="min-w-0 space-y-1">
-                <Label
-                  htmlFor="exclude-from-global-search"
-                  className="text-sm font-medium text-foreground cursor-pointer"
+            <SwitchRow className="flex flex-col items-center gap-3 rounded-[var(--goose-control-radius)] border border-border/60 bg-muted/20 px-4 py-3 text-center">
+              <span className="block min-w-0 space-y-1">
+                <span
+                  className="text-sm font-medium leading-none text-foreground"
                 >
-                  {uiText("excludeFromGlobalSearch_0025")}</Label>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {uiText("excludeThisNotebookWhenSearchingAll_add2")}</p>
-              </div>
+                  {uiText("excludeFromGlobalSearch_0025")}</span>
+                <span className="block text-xs text-muted-foreground leading-relaxed">
+                  {uiText("excludeThisNotebookWhenSearchingAll_add2")}</span>
+              </span>
               <Switch
                 id="exclude-from-global-search"
                 checked={excludeFromGlobalSearch}
                 onCheckedChange={onExcludeFromGlobalSearchChange}
                 className="shrink-0"
               />
-            </div>
+            </SwitchRow>
           </div>
         )}
 

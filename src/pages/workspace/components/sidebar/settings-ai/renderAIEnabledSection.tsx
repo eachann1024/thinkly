@@ -11,8 +11,7 @@ en:
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Switch, SwitchRow } from "@/components/ui/switch";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
@@ -27,32 +26,31 @@ export function renderAIEnabledSection(
       className={isOnboarding ? "p-4" : undefined}
       contentClassName={isOnboarding ? "space-y-3" : undefined}
     >
-      <div
+      <SwitchRow
         className={cn(
           "flex items-center justify-between gap-4 p-4",
           SETTINGS_OPTION_ROW_CLASS,
         )}
       >
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
+        <span className="block space-y-1.5">
+          <span className="flex items-center gap-2">
             <GooseIcons.Sparkles className="h-4 w-4 text-current" />
-            <Label
-              htmlFor="ai-enabled"
-              className="cursor-pointer text-sm font-medium text-foreground"
+            <span
+              className="text-sm font-medium leading-none text-foreground"
             >
               {uiText("enableAiAssistant_c698")}
-            </Label>
-          </div>
-          <div className="text-sm leading-relaxed text-muted-foreground">
+            </span>
+          </span>
+          <span className="block text-sm leading-relaxed text-muted-foreground">
             {uiText("turningThisOffStopsAnyResponse_42a7")}
-          </div>
-        </div>
+          </span>
+        </span>
         <Switch
           id="ai-enabled"
           checked={enabled}
           onCheckedChange={setEnabled}
         />
-      </div>
+      </SwitchRow>
     </SettingsSectionCard>
   );
 }
