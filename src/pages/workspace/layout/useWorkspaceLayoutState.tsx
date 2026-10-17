@@ -14,6 +14,8 @@ import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { isEffectiveRightSidePanelOpen } from "@/lib/workspaceViewport";
 import { useWorkspaceViewportCollapse } from "@/hooks/useWorkspaceViewportCollapse";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import { useAiPanelVisibility } from "@/stores/useAiPanelVisibility";
+import { useEffect } from "react";
 import { type WorkspaceLayoutProps } from "./shared";
 
 export function useWorkspaceLayoutState({
@@ -135,6 +137,11 @@ export function useWorkspaceLayoutState({
 
   // 全屏 AI 优先用当前笔记本；本地文件夹切页竞态下 activeNotebookId 可能短暂为空，回退到页面所属本。
   const aiNotebookId = activeNotebookId ?? page?.workspaceId ?? null;
+
+  const aiPanelVisible = (showSideAiPanel || showFullscreenAi) && Boolean(aiNotebookId);
+  useEffect(() => {
+    useAiPanelVisibility.setState({ visible: aiPanelVisible });
+  }, [aiPanelVisible]);
 
   const paneRegistry = useOptionalEditorPaneRegistry();
   return {

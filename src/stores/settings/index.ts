@@ -12,6 +12,7 @@ import {
 import { createSearchProvidersSlice } from "./slices/searchProvidersSlice";
 import { createLocalFolderSlice } from "./slices/localFolderSlice";
 import { createWebdavSlice } from "./slices/webdavSlice";
+import { createSidebarRailSlice } from "./slices/sidebarRailSlice";
 import { migrateSettingsPersistedState } from "./migrations";
 import { localStorageAdapter } from "@/lib/storage";
 import { hydrateSettings } from "./hydration";
@@ -38,6 +39,9 @@ export const useSettings = create<SettingsState>()(
         set as Parameters<typeof createLocalFolderSlice>[0],
       ),
       ...createWebdavSlice(set as Parameters<typeof createWebdavSlice>[0]),
+      ...createSidebarRailSlice(
+        set as Parameters<typeof createSidebarRailSlice>[0],
+      ),
       _hasHydrated: false,
       defaultPageLayout: "standard",
       contentsWidth: 180,
