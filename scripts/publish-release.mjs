@@ -16,7 +16,6 @@ import { fileURLToPath } from "node:url";
 import { assertPublishVersion, getReleases, gh, publishMetadata, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
-import { publishDistribution } from "./distribution/publish.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -43,7 +42,6 @@ async function main() {
   if (existingPublished) {
     assertPublishVersion(version, tag, releases.filter((release) => !release.draft));
     verifyReleaseSource(existingPublished, tag, sha);
-    await publishDistribution(existingPublished);
     publishMetadata(publishedDownloadMetadata(existingPublished), tag);
     console.log(`Repaired ${tag} metadata; published installers are unchanged.`);
     return;
@@ -125,7 +123,6 @@ async function main() {
     if (uploaded.draft) gh(["release", "edit", tag, "--repo", REPO, "--draft=false", "--latest"]);
     const published = findRelease(tag);
     verifyReleaseSource(published, tag, sha);
-    await publishDistribution(published, { directory: stage });
     publishMetadata(publishedDownloadMetadata(published), tag);
     console.log(`Published and verified ${tag} in ${REPO}.`);
   } finally {
