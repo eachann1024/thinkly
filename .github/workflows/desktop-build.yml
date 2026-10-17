@@ -2,12 +2,16 @@ name: Desktop installers
 
 on:
   schedule:
-    # 每天北京时间 8 点仅在 package.json 有新版本时自动发布。
-    - cron: '0 0 * * *'
+    # 每小时检查；版本号没变则只跑判断，不构建、不上传夸克。
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       publish:
         description: Publish installers and update feed after building
+        type: boolean
+        default: false
+      force:
+        description: Build and publish even when the package version is unchanged
         type: boolean
         default: false
       expected_sha:
@@ -45,6 +49,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PUBLISH: ${{ inputs.publish == true }}
+          FORCE: ${{ inputs.force == true }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: node scripts/select-desktop-release.mjs
 
@@ -312,6 +317,12 @@ jobs:
         run: |
           set -euo pipefail
           version="$(node -p 'require("./package.json").version')"
+          fail() {
+            line="QUARK_UPLOAD_FAILED version=${version} reason=$1"
+            if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then printf '%s\n' "$line" >> "$GITHUB_STEP_SUMMARY"; fi
+            printf '%s\n' "$line" >&2
+            exit 1
+          }
           tag="v${version}-${SOURCE_SHA:0:7}"
           mkdir -p quark-assets
           downloaded=0
@@ -322,5 +333,5 @@ jobs:
             fi
             sleep 5
           done
-          test "$downloaded" = 1
+          if [ "$downloaded" != 1 ]; then fail release_download_failed; fi
           node scripts/quark-upload.mjs quark-assets "$version"

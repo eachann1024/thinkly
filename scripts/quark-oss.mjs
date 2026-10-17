@@ -110,7 +110,11 @@ async function putPart(cookie, session, partNumber, bytes, hashCtx) {
       }), { method: "PUT", headers, body: bytes }, 300_000);
       const body = await response.text();
       const etag = etagFrom(response, body);
-      if (!etag) throw new QuarkFailure(`分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
+      if (!etag) {
+        const failure = new QuarkFailure(`分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
+        failure.reason = `part_upload_http_${response.status}`;
+        throw failure;
+      }
       return etag;
     } catch (error) {
       if (error?.cookie || String(error?.message).includes("夸克 Cookie")) throw error;
@@ -155,7 +159,9 @@ async function completeUpload(cookie, session, parts) {
     return;
   }
   const body = await response.text();
-  throw new QuarkFailure(`完成分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
+  const failure = new QuarkFailure(`完成分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
+  failure.reason = `complete_upload_http_${response.status}`;
+  throw failure;
 }
 
 export async function uploadFile(cookie, parentId, file, remoteName = basename(file)) {
