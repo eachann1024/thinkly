@@ -3,7 +3,7 @@ import "../types";
 declare module "../types" {
   interface MessageCatalog {
     "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };
-    "src/pages/workspace/components/sidebar/notebook-switcher/renderNotebookMenu.tsx#localMessages:1": { "actions_2b6b": {  }; "notebookList": { "kind": string | number }; "openFolder": {  }; "switchNotebook": { "kind": string | number } };
+    "src/pages/workspace/components/sidebar/notebook-switcher/renderNotebookMenu.tsx#localMessages:1": { "actions_2b6b": {  }; "addNotebook": { "kind": string | number }; "notebookList": { "kind": string | number }; "switchNotebook": { "kind": string | number } };
     "src/pages/workspace/components/sidebar/notebook-switcher/shared.tsx#localMessages:1": { "editNotebook_ed4e": {  }; "pathUnavailable_ddd1": {  }; "removeLocalFolder_505d": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "renameFailed_37ba": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1": { "folder": {  }; "openFolder": {  } };

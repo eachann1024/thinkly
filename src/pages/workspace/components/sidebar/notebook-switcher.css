@@ -168,3 +168,29 @@
 
 .goose-notebook-menu-list { display: flex; flex-direction: column; gap: var(--goose-menu-row-gap); }
 .goose-notebook-menu-actions { display: flex; flex-direction: column; gap: var(--goose-menu-row-gap); }
+.goose-notebook-menu-surface .goose-notebook-menu-actions > .goose-notebook-add-action {
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 32px;
+  margin-top: 8px;
+  padding-inline: var(--goose-menu-content-gap);
+  border-radius: var(--goose-control-radius, 8px);
+  background-color: color-mix(in srgb, var(--goose-accent-solid, hsl(var(--primary))) 10%, transparent);
+  color: var(--goose-accent-text, hsl(var(--primary)));
+  font-size: var(--goose-menu-item-font-size);
+  font-weight: var(--font-weight-medium, 460);
+  cursor: pointer;
+}
+.goose-notebook-menu-surface .goose-notebook-menu-actions > .goose-notebook-add-action svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.goose-notebook-menu-surface .goose-notebook-menu-actions > .goose-notebook-add-action:is(:hover, :focus-visible, [data-keyboard-active="true"], [data-highlighted]) {
+  background-color: color-mix(in srgb, var(--goose-accent-solid, hsl(var(--primary))) 16%, transparent);
+  color: var(--goose-accent-text, hsl(var(--primary)));
+}
+.goose-notebook-menu-surface .goose-notebook-menu-actions > .goose-notebook-add-action:active {
+  background-color: color-mix(in srgb, var(--goose-accent-solid, hsl(var(--primary))) 22%, transparent);
+}
