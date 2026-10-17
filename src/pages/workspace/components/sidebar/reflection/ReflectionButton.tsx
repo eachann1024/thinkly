@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { useState } from "react";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
-import * as GooseIcons from "@/components/ui/icons";
+import { SidebarRailIcon } from "../SidebarRailIcon";
 import { previousWeek } from "@/lib/reflection/weekRange";
 import { selectHasUnseenReflection, useReflection } from "@/stores/useReflection";
 import { ReflectionDialog } from "./ReflectionDialog";
@@ -26,6 +26,7 @@ export function ReflectionButton({ className }: { className?: string }) {
           <IconButton
             type="button"
             size="xs"
+            active={open}
             className={className}
             aria-label={uiText("reflection")}
             title={uiText("reflection")}
@@ -33,8 +34,8 @@ export function ReflectionButton({ className }: { className?: string }) {
             aria-expanded={open}
             onClick={() => setOpen(true)}
           >
-            <span className="relative">
-              <GooseIcons.CalendarDays aria-hidden="true" className="h-4 w-4" />
+            <span className="relative inline-flex shrink-0">
+              <SidebarRailIcon name="calendar" selected={open} />
               {unseen && (
                 <span aria-hidden="true" className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-danger ring-2 ring-background" />
               )}

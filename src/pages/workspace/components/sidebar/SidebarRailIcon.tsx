@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type SidebarRailIconName = "folder" | "outline" | "search" | "settings";
+type SidebarRailIconName = "folder" | "outline" | "search" | "calendar" | "settings";
 
 // Geometry follows concept 04's 246px preview crops, normalized to 24px.
 // The back sheet is open so no hidden edges show through the front page.
@@ -51,6 +51,13 @@ const outlineIcons: Record<SidebarRailIconName, ReactNode> = {
       <path d={searchHandlePath} />
     </g>
   ),
+  calendar: (
+    <>
+      <rect x="3" y="4.5" width="18" height="17" rx="2" />
+      <path d="M7 2.5V6.5M17 2.5V6.5M3 9H21" />
+      <path d="M7 13H8M11.5 13H12.5M16 13H17M7 17H8M11.5 17H12.5M16 17H17" />
+    </>
+  ),
   settings: (
     <>
       <path d={settingsPath} />
@@ -78,6 +85,15 @@ const solidIcons: Record<SidebarRailIconName, ReactNode> = {
       <circle cx="10.3" cy="10.1" r="6.7" />
       <path d={searchHandlePath} />
     </g>
+  ),
+  calendar: (
+    <>
+      <path
+        d="M5 3.8H19Q21.7 3.8 21.7 6.5V19.5Q21.7 22.2 19 22.2H5Q2.3 22.2 2.3 19.5V6.5Q2.3 3.8 5 3.8Z M3.8 8.3H20.2V9.7H3.8Z M6.5 12.2H8.5V14.2H6.5Z M11 12.2H13V14.2H11Z M15.5 12.2H17.5V14.2H15.5Z M6.5 16.2H8.5V18.2H6.5Z M11 16.2H13V18.2H11Z M15.5 16.2H17.5V18.2H15.5Z"
+        fillRule="evenodd"
+      />
+      <path d="M7 2.5V6.5M17 2.5V6.5" fill="none" stroke="currentColor" strokeWidth="2.1" />
+    </>
   ),
   settings: (
     <path
