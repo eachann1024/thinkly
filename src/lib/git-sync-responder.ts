@@ -1,5 +1,5 @@
 import { gitText } from "./git-messages";
-import { migrateNotebookHistory } from "./history/localDisk";
+import { migrateNotebookHistory } from "./history/notebookHistory";
 import { canonicalRelativePath } from "./canonicalLocalPath";
 import { acquireLocalPageFileOperation } from "@/stores/pages/folderSync";
 import { usePages } from "@/stores/usePages";

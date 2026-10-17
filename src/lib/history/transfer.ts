@@ -1,17 +1,13 @@
 import { historyText as uiText } from "./messages";
 
-import {
-  historyDiskOperation,
-  readHistoryLocations,
-  rendererHistoryDisk,
-  writeHistoryJson,
-} from "./localDisk";
-import { historyHash, originalHistoryPath } from "./localPaths";
+import { ensureHistoryLayout } from "./legacyMigration";
+import { findHistoryEntry, invalidatePortableIds, listHistoryEntries, META_FILE, type HistoryMeta } from "./layout";
+import { historyDiskOperation, rendererHistoryDisk } from "./localDisk";
 import { rebaseResourceContent } from "../local-resource-paths";
 
 type HistoryMove = { id: string; from: string; to: string };
 
-/** 先复制并核对历史，再移动正文；正文失败时撤掉新副本，成功后清理旧副本。 */
+/** 跨笔记本移动：整个 `<hash>/` 目录先复制并核对，正文移动成功后再清理源目录。 */
 export async function withNotebookHistoryTransfer<T>(
   sourceBase: string,
   targetBase: string,
@@ -29,146 +25,69 @@ export async function withNotebookHistoryTransfer<T>(
   return locked(0);
 
   async function transfer(): Promise<T> {
-    const sourceRoot = `${sourceBase}/.goose/history`;
-    if (!(await fs!.exists(sourceRoot))) return move();
-    const source = await readHistoryLocations(sourceBase, fs!);
-    const target = await readHistoryLocations(targetBase, fs!);
-    const previousTarget = JSON.stringify(target);
-    const entries = new Map(moves.map((entry) => [entry.id, entry]));
+    await ensureHistoryLayout(sourceBase, fs!);
+    await ensureHistoryLayout(targetBase, fs!);
     const relocate = (path: string) => {
-      const match = moves.find(
-        (entry) => path === entry.from || path.startsWith(entry.from + "/"),
-      );
+      const match = moves.find((entry) => path === entry.from || path.startsWith(entry.from + "/"));
       return match ? match.to + path.slice(match.from.length) : undefined;
     };
-    for (const [id, location] of Object.entries(source.pages)) {
-      const to = relocate(location.relativePath);
-      if (to) entries.set(id, { id, from: location.relativePath, to });
-    }
-    // 兼容尚未迁到按笔记路径分组的旧历史文件。
-    for (const file of await fs!.readDir(sourceRoot)) {
-      if (!file.isFile || !/^[a-f0-9]{8}\..+\.json$/.test(file.name)) continue;
-      const text = await fs!.readFile(`${sourceRoot}/${file.name}`);
-      if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheMove"));
-      const data = JSON.parse(text);
-      const from =
-        data.relativePath ?? originalHistoryPath(data.pageId, data.workspaceId);
-      const to = from && relocate(from);
-      if (to && typeof data.pageId === "string")
-        entries.set(data.pageId, { id: data.pageId, from, to });
+    const ids = new Map(moves.map((entry) => [entry.id, entry]));
+    const planned: { sourceDir: string; meta: HistoryMeta; from: string; to: string }[] = [];
+    for (const { dir, meta } of await listHistoryEntries(sourceBase, fs!)) {
+      const byPath = meta.relativePath ? relocate(meta.relativePath) : undefined;
+      const byId = ids.get(meta.pageId);
+      const to = byPath ?? byId?.to;
+      if (to) planned.push({ sourceDir: dir, meta, from: meta.relativePath ?? byId!.from, to });
     }
     const created: string[] = [];
-    const originals = new Set<string>();
-    let published = false;
     try {
-      for (const entry of entries.values()) {
-        const location = source.pages[entry.id];
-        const directories = new Set([
-          sourceRoot,
-          `${sourceRoot}/${entry.from}`,
-          ...[location?.relativePath, ...(location?.previousPaths ?? [])]
-            .filter((path): path is string => !!path)
-            .map((path) => `${sourceRoot}/${path}`),
-        ]);
-        const destination = `${targetBase}/.goose/history/${entry.to}`;
-        let hasHistory = false;
-        for (const directory of directories) {
-          if (!(await fs!.exists(directory))) continue;
-          for (const file of await fs!.readDir(directory)) {
-            if (
-              !file.isFile ||
-              !file.name.startsWith(`${historyHash(entry.id)}.`) ||
-              !file.name.endsWith(".json")
-            )
-              continue;
-            const from = `${directory}/${file.name}`,
-              to = `${destination}/${file.name}`;
-            const text = await fs!.readFile(from);
-            if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheMove"));
-            const data = JSON.parse(text);
-            if (data.pageId !== entry.id)
-              throw new Error(uiText("historyIdentifiersDonTMatchTheMoveStopped"));
-            const content =
-              JSON.stringify(
-                {
-                  ...data,
-                  ...(data.content != null
-                    ? {
-                        content: rebaseResourceContent(
-                          data.content,
-                          `${sourceBase}/${data.relativePath ?? entry.from}`,
-                          `${targetBase}/${entry.to}`,
-                          {
-                            from: `${sourceBase}/${moves[0].from}`,
-                            to: `${targetBase}/${moves[0].to}`,
-                          },
-                        ),
-                      }
-                    : {}),
-                  workspaceId: targetNotebookId,
-                  relativePath: entry.to,
-                },
-                null,
-                2,
-              ) + "\n";
-            if (
-              !(await fs!.exists(destination)) &&
-              !(await fs!.mkdir(destination))
-            )
-              throw new Error(uiText("couldnTCreateTheDestinationHistoryFolder"));
-            const existing = (await fs!.exists(to))
-              ? await fs!.readFile(to)
-              : null;
-            if (existing !== null && existing !== content)
-              throw new Error(uiText("theDestinationNotebookHasDifferentHistoryRecordsTheMove"));
-            if (existing === null) {
-              created.push(to);
-              if (!(await fs!.writeFile(to, content)))
-                throw new Error(uiText("couldnTWriteTheMigratedHistory"));
-            }
-            if ((await fs!.readFile(to)) !== content)
-              throw new Error(uiText("migratedHistoryFailedVerification"));
-            originals.add(from);
-            hasHistory = true;
-          }
+      for (const entry of planned) {
+        const target = await findHistoryEntry(targetBase, entry.meta.pageId, fs!);
+        if (target.meta) throw new Error(uiText("theDestinationNotebookHasDifferentHistoryRecordsTheMove"));
+        if (!(await fs!.exists(target.dir))) {
+          if (!(await fs!.mkdir(target.dir))) throw new Error(uiText("couldnTCreateTheDestinationHistoryFolder"));
+          created.push(target.dir);
         }
-        if (hasHistory)
-          target.pages[entry.id] = {
+        const names = (await fs!.readDir(entry.sourceDir)).filter((file) => file.isFile && file.name.endsWith(".json") && file.name !== META_FILE);
+        for (const file of names) {
+          const text = await fs!.readFile(file.path);
+          if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheMove"));
+          const data = JSON.parse(text);
+          if (data.pageId !== entry.meta.pageId) throw new Error(uiText("historyIdentifiersDonTMatchTheMoveStopped"));
+          const content = JSON.stringify({
+            ...data,
+            ...(data.content != null ? {
+              content: rebaseResourceContent(
+                data.content,
+                `${sourceBase}/${data.relativePath ?? entry.from}`,
+                `${targetBase}/${entry.to}`,
+                { from: `${sourceBase}/${moves[0].from}`, to: `${targetBase}/${moves[0].to}` },
+              ),
+            } : {}),
+            workspaceId: targetNotebookId,
             relativePath: entry.to,
-            previousPaths: [],
-          };
-      }
-      if (created.length || originals.size) {
-        published = true;
-        await writeHistoryJson(
-          `${targetBase}/.goose/history-map.json`,
-          target,
-          fs!,
-        );
+          }, null, 2) + "\n";
+          const destination = `${target.dir}/${file.name}`;
+          if (!(await fs!.writeFile(destination, content))) throw new Error(uiText("couldnTWriteTheMigratedHistory"));
+          if ((await fs!.readFile(destination)) !== content) throw new Error(uiText("migratedHistoryFailedVerification"));
+        }
+        // meta.json 最后写入：它出现即代表该目录完整可用。
+        const meta = JSON.stringify({ ...entry.meta, relativePath: entry.to, previousPaths: [] }, null, 2) + "\n";
+        const metaFile = `${target.dir}/${META_FILE}`;
+        if (!(await fs!.writeFile(metaFile, meta)) || (await fs!.readFile(metaFile)) !== meta) throw new Error(uiText("migratedHistoryFailedVerification"));
       }
       const result = await move();
       // 正文已移动，清理失败只保留额外历史副本，不能撤回目标的有效历史。
-      try {
-        for (const id of entries.keys()) delete source.pages[id];
-        await writeHistoryJson(
-          `${sourceBase}/.goose/history-map.json`,
-          source,
-          fs!,
-        );
-        for (const path of originals) await fs!.deleteFile(path);
-      } catch (error) {
-        console.warn("[notebook-move] 原历史副本尚未清理", error);
+      for (const entry of planned) {
+        if (!(await fs!.deleteDir(entry.sourceDir))) console.warn("[notebook-move] 原历史副本尚未清理", entry.sourceDir);
       }
       return result;
     } catch (error) {
-      if (published)
-        await writeHistoryJson(
-          `${targetBase}/.goose/history-map.json`,
-          JSON.parse(previousTarget),
-          fs!,
-        );
-      await Promise.allSettled(created.map((path) => fs!.deleteFile(path)));
+      await Promise.allSettled(created.map((dir) => fs!.deleteDir(dir)));
       throw error;
+    } finally {
+      invalidatePortableIds(sourceBase);
+      invalidatePortableIds(targetBase);
     }
   }
 }

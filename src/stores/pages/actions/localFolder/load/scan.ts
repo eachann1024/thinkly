@@ -15,6 +15,7 @@ import { isNotebookRescanSuppressed } from "@/lib/local-folder-rescan-guard";
 import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { recoverScannedLocalPages } from "./recovery";
+import { clearHistoryTombstones, recordHistoryTombstones } from "@/lib/history/tombstones";
 import "../../../../useTabs";
 
 export const loadLocalFolderPagesOnce = async (
@@ -90,6 +91,13 @@ export const loadLocalFolderPagesOnce = async (
     // 同一记事本可能在启动恢复、点击切换和 watch 兜底中同时发起刷新。
     // 只允许最新请求提交，避免较慢的旧扫描反向覆盖新目录状态。
     if (isNotebookRescanSuppressed(notebookId) || !isCurrentRequest()) return;
+
+    // 重扫发现缺失的笔记只记墓碑（历史延迟清理）；重新出现的清除墓碑。
+    const scannedIds = new Set(localPages.map((page) => page.id));
+    recordHistoryTombstones(notebookId, Object.values(currentPages)
+      .filter((page) => page.workspaceId === notebookId && page.localFilePath && !page.isFolder && !scannedIds.has(page.id))
+      .map((page) => page.id));
+    clearHistoryTombstones(notebookId, localPages.filter((page) => !page.isFolder).map((page) => page.id));
 
     set((state) => {
       const pagesOutsideNotebook = Object.fromEntries(
