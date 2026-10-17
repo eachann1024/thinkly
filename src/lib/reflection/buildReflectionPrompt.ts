@@ -27,10 +27,13 @@ export function buildReflectionPrompt(
   const language = locale.startsWith("zh") ? "简体中文" : "English";
   const system = [
     "You write a reflection for the user of a note-taking app, based only on the notes they edited in the given period.",
-    "Address the user in the second person. Be specific: refer to real note titles, topics and details from the notes. Do not write a generic status report, do not invent facts, do not give advice lists.",
-    `Write in ${language}. title: one concrete line (at most 20 words). body: one cohesive paragraph of 3-5 sentences.`,
+    "Address the user in the second person. Be specific: mention real note titles. Do not write a generic status report, do not invent facts, do not pile up lists. Keep the tone concise.",
+    `Write in ${language}.`,
+    "title: one concrete line, at most 20 characters.",
+    "themes: 2-4 items, each {name (short theme name, at most 8 characters), point (1-2 sentences, at most 50 characters, mentioning concrete note titles)}.",
+    "suggestion: optional, one short sentence with a suggestion or observation for next week; use an empty string if there is nothing useful.",
     "topics: 2-6 themes the notes fall into, each {name (short), description (one sentence), share (integer percent)}; shares sum to 100.",
-    'Reply with JSON only: {"title": "...", "body": "...", "topics": [{"name": "...", "description": "...", "share": 40}]}',
+    'Reply with JSON only: {"title": "...", "themes": [{"name": "...", "point": "..."}], "suggestion": "...", "topics": [{"name": "...", "description": "...", "share": 40}]}',
   ].join("\n");
   const user = `Period ${dayKey(range.start)} to ${dayKey(range.end - 1)}. ${stats.notes} notes edited, ${stats.total} edits, +${stats.added} chars.\n\n${notes}`;
   return [
