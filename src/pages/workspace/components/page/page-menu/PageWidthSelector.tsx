@@ -6,18 +6,16 @@ import { normalizePageLayout } from "@/lib/local-frontmatter";
 const messages = i18nYaml<"src/pages/workspace/components/page/page-menu/PageWidthSelector.tsx#messages:1">`
 zh-Hans:
   contentWidth: "正文宽度"
-  followDefault: "默认"
   standard: "标准"
   fullWidth: "全宽"
+  withDefault: "{{label}}（默认）"
 en:
   contentWidth: "Content width"
-  followDefault: "Default"
   standard: "Standard"
   fullWidth: "Full width"
+  withDefault: "{{label}} (Default)"
 `;
 const t = createTranslator(messages);
-
-type WidthChoice = "default" | "standard" | "full";
 
 /** 页面示意：外框代表窗口，内条代表正文占用宽度。 */
 function WidthGlyph({ layout }: { layout: "standard" | "full" }) {
@@ -47,33 +45,32 @@ export function PageWidthSelector({
   onChange: (value: Page["pageLayout"]) => void;
 }) {
   useLocale();
-  const current: WidthChoice =
-    pageLayout === undefined ? "default" : normalizePageLayout(pageLayout);
   const fallback = normalizePageLayout(defaultLayout);
-  const choices: { value: WidthChoice; label: string; glyph: "standard" | "full" }[] = [
-    { value: "default", label: t("followDefault"), glyph: fallback },
-    { value: "standard", label: t("standard"), glyph: "standard" },
-    { value: "full", label: t("fullWidth"), glyph: "full" },
-  ];
+  const current = normalizePageLayout(pageLayout ?? fallback);
+  const choices = [
+    { value: "standard", label: t("standard") },
+    { value: "full", label: t("fullWidth") },
+  ] as const;
 
   return (
     <div
       role="group"
       aria-label={t("contentWidth")}
-      className="goose-segmented-tray grid w-full grid-cols-3 gap-0.5 p-[3px]"
+      className="goose-segmented-tray grid w-full grid-cols-2 gap-0.5 p-[3px]"
     >
       {choices.map((choice) => (
         <button
           key={choice.value}
           type="button"
           aria-pressed={current === choice.value}
-          onClick={() =>
-            onChange(choice.value === "default" ? undefined : choice.value)
-          }
+          // 选回默认项时清除单篇覆盖，继续跟随全局默认宽度。
+          onClick={() => onChange(choice.value === fallback ? undefined : choice.value)}
           className="goose-segmented-option flex h-14 min-w-0 flex-col items-center justify-center gap-1.5"
         >
-          <WidthGlyph layout={choice.glyph} />
-          <span className="truncate text-xs leading-none">{choice.label}</span>
+          <WidthGlyph layout={choice.value} />
+          <span className="truncate text-xs leading-none">
+            {choice.value === fallback ? t("withDefault", { label: choice.label }) : choice.label}
+          </span>
         </button>
       ))}
     </div>
