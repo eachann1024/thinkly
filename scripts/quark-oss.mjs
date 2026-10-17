@@ -154,13 +154,55 @@ async function completeUpload(cookie, session, parts) {
     },
     body: xml,
   }, 60_000);
-  if (response.status === 200 || response.status === 203) {
-    await response.body?.cancel();
-    return;
-  }
   const body = await response.text();
+  if (response.status === 200 || response.status === 203) {
+    if (response.status === 203) console.log("分片完成回调返回 HTTP 203，继续向夸克确认");
+    return responseFid(body);
+  }
   const failure = new QuarkFailure(`完成分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
   failure.reason = `complete_upload_http_${response.status}`;
+  throw failure;
+}
+
+function responseFid(body) {
+  return /"fid"\s*:\s*"([0-9A-Za-z_-]{6,80})"/.exec(body)?.[1] ?? "";
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function confirmFinish(cookie, taskId, objKey, fallbackFid) {
+  let lastError;
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    try {
+      const payload = await api(cookie, "POST", "file/upload/finish", {
+        body: { task_id: taskId, ...(objKey ? { obj_key: objKey } : {}) },
+      });
+      const data = payload.data ?? {};
+      if (data.finish === true) {
+        const fid = String(data.fid || fallbackFid || "");
+        if (fid) return fid;
+        const missing = new QuarkFailure("完成上传后没有文件编号");
+        missing.reason = "rename_target_missing";
+        throw missing;
+      }
+      if (attempt < 5) {
+        console.log(`完成确认未就绪，第 ${attempt} 次后重试`);
+        await delay(attempt * 1000);
+      }
+    } catch (error) {
+      if (error?.cookie || error?.reason === "cookie_invalid" || error?.reason === "rename_target_missing") throw error;
+      lastError = error;
+      if (attempt < 5) await delay(attempt * 1000);
+    }
+  }
+  if (lastError) {
+    if (!lastError.reason) lastError.reason = "finish_not_ready";
+    throw lastError;
+  }
+  const failure = new QuarkFailure("完成上传后服务器未确认文件");
+  failure.reason = "finish_not_ready";
   throw failure;
 }
 
@@ -177,11 +219,13 @@ export async function uploadFile(cookie, parentId, file, remoteName = basename(f
   });
   const data = prepared.data ?? {};
   if (!data.task_id) throw new QuarkFailure(`预上传失败：${name}`);
-  if (data.finish === true) return;
+  const preparedFid = String(data.fid ?? "");
+  if (data.finish === true) return { fid: await confirmFinish(cookie, data.task_id, data.obj_key, preparedFid) };
   const hashed = await api(cookie, "POST", "file/update/hash", {
     body: { md5: hashes.md5, sha1: hashes.sha1, task_id: data.task_id },
   });
-  if (hashed.data?.finish === true) return;
+  const hashedFid = String(hashed.data?.fid ?? preparedFid);
+  if (hashed.data?.finish === true) return { fid: await confirmFinish(cookie, data.task_id, data.obj_key, hashedFid) };
   const partSize = Number(prepared.metadata?.part_size);
   if (!Number.isInteger(partSize) || partSize < 1) throw new QuarkFailure(`预上传未返回分片大小：${name}`);
   const session = {
@@ -203,6 +247,6 @@ export async function uploadFile(cookie, parentId, file, remoteName = basename(f
     sha1Write(state, bytes);
     offset += length;
   }
-  await completeUpload(cookie, session, parts);
-  await api(cookie, "POST", "file/upload/finish", { body: { obj_key: session.objKey, task_id: session.taskId } });
+  const callbackFid = await completeUpload(cookie, session, parts);
+  return { fid: await confirmFinish(cookie, session.taskId, session.objKey, callbackFid || preparedFid) };
 }

@@ -85,7 +85,10 @@ export async function listChildren(cookie, parentId) {
   const files = [];
   for (let page = 1; page <= 20; page += 1) {
     const payload = await api(cookie, "GET", "file/sort", {
-      query: { pdir_fid: parentId, _page: page, _size: 200, _fetch_total: 1 },
+      query: {
+        pdir_fid: parentId, _page: page, _size: 200, _fetch_total: 1,
+        fetch_all_file: 1, fetch_risk_file_name: 1,
+      },
     });
     const list = Array.isArray(payload.data?.list) ? payload.data.list : [];
     files.push(...list);
@@ -109,7 +112,12 @@ export async function ensureFolder(cookie, name) {
 }
 
 export async function renameFile(cookie, fid, fileName) {
-  await api(cookie, "POST", "file/rename", { body: { fid, file_name: fileName } });
+  try {
+    await api(cookie, "POST", "file/rename", { body: { fid, file_name: fileName } });
+  } catch (error) {
+    if (error && !error.reason) error.reason = "rename_failed";
+    throw error;
+  }
 }
 
 export async function deleteFiles(cookie, ids) {
