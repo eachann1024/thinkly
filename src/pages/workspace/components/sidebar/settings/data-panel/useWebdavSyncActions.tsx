@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useWebdavSyncActions.tsx#localMessages:1">`
+zh-Hans:
+  noNotebookDataToExport_03e2: "无可导出的笔记本数据"
+  backupSynced_dea7: "同步备份成功"
+  backupsCleaned: "已清理 {{count}} 个云端过期备份"
+  couldNotUploadBackup_7240: "备份上传失败"
+  noUsableBackupsFoundInThe_3663: "云端未发现可用的备份文件"
+  syncFailed_d610: "同步失败"
+en:
+  noNotebookDataToExport_03e2: "No notebook data to export"
+  backupSynced_dea7: "Backup synced"
+  backupsCleaned: "Expired cloud backups removed: {{count}}"
+  couldNotUploadBackup_7240: "Could not upload backup"
+  noUsableBackupsFoundInThe_3663: "No usable backups found in the cloud"
+  syncFailed_d610: "Sync failed"
+`;
+const uiText = createTranslator(localMessages);
 import { generateExportZip } from "@/lib/export";
 import { uploadWebdavBackup } from "@/lib/webdavSync";
 import { toast } from "@/components/ui/sonner";
@@ -35,7 +54,7 @@ export function useWebdavSyncActions(
     try {
       const notebookIds = notebookList.map((n) => n.id);
       if (notebookIds.length === 0) {
-        toast.error("无可导出的笔记本数据");
+        toast.error(uiText("noNotebookDataToExport_03e2"));
         return;
       }
       const zipBlob = await generateExportZip(
@@ -61,15 +80,15 @@ export function useWebdavSyncActions(
           webdavLastUploadAt: now.toISOString(),
           webdavLastUploadFilename: fileName,
         });
-        toast.success("同步备份成功", {
-          description: `已清理 ${result.cleanedCount} 个云端过期备份`,
+        toast.success(uiText("backupSynced_dea7"), {
+          description: uiText("backupsCleaned", { count: result.cleanedCount }),
         });
         if (isRemoteListOpen && isCurrentActivation(epoch))
           await readRemoteList();
       }
     } catch (err: any) {
       console.error(err);
-      toast.error("备份上传失败", { description: err.message || String(err) });
+      toast.error(uiText("couldNotUploadBackup_7240"), { description: err.message || String(err) });
     } finally {
       sendWebdavEvent({ type: "operation.finished", id });
     }
@@ -85,7 +104,7 @@ export function useWebdavSyncActions(
       const list = await readRemoteList();
       if (!isCurrentActivation(epoch)) return;
       if (list.length === 0) {
-        toast.error("云端未发现可用的备份文件");
+        toast.error(uiText("noUsableBackupsFoundInThe_3663"));
         return;
       }
       sendWebdavEvent({
@@ -105,7 +124,7 @@ export function useWebdavSyncActions(
     } catch (err: any) {
       if (!isCurrentActivation(epoch)) return;
       console.error(err);
-      toast.error("同步失败", { description: err.message || String(err) });
+      toast.error(uiText("syncFailed_d610"), { description: err.message || String(err) });
     } finally {
       if (!awaitingConfirmation)
         sendWebdavEvent({ type: "operation.finished", id });

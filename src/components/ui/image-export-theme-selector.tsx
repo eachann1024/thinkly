@@ -1,3 +1,27 @@
+import { common } from "@/i18n/common";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/image-export-theme-selector.tsx#localMessages:1">`
+zh-Hans:
+  description: "为「{{mode}}」选择一种视觉风格，共 {{count}} 种主题可选"
+  wholePage: "整页"
+  selection: "选中内容"
+  chooseTheme: "选择卡片主题"
+  current: "当前"
+  light: "浅色"
+  dark: "深色"
+  generateImage: "生成图片"
+en:
+  description: "Choose a style for {{mode}} from {{count}} themes"
+  wholePage: "Entire page"
+  selection: "Selected content"
+  chooseTheme: "Choose a card theme"
+  current: "Current"
+  light: "Light"
+  dark: "Dark"
+  generateImage: "Generate image"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -48,7 +72,7 @@ export function ImageExportThemeSelector({
     onOpenChange(false);
   };
 
-  const modeText = mode === "page" ? "整页" : "选中内容";
+  const modeText = mode === "page" ? uiText("wholePage") : uiText("selection");
   const notebookContext = useMemo(
     () => ({
       fontFamily: page?.fontFamily ?? "default",
@@ -103,10 +127,9 @@ export function ImageExportThemeSelector({
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 px-6 pt-6 pb-3 pr-12 shrink-0">
           <DialogHeader className="min-w-0 flex-1 space-y-1 text-left">
             <DialogTitle className="text-sm font-semibold tracking-tight">
-              选择卡片主题
-            </DialogTitle>
+              {uiText("chooseTheme")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              为「{modeText}」选择一种视觉风格，共 {CARD_THEMES.length} 种主题可选
+              {uiText("description", {mode: modeText, count: CARD_THEMES.length})}
             </DialogDescription>
           </DialogHeader>
           <GenerationOptionsPanel wm={wm} onToggle={toggleConfig} />
@@ -135,8 +158,7 @@ export function ImageExportThemeSelector({
                 <header className="flex items-center gap-2 mb-2.5 px-0.5">
                   <span className="inline-block h-1.5 w-1.5 rounded-marker bg-[var(--goose-accent-solid)]" />
                   <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
-                    当前
-                  </span>
+                    {uiText("current")}</span>
                   <span className="ml-1 flex-1 h-px bg-border/70" />
                 </header>
                 <div className={showLivePreview ? "grid grid-cols-2 gap-4" : "grid grid-cols-3 gap-4"}>
@@ -161,7 +183,7 @@ export function ImageExportThemeSelector({
                       className={`inline-block h-1.5 w-1.5 rounded-marker ${group === "light" ? "bg-foreground/40" : "bg-foreground"}`}
                     />
                     <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
-                      {group === "light" ? "浅色" : "深色"}
+                      {group === "light" ? uiText("light") : uiText("dark")}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
                       {themes.length}
@@ -200,12 +222,10 @@ export function ImageExportThemeSelector({
             onClick={() => onOpenChange(false)}
             className="h-8 text-xs"
           >
-            取消
-          </Button>
+            {common("cancel")}</Button>
           <Button size="sm" onClick={handleConfirm} className="h-8 text-xs">
             <GooseIcons.Image className="mr-1.5 h-3.5 w-3.5" />
-            生成图片
-          </Button>
+            {uiText("generateImage")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

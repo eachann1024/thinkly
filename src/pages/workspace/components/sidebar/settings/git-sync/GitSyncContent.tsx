@@ -1,3 +1,44 @@
+import { createTranslator, i18nYaml, getFormatLocale } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitSyncContent.tsx#localMessages:1">`
+zh-Hans:
+  removeConfiguration_9285: "移除配置"
+  gitSyncIsAvailableInThe_bf2b: "Git 同步仅在桌面版应用中可用。"
+  loadingSyncConfiguration_41ae: "正在读取同步配置…"
+  reload_9e56: "重新读取"
+  repository_c270: "仓库"
+  addRepository_7135: "添加仓库"
+  addARepositoryChooseFoldersThen_a359: "添加仓库，选择文件夹后连接并同步。"
+  lastSuccessfulSync_28c1: "上次同步成功："
+  noHistoryYet_5dbb: "尚无记录"
+  sync_6a62: "同步"
+  retry_132c: "重试"
+  syncNow_5f71: "立即同步"
+  errorDetails_71f6: "错误详情"
+  resolveConflictsAndResumeSync_6864: "解决冲突并继续同步"
+  connectAndSync_9751: "连接并同步"
+  cancel_625f: "取消"
+  readFailed: "读取配置失败：{{error}}"
+en:
+  removeConfiguration_9285: "Remove configuration"
+  gitSyncIsAvailableInThe_bf2b: "Git sync is available in the desktop app only."
+  loadingSyncConfiguration_41ae: "Loading sync configuration…"
+  reload_9e56: "Reload"
+  repository_c270: "Repository"
+  addRepository_7135: "Add repository"
+  addARepositoryChooseFoldersThen_a359: "Add a repository, choose folders, then connect and sync."
+  lastSuccessfulSync_28c1: "Last successful sync:"
+  noHistoryYet_5dbb: "No history yet"
+  sync_6a62: "Sync"
+  retry_132c: "Retry"
+  syncNow_5f71: "Sync now"
+  errorDetails_71f6: "Error details"
+  resolveConflictsAndResumeSync_6864: "Resolve conflicts and resume sync"
+  connectAndSync_9751: "Connect and sync"
+  cancel_625f: "Cancel"
+  readFailed: "Could not read configuration: {{error}}"
+`;
+const uiText = createTranslator(localMessages);
 import { GitDetails } from "./GitDetails";
 import { GitSyncSettings } from "./GitSyncSettings";
 import { repositoryLabel, shortSyncError } from "./gitSyncPresentation";
@@ -101,32 +142,30 @@ export function GitSyncContent({
     removeConfirmation,
     setRemoveConfirmation,
     onRemove: () => {
-      if (bridge) void run(id, "移除配置", () => bridge.remove(id), onRemoved);
+      if (bridge) void run(id, uiText("removeConfiguration_9285"), () => bridge.remove(id), onRemoved);
     },
   };
   return (
     <div className="w-full max-w-[860px] min-w-0 space-y-5">
       {!bridge ? (
         <SettingsSectionCard>
-          <p className="text-sm text-muted-foreground">Git 同步仅在桌面版应用中可用。</p>
+          <p className="text-sm text-muted-foreground">{uiText("gitSyncIsAvailableInThe_bf2b")}</p>
         </SettingsSectionCard>
       ) : (
         <>
           {loading && (
             <p role="status" className="text-sm text-muted-foreground">
-              正在读取同步配置…
-            </p>
+              {uiText("loadingSyncConfiguration_41ae")}</p>
           )}
           {loadError && (
             <div role="alert" className="space-y-2 text-sm">
-              <p className="git-sync-error">读取配置失败：{loadError}</p>
+              <p className="git-sync-error">{uiText("readFailed", { error: loadError })}</p>
               <Button variant="outline" onClick={onReload}>
-                重新读取
-              </Button>
+                {uiText("reload_9e56")}</Button>
             </div>
           )}
           <SettingsSectionCard
-            title="仓库"
+            title={uiText("repository_c270")}
             actions={
               <Button
                 variant="outline"
@@ -135,8 +174,7 @@ export function GitSyncContent({
                 disabled={loading || Boolean(loadError) || adding}
                 onClick={onAdd}
               >
-                添加仓库
-              </Button>
+                {uiText("addRepository_7135")}</Button>
             }
           >
             <div className="space-y-2">
@@ -162,7 +200,7 @@ export function GitSyncContent({
                 );
               })}
               {!loading && !loadError && !state.configs.length && (
-                <p className="text-sm text-muted-foreground">添加仓库，选择文件夹后连接并同步。</p>
+                <p className="text-sm text-muted-foreground">{uiText("addARepositoryChooseFoldersThen_a359")}</p>
               )}
             </div>
           </SettingsSectionCard>
@@ -172,7 +210,7 @@ export function GitSyncContent({
                 <div role="status" aria-live="polite" className="space-y-2 text-sm">
                   <p className="text-base font-semibold">{summary}</p>
                   <p className="text-muted-foreground">
-                    上次同步成功：{status?.lastSyncedAt ? new Date(status.lastSyncedAt).toLocaleString() : "尚无记录"}
+                    {uiText("lastSuccessfulSync_28c1")}{status?.lastSyncedAt ? new Date(status.lastSyncedAt).toLocaleString(getFormatLocale()) : uiText("noHistoryYet_5dbb")}
                   </p>
                 </div>
                 {!conflicts.length && (
@@ -182,17 +220,17 @@ export function GitSyncContent({
                     disabled={actionDisabled || !folders.length}
                     onClick={() => {
                       onFolderCheck();
-                      void run(id, "同步", () => bridge.syncNow(id));
+                      void run(id, uiText("sync_6a62"), () => bridge.syncNow(id));
                     }}
                   >
-                    {status?.phase === "error" || folderError ? "重试" : "立即同步"}
+                    {status?.phase === "error" || folderError ? uiText("retry_132c") : uiText("syncNow_5f71")}
                   </Button>
                 )}
               </div>
               {syncError && !conflicts.length && !folderError && (
                 <div className="space-y-2 text-sm">
                   <p className="text-danger">{shortSyncError(syncError)}</p>
-                  <GitDetails className="text-sm text-muted-foreground" title="错误详情">
+                  <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
                     <p className="mt-2 whitespace-pre-wrap break-words">{syncError}</p>
                   </GitDetails>
                 </div>
@@ -204,7 +242,7 @@ export function GitSyncContent({
                   conflicts={conflicts}
                   bridge={bridge}
                   disabled={disabled}
-                  onResolve={(request) => void run(id, "解决冲突并继续同步", () => bridge.resolveConflict(request))}
+                  onResolve={(request) => void run(id, uiText("resolveConflictsAndResumeSync_6864"), () => bridge.resolveConflict(request))}
                 />
               )}
             </SettingsSectionCard>
@@ -233,11 +271,9 @@ export function GitSyncContent({
                     disabled={disabled || !draft.remoteUrl.trim() || !folders.length}
                     onClick={connect}
                   >
-                    连接并同步
-                  </Button>
+                    {uiText("connectAndSync_9751")}</Button>
                   <Button className="min-h-[44px]" variant="ghost" disabled={disabled} onClick={onCancel}>
-                    取消
-                  </Button>
+                    {uiText("cancel_625f")}</Button>
                 </div>
               )}
             </>
@@ -246,7 +282,7 @@ export function GitSyncContent({
           {error && (
             <div role="alert" className="space-y-2 text-sm">
               <p className="text-danger">{shortSyncError(error)}</p>
-              <GitDetails className="text-sm text-muted-foreground" title="错误详情">
+              <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
                 <p className="mt-2 whitespace-pre-wrap break-words">{error}</p>
               </GitDetails>
             </div>

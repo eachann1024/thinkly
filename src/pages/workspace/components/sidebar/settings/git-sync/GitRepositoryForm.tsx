@@ -1,3 +1,30 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitRepositoryForm.tsx#localMessages:1">`
+zh-Hans:
+  automaticBackgroundSync_2b6d: "后台自动同步"
+  saving_9b80: "正在保存…"
+  syncInterval_2543: "同步间隔"
+  minutes_3a17: "分钟"
+  enterAWholeNumberFrom1_2a07: "请输入 1–1440 之间的整数。"
+  connectRepository_9d8e: "连接仓库"
+  sshRepositoryUrl_79e4: "SSH 仓库地址"
+  advancedSettings_e370: "高级设置"
+  branch_bfc0: "分支"
+  sshPlaceholder: "git@github.com:username/repository.git"
+en:
+  automaticBackgroundSync_2b6d: "Automatic background sync"
+  saving_9b80: "Saving…"
+  syncInterval_2543: "Sync interval"
+  minutes_3a17: "minutes"
+  enterAWholeNumberFrom1_2a07: "Enter a whole number from 1 to 1440."
+  connectRepository_9d8e: "Connect repository"
+  sshRepositoryUrl_79e4: "SSH repository URL"
+  advancedSettings_e370: "Advanced settings"
+  branch_bfc0: "Branch"
+  sshPlaceholder: "git@github.com:username/repository.git"
+`;
+const uiText = createTranslator(localMessages);
 import { GitDetails } from "./GitDetails";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +57,7 @@ function AutomaticSync({
       >
         <span className="flex flex-1 flex-col justify-center">
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] font-medium">
-            后台自动同步
-            {saving &&
+            {uiText("automaticBackgroundSync_2b6d")}{saving &&
               Number.isInteger(draft.intervalMinutes) &&
               draft.intervalMinutes >= 1 &&
               draft.intervalMinutes <= 1440 && (
@@ -39,8 +65,7 @@ function AutomaticSync({
                   role="status"
                   className="text-sm font-normal text-muted-foreground"
                 >
-                  正在保存…
-                </span>
+                  {uiText("saving_9b80")}</span>
               )}
           </span>
         </span>
@@ -53,8 +78,7 @@ function AutomaticSync({
       </Label>
       <div className="flex min-h-[44px] items-center justify-between gap-4">
         <Label htmlFor="git-sync-interval" className="text-[15px]">
-          同步间隔
-        </Label>
+          {uiText("syncInterval_2543")}</Label>
         <div className="flex shrink-0 items-center gap-2">
           <Input
             id="git-sync-interval"
@@ -69,15 +93,14 @@ function AutomaticSync({
               onChange("intervalMinutes", Number(event.target.value))
             }
           />
-          <span className="text-sm text-muted-foreground">分钟</span>
+          <span className="text-sm text-muted-foreground">{uiText("minutes_3a17")}</span>
         </div>
       </div>
       {!Number.isInteger(draft.intervalMinutes) ||
       draft.intervalMinutes < 1 ||
       draft.intervalMinutes > 1440 ? (
         <p className="text-sm text-danger">
-          请输入 1–1440 之间的整数。
-        </p>
+          {uiText("enterAWholeNumberFrom1_2a07")}</p>
       ) : null}
     </section>
   );
@@ -86,23 +109,23 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
   const { adding, draft, disabled, onChange } = props;
   if (!adding) return <AutomaticSync {...props} />;
   return (
-    <SettingsSectionCard title="连接仓库">
+    <SettingsSectionCard title={uiText("connectRepository_9d8e")}>
       <div className="space-y-2">
-        <Label htmlFor="git-sync-remote">SSH 仓库地址</Label>
+        <Label htmlFor="git-sync-remote">{uiText("sshRepositoryUrl_79e4")}</Label>
         <Input
           id="git-sync-remote"
           className="h-[44px]"
           value={draft.remoteUrl}
           disabled={disabled}
           onChange={(event) => onChange("remoteUrl", event.target.value)}
-          placeholder={"git" + "@github.com:用户名/仓库.git"}
+          placeholder={uiText("sshPlaceholder")}
           autoComplete="off"
         />
       </div>
-      <GitDetails title="高级设置">
+      <GitDetails title={uiText("advancedSettings_e370")}>
         <div className="space-y-4 px-3 pb-3">
           <div className="space-y-2">
-            <Label htmlFor="git-sync-branch">分支</Label>
+            <Label htmlFor="git-sync-branch">{uiText("branch_bfc0")}</Label>
             <Input
               id="git-sync-branch"
               className="h-[44px]"

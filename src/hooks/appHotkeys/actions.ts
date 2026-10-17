@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/hooks/appHotkeys/actions.ts#block1:1">`
+zh-Hans:
+  newFile: "已创建新文件"
+  newNote: "已创建新笔记"
+en:
+  newFile: "New file created"
+  newNote: "New note created"
+`);
 import { createNamedPage } from "@/lib/create-named-page";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { toast } from "@/components/ui/sonner";
@@ -153,7 +162,7 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
       if (!newPageId) return;
       useTabs.getState().openTab(newPageId);
       toast.success(
-        notebook?.source === "local-folder" ? "已创建新文件" : "已创建新笔记",
+        notebook?.source === "local-folder" ? storeText("newFile") : storeText("newNote"),
         { duration: 1500 },
       );
     })();

@@ -3,6 +3,15 @@ import * as GooseIcons from "@/components/ui/icons";
 import { useCallback, type ReactNode } from "react";
 import { FilePanelExtension } from "@blocknote/core/extensions";
 import { cn } from "@/components/editor/utils/cn";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/shared/MediaPlaceholder.tsx#messages:1">`
+zh-Hans:
+  uploading: "上传中…"
+en:
+  uploading: "Uploading…"
+`;
+const t = createTranslator(messages);
+
 
 export type MediaPlaceholderVariant = "image" | "file";
 
@@ -67,7 +76,7 @@ export function MediaPlaceholder({
   );
 }
 
-export function MediaLoadingPreview({ label = "上传中…" }: { label?: string }) {
+export function MediaLoadingPreview({ label = t("uploading") }: { label?: string }) {
   return (
     <div className="goose-media-loading" role="status" aria-live="polite">
       <GooseIcons.Loader2

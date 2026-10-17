@@ -1,3 +1,13 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const localMessages = i18nYaml<"src/lib/editor-split/commands.ts#localMessages:1">`
+zh-Hans:
+  noNoteIsAvailableToOpenInSplitView: "当前没有可分屏的笔记"
+  youCanOpenUpToPanes: "最多只能分成 4 格"
+en:
+  noNoteIsAvailableToOpenInSplitView: "No note is available to open in split view"
+  youCanOpenUpToPanes: "You can open up to 4 panes"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * 常规笔记本分屏命令。快捷键代理只应调用这里。
  * - splitRight() / splitDown()
@@ -17,9 +27,8 @@ import type {
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { flushEditorContent, usePages } from "@/stores/usePages";
 import { isSpecialTab, useTabs } from "@/stores/useTabs";
-import { createSplitBlankPage } from "./createBlankPage";
+import { createSplitBlankPage, discardFailedSplitPage } from "./createBlankPage";
 import { focusNewPage } from "@/stores/pages/actions/create/content";
-
 export type ClosePaneOrTabResult = "close-tab" | "closed-pane";
 import {
   activeWorkspaceTab,
@@ -33,16 +42,6 @@ import {
 } from "./commandContext";
 export type { FocusSplitPaneOptions } from "./commandContext";
 
-function discardFailedSplitPage(pageId: string) {
-  const pages = usePages.getState();
-  const page = pages.getPage(pageId);
-  if (
-    isUnsavedEditorPage(page) &&
-    !localPageHasPersistableContent(page.content)
-  ) {
-    pages.discardEditorDraftPage(pageId);
-  }
-}
 
 async function splitInDirection(direction: SplitDirection): Promise<boolean> {
   const blocked = canSplitCurrentView();
@@ -52,7 +51,7 @@ async function splitInDirection(direction: SplitDirection): Promise<boolean> {
   }
   const tab = activeWorkspaceTab();
   if (!tab || isSpecialTab(tab)) {
-    toast.error("当前没有可分屏的笔记");
+    toast.error(uiText("noNoteIsAvailableToOpenInSplitView"));
     return false;
   }
 
@@ -60,7 +59,7 @@ async function splitInDirection(direction: SplitDirection): Promise<boolean> {
   split.ensureTab(tab.id, tab.pageId);
   const currentState = split.getStateForTab(tab.id);
   if (currentState && countLeaves(currentState.root) >= MAX_SPLIT_LEAVES) {
-    toast.error("最多只能分成 4 格");
+    toast.error(uiText("youCanOpenUpToPanes"));
     return false;
   }
   const previousFocused = split.focusedPageId(tab.id);

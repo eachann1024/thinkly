@@ -1,5 +1,32 @@
 import type { ProgressStep } from "./toolProgressModel";
 import type { WorkCardStatusData } from "./workCardStatusContext";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/workCardHeading.ts#messages:1">`
+zh-Hans:
+  thePageContentHasChanged: "页面内容已发生变化"
+  writeCanceled: "写入已取消"
+  failed: "处理失败"
+  processing: "处理中"
+  awaitingApproval: "等待审批"
+  canceled: "已取消"
+  undone: "已撤回"
+  pending: "待处理"
+  complete: "处理完成"
+  detailSteps: "{{value1}} 步{{value2}}"
+en:
+  thePageContentHasChanged: "The page content has changed"
+  writeCanceled: "Write canceled"
+  failed: "Failed"
+  processing: "Processing"
+  awaitingApproval: "Awaiting approval"
+  canceled: "Canceled"
+  undone: "Undone"
+  pending: "Pending"
+  complete: "Complete"
+  detailSteps: "{{value1}} steps{{value2}}"
+`;
+const t = createTranslator(messages);
+
 
 export type WorkCardPhase = ProgressStep["status"];
 
@@ -49,14 +76,14 @@ export function getWorkCardHeading(
   const latest =
     errorStep ?? (phase === "running" ? runningStep : steps[n - 1]) ?? doneStep;
   const toggle =
-    n === 0 ? "" : `${n} 步${latest?.label ? ` · ${latest.label}` : ""}`;
+    n === 0 ? "" : t("detailSteps", { value1: n, value2: latest?.label ? ` · ${latest.label}` : "" });
 
   if (phase === "error") {
     const detail = errorStep?.detail ?? "";
-    const conflict = detail.includes(CONFLICT);
+    const conflict = detail.includes(CONFLICT) || detail.includes(t("thePageContentHasChanged"));
     return {
       status: {
-        label: conflict ? "写入已取消" : "处理失败",
+        label: conflict ? t("writeCanceled") : t("failed"),
         tone: "danger",
         icon: conflict ? "cancelled" : "error",
       },
@@ -67,20 +94,20 @@ export function getWorkCardHeading(
 
   if (phase === "running") {
     return {
-      status: { label: "处理中", tone: "accent", icon: "running" },
+      status: { get label() { return t("processing"); }, tone: "accent", icon: "running" },
       toggle,
     };
   }
 
   const status: WorkCardStatusData =
     phase === "approval"
-      ? { label: "等待同意", tone: "warning", icon: "waiting" }
+      ? { get label() { return t("awaitingApproval"); }, tone: "warning", icon: "waiting" }
       : phase === "cancelled"
-        ? { label: "已取消", tone: "neutral", icon: "cancelled" }
+        ? { get label() { return t("canceled"); }, tone: "neutral", icon: "cancelled" }
         : phase === "undone"
-          ? { label: "已撤回", tone: "neutral", icon: "undone" }
+          ? { get label() { return t("undone"); }, tone: "neutral", icon: "undone" }
           : phase === "waiting"
-            ? { label: "待处理", tone: "warning", icon: "waiting" }
-            : { label: "处理完成", tone: "success", icon: "done" };
+            ? { get label() { return t("pending"); }, tone: "warning", icon: "waiting" }
+            : { get label() { return t("complete"); }, tone: "success", icon: "done" };
   return { status, toggle };
 }

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/electron/gooseFs.ts#localMessages:1">`
+zh-Hans:
+  desktopIntegrationIsUnavailable: "gooseDesktop 不可用"
+en:
+  desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
+`;
+const uiText = createTranslator(localMessages);
 import { electronGooseFsShell } from "./gooseFsShell";
 /**
  * Electron 桌面端的 window.gooseFs 同构实现。
@@ -79,7 +88,7 @@ export const electronGooseFs = {
   readFileStat: undefined,
   readFileStatAsync: async (path: string) => {
     const api = getGooseDesktop();
-    if (!api) return { ok: false, error: "gooseDesktop 不可用", content: null };
+    if (!api) return { ok: false, error: uiText("desktopIntegrationIsUnavailable"), content: null };
     try {
       const content = await api.fsReadText(path);
       rememberExists(path, true);

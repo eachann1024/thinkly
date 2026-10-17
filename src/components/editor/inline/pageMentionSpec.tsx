@@ -11,11 +11,20 @@ import {
   serializePageMentionHref,
   type PageMentionProps,
 } from "./pageMention";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/inline/pageMentionSpec.tsx#messages:1">`
+zh-Hans:
+  untitled: "未命名"
+en:
+  untitled: "Untitled"
+`;
+const t = createTranslator(messages);
+
 
 function PageMentionTag({ props }: { props: PageMentionProps }) {
   const { onOpenPage } = useEditorPageContext();
   const live = usePageMentionTitle(props);
-  const label = pageMentionLabel(live);
+  const label = live.title.trim() ? pageMentionLabel(live) : `@${t("untitled")}`;
   const open = mentionOpenPayload(props);
   return (
     <span

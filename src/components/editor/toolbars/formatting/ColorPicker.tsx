@@ -7,6 +7,19 @@ import { useSelectionColorState } from "./useSelectionColors";
 import { useColorPanelState } from "./useColorPanelState";
 import { useColorActions } from "./useColorActions";
 import { ColorPickerPanel } from "./ColorPickerPanel";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/ColorPicker.tsx#messages:1">`
+zh-Hans:
+  chooseATextOrBackgroundColorClickTo: "选择文本或背景颜色；点击应用上次颜色"
+  colorMixedFormattingClickToApplyTheLast: "颜色选择（混合格式）；点击应用上次颜色"
+  colorClickToApplyTheLastColor: "颜色选择；点击应用上次颜色"
+en:
+  chooseATextOrBackgroundColorClickTo: "Choose a text or background color; click to apply the last color"
+  colorMixedFormattingClickToApplyTheLast: "Color (mixed formatting); click to apply the last color"
+  colorClickToApplyTheLastColor: "Color; click to apply the last color"
+`;
+const t = createTranslator(messages);
+
 
 export { getColorPanelPosition } from "./colorPanelGeometry";
 export {
@@ -55,10 +68,10 @@ export function FormattingToolbarColorPicker({
           isBgMixed
         }
         className={cn("goose-formatting-toolbar-control")}
-        title="选择文本或背景颜色；点击应用上次颜色"
+        title={t("chooseATextOrBackgroundColorClickTo")}
         aria-label={isTextMixed || isBgMixed
-          ? "颜色选择（混合格式）；点击应用上次颜色"
-          : "颜色选择；点击应用上次颜色"}
+          ? t("colorMixedFormattingClickToApplyTheLast")
+          : t("colorClickToApplyTheLastColor")}
         onClick={() => {
           applyLastFormatColors();
         }}

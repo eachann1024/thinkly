@@ -1,3 +1,4 @@
+import { t } from "../i18n/attachments";
 import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import {
@@ -77,7 +78,7 @@ export function createQuicknoteWindow(): BrowserWindow {
   const isMac = process.platform === "darwin";
   const bounds = resolveQuicknoteBounds();
   const win = new BrowserWindow({
-    title: "速记",
+    title: t("quicknoteTitle"),
     width: bounds.width ?? QUICKNOTE_WIDTH,
     height: bounds.height ?? QUICKNOTE_HEIGHT,
     ...(bounds.x != null && bounds.y != null

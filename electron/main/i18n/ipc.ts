@@ -1,0 +1,26 @@
+import { lookupWindowContext } from "../windows";
+import { BrowserWindow, ipcMain } from "electron";
+import { getLanguageSnapshot, saveLanguagePreference } from "./store";
+
+export function registerLanguageIpc(): void {
+  ipcMain.on("desktop:language-initial", (event) => {
+    event.returnValue = getLanguageSnapshot();
+  });
+  ipcMain.handle("desktop:language-get", () => getLanguageSnapshot());
+  const save = async (preference: unknown) => {
+    const snapshot = await saveLanguagePreference(preference);
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+        win.webContents.send("desktop:language-changed", snapshot);
+      }
+    }
+    return snapshot;
+  };
+  const assertWorkspace = (event: Electron.IpcMainInvokeEvent) => {
+    if (event.senderFrame !== event.sender.mainFrame || lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") {
+      throw new Error("language.untrustedWindow");
+    }
+  };
+  ipcMain.handle("desktop:language-set", (event, preference: unknown) => { assertWorkspace(event); return save(preference); });
+  ipcMain.handle("desktop:language-reset", (event) => { assertWorkspace(event); return save("system"); });
+}

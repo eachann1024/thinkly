@@ -8,6 +8,7 @@ import { createAssetPlugin } from "./config/vite/assetPlugin";
 import { createIconMiddleware } from "./config/vite/iconMiddleware";
 import { createAutoImportPlugins } from "./config/vite/autoImportPlugin";
 import { createBuildOptions } from "./config/vite/buildOptions";
+import { createI18nPlugin } from "./config/vite/i18nPlugin";
 import { optimizeDeps } from "./config/vite/optimizeDeps";
 
 export default defineConfig({
@@ -18,6 +19,7 @@ export default defineConfig({
     __GOOSE_EDITOR_AI__: true,
   },
   plugins: [
+    createI18nPlugin(),
     createAssetPlugin(__dirname),
     codeInspectorPlugin({
       bundler: "vite",

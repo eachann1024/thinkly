@@ -1,3 +1,27 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIServiceSection.tsx#localMessages:1">`
+zh-Hans:
+  aiService_783b: "AI 服务"
+  provider_bab2: "服务商"
+  enterApiKey_0d3a: "输入 API Key"
+  hideApiKey_f087: "隐藏 API Key"
+  showApiKey_f07e: "显示 API Key"
+  saveConfiguration_ed75: "保存配置"
+  fetchingModels_d0ad: "获取模型中…"
+  saveAndFetchModels_dced: "保存并获取模型"
+  cancelFetch_de4a: "取消获取"
+en:
+  aiService_783b: "AI service"
+  provider_bab2: "Provider"
+  enterApiKey_0d3a: "Enter API key"
+  hideApiKey_f087: "Hide API key"
+  showApiKey_f07e: "Show API key"
+  saveConfiguration_ed75: "Save configuration"
+  fetchingModels_d0ad: "Fetching models…"
+  saveAndFetchModels_dced: "Save and fetch models"
+  cancelFetch_de4a: "Cancel fetch"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +47,6 @@ import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
 import { SETTINGS_OPTION_ROW_CLASS, ProviderIconTile } from "./shared";
-
 export function renderAIServiceSection(
   context: ReturnType<typeof useAIModelRefresh>,
 ) {
@@ -57,8 +80,7 @@ export function renderAIServiceSection(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          AI 服务
-        </span>
+          {uiText("aiService_783b")}</span>
       }
     >
       <div className="space-y-3">
@@ -73,8 +95,7 @@ export function renderAIServiceSection(
               <ProviderIconTile providerId={providerId} />
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-foreground">
-                  供应商
-                </Label>
+                  {uiText("provider_bab2")}</Label>
               </div>
             </div>
             <DropdownMenu>
@@ -127,7 +148,6 @@ export function renderAIServiceSection(
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
           {allowCustomBaseURL ? (
             <div className={cn("space-y-3 p-4", SETTINGS_OPTION_ROW_CLASS)}>
               <div className="flex items-center gap-3">
@@ -163,7 +183,6 @@ export function renderAIServiceSection(
               />
             </div>
           ) : null}
-
           <div className={cn("space-y-3 p-4", SETTINGS_OPTION_ROW_CLASS)}>
             <div className="flex items-center gap-3">
               <GooseIcons.KeyRound
@@ -190,7 +209,7 @@ export function renderAIServiceSection(
                   dismissModelError();
                   setApiKeyDraft(event.target.value);
                 }}
-                placeholder="输入 API Key"
+                placeholder={uiText("enterApiKey_0d3a")}
                 autoComplete="off"
                 spellCheck={false}
                 className="pr-10"
@@ -201,7 +220,7 @@ export function renderAIServiceSection(
                 size="icon"
                 className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] hover:bg-[var(--goose-interactive-hover)]"
                 onClick={() => setApiKeyVisible((visible) => !visible)}
-                aria-label={apiKeyVisible ? "隐藏 API Key" : "显示 API Key"}
+                aria-label={apiKeyVisible ? uiText("hideApiKey_f087") : uiText("showApiKey_f07e")}
                 aria-pressed={apiKeyVisible}
               >
                 {apiKeyVisible ? (
@@ -212,7 +231,6 @@ export function renderAIServiceSection(
               </Button>
             </div>
           </div>
-
           <div
             className={cn(
               "flex items-center justify-between gap-4 p-4",
@@ -226,8 +244,7 @@ export function renderAIServiceSection(
               />
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-foreground">
-                  保存配置
-                </Label>
+                  {uiText("saveConfiguration_ed75")}</Label>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -250,7 +267,7 @@ export function renderAIServiceSection(
                         {!savingCustomConfig && (
                           <GooseIcons.Save className="h-4 w-4" />
                         )}
-                        {savingCustomConfig ? "获取模型中…" : "保存并获取模型"}
+                        {savingCustomConfig ? uiText("fetchingModels_d0ad") : uiText("saveAndFetchModels_dced")}
                       </Button>
                     </div>
                   </TooltipTrigger>
@@ -268,8 +285,7 @@ export function renderAIServiceSection(
                   size="sm"
                   onClick={cancelModelRefresh}
                 >
-                  取消获取
-                </Button>
+                  {uiText("cancelFetch_de4a")}</Button>
               ) : null}
             </div>
           </div>

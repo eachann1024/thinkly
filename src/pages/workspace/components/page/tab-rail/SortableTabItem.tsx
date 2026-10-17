@@ -1,3 +1,28 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/tab-rail/SortableTabItem.tsx#localMessages:1">`
+zh-Hans:
+  newTab: "新标签页"
+  missingPage: "页面已不存在"
+  closeTab: "关闭标签页"
+  revealInTree: "在文件树中定位"
+  newWindow: "在新窗口打开"
+  closeOtherTabs: "关闭其他标签页"
+  closeLeftTabs: "关闭左侧标签页"
+  closeRightTabs: "关闭右侧标签页"
+  close: "关闭"
+en:
+  newTab: "New tab"
+  missingPage: "This note no longer exists"
+  closeTab: "Close tab"
+  revealInTree: "Reveal in file tree"
+  newWindow: "Open in new window"
+  closeOtherTabs: "Close other tabs"
+  closeLeftTabs: "Close tabs to the left"
+  closeRightTabs: "Close tabs to the right"
+  close: "Close"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
@@ -70,10 +95,10 @@ export function SortableTabItem({
   };
   const title =
     tab.type === "welcome"
-      ? "新标签页"
+      ? uiText("newTab")
       : tabPage
         ? getPageTitle(tabPage)
-        : "页面已不存在";
+        : uiText("missingPage");
   const electronNoDrag = variant === "electron-titlebar";
   const windowDragEnabled = !dragEnabled && variant === "electron-titlebar";
   const onWindowDragPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -159,14 +184,15 @@ export function SortableTabItem({
                     event.stopPropagation();
                     onClose();
                   }}
-                  aria-label="关闭标签页"
+                  data-tab-close
+                  aria-label={uiText("closeTab")}
                 >
                   <GooseIcons.X className="h-3.5 w-3.5" />
                 </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
-                  <span>关闭标签页</span>
+                  <span>{uiText("closeTab")}</span>
                   {closeTabShortcutLabel && (
                     <span className="text-[11px] text-muted-foreground">
                       {closeTabShortcutLabel}
@@ -183,28 +209,22 @@ export function SortableTabItem({
         {tab.type !== "welcome" && onLocateInTree && (
           <>
             <ContextMenuItem onSelect={onLocateInTree}>
-              在文件树中定位
-            </ContextMenuItem>
+              {uiText("revealInTree")}</ContextMenuItem>
 
           </>
         )}
         {onOpenInNewWindow ? (
           <ContextMenuItem onSelect={onOpenInNewWindow}>
-            在新窗口打开
-          </ContextMenuItem>
+            {uiText("newWindow")}</ContextMenuItem>
         ) : null}
         {hasOtherTabs && <ContextMenuItem onSelect={onCloseOthers}>
-          关闭其他标签页
-        </ContextMenuItem>}
+          {uiText("closeOtherTabs")}</ContextMenuItem>}
         {hasLeftTabs && <ContextMenuItem onSelect={onCloseLeft}>
-          关闭左侧标签页
-        </ContextMenuItem>}
+          {uiText("closeLeftTabs")}</ContextMenuItem>}
         {hasRightTabs && <ContextMenuItem onSelect={onCloseRight}>
-          关闭右侧标签页
-        </ContextMenuItem>}
+          {uiText("closeRightTabs")}</ContextMenuItem>}
         <ContextMenuItem onSelect={onClose}>
-          关闭
-          {closeTabShortcutLabel && (
+          {uiText("close")}{closeTabShortcutLabel && (
             <span className="goose-menu-shortcut">
               {closeTabShortcutLabel}
             </span>

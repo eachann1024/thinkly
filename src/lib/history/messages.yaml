@@ -1,0 +1,50 @@
+zh-Hans:
+  invalidNoteHistoryPath: 笔记历史路径无效
+  theHistoryFileCouldnTBeReadTheOriginal: 历史文件无法读取，未清除原文件
+  historyFileIdentifiersDonTMatchTheOriginalHas: 历史文件标识不一致，未清除原文件
+  theDestinationContainsADifferentHistoryVersionBothCopies: 历史迁移目标已有不同版本，双方记录已保留
+  couldnTWriteTheMigratedHistoryTheOriginalHas: 历史迁移写入失败，原文件已保留
+  migratedHistoryFailedVerificationTheOriginalHasBeenKept: 历史迁移校验失败，原文件已保留
+  historyMigratedButTheOldCopyCouldnTBe: 历史已迁移，旧副本尚未清理；下次备份将重试
+  theHistoryFileCouldnTBeReadMigrationStopped: 历史文件无法读取，已停止迁移
+  theHistoryFileFormatIsInvalidMigrationStopped: 历史文件格式无效，已停止迁移
+  invalidVersionHistoryIdentifier: 历史版本标识无效
+  versionHistoryIndexIdentifiersDonTMatch: 历史索引标识不一致
+  couldnTClearVersionHistory: 无法清除历史版本
+  couldnTPermanentlyClearVersionHistory: 无法永久清除历史记录
+  theHistoryPathMappingIsInvalidOriginalHistoryFiles: 历史路径映射无效，原历史文件已保留
+  theHistoryMappingContainsAnInvalidPathOriginalHistory: 历史路径映射包含无效路径，原历史文件已保留
+  historyStorageIsUnavailable: 历史文件系统不可用
+  theHistoryFileCouldnTBeReadTheMove: 历史文件无法读取，已停止移动
+  historyIdentifiersDonTMatchTheMoveStopped: 历史标识不一致，已停止移动
+  couldnTCreateTheDestinationHistoryFolder: 无法创建目标历史目录
+  theDestinationNotebookHasDifferentHistoryRecordsTheMove: "目标笔记本已有不同历史记录，已停止移动"
+  couldnTWriteTheMigratedHistory: 历史迁移写入失败
+  migratedHistoryFailedVerification: 历史迁移校验失败
+  createHistoryDirectory: 无法创建历史目录：{{path}}
+  saveHistoryFile: 无法保存历史文件：{{path}}
+en:
+  invalidNoteHistoryPath: Invalid note history path
+  theHistoryFileCouldnTBeReadTheOriginal: The history file couldn’t be read. The original has been kept.
+  historyFileIdentifiersDonTMatchTheOriginalHas: History file identifiers don’t match. The original has been kept.
+  theDestinationContainsADifferentHistoryVersionBothCopies: The destination contains a different history version. Both copies have been kept.
+  couldnTWriteTheMigratedHistoryTheOriginalHas: Couldn’t write the migrated history. The original has been kept.
+  migratedHistoryFailedVerificationTheOriginalHasBeenKept: Migrated history failed verification. The original has been kept.
+  historyMigratedButTheOldCopyCouldnTBe: History migrated, but the old copy couldn’t be removed. Cleanup will retry during the next backup.
+  theHistoryFileCouldnTBeReadMigrationStopped: The history file couldn’t be read. Migration stopped.
+  theHistoryFileFormatIsInvalidMigrationStopped: The history file format is invalid. Migration stopped.
+  invalidVersionHistoryIdentifier: Invalid version history identifier
+  versionHistoryIndexIdentifiersDonTMatch: Version history index identifiers don’t match
+  couldnTClearVersionHistory: Couldn’t clear version history
+  couldnTPermanentlyClearVersionHistory: Couldn’t permanently clear version history
+  theHistoryPathMappingIsInvalidOriginalHistoryFiles: The history path mapping is invalid. Original history files have been kept.
+  theHistoryMappingContainsAnInvalidPathOriginalHistory: The history mapping contains an invalid path. Original history files have been kept.
+  historyStorageIsUnavailable: History storage is unavailable
+  theHistoryFileCouldnTBeReadTheMove: The history file couldn’t be read. The move stopped.
+  historyIdentifiersDonTMatchTheMoveStopped: History identifiers don’t match. The move stopped.
+  couldnTCreateTheDestinationHistoryFolder: Couldn’t create the destination history folder
+  theDestinationNotebookHasDifferentHistoryRecordsTheMove: The destination notebook has different history records. The move stopped.
+  couldnTWriteTheMigratedHistory: Couldn’t write the migrated history
+  migratedHistoryFailedVerification: Migrated history failed verification
+  createHistoryDirectory: "Couldn’t create the history folder: {{path}}"
+  saveHistoryFile: "Couldn’t save the history file: {{path}}"

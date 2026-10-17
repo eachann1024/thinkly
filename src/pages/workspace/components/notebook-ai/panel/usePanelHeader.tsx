@@ -32,6 +32,29 @@ import {
 } from "../aiHeaderSlot";
 import type { NotebookAiPanelProps } from "./types";
 import type { PanelCommands } from "./usePanelCommands";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/usePanelHeader.tsx#messages:1">`
+zh-Hans:
+  aiToolbar: "AI 工具栏"
+  newConversation: "新建会话"
+  conversationHistory: "历史会话"
+  morePanelOptions: "更多面板选项"
+  sideBySide: "侧栏并排"
+  fullScreen: "全屏"
+  closeAi: "关闭 AI"
+  aiAssistant: "AI 助手"
+en:
+  aiToolbar: "AI toolbar"
+  newConversation: "New conversation"
+  conversationHistory: "Conversation history"
+  morePanelOptions: "More panel options"
+  sideBySide: "Side by side"
+  fullScreen: "Full screen"
+  closeAi: "Close AI"
+  aiAssistant: "AI assistant"
+`;
+const t = createTranslator(messages);
+
 export function usePanelHeader(
   props: NotebookAiPanelProps,
   commands: PanelCommands,
@@ -68,7 +91,7 @@ export function usePanelHeader(
         <div
           className="notebook-ai-header-toolbar flex shrink-0 items-center gap-0.5"
           role="toolbar"
-          aria-label="AI 工具栏"
+          aria-label={t("aiToolbar")}
         >
           {!unavailable ? (
             <>
@@ -78,13 +101,13 @@ export function usePanelHeader(
                     type="button"
                     onClick={handleNewConversation}
                     className={iconBtn}
-                    aria-label="新建会话"
+                    aria-label={t("newConversation")}
                     disabled={isBusy}
                   >
                     <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </IconButton>
                 </TooltipTrigger>
-                <TooltipContent>新建会话</TooltipContent>
+                <TooltipContent>{t("newConversation")}</TooltipContent>
               </Tooltip>
 
               <Popover>
@@ -92,7 +115,7 @@ export function usePanelHeader(
                   <IconButton size="sm" tone="muted"
                     type="button"
                     className={iconBtn}
-                    aria-label="历史会话"
+                    aria-label={t("conversationHistory")}
                   >
                     <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </IconButton>
@@ -119,7 +142,7 @@ export function usePanelHeader(
                     <IconButton size="sm" tone="muted"
                       type="button"
                       className={iconBtn}
-                      aria-label="更多面板选项"
+                      aria-label={t("morePanelOptions")}
                     >
                       <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
                     </IconButton>
@@ -137,7 +160,7 @@ export function usePanelHeader(
                       className="gap-2"
                     >
                       <PanelRight className="h-4 w-4" strokeWidth={1.75} />
-                      <span className="flex-1">侧栏并排</span>
+                      <span className="flex-1">{t("sideBySide")}</span>
                       {!layoutIsFullscreen ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : null}
@@ -148,7 +171,7 @@ export function usePanelHeader(
                       className="gap-2"
                     >
                       <AppWindow className="h-4 w-4" strokeWidth={1.75} />
-                      <span className="flex-1">全屏</span>
+                      <span className="flex-1">{t("fullScreen")}</span>
                       {layoutIsFullscreen ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : null}
@@ -164,12 +187,12 @@ export function usePanelHeader(
                 type="button"
                 onClick={onClose}
                 className={iconBtn}
-                aria-label="关闭 AI"
+                aria-label={t("closeAi")}
               >
                 <X className="h-4 w-4" strokeWidth={1.75} />
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent>关闭 AI</TooltipContent>
+            <TooltipContent>{t("closeAi")}</TooltipContent>
           </Tooltip>
         </div>
       </TooltipProvider>
@@ -194,7 +217,7 @@ export function usePanelHeader(
       return;
     }
     setAiHeaderActions(headerToolbar);
-    setAiHeaderTitle(unavailable ? "AI 助手" : conversationSummary);
+    setAiHeaderTitle(unavailable ? t("aiAssistant") : conversationSummary);
     return () => {
       clearAiHeaderActions();
       clearAiHeaderTitle();

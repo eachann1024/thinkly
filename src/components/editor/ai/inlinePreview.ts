@@ -1,6 +1,19 @@
 import { Plugin, PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
 import { createInlinePreviewOutline } from "./inlinePreviewOutline";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/inlinePreview.ts#messages:1">`
+zh-Hans:
+  readOnlyAiChangePreview: "AI 只读修改预览"
+  addedText: "新增文字"
+  formattingStructureChanges: "格式 / 结构变更"
+en:
+  readOnlyAiChangePreview: "Read-only AI change preview"
+  addedText: "Added text"
+  formattingStructureChanges: "Formatting / structure changes"
+`;
+const t = createTranslator(messages);
+
 
 export interface InlinePreviewPart {
   from: number;
@@ -49,7 +62,7 @@ export function createInlinePreviewPlugin() {
           if (part.blockFrom < 0 || part.blockTo > state.doc.content.size || part.blockFrom >= part.blockTo) continue;
           decorations.push(Decoration.node(part.blockFrom, part.blockTo, {
             class: "goose-ai-preview-target",
-            ...(part.reviewing ? { contenteditable: "false", "aria-label": "AI 只读修改预览" } : {}),
+            ...(part.reviewing ? { contenteditable: "false", get "aria-label"() { return t("readOnlyAiChangePreview"); } } : {}),
           }));
           if (!part.reviewing || part.newText === undefined) continue;
           const { start, end } = inlineDiffEdges(part.oldText, part.newText);
@@ -61,7 +74,7 @@ export function createInlinePreviewPlugin() {
             const span = document.createElement("ins");
             span.className = "goose-ai-preview-addition";
             span.contentEditable = "false";
-            span.setAttribute("aria-label", "新增文字");
+            span.setAttribute("aria-label", t("addedText"));
             span.textContent = added;
             return span;
           }, { side: -1, key: `${part.blockFrom}:${added}`, ignoreSelection: true }));
@@ -69,7 +82,7 @@ export function createInlinePreviewPlugin() {
             const label = document.createElement("span");
             label.className = "goose-ai-preview-format-change";
             label.contentEditable = "false";
-            label.textContent = "格式 / 结构变更";
+            label.textContent = t("formattingStructureChanges");
             return label;
           }, { side: 1, key: `${part.blockFrom}:format`, ignoreSelection: true }));
         }

@@ -1,5 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/AssistantLetterFold.tsx#messages:1">`
+zh-Hans:
+  thinking: "思考"
+en:
+  thinking: "Thinking"
+`;
+const t = createTranslator(messages);
+
 function LetterFoldChevron() {
   return (
     <svg
@@ -31,7 +40,7 @@ export function AssistantLetterFold({ children }: { children: ReactNode }) {
         onClick={() => setOpen((value) => !value)}
       >
         <LetterFoldChevron />
-        <span>思考</span>
+        <span>{t("thinking")}</span>
       </Button>
       {open ? (
         <div className="notebook-ai-letter-fold-body">{children}</div>

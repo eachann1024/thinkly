@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-asset-maintenance.ts#localMessages:1">`
+zh-Hans:
+  chooseALocalFolderNotebook: "请选择本地文件夹笔记本"
+en:
+  chooseALocalFolderNotebook: "Choose a local folder notebook"
+`;
+const uiText = createTranslator(localMessages);
 import type {
   UnreferencedLocalAsset,
   RestoreMissingLocalAssetsResult,
@@ -36,7 +45,7 @@ export async function scanUnreferencedLocalAssets({
   gooseFs,
 }: ScanUnreferencedLocalAssetsOptions): Promise<UnreferencedLocalAsset[]> {
   const normalizedBasePath = normalizePath(basePath);
-  if (!isAbsolutePath(basePath)) throw new Error("请选择本地文件夹笔记本");
+  if (!isAbsolutePath(basePath)) throw new Error(uiText("chooseALocalFolderNotebook"));
   const files = await collectNotebookFiles(gooseFs, normalizedBasePath);
   const index = await collectReferenceIndex(
     { basePath, pages, gooseFs },

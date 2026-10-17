@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/titlebar/DesktopWindowNavigation.tsx#localMessages:1">`
+zh-Hans:
+  back: "后退"
+  forward: "前进"
+  showSidebar: "展开侧栏"
+  hideSidebar: "收起侧栏"
+en:
+  back: "Back"
+  forward: "Forward"
+  showSidebar: "Show sidebar"
+  hideSidebar: "Hide sidebar"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -23,8 +38,8 @@ export function DesktopWindowNavigation({
     >
       <TooltipProvider delayDuration={600}>
         {[
-          { label: "后退", Icon: GooseIcons.ArrowLeft, disabled: !canGoBack, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goBackTabHistory(); } },
-          { label: "前进", Icon: GooseIcons.ArrowRight, disabled: !canGoForward, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goForwardTabHistory(); } },
+          { label: uiText("back"), Icon: GooseIcons.ArrowLeft, disabled: !canGoBack, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goBackTabHistory(); } },
+          { label: uiText("forward"), Icon: GooseIcons.ArrowRight, disabled: !canGoForward, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goForwardTabHistory(); } },
         ].map(({ label, Icon, disabled, onClick }) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
@@ -41,7 +56,7 @@ export function DesktopWindowNavigation({
               type="button"
               className={cn(actionButtonClass, "sidebar-toggle-button")}
               onClick={onToggleSidebar ?? toggleSidebarCollapsed}
-              aria-label={sidebarCollapsed ? "展开侧栏" : "收起侧栏"}
+              aria-label={sidebarCollapsed ? uiText("showSidebar") : uiText("hideSidebar")}
               aria-pressed={sidebarCollapsed}
               aria-expanded={!sidebarCollapsed}
             >
@@ -49,7 +64,7 @@ export function DesktopWindowNavigation({
             </IconButton>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <span>{sidebarCollapsed ? "展开侧栏" : "收起侧栏"}</span>
+            <span>{sidebarCollapsed ? uiText("showSidebar") : uiText("hideSidebar")}</span>
             {toggleSidebarShortcutLabel && (
               <span className="ml-2 text-[11px] text-muted-foreground">
                 {toggleSidebarShortcutLabel}

@@ -12,6 +12,19 @@ import { looksLikeBlockStructure, looksLikeMarkdownFragment, normalizeMarkdownPa
 import { htmlLooksLikeBlockNoteClipboard } from "../utils/multilinePaste";
 import { focusPastedBlock } from "../utils/pasteAtCursor";
 import { writeContextClipboard } from "./contextClipboardWrite";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/useEditorContextClipboard.ts#messages:1">`
+zh-Hans:
+  theNoteHasChangedSelectTheContentAgain: "笔记内容已变化，请重新选择后操作"
+  couldNotReadOrPasteFromTheClipboard: "无法读取或粘贴剪贴板，原内容已保留"
+  couldNotWriteToTheClipboardYourOriginal: "无法写入剪贴板，原内容已保留"
+en:
+  theNoteHasChangedSelectTheContentAgain: "The note has changed. Select the content again to continue."
+  couldNotReadOrPasteFromTheClipboard: "Could not read or paste from the clipboard. Your original content was preserved."
+  couldNotWriteToTheClipboardYourOriginal: "Could not write to the clipboard. Your original content was preserved."
+`;
+const t = createTranslator(messages);
+
 
 export function useEditorContextClipboard(
   editor: any,
@@ -25,7 +38,7 @@ export function useEditorContextClipboard(
   }, [editor]);
   const restore = useCallback((snapshot: EditorSelectionSnapshot) => {
     if (restoreEditorSelection(editor.prosemirrorView, snapshot)) return true;
-    toast.error("笔记内容已变化，请重新选择后操作");
+    toast.error(t("theNoteHasChangedSelectTheContentAgain"));
     return false;
   }, [editor]);
 
@@ -81,7 +94,7 @@ export function useEditorContextClipboard(
       editor.focus();
     } catch (error) {
       console.error("[editor] Failed to paste clipboard", error);
-      toast.error("无法读取或粘贴剪贴板，原内容已保留");
+      toast.error(t("couldNotReadOrPasteFromTheClipboard"));
     }
   }, [editable, editor, platform, restore]);
 
@@ -99,7 +112,7 @@ export function useEditorContextClipboard(
       if (cut && restore(snapshot)) deleteCutSelection(editor.prosemirrorView);
     } catch (error) {
       console.error("[editor] Failed to write context clipboard", error);
-      toast.error("无法写入剪贴板，原内容已保留");
+      toast.error(t("couldNotWriteToTheClipboardYourOriginal"));
     }
   }, [editable, editor, platform, restore]);
 

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/useGitFolderChecks.ts#localMessages:1">`
+zh-Hans:
+  couldNotCheckFolder_5d5e: "无法检查文件夹"
+en:
+  couldNotCheckFolder_5d5e: "Could not check folder"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useState } from "react";
 import type { GitFolderCheck, GitSyncBridge } from "@/lib/git-sync-contract";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -22,7 +31,7 @@ export function useGitFolderChecks(bridge: GitSyncBridge | undefined, active: bo
       running = true;
       const results = await Promise.all(roots.map(async (path) => {
         const result = await bridge.checkFolder(path).catch((error: unknown) => ({
-          error: error instanceof Error ? error.message : "无法检查文件夹",
+          error: error instanceof Error ? error.message : uiText("couldNotCheckFolder_5d5e"),
         }));
         return [path, result] as const;
       }));

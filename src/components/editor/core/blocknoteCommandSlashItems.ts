@@ -2,22 +2,59 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from "../toolbars/formatting/colorPalette";
 import type { SlashMenuItem } from "./blocknoteSlashModel";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/blocknoteCommandSlashItems.ts#messages:1">`
+zh-Hans:
+  text: "文本"
+  heading1: "一级标题"
+  heading2: "二级标题"
+  heading3: "三级标题"
+  checklist: "待办事项"
+  bulletedList: "无序列表"
+  numberedList: "有序列表"
+  toggleList: "折叠列表"
+  toggleHeading1: "折叠一级标题"
+  toggleHeading2: "折叠二级标题"
+  toggleHeading3: "折叠三级标题"
+  quote: "引用"
+  callout: "标注"
+  codeBlock: "代码块"
+  turnIntoBlock: "转换为{{label}}"
+en:
+  text: "Text"
+  heading1: "Heading 1"
+  heading2: "Heading 2"
+  heading3: "Heading 3"
+  checklist: "Checklist"
+  bulletedList: "Bulleted list"
+  numberedList: "Numbered list"
+  toggleList: "Toggle list"
+  toggleHeading1: "Toggle heading 1"
+  toggleHeading2: "Toggle heading 2"
+  toggleHeading3: "Toggle heading 3"
+  quote: "Quote"
+  callout: "Callout"
+  codeBlock: "Code block"
+  turnIntoBlock: "Turn into {{label}}"
+`;
+const t = createTranslator(messages);
+
 
 const BLOCK_CONVERSIONS = [
-  { label: "文本", type: "paragraph" },
-  { label: "一级标题", type: "heading", props: { level: 1, isToggleable: false, collapsed: false } },
-  { label: "二级标题", type: "heading", props: { level: 2, isToggleable: false, collapsed: false } },
-  { label: "三级标题", type: "heading", props: { level: 3, isToggleable: false, collapsed: false } },
-  { label: "待办事项", type: "checkListItem" },
-  { label: "无序列表", type: "bulletListItem" },
-  { label: "有序列表", type: "numberedListItem" },
-  { label: "折叠列表", type: "toggleListItem", props: { collapsed: false } },
-  { label: "折叠一级标题", type: "heading", props: { level: 1, isToggleable: true, collapsed: false } },
-  { label: "折叠二级标题", type: "heading", props: { level: 2, isToggleable: true, collapsed: false } },
-  { label: "折叠三级标题", type: "heading", props: { level: 3, isToggleable: true, collapsed: false } },
-  { label: "引用", type: "quote" },
-  { label: "标注", type: "callout" },
-  { label: "代码块", type: "codeBlock", props: { language: "text" } },
+  { get label() { return t("text"); }, type: "paragraph" },
+  { get label() { return t("heading1"); }, type: "heading", props: { level: 1, isToggleable: false, collapsed: false } },
+  { get label() { return t("heading2"); }, type: "heading", props: { level: 2, isToggleable: false, collapsed: false } },
+  { get label() { return t("heading3"); }, type: "heading", props: { level: 3, isToggleable: false, collapsed: false } },
+  { get label() { return t("checklist"); }, type: "checkListItem" },
+  { get label() { return t("bulletedList"); }, type: "bulletListItem" },
+  { get label() { return t("numberedList"); }, type: "numberedListItem" },
+  { get label() { return t("toggleList"); }, type: "toggleListItem", props: { collapsed: false } },
+  { get label() { return t("toggleHeading1"); }, type: "heading", props: { level: 1, isToggleable: true, collapsed: false } },
+  { get label() { return t("toggleHeading2"); }, type: "heading", props: { level: 2, isToggleable: true, collapsed: false } },
+  { get label() { return t("toggleHeading3"); }, type: "heading", props: { level: 3, isToggleable: true, collapsed: false } },
+  { get label() { return t("quote"); }, type: "quote" },
+  { get label() { return t("callout"); }, type: "callout" },
+  { get label() { return t("codeBlock"); }, type: "codeBlock", props: { language: "text" } },
 ] as const;
 
 const aliases: Record<string, string> = {
@@ -36,7 +73,7 @@ export function getCommandSlashItems(
     const q = (turn[1] ?? "").trim().toLowerCase();
     return BLOCK_CONVERSIONS.filter((target) => `${target.label} ${aliases[target.type]}`.toLowerCase().includes(q))
       .map((target) => ({
-        title: `转换为${target.label}`,
+        title: t("turnIntoBlock", { label: target.label }),
         onItemClick: () => {
           const block = editor.getTextCursorPosition().block;
           if (block.id === getProtectedTitleBlockId(editor) || editor.schema.blockSchema[block.type]?.content !== "inline") return;

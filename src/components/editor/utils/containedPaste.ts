@@ -7,6 +7,17 @@ import { importMarkdownFragment } from "@/lib/export/markdown/parse";
 import { restoreBlockPropsMarkers } from "@/lib/export/markdown/blockPropsMarker";
 import { htmlLooksLikeBlockNoteClipboard } from "./multilinePaste";
 import { toast } from "@/components/ui/sonner";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/utils/containedPaste.ts#messages:1">`
+zh-Hans:
+  theClipboardContentCouldNotBeRead: "剪贴板内容无法解析"
+  pasteFailedYourOriginalContentHasBeenPreserved: "粘贴失败，原内容已保留"
+en:
+  theClipboardContentCouldNotBeRead: "The clipboard content could not be read"
+  pasteFailedYourOriginalContentHasBeenPreserved: "Paste failed. Your original content has been preserved."
+`;
+const t = createTranslator(messages);
+
 
 type Editor = BlockNoteEditor<any, any, any>;
 const CONTAINERS = new Set(["callout", "quote"]);
@@ -90,7 +101,7 @@ export function pasteInsideCurrentBlock(
     } else {
       blocks = [{ type: "paragraph", content: plain }];
     }
-    if (!blocks.length) throw new Error("剪贴板内容无法解析");
+    if (!blocks.length) throw new Error(t("theClipboardContentCouldNotBeRead"));
     // Paragraph-only content is text within the current block. Structured content
     // keeps its types and children instead of being flattened into plain text.
     const openSlice = internal.match(/data-pm-slice=["'](\d+)\s+(\d+)/);
@@ -115,7 +126,7 @@ export function pasteInsideCurrentBlock(
     editor.focus();
   } catch (error) {
     console.error("[containedPaste]", error);
-    toast.error("粘贴失败，原内容已保留");
+    toast.error(t("pasteFailedYourOriginalContentHasBeenPreserved"));
   }
   return true;
 }

@@ -15,6 +15,21 @@ import { useComposerSubmission } from "./composer/useComposerSubmission";
 import { useComposerAttachments } from "./composer/useComposerAttachments";
 import { useComposerSelectionHandle } from "./composer/useComposerSelectionHandle";
 import type { ComposerHandle, ComposerProps } from "./composer/types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/Composer.tsx#messages:1">`
+zh-Hans:
+  askAiUseForCommandsOrSkillsOr: "向 AI 提问，/ 调用指令或 Skill，@ 引用笔记或本地文件…"
+  uploadImage: "上传图片"
+  stopGenerating: "停止生成"
+  sendMessage: "发送消息"
+en:
+  askAiUseForCommandsOrSkillsOr: "Ask AI, use / for commands or skills, or @ to reference notes or local files…"
+  uploadImage: "Upload image"
+  stopGenerating: "Stop generating"
+  sendMessage: "Send message"
+`;
+const t = createTranslator(messages);
+
 export type {
   NotebookAiImageAttachment,
   ComposerHandle,
@@ -28,7 +43,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       onSlashCommand,
       isStreaming,
       disabled,
-      placeholder = "向 AI 提问，/ 调用指令或 Skill，@ 引用笔记或本地文件…",
+      placeholder = t("askAiUseForCommandsOrSkillsOr"),
       searchPages,
       onEscape,
       layout = "side-panel",
@@ -122,8 +137,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   )}
                   aria-hidden={isStreaming}
                   tabIndex={isStreaming ? -1 : undefined}
-                  aria-label="上传图片"
-                  title="上传图片"
+                  aria-label={t("uploadImage")}
+                  title={t("uploadImage")}
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                 </IconButton>
@@ -159,8 +174,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 {isStreaming ? (
                   <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="muted" />}
                     className="bui-composer-send goose-interactive-primary"
-                    aria-label="停止生成"
-                    title="停止生成"
+                    aria-label={t("stopGenerating")}
+                    title={t("stopGenerating")}
                   >
                     <span className="notebook-ai-stop-square" aria-hidden="true" />
                   </ComposerPrimitive.Cancel>
@@ -171,8 +186,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     disabled={!canClickSend}
                     className={cn("bui-composer-send notebook-ai-send-button", sendLooksReady && "goose-interactive-primary")}
                     data-ready={sendLooksReady ? "true" : "false"}
-                    aria-label="发送消息"
-                    title="发送消息"
+                    aria-label={t("sendMessage")}
+                    title={t("sendMessage")}
                   >
                     <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.2} />
                   </IconButton>

@@ -1,3 +1,4 @@
+import { t } from "../i18n/updates";
 import { BrowserWindow, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { lookupWindowContext } from "../windows";
@@ -15,8 +16,8 @@ export async function flushBeforeUpdate(): Promise<void> {
       const reply = (event: Electron.IpcMainEvent, id: string, error: string | null) => {
         if (id === requestId && event.sender === win.webContents) finish(error || undefined);
       };
-      const closed = () => finish("窗口已关闭，请重新尝试更新");
-      const timer = setTimeout(() => finish("保存笔记超时，请保存后重新尝试更新"), 30_000);
+      const closed = () => finish(t("windowClosed"));
+      const timer = setTimeout(() => finish(t("saveTimeout")), 30_000);
       ipcMain.on("desktop:before-update-reply", reply);
       win.once("closed", closed);
       win.webContents.send("desktop:before-update", requestId);

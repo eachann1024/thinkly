@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/zip/inspectImport.ts#localMessages:1">`
+zh-Hans:
+  theBackupIsnTAValidZipFile: "备份文件不是有效的 ZIP 包"
+  theBackupMetadataIsDamaged: "备份元数据已损坏"
+  theBackupMetadataFormatIsInvalid: "备份元数据格式无效"
+  theBackupMetadataIsMissingItsNotebookOrPage: "备份元数据缺少笔记本或页面列表"
+  theBackupContainsInvalidNotebookData: "备份中包含无效的笔记本信息"
+  theBackupContainsInvalidPageData: "备份中包含无效的页面信息"
+  thisZipFileContainsNoRecoverableGooseNotesData: "ZIP 中没有可恢复的鹅的笔记数据"
+en:
+  theBackupIsnTAValidZipFile: "The backup isn’t a valid ZIP file"
+  theBackupMetadataIsDamaged: "The backup metadata is damaged"
+  theBackupMetadataFormatIsInvalid: "The backup metadata format is invalid"
+  theBackupMetadataIsMissingItsNotebookOrPage: "The backup metadata is missing its notebook or page list"
+  theBackupContainsInvalidNotebookData: "The backup contains invalid notebook data"
+  theBackupContainsInvalidPageData: "The backup contains invalid page data"
+  thisZipFileContainsNoRecoverableGooseNotesData: "This ZIP file contains no recoverable Goose Note data"
+`;
+const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";
 import type { NotebookImportInspection } from "./types";
 
@@ -13,7 +34,7 @@ export async function inspectNotebookImportZip(
   try {
     zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
   } catch (error) {
-    throw new Error("备份文件不是有效的 ZIP 包", { cause: error });
+    throw new Error(uiText("theBackupIsnTAValidZipFile"), { cause: error });
   }
 
   const metaFile = zip.file("backup-metadata.json");
@@ -22,11 +43,11 @@ export async function inspectNotebookImportZip(
     try {
       meta = JSON.parse(await metaFile.async("text"));
     } catch (error) {
-      throw new Error("备份元数据已损坏", { cause: error });
+      throw new Error(uiText("theBackupMetadataIsDamaged"), { cause: error });
     }
 
     if (!meta || typeof meta !== "object") {
-      throw new Error("备份元数据格式无效");
+      throw new Error(uiText("theBackupMetadataFormatIsInvalid"));
     }
     const notebooks = (meta as { notebooks?: unknown }).notebooks;
     const pages = (meta as { pages?: unknown }).pages;
@@ -35,7 +56,7 @@ export async function inspectNotebookImportZip(
       notebooks.length === 0 ||
       !Array.isArray(pages)
     ) {
-      throw new Error("备份元数据缺少笔记本或页面列表");
+      throw new Error(uiText("theBackupMetadataIsMissingItsNotebookOrPage"));
     }
     if (
       notebooks.some((notebook) => {
@@ -49,7 +70,7 @@ export async function inspectNotebookImportZip(
         );
       })
     ) {
-      throw new Error("备份中包含无效的笔记本信息");
+      throw new Error(uiText("theBackupContainsInvalidNotebookData"));
     }
     const notebookIds = new Set(
       notebooks.map((notebook) => (notebook as { id: string }).id),
@@ -65,7 +86,7 @@ export async function inspectNotebookImportZip(
         );
       })
     ) {
-      throw new Error("备份中包含无效的页面信息");
+      throw new Error(uiText("theBackupContainsInvalidPageData"));
     }
     return {
       source: "metadata",
@@ -87,7 +108,7 @@ export async function inspectNotebookImportZip(
     pageCount += 1;
   });
   if (notebookNames.size === 0 || pageCount === 0) {
-    throw new Error("ZIP 中没有可恢复的鹅的笔记数据");
+    throw new Error(uiText("thisZipFileContainsNoRecoverableGooseNotesData"));
   }
   return {
     source: "folders",

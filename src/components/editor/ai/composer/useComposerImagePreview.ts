@@ -6,6 +6,19 @@ import {
   positionImagePreview,
 } from "./composerImageChip";
 import type { ComposerImagesOptions } from "./composerImageTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/useComposerImagePreview.ts#messages:1">`
+zh-Hans:
+  imagePreview: "图片预览"
+  image: "图片"
+  previewNamedImage: "预览 {{name}}"
+en:
+  imagePreview: "Image preview"
+  image: "Image"
+  previewNamedImage: "Preview {{name}}"
+`;
+const t = createTranslator(messages);
+
 
 export function useComposerImagePreview(options: ComposerImagesOptions) {
   const {
@@ -72,8 +85,8 @@ export function useComposerImagePreview(options: ComposerImagesOptions) {
       if (img.src !== previewUrl) {
         img.src = previewUrl;
       }
-      img.alt = fileName || "图片预览";
-      preview.setAttribute("aria-label", `预览 ${fileName || "图片"}`);
+      img.alt = fileName || t("imagePreview");
+      preview.setAttribute("aria-label", t("previewNamedImage", { name: fileName || t("image") }));
       preview.removeAttribute("aria-hidden");
       preview.style.visibility = "hidden";
       preview.style.display = "block";

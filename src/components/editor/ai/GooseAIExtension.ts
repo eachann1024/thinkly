@@ -10,6 +10,23 @@ import { composeInlineBusyTicker } from "./inlineBusyTicker";
 import { runInlineMarkdownRewrite } from "./transport/runInlineMarkdownRewrite";
 import { createInlinePreviewPlugin, setInlinePreview, type InlinePreviewPart } from "./inlinePreview";
 import { TextSelection } from "prosemirror-state";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/GooseAIExtension.ts#messages:1">`
+zh-Hans:
+  thisPageWasDeletedLockedOrIsNot: "当前页面已删除、锁定或不可编辑，原文未修改。"
+  selectTheBodyTextAgain: "请重新选择正文。"
+  pageTitlesDoNotSupportInlineAiRewriting: "页面标题不支持行内 AI 改写，请选择正文。"
+  selectAModelBeforeUsingInlineAi: "请先选择模型后再使用行内 AI。"
+  thisPageIsNotEditableOrAiIs: "当前页面不可编辑或 AI 未开启。"
+en:
+  thisPageWasDeletedLockedOrIsNot: "This page was deleted, locked, or is not editable. The original text was not changed."
+  selectTheBodyTextAgain: "Select the body text again."
+  pageTitlesDoNotSupportInlineAiRewriting: "Page titles do not support inline AI rewriting. Select body text instead."
+  selectAModelBeforeUsingInlineAi: "Select a model before using inline AI."
+  thisPageIsNotEditableOrAiIs: "This page is not editable or AI is not enabled."
+`;
+const t = createTranslator(messages);
+
 
 type Options = {
   getScope: () => { pageId: string; editable: boolean; protectFirstTitle: boolean };
@@ -32,10 +49,10 @@ export const GooseAIExtension = createExtension(
     const validate = (owned: PageInlineRewriteSession) => {
       const scope = options.getScope();
       if (current() !== owned || !scope.editable || options.getSettings().enabled === false)
-        throw new Error("当前页面已删除、锁定或不可编辑，原文未修改。");
-      if (!owned.target) throw new Error("请重新选择正文。");
+        throw new Error(t("thisPageWasDeletedLockedOrIsNot"));
+      if (!owned.target) throw new Error(t("selectTheBodyTextAgain"));
       if (scope.protectFirstTitle && owned.target.sourceBlockIds.includes(editor.document[0]?.id))
-        throw new Error("页面标题不支持行内 AI 改写，请选择正文。");
+        throw new Error(t("pageTitlesDoNotSupportInlineAiRewriting"));
       assertPrivateInlineTarget(editor, owned.target);
     };
     const refresh = () => {
@@ -95,7 +112,7 @@ export const GooseAIExtension = createExtension(
         const preferred = settings.workspaceSelectedModelId?.trim();
         const modelId = (preferred && models.some((model) => model.id === preferred) ? preferred : "") ||
           settings.selectedModelId?.trim() || models[0]?.id || "";
-        if (!modelId) throw new Error("请先选择模型后再使用行内 AI。");
+        if (!modelId) throw new Error(t("selectAModelBeforeUsingInlineAi"));
         await owned.submit(prompt, (oldMarkdown, userPrompt, abortSignal, update) => runInlineMarkdownRewrite({
           settings, modelId, userPrompt, oldMarkdown, abortSignal,
           onUpdate: (value) => update(composeInlineBusyTicker(value)),
@@ -144,10 +161,10 @@ export const GooseAIExtension = createExtension(
         try {
           const scope = options.getScope();
           if (!scope.editable || options.getSettings().enabled === false || !editor.isEditable)
-            throw new Error("当前页面不可编辑或 AI 未开启。");
+            throw new Error(t("thisPageIsNotEditableOrAiIs"));
           const target = capturePrivateInlineTarget(editor, blockId);
           if (scope.protectFirstTitle && target.sourceBlockIds.includes(editor.document[0]?.id))
-            throw new Error("页面标题不支持行内 AI 改写，请选择正文。");
+            throw new Error(t("pageTitlesDoNotSupportInlineAiRewriting"));
           owned.open(target);
         } catch (error) { owned.close(); owned.fail(error, blockId); }
       },

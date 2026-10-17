@@ -16,6 +16,10 @@ import {
   MediaLoadingPreview,
   MediaPlaceholder,
 } from "@/components/editor/blocks/shared/MediaPlaceholder";
+import messages from "./customFileBlock.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 
 function describeOpenFailure(error: unknown): string {
   const message =
@@ -24,7 +28,7 @@ function describeOpenFailure(error: unknown): string {
       : error instanceof Error
         ? error.message.trim()
         : "";
-  if (!message || /failed to fetch/i.test(message)) return "请下载后再打开";
+  if (!message || /failed to fetch/i.test(message)) return t("downloadTheFileBeforeOpeningIt");
   return message;
 }
 
@@ -40,10 +44,10 @@ function triggerDownload(url: string, name: string): void {
 async function saveOrFallback(blob: Blob, name: string): Promise<void> {
   const saved = await saveBlobAndReveal(blob, name);
   if (saved) {
-    toast.success("已保存到下载文件夹");
+    toast.success(t("savedToDownloads"));
     return;
   }
-  toast.error("保存失败");
+  toast.error(t("saveFailed"));
 }
 
 function CustomFileBlockContent({
@@ -75,7 +79,7 @@ function CustomFileBlockContent({
       if (!/^(?:https?|data|blob):/i.test(url)) {
         const blob = await platform.imageStorage.load(url);
         if (!blob) {
-          toast.error("附件不存在或尚未同步完成");
+          toast.error(t("theAttachmentIsMissingOrHasNotFinished"));
           return;
         }
         await saveOrFallback(blob, name);
@@ -103,12 +107,12 @@ function CustomFileBlockContent({
     try {
       const result = await onOpenAttachment(url, name);
       if (!result.ok) {
-        toast.error("无法使用系统默认应用打开", {
+        toast.error(t("couldNotOpenInTheDefaultApp"), {
           description: describeOpenFailure(result.error),
         });
       }
     } catch (error) {
-      toast.error("无法使用系统默认应用打开", {
+      toast.error(t("couldNotOpenInTheDefaultApp"), {
         description: describeOpenFailure(error),
       });
     }
@@ -167,8 +171,8 @@ function CustomFileBlockContent({
         variant="file"
         blockId={block.id}
         editor={editor}
-        title="添加附件"
-        hint="点击选择，或直接拖入编辑器"
+        title={t("addAttachment")}
+        hint={t("clickToChooseOrDragIntoTheEditor")}
         icon={<GooseIcons.FileUp size={18} strokeWidth={1.75} />}
       />
     );
@@ -182,7 +186,7 @@ function CustomFileBlockContent({
             type="button"
             className="goose-file-block-icon-btn"
             onClick={handleAddFile}
-            title="更换文件"
+            title={t("replaceFile")}
           >
             <GooseIcons.FileText size={20} strokeWidth={1.75} />
           </EditorAction>
@@ -207,7 +211,7 @@ function CustomFileBlockContent({
             type="button"
             className="goose-file-block-name"
             onClick={handleOpen}
-            title="使用系统默认应用打开"
+            title={t("openInDefaultApp")}
           >
             {block.props.name}
           </EditorAction>
@@ -219,7 +223,7 @@ function CustomFileBlockContent({
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleOpen}
-            title="使用系统默认应用打开"
+            title={t("openInDefaultApp")}
           >
             <GooseIcons.ExternalLink size={16} strokeWidth={1.75} />
           </EditorAction>
@@ -229,7 +233,7 @@ function CustomFileBlockContent({
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleRenameStart}
-            title="重命名"
+            title={t("rename")}
           >
             <GooseIcons.Pencil size={16} strokeWidth={1.75} />
           </EditorAction>
@@ -238,7 +242,7 @@ function CustomFileBlockContent({
           type="button"
           className="goose-file-block-action-btn"
           onClick={handleDownload}
-          title="下载"
+          title={t("download")}
         >
           <GooseIcons.Download size={16} strokeWidth={1.75} />
         </EditorAction>
@@ -247,7 +251,7 @@ function CustomFileBlockContent({
             type="button"
             className="goose-file-block-action-btn"
             onClick={handleDelete}
-            title="删除"
+            title={t("delete")}
           >
             <GooseIcons.Trash2 size={16} strokeWidth={1.75} />
           </EditorAction>
@@ -267,7 +271,7 @@ export const customFileBlock = createReactBlockSpec(createFileBlockConfig(), {
   parse: fileParse(),
   toExternalHTML: ({ block }) => {
     if (!block.props.url) {
-      return <p>添加文件</p>;
+      return <p>{t("addFile")}</p>;
     }
 
     const link = (

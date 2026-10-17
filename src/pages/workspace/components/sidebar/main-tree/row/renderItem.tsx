@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1">`
+zh-Hans:
+  fileName_d2e2: "文件名称"
+  untitled_44a7: "无标题"
+  noFilesYet_4b78: "暂无文件"
+en:
+  fileName_d2e2: "File name"
+  untitled_44a7: "Untitled"
+  noFilesYet_4b78: "No files yet"
+`;
+const uiText = createTranslator(localMessages);
 import { TreeBranch } from "../TreeBranch";
 import { type HTMLProps } from "react";
 import { SidebarContextMenu } from "../../SidebarContextMenu";
@@ -48,7 +61,7 @@ export function renderItem({
   const withoutChildren =
     context.itemContainerWithoutChildrenProps as HTMLProps<HTMLDivElement>;
 
-  const title = page.localPendingCreate === "file" ? "文件名称" : getPageTitle(page);
+  const title = page.localPendingCreate === "file" ? uiText("fileName_d2e2") : getPageTitle(page);
   const notebook = page?.workspaceId
     ? useNotebooks.getState().notebooks[page.workspaceId]
     : undefined;
@@ -120,7 +133,7 @@ export function renderItem({
       const iconSvg = rowEl?.querySelector(".main-tree-row-icon-slot svg");
       if (iconSvg) folderGhost.appendChild(iconSvg.cloneNode(true));
       const label = document.createElement("span");
-      label.textContent = title || "无标题";
+      label.textContent = title || uiText("untitled_44a7");
       folderGhost.appendChild(label);
     }
     const dragImage = folderGhost ?? ghost;
@@ -260,8 +273,7 @@ export function renderItem({
               minHeight: "var(--main-tree-row-height)",
             }}
           >
-            暂无文件
-          </div>
+            {uiText("noFilesYet_4b78")}</div>
         ) : null}
       </TreeBranch>
     </li>

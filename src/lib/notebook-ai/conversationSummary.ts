@@ -1,4 +1,13 @@
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/conversationSummary.ts#messages:1">`
+zh-Hans:
+  newConversation: "新会话"
+en:
+  newConversation: "New conversation"
+`;
+const t = createTranslator(messages);
+
 
 function getMessageText(message: NotebookAiMessage) {
   const textPart = message.parts?.find((part) => part.type === "text");
@@ -25,11 +34,11 @@ function getUserDisplayText(message: NotebookAiMessage) {
 export function getConversationSummary(messages: NotebookAiMessage[]) {
   const firstUserMessage = messages.find((message) => message.role === "user");
   return firstUserMessage
-    ? getUserDisplayText(firstUserMessage) || "新会话"
-    : "新会话";
+    ? getUserDisplayText(firstUserMessage) || t("newConversation")
+    : t("newConversation");
 }
 
 export function isEmptyConversationSummary(summary: string) {
   const trimmed = summary.trim();
-  return trimmed.length === 0 || trimmed === "新会话";
+  return trimmed.length === 0 || trimmed === "新会话" || trimmed === "New conversation";
 }

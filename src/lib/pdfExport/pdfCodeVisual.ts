@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/pdfExport/pdfCodeVisual.ts#localMessages:1">`
+zh-Hans:
+  exportingEquationsAsImagesIsnTSupportedInThis: "当前环境不支持导出公式图片"
+  theEquationImageIsnTAPngDataUrl: "公式截图结果不是 PNG data URL"
+en:
+  exportingEquationsAsImagesIsnTSupportedInThis: "Exporting equations as images isn’t supported in this environment"
+  theEquationImageIsnTAPngDataUrl: "The equation image isn’t a PNG data URL"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import { blobToBase64 } from "@/lib/imageStorage/utils";
 import { isRasterPdfImageSrc, rasterizeSvgMarkup } from "./pdfImageRaster";
@@ -44,7 +55,7 @@ export async function renderMathPngDataUrl(source: string): Promise<string | nul
   const trimmed = source.trim();
   if (!trimmed) return null;
   if (typeof document === "undefined") {
-    throw new Error("当前环境不支持导出公式图片");
+    throw new Error(uiText("exportingEquationsAsImagesIsnTSupportedInThis"));
   }
   const { default: katex } = await import("katex");
   const { captureElementAsPngBlob } = await import("@/lib/imageExport/svgToPng");
@@ -75,7 +86,7 @@ export async function renderMathPngDataUrl(source: string): Promise<string | nul
     const blob = await captureElementAsPngBlob(wrapper, { targetLongEdge: 1600 });
     const dataUrl = await blobToBase64(blob);
     if (!isRasterPdfImageSrc(dataUrl)) {
-      throw new Error("公式截图结果不是 PNG data URL");
+      throw new Error(uiText("theEquationImageIsnTAPngDataUrl"));
     }
     return dataUrl;
   } finally {

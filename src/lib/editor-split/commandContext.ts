@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/editor-split/commandContext.ts#localMessages:1">`
+zh-Hans:
+  splitViewIsnTAvailableInFullScreenAi: "全屏 AI 下不能分屏"
+  splitViewIsnTAvailableInThisView: "当前视图不能分屏"
+  splitViewIsnTAvailableInVersionHistory: "历史预览下不能分屏"
+en:
+  splitViewIsnTAvailableInFullScreenAi: "Split view isn’t available in full-screen AI mode"
+  splitViewIsnTAvailableInThisView: "Split view isn’t available in this view"
+  splitViewIsnTAvailableInVersionHistory: "Split view isn’t available in version history"
+`;
+const uiText = createTranslator(localMessages);
 import { isNotebookAiFullscreenOpen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import type { Page } from "@/types";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -88,13 +101,13 @@ export function isNormalEditorSurface(): boolean {
 }
 
 export function canSplitCurrentView(): string | null {
-  if (isNotebookAiFullscreenOpen()) return "全屏 AI 下不能分屏";
+  if (isNotebookAiFullscreenOpen()) return uiText("splitViewIsnTAvailableInFullScreenAi");
   const tab = activeWorkspaceTab();
-  if (!tab || isSpecialTab(tab)) return "当前视图不能分屏";
+  if (!tab || isSpecialTab(tab)) return uiText("splitViewIsnTAvailableInThisView");
   const page = usePages.getState().getPage(tab.pageId);
-  if (page?.isFolder) return "当前视图不能分屏";
+  if (page?.isFolder) return uiText("splitViewIsnTAvailableInThisView");
   if (isHistoryPreviewSurface()) {
-    return "历史预览下不能分屏";
+    return uiText("splitViewIsnTAvailableInVersionHistory");
   }
   return null;
 }

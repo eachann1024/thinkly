@@ -1,3 +1,11 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/image/imageUtils.ts#messages:1">`
+zh-Hans:
+  imageReadFailed: "图片读取失败（{{status}}）"
+en:
+  imageReadFailed: "Could not read the image ({{status}})"
+`;
+const t = createTranslator(messages);
 import type { EditorPlatform } from "@/components/editor/platform/types";
 import { blobToBase64, convertImageBlobToPng } from "@/lib/imageProcessor";
 
@@ -31,7 +39,7 @@ export async function copyImageSrcToClipboard(
     }
     const response = await fetch(resolvedSrc);
     if (!response.ok) {
-      throw new Error(`图片读取失败（${response.status}）`);
+      throw new Error(t("imageReadFailed", { status: response.status }));
     }
     const sourceBlob = await response.blob();
     const pngBlob = await convertImageBlobToPng(sourceBlob);

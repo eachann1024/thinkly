@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/folderSync.ts#block1:1">`
+zh-Hans:
+  savingBeforeMove: "页面正在保存，请完成保存后再迁移"
+en:
+  savingBeforeMove: "The page is being saved. Wait for saving to finish before moving it."
+`);
 import type { JSONContent } from "@/types";
 import type { PagesState } from "./types";
 import { LOCAL_SAVE_DEBOUNCE_MS, LOCAL_SAVE_MAX_WAIT_MS } from "./types";
@@ -54,7 +61,7 @@ export const migratePendingLocalSave = (
 ): { ok: true } | { ok: false; error: string } => {
   if (oldPageId === newPageId) return { ok: true };
   // A running write has captured its page ID. Its owner must flush before moving identity.
-  if (hasLocalSaveWriteChain(oldPageId) || hasLocalSaveWriteChain(newPageId)) return { ok: false, error: "页面正在保存，请完成保存后再迁移" };
+  if (hasLocalSaveWriteChain(oldPageId) || hasLocalSaveWriteChain(newPageId)) return { ok: false, error: storeText("savingBeforeMove") };
   const previous = getLocalSavePageState(oldPageId);
   if (previous.pending.status === "empty" && previous.permission.status === "automatic" && previous.recovery.status === "none") return { ok: true };
   const moved = moveRecoveryEntry("local-file", oldPageId, newPageId);

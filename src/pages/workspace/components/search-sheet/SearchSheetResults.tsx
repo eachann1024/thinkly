@@ -1,3 +1,20 @@
+import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheetResults.tsx#localMessages:1">`
+zh-Hans:
+  matchCount: "{{count}} 处"
+  title: "标题"
+  pinyin: "拼音"
+  askAi: "询问 AI："
+  removeRecent: "从最近访问中移除 {{title}}"
+en:
+  matchCount: "Matches: {{count}}"
+  title: "Title"
+  pinyin: "Pinyin"
+  askAi: "Ask AI: "
+  removeRecent: "Remove {{title}} from recently opened"
+`;
+const uiText = createTranslator(localMessages);
 import { Fragment, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -22,18 +39,18 @@ function Highlight({ text, query }: { text: string; query: string }) {
 
 function formatDate(time: number) {
   const date = new Date(time), now = new Date();
-  return date.getFullYear() === now.getFullYear() ? `${date.getMonth() + 1}月${date.getDate()}日` : `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  return date.toLocaleDateString(getFormatLocale(), {year: date.getFullYear() === now.getFullYear() ? undefined : "numeric", month: "short", day: "numeric"});
 }
 
 function matchLabel(page: SearchResultPage) {
-  if (page.literalBodyMatchCount) return `${page.literalBodyMatchCount} 处`;
-  return page.matchKind === "title" ? "标题" : page.matchKind === "pinyin" ? "拼音" : "";
+  if (page.literalBodyMatchCount) return uiText("matchCount", {count: page.literalBodyMatchCount});
+  return page.matchKind === "title" ? uiText("title") : page.matchKind === "pinyin" ? uiText("pinyin") : "";
 }
 
 export function AskAiRow({ query, selected, onAsk }: { query: string; selected: boolean; onAsk: () => void }) {
   return <Button contentStyle="preserve" variant="ghost" size="sm" id={AI_ROW_ID} type="button" role="option" aria-selected={selected} data-kind="ai" className="search-sheet-row" onClick={onAsk}>
     <span className="search-sheet-row-icon"><Sparkles size={16} aria-hidden="true"/></span>
-    <span className="search-sheet-row-title">询问 AI：{query}</span>
+    <span className="search-sheet-row-title">{uiText("askAi")}{query}</span>
     <kbd className="search-sheet-kbd" aria-hidden="true">⇧↵</kbd>
   </Button>;
 }
@@ -57,7 +74,7 @@ export const SearchSheetResults = memo(function SearchSheetResults({ results, qu
         <span className="search-sheet-row-meta">{[path, formatDate(page.updatedAt)].filter(Boolean).join(" · ")}</span>
         {hasQuery && snippet && <span className="search-sheet-row-snippet"><Highlight text={snippet} query={query}/></span>}
       </Button>
-      {!hasQuery && <IconButton size="xs" className="p-0 search-sheet-remove" aria-label={`从最近访问中移除 ${title}`} onClick={() => removeRecent(page.id)}><X size={14}/></IconButton>}
+      {!hasQuery && <IconButton size="xs" className="p-0 search-sheet-remove" aria-label={uiText("removeRecent", {title})} onClick={() => removeRecent(page.id)}><X size={14}/></IconButton>}
     </div>;
   })}</>;
 });

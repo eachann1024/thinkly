@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIContextSection.tsx#localMessages:1">`
+zh-Hans:
+  promptsAndSkills_aace: "提示词与技能"
+  whenEnabledRelevantLocalContentIs_8628: "开启后，相关本地内容会随对话发送给 AI 服务商。"
+  readGlobalPrompts_1b07: "读取全局提示词"
+  readLocalSkills_b400: "读取本地技能 (Skills)"
+en:
+  promptsAndSkills_aace: "Prompts and skills"
+  whenEnabledRelevantLocalContentIs_8628: "When enabled, relevant local content is sent to the AI provider with your conversation."
+  readGlobalPrompts_1b07: "Read global prompts"
+  readLocalSkills_b400: "Read local skills"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -19,10 +34,9 @@ export function renderAIContextSection(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          提示词与技能
-        </span>
+          {uiText("promptsAndSkills_aace")}</span>
       }
-      description="开启后，相关本地内容会随对话发送给 AI 服务商。"
+      description={uiText("whenEnabledRelevantLocalContentIs_8628")}
     >
       <div className="space-y-2">
         <div
@@ -36,8 +50,7 @@ export function renderAIContextSection(
               htmlFor="ai-read-global-prompt"
               className="cursor-pointer text-sm font-medium text-foreground"
             >
-              读取全局提示词
-            </Label>
+              {uiText("readGlobalPrompts_1b07")}</Label>
           </div>
           <Switch
             id="ai-read-global-prompt"
@@ -56,8 +69,7 @@ export function renderAIContextSection(
               htmlFor="ai-read-local-skills"
               className="cursor-pointer text-sm font-medium text-foreground"
             >
-              读取本地技能 (Skills)
-            </Label>
+              {uiText("readLocalSkills_b400")}</Label>
           </div>
           <Switch
             id="ai-read-local-skills"

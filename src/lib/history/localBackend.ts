@@ -1,3 +1,5 @@
+import { historyText as uiText } from "./messages";
+
 import type { HistoryBackend } from "./backend";
 import type { HistoryIndex, HistoryIndexEntry } from "./types";
 import { normalizeHistoryIndex } from "./guards";
@@ -51,7 +53,7 @@ export function makeLocalFolderHistoryBackend(
     ];
   }
   const file = (directory: string, id: string, version: string) => {
-    if (!/^[a-zA-Z0-9_-]+$/.test(version)) throw new Error("历史版本标识无效");
+    if (!/^[a-zA-Z0-9_-]+$/.test(version)) throw new Error(uiText("invalidVersionHistoryIdentifier"));
     return `${directory}/${historyHash(id)}.${version}.json`;
   };
   return {
@@ -67,7 +69,7 @@ export function makeLocalFolderHistoryBackend(
               : null;
             const data = text ? (JSON.parse(text) as HistoryIndex) : null;
             if (data && data.pageId !== id)
-              throw new Error("历史索引标识不一致");
+              throw new Error(uiText("versionHistoryIndexIdentifiersDonTMatch"));
             for (const entry of normalizeHistoryIndex(data, id).versions) {
               if (
                 !entries.has(entry.versionId) &&
@@ -156,7 +158,7 @@ export function makeLocalFolderHistoryBackend(
             const path = file(directory, id, versionId);
             invalidateHistoryVersion(path);
             if ((await fs.exists(path)) && !(await fs.deleteFile(path)))
-              throw new Error("无法清除历史版本");
+              throw new Error(uiText("couldnTClearVersionHistory"));
           }
         },
         undefined,
@@ -176,7 +178,7 @@ export function makeLocalFolderHistoryBackend(
             const path = `${directory}/${entry.name}`;
             invalidateHistoryVersion(path);
             if (!(await fs.deleteFile(path)))
-              throw new Error("无法永久清除历史记录");
+              throw new Error(uiText("couldnTPermanentlyClearVersionHistory"));
           }
           const locations = await readHistoryLocations(basePath, fs);
           for (const id of ids) delete locations.pages[id];

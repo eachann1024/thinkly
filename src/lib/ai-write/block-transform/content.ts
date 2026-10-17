@@ -5,6 +5,25 @@ import {
   type BlockTypeTransformIntent,
 } from "./types";
 import { assertValidIntent } from "./intent";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/ai-write/block-transform/content.ts#messages:1">`
+zh-Hans:
+  thereAreNoTextBlocksToConvert: "没有可转换的文本块。"
+  theSelectedBlocksAreMissingIdsSelectThem: "选区块缺少标识，请重新选择后再试。"
+  theConversionProducedTheWrongBlockTypeYour: "转换计划生成了错误的块类型，内容未修改。"
+  theConversionProducedTheWrongHeadingLevelYour: "转换计划生成了错误的标题级别，内容未修改。"
+  detailTheSelectionContainsBlocksThatCannotBeConverted: "选区包含不能转换为{{value1}}的块。"
+  detailTheSelectionContainsNestedContentAndCannotBe: "选区包含嵌套内容，暂不能安全转换为{{value1}}。"
+en:
+  thereAreNoTextBlocksToConvert: "There are no text blocks to convert."
+  theSelectedBlocksAreMissingIdsSelectThem: "The selected blocks are missing IDs. Select them again and retry."
+  theConversionProducedTheWrongBlockTypeYour: "The conversion produced the wrong block type. Your content was not changed."
+  theConversionProducedTheWrongHeadingLevelYour: "The conversion produced the wrong heading level. Your content was not changed."
+  detailTheSelectionContainsBlocksThatCannotBeConverted: "The selection contains blocks that cannot be converted to {{value1}}."
+  detailTheSelectionContainsNestedContentAndCannotBe: "The selection contains nested content and cannot be safely converted to {{value1}} yet."
+`;
+const t = createTranslator(messages);
+
 
 const SUPPORTED_SOURCE_BLOCK_TYPES = new Set([
   "paragraph",
@@ -115,15 +134,15 @@ export function validateSourceBlocks(
   blocks: BlockTypeTransformBlock[],
   targetLabel: string,
 ) {
-  if (blocks.length === 0) throw new Error("没有可转换的文本块。");
+  if (blocks.length === 0) throw new Error(t("thereAreNoTextBlocksToConvert"));
 
   for (const block of blocks) {
-    if (!block.id) throw new Error("选区块缺少标识，请重新选择后再试。");
+    if (!block.id) throw new Error(t("theSelectedBlocksAreMissingIdsSelectThem"));
     if (!block.type || !SUPPORTED_SOURCE_BLOCK_TYPES.has(block.type)) {
-      throw new Error(`选区包含不能转换为${targetLabel}的块。`);
+      throw new Error(t("detailTheSelectionContainsBlocksThatCannotBeConverted", { value1: targetLabel }));
     }
     if (block.children?.length) {
-      throw new Error(`选区包含嵌套内容，暂不能安全转换为${targetLabel}。`);
+      throw new Error(t("detailTheSelectionContainsNestedContentAndCannotBe", { value1: targetLabel }));
     }
   }
 }
@@ -135,14 +154,14 @@ export function assertReplacementStructure(
   assertValidIntent(intent);
   for (const block of blocks) {
     if (block.type !== intent.blockType) {
-      throw new Error("转换计划生成了错误的块类型，内容未修改。");
+      throw new Error(t("theConversionProducedTheWrongBlockTypeYour"));
     }
     if (
       intent.blockType === "heading" &&
       (block.props as Record<string, unknown> | undefined)?.level !==
         intent.headingLevel
     ) {
-      throw new Error("转换计划生成了错误的标题级别，内容未修改。");
+      throw new Error(t("theConversionProducedTheWrongHeadingLevelYour"));
     }
   }
 }

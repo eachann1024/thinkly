@@ -1,3 +1,30 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/presets.ts#localMessages:1">`
+zh-Hans:
+  officialApiEnterYourApiKey: "官方 API（填入 Key 即用）"
+  glmZhipu: "GLM (智谱)"
+  zhipuBigmodelPlatform: "智谱 BigModel 开放平台"
+  officialApiPlatform: "官方开放平台"
+  customOpenaiResponses: "自定义 OpenAI Responses"
+  openaiResponsesCompatible: "兼容 OpenAI Responses 协议"
+  customOpenaiCompatible: "自定义 OpenAI 兼容"
+  chatCompletionsCompatible: "兼容 Chat Completions 标准协议"
+  customAnthropic: "自定义 Anthropic"
+  claudeMessagesCompatible: "兼容 Claude Messages 协议"
+en:
+  officialApiEnterYourApiKey: "Official API (enter your API key)"
+  glmZhipu: "GLM (Zhipu)"
+  zhipuBigmodelPlatform: "Zhipu BigModel platform"
+  officialApiPlatform: "Official API platform"
+  customOpenaiResponses: "Custom OpenAI Responses"
+  openaiResponsesCompatible: "OpenAI Responses compatible"
+  customOpenaiCompatible: "Custom OpenAI-compatible"
+  chatCompletionsCompatible: "Chat Completions compatible"
+  customAnthropic: "Custom Anthropic"
+  claudeMessagesCompatible: "Claude Messages compatible"
+`;
+const uiText = createTranslator(localMessages);
 import type { AIModelOption, CustomAIProtocol } from "./types";
 
 /**
@@ -42,7 +69,7 @@ export const AI_PROVIDER_PRESETS: AIProviderPreset[] = [
   {
     id: "deepseek",
     label: "DeepSeek",
-    description: "官方 API（填入 Key 即用）",
+    description: uiText("officialApiEnterYourApiKey"),
     baseURL: DEEPSEEK_BASE_URL,
     protocol: "openai-responses",
     allowCustomBaseURL: false,
@@ -53,8 +80,8 @@ export const AI_PROVIDER_PRESETS: AIProviderPreset[] = [
   },
   {
     id: "glm",
-    label: "GLM (智谱)",
-    description: "智谱 BigModel 开放平台",
+    label: uiText("glmZhipu"),
+    description: uiText("zhipuBigmodelPlatform"),
     baseURL: GLM_BASE_URL,
     protocol: "openai",
     allowCustomBaseURL: false,
@@ -66,7 +93,7 @@ export const AI_PROVIDER_PRESETS: AIProviderPreset[] = [
   {
     id: "minimax",
     label: "MiniMax",
-    description: "官方开放平台",
+    description: uiText("officialApiPlatform"),
     baseURL: MINIMAX_BASE_URL,
     protocol: "openai",
     allowCustomBaseURL: false,
@@ -77,24 +104,24 @@ export const AI_PROVIDER_PRESETS: AIProviderPreset[] = [
   },
   {
     id: "custom-openai-responses",
-    label: "自定义 OpenAI Responses",
-    description: "兼容 OpenAI Responses 协议",
+    label: uiText("customOpenaiResponses"),
+    description: uiText("openaiResponsesCompatible"),
     baseURL: null,
     protocol: "openai-responses",
     allowCustomBaseURL: true,
   },
   {
     id: "custom-openai",
-    label: "自定义 OpenAI 兼容",
-    description: "兼容 Chat Completions 标准协议",
+    label: uiText("customOpenaiCompatible"),
+    description: uiText("chatCompletionsCompatible"),
     baseURL: null,
     protocol: "openai",
     allowCustomBaseURL: true,
   },
   {
     id: "custom-claude",
-    label: "自定义 Anthropic",
-    description: "兼容 Claude Messages 协议",
+    label: uiText("customAnthropic"),
+    description: uiText("claudeMessagesCompatible"),
     baseURL: null,
     protocol: "claude",
     allowCustomBaseURL: true,

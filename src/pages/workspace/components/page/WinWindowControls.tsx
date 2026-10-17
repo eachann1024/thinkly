@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/WinWindowControls.tsx#localMessages:1">`
+zh-Hans:
+  windowControls: "窗口控制"
+  minimize: "最小化"
+  restoreWindow: "还原"
+  maximize: "最大化"
+  close: "关闭"
+en:
+  windowControls: "Window controls"
+  minimize: "Minimize"
+  restoreWindow: "Restore"
+  maximize: "Maximize"
+  close: "Close"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Frameless 工作区窗的自定义窗控（Win/Linux 均为 frame：false）。
  * 放在 DesktopTitleBar 最右侧：最小化 / 最大化·还原 / 关闭。
@@ -36,12 +53,12 @@ export function WinWindowControls() {
       className="electron-win-chrome-controls ml-1 flex shrink-0 items-stretch self-stretch"
       data-electron-no-drag
       role="group"
-      aria-label="窗口控制"
+      aria-label={uiText("windowControls")}
     >
       <button
         type="button"
         className={btnClass}
-        aria-label="最小化"
+        aria-label={uiText("minimize")}
         onClick={() => void desktop?.minimizeWindow?.()}
       >
         <GooseIcons.Minus className="h-3.5 w-3.5" strokeWidth={2} />
@@ -49,7 +66,7 @@ export function WinWindowControls() {
       <button
         type="button"
         className={btnClass}
-        aria-label={maximized ? "还原" : "最大化"}
+        aria-label={maximized ? uiText("restoreWindow") : uiText("maximize")}
         onClick={() => {
           void desktop?.toggleMaximizeWindow?.().then((v) => {
             if (typeof v === "boolean") setMaximized(v);
@@ -65,7 +82,7 @@ export function WinWindowControls() {
       <button
         type="button"
         className={cn(btnClass, "hover:bg-[#c42b1c] hover:text-inverse")}
-        aria-label="关闭"
+        aria-label={uiText("close")}
         onClick={() => void desktop?.closeWindow?.()}
       >
         <GooseIcons.X className="h-3.5 w-3.5" strokeWidth={2} />

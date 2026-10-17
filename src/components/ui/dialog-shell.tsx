@@ -1,3 +1,15 @@
+import { common } from "@/i18n/common";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/dialog-shell.tsx#localMessages:1">`
+zh-Hans:
+  dialog: "对话框"
+  dialogContent: "对话框内容"
+en:
+  dialog: "Dialog"
+  dialogContent: "Dialog content"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -43,8 +55,8 @@ export function DialogShell({
     (isFullscreen ? "bg-transparent backdrop-blur-0" : undefined);
   const hasTitle = Boolean(title);
   const hasDescription = Boolean(description);
-  const accessibleTitle = hasTitle ? title : "对话框";
-  const accessibleDescription = hasDescription ? description : "对话框内容";
+  const accessibleTitle = hasTitle ? title : uiText("dialog");
+  const accessibleDescription = hasDescription ? description : uiText("dialogContent");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,7 +79,7 @@ export function DialogShell({
               "absolute z-10 text-muted-foreground",
               isFullscreen ? "top-4 right-4" : "top-4 right-4",
             )}
-            aria-label="关闭"
+            aria-label={common("close")}
           >
             <GooseIcons.X className="h-7 w-7" />
           </DialogClose>

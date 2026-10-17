@@ -1,3 +1,13 @@
+import { formatDecimal, formatNumber } from "@/i18n/format";
+import { createTranslator, i18nYaml, getFormatLocale } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/shared.tsx#localMessages:1">`
+zh-Hans:
+  unknown_1622: "未知"
+en:
+  unknown_1622: "Unknown"
+`;
+const uiText = createTranslator(localMessages);
 import type { ExportOptions } from "@/lib/export";
 
 export interface NotebookOption {
@@ -30,14 +40,14 @@ export const DATA_UNSELECTED_CARD_CLASS =
   "border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)] dark:bg-[hsl(var(--foreground)/0.08)]";
 
 export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024) return `${formatNumber(bytes)} B`;
+  if (bytes < 1024 * 1024) return `${formatDecimal(bytes / 1024, 1)} KB`;
+  return `${formatDecimal(bytes / (1024 * 1024), 1)} MB`;
 }
 
 export function formatRemoteTime(value: string | null | undefined): string {
-  if (!value) return "未知";
+  if (!value) return uiText("unknown_1622");
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return value;
-  return date.toLocaleString();
+  return date.toLocaleString(getFormatLocale());
 }

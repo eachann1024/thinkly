@@ -1,3 +1,50 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/page-delete-actions.ts#localMessages:1">`
+zh-Hans:
+  restoredChildren: "，并恢复 {{count}} 个子项"
+  restoredItem: "已恢复{{kind}}「{{title}}」"
+  restoredLocation: "位置：{{notebook}} / {{path}}{{children}}"
+  confirmDelete: "彻底删除「{{title}}」？"
+  deleting: "正在彻底删除「{{title}}」…"
+  deleted: "已彻底删除「{{title}}」"
+  deleteFailed: "无法彻底删除「{{title}}」"
+  restored: "已恢复「{{title}}」"
+  root: "顶层"
+  note: "页面"
+  untitled: "无标题"
+  untitledNotebook: "未命名笔记本"
+  thisWillPermanentlyDeleteTheItemAndAllIts: "删除后将连同全部子项一并移除，且无法恢复。"
+  thisCanTBeUndone: "删除后无法恢复。"
+  deletePermanently: "彻底删除"
+  theNoteStillExists: "页面仍然存在"
+  tryAgainLater: "请稍后重试。"
+  theSystemTrashStillContainsACopyOfThe: "系统废纸篓仍保留原文件副本。"
+  couldnTRestoreTheFileFromTheSystemTrash: "无法从废纸篓恢复文件"
+  fileRestoredRefreshTheFolderToSeeIt: "文件已恢复，请刷新目录查看"
+en:
+  restoredChildren: "; child items restored: {{count}}"
+  restoredItem: "Restored {{kind}} “{{title}}”"
+  restoredLocation: "Location: {{notebook}} / {{path}}{{children}}"
+  confirmDelete: "Permanently delete “{{title}}”?"
+  deleting: "Permanently deleting “{{title}}”…"
+  deleted: "Permanently deleted “{{title}}”"
+  deleteFailed: "Couldn’t permanently delete “{{title}}”"
+  restored: "Restored “{{title}}”"
+  root: "Root"
+  note: "Note"
+  untitled: "Untitled"
+  untitledNotebook: "Untitled notebook"
+  thisWillPermanentlyDeleteTheItemAndAllIts: "This will permanently delete the item and all its contents. This can’t be undone."
+  thisCanTBeUndone: "This can’t be undone."
+  deletePermanently: "Delete permanently"
+  theNoteStillExists: "The note still exists"
+  tryAgainLater: "Try again later."
+  theSystemTrashStillContainsACopyOfThe: "The system trash still contains a copy of the original file."
+  couldnTRestoreTheFileFromTheSystemTrash: "Couldn’t restore the file from the system trash"
+  fileRestoredRefreshTheFolderToSeeIt: "File restored. Refresh the folder to see it."
+`;
+const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { showDeleteReceipt } from "@/components/ui/delete-receipt";
 import { usePages } from "@/stores/usePages";
@@ -36,15 +83,15 @@ export function restorePageWithToast(
   const parentPath =
     result.parentTitles && result.parentTitles.length > 0
       ? result.parentTitles.join(" / ")
-      : "顶层";
+      : uiText("root");
   const restoredChildrenCount = Math.max((result.restoredCount || 1) - 1, 0);
   const restoredChildrenText =
-    restoredChildrenCount > 0 ? `，并恢复 ${restoredChildrenCount} 个子项` : "";
+    restoredChildrenCount > 0 ? uiText("restoredChildren", {count: restoredChildrenCount}) : "";
 
   toast.success(
-    `已恢复${result.itemLabel || "页面"}「${result.pageTitle || "无标题"}」`,
+    uiText("restoredItem", {kind: result.itemLabel || uiText("note"), title: result.pageTitle || uiText("untitled")}),
     {
-      description: `位置：${result.notebookName || "未命名笔记本"} / ${parentPath}${restoredChildrenText}`,
+      description: uiText("restoredLocation", {notebook: result.notebookName || uiText("untitledNotebook"), path: parentPath, children: restoredChildrenText}),
     },
   );
 }
@@ -55,38 +102,38 @@ const permanentDeleteInFlight = new Set<string>();
 export function permanentlyDeletePageWithCleanup(pageId: string) {
   const page = usePages.getState().pages[pageId];
   if (!page || permanentDeleteInFlight.has(pageId)) return;
-  const title = getPageTitle(page) || "无标题";
+  const title = getPageTitle(page) || uiText("untitled");
   const toastId = `permanent-delete:${pageId}`;
 
-  toast.warning(`彻底删除「${title}」？`, {
+  toast.warning(uiText("confirmDelete", {title}), {
     id: toastId,
     duration: 8000,
     classNames: { actionButton: "goose-toast-action-danger" },
     description: page.isFolder
-      ? "删除后将连同全部子项一并移除，且无法恢复。"
-      : "删除后无法恢复。",
+      ? uiText("thisWillPermanentlyDeleteTheItemAndAllIts")
+      : uiText("thisCanTBeUndone"),
     action: {
-      label: "彻底删除",
+      label: uiText("deletePermanently"),
       onClick: (event) => {
         event.preventDefault();
         if (permanentDeleteInFlight.has(pageId)) return;
         permanentDeleteInFlight.add(pageId);
-        toast.loading(`正在彻底删除「${title}」…`, { id: toastId });
+        toast.loading(uiText("deleting", {title}), { id: toastId });
         void usePages
           .getState()
           .permanentlyDeletePage(pageId)
           .then(() => {
             if (usePages.getState().getPage(pageId)) {
-              throw new Error("页面仍然存在");
+              throw new Error(uiText("theNoteStillExists"));
             }
             useTabs.getState().removeDeletedPage(pageId);
-            toast.success(`已彻底删除「${title}」`, { id: toastId });
+            toast.success(uiText("deleted", {title}), { id: toastId });
           })
           .catch((error) => {
             console.error("[page-delete] permanently delete failed", error);
-            toast.error(`无法彻底删除「${title}」`, {
+            toast.error(uiText("deleteFailed", {title}), {
               id: toastId,
-              description: "请稍后重试。",
+              description: uiText("tryAgainLater"),
             });
           })
           .finally(() => {
@@ -103,7 +150,7 @@ export async function deletePageWithUndo(pageId: string) {
   if (!page) return;
   const notebook = useNotebooks.getState().notebooks[page.workspaceId];
   const isLocalFolder = notebook?.source === "local-folder";
-  const pageTitle = getPageTitle(page) || "无标题";
+  const pageTitle = getPageTitle(page) || uiText("untitled");
 
   let deleted = false;
   let localTrashToken: string | undefined;
@@ -132,8 +179,8 @@ export async function deletePageWithUndo(pageId: string) {
               closeNotebookAiIfFullscreen();
               useTabs.getState().openTab(pageId);
             }
-            toast.success(`已恢复「${pageTitle}」`, {
-              description: "系统废纸篓仍保留原文件副本。",
+            toast.success(uiText("restored", {title: pageTitle}), {
+              description: uiText("theSystemTrashStillContainsACopyOfThe"),
             });
           }
         : undefined
@@ -143,14 +190,14 @@ export async function deletePageWithUndo(pageId: string) {
 
 /** Restore only the exact item backed up for this deletion; never guess by filename. */
 export async function undoLocalTrash(token: string, notebookId: string) {
-  if (!(await window.gooseFs?.undoTrash?.(token))) throw new Error("无法从废纸篓恢复文件");
+  if (!(await window.gooseFs?.undoTrash?.(token))) throw new Error(uiText("couldnTRestoreTheFileFromTheSystemTrash"));
   const notebook = useNotebooks.getState().notebooks[notebookId];
   if (notebook?.localPath) {
     try {
       await usePages.getState().loadLocalFolderPages(notebookId, notebook.localPath);
     } catch (error) {
       console.warn("[page-delete] restored file but could not refresh sidebar", error);
-      toast.warning("文件已恢复，请刷新目录查看");
+      toast.warning(uiText("fileRestoredRefreshTheFolderToSeeIt"));
     }
   }
 }

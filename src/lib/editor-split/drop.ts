@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/editor-split/drop.ts#localMessages:1">`
+zh-Hans:
+  youCanOpenUpToPanes: "最多只能分成 4 格"
+  thisNoteIsNoLongerAvailable: "这篇笔记已不可用"
+en:
+  youCanOpenUpToPanes: "You can open up to 4 panes"
+  thisNoteIsNoLongerAvailable: "This note is no longer available"
+`;
+const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { flushEditorContent, usePages } from "@/stores/usePages";
@@ -49,12 +60,12 @@ export async function dropWorkspaceContent(
   const target = current && findLeaf(current.root, paneId);
   if (!current || !target) return false;
   if (countLeaves(current.root) >= MAX_SPLIT_LEAVES) {
-    toast.error("最多只能分成 4 格");
+    toast.error(uiText("youCanOpenUpToPanes"));
     return false;
   }
   if (payload.kind === "text" && !payload.text.trim()) return false;
   if (payload.kind === "page" && !isLiveEditorPage(usePages.getState().getPage(payload.pageId))) {
-    toast.error("这篇笔记已不可用");
+    toast.error(uiText("thisNoteIsNoLongerAvailable"));
     return false;
   }
   const newPageId = payload.kind === "page"

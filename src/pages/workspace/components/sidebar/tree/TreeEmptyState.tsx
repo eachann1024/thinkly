@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/tree/TreeEmptyState.tsx#localMessages:1">`
+zh-Hans:
+  noNotesYetClickAboveTo_6d5a: "暂无笔记，点击上方 ＋ 新建"
+  linkALocalFolderFirst_909e: "请先关联本地文件夹"
+en:
+  noNotesYetClickAboveTo_6d5a: "No notes yet. Click + above to create one."
+  linkALocalFolderFirst_909e: "Link a local folder first"
+`;
+const uiText = createTranslator(localMessages);
 import { cn } from "@/lib/utils";
 
 interface TreeEmptyStateProps {
@@ -22,8 +33,8 @@ export function TreeEmptyState({
     >
       <p className="text-sm font-normal leading-relaxed text-muted-foreground">
         {isLocalNotebook
-          ? "暂无笔记，点击上方 ＋ 新建"
-          : "请先关联本地文件夹"}
+          ? uiText("noNotesYetClickAboveTo_6d5a")
+          : uiText("linkALocalFolderFirst_909e")}
       </p>
     </div>
   );

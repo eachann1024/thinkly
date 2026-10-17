@@ -1,3 +1,45 @@
+import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
+const localMessages = i18nYaml<"src/pages/workspace/components/page/PageMenu.tsx#localMessages:1">`
+zh-Hans:
+  wordCount: "字数：{{count}}"
+  editedAt: "编辑于 {{date}}"
+  moreActions: "更多操作"
+  pageLayout: "页面布局"
+  contentWidth: "正文宽度"
+  chooseLayout: "选择当前笔记布局"
+  standard: "标准"
+  fullWidth: "全宽"
+  defaultWidth: "跟随默认宽度"
+  lockNote: "锁定笔记"
+  newWindow: "在新窗口打开"
+  import: "导入"
+  exportSelectionImage: "导出所选为图片"
+  exportImage: "导出为图片"
+  versionHistory: "历史版本"
+  moveSystemTrash: "移到废纸篓"
+  moveSystemRecycle: "移到系统回收站"
+  moveTrash: "移入回收站"
+en:
+  wordCount: "Word count: {{count}}"
+  editedAt: "Edited {{date}}"
+  moreActions: "More actions"
+  pageLayout: "Page layout"
+  contentWidth: "Content width"
+  chooseLayout: "Choose a layout for this note"
+  standard: "Standard"
+  fullWidth: "Full width"
+  defaultWidth: "Use default width"
+  lockNote: "Lock note"
+  newWindow: "Open in new window"
+  import: "Import"
+  exportSelectionImage: "Export selection as image"
+  exportImage: "Export as image"
+  versionHistory: "Version history"
+  moveSystemTrash: "Move to Trash"
+  moveSystemRecycle: "Move to Recycle Bin"
+  moveTrash: "Move to Trash"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
@@ -7,14 +49,12 @@ import "./page-menu.css";
 import { ImageExportThemeSelector } from "@/components/ui/image-export-theme-selector";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { deletePageWithUndo } from "@/lib/page-delete-actions";
-import { cn } from "@/lib/utils";
+import { cn, getPlatformKind } from "@/lib/utils";
 import { normalizePageLayout } from "@/lib/local-frontmatter";
 import { createDesktopWindow } from "@/lib/electron/windowContext";
 import { detachTabFromThisWindow } from "@/lib/electron/detachTab";
-
 import { PageExportSubmenu } from "./page-menu/PageExportSubmenu";
 import { usePageMenu } from "./page-menu/usePageMenu";
-
 export function PageMenu() {
   const {
     page, activePageId, viewport,
@@ -37,12 +77,12 @@ export function PageMenu() {
       >
         <PopoverTrigger asChild>
           <IconButton size="icon" tone="muted"
-            aria-label="更多操作"
+            aria-label={uiText("moreActions")}
             onPointerDownCapture={captureSelectedBlocks}
             className="text-muted-foreground "
           >
             <GooseIcons.MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">更多操作</span>
+            <span className="sr-only">{uiText("moreActions")}</span>
           </IconButton>
         </PopoverTrigger>
         {/*
@@ -69,12 +109,12 @@ export function PageMenu() {
           forceMount
         >
           {!page.isFolder && (
-            <section aria-label="页面布局" className="px-1 py-2">
-              <div className="px-1 pb-2 text-xs text-muted-foreground">正文宽度</div>
-              <div className="grid grid-cols-2 gap-1" role="group" aria-label="选择当前笔记布局">
+            <section aria-label={uiText("pageLayout")} className="px-1 py-2">
+              <div className="px-1 pb-2 text-xs text-muted-foreground">{uiText("contentWidth")}</div>
+              <div className="grid grid-cols-2 gap-1" role="group" aria-label={uiText("chooseLayout")}>
                 {([
-                  ["standard", "标准"],
-                  ["full", "全宽"],
+                  ["standard", uiText("standard")],
+                  ["full", uiText("fullWidth")],
                 ] as const).map(([value, label]) => (
                   <Button contentStyle="preserve" variant="ghost" size={null}
                     key={value}
@@ -98,8 +138,7 @@ export function PageMenu() {
                   className="mt-2 px-1 text-xs text-muted-foreground hover:text-foreground"
                   onClick={() => updatePage(activePageId, { pageLayout: undefined })}
                 >
-                  跟随默认宽度
-                </Button>
+                  {uiText("defaultWidth")}</Button>
               )}
             </section>
           )}
@@ -113,7 +152,6 @@ export function PageMenu() {
               }
             />
           </div>
-
 
           <div
             role="button"
@@ -131,9 +169,9 @@ export function PageMenu() {
             }}
           >
             <GooseIcons.Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="min-w-0 truncate">锁定笔记</span>
+            <span className="min-w-0 truncate">{uiText("lockNote")}</span>
             <Switch
-              aria-label="锁定笔记"
+              aria-label={uiText("lockNote")}
               checked={page.isLocked}
               onCheckedChange={(checked) =>
                 updatePage(activePageId, { isLocked: checked })
@@ -163,7 +201,7 @@ export function PageMenu() {
               }}
             >
               <GooseIcons.AppWindow className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
-              <span className="min-w-0 truncate">在新窗口打开</span>
+              <span className="min-w-0 truncate">{uiText("newWindow")}</span>
             </PopoverAction>
           ) : null}
 
@@ -174,7 +212,7 @@ export function PageMenu() {
               onSelect={handleImport}
             >
               <GooseIcons.Upload className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
-              <span className="min-w-0 truncate">导入</span>
+              <span className="min-w-0 truncate">{uiText("import")}</span>
             </PopoverAction>
           </div>
 
@@ -187,7 +225,7 @@ export function PageMenu() {
           >
             <GooseIcons.Image className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="page-menu-shimmer-text min-w-0 truncate font-medium text-foreground">
-              {selectedBlocks.length > 0 ? "导出所选为图片" : "导出为图片"}
+              {selectedBlocks.length > 0 ? uiText("exportSelectionImage") : uiText("exportImage")}
             </span>
           </PopoverAction>
 
@@ -221,7 +259,7 @@ export function PageMenu() {
               }}
             >
               <GooseIcons.History className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
-              <span className="min-w-0 truncate">历史版本</span>
+              <span className="min-w-0 truncate">{uiText("versionHistory")}</span>
             </PopoverAction>
           </div>
 
@@ -235,15 +273,14 @@ export function PageMenu() {
               <GooseIcons.Trash2 className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-color-danger-focus)]" />
             )}
             <span className="min-w-0 truncate">
-              {isLocalItem ? "移到废纸篓" : "移入回收站"}
+              {isLocalItem ? uiText(getPlatformKind() === "windows" ? "moveSystemRecycle" : "moveSystemTrash") : uiText("moveTrash")}
             </span>
           </PopoverAction>
 
-
           <div className="flex items-center justify-between gap-3 px-2 py-1 text-[10px] text-muted-foreground">
-            <span>{countWords(page.content)} 字</span>
+            <span>{uiText("wordCount", {count: countWords(page.content)})}</span>
             <span className="min-w-0 truncate text-right">
-              编辑于 {new Date(page.updatedAt).toLocaleString("zh-CN")}
+              {uiText("editedAt", {date: new Date(page.updatedAt).toLocaleString(getFormatLocale())})}
             </span>
           </div>
         </PopoverContent>

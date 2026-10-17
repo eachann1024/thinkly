@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-shell/SidebarModeRail.tsx#localMessages:1">`
+zh-Hans:
+  local_8e7e: "本地"
+  outline_9338: "大纲"
+  search_e5f7: "搜索"
+  sidebarViews_2d93: "侧栏视图"
+en:
+  local_8e7e: "Local"
+  outline_9338: "Outline"
+  search_e5f7: "Search"
+  sidebarViews_2d93: "Sidebar views"
+`;
+const uiText = createTranslator(localMessages);
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarFooter } from "../SidebarFooter";
@@ -30,19 +45,19 @@ export function SidebarModeRail({
   const views = [
     {
       view: "pages" as const,
-      label: "本地",
+      label: uiText("local_8e7e"),
       icon: "folder" as const,
       digit: 1 as const,
     },
     {
       view: "outline" as const,
-      label: "大纲",
+      label: uiText("outline_9338"),
       icon: "outline" as const,
       digit: 2 as const,
     },
     {
       view: "search" as const,
-      label: "搜索",
+      label: uiText("search_e5f7"),
       icon: "search" as const,
       digit: 3 as const,
     },
@@ -57,7 +72,7 @@ export function SidebarModeRail({
         <nav
           ref={sidebarModeRailRef}
           className="sidebar-mode-rail"
-          aria-label="侧栏视图"
+          aria-label={uiText("sidebarViews_2d93")}
         >
           {views.map(({ view, label, icon, digit }) => (
             <Tooltip key={view}>
@@ -66,6 +81,7 @@ export function SidebarModeRail({
                   type="button"
                   className="h-auto whitespace-normal border-0 px-0 py-0 sidebar-mode-rail-button rounded-lg"
                   aria-label={label}
+                  data-sidebar-view={view}
                   aria-pressed={view === "search" ? searchSheetOpen : !settingsOpen && currentView === view}
                   aria-expanded={
                     view === "search" ? undefined : !settingsOpen && !sidebarCollapsed && currentView === view

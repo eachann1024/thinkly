@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/settings/types/search.ts#block1:1">`
+zh-Hans:
+  enterSearchUrl: "请输入搜索网址"
+  searchPlaceholder: "搜索网址需要包含一个 %s"
+  searchProtocol: "搜索网址仅支持 http 或 https"
+  invalidUrl: "请输入有效的网址"
+en:
+  enterSearchUrl: "Enter a search URL."
+  searchPlaceholder: "The search URL must contain exactly one %s placeholder."
+  searchProtocol: "The search URL must use HTTP or HTTPS."
+  invalidUrl: "Enter a valid URL."
+`);
 export interface SearchProvider {
   id: string;
   name: string;
@@ -131,18 +144,18 @@ export function getSearchProviderTemplateError(
   urlTemplate: string,
 ): string | null {
   const template = urlTemplate.trim();
-  if (!template) return "请输入搜索网址";
+  if (!template) return storeText("enterSearchUrl");
 
   const placeholderCount = template.split("%s").length - 1;
-  if (placeholderCount !== 1) return "搜索网址需要包含一个 %s";
+  if (placeholderCount !== 1) return storeText("searchPlaceholder");
 
   try {
     const url = new URL(template.replace("%s", "goose-note-search"));
     if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return "搜索网址仅支持 http 或 https";
+      return storeText("searchProtocol");
     }
   } catch {
-    return "请输入有效的网址";
+    return storeText("invalidUrl");
   }
 
   return null;

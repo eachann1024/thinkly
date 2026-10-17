@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookSwitcher.tsx#localMessages:1">`
+zh-Hans:
+  currentNotebook: "当前{{kind}} {{name}}，点击切换"
+  notebook_0021: "笔记本"
+en:
+  currentNotebook: "Current {{kind}}: {{name}}. Click to switch."
+  notebook_0021: "Notebook"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
 import { useLayoutEffect, useRef } from "react";
@@ -71,7 +82,7 @@ export function NotebookSwitcher(
                 ref={triggerRef}
                 type="button"
                 disabled={!active}
-                aria-label={`当前${notebookKind} ${activeNotebookLabel}，点击切换`}
+                aria-label={uiText("currentNotebook", { kind: notebookKind, name: activeNotebookLabel })}
                 className={cn(
                   "h-auto border-0 py-0 sidebar-notebook-trigger group text-foreground outline-none",
                   isRail && "sidebar-notebook-trigger--rail",
@@ -97,7 +108,7 @@ export function NotebookSwitcher(
                   {renderNotebookIcon(activeNotebook?.icon || defaultNotebookIcon)}
                 </span>
                 {isRail ? (
-                  <span className="sidebar-rail-control-label">记事本</span>
+                  <span className="sidebar-rail-control-label">{uiText("notebook_0021")}</span>
                 ) : (
                   <NotebookName name={activeNotebookLabel} />
                 )}

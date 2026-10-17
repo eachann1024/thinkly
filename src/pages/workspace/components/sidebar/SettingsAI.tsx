@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsAI.tsx#localMessages:1">`
+zh-Hans:
+  advancedOptions_1083: "高级选项"
+  aiAssistant_318e: "AI 助手"
+en:
+  advancedOptions_1083: "Advanced options"
+  aiAssistant_318e: "AI assistant"
+`;
+const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
 import { type SettingsAIProps } from "./settings-ai/shared";
 import { useAISettingsDraft } from "./settings-ai/useAISettingsDraft";
@@ -37,8 +48,7 @@ export function SettingsAI(props: SettingsAIProps) {
         {connectionTestSection}
         <Disclosure className="rounded-lg border border-border bg-background/50 p-3">
           <DisclosureSummary className="cursor-pointer text-sm font-medium text-foreground ">
-            高级选项
-          </DisclosureSummary>
+            {uiText("advancedOptions_1083")}</DisclosureSummary>
           <div className="pt-3">{contextSection}</div>
         </Disclosure>
       </div>
@@ -48,8 +58,7 @@ export function SettingsAI(props: SettingsAIProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold tracking-tight text-foreground">
-        AI 助手
-      </h3>
+        {uiText("aiAssistant_318e")}</h3>
       <div className="settings-card-columns">
         <div className="space-y-5">
           {enabledSection}

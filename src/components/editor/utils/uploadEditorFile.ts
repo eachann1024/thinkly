@@ -5,6 +5,15 @@ import {
 } from "./pasteClipboardImage";
 import { isVideoUploadFile } from "@/lib/videoProcessor";
 import { videoStorage } from "@/lib/videoStorage";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/utils/uploadEditorFile.ts#messages:1">`
+zh-Hans:
+  thisNotebookDoesNotSupportUploadingAttachments: "当前笔记本不支持附件上传"
+en:
+  thisNotebookDoesNotSupportUploadingAttachments: "This notebook does not support uploading attachments"
+`;
+const t = createTranslator(messages);
+
 
 export interface EditorFileUploadDeps {
   getBlock: ((id: string) => { type?: string } | null | undefined) | null;
@@ -41,7 +50,7 @@ export async function uploadEditorFile(
 
   const availability = deps.getFileUploadAvailability();
   if (!availability.enabled) {
-    throw new Error(availability.reason || "当前笔记本不支持附件上传");
+    throw new Error(availability.reason || t("thisNotebookDoesNotSupportUploadingAttachments"));
   }
 
   const saved = await deps.fileStorage.save(file);

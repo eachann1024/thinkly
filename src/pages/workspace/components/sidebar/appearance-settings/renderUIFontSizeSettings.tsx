@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/renderUIFontSizeSettings.tsx#localMessages:1">`
+zh-Hans:
+  interfaceScale_b560: "界面缩放"
+  scaleTheTitleBarSidebarAnd_4d3f: "缩放标题栏、侧栏与设置面板；图标大小固定，正文字号保持独立。"
+  resetToDefault100_b566: "恢复默认 (100%)"
+en:
+  interfaceScale_b560: "Interface scale"
+  scaleTheTitleBarSidebarAnd_4d3f: "Scale the title bar, sidebar, and settings. Icon size stays fixed; note text size is controlled separately."
+  resetToDefault100_b566: "Reset to default (100%)"
+`;
+const uiText = createTranslator(localMessages);
 import { Range } from "@/components/ui/range";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -25,15 +38,13 @@ export function renderUIFontSizeSettings(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          界面缩放
-        </Label>
+          {uiText("interfaceScale_b560")}</Label>
         <output htmlFor="interface-scale" className="text-sm tabular-nums">
           {uiFontSize}%
         </output>
       </div>
       <p className="text-xs text-muted-foreground">
-        缩放标题栏、侧栏与设置面板；图标大小固定，正文字号保持独立。
-      </p>
+        {uiText("scaleTheTitleBarSidebarAnd_4d3f")}</p>
       <Range
         id="interface-scale"
         min={UI_SCALE_MIN}
@@ -56,8 +67,7 @@ export function renderUIFontSizeSettings(
           disabled={uiFontSize === DEFAULT_UI_FONT_SIZE}
           onClick={() => setUIFontSize(DEFAULT_UI_FONT_SIZE)}
         >
-          恢复默认 (100%)
-        </Button>
+          {uiText("resetToDefault100_b566")}</Button>
         <span>{UI_SCALE_MAX}%</span>
       </div>
     </div>

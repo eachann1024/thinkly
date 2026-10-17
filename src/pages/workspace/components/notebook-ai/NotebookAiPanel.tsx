@@ -14,6 +14,15 @@ import { usePanelCommands } from "./panel/usePanelCommands";
 import { usePanelHeader } from "./panel/usePanelHeader";
 import { NotebookAiPanelBody } from "./panel/NotebookAiPanelBody";
 import { usePanelWorkspaceDrag } from "./panel/usePanelWorkspaceDrag";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/NotebookAiPanel.tsx#messages:1">`
+zh-Hans:
+  aiAssistant: "AI 助手"
+en:
+  aiAssistant: "AI assistant"
+`;
+const t = createTranslator(messages);
+
 export function NotebookAiPanel(props: NotebookAiPanelProps) {
   const {
     notebookId,
@@ -92,7 +101,7 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
         {!isFullscreen && !isElectronChrome ? (
           <header className="notebook-ai-panel-header flex h-12 shrink-0 items-center gap-2 px-3">
             <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-              AI 助手
+              {t("aiAssistant")}
             </span>
             <div className="flex shrink-0 items-center">{headerToolbar}</div>
           </header>

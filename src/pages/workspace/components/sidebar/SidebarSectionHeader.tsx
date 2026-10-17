@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarSectionHeader.tsx#localMessages:1">`
+zh-Hans:
+  collapseAllPages_a4fb: "收起全部页面"
+en:
+  collapseAllPages_a4fb: "Collapse all pages"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 interface SidebarSectionHeaderProps {
   title?: string;
@@ -39,13 +48,14 @@ export function SidebarSectionHeader({
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                  aria-label="收起全部页面"
+                  aria-label={uiText("collapseAllPages_a4fb")}
+                  data-sidebar-action="collapse-all"
                   onClick={onCollapseAll}
                 >
                   <GooseIcons.ListCollapse className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">收起全部页面</TooltipContent>
+              <TooltipContent side="bottom">{uiText("collapseAllPages_a4fb")}</TooltipContent>
             </Tooltip>
           )}
           {onCreate && (
@@ -56,6 +66,7 @@ export function SidebarSectionHeader({
                   size="icon"
                   className="h-6 w-6 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
                   aria-label={createTitle}
+                  data-sidebar-action="create"
                   onClick={onCreate}
                 >
                   <GooseIcons.Plus className="h-4 w-4" />

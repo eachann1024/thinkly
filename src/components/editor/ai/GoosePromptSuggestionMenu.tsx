@@ -10,6 +10,17 @@ import {
   useState,
 } from "react";
 import { GoosePromptActions } from "./GoosePromptActions";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/GoosePromptSuggestionMenu.tsx#messages:1">`
+zh-Hans:
+  aiRewriteInstructions: "AI 改写要求"
+  thinking: "思考中"
+en:
+  aiRewriteInstructions: "AI rewrite instructions"
+  thinking: "Thinking"
+`;
+const t = createTranslator(messages);
+
 
 export type GooseAiMenuTag = {
   key: string;
@@ -177,7 +188,7 @@ export function GoosePromptSuggestionMenu(
           ref={textareaRef}
           className="goose-ai-prompt-field__textarea bn-combobox-input"
           name="ai-prompt"
-          aria-label="AI 改写要求"
+          aria-label={t("aiRewriteInstructions")}
           rows={1}
           value={promptTextToUse || ""}
           placeholder={props.busy ? "" : props.placeholder}
@@ -206,7 +217,7 @@ export function GoosePromptSuggestionMenu(
             aria-atomic="false"
           >
             <div className="goose-ai-think-ticker__scroller">
-              {props.busyTickerText?.trim() || props.placeholder || "思考中"}
+              {props.busyTickerText?.trim() || props.placeholder || t("thinking")}
             </div>
           </div>
         ) : null}

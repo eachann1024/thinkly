@@ -1,3 +1,8 @@
+import { localizeSavedGitError } from "./i18n/savedGitErrors";
+import { isGitMessage } from "../../src/lib/git-messages";
+import { t } from "./i18n/gitSyncMessages";
+import { isDesktopMessage } from "./i18n/messages";
+import { getLocale } from "../../src/i18n/core";
 import { app, BrowserWindow, ipcMain, Notification } from "electron";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
@@ -5,7 +10,7 @@ import path from "node:path";
 import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
 import { idleGitSyncStatus as idle, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
 import { gitSchedulerTransition, gitLoadTransition, type GitSchedulerState, type GitLoadState } from "./gitSyncLifecycle";
-import { gitSyncPreparationFailure } from "../../src/lib/git-sync-preparation";
+import { gitSyncPreparationFailure, isGitPreparationMessage } from "../../src/lib/git-sync-preparation";
 import { broadcast, lookupWindowContext } from "./windows";
 import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
 import { retainGitConflicts } from "./gitSyncConflict";
@@ -28,14 +33,19 @@ let loading: GitLoadState = { phase: "unread" };
 let timer: NodeJS.Timeout | undefined;
 let loadPromise: Promise<void> | undefined;
 const configFile = () => path.join(app.getPath("userData"), "git-sync.json");
-const state = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory });
+const rawState = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory });
+const state = (): GitSyncState => {
+  const view = rawState();
+  for (const status of view.statuses) if (status.error) status.error = localizeSavedGitError(status.error);
+  return view;
+};
 const publish = () => broadcast("git-sync:state", state());
-const messageOf = (error: unknown) => error instanceof Error && /^[\u3400-\u9fff]/.test(error.message) ? error.message.slice(0, 500) : "同步操作失败，请检查文件夹、SSH 权限和网络后重试";
+const messageOf = (error: unknown) => error instanceof Error && (isDesktopMessage(error.message) || isGitMessage(error.message) || isGitPreparationMessage(error.message) || (getLocale() === "zh-Hans" && /^[\u3400-\u9fff]/.test(error.message))) ? error.message.slice(0, 500) : t("failed");
 
 function notifyFailure(id: string, message: string) {
   if (notifications.get(id) === message) return;
   notifications.set(id, message);
-  if (Notification.isSupported()) new Notification({ title: "鹅的笔记 · Git 同步异常", body: message.slice(0, 400) }).show();
+  if (Notification.isSupported()) new Notification({ title: t("notification"), body: message.slice(0, 400) }).show();
 }
 
 async function atomic(file: string, value: unknown) {
@@ -56,7 +66,7 @@ async function load() {
         await persist();
       } catch (error) {
         configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
-        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("无法读取 Git 同步配置，已停止同步以保护现有文件"), { cause: error });
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error(t("configUnreadable")), { cause: error });
       }
       // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
       await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
@@ -72,35 +82,35 @@ async function load() {
 }
 
 async function persist() {
-  await atomic(configFile(), { version: 2, ...state(), mappingHistory });
+  await atomic(configFile(), { version: 2, ...rawState(), mappingHistory });
 }
 
 function assertWorkspace(event: Electron.IpcMainInvokeEvent) {
-  if (event.senderFrame !== event.sender.mainFrame || lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") throw new Error("请从笔记工作区操作 Git 同步");
+  if (event.senderFrame !== event.sender.mainFrame || lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") throw new Error(t("workspaceOnly"));
 }
 
 function prepareWindow(win: BrowserWindow, roots: string[], requestId: string) {
   return new Promise<void>((resolve, reject) => {
     // Cold iCloud histories may need hundreds of verified file copies before locking roots.
-    const timeout = setTimeout(() => finish("整理历史或保存笔记超时，已停止同步；原文件已保留，请稍后重试"), 120_000);
+    const timeout = setTimeout(() => finish(t("saveTimeout")), 120_000);
     const finish = (error: string | null) => {
       clearTimeout(timeout); pendingReplies.delete(requestId);
       win.webContents.removeListener("destroyed", destroyed);
       if (error) reject(new Error(error)); else resolve();
     };
-    const destroyed = () => finish("工作区已关闭");
+    const destroyed = () => finish(t("windowClosed"));
     win.webContents.once("destroyed", destroyed);
     pendingReplies.set(requestId, { senderId: win.webContents.id, finish });
     try { win.webContents.send("git-sync:prepare", requestId, roots); }
-    catch { finish("工作区已关闭"); }
+    catch { finish(t("windowClosed")); }
   });
 }
 
 async function sync(repositoryId: string): Promise<GitSyncState> {
   const found = configs.get(repositoryId);
-  if (!found) throw new Error("请先保存同步配置");
+  if (!found) throw new Error(t("saveFirst"));
   const config = structuredClone(found);
-  if ([...configs.values()].some((other) => other.id !== config.id && normalizedGitRemote(other) === normalizedGitRemote(config) && other.branch === config.branch)) throw new Error("多个配置指向同一仓库分支，请先移除重复配置");
+  if ([...configs.values()].some((other) => other.id !== config.id && normalizedGitRemote(other) === normalizedGitRemote(config) && other.branch === config.branch)) throw new Error(t("duplicateConfigs"));
   statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.started" })); publish();
   const unlocks: (() => void)[] = [];
   const roots: string[] = [];
@@ -108,7 +118,7 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
   try {
     for (const folder of config.folders) { folder.localPath = await checkedRoot(folder.localPath); roots.push(folder.localPath); }
     const windows = BrowserWindow.getAllWindows().filter((win) => lookupWindowContext(win)?.kind === "workspace");
-    if (!windows.length && roots.length) throw new Error("请保持笔记工作区打开以进行同步");
+    if (!windows.length && roots.length) throw new Error(t("keepWorkspaceOpen"));
     const requests = windows.map((win) => ({ win, requestId: randomUUID() }));
     prepared.push(...requests);
     const results = await Promise.allSettled(requests.map(({ win, requestId }) => prepareWindow(win, roots, requestId)));
@@ -162,12 +172,12 @@ async function save(raw: GitRepositoryInput) {
   let input = validateGitRepository(raw);
   const previous = configs.get(input.id);
   if (previous) {
-    const manifest = await readFile(path.join(app.getPath("userData"), "git-sync-repositories", input.id, "manifest.json"), "utf8").then((value) => JSON.parse(value)).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw new Error("无法读取同步恢复记录"); });
-    if (manifest?.pending && !sameGitFolderTargets(input.folders, previous.folders)) throw new Error("上次同步尚未恢复完成，请先同步原文件夹再修改选择");
+    const manifest = await readFile(path.join(app.getPath("userData"), "git-sync-repositories", input.id, "manifest.json"), "utf8").then((value) => JSON.parse(value)).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw new Error(t("recoveryUnreadable")); });
+    if (manifest?.pending && !sameGitFolderTargets(input.folders, previous.folders)) throw new Error(t("recoveryPending"));
   }
-  if (previous && (normalizedGitRemote(input) !== normalizedGitRemote(previous) || input.branch !== previous.branch || input.layout !== previous.layout)) throw new Error("已保存仓库的地址、分支和布局不可修改；请新建配置");
-  if (!previous && input.layout === "legacy-root") throw new Error("新仓库必须使用子目录布局");
-  if ([...configs.values()].some((other) => other.id !== input.id && normalizedGitRemote(other) === normalizedGitRemote(input) && other.branch === input.branch)) throw new Error("此仓库分支已有同步配置");
+  if (previous && (normalizedGitRemote(input) !== normalizedGitRemote(previous) || input.branch !== previous.branch || input.layout !== previous.layout)) throw new Error(t("immutableRepository"));
+  if (!previous && input.layout === "legacy-root") throw new Error(t("subfolderRequired"));
+  if ([...configs.values()].some((other) => other.id !== input.id && normalizedGitRemote(other) === normalizedGitRemote(input) && other.branch === input.branch)) throw new Error(t("duplicateBranch"));
   const history = mappingHistory[input.id] ?? [];
   input = await prepareGitFolderMappings(input, previous, history, path.join(app.getPath("userData"), "git-sync-repositories"));
   input = { ...input, remoteUrl: previous?.remoteUrl ?? input.remoteUrl };
@@ -216,12 +226,12 @@ export function registerGitSyncIpc() {
   handle("git-sync:rebind", async (request) => sync(await rebindGitFolder(request, { configs, mappingHistory, storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), persist, publish })));
   handle("git-sync:conflict", async (request: { repositoryId: string; conflictId: string }) => {
     const id = validateRepositoryId(request?.repositoryId);
-    if (!configs.has(id) || typeof request.conflictId !== "string" || !/^[a-f0-9]{64}$/.test(request.conflictId)) throw new Error("冲突记录无效，请重新同步");
+    if (!configs.has(id) || typeof request.conflictId !== "string" || !/^[a-f0-9]{64}$/.test(request.conflictId)) throw new Error(t("invalidConflict"));
     return getGitConflict(id, request.conflictId);
   });
   handle("git-sync:resolve-conflict", async (request: GitConflictResolution) => {
     const id = validateRepositoryId(request?.repositoryId);
-    if (!configs.has(id)) throw new Error("同步配置已移除");
+    if (!configs.has(id)) throw new Error(t("configRemoved"));
     await resolveGitConflict(request);
     return sync(id);
   });

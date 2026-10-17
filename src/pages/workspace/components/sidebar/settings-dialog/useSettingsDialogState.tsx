@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsDialogState.tsx#localMessages:1">`
+zh-Hans:
+  iUnderstandTheRisks_438d: "我已知晓风险"
+en:
+  iUnderstandTheRisks_438d: "I understand the risks"
+`;
+const uiText = createTranslator(localMessages);
 import { useSettingsDataOperation } from "./useSettingsDataOperation";
 import { useShallow } from "zustand/react/shallow";
 import { useNotebooks, sortNotebooksByOrder } from "@/stores/useNotebooks";
@@ -126,7 +135,7 @@ export function useSettingsDialogState({
     useShallow((s) => ({ createNotebook: s.createNotebook })),
   );
 
-  const resetPhrase = "我已知晓风险";
+  const resetPhrase = uiText("iUnderstandTheRisks_438d");
 
   const canReset = resetInput.trim() === resetPhrase;
 

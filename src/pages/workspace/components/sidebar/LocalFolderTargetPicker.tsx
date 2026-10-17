@@ -1,3 +1,32 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/LocalFolderTargetPicker.tsx#localMessages:1">`
+zh-Hans:
+  importFailed_fddc: "导入失败"
+  theFileCouldNotBeParsed_8954: "文件内容无法解析为笔记。"
+  textFileImported_376b: "文本文件已导入"
+  filesImported: "已导入 {{count}} 个文件"
+  filesSkipped: "{{count}} 个文件导入失败，已跳过"
+  searchOtherNotebooks_c47c: "搜索其他笔记本…"
+  searchFoldersOrPaths_40c6: "搜索文件夹或路径…"
+  noOtherNotebooksAvailable_35ba: "没有可移动的其他笔记本"
+  noMatchingFolders_6b46: "没有匹配的文件夹"
+  moveTo_86ed: "移动到"
+  importTo_5a85: "导入到"
+en:
+  importFailed_fddc: "Import failed"
+  theFileCouldNotBeParsed_8954: "The file could not be parsed as a note."
+  textFileImported_376b: "Text file imported"
+  filesImported: "Files imported: {{count}}"
+  filesSkipped: "Files skipped after import errors: {{count}}"
+  searchOtherNotebooks_c47c: "Search other notebooks…"
+  searchFoldersOrPaths_40c6: "Search folders or paths…"
+  noOtherNotebooksAvailable_35ba: "No other notebooks available"
+  noMatchingFolders_6b46: "No matching folders"
+  moveTo_86ed: "Move to"
+  importTo_5a85: "Import to"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -89,8 +118,8 @@ export function LocalFolderTargetPicker() {
 
     const firstPageId = importedIds[0];
     if (!firstPageId) {
-      toast.error("导入失败", {
-        description: "文件内容无法解析为笔记。",
+      toast.error(uiText("importFailed_fddc"), {
+        description: uiText("theFileCouldNotBeParsed_8954"),
       });
       return;
     }
@@ -106,10 +135,10 @@ export function LocalFolderTargetPicker() {
 
     const successCount = importedIds.length;
     toast.success(
-      successCount === 1 ? "文本文件已导入" : `已导入 ${successCount} 个文件`,
+      successCount === 1 ? uiText("textFileImported_376b") : uiText("filesImported", { count: successCount }),
       {
         description:
-          failedCount > 0 ? `${failedCount} 个文件导入失败，已跳过` : undefined,
+          failedCount > 0 ? uiText("filesSkipped", { count: failedCount }) : undefined,
       },
     );
   };
@@ -124,14 +153,14 @@ export function LocalFolderTargetPicker() {
         ref={inputRef}
         value={query}
         onValueChange={setQuery}
-        placeholder={mode === "move" ? "搜索其他记事本…" : "搜索文件夹或路径…"}
+        placeholder={mode === "move" ? uiText("searchOtherNotebooks_c47c") : uiText("searchFoldersOrPaths_40c6")}
       />
       <CommandList>
         <CommandEmpty>
-          {mode === "move" ? "没有可移动的其他记事本" : "没有匹配的文件夹"}
+          {mode === "move" ? uiText("noOtherNotebooksAvailable_35ba") : uiText("noMatchingFolders_6b46")}
         </CommandEmpty>
         {mode === "move" ? (
-          <CommandGroup heading="移动到">
+          <CommandGroup heading={uiText("moveTo_86ed")}>
             {moveTargets.map((notebook) => (
               <CommandItem
                 key={notebook.id}
@@ -148,7 +177,7 @@ export function LocalFolderTargetPicker() {
             ))}
           </CommandGroup>
         ) : (
-          <CommandGroup heading="导入到">
+          <CommandGroup heading={uiText("importTo_5a85")}>
             {items.map((item) => (
               <CommandItem
                 key={item.key}

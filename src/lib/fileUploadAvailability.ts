@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/fileUploadAvailability.ts#localMessages:1">`
+zh-Hans:
+  openALocalFolderNotebookBeforeInsertingAttachments: "请先打开本地文件夹笔记本，再插入附件"
+en:
+  openALocalFolderNotebookBeforeInsertingAttachments: "Open a local folder notebook before inserting attachments"
+`;
+const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 
@@ -22,7 +31,7 @@ export function getFileUploadAvailability(): {
     if (!activePage?.localFilePath) {
       return {
         enabled: false,
-        reason: "请先打开文件夹仓库，再插入附件",
+        reason: uiText("openALocalFolderNotebookBeforeInsertingAttachments"),
       };
     }
     return { enabled: true };

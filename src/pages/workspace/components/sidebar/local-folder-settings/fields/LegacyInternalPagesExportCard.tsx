@@ -1,3 +1,32 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/LegacyInternalPagesExportCard.tsx#localMessages:1">`
+zh-Hans:
+  openALocalFolderFirst_f657: "请先打开本地文件夹"
+  switchToTheDestinationFolderBefore_69bc: "请切换到目标文件夹后再执行数据导出。"
+  untitled_44a7: "无标题"
+  legacyNotesExported: "已导出 {{count}} 篇早期内置笔记"
+  exportDestination: "文件已写入 {{path}}；原始数据已完整保留。"
+  exportFailedPleaseTryAgain_28ce: "导出失败，请重试"
+  legacyDataMigration_20ff: "旧数据迁移"
+  exportAsMarkdownToTheCurrent_f443: "导出为 Markdown 到当前文件夹，原始笔记会保留。"
+  exporting_86f9: "导出中…"
+  exportToCurrentFolder_958f: "导出到当前文件夹"
+  legacyFound: "检测到早期内置笔记 ({{count}} 篇)"
+en:
+  openALocalFolderFirst_f657: "Open a local folder first"
+  switchToTheDestinationFolderBefore_69bc: "Switch to the destination folder before exporting."
+  untitled_44a7: "Untitled"
+  legacyNotesExported: "Legacy built-in notes exported: {{count}}"
+  exportDestination: "Files saved to {{path}}. All original data has been kept."
+  exportFailedPleaseTryAgain_28ce: "Export failed. Please try again."
+  legacyDataMigration_20ff: "Legacy data migration"
+  exportAsMarkdownToTheCurrent_f443: "Export as Markdown to the current folder. The original notes are kept."
+  exporting_86f9: "Exporting…"
+  exportToCurrentFolder_958f: "Export to current folder"
+  legacyFound: "Legacy built-in notes found: {{count}}"
+`;
+const uiText = createTranslator(localMessages);
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SettingsSectionCard } from "../../settings/SettingsSectionCard";
@@ -39,8 +68,8 @@ function LegacyInternalPagesExportCard() {
       !activeNotebook.localPath ||
       !window.gooseFs
     ) {
-      toast.error("请先打开本地文件夹", {
-        description: "请切换到目标文件夹后再执行数据导出。",
+      toast.error(uiText("openALocalFolderFirst_f657"), {
+        description: uiText("switchToTheDestinationFolderBefore_69bc"),
       });
       return;
     }
@@ -55,7 +84,7 @@ function LegacyInternalPagesExportCard() {
 
       let exported = 0;
       for (const page of legacyPages) {
-        const title = (getPageTitle(page) || "无标题")
+        const title = (getPageTitle(page) || uiText("untitled_44a7"))
           .trim()
           .replace(/[\\/:*?"<>|]/g, "_");
         const markdown = await blocksToMarkdown(page.content as never);
@@ -75,15 +104,15 @@ function LegacyInternalPagesExportCard() {
         if (ok) exported += 1;
       }
 
-      toast.success(`已导出 ${exported} 篇早期内置笔记`, {
-        description: `文件已写入 ${basePath}；原始数据已完整保留。`,
+      toast.success(uiText("legacyNotesExported", { count: exported }), {
+        description: uiText("exportDestination", { path: basePath }),
       });
       await usePages
         .getState()
         .loadLocalFolderPages(activeNotebook.id, activeNotebook.localPath);
     } catch (error) {
       console.error("[settings] 导出旧内置笔记失败", error);
-      toast.error("导出失败，请重试");
+      toast.error(uiText("exportFailedPleaseTryAgain_28ce"));
     } finally {
       setExporting(false);
       setLegacyCount(listLegacyInternalPages().length);
@@ -91,15 +120,14 @@ function LegacyInternalPagesExportCard() {
   };
 
   return (
-    <SettingsSectionCard title="旧数据迁移">
+    <SettingsSectionCard title={uiText("legacyDataMigration_20ff")}>
       <div className="flex items-start justify-between gap-4 goose-settings-option-row px-4 py-3">
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-medium text-foreground">
-            检测到早期内置笔记 ({legacyCount} 篇)
+            {uiText("legacyFound", { count: legacyCount })}
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            导出为 Markdown 到当前文件夹，原始笔记会保留。
-          </p>
+            {uiText("exportAsMarkdownToTheCurrent_f443")}</p>
         </div>
         <Button
           variant="outline"
@@ -108,7 +136,7 @@ function LegacyInternalPagesExportCard() {
           onClick={() => void handleExport()}
           className="shrink-0"
         >
-          {exporting ? "导出中…" : "导出到当前文件夹"}
+          {exporting ? uiText("exporting_86f9") : uiText("exportToCurrentFolder_958f")}
         </Button>
       </div>
     </SettingsSectionCard>

@@ -1,4 +1,17 @@
 import { cn } from "@/lib/utils";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/AiPanelResizeEdge.tsx#messages:1">`
+zh-Hans:
+  resizeAiPanelLeftAndRightArrowsHome: "调整 AI 面板宽度：左右方向键；Home 最窄，End 最宽"
+  resizeAiPanel: "调整 AI 面板宽度"
+  detailPixels: "{{value1}} 像素"
+en:
+  resizeAiPanelLeftAndRightArrowsHome: "Resize AI panel: Left and Right arrows; Home for minimum, End for maximum"
+  resizeAiPanel: "Resize AI panel"
+  detailPixels: "{{value1}} pixels"
+`;
+const t = createTranslator(messages);
+
 
 interface AiPanelResizeEdgeProps {
   isResizing: boolean;
@@ -25,12 +38,12 @@ export function AiPanelResizeEdge({
       aria-valuemin={Math.min(320, maxWidth)}
       aria-valuemax={maxWidth}
       aria-valuenow={width}
-      aria-valuetext={`${Math.round(width)} 像素`}
-      title="调整 AI 面板宽度：左右方向键；Home 最窄，End 最宽"
+      aria-valuetext={t("detailPixels", { value1: Math.round(width) })}
+      title={t("resizeAiPanelLeftAndRightArrowsHome")}
       onPointerDown={onPointerDown}
       role="separator"
       aria-orientation="vertical"
-      aria-label="调整 AI 面板宽度"
+      aria-label={t("resizeAiPanel")}
     >
       <div
         className={cn(

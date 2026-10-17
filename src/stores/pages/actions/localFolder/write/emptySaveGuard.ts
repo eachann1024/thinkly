@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/emptySaveGuard.ts#block1:1">`
+zh-Hans:
+  serializeBlocked: "笔记内容未能完整序列化，已阻止保存，原文件未更改。"
+  readBlocked: "此文件读取或解析失败，已阻止保存，请重新载入后重试。"
+  emptyReadBlocked: "无法读取磁盘原文，已阻止清空保存，请重新载入后重试。"
+  emptyPathChanged: "页面或保存路径已变化，本次清空未写入磁盘，请重试。"
+  emptyExternalConflict: "磁盘原文已被外部修改，已阻止清空。请先处理文件冲突。"
+  emptyNewerContent: "页面已有更新内容，本次清空未写入磁盘，请重新保存。"
+  emptyRecoveryFailed: "无法读取编辑恢复记录，已阻止清空原文件，请重试。"
+  emptyUnconfirmed: "尚未确认本次清空编辑，已保留磁盘原文。请重新编辑后保存。"
+en:
+  serializeBlocked: "The note content couldn’t be fully serialized. Saving was blocked and the original file is unchanged."
+  readBlocked: "The file couldn’t be read or parsed. Saving was blocked. Reload and try again."
+  emptyReadBlocked: "The original content on disk couldn’t be read. Saving an empty note was blocked. Reload and try again."
+  emptyPathChanged: "The page or save path has changed. The empty content was not written to disk. Please try again."
+  emptyExternalConflict: "The file on disk was changed externally. Saving an empty note was blocked. Resolve the file conflict first."
+  emptyNewerContent: "The page has newer content. The empty content was not written to disk. Save again."
+  emptyRecoveryFailed: "The recovery record couldn’t be read. Clearing the original file was blocked. Please try again."
+  emptyUnconfirmed: "Clearing this note hasn’t been confirmed. The original content on disk was preserved. Edit and save again."
+`);
 import type { JSONContent, Page } from "@/types";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { DiskWriteError } from "@/lib/diskWriteError";
@@ -39,13 +60,13 @@ export function assertEmptySerializationIsExpected(
   sourceIsEmpty: boolean, processedContent: unknown, markdown: string, filePath: string,
 ): void {
   if (!markdown.trim() && (!sourceIsEmpty || !isEmptyParagraphDocument(processedContent))) {
-    throw new DiskWriteError("笔记内容未能完整序列化，已阻止保存，原文件未更改。", { path: filePath });
+    throw new DiskWriteError(storeText("serializeBlocked"), { path: filePath });
   }
 }
 
 export function assertLocalPageReadable(page: Page | undefined, filePath: string): void {
   if (page?.localReadState === "error") {
-    throw new DiskWriteError("此文件读取或解析失败，已阻止保存，请重新载入后重试。", { path: filePath });
+    throw new DiskWriteError(storeText("readBlocked"), { path: filePath });
   }
 }
 
@@ -67,7 +88,7 @@ export async function prepareEmptyLocalWrite(
       oldContent = read;
     }
   } catch (cause) {
-    throw new DiskWriteError("无法读取磁盘原文，已阻止清空保存，请重新载入后重试。", { path: filePath, cause });
+    throw new DiskWriteError(storeText("emptyReadBlocked"), { path: filePath, cause });
   }
 
   return () => {
@@ -75,19 +96,19 @@ export async function prepareEmptyLocalWrite(
     assertLocalPageReadable(latest, filePath);
     if (!latest || latest.workspaceId !== page.workspaceId ||
       get().getLocalFilePath(page.id) !== filePath) {
-      throw new DiskWriteError("页面或保存路径已变化，本次清空未写入磁盘，请重试。", { path: filePath });
+      throw new DiskWriteError(storeText("emptyPathChanged"), { path: filePath });
     }
     if (!force && !isDiskContentMatchingSnapshot(filePath, oldContent)) {
       window.dispatchEvent(new CustomEvent("goose-note:local-file-conflict", {
         detail: { pageId: page.id, filePath, source: "pre-write" },
       }));
-      throw new DiskWriteError("磁盘原文已被外部修改，已阻止清空。请先处理文件冲突。", { path: filePath });
+      throw new DiskWriteError(storeText("emptyExternalConflict"), { path: filePath });
     }
     const signature = getContentSignature(cloneLocalPageContent(content));
     if (signature === "__goose-note-unserializable-content__" ||
       !isEmptyParagraphDocument(latest.content) ||
       getContentSignature(cloneLocalPageContent(latest.content)) !== signature) {
-      throw new DiskWriteError("页面已有更新内容，本次清空未写入磁盘，请重新保存。", { path: filePath });
+      throw new DiskWriteError(storeText("emptyNewerContent"), { path: filePath });
     }
     if (!extractFrontmatter(oldContent).body.trim()) return;
 
@@ -98,10 +119,10 @@ export async function prepareEmptyLocalWrite(
         Boolean(entry && isEmptyParagraphDocument(entry.content) &&
           getContentSignature(cloneLocalPageContent(entry.content)) === signature);
     } catch (cause) {
-      throw new DiskWriteError("无法读取编辑恢复记录，已阻止清空原文件，请重试。", { path: filePath, cause });
+      throw new DiskWriteError(storeText("emptyRecoveryFailed"), { path: filePath, cause });
     }
     if (!confirmed) {
-      throw new DiskWriteError("尚未确认本次清空编辑，已保留磁盘原文。请重新编辑后保存。", { path: filePath });
+      throw new DiskWriteError(storeText("emptyUnconfirmed"), { path: filePath });
     }
   };
 }

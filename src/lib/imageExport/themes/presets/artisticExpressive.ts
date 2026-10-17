@@ -1,3 +1,36 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/artisticExpressive.ts#localMessages:1">`
+zh-Hans:
+  journalNotes: "手账便签"
+  warmHandwritingWithAPersonalTouch: "温暖手写，生活气息"
+  handwritten: "手写"
+  cozy: "温馨"
+  mochaMousse: "摩卡慕斯"
+  warmEarthyBrownsInspiredByTheColorOfThe: "暖棕大地色，2025 年度风"
+  light: "浅色"
+  warm: "温暖"
+  boldPrint: "野性印刷"
+  boldTypeSharpEdgesAndSolidShadows: "硬边大字 + 实心投影，叛逆派"
+  unconventional: "特立独行"
+  risographTextureWithFluorescentInkColors: "孔版印刷，荧光油墨手感"
+  print: "印刷"
+en:
+  journalNotes: "Journal Notes"
+  warmHandwritingWithAPersonalTouch: "Warm handwriting with a personal touch"
+  handwritten: "Handwritten"
+  cozy: "Cozy"
+  mochaMousse: "Mocha Mousse"
+  warmEarthyBrownsInspiredByTheColorOfThe: "Warm earthy browns inspired by the 2025 color of the year"
+  light: "Light"
+  warm: "Warm"
+  boldPrint: "Bold Print"
+  boldTypeSharpEdgesAndSolidShadows: "Bold type, sharp edges, and solid shadows"
+  unconventional: "Unconventional"
+  risographTextureWithFluorescentInkColors: "Risograph texture with fluorescent ink colors"
+  print: "Print"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
@@ -5,10 +38,10 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 8. Stationery ────────────────────────────────────────────
   {
     id: "stationery",
-    name: "手账便签",
+    name: uiText("journalNotes"),
     nameEn: "Stationery",
-    description: "温暖手写，生活气息",
-    tags: ["手写", "温馨"],
+    description: uiText("warmHandwritingWithAPersonalTouch"),
+    tags: [uiText("handwritten"), uiText("cozy")],
     mode: "light",
     titleFont: "'Ma Shan Zheng', 'ZCOOL XiaoWei', 'Noto Sans SC', 'PingFang SC', sans-serif",
     bodyFont: "'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
@@ -47,10 +80,10 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 17. Mocha Mousse (Pantone-inspired) ──────────────────────
   {
     id: "mocha-mousse",
-    name: "摩卡慕斯",
+    name: uiText("mochaMousse"),
     nameEn: "Mocha Mousse",
-    description: "暖棕大地色，2025 年度风",
-    tags: ["浅色", "温暖"],
+    description: uiText("warmEarthyBrownsInspiredByTheColorOfThe"),
+    tags: [uiText("light"), uiText("warm")],
     mode: "light",
     titleFont: "'Fraunces', 'Noto Serif SC', Georgia, serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -89,10 +122,10 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
   // ── 19. Brutalist ────────────────────────────────────────────
   {
     id: "brutalist",
-    name: "野性印刷",
+    name: uiText("boldPrint"),
     nameEn: "Brutalist",
-    description: "硬边大字 + 实心投影，叛逆派",
-    tags: ["浅色", "特立独行"],
+    description: uiText("boldTypeSharpEdgesAndSolidShadows"),
+    tags: [uiText("light"), uiText("unconventional")],
     mode: "light",
     titleFont: "'Space Grotesk', 'Inter', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -134,8 +167,8 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     id: "risograph",
     name: "Risograph",
     nameEn: "Risograph",
-    description: "孔版印刷，荧光油墨手感",
-    tags: ["浅色", "印刷"],
+    description: uiText("risographTextureWithFluorescentInkColors"),
+    tags: [uiText("light"), uiText("print")],
     mode: "light",
     titleFont: "'Fraunces', 'Noto Serif SC', Georgia, serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",

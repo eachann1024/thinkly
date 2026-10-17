@@ -11,6 +11,15 @@ import {
 import { useCenteredActiveItemScroll } from "@/components/editor/hooks/useCenteredActiveItemScroll";
 import { cn } from "@/lib/utils";
 import { useComposerSuggestionsPosition } from "./useComposerSuggestionsPosition";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/SkillSuggestionsList.tsx#messages:1">`
+zh-Hans:
+  noMatchingCommandsOrSkills: "没有匹配的指令或 Skill"
+en:
+  noMatchingCommandsOrSkills: "No matching commands or skills"
+`;
+const t = createTranslator(messages);
+
 
 const getSkillItemSelector = (index: number) => `[data-skill-index="${index}"]`;
 
@@ -59,7 +68,7 @@ export function SkillSuggestionsList(props: {
       >
         {props.items.length === 0 ? (
           <div className="px-3 py-2 text-[12px] text-muted-foreground">
-            没有匹配的指令或 Skill
+            {t("noMatchingCommandsOrSkills")}
           </div>
         ) : (
           props.items.map((item, index) => {

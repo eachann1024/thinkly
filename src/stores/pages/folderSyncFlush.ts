@@ -1,3 +1,12 @@
+import { createTranslator as extraTranslator, i18nYaml } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/folderSyncFlush.ts#block1:1">`
+zh-Hans:
+  saveIncomplete: "本地页面保存未完成：{{id}}"
+  recoveryIncomplete: "本地页面恢复日志确认未完成：{{id}}"
+en:
+  saveIncomplete: "The local page has not finished saving: {{id}}"
+  recoveryIncomplete: "The local page’s recovery log has not been acknowledged: {{id}}"
+`);
 import type { PagesState } from "./types";
 import { acknowledgeRecoveryEntry } from "@/lib/storage/recoveryJournal";
 import { getLocalSavePageState, localSavePageIds, transitionLocalSave } from "./folderSyncRegistry";
@@ -16,7 +25,7 @@ export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: 
       const attempt = started.write.attempt;
       try {
         const saved = await getState().saveLocalPageContent(pageId, cloneJSONContent(attempt.content));
-        if (!saved) throw new Error(`本地页面保存未完成：${pageId}`);
+        if (!saved) throw new Error(extraText("saveIncomplete", { id: pageId }));
         const confirmationRequired = getLocalSavePageState(pageId).permission.status === "confirmation-required";
         const acknowledged = !confirmationRequired && attempt.revision !== null && acknowledgeRecoveryEntry("local-file", pageId, attempt.revision);
         transitionLocalSave(pageId, { type: "write-succeeded", attemptId, acknowledgedRevision: acknowledged ? attempt.revision : null });
@@ -30,7 +39,7 @@ export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: 
     // A recovered draft introduced while an earlier write was in flight stays unconfirmed.
     if (current.permission.status === "confirmation-required" || current.pending.status !== "empty" || current.recovery.status === "none") return;
     const revision = current.recovery.revision;
-    if (!acknowledgeRecoveryEntry("local-file", pageId, revision)) throw new Error(`本地页面恢复日志确认未完成：${pageId}`);
+    if (!acknowledgeRecoveryEntry("local-file", pageId, revision)) throw new Error(extraText("recoveryIncomplete", { id: pageId }));
     transitionLocalSave(pageId, { type: "acknowledged", revision });
   });
   const finalized = next.finally(() => {

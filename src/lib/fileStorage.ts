@@ -1,3 +1,25 @@
+import { formatDecimal, formatNumber } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/fileStorage.ts#localMessages:1">`
+zh-Hans:
+  fileTooLarge: "文件超过 {{limit}}MB 上限（当前 {{size}}）"
+  emptyFilesCanTBeUploaded: "不能上传空文件"
+  openALocalFolderNotebookBeforeInsertingAttachments: "请先打开本地文件夹笔记本，再插入附件"
+  localFileServicesArenTReadyTheAttachmentCouldn: "本地文件服务未就绪，无法保存附件"
+  theAttachmentPathIsOutsideTheNotebookFolder: "附件保存路径超出笔记本目录"
+  couldnTCreateTheAttachmentsFolder: "附件资源目录创建失败"
+  couldnTSaveTheAttachmentToTheLocalFolder: "附件写入本地文件夹失败"
+en:
+  fileTooLarge: "The file exceeds the {{limit}} MB limit ({{size}})"
+  emptyFilesCanTBeUploaded: "Empty files can’t be uploaded"
+  openALocalFolderNotebookBeforeInsertingAttachments: "Open a local folder notebook before inserting attachments"
+  localFileServicesArenTReadyTheAttachmentCouldn: "Local file services aren’t ready. The attachment couldn’t be saved."
+  theAttachmentPathIsOutsideTheNotebookFolder: "The attachment path is outside the notebook folder"
+  couldnTCreateTheAttachmentsFolder: "Couldn’t create the attachments folder"
+  couldnTSaveTheAttachmentToTheLocalFolder: "Couldn’t save the attachment to the local folder"
+`;
+const uiText = createTranslator(localMessages);
 import { HostAdapter } from "@/lib/host/adapter";
 import { fs } from "@/lib/electron-platform/fs";
 import {
@@ -53,9 +75,9 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
 
 export function formatAttachmentSize(size: number): string {
   if (!Number.isFinite(size) || size < 0) return "--";
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(size >= 10 * 1024 ? 0 : 1)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(size >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
+  if (size < 1024) return `${formatNumber(size)} B`;
+  if (size < 1024 * 1024) return `${formatDecimal(size / 1024, size >= 10 * 1024 ? 0 : 1)} KB`;
+  return `${formatDecimal(size / (1024 * 1024), size >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
 }
 
 export function getAttachmentBadgeLabel(fileName: string, mimeType: string): string {
@@ -78,13 +100,13 @@ function isLocalFileStorageRef(storageRef: string): boolean {
 export const fileStorage = {
   async save(file: File): Promise<FileAttachmentAttrs> {
     if (file.size === 0) {
-      throw new Error("不能上传空文件");
+      throw new Error(uiText("emptyFilesCanTBeUploaded"));
     }
 
     const maxSize = getMaxFileAttachmentSize();
     if (file.size > maxSize) {
       throw new Error(
-        `文件超过 ${Math.floor(maxSize / (1024 * 1024))}MB 上限（当前 ${formatAttachmentSize(file.size)}）`,
+        uiText("fileTooLarge", {limit: Math.floor(maxSize / (1024 * 1024)), size: formatAttachmentSize(file.size)}),
       );
     }
 
@@ -93,11 +115,11 @@ export const fileStorage = {
 
     // Electron 仅本地文件夹模式：无仓库（当前页非本地文件）时禁止附件写入内置 db
     if (!localPagePath) {
-      throw new Error("请先打开文件夹仓库，再插入附件");
+      throw new Error(uiText("openALocalFolderNotebookBeforeInsertingAttachments"));
     }
 
     if (!fs.isAvailable()) {
-      throw new Error("本地文件服务未就绪，无法保存附件");
+      throw new Error(uiText("localFileServicesArenTReadyTheAttachmentCouldn"));
     }
 
     const assetsDirectory = `${pageDirectory(localPagePath)}/assets`;
@@ -106,14 +128,14 @@ export const fileStorage = {
     const fullPath = `${assetsDirectory}/${filename}`;
     const notebookRoot = await currentLocalNotebookRoot();
     if (notebookRoot && !isPathInsideNotebookRoot(fullPath, notebookRoot)) {
-      throw new Error("附件保存路径超出笔记本目录");
+      throw new Error(uiText("theAttachmentPathIsOutsideTheNotebookFolder"));
     }
 
     if (
       !(await fs.existsAsync(assetsDirectory)) &&
       !(await fs.mkdir(assetsDirectory))
     ) {
-      throw new Error("附件资源目录创建失败");
+      throw new Error(uiText("couldnTCreateTheAttachmentsFolder"));
     }
 
     const buffer = new Uint8Array(await file.arrayBuffer());
@@ -123,7 +145,7 @@ export const fileStorage = {
       "base64",
     );
     if (!saved) {
-      throw new Error("附件写入本地文件夹失败");
+      throw new Error(uiText("couldnTSaveTheAttachmentToTheLocalFolder"));
     }
 
     return {

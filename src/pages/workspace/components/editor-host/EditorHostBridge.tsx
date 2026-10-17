@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1">`
+zh-Hans:
+  thisNoteIsInTrash: "这篇笔记已在回收站"
+  noteNotFound: "找不到这篇笔记"
+en:
+  thisNoteIsInTrash: "This note is in Trash"
+  noteNotFound: "Note not found"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * EditorHostBridge —— 宿主（Electron app）把应用 store 桥接成编辑器内核所需的注入对象。
  *
@@ -154,7 +165,7 @@ export function EditorHostBridge({
         );
         if (!resolved.ok) {
           toast.error(
-            resolved.reason === "trashed" ? "这篇笔记已在回收站" : "找不到这篇笔记",
+            resolved.reason === "trashed" ? uiText("thisNoteIsInTrash") : uiText("noteNotFound"),
           );
           return false;
         }

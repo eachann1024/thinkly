@@ -1,3 +1,4 @@
+import { t } from "./i18n/nativeServices";
 import { assertGitSyncWritable } from "./gitSyncLock";
 import { randomUUID } from "node:crypto";
 import { constants } from "node:fs";
@@ -49,8 +50,8 @@ export async function trashWithUndo(
 
 export async function undoTrash(token: string): Promise<string> {
   const item = pending.get(token);
-  if (!item) throw new Error("撤回已过期，请从系统废纸篓恢复");
-  if (item.status === "restoring") throw new Error("正在撤回此文件，请稍候");
+  if (!item) throw new Error(t(process.platform === "win32" ? "undoExpiredRecycle" : "undoExpiredTrash"));
+  if (item.status === "restoring") throw new Error(t("undoBusy"));
   const { original, backup, timer } = item;
   assertGitSyncWritable(original);
   transition(token, { type: "restore" });
@@ -59,7 +60,7 @@ export async function undoTrash(token: string): Promise<string> {
   try {
     try {
       await lstat(original);
-      throw new Error("原位置已有同名文件，未覆盖；请先处理冲突");
+      throw new Error(t("undoConflict"));
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }

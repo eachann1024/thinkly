@@ -1,3 +1,15 @@
+import { formatDecimal } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageMaterialization.ts#localMessages:1">`
+zh-Hans:
+  unknownImageFormat: "无法识别的图片格式（{{type}}，{{size}}MB）"
+  theClipboardImageIsEmptyCopyItAgainBefore: "剪贴板图片为空，请重新复制后再粘贴"
+en:
+  unknownImageFormat: "Unrecognized image format ({{type}}, {{size}} MB)"
+  theClipboardImageIsEmptyCopyItAgainBefore: "The clipboard image is empty. Copy it again before pasting."
+`;
+const uiText = createTranslator(localMessages);
 export const WEBP_MIME = "image/webp";
 export const PNG_MIME = "image/png";
 export const SVG_MIME = "image/svg+xml";
@@ -85,7 +97,7 @@ export async function materializeImageBlob(
 ): Promise<Blob> {
   const buffer = await input.arrayBuffer();
   if (buffer.byteLength === 0) {
-    throw new Error("剪贴板图片为空，请重新复制后再粘贴");
+    throw new Error(uiText("theClipboardImageIsEmptyCopyItAgainBefore"));
   }
 
   const bytes = new Uint8Array(buffer);
@@ -103,7 +115,7 @@ export async function materializeImageBlob(
   const detected = detectRasterMime(bytes, declared);
   if (!detected) {
     throw new Error(
-      `无法识别的图片格式（${declared || "unknown"}，${(buffer.byteLength / (1024 * 1024)).toFixed(1)}MB）`,
+      uiText("unknownImageFormat", {type: declared || 'unknown', size: formatDecimal(buffer.byteLength / (1024 * 1024), 1)}),
     );
   }
 

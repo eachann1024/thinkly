@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx#localMessages:1">`
+zh-Hans:
+  settings_e366: "设置"
+  settingsCategories_2590: "设置分类"
+  closeSettings_c252: "关闭设置"
+en:
+  settings_e366: "Settings"
+  settingsCategories_2590: "Settings categories"
+  closeSettings_c252: "Close settings"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -81,10 +94,10 @@ export function SettingsScaffold({
             aria-hidden={!visible}
           >
             <div className="flex shrink-0 items-center px-2 pb-4">
-              <h1 className="text-xl font-semibold">设置</h1>
+              <h1 className="text-xl font-semibold">{uiText("settings_e366")}</h1>
             </div>
             <nav
-              aria-label="设置分类"
+              aria-label={uiText("settingsCategories_2590")}
               className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
             >
               {tabs.map((tab) => {
@@ -120,11 +133,11 @@ export function SettingsScaffold({
             data-settings=""
             data-settings-tab={activeTab}
           >
-            <nav className="settings-compact-navigation" aria-label="设置分类">
-              <span className="text-sm font-medium">设置</span>
+            <nav className="settings-compact-navigation" aria-label={uiText("settingsCategories_2590")}>
+              <span className="text-sm font-medium">{uiText("settings_e366")}</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button ref={compactNavigationRef} variant="outline" size="sm" aria-label="设置分类" className="min-w-0 flex-1 justify-between">
+                  <Button ref={compactNavigationRef} variant="outline" size="sm" aria-label={uiText("settingsCategories_2590")} className="min-w-0 flex-1 justify-between">
                     <span className="truncate">{tabs.find((tab) => tab.id === activeTab)?.label}</span>
                     <ChevronDown aria-hidden="true" className="size-4" />
                   </Button>
@@ -139,7 +152,7 @@ export function SettingsScaffold({
             <IconButton size="xs"
               type="button"
               className="p-0 settings-close absolute right-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-              aria-label="关闭设置"
+              aria-label={uiText("closeSettings_c252")}
               onClick={onClose}
             >
               <X className="h-4 w-4" />

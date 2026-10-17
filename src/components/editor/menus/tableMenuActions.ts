@@ -1,6 +1,15 @@
 import { getNodeById, type PartialTableContent } from "@blocknote/core";
 import type { Command, EditorState } from "prosemirror-state";
 import { addColumn, addRow, TableMap } from "prosemirror-tables";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/tableMenuActions.ts#messages:1">`
+zh-Hans:
+  rowsAndColumnsWithMergedCellsCannotBe: "含合并单元格，暂不支持复制行列"
+en:
+  rowsAndColumnsWithMergedCellsCannotBe: "Rows and columns with merged cells cannot be duplicated yet"
+`;
+const t = createTranslator(messages);
+
 
 type Axis = "row" | "column";
 type Content = PartialTableContent<any, any>;
@@ -25,7 +34,7 @@ export function duplicateTableDimension(
 ): Content {
   // ponytail: merged tables are disabled in the menu; upgrade with span-aware duplication.
   if (hasMergedTableCells(content))
-    throw new Error("含合并单元格，暂不支持复制行列");
+    throw new Error(t("rowsAndColumnsWithMergedCellsCannotBe"));
   const count =
     axis === "row" ? content.rows.length : (content.rows[0]?.cells.length ?? 0);
   if (!Number.isInteger(index) || index < 0 || index >= count)

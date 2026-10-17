@@ -8,6 +8,10 @@ import {
   serializeBlocksToMarkdown,
   parseMarkdownToBlocks,
 } from "./inlineMarkdownCodec";
+import messages from "./inlineMarkdownApply.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 export {
   serializeBlocksToMarkdown,
   parseMarkdownToBlocks,
@@ -94,7 +98,7 @@ export function snapshotBlocks(
     foundIds.push(id);
   }
   if (blocks.length === 0) {
-    throw new Error("目标块已不在文档中，无法替换。请重新选中后再试。");
+    throw new Error(t("theTargetBlockIsNoLongerInThe"));
   }
   return { blocks, sourceBlockIds: foundIds };
 }
@@ -142,7 +146,7 @@ export function serializeInlineEditTarget(
   const cursorId =
     cursorBlock && typeof cursorBlock.id === "string" ? cursorBlock.id : "";
   if (!cursorId) {
-    throw new Error("无法定位当前编辑块，请将光标放入正文后再试。");
+    throw new Error(t("theCurrentBlockCouldNotBeLocatedPlace"));
   }
   const live =
     typeof editor.getBlock === "function"
@@ -184,14 +188,14 @@ export function applyMarkdownToInlineTarget(
   if (sourceBlockIds.length === 0) {
     throw new Error(
       requestedIds.length === 0
-        ? "缺少要替换的目标块。"
-        : "目标块已不在文档中，无法替换。请重新选中后再试。",
+        ? t("noTargetBlockWasProvidedForReplacement")
+        : t("theTargetBlockIsNoLongerInThe"),
     );
   }
 
   const normalized = normalizeAiMarkdown(newMarkdown ?? "").trim();
   if (!normalized) {
-    throw new Error("AI 未返回可写入的内容。");
+    throw new Error(t("aiDidNotReturnAnyContentThatCould"));
   }
 
   const parsed = parseMarkdownToBlocks(editor, normalized);
@@ -204,7 +208,7 @@ export function applyMarkdownToInlineTarget(
     inheritPresentationFromSource(sourceBlocks, parsed),
   );
   if (replacementBlocks.length === 0) {
-    throw new Error("AI 返回的内容无法解析为有效块。");
+    throw new Error(t("theAiResponseCouldNotBeParsedInto"));
   }
 
   // 记录源块在文档中的锚点，便于事后收集新块 id

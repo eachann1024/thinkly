@@ -1,3 +1,4 @@
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { useRef, useReducer } from "react";
 import { Loader2, RotateCcw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,10 @@ import { planReviewState, reviewOutput } from "./reviewState";
 import { requestPlanRefinement } from "./refinePlan";
 import "./plan-review.css";
 import { reviewActionReducer } from "./reviewActionState";
+import messages from "./ReviewActions.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 
 export function ReviewActions({
   part,
@@ -55,23 +60,23 @@ export function ReviewActions({
   const status: WorkCardStatusData =
     submitting || review.phase === "executing"
       ? {
-          label: submitting && !approving ? "正在取消" : "正在应用",
+          label: submitting && !approving ? t("canceling") : t("applying"),
           icon: "running",
           tone: "accent",
         }
       : undoing
-        ? { label: "正在撤回", icon: "running", tone: "accent" }
+        ? { get label() { return t("undoing"); }, icon: "running", tone: "accent" }
         : undone
-          ? { label: "已撤回", icon: "undone", tone: "neutral" }
+          ? { get label() { return t("undone"); }, icon: "undone", tone: "neutral" }
           : undoFailed || undoConflict
             ? {
-                label: undoConflict ? "撤回冲突" : "撤回失败",
+                label: undoConflict ? t("undoConflict") : t("undoFailed"),
                 icon: "error",
                 tone: "danger",
               }
             : hasError
               ? {
-                  label: actionError ? "执行未完成" : review.label,
+                  label: actionError ? t("incomplete") : review.label,
                   icon: "error",
                   tone: "danger",
                 }
@@ -144,18 +149,18 @@ export function ReviewActions({
     "h-[40px] text-[14px] text-foreground shadow-none";
   const detail = submitting
     ? approving
-      ? "正在应用已选操作，请稍候。"
-      : "正在取消本方案，请稍候。"
+      ? t("applyingSelectedChangesPleaseWait")
+      : t("cancelingThisPlanPleaseWait")
     : undoing
-      ? "正在撤回本次变更，请稍候。"
+      ? t("undoingTheseChangesPleaseWait")
       : undone
-        ? "本次变更已撤回。"
+        ? t("theseChangesHaveBeenUndone")
         : undoConflict
-          ? "笔记在应用后发生变化，未覆盖后续编辑。"
+          ? t("theNotesChangedAfterThePlanWasApplied")
           : undoFailed
-            ? "未能撤回，请检查目标笔记后重试。"
+            ? t("couldNotUndoTheChangesCheckTheTarget")
             : review.detail;
-  const reason = actionError || undoResult?.error || review.error;
+  const reason = localizeNotebookAiDiagnostic(actionError || undoResult?.error || review.error);
   const canUndo =
     (review.phase === "applied" || undoConflict) &&
     output.canUndo !== false &&
@@ -167,7 +172,7 @@ export function ReviewActions({
       review.selectedCount !== undefined &&
       operationIds.length > review.selectedCount ? (
         <p className="text-muted-foreground">
-          已跳过 {operationIds.length - review.selectedCount} 项未选操作。
+          {t("skippedCount", { count: operationIds.length - review.selectedCount })}
         </p>
       ) : null}
       {reason ? (
@@ -179,7 +184,7 @@ export function ReviewActions({
         <>
           {!journal ? (
             <p className="text-[var(--goose-color-danger-focus)]" role="alert">
-              原方案记录已不可用，请重新生成。
+              {t("theOriginalPlanIsNoLongerAvailableGenerate")}
             </p>
           ) : null}
           <div className="grid grid-cols-[1fr_1.2fr] gap-2.5">
@@ -190,7 +195,7 @@ export function ReviewActions({
               disabled={submitting}
               onClick={() => void respond(false)}
             >
-              取消
+              {t("cancel")}
             </Button>
             <Button
               type="button"
@@ -199,7 +204,7 @@ export function ReviewActions({
               onClick={() => void respond(true)}
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              应用 {selectedIds.length} 项
+              {t("applyCount", { count: selectedIds.length })}
             </Button>
           </div>
           {!journal ? (
@@ -209,7 +214,7 @@ export function ReviewActions({
               className={secondaryClass}
               onClick={regenerate}
             >
-              重新生成方案
+              {t("regeneratePlan")}
             </Button>
           ) : null}
         </>
@@ -227,7 +232,7 @@ export function ReviewActions({
           ) : (
             <RotateCcw className="h-4 w-4" />
           )}
-          {undoFailed || undoConflict ? "重试撤回" : "撤回本次变更"}
+          {undoFailed || undoConflict ? t("retryUndo") : t("undoTheseChanges")}
         </Button>
       ) : null}
       {hasError && !undoConflict ? (
@@ -237,7 +242,7 @@ export function ReviewActions({
           className={secondaryClass}
           onClick={regenerate}
         >
-          调整并重新生成方案
+          {t("reviseAndRegeneratePlan")}
         </Button>
       ) : null}
     </div>
@@ -246,7 +251,7 @@ export function ReviewActions({
     footer
   ) : (
     <ApprovalCard
-      title={input?.title ?? "笔记变更计划"}
+      title={input?.title ?? t("noteChangePlan")}
       status={status}
       footer={footer}
     />

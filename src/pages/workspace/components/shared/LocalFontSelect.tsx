@@ -1,3 +1,28 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/shared/LocalFontSelect.tsx#localMessages:1">`
+zh-Hans:
+  selected: "{{label}}：{{name}}"
+  selectedFallback: "{{label}}：{{name}}，未安装，已回退"
+  systemFont: "系统字体"
+  fontNotInstalledUsingAFallback: "本机未找到，已使用备用字体"
+  checkingInstalledFonts: "正在确认本机字体…"
+  fontMissing: "{{name}}（未安装，已回退）"
+  couldnTReadInstalledFontsReopenThe: "无法读取本机字体，请重新打开菜单重试。"
+  loadingInstalledFonts: "正在读取本机字体…"
+  noInstalledFontsFound: "未读取到本机字体。"
+en:
+  selected: "{{label}}: {{name}}"
+  selectedFallback: "{{label}}: {{name}}, not installed; using fallback"
+  systemFont: "System font"
+  fontNotInstalledUsingAFallback: "Font not installed; using a fallback"
+  checkingInstalledFonts: "Checking installed fonts…"
+  fontMissing: "{{name}} (not installed; using fallback)"
+  couldnTReadInstalledFontsReopenThe: "Couldn’t read installed fonts. Reopen the menu to try again."
+  loadingInstalledFonts: "Loading installed fonts…"
+  noInstalledFontsFound: "No installed fonts found."
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useReducer } from "react";
 import { ChevronDown } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -22,7 +47,7 @@ export function LocalFontSelect({
   value,
   onChange,
   baseFont = SYSTEM_FONT_STACK,
-  baseFontLabel = "系统字体",
+  baseFontLabel = uiText("systemFont"),
   fallbackFontFamily = SYSTEM_FONT_STACK,
 }: {
   id: string;
@@ -99,7 +124,7 @@ export function LocalFontSelect({
             id={id}
             type="button"
             variant="outline"
-            aria-label={`${label}：${selectedName}${fallback ? "，未安装，已回退" : ""}`}
+            aria-label={uiText(fallback ? "selectedFallback" : "selected", {label, name: selectedName})}
             onKeyDown={(event) => {
               if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();
@@ -116,8 +141,8 @@ export function LocalFontSelect({
               {(fallback || (value && availability === undefined)) && (
                 <span className="block text-xs text-muted-foreground">
                   {fallback
-                    ? "本机未找到，已使用备用字体"
-                    : "正在确认本机字体…"}
+                    ? uiText("fontNotInstalledUsingAFallback")
+                    : uiText("checkingInstalledFonts")}
                 </span>
               )}
             </span>
@@ -144,9 +169,9 @@ export function LocalFontSelect({
           />
           {(fallback || fontAccessFailed || fonts === null || fonts.length === 0) && (
             <p role="status" className="px-2 py-1.5 text-xs text-muted-foreground">
-              {fallback ? `${value}（未安装，已回退）` : fontAccessFailed
-                ? "无法读取本机字体，请重新打开菜单重试。"
-                : fonts === null ? "正在读取本机字体…" : "未读取到本机字体。"}
+              {fallback ? uiText("fontMissing", {name: value ?? selectedName}) : fontAccessFailed
+                ? uiText("couldnTReadInstalledFontsReopenThe")
+                : fonts === null ? uiText("loadingInstalledFonts") : uiText("noInstalledFontsFound")}
             </p>
           )}
         </PopoverContent>

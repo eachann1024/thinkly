@@ -14,6 +14,53 @@ import { getTableDeletionLabel } from "./tableDeletion";
 import { GooseTableColorMenu } from "./GooseTableColorMenu";
 import { useTableHandleDrag } from "./useTableHandleDrag";
 import { useGooseTableHandle } from "./useGooseTableHandle";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/GooseTableHandle.tsx#messages:1">`
+zh-Hans:
+  rowActions: "行操作"
+  columnActions: "列操作"
+  insertRowAbove: "在上方插入行"
+  insertColumnLeft: "在左侧插入列"
+  insertRowBelow: "在下方插入行"
+  insertColumnRight: "在右侧插入列"
+  copy: "复制"
+  rowsAndColumnsWithMergedCellsCannotBe: "含合并单元格，暂不支持复制行列"
+  clearContents: "清空内容"
+  tableOptions: "表格选项"
+  headerRow: "标题行"
+  headerColumn: "标题列"
+  enabled: "已启用"
+  disabled: "未启用"
+  distributeColumnsEvenly: "列宽均分"
+  fitToPageWidth: "适应页面宽度"
+  deleteRow: "删除行"
+  deleteColumn: "删除列"
+  duplicateRow: "复制行"
+  duplicateColumn: "复制列"
+en:
+  rowActions: "Row actions"
+  columnActions: "Column actions"
+  insertRowAbove: "Insert row above"
+  insertColumnLeft: "Insert column left"
+  insertRowBelow: "Insert row below"
+  insertColumnRight: "Insert column right"
+  copy: "Copy"
+  rowsAndColumnsWithMergedCellsCannotBe: "Rows and columns with merged cells cannot be duplicated yet"
+  clearContents: "Clear contents"
+  tableOptions: "Table options"
+  headerRow: "Header row"
+  headerColumn: "Header column"
+  enabled: "Enabled"
+  disabled: "Disabled"
+  distributeColumnsEvenly: "Distribute columns evenly"
+  fitToPageWidth: "Fit to page width"
+  deleteRow: "Delete row"
+  deleteColumn: "Delete column"
+  duplicateRow: "Duplicate row"
+  duplicateColumn: "Duplicate column"
+`;
+const t = createTranslator(messages);
+
 export { GooseTableExtendButton } from "./GooseTableExtendButton";
 
 type TableHandleProps = {
@@ -58,7 +105,7 @@ export function GooseTableHandle({
           data-dragging={isDragging || undefined}
           type="button"
           className="bn-table-handle goose-editor-position-safe-trigger goose-table-handle-btn"
-          aria-label={isRow ? "行操作" : "列操作"}
+          aria-label={isRow ? t("rowActions") : t("columnActions")}
         >
           {isRow ? (
             <GooseIcons.GripVertical className="h-4 w-4" />
@@ -77,13 +124,13 @@ export function GooseTableHandle({
           onSelect={() => runMenuAction(() => insertDimension(true))}
         >
           {isRow ? <GooseIcons.ArrowUp /> : <GooseIcons.ArrowLeft />}{" "}
-          {isRow ? "在上方插入行" : "在左侧插入列"}
+          {isRow ? t("insertRowAbove") : t("insertColumnLeft")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => runMenuAction(() => insertDimension(false))}
         >
           {isRow ? <GooseIcons.ArrowDown /> : <GooseIcons.ArrowRight />}{" "}
-          {isRow ? "在下方插入行" : "在右侧插入列"}
+          {isRow ? t("insertRowBelow") : t("insertColumnRight")}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={hasMergedTableCells(state.block.content)}
@@ -92,7 +139,7 @@ export function GooseTableHandle({
           }
           onSelect={() => runMenuAction(duplicateDimension)}
         >
-          <GooseIcons.Copy /> 复制{isRow ? "行" : "列"}
+          <GooseIcons.Copy /> {isRow ? t("duplicateRow") : t("duplicateColumn")}
         </DropdownMenuItem>
         {hasMergedTableCells(state.block.content) && (
           <DropdownMenuItem
@@ -100,7 +147,7 @@ export function GooseTableHandle({
             id={mergeNoteId}
             className="goose-table-menu-note"
           >
-            含合并单元格，暂不支持复制行列
+            {t("rowsAndColumnsWithMergedCellsCannotBe")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
@@ -114,7 +161,7 @@ export function GooseTableHandle({
             )
           }
         >
-          <GooseIcons.Eraser /> 清空内容
+          <GooseIcons.Eraser /> {t("clearContents")}
         </DropdownMenuItem>
         <GooseTableColorMenu
           editor={editor}
@@ -126,8 +173,8 @@ export function GooseTableHandle({
         {features.tablePresentationControls && (
           <>
             <EditorSubmenuTrigger>
-              <DropdownMenuItem textValue="表格选项">
-                <GooseIcons.Table2 /> 表格选项{" "}
+              <DropdownMenuItem textValue={t("tableOptions")}>
+                <GooseIcons.Table2 /> {t("tableOptions")}{" "}
                 <GooseIcons.ChevronRight className="ml-auto" />
               </DropdownMenuItem>
               <DropdownMenuContent
@@ -139,7 +186,7 @@ export function GooseTableHandle({
                 {(["headerRows", "headerCols"] as const).map((key) => (
                   <DropdownMenuItem
                     key={key}
-                    textValue={`${key === "headerRows" ? "标题行" : "标题列"}，${state.block.content[key] ? "已启用" : "未启用"}`}
+                    textValue={`${key === "headerRows" ? t("headerRow") : t("headerColumn")}，${state.block.content[key] ? t("enabled") : t("disabled")}`}
                     onSelect={() => runMenuAction(() => toggleHeader(key))}
                   >
                     {key === "headerRows" ? (
@@ -147,9 +194,9 @@ export function GooseTableHandle({
                     ) : (
                       <GooseIcons.PanelLeft />
                     )}
-                    {key === "headerRows" ? "标题行" : "标题列"}
+                    {key === "headerRows" ? t("headerRow") : t("headerColumn")}
                     <span className="sr-only">
-                      {state.block.content[key] ? "已启用" : "未启用"}
+                      {state.block.content[key] ? t("enabled") : t("disabled")}
                     </span>
                     {Boolean(state.block.content[key]) && (
                       <GooseIcons.Check className="ml-auto" />
@@ -159,10 +206,10 @@ export function GooseTableHandle({
                 <DropdownMenuItem
                   onSelect={() => runMenuAction(handleEvenColumnWidth)}
                 >
-                  <GooseIcons.AlignJustify /> 列宽均分
+                  <GooseIcons.AlignJustify /> {t("distributeColumnsEvenly")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => runMenuAction(handleFitPageWidth)}>
-                  <GooseIcons.Maximize2 /> 适应页面宽度
+                  <GooseIcons.Maximize2 /> {t("fitToPageWidth")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </EditorSubmenuTrigger>
@@ -176,8 +223,8 @@ export function GooseTableHandle({
           {deletionSnapshot
             ? getTableDeletionLabel(deletionSnapshot.plan)
             : isRow
-              ? "删除行"
-              : "删除列"}
+              ? t("deleteRow")
+              : t("deleteColumn")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

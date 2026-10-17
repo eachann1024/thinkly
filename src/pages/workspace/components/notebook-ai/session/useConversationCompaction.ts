@@ -10,6 +10,21 @@ import {
 } from "@/lib/notebook-ai/compactConversation";
 import { createChatMessageId } from "./helpers";
 import type { SessionState } from "./useSessionState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useConversationCompaction.ts#messages:1">`
+zh-Hans:
+  waitForAiToFinishRespondingBeforeCompacting: "AI 正在回复中，请待生成结束后再压缩上下文"
+  thereIsNoHistoryToCompactInThis: "当前会话暂无需要压缩的历史内容"
+  conversationContextCompacted: "会话上下文已压缩"
+  compactionFailed: "压缩失败"
+en:
+  waitForAiToFinishRespondingBeforeCompacting: "Wait for AI to finish responding before compacting the context"
+  thereIsNoHistoryToCompactInThis: "There is no history to compact in this conversation"
+  conversationContextCompacted: "Conversation context compacted"
+  compactionFailed: "Compaction failed"
+`;
+const t = createTranslator(messages);
+
 
 export function useConversationCompaction(state: SessionState) {
   const {
@@ -28,7 +43,7 @@ export function useConversationCompaction(state: SessionState) {
   } = state;
   const compactConversation = useCallback(() => {
     if (isBusy || (compactAbortRef.current && !compactAbortRef.current.signal.aborted)) {
-      toast.warning("AI 正在回复中，请待生成结束后再压缩上下文");
+      toast.warning(t("waitForAiToFinishRespondingBeforeCompacting"));
       return;
     }
     if (unavailableReason) {
@@ -37,7 +52,7 @@ export function useConversationCompaction(state: SessionState) {
     }
     const currentMessages = messagesRef.current;
     if (!conversationHasCompactableContent(currentMessages)) {
-      toast.info("当前会话暂无需要压缩的历史内容");
+      toast.info(t("thereIsNoHistoryToCompactInThis"));
       return;
     }
 
@@ -61,11 +76,11 @@ export function useConversationCompaction(state: SessionState) {
         useNotebookAiChats
           .getState()
           .setMessages(notebookId, conversationId, compacted);
-        toast.success("会话上下文已压缩");
+        toast.success(t("conversationContextCompacted"));
       })
       .catch((error) => {
         if (abort.signal.aborted || !isCurrentSession(scope)) return;
-        toast.error("压缩失败", {
+        toast.error(t("compactionFailed"), {
           description: formatNotebookAiError(error, { phase: "chat" }),
         });
       })

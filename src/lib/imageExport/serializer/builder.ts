@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/serializer/builder.ts#localMessages:1">`
+zh-Hans:
+  untitled: "无标题"
+en:
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 import { buildDocumentCss } from "./styles/documentCss";
 import { buildBlockCss } from "./styles/blockCss";
 import { buildFooterCss } from "./styles/footerCss";
@@ -91,7 +100,7 @@ ${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleS
     ${
       wm.showTitle
         ? `<div class="gooseshot-header">
-      <div${titleClass}${titleInlineAttr}>${escapeHtml(title || "无标题")}</div>
+      <div${titleClass}${titleInlineAttr}>${escapeHtml(title || uiText("untitled"))}</div>
     </div>`
         : ""
     }

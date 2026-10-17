@@ -10,6 +10,37 @@ import { toast } from "@/components/ui/sonner";
 import { openPreviewInSystem } from "@/lib/preview/previewAction";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { useEditorPlatform } from "@/components/editor/platform/context";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/useCodePreviewActions.ts#messages:1">`
+zh-Hans:
+  nothingToExport: "无可导出内容"
+  thisTypeDoesNotSupportExportingImages: "当前类型不支持导出图片"
+  imageSavedToDownloads: "图片已保存到下载文件夹"
+  saveFailed: "保存失败"
+  savedToDownloads: "已保存到下载文件夹"
+  unknownError: "未知错误"
+  copiedToClipboard: "已复制到剪贴板"
+  nothingToPreview: "无可预览内容"
+  thisCodeBlockDoesNotSupportSystemPreview: "当前代码块不支持系统预览"
+  downloadFailed: "下载失败：{{error}}"
+  copyFailed: "复制失败：{{error}}"
+  systemPreviewFailed: "系统预览失败：{{error}}"
+en:
+  nothingToExport: "Nothing to export"
+  thisTypeDoesNotSupportExportingImages: "This type does not support exporting images"
+  imageSavedToDownloads: "Image saved to Downloads"
+  saveFailed: "Save failed"
+  savedToDownloads: "Saved to Downloads"
+  unknownError: "Unknown error"
+  copiedToClipboard: "Copied to clipboard"
+  nothingToPreview: "Nothing to preview"
+  thisCodeBlockDoesNotSupportSystemPreview: "This code block does not support system preview"
+  downloadFailed: "Download failed: {{error}}"
+  copyFailed: "Copy failed: {{error}}"
+  systemPreviewFailed: "System preview failed: {{error}}"
+`;
+const t = createTranslator(messages);
+
 
 export function isDarkTheme(theme: string | undefined): boolean {
   if (theme === "dark") return true;
@@ -35,7 +66,7 @@ export function useCodePreviewActions({
   const resolvePreviewPngBlob = useCallback(async (): Promise<Blob> => {
     const text = getCodeContent().trim();
     if (!text || typeof document === "undefined") {
-      throw new Error("无可导出内容");
+      throw new Error(t("nothingToExport"));
     }
 
     if (language === "mermaid") {
@@ -83,7 +114,7 @@ export function useCodePreviewActions({
       }
     }
 
-    throw new Error("当前类型不支持导出图片");
+    throw new Error(t("thisTypeDoesNotSupportExportingImages"));
   }, [getCodeContent, language, theme]);
 
   const handleDownloadPreview = useCallback(async () => {
@@ -98,8 +129,8 @@ export function useCodePreviewActions({
             ? `formula-${Date.now()}.png`
             : `mermaid-${Date.now()}.png`;
         const saved = await saveBlobAndReveal(pngBlob, filename);
-        if (saved) toast.success("图片已保存到下载文件夹");
-        else toast.error("保存失败");
+        if (saved) toast.success(t("imageSavedToDownloads"));
+        else toast.error(t("saveFailed"));
         return;
       }
 
@@ -107,11 +138,11 @@ export function useCodePreviewActions({
         new Blob([text], { type: "text/plain;charset=utf-8" }),
         "code.txt",
       );
-      if (saved) toast.success("已保存到下载文件夹");
-      else toast.error("保存失败");
+      if (saved) toast.success(t("savedToDownloads"));
+      else toast.error(t("saveFailed"));
     } catch (err) {
       toast.error(
-        `下载失败：${err instanceof Error ? err.message : "未知错误"}`,
+        t("downloadFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
       );
     }
   }, [getCodeContent, language, resolvePreviewPngBlob]);
@@ -121,10 +152,10 @@ export function useCodePreviewActions({
       const pngBlob = await resolvePreviewPngBlob();
       const dataUrl = await blobToBase64(pngBlob);
       await platform.clipboard.copyImage(dataUrl);
-      toast.success("已复制到剪贴板");
+      toast.success(t("copiedToClipboard"));
     } catch (err) {
       toast.error(
-        `复制失败：${err instanceof Error ? err.message : "未知错误"}`,
+        t("copyFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
       );
       throw err;
     }
@@ -133,7 +164,7 @@ export function useCodePreviewActions({
   const handleSystemPreview = useCallback(async () => {
     try {
       const text = getCodeContent().trim();
-      if (!text) throw new Error("无可预览内容");
+      if (!text) throw new Error(t("nothingToPreview"));
 
       if (language === "mermaid") {
         const svg = await renderMermaidSvgForExport(
@@ -158,10 +189,10 @@ export function useCodePreviewActions({
         return;
       }
 
-      throw new Error("当前代码块不支持系统预览");
+      throw new Error(t("thisCodeBlockDoesNotSupportSystemPreview"));
     } catch (err) {
       toast.error(
-        `系统预览失败：${err instanceof Error ? err.message : "未知错误"}`,
+        t("systemPreviewFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
       );
     }
   }, [getCodeContent, language, theme]);

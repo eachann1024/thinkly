@@ -4,6 +4,21 @@ import { cn } from "@/components/editor/utils/cn";
 import { useVideoPlayback } from "./useVideoPlayback";
 import { VideoControls } from "./VideoControls";
 import type { GooseVideoPlayerProps } from "./videoPlayerTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/video/GooseVideoPlayer.tsx#messages:1">`
+zh-Hans:
+  videoPlayer: "视频播放器"
+  theVideoCouldNotBeReadReplaceIt: "视频无法读取，请从上方工具栏更换"
+  pause: "暂停"
+  play: "播放"
+en:
+  videoPlayer: "Video player"
+  theVideoCouldNotBeReadReplaceIt: "The video could not be read. Replace it using the toolbar above."
+  pause: "Pause"
+  play: "Play"
+`;
+const t = createTranslator(messages);
+
 
 export function GooseVideoPlayer({
   src,
@@ -40,7 +55,7 @@ export function GooseVideoPlayer({
       onFocus={revealControls}
       tabIndex={0}
       role="group"
-      aria-label="视频播放器"
+      aria-label={t("videoPlayer")}
       onKeyDown={(e) => {
         if (e.key === " " || e.key === "k" || e.key === "K") {
           e.preventDefault();
@@ -95,7 +110,7 @@ export function GooseVideoPlayer({
       {loadError && (
         <div className="goose-video-player__error" role="status">
           <VideoOff aria-hidden="true" />
-          <span>视频无法读取，请从上方工具栏更换</span>
+          <span>{t("theVideoCouldNotBeReadReplaceIt")}</span>
         </div>
       )}
 
@@ -104,7 +119,7 @@ export function GooseVideoPlayer({
         <EditorAction context="media"
           type="button"
           className="goose-video-player__center-play"
-          aria-label={playing ? "暂停" : "播放"}
+          aria-label={playing ? t("pause") : t("play")}
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();

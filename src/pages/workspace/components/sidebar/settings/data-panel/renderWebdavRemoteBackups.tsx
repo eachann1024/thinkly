@@ -1,3 +1,28 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/renderWebdavRemoteBackups.tsx#localMessages:1">`
+zh-Hans:
+  remoteBackups_4419: "远端备份"
+  loadingRemoteBackups_8208: "正在加载远端备份"
+  noRemoteBackups_5d1a: "暂无远端备份"
+  time_14e6: "时间："
+  size_19e5: "大小："
+  restore_c7db: "恢复"
+  delete_2f4a: "删除"
+  showFewerBackups_2fbc: "收起备份"
+  showAllBackups: "展开全部远端备份 (还有 {{count}} 个)"
+en:
+  remoteBackups_4419: "Remote backups"
+  loadingRemoteBackups_8208: "Loading remote backups"
+  noRemoteBackups_5d1a: "No remote backups"
+  time_14e6: "Time:"
+  size_19e5: "Size:"
+  restore_c7db: "Restore"
+  delete_2f4a: "Delete"
+  showFewerBackups_2fbc: "Show fewer backups"
+  showAllBackups: "Show all remote backups ({{count}} more)"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import {
   Download,
@@ -44,7 +69,7 @@ export function renderWebdavRemoteBackups(
               isRemoteListOpen && "rotate-90",
             )}
           />
-          <span>远端备份</span>
+          <span>{uiText("remoteBackups_4419")}</span>
         </Button>
       }
       actions={
@@ -68,7 +93,7 @@ export function renderWebdavRemoteBackups(
           {remoteLoading ? (
             <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              <span>正在加载远端备份</span>
+              <span>{uiText("loadingRemoteBackups_8208")}</span>
             </div>
           ) : remoteFiles.length === 0 ? (
             <div className="flex flex-col items-center gap-2 border border-dashed rounded-[var(--goose-control-radius)] border-muted py-6 text-center">
@@ -77,8 +102,7 @@ export function renderWebdavRemoteBackups(
                 strokeWidth={1.75}
               />
               <p className="text-sm font-medium text-foreground">
-                暂无远端备份
-              </p>
+                {uiText("noRemoteBackups_5d1a")}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -98,8 +122,8 @@ export function renderWebdavRemoteBackups(
                         {file.basename}
                       </p>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        <span>时间：{formatRemoteTime(file.lastmod)}</span>
-                        <span>大小：{formatFileSize(file.size)}</span>
+                        <span>{uiText("time_14e6")}{formatRemoteTime(file.lastmod)}</span>
+                        <span>{uiText("size_19e5")}{formatFileSize(file.size)}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-center">
@@ -115,8 +139,7 @@ export function renderWebdavRemoteBackups(
                         ) : (
                           <Download className="h-3 w-3" />
                         )}
-                        恢复
-                      </Button>
+                        {uiText("restore_c7db")}</Button>
                       <Button
                         variant="destructive"
                         size="sm"
@@ -129,8 +152,7 @@ export function renderWebdavRemoteBackups(
                         ) : (
                           <Trash2 className="h-3 w-3" />
                         )}
-                        删除
-                      </Button>
+                        {uiText("delete_2f4a")}</Button>
                     </div>
                   </div>
                 );
@@ -145,8 +167,8 @@ export function renderWebdavRemoteBackups(
                     className="text-sm hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
                   >
                     {showAllRemote
-                      ? "收起备份"
-                      : `展开全部远端备份 (还有 ${remoteFiles.length - 3} 个)`}
+                      ? uiText("showFewerBackups_2fbc")
+                      : uiText("showAllBackups", { count: remoteFiles.length - 3 })}
                   </Button>
                 </div>
               )}

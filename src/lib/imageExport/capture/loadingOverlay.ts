@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/capture/loadingOverlay.ts#localMessages:1">`
+zh-Hans:
+  generating: "正在生成图片"
+en:
+  generating: "Generating image"
+`;
+const uiText = createTranslator(localMessages);
 import { UI_LAYERS } from "@/lib/uiLayers";
 
 // ── Loading Overlay ────────────────────────────────────────────
@@ -72,7 +81,7 @@ export function createLoadingOverlay(): HTMLElement {
   <div style="position:absolute;inset:-16px;animation:ge-cw 4s linear infinite;will-change:transform"><div style="position:absolute;left:-2px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#f472b6;box-shadow:0 0 6px rgba(244,114,182,.7)"></div></div>
 </div>
 
-<div style="margin-top:30px;font-size:15px;font-weight:600;letter-spacing:.05em;background:linear-gradient(90deg,#58d7b8,#4f9cf7,#9b72f2,#f472b6,#ffb56a,#58d7b8);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:ge-shimmer 2.5s linear infinite,ge-enter .65s cubic-bezier(.16,1,.3,1) .18s both">正在生成图片</div>
+<div style="margin-top:30px;font-size:15px;font-weight:600;letter-spacing:.05em;background:linear-gradient(90deg,#58d7b8,#4f9cf7,#9b72f2,#f472b6,#ffb56a,#58d7b8);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:ge-shimmer 2.5s linear infinite,ge-enter .65s cubic-bezier(.16,1,.3,1) .18s both">${uiText("generating")}</div>
 
 <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">${particles}</div>`;
 

@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useWebdavConfiguration.tsx#localMessages:1">`
+zh-Hans:
+  couldNotLoadRemoteBackups_f7ce: "加载远端列表失败"
+  saveFailed_6de9: "保存失败"
+  invalidServerUrl_dedc: "服务地址格式不正确"
+  invalidRemoteFolder_5a1d: "远端目录格式不正确"
+  configurationSavedAndConnectionVerified_c7f1: "配置已保存，连接测试成功"
+  connectionCheckFailed_f917: "连接测试失败"
+  operationFailed_5fa8: "操作失败"
+en:
+  couldNotLoadRemoteBackups_f7ce: "Could not load remote backups"
+  saveFailed_6de9: "Save failed"
+  invalidServerUrl_dedc: "Invalid server URL"
+  invalidRemoteFolder_5a1d: "Invalid remote folder"
+  configurationSavedAndConnectionVerified_c7f1: "Configuration saved and connection verified"
+  connectionCheckFailed_f917: "Connection check failed"
+  operationFailed_5fa8: "Operation failed"
+`;
+const uiText = createTranslator(localMessages);
 import {
   testWebdavConnection,
   listWebdavBackups,
@@ -71,7 +92,7 @@ export function useWebdavConfiguration(
       await readRemoteList("standalone");
     } catch (err) {
       console.error(err);
-      toast.error("加载远端列表失败");
+      toast.error(uiText("couldNotLoadRemoteBackups_f7ce"));
     }
   };
 
@@ -87,16 +108,16 @@ export function useWebdavConfiguration(
       try {
         cleanUrl = normalizeBaseUrl(tempUrl);
       } catch (err: any) {
-        toast.error("保存失败", {
-          description: err.message || "服务地址格式不正确",
+        toast.error(uiText("saveFailed_6de9"), {
+          description: err.message || uiText("invalidServerUrl_dedc"),
         });
         return;
       }
       try {
         cleanDir = normalizeRemoteDir(tempRemoteDir);
       } catch (err: any) {
-        toast.error("保存失败", {
-          description: err.message || "远端目录格式不正确",
+        toast.error(uiText("saveFailed_6de9"), {
+          description: err.message || uiText("invalidRemoteFolder_5a1d"),
         });
         return;
       }
@@ -123,7 +144,7 @@ export function useWebdavConfiguration(
           webdavAutoBackupEnabled: tempAutoBackupEnabled,
         });
         setTempPassword("");
-        toast.success("配置已保存，连接测试成功");
+        toast.success(uiText("configurationSavedAndConnectionVerified_c7f1"));
         if (isRemoteListOpen && isCurrentActivation(epoch)) {
           await readRemoteList("nested", {
             url: cleanUrl,
@@ -133,10 +154,10 @@ export function useWebdavConfiguration(
           });
         }
       } else {
-        toast.error("连接测试失败", { description: result.message });
+        toast.error(uiText("connectionCheckFailed_f917"), { description: result.message });
       }
     } catch (err: any) {
-      toast.error("操作失败", { description: err.message || String(err) });
+      toast.error(uiText("operationFailed_5fa8"), { description: err.message || String(err) });
     } finally {
       sendWebdavEvent({ type: "operation.finished", id });
     }

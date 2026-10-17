@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/math.ts#localMessages:1">`
+zh-Hans:
+  couldnTEncodeTheEquationImage: "公式图片编码失败"
+  equation: "公式"
+en:
+  couldnTEncodeTheEquationImage: "Couldn’t encode the equation image"
+  equation: "Equation"
+`;
+const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { CardTheme } from "./themes";
 
@@ -48,7 +59,7 @@ async function mathHtmlToPngDataUrl(html: string, theme: CardTheme): Promise<str
     return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result ?? ""));
-      reader.onerror = () => reject(new Error("公式图片编码失败"));
+      reader.onerror = () => reject(new Error(uiText("couldnTEncodeTheEquationImage")));
       reader.readAsDataURL(blob);
     });
   } finally {
@@ -95,7 +106,7 @@ async function renderMathBlockAsImage(block: any, theme: CardTheme): Promise<voi
     block.children = [];
     block.props = {
       url: dataUrl,
-      caption: "公式",
+      caption: uiText("equation"),
       textAlignment: "center",
     };
   } catch (error) {

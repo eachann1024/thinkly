@@ -1,3 +1,37 @@
+import { getPlatformKind } from "@/lib/utils";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/delete-receipt.tsx#localMessages:1">`
+zh-Hans:
+  systemTrash: "系统废纸篓"
+  systemRecycle: "系统回收站"
+  trash: "回收站"
+  partialDelete: "{{done}} 项已移动，{{failed}} 项未完成"
+  failedDelete: "{{failed}} 项未完成"
+  deletedItem: "已移入{{destination}} · {{title}}"
+  deletedMany: "{{done}} 项已移入{{destination}}"
+  deleteResult: "删除回执"
+  undoDelete: "撤回删除"
+  undoFailed: "撤回失败"
+  restoreManually: "请稍后重试，或前往{{destination}}手动恢复"
+  undo: "撤回"
+  dismissResult: "关闭删除回执"
+en:
+  systemTrash: "Trash"
+  systemRecycle: "Recycle Bin"
+  trash: "Trash"
+  partialDelete: "Moved: {{done}} · Failed: {{failed}}"
+  failedDelete: "Couldn’t move {{failed}}"
+  deletedItem: "Moved to {{destination}} · {{title}}"
+  deletedMany: "Moved to {{destination}}: {{done}}"
+  deleteResult: "Deletion result"
+  undoDelete: "Undo deletion"
+  undoFailed: "Couldn’t undo deletion"
+  restoreManually: "Try again later, or restore the items from {{destination}}."
+  undo: "Undo"
+  dismissResult: "Dismiss deletion result"
+`;
+const uiText = createTranslator(localMessages);
 import { CircleAlert, RotateCcw, X } from "@/components/ui/icons";
 import { Button } from "./button";
 import { IconButton } from "./icon-button";
@@ -14,19 +48,19 @@ export function showDeleteReceipt(
   if (!items.length) return;
   const done = items.filter((item) => item.deleted).length;
   const failed = items.length - done;
-  const destination = isLocalFolder ? "系统废纸篓" : "回收站";
+  const destination = isLocalFolder ? uiText(getPlatformKind() === "windows" ? "systemRecycle" : "systemTrash") : uiText("trash");
   let undoing = false;
   // ponytail: the receipt shows only outcome and undo; add a detail view if item-level diagnostics become necessary.
   const label = failed
-    ? done ? `${done} 项已移动，${failed} 项未完成` : `${failed} 项未完成`
+    ? done ? uiText("partialDelete", {done, failed}) : uiText("failedDelete", {failed})
     : items.length === 1
-      ? `已移入${destination} · ${items[0].title}`
-      : `${done} 项已移入${destination}`;
+      ? uiText("deletedItem", {destination, title: items[0].title})
+      : uiText("deletedMany", {done, destination});
 
   toast.custom(
     (id) => (
       <section
-        aria-label="删除回执"
+        aria-label={uiText("deleteResult")}
         role="status"
         className="flex w-full items-center gap-3 text-foreground"
       >
@@ -37,22 +71,21 @@ export function showDeleteReceipt(
         )}
         <p className="min-w-0 flex-1 truncate text-sm font-semibold" title={label}>{label}</p>
         {done > 0 && onUndo && (
-          <Button size="sm" type="button" aria-label="撤回删除" onClick={async () => {
+          <Button size="sm" type="button" aria-label={uiText("undoDelete")} onClick={async () => {
             if (undoing) return;
             undoing = true;
             try {
               await onUndo();
               toast.dismiss(id);
             } catch (error) {
-              toast.error("撤回失败", { description: error instanceof Error ? error.message : "请稍后重试，或前往回收站手动恢复" });
+              toast.error(uiText("undoFailed"), { description: error instanceof Error ? error.message : uiText("restoreManually", { destination }) });
             } finally {
               undoing = false;
             }
           }} className="shrink-0 text-xs">
-            <RotateCcw className="size-4" aria-hidden="true" />撤回
-          </Button>
+            <RotateCcw className="size-4" aria-hidden="true" />{uiText("undo")}</Button>
         )}
-        <IconButton type="button" tone="muted" aria-label="关闭删除回执" onClick={() => toast.dismiss(id)} >
+        <IconButton type="button" tone="muted" aria-label={uiText("dismissResult")} onClick={() => toast.dismiss(id)} >
           <X className="size-4" aria-hidden="true" />
         </IconButton>
       </section>

@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/SetupGuide.tsx#localMessages:1">`
+zh-Hans:
+  progress: "第 {{step}} 步，共 {{total}} 步"
+  appearance: "外观"
+  customizeAppearance: "设置外观"
+  reading: "阅读"
+  adjustReadingPreferences: "调整阅读体验"
+  setupGuide: "设置引导"
+  setupSteps: "设置步骤"
+  appearancePreview: "外观即时预览"
+  exitSetup: "退出引导"
+  back: "上一步"
+  next: "下一步"
+  finishSetup: "完成设置"
+en:
+  progress: "Step {{step}} of {{total}}"
+  appearance: "Appearance"
+  customizeAppearance: "Customize appearance"
+  reading: "Reading"
+  adjustReadingPreferences: "Adjust reading preferences"
+  setupGuide: "Setup guide"
+  setupSteps: "Setup steps"
+  appearancePreview: "Appearance preview"
+  exitSetup: "Exit setup"
+  back: "Back"
+  next: "Next"
+  finishSetup: "Finish setup"
+`;
+const uiText = createTranslator(localMessages);
 import { useLayoutEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { useShallow } from "zustand/react/shallow";
@@ -12,8 +43,8 @@ import "./setup-guide.css";
 import { useIntroVideo } from "@/stores/introVideo";
 
 const STEPS = [
-  { label: "外观", title: "设置外观" },
-  { label: "阅读", title: "调整阅读体验" },
+  { label: uiText("appearance"), title: uiText("customizeAppearance") },
+  { label: uiText("reading"), title: uiText("adjustReadingPreferences") },
 ] as const;
 
 type SetupStep = 0 | 1;
@@ -72,7 +103,7 @@ function SetupGuideFlow() {
     <main
       className="setup-guide"
       data-native-platform={nativePlatform}
-      aria-label="设置引导"
+      aria-label={uiText("setupGuide")}
     >
       <div className="setup-guide-windowbar">
         {(nativePlatform === "win" || nativePlatform === "linux") && (
@@ -81,7 +112,7 @@ function SetupGuideFlow() {
       </div>
 
       <header className="setup-guide-header">
-        <ol className="setup-guide-steps" aria-label="设置步骤">
+        <ol className="setup-guide-steps" aria-label={uiText("setupSteps")}>
           {STEPS.map((item, index) => {
             const active = index === step;
             const complete = index < step;
@@ -101,7 +132,7 @@ function SetupGuideFlow() {
           })}
         </ol>
         <div className="setup-guide-heading">
-          <p className="text-xs text-muted-foreground">第 {step + 1} 步，共 {STEPS.length} 步</p>
+          <p className="text-xs text-muted-foreground">{uiText("progress", {step: step + 1, total: STEPS.length})}</p>
           <h1 id="setup-guide-title" ref={headingRef} tabIndex={-1}>
             {STEPS[step].title}
           </h1>
@@ -109,7 +140,7 @@ function SetupGuideFlow() {
       </header>
 
       <div className="setup-guide-content">
-        <section className="setup-guide-preview" aria-label="外观即时预览">
+        <section className="setup-guide-preview" aria-label={uiText("appearancePreview")}>
           <AppearanceEditorPreview
             editorFontSize={appearance.editorFontSize}
             editorLineHeight={appearance.editorLineHeight}
@@ -153,8 +184,7 @@ function SetupGuideFlow() {
       <footer className="setup-guide-footer">
         {step < 1 && (
           <Button type="button" variant="ghost" onClick={() => closeGuide()}>
-            退出引导
-          </Button>
+            {uiText("exitSetup")}</Button>
         )}
         <Button
           type="button"
@@ -162,17 +192,14 @@ function SetupGuideFlow() {
           onClick={() => moveToStep(0)}
           disabled={step === 0}
         >
-          上一步
-        </Button>
+          {uiText("back")}</Button>
         <div className="setup-guide-footer-actions">
           {step < 1 ? (
             <Button type="button" onClick={() => moveToStep(1)}>
-              下一步
-            </Button>
+              {uiText("next")}</Button>
           ) : (
             <Button type="button" onClick={() => closeGuide(true)}>
-              完成设置
-            </Button>
+              {uiText("finishSetup")}</Button>
           )}
         </div>
       </footer>

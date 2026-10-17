@@ -2,6 +2,37 @@ import type {
   BlockTypeTransformTarget,
   BlockTypeTransformIntent,
 } from "./types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/ai-write/block-transform/intent.ts#messages:1">`
+zh-Hans:
+  thisTargetBlockTypeIsNotSupported: "不支持该目标块类型。"
+  chooseHeadingLevel12Or3For: "标题转换必须明确指定一级、二级或三级标题。"
+  headingLevelsCanOnlyBeSetForHeading: "非标题块不能指定标题级别。"
+  heading1: "一级标题"
+  heading2: "二级标题"
+  heading3: "三级标题"
+  paragraph: "普通段落"
+  bulletedList: "无序列表"
+  numberedList: "有序列表"
+  checklist: "待办事项"
+  quoteBlock: "引用块"
+  codeBlock: "代码块"
+en:
+  thisTargetBlockTypeIsNotSupported: "This target block type is not supported."
+  chooseHeadingLevel12Or3For: "Choose heading level 1, 2, or 3 for this conversion."
+  headingLevelsCanOnlyBeSetForHeading: "Heading levels can only be set for heading blocks."
+  heading1: "Heading 1"
+  heading2: "Heading 2"
+  heading3: "Heading 3"
+  paragraph: "Paragraph"
+  bulletedList: "Bulleted list"
+  numberedList: "Numbered list"
+  checklist: "Checklist"
+  quoteBlock: "Quote block"
+  codeBlock: "Code block"
+`;
+const t = createTranslator(messages);
+
 
 const CONVERT_PATTERN =
   /(?:改成|改为|变成|变为|转成|转为|转换成|转换为|处理成|处理为|调整成|调整为|设为|做成|整理成|整理为|convert\s+(?:it|this|these)?\s*to|turn\s+(?:it|this|these)?\s*into|change\s+(?:it|this|these)?\s*to|make\s+(?:it|this|these)?\s*(?:a\s+)?)/i;
@@ -109,16 +140,16 @@ export function assertValidIntent(
   intent: BlockTypeTransformIntent,
 ): asserts intent is BlockTypeTransformIntent {
   if (!TARGET_DEFINITIONS.some((item) => item.blockType === intent.blockType)) {
-    throw new Error("不支持该目标块类型。");
+    throw new Error(t("thisTargetBlockTypeIsNotSupported"));
   }
   if (
     intent.blockType === "heading" &&
     ![1, 2, 3].includes(intent.headingLevel ?? 0)
   ) {
-    throw new Error("标题转换必须明确指定一级、二级或三级标题。");
+    throw new Error(t("chooseHeadingLevel12Or3For"));
   }
   if (intent.blockType !== "heading" && intent.headingLevel !== undefined) {
-    throw new Error("非标题块不能指定标题级别。");
+    throw new Error(t("headingLevelsCanOnlyBeSetForHeading"));
   }
 }
 
@@ -128,19 +159,19 @@ export function getBlockTypeTransformTargetLabel(
   assertValidIntent(intent);
   switch (intent.blockType) {
     case "paragraph":
-      return "普通段落";
+      return t("paragraph");
     case "heading":
-      return `${intent.headingLevel === 1 ? "一" : intent.headingLevel === 2 ? "二" : "三"}级标题`;
+      return t(intent.headingLevel === 1 ? "heading1" : intent.headingLevel === 2 ? "heading2" : "heading3");
     case "bulletListItem":
-      return "无序列表";
+      return t("bulletedList");
     case "numberedListItem":
-      return "有序列表";
+      return t("numberedList");
     case "checkListItem":
-      return "待办事项";
+      return t("checklist");
     case "quote":
-      return "引用块";
+      return t("quoteBlock");
     case "codeBlock":
-      return "代码块";
+      return t("codeBlock");
   }
 }
 

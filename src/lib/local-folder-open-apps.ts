@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-open-apps.ts#localMessages:1">`
+zh-Hans:
+  finder: "访达"
+  fileExplorer: "资源管理器"
+  notepad: "记事本"
+  terminal: "终端"
+  commandPrompt: "命令提示符"
+en:
+  finder: "Finder"
+  fileExplorer: "File Explorer"
+  notepad: "Notepad"
+  terminal: "Terminal"
+  commandPrompt: "Command Prompt"
+`;
+const uiText = createTranslator(localMessages);
 export type LocalFolderOpenAppKind = "file-manager" | "editor" | "terminal";
 
 export interface LocalFolderOpenAppCandidate {
@@ -13,14 +30,14 @@ export interface LocalFolderOpenAppCandidate {
 export const LOCAL_FOLDER_FILE_MANAGER_CANDIDATES: LocalFolderOpenAppCandidate[] = [
   {
     id: "finder",
-    label: "访达",
+    label: uiText("finder"),
     appName: "Finder",
     aliases: ["Finder"],
     kind: "file-manager",
   },
   {
     id: "explorer",
-    label: "资源管理器",
+    label: uiText("fileExplorer"),
     appName: "Explorer",
     aliases: ["explorer"],
     commands: ["explorer"],
@@ -74,7 +91,7 @@ export const LOCAL_FOLDER_EDITOR_CANDIDATES: LocalFolderOpenAppCandidate[] = [
     kind: "editor",
   },
   { id: "windsurf", label: "Windsurf", appName: "Windsurf", commands: ["windsurf"], kind: "editor" },
-  { id: "notepad", label: "记事本", appName: "Notepad", commands: ["notepad"], kind: "editor" },
+  { id: "notepad", label: uiText("notepad"), appName: "Notepad", commands: ["notepad"], kind: "editor" },
   { id: "notepadpp", label: "Notepad++", appName: "Notepad++", commands: ["notepad++"], kind: "editor" },
   { id: "typora", label: "Typora", appName: "Typora", commands: ["typora"], kind: "editor" },
   { id: "obsidian", label: "Obsidian", appName: "Obsidian", kind: "editor" },
@@ -95,8 +112,8 @@ export const LOCAL_FOLDER_EDITOR_CANDIDATES: LocalFolderOpenAppCandidate[] = [
 ];
 
 export const LOCAL_FOLDER_TERMINAL_CANDIDATES: LocalFolderOpenAppCandidate[] = [
-  { id: "terminal", label: "终端", appName: "Terminal", aliases: ["Terminal"], kind: "terminal" },
-  { id: "cmd", label: "命令提示符", appName: "Command Prompt", aliases: ["cmd"], commands: ["cmd"], kind: "terminal" },
+  { id: "terminal", label: uiText("terminal"), appName: "Terminal", aliases: ["Terminal"], kind: "terminal" },
+  { id: "cmd", label: uiText("commandPrompt"), appName: "Command Prompt", aliases: ["cmd"], commands: ["cmd"], kind: "terminal" },
   { id: "windows-terminal", label: "Windows Terminal", appName: "Windows Terminal", aliases: ["wt"], commands: ["wt"], kind: "terminal" },
   { id: "powershell", label: "PowerShell", appName: "PowerShell", commands: ["powershell", "pwsh"], kind: "terminal" },
   { id: "gnome-terminal", label: "GNOME Terminal", appName: "GNOME Terminal", commands: ["gnome-terminal"], kind: "terminal" },

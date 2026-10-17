@@ -15,6 +15,10 @@ import {
   setFindQuery,
   stepFindMatch,
 } from "@/components/editor/find/findInPagePlugin";
+import messages from "./FindInPageBar.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 
 type FindInPageBarProps = {
   editor: BlockNoteEditor<any, any, any> | null;
@@ -159,8 +163,8 @@ export function FindInPageBar({
           type="button"
           aria-expanded={replaceOpen}
           aria-controls={replaceOpen ? "goose-find-replace-row" : undefined}
-          aria-label={replaceOpen ? "收起替换" : "展开替换"}
-          title={replaceOpen ? "收起替换" : "展开替换"}
+          aria-label={replaceOpen ? t("hideReplace") : t("showReplace")}
+          title={replaceOpen ? t("hideReplace") : t("showReplace")}
           className={iconBtnClass}
           onClick={handleToggleReplace}
         >
@@ -186,8 +190,8 @@ export function FindInPageBar({
                   onClose();
                 }
               }}
-              placeholder="页内查找"
-              aria-label="页内查找"
+              placeholder={t("findInPage")}
+              aria-label={t("findInPage")}
               className={inputClass}
             />
             <span className="w-14 shrink-0 text-center text-xs tabular-nums text-muted-foreground">
@@ -195,8 +199,8 @@ export function FindInPageBar({
             </span>
             <EditorAction
               type="button"
-              title={caseSensitive ? "区分大小写：开" : "区分大小写：关"}
-              aria-label={caseSensitive ? "区分大小写：开" : "区分大小写：关"}
+              title={caseSensitive ? t("matchCaseOn") : t("matchCaseOff")}
+              aria-label={caseSensitive ? t("matchCaseOn") : t("matchCaseOff")}
               aria-pressed={caseSensitive}
               className={cn(
                 iconBtnClass,
@@ -209,8 +213,8 @@ export function FindInPageBar({
             </EditorAction>
             <EditorAction
               type="button"
-              title={`上一个（${formatShortcut("Shift+Enter")}）`}
-              aria-label="上一个匹配"
+              title={t("previousShortcut", { shortcut: formatShortcut("Shift+Enter") })}
+              aria-label={t("previousMatch")}
               className={iconBtnClass}
               disabled={total === 0}
               onClick={() => handleStep(-1)}
@@ -219,8 +223,8 @@ export function FindInPageBar({
             </EditorAction>
             <EditorAction
               type="button"
-              title={`下一个（${formatShortcut("Enter")}）`}
-              aria-label="下一个匹配"
+              title={t("nextShortcut", { shortcut: formatShortcut("Enter") })}
+              aria-label={t("nextMatch")}
               className={iconBtnClass}
               disabled={total === 0}
               onClick={() => handleStep(1)}
@@ -229,8 +233,8 @@ export function FindInPageBar({
             </EditorAction>
             <EditorAction
               type="button"
-              title={`关闭（${formatShortcut("Esc")}）`}
-              aria-label="关闭查找"
+              title={t("closeShortcut", { shortcut: formatShortcut("Esc") })}
+              aria-label={t("closeFind")}
               className={iconBtnClass}
               onClick={onClose}
             >
@@ -263,14 +267,14 @@ export function FindInPageBar({
                     onClose();
                   }
                 }}
-                placeholder="替换"
-                aria-label="替换为"
+                placeholder={t("replace")}
+                aria-label={t("replaceWith")}
                 className={inputClass}
               />
               <EditorAction
                 type="button"
-                title="替换"
-                aria-label="替换"
+                title={t("replace")}
+                aria-label={t("replace")}
                 className={iconBtnClass}
                 disabled={!canReplace}
                 onClick={handleReplace}
@@ -279,8 +283,8 @@ export function FindInPageBar({
               </EditorAction>
               <EditorAction
                 type="button"
-                title="全部替换"
-                aria-label="全部替换"
+                title={t("replaceAll")}
+                aria-label={t("replaceAll")}
                 className={iconBtnClass}
                 disabled={!canReplace}
                 onClick={handleReplaceAll}

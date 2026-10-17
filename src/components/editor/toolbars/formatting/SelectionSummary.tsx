@@ -1,3 +1,13 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/SelectionSummary.tsx#messages:1">`
+zh-Hans:
+  tableSelection: "{{rows}} 行 × {{columns}} 列"
+  blockCount: "{{count}} 块"
+en:
+  tableSelection: "{{rows}} rows × {{columns}} columns"
+  blockCount: "{{count}} blocks"
+`;
+const t = createTranslator(messages);
 import { useBlockNoteEditor, useEditorState } from "@blocknote/react";
 import { CellSelection, selectedRect } from "prosemirror-tables";
 import type { FormattingSelectionMode } from "./formattingCapabilities";
@@ -15,14 +25,14 @@ export function useSelectionSummary(mode: FormattingSelectionMode) {
       ) {
         try {
           const rect = selectedRect(editor.prosemirrorState);
-          return `${rect.bottom - rect.top} 行 × ${rect.right - rect.left} 列`;
+          return t("tableSelection", { rows: rect.bottom - rect.top, columns: rect.right - rect.left });
         } catch {
           return null;
         }
       }
       if (mode === "multiBlock") {
         const count = collectSelectedContentBlockIds(editor).size;
-        return count > 1 ? `${count} 块` : null;
+        return count > 1 ? t("blockCount", { count }) : null;
       }
       return null;
     },

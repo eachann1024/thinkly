@@ -1,6 +1,15 @@
 import { Input } from "@/components/editor/ui/input";
 import { EditorAction } from "@/components/editor/ui/button";
 import type { useEditorComposerInteractions } from "./useEditorComposerInteractions";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/EditorLinkPopover.tsx#messages:1">`
+zh-Hans:
+  confirm: "确认"
+en:
+  confirm: "Confirm"
+`;
+const t = createTranslator(messages);
+
 type EditorLinkPopoverProps = Pick<
   ReturnType<typeof useEditorComposerInteractions>,
   | "linkPopoverOpen"
@@ -49,7 +58,7 @@ export function EditorLinkPopover({
               onClick={handleLinkPopoverSubmit}
               className="goose-interactive goose-interactive-primary flex h-8 items-center rounded-md px-2.5 text-xs font-medium"
             >
-              确认
+              {t("confirm")}
             </EditorAction>
           </div>
         </div>

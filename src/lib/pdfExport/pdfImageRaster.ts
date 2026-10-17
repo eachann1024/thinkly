@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/pdfExport/pdfImageRaster.ts#localMessages:1">`
+zh-Hans:
+  notAnSvgDataUrl: "不是 SVG data URL"
+  theRasterizedSvgIsnTAPngDataUrl: "SVG 栅格化结果不是 PNG data URL"
+en:
+  notAnSvgDataUrl: "Not an SVG data URL"
+  theRasterizedSvgIsnTAPngDataUrl: "The rasterized SVG isn’t a PNG data URL"
+`;
+const uiText = createTranslator(localMessages);
 import { blobToBase64 } from "@/lib/imageStorage/utils";
 
 export const PDF_RASTER_DATA_URL_RE =
@@ -14,7 +25,7 @@ export function isSvgDataUrl(url: string): boolean {
 
 function decodeSvgDataUrl(url: string): string {
   const match = url.match(/^data:image\/svg\+xml([^,]*),(.*)$/is);
-  if (!match) throw new Error("不是 SVG data URL");
+  if (!match) throw new Error(uiText("notAnSvgDataUrl"));
   const meta = match[1] ?? "";
   const payload = match[2] ?? "";
   if (/;base64/i.test(meta)) {
@@ -31,7 +42,7 @@ export async function rasterizeSvgMarkup(svg: string): Promise<string> {
   const blob = await svgMarkupToPngBlob(svg, { targetLongEdge: 2048, padding: 12 });
   const dataUrl = await blobToBase64(blob);
   if (!isRasterPdfImageSrc(dataUrl)) {
-    throw new Error("SVG 栅格化结果不是 PNG data URL");
+    throw new Error(uiText("theRasterizedSvgIsnTAPngDataUrl"));
   }
   return dataUrl;
 }

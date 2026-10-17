@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/providers/claude.ts#localMessages:1">`
+zh-Hans:
+  theCustomAnthropicModelRequestFailed: "请求自定义 Anthropic 模型失败"
+en:
+  theCustomAnthropicModelRequestFailed: "The custom Anthropic model request failed"
+`;
+const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";
 import {
   getCustomAIApiKey,
@@ -61,7 +70,7 @@ export async function handleClaudeStream(
 
   if (!response.ok) {
     const errMs = await readErrorMessage(response);
-    throw new Error(errMs || "请求自定义 Anthropic 模型失败");
+    throw new Error(errMs || uiText("theCustomAnthropicModelRequestFailed"));
   }
 
   let fullText = "";

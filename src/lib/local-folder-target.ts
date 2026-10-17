@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-target.ts#localMessages:1">`
+zh-Hans:
+  repositoryRoot: "仓库根目录"
+  folder: "文件夹"
+en:
+  repositoryRoot: "Repository root"
+  folder: "Folder"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { usePages } from "@/stores/usePages";
@@ -118,7 +129,7 @@ export function buildLocalFolderPickerItems(
   pushItem({
     key: "root",
     folderId: undefined,
-    label: "仓库根目录",
+    label: uiText("repositoryRoot"),
     pathLabel: "/",
   });
 
@@ -127,7 +138,7 @@ export function buildLocalFolderPickerItems(
       pushItem({
         key: "root",
         folderId: undefined,
-        label: "仓库根目录",
+        label: uiText("repositoryRoot"),
         pathLabel: "/",
       });
       continue;
@@ -139,7 +150,7 @@ export function buildLocalFolderPickerItems(
     pushItem({
       key,
       folderId: key,
-      label: getPageTitle(page) || "文件夹",
+      label: getPageTitle(page) || uiText("folder"),
       pathLabel: page.localFilePath ?? key,
     });
   }
@@ -162,7 +173,7 @@ export function buildLocalFolderPickerItems(
     pushItem({
       key: folder.id,
       folderId: folder.id,
-      label: getPageTitle(folder) || "文件夹",
+      label: getPageTitle(folder) || uiText("folder"),
       pathLabel: folder.localFilePath ?? folder.id,
     });
   }

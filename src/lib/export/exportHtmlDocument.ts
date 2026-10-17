@@ -1,3 +1,16 @@
+import { createTranslator, getLocale, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/exportHtmlDocument.ts#localMessages:1">`
+zh-Hans:
+  contents: "目录"
+  outline: "文档目录"
+  collapse: "收起"
+en:
+  contents: "Contents"
+  outline: "Document outline"
+  collapse: "Collapse"
+`;
+const uiText = createTranslator(localMessages);
 import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 import {
   EXPORT_HTML_HEAD_ASSETS,
@@ -75,7 +88,7 @@ export async function renderExportHtml(
   const theme = readThemeSurfaceSnapshot();
   const chromeTokens = `:root { --export-control-surface:${theme.background}; --export-control-fg:${theme.foreground}; --export-control-muted:${theme.secondary}; --export-control-border:${theme.border}; --export-control-hover:${theme.hover}; --export-control-selected:${theme.selected}; --export-control-radius:${theme.radius}; --export-control-gap:0.15rem; }`;
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -88,10 +101,10 @@ ${PAGE_CHROME_CSS}
 </style>
 </head>
 <body>
-<nav class="export-toc" aria-label="文档目录">
+<nav class="export-toc" lang="${getLocale()}" aria-label="${escapeHtmlText(uiText("outline"))}">
   <div class="export-toc__header">
-    <p class="export-toc__title">目录</p>
-    <button class="export-toc__toggle" type="button" aria-expanded="true">收起</button>
+    <p class="export-toc__title">${escapeHtmlText(uiText("contents"))}</p>
+    <button class="export-toc__toggle" type="button" aria-expanded="true">${escapeHtmlText(uiText("collapse"))}</button>
   </div>
   <ol class="export-toc__list"></ol>
 </nav>
@@ -131,7 +144,7 @@ ${bodyHeading}${wrapExportEditorHtml(bodyHtml)}
   if (!list?.children.length) toc?.remove();
   toggle?.addEventListener('click', () => {
     const collapsed = toc?.classList.toggle('is-collapsed') ?? false;
-    toggle.textContent = collapsed ? '目录' : '收起';
+    toggle.textContent = collapsed ? ${JSON.stringify(uiText("contents"))} : ${JSON.stringify(uiText("collapse"))};
     toggle.setAttribute('aria-expanded', String(!collapsed));
   });
 })();

@@ -1,3 +1,42 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookEditDialog.tsx#localMessages:1">`
+zh-Hans:
+  removeLocalFolder_505d: "移除本地文件夹"
+  permanentlyDeleteNotebook_f65f: "永久删除笔记本"
+  editNotebook_ed4e: "编辑笔记本"
+  thisOnlyRemovesTheFolderFrom_f45b: "仅移除挂载，不会删除磁盘上的文件"
+  thisActionCannotBeUndone_a002: "此操作无法撤销，请谨慎操作"
+  changeTheNotebookNameIconAnd_0816: "修改笔记本的名称、图标与搜索设置"
+  remove_e2cf: "确认移除"
+  delete_631c: "确认删除"
+  cancel_625f: "取消"
+  notebookName_1be5: "笔记本名称"
+  enterANotebookName_9843: "输入笔记本名称"
+  excludeFromGlobalSearch_0025: "不在全局搜索中展示"
+  excludeThisNotebookWhenSearchingAll_add2: "开启后，从其他笔记本搜索「所有笔记本」时排除该笔记本；当前笔记本内搜索不受影响。"
+  removeThisNotebook_54d3: "移除此笔记本"
+  deleteThisNotebook_8601: "删除此笔记本"
+  save_be5f: "保存"
+en:
+  removeLocalFolder_505d: "Remove local folder"
+  permanentlyDeleteNotebook_f65f: "Permanently delete notebook"
+  editNotebook_ed4e: "Edit notebook"
+  thisOnlyRemovesTheFolderFrom_f45b: "This only removes the folder from the app. Files on disk are kept."
+  thisActionCannotBeUndone_a002: "This action cannot be undone."
+  changeTheNotebookNameIconAnd_0816: "Change the notebook name, icon, and search settings"
+  remove_e2cf: "Remove"
+  delete_631c: "Delete"
+  cancel_625f: "Cancel"
+  notebookName_1be5: "Notebook name"
+  enterANotebookName_9843: "Enter a notebook name"
+  excludeFromGlobalSearch_0025: "Exclude from global search"
+  excludeThisNotebookWhenSearchingAll_add2: "Exclude this notebook when searching all notebooks from another notebook. Searching within this notebook is unaffected."
+  removeThisNotebook_54d3: "Remove this notebook"
+  deleteThisNotebook_8601: "Delete this notebook"
+  save_be5f: "Save"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { AlertTriangle, Save } from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
@@ -74,13 +113,13 @@ export function NotebookEditDialog({
           )}
           <h1 className="text-2xl font-bold text-foreground mb-2">
             {showDeleteConfirm
-              ? (isLocalFolder ? "移除本地文件夹" : "永久删除笔记本")
-              : "编辑笔记本"}
+              ? (isLocalFolder ? uiText("removeLocalFolder_505d") : uiText("permanentlyDeleteNotebook_f65f"))
+              : uiText("editNotebook_ed4e")}
           </h1>
           <p className="text-muted-foreground">
             {showDeleteConfirm
-              ? (isLocalFolder ? "仅移除挂载，不会删除磁盘上的文件" : "此操作无法撤销，请谨慎操作")
-              : "修改笔记本的名称、图标与搜索设置"}
+              ? (isLocalFolder ? uiText("thisOnlyRemovesTheFolderFrom_f45b") : uiText("thisActionCannotBeUndone_a002"))
+              : uiText("changeTheNotebookNameIconAnd_0816")}
           </p>
         </div>
 
@@ -92,7 +131,7 @@ export function NotebookEditDialog({
                 htmlFor="confirm-delete"
                 className="select-text text-sm font-medium text-danger"
               >
-                {isLocalFolder ? "确认移除" : "确认删除"} <span className="select-text font-bold">{confirmName}</span>
+                {isLocalFolder ? uiText("remove_e2cf") : uiText("delete_631c")} <span className="select-text font-bold">{confirmName}</span>
               </Label>
               <Input
                 id="confirm-delete"
@@ -119,8 +158,7 @@ export function NotebookEditDialog({
                 }}
                 className="flex-1"
               >
-                取消
-              </Button>
+                {uiText("cancel_625f")}</Button>
               <Button
                 variant="destructive"
                 size="lg"
@@ -131,7 +169,7 @@ export function NotebookEditDialog({
                 disabled={!isDeleteEnabled}
                 className="flex-1"
               >
-                {isLocalFolder ? "确认移除" : "确认删除"}
+                {isLocalFolder ? uiText("remove_e2cf") : uiText("delete_631c")}
               </Button>
             </div>
           </div>
@@ -148,10 +186,10 @@ export function NotebookEditDialog({
             <div className="flex flex-col items-center gap-3">
               <Input
                 id="notebook-name"
-                aria-label="笔记本名称"
+                aria-label={uiText("notebookName_1be5")}
                 value={name}
                 onChange={(e) => onNameChange(e.target.value)}
-                placeholder="输入笔记本名称"
+                placeholder={uiText("enterANotebookName_9843")}
                 className="h-12 text-center text-base"
                 autoFocus
                 onKeyDown={(e) => {
@@ -169,11 +207,9 @@ export function NotebookEditDialog({
                   htmlFor="exclude-from-global-search"
                   className="text-sm font-medium text-foreground cursor-pointer"
                 >
-                  不在全局搜索中展示
-                </Label>
+                  {uiText("excludeFromGlobalSearch_0025")}</Label>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  开启后，从其他笔记本搜索「所有笔记本」时排除该笔记本；当前笔记本内搜索不受影响。
-                </p>
+                  {uiText("excludeThisNotebookWhenSearchingAll_add2")}</p>
               </div>
               <Switch
                 id="exclude-from-global-search"
@@ -201,7 +237,7 @@ export function NotebookEditDialog({
                   ) : (
                     <GooseIcons.Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  {isLocalFolder ? "移除此笔记本" : "删除此笔记本"}
+                  {isLocalFolder ? uiText("removeThisNotebook_54d3") : uiText("deleteThisNotebook_8601")}
                 </Button>
               )}
 
@@ -212,8 +248,7 @@ export function NotebookEditDialog({
                 onClick={() => onOpenChange(false)}
                 className="h-11 w-full"
               >
-                取消
-              </Button>
+                {uiText("cancel_625f")}</Button>
               <Button
                 size="lg"
                 onClick={onSave}
@@ -221,8 +256,7 @@ export function NotebookEditDialog({
                 className="h-11 w-full"
               >
                 <Save className="mr-2 h-4 w-4" />
-                保存
-              </Button>
+                {uiText("save_be5f")}</Button>
             </div>
           </div>
         )}

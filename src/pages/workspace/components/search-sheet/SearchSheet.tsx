@@ -1,3 +1,50 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheet.tsx#localMessages:1">`
+zh-Hans:
+  searching: "搜索中…"
+  noteCount: "{{count}} 篇"
+  searchNotes: "搜索笔记…"
+  searchNotesOrAskAi: "搜索笔记、提问 AI…"
+  clearSearch: "清空搜索"
+  searchResults: "搜索结果"
+  recentlyOpened: "最近访问"
+  hide: "隐藏"
+  notes: "笔记"
+  someNotebooksCouldnTBeRead: "部分笔记本读取失败"
+  tryAgain: "重试读取"
+  noMatchingNotes: "未找到相关笔记"
+  searchAllNotebooks: "搜索所有笔记本"
+  searchCurrentNotebook: "搜索当前笔记本"
+  enableAiAnswers: "启用 AI 问答"
+  loadMoreResults: "加载更多结果"
+  select: "选择"
+  open: "打开"
+  askAi: "询问 AI"
+  changeScope: "切换范围"
+en:
+  searching: "Searching…"
+  noteCount: "Notes: {{count}}"
+  searchNotes: "Search notes…"
+  searchNotesOrAskAi: "Search notes or ask AI…"
+  clearSearch: "Clear search"
+  searchResults: "Search results"
+  recentlyOpened: "Recently opened"
+  hide: "Hide"
+  notes: "Notes"
+  someNotebooksCouldnTBeRead: "Some notebooks couldn’t be read"
+  tryAgain: "Try again"
+  noMatchingNotes: "No matching notes"
+  searchAllNotebooks: "Search all notebooks"
+  searchCurrentNotebook: "Search current notebook"
+  enableAiAnswers: "Enable AI answers"
+  loadMoreResults: "Load more results"
+  select: "Select"
+  open: "Open"
+  askAi: "Ask AI"
+  changeScope: "Change scope"
+`;
+const uiText = createTranslator(localMessages);
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
@@ -127,47 +174,47 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const scopeAll = session.scope.kind === "all";
   const statusKind = searchError ? "error" : busy || results.length ? null : hasQuery ? "none" : "empty";
   const resultsKey = `${deferredQuery}|${session.scope.kind}|${session.titleOnly}|${session.sort}`;
-  const count = searchError || !hasQuery ? "" : busy ? "搜索中…" : `${total} 篇`;
+  const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
   return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
     <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>
-    <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label="搜索笔记" inert={!visible} data-dragging={drag.dragging}
+    <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label={uiText("searchNotes")} inert={!visible} data-dragging={drag.dragging}
       style={drag.offset ? { "--search-sheet-drag": `${drag.offset}px` } as CSSProperties : undefined}>
       <div className="search-sheet-grab" aria-hidden="true" {...drag.handlers}/>
       <div className="search-sheet-query">
         <Search size={20} aria-hidden="true"/>
-        <Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label="搜索笔记" aria-controls="search-sheet-results" aria-expanded={visible} aria-autocomplete="list" aria-activedescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
-          value={draft} placeholder={aiReady ? "搜索笔记、提问 AI…" : "搜索笔记…"} autoComplete="off" spellCheck={false}
+        <Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label={uiText("searchNotes")} aria-controls="search-sheet-results" aria-expanded={visible} aria-autocomplete="list" aria-activedescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
+          value={draft} placeholder={aiReady ? uiText("searchNotesOrAskAi") : uiText("searchNotes")} autoComplete="off" spellCheck={false}
           onChange={e => { setDraft(e.target.value); if (!composing.current) session.setQuery(e.target.value); }}
           onCompositionStart={() => { composing.current = true; }} onCompositionEnd={e => { composing.current = false; session.setQuery(e.currentTarget.value); }}/>
-        {draft ? <IconButton size="xs" className="p-0" aria-label="清空搜索" onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
+        {draft ? <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
       </div>
       <SearchSheetFilters count={count}/>
       {answer ? <div className="search-sheet-list" data-answer="true">
         <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
       </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
-        <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label="搜索结果">
+        <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}
-          {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>最近访问</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>隐藏</Button></div>}
-          {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>笔记</span></div>}
+          {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>{uiText("recentlyOpened")}</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>{uiText("hide")}</Button></div>}
+          {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>{uiText("notes")}</span></div>}
           <SearchSheetResults results={results} query={deferredQuery} selectedId={selectedId} notebookNames={notebookNames} pages={pages} openResult={openResult} removeRecent={removeRecent}/>
         </div>
-        {loadError && <div className="search-sheet-status" role="alert">部分笔记本读取失败<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>重试读取</Button></div>}
+        {loadError && <div className="search-sheet-status" role="alert">{uiText("someNotebooksCouldnTBeRead")}<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>{uiText("tryAgain")}</Button></div>}
         {statusKind && <div key={statusKind} className="search-sheet-status" role={statusKind === "error" ? "alert" : "status"} data-state={statusKind}>
           <span className="search-sheet-status-glyph" aria-hidden="true">{statusKind === "error" ? <CircleAlert size={20}/> : statusKind === "none" ? <FileX size={20}/> : <Search size={20}/>}</span>
-          <strong>{statusKind === "error" ? searchError : statusKind === "none" ? "未找到相关笔记" : scopeAll ? "搜索所有记事本" : "搜索当前记事本"}</strong>
+          <strong>{statusKind === "error" ? searchError : statusKind === "none" ? uiText("noMatchingNotes") : scopeAll ? uiText("searchAllNotebooks") : uiText("searchCurrentNotebook")}</strong>
           {statusKind === "none" && <div className="search-sheet-status-actions">
-            <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? "清空搜索" : "搜索所有记事本"}</Button>
-            {!aiReady && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>启用 AI 问答</Button>}
+            <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? uiText("clearSearch") : uiText("searchAllNotebooks")}</Button>
+            {!aiReady && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>{uiText("enableAiAnswers")}</Button>}
           </div>}
         </div>}
-        {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>加载更多结果</Button>}
+        {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>{uiText("loadMoreResults")}</Button>}
         {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}
       </div>}
       <div className="search-sheet-footer" aria-hidden="true">
-        <span><kbd className="search-sheet-kbd">↑↓</kbd>选择</span>
-        <span><kbd className="search-sheet-kbd">↵</kbd>打开</span>
-        {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>询问 AI</span>}
-        <span><kbd className="search-sheet-kbd">Tab</kbd>切换范围</span>
+        <span><kbd className="search-sheet-kbd">↑↓</kbd>{uiText("select")}</span>
+        <span><kbd className="search-sheet-kbd">↵</kbd>{uiText("open")}</span>
+        {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("askAi")}</span>}
+        <span><kbd className="search-sheet-kbd">Tab</kbd>{uiText("changeScope")}</span>
       </div>
     </div>
   </div></OverlayLayerProvider>;

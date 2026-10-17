@@ -1,3 +1,12 @@
+import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/watermark.ts#localMessages:1">`
+zh-Hans:
+  gooseNotes: "鹅的笔记"
+en:
+  gooseNotes: "Goose Note"
+`;
+const uiText = createTranslator(localMessages);
 import type { CardTheme } from "./themes";
 
 // ── Watermark ──────────────────────────────────────────────────
@@ -32,7 +41,7 @@ export function getWatermarkHTML(
   if (!theme.watermarkVisible || !config.showWatermark) return "";
 
   const brandParts: string[] = [];
-  if (config.showBrand) brandParts.push("鹅的笔记");
+  if (config.showBrand) brandParts.push(uiText("gooseNotes"));
   const brandHtml = brandParts.length > 0
     ? `<span class="gooseshot-watermark-brand">${brandParts.join(" · ")}</span>`
     : "";
@@ -40,10 +49,9 @@ export function getWatermarkHTML(
   let dateHtml = "";
   if (config.showDate) {
     const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const dateStr = `${now.getFullYear()}年${pad(now.getMonth() + 1)}月${pad(now.getDate())}日`;
+    const dateStr = now.toLocaleDateString(getFormatLocale());
     const timeStr = config.showTime
-      ? ` ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
+      ? ` ${now.toLocaleTimeString(getFormatLocale())}`
       : "";
     dateHtml = `<div class="gooseshot-watermark-date">${dateStr}${timeStr}</div>`;
   }

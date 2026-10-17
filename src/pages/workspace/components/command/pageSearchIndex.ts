@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/command/pageSearchIndex.ts#localMessages:1">`
+zh-Hans:
+  untitled: "无标题"
+en:
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Shared incremental MiniSearch index. Every complete index is tied to one
  * immutable catalog; partially maintained versions are never queried.
@@ -10,7 +19,7 @@ import type { SearchCatalog } from "./pageSearchCatalog";
 import { createSearchTaskBudget, yieldSearchTask } from "./searchTaskScheduling";
 
 function isPlaceholderTitle(title: string): boolean {
-  return title === UNTITLED_PAGE_TITLE || title === "无标题";
+  return title === UNTITLED_PAGE_TITLE || title === uiText("untitled");
 }
 
 function bodyForSearchIndex(page: Page, title: string): string {

@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/pdfExport/printPdf.ts#localMessages:1">`
+zh-Hans:
+  thePdfPrintingServiceReturnedEmptyContent: "printToPDF 返回空内容"
+  thePdfPrintingServiceIsUnavailable: "printToPDF 不可用"
+  theDesktopPdfPrintingServiceIsUnavailable: "Electron PDF 打印服务不可用"
+en:
+  thePdfPrintingServiceReturnedEmptyContent: "The PDF printing service returned empty content"
+  thePdfPrintingServiceIsUnavailable: "The PDF printing service is unavailable"
+  theDesktopPdfPrintingServiceIsUnavailable: "The desktop PDF printing service is unavailable"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Electron 主路径：把笔记 HTML 丢进隐藏窗，webContents.printToPDF。
  * 浏览器没有这套 API 时由 exportToPDF 降级 react-pdf。
@@ -99,7 +112,7 @@ export async function renderPrintHtml(
     : "";
   const editorCss = sanitizePrintCss(await getExportHtmlCss());
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -180,7 +193,7 @@ function pdfBase64ToBlob(base64: string): Blob {
     bytes[i] = binary.charCodeAt(i);
   }
   if (bytes.byteLength < 80) {
-    throw new Error("printToPDF 返回空内容");
+    throw new Error(uiText("thePdfPrintingServiceReturnedEmptyContent"));
   }
   return new Blob([bytes], { type: "application/pdf" });
 }
@@ -190,7 +203,7 @@ export async function exportPageViaPrintToPdf(
   blocks: BlockNoteContent,
 ): Promise<Blob> {
   if (!canPrintToPdf()) {
-    throw new Error("printToPDF 不可用");
+    throw new Error(uiText("thePdfPrintingServiceIsUnavailable"));
   }
   const html = await buildPagePrintHtml(page, blocks);
   const gfs = window.gooseFs as (GooseFs & {
@@ -198,8 +211,8 @@ export async function exportPageViaPrintToPdf(
   }) | undefined;
   if (typeof gfs?.printHtmlToPdf === "function") {
     const base64 = await gfs.printHtmlToPdf(html);
-    if (!base64) throw new Error("printToPDF 返回空内容");
+    if (!base64) throw new Error(uiText("thePdfPrintingServiceReturnedEmptyContent"));
     return pdfBase64ToBlob(base64);
   }
-  throw new Error("Electron PDF 打印服务不可用");
+  throw new Error(uiText("theDesktopPdfPrintingServiceIsUnavailable"));
 }

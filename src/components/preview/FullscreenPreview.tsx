@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/preview/FullscreenPreview.tsx#localMessages:1">`
+zh-Hans:
+  preview: "预览"
+  zoomOut: "缩小"
+  zoomIn: "放大"
+  resetZoom: "重置为 100%"
+  closePreview: "关闭预览"
+en:
+  preview: "Preview"
+  zoomOut: "Zoom out"
+  zoomIn: "Zoom in"
+  resetZoom: "Reset to 100%"
+  closePreview: "Close preview"
+`;
+const uiText = createTranslator(localMessages);
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Minus, Plus, RotateCcw, X } from "@/components/ui/icons";
@@ -26,7 +43,7 @@ export function FullscreenPreview(props: FullscreenPreviewProps) {
 function ActiveFullscreenPreview({
   open,
   content,
-  title = "预览",
+  title = uiText("preview"),
   onClose,
 }: FullscreenPreviewProps) {
   const themeSurface = useThemeSurfaceSnapshot();
@@ -53,7 +70,7 @@ function ActiveFullscreenPreview({
               type="button"
               tone="muted"
               size="sm"
-              aria-label="缩小"
+              aria-label={uiText("zoomOut")}
               disabled={atMinZoom}
               className={PREVIEW_ICON_CLASS}
               onClick={() =>
@@ -71,7 +88,7 @@ function ActiveFullscreenPreview({
               type="button"
               tone="muted"
               size="sm"
-              aria-label="放大"
+              aria-label={uiText("zoomIn")}
               disabled={atMaxZoom}
               className={PREVIEW_ICON_CLASS}
               onClick={() =>
@@ -86,7 +103,7 @@ function ActiveFullscreenPreview({
               type="button"
               tone="muted"
               size="sm"
-              aria-label="重置为 100%"
+              aria-label={uiText("resetZoom")}
               disabled={zoomPercent === 100}
               className={PREVIEW_ICON_CLASS}
               onClick={() => setZoomPercent(100)}
@@ -98,7 +115,7 @@ function ActiveFullscreenPreview({
             type="button"
             tone="muted"
             size="sm"
-            aria-label="关闭预览"
+            aria-label={uiText("closePreview")}
             className={`goose-code-preview-lightbox-close ${PREVIEW_ICON_CLASS}`}
             onClick={onClose}
           >

@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/index.ts#localMessages:1">`
+zh-Hans:
+  readError: "读取文件失败：{{error}}"
+  invalidJsonTheContentFieldIsMissing: "无效的 JSON 格式：缺少 content 字段"
+  couldnTParseTheJsonFile: "解析 JSON 失败"
+  noteFiles: "笔记文件"
+  noFileSelected: "未选择文件"
+  unsupportedFileFormat: "不支持的文件格式"
+  couldnTReadTheFile: "读取文件失败"
+en:
+  readError: "Couldn’t read the file: {{error}}"
+  invalidJsonTheContentFieldIsMissing: "Invalid JSON: the content field is missing"
+  couldnTParseTheJsonFile: "Couldn’t parse the JSON file"
+  noteFiles: "Note files"
+  noFileSelected: "No file selected"
+  unsupportedFileFormat: "Unsupported file format"
+  couldnTReadTheFile: "Couldn’t read the file"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import type { CustomFonts } from "@/stores/useSettings";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
@@ -72,7 +93,7 @@ export function importFromJSON(
         title: "",
         content: createEmptyBlockNoteContent(),
         success: false,
-        error: "无效的 JSON 格式：缺少 content 字段",
+        error: uiText("invalidJsonTheContentFieldIsMissing"),
       };
     }
     const record = data as Record<string, unknown>;
@@ -81,7 +102,7 @@ export function importFromJSON(
         title: "",
         content: createEmptyBlockNoteContent(),
         success: false,
-        error: "无效的 JSON 格式：缺少 content 字段",
+        error: uiText("invalidJsonTheContentFieldIsMissing"),
       };
     }
 
@@ -105,7 +126,7 @@ export function importFromJSON(
       title: "",
       content: createEmptyBlockNoteContent(),
       success: false,
-      error: "解析 JSON 失败",
+      error: uiText("couldnTParseTheJsonFile"),
     };
   }
 }
@@ -121,9 +142,9 @@ export async function importFile(options?: {
   });
   try {
     const file = await pickImportFile([
-      { name: "笔记文件", extensions: ["json", "md", "markdown", "txt"] },
+      { name: uiText("noteFiles"), extensions: ["json", "md", "markdown", "txt"] },
     ]);
-    if (!file) return failed("未选择文件");
+    if (!file) return failed(uiText("noFileSelected"));
     const text = await file.text();
     const ext = file.name.split(".").pop()?.toLowerCase();
     const filename = file.name.replace(/\.[^/.]+$/, "");
@@ -133,9 +154,9 @@ export async function importFile(options?: {
         preserveStructure: options?.preserveStructure === true,
       });
     }
-    return failed("不支持的文件格式");
+    return failed(uiText("unsupportedFileFormat"));
   } catch (error) {
     return failed(error instanceof Error && error.message
-      ? `读取文件失败：${error.message}` : "读取文件失败");
+      ? uiText("readError", {error: error.message}) : uiText("couldnTReadTheFile"));
   }
 }

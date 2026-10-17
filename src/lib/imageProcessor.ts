@@ -1,3 +1,27 @@
+import { formatDecimal } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageProcessor.ts#localMessages:1">`
+zh-Hans:
+  imageDecodeFailed: "图片解码失败（{{type}}，{{size}}MB），请确认不是损坏文件"
+  imageTooLarge: "图片过大（约 {{size}}MB），超过 {{limit}}MB 上限"
+  compressedImageTooLarge: "图片过大（约 {{size}}MB），压缩后仍超过 {{limit}}MB 上限"
+  imageDecodingIsUnavailableCreateimagebitmapIsMissing: "当前环境不支持图片解码（缺少 createImageBitmap）"
+  couldnTCreateACanvasToProcessTheImage: "无法创建画布，图片处理失败"
+  webpEncodingFailed: "WebP 编码失败"
+  couldnTCreateACanvasToConvertTheImage: "无法创建画布，PNG 转换失败"
+  couldnTConvertTheImageToPng: "转换为 PNG 失败"
+en:
+  imageDecodeFailed: "Couldn’t decode the image ({{type}}, {{size}} MB). Check that the file isn’t damaged."
+  imageTooLarge: "The image (about {{size}} MB) exceeds the {{limit}} MB limit"
+  compressedImageTooLarge: "The compressed image (about {{size}} MB) still exceeds the {{limit}} MB limit"
+  imageDecodingIsUnavailableCreateimagebitmapIsMissing: "Image decoding is unavailable (createImageBitmap is missing)"
+  couldnTCreateACanvasToProcessTheImage: "Couldn’t create a canvas to process the image"
+  webpEncodingFailed: "WebP encoding failed"
+  couldnTCreateACanvasToConvertTheImage: "Couldn’t create a canvas to convert the image to PNG"
+  couldnTConvertTheImageToPng: "Couldn’t convert the image to PNG"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * 图片处理工具：压缩、转换、存储
  *
@@ -61,14 +85,14 @@ function resolveTargetSize(
 
 async function decodeBitmap(blob: Blob): Promise<ImageBitmap> {
   if (typeof createImageBitmap !== "function") {
-    throw new Error("当前环境不支持图片解码（缺少 createImageBitmap）");
+    throw new Error(uiText("imageDecodingIsUnavailableCreateimagebitmapIsMissing"));
   }
 
   try {
     return await createImageBitmap(blob);
   } catch {
     throw new Error(
-      `图片解码失败（${blob.type || "unknown"}，${(blob.size / (1024 * 1024)).toFixed(1)}MB），请确认不是损坏文件`,
+      uiText("imageDecodeFailed", {type: blob.type || 'unknown', size: formatDecimal(blob.size / (1024 * 1024), 1)}),
     );
   }
 }
@@ -86,7 +110,7 @@ async function encodeWebp(
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     bitmap.close();
-    throw new Error("无法创建画布，图片处理失败");
+    throw new Error(uiText("couldnTCreateACanvasToProcessTheImage"));
   }
 
   ctx.drawImage(bitmap, 0, 0, size.width, size.height);
@@ -94,7 +118,7 @@ async function encodeWebp(
 
   const encoded = await canvasToBlob(canvas, WEBP_MIME, quality);
   if (!encoded || encoded.size === 0) {
-    throw new Error("WebP 编码失败");
+    throw new Error(uiText("webpEncodingFailed"));
   }
   return encoded;
 }
@@ -118,7 +142,7 @@ export async function compressIfNeeded(
   if (source.type === WEBP_MIME) {
     if (source.size > MAX_IMAGE_STORE_BYTES) {
       throw new Error(
-        `图片过大（约 ${(source.size / (1024 * 1024)).toFixed(1)}MB），超过 ${Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}MB 上限`,
+        uiText("imageTooLarge", {size: formatDecimal(source.size / (1024 * 1024), 1), limit: Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}),
       );
     }
     return source;
@@ -131,7 +155,7 @@ export async function compressIfNeeded(
 
   if (encoded.size > MAX_IMAGE_STORE_BYTES) {
     throw new Error(
-      `图片过大（约 ${(encoded.size / (1024 * 1024)).toFixed(1)}MB），压缩后仍超过 ${Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}MB 上限`,
+      uiText("compressedImageTooLarge", {size: formatDecimal(encoded.size / (1024 * 1024), 1), limit: Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}),
     );
   }
 
@@ -160,7 +184,7 @@ export async function convertImageBlobToPng(input: Blob): Promise<Blob> {
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     bitmap.close();
-    throw new Error("无法创建画布，PNG 转换失败");
+    throw new Error(uiText("couldnTCreateACanvasToConvertTheImage"));
   }
 
   ctx.drawImage(bitmap, 0, 0);
@@ -168,7 +192,7 @@ export async function convertImageBlobToPng(input: Blob): Promise<Blob> {
 
   const png = await canvasToBlob(canvas, PNG_MIME);
   if (!png || png.size === 0) {
-    throw new Error("转换为 PNG 失败");
+    throw new Error(uiText("couldnTConvertTheImageToPng"));
   }
   return png;
 }

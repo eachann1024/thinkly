@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/techApplication.ts#localMessages:1">`
+zh-Hans:
+  vercelBlack: "Vercel 极黑"
+  minimalBlackWithAModernEdge: "纯黑极简，硬核现代"
+  dark: "深色"
+  minimal: "极简"
+  tokyoNight: "东京之夜"
+  deepBluesAndPurplesInspiredByAClassicEditor: "深蓝紫调，编辑器经典"
+  code: "代码"
+  aDarkThemeWithSoftPinkAccents: "柔和粉调暗色，开发者最爱"
+  soft: "柔和"
+  coolGeometricStylingWithATechnicalFeel: "几何冷感，工程师审美"
+  light: "浅色"
+  geometric: "几何"
+en:
+  vercelBlack: "Vercel Black"
+  minimalBlackWithAModernEdge: "Minimal black with a modern edge"
+  dark: "Dark"
+  minimal: "Minimal"
+  tokyoNight: "Tokyo Night"
+  deepBluesAndPurplesInspiredByAClassicEditor: "Deep blues and purples inspired by a classic editor theme"
+  code: "Code"
+  aDarkThemeWithSoftPinkAccents: "A dark theme with soft pink accents"
+  soft: "Soft"
+  coolGeometricStylingWithATechnicalFeel: "Cool geometric styling with a technical feel"
+  light: "Light"
+  geometric: "Geometric"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
@@ -5,10 +36,10 @@ export const TECH_APPLICATION: CardTheme[] = [
   // ── 12. Vercel Geist ─────────────────────────────────────────
   {
     id: "vercel-dark",
-    name: "Vercel 极黑",
+    name: uiText("vercelBlack"),
     nameEn: "Vercel Geist",
-    description: "纯黑极简，硬核现代",
-    tags: ["深色", "极简"],
+    description: uiText("minimalBlackWithAModernEdge"),
+    tags: [uiText("dark"), uiText("minimal")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -47,10 +78,10 @@ export const TECH_APPLICATION: CardTheme[] = [
   // ── 13. Tokyo Night ──────────────────────────────────────────
   {
     id: "tokyo-night",
-    name: "东京之夜",
+    name: uiText("tokyoNight"),
     nameEn: "Tokyo Night",
-    description: "深蓝紫调，编辑器经典",
-    tags: ["深色", "代码"],
+    description: uiText("deepBluesAndPurplesInspiredByAClassicEditor"),
+    tags: [uiText("dark"), uiText("code")],
     mode: "dark",
     titleFont: "'Inter', 'JetBrains Mono', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -91,8 +122,8 @@ export const TECH_APPLICATION: CardTheme[] = [
     id: "catppuccin",
     name: "Catppuccin",
     nameEn: "Macchiato",
-    description: "柔和粉调暗色，开发者最爱",
-    tags: ["深色", "柔和"],
+    description: uiText("aDarkThemeWithSoftPinkAccents"),
+    tags: [uiText("dark"), uiText("soft")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -133,8 +164,8 @@ export const TECH_APPLICATION: CardTheme[] = [
     id: "linear",
     name: "Linear",
     nameEn: "Linear",
-    description: "几何冷感，工程师审美",
-    tags: ["浅色", "几何"],
+    description: uiText("coolGeometricStylingWithATechnicalFeel"),
+    tags: [uiText("light"), uiText("geometric")],
     mode: "light",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",

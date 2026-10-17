@@ -9,6 +9,15 @@ import {
   insertArtifactBlocks,
   tableToMarkdown,
 } from "./insertArtifact";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/TableCard.tsx#messages:1">`
+zh-Hans:
+  table: "表格"
+en:
+  table: "Table"
+`;
+const t = createTranslator(messages);
+
 
 interface TableCardProps {
   title?: string;
@@ -23,7 +32,7 @@ function tableFilename(title?: string) {
       ?.trim()
       .replace(/[\\/:*?"<>|]+/g, "")
       .replace(/\s+/g, " ")
-      .slice(0, 40) || "表格";
+      .slice(0, 40) || t("table");
   return `${base}.md`;
 }
 
@@ -52,7 +61,7 @@ export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
   return (
     <div className="notebook-ai-canvas-card notebook-ai-canvas-card--scroll my-2 min-w-0 max-w-full">
       <div className="notebook-ai-canvas-card-header">
-        <div className="notebook-ai-canvas-card-title">{title?.trim() || "表格"}</div>
+        <div className="notebook-ai-canvas-card-title">{title?.trim() || t("table")}</div>
         {markdown ? (
           <ArtifactActions
             previewIdentity={JSON.stringify([markdown, title])}

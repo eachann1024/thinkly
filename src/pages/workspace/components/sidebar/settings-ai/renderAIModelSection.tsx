@@ -1,3 +1,28 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIModelSection.tsx#localMessages:1">`
+zh-Hans:
+  aiModels_a342: "AI 模型"
+  fetchingModels_e925: "正在获取模型…"
+  fetchError: "获取失败：{{error}}"
+  availableModels: "{{count}} 个可用模型"
+  saveTheServiceConfigurationToFetch_d515: "请先保存服务配置以获取模型"
+  fetching_43c6: "获取中…"
+  refreshModels_3d7d: "重新获取模型"
+  defaultModel_b11d: "默认模型"
+  selectAModel_0e34: "请选择模型"
+en:
+  aiModels_a342: "AI models"
+  fetchingModels_e925: "Fetching models…"
+  fetchError: "Fetch failed: {{error}}"
+  availableModels: "Available models: {{count}}"
+  saveTheServiceConfigurationToFetch_d515: "Save the service configuration to fetch models"
+  fetching_43c6: "Fetching…"
+  refreshModels_3d7d: "Refresh models"
+  defaultModel_b11d: "Default model"
+  selectAModel_0e34: "Select a model"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -54,18 +79,17 @@ export function renderAIModelSection(
               className="h-4 w-4 shrink-0 text-muted-foreground"
               strokeWidth={1.75}
             />
-            AI 模型
-          </span>
+            {uiText("aiModels_a342")}</span>
         }
         description={
           <span role="status" aria-live="polite">
             {savingCustomConfig
-              ? "正在获取模型…"
+              ? uiText("fetchingModels_e925")
               : customSaveError
-                ? `获取失败：${customSaveError}`
+                ? uiText("fetchError", { error: customSaveError })
                 : customModels.length > 0
-                  ? `${customModels.length} 个可用模型`
-                  : "请先保存服务配置以获取模型"}
+                  ? uiText("availableModels", { count: customModels.length })
+                  : uiText("saveTheServiceConfigurationToFetch_d515")}
           </span>
         }
         actions={
@@ -85,7 +109,7 @@ export function renderAIModelSection(
             ) : (
               <GooseIcons.RefreshCw className="h-4 w-4" />
             )}
-            {savingCustomConfig ? "获取中…" : "重新获取模型"}
+            {savingCustomConfig ? uiText("fetching_43c6") : uiText("refreshModels_3d7d")}
           </Button>
         }
       >
@@ -103,8 +127,7 @@ export function renderAIModelSection(
               />
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-foreground">
-                  默认模型
-                </Label>
+                  {uiText("defaultModel_b11d")}</Label>
               </div>
             </div>
             <TooltipProvider delayDuration={600}>
@@ -125,7 +148,7 @@ export function renderAIModelSection(
                           <span className="truncate">
                             {currentModel?.label ??
                               modelButtonReason ??
-                              "请选择模型"}
+                              uiText("selectAModel_0e34")}
                           </span>
                           <GooseIcons.ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
                         </Button>

@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/TabRail.tsx#localMessages:1">`
+zh-Hans:
+  openTabs: "打开的标签页"
+  allTabs: "全部标签页"
+  newTab: "新标签页"
+  missingPage: "页面已不存在"
+en:
+  openTabs: "Open tabs"
+  allTabs: "All tabs"
+  newTab: "New tab"
+  missingPage: "This note no longer exists"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { activateWorkspace } from "@/lib/settings-navigation";
@@ -96,7 +111,7 @@ export function TabRail({
       <div
         ref={tabsScrollerRef}
         role="tablist"
-        aria-label="打开的标签页"
+        aria-label={uiText("openTabs")}
         className={cn(
           "relative @container min-w-0 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           tabRailListClassName(visibleTabs.length),
@@ -154,7 +169,7 @@ export function TabRail({
                 <IconButton size="sm" tone="muted"
                   type="button"
                   className="inline-flex shrink-0 items-center justify-center text-muted-foreground "
-                  aria-label="全部标签页"
+                  aria-label={uiText("allTabs")}
                 >
                   <GooseIcons.ChevronDown
                     className="h-3.5 w-3.5"
@@ -173,10 +188,10 @@ export function TabRail({
                     tab.type === "welcome" ? undefined : getPage(displayPageId);
                   const title =
                     tab.type === "welcome"
-                      ? "新标签页"
+                      ? uiText("newTab")
                       : tabPage
                         ? getPageTitle(tabPage)
-                        : "页面已不存在";
+                        : uiText("missingPage");
                   const isActive =
                     activeTabId === tab.id &&
                     !(aiPanelOpen && isFullscreenAiLayout(aiLayoutMode));

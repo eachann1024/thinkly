@@ -1,11 +1,28 @@
 import type { NotebookAiImageAttachment } from "../Composer";
 import { formatNotebookAiError } from "@/lib/notebook-ai/errors";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/helpers.ts#messages:1">`
+zh-Hans:
+  askAiUseForCommandsOrSkillsOr: "向 AI 提问，/ 调用指令或 Skill，@ 引用笔记或本地文件…"
+  askAiToCreateATrendChartFrom: "让 AI 根据当前笔记生成一张趋势图…"
+  askAiToDrawAFlowchartOrArchitecture: "让 AI 画一个流程图或架构图…"
+  askAiToCreateAnIconOrIllustration: "让 AI 生成一张图标或示意图…"
+  trySummarizeLocalFileAndMapOutThe: "试试：总结 @本地文件，并画出要点关系图…"
+en:
+  askAiUseForCommandsOrSkillsOr: "Ask AI, use / for commands or skills, or @ to reference notes or local files…"
+  askAiToCreateATrendChartFrom: "Ask AI to create a trend chart from this note…"
+  askAiToDrawAFlowchartOrArchitecture: "Ask AI to draw a flowchart or architecture diagram…"
+  askAiToCreateAnIconOrIllustration: "Ask AI to create an icon or illustration…"
+  trySummarizeLocalFileAndMapOutThe: "Try: summarize @local-file and map out the key ideas…"
+`;
+const t = createTranslator(messages);
+
 export const NOTEBOOK_AI_PLACEHOLDER_HINTS = [
-  "向 AI 提问，/ 调用指令或 Skill，@ 引用笔记或本地文件…",
-  "让 AI 根据当前笔记生成一张趋势图…",
-  "让 AI 画一个流程图或架构图…",
-  "让 AI 生成一张图标或示意图…",
-  "试试：总结 @本地文件，并画出要点关系图…",
+  t("askAiUseForCommandsOrSkillsOr"),
+  t("askAiToCreateATrendChartFrom"),
+  t("askAiToDrawAFlowchartOrArchitecture"),
+  t("askAiToCreateAnIconOrIllustration"),
+  t("trySummarizeLocalFileAndMapOutThe"),
 ];
 
 export function createChatMessageId(prefix: string) {

@@ -6,6 +6,17 @@ import {
   dispatchAppendComposerSelection,
   SELECTION_QUOTE_ADD_SHORTCUT,
 } from "@/components/editor/ai/composer/selectionQuote";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AddToChatButton.tsx#messages:1">`
+zh-Hans:
+  addSelectionToChat: "将选区加入对话"
+  addToChat: "加入对话"
+en:
+  addSelectionToChat: "Add selection to chat"
+  addToChat: "Add to chat"
+`;
+const t = createTranslator(messages);
+
 
 export function AddToChatButton({
   selectedText,
@@ -24,7 +35,7 @@ export function AddToChatButton({
         <EditorAction
           type="button"
           className="goose-formatting-toolbar-add-to-chat"
-          aria-label="将选区加入对话"
+          aria-label={t("addSelectionToChat")}
           aria-keyshortcuts="Control+Shift+U Meta+Shift+U"
           onClick={() => {
             dispatchAppendComposerSelection({
@@ -37,11 +48,11 @@ export function AddToChatButton({
         >
           <MessageSquare aria-hidden="true" />
           <span className="goose-formatting-toolbar-add-to-chat-label">
-            加入对话
+            {t("addToChat")}
           </span>
         </EditorAction>
       </TooltipTrigger>
-      <ToolbarTooltip label="将选区加入对话" shortcut={SELECTION_QUOTE_ADD_SHORTCUT} />
+      <ToolbarTooltip label={t("addSelectionToChat")} shortcut={SELECTION_QUOTE_ADD_SHORTCUT} />
     </Tooltip>
   );
 }

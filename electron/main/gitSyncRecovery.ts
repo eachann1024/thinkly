@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { createHash } from "node:crypto";
 
 type Files = Record<string, string>;
@@ -14,7 +15,7 @@ export function retainDeletedGitFiles(base: Files | undefined, local: Files, rem
     const destination = `.goose/recovery/${name}/${hash}.json`;
     const record = JSON.stringify({ version: 1, relativePath: name, reason: "deleted", sha256: hash, encoding: "base64", content }, null, 2) + "\n";
     const encoded = Buffer.from(record).toString("base64");
-    if (result[destination] !== undefined && result[destination] !== encoded) throw new Error("删除恢复记录发生冲突，原文件已保留");
+    if (result[destination] !== undefined && result[destination] !== encoded) throw new Error(t("recoveryConflict"));
     result[destination] = encoded;
   }
   return result;

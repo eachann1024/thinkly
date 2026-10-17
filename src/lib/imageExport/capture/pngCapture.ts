@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/capture/pngCapture.ts#localMessages:1">`
+zh-Hans:
+  loadFailed: "图片加载失败"
+  imageEncodingFailed: "图片编码失败"
+  imageGenerationTimedOut: "生成图片超时"
+  imageEncodingTimedOut: "图片编码超时"
+  couldnTGenerateTheImage: "生成图片失败"
+en:
+  loadFailed: "Image couldn’t load"
+  imageEncodingFailed: "Image encoding failed"
+  imageGenerationTimedOut: "Image generation timed out"
+  imageEncodingTimedOut: "Image encoding timed out"
+  couldnTGenerateTheImage: "Couldn’t generate the image"
+`;
+const uiText = createTranslator(localMessages);
 import { toCanvas } from "html-to-image";
 import { TEXT_COLORS } from "@/lib/textColors";
 import { getElementCapturePixelRatios } from "./pixelRatio";
@@ -12,7 +29,7 @@ function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
         if (blob) {
           resolve(blob);
         } else {
-          reject(new Error("图片编码失败"));
+          reject(new Error(uiText("imageEncodingFailed")));
         }
       }, "image/png");
     } catch (error) {
@@ -51,18 +68,18 @@ export async function renderPngBlobWithFallback(element: HTMLElement): Promise<B
             encodeURIComponent(
               '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80">' +
                 '<rect width="200" height="80" rx="6" fill="#f3f4f6"/>' +
-                `<text x="100" y="44" font-family="sans-serif" font-size="13" fill="${TEXT_COLORS.light.secondary}" text-anchor="middle">图片加载失败</text>` +
+                `<text x="100" y="44" font-family="sans-serif" font-size="13" fill="${TEXT_COLORS.light.secondary}" text-anchor="middle">${uiText("loadFailed")}</text>` +
                 "</svg>",
             ),
         }),
         CAPTURE_TIMEOUT_MS,
-        "生成图片超时",
+        uiText("imageGenerationTimedOut"),
       );
 
       return await withTimeout(
         canvasToPngBlob(canvas),
         CAPTURE_TIMEOUT_MS,
-        "图片编码超时",
+        uiText("imageEncodingTimedOut"),
       );
     } catch (error) {
       lastError = error;
@@ -86,5 +103,5 @@ export async function renderPngBlobWithFallback(element: HTMLElement): Promise<B
     }
   }
 
-  throw lastError instanceof Error ? lastError : new Error("生成图片失败");
+  throw lastError instanceof Error ? lastError : new Error(uiText("couldnTGenerateTheImage"));
 }

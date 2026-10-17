@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/command/useCommandSearchScope.ts#localMessages:1">`
+zh-Hans:
+  couldnTReadTheSearchFolderClose: "搜索目录读取失败，请关闭搜索后重试"
+en:
+  couldnTReadTheSearchFolderClose: "Couldn’t read the search folder. Close search and try again."
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";
 import type { Page } from "@/types";
 import {
@@ -37,7 +46,7 @@ export function useCommandSearchScope(
       if (controller.signal.aborted) return;
       console.error("Command search catalog failed", error);
       setPrepared({ ...snapshot, catalog: null, scope: EMPTY_PAGES,
-        error: "搜索目录读取失败，请关闭搜索后重试" });
+        error: uiText("couldnTReadTheSearchFolderClose") });
     });
     return () => { controller.abort(); };
   }, [pages, notebooks, all, activeId, enabled]);

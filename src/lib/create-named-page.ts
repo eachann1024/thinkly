@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/create-named-page.ts#localMessages:1">`
+zh-Hans:
+  couldnTCreateTheNoteTheDestinationIsUnavailable: "新建失败：目标位置不可用或无写入权限"
+en:
+  couldnTCreateTheNoteTheDestinationIsUnavailable: "Couldn’t create the note: the destination is unavailable or you don’t have write permission"
+`;
+const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { createDefaultPageContent, focusNewPage } from "@/stores/pages/actions/create/content";
@@ -11,7 +20,7 @@ export async function createNamedPage(parentId: string | undefined, workspaceId:
   const notebooks = useNotebooks.getState();
   if (notebooks.notebooks[workspaceId]?.source === "local-folder") {
     const localId = await usePages.getState().createLocalPage(parentId, workspaceId);
-    if (!localId) toast.error("新建失败：目标位置不可用或无写入权限");
+    if (!localId) toast.error(uiText("couldnTCreateTheNoteTheDestinationIsUnavailable"));
     return localId;
   }
   flushEditorContent();

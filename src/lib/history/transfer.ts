@@ -1,3 +1,5 @@
+import { historyText as uiText } from "./messages";
+
 import {
   historyDiskOperation,
   readHistoryLocations,
@@ -18,7 +20,7 @@ export async function withNotebookHistoryTransfer<T>(
   move: () => Promise<T>,
 ): Promise<T> {
   const fs = rendererHistoryDisk();
-  if (!fs) throw new Error("历史文件系统不可用");
+  if (!fs) throw new Error(uiText("historyStorageIsUnavailable"));
   const roots = [sourceBase, targetBase].sort();
   const locked = (index: number): Promise<T> =>
     index < roots.length
@@ -47,7 +49,7 @@ export async function withNotebookHistoryTransfer<T>(
     for (const file of await fs!.readDir(sourceRoot)) {
       if (!file.isFile || !/^[a-f0-9]{8}\..+\.json$/.test(file.name)) continue;
       const text = await fs!.readFile(`${sourceRoot}/${file.name}`);
-      if (!text) throw new Error("历史文件无法读取，已停止移动");
+      if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheMove"));
       const data = JSON.parse(text);
       const from =
         data.relativePath ?? originalHistoryPath(data.pageId, data.workspaceId);
@@ -82,10 +84,10 @@ export async function withNotebookHistoryTransfer<T>(
             const from = `${directory}/${file.name}`,
               to = `${destination}/${file.name}`;
             const text = await fs!.readFile(from);
-            if (!text) throw new Error("历史文件无法读取，已停止移动");
+            if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheMove"));
             const data = JSON.parse(text);
             if (data.pageId !== entry.id)
-              throw new Error("历史标识不一致，已停止移动");
+              throw new Error(uiText("historyIdentifiersDonTMatchTheMoveStopped"));
             const content =
               JSON.stringify(
                 {
@@ -113,19 +115,19 @@ export async function withNotebookHistoryTransfer<T>(
               !(await fs!.exists(destination)) &&
               !(await fs!.mkdir(destination))
             )
-              throw new Error("无法创建目标历史目录");
+              throw new Error(uiText("couldnTCreateTheDestinationHistoryFolder"));
             const existing = (await fs!.exists(to))
               ? await fs!.readFile(to)
               : null;
             if (existing !== null && existing !== content)
-              throw new Error("目标记事本已有不同历史记录，已停止移动");
+              throw new Error(uiText("theDestinationNotebookHasDifferentHistoryRecordsTheMove"));
             if (existing === null) {
               created.push(to);
               if (!(await fs!.writeFile(to, content)))
-                throw new Error("历史迁移写入失败");
+                throw new Error(uiText("couldnTWriteTheMigratedHistory"));
             }
             if ((await fs!.readFile(to)) !== content)
-              throw new Error("历史迁移校验失败");
+              throw new Error(uiText("migratedHistoryFailedVerification"));
             originals.add(from);
             hasHistory = true;
           }

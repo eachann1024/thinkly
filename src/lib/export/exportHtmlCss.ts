@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/exportHtmlCss.ts#localMessages:1">`
+zh-Hans:
+  exportStylesAreMissingFromThisBuild: "导出样式未打包"
+en:
+  exportStylesAreMissingFromThisBuild: "Export styles are missing from this build"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS, textColorVariables } from "@/lib/textColors";
 /**
  * 独立 HTML / printToPDF 共用的编辑器样式。
@@ -202,7 +211,7 @@ async function loadViteVendorCss(): Promise<string> {
   // Vite 编译期展开；Playwright 单测不会走到这里（先读磁盘）。
   const loaders = import.meta.glob("./exportHtmlCss.vite.ts");
   const load = loaders["./exportHtmlCss.vite.ts"];
-  if (!load) throw new Error("导出样式未打包");
+  if (!load) throw new Error(uiText("exportStylesAreMissingFromThisBuild"));
   const mod = (await load()) as { EXPORT_VENDOR_CSS: string };
   return mod.EXPORT_VENDOR_CSS;
 }

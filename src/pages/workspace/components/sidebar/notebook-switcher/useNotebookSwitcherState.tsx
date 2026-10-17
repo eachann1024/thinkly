@@ -1,3 +1,13 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1">`
+zh-Hans:
+  folder: "文件夹"
+  openFolder: "打开文件夹"
+en:
+  folder: "Folder"
+  openFolder: "Open folder"
+`;
+const uiText = createTranslator(localMessages);
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortNotebooksByOrder, useNotebooks } from "@/stores/useNotebooks";
@@ -63,10 +73,10 @@ export function useNotebookSwitcherState({
   const isRail = variant === "rail";
   const isHeader = variant === "header";
 
-  const notebookKind = "文件夹";
+  const notebookKind = uiText("folder");
 
   const activeNotebookLabel =
-    activeNotebook?.name || "打开文件夹";
+    activeNotebook?.name || uiText("openFolder");
 
   const notebookList = sortNotebooksByOrder(notebooks);
   // Electron 仅本地文件夹模式：最后一个文件夹也允许移除（回到空态）

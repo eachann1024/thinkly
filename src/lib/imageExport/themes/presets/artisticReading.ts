@@ -1,3 +1,42 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/artisticReading.ts#localMessages:1">`
+zh-Hans:
+  mediumMagazine: "Medium 杂志"
+  largeSerifHeadingsForComfortableReading: "衬线大标题，阅读感"
+  magazine: "杂志"
+  reading: "阅读"
+  haraWhite: "原研哉·白"
+  generousWhiteSpaceWithAQuietMinimalFeel: "极致留白，东方禅意"
+  minimal: "极简"
+  design: "设计"
+  vintageTypewriter: "复古打字机"
+  creamPaperWithALiteraryFeel: "米黄纸张，文学气息"
+  vintage: "复古"
+  literary: "文学"
+  academicLatex: "学术 LaTeX"
+  preciseTypesettingInspiredByAcademicPapers: "严谨排版，论文感"
+  academic: "学术"
+  formal: "严肃"
+en:
+  mediumMagazine: "Medium Magazine"
+  largeSerifHeadingsForComfortableReading: "Large serif headings for comfortable reading"
+  magazine: "Magazine"
+  reading: "Reading"
+  haraWhite: "Hara White"
+  generousWhiteSpaceWithAQuietMinimalFeel: "Generous white space with a quiet, minimal feel"
+  minimal: "Minimal"
+  design: "Design"
+  vintageTypewriter: "Vintage Typewriter"
+  creamPaperWithALiteraryFeel: "Cream paper with a literary feel"
+  vintage: "Vintage"
+  literary: "Literary"
+  academicLatex: "Academic LaTeX"
+  preciseTypesettingInspiredByAcademicPapers: "Precise typesetting inspired by academic papers"
+  academic: "Academic"
+  formal: "Formal"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
@@ -5,10 +44,10 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 3. Medium ────────────────────────────────────────────────
   {
     id: "medium",
-    name: "Medium 杂志",
+    name: uiText("mediumMagazine"),
     nameEn: "Medium",
-    description: "衬线大标题，阅读感",
-    tags: ["杂志", "阅读"],
+    description: uiText("largeSerifHeadingsForComfortableReading"),
+    tags: [uiText("magazine"), uiText("reading")],
     mode: "light",
     titleFont: "'Noto Serif SC', 'Georgia', 'Times New Roman', serif",
     bodyFont: "'Noto Serif SC', 'Georgia', 'Times New Roman', serif",
@@ -47,10 +86,10 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 4. Kenya Hara ────────────────────────────────────────────
   {
     id: "kenya-hara",
-    name: "原研哉·白",
+    name: uiText("haraWhite"),
     nameEn: "Kenya Hara",
-    description: "极致留白，东方禅意",
-    tags: ["极简", "设计"],
+    description: uiText("generousWhiteSpaceWithAQuietMinimalFeel"),
+    tags: [uiText("minimal"), uiText("design")],
     mode: "light",
     titleFont: "'Noto Sans SC', 'Helvetica Neue', sans-serif",
     bodyFont: "'Noto Sans SC', 'Helvetica Neue', sans-serif",
@@ -89,10 +128,10 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 5. Typewriter ────────────────────────────────────────────
   {
     id: "typewriter",
-    name: "复古打字机",
+    name: uiText("vintageTypewriter"),
     nameEn: "Typewriter",
-    description: "米黄纸张，文学气息",
-    tags: ["复古", "文学"],
+    description: uiText("creamPaperWithALiteraryFeel"),
+    tags: [uiText("vintage"), uiText("literary")],
     mode: "light",
     titleFont: "'Courier Prime', 'Noto Serif SC', 'Songti SC', serif",
     bodyFont: "'Courier Prime', 'Noto Serif SC', 'Songti SC', serif",
@@ -131,10 +170,10 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 7. Academic ──────────────────────────────────────────────
   {
     id: "academic",
-    name: "学术 LaTeX",
+    name: uiText("academicLatex"),
     nameEn: "Academic",
-    description: "严谨排版，论文感",
-    tags: ["学术", "严肃"],
+    description: uiText("preciseTypesettingInspiredByAcademicPapers"),
+    tags: [uiText("academic"), uiText("formal")],
     mode: "light",
     titleFont: "'Noto Serif SC', 'Times New Roman', 'Georgia', serif",
     bodyFont: "'Noto Serif SC', 'Times New Roman', 'Georgia', serif",

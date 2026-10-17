@@ -1,3 +1,4 @@
+import { t } from "../i18n/updates";
 import { app } from "electron";
 import { execFile, spawn } from "node:child_process";
 import { access, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
@@ -14,15 +15,15 @@ const unpackedApp = (update: VerifiedUpdate) => path.join(path.dirname(update.pa
 const stageRecord = () => path.join(app.getPath("userData"), "app-updates", "install-stage.json");
 
 async function validateBundle(bundle: string, version: string): Promise<void> {
-  if (!(await lstat(bundle)).isDirectory() || await realpath(bundle) !== bundle) throw new Error("更新应用目录无效");
+  if (!(await lstat(bundle)).isDirectory() || await realpath(bundle) !== bundle) throw new Error(t("invalidBundle"));
   const plist = path.join(bundle, "Contents", "Info.plist");
   const value = async (key: string) => (await exec("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", plist])).stdout.trim();
   if (await value("CFBundleIdentifier") !== "com.goosenote.desktop" || await value("CFBundleShortVersionString") !== version) {
-    throw new Error("更新应用的身份或版本不匹配");
+    throw new Error(t("identityMismatch"));
   }
   const executable = path.join(bundle, "Contents", "MacOS", "Goose Note");
   const arch = (await exec("/usr/bin/lipo", ["-archs", executable])).stdout.trim().split(/\s+/);
-  if (!arch.includes(process.arch === "arm64" ? "arm64" : "x86_64")) throw new Error("更新应用的架构不匹配");
+  if (!arch.includes(process.arch === "arm64" ? "arm64" : "x86_64")) throw new Error(t("architectureMismatch"));
 }
 
 export async function prepareMacUpdate(update: VerifiedUpdate): Promise<void> {
@@ -73,7 +74,7 @@ rm -rf "$stage"
 async function installMac(update: VerifiedUpdate): Promise<void> {
   const target = installedApp();
   if (!target.endsWith(".app") || target.includes("/AppTranslocation/") || target.startsWith("/Volumes/")) {
-    throw new Error("请先将鹅的笔记移到应用程序文件夹，再安装更新");
+    throw new Error(t("moveToApplications"));
   }
   await access(path.dirname(target), constants.W_OK);
   // Re-extract from the verified archive so an interrupted/modified staging folder is never reused.
@@ -105,7 +106,7 @@ async function installMac(update: VerifiedUpdate): Promise<void> {
 
 export async function installUpdate(update: VerifiedUpdate): Promise<void> {
   if (process.platform === "darwin") return installMac(update);
-  if (process.platform !== "win32" || !update.path.endsWith(".exe")) throw new Error("请打开已下载的安装包完成更新");
+  if (process.platform !== "win32" || !update.path.endsWith(".exe")) throw new Error(t("finishInstaller"));
   await flushBeforeUpdate();
   const child = spawn(update.path, ["--updated", "--force-run"], { detached: true, stdio: "ignore" });
   await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });

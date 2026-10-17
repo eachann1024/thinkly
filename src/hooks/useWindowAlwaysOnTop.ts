@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/hooks/useWindowAlwaysOnTop.ts#block1:1">`
+zh-Hans:
+  readPinFailed: "无法读取窗口置顶状态，请重试"
+  togglePinFailed: "窗口置顶切换失败，请重试"
+en:
+  readPinFailed: "Couldn’t read the window’s always-on-top setting. Please try again."
+  togglePinFailed: "Couldn’t change the window’s always-on-top setting. Please try again."
+`);
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -22,7 +31,7 @@ export function useWindowAlwaysOnTop(): {
     void getDesktopAlwaysOnTop().then((value) => {
       if (!cancelled) setAlwaysOnTop(value);
     }).catch(() => {
-      if (!cancelled) toast.error("无法读取窗口置顶状态，请重试");
+      if (!cancelled) toast.error(storeText("readPinFailed"));
     }).finally(() => {
       if (!cancelled) {
         pendingRef.current = false;
@@ -47,7 +56,7 @@ export function useWindowAlwaysOnTop(): {
       const next = await setDesktopAlwaysOnTop(!current);
       if (mountedRef.current) setAlwaysOnTop(next);
     } catch {
-      if (mountedRef.current) toast.error("窗口置顶切换失败，请重试");
+      if (mountedRef.current) toast.error(storeText("togglePinFailed"));
     } finally {
       pendingRef.current = false;
       if (mountedRef.current) setIsPending(false);

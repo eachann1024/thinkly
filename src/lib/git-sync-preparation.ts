@@ -1,9 +1,12 @@
+import { getLocale } from "../i18n/core";
+import { gitMessages, gitText } from "./git-messages";
+import { historyMessages, HistoryWriteError } from "./history/messages";
 export interface GitSyncPreparationRequest {
   finished: boolean;
   addRelease: (release: () => void) => void;
 }
 
-const safeFailures = new Set([
+const safeSources = new Set([
   "同步文件夹无效", "同步文件夹重复或重叠",
   "同步笔记本未打开或路径已变化，请重新打开或关联此文件夹",
   "笔记本还有未保存的内容，请保存后再重试同步",
@@ -12,16 +15,28 @@ const safeFailures = new Set([
   "历史迁移校验失败，原文件已保留", "历史已迁移，旧副本尚未清理；下次备份将重试",
   "历史文件无法读取，已停止迁移", "历史文件格式无效，已停止迁移", "笔记历史路径无效",
   "历史路径映射无效，原历史文件已保留", "历史路径映射包含无效路径，原历史文件已保留",
+  "无法创建隐藏历史目录，请检查文件夹写入权限", "无法保存隐藏历史记录，请检查文件夹写入权限",
 ]);
+const safeFailures = new Map<string, { "zh-Hans": string; en: string }>();
+for (const catalog of [gitMessages, historyMessages]) {
+  for (const [key, source] of Object.entries(catalog["zh-Hans"])) {
+    if (!safeSources.has(source)) continue;
+    const pair = { "zh-Hans": source, en: catalog.en[key]! };
+    safeFailures.set(source, pair);
+    safeFailures.set(pair.en, pair);
+  }
+}
+
+export const isGitPreparationMessage = (message: string) => safeFailures.has(message);
 
 /** Only known application messages cross IPC; native paths and causes stay local. */
 export function gitSyncPreparationFailure(error: unknown): string {
+  if (error instanceof HistoryWriteError) {
+    return gitText(error.kind === "directory" ? "createHistoryFailed" : "saveHistoryFailed");
+  }
   const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";
-  if (safeFailures.has(message)) return message;
-  if (message.startsWith("无法创建历史目录：")) return "无法创建隐藏历史目录，请检查文件夹写入权限";
-  if (message.startsWith("无法保存历史文件：")) return "无法保存隐藏历史记录，请检查文件夹写入权限";
-  if (["无法创建隐藏历史目录，请检查文件夹写入权限", "无法保存隐藏历史记录，请检查文件夹写入权限"].includes(message)) return message;
-  return "工作区未能保存全部笔记，已停止同步；请检查未保存内容后重试";
+  const known = safeFailures.get(message);
+  return known ? known[getLocale()] : gitText("preparationFailed");
 }
 
 /** Tracks all roots in one window request; late acquisitions are released immediately. */

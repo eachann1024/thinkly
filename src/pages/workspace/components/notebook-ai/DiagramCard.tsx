@@ -9,6 +9,21 @@ import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 
 import { diagramRenderReducer } from "./diagramRenderState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/DiagramCard.tsx#messages:1">`
+zh-Hans:
+  theDiagramIsNotReadyYet: "图形尚未就绪"
+  diagram: "图形"
+  diagramGenerationFailed: "图形生成失败"
+  generatingDiagram: "正在生成图形"
+en:
+  theDiagramIsNotReadyYet: "The diagram is not ready yet"
+  diagram: "Diagram"
+  diagramGenerationFailed: "Diagram generation failed"
+  generatingDiagram: "Generating diagram"
+`;
+const t = createTranslator(messages);
+
 
 interface DiagramCardProps {
   title?: string;
@@ -50,14 +65,14 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
     const markup =
       svg ||
       (await renderMermaidSvgForExport(source, resolvedTheme));
-    if (!markup.trim()) throw new Error("图形尚未就绪");
+    if (!markup.trim()) throw new Error(t("theDiagramIsNotReadyYet"));
     return svgMarkupToPngBlob(markup);
   }, [resolvedTheme, source, svg]);
 
   return (
     <div className="notebook-ai-canvas-card my-2 overflow-hidden">
       <div className="notebook-ai-canvas-card-header">
-        <div className="notebook-ai-canvas-card-title">{title?.trim() || "图形"}</div>
+        <div className="notebook-ai-canvas-card-title">{title?.trim() || t("diagram")}</div>
         <ArtifactActions
           previewIdentity={key}
           copySource={source}
@@ -68,7 +83,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
             const markup =
               svg ||
               (await renderMermaidSvgForExport(source, resolvedTheme));
-            if (!markup.trim()) throw new Error("图形尚未就绪");
+            if (!markup.trim()) throw new Error(t("theDiagramIsNotReadyYet"));
             return {
               kind: "svg",
               markup,
@@ -96,11 +111,11 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
         </ArtifactPanZoom>
       ) : failed ? (
         <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          图形生成失败
+          {t("diagramGenerationFailed")}
         </div>
       ) : (
         <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          正在生成图形
+          {t("generatingDiagram")}
         </div>
       )}
     </div>

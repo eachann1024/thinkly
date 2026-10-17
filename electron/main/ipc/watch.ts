@@ -1,3 +1,4 @@
+import { t } from "../i18n/nativeServices";
 import { ipcMain } from "electron";
 import { type WatchEventType } from "node:fs";
 import path from "node:path";
@@ -37,7 +38,7 @@ export function registerWatchIpc(): void {
       console.warn("[desktop:fsWatch] failed to start watcher", target, err);
       const detail =
         err instanceof Error && err.message ? err.message : String(err);
-      throw new Error(`无法监视目录: ${detail}`, { cause: err });
+      throw new Error(t("watchFailed", { reason: detail }), { cause: err });
     }
     return id;
   });

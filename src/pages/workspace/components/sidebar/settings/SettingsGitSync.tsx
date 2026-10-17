@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsGitSync.tsx#localMessages:1">`
+zh-Hans:
+  saveSelectionAndSync_e9da: "保存选择并同步"
+  savingSettingsAutomatically_a7dc: "自动保存设置"
+  operationFailed: "{{action}}失败：{{error}}"
+  selectAtLeastOneFolderTo_0e62: "请先选择至少一个同步文件夹"
+  connectAndSync_9751: "连接并同步"
+  restoreFolder_5b9e: "恢复文件夹"
+en:
+  saveSelectionAndSync_e9da: "Save selection and sync"
+  savingSettingsAutomatically_a7dc: "Saving settings automatically"
+  operationFailed: "{{action}} failed: {{error}}"
+  selectAtLeastOneFolderTo_0e62: "Select at least one folder to sync"
+  connectAndSync_9751: "Connect and sync"
+  restoreFolder_5b9e: "Restore folder"
+`;
+const uiText = createTranslator(localMessages);
 import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
@@ -65,7 +84,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const syncing = status?.phase === "syncing";
   const disabled = loading || Boolean(loadError) || Boolean(pending) || syncing;
   const selectionDisabled =
-    loading || Boolean(loadError) || Boolean(pending && pending !== "保存选择并同步" && pending !== "自动保存设置");
+    loading || Boolean(loadError) || Boolean(pending && pending !== uiText("saveSelectionAndSync_e9da") && pending !== uiText("savingSettingsAutomatically_a7dc"));
   const updateDraft = <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => {
     setErrors((current) => ({ ...current, [id]: "" }));
     setDrafts((current) => ({
@@ -94,7 +113,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       applyState(await operation());
       onSuccess?.();
     } catch (error) {
-      setErrors((current) => ({ ...current, [repositoryId]: `${label}失败：${messageOf(error)}` }));
+      setErrors((current) => ({ ...current, [repositoryId]: uiText("operationFailed", { action: label, error: messageOf(error) }) }));
     } finally {
       locks.current.delete(repositoryId);
       setBusy((current) => ({ ...current, [repositoryId]: "" }));
@@ -112,7 +131,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     const timer = setTimeout(() => {
       void run(
         id,
-        folderSnapshot || reconciledFolders ? "保存选择并同步" : "自动保存设置",
+        folderSnapshot || reconciledFolders ? uiText("saveSelectionAndSync_e9da") : uiText("savingSettingsAutomatically_a7dc"),
         () => bridge.save(validate({ ...config, ...draft, folders })),
         () => {
           setDrafts((current) => {
@@ -138,12 +157,12 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   function connect() {
     if (!bridge || disabled) return;
     if (!folders.length) {
-      setErrors((current) => ({ ...current, [id]: "请先选择至少一个同步文件夹" }));
+      setErrors((current) => ({ ...current, [id]: uiText("selectAtLeastOneFolderTo_0e62") }));
       return;
     }
     void run(
       id,
-      "连接并同步",
+      uiText("connectAndSync_9751"),
       () => bridge.save(validate({ id, ...draft, layout: "subfolders", folders })),
       () => {
         setDrafts((current) => {
@@ -188,7 +207,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     if (!bridge || disabled) return;
     void run(
       id,
-      "恢复文件夹",
+      uiText("restoreFolder_5b9e"),
       async () => {
         const localPath = await selectRecoveryPath(folder, relocate);
         if (!localPath) return bridge.getState();

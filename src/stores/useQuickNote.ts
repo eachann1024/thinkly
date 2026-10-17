@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/useQuickNote.ts#block1:1">`
+zh-Hans:
+  quicknoteRecovered: "已恢复未完成保存的速记"
+  quicknoteRecoveredDetail: "恢复内容已放回原速记槽位，请确认后继续编辑。"
+  quicknoteDraftSeparate: "发现未自动覆盖的速记恢复稿"
+  quicknoteNewer: "现有草稿更新，恢复稿仍被安全保留。"
+en:
+  quicknoteRecovered: "Unsaved Quick Note recovered"
+  quicknoteRecoveredDetail: "The recovered content is back in its original slot. Review it before continuing to edit."
+  quicknoteDraftSeparate: "A Quick Note recovery draft was preserved separately"
+  quicknoteNewer: "The current draft is newer. The recovery draft has been safely preserved."
+`);
 import { create } from "zustand";
 import type { QuickNoteState } from "./quicknote/types";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -93,17 +106,17 @@ export const useQuickNote = create<QuickNoteState>()(
       );
       if (recovery.recoveredSlots.length > 0) {
         queueMicrotask(() =>
-          toast.warning("已恢复未完成保存的速记", {
+          toast.warning(storeText("quicknoteRecovered"), {
             id: "goose-quicknote-recovered",
-            description: "恢复内容已放回原便签槽位，请确认后继续编辑。",
+            description: storeText("quicknoteRecoveredDetail"),
           }),
         );
       }
       if (recovery.conflictSlots.length > 0) {
         queueMicrotask(() =>
-          toast.warning("发现未自动覆盖的速记恢复稿", {
+          toast.warning(storeText("quicknoteDraftSeparate"), {
             id: "goose-quicknote-recovery-conflict",
-            description: "现有草稿更新，恢复稿仍被安全保留。",
+            description: storeText("quicknoteNewer"),
           }),
         );
       }

@@ -1,6 +1,17 @@
 import { generateText } from "ai";
 import { buildLanguageModel } from "./model";
 import type { NotebookAiMessage } from "./types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/compactConversation.ts#messages:1">`
+zh-Hans:
+  thereIsNoContentToCompactInThis: "当前会话没有可压缩的内容"
+  compactionFailedNoSummaryWasReturned: "压缩失败，未得到摘要"
+en:
+  thereIsNoContentToCompactInThis: "There is no content to compact in this conversation"
+  compactionFailedNoSummaryWasReturned: "Compaction failed. No summary was returned."
+`;
+const t = createTranslator(messages);
+
 
 const MAX_COMPACT_TRANSCRIPT_CHARS = 80_000;
 
@@ -110,7 +121,7 @@ export async function generateConversationCompactSummary(
   }
   const transcript = formatConversationTranscript(messages);
   if (!transcript) {
-    throw new Error("当前会话没有可压缩的内容");
+    throw new Error(t("thereIsNoContentToCompactInThis"));
   }
   const { text } = await generateText({
     model: modelCheck.model,
@@ -121,7 +132,7 @@ export async function generateConversationCompactSummary(
   });
   const summary = text.trim();
   if (!summary) {
-    throw new Error("压缩失败，未得到摘要");
+    throw new Error(t("compactionFailedNoSummaryWasReturned"));
   }
   return summary;
 }

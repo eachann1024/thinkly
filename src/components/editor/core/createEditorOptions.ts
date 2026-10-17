@@ -1,5 +1,5 @@
 import type { BlockNoteEditorOptions } from "@blocknote/core";
-import { zh } from "@blocknote/core/locales";
+import { en, zh } from "@blocknote/core/locales";
 import { normalizeExternalUrl } from "@/lib/openExternalUrl";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { shouldArmLinkOpenHint } from "@/components/editor/extensions/linkKeyboardExtension";
@@ -16,6 +16,17 @@ import { isLinkworthyText } from "@/components/editor/utils/clipboard";
 import { editorSchema } from "./schema";
 import type { EditorSession } from "./useEditorSession";
 import type { useEditorExtensions } from "./useEditorExtensions";
+import { i18nYaml, createTranslator, getLocale } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/createEditorOptions.ts#messages:1">`
+zh-Hans:
+  typeToInsertABlock: "输入 / 选择内容"
+  quote: "引用"
+en:
+  typeToInsertABlock: "Type / to insert a block"
+  quote: "Quote"
+`;
+const t = createTranslator(messages);
+
 
 export function createEditorOptions(
   session: EditorSession,
@@ -30,6 +41,7 @@ export function createEditorOptions(
     getActivePageLocalFilePathRef,
     onOpenPageRef,
   } = session;
+  const dictionary = getLocale() === "zh-Hans" ? zh : en;
   return {
     initialContent: initialContent as any,
     schema: editorSchema,
@@ -43,16 +55,16 @@ export function createEditorOptions(
       "divider-block-shortcuts",
     ],
     dictionary: {
-      ...zh,
+      ...dictionary,
       placeholders: {
-        ...zh.placeholders,
+        ...dictionary.placeholders,
         // 速记小窗打开即可输入，不用长提示抢占空白草稿的视觉焦点。
         // 常规笔记本仍保留菜单入口提示。
         default:
           isQuickNoteEditorPage(page)
             ? ""
-            : "输入 / 选择内容",
-        quote: "引用",
+            : t("typeToInsertABlock"),
+        get quote() { return t("quote"); },
         toggleListItem: "",
       },
     },

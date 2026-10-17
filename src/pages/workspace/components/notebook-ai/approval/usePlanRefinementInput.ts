@@ -2,6 +2,15 @@ import { useEffect, type RefObject } from "react";
 import type { AiComposerInputHandle } from "@/components/editor/ai/composer/AiComposerInput";
 import { toast } from "@/components/ui/sonner";
 import { REFINE_PLAN_EVENT, takePendingRefinement, type RefinePlanRequest } from "./refinePlan";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/approval/usePlanRefinementInput.ts#messages:1">`
+zh-Hans:
+  theInputIsTemporarilyUnavailableTryRefiningThe: "输入框暂不可用，请稍后调整方案。"
+en:
+  theInputIsTemporarilyUnavailableTryRefiningThe: "The input is temporarily unavailable. Try refining the plan later."
+`;
+const t = createTranslator(messages);
+
 
 /** 追加到现有草稿，保留引用和附件；由用户补充要求后发送。 */
 export function usePlanRefinementInput(
@@ -15,7 +24,7 @@ export function usePlanRefinementInput(
       const input = inputRef.current;
       const el = input?.getEditorEl();
       if (disabled || !input || !el) {
-        toast.error("输入框暂不可用，请稍后调整方案。");
+        toast.error(t("theInputIsTemporarilyUnavailableTryRefiningThe"));
         return;
       }
       input.focus();

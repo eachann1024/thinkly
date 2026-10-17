@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarInlineRename.tsx#localMessages:1">`
+zh-Hans:
+  namesCannotContainPathSeparatorsOr_26f3: "名称不能包含路径分隔符或非法字符"
+  thisItemNoLongerExists_0117: "该项目已不存在"
+  renameFailed_37ba: "重命名失败"
+  renameEnterToConfirmEscapeTo_4d0a: "重命名，Enter 确认，Escape 取消"
+  pressTabOrClickElsewhereTo_7735: "Tab 或点击其他位置保存；空名称保留原名"
+en:
+  namesCannotContainPathSeparatorsOr_26f3: "Names cannot contain path separators or invalid characters"
+  thisItemNoLongerExists_0117: "This item no longer exists"
+  renameFailed_37ba: "Rename failed"
+  renameEnterToConfirmEscapeTo_4d0a: "Rename: Enter to confirm, Escape to cancel"
+  pressTabOrClickElsewhereTo_7735: "Press Tab or click elsewhere to save. Leave empty to keep the current name."
+`;
+const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { getPageTitle, withInternalPageTitle } from "@/components/editor/utils/page-title";
@@ -59,15 +76,15 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
     }
     // eslint-disable-next-line no-control-regex -- 文件名校验需要明确拒绝控制字符。
     if (/[\\/:*?"<>|\x00-\x1f\x7f]/.test(next) || /^\.+$/.test(next)) {
-      setError("名称不能包含路径分隔符或非法字符");
-      toast.error("名称不能包含路径分隔符或非法字符");
+      setError(uiText("namesCannotContainPathSeparatorsOr_26f3"));
+      toast.error(uiText("namesCannotContainPathSeparatorsOr_26f3"));
       return;
     }
     committing.current = true;
     setBusy(true);
     try {
       const live = usePages.getState().pages[page.id];
-      if (!live || live.trashedAt) throw new Error("该项目已不存在");
+      if (!live || live.trashedAt) throw new Error(uiText("thisItemNoLongerExists_0117"));
       if (live.localFilePath) {
         await usePages.getState().renameLocalPageFile(live.id, next);
       } else {
@@ -77,7 +94,7 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
       }
       finish(document.activeElement === inputRef.current);
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : "重命名失败";
+      const message = cause instanceof Error ? cause.message : uiText("renameFailed_37ba");
       setError(message);
       toast.error(message);
     } finally {
@@ -92,9 +109,9 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
       ref={inputRef}
       data-sidebar-rename-field=""
       className="relative z-20 min-w-0 flex-1 cursor-text select-text"
-      aria-label="重命名，Enter 确认，Escape 取消"
+      aria-label={uiText("renameEnterToConfirmEscapeTo_4d0a")}
       aria-invalid={!!error}
-      aria-description={error || "Tab 或点击其他位置保存；空名称保留原名"}
+      aria-description={error || uiText("pressTabOrClickElsewhereTo_7735")}
       aria-busy={busy}
       value={value}
       readOnly={busy}

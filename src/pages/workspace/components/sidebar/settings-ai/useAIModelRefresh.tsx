@@ -1,3 +1,31 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/useAIModelRefresh.tsx#localMessages:1">`
+zh-Hans:
+  fetchingModelsTimedOutAfter30_6d78: "获取模型列表超时（30 秒），配置已保存，可重试。"
+  theModelListWasNotUpdated_9f40: "模型列表未更新，已保留当前配置。"
+  theApiKeyWasSavedBut_935a: "API Key 已保存，模型列表未能更新。"
+  providerSaved: "{{provider}} 配置已保存"
+  noModelsReturnedCheckWhetherThis_5cfd: "已获取 0 个模型，请确认该服务是否提供模型列表接口。"
+  providerSwitched: "已切换到 {{provider}}"
+  modelsUpdated: "{{provider}} 模型列表已更新"
+  modelsFetched: "已获取 {{count}} 个模型，默认选择 {{model}}。"
+  couldNotFetchTheModelList_7e6f: "获取模型列表失败"
+  theServiceConfigurationCouldNotBe_4f24: "服务配置未能保存。"
+  enterAnApiKeyAndSave_67e0: "填写 API Key 并保存后，将自动获取模型列表。"
+en:
+  fetchingModelsTimedOutAfter30_6d78: "Fetching models timed out after 30 seconds. Your configuration was saved; you can try again."
+  theModelListWasNotUpdated_9f40: "The model list was not updated. Your current configuration was kept."
+  theApiKeyWasSavedBut_935a: "The API key was saved, but the model list could not be updated."
+  providerSaved: "{{provider}} configuration saved"
+  noModelsReturnedCheckWhetherThis_5cfd: "No models returned. Check whether this service provides a model-list endpoint."
+  providerSwitched: "Switched to {{provider}}"
+  modelsUpdated: "{{provider}} model list updated"
+  modelsFetched: "Models fetched: {{count}}. Default: {{model}}."
+  couldNotFetchTheModelList_7e6f: "Could not fetch the model list"
+  theServiceConfigurationCouldNotBe_4f24: "The service configuration could not be saved."
+  enterAnApiKeyAndSave_67e0: "Enter an API key and save to fetch the model list automatically."
+`;
+const uiText = createTranslator(localMessages);
 import { isModelRequestBusy } from "./aiRequestState";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -20,7 +48,6 @@ import {
   readStoredApiKey,
 } from "./shared";
 import type { useAIConnectionTest } from "./useAIConnectionTest";
-
 export function useAIModelRefresh(
   input: ReturnType<typeof useAIConnectionTest>,
 ) {
@@ -51,7 +78,6 @@ export function useAIModelRefresh(
     scrollToModelSection,
     saveButtonReason,
   } = input;
-
   const refreshCustomModels = async (
     connection: ProviderConnection,
     action: "save" | "switch" | "refresh",
@@ -62,7 +88,6 @@ export function useAIModelRefresh(
       toast.error(CUSTOM_AI_KEY_HINT);
       return;
     }
-
     const provider = getAIProviderPreset(connection.providerId);
     if (isOnboarding) cancelModelRefresh();
     const requestId = ++modelRequestIdRef.current;
@@ -73,19 +98,18 @@ export function useAIModelRefresh(
         if (requestId !== modelRequestIdRef.current || !isMountedRef.current) {
           return;
         }
-        const message = "获取模型列表超时（30 秒），配置已保存，可重试。";
+        const message = uiText("fetchingModelsTimedOutAfter30_6d78");
         sendRequestEvent({ type: "models.failed", requestId, message });
         modelRequestIdRef.current += 1;
         modelAbortControllerRef.current = null;
         modelTimeoutRef.current = null;
         controller.abort();
         toast.error(message, {
-          description: action === "refresh" ? "模型列表未更新，已保留当前配置。" : "API Key 已保存，模型列表未能更新。",
+          description: action === "refresh" ? uiText("theModelListWasNotUpdated_9f40") : uiText("theApiKeyWasSavedBut_935a"),
         });
       }, 30_000);
     }
     sendRequestEvent({ type: "models.started", requestId, action });
-
     try {
       // 先持久化供应商 / Key / Base URL，避免拉模型失败时配置丢失。
       const sameSavedConnection = areSetupGuideAIConnectionsEqual(
@@ -143,18 +167,18 @@ export function useAIModelRefresh(
       scrollToModelSection();
 
       if (modelOptions.length === 0) {
-        toast.warning(`${provider.label} 配置已保存`, {
-          description: "已获取 0 个模型，请确认该服务是否提供模型列表接口。",
+        toast.warning(uiText("providerSaved", { provider: provider.label }), {
+          description: uiText("noModelsReturnedCheckWhetherThis_5cfd"),
         });
       } else {
         const actionLabel =
           action === "switch"
-            ? `已切换到 ${provider.label}`
+            ? uiText("providerSwitched", { provider: provider.label })
             : action === "refresh"
-              ? `${provider.label} 模型列表已更新`
-              : `${provider.label} 配置已保存`;
+              ? uiText("modelsUpdated", { provider: provider.label })
+              : uiText("providerSaved", { provider: provider.label });
         toast.success(actionLabel, {
-          description: `已获取 ${modelOptions.length} 个模型，默认选择 ${nextModel?.label ?? nextModel?.id}。`,
+          description: uiText("modelsFetched", { count: modelOptions.length, model: nextModel?.label ?? nextModel?.id ?? "" }),
         });
       }
     } catch (error) {
@@ -163,15 +187,15 @@ export function useAIModelRefresh(
       }
       if (controller?.signal.aborted) return;
       const rawMessage =
-        error instanceof Error ? error.message : "获取模型列表失败";
-      const message = redactSetupGuideAIError(rawMessage, apiKey) || "获取模型列表失败";
+        error instanceof Error ? error.message : uiText("couldNotFetchTheModelList_7e6f");
+      const message = redactSetupGuideAIError(rawMessage, apiKey) || uiText("couldNotFetchTheModelList_7e6f");
       const configSaved = requestStateRef.current.models.status === "loading";
       sendRequestEvent({ type: "models.failed", requestId, message });
       toast.error(message, {
-        description: !configSaved ? "服务配置未能保存。" :
+        description: !configSaved ? uiText("theServiceConfigurationCouldNotBe_4f24") :
           action === "refresh"
-            ? "模型列表未更新，已保留当前配置。"
-            : "API Key 已保存，模型列表未能更新。",
+            ? uiText("theModelListWasNotUpdated_9f40")
+            : uiText("theApiKeyWasSavedBut_935a"),
       });
     } finally {
       if (requestId === modelRequestIdRef.current) {
@@ -230,8 +254,8 @@ export function useAIModelRefresh(
     setApiKeyDraft(finalKey);
 
     if (!finalKey.trim()) {
-      toast.info(`已切换到 ${nextPreset.label}`, {
-        description: "填写 API Key 并保存后，将自动获取模型列表。",
+      toast.info(uiText("providerSwitched", { provider: nextPreset.label }), {
+        description: uiText("enterAnApiKeyAndSave_67e0"),
       });
       return;
     }

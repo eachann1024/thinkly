@@ -15,6 +15,15 @@ import {
 } from "../historyViewPresentation";
 
 import { historyIndexReducer, historySelectionReducer } from "./historyRequestState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/history/history-view/logic/useHistoryViewState.tsx#messages:1">`
+zh-Hans:
+  untitled: "无标题"
+en:
+  untitled: "Untitled"
+`;
+const t = createTranslator(messages);
+
 
 export function useHistoryViewState() {
   const active = useHistoryView((s) => s.active);
@@ -39,7 +48,7 @@ export function useHistoryViewState() {
 
   const page = usePages((s) => pageId ? s.pages[pageId] : undefined);
 
-  const pageTitle = page ? extractBlockNoteTitle(page.content) || "无标题" : "";
+  const pageTitle = page ? extractBlockNoteTitle(page.content) || t("untitled") : "";
 
   const [indexState, dispatchIndex] = useReducer(historyIndexReducer, { status: "idle" });
   const [selectionState, dispatchSelection] = useReducer(historySelectionReducer, { status: "idle" });

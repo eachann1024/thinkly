@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-switcher/renderNotebookMenu.tsx#localMessages:1">`
+zh-Hans:
+  switchNotebook: "切换{{kind}}"
+  notebookList: "现有{{kind}}列表"
+  actions_2b6b: "操作"
+  openFolder: "打开文件夹"
+en:
+  switchNotebook: "Switch {{kind}}"
+  notebookList: "Available {{kind}} list"
+  actions_2b6b: "Actions"
+  openFolder: "Open folder"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
@@ -37,7 +52,7 @@ export function renderNotebookMenu(
     <PopoverContent
       data-goose-menu-slot="root"
       variant="menu"
-      aria-label={`切换${notebookKind}`}
+      aria-label={uiText("switchNotebook", { kind: notebookKind })}
       className={cn(
         "goose-notebook-menu-surface goose-list-layout w-[var(--goose-popover-trigger-width)] min-w-56 max-w-[calc(100vw-1rem)] p-1 backdrop-blur-0",
         isRail && "goose-notebook-menu-surface--rail w-56",
@@ -101,7 +116,7 @@ export function renderNotebookMenu(
       {notebookList.length > 0 && (
         <div
           role="group"
-          aria-label={`现有${notebookKind}列表`}
+          aria-label={uiText("notebookList", { kind: notebookKind })}
           data-goose-menu-slot="group"
           className="goose-list-group min-w-0"
         >
@@ -144,7 +159,7 @@ export function renderNotebookMenu(
 
       <div
         role="group"
-        aria-label="操作"
+        aria-label={uiText("actions_2b6b")}
         data-goose-menu-slot="group"
         className="goose-list-group goose-notebook-menu-actions min-w-0"
       >
@@ -152,7 +167,7 @@ export function renderNotebookMenu(
         className={notebookMenuRowClassName}
         onClick={handleOpenLocalFolder}
       >
-        <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name="打开文件夹" />
+        <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name={uiText("openFolder")} />
       </PopoverAction>
       </div>
     </PopoverContent>

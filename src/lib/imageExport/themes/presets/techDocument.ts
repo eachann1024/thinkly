@@ -1,3 +1,38 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/techDocument.ts#localMessages:1">`
+zh-Hans:
+  minimalWhite: "极简白"
+  cleanProfessionalDocumentStyling: "极简专业，文档感"
+  minimal: "极简"
+  document: "文档"
+  deepNight: "深邃夜"
+  aDarkThemeWithACodeEditorFeel: "深色模式，代码感"
+  dark: "深色"
+  technical: "技术"
+  githubLight: "GitHub 浅"
+  githubInspiredLightTheme: "GitHub 官方浅色，开发者友好"
+  light: "浅色"
+  development: "开发"
+  githubDark: "GitHub 深"
+  githubInspiredDarkThemeForFocusedReading: "GitHub 官方深色，平静专注"
+en:
+  minimalWhite: "Minimal White"
+  cleanProfessionalDocumentStyling: "Clean, professional document styling"
+  minimal: "Minimal"
+  document: "Document"
+  deepNight: "Deep Night"
+  aDarkThemeWithACodeEditorFeel: "A dark theme with a code-editor feel"
+  dark: "Dark"
+  technical: "Technical"
+  githubLight: "GitHub Light"
+  githubInspiredLightTheme: "GitHub-inspired light theme"
+  light: "Light"
+  development: "Development"
+  githubDark: "GitHub Dark"
+  githubInspiredDarkThemeForFocusedReading: "GitHub-inspired dark theme for focused reading"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
@@ -5,10 +40,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 1. Notion ────────────────────────────────────────────────
   {
     id: "notion",
-    name: "极简白",
+    name: uiText("minimalWhite"),
     nameEn: "Minimal White",
-    description: "极简专业，文档感",
-    tags: ["极简", "文档"],
+    description: uiText("cleanProfessionalDocumentStyling"),
+    tags: [uiText("minimal"), uiText("document")],
     mode: "light",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -47,10 +82,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 2. Obsidian ──────────────────────────────────────────────
   {
     id: "obsidian",
-    name: "深邃夜",
+    name: uiText("deepNight"),
     nameEn: "Deep Night",
-    description: "深色模式，代码感",
-    tags: ["深色", "技术"],
+    description: uiText("aDarkThemeWithACodeEditorFeel"),
+    tags: [uiText("dark"), uiText("technical")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -89,10 +124,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 10. GitHub Light ─────────────────────────────────────────
   {
     id: "github-light",
-    name: "GitHub 浅",
+    name: uiText("githubLight"),
     nameEn: "GitHub Light",
-    description: "GitHub 官方浅色，开发者友好",
-    tags: ["浅色", "开发"],
+    description: uiText("githubInspiredLightTheme"),
+    tags: [uiText("light"), uiText("development")],
     mode: "light",
     titleFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
@@ -131,10 +166,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 11. GitHub Dark ──────────────────────────────────────────
   {
     id: "github-dark",
-    name: "GitHub 深",
+    name: uiText("githubDark"),
     nameEn: "GitHub Dark",
-    description: "GitHub 官方深色，平静专注",
-    tags: ["深色", "开发"],
+    description: uiText("githubInspiredDarkThemeForFocusedReading"),
+    tags: [uiText("dark"), uiText("development")],
     mode: "dark",
     titleFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",

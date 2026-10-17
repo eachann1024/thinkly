@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/image-export/GenerationOptionsPanel.tsx#localMessages:1">`
+zh-Hans:
+  branding: "品牌"
+  date: "日期"
+  time: "时分秒"
+  exportOptions: "生成选项"
+  title: "标题"
+  footerOptions: "底部栏选项"
+  footer: "底部栏"
+en:
+  branding: "Branding"
+  date: "Date"
+  time: "Time"
+  exportOptions: "Export options"
+  title: "Title"
+  footerOptions: "Footer options"
+  footer: "Footer"
+`;
+const uiText = createTranslator(localMessages);
 import { useId, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -22,9 +43,9 @@ export function GenerationOptionsPanel({
     label: string;
     disabled?: boolean;
   }> = [
-    { key: "showBrand", label: "品牌", disabled: !wm.showWatermark },
-    { key: "showDate", label: "日期", disabled: !wm.showWatermark },
-    { key: "showTime", label: "时分秒", disabled: !wm.showWatermark || !wm.showDate },
+    { key: "showBrand", label: uiText("branding"), disabled: !wm.showWatermark },
+    { key: "showDate", label: uiText("date"), disabled: !wm.showWatermark },
+    { key: "showTime", label: uiText("time"), disabled: !wm.showWatermark || !wm.showDate },
   ];
   const renderRow = (key: keyof WatermarkConfig, label: string, disabled = false, child = false) => (
     <label
@@ -50,7 +71,7 @@ export function GenerationOptionsPanel({
   );
 
   return (
-    <div ref={setContainer} role="group" aria-label="生成选项" className="ml-auto shrink-0">
+    <div ref={setContainer} role="group" aria-label={uiText("exportOptions")} className="ml-auto shrink-0">
       {/* Keep the portal host outside the button row so mounting it cannot add a flex gap. */}
       <div className="flex items-center gap-2">
         <Toggle
@@ -59,14 +80,13 @@ export function GenerationOptionsPanel({
           pressed={wm.showTitle}
           onPressedChange={() => onToggle("showTitle")}
           className="h-8 gap-1.5 text-xs"
-          aria-label="标题"
+          aria-label={uiText("title")}
         >
           <GooseIcons.Type className="h-3.5 w-3.5" />
-          标题
-        </Toggle>
+          {uiText("title")}</Toggle>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" aria-label="底部栏选项">
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" aria-label={uiText("footerOptions")}>
               <span
                 aria-hidden="true"
                 className={cn(
@@ -74,8 +94,7 @@ export function GenerationOptionsPanel({
                   wm.showWatermark ? "bg-[var(--goose-accent-solid)]" : "bg-muted-foreground/50",
                 )}
               />
-              底部栏
-              <GooseIcons.ChevronDown className={cn("h-3.5 w-3.5 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
+              {uiText("footer")}<GooseIcons.ChevronDown className={cn("h-3.5 w-3.5 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -85,7 +104,7 @@ export function GenerationOptionsPanel({
             side="bottom"
             sideOffset={6}
             collisionPadding={12}
-            aria-label="底部栏选项"
+            aria-label={uiText("footerOptions")}
             className="goose-list-layout w-60 max-w-[calc(100vw-24px)]"
             onKeyDownCapture={(event) => {
               if (event.key !== "Escape") return;
@@ -94,7 +113,7 @@ export function GenerationOptionsPanel({
               setOpen(false);
             }}
           >
-            {renderRow("showWatermark", "底部栏")}
+            {renderRow("showWatermark", uiText("footer"))}
             {rows.map((row) => renderRow(row.key, row.label, row.disabled, true))}
           </PopoverContent>
         </Popover>
