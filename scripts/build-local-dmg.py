@@ -101,7 +101,7 @@ def main():
     info = plistlib.loads((args.app / 'Contents/Info.plist').read_bytes())
     if info.get('CFBundleIdentifier') != 'com.goosenote.desktop':
         raise RuntimeError('Unexpected application bundle')
-    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' HiDPI'
+    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' Clean'
     if not title.isascii() or len(title.encode()) > 27:
         raise RuntimeError('DMG volume title must be ASCII and at most 27 bytes')
     modules = sorted(glob.glob(str(Path.home() / 'Library/Caches/electron-builder/dmg-builder@*/*/python/lib/python*/site-packages')))
@@ -127,6 +127,8 @@ def main():
                                  ('electron/icons/icon.icns', '.VolumeIcon.icns'),
                                  ('electron/installer/安装指令.command', '安装指令.command')]:
                 shutil.copy2(ROOT / source, mount / name)
+            run('/usr/bin/swift', ROOT / 'scripts/set-file-icon.swift',
+                ROOT / 'electron/installer/authorization-icon.png', mount / '安装指令.command')
             (mount / 'Applications').symlink_to('/Applications')
             write_layout(mount, Alias, DSStore)
             run('SetFile', '-a', 'C', mount)
@@ -145,6 +147,14 @@ def main():
                 resolved = resolve_alias(store['.']['icvp']['backgroundImageAlias'])
             if resolved.resolve() != (mount / '.background.tiff').resolve():
                 raise RuntimeError('Final DMG background reference is invalid')
+            command = mount / '安装指令.command'
+            finder_info = bytes.fromhex(run('/usr/bin/xattr', '-px', 'com.apple.FinderInfo',
+                                           command, capture_output=True, text=True).stdout)
+            if not (int.from_bytes(finder_info[8:10], 'big') & 0x0400):
+                raise RuntimeError('Installation command custom icon flag is missing')
+            if not run('/usr/bin/xattr', '-px', 'com.apple.ResourceFork', command,
+                       capture_output=True).stdout.strip():
+                raise RuntimeError('Installation command custom icon data is missing')
             run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
         hasher = hashlib.sha256()
         with result.open('rb') as image_file:
