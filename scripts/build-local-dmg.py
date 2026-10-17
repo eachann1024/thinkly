@@ -132,7 +132,11 @@ def main():
             if resolved.resolve() != (mount / '.background.png').resolve():
                 raise RuntimeError('Final DMG background reference is invalid')
             run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
-        digest = hashlib.sha256(result.read_bytes()).hexdigest()
+        hasher = hashlib.sha256()
+        with result.open('rb') as image_file:
+            for chunk in iter(lambda: image_file.read(1024 * 1024), b''):
+                hasher.update(chunk)
+        digest = hasher.hexdigest()
         # Exclusive creation preserves an existing sidecar, including a late arrival.
         with checksum.open('x') as sidecar:
             sidecar.write(f'{digest}  {args.output.name}\n')
