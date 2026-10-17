@@ -1,8 +1,9 @@
-import { appendFileSync, copyFileSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile, uploadFile } from "./quark-api.mjs";
+import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile } from "./quark-api.mjs";
+import { uploadFile } from "./quark-oss.mjs";
 
 const FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
@@ -54,39 +55,29 @@ function knownFiles(entries) {
 }
 
 async function uploadReplacing(cookie, folderId, source, name) {
-  let entries = await listChildren(cookie, folderId);
   const tempName = `${name}.uploading`;
   const backupName = `${name}.previous`;
-  const backup = entries.find((item) => isFile(item, backupName));
-  if (backup && !entries.some((item) => isFile(item, name))) await renameFile(cookie, backup.fid, name);
+  let entries = await listChildren(cookie, folderId);
+  const orphan = entries.find((item) => isFile(item, backupName) && !entries.some((entry) => isFile(entry, name)));
+  if (orphan) await renameFile(cookie, orphan.fid, name);
   entries = await listChildren(cookie, folderId);
   const temps = entries.filter((item) => isFile(item, tempName) || (isFile(item, backupName) && entries.some((entry) => isFile(entry, name))));
   if (temps.length) await deleteFiles(cookie, temps.map((item) => item.fid));
   const current = (await listChildren(cookie, folderId)).filter((item) => isFile(item, name));
-  console.log(`上传 ${name}`);
-  if (current.length === 0) {
-    await uploadFile(cookie, folderId, source);
-    return;
-  }
+  console.log(current.length ? `覆盖已有文件 ${name}` : `上传 ${name}`);
   if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
-  const staging = mkdtempSync(join(tmpdir(), "goose-quark-part-"));
-  const staged = join(staging, tempName);
-  copyFileSync(source, staged);
-  await uploadFile(cookie, folderId, staged);
-  const kept = current[0];
-  await renameFile(cookie, kept.fid, backupName);
+  await uploadFile(cookie, folderId, source, tempName);
   const uploaded = (await listChildren(cookie, folderId)).find((item) => isFile(item, tempName));
-  if (!uploaded) {
-    await renameFile(cookie, kept.fid, name);
-    throw new QuarkFailure(`上传后未找到临时文件：${name}`);
-  }
+  if (!uploaded) throw new QuarkFailure(`上传后未找到临时文件：${name}`);
+  const kept = current[0];
+  if (kept) await renameFile(cookie, kept.fid, backupName);
   try {
     await renameFile(cookie, uploaded.fid, name);
   } catch (error) {
-    await renameFile(cookie, kept.fid, name);
+    if (kept) await renameFile(cookie, kept.fid, name);
     throw error;
   }
-  await deleteFiles(cookie, [kept.fid]);
+  if (kept) await deleteFiles(cookie, [kept.fid]);
 }
 
 async function retainLatest(cookie, folderId, version) {

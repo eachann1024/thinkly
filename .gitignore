@@ -80,6 +80,8 @@ scripts/*
 !scripts/run-task.mjs
 !scripts/signpath-config.mjs
 !scripts/quark-api.mjs
+!scripts/quark-hash.mjs
+!scripts/quark-oss.mjs
 !scripts/quark-upload.mjs
 # stray verification screenshots in repo root
 /*.png
