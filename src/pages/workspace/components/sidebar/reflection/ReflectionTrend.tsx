@@ -39,6 +39,7 @@ function niceMax(max: number): number {
 export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
   useLocale();
   const [metric, setMetric] = useState<Metric>("edits");
+  const [hover, setHover] = useState<number | null>(null);
   const locale = getFormatLocale();
   const values = points.map((p) => p[metric]);
   const top = niceMax(Math.max(0, ...values));
@@ -52,6 +53,15 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
     new Set(Array.from({ length: Math.min(X_TICKS, points.length) }, (_, k) =>
       Math.round((k * (points.length - 1)) / Math.max(1, Math.min(X_TICKS, points.length) - 1)))),
   );
+  const full = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" });
+  const onMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (points.length === 0) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = ((event.clientX - rect.left) / rect.width) * WIDTH;
+    const index = points.length > 1 ? Math.round(((px - LEFT) / plotW) * (points.length - 1)) : 0;
+    setHover(Math.min(points.length - 1, Math.max(0, index)));
+  };
+  const active = hover !== null && hover < points.length ? hover : null;
   return (
     <div>
       <div className="mb-3 flex items-center justify-between gap-4">
@@ -67,7 +77,8 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
           ]}
         />
       </div>
-      <svg role="img" aria-label={uiText("trend")} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-auto w-full">
+      <div className="relative">
+      <svg role="img" aria-label={uiText("trend")} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-auto w-full" onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {Array.from({ length: GRID_LINES + 1 }, (_, k) => {
           const value = (top / GRID_LINES) * k;
           return (
@@ -99,7 +110,34 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
           strokeLinejoin="round"
           strokeLinecap="round"
         />
+        {active !== null && (
+          <line x1={x(active)} x2={x(active)} y1={TOP} y2={TOP + plotH} className="stroke-border" strokeWidth={1} />
+        )}
+        {values.map((v, i) => (
+          <circle
+            key={i}
+            cx={x(i)}
+            cy={y(v)}
+            r={i === active ? 5 : 3}
+            className="fill-[var(--goose-accent-solid)] stroke-[var(--goose-menu-surface)]"
+            strokeWidth={i === active ? 2 : 0}
+          />
+        ))}
       </svg>
+      {active !== null && (
+        <div
+          role="tooltip"
+          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-border bg-[var(--goose-menu-surface)] px-2 py-1 text-xs text-foreground shadow-md"
+          style={{
+            left: `${(Math.min(Math.max(x(active), 60), WIDTH - 60) / WIDTH) * 100}%`,
+            top: `calc(${((y(values[active]) / HEIGHT) * 100).toFixed(2)}% - 10px)`,
+          }}
+        >
+          <span className="text-muted-foreground">{full.format(points[active].start)}</span>
+          <span className="goose-tabular ml-2 font-medium">{values[active].toLocaleString(locale)}</span>
+        </div>
+      )}
+      </div>
     </div>
   );
 }
