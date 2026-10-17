@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/directory.ts#block1:1">`
+zh-Hans:
+  fsUnavailable: "文件系统不可用"
+  targetNotebookMissing: "目标笔记本不存在"
+  pathChanged: "路径已发生变化，请重试"
+  nameExists: "目标名称已存在"
+  readStoppedFolderMove: "无法读取笔记，已停止移动目录"
+  resourceRefsFailed: "资源引用更新失败"
+  moveIncomplete: "移动未成功"
+  moveRollbackPartial: "移动未完成，部分资源引用未能还原，请重新载入；正文仍在原位置"
+  folderMissing: "目录不存在"
+en:
+  fsUnavailable: "The file system is unavailable."
+  targetNotebookMissing: "The destination notebook does not exist."
+  pathChanged: "The path has changed. Please try again."
+  nameExists: "An item with that name already exists."
+  readStoppedFolderMove: "The folder move stopped because a note couldn’t be read."
+  resourceRefsFailed: "Couldn’t update the attachment references."
+  moveIncomplete: "The move did not complete."
+  moveRollbackPartial: "The move did not complete, and some attachment references couldn’t be restored. Please reload. The note content remains in its original location."
+  folderMissing: "The folder does not exist."
+`);
 import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import {
   rebaseMarkdownResources,
@@ -35,12 +58,12 @@ export async function relocateLocalPageTree(
   const basePath =
     useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
   if (!fs || !basePath || !page.localFilePath)
-    throw new Error("文件系统不可用");
+    throw new Error(storeText("fsUnavailable"));
   const oldPath = page.localFilePath.replace(/\\/g, "/");
   const targetNotebookId = target?.workspaceId ?? page.workspaceId;
   const targetBasePath =
     useNotebooks.getState().notebooks[targetNotebookId]?.localPath;
-  if (!targetBasePath) throw new Error("目标记事本不存在");
+  if (!targetBasePath) throw new Error(storeText("targetNotebookMissing"));
   const acrossNotebooks = targetNotebookId !== page.workspaceId;
   if (oldPath === nextPath) return pageId;
   const inside = (path: string) =>
@@ -63,9 +86,9 @@ export async function relocateLocalPageTree(
     if (
       related.some((p) => get().pages[p.id]?.localFilePath !== p.localFilePath)
     )
-      throw new Error("路径已发生变化，请重试");
+      throw new Error(storeText("pathChanged"));
     if (await (fs.existsAsync ? fs.existsAsync(nextPath) : fs.exists(nextPath)))
-      throw new Error("目标名称已存在");
+      throw new Error(storeText("nameExists"));
     const moved = { from: oldPath, to: nextPath };
     const rewrites: Array<{
       id: string;
@@ -79,7 +102,7 @@ export async function relocateLocalPageTree(
       const before = await (fs.readFileAsync
         ? fs.readFileAsync(path)
         : fs.readFile(path));
-      if (before === null) throw new Error("无法读取笔记，已停止移动目录");
+      if (before === null) throw new Error(storeText("readStoppedFolderMove"));
       const after = rebaseMarkdownResources(
         before,
         path,
@@ -95,7 +118,7 @@ export async function relocateLocalPageTree(
           ? fs.writeFileAsync(path, text)
           : fs.writeFile(path, text)))
       )
-        throw new Error("资源引用更新失败");
+        throw new Error(storeText("resourceRefsFailed"));
     };
     try {
       for (const entry of rewrites) {
@@ -107,7 +130,7 @@ export async function relocateLocalPageTree(
       markSelfMoved(nextPath);
       const rename = async () => {
         if (!(await fs.rename(oldPath, nextPath)))
-          throw new Error("移动未成功");
+          throw new Error(storeText("moveIncomplete"));
       };
       if (acrossNotebooks) {
         await withNotebookHistoryTransfer(
@@ -137,7 +160,7 @@ export async function relocateLocalPageTree(
       );
       if (restored.some((result) => result.status === "rejected"))
         throw new Error(
-          "移动未完成，部分资源引用未能还原，请重新载入；正文仍在原位置",
+          storeText("moveRollbackPartial"),
           { cause: error },
         );
       throw error;
@@ -230,7 +253,7 @@ export async function renameLocalDirectory(
   name: string,
 ): Promise<string> {
   const path = get().pages[pageId]?.localFilePath;
-  if (!path) throw new Error("目录不存在");
+  if (!path) throw new Error(storeText("folderMissing"));
   const normalized = path.replace(/\\/g, "/");
   return relocateLocalPageTree(
     set,

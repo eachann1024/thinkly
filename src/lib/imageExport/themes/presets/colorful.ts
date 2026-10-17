@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/colorful.ts#localMessages:1">`
+zh-Hans:
+  boldPoster: "海报大字报"
+  highImpactDesignForShortText: "冲击力强，短内容"
+  poster: "海报"
+  impact: "冲击"
+  synthwave: "蒸汽合成"
+  retroCyberpunkWithNeonColors: "复古赛博朋克，霓虹回潮"
+  dark: "深色"
+  vintage: "复古"
+  solarizedLight: "Solarized 浅"
+  classicMutedColorsOnACalmCreamBackground: "经典护眼配色，米黄沉静"
+  light: "浅色"
+  classic: "经典"
+en:
+  boldPoster: "Bold Poster"
+  highImpactDesignForShortText: "High-impact design for short text"
+  poster: "Poster"
+  impact: "Impact"
+  synthwave: "Synthwave"
+  retroCyberpunkWithNeonColors: "Retro cyberpunk with neon colors"
+  dark: "Dark"
+  vintage: "Vintage"
+  solarizedLight: "Solarized Light"
+  classicMutedColorsOnACalmCreamBackground: "Classic, muted colors on a calm cream background"
+  light: "Light"
+  classic: "Classic"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
@@ -5,10 +36,10 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 9. Poster ────────────────────────────────────────────────
   {
     id: "poster",
-    name: "海报大字报",
+    name: uiText("boldPoster"),
     nameEn: "Poster",
-    description: "冲击力强，短内容",
-    tags: ["海报", "冲击"],
+    description: uiText("highImpactDesignForShortText"),
+    tags: [uiText("poster"), uiText("impact")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -47,10 +78,10 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 15. Synthwave ────────────────────────────────────────────
   {
     id: "synthwave",
-    name: "蒸汽合成",
+    name: uiText("synthwave"),
     nameEn: "Synthwave",
-    description: "复古赛博朋克，霓虹回潮",
-    tags: ["深色", "复古"],
+    description: uiText("retroCyberpunkWithNeonColors"),
+    tags: [uiText("dark"), uiText("vintage")],
     mode: "dark",
     titleFont: "'Space Grotesk', 'Inter', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -89,10 +120,10 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 18. Solarized Light ──────────────────────────────────────
   {
     id: "solarized-light",
-    name: "Solarized 浅",
+    name: uiText("solarizedLight"),
     nameEn: "Solarized",
-    description: "经典护眼配色，米黄沉静",
-    tags: ["浅色", "经典"],
+    description: uiText("classicMutedColorsOnACalmCreamBackground"),
+    tags: [uiText("light"), uiText("classic")],
     mode: "light",
     titleFont: "'Inter', 'IBM Plex Sans', 'Noto Sans SC', sans-serif",
     bodyFont: "'Inter', 'Noto Sans SC', sans-serif",

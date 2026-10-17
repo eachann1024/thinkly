@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-shell/renderSidebarViews.tsx#localMessages:1">`
+zh-Hans:
+  newNote_e82d: "新建笔记"
+en:
+  newNote_e82d: "New note"
+`;
+const uiText = createTranslator(localMessages);
 import { NotebookSwitcher } from "../NotebookSwitcher";
 import { SidebarMainTree } from "../main-tree/SidebarMainTree";
 import { SidebarSectionHeader } from "../SidebarSectionHeader";
@@ -61,7 +70,7 @@ export function renderSidebarViews(
                         ? handleCreatePage
                         : undefined
                     }
-                    createTitle="新建笔记"
+                    createTitle={uiText("newNote_e82d")}
                     onCollapseAll={
                       currentView === "pages" && activeNotebookId
                         ? () => setExpanded(activeNotebookId, [])

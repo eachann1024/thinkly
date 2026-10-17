@@ -7,6 +7,25 @@ import { resolveFormattingToolbarAiBlockId } from "./selectionBlocks";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { toast } from "@/components/ui/sonner";
 import { getCustomAIApiKey } from "@/lib/ai-provider";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/useFormattingToolbarAiActivate.ts#messages:1">`
+zh-Hans:
+  thisPageCannotBeEdited: "当前页面不可编辑。"
+  enableTheAiAssistantInSettingsFirst: "AI 助手尚未开启，请先到设置中打开"
+  noApiKeyIsConfiguredCheckSettingsAi: "未填写 API Key。请前往「设置 › AI 助手 › AI 服务」检查配置。"
+  saveTheAiServiceSettingsAndLoadThe: "请先保存 AI 服务配置并获取模型列表"
+  theSelectionCouldNotBeLocatedSelectThe: "无法定位当前选区，请重新选中正文文字后再试"
+  thisSelectionDoesNotSupportInlineRewritingSelect: "当前选区暂不支持行内改写，请重新选择正文文字。"
+en:
+  thisPageCannotBeEdited: "This page cannot be edited."
+  enableTheAiAssistantInSettingsFirst: "Enable the AI assistant in Settings first"
+  noApiKeyIsConfiguredCheckSettingsAi: "No API key is configured. Check Settings › AI assistant › AI service."
+  saveTheAiServiceSettingsAndLoadThe: "Save the AI service settings and load the model list first"
+  theSelectionCouldNotBeLocatedSelectThe: "The selection could not be located. Select the body text again and retry."
+  thisSelectionDoesNotSupportInlineRewritingSelect: "This selection does not support inline rewriting. Select body text and try again."
+`;
+const t = createTranslator(messages);
+
 
 export function useFormattingToolbarAiActivate({
   editor,
@@ -33,20 +52,20 @@ export function useFormattingToolbarAiActivate({
       const { selection } = editor.prosemirrorState;
       if (selection.empty) return;
       if (!editor.isEditable) {
-        toast.error("当前页面不可编辑。");
+        toast.error(t("thisPageCannotBeEdited"));
         return;
       }
       // Freeze only supported text containers; node selections exclude implicit children.
       captureInlineSelectionParts(editor.prosemirrorState.doc, selection);
 
       if (!aiSettings.enabled) {
-        toast.error("AI 助手尚未开启，请先到设置中打开");
+        toast.error(t("enableTheAiAssistantInSettingsFirst"));
         return;
       }
       const apiKey = getCustomAIApiKey(aiSettings);
       if (!apiKey) {
         toast.error(
-          "未填写 API Key。请前往「设置 › AI 助手 › AI 服务」检查配置。",
+          t("noApiKeyIsConfiguredCheckSettingsAi"),
         );
         return;
       }
@@ -54,7 +73,7 @@ export function useFormattingToolbarAiActivate({
         aiSettings.selectedModelId?.trim() ||
         aiSettings.customModelOptions[0]?.id;
       if (!hasModel) {
-        toast.error("请先保存 AI 服务配置并获取模型列表");
+        toast.error(t("saveTheAiServiceSettingsAndLoadThe"));
         return;
       }
 
@@ -66,7 +85,7 @@ export function useFormattingToolbarAiActivate({
       if (!blockId) {
         setFakeSelection(editor, null);
         resetFormattingToolbarAi(editor);
-        toast.error("无法定位当前选区，请重新选中正文文字后再试");
+        toast.error(t("theSelectionCouldNotBeLocatedSelectThe"));
         return;
       }
       setActiveTooltip(null);
@@ -75,7 +94,7 @@ export function useFormattingToolbarAiActivate({
       toast.error(
         error instanceof Error
           ? error.message
-          : "当前选区暂不支持行内改写，请重新选择正文文字。",
+          : t("thisSelectionDoesNotSupportInlineRewritingSelect"),
       );
       try {
         setFakeSelection(editor, null);

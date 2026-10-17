@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/command.tsx#localMessages:1">`
+zh-Hans:
+  chooseFolder: "选择目标文件夹"
+  findFolder: "搜索并选择本地仓库中的目标文件夹"
+en:
+  chooseFolder: "Choose a destination folder"
+  findFolder: "Find and select a destination folder in the local repository"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
@@ -118,10 +129,9 @@ const CommandDialog = ({
         className="overflow-hidden p-0 shadow-lg duration-150 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:max-w-md"
         overlayClassName="duration-150 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
       >
-        <DialogTitle className="sr-only">选择目标文件夹</DialogTitle>
+        <DialogTitle className="sr-only">{uiText("chooseFolder")}</DialogTitle>
         <DialogDescription className="sr-only">
-          搜索并选择本地仓库中的目标文件夹
-        </DialogDescription>
+          {uiText("findFolder")}</DialogDescription>
         <Command
           className="[&_[cmdk-group-heading]]:text-muted-foreground"
           {...commandProps}

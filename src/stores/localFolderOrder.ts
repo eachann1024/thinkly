@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/localFolderOrder.ts#block1:1">`
+zh-Hans:
+  saveOrderFailed: "排序保存失败"
+  saveOrderDetail: "本地存储写入失败，本次排序没有生效。"
+en:
+  saveOrderFailed: "Couldn’t save the sort order"
+  saveOrderDetail: "Local storage couldn’t be updated. The sort order was not changed."
+`);
 import { create } from "zustand";
 import {
   writeDbStorageJSON,
@@ -41,8 +50,8 @@ function putInState(notebookId: string, orders: LocalFolderOrderMap): void {
 /** 落盘成功才更新内存：写失败就报错，不能让界面假装已保存。 */
 function persist(notebookId: string, orders: LocalFolderOrderMap): boolean {
   if (!writeDbStorageJSON(storageKey(notebookId), orders)) {
-    toast.error("排序保存失败", {
-      description: "本地存储写入失败，本次排序没有生效。",
+    toast.error(storeText("saveOrderFailed"), {
+      description: storeText("saveOrderDetail"),
     });
     return false;
   }

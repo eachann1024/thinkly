@@ -1,3 +1,36 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/hooks/useFileDrop.ts#localMessages:1">`
+zh-Hans:
+  textFileImported: "文本文件已导入"
+  filesImported: "已导入 {{count}} 个文件"
+  folderOpened: "文件夹已打开"
+  thisFileFormatIsnTSupportedYet: "暂不支持此文件格式"
+  dropAPlainTextFileInMd: "请拖入 .md、.markdown 或 .txt 纯文本文件。"
+  connectALocalFolderFirst: "请先关联本地文件夹"
+  openOrConnectALocalFolderIn: "导入前请先在左侧栏打开或关联一个本地文件夹。"
+  couldnTImportThisFile: "无法导入该文件"
+  theFileMayBeDamagedOrUse: "文件内容可能损坏或编码异常，无法解析为笔记。"
+  filesSkipped: "{{count}} 个文件导入失败，已跳过"
+  importFailed: "导入失败"
+  couldnTLoadTheImporterTryAgain: "导入模块加载失败，请重试。"
+  theFileCouldnTBeReadAs: "文件内容无法解析为笔记。"
+en:
+  textFileImported: "Text file imported"
+  filesImported: "Files imported: {{count}}"
+  folderOpened: "Folder opened"
+  thisFileFormatIsnTSupportedYet: "This file format isn’t supported yet"
+  dropAPlainTextFileInMd: "Drop a plain text file in .md, .markdown, or .txt format."
+  connectALocalFolderFirst: "Connect a local folder first"
+  openOrConnectALocalFolderIn: "Open or connect a local folder in the sidebar before importing."
+  couldnTImportThisFile: "Couldn’t import this file"
+  theFileMayBeDamagedOrUse: "The file may be damaged or use an unsupported encoding, so it couldn’t be read as a note."
+  filesSkipped: "Files skipped because import failed: {{count}}"
+  importFailed: "Import failed"
+  couldnTLoadTheImporterTryAgain: "Couldn’t load the importer. Try again."
+  theFileCouldnTBeReadAs: "The file couldn’t be read as a note."
+`;
+const uiText = createTranslator(localMessages);
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import { usePages } from "@/stores/usePages";
@@ -51,7 +84,7 @@ async function openImportedPages(
   useTabs.getState().openTab(firstPageId);
   await usePages.getState().setActivePage(firstPageId);
   toast.success(
-    pageIds.length === 1 ? "文本文件已导入" : `已导入 ${pageIds.length} 个文件`,
+    pageIds.length === 1 ? uiText("textFileImported") : uiText("filesImported", {count: pageIds.length}),
     { description },
   );
 }
@@ -115,7 +148,7 @@ export function useFileDrop() {
         .getState()
         .loadLocalFolderPages(notebookId, folderPath, { showWelcome: true });
       clearLocalFolderFileDropTarget();
-      toast.success("文件夹已打开");
+      toast.success(uiText("folderOpened"));
       return;
     }
 
@@ -123,8 +156,8 @@ export function useFileDrop() {
     clearLocalFolderFileDropTarget();
 
     if (files.length === 0) {
-      toast.error("暂不支持此文件格式", {
-        description: "请拖入 .md、.markdown 或 .txt 纯文本文件。",
+      toast.error(uiText("thisFileFormatIsnTSupportedYet"), {
+        description: uiText("dropAPlainTextFileInMd"),
       });
       return;
     }
@@ -136,8 +169,8 @@ export function useFileDrop() {
     const isLocalFolder = currentNotebook?.source === "local-folder";
 
     if (!isLocalFolder) {
-      toast.error("请先关联本地文件夹", {
-        description: "导入前请先在左侧栏打开或关联一个本地文件夹。",
+      toast.error(uiText("connectALocalFolderFirst"), {
+        description: uiText("openOrConnectALocalFolderIn"),
       });
       return;
     }
@@ -159,8 +192,8 @@ export function useFileDrop() {
       });
 
       if (importedIds.length === 0) {
-        toast.error("无法导入该文件", {
-          description: "文件内容可能损坏或编码异常，无法解析为笔记。",
+        toast.error(uiText("couldnTImportThisFile"), {
+          description: uiText("theFileMayBeDamagedOrUse"),
         });
         return;
       }
@@ -168,7 +201,7 @@ export function useFileDrop() {
       await openImportedPages(
         currentNotebookId,
         importedIds,
-        failedCount > 0 ? `${failedCount} 个文件导入失败，已跳过` : undefined,
+        failedCount > 0 ? uiText("filesSkipped", {count: failedCount}) : undefined,
       );
       return;
     }
@@ -185,7 +218,7 @@ export function useFileDrop() {
     try {
       ({ importFromMarkdown } = await import("@/lib/export"));
     } catch {
-      toast.error("导入失败", { description: "导入模块加载失败，请重试。" });
+      toast.error(uiText("importFailed"), { description: uiText("couldnTLoadTheImporterTryAgain") });
       return;
     }
 
@@ -206,8 +239,8 @@ export function useFileDrop() {
     }
 
     if (createdPageIds.length === 0) {
-      toast.error("导入失败", {
-        description: "文件内容无法解析为笔记。",
+      toast.error(uiText("importFailed"), {
+        description: uiText("theFileCouldnTBeReadAs"),
       });
       return;
     }

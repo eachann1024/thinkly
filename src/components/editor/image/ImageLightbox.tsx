@@ -10,6 +10,29 @@ import { useLightboxActions } from "./useLightboxActions";
 import { useSelectedImage } from "./useSelectedImage";
 import type { ImageLightboxProps } from "./lightboxTypes";
 import { OverlayLayerProvider, useModalLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/image/ImageLightbox.tsx#messages:1">`
+zh-Hans:
+  zoomIn: "放大"
+  zoomOut: "缩小"
+  close: "关闭"
+  nextImage: "下一张"
+  previousImage: "上一张"
+  imagePreview: "图片预览"
+  downloadImage: "下载图片"
+  copyImage: "复制图片"
+en:
+  zoomIn: "Zoom in"
+  zoomOut: "Zoom out"
+  close: "Close"
+  nextImage: "Next image"
+  previousImage: "Previous image"
+  imagePreview: "Image preview"
+  downloadImage: "Download image"
+  copyImage: "Copy image"
+`;
+const t = createTranslator(messages);
+
 
 export function ImageLightbox({
   editor,
@@ -86,11 +109,11 @@ export function ImageLightbox({
             doubleClickDelay: 250,
           }}
           labels={{
-            "Zoom in": "放大",
-            "Zoom out": "缩小",
-            Close: "关闭",
-            Next: "下一张",
-            Previous: "上一张",
+            get "Zoom in"() { return t("zoomIn"); },
+            get "Zoom out"() { return t("zoomOut"); },
+            get Close() { return t("close"); },
+            get Next() { return t("nextImage"); },
+            get Previous() { return t("previousImage"); },
           }}
           carousel={{ finite: slides.length <= 1, padding: "48px" }}
           controller={{ closeOnBackdropClick: true, closeOnPullDown: true }}
@@ -100,15 +123,15 @@ export function ImageLightbox({
           toolbar={{
             buttons: [
               <div key="title" className="goose-image-lightbox-title">
-                {currentSlide?.alt || "图片预览"}
+                {currentSlide?.alt || t("imagePreview")}
               </div>,
               // Zoom 插件默认把按钮前置插入工具条；用占位符锁定它在右侧操作组的位置
               "zoom",
               <EditorAction
                 key="download"
                 type="button"
-                title="下载图片"
-                aria-label="下载图片"
+                title={t("downloadImage")}
+                aria-label={t("downloadImage")}
                 onClick={handleDownload}
                 className="yarl__button"
               >
@@ -117,8 +140,8 @@ export function ImageLightbox({
               <EditorAction
                 key="copy"
                 type="button"
-                title="复制图片"
-                aria-label="复制图片"
+                title={t("copyImage")}
+                aria-label={t("copyImage")}
                 onClick={handleCopy}
                 className="yarl__button"
               >
@@ -138,8 +161,8 @@ export function ImageLightbox({
               <EditorAction
                 key="close"
                 type="button"
-                title="关闭"
-                aria-label="关闭"
+                title={t("close")}
+                aria-label={t("close")}
                 onClick={closeLightbox}
                 className="yarl__button"
               >

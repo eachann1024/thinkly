@@ -28,7 +28,7 @@ export function useInterfaceScaleDrag(
     const thumbInset = 8;
     const trackStart = rect.left + thumbInset;
     const trackWidth = Math.max(1, rect.width - thumbInset * 2);
-    const preview = layoutRef.current?.querySelector<HTMLElement>('[aria-label="编辑器即时预览"]');
+    const preview = layoutRef.current?.querySelector<HTMLElement>('[data-editor-preview]');
     setScaleDragLayout(preview && getComputedStyle(preview).display !== "none" ? "preview" : "options");
     const scrollContainer = slider.closest<HTMLElement>(".settings-appearance-options");
     if (scrollContainer) {

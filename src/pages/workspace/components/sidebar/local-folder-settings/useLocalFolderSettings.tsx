@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/useLocalFolderSettings.tsx#localMessages:1">`
+zh-Hans:
+  attachmentCleanupRequiresTheDesktopApp_0b32: "仅桌面应用支持资源清理"
+  couldNotOpenTheAttachmentCleanup_59de: "无法打开资源清理窗口"
+  someLocalFoldersHaveUnsavedChanges_5f18: "部分本地文件夹仍有未保存内容，已暂缓刷新隐藏目录"
+  couldNotRefreshHiddenFolders_1ba7: "刷新隐藏目录失败"
+en:
+  attachmentCleanupRequiresTheDesktopApp_0b32: "Attachment cleanup requires the desktop app"
+  couldNotOpenTheAttachmentCleanup_59de: "Could not open the attachment cleanup window"
+  someLocalFoldersHaveUnsavedChanges_5f18: "Some local folders have unsaved changes. Hidden-folder refresh has been postponed."
+  couldNotRefreshHiddenFolders_1ba7: "Could not refresh hidden folders"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LOCAL_FOLDER_EDITOR_CANDIDATES,
@@ -50,10 +65,10 @@ export function useLocalFolderSettings({
   const openAssetMaintenance = async () => {
     try {
       if (!window.gooseDesktop?.assetMaintenance)
-        throw new Error("仅桌面应用支持资源清理");
+        throw new Error(uiText("attachmentCleanupRequiresTheDesktopApp_0b32"));
       await window.gooseDesktop.assetMaintenance.open();
     } catch (error) {
-      toast.error("无法打开资源清理窗口", { description: String(error) });
+      toast.error(uiText("couldNotOpenTheAttachmentCleanup_59de"), { description: String(error) });
     }
   };
 
@@ -112,11 +127,11 @@ export function useLocalFolderSettings({
         }
 
         if (skippedDirtyNotebook) {
-          toast.warning("部分本地文件夹仍有未保存内容，已暂缓刷新隐藏目录");
+          toast.warning(uiText("someLocalFoldersHaveUnsavedChanges_5f18"));
         }
       } catch (error) {
         console.error("[settings] 刷新本地文件夹隐藏目录失败", error);
-        toast.error("刷新隐藏目录失败", {
+        toast.error(uiText("couldNotRefreshHiddenFolders_1ba7"), {
           description: error instanceof Error ? error.message : String(error),
         });
       }

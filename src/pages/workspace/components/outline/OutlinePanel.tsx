@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/outline/OutlinePanel.tsx#localMessages:1">`
+zh-Hans:
+  collapsedHeading: "H{{level}} {{text}}，已收起"
+  heading: "H{{level}} {{text}}"
+  noHeadingsInThisNote: "正文暂无标题"
+  documentOutline: "文档大纲"
+en:
+  collapsedHeading: "H{{level}} {{text}}, collapsed"
+  heading: "H{{level}} {{text}}"
+  noHeadingsInThisNote: "No headings in this note"
+  documentOutline: "Document outline"
+`;
+const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
@@ -25,7 +40,7 @@ export function OutlinePanel({
   activeId,
   onHeadingClick,
   onHeadingToggle,
-  emptyMessage = "正文暂无标题",
+  emptyMessage = uiText("noHeadingsInThisNote"),
   emptyHint = null,
 }: OutlinePanelProps) {
   const itemHeight = useSidebarItemHeight();
@@ -44,8 +59,8 @@ export function OutlinePanel({
 
   if (headings.length === 0) {
     return (
-      <section className="outline-panel" aria-label="文档大纲">
-        <div className="sidebar-search-heading"><strong>文档大纲</strong></div>
+      <section className="outline-panel" aria-label={uiText("documentOutline")}>
+        <div className="sidebar-search-heading"><strong>{uiText("documentOutline")}</strong></div>
         <div className="outline-empty" role="status">
           <p>{emptyMessage}</p>
           {emptyHint ? <p className="outline-empty-hint">{emptyHint}</p> : null}
@@ -55,8 +70,8 @@ export function OutlinePanel({
   }
 
   return (
-    <section className="outline-panel" aria-label="文档大纲">
-      <div className="sidebar-search-heading"><strong>文档大纲</strong></div>
+    <section className="outline-panel" aria-label={uiText("documentOutline")}>
+      <div className="sidebar-search-heading"><strong>{uiText("documentOutline")}</strong></div>
       <div className="outline-body">
         <nav>
           {headings.map((heading) => (
@@ -140,7 +155,7 @@ function OutlineTreeNode({
           onClick={() => onHeadingClick(heading.id)}
           aria-current={isActive ? "location" : undefined}
           aria-label={
-            `H${heading.level} ${heading.text}${isEditorCollapsed ? "，已收起" : ""}`
+            uiText(isEditorCollapsed ? "collapsedHeading" : "heading", {level: heading.level, text: heading.text})
           }
           className={cn(
             "outline-heading relative z-10 min-w-0 flex-1 truncate text-left leading-snug",

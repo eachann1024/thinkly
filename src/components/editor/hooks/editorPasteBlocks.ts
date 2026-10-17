@@ -17,6 +17,15 @@ import {
 import { GOOSE_BLOCKNOTE_BLOCK_COPY_MIME } from "../extensions/copyCurrentBlockExtension";
 import { selectionIsInsideFirstTitleBlock } from "../toolbars/formatting/helpers";
 import { normalizeParsedImageProps } from "../blocks/image/imageCaption";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/hooks/editorPasteBlocks.ts#messages:1">`
+zh-Hans:
+  theNoteHasChangedPleasePasteAgain: "笔记内容已变化，请重新粘贴"
+en:
+  theNoteHasChangedPleasePasteAgain: "The note has changed. Please paste again."
+`;
+const t = createTranslator(messages);
+
 
 export type Editor = ReturnType<typeof useCreateBlockNote>;
 
@@ -79,7 +88,7 @@ export function finishPasteAtAnchor(
   target: CachedPasteTarget,
 ): boolean {
   if (target.selection && !restoreEditorSelection(editor.prosemirrorView, target.selection)) {
-    toast.error("笔记内容已变化，请重新粘贴");
+    toast.error(t("theNoteHasChangedPleasePasteAgain"));
     return false;
   }
   const anchor = resolvePasteAnchor(editor, target);
@@ -132,7 +141,7 @@ export async function pasteClipboardHtmlAsBlocks(
 ): Promise<boolean> {
   if (target.selection && !target.selection.bookmark.resolve(target.selection.doc).empty && htmlLooksLikeBlockNoteClipboard(htmlText)) {
     if (!restoreEditorSelection(editor.prosemirrorView, target.selection)) {
-      toast.error("笔记内容已变化，请重新粘贴");
+      toast.error(t("theNoteHasChangedPleasePasteAgain"));
       return false;
     }
     editor.pasteHTML(withoutBlockNoteClipboardIds(htmlText), true);

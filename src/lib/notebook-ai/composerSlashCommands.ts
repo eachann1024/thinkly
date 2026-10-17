@@ -1,6 +1,21 @@
 import type { LocalSkill } from "./localContext";
 import { searchLocalSkills } from "./localContext";
 import type { AiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/composerSlashCommands.ts#messages:1">`
+zh-Hans:
+  newConversation: "新会话"
+  startABlankConversationAndKeepThisOne: "开启空白对话，当前会话会留在历史里"
+  compact: "压缩"
+  summarizeThisConversationToFreeUpContextSpace: "把当前对话压成摘要，腾出上下文空间"
+en:
+  newConversation: "new"
+  startABlankConversationAndKeepThisOne: "Start a blank conversation and keep this one in history"
+  compact: "compact"
+  summarizeThisConversationToFreeUpContextSpace: "Summarize this conversation to free up context space"
+`;
+const t = createTranslator(messages);
+
 
 export type ComposerSlashBuiltinId = "new" | "compact";
 
@@ -21,16 +36,16 @@ export const COMPOSER_SLASH_BUILTINS: readonly ComposerSlashBuiltin[] = [
   {
     kind: "builtin",
     id: "new",
-    name: "新会话",
+    get name() { return t("newConversation"); },
     aliases: ["new", "新会话"],
-    description: "开启空白对话，当前会话会留在历史里",
+    get description() { return t("startABlankConversationAndKeepThisOne"); },
   },
   {
     kind: "builtin",
     id: "compact",
-    name: "压缩",
+    get name() { return t("compact"); },
     aliases: ["compact", "压缩"],
-    description: "把当前对话压成摘要，腾出上下文空间",
+    get description() { return t("summarizeThisConversationToFreeUpContextSpace"); },
   },
 ];
 

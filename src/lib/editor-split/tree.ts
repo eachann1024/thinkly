@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/editor-split/tree.ts#localMessages:1">`
+zh-Hans:
+  theCurrentPaneCouldnTBeFound: "找不到当前分屏格子"
+  youCanOpenUpToPanes: "最多只能分成 4 格"
+en:
+  theCurrentPaneCouldnTBeFound: "The current pane couldn’t be found"
+  youCanOpenUpToPanes: "You can open up to 4 panes"
+`;
+const uiText = createTranslator(localMessages);
 import {
   MAX_SPLIT_LEAVES,
   type CloseLeafResult,
@@ -52,10 +63,10 @@ export function splitLeaf(
   const leafId = input.leafId ?? state.focusedLeafId;
   const path = findLeafPath(state.root, leafId);
   if (!path) {
-    return { ok: false, error: "找不到当前分屏格子", state };
+    return { ok: false, error: uiText("theCurrentPaneCouldnTBeFound"), state };
   }
   if (countLeaves(state.root) >= MAX_SPLIT_LEAVES) {
-    return { ok: false, error: "最多只能分成 4 格", state };
+    return { ok: false, error: uiText("youCanOpenUpToPanes"), state };
   }
 
   const orientation = orientationForDirection(input.direction);

@@ -1,3 +1,37 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/move.ts#block1:1">`
+zh-Hans:
+  nameExists: "目标目录下已存在同名文件：{{name}}"
+  moveFailed: "移动失败：{{reason}}"
+en:
+  nameExists: "A file named {{name}} already exists in the destination folder."
+  moveFailed: "Move failed: {{reason}}"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/move.ts#block2:2">`
+zh-Hans:
+  fsUnavailable: "文件系统不可用"
+  pageUnavailable: "页面不存在或非本地文件夹页面"
+  notebookMissing: "所属笔记本不存在"
+  targetFolderMissing: "目标目录不存在"
+  moveIntoSelf: "不能将目录移到自身的子目录内"
+  readStoppedMove: "无法读取笔记，已停止移动"
+  moveFailed: "移动操作未成功"
+  writeResourceFailed: "资源路径写入失败"
+  resourceMoved: "资源路径更新失败，笔记保留在新位置，请重新载入"
+  resourceRolledBack: "资源路径更新失败，已恢复原笔记位置"
+en:
+  fsUnavailable: "The file system is unavailable."
+  pageUnavailable: "The page does not exist or is not a local folder page."
+  notebookMissing: "The notebook no longer exists."
+  targetFolderMissing: "The destination folder does not exist."
+  moveIntoSelf: "A folder can’t be moved into one of its own subfolders."
+  readStoppedMove: "The move stopped because the note couldn’t be read."
+  moveFailed: "The move did not complete."
+  writeResourceFailed: "Couldn’t write the attachment paths."
+  resourceMoved: "Attachment paths couldn’t be updated. The note remains in its new location. Please reload."
+  resourceRolledBack: "Attachment paths couldn’t be updated. The note was moved back to its original location."
+`);
 import {
   rebaseMarkdownResources,
   rebaseResourceContent,
@@ -59,17 +93,17 @@ export async function moveLocalPageAction(
   targetFolderId: string | undefined,
 ): Promise<void> {
   if (typeof window === "undefined" || !window.gooseFs) {
-    throw new Error("文件系统不可用");
+    throw new Error(storeText("fsUnavailable"));
   }
 
   const page = get().pages[pageId];
   if (!page || !page.localFilePath) {
-    throw new Error("页面不存在或非本地文件夹页面");
+    throw new Error(storeText("pageUnavailable"));
   }
 
   const notebook = useNotebooks.getState().notebooks[page.workspaceId];
   if (!notebook?.localPath) {
-    throw new Error("所属笔记本不存在");
+    throw new Error(storeText("notebookMissing"));
   }
 
   // 解析目标目录路径
@@ -79,7 +113,7 @@ export async function moveLocalPageAction(
   } else {
     const targetPage = get().pages[targetFolderId];
     if (!targetPage || !targetPage.isFolder || !targetPage.localFilePath) {
-      throw new Error("目标目录不存在");
+      throw new Error(storeText("targetFolderMissing"));
     }
     targetDirPath = targetPage.localFilePath;
   }
@@ -103,7 +137,7 @@ export async function moveLocalPageAction(
       normalizedTargetDir === normalizedOld ||
       normalizedTargetDir.startsWith(normalizedOld + "/")
     ) {
-      throw new Error("不能将目录移到自身的子目录内");
+      throw new Error(storeText("moveIntoSelf"));
     }
   }
 
@@ -120,7 +154,7 @@ export async function moveLocalPageAction(
     }
   })();
   if (exists) {
-    throw new Error(`目标目录下已存在同名文件：${fileName}`);
+    throw new Error(extraText("nameExists", { name: fileName }));
   }
 
   if (page.isFolder) {
@@ -154,7 +188,7 @@ export async function moveLocalPageAction(
           ? fs.readFileAsync(oldPath)
           : fs.readFile(oldPath));
     if (!page.isFolder && markdown === null)
-      throw new Error("无法读取笔记，已停止移动");
+      throw new Error(storeText("readStoppedMove"));
     const relocatedMarkdown =
       markdown === null
         ? null
@@ -165,12 +199,12 @@ export async function moveLocalPageAction(
     try {
       renamed = Boolean(await Promise.resolve(fs.rename(oldPath, newPath)));
     } catch (err) {
-      throw new Error(`移动失败：${(err as Error).message ?? String(err)}`, {
+      throw new Error(extraText("moveFailed", { reason: (err as Error).message ?? String(err) }), {
         cause: err,
       });
     }
     if (!renamed) {
-      throw new Error("移动操作未成功");
+      throw new Error(storeText("moveFailed"));
     }
 
     if (relocatedMarkdown !== null && relocatedMarkdown !== markdown) {
@@ -178,16 +212,16 @@ export async function moveLocalPageAction(
         const written = fs.writeFileAsync
           ? await fs.writeFileAsync(newPath, relocatedMarkdown)
           : await fs.writeFile(newPath, relocatedMarkdown);
-        if (!written) throw new Error("资源路径写入失败");
+        if (!written) throw new Error(storeText("writeResourceFailed"));
       } catch (error) {
         const restored = await (fs.writeFileAsync
           ? fs.writeFileAsync(newPath, markdown!)
           : fs.writeFile(newPath, markdown!));
         if (!restored || !(await fs.rename(newPath, oldPath)))
-          throw new Error("资源路径更新失败，笔记保留在新位置，请重新载入", {
+          throw new Error(storeText("resourceMoved"), {
             cause: error,
           });
-        throw new Error("资源路径更新失败，已恢复原笔记位置", { cause: error });
+        throw new Error(storeText("resourceRolledBack"), { cause: error });
       }
     }
     const basePath = notebook.localPath;

@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { createHash } from "node:crypto";
 import type { GitRepositoryFolder, GitSyncConflict, GitSyncConflictDetail, GitConflictResolution } from "../../src/lib/git-sync-contract";
 export type { GitSyncConflict, GitSyncConflictDetail, GitConflictResolution } from "../../src/lib/git-sync-contract";
@@ -14,7 +15,7 @@ const repositories = new Map<string, Map<string, CachedConflict>>();
 export class GitConflictError extends Error {
   readonly conflicts: readonly GitSyncConflict[];
   constructor(conflicts: GitSyncConflict[]) {
-    super("同步冲突：请选择每个文件的处理方式，然后继续同步。双方内容已保留。");
+    super(t("conflict"));
     this.name = "GitConflictError";
     this.conflicts = conflicts;
   }
@@ -52,15 +53,15 @@ function preview(value: string | undefined) {
 
 export async function getGitConflict(repositoryId: string, conflictId: string): Promise<GitSyncConflictDetail> {
   const conflict = repositories.get(repositoryId)?.get(conflictId);
-  if (!conflict) throw new Error("冲突已变化或已处理，请重新同步以获取最新内容");
+  if (!conflict) throw new Error(t("conflictChanged"));
   const local = preview(conflict.local), remote = preview(conflict.remote);
   return { ...conflict.info, localText: local.text, remoteText: remote.text, binary: local.binary || remote.binary, truncated: local.truncated || remote.truncated };
 }
 
 export async function resolveGitConflict(request: GitConflictResolution): Promise<void> {
-  if (!["local", "remote", "both"].includes(request.choice)) throw new Error("冲突处理方式无效");
+  if (!["local", "remote", "both"].includes(request.choice)) throw new Error(t("invalidResolution"));
   const conflict = repositories.get(request.repositoryId)?.get(request.conflictId);
-  if (!conflict) throw new Error("冲突已变化或已处理，请重新同步以获取最新内容");
-  if (request.choice === "both" && (conflict.local === undefined || conflict.remote === undefined)) throw new Error("一方已删除文件，无法保留两份；请选择本地或远端版本");
+  if (!conflict) throw new Error(t("conflictChanged"));
+  if (request.choice === "both" && (conflict.local === undefined || conflict.remote === undefined)) throw new Error(t("cannotKeepBoth"));
   conflict.choice = request.choice;
 }

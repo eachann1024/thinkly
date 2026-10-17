@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { execFile as nodeExecFile } from "node:child_process";
 import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
@@ -56,7 +57,7 @@ function expectedUrl(config: GitSyncConfig): string {
   const host = config.provider === "github" ? "github.com" : "gitee.com";
   const url = config.remoteUrl.trim();
   const match = url.match(new RegExp(`^(?:git@${host.replace(".", "\\.")}:|ssh://git@${host.replace(".", "\\.")}/)([A-Za-z0-9_-][A-Za-z0-9_.-]*/[A-Za-z0-9_-][A-Za-z0-9_.-]*)$`));
-  if (!match) throw new Error(`仅支持 ${host} 的 SSH 仓库地址`);
+  if (!match) throw new Error(t("sshHostOnly", { host }));
   return `git@${host}:${match[1]}`;
 }
 
@@ -73,7 +74,7 @@ async function rejectLocalRewrites(root: string, url: string): Promise<void> {
     const key = record.slice(0, separator);
     const prefix = record.slice(separator + 1);
     if ((key.endsWith(".insteadof") || key.endsWith(".pushinsteadof")) && url.startsWith(prefix)) {
-      throw new Error("仓库配置包含会改写同步地址的 Git 规则，请先移除 url.*.insteadOf/pushInsteadOf 配置");
+      throw new Error(t("urlRewrite"));
     }
   }
 }
@@ -94,44 +95,44 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
     if (error.code === "ENOENT") return null;
     throw error;
   });
-  if (gitEntry && (!gitEntry.isDirectory() || gitEntry.isSymbolicLink())) throw new Error("同步需要普通 Git 仓库，不支持外置 .git 或 linked worktree");
+  if (gitEntry && (!gitEntry.isDirectory() || gitEntry.isSymbolicLink())) throw new Error(t("normalRepoRequired"));
 
   let rootRepo = false;
   try {
     const top = await git(root, ["rev-parse", "--show-toplevel"]);
-    if (resolve(top) !== root) throw new Error("笔记本目录位于其他 Git 仓库内，拒绝在父仓库中同步");
+    if (resolve(top) !== root) throw new Error(t("nestedRepo"));
     rootRepo = true;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("位于其他 Git 仓库内")) throw error;
+    if (error instanceof Error && error.message === t("nestedRepo")) throw error;
   }
 
   if (!rootRepo) {
-    if (gitEntry) throw new Error("现有 Git 仓库无法读取，请检查仓库权限和状态");
+    if (gitEntry) throw new Error(t("repoUnreadable"));
     if (await isAncestorRepository(dirname(root))) {
-      throw new Error("笔记本目录位于其他 Git 仓库内，请移出父仓库后再同步");
+      throw new Error(t("moveFromParent"));
     }
     await git(root, ["init", "--initial-branch", config.branch]);
   }
 
   const top = resolve(await git(root, ["rev-parse", "--show-toplevel"]));
-  if (top !== root) throw new Error("Git 仓库根目录必须与笔记本目录相同");
+  if (top !== root) throw new Error(t("rootMismatch"));
   const gitDir = await git(root, ["rev-parse", "--absolute-git-dir"]);
   const commonDir = await git(root, ["rev-parse", "--git-common-dir"]);
-  if (resolve(root, commonDir) !== resolve(gitDir)) throw new Error("不支持 Git linked worktree，请使用普通仓库目录");
+  if (resolve(root, commonDir) !== resolve(gitDir)) throw new Error(t("noWorktree"));
   const branch = await git(root, ["branch", "--show-current"]);
-  if (branch !== config.branch) throw new Error(`当前分支是 ${branch || "（分离 HEAD）"}，请切换到 ${config.branch} 后重试`);
+  if (branch !== config.branch) throw new Error(t("wrongBranch", { branch: branch || t("detachedHead"), target: config.branch }));
 
   for (const marker of ["MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "rebase-merge", "rebase-apply"]) {
-    if (await lstat(resolve(gitDir, marker)).then(() => true).catch(() => false)) throw new Error("仓库有未完成的合并或变基，请先在终端完成或中止后重试");
+    if (await lstat(resolve(gitDir, marker)).then(() => true).catch(() => false)) throw new Error(t("mergePending"));
   }
-  if (await git(root, ["ls-files", "--unmerged"])) throw new Error("仓库存在未解决冲突，请先处理后重试");
+  if (await git(root, ["ls-files", "--unmerged"])) throw new Error(t("unresolved"));
   await rejectLocalRewrites(root, url);
   const hasRemote = (await git(root, ["remote"]).catch(() => "")).split("\n").includes(REMOTE);
   if (hasRemote) {
     const currentUrl = await git(root, ["remote", "get-url", REMOTE]);
-    if (currentUrl !== url) throw new Error(`专用远程 ${REMOTE} 已配置为其他地址；请先检查后再同步`);
+    if (currentUrl !== url) throw new Error(t("remoteUrl", { remote: REMOTE }));
     const pushUrls = await git(root, ["remote", "get-url", "--push", "--all", REMOTE]);
-    if (pushUrls !== url) throw new Error(`专用远程 ${REMOTE} 配置了不同的推送地址，请先移除 pushurl`);
+    if (pushUrls !== url) throw new Error(t("pushUrl", { remote: REMOTE }));
   } else {
     await git(root, ["remote", "add", REMOTE, url]);
   }
@@ -161,7 +162,7 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
       }
     } catch (error) {
       await git(root, ["merge", "--abort"]).catch(() => undefined);
-      throw Object.assign(new Error(`同步合并发生冲突，本地提交和原文件已保留。请手动解决冲突后再同步。${error instanceof Error ? `（${error.message}）` : ""}`), { cause: error });
+      throw Object.assign(new Error(t("mergeConflict", { reason: error instanceof Error ? error.message : "" })), { cause: error });
     }
   } else if (!localHead) {
     // Empty local and remote repositories have nothing to merge or push.
@@ -173,6 +174,6 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
   try {
     await git(root, ["push", "--no-verify", url, `HEAD:refs/heads/${config.branch}`]);
   } catch (error) {
-    throw Object.assign(new Error(`本地提交已保留，但推送失败；请检查 SSH 权限和网络后重试。${error instanceof Error ? `（${error.message}）` : ""}`), { cause: error });
+    throw Object.assign(new Error(t("localCommitKept", { reason: error instanceof Error ? error.message : "" })), { cause: error });
   }
 }

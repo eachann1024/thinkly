@@ -73,7 +73,7 @@ html.is-electron .electron-titlebar :is(
 }
 /* 同时覆盖已保存文件的按钮与未保存文件的静态图标；保留原点击区域。 */
 html.is-electron .electron-titlebar .page-file-title svg,
-html.is-electron .electron-titlebar .electron-document-header [data-goose-control="icon-button"]:not([aria-label="关闭标签页"]) > svg,
+html.is-electron .electron-titlebar .electron-document-header [data-goose-control="icon-button"]:not([data-tab-close]) > svg,
 html.is-electron .electron-titlebar .notebook-ai-header-toolbar [data-goose-control="icon-button"] > svg {
   width: var(--titlebar-icon-size);
   height: var(--titlebar-icon-size);
@@ -156,7 +156,7 @@ html.is-electron.os-linux {
   .electron-ai-header::before {
     display: none;
   }
-  .electron-window-controls button:is([aria-label="后退"], [aria-label="前进"]) {
+  .electron-window-controls .electron-history-button {
     display: none;
   }
   .workspace-shell[data-electron-chrome] .electron-titlebar[data-sidebar-collapsed="true"],

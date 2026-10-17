@@ -13,6 +13,15 @@ import {
   type SelectionMenuChange,
 } from "../useSelectionMenu";
 import { AlignGroup } from "./AlignGroup";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AlignmentMenu.tsx#messages:1">`
+zh-Hans:
+  alignment: "对齐方式"
+en:
+  alignment: "Alignment"
+`;
+const t = createTranslator(messages);
+
 
 export function AlignmentMenu({
   textAlignment,
@@ -42,13 +51,13 @@ export function AlignmentMenu({
               variant="ghost"
               size="sm"
               className="goose-formatting-toolbar-control"
-              aria-label="对齐方式"
+              aria-label={t("alignment")}
             >
               <Icon />
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <ToolbarTooltip label="对齐方式" />
+        <ToolbarTooltip label={t("alignment")} />
       </Tooltip>
       <PopoverContent
         editorContext
@@ -60,7 +69,7 @@ export function AlignmentMenu({
           data-formatting-toolbar
           className="goose-formatting-toolbar-menu"
           role="toolbar"
-          aria-label="对齐方式"
+          aria-label={t("alignment")}
         >
           <AlignGroup
             textAlignment={textAlignment}

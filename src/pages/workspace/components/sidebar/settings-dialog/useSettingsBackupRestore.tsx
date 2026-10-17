@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsBackupRestore.tsx#localMessages:1">`
+zh-Hans:
+  theBackupContainsNoNotebooksTo_ad6c: "备份中没有可恢复的笔记本"
+  restoreFailedAndAutomaticRollbackDid_84d4: "恢复失败，且自动回滚未完成，请从本地导出备份恢复"
+  restoreFailedYourPreviousDataWas_dcd9: "恢复失败，已自动恢复覆盖前的数据"
+  restoredAndSynced_ea35: "恢复并同步成功"
+en:
+  theBackupContainsNoNotebooksTo_ad6c: "The backup contains no notebooks to restore"
+  restoreFailedAndAutomaticRollbackDid_84d4: "Restore failed and automatic rollback did not finish. Restore from a local exported backup."
+  restoreFailedYourPreviousDataWas_dcd9: "Restore failed. Your previous data was restored automatically."
+  restoredAndSynced_ea35: "Restored and synced"
+`;
+const uiText = createTranslator(localMessages);
 import { useNotebooks } from "@/stores/useNotebooks";
 import { clearLocalPageMetadataCache, usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
@@ -126,7 +141,7 @@ export function useSettingsBackupRestore(
       },
     );
     if (!firstWorkspaceId) {
-      throw new Error("备份中没有可恢复的笔记本");
+      throw new Error(uiText("theBackupContainsNoNotebooksTo_ad6c"));
     }
     useNotebooks.setState({ activeNotebookId: firstWorkspaceId });
     closeNotebookAiIfFullscreen();
@@ -174,13 +189,13 @@ export function useSettingsBackupRestore(
         useTabs.getState().reconcileTabs();
       } catch (rollbackError) {
         console.error("[restore] 回滚失败", rollbackError);
-        throw new Error("恢复失败，且自动回滚未完成，请从本地导出备份恢复", {
+        throw new Error(uiText("restoreFailedAndAutomaticRollbackDid_84d4"), {
           cause: rollbackError,
         });
       }
-      throw new Error("恢复失败，已自动恢复覆盖前的数据", { cause: error });
+      throw new Error(uiText("restoreFailedYourPreviousDataWas_dcd9"), { cause: error });
     }
-    toast.success("恢复并同步成功");
+    toast.success(uiText("restoredAndSynced_ea35"));
   };
   return {
     ...input,

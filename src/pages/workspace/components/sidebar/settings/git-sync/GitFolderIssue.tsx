@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitFolderIssue.tsx#localMessages:1">`
+zh-Hans:
+  folderIssue: "{{name}}：{{summary}}{{action}}"
+  viewResolution: "，查看处理方式"
+en:
+  folderIssue: "{{name}}: {{summary}}{{action}}"
+  viewResolution: ", view resolution"
+`;
+const uiText = createTranslator(localMessages);
 import { useState } from "react";
 import { CircleAlert } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -28,7 +39,7 @@ export function GitFolderIssue({
       type="button"
       variant="ghost"
       contentStyle="preserve"
-      aria-label={`${name}：${summary}${actionLabel ? "，查看处理方式" : ""}`}
+      aria-label={uiText("folderIssue", { name, summary, action: actionLabel ? uiText("viewResolution") : "" })}
       className="group relative flex size-8 items-center justify-center rounded-lg p-0 text-muted-foreground hover:text-foreground"
     >
       <CircleAlert aria-hidden="true" className="size-4" />

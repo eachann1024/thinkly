@@ -1,15 +1,15 @@
 import type { EditorPlatform } from "@/components/editor/platform/types";
-
+import messages from "./openResourceExternally.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
 const TEMP_RESOURCE_PREFIX = "goose-note/opened-resources";
 const TEMP_RESOURCE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const MAX_MATERIALIZED_RESOURCE_SIZE = 100 * 1024 * 1024;
-
 export type OpenExternalResourceResult = {
   ok: boolean;
   error?: string;
   path?: string;
 };
-
 type OpenExternalResourceOptions = {
   source: string;
   fileName?: string;
@@ -105,7 +105,7 @@ export function resolvePhysicalResourcePath(
 function formatResourceReadError(error: unknown): string {
   const message = error instanceof Error ? error.message.trim() : "";
   if (!message || /failed to fetch/i.test(message)) {
-    return "文件无法读取，请重新添加附件";
+    return t("theFileCouldNotBeReadPleaseAdd");
   }
   return message;
 }
@@ -113,7 +113,7 @@ function formatResourceReadError(error: unknown): string {
 function readBlobViaXhr(source: string): Promise<Blob> {
   return new Promise((resolve, reject) => {
     if (typeof XMLHttpRequest !== "function") {
-      reject(new Error("资源读取失败"));
+      reject(new Error(t("couldNotReadTheResource")));
       return;
     }
     const xhr = new XMLHttpRequest();
@@ -124,9 +124,9 @@ function readBlobViaXhr(source: string): Promise<Blob> {
         resolve(xhr.response);
         return;
       }
-      reject(new Error(`资源读取失败（${xhr.status}）`));
+      reject(new Error(t("resourceReadStatus", { status: xhr.status })));
     };
-    xhr.onerror = () => reject(new Error("资源读取失败"));
+    xhr.onerror = () => reject(new Error(t("couldNotReadTheResource")));
     xhr.send();
   });
 }
@@ -142,7 +142,7 @@ async function readUrlAsBlob(source: string): Promise<Blob> {
   }
   const response = await fetch(source);
   if (!response.ok && response.status !== 0) {
-    throw new Error(`资源读取失败（${response.status}）`);
+    throw new Error(t("resourceResponseStatus", { status: response.status }));
   }
   return response.blob();
 }
@@ -165,7 +165,7 @@ async function tryOpenNamedLocalFile(
     const opened = await platform.shell.openPath(candidate);
     return opened
       ? { ok: true, path: candidate }
-      : { ok: false, error: "无法使用系统默认应用打开" };
+      : { ok: false, get error() { return t("couldNotOpenInTheDefaultApp"); } };
   }
   return null;
 }
@@ -187,9 +187,9 @@ async function readResourceBlob(
   const blob = /^(?:https?|data|blob):/i.test(source)
     ? await readUrlAsBlob(source)
     : await loadInternalResource?.(source);
-  if (!blob) throw new Error("资源不存在或尚未同步完成");
+  if (!blob) throw new Error(t("theResourceIsMissingOrHasNotFinished"));
   if (blob.size > MAX_MATERIALIZED_RESOURCE_SIZE) {
-    throw new Error("文件大小超过 100MB，无法直接打开");
+    throw new Error(t("filesLargerThan100MbCannotBeOpened"));
   }
   return blob;
 }
@@ -214,12 +214,12 @@ async function openMaterializedBlob(
     relativePath,
     await blobToBase64Payload(blob),
   );
-  if (!targetPath) return { ok: false, error: "临时文件写入失败" };
+  if (!targetPath) return { ok: false, get error() { return t("couldNotWriteTheTemporaryFile"); } };
 
   const opened = await options.platform.shell.openPath(targetPath);
   return opened
     ? { ok: true, path: targetPath }
-    : { ok: false, error: "无法使用系统默认应用打开" };
+    : { ok: false, get error() { return t("couldNotOpenInTheDefaultApp"); } };
 }
 
 async function openResourceOnce(
@@ -227,7 +227,7 @@ async function openResourceOnce(
 ): Promise<OpenExternalResourceResult> {
   const { source, platform, pageLocalFilePath } = options;
   const trimmedSource = source.trim();
-  if (!trimmedSource) return { ok: false, error: "资源地址为空" };
+  if (!trimmedSource) return { ok: false, get error() { return t("theResourceAddressIsEmpty"); } };
 
   const physicalPath = resolvePhysicalResourcePath(
     trimmedSource,
@@ -243,17 +243,17 @@ async function openResourceOnce(
           platform,
         );
         if (named) return named;
-        return { ok: false, error: "本地文件不存在" };
+        return { ok: false, get error() { return t("theLocalFileDoesNotExist"); } };
       }
     }
     const opened = await platform.shell.openPath(physicalPath);
     return opened
       ? { ok: true, path: physicalPath }
-      : { ok: false, error: "无法使用系统默认应用打开" };
+      : { ok: false, get error() { return t("couldNotOpenInTheDefaultApp"); } };
   }
 
   if (!platform.fs.isAvailable()) {
-    return { ok: false, error: "当前环境不支持调用系统应用" };
+    return { ok: false, get error() { return t("openingSystemAppsIsNotSupportedInThis"); } };
   }
 
   if (!cleanedPlatforms.has(platform)) {

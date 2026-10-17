@@ -14,6 +14,19 @@ import {
   resolveActiveProtocol,
 } from "@/lib/ai-provider";
 import { useSettings } from "@/stores/useSettings";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/pi/model.ts#messages:1">`
+zh-Hans:
+  enableTheAiAssistantInSettingsToUse: "AI 功能未开启，请前往设置启用 AI 助手。"
+  chooseAModelInSettingsBeforeUsingThe: "请在设置中选择一个模型后再使用 AI 笔记本功能。"
+  detailCouldNotCreatePiModel: "构造 Pi 模型失败：{{value1}}"
+en:
+  enableTheAiAssistantInSettingsToUse: "Enable the AI assistant in Settings to use this feature."
+  chooseAModelInSettingsBeforeUsingThe: "Choose a model in Settings before using the AI notebook."
+  detailCouldNotCreatePiModel: "Could not create Pi model: {{value1}}"
+`;
+const t = createTranslator(messages);
+
 
 export type PiModelAvailability =
   | { ok: true; models: Models; model: Model<any>; providerId: string }
@@ -53,14 +66,14 @@ export function buildPiLanguageModel(): PiModelAvailability {
   const ai = useSettings.getState().ai;
 
   if (!ai.enabled) {
-    return { ok: false, reason: "AI 功能未开启，请前往设置启用 AI 助手。" };
+    return { ok: false, get reason() { return t("enableTheAiAssistantInSettingsToUse"); } };
   }
 
   const modelId = resolveSelectedModelId();
   if (!modelId) {
     return {
       ok: false,
-      reason: "请在设置中选择一个模型后再使用 AI 笔记本功能。",
+      get reason() { return t("chooseAModelInSettingsBeforeUsingThe"); },
     };
   }
 
@@ -166,7 +179,7 @@ export function buildPiLanguageModel(): PiModelAvailability {
   } catch (err) {
     return {
       ok: false,
-      reason: `构造 Pi 模型失败：${err instanceof Error ? err.message : String(err)}`,
+      reason: t("detailCouldNotCreatePiModel", { value1: err instanceof Error ? err.message : String(err) }),
     };
   }
 }

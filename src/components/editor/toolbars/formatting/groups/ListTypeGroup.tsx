@@ -10,6 +10,19 @@ import {
   getListTypeToolbarState,
   type ListBlockType,
 } from "../listType";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/ListTypeGroup.tsx#messages:1">`
+zh-Hans:
+  checklist: "待办事项"
+  bulletedList: "无序列表"
+  numberedList: "有序列表"
+en:
+  checklist: "Checklist"
+  bulletedList: "Bulleted list"
+  numberedList: "Numbered list"
+`;
+const t = createTranslator(messages);
+
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -19,9 +32,9 @@ const LIST_TYPE_ITEMS: {
   shortcut: string;
   icon: typeof List;
 }[] = [
-  { type: "checkListItem", label: "提醒事项", shortcut: "Mod+Shift+9", icon: CheckSquare },
-  { type: "bulletListItem", label: "无序列表", shortcut: "Mod+Shift+8", icon: List },
-  { type: "numberedListItem", label: "有序列表", shortcut: "Mod+Shift+7", icon: ListOrdered },
+  { type: "checkListItem", get label() { return t("checklist"); }, shortcut: "Mod+Shift+9", icon: CheckSquare },
+  { type: "bulletListItem", get label() { return t("bulletedList"); }, shortcut: "Mod+Shift+8", icon: List },
+  { type: "numberedListItem", get label() { return t("numberedList"); }, shortcut: "Mod+Shift+7", icon: ListOrdered },
 ];
 
 export function ListTypeGroup({

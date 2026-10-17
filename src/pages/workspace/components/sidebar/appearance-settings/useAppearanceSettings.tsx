@@ -33,7 +33,7 @@ export function useAppearanceSettings({
 
   const lockScaleDragLayout = (event: PointerEvent<HTMLInputElement>) => {
     const preview = appearanceLayoutRef.current?.querySelector<HTMLElement>(
-      '[aria-label="编辑器即时预览"]',
+      '[data-editor-preview]',
     );
     setScaleDragLayout(
       preview && getComputedStyle(preview).display !== "none"

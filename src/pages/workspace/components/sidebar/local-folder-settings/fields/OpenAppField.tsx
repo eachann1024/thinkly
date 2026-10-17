@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/OpenAppField.tsx#localMessages:1">`
+zh-Hans:
+  custom_f1d4: "自定义"
+  applicationName: "{{title}}名称"
+en:
+  custom_f1d4: "Custom"
+  applicationName: "{{title}} name"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,7 +65,7 @@ export function OpenAppField({
         : (matchedOption?.appName ?? CUSTOM_VALUE);
   const selectedLabel =
     customActive && !trimmedValue
-      ? "自定义"
+      ? uiText("custom_f1d4")
       : !trimmedValue
         ? defaultLabel
         : (matchedOption?.label ?? trimmedValue);
@@ -142,7 +153,7 @@ export function OpenAppField({
                 ))}
               <DropdownMenuRadioItem value={CUSTOM_VALUE} hideIndicator>
                 {appIcon()}
-                <span>自定义</span>
+                <span>{uiText("custom_f1d4")}</span>
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -153,7 +164,7 @@ export function OpenAppField({
         <div className="pl-7">
           <Input
             id={`${id}-custom`}
-            aria-label={`${title}名称`}
+            aria-label={uiText("applicationName", { title })}
             value={trimmedValue}
             onChange={(event) => onChange(event.target.value)}
             onBlur={(event) => onChange(event.target.value.trim())}

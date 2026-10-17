@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/useEditorSplit.ts#block1:1">`
+zh-Hans:
+  paneMissing: "找不到当前分屏格子"
+en:
+  paneMissing: "The current split pane couldn’t be found."
+`);
 import type { SplitState } from "@/lib/editor-split/types";
 import { moveLeaf } from "@/lib/editor-split/move";
 import {
@@ -45,7 +52,7 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   splitFocused: (input) => {
     const current = get().byTabId[input.tabId];
     if (!current) {
-      return { ok: false, error: "找不到当前分屏格子" };
+      return { ok: false, error: storeText("paneMissing") };
     }
     const result = splitLeaf(current, {
       direction: input.direction,

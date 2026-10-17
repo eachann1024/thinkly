@@ -1,3 +1,14 @@
+
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/selectionQuoteData.ts#messages:1">`
+zh-Hans:
+  thisSelectionIsAlreadyInTheInput: "该选区已在输入框中"
+  selectionReferenceAdded: "已加入选区引用"
+en:
+  thisSelectionIsAlreadyInTheInput: "This selection is already in the input"
+  selectionReferenceAdded: "Selection reference added"
+`;
+const t = createTranslator(messages);
 /** 可序列化选区引用及去重、标签和展示策略。 */
 export const APPEND_COMPOSER_SELECTION_EVENT =
   "goose-note:append-composer-selection";
@@ -5,8 +16,8 @@ export const OPEN_AI_PANEL_EVENT = "goose-note:open-ai-panel";
 export const FOCUS_AI_COMPOSER_EVENT = "goose-note:focus-ai-composer";
 
 export const SELECTION_QUOTE_SUMMARY_MAX = 16;
-export const SELECTION_QUOTE_DUPLICATE_TOAST = "该选区已在输入框中";
-export const SELECTION_QUOTE_LIVE_ANNOUNCEMENT = "已加入选区引用";
+export const SELECTION_QUOTE_DUPLICATE_TOAST = t("thisSelectionIsAlreadyInTheInput");
+export const SELECTION_QUOTE_LIVE_ANNOUNCEMENT = t("selectionReferenceAdded");
 export const SELECTION_QUOTE_ADD_SHORTCUT = "Mod+Shift+U";
 export const AI_PANEL_ACTIVE_ATTR = "data-goose-ai-panel-active";
 

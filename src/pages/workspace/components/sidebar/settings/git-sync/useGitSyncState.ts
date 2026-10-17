@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/useGitSyncState.ts#localMessages:1">`
+zh-Hans:
+  couldNotReadConfiguration_a6ab: "读取配置失败"
+en:
+  couldNotReadConfiguration_a6ab: "Could not read configuration"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useReducer, useState } from "react";
 import type { GitSyncBridge, GitSyncState } from "@/lib/git-sync-contract";
 import { gitSyncLoadReducer } from "./gitSyncLoadState";
@@ -21,7 +30,7 @@ export function useGitSyncState(bridge: GitSyncBridge | undefined, visible: bool
     bridge.getState().then(next => {
       if (mounted && !pushed) applyState(next);
     }).catch((error: unknown) => {
-      if (mounted && !pushed) dispatch({ type: "failed", error: error instanceof Error ? error.message : "读取配置失败" });
+      if (mounted && !pushed) dispatch({ type: "failed", error: error instanceof Error ? error.message : uiText("couldNotReadConfiguration_a6ab") });
     });
     return () => { mounted = false; unsubscribe(); };
   }, [bridge, visible, revision, applyState]);

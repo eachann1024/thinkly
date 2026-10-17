@@ -10,6 +10,17 @@ import { isColorSwatchSelected } from "./heldColorSelection";
 import type { useColorPanelState } from "./useColorPanelState";
 import type { useColorActions } from "./useColorActions";
 import { useOverlayLayer } from "@/components/ui/overlay-layer";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/ColorPickerPanel.tsx#messages:1">`
+zh-Hans:
+  textColor: "文本颜色"
+  backgroundColor: "背景颜色"
+en:
+  textColor: "Text color"
+  backgroundColor: "Background color"
+`;
+const t = createTranslator(messages);
+
 
 export function ColorPickerPanel({
   panel,
@@ -47,7 +58,7 @@ export function ColorPickerPanel({
     >
       <div className="goose-color-picker-panel goose-menu-surface flex flex-col">
         <div className="goose-color-picker-title goose-menu-label">
-          文本颜色
+          {t("textColor")}
         </div>
         <div className="goose-color-picker-grid goose-list-group grid" data-goose-layout="grid">
           {TEXT_COLORS.map((item, index) => (
@@ -83,7 +94,7 @@ export function ColorPickerPanel({
         </div>
 
         <div className="goose-color-picker-title goose-menu-label">
-          背景颜色
+          {t("backgroundColor")}
         </div>
         <div className="goose-color-picker-grid goose-color-picker-grid-last goose-list-group grid" data-goose-layout="grid">
           {HIGHLIGHT_COLORS.map((item, index) => (

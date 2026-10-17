@@ -23,6 +23,15 @@ import {
   setDomFromJsonContent,
 } from "./composerTokens";
 import type { ComposerNativeHandlers } from "./composerInputTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/useComposerNativeEditor.ts#messages:1">`
+zh-Hans:
+  aiInput: "AI 输入"
+en:
+  aiInput: "AI input"
+`;
+const t = createTranslator(messages);
+
 
 export function useComposerEditor(options: {
   editorHostRef: RefObject<HTMLDivElement | null>;
@@ -65,7 +74,7 @@ export function useComposerEditor(options: {
 
     const el = document.createElement("div");
     el.setAttribute("role", "textbox");
-    el.setAttribute("aria-label", "AI 输入");
+    el.setAttribute("aria-label", t("aiInput"));
     el.setAttribute("aria-multiline", "true");
     el.dataset.aiComposerEditor = "true";
     el.dataset.aiComposerVariant = variant;

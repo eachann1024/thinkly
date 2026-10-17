@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/pageMutations/restore.ts#block1:1">`
+zh-Hans:
+  unnamedNotebook: "未命名笔记本"
+  untitled: "无标题"
+  folder: "文件夹"
+  file: "文件"
+  page: "页面"
+en:
+  unnamedNotebook: "Unnamed notebook"
+  untitled: "Untitled"
+  folder: "Folder"
+  file: "File"
+  page: "Page"
+`);
 import type { Page } from "@/types";
 import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
@@ -24,13 +39,13 @@ export const restorePageAction = (
 
   const notebookName =
     useNotebooks.getState().notebooks[page.workspaceId]?.name ||
-    "未命名笔记本";
-  const pageTitle = getPageTitle(page) || "无标题";
+    storeText("unnamedNotebook");
+  const pageTitle = getPageTitle(page) || storeText("untitled");
   const itemLabel = page.isFolder
-    ? "文件夹"
+    ? storeText("folder")
     : page.localFilePath
-      ? "文件"
-      : "页面";
+      ? storeText("file")
+      : storeText("page");
 
   const parentTitles: string[] = [];
   const parentVisited = new Set<string>();
@@ -39,7 +54,7 @@ export const restorePageAction = (
     parentVisited.add(currentParentId);
     const parentPage = snapshotPages[currentParentId];
     if (!parentPage) break;
-    parentTitles.unshift(getPageTitle(parentPage) || "无标题");
+    parentTitles.unshift(getPageTitle(parentPage) || storeText("untitled"));
     currentParentId = parentPage.parentId;
   }
 

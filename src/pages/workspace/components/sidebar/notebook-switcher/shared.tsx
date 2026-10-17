@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-switcher/shared.tsx#localMessages:1">`
+zh-Hans:
+  pathUnavailable_ddd1: "路径失效"
+  removeLocalFolder_505d: "移除本地文件夹"
+  editNotebook_ed4e: "编辑笔记本"
+en:
+  pathUnavailable_ddd1: "Path unavailable"
+  removeLocalFolder_505d: "Remove local folder"
+  editNotebook_ed4e: "Edit notebook"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { useSortable } from "@dnd-kit/sortable";
@@ -83,7 +96,7 @@ export function SortableNotebookItem({
         name={notebook.name}
       >
         {notebook.localPathMissing && (
-          <span className="shrink-0 whitespace-nowrap text-xs text-danger">路径失效</span>
+          <span className="shrink-0 whitespace-nowrap text-xs text-danger">{uiText("pathUnavailable_ddd1")}</span>
         )}
       </NotebookMenuItemContent>
       <div
@@ -101,12 +114,12 @@ export function SortableNotebookItem({
                     e.stopPropagation();
                     onDeleteLocal(notebook.id);
                   }}
-                  aria-label="移除本地文件夹"
+                  aria-label={uiText("removeLocalFolder_505d")}
                 >
                   <GooseIcons.FolderX className="h-3.5 w-3.5" />
                 </IconButton>
               </TooltipTrigger>
-              <TooltipContent side="bottom">移除本地文件夹</TooltipContent>
+              <TooltipContent side="bottom">{uiText("removeLocalFolder_505d")}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
@@ -116,7 +129,7 @@ export function SortableNotebookItem({
               <IconButton size="xs"
                 type="button"
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md overflow-hidden px-0 text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                aria-label="编辑笔记本"
+                aria-label={uiText("editNotebook_ed4e")}
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(notebook.id);
@@ -125,7 +138,7 @@ export function SortableNotebookItem({
                 <GooseIcons.Settings className="h-3.5 w-3.5" />
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent side="bottom">编辑笔记本</TooltipContent>
+            <TooltipContent side="bottom">{uiText("editNotebook_ed4e")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>

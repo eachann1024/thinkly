@@ -6,6 +6,21 @@ import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
 import { withPreservedSelection } from "../selectionRestore";
 import type { RunToolbarAction } from "../useSelectionMenu";
 import type { BooleanMarkState } from "../selectionMarkStates";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/InlineGroup.tsx#messages:1">`
+zh-Hans:
+  underlineMixedFormatting: "下划线（混合格式）"
+  underline: "下划线"
+  inlineCodeMixedFormatting: "行内代码（混合格式）"
+  inlineCode: "行内代码"
+en:
+  underlineMixedFormatting: "Underline (mixed formatting)"
+  underline: "Underline"
+  inlineCodeMixedFormatting: "Inline code (mixed formatting)"
+  inlineCode: "Inline code"
+`;
+const t = createTranslator(messages);
+
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -44,13 +59,13 @@ export function InlineGroup({
                   ? editor.removeStyles({ underline: true })
                   : editor.addStyles({ underline: true }))
               }
-              aria-label={isUnderline === "mixed" ? "下划线（混合格式）" : "下划线"}
+              aria-label={isUnderline === "mixed" ? t("underlineMixedFormatting") : t("underline")}
               className={ITEM_CLASS}
             >
               <GooseIcons.Underline className="h-[15px] w-[15px]" />
             </Toggle>
           </TooltipTrigger>
-          <ToolbarTooltip label={isUnderline === "mixed" ? "下划线（混合格式）" : "下划线"} shortcut="Mod+U" />
+          <ToolbarTooltip label={isUnderline === "mixed" ? t("underlineMixedFormatting") : t("underline")} shortcut="Mod+U" />
         </Tooltip>
       )}
 
@@ -67,13 +82,13 @@ export function InlineGroup({
                   ? editor.removeStyles({ code: true })
                   : editor.addStyles({ code: true }))
               }
-              aria-label={isCode === "mixed" ? "行内代码（混合格式）" : "行内代码"}
+              aria-label={isCode === "mixed" ? t("inlineCodeMixedFormatting") : t("inlineCode")}
               className={ITEM_CLASS}
             >
               <GooseIcons.Code className="h-[15px] w-[15px]" />
             </Toggle>
           </TooltipTrigger>
-          <ToolbarTooltip label={isCode === "mixed" ? "行内代码（混合格式）" : "行内代码"} shortcut="Mod+E" />
+          <ToolbarTooltip label={isCode === "mixed" ? t("inlineCodeMixedFormatting") : t("inlineCode")} shortcut="Mod+E" />
         </Tooltip>
       )}
     </>

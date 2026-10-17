@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/renderMainTreeSurface.tsx#localMessages:1">`
+zh-Hans:
+  fileName_d2e2: "文件名称"
+  page_59ce: "页面"
+en:
+  fileName_d2e2: "File name"
+  page_59ce: "Page"
+`;
+const uiText = createTranslator(localMessages);
 import { type CSSProperties } from "react";
 import {
   ControlledTreeEnvironment,
@@ -116,7 +127,7 @@ export function renderMainTreeSurface(
         <ControlledTreeEnvironment<Page>
           items={items}
           getItemTitle={(item) =>
-            item.index === "root" ? "" : item.data.localPendingCreate === "file" ? "文件名称" : getPageTitle(item.data)
+            item.index === "root" ? "" : item.data.localPendingCreate === "file" ? uiText("fileName_d2e2") : getPageTitle(item.data)
           }
           viewState={viewState}
           defaultInteractionMode={InteractionMode.ClickArrowToExpand}
@@ -223,7 +234,7 @@ export function renderMainTreeSurface(
           renderTreeContainer={renderTreeContainer}
           renderDragBetweenLine={renderDragBetweenLine}
         >
-          <Tree treeId="main" rootItem="root" treeLabel="页面" />
+          <Tree treeId="main" rootItem="root" treeLabel={uiText("page_59ce")} />
         </ControlledTreeEnvironment>
       </div>
     </ContextMenuTrigger>

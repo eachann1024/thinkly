@@ -5,6 +5,15 @@ import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { CodeBlockHeader } from "./CodeBlockHeader";
 import { CodeLatexHints } from "./CodeLatexHints";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockView.tsx#messages:1">`
+zh-Hans:
+  formulaPreview: "公式预览"
+en:
+  formulaPreview: "Formula preview"
+`;
+const t = createTranslator(messages);
+
 
 export function CodeBlockView(props: CodeBlockViewProps) {
   const { language, wrap, collapsed, contentRef, isEditable, edit, preview } =
@@ -88,7 +97,7 @@ export function CodeBlockView(props: CodeBlockViewProps) {
       <FullscreenPreview
         open={Boolean(previewContent)}
         content={previewContent}
-        title={language === "math" ? "公式预览" : "Mermaid"}
+        title={language === "math" ? t("formulaPreview") : "Mermaid"}
         onClose={() => setPreviewContent(null)}
       />
       <CodeLatexHints

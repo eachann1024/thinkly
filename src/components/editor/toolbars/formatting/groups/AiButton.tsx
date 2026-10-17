@@ -2,6 +2,15 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Button } from "@/components/editor/ui/button";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AiButton.tsx#messages:1">`
+zh-Hans:
+  polishWithAi: "AI 润色"
+en:
+  polishWithAi: "Polish with AI"
+`;
+const t = createTranslator(messages);
+
 
 export function AiButton({
   onActivate,
@@ -17,13 +26,13 @@ export function AiButton({
           variant="ghost"
           size="sm"
           onClick={onActivate}
-          aria-label="AI 润色"
+          aria-label={t("polishWithAi")}
           className="goose-formatting-toolbar-control"
         >
           <GooseIcons.Sparkles className="h-[15px] w-[15px]" />
         </Button>
       </TooltipTrigger>
-      <ToolbarTooltip label="AI 润色" />
+      <ToolbarTooltip label={t("polishWithAi")} />
     </Tooltip>
   );
 }

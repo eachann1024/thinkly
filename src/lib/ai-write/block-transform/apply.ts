@@ -10,6 +10,19 @@ import {
   type BlockTypeTransformSelectionSnapshot,
 } from "./types";
 import { planBlockTypeTransform } from "./plan";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/ai-write/block-transform/apply.ts#messages:1">`
+zh-Hans:
+  thereAreNoTextBlocksToConvert: "没有可转换的文本块。"
+  theTargetBlockIsNoLongerInThe: "目标块已不在文档中，无法转换。"
+  theBlockToConvertCouldNotBeLocated: "无法定位要转换的块。"
+en:
+  thereAreNoTextBlocksToConvert: "There are no text blocks to convert."
+  theTargetBlockIsNoLongerInThe: "The target block is no longer in the document and cannot be converted."
+  theBlockToConvertCouldNotBeLocated: "The block to convert could not be located."
+`;
+const t = createTranslator(messages);
+
 
 const SKIP_COERCE_TYPES = new Set([
   "heading",
@@ -50,7 +63,7 @@ export function coerceGeneratedBlocksToExpectedType(
   intent: BlockTypeTransformIntent,
 ): BlockTypeTransformResult {
   const ids = blockIds.filter((id) => typeof id === "string" && id.length > 0);
-  if (ids.length === 0) throw new Error("没有可转换的文本块。");
+  if (ids.length === 0) throw new Error(t("thereAreNoTextBlocksToConvert"));
 
   const currentBlocks = (editor.document ?? []) as BlockTypeTransformBlock[];
   const byId = new Map(
@@ -66,7 +79,7 @@ export function coerceGeneratedBlocksToExpectedType(
   if (targets.length === 0) {
     targets = live.filter((block) => block.type === "paragraph");
   }
-  if (targets.length === 0) throw new Error("没有可转换的文本块。");
+  if (targets.length === 0) throw new Error(t("thereAreNoTextBlocksToConvert"));
 
   let convertedCount = 0;
   editor.transact(() => {
@@ -99,7 +112,7 @@ export function applyBlockTypeTransformToContiguousIds(
   intent: BlockTypeTransformIntent,
 ): BlockTypeTransformResult {
   const ids = blockIds.filter((id) => typeof id === "string" && id.length > 0);
-  if (ids.length === 0) throw new Error("没有可转换的文本块。");
+  if (ids.length === 0) throw new Error(t("thereAreNoTextBlocksToConvert"));
 
   const currentBlocks = (editor.document ?? []) as BlockTypeTransformBlock[];
   const startIndex = currentBlocks.findIndex((block) => block.id === ids[0]);
@@ -107,14 +120,14 @@ export function applyBlockTypeTransformToContiguousIds(
     (block) => block.id === ids[ids.length - 1],
   );
   if (startIndex < 0 || endIndex < startIndex) {
-    throw new Error("目标块已不在文档中，无法转换。");
+    throw new Error(t("theTargetBlockIsNoLongerInThe"));
   }
 
   const slice = currentBlocks.slice(startIndex, endIndex + 1);
   const startBlockId = slice[0]?.id;
   const endBlockId = slice[slice.length - 1]?.id;
   if (!startBlockId || !endBlockId) {
-    throw new Error("无法定位要转换的块。");
+    throw new Error(t("theBlockToConvertCouldNotBeLocated"));
   }
 
   return applyBlockTypeTransformToEditor(

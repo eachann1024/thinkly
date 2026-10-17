@@ -1,10 +1,21 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1">`
+zh-Hans:
+  unpinWindow: "取消窗口置顶"
+  pinWindow: "置顶窗口"
+en:
+  unpinWindow: "Turn off always on top"
+  pinWindow: "Always on top"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWindowAlwaysOnTop } from "@/hooks/useWindowAlwaysOnTop";
 
 export function WindowAlwaysOnTopButton() {
   const { alwaysOnTop, isPending, toggleAlwaysOnTop } = useWindowAlwaysOnTop();
-  const label = alwaysOnTop ? "取消窗口置顶" : "置顶窗口";
+  const label = alwaysOnTop ? uiText("unpinWindow") : uiText("pinWindow");
 
   return (
     <Tooltip>

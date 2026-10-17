@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/providers/openaiResponses.ts#localMessages:1">`
+zh-Hans:
+  theCustomOpenaiResponsesModelRequestFailed: "请求自定义 OpenAI Responses 模型失败"
+  theOpenaiResponsesStreamingRequestFailed: "OpenAI Responses 流式请求失败"
+en:
+  theCustomOpenaiResponsesModelRequestFailed: "The custom OpenAI Responses model request failed"
+  theOpenaiResponsesStreamingRequestFailed: "The OpenAI Responses streaming request failed"
+`;
+const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";
 import {
   getCustomAIApiKey,
@@ -57,7 +68,7 @@ export async function handleOpenAIResponsesStream(
 
   if (!response.ok) {
     const errorMessage = await readErrorMessage(response);
-    throw new Error(errorMessage || "请求自定义 OpenAI Responses 模型失败");
+    throw new Error(errorMessage || uiText("theCustomOpenaiResponsesModelRequestFailed"));
   }
 
   let fullText = "";
@@ -81,10 +92,10 @@ export async function handleOpenAIResponsesStream(
           emit("thinking", reasoningDelta, true);
         } else if (event.type === "error") {
           streamError =
-            event.message || event.error?.message || "OpenAI Responses 流式请求失败";
+            event.message || event.error?.message || uiText("theOpenaiResponsesStreamingRequestFailed");
         } else if (event.type === "response.failed") {
           streamError =
-            event.response?.error?.message || "OpenAI Responses 流式请求失败";
+            event.response?.error?.message || uiText("theOpenaiResponsesStreamingRequestFailed");
         }
       }
     } catch {

@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/openAssociatedMarkdown.ts#localMessages:1">`
+zh-Hans:
+  couldnTOpenThisMarkdownFile: "无法打开该 Markdown 文件"
+  theFileIsnTInsideAFolderThatCan: "文件不在可挂载的文件夹内。"
+  theFileIsnTAmongTheVisibleNotesIn: "文件不在当前仓库的可见笔记中。"
+en:
+  couldnTOpenThisMarkdownFile: "Couldn’t open this Markdown file"
+  theFileIsnTInsideAFolderThatCan: "The file isn’t inside a folder that can be opened as a notebook."
+  theFileIsnTAmongTheVisibleNotesIn: "The file isn’t among the visible notes in the current repository."
+`;
+const uiText = createTranslator(localMessages);
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -82,8 +95,8 @@ export async function openAssociatedMarkdownFile(
   if (!notebook) {
     const parentDir = pageDirectory(trimmed);
     if (!parentDir) {
-      toast.error("无法打开该 Markdown 文件", {
-        description: "文件不在可挂载的文件夹内。",
+      toast.error(uiText("couldnTOpenThisMarkdownFile"), {
+        description: uiText("theFileIsnTInsideAFolderThatCan"),
       });
       return false;
     }
@@ -113,8 +126,8 @@ export async function openAssociatedMarkdownFile(
   }
 
   if (!pageId) {
-    toast.error("无法打开该 Markdown 文件", {
-      description: "文件不在当前仓库的可见笔记中。",
+    toast.error(uiText("couldnTOpenThisMarkdownFile"), {
+      description: uiText("theFileIsnTAmongTheVisibleNotesIn"),
     });
     return false;
   }

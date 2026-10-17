@@ -1,3 +1,36 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/page-menu/usePageMenu.ts#localMessages:1">`
+zh-Hans:
+  noFile: "未选择文件"
+  importFailed: "导入失败"
+  needFolder: "请先关联本地文件夹"
+  chooseImportFolder: "导入前请先在左侧栏打开或新建一个本地文件夹作为存储位置。"
+  retryImport: "导入失败，请重试"
+  imported: "已导入为新笔记"
+  checkImportFile: "导入失败，请检查文件后重试"
+  exportSingleNote: "暂不支持整夹导出，请打开具体笔记后再执行导出"
+  exporting: "正在导出 {{format}}…"
+  exported: "{{format}} 已导出"
+  exportError: "{{format}} 导出失败：{{error}}"
+  exportFailed: "{{format}} 导出失败"
+  selection: "选中内容"
+en:
+  noFile: "No file selected"
+  importFailed: "Import failed"
+  needFolder: "Connect a local folder first"
+  chooseImportFolder: "Open or create a local folder in the sidebar before importing."
+  retryImport: "Import failed. Try again."
+  imported: "Imported as a new note"
+  checkImportFile: "Import failed. Check the file and try again."
+  exportSingleNote: "Folder export isn’t supported yet. Open a note to export it."
+  exporting: "Exporting {{format}}…"
+  exported: "{{format}} exported"
+  exportError: "Couldn’t export {{format}}: {{error}}"
+  exportFailed: "Couldn’t export {{format}}"
+  selection: "Selected content"
+`;
+const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";
 import { useEffect, useRef, useState } from "react";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
@@ -71,16 +104,16 @@ export function usePageMenu() {
         preserveStructure: isLocalFolderNotebook,
       });
       if (!result.success) {
-        if (result.error !== "未选择文件") {
-          toast.error(result.error || "导入失败");
+        if (result.error !== uiText("noFile")) {
+          toast.error(result.error || uiText("importFailed"));
         }
         return;
       }
 
       closeNotebookAiIfFullscreen();
       if (!activeNotebookId) {
-        toast.error("请先关联本地文件夹", {
-          description: "导入前请先在左侧栏打开或新建一个本地文件夹作为存储位置。",
+        toast.error(uiText("needFolder"), {
+          description: uiText("chooseImportFolder"),
         });
         return;
       }
@@ -92,14 +125,14 @@ export function usePageMenu() {
           content: result.content as never,
         });
         if (!pageId) {
-          toast.error("导入失败，请重试");
+          toast.error(uiText("retryImport"));
           return;
         }
         setActivePage(null);
         requestAnimationFrame(() => {
           setActivePage(pageId);
         });
-        toast.success("已导入为新笔记");
+        toast.success(uiText("imported"));
         return;
       }
 
@@ -118,10 +151,10 @@ export function usePageMenu() {
       requestAnimationFrame(() => {
         setActivePage(newId);
       });
-      toast.success("已导入为新笔记");
+      toast.success(uiText("imported"));
     } catch (error) {
       console.error("导入失败:", error);
-      toast.error("导入失败，请检查文件后重试");
+      toast.error(uiText("checkImportFile"));
     } finally {
       importPending.current = false;
     }
@@ -130,21 +163,21 @@ export function usePageMenu() {
   const runExport = (label: string, task: () => Promise<boolean>) => {
     if (exportPending.current) return;
     if (page?.isFolder) {
-      toast.error("暂不支持整夹导出，请打开具体笔记后再执行导出");
+      toast.error(uiText("exportSingleNote"));
       return;
     }
     exportPending.current = true;
-    const toastId = toast.loading(`正在导出 ${label}…`);
+    const toastId = toast.loading(uiText("exporting", {format: label}));
     void Promise.resolve().then(task)
       .then((saved) => {
-        if (saved) toast.success(`${label} 已导出`, { id: toastId });
+        if (saved) toast.success(uiText("exported", {format: label}), { id: toastId });
         else toast.dismiss(toastId);
       })
       .catch((error) => {
         console.error(`[export] ${label} 失败:`, error);
         const message = error instanceof Error ? error.message : "";
         toast.error(
-          message ? `${label} 导出失败：${message}` : `${label} 导出失败`,
+          message ? uiText("exportError", {format: label, error: message}) : uiText("exportFailed", {format: label}),
           { id: toastId },
         );
       })
@@ -160,7 +193,7 @@ export function usePageMenu() {
     if (blocks.length > 0) {
       exportSelectionToImage(
         blocks,
-        extractBlockNoteTitle(page.content) || "选中内容",
+        extractBlockNoteTitle(page.content) || uiText("selection"),
         themeId,
         watermarkConfig,
         page,

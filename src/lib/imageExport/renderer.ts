@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/renderer.ts#localMessages:1">`
+zh-Hans:
+  selectedContent: "选中内容"
+  selection: "选中"
+en:
+  selectedContent: "Selected content"
+  selection: "Selection"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import { type BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
@@ -128,7 +139,7 @@ export async function exportSelectionToImage(
 
   const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
   const wm = normalizeWatermarkConfig(watermarkConfig);
-  const title = pageTitle || "选中内容";
+  const title = pageTitle || uiText("selectedContent");
 
   const clonedBlocks = cloneExportBlocks(selectionBlocks, {
     ensureFirstTitle: false,
@@ -167,7 +178,7 @@ export async function exportSelectionToImage(
     ) as HTMLElement;
     if (!cardElement) throw new Error("Failed to create preview element");
 
-    await captureElementToPng(cardElement, buildFileName(title, theme, "选中"));
+    await captureElementToPng(cardElement, buildFileName(title, theme, uiText("selection")));
   } finally {
     document.body.removeChild(container);
   }

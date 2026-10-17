@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeDragActions.tsx#localMessages:1">`
+zh-Hans:
+  moveFailed: "移动失败：{{error}}"
+en:
+  moveFailed: "Move failed: {{error}}"
+`;
+const uiText = createTranslator(localMessages);
 import { type DraggingPosition, type TreeItem } from "react-complex-tree";
 import type { Page } from "@/types";
 import { toast } from "@/components/ui/sonner";
@@ -106,7 +115,7 @@ export function useMainTreeDragActions(
             await moveLocalPage(id, newParentId);
             movedIds.push(id);
           } catch (err) {
-            toast.error(`移动失败：${(err as Error).message ?? String(err)}`);
+            toast.error(uiText("moveFailed", { error: (err as Error).message ?? String(err) }));
           }
         }
         // 跨目录移动成功后补落点：文件系统移动本身不表达位置，同目录那种

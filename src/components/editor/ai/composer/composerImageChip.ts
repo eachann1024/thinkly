@@ -1,3 +1,13 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/composerImageChip.ts#messages:1">`
+zh-Hans:
+  removeNamedImage: "移除图片 {{name}}"
+  removeNamedFile: "移除 {{name}}"
+en:
+  removeNamedImage: "Remove image {{name}}"
+  removeNamedFile: "Remove {{name}}"
+`;
+const t = createTranslator(messages);
 /**
  * 内联图片 chip / hover 预览 portal 的命令式 DOM，以及注册表 GC。
  * 被 composerTokens、useComposerImages、AiComposerInput 使用。
@@ -108,8 +118,8 @@ export function createImageChipElement(
   removeBtn.dataset.gooseControl = "button";
   removeBtn.dataset.gooseContext = "editor";
   removeBtn.dataset.aiImageRemove = attrs.imageId;
-  removeBtn.setAttribute("aria-label", `移除图片 ${attrs.fileName}`);
-  removeBtn.title = `移除 ${attrs.fileName}`;
+  removeBtn.setAttribute("aria-label", t("removeNamedImage", { name: attrs.fileName }));
+  removeBtn.title = t("removeNamedFile", { name: attrs.fileName });
   removeBtn.className =
     "goose-control goose-interactive ai-composer-chip-remove ml-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[var(--goose-control-radius)] cursor-pointer" +
     " text-muted-foreground";

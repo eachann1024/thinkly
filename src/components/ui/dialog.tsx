@@ -1,3 +1,5 @@
+import { common } from "@/i18n/common";
+
 import * as GooseIcons from "@/components/ui/icons";
 import * as React from "react";
 import { Dialog as AriaDialog, Heading, Modal as AriaModal, ModalOverlay } from "react-aria-components";
@@ -143,7 +145,8 @@ const DialogContent = React.forwardRef<HTMLElement, DialogContentProps>(
           {!hideClose && (
             <DialogClose
               icon
-              aria-label="关闭"
+              data-dialog-close
+              aria-label={common("close")}
               className="absolute right-4 top-4 text-muted-foreground"
             >
               <GooseIcons.X className="h-4 w-4" />

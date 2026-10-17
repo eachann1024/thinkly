@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitFolderList.tsx#localMessages:1">`
+zh-Hans:
+  containsSymbolicLinksCannotSync_a3fb: "包含符号链接，无法同步"
+  theOriginalFolderNoLongerExists_9875: "原文件夹已不存在"
+  theNotebookIsNotOpenOr_a185: "笔记本未打开或无法匹配"
+  cannotReadFolderCheckItsPermissions_7101: "无法读取文件夹，请检查权限"
+  foldersToSync_19ed: "同步文件夹"
+  deselectingAFolderDoesNotDelete_4773: "取消勾选不会删除文件。"
+  legacyRepositoriesSupportOnlyOneFolder_76b4: "旧版仓库仅支持一个文件夹。"
+  noLocalFoldersAddALocal_8faf: "暂无本地文件夹，请先在侧栏添加本地笔记本。"
+  theOriginalNotebookIsNotOpen_5ea0: "原笔记本未打开或无法匹配"
+  syncFolderLabel: "同步 {{name}} {{path}}{{error}}"
+  chooseFolderAgain_b01b: "重新选择文件夹"
+  locateIssue_f93a: "定位问题"
+en:
+  containsSymbolicLinksCannotSync_a3fb: "Contains symbolic links; cannot sync"
+  theOriginalFolderNoLongerExists_9875: "The original folder no longer exists"
+  theNotebookIsNotOpenOr_a185: "The notebook is not open or could not be matched"
+  cannotReadFolderCheckItsPermissions_7101: "Cannot read folder. Check its permissions."
+  foldersToSync_19ed: "Folders to sync"
+  deselectingAFolderDoesNotDelete_4773: "Deselecting a folder does not delete its files."
+  legacyRepositoriesSupportOnlyOneFolder_76b4: "Legacy repositories support only one folder."
+  noLocalFoldersAddALocal_8faf: "No local folders. Add a local notebook in the sidebar first."
+  theOriginalNotebookIsNotOpen_5ea0: "The original notebook is not open or could not be matched"
+  syncFolderLabel: "Sync {{name}} {{path}}{{error}}"
+  chooseFolderAgain_b01b: "Choose folder again"
+  locateIssue_f93a: "Locate issue"
+`;
+const uiText = createTranslator(localMessages);
 import { GitFolderIssue } from "./GitFolderIssue";
 import { Check } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -8,11 +39,11 @@ import type {
 import { SettingsSectionCard } from "../SettingsSectionCard";
 
 function shortFolderReason(error: string) {
-  if (/符号链接/.test(error)) return "包含符号链接，无法同步";
-  if (/不存在/.test(error)) return "原文件夹已不存在";
+  if (/符号链接/.test(error)) return uiText("containsSymbolicLinksCannotSync_a3fb");
+  if (/不存在/.test(error)) return uiText("theOriginalFolderNoLongerExists_9875");
   if (/未打开|无法匹配|身份|路径已变化/.test(error))
-    return "笔记本未打开或无法匹配";
-  if (/权限/.test(error)) return "无法读取文件夹，请检查权限";
+    return uiText("theNotebookIsNotOpenOr_a185");
+  if (/权限/.test(error)) return uiText("cannotReadFolderCheckItsPermissions_7101");
   return error.split(/[\n，。；]/)[0].slice(0, 60);
 }
 
@@ -62,19 +93,17 @@ export function GitFolderList({
 }) {
   return (
     <SettingsSectionCard
-      title="同步文件夹"
-      description="取消勾选不会删除文件。"
+      title={uiText("foldersToSync_19ed")}
+      description={uiText("deselectingAFolderDoesNotDelete_4773")}
       contentClassName="space-y-2"
     >
       {legacy && (
         <p className="text-sm text-muted-foreground">
-          旧版仓库仅支持一个文件夹。
-        </p>
+          {uiText("legacyRepositoriesSupportOnlyOneFolder_76b4")}</p>
       )}
       {!rows.length && (
         <p className="text-sm text-muted-foreground">
-          暂无本地文件夹，请先在侧栏添加本地笔记本。
-        </p>
+          {uiText("noLocalFoldersAddALocal_8faf")}</p>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] items-start gap-2">
         {rows.map((folder) => {
@@ -83,7 +112,7 @@ export function GitFolderList({
           );
           const available = availableIds.has(folder.notebookId);
           const check = checks[folder.localPath];
-          const error = !available ? "原笔记本未打开或无法匹配" : check?.error;
+          const error = !available ? uiText("theOriginalNotebookIsNotOpen_5ea0") : check?.error;
           const displayError = error?.replace(
             /[，。； ]*已停止本次同步[。]?/g,
             "",
@@ -119,7 +148,7 @@ export function GitFolderList({
                   "group relative flex h-auto min-h-[44px] w-full min-w-0 items-center justify-start gap-3 rounded-lg px-3 py-2 text-left !bg-transparent disabled:!bg-transparent" +
                   (error ? " pr-12" : "")
                 }
-                aria-label={`同步 ${folder.name} ${folder.localPath}${error ? `，${shortFolderReason(error)}` : ""}`}
+                aria-label={uiText("syncFolderLabel", { name: folder.name, path: folder.localPath, error: error ? `, ${shortFolderReason(error)}` : "" })}
                 disabled={blocked}
                 onClick={() => {
                   if (!checked && error) {
@@ -157,8 +186,8 @@ export function GitFolderList({
                   detail={displayError ?? error}
                   actionLabel={
                     needsRecovery
-                      ? "重新选择文件夹"
-                      : "定位问题"
+                      ? uiText("chooseFolderAgain_b01b")
+                      : uiText("locateIssue_f93a")
                   }
                   actionDisabled={needsRecovery ? recoveryDisabled : disabled}
                   onAction={() =>

@@ -5,6 +5,35 @@ import { planReviewState, reviewOutput } from "./reviewState";
 import { readReviewPlan } from "./planReviewData";
 import { ReviewOperation } from "./ReviewOperation";
 import "./plan-review.css";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/approval/ReviewProposal.tsx#messages:1">`
+zh-Hans:
+  notApplied: "未执行"
+  skipped: "已跳过"
+  pending: "等待执行"
+  failed: "失败"
+  undone: "已撤回"
+  rolledBack: "已恢复"
+  needsReview: "请检查"
+  applied: "已应用"
+  deselectAll: "取消全选"
+  selectAll: "全选"
+  selectedCount: "已选 {{selected}} / {{total}} 项，未选项将跳过"
+en:
+  notApplied: "Not applied"
+  skipped: "Skipped"
+  pending: "Pending"
+  failed: "Failed"
+  undone: "Undone"
+  rolledBack: "Rolled back"
+  needsReview: "Needs review"
+  applied: "Applied"
+  deselectAll: "Deselect all"
+  selectAll: "Select all"
+  selectedCount: "{{selected}} of {{total}} selected; unselected operations will be skipped"
+`;
+const t = createTranslator(messages);
+
 
 export function ReviewProposal({
   part,
@@ -40,18 +69,18 @@ export function ReviewProposal({
   const resultLabel = (id: string) => {
     if (review.phase === "approval" || review.phase === "preparing")
       return undefined;
-    if (review.phase === "cancelled") return "未执行";
+    if (review.phase === "cancelled") return t("notApplied");
     const included =
       journal?.selectedOperationIds.includes(id) ??
       results.some((result) => result.operationId === id);
-    if (!included && results.length) return "已跳过";
+    if (!included && results.length) return t("skipped");
     const result = results.find((item) => item.operationId === id);
-    if (!result) return review.phase === "executing" ? "等待执行" : "未执行";
-    if (!result.ok) return "失败";
-    if (review.phase === "undone") return "已撤回";
+    if (!result) return review.phase === "executing" ? t("pending") : t("notApplied");
+    if (!result.ok) return t("failed");
+    if (review.phase === "undone") return t("undone");
     if (review.phase === "failed" || review.phase === "conflict")
-      return review.rollback === "complete" ? "已恢复" : "请检查";
-    return "已应用";
+      return review.rollback === "complete" ? t("rolledBack") : t("needsReview");
+    return t("applied");
   };
   return (
     <div className="notebook-ai-work-proposal">
@@ -59,7 +88,7 @@ export function ReviewProposal({
       {canSelect ? (
         <div className="notebook-ai-review-selection">
           <span>
-            已选 {selectedIds.length} / {operations.length} 项，未选项将跳过
+            {t("selectedCount", { selected: selectedIds.length, total: operations.length })}
           </span>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
@@ -71,7 +100,7 @@ export function ReviewProposal({
               )
             }
           >
-            {selectedIds.length === operations.length ? "取消全选" : "全选"}
+            {selectedIds.length === operations.length ? t("deselectAll") : t("selectAll")}
           </Button>
         </div>
       ) : null}

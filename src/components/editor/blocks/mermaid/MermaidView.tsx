@@ -10,6 +10,17 @@ import {
 } from "./mermaidPreviewCache";
 
 import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/mermaid/MermaidView.tsx#messages:1">`
+zh-Hans:
+  previewUnavailableCheckTheSource: "无法预览，请查看源码"
+  loadingDiagram: "图表加载中…"
+en:
+  previewUnavailableCheckTheSource: "Preview unavailable. Check the source."
+  loadingDiagram: "Loading diagram…"
+`;
+const t = createTranslator(messages);
+
 
 interface MermaidViewProps {
   value: string;
@@ -112,7 +123,7 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
       dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
     >
       {svg ? null : <span className="text-sm text-muted-foreground">
-        {failed ? "无法预览，请查看源码" : "图表加载中…"}
+        {failed ? t("previewUnavailableCheckTheSource") : t("loadingDiagram")}
       </span>}
     </div>
   );

@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-shell/useSidebarLifecycle.tsx#localMessages:1">`
+zh-Hans:
+  search_e5f7: "搜索"
+  documentOutline_081c: "文档大纲"
+  local_8e7e: "本地"
+  repository_c270: "仓库"
+  page_59ce: "页面"
+en:
+  search_e5f7: "Search"
+  documentOutline_081c: "Document outline"
+  local_8e7e: "Local"
+  repository_c270: "Repository"
+  page_59ce: "Page"
+`;
+const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";
 import { useSearchSession } from "../useSearchSession";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
@@ -91,7 +108,7 @@ export function useSidebarLifecycle(
     restoreSidebarFocusRef.current = null;
     sidebarRef.current
       ?.closest(".workspace-shell")
-      ?.querySelector<HTMLButtonElement>(`.sidebar-mode-rail-button[aria-label="${view === "pages" ? "本地" : view === "outline" ? "大纲" : "搜索"}"]`)
+      ?.querySelector<HTMLButtonElement>(`.sidebar-mode-rail-button[data-sidebar-view="${view}"]`)
       ?.focus({ preventScroll: true });
   }, [sidebarOverlay, sidebarRef, restoreSidebarFocusRef, currentView]);
 
@@ -161,14 +178,14 @@ export function useSidebarLifecycle(
 
   const headerTitle =
     currentView === "search"
-      ? "搜索"
+      ? uiText("search_e5f7")
       : currentView === "outline"
-        ? "文档大纲"
+        ? uiText("documentOutline_081c")
         : isLocalFolder
-          ? "本地"
+          ? uiText("local_8e7e")
           : electronNoVault
-            ? "仓库"
-            : "页面";
+            ? uiText("repository_c270")
+            : uiText("page_59ce");
   return {
     ...input,
     previousNotebookIdRef,

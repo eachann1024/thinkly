@@ -2,6 +2,21 @@ import { useEffect, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { EditorAction } from "@/components/editor/ui/button";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/image/ResolvedImagePreview.tsx#messages:1">`
+zh-Hans:
+  imageReferenceUnresolved: "图片引用未解析"
+  couldNotLoadImage: "图片无法加载"
+  loadingImage: "图片加载中"
+  retry: "重试"
+en:
+  imageReferenceUnresolved: "Image reference unresolved"
+  couldNotLoadImage: "Could not load image"
+  loadingImage: "Loading image"
+  retry: "Retry"
+`;
+const t = createTranslator(messages);
+
 
 type ImageBlock = {
   props: { url: string; name?: string; alt?: string; previewWidth?: number };
@@ -38,7 +53,7 @@ export function ResolvedImagePreview({
           ? await editor.resolveFileUrl(source)
           : source;
         if (!src || /^(?:att(?:-file|-video)?:|uuid:)/i.test(src)) {
-          throw new Error("图片引用未解析");
+          throw new Error(t("imageReferenceUnresolved"));
         }
         if (!cancelled) setResource({ ...current, src });
       } catch {
@@ -62,13 +77,13 @@ export function ResolvedImagePreview({
       style={phase !== "loaded" ? { width: block.props.previewWidth || 512 } : undefined}>
       {phase !== "loaded" && (
         <div className="goose-image-preview__status" role="status" aria-live="polite"
-          aria-label={phase === "error" ? "图片无法加载" : "图片加载中"}>
+          aria-label={phase === "error" ? t("couldNotLoadImage") : t("loadingImage")}>
           <GooseIcons.Image size={20} strokeWidth={1.5} aria-hidden="true" />
-          <span>{phase === "error" ? "图片无法加载" : "图片加载中"}</span>
+          <span>{phase === "error" ? t("couldNotLoadImage") : t("loadingImage")}</span>
           <EditorAction type="button" className="goose-image-preview__retry"
             disabled={phase === "loading"}
             onMouseDown={event => event.preventDefault()}
-            onClick={() => setAttempt(value => value + 1)}>重试</EditorAction>
+            onClick={() => setAttempt(value => value + 1)}>{t("retry")}</EditorAction>
         </div>
       )}
       {current?.src && phase !== "error" && (

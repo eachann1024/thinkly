@@ -2,6 +2,15 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { createToggleWrapper, mergeParagraphs } from "@blocknote/core/blocks";
 import { DOMParser, Fragment, type Schema } from "prosemirror-model";
 import { readToggleCollapsed } from "../../core/toggleBlocks";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/toggle/toggleBlockHelpers.ts#messages:1">`
+zh-Hans:
+  expandOrCollapseChildBlocks: "展开或收起子块"
+en:
+  expandOrCollapseChildBlocks: "Expand or collapse child blocks"
+`;
+const t = createTranslator(messages);
+
 
 /** 使用 BlockNote 原生结构/CSS，但展开状态随笔记保存，且所有 DOM 操作局限于此 wrapper。 */
 export function createPersistentToggleWrapper(
@@ -18,7 +27,7 @@ export function createPersistentToggleWrapper(
   });
   const button = wrapper.dom.querySelector<HTMLButtonElement>(".bn-toggle-button");
   if (button) {
-    button.setAttribute("aria-label", "展开或收起子块");
+    button.setAttribute("aria-label", t("expandOrCollapseChildBlocks"));
     button.setAttribute("aria-expanded", String(!readToggleCollapsed(block)));
   }
   return wrapper;

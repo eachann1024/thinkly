@@ -1,3 +1,11 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const entryText = createTranslator(i18nYaml<"src/quicknote.tsx#block1:1">`
+zh-Hans:
+  title: 速记
+en:
+  title: Quick Note
+`);
+document.title = entryText("title");
 /**
  * 速记小窗入口（独立 browser 窗口加载 quicknote.html → 本文件）。
  *

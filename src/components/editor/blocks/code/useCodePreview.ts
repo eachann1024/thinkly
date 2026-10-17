@@ -3,6 +3,21 @@ import { toast } from "@/components/ui/sonner";
 import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import { isDarkTheme, useCodePreviewActions } from "./useCodePreviewActions";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/useCodePreview.ts#messages:1">`
+zh-Hans:
+  nothingToPreview: "无可预览内容"
+  thisCodeBlockDoesNotSupportPreview: "当前代码块不支持预览"
+  unknownError: "未知错误"
+  previewFailed: "预览失败：{{error}}"
+en:
+  nothingToPreview: "Nothing to preview"
+  thisCodeBlockDoesNotSupportPreview: "This code block does not support preview"
+  unknownError: "Unknown error"
+  previewFailed: "Preview failed: {{error}}"
+`;
+const t = createTranslator(messages);
+
 
 export function useCodePreview(
   getCodeContent: () => string,
@@ -30,7 +45,7 @@ export function useCodePreview(
   const handleInternalPreview = useCallback(async () => {
     try {
       const text = getCodeContent().trim();
-      if (!text) throw new Error("无可预览内容");
+      if (!text) throw new Error(t("nothingToPreview"));
 
       if (language === "mermaid") {
         const svg = await renderMermaidSvgForExport(
@@ -55,10 +70,10 @@ export function useCodePreview(
         return;
       }
 
-      throw new Error("当前代码块不支持预览");
+      throw new Error(t("thisCodeBlockDoesNotSupportPreview"));
     } catch (err) {
       toast.error(
-        `预览失败：${err instanceof Error ? err.message : "未知错误"}`,
+        t("previewFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
       );
     }
   }, [getCodeContent, language, theme]);

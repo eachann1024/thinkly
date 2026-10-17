@@ -1,3 +1,15 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/ai-write/blockStructureValidation.ts#messages:1">`
+zh-Hans:
+  detailAiGeneratedPlainParagraphsThatLookLikeThe: "AI 生成了看似{{value1}}的普通段落，已撤销本次修改。"
+  detailAiDidNotGenerateActualBlocksTheChanges: "AI 没有生成真实的{{value1}}块，已撤销本次修改。"
+  detailTheAiResponseIncludedBlocksThatDoNot: "AI 生成结果混入了与{{value1}}不一致的块结构，已撤销本次修改。"
+en:
+  detailAiGeneratedPlainParagraphsThatLookLikeThe: "AI generated plain paragraphs that look like {{value1}}. The changes were rolled back."
+  detailAiDidNotGenerateActualBlocksTheChanges: "AI did not generate actual {{value1}} blocks. The changes were rolled back."
+  detailTheAiResponseIncludedBlocksThatDoNot: "The AI response included blocks that do not match {{value1}}. The changes were rolled back."
+`;
+const t = createTranslator(messages);
 import {
   getBlockTypeTransformTargetLabel,
   resolveExplicitBlockTypeTarget,
@@ -175,7 +187,7 @@ export function validateGeneratedBlockStructure({
   if (pseudoMarkers.length > 0) {
     return {
       ok: false,
-      reason: `AI 生成了看似${label}的普通段落，已撤销本次修改。`,
+      reason: t("detailAiGeneratedPlainParagraphsThatLookLikeThe", { value1: label }),
       pseudoMarkers,
     };
   }
@@ -186,7 +198,7 @@ export function validateGeneratedBlockStructure({
   if (matching.length === 0) {
     return {
       ok: false,
-      reason: `AI 没有生成真实的${label}块，已撤销本次修改。`,
+      reason: t("detailAiDidNotGenerateActualBlocksTheChanges", { value1: label }),
       pseudoMarkers: [],
     };
   }
@@ -203,7 +215,7 @@ export function validateGeneratedBlockStructure({
   if (wrongNewStructures.length > 0) {
     return {
       ok: false,
-      reason: `AI 生成结果混入了与${label}不一致的块结构，已撤销本次修改。`,
+      reason: t("detailTheAiResponseIncludedBlocksThatDoNot", { value1: label }),
       pseudoMarkers: [],
     };
   }

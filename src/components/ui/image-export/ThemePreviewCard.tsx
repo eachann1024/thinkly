@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/image-export/ThemePreviewCard.tsx#localMessages:1">`
+zh-Hans:
+  sampleFile: "2026-05-15-手动更新"
+  sampleTitle: "设计即生活"
+  sampleBody: "好的排版让阅读成为一种享受，每个细节都藏着设计师的用心。"
+en:
+  sampleFile: "2026-05-15-manual-update"
+  sampleTitle: "Design is life"
+  sampleBody: "Thoughtful typography makes reading a pleasure. Every detail reflects the care behind the design."
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { useMemo } from "react";
 import { type CardTheme, type WatermarkConfig } from "@/lib/imageExport";
@@ -21,13 +34,13 @@ export function ThemePreviewCard({
   sampleBlocks?: BlockNoteContent;
   watermarkConfig?: WatermarkConfig;
 }) {
-  const previewTitle = "设计即生活";
-  const previewBody = "好的排版让阅读成为一种享受，每个细节都藏着设计师的用心。";
+  const previewTitle = uiText("sampleTitle");
+  const previewBody = uiText("sampleBody");
   const notebookPreview = theme.id === "notebook";
   const sampleHtml = useMemo(() => {
     if (!notebookPreview || !sampleBlocks) return null;
     return buildImageExportPreviewHtml({
-      title: "2026-05-15-手动更新",
+      title: uiText("sampleFile"),
       blocks: sampleBlocks,
       theme,
       mode: "page",

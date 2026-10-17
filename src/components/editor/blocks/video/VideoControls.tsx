@@ -9,6 +9,27 @@ import {
 } from "@/components/ui/icons";
 import { formatTime } from "./videoTime";
 import type { useVideoPlayback } from "./useVideoPlayback";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/video/VideoControls.tsx#messages:1">`
+zh-Hans:
+  playbackProgress: "播放进度"
+  pause: "暂停"
+  play: "播放"
+  unmute: "取消静音"
+  mute: "静音"
+  exitFullScreen: "退出全屏"
+  fullScreen: "全屏"
+en:
+  playbackProgress: "Playback progress"
+  pause: "Pause"
+  play: "Play"
+  unmute: "Unmute"
+  mute: "Mute"
+  exitFullScreen: "Exit full screen"
+  fullScreen: "Full screen"
+`;
+const t = createTranslator(messages);
+
 
 export function VideoControls({
   playback,
@@ -36,7 +57,7 @@ export function VideoControls({
       <div
         className="goose-video-player__progress"
         role="slider"
-        aria-label="播放进度"
+        aria-label={t("playbackProgress")}
         aria-valuemin={0}
         aria-valuemax={Math.floor(duration) || 0}
         aria-valuenow={Math.floor(current)}
@@ -72,7 +93,7 @@ export function VideoControls({
           <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
-            aria-label={playing ? "暂停" : "播放"}
+            aria-label={playing ? t("pause") : t("play")}
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => {
               e.stopPropagation();
@@ -93,7 +114,7 @@ export function VideoControls({
           <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
-            aria-label={muted || volume === 0 ? "取消静音" : "静音"}
+            aria-label={muted || volume === 0 ? t("unmute") : t("mute")}
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => {
               e.stopPropagation();
@@ -118,7 +139,7 @@ export function VideoControls({
           <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"
-            aria-label={isFullscreen ? "退出全屏" : "全屏"}
+            aria-label={isFullscreen ? t("exitFullScreen") : t("fullScreen")}
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => {
               e.stopPropagation();

@@ -1,3 +1,12 @@
+import { createTranslator as extraTranslator, i18nYaml } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/tabs/helpers.ts#block1:1">`
+zh-Hans:
+  saveFailed: "「{{title}}」未能保存到磁盘"
+  saveIncomplete: "本地页面保存未完成：{{id}}"
+en:
+  saveFailed: "“{{title}}” couldn’t be saved to disk"
+  saveIncomplete: "The local page has not finished saving: {{id}}"
+`);
 import { usePages } from "../usePages";
 import type { TabItem } from "./types";
 import { useEditorSplit } from "../useEditorSplit";
@@ -148,9 +157,9 @@ export const flushClosedPageSaves = (pageIds: string[]): void => {
       if (stillDirty && !isRecoveredLocalSaveConfirmationRequired(pageId)) {
         const page = usePages.getState().getPage(pageId);
         const title = page ? getPageTitle(page) : pageId;
-        toast.warning(`「${title}」未能保存到磁盘`, {
+        toast.warning(extraText("saveFailed", { title }), {
           description: describeDiskWriteError(
-            flushError ?? new Error(`本地页面保存未完成：${pageId}`),
+            flushError ?? new Error(extraText("saveIncomplete", { id: pageId })),
           ),
         });
       }

@@ -1,3 +1,23 @@
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
+
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/formatAiMenuError.ts#messages:1">`
+zh-Hans:
+  theTargetBlockHasChangedTheOriginalText: "目标块已变化，原文未修改。请重新选择后再试"
+  thisModelSThinkingModeDoesNotSupport: "当前模型的思考模式不支持强制工具调用，请换非思考模型或关闭思考后再试"
+  theApiKeyIsInvalidOrMissing: "密钥无效或未配置"
+  theRequestFailedCheckYourConnectionOrBase: "网络请求失败，请检查网络或 Base URL"
+  stopped: "已停止"
+  theModelReturnedAnInvalidResponseTryAnother: "模型返回格式异常，请换模型或稍后再试"
+en:
+  theTargetBlockHasChangedTheOriginalText: "The target block has changed. The original text was preserved. Select it again and retry."
+  thisModelSThinkingModeDoesNotSupport: "This model's thinking mode does not support required tool calls. Choose a non-thinking model or turn off thinking and retry."
+  theApiKeyIsInvalidOrMissing: "The API key is invalid or missing"
+  theRequestFailedCheckYourConnectionOrBase: "The request failed. Check your connection or Base URL."
+  stopped: "Stopped"
+  theModelReturnedAnInvalidResponseTryAnother: "The model returned an invalid response. Try another model or retry later."
+`;
+const t = createTranslator(messages);
 /**
  * 行内 AI 菜单错误文案。目标失效时保留原文并提示重新选择。
  */
@@ -6,6 +26,7 @@ export function isMissingTargetBlockError(error: unknown): boolean {
   if (!message) return false;
   return (
     message.includes("block not found") ||
+    message.includes("target block is no longer") ||
     message.includes("找不到块") ||
     message.includes("目标块已不在")
   );
@@ -16,32 +37,32 @@ export function formatAiMenuError(error: unknown): string {
   if (!message) return "";
 
   if (isMissingTargetBlockError(message)) {
-    return "目标块已变化，原文未修改。请重新选择后再试";
+    return t("theTargetBlockHasChangedTheOriginalText");
   }
   if (/tool_choice|Thinking mode/i.test(message)) {
-    return "当前模型的思考模式不支持强制工具调用，请换非思考模型或关闭思考后再试";
+    return t("thisModelSThinkingModeDoesNotSupport");
   }
   if (
     /\b401\b|\b403\b|unauthorized|forbidden|invalid.?api.?key|api.?key.*(invalid|missing|required)|incorrect.?api.?key|authentication/i.test(
       message,
     )
   ) {
-    return "密钥无效或未配置";
+    return t("theApiKeyIsInvalidOrMissing");
   }
   if (
     /network|fetch failed|failed to fetch|load failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ECONNRESET|timeout|网路|网络/i.test(
       message,
     )
   ) {
-    return "网络请求失败，请检查网络或 Base URL";
+    return t("theRequestFailedCheckYourConnectionOrBase");
   }
   if (/abort|cancel|停止/i.test(message)) {
-    return "已停止";
+    return t("stopped");
   }
   if (/invalid json response/i.test(message)) {
-    return "模型返回格式异常，请换模型或稍后再试";
+    return t("theModelReturnedAnInvalidResponseTryAnother");
   }
-  return message;
+  return localizeNotebookAiDiagnostic(message);
 }
 
 function toErrorText(error: unknown): string {

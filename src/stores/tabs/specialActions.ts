@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/tabs/specialActions.ts#block1:1">`
+zh-Hans:
+  blankTabFailed: "无法打开空白标签页"
+en:
+  blankTabFailed: "Couldn’t open a blank tab."
+`);
 import type { TabSet, TabGet, TabsState, TabItem } from "./types";
 import type { TabsActionContext } from "./context";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
@@ -89,7 +96,7 @@ export function createSpecialTabActions(
         : null;
       const pageId = usePages.getState().createEditorDraftPage(siblingSource, workspaceId);
       if (!pageId) {
-        toast.error("无法打开空白标签页");
+        toast.error(storeText("blankTabFailed"));
         return;
       }
       get().openPermanentTab(pageId, { reuseEmpty: false });

@@ -1,3 +1,13 @@
+import "../../i18n/core";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/preview-renderer/renderer.ts#localMessages:1">`
+zh-Hans:
+  couldnTRenderTheChart: "图表渲染失败"
+en:
+  couldnTRenderTheChart: "Couldn’t render the chart"
+`;
+const uiText = createTranslator(localMessages);
 import "katex/dist/katex.min.css";
 import { renderCachedMermaid } from "../imageExport/mermaidCache";
 import { ensurePersistentRemoteFont } from "../fontLoader";
@@ -20,7 +30,7 @@ if (bridge) {
         const svg = await renderCachedMermaid(job.source, job.options, job.context, job.fontIdentity);
         if (!cancelled.has(job.id)) bridge.reply({ id: job.id, svg });
       } catch (error) {
-        if (!cancelled.has(job.id)) bridge.reply({ id: job.id, error: error instanceof Error ? error.message : "图表渲染失败" });
+        if (!cancelled.has(job.id)) bridge.reply({ id: job.id, error: error instanceof Error ? error.message : uiText("couldnTRenderTheChart") });
       } finally {
         queued.delete(job.id); cancelled.delete(job.id);
       }

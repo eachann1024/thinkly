@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-file-actions.ts#localMessages:1">`
+zh-Hans:
+  couldnTOpenTheFileCheckYourExternalApp: "打开失败，请检查外部应用设置"
+  couldnTOpenTheFolderCheckYourFileManager: "打开失败，请检查文件管理器设置"
+  couldnTOpenTheTerminalCheckYourTerminalSettings: "打开失败，请检查终端设置"
+  folderPathCopied: "已复制文件夹路径"
+  filePathCopied: "已复制文件路径"
+  copyFailed: "复制失败"
+en:
+  couldnTOpenTheFileCheckYourExternalApp: "Couldn’t open the file. Check your external app settings."
+  couldnTOpenTheFolderCheckYourFileManager: "Couldn’t open the folder. Check your file manager settings."
+  couldnTOpenTheTerminalCheckYourTerminalSettings: "Couldn’t open the terminal. Check your terminal settings."
+  folderPathCopied: "Folder path copied"
+  filePathCopied: "File path copied"
+  copyFailed: "Copy failed"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import { toast } from "@/components/ui/sonner";
 import { pageDirectory } from "@/lib/currentLocalPagePath";
@@ -42,7 +61,7 @@ export async function openLocalFolderPageInExternalApp(page: Page) {
   const ok = editor
     ? await shell.openWithEditor(target, editor)
     : await shell.openPath(target);
-  if (!ok) toast.error("打开失败，请检查外部应用设置");
+  if (!ok) toast.error(uiText("couldnTOpenTheFileCheckYourExternalApp"));
 }
 
 export async function revealLocalFolderPageInFileManager(page: Page) {
@@ -54,7 +73,7 @@ export async function revealLocalFolderPageInFileManager(page: Page) {
     : page.isFolder
       ? await shell.openPath(target)
       : await shell.showItemInFolder(target);
-  if (!ok) toast.error("打开失败，请检查文件管理器设置");
+  if (!ok) toast.error(uiText("couldnTOpenTheFolderCheckYourFileManager"));
 }
 
 export async function openLocalFolderPageInTerminal(page: Page) {
@@ -63,7 +82,7 @@ export async function openLocalFolderPageInTerminal(page: Page) {
   const directory = page.isFolder ? target : pageDirectory(target);
   const terminal = useSettings.getState().localFolderTerminal;
   const ok = await shell.openTerminalAtPath(directory, terminal);
-  if (!ok) toast.error("打开失败，请检查终端设置");
+  if (!ok) toast.error(uiText("couldnTOpenTheTerminalCheckYourTerminalSettings"));
 }
 
 export async function copyLocalFolderPagePath(page: Page) {
@@ -74,8 +93,8 @@ export async function copyLocalFolderPagePath(page: Page) {
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(target);
     }
-    toast.success(page.isFolder ? "已复制文件夹路径" : "已复制文件路径");
+    toast.success(page.isFolder ? uiText("folderPathCopied") : uiText("filePathCopied"));
   } catch {
-    toast.error("复制失败");
+    toast.error(uiText("copyFailed"));
   }
 }

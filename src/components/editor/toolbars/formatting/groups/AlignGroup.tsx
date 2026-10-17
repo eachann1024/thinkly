@@ -2,6 +2,19 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Toggle } from "@/components/editor/ui/toggle";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AlignGroup.tsx#messages:1">`
+zh-Hans:
+  alignLeft: "左对齐"
+  alignCenter: "居中对齐"
+  alignRight: "右对齐"
+en:
+  alignLeft: "Align left"
+  alignCenter: "Align center"
+  alignRight: "Align right"
+`;
+const t = createTranslator(messages);
+
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 
@@ -22,13 +35,13 @@ export function AlignGroup({
             size="sm"
             pressed={textAlignment === "left"}
             onPressedChange={() => setTextAlignment("left")}
-            aria-label="左对齐"
+            aria-label={t("alignLeft")}
             className={ITEM_CLASS}
           >
             <GooseIcons.AlignLeft className="h-[15px] w-[15px]" />
           </Toggle>
         </TooltipTrigger>
-        <ToolbarTooltip label="左对齐" />
+        <ToolbarTooltip label={t("alignLeft")} />
       </Tooltip>
 
       <Tooltip {...bindTooltip("align-center")}>
@@ -37,13 +50,13 @@ export function AlignGroup({
             size="sm"
             pressed={textAlignment === "center"}
             onPressedChange={() => setTextAlignment("center")}
-            aria-label="居中对齐"
+            aria-label={t("alignCenter")}
             className={ITEM_CLASS}
           >
             <GooseIcons.AlignCenter className="h-[15px] w-[15px]" />
           </Toggle>
         </TooltipTrigger>
-        <ToolbarTooltip label="居中对齐" />
+        <ToolbarTooltip label={t("alignCenter")} />
       </Tooltip>
 
       <Tooltip {...bindTooltip("align-right")}>
@@ -52,13 +65,13 @@ export function AlignGroup({
             size="sm"
             pressed={textAlignment === "right"}
             onPressedChange={() => setTextAlignment("right")}
-            aria-label="右对齐"
+            aria-label={t("alignRight")}
             className={ITEM_CLASS}
           >
             <GooseIcons.AlignRight className="h-[15px] w-[15px]" />
           </Toggle>
         </TooltipTrigger>
-        <ToolbarTooltip label="右对齐" />
+        <ToolbarTooltip label={t("alignRight")} />
       </Tooltip>
     </>
   );

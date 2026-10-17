@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/quick-note/QuickNoteSlotSwitcher.tsx#localMessages:1">`
+zh-Hans:
+  occupied: "{{name}}，有内容"
+  empty: "{{name}}，空白"
+  switchNote: "切换速记"
+  renameHint: "{{name}}；再次点击可改名"
+en:
+  occupied: "{{name}}, has content"
+  empty: "{{name}}, empty"
+  switchNote: "Switch Quick Note"
+  renameHint: "{{name}}; click again to rename"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
 import { getQuickNoteSlotName, QUICKNOTE_SLOTS } from "@/stores/useQuickNote";
@@ -29,7 +44,7 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
       data-held={held ? "true" : "false"}
       role="radiogroup"
       data-goose-slot="choice-group"
-      aria-label="切换便签"
+      aria-label={uiText("switchNote")}
       style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
       onMouseLeave={onRootPointerLeave}
       onKeyDown={onKeyDown}
@@ -45,8 +60,8 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
             role="radio"
             data-goose-slot="choice-row"
             aria-checked={active}
-            aria-label={`${slotName}${occupied ? "，有内容" : "，空白"}`}
-            title={`${slotName}；再次点击可改名`}
+            aria-label={uiText(occupied ? "occupied" : "empty", {name: slotName})}
+            title={uiText("renameHint", {name: slotName})}
             tabIndex={active ? 0 : -1}
             data-slot={slot}
             data-active={active ? "true" : "false"}

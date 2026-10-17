@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/contentPixelRatio.ts#localMessages:1">`
+zh-Hans:
+  theContentIsTooLargeToExportAsOne: "内容过大，无法导出为单张图片，请缩小范围后重试"
+en:
+  theContentIsTooLargeToExportAsOne: "The content is too large to export as one image. Select a smaller range and try again."
+`;
+const uiText = createTranslator(localMessages);
 /** 导出长边目标像素（4K 冗余） */
 export const EXPORT_TARGET_LONG_EDGE = 3840;
 /** 内容清晰度下限倍率（视网膜） */
@@ -75,7 +84,7 @@ export function calculateContentAwarePixelRatio(
   }
 
   if (!isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio)) {
-    throw new Error("内容过大，无法导出为单张图片，请缩小范围后重试");
+    throw new Error(uiText("theContentIsTooLargeToExportAsOne"));
   }
   return ratio;
 }

@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1">`
+zh-Hans:
+  collapseChildren_2995: "折叠子项"
+  expandChildren_62f2: "展开子项"
+en:
+  collapseChildren_2995: "Collapse children"
+  expandChildren_62f2: "Expand children"
+`;
+const uiText = createTranslator(localMessages);
 import {
   useEffect,
   useState,
@@ -66,7 +77,7 @@ export function TreeRowIcon({
       {isFolderRow && !isRenaming ? (
         <MainTreeRowDisclosure
           expanded={isExpanded}
-          label={isExpanded ? "折叠子项" : "展开子项"}
+          label={isExpanded ? uiText("collapseChildren_2995") : uiText("expandChildren_62f2")}
           onToggle={onToggleExpanded}
           className="ml-0 rounded-md pointer-events-auto"
           nativeProps={{

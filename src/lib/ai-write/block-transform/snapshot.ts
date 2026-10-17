@@ -5,6 +5,23 @@ import {
   type BlockTypeTransformSelectionSnapshot,
   type BlockTypeTransformEditor,
 } from "./types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/ai-write/block-transform/snapshot.ts#messages:1">`
+zh-Hans:
+  selectTheContentToConvertFirst: "请先选择要转换的内容。"
+  pageTitlesCannotBeConvertedToAnotherBlock: "页面标题不能参与块类型转换。"
+  theSelectedBlocksCouldNotBeLocatedSelect: "无法定位选区块，请重新选择后再试。"
+  thisPageHasNoBodyBlocksToConvert: "当前页面没有可转换的正文块。"
+  bodyBlocksOnThisPageAreMissingIds: "当前页面正文缺少块标识，无法安全转换。"
+en:
+  selectTheContentToConvertFirst: "Select the content to convert first."
+  pageTitlesCannotBeConvertedToAnotherBlock: "Page titles cannot be converted to another block type."
+  theSelectedBlocksCouldNotBeLocatedSelect: "The selected blocks could not be located. Select them again and retry."
+  thisPageHasNoBodyBlocksToConvert: "This page has no body blocks to convert."
+  bodyBlocksOnThisPageAreMissingIds: "Body blocks on this page are missing IDs and cannot be safely converted."
+`;
+const t = createTranslator(messages);
+
 
 function sameSelectedContent(
   cutBlocks: BlockTypeTransformBlock[],
@@ -32,7 +49,7 @@ export function createBlockTypeTransformSelectionSnapshot(
   const fullBlocks = (fullSelection?.blocks ?? []) as BlockTypeTransformBlock[];
   const editorDocument = (editor.document ?? []) as BlockTypeTransformBlock[];
   const blocks = cloneValue(fullBlocks.length ? fullBlocks : cutBlocks);
-  if (!blocks.length) throw new Error("请先选择要转换的内容。");
+  if (!blocks.length) throw new Error(t("selectTheContentToConvertFirst"));
 
   if (
     options.protectFirstTitle !== false &&
@@ -43,13 +60,13 @@ export function createBlockTypeTransformSelectionSnapshot(
         block.props?.level === 1,
     )
   ) {
-    throw new Error("页面标题不能参与块类型转换。");
+    throw new Error(t("pageTitlesCannotBeConvertedToAnotherBlock"));
   }
 
   const startBlockId = blocks[0]?.id;
   const endBlockId = blocks[blocks.length - 1]?.id;
   if (!startBlockId || !endBlockId) {
-    throw new Error("无法定位选区块，请重新选择后再试。");
+    throw new Error(t("theSelectedBlocksCouldNotBeLocatedSelect"));
   }
 
   return {
@@ -76,11 +93,11 @@ export function createPageBodyBlockTypeTransformSnapshot(
   ) {
     blocks.shift();
   }
-  if (!blocks.length) throw new Error("当前页面没有可转换的正文块。");
+  if (!blocks.length) throw new Error(t("thisPageHasNoBodyBlocksToConvert"));
   const startBlockId = blocks[0]?.id;
   const endBlockId = blocks[blocks.length - 1]?.id;
   if (!startBlockId || !endBlockId) {
-    throw new Error("当前页面正文缺少块标识，无法安全转换。");
+    throw new Error(t("bodyBlocksOnThisPageAreMissingIds"));
   }
   return {
     version: 1,

@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/hooks/useAppUpdate.ts#block1:1">`
+zh-Hans:
+  updateFailed: "更新失败，请重试"
+  downloadUnavailable: "当前环境不支持下载更新"
+  downloaded: "安装包已下载"
+en:
+  updateFailed: "Update failed. Please try again."
+  downloadUnavailable: "Downloading updates is not supported in this environment."
+  downloaded: "Installer downloaded"
+`);
 import { useEffect } from "react";
 import type { AppUpdateState } from "@/lib/appUpdateTypes";
 import { downloadAppUpdate, readAppVersion } from "@/lib/electron/appUpdate";
@@ -18,7 +29,7 @@ let installTask: Promise<void> | undefined;
 let nextInstallId = 0;
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "更新失败，请重试";
+  return error instanceof Error ? error.message : storeText("updateFailed");
 }
 
 function setUpdateState(state: AppUpdateState) {
@@ -89,13 +100,13 @@ function download(): Promise<void> {
         target.downloadUrl,
         target.assetName,
       );
-      if (!downloadPath) throw new Error("当前环境不支持下载更新");
+      if (!downloadPath) throw new Error(storeText("downloadUnavailable"));
       await readLatestState(
         appUpdateTransition(state, {
           type: "download.completed",
           target,
           path: downloadPath,
-          message: "安装包已下载",
+          message: storeText("downloaded"),
         }),
       );
     } catch (error) {

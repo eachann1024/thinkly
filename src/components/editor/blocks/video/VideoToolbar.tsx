@@ -23,6 +23,27 @@ import {
   getScaledEditorUiPx,
 } from "@/components/editor/utils/editorContextUi";
 import { useEditorUiScale } from "@/components/editor/hooks/useEditorUiScale";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/video/VideoToolbar.tsx#messages:1">`
+zh-Hans:
+  videoActions: "视频操作"
+  alignLeft: "左对齐"
+  alignCenter: "居中对齐"
+  alignRight: "右对齐"
+  replaceVideo: "更换视频"
+  downloadVideo: "下载视频"
+  deleteVideo: "删除视频"
+en:
+  videoActions: "Video actions"
+  alignLeft: "Align left"
+  alignCenter: "Align center"
+  alignRight: "Align right"
+  replaceVideo: "Replace video"
+  downloadVideo: "Download video"
+  deleteVideo: "Delete video"
+`;
+const t = createTranslator(messages);
+
 
 type VideoToolbarProps = {
   rect: DOMRect;
@@ -123,15 +144,15 @@ export function VideoToolbar({
           event.stopPropagation();
         }}
         role="toolbar"
-        aria-label="视频操作"
+        aria-label={t("videoActions")}
       >
         <div className="goose-editor-context-ui goose-block-toolbar-surface animate-in fade-in-0 zoom-in-95 duration-150">
           {editable &&
             (
               [
-                ["left", "左对齐", AlignLeft],
-                ["center", "居中对齐", AlignCenter],
-                ["right", "右对齐", AlignRight],
+                ["left", t("alignLeft"), AlignLeft],
+                ["center", t("alignCenter"), AlignCenter],
+                ["right", t("alignRight"), AlignRight],
               ] as const
             ).map(([value, label, Icon]) => (
               <VideoToolButton
@@ -149,7 +170,7 @@ export function VideoToolbar({
 
           {editable && (
             <VideoToolButton
-              label="更换视频"
+              label={t("replaceVideo")}
               tooltipSideOffset={getScaledEditorUiPx(8, editorUiScale)}
               onClick={onReplace}
             >
@@ -157,7 +178,7 @@ export function VideoToolbar({
             </VideoToolButton>
           )}
           <VideoToolButton
-            label="下载视频"
+            label={t("downloadVideo")}
             tooltipSideOffset={getScaledEditorUiPx(8, editorUiScale)}
             onClick={onDownload}
           >
@@ -165,7 +186,7 @@ export function VideoToolbar({
           </VideoToolButton>
           {editable && (
             <VideoToolButton
-              label="删除视频"
+              label={t("deleteVideo")}
               tooltipSideOffset={getScaledEditorUiPx(8, editorUiScale)}
               onClick={onDelete}
               className="hover:bg-destructive/10 hover:text-danger focus-visible:bg-destructive/10 focus-visible:text-danger"

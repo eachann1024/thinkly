@@ -3,6 +3,17 @@ import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 import { renderMathPreview } from "./mathPreviewCache";
 
 import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/math/MathView.tsx#messages:1">`
+zh-Hans:
+  addFormula: "添加公式"
+  thisFormulaCannotBeDisplayedCheckTheSource: "公式无法显示，请查看源码"
+en:
+  addFormula: "Add formula"
+  thisFormulaCannotBeDisplayedCheckTheSource: "This formula cannot be displayed. Check the source."
+`;
+const t = createTranslator(messages);
+
 
 interface MathViewProps {
   value: string;
@@ -19,8 +30,8 @@ export const MathView: React.FC<MathViewProps> = ({
   const html = previewRenderHTML(renderState);
   const result = renderState.phase === "loading" ? renderState.previous : renderState;
   const ready = result !== undefined && result.phase !== "idle";
-  const placeholder = result?.phase === "empty" ? "添加公式"
-    : result?.phase === "error" ? "公式无法显示，请查看源码" : undefined;
+  const placeholder = result?.phase === "empty" ? t("addFormula")
+    : result?.phase === "error" ? t("thisFormulaCannotBeDisplayedCheckTheSource") : undefined;
 
   useEffect(() => {
     if (!activated) return;

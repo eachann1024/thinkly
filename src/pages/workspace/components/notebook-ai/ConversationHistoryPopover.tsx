@@ -17,6 +17,21 @@ import {
 import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { cn } from "@/lib/utils";
+import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1">`
+zh-Hans:
+  noPreviousConversations: "暂无历史会话"
+  current: "当前"
+  deleteConversation: "删除会话"
+  conversationHistory: "历史会话"
+en:
+  noPreviousConversations: "No previous conversations"
+  current: "Current"
+  deleteConversation: "Delete conversation"
+  conversationHistory: "Conversation history"
+`;
+const t = createTranslator(messages);
+
 
 export interface ConversationHistoryListProps {
   notebookId: string;
@@ -41,11 +56,10 @@ function formatConversationTime(timestamp: number) {
   if (Number.isNaN(date.getTime())) return "";
 
   const now = new Date();
-  const time = date.toLocaleTimeString("zh-CN", {
+  const time = date.toLocaleTimeString(getFormatLocale(), {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
   });
 
   const isToday =
@@ -55,7 +69,7 @@ function formatConversationTime(timestamp: number) {
 
   if (isToday) return time;
 
-  const datePart = date.toLocaleDateString("zh-CN", {
+  const datePart = date.toLocaleDateString(getFormatLocale(), {
     year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
     month: "short",
     day: "numeric",
@@ -113,7 +127,7 @@ export function ConversationHistoryList({
         }
       >
         <MessageSquareText className="h-5 w-5" strokeWidth={1.5} />
-        <span className="text-xs">暂无历史会话</span>
+        <span className="text-xs">{t("noPreviousConversations")}</span>
       </div>
     );
   }
@@ -155,14 +169,14 @@ export function ConversationHistoryList({
                 {isActive ? (
                   <span className="flex shrink-0 items-center gap-0.5 text-[11px] text-foreground">
                     <Check className="h-3 w-3" strokeWidth={2} />
-                    当前
+                    {t("current")}
                   </span>
                 ) : null}
                 {onDeleteConversation ? (
                   <IconButton size="xs" tone="danger"
                     type="button"
-                    aria-label="删除会话"
-                    title="删除会话"
+                    aria-label={t("deleteConversation")}
+                    title={t("deleteConversation")}
                     onClick={(event) =>
                       confirmDeleteConversation(event, conversation.id, summary)
                     }
@@ -214,8 +228,8 @@ export function ConversationHistoryPopover({
         <IconButton size="sm" tone="muted"
           type="button"
           className="flex items-center justify-center text-muted-foreground disabled:pointer-events-none disabled:text-disabled "
-          aria-label="历史会话"
-          title="历史会话"
+          aria-label={t("conversationHistory")}
+          title={t("conversationHistory")}
           disabled={disabled}
         >
           <HistoryIcon className="h-3.5 w-3.5" strokeWidth={1.75} />

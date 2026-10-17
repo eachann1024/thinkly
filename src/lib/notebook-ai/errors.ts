@@ -1,11 +1,49 @@
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
+
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/errors.ts#messages:1">`
+zh-Hans:
+  aiStoppedBecauseItCouldNotGenerateA: "计划格式生成失败，AI 已停止执行。已执行 0 项，且没有写入。请重试，或切换模型后再试。"
+  thisPlanCannotBeAppliedNoOperationsWere: "计划无法执行，已执行 0 项且没有写入。请调整目标后重试。"
+  thePlanDidNotFinishRecoveryWasAttempted: "执行未完成，已尝试恢复。请检查相关页面后重试。"
+  undoFailedThePagesMayHaveChangedCheck: "撤回失败，页面可能已发生变化。请检查页面后重试。"
+  thisRequestFailedPleaseTryAgainLater: "本轮请求失败，请稍后重试。"
+  thisBatchPlanDoesNotSupportThatOperation: "当前批量计划不支持本地文件夹页面的该操作，已执行 0 项且没有写入。"
+  theNewPageSParentIsUnavailableNo: "新页面的父级不可用，已执行 0 项且没有写入。请换一个有效父页面后重试。"
+  aPlanTargetIsUnavailableOrBelongsTo: "计划目标不可用或不属于当前笔记本，已执行 0 项且没有写入。请检查目标后重试。"
+  selectAtLeastOneOperationAndRetryNothing: "请至少选择一项操作后重试；当前没有写入。"
+  thePlanIsIncompleteNoOperationsWereApplied: "计划内容不完整，已执行 0 项且没有写入。请让 AI 重新生成计划。"
+  theLocalFileCouldNotBeCreatedNo: "无法创建本地文件，已执行 0 项且没有写入。请检查同名文件后重试。"
+  thePageContentHasChangedThisWriteWas: "页面内容已发生变化，为避免覆盖新的编辑，本次写入已取消"
+  couldNotAuthenticateWithTheAiServiceCheck: "无法通过 AI 服务鉴权。请到「设置 → AI 助手」检查 API Key 与 Base URL。"
+  couldNotConnectToTheAiServiceCheck: "无法连接 AI 服务。请检查 Base URL、网络或代理是否可达。"
+  theCurrentAiProtocolCannotAccessTheResponses: "当前 AI 协议无法访问 Responses 接口，请确认服务端兼容 /v1/responses。"
+en:
+  aiStoppedBecauseItCouldNotGenerateA: "AI stopped because it could not generate a valid plan. No operations were applied and nothing was written. Retry or choose another model."
+  thisPlanCannotBeAppliedNoOperationsWere: "This plan cannot be applied. No operations were applied and nothing was written. Adjust the targets and retry."
+  thePlanDidNotFinishRecoveryWasAttempted: "The plan did not finish. Recovery was attempted. Check the affected pages before retrying."
+  undoFailedThePagesMayHaveChangedCheck: "Undo failed. The pages may have changed. Check them before retrying."
+  thisRequestFailedPleaseTryAgainLater: "This request failed. Please try again later."
+  thisBatchPlanDoesNotSupportThatOperation: "This batch plan does not support that operation on local folder pages. No operations were applied and nothing was written."
+  theNewPageSParentIsUnavailableNo: "The new page's parent is unavailable. No operations were applied and nothing was written. Choose a valid parent page and retry."
+  aPlanTargetIsUnavailableOrBelongsTo: "A plan target is unavailable or belongs to another notebook. No operations were applied and nothing was written. Check the targets and retry."
+  selectAtLeastOneOperationAndRetryNothing: "Select at least one operation and retry. Nothing has been written."
+  thePlanIsIncompleteNoOperationsWereApplied: "The plan is incomplete. No operations were applied and nothing was written. Ask AI to regenerate it."
+  theLocalFileCouldNotBeCreatedNo: "The local file could not be created. No operations were applied and nothing was written. Check for an existing file with the same name before retrying."
+  thePageContentHasChangedThisWriteWas: "The page content has changed. This write was canceled to preserve newer edits."
+  couldNotAuthenticateWithTheAiServiceCheck: "Could not authenticate with the AI service. Check the API key and Base URL in Settings → AI assistant."
+  couldNotConnectToTheAiServiceCheck: "Could not connect to the AI service. Check the Base URL, connection, or proxy."
+  theCurrentAiProtocolCannotAccessTheResponses: "The current AI protocol cannot access the Responses API. Check that the server supports /v1/responses."
+`;
+const t = createTranslator(messages);
 const BATCH_PLAN_SCHEMA_ERROR =
-  "计划格式生成失败，AI 已停止执行。已执行 0 项，且没有写入。请重试，或切换模型后再试。";
+  t("aiStoppedBecauseItCouldNotGenerateA");
 const BATCH_PLAN_BUSINESS_ERROR =
-  "计划无法执行，已执行 0 项且没有写入。请调整目标后重试。";
+  t("thisPlanCannotBeAppliedNoOperationsWere");
 const BATCH_PLAN_EXECUTION_ERROR =
-  "执行未完成，已尝试恢复。请检查相关页面后重试。";
-const UNDO_ERROR = "撤回失败，页面可能已发生变化。请检查页面后重试。";
-const DEFAULT_ERROR = "本轮请求失败，请稍后重试。";
+  t("thePlanDidNotFinishRecoveryWasAttempted");
+const UNDO_ERROR = t("undoFailedThePagesMayHaveChangedCheck");
+const DEFAULT_ERROR = t("thisRequestFailedPleaseTryAgainLater");
 
 function toText(error: unknown): string {
   if (error instanceof Error) return error.message.trim();
@@ -68,32 +106,32 @@ export function isNotebookAiBatchPlanBusinessError(error: unknown): boolean {
 
 function batchBusinessMessage(message: string): string {
   if (message.includes("本地文件夹")) {
-    return "当前批量计划不支持本地文件夹页面的该操作，已执行 0 项且没有写入。";
+    return t("thisBatchPlanDoesNotSupportThatOperation");
   }
   if (
     message.includes("父级不存在") ||
     (message.includes("父级") && message.includes("不属于"))
   ) {
-    return "新页面的父级不可用，已执行 0 项且没有写入。请换一个有效父页面后重试。";
+    return t("theNewPageSParentIsUnavailableNo");
   }
   if (
     message.includes("删除目标不存在") ||
     message.includes("不属于当前笔记本")
   ) {
-    return "计划目标不可用或不属于当前笔记本，已执行 0 项且没有写入。请检查目标后重试。";
+    return t("aPlanTargetIsUnavailableOrBelongsTo");
   }
   if (message.includes("至少选择一项")) {
-    return "请至少选择一项操作后重试；当前没有写入。";
+    return t("selectAtLeastOneOperationAndRetryNothing");
   }
   if (message.includes("参数不完整")) {
-    return "计划内容不完整，已执行 0 项且没有写入。请让 AI 重新生成计划。";
+    return t("thePlanIsIncompleteNoOperationsWereApplied");
   }
   if (
     message.includes("本地新建目标") ||
     message.includes("创建本地文件") ||
     message.includes("创建页面失败")
   ) {
-    return "无法创建本地文件，已执行 0 项且没有写入。请检查同名文件后重试。";
+    return t("theLocalFileCouldNotBeCreatedNo");
   }
   return BATCH_PLAN_BUSINESS_ERROR;
 }
@@ -108,7 +146,7 @@ export function formatNotebookAiError(
   const phase = options.phase ?? "chat";
   if (phase === "execute") {
     if (message.includes("页面内容已发生变化")) {
-      return "页面内容已发生变化，为避免覆盖新的编辑，本次写入已取消";
+      return t("thePageContentHasChangedThisWriteWas");
     }
     return BATCH_PLAN_EXECUTION_ERROR;
   }
@@ -127,7 +165,7 @@ export function formatNotebookAiError(
     lower.includes("incorrect api key") ||
     lower.includes("authentication")
   ) {
-    return "无法通过 AI 服务鉴权。请到「设置 → AI 助手」检查 API Key 与 Base URL。";
+    return t("couldNotAuthenticateWithTheAiServiceCheck");
   }
   if (
     lower.includes("failed to fetch") ||
@@ -136,7 +174,7 @@ export function formatNotebookAiError(
     lower.includes("network request failed") ||
     lower.includes("timeout")
   ) {
-    return "无法连接 AI 服务。请检查 Base URL、网络或代理是否可达。";
+    return t("couldNotConnectToTheAiServiceCheck");
   }
   if (
     lower.includes("responses") &&
@@ -144,9 +182,10 @@ export function formatNotebookAiError(
       lower.includes("not found") ||
       lower.includes("not supported"))
   ) {
-    return "当前 AI 协议无法访问 Responses 接口，请确认服务端兼容 /v1/responses。";
+    return t("theCurrentAiProtocolCannotAccessTheResponses");
   }
-  return DEFAULT_ERROR;
+  const localized = localizeNotebookAiDiagnostic(message);
+  return localized !== message ? localized : DEFAULT_ERROR;
 }
 
 export const NOTEBOOK_AI_BATCH_PLAN_SCHEMA_ERROR = BATCH_PLAN_SCHEMA_ERROR;

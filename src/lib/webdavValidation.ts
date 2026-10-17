@@ -1,9 +1,36 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/webdavValidation.ts#localMessages:1">`
+zh-Hans:
+  enterAWebdavUrl: "WebDAV 地址不能为空"
+  theWebdavUrlMustStartWithHttpOrHttps: "WebDAV 地址必须以 http 或 https 开头"
+  publicWebdavServicesMustUseASecureHttpsConnection: "公网 WebDAV 服务必须使用安全的 https 连接"
+  invalidWebdavUrl: "WebDAV 地址格式无效"
+  enterARemoteWebdavFolder: "WebDAV 远端目录不能为空"
+  theRemoteWebdavFolderCanTContainBackslashes: "WebDAV 远端目录不能包含反斜杠"
+  theRemoteWebdavFolderCanTContainEmptyPath: "WebDAV 远端目录不能包含空路径段"
+  theRemoteWebdavFolderHasInvalidEncoding: "WebDAV 远端目录编码无效"
+  theRemoteWebdavFolderCanTContainParentDirectory: "WebDAV 远端目录不能包含路径穿越片段"
+  theParentFolderDoesnTExistMakeSureThe: "检测到上级目录不存在，请确认“远端目录”填写的是服务端已经存在的路径。部分 WebDAV 服务不支持直接在根目录创建文件夹，例如 Nextcloud、ownCloud、坚果云或部分 NAS 场景通常需要先在服务端创建同步目录，再在这里填写对应路径（如“backups/goose-note-app”）。"
+en:
+  enterAWebdavUrl: "Enter a WebDAV URL"
+  theWebdavUrlMustStartWithHttpOrHttps: "The WebDAV URL must start with http or https"
+  publicWebdavServicesMustUseASecureHttpsConnection: "Public WebDAV services must use a secure HTTPS connection"
+  invalidWebdavUrl: "Invalid WebDAV URL"
+  enterARemoteWebdavFolder: "Enter a remote WebDAV folder"
+  theRemoteWebdavFolderCanTContainBackslashes: "The remote WebDAV folder can’t contain backslashes"
+  theRemoteWebdavFolderCanTContainEmptyPath: "The remote WebDAV folder can’t contain empty path segments"
+  theRemoteWebdavFolderHasInvalidEncoding: "The remote WebDAV folder has invalid encoding"
+  theRemoteWebdavFolderCanTContainParentDirectory: "The remote WebDAV folder can’t contain parent-directory traversal segments"
+  theParentFolderDoesnTExistMakeSureThe: "The parent folder doesn’t exist. Make sure the remote folder points to an existing path on the server. Some WebDAV services, including Nextcloud, ownCloud, Nutstore, and some NAS setups, require you to create the sync folder on the server first, then enter its path here (for example, backups/goose-note-app)."
+`;
+const uiText = createTranslator(localMessages);
 export function normalizeBaseUrl(raw: string): string {
   let val = raw.trim();
-  if (!val) throw new Error("WebDAV 地址不能为空");
+  if (!val) throw new Error(uiText("enterAWebdavUrl"));
 
   if (!/^https?:\/\//i.test(val)) {
-    throw new Error("WebDAV 地址必须以 http 或 https 开头");
+    throw new Error(uiText("theWebdavUrlMustStartWithHttpOrHttps"));
   }
 
   if (/^http:\/\//i.test(val)) {
@@ -33,7 +60,7 @@ export function normalizeBaseUrl(raw: string): string {
       host.startsWith("[fc");
 
     if (!isLocal) {
-      throw new Error("公网 WebDAV 服务必须使用安全的 https 连接");
+      throw new Error(uiText("publicWebdavServicesMustUseASecureHttpsConnection"));
     }
   }
 
@@ -43,7 +70,7 @@ export function normalizeBaseUrl(raw: string): string {
     url.hash = "";
     val = url.toString();
   } catch (e) {
-    throw new Error("WebDAV 地址格式无效", { cause: e });
+    throw new Error(uiText("invalidWebdavUrl"), { cause: e });
   }
 
   if (!val.endsWith("/")) {
@@ -54,24 +81,24 @@ export function normalizeBaseUrl(raw: string): string {
 
 export function normalizeRemoteDir(raw: string): string {
   const val = raw.trim().replace(/^\/|\/$/g, "");
-  if (!val) throw new Error("WebDAV 远端目录不能为空");
-  if (val.includes("\\")) throw new Error("WebDAV 远端目录不能包含反斜杠");
+  if (!val) throw new Error(uiText("enterARemoteWebdavFolder"));
+  if (val.includes("\\")) throw new Error(uiText("theRemoteWebdavFolderCanTContainBackslashes"));
 
   const parts = val.split("/");
   const cleanParts: string[] = [];
   for (const part of parts) {
     const clean = part.trim();
-    if (!clean) throw new Error("WebDAV 远端目录不能包含空路径段");
+    if (!clean) throw new Error(uiText("theRemoteWebdavFolderCanTContainEmptyPath"));
 
     let decoded: string;
     try {
       decoded = decodeURIComponent(clean);
     } catch (e) {
-      throw new Error("WebDAV 远端目录编码无效", { cause: e });
+      throw new Error(uiText("theRemoteWebdavFolderHasInvalidEncoding"), { cause: e });
     }
 
     if (decoded === "." || decoded === ".." || decoded.includes("\\")) {
-      throw new Error("WebDAV 远端目录不能包含路径穿越片段");
+      throw new Error(uiText("theRemoteWebdavFolderCanTContainParentDirectory"));
     }
     cleanParts.push(clean);
   }
@@ -94,7 +121,7 @@ export function formatWebdavError(error: any): string {
     msg.includes("AncestorsNotFound") ||
     msg.includes("The ancestors of this location does not found")
   ) {
-    return "检测到上级目录不存在，请确认“远端目录”填写的是服务端已经存在的路径。部分 WebDAV 服务不支持直接在根目录创建文件夹，例如 Nextcloud、ownCloud、坚果云或部分 NAS 场景通常需要先在服务端创建同步目录，再在这里填写对应路径（如“backups/goose-note-app”）。";
+    return uiText("theParentFolderDoesnTExistMakeSureThe");
   }
   return msg;
 }

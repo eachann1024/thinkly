@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1">`
+zh-Hans:
+  dropToOpenFolder: "松手打开文件夹"
+  dropToImportIntoTheCurrentFolder: "松开以导入到当前文件夹 · 按住 ⌥ 选择位置"
+  dropToImportTextFile: "松手导入文本文件"
+  dropToCheckFile: "松手后检查文件"
+  opensAsALocalFolderNotebook: "会作为本地文件夹笔记本载入"
+  supportsMdMarkdownAndTxt: "支持 .md、.markdown、.txt"
+en:
+  dropToOpenFolder: "Drop to open folder"
+  dropToImportIntoTheCurrentFolder: "Drop to import into the current folder · Hold Alt/Option to choose a location"
+  dropToImportTextFile: "Drop to import text file"
+  dropToCheckFile: "Drop to check file"
+  opensAsALocalFolderNotebook: "Opens as a local folder notebook"
+  supportsMdMarkdownAndTxt: "Supports .md, .markdown, and .txt"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SearchSessionController } from "../components/sidebar/SearchSessionController";
@@ -122,17 +141,17 @@ export function renderWorkspaceShell(
               )}
               <p className="text-base font-medium text-foreground">
                 {dragIntent === "folder"
-                  ? "松手打开文件夹"
+                  ? uiText("dropToOpenFolder")
                   : dragIntent === "text-file"
                     ? showElectronLocalImportHint
-                      ? "松开以导入到当前文件夹 · 按住 ⌥ 选择位置"
-                      : "松手导入文本文件"
-                    : "松手后检查文件"}
+                      ? uiText("dropToImportIntoTheCurrentFolder")
+                      : uiText("dropToImportTextFile")
+                    : uiText("dropToCheckFile")}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {dragIntent === "folder"
-                  ? "会作为本地文件夹笔记本载入"
-                  : "支持 .md、.markdown、.txt"}
+                  ? uiText("opensAsALocalFolderNotebook")
+                  : uiText("supportsMdMarkdownAndTxt")}
               </p>
             </div>
           </div>

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1">`
+zh-Hans:
+  aiCouldnTAnswer: "AI 回答失败"
+en:
+  aiCouldnTAnswer: "AI couldn’t answer"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer } from "react";
 import { getAIAvailability, runAITextStream } from "@/lib/ai-provider";
 import { useSettings } from "@/stores/useSettings";
@@ -50,7 +59,7 @@ export function useSheetAnswer() {
       if (!abort.signal.aborted) dispatch({ type: "finish", requestId, text });
     } catch (error) {
       if (abort.signal.aborted) return;
-      dispatch({ type: "fail", requestId, error: error instanceof Error ? error.message : "AI 回答失败" });
+      dispatch({ type: "fail", requestId, error: error instanceof Error ? error.message : uiText("aiCouldnTAnswer") });
     } finally {
       if (controller.current === abort) controller.current = null;
     }

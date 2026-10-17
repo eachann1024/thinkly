@@ -1,9 +1,36 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/DesktopTitleBar.tsx#localMessages:1">`
+zh-Hans:
+  aiConversation: "AI 会话"
+  newConversation: "新会话"
+  locked: "已锁定"
+  deleted: "页面已被删除"
+  closeAi: "关闭 AI 面板"
+  openAi: "打开 AI 面板"
+  restore: "恢复笔记"
+  deletePermanently: "彻底删除笔记"
+  permanentDelete: "彻底删除"
+  aiAssistant: "AI 助手"
+en:
+  aiConversation: "AI conversation"
+  newConversation: "New conversation"
+  locked: "Locked"
+  deleted: "This note has been deleted"
+  closeAi: "Close AI panel"
+  openAi: "Open AI panel"
+  restore: "Restore note"
+  deletePermanently: "Delete note permanently"
+  permanentDelete: "Delete permanently"
+  aiAssistant: "AI assistant"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { useRef } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { WinWindowControls } from "./WinWindowControls";
-import type { Page } from "@/types";
+import type { DesktopTitleBarProps } from "./titlebar/DesktopTitleBarProps";
 import { cn, formatShortcut } from "@/lib/utils";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { bindIdleWindowDrag } from "@/lib/electron/windowDrag";
@@ -15,7 +42,7 @@ import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { useSettings } from "@/stores/useSettings";
 import { useAiStatus } from "@/stores/useAiStatus";
-import { isFullscreenAiLayout, type NotebookAiLayoutMode } from "../notebook-ai/useNotebookAiPanel";
+import { isFullscreenAiLayout } from "../notebook-ai/useNotebookAiPanel";
 import { useAiHeaderActions, useAiHeaderTitle } from "../notebook-ai/aiHeaderSlot";
 import { ConversationTitle } from "../notebook-ai/ConversationTitle";
 import { HistoryToolbar } from "../history/HistoryView";
@@ -27,21 +54,7 @@ import { useIncomingWorkspaceTabs } from "./useIncomingWorkspaceTabs";
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
 
-interface DesktopTitleBarProps {
-  page?: Page;
-  settingsOpen?: boolean;
-  sidebarCollapsedOverride?: boolean;
-  onToggleSidebar?: () => void;
-  isWelcomeTab: boolean;
-  inHistoryMode: boolean;
-  onOpenSearch: () => void;
-  onBeforeActivateTab?: () => void;
-  onRestore?: () => void;
-  onDelete?: () => void;
-  aiPanelOpen?: boolean;
-  aiLayoutMode?: NotebookAiLayoutMode;
-  onToggleAiPanel?: () => void;
-}
+
 
 export function DesktopTitleBar({
   page,
@@ -152,7 +165,7 @@ export function DesktopTitleBar({
           <div
             className="tab-rail flex min-w-0 flex-1 items-center"
             role="tablist"
-            aria-label="AI 会话"
+            aria-label={uiText("aiConversation")}
           >
             <div
               role="tab"
@@ -161,7 +174,7 @@ export function DesktopTitleBar({
               className="tab-rail-item flex min-w-0 flex-1 items-center px-2 text-foreground"
             >
               <ConversationTitle
-                summary={aiHeaderTitle ?? "新会话"}
+                summary={aiHeaderTitle ?? uiText("newConversation")}
                 muted={false}
               />
             </div>
@@ -173,13 +186,11 @@ export function DesktopTitleBar({
 
         {!aiFullscreenOpen && page?.isLocked && (
           <span className="rounded bg-[var(--goose-color-lock-bg)] px-1.5 py-0.5 text-xs text-[var(--goose-color-lock-text)]">
-            已锁定
-          </span>
+            {uiText("locked")}</span>
         )}
         {!aiFullscreenOpen && page?.trashedAt && (
           <span className="rounded bg-[var(--goose-color-lock-bg)] px-1.5 py-0.5 text-xs text-[var(--goose-color-lock-text)]">
-            页面已被删除
-          </span>
+            {uiText("deleted")}</span>
         )}
       </div>
 
@@ -197,7 +208,7 @@ export function DesktopTitleBar({
                   )}
                   data-ai-state={aiPhase}
                   onClick={onToggleAiPanel}
-                  aria-label={aiPanelOpen ? "关闭 AI 面板" : "打开 AI 面板"}
+                  aria-label={aiPanelOpen ? uiText("closeAi") : uiText("openAi")}
                   aria-pressed={aiPanelOpen}
                 >
                   <Sparkles className="h-4 w-4" />
@@ -205,7 +216,7 @@ export function DesktopTitleBar({
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
-                  <span>{aiPanelOpen ? "关闭 AI 面板" : "打开 AI 面板"}</span>
+                  <span>{aiPanelOpen ? uiText("closeAi") : uiText("openAi")}</span>
                   {toggleAiPanelShortcutLabel && (
                     <span className="text-[11px] text-muted-foreground">
                       {toggleAiPanelShortcutLabel}
@@ -225,13 +236,13 @@ export function DesktopTitleBar({
                   <IconButton size="icon" tone="muted"
                     onClick={onRestore}
                     type="button"
-                    aria-label="恢复笔记"
+                    aria-label={uiText("restore")}
                     className=""
                   >
                     <GooseIcons.RotateCcw className="h-4 w-4" />
                   </IconButton>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">恢复笔记</TooltipContent>
+                <TooltipContent side="bottom">{uiText("restore")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider delayDuration={600}>
@@ -240,13 +251,13 @@ export function DesktopTitleBar({
                   <IconButton size="icon" tone="danger"
                     onClick={onDelete}
                     type="button"
-                    aria-label="彻底删除笔记"
+                    aria-label={uiText("deletePermanently")}
                     className=""
                   >
                     <GooseIcons.Trash2 className="h-4 w-4" />
                   </IconButton>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">彻底删除</TooltipContent>
+                <TooltipContent side="bottom">{uiText("permanentDelete")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </>
@@ -277,7 +288,7 @@ export function DesktopTitleBar({
       {!settingsOpen && titleBarRow}
       {!settingsOpen && aiSidePanelOpen && (
         <div className="electron-ai-header relative flex min-w-0 shrink-0 items-center gap-2 px-3">
-          <span className="min-w-0 flex-1 truncate text-sm font-medium">AI 助手</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">{uiText("aiAssistant")}</span>
           {aiHeaderActions}
         </div>
       )}

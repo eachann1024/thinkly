@@ -1,3 +1,19 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsResetActions.tsx#localMessages:1">`
+zh-Hans:
+  resetComplete_faa3: "重置成功"
+  resetFailed_4d71: "重置失败"
+  languageResetFailed: "其他设置已重置，但语言设置未能恢复为跟随系统。请重新启动后重试。"
+  dataIsBeingResetOrRestored_eec4: "正在重置或恢复数据，请稍后重试"
+en:
+  resetComplete_faa3: "Reset complete"
+  resetFailed_4d71: "Reset failed"
+  languageResetFailed: "Other settings were reset, but the language setting could not be changed to Follow system. Restart the app and try again."
+  dataIsBeingResetOrRestored_eec4: "Data is being reset or restored. Please try again later."
+`;
+const uiText = createTranslator(localMessages);
+import { resetLanguagePreference } from "@/i18n";
 import { useSettings } from "@/stores/useSettings";
 import {
   QUICKNOTE_DEFAULT_HEIGHT,
@@ -89,12 +105,17 @@ export function useSettingsResetActions(
       createDefaultNotebook();
       await resetSettingsToDefaults();
       resetAuxiliaryAppState();
+      // Only change next-startup language after the other reset steps succeed.
+      if (window.gooseLanguage) {
+        try { await resetLanguagePreference(); }
+        catch (cause) { throw new Error(uiText("languageResetFailed"), { cause }); }
+      }
       sendDataEvent({ type: "reset.closed" });
       onOpenChange(false);
-      toast.success("重置成功");
+      toast.success(uiText("resetComplete_faa3"));
     } catch (error) {
       console.error("Reset failed", error);
-      toast.error("重置失败", {
+      toast.error(uiText("resetFailed_4d71"), {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -105,7 +126,7 @@ export function useSettingsResetActions(
   const handleReset = async (zipBlob?: Blob) => {
     if (!zipBlob) return handleManualReset();
     const id = beginDataOperation("restore");
-    if (id === null) throw new Error("正在重置或恢复数据，请稍后重试");
+    if (id === null) throw new Error(uiText("dataIsBeingResetOrRestored_eec4"));
     try {
       await restoreBackupWithRollback(zipBlob);
     } finally {

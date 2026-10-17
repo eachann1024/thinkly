@@ -25,6 +25,31 @@ import {
   WorkCardStatusContext,
   type WorkCardStatusData,
 } from "./workCardStatusContext";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ToolProgressCard.tsx#messages:1">`
+zh-Hans:
+  inProgress: "进行中"
+  failed: "失败"
+  complete: "完成"
+  awaitingApproval: "等待审批"
+  canceled: "已取消"
+  undone: "已撤回"
+  pending: "待处理"
+  thinking: "思考"
+  progress: "处理进度"
+en:
+  inProgress: "In progress"
+  failed: "Failed"
+  complete: "Complete"
+  awaitingApproval: "Awaiting approval"
+  canceled: "Canceled"
+  undone: "Undone"
+  pending: "Pending"
+  thinking: "Thinking"
+  progress: "Progress"
+`;
+const t = createTranslator(messages);
+
 
 export {
   getToolProgressStepStatus,
@@ -33,13 +58,13 @@ export {
 };
 
 function stepStatusLabel(status: ProgressStep["status"]) {
-  if (status === "running") return "进行中";
-  if (status === "error") return "失败";
-  if (status === "done") return "完成";
-  if (status === "approval") return "等待同意";
-  if (status === "cancelled") return "已取消";
-  if (status === "undone") return "已撤回";
-  return "待处理";
+  if (status === "running") return t("inProgress");
+  if (status === "error") return t("failed");
+  if (status === "done") return t("complete");
+  if (status === "approval") return t("awaitingApproval");
+  if (status === "cancelled") return t("canceled");
+  if (status === "undone") return t("undone");
+  return t("pending");
 }
 
 function FoldChevron() {
@@ -151,7 +176,7 @@ export function ToolProgressCard({
   // 步骤默认收起，不随 running/error 自动展开
   const [open, setOpen] = useState(false);
   const foldable = steps.length > 0;
-  const traceLabel = foldable ? heading.toggle : hasThinking ? "思考" : "";
+  const traceLabel = foldable ? heading.toggle : hasThinking ? t("thinking") : "";
   const showTraceRow = foldable || hasThinking;
   // 纯问答纸：无步骤且非 running 时不出抬头，避免伪造「处理完成」
   const hasHeading = foldable || showRunning;
@@ -166,7 +191,7 @@ export function ToolProgressCard({
             "bui-root bui-approval notebook-ai-work-card",
             showProcessing && "notebook-ai-work-card--running",
           )}
-          aria-label="处理进度"
+          aria-label={t("progress")}
           aria-busy={showProcessing || undefined}
         >
           {hasHeading ? <WorkCardStatus status={status} /> : null}

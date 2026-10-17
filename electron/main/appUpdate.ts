@@ -1,3 +1,4 @@
+import { t } from "./i18n/updates";
 import { app, BrowserWindow, shell } from "electron";
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
@@ -45,13 +46,13 @@ async function check(): Promise<AppUpdateCheckResult> {
       return { ...details, status: "up-to-date", currentVersion, latestVersion: release.version, releaseUrl: release.releaseUrl || releaseUrl };
     }
     const asset = pickUpdateAsset(release.assets, process.platform, process.arch);
-    if (!asset) throw new Error("已有新版本，但没有适合当前系统的安装包");
+    if (!asset) throw new Error(t("noPackage"));
     const result = { ...details, status: "available" as const, currentVersion, latestVersion: release.version,
       assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.releaseUrl || releaseUrl };
     if (canShowCheck()) sendUpdateEvent({ type: "check.available", target: updateTarget(release.version, asset, details) });
     return result;
   } catch (error) {
-    const reason = error instanceof Error ? error.message : "检查更新失败";
+    const reason = error instanceof Error ? error.message : t("checkFailed");
     if (canShowCheck()) sendUpdateEvent({ type: "check.failed", metadata: hasKnownUpdate ? updateRetryMetadata(known) : {}, message: reason });
     return { status: "unavailable", currentVersion, reason, releaseUrl };
   }
@@ -71,13 +72,13 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
     const asset = pickUpdateAsset(release.assets, process.platform, process.arch);
     if (compareSemver(release.version, getAppVersion()) <= 0) {
       target = { version: getAppVersion() };
-      throw new Error("当前已是最新版本");
+      throw new Error(t("upToDate"));
     }
-    if (!asset) throw new Error("已有新版本，但没有适合当前系统的安装包");
+    if (!asset) throw new Error(t("noPackage"));
     const details = releaseDetails(release);
     target = updateTarget(release.version, asset, details);
     if (asset.name !== filename || asset.browser_download_url !== downloadUrl) {
-      throw new Error("版本已变化，请重试更新");
+      throw new Error(t("versionChanged"));
     }
     sendUpdateEvent({ type: "download.started", target: updateTarget(release.version, asset, details) });
     const update = await downloadVerifiedUpdate(release.version, asset, details);
@@ -86,7 +87,7 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
     } else if (process.platform !== "win32") {
       shell.showItemInFolder(update.path);
       sendUpdateEvent({ type: "download.completed", target: updateTarget(release.version, asset, details), path: update.path,
-        message: "安装包已下载，请打开安装" });
+        message: t("openInstaller") });
       return { path: update.path };
     }
     await writeFile(recordPath(), JSON.stringify(update), { mode: 0o600 });
@@ -94,7 +95,7 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
     notifyReady(update);
     return { path: update.path };
   } catch (error) {
-    sendUpdateEvent({ type: "download.failed", metadata: target, message: error instanceof Error ? error.message : "下载更新失败" });
+    sendUpdateEvent({ type: "download.failed", metadata: target, message: error instanceof Error ? error.message : t("downloadFailed") });
     throw error;
   }
 }
@@ -102,7 +103,7 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
 export function downloadAppUpdate(downloadUrl: string, filename: string): Promise<{ path: string }> {
   if (lifecycle.phase === "restoring" && restoreTask) return restoreTask.then(() => downloadAppUpdate(downloadUrl, filename));
   if (lifecycle.phase === "ready" || lifecycle.phase === "installing") return Promise.resolve({ path: lifecycle.update.path });
-  if (lifecycle.phase === "invalidating") return Promise.reject(new Error("正在校验安装包，请稍后重试"));
+  if (lifecycle.phase === "invalidating") return Promise.reject(new Error(t("verifying")));
   if (!downloadTask) {
     const id = ++nextDownloadId;
     sendLifecycle({ type: "download.started", id });
@@ -122,7 +123,7 @@ function notifyReady(update: VerifiedUpdate): void {
 export async function installReadyUpdate(): Promise<void> {
   const current = lifecycle;
   if (current.phase === "installing" || current.phase === "invalidating") return;
-  if (current.phase !== "ready" || !app.isPackaged) throw new Error("没有可安装的更新");
+  if (current.phase !== "ready" || !app.isPackaged) throw new Error(t("noReadyUpdate"));
   const update = current.update;
   sendLifecycle({ type: "install.started" });
   try {
@@ -136,7 +137,7 @@ export async function installReadyUpdate(): Promise<void> {
   } catch (error) {
     sendUpdateEvent({ type: "install.failed", target: updateTarget(update.version, update.asset, update),
       path: lifecycle.phase === "installing" ? update.path : undefined,
-      message: error instanceof Error ? error.message : "安装更新失败" });
+      message: error instanceof Error ? error.message : t("installFailed") });
     throw error;
   } finally { sendLifecycle({ type: "install.finished" }); }
 }

@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1">`
+zh-Hans:
+  nameSortingRestored_df43: "已恢复名称排序"
+  sortByName_5b70: "恢复名称排序"
+  couldNotReadLocalFolder_198b: "无法读取本地文件夹"
+en:
+  nameSortingRestored_df43: "Name sorting restored"
+  sortByName_5b70: "Sort by name"
+  couldNotReadLocalFolder_198b: "Could not read local folder"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Page } from "@/types";
@@ -69,13 +82,13 @@ export function useMainTreeState({
             if (
               clearLocalFolderOrder(activeNotebookId, LOCAL_FOLDER_ROOT_DIR_KEY)
             ) {
-              toast.success("已恢复名称排序");
+              toast.success(uiText("nameSortingRestored_df43"));
             }
           })
         }
       >
         <GooseIcons.ArrowDownAZ className="h-4 w-4" />
-        <span>恢复名称排序</span>
+        <span>{uiText("sortByName_5b70")}</span>
       </ContextMenuItem>
     </ContextMenuGroup>
   ) : null;
@@ -124,7 +137,7 @@ export function useMainTreeState({
 
   const localLoadError =
     isLocalFolder && localLoadState?.status === "error"
-      ? localLoadState?.error || "无法读取本地文件夹"
+      ? localLoadState?.error || uiText("couldNotReadLocalFolder_198b")
       : null;
 
   const retryLocalFolderLoad = useCallback(() => {

@@ -22,6 +22,10 @@ import {
 } from "./planReviewData";
 import { requestPlanRefinement } from "./refinePlan";
 import { ReviewDiff } from "./ReviewDiff";
+import messages from "./ReviewOperation.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 
 export function ReviewOperation({
   operation,
@@ -50,10 +54,10 @@ export function ReviewOperation({
       : operation.type === "edit" && operation.title
         ? operation.title
         : operation.type === "delete" && operation.pageIds.length > 1
-          ? `${operation.pageIds.length} 篇笔记`
+          ? t("detailNotes", { value1: operation.pageIds.length })
           : page
             ? getPageTitle(page)
-            : "目标笔记已不可用";
+            : t("theTargetNoteIsNoLongerAvailable");
   const livePage = page ? usePages.getState().pages[page.id] : undefined;
   const navigable = Boolean(
     livePage && !livePage.trashedAt && !livePage.isFolder,
@@ -89,18 +93,18 @@ export function ReviewOperation({
   );
   const scope =
     operation.type === "search_replace"
-      ? `${operation.replaceAll ? "替换全部匹配" : "替换首处匹配"}${replacementPreview?.ok ? ` · ${replacementPreview.replacedCount} 处` : ""}`
+      ? `${operation.replaceAll ? t("replaceAllMatches") : t("replaceFirstMatch")}${replacementPreview?.ok ? t("matchCount", { count: replacementPreview.replacedCount }) : ""}`
       : operation.type === "edit"
-        ? "替换整篇正文"
+        ? t("replaceEntireNoteBody")
         : operation.type === "delete"
-          ? `移入回收站 ${affectedCount} 篇（含子笔记）`
-          : "新建笔记";
+          ? t("detailMoveNotesToTrashIncludingChildNotes", { value1: affectedCount ?? operation.pageIds.length })
+          : t("createNote");
   const path = page
     ? reviewPagePath(page)
     : operation.type === "create"
       ? (journal?.plannedLocalPaths[operation.operationId] ??
         (operation.parentId
-          ? `${usePages.getState().pages[operation.parentId] ? reviewPagePath(usePages.getState().pages[operation.parentId]!) : "目标父级"} / ${title}`
+          ? `${usePages.getState().pages[operation.parentId] ? reviewPagePath(usePages.getState().pages[operation.parentId]!) : t("targetParent")} / ${title}`
           : `${journal ? (useNotebooks.getState().notebooks[journal.notebookId]?.name ?? "") : ""} / ${title}`))
       : "";
   const Icon =
@@ -126,10 +130,10 @@ export function ReviewOperation({
       const desktop = getGooseDesktop();
       if (desktop) await desktop.writeText(text);
       else if (navigator.clipboard) await navigator.clipboard.writeText(text);
-      else throw new Error("剪贴板不可用");
-      setCopyStatus(`${label}已复制`);
+      else throw new Error(t("clipboardUnavailable"));
+      setCopyStatus(t("detailCopied", { value1: label }));
     } catch {
-      setCopyStatus("复制失败，请拖选后使用复制快捷键。");
+      setCopyStatus(t("copyFailedSelectTheTextAndUseThe"));
     }
   };
   const refine = () => {
@@ -153,7 +157,7 @@ export function ReviewOperation({
           <Checkbox
             isSelected={selected}
             onChange={onSelect}
-            aria-label={`执行${planOperationKindLabel(operation.type)} ${title}`}
+            aria-label={t("detailApply", { value1: planOperationKindLabel(operation.type), value2: title })}
           >
             <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
           </Checkbox>
@@ -167,7 +171,7 @@ export function ReviewOperation({
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             className="notebook-ai-plan-file-title notebook-ai-review-target"
-            title={`打开目标笔记：${path}`}
+            title={t("detailOpenTargetNote", { value1: path })}
             onClick={() => onOpenPage(livePage!.id)}
           >
             {title}
@@ -183,20 +187,20 @@ export function ReviewOperation({
         <span title={path}>{path}</span>
         <span>
           {scope}
-          {lines.length ? ` · +${added} / −${deleted} 行` : ""}
+          {lines.length ? t("detailLines", { value1: added, value2: deleted }) : ""}
         </span>
       </div>
       {newText !== undefined ? (
         <div className="notebook-ai-review-toolbar">
           {oldText !== undefined && operation.type !== "create" ? (
-            <div role="group" aria-label={`${title} 预览方式`}>
+            <div role="group" aria-label={t("detailPreviewModeFor", { value1: title })}>
               <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 aria-pressed={view === "diff"}
                 className="goose-accent-selection"
                 onClick={() => setView("diff")}
               >
-                差异
+                {t("diff")}
               </Button>
               <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
@@ -204,17 +208,17 @@ export function ReviewOperation({
                 className="goose-accent-selection"
                 onClick={() => setView("new")}
               >
-                {operation.type === "search_replace" ? "新片段" : "最终正文"}
+                {operation.type === "search_replace" ? t("newText") : t("resultingContent")}
               </Button>
             </div>
           ) : null}
           {oldText !== undefined && operation.type !== "create" ? (
-            <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(oldText, "原文")}>
-              复制原文
+            <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(oldText, t("original"))}>
+              {t("copyOriginal")}
             </Button>
           ) : null}
-          <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(newText, "新内容")}>
-            复制新内容
+          <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(newText, t("newContent"))}>
+            {t("copyNewContent")}
           </Button>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
@@ -222,7 +226,7 @@ export function ReviewOperation({
             onMouseDown={(event) => event.preventDefault()}
             onClick={refine}
           >
-            调整选中文字
+            {t("refineSelectedText")}
           </Button>
         </div>
       ) : null}
@@ -258,7 +262,7 @@ export function ReviewOperation({
                   ) : target ? (
                     reviewPagePath(target)
                   ) : (
-                    "目标笔记已不可用"
+                    t("theTargetNoteIsNoLongerAvailable")
                   )}
                 </li>
               );
@@ -271,7 +275,7 @@ export function ReviewOperation({
         ) : newText ? (
           <PlanMarkdown markdown={newText} />
         ) : (
-          <p className="notebook-ai-review-empty">此片段将被删除。</p>
+          <p className="notebook-ai-review-empty">{t("thisTextWillBeDeleted")}</p>
         )}
       </div>
     </section>

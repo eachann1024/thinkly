@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/sections/useDesktopHotkeyToasts.ts#localMessages:1">`
+zh-Hans:
+  mainWindowShortcut_8e10: "主窗口快捷键"
+  quickNoteShortcut_7505: "速记小窗快捷键"
+  globalSearchShortcut_18d6: "全局搜索快捷键"
+  shortcutEnabled: "{{label}}已生效"
+  shortcutDisabled: "{{label}}已停用"
+  invalidShortcut_b55e: "快捷键无效"
+  registrationFailed_1c56: "注册失败"
+  shortcutFailed: "{{label}}未生效"
+en:
+  mainWindowShortcut_8e10: "Main window shortcut"
+  quickNoteShortcut_7505: "Quick Note shortcut"
+  globalSearchShortcut_18d6: "Global search shortcut"
+  shortcutEnabled: "{{label}} enabled"
+  shortcutDisabled: "{{label}} disabled"
+  invalidShortcut_b55e: "Invalid shortcut"
+  registrationFailed_1c56: "Registration failed"
+  shortcutFailed: "{{label}} could not be enabled"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import { formatShortcut } from "@/lib/utils";
@@ -7,9 +30,9 @@ import { useSettings } from "@/stores/useSettings";
 export type DesktopHotkeySlot = "wake" | "quicknote" | "search";
 
 const SLOT_LABEL: Record<DesktopHotkeySlot, string> = {
-  wake: "主窗口快捷键",
-  quicknote: "速记小窗快捷键",
-  search: "全局搜索快捷键",
+  wake: uiText("mainWindowShortcut_8e10"),
+  quicknote: uiText("quickNoteShortcut_7505"),
+  search: uiText("globalSearchShortcut_18d6"),
 };
 
 function signature(status: DesktopHotkeyStatus, shortcut: string, enabled: boolean) {
@@ -25,15 +48,15 @@ function notifyStatus(
   const label = SLOT_LABEL[slot];
   const keys = shortcut ? formatShortcut(shortcut) : "";
   if (status.state === "active") {
-    toast.success(`${label}已生效`, { description: keys || undefined });
+    toast.success(uiText("shortcutEnabled", { label }), { description: keys || undefined });
     return;
   }
   if (status.state === "disabled") {
-    toast.success(`${label}已停用`);
+    toast.success(uiText("shortcutDisabled", { label }));
     return;
   }
-  const detail = status.message || (status.state === "invalid" ? "快捷键无效" : "注册失败");
-  toast.error(`${label}未生效`, { description: detail });
+  const detail = status.message || (status.state === "invalid" ? uiText("invalidShortcut_b55e") : uiText("registrationFailed_1c56"));
+  toast.error(uiText("shortcutFailed", { label }), { description: detail });
 }
 
 /** 只在用户改键后的真实注册结果变化时通知，打开设置或初次水合不提示。 */

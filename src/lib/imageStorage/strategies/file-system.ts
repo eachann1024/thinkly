@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageStorage/strategies/file-system.ts#localMessages:1">`
+zh-Hans:
+  couldnTSaveTheImageToTheLocalFolder: "图片写入本地文件夹失败"
+en:
+  couldnTSaveTheImageToTheLocalFolder: "Couldn’t save the image to the local folder"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * 文件系统存储策略
  * 用于 Electron 本地文件模式，保存图片到 ./assets/ 文件夹
@@ -17,34 +26,8 @@ import { isInternalAssetRef } from "@/lib/internalAssetRef";
 const LOCAL_FILE_EXTENSIONS =
   /\.(png|jpe?g|gif|webp|svg|bmp|ico|tiff?|html?|pdf|txt|md|markdown|json|csv|zip)$/i;
 
-const MIME_MAP: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  svg: "image/svg+xml",
-  bmp: "image/bmp",
-  ico: "image/x-icon",
-  tif: "image/tiff",
-  tiff: "image/tiff",
-  html: "text/html",
-  htm: "text/html",
-  pdf: "application/pdf",
-  txt: "text/plain",
-  json: "application/json",
-  csv: "text/csv",
-  zip: "application/zip",
-  mp4: "video/mp4",
-  m4v: "video/x-m4v",
-  mov: "video/quicktime",
-  webm: "video/webm",
-};
+import { guessMime } from "./fileMime";
 
-function guessMime(filePath: string): string {
-  const ext = filePath.split(".").pop()?.toLowerCase() || "png";
-  return MIME_MAP[ext] || "image/png";
-}
 
 /**
  * 通过 gooseFs.readFileBase64 读取本地二进制文件为 Blob
@@ -226,7 +209,7 @@ export class FileSystemStrategy implements IImageStorageStrategy {
         ? await fs.writeFileAsync(fullPath, base64Data, "base64")
         : fs.writeFile(fullPath, base64Data, "base64");
     if (!saved) {
-      throw new Error("图片写入本地文件夹失败");
+      throw new Error(uiText("couldnTSaveTheImageToTheLocalFolder"));
     }
 
     return `./assets/${filename}`;

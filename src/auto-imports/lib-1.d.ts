@@ -41,7 +41,6 @@ declare global {
   const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
   const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
   const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
-  const ONBOARDING_THIRD_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_THIRD_CHILD_CONTENT
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
@@ -156,6 +155,7 @@ declare global {
   const isDescendantPage: typeof import('../lib/local-folder-target').isDescendantPage
   const isDiskContentMatchingSnapshot: typeof import('../lib/local-md-snapshot').isDiskContentMatchingSnapshot
   const isExternalFileDrag: typeof import('../lib/local-folder-target').isExternalFileDrag
+  const isGitPreparationMessage: typeof import('../lib/git-sync-preparation').isGitPreparationMessage
   const isGithubDownloadUrl: typeof import('../lib/appUpdateRelease').isGithubDownloadUrl
   const isGooseFrontmatterKey: typeof import('../lib/local-frontmatter').isGooseFrontmatterKey
   const isInternalAssetRef: typeof import('../lib/internalAssetRef').isInternalAssetRef

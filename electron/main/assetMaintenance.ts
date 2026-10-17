@@ -1,3 +1,4 @@
+import { t } from "./i18n/attachments";
 import { assertGitSyncWritable } from "./gitSyncLock";
 import { BrowserWindow, dialog, ipcMain, net, shell } from "electron";
 import { randomUUID } from "node:crypto";
@@ -22,10 +23,10 @@ function workspaces() {
 
 async function workspaceSnapshots(): Promise<AssetWorkspaceSnapshot[]> {
   const windows = workspaces();
-  if (!windows.length) throw new Error("请保持笔记工作区打开后再清理");
+  if (!windows.length) throw new Error(t("workspaceRequired"));
   return Promise.all(windows.map((win) => new Promise<AssetWorkspaceSnapshot>((resolve, reject) => {
     const requestId = randomUUID();
-    const timer = setTimeout(() => finish(new Error("工作区未响应，已停止清理。请等待全部窗口加载完成后重试。")), 15000);
+    const timer = setTimeout(() => finish(new Error(t("workspaceTimeout"))), 15000);
     const finish = (error?: Error, snapshot?: AssetWorkspaceSnapshot) => {
       clearTimeout(timer);
       requests.delete(requestId);
@@ -40,7 +41,7 @@ function notebooksFrom(snapshots: AssetWorkspaceSnapshot[]): AssetNotebook[] {
   const byId = new Map<string, AssetNotebook>();
   for (const snapshot of snapshots) for (const notebook of snapshot.notebooks) {
     const previous = byId.get(notebook.id);
-    if (previous && previous.localPath !== notebook.localPath) throw new Error("笔记本路径在窗口间不一致，请重新打开工作区");
+    if (previous && previous.localPath !== notebook.localPath) throw new Error(t("pathsMismatch"));
     byId.set(notebook.id, notebook);
   }
   return [...byId.values()];
@@ -59,23 +60,23 @@ function pagesForNotebook(snapshots: AssetWorkspaceSnapshot[], notebook: AssetNo
 
 function assertMaintenanceSender(event: Electron.IpcMainInvokeEvent) {
   if (event.sender !== getAssetMaintenanceWindow()?.webContents || event.senderFrame !== event.sender.mainFrame) {
-    throw new Error("仅资源清理窗口可执行此操作");
+    throw new Error(t("windowRequired"));
   }
 }
 
 function assertIdle() {
-  if (assetMaintenanceBusy(lifecycle)) throw new Error("资源清理正在执行，请稍候");
+  if (assetMaintenanceBusy(lifecycle)) throw new Error(t("busy"));
 }
 
 export function registerAssetMaintenanceIpc(): void {
   ipcMain.on("asset-maintenance:snapshot-reply", (event, requestId: string, snapshot: AssetWorkspaceSnapshot | null) => {
     const request = requests.get(requestId);
     if (!request || request.senderId !== event.sender.id || event.senderFrame !== event.sender.mainFrame) return;
-    if (!snapshot || !Array.isArray(snapshot.pages) || !Array.isArray(snapshot.notebooks)) request.reject(new Error("无法读取工作区编辑内容，已停止清理"));
+    if (!snapshot || !Array.isArray(snapshot.pages) || !Array.isArray(snapshot.notebooks)) request.reject(new Error(t("snapshotFailed")));
     else request.resolve(snapshot);
   });
   ipcMain.handle("asset-maintenance:open", (event) => {
-    if (lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") throw new Error("请从工作区设置打开");
+    if (lookupWindowContext(BrowserWindow.fromWebContents(event.sender))?.kind !== "workspace") throw new Error(t("openFromWorkspace"));
     const existing = getAssetMaintenanceWindow();
     const win = createAssetMaintenanceWindow();
     if (existing) return;
@@ -114,7 +115,7 @@ export function registerAssetMaintenanceIpc(): void {
     try {
       const snapshots = await workspaceSnapshots();
       const notebook = notebooksFrom(snapshots).find((item) => item.id === notebookId);
-      if (!notebook) throw new Error("请先选择本地文件夹笔记本");
+      if (!notebook) throw new Error(t("selectNotebook"));
       const root = await realpath(assertAllowed(notebook.localPath));
       assertAllowed(root);
       const assets = await scanUnreferencedLocalAssets({ basePath: root, pages: pagesForNotebook(snapshots, notebook, root), gooseFs: notebookScanFs(root) });
@@ -122,7 +123,7 @@ export function registerAssetMaintenanceIpc(): void {
       for (const asset of assets) fingerprints.set(asset.path, await assetFingerprint(root, asset.path));
       const token = randomUUID();
       const result: AssetScan = { token, notebook, assets: assets.map((asset, index) => ({ ...asset, previewUrl: `goose-asset://${token}/${index}` })) };
-      if (event.sender.isDestroyed()) throw new Error("资源清理窗口已关闭");
+      if (event.sender.isDestroyed()) throw new Error(t("windowClosed"));
       lifecycle = assetMaintenanceTransition(lifecycle, { type: "scanned", operationId, record: { result, root, fingerprints, created: Date.now() } });
       return result;
     } finally { lifecycle = assetMaintenanceTransition(lifecycle, { type: "finish", operationId }); }
@@ -131,15 +132,15 @@ export function registerAssetMaintenanceIpc(): void {
     assertMaintenanceSender(event);
     assertIdle();
     const record = activeAssetScan(lifecycle);
-    if (!record || record.result.token !== token || Date.now() - record.created > 10 * 60_000) throw new Error("扫描结果已过期，请重新扫描");
-    if (!Array.isArray(paths) || !paths.length || paths.some((p) => !record.fingerprints.has(p))) throw new Error("只能删除本次扫描中的图片和视频");
+    if (!record || record.result.token !== token || Date.now() - record.created > 10 * 60_000) throw new Error(t("expired"));
+    if (!Array.isArray(paths) || !paths.length || paths.some((p) => !record.fingerprints.has(p))) throw new Error(t("onlyScannedFiles"));
     const operationId = ++nextOperationId;
     lifecycle = assetMaintenanceTransition(lifecycle, { type: "confirm", operationId });
     try {
       const selected = [...new Set(paths)];
       const confirmation = await dialog.showMessageBox(getAssetMaintenanceWindow()!, {
-        type: "warning", title: "移入系统废纸篓", message: `将 ${selected.length} 个图片或视频移入系统废纸篓？`,
-        detail: "确认后会重新读取 Markdown 和所有工作区的当前编辑内容。结果发生变化时会停止删除。", buttons: ["取消", "移入废纸篓"], defaultId: 0, cancelId: 0, noLink: true,
+        type: "warning", title: t(process.platform === "win32" ? "moveRecycle" : "moveTrash"), message: t(process.platform === "win32" ? "confirmRecycle" : "confirmTrash", { count: selected.length }),
+        detail: t("confirmDetail"), buttons: [t("cancel"), t(process.platform === "win32" ? "moveRecycle" : "moveTrash")], defaultId: 0, cancelId: 0, noLink: true,
       });
       if (confirmation.response !== 1) {
         lifecycle = assetMaintenanceTransition(lifecycle, { type: "cancel", operationId });
@@ -147,27 +148,27 @@ export function registerAssetMaintenanceIpc(): void {
       }
       // 一次性令牌；任何失败、部分完成或再次点击均须重新扫描。
       lifecycle = assetMaintenanceTransition(lifecycle, { type: "consume", operationId });
-      if (event.sender.isDestroyed()) throw new Error("资源清理窗口已关闭");
-      if (Date.now() - record.created > 10 * 60_000) throw new Error("扫描结果已过期，请重新扫描");
+      if (event.sender.isDestroyed()) throw new Error(t("windowClosed"));
+      if (Date.now() - record.created > 10 * 60_000) throw new Error(t("expired"));
       const snapshots = await workspaceSnapshots();
       const notebook = notebooksFrom(snapshots).find((item) => item.id === record.result.notebook.id);
-      if (!notebook || await realpath(assertAllowed(notebook.localPath)) !== record.root) throw new Error("笔记本已变更，请重新扫描");
+      if (!notebook || await realpath(assertAllowed(notebook.localPath)) !== record.root) throw new Error(t("notebookChanged"));
       const latest = await scanUnreferencedLocalAssets({ basePath: record.root, pages: pagesForNotebook(snapshots, notebook, record.root), gooseFs: notebookScanFs(record.root) });
       const unreferenced = new Set(latest.map((asset) => asset.path));
       for (const filePath of selected) {
-        if (!unreferenced.has(filePath) || await assetFingerprint(record.root, filePath) !== record.fingerprints.get(filePath)) throw new Error("资源引用或文件已变化，未删除，请重新扫描");
+        if (!unreferenced.has(filePath) || await assetFingerprint(record.root, filePath) !== record.fingerprints.get(filePath)) throw new Error(t("changed"));
       }
       let deleted = 0;
       try {
         for (const filePath of selected) {
-          if (event.sender.isDestroyed()) throw new Error("资源清理窗口已关闭");
+          if (event.sender.isDestroyed()) throw new Error(t("windowClosed"));
           await assertNotebookPath(record.root, filePath);
-          if (await assetFingerprint(record.root, filePath) !== record.fingerprints.get(filePath)) throw new Error("资源文件已变化");
+          if (await assetFingerprint(record.root, filePath) !== record.fingerprints.get(filePath)) throw new Error(t("fileChanged"));
           assertGitSyncWritable(filePath);
           await shell.trashItem(filePath);
           deleted++;
         }
-      } catch (error) { throw new Error(`已移入废纸篓 ${deleted} 个，其余未完成。请重新扫描。${String(error)}`, { cause: error }); }
+      } catch (error) { throw new Error(t(process.platform === "win32" ? "partialRecycle" : "partialTrash", { count: deleted, reason: String(error) }), { cause: error }); }
       return { deleted, canceled: false };
     } finally { lifecycle = assetMaintenanceTransition(lifecycle, { type: "finish", operationId }); }
   });

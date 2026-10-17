@@ -1,9 +1,35 @@
+import { formatDecimal, formatNumber } from "@/i18n/format";
 import {
   getToolProgressStepStatus,
   getToolProgressStepText,
   type ProgressStep,
   type ToolProgressPart,
 } from "./toolProgressModel";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/beautifulUiMap.ts#messages:1">`
+zh-Hans:
+  thisStepWasNotCompletedAndMayHave: "本步骤未完成，可能已被本轮生成跳过。"
+  searching: "正在搜索"
+  runningTools: "正在运行工具"
+  thinking: "思考中"
+  processing: "处理中"
+  searchComplete: "已搜索"
+  detailToolsRun: "已运行 {{value1}} 个工具"
+  detailThoughtFor: "思考了 {{value1}}"
+  detailProcessedFor: "处理了 {{value1}}"
+en:
+  thisStepWasNotCompletedAndMayHave: "This step was not completed and may have been skipped in this response."
+  searching: "Searching"
+  runningTools: "Running tools"
+  thinking: "Thinking"
+  processing: "Processing"
+  searchComplete: "Search complete"
+  detailToolsRun: "Tools run: {{value1}}"
+  detailThoughtFor: "Thought for {{value1}}"
+  detailProcessedFor: "Processed for {{value1}}"
+`;
+const t = createTranslator(messages);
+
 
 export type LoaderChipStatus = "pending" | "running" | "done" | "error";
 export type LoaderTaskStatus =
@@ -61,8 +87,8 @@ function partId(part: ToolProgressPart, index: number): string {
 /** LoadingState 等宽耗时：<60s 用 `12.3s`，否则 `1m 2.3s` */
 export function formatLoaderElapsed(ms: number): string {
   const total = Math.max(0, ms) / 1000;
-  if (total < 60) return `${total.toFixed(1)}s`;
-  return `${Math.floor(total / 60)}m ${(total % 60).toFixed(1)}s`;
+  if (total < 60) return `${formatDecimal(total, 1)}s`;
+  return `${formatNumber(Math.floor(total / 60))}m ${formatDecimal(total % 60, 1)}s`;
 }
 
 export function mapToolPartsToChips(
@@ -95,7 +121,7 @@ export function mapToolPartsToTaskRows(
       status: taskStatusFromStep(status),
       detail:
         status === "waiting"
-          ? "本步骤未完成，可能已被本轮生成跳过。"
+          ? t("thisStepWasNotCompletedAndMayHave")
           : text.detail,
     };
   });
@@ -107,10 +133,10 @@ function inferThinkingVariant(
   const haystack = steps
     .map((step) => `${step.label} ${step.detail ?? ""}`)
     .join("\n");
-  if (/搜索|联网|查找|检索/.test(haystack)) return "Search";
-  if (/写入|创建|修改|追加|替换|重命名|删除|代码|命令/.test(haystack))
+  if (/搜索|联网|查找|检索|search|web|lookup/i.test(haystack)) return "Search";
+  if (/写入|创建|修改|追加|替换|重命名|删除|代码|命令|write|create|edit|update|append|replace|rename|delete|code|command/i.test(haystack))
     return "Coding";
-  if (/思考|推理|分析/.test(haystack)) return "Reasoning";
+  if (/思考|推理|分析|think|reason|analy/i.test(haystack)) return "Reasoning";
   return "Steps";
 }
 
@@ -122,20 +148,20 @@ export function mapStepsToThinkingTrace(
   const elapsed = formatLoaderElapsed(Math.max(0, elapsedMs));
   const activeLabel =
     variant === "Search"
-      ? "正在搜索"
+      ? t("searching")
       : variant === "Coding"
-        ? "正在运行工具"
+        ? t("runningTools")
         : variant === "Reasoning"
-          ? "思考中"
-          : "处理中";
+          ? t("thinking")
+          : t("processing");
   const doneLabel =
     variant === "Search"
-      ? "已搜索"
+      ? t("searchComplete")
       : variant === "Coding"
-        ? `已运行 ${steps.length} 个工具`
+        ? t("detailToolsRun", { value1: steps.length })
         : variant === "Reasoning"
-          ? `思考了 ${elapsed}`
-          : `处理了 ${elapsed}`;
+          ? t("detailThoughtFor", { value1: elapsed })
+          : t("detailProcessedFor", { value1: elapsed });
 
   return {
     variant,

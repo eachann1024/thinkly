@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarOutline.tsx#localMessages:1">`
+zh-Hans:
+  selectANoteToViewIts_13a8: "选择一篇笔记查看大纲"
+  thisNoteIsUnavailable_0618: "当前笔记不可用"
+  foldersDoNotHaveAnOutline_45b6: "文件夹无大纲结构"
+  loadingOutline_1285: "正在载入大纲…"
+  noteContentIsTemporarilyUnavailable_0257: "当前正文暂不可用"
+en:
+  selectANoteToViewIts_13a8: "Select a note to view its outline"
+  thisNoteIsUnavailable_0618: "This note is unavailable"
+  foldersDoNotHaveAnOutline_45b6: "Folders do not have an outline"
+  loadingOutline_1285: "Loading outline…"
+  noteContentIsTemporarilyUnavailable_0257: "Note content is temporarily unavailable"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import {
   isFoldableHeadingBlock,
@@ -119,17 +136,17 @@ export function SidebarOutline({
   );
 
   const emptyMessage = !pageId
-    ? "选择一篇笔记查看大纲"
+    ? uiText("selectANoteToViewIts_13a8")
     : !page || page.trashedAt
-      ? "当前笔记不可用"
+      ? uiText("thisNoteIsUnavailable_0618")
       : page.isFolder
-          ? "文件夹无大纲结构"
+          ? uiText("foldersDoNotHaveAnOutline_45b6")
           : !paneMatches
             ? registry
-              ? "正在载入大纲…"
-              : "当前正文暂不可用"
+              ? uiText("loadingOutline_1285")
+              : uiText("noteContentIsTemporarilyUnavailable_0257")
           : !editor
-            ? "正在载入大纲…"
+            ? uiText("loadingOutline_1285")
             : undefined;
 
   return (

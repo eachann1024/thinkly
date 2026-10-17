@@ -9,6 +9,35 @@ import { materializeVersion } from "@/lib/history/restore";
 import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 import { createSafeHistoryContent } from "../historyViewPresentation";
 import type { useHistoryViewState } from "./useHistoryViewState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/history/history-view/logic/useHistoryRestoreActions.tsx#messages:1">`
+zh-Hans:
+  thisVersionCouldNotBeRead: "无法读取该版本"
+  theVersionFileIsEmptyOrUnreadableIf: "版本文件为空或无法读取。若仓库在云盘上，请先恢复云盘登录。"
+  thisVersionHasAnInvalidFormatAndCannot: "该历史版本格式异常，无法还原"
+  thisVersionHasDamagedMetadataAndCannotBe: "该历史版本头部属性损坏，无法还原"
+  versionRestoredThePreviousContentWasSavedAs: "已还原至所选版本，原内容已保留为快照"
+  milestoneMarkedThisVersionWillBeKeptIndefinitely: "已设为里程碑，该版本将长期保留"
+  milestoneRemoved: "已取消里程碑"
+  couldNotMarkMilestone: "标记失败"
+  couldNotRemoveMilestone: "取消标记失败"
+  confirmRestore: "确定还原到此历史版本？\\n当前正文会自动保留为「还原前快照」，可随时恢复。"
+  confirmRemoveMilestone: "确定取消里程碑标记？\\n取消后该版本将恢复为普通快照，超出数量上限时可能被自动清理。"
+en:
+  thisVersionCouldNotBeRead: "This version could not be read"
+  theVersionFileIsEmptyOrUnreadableIf: "The version file is empty or unreadable. If your notebook is in cloud storage, sign in to it first."
+  thisVersionHasAnInvalidFormatAndCannot: "This version has an invalid format and cannot be restored"
+  thisVersionHasDamagedMetadataAndCannotBe: "This version has damaged metadata and cannot be restored"
+  versionRestoredThePreviousContentWasSavedAs: "Version restored. The previous content was saved as a snapshot."
+  milestoneMarkedThisVersionWillBeKeptIndefinitely: "Milestone marked. This version will be kept indefinitely."
+  milestoneRemoved: "Milestone removed"
+  couldNotMarkMilestone: "Could not mark milestone"
+  couldNotRemoveMilestone: "Could not remove milestone"
+  confirmRestore: "Restore this version?\\nThe current content will be saved as a snapshot that you can restore at any time."
+  confirmRemoveMilestone: "Remove this milestone?\\nThis version will become a regular snapshot and may be deleted automatically when the snapshot limit is exceeded."
+`;
+const t = createTranslator(messages);
+
 
 export function useHistoryRestoreActions(
   input: ReturnType<typeof useHistoryViewState>,
@@ -32,7 +61,7 @@ export function useHistoryRestoreActions(
     const current = getPage(pageId);
     if (!current) return;
     const ok = window.confirm(
-      "确定还原到此历史版本？\n当前正文会自动保留为「还原前快照」，可随时恢复。",
+      t("confirmRestore"),
     );
     if (!ok) return;
     setIsRestoring(true);
@@ -56,16 +85,15 @@ export function useHistoryRestoreActions(
     materializeVersion(pageId, selectedVersionId)
       .then((result) => {
         if (!result || result.content == null) {
-          toast.error("无法读取该版本", {
-            description:
-              "版本文件为空或无法读取。若仓库在云盘上，请先恢复云盘登录。",
+          toast.error(t("thisVersionCouldNotBeRead"), {
+            get description() { return t("theVersionFileIsEmptyOrUnreadableIf"); },
           });
           setIsRestoring(false);
           return;
         }
         const safeContent = createSafeHistoryContent(result.content);
         if (!safeContent) {
-          toast.error("该历史版本格式异常，无法还原");
+          toast.error(t("thisVersionHasAnInvalidFormatAndCannot"));
           setIsRestoring(false);
           return;
         }
@@ -77,7 +105,7 @@ export function useHistoryRestoreActions(
           // 还原 frontmatter 时同步 goose 设置，避免随后写盘用当前内存设置覆盖
           const fm = parseLocalFrontmatterBlob(result.localFrontmatter);
           if (!fm.ok) {
-            toast.error("该历史版本头部属性损坏，无法还原");
+            toast.error(t("thisVersionHasDamagedMetadataAndCannotBe"));
             setIsRestoring(false);
             return;
           }
@@ -86,12 +114,12 @@ export function useHistoryRestoreActions(
           updates.isLocked = fm.settings.isLocked;
         }
         updatePage(pageId, updates);
-        toast.success("已还原至所选版本，原内容已保留为快照");
+        toast.success(t("versionRestoredThePreviousContentWasSavedAs"));
         setIsRestoring(false);
         exit();
       })
       .catch((error) => {
-        toast.error("无法读取该版本", {
+        toast.error(t("thisVersionCouldNotBeRead"), {
           description: describeDiskWriteError(error),
         });
         setIsRestoring(false);
@@ -106,7 +134,7 @@ export function useHistoryRestoreActions(
     if (!pageId || pendingMilestoneVersionId) return;
     if (!willBe) {
       const ok = window.confirm(
-        "确定取消里程碑标记？\n取消后该版本将恢复为普通快照，超出数量上限时可能被自动清理。",
+        t("confirmRemoveMilestone"),
       );
       if (!ok) return;
     }
@@ -116,8 +144,8 @@ export function useHistoryRestoreActions(
       ? markMilestone(pageId, versionId)
       : unmarkMilestone(pageId, versionId);
     op.then(() => {
-      if (willBe) toast.success("已设为里程碑，该版本将长期保留");
-      else toast.success("已取消里程碑");
+      if (willBe) toast.success(t("milestoneMarkedThisVersionWillBeKeptIndefinitely"));
+      else toast.success(t("milestoneRemoved"));
       bumpRefresh();
     })
       .catch((err) => {
@@ -126,7 +154,7 @@ export function useHistoryRestoreActions(
           err,
         );
         applyMilestoneLocally(versionId, !willBe);
-        toast.error(willBe ? "标记失败" : "取消标记失败", {
+        toast.error(willBe ? t("couldNotMarkMilestone") : t("couldNotRemoveMilestone"), {
           description: describeDiskWriteError(err),
         });
       })

@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/renderAppearanceTheme.tsx#localMessages:1">`
+zh-Hans:
+  theme_9970: "主题"
+  themeMode_b0bb: "主题模式"
+  automatic_3aed: "自动"
+  useSystemSetting_71bb: "跟随系统"
+  lightMode_8755: "浅色模式"
+  darkMode_18d1: "深色模式"
+  colorsAndThemes_05fe: "配色与主题"
+  fullTheme: "{{theme}} · 完整主题"
+en:
+  theme_9970: "Theme"
+  themeMode_b0bb: "Theme mode"
+  automatic_3aed: "Automatic"
+  useSystemSetting_71bb: "Use system setting"
+  lightMode_8755: "Light mode"
+  darkMode_18d1: "Dark mode"
+  colorsAndThemes_05fe: "Colors and themes"
+  fullTheme: "{{theme}} · Full theme"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
@@ -22,14 +45,14 @@ export function renderAppearanceTheme(
     handleAccentKeyDown,
   } = context;
   return (
-    <SettingsSectionCard title="主题" className="border border-border/60">
+    <SettingsSectionCard title={uiText("theme_9970")} className="border border-border/60">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <GooseIcons.SunMoon
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          <Label>主题模式</Label>
+          <Label>{uiText("themeMode_b0bb")}</Label>
         </div>
         <div className="flex items-center gap-1 rounded-control bg-[hsl(var(--goose-selected-bg)/0.76)] p-1">
           <TooltipProvider delayDuration={600}>
@@ -38,7 +61,7 @@ export function renderAppearanceTheme(
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label="自动"
+                  aria-label={uiText("automatic_3aed")}
                   aria-pressed={theme === "system"}
                   className={cn(
                     "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
@@ -51,14 +74,14 @@ export function renderAppearanceTheme(
                   <GooseIcons.Laptop className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">跟随系统</TooltipContent>
+              <TooltipContent side="bottom">{uiText("useSystemSetting_71bb")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label="浅色模式"
+                  aria-label={uiText("lightMode_8755")}
                   aria-pressed={theme === "light"}
                   className={cn(
                     "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
@@ -71,14 +94,14 @@ export function renderAppearanceTheme(
                   <GooseIcons.Sun className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">浅色模式</TooltipContent>
+              <TooltipContent side="bottom">{uiText("lightMode_8755")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label="深色模式"
+                  aria-label={uiText("darkMode_18d1")}
                   aria-pressed={theme === "dark"}
                   className={cn(
                     "goose-accent-selection h-7 w-7 rounded-control transition-all duration-200",
@@ -91,7 +114,7 @@ export function renderAppearanceTheme(
                   <GooseIcons.Moon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">深色模式</TooltipContent>
+              <TooltipContent side="bottom">{uiText("darkMode_18d1")}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -107,8 +130,7 @@ export function renderAppearanceTheme(
             id="appearance-accent-color-label"
             className="text-sm font-medium text-foreground"
           >
-            配色与主题
-          </div>
+            {uiText("colorsAndThemes_05fe")}</div>
         </div>
         <div
           role="radiogroup"
@@ -177,7 +199,7 @@ export function renderAppearanceTheme(
                   side="bottom"
                   className="max-w-64 whitespace-normal p-3 text-sm leading-relaxed"
                 >
-                  <p className="font-semibold">{option.label} · 完整主题</p>
+                  <p className="font-semibold">{uiText("fullTheme", { theme: option.label })}</p>
                   <p className="mt-1 text-muted-foreground">
                     {option.fullTheme}
                   </p>

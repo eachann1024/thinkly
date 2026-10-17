@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarResizeEdge.tsx#localMessages:1">`
+zh-Hans:
+  resizeSidebar_7141: "调整侧栏宽度"
+  widthPixels: "{{width}} 像素"
+  resizeSidebarUseLeftAndRight_2431: "调整侧栏宽度：左右方向键；Home 最窄，End 最宽"
+en:
+  resizeSidebar_7141: "Resize sidebar"
+  widthPixels: "{{width}} pixels"
+  resizeSidebarUseLeftAndRight_2431: "Resize sidebar: use Left and Right arrows; Home for minimum width, End for maximum"
+`;
+const uiText = createTranslator(localMessages);
 interface SidebarResizeEdgeProps {
   width: number;
   minWidth: number;
@@ -23,13 +36,13 @@ export function SidebarResizeEdge({
       onKeyDown={onKeyDown}
       tabIndex={0}
       role="separator"
-      aria-label="调整侧栏宽度"
+      aria-label={uiText("resizeSidebar_7141")}
       aria-orientation="vertical"
       aria-valuemin={minWidth}
       aria-valuemax={maxWidth}
       aria-valuenow={width}
-      aria-valuetext={`${Math.round(width)} 像素`}
-      title="调整侧栏宽度：左右方向键；Home 最窄，End 最宽"
+      aria-valuetext={uiText("widthPixels", { width: Math.round(width) })}
+      title={uiText("resizeSidebarUseLeftAndRight_2431")}
     >
       <div
         className={cn(

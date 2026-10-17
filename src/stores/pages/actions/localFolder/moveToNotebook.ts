@@ -1,3 +1,27 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/moveToNotebook.ts#block1:1">`
+zh-Hans:
+  nameExists: "目标笔记本已存在同名文件：{{name}}"
+en:
+  nameExists: "A file named {{name}} already exists in the destination notebook."
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/moveToNotebook.ts#block2:2">`
+zh-Hans:
+  cannotMove: "当前文件无法移动"
+  sameNotebook: "文件已在当前笔记本"
+  targetUnavailable: "目标笔记本不可用"
+  sameFolder: "目标笔记本与当前笔记本使用同一文件夹"
+  moveIntoSelf: "不能将目录移到自身的子目录内"
+  targetNotebookFolderMissing: "目标笔记本文件夹不存在"
+en:
+  cannotMove: "This file can’t be moved."
+  sameNotebook: "The file is already in this notebook."
+  targetUnavailable: "The destination notebook is unavailable."
+  sameFolder: "The destination and current notebooks use the same folder."
+  moveIntoSelf: "A folder can’t be moved into one of its own subfolders."
+  targetNotebookFolderMissing: "The destination notebook’s folder does not exist."
+`);
 import { useNotebooks } from "../../../useNotebooks";
 import { useTabs } from "../../../useTabs";
 import { transferLocalFolderOrder } from "@/stores/localFolderOrder/transfer";
@@ -22,9 +46,9 @@ export async function moveLocalPageToNotebookAction(
     page.localUnsaved ||
     page.localPendingCreate
   )
-    throw new Error("当前文件无法移动");
+    throw new Error(storeText("cannotMove"));
   if (page.workspaceId === targetNotebookId)
-    throw new Error("文件已在当前记事本");
+    throw new Error(storeText("sameNotebook"));
   if (
     source?.source !== "local-folder" ||
     !source.localPath ||
@@ -32,26 +56,26 @@ export async function moveLocalPageToNotebookAction(
     !target.localPath ||
     target.localPathMissing
   )
-    throw new Error("目标记事本不可用");
+    throw new Error(storeText("targetUnavailable"));
   const oldPath = page.localFilePath.replace(/\\/g, "/");
   const targetRoot = target.localPath.replace(/\\/g, "/").replace(/\/$/, "");
   const name = oldPath.slice(oldPath.lastIndexOf("/") + 1);
   const nextPath = `${targetRoot}/${name}`;
   if (source.localPath.replace(/\\/g, "/").replace(/\/$/, "") === targetRoot)
-    throw new Error("目标记事本与当前记事本使用同一文件夹");
+    throw new Error(storeText("sameFolder"));
   if (
     page.isFolder &&
     (targetRoot === oldPath || targetRoot.startsWith(oldPath + "/"))
   )
-    throw new Error("不能将目录移到自身的子目录内");
+    throw new Error(storeText("moveIntoSelf"));
   if (
     !(await (fs.existsAsync
       ? fs.existsAsync(targetRoot)
       : fs.exists(targetRoot)))
   )
-    throw new Error("目标记事本文件夹不存在");
+    throw new Error(storeText("targetNotebookFolderMissing"));
   if (await (fs.existsAsync ? fs.existsAsync(nextPath) : fs.exists(nextPath)))
-    throw new Error(`目标记事本已存在同名文件：${name}`);
+    throw new Error(extraText("nameExists", { name }));
   const moved = Object.values(get().pages).filter((p) => {
     const path = p.localFilePath?.replace(/\\/g, "/");
     return (

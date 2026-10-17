@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1">`
+zh-Hans:
+  newFolder_f3a4: "新建文件夹"
+  theDestinationFolderNoLongerExists_0e13: "目标文件夹已不存在，请重新选择位置"
+  couldNotCreateItemTheName_2735: "创建失败：名称已存在或无写入权限，请修改后重试"
+  folderCreated_1541: "已新建文件夹"
+en:
+  newFolder_f3a4: "New folder"
+  theDestinationFolderNoLongerExists_0e13: "The destination folder no longer exists. Choose another location."
+  couldNotCreateItemTheName_2735: "Could not create item: the name exists or the folder is not writable. Change the name or check permissions, then try again."
+  folderCreated_1541: "Folder created"
+`;
+const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useCallback, useEffect, useRef } from "react";
@@ -39,7 +54,7 @@ export function useMainTreeLocalCreation(
       const safeParentId = parentPage?.isFolder ? parentId : undefined;
       const pendingId = `${PENDING_CREATE_ID_PREFIX}folder-${crypto.randomUUID()}`;
       const now = Date.now();
-      const defaultTitle = "新建文件夹";
+      const defaultTitle = uiText("newFolder_f3a4");
       setPendingCreate({
         id: pendingId,
         workspaceId: activeNotebookId,
@@ -92,19 +107,19 @@ export function useMainTreeLocalCreation(
       const workspaceId = current.workspaceId;
       const parent = current.parentId ? usePages.getState().pages[current.parentId] : undefined;
       if (current.parentId && (!parent || parent.trashedAt || parent.workspaceId !== workspaceId || (isLocalFolder && !parent.isFolder))) {
-        throw new Error("目标文件夹已不存在，请重新选择位置");
+        throw new Error(uiText("theDestinationFolderNoLongerExists_0e13"));
       }
       committingRef.current = true;
       try {
         const createdId = await createLocalFolderRecord({ workspaceId, parentId: current.parentId, title: name });
-        if (!createdId) throw new Error("创建失败：名称已存在或无写入权限，请修改后重试");
+        if (!createdId) throw new Error(uiText("couldNotCreateItemTheName_2735"));
         setPendingCreate((latest) => latest?.id === id ? null : latest);
         const stillActive = useNotebooks.getState().activeNotebookId === workspaceId;
         if (stillActive) {
           if (current.parentId) expandView(workspaceId, current.parentId);
           setExpandPageId(createdId);
         }
-        toast.success("已新建文件夹");
+        toast.success(uiText("folderCreated_1541"));
         return true;
       } finally {
         committingRef.current = false;

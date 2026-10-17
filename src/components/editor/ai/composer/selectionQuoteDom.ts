@@ -1,3 +1,15 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/selectionQuoteDom.ts#messages:1">`
+zh-Hans:
+  previewSourceSelection: "预览选区引用，来自{{title}}"
+  removeSelectionReference: "移除选区引用"
+  selectionFromSource: "选区引用，来自{{title}}"
+en:
+  previewSourceSelection: "Preview selection from {{title}}"
+  removeSelectionReference: "Remove selection reference"
+  selectionFromSource: "Selection from {{title}}"
+`;
+const t = createTranslator(messages);
 import { ensureComposerCaretAnchors } from "./composerCaret";
 import {
   parseSelectionQuoteAttrs,
@@ -41,16 +53,16 @@ export function createSelectionQuoteChipElement(
   preview.dataset.aiQuotePreview = "";
   preview.className = "ai-selection-quote-preview";
   preview.textContent = label;
-  preview.setAttribute("aria-label", `预览选区引用，来自${attrs.pageTitle}`);
+  preview.setAttribute("aria-label", t("previewSourceSelection", { title: attrs.pageTitle }));
   const remove = document.createElement("button");
   remove.type = "button";
   remove.dataset.aiQuoteRemove = "";
   remove.className = "ai-selection-quote-remove";
   remove.textContent = "×";
-  remove.setAttribute("aria-label", "移除选区引用");
+  remove.setAttribute("aria-label", t("removeSelectionReference"));
   span.append(preview, remove);
   span.title = attrs.text;
-  span.setAttribute("aria-label", `选区引用，来自${attrs.pageTitle}`);
+  span.setAttribute("aria-label", t("selectionFromSource", { title: attrs.pageTitle }));
   if (options?.animate) {
     span.dataset.aiSelectionQuoteEnter = "";
   }

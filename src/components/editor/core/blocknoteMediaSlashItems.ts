@@ -3,16 +3,31 @@ import { FilePanelExtension } from "@blocknote/core/extensions";
 import { SLASH_ICONS, type SlashMenuItem } from "./blocknoteSlashModel";
 import { Volume2 } from "@/components/ui/icons";
 import { createElement } from "react";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/blocknoteMediaSlashItems.ts#messages:1">`
+zh-Hans:
+  image: "图片"
+  video: "视频"
+  audio: "音频"
+  file: "文件"
+en:
+  image: "Image"
+  video: "Video"
+  audio: "Audio"
+  file: "File"
+`;
+const t = createTranslator(messages);
+
 
 export function getMediaSlashMenuItems(
   editor: BlockNoteEditor<any, any, any>,
   insert: (block: any) => any,
 ): SlashMenuItem[] {
   return ([
-    ["image", "图片", SLASH_ICONS.image, ["image", "photo", "tupian", "img"]],
-    ["video", "视频", SLASH_ICONS.video, ["video", "movie", "shipin", "luping"]],
-    ["audio", "音频", createElement(Volume2, { size: 18 }), ["audio", "sound", "music", "yinpin", "yinyue"]],
-    ["file", "文件", SLASH_ICONS.file, ["file", "attachment", "pdf", "wenjian", "fujian"]],
+    ["image", t("image"), SLASH_ICONS.image, ["image", "photo", "tupian", "img"]],
+    ["video", t("video"), SLASH_ICONS.video, ["video", "movie", "shipin", "luping"]],
+    ["audio", t("audio"), createElement(Volume2, { size: 18 }), ["audio", "sound", "music", "yinpin", "yinyue"]],
+    ["file", t("file"), SLASH_ICONS.file, ["file", "attachment", "pdf", "wenjian", "fujian"]],
   ] as const).map(([type, title, icon, aliases]) => ({
     title, icon, aliases: [...aliases],
     onItemClick: () => {

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useDataPanelState.tsx#localMessages:1">`
+zh-Hans:
+  notSyncedYet_e1d9: "尚未同步"
+en:
+  notSyncedYet_e1d9: "Not synced yet"
+`;
+const uiText = createTranslator(localMessages);
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useSettings } from "@/stores/settings";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -101,14 +110,14 @@ export function useDataPanelState({
     const time = formatRemoteTime(webdavLastUploadAt);
     return webdavLastUploadFilename
       ? `${time} (${webdavLastUploadFilename})`
-      : "尚未同步";
+      : uiText("notSyncedYet_e1d9");
   }, [webdavLastUploadAt, webdavLastUploadFilename]);
 
   const lastDownloadText = useMemo(() => {
     const time = formatRemoteTime(webdavLastDownloadAt);
     return webdavLastDownloadFilename
       ? `${time} (${webdavLastDownloadFilename})`
-      : "尚未同步";
+      : uiText("notSyncedYet_e1d9");
   }, [webdavLastDownloadAt, webdavLastDownloadFilename]);
   return {
     active,

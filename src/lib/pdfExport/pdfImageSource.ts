@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/pdfExport/pdfImageSource.ts#localMessages:1">`
+zh-Hans:
+  blobReadFailed: "blob 读取失败（{{status}}）"
+  couldnTReadTheImageData: "blob 读取失败"
+en:
+  blobReadFailed: "Couldn’t read image data ({{status}})"
+  couldnTReadTheImageData: "Couldn’t read the image data"
+`;
+const uiText = createTranslator(localMessages);
 import { isLocalFilePath, readLocalFileAsBlobAsync, resolveToAbsolute } from "@/lib/imageStorage/strategies/file-system";
 import { fileUrlToLocalPath } from "./fontConfig";
 import { rasterizeIfNeeded, blobToPdfImageDataUrl } from "./pdfImageRaster";
@@ -71,9 +82,9 @@ async function blobUrlToDataUrl(url: string): Promise<string | null> {
           resolve(xhr.response as Blob);
           return;
         }
-        reject(new Error(`blob 读取失败（${xhr.status}）`));
+        reject(new Error(uiText("blobReadFailed", {status: xhr.status})));
       };
-      xhr.onerror = () => reject(new Error("blob 读取失败"));
+      xhr.onerror = () => reject(new Error(uiText("couldnTReadTheImageData")));
       xhr.send();
     });
     return blobToPdfImageDataUrl(blob);

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/command/searchPageFilter.ts#localMessages:1">`
+zh-Hans:
+  untitled: "无标题"
+en:
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { isCanonicalPathInside } from "@/lib/canonicalLocalPath";
 import type { Page } from "@/types";
@@ -31,7 +40,7 @@ export function isCommandSearchablePage(
       !belongsToSearchNotebook(page, notebooks)) return false;
 
   const title = getPageTitle(page);
-  if (!title || title === "无标题") return false;
+  if (!title || title === uiText("untitled")) return false;
 
   return !(
     notebooks[page.workspaceId]?.source === "local-folder" && page.isFolder

@@ -1,3 +1,29 @@
+import { formatNumber, formatRelativeDate } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/FolderHomePage.tsx#localMessages:1">`
+zh-Hans:
+  itemCount: "{{count}} 个子项"
+  createFirst: "在「{{folder}}」里创建第一个文件或子文件夹"
+  local: "本地"
+  folderFailed: "新建文件夹失败：名称已存在或无写入权限"
+  folderCreated: "已新建文件夹"
+  contents: "内容"
+  newSubfolder: "新建子文件夹"
+  newFile: "新建文件"
+  emptyFolder: "这个文件夹还是空的"
+en:
+  itemCount: "Items: {{count}}"
+  createFirst: "Create your first file or subfolder in {{folder}}"
+  local: "Local"
+  folderFailed: "Couldn’t create the folder: the name is already in use or you don’t have write permission"
+  folderCreated: "Folder created"
+  contents: "Contents"
+  newSubfolder: "New subfolder"
+  newFile: "New file"
+  emptyFolder: "This folder is empty"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 /**
  * FolderHomePage —— 本地文件夹「目录主页」（方案 B：Finder 式）。
@@ -37,19 +63,7 @@ interface FolderHomePageProps {
   page: Page;
 }
 
-/** 与编辑器一致的相对时间，够用且不引新依赖 */
-function formatRelativeTime(timestamp: number): string {
-  const diff = Date.now() - timestamp;
-  const minute = 60_000;
-  const hour = 60 * minute;
-  const day = 24 * hour;
-  if (diff < minute) return "刚刚";
-  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`;
-  if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
-  if (diff < 7 * day) return `${Math.floor(diff / day)} 天前`;
-  const d = new Date(timestamp);
-  return `${d.getMonth() + 1}月${d.getDate()}日`;
-}
+
 
 export function FolderHomePage({ page }: FolderHomePageProps) {
   const pages = useStoreWithEqualityFn(
@@ -63,7 +77,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
   const expandView = useSidebarView((s) => s.expand);
   const openPreviewTab = useTabs((s) => s.openPreviewTab);
   const notebookName = useNotebooks(
-    (s) => s.notebooks[page.workspaceId]?.name ?? "本地",
+    (s) => s.notebooks[page.workspaceId]?.name ?? uiText("local"),
   );
   const [creating, setCreating] = useState<"file" | "folder" | null>(null);
 
@@ -106,13 +120,13 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
         parentId: page.id,
       });
       if (!newId) {
-        toast.error("新建文件夹失败：名称已存在或无写入权限");
+        toast.error(uiText("folderFailed"));
         return;
       }
       // 侧栏展开父级并定位新文件夹，保持「双向可见」
       expandView(page.workspaceId, page.id);
       setExpandPageId(newId);
-      toast.success("已新建文件夹");
+      toast.success(uiText("folderCreated"));
     } finally {
       setCreating(null);
     }
@@ -138,7 +152,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               {folderName}
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              {notebookName} / {folderName} · {count} 个子项
+              {notebookName} / {folderName} · {uiText("itemCount", {count: formatNumber(count)})}
             </p>
           </div>
         </div>
@@ -146,8 +160,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
         {/* 内容标题行 + 创建入口 */}
         <div className="mb-2.5 flex shrink-0 items-center gap-2.5">
           <h2 className="text-[13px] font-semibold text-muted-foreground">
-            内容
-            <span className="ml-1.5 rounded-control bg-[hsl(var(--goose-selected-bg))] px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
+            {uiText("contents")}<span className="ml-1.5 rounded-control bg-[hsl(var(--goose-selected-bg))] px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
               {count}
             </span>
           </h2>
@@ -163,8 +176,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
             ) : (
               <FolderPlus className="h-3.5 w-3.5" />
             )}
-            新建子文件夹
-          </Button>
+            {uiText("newSubfolder")}</Button>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             onClick={() => void handleCreateFile()}
@@ -176,8 +188,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
             ) : (
               <FilePlus2 className="h-3.5 w-3.5" />
             )}
-            新建文件
-          </Button>
+            {uiText("newFile")}</Button>
         </div>
 
         {count === 0 ? (
@@ -187,10 +198,9 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               <FolderOpen className="h-5 w-5" />
             </span>
             <p className="m-0 text-sm font-semibold text-foreground">
-              这个文件夹还是空的
-            </p>
+              {uiText("emptyFolder")}</p>
             <p className="m-0 mb-3 text-xs text-muted-foreground">
-              在「{folderName}」里创建第一个文件或子文件夹
+              {uiText("createFirst", {folder: folderName})}
             </p>
             <div className="flex gap-2">
               <Button contentStyle="preserve" variant="ghost" size={null}
@@ -200,8 +210,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
               >
                 <FilePlus2 className="h-3.5 w-3.5" />
-                新建文件
-              </Button>
+                {uiText("newFile")}</Button>
               <Button contentStyle="preserve" variant="ghost" size={null}
                 type="button"
                 onClick={() => void handleCreateFolder()}
@@ -209,8 +218,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors disabled:text-disabled"
               >
                 <FolderPlus className="h-3.5 w-3.5" />
-                新建子文件夹
-              </Button>
+                {uiText("newSubfolder")}</Button>
             </div>
           </div>
         ) : (
@@ -235,7 +243,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
                   )}
                 </span>
                 <span className="shrink-0 text-[11px] text-muted-foreground">
-                  {formatRelativeTime(child.updatedAt)}
+                  {formatRelativeDate(child.updatedAt)}
                 </span>
               </Button>
             ))}

@@ -1,3 +1,4 @@
+import { t } from "../i18n/nativeServices";
 import { app, ipcMain, shell } from "electron";
 import path from "node:path";
 import { assertAllowed, userDataRoot } from "../allowlist";
@@ -26,7 +27,7 @@ export function registerIntegrationIpc(): void {
 
   ipcMain.handle("desktop:openUrl", async (_event, url: string) => {
     if (!isOpenUrlAllowed(url)) {
-      throw new Error("只允许打开 http/https 链接");
+      throw new Error(t("httpOnly"));
     }
     await shell.openExternal(url);
   });
@@ -52,7 +53,7 @@ export function registerIntegrationIpc(): void {
           (name) => typeof name !== "string" || name.length > 100,
         )
       ) {
-        throw new Error("无效的应用列表");
+        throw new Error(t("invalidApps"));
       }
       const names = new Set(requestedNames.map((name) => name.toLowerCase()));
       const found = (await listOpenApps()).filter(
@@ -74,7 +75,7 @@ export function registerIntegrationIpc(): void {
     async (_event, appName: string, p: string) => {
       const target = assertAllowed(p);
       if (!openWithApp(appName, target)) {
-        throw new Error("无法用指定应用打开");
+        throw new Error(t("openAppFailed"));
       }
     },
   );
@@ -89,7 +90,7 @@ export function registerIntegrationIpc(): void {
           typeof terminal === "string" ? terminal : undefined,
         )
       ) {
-        throw new Error("无法在该路径打开终端");
+        throw new Error(t("openTerminalFailed"));
       }
     },
   );

@@ -10,6 +10,17 @@ import type { NotebookAiImageAttachment } from "../Composer";
 import type { NotebookAiPanelSelectionCapture } from "../useNotebookAiPanel";
 import { createImageFileList } from "./helpers";
 import type { SessionState } from "./useSessionState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useSendMessage.ts#messages:1">`
+zh-Hans:
+  summarizeSelection: "总结选区内容"
+  imagesUploaded: "已上传图片"
+en:
+  summarizeSelection: "Summarize selection"
+  imagesUploaded: "Images uploaded"
+`;
+const t = createTranslator(messages);
+
 
 export function useSendMessage(state: SessionState) {
   const {
@@ -58,7 +69,7 @@ export function useSendMessage(state: SessionState) {
         currentPageId,
         useImplicitPage: false,
       });
-      metadata.displayText = displayText || (hasQuotes ? "总结选区内容" : "已上传图片");
+      metadata.displayText = displayText || (hasQuotes ? t("summarizeSelection") : t("imagesUploaded"));
       metadata.createdAt = Date.now();
       metadata.imageAttachments = imageAttachments.map(({ file }) => ({
         filename: file.name,

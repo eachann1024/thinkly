@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { createHash } from "node:crypto";
 import { idleGitSyncStatus, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
 import { normalizedGitRemote, validateGitRepository, validateGitSyncConfig, type GitRepositoryConfig, type GitSyncState } from "../../src/lib/git-sync-contract";
@@ -7,7 +8,7 @@ export interface GitSyncSavedState extends GitSyncState { version: 2; mappingHis
 
 /** v1 mappings keep their remote-root layout; duplicate remotes are disabled, never merged. */
 export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
-  if (!saved || typeof saved !== "object" || !Array.isArray((saved as GitSyncState).configs)) throw new Error("同步配置文件格式无效");
+  if (!saved || typeof saved !== "object" || !Array.isArray((saved as GitSyncState).configs)) throw new Error(t("invalidConfig"));
   const raw = saved as GitSyncSavedState;
   const configs = raw.configs.map((item) => {
     if (raw.version === 2) {
@@ -21,19 +22,19 @@ export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
       folders: [{ notebookId: legacy.notebookId, localPath: legacy.localPath, name: "原笔记本", remotePath: "" }],
     };
   });
-  if (new Set(configs.map((c) => c.id)).size !== configs.length) throw new Error("同步仓库标识重复");
+  if (new Set(configs.map((c) => c.id)).size !== configs.length) throw new Error(t("duplicateId"));
   const statuses = configs.map((config) => {
     const previous = raw.statuses?.find((status) => raw.version === 2 ? status.repositoryId === config.id : (status as unknown as { notebookId: string }).notebookId === config.folders[0]?.notebookId);
     const duplicate = configs.some((other) => other.id !== config.id && normalizedGitRemote(other) === normalizedGitRemote(config) && other.branch === config.branch);
     if (duplicate) config.enabled = false;
     const initial = idleGitSyncStatus(config.id, typeof previous?.lastSyncedAt === "string" ? previous.lastSyncedAt : null);
     return duplicate ? gitSyncStatusTransition(initial, { type: "sync.failed",
-      message: "多个旧配置指向同一仓库分支，已停用；请保留一个配置或改用独立仓库，原文件未改变" }) : initial;
+      message: t("legacyDuplicate") }) : initial;
   });
   const mappingHistory: GitMappingHistory = Object.create(null);
   if (raw.version === 2 && raw.mappingHistory && typeof raw.mappingHistory === "object") {
     for (const [id, folders] of Object.entries(raw.mappingHistory)) {
-      if (!Array.isArray(folders)) throw new Error("文件夹映射历史无效");
+      if (!Array.isArray(folders)) throw new Error(t("invalidHistory"));
       mappingHistory[id] = folders;
     }
   }

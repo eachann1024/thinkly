@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/quicknote/recovery.ts#block1:1">`
+zh-Hans:
+  quicknoteRecoveryFailed: "速记恢复备份写入失败"
+  keepQuicknoteOpen: "请暂时不要关闭小窗，并复制重要内容后重试。"
+  quicknoteNotSaved: "速记暂未保存"
+  quicknoteRetry: "当前草稿已放入恢复备份，可点击重试。"
+  retry: "重试"
+en:
+  quicknoteRecoveryFailed: "Couldn’t write the Quick Note recovery backup"
+  keepQuicknoteOpen: "Keep the Quick Note window open. Copy any important content, then try again."
+  quicknoteNotSaved: "Quick Note has not been saved"
+  quicknoteRetry: "The current draft was saved to a recovery backup. Click Retry to try saving again."
+  retry: "Retry"
+`);
 import type { QuickNoteSlot, QuickNoteDrafts } from "./types";
 import type { JSONContent } from "@/types";
 import {
@@ -33,9 +48,9 @@ export const recordQuickNoteRecovery = (
     pendingQuickNoteRecoveryRevisions.set(slot, entry.revision);
     return;
   }
-  toast.error("速记恢复备份写入失败", {
+  toast.error(storeText("quicknoteRecoveryFailed"), {
     id: "goose-quicknote-journal-failed",
-    description: "请暂时不要关闭小窗，并复制重要内容后重试。",
+    description: storeText("keepQuicknoteOpen"),
   });
 };
 
@@ -91,11 +106,11 @@ export const quickNoteStorage: StateStorage = {
       }
       return;
     }
-    toast.error("速记暂未保存", {
+    toast.error(storeText("quicknoteNotSaved"), {
       id: "goose-quicknote-save-failed",
-      description: "当前草稿已放入恢复备份，可点击重试。",
+      description: storeText("quicknoteRetry"),
       action: {
-        label: "重试",
+        label: storeText("retry"),
         onClick: () => {
           useQuickNote.setState((state) => ({ drafts: { ...state.drafts } }));
         },

@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/utils.ts#localMessages:1">`
+zh-Hans:
+  mouseBackButton: "鼠标后退键"
+  mouseForwardButton: "鼠标前进键"
+en:
+  mouseBackButton: "Mouse back button"
+  mouseForwardButton: "Mouse forward button"
+`;
+const uiText = createTranslator(localMessages);
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -80,8 +91,8 @@ export function formatShortcut(
       if (p === "down" || p === "arrowdown") return "↓";
       if (p === "left" || p === "arrowleft") return "←";
       if (p === "right" || p === "arrowright") return "→";
-      if (p === "mouseback") return "鼠标后退键";
-      if (p === "mouseforward") return "鼠标前进键";
+      if (p === "mouseback") return uiText("mouseBackButton");
+      if (p === "mouseforward") return uiText("mouseForwardButton");
       return part.trim();
     })
     .join(isMac ? "" : " + ");

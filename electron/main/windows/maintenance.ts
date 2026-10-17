@@ -1,3 +1,4 @@
+import { t } from "../i18n/attachments";
 import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import path from "node:path";
@@ -26,7 +27,7 @@ export function createAssetMaintenanceWindow(): BrowserWindow {
     return existing;
   }
   const win = new BrowserWindow({
-    title: "资源清理 · Goose Note",
+    title: t("cleanupTitle"),
     width: 1000,
     height: 720,
     minWidth: 760,

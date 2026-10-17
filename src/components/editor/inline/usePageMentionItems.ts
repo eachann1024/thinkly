@@ -4,6 +4,19 @@ import { toast } from "@/components/ui/sonner";
 import { useEditorPageContext } from "../platform/hostContext";
 import { getPageMentionMenuItems, getPageMentionTriggerRange, insertPageMentionFromMenu } from "./pageMentionMenuItems";
 import { snapshotEditorSelection, restoreEditorSelection } from "../utils/editorSelectionSnapshot";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/inline/usePageMentionItems.ts#messages:1">`
+zh-Hans:
+  pageCreatedTheOriginalNoteHasChangedOpen: "新页面已创建；原笔记内容已变化，请从侧栏打开"
+  couldNotCreateThePageYourOriginalContent: "创建页面失败，原内容已保留"
+  createPageHere: "在当前目录新建“{{title}}”"
+en:
+  pageCreatedTheOriginalNoteHasChangedOpen: "Page created. The original note has changed; open the new page from the sidebar."
+  couldNotCreateThePageYourOriginalContent: "Could not create the page. Your original content was preserved."
+  createPageHere: "Create “{{title}}” in this folder"
+`;
+const t = createTranslator(messages);
+
 
 export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
   const { page, searchPages, createPageMentionTarget } = useEditorPageContext();
@@ -21,7 +34,7 @@ export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
     const title = query.trim();
     if (createPageMentionTarget && title && !items.some((item) => item.title.trim() === title)) {
       result.push({
-        title: `在当前目录新建“${title}”`,
+        title: t("createPageHere", { title }),
         onItemClick: () => {
           if (pageVisit.current !== origin || !editor.isEditable) return;
           const snapshot = snapshotEditorSelection(editor.prosemirrorState);
@@ -30,13 +43,13 @@ export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
             if (!created) return;
             if (pageVisit.current !== origin || !editor.isEditable ||
               !restoreEditorSelection(editor.prosemirrorView, snapshot)) {
-              toast.info("新页面已创建；原笔记内容已变化，请从侧栏打开");
+              toast.info(t("pageCreatedTheOriginalNoteHasChangedOpen"));
               return;
             }
             insertPageMentionFromMenu(editor, created, range);
             editor.focus();
           }).catch((error) => {
-            toast.error(error instanceof Error ? error.message : "创建页面失败，原内容已保留");
+            toast.error(error instanceof Error ? error.message : t("couldNotCreateThePageYourOriginalContent"));
           });
         },
       });

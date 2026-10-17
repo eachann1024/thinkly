@@ -1,3 +1,15 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/UserMessage.tsx#messages:1">`
+zh-Hans:
+  detailLocalSkill: "本地 Skill：/{{value1}}"
+  detailSelectionFrom: "选区引用，来自{{value1}}"
+  detailOpen: "打开：{{value1}}"
+en:
+  detailLocalSkill: "Local skill: /{{value1}}"
+  detailSelectionFrom: "Selection from {{value1}}"
+  detailOpen: "Open: {{value1}}"
+`;
+const t = createTranslator(messages);
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { SelectionQuotePreview } from "@/components/editor/ai/composer/SelectionQuotePreview";
@@ -104,8 +116,8 @@ export function UserMessage({
                       key={segment.key}
                       data-ai-skill-chip=""
                       className="ai-composer-chip inline-flex max-w-full min-w-0 items-center align-middle mx-1 truncate rounded-[6px] px-1.5 text-[11px] font-medium leading-none"
-                      title={`本地 Skill：/${segment.skill.name}`}
-                      aria-label={`本地 Skill：/${segment.skill.name}`}
+                      title={t("detailLocalSkill", { value1: segment.skill.name })}
+                      aria-label={t("detailLocalSkill", { value1: segment.skill.name })}
                     >
                       /{segment.skill.name}
                     </span>
@@ -119,7 +131,7 @@ export function UserMessage({
                       data-ai-selection-quote-chip=""
                       className="ai-composer-chip inline-flex max-w-full min-w-0 items-center align-middle mx-1 truncate rounded-[6px] px-1.5 text-[11px] font-medium leading-none"
                       title={segment.quote.text}
-                      aria-label={`选区引用，来自${segment.quote.pageTitle}`}
+                      aria-label={t("detailSelectionFrom", { value1: segment.quote.pageTitle })}
                       onClick={() => setQuotePreview(segment.quote)}
                     >
                       {formatSelectionQuotePromptLabel(segment.quote)}
@@ -137,8 +149,8 @@ export function UserMessage({
                     type="button"
                     data-ai-mention-chip=""
                     className="ai-composer-chip inline-flex max-w-full min-w-0 items-center align-middle mx-1 truncate rounded-[6px] px-1.5 text-[11px] font-medium leading-none"
-                    title={`打开：${title}`}
-                    aria-label={`打开：${title}`}
+                    title={t("detailOpen", { value1: title })}
+                    aria-label={t("detailOpen", { value1: title })}
                     onClick={() =>
                       navigateNotebookAiReference(
                         segment.reference.pageId,

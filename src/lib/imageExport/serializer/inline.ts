@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/serializer/inline.ts#localMessages:1">`
+zh-Hans:
+  untitled: "未命名"
+en:
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 import type { CardTheme } from "../themes";
 import { TEXT_COLORS } from "@/lib/textColors";
 import { escapeHtml, resolveExportColor } from "./utils";
@@ -26,7 +35,7 @@ export function renderInline(content: unknown, theme?: CardTheme): string {
         const title =
           typeof item.props?.title === "string" && item.props.title.trim()
             ? item.props.title.trim()
-            : "未命名";
+            : uiText("untitled");
         const label = title.startsWith("@") ? title : `@${title}`;
         const color = TEXT_COLORS[theme?.mode === "dark" ? "dark" : "light"].info;
         return `<span style="display:inline-flex;align-items:center;vertical-align:middle;margin:0 0.25em;padding:0 8px;border-radius:6px;background-color:${bgPalette(theme).blue};color:${color};font-size:0.85em;line-height:1.25em;">${escapeHtml(label)}</span>`;

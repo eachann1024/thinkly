@@ -4,6 +4,15 @@
  */
 import type { AISettingsLike, AIStreamUpdate } from "@/lib/ai-provider/types";
 import { runAITextStream } from "@/lib/ai-provider";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/transport/runInlineMarkdownRewrite.ts#messages:1">`
+zh-Hans:
+  aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
+en:
+  aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+`;
+const t = createTranslator(messages);
+
 
 export interface RunInlineMarkdownRewriteOptions {
   settings: AISettingsLike;
@@ -63,7 +72,7 @@ export async function runInlineMarkdownRewrite(
 
   const stripped = stripOuterFence(text ?? "");
   if (!stripped) {
-    throw new Error("AI 未返回可写入的内容。");
+    throw new Error(t("aiDidNotReturnAnyContentThatCould"));
   }
   return stripped;
 }

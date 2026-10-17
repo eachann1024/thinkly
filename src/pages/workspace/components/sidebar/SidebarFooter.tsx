@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarFooter.tsx#localMessages:1">`
+zh-Hans:
+  settings_e366: "设置"
+en:
+  settings_e366: "Settings"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { AppUpdateButton } from "@/components/app-update/AppUpdateButton";
 import { cn } from "@/lib/utils";
@@ -27,15 +36,15 @@ export function SidebarFooter({
             <IconButton size="xs"
               type="button"
               className={cn(btnClass, isSettingsOpen && activeClass)}
-              aria-label="设置"
-              title="设置"
+              aria-label={uiText("settings_e366")}
+              title={uiText("settings_e366")}
               aria-pressed={isSettingsOpen}
               onClick={onOpenSettings}
             >
               <SidebarRailIcon name="settings" selected={isSettingsOpen} />
             </IconButton>
           </TooltipTrigger>
-          <TooltipContent side="right">设置</TooltipContent>
+          <TooltipContent side="right">{uiText("settings_e366")}</TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

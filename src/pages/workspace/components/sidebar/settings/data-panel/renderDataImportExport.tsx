@@ -1,3 +1,32 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/renderDataImportExport.tsx#localMessages:1">`
+zh-Hans:
+  importAndExport_3a3a: "导入与导出"
+  importing_d2b5: "正在导入…"
+  importZip_b770: "导入 ZIP"
+  selectNotebooks_d119: "选择笔记本"
+  deselectAll_a041: "取消全选"
+  selectAll_66ee: "全选"
+  exportFormat_230a: "导出格式"
+  exporting_caeb: "正在导出…"
+  export_c9e7: "开始导出"
+  resetAllData_b749: "重置所有数据"
+  selectedCount: "已选 {{selected}}/{{total}}"
+en:
+  importAndExport_3a3a: "Import and export"
+  importing_d2b5: "Importing…"
+  importZip_b770: "Import ZIP"
+  selectNotebooks_d119: "Select notebooks"
+  deselectAll_a041: "Deselect all"
+  selectAll_66ee: "Select all"
+  exportFormat_230a: "Export format"
+  exporting_caeb: "Exporting…"
+  export_c9e7: "Export"
+  resetAllData_b749: "Reset all data"
+  selectedCount: "Selected: {{selected}}/{{total}}"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import {
   Download,
@@ -39,8 +68,7 @@ export function renderDataImportExport(
               className="h-4 w-4 shrink-0 text-muted-foreground"
               strokeWidth={1.75}
             />
-            导入与导出
-          </span>
+            {uiText("importAndExport_3a3a")}</span>
         }
         actions={
           <Button
@@ -49,7 +77,7 @@ export function renderDataImportExport(
             onClick={onImport}
             disabled={importing}
           >
-            {importing ? "正在导入…" : "导入 ZIP"}
+            {importing ? uiText("importing_d2b5") : uiText("importZip_b770")}
             {!importing && <Upload className="ml-2 h-4 w-4" />}
           </Button>
         }
@@ -57,11 +85,10 @@ export function renderDataImportExport(
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-foreground">
-              选择笔记本
-            </Label>
+              {uiText("selectNotebooks_d119")}</Label>
             <div className="flex items-center gap-2">
               <span className={DATA_BADGE_CLASS}>
-                已选 {selectedCount}/{totalCount}
+                {uiText("selectedCount", { selected: selectedCount, total: totalCount })}
               </span>
               <Button
                 variant="ghost"
@@ -69,7 +96,7 @@ export function renderDataImportExport(
                 onClick={onSelectAll}
                 className="h-8 rounded-[var(--goose-control-radius)] px-2 text-sm text-muted-foreground transition-colors hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
               >
-                {selectedCount === totalCount ? "取消全选" : "全选"}
+                {selectedCount === totalCount ? uiText("deselectAll_a041") : uiText("selectAll_66ee")}
               </Button>
             </div>
           </div>
@@ -107,8 +134,7 @@ export function renderDataImportExport(
 
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
-            导出格式
-          </Label>
+            {uiText("exportFormat_230a")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <SelectableCard
               selected={format === "md"}
@@ -140,7 +166,7 @@ export function renderDataImportExport(
           onClick={onExport}
           disabled={selectedCount === 0 || exporting}
         >
-          {exporting ? "正在导出…" : "开始导出"}
+          {exporting ? uiText("exporting_caeb") : uiText("export_c9e7")}
           {!exporting && <Download className="ml-2 h-4 w-4" />}
         </Button>
       </SettingsSectionCard>
@@ -153,13 +179,11 @@ export function renderDataImportExport(
               className="h-4 w-4 shrink-0 text-muted-foreground"
               strokeWidth={1.75}
             />
-            重置所有数据
-          </span>
+            {uiText("resetAllData_b749")}</span>
         }
         actions={
           <Button variant="destructive" size="sm" onClick={onOpenResetDialog}>
-            重置所有数据
-          </Button>
+            {uiText("resetAllData_b749")}</Button>
         }
       />
     </div>

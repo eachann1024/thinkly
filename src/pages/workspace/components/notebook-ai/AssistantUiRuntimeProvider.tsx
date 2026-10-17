@@ -1,3 +1,14 @@
+import { getUserDisplayText } from "./messages/messagePresentation";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/AssistantUiRuntimeProvider.tsx#messages:1">`
+zh-Hans:
+  detailImage: "图片 {{value1}}"
+  compactedSummary: "会话已压缩。后续提问会基于这份摘要继续。"
+en:
+  detailImage: "Image {{value1}}"
+  compactedSummary: "Conversation compacted. Future replies will use this summary as context."
+`;
+const t = createTranslator(messages);
 /**
  * assistant-ui 外部运行时适配。
  *
@@ -25,20 +36,11 @@ interface NotebookAiAssistantRuntimeProviderProps {
   children: ReactNode;
 }
 
-function getUserDisplayText(message: NotebookAiMessage) {
-  const metadataText = message.metadata?.displayText?.trim();
-  if (metadataText) return metadataText;
-
-  const textPart = message.parts?.find((part) => part.type === "text");
-  const rawText =
-    textPart && "text" in textPart ? String(textPart.text).trim() : "";
-  const hiddenContextStart = rawText.indexOf("\n\n本轮笔记上下文：");
-  if (rawText.startsWith("用户输入：") && hiddenContextStart > -1) {
-    return rawText.slice("用户输入：".length, hiddenContextStart).trim();
-  }
-  return rawText.startsWith("用户输入：")
-    ? rawText.slice("用户输入：".length).trim()
-    : rawText;
+function getAssistantDisplayText(message: NotebookAiMessage, text: string): string {
+  const prefix = "会话已压缩。后续提问会基于这份摘要继续。";
+  return message.metadata?.compacted && text.startsWith(prefix)
+    ? t("compactedSummary") + text.slice(prefix.length)
+    : text;
 }
 
 function toJsonObject(input: unknown): Record<string, unknown> {
@@ -73,7 +75,7 @@ function convertNotebookAiMessage(
         text:
           message.role === "user"
             ? getUserDisplayText(message)
-            : String(part.text),
+            : getAssistantDisplayText(message, String(part.text)),
       });
       continue;
     }
@@ -119,7 +121,7 @@ function convertNotebookAiMessage(
   const attachments = liveImageParts.map((part, index) => ({
     id: `${message.id}-attachment-${index}`,
     type: "image" as const,
-    name: part.filename ?? `图片 ${index + 1}`,
+    name: part.filename ?? t("detailImage", { value1: index + 1 }),
     contentType: part.mediaType,
     status: { type: "complete" as const },
     content: [

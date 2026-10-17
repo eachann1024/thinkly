@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/settings/slices/shortcutsSlice.ts#block1:1">`
+zh-Hans:
+  wakeDisabled: "已关闭全局唤醒快捷键"
+  searchDisabled: "已关闭全局搜索快捷键"
+  quicknoteDisabled: "已关闭速记小窗全局快捷键"
+en:
+  wakeDisabled: "The global shortcut for showing the app is off."
+  searchDisabled: "The global search shortcut is off."
+  quicknoteDisabled: "The global shortcut for Quick Note is off."
+`);
 import type { DesktopSettings, DesktopHotkeyStatus } from '../types'
 import {
     DEFAULT_WAKE_HOTKEY,
@@ -124,7 +135,7 @@ export function createShortcutsSlice(set: SetFn): ShortcutsSlice {
                     wakeHotkeyEnabled: enabled,
                     wakeHotkeyStatus: enabled ? DEFAULT_HOTKEY_STATUS : {
                         state: 'disabled',
-                        message: '已关闭全局唤醒快捷键',
+                        message: storeText("wakeDisabled"),
                     },
                 },
             })),
@@ -143,7 +154,7 @@ export function createShortcutsSlice(set: SetFn): ShortcutsSlice {
                     searchHotkeyEnabled: enabled,
                     searchHotkeyStatus: enabled ? DEFAULT_HOTKEY_STATUS : {
                         state: 'disabled',
-                        message: '已关闭全局搜索快捷键',
+                        message: storeText("searchDisabled"),
                     },
                 },
             })),
@@ -162,7 +173,7 @@ export function createShortcutsSlice(set: SetFn): ShortcutsSlice {
                     quicknoteHotkeyEnabled: enabled,
                     quicknoteHotkeyStatus: enabled ? DEFAULT_HOTKEY_STATUS : {
                         state: 'disabled',
-                        message: '已关闭速记小窗全局快捷键',
+                        message: storeText("quicknoteDisabled"),
                     },
                 },
             })),

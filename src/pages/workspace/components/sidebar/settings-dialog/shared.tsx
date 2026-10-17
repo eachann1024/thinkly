@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/shared.tsx#localMessages:1">`
+zh-Hans:
+  appearanceAndThemes_6902: "外观与主题"
+  general_aa05: "通用"
+  keyboardShortcuts_f7d2: "快捷键"
+  localFolders_497e: "本地文件夹"
+  gitSync_fcb0: "Git 同步"
+  aiAssistant_318e: "AI 助手"
+  dataAndBackups_e963: "数据与备份"
+  localVersionBeforeBackupRestore_8346: "备份覆盖前本地版本"
+en:
+  appearanceAndThemes_6902: "Appearance and themes"
+  general_aa05: "General"
+  keyboardShortcuts_f7d2: "Keyboard shortcuts"
+  localFolders_497e: "Local folders"
+  gitSync_fcb0: "Git sync"
+  aiAssistant_318e: "AI assistant"
+  dataAndBackups_e963: "Data and backups"
+  localVersionBeforeBackupRestore_8346: "Local version before backup restore"
+`;
+const uiText = createTranslator(localMessages);
 import type { SettingsTab, SettingsTabConfig } from "../settings/types";
 import { usePages } from "@/stores/usePages";
 import * as GooseIcons from "@/components/ui/icons";
@@ -12,13 +35,13 @@ export interface SettingsDialogProps {
 }
 
 export const SETTINGS_TABS: SettingsTabConfig[] = [
-  { id: "appearance", label: "外观与主题", icon: GooseIcons.Laptop },
-  { id: "general", label: "通用", icon: GooseIcons.Settings },
-  { id: "shortcuts", label: "快捷键", icon: GooseIcons.Keyboard },
-  { id: "local-folder", label: "本地文件夹", icon: GooseIcons.FolderOpen },
-  { id: "git-sync", label: "Git 同步", icon: GooseIcons.GitBranch },
-  { id: "ai", label: "AI 助手", icon: GooseIcons.Sparkles },
-  { id: "data", label: "数据与备份", icon: GooseIcons.Database },
+  { id: "appearance", label: uiText("appearanceAndThemes_6902"), icon: GooseIcons.Laptop },
+  { id: "general", label: uiText("general_aa05"), icon: GooseIcons.Settings },
+  { id: "shortcuts", label: uiText("keyboardShortcuts_f7d2"), icon: GooseIcons.Keyboard },
+  { id: "local-folder", label: uiText("localFolders_497e"), icon: GooseIcons.FolderOpen },
+  { id: "git-sync", label: uiText("gitSync_fcb0"), icon: GooseIcons.GitBranch },
+  { id: "ai", label: uiText("aiAssistant_318e"), icon: GooseIcons.Sparkles },
+  { id: "data", label: uiText("dataAndBackups_e963"), icon: GooseIcons.Database },
 ];
 
 export const recordPreOverwriteHistory = async (id: string | undefined) => {
@@ -35,7 +58,7 @@ export const recordPreOverwriteHistory = async (id: string | undefined) => {
         content: oldContent,
         trigger: "manual",
         isMilestone: true,
-        label: "备份覆盖前本地版本",
+        label: uiText("localVersionBeforeBackupRestore_8346"),
       });
     } catch (err) {
       console.error("[history] Failed to save pre-overwrite history", err);

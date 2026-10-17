@@ -1,3 +1,38 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/HiddenFoldersField.tsx#localMessages:1">`
+zh-Hans:
+  enterAFolderName_4a86: "请输入文件夹名称。"
+  thisFolderIsAlreadyHidden_1674: "该文件夹已在隐藏列表中。"
+  hiddenFolders_0e77: "隐藏文件夹"
+  hideAllFoldersWithMatchingNames_2052: "侧栏隐藏所有同名文件夹，不删除本地文件。"
+  resetToDefaults_7468: "恢复默认"
+  noHiddenFolders_8f82: "暂无隐藏文件夹"
+  builtInRulesAlwaysHidden_74ff: "预置规则 · 始终隐藏"
+  removeFolder: "移除 {{folder}}"
+  addHiddenFolder_50c3: "添加隐藏文件夹"
+  folderName_a984: "文件夹名称"
+  eGObsidian_55c9: "例如 .obsidian"
+  add_b58c: "添加"
+  display: "显示"
+  hiddenCount: "已隐藏 {{count}} 项"
+en:
+  enterAFolderName_4a86: "Enter a folder name."
+  thisFolderIsAlreadyHidden_1674: "This folder is already hidden."
+  hiddenFolders_0e77: "Hidden folders"
+  hideAllFoldersWithMatchingNames_2052: "Hide all folders with matching names in the sidebar. Local files are not deleted."
+  resetToDefaults_7468: "Reset to defaults"
+  noHiddenFolders_8f82: "No hidden folders"
+  builtInRulesAlwaysHidden_74ff: "Built-in rules · Always hidden"
+  removeFolder: "Remove {{folder}}"
+  addHiddenFolder_50c3: "Add hidden folder"
+  folderName_a984: "Folder name"
+  eGObsidian_55c9: "e.g. .obsidian"
+  add_b58c: "Add"
+  display: "Display"
+  hiddenCount: "Hidden items: {{count}}"
+`;
+const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
 import { IconButton } from "@/components/ui/icon-button";
 import { useState } from "react";
@@ -22,11 +57,11 @@ export function HiddenFoldersField({
   const addFolder = (raw: string) => {
     const name = raw.trim();
     if (!name) {
-      setError("请输入文件夹名称。");
+      setError(uiText("enterAFolderName_4a86"));
       return;
     }
     if (folders.includes(name)) {
-      setError("该文件夹已在隐藏列表中。");
+      setError(uiText("thisFolderIsAlreadyHidden_1674"));
       return;
     }
     onChange([...folders, name]);
@@ -48,10 +83,10 @@ export function HiddenFoldersField({
 
   return (
     <SettingsSectionCard
-      title="显示"
+      title={uiText("display")}
       actions={
         <span className="text-sm text-muted-foreground">
-          {folders.length} 项已隐藏
+          {uiText("hiddenCount", { count: folders.length })}
         </span>
       }
     >
@@ -64,11 +99,10 @@ export function HiddenFoldersField({
               className="h-4 w-4 shrink-0 text-muted-foreground"
               strokeWidth={1.75}
             />
-            <Label>隐藏文件夹</Label>
+            <Label>{uiText("hiddenFolders_0e77")}</Label>
           </div>
           <p className="mt-1 pl-7 text-sm leading-relaxed text-muted-foreground">
-            侧栏隐藏所有同名文件夹，不删除本地文件。
-          </p>
+            {uiText("hideAllFoldersWithMatchingNames_2052")}</p>
         </div>
         {!isDefault && (
           <Button
@@ -78,15 +112,13 @@ export function HiddenFoldersField({
             className="shrink-0"
             onClick={resetToDefault}
           >
-            恢复默认
-          </Button>
+            {uiText("resetToDefaults_7468")}</Button>
         )}
       </div>
 
       {folders.length === 0 && (
         <p className={`p-4 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
-          暂无隐藏文件夹
-        </p>
+          {uiText("noHiddenFolders_8f82")}</p>
       )}
       {folders.map((folder) => {
         const isDefaultFolder = DEFAULT_HIDDEN_FOLDERS.includes(folder);
@@ -106,15 +138,14 @@ export function HiddenFoldersField({
             </div>
             {isDefaultFolder ? (
               <span className="text-sm text-muted-foreground">
-                预置规则 · 始终隐藏
-              </span>
+                {uiText("builtInRulesAlwaysHidden_74ff")}</span>
             ) : (
               <IconButton
                 size="sm"
                 tone="muted"
                 type="button"
                 onClick={() => removeFolder(folder)}
-                aria-label={`移除 ${folder}`}
+                aria-label={uiText("removeFolder", { folder })}
               >
                 <GooseIcons.X className="h-4 w-4" />
               </IconButton>
@@ -129,8 +160,7 @@ export function HiddenFoldersField({
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          添加隐藏文件夹
-        </DisclosureSummary>
+          {uiText("addHiddenFolder_50c3")}</DisclosureSummary>
         <form
           className="space-y-2 pt-3"
           onSubmit={(event) => {
@@ -142,8 +172,7 @@ export function HiddenFoldersField({
             htmlFor="local-folder-hidden-folder-input"
             className="text-sm"
           >
-            文件夹名称
-          </Label>
+            {uiText("folderName_a984")}</Label>
           <div className="flex flex-wrap gap-2">
             <Input
               id="local-folder-hidden-folder-input"
@@ -152,12 +181,11 @@ export function HiddenFoldersField({
                 setInputValue(event.target.value);
                 setError("");
               }}
-              placeholder="例如 .obsidian"
+              placeholder={uiText("eGObsidian_55c9")}
               className="h-9 min-w-36 flex-1 text-sm"
             />
             <Button type="submit" size="sm" className="h-9 shrink-0">
-              添加
-            </Button>
+              {uiText("add_b58c")}</Button>
           </div>
           {error && (
             <p role="alert" className="text-sm text-danger">

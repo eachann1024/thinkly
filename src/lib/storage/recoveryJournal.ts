@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/storage/recoveryJournal.ts#localMessages:1">`
+zh-Hans:
+  couldnTWriteTheDestinationRecoveryJournal: "目标恢复日志写入失败"
+  couldnTAcknowledgeTheOriginalRecoveryJournal: "原恢复日志确认失败"
+en:
+  couldnTWriteTheDestinationRecoveryJournal: "Couldn’t write the destination recovery journal"
+  couldnTAcknowledgeTheOriginalRecoveryJournal: "Couldn’t acknowledge the original recovery journal"
+`;
+const uiText = createTranslator(localMessages);
 import type { JSONContent, Page } from "@/types";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { HostAdapter } from "@/lib/host/adapter";
@@ -192,10 +203,10 @@ export const moveRecoveryEntry = (
     },
   }));
   if (!moved?.entry) {
-    return { ok: false, error: "目标恢复日志写入失败" };
+    return { ok: false, error: uiText("couldnTWriteTheDestinationRecoveryJournal") };
   }
   if (!acknowledgeRecoveryEntry(source, oldId, current.revision)) {
-    return { ok: false, error: "原恢复日志确认失败" };
+    return { ok: false, error: uiText("couldnTAcknowledgeTheOriginalRecoveryJournal") };
   }
   return { ok: true, entry: moved.entry };
 };

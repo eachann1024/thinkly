@@ -27,6 +27,10 @@ import {
 } from "./codeBlockLanguageNav";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
 import { useCodeLanguageFocus } from "./useCodeLanguageFocus";
+import messages from "./CodeLanguagePicker.messages.yaml";
+import { createTranslator } from "@/i18n";
+const t = createTranslator(messages);
+
 
 export function CodeLanguagePicker({
   language,
@@ -205,7 +209,7 @@ export function CodeLanguagePicker({
               <Input
                 ref={inputRef}
                 role="combobox"
-                aria-label="搜索代码语言"
+                aria-label={t("searchCodeLanguages")}
                 aria-autocomplete="list"
                 aria-expanded={isOpen}
                 aria-controls={languageListId}
@@ -214,7 +218,7 @@ export function CodeLanguagePicker({
                     ? `${languageListId}-opt-${safeHighlightedIndex}`
                     : undefined
                 }
-                placeholder="搜索语言…"
+                placeholder={t("searchLanguages")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 onKeyDown={handleSearchKeyDown}
@@ -222,17 +226,17 @@ export function CodeLanguagePicker({
               />
             </div>
             {!search && (
-              <div className="goose-code-language-label goose-menu-label">常用语言</div>
+              <div className="goose-code-language-label goose-menu-label">{t("commonLanguages")}</div>
             )}
             <div
               id={languageListId}
               className="goose-code-language-list goose-list-layout"
               data-goose-menu-slot="root"
               role="listbox"
-              aria-label="代码语言"
+              aria-label={t("codeLanguage")}
             >
               {filteredLanguages.length === 0 ? (
-                <div className="goose-code-language-empty">未找到语言</div>
+                <div className="goose-code-language-empty">{t("noLanguagesFound")}</div>
               ) : null}
               {filteredLanguages.map((lang, index) => (
                 <PopoverAction

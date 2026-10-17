@@ -8,6 +8,19 @@ import {
   getNotebookSnapshot,
   getLocationSnapshot,
 } from "./referenceMetadata";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/referenceSuggestions.ts#messages:1">`
+zh-Hans:
+  unknownNotebook: "未知笔记本"
+  appPage: "应用页面"
+  appPageNotebook: "应用页面 · {{notebookName}}"
+en:
+  unknownNotebook: "Unknown notebook"
+  appPage: "App page"
+  appPageNotebook: "App page · {{notebookName}}"
+`;
+const t = createTranslator(messages);
+
 
 function normalizeSearchValue(value: string) {
   return value.trim().toLowerCase();
@@ -24,7 +37,7 @@ function buildDescription(
 ) {
   const wsId = page.workspaceId ?? (page as { notebookId?: string }).notebookId;
   const notebook = getNotebookSnapshot(wsId, notebooks);
-  const notebookName = notebook?.name ?? "未知笔记本";
+  const notebookName = notebook?.name ?? t("unknownNotebook");
   const isActiveNotebook =
     activeNotebookId != null && wsId === activeNotebookId;
 
@@ -34,7 +47,7 @@ function buildDescription(
     return `${notebookName} · ${location}`;
   }
 
-  return isActiveNotebook ? "应用页面" : `应用页面 · ${notebookName}`;
+  return isActiveNotebook ? t("appPage") : t("appPageNotebook", { notebookName });
 }
 
 function pageFilenameStem(page: Page): string {

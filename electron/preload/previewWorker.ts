@@ -1,3 +1,4 @@
+import "./language";
 import { contextBridge, ipcRenderer } from "electron";
 import type { PreviewWorkerBridge } from "../../src/lib/preview-renderer/contract";
 

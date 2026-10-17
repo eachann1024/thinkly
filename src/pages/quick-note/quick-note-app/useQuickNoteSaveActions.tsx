@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/quick-note/quick-note-app/useQuickNoteSaveActions.tsx#localMessages:1">`
+zh-Hans:
+  saveFailed: "未能保存到笔记"
+  openNotebook: "请确认已打开笔记本后再试。"
+  saved: "已保存到笔记"
+en:
+  saveFailed: "Couldn’t save to notes"
+  openNotebook: "Make sure a notebook is open, then try again."
+  saved: "Saved to notes"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect } from "react";
 import {
   useQuickNote,
@@ -34,13 +47,13 @@ export function useQuickNoteSaveActions(
       await useNotebooks.persist.rehydrate();
       const id = await useQuickNote.getState().saveDraftToNotebook();
       if (!id) {
-        toast.error("未能保存到笔记", {
-          description: "请确认已打开笔记本后再试。",
+        toast.error(uiText("saveFailed"), {
+          description: uiText("openNotebook"),
         });
         return;
       }
       applyHistoryContentToEditor(null);
-      toast.success("已保存到笔记");
+      toast.success(uiText("saved"));
     } finally {
       setSavingToNote(false);
     }

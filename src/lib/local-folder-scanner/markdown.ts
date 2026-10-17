@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-scanner/markdown.ts#localMessages:1">`
+zh-Hans:
+  couldnTReadTheMarkdownFile: "Markdown 文件读取失败"
+  theYamlFrontmatterIsNotClosedTheOriginalFile: "YAML 前置区未闭合，原文件已保留，请修复后重新载入"
+  couldnTParseMarkdown: "Markdown 解析失败"
+en:
+  couldnTReadTheMarkdownFile: "Couldn’t read the Markdown file"
+  theYamlFrontmatterIsNotClosedTheOriginalFile: "The YAML frontmatter is not closed. The original file has been kept. Fix it and reload."
+  couldnTParseMarkdown: "Couldn’t parse Markdown"
+`;
+const uiText = createTranslator(localMessages);
 import { getParsedMarkdown, cacheParsedMarkdown } from "./parsed-cache";
 import {
   encodeUnsupportedMarkdownForEditor,
@@ -47,7 +60,7 @@ export async function parseLocalMarkdownContent(
       isPinned: false,
       isFavorite: false,
       readState: "error",
-      readError: readError || "Markdown 文件读取失败",
+      readError: readError || uiText("couldnTReadTheMarkdownFile"),
     };
   }
 
@@ -91,10 +104,10 @@ export async function parseLocalMarkdownContent(
     isFavorite: fmSettings.isFavorite,
     readState: imported.success && !unclosedFrontmatter ? "ready" : "error",
     readError: unclosedFrontmatter
-      ? "YAML 前置区未闭合，原文件已保留，请修复后重新载入"
+      ? uiText("theYamlFrontmatterIsNotClosedTheOriginalFile")
       : imported.success
         ? undefined
-        : imported.error || "Markdown 解析失败",
+        : imported.error || uiText("couldnTParseMarkdown"),
   };
 }
 

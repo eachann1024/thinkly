@@ -1,0 +1,12 @@
+zh-Hans:
+  theTargetBlockIsNoLongerInThe: "目标块已不在文档中，无法替换。请重新选中后再试。"
+  theCurrentBlockCouldNotBeLocatedPlace: "无法定位当前编辑块，请将光标放入正文后再试。"
+  noTargetBlockWasProvidedForReplacement: "缺少要替换的目标块。"
+  aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
+  theAiResponseCouldNotBeParsedInto: "AI 返回的内容无法解析为有效块。"
+en:
+  theTargetBlockIsNoLongerInThe: "The target block is no longer in the document. Select the content again and retry."
+  theCurrentBlockCouldNotBeLocatedPlace: "The current block could not be located. Place the cursor in the body text and retry."
+  noTargetBlockWasProvidedForReplacement: "No target block was provided for replacement."
+  aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+  theAiResponseCouldNotBeParsedInto: "The AI response could not be parsed into valid blocks."

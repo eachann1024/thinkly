@@ -1,3 +1,30 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useWebdavRemoteActions.tsx#localMessages:1">`
+zh-Hans:
+  cloudBackupDeleted_5e7b: "云端备份已删除"
+  couldNotDeleteBackup_31a4: "删除备份失败"
+  syncFailed_d610: "同步失败"
+  couldNotRestoreBackup_f06d: "恢复备份失败"
+  deleteCloudBackup_6352: "删除云端备份"
+  restoreFromCloud_6e37: "从云端恢复"
+  restoreCloudBackup_bfc3: "恢复云端备份"
+  confirmDeleteBackup: "确定删除云端备份「{{name}}」？删除后无法从云端找回。"
+  confirmRestoreLatest: "确定从云端恢复最新备份「{{name}}」？此操作将覆盖本地当前数据。恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。"
+  confirmRestoreBackup: "确定使用云端备份「{{name}}」恢复数据？恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。"
+en:
+  cloudBackupDeleted_5e7b: "Cloud backup deleted"
+  couldNotDeleteBackup_31a4: "Could not delete backup"
+  syncFailed_d610: "Sync failed"
+  couldNotRestoreBackup_f06d: "Could not restore backup"
+  deleteCloudBackup_6352: "Delete cloud backup"
+  restoreFromCloud_6e37: "Restore from cloud"
+  restoreCloudBackup_bfc3: "Restore cloud backup"
+  confirmDeleteBackup: "Delete cloud backup “{{name}}”? It cannot be recovered from the cloud."
+  confirmRestoreLatest: "Restore the latest cloud backup “{{name}}”? This replaces current local data. The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
+  confirmRestoreBackup: "Restore cloud backup “{{name}}”? The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
+`;
+const uiText = createTranslator(localMessages);
 import {
   downloadWebdavBackup,
   deleteWebdavBackup,
@@ -75,7 +102,7 @@ export function useWebdavRemoteActions(
           connection.dir,
           file.basename,
         );
-        toast.success("云端备份已删除");
+        toast.success(uiText("cloudBackupDeleted_5e7b"));
         if (isCurrentActivation(epoch))
           await readRemoteList("nested", connection);
       } else {
@@ -100,10 +127,10 @@ export function useWebdavRemoteActions(
       console.error(err);
       toast.error(
         action === "delete"
-          ? "删除备份失败"
+          ? uiText("couldNotDeleteBackup_31a4")
           : action === "latest"
-            ? "同步失败"
-            : "恢复备份失败",
+            ? uiText("syncFailed_d610")
+            : uiText("couldNotRestoreBackup_f06d"),
         { description: err.message || String(err) },
       );
     } finally {
@@ -115,16 +142,16 @@ export function useWebdavRemoteActions(
     ? {
         title:
           confirmation.action === "delete"
-            ? "删除云端备份"
+            ? uiText("deleteCloudBackup_6352")
             : confirmation.action === "latest"
-              ? "从云端恢复"
-              : "恢复云端备份",
+              ? uiText("restoreFromCloud_6e37")
+              : uiText("restoreCloudBackup_bfc3"),
         description:
           confirmation.action === "delete"
-            ? `确定删除云端备份「${confirmation.file.basename}」？删除后无法从云端找回。`
+            ? uiText("confirmDeleteBackup", { name: confirmation.file.basename })
             : confirmation.action === "latest"
-              ? `确定从云端恢复最新备份「${confirmation.file.basename}」？此操作将覆盖本地当前数据。恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。`
-              : `确定使用云端备份「${confirmation.file.basename}」恢复数据？恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。`,
+              ? uiText("confirmRestoreLatest", { name: confirmation.file.basename })
+              : uiText("confirmRestoreBackup", { name: confirmation.file.basename }),
       }
     : null;
   const visibleRemoteFiles = showAllRemote

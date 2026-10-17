@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx#localMessages:1">`
+zh-Hans:
+  welcomeVideo: "欢迎视频"
+  closeWelcomeAnimation: "关闭欢迎动画"
+  closeWelcomeAnimationEsc: "关闭欢迎动画（Esc）"
+en:
+  welcomeVideo: "Welcome video"
+  closeWelcomeAnimation: "Close welcome animation"
+  closeWelcomeAnimationEsc: "Close welcome animation (Esc)"
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer, useState } from "react";
 import { createPortal } from "react-dom";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -59,7 +72,7 @@ function IntroVideoLayer() {
       className="intro-video-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="欢迎视频"
+      aria-label={uiText("welcomeVideo")}
       data-ready={ready}
       data-closing={closing}
     >
@@ -82,8 +95,8 @@ function IntroVideoLayer() {
           type="button"
           variant="outline"
           size="icon"
-          aria-label="关闭欢迎动画"
-          title="关闭欢迎动画（Esc）"
+          aria-label={uiText("closeWelcomeAnimation")}
+          title={uiText("closeWelcomeAnimationEsc")}
           className="intro-video-close"
           onClick={close}
         >

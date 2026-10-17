@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/svgToPng.ts#localMessages:1">`
+zh-Hans:
+  couldnTReadTheImageData: "图片数据读取失败"
+  theImageIsEmpty: "图片为空"
+  couldnTGenerateTheImage: "生成图片失败"
+  imageExportIsnTSupportedInThisEnvironment: "当前环境不支持导出图片"
+  theSvgIsEmpty: "SVG 为空"
+  readFailed: "图片读取失败（{{status}}）"
+en:
+  couldnTReadTheImageData: "Couldn’t read the image data"
+  theImageIsEmpty: "The image is empty"
+  couldnTGenerateTheImage: "Couldn’t generate the image"
+  imageExportIsnTSupportedInThisEnvironment: "Image export isn’t supported in this environment"
+  theSvgIsEmpty: "The SVG is empty"
+  readFailed: "Couldn’t load the image ({{status}})"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * 将 SVG 标记或预览 DOM 安全栅格化为 PNG。
  *
@@ -79,9 +98,9 @@ export function ensureSvgContentSize(svgEl: SVGSVGElement): {
 
 function dataUrlToBlob(dataUrl: string): Promise<Blob> {
   return fetch(dataUrl).then(async (response) => {
-    if (!response.ok) throw new Error("图片数据读取失败");
+    if (!response.ok) throw new Error(uiText("couldnTReadTheImageData"));
     const blob = await response.blob();
-    if (!blob.size) throw new Error("图片为空");
+    if (!blob.size) throw new Error(uiText("theImageIsEmpty"));
     return blob;
   });
 }
@@ -124,7 +143,7 @@ async function toPngWithRatioFallback(
       );
     }
   }
-  throw lastError instanceof Error ? lastError : new Error("生成图片失败");
+  throw lastError instanceof Error ? lastError : new Error(uiText("couldnTGenerateTheImage"));
 }
 
 /** 将 SVG 字符串离屏挂载后截为 PNG Blob */
@@ -138,10 +157,10 @@ export async function svgMarkupToPngBlob(
   },
 ): Promise<Blob> {
   if (typeof document === "undefined") {
-    throw new Error("当前环境不支持导出图片");
+    throw new Error(uiText("imageExportIsnTSupportedInThisEnvironment"));
   }
   const markup = svg.trim();
-  if (!markup) throw new Error("SVG 为空");
+  if (!markup) throw new Error(uiText("theSvgIsEmpty"));
 
   const padding = options?.padding ?? 12;
   const backgroundColor = options?.backgroundColor ?? "transparent";
@@ -237,9 +256,9 @@ export async function captureElementAsPngBlob(
 /** data URL / blob URL / 任意可 fetch 的图片地址 → PNG Blob */
 export async function imageUrlToPngBlob(url: string): Promise<Blob> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`图片读取失败（${response.status}）`);
+  if (!response.ok) throw new Error(uiText("readFailed", {status: response.status}));
   const blob = await response.blob();
-  if (!blob.size) throw new Error("图片为空");
+  if (!blob.size) throw new Error(uiText("theImageIsEmpty"));
   if (blob.type === "image/png" || blob.type === "") {
     // getDataURL 可能不带 type，按内容处理
     if (blob.type === "image/png") return blob;

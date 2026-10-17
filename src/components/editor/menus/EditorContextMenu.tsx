@@ -20,6 +20,25 @@ import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard
 import { useEditorContextClipboard } from "./useEditorContextClipboard";
 import { getEditorSelectedBlocksForExport } from "@/components/editor/utils/selection";
 import { cn, formatShortcut } from "@/lib/utils";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/EditorContextMenu.tsx#messages:1">`
+zh-Hans:
+  selectedContent: "选中内容"
+  cut: "剪切"
+  copy: "复制"
+  paste: "粘贴"
+  insertParagraphBelow: "在块下方插入段落"
+  exportSelectionAsImage: "导出所选内容为图片"
+en:
+  selectedContent: "Selected content"
+  cut: "Cut"
+  copy: "Copy"
+  paste: "Paste"
+  insertParagraphBelow: "Insert paragraph below"
+  exportSelectionAsImage: "Export selection as image"
+`;
+const t = createTranslator(messages);
+
 
 // 展示型块不显示右键菜单，文字选区继续使用剪贴板菜单。
 // math/mermaid 是 codeBlock 的 language 变体，其 data-content-type 为 "codeBlock"，
@@ -122,7 +141,7 @@ export function EditorContextMenu({
   ) => {
     const blocks = selectedBlocksRef.current;
     if (!Array.isArray(blocks) || blocks.length === 0) return;
-    const title = extractBlockNoteTitle(page?.content) || "选中内容";
+    const title = extractBlockNoteTitle(page?.content) || t("selectedContent");
     exportSelectionToImage(blocks, title, themeId, watermarkConfig, page);
   };
 
@@ -175,7 +194,7 @@ export function EditorContextMenu({
           {editable && (
             <ContextMenuItem disabled={!canCopy} onSelect={handleCutSelection}>
               <GooseIcons.Scissors className="size-4" />
-              剪切
+              {t("cut")}
               <span className="goose-menu-shortcut">
                 {formatShortcut("Mod+X")}
               </span>
@@ -183,7 +202,7 @@ export function EditorContextMenu({
           )}
           <ContextMenuItem disabled={!canCopy} onSelect={handleCopySelection}>
             <GooseIcons.Copy className="size-4" />
-            复制
+            {t("copy")}
             <span className="goose-menu-shortcut">
               {formatShortcut("Mod+C")}
             </span>
@@ -191,7 +210,7 @@ export function EditorContextMenu({
           {editable && (
             <ContextMenuItem onSelect={handleContextPaste}>
               <GooseIcons.Clipboard className="size-4" />
-              粘贴
+              {t("paste")}
               <span className="goose-menu-shortcut">
                 {formatShortcut("Mod+V")}
               </span>
@@ -200,7 +219,7 @@ export function EditorContextMenu({
           {editable && contextBlockIdRef.current && (
             <ContextMenuItem onSelect={() => insertParagraphAfterBlock(editor, contextBlockIdRef.current!)}>
               <GooseIcons.Plus className="size-4" />
-              在块下方插入段落
+              {t("insertParagraphBelow")}
             </ContextMenuItem>
           )}
           {showSelectionImageExport && selectedBlocks.length > 0 && (
@@ -211,7 +230,7 @@ export function EditorContextMenu({
               }}
             >
               <GooseIcons.Image className="size-4" />
-              导出所选内容为图片
+              {t("exportSelectionAsImage")}
             </ContextMenuItem>
           )}
         </ContextMenuContent>

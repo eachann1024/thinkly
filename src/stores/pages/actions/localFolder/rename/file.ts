@@ -1,3 +1,27 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/file.ts#block1:1">`
+zh-Hans:
+  renameFailed: "重命名失败：{{reason}}"
+en:
+  renameFailed: "Rename failed: {{reason}}"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/file.ts#block2:2">`
+zh-Hans:
+  pageUnavailable: "页面不存在或非本地文件夹页面"
+  invalidName: "名称不能包含路径分隔符或非法字符"
+  emptyName: "文件名不能为空"
+  fsUnavailable: "文件系统不可用"
+  renamePathChanged: "路径已发生变化，请重新命名"
+  renameFailed: "重命名操作未成功"
+en:
+  pageUnavailable: "The page does not exist or is not a local folder page."
+  invalidName: "Names can’t contain path separators or invalid characters."
+  emptyName: "The filename can’t be empty."
+  fsUnavailable: "The file system is unavailable."
+  renamePathChanged: "The path has changed. Rename the file again."
+  renameFailed: "The rename did not complete."
+`);
 import { migrateNotebookHistory } from "@/lib/history/localDisk";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {
@@ -32,7 +56,7 @@ export async function renameLocalPageFileAction(
 ): Promise<string> {
   const page = get().pages[pageId];
   if (!page || !page.localFilePath) {
-    throw new Error("页面不存在或非本地文件夹页面");
+    throw new Error(storeText("pageUnavailable"));
   }
 
   // 文件名必须拒绝控制字符，范围匹配是这里的业务约束。
@@ -41,11 +65,11 @@ export async function renameLocalPageFileAction(
     /[\\/:*?"<>|\x00-\x1f\x7f]/.test(newBaseName) ||
     /^\.+$/.test(newBaseName.trim())
   ) {
-    throw new Error("名称不能包含路径分隔符或非法字符");
+    throw new Error(storeText("invalidName"));
   }
   const sanitized = sanitizeFilenameSegment(newBaseName);
   if (!sanitized) {
-    throw new Error("文件名不能为空");
+    throw new Error(storeText("emptyName"));
   }
 
   if (page.isFolder) return renameLocalDirectory(set, get, pageId, sanitized);
@@ -57,7 +81,7 @@ export async function renameLocalPageFileAction(
   }
 
   if (typeof window === "undefined" || !window.gooseFs) {
-    throw new Error("文件系统不可用");
+    throw new Error(storeText("fsUnavailable"));
   }
 
   const fs = window.gooseFs;
@@ -91,13 +115,13 @@ export async function renameLocalPageFileAction(
   const releaseFileOperation = await acquireLocalPageFileOperation(pageId);
   try {
     if (get().pages[pageId]?.localFilePath !== page.localFilePath) {
-      throw new Error("路径已发生变化，请重新重命名");
+      throw new Error(storeText("renamePathChanged"));
     }
     const renamed = Boolean(
       await Promise.resolve(fs.rename(page.localFilePath, nextFilePath)),
     );
     if (!renamed) {
-      throw new Error("重命名操作未成功");
+      throw new Error(storeText("renameFailed"));
     }
 
     // 成功后才登记自移路径；失败时不应误吞接下来 5 秒的真实文件事件。
@@ -142,11 +166,11 @@ export async function renameLocalPageFileAction(
     if (basePath) await migrateNotebookHistory(basePath, { [pageId]: newRelativePath });
     return pageId;
   } catch (error) {
-    if (error instanceof Error && error.message === "重命名操作未成功") {
+    if (error instanceof Error && error.message === storeText("renameFailed")) {
       throw error;
     }
     throw new Error(
-      `重命名失败：${error instanceof Error ? error.message : String(error)}`,
+      extraText("renameFailed", { reason: error instanceof Error ? error.message : String(error) }),
       { cause: error },
     );
   } finally {

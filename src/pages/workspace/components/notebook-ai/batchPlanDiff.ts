@@ -1,3 +1,18 @@
+
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/batchPlanDiff.ts#messages:1">`
+zh-Hans:
+  create: "新建"
+  delete: "删除"
+  replace: "替换"
+  edit: "编辑"
+en:
+  create: "Create"
+  delete: "Delete"
+  replace: "Replace"
+  edit: "Edit"
+`;
+const t = createTranslator(messages);
 export type PlanDiffLine = {
   kind: "eq" | "del" | "add";
   text: string;
@@ -83,8 +98,8 @@ export function diffTextLines(oldText: string, newText: string): PlanDiffLine[] 
 export function planOperationKindLabel(
   type: "create" | "edit" | "delete" | "search_replace",
 ): string {
-  if (type === "create") return "新建";
-  if (type === "delete") return "删除";
-  if (type === "search_replace") return "替换";
-  return "编辑";
+  if (type === "create") return t("create");
+  if (type === "delete") return t("delete");
+  if (type === "search_replace") return t("replace");
+  return t("edit");
 }

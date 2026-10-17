@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/livePreview.ts#localMessages:1">`
+zh-Hans:
+  selectedContent: "选中内容"
+  untitled: "无标题"
+en:
+  selectedContent: "Selected content"
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
 import { getPageTitle } from "@/components/editor/utils/page-title";
@@ -38,7 +49,7 @@ export function getImageExportPreviewSource(params: {
     const title =
       (page ? getPageTitle(page as Page) : "") ||
       extractTitleFromContent(page?.content) ||
-      "选中内容";
+      uiText("selectedContent");
     return { title, blocks: selection };
   }
 
@@ -48,7 +59,7 @@ export function getImageExportPreviewSource(params: {
   const title =
     (page ? getPageTitle(page as Page) : "") ||
     extractTitleFromContent(content) ||
-    "无标题";
+    uiText("untitled");
   return { title, blocks: content };
 }
 

@@ -1,3 +1,4 @@
+import { t } from "./i18n/nativeServices";
 import { app, BrowserWindow } from "electron";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -75,7 +76,7 @@ export async function printHtmlToPdf(html: string): Promise<string | null> {
             });
             const buf = Buffer.isBuffer(data) ? data : Buffer.from(data || []);
             if (!buf.length) {
-              finish(new Error("printToPDF 返回空内容"), null);
+              finish(new Error(t("emptyPdf")), null);
               return;
             }
             finish(null, buf.toString("base64"));
@@ -100,7 +101,7 @@ export async function printHtmlToPdf(html: string): Promise<string | null> {
           void runPrint();
         });
 
-        setTimeout(() => finish(new Error("printToPDF 超时"), null), 20000);
+        setTimeout(() => finish(new Error(t("pdfTimeout")), null), 20000);
       });
     } finally {
       try {

@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/themes/presets/notebook.ts#localMessages:1">`
+zh-Hans:
+  notebook: "笔记本"
+  matchesYourEditor: "所见即所得"
+  current: "当前"
+  editor: "编辑器"
+en:
+  notebook: "Notebook"
+  matchesYourEditor: "Matches your editor"
+  current: "Current"
+  editor: "Editor"
+`;
+const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";
 import {
   getEditorFontFamilies,
@@ -59,10 +74,10 @@ function joinFontStack(families: string[]): string {
 /** 静态浅色 fallback：无 DOM / 无页面上下文时仍可导出。 */
 export const NOTEBOOK_THEME: CardTheme = {
   id: "notebook",
-  name: "笔记本",
+  name: uiText("notebook"),
   nameEn: "Notebook",
-  description: "所见即所得",
-  tags: ["当前", "编辑器"],
+  description: uiText("matchesYourEditor"),
+  tags: [uiText("current"), uiText("editor")],
   mode: "light",
   titleFont: LIGHT_PAGE_FONT,
   bodyFont: LIGHT_PAGE_FONT,

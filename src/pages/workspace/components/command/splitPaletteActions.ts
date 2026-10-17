@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/command/splitPaletteActions.ts#localMessages:1">`
+zh-Hans:
+  splitRight: "向右分屏"
+  splitDown: "向下分屏"
+  maximizePane: "最大化分屏格"
+  closePane: "关闭分屏格"
+en:
+  splitRight: "Split right"
+  splitDown: "Split down"
+  maximizePane: "Maximize pane"
+  closePane: "Close pane"
+`;
+const uiText = createTranslator(localMessages);
 import {
   closePaneOrTab,
   splitDown,
@@ -20,7 +35,7 @@ export type SplitPaletteAction = {
 export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   {
     id: "split-right",
-    label: "向右分屏",
+    label: uiText("splitRight"),
     keywords: "分屏 向右 split right pane",
     shortcutId: "splitRight",
     run: () => {
@@ -29,7 +44,7 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   },
   {
     id: "split-down",
-    label: "向下分屏",
+    label: uiText("splitDown"),
     keywords: "分屏 向下 split down pane",
     shortcutId: "splitDown",
     run: () => {
@@ -38,14 +53,14 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   },
   {
     id: "split-zoom",
-    label: "最大化格",
+    label: uiText("maximizePane"),
     keywords: "分屏 最大化 格 zoom pane",
     shortcutId: "splitZoom",
     run: toggleZoom,
   },
   {
     id: "split-close",
-    label: "关闭分屏格",
+    label: uiText("closePane"),
     keywords: "关闭 关格 分屏 close pane",
     shortcutId: "closeSplitPane",
     run: () => {

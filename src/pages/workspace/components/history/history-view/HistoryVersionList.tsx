@@ -7,6 +7,36 @@ import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPane
 import { triggerLabel, formatTime } from "./historyViewPresentation";
 import "./history-controls.css";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
+import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/history/history-view/HistoryVersionList.tsx#messages:1">`
+zh-Hans:
+  versionHistory: "页面历史"
+  selectAVersionToPreviewAndRestore: "选择时间点预览后还原"
+  noVersionHistory: "暂无历史版本"
+  milestone: "里程碑"
+  removingMilestone: "正在取消标记此版本"
+  markingMilestone: "正在标记此版本"
+  removeMilestone: "取消标记此版本"
+  markAsMilestone: "标记此版本"
+  characterCount_other: "{{count}} 字"
+  changeCount: "变化 {{count}}"
+  viewVersionAt: "查看 {{date}} {{time}} 的历史版本"
+en:
+  versionHistory: "Version history"
+  selectAVersionToPreviewAndRestore: "Select a version to preview and restore"
+  noVersionHistory: "No version history"
+  milestone: "Milestone"
+  removingMilestone: "Removing milestone"
+  markingMilestone: "Marking milestone"
+  removeMilestone: "Remove milestone"
+  markAsMilestone: "Mark as milestone"
+  characterCount_one: "{{count}} character"
+  characterCount_other: "{{count}} characters"
+  changeCount: "Change: {{count}}"
+  viewVersionAt: "View version from {{date}}, {{time}}"
+`;
+const t = createTranslator(messages);
+
 
 export /**
  * 页面历史模块（历史模式下占据整块侧栏主体，替换笔记本头 + 页面树/大纲）。
@@ -25,23 +55,23 @@ function HistoryVersionList() {
   } = useHistoryViewLogic();
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col" aria-label="页面历史">
+    <div className="flex-1 min-h-0 flex flex-col" aria-label={t("versionHistory")}>
       <div className="shrink-0 px-3 pt-3 pb-2">
         <div className="flex items-center gap-1.5">
           <GooseIcons.History className="h-3.5 w-3.5 text-[var(--goose-interactive-selected-fg)]" />
           <span className="text-[12px] font-medium text-foreground">
-            页面历史
+            {t("versionHistory")}
           </span>
         </div>
         {!isEmpty && (
           <p className="mt-1 truncate whitespace-nowrap text-[11px] leading-none text-muted-foreground">
-            选择时间点预览后还原
+            {t("selectAVersionToPreviewAndRestore")}
           </p>
         )}
       </div>
       {isEmpty ? (
         <p className="px-3 pt-2 text-xs text-muted-foreground">
-          {indexError ?? "暂无历史版本"}
+          {indexError ?? t("noVersionHistory")}
         </p>
       ) : (
         <ScrollArea className="flex-1">
@@ -62,12 +92,12 @@ function HistoryVersionList() {
                     const deltaText =
                       delta === 0 ? null : delta > 0 ? `+${delta}` : `${delta}`;
                     const detailTitle = [
-                      new Date(v.createdAt).toLocaleString("zh-CN"),
+                      new Date(v.createdAt).toLocaleString(getFormatLocale()),
                       triggerLabel(v.trigger),
-                      `${v.charCount} 字`,
-                      deltaText ? `变化 ${deltaText}` : null,
+                      t("characterCount", { count: v.charCount }),
+                      deltaText ? t("changeCount", { count: deltaText }) : null,
                       v.label || null,
-                      v.isMilestone ? "里程碑" : null,
+                      v.isMilestone ? t("milestone") : null,
                     ]
                       .filter(Boolean)
                       .join(" · ");
@@ -103,7 +133,7 @@ function HistoryVersionList() {
                           title={detailTitle}
                           aria-current={isSelected ? "true" : undefined}
                           data-selected={isSelected ? "true" : "false"}
-                          aria-label={`查看 ${group.label} ${formatTime(v.createdAt)} 的历史版本`}
+                          aria-label={t("viewVersionAt", { date: group.label, time: formatTime(v.createdAt) })}
                           onClick={() => {
                             closeNotebookAiIfFullscreen();
                             select(v.versionId);
@@ -157,11 +187,11 @@ function HistoryVersionList() {
                           aria-label={
                             isMilestonePending
                               ? v.isMilestone
-                                ? "正在取消标记此版本"
-                                : "正在标记此版本"
+                                ? t("removingMilestone")
+                                : t("markingMilestone")
                               : v.isMilestone
-                                ? "取消标记此版本"
-                                : "标记此版本"
+                                ? t("removeMilestone")
+                                : t("markAsMilestone")
                           }
                           onPointerDown={(event) => {
                             event.stopPropagation();

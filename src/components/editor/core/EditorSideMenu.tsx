@@ -20,6 +20,27 @@ import {
 import { getSectionInsertAnchorId } from "@/components/editor/core/headingSectionFold";
 import { useEditorSideMenuTarget } from "./useEditorSideMenuTarget";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/EditorSideMenu.tsx#messages:1">`
+zh-Hans:
+  addBlock: "添加块"
+  addBlockBelow: "在下方添加块"
+  addBlockAbove: "在上方添加块"
+  collapseSection: "收起章节"
+  expandSection: "展开章节"
+  dragToMoveBlock: "拖动移动块"
+  click: "点击"
+en:
+  addBlock: "Add block"
+  addBlockBelow: "Add block below"
+  addBlockAbove: "Add block above"
+  collapseSection: "Collapse section"
+  expandSection: "Expand section"
+  dragToMoveBlock: "Drag to move block"
+  click: "Click"
+`;
+const t = createTranslator(messages);
+
 
 const isMac = /Mac/i.test(navigator.platform);
 const altKeyLabel = isMac ? "⌥" : "Alt";
@@ -172,7 +193,7 @@ export function EditorSideMenu() {
             <TooltipTrigger asChild>
               <EditorAction
                 type="button"
-                aria-label="添加块"
+                aria-label={t("addBlock")}
                 onClick={handleAdd}
                 className={cn(
                   "flex h-6 w-[22px] items-center justify-center rounded-[7px] text-muted-foreground",
@@ -185,14 +206,14 @@ export function EditorSideMenu() {
             <TooltipContent editorContext side="bottom" align="start">
               <div className="flex flex-col gap-1 whitespace-nowrap">
                 <span>
-                  <span className="text-[hsl(var(--foreground))]">点击</span>{" "}
-                  在下方添加块
+                  <span className="text-[hsl(var(--foreground))]">{t("click")}</span>{" "}
+                  {t("addBlockBelow")}
                 </span>
                 <span>
                   <span className="text-[hsl(var(--foreground))]">
-                    {altKeyLabel} 点击
+                    {altKeyLabel} {t("click")}
                   </span>{" "}
-                  在上方添加块
+                  {t("addBlockAbove")}
                 </span>
               </div>
             </TooltipContent>
@@ -203,7 +224,7 @@ export function EditorSideMenu() {
             type="button"
             draggable={false}
             aria-expanded={headingExpanded}
-            aria-label={headingExpanded ? "收起章节" : "展开章节"}
+            aria-label={headingExpanded ? t("collapseSection") : t("expandSection")}
             data-fold-hot={foldHot ? "true" : undefined}
             onMouseEnter={() => setFoldHot(true)}
             onMouseLeave={() => setFoldHot(false)}
@@ -231,7 +252,7 @@ export function EditorSideMenu() {
         <EditorAction
           type="button"
           draggable
-          aria-label="拖动移动块"
+          aria-label={t("dragToMoveBlock")}
           onPointerDown={() => {
             pressedHandle.current = true;
           }}

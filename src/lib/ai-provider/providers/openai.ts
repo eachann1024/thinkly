@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/providers/openai.ts#localMessages:1">`
+zh-Hans:
+  theCustomOpenaiModelRequestFailed: "请求自定义 OpenAI 模型失败"
+en:
+  theCustomOpenaiModelRequestFailed: "The custom OpenAI model request failed"
+`;
+const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";
 import {
   getCustomAIApiKey,
@@ -46,7 +55,7 @@ export async function handleOpenAIStream(
 
   if (!response.ok) {
     const errMs = await readErrorMessage(response);
-    throw new Error(errMs || "请求自定义 OpenAI 模型失败");
+    throw new Error(errMs || uiText("theCustomOpenaiModelRequestFailed"));
   }
 
   let fullText = "";

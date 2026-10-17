@@ -1,3 +1,22 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/hydrate.ts#block1:1">`
+zh-Hans:
+  recovered_other: "已恢复 {{count}} 篇未完成保存的笔记"
+en:
+  recovered_other: "Recovered {{count}} unsaved notes"
+  recovered_one: "Recovered {{count}} unsaved note"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/hydrate.ts#block2:2">`
+zh-Hans:
+  recoveredEditor: "内容已放回编辑区，请确认后继续编辑或保存。"
+  recoveryKept: "发现未自动覆盖的恢复稿"
+  newerStored: "主存储中有更新版本，恢复稿仍被保留。"
+en:
+  recoveredEditor: "The content is back in the editor. Review it before continuing to edit or save."
+  recoveryKept: "A recovery draft was preserved separately"
+  newerStored: "Storage contains a newer version. The recovery draft has been preserved."
+`);
 import {
   loadPagesFromStorage,
   saveInternalPage,
@@ -144,15 +163,15 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
     onboardingCompleted,
   });
   if (recoveredCount > 0) {
-    toast.warning(`已恢复 ${recoveredCount} 篇未完成保存的笔记`, {
+    toast.warning(extraText("recovered", { count: recoveredCount }), {
       id: "goose-recovered-internal-pages",
-      description: "内容已放回编辑区，请确认后继续编辑或保存。",
+      description: storeText("recoveredEditor"),
     });
   }
   if (conflictCount > 0) {
-    toast.warning("发现未自动覆盖的恢复稿", {
+    toast.warning(storeText("recoveryKept"), {
       id: "goose-recovery-conflicts",
-      description: "主存储中有更新版本，恢复稿仍被保留。",
+      description: storeText("newerStored"),
     });
   }
 };

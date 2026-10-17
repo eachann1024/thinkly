@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/webdavSync.ts#localMessages:1">`
+zh-Hans:
+  connected: "连接成功"
+  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV 只允许操作 Goose Note 备份文件"
+en:
+  connected: "Connected"
+  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV can only access Goose Note backup files"
+`;
+const uiText = createTranslator(localMessages);
 import { createClient } from "webdav";
 import { useSettings } from "@/stores/settings";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -42,7 +53,7 @@ export async function testWebdavConnection(
     await ensureRemoteDir(client, cleanDir);
     await client.getDirectoryContents(cleanDir);
 
-    return { ok: true, message: "连接成功" };
+    return { ok: true, message: uiText("connected") };
   } catch (err) {
     return { ok: false, message: formatWebdavError(err) };
   }
@@ -99,7 +110,7 @@ export async function uploadWebdavBackup(
   fileName: string,
 ): Promise<{ success: boolean; cleanedCount: number }> {
   if (!isBackupFileName(fileName)) {
-    throw new Error("WebDAV 只允许操作鹅毛笔备份文件");
+    throw new Error(uiText("webdavCanOnlyAccessGooseNotesBackupFiles"));
   }
 
   const cleanUrl = normalizeBaseUrl(url);
@@ -151,7 +162,7 @@ export async function downloadWebdavBackup(
   fileName: string,
 ): Promise<Blob> {
   if (!isBackupFileName(fileName)) {
-    throw new Error("WebDAV 只允许操作鹅毛笔备份文件");
+    throw new Error(uiText("webdavCanOnlyAccessGooseNotesBackupFiles"));
   }
 
   const cleanUrl = normalizeBaseUrl(url);
@@ -172,7 +183,7 @@ export async function deleteWebdavBackup(
   fileName: string,
 ): Promise<void> {
   if (!isBackupFileName(fileName)) {
-    throw new Error("WebDAV 只允许操作鹅毛笔备份文件");
+    throw new Error(uiText("webdavCanOnlyAccessGooseNotesBackupFiles"));
   }
 
   const cleanUrl = normalizeBaseUrl(url);
