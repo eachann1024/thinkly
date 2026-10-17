@@ -1,8 +1,0 @@
-{
-  "name": "goose-note-distribution-tools",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "ali-oss": "6.23.0"
-  }
-}

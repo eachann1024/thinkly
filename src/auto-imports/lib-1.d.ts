@@ -40,10 +40,10 @@ declare global {
   const NOTEBOOK_THEME: typeof import('../lib/imageExport/index').NOTEBOOK_THEME
   const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
   const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
+  const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
-  const PUBLIC_DISTRIBUTION_BASE_URL: typeof import('../lib/appUpdateRelease').PUBLIC_DISTRIBUTION_BASE_URL
   const PUBLIC_GITHUB_UPDATE_URL: typeof import('../lib/appUpdateRelease').PUBLIC_GITHUB_UPDATE_URL
   const PUBLIC_RELEASES_API_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_API_URL
   const PUBLIC_RELEASES_LATEST_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_LATEST_URL
