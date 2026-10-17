@@ -57,7 +57,7 @@ export function useSidebarNavigation(
       : "",
   );
 
-  const sidebarViewShortcut = (digit: 1 | 2 | 3) =>
+  const sidebarViewShortcut = (digit: number) =>
     formatShortcut(`Mod+${digit}`);
 
   // 历史列表替换内容面板；导航轨道继续提供返回笔记和设置的入口。

@@ -19,7 +19,6 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import { useRef, type ComponentProps } from "react";
-import { formatShortcut } from "@/lib/utils";
 import { useAiPanelVisibility } from "@/stores/useAiPanelVisibility";
 import {
   normalizeSidebarRailOrder,
@@ -53,10 +52,11 @@ export function SidebarModeRail({
   const pageTrashed = usePages((s) =>
     Boolean(s.activePageId && s.pages[s.activePageId]?.trashedAt),
   );
-  const toggleAiShortcut = useSettings((s) => s.appShortcuts.toggleAIPanel);
   const storedOrder = useSettings((s) => s.sidebarRailOrder);
   const setRailOrder = useSettings((s) => s.setSidebarRailOrder);
   const showAi = aiEnabled && aiFullscreen && folderActionsAvailable && Boolean(activePageId) && !pageTrashed;
+  // Mod+1~4 按完整顺序编号，AI 入口不在图标栏时也保留它的序号。
+  const order = normalizeSidebarRailOrder(storedOrder);
   const toggleAiLabel = aiPanelVisible ? uiText("closeAi") : uiText("openAi");
   const {
     sidebarModeRailRef,
@@ -76,14 +76,13 @@ export function SidebarModeRail({
     view: "pages" | "outline" | "search",
     label: string,
     icon: "folder" | "outline" | "search",
-    digit: 1 | 2 | 3,
   ): RailButtonConfig => {
     const selected = view === "search" ? searchSheetOpen : !settingsOpen && currentView === view;
     return {
       label,
       icon,
       selected,
-      tooltip: `${label} · ${sidebarViewShortcut(digit)}`,
+      tooltip: `${label} · ${sidebarViewShortcut(order.indexOf(view) + 1)}`,
       "data-sidebar-view": view,
       "aria-expanded":
         view === "search" ? undefined : !settingsOpen && !sidebarCollapsed && currentView === view,
@@ -109,23 +108,20 @@ export function SidebarModeRail({
     } as RailButtonConfig;
   };
   const buttons: Record<SidebarRailItem, RailButtonConfig> = {
-    pages: viewButton("pages", uiText("local_8e7e"), "folder", 1),
+    pages: viewButton("pages", uiText("local_8e7e"), "folder"),
     ai: {
       label: toggleAiLabel,
       icon: "ai",
       // 与其他入口一致：设置页打开时只高亮设置。
       selected: !settingsOpen && aiPanelVisible,
-      tooltip: toggleAiShortcut
-        ? `${toggleAiLabel} · ${formatShortcut(toggleAiShortcut)}`
-        : toggleAiLabel,
+      tooltip: `${toggleAiLabel} · ${sidebarViewShortcut(order.indexOf("ai") + 1)}`,
       onClick: () => {
         window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
       },
     },
-    outline: viewButton("outline", uiText("outline_9338"), "outline", 2),
-    search: viewButton("search", uiText("search_e5f7"), "search", 3),
+    outline: viewButton("outline", uiText("outline_9338"), "outline"),
+    search: viewButton("search", uiText("search_e5f7"), "search"),
   };
-  const order = normalizeSidebarRailOrder(storedOrder);
   const visible = order.filter((item) => item !== "ai" || showAi);
   return (
     <div

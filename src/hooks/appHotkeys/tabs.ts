@@ -3,6 +3,8 @@ import { createDesktopWindow } from "@/lib/electron/windowContext";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
 import { useSidebarView } from "@/stores/useSidebarView";
+import { useSettings } from "@/stores/useSettings";
+import { normalizeSidebarRailOrder } from "@/stores/settings/slices/sidebarRailSlice";
 import { matchShortcut } from "@/lib/shortcut-match";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import type { HotkeyEntry } from "./types";
@@ -68,7 +70,7 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         runUnifiedClose();
       },
     },
-    // Cmd/Ctrl+1~3 切左上角侧栏视图：本地、大纲、搜索。不绑定 Cmd+0（字体缩放重置）。
+    // Cmd/Ctrl+1~4 按图标栏顺序切换入口；AI 项开关 AI 面板。不绑定 Cmd+0（字体缩放重置）。
     {
       id: "switch-sidebar-view-by-number",
       match: (event) => {
@@ -80,24 +82,26 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         ) {
           return false;
         }
-        return /^Digit[1-3]$/.test(event.code);
+        return /^Digit[1-4]$/.test(event.code);
       },
       handler: (event) => {
         event.preventDefault();
+        const order = normalizeSidebarRailOrder(useSettings.getState().sidebarRailOrder);
+        const item = order[Number(event.code.slice(-1)) - 1];
+        // 与按钮一致只派发事件；AI 未启用或不可用时由工作区监听方忽略。
+        if (item === "ai") {
+          window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
+          return;
+        }
         if (useSidebarView.getState().sidebarCollapsed) {
           useSidebarView.getState().setSidebarCollapsed(false);
         }
-        const digit = Number(event.code.slice(-1));
         window.dispatchEvent(
-          new CustomEvent("goose-note:switch-sidebar-view", {
-            detail: {
-              view: digit === 1 ? "pages" : digit === 2 ? "outline" : "search",
-            },
-          }),
+          new CustomEvent("goose-note:switch-sidebar-view", { detail: { view: item } }),
         );
       },
     },
-    // Cmd/Ctrl+4~8 跳到对应序号标签，Cmd/Ctrl+9 跳到最后一个。1~3 已用于侧栏视图。
+    // Cmd/Ctrl+5~8 跳到对应序号标签，Cmd/Ctrl+9 跳到最后一个。1~4 已用于图标栏入口。
     {
       id: "switch-tab-by-number",
       match: (event) => {
@@ -110,12 +114,12 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         ) {
           return false;
         }
-        return /^Digit[4-9]$/.test(event.code);
+        return /^Digit[5-9]$/.test(event.code);
       },
       handler: (event) => {
         const digit = Number(event.code.slice(-1));
         const tabs = openTabsRef.current;
-        const targetTab = digit === 9 ? tabs[tabs.length - 1] : tabs[digit - 4];
+        const targetTab = digit === 9 ? tabs[tabs.length - 1] : tabs[digit - 5];
         if (!targetTab) return;
         event.preventDefault();
         useTabs.getState().setActiveTab(targetTab.id);
