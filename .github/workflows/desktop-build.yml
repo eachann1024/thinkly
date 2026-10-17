@@ -2,8 +2,8 @@ name: Desktop installers
 
 on:
   schedule:
-    # 每小时第 17 分检查；已有同版本 release 则只跑判断。
-    - cron: '17 * * * *'
+    # 每小时整点检查；已有同版本 release 则只跑判断。
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       publish:
