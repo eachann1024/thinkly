@@ -100,8 +100,11 @@ function editableCaret(el: HTMLElement): CaretBox | null {
   const caretLineHeight = blockContent ? contentHeight : Math.min(contentHeight, lineHeight);
   const caretHeight = Math.min(caretLineHeight, Math.round(fontSize * CARET_EM_RATIO));
   const rtl = style.direction === "rtl";
-  const caretTop = blockContent
-    ? blockContent.getBoundingClientRect().top + Math.max(0, (blockContent.getBoundingClientRect().height - caretHeight) / 2)
+  // 折叠块的 blockContent 还包住子块区与“添加区块”按钮，只能在标题所在行内居中。
+  const caretRow = blockContent && anchor.parentElement !== blockContent ? anchor.parentElement : blockContent;
+  const rowBox = caretRow?.getBoundingClientRect();
+  const caretTop = rowBox
+    ? rowBox.top + Math.max(0, (rowBox.height - caretHeight) / 2)
     : box.top + padTop + Math.max(0, (caretLineHeight - caretHeight) / 2);
   return {
     left: rtl
