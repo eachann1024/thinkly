@@ -38,7 +38,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      review: ${{ steps.pragent.outputs.review }}
+      review_b64: ${{ steps.pragent.outputs.review_b64 }}
     steps:
       - name: Checkout trusted review script
         uses: actions/checkout@v4
@@ -55,11 +55,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/review.json"
-          {
-            echo 'review<<REVIEW_JSON_EOF'
-            cat "$RUNNER_TEMP/review.json"
-            echo 'REVIEW_JSON_EOF'
-          } >> "$GITHUB_OUTPUT"
+          # 单行 base64：避免结果缺末尾换行导致分隔符解析失败，也避免含 { } 的行被当成密钥掩码而丢弃输出。
+          echo "review_b64=$(base64 -w0 "$RUNNER_TEMP/review.json")" >> "$GITHUB_OUTPUT"
           {
             echo '## AI 审核结论'
             echo
@@ -162,5 +159,8 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REVIEW_RESULT: ${{ needs.review.result }}
-          REVIEW_JSON: ${{ needs.review.outputs.review }}
-        run: python3 .github/codex-review/merge.py
+          REVIEW_B64: ${{ needs.review.outputs.review_b64 }}
+        run: |
+          REVIEW_JSON="$(printf '%s' "$REVIEW_B64" | base64 -d 2>/dev/null || true)"
+          export REVIEW_JSON
+          python3 .github/codex-review/merge.py
