@@ -1,4 +1,4 @@
-import { appendFileSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,10 +54,34 @@ function knownFiles(entries) {
   return entries.filter((item) => isFile(item, item.file_name) && (item.file_name === NOTE_NAME || installerVersion(item.file_name)));
 }
 
+function fileSize(item) {
+  const size = Number(item?.size);
+  return Number.isInteger(size) && size >= 0 ? size : -1;
+}
+
+function folderFiles(entries) {
+  return entries.filter((item) => item?.fid && item.file_name && item.file !== false && item.dir !== true && item.file_type !== 0);
+}
+
+function logFolder(entries) {
+  const lines = folderFiles(entries)
+    .map((item) => `QUARK_FILE name=${item.file_name} size=${fileSize(item)}`)
+    .sort();
+  console.log(["QUARK_FOLDER_FINAL", ...lines].join("\n"));
+  const summary = process.env.GITHUB_STEP_SUMMARY;
+  if (summary) appendFileSync(summary, `${["QUARK_FOLDER_FINAL", ...lines].join("\n")}\n`);
+}
+
 async function uploadReplacing(cookie, folderId, source, name) {
+  const localSize = statSync(source).size;
   const tempName = `${name}.uploading`;
   const backupName = `${name}.previous`;
   let entries = await listChildren(cookie, folderId);
+  const existing = entries.filter((item) => isFile(item, name));
+  if (existing.some((item) => fileSize(item) === localSize)) {
+    console.log(`跳过同名同大小 ${name} ${localSize}`);
+    return;
+  }
   const orphan = entries.find((item) => isFile(item, backupName) && !entries.some((entry) => isFile(entry, name)));
   if (orphan) await renameFile(cookie, orphan.fid, name);
   entries = await listChildren(cookie, folderId);
@@ -107,19 +131,45 @@ async function main() {
   writeFileSync(note, noteText(version));
   await uploadReplacing(cookie, folderId, note, NOTE_NAME);
   await retainLatest(cookie, folderId, version);
+  logFolder(await listChildren(cookie, folderId));
   const summary = process.env.GITHUB_STEP_SUMMARY;
-  if (summary) appendFileSync(summary, `夸克网盘已上传 ${names.length} 个安装包，当前版本 v${version}。\n`);
-  console.log(`夸克网盘已上传 ${names.length} 个安装包，当前版本 v${version}。`);
+  if (summary) appendFileSync(summary, `夸克网盘已处理 ${names.length} 个安装包，当前版本 v${version}。\n`);
+  console.log(`夸克网盘已处理 ${names.length} 个安装包，当前版本 v${version}。`);
+}
+
+function failureReason(error) {
+  if (typeof error?.reason === "string" && error.reason) return error.reason;
+  const message = String(error?.message ?? "");
+  if (message.includes("未配置")) return "not_configured";
+  if (message.includes("Cookie 失效")) return "cookie_invalid";
+  const status = /HTTP (\d+)/.exec(message)?.[1];
+  if (message.includes("分片") && status) return `part_upload_http_${status}`;
+  if (message.includes("完成分片") && status) return `complete_upload_http_${status}`;
+  if (message.includes("超时")) return "timeout";
+  if (message.includes("缺少安装包")) return "missing_installers";
+  if (message.includes("版本号")) return "bad_version";
+  if (message.includes("网络")) return "network";
+  return "upload_failed";
+}
+
+function reportFailure(version, error) {
+  const safeVersion = /^\d+\.\d+\.\d+$/.test(version) ? version : "unknown";
+  const reason = failureReason(error).replace(/\s+/g, "_");
+  const line = `QUARK_UPLOAD_FAILED version=${safeVersion} reason=${reason}`;
+  console.error(line);
+  const summary = process.env.GITHUB_STEP_SUMMARY;
+  if (summary) appendFileSync(summary, `${line}\n`);
+  const message = error instanceof Error ? error.message : "夸克上传失败";
+  if (message !== line) console.error(message);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  let version = String(process.argv[3] ?? "").replace(/^v/, "");
+  if (!/^\d+\.\d+\.\d+$/.test(version)) version = "unknown";
   try {
     await main();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "夸克上传失败";
-    const summary = process.env.GITHUB_STEP_SUMMARY;
-    if (summary && message.includes("夸克 Cookie")) appendFileSync(summary, `${message}\n`);
-    console.error(message);
+    reportFailure(version, error);
     process.exit(1);
   }
 }

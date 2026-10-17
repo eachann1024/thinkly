@@ -34,9 +34,16 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
+          version=unknown
+          fail() {
+            line="QUARK_UPLOAD_FAILED version=${version} reason=$1"
+            if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then printf '%s\n' "$line" >> "$GITHUB_STEP_SUMMARY"; fi
+            printf '%s\n' "$line" >&2
+            exit 1
+          }
           tag="$RELEASE_TAG"
           if [ -z "$tag" ] || [ "$tag" = "latest" ]; then
-            tag="$(gh release view --repo "$GH_REPO" --json tagName --jq .tagName)"
+            tag="$(gh release view --repo "$GH_REPO" --json tagName --jq .tagName)" || fail release_lookup_failed
           fi
           mkdir -p quark-assets
           downloaded=0
@@ -47,6 +54,6 @@ jobs:
             fi
             sleep 5
           done
-          test "$downloaded" = 1
-          version="$(node --input-type=module -e 'const match=/^v(\d+\.\d+\.\d+)(?:-|$)/.exec(process.argv[1] ?? ""); if (!match) process.exit(1); console.log(match[1])' "$tag")"
+          if [ "$downloaded" != 1 ]; then fail release_download_failed; fi
+          version="$(node --input-type=module -e 'const match=/^v(\d+\.\d+\.\d+)(?:-|$)/.exec(process.argv[1] ?? ""); if (!match) process.exit(1); console.log(match[1])' "$tag")" || fail bad_version
           node scripts/quark-upload.mjs quark-assets "$version"
