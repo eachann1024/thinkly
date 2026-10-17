@@ -68,7 +68,7 @@ PROMPT
   echo '```'
 } >> "$prompt_file"
 
-out="${RUNNER_TEMP}/review.json"
+out="${RUNNER_TEMP}/codex-last-message.json"
 env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_home" codex exec \
   --ephemeral \
   --disable shell_tool \
