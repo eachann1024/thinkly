@@ -10,6 +10,7 @@ const uiText = createTranslator(localMessages);
 import { buildDocumentCss } from "./styles/documentCss";
 import { buildBlockCss } from "./styles/blockCss";
 import { buildFooterCss } from "./styles/footerCss";
+import { buildDecorationCss } from "./styles/decorations";
 import type { CardTheme } from "../themes";
 import type { WatermarkConfig } from "../watermark";
 import { getWatermarkHTML, normalizeWatermarkConfig } from "../watermark";
@@ -52,7 +53,7 @@ export function buildStyledHTML(params: {
   const titleClass = titleHasBlockBg
     ? ' class="gooseshot-title has-block-bg"'
     : ' class="gooseshot-title"';
-  const decoStyle = t.showDecorations
+  const decoStyle = t.showDecorations && !t.decorations?.length
     ? `
     .gooseshot-container::before {
       content: '';
@@ -91,7 +92,7 @@ export function buildStyledHTML(params: {
 <meta charset="UTF-8">
 <link rel="stylesheet" href="${getGoogleFontsUrl()}">
 <style>
-${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleStyle })}${buildBlockCss(t)}${buildFooterCss(t)}
+${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleStyle })}${buildBlockCss(t)}${buildFooterCss(t)}${buildDecorationCss(t)}
 </style>
 </head>
 <body>

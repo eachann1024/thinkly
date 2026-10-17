@@ -1,3 +1,7 @@
+import type { CardDecoration } from "./decorations";
+
+export type { CardDecoration } from "./decorations";
+
 // ── Card Theme Interface ───────────────────────────────────────
 export interface CardTheme {
   id: string;
@@ -45,4 +49,6 @@ export interface CardTheme {
   showDecorations: boolean;
   decorationColor: string;
   watermarkVisible: boolean;
+  /** 主题专属装饰（胶带、网点、印章等），见 decorations.ts */
+  decorations?: CardDecoration[];
 }

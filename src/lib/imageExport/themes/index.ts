@@ -1,4 +1,4 @@
-export type { CardTheme } from "./types";
+export type { CardTheme, CardDecoration } from "./types";
 export {
   CARD_THEMES,
   getCardTheme,

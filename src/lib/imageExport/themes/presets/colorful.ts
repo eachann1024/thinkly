@@ -52,7 +52,7 @@ export const COLORFUL_THEMES: CardTheme[] = [
     bodyFontSize: 16,
     bodyLineHeight: 1.7,
     bodyLetterSpacing: "0",
-    background: "linear-gradient(145deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
+    background: "#121a2c",
     cardBg: "transparent",
     textColor: TEXT_COLORS.dark.primary,
     secondaryText: TEXT_COLORS.dark.secondary,
@@ -70,9 +70,14 @@ export const COLORFUL_THEMES: CardTheme[] = [
     cardRadius: 0,
     cardBorder: "none",
     cardShadow: "none",
-    showDecorations: true,
+    showDecorations: false,
     decorationColor: "rgba(0,217,255,0.1)",
     watermarkVisible: true,
+    decorations: [
+      { kind: "halftone-corner", color: "rgba(0,217,255,0.16)", size: 260 },
+      { kind: "grain", target: "container", tone: "#ffffff", opacity: 0.05 },
+      { kind: "title-rule", color: "#00d9ff", thickness: 5, width: 56, gap: 18 },
+    ],
   },
 
   // ── 15. Synthwave ────────────────────────────────────────────
@@ -94,8 +99,8 @@ export const COLORFUL_THEMES: CardTheme[] = [
     bodyFontSize: 15,
     bodyLineHeight: 1.75,
     bodyLetterSpacing: "0",
-    background: "linear-gradient(165deg, #1a0533 0%, #2d0a4e 45%, #0d0220 100%)",
-    cardBg: "rgba(20,8,40,0.6)",
+    background: "#170a2e",
+    cardBg: "#1c0d38",
     textColor: TEXT_COLORS.dark.primary,
     secondaryText: TEXT_COLORS.dark.secondary,
     accent: "#ff2a6d",
@@ -111,10 +116,15 @@ export const COLORFUL_THEMES: CardTheme[] = [
     cardPaddingY: 40,
     cardRadius: 18,
     cardBorder: "1px solid rgba(255,42,109,0.25)",
-    cardShadow: "0 0 50px rgba(255,42,109,0.18), inset 0 0 0 1px rgba(255,255,255,0.04)",
-    showDecorations: true,
+    cardShadow: "none",
+    showDecorations: false,
     decorationColor: "rgba(0,217,255,0.12)",
     watermarkVisible: true,
+    decorations: [
+      { kind: "synth-horizon", color: "rgba(255,42,109,0.32)" },
+      { kind: "synth-sun", color: "rgba(255,92,120,0.5)" },
+      { kind: "scanlines", target: "card", color: "rgba(255,255,255,0.025)" },
+    ],
   },
 
   // ── 18. Solarized Light ──────────────────────────────────────

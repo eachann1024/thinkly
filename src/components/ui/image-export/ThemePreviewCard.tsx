@@ -11,10 +11,14 @@ en:
   sampleBody: "Thoughtful typography makes reading a pleasure. Every detail reflects the care behind the design."
 `;
 const uiText = createTranslator(localMessages);
+
+/** 缩略卡约为导出尺寸的 0.3 倍，装饰按同比例缩放。 */
+const MINI_DECORATION_SCALE = 0.3;
 import * as GooseIcons from "@/components/ui/icons";
 import { useMemo } from "react";
 import { type CardTheme, type WatermarkConfig } from "@/lib/imageExport";
 import { buildImageExportPreviewHtml } from "@/lib/imageExport/livePreview";
+import { buildDecorationStyles } from "@/lib/imageExport/serializer/styles/decorations";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { cn } from "@/lib/utils";
 import { PreviewFrame } from "./PreviewFrame";
@@ -47,12 +51,31 @@ export function ThemePreviewCard({
       watermarkConfig,
     });
   }, [notebookPreview, sampleBlocks, theme, watermarkConfig]);
+  const miniClass = `gs-mini-${theme.id}`;
+  const deco = useMemo(
+    () =>
+      buildDecorationStyles(
+        theme,
+        {
+          container: `.${miniClass}`,
+          card: `.${miniClass} .gs-mini-card`,
+          header: `.${miniClass} .gs-mini-header`,
+          title: `.${miniClass} .gs-mini-title`,
+          content: `.${miniClass} .gs-mini-body`,
+          watermark: `.${miniClass} .gs-mini-footer`,
+          date: `.${miniClass} .gs-mini-footer`,
+        },
+        MINI_DECORATION_SCALE,
+      ),
+    [miniClass, theme],
+  );
 
   const cardStyle: React.CSSProperties = {
-    background: theme.background,
+    background: sampleHtml ? theme.background : deco.containerBackground,
     borderRadius: 10,
     padding: 14,
     position: "relative",
+    overflow: "hidden",
     transition: reducedMotion
       ? "box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1)"
       : "transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1)",
@@ -66,11 +89,8 @@ export function ThemePreviewCard({
   };
 
   const innerCardStyle: React.CSSProperties = {
-    background: theme.cardBg.includes("rgba")
-      ? theme.cardBg
-      : theme.cardBg === "transparent"
-        ? "transparent"
-        : theme.cardBg,
+    background: deco.cardBackground,
+    position: "relative",
     borderRadius: Math.max(theme.cardRadius * 0.35, 4),
     padding: `${Math.max(theme.cardPaddingY * 0.28, 10)}px ${Math.max(theme.cardPaddingX * 0.28, 12)}px`,
     border: theme.cardBorder === "none" ? "none" : "1px solid rgba(0,0,0,0.06)",
@@ -87,7 +107,6 @@ export function ThemePreviewCard({
     letterSpacing: theme.titleLetterSpacing,
     color: theme.textColor,
     textAlign: theme.titleAlign,
-    marginBottom: 4,
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -114,9 +133,11 @@ export function ThemePreviewCard({
       onClick={onClick}
       className="group flex flex-col gap-2.5 text-left"
     >
+      {!sampleHtml && deco.css ? <style>{deco.css}</style> : null}
       <div
         style={cardStyle}
         className={cn(
+          miniClass,
           "cursor-pointer",
           !reducedMotion && "group-hover:-translate-y-0.5",
         )}
@@ -131,9 +152,11 @@ export function ThemePreviewCard({
             />
           </div>
         ) : (
-          <div style={innerCardStyle}>
-            <div style={titleStyle}>{previewTitle}</div>
-            <div style={bodyStyle}>{previewBody}</div>
+          <div className="gs-mini-card" style={innerCardStyle}>
+            <div className="gs-mini-header" style={{ marginBottom: 4 }}>
+              <div className="gs-mini-title" style={titleStyle}>{previewTitle}</div>
+            </div>
+            <div className="gs-mini-body" style={bodyStyle}>{previewBody}</div>
           </div>
         )}
         {selected && (
