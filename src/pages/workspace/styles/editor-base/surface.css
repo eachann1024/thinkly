@@ -132,14 +132,14 @@
 
 /* 光标所在文本行：Zed 式浅底，只盖当前块内容、不含子块。
  * 左右外扩与标题色条对齐，再用等量 padding 把文字/光标放回原基线。
- * 标题本身已外扩 8px，不再叠一次。 */
-:is(.bn-editor:focus-within .bn-block-outer.goose-active-line, .bn-editor .bn-block-outer.goose-ai-empty-target)
+ * 标题本身已外扩 8px，不再叠一次。容器块由外层统一高亮，避免行底色外扩遮住引用边线。 */
+:is(.bn-editor:focus-within .bn-block-outer.goose-active-line, .bn-editor .bn-block-outer.goose-ai-empty-target):not(.goose-content-container)
   > .bn-block
   > .bn-block-content {
   background-color: var(--goose-active-line-bg);
 }
 
-:is(.bn-editor:focus-within .bn-block-outer.goose-active-line, .bn-editor .bn-block-outer.goose-ai-empty-target)
+:is(.bn-editor:focus-within .bn-block-outer.goose-active-line, .bn-editor .bn-block-outer.goose-ai-empty-target):not(.goose-content-container)
   > .bn-block
   > .bn-block-content:not([data-content-type="heading"]) {
   box-sizing: border-box;
