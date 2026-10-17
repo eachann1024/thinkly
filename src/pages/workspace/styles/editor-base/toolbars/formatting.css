@@ -124,6 +124,16 @@
   .goose-formatting-toolbar-row {
   gap: calc(6px * var(--editor-ui-scale, 1));
   padding: calc(4px * var(--editor-ui-scale, 1));
+  /* 浮动条按内容取宽；缩放后的小数宽度会让 wrap 误判换行，改为单行、极窄时横向滚动。 */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+[data-formatting-toolbar][data-goose-floating-toolbar="true"]
+  :is(.goose-formatting-toolbar-group, .goose-formatting-toolbar-row > *) {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
 }
 
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
