@@ -140,8 +140,8 @@ export function useWorkspaceLayoutState({
 
   const aiPanelVisible = (showSideAiPanel || showFullscreenAi) && Boolean(aiNotebookId);
   useEffect(() => {
-    useAiPanelVisibility.setState({ visible: aiPanelVisible });
-  }, [aiPanelVisible]);
+    useAiPanelVisibility.setState({ visible: aiPanelVisible, fullscreen: aiFullscreen });
+  }, [aiPanelVisible, aiFullscreen]);
 
   const paneRegistry = useOptionalEditorPaneRegistry();
   return {
