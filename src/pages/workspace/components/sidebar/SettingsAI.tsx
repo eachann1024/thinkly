@@ -22,6 +22,7 @@ import {
 import { renderAIModelSection } from "./settings-ai/renderAIModelSection";
 import { useAIContextAvailability } from "./settings-ai/useAIContextAvailability";
 import { renderAIContextSection } from "./settings-ai/renderAIContextSection";
+import { ReflectionAISection } from "./settings-ai/renderReflectionSection";
 import { renderAIServiceSection } from "./settings-ai/renderAIServiceSection";
 import { renderAIConnectionTestSection } from "./settings-ai/renderAIConnectionTestSection";
 
@@ -88,6 +89,7 @@ export function SettingsAI(props: SettingsAIProps) {
           {enabledSection}
           {modelSection}
           {contextSection}
+          <ReflectionAISection />
         </div>
         <div className="space-y-5">{serviceSection}</div>
       </div>
