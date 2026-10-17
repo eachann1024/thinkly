@@ -68,7 +68,7 @@ html.is-electron .electron-titlebar :is(
 ) {
   font-family: inherit;
   font-size: var(--titlebar-label-size);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.4;
 }
 /* 同时覆盖已保存文件的按钮与未保存文件的静态图标；保留原点击区域。 */
@@ -196,4 +196,9 @@ html.is-electron .electron-titlebar [data-page-title-field] {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+}
+
+/* 历史预览顶栏：无导航按钮，左侧只为 macOS 红绿灯 / Windows 边距留位，工具条占满整行。 */
+.workspace-shell[data-electron-chrome] .electron-titlebar[data-history-mode] {
+  padding-left: var(--electron-traffic-inset, 12px);
 }

@@ -45,24 +45,24 @@ export function HistoryToolbar() {
   } = useHistoryViewLogic();
 
   return (
-    <header className="h-11 px-3 flex items-center gap-3 shrink-0 bg-[hsl(var(--goose-editor-bg))]">
+    <header className="history-toolbar h-11 min-w-0 flex-1 px-3 flex items-center gap-3 bg-[hsl(var(--goose-editor-bg))] [-webkit-app-region:no-drag]">
       <Button
         variant="secondary"
         size="sm"
         aria-label={t("backToEditor")}
-        className="history-secondary-control h-8 px-3 text-xs gap-1.5 shadow-none"
+        className="history-secondary-control h-8 px-3 text-sm gap-1.5 shadow-none"
         onClick={exit}
+        data-electron-no-drag
       >
-        <GooseIcons.ArrowLeft className="h-3.5 w-3.5" />
+        <GooseIcons.ArrowLeft className="h-4 w-4" />
         {t("back")}
       </Button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="truncate text-sm font-medium">{pageTitle}</span>
-      </div>
+      <span className="h-5 w-px shrink-0 bg-[var(--workspace-divider-strong)]" aria-hidden />
+      <span className="min-w-0 flex-1 truncate text-base font-semibold [-webkit-app-region:drag]">{pageTitle}</span>
 
       {sidebarCollapsed && (
-        <Button variant="ghost" size="sm" onClick={openVersions} aria-label={t("selectAVersion")}>
+        <Button variant="ghost" size="sm" onClick={openVersions} aria-label={t("selectAVersion")} data-electron-no-drag>
           <GooseIcons.History className="h-4 w-4" />{t("version")}
         </Button>
       )}
@@ -77,7 +77,8 @@ export function HistoryToolbar() {
                 : t("restoreThisVersion")
           }
           aria-busy={isRestoring || selectedStatus === "loading" || undefined}
-          className="history-primary-control h-7 shrink-0 px-3 text-xs"
+          className="history-primary-control h-8 shrink-0 px-4 text-sm font-medium"
+          data-electron-no-drag
           disabled={
             !selectedVersionId || selectedStatus !== "ready" || isRestoring
           }

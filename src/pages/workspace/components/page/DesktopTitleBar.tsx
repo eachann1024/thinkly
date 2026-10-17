@@ -137,14 +137,15 @@ export function DesktopTitleBar({
   );
 
   if (inHistoryMode) {
+    // 历史预览：不渲染导航/侧栏/置顶按钮和标签栏，仅保留 返回 + 标题 + 还原。
     return (
       <div
-        className="electron-titlebar flex w-full shrink-0 items-center"
+        className={cn("electron-titlebar flex w-full shrink-0 items-center", !isFramelessElectron && "pr-4")}
+        data-history-mode
         data-sidebar-collapsed={sidebarCollapsed}
         onPointerDown={onTitleBarPointerDown}
         onDoubleClick={onTitleBarDoubleClick}
       >
-        {windowControls}
         <HistoryToolbar />
         {isFramelessElectron ? <WinWindowControls /> : null}
       </div>
