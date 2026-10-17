@@ -3,7 +3,7 @@ import path from "node:path";
 
 const SR = 48000;
 const BPM = 120;
-const DURATION = 32;
+const DURATION = 48;
 const TOTAL = SR * DURATION;
 const BEAT = 60 / BPM;
 const BAR = BEAT * 4;
@@ -97,7 +97,7 @@ for (let loop = 0; loop < DURATION / (BAR * 4); loop += 1) {
 }
 
 // 强调落位与品牌定格：8ms 1200Hz 正弦 click。
-for (const frame of [1640, 1800]) {
+for (const frame of [2360, 2640]) {
   const start = frame / 60;
   addTone(
     start,
