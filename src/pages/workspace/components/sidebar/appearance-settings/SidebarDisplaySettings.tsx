@@ -10,8 +10,7 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Switch, SwitchRow } from "@/components/ui/switch";
 import { useSettings } from "@/stores/useSettings";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { APPEARANCE_OPTION_ROW_CLASS } from "./shared";
@@ -23,13 +22,13 @@ export function SidebarDisplaySettings() {
   const setEnabled = useSettings((state) => state.setShowSidebarFolderCount);
   return (
     <SettingsSectionCard title={uiText("sidebar_63f4")}>
-      <div className={`flex items-center justify-between gap-4 p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
-        <div className="flex items-center gap-3">
+      <SwitchRow className={`flex items-center justify-between gap-4 p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
+        <span className="flex items-center gap-3">
           <GooseIcons.Folder className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-          <Label htmlFor="sidebar-folder-count" className="cursor-pointer">{uiText("showFolderCounts_f654")}</Label>
-        </div>
+          <span className="text-sm font-medium leading-none">{uiText("showFolderCounts_f654")}</span>
+        </span>
         <Switch id="sidebar-folder-count" checked={enabled} onCheckedChange={setEnabled} className={SWITCH_CLASS} />
-      </div>
+      </SwitchRow>
     </SettingsSectionCard>
   );
 }
