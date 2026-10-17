@@ -12,7 +12,6 @@ en:
   monospace: "Monospace"
 `;
 const uiText = createTranslator(localMessages);
-import { ListRow } from "@/components/ui/list-row";
 import type { Page } from "@/types";
 import {
   DEFAULT_FONT_NAMES,
@@ -59,19 +58,22 @@ export function FontSelector({
   };
 
   return (
-    <div className={cn("flex gap-[var(--goose-list-row-gap)]", compact ? "p-0.5" : "p-1")}>
+    <div
+      role="group"
+      className={cn(
+        "goose-segmented-tray grid w-full grid-cols-3 gap-0.5 p-[3px]",
+      )}
+    >
       {defaultFonts.map((font) => {
         const customFont = customFonts[font.value];
-        const label = font.label;
-        const fontName = customFont.font || font.defaultFont;
+        const fontFamily = toCssFontFamily(customFont.font || font.defaultFont);
         const selected = (value ?? "default") === font.value;
 
         return (
-          <ListRow
+          <button
             key={font.value}
             type="button"
             aria-pressed={selected}
-            data-selected={selected || undefined}
             onPointerDown={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -83,27 +85,18 @@ export function FontSelector({
               selectFont(font.value);
             }}
             className={cn(
-              "goose-list-row goose-accent-selection flex-1 shadow-none ",
-              compact ? "px-2 py-1.5" : "px-3 py-2",
-              "flex flex-col items-center justify-center border-2 border-transparent",
+              "goose-segmented-option flex min-w-0 flex-col items-center justify-center",
+              compact ? "h-16 gap-1.5" : "h-[72px] gap-2",
             )}
           >
             <span
-              className={cn(
-                "leading-none",
-                compact ? "mb-0.5 text-xl" : "mb-1 text-2xl",
-              )}
-              style={{ fontFamily: toCssFontFamily(fontName) }}
+              className={cn("leading-none", compact ? "text-2xl" : "text-[28px]")}
+              style={{ fontFamily }}
             >
               Ag
             </span>
-            <span
-              className="text-xs"
-              style={{ fontFamily: toCssFontFamily(fontName) }}
-            >
-              {label}
-            </span>
-          </ListRow>
+            <span className="truncate text-xs leading-none">{font.label}</span>
+          </button>
         );
       })}
     </div>

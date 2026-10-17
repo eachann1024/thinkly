@@ -1,0 +1,37 @@
+/* 分段托盘：凹陷底承载一组同类选项，选中项凸起并带精准轮廓；随 popover 与前景色适配所有主题。 */
+:root {
+  --goose-segmented-tray-bg: color-mix(in srgb, hsl(var(--foreground)) 5%, hsl(var(--popover)));
+  --goose-segmented-raised-bg: hsl(var(--popover));
+  --goose-segmented-raised-shadow: 0 1px 2px rgb(15 23 42 / 0.1), 0 0 0 1px rgb(15 23 42 / 0.06);
+}
+.dark {
+  --goose-segmented-tray-bg: color-mix(in srgb, #000 28%, hsl(var(--popover)));
+  --goose-segmented-raised-bg: color-mix(in srgb, hsl(var(--foreground)) 10%, hsl(var(--popover)));
+  --goose-segmented-raised-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+.goose-segmented-tray {
+  border-radius: calc(var(--goose-control-radius) + 2px);
+  background: var(--goose-segmented-tray-bg);
+}
+
+.goose-segmented-option {
+  border: 0;
+  border-radius: var(--goose-control-radius);
+  background: transparent;
+  color: var(--goose-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--goose-control-motion-duration) ease-out,
+    box-shadow var(--goose-control-motion-duration) ease-out,
+    color var(--goose-control-motion-duration) ease-out;
+}
+.goose-segmented-option:is(:hover, :focus-visible) {
+  color: var(--goose-text-primary);
+  outline: none;
+}
+.goose-segmented-option[aria-pressed="true"] {
+  background: var(--goose-segmented-raised-bg);
+  color: var(--goose-text-primary);
+  box-shadow: var(--goose-segmented-raised-shadow), inset 0 0 0 1px var(--goose-accent-solid);
+}
