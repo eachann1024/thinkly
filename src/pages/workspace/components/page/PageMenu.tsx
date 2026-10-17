@@ -4,12 +4,6 @@ zh-Hans:
   wordCount: "字数：{{count}}"
   editedAt: "编辑于 {{date}}"
   moreActions: "更多操作"
-  pageLayout: "页面布局"
-  contentWidth: "正文宽度"
-  chooseLayout: "选择当前笔记布局"
-  standard: "标准"
-  fullWidth: "全宽"
-  defaultWidth: "跟随默认宽度"
   lockNote: "锁定笔记"
   newWindow: "在新窗口打开"
   import: "导入"
@@ -23,12 +17,6 @@ en:
   wordCount: "Word count: {{count}}"
   editedAt: "Edited {{date}}"
   moreActions: "More actions"
-  pageLayout: "Page layout"
-  contentWidth: "Content width"
-  chooseLayout: "Choose a layout for this note"
-  standard: "Standard"
-  fullWidth: "Full width"
-  defaultWidth: "Use default width"
   lockNote: "Lock note"
   newWindow: "Open in new window"
   import: "Import"
@@ -40,7 +28,6 @@ en:
   moveTrash: "Move to Trash"
 `;
 const uiText = createTranslator(localMessages);
-import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { Popover, PopoverTrigger, PopoverContent, PopoverAction } from "@/components/ui/popover";
@@ -49,11 +36,11 @@ import "./page-menu.css";
 import { ImageExportThemeSelector } from "@/components/ui/image-export-theme-selector";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { deletePageWithUndo } from "@/lib/page-delete-actions";
-import { cn, getPlatformKind } from "@/lib/utils";
-import { normalizePageLayout } from "@/lib/local-frontmatter";
+import { getPlatformKind } from "@/lib/utils";
 import { createDesktopWindow } from "@/lib/electron/windowContext";
 import { detachTabFromThisWindow } from "@/lib/electron/detachTab";
 import { PageExportSubmenu } from "./page-menu/PageExportSubmenu";
+import { PageWidthSelector } from "./page-menu/PageWidthSelector";
 import { usePageMenu } from "./page-menu/usePageMenu";
 export function PageMenu() {
   useLocale();
@@ -109,40 +96,6 @@ export function PageMenu() {
           }}
           forceMount
         >
-          {!page.isFolder && (
-            <section aria-label={uiText("pageLayout")} className="px-1 py-2">
-              <div className="px-1 pb-2 text-xs text-muted-foreground">{uiText("contentWidth")}</div>
-              <div className="grid grid-cols-2 gap-1" role="group" aria-label={uiText("chooseLayout")}>
-                {([
-                  ["standard", uiText("standard")],
-                  ["full", uiText("fullWidth")],
-                ] as const).map(([value, label]) => (
-                  <Button contentStyle="preserve" variant="ghost" size={null}
-                    key={value}
-                    type="button"
-                    aria-pressed={normalizePageLayout(page.pageLayout ?? defaultLayout) === value}
-                    onClick={() => updatePage(activePageId, { pageLayout: value })}
-                    className={cn(
-                      "rounded-lg border px-2 py-2 text-xs ",
-                      normalizePageLayout(page.pageLayout ?? defaultLayout) === value
-                        ? "border-[var(--goose-interactive-selected-border)] bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
-                        : "border-border ",
-                    )}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-              {page.pageLayout !== undefined && (
-                <Button contentStyle="preserve" variant="ghost" size={null}
-                  type="button"
-                  className="mt-2 px-1 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={() => updatePage(activePageId, { pageLayout: undefined })}
-                >
-                  {uiText("defaultWidth")}</Button>
-              )}
-            </section>
-          )}
           {/* Font Selector */}
           <div className="pb-1.5">
             <FontSelector
@@ -153,6 +106,16 @@ export function PageMenu() {
               }
             />
           </div>
+
+          {!page.isFolder && (
+            <div className="pb-1.5">
+              <PageWidthSelector
+                pageLayout={page.pageLayout}
+                defaultLayout={defaultLayout}
+                onChange={(pageLayout) => updatePage(activePageId, { pageLayout })}
+              />
+            </div>
+          )}
 
           <div
             role="button"
