@@ -12,7 +12,6 @@ zh-Hans:
   checklist: "待办事项"
   bulletedList: "无序列表"
   numberedList: "有序列表"
-  toggleList: "折叠列表"
   toggleHeading1: "折叠一级标题"
   toggleHeading2: "折叠二级标题"
   toggleHeading3: "折叠三级标题"
@@ -28,7 +27,6 @@ en:
   checklist: "Checklist"
   bulletedList: "Bulleted list"
   numberedList: "Numbered list"
-  toggleList: "Toggle list"
   toggleHeading1: "Toggle heading 1"
   toggleHeading2: "Toggle heading 2"
   toggleHeading3: "Toggle heading 3"
@@ -48,7 +46,6 @@ const BLOCK_CONVERSIONS = [
   { get label() { return t("checklist"); }, type: "checkListItem" },
   { get label() { return t("bulletedList"); }, type: "bulletListItem" },
   { get label() { return t("numberedList"); }, type: "numberedListItem" },
-  { get label() { return t("toggleList"); }, type: "toggleListItem", props: { collapsed: false } },
   { get label() { return t("toggleHeading1"); }, type: "heading", props: { level: 1, isToggleable: true, collapsed: false } },
   { get label() { return t("toggleHeading2"); }, type: "heading", props: { level: 2, isToggleable: true, collapsed: false } },
   { get label() { return t("toggleHeading3"); }, type: "heading", props: { level: 3, isToggleable: true, collapsed: false } },
@@ -60,7 +57,7 @@ const BLOCK_CONVERSIONS = [
 const aliases: Record<string, string> = {
   paragraph: "text paragraph 文本", heading: "heading title 标题", checkListItem: "todo task 待办",
   bulletListItem: "bullet list 无序列表", numberedListItem: "number ordered 有序列表",
-  toggleListItem: "toggle 折叠列表", quote: "quote 引用", callout: "callout 标注",
+  quote: "quote 引用", callout: "callout 标注",
   codeBlock: "code 代码块",
 };
 

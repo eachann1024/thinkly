@@ -219,7 +219,7 @@ export function getBlockNoteSlashMenuItems(
       get description() { return t("insertAQuote"); },
       icon: SLASH_ICONS.quote,
       aliases: ["quote", "blockquote", "yinyong"],
-      badge: '" ',
+      badge: ">",
       onItemClick: () => insertOrUpdate({ type: "quote" }),
     },
     {

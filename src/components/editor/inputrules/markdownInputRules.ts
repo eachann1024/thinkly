@@ -34,7 +34,7 @@ export function matchCheckListTrigger(
 export function matchQuoteTrigger(
   textBefore: string,
 ): { triggerText: string } | null {
-  const matched = /^["“|｜]$/u.exec(textBefore);
+  const matched = /^["“|｜>＞]$/u.exec(textBefore);
   if (!matched) return null;
   return { triggerText: matched[0] };
 }
@@ -99,10 +99,6 @@ function getBlockTrigger(
       props: { level: heading[1].length, isToggleable: false, collapsed: false },
       triggerText: heading[0],
     };
-  }
-
-  if (/^[>＞]$/u.test(textBefore)) {
-    return { type: "toggleListItem", props: { collapsed: false }, triggerText: textBefore };
   }
 
   const quote = matchQuoteTrigger(textBefore);

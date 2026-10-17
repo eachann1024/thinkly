@@ -228,6 +228,11 @@ function normalizeBlock(block: any): PartialBlock[] {
   if (!block || typeof block !== "object") return [];
 
   const type = block.type;
+  // 折叠列表已下线，旧数据转普通段落，子块保留为缩进。
+  if (type === "toggleListItem") {
+    const { props: _props, ...rest } = block;
+    return normalizeBlock({ ...rest, type: "paragraph" });
+  }
   if (type === "horizontalRule") {
     return [{ type: "divider" } as PartialBlock];
   }
