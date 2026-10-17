@@ -43,7 +43,7 @@ function compareSemver(left, right) {
 }
 
 function noteText(version) {
-  return `鹅的笔记桌面版安装包。当前版本 v${version}（及上一版）。macOS 选 .dmg（Apple 芯片 arm64 / Intel x64），Windows 选 .exe（x64 / arm64），Linux 选 AppImage / deb / pacman。macOS 首次打开请看 https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/goose-note/releases\n`;
+  return `鹅的笔记桌面版安装包。当前版本 v${version}。macOS 选 .dmg（Apple 芯片 arm64 / Intel x64），Windows 选 .exe（x64 / arm64），Linux 选 AppImage / deb / pacman。macOS 首次打开请看 https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/goose-note/releases\n`;
 }
 
 function isFile(item, name) {
@@ -185,7 +185,7 @@ async function uploadReplacing(cookie, folderId, source, name) {
 async function retainLatest(cookie, folderId, version) {
   const entries = knownFiles(await listChildren(cookie, folderId)).filter((item) => installerVersion(item.file_name));
   const versions = [...new Set(entries.map((item) => installerVersion(item.file_name)))].sort(compareSemver).reverse();
-  const keep = new Set(versions.slice(0, 2));
+  const keep = new Set(versions.slice(0, 1));
   const remove = entries.filter((item) => !keep.has(installerVersion(item.file_name)));
   await deleteFiles(cookie, remove.map((item) => item.fid));
   for (const item of remove) console.log(`删除旧版本 ${item.file_name}`);
