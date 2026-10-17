@@ -182,13 +182,9 @@ dmg:
       type: link
       path: /Applications
     - x: 480
-      y: 455
+      y: 470
       type: file
       path: dmg-assets/安装指令.command
-    - x: 140
-      y: 545
-      type: file
-      path: dmg-assets/安装帮助.txt
 win:
   icon: icon.ico
   # true：把 icon/版本信息写入 exe；CI 已关 CSC_IDENTITY_AUTO_DISCOVERY，不会真签名
