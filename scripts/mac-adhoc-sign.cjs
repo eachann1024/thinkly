@@ -1,10 +1,32 @@
 const { execFileSync } = require('node:child_process');
+const { cpSync, existsSync, mkdirSync } = require('node:fs');
 const { join } = require('node:path');
+
+function installLocalizedDisplayName(app) {
+  const src = join(__dirname, 'macos-l10n');
+  if (!existsSync(src)) return;
+  const resources = join(app, 'Contents', 'Resources');
+  const chinese = join(src, 'zh-Hans.lproj', 'InfoPlist.strings');
+  const english = join(src, 'en.lproj', 'InfoPlist.strings');
+  for (const lang of ['zh-Hans', 'zh_CN', 'zh-Hans-CN']) {
+    const dir = join(resources, `${lang}.lproj`);
+    mkdirSync(dir, { recursive: true });
+    cpSync(chinese, join(dir, 'InfoPlist.strings'));
+  }
+  const en = join(resources, 'en.lproj');
+  mkdirSync(en, { recursive: true });
+  cpSync(english, join(en, 'InfoPlist.strings'));
+  execFileSync('/usr/bin/plutil', [
+    '-replace', 'LSHasLocalizedDisplayName', '-bool', 'true',
+    join(app, 'Contents', 'Info.plist'),
+  ]);
+}
 
 // Explicit "-" avoids certificate discovery and never accesses a private key.
 // Developer ID builds retain electron-builder's normal signing/notarization flow.
 module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
   if (electronPlatformName !== 'darwin') return;
+  installLocalizedDisplayName(join(appOutDir, `${packager.appInfo.productFilename}.app`));
   // dmgbuild supports position-only entries, but electron-builder 26's schema
   // omits that type. Add them after config validation, before DMG construction.
   // These resources remain available to Finder, outside the 960×640 viewport,

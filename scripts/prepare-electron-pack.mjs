@@ -47,6 +47,7 @@ cpSync(resolve(root, "electron/icons/icon.ico"), resolve(pack, "icon.ico"));
 cpSync(resolve(root, "electron/icons/icon.png"), resolve(pack, "icon.png"));
 cpSync(resolve(root, "electron/installer.nsh"), resolve(pack, "installer.nsh"));
 cpSync(resolve(root, "scripts/mac-adhoc-sign.cjs"), resolve(pack, "mac-adhoc-sign.cjs"));
+cpSync(resolve(root, "electron/macos-l10n"), resolve(pack, "macos-l10n"), { recursive: true });
 cpSync(resolve(root, "electron/installer"), resolve(pack, "dmg-assets"), { recursive: true });
 mkdirSync(resolve(pack, "node_modules"), { recursive: true });
 
@@ -158,6 +159,7 @@ mac:
   hardenedRuntime: ${Boolean(process.env.CSC_LINK)}
   gatekeeperAssess: false
   extendInfo:
+    LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
     NSAppleEventsUsageDescription: Goose Note 需要发送系统事件，以便用快捷键唤出主窗口和速记小窗。
     NSAccessibilityUsageDescription: Goose Note 需要辅助功能权限，以便在其他应用处于前台时用快捷键唤出主窗口和速记小窗。
