@@ -10,7 +10,8 @@ import {
   getLastWeekSnapshot,
   isReflectionAIReady,
 } from "@/lib/reflection/reflectionRunner";
-import { addDays, trailingWeeks } from "@/lib/reflection/weekRange";
+import { EMPTY_ACTIVITY } from "@/lib/reflection/activityLog";
+import { addDays, previousWeek, trailingWeeks } from "@/lib/reflection/weekRange";
 import { computeWeekStats } from "@/lib/reflection/weekStats";
 import { ReflectionChart } from "./ReflectionChart";
 import { ReflectionNarrative, type NarrativeState } from "./ReflectionNarrative";
@@ -30,18 +31,28 @@ interface Props {
 }
 
 export function ReflectionDialog({ open, onOpenChange }: Props) {
-  const pages = usePages((s) => s.pages);
   const ai = useSettings((s) => s.ai);
-  const { activity, reports, aiConsent, generatingKey, error, markSeen, setAiConsent } = useReflection();
+  const activity = useReflection((s) => s.activity);
+  const reports = useReflection((s) => s.reports);
+  const aiConsent = useReflection((s) => s.aiConsent);
+  const generatingKey = useReflection((s) => s.generatingKey);
+  const failure = useReflection((s) => s.failure);
+  const markSeen = useReflection((s) => s.markSeen);
+  const setAiConsent = useReflection((s) => s.setAiConsent);
 
+  // 仅在打开（或 activity 变化）时计算；pages 只在计算时取一次快照，不订阅。
   const { week, stats, eligible, trend } = useMemo(() => {
+    if (!open) {
+      const stats = computeWeekStats(EMPTY_ACTIVITY, {}, previousWeek());
+      return { week: previousWeek(), stats, eligible: false, trend: [] as number[][] };
+    }
     const snapshot = getLastWeekSnapshot();
+    const pages = usePages.getState().pages;
     const trend = trailingWeeks(snapshot.week.start, 4).map(
       (w) => computeWeekStats(activity, pages, w).daily,
     );
     return { ...snapshot, trend };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, activity, pages]);
+  }, [open, activity]);
 
   const aiReady = useMemo(() => isReflectionAIReady(), [ai]); // eslint-disable-line react-hooks/exhaustive-deps
   const report = reports[week.key];
@@ -58,7 +69,7 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
   else if (!aiReady) state = "notConfigured";
   else if (!aiConsent) state = "needsConsent";
   else if (generating) state = "generating";
-  else if (error && !report) state = "failed";
+  else if (failure?.weekKey === week.key && !report) state = "failed";
 
   const range = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(getFormatLocale(), { month: "short", day: "numeric" });

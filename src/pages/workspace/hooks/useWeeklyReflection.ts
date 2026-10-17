@@ -11,9 +11,10 @@ export function useWeeklyReflection() {
     const failedKeys = new Set<string>();
     const check = () => {
       const key = previousWeek().key;
-      if (failedKeys.has(key) || useReflection.getState().reports[key]) return;
+      const state = useReflection.getState();
+      if (failedKeys.has(key) || state.reports[key] || state.failure?.weekKey === key) return;
       void ensureLastWeekReflection().then(() => {
-        if (useReflection.getState().error) failedKeys.add(key);
+        if (useReflection.getState().failure?.weekKey === key) failedKeys.add(key);
       });
     };
     const timer = window.setTimeout(check, STARTUP_DELAY_MS);

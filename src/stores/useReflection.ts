@@ -4,6 +4,7 @@ import { localStorageAdapter } from "@/lib/storage";
 import {
   EMPTY_ACTIVITY,
   appendEdit,
+  mergeActivity,
   pruneActivity,
   type ActivityLog,
 } from "@/lib/reflection/activityLog";
@@ -24,12 +25,14 @@ interface ReflectionState {
   /** 用户已同意把上周笔记标题和摘要发给当前 AI。 */
   aiConsent: boolean;
   generatingKey: string | null;
-  error: string | null;
+  /** 最近一次失败，按周记录，避免误伤其它周。 */
+  failure: { weekKey: string; message: string } | null;
   recordEdit: (pageId: string, now: number) => void;
   saveReport: (weekKey: string, report: ReflectionReport) => void;
   markSeen: (weekKey: string) => void;
   setAiConsent: (value: boolean) => void;
-  setGenerating: (weekKey: string | null, error?: string | null) => void;
+  setGenerating: (weekKey: string | null) => void;
+  setFailed: (weekKey: string, message: string) => void;
 }
 
 export const useReflection = create<ReflectionState>()(
@@ -40,7 +43,7 @@ export const useReflection = create<ReflectionState>()(
       lastSeenWeekKey: null,
       aiConsent: false,
       generatingKey: null,
-      error: null,
+      failure: null,
       recordEdit: (pageId, now) =>
         set((s) => ({ activity: appendEdit(s.activity, pageId, now) })),
       saveReport: (weekKey, report) =>
@@ -52,7 +55,13 @@ export const useReflection = create<ReflectionState>()(
       markSeen: (weekKey) =>
         set((s) => (s.lastSeenWeekKey === weekKey ? s : { lastSeenWeekKey: weekKey })),
       setAiConsent: (aiConsent) => set({ aiConsent }),
-      setGenerating: (generatingKey, error = null) => set({ generatingKey, error }),
+      setGenerating: (generatingKey) =>
+        set((s) => ({
+          generatingKey,
+          failure: generatingKey ? null : s.failure,
+        })),
+      setFailed: (weekKey, message) =>
+        set({ generatingKey: null, failure: { weekKey, message } }),
     }),
     {
       name: "goose-note-reflection",
@@ -71,7 +80,7 @@ export const useReflection = create<ReflectionState>()(
           ...current,
           activity:
             p.activity?.buckets && p.activity.pages
-              ? pruneActivity(p.activity, Date.now())
+              ? pruneActivity(mergeActivity(p.activity, current.activity), Date.now())
               : current.activity,
           reports: p.reports ?? current.reports,
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
