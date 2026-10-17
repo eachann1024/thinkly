@@ -25,6 +25,8 @@ export async function initializeApplicationState(
     // NotebookAiChats 持久化 store（skipHydration=true，需手动水合）。主应用 AI 聊天记录，小窗不需要。
     const { useNotebookAiChats } = await import("@/stores/useNotebookAiChats");
     useNotebookAiChats.persist.rehydrate();
+    const { useReflection } = await import("@/stores/useReflection");
+    await useReflection.persist.rehydrate();
     // 加载+修复全部笔记（随笔记数线性变慢）；小窗草稿是独立存储，不读 pages。
     await usePages.getState().hydrateFromStorage();
     // Electron 仅本地文件夹模式不会恢复旧内置记事本，因此这些页面不会进入

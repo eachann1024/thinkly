@@ -5,6 +5,7 @@ import { useShallow } from "zustand/react/shallow";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useWorkspaceEvents } from "./hooks/useWorkspaceEvents";
+import { useWeeklyReflection } from "./hooks/useWeeklyReflection";
 import { useLocalFolderWatch } from "./hooks/useLocalFolderWatch";
 import { useFileDrop } from "./hooks/useFileDrop";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
@@ -64,6 +65,7 @@ export function WorkspacePage() {
 
   // Hooks
   useWorkspaceEvents({ activePageId, page });
+  useWeeklyReflection();
   useLocalFolderWatch({ notebook, activePageId, page });
 
   const {
