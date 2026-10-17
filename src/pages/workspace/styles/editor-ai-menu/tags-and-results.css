@@ -18,7 +18,7 @@
   padding: 4px 12px;
   font-size: 12.5px;
   line-height: 18px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   cursor: pointer;
   transition:

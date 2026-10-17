@@ -71,7 +71,7 @@
   align-items: center;
   padding: 0 6px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -88,7 +88,7 @@
   border: 0;
   border-radius: var(--goose-control-radius);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;

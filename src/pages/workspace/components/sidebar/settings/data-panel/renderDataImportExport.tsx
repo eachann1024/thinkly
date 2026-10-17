@@ -84,7 +84,7 @@ export function renderDataImportExport(
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium text-foreground">
+            <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("selectNotebooks_d119")}</Label>
             <div className="flex items-center gap-2">
               <span className={DATA_BADGE_CLASS}>
@@ -133,7 +133,7 @@ export function renderDataImportExport(
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">
+          <Label className="text-sm font-normal leading-5 text-foreground">
             {uiText("exportFormat_230a")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <SelectableCard

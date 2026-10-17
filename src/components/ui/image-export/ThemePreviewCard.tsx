@@ -176,7 +176,7 @@ export function ThemePreviewCard({
         >
           {theme.name}
         </span>
-        <span className="text-[10px] text-muted-foreground leading-tight tracking-wide">
+        <span className="text-[11px] text-muted-foreground leading-tight tracking-wide">
           {theme.nameEn}
         </span>
       </div>

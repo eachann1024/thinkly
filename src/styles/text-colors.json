@@ -1,8 +1,9 @@
 {
   "light": {
-    "primary": "#20242c",
-    "secondary": "#526071",
-    "disabled": "#526071",
+    "primary": "#1f1e1d",
+    "secondary": "#5e5d59",
+    "disabled": "#8a8983",
+    "placeholder": "#85847e",
     "danger": "#b42318",
     "warning": "#855600",
     "success": "#086b42",
@@ -23,9 +24,10 @@
     }
   },
   "dark": {
-    "primary": "#ececec",
-    "secondary": "#b4b4b4",
-    "disabled": "#999999",
+    "primary": "#f0efec",
+    "secondary": "#c3c2b7",
+    "disabled": "#8f8e88",
+    "placeholder": "#9a9992",
     "danger": "#ffb4ab",
     "warning": "#f3d17c",
     "success": "#8ce0b1",

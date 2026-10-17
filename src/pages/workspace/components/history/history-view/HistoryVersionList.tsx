@@ -80,7 +80,7 @@ function HistoryVersionList() {
           <div className="py-1 pb-4">
             {groups.map((group) => (
               <div key={group.label} className="mb-1">
-                <div className="px-3 py-1.5 text-[10px] tracking-wider text-muted-foreground">
+                <div className="px-3 py-1.5 text-[11px] tracking-wider text-muted-foreground">
                   {group.label}
                 </div>
                 <div className="px-2">
@@ -170,7 +170,7 @@ function HistoryVersionList() {
                             {deltaText ? (
                               <span
                                 className={cn(
-                                  "ml-1.5 text-[10px] tabular-nums",
+                                  "ml-1.5 text-[11px] tabular-nums",
                                   isSelected
                                     ? "text-[var(--goose-interactive-selected-fg)]"
                                     : "text-muted-foreground",

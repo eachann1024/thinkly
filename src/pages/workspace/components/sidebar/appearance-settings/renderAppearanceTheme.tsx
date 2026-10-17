@@ -185,7 +185,7 @@ export function renderAppearanceTheme(
                 <span className="flex min-w-0 flex-1 items-center gap-1 whitespace-nowrap">
                   {option.label}
                   {option.pro && (
-                    <span className="shrink-0 rounded-control bg-[var(--goose-interactive-hover)] px-1 py-px text-[9px] font-semibold leading-none tracking-wide text-[var(--goose-interactive-hover-fg)]">
+                    <span className="shrink-0 rounded-control bg-[var(--goose-interactive-hover)] px-1 py-px text-[11px] font-semibold leading-none tracking-wide text-[var(--goose-interactive-hover-fg)]">
                       Pro
                     </span>
                   )}

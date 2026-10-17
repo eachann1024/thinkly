@@ -34,7 +34,7 @@
   background: transparent;
   color: hsl(var(--muted-foreground));
   font-size: 10px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   line-height: 1;
@@ -89,7 +89,7 @@
   background: var(--goose-interactive-selected);
   color: var(--goose-accent-text);
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 @media (prefers-reduced-motion: reduce) {

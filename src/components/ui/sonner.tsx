@@ -25,10 +25,10 @@ const defaultToastClassNames = {
   // 3. 宽度由 goose-toast.css 控制：max-content + max-width，避免固定 356px。
   toast:
     // Electron 旧内核不支持 hsl(var(--x)/alpha)，避免 bg-*/95、border-*/70 退化成实色
-    "group goose-toast goose-toast-surface !font-medium !text-sm !overflow-visible",
-  title: "!text-foreground !opacity-100 !font-semibold",
-  description: "!text-muted-foreground",
-  actionButton: cn(buttonVariants({ size: "sm" }), "!text-xs"),
+    "group goose-toast goose-toast-surface !text-sm !overflow-visible",
+  title: "!text-foreground !opacity-100 !font-medium !text-[14px] !leading-5",
+  description: "!text-[13px] !leading-5 !text-muted-foreground",
+  actionButton: cn(buttonVariants({ size: "sm" }), "!text-xs !font-medium"),
   cancelButton: cn(buttonVariants({ variant: "ghost", size: "sm" }), "!text-xs"),
   // Sonner owns the close button and dismissal; share the IconButton recipe.
   closeButton: cn(iconButtonVariants({ tone: "muted", size: "xs" }),

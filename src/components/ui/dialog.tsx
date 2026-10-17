@@ -195,7 +195,7 @@ const DialogTitle = React.forwardRef<
     slot="title"
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-base font-semibold leading-6 tracking-[-0.01em]",
       className,
     )}
   />
@@ -210,7 +210,7 @@ const DialogDescription = React.forwardRef<
       id={id}
       {...props}
       ref={ref}
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn("text-[13px] leading-5 text-muted-foreground", className)}
     />
   );
 });

@@ -29,6 +29,7 @@
 @import "./styles/global/menu-items.css";
 @import "./styles/global/tailwind-controls.css";
 @import "./styles/global/theme-tokens.css";
+@import "./styles/global/typography.css";
 @import "./styles/global/control-tokens.css";
 @import "./styles/global/icon-sizing.css";
 @import "./styles/global/control-layout.css";

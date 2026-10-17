@@ -71,7 +71,7 @@
 
 .setup-guide-steps li[aria-current="step"] {
   color: hsl(var(--foreground));
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .setup-guide-steps li[data-complete="true"] {

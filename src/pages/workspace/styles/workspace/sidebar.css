@@ -72,8 +72,9 @@
 }
 
 .workspace-shell .workspace-sidebar-pane .sidebar-section-label {
-  font-size: calc(var(--sidebar-font-size, 13px) * 0.85);
-  letter-spacing: 0.02em;
+  font-size: calc(var(--sidebar-font-size, 13px) - 1px);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
 }
 
 .workspace-shell .workspace-sidebar-pane .main-tree-row,

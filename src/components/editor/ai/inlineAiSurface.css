@@ -29,7 +29,7 @@
   align-items: center;
   gap: .65rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .goose-inline-ai-surface .goose-inline-ai-header svg {
   width: 1.2em;
@@ -136,7 +136,7 @@
   font-family: inherit;
   font-size: .9rem;
   line-height: 1.5;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;

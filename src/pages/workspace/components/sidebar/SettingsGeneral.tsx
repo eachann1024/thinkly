@@ -46,21 +46,21 @@ export function SettingsGeneral({
   const forceCollapseLeft = useWorkspaceViewport((state) => state.forceCollapseLeft);
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold tracking-tight text-foreground">{t("general")}</h3>
+      <h3 className="text-xl font-semibold tracking-[-0.01em] text-foreground">{t("general")}</h3>
       <div className="space-y-5">
         <SettingsSectionCard title={t("common")}>
           <SettingsLanguage />
           <SwitchRow className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.FileClock className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-              <span className="text-sm font-medium leading-none">{t("autoOpen")}</span>
+              <span className="text-sm font-normal leading-5">{t("autoOpen")}</span>
             </span>
             <Switch id="auto-open-last-note" checked={autoOpenLastNote} onCheckedChange={setAutoOpenLastNote} className={SWITCH_CLASS} />
           </SwitchRow>
           <SwitchRow className={`mt-2 flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.MousePointer2 className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-              <span className="text-sm font-medium leading-none">{t("hover")}</span>
+              <span className="text-sm font-normal leading-5">{t("hover")}</span>
             </span>
             <Switch id="notebook-hover-expand" disabled={forceCollapseLeft} checked={notebookDropdownHoverExpand && !forceCollapseLeft} onCheckedChange={setNotebookDropdownHoverExpand} className={SWITCH_CLASS} />
           </SwitchRow>
@@ -69,7 +69,7 @@ export function SettingsGeneral({
           <SwitchRow className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.History className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-              <span className="text-sm font-medium leading-none">{t("recent")}</span>
+              <span className="text-sm font-normal leading-5">{t("recent")}</span>
             </span>
             <Switch id="show-recent-in-search" checked={showRecentInSearch} onCheckedChange={setShowRecentInSearch} className={SWITCH_CLASS} />
           </SwitchRow>

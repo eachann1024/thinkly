@@ -125,9 +125,8 @@
   /* Placeholder 也是操作提示，需达到与普通小号文本一致的可读性。 */
   input::placeholder,
   textarea::placeholder {
-    color: hsl(var(--muted-foreground)) !important;
+    color: var(--goose-text-placeholder) !important;
     opacity: 1;
-    font-size: 0.875em;
   }
 
   /* Prevent image dragging globally */

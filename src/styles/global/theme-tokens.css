@@ -72,8 +72,8 @@
     --accent: var(--goose-selected-bg);
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: var(--goose-text-on-dark-channels);
-    --border: 0 0% 86%;
-    --input: 0 0% 86%;
+    --border: 40 6% 87%;
+    --input: 40 6% 87%;
     --ring: 239 84% 67%;
     --radius: 0.75rem;
     --radius-notion-slash: 18px;
@@ -84,15 +84,18 @@
     --workspace-drag-line-glow: 0 0 8px hsl(var(--primary) / 0.4);
 
     /* Font Variables mapped to Tailwind theme */
-    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-default: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-serif:
-      Georgia, "Songti SC", "STSong", "SimSun", Cambria,
-      "Times New Roman", Times, serif;
-    --font-mono:
+    --font-ui:
+      "Inter Variable", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Segoe UI", sans-serif;
+    --font-default: var(--font-ui);
+    --goose-font-serif:
+      Georgia, "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC",
+      "SimSun", Cambria, "Times New Roman", Times, serif;
+    --goose-font-mono:
       "JetBrains Mono", ui-monospace, Menlo, Consolas,
       "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
       monospace;
+    --font-serif: var(--goose-font-serif);
+    --font-mono: var(--goose-font-mono);
   }
 
   .dark {
@@ -162,8 +165,8 @@
     --accent: var(--goose-selected-bg);
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: var(--goose-text-on-dark-channels);
-    --border: 215 16% 28%;
-    --input: 215 16% 28%;
+    --border: 40 5% 28%;
+    --input: 40 5% 28%;
     --ring: 217 91% 60%;
     --workspace-drag-line-color: hsl(var(--primary));
     --workspace-drag-line-glow: 0 0 8px hsl(var(--primary) / 0.45);

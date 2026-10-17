@@ -41,7 +41,7 @@
   border-radius: var(--goose-control-radius, 0.428571rem);
   background: transparent;
   font-size: calc(var(--sidebar-font-size, 13px) + 1px);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .sidebar-navigation-heading .sidebar-notebook-trigger--header > .goose-notebook-monogram {
   flex-shrink: 0;
