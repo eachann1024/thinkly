@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-context-menu/SidebarMoveSubmenu.tsx#localMessages:1">`
@@ -21,6 +22,7 @@ export function SidebarMoveSubmenu({
   notebooks: Notebook[];
   onMove: (notebookId: string) => void;
 }) {
+  useLocale();
   return (
     <ContextMenuSub>
       <ContextMenuSubTrigger disabled={notebooks.length === 0}>

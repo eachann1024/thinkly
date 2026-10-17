@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/command.tsx#localMessages:1">`
@@ -122,6 +123,7 @@ const CommandDialog = ({
 }: DialogProps & {
   commandProps?: React.ComponentPropsWithoutRef<typeof Command>;
 }) => {
+  useLocale();
   return (
     <Dialog {...props}>
       <DialogContent

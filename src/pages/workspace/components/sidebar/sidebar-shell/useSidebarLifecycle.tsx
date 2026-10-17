@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-shell/useSidebarLifecycle.tsx#localMessages:1">`
@@ -25,6 +26,7 @@ import type { useSidebarNavigation } from "./useSidebarNavigation";
 export function useSidebarLifecycle(
   input: ReturnType<typeof useSidebarNavigation>,
 ) {
+  useLocale();
   const {
     selectedPageId,
     scrollContainerRef,

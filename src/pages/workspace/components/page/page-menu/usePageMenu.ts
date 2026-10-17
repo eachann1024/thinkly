@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/page-menu/usePageMenu.ts#localMessages:1">`
@@ -52,6 +53,7 @@ function captureEditorSelectedBlocks(): BlockNoteContent {
 }
 
 export function usePageMenu() {
+  useLocale();
   const defaultLayout = useSettings(state => state.defaultPageLayout);
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 0 : window.innerWidth,

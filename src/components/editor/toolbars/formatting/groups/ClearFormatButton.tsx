@@ -2,7 +2,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Button } from "@/components/editor/ui/button";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/ClearFormatButton.tsx#messages:1">`
 zh-Hans:
   clearFormatting: "清除格式"
@@ -19,6 +19,7 @@ export function ClearFormatButton({
   onClear: () => void;
   bindTooltip: BindTooltip;
 }) {
+  useLocale();
   return (
     <Tooltip {...bindTooltip("clear")}>
       <TooltipTrigger asChild>

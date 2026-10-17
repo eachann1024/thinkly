@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/outline/OutlineHeadingMarker.tsx#localMessages:1">`
@@ -24,6 +25,7 @@ export function OutlineHeadingMarker({
   expanded,
   onToggle,
 }: OutlineHeadingMarkerProps) {
+  useLocale();
   return (
     <span
       className="outline-heading-marker"

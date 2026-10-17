@@ -23,7 +23,7 @@ import {
   getScaledEditorUiPx,
 } from "@/components/editor/utils/editorContextUi";
 import { useEditorUiScale } from "@/components/editor/hooks/useEditorUiScale";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/video/VideoToolbar.tsx#messages:1">`
 zh-Hans:
   videoActions: "视频操作"
@@ -72,6 +72,7 @@ function VideoToolButton({
   onClick: MouseEventHandler<HTMLButtonElement>;
   children: ReactNode;
 }) {
+  useLocale();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -101,6 +102,7 @@ export function VideoToolbar({
   onDownload,
   onDelete,
 }: VideoToolbarProps) {
+  useLocale();
   const editorUiScale = useEditorUiScale();
   const overflowPadding = getScaledEditorUiPx(8, editorUiScale);
   const { refs, floatingStyles, update } = useFloating({

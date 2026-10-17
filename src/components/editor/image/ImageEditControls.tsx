@@ -6,7 +6,7 @@ import { Input } from "@/components/editor/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/editor/ui/popover";
 import { Image, Pencil } from "@/components/ui/icons";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/image/ImageEditControls.tsx#messages:1">`
 zh-Hans:
   replaceImage: "替换图片"
@@ -36,6 +36,7 @@ export function ImageEditControls({ editor, blockId }: {
   editor: BlockNoteEditor<any, any, any>;
   blockId: string | null;
 }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const [caption, setCaption] = useState("");
   const [alt, setAlt] = useState("");

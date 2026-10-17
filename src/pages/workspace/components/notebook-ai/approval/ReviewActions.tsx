@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { useRef, useReducer } from "react";
 import { Loader2, RotateCcw } from "@/components/ui/icons";
@@ -27,6 +28,7 @@ export function ReviewActions({
   onUndo,
   embedded = false,
 }: ApprovalPlanCardProps) {
+  useLocale();
   const { input, journal } = readReviewPlan(part);
   const output = reviewOutput(part.output);
   const operationIds =
@@ -65,9 +67,9 @@ export function ReviewActions({
           tone: "accent",
         }
       : undoing
-        ? { get label() { return t("undoing"); }, icon: "running", tone: "accent" }
+        ? { label: t("undoing"), icon: "running", tone: "accent" }
         : undone
-          ? { get label() { return t("undone"); }, icon: "undone", tone: "neutral" }
+          ? { label: t("undone"), icon: "undone", tone: "neutral" }
           : undoFailed || undoConflict
             ? {
                 label: undoConflict ? t("undoConflict") : t("undoFailed"),

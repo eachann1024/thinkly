@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 /** Notebook AI 输入条：草稿、附件、布局与原生引用动作各自维护。 */
 import { forwardRef, useCallback } from "react";
@@ -38,6 +39,7 @@ const MAX_IMAGE_ATTACHMENTS = 4;
 const MAX_IMAGE_FILE_BYTES = 10 * 1024 * 1024;
 export const Composer = forwardRef<ComposerHandle, ComposerProps>(
   function Composer({ ...props }, ref) {
+  useLocale();
     const {
       notebookId,
       onSlashCommand,

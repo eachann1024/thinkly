@@ -9,7 +9,7 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
 import { hasTableMergeAction, TableMergeControls } from "./TableMergeControls";
 import { useToolbarHorizontalScroll } from "./useToolbarHorizontalScroll";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/FormattingToolbarLayout.tsx#messages:1">`
 zh-Hans:
   textFormatting: "文字格式"
@@ -24,6 +24,7 @@ export function FormattingToolbarLayout({
 }: {
   state: ReturnType<typeof useFormattingToolbarState>;
 }) {
+  useLocale();
   const {
     aiSettings,
     page,

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
 import { IntroVideoOverlay } from "@/pages/workspace/components/intro-video/IntroVideoOverlay";
 import { useIntroVideo } from "@/stores/introVideo";
@@ -53,6 +54,7 @@ function AppearanceSync() {
 }
 
 function App() {
+  useLocale();
   useTextCaret();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
   const showSetupGuide = useSettings(isSetupGuideVisible);

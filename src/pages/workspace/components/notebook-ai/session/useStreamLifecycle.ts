@@ -1,10 +1,11 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { sanitizeNotebookAiMessages } from "@/lib/notebook-ai/messageUtils";
 import { ensureNotebookAiMessageCreatedAt } from "@/lib/notebook-ai/messageTime";
-import { NOTEBOOK_AI_PLACEHOLDER_HINTS } from "./helpers";
+import { getNotebookAiPlaceholderHints } from "./helpers";
 import type { NotebookAiSessionScope } from "./types";
 import type { SessionState } from "./useSessionState";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -21,6 +22,7 @@ const t = createTranslator(messages);
 
 const NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS = 60_000;
 export function useStreamLifecycle(state: SessionState) {
+  useLocale();
   const {
     activeSessionScopeRef,
     currentSessionScope,
@@ -149,7 +151,7 @@ export function useStreamLifecycle(state: SessionState) {
       void committedStopRef.current();
       toast.error(t("aiResponseTimedOutThisTaskWasPaused"), {
         id: "notebook-ai-stream-timeout",
-        get description() { return t("completedContentWasPreservedYouCanRetryAt"); },
+        description: t("completedContentWasPreservedYouCanRetryAt"),
       });
     }, NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
@@ -201,7 +203,7 @@ export function useStreamLifecycle(state: SessionState) {
       if (timer !== null) return;
       timer = window.setInterval(() => {
         setPlaceholderIndex(
-          (index) => (index + 1) % NOTEBOOK_AI_PLACEHOLDER_HINTS.length,
+          (index) => (index + 1) % getNotebookAiPlaceholderHints().length,
         );
       }, 4500);
     };

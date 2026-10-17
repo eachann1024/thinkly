@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-shell/SidebarModeRail.tsx#localMessages:1">`
@@ -26,6 +27,7 @@ export function SidebarModeRail({
 }: {
   context: ReturnType<typeof useSidebarHover>;
 }) {
+  useLocale();
   const searchSelectionRef = useRef("");
   const searchSheetOpen = useSearchSession((s) => s.view.phase === "sheet");
   const {

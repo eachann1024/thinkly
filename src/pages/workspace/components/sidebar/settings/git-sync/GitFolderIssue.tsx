@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitFolderIssue.tsx#localMessages:1">`
@@ -33,6 +34,7 @@ export function GitFolderIssue({
   actionDisabled: boolean;
   onAction: () => void;
 }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const trigger = (
     <Button

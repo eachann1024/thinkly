@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/image-export/LivePreviewPane.tsx#localMessages:1">`
@@ -30,13 +31,14 @@ export function LivePreviewPane({
   theme: CardTheme;
   watermarkConfig: WatermarkConfig;
 }) {
+  const locale = useLocale();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.42);
   const [frameHeight, setFrameHeight] = useState(900);
 
   const source = useMemo(
     () => getImageExportPreviewSource({ mode, page, blocks }),
-    [mode, page, blocks],
+    [mode, page, blocks, locale],
   );
   const html = useMemo(
     () =>
@@ -47,7 +49,7 @@ export function LivePreviewPane({
         mode,
         watermarkConfig,
       }),
-    [source, theme, mode, watermarkConfig],
+    [source, theme, mode, watermarkConfig, locale],
   );
 
   useEffect(() => {

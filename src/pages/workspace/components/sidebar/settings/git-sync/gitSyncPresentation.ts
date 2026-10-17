@@ -35,6 +35,7 @@ en:
   resolveTheFolderIssuesBelowThen_4974: "Resolve the folder issues below, then try again"
 `;
 const uiText = createTranslator(localMessages);
+import { gitSyncActionLabel, type GitSyncAction } from "./gitSyncUiState";
 import { DEFAULT_GIT_SYNC_INTERVAL, validateGitRepository, normalizedGitRemote } from "@/lib/git-sync-contract";
 import type { GitDraft } from "./GitRepositoryForm";
 import { folderPathKey } from "./gitFolderRows";
@@ -47,14 +48,14 @@ import type {
 
 export function gitSyncSummary(
   status: GitSyncStatus | undefined,
-  pending: string | undefined,
+  pending: GitSyncAction | undefined,
   folderError: number,
   folderCount: number,
   enabled: boolean,
 ) {
   if (status?.phase === "syncing") return uiText("syncing_a270");
-  if (pending && /文件夹/.test(pending)) return uiText("restoringFolder_6233");
-  if (pending) return /保存/.test(pending) ? uiText("saving_9b80") : `${pending}…`;
+  if (pending === "restore") return uiText("restoringFolder_6233");
+  if (pending) return pending === "save-selection" || pending === "save-settings" ? uiText("saving_9b80") : `${gitSyncActionLabel(pending)}…`;
   if (folderError) return uiText("folderIssueCount", { count: folderError });
   if (!folderCount) return uiText("noFoldersSelectedForSync_2971");
   if (status?.conflicts?.length) return uiText("contentConflicts_66cf");
@@ -106,8 +107,8 @@ export function repositoryLabel(remoteUrl: string) {
   return remoteUrl.replace(/^git@[^:]+:|^ssh:\/\/git@[^/]+\//, "").replace(/\.git$/, "");
 }
 export function shortSyncError(error: string) {
-  if (/网络|连接.*失败|超时|无法连接|DNS/.test(error)) return uiText("networkConnectionFailedPleaseTryAgain_9bb3");
-  if (/SSH|公钥|鉴权|认证/.test(error)) return uiText("sshConnectionFailedCheckYourConnection_9f5b");
-  if (/文件夹|符号链接|路径|笔记本/.test(error)) return uiText("resolveTheFolderIssuesBelowThen_4974");
+  if (/网络|连接.*失败|超时|无法连接|network|connection.*failed|timed? out|timeout|cannot connect|could not connect|DNS/i.test(error)) return uiText("networkConnectionFailedPleaseTryAgain_9bb3");
+  if (/SSH|公钥|鉴权|认证|public.key|authentication|authorization/i.test(error)) return uiText("sshConnectionFailedCheckYourConnection_9f5b");
+  if (/文件夹|符号链接|路径|笔记本|folder|symbolic link|symlink|path|notebook/i.test(error)) return uiText("resolveTheFolderIssuesBelowThen_4974");
   return error.split(/[\n。；]/)[0].slice(0, 70);
 }

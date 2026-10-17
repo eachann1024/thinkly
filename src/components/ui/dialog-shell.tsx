@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { common } from "@/i18n/common";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -49,6 +50,7 @@ export function DialogShell({
   footer,
   children,
 }: DialogShellProps) {
+  useLocale();
   const isFullscreen = layout === "fullscreen";
   const resolvedOverlayClassName =
     overlayClassName ??

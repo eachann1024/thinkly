@@ -12,7 +12,7 @@ import { looksLikeBlockStructure, looksLikeMarkdownFragment, normalizeMarkdownPa
 import { htmlLooksLikeBlockNoteClipboard } from "../utils/multilinePaste";
 import { focusPastedBlock } from "../utils/pasteAtCursor";
 import { writeContextClipboard } from "./contextClipboardWrite";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/useEditorContextClipboard.ts#messages:1">`
 zh-Hans:
   theNoteHasChangedSelectTheContentAgain: "笔记内容已变化，请重新选择后操作"
@@ -31,6 +31,7 @@ export function useEditorContextClipboard(
   editable: boolean,
   _selectedTextRef: RefObject<string>,
 ) {
+  useLocale();
   const platform = useEditorPlatform();
   const snapshotRef = useRef<EditorSelectionSnapshot | null>(null);
   const rememberContextSelection = useCallback(() => {

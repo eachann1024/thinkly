@@ -194,3 +194,14 @@ export function clearComposerImageRegistry(options: {
   options.registry.clear();
   options.dedup.clear();
 }
+
+/** Refresh chrome only; keep attachment nodes, caret and editable content intact. */
+export function refreshComposerImageLabels(container: HTMLElement) {
+  container.querySelectorAll<HTMLElement>("[data-ai-image-attrs]").forEach((chip) => {
+    const attrs = parseImageChipAttrs(chip);
+    const remove = chip.querySelector<HTMLButtonElement>("[data-ai-image-remove]");
+    if (!attrs || !remove) return;
+    remove.setAttribute("aria-label", t("removeNamedImage", { name: attrs.fileName }));
+    remove.title = t("removeNamedFile", { name: attrs.fileName });
+  });
+}

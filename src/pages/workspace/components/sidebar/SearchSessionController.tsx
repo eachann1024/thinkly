@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useEffect, useRef } from "react";
 import { useSearchSession } from "./useSearchSession";
 import { usePages } from "@/stores/usePages";
@@ -7,6 +8,7 @@ import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { useCommandSearchIndexWarmup } from "../command/useCommandSearchIndexWarmup";
 
 export function SearchSessionController() {
+  useLocale();
   useCommandSearchIndexWarmup();
   const nonce = useSearchSession(s => s.navigation.phase === "target" ? s.navigation.id : 0);
   const handled = useRef(0);

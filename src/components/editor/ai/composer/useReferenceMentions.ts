@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import {
   useCallback,
   useEffect,
@@ -39,6 +40,7 @@ export function useReferenceMentions({
   searchPages: searchPagesOverride,
   referencePlacement = "inline",
 }: UseReferenceMentionsOptions) {
+  const locale = useLocale();
   const { searchPages } = useEditorPageContext();
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDetectedRef = useRef<DetectedMention | null>(null);
@@ -48,7 +50,7 @@ export function useReferenceMentions({
   const mentionItems = useMemo(
     () =>
       mention.phase === "active" ? (searchPagesOverride ?? searchPages)(mention.query) : [],
-    [mention.phase, mentionQuery, searchPages, searchPagesOverride],
+    [mention.phase, mentionQuery, searchPages, searchPagesOverride, locale],
   );
 
   // Keep a ref so keyboard handler always sees current items without stale closure

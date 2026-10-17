@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { formatNumber, formatRelativeDate } from "@/i18n/format";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -66,6 +67,7 @@ interface FolderHomePageProps {
 
 
 export function FolderHomePage({ page }: FolderHomePageProps) {
+  useLocale();
   const pages = useStoreWithEqualityFn(
     usePages,
     (s) => s.pages,

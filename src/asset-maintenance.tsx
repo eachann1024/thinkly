@@ -1,4 +1,5 @@
-import { createTranslator, i18nYaml, getFormatLocale } from "@/i18n/core";
+import { useLocale } from "@/i18n";
+import { createTranslator, i18nYaml, getFormatLocale, subscribeLanguage } from "@/i18n/core";
 const assetText = createTranslator(i18nYaml<"src/asset-maintenance.tsx#block1:1">`
 zh-Hans:
   previewUnavailable: "无法预览此格式，文件仍保留"
@@ -65,7 +66,9 @@ en:
   initFailed: "Couldn’t initialize attachment cleanup: {{reason}}"
   windowTitle: "Attachment Cleanup · Goose Note"
 `);
-document.title = assetText("windowTitle");
+const updateTitle = () => { document.title = assetText("windowTitle"); };
+updateTitle();
+subscribeLanguage(updateTitle);
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ChevronDown, Film, Image as ImageIcon, ScanSearch, Trash2 } from "@/components/ui/icons";
@@ -99,6 +102,7 @@ function AssetIcon({ asset }: { asset: Asset }) {
   return getLocalAssetKind(asset.name) === "video" ? <Film className="h-6 w-6" aria-hidden="true" /> : <ImageIcon className="h-6 w-6" aria-hidden="true" />;
 }
 function Preview({ asset, thumbnail = false }: { asset: Asset; thumbnail?: boolean }) {
+  useLocale();
   const [failed, setFailed] = useState(false);
   const video = getLocalAssetKind(asset.name) === "video";
   if (failed || (thumbnail && video)) return <span className="flex flex-col items-center gap-2 text-muted-foreground"><AssetIcon asset={asset} />{!thumbnail && <span className="text-sm">{assetText("previewUnavailable")}</span>}</span>;
@@ -107,6 +111,7 @@ function Preview({ asset, thumbnail = false }: { asset: Asset; thumbnail?: boole
 }
 
 function AssetMaintenanceApp() {
+  useLocale();
   const { notebooks, notebookId, scan, selected, previewPath, busy, loading, message, error,
     loadNotebooks, runScan, trash, toggle, selectNotebook, selectAll } = useAssetMaintenanceState(bridge);
   const preview = scan?.assets.find((asset) => asset.path === previewPath);

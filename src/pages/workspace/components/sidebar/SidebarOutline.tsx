@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarOutline.tsx#localMessages:1">`
@@ -47,6 +48,7 @@ export function SidebarOutline({
   paneId,
   focusKey = pageId ?? "",
 }: SidebarOutlineProps) {
+  useLocale();
   const page = usePages((state) =>
     pageId ? state.pages[pageId] : undefined,
   );

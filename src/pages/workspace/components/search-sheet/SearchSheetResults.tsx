@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheetResults.tsx#localMessages:1">`
@@ -48,6 +49,7 @@ function matchLabel(page: SearchResultPage) {
 }
 
 export function AskAiRow({ query, selected, onAsk }: { query: string; selected: boolean; onAsk: () => void }) {
+  useLocale();
   return <Button contentStyle="preserve" variant="ghost" size="sm" id={AI_ROW_ID} type="button" role="option" aria-selected={selected} data-kind="ai" className="search-sheet-row" onClick={onAsk}>
     <span className="search-sheet-row-icon"><Sparkles size={16} aria-hidden="true"/></span>
     <span className="search-sheet-row-title">{uiText("askAi")}{query}</span>
@@ -60,6 +62,7 @@ export const SearchSheetResults = memo(function SearchSheetResults({ results, qu
   notebookNames: Record<string, string>; pages: Record<string, Page>;
   openResult: (page: SearchResultPage) => void; removeRecent: (id: string) => void;
 }) {
+  useLocale();
   const hasQuery = Boolean(query.trim());
   return <>{results.map(page => {
     const title = getPageTitle(page);

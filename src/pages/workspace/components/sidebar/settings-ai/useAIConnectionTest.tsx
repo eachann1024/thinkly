@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/useAIConnectionTest.tsx#localMessages:1">`
@@ -33,12 +34,13 @@ import {
   isSetupGuideAIRequestCurrent,
   redactSetupGuideAIError,
 } from "@/lib/setupGuideAI";
-import { CUSTOM_AI_KEY_HINT } from "./shared";
+import { getCustomAiKeyHint } from "./shared";
 import type { useAIProviderConnection } from "./useAIProviderConnection";
 
 export function useAIConnectionTest(
   input: ReturnType<typeof useAIProviderConnection>,
 ) {
+  useLocale();
   const {
     onSetupStateChange,
     ai,
@@ -192,7 +194,7 @@ export function useAIConnectionTest(
   const saveButtonReason = savingCustomConfig
     ? uiText("savingAndFetchingTheModelList_8623")
     : !apiKeyDraft.trim()
-      ? CUSTOM_AI_KEY_HINT
+      ? getCustomAiKeyHint()
       : allowCustomBaseURL && !customBaseURL.trim()
         ? uiText("enterABaseUrl_463f")
         : null;

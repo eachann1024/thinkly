@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/shared.tsx#localMessages:1">`
@@ -88,49 +89,49 @@ export type AccentOption = {
 const accentOptionDefinitions: Pick<AccentOption, "value" | "label" | "fullTheme" | "pro">[] = [
   {
     value: "ocean",
-    label: uiText("ocean_212e"),
+    get label() { return uiText("ocean_212e"); },
   },
   {
     value: "iris",
-    label: uiText("iris_8a32"),
+    get label() { return uiText("iris_8a32"); },
   },
   {
     value: "pine",
-    label: uiText("pine_3fa7"),
+    get label() { return uiText("pine_3fa7"); },
   },
   {
     value: "coral",
-    label: uiText("vermilion_2107"),
+    get label() { return uiText("vermilion_2107"); },
   },
   {
     value: "rose",
-    label: uiText("berry_10a3"),
+    get label() { return uiText("berry_10a3"); },
   },
   {
     value: "grape",
-    label: uiText("grape_05b1"),
+    get label() { return uiText("grape_05b1"); },
   },
   {
     value: "mono",
-    label: uiText("leaf_461c"),
+    get label() { return uiText("leaf_461c"); },
     pro: true,
   },
   {
     value: "amber",
-    label: uiText("earlyAutumn_c4e4"),
-    fullTheme: uiText("paleCreamAndWarmWhiteLike_7eae"),
+    get label() { return uiText("earlyAutumn_c4e4"); },
+    get fullTheme() { return uiText("paleCreamAndWarmWhiteLike_7eae"); },
     pro: true,
   },
   {
     value: "wheat",
-    label: uiText("wheatPaper_013e"),
-    fullTheme: uiText("softWheatGrayAndIvoryLike_a5bb"),
+    get label() { return uiText("wheatPaper_013e"); },
+    get fullTheme() { return uiText("softWheatGrayAndIvoryLike_a5bb"); },
     pro: true,
   },
   {
     value: "claude",
     label: "Claude",
-    fullTheme: uiText("flatWarmPaperWithTerracottaAccents_b6c6"),
+    get fullTheme() { return uiText("flatWarmPaperWithTerracottaAccents_b6c6"); },
     pro: true,
   },
 ];
@@ -140,6 +141,8 @@ export const accentOptions: AccentOption[] = accentOptionDefinitions.map((option
   const dark = resolveAccentRuntimeTokens(option.value, true);
   return {
     ...option,
+    get label() { return option.label; },
+    get fullTheme() { return option.fullTheme; },
     previewLight: light["--goose-accent-solid"],
     previewDark: dark["--goose-accent-solid"],
     lightSurface: light["--goose-interactive-selected"],
@@ -158,12 +161,13 @@ export type AccentOptionStyle = CSSProperties & {
   "--goose-accent-option-dark-focus": string;
 };
 
-export const defaultLabels = { serif: uiText("serif_11e5"), mono: uiText("monospace_5226") };
+export const defaultLabels = { get serif() { return uiText("serif_11e5"); }, get mono() { return uiText("monospace_5226"); } };
 
 export const APPEARANCE_OPTION_ROW_CLASS =
   "goose-settings-option-row";
 
 export function EditorLayoutSettings() {
+  useLocale();
   const layout = useSettings((state) => state.defaultPageLayout);
   return (
     <SettingsSectionCard

@@ -16,9 +16,8 @@ import {
   stepFindMatch,
 } from "@/components/editor/find/findInPagePlugin";
 import messages from "./FindInPageBar.messages.yaml";
-import { createTranslator } from "@/i18n";
+import { createTranslator, useLocale } from "@/i18n";
 const t = createTranslator(messages);
-
 
 type FindInPageBarProps = {
   editor: BlockNoteEditor<any, any, any> | null;
@@ -47,6 +46,7 @@ export function FindInPageBar({
   navigationRequest = null,
   onClose,
 }: FindInPageBarProps) {
+  useLocale();
   const editorUiScale = useEditorUiScale();
   const inputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);

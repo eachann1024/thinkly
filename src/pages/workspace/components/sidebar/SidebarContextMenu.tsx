@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { renderSidebarContextGroups } from "./sidebar-context-menu/renderSidebarContextGroups";
 import { SidebarRenameContext } from "./SidebarInlineRename";
 import { type SidebarContextMenuProps } from "./sidebar-context-menu/shared";
@@ -5,6 +6,7 @@ import { useSidebarContextMenu } from "./sidebar-context-menu/useSidebarContextM
 import "./sidebar-context-menu.css";
 
 export function SidebarContextMenu(props: SidebarContextMenuProps) {
+  useLocale();
   const sidebarContextMenuContext = useSidebarContextMenu(props);
   const context = sidebarContextMenuContext;
   const {

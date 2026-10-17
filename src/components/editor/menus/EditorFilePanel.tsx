@@ -7,7 +7,7 @@ import { Link, Upload } from "@/components/ui/icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { filePanelReducer } from "./filePanelState";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/EditorFilePanel.tsx#messages:1">`
 zh-Hans:
   attachmentUploadFailed: "附件上传失败"
@@ -43,6 +43,7 @@ function remoteMediaUrl(value: string): URL | null {
 }
 
 export function EditorFilePanel({ blockId }: { blockId: string }) {
+  useLocale();
   const editor = useBlockNoteEditor<any, any, any>();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [tab, setTab] = useState<"upload" | "url">("upload");

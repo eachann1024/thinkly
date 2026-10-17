@@ -20,7 +20,7 @@ import type { ImageAlignment } from "@/components/editor/image/imageUtils";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { toast } from "@/components/ui/sonner";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/video/videoBlock.tsx#messages:1">`
 zh-Hans:
   savedToDownloads: "已保存到下载文件夹"
@@ -67,6 +67,7 @@ function VideoBlockContent({
   block: any;
   editor: BlockNoteEditor<any, any, any>;
 }) {
+  useLocale();
   const showLoader = useUploadLoading(block.id);
   const shellRef = useRef<HTMLDivElement>(null);
   const platform = useEditorPlatform();

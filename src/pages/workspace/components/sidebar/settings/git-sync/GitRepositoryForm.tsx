@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitRepositoryForm.tsx#localMessages:1">`
@@ -49,6 +50,7 @@ function AutomaticSync({
   saving,
   onChange,
 }: GitRepositoryFormProps) {
+  useLocale();
   return (
     <section className="space-y-3">
       <Label
@@ -106,6 +108,7 @@ function AutomaticSync({
   );
 }
 export function GitRepositoryForm(props: GitRepositoryFormProps) {
+  useLocale();
   const { adding, draft, disabled, onChange } = props;
   if (!adding) return <AutomaticSync {...props} />;
   return (

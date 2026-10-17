@@ -1,8 +1,10 @@
+import { useLocale } from "@/i18n";
 import type { ReactNode } from "react";
 import { useSplitPaneDrag } from "./useSplitPaneDrag";
 import { splitDropLabels } from "./splitDropGeometry";
 
 export function SplitPaneDragSurface({ tabId, children }: { tabId: string; children: ReactNode }) {
+  useLocale();
   const { surfaceRef, preview, announcement } = useSplitPaneDrag(tabId);
   return (
     <div

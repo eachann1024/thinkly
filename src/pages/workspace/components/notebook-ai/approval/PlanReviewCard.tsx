@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { ToolProgressCard } from "../ToolProgressCard";
 import { ReviewActions } from "./ReviewActions";
 import { ReviewProposal } from "./ReviewProposal";
@@ -9,6 +10,7 @@ export function PlanReviewCard({
   onApprovalResponse,
   onUndo,
 }: ApprovalPlanCardProps) {
+  useLocale();
   return (
     <ToolProgressCard
       parts={[{ ...part, type: "tool-executeBatchPlan" }]}

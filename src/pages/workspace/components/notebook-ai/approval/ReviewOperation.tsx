@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
@@ -42,6 +43,7 @@ export function ReviewOperation({
   onSelect: () => void;
   resultLabel?: string;
 }) {
+  useLocale();
   const { onOpenPage } = useEditorPageContext();
   const [view, setView] = useState<"diff" | "new">("diff");
   const [copyStatus, setCopyStatus] = useState("");

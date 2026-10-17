@@ -6,7 +6,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Input } from "@/components/editor/ui/input";
 import { Button } from "@/components/editor/ui/button";
 import { useEditorPlatform } from "@/components/editor/platform/context";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/link/EditorLinkToolbar.tsx#messages:1">`
 zh-Hans:
   linkText: "链接文字"
@@ -40,6 +40,7 @@ export function EditorLinkToolbar({
   setToolbarOpen,
   setToolbarPositionFrozen,
 }: LinkToolbarProps) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const platform = useEditorPlatform();
   const [editing, setEditing] = useState(false);

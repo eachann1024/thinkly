@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { type RefObject } from "react";
 import { cn } from "@/lib/utils";
 import { usePages } from "@/stores/usePages";
@@ -67,6 +68,7 @@ function NotebookAiWorkspaceBody({
   isTrashed: boolean;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
 }) {
+  useLocale();
   const handleOpenSearch = showFullscreenAi
     ? () => {
         closeAiPanel();

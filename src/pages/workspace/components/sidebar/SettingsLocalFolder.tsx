@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsLocalFolder.tsx#localMessages:1">`
@@ -47,6 +48,7 @@ import {
 import { useLocalFolderSettings } from "./local-folder-settings/useLocalFolderSettings";
 
 export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
+  useLocale();
   const localFolderSettingsContext = useLocalFolderSettings(props);
   const context = localFolderSettingsContext;
   const {

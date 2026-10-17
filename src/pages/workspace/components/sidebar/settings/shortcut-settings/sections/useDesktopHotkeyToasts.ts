@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/sections/useDesktopHotkeyToasts.ts#localMessages:1">`
@@ -30,9 +31,9 @@ import { useSettings } from "@/stores/useSettings";
 export type DesktopHotkeySlot = "wake" | "quicknote" | "search";
 
 const SLOT_LABEL: Record<DesktopHotkeySlot, string> = {
-  wake: uiText("mainWindowShortcut_8e10"),
-  quicknote: uiText("quickNoteShortcut_7505"),
-  search: uiText("globalSearchShortcut_18d6"),
+  get wake() { return uiText("mainWindowShortcut_8e10"); },
+  get quicknote() { return uiText("quickNoteShortcut_7505"); },
+  get search() { return uiText("globalSearchShortcut_18d6"); },
 };
 
 function signature(status: DesktopHotkeyStatus, shortcut: string, enabled: boolean) {
@@ -61,6 +62,7 @@ function notifyStatus(
 
 /** 只在用户改键后的真实注册结果变化时通知，打开设置或初次水合不提示。 */
 export function useDesktopHotkeyToasts(enabled: boolean) {
+  useLocale();
   const wake = useSettings((s) => s.desktop.wakeHotkeyStatus);
   const wakeHotkey = useSettings((s) => s.desktop.wakeHotkey);
   const wakeEnabled = useSettings((s) => s.desktop.wakeHotkeyEnabled);

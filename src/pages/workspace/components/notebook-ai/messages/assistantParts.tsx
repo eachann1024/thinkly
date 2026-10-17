@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useContext } from "react";
 import type {
   TextMessagePartProps,
@@ -10,6 +11,7 @@ import { AssistantStreamdownText } from "./AssistantStreamdownText";
 import { shouldShowToolPart } from "./messagePresentation";
 import { renderToolVisual } from "./toolVisual";
 function AssistantTextPart({ text, status }: TextMessagePartProps) {
+  useLocale();
   const ctx = useContext(AssistantToolRenderContext);
   // 多轮工具调用会留下多段正文；只有当前仍在输出的 part 才是 running
   const isPartStreaming =
@@ -25,6 +27,7 @@ function AssistantTextPart({ text, status }: TextMessagePartProps) {
 
 /** 工作卡 footer：只渲染 executeBatchPlan 的 embedded 审批，其余 part 一律 null */
 function AssistantApprovalPart({ artifact }: ToolCallMessagePartProps) {
+  useLocale();
   const ctx = useContext(AssistantToolRenderContext);
   if (!ctx) return null;
   const { isStreaming, onBatchApproval, onBatchUndo } = ctx;
@@ -51,6 +54,7 @@ function AssistantApprovalPart({ artifact }: ToolCallMessagePartProps) {
 
 /** 纸外 artifact：只渲染 Table/Chart/Diagram/Svg，text 与审批一律 null */
 function AssistantArtifactPart({ artifact }: ToolCallMessagePartProps) {
+  useLocale();
   const ctx = useContext(AssistantToolRenderContext);
   if (!ctx) return null;
   const { isStreaming, editorRef } = ctx;

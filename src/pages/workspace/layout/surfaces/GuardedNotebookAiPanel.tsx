@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1">`
@@ -18,6 +19,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 export function GuardedNotebookAiPanel(
   props: ComponentProps<typeof NotebookAiPanel>,
 ) {
+  useLocale();
   return (
     <ErrorBoundary
       resetKey={props.notebookId}

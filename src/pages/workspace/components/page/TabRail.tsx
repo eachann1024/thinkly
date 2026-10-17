@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/TabRail.tsx#localMessages:1">`
@@ -40,6 +41,7 @@ export function TabRail({
   aiPanelOpen,
   aiLayoutMode = "fullscreen",
 }: TabRailProps) {
+  useLocale();
   const folderActionsAvailable = useFolderToolbarActions();
   const {
     visibleTabs, focusedPageByTabId, getPage,

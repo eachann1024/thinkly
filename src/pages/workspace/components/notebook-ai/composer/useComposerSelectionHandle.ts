@@ -2,7 +2,7 @@ import { useEffect, useImperativeHandle, type Ref } from "react";
 import { toast } from "@/components/ui/sonner";
 import {
   APPEND_COMPOSER_SELECTION_EVENT,
-  SELECTION_QUOTE_DUPLICATE_TOAST,
+  getSelectionQuoteDuplicateToast,
   buildSelectionQuoteAttrs,
   consumePendingAppendComposerSelections,
   shouldDeferPendingSelectionQuote,
@@ -41,7 +41,7 @@ export function useComposerSelectionHandle(
         restoreCaret: false,
       });
       if (result === "duplicate") {
-        toast(SELECTION_QUOTE_DUPLICATE_TOAST);
+        toast(getSelectionQuoteDuplicateToast());
         inputRef.current?.focus();
         return true;
       }

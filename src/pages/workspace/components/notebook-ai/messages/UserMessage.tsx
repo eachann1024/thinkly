@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/UserMessage.tsx#messages:1">`
 zh-Hans:
@@ -33,6 +34,7 @@ export function UserMessage({
   msg: NotebookAiMessage;
   setPreviewContent: (content: PreviewContent) => void;
 }) {
+  useLocale();
   const { onOpenPage } = useEditorPageContext();
   const [quotePreview, setQuotePreview] = useState<AiSelectionQuoteAttrs | null>(null);
   const text = getUserDisplayText(msg);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/HiddenFoldersField.tsx#localMessages:1">`
@@ -51,6 +52,7 @@ export function HiddenFoldersField({
   folders,
   onChange,
 }: HiddenFoldersFieldProps) {
+  useLocale();
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
 

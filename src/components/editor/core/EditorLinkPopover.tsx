@@ -1,7 +1,7 @@
 import { Input } from "@/components/editor/ui/input";
 import { EditorAction } from "@/components/editor/ui/button";
 import type { useEditorComposerInteractions } from "./useEditorComposerInteractions";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/EditorLinkPopover.tsx#messages:1">`
 zh-Hans:
   confirm: "确认"
@@ -28,6 +28,7 @@ export function EditorLinkPopover({
   closeLinkPopover,
   handleLinkPopoverSubmit,
 }: EditorLinkPopoverProps) {
+  useLocale();
   return (
     <>
       {linkPopoverOpen && (

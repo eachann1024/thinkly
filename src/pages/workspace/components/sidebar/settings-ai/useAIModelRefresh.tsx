@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/useAIModelRefresh.tsx#localMessages:1">`
 zh-Hans:
@@ -43,7 +44,7 @@ import {
   redactSetupGuideAIError,
 } from "@/lib/setupGuideAI";
 import {
-  CUSTOM_AI_KEY_HINT,
+  getCustomAiKeyHint,
   type ProviderConnection,
   readStoredApiKey,
 } from "./shared";
@@ -51,6 +52,7 @@ import type { useAIConnectionTest } from "./useAIConnectionTest";
 export function useAIModelRefresh(
   input: ReturnType<typeof useAIConnectionTest>,
 ) {
+  useLocale();
   const {
     ai,
     selectedModelId,
@@ -85,7 +87,7 @@ export function useAIModelRefresh(
     if (isModelRequestBusy(requestStateRef.current.models) || requestStateRef.current.test.status === "testing") return;
     const apiKey = connection.apiKey.trim();
     if (!apiKey) {
-      toast.error(CUSTOM_AI_KEY_HINT);
+      toast.error(getCustomAiKeyHint());
       return;
     }
     const provider = getAIProviderPreset(connection.providerId);

@@ -10,7 +10,7 @@ import {
   getListTypeToolbarState,
   type ListBlockType,
 } from "../listType";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/ListTypeGroup.tsx#messages:1">`
 zh-Hans:
   checklist: "待办事项"
@@ -44,6 +44,7 @@ export function ListTypeGroup({
   bindTooltip: BindTooltip;
   runAction?: RunToolbarAction;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const run = runAction ?? ((apply) => withPreservedSelection(editor, apply));
   const active = useEditorState({

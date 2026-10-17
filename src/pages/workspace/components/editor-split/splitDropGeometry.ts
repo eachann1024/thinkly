@@ -27,8 +27,8 @@ export type SplitDropTarget = {
 };
 
 export const splitDropLabels: Record<SplitDropPlacement, string> = {
-  left: uiText("moveLeft"), right: uiText("moveRight"), top: uiText("moveAbove"),
-  bottom: uiText("moveBelow"), center: uiText("swapPositions"),
+  get left() { return uiText("moveLeft"); }, get right() { return uiText("moveRight"); }, get top() { return uiText("moveAbove"); },
+  get bottom() { return uiText("moveBelow"); }, get center() { return uiText("swapPositions"); },
 };
 
 export function paneElements(surface: HTMLElement): HTMLElement[] {

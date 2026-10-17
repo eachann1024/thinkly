@@ -28,7 +28,7 @@ import {
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
 import { useCodeLanguageFocus } from "./useCodeLanguageFocus";
 import messages from "./CodeLanguagePicker.messages.yaml";
-import { createTranslator } from "@/i18n";
+import { createTranslator, useLocale } from "@/i18n";
 const t = createTranslator(messages);
 
 
@@ -50,6 +50,7 @@ export function CodeLanguagePicker({
   chipClass: string;
   chipActiveClass: string;
 }) {
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -90,7 +91,7 @@ export function CodeLanguagePicker({
       if (!aI && bI) return 1;
       return 0;
     });
-  }, [search]);
+  }, [search, locale]);
 
   const safeHighlightedIndex =
     filteredLanguages.length === 0

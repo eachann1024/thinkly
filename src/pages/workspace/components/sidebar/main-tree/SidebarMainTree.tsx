@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/SidebarMainTree.tsx#localMessages:1">`
@@ -38,6 +39,7 @@ import { useMainTreeView } from "./controller/useMainTreeView";
 import { useMainTreeDragActions } from "./controller/useMainTreeDragActions";
 
 export const SidebarMainTree = memo(function SidebarMainTree(props: SidebarMainTreeProps) {
+  useLocale();
   const tree = useMainTreeState(props);
   const creation = useMainTreeLocalCreation(tree);
   const view = useMainTreeView(creation);

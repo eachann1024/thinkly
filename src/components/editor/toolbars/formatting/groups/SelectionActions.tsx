@@ -14,7 +14,7 @@ import {
   snapshotCurrentSelection,
 } from "../selectionRestore";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/SelectionActions.tsx#messages:1">`
 zh-Hans:
   couldNotCopyPleaseTryAgain: "复制失败，请重试"
@@ -35,6 +35,7 @@ export function SelectionActions({
 }: {
   bindTooltip: BindTooltip;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const [copying, setCopying] = useState(false);
   const pending = useRef(false);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/image-export/GenerationOptionsPanel.tsx#localMessages:1">`
@@ -35,6 +36,7 @@ export function GenerationOptionsPanel({
   wm: WatermarkConfig;
   onToggle: (key: keyof WatermarkConfig) => void;
 }) {
+  useLocale();
   const labelPrefix = useId();
   const [open, setOpen] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);

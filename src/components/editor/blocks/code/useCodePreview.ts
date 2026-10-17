@@ -3,7 +3,7 @@ import { toast } from "@/components/ui/sonner";
 import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import { isDarkTheme, useCodePreviewActions } from "./useCodePreviewActions";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/useCodePreview.ts#messages:1">`
 zh-Hans:
   nothingToPreview: "无可预览内容"
@@ -25,6 +25,7 @@ export function useCodePreview(
   wrap: boolean,
   theme: string | undefined,
 ) {
+  useLocale();
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewMode, setPreviewMode] = useState<"code" | "preview">(() =>
     !__GOOSE_EDITOR_COMPACT__ &&

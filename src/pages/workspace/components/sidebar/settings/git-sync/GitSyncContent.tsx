@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml, getFormatLocale } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitSyncContent.tsx#localMessages:1">`
@@ -39,6 +40,7 @@ en:
   readFailed: "Could not read configuration: {{error}}"
 `;
 const uiText = createTranslator(localMessages);
+import { localizeGitUiReason, type GitSyncAction } from "./gitSyncUiState";
 import { GitDetails } from "./GitDetails";
 import { GitSyncSettings } from "./GitSyncSettings";
 import { repositoryLabel, shortSyncError } from "./gitSyncPresentation";
@@ -80,7 +82,7 @@ export interface GitSyncContentProps {
   removeConfirmation: string;
   setRemoveConfirmation: Dispatch<SetStateAction<string>>;
   updateDraft: <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => void;
-  run: (id: string, label: string, operation: () => Promise<GitSyncState>, onSuccess?: () => void) => Promise<void>;
+  run: (id: string, action: GitSyncAction, operation: () => Promise<GitSyncState>, onSuccess?: () => void) => Promise<void>;
   toggleFolder: (folder: GitRepositoryFolder, checked: boolean) => void;
   recoverFolder: (folder: GitRepositoryFolder, relocate: boolean) => Promise<void>;
   locateFolder: (folder: GitRepositoryFolder) => Promise<void>;
@@ -128,9 +130,10 @@ export function GitSyncContent({
   onRemoved,
   onFolderCheck,
 }: GitSyncContentProps) {
+  useLocale();
   const actionDisabled = disabled || unsavedFolders || unsavedSettings;
   const conflicts = status?.conflicts ?? [];
-  const syncError = status?.error;
+  const syncError = status?.error ? localizeGitUiReason(status.error) : undefined;
   const folderError = folderErrorCount > 0;
   const settingsProps = {
     config,
@@ -142,7 +145,7 @@ export function GitSyncContent({
     removeConfirmation,
     setRemoveConfirmation,
     onRemove: () => {
-      if (bridge) void run(id, uiText("removeConfiguration_9285"), () => bridge.remove(id), onRemoved);
+      if (bridge) void run(id, "remove", () => bridge.remove(id), onRemoved);
     },
   };
   return (
@@ -220,7 +223,7 @@ export function GitSyncContent({
                     disabled={actionDisabled || !folders.length}
                     onClick={() => {
                       onFolderCheck();
-                      void run(id, uiText("sync_6a62"), () => bridge.syncNow(id));
+                      void run(id, "sync", () => bridge.syncNow(id));
                     }}
                   >
                     {status?.phase === "error" || folderError ? uiText("retry_132c") : uiText("syncNow_5f71")}
@@ -242,7 +245,7 @@ export function GitSyncContent({
                   conflicts={conflicts}
                   bridge={bridge}
                   disabled={disabled}
-                  onResolve={(request) => void run(id, uiText("resolveConflictsAndResumeSync_6864"), () => bridge.resolveConflict(request))}
+                  onResolve={(request) => void run(id, "resolve", () => bridge.resolveConflict(request))}
                 />
               )}
             </SettingsSectionCard>

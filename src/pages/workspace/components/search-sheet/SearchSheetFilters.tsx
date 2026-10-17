@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheetFilters.tsx#localMessages:1">`
@@ -30,9 +31,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSearchSession, type SearchSort } from "../sidebar/useSearchSession";
 
-const SORT_LABELS: Record<SearchSort, string> = { best: uiText("bestMatch"), recent: uiText("recentlyEdited") };
+const SORT_LABELS: Record<SearchSort, string> = { get best() { return uiText("bestMatch"); }, get recent() { return uiText("recentlyEdited"); } };
 
 export function SearchSheetFilters({ count }: { count: string }) {
+  useLocale();
   const s = useSearchSession(useShallow(state => ({
     scope: state.scope, startingNotebookId: state.view.phase !== "closed" ? state.view.context.startingNotebookId : null, titleOnly: state.titleOnly, sort: state.sort,
     setScope: state.setScope, setTitleOnly: state.setTitleOnly, setSort: state.setSort,

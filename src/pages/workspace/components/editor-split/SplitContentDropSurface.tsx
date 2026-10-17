@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1">`
@@ -31,7 +32,7 @@ type SplitDropTarget = {
 };
 
 const labels: Record<SplitContentPlacement, string> = {
-  left: uiText("splitToTheLeft"), right: uiText("splitToTheRight"), top: uiText("splitAbove"), bottom: uiText("splitBelow"),
+  get left() { return uiText("splitToTheLeft"); }, get right() { return uiText("splitToTheRight"); }, get top() { return uiText("splitAbove"); }, get bottom() { return uiText("splitBelow"); },
 };
 
 function isFileDrag(data: DataTransfer): boolean {
@@ -72,6 +73,7 @@ function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDro
 
 /** 文件只允许落在分屏边缘；正文选区仍保留原有的文内拖动行为。 */
 export function SplitContentDropSurface({ tabId, children }: { tabId: string; children: ReactNode }) {
+  useLocale();
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [preview, setPreview] = useState<SplitDropTarget | null>(null);
   const [full, setFull] = useState(false);

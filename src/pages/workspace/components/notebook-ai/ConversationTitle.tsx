@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { isEmptyConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -25,6 +26,7 @@ export function ConversationTitle({
   className,
   muted,
 }: ConversationTitleProps) {
+  useLocale();
   const display = summary.trim() || t("newConversation");
   const isMuted = muted ?? isEmptyConversationSummary(display);
 

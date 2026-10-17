@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { getUserDisplayText } from "./messages/messagePresentation";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/AssistantUiRuntimeProvider.tsx#messages:1">`
@@ -157,7 +158,8 @@ export function NotebookAiAssistantRuntimeProvider({
   onCancel,
   children,
 }: NotebookAiAssistantRuntimeProviderProps) {
-  const projectMessages = useMemo(() => createAiMessageProjector(), []);
+  const locale = useLocale();
+  const projectMessages = useMemo(() => createAiMessageProjector(), [locale]);
   const projectedMessages = useMemo(
     () => projectMessages(messages, isRunning),
     [messages, isRunning, projectMessages],

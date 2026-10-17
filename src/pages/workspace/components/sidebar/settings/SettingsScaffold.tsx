@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx#localMessages:1">`
@@ -46,6 +47,7 @@ export function SettingsScaffold({
   children,
   feedbackBanner,
 }: SettingsScaffoldProps) {
+  useLocale();
   const compact = useWorkspaceViewport((s) => s.forceCollapseLeft);
   const compactNavigationRef = useRef<HTMLButtonElement>(null);
   const navigationRef = useRef<HTMLDivElement | null>(null);

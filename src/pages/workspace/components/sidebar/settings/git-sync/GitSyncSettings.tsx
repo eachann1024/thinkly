@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitSyncSettings.tsx#localMessages:1">`
@@ -49,6 +50,7 @@ export function GitSyncSettings({
   setRemoveConfirmation: Dispatch<SetStateAction<string>>;
   onRemove: () => void;
 }) {
+  useLocale();
   if (!config) return null;
   return (
     <SettingsSectionCard className="overflow-hidden p-2">

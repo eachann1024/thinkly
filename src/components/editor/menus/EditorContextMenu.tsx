@@ -20,7 +20,7 @@ import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard
 import { useEditorContextClipboard } from "./useEditorContextClipboard";
 import { getEditorSelectedBlocksForExport } from "@/components/editor/utils/selection";
 import { cn, formatShortcut } from "@/lib/utils";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/EditorContextMenu.tsx#messages:1">`
 zh-Hans:
   selectedContent: "选中内容"
@@ -97,6 +97,7 @@ export function EditorContextMenu({
   isEditorFullWidth,
   children,
 }: EditorContextMenuProps) {
+  useLocale();
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
   const [canCopy, setCanCopy] = useState(false);
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);

@@ -2,7 +2,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { EditorAction } from "@/components/editor/ui/button";
 import { ArrowUp, ChevronDown, Settings } from "@/components/ui/icons";
 import type { GoosePromptSuggestionMenuProps } from "./GoosePromptSuggestionMenu";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/GoosePromptActions.tsx#messages:1">`
 zh-Hans:
   aiQuickActions: "AI 快捷操作"
@@ -27,6 +27,7 @@ export function GoosePromptActions({
   props: GoosePromptSuggestionMenuProps;
   promptTextToUse: string;
 }) {
+  useLocale();
   const tags = props.tags ?? [];
   const disabled = props.disabled;
   const onManualPromptSubmit = props.onManualPromptSubmit;

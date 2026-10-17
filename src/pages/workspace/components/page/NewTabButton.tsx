@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/NewTabButton.tsx#localMessages:1">`
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function NewTabButton({ onClick }: { onClick: () => void }) {
+  useLocale();
   return (
     <TooltipProvider delayDuration={600}>
       <Tooltip>

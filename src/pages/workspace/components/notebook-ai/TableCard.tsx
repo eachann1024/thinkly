@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 /**
  * showTable 工具的输出渲染卡片
  */
@@ -56,6 +57,7 @@ function tableToHtml(columns: string[], rows: string[][]): string {
 }
 
 export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
+  useLocale();
   const markdown = tableToMarkdown(columns, rows);
 
   return (

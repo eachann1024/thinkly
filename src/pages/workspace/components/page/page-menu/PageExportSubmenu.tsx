@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/page-menu/PageExportSubmenu.tsx#localMessages:1">`
@@ -50,6 +51,7 @@ export function PageExportSubmenu({
   onExportWord: () => void;
   onExportPdf: () => void;
 }) {
+  useLocale();
   const [state, dispatch] = useReducer(exportSubmenuReducer, { status: "closed" });
   const stateRef = useRef(state);
   stateRef.current = state;

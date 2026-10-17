@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/PageEmptyState.tsx#localMessages:1">`
@@ -24,6 +25,7 @@ function EmptyStateActionIcon({ actionKey }: { actionKey: string }) {
 }
 
 export function PageEmptyState() {
+  useLocale();
   const { isLocalFolder, actions } = usePageEmptyState();
   const needsFolder = !isLocalFolder;
   const [primary, ...secondary] = actions;

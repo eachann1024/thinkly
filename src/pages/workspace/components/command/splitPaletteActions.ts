@@ -35,7 +35,7 @@ export type SplitPaletteAction = {
 export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   {
     id: "split-right",
-    label: uiText("splitRight"),
+    get label() { return uiText("splitRight"); },
     keywords: "分屏 向右 split right pane",
     shortcutId: "splitRight",
     run: () => {
@@ -44,7 +44,7 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   },
   {
     id: "split-down",
-    label: uiText("splitDown"),
+    get label() { return uiText("splitDown"); },
     keywords: "分屏 向下 split down pane",
     shortcutId: "splitDown",
     run: () => {
@@ -53,14 +53,14 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   },
   {
     id: "split-zoom",
-    label: uiText("maximizePane"),
+    get label() { return uiText("maximizePane"); },
     keywords: "分屏 最大化 格 zoom pane",
     shortcutId: "splitZoom",
     run: toggleZoom,
   },
   {
     id: "split-close",
-    label: uiText("closePane"),
+    get label() { return uiText("closePane"); },
     keywords: "关闭 关格 分屏 close pane",
     shortcutId: "closeSplitPane",
     run: () => {

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/hooks/useAppUpdate.ts#block1:1">`
 zh-Hans:
@@ -166,6 +167,7 @@ async function revealDownload() {
 }
 
 export function useAppUpdate() {
+  useLocale();
   const ui = useAppUpdateUi();
   useEffect(subscribeUpdates, []);
   return {

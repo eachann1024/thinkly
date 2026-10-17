@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 /**
  * 侧边 AI 模型选择器 — 默认跟随设置里配置的模型，
@@ -31,6 +32,7 @@ interface ModelSelectorPopoverProps {
 }
 
 export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const customModelOptions = useSettings(
     (state) => state.ai.customModelOptions,

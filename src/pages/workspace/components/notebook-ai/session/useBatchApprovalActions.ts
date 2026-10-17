@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback } from "react";
 import { batchExecutionSummary } from "@/lib/notebook-ai/batch-plan/executionSummary";
 import { toast } from "@/components/ui/sonner";
@@ -38,6 +39,7 @@ const t = createTranslator(messages);
 
 
 export function useBatchApprovalActions(state: SessionState) {
+  useLocale();
   const {
     currentSessionScope,
     isCurrentSession,
@@ -127,13 +129,7 @@ export function useBatchApprovalActions(state: SessionState) {
         });
       }
     },
-    [
-      conversationId,
-      currentSessionScope,
-      isCurrentSession,
-      notebookId,
-      setMessages,
-    ],
+    [conversationId, currentSessionScope, isCurrentSession, notebookId, setMessages],
   );
 
   const onBatchUndo = useCallback(
@@ -142,7 +138,7 @@ export function useBatchApprovalActions(state: SessionState) {
       try {
         const result = await undoBatchPlan(toolCallId, runId);
         if (!isCurrentSession(scope)) {
-          return { ok: false, get error() { return t("conversationChangedOutdatedResultsWereIgnored"); } };
+          return { ok: false, error: t("conversationChangedOutdatedResultsWereIgnored") };
         }
         if (!result.ok) {
           toast.error(t("couldNotUndoAllChangesInThisBatch"), {
@@ -189,20 +185,14 @@ export function useBatchApprovalActions(state: SessionState) {
         };
       } catch (undoError) {
         if (!isCurrentSession(scope)) {
-          return { ok: false, get error() { return t("conversationChangedOutdatedResultsWereIgnored"); } };
+          return { ok: false, error: t("conversationChangedOutdatedResultsWereIgnored") };
         }
         const description = formatNotebookAiError(undoError, { phase: "undo" });
         toast.error(t("undoFailed"), { description });
         return { ok: false, error: description };
       }
     },
-    [
-      conversationId,
-      currentSessionScope,
-      isCurrentSession,
-      notebookId,
-      setMessages,
-    ],
+    [conversationId, currentSessionScope, isCurrentSession, notebookId, setMessages],
   );
 
   return { onBatchApproval, onBatchUndo };

@@ -11,7 +11,7 @@ import {
   LUCIDE_ICON_TO_EMOJI,
   normalizeCalloutIcon,
 } from "./calloutIcons";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/callout/calloutBlock.tsx#messages:1">`
 zh-Hans:
   calloutIcon: "提示块图标"
@@ -57,6 +57,7 @@ function CalloutBlockView({
   contentRef: (node: HTMLElement | null) => void;
   editor: BlockNoteEditor<any, any, any>;
 }) {
+  useLocale();
   const icon = (block.props.icon as string) || DEFAULT_CALLOUT_ICON;
 
   return (

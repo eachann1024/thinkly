@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/OpenAppField.tsx#localMessages:1">`
@@ -39,6 +40,7 @@ export function OpenAppField({
   options,
   systemIds,
 }: OpenAppFieldProps) {
+  useLocale();
   const trimmedValue = value.trim();
   const matchedOption = useMemo(
     () => options.find((option) => option.appName === trimmedValue),

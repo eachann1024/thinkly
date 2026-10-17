@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/hooks/local-folder-watch/useLocalFolderWatchLifecycle.tsx#localMessages:1">`
@@ -22,6 +23,7 @@ import type { useLocalFileChangeEvents } from "./useLocalFileChangeEvents";
 export function useLocalFolderWatchLifecycle(
   input: ReturnType<typeof useLocalFileChangeEvents>,
 ) {
+  useLocale();
   const { notebook, activePageId, renameDebounceTimers, changeDebounceTimers } =
     input;
 

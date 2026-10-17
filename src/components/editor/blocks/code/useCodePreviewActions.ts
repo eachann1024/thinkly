@@ -10,7 +10,7 @@ import { toast } from "@/components/ui/sonner";
 import { openPreviewInSystem } from "@/lib/preview/previewAction";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { useEditorPlatform } from "@/components/editor/platform/context";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/useCodePreviewActions.ts#messages:1">`
 zh-Hans:
   nothingToExport: "无可导出内容"
@@ -62,6 +62,7 @@ export function useCodePreviewActions({
   theme: string | undefined;
   previewRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  useLocale();
   const platform = useEditorPlatform();
   const resolvePreviewPngBlob = useCallback(async (): Promise<Blob> => {
     const text = getCodeContent().trim();

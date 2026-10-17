@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { WorkCardStatus } from "../WorkCardStatus";
@@ -25,6 +26,7 @@ export function ApprovalCard({
   footer?: ReactNode;
   className?: string;
 }) {
+  useLocale();
   return (
     <section
       className={cn(

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsShortcuts.tsx#localMessages:1">`
@@ -17,6 +18,7 @@ import { type SettingsShortcutsProps } from "./shortcut-settings/shared";
 import { useShortcutSettings } from "./shortcut-settings/useShortcutSettings";
 
 export function SettingsShortcuts(props: SettingsShortcutsProps) {
+  useLocale();
   const shortcutSettingsContext = useShortcutSettings(props);
   const context = shortcutSettingsContext;
   const { confirmReset, setConfirmReset, handleReset } = context;

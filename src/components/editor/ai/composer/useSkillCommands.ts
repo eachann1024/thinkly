@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import {
   useCallback,
   useEffect,
@@ -51,6 +52,7 @@ export function useSkillCommands(options: {
   onContentMutation: () => void;
   onBuiltinCommand?: (id: ComposerSlashBuiltinId) => void;
 }) {
+  const locale = useLocale();
   const {
     editorRef,
     isComposingRef,
@@ -71,7 +73,7 @@ export function useSkillCommands(options: {
             includeSkills,
           })
         : [],
-    [command.phase, commandQuery, enabled, includeSkills, notebookId],
+    [command.phase, commandQuery, enabled, includeSkills, notebookId, locale],
   );
   const itemsRef = useRef(items);
   useEffect(() => {

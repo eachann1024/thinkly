@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1">`
@@ -25,6 +26,7 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
   onCommit?: (id: string, name: string) => Promise<boolean>;
   onCancel?: (id: string) => void;
 }) {
+  useLocale();
   const { value, valueRef, inputProps, isComposing } = useImeInput(kind === "folder" ? uiText("newFolder_f3a4") : "");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const finishedRef = useRef(false);

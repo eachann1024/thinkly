@@ -1,7 +1,7 @@
 import { Plugin, PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
 import { createInlinePreviewOutline } from "./inlinePreviewOutline";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, subscribeLanguage, getLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/inlinePreview.ts#messages:1">`
 zh-Hans:
   readOnlyAiChangePreview: "AI 只读修改预览"
@@ -42,7 +42,17 @@ export function createInlinePreviewPlugin() {
   const key = new PluginKey<InlinePreviewPart[]>("goose-inline-ai-preview");
   const plugin = new Plugin<InlinePreviewPart[]>({
     key,
-    view: (view) => createInlinePreviewOutline(view, key),
+    view: (view) => {
+      const outline = createInlinePreviewOutline(view, key);
+      // Refresh decorations against the same state: no transaction or undo step.
+      const unsubscribe = subscribeLanguage(() => {
+        if (!view.isDestroyed) view.updateState(view.state);
+      });
+      return {
+        ...outline,
+        destroy: () => { unsubscribe(); outline.destroy(); },
+      };
+    },
     state: {
       init: () => [],
       apply(tr, value) {
@@ -77,14 +87,14 @@ export function createInlinePreviewPlugin() {
             span.setAttribute("aria-label", t("addedText"));
             span.textContent = added;
             return span;
-          }, { side: -1, key: `${part.blockFrom}:${added}`, ignoreSelection: true }));
+          }, { side: -1, key: `${getLocale()}:${part.blockFrom}:${added}`, ignoreSelection: true }));
           if (part.formattingChanged) decorations.push(Decoration.widget(part.to, () => {
             const label = document.createElement("span");
             label.className = "goose-ai-preview-format-change";
             label.contentEditable = "false";
             label.textContent = t("formattingStructureChanges");
             return label;
-          }, { side: 1, key: `${part.blockFrom}:format`, ignoreSelection: true }));
+          }, { side: 1, key: `${getLocale()}:${part.blockFrom}:format`, ignoreSelection: true }));
         }
         return DecorationSet.create(state.doc, decorations);
       },

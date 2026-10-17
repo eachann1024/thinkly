@@ -1,4 +1,4 @@
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/SelectionSummary.tsx#messages:1">`
 zh-Hans:
   tableSelection: "{{rows}} 行 × {{columns}} 列"
@@ -14,6 +14,7 @@ import type { FormattingSelectionMode } from "./formattingCapabilities";
 import { collectSelectedContentBlockIds } from "./selectionBlocks";
 
 export function useSelectionSummary(mode: FormattingSelectionMode) {
+  useLocale();
   const editor = useBlockNoteEditor();
   return useEditorState({
     editor,
@@ -40,5 +41,6 @@ export function useSelectionSummary(mode: FormattingSelectionMode) {
 }
 
 export function SelectionSummary({ label }: { label: string }) {
+  useLocale();
   return <span className="goose-formatting-toolbar-summary">{label}</span>;
 }

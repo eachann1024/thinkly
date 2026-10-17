@@ -24,7 +24,7 @@ import { fs } from "@/lib/electron-platform/fs";
 import { shell } from "@/lib/electron-platform/shell";
 
 /** 所有「打开来看」预览按钮的统一文案 */
-export const PREVIEW_ACTION_TOOLTIP = uiText("previewClickForFullScreenRightClickForSystem");
+export const getPreviewActionTooltip = () => uiText("previewClickForFullScreenRightClickForSystem");
 
 /** 预览缩放按百分比步进，不用 1.2 倍这种非整比例 */
 export const PREVIEW_ZOOM_STEP_PERCENT = 25;
@@ -52,7 +52,7 @@ export function previewPointerHandlers(handlers: {
   disabled?: boolean;
 }) {
   return {
-    "aria-label": PREVIEW_ACTION_TOOLTIP,
+    "aria-label": getPreviewActionTooltip(),
     onClick: (event: ReactMouseEvent<HTMLElement>) => {
       if (handlers.disabled) return;
       event.preventDefault();

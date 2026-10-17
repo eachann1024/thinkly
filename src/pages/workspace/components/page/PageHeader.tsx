@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/PageHeader.tsx#localMessages:1">`
@@ -63,6 +64,7 @@ export function PageHeader({
   aiLayoutMode = "fullscreen",
   onToggleAiPanel,
 }: PageHeaderProps) {
+  useLocale();
   const aiPhase = useAiStatus((state) => state.phase);
   const folderActionsAvailable = useFolderToolbarActions();
   const { appShortcuts } = useSettings();

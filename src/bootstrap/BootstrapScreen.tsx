@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/bootstrap/BootstrapScreen.tsx#localMessages:1">`
@@ -18,6 +19,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { FileText } from "@/components/ui/icons";
 
 export function BootstrapScreen({ lean, error }: { lean: boolean; error?: unknown }) {
+  useLocale();
   const message = error instanceof Error ? error.message : error ? String(error) : undefined;
   return (
     <main className="bootstrap-screen">

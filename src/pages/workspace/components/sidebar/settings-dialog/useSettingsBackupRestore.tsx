@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsBackupRestore.tsx#localMessages:1">`
@@ -34,6 +35,7 @@ import type { useSettingsImportExport } from "./useSettingsImportExport";
 export function useSettingsBackupRestore(
   input: ReturnType<typeof useSettingsImportExport>,
 ) {
+  useLocale();
   const { notebooks, pages, format, createNotebook } = input;
 
   const clearCurrentContent = async (options?: {

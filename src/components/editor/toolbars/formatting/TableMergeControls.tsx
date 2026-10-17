@@ -2,7 +2,7 @@ import { mergeCells, splitCell } from "prosemirror-tables";
 import { EditorAction } from "@/components/editor/ui/button";
 import { Table2 } from "@/components/ui/icons";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/TableMergeControls.tsx#messages:1">`
 zh-Hans:
   mergeCells: "合并单元格"
@@ -19,6 +19,7 @@ export function hasTableMergeAction(editor: BlockNoteEditor<any, any, any>) {
 }
 
 export function TableMergeControls({ editor }: { editor: BlockNoteEditor<any, any, any> }) {
+  useLocale();
   if (!editor.isEditable) return null;
   const state = editor.prosemirrorState;
   const merge = mergeCells(state);
