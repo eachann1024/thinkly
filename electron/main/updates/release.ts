@@ -1,6 +1,6 @@
 import { t } from "../i18n/updates";
 import { app, net } from "electron";
-import { PUBLIC_UPDATE_URL, PUBLIC_GITHUB_UPDATE_URL, PUBLIC_RELEASES_REPO, PUBLIC_DISTRIBUTION_BASE_URL,
+import { PUBLIC_UPDATE_URL, PUBLIC_GITHUB_UPDATE_URL, PUBLIC_RELEASES_REPO,
   parseReleaseTag, isTrustedUpdateAsset,
   type GithubReleaseAsset } from "../../../src/lib/appUpdateRelease";
 import type { AppReleaseDetails } from "../../../src/lib/appUpdateTypes";
@@ -24,9 +24,7 @@ async function requestRelease(url: string): Promise<ReleaseDetails & { version: 
   const releaseNotes = typeof payload.releaseNotes === "string" ? payload.releaseNotes.slice(0, 100_000).trim() : "";
   const publishedAt = typeof payload.publishedAt === "string" && Number.isFinite(Date.parse(payload.publishedAt))
     ? new Date(payload.publishedAt).toISOString() : undefined;
-  const releaseUrl = url === PUBLIC_UPDATE_URL && PUBLIC_DISTRIBUTION_BASE_URL
-    ? `${PUBLIC_DISTRIBUTION_BASE_URL}/releases/${encodeURIComponent(parsed.tag)}/index.html`
-    : `https://github.com/${PUBLIC_RELEASES_REPO}/releases/tag/${encodeURIComponent(parsed.tag)}`;
+  const releaseUrl = `https://github.com/${PUBLIC_RELEASES_REPO}/releases/tag/${encodeURIComponent(parsed.tag)}`;
   return { version: parsed.version, assets, releaseNotes, publishedAt, releaseUrl };
 }
 
