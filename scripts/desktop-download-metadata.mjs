@@ -39,8 +39,8 @@ export function createCask(version, tag, hashes, repo = REPO, signed = false) {
   sha256 arm: "${hashes.get(arm)}",
          intel: "${hashes.get(intel)}"
   url "https://github.com/${repo}/releases/download/v#{version.csv.first}-#{version.csv.second}/Goose.Note-#{version.csv.first}#{arch}.dmg"
-  name "Goose Note"
-  desc "Local-first Markdown notes with AI"
+  name "Thinkly"
+  desc "Thinkly: Keep every passing thought. Ask your past anytime."
   homepage "https://github.com/${repo}"
   depends_on :macos
   app "Goose Note.app"
@@ -51,7 +51,7 @@ export function createCask(version, tag, hashes, repo = REPO, signed = false) {
     "~/Library/Saved Application State/com.goosenote.desktop.savedState",
   ]${signed ? "" : `
   caveats <<~EOS
-    Goose Note has no Developer ID signature or Apple notarization.
+    Thinkly has no Developer ID signature or Apple notarization.
     The independent author has not enrolled in Apple's paid developer program.
     Try opening the app, then allow it in System Settings → Privacy & Security.
     Homebrew installs the app only; it does not install the DMG's command helper.
@@ -75,7 +75,7 @@ export function downloadMetadata(version, tag, hashes, signed, publishedAt, rele
       files[`updates/mac-${arch}.json`] = JSON.stringify({ currentRelease: version,
         releases: [{ version, updateTo: {
           url: `https://github.com/${REPO}/releases/download/${tag}/${encodeURIComponent(zip)}`,
-          name: version, notes: `Goose Note ${version}`, pub_date: publishedAt,
+          name: version, notes: `Thinkly ${version}`, pub_date: publishedAt,
         } }],
       }) + "\n";
     }

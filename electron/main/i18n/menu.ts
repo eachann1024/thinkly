@@ -2,24 +2,16 @@ import { BrowserWindow, Menu } from "electron";
 import { createTranslator, i18nYaml } from "../../../src/i18n/core";
 import { CLOSE_TAB_ACCELERATOR, CLOSE_WINDOW_ACCELERATOR } from "../closeTabAccelerator";
 import { createWorkspaceWindow, getMainWindow, requestCloseActiveTab } from "../windows";
-import { getLanguageSnapshot } from "./store";
-
-export function localizedAppName(): string {
-  try {
-    return getLanguageSnapshot().effectiveLocale === "zh-Hans" ? "鹅的笔记" : "Goose Note";
-  } catch {
-    return "Goose Note";
-  }
-}
+import { localizedAppName } from "./appName";
 
 const t = createTranslator(i18nYaml<"electron/main/i18n/menu.ts#block1:1">`
 zh-Hans:
-  about: 关于鹅的笔记
+  about: 关于思绪 · Thinkly
   services: 服务
-  hide: 隐藏鹅的笔记
+  hide: 隐藏思绪 · Thinkly
   hideOthers: 隐藏其他
   showAll: 显示全部
-  quit: 退出鹅的笔记
+  quit: 退出思绪 · Thinkly
   file: 文件
   newWindow: 新建窗口
   closeTab: 关闭标签
@@ -46,12 +38,12 @@ zh-Hans:
   zoom: 缩放
   front: 前置全部窗口
 en:
-  about: About Goose Note
+  about: About Thinkly
   services: Services
-  hide: Hide Goose Note
+  hide: Hide Thinkly
   hideOthers: Hide Others
   showAll: Show All
-  quit: Quit Goose Note
+  quit: Quit Thinkly
   file: File
   newWindow: New Window
   closeTab: Close Tab

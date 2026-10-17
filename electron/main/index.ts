@@ -1,9 +1,12 @@
 import { registerAppearanceIpc } from "./appearance";
 import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
 import { app, protocol } from "electron";
+import { mkdirSync } from "node:fs";
+import path from "node:path";
 import { initializeLanguage, getLanguageSnapshot } from "./i18n/store";
 import { registerLanguageIpc } from "./i18n/ipc";
-import { installMenu, localizedAppName } from "./i18n/menu";
+import { localizedAppName } from "./i18n/appName";
+import { installMenu } from "./i18n/menu";
 import { setLanguageSnapshot } from "../../src/i18n/core";
 import { loadVaultRoots } from "./allowlist";
 import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
@@ -23,6 +26,11 @@ const DEFAULT_QUICKNOTE = "Alt+N";
 
 protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 
+// 显示名在语言就绪后才会换成「思绪 · Thinkly」或 Thinkly。
+// 数据目录必须先钉在旧路径，否则 setName 会让升级后的笔记进新文件夹。
+const legacyUserData = path.join(app.getPath("appData"), "Goose Note");
+mkdirSync(legacyUserData, { recursive: true });
+app.setPath("userData", legacyUserData);
 app.setName("Goose Note");
 // 禁止触控板捏合缩放整页；键盘 Cmd/Ctrl+/- 由渲染进程改编辑器字号。
 app.commandLine.appendSwitch("disable-pinch");

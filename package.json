@@ -4,7 +4,7 @@
   "version": "1.7.316",
   "type": "module",
   "packageManager": "bun@1.3.14",
-  "description": "Goose Note is a local-first Markdown desktop app with quick capture and optional AI.",
+  "description": "Thinkly: Keep every passing thought. Ask your past anytime.",
   "author": {
     "name": "eachann1024",
     "url": "https://github.com/eachann1024"

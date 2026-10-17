@@ -33,7 +33,7 @@ const linuxMaintainer =
   (pkg.author?.email
     ? `${pkg.author.name} <${pkg.author.email}>`.trim()
     : undefined) ||
-  "Goose Note <goose-note@users.noreply.github.com>";
+  "Thinkly <goose-note@users.noreply.github.com>";
 
 rmSync(pack, { recursive: true, force: true });
 mkdirSync(pack, { recursive: true });
@@ -110,6 +110,7 @@ writeFileSync(
 writeFileSync(
   resolve(pack, "electron-builder.yml"),
   `appId: com.goosenote.desktop
+# productName 决定 .app、可执行文件和安装目录。显示名走 InfoPlist / setName / 快捷方式名。
 productName: Goose Note
 copyright: Copyright © 2026 eachann1024
 directories:
@@ -163,14 +164,17 @@ mac:
   extendInfo:
     LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
-    NSAppleEventsUsageDescription: Goose Note 需要发送系统事件，以便用快捷键唤出主窗口和速记小窗。
-    NSAccessibilityUsageDescription: Goose Note 需要辅助功能权限，以便在其他应用处于前台时用快捷键唤出主窗口和速记小窗。
+    CFBundleDisplayName: Thinkly
+    CFBundleName: Thinkly
+    NSAppleEventsUsageDescription: Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.
+    NSAccessibilityUsageDescription: Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.
   target:
     - target: dir
       arch:
         - arm64
         - x64
 dmg:
+  title: Thinkly
   background: dmg-assets/background.tiff
   window:
     width: 960
@@ -204,22 +208,27 @@ nsis:
   installerIcon: icon.ico
   uninstallerIcon: icon.ico
   installerHeaderIcon: icon.ico
+  # 安装包文件名继续用 productName（Goose Note），发布时再收成 Goose.Note-*。
+  shortcutName: Thinkly
+  uninstallDisplayName: Thinkly
   artifactName: \${productName}-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
   executableName: goose-note-app
   category: Utility
-  vendor: ${pkg.author?.name || "Goose Note"}
-  synopsis: ${pkg.description || "Local-first note taking app"}
-  maintainer: ${linuxMaintainer}
+  vendor: ${pkg.author?.name || "Thinkly"}
+  synopsis: ${JSON.stringify(pkg.description || "Local-first note taking app")}
+  maintainer: ${JSON.stringify(linuxMaintainer)}
   target:
     - AppImage
     - deb
     - pacman
   desktop:
     entry:
-      Name: Goose Note
-      Comment: Local-first notes
+      Name: Thinkly
+      "Name[zh_CN]": "思绪 · Thinkly"
+      Comment: "Thinkly: Keep every passing thought. Ask your past anytime."
+      "Comment[zh_CN]": "思绪 Thinkly：安放每一瞬念头，随时向过去提问"
       Categories: Office;Note;
       MimeType: text/markdown;text/x-markdown;
       # 打包版 WM_CLASS 是 productName 的小写中划线形式 "goose-note"（实测 AppImage/deb）；

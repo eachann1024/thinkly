@@ -25,7 +25,7 @@ const active = existing.find((run) => run.status !== "completed");
 assert.ok(!active, `A build is already running: ${active?.url}`);
 const dispatchedAt = Date.now() - 5_000;
 gh(["workflow", "run", "desktop-build.yml", "--repo", REPO, "--ref", "main", "--field", "publish=true", "--field", `expected_sha=${sha}`]);
-console.log(`Requested Goose Note ${version} (${sha.slice(0, 7)}) publication.`);
+console.log(`Requested Thinkly ${version} (${sha.slice(0, 7)}) publication.`);
 for (let attempt = 0; attempt < 15; attempt += 1) {
   const runs = JSON.parse(gh(["run", "list", "--repo", REPO, "--workflow", "desktop-build.yml", "--commit", sha,
     "--event", "workflow_dispatch", "--json", "databaseId,createdAt,url", "--limit", "20"]));

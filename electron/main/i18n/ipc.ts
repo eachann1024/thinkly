@@ -2,7 +2,8 @@ import { getAssetMaintenanceWindow, getQuicknoteWindow, lookupWindowContext } fr
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getLanguageSnapshot, saveLanguagePreference } from "./store";
 import { setLanguageSnapshot } from "../../../src/i18n/core";
-import { installMenu, localizedAppName } from "./menu";
+import { localizedAppName } from "./appName";
+import { installMenu } from "./menu";
 import { t as attachmentText } from "./attachments";
 
 export function registerLanguageIpc(): void {

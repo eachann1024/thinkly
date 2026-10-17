@@ -1,14 +1,14 @@
-鹅的笔记 · macOS 安装
+思绪 · Thinkly · macOS 安装
 
 为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。
 
-1. 将 Goose Note 拖入「应用程序」，等待复制完成。
+1. 将「思绪 · Thinkly」拖入「应用程序」，等待复制完成。英文系统里图标名是 Thinkly。
 2. 双击「安装指令.command」，在 macOS 授权窗口中输入密码。
 
 如果「安装指令」被拦截：先尝试打开一次，再到「系统设置 → 隐私与安全性」找到该指令并点击「仍要打开」，然后确认打开。
 
-安装指令会打开终端，但不需要输入命令。密码由 macOS 系统授权窗口处理；指令只清除 /Applications/Goose Note.app 的下载隔离标记，不修改笔记，也不会关闭 Gatekeeper。
+安装指令会打开终端，但不需要输入命令。密码由 macOS 系统授权窗口处理；指令只清除 /Applications/Goose Note.app 的下载隔离标记，不修改笔记，也不会关闭 Gatekeeper。磁盘上的包名仍是 Goose Note.app。
 
-仅在确认安装包来自 Goose Note 官方发布且未被篡改时使用。此操作不是代码签名或公证，也不能修复真正损坏的安装包。受组织管理的 Mac 可能不允许手动放行，请联系管理员。
+仅在确认安装包来自 Thinkly 官方发布且未被篡改时使用。此操作不是代码签名或公证，也不能修复真正损坏的安装包。受组织管理的 Mac 可能不允许手动放行，请联系管理员。
 
 官方发布：https://github.com/eachann1024/goose-note/releases

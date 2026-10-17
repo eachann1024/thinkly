@@ -53,4 +53,4 @@ if (onMain) {
 }
 const shouldBuild = build;
 appendFileSync(process.env.GITHUB_OUTPUT, `should_build=${shouldBuild}\nbuild=${shouldBuild}\npublish=${shouldBuild && publish}\nrepair=${repair}\nrelease_tag=${releaseTag}\n`);
-console.log(`Selected Goose Note ${version}: should_build=${shouldBuild}, publish=${shouldBuild && publish}`);
+console.log(`Selected Thinkly ${version}: should_build=${shouldBuild}, publish=${shouldBuild && publish}`);
