@@ -40,7 +40,6 @@ declare global {
   const NOTEBOOK_THEME: typeof import('../lib/imageExport/index').NOTEBOOK_THEME
   const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
   const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
-  const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
@@ -201,6 +200,7 @@ declare global {
   const registerEscapeClose: typeof import('../lib/escape-close').registerEscapeClose
   const releaseGitSyncWrites: typeof import('../lib/git-sync-write-barrier').releaseGitSyncWrites
   const releaseStartupSettlingAfterPaint: typeof import('../lib/appearance').releaseStartupSettlingAfterPaint
+  const relocateLocalMdSnapshots: typeof import('../lib/local-md-snapshot').relocateLocalMdSnapshots
   const rememberDiskWriteFailure: typeof import('../lib/diskWriteError').rememberDiskWriteFailure
   const rememberLocalFolderTarget: typeof import('../lib/local-folder-target').rememberLocalFolderTarget
   const removeLocalPageIdMap: typeof import('../lib/local-page-idmap').removeLocalPageIdMap
@@ -268,7 +268,7 @@ declare global {
   export type { FixedAppShortcutId } from '../lib/fixed-app-shortcuts'
   import('../lib/fixed-app-shortcuts')
   // @ts-ignore
-  export type { GitConflictResolution, GitFolderCheck, GitFolderRebind, GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitSyncBridge, GitSyncConfig, GitSyncConflict, GitSyncConflictDetail, GitSyncProvider, GitSyncState, GitSyncStatus } from '../lib/git-sync-contract'
+  export type { GitConflictResolution, GitFolderCheck, GitFolderRebind, GitNotebookFolderRename, GitRepositoryConfig, GitRepositoryFolder, GitRepositoryInput, GitSyncBridge, GitSyncConfig, GitSyncConflict, GitSyncConflictDetail, GitSyncProvider, GitSyncState, GitSyncStatus } from '../lib/git-sync-contract'
   import('../lib/git-sync-contract')
   // @ts-ignore
   export type { GitSyncPreparation, GitSyncPreparationRequest } from '../lib/git-sync-preparation'

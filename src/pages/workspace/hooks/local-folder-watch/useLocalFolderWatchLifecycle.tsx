@@ -137,6 +137,6 @@ export function useLocalFolderWatchLifecycle(
         }
       }
     };
-  }, [notebook?.id]);
+  }, [notebook?.id, notebook?.localPath]);
   return { ...input };
 }

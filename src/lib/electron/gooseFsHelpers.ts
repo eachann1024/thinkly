@@ -7,6 +7,7 @@
  * 仅被 src/lib/host/runtime.electron.ts 动态 import（electron 构建专属）。
  */
 
+import { canonicalRelativePath } from "@/lib/canonicalLocalPath";
 import { getGooseDesktop } from "./runtime";
 import {
   rememberDiskWriteFailure,
@@ -18,6 +19,27 @@ const LAST_DIRECTORY_KEY = "goose-note:electron-last-directory";
 export const existsCache = new Map<string, boolean>();
 export const rememberExists = (path: string, value: boolean) => {
   existsCache.set(path, value);
+};
+
+/** 根目录改名后，存在性缓存和上次打开的目录都改指新路径。 */
+export const relocateExistsCache = (oldRoot: string, newRoot: string) => {
+  const nextRoot = newRoot.replace(/\\/g, "/").replace(/\/+$/, "");
+  for (const [key, value] of [...existsCache]) {
+    const relative = canonicalRelativePath(oldRoot, key);
+    if (relative === null) continue;
+    existsCache.delete(key);
+    const rebuilt = relative ? `${nextRoot}/${relative}` : nextRoot;
+    existsCache.set(key.includes("\\") && !key.includes("/") ? rebuilt.replace(/\//g, "\\") : rebuilt, value);
+  }
+  try {
+    const saved = window.localStorage.getItem(LAST_DIRECTORY_KEY);
+    if (!saved) return;
+    const relative = canonicalRelativePath(oldRoot, saved);
+    if (relative === null) return;
+    window.localStorage.setItem(LAST_DIRECTORY_KEY, relative ? `${nextRoot}/${relative}` : nextRoot);
+  } catch {
+    // 目录记忆写失败不影响已经完成的重命名。
+  }
 };
 
 export const bytesToBase64 = (data: Uint8Array): string => {

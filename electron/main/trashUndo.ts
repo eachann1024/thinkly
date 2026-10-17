@@ -1,3 +1,4 @@
+import { canonicalRelativePath } from "../../src/lib/canonicalLocalPath";
 import { t } from "./i18n/nativeServices";
 import { assertGitSyncWritable } from "./gitSyncLock";
 import { randomUUID } from "node:crypto";
@@ -86,6 +87,22 @@ export async function undoTrash(token: string): Promise<string> {
   } catch (error) {
     transition(token, { type: "retry", timer: retentionTimer(token, backup) });
     throw error;
+  }
+}
+
+function rebaseUndoPath(filePath: string, oldRoot: string, newRoot: string): string {
+  const relative = canonicalRelativePath(oldRoot, filePath);
+  if (relative === null) return filePath;
+  const next = newRoot.replace(/\\/g, "/").replace(/\/+$/, "");
+  return relative ? `${next}/${relative}` : next;
+}
+
+/** 笔记本根目录改名后，撤回仍应回到新路径，而不是已经不存在的旧路径。 */
+export function retargetTrashUndoPaths(oldRoot: string, newRoot: string): void {
+  for (const [token, item] of pending) {
+    if (item.status !== "retained" && item.status !== "restoring") continue;
+    const original = rebaseUndoPath(item.original, oldRoot, newRoot);
+    if (original !== item.original) pending.set(token, { ...item, original });
   }
 }
 
