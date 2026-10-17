@@ -1,4 +1,4 @@
-"""Goose Note 构建：processes。"""
+"""思绪 · Thinkly 构建：processes。"""
 
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ def cmd_kill(_args: argparse.Namespace) -> None:
     targets = {"installed": find_installed_pids(), "dev": find_dev_pids()}
     total = sum(len(v) for v in targets.values())
     if total == 0:
-        log("kill", "没有正在运行的 Goose Note。")
+        log("kill", "没有正在运行的思绪 · Thinkly。")
         return
     for kind, pids in targets.items():
         if pids:
