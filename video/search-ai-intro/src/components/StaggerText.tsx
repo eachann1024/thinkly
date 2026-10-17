@@ -130,7 +130,7 @@ export function Eyebrow({ right }: { right: string }) {
         alignItems: "baseline",
       }}
     >
-      <MonoLabel color={COLORS.inkSoft}>GOOSE NOTE</MonoLabel>
+      <MonoLabel color={COLORS.inkSoft}>Thinkly</MonoLabel>
       <MonoLabel>{right}</MonoLabel>
     </div>
   );
