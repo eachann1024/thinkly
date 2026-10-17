@@ -1,6 +1,6 @@
 # Code signing policy
 
-Goose Note installers are published from the public repository [eachann1024/goose-note](https://github.com/eachann1024/goose-note).
+Thinkly installers are published from the public repository [eachann1024/goose-note](https://github.com/eachann1024/goose-note).
 
 ## What is signed
 

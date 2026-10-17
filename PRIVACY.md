@@ -1,9 +1,9 @@
 # Privacy policy / 隐私政策
 
-Goose Note is a local-first desktop note-taking app. It has no accounts, no analytics and no telemetry.
+Thinkly is a local-first desktop note-taking app. It has no accounts, no analytics and no telemetry.
 Your notes stay in the folders you open or in the app's local data directory.
 
-Goose Note does not transfer your notes or other personal data to networked systems unless you specifically
+Thinkly does not transfer your notes or other personal data to networked systems unless you specifically
 request it (for example by configuring an AI provider, Git sync or error reporting). Like any desktop app, it
 makes a few requests that carry no note content, only the information inherent to an HTTPS request (IP address,
 user agent). All network activity is listed below.
@@ -41,4 +41,4 @@ Uninstalling the app removes the program; your note folders are never deleted au
 
 ---
 
-**中文摘要**：Goose Note 无账号、无统计、无遥测，笔记保存在本地。除你主动配置的 AI 服务、联网搜索、Git 同步、错误上报以及导出功能外，不会发送笔记或个人数据。自动发生、且不含笔记内容的请求只有：启动时及每 4 小时从 GitHub 读取更新信息；默认等宽字体 JetBrains Mono 随 App 内置，默认衬线使用 Georgia 和系统宋体，无需联网；显式选择旧字体 DM Mono 或仓耳今楷时按需从 CDN 下载字体；显示内置欢迎页时从维护者的腾讯云 COS 加载封面图。
+**中文摘要**：思绪 · Thinkly 无账号、无统计、无遥测，笔记保存在本地。除你主动配置的 AI 服务、联网搜索、Git 同步、错误上报以及导出功能外，不会发送笔记或个人数据。自动发生、且不含笔记内容的请求只有：启动时及每 4 小时从 GitHub 读取更新信息；默认等宽字体 JetBrains Mono 随 App 内置，默认衬线使用 Georgia 和系统宋体，无需联网；显式选择旧字体 DM Mono 或仓耳今楷时按需从 CDN 下载字体；显示内置欢迎页时从维护者的腾讯云 COS 加载封面图。

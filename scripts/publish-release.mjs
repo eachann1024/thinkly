@@ -96,7 +96,7 @@ async function main() {
     const existing = findRelease(tag);
     if (!existing) {
       gh(["release", "create", tag, "--repo", REPO, "--target", sha,
-        "--title", `Goose Note ${version}`, "--notes", notes, "--draft"]);
+        "--title", `Thinkly ${version}`, "--notes", notes, "--draft"]);
     } else if (existing.draft) {
       gh(["release", "edit", tag, "--repo", REPO, "--notes", notes]);
     }

@@ -1,2 +1,4 @@
-CFBundleDisplayName = "Goose Note";
-CFBundleName = "Goose Note";
+CFBundleDisplayName = "Thinkly";
+CFBundleName = "Thinkly";
+NSAppleEventsUsageDescription = "Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.";
+NSAccessibilityUsageDescription = "Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.";
