@@ -11,8 +11,8 @@ zh-Hans:
   closeCurrentContentInClosingOrder_c9e7: "按关闭顺序关闭当前内容（桌面）"
   closeWindowMacos_f73b: "关闭窗口（macOS）"
   openSettings_6342: "打开设置"
-  switchSidebarViewLocalOutlineSearch_b198: "切换侧栏视图（本地 / 大纲 / 搜索）"
-  switchTabs48ByPosition_df0c: "切换标签页（4~8 对应序号，9 到最后）"
+  switchSidebarViewLocalOutlineSearch_b198: "按图标栏顺序切换入口（本地 / AI / 大纲 / 搜索）"
+  switchTabs48ByPosition_df0c: "切换标签页（5~8 对应序号，9 到最后）"
   nextTab_2438: "循环切换标签页"
   previousTab_4c44: "反向循环切换标签页"
   findNext_d7b5: "查找下一处"
@@ -53,8 +53,8 @@ en:
   closeCurrentContentInClosingOrder_c9e7: "Close current content in closing order (desktop)"
   closeWindowMacos_f73b: "Close window (macOS)"
   openSettings_6342: "Open settings"
-  switchSidebarViewLocalOutlineSearch_b198: "Switch sidebar view (Local / Outline / Search)"
-  switchTabs48ByPosition_df0c: "Switch tabs (4–8 by position; 9 for the last tab)"
+  switchSidebarViewLocalOutlineSearch_b198: "Switch sidebar rail items in order (Local / AI / Outline / Search)"
+  switchTabs48ByPosition_df0c: "Switch tabs (5–8 by position; 9 for the last tab)"
   nextTab_2438: "Next tab"
   previousTab_4c44: "Previous tab"
   findNext_d7b5: "Find next"
@@ -133,6 +133,7 @@ export const ALWAYS_FIXED_SHORTCUT_VALUES = [
   "Mod+1",
   "Mod+2",
   "Mod+3",
+  "Mod+4",
   "Mod+A",
   "Mod+Z",
   "Mod+Shift+Z",
@@ -151,7 +152,7 @@ export /** 仅多标签模式生效的固定快捷键。 */
 const TAB_ONLY_FIXED_SHORTCUT_VALUES = [
   "Mod+W",
   FIXED_APP_SHORTCUTS.reopenTab,
-  ...Array.from({ length: 6 }, (_, index) => `Mod+${index + 4}`),
+  ...Array.from({ length: 5 }, (_, index) => `Mod+${index + 5}`),
   "Ctrl+Tab",
   "Ctrl+Shift+Tab",
 ];
@@ -187,10 +188,10 @@ export const FIXED_SHORTCUTS: Array<{
     platforms: ["mac"],
   },
   { get label() { return uiText("openSettings_6342"); }, shortcut: FIXED_APP_SHORTCUTS.openSettings },
-  { get label() { return uiText("switchSidebarViewLocalOutlineSearch_b198"); }, shortcut: "Mod+1~3" },
+  { get label() { return uiText("switchSidebarViewLocalOutlineSearch_b198"); }, shortcut: "Mod+1~4" },
   {
     get label() { return uiText("switchTabs48ByPosition_df0c"); },
-    shortcut: "Mod+4~9",
+    shortcut: "Mod+5~9",
     tabOnly: true,
   },
   { get label() { return uiText("nextTab_2438"); }, shortcut: "Ctrl+Tab", tabOnly: true },
