@@ -1,4 +1,4 @@
-# Goose Note 开发说明
+# 思绪 · Thinkly 开发说明
 
 本地优先的 Electron Markdown 笔记应用，主窗口与独立速记小窗共享 React、TypeScript、Vite 和 BlockNote 编辑器。
 
@@ -26,7 +26,7 @@ bun run linux        # Linux 包
 
 各平台命令自动编译 renderer、Electron main/preload，准备 `dist-electron/app-pack` 后打包。CI 和 Python 构建脚本通过 `node scripts/run-task.mjs build` 调用公共编译流程；需要调试信息时设置环境变量 `GOOSE_DEBUG=1`。
 
-仓库与源码目录统一为 `goose-note`，应用展示名为 `Goose Note`（鹅的笔记）。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、应用数据目录、Linux 包名及可执行文件名 `goose-note-app`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单中的安装包继续使用旧仓库下载别名，由 GitHub 重定向；客户端同时校验新旧仓库地址。请勿复用旧仓库名，以免中断旧版更新。
+仓库与源码目录统一为 `goose-note`，中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、数据目录名 Goose Note、安装包文件名、Linux 包名及可执行文件名 `goose-note-app`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单中的安装包继续使用旧仓库下载别名，由 GitHub 重定向；客户端同时校验新旧仓库地址。请勿复用旧仓库名，以免中断旧版更新。
 
 跨平台单入口脚本（参考 1Panel build.py 思路，三平台通用）：
 

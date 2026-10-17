@@ -1,6 +1,6 @@
 zh-Hans:
   failed: "同步操作失败，请检查文件夹、SSH 权限和网络后重试"
-  notification: "鹅的笔记 · Git 同步异常"
+  notification: "思绪 · Thinkly · Git 同步异常"
   configUnreadable: "无法读取 Git 同步配置，已停止同步以保护现有文件"
   workspaceOnly: "请从笔记工作区操作 Git 同步"
   saveTimeout: "整理历史或保存笔记超时，已停止同步；原文件已保留，请稍后重试"
@@ -17,7 +17,7 @@ zh-Hans:
   configRemoved: "同步配置已移除"
 en:
   failed: "Sync failed. Check your folders, SSH access, and network connection, then try again."
-  notification: "Goose Note · Git sync failed"
+  notification: "Thinkly · Git sync failed"
   configUnreadable: "Couldn’t read the Git sync settings. Sync was stopped to protect your files."
   workspaceOnly: "Use Git sync from a note workspace."
   saveTimeout: "Preparing history or saving notes timed out. Sync was stopped and the original files were preserved. Please try again later."

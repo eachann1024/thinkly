@@ -101,7 +101,7 @@ def main():
     info = plistlib.loads((args.app / 'Contents/Info.plist').read_bytes())
     if info.get('CFBundleIdentifier') != 'com.goosenote.desktop':
         raise RuntimeError('Unexpected application bundle')
-    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' Clean'
+    title = 'Thinkly ' + info['CFBundleShortVersionString'] + ' Clean'
     if not title.isascii() or len(title.encode()) > 27:
         raise RuntimeError('DMG volume title must be ASCII and at most 27 bytes')
     modules = sorted(glob.glob(str(Path.home() / 'Library/Caches/electron-builder/dmg-builder@*/*/python/lib/python*/site-packages')))

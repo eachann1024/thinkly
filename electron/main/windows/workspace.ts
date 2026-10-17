@@ -1,3 +1,4 @@
+import { localizedAppName } from "../i18n/appName";
 import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
 import { bindOpenMarkdownWindow } from "../openMarkdownFiles";
@@ -141,7 +142,7 @@ export function createWorkspaceWindow(
   const material = workspaceWindowMaterialOptions();
   const icon = framelessWindowIcon();
   const win = new BrowserWindow({
-    title: "Goose Note",
+    title: localizedAppName(),
     width: bounds.width ?? MAIN_WIDTH,
     height: bounds.height ?? MAIN_HEIGHT,
     ...(bounds.x != null && bounds.y != null
