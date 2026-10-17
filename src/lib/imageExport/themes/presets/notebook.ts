@@ -21,7 +21,7 @@ import {
 } from "@/lib/fontLoader";
 import { EDITOR_FONT_SIZE_DEFAULT, type CustomFonts } from "@/stores/settings/types";
 import type { FontFamily } from "@/types";
-import type { CardTheme } from "../types";
+import type { CardDecoration, CardTheme } from "../types";
 
 export interface NotebookCardThemeContext {
   fontFamily?: FontFamily;
@@ -71,6 +71,14 @@ function joinFontStack(families: string[]): string {
   return families.map((family) => toCssFontFamily(family)).join(", ");
 }
 
+/** 笔记本：留白处的点阵纸 + 书签带，颜色随编辑器主题。 */
+function notebookDecorations(accent: string, dots: string): CardDecoration[] {
+  return [
+    { kind: "dot-grid", target: "container", color: dots, gap: 16 },
+    { kind: "bookmark-ribbon", color: accent },
+  ];
+}
+
 /** 静态浅色 fallback：无 DOM / 无页面上下文时仍可导出。 */
 export const NOTEBOOK_THEME: CardTheme = {
   id: "notebook",
@@ -111,6 +119,7 @@ export const NOTEBOOK_THEME: CardTheme = {
   showDecorations: false,
   decorationColor: "transparent",
   watermarkVisible: true,
+  decorations: notebookDecorations("#2563eb", "#e3e2df"),
 };
 
 export function buildNotebookCardTheme(
@@ -182,5 +191,6 @@ export function buildNotebookCardTheme(
     watermark: secondaryText,
     cardBorder: `1px solid ${calloutBorder}`,
     cardShadow: isDark ? "none" : NOTEBOOK_THEME.cardShadow,
+    decorations: notebookDecorations(accent, subtleBorder),
   };
 }

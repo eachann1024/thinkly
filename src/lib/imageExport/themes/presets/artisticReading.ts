@@ -81,6 +81,11 @@ export const ARTISTIC_READING: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "masthead-rule", color: TEXT_COLORS.light.primary },
+      { kind: "title-ornament", color: TEXT_COLORS.light.secondary },
+      { kind: "quote-mark", color: "#1a8917" },
+    ],
   },
 
   // ── 4. Kenya Hara ────────────────────────────────────────────
@@ -123,6 +128,11 @@ export const ARTISTIC_READING: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: false,
+    decorations: [
+      { kind: "grain", target: "container", tone: "#8a8172", opacity: 0.07, fibers: true },
+      { kind: "trim-marks", color: "#d4d4d4", inset: 28 },
+      { kind: "stamp-seal", color: "#b8432f" },
+    ],
   },
 
   // ── 5. Typewriter ────────────────────────────────────────────
@@ -165,6 +175,12 @@ export const ARTISTIC_READING: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "ink-bleed", color: "rgba(61,50,37,0.35)" },
+      { kind: "grain", target: "card", tone: "#6b5434", opacity: 0.08 },
+      { kind: "coffee-ring", color: "#8b5a2b" },
+      { kind: "mono-footer", color: "#d4c9b8", dashed: true },
+    ],
   },
 
   // ── 7. Academic ──────────────────────────────────────────────

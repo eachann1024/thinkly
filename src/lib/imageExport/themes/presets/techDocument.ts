@@ -161,6 +161,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "title-rule", color: "#d1d9e0", thickness: 1, gap: 10 },
+      { kind: "contribution-graph", colors: ["#eff2f5", "#aceebb", "#4ac26b", "#2da44e", "#116329"] },
+    ],
   },
 
   // ── 11. GitHub Dark ──────────────────────────────────────────
@@ -203,6 +207,10 @@ export const TECH_DOCUMENT: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "title-rule", color: "#30363d", thickness: 1, gap: 10 },
+      { kind: "contribution-graph", colors: ["#151b23", "#033a16", "#196c2e", "#2ea043", "#56d364"] },
+    ],
   },
 
 ];
