@@ -59,3 +59,13 @@
 .workspace-shell .workspace-stage:has(> .sidebar-rail-shell) > .workspace-content-frame {
   left: calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width));
 }
+
+/* 拖动排序：被拖图标浮起，其余图标让位。 */
+.workspace-shell .sidebar-rail-shell > .sidebar-mode-rail .sidebar-mode-rail-button[data-rail-dragging] {
+  position: relative;
+  z-index: 1;
+  cursor: grabbing;
+  background: var(--goose-interactive-hover);
+  color: hsl(var(--foreground));
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.14);
+}

@@ -45,7 +45,7 @@ export function useSidebarNavigation(
     if (!rail?.contains(document.activeElement)) return;
     // 焦点已在窄栏内时跟随当前视图，保留编辑器或搜索框里的焦点。
     rail
-      .querySelector<HTMLButtonElement>('[aria-pressed="true"]')
+      .querySelector<HTMLButtonElement>('[data-sidebar-view][aria-pressed="true"]')
       ?.focus({ preventScroll: true });
   }, [currentView, settingsOpen, sidebarModeRailRef]);
 
