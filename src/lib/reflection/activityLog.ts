@@ -47,3 +47,14 @@ export function pruneActivity(log: ActivityLog, now: number): ActivityLog {
     pages: Object.fromEntries(Object.entries(log.pages).filter(([k]) => k >= cutoff)),
   };
 }
+
+/** 水合时合并：持久化数据 + 水合前内存里已记录的编辑（桶计数相加，页面 id 取并集）。 */
+export function mergeActivity(persisted: ActivityLog, memory: ActivityLog): ActivityLog {
+  const buckets = { ...persisted.buckets };
+  for (const [k, v] of Object.entries(memory.buckets)) buckets[k] = (buckets[k] ?? 0) + v;
+  const pages = { ...persisted.pages };
+  for (const [k, ids] of Object.entries(memory.pages)) {
+    pages[k] = Array.from(new Set([...(pages[k] ?? []), ...ids]));
+  }
+  return { buckets, pages };
+}

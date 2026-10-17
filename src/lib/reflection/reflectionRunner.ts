@@ -25,10 +25,12 @@ export function isReflectionAIReady() {
  */
 export async function ensureLastWeekReflection(force = false): Promise<boolean> {
   const store = useReflection.getState();
-  if (store.generatingKey) return false;
+  if (store.generatingKey || !store.aiConsent) return false;
+  const weekKey = previousWeek().key;
+  if (!force && store.reports[weekKey]) return false;
+  if (!isReflectionAIReady()) return false;
   const { week, stats, eligible } = getLastWeekSnapshot();
-  if (!eligible || !store.aiConsent || !isReflectionAIReady()) return false;
-  if (!force && store.reports[week.key]) return false;
+  if (!eligible) return false;
   store.setGenerating(week.key);
   try {
     const narrative = await generateReflection(
@@ -44,7 +46,7 @@ export async function ensureLastWeekReflection(force = false): Promise<boolean> 
   } catch (error) {
     useReflection
       .getState()
-      .setGenerating(null, error instanceof Error ? error.message : String(error));
+      .setFailed(week.key, error instanceof Error ? error.message : String(error));
     return false;
   }
 }

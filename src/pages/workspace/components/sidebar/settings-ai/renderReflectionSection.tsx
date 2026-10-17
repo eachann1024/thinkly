@@ -1,4 +1,9 @@
 import { createTranslator, i18nYaml } from "@/i18n";
+import { Switch, SwitchRow } from "@/components/ui/switch";
+import { useReflection } from "@/stores/useReflection";
+import { cn } from "@/lib/utils";
+import { SettingsSectionCard } from "../settings/SettingsSectionCard";
+import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderReflectionSection.tsx#localMessages:1">`
 zh-Hans:
@@ -9,11 +14,6 @@ en:
   sendLastWeekNotes: "Allow sending the titles and excerpts of last week's notes to the AI to write the weekly reflection"
 `;
 const uiText = createTranslator(localMessages);
-import { Switch, SwitchRow } from "@/components/ui/switch";
-import { useReflection } from "@/stores/useReflection";
-import { cn } from "@/lib/utils";
-import { SettingsSectionCard } from "../settings/SettingsSectionCard";
-import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 export function ReflectionAISection() {
   const aiConsent = useReflection((s) => s.aiConsent);
