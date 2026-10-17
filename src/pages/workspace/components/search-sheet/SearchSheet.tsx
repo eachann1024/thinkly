@@ -65,6 +65,7 @@ import { useSheetResults } from "./useSheetResults";
 import { useSheetDrag } from "./useSheetDrag";
 import { useSearchAiAvailable, useSheetAnswer } from "./useSheetAnswer";
 import { SearchSheetAnswer } from "./SearchSheetAnswer";
+import { openSheetConversation, saveSheetConversation } from "./saveSheetConversation";
 import "./search-sheet.css";
 
 export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNotebookId: string | null }) {
@@ -87,6 +88,11 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults();
   const aiReady = useSearchAiAvailable();
   const { answer, ask, reset: resetAnswer } = useSheetAnswer();
+  const savedConversation = useRef<{ requestId: number; id: string } | null>(null);
+  useEffect(() => {
+    if (!aiNotebookId || answer?.status !== "done" || !answer.text || savedConversation.current?.requestId === answer.requestId) return;
+    savedConversation.current = { requestId: answer.requestId, id: saveSheetConversation(aiNotebookId, answer) };
+  }, [aiNotebookId, answer]);
   const layer = useModalLayer(visible);
   const close = useCallback(() => useSearchSession.getState().closeSearch(), []);
   const drag = useSheetDrag(sheetRef, close);
@@ -128,7 +134,9 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const continueInPanel = aiNotebookId && answer ? () => {
     skipRestore.current = true;
     session.closeSearch();
-    askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
+    const saved = savedConversation.current;
+    if (saved?.requestId === answer.requestId) openSheetConversation(aiNotebookId, saved.id);
+    else askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
   } : undefined;
   const openSource = (id: string) => {
     returnFocus.current = null;

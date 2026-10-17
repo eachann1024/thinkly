@@ -80,7 +80,8 @@ export function useConversationActions(state: SessionState) {
     useNotebookAiChats.getState().clearComposerDraft(notebookId);
     setComposerRevision((revision) => revision + 1);
     setConversationId(nextConversationId);
-    setMessages([]);
+    // 外部（如搜索面板）可能预先激活了带消息的会话，按存储内容恢复。
+    setMessages(useNotebookAiChats.getState().getConversationMessages(notebookId, nextConversationId));
     return nextConversationId;
   }, [
     isBusy,
