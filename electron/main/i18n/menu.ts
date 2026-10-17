@@ -2,15 +2,24 @@ import { BrowserWindow, Menu } from "electron";
 import { createTranslator, i18nYaml } from "../../../src/i18n/core";
 import { CLOSE_TAB_ACCELERATOR, CLOSE_WINDOW_ACCELERATOR } from "../closeTabAccelerator";
 import { createWorkspaceWindow, getMainWindow, requestCloseActiveTab } from "../windows";
+import { getLanguageSnapshot } from "./store";
+
+export function localizedAppName(): string {
+  try {
+    return getLanguageSnapshot().effectiveLocale === "zh-Hans" ? "鹅的笔记" : "Goose Note";
+  } catch {
+    return "Goose Note";
+  }
+}
 
 const t = createTranslator(i18nYaml<"electron/main/i18n/menu.ts#block1:1">`
 zh-Hans:
-  about: 关于 Goose Note
+  about: 关于鹅的笔记
   services: 服务
-  hide: 隐藏 Goose Note
+  hide: 隐藏鹅的笔记
   hideOthers: 隐藏其他
   showAll: 显示全部
-  quit: 退出 Goose Note
+  quit: 退出鹅的笔记
   file: 文件
   newWindow: 新建窗口
   closeTab: 关闭标签
@@ -74,7 +83,7 @@ export function installMenu(): void {
   // Preserve the Windows/Linux behavior: Alt does not open a native menu.
   if (process.platform !== "darwin") { Menu.setApplicationMenu(null); return; }
   const template: Electron.MenuItemConstructorOptions[] = [
-    { label: "Goose Note", submenu: [
+    { label: localizedAppName(), submenu: [
       { role: "about", label: t("about") }, { type: "separator" },
       { role: "services", label: t("services") }, { type: "separator" },
       { role: "hide", label: t("hide") }, { role: "hideOthers", label: t("hideOthers") },

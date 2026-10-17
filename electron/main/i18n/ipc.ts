@@ -1,8 +1,8 @@
 import { getAssetMaintenanceWindow, getQuicknoteWindow, lookupWindowContext } from "../windows";
-import { BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { getLanguageSnapshot, saveLanguagePreference } from "./store";
 import { setLanguageSnapshot } from "../../../src/i18n/core";
-import { installMenu } from "./menu";
+import { installMenu, localizedAppName } from "./menu";
 import { t as attachmentText } from "./attachments";
 
 export function registerLanguageIpc(): void {
@@ -15,7 +15,7 @@ export function registerLanguageIpc(): void {
     setLanguageSnapshot(snapshot);
     // Persistence has succeeded: a closed window or a native menu failure must
     // not report a failed save or prevent other windows receiving the snapshot.
-    try { installMenu(); }
+    try { app.setName(localizedAppName()); installMenu(); }
     catch (error) { console.error("[i18n] Could not refresh application menu", error); }
     for (const win of BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
