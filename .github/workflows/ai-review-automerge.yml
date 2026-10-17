@@ -37,8 +37,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    outputs:
-      review_b64: ${{ steps.pragent.outputs.review_b64 }}
     steps:
       - name: Checkout trusted review script
         uses: actions/checkout@v4
@@ -55,8 +53,6 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/review.json"
-          # 单行 base64：避免结果缺末尾换行导致分隔符解析失败，也避免含 { } 的行被当成密钥掩码而丢弃输出。
-          echo "review_b64=$(base64 -w0 "$RUNNER_TEMP/review.json")" >> "$GITHUB_OUTPUT"
           {
             echo '## AI 审核结论'
             echo
@@ -146,12 +142,21 @@ jobs:
       issues: write
       checks: read
       statuses: read
+      actions: read
     steps:
       - name: Checkout trusted merge script
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      # 审核结果走产物传递：job output 会被多行 Secret 的按行掩码误判为含密钥而整段丢弃。
+      - name: Download review result
+        if: needs.review.result == 'success'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: codex-review
+          path: ${{ runner.temp }}/codex-review
       - name: Decide and merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,8 +164,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REVIEW_RESULT: ${{ needs.review.result }}
-          REVIEW_B64: ${{ needs.review.outputs.review_b64 }}
         run: |
-          REVIEW_JSON="$(printf '%s' "$REVIEW_B64" | base64 -d 2>/dev/null || true)"
+          REVIEW_JSON="$(cat "$RUNNER_TEMP/codex-review/review.json" 2>/dev/null || true)"
           export REVIEW_JSON
           python3 .github/codex-review/merge.py
