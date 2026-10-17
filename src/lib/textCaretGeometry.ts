@@ -128,7 +128,8 @@ export function prepareTextCaret(el: HTMLElement, mirror: HTMLDivElement): () =>
     const fontSize = parseFloat(style.fontSize) || 14;
     const isInput = el instanceof HTMLInputElement;
     mirror.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;contain:layout style paint;";
-    for (const key of ["font", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
+    // font 简写在 font-feature-settings 等非默认值下计算为空串，必须逐项复制。
+    for (const key of ["font-family", "font-size", "font-weight", "font-style", "font-stretch", "font-variant", "font-feature-settings", "font-variation-settings", "font-optical-sizing", "font-kerning", "letter-spacing", "line-height", "text-align", "text-indent", "direction", "padding", "border-width", "border-style", "box-sizing", "word-break", "overflow-wrap", "tab-size"]) {
       mirror.style.setProperty(key, style.getPropertyValue(key));
     }
     mirror.style.boxSizing = "border-box";
