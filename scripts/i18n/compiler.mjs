@@ -11,9 +11,12 @@ function isI18nImport(name, filename) {
 }
 
 export function extractBlocks(code, filename) {
+  // TypeScript requests forward-slash paths even when esbuild supplies Windows paths.
+  filename = filename.replaceAll("\\", "/");
   const file = ts.createSourceFile(filename, code, ts.ScriptTarget.Latest, true, filename.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const host = ts.createCompilerHost({ noLib: true, noResolve: true });
-  host.getSourceFile = (name) => name === filename ? file : undefined;
+  const canonicalFilename = host.getCanonicalFileName(filename);
+  host.getSourceFile = (name) => host.getCanonicalFileName(name.replaceAll("\\", "/")) === canonicalFilename ? file : undefined;
   const program = ts.createProgram([filename], { noLib: true, noResolve: true }, host);
   const checker = program.getTypeChecker();
   const bindings = new Set();
