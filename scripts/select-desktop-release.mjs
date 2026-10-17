@@ -21,15 +21,20 @@ if (onMain) {
   const stable = releases.filter((release) => !release.draft && !release.prerelease && versionFromTag(release.tag_name))
     .sort((left, right) => compareVersions(versionFromTag(left.tag_name), versionFromTag(right.tag_name)));
   const previous = stable.at(-1);
-  const unchanged = previous && compareVersions(version, versionFromTag(previous.tag_name)) <= 0;
-  if (unchanged && !force) {
+  const sameVersion = releases.find((release) => !release.draft && new RegExp(`^v${version.replaceAll(".", "\\.")}(?:-|$)`).test(release.tag_name));
+  const notNewer = previous && compareVersions(version, versionFromTag(previous.tag_name)) <= 0;
+  if ((sameVersion || notNewer) && !force) {
     build = false;
     publish = false;
     repair = false;
-    releaseTag = previous.tag_name;
-    const line = `版本 ${version} 未变，跳过构建和夸克上传`;
+    releaseTag = (sameVersion ?? previous).tag_name;
+    const line = `版本 ${version} 已有 release ${releaseTag}，跳过构建和夸克上传`;
     console.log(line);
     if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n`);
+  } else if (sameVersion || notNewer) {
+    publish = false;
+    releaseTag = (sameVersion ?? previous).tag_name;
+    console.log(`force：版本 ${version} 已有 release ${releaseTag}，只强制构建`);
   } else if (publish) {
     versionReleaseNotes(readFileSync(resolve(ROOT, "CHANGELOG.md"), "utf8"), version);
     const samePublished = releases.find((release) => !release.draft && release.tag_name === tag);
@@ -46,5 +51,6 @@ if (onMain) {
     }
   }
 }
-appendFileSync(process.env.GITHUB_OUTPUT, `build=${build}\npublish=${build && publish}\nrepair=${repair}\nrelease_tag=${releaseTag}\n`);
-console.log(`Selected Goose Note ${version}: build=${build}, publish=${build && publish}`);
+const shouldBuild = build;
+appendFileSync(process.env.GITHUB_OUTPUT, `should_build=${shouldBuild}\nbuild=${shouldBuild}\npublish=${shouldBuild && publish}\nrepair=${repair}\nrelease_tag=${releaseTag}\n`);
+console.log(`Selected Goose Note ${version}: should_build=${shouldBuild}, publish=${shouldBuild && publish}`);
