@@ -6,12 +6,14 @@ import type { ReflectionReport } from "@/stores/useReflection";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1">`
 zh-Hans:
+  nextStep: "下一步"
   generating: "正在生成…"
   failed: "生成失败，可点击右上角重新生成"
   consent: "开启后，会把范围内笔记的标题和摘要发送给当前配置的 AI 来生成反思。"
   enable: "开启"
   notConfigured: "尚未配置 AI。在设置中配置后即可生成反思。"
 en:
+  nextStep: "Next"
   generating: "Generating…"
   failed: "Generation failed. Use the button at the top right to retry."
   consent: "When enabled, the titles and excerpts of the notes in this range are sent to your configured AI to write the reflection."
@@ -45,16 +47,19 @@ export function ReflectionNarrative({ state, report, onEnable }: Props) {
         <h3 className="text-xl font-semibold leading-snug text-foreground">{report.title}</h3>
         {report.themes?.length ? (
           <>
-            <ul className="mt-3 space-y-2.5">
+            <ul className="mt-4 space-y-3.5">
               {report.themes.map((theme) => (
-                <li key={theme.name} className="text-sm leading-relaxed text-foreground">
-                  <span className="mr-2 font-medium text-muted-foreground">{theme.name}</span>
-                  {theme.point}
+                <li key={theme.name}>
+                  <div className="text-xs font-medium text-muted-foreground">{theme.name}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-foreground">{theme.point}</p>
                 </li>
               ))}
             </ul>
             {report.suggestion ? (
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{report.suggestion}</p>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                <span className="mr-1.5 font-medium text-foreground">{uiText("nextStep")}</span>
+                {report.suggestion}
+              </p>
             ) : null}
           </>
         ) : (
