@@ -21,6 +21,16 @@ en:
   delete_2f4a: "Delete"
   showFewerBackups_2fbc: "Show fewer backups"
   showAllBackups: "Show all remote backups ({{count}} more)"
+ja:
+  remoteBackups_4419: "リモートバックアップ"
+  loadingRemoteBackups_8208: "リモートバックアップを読み込んでいます"
+  noRemoteBackups_5d1a: "リモートバックアップはありません"
+  time_14e6: "日時:"
+  size_19e5: "サイズ:"
+  restore_c7db: "復元"
+  delete_2f4a: "削除"
+  showFewerBackups_2fbc: "バックアップを折りたたむ"
+  showAllBackups: "すべてのリモートバックアップを表示 (他 {{count}} 件)"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

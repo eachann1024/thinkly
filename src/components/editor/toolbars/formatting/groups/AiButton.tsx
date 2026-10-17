@@ -8,6 +8,8 @@ zh-Hans:
   polishWithAi: "AI 润色"
 en:
   polishWithAi: "Polish with AI"
+ja:
+  polishWithAi: "AI で推敲"
 `;
 const t = createTranslator(messages);
 

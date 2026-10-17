@@ -6,6 +6,7 @@ export interface MessageCatalog {}
 export type CompiledMessages<Schema extends MessageSchema = MessageSchema> = {
   readonly "zh-Hans": MessageResource;
   readonly en: MessageResource;
+  readonly ja: MessageResource;
   readonly __schema?: Schema;
 };
 export type Translator<Schema extends MessageSchema = MessageSchema> = string extends keyof Schema

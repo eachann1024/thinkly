@@ -15,6 +15,11 @@ en:
   video: "Video"
   audio: "Audio"
   file: "File"
+ja:
+  image: "画像"
+  video: "ビデオ"
+  audio: "オーディオ"
+  file: "ファイル"
 `;
 const t = createTranslator(messages);
 

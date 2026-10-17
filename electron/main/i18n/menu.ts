@@ -69,6 +69,38 @@ en:
   minimize: Minimize
   zoom: Zoom
   front: Bring All to Front
+ja:
+  about: "Thinkly について"
+  services: "サービス"
+  hide: "Thinkly を非表示"
+  hideOthers: "ほかを非表示"
+  showAll: "すべてを表示"
+  quit: "Thinkly を終了"
+  file: "ファイル"
+  newWindow: "新規ウィンドウ"
+  closeTab: "タブを閉じる"
+  closeWindow: "ウィンドウを閉じる"
+  edit: "編集"
+  undo: "元に戻す"
+  redo: "やり直す"
+  cut: "切り取り"
+  copy: "コピー"
+  paste: "貼り付け"
+  pastePlain: "ペーストしてスタイルを合わせる"
+  delete: "削除"
+  selectAll: "すべてを選択"
+  speech: "音声"
+  startSpeaking: "読み上げを開始"
+  stopSpeaking: "読み上げを停止"
+  view: "表示"
+  reload: "再読み込み"
+  forceReload: "強制的に再読み込み"
+  devTools: "開発者ツール"
+  fullscreen: "フルスクリーンを切り替え"
+  window: "ウィンドウ"
+  minimize: "最小化"
+  zoom: "拡大/縮小"
+  front: "すべてを手前に移動"
 `);
 
 export function installMenu(): void {

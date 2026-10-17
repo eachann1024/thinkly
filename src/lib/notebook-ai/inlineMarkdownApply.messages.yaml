@@ -10,3 +10,9 @@ en:
   noTargetBlockWasProvidedForReplacement: "No target block was provided for replacement."
   aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
   theAiResponseCouldNotBeParsedInto: "The AI response could not be parsed into valid blocks."
+ja:
+  theTargetBlockIsNoLongerInThe: "対象のブロックがドキュメント内にないため、置換できません。選択し直してからもう一度お試しください。"
+  theCurrentBlockCouldNotBeLocatedPlace: "現在の編集ブロックを特定できません。カーソルを本文内に置いてからもう一度お試しください。"
+  noTargetBlockWasProvidedForReplacement: "置換する対象ブロックがありません。"
+  aiDidNotReturnAnyContentThatCould: "AI から書き込み可能な内容が返されませんでした。"
+  theAiResponseCouldNotBeParsedInto: "AI の返答を有効なブロックとして解析できませんでした。"

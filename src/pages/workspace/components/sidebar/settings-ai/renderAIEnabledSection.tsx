@@ -8,6 +8,9 @@ zh-Hans:
 en:
   enableAiAssistant_c698: "Enable AI assistant"
   turningThisOffStopsAnyResponse_42a7: "Turning this off stops any response being generated."
+ja:
+  enableAiAssistant_c698: "AI アシスタントを有効にする"
+  turningThisOffStopsAnyResponse_42a7: "オフにすると、生成中の回答が停止します。"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

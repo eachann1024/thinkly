@@ -7,6 +7,9 @@ zh-Hans:
 en:
   blobReadFailed: "Couldn’t read image data ({{status}})"
   couldnTReadTheImageData: "Couldn’t read the image data"
+ja:
+  blobReadFailed: "blob の読み込みに失敗しました（{{status}}）"
+  couldnTReadTheImageData: "blob の読み込みに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import { isLocalFilePath, readLocalFileAsBlobAsync, resolveToAbsolute } from "@/lib/imageStorage/strategies/file-system";

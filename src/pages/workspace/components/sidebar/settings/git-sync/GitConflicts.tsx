@@ -43,6 +43,26 @@ en:
   remoteOverwrite: "Keeping remote replaces the local content."
   remoteDelete: "Keeping remote deletes the local file."
   keepBothDetails: "Keeping both saves the remote version as a separate file."
+ja:
+  couldNotReadConflictingContent_1b17: "競合する内容を読み込めませんでした"
+  loading_8b50: "読み込み中…"
+  viewBothVersions_4142: "両方の内容を表示"
+  aTextPreviewIsUnavailableFor_a7d3: "このファイルはテキストプレビューを表示できません。保持するバージョンは選択できます。"
+  localContent_0cdc: "ローカルの内容"
+  remoteContent_2203: "リモートの内容"
+  theFileWasDeletedInThis_c79b: "このバージョンではファイルが削除されています"
+  onlyTheBeginningIsShownYour_1566: "内容が長いため、プレビューには冒頭のみ表示しています。選択するとファイル全体が保持されます。"
+  keepLocal_4f1d: "ローカルを保持"
+  keepLocalDeletion_e4fe: "ローカルの削除を保持"
+  keepRemote_7d5c: "リモートを保持"
+  keepRemoteDeletion_1f51: "リモートの削除を保持"
+  keepBoth_da3b: "両方を保持"
+  conflictCount: "{{count}} 件のファイルで、保持する内容を選択してください。完了すると同期を再開します。"
+  localOverwrite: "ローカルを保持すると、リモートの内容が上書きされます。"
+  localDelete: "ローカルを保持すると、リモートのファイルが削除されます。"
+  remoteOverwrite: "リモートを保持すると、ローカルの内容が上書きされます。"
+  remoteDelete: "リモートを保持すると、ローカルのファイルが削除されます。"
+  keepBothDetails: "両方を保持すると、リモート版が別ファイルとして保存されます。"
 `;
 const uiText = createTranslator(localMessages);
 import { localizeGitUiReason } from "./gitSyncUiState";

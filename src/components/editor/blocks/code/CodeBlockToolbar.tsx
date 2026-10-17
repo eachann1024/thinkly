@@ -36,6 +36,14 @@ en:
   codeCopied: "Code copied"
   copyCode: "Copy code"
   copied: "Copied"
+ja:
+  codeActions: "コード操作"
+  turnOffLineWrapping: "折り返しを解除"
+  wrapLines: "右端で折り返す"
+  formatCode: "コードを整形"
+  codeCopied: "コードをコピーしました"
+  copyCode: "コードをコピー"
+  copied: "コピーしました"
 `;
 const t = createTranslator(messages);
 

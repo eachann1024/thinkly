@@ -29,6 +29,20 @@ en:
   closeCurrentSplitOrTab_1409: "Close current split or tab"
   exitEditingSearchOrDialog_6898: "Exit editing, search, or dialog"
   builtInShortcuts_8754: "Built-in shortcuts"
+ja:
+  showOrHideSidebar_b51d: "サイドバーの表示/非表示"
+  showOrHideAiAssistant_1192: "AI アシスタントの表示/非表示"
+  openSearch_043f: "検索を開く"
+  switchAppearance_f3b1: "外観を切り替え"
+  goBack_efa6: "前に戻る"
+  goForward_0a13: "次に進む"
+  newTab_b52d: "新規タブ"
+  inApp_ce8e: "アプリ内"
+  splitView_37e2: "分割表示"
+  close_b15d: "閉じる"
+  closeCurrentSplitOrTab_1409: "現在の分割表示またはタブを閉じる"
+  exitEditingSearchOrDialog_6898: "編集、検索、ダイアログを終了"
+  builtInShortcuts_8754: "組み込みショートカット"
 `;
 const uiText = createTranslator(localMessages);
 import { getPlatformKind } from "@/lib/utils";

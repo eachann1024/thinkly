@@ -13,6 +13,12 @@ en:
   tooManyRequestsToTheAiServicePlease: "Too many requests to the AI service. Please try again later."
   couldNotConnectToTheAiServiceCheck: "Could not connect to the AI service. Check your connection or try again later."
   theAiServiceIsTemporarilyUnavailablePleaseTry: "The AI service is temporarily unavailable. Please try again later."
+ja:
+  authenticationFailedCheckTheCredentialsAndServiceUrl: "認証に失敗しました。AI 設定で認証情報とサービス URL を確認してください。"
+  theAiServiceHasInsufficientCreditSwitchServices: "AI サービスのクレジットが不足しています。設定でサービスを切り替えるか、提供元でクレジットを管理してください。"
+  tooManyRequestsToTheAiServicePlease: "AI サービスへのリクエストが多すぎます。しばらくしてからもう一度お試しください。"
+  couldNotConnectToTheAiServiceCheck: "AI サービスに接続できません。ネットワークを確認するか、しばらくしてからもう一度お試しください。"
+  theAiServiceIsTemporarilyUnavailablePleaseTry: "AI サービスは一時的に利用できません。しばらくしてからもう一度お試しください。"
 `;
 const t = createTranslator(messages);
 /** 仅把明确的连接/鉴权/额度故障视为服务不可用，普通生成错误仍留在对话中。 */

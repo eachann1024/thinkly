@@ -36,6 +36,13 @@ en:
   addVideo: "Add video"
   chooseALocalVideoToAutomaticallyCompressIt: "Choose a local video to automatically compress it to MP4"
   loadingVideo: "Loading video…"
+ja:
+  savedToDownloads: "ダウンロードフォルダに保存しました"
+  saveFailed: "保存に失敗しました"
+  processingVideo: "ビデオを処理中…"
+  addVideo: "ビデオを追加"
+  chooseALocalVideoToAutomaticallyCompressIt: "クリックしてローカルのビデオを選択すると、自動的に MP4 に圧縮されます"
+  loadingVideo: "ビデオを読み込み中…"
 `;
 const t = createTranslator(messages);
 

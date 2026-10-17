@@ -8,6 +8,9 @@ zh-Hans:
 en:
   theAiPanelCouldnTBeDisplayed: "The AI panel couldn’t be displayed"
   retry: "Retry"
+ja:
+  theAiPanelCouldnTBeDisplayed: "AI パネルを一時的に表示できません"
+  retry: "再試行"
 `;
 const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";

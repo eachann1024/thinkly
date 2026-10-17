@@ -21,6 +21,13 @@ en:
   theConversionProducedTheWrongHeadingLevelYour: "The conversion produced the wrong heading level. Your content was not changed."
   detailTheSelectionContainsBlocksThatCannotBeConverted: "The selection contains blocks that cannot be converted to {{value1}}."
   detailTheSelectionContainsNestedContentAndCannotBe: "The selection contains nested content and cannot be safely converted to {{value1}} yet."
+ja:
+  thereAreNoTextBlocksToConvert: "変換できるテキストブロックがありません。"
+  theSelectedBlocksAreMissingIdsSelectThem: "選択したブロックに ID がありません。選択し直してからやり直してください。"
+  theConversionProducedTheWrongBlockTypeYour: "変換結果のブロックタイプが正しくありません。内容は変更されていません。"
+  theConversionProducedTheWrongHeadingLevelYour: "変換結果の見出しレベルが正しくありません。内容は変更されていません。"
+  detailTheSelectionContainsBlocksThatCannotBeConverted: "選択範囲に{{value1}}へ変換できないブロックが含まれています。"
+  detailTheSelectionContainsNestedContentAndCannotBe: "選択範囲にネストされた内容が含まれているため、現在は{{value1}}へ安全に変換できません。"
 `;
 const t = createTranslator(messages);
 

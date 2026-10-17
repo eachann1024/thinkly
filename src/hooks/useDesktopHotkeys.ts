@@ -13,6 +13,12 @@ en:
   quicknoteDisabled: "The global shortcut for Quick Note is off."
   searchDisabled: "The global search shortcut is off."
   shortcutUnavailable: "This shortcut is invalid or already used by another app."
+ja:
+  hotkeysFailed: "デスクトップのショートカットを登録できませんでした"
+  mainDisabled: "メインウィンドウのグローバルショートカットをオフにしました"
+  quicknoteDisabled: "クイックノートのグローバルショートカットをオフにしました"
+  searchDisabled: "グローバル検索のショートカットをオフにしました"
+  shortcutUnavailable: "ショートカットが他のアプリで使用されているか、無効です"
 `);
 /**
  * Electron 桌面端全局热键注册（仅主应用 App 调用；速记小窗 lean 入口不注册）。

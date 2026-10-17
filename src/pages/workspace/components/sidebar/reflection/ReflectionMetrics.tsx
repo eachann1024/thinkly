@@ -14,6 +14,11 @@ en:
   peakHour: "Peak hours"
   notesEdited: "Notes edited"
   charsAdded: "Characters added"
+ja:
+  busiestDay: "最も活発だった日"
+  peakHour: "ピーク時間帯"
+  notesEdited: "編集したノート"
+  charsAdded: "追加した文字数"
 `;
 const uiText = createTranslator(localMessages);
 

@@ -6,6 +6,9 @@ zh-Hans:
 en:
   removeNamedImage: "Remove image {{name}}"
   removeNamedFile: "Remove {{name}}"
+ja:
+  removeNamedImage: "画像 {{name}} を削除"
+  removeNamedFile: "{{name}} を削除"
 `;
 const t = createTranslator(messages);
 /**

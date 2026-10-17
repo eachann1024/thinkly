@@ -20,6 +20,10 @@ en:
   thereAreNoTextBlocksToConvert: "There are no text blocks to convert."
   theTargetBlockIsNoLongerInThe: "The target block is no longer in the document and cannot be converted."
   theBlockToConvertCouldNotBeLocated: "The block to convert could not be located."
+ja:
+  thereAreNoTextBlocksToConvert: "変換できるテキストブロックがありません。"
+  theTargetBlockIsNoLongerInThe: "対象のブロックがドキュメントに存在しないため、変換できません。"
+  theBlockToConvertCouldNotBeLocated: "変換するブロックを特定できませんでした。"
 `;
 const t = createTranslator(messages);
 

@@ -13,6 +13,12 @@ en:
   invalidShortcutRecordItAgain: "Invalid shortcut. Record it again."
   theShortcutIsInvalidOrAlreadyUsedByAnother: "The shortcut is invalid or already used by another app"
   couldnTDisableTheShortcutTryAgain: "Couldn’t disable the shortcut. Try again."
+ja:
+  desktopIntegrationIsUnavailable: "デスクトップ連携を利用できません"
+  finishRecordingBeforeRegisteringTheGlobalShortcut: "グローバルショートカットを登録するには、先に記録を完了してください"
+  invalidShortcutRecordItAgain: "ショートカットが無効です。もう一度記録してください"
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "ショートカットが無効か、他のアプリで使用されています"
+  couldnTDisableTheShortcutTryAgain: "ショートカットを無効にできませんでした。もう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 /** Electron 全局热键 IPC；注册、暂停、恢复共用队列，结果只对应提交时的快照。 */

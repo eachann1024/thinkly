@@ -6,6 +6,8 @@ zh-Hans:
   couldnTRenderTheChart: "图表渲染失败"
 en:
   couldnTRenderTheChart: "Couldn’t render the chart"
+ja:
+  couldnTRenderTheChart: "グラフを描画できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import "katex/dist/katex.min.css";

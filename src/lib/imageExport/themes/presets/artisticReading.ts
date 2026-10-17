@@ -35,6 +35,23 @@ en:
   preciseTypesettingInspiredByAcademicPapers: "Precise typesetting inspired by academic papers"
   academic: "Academic"
   formal: "Formal"
+ja:
+  mediumMagazine: "Medium マガジン"
+  largeSerifHeadingsForComfortableReading: "大きな明朝体の見出しで読みやすく"
+  magazine: "マガジン"
+  reading: "読書"
+  haraWhite: "原研哉・白"
+  generousWhiteSpaceWithAQuietMinimalFeel: "たっぷりの余白で静かなミニマルな印象"
+  minimal: "ミニマル"
+  design: "デザイン"
+  vintageTypewriter: "ヴィンテージタイプライター"
+  creamPaperWithALiteraryFeel: "クリーム色の紙で文学的な雰囲気"
+  vintage: "ヴィンテージ"
+  literary: "文学的"
+  academicLatex: "アカデミック LaTeX"
+  preciseTypesettingInspiredByAcademicPapers: "学術論文を思わせる端正な組版"
+  academic: "学術"
+  formal: "フォーマル"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

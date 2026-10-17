@@ -18,6 +18,9 @@ zh-Hans:
 en:
   textColor: "Text color"
   backgroundColor: "Background color"
+ja:
+  textColor: "文字色"
+  backgroundColor: "背景色"
 `;
 const t = createTranslator(messages);
 

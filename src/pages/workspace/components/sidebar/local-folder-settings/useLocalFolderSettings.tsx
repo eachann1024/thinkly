@@ -12,6 +12,11 @@ en:
   couldNotOpenTheAttachmentCleanup_59de: "Could not open the attachment cleanup window"
   someLocalFoldersHaveUnsavedChanges_5f18: "Some local folders have unsaved changes. Hidden-folder refresh has been postponed."
   couldNotRefreshHiddenFolders_1ba7: "Could not refresh hidden folders"
+ja:
+  attachmentCleanupRequiresTheDesktopApp_0b32: "添付ファイルの整理はデスクトップアプリでのみ利用できます"
+  couldNotOpenTheAttachmentCleanup_59de: "添付ファイルの整理ウィンドウを開けませんでした"
+  someLocalFoldersHaveUnsavedChanges_5f18: "一部のローカルフォルダに未保存の変更があるため、非表示フォルダの更新を保留しました"
+  couldNotRefreshHiddenFolders_1ba7: "非表示フォルダを更新できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";

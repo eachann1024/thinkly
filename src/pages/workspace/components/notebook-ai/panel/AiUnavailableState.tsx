@@ -26,6 +26,16 @@ en:
   checkTheServiceAndModelInAiSettings: "Check the service and model in AI settings."
   retry: "Retry"
   setUpAi: "Set up AI"
+ja:
+  chooseAModel: "モデルを選択"
+  loadingAiSettings: "AI 設定を読み込み中"
+  aiAssistantIsOff: "AI アシスタントはオフです"
+  noModelSelected: "モデルが未選択です"
+  aiIsTemporarilyUnavailable: "AI は現在利用できません"
+  aiStatus: "AI の状態"
+  checkTheServiceAndModelInAiSettings: "AI 設定でサービスとモデルを確認してください。"
+  retry: "再試行"
+  setUpAi: "AI を設定"
 `;
 const t = createTranslator(messages);
 

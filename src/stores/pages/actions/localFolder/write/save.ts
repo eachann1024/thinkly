@@ -4,6 +4,8 @@ zh-Hans:
   writeFailed: "无法写入文件：{{path}}"
 en:
   writeFailed: "Couldn’t write the file: {{path}}"
+ja:
+  writeFailed: "ファイルに書き込めません：{{path}}"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/save.ts#block2:2">`
@@ -11,6 +13,8 @@ zh-Hans:
   invalidFrontmatterSave: "YAML 前置区格式异常，已阻止保存"
 en:
   invalidFrontmatterSave: "The YAML frontmatter is invalid. Saving was blocked."
+ja:
+  invalidFrontmatterSave: "YAML フロントマターの形式が正しくないため、保存を中止しました"
 `);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import type { JSONContent } from "@/types";

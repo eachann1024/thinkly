@@ -17,6 +17,14 @@ en:
   theBackupContainsInvalidNotebookData: "The backup contains invalid notebook data"
   theBackupContainsInvalidPageData: "The backup contains invalid page data"
   thisZipFileContainsNoRecoverableGooseNotesData: "This ZIP file contains no recoverable Thinkly data"
+ja:
+  theBackupIsnTAValidZipFile: "バックアップが有効な ZIP ファイルではありません"
+  theBackupMetadataIsDamaged: "バックアップのメタデータが破損しています"
+  theBackupMetadataFormatIsInvalid: "バックアップのメタデータの形式が無効です"
+  theBackupMetadataIsMissingItsNotebookOrPage: "バックアップのメタデータにノートブックまたはページの一覧がありません"
+  theBackupContainsInvalidNotebookData: "バックアップに無効なノートブック情報が含まれています"
+  theBackupContainsInvalidPageData: "バックアップに無効なページ情報が含まれています"
+  thisZipFileContainsNoRecoverableGooseNotesData: "この ZIP ファイルに復元できる Thinkly のデータはありません"
 `;
 const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";

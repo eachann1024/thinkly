@@ -5,6 +5,8 @@ zh-Hans:
   couldnTSaveTheImageToTheLocalFolder: "图片写入本地文件夹失败"
 en:
   couldnTSaveTheImageToTheLocalFolder: "Couldn’t save the image to the local folder"
+ja:
+  couldnTSaveTheImageToTheLocalFolder: "画像をローカルフォルダに保存できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 /**

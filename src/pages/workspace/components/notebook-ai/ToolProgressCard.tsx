@@ -48,6 +48,16 @@ en:
   pending: "Pending"
   thinking: "Thinking"
   progress: "Progress"
+ja:
+  inProgress: "進行中"
+  failed: "失敗"
+  complete: "完了"
+  awaitingApproval: "承認待ち"
+  canceled: "キャンセル済み"
+  undone: "取り消し済み"
+  pending: "保留中"
+  thinking: "思考"
+  progress: "処理状況"
 `;
 const t = createTranslator(messages);
 

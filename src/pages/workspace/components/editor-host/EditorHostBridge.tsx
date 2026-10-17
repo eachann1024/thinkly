@@ -8,6 +8,9 @@ zh-Hans:
 en:
   thisNoteIsInTrash: "This note is in Trash"
   noteNotFound: "Note not found"
+ja:
+  thisNoteIsInTrash: "このノートはゴミ箱に入っています"
+  noteNotFound: "このノートが見つかりません"
 `;
 const uiText = createTranslator(localMessages);
 /**

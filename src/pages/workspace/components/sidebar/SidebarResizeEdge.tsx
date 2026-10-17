@@ -10,6 +10,10 @@ en:
   resizeSidebar_7141: "Resize sidebar"
   widthPixels: "{{width}} pixels"
   resizeSidebarUseLeftAndRight_2431: "Resize sidebar: use Left and Right arrows; Home for minimum width, End for maximum"
+ja:
+  resizeSidebar_7141: "サイドバーの幅を調整"
+  widthPixels: "{{width}} ピクセル"
+  resizeSidebarUseLeftAndRight_2431: "サイドバーの幅を調整：左右の矢印キー、Home で最小、End で最大"
 `;
 const uiText = createTranslator(localMessages);
 interface SidebarResizeEdgeProps {

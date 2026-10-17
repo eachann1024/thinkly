@@ -28,6 +28,11 @@ en:
   uploadImage: "Upload image"
   stopGenerating: "Stop generating"
   sendMessage: "Send message"
+ja:
+  askAiUseForCommandsOrSkillsOr: "AI に質問、/ でコマンドやスキルを呼び出し、@ でノートやローカルファイルを参照…"
+  uploadImage: "画像をアップロード"
+  stopGenerating: "生成を停止"
+  sendMessage: "メッセージを送信"
 `;
 const t = createTranslator(messages);
 

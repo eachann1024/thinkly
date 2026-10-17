@@ -44,6 +44,27 @@ en:
   ifTheWeatherIsNiceI_cd40: "If the weather is nice, I will pick up a rosemary plant at the flower market on Saturday morning. Coffee beans on the way home, then a quiet afternoon with a fresh cup and last month’s photos to sort."
   iWouldAlsoLikeAnUnhurried_1117: "I would also like an unhurried afternoon: return to my bookmark, finish the page, and write down a few favorite lines."
   liveEditorPreview_d9e9: "Live editor preview"
+ja:
+  currentFolder_9db0: "📁 現在のフォルダ"
+  wednesdayAfterTheRain_a77a: "雨上がりの水曜日"
+  local_8e7e: "ローカル"
+  wednesdayAfterTheRain_db18: "▤ 雨上がりの水曜日"
+  projectPlan_271c: "▤ プロジェクト計画"
+  theRainHadJustStoppedAs_7743: "夕方、仕事を終えるころに雨がちょうど上がった。街角のパン屋はまだ明かりがついていて、焼きたてのクロワッサンを買い、小さな公園をのんびり歩いて帰った。"
+  theTreesCastLongShadowsUnder_e9d6: "街灯の下で木々の影が長く伸び、ベンチにはまだ小さな水滴が残っていた"
+  theCroissantWarmedItsPaperBag_bea6: "紙袋の中のクロワッサンは温かく、家の前に着いてもサクサクのままだった"
+  afterDinnerIWateredTheMint_0f53: "夕食のあと、ベランダのミントに水をやった。新しい葉がもう顔を出している。窓から涼しい風が入り、部屋の明かりはデスクランプだけ。長く置いたままだった本を数ページ読んだ。"
+  reminders_1062: "リマインダー"
+  callMomAndAskHowShe_eca4: "母に電話して、最近よく眠れているか聞く"
+  sortThePhotosFromMyWalk_a34c: "散歩で撮った写真をアルバムに整理する"
+  thereIsNoNeedToFill_a850: "「毎日を詰め込みすぎなくていい。少し余白を残せば、窓の外の雲を眺める時間ができる。」"
+  serifPreviewALittleRoomTo_3bc8: "明朝体のサンプル · A little room to breathe."
+  visitTheFlowerMarket_1874: "「花市場に行く」"
+  buyCoffeeBeans_bc59: "「コーヒー豆を買う」"
+  aFewPlansForTheWeekend_b122: "週末のささやかな予定"
+  ifTheWeatherIsNiceI_cd40: "天気がよければ、土曜の朝は花市場でローズマリーの鉢を選ぶ。帰りにコーヒー豆を買って、午後は家で一杯淹れながら、先月の写真をゆっくり整理しよう。"
+  iWouldAlsoLikeAnUnhurried_1117: "時間に追われない午後も過ごしたい。しおりを挟んだページを開いて読み終え、気に入った一節を書き留める。"
+  liveEditorPreview_d9e9: "エディタのライブプレビュー"
 `;
 const uiText = createTranslator(localMessages);
 import { computeUiFontSize, computeSidebarFontSize } from "@/lib/appearance";

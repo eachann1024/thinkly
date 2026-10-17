@@ -8,6 +8,9 @@ zh-Hans:
 en:
   unpinWindow: "Turn off always on top"
   pinWindow: "Always on top"
+ja:
+  unpinWindow: "ウィンドウの最前面表示を解除"
+  pinWindow: "ウィンドウを最前面に固定"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

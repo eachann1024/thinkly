@@ -12,6 +12,11 @@ en:
   couldNotCreateItemPleaseTry_db8e: "Could not create item. Please try again."
   folderName_a984: "Folder name"
   fileName_d2e2: "File name"
+ja:
+  newFolder_f3a4: "新規フォルダ"
+  couldNotCreateItemPleaseTry_db8e: "作成に失敗しました。もう一度お試しください"
+  folderName_a984: "フォルダ名"
+  fileName_d2e2: "ファイル名"
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";

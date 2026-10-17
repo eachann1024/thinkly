@@ -6,6 +6,9 @@ zh-Hans:
 en:
   tableSelection: "{{rows}} rows × {{columns}} columns"
   blockCount: "{{count}} blocks"
+ja:
+  tableSelection: "{{rows}} 行 × {{columns}} 列"
+  blockCount: "{{count}} ブロック"
 `;
 const t = createTranslator(messages);
 import { useBlockNoteEditor, useEditorState } from "@blocknote/react";

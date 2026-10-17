@@ -12,6 +12,11 @@ en:
   openNotebook: "Make sure a notebook is open, then try again."
   saved: "Saved to notes"
   savedButNotOpened: "The note was saved, but the main window could not open it."
+ja:
+  saveFailed: "ノートに保存できませんでした"
+  openNotebook: "ノートブックが開いていることを確認してから、もう一度お試しください。"
+  saved: "ノートに保存しました"
+  savedButNotOpened: "ノートは書き込まれましたが、メインウィンドウで開けませんでした。"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect } from "react";

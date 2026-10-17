@@ -22,6 +22,10 @@ en:
   theNoteHasChangedSelectTheContentAgain: "The note has changed. Select the content again to continue."
   couldNotReadOrPasteFromTheClipboard: "Could not read or paste from the clipboard. Your original content was preserved."
   couldNotWriteToTheClipboardYourOriginal: "Could not write to the clipboard. Your original content was preserved."
+ja:
+  theNoteHasChangedSelectTheContentAgain: "ノートの内容が変更されました。もう一度選択してから操作してください"
+  couldNotReadOrPasteFromTheClipboard: "クリップボードを読み取れないか、貼り付けできませんでした。元の内容は残されています"
+  couldNotWriteToTheClipboardYourOriginal: "クリップボードに書き込めませんでした。元の内容は残されています"
 `;
 const t = createTranslator(messages);
 

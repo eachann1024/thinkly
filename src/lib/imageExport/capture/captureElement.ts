@@ -13,6 +13,12 @@ en:
   generatingImagePleaseWait: "Generating image. Please wait."
   timedOutWaitingForImagesToLoad: "Timed out waiting for images to load"
   imageSaved: "Image saved"
+ja:
+  couldnTExportTheImageTryAgain: "画像を書き出せませんでした。もう一度お試しください"
+  exportFailed: "画像を書き出せませんでした: {{error}}"
+  generatingImagePleaseWait: "画像を生成しています。しばらくお待ちください"
+  timedOutWaitingForImagesToLoad: "画像の読み込み待ちがタイムアウトしました"
+  imageSaved: "画像を保存しました"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

@@ -25,6 +25,9 @@ zh-Hans:
 en:
   copyingTextIsNotSupportedInThisEnvironment: "Copying text is not supported in this environment."
   copyingImagesIsNotSupportedInThisEnvironment: "Copying images is not supported in this environment."
+ja:
+  copyingTextIsNotSupportedInThisEnvironment: "この環境ではテキストのコピーに対応していません。"
+  copyingImagesIsNotSupportedInThisEnvironment: "この環境では画像のコピーに対応していません。"
 `;
 const t = createTranslator(messages);
 

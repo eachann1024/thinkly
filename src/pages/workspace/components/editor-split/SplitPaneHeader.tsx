@@ -12,6 +12,11 @@ en:
   dragToRearrangePanes: "Drag to rearrange panes"
   dragToTheEdgeOfAnotherPane: "Drag to the edge of another pane to rearrange, or to its center to swap. You can also press Space to pick up, use arrow keys to choose a pane, Shift and arrow keys to choose an edge, Enter to drop, and Escape to cancel."
   closeThisPane: "Close this pane"
+ja:
+  movePane: "ペインを移動：{{title}}"
+  dragToRearrangePanes: "ドラッグしてペインを並べ替え"
+  dragToTheEdgeOfAnotherPane: "別のペインの端にドラッグすると並べ替え、中央にドラッグすると位置を入れ替えます。スペースキーで選択し、方向キーで移動先を選び、Shift + 方向キーで端を選択、Enter で確定、Escape でキャンセルすることもできます。"
+  closeThisPane: "このペインを閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

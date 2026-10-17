@@ -17,6 +17,14 @@ en:
   noFileSelected: "No file selected"
   unsupportedFileFormat: "Unsupported file format"
   couldnTReadTheFile: "Couldn’t read the file"
+ja:
+  readError: "ファイルを読み込めませんでした: {{error}}"
+  invalidJsonTheContentFieldIsMissing: "JSON 形式が無効です。content フィールドがありません"
+  couldnTParseTheJsonFile: "JSON ファイルを解析できませんでした"
+  noteFiles: "ノートファイル"
+  noFileSelected: "ファイルが選択されていません"
+  unsupportedFileFormat: "サポートされていないファイル形式です"
+  couldnTReadTheFile: "ファイルを読み込めませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

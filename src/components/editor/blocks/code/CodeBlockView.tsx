@@ -11,6 +11,8 @@ zh-Hans:
   formulaPreview: "公式预览"
 en:
   formulaPreview: "Formula preview"
+ja:
+  formulaPreview: "数式のプレビュー"
 `;
 const t = createTranslator(messages);
 

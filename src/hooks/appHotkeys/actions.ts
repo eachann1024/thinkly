@@ -6,6 +6,9 @@ zh-Hans:
 en:
   newFile: "New file created"
   newNote: "New note created"
+ja:
+  newFile: "新しいファイルを作成しました"
+  newNote: "新しいノートを作成しました"
 `);
 import { createNamedPage } from "@/lib/create-named-page";
 import { isSetupGuideVisible } from "@/lib/setupGuide";

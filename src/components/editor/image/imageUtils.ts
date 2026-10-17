@@ -4,6 +4,8 @@ zh-Hans:
   imageReadFailed: "图片读取失败（{{status}}）"
 en:
   imageReadFailed: "Could not read the image ({{status}})"
+ja:
+  imageReadFailed: "画像の読み込みに失敗しました（{{status}}）"
 `;
 const t = createTranslator(messages);
 import type { EditorPlatform } from "@/components/editor/platform/types";

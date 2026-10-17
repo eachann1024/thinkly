@@ -30,7 +30,7 @@ export async function initializeLanguage(): Promise<void> {
     source = await readSource();
     if (source !== null) {
       const saved = JSON.parse(source);
-      if (saved?.version !== 1 || !["system", "zh-Hans", "en"].includes(saved?.preference)) {
+      if (saved?.version !== 1 || !["system", "zh-Hans", "en", "ja"].includes(saved?.preference)) {
         throw new Error("Invalid language preference");
       }
       preference = saved.preference;
@@ -50,7 +50,7 @@ export function getLanguageSnapshot(): LanguageSnapshot {
 }
 
 export function saveLanguagePreference(preference: unknown): Promise<LanguageSnapshot> {
-  if (preference !== "system" && preference !== "zh-Hans" && preference !== "en") {
+  if (preference !== "system" && preference !== "zh-Hans" && preference !== "en" && preference !== "ja") {
     return Promise.reject(new Error("language.invalidPreference"));
   }
   const operation = writes.then(async () => {

@@ -8,6 +8,10 @@ en:
   wakeDisabled: "The global shortcut for showing the app is off."
   searchDisabled: "The global search shortcut is off."
   quicknoteDisabled: "The global shortcut for Quick Note is off."
+ja:
+  wakeDisabled: "アプリを呼び出すグローバルショートカットをオフにしました"
+  searchDisabled: "グローバル検索ショートカットをオフにしました"
+  quicknoteDisabled: "クイックノートのグローバルショートカットをオフにしました"
 `);
 import type { DesktopSettings, DesktopHotkeyStatus } from '../types'
 import {

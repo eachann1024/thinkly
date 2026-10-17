@@ -7,6 +7,9 @@ zh-Hans:
 en:
   notAnSvgDataUrl: "Not an SVG data URL"
   theRasterizedSvgIsnTAPngDataUrl: "The rasterized SVG isn’t a PNG data URL"
+ja:
+  notAnSvgDataUrl: "SVG data URL ではありません"
+  theRasterizedSvgIsnTAPngDataUrl: "SVG のラスタライズ結果が PNG data URL ではありません"
 `;
 const uiText = createTranslator(localMessages);
 import { blobToBase64 } from "@/lib/imageStorage/utils";

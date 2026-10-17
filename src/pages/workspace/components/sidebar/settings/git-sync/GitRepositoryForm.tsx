@@ -24,6 +24,17 @@ en:
   advancedSettings_e370: "Advanced settings"
   branch_bfc0: "Branch"
   sshPlaceholder: "git@github.com:username/repository.git"
+ja:
+  automaticBackgroundSync_2b6d: "バックグラウンド自動同期"
+  saving_9b80: "保存中…"
+  syncInterval_2543: "同期間隔"
+  minutes_3a17: "分"
+  enterAWholeNumberFrom1_2a07: "1～1440 の整数を入力してください。"
+  connectRepository_9d8e: "リポジトリに接続"
+  sshRepositoryUrl_79e4: "SSH リポジトリ URL"
+  advancedSettings_e370: "詳細設定"
+  branch_bfc0: "ブランチ"
+  sshPlaceholder: "git@github.com:username/repository.git"
 `;
 const uiText = createTranslator(localMessages);
 import { GitDetails } from "./GitDetails";

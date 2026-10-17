@@ -4,6 +4,8 @@ zh-Hans:
   paneMissing: "找不到当前分屏格子"
 en:
   paneMissing: "The current split pane couldn’t be found."
+ja:
+  paneMissing: "現在の分割ペインが見つかりません"
 `);
 import type { SplitState } from "@/lib/editor-split/types";
 import { moveLeaf } from "@/lib/editor-split/move";

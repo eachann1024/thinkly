@@ -12,6 +12,8 @@ zh-Hans:
   noMatchingNotes: "未找到匹配笔记"
 en:
   noMatchingNotes: "No matching notes"
+ja:
+  noMatchingNotes: "一致するノートが見つかりません"
 `;
 const t = createTranslator(messages);
 

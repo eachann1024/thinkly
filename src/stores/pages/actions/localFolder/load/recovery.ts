@@ -5,6 +5,8 @@ zh-Hans:
 en:
   recovered_other: "Recovered {{count}} local notes that hadn’t been saved to disk"
   recovered_one: "Recovered {{count}} local note that hadn’t been saved to disk"
+ja:
+  recovered_other: "ディスクに書き込まれていなかったローカルノートを {{count}} 件復元しました"
 `);
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/load/recovery.ts#block2:2">`
@@ -16,6 +18,10 @@ en:
   recoveredLocal: "The content is back in the editor. Review it, then use the save shortcut."
   externalConflict: "An external file conflict was detected"
   recoverySeparate: "The recovery draft was kept separately. The newer version on disk was not overwritten."
+ja:
+  recoveredLocal: "内容をエディタに復元しました。内容を確認してから、ショートカットで保存してください。"
+  externalConflict: "外部ファイルの競合を検出しました"
+  recoverySeparate: "復元データは別に保持されており、ディスク上のより新しい版は上書きされていません。"
 `);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {

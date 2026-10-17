@@ -10,6 +10,11 @@ en:
   quicknoteRecoveredDetail: "The recovered content is back in its original slot. Review it before continuing to edit."
   quicknoteDraftSeparate: "A Quick Note recovery draft was preserved separately"
   quicknoteNewer: "The current draft is newer. The recovery draft has been safely preserved."
+ja:
+  quicknoteRecovered: "未保存のクイックノートを復元しました"
+  quicknoteRecoveredDetail: "復元した内容は元のスロットに戻しました。確認してから編集を続けてください。"
+  quicknoteDraftSeparate: "自動で上書きされなかったクイックノートの復元用下書きがあります"
+  quicknoteNewer: "現在の下書きのほうが新しいため、復元用下書きは安全に保管されています。"
 `);
 import { create } from "zustand";
 import type { QuickNoteState } from "./quicknote/types";

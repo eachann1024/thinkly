@@ -17,6 +17,11 @@ en:
   stalled: "Possibly stalled notes"
   meta: "{{edits}} edits · +{{added}} chars"
   lastEdit: "Last edited {{date}}"
+ja:
+  topNotes: "最も取り組んだノート"
+  stalled: "停滞している可能性のあるノート"
+  meta: "{{edits}} 回編集 · +{{added}} 文字"
+  lastEdit: "最終編集: {{date}}"
 `;
 const uiText = createTranslator(localMessages);
 

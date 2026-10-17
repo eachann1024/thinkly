@@ -8,6 +8,9 @@ zh-Hans:
 en:
   compressedImageTooLarge: "The compressed image (about {{size}} MB) still exceeds the {{limit}} MB limit"
   imageAttachmentFailed: "Couldn’t save the image as an attachment: {{error}}"
+ja:
+  compressedImageTooLarge: "画像が大きすぎます（約 {{size}}MB）。圧縮後も上限の {{limit}}MB を超えています"
+  imageAttachmentFailed: "画像を添付ファイルとして保存できませんでした: {{error}}"
 `;
 const uiText = createTranslator(localMessages);
 /**

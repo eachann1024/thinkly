@@ -14,6 +14,12 @@ en:
   askAiToDrawAFlowchartOrArchitecture: "Ask AI to draw a flowchart or architecture diagram…"
   askAiToCreateAnIconOrIllustration: "Ask AI to create an icon or illustration…"
   trySummarizeLocalFileAndMapOutThe: "Try: summarize @local-file and map out the key ideas…"
+ja:
+  askAiUseForCommandsOrSkillsOr: "AI に質問、/ でコマンドやスキルを呼び出し、@ でノートやローカルファイルを参照…"
+  askAiToCreateATrendChartFrom: "現在のノートからトレンドグラフを作成するよう AI に依頼…"
+  askAiToDrawAFlowchartOrArchitecture: "フローチャートやアーキテクチャ図を描くよう AI に依頼…"
+  askAiToCreateAnIconOrIllustration: "アイコンやイラストを作成するよう AI に依頼…"
+  trySummarizeLocalFileAndMapOutThe: "例：@ローカルファイルを要約して、要点の関係図を描いて…"
 `;
 const t = createTranslator(messages);
 

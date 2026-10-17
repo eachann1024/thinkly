@@ -27,6 +27,18 @@ en:
   lineSpacingPresets: "Line spacing presets"
   standard: "Standard"
   relaxed: "Relaxed"
+ja:
+  textSize: "本文の文字サイズ"
+  lineSpacing: "本文の行間"
+  times: "倍"
+  readingPreview: "読みやすさのプレビュー"
+  livePreview: "リアルタイムプレビュー"
+  giveYourWordsRoomToBreathe: "言葉に、少しの余白を"
+  writeDownSomethingWorthRememberingTodayThere: "今日覚えておきたいことを、ここに書き留めましょう。思考を急いで整理する必要はありません。まずはひらめきのために、少し余白を残しておきましょう。"
+  aLittleSpaceBetweenTheLinesMakes: "行と行のあいだに余白があれば、長いノートでもゆったりと読み進められます。"
+  lineSpacingPresets: "行間のプリセット"
+  standard: "標準"
+  relaxed: "ゆったり"
 `;
 const uiText = createTranslator(localMessages);
 import { useId } from "react";

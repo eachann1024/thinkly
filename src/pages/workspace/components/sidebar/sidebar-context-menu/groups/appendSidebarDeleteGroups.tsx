@@ -15,6 +15,13 @@ en:
   deletePermanently_7327: "Delete permanently"
   moveToTrash_8d3b: "Move to Trash"
   moveToRecycleBin_1e96: "Move to Recycle Bin"
+ja:
+  restoreFolder_5b9e: "フォルダを復元"
+  restoreFile_e6af: "ファイルを復元"
+  restoreNote_53bb: "ノートを復元"
+  deletePermanently_7327: "完全に削除"
+  moveToTrash_8d3b: "ゴミ箱に移動"
+  moveToRecycleBin_1e96: "ごみ箱に移動"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

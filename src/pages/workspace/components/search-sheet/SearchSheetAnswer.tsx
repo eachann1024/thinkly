@@ -26,6 +26,18 @@ en:
   sources: "Sources"
   backToResults: "Back to results"
   continueInAiPanel: "Continue in AI panel"
+ja:
+  readingNotes: "関連ノート {{count}} 件を読み込んでいます…"
+  thinking: "考え中…"
+  tool_understand: "質問を理解しています…"
+  tool_searchNotes: "ノートを検索しています…"
+  tool_readPage: "ノートを読み込んでいます…"
+  tool_listPages: "ページ一覧を確認しています…"
+  tool_searchWeb: "Web を検索しています…"
+  tool_readWebPage: "Web ページを読み込んでいます…"
+  sources: "出典"
+  backToResults: "結果に戻る"
+  continueInAiPanel: "AI パネルで続ける"
 `;
 const uiText = createTranslator(localMessages);
 import { memo } from "react";

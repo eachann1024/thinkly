@@ -18,6 +18,11 @@ en:
   underline: "Underline"
   inlineCodeMixedFormatting: "Inline code (mixed formatting)"
   inlineCode: "Inline code"
+ja:
+  underlineMixedFormatting: "下線（書式が混在）"
+  underline: "下線"
+  inlineCodeMixedFormatting: "インラインコード（書式が混在）"
+  inlineCode: "インラインコード"
 `;
 const t = createTranslator(messages);
 

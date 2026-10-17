@@ -15,6 +15,8 @@ zh-Hans:
   chooseAPngJpegWebpOrGifImage: "请选择 PNG、JPEG、WebP 或 GIF 图片。"
 en:
   chooseAPngJpegWebpOrGifImage: "Choose a PNG, JPEG, WebP, or GIF image."
+ja:
+  chooseAPngJpegWebpOrGifImage: "PNG、JPEG、WebP、GIF のいずれかの画像を選択してください。"
 `;
 const t = createTranslator(messages);
 

@@ -10,6 +10,10 @@ en:
   attachmentTooLarge: "The attachment exceeds the 50 MB limit ({{size}} MB)"
   attachmentWriteFailed: "Couldn’t save the attachment to disk: {{error}}"
   desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
+ja:
+  attachmentTooLarge: "添付ファイルが 50MB の上限を超えています（実際のサイズ: {{size}}MB）"
+  attachmentWriteFailed: "添付ファイルをディスクに保存できませんでした: {{error}}"
+  desktopIntegrationIsUnavailable: "デスクトップ連携を利用できません"
 `;
 const uiText = createTranslator(localMessages);
 import { clearResolvedUrlCache } from "@/lib/imageStorage/resolvedUrlCache";

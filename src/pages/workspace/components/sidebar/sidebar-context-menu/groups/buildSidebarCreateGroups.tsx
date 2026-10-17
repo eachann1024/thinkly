@@ -15,6 +15,13 @@ en:
   newFolder_f3a4: "New folder"
   nameSortingRestored_df43: "Name sorting restored"
   sortByName_5b70: "Sort by name"
+ja:
+  rename_c8ce: "名前を変更"
+  new_26bb: "新規"
+  newNote_e82d: "新規ノート"
+  newFolder_f3a4: "新規フォルダ"
+  nameSortingRestored_df43: "名前順に戻しました"
+  sortByName_5b70: "名前順に戻す"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

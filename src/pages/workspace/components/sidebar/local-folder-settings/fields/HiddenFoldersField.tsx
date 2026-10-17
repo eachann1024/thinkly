@@ -32,6 +32,21 @@ en:
   add_b58c: "Add"
   display: "Display"
   hiddenCount: "Hidden items: {{count}}"
+ja:
+  enterAFolderName_4a86: "フォルダ名を入力してください。"
+  thisFolderIsAlreadyHidden_1674: "このフォルダはすでに非表示リストにあります。"
+  hiddenFolders_0e77: "非表示フォルダ"
+  hideAllFoldersWithMatchingNames_2052: "同じ名前のフォルダをサイドバーですべて非表示にします。ローカルファイルは削除されません。"
+  resetToDefaults_7468: "デフォルトに戻す"
+  noHiddenFolders_8f82: "非表示フォルダはありません"
+  builtInRulesAlwaysHidden_74ff: "プリセットルール · 常に非表示"
+  removeFolder: "{{folder}}を削除"
+  addHiddenFolder_50c3: "非表示フォルダを追加"
+  folderName_a984: "フォルダ名"
+  eGObsidian_55c9: "例：.obsidian"
+  add_b58c: "追加"
+  display: "表示"
+  hiddenCount: "{{count}} 件を非表示"
 `;
 const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";

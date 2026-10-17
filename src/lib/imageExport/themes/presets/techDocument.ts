@@ -31,6 +31,21 @@ en:
   development: "Development"
   githubDark: "GitHub Dark"
   githubInspiredDarkThemeForFocusedReading: "GitHub-inspired dark theme for focused reading"
+ja:
+  minimalWhite: "ミニマルホワイト"
+  cleanProfessionalDocumentStyling: "すっきりとしたプロフェッショナルなドキュメントスタイル"
+  minimal: "ミニマル"
+  document: "ドキュメント"
+  deepNight: "ディープナイト"
+  aDarkThemeWithACodeEditorFeel: "コードエディタのようなダークテーマ"
+  dark: "ダーク"
+  technical: "テクニカル"
+  githubLight: "GitHub ライト"
+  githubInspiredLightTheme: "GitHub 風のライトテーマ、開発者向け"
+  light: "ライト"
+  development: "開発"
+  githubDark: "GitHub ダーク"
+  githubInspiredDarkThemeForFocusedReading: "GitHub 風のダークテーマ、集中して読むのに最適"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

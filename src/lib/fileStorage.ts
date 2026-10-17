@@ -18,6 +18,14 @@ en:
   theAttachmentPathIsOutsideTheNotebookFolder: "The attachment path is outside the notebook folder"
   couldnTCreateTheAttachmentsFolder: "Couldn’t create the attachments folder"
   couldnTSaveTheAttachmentToTheLocalFolder: "Couldn’t save the attachment to the local folder"
+ja:
+  fileTooLarge: "ファイルが {{limit}}MB の上限を超えています（現在 {{size}}）"
+  emptyFilesCanTBeUploaded: "空のファイルはアップロードできません"
+  openALocalFolderNotebookBeforeInsertingAttachments: "添付ファイルを挿入するには、先にローカルフォルダのノートブックを開いてください"
+  localFileServicesArenTReadyTheAttachmentCouldn: "ローカルファイルサービスの準備ができていないため、添付ファイルを保存できませんでした"
+  theAttachmentPathIsOutsideTheNotebookFolder: "添付ファイルの保存パスがノートブックのフォルダの外にあります"
+  couldnTCreateTheAttachmentsFolder: "添付ファイル用フォルダを作成できませんでした"
+  couldnTSaveTheAttachmentToTheLocalFolder: "添付ファイルをローカルフォルダに保存できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { HostAdapter } from "@/lib/host/adapter";

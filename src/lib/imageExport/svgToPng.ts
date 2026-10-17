@@ -15,6 +15,13 @@ en:
   imageExportIsnTSupportedInThisEnvironment: "Image export isn’t supported in this environment"
   theSvgIsEmpty: "The SVG is empty"
   readFailed: "Couldn’t load the image ({{status}})"
+ja:
+  couldnTReadTheImageData: "画像データを読み込めませんでした"
+  theImageIsEmpty: "画像が空です"
+  couldnTGenerateTheImage: "画像を生成できませんでした"
+  imageExportIsnTSupportedInThisEnvironment: "この環境では画像の書き出しに対応していません"
+  theSvgIsEmpty: "SVG が空です"
+  readFailed: "画像を読み込めませんでした（{{status}}）"
 `;
 const uiText = createTranslator(localMessages);
 /**

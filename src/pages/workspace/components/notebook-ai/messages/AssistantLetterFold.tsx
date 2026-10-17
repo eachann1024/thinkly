@@ -7,6 +7,8 @@ zh-Hans:
   thinking: "思考"
 en:
   thinking: "Thinking"
+ja:
+  thinking: "思考"
 `;
 const t = createTranslator(messages);
 

@@ -9,6 +9,9 @@ zh-Hans:
 en:
   dialog: "Dialog"
   dialogContent: "Dialog content"
+ja:
+  dialog: "ダイアログ"
+  dialogContent: "ダイアログの内容"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

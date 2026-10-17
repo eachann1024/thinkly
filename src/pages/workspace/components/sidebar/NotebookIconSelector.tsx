@@ -28,6 +28,19 @@ en:
   random_3bde: "Random"
   resetIcon: "Reset {{label}}"
   resetToDefaults_7468: "Reset to defaults"
+ja:
+  all_a8b0: "すべて"
+  notebookIcon_cdc6: "ノートブックのアイコン"
+  chooseIcon: "{{label}}を選択"
+  searchIcon: "{{label}}を検索"
+  searchIcons_c320: "アイコンを検索"
+  iconCategories_7ee8: "アイコンのカテゴリ"
+  availableIcons_29dd: "利用可能なアイコン"
+  noMatchingIcons_f8cb: "一致するアイコンがありません"
+  randomizeIcon: "{{label}}をランダムに選択"
+  random_3bde: "ランダム"
+  resetIcon: "{{label}}をデフォルトに戻す"
+  resetToDefaults_7468: "デフォルトに戻す"
 `;
 const uiText = createTranslator(localMessages);
 import { createElement, useId, useMemo, useRef, useState } from "react";

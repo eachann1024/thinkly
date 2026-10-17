@@ -6,6 +6,8 @@ zh-Hans:
   itemCount: "{{count}} 项"
 en:
   itemCount: "Items: {{count}}"
+ja:
+  itemCount: "{{count}} 項目"
 `;
 const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";

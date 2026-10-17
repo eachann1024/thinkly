@@ -1,5 +1,5 @@
-export type LanguagePreference = "system" | "zh-Hans" | "en";
-export type AppLocale = "zh-Hans" | "en";
+export type LanguagePreference = "system" | "zh-Hans" | "en" | "ja";
+export type AppLocale = "zh-Hans" | "en" | "ja";
 export type LanguageSnapshot = {
   preference: LanguagePreference;
   effectiveLocale: AppLocale;
@@ -9,7 +9,7 @@ export type LanguageSnapshot = {
 };
 
 export function normalizePreference(value: unknown): LanguagePreference {
-  return value === "zh-Hans" || value === "en" ? value : "system";
+  return value === "zh-Hans" || value === "en" || value === "ja" ? value : "system";
 }
 
 export function normalizeSystemLocale(value: unknown): string | undefined {
@@ -24,6 +24,7 @@ function matchLocale(value: unknown): AppLocale | undefined {
   if (!tag) return undefined;
   const locale = new Intl.Locale(tag);
   if (locale.language === "en") return "en";
+  if (locale.language === "ja") return "ja";
   if (locale.language !== "zh") return undefined;
   if (locale.script === "Hans") return "zh-Hans";
   if (locale.script) return undefined;

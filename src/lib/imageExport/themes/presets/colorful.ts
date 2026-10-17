@@ -27,6 +27,19 @@ en:
   classicMutedColorsOnACalmCreamBackground: "Classic, muted colors on a calm cream background"
   light: "Light"
   classic: "Classic"
+ja:
+  boldPoster: "ボールドポスター"
+  highImpactDesignForShortText: "短い文章向けのインパクトのあるデザイン"
+  poster: "ポスター"
+  impact: "インパクト"
+  synthwave: "シンセウェーブ"
+  retroCyberpunkWithNeonColors: "ネオンカラーのレトロサイバーパンク"
+  dark: "ダーク"
+  vintage: "ヴィンテージ"
+  solarizedLight: "Solarized ライト"
+  classicMutedColorsOnACalmCreamBackground: "落ち着いたクリーム色の背景に合う、定番の穏やかな配色"
+  light: "ライト"
+  classic: "クラシック"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

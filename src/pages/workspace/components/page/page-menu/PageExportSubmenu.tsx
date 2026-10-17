@@ -6,6 +6,8 @@ zh-Hans:
   export: "导出"
 en:
   export: "Export"
+ja:
+  export: "書き出し"
 `;
 const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";

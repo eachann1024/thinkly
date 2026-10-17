@@ -32,6 +32,18 @@ en:
   deselectAll: "Deselect all"
   selectAll: "Select all"
   selectedCount: "{{selected}} of {{total}} selected; unselected operations will be skipped"
+ja:
+  notApplied: "未適用"
+  skipped: "スキップ済み"
+  pending: "適用待ち"
+  failed: "失敗"
+  undone: "取り消し済み"
+  rolledBack: "元に戻しました"
+  needsReview: "要確認"
+  applied: "適用済み"
+  deselectAll: "すべての選択を解除"
+  selectAll: "すべて選択"
+  selectedCount: "{{total}} 件中 {{selected}} 件を選択済み。未選択の操作はスキップされます"
 `;
 const t = createTranslator(messages);
 

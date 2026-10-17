@@ -13,6 +13,12 @@ en:
   moveAbove: "Move above"
   moveBelow: "Move below"
   swapPositions: "Swap positions"
+ja:
+  moveLeft: "左に移動"
+  moveRight: "右に移動"
+  moveAbove: "上に移動"
+  moveBelow: "下に移動"
+  swapPositions: "位置を入れ替え"
 `;
 const uiText = createTranslator(localMessages);
 import type { SplitDropPlacement } from "@/lib/editor-split/types";

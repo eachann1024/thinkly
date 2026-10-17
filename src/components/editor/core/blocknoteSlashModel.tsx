@@ -48,6 +48,20 @@ en:
   divider: "Divider"
   codeBlock: "Code block"
   image: "Image"
+ja:
+  text: "テキスト"
+  heading1: "見出し 1"
+  heading2: "見出し 2"
+  checklist: "ToDo リスト"
+  bulletedList: "箇条書きリスト"
+  numberedList: "番号付きリスト"
+  toggleHeading1: "トグル見出し 1"
+  toggleHeading2: "トグル見出し 2"
+  quote: "引用"
+  callout: "コールアウト"
+  divider: "区切り線"
+  codeBlock: "コードブロック"
+  image: "画像"
 `;
 
 export const SLASH_ICONS = {
@@ -114,6 +128,7 @@ export function isSlashMenuDivider(item: SlashMenuItem): boolean {
 export const COMPACT_SLASH_MENU_TITLES = new Set([
   ...Object.values(messages["zh-Hans"]),
   ...Object.values(messages.en),
+  ...Object.values(messages.ja),
 ]);
 
 export function filterCompactSlashMenuItems(

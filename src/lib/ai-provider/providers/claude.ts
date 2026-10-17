@@ -5,6 +5,8 @@ zh-Hans:
   theCustomAnthropicModelRequestFailed: "请求自定义 Anthropic 模型失败"
 en:
   theCustomAnthropicModelRequestFailed: "The custom Anthropic model request failed"
+ja:
+  theCustomAnthropicModelRequestFailed: "カスタム Anthropic モデルへのリクエストに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
 import type { AISettingsLike, AIMessage, AIStreamPhase, AIRequestOverrides } from "../types";

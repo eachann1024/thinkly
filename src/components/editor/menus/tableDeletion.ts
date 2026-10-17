@@ -155,5 +155,9 @@ en:
   deleteTable: "Delete table"
   deleteRow: "Delete row"
   deleteColumn: "Delete column"
+ja:
+  deleteTable: "表を削除"
+  deleteRow: "行を削除"
+  deleteColumn: "列を削除"
 `;
 const t = createTranslator(messages);

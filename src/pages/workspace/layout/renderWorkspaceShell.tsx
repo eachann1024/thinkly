@@ -15,6 +15,13 @@ en:
   dropToCheckFile: "Drop to check file"
   opensAsALocalFolderNotebook: "Opens as a local folder notebook"
   supportsMdMarkdownAndTxt: "Supports .md, .markdown, and .txt"
+ja:
+  dropToOpenFolder: "ドロップしてフォルダを開く"
+  dropToImportIntoTheCurrentFolder: "ドロップして現在のフォルダに読み込む · ⌥ を押しながら場所を選択"
+  dropToImportTextFile: "ドロップしてテキストファイルを読み込む"
+  dropToCheckFile: "ドロップしてファイルを確認"
+  opensAsALocalFolderNotebook: "ローカルフォルダのノートブックとして読み込まれます"
+  supportsMdMarkdownAndTxt: ".md、.markdown、.txt に対応"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

@@ -28,6 +28,11 @@ en:
   thisVersionCannotBeDisplayed: "This version cannot be displayed"
   theContentMayUseAnOlderFormatOr: "The content may use an older format or contain data that cannot be read."
   thisNoteCouldNotBeFoundSoIts: "This note could not be found, so its history cannot be previewed."
+ja:
+  thisNoteCannotBePreviewed: "このノートはプレビューできません"
+  thisVersionCannotBeDisplayed: "この履歴バージョンは表示できません"
+  theContentMayUseAnOlderFormatOr: "内容が古い形式であるか、解析できないデータを含んでいる可能性があります。"
+  thisNoteCouldNotBeFoundSoIts: "このノートが見つからないため、履歴バージョンをプレビューできません。"
 `;
 const t = createTranslator(messages);
 

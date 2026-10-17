@@ -9,6 +9,9 @@ zh-Hans:
 en:
   thereIsNoContentToCompactInThis: "There is no content to compact in this conversation"
   compactionFailedNoSummaryWasReturned: "Compaction failed. No summary was returned."
+ja:
+  thereIsNoContentToCompactInThis: "この会話には圧縮できる内容がありません"
+  compactionFailedNoSummaryWasReturned: "圧縮に失敗しました。要約が返されませんでした"
 `;
 const t = createTranslator(messages);
 

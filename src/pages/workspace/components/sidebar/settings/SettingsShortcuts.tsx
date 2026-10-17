@@ -10,6 +10,10 @@ en:
   keyboardShortcuts_f7d2: "Keyboard shortcuts"
   clickAgainToConfirmReset_50cc: "Click again to confirm reset"
   resetToDefaults_7468: "Reset to defaults"
+ja:
+  keyboardShortcuts_f7d2: "ショートカット"
+  clickAgainToConfirmReset_50cc: "もう一度クリックして初期設定に戻す"
+  resetToDefaults_7468: "初期設定に戻す"
 `;
 const uiText = createTranslator(localMessages);
 import { renderShortcutSettingsColumns } from "./shortcut-settings/renderShortcutSettingsColumns";

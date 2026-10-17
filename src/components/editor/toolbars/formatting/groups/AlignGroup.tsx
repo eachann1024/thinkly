@@ -12,6 +12,10 @@ en:
   alignLeft: "Align left"
   alignCenter: "Align center"
   alignRight: "Align right"
+ja:
+  alignLeft: "左揃え"
+  alignCenter: "中央揃え"
+  alignRight: "右揃え"
 `;
 const t = createTranslator(messages);
 

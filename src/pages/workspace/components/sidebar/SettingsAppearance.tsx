@@ -8,6 +8,9 @@ zh-Hans:
 en:
   fontsAndReading_6d3b: "Fonts and reading"
   interfaceAndSidebar_f3b6: "Interface and sidebar"
+ja:
+  fontsAndReading_6d3b: "フォントと読みやすさ"
+  interfaceAndSidebar_f3b6: "インターフェイスとサイドバーの調整"
 `;
 const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";

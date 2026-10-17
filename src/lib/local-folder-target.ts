@@ -7,6 +7,9 @@ zh-Hans:
 en:
   repositoryRoot: "Repository root"
   folder: "Folder"
+ja:
+  repositoryRoot: "リポジトリのルート"
+  folder: "フォルダ"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

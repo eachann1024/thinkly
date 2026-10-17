@@ -20,6 +20,15 @@ en:
   showMainWindow_61e7: "Show main window"
   showQuickNote_cd4c: "Show Quick Note"
   showSearch_c05b: "Show search"
+ja:
+  shortcutConflict_3ff0: "ショートカットの競合"
+  shortcutInUse: "{{shortcut}} は他の操作で使用されています。"
+  globalShortcuts_2205: "グローバルショートカット"
+  allowGooseNoteInAccessibilitySettings_4a8a: "Thinkly にアクセシビリティの使用を許可すると、他のアプリからウィンドウを呼び出せます。"
+  openAccessibilitySettings_1769: "アクセシビリティを開く"
+  showMainWindow_61e7: "メインウィンドウを表示"
+  showQuickNote_cd4c: "クイックノートを表示"
+  showSearch_c05b: "検索を表示"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";

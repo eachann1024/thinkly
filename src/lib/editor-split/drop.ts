@@ -7,6 +7,9 @@ zh-Hans:
 en:
   youCanOpenUpToPanes: "You can open up to 4 panes"
   thisNoteIsNoLongerAvailable: "This note is no longer available"
+ja:
+  youCanOpenUpToPanes: "分割は最大 4 つまでです"
+  thisNoteIsNoLongerAvailable: "このノートは利用できなくなりました"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

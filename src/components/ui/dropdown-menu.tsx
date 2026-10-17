@@ -6,6 +6,8 @@ zh-Hans:
   actions: "操作"
 en:
   actions: "Actions"
+ja:
+  actions: "操作"
 `;
 const uiText = createTranslator(localMessages);
 import * as React from "react";

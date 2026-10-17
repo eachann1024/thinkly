@@ -6,6 +6,9 @@ zh-Hans:
 en:
   saveIncomplete: "The local page has not finished saving: {{id}}"
   recoveryIncomplete: "The local page’s recovery log has not been acknowledged: {{id}}"
+ja:
+  saveIncomplete: "ローカルページの保存が完了していません：{{id}}"
+  recoveryIncomplete: "ローカルページの復元ログの確認が完了していません：{{id}}"
 `);
 import type { PagesState } from "./types";
 import { acknowledgeRecoveryEntry } from "@/lib/storage/recoveryJournal";

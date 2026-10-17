@@ -19,6 +19,12 @@ en:
   theSelectedBlocksCouldNotBeLocatedSelect: "The selected blocks could not be located. Select them again and retry."
   thisPageHasNoBodyBlocksToConvert: "This page has no body blocks to convert."
   bodyBlocksOnThisPageAreMissingIds: "Body blocks on this page are missing IDs and cannot be safely converted."
+ja:
+  selectTheContentToConvertFirst: "先に変換する内容を選択してください。"
+  pageTitlesCannotBeConvertedToAnotherBlock: "ページタイトルは別のブロックタイプに変換できません。"
+  theSelectedBlocksCouldNotBeLocatedSelect: "選択したブロックを特定できませんでした。選択し直してからやり直してください。"
+  thisPageHasNoBodyBlocksToConvert: "このページには変換できる本文ブロックがありません。"
+  bodyBlocksOnThisPageAreMissingIds: "このページの本文ブロックに ID がないため、安全に変換できません。"
 `;
 const t = createTranslator(messages);
 

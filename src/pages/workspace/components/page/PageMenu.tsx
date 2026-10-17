@@ -26,6 +26,19 @@ en:
   moveSystemTrash: "Move to Trash"
   moveSystemRecycle: "Move to Recycle Bin"
   moveTrash: "Move to Trash"
+ja:
+  import: "インポート"
+  wordCount: "文字数：{{count}}"
+  editedAt: "{{date}} に編集"
+  moreActions: "その他の操作"
+  lockNote: "ノートをロック"
+  newWindow: "新しいウィンドウで開く"
+  exportSelectionImage: "選択範囲を画像として書き出す"
+  exportImage: "画像として書き出す"
+  versionHistory: "バージョン履歴"
+  moveSystemTrash: "ゴミ箱に移動"
+  moveSystemRecycle: "システムのごみ箱に移動"
+  moveTrash: "ゴミ箱に移動"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

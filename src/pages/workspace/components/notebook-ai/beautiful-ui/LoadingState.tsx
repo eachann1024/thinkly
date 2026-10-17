@@ -8,6 +8,8 @@ zh-Hans:
   processing: "处理中"
 en:
   processing: "Processing"
+ja:
+  processing: "処理中"
 `;
 const t = createTranslator(messages);
 

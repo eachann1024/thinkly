@@ -16,6 +16,10 @@ en:
   selectionReference: "Selection reference"
   openSourceNote: "Open source note"
   sourceNoteUnavailable: "Source note unavailable"
+ja:
+  selectionReference: "選択範囲の引用"
+  openSourceNote: "元のノートを開く"
+  sourceNoteUnavailable: "元のノートは利用できません"
 `;
 const t = createTranslator(messages);
 

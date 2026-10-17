@@ -18,6 +18,14 @@ en:
   title: "Title"
   footerOptions: "Footer options"
   footer: "Footer"
+ja:
+  branding: "ブランド"
+  date: "日付"
+  time: "時刻"
+  exportOptions: "生成オプション"
+  title: "タイトル"
+  footerOptions: "フッターのオプション"
+  footer: "フッター"
 `;
 const uiText = createTranslator(localMessages);
 import { useId, useState } from "react";

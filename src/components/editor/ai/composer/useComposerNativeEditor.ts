@@ -31,6 +31,8 @@ zh-Hans:
   aiInput: "AI 输入"
 en:
   aiInput: "AI input"
+ja:
+  aiInput: "AI 入力"
 `;
 const t = createTranslator(messages);
 

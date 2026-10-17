@@ -10,6 +10,10 @@ en:
   appUpdates_3f91: "App updates"
   currentVersion: "Current version: v{{version}}"
   updateVersion: "Update to v{{version}}"
+ja:
+  appUpdates_3f91: "アプリのアップデート"
+  currentVersion: "現在のバージョン v{{version}}"
+  updateVersion: "v{{version}} にアップデート"
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";

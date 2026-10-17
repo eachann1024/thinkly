@@ -56,7 +56,6 @@ declare module "../types" {
     "src/components/editor/core/blocknoteColumnSlashItems.tsx#messages:1": { "columns": { "count": string | number } };
     "src/components/editor/core/blocknoteCommandSlashItems.ts#messages:1": { "bulletedList": {  }; "callout": {  }; "checklist": {  }; "codeBlock": {  }; "heading1": {  }; "heading2": {  }; "heading3": {  }; "numberedList": {  }; "quote": {  }; "text": {  }; "toggleHeading1": {  }; "toggleHeading2": {  }; "toggleHeading3": {  }; "turnIntoBlock": { "label": string | number } };
     "src/components/editor/core/blocknoteMediaSlashItems.ts#messages:1": { "audio": {  }; "file": {  }; "image": {  }; "video": {  } };
-    "src/components/editor/core/blocknoteSlashItems.tsx#messages:1": { "aListOfTasksWithCheckboxes": {  }; "bulletedList": {  }; "callout": {  }; "checklist": {  }; "codeBlock": {  }; "continueWriting": {  }; "createABulletedList": {  }; "createANumberedList": {  }; "divider": {  }; "generate": {  }; "heading1": {  }; "heading2": {  }; "heading3": {  }; "insertACalloutWithAnIcon": {  }; "insertACodeBlockWithSyntaxHighlighting": {  }; "insertAFlowchartSequenceDiagramAndMoreMermaid": {  }; "insertAHorizontalDivider": {  }; "insertAMathFormulaKatex": {  }; "insertAQuote": {  }; "insertASimpleTable": {  }; "largeHeading": {  }; "mathFormula": {  }; "mediumHeading": {  }; "mermaidDiagram": {  }; "numberedList": {  }; "quote": {  }; "smallHeading": {  }; "table": {  }; "text": {  } };
     "src/components/editor/core/blocknoteSlashModel.tsx#messages:1": { "bulletedList": {  }; "callout": {  }; "checklist": {  }; "codeBlock": {  }; "divider": {  }; "heading1": {  }; "heading2": {  }; "image": {  }; "numberedList": {  }; "quote": {  }; "text": {  }; "toggleHeading1": {  }; "toggleHeading2": {  } };
     "src/components/editor/core/blocknoteToggleSlashItems.tsx#messages:1": { "toggleHeading": { "level": string | number } };
     "src/components/editor/core/editorLocale.ts#messages:1": { "quote": {  }; "typeToInsertABlock": {  } };
@@ -122,5 +121,6 @@ declare module "../types" {
     "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
     "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
     "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
+    "src/lib/ai-provider/modelCatalog.ts#localMessages:1": { "authenticationFailed": { "hint": string | number; "provider": string | number }; "customAnthropicProvider": {  }; "customOpenaiCompatibleProvider": {  }; "customOpenaiResponsesProvider": {  }; "enableTheAiAssistantInSettingsFirst": {  }; "missingApiKey": { "hint": string | number }; "saveYourCustomAiConfigurationAndLoadTheModel": {  } };
   }
 }

@@ -6,6 +6,8 @@ zh-Hans:
   copyingImagesIsnTSupportedOnThisSystem: "当前系统不支持复制图片。"
 en:
   copyingImagesIsnTSupportedOnThisSystem: "Copying images isn’t supported on this system."
+ja:
+  copyingImagesIsnTSupportedOnThisSystem: "このシステムでは画像のコピーに対応していません。"
 `;
 const uiText = createTranslator(localMessages);
 /**

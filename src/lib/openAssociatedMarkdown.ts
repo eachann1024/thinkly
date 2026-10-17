@@ -9,6 +9,10 @@ en:
   couldnTOpenThisMarkdownFile: "Couldn’t open this Markdown file"
   theFileIsnTInsideAFolderThatCan: "The file isn’t inside a folder that can be opened as a notebook."
   theFileIsnTAmongTheVisibleNotesIn: "The file isn’t among the visible notes in the current repository."
+ja:
+  couldnTOpenThisMarkdownFile: "この Markdown ファイルを開けません"
+  theFileIsnTInsideAFolderThatCan: "ファイルがマウント可能なフォルダ内にありません。"
+  theFileIsnTAmongTheVisibleNotesIn: "ファイルが現在のリポジトリの表示中のノートに含まれていません。"
 `;
 const uiText = createTranslator(localMessages);
 import { activateWorkspace } from "@/lib/settings-navigation";

@@ -21,6 +21,16 @@ en:
   aDiskErrorOccurredCheckYourDriveOrCloud: "A disk error occurred. Check your drive or cloud storage and try again."
   couldnTSaveTheNoteToDiskCheckThat: "Couldn’t save the note to disk. Check that you have write access to the folder."
   couldnTSaveTheNoteToDiskTryAgain: "Couldn’t save the note to disk. Try again."
+ja:
+  cloudPermission: "ノートフォルダに書き込めません（権限がありません）。ノートが iCloud などのクラウドドライブにある場合は、先にクラウドドライブにサインインし直してから保存してください。"
+  youDonTHaveWriteAccessToTheNotes: "ノートフォルダに書き込めません（権限がありません）。システムのフォルダ権限を確認してから保存してください。"
+  theNotesFolderIsReadOnlyChangesCouldnT: "ノートフォルダは読み取り専用のため、変更を保存できません。"
+  thereIsnTEnoughDiskSpaceToSaveYour: "ディスクの空き容量が不足しているため、変更を保存できません。空き容量を確保してからやり直してください。"
+  theSaveLocationNoLongerExistsItsFolderMay: "保存先が存在しません。フォルダが移動または名前変更された可能性があります。"
+  theFileSystemIsBusyTrySavingAgainIn: "ファイルシステムがビジー状態です。しばらくしてからもう一度保存してください。"
+  aDiskErrorOccurredCheckYourDriveOrCloud: "ディスクエラーが発生しました。ドライブまたはクラウドストレージの状態を確認してから、もう一度お試しください。"
+  couldnTSaveTheNoteToDiskCheckThat: "ノートをディスクに保存できませんでした。フォルダへの書き込み権限があるか確認してください。"
+  couldnTSaveTheNoteToDiskTryAgain: "ノートをディスクに保存できませんでした。もう一度お試しください。"
 `;
 const uiText = createTranslator(localMessages);
 /** 磁盘写入失败。把 EACCES 等底层错误收成可展示的中文说明。 */

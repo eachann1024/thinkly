@@ -7,6 +7,9 @@ zh-Hans:
 en:
   couldNotOpenTheFolderPicker_3fce: "Could not open the folder picker. Restart the desktop app."
   couldNotReadFolder_b081: "Could not read folder"
+ja:
+  couldNotOpenTheFolderPicker_3fce: "フォルダ選択ダイアログを開けませんでした。デスクトップアプリを再起動してください"
+  couldNotReadFolder_b081: "フォルダを読み込めませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { getGooseDesktop } from "@/lib/electron/runtime";

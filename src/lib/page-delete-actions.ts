@@ -43,6 +43,27 @@ en:
   theSystemTrashStillContainsACopyOfThe: "The system trash still contains a copy of the original file."
   couldnTRestoreTheFileFromTheSystemTrash: "Couldn’t restore the file from the system trash"
   fileRestoredRefreshTheFolderToSeeIt: "File restored. Refresh the folder to see it."
+ja:
+  restoredChildren: "。子項目 {{count}} 件も復元しました"
+  restoredItem: "{{kind}}「{{title}}」を復元しました"
+  restoredLocation: "場所：{{notebook}} / {{path}}{{children}}"
+  confirmDelete: "「{{title}}」を完全に削除しますか？"
+  deleting: "「{{title}}」を完全に削除しています…"
+  deleted: "「{{title}}」を完全に削除しました"
+  deleteFailed: "「{{title}}」を完全に削除できません"
+  restored: "「{{title}}」を復元しました"
+  root: "最上位"
+  note: "ページ"
+  untitled: "無題"
+  untitledNotebook: "名称未設定のノートブック"
+  thisWillPermanentlyDeleteTheItemAndAllIts: "削除すると、すべての子項目も一緒に削除され、元に戻せません。"
+  thisCanTBeUndone: "削除すると元に戻せません。"
+  deletePermanently: "完全に削除"
+  theNoteStillExists: "ページはまだ存在します"
+  tryAgainLater: "しばらくしてからもう一度お試しください。"
+  theSystemTrashStillContainsACopyOfThe: "システムのゴミ箱に元のファイルのコピーが残っています。"
+  couldnTRestoreTheFileFromTheSystemTrash: "ゴミ箱からファイルを復元できません"
+  fileRestoredRefreshTheFolderToSeeIt: "ファイルを復元しました。フォルダを更新して確認してください"
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";

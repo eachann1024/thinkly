@@ -10,6 +10,10 @@ en:
   pathUnavailable_ddd1: "Path unavailable"
   removeLocalFolder_505d: "Remove local folder"
   editNotebook_ed4e: "Edit notebook"
+ja:
+  pathUnavailable_ddd1: "パスが無効です"
+  removeLocalFolder_505d: "ローカルフォルダを削除"
+  editNotebook_ed4e: "ノートブックを編集"
 `;
 const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";

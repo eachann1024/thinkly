@@ -32,6 +32,12 @@ en:
   linkUrl: "Link URL"
   cancel: "Cancel"
   confirm: "Confirm"
+ja:
+  removeLink: "リンクを削除"
+  addLink: "リンクを追加"
+  linkUrl: "リンク URL"
+  cancel: "キャンセル"
+  confirm: "OK"
 `;
 const t = createTranslator(messages);
 

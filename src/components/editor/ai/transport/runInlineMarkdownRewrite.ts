@@ -10,6 +10,8 @@ zh-Hans:
   aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
 en:
   aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+ja:
+  aiDidNotReturnAnyContentThatCould: "AI が書き込める内容を返しませんでした。"
 `;
 const t = createTranslator(messages);
 

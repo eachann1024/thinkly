@@ -7,6 +7,9 @@ zh-Hans:
 en:
   mouseBackButton: "Mouse back button"
   mouseForwardButton: "Mouse forward button"
+ja:
+  mouseBackButton: "マウスの戻るボタン"
+  mouseForwardButton: "マウスの進むボタン"
 `;
 const uiText = createTranslator(localMessages);
 import { getPlatformKind, type PlatformKind } from "@/lib/utils";

@@ -20,6 +20,15 @@ en:
   removeThisSyncConfigurationLocalAnd_4136: "Remove this sync configuration? Local and remote files will be kept."
   remove_e2cf: "Remove"
   cancel_625f: "Cancel"
+ja:
+  syncSettings_1cbb: "同期設定"
+  repositoryDetails_22cd: "リポジトリ情報"
+  branch_bfc0: "ブランチ"
+  sshUrl_4436: "SSH URL"
+  removeSyncConfiguration_dcd6: "同期設定を削除"
+  removeThisSyncConfigurationLocalAnd_4136: "この同期設定を削除しますか？ローカルとリモートのファイルは削除されません。"
+  remove_e2cf: "削除"
+  cancel_625f: "キャンセル"
 `;
 const uiText = createTranslator(localMessages);
 import { GitDetails } from "./GitDetails";

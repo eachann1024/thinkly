@@ -17,6 +17,10 @@ en:
   chooseATextOrBackgroundColorClickTo: "Choose a text or background color; click to apply the last color"
   colorMixedFormattingClickToApplyTheLast: "Color (mixed formatting); click to apply the last color"
   colorClickToApplyTheLastColor: "Color; click to apply the last color"
+ja:
+  chooseATextOrBackgroundColorClickTo: "文字色または背景色を選択。クリックで前回の色を適用"
+  colorMixedFormattingClickToApplyTheLast: "色の選択（書式が混在）。クリックで前回の色を適用"
+  colorClickToApplyTheLastColor: "色の選択。クリックで前回の色を適用"
 `;
 const t = createTranslator(messages);
 

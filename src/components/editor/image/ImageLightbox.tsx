@@ -30,6 +30,15 @@ en:
   imagePreview: "Image preview"
   downloadImage: "Download image"
   copyImage: "Copy image"
+ja:
+  zoomIn: "拡大"
+  zoomOut: "縮小"
+  close: "閉じる"
+  nextImage: "次の画像"
+  previousImage: "前の画像"
+  imagePreview: "画像プレビュー"
+  downloadImage: "画像をダウンロード"
+  copyImage: "画像をコピー"
 `;
 const t = createTranslator(messages);
 

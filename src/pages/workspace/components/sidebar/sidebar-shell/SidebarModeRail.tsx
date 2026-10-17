@@ -16,6 +16,13 @@ en:
   sidebarViews_2d93: "Sidebar views"
   openAi: "Open AI panel"
   closeAi: "Close AI panel"
+ja:
+  local_8e7e: "ローカル"
+  outline_9338: "アウトライン"
+  search_e5f7: "検索"
+  sidebarViews_2d93: "サイドバーの表示"
+  openAi: "AI パネルを開く"
+  closeAi: "AI パネルを閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { useRef, type ComponentProps } from "react";

@@ -22,6 +22,11 @@ en:
   generatingImage: "Generating image"
   generatingImage2: "Generating image"
   couldNotDisplayImage: "Could not display image"
+ja:
+  image: "画像"
+  generatingImage: "画像を生成中"
+  generatingImage2: "画像を生成中"
+  couldNotDisplayImage: "画像を表示できません"
 `;
 const t = createTranslator(messages);
 

@@ -12,6 +12,11 @@ en:
   theDestinationFolderNoLongerExists_0e13: "The destination folder no longer exists. Choose another location."
   couldNotCreateItemTheName_2735: "Could not create item: the name exists or the folder is not writable. Change the name or check permissions, then try again."
   folderCreated_1541: "Folder created"
+ja:
+  newFolder_f3a4: "新規フォルダ"
+  theDestinationFolderNoLongerExists_0e13: "移動先のフォルダが存在しません。場所を選び直してください"
+  couldNotCreateItemTheName_2735: "作成に失敗しました：同じ名前が存在するか、書き込み権限がありません。名前を変更するか権限を確認して、もう一度お試しください"
+  folderCreated_1541: "フォルダを作成しました"
 `;
 const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";

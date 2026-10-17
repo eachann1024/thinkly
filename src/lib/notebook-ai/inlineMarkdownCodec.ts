@@ -12,6 +12,8 @@ zh-Hans:
   theAiResponseCouldNotBeParsedInto: "AI 返回的内容无法解析为有效块。"
 en:
   theAiResponseCouldNotBeParsedInto: "The AI response could not be parsed into valid blocks."
+ja:
+  theAiResponseCouldNotBeParsedInto: "AI の返答を有効なブロックとして解析できませんでした。"
 `;
 const t = createTranslator(messages);
 

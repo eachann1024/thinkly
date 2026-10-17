@@ -30,6 +30,20 @@ en:
   restoreManually: "Try again later, or restore the items from {{destination}}."
   undo: "Undo"
   dismissResult: "Dismiss deletion result"
+ja:
+  systemTrash: "システムのゴミ箱"
+  systemRecycle: "システムのごみ箱"
+  trash: "ゴミ箱"
+  partialDelete: "{{done}} 件を移動しました（{{failed}} 件は未完了）"
+  failedDelete: "{{failed}} 件は未完了です"
+  deletedItem: "{{destination}}に移動しました · {{title}}"
+  deletedMany: "{{done}} 件を{{destination}}に移動しました"
+  deleteResult: "削除の結果"
+  undoDelete: "削除を元に戻す"
+  undoFailed: "元に戻せませんでした"
+  restoreManually: "しばらくしてからもう一度お試しいただくか、{{destination}}から手動で復元してください"
+  undo: "元に戻す"
+  dismissResult: "削除の結果を閉じる"
 `;
 const uiText = createTranslator(localMessages);
 import { CircleAlert, RotateCcw, X } from "@/components/ui/icons";

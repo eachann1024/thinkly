@@ -29,6 +29,16 @@ en:
   selectAVersionOnTheLeft: "Select a version on the left"
   thisVersionIsTemporarilyUnavailable: "This version is temporarily unavailable"
   retry: "Retry"
+ja:
+  loadingVersion: "履歴バージョンを読み込み中"
+  versionHistoryCouldNotBeLoaded: "履歴一覧を読み込めません"
+  noVersionHistory: "履歴バージョンはまだありません"
+  thisVersionCouldNotBeRead: "この履歴バージョンは読み込めません"
+  ifYouUseCloudStorageSignInAnd: "クラウドストレージを使用している場合は、サインインしていることと、このバージョンのファイルがダウンロード済みであることを確認してください。"
+  thisVersionHasAnInvalidFormat: "この履歴バージョンの形式が正しくありません"
+  selectAVersionOnTheLeft: "左側から履歴バージョンを選択してください"
+  thisVersionIsTemporarilyUnavailable: "履歴バージョンを一時的に表示できません"
+  retry: "再試行"
 `;
 const t = createTranslator(messages);
 

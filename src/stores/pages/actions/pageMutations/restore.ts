@@ -12,6 +12,12 @@ en:
   folder: "Folder"
   file: "File"
   page: "Page"
+ja:
+  unnamedNotebook: "名称未設定のノートブック"
+  untitled: "無題"
+  folder: "フォルダ"
+  file: "ファイル"
+  page: "ページ"
 `);
 import type { Page } from "@/types";
 import { useNotebooks } from "../../../useNotebooks";

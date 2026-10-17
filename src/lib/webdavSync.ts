@@ -7,6 +7,9 @@ zh-Hans:
 en:
   connected: "Connected"
   webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV can only access Thinkly backup files"
+ja:
+  connected: "接続に成功しました"
+  webdavCanOnlyAccessGooseNotesBackupFiles: "WebDAV では Thinkly のバックアップファイルのみ操作できます"
 `;
 const uiText = createTranslator(localMessages);
 import { createClient } from "webdav";

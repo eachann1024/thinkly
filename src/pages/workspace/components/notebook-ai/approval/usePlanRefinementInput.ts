@@ -9,6 +9,8 @@ zh-Hans:
   theInputIsTemporarilyUnavailableTryRefiningThe: "输入框暂不可用，请稍后调整方案。"
 en:
   theInputIsTemporarilyUnavailableTryRefiningThe: "The input is temporarily unavailable. Try refining the plan later."
+ja:
+  theInputIsTemporarilyUnavailableTryRefiningThe: "入力欄を現在利用できません。しばらくしてからプランを調整してください。"
 `;
 const t = createTranslator(messages);
 

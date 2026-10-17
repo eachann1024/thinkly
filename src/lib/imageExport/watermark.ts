@@ -5,6 +5,8 @@ zh-Hans:
   gooseNotes: "思绪 · Thinkly"
 en:
   gooseNotes: "Thinkly"
+ja:
+  gooseNotes: "Thinkly"
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "./themes";

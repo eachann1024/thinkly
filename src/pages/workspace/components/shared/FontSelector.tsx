@@ -10,6 +10,10 @@ en:
   default: "Default"
   serif: "Serif"
   monospace: "Monospace"
+ja:
+  default: "デフォルト"
+  serif: "明朝体"
+  monospace: "等幅"
 `;
 const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";

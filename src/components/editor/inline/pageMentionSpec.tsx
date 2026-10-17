@@ -17,6 +17,8 @@ zh-Hans:
   untitled: "未命名"
 en:
   untitled: "Untitled"
+ja:
+  untitled: "無題"
 `;
 const t = createTranslator(messages);
 

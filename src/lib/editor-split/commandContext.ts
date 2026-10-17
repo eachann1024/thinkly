@@ -9,6 +9,10 @@ en:
   splitViewIsnTAvailableInFullScreenAi: "Split view isn’t available in full-screen AI mode"
   splitViewIsnTAvailableInThisView: "Split view isn’t available in this view"
   splitViewIsnTAvailableInVersionHistory: "Split view isn’t available in version history"
+ja:
+  splitViewIsnTAvailableInFullScreenAi: "フルスクリーン AI では分割表示を使用できません"
+  splitViewIsnTAvailableInThisView: "このビューでは分割表示を使用できません"
+  splitViewIsnTAvailableInVersionHistory: "バージョン履歴では分割表示を使用できません"
 `;
 const uiText = createTranslator(localMessages);
 import { isNotebookAiFullscreenOpen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";

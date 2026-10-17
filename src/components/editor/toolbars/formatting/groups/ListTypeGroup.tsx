@@ -20,6 +20,10 @@ en:
   checklist: "Checklist"
   bulletedList: "Bulleted list"
   numberedList: "Numbered list"
+ja:
+  checklist: "ToDo リスト"
+  bulletedList: "箇条書きリスト"
+  numberedList: "番号付きリスト"
 `;
 const t = createTranslator(messages);
 

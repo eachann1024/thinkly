@@ -9,6 +9,10 @@ en:
   attachment: "Attachment"
   video: "Video"
   audio: "Audio"
+ja:
+  attachment: "添付ファイル"
+  video: "動画"
+  audio: "音声"
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "../themes";

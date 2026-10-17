@@ -6,6 +6,8 @@ zh-Hans:
   exportPreview: "图片导出预览"
 en:
   exportPreview: "Image export preview"
+ja:
+  exportPreview: "画像書き出しプレビュー"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";

@@ -5,6 +5,8 @@ zh-Hans:
   couldnTParseTheMarkdownFile: "解析 Markdown 失败"
 en:
   couldnTParseTheMarkdownFile: "Couldn’t parse the Markdown file"
+ja:
+  couldnTParseTheMarkdownFile: "Markdown ファイルを解析できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";

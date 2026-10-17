@@ -28,6 +28,8 @@ zh-Hans:
   thisResponseCouldNotBeGenerated: "这条回复生成失败。"
 en:
   thisResponseCouldNotBeGenerated: "This response could not be generated."
+ja:
+  thisResponseCouldNotBeGenerated: "この回答を生成できませんでした。"
 `;
 const t = createTranslator(messages);
 

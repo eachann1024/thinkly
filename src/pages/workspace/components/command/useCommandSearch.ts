@@ -8,6 +8,9 @@ zh-Hans:
 en:
   untitled: "Untitled"
   searchFailedTryDifferentKeywords: "Search failed. Try different keywords."
+ja:
+  untitled: "無題"
+  searchFailedTryDifferentKeywords: "検索に失敗しました。キーワードを変更してもう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";

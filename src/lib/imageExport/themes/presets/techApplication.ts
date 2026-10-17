@@ -27,6 +27,19 @@ en:
   coolGeometricStylingWithATechnicalFeel: "Cool geometric styling with a technical feel"
   light: "Light"
   geometric: "Geometric"
+ja:
+  vercelBlack: "Vercel ブラック"
+  minimalBlackWithAModernEdge: "ミニマルな黒、モダンで硬派な印象"
+  dark: "ダーク"
+  minimal: "ミニマル"
+  tokyoNight: "Tokyo Night"
+  deepBluesAndPurplesInspiredByAClassicEditor: "ディープブルーとパープルの、定番エディタ風配色"
+  code: "コード"
+  aDarkThemeWithSoftPinkAccents: "やわらかなピンクをあしらったダークテーマ、開発者に人気"
+  soft: "ソフト"
+  coolGeometricStylingWithATechnicalFeel: "クールな幾何学スタイルで、技術者好みの雰囲気"
+  light: "ライト"
+  geometric: "幾何学"
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS } from "@/lib/textColors";

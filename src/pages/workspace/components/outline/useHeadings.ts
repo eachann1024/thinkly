@@ -6,6 +6,8 @@ zh-Hans:
   untitled: "无标题"
 en:
   untitled: "Untitled"
+ja:
+  untitled: "無題"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect, useState, useCallback } from "react";

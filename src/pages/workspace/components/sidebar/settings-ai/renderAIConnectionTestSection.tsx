@@ -23,6 +23,17 @@ en:
   saveTheCurrentProviderConfigurationFirst_3c68: "Save the current provider configuration first."
   saveTheConfigurationAndFetchAvailable_11da: "Save the configuration and fetch available models first."
   readyToCheckTheConnection_542d: "Ready to check the connection."
+ja:
+  connectionCheck_58bb: "接続テスト"
+  thisCheckDoesNotReadNotes_a76b: "テストでノートやローカルのコンテキストが読み取られることはありません。"
+  checking_2ff3: "テスト中…"
+  checkConnection_69e7: "接続をテスト"
+  cancelCheck_ca80: "テストをキャンセル"
+  checkingConnection_3d70: "接続をテストしています…"
+  enableTheAiAssistantSaveA_9011: "AI アシスタントを有効にし、設定を保存してモデルを取得すると、接続をテストできます。"
+  saveTheCurrentProviderConfigurationFirst_3c68: "先に現在のプロバイダ設定を保存してください。"
+  saveTheConfigurationAndFetchAvailable_11da: "先に設定を保存し、利用可能なモデルを取得してください。"
+  readyToCheckTheConnection_542d: "接続をテストできます。"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";

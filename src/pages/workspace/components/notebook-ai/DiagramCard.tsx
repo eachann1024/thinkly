@@ -22,6 +22,11 @@ en:
   diagram: "Diagram"
   diagramGenerationFailed: "Diagram generation failed"
   generatingDiagram: "Generating diagram"
+ja:
+  theDiagramIsNotReadyYet: "図はまだ準備できていません"
+  diagram: "図"
+  diagramGenerationFailed: "図の生成に失敗しました"
+  generatingDiagram: "図を生成中"
 `;
 const t = createTranslator(messages);
 

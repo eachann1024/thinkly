@@ -10,6 +10,10 @@ en:
   enterANotebookName_648e: "Enter a notebook name"
   renameFailed_37ba: "Rename failed"
   pickerUnavailable: "The folder picker is unavailable"
+ja:
+  enterANotebookName_648e: "ノートブック名を入力してください"
+  renameFailed_37ba: "名前を変更できませんでした"
+  pickerUnavailable: "フォルダ選択ダイアログを開けません"
 `;
 const uiText = createTranslator(localMessages);
 import { type DragEndEvent } from "@dnd-kit/core";

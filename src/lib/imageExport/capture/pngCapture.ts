@@ -13,6 +13,12 @@ en:
   imageGenerationTimedOut: "Image generation timed out"
   imageEncodingTimedOut: "Image encoding timed out"
   couldnTGenerateTheImage: "Couldn’t generate the image"
+ja:
+  loadFailed: "画像を読み込めませんでした"
+  imageEncodingFailed: "画像のエンコードに失敗しました"
+  imageGenerationTimedOut: "画像の生成がタイムアウトしました"
+  imageEncodingTimedOut: "画像のエンコードがタイムアウトしました"
+  couldnTGenerateTheImage: "画像を生成できませんでした"
 `;
 const uiText = createTranslator(localMessages);
 import { toCanvas } from "html-to-image";

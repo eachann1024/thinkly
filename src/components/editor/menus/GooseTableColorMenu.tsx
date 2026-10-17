@@ -20,6 +20,12 @@ en:
   backgroundColor: "Background color"
   text: "Text"
   background: "Background"
+ja:
+  color: "色"
+  textColor: "文字色"
+  backgroundColor: "背景色"
+  text: "文字"
+  background: "背景"
 `;
 const t = createTranslator(messages);
 

@@ -23,6 +23,9 @@ zh-Hans:
 en:
   addColumn: "Add column"
   addRow: "Add row"
+ja:
+  addColumn: "列を追加"
+  addRow: "行を追加"
 `;
 const t = createTranslator(messages);
 

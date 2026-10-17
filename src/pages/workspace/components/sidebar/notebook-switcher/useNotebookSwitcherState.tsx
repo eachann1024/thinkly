@@ -7,6 +7,9 @@ zh-Hans:
 en:
   folder: "Folder"
   openFolder: "Open folder"
+ja:
+  folder: "フォルダ"
+  openFolder: "フォルダを開く"
 `;
 const uiText = createTranslator(localMessages);
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";

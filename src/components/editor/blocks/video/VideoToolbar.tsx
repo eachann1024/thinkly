@@ -41,6 +41,14 @@ en:
   replaceVideo: "Replace video"
   downloadVideo: "Download video"
   deleteVideo: "Delete video"
+ja:
+  videoActions: "ビデオの操作"
+  alignLeft: "左揃え"
+  alignCenter: "中央揃え"
+  alignRight: "右揃え"
+  replaceVideo: "ビデオを置き換え"
+  downloadVideo: "ビデオをダウンロード"
+  deleteVideo: "ビデオを削除"
 `;
 const t = createTranslator(messages);
 

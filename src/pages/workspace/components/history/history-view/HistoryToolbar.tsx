@@ -26,6 +26,16 @@ en:
   restoreThisVersion: "Restore this version"
   restoring: "Restoring"
   loading: "Loading"
+ja:
+  backToEditor: "編集画面に戻る"
+  back: "戻る"
+  selectAVersion: "履歴バージョンを選択"
+  version: "バージョン"
+  restoringVersion: "このバージョンを復元中"
+  loadingVersion: "履歴バージョンを読み込み中"
+  restoreThisVersion: "このバージョンを復元"
+  restoring: "復元中"
+  loading: "読み込み中"
 `;
 const t = createTranslator(messages);
 

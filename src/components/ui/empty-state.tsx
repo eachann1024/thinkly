@@ -6,6 +6,8 @@ zh-Hans:
   details: "详情"
 en:
   details: "Details"
+ja:
+  details: "詳細"
 `;
 const uiText = createTranslator(localMessages);
 import type { ReactNode } from "react";

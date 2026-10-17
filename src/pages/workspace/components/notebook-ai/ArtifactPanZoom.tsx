@@ -28,6 +28,13 @@ en:
   zoomIn: "Zoom in"
   zoomInThenDragOrScrollToPan: "Zoom in, then drag or scroll to pan"
   fitToWindow: "Fit to window"
+ja:
+  zoomedDiagramDragOrScrollToPan: "拡大された図です。ドラッグまたはスクロールで移動できます"
+  diagramPreview: "図のプレビュー"
+  zoomOut: "縮小"
+  zoomIn: "拡大"
+  zoomInThenDragOrScrollToPan: "拡大後はドラッグまたはスクロールで移動できます"
+  fitToWindow: "ウィンドウに合わせる"
 `;
 const t = createTranslator(messages);
 

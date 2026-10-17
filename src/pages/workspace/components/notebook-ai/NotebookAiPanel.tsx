@@ -21,6 +21,8 @@ zh-Hans:
   aiAssistant: "AI 助手"
 en:
   aiAssistant: "AI assistant"
+ja:
+  aiAssistant: "AI アシスタント"
 `;
 const t = createTranslator(messages);
 

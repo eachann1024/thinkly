@@ -8,6 +8,8 @@ zh-Hans:
   expandOrCollapseChildBlocks: "展开或收起子块"
 en:
   expandOrCollapseChildBlocks: "Expand or collapse child blocks"
+ja:
+  expandOrCollapseChildBlocks: "子ブロックを展開または折りたたむ"
 `;
 const t = createTranslator(messages);
 

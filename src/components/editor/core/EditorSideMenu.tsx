@@ -38,6 +38,14 @@ en:
   expandSection: "Expand section"
   dragToMoveBlock: "Drag to move block"
   click: "Click"
+ja:
+  addBlock: "ブロックを追加"
+  addBlockBelow: "下にブロックを追加"
+  addBlockAbove: "上にブロックを追加"
+  collapseSection: "セクションを折りたたむ"
+  expandSection: "セクションを展開"
+  dragToMoveBlock: "ドラッグしてブロックを移動"
+  click: "クリック"
 `;
 const t = createTranslator(messages);
 
