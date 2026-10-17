@@ -11,13 +11,23 @@ export interface ReflectionTopic {
   share: number;
 }
 
+/** 结构化要点：简短主题名 + 一两句话。 */
+export interface ReflectionTheme {
+  name: string;
+  point: string;
+}
+
 export interface ReflectionNarrative {
   title: string;
+  /** 旧格式的整段正文；新格式为空串。 */
   body: string;
   topics: ReflectionTopic[];
+  themes?: ReflectionTheme[];
+  suggestion?: string;
 }
 
 const MAX_TOPICS = 6;
+const MAX_THEMES = 4;
 const clean = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 /** 把 share 缩放到合计 100（最大余数法）；无有效数据返回空。 */
@@ -44,6 +54,17 @@ export function normalizeTopics(raw: unknown): ReflectionTopic[] {
   return items.map((t, i) => ({ name: t.name, description: t.description, share: floors[i] }));
 }
 
+function normalizeThemes(raw: unknown): ReflectionTheme[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((t) => {
+      const r = (t ?? {}) as Record<string, unknown>;
+      return { name: clean(r.name), point: clean(r.point) };
+    })
+    .filter((t) => t.name && t.point)
+    .slice(0, MAX_THEMES);
+}
+
 /** 容错解析：代码围栏、前后多余文字，或完全不是 JSON 时按「首行标题 + 其余正文」。 */
 export function parseReflectionText(raw: string): ReflectionNarrative | null {
   const text = raw.replace(/```(?:json)?/gi, "").trim();
@@ -54,7 +75,17 @@ export function parseReflectionText(raw: string): ReflectionNarrative | null {
       const data = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
       const title = clean(data.title);
       const body = clean(data.body);
-      if (title && body) return { title, body, topics: normalizeTopics(data.topics) };
+      const themes = normalizeThemes(data.themes);
+      if (title && (themes.length || body)) {
+        const suggestion = clean(data.suggestion);
+        return {
+          title,
+          body: themes.length ? "" : body,
+          topics: normalizeTopics(data.topics),
+          ...(themes.length ? { themes } : {}),
+          ...(themes.length && suggestion ? { suggestion } : {}),
+        };
+      }
     } catch {
       /* 继续走纯文本兜底 */
     }
