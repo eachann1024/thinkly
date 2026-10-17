@@ -47,6 +47,8 @@ export function SidebarModeRail({
   const folderActionsAvailable = useFolderToolbarActions();
   // 只读布局层算出的真实可见状态，不在这里另起一份 AI 面板状态。
   const aiPanelVisible = useAiPanelVisibility((s) => s.visible);
+  // 侧屏模式下 AI 入口在标题栏，图标栏只在全屏模式显示。
+  const aiFullscreen = useAiPanelVisibility((s) => s.fullscreen);
   const activePageId = usePages((s) => s.activePageId);
   const pageTrashed = usePages((s) =>
     Boolean(s.activePageId && s.pages[s.activePageId]?.trashedAt),
@@ -54,7 +56,7 @@ export function SidebarModeRail({
   const toggleAiShortcut = useSettings((s) => s.appShortcuts.toggleAIPanel);
   const storedOrder = useSettings((s) => s.sidebarRailOrder);
   const setRailOrder = useSettings((s) => s.setSidebarRailOrder);
-  const showAi = aiEnabled && folderActionsAvailable && Boolean(activePageId) && !pageTrashed;
+  const showAi = aiEnabled && aiFullscreen && folderActionsAvailable && Boolean(activePageId) && !pageTrashed;
   const toggleAiLabel = aiPanelVisible ? uiText("closeAi") : uiText("openAi");
   const {
     sidebarModeRailRef,
