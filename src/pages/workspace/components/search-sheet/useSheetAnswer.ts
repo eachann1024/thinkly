@@ -8,11 +8,11 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer } from "react";
-import { getAIAvailability, runAITextStream } from "@/lib/ai-provider";
+import { getAIAvailability } from "@/lib/ai-provider";
+import { runPiReadOnlyAgent } from "@/lib/notebook-ai/pi/readOnlyAgent";
 import { useSettings } from "@/stores/useSettings";
 import type { Page } from "@/types";
-import { expandQuery } from "./expandQuery";
-import { buildAnswerPrompt, retrieveNotes } from "./retrieveNotes";
+import { buildAgentPrompt, retrieveNotes, type NoteSource } from "./retrieveNotes";
 
 import { sheetAnswerReducer } from "./sheetAnswerState";
 export type { SheetAnswer } from "./sheetAnswerState";
@@ -21,7 +21,13 @@ export function useSearchAiAvailable() {
   return useSettings(s => getAIAvailability(s.ai).ok);
 }
 
-/** 搜索面板内的就地问答：检索相关笔记片段，流式生成带引用的回答。 */
+function readPageSource(result: unknown): NoteSource | null {
+  const page = result as { pageId?: unknown; title?: unknown; markdown?: unknown } | null;
+  if (typeof page?.pageId !== "string" || typeof page.title !== "string") return null;
+  return { id: page.pageId, title: page.title, excerpt: typeof page.markdown === "string" ? page.markdown.slice(0, 200) : "" };
+}
+
+/** 搜索面板内的就地问答：先本地预检索笔记，再用只读 Pi Agent 多步调用工具，流式生成回答。 */
 export function useSheetAnswer() {
   const [state, dispatch] = useReducer(sheetAnswerReducer, { status: "idle" });
   const answer = state.status === "idle" ? null : state;
@@ -35,25 +41,30 @@ export function useSheetAnswer() {
   }, []);
   useEffect(() => () => controller.current?.abort(), []);
 
-  const ask = useCallback(async (question: string, candidates: Page[], ranked: Page[]) => {
+  const ask = useCallback(async (question: string, candidates: Page[], ranked: Page[], notebookId: string | null) => {
     controller.current?.abort();
     const abort = new AbortController();
     controller.current = abort;
     const requestId = ++sequence.current;
     dispatch({ type: "ask", requestId, question });
     try {
-      const extraTerms = await expandQuery(question, abort.signal);
-      if (abort.signal.aborted) return;
-      const sources = retrieveNotes(question, candidates, ranked, extraTerms);
+      const sources = retrieveNotes(question, candidates, ranked);
       dispatch({ type: "retrieved", requestId, sources });
-      const ai = useSettings.getState().ai;
-      const modelId = ai.workspaceSelectedModelId?.trim() || ai.selectedModelId;
-      const text = await runAITextStream(ai, buildAnswerPrompt(question, sources), {
-        abortSignal: abort.signal,
-        requestOverrides: { selectedModelId: modelId },
-        onUpdate: update => {
-          if (abort.signal.aborted || !update.text) return;
-          dispatch({ type: "chunk", requestId, text: update.text });
+      const { system, prompt } = buildAgentPrompt(question, sources);
+      const text = await runPiReadOnlyAgent({
+        notebookId: notebookId ?? "",
+        systemPrompt: system,
+        prompt,
+        signal: abort.signal,
+        handlers: {
+          onText: text => { if (!abort.signal.aborted) dispatch({ type: "chunk", requestId, text }); },
+          onToolStart: tool => { if (!abort.signal.aborted) dispatch({ type: "tool", requestId, tool }); },
+          onToolEnd: (tool, result, isError) => {
+            if (abort.signal.aborted) return;
+            dispatch({ type: "tool", requestId, tool: null });
+            const source = tool === "readPage" && !isError ? readPageSource(result) : null;
+            if (source) dispatch({ type: "source", requestId, source });
+          },
         },
       });
       if (!abort.signal.aborted) dispatch({ type: "finish", requestId, text });

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useState } from "react";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
@@ -8,13 +9,14 @@ import { ReflectionDialog } from "./ReflectionDialog";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflection/ReflectionButton.tsx#localMessages:1">`
 zh-Hans:
-  reflection: "每周反思"
+  reflection: "反思"
 en:
-  reflection: "Weekly reflection"
+  reflection: "Reflection"
 `;
 const uiText = createTranslator(localMessages);
 
 export function ReflectionButton({ className }: { className?: string }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const unseen = useReflection(selectHasUnseenReflection(previousWeek().key));
   return (

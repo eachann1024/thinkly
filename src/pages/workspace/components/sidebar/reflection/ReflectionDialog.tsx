@@ -1,27 +1,29 @@
-import { useEffect, useMemo } from "react";
+import { useLocale } from "@/i18n";
+import { useEffect, useMemo, useState } from "react";
 import { createTranslator, i18nYaml } from "@/i18n";
-import { getFormatLocale } from "@/i18n/runtime";
 import { DialogShell } from "@/components/ui/dialog-shell";
 import { usePages } from "@/stores/usePages";
+import { useTabs } from "@/stores/useTabs";
 import { useSettings } from "@/stores/useSettings";
 import { useReflection } from "@/stores/useReflection";
-import {
-  ensureLastWeekReflection,
-  getLastWeekSnapshot,
-  isReflectionAIReady,
-} from "@/lib/reflection/reflectionRunner";
-import { EMPTY_ACTIVITY } from "@/lib/reflection/activityLog";
-import { addDays, previousWeek, trailingWeeks } from "@/lib/reflection/weekRange";
-import { computeWeekStats } from "@/lib/reflection/weekStats";
-import { ReflectionChart } from "./ReflectionChart";
+import { activateNotebook } from "@/lib/notebookNavigation";
+import { ensureReflection, isReflectionAIReady } from "@/lib/reflection/reflectionRunner";
+import { DEFAULT_SCOPE, type ReflectionScope } from "@/lib/reflection/scopeRange";
+import { previousWeek } from "@/lib/reflection/weekRange";
+import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
+import { ReflectionHeader } from "./ReflectionHeader";
+import { ReflectionMetrics } from "./ReflectionMetrics";
 import { ReflectionNarrative, type NarrativeState } from "./ReflectionNarrative";
-import { ReflectionStats } from "./ReflectionStats";
+import { ReflectionNoteList } from "./ReflectionNoteList";
+import { ReflectionTopics } from "./ReflectionTopics";
+import { ReflectionTrend } from "./ReflectionTrend";
+import { useReflectionData } from "./useReflectionData";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1">`
 zh-Hans:
-  title: "每周反思"
+  empty: "这段时间没有编辑记录"
 en:
-  title: "Weekly reflection"
+  empty: "No edits in this period"
 `;
 const uiText = createTranslator(localMessages);
 
@@ -31,70 +33,84 @@ interface Props {
 }
 
 export function ReflectionDialog({ open, onOpenChange }: Props) {
+  useLocale();
+  const [scope, setScope] = useState<ReflectionScope>(DEFAULT_SCOPE);
   const ai = useSettings((s) => s.ai);
-  const activity = useReflection((s) => s.activity);
   const reports = useReflection((s) => s.reports);
   const aiConsent = useReflection((s) => s.aiConsent);
   const generatingKey = useReflection((s) => s.generatingKey);
   const failure = useReflection((s) => s.failure);
   const markSeen = useReflection((s) => s.markSeen);
   const setAiConsent = useReflection((s) => s.setAiConsent);
-
-  // 仅在打开（或 activity 变化）时计算；pages 只在计算时取一次快照，不订阅。
-  const { week, stats, eligible, trend } = useMemo(() => {
-    if (!open) {
-      const stats = computeWeekStats(EMPTY_ACTIVITY, {}, previousWeek());
-      return { week: previousWeek(), stats, eligible: false, trend: [] as number[][] };
-    }
-    const snapshot = getLastWeekSnapshot();
-    const pages = usePages.getState().pages;
-    const trend = trailingWeeks(snapshot.week.start, 4).map(
-      (w) => computeWeekStats(activity, pages, w).daily,
-    );
-    return { ...snapshot, trend };
-  }, [open, activity]);
+  const { data, loading, reload } = useReflectionData(open, scope);
 
   const aiReady = useMemo(() => isReflectionAIReady(), [ai]); // eslint-disable-line react-hooks/exhaustive-deps
-  const report = reports[week.key];
-  const generating = generatingKey === week.key;
+  const key = data?.range.key ?? null;
+  const report = key ? reports[key] : undefined;
+  const hasEdits = (data?.stats.total ?? 0) > 0;
+  const generating = key !== null && generatingKey === key;
 
   useEffect(() => {
-    if (!open) return;
-    if (report) markSeen(week.key);
-    if (eligible && aiConsent && aiReady && !report) void ensureLastWeekReflection();
-  }, [open, week.key, eligible, aiConsent, aiReady, report, markSeen]);
+    if (open) markSeen(previousWeek().key);
+  }, [open, markSeen]);
+
+  useEffect(() => {
+    if (open && data && hasEdits && aiConsent && aiReady && !report) void ensureReflection(scope, { data });
+  }, [open, data, hasEdits, aiConsent, aiReady, report, scope]);
+
+  const refresh = async () => {
+    const next = await reload(true);
+    if (next) void ensureReflection(scope, { force: true, data: next });
+  };
+
+  const openNote = async (pageId: string) => {
+    const page = usePages.getState().pages[pageId];
+    if (!page) return;
+    onOpenChange(false);
+    closeNotebookAiIfFullscreen();
+    await activateNotebook(page.workspaceId);
+    useTabs.getState().openTab(pageId);
+    await usePages.getState().setActivePage(pageId);
+  };
 
   let state: NarrativeState = "ready";
-  if (!eligible) state = "tooFew";
-  else if (!aiReady) state = "notConfigured";
+  if (!aiReady) state = "notConfigured";
   else if (!aiConsent) state = "needsConsent";
   else if (generating) state = "generating";
-  else if (failure?.weekKey === week.key && !report) state = "failed";
+  else if (failure?.key === key && !report) state = "failed";
 
-  const range = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(getFormatLocale(), { month: "short", day: "numeric" });
-    return `${fmt.format(week.start)} – ${fmt.format(addDays(week.start, 6))}`;
-  }, [week.start]);
-
+  const pages = usePages.getState().pages;
   return (
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title={`${uiText("title")} · ${range}`}
-      contentClassName="sm:max-w-xl"
-      bodyClassName="space-y-4 p-6 pt-2"
+      contentClassName="sm:max-w-3xl"
+      bodyClassName="space-y-10 p-8"
     >
-      <ReflectionNarrative
-        state={state}
-        report={report}
-        onEnable={() => {
-          setAiConsent(true);
-          void ensureLastWeekReflection();
-        }}
-        onRefresh={() => void ensureLastWeekReflection(true)}
+      <ReflectionHeader
+        scope={scope}
+        busy={loading || generating}
+        onScopeChange={setScope}
+        onRefresh={() => void refresh()}
       />
-      {stats.total > 0 ? <ReflectionStats stats={stats} weekStart={week.start} /> : null}
-      <ReflectionChart weeks={trend} />
+      {data && !hasEdits ? <p className="text-sm text-muted-foreground">{uiText("empty")}</p> : null}
+      {data && hasEdits ? (
+        <>
+          <ReflectionNarrative
+            state={state}
+            report={report}
+            onEnable={() => {
+              setAiConsent(true);
+              void ensureReflection(scope, { data });
+            }}
+          />
+          <ReflectionMetrics stats={data.stats} />
+          <ReflectionTrend points={data.stats.trend} />
+          {report ? <ReflectionTopics topics={report.topics} /> : null}
+          <ReflectionNoteList variant="top" notes={data.stats.perNote.slice(0, 5)} pages={pages} onOpen={(id) => void openNote(id)} />
+          <ReflectionNoteList variant="stalled" notes={data.stats.stalled} pages={pages} onOpen={(id) => void openNote(id)} />
+        </>
+      ) : null}
     </DialogShell>
   );
 }

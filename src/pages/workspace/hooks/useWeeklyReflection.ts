@@ -1,21 +1,21 @@
 import { useEffect } from "react";
-import { ensureLastWeekReflection } from "@/lib/reflection/reflectionRunner";
-import { previousWeek } from "@/lib/reflection/weekRange";
-import { useReflection } from "@/stores/useReflection";
+import { ensureReflection, refreshLastWeekEdited } from "@/lib/reflection/reflectionRunner";
 
-const STARTUP_DELAY_MS = 15_000;
+const STARTUP_DELAY_MS = 8_000;
 
-/** 启动和窗口获得焦点时检查是否有待生成的上周反思；同一周失败后本次会话不再自动重试。 */
+/** 启动和窗口获得焦点时刷新上周红点；已授权且 AI 可用时后台预生成「过去 7 天」叙事。失败静默，不自动重试同一键。 */
 export function useWeeklyReflection() {
   useEffect(() => {
-    const failedKeys = new Set<string>();
+    let running = false;
     const check = () => {
-      const key = previousWeek().key;
-      const state = useReflection.getState();
-      if (failedKeys.has(key) || state.reports[key] || state.failure?.weekKey === key) return;
-      void ensureLastWeekReflection().then(() => {
-        if (useReflection.getState().failure?.weekKey === key) failedKeys.add(key);
-      });
+      if (running) return;
+      running = true;
+      void refreshLastWeekEdited()
+        .then(() => ensureReflection("7d"))
+        .catch(() => undefined)
+        .finally(() => {
+          running = false;
+        });
     };
     const timer = window.setTimeout(check, STARTUP_DELAY_MS);
     window.addEventListener("focus", check);
