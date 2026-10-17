@@ -10,6 +10,7 @@ const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { AppUpdateButton } from "@/components/app-update/AppUpdateButton";
 import { cn } from "@/lib/utils";
+import { ReflectionButton } from "./reflection/ReflectionButton";
 import { SidebarRailIcon } from "./SidebarRailIcon";
 import "./sidebar-footer-labels.css";
 
@@ -31,6 +32,7 @@ export function SidebarFooter({
     <TooltipProvider delayDuration={600}>
       <div className="sidebar-rail-footer">
         <AppUpdateButton className={btnClass} />
+        <ReflectionButton className={btnClass} />
         <Tooltip>
           <TooltipTrigger asChild>
             <IconButton size="xs"

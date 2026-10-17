@@ -37,6 +37,8 @@ import {
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { toast } from "@/components/ui/sonner";
 import { useNotebooks } from "../../useNotebooks";
+import { useReflection } from "../../useReflection";
+import { shouldCountEdit } from "@/lib/reflection/activityLog";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
 import { queueLocalPageSave } from "../folderSync";
 import { clonePageContent } from "../actions/create/content";
@@ -68,6 +70,9 @@ export function createUpdatePageSlice(
         Boolean(page) && "content" in updates && !silent &&
         (!page?.editorDraft || localPageHasPersistableContent(updates.content) ||
           localPageHasPersistableContent(page.content));
+      if (isDurableContentEdit && shouldCountEdit(id, Date.now())) {
+        useReflection.getState().recordEdit(id, Date.now());
+      }
       const recoveryEntry = isDurableContentEdit
         ? recordRecoveryEntry({
             source: isLocal ? "local-file" : "internal-page",
