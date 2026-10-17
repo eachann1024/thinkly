@@ -29,13 +29,13 @@ module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
   installLocalizedDisplayName(join(appOutDir, `${packager.appInfo.productFilename}.app`));
   // dmgbuild supports position-only entries, but electron-builder 26's schema
   // omits that type. Add them after config validation, before DMG construction.
-  // These resources remain available to Finder, outside the 960×640 viewport,
-  // including when the user enables Show Hidden Files.
+  // Keep these resources beyond common enlarged Finder windows as well as the
+  // initial 960×640 viewport, including when Show Hidden Files is enabled.
   const contents = packager.config.dmg?.contents;
   if (contents) {
-    for (const [index, name] of ['.background.png', '.VolumeIcon.icns', '.DS_Store'].entries()) {
+    for (const [index, name] of ['.background.tiff', '.VolumeIcon.icns', '.DS_Store'].entries()) {
       if (!contents.some(item => item.type === 'position' && item.path === name)) {
-        contents.push({ type: 'position', path: name, x: 1200 + index * 180, y: 100 });
+        contents.push({ type: 'position', path: name, x: 10000 + index * 180, y: 10000 });
       }
     }
   }
