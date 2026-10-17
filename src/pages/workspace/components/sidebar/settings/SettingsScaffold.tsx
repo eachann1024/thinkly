@@ -96,7 +96,7 @@ export function SettingsScaffold({
             aria-hidden={!visible}
           >
             <div className="flex shrink-0 items-center px-2 pb-4">
-              <h1 className="text-xl font-semibold">{uiText("settings_e366")}</h1>
+              <h1 className="text-xl font-semibold tracking-[-0.01em]">{uiText("settings_e366")}</h1>
             </div>
             <nav
               aria-label={uiText("settingsCategories_2590")}

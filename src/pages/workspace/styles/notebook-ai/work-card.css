@@ -254,7 +254,7 @@
  background: transparent;
  color: hsl(var(--muted-foreground));
  font-size: 13px;
- font-weight: 500;
+ font-weight: var(--font-weight-medium);
  line-height: 20px;
  cursor: pointer;
 }

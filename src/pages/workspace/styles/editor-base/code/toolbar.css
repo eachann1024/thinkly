@@ -75,7 +75,7 @@
 .goose-code-toolbar-actions-visual .goose-code-display-toggle-button {
   min-width: 42px;
   border-radius: var(--goose-control-radius);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   line-height: 1;
 }
 

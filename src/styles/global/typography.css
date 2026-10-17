@@ -1,0 +1,29 @@
+/* 字号 / 行高令牌与渲染设置；字体栈见 theme-tokens.css。 */
+:root {
+  --goose-type-caption: 11px;
+  --goose-type-footnote: 12px;
+  --goose-type-body: 13px;
+  --goose-type-control: 14px;
+  --goose-type-heading: 15px;
+  --goose-type-title: 20px;
+  --goose-leading-caption: 16px;
+  --goose-leading-footnote: 16px;
+  --goose-leading-body: 20px;
+  --goose-leading-control: 20px;
+  --goose-leading-heading: 22px;
+  --goose-leading-title: 28px;
+  --goose-tracking-title: -0.01em;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
+  font-feature-settings: "calt" 1;
+}
+
+/* 数字对齐场景（计数、时间、快捷键）。 */
+.goose-tabular {
+  font-variant-numeric: tabular-nums;
+}

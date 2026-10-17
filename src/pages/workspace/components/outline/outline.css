@@ -34,7 +34,7 @@
 
 .outline-heading-level {
   font-size: 0.75em;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1;
   color: inherit;
   opacity: 0.55;

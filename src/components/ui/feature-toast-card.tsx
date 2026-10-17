@@ -31,7 +31,7 @@ export function FeatureToastCard({
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="pr-6 text-sm font-semibold text-foreground">{title}</div>
+        <div className="pr-6 text-sm font-medium leading-5 text-foreground">{title}</div>
         <div className="mt-1 space-y-1 text-[13px] leading-5 text-muted-foreground">
           {children}
         </div>

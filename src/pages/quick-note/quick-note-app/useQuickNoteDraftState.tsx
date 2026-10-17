@@ -9,6 +9,7 @@ import {
   type QuickNoteSlot,
 } from "@/stores/useQuickNote";
 import { type EditorRef } from "@/components/editor/core/Editor";
+import { formatShortcut, getPlatformKind } from "@/lib/utils";
 import { getQuickNoteCollectVariant } from "../quickNoteCollectDetector";
 import { useSettings } from "@/stores/settings";
 import {
@@ -98,6 +99,22 @@ export function useQuickNoteDraftState() {
 
   const slotNamesRef = useRef(slotNames);
 
+  const helpShortcuts = useMemo(() => {
+    const platform = getPlatformKind();
+    return {
+      switchSlots: formatShortcut("Mod+1–5", platform),
+      alternateSwitchSlots:
+        platform === "windows" ? formatShortcut("Alt+1–5", platform) : null,
+      zoomIn: formatShortcut("Mod+Plus", platform),
+      zoomOut: formatShortcut("Mod+-", platform),
+      zoomReset: formatShortcut("Mod+0", platform),
+      undo: formatShortcut("Mod+Z", platform),
+      redo: formatShortcut("Mod+Shift+Z", platform),
+      alternateRedo: formatShortcut("Mod+Y", platform),
+      dismiss: formatShortcut("Esc", platform),
+    };
+  }, []);
+
   const displaySlot = previewSlot ?? activeSlot;
 
   const displaySlotName = getQuickNoteSlotName(displaySlot, slotNames);
@@ -154,6 +171,7 @@ export function useQuickNoteDraftState() {
     slotNames,
     setSlotNames,
     slotNamesRef,
+    helpShortcuts,
     displaySlot,
     displaySlotName,
     occupiedSlots,

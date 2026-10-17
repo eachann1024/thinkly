@@ -63,7 +63,7 @@
 
 .notebook-ai-messages .ai-md [data-streamdown="table-header-cell"],
 .notebook-ai-messages .ai-md th {
- font-weight: 600;
+ font-weight: var(--font-weight-semibold);
  color: hsl(var(--muted-foreground));
 }
 

@@ -50,7 +50,7 @@
   border: 1px solid var(--sidebar-dnd-overlay-border);
   color: hsl(var(--foreground));
   font-size: var(--sidebar-font-size, 13px);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.4;
   white-space: nowrap;
   /* 不加 box-shadow：drag image 截图把阴影算进矩形 bounding box，

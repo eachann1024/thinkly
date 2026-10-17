@@ -77,7 +77,7 @@ export function LivePreviewPane({
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b shrink-0">
         <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
           {uiText("exportPreview")}</span>
-        <span className="text-[10px] text-muted-foreground truncate">
+        <span className="text-[11px] text-muted-foreground truncate">
           {theme.name}
         </span>
       </div>

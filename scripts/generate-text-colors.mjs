@@ -53,8 +53,10 @@ for (const [theme, roles] of Object.entries(palette)) {
   css += `  --goose-text-primary-channels: ${channels(roles.primary)};\n  --goose-text-secondary-channels: ${channels(roles.secondary)};\n  --goose-text-on-dark-channels: ${channels(roles.onDark)};\n  --goose-text-on-light-channels: ${channels(roles.onLight)};\n`;
   for (const [alias, role] of Object.entries(aliases))
     css += `  --${alias}: var(--goose-text-${role}-channels);\n`;
+  if (!roles.placeholder)
+    css += "  --goose-text-placeholder: var(--goose-text-secondary);\n";
   css +=
-    "  --goose-text-placeholder: var(--goose-text-secondary);\n  --goose-text-link: var(--goose-text-info);\n  --goose-interactive-danger-fg: var(--goose-text-danger);\n  --goose-interactive-success-fg: var(--goose-text-success);\n  --goose-interactive-warning-fg: var(--goose-text-warning);\n}\n";
+    "  --goose-text-link: var(--goose-text-info);\n  --goose-interactive-danger-fg: var(--goose-text-danger);\n  --goose-interactive-success-fg: var(--goose-text-success);\n  --goose-interactive-warning-fg: var(--goose-text-warning);\n}\n";
 }
 const output = new URL("../src/styles/goose-text-palette.css", import.meta.url);
 if ((await readFile(output, "utf8").catch(() => "")) !== css)

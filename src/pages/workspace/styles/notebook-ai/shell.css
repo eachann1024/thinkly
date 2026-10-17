@@ -27,7 +27,7 @@
 .electron-ai-header > span,
 .notebook-ai-conversation-title {
  font-size: 1.075rem;
- font-weight: 600;
+ font-weight: var(--font-weight-semibold);
  line-height: 1.4;
 }
 

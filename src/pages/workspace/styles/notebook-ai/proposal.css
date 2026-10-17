@@ -32,7 +32,7 @@
 
 .notebook-ai-plan-file-kind {
  flex: 0 0 auto;
- font-weight: 600;
+ font-weight: var(--font-weight-semibold);
 }
 
 .notebook-ai-plan-file-title {
@@ -41,7 +41,7 @@
  text-overflow: ellipsis;
  white-space: nowrap;
  color: hsl(var(--foreground));
- font-weight: 600;
+ font-weight: var(--font-weight-semibold);
 }
 
 .notebook-ai-plan-file-body {
@@ -121,7 +121,7 @@
  font-size: 1.15em;
  margin-top: 0.9rem;
  margin-bottom: 0.35rem;
- font-weight: 600;
+ font-weight: var(--font-weight-semibold);
  line-height: 1.35;
 }
 

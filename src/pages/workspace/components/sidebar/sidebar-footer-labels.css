@@ -18,6 +18,7 @@
   overflow: hidden;
   font-size: 0.714286rem;
   font-weight: 400;
+  color: hsl(var(--muted-foreground));
   line-height: 0.857143rem;
   text-overflow: ellipsis;
   white-space: nowrap;

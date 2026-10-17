@@ -26,7 +26,7 @@
 .page-empty-state-title {
   margin: 0;
   font-size: 1.571429rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   line-height: 2.142857rem;
   text-wrap: balance;
 }
@@ -45,7 +45,7 @@
   padding: 0.714286rem 1.714286rem;
   border-radius: 0.714286rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.428571rem;
 }
 

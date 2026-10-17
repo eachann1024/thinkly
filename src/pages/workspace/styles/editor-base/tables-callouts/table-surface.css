@@ -55,7 +55,7 @@
   background-color: var(--goose-table-header);
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] th {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* CellSelection 时隐藏原生文字高亮，避免和格子装饰叠在一起。

@@ -30,13 +30,44 @@
   max-height: var(--goose-popover-available-height);
   flex-direction: column;
   gap: 8px;
-  overflow-y: auto;
+  overflow: hidden;
   line-height: 1.6;
 }
 
-.quicknote-help-rename {
+.quicknote-help-heading {
   flex: 0 0 auto;
-  background: transparent;
+}
+
+.quicknote-help-heading p {
+  margin: 4px 0 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.quicknote-help-list {
+  min-height: 0;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  list-style: none;
+}
+
+.quicknote-help-list li + li {
+  margin-top: 8px;
+}
+
+.quicknote-help-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quicknote-help-list::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: hsl(var(--muted-foreground) / 0.25);
+}
+
+.quicknote-help-list::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
 }
 
 .quicknote-font-control {

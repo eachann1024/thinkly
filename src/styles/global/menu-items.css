@@ -46,7 +46,7 @@
   color: hsl(var(--muted-foreground));
   font-size: 12px;
   line-height: 18px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: normal;
 }
 [data-goose-menu-slot="root"]:not([data-goose-layout="grid"]):has(> [data-goose-menu-slot="group"]) {

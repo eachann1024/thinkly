@@ -120,7 +120,7 @@
   border-radius: var(--goose-menu-item-radius);
   background-color: var(--goose-table-swatch-bg);
   color: var(--goose-table-swatch-fg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .workspace-editor-surface

@@ -18,7 +18,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: hsl(var(--foreground));
 }
 
@@ -143,7 +143,7 @@
   background: hsl(var(--background) / 0.94);
   color: var(--goose-accent-text);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   box-shadow: 0 3px 12px hsl(var(--foreground) / 0.06);
 }
 

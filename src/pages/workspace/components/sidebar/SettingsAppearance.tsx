@@ -80,7 +80,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
                 {defaultFontSettings}
                 {readingSettings}
                 <Disclosure className="setup-guide-advanced-settings border-t border-border/60 pt-3">
-                  <DisclosureSummary className="cursor-pointer rounded-md py-2 text-sm font-medium text-foreground">
+                  <DisclosureSummary className="cursor-pointer rounded-md py-2 text-[15px] font-semibold text-foreground">
                     {uiText("interfaceAndSidebar_f3b6")}</DisclosureSummary>
                   <div className="mt-4 space-y-4">
                     {interfaceFontSettings}
