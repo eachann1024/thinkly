@@ -59,6 +59,25 @@ export function addVaultRoot(p: string): string {
   return resolved;
 }
 
+/** 笔记本根目录改名后，允许列表必须跟着新路径，否则后续读写会被拒绝。 */
+export function replaceVaultRoot(from: string, to: string): void {
+  const oldKey = normalizePath(from);
+  const nextKey = normalizePath(to);
+  const current = vaultRoots.has(oldKey)
+    ? oldKey
+    : [...vaultRoots].find((root) => root.toLowerCase() === oldKey.toLowerCase());
+  if (!current || current === nextKey) return;
+  vaultRoots.delete(current);
+  vaultRoots.add(nextKey);
+  for (const allowed of [...sessionAllowed]) {
+    if (allowed !== current && !isUnder(current, allowed)) continue;
+    sessionAllowed.delete(allowed);
+    const relative = path.relative(current, allowed);
+    sessionAllowed.add(relative ? normalizePath(path.join(nextKey, relative)) : nextKey);
+  }
+  persistVaultRoots();
+}
+
 export function addSessionAllowed(p: string): string {
   const resolved = normalizePath(p);
   sessionAllowed.add(resolved);

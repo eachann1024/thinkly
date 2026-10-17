@@ -1,8 +1,21 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1">`
+zh-Hans:
+  enterANotebookName_648e: "请输入笔记本名称"
+  renameFailed_37ba: "重命名失败"
+en:
+  enterANotebookName_648e: "Enter a notebook name"
+  renameFailed_37ba: "Rename failed"
+`;
+const uiText = createTranslator(localMessages);
 import { type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { toast } from "@/components/ui/sonner";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import { dialogs } from "@/lib/electron-platform/dialogs";
+import { renameLocalNotebookFolder } from "@/lib/rename-notebook-folder";
 import type { useNotebookSwitcherState } from "./useNotebookSwitcherState";
 
 export function useNotebookSwitcherActions(
@@ -20,6 +33,7 @@ export function useNotebookSwitcherActions(
     setEditDialog,
     notebookList,
   } = input;
+  const savingRef = useRef(false);
 
   const handleOpenLocalFolder = async () => {
     try {
@@ -60,13 +74,33 @@ export function useNotebookSwitcherActions(
   };
 
   const handleSaveEdit = () => {
-    if (!editDialog.id) return;
-    updateNotebook(editDialog.id, {
-      name: editDialog.name,
+    if (!editDialog.id || savingRef.current) return;
+    const name = editDialog.name.trim();
+    if (!name) {
+      toast.error(uiText("enterANotebookName_648e"));
+      return;
+    }
+    const notebook = notebooks[editDialog.id];
+    const updates = {
+      name,
       icon: editDialog.icon,
       excludeFromGlobalSearch: editDialog.excludeFromGlobalSearch,
-    });
-    setEditDialog({ ...editDialog, open: false });
+    };
+    const close = () => setEditDialog({ ...editDialog, open: false });
+    if (notebook?.source === "local-folder" && notebook.localPath && name !== notebook.name) {
+      savingRef.current = true;
+      void renameLocalNotebookFolder(editDialog.id, name, updates)
+        .then(close)
+        .catch((error: unknown) => {
+          toast.error(error instanceof Error ? error.message : uiText("renameFailed_37ba"));
+        })
+        .finally(() => {
+          savingRef.current = false;
+        });
+      return;
+    }
+    updateNotebook(editDialog.id, updates);
+    close();
   };
 
   const handleDelete = () => {

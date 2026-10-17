@@ -5,6 +5,7 @@
 export {}
 declare global {
   const EDITOR_ONLY_FIXED_SHORTCUTS: typeof import('../lib/shortcut-platform').EDITOR_ONLY_FIXED_SHORTCUTS
+  const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const ONBOARDING_THIRD_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_THIRD_CHILD_CONTENT
   const SIDEBAR_PAGE_LIST_SELECTOR: typeof import('../lib/sidebarListCollapse').SIDEBAR_PAGE_LIST_SELECTOR
   const TEXT_COLORS: typeof import('../lib/textColors').TEXT_COLORS

@@ -11,6 +11,7 @@ import { useNotebooks } from "../../../../useNotebooks";
 import { localPageMetadataCache } from "../../../persistence";
 import { scanLocalFolderPages } from "@/lib/local-folder-scanner";
 import { latestLocalFolderLoadRequest } from "./tasks";
+import { isNotebookRescanSuppressed } from "@/lib/local-folder-rescan-guard";
 import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { recoverScannedLocalPages } from "./recovery";
@@ -31,7 +32,7 @@ export const loadLocalFolderPagesOnce = async (
   const isCurrentRequest = () =>
     latestLocalFolderLoadRequest.get(notebookId) === requestId &&
     useNotebooks.getState().notebooks[notebookId]?.localPath === basePath;
-  if (!isCurrentRequest()) return;
+  if (isNotebookRescanSuppressed(notebookId) || !isCurrentRequest()) return;
 
   const previousActivePageId = get().activePageId;
   const previousActivePage = previousActivePageId
@@ -88,7 +89,7 @@ export const loadLocalFolderPagesOnce = async (
 
     // 同一记事本可能在启动恢复、点击切换和 watch 兜底中同时发起刷新。
     // 只允许最新请求提交，避免较慢的旧扫描反向覆盖新目录状态。
-    if (!isCurrentRequest()) return;
+    if (isNotebookRescanSuppressed(notebookId) || !isCurrentRequest()) return;
 
     set((state) => {
       const pagesOutsideNotebook = Object.fromEntries(

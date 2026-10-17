@@ -20,6 +20,9 @@ import { lockGitSyncPath } from "./gitSyncLock";
 import { GitSyncSerialQueue, migrateGitSyncState, type GitMappingHistory } from "./gitSyncStore";
 import { durableAtomicWrite } from "./gitSyncDisk";
 import { prepareGitFolderMappings, sameGitFolderTargets } from "./gitSyncMappings";
+import { finishNotebookRenameIntent, renameGitTrackedNotebookFolder, type NotebookRetargetContext } from "./gitSyncRetarget";
+import { readFinishedNotebookRenameIntent } from "./gitSyncRenameIntent";
+import { adoptRenamedNotebookFolder } from "./notebookFolderAdopt";
 
 const configs = new Map<string, GitRepositoryConfig>();
 const statuses = new Map<string, GitSyncStatus>();
@@ -63,6 +66,11 @@ async function load() {
         mappingHistory = saved.mappingHistory;
         for (const config of saved.configs) { configs.set(config.id, config); nextRun.set(config.id, Date.now() + config.intervalMinutes * 60_000); }
         for (const status of saved.statuses) statuses.set(status.repositoryId, status);
+        const intent = await readFinishedNotebookRenameIntent(app.getPath("userData")).catch(() => null);
+        if (intent) {
+          try { await finishNotebookRenameIntent(retargetContext(), intent); }
+          catch (error) { console.error("[git-sync] rename recovery failed", error); }
+        }
         await persist();
       } catch (error) {
         configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
@@ -79,6 +87,10 @@ async function load() {
     });
   }
   return loadPromise;
+}
+
+function retargetContext(): NotebookRetargetContext {
+  return { configs, mappingHistory, persist, publish, userData: app.getPath("userData") };
 }
 
 async function persist() {
@@ -224,6 +236,8 @@ export function registerGitSyncIpc() {
   handle("git-sync:save", save);
   handle("git-sync:now", async (value) => sync(validateRepositoryId(value)));
   handle("git-sync:rebind", async (request) => sync(await rebindGitFolder(request, { configs, mappingHistory, storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), persist, publish })));
+  handle("git-sync:rename-folder", async (request) => renameGitTrackedNotebookFolder(request, retargetContext()));
+  handle("git-sync:adopt-folder", async (request) => adoptRenamedNotebookFolder(request, retargetContext()));
   handle("git-sync:conflict", async (request: { repositoryId: string; conflictId: string }) => {
     const id = validateRepositoryId(request?.repositoryId);
     if (!configs.has(id) || typeof request.conflictId !== "string" || !/^[a-f0-9]{64}$/.test(request.conflictId)) throw new Error(t("invalidConflict"));

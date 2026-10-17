@@ -15,6 +15,7 @@ import { wasRecentlySelfMoved } from "@/stores/pages/actions/localFolder/move";
 import { useSettings } from "@/stores/useSettings";
 import { shouldIgnoreLocalRelativePath } from "@/lib/local-folder-scanner";
 import { wasRecentlyInteracting } from "@/lib/editor-interaction-signal";
+import { isNotebookRescanSuppressed } from "@/lib/local-folder-rescan-guard";
 import {
   type UseLocalFolderWatchOptions,
   readDiskContent,
@@ -41,7 +42,7 @@ export function useLocalFileChangeEvents({
   // 监听文件变更事件
   useEffect(() => {
     const processChangeEvent = async (filePath: string) => {
-      if (!notebook) return;
+      if (!notebook || isNotebookRescanSuppressed(notebook.id)) return;
       const pages = usePages.getState().pages;
       const target = Object.values(pages).find(
         (p) =>
@@ -125,6 +126,7 @@ export function useLocalFileChangeEvents({
     };
 
     const handleFileChange = async (event: Event) => {
+      if (notebook?.id && isNotebookRescanSuppressed(notebook.id)) return;
       const customEvent = event as CustomEvent;
       const { eventType, filename, dirPath } = customEvent.detail;
       if (
@@ -169,6 +171,7 @@ export function useLocalFileChangeEvents({
 
         const timer = setTimeout(async () => {
           renameDebounceTimers.current.delete(debounceKey);
+          if (notebook?.id && isNotebookRescanSuppressed(notebook.id)) return;
 
           // macOS 的 fs.watch 可能把普通 writeFile 报成 rename。应用自身保存产生的
           // 这类回声不能按“文件重新出现”处理，否则 addSingleLocalPage 会替换当前页，
