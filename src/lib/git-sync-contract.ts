@@ -46,6 +46,19 @@ export interface GitFolderRebind {
   folder: GitRepositoryFolder;
 }
 
+export interface GitNotebookFolderRename {
+  notebookId: string;
+  previousLocalPath: string;
+  localPath: string;
+  name: string;
+}
+
+export interface GitNotebookFolderAdopt {
+  notebookId: string;
+  previousLocalPath: string;
+  occupiedPaths: string[];
+}
+
 export interface GitFolderCheck {
   error: string | null;
   path?: string;
@@ -84,6 +97,8 @@ export interface GitSyncBridge {
   remove: (repositoryId: string) => Promise<GitSyncState>;
   syncNow: (repositoryId: string) => Promise<GitSyncState>;
   rebindFolder: (request: GitFolderRebind) => Promise<GitSyncState>;
+  renameNotebookFolder: (request: GitNotebookFolderRename) => Promise<{ localPath: string }>;
+  adoptRenamedNotebookFolder: (request: GitNotebookFolderAdopt) => Promise<{ localPath: string; name: string } | null>;
   getConflict: (repositoryId: string, conflictId: string) => Promise<GitSyncConflictDetail>;
   resolveConflict: (request: GitConflictResolution) => Promise<GitSyncState>;
   onState: (callback: (state: GitSyncState) => void) => () => void;

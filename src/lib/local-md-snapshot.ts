@@ -1,3 +1,5 @@
+import { canonicalRelativePath } from "./canonicalLocalPath";
+
 /**
  * 本地 Markdown 文件内容快照缓存。
  *
@@ -125,6 +127,23 @@ export function wasRecentlySelfWritten(
 
 export function deleteLocalMdSnapshot(absPath: string): void {
   snapshotMap.delete(absPath);
+}
+
+/** 笔记本根目录改名后，把仍指向旧绝对路径的快照和自写标记挪到新路径。 */
+export function relocateLocalMdSnapshots(oldRoot: string, newRoot: string): void {
+  const nextRoot = newRoot.replace(/\\/g, "/").replace(/\/+$/, "");
+  const relocate = <T,>(map: Map<string, T>) => {
+    const moved: Array<[string, T]> = [];
+    for (const [key, value] of map) {
+      const relative = canonicalRelativePath(oldRoot, key);
+      if (relative === null) continue;
+      moved.push([relative ? `${nextRoot}/${relative}` : nextRoot, value]);
+      map.delete(key);
+    }
+    for (const [key, value] of moved) map.set(key, value);
+  };
+  relocate(snapshotMap);
+  relocate(selfWriteTimestamps);
 }
 
 /** 清空进程内的本地文件快照与自写标记，不会删除或改写任何磁盘文件。 */

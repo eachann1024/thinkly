@@ -48,17 +48,18 @@ export function createActiveNotebookActions(
         fs.isAvailable()
       ) {
         void (async () => {
-          const exists = await fs.existsAsync(notebook.localPath!);
+          const { resolveLocalNotebookRoot } = await import("@/lib/resolve-local-notebook");
+          const root = await resolveLocalNotebookRoot(notebook);
 
           if (get().activeNotebookId !== id) return;
 
-          if (exists) {
+          if (root) {
             if (notebook.localPathMissing) {
               get().updateNotebook(id, { localPathMissing: false });
             }
             await usePages
               .getState()
-              .loadLocalFolderPages(id, notebook.localPath!);
+              .loadLocalFolderPages(id, root);
           } else {
             if (!notebook.localPathMissing) {
               get().updateNotebook(id, { localPathMissing: true });

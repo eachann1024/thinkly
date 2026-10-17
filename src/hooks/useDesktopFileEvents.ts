@@ -5,6 +5,7 @@ import { useTabs } from "@/stores/useTabs";
 import { fs } from "@/lib/electron-platform/fs";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { restoreLastNoteIfNeeded, clearWorkspaceStartupSelection } from "@/lib/workspaceStartup";
+import { resolveLocalNotebookRoot } from "@/lib/resolve-local-notebook";
 
 export function useDesktopFileEvents() {
   useEffect(() => {
@@ -40,10 +41,10 @@ export function useDesktopFileEvents() {
     const notebooks = sortNotebooksByOrder(notebooksStore.notebooks);
     void (async () => {
       for (const notebook of notebooks.filter((item) => item.source === "local-folder")) {
-        const exists = Boolean(notebook.localPath) && await fs.existsAsync(notebook.localPath!);
-        if (exists) {
+        const root = await resolveLocalNotebookRoot(notebook);
+        if (root) {
           if (notebook.localPathMissing) notebooksStore.updateNotebook(notebook.id, { localPathMissing: false });
-          await pagesStore.loadLocalFolderPages(notebook.id, notebook.localPath!);
+          await pagesStore.loadLocalFolderPages(notebook.id, root);
         } else {
           if (!notebook.localPathMissing) notebooksStore.updateNotebook(notebook.id, { localPathMissing: true });
           pagesStore.removePagesByWorkspaceId(notebook.id);

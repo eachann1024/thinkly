@@ -163,10 +163,9 @@ export async function prepareWorkspaceStartup(): Promise<LastNoteRestoreResult> 
     }
 
     try {
-      const exists = gooseFs.existsAsync
-        ? await gooseFs.existsAsync(activeNotebook.localPath)
-        : gooseFs.exists(activeNotebook.localPath);
-      if (!exists) {
+      const { resolveLocalNotebookRoot } = await import("@/lib/resolve-local-notebook");
+      const root = await resolveLocalNotebookRoot(activeNotebook);
+      if (!root) {
         notebooksStore.updateNotebook(activeNotebookId, {
           localPathMissing: true,
         });
@@ -182,7 +181,7 @@ export async function prepareWorkspaceStartup(): Promise<LastNoteRestoreResult> 
       }
       await pagesStore.loadLocalFolderPages(
         activeNotebookId,
-        activeNotebook.localPath,
+        root,
       );
     } catch (error) {
       // 单个本地目录不可读不应阻止整个应用出现；loadLocalFolderPages 已记录 error 状态。
