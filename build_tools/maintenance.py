@@ -1,4 +1,4 @@
-"""Goose Note 构建：maintenance。"""
+"""思绪 · Thinkly 构建：maintenance。"""
 
 from __future__ import annotations
 

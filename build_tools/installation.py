@@ -1,4 +1,4 @@
-"""Goose Note 构建：installation。"""
+"""思绪 · Thinkly 构建：installation。"""
 
 from __future__ import annotations
 

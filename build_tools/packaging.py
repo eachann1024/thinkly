@@ -1,4 +1,4 @@
-"""Goose Note 构建：packaging。"""
+"""思绪 · Thinkly 构建：packaging。"""
 
 from __future__ import annotations
 
