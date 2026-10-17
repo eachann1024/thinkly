@@ -75,6 +75,11 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "washi-tape", color: "rgba(252,196,57,0.55)", angle: -2 },
+      { kind: "dot-grid", target: "card", color: "rgba(180,140,70,0.18)", gap: 18 },
+      { kind: "pen-underline", color: "#d97706" },
+    ],
   },
 
   // ── 17. Mocha Mousse (Pantone-inspired) ──────────────────────
@@ -117,6 +122,11 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "letterpress", highlight: "rgba(255,255,255,0.75)" },
+      { kind: "grain", target: "card", tone: "#7a5a44", opacity: 0.06 },
+      { kind: "wax-seal", color: "#a47864" },
+    ],
   },
 
   // ── 19. Brutalist ────────────────────────────────────────────
@@ -160,6 +170,11 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "edge-tab", color: "#ff5500", ink: "#0a0a0a" },
+      { kind: "title-rule", color: "#0a0a0a", thickness: 4, gap: 14 },
+      { kind: "hazard-hatch", color: "#0a0a0a" },
+    ],
   },
 
   // ── 20. Risograph ────────────────────────────────────────────
@@ -198,9 +213,16 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     cardPaddingY: 40,
     cardRadius: 4,
     cardBorder: "1px solid #d4c5a8",
-    cardShadow: "4px 4px 0 rgba(240,111,111,0.18)",
+    cardShadow: "none",
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "misregistration", color: "rgba(240,111,111,0.45)" },
+      { kind: "offset-plate", color: "rgba(240,111,111,0.55)", tint: "rgba(240,111,111,0.1)", offset: 8 },
+      { kind: "grain", target: "container", tone: "#7a5c3c", opacity: 0.07 },
+      { kind: "quote-rule", color: "#f06f6f", width: 1.5 },
+      { kind: "mono-footer", color: "#f0b4ac" },
+    ],
   },
 ];

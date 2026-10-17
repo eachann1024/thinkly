@@ -73,6 +73,10 @@ export const TECH_APPLICATION: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "line-grid", target: "container", color: "#161616", gap: 64 },
+      { kind: "crosshair-corners", color: "#5c5c5c" },
+    ],
   },
 
   // ── 13. Tokyo Night ──────────────────────────────────────────
@@ -115,6 +119,10 @@ export const TECH_APPLICATION: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "starfield", color: "#c0caf5" },
+      { kind: "palette-strip", colors: ["#7aa2f7", "#bb9af7", "#7dcfff", "#9ece6a", "#e0af68", "#f7768e"] },
+    ],
   },
 
   // ── 14. Catppuccin Macchiato ─────────────────────────────────
@@ -157,6 +165,10 @@ export const TECH_APPLICATION: CardTheme[] = [
     showDecorations: false,
     decorationColor: "transparent",
     watermarkVisible: true,
+    decorations: [
+      { kind: "stitched-border", color: "rgba(198,160,246,0.3)" },
+      { kind: "palette-dots", colors: ["#f4dbd6", "#f5bde6", "#c6a0f6", "#8aadf4", "#a6da95", "#eed49f"] },
+    ],
   },
 
   // ── 16. Linear ───────────────────────────────────────────────
