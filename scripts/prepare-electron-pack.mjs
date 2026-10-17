@@ -169,7 +169,7 @@ mac:
         - arm64
         - x64
 dmg:
-  background: dmg-assets/background.png
+  background: dmg-assets/background.tiff
   window:
     width: 960
     height: 640
@@ -184,7 +184,7 @@ dmg:
       type: link
       path: /Applications
     - x: 480
-      y: 470
+      y: 520
       type: file
       path: dmg-assets/安装指令.command
 win:
