@@ -1,18 +1,18 @@
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 60;
-export const DURATION = 1920;
+export const DURATION = 2880;
 
-/** 每个镜头 {start, end}，边界都落在 120 BPM 的拍点上（30 帧/拍）。 */
+/** 每个镜头 {start, end}，边界都落在 120 BPM 的拍点上（30 帧/拍）；每镜至少停留 5 秒。 */
 export const SHOTS = {
-  question: { start: 0, end: 210 },
-  shortcut: { start: 210, end: 450 },
-  search: { start: 450, end: 690 },
-  answer: { start: 690, end: 990 },
-  sources: { start: 990, end: 1230 },
-  continue: { start: 1230, end: 1530 },
-  promise: { start: 1530, end: 1710 },
-  brand: { start: 1710, end: 1920 },
+  question: { start: 0, end: 330 },
+  shortcut: { start: 330, end: 690 },
+  search: { start: 690, end: 1050 },
+  answer: { start: 1050, end: 1470 },
+  sources: { start: 1470, end: 1830 },
+  continue: { start: 1830, end: 2250 },
+  promise: { start: 2250, end: 2550 },
+  brand: { start: 2550, end: 2880 },
 } as const;
 
 /** 高明度低饱和场景色，只在转场或换镜时整屏切换。 */
