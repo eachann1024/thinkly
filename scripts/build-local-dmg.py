@@ -50,11 +50,14 @@ def write_layout(mount, alias_type, store_type):
     if resolve_alias(alias).resolve() != (mount / '.background.png').resolve():
         raise RuntimeError('Background alias resolved outside this image')
     with store_type.open(str(mount / '.DS_Store'), 'w+') as store:
+        # Match dmgbuild's complete Finder view schema, including its version.
+        store['.']['vSrn'] = ('long', 1)
         store['.']['bwsp'] = dict(ShowStatusBar=False, WindowBounds='{{400, 200}, {960, 640}}',
                                  ContainerShowSidebar=False, PreviewPaneVisibility=False,
                                  SidebarWidth=0, ShowTabView=False, ShowToolbar=False,
                                  ShowPathbar=False, ShowSidebar=False)
         store['.']['icvp'] = dict(viewOptionsVersion=1, backgroundType=2,
+                                 backgroundColorRed=1., backgroundColorGreen=1., backgroundColorBlue=1.,
                                  backgroundImageAlias=alias, gridOffsetX=0., gridOffsetY=0.,
                                  gridSpacing=100., arrangeBy='none', showIconPreview=False,
                                  showItemInfo=False, labelOnBottom=True, textSize=16.,
@@ -94,7 +97,7 @@ def main():
     info = plistlib.loads((args.app / 'Contents/Info.plist').read_bytes())
     if info.get('CFBundleIdentifier') != 'com.goosenote.desktop':
         raise RuntimeError('Unexpected application bundle')
-    title = 'Goose Note ' + info['CFBundleShortVersionString']
+    title = 'Goose Note ' + info['CFBundleShortVersionString'] + ' Setup'
     if not title.isascii() or len(title.encode()) > 27:
         raise RuntimeError('DMG volume title must be ASCII and at most 27 bytes')
     modules = sorted(glob.glob(str(Path.home() / 'Library/Caches/electron-builder/dmg-builder@*/*/python/lib/python*/site-packages')))
@@ -128,6 +131,13 @@ def main():
         run('hdiutil', 'verify', result, timeout=60)
         with attach(result) as mount:
             with DSStore.open(str(mount / '.DS_Store'), 'r') as store:
+                if store['.']['vSrn'] != (b'long', 1):
+                    raise RuntimeError('Final DMG is missing the Finder view version')
+                options = store['.']['icvp']
+                if any(options.get('backgroundColor' + channel) != 1. for channel in ('Red', 'Green', 'Blue')):
+                    raise RuntimeError('Final DMG background colors are missing')
+                if options['backgroundType'] != 2 or options['iconSize'] != 88.:
+                    raise RuntimeError('Final DMG icon view settings are invalid')
                 resolved = resolve_alias(store['.']['icvp']['backgroundImageAlias'])
             if resolved.resolve() != (mount / '.background.png').resolve():
                 raise RuntimeError('Final DMG background reference is invalid')
