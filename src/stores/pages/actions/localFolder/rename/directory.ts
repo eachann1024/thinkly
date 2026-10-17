@@ -21,7 +21,7 @@ en:
   moveRollbackPartial: "The move did not complete, and some attachment references couldn’t be restored. Please reload. The note content remains in its original location."
   folderMissing: "The folder does not exist."
 `);
-import { migrateNotebookHistory } from "@/lib/history/localDisk";
+import { migrateNotebookHistory } from "@/lib/history/notebookHistory";
 import {
   rebaseMarkdownResources,
   rebaseResourceContent,

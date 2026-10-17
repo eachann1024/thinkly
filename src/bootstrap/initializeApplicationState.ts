@@ -52,6 +52,7 @@ export async function initializeApplicationState(
     const { installGitSyncResponder } =
       await import("@/lib/git-sync-responder");
     installGitSyncResponder();
+    void import("@/lib/history/housekeeping").then((module) => module.scheduleHistoryHousekeeping());
   }
   setupSaveGuards();
   const settings = useSettings.getState();

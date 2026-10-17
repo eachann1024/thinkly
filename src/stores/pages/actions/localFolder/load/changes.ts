@@ -19,7 +19,8 @@ import {
 import { localPageMetadataCache } from "../../../persistence";
 import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
-import { portableHistoryIds } from "@/lib/history/localDisk";
+import { portableHistoryIds } from "@/lib/history/notebookHistory";
+import { clearHistoryTombstones, recordHistoryTombstones } from "@/lib/history/tombstones";
 
 // ── 增量 watch 辅助：单页从 store 移除 ────────────────────────────────────────
 /**
@@ -44,7 +45,8 @@ export const removeSingleLocalPageAction = (
   // 清除快照
   deleteLocalMdSnapshot(filePath);
 
-  // 外部删除或移走仅移除当前页面；隐藏历史保留，供恢复及再次打开使用。
+  // 外部删除或移走仅移除当前页面；历史只记本机墓碑，14 天后才由空闲清理删除。
+  if (!target.isFolder) recordHistoryTombstones(target.workspaceId, [pageId]);
 
   set((state) => {
     const newPages = { ...state.pages };
@@ -112,6 +114,7 @@ export const addSingleLocalPageAction = async (
   if (dirty || adopted) {
     writeLocalPageIdMap(notebookId, idMap);
   }
+  clearHistoryTombstones(notebookId, [pageId]);
 
   let markdown: string | null;
   let readError: string | undefined;

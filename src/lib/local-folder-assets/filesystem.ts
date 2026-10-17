@@ -189,7 +189,9 @@ export async function collectReferenceIndex(
     const version = JSON.parse(text!);
     if (!version.content) continue;
     const mirror = relativePath(basePath, file).slice(".goose/history/".length).split("/").slice(0, -1).join("/");
-    const relative = version.relativePath || mirror || originalHistoryPath(version.pageId, version.workspaceId);
+    // 新布局目录名是 pageId 哈希，不是笔记路径；只有旧布局的镜像目录才可当作路径。
+    const legacyMirror = /^[a-f0-9]{8}(?:-\d+)?$/.test(mirror) ? "" : mirror;
+    const relative = version.relativePath || legacyMirror || originalHistoryPath(version.pageId, version.workspaceId);
     const notePath = relative ? `${normalizedBasePath}/${relative}` : `${normalizedBasePath}/history.md`;
     collectReferencesFromJson(version.content, notePath, normalizedBasePath, index, new WeakSet());
   }

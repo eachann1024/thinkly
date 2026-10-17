@@ -1,4 +1,4 @@
-import { portableHistoryIds } from "./history/localDisk";
+import { portableHistoryIds } from "./history/notebookHistory";
 import { pruneParsedMarkdown } from "./local-folder-scanner/parsed-cache";
 import {
   type LocalPageIdMap,

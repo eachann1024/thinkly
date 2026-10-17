@@ -215,6 +215,18 @@ export const electronGooseFs = {
     }
   },
 
+  purgeGoose: async (path: string) => {
+    const api = getGooseDesktop();
+    if (!api?.fsPurgeGoose) return false;
+    try {
+      await api.fsPurgeGoose(path);
+      rememberExists(path, false);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
   rename: async (oldPath: string, newPath: string) => {
     const api = getGooseDesktop();
     if (!api) return false;

@@ -36,7 +36,7 @@ import {
   rebaseMarkdownResources,
   rebaseResourceContent,
 } from "@/lib/local-resource-paths";
-import { migrateNotebookHistory } from "@/lib/history/localDisk";
+import { migrateNotebookHistory } from "@/lib/history/notebookHistory";
 import { useNotebooks } from "../../../useNotebooks";
 import {
   migrateLocalPageIdMapEntry,
