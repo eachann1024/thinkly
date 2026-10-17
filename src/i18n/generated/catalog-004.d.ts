@@ -10,7 +10,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx#localMessages:1": { "empty": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1": { "basis": {  }; "range": {  }; "refresh": {  }; "scope30d": {  }; "scope7d": {  }; "scope90d": {  }; "title": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionMetrics.tsx#localMessages:1": { "busiestDay": {  }; "charsAdded": {  }; "notesEdited": {  }; "peakHour": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "notConfigured": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "nextStep": {  }; "notConfigured": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNoteList.tsx#localMessages:1": { "lastEdit": { "date": string | number }; "meta": { "added": string | number; "edits": string | number }; "stalled": {  }; "topNotes": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionTopics.tsx#localMessages:1": { "topics": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionTrend.tsx#localMessages:1": { "added": {  }; "edits": {  }; "trend": {  } };

@@ -62,6 +62,17 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
     setHover(Math.min(points.length - 1, Math.max(0, index)));
   };
   const active = hover !== null && hover < points.length ? hover : null;
+  // 浮层定位用百分比，靠边收拢，顶部节点改为向下展开，避免被 SVG 外沿裁切。
+  const tip =
+    active === null
+      ? null
+      : {
+          point: points[active],
+          value: values[active],
+          left: Math.min(88, Math.max(12, (x(active) / WIDTH) * 100)),
+          top: (y(values[active]) / HEIGHT) * 100,
+          below: y(values[active]) < TOP + plotH * 0.25,
+        };
   return (
     <div>
       <div className="mb-3 flex items-center justify-between gap-4">
@@ -124,19 +135,20 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
           />
         ))}
       </svg>
-      {active !== null && (
-        <div
-          role="tooltip"
-          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-border bg-[var(--goose-menu-surface)] px-2 py-1 text-xs text-foreground shadow-md"
-          style={{
-            left: `${(Math.min(Math.max(x(active), 60), WIDTH - 60) / WIDTH) * 100}%`,
-            top: `calc(${((y(values[active]) / HEIGHT) * 100).toFixed(2)}% - 10px)`,
-          }}
-        >
-          <span className="text-muted-foreground">{full.format(points[active].start)}</span>
-          <span className="goose-tabular ml-2 font-medium">{values[active].toLocaleString(locale)}</span>
-        </div>
-      )}
+        {tip ? (
+          <div
+            className="goose-tooltip-surface pointer-events-none absolute z-10"
+            style={{
+              left: `${tip.left}%`,
+              top: `${tip.top}%`,
+              transform: `translate(-50%, ${tip.below ? "12px" : "calc(-100% - 12px)"})`,
+            }}
+          >
+            <span className="text-muted-foreground">{full.format(tip.point.start)}</span>
+            <span className="goose-tabular ml-2 font-medium">{tip.value.toLocaleString(locale)}</span>
+            <span className="ml-1 text-muted-foreground">{uiText(metric)}</span>
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -24,18 +24,31 @@ export function buildReflectionPrompt(
       return `${i + 1}. ${pageDisplayTitle(page)} (${n.edits} edits, +${n.added} chars)\n${excerpt}`;
     })
     .join("\n\n");
+  const stalledNotes = stats.stalled
+    .filter((n) => pages[n.pageId])
+    .map((n) => pageDisplayTitle(pages[n.pageId]))
+    .join("、");
   const language = locale.startsWith("zh") ? "简体中文" : "English";
   const system = [
-    "You write a reflection for the user of a note-taking app, based only on the notes they edited in the given period.",
-    "Address the user in the second person. Be specific: mention real note titles. Do not write a generic status report, do not invent facts, do not pile up lists. Keep the tone concise.",
+    "You are a thoughtful friend who has read the notes this person wrote during the period, and you tell them what you noticed.",
     `Write in ${language}.`,
-    "title: one concrete line, at most 20 characters.",
-    "themes: 2-4 items, each {name (short theme name, at most 8 characters), point (1-2 sentences, at most 50 characters, mentioning concrete note titles)}.",
-    "suggestion: optional, one short sentence with a suggestion or observation for next week; use an empty string if there is nothing useful.",
-    "topics: 2-6 themes the notes fall into, each {name (short), description (one sentence), share (integer percent)}; shares sum to 100.",
+    "Voice: speak to them as \"you\", in complete, natural sentences a person would say out loud. Every sentence must be understandable on its own by someone who has not read the notes.",
+    "Never do these: telegraphic or headline style; stacks of quoted note titles; copying phrases out of the notes verbatim; jargon lifted from the notes without explaining it; generic filler such as \"keep it up\"; any judgement about whether the note contents are sensitive, private or risky; inventing anything the data does not show.",
+    "title: one natural sentence saying what this period was mainly about, at most 24 characters.",
+    "themes: 2-3 items. name is a plain label of at most 6 characters. point is 1-2 natural sentences, at most 60 characters, saying what they were actually working on and why it mattered; it may name at most one note, and must explain the subject in your own words rather than quoting it.",
+    "suggestion: one concrete, actionable sentence grounded in the activity data (for example a note that has stalled, or where the effort is concentrated). Use an empty string if nothing useful follows from the data.",
+    "topics: 2-6 areas the notes fall into, each {name (short), description (one natural sentence), share (integer percent)}; shares sum to 100.",
     'Reply with JSON only: {"title": "...", "themes": [{"name": "...", "point": "..."}], "suggestion": "...", "topics": [{"name": "...", "description": "...", "share": 40}]}',
   ].join("\n");
-  const user = `Period ${dayKey(range.start)} to ${dayKey(range.end - 1)}. ${stats.notes} notes edited, ${stats.total} edits, +${stats.added} chars.\n\n${notes}`;
+  const facts = [
+    `Period ${dayKey(range.start)} to ${dayKey(range.end - 1)}: ${stats.notes} notes edited, ${stats.total} edits, +${stats.added} chars.`,
+    stats.busiestDay === null ? "" : `Most active day: ${dayKey(stats.busiestDay)}.`,
+    stats.peakHour === null ? "" : `Most edits around ${stats.peakHour}:00.`,
+    stalledNotes ? `Stalled (no edits for two weeks or more): ${stalledNotes}.` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const user = `${facts}\n\nNotes edited, most active first:\n\n${notes}`;
   return [
     { role: "system", content: system },
     { role: "user", content: user },
