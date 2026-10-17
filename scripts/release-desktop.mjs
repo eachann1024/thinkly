@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { setTimeout } from "node:timers/promises";
 import { assertPublishVersion, getReleases, gh, REPO, ROOT } from "./desktop-release-support.mjs";
+import { versionReleaseNotes } from "./desktop-release-notes.mjs";
 
 // Publishes the committed and pushed main revision. Unrelated local edits are never uploaded.
 const args = process.argv.slice(2);
@@ -13,6 +14,7 @@ const sha = git("rev-parse", "HEAD");
 assert.equal(gh(["api", `repos/${REPO}/commits/main`, "--jq", ".sha"]).trim(), sha,
   "Push the release commit to main before publishing");
 const { version } = JSON.parse(git("show", "HEAD:package.json"));
+versionReleaseNotes(git("show", "HEAD:CHANGELOG.md"), version);
 const tag = `v${version}-${sha.slice(0, 7)}`;
 const releases = getReleases();
 const published = releases.some((release) => release.tag_name === tag && !release.draft);

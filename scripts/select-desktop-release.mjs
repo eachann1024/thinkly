@@ -3,6 +3,7 @@ import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { assertPublishVersion, compareVersions, getReleases, ROOT, versionFromTag } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata } from "./desktop-download-metadata.mjs";
+import { versionReleaseNotes } from "./desktop-release-notes.mjs";
 
 const expectedSha = process.env.EXPECTED_SHA;
 assert.ok(!expectedSha || expectedSha === process.env.GITHUB_SHA, "main changed after release preflight; retry from the pushed revision");
@@ -14,6 +15,7 @@ let build = true;
 let repair = false;
 let releaseTag = "";
 if (publish) {
+  versionReleaseNotes(readFileSync(resolve(ROOT, "CHANGELOG.md"), "utf8"), version);
   const releases = getReleases();
   const previous = releases.filter((release) => !release.draft && !release.prerelease && versionFromTag(release.tag_name))
     .sort((left, right) => compareVersions(versionFromTag(left.tag_name), versionFromTag(right.tag_name))).at(-1);
