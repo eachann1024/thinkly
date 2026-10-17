@@ -5,12 +5,12 @@ zh-Hans:
   switchNotebook: "切换{{kind}}"
   notebookList: "现有{{kind}}列表"
   actions_2b6b: "操作"
-  openFolder: "打开文件夹"
+  addNotebook: "添加{{kind}}"
 en:
   switchNotebook: "Switch {{kind}}"
   notebookList: "Available {{kind}} list"
   actions_2b6b: "Actions"
-  openFolder: "Open folder"
+  addNotebook: "Add {{kind}}"
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
@@ -24,7 +24,6 @@ import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import type { useNotebookSwitcherActions } from "./useNotebookSwitcherActions";
 import { SortableNotebookItem } from "./shared";
-import { NotebookMenuItemContent, notebookMenuRowClassName } from "./NotebookMenuItem";
 
 export function renderNotebookMenu(
   context: ReturnType<typeof useNotebookSwitcherActions>,
@@ -83,7 +82,7 @@ export function renderNotebookMenu(
           return;
         const rows = Array.from(
           event.currentTarget.querySelectorAll<HTMLElement>(
-            ".goose-notebook-row",
+            ".goose-notebook-row, .goose-notebook-add-action",
           ),
         );
         if (!rows.length) return;
@@ -164,10 +163,11 @@ export function renderNotebookMenu(
         className="goose-list-group goose-notebook-menu-actions min-w-0"
       >
       <PopoverAction
-        className={notebookMenuRowClassName}
+        className="goose-notebook-add-action"
         onClick={handleOpenLocalFolder}
       >
-        <NotebookMenuItemContent icon={<GooseIcons.FolderOpen />} name={uiText("openFolder")} />
+        <GooseIcons.FolderPlus aria-hidden="true" />
+        <span className="truncate">{uiText("addNotebook", { kind: notebookKind })}</span>
       </PopoverAction>
       </div>
     </PopoverContent>
