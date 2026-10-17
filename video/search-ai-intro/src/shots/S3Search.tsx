@@ -23,7 +23,7 @@ export function S3Search() {
       </div>
 
       <div style={{ position: "absolute", left: 96, top: 586 }}>
-        <MonoLabel>12 NOTES / 4 NOTEBOOKS</MonoLabel>
+        <MonoLabel>TITLE + BODY + PINYIN</MonoLabel>
       </div>
 
       <SearchSheetMock resultCount={4} style={{ top: 640 }} />

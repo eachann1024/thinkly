@@ -8,7 +8,7 @@ import {
 } from "../Icons";
 
 export const QUERY = "上周会议定了什么？";
-export const TERMS = ["上周", "会议", "周会", "搜索", "入口"];
+export const TERMS = ["上周", "会议", "周会"];
 
 export function Mark({ children }: { children: ReactNode }) {
   return (
