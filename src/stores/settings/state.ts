@@ -4,13 +4,15 @@ import type { ShortcutsSlice } from "./slices/shortcutsSlice";
 import type { SearchProvidersSlice } from "./slices/searchProvidersSlice";
 import type { LocalFolderSlice } from "./slices/localFolderSlice";
 import type { WebdavSlice } from "./slices/webdavSlice";
+import type { SidebarRailSlice } from "./slices/sidebarRailSlice";
 
 export type SettingsState = AISlice &
   AppearanceSlice &
   ShortcutsSlice &
   SearchProvidersSlice &
   LocalFolderSlice &
-  WebdavSlice & {
+  WebdavSlice &
+  SidebarRailSlice & {
     _hasHydrated: boolean;
     defaultPageLayout: import("@/types").PageLayout;
     contentsWidth: number;
