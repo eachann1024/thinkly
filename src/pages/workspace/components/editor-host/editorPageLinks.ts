@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-host/editorPageLinks.ts#localMessages:1">`
+zh-Hans:
+  thisNoteIsnTEditableNoPage: "当前笔记不可编辑，未创建页面"
+  thisNotebookDoesnTSupportCreatingLocal: "当前笔记本不支持创建本地页面"
+  theFolderHasChangedChooseALocation: "当前目录已变化，请重新选择位置"
+  couldnTCreateThePageYourOriginal: "创建页面失败，原内容已保留"
+  pageCreatedOpenItFromTheSidebar: "新页面已创建，请从侧栏打开"
+en:
+  thisNoteIsnTEditableNoPage: "This note isn’t editable. No page was created."
+  thisNotebookDoesnTSupportCreatingLocal: "This notebook doesn’t support creating local pages"
+  theFolderHasChangedChooseALocation: "The folder has changed. Choose a location again."
+  couldnTCreateThePageYourOriginal: "Couldn’t create the page. Your original content has been kept."
+  pageCreatedOpenItFromTheSidebar: "Page created. Open it from the sidebar."
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -16,22 +33,22 @@ async function createMentionTarget(sourceId: string, rawTitle: string) {
   const title = normalizeNewFileName(rawTitle);
   const source = usePages.getState().pages[sourceId];
   if (!source || source.trashedAt || source.isLocked || source.localReadState === "error") {
-    throw new Error("当前笔记不可编辑，未创建页面");
+    throw new Error(uiText("thisNoteIsnTEditableNoPage"));
   }
   const notebook = useNotebooks.getState().notebooks[source.workspaceId];
-  if (notebook?.source !== "local-folder") throw new Error("当前笔记本不支持创建本地页面");
+  if (notebook?.source !== "local-folder") throw new Error(uiText("thisNotebookDoesnTSupportCreatingLocal"));
   const parent = source.parentId ? usePages.getState().pages[source.parentId] : null;
   if (source.parentId && (!parent?.isFolder || parent.trashedAt || parent.workspaceId !== source.workspaceId)) {
-    throw new Error("当前目录已变化，请重新选择位置");
+    throw new Error(uiText("theFolderHasChangedChooseALocation"));
   }
   flushEditorContent();
   const id = await usePages.getState().createLocalPageRecord({
     workspaceId: source.workspaceId, parentId: source.parentId,
     title, content: createEmptyLocalPageContent(),
   });
-  if (!id) throw new Error("创建页面失败，原内容已保留");
+  if (!id) throw new Error(uiText("couldnTCreateThePageYourOriginal"));
   const created = usePages.getState().pages[id];
-  if (!created) throw new Error("新页面已创建，请从侧栏打开");
+  if (!created) throw new Error(uiText("pageCreatedOpenItFromTheSidebar"));
   const attrs = buildAiFileReferenceAttrs(created, useNotebooks.getState().notebooks);
   return { ...attrs, title: getPageTitle(created), description: attrs.locationSnapshot || "" };
 }

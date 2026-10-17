@@ -6,6 +6,31 @@ import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { HistoryReadOnlyEditor } from "../HistoryReadOnlyEditor";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/history/history-view/HistoryReader.tsx#messages:1">`
+zh-Hans:
+  loadingVersion: "正在读取历史版本"
+  versionHistoryCouldNotBeLoaded: "历史列表无法读取"
+  noVersionHistory: "暂无历史版本"
+  thisVersionCouldNotBeRead: "此历史版本不可读取"
+  ifYouUseCloudStorageSignInAnd: "若使用云盘，请确认已登录并下载此版本文件。"
+  thisVersionHasAnInvalidFormat: "此历史版本格式异常"
+  selectAVersionOnTheLeft: "选择左侧的历史版本"
+  thisVersionIsTemporarilyUnavailable: "历史版本暂时无法显示"
+  retry: "重试"
+en:
+  loadingVersion: "Loading version"
+  versionHistoryCouldNotBeLoaded: "Version history could not be loaded"
+  noVersionHistory: "No version history"
+  thisVersionCouldNotBeRead: "This version could not be read"
+  ifYouUseCloudStorageSignInAnd: "If you use cloud storage, sign in and download this version first."
+  thisVersionHasAnInvalidFormat: "This version has an invalid format"
+  selectAVersionOnTheLeft: "Select a version on the left"
+  thisVersionIsTemporarilyUnavailable: "This version is temporarily unavailable"
+  retry: "Retry"
+`;
+const t = createTranslator(messages);
+
 
 export function HistoryReaderState({
   icon: Icon,
@@ -42,7 +67,7 @@ function HistoryReader() {
     return (
       <HistoryReaderState
         icon={GooseIcons.LoaderCircle}
-        title="正在读取历史版本"
+        title={t("loadingVersion")}
       />
     );
   }
@@ -51,7 +76,7 @@ function HistoryReader() {
     return (
       <HistoryReaderState
         icon={indexError ? GooseIcons.FileWarning : GooseIcons.History}
-        title={indexError ? "历史列表无法读取" : "暂无历史版本"}
+        title={indexError ? t("versionHistoryCouldNotBeLoaded") : t("noVersionHistory")}
         description={indexError ?? undefined}
       />
     );
@@ -61,8 +86,8 @@ function HistoryReader() {
     return (
       <HistoryReaderState
         icon={GooseIcons.FileQuestion}
-        title="此历史版本不可读取"
-        description="若使用云盘，请确认已登录并下载此版本文件。"
+        title={t("thisVersionCouldNotBeRead")}
+        description={t("ifYouUseCloudStorageSignInAnd")}
       />
     );
   }
@@ -71,7 +96,7 @@ function HistoryReader() {
     return (
       <HistoryReaderState
         icon={GooseIcons.FileWarning}
-        title="此历史版本格式异常"
+        title={t("thisVersionHasAnInvalidFormat")}
       />
     );
   }
@@ -80,7 +105,7 @@ function HistoryReader() {
     return (
       <HistoryReaderState
         icon={GooseIcons.MousePointerClick}
-        title="选择左侧的历史版本"
+        title={t("selectAVersionOnTheLeft")}
       />
     );
   }
@@ -91,7 +116,7 @@ function HistoryReader() {
       fallback={(_, reset) => (
         <HistoryReaderState
           icon={GooseIcons.FileWarning}
-          title="历史版本暂时无法显示"
+          title={t("thisVersionIsTemporarilyUnavailable")}
           action={
             <Button
               type="button"
@@ -100,7 +125,7 @@ function HistoryReader() {
               className="h-auto rounded-lg px-2 py-1 text-xs shadow-none"
               onClick={reset}
             >
-              重试
+              {t("retry")}
             </Button>
           }
         />

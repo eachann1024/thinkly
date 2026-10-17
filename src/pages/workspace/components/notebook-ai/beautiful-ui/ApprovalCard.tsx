@@ -2,6 +2,15 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { WorkCardStatus } from "../WorkCardStatus";
 import type { WorkCardStatusData } from "../workCardStatusContext";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/beautiful-ui/ApprovalCard.tsx#messages:1">`
+zh-Hans:
+  aiNoteChangePlan: "AI 笔记变更计划"
+en:
+  aiNoteChangePlan: "AI note change plan"
+`;
+const t = createTranslator(messages);
+
 
 export function ApprovalCard({
   title,
@@ -22,7 +31,7 @@ export function ApprovalCard({
         "bui-root bui-approval notebook-ai-approval-plan",
         className,
       )}
-      aria-label="AI 笔记变更计划"
+      aria-label={t("aiNoteChangePlan")}
       aria-busy={status.icon === "running" || undefined}
     >
       <WorkCardStatus status={status} />

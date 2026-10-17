@@ -1,3 +1,4 @@
+import "./language";
 import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync } from "./services";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";

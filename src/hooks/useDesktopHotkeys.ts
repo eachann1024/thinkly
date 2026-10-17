@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/hooks/useDesktopHotkeys.ts#block1:1">`
+zh-Hans:
+  hotkeysFailed: "桌面快捷键注册失败"
+  mainDisabled: "已关闭主窗口全局快捷键"
+  quicknoteDisabled: "已关闭速记小窗全局快捷键"
+  searchDisabled: "已关闭全局搜索快捷键"
+  shortcutUnavailable: "快捷键已被其他应用占用或无效"
+en:
+  hotkeysFailed: "Couldn’t register desktop shortcuts."
+  mainDisabled: "The global shortcut for the main window is off."
+  quicknoteDisabled: "The global shortcut for Quick Note is off."
+  searchDisabled: "The global search shortcut is off."
+  shortcutUnavailable: "This shortcut is invalid or already used by another app."
+`);
 /**
  * Electron 桌面端全局热键注册（仅主应用 App 调用；速记小窗 lean 入口不注册）。
  *
@@ -90,7 +105,7 @@ export function useDesktopHotkeys(): void {
       const failed: HostHotkeyRegisterResult = {
         ok: false,
         state: "error",
-        error: "桌面快捷键注册失败",
+        error: storeText("hotkeysFailed"),
       };
       let result: {
         wake: HostHotkeyRegisterResult;
@@ -116,7 +131,7 @@ export function useDesktopHotkeys(): void {
           wakeHotkeyEnabled,
           wakeHotkey,
           result.wake,
-          "已关闭主窗口全局快捷键",
+          storeText("mainDisabled"),
         ),
       );
       settings.setQuicknoteHotkeyStatus(
@@ -124,7 +139,7 @@ export function useDesktopHotkeys(): void {
           quicknoteHotkeyEnabled,
           quicknoteHotkey,
           result.quicknote,
-          "已关闭速记小窗全局快捷键",
+          storeText("quicknoteDisabled"),
         ),
       );
       settings.setSearchHotkeyStatus(
@@ -132,7 +147,7 @@ export function useDesktopHotkeys(): void {
           searchHotkeyEnabled,
           searchHotkey,
           result.search,
-          "已关闭全局搜索快捷键",
+          storeText("searchDisabled"),
         ),
       );
     })();
@@ -164,32 +179,32 @@ export function useDesktopHotkeys(): void {
       const desktop = settings.desktop;
       settings.setWakeHotkeyStatus(
         !desktop.wakeHotkeyEnabled || !desktop.wakeHotkey.trim()
-          ? { state: "disabled", message: "已关闭主窗口全局快捷键" }
+          ? { state: "disabled", message: storeText("mainDisabled") }
           : result.wakeOk
             ? { state: "active" }
             : {
                 state: "occupied",
-                message: "快捷键已被其他应用占用或无效",
+                message: storeText("shortcutUnavailable"),
               },
       );
       settings.setQuicknoteHotkeyStatus(
         !desktop.quicknoteHotkeyEnabled || !desktop.quicknoteHotkey.trim()
-          ? { state: "disabled", message: "已关闭速记小窗全局快捷键" }
+          ? { state: "disabled", message: storeText("quicknoteDisabled") }
           : result.quicknoteOk
             ? { state: "active" }
             : {
                 state: "occupied",
-                message: "快捷键已被其他应用占用或无效",
+                message: storeText("shortcutUnavailable"),
               },
       );
       settings.setSearchHotkeyStatus(
         !desktop.searchHotkeyEnabled || !desktop.searchHotkey.trim()
-          ? { state: "disabled", message: "已关闭全局搜索快捷键" }
+          ? { state: "disabled", message: storeText("searchDisabled") }
           : result.searchOk
             ? { state: "active" }
             : {
                 state: "occupied",
-                message: "快捷键已被其他应用占用或无效",
+                message: storeText("shortcutUnavailable"),
               },
       );
     };

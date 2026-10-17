@@ -1,3 +1,17 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/save.ts#block1:1">`
+zh-Hans:
+  writeFailed: "无法写入文件：{{path}}"
+en:
+  writeFailed: "Couldn’t write the file: {{path}}"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/save.ts#block2:2">`
+zh-Hans:
+  invalidFrontmatterSave: "YAML 前置区格式异常，已阻止保存"
+en:
+  invalidFrontmatterSave: "The YAML frontmatter is invalid. Saving was blocked."
+`);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import type { JSONContent } from "@/types";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
@@ -128,7 +142,7 @@ export const saveLocalPageContentUnlocked = async (
       },
     );
     if (frontmatterMerge.parseFailed) {
-      throw new Error("YAML 前置区格式异常，已阻止保存");
+      throw new Error(storeText("invalidFrontmatterSave"));
     }
     frontmatterBlob = frontmatterMerge.blob;
     finalContent = frontmatterBlob
@@ -210,7 +224,7 @@ export const saveLocalPageContentUnlocked = async (
   } catch (err) {
     throw (
       consumeDiskWriteFailure() ??
-      new DiskWriteError(`无法写入文件：${filePath}`, {
+      new DiskWriteError(extraText("writeFailed", { path: filePath }), {
         path: filePath,
         cause: err,
       })
@@ -220,7 +234,7 @@ export const saveLocalPageContentUnlocked = async (
   if (!result) {
     throw (
       consumeDiskWriteFailure() ??
-      new DiskWriteError(`无法写入文件：${filePath}`, { path: filePath })
+      new DiskWriteError(extraText("writeFailed", { path: filePath }), { path: filePath })
     );
   }
 

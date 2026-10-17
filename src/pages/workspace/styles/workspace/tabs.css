@@ -54,7 +54,7 @@
   background-color: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
 }
-.tab-rail-item:has([data-page-title-field]:focus) [aria-label="关闭标签页"] {
+.tab-rail-item:has([data-page-title-field]:focus) [data-tab-close] {
   visibility: hidden;
   pointer-events: none;
 }

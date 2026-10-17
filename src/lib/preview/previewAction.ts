@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/preview/previewAction.ts#localMessages:1">`
+zh-Hans:
+  previewClickForFullScreenRightClickForSystem: "预览（左键全屏 / 右键系统）"
+  invalidPreviewData: "预览数据无效"
+  preview: "预览"
+  equationPreview: "公式预览"
+  systemPreviewIsnTSupportedInThisEnvironment: "当前环境不支持系统预览"
+  couldnTOpenTheSystemPreview: "系统预览打开失败"
+en:
+  previewClickForFullScreenRightClickForSystem: "Preview (click for full screen / right-click for system preview)"
+  invalidPreviewData: "Invalid preview data"
+  preview: "Preview"
+  equationPreview: "Equation preview"
+  systemPreviewIsnTSupportedInThisEnvironment: "System preview isn’t supported in this environment"
+  couldnTOpenTheSystemPreview: "Couldn’t open the system preview"
+`;
+const uiText = createTranslator(localMessages);
 import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { blobToBase64, getExtensionFromMimeType } from "@/lib/imageStorage/utils";
@@ -5,7 +24,7 @@ import { fs } from "@/lib/electron-platform/fs";
 import { shell } from "@/lib/electron-platform/shell";
 
 /** 所有「打开来看」预览按钮的统一文案 */
-export const PREVIEW_ACTION_TOOLTIP = "预览（左键全屏 / 右键系统）";
+export const PREVIEW_ACTION_TOOLTIP = uiText("previewClickForFullScreenRightClickForSystem");
 
 /** 预览缩放按百分比步进，不用 1.2 倍这种非整比例 */
 export const PREVIEW_ZOOM_STEP_PERCENT = 25;
@@ -51,7 +70,7 @@ export function previewPointerHandlers(handlers: {
 export async function toImageDataUrl(payload: string | Blob): Promise<string> {
   if (typeof payload === "string") {
     if (!payload.startsWith("data:")) {
-      throw new Error("预览数据无效");
+      throw new Error(uiText("invalidPreviewData"));
     }
     return payload;
   }
@@ -65,7 +84,7 @@ export function buildPreviewTempFile(
 ): { relativePath: string; base64: string } {
   const mime = dataUrl.match(/^data:([^;]+);base64,/)?.[1] ?? "image/png";
   const base64 = dataUrl.replace(/^data:.*?;base64,/, "");
-  if (!base64) throw new Error("预览数据无效");
+  if (!base64) throw new Error(uiText("invalidPreviewData"));
 
   const fallbackExt = getExtensionFromMimeType(mime);
   const hasExt = /\.[a-z0-9]{1,8}$/i.test(fileName);
@@ -108,9 +127,9 @@ export function wrapSvgAsHtml(
   const theme = readThemeSurfaceSnapshot();
   const background = options?.background ?? theme.background;
   const color = options?.color ?? theme.foreground;
-  const title = escapeHtml(options?.title ?? "预览");
+  const title = escapeHtml(options?.title ?? uiText("preview"));
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -140,10 +159,10 @@ export function wrapHtmlDocument(
   const theme = readThemeSurfaceSnapshot();
   const background = options?.background ?? theme.background;
   const color = options?.color ?? theme.foreground;
-  const title = escapeHtml(options?.title ?? "预览");
+  const title = escapeHtml(options?.title ?? uiText("preview"));
   const extraHead = options?.extraHead ?? "";
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -210,7 +229,7 @@ export async function openPreviewInSystem(
   });
   await openTextFileInSystem(
     wrapHtmlDocument(`<div class="katex-preview">${mathHtml}</div>`, {
-      title: "公式预览",
+      title: uiText("equationPreview"),
       extraHead:
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">',
     }),
@@ -234,11 +253,11 @@ async function writeAndOpenTempFile(file: {
 }): Promise<void> {
   const targetPath = await fs.writeTempFile(file.relativePath, file.base64);
   if (!targetPath) {
-    throw new Error("当前环境不支持系统预览");
+    throw new Error(uiText("systemPreviewIsnTSupportedInThisEnvironment"));
   }
   const opened = await shell.openPath(targetPath);
   if (!opened) {
-    throw new Error("系统预览打开失败");
+    throw new Error(uiText("couldnTOpenTheSystemPreview"));
   }
 }
 

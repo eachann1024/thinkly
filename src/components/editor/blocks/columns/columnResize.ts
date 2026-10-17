@@ -1,3 +1,11 @@
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/columns/columnResize.ts#messages:1">`
+zh-Hans:
+  resizeColumns: "调整第 {{first}}、{{second}} 栏宽度"
+en:
+  resizeColumns: "Resize columns {{first}} and {{second}}"
+`;
+const t = createTranslator(messages);
 import type { BlockNoteEditor } from "@blocknote/core";
 import { columnWidthsProp, readColumnWidths } from "./columnModel";
 
@@ -56,7 +64,7 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
     handle.type = "button";
     handle.className = "goose-column-resizer";
     handle.setAttribute("role", "separator");
-    handle.setAttribute("aria-label", `调整第 ${index + 1}、${index + 2} 栏宽度`);
+    handle.setAttribute("aria-label", t("resizeColumns", { first: index + 1, second: index + 2 }));
     handle.setAttribute("aria-orientation", "vertical");
     handle.setAttribute("aria-valuemin", "1");
     handle.setAttribute("aria-valuemax", "99");

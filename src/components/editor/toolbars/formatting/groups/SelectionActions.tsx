@@ -14,6 +14,21 @@ import {
   snapshotCurrentSelection,
 } from "../selectionRestore";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/SelectionActions.tsx#messages:1">`
+zh-Hans:
+  couldNotCopyPleaseTryAgain: "复制失败，请重试"
+  copying: "复制中"
+  copySelection: "复制选中内容"
+  clearSelection: "取消选区"
+en:
+  couldNotCopyPleaseTryAgain: "Could not copy. Please try again."
+  copying: "Copying"
+  copySelection: "Copy selection"
+  clearSelection: "Clear selection"
+`;
+const t = createTranslator(messages);
+
 
 export function SelectionActions({
   bindTooltip,
@@ -48,7 +63,7 @@ export function SelectionActions({
         await navigator.clipboard.writeText(text);
       }
     } catch {
-      toast.error("复制失败，请重试");
+      toast.error(t("couldNotCopyPleaseTryAgain"));
     } finally {
       pending.current = false;
       setCopying(false);
@@ -74,7 +89,7 @@ export function SelectionActions({
             variant="ghost"
             size="sm"
             className="goose-formatting-toolbar-control"
-            aria-label={copying ? "复制中" : "复制选中内容"}
+            aria-label={copying ? t("copying") : t("copySelection")}
             aria-busy={copying}
             disabled={copying}
             onClick={() => void copy()}
@@ -83,7 +98,7 @@ export function SelectionActions({
           </Button>
         </TooltipTrigger>
         <ToolbarTooltip
-          label={copying ? "复制中" : "复制选中内容"}
+          label={copying ? t("copying") : t("copySelection")}
           shortcut="Mod+C"
         />
       </Tooltip>
@@ -93,13 +108,13 @@ export function SelectionActions({
             variant="ghost"
             size="sm"
             className="goose-formatting-toolbar-control"
-            aria-label="取消选区"
+            aria-label={t("clearSelection")}
             onClick={cancel}
           >
             <X />
           </Button>
         </TooltipTrigger>
-        <ToolbarTooltip label="取消选区" shortcut="Esc" />
+        <ToolbarTooltip label={t("clearSelection")} shortcut="Esc" />
       </Tooltip>
     </>
   );

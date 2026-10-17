@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import path from "node:path";
 import type { GitRepositoryFolder } from "../../src/lib/git-sync-contract";
 import { recordGitConflict, type GitSyncConflict } from "./gitSyncConflict";
@@ -22,7 +23,7 @@ function remoteCopy(name: string, reserved: Set<string>) {
       return candidate;
     }
   }
-  throw new Error("无法为远端副本创建安全的唯一文件名，请先整理该目录");
+  throw new Error(t("uniqueName"));
 }
 
 /** A missing baseline means first attach: absence locally must not delete remote files. */
@@ -38,7 +39,7 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
     else if (base && own(base, name) && l === b) value = r;
     else if (base && own(base, name) && r === b) value = l;
     else {
-      if (!context) throw new Error("同步冲突：同一文件的本地与远端内容不同；双方内容已保留，请先处理后重试");
+      if (!context) throw new Error(t("resolveFirst"));
       const conflict = recordGitConflict(context.repositoryId, context.identity, context.folder, name, l, r);
       context.active.add(conflict.info.id);
       if (!conflict.choice) {
@@ -49,7 +50,7 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
       else {
         value = l;
         if (conflict.choice === "both") {
-          if (l === undefined || r === undefined) throw new Error("一方已删除文件，无法保留两份");
+          if (l === undefined || r === undefined) throw new Error(t("oneDeleted"));
           merged[remoteCopy(name, reserved)] = r;
         }
       }

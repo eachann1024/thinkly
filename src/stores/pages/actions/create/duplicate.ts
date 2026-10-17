@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/create/duplicate.ts#block1:1">`
+zh-Hans:
+  invalidFrontmatterCopy: "YAML 前置区格式异常，未创建副本"
+en:
+  invalidFrontmatterCopy: "The YAML frontmatter is invalid. No copy was created."
+`);
 import type { StoreSet, StoreGet } from "../hydrate";
 import { flushEditorContent } from "../flushEditor";
 import { useNotebooks } from "../../../useNotebooks";
@@ -98,7 +105,7 @@ export const duplicatePageAction = async (
       copySettings,
     );
     if (copyFmMerge.parseFailed) {
-      toast.error("YAML 前置区格式异常，未创建副本");
+      toast.error(storeText("invalidFrontmatterCopy"));
       return id;
     }
     let copyFrontmatterBlob = copyFmMerge.blob;
@@ -135,7 +142,7 @@ export const duplicatePageAction = async (
         }
       }
     } catch {
-      toast.error("YAML 前置区格式异常，未创建副本");
+      toast.error(storeText("invalidFrontmatterCopy"));
       return id;
     }
 
@@ -153,7 +160,7 @@ export const duplicatePageAction = async (
           copySettings,
         );
       } catch {
-        toast.error("YAML 前置区格式异常，未创建副本");
+        toast.error(storeText("invalidFrontmatterCopy"));
         return id;
       }
       if (headerMerge) {

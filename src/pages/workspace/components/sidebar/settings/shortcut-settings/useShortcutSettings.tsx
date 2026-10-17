@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/useShortcutSettings.tsx#localMessages:1">`
+zh-Hans:
+  defaultShortcutsRestored_9e68: "已恢复默认快捷键"
+en:
+  defaultShortcutsRestored_9e68: "Default shortcuts restored"
+`;
+const uiText = createTranslator(localMessages);
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -51,7 +60,7 @@ export function useShortcutSettings({
     settings.setSearchHotkey(DEFAULT_SEARCH_HOTKEY);
     settings.setSearchHotkeyEnabled(true);
     setConfirmReset(false);
-    toast.success("已恢复默认快捷键");
+    toast.success(uiText("defaultShortcutsRestored_9e68"));
   };
 
   const safeSetAppShortcut = (id: string) =>

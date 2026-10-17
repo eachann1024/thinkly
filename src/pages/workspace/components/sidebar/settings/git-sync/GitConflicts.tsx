@@ -1,3 +1,49 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/git-sync/GitConflicts.tsx#localMessages:1">`
+zh-Hans:
+  couldNotReadConflictingContent_1b17: "无法读取冲突内容"
+  loading_8b50: "读取中…"
+  viewBothVersions_4142: "查看双方内容"
+  aTextPreviewIsUnavailableFor_a7d3: "此文件无法显示文字预览，可以选择保留版本。"
+  localContent_0cdc: "本地内容"
+  remoteContent_2203: "远端内容"
+  theFileWasDeletedInThis_c79b: "此版本已删除文件"
+  onlyTheBeginningIsShownYour_1566: "内容过长，预览仅显示开头；选择会保留完整文件。"
+  keepLocal_4f1d: "保留本地"
+  keepLocalDeletion_e4fe: "按本地删除"
+  keepRemote_7d5c: "保留远端"
+  keepRemoteDeletion_1f51: "按远端删除"
+  keepBoth_da3b: "保留两份"
+  conflictCount: "有 {{count}} 个文件需要决定保留内容；处理完成后会继续同步。"
+  localOverwrite: "保留本地将覆盖远端内容。"
+  localDelete: "保留本地将删除远端文件。"
+  remoteOverwrite: "保留远端将覆盖本地内容。"
+  remoteDelete: "保留远端将删除本地文件。"
+  keepBothDetails: "保留两份会另存远端版本。"
+en:
+  couldNotReadConflictingContent_1b17: "Could not read conflicting content"
+  loading_8b50: "Loading…"
+  viewBothVersions_4142: "View both versions"
+  aTextPreviewIsUnavailableFor_a7d3: "A text preview is unavailable for this file. You can still choose which version to keep."
+  localContent_0cdc: "Local content"
+  remoteContent_2203: "Remote content"
+  theFileWasDeletedInThis_c79b: "The file was deleted in this version"
+  onlyTheBeginningIsShownYour_1566: "Only the beginning is shown. Your choice will preserve the complete file."
+  keepLocal_4f1d: "Keep local"
+  keepLocalDeletion_e4fe: "Keep local deletion"
+  keepRemote_7d5c: "Keep remote"
+  keepRemoteDeletion_1f51: "Keep remote deletion"
+  keepBoth_da3b: "Keep both"
+  conflictCount_one: "Choose which content to keep for {{count}} conflicting file. Sync will resume once it is resolved."
+  conflictCount_other: "Choose which content to keep for {{count}} conflicting files. Sync will resume once they are resolved."
+  localOverwrite: "Keeping local replaces the remote content."
+  localDelete: "Keeping local deletes the remote file."
+  remoteOverwrite: "Keeping remote replaces the local content."
+  remoteDelete: "Keeping remote deletes the local file."
+  keepBothDetails: "Keeping both saves the remote version as a separate file."
+`;
+const uiText = createTranslator(localMessages);
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type {
@@ -29,14 +75,14 @@ export function GitConflicts({
     try {
       setDetail(await bridge.getConflict(repositoryId, conflictId));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "无法读取冲突内容");
+      setError(reason instanceof Error ? reason.message : uiText("couldNotReadConflictingContent_1b17"));
     } finally {
       setLoadingId("");
     }
   }
   return (
     <div className="space-y-3 rounded-lg border border-border p-3">
-      <p className="text-sm font-medium">有 {conflicts.length} 个文件需要决定保留内容；处理完成后会继续同步。</p>
+      <p className="text-sm font-medium">{uiText("conflictCount", { count: conflicts.length })}</p>
       {conflicts.map((conflict) => (
         <div key={conflict.id} className="space-y-2 rounded-lg bg-muted/50 p-3">
           <div className="flex items-start justify-between gap-2">
@@ -49,36 +95,37 @@ export function GitConflicts({
               disabled={disabled || Boolean(loadingId)}
               onClick={() => void inspect(conflict.id)}
             >
-              {loadingId === conflict.id ? "读取中…" : "查看双方内容"}
+              {loadingId === conflict.id ? uiText("loading_8b50") : uiText("viewBothVersions_4142")}
             </Button>
           </div>
           {detail?.id === conflict.id && (
             <div className="space-y-3">
               {detail.binary ? (
-                <p className="text-sm leading-relaxed text-muted-foreground">此文件无法显示文字预览，可以选择保留版本。</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{uiText("aTextPreviewIsUnavailableFor_a7d3")}</p>
               ) : (
                 <div className="grid gap-2 md:grid-cols-2">
                   {(
                     [
-                      ["本地内容", detail.localText],
-                      ["远端内容", detail.remoteText],
+                      [uiText("localContent_0cdc"), detail.localText],
+                      [uiText("remoteContent_2203"), detail.remoteText],
                     ] as const
                   ).map(([label, content]) => (
                     <div key={label} className="min-w-0">
                       <p className="mb-1 text-xs font-medium">{label}</p>
                       <pre className="max-h-60 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-background p-2 text-xs">
-                        {content ?? "此版本已删除文件"}
+                        {content ?? uiText("theFileWasDeletedInThis_c79b")}
                       </pre>
                     </div>
                   ))}
                 </div>
               )}
               {detail.truncated && (
-                <p className="text-sm leading-relaxed text-muted-foreground">内容过长，预览仅显示开头；选择会保留完整文件。</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{uiText("onlyTheBeginningIsShownYour_1566")}</p>
               )}
               <p className="text-sm leading-relaxed text-muted-foreground">
-                保留本地将覆盖远端{!conflict.localExists ? "并删除文件" : "内容"}；保留远端将覆盖本地
-                {!conflict.remoteExists ? "并删除文件" : "内容"}。保留两份会另存远端版本。
+                {uiText(conflict.localExists ? "localOverwrite" : "localDelete")}{" "}
+                {uiText(conflict.remoteExists ? "remoteOverwrite" : "remoteDelete")}{" "}
+                {uiText("keepBothDetails")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {(["local", "remote", "both"] as const).map((choice) => (
@@ -94,13 +141,13 @@ export function GitConflicts({
                   >
                     {choice === "local"
                       ? conflict.localExists
-                        ? "保留本地"
-                        : "按本地删除"
+                        ? uiText("keepLocal_4f1d")
+                        : uiText("keepLocalDeletion_e4fe")
                       : choice === "remote"
                         ? conflict.remoteExists
-                          ? "保留远端"
-                          : "按远端删除"
-                        : "保留两份"}
+                          ? uiText("keepRemote_7d5c")
+                          : uiText("keepRemoteDeletion_1f51")
+                        : uiText("keepBoth_da3b")}
                   </Button>
                 ))}
               </div>

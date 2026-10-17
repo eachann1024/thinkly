@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/shortcut-platform.ts#localMessages:1">`
+zh-Hans:
+  mouseBackButton: "鼠标后退键"
+  mouseForwardButton: "鼠标前进键"
+en:
+  mouseBackButton: "Mouse back button"
+  mouseForwardButton: "Mouse forward button"
+`;
+const uiText = createTranslator(localMessages);
 import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 
 const MOD_ALIASES = new Set([
@@ -52,8 +63,8 @@ export function formatShortcutToken(
   if (part === "down" || part === "arrowdown") return "↓";
   if (part === "left" || part === "arrowleft") return "←";
   if (part === "right" || part === "arrowright") return "→";
-  if (part === "mouseback") return "鼠标后退键";
-  if (part === "mouseforward") return "鼠标前进键";
+  if (part === "mouseback") return uiText("mouseBackButton");
+  if (part === "mouseforward") return uiText("mouseForwardButton");
   return token.trim();
 }
 

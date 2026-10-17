@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIEnabledSection.tsx#localMessages:1">`
+zh-Hans:
+  enableAiAssistant_c698: "启用 AI 助手"
+  turningThisOffStopsAnyResponse_42a7: "关闭会停止正在生成的回答。"
+en:
+  enableAiAssistant_c698: "Enable AI assistant"
+  turningThisOffStopsAnyResponse_42a7: "Turning this off stops any response being generated."
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -28,12 +39,10 @@ export function renderAIEnabledSection(
               htmlFor="ai-enabled"
               className="cursor-pointer text-sm font-medium text-foreground"
             >
-              启用 AI 助手
-            </Label>
+              {uiText("enableAiAssistant_c698")}</Label>
           </div>
           <div className="text-sm leading-relaxed text-muted-foreground">
-            关闭会停止正在生成的回答。
-          </div>
+            {uiText("turningThisOffStopsAnyResponse_42a7")}</div>
         </div>
         <Switch
           id="ai-enabled"

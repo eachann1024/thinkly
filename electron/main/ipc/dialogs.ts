@@ -1,3 +1,4 @@
+import { createTranslator, i18nYaml } from "../../../src/i18n/core";
 import { dialog, ipcMain } from "electron";
 import path from "node:path";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../../src/lib/native-dialog-contract";
@@ -7,6 +8,13 @@ import { dialogDirectory, rememberDialogDirectory, saveDialogPath } from "../dia
 import { withWindowDialog } from "../dialogSession";
 import { senderWindow } from "./common";
 
+const t = createTranslator(i18nYaml<"electron/main/ipc/dialogs.ts#block1:1">`
+zh-Hans:
+  markdownFolder: 选择 Markdown 文件夹
+en:
+  markdownFolder: Choose a Markdown folder
+`);
+
 export function registerDialogsIpc(): void {
   ipcMain.handle("desktop:selectDirectory", async (event, opts: DirectoryDialogOptions = {}) => {
     return withWindowDialog<string | null>(senderWindow(event) ?? getMainWindow(), null, async (win) => {
@@ -15,7 +23,7 @@ export function registerDialogsIpc(): void {
       if (win.isDestroyed()) return null;
       const result = await dialog.showOpenDialog(win, {
         properties: ["openDirectory"],
-        title: "选择 Markdown 文件夹",
+        title: t("markdownFolder"),
         defaultPath,
       });
       if (result.canceled || result.filePaths.length === 0) return null;

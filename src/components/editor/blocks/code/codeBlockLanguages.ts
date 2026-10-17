@@ -1,3 +1,14 @@
+
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/codeBlockLanguages.ts#messages:1">`
+zh-Hans:
+  mathFormula: "数学公式 ($$)"
+  documentMetadataYaml: "文档元数据 (YAML)"
+en:
+  mathFormula: "Math formula ($$)"
+  documentMetadataYaml: "Document metadata (YAML)"
+`;
+const t = createTranslator(messages);
 export const POPULAR_LANGUAGES = [
   "text",
   "javascript",
@@ -116,8 +127,8 @@ export const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
   objectc: "Objective-C",
   vim: "Vim Script",
   wasm: "WebAssembly",
-  math: "数学公式 ($$)",
-  "yaml-frontmatter": "文档元数据 (YAML)",
+  get math() { return t("mathFormula"); },
+  get "yaml-frontmatter"() { return t("documentMetadataYaml"); },
   text: "Plain Text",
 };
 

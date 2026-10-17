@@ -1,3 +1,24 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/modelCatalog.ts#localMessages:1">`
+zh-Hans:
+  missingApiKey: "未填写 API Key。{{hint}}"
+  authenticationFailed: "{{provider}} 鉴权失败。{{hint}}"
+  enableTheAiAssistantInSettingsFirst: "AI 助手尚未开启，请先到设置中打开"
+  saveYourCustomAiConfigurationAndLoadTheModel: "请先保存自定义 AI 配置并获取模型列表"
+  customAnthropicProvider: "自定义 Anthropic 源"
+  customOpenaiResponsesProvider: "自定义 OpenAI Responses 源"
+  customOpenaiCompatibleProvider: "自定义 OpenAI 兼容源"
+en:
+  missingApiKey: "No API key entered. {{hint}}"
+  authenticationFailed: "{{provider}} authentication failed. {{hint}}"
+  enableTheAiAssistantInSettingsFirst: "Enable the AI assistant in Settings first"
+  saveYourCustomAiConfigurationAndLoadTheModel: "Save your custom AI configuration and load the model list first"
+  customAnthropicProvider: "Custom Anthropic provider"
+  customOpenaiResponsesProvider: "Custom OpenAI Responses provider"
+  customOpenaiCompatibleProvider: "Custom OpenAI-compatible provider"
+`;
+const uiText = createTranslator(localMessages);
 import type {
   AIModelOption,
   AISettingsLike,
@@ -59,11 +80,11 @@ export async function readErrorMessage(response: Response) {
 }
 
 export function getApiKeyMissingMessage() {
-  return `未填写 API Key。${SETTINGS_ENTRY_HINT}`;
+  return uiText("missingApiKey", {hint: SETTINGS_ENTRY_HINT});
 }
 
 export function getAuthFailedMessage(providerLabel: string) {
-  return `${providerLabel} 鉴权失败。${SETTINGS_ENTRY_HINT}`;
+  return uiText("authenticationFailed", {provider: providerLabel, hint: SETTINGS_ENTRY_HINT});
 }
 
 export function getStoredAIModelOptions(
@@ -151,7 +172,7 @@ export function getAIAvailability(
   requestOverrides?: AIRequestOverrides,
 ) {
   if (!settings.enabled) {
-    return { ok: false as const, reason: "AI 助手尚未开启，请先到设置中打开" };
+    return { ok: false as const, reason: uiText("enableTheAiAssistantInSettingsFirst") };
   }
 
   if (!getCustomAIApiKey(settings)) {
@@ -162,7 +183,7 @@ export function getAIAvailability(
   if (!selectedModelId) {
     return {
       ok: false as const,
-      reason: "请先保存自定义 AI 配置并获取模型列表",
+      reason: uiText("saveYourCustomAiConfigurationAndLoadTheModel"),
     };
   }
 
@@ -188,10 +209,10 @@ export async function fetchCustomAIModels(config: {
   const providerLabel =
     preset?.label ??
     (config.protocol === "claude"
-      ? "自定义 Anthropic 源"
+      ? uiText("customAnthropicProvider")
       : config.protocol === "openai-responses"
-        ? "自定义 OpenAI Responses 源"
-        : "自定义 OpenAI 兼容源");
+        ? uiText("customOpenaiResponsesProvider")
+        : uiText("customOpenaiCompatibleProvider"));
 
   const modelsUrl =
     config.protocol === "claude"

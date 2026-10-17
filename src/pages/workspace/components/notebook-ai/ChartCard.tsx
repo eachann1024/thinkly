@@ -20,6 +20,25 @@ import {
   createImageArtifactBlocks,
   insertArtifactBlocks,
 } from "./insertArtifact";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ChartCard.tsx#messages:1">`
+zh-Hans:
+  chartExportFailed: "图表导出失败"
+  chartExportIsEmpty: "图表导出为空"
+  imageEncodingFailed: "图片编码失败"
+  chartDataIsIncomplete: "图表数据不完整"
+  theChartIsNotReadyYet: "图表尚未就绪"
+  chart: "图表"
+en:
+  chartExportFailed: "Chart export failed"
+  chartExportIsEmpty: "Chart export is empty"
+  imageEncodingFailed: "Image encoding failed"
+  chartDataIsIncomplete: "Chart data is incomplete"
+  theChartIsNotReadyYet: "The chart is not ready yet"
+  chart: "Chart"
+`;
+const t = createTranslator(messages);
+
 
 interface ChartSeries {
   name: string;
@@ -36,9 +55,9 @@ interface ChartCardProps {
 
 async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
   const response = await fetch(dataUrl);
-  if (!response.ok) throw new Error("图表导出失败");
+  if (!response.ok) throw new Error(t("chartExportFailed"));
   const blob = await response.blob();
-  if (!blob.size) throw new Error("图表导出为空");
+  if (!blob.size) throw new Error(t("chartExportIsEmpty"));
   return blob;
 }
 
@@ -47,9 +66,9 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === "string") resolve(reader.result);
-      else reject(new Error("图片编码失败"));
+      else reject(new Error(t("imageEncodingFailed")));
     };
-    reader.onerror = () => reject(new Error("图片编码失败"));
+    reader.onerror = () => reject(new Error(t("imageEncodingFailed")));
     reader.readAsDataURL(blob);
   });
 }
@@ -63,7 +82,7 @@ export function ChartIncompleteNotice({ title }: { title?: string }) {
         </div>
       ) : null}
       <div className="px-3.5 py-6 text-sm text-muted-foreground">
-        图表数据不完整
+        {t("chartDataIsIncomplete")}
       </div>
     </div>
   );
@@ -161,7 +180,7 @@ export function ChartCard(props: ChartCardProps) {
 
   const capturePngDataUrl = useCallback(async () => {
     const chart = chartRef.current;
-    if (!chart) throw new Error("图表尚未就绪");
+    if (!chart) throw new Error(t("theChartIsNotReadyYet"));
     const width = Math.max(1, chart.getWidth?.() || containerRef.current?.clientWidth || 1);
     const height = Math.max(
       1,
@@ -187,7 +206,7 @@ export function ChartCard(props: ChartCardProps) {
   return (
     <div className="notebook-ai-canvas-card my-2 overflow-hidden">
       <div className="notebook-ai-canvas-card-header">
-        <div className="notebook-ai-canvas-card-title">{props.title?.trim() || "图表"}</div>
+        <div className="notebook-ai-canvas-card-title">{props.title?.trim() || t("chart")}</div>
         <ArtifactActions
           previewIdentity={JSON.stringify([props.type, props.categories, props.series, resolvedTheme, themeSurface])}
           onCopyImage={capturePngDataUrl}
@@ -199,7 +218,7 @@ export function ChartCard(props: ChartCardProps) {
             const dataUrl = await blobToDataUrl(await capturePngBlob());
             return insertArtifactBlocks(
               props.editorRef,
-              createImageArtifactBlocks(props.title, dataUrl, "图表"),
+              createImageArtifactBlocks(props.title, dataUrl, t("chart")),
             );
           }}
         />
@@ -209,7 +228,7 @@ export function ChartCard(props: ChartCardProps) {
         className="notebook-ai-chart-card-canvas"
         style={{ width: "100%", height: props.type === "pie" ? 260 : 240 }}
         role="img"
-        aria-label={props.title ?? "图表"}
+        aria-label={props.title ?? t("chart")}
       />
     </div>
   );

@@ -8,6 +8,15 @@ import {
 import type { ComposerProps } from "./types";
 import type { ComposerSurfaceState } from "./useComposerSurface";
 import { GOOSE_FOLDER_MIME, hasWorkspaceDrag } from "@/lib/workspace-drag";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/composer/useComposerAttachments.ts#messages:1">`
+zh-Hans:
+  chooseAPngJpegWebpOrGifImage: "请选择 PNG、JPEG、WebP 或 GIF 图片。"
+en:
+  chooseAPngJpegWebpOrGifImage: "Choose a PNG, JPEG, WebP, or GIF image."
+`;
+const t = createTranslator(messages);
+
 const SUPPORTED_IMAGE_MEDIA_TYPES = new Set([
   "image/png",
   "image/jpeg",
@@ -48,7 +57,7 @@ export function useComposerAttachments(
         });
 
       if (accepted.length === 0) {
-        toast.error("请选择 PNG、JPEG、WebP 或 GIF 图片。");
+        toast.error(t("chooseAPngJpegWebpOrGifImage"));
         return;
       }
 

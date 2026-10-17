@@ -46,6 +46,15 @@ import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/s
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
 import { gooseColumnLayoutExtension } from "../extensions/columnLayoutExtension";
 import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/useEditorExtensions.ts#messages:1">`
+zh-Hans:
+  couldNotOpenThisMarkdownNote: "无法打开该 Markdown 笔记"
+en:
+  couldNotOpenThisMarkdownNote: "Could not open this Markdown note"
+`;
+const t = createTranslator(messages);
+
 
 export function useEditorExtensions(session: EditorSession) {
   const {
@@ -74,7 +83,7 @@ export function useEditorExtensions(session: EditorSession) {
           if (!openMarkdown) return;
           void openMarkdown(rawText).then((opened) => {
             if (!opened) {
-              toast.error("无法打开该 Markdown 笔记");
+              toast.error(t("couldNotOpenThisMarkdownNote"));
             }
           });
         },

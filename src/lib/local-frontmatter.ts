@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-frontmatter.ts#localMessages:1">`
+zh-Hans:
+  theYamlFrontmatterIsNotClosedSavingHasBeen: "YAML 前置区未闭合，已阻止保存"
+  theYamlFrontmatterIsInvalidSavingHasBeenBlocked: "YAML 前置区格式异常，已阻止保存"
+  couldnTSerializeYaml: "YAML 序列化失败"
+en:
+  theYamlFrontmatterIsNotClosedSavingHasBeen: "The YAML frontmatter is not closed. Saving has been blocked."
+  theYamlFrontmatterIsInvalidSavingHasBeenBlocked: "The YAML frontmatter is invalid. Saving has been blocked."
+  couldnTSerializeYaml: "Couldn’t serialize YAML"
+`;
+const uiText = createTranslator(localMessages);
 import { parseLocalFrontmatterBlob } from "./local-frontmatter/parser";
 export {
   parseLocalFrontmatterBlob,
@@ -140,9 +153,9 @@ export function mergeSettingsIntoFrontmatterHeader(
 ): { markdown: string; frontmatter: string | undefined } | null {
   if (!/^---\s*\n/.test(markdown)) return null;
   const { frontmatter, body } = extractFrontmatter(markdown);
-  if (!frontmatter) throw new Error("YAML 前置区未闭合，已阻止保存");
+  if (!frontmatter) throw new Error(uiText("theYamlFrontmatterIsNotClosedSavingHasBeen"));
   const merged = mergeLocalPageSettingsIntoFrontmatter(frontmatter, settings);
-  if (merged.parseFailed) throw new Error("YAML 前置区格式异常，已阻止保存");
+  if (merged.parseFailed) throw new Error(uiText("theYamlFrontmatterIsInvalidSavingHasBeenBlocked"));
   const mergedBlob = merged.blob;
   return {
     markdown: mergedBlob ? `${mergedBlob}\n\n${body}` : body,
@@ -241,7 +254,7 @@ export function mergeLocalPageSettingsIntoFrontmatter(
     return {
       blob: existingBlob?.trim() ? existingBlob : undefined,
       parseFailed: true,
-      error: error instanceof Error ? error.message : "YAML 序列化失败",
+      error: error instanceof Error ? error.message : uiText("couldnTSerializeYaml"),
       settings: normalized,
     };
   }

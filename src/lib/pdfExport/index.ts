@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/pdfExport/index.ts#localMessages:1">`
+zh-Hans:
+  couldnTLoadTheChineseFontRequiredToGenerate: "未能加载中文字体，无法生成 PDF"
+  theGeneratedPdfIsEmpty: "react-pdf 生成了空 PDF"
+  pdfExportFailed: "PDF 导出失败"
+en:
+  couldnTLoadTheChineseFontRequiredToGenerate: "Couldn’t load the Chinese font required to generate the PDF"
+  theGeneratedPdfIsEmpty: "The generated PDF is empty"
+  pdfExportFailed: "PDF export failed"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * PDF 渲染入口（只出 blob）。保存/有附件打 ZIP 由 export/index.exportToPDF 负责。
  *
@@ -31,7 +44,7 @@ async function exportViaReactPdf(
     customFonts: fonts,
   });
   if (!registered.ready) {
-    throw new Error("未能加载中文字体，无法生成 PDF");
+    throw new Error(uiText("couldnTLoadTheChineseFontRequiredToGenerate"));
   }
 
   const [ReactPDF, { createPdfDocument }] = await Promise.all([
@@ -44,7 +57,7 @@ async function exportViaReactPdf(
   const document = await createPdfDocument(blocks, blockMapping, registered.pageFontFamily);
   const blob = await ReactPDF.pdf(document).toBlob();
   if (!blob || blob.size < 80) {
-    throw new Error("react-pdf 生成了空 PDF");
+    throw new Error(uiText("theGeneratedPdfIsEmpty"));
   }
   return blob;
 }
@@ -80,7 +93,7 @@ export async function renderPageToPdfBlob(
   if (!blob) {
     throw lastError instanceof Error
       ? lastError
-      : new Error("PDF 导出失败");
+      : new Error(uiText("pdfExportFailed"));
   }
 
   return blob;

@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1">`
+zh-Hans:
+  pane: "分屏"
+  edgeTarget: "{{name}}，移到边缘，回车放下"
+  swapTarget: "{{name}}，交换位置，回车放下"
+  panesRearranged: "分屏位置已更新"
+  moveCanceled: "已取消移动"
+  movingPane: "正在移动 {{title}}，拖到边缘排列或中央交换，Escape 取消"
+  untitled: "未命名"
+  swapPositions: "交换位置"
+en:
+  pane: "Pane"
+  edgeTarget: "{{name}}, move to edge. Press Enter to drop."
+  swapTarget: "{{name}}, swap positions. Press Enter to drop."
+  panesRearranged: "Panes rearranged"
+  moveCanceled: "Move canceled"
+  movingPane: "Moving {{title}}. Drop at an edge to rearrange or in the center to swap. Escape to cancel."
+  untitled: "Untitled"
+  swapPositions: "Swap positions"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState } from "react";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import type { SplitDropPlacement } from "@/lib/editor-split/types";
@@ -51,8 +74,8 @@ export function useSplitPaneDrag(tabId: string) {
       }
       if (commit && current.active && current.preview.target && enabled()) {
         commitPaneMove(tabId, current.sourceId, current.preview.target, registry, current.pointerId !== null);
-        setAnnouncement("分屏位置已更新");
-      } else if (current.active) setAnnouncement("已取消移动");
+        setAnnouncement(uiText("panesRearranged"));
+      } else if (current.active) setAnnouncement(uiText("moveCanceled"));
       if (current.pointerId === null && restoreFocus) {
         requestAnimationFrame(() => {
           const handle = Array.from(surface.querySelectorAll<HTMLButtonElement>("[data-split-drag-handle]"))
@@ -65,13 +88,13 @@ export function useSplitPaneDrag(tabId: string) {
       current.active = true;
       focusSplitPane(tabId, current.sourceId, { focusEditor: false });
       document.body.classList.add("editor-split-rearranging");
-      setAnnouncement(`正在移动 ${current.title}，拖到边缘排列或中央交换，Escape 取消`);
+      setAnnouncement(uiText("movingPane", {title: current.title}));
     };
     const getHandle = (target: EventTarget | null) => target instanceof Element
       ? target.closest<HTMLButtonElement>("[data-split-drag-handle]") : null;
     const createSession = (handle: HTMLButtonElement, pointerId: number | null, x: number, y: number): DragSession => ({
       handle, sourceId: handle.dataset.splitDragHandle!,
-      title: handle.closest("[data-split-chrome]")?.querySelector(".editor-split-header-title")?.textContent ?? "未命名",
+      title: handle.closest("[data-split-chrome]")?.querySelector(".editor-split-header-title")?.textContent ?? uiText("untitled"),
       pointerId, startX: x, startY: y, active: false,
       preview: { sourceId: handle.dataset.splitDragHandle!, title: "", x: 0, y: 0, target: null },
     });
@@ -151,7 +174,7 @@ export function useSplitPaneDrag(tabId: string) {
       if (!pane) return;
       session.preview = { ...session.preview, target: targetForPane(surface, pane, event.shiftKey ? placement : "center") };
       setPreview(session.preview);
-      setAnnouncement(`${pane.querySelector(".editor-split-header-title")?.textContent ?? "分屏"}，${event.shiftKey ? "移到边缘" : "交换位置"}，回车放下`);
+      setAnnouncement(uiText(event.shiftKey ? "edgeTarget" : "swapTarget", {name: pane.querySelector(".editor-split-header-title")?.textContent ?? uiText("pane")}));
     };
     const cancel = () => finish(false, false);
     const onClick = (event: MouseEvent) => {

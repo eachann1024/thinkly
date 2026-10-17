@@ -18,6 +18,27 @@ import {
 import { CodeLanguagePicker } from "./CodeLanguagePicker";
 import { CodePreviewToolbar } from "./CodePreviewToolbar";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockToolbar.tsx#messages:1">`
+zh-Hans:
+  codeActions: "代码操作"
+  turnOffLineWrapping: "取消换行"
+  wrapLines: "自动换行"
+  formatCode: "格式化代码"
+  codeCopied: "已复制代码"
+  copyCode: "复制代码"
+  copied: "已复制"
+en:
+  codeActions: "Code actions"
+  turnOffLineWrapping: "Turn off line wrapping"
+  wrapLines: "Wrap lines"
+  formatCode: "Format code"
+  codeCopied: "Code copied"
+  copyCode: "Copy code"
+  copied: "Copied"
+`;
+const t = createTranslator(messages);
+
 
 export function CodeBlockToolbar({
   language,
@@ -96,7 +117,7 @@ export function CodeBlockToolbar({
       <SelectionToolbarSurface
         context="code"
         variant="embedded"
-        aria-label="代码操作"
+        aria-label={t("codeActions")}
         contentEditable={false}
         className={cn(
           "goose-editor-position-safe-trigger goose-code-toolbar-actions inline-flex items-center",
@@ -141,7 +162,7 @@ export function CodeBlockToolbar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={wrap ? "取消换行" : "自动换行"}
+                  aria-label={wrap ? t("turnOffLineWrapping") : t("wrapLines")}
                   aria-pressed={wrap}
                   onClick={() => onWrapChange(!wrap)}
                   className={cn(
@@ -157,7 +178,7 @@ export function CodeBlockToolbar({
                   )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{wrap ? "取消换行" : "自动换行"}</TooltipContent>
+              <TooltipContent>{wrap ? t("turnOffLineWrapping") : t("wrapLines")}</TooltipContent>
             </Tooltip>
           )}
 
@@ -180,7 +201,7 @@ export function CodeBlockToolbar({
                   )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>格式化代码</TooltipContent>
+              <TooltipContent>{t("formatCode")}</TooltipContent>
             </Tooltip>
           )}
 
@@ -191,7 +212,7 @@ export function CodeBlockToolbar({
                   variant="ghost"
                   size="sm"
                   onClick={() => void handleCopyCode()}
-                  aria-label={copied ? "已复制代码" : "复制代码"}
+                  aria-label={copied ? t("codeCopied") : t("copyCode")}
                   className={cn("h-6 w-6 p-0", chipClass)}
                 >
                   {copied ? (
@@ -206,7 +227,7 @@ export function CodeBlockToolbar({
                   )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{copied ? "已复制" : "复制代码"}</TooltipContent>
+              <TooltipContent>{copied ? t("copied") : t("copyCode")}</TooltipContent>
             </Tooltip>
           )}
         </div>

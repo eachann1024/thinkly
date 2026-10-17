@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-frontmatter/parser.ts#localMessages:1">`
+zh-Hans:
+  theYamlFrontmatterIsNotClosed: "YAML 前置区未闭合"
+  theFrontmatterRootMustBeAnObject: "frontmatter 根节点必须是对象"
+  couldnTParseYaml: "YAML 解析失败"
+en:
+  theYamlFrontmatterIsNotClosed: "The YAML frontmatter is not closed"
+  theFrontmatterRootMustBeAnObject: "The frontmatter root must be an object"
+  couldnTParseYaml: "Couldn’t parse YAML"
+`;
+const uiText = createTranslator(localMessages);
 import { isMap, parseDocument } from "yaml";
 import { extractFrontmatter } from "../markdown-raw-guard";
 import {
@@ -45,7 +58,7 @@ export function parseLocalFrontmatterBlob(blob: string | null | undefined): {
       ok: false,
       data: {},
       settings: { ...DEFAULT_SETTINGS },
-      error: "YAML 前置区未闭合",
+      error: uiText("theYamlFrontmatterIsNotClosed"),
     };
   }
   const yamlText = stripFrontmatterDelimiters(blob);
@@ -64,7 +77,7 @@ export function parseLocalFrontmatterBlob(blob: string | null | undefined): {
         ok: false,
         data: {},
         settings: { ...DEFAULT_SETTINGS },
-        error: "frontmatter 根节点必须是对象",
+        error: uiText("theFrontmatterRootMustBeAnObject"),
       };
     }
     const parsed = document.toJS() as Record<string, unknown>;
@@ -78,7 +91,7 @@ export function parseLocalFrontmatterBlob(blob: string | null | undefined): {
       ok: false,
       data: {},
       settings: { ...DEFAULT_SETTINGS },
-      error: "YAML 解析失败",
+      error: uiText("couldnTParseYaml"),
     };
   }
 }

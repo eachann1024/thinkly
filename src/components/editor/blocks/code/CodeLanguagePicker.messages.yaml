@@ -1,0 +1,12 @@
+zh-Hans:
+  searchCodeLanguages: "搜索代码语言"
+  searchLanguages: "搜索语言…"
+  commonLanguages: "常用语言"
+  codeLanguage: "代码语言"
+  noLanguagesFound: "未找到语言"
+en:
+  searchCodeLanguages: "Search code languages"
+  searchLanguages: "Search languages…"
+  commonLanguages: "Common languages"
+  codeLanguage: "Code language"
+  noLanguagesFound: "No languages found"

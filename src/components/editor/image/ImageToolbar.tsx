@@ -34,6 +34,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/editor/ui/tooltip";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/image/ImageToolbar.tsx#messages:1">`
+zh-Hans:
+  imageActions: "图片操作"
+  alignLeft: "左对齐"
+  alignCenter: "居中对齐"
+  alignRight: "右对齐"
+  copyImage: "复制图片"
+  downloadImage: "下载图片"
+en:
+  imageActions: "Image actions"
+  alignLeft: "Align left"
+  alignCenter: "Align center"
+  alignRight: "Align right"
+  copyImage: "Copy image"
+  downloadImage: "Download image"
+`;
+const t = createTranslator(messages);
+
 
 export interface SelectedImageState {
   blockId: string | null;
@@ -177,12 +196,12 @@ export function ImageToolbar({
           e.stopPropagation();
         }}
       >
-        <SelectionToolbarSurface context="image" aria-label="图片操作" className="goose-editor-context-ui goose-block-toolbar-surface animate-in fade-in-0 zoom-in-95 duration-150">
+        <SelectionToolbarSurface context="image" aria-label={t("imageActions")} className="goose-editor-context-ui goose-block-toolbar-surface animate-in fade-in-0 zoom-in-95 duration-150">
           {(
             [
-              ["left", "左对齐", AlignLeft],
-              ["center", "居中对齐", AlignCenter],
-              ["right", "右对齐", AlignRight],
+              ["left", t("alignLeft"), AlignLeft],
+              ["center", t("alignCenter"), AlignCenter],
+              ["right", t("alignRight"), AlignRight],
             ] as const
           ).map(([alignment, label, Icon]) => (
             <ImageToolButton
@@ -212,14 +231,14 @@ export function ImageToolbar({
             <Maximize2 className="h-[15px] w-[15px]" />
           </ImageToolButton>
           <ImageToolButton
-            label="复制图片"
+            label={t("copyImage")}
             tooltipSideOffset={getScaledEditorUiPx(8, editorUiScale)}
             onClick={handleSelectedImageCopy}
           >
             <Copy className="h-[15px] w-[15px]" />
           </ImageToolButton>
           <ImageToolButton
-            label="下载图片"
+            label={t("downloadImage")}
             tooltipSideOffset={getScaledEditorUiPx(8, editorUiScale)}
             onClick={handleSelectedImageDownload}
           >

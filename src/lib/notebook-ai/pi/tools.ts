@@ -1,3 +1,33 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/pi/tools.ts#messages:1">`
+zh-Hans:
+  loadSkill: "加载 Skill"
+  searchWeb: "联网搜索"
+  readWebPage: "读取网页"
+  listNotebooks: "列出笔记本"
+  listPages: "列出页面"
+  searchNotes: "搜索笔记"
+  readPage: "读取页面"
+  executeBatchPlan: "变更计划"
+  showTable: "表格"
+  showChart: "图表"
+  showDiagram: "流程图"
+  showSvg: "图片"
+en:
+  loadSkill: "Load skill"
+  searchWeb: "Search the web"
+  readWebPage: "Read web page"
+  listNotebooks: "List notebooks"
+  listPages: "List notes"
+  searchNotes: "Search notes"
+  readPage: "Read note"
+  executeBatchPlan: "Change plan"
+  showTable: "Table"
+  showChart: "Chart"
+  showDiagram: "Diagram"
+  showSvg: "Image"
+`;
+const t = createTranslator(messages);
 import { Type, type Static, type TSchema } from "@earendil-works/pi-ai";
 import type { AgentTool, AgentToolResult } from "@earendil-works/pi-agent-core";
 import { notebookAiTools } from "../tools";
@@ -7,21 +37,6 @@ import type { NotebookAiAgentContext } from "../types";
 import { isNotebookSkillId } from "../skillIds";
 
 type SdkTool = (typeof notebookAiTools)[keyof typeof notebookAiTools];
-
-const TOOL_LABELS: Record<keyof typeof notebookAiTools, string> = {
-  loadSkill: "加载 Skill",
-  searchWeb: "联网搜索",
-  readWebPage: "读取网页",
-  listNotebooks: "列出笔记本",
-  listPages: "列出页面",
-  searchNotes: "搜索笔记",
-  readPage: "读取页面",
-  executeBatchPlan: "变更计划",
-  showTable: "表格",
-  showChart: "图表",
-  showDiagram: "流程图",
-  showSvg: "图片",
-};
 
 /** 与 AI SDK 工具描述对齐的 TypeBox 参数（给模型看）。 */
 const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
@@ -183,7 +198,7 @@ export function buildPiDomainTools(
     const parameters = TOOL_PARAMETERS[name];
     return {
       name,
-      label: TOOL_LABELS[name],
+      label: t(name),
       description: sdkTool.description ?? name,
       parameters,
       execute: async (toolCallId, params, signal) =>

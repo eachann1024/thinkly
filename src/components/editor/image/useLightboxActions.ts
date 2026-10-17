@@ -14,6 +14,27 @@ import {
   getImageSrc,
 } from "./imageUtils";
 import type { ImageLightboxProps, SlideInfo } from "./lightboxTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/image/useLightboxActions.ts#messages:1">`
+zh-Hans:
+  couldNotOpenInTheSystemImageViewer: "无法使用系统图片查看器打开"
+  unknownError: "未知错误"
+  imageSavedToDownloads: "图片已保存到下载文件夹"
+  saveFailed: "保存失败"
+  copiedToClipboard: "已复制到剪贴板"
+  downloadFailed: "下载失败：{{error}}"
+  copyFailed: "复制失败：{{error}}"
+en:
+  couldNotOpenInTheSystemImageViewer: "Could not open in the system image viewer"
+  unknownError: "Unknown error"
+  imageSavedToDownloads: "Image saved to Downloads"
+  saveFailed: "Save failed"
+  copiedToClipboard: "Copied to clipboard"
+  downloadFailed: "Download failed: {{error}}"
+  copyFailed: "Copy failed: {{error}}"
+`;
+const t = createTranslator(messages);
+
 
 export function useLightboxActions(
   editor: ImageLightboxProps["editor"],
@@ -46,8 +67,8 @@ export function useLightboxActions(
         loadInternalResource: (source) => platform.imageStorage.load(source),
       });
       if (result.ok) return;
-      toast.error("无法使用系统图片查看器打开", {
-        description: result.error || "未知错误",
+      toast.error(t("couldNotOpenInTheSystemImageViewer"), {
+        description: result.error || t("unknownError"),
       });
     },
     [editor, editorContainerRef, getActivePageLocalFilePath, platform],
@@ -71,13 +92,13 @@ export function useLightboxActions(
         const filename = `image-${Date.now()}.png`;
         const saved = await saveBlobAndReveal(blob, filename);
         if (saved) {
-          toast.success("图片已保存到下载文件夹");
+          toast.success(t("imageSavedToDownloads"));
           return;
         }
-        toast.error("保存失败");
+        toast.error(t("saveFailed"));
       } catch (err) {
         toast.error(
-          `下载失败：${err instanceof Error ? err.message : "未知错误"}`,
+          t("downloadFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
         );
       } finally {
         if (resolvedObjectUrl) {
@@ -115,10 +136,10 @@ export function useLightboxActions(
         const blob = await convertImageBlobToPng(sourceBlob);
         const base64 = await blobToBase64(blob);
         await platform.clipboard.copyImage(base64);
-        toast.success("已复制到剪贴板");
+        toast.success(t("copiedToClipboard"));
       } catch (err) {
         toast.error(
-          `复制失败：${err instanceof Error ? err.message : "未知错误"}`,
+          t("copyFailed", { error: err instanceof Error ? err.message : t("unknownError") }),
         );
       } finally {
         if (resolvedObjectUrl) {

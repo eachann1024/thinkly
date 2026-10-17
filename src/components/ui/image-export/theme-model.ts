@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/image-export/theme-model.ts#localMessages:1">`
+zh-Hans:
+  sampleFile: "2026-05-15-手动更新"
+  sampleHeading: "手动更新流程"
+  sampleEdition: "（raven / ERP 标准版）"
+en:
+  sampleFile: "2026-05-15-manual-update"
+  sampleHeading: "Manual update process"
+  sampleEdition: "(raven / ERP Standard)"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";
 import { type CardThemeId, type CardTheme, type WatermarkConfig } from "@/lib/imageExport";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
@@ -21,13 +34,13 @@ export const NOTEBOOK_CARD_BLOCKS: BlockNoteContent = [
   {
     type: "heading",
     props: { level: 1 },
-    content: [{ type: "text", text: "2026-05-15-手动更新", styles: {} }],
+    content: [{ type: "text", text: uiText("sampleFile"), styles: {} }],
   },
   {
     type: "paragraph",
     content: [
-      { type: "text", text: "手动更新流程", styles: { bold: true } },
-      { type: "text", text: "（raven / ERP 标准版）", styles: {} },
+      { type: "text", text: uiText("sampleHeading"), styles: { bold: true } },
+      { type: "text", text: uiText("sampleEdition"), styles: {} },
     ],
   },
   {

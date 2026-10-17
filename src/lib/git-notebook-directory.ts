@@ -1,7 +1,8 @@
+import { gitText } from "./git-messages";
 /** Shared by settings and the desktop synchronizer; IDs never enter folder names. */
 export function gitNotebookDirectory(localPath: string): string {
   const name = localPath.replace(/\\/g, "/").replace(/\/+$/, "").split("/").pop() ?? "";
-  if (!isGitNotebookDirectory(name)) throw new Error("文件夹名称不符合跨平台同步规则，请先重命名本地文件夹");
+  if (!isGitNotebookDirectory(name)) throw new Error(gitText("crossPlatformName"));
   return name;
 }
 

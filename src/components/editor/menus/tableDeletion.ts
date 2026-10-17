@@ -18,10 +18,10 @@ export type TableDeletionPlan =
 
 export function getTableDeletionLabel(plan: TableDeletionPlan) {
   return plan.kind === "delete-table"
-    ? "删除表格"
+    ? t("deleteTable")
     : plan.kind === "delete-rows"
-      ? "删除行"
-      : "删除列";
+      ? t("deleteRow")
+      : t("deleteColumn");
 }
 
 export type TableDeletionSnapshot = {
@@ -145,3 +145,15 @@ export function createTableDeletionSnapshot({
   };
 }
 import type { Node as ProseMirrorNode } from "prosemirror-model";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/tableDeletion.ts#messages:1">`
+zh-Hans:
+  deleteTable: "删除表格"
+  deleteRow: "删除行"
+  deleteColumn: "删除列"
+en:
+  deleteTable: "Delete table"
+  deleteRow: "Delete row"
+  deleteColumn: "Delete column"
+`;
+const t = createTranslator(messages);

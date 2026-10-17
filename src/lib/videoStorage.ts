@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/videoStorage.ts#localMessages:1">`
+zh-Hans:
+  openALocalFolderNotebookBeforeInsertingAVideo: "请先打开本地文件夹笔记本，再插入视频"
+  localFileServicesArenTReadyTheVideoCouldn: "本地文件服务未就绪，无法保存视频"
+  couldnTCreateTheVideoFolder: "视频资源目录创建失败"
+  couldnTSaveTheCompressedVideo: "压缩后的视频保存失败"
+en:
+  openALocalFolderNotebookBeforeInsertingAVideo: "Open a local folder notebook before inserting a video"
+  localFileServicesArenTReadyTheVideoCouldn: "Local file services aren’t ready. The video couldn’t be saved."
+  couldnTCreateTheVideoFolder: "Couldn’t create the video folder"
+  couldnTSaveTheCompressedVideo: "Couldn’t save the compressed video"
+`;
+const uiText = createTranslator(localMessages);
 import { HostAdapter } from "@/lib/host/adapter";
 import { fs } from "@/lib/electron-platform/fs";
 import {
@@ -39,17 +54,17 @@ export const videoStorage = {
 
     // Electron 仅本地文件夹模式：无仓库时禁止视频写入内置 db
     if (!localPagePath) {
-      throw new Error("请先打开文件夹仓库，再插入视频");
+      throw new Error(uiText("openALocalFolderNotebookBeforeInsertingAVideo"));
     }
 
     if (!fs.isAvailable())
-      throw new Error("本地文件服务未就绪，无法保存视频");
+      throw new Error(uiText("localFileServicesArenTReadyTheVideoCouldn"));
     const assetsDirectory = `${pageDirectory(localPagePath)}/assets`;
     if (
       !(await fs.existsAsync(assetsDirectory)) &&
       !(await fs.mkdir(assetsDirectory))
     ) {
-      throw new Error("视频资源目录创建失败");
+      throw new Error(uiText("couldnTCreateTheVideoFolder"));
     }
     // 转码产物固定 mp4；无 FFmpeg 宿主透传原文件时保留原扩展名，避免 mislabel。
     const passthroughExt =
@@ -62,7 +77,7 @@ export const videoStorage = {
       (await blobToBase64(video)).split(",")[1],
       "base64",
     );
-    if (!saved) throw new Error("压缩后的视频保存失败");
+    if (!saved) throw new Error(uiText("couldnTSaveTheCompressedVideo"));
     return `./assets/${filename}`;
   },
 

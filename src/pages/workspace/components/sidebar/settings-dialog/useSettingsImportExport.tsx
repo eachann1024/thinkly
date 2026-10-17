@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsImportExport.tsx#localMessages:1">`
+zh-Hans:
+  exportComplete_105c: "导出成功"
+  exportFailed_dd51: "导出失败"
+  pleaseTryAgainLater_d610: "请稍后重试。"
+  noteBackup_fbdd: "笔记备份"
+  importComplete_b6d1: "导入成功"
+  notebooksRestored: "已恢复 {{notebooks}} 个笔记本，共 {{pages}} 个页面"
+  importFailed_fddc: "导入失败"
+  chooseAValidExportedZipBackup_0933: "请确保文件是有效的导出 ZIP 包"
+en:
+  exportComplete_105c: "Export complete"
+  exportFailed_dd51: "Export failed"
+  pleaseTryAgainLater_d610: "Please try again later."
+  noteBackup_fbdd: "Note backup"
+  importComplete_b6d1: "Import complete"
+  notebooksRestored: "Restore complete. Notebooks: {{notebooks}}; pages: {{pages}}."
+  importFailed_fddc: "Import failed"
+  chooseAValidExportedZipBackup_0933: "Choose a valid exported ZIP backup"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect } from "react";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
@@ -37,11 +60,11 @@ export function useSettingsImportExport(
         notebooks,
         Object.values(pages),
       );
-      if (saved) toast.success("导出成功");
+      if (saved) toast.success(uiText("exportComplete_105c"));
     } catch (err) {
       console.error("Export failed", err);
-      toast.error("导出失败", {
-        description: err instanceof Error ? err.message : "请稍后重试。",
+      toast.error(uiText("exportFailed_dd51"), {
+        description: err instanceof Error ? err.message : uiText("pleaseTryAgainLater_d610"),
       });
     } finally {
       sendDataEvent({ type: "export.finished", id });
@@ -53,7 +76,7 @@ export function useSettingsImportExport(
     if (id === null) return;
     try {
       const file = await pickImportFile([
-        { name: "笔记备份", extensions: ["zip", "mdzip"] },
+        { name: uiText("noteBackup_fbdd"), extensions: ["zip", "mdzip"] },
       ]);
       if (!file) return;
       sendDataEvent({ type: "import.fileChosen", id });
@@ -95,13 +118,13 @@ export function useSettingsImportExport(
         setActivePage(firstPageId);
       }
 
-      toast.success("导入成功", {
-        description: `已恢复 ${notebookCount} 个笔记本，共 ${pageCount} 个页面`,
+      toast.success(uiText("importComplete_b6d1"), {
+        description: uiText("notebooksRestored", { notebooks: notebookCount, pages: pageCount }),
       });
     } catch (err) {
       console.error("Import failed", err);
-      toast.error("导入失败", {
-        description: err instanceof Error ? err.message : "请确保文件是有效的导出 ZIP 包",
+      toast.error(uiText("importFailed_fddc"), {
+        description: err instanceof Error ? err.message : uiText("chooseAValidExportedZipBackup_0933"),
       });
     } finally {
       sendDataEvent({ type: "import.finished", id });

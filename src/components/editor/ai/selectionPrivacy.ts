@@ -1,5 +1,20 @@
 import { Fragment, type Node as ProseMirrorNode } from "prosemirror-model";
 import { TextSelection, type Selection } from "prosemirror-state";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/selectionPrivacy.ts#messages:1">`
+zh-Hans:
+  theSelectionContainsATableOrNonText: "选区含表格或非文字块，请只选择正文文字后重试。"
+  selectTextFromBodyBlocksAtTheSame: "请在同一层级的正文块中选择文字后重试；表格或跨层级选区暂不支持行内改写。"
+  theSelectionContainsNonTextBlocksSelectA: "选区含非文字块，请缩小范围后重试。"
+  aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
+en:
+  theSelectionContainsATableOrNonText: "The selection contains a table or non-text blocks. Select only body text and retry."
+  selectTextFromBodyBlocksAtTheSame: "Select text from body blocks at the same level. Tables and selections across nested levels do not support inline rewriting yet."
+  theSelectionContainsNonTextBlocksSelectA: "The selection contains non-text blocks. Select a smaller range and retry."
+  aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+`;
+const t = createTranslator(messages);
+
 
 export interface InlineSelectionPart {
   blockId: string;
@@ -19,7 +34,7 @@ export function captureInlineSelectionParts(
   const { from, to } = selection;
   const textSelection = selection instanceof TextSelection;
   const parts: InlineSelectionPart[] = [];
-  const unsupported = () => new Error("选区含表格或非文字块，请只选择正文文字后重试。");
+  const unsupported = () => new Error(t("theSelectionContainsATableOrNonText"));
   // Body-wide selection (second Cmd+A) can end between containers instead of
   // inside inline text. Validate those ranges per block below, while still
   // rejecting positions inside tables and other non-inline content.
@@ -88,7 +103,7 @@ export function captureInlineSelection(
     start.start(start.depth - 2) !== end.start(end.depth - 2)
   ) {
     throw new Error(
-      "请在同一层级的正文块中选择文字后重试；表格或跨层级选区暂不支持行内改写。",
+      t("selectTextFromBodyBlocksAtTheSame"),
     );
   }
   const replaceFrom = start.before(start.depth - 1);
@@ -101,7 +116,7 @@ export function captureInlineSelection(
     if (pos >= replaceFrom && pos < replaceTo) {
       const content = node.firstChild;
       if (node.type.name !== "blockContainer" || !content?.isTextblock) {
-        throw new Error("选区含非文字块，请缩小范围后重试。");
+        throw new Error(t("theSelectionContainsNonTextBlocksSelectA"));
       }
       sourceNodes.push(node);
       const selected = content.copy(
@@ -136,7 +151,7 @@ export function composeInlineReplacement(
   target: InlineSelectionSnapshot,
   generated: ProseMirrorNode[],
 ): Fragment {
-  if (!generated.length) throw new Error("AI 未返回可写入的内容。");
+  if (!generated.length) throw new Error(t("aiDidNotReturnAnyContentThatCould"));
   const first = target.sourceNodes[0];
   const last = target.sourceNodes.at(-1)!;
   const firstContent = first.firstChild!;

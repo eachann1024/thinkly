@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/bootstrap/assertQuickNoteSaved.ts#localMessages:1">`
+zh-Hans:
+  unsavedQuickNote: "速记草稿尚未保存，请在小窗重试保存后更新"
+en:
+  unsavedQuickNote: "Your Quick Note draft hasn’t been saved. Try saving it in the Quick Note window before updating."
+`;
+const uiText = createTranslator(localMessages);
 import type { JSONContent } from "@/types";
 import type { QuickNoteSlot } from "@/stores/quicknote/types";
 
@@ -26,7 +35,7 @@ export async function assertQuickNoteSaved(): Promise<void> {
     const saved = persisted[slot] ?? null;
     if (quickNote.isQuickNoteDraftEmpty(draft) && quickNote.isQuickNoteDraftEmpty(saved)) continue;
     if (content.getContentSignature(draft) !== content.getContentSignature(saved)) {
-      throw new Error("速记草稿尚未保存，请在小窗重试保存后更新");
+      throw new Error(uiText("unsavedQuickNote"));
     }
   }
 }

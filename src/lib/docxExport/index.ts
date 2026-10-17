@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/docxExport/index.ts#localMessages:1">`
+zh-Hans:
+  theGeneratedWordDocumentIsEmpty: "生成了空的 Word 文档"
+en:
+  theGeneratedWordDocumentIsEmpty: "The generated Word document is empty"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import type { CustomFonts } from "@/stores/useSettings";
 import {
@@ -166,7 +175,7 @@ export async function renderPageToDocxBlob(page: Page): Promise<Blob> {
   const doc = await buildDocxDocument(page);
   const blob = await Packer.toBlob(doc);
   if (!blob || blob.size < 80) {
-    throw new Error("生成了空的 Word 文档");
+    throw new Error(uiText("theGeneratedWordDocumentIsEmpty"));
   }
   return blob;
 }

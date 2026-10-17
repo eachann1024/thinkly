@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/hooks/local-folder-watch/shared.tsx#localMessages:1">`
+zh-Hans:
+  externalChange: "「{{name}}」已被外部修改"
+  chooseHowToResolveTheConflict: "选择如何处理冲突"
+  keepMyEdits: "保留我的编辑"
+  loadDiskVersion: "加载磁盘版本"
+en:
+  externalChange: "{{name}} was changed outside the app"
+  chooseHowToResolveTheConflict: "Choose how to resolve the conflict"
+  keepMyEdits: "Keep my edits"
+  loadDiskVersion: "Load disk version"
+`;
+const uiText = createTranslator(localMessages);
 import { readMarkdownFile } from "@/lib/local-folder-scanner/entries";
 import {
   readSharedMarkdown,
@@ -76,18 +91,18 @@ export function showConflictToast(
   if (activeConflictToasts.has(filePath)) return;
 
   const fileName = filePath.replace(/^.*[\\/]/, "");
-  const toastId = toast.warning(`「${fileName}」已被外部修改`, {
-    description: "选择如何处理冲突",
+  const toastId = toast.warning(uiText("externalChange", {name: fileName}), {
+    description: uiText("chooseHowToResolveTheConflict"),
     duration: Infinity,
     action: {
-      label: "保留我的编辑",
+      label: uiText("keepMyEdits"),
       onClick: (_e) => {
         activeConflictToasts.delete(filePath);
         onKeepMine();
       },
     },
     cancel: {
-      label: "加载磁盘版本",
+      label: uiText("loadDiskVersion"),
       onClick: (_e) => {
         activeConflictToasts.delete(filePath);
         onLoadDisk();

@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/local-folder-assets/filesystem.ts#localMessages:1">`
+zh-Hans:
+  readDirectoryFailed: "无法读取目录：{{path}}"
+  readMarkdownFailed: "无法读取 Markdown：{{path}}"
+  directoryCycle: "目录循环：{{path}}"
+  pathOutsideNotebook: "扫描路径超出笔记本：{{path}}"
+en:
+  readDirectoryFailed: "Couldn’t read folder: {{path}}"
+  readMarkdownFailed: "Couldn’t read Markdown: {{path}}"
+  directoryCycle: "Folder cycle detected: {{path}}"
+  pathOutsideNotebook: "Scan path is outside the notebook: {{path}}"
+`;
+const uiText = createTranslator(localMessages);
 import { originalHistoryPath } from "../history/localPaths";
 import type { JSONContent } from "@/types";
 import { getLocalMdSnapshot } from "../local-md-snapshot";
@@ -23,7 +38,7 @@ async function readDirectory(
   const entries = gooseFs.readDirAsync
     ? await gooseFs.readDirAsync(path)
     : gooseFs.readDir(path);
-  if (!Array.isArray(entries)) throw new Error(`无法读取目录：${path}`);
+  if (!Array.isArray(entries)) throw new Error(uiText("readDirectoryFailed", {path}));
   return entries;
 }
 
@@ -43,7 +58,7 @@ async function readTextFile(
     ? await gooseFs.readFileAsync(filePath)
     : gooseFs.readFile(filePath);
   if (typeof text !== "string")
-    throw new Error(`无法读取 Markdown：${filePath}`);
+    throw new Error(uiText("readMarkdownFailed", {path: filePath}));
   return text;
 }
 
@@ -63,7 +78,7 @@ export async function collectNotebookFiles(
   const history: string[] = [];
   const seen = new Set<string>();
   const walk = async (directory: string) => {
-    if (seen.has(directory)) throw new Error(`目录循环：${directory}`);
+    if (seen.has(directory)) throw new Error(uiText("directoryCycle", {path: directory}));
     seen.add(directory);
     const entries = await readDirectory(gooseFs, directory);
     for (const entry of entries) {
@@ -71,7 +86,7 @@ export async function collectNotebookFiles(
         !isWithin(basePath, entry.path) ||
         dirname(entry.path) !== normalizePath(directory)
       ) {
-        throw new Error(`扫描路径超出笔记本：${entry.path}`);
+        throw new Error(uiText("pathOutsideNotebook", {path: entry.path}));
       }
       if (entry.isDirectory) await walk(entry.path);
       if (!entry.isFile) continue;

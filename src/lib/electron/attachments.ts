@@ -1,3 +1,17 @@
+import { formatDecimal } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/electron/attachments.ts#localMessages:1">`
+zh-Hans:
+  attachmentTooLarge: "附件超过 50MB 上限（实际 {{size}}MB）"
+  attachmentWriteFailed: "附件写入磁盘失败: {{error}}"
+  desktopIntegrationIsUnavailable: "gooseDesktop 不可用"
+en:
+  attachmentTooLarge: "The attachment exceeds the 50 MB limit ({{size}} MB)"
+  attachmentWriteFailed: "Couldn’t save the attachment to disk: {{error}}"
+  desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
+`;
+const uiText = createTranslator(localMessages);
 import { clearResolvedUrlCache } from "@/lib/imageStorage/resolvedUrlCache";
 /**
  * Electron 桌面端的附件磁盘存储。
@@ -34,7 +48,7 @@ const attachmentPaths = async (
   id: string,
 ): Promise<{ dataPath: string; metaPath: string; parentDir: string }> => {
   const api = getGooseDesktop();
-  if (!api) throw new Error("gooseDesktop 不可用");
+  if (!api) throw new Error(uiText("desktopIntegrationIsUnavailable"));
   const base = await api.getUserDataPath();
   const segments = [ATTACHMENTS_DIR, ...id.split("/").filter(Boolean)];
   const dataPath = await api.joinPath(base, ...segments);
@@ -93,20 +107,20 @@ export const postAttachment = async (
     return {
       id,
       ok: false,
-      error: `附件超过 50MB 上限（实际 ${(data.byteLength / (1024 * 1024)).toFixed(1)}MB）`,
+      error: uiText("attachmentTooLarge", {size: formatDecimal(data.byteLength / (1024 * 1024), 1)}),
     };
   }
   try {
     await migrateLegacyAttachments();
     const api = getGooseDesktop();
-    if (!api) return { id, ok: false, error: "gooseDesktop 不可用" };
+    if (!api) return { id, ok: false, error: uiText("desktopIntegrationIsUnavailable") };
     const { dataPath, metaPath, parentDir } = await attachmentPaths(id);
     await api.fsMkdir(parentDir);
     await api.fsWrite(dataPath, data);
     await api.fsWriteText(metaPath, JSON.stringify({ type }));
     return { id, ok: true };
   } catch (error) {
-    return { id, ok: false, error: `附件写入磁盘失败: ${toErrorMessage(error)}` };
+    return { id, ok: false, error: uiText("attachmentWriteFailed", {error: toErrorMessage(error)}) };
   }
 };
 

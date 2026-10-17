@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/empty-state/usePageEmptyState.ts#localMessages:1">`
+zh-Hans:
+  notebookCreated: "已自动创建笔记本"
+  openFailed: "打开文件夹失败："
+  newNote: "新建笔记"
+  openLocalFolder: "打开本地文件夹"
+en:
+  notebookCreated: "Notebook created"
+  openFailed: "Couldn’t open folder: "
+  newNote: "New note"
+  openLocalFolder: "Open local folder"
+`;
+const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
@@ -32,7 +47,7 @@ export function usePageEmptyState() {
       const notebookIds = Object.keys(notebooks);
       if (notebookIds.length === 0) {
         notebookId = createNotebook("我的笔记");
-        toast.success("已自动创建笔记本");
+        toast.success(uiText("notebookCreated"));
       } else {
         notebookId = notebookIds[0];
         setActiveNotebook(notebookId);
@@ -65,7 +80,7 @@ export function usePageEmptyState() {
       }
     } catch (e) {
       console.error(e);
-      toast.error("打开文件夹失败：" + String(e));
+      toast.error(uiText("openFailed") + String(e));
     }
   }, [createLocalFolderNotebook, loadLocalFolderPages]);
 
@@ -100,14 +115,14 @@ export function usePageEmptyState() {
     if (showCreatePage) {
       list.push({
         key: "create-page",
-        title: "新建笔记",
+        title: uiText("newNote"),
         onClick: onCreatePage,
       });
     }
 
     list.push({
       key: "open-folder",
-      title: "打开本地文件夹",
+      title: uiText("openLocalFolder"),
       onClick: onOpenLocalFolder,
     });
 

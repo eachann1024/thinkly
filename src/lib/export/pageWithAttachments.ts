@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/pageWithAttachments.ts#localMessages:1">`
+zh-Hans:
+  theRenderedFileRequiredForPdfExportIsMissing: "PDF 导出缺少已渲染的文件"
+  couldnTCreateTheAttachmentsFolder: "无法创建附件目录"
+en:
+  theRenderedFileRequiredForPdfExportIsMissing: "The rendered file required for PDF export is missing"
+  couldnTCreateTheAttachmentsFolder: "Couldn’t create the attachments folder"
+`;
+const uiText = createTranslator(localMessages);
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { cloneExportBlocks, prepareExportBlocks } from "./prepareExportBlocks";
@@ -55,7 +66,7 @@ async function buildPlainExport(
   pdfBlob?: Blob,
 ): Promise<{ blob: Blob; filename: string }> {
   if (format === "pdf") {
-    if (!pdfBlob) throw new Error("PDF 导出缺少已渲染的文件");
+    if (!pdfBlob) throw new Error(uiText("theRenderedFileRequiredForPdfExportIsMissing"));
     return { blob: pdfBlob, filename: `${rawTitle}.pdf` };
   }
   if (format === "json") {
@@ -91,7 +102,7 @@ async function buildMainFile(
   pdfBlob?: Blob,
 ): Promise<{ filename: string; content: Blob | string }> {
   if (format === "pdf") {
-    if (!pdfBlob) throw new Error("PDF 导出缺少已渲染的文件");
+    if (!pdfBlob) throw new Error(uiText("theRenderedFileRequiredForPdfExportIsMissing"));
     return { filename: `${safeTitle}.pdf`, content: pdfBlob };
   }
   if (format === "json") {
@@ -132,7 +143,7 @@ export async function buildSinglePageExport(
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const assetsFolder = zip.folder("assets");
-  if (!assetsFolder) throw new Error("无法创建附件目录");
+  if (!assetsFolder) throw new Error(uiText("couldnTCreateTheAttachmentsFolder"));
 
   const pageClone = structuredClone(page) as Page;
   pageClone.content = cloneExportBlocks(pageClone.content, {

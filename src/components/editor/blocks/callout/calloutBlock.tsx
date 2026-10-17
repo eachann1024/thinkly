@@ -11,6 +11,15 @@ import {
   LUCIDE_ICON_TO_EMOJI,
   normalizeCalloutIcon,
 } from "./calloutIcons";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/callout/calloutBlock.tsx#messages:1">`
+zh-Hans:
+  calloutIcon: "提示块图标"
+en:
+  calloutIcon: "Callout icon"
+`;
+const t = createTranslator(messages);
+
 
 export { DEFAULT_CALLOUT_ICON, LUCIDE_ICON_TO_EMOJI, normalizeCalloutIcon };
 
@@ -59,7 +68,7 @@ function CalloutBlockView({
       <div contentEditable={false} className="callout-icon-slot shrink-0">
         {editor.isEditable ? (
           <NotebookIconSelector value={icon} defaultIcon={DEFAULT_CALLOUT_ICON}
-            label="提示块图标" container={null} compact
+            label={t("calloutIcon")} container={null} compact
             onChange={(value) => {
               if (!editor.isEditable) return;
               editor.updateBlock(block, { props: { icon: value } });

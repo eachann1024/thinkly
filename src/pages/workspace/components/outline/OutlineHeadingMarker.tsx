@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/outline/OutlineHeadingMarker.tsx#localMessages:1">`
+zh-Hans:
+  collapseSubheadings: "收起子标题"
+  expandSubheadings: "展开子标题"
+en:
+  collapseSubheadings: "Collapse subheadings"
+  expandSubheadings: "Expand subheadings"
+`;
+const uiText = createTranslator(localMessages);
 import { MainTreeRowDisclosure } from "../sidebar/main-tree/MainTreeRowShell";
 
 interface OutlineHeadingMarkerProps {
@@ -24,7 +35,7 @@ export function OutlineHeadingMarker({
       {expandable && (
         <MainTreeRowDisclosure
           expanded={expanded}
-          label={expanded ? "收起子标题" : "展开子标题"}
+          label={expanded ? uiText("collapseSubheadings") : uiText("expandSubheadings")}
           onToggle={onToggle}
           className="outline-heading-disclosure"
         />

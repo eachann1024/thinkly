@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/asset-maintenance-state.ts#localMessages:1">`
+zh-Hans:
+  cleanupDone: "已将 {{count}} 个文件移入废纸篓。继续清理请重新扫描。"
+en:
+  cleanupDone: "Files moved to system trash: {{count}}. Scan again to continue cleanup."
+`;
+const uiText = createTranslator(localMessages);
 import type { AssetNotebook, AssetScan } from "./asset-maintenance-contract";
 
 type Workspace = { notebooks: AssetNotebook[]; notebookId: string };
@@ -39,7 +48,7 @@ export function assetMaintenanceReducer(state: AssetMaintenanceState, event: Ass
   if (event.type === "trashed") {
     if (state.status !== "trashing" || state.requestId !== event.requestId) return state;
     return event.canceled ? { ...workspace, status: "ready", scan: state.scan, selected: state.selected, previewPath: state.previewPath }
-      : { ...workspace, status: "success", message: `已将 ${event.deleted} 个文件移入废纸篓。继续清理请重新扫描。` };
+      : { ...workspace, status: "success", message: uiText("cleanupDone", {count: event.deleted}) };
   }
   if (state.status !== "ready") return state;
   if (event.type === "select-all") return { ...state, selected: event.selected ? new Set(state.scan.assets.map(asset => asset.path)) : new Set() };

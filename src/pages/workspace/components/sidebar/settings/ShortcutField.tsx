@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/ShortcutField.tsx#localMessages:1">`
+zh-Hans:
+  pressAShortcutEscToCancel_f78c: "按下快捷键，Esc 取消"
+  clickThenPressAShortcut_b24f: "点击后按下快捷键"
+  resetToDefaults_7468: "恢复默认"
+  clear_288f: "清空"
+en:
+  pressAShortcutEscToCancel_f78c: "Press a shortcut; Esc to cancel"
+  clickThenPressAShortcut_b24f: "Click, then press a shortcut"
+  resetToDefaults_7468: "Reset to defaults"
+  clear_288f: "Clear"
+`;
+const uiText = createTranslator(localMessages);
 import { useRef, useState } from "react"
 import * as GooseIcons from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
@@ -124,7 +139,7 @@ export function ShortcutField({
           value={displayValue}
           readOnly
           data-shortcut-recorder
-          placeholder={isCapturing ? "按下快捷键，Esc 取消" : "点击后按下快捷键"}
+          placeholder={isCapturing ? uiText("pressAShortcutEscToCancel_f78c") : uiText("clickThenPressAShortcut_b24f")}
           className={cn(
             "h-9 text-sm transition-colors",
             isCapturing && "placeholder:text-[var(--goose-color-capture-hint)]",
@@ -240,8 +255,7 @@ export function ShortcutField({
             className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
             onClick={() => onChange(resetValue)}
           >
-            恢复默认
-          </Button>
+            {uiText("resetToDefaults_7468")}</Button>
         )}
         <Button
           type="button"
@@ -250,8 +264,7 @@ export function ShortcutField({
           className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
           onClick={() => onChange("")}
         >
-          清空
-        </Button>
+          {uiText("clear_288f")}</Button>
       </div>
     </div>
   )

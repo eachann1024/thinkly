@@ -18,6 +18,25 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import type { ChatMessagesProps } from "./messages/types";
 import { UserMessage } from "./messages/UserMessage";
 import { AssistantMessage } from "./messages/AssistantMessage";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ChatMessages.tsx#messages:1">`
+zh-Hans:
+  howWouldYouLikeToEditThisNote: "想怎么修改这篇笔记？"
+  polishThisText: "润色这段文字"
+  turnIntoAChecklist: "整理成清单"
+  extractKeyPoints: "提炼要点"
+  scrollToBottom: "滚动到底部"
+  detailSendSuggestion: "发送建议：{{value1}}"
+en:
+  howWouldYouLikeToEditThisNote: "How would you like to edit this note?"
+  polishThisText: "Polish this text"
+  turnIntoAChecklist: "Turn into a checklist"
+  extractKeyPoints: "Extract key points"
+  scrollToBottom: "Scroll to bottom"
+  detailSendSuggestion: "Send suggestion: {{value1}}"
+`;
+const t = createTranslator(messages);
+
 export { buildUserMessageSegments } from "@/lib/notebook-ai/userMessageSegments";
 export {
   ASSISTANT_TEXT_PARTS,
@@ -107,16 +126,16 @@ export function ChatMessages({
               <Quote size={26} fill="currentColor" />
             </div>
             <h2 className="notebook-ai-empty-title text-foreground">
-              想怎么修改这篇笔记？
+              {t("howWouldYouLikeToEditThisNote")}
             </h2>
             <div className="notebook-ai-empty-suggestions">
-              {["润色这段文字", "整理成清单", "提炼要点"].map((text) => (
+              {[{ label: t("polishThisText"), prompt: "润色这段文字" }, { label: t("turnIntoAChecklist"), prompt: "整理成清单" }, { label: t("extractKeyPoints"), prompt: "提炼要点" }].map(({ label: text, prompt }) => (
                 <Button contentStyle="preserve" variant="ghost" size={null}
                   key={text}
                   type="button"
                   className="notebook-ai-empty-suggestion"
-                  onClick={() => onEmptySuggestion?.(text)}
-                  aria-label={`发送建议：${text}`}
+                  onClick={() => onEmptySuggestion?.(prompt)}
+                  aria-label={t("detailSendSuggestion", { value1: text })}
                 >
                   <span>{text}</span>
                 </Button>
@@ -167,8 +186,8 @@ export function ChatMessages({
             <ThreadPrimitive.ViewportFooter className="pointer-events-none sticky bottom-[calc(var(--ai-composer-float-pad,7.5rem)+12px)] z-10 flex h-0 justify-center overflow-visible">
               <ThreadPrimitive.ScrollToBottom render={<IconButton size="icon" tone="muted" />}
                 className="pointer-events-auto -translate-y-10 border border-border bg-background text-muted-foreground shadow-sm disabled:hidden"
-                aria-label="滚动到底部"
-                title="滚动到底部"
+                aria-label={t("scrollToBottom")}
+                title={t("scrollToBottom")}
               >
                 <ArrowDown className="h-4 w-4" strokeWidth={1.75} />
               </ThreadPrimitive.ScrollToBottom>

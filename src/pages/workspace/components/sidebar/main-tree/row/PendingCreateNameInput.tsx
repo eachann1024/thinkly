@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1">`
+zh-Hans:
+  newFolder_f3a4: "新建文件夹"
+  couldNotCreateItemPleaseTry_db8e: "创建失败，请重试"
+  folderName_a984: "文件夹名称"
+  fileName_d2e2: "文件名称"
+en:
+  newFolder_f3a4: "New folder"
+  couldNotCreateItemPleaseTry_db8e: "Could not create item. Please try again."
+  folderName_a984: "Folder name"
+  fileName_d2e2: "File name"
+`;
+const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useImeInput } from "@/hooks/useImeInput";
@@ -10,7 +25,7 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
   onCommit?: (id: string, name: string) => Promise<boolean>;
   onCancel?: (id: string) => void;
 }) {
-  const { value, valueRef, inputProps, isComposing } = useImeInput(kind === "folder" ? "新建文件夹" : "");
+  const { value, valueRef, inputProps, isComposing } = useImeInput(kind === "folder" ? uiText("newFolder_f3a4") : "");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const finishedRef = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -34,7 +49,7 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
       setBusy(true);
       if (await onCommit?.(id, name)) return;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "创建失败，请重试");
+      toast.error(error instanceof Error ? error.message : uiText("couldNotCreateItemPleaseTry_db8e"));
     }
     finishedRef.current = false;
     setBusy(false);
@@ -61,7 +76,7 @@ export function PendingCreateNameInput({ id, kind, onCommit, onCancel }: {
         onDoubleClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
-        aria-label={kind === "folder" ? "文件夹名称" : "文件名称"} />
+        aria-label={kind === "folder" ? uiText("folderName_a984") : uiText("fileName_d2e2")} />
     </span>
   );
 }

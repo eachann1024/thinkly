@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/capture/captureElement.ts#localMessages:1">`
+zh-Hans:
+  couldnTExportTheImageTryAgain: "导出图片失败，请重试"
+  exportFailed: "导出图片失败：{{error}}"
+  generatingImagePleaseWait: "图片正在生成，请稍候"
+  timedOutWaitingForImagesToLoad: "等待图片资源超时"
+  imageSaved: "图片已保存"
+en:
+  couldnTExportTheImageTryAgain: "Couldn’t export the image. Try again."
+  exportFailed: "Couldn’t export the image: {{error}}"
+  generatingImagePleaseWait: "Generating image. Please wait."
+  timedOutWaitingForImagesToLoad: "Timed out waiting for images to load"
+  imageSaved: "Image saved"
+`;
+const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { withTimeout } from "./timeout";
 import { renderPngBlobWithFallback } from "./pngCapture";
@@ -7,12 +24,12 @@ let isCapturingImage = false;
 
 function getExportErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message.trim() : "";
-  if (!message) return "导出图片失败，请重试";
-  if (/timeout|超时/i.test(message)) return `导出图片失败：${message}`;
-  if (/内容过长|尺寸超出|图片编码|保存图片/.test(message)) {
+  if (!message) return uiText("couldnTExportTheImageTryAgain");
+  if (/timeout|timed out|超时/i.test(message)) return uiText("exportFailed", {error: message});
+  if (/内容过长|尺寸超出|图片编码|保存图片|content is too (?:long|large)|image encoding|save the image/i.test(message)) {
     return message;
   }
-  return "导出图片失败，请重试";
+  return uiText("couldnTExportTheImageTryAgain");
 }
 
 async function waitForImages(container: HTMLElement): Promise<void> {
@@ -36,7 +53,7 @@ async function waitForImages(container: HTMLElement): Promise<void> {
 
 export async function captureElementToPng(element: HTMLElement, filename: string) {
   if (isCapturingImage) {
-    toast.info("图片正在生成，请稍候");
+    toast.info(uiText("generatingImagePleaseWait"));
     return;
   }
 
@@ -47,7 +64,7 @@ export async function captureElementToPng(element: HTMLElement, filename: string
     await withTimeout(
       Promise.all([document.fonts.ready, waitForImages(element)]),
       10_000,
-      "等待图片资源超时",
+      uiText("timedOutWaitingForImagesToLoad"),
     );
 
     await new Promise((resolve) =>
@@ -60,7 +77,7 @@ export async function captureElementToPng(element: HTMLElement, filename: string
     const { saveDocumentBlobAndReveal } = await import("../../export/documentFileDialogs");
     const saved = await saveDocumentBlobAndReveal(blob, filename);
     if (saved) {
-      toast.success("图片已保存");
+      toast.success(uiText("imageSaved"));
     }
   } catch (error) {
     toast.error(getExportErrorMessage(error));

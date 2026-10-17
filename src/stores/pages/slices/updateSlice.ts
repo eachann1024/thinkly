@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/slices/updateSlice.ts#block1:1">`
+zh-Hans:
+  recoveryWriteFailed: "无法写入恢复备份"
+  keepWindowOpen: "请先不要关闭窗口，并复制重要内容后重试。"
+  readSettingsUnchanged: "页面读取失败，未更改设置"
+  yamlSettingsUnchanged: "YAML 前置区格式异常，未更改设置"
+  fixYaml: "原文已保留，请先修复 YAML 后重试。"
+  notSaved: "内容暂未保存"
+  recoverySaved: "最新内容已放入恢复备份，下次打开仍可找回。"
+en:
+  recoveryWriteFailed: "Couldn’t write the recovery backup"
+  keepWindowOpen: "Keep this window open. Copy any important content, then try again."
+  readSettingsUnchanged: "The page couldn’t be read. Settings were not changed."
+  yamlSettingsUnchanged: "The YAML frontmatter is invalid. Settings were not changed."
+  fixYaml: "The original content was preserved. Fix the YAML and try again."
+  notSaved: "Content has not been saved"
+  recoverySaved: "The latest content was saved to a recovery backup and can be recovered the next time you open the app."
+`);
 import type { PagesState } from "../types";
 import {
   normalizePageLayout,
@@ -64,9 +83,9 @@ export function createUpdatePageSlice(
           })
         : null;
       if (isDurableContentEdit && !recoveryEntry) {
-        toast.error("无法写入恢复备份", {
+        toast.error(storeText("recoveryWriteFailed"), {
           id: "goose-recovery-journal-failed",
-          description: "请先不要关闭窗口，并复制重要内容后重试。",
+          description: storeText("keepWindowOpen"),
         });
       }
       const shouldMergeFrontmatterSettings =
@@ -76,7 +95,7 @@ export function createUpdatePageSlice(
         shouldMergeFrontmatterSettings && page?.localReadState !== "error" && !page?.editorDraft;
 
       if (shouldMergeFrontmatterSettings && page?.localReadState === "error") {
-        toast.error("页面读取失败，未更改设置");
+        toast.error(storeText("readSettingsUnchanged"));
         return;
       }
       let settingsRejected = false;
@@ -196,8 +215,8 @@ export function createUpdatePageSlice(
       });
 
       if (settingsRejected) {
-        toast.error("YAML 前置区格式异常，未更改设置", {
-          description: "原文已保留，请先修复 YAML 后重试。",
+        toast.error(storeText("yamlSettingsUnchanged"), {
+          description: storeText("fixYaml"),
         });
         return;
       }
@@ -224,9 +243,9 @@ export function createUpdatePageSlice(
       if (persisted && recoveryEntry) {
         acknowledgeRecoveryEntry("internal-page", id, recoveryEntry.revision);
       } else if (!persisted) {
-        toast.error("内容暂未保存", {
+        toast.error(storeText("notSaved"), {
           id: `goose-page-save-failed:${id}`,
-          description: "最新内容已放入恢复备份，下次打开仍可找回。",
+          description: storeText("recoverySaved"),
         });
       }
     },

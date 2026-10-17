@@ -77,8 +77,8 @@
   line-height: 1.142857rem;
 }
 .sidebar-design .sidebar-tree-heading .sidebar-section-label > div:last-child { gap: 0.142857rem; }
-.sidebar-design .sidebar-tree-heading button[aria-label="收起全部页面"],
-.sidebar-design .sidebar-tree-heading button[aria-label^="新建"] { width: 1.714286rem; height: 1.714286rem; min-width: 1.714286rem; }
+.sidebar-design .sidebar-tree-heading button[data-sidebar-action="collapse-all"],
+.sidebar-design .sidebar-tree-heading button[data-sidebar-action="create"] { width: 1.714286rem; height: 1.714286rem; min-width: 1.714286rem; }
 .sidebar-design[hidden],
 .sidebar-content-pane[hidden] { display: none !important; }
 .sidebar-design .sidebar-page-list {

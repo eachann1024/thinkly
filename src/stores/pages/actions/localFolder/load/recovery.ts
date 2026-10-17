@@ -1,3 +1,22 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/load/recovery.ts#block1:1">`
+zh-Hans:
+  recovered_other: "已找回 {{count}} 篇未写盘的本地笔记"
+en:
+  recovered_other: "Recovered {{count}} local notes that hadn’t been saved to disk"
+  recovered_one: "Recovered {{count}} local note that hadn’t been saved to disk"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/load/recovery.ts#block2:2">`
+zh-Hans:
+  recoveredLocal: "内容已恢复至编辑器，请确认内容后按快捷键保存。"
+  externalConflict: "检测到外部文件冲突"
+  recoverySeparate: "恢复稿已独立保留，未直接覆盖磁盘上的较新版本。"
+en:
+  recoveredLocal: "The content is back in the editor. Review it, then use the save shortcut."
+  externalConflict: "An external file conflict was detected"
+  recoverySeparate: "The recovery draft was kept separately. The newer version on disk was not overwritten."
+`);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import {
   listRecoveryEntries,
@@ -64,15 +83,15 @@ export function recoverScannedLocalPages(
     }
   }
   if (recoveredCount > 0) {
-    toast.warning(`已找回 ${recoveredCount} 篇未写盘的本地笔记`, {
+    toast.warning(extraText("recovered", { count: recoveredCount }), {
       id: `goose-recovered-local-pages:${notebookId}`,
-      description: "内容已恢复至编辑器，请确认内容后按快捷键保存。",
+      description: storeText("recoveredLocal"),
     });
   }
   if (conflictCount > 0) {
-    toast.warning("检测到外部文件冲突", {
+    toast.warning(storeText("externalConflict"), {
       id: `goose-local-recovery-conflicts:${notebookId}`,
-      description: "恢复稿已独立保留，未直接覆盖磁盘上的较新版本。",
+      description: storeText("recoverySeparate"),
     });
   }
 }

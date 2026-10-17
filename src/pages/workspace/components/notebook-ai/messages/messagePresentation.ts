@@ -1,3 +1,11 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/messagePresentation.ts#messages:1">`
+zh-Hans:
+  compactCommand: "/压缩"
+en:
+  compactCommand: "/compact"
+`;
+const t = createTranslator(messages);
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import type { ApprovalPlanPart } from "../ApprovalPlanCard";
 import {
@@ -32,6 +40,7 @@ export function collectReasoningText(message: NotebookAiMessage): string {
 
 export function getUserDisplayText(message: NotebookAiMessage) {
   const metadataText = message.metadata?.displayText?.trim();
+  if (message.metadata?.compacted && metadataText === "/压缩") return t("compactCommand");
   if (metadataText) return metadataText;
 
   const rawText = getTextPartText(message).trim();

@@ -1,5 +1,16 @@
 import type { PrivateInlineTarget } from "@/lib/notebook-ai/inlineMarkdownApplySelection";
 import type { InlineMenuState } from "./inlineRewriteSession";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/pageInlineRewriteSession.ts#messages:1">`
+zh-Hans:
+  aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
+  generatingWithPrefix: "{{prefix}}正在生成建议"
+en:
+  aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+  generatingWithPrefix: "{{prefix}}Generating suggestions"
+`;
+const t = createTranslator(messages);
+
 
 export type PageInlineState = InlineMenuState;
 export type RewritePart = (markdown: string, prompt: string, signal: AbortSignal, update: (text: string) => void) => Promise<string>;
@@ -77,12 +88,12 @@ export function createPageInlineRewriteSession(pageId: string) {
         for (let index = 0; index < captured.parts.length; index++) {
           if (!owns()) return;
           const prefix = captured.parts.length > 1 ? `${index + 1}/${captured.parts.length} · ` : "";
-          publish({ ...pending, status: "thinking", ticker: `${prefix}正在生成建议` });
+          publish({ ...pending, status: "thinking", ticker: t("generatingWithPrefix", { prefix }) });
           const result = await rewrite(source[index], prompt, abort.signal, (ticker) => {
             if (owns()) publish({ ...pending, status: "thinking", ticker: prefix + ticker });
           });
           if (!owns()) return;
-          if (!result.trim()) throw new Error("AI 未返回可写入的内容。");
+          if (!result.trim()) throw new Error(t("aiDidNotReturnAnyContentThatCould"));
           results.push(result);
         }
         if (!owns()) return;

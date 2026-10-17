@@ -1,3 +1,5 @@
+import { historyText as uiText, HistoryWriteError } from "./messages";
+
 import { historyHash, originalHistoryPath, parseHistoryLocations, validHistoryRelativePath, type HistoryLocations } from "./localPaths";
 
 export interface HistoryDisk {
@@ -39,12 +41,12 @@ async function ensureDirectory(basePath: string, relative: string, fs: HistoryDi
   let directory = basePath;
   for (const part of relative.split("/")) {
     directory += `/${part}`;
-    if (!await fs.exists(directory) && !await fs.mkdir(directory)) throw new Error(`无法创建历史目录：${directory}`);
+    if (!await fs.exists(directory) && !await fs.mkdir(directory)) throw new HistoryWriteError("directory", directory);
   }
 }
 
 export async function writeHistoryJson(file: string, value: unknown, fs: HistoryDisk) {
-  if (!await fs.writeFile(file, JSON.stringify(value, null, 2) + "\n")) throw new Error(`无法保存历史文件：${file}`);
+  if (!await fs.writeFile(file, JSON.stringify(value, null, 2) + "\n")) throw new HistoryWriteError("file", file);
 }
 
 /** Copy and verify first; publish the new location before removing old copies. */
@@ -52,7 +54,7 @@ export async function bindHistoryLocation(basePath: string, pageId: string, rela
   const locations = await readHistoryLocations(basePath, fs);
   const previous = locations.pages[pageId];
   const relative = relativePath ?? previous?.relativePath ?? originalHistoryPath(pageId) ?? `_未定位/${historyHash(pageId)}`;
-  if (!validHistoryRelativePath(relative)) throw new Error("笔记历史路径无效");
+  if (!validHistoryRelativePath(relative)) throw new Error(uiText("invalidNoteHistoryPath"));
   const directory = `${basePath}/.goose/history/${relative}`;
   await ensureDirectory(basePath, `.goose/history/${relative}`, fs);
   const sources = new Set([`${basePath}/.goose/history`, ...(previous ? [...previous.previousPaths, previous.relativePath].filter((path) => path !== relative).map((path) => `${basePath}/.goose/history/${path}`) : [])]);
@@ -64,13 +66,13 @@ export async function bindHistoryLocation(basePath: string, pageId: string, rela
       if (!entry.isFile || !entry.name.startsWith(prefix) || !entry.name.endsWith(".json")) continue;
       const from = `${source}/${entry.name}`, to = `${directory}/${entry.name}`;
       const text = await fs.readFile(from);
-      if (!text) throw new Error("历史文件无法读取，未清除原文件");
+      if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadTheOriginal"));
       const data = JSON.parse(text);
-      if (data.pageId !== pageId) throw new Error("历史文件标识不一致，未清除原文件");
+      if (data.pageId !== pageId) throw new Error(uiText("historyFileIdentifiersDonTMatchTheOriginalHas"));
       const target = await fs.exists(to) ? await fs.readFile(to) : null;
-      if (target !== null && target !== text) throw new Error("历史迁移目标已有不同版本，双方记录已保留");
-      if (target === null && !await fs.writeFile(to, text)) throw new Error("历史迁移写入失败，原文件已保留");
-      if (await fs.readFile(to) !== text) throw new Error("历史迁移校验失败，原文件已保留");
+      if (target !== null && target !== text) throw new Error(uiText("theDestinationContainsADifferentHistoryVersionBothCopies"));
+      if (target === null && !await fs.writeFile(to, text)) throw new Error(uiText("couldnTWriteTheMigratedHistoryTheOriginalHas"));
+      if (await fs.readFile(to) !== text) throw new Error(uiText("migratedHistoryFailedVerificationTheOriginalHasBeenKept"));
       copied.push(from);
     }
   }
@@ -78,7 +80,7 @@ export async function bindHistoryLocation(basePath: string, pageId: string, rela
     locations.pages[pageId] = { relativePath: relative, previousPaths: [...new Set([...(previous?.previousPaths ?? []), ...(previous ? [previous.relativePath] : [])])] };
     await writeHistoryJson(`${basePath}/.goose/history-map.json`, locations, fs);
   }
-  for (const source of copied) if (!await fs.deleteFile(source)) throw new Error("历史已迁移，旧副本尚未清理；下次备份将重试");
+  for (const source of copied) if (!await fs.deleteFile(source)) throw new Error(uiText("historyMigratedButTheOldCopyCouldnTBe"));
   return directory;
 }
 
@@ -102,9 +104,9 @@ export async function migrateNotebookHistory(basePath: string, knownPaths: Recor
     for (const entry of await fs.readDir(root)) {
       if (!entry.isFile || !/^[a-f0-9]{8}\..+\.json$/.test(entry.name)) continue;
       const text = await fs.readFile(`${root}/${entry.name}`);
-      if (!text) throw new Error("历史文件无法读取，已停止迁移");
+      if (!text) throw new Error(uiText("theHistoryFileCouldnTBeReadMigrationStopped"));
       const data = JSON.parse(text);
-      if (typeof data.pageId !== "string") throw new Error("历史文件格式无效，已停止迁移");
+      if (typeof data.pageId !== "string") throw new Error(uiText("theHistoryFileFormatIsInvalidMigrationStopped"));
       paths[data.pageId] ??= data.relativePath ?? originalHistoryPath(data.pageId, data.workspaceId);
     }
     for (const [id, path] of Object.entries(paths)) await bindHistoryLocation(basePath, id, path, fs);

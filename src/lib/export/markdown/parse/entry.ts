@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/markdown/parse/entry.ts#localMessages:1">`
+zh-Hans:
+  couldnTParseTheMarkdownFile: "解析 Markdown 失败"
+en:
+  couldnTParseTheMarkdownFile: "Couldn’t parse the Markdown file"
+`;
+const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { ImportResult } from "../parse";
 import {
@@ -39,7 +48,7 @@ export function importFromMarkdown(
       title: "",
       content: createEmptyBlockNoteContent(),
       success: false,
-      error: "解析 Markdown 失败",
+      error: uiText("couldnTParseTheMarkdownFile"),
     };
   }
 }

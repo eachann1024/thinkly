@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/quick-note/QuickNoteCollectPreview.tsx#localMessages:1">`
+zh-Hans:
+  emptyCollection: "还没有采集内容"
+  sampleClip: "模拟剪贴板片段 {{number}}"
+  collected: "已收集"
+  collectingCount: "自动收集中，已收集 {{count}} 条"
+  collecting: "收集中"
+  itemCount: "{{count}} 条"
+  simulateOne: "模拟收集一条"
+  simulate: "模拟收集"
+  stopAutoCollect: "停止自动收集"
+  stopCollect: "停止收集"
+  collectionStatus: "自动收集中，已收集 {{count}} 条，最近：{{recent}}"
+  stop: "停止"
+en:
+  emptyCollection: "Nothing collected yet"
+  sampleClip: "Sample clipboard item {{number}}"
+  collected: "Collected"
+  collectingCount: "Auto-collecting · {{count}} collected"
+  collecting: "Collecting"
+  itemCount: "Items: {{count}}"
+  simulateOne: "Simulate collecting an item"
+  simulate: "Simulate collection"
+  stopAutoCollect: "Stop auto-collecting"
+  stopCollect: "Stop collecting"
+  collectionStatus: "Auto-collecting · {{count}} collected · Latest: {{recent}}"
+  stop: "Stop"
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClipboardPlus, Square } from "@/components/ui/icons";
@@ -25,15 +56,15 @@ export function QuickNoteCollectPreview({
   );
   const [enabled, setEnabled] = useState(false);
   const [count, setCount] = useState(0);
-  const [recent, setRecent] = useState("还没有采集内容");
+  const [recent, setRecent] = useState(uiText("emptyCollection"));
 
   const simulateCollect = useCallback(() => {
     setCount((previous) => {
       const next = previous + 1;
-      setRecent(`模拟剪贴板片段 ${next}`);
+      setRecent(uiText("sampleClip", {number: next}));
       return next;
     });
-    toast.success("已收集", {
+    toast.success(uiText("collected"), {
       id: "quicknote-collect-preview",
       duration: 1200,
     });
@@ -87,18 +118,18 @@ export function QuickNoteCollectPreview({
         className="quicknote-collect-chip"
         data-quicknote-collect-preview="chip"
         role="status"
-        aria-label={`自动收集中，已收集 ${count} 条`}
+        aria-label={uiText("collectingCount", {count})}
       >
         <span className="quicknote-collect-pulse" aria-hidden="true" />
-        <span className="quicknote-collect-chip-label">收集中</span>
-        <span className="quicknote-collect-count" aria-label={`${count} 条`}>
+        <span className="quicknote-collect-chip-label">{uiText("collecting")}</span>
+        <span className="quicknote-collect-count" aria-label={uiText("itemCount", {count})}>
           {count}
         </span>
         <Button contentStyle="preserve" variant="ghost"
           type="button"
           className="quicknote-collect-icon-btn"
-          aria-label="模拟收集一条"
-          title="模拟收集"
+          aria-label={uiText("simulateOne")}
+          title={uiText("simulate")}
           onClick={simulateCollect}
         >
           <ClipboardPlus aria-hidden="true" />
@@ -106,8 +137,8 @@ export function QuickNoteCollectPreview({
         <Button contentStyle="preserve" variant="ghost"
           type="button"
           className="quicknote-collect-icon-btn quicknote-collect-stop-btn goose-interactive-danger"
-          aria-label="停止自动收集"
-          title="停止收集"
+          aria-label={uiText("stopAutoCollect")}
+          title={uiText("stopCollect")}
           onClick={stopCollecting}
         >
           <Square aria-hidden="true" />
@@ -121,14 +152,14 @@ export function QuickNoteCollectPreview({
       className="quicknote-collect-shelf"
       data-quicknote-collect-preview="shelf"
       role="status"
-      aria-label={`自动收集中，已收集 ${count} 条，最近：${recent}`}
+      aria-label={uiText("collectionStatus", {count, recent})}
     >
       <span className="quicknote-collect-pulse" aria-hidden="true" />
-      <span className="quicknote-collect-shelf-state">收集中</span>
+      <span className="quicknote-collect-shelf-state">{uiText("collecting")}</span>
       <span className="quicknote-collect-shelf-recent" title={recent}>
         {recent}
       </span>
-      <span className="quicknote-collect-count" aria-label={`${count} 条`}>
+      <span className="quicknote-collect-count" aria-label={uiText("itemCount", {count})}>
         {count}
       </span>
       <Button contentStyle="preserve" variant="ghost"
@@ -136,15 +167,13 @@ export function QuickNoteCollectPreview({
         className="quicknote-collect-simulate-btn"
         onClick={simulateCollect}
       >
-        模拟收集
-      </Button>
+        {uiText("simulate")}</Button>
       <Button contentStyle="preserve" variant="ghost"
         type="button"
         className="quicknote-collect-stop-text-btn goose-interactive-danger"
         onClick={stopCollecting}
       >
-        停止
-      </Button>
+        {uiText("stop")}</Button>
     </div>
   );
 }

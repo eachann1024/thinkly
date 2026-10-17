@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/serializer/mediaBlocks.ts#localMessages:1">`
+zh-Hans:
+  attachment: "附件"
+  video: "视频"
+  audio: "音频"
+en:
+  attachment: "Attachment"
+  video: "Video"
+  audio: "Audio"
+`;
+const uiText = createTranslator(localMessages);
 import type { CardTheme } from "../themes";
 import { isGeneratedDataImageName } from "@/components/editor/blocks/image/imageCaption";
 import { escapeHtml } from "./utils";
@@ -56,7 +69,7 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
 
     case "file": {
       const src = block.props?.url || block.props?.src || "";
-      const name = block.props?.name || block.props?.caption || "附件";
+      const name = block.props?.name || block.props?.caption || uiText("attachment");
       const caption = block.props?.caption || "";
       if (src && looksLikeImageUrl(src)) {
         const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(caption || name)}" />`;
@@ -77,7 +90,7 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
 
     case "video": {
       const src = block.props?.url || block.props?.src || "";
-      const name = block.props?.name || block.props?.caption || "视频";
+      const name = block.props?.name || block.props?.caption || uiText("video");
       if (!src) {
         return `<p class="media-fallback"${styleAttr}>▶ ${escapeHtml(name)}</p>`;
       }
@@ -86,7 +99,7 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
 
     case "audio": {
       const src = block.props?.url || block.props?.src || "";
-      const name = block.props?.name || block.props?.caption || "音频";
+      const name = block.props?.name || block.props?.caption || uiText("audio");
       if (!src) {
         return `<p class="media-fallback"${styleAttr}>♪ ${escapeHtml(name)}</p>`;
       }

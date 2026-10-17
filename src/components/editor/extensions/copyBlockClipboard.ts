@@ -8,6 +8,15 @@ import { serializeDocRangePlainText, serializeSlicePlainText } from "../utils/cl
 import { getSelectedCellPlainText, getSelectedImageUrl, isWholeTableCellSelection } from "../utils/selection";
 import { resolveCopyBlockSelection, getTableBlockContainerSelection } from "./copyBlockSelection";
 import { deleteSelectionSafely } from "./selectionDelete";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/extensions/copyBlockClipboard.ts#messages:1">`
+zh-Hans:
+  couldNotWriteToTheClipboardYourOriginal: "无法写入剪贴板，原内容已保留"
+en:
+  couldNotWriteToTheClipboardYourOriginal: "Could not write to the clipboard. Your original content was preserved."
+`;
+const t = createTranslator(messages);
+
 
 export const GOOSE_BLOCKNOTE_BLOCK_COPY_MIME = "application/x-goose-blocknote-block";
 
@@ -70,7 +79,7 @@ export function writeSelectionClipboard(view: EditorView, event: ClipboardEvent)
   } catch (error) {
     event.preventDefault();
     console.error("[editor] Failed to write selection clipboard", error);
-    toast.error("无法写入剪贴板，原内容已保留");
+    toast.error(t("couldNotWriteToTheClipboardYourOriginal"));
     return false;
   }
 }

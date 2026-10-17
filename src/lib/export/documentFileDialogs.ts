@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/documentFileDialogs.ts#localMessages:1">`
+zh-Hans:
+  couldnTOpenTheFilePickerRestartTheDesktop: "无法打开文件选择器，请重新启动桌面应用"
+  couldnTOpenTheSaveDialogRestartTheDesktop: "无法打开保存对话框，请重新启动桌面应用"
+en:
+  couldnTOpenTheFilePickerRestartTheDesktop: "Couldn’t open the file picker. Restart the desktop app."
+  couldnTOpenTheSaveDialogRestartTheDesktop: "Couldn’t open the save dialog. Restart the desktop app."
+`;
+const uiText = createTranslator(localMessages);
 import { getGooseDesktop, isElectronRuntime } from "@/lib/electron/runtime";
 import { sanitizeFilenameSegment } from "@/lib/local-title-binding";
 import type { OpenFileDialogOptions } from "@/lib/native-dialog-contract";
@@ -15,7 +26,7 @@ export async function pickImportFile(filters: FileFilters): Promise<File | null>
     const name = path.split(/[\\/]/).pop() || "import";
     return new File([bytes], name);
   }
-  if (isElectronRuntime()) throw new Error("无法打开文件选择器，请重新启动桌面应用");
+  if (isElectronRuntime()) throw new Error(uiText("couldnTOpenTheFilePickerRestartTheDesktop"));
 
   return new Promise((resolve) => {
     const input = document.createElement("input");
@@ -35,7 +46,7 @@ export async function saveDocumentBlobAndReveal(
   filename: string,
 ): Promise<boolean> {
   const desktop = getGooseDesktop();
-  if (!desktop) throw new Error("无法打开保存对话框，请重新启动桌面应用");
+  if (!desktop) throw new Error(uiText("couldnTOpenTheSaveDialogRestartTheDesktop"));
   const suffix = filename.match(/(\.[a-z0-9]{1,12})$/i)?.[1] || "";
   const stem = suffix ? filename.slice(0, -suffix.length) : filename;
   const safeName = `${sanitizeFilenameSegment(stem) || "untitled"}${suffix}`;

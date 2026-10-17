@@ -14,6 +14,17 @@ import {
   normalizeParsedImageProps,
 } from "./imageCaption";
 import { ResolvedImagePreview } from "./ResolvedImagePreview";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/image/customImageBlock.tsx#messages:1">`
+zh-Hans:
+  addImage: "添加图片"
+  clickToChooseOrDragIntoTheEditor: "点击选择，或直接拖入编辑器"
+en:
+  addImage: "Add image"
+  clickToChooseOrDragIntoTheEditor: "Click to choose or drag into the editor"
+`;
+const t = createTranslator(messages);
+
 
 function CustomImageBlockContent({
   block,
@@ -34,8 +45,8 @@ function CustomImageBlockContent({
         variant="image"
         blockId={block.id}
         editor={editor}
-        title="添加图片"
-        hint="点击选择，或直接拖入编辑器"
+        title={t("addImage")}
+        hint={t("clickToChooseOrDragIntoTheEditor")}
         icon={<GooseIcons.Image size={22} strokeWidth={1.75} />}
       />
     );

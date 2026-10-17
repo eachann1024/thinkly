@@ -1,6 +1,10 @@
 import { registerAppearanceIpc } from "./appearance";
 import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
-import { app, Menu, protocol } from "electron";
+import { app, protocol } from "electron";
+import { initializeLanguage, getLanguageSnapshot } from "./i18n/store";
+import { registerLanguageIpc } from "./i18n/ipc";
+import { installMenu } from "./i18n/menu";
+import { setLanguageSnapshot } from "../../src/i18n/core";
 import { loadVaultRoots } from "./allowlist";
 import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
 import { closeAllWatchers, registerIpcHandlers } from "./ipc";
@@ -11,12 +15,8 @@ import {
   markOpenMarkdownRendererUnavailable,
   registerOpenFileEvent,
 } from "./openMarkdownFiles";
-import {
-  CLOSE_TAB_ACCELERATOR,
-  CLOSE_WINDOW_ACCELERATOR,
-} from "./closeTabAccelerator";
 import { lockWebContentsPageZoom } from "./pageZoom";
-import { createWorkspaceWindow, getMainWindow, markQuitting, requestCloseActiveTab, restoreWorkspaceWindows, shouldSuppressWorkspaceActivate } from "./windows";
+import { createWorkspaceWindow, getMainWindow, markQuitting, restoreWorkspaceWindows, shouldSuppressWorkspaceActivate } from "./windows";
 
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
 const DEFAULT_QUICKNOTE = "Alt+N";
@@ -50,6 +50,7 @@ if (!gotLock) {
 
 function startApp(): void {
   let pendingFocus = false;
+  let languageReady = false;
 
   app.on("web-contents-created", (_event, contents) => {
     lockWebContentsPageZoom(contents);
@@ -59,7 +60,7 @@ function startApp(): void {
     const win = getMainWindow();
     if (!win) {
       pendingFocus = true;
-      if (app.isReady()) {
+      if (app.isReady() && languageReady) {
         markOpenMarkdownRendererUnavailable();
         createWorkspaceWindow({ mode: "blank" });
       }
@@ -83,71 +84,11 @@ function startApp(): void {
   registerAppearanceIpc();
   registerGitSyncIpc();
 
-  function installMenu(): void {
-    // Windows/Linux：不挂应用菜单，避免按 Alt 弹出 File/Edit/View/Window。
-    if (process.platform !== "darwin") {
-      Menu.setApplicationMenu(null);
-      return;
-    }
-    const template: Electron.MenuItemConstructorOptions[] = [
-      ...(process.platform === "darwin" ? [{ role: "appMenu" as const }] : []),
-      {
-        role: "fileMenu",
-        submenu: [
-          {
-            label: "新建窗口",
-            accelerator: "CommandOrControl+Shift+N",
-            click: () => {
-              createWorkspaceWindow({
-                mode: "blank",
-                sourceWindow: getMainWindow(),
-              });
-            },
-          },
-          { type: "separator" },
-          {
-            label: "关闭标签",
-            accelerator: CLOSE_TAB_ACCELERATOR,
-            click: (_item, win) => {
-              requestCloseActiveTab(win ?? getMainWindow());
-            },
-          },
-          {
-            label: "关闭窗口",
-            accelerator: CLOSE_WINDOW_ACCELERATOR,
-            click: (_item, win) => {
-              (win ?? getMainWindow())?.close();
-            },
-          },
-        ],
-      },
-      { role: "editMenu" },
-      {
-        // 默认 viewMenu 带 zoomIn/zoomOut/resetZoom，会缩放整个 webContents。
-        role: "viewMenu",
-        submenu: [
-          { role: "reload" },
-          { role: "forceReload" },
-          { role: "toggleDevTools" },
-          { type: "separator" },
-          { role: "togglefullscreen" },
-        ],
-      },
-      {
-        role: "window",
-        submenu: [
-          { role: "minimize" },
-          { role: "zoom" },
-          ...(process.platform === "darwin"
-            ? ([{ type: "separator" as const }, { role: "front" as const }] as const)
-            : []),
-        ],
-      },
-    ];
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-  }
-
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
+    await initializeLanguage();
+    setLanguageSnapshot(getLanguageSnapshot());
+    registerLanguageIpc();
+    languageReady = true;
     installMenu();
     loadVaultRoots();
     enqueueMarkdownPathsFromArgv(process.argv);

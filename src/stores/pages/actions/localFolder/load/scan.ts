@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/load/scan.ts#block1:1">`
+zh-Hans:
+  readFolderFailed: "无法读取本地文件夹"
+en:
+  readFolderFailed: "Couldn’t read the local folder."
+`);
 import type { StoreSet, StoreGet } from "../../hydrate";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { useNotebooks } from "../../../../useNotebooks";
@@ -252,7 +259,7 @@ export const loadLocalFolderPagesOnce = async (
     const message =
       error instanceof Error && error.message
         ? error.message
-        : "无法读取本地文件夹";
+        : storeText("readFolderFailed");
     useNotebooks.getState().dispatchLocalFolderLoadEvent(notebookId, {
       type: "failed", requestId, fingerprint,
       finishedAt: Date.now(),

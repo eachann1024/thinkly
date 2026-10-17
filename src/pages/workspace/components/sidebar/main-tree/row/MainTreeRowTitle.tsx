@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1">`
+zh-Hans:
+  itemCount: "{{count}} 项"
+en:
+  itemCount: "Items: {{count}}"
+`;
+const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";
 
 const TITLE_CLASS =
@@ -24,7 +33,7 @@ export function MainTreeRowTitle({
       </span>
       <span
         className="main-tree-row-count"
-        aria-label={`${count} 项`}
+        aria-label={uiText("itemCount", { count })}
       >
         {count}
       </span>

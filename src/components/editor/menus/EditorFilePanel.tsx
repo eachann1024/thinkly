@@ -7,6 +7,31 @@ import { Link, Upload } from "@/components/ui/icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { filePanelReducer } from "./filePanelState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/EditorFilePanel.tsx#messages:1">`
+zh-Hans:
+  attachmentUploadFailed: "附件上传失败"
+  enterAValidHttpOrHttpsUrl: "请输入有效的 http 或 https 链接"
+  mediaSource: "媒体来源"
+  upload: "上传"
+  embedLink: "嵌入链接"
+  uploading: "上传中…"
+  chooseFile: "选择文件"
+  mediaUrl: "媒体链接"
+  embed: "嵌入"
+en:
+  attachmentUploadFailed: "Attachment upload failed"
+  enterAValidHttpOrHttpsUrl: "Enter a valid HTTP or HTTPS URL"
+  mediaSource: "Media source"
+  upload: "Upload"
+  embedLink: "Embed link"
+  uploading: "Uploading…"
+  chooseFile: "Choose file"
+  mediaUrl: "Media URL"
+  embed: "Embed"
+`;
+const t = createTranslator(messages);
+
 
 /** 远程媒体只保存地址，沿用浏览器正常加载。 */
 function remoteMediaUrl(value: string): URL | null {
@@ -56,13 +81,13 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
       dispatch({ type: "upload-completed", request });
     } catch (failure) {
       if (requestRef.current === request) dispatch({ type: "upload-failed", request,
-        message: failure instanceof Error ? failure.message : "附件上传失败" });
+        message: failure instanceof Error ? failure.message : t("attachmentUploadFailed") });
     }
   };
   const embed = (event: React.FormEvent) => {
     event.preventDefault();
     const url = remoteMediaUrl(urlInput);
-    if (!url) { dispatch({ type: "url-invalid", message: "请输入有效的 http 或 https 链接" }); return; }
+    if (!url) { dispatch({ type: "url-invalid", get message() { return t("enterAValidHttpOrHttpsUrl"); } }); return; }
     let name = "";
     try { name = decodeURIComponent(url.pathname.split("/").pop() || ""); } catch { /* 地址仍可用。 */ }
     update(url.href, name || url.hostname);
@@ -75,25 +100,25 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
         if (event.key === "Escape") { event.preventDefault(); close(); }
       }}>
       <Tabs value={tab} onValueChange={(value) => { setTab(value as "upload" | "url"); dispatch({ type: "form-edited" }); }}>
-      <TabsList className="mb-3" aria-label="媒体来源">
+      <TabsList className="mb-3" aria-label={t("mediaSource")}>
         <TabsTrigger value="upload" disabled={loading}>
-          <Upload className="h-4 w-4" /> 上传
+          <Upload className="h-4 w-4" /> {t("upload")}
         </TabsTrigger>
         <TabsTrigger value="url" disabled={loading}>
-          <Link className="h-4 w-4" /> 嵌入链接
+          <Link className="h-4 w-4" /> {t("embedLink")}
         </TabsTrigger>
       </TabsList>
       {tab === "upload" ? (
         <TabsContent value="upload">
           <input ref={inputRef} type="file" className="hidden" accept={accept} onChange={upload} />
           <Button type="button" variant="outline" className="w-full" disabled={loading}
-            onClick={() => inputRef.current?.click()}>{loading ? "上传中…" : "选择文件"}</Button>
+            onClick={() => inputRef.current?.click()}>{loading ? t("uploading") : t("chooseFile")}</Button>
         </TabsContent>
       ) : (
         <TabsContent value="url"><form onSubmit={embed} className="flex flex-col gap-2">
-          <Input autoFocus type="url" value={urlInput} placeholder="https://…" aria-label="媒体链接"
+          <Input autoFocus type="url" value={urlInput} placeholder="https://…" aria-label={t("mediaUrl")}
             onChange={(event) => { setUrlInput(event.target.value); dispatch({ type: "form-edited" }); }} />
-          <Button type="submit" disabled={!urlInput.trim()}>嵌入</Button>
+          <Button type="submit" disabled={!urlInput.trim()}>{t("embed")}</Button>
         </form></TabsContent>
       )}
       </Tabs>

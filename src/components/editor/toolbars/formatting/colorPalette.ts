@@ -1,30 +1,77 @@
 import { documentTextColors } from "@/lib/textColors";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/colorPalette.ts#messages:1">`
+zh-Hans:
+  default: "默认"
+  gray: "灰色"
+  brown: "褐色"
+  red: "红色"
+  orange: "橙色"
+  yellow: "黄色"
+  green: "绿色"
+  blue: "蓝色"
+  purple: "紫色"
+  pink: "粉色"
+  noBackground: "无背景"
+  grayBackground: "灰色背景"
+  brownBackground: "褐色背景"
+  redBackground: "红色背景"
+  orangeBackground: "橙色背景"
+  yellowBackground: "黄色背景"
+  greenBackground: "绿色背景"
+  blueBackground: "蓝色背景"
+  purpleBackground: "紫色背景"
+  pinkBackground: "粉色背景"
+en:
+  default: "Default"
+  gray: "Gray"
+  brown: "Brown"
+  red: "Red"
+  orange: "Orange"
+  yellow: "Yellow"
+  green: "Green"
+  blue: "Blue"
+  purple: "Purple"
+  pink: "Pink"
+  noBackground: "No background"
+  grayBackground: "Gray background"
+  brownBackground: "Brown background"
+  redBackground: "Red background"
+  orangeBackground: "Orange background"
+  yellowBackground: "Yellow background"
+  greenBackground: "Green background"
+  blueBackground: "Blue background"
+  purpleBackground: "Purple background"
+  pinkBackground: "Pink background"
+`;
+const t = createTranslator(messages);
+
 
 /** BlockNote 命名颜色 —— 必须与 BlockNote CSS 中定义的颜色名一致 */
 export const TEXT_COLORS = [
-  { name: "默认", color: "default" },
-  { name: "灰色", color: "gray" },
-  { name: "褐色", color: "brown" },
-  { name: "红色", color: "red" },
-  { name: "橙色", color: "orange" },
-  { name: "黄色", color: "yellow" },
-  { name: "绿色", color: "green" },
-  { name: "蓝色", color: "blue" },
-  { name: "紫色", color: "purple" },
-  { name: "粉色", color: "pink" },
+  { get name() { return t("default"); }, color: "default" },
+  { get name() { return t("gray"); }, color: "gray" },
+  { get name() { return t("brown"); }, color: "brown" },
+  { get name() { return t("red"); }, color: "red" },
+  { get name() { return t("orange"); }, color: "orange" },
+  { get name() { return t("yellow"); }, color: "yellow" },
+  { get name() { return t("green"); }, color: "green" },
+  { get name() { return t("blue"); }, color: "blue" },
+  { get name() { return t("purple"); }, color: "purple" },
+  { get name() { return t("pink"); }, color: "pink" },
 ];
 
 export const HIGHLIGHT_COLORS = [
-  { name: "无背景", color: "default" },
-  { name: "灰色背景", color: "gray" },
-  { name: "褐色背景", color: "brown" },
-  { name: "红色背景", color: "red" },
-  { name: "橙色背景", color: "orange" },
-  { name: "黄色背景", color: "yellow" },
-  { name: "绿色背景", color: "green" },
-  { name: "蓝色背景", color: "blue" },
-  { name: "紫色背景", color: "purple" },
-  { name: "粉色背景", color: "pink" },
+  { get name() { return t("noBackground"); }, color: "default" },
+  { get name() { return t("grayBackground"); }, color: "gray" },
+  { get name() { return t("brownBackground"); }, color: "brown" },
+  { get name() { return t("redBackground"); }, color: "red" },
+  { get name() { return t("orangeBackground"); }, color: "orange" },
+  { get name() { return t("yellowBackground"); }, color: "yellow" },
+  { get name() { return t("greenBackground"); }, color: "green" },
+  { get name() { return t("blueBackground"); }, color: "blue" },
+  { get name() { return t("purpleBackground"); }, color: "purple" },
+  { get name() { return t("pinkBackground"); }, color: "pink" },
 ];
 
 /**

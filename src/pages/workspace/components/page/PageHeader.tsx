@@ -1,3 +1,28 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/PageHeader.tsx#localMessages:1">`
+zh-Hans:
+  newConversation: "新会话"
+  showSidebar: "展开侧栏"
+  locked: "已锁定"
+  deleted: "页面已被删除"
+  closeAi: "关闭 AI 面板"
+  openAi: "打开 AI 面板"
+  restore: "恢复页面"
+  deletePermanently: "永久删除页面"
+  permanentDelete: "永久删除"
+en:
+  newConversation: "New conversation"
+  showSidebar: "Show sidebar"
+  locked: "Locked"
+  deleted: "This note has been deleted"
+  closeAi: "Close AI panel"
+  openAi: "Open AI panel"
+  restore: "Restore note"
+  deletePermanently: "Delete note permanently"
+  permanentDelete: "Delete permanently"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { Page } from "@/types";
@@ -76,7 +101,7 @@ export function PageHeader({
     >
       {aiFullscreenOpen ? (
         <div className="flex min-w-0 items-center px-0.5">
-          <ConversationTitle summary={aiHeaderTitle ?? "新会话"} />
+          <ConversationTitle summary={aiHeaderTitle ?? uiText("newConversation")} />
         </div>
       ) : null}
       <div
@@ -97,14 +122,14 @@ export function PageHeader({
                     "sidebar-toggle-button",
                   )}
                   onClick={toggleSidebarCollapsed}
-                  aria-label="展开侧栏"
+                  aria-label={uiText("showSidebar")}
                 >
                   <GooseIcons.PanelLeftOpen className="h-4 w-4" />
                 </IconButton>
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
-                  <span>展开侧栏</span>
+                  <span>{uiText("showSidebar")}</span>
                   {toggleSidebarShortcutLabel && (
                     <span className="text-[11px] text-muted-foreground">
                       {toggleSidebarShortcutLabel}
@@ -122,13 +147,11 @@ export function PageHeader({
 
         {page?.isLocked && (
           <span className="text-xs bg-[var(--goose-color-lock-bg)] text-[var(--goose-color-lock-text)] px-1.5 py-0.5 rounded">
-            已锁定
-          </span>
+            {uiText("locked")}</span>
         )}
         {page?.trashedAt && (
           <span className="text-xs bg-[var(--goose-color-lock-bg)] text-[var(--goose-color-lock-text)] px-1.5 py-0.5 rounded">
-            页面已被删除
-          </span>
+            {uiText("deleted")}</span>
         )}
       </div>
       <div className="ml-2 flex shrink-0 items-center gap-1">
@@ -145,7 +168,7 @@ export function PageHeader({
                   )}
                   data-ai-state={aiPhase}
                   onClick={onToggleAiPanel}
-                  aria-label={aiPanelOpen ? "关闭 AI 面板" : "打开 AI 面板"}
+                  aria-label={aiPanelOpen ? uiText("closeAi") : uiText("openAi")}
                   aria-pressed={aiPanelOpen}
                 >
                   <Sparkles className="h-4 w-4" />
@@ -153,7 +176,7 @@ export function PageHeader({
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <div className="flex items-center gap-2">
-                  <span>{aiPanelOpen ? "关闭 AI 面板" : "打开 AI 面板"}</span>
+                  <span>{aiPanelOpen ? uiText("closeAi") : uiText("openAi")}</span>
                   {toggleAiPanelShortcutLabel && (
                     <span className="text-[11px] text-muted-foreground">
                       {toggleAiPanelShortcutLabel}
@@ -173,13 +196,13 @@ export function PageHeader({
                   <IconButton size="icon" tone="muted"
                     onClick={onRestore}
                     type="button"
-                    aria-label="恢复页面"
+                    aria-label={uiText("restore")}
                     className=""
                   >
                     <GooseIcons.RotateCcw className="h-4 w-4" />
                   </IconButton>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">恢复页面</TooltipContent>
+                <TooltipContent side="bottom">{uiText("restore")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider delayDuration={600}>
@@ -188,13 +211,13 @@ export function PageHeader({
                   <IconButton size="icon" tone="danger"
                     onClick={onDelete}
                     type="button"
-                    aria-label="永久删除页面"
+                    aria-label={uiText("deletePermanently")}
                     className=""
                   >
                     <GooseIcons.Trash2 className="h-4 w-4" />
                   </IconButton>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">永久删除</TooltipContent>
+                <TooltipContent side="bottom">{uiText("permanentDelete")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </>

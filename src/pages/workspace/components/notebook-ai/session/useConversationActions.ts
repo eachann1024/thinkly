@@ -5,6 +5,15 @@ import { OPEN_AI_PANEL_EVENT } from "@/components/editor/ai/composer/selectionQu
 import { getNotebookAiReferenceSuggestions } from "@/lib/notebook-ai/context";
 import { sanitizeNotebookAiMessages } from "@/lib/notebook-ai/messageUtils";
 import type { SessionState } from "./useSessionState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useConversationActions.ts#messages:1">`
+zh-Hans:
+  waitForTheResponseToFinishBeforeDeleting: "正在生成回复，请稍后再删除当前会话"
+en:
+  waitForTheResponseToFinishBeforeDeleting: "Wait for the response to finish before deleting this conversation"
+`;
+const t = createTranslator(messages);
+
 
 export function useConversationActions(state: SessionState) {
   const {
@@ -126,7 +135,7 @@ export function useConversationActions(state: SessionState) {
     (targetConversationId: string) => {
       // 流式中只拒绝删除当前激活会话，删除其他历史会话不受影响
       if (isBusy && targetConversationId === conversationId) {
-        toast.warning("正在生成回复，请稍后再删除当前会话");
+        toast.warning(t("waitForTheResponseToFinishBeforeDeleting"));
         return false;
       }
 

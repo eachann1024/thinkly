@@ -6,14 +6,29 @@ import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
 import { withPreservedSelection } from "../selectionRestore";
 import type { RunToolbarAction } from "../useSelectionMenu";
 import type { BooleanMarkState } from "../selectionMarkStates";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/MarkGroup.tsx#messages:1">`
+zh-Hans:
+  bold: "粗体"
+  italic: "斜体"
+  strikethrough: "删除线"
+  mixedFormatting: "{{label}}（混合格式）"
+en:
+  bold: "Bold"
+  italic: "Italic"
+  strikethrough: "Strikethrough"
+  mixedFormatting: "{{label}} (mixed formatting)"
+`;
+const t = createTranslator(messages);
+
 
 const ITEM_CLASS = "goose-formatting-toolbar-control";
 const MARKS = [
-  { key: "bold", label: "粗体", icon: GooseIcons.Bold, shortcut: "Mod+B" },
-  { key: "italic", label: "斜体", icon: GooseIcons.Italic, shortcut: "Mod+I" },
+  { key: "bold", get label() { return t("bold"); }, icon: GooseIcons.Bold, shortcut: "Mod+B" },
+  { key: "italic", get label() { return t("italic"); }, icon: GooseIcons.Italic, shortcut: "Mod+I" },
   {
     key: "strike",
-    label: "删除线",
+    get label() { return t("strikethrough"); },
     icon: GooseIcons.Strikethrough,
     shortcut: "Mod+Shift+S",
   },
@@ -60,12 +75,12 @@ export function MarkGroup({
                     ? editor.removeStyles({ [key]: true })
                     : editor.addStyles({ [key]: true }))
                 }
-                aria-label={active[key] === "mixed" ? `${label}（混合格式）` : label}
+                aria-label={active[key] === "mixed" ? t("mixedFormatting", { label }) : label}
               >
                 <Icon className="h-[15px] w-[15px]" />
               </Toggle>
             </TooltipTrigger>
-            <ToolbarTooltip label={active[key] === "mixed" ? `${label}（混合格式）` : label} shortcut={shortcut} />
+            <ToolbarTooltip label={active[key] === "mixed" ? t("mixedFormatting", { label }) : label} shortcut={shortcut} />
           </Tooltip>
         ),
       )}

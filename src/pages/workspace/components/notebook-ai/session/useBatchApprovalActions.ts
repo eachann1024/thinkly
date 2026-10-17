@@ -15,6 +15,27 @@ import type {
   BatchUndoResult,
 } from "../ApprovalPlanCard";
 import type { SessionState } from "./useSessionState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useBatchApprovalActions.ts#messages:1">`
+zh-Hans:
+  theUserCanceledTheEntirePlan: "用户取消了整批计划"
+  thisPlanHasExpiredAskAiToGenerate: "当前执行计划已过期，请重新向 AI 发起指令生成新计划"
+  couldNotApplyTheBatchPlan: "批量计划执行失败"
+  conversationChangedOutdatedResultsWereIgnored: "会话已切换，已忽略过期结果"
+  couldNotUndoAllChangesInThisBatch: "无法完整撤回本批变更"
+  changesInThisBatchUndone: "已撤回本批变更"
+  undoFailed: "撤回失败"
+en:
+  theUserCanceledTheEntirePlan: "The user canceled the entire plan"
+  thisPlanHasExpiredAskAiToGenerate: "This plan has expired. Ask AI to generate a new one."
+  couldNotApplyTheBatchPlan: "Could not apply the batch plan"
+  conversationChangedOutdatedResultsWereIgnored: "Conversation changed. Outdated results were ignored."
+  couldNotUndoAllChangesInThisBatch: "Could not undo all changes in this batch"
+  changesInThisBatchUndone: "Changes in this batch undone"
+  undoFailed: "Undo failed"
+`;
+const t = createTranslator(messages);
+
 
 export function useBatchApprovalActions(state: SessionState) {
   const {
@@ -74,7 +95,7 @@ export function useBatchApprovalActions(state: SessionState) {
         response.selectedOperationIds,
       );
       if (!journal) {
-        toast.error("当前执行计划已过期，请重新向 AI 发起指令生成新计划");
+        toast.error(t("thisPlanHasExpiredAskAiToGenerate"));
         return;
       }
 
@@ -102,7 +123,7 @@ export function useBatchApprovalActions(state: SessionState) {
           errorText:
             executeError instanceof Error
               ? executeError.message
-              : "批量计划执行失败",
+              : t("couldNotApplyTheBatchPlan"),
         });
       }
     },
@@ -121,10 +142,10 @@ export function useBatchApprovalActions(state: SessionState) {
       try {
         const result = await undoBatchPlan(toolCallId, runId);
         if (!isCurrentSession(scope)) {
-          return { ok: false, error: "会话已切换，已忽略过期结果" };
+          return { ok: false, get error() { return t("conversationChangedOutdatedResultsWereIgnored"); } };
         }
         if (!result.ok) {
-          toast.error("无法完整撤回本批变更", {
+          toast.error(t("couldNotUndoAllChangesInThisBatch"), {
             description: formatNotebookAiError(result.error, { phase: "undo" }),
           });
           return {
@@ -159,7 +180,7 @@ export function useBatchApprovalActions(state: SessionState) {
             .setMessages(notebookId, conversationId, cleanedMessages);
           return cleanedMessages;
         });
-        toast.success("已撤回本批变更");
+        toast.success(t("changesInThisBatchUndone"));
         return {
           ok: true,
           status: "reverted",
@@ -168,10 +189,10 @@ export function useBatchApprovalActions(state: SessionState) {
         };
       } catch (undoError) {
         if (!isCurrentSession(scope)) {
-          return { ok: false, error: "会话已切换，已忽略过期结果" };
+          return { ok: false, get error() { return t("conversationChangedOutdatedResultsWereIgnored"); } };
         }
         const description = formatNotebookAiError(undoError, { phase: "undo" });
-        toast.error("撤回失败", { description });
+        toast.error(t("undoFailed"), { description });
         return { ok: false, error: description };
       }
     },

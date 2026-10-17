@@ -1,3 +1,4 @@
+import { t } from "../i18n/nativeServices";
 import { assertGitSyncWritable, waitForGitSyncRead } from "../gitSyncLock";
 import { ipcMain, shell } from "electron";
 import {
@@ -150,7 +151,7 @@ export function registerFilesystemIpc(undoRoot: string): void {
   });
 
   ipcMain.handle("desktop:fsUndoTrash", async (_event, token: string) => {
-    if (typeof token !== "string") throw new Error("无效的撤回标识");
+    if (typeof token !== "string") throw new Error(t("invalidUndo"));
     const original = await undoTrash(token);
     // The destination is the original, pre-validated path; no arbitrary restore path is accepted.
     markRecentWrite(original);

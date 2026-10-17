@@ -17,6 +17,17 @@ import type {
   EditorPlatformImageStorage,
   EditorPlatformShell,
 } from "./types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/platform/noopPlatform.ts#messages:1">`
+zh-Hans:
+  copyingTextIsNotSupportedInThisEnvironment: "当前环境不支持复制文字。"
+  copyingImagesIsNotSupportedInThisEnvironment: "当前环境不支持复制图片。"
+en:
+  copyingTextIsNotSupportedInThisEnvironment: "Copying text is not supported in this environment."
+  copyingImagesIsNotSupportedInThisEnvironment: "Copying images is not supported in this environment."
+`;
+const t = createTranslator(messages);
+
 
 function notImplemented(method: string): never {
   throw new Error(`[EditorPlatform] ${method} 未实现（noopPlatform）`);
@@ -70,7 +81,7 @@ const dialog: EditorPlatformDialog = {
 const clipboard: EditorPlatformClipboard = {
   copyText: async (text) => {
     if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
-      throw new Error("当前环境不支持复制文字。");
+      throw new Error(t("copyingTextIsNotSupportedInThisEnvironment"));
     }
     await navigator.clipboard.writeText(text);
   },
@@ -80,7 +91,7 @@ const clipboard: EditorPlatformClipboard = {
       !navigator.clipboard ||
       typeof ClipboardItem === "undefined"
     ) {
-      throw new Error("当前环境不支持复制图片。");
+      throw new Error(t("copyingImagesIsNotSupportedInThisEnvironment"));
     }
     const response = await fetch(dataUrl);
     const blob = await response.blob();

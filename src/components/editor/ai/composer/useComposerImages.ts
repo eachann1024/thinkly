@@ -17,6 +17,26 @@ import {
 
 import type { ComposerImagesOptions } from "./composerImageTypes";
 import { useComposerImagePreview } from "./useComposerImagePreview";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/composer/useComposerImages.ts#messages:1">`
+zh-Hans:
+  image: "图片"
+  imageLimit_other: "每次最多添加 {{count}} 张图片。"
+  oversizedImages: "有 {{count}} 张图片超过 {{limit}}MB，未添加。"
+  duplicateImages: "有 {{count}} 张重复图片，未添加。"
+  imagesAdded: "已添加 {{count}} 张图片。"
+  duplicateRemoved: "检测到重复图片，已移除后加入的图片。"
+en:
+  image: "Image"
+  imageLimit_one: "You can add up to {{count}} image at a time."
+  imageLimit_other: "You can add up to {{count}} images at a time."
+  oversizedImages: "Images skipped for exceeding {{limit}} MB: {{count}}."
+  duplicateImages: "Duplicate images skipped: {{count}}."
+  imagesAdded: "Images added: {{count}}."
+  duplicateRemoved: "Duplicate images detected. The copies added later were removed."
+`;
+const t = createTranslator(messages);
+
 
 export function useComposerImages(options: ComposerImagesOptions) {
   const {
@@ -100,8 +120,8 @@ export function useComposerImages(options: ComposerImagesOptions) {
           ? Math.max(0, maxImageCount - currentCount)
           : files.length;
 
-      if (capacity <= 0) {
-        onImageRejected?.(`每次最多添加 ${maxImageCount} 张图片。`);
+      if (capacity <= 0 && maxImageCount !== undefined) {
+        onImageRejected?.(t("imageLimit", { count: maxImageCount }));
         return;
       }
 
@@ -117,7 +137,7 @@ export function useComposerImages(options: ComposerImagesOptions) {
 
         const attrs: AiImageAttachmentAttrs = {
           imageId: createImageId(),
-          fileName: file.name || "图片",
+          fileName: file.name || t("image"),
           mediaType: file.type || "image/*",
           size: file.size,
         };
@@ -130,15 +150,15 @@ export function useComposerImages(options: ComposerImagesOptions) {
 
       if (oversized > 0) {
         onImageRejected?.(
-          `有 ${oversized} 张图片超过 ${Math.round(maxImageBytes! / 1024 / 1024)}MB，未添加。`,
+          t("oversizedImages", { count: oversized, limit: Math.round(maxImageBytes! / 1024 / 1024) }),
         );
       }
       if (duplicates > 0) {
-        onImageRejected?.(`有 ${duplicates} 张重复图片，未添加。`);
+        onImageRejected?.(t("duplicateImages", { count: duplicates }));
       }
       if (accepted.length === 0) return;
       if (accepted.length < files.length - oversized - duplicates) {
-        onImageRejected?.(`已添加 ${accepted.length} 张图片。`);
+        onImageRejected?.(t("imagesAdded", { count: accepted.length }));
       }
 
       // 确保 selection 落在编辑器内（否则追加到末尾）
@@ -190,7 +210,7 @@ export function useComposerImages(options: ComposerImagesOptions) {
           );
           if (!duplicateId) return;
           removeImageChip(duplicateId);
-          onImageRejected?.("检测到重复图片，已移除后加入的图片。");
+          onImageRejected?.(t("duplicateRemoved"));
         });
       }
     },

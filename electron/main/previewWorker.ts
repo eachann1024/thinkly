@@ -1,3 +1,4 @@
+import { t } from "./i18n/preview";
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,7 +19,7 @@ const jobs = new Map<number, {
   requestId?: string;
 }>();
 
-function closeWorker(reason = "预览渲染进程已关闭") {
+function closeWorker(reason = t("closed")) {
   const old = getWorker();
   lifecycle = previewWorkerTransition(lifecycle, { type: "close" });
   for (const job of jobs.values()) {
@@ -46,16 +47,16 @@ function ensureWorker(): Promise<void> {
   current.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   current.webContents.on("will-navigate", event => event.preventDefault());
   current.webContents.on("render-process-gone", () => {
-    if (getWorker() === current) closeWorker("预览渲染进程异常退出，请重试");
+    if (getWorker() === current) closeWorker(t("crashed"));
   });
   const opening = new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {
-      cleanup(); reject(new Error("预览渲染进程启动超时")); closeWorker();
+      cleanup(); reject(new Error(t("startTimeout"))); closeWorker();
     }, 20000);
     const ready = (event: Electron.IpcMainEvent) => {
       if (event.sender !== current.webContents) return;
       cleanup();
-      if (getWorker() !== current) { reject(new Error("预览渲染进程已关闭")); return; }
+      if (getWorker() !== current) { reject(new Error(t("closed"))); return; }
       lifecycle = previewWorkerTransition(lifecycle, { type: "ready", worker: current });
       resolve();
     };
@@ -67,7 +68,7 @@ function ensureWorker(): Promise<void> {
       : current.loadFile(path.join(root, "../renderer/preview-renderer.html"));
     void load.catch(error => { cleanup(); reject(error); if (getWorker() === current) closeWorker(); });
     current.once("closed", () => {
-      cleanup(); reject(new Error("预览渲染进程已关闭"));
+      cleanup(); reject(new Error(t("closed")));
       if (getWorker() === current) closeWorker();
     });
   });
@@ -77,7 +78,7 @@ function ensureWorker(): Promise<void> {
 
 function validate(request: MermaidPreviewRequest) {
   const o = request?.options;
-  if (request?.requestId !== undefined && (typeof request.requestId !== "string" || request.requestId.length > 100)) throw new Error("无效的预览请求标识");
+  if (request?.requestId !== undefined && (typeof request.requestId !== "string" || request.requestId.length > 100)) throw new Error(t("invalidId"));
   if (!request || typeof request.source !== "string" || request.source.length > 1024 * 1024 ||
       (request.context !== "editor" && request.context !== "export") ||
       !o || !["dark", "light"].includes(o.mode) ||
@@ -85,7 +86,7 @@ function validate(request: MermaidPreviewRequest) {
       (o.fontFamily !== undefined && (typeof o.fontFamily !== "string" || o.fontFamily.length > 4096)) ||
       (o.useMaxWidth !== undefined && typeof o.useMaxWidth !== "boolean") ||
       (request.fontIdentity !== undefined && (typeof request.fontIdentity !== "string" || request.fontIdentity.length > 65536))) {
-    throw new Error("无效的图表预览请求");
+    throw new Error(t("invalidRequest"));
   }
 }
 
@@ -97,14 +98,14 @@ export function registerPreviewWorkerIpc() {
     waiting.set(token, state);
     try {
       await ensureWorker();
-      if (state.cancelled) throw new Error("预览任务已取消");
-      if (event.sender.isDestroyed()) throw new Error("请求窗口已关闭");
+      if (state.cancelled) throw new Error(t("cancelled"));
+      if (event.sender.isDestroyed()) throw new Error(t("windowClosed"));
       const worker = getWorker();
-      if (!worker || worker.isDestroyed()) throw new Error("预览渲染进程不可用");
-      if (jobs.size >= 64) throw new Error("预览队列已满，请稍后重试");
+      if (!worker || worker.isDestroyed()) throw new Error(t("unavailable"));
+      if (jobs.size >= 64) throw new Error(t("queueFull"));
       const id = ++nextId;
       const result = new Promise<string>((resolve, reject) => {
-        const timer = setTimeout(() => closeWorker("图表渲染超时，请检查源码后重试"), 45000);
+        const timer = setTimeout(() => closeWorker(t("renderTimeout")), 45000);
         jobs.set(id, { resolve, reject, timer, owner: event.sender.id, requestId: request.requestId });
       });
       worker.webContents.send("preview-worker:request", { ...request, id });
@@ -117,7 +118,7 @@ export function registerPreviewWorkerIpc() {
     if (state) state.cancelled = true;
     for (const [id, job] of jobs) {
       if (job.owner !== event.sender.id || job.requestId !== requestId) continue;
-      jobs.delete(id); clearTimeout(job.timer); job.reject(new Error("预览任务已取消"));
+      jobs.delete(id); clearTimeout(job.timer); job.reject(new Error(t("cancelled")));
       const worker = getWorker();
       if (worker && !worker.isDestroyed()) worker.webContents.send("preview-worker:cancel", id);
     }
@@ -129,7 +130,7 @@ export function registerPreviewWorkerIpc() {
     if (!job) return;
     jobs.delete(reply.id); clearTimeout(job.timer);
     if (typeof reply.svg === "string" && reply.svg.length <= 8 * 1024 * 1024) job.resolve(reply.svg);
-    else job.reject(new Error(typeof reply.error === "string" ? reply.error : "图表渲染失败"));
+    else job.reject(new Error(typeof reply.error === "string" ? reply.error : t("renderFailed")));
   });
   app.on("before-quit", () => closeWorker());
   app.on("browser-window-created", (_event, win) => {

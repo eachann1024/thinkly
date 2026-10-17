@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/shared/FontSelector.tsx#localMessages:1">`
+zh-Hans:
+  default: "默认"
+  serif: "衬线体"
+  monospace: "等宽体"
+en:
+  default: "Default"
+  serif: "Serif"
+  monospace: "Monospace"
+`;
+const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";
 import type { Page } from "@/types";
 import {
@@ -15,17 +28,17 @@ interface FontSelectorProps {
 const defaultFonts = [
   {
     value: "default" as const,
-    label: "默认",
+    label: uiText("default"),
     defaultFont: DEFAULT_FONT_NAMES.default,
   },
   {
     value: "serif" as const,
-    label: "衬线体",
+    label: uiText("serif"),
     defaultFont: DEFAULT_FONT_NAMES.serif,
   },
   {
     value: "mono" as const,
-    label: "等宽体",
+    label: uiText("monospace"),
     defaultFont: DEFAULT_FONT_NAMES.mono,
   },
 ];

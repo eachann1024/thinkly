@@ -1,3 +1,4 @@
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { IconButton } from "@/components/ui/icon-button";
 import { copyText, downloadText, copyImagePayload } from "./artifactClipboard";
 import { useState } from "react";
@@ -24,6 +25,33 @@ import {
 } from "@/lib/preview/previewAction";
 import { useArtifactPreview } from "./useArtifactPreview";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ArtifactActions.tsx#messages:1">`
+zh-Hans:
+  copyImage: "复制图片"
+  unknownError: "未知错误"
+  copySource: "复制源码"
+  insertIntoCurrentNote: "插入当前笔记"
+  insertedIntoCurrentNote: "已插入当前笔记"
+  downloadImage: "下载图片"
+  saved: "已保存"
+  download: "下载"
+  detailCopyFailed: "复制失败：{{value1}}"
+  detailDownloadFailed: "下载失败：{{value1}}"
+en:
+  copyImage: "Copy image"
+  unknownError: "Unknown error"
+  copySource: "Copy source"
+  insertIntoCurrentNote: "Insert into current note"
+  insertedIntoCurrentNote: "Inserted into current note"
+  downloadImage: "Download image"
+  saved: "Saved"
+  download: "Download"
+  detailCopyFailed: "Copy failed: {{value1}}"
+  detailDownloadFailed: "Download failed: {{value1}}"
+`;
+const t = createTranslator(messages);
+
 
 const iconBtnClass = "cursor-pointer";
 
@@ -74,7 +102,7 @@ export function ArtifactActions({
             <TooltipTrigger asChild>
               <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
-                aria-label="复制图片"
+                aria-label={t("copyImage")}
                 disabled={copyingImage}
                 onClick={() => {
                   if (!onCopyImage || copyingImage) return;
@@ -85,7 +113,7 @@ export function ArtifactActions({
                       await copyImagePayload(payload);
                     } catch (err) {
                       toast.error(
-                        `复制失败：${err instanceof Error ? err.message : "未知错误"}`,
+                        t("detailCopyFailed", { value1: err instanceof Error ? localizeNotebookAiDiagnostic(err.message) : t("unknownError") }),
                       );
                     } finally {
                       setCopyingImage(false);
@@ -103,7 +131,7 @@ export function ArtifactActions({
                 )}
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent>复制图片</TooltipContent>
+            <TooltipContent>{t("copyImage")}</TooltipContent>
           </Tooltip>
         ) : null}
 
@@ -112,13 +140,13 @@ export function ArtifactActions({
             <TooltipTrigger asChild>
               <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
-                aria-label="复制源码"
+                aria-label={t("copySource")}
                 onClick={() => void copyText(copySource!)}
               >
                 <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent>复制源码</TooltipContent>
+            <TooltipContent>{t("copySource")}</TooltipContent>
           </Tooltip>
         ) : null}
 
@@ -127,18 +155,18 @@ export function ArtifactActions({
             <TooltipTrigger asChild>
               <IconButton type="button" size="sm" tone="muted"
                 className={iconBtnClass}
-                aria-label="插入当前笔记"
+                aria-label={t("insertIntoCurrentNote")}
                 onClick={async () => {
                   const result = await onInsert();
                   toast[result.ok ? "success" : "error"](
-                    result.ok ? "已插入当前笔记" : result.error,
+                    result.ok ? t("insertedIntoCurrentNote") : result.error,
                   );
                 }}
               >
                 <FilePlus2 className="h-3.5 w-3.5" strokeWidth={1.75} />
               </IconButton>
             </TooltipTrigger>
-            <TooltipContent>插入当前笔记</TooltipContent>
+            <TooltipContent>{t("insertIntoCurrentNote")}</TooltipContent>
           </Tooltip>
         ) : null}
 
@@ -170,7 +198,7 @@ export function ArtifactActions({
             variant="ghost"
             size="sm"
             className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
-            aria-label="下载图片"
+            aria-label={t("downloadImage")}
             disabled={downloadingImage}
             onClick={() => {
               if (!onDownloadImage || downloadingImage) return;
@@ -179,10 +207,10 @@ export function ArtifactActions({
                 try {
                   const blob = await onDownloadImage();
                   await saveBlobAndReveal(blob, downloadImageFilename);
-                  toast.success("已保存");
+                  toast.success(t("saved"));
                 } catch (err) {
                   toast.error(
-                    `下载失败：${err instanceof Error ? err.message : "未知错误"}`,
+                    t("detailDownloadFailed", { value1: err instanceof Error ? localizeNotebookAiDiagnostic(err.message) : t("unknownError") }),
                   );
                 } finally {
                   setDownloadingImage(false);
@@ -198,7 +226,7 @@ export function ArtifactActions({
             ) : (
               <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
             )}
-            下载
+            {t("download")}
           </Button>
         ) : hasSourceDownload ? (
           <Button
@@ -206,13 +234,13 @@ export function ArtifactActions({
             variant="ghost"
             size="sm"
             className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
-            aria-label="下载"
+            aria-label={t("download")}
             onClick={() =>
               void downloadText(downloadSource!, filename, mimeType)
             }
           >
             <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
-            下载
+            {t("download")}
           </Button>
         ) : null}
       </div>

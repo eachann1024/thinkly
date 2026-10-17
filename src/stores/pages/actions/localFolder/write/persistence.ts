@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/persistence.ts#block1:1">`
+zh-Hans:
+  notSavedDisk: "笔记尚未保存到磁盘"
+en:
+  notSavedDisk: "The note has not been saved to disk"
+`);
 import { updateSnapshotStat } from "@/lib/local-md-snapshot";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import type { JSONContent } from "@/types";
@@ -48,7 +55,7 @@ export const saveLocalPageContentAction = async (
       options,
     );
   } catch (error) {
-    toast.error("笔记尚未保存到磁盘", {
+    toast.error(storeText("notSavedDisk"), {
       description: describeDiskWriteError(error),
     });
     throw error;

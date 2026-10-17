@@ -8,6 +8,17 @@ import type { SlashMenuItem } from "@/components/editor/core/blocknoteSlashItems
 import { PAGE_MENTION_TYPE, wikiTargetFromReference } from "./pageMention";
 import { mentionTriggerDeleteRange } from "@/components/editor/utils/slashMenuPolicy";
 import { PAGE_MENTION_TRIGGERS } from "../utils/pageMentionQuery";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/inline/pageMentionMenuItems.tsx#messages:1">`
+zh-Hans:
+  noMatchingNotes: "未找到匹配笔记"
+  tryAnotherKeyword: "换个关键词试试"
+en:
+  noMatchingNotes: "No matching notes"
+  tryAnotherKeyword: "Try another keyword"
+`;
+const t = createTranslator(messages);
+
 
 type MentionRange = { from: number; to: number };
 
@@ -78,9 +89,9 @@ export function getPageMentionMenuItems(
   if (items.length === 0) {
     return [
       {
-        title: "未找到匹配笔记",
+        get title() { return t("noMatchingNotes"); },
         disabled: true,
-        disabledReason: "换个关键词试试",
+        get disabledReason() { return t("tryAnotherKeyword"); },
         onItemClick: () => {},
       },
     ];

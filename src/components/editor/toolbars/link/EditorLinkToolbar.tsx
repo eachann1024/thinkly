@@ -6,6 +6,25 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Input } from "@/components/editor/ui/input";
 import { Button } from "@/components/editor/ui/button";
 import { useEditorPlatform } from "@/components/editor/platform/context";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/link/EditorLinkToolbar.tsx#messages:1">`
+zh-Hans:
+  linkText: "链接文字"
+  save: "保存"
+  cancel: "取消"
+  edit: "编辑"
+  open: "打开"
+  remove: "移除"
+en:
+  linkText: "Link text"
+  save: "Save"
+  cancel: "Cancel"
+  edit: "Edit"
+  open: "Open"
+  remove: "Remove"
+`;
+const t = createTranslator(messages);
+
 
 function normalizeExternalUrl(url: string): string {
   const trimmed = url.trim();
@@ -94,7 +113,7 @@ export function EditorLinkToolbar({
             ref={inputRef}
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            placeholder="链接文字"
+            placeholder={t("linkText")}
             className="goose-link-toolbar-input"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -127,7 +146,7 @@ export function EditorLinkToolbar({
         </div>
         <div className="flex flex-col gap-1">
           <Button size="sm" className="goose-link-toolbar-form-button" onClick={handleSave}>
-            保存
+            {t("save")}
           </Button>
           <Button
             variant="ghost"
@@ -135,7 +154,7 @@ export function EditorLinkToolbar({
             className="goose-link-toolbar-form-button"
             onClick={cancelEditing}
           >
-            取消
+            {t("cancel")}
           </Button>
         </div>
       </div>
@@ -159,7 +178,7 @@ export function EditorLinkToolbar({
           className="goose-link-toolbar-control"
         >
           <GooseIcons.Pencil />
-          编辑
+          {t("edit")}
         </EditorAction>
       ) : null}
       <EditorAction
@@ -179,7 +198,7 @@ export function EditorLinkToolbar({
         className="goose-link-toolbar-control"
       >
         <GooseIcons.ExternalLink />
-        打开
+        {t("open")}
       </EditorAction>
       {editor.isEditable ? (
         <EditorAction
@@ -189,7 +208,7 @@ export function EditorLinkToolbar({
           className="goose-link-toolbar-control goose-link-toolbar-control-danger"
         >
           <GooseIcons.Unlink />
-          移除
+          {t("remove")}
         </EditorAction>
       ) : null}
     </div>

@@ -130,7 +130,7 @@
   grid-area: preview;
 }
 
-.setup-guide-preview > [aria-label="编辑器即时预览"] {
+.setup-guide-preview > [data-editor-preview] {
   width: 100%;
   height: 100%;
 }

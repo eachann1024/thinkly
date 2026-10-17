@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/electron/globalHotkeys.ts#localMessages:1">`
+zh-Hans:
+  desktopIntegrationIsUnavailable: "桌面桥不可用"
+  finishRecordingBeforeRegisteringTheGlobalShortcut: "录制结束后才能注册全局快捷键"
+  invalidShortcutRecordItAgain: "快捷键无效，请重新录制"
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "快捷键已被其他应用占用或无效"
+  couldnTDisableTheShortcutTryAgain: "停用快捷键失败，请重试"
+en:
+  desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
+  finishRecordingBeforeRegisteringTheGlobalShortcut: "Finish recording before registering the global shortcut"
+  invalidShortcutRecordItAgain: "Invalid shortcut. Record it again."
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "The shortcut is invalid or already used by another app"
+  couldnTDisableTheShortcutTryAgain: "Couldn’t disable the shortcut. Try again."
+`;
+const uiText = createTranslator(localMessages);
 /** Electron 全局热键 IPC；注册、暂停、恢复共用队列，结果只对应提交时的快照。 */
 import type { HostHotkeyRegisterResult } from "@/lib/host/types";
 import { toElectronAccelerator } from "./accelerator";
@@ -47,18 +64,18 @@ function resultForSlot(
   deferred = false,
 ): HostHotkeyRegisterResult {
   if (bridgeMissing) {
-    return { ok: false, state: "error", error: "桌面桥不可用" };
+    return { ok: false, state: "error", error: uiText("desktopIntegrationIsUnavailable") };
   }
   if (deferred) {
-    return { ok: false, state: "error", error: "录制结束后才能注册全局快捷键" };
+    return { ok: false, state: "error", error: uiText("finishRecordingBeforeRegisteringTheGlobalShortcut") };
   }
   if (slot.invalid) {
-    return { ok: false, state: "invalid", error: "快捷键无效，请重新录制" };
+    return { ok: false, state: "invalid", error: uiText("invalidShortcutRecordItAgain") };
   }
   if (ok) return { ok: true };
   return slot.value
-    ? { ok: false, state: "occupied", error: "快捷键已被其他应用占用或无效" }
-    : { ok: false, state: "error", error: "停用快捷键失败，请重试" };
+    ? { ok: false, state: "occupied", error: uiText("theShortcutIsInvalidOrAlreadyUsedByAnother") }
+    : { ok: false, state: "error", error: uiText("couldnTDisableTheShortcutTryAgain") };
 }
 
 async function submitSnapshot(
@@ -90,7 +107,7 @@ async function submitSnapshot(
 
 export async function pauseDesktopGlobalHotkeys(): Promise<void> {
   const api = getGooseDesktop();
-  if (!api) throw new Error("桌面桥不可用");
+  if (!api) throw new Error(uiText("desktopIntegrationIsUnavailable"));
   await enqueue(async () => {
     needsResume = true;
     await api.pauseHotkeys();
@@ -142,5 +159,5 @@ export async function unregisterDesktopGlobalHotkey(
   const result = await submitSnapshot({ ...current });
   if (!result) return;
   const ok = id === "wake" ? result.wakeOk : id === "quicknote" ? result.quicknoteOk : result.searchOk;
-  if (!ok) throw new Error("停用快捷键失败，请重试");
+  if (!ok) throw new Error(uiText("couldnTDisableTheShortcutTryAgain"));
 }

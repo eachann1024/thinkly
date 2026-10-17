@@ -8,6 +8,17 @@ import {
   resolveImageMimeForUpload,
 } from "./pasteClipboardImage";
 import { toast } from "@/components/ui/sonner";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/utils/pasteClipboardFilesFromClipboard.ts#messages:1">`
+zh-Hans:
+  couldNotPasteTheVideoPleaseTryAgain: "视频粘贴失败，请稍后重试"
+  couldNotPasteTheImagePleaseTryAgain: "图片粘贴失败，请稍后重试"
+en:
+  couldNotPasteTheVideoPleaseTryAgain: "Could not paste the video. Please try again later."
+  couldNotPasteTheImagePleaseTryAgain: "Could not paste the image. Please try again later."
+`;
+const t = createTranslator(messages);
+
 
 function insertOrUpdateBlock(
   editor: BlockNoteEditor<any, any, any>,
@@ -167,8 +178,8 @@ export async function pasteClipboardMedia(
         err instanceof Error && err.message
           ? err.message
           : isVideo
-            ? "视频粘贴失败，请稍后重试"
-            : "图片粘贴失败，请稍后重试";
+            ? t("couldNotPasteTheVideoPleaseTryAgain")
+            : t("couldNotPasteTheImagePleaseTryAgain");
       toast.error(message);
     }
   }

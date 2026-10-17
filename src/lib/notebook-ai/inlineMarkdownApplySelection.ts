@@ -12,6 +12,33 @@ import {
 import { normalizeAiMarkdown } from "./markdown";
 import { inheritPresentationFromSource } from "./inheritPresentation";
 import { parseMarkdownToBlocks, serializeBlocksToMarkdown } from "./inlineMarkdownApply";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/inlineMarkdownApplySelection.ts#messages:1">`
+zh-Hans:
+  thisBlockDoesNotSupportInlineTextRewriting: "当前块不支持行内文字改写。"
+  theTargetBlockIsNoLongerInThe: "目标块已不在文档中，请重新选择。"
+  theAiSuggestionDoesNotMatchTheNumber: "AI 建议与选中块数量不一致，请重试。"
+  aiDidNotReturnAnyContentThatCould: "AI 未返回可写入的内容。"
+  aiReturnedATableOrNonTextBlocks: "AI 返回了表格或非文字块，请重试。"
+  theOriginalBlocksHaveDuplicateIdsSelectThe: "原文块 ID 重复，请重新选择。"
+  theTextChangedOrTheBlocksMovedSelect: "原文已变化或块已移动，请重新选择后生成，原文未修改。"
+  thisPageCannotBeEdited: "当前页面不可编辑。"
+  theAiSuggestionIsIncompletePleaseRetry: "AI 建议不完整，请重试。"
+  theTargetBlockIsNoLongerInThe9: "目标块已不在文档中。"
+en:
+  thisBlockDoesNotSupportInlineTextRewriting: "This block does not support inline text rewriting."
+  theTargetBlockIsNoLongerInThe: "The target block is no longer in the document. Select the content again."
+  theAiSuggestionDoesNotMatchTheNumber: "The AI suggestion does not match the number of selected blocks. Please retry."
+  aiDidNotReturnAnyContentThatCould: "AI did not return any content that could be inserted."
+  aiReturnedATableOrNonTextBlocks: "AI returned a table or non-text blocks. Please retry."
+  theOriginalBlocksHaveDuplicateIdsSelectThe: "The original blocks have duplicate IDs. Select the content again."
+  theTextChangedOrTheBlocksMovedSelect: "The text changed or the blocks moved. Select the content again and regenerate. The original text was not changed."
+  thisPageCannotBeEdited: "This page cannot be edited."
+  theAiSuggestionIsIncompletePleaseRetry: "The AI suggestion is incomplete. Please retry."
+  theTargetBlockIsNoLongerInThe9: "The target block is no longer in the document."
+`;
+const t = createTranslator(messages);
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Editor = BlockNoteEditor<any, any, any>;
@@ -33,12 +60,12 @@ export function capturePrivateInlineTarget(editor: Editor, blockId: string): Pri
     doc.descendants((node, pos) => {
       if (found) return false;
       if (node.type.name !== "blockContainer" || node.attrs.id !== blockId) return true;
-      if (!node.firstChild?.isTextblock) throw new Error("当前块不支持行内文字改写。");
+      if (!node.firstChild?.isTextblock) throw new Error(t("thisBlockDoesNotSupportInlineTextRewriting"));
       selection = TextSelection.create(doc, pos + 2, pos + 2 + node.firstChild.content.size);
       found = true;
       return false;
     });
-    if (!found) throw new Error("目标块已不在文档中，请重新选择。");
+    if (!found) throw new Error(t("theTargetBlockIsNoLongerInThe"));
   }
   const parts = captureInlineSelectionParts(doc, selection).map((part) => {
     const selected = part.node.copy(Fragment.from(part.node.firstChild!.copy(
@@ -67,17 +94,17 @@ export function preparePrivateInlineDraft(
   markdown: string | string[],
 ): PrivateInlineDraft {
   const values = typeof markdown === "string" ? [markdown] : markdown;
-  if (values.length !== target.parts.length) throw new Error("AI 建议与选中块数量不一致，请重试。");
+  if (values.length !== target.parts.length) throw new Error(t("theAiSuggestionDoesNotMatchTheNumber"));
   return { edits: target.parts.map((part, index) => {
     const normalized = normalizeAiMarkdown(values[index]).trim();
-    if (!normalized) throw new Error("AI 未返回可写入的内容。");
+    if (!normalized) throw new Error(t("aiDidNotReturnAnyContentThatCould"));
     const parsed = inheritPresentationFromSource([editor.getBlock(part.blockId)], parseMarkdownToBlocks(editor, normalized));
     const nodes = parsed.map((block) => blockToNode(withoutIds(block) as Parameters<typeof blockToNode>[0],
       editor.prosemirrorState.schema, editor.schema.styleSchema));
     for (const node of nodes) {
       const check = (value: ProseMirrorNode) => {
         if (value.type.name === "blockContainer" && !value.firstChild?.isTextblock)
-          throw new Error("AI 返回了表格或非文字块，请重试。");
+          throw new Error(t("aiReturnedATableOrNonTextBlocks"));
       };
       check(node);
       node.descendants(check);
@@ -116,7 +143,7 @@ export function locatePrivateInlineTarget(editor: Editor, target: PrivateInlineT
   const doc = editor.prosemirrorState.doc;
   doc.descendants((node, pos) => {
     if (node.type.name === "blockContainer" && target.sourceBlockIds.includes(String(node.attrs.id))) {
-      if (locations.has(String(node.attrs.id))) throw new Error("原文块 ID 重复，请重新选择。");
+      if (locations.has(String(node.attrs.id))) throw new Error(t("theOriginalBlocksHaveDuplicateIdsSelectThe"));
       locations.set(String(node.attrs.id), { node, pos });
     }
   });
@@ -131,32 +158,32 @@ export function locatePrivateInlineTarget(editor: Editor, target: PrivateInlineT
     // Each remounted editor owns a distinct schema; node.eq would compare type identities.
     if (!found || JSON.stringify(found.node.firstChild?.toJSON()) !== JSON.stringify(part.node.firstChild!.toJSON()) ||
       JSON.stringify(ancestors) !== JSON.stringify(part.ancestors)) {
-      throw new Error("原文已变化或块已移动，请重新选择后生成，原文未修改。");
+      throw new Error(t("theTextChangedOrTheBlocksMovedSelect"));
     }
     return { ...part, node: found.node, from: found.pos + 2 + part.offsetFrom, to: found.pos + 2 + part.offsetTo };
   });
 }
 
 export function assertPrivateInlineTarget(editor: Editor, target: PrivateInlineTarget): void {
-  if (!editor.isEditable) throw new Error("当前页面不可编辑。");
+  if (!editor.isEditable) throw new Error(t("thisPageCannotBeEdited"));
   locatePrivateInlineTarget(editor, target);
 }
 
 export function applyPrivateInlineDraft(editor: Editor, target: PrivateInlineTarget, draft: PrivateInlineDraft): void {
   assertPrivateInlineTarget(editor, target);
   const parts = locatePrivateInlineTarget(editor, target);
-  if (draft.edits.length !== parts.length) throw new Error("AI 建议不完整，请重试。");
+  if (draft.edits.length !== parts.length) throw new Error(t("theAiSuggestionIsIncompletePleaseRetry"));
   editor.transact((tr) => {
     closeHistory(tr);
     // Descendants are applied first. Parents are re-read from this transaction so their children survive.
     for (const part of [...parts].sort((a, b) => b.from - a.from)) {
       const edit = draft.edits.find((item) => item.blockId === part.blockId);
-      if (!edit) throw new Error("AI 建议不完整，请重试。");
+      if (!edit) throw new Error(t("theAiSuggestionIsIncompletePleaseRetry"));
       let pos: number | undefined;
       tr.doc.descendants((node, offset) => {
         if (node.type.name === "blockContainer" && node.attrs.id === part.blockId) { pos = offset; return false; }
       });
-      if (pos === undefined) throw new Error("目标块已不在文档中。");
+      if (pos === undefined) throw new Error(t("theTargetBlockIsNoLongerInThe9"));
       const snapshot = captureInlineSelection(tr.doc, pos + 2 + part.offsetFrom, pos + 2 + part.offsetTo);
       tr.replaceWith(snapshot.replaceFrom, snapshot.replaceTo, composeInlineReplacement(snapshot, edit.nodes));
     }

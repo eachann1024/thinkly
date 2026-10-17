@@ -7,6 +7,17 @@ import { ensureNotebookAiMessageCreatedAt } from "@/lib/notebook-ai/messageTime"
 import { NOTEBOOK_AI_PLACEHOLDER_HINTS } from "./helpers";
 import type { NotebookAiSessionScope } from "./types";
 import type { SessionState } from "./useSessionState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useStreamLifecycle.ts#messages:1">`
+zh-Hans:
+  aiResponseTimedOutThisTaskWasPaused: "AI 响应超时，已暂停本次任务"
+  completedContentWasPreservedYouCanRetryAt: "已完成的内容已保留，可随时重试。"
+en:
+  aiResponseTimedOutThisTaskWasPaused: "AI response timed out. This task was paused."
+  completedContentWasPreservedYouCanRetryAt: "Completed content was preserved. You can retry at any time."
+`;
+const t = createTranslator(messages);
+
 
 const NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS = 60_000;
 export function useStreamLifecycle(state: SessionState) {
@@ -136,9 +147,9 @@ export function useStreamLifecycle(state: SessionState) {
     if (!isStreaming) return;
     const timer = window.setTimeout(() => {
       void committedStopRef.current();
-      toast.error("AI 响应超时，已暂停本次任务", {
+      toast.error(t("aiResponseTimedOutThisTaskWasPaused"), {
         id: "notebook-ai-stream-timeout",
-        description: "已完成的内容已保留，可随时重试。",
+        get description() { return t("completedContentWasPreservedYouCanRetryAt"); },
       });
     }, NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS);
     return () => window.clearTimeout(timer);

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/editor-platform/electron.ts#localMessages:1">`
+zh-Hans:
+  copyingImagesIsnTSupportedOnThisSystem: "当前系统不支持复制图片。"
+en:
+  copyingImagesIsnTSupportedOnThisSystem: "Copying images isn’t supported on this system."
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Electron 桌面端（仅本地模式）的 EditorPlatform 实现。
  *
@@ -202,7 +211,7 @@ const clipboard: EditorPlatformClipboard = {
       }
     }
     if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
-      throw new Error("当前系统不支持复制图片。");
+      throw new Error(uiText("copyingImagesIsnTSupportedOnThisSystem"));
     }
     const response = await fetch(dataUrl);
     const blob = await response.blob();

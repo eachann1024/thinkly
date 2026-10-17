@@ -1,3 +1,19 @@
+import { createTranslator as extraTranslator } from "@/i18n/core";
+const extraText = extraTranslator(i18nYaml<"src/stores/tabs/replacementContext.ts#block1:1">`
+zh-Hans:
+  saveIncomplete: "本地页面保存未完成：{{id}}"
+en:
+  saveIncomplete: "The local page has not finished saving: {{id}}"
+`);
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/tabs/replacementContext.ts#block2:2">`
+zh-Hans:
+  currentSaveFailed: "当前笔记保存失败，未切换"
+  resolveSaveFirst: "请先处理当前文件的保存状态。"
+en:
+  currentSaveFailed: "The current note couldn’t be saved. The tab was not switched."
+  resolveSaveFirst: "Resolve the current file’s save issue first."
+`);
 import type { TabSet, TabGet, TabItem } from "./types";
 import { usePages } from "../usePages";
 import {
@@ -126,7 +142,7 @@ export function createTabReplacementContext(
       try {
         await usePages.getState().flushPendingLocalSaveByPageId(currentPageId);
       } catch (error) {
-        toast.error("当前笔记保存失败，未切换", {
+        toast.error(storeText("currentSaveFailed"), {
           description: describeDiskWriteError(error),
         });
         return;
@@ -137,12 +153,12 @@ export function createTabReplacementContext(
         !isRecoveredLocalSaveConfirmationRequired(currentPageId)
       ) {
         const currentPage = usePages.getState().getPage(currentPageId);
-        toast.error("当前笔记保存失败，未切换", {
+        toast.error(storeText("currentSaveFailed"), {
           description: currentPage
             ? describeDiskWriteError(
-                new Error(`本地页面保存未完成：${currentPageId}`),
+                new Error(extraText("saveIncomplete", { id: currentPageId })),
               )
-            : "请先处理当前文件的保存状态。",
+            : storeText("resolveSaveFirst"),
         });
         return;
       }
@@ -212,7 +228,7 @@ export function createTabReplacementContext(
       try {
         await usePages.getState().flushPendingLocalSaveByPageId(currentPageId);
       } catch (error) {
-        toast.error("当前笔记保存失败，未切换", {
+        toast.error(storeText("currentSaveFailed"), {
           description: describeDiskWriteError(error),
         });
         return;
@@ -222,9 +238,9 @@ export function createTabReplacementContext(
         usePages.getState().dirtyLocalPageIds[currentPageId] &&
         !isRecoveredLocalSaveConfirmationRequired(currentPageId)
       ) {
-        toast.error("当前笔记保存失败，未切换", {
+        toast.error(storeText("currentSaveFailed"), {
           description: describeDiskWriteError(
-            new Error(`本地页面保存未完成：${currentPageId}`),
+            new Error(extraText("saveIncomplete", { id: currentPageId })),
           ),
         });
         return;

@@ -58,7 +58,7 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
-.settings-appearance-layout > [aria-label="编辑器即时预览"] {
+.settings-appearance-layout > [data-editor-preview] {
   display: none;
   grid-column: 1;
   grid-row: 1;
@@ -75,15 +75,15 @@
 /* 预览所需空间按实际宽度判断，避免界面缩放本身切换布局。 */
 @container settings (min-width: 1036px) {
   .settings-appearance-layout { grid-template-columns: minmax(0, 1fr) 520px; }
-  .settings-appearance-layout > [aria-label="编辑器即时预览"] { display: block; }
+  .settings-appearance-layout > [data-editor-preview] { display: block; }
   .settings-appearance-options { grid-column: 2; }
 }
 /* 同一次拖动保持起始布局，松手后再响应窗口或侧栏的宽度变化。 */
 .settings-appearance-layout[data-scale-drag-layout="preview"] { grid-template-columns: minmax(0, 1fr) 520px; }
-.settings-appearance-layout[data-scale-drag-layout="preview"] > [aria-label="编辑器即时预览"] { display: block; }
+.settings-appearance-layout[data-scale-drag-layout="preview"] > [data-editor-preview] { display: block; }
 .settings-appearance-layout[data-scale-drag-layout="preview"] .settings-appearance-options { grid-column: 2; }
 .settings-appearance-layout[data-scale-drag-layout="options"] { grid-template-columns: minmax(0, 1fr); }
-.settings-appearance-layout[data-scale-drag-layout="options"] > [aria-label="编辑器即时预览"] { display: none; }
+.settings-appearance-layout[data-scale-drag-layout="options"] > [data-editor-preview] { display: none; }
 .settings-appearance-layout[data-scale-drag-layout="options"] .settings-appearance-options { grid-column: 1; }
 @container settings (max-width: 76rem) {
   .settings-scroll { padding: 3rem 1.5rem 1.5rem; }

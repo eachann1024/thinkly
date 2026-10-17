@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/image-export/LivePreviewPane.tsx#localMessages:1">`
+zh-Hans:
+  exportPreview: "图片导出预览"
+en:
+  exportPreview: "Image export preview"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type CardTheme, type WatermarkConfig } from "@/lib/imageExport";
 import { buildImageExportPreviewHtml, getImageExportPreviewSource } from "@/lib/imageExport/livePreview";
@@ -60,13 +69,12 @@ export function LivePreviewPane({
 
   return (
     <aside
-      aria-label="图片导出预览"
+      aria-label={uiText("exportPreview")}
       className="min-h-0 flex flex-col overflow-hidden rounded-[12px] border bg-muted/20"
     >
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b shrink-0">
         <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
-          图片导出预览
-        </span>
+          {uiText("exportPreview")}</span>
         <span className="text-[10px] text-muted-foreground truncate">
           {theme.name}
         </span>
@@ -80,7 +88,7 @@ export function LivePreviewPane({
           }}
         >
           <PreviewFrame
-            title="图片导出预览"
+            title={uiText("exportPreview")}
             html={html}
             onHeightChange={setFrameHeight}
             style={{

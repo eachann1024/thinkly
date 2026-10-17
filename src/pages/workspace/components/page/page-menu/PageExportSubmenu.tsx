@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/page-menu/PageExportSubmenu.tsx#localMessages:1">`
+zh-Hans:
+  export: "导出"
+en:
+  export: "Export"
+`;
+const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";
 import * as GooseIcons from "@/components/ui/icons";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
@@ -167,7 +176,7 @@ export function PageExportSubmenu({
           className="goose-menu-item goose-list-row group grid min-h-[32px] w-full cursor-default grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-lg px-2 text-left text-xs"
         >
           <GooseIcons.Export className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)] group-data-[state=open]:text-[var(--goose-interactive-selected-fg)]" />
-          <span className="min-w-0 truncate">导出</span>
+          <span className="min-w-0 truncate">{uiText("export")}</span>
           <GooseIcons.ChevronRight className="ml-auto h-4 w-4" />
         </ListRow>
       </PopoverTrigger>
@@ -189,7 +198,7 @@ export function PageExportSubmenu({
               : `${Math.max(120, viewportHeight - 16)}px`,
         }}
       >
-        <div role="menu" aria-label="导出" className="goose-list-layout">
+        <div role="menu" aria-label={uiText("export")} className="goose-list-layout">
           <ListRow
             type="button"
             role="menuitem"

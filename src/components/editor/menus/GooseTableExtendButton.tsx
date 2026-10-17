@@ -15,6 +15,17 @@ import {
 import { cn } from "@/components/editor/utils/cn";
 import { isTableExtendPointerClick } from "./tableExtendClick";
 import { getTableColumnCount } from "./tableHandleSizing";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/GooseTableExtendButton.tsx#messages:1">`
+zh-Hans:
+  addColumn: "添加列"
+  addRow: "添加行"
+en:
+  addColumn: "Add column"
+  addRow: "Add row"
+`;
+const t = createTranslator(messages);
+
 
 type TableExtendButtonProps = {
   orientation: "addOrRemoveRows" | "addOrRemoveColumns";
@@ -200,7 +211,7 @@ export function GooseTableExtendButton({
           : "goose-table-extend-button-rows",
         editingState && "is-editing",
       )}
-      aria-label={isColumnHandle ? "添加列" : "添加行"}
+      aria-label={isColumnHandle ? t("addColumn") : t("addRow")}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >

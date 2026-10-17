@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { assertRoot, scan, assertTree, safeTarget, ignored, safeParts } from "./gitSyncFiles";
 import { aliasGitLayout, planGitLayout, gitLayoutMetadata, assertGitLayoutTargets } from "./gitSyncLayout";
 import { createHash } from "node:crypto";
@@ -46,7 +47,7 @@ async function applyJournal(config: GitRepositoryInput, journal: Journal, verify
     const key = mappingKey(folder), before = journal.before[key] ?? empty(), after = journal.after[key] ?? empty();
     const current = await scan(folder.localPath);
     for (const name of new Set([...Object.keys(before), ...Object.keys(after), ...Object.keys(current)])) {
-      if (current[name] !== before[name] && current[name] !== after[name]) throw new Error("上次同步尚未应用完成，本地文件又有修改；恢复备份已保留，请处理后重试");
+      if (current[name] !== before[name] && current[name] !== after[name]) throw new Error(t("recoveryLocalChanged"));
       await safeTarget(folder.localPath, name);
     }
   }
@@ -57,7 +58,7 @@ async function applyJournal(config: GitRepositoryInput, journal: Journal, verify
       const target = await safeTarget(folder.localPath, name);
       const current = await readFile(target).then((value) => value.toString("base64")).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return undefined; throw error; });
       if (current === after[name]) continue;
-      if (current !== before[name]) throw new Error("应用同步时文件发生变化；恢复备份已保留");
+      if (current !== before[name]) throw new Error(t("applyChanged"));
       if (after[name] === undefined) {
         await rm(target);
         if (process.platform !== "win32") {
@@ -93,17 +94,17 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   await assertRoot(work);
   const gitDir = path.join(work, ".git");
   const gitStat = await lstat(gitDir).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw error; });
-  if (gitStat && (!gitStat.isDirectory() || gitStat.isSymbolicLink())) throw new Error("隔离同步仓库路径无效");
+  if (gitStat && (!gitStat.isDirectory() || gitStat.isSymbolicLink())) throw new Error(t("invalidIsolatedRepo"));
   if (!gitStat) await git(work, ["init", "--initial-branch", config.branch]);
   // All transport uses an explicit validated URL; never honor local rewrite rules.
   const rewrites = await git(work, ["config", "--local", "--includes", "--get-regexp", "^(url\\.|include\\.|includeif\\.)"]).catch(() => "");
-  if (rewrites) throw new Error("隔离仓库包含地址改写规则，已停止同步");
+  if (rewrites) throw new Error(t("rewrites"));
   const identity = createHash("sha256").update(`${config.provider}\0${config.remoteUrl}\0${config.branch}\0${config.layout}`).digest("hex");
   const manifestFile = path.join(root, "manifest.json");
   let manifest: Manifest;
   try { manifest = JSON.parse(await readFile(manifestFile, "utf8"), (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.assign(Object.create(null), value) : value); }
-  catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error("同步恢复记录无法读取，已停止同步"), { cause: error }); manifest = { version: 1, identity, baseline: {} }; }
-  if (manifest.version !== 1 || manifest.identity !== identity) throw new Error("仓库身份已变化，请新建同步配置");
+  catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error(t("recoveryUnreadable")), { cause: error }); manifest = { version: 1, identity, baseline: {} }; }
+  if (manifest.version !== 1 || manifest.identity !== identity) throw new Error(t("identityChanged"));
   aliasGitLayout(manifest.baseline, moves);
   aliasGitLayout(manifest.pending?.before, moves);
   aliasGitLayout(manifest.pending?.after, moves);
@@ -134,7 +135,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
         && JSON.stringify(journal.before[key]) === JSON.stringify(journal.before[selected])
         && JSON.stringify(journal.after[key]) === JSON.stringify(journal.after[selected]);
     });
-    if (Object.keys(journal.after).some((key) => !selectedKeys.has(key) && !reboundAlias(key) && !moves.some((move) => key === `${move.notebookId}:${move.from}`))) throw new Error("上次同步仍有待恢复文件夹，请重新勾选原文件夹并完成同步后再取消选择");
+    if (Object.keys(journal.after).some((key) => !selectedKeys.has(key) && !reboundAlias(key) && !moves.some((move) => key === `${move.notebookId}:${move.from}`))) throw new Error(t("pendingFolders"));
     const pushed = remoteHead && await git(work, ["merge-base", "--is-ancestor", manifest.pending.commit, remoteHead]).then(() => true).catch(() => false);
     if (pushed) {
       await applyJournal(config, manifest.pending, options.verifyRoot);
@@ -162,7 +163,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
     assertGitLayoutTargets(entries.map((entry) => entry.slice(entry.indexOf("\t") + 1)), metadataPrevious, moves);
     for (const entry of entries) {
       const match = /^(\d+) (\w+) ([a-f0-9]+)\t([\s\S]+)$/.exec(entry);
-      if (!match) throw new Error("远端 Git 文件树无效");
+      if (!match) throw new Error(t("invalidTree"));
       const mode = match[1]!, type = match[2]!, oid = match[3]!, name = match[4]!;
       for (const folder of config.folders) {
         const move = moves.find((entry) => entry.notebookId === folder.notebookId);
@@ -170,15 +171,15 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
         if (move && source === move.from) removedRemoteNames.push(name);
         if (source && name !== source && !name.startsWith(`${source}/`)) {
           const folded = name.normalize("NFC").toLowerCase(), prefix = source.normalize("NFC").toLowerCase();
-          if (folded === prefix || folded.startsWith(`${prefix}/`)) throw new Error("远端目录名称存在大小写冲突，已停止同步");
+          if (folded === prefix || folded.startsWith(`${prefix}/`)) throw new Error(t("remoteCaseConflict"));
           continue;
         }
         const relative = source ? name.slice(source.length + 1) : name;
         if (ignored(relative)) continue;
-        if (!relative || !safeParts(relative) || type !== "blob" || !["100644", "100755"].includes(mode)) throw new Error("远端所选目录包含符号链接、子模块或不安全路径，已停止同步");
+        if (!relative || !safeParts(relative) || type !== "blob" || !["100644", "100755"].includes(mode)) throw new Error(t("unsafeRemote"));
         const bytes = (await gitBytes(work, ["cat-file", "blob", oid])).toString("base64");
         const files = remote[mappingKey(folder)]!;
-        if (files[relative] !== undefined && files[relative] !== bytes) throw new Error("目录迁移目标包含不同内容，双方笔记已保留");
+        if (files[relative] !== undefined && files[relative] !== bytes) throw new Error(t("migrationConflict"));
         files[relative] = bytes;
       }
     }
@@ -233,7 +234,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   await atomicJson(manifestFile, manifest);
   if (!unchanged) {
     try { await git(work, ["push", "--no-verify", config.remoteUrl, `${commit}:${ref}`]); }
-    catch (error) { throw Object.assign(new Error(`推送失败，本地内容与恢复备份已保留。${error instanceof Error ? error.message : "请检查 SSH 权限与网络后重试"}`), { cause: error }); }
+    catch (error) { throw Object.assign(new Error(t("pushFailed", { reason: error instanceof Error ? error.message : t("retrySsh") })), { cause: error }); }
   }
   await options.afterPush?.();
   await applyJournal(config, manifest.pending, options.verifyRoot);

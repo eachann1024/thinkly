@@ -14,6 +14,15 @@ import {
   type RunToolbarAction,
   type SelectionMenuChange,
 } from "./useSelectionMenu";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/ToolbarMoreMenu.tsx#messages:1">`
+zh-Hans:
+  moreFormatting: "更多格式"
+en:
+  moreFormatting: "More formatting"
+`;
+const t = createTranslator(messages);
+
 
 export function ToolbarMoreMenu({
   children,
@@ -37,13 +46,13 @@ export function ToolbarMoreMenu({
               variant="ghost"
               size="sm"
               className="goose-formatting-toolbar-control"
-              aria-label="更多格式"
+              aria-label={t("moreFormatting")}
             >
               <MoreHorizontal />
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <ToolbarTooltip label="更多格式" />
+        <ToolbarTooltip label={t("moreFormatting")} />
       </Tooltip>
       <PopoverContent
         editorContext
@@ -63,7 +72,7 @@ export function ToolbarMoreMenu({
           data-formatting-toolbar
           className="goose-formatting-toolbar-menu"
           role="toolbar"
-          aria-label="更多格式"
+          aria-label={t("moreFormatting")}
         >
           {children(menu.runAction)}
         </div>

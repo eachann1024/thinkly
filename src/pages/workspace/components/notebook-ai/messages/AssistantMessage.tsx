@@ -21,6 +21,15 @@ import {
   ASSISTANT_ARTIFACT_PARTS,
 } from "./assistantParts";
 import { MessageActionBar } from "./MessageActionBar";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/AssistantMessage.tsx#messages:1">`
+zh-Hans:
+  thisResponseCouldNotBeGenerated: "这条回复生成失败。"
+en:
+  thisResponseCouldNotBeGenerated: "This response could not be generated."
+`;
+const t = createTranslator(messages);
+
 export function AssistantMessage({
   msg,
   isStreaming,
@@ -99,7 +108,7 @@ export function AssistantMessage({
         ))}
         <MessagePrimitive.Parts components={ASSISTANT_ARTIFACT_PARTS} />
         <MessagePrimitive.Error>
-          <p className="text-xs text-danger">这条回复生成失败。</p>
+          <p className="text-xs text-danger">{t("thisResponseCouldNotBeGenerated")}</p>
         </MessagePrimitive.Error>
         {/* 流式中不占位：避免底部空出一截操作栏高度 */}
         {!isStreaming ? <MessageActionBar /> : null}

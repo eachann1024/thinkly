@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-file-icon.tsx#localMessages:1">`
+zh-Hans:
+  couldNotReadMarkdownFile_6724: "Markdown 文件读取失败"
+en:
+  couldNotReadMarkdownFile_6724: "Could not read Markdown file"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { resolvePageIcon } from "@/lib/resolvePageIcon";
 import type { Page } from "@/types";
@@ -118,7 +127,7 @@ export function LocalFileIcon({
       <GooseIcons.CircleX
         size={16}
         className={cn("h-4 w-4 text-danger", className)}
-        aria-label={page.localReadError || "Markdown 文件读取失败"}
+        aria-label={page.localReadError || uiText("couldNotReadMarkdownFile_6724")}
       />
     );
   }

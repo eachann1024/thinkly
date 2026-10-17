@@ -9,6 +9,17 @@ import {
   type NotebookAiSessionValue,
 } from "../NotebookAiSession";
 import type { NotebookAiPanelProps } from "./types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/usePanelCommands.ts#messages:1">`
+zh-Hans:
+  configureAnAiModelInSettingsFirst: "请先在设置中配置 AI 模型"
+  generating: "正在生成结果…"
+en:
+  configureAnAiModelInSettingsFirst: "Configure an AI model in Settings first"
+  generating: "Generating…"
+`;
+const t = createTranslator(messages);
+
 export function usePanelCommands(
   props: NotebookAiPanelProps,
   session: NotebookAiSessionValue,
@@ -56,9 +67,9 @@ export function usePanelCommands(
   }, [isFullscreen, onClose]);
 
   const composerPlaceholder = unavailableReason
-    ? "请先在设置中配置 AI 模型"
+    ? t("configureAnAiModelInSettingsFirst")
     : isBusy
-      ? "正在生成结果…"
+      ? t("generating")
       : NOTEBOOK_AI_PLACEHOLDER_HINTS[placeholderIndex];
 
   const handleSend = useCallback(

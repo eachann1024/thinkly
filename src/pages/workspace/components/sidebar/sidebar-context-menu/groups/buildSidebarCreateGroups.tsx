@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-context-menu/groups/buildSidebarCreateGroups.tsx#localMessages:1">`
+zh-Hans:
+  rename_c8ce: "重命名"
+  new_26bb: "新建"
+  newNote_e82d: "新建笔记"
+  newFolder_f3a4: "新建文件夹"
+  nameSortingRestored_df43: "已恢复名称排序"
+  sortByName_5b70: "恢复名称排序"
+en:
+  rename_c8ce: "Rename"
+  new_26bb: "New"
+  newNote_e82d: "New note"
+  newFolder_f3a4: "New folder"
+  nameSortingRestored_df43: "Name sorting restored"
+  sortByName_5b70: "Sort by name"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import type { ReactNode } from "react";
 import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
@@ -63,7 +82,7 @@ export function buildSidebarCreateGroups(
           onSelect={() => scheduleAfterMenuClose(() => setRenaming(true))}
         >
           <GooseIcons.Pencil className="h-4 w-4" />
-          <span>重命名</span>
+          <span>{uiText("rename_c8ce")}</span>
           <MenuShortcut shortcut="F2" />
         </ContextMenuItem>
       </ContextMenuGroup>,
@@ -73,7 +92,7 @@ export function buildSidebarCreateGroups(
   if (showCreate) {
     sections.push(
       <ContextMenuGroup key="create">
-        <ContextMenuLabel>新建</ContextMenuLabel>
+        <ContextMenuLabel>{uiText("new_26bb")}</ContextMenuLabel>
         {onCreateLocalFile ? (
           <ContextMenuItem
             onSelect={() =>
@@ -81,7 +100,7 @@ export function buildSidebarCreateGroups(
             }
           >
             <GooseIcons.FilePlus2 className="h-4 w-4" />
-            <span className="min-w-0 truncate">新建笔记</span>
+            <span className="min-w-0 truncate">{uiText("newNote_e82d")}</span>
             <MenuShortcut shortcut={getFixedAppShortcuts().newNote} />
           </ContextMenuItem>
         ) : null}
@@ -92,7 +111,7 @@ export function buildSidebarCreateGroups(
             }
           >
             <GooseIcons.FolderPlus className="h-4 w-4" />
-            <span>新建文件夹</span>
+            <span>{uiText("newFolder_f3a4")}</span>
           </ContextMenuItem>
         ) : null}
       </ContextMenuGroup>,
@@ -106,13 +125,13 @@ export function buildSidebarCreateGroups(
           onSelect={() =>
             scheduleAfterMenuClose(() => {
               if (clearLocalFolderOrder(page.workspaceId, page.id)) {
-                toast.success("已恢复名称排序");
+                toast.success(uiText("nameSortingRestored_df43"));
               }
             })
           }
         >
           <GooseIcons.ArrowDownAZ className="h-4 w-4" />
-          <span className="min-w-0 truncate">恢复名称排序</span>
+          <span className="min-w-0 truncate">{uiText("sortByName_5b70")}</span>
         </ContextMenuItem>
       </ContextMenuGroup>,
     );

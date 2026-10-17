@@ -2,6 +2,15 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Tooltip, TooltipTrigger } from "@/components/editor/ui/tooltip";
 import { Button } from "@/components/editor/ui/button";
 import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/ClearFormatButton.tsx#messages:1">`
+zh-Hans:
+  clearFormatting: "清除格式"
+en:
+  clearFormatting: "Clear formatting"
+`;
+const t = createTranslator(messages);
+
 
 export function ClearFormatButton({
   onClear,
@@ -17,13 +26,13 @@ export function ClearFormatButton({
           variant="ghost"
           size="sm"
           onClick={onClear}
-          aria-label="清除格式"
+          aria-label={t("clearFormatting")}
           className="goose-formatting-toolbar-control"
         >
           <GooseIcons.Eraser className="h-[15px] w-[15px]" />
         </Button>
       </TooltipTrigger>
-      <ToolbarTooltip label="清除格式" />
+      <ToolbarTooltip label={t("clearFormatting")} />
     </Tooltip>
   );
 }

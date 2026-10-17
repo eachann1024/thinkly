@@ -9,6 +9,17 @@ import {
   reconcilePageMentionSuggestionMenu,
 } from "@/components/editor/utils/slashMenuPolicy";
 import type { EditorRuntime } from "./useEditorSession";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/core/useEditorClipboard.ts#messages:1">`
+zh-Hans:
+  imageCopiedTheNoteHasChangedSoThe: "图片已复制；笔记内容已变化，原图片已保留"
+  couldNotCopyTheImageToTheClipboard: "无法写入图片剪贴板，原图片已保留"
+en:
+  imageCopiedTheNoteHasChangedSoThe: "Image copied. The note has changed, so the original image was preserved."
+  couldNotCopyTheImageToTheClipboard: "Could not copy the image to the clipboard. The original image was preserved."
+`;
+const t = createTranslator(messages);
+
 
 export function useEditorClipboard(runtime: EditorRuntime) {
   const {
@@ -38,13 +49,13 @@ export function useEditorClipboard(runtime: EditorRuntime) {
           );
           if (event.type !== "cut" || !view.editable) return;
           if (!restoreEditorSelection(view, snapshot)) {
-            toast.error("图片已复制；笔记内容已变化，原图片已保留");
+            toast.error(t("imageCopiedTheNoteHasChangedSoThe"));
             return;
           }
           deleteCutSelection(view);
         } catch (error) {
           console.error("[editor] Failed to copy selected image", error);
-          toast.error("无法写入图片剪贴板，原图片已保留");
+          toast.error(t("couldNotCopyTheImageToTheClipboard"));
         }
       })();
     };

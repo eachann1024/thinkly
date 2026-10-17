@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/bootstrap/saveGuards.ts#localMessages:1">`
+zh-Hans:
+  saveFailed: "笔记未能保存到磁盘"
+  retry: "重试"
+  unsavedNotes: "仍有笔记未保存，请保存后重试更新"
+  parseFailed: "此文件无法解析，已禁用保存"
+en:
+  saveFailed: "Couldn’t save the note to disk"
+  retry: "Retry"
+  unsavedNotes: "Some notes haven’t been saved. Save them before updating."
+  parseFailed: "This file couldn’t be read. Saving is disabled."
+`;
+const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -26,11 +41,11 @@ const runFlushOnce = () => {
 
 const reportFlushFailure = (error: unknown) => {
   console.error("[save-guard] pending writes flush failed", error);
-  toast.error("笔记未能保存到磁盘", {
+  toast.error(uiText("saveFailed"), {
     id: "goose-pending-writes-failed",
     description: describeDiskWriteError(error),
     action: {
-      label: "重试",
+      label: uiText("retry"),
       onClick: () => retryPendingWrites(),
     },
   });
@@ -61,7 +76,7 @@ export const setupSaveGuards = () => {
     try {
       await runFlushOnce();
       if (Object.values(usePages.getState().dirtyLocalPageIds).some(Boolean)) {
-        throw new Error("仍有笔记未保存，请保存后重试更新");
+        throw new Error(uiText("unsavedNotes"));
       }
       await assertQuickNoteSaved();
       desktop.replyBeforeUpdate(requestId, null);
@@ -98,7 +113,7 @@ export const setupSaveGuards = () => {
 
     if (isLocalFile && activePageId) {
       if (activePage?.localReadState === "error") {
-        toast.error("此文件无法解析，已禁用保存", { duration: 1800 });
+        toast.error(uiText("parseFailed"), { duration: 1800 });
         return;
       }
       // 内容已自动保存；显式保存会再确保落盘并应用「标题→文件名」重命名。

@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsDataPanel.tsx#localMessages:1">`
+zh-Hans:
+  dataManagement_2d71: "数据管理"
+  gettingStarted_9a32: "新手引导"
+  replayAnimation_b9c4: "重播动画"
+  restartSetupGuide_8ab0: "重新开始引导"
+  cancel_625f: "取消"
+  confirm_38cf: "确定"
+en:
+  dataManagement_2d71: "Data management"
+  gettingStarted_9a32: "Getting started"
+  replayAnimation_b9c4: "Replay animation"
+  restartSetupGuide_8ab0: "Restart setup guide"
+  cancel_625f: "Cancel"
+  confirm_38cf: "Confirm"
+`;
+const uiText = createTranslator(localMessages);
 import { renderWebdavRemoteBackups } from "./data-panel/renderWebdavRemoteBackups";
 import { renderWebdavConfiguration } from "./data-panel/renderWebdavConfiguration";
 import { renderDataImportExport } from "./data-panel/renderDataImportExport";
@@ -27,19 +46,16 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold tracking-tight text-foreground">
-        数据管理
-      </h3>
+        {uiText("dataManagement_2d71")}</h3>
 
       <SettingsSectionCard
-        title="新手引导"
+        title={uiText("gettingStarted_9a32")}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={replayIntro}>
-              重播动画
-            </Button>
+              {uiText("replayAnimation_b9c4")}</Button>
             <Button variant="outline" onClick={onRestartGuide}>
-              重新开始引导
-            </Button>
+              {uiText("restartSetupGuide_8ab0")}</Button>
           </div>
         }
       />
@@ -75,15 +91,13 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
                 cancelConfirmation();
               }}
             >
-              取消
-            </Button>
+              {uiText("cancel_625f")}</Button>
             <Button
               variant="destructive"
               className="rounded-[var(--goose-control-radius)]"
               onClick={() => void confirmRemoteAction()}
             >
-              确定
-            </Button>
+              {uiText("confirm_38cf")}</Button>
           </div>
         </div>
       </DialogShell>

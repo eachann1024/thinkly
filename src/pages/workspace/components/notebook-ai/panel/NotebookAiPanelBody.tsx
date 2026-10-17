@@ -13,6 +13,17 @@ import type { NotebookAiPanelProps } from "./types";
 import type { PanelCommands } from "./usePanelCommands";
 import type { PanelSurfaceState } from "./usePanelSurface";
 import type { usePanelComposerSeed } from "./usePanelComposerSeed";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/NotebookAiPanelBody.tsx#messages:1">`
+zh-Hans:
+  whyThisResponseFailed: "本轮失败原因"
+  dismissError: "关闭错误提示"
+en:
+  whyThisResponseFailed: "Why this response failed"
+  dismissError: "Dismiss error"
+`;
+const t = createTranslator(messages);
+
 export function NotebookAiPanelBody({
   props,
   session,
@@ -113,7 +124,7 @@ export function NotebookAiPanelBody({
               />
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-[var(--goose-color-danger-focus)]">
-                  本轮失败原因
+                  {t("whyThisResponseFailed")}
                 </div>
                 <div className="mt-0.5 break-words leading-relaxed text-foreground">
                   {formatNotebookAiChatError(error)}
@@ -123,7 +134,7 @@ export function NotebookAiPanelBody({
                 type="button"
                 onClick={() => clearError()}
                 className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-[var(--goose-color-danger-focus)] outline-none hover:bg-[var(--goose-color-danger-subtle-bg)]"
-                aria-label="关闭错误提示"
+                aria-label={t("dismissError")}
               >
                 <X className="h-3.5 w-3.5" strokeWidth={1.75} />
               </IconButton>

@@ -6,6 +6,23 @@ import {
 } from "@/components/editor/ui/dropdown-menu";
 import { editTableDimension, tableDimensionColor } from "./tableMenuActions";
 import { TEXT_COLORS } from "../toolbars/formatting/colorPalette";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/menus/GooseTableColorMenu.tsx#messages:1">`
+zh-Hans:
+  color: "颜色"
+  textColor: "文字颜色"
+  backgroundColor: "背景颜色"
+  text: "文字"
+  background: "背景"
+en:
+  color: "Color"
+  textColor: "Text color"
+  backgroundColor: "Background color"
+  text: "Text"
+  background: "Background"
+`;
+const t = createTranslator(messages);
+
 
 interface GooseTableColorMenuProps {
   editor: any;
@@ -24,8 +41,8 @@ export function GooseTableColorMenu({
 }: GooseTableColorMenuProps) {
   return (
     <EditorSubmenuTrigger>
-      <DropdownMenuItem textValue="颜色">
-        <GooseIcons.Palette /> 颜色{" "}
+      <DropdownMenuItem textValue={t("color")}>
+        <GooseIcons.Palette /> {t("color")}{" "}
         <GooseIcons.ChevronRight className="ml-auto" />
       </DropdownMenuItem>
       <DropdownMenuContent
@@ -46,22 +63,22 @@ export function GooseTableColorMenu({
             <EditorMenuSection data-goose-menu-slot="group" data-goose-layout="grid"
               key={property}
               className="goose-table-color-group goose-list-group"
-              aria-label={property === "textColor" ? "文字颜色" : "背景颜色"}
+              aria-label={property === "textColor" ? t("textColor") : t("backgroundColor")}
               selectionMode="single"
               selectedKeys={
                 selectedColor ? [`${property}:${selectedColor}`] : []
               }
             >
               <EditorMenuHeader className="goose-table-menu-heading px-2 py-1 text-xs font-semibold tracking-wide text-muted-foreground">
-                {property === "textColor" ? "文字颜色" : "背景颜色"}
+                {property === "textColor" ? t("textColor") : t("backgroundColor")}
               </EditorMenuHeader>
               {TEXT_COLORS.map(({ color, name: label }) => (
                 <DropdownMenuItem
                   key={color}
                   id={`${property}:${color}`}
                   className="goose-table-color-swatch"
-                  aria-label={`${label}${property === "textColor" ? "文字" : "背景"}`}
-                  textValue={`${label}${property === "textColor" ? "文字" : "背景"}`}
+                  aria-label={`${label}${property === "textColor" ? t("text") : t("background")}`}
+                  textValue={`${label}${property === "textColor" ? t("text") : t("background")}`}
                   style={
                     {
                       "--goose-table-swatch-fg":

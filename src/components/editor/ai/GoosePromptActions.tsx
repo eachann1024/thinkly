@@ -2,6 +2,23 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { EditorAction } from "@/components/editor/ui/button";
 import { ArrowUp, ChevronDown, Settings } from "@/components/ui/icons";
 import type { GoosePromptSuggestionMenuProps } from "./GoosePromptSuggestionMenu";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/ai/GoosePromptActions.tsx#messages:1">`
+zh-Hans:
+  aiQuickActions: "AI 快捷操作"
+  openAiSettings: "打开 AI 设置"
+  sendRewriteInstructions: "发送改写要求"
+  sendEnter: "发送（回车）"
+  send: "发送"
+en:
+  aiQuickActions: "AI quick actions"
+  openAiSettings: "Open AI settings"
+  sendRewriteInstructions: "Send rewrite instructions"
+  sendEnter: "Send (Enter)"
+  send: "Send"
+`;
+const t = createTranslator(messages);
+
 
 export function GoosePromptActions({
   props,
@@ -15,7 +32,7 @@ export function GoosePromptActions({
   const onManualPromptSubmit = props.onManualPromptSubmit;
   return (
     <div className="goose-inline-ai-footer">
-      <div className="goose-ai-tags" role="group" aria-label="AI 快捷操作">
+      <div className="goose-ai-tags" role="group" aria-label={t("aiQuickActions")}>
         {tags.map((tag) => (
           <EditorAction
             key={tag.key}
@@ -57,8 +74,8 @@ export function GoosePromptActions({
           <EditorAction
             type="button"
             className="goose-ai-tag goose-ai-tag--plus"
-            aria-label="打开 AI 设置"
-            title="打开 AI 设置"
+            aria-label={t("openAiSettings")}
+            title={t("openAiSettings")}
             onMouseDown={(event) => {
               event.preventDefault();
             }}
@@ -76,14 +93,14 @@ export function GoosePromptActions({
             type="button"
             className={`goose-inline-ai-send${tags.some((tag) => tag.key === "accept") ? "" : " goose-inline-ai-primary"}`}
             disabled={disabled || !promptTextToUse.trim()}
-            aria-label="发送改写要求"
-            title="发送（回车）"
+            aria-label={t("sendRewriteInstructions")}
+            title={t("sendEnter")}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => {
               if (promptTextToUse.trim()) onManualPromptSubmit(promptTextToUse);
             }}
           >
-            发送
+            {t("send")}
             <ArrowUp aria-hidden className="h-3.5 w-3.5" />
           </EditorAction>
         )}

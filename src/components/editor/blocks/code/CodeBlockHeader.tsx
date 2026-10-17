@@ -4,6 +4,19 @@ import { Input } from "@/components/editor/ui/input";
 import { cn } from "@/lib/utils";
 import { CodeBlockToolbar } from "./CodeBlockToolbar";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1">`
+zh-Hans:
+  expandCodeBlock: "展开代码块"
+  collapseCodeBlock: "折叠代码块"
+  addCodeCaption: "添加代码说明"
+en:
+  expandCodeBlock: "Expand code block"
+  collapseCodeBlock: "Collapse code block"
+  addCodeCaption: "Add code caption"
+`;
+const t = createTranslator(messages);
+
 
 export function CodeBlockHeader({
   language,
@@ -49,7 +62,7 @@ export function CodeBlockHeader({
               type="button"
               variant="ghost"
               size="sm"
-              aria-label={collapsed ? "展开代码块" : "折叠代码块"}
+              aria-label={collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
               onClick={handleCollapsedChange}
               className={cn(
                 "h-6 w-6 p-0 shrink-0 rounded-md transition-transform",
@@ -63,7 +76,7 @@ export function CodeBlockHeader({
               variant="inline"
               value={isEditingSummary ? summaryDraft : summary}
               readOnly={!isEditable || !isEditingSummary}
-              placeholder="添加代码说明"
+              placeholder={t("addCodeCaption")}
               onMouseDown={(e) => {
                 e.stopPropagation();
                 if (!isEditable) return;

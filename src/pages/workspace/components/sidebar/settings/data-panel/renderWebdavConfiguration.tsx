@@ -1,3 +1,48 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/renderWebdavConfiguration.tsx#localMessages:1">`
+zh-Hans:
+  webdavConfiguration_0e03: "WebDAV 配置"
+  serverUrl_f562: "服务地址"
+  eGHttpsExampleComDav_f2d9: "例如 https://example.com/dav/"
+  account_7035: "账号"
+  emailOrUsername_515b: "邮箱或用户名"
+  remoteFolder_98d0: "远端目录"
+  backupFolder_534c: "备份目录"
+  appPassword_1976: "应用密码"
+  savedLeaveBlankToKeepIt_7b29: "已保存，留空保持不变"
+  thirdPartyAppPassword_8d0a: "第三方应用密码"
+  cloudBackupRetentionDays_54eb: "云端保留天数"
+  afterUploadingABackupCloudBackups_2113: "上传备份后，将删除超过保留天数的云端备份。"
+  automaticCloudBackups_c110: "自动云备份"
+  backUpWhileTheAppIs_48b5: "距上次备份超过 24 小时后，在应用空闲时备份。"
+  lastUpload_65db: "最近上传："
+  lastRestore_cc8b: "最近恢复："
+  saveAndCheck_8840: "保存并测试"
+  backUpNow_68c4: "立即备份"
+  restoreLatestBackup_31a8: "恢复最新备份"
+en:
+  webdavConfiguration_0e03: "WebDAV configuration"
+  serverUrl_f562: "Server URL"
+  eGHttpsExampleComDav_f2d9: "e.g. https://example.com/dav/"
+  account_7035: "Account"
+  emailOrUsername_515b: "Email or username"
+  remoteFolder_98d0: "Remote folder"
+  backupFolder_534c: "Backup folder"
+  appPassword_1976: "App password"
+  savedLeaveBlankToKeepIt_7b29: "Saved; leave blank to keep it"
+  thirdPartyAppPassword_8d0a: "Third-party app password"
+  cloudBackupRetentionDays_54eb: "Cloud backup retention (days)"
+  afterUploadingABackupCloudBackups_2113: "After uploading a backup, cloud backups older than this period will be deleted."
+  automaticCloudBackups_c110: "Automatic cloud backups"
+  backUpWhileTheAppIs_48b5: "Back up while the app is idle if more than 24 hours have passed since the last backup."
+  lastUpload_65db: "Last upload:"
+  lastRestore_cc8b: "Last restore:"
+  saveAndCheck_8840: "Save and check"
+  backUpNow_68c4: "Back up now"
+  restoreLatestBackup_31a8: "Restore latest backup"
+`;
+const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
 import { Upload, Cloud, RefreshCw } from "@/components/ui/icons";
 import { SettingsSectionCard } from "../SettingsSectionCard";
@@ -39,46 +84,43 @@ export function renderWebdavConfiguration(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          WebDAV 配置
-        </span>
+          {uiText("webdavConfiguration_0e03")}</span>
       }
       className="pb-3"
     >
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium text-foreground">
-            服务地址
-          </Label>
+            {uiText("serverUrl_f562")}</Label>
           <Input
             className="h-9 bg-transparent py-1 text-sm"
             value={tempUrl}
             disabled={busy}
             onChange={(e) => setTempUrl(e.target.value)}
-            placeholder="例如 https://example.com/dav/"
+            placeholder={uiText("eGHttpsExampleComDav_f2d9")}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium text-foreground">账号</Label>
+            <Label className="text-sm font-medium text-foreground">{uiText("account_7035")}</Label>
             <Input
               className="h-9 bg-transparent py-1 text-sm"
               value={tempUsername}
               disabled={busy}
               onChange={(e) => setTempUsername(e.target.value)}
-              placeholder="邮箱或用户名"
+              placeholder={uiText("emailOrUsername_515b")}
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium text-foreground">
-              远端目录
-            </Label>
+              {uiText("remoteFolder_98d0")}</Label>
             <Input
               className="h-9 bg-transparent py-1 text-sm"
               value={tempRemoteDir}
               disabled={busy}
               onChange={(e) => setTempRemoteDir(e.target.value)}
-              placeholder="备份目录"
+              placeholder={uiText("backupFolder_534c")}
             />
           </div>
         </div>
@@ -86,8 +128,7 @@ export function renderWebdavConfiguration(
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-sm font-medium text-foreground">
-              应用密码
-            </Label>
+              {uiText("appPassword_1976")}</Label>
             <Input
               type="password"
               className="h-9 bg-transparent py-1 text-sm"
@@ -95,14 +136,13 @@ export function renderWebdavConfiguration(
               disabled={busy}
               onChange={(e) => setTempPassword(e.target.value)}
               placeholder={
-                webdavPassword ? "已保存，留空保持不变" : "第三方应用密码"
+                webdavPassword ? uiText("savedLeaveBlankToKeepIt_7b29") : uiText("thirdPartyAppPassword_8d0a")
               }
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium text-foreground">
-              云端保留天数
-            </Label>
+              {uiText("cloudBackupRetentionDays_54eb")}</Label>
             <Input
               type="number"
               min={1}
@@ -115,19 +155,16 @@ export function renderWebdavConfiguration(
               }
             />
             <p className="text-sm leading-relaxed text-muted-foreground">
-              上传备份后，将删除超过保留天数的云端备份。
-            </p>
+              {uiText("afterUploadingABackupCloudBackups_2113")}</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
           <div className="space-y-0.5 pr-4">
             <Label className="text-sm font-medium text-foreground">
-              自动云备份
-            </Label>
+              {uiText("automaticCloudBackups_c110")}</Label>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              距上次备份超过 24 小时后，在应用空闲时备份。
-            </p>
+              {uiText("backUpWhileTheAppIs_48b5")}</p>
           </div>
           <Switch
             checked={tempAutoBackupEnabled}
@@ -139,11 +176,11 @@ export function renderWebdavConfiguration(
         <div className="rounded-[var(--goose-control-radius)] border border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] p-3 text-xs text-foreground dark:bg-[hsl(var(--foreground)/0.08)]">
           <div className="flex flex-col gap-1.5">
             <div>
-              <strong>最近上传：</strong>
+              <strong>{uiText("lastUpload_65db")}</strong>
               <span>{lastUploadText}</span>
             </div>
             <div>
-              <strong>最近恢复：</strong>
+              <strong>{uiText("lastRestore_cc8b")}</strong>
               <span>{lastDownloadText}</span>
             </div>
           </div>
@@ -160,8 +197,7 @@ export function renderWebdavConfiguration(
             ) : (
               <Cloud className="h-4 w-4" />
             )}
-            保存并测试
-          </Button>
+            {uiText("saveAndCheck_8840")}</Button>
           <Button
             variant="secondary"
             className="w-full flex items-center justify-center gap-1.5 rounded-[var(--goose-control-radius)]"
@@ -173,8 +209,7 @@ export function renderWebdavConfiguration(
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            立即备份
-          </Button>
+            {uiText("backUpNow_68c4")}</Button>
           <Button
             variant="secondary"
             className="w-full flex items-center justify-center gap-1.5 rounded-[var(--goose-control-radius)]"
@@ -186,8 +221,7 @@ export function renderWebdavConfiguration(
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            恢复最新备份
-          </Button>
+            {uiText("restoreLatestBackup_31a8")}</Button>
         </div>
       </div>
     </SettingsSectionCard>

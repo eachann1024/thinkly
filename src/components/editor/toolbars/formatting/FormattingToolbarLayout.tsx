@@ -9,6 +9,15 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useFormattingToolbarState } from "./useFormattingToolbarState";
 import { hasTableMergeAction, TableMergeControls } from "./TableMergeControls";
 import { useToolbarHorizontalScroll } from "./useToolbarHorizontalScroll";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/toolbars/formatting/FormattingToolbarLayout.tsx#messages:1">`
+zh-Hans:
+  textFormatting: "文字格式"
+en:
+  textFormatting: "Text formatting"
+`;
+const t = createTranslator(messages);
+
 
 export function FormattingToolbarLayout({
   state,
@@ -100,7 +109,7 @@ export function FormattingToolbarLayout({
           e.stopPropagation();
         }}
         role="toolbar"
-        aria-label="文字格式"
+        aria-label={t("textFormatting")}
         className={cn(
           // 小窗底栏已用固定 px 尺寸，禁止再套 CSS zoom：
           // Electron 旧内核会放大 zoom 祖先的 getBoundingClientRect，

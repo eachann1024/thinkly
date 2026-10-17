@@ -56,6 +56,7 @@ default.profraw
 !/docs/showcase/PUBLISH.md
 !/docs/signpath-application.md
 !/docs/desktop-distribution.md
+!/docs/localization.md
 CHANGELOG.md
 
 skills-lock.json
@@ -66,6 +67,8 @@ skills-lock.json
 tasks/
 .pi-lens.json
 scripts/*
+!scripts/i18n/
+!scripts/i18n/**
 !scripts/collect-desktop-artifacts.mjs
 !scripts/compile-electron.mjs
 !scripts/electron-build-linux.mjs

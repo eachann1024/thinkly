@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1">`
+zh-Hans:
+  moveLeft: "移到左侧"
+  moveRight: "移到右侧"
+  moveAbove: "移到上方"
+  moveBelow: "移到下方"
+  swapPositions: "交换位置"
+en:
+  moveLeft: "Move left"
+  moveRight: "Move right"
+  moveAbove: "Move above"
+  moveBelow: "Move below"
+  swapPositions: "Swap positions"
+`;
+const uiText = createTranslator(localMessages);
 import type { SplitDropPlacement } from "@/lib/editor-split/types";
 
 export type SplitDropTarget = {
@@ -10,8 +27,8 @@ export type SplitDropTarget = {
 };
 
 export const splitDropLabels: Record<SplitDropPlacement, string> = {
-  left: "移到左侧", right: "移到右侧", top: "移到上方",
-  bottom: "移到下方", center: "交换位置",
+  left: uiText("moveLeft"), right: uiText("moveRight"), top: uiText("moveAbove"),
+  bottom: uiText("moveBelow"), center: uiText("swapPositions"),
 };
 
 export function paneElements(surface: HTMLElement): HTMLElement[] {

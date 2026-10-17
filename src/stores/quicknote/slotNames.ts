@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/stores/quicknote/slotNames.ts#localMessages:1">`
+zh-Hans:
+  defaultName: "速记 {{slot}}"
+en:
+  defaultName: "Quick Note {{slot}}"
+`;
+const uiText = createTranslator(localMessages);
 import type { QuickNoteSlotNames, QuickNoteSlot } from "./types";
 import {
   normalizeSlot,
@@ -72,5 +81,5 @@ export function getQuickNoteSlotName(
   slot: QuickNoteSlot,
   names: QuickNoteSlotNames,
 ): string {
-  return normalizeSlotName(names[slot]) || `便签 ${slot}`;
+  return normalizeSlotName(names[slot]) || uiText("defaultName", {slot});
 }

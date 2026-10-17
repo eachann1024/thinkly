@@ -4,26 +4,65 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/CodeLatexHints.tsx#messages:1">`
+zh-Hans:
+  fraction: "分数"
+  superscript: "上标"
+  subscript: "下标"
+  squareRoot: "根号"
+  sum: "求和"
+  integral: "积分"
+  limit: "极限"
+  infinity: "无穷大"
+  notEqual: "不等于"
+  lessThanOrEqualTo: "小于等于"
+  greaterThanOrEqualTo: "大于等于"
+  arrow: "箭头"
+  vector: "向量"
+  matrix: "矩阵"
+  nthRoot: "n次根"
+  latexSyntaxReference: "LaTeX 语法参考"
+en:
+  fraction: "Fraction"
+  superscript: "Superscript"
+  subscript: "Subscript"
+  squareRoot: "Square root"
+  sum: "Sum"
+  integral: "Integral"
+  limit: "Limit"
+  infinity: "Infinity"
+  notEqual: "Not equal"
+  lessThanOrEqualTo: "Less than or equal to"
+  greaterThanOrEqualTo: "Greater than or equal to"
+  arrow: "Arrow"
+  vector: "Vector"
+  matrix: "Matrix"
+  nthRoot: "Nth root"
+  latexSyntaxReference: "LaTeX syntax reference"
+`;
+const t = createTranslator(messages);
+
 
 const LATEX_SNIPPETS = [
-  { label: "分数", code: "\\frac{a}{b}" },
-  { label: "上标", code: "x^{n}" },
-  { label: "下标", code: "x_{n}" },
-  { label: "根号", code: "\\sqrt{x}" },
-  { label: "求和", code: "\\sum_{i=1}^{n}" },
-  { label: "积分", code: "\\int_{a}^{b}" },
-  { label: "极限", code: "\\lim_{x \\to a}" },
-  { label: "无穷大", code: "\\infty" },
-  { label: "不等于", code: "\\neq" },
-  { label: "小于等于", code: "\\leq" },
-  { label: "大于等于", code: "\\geq" },
-  { label: "箭头", code: "\\rightarrow" },
-  { label: "向量", code: "\\vec{a}" },
+  { get label() { return t("fraction"); }, code: "\\frac{a}{b}" },
+  { get label() { return t("superscript"); }, code: "x^{n}" },
+  { get label() { return t("subscript"); }, code: "x_{n}" },
+  { get label() { return t("squareRoot"); }, code: "\\sqrt{x}" },
+  { get label() { return t("sum"); }, code: "\\sum_{i=1}^{n}" },
+  { get label() { return t("integral"); }, code: "\\int_{a}^{b}" },
+  { get label() { return t("limit"); }, code: "\\lim_{x \\to a}" },
+  { get label() { return t("infinity"); }, code: "\\infty" },
+  { get label() { return t("notEqual"); }, code: "\\neq" },
+  { get label() { return t("lessThanOrEqualTo"); }, code: "\\leq" },
+  { get label() { return t("greaterThanOrEqualTo"); }, code: "\\geq" },
+  { get label() { return t("arrow"); }, code: "\\rightarrow" },
+  { get label() { return t("vector"); }, code: "\\vec{a}" },
   { label: "α", code: "\\alpha" },
   { label: "β", code: "\\beta" },
   { label: "π", code: "\\pi" },
-  { label: "矩阵", code: "\\begin{matrix} a & b \\\\ c & d \\end{matrix}" },
-  { label: "n次根", code: "\\sqrt[n]{x}" },
+  { get label() { return t("matrix"); }, code: "\\begin{matrix} a & b \\\\ c & d \\end{matrix}" },
+  { get label() { return t("nthRoot"); }, code: "\\sqrt[n]{x}" },
 ];
 
 export function CodeLatexHints({
@@ -49,7 +88,7 @@ export function CodeLatexHints({
             <PopoverTrigger asChild>
               <Button
                 type="button"
-                aria-label="LaTeX 语法参考"
+                aria-label={t("latexSyntaxReference")}
                 aria-expanded={showLatexHint}
                 data-state={showLatexHint ? "open" : "closed"}
                 variant="ghost"
@@ -67,11 +106,11 @@ export function CodeLatexHints({
               side="top"
               align="end"
               className="w-[420px] max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-3 shadow-lg"
-              aria-label="LaTeX 语法参考"
+              aria-label={t("latexSyntaxReference")}
               manageFocus={false}
             >
               <div className="flex items-center justify-between border-b pb-2 mb-2">
-                <span className="text-xs font-semibold">LaTeX 语法参考</span>
+                <span className="text-xs font-semibold">{t("latexSyntaxReference")}</span>
                 <EditorAction
                   type="button"
                   onClick={() => setShowLatexHint(false)}

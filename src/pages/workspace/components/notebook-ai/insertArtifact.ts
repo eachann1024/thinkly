@@ -9,6 +9,19 @@ import {
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import type { JSONContent } from "@/types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/insertArtifact.ts#messages:1">`
+zh-Hans:
+  image: "图片"
+  noPageIsOpen: "当前没有打开页面"
+  nothingToInsert: "没有可插入的内容"
+en:
+  image: "Image"
+  noPageIsOpen: "No page is open"
+  nothingToInsert: "Nothing to insert"
+`;
+const t = createTranslator(messages);
+
 
 type ArtifactEditorRef = RefObject<EditorRef | null>;
 type ArtifactEditor = NonNullable<EditorRef["editor"]>;
@@ -85,7 +98,7 @@ export function createMermaidArtifactBlocks(
 export function createImageArtifactBlocks(
   title: string | undefined,
   dataUrl: string,
-  caption = "图片",
+  caption = t("image"),
 ): PartialBlock[] {
   if (!dataUrl.trim()) return [];
   const blocks: PartialBlock[] = [];
@@ -107,7 +120,7 @@ export function createSvgArtifactBlocks(
   sanitizedSvg: string,
 ): PartialBlock[] {
   if (!sanitizedSvg.trim()) return [];
-  return createImageArtifactBlocks(title, svgToDataUrl(sanitizedSvg), "图片");
+  return createImageArtifactBlocks(title, svgToDataUrl(sanitizedSvg), t("image"));
 }
 
 function isEmptyInlineBlock(block: unknown): boolean {
@@ -211,7 +224,7 @@ async function appendBlocksToActivePage(
 ): Promise<ArtifactInsertResult> {
   const { pageId, expectedNotebookId, guard } = guardActiveArtifactPage();
   if (!pageId || !guard.ok) {
-    return { ok: false, error: guard.ok ? "当前没有打开页面" : guard.error };
+    return { ok: false, error: guard.ok ? t("noPageIsOpen") : guard.error };
   }
   const result = await appendPageContentSafely(pageId, blocks as JSONContent, {
     expectedNotebookId,
@@ -223,11 +236,11 @@ export async function insertArtifactBlocks(
   editorRef: ArtifactEditorRef | undefined,
   blocks: PartialBlock[],
 ): Promise<ArtifactInsertResult> {
-  if (blocks.length === 0) return { ok: false, error: "没有可插入的内容" };
+  if (blocks.length === 0) return { ok: false, get error() { return t("nothingToInsert"); } };
 
   const { pageId, guard } = guardActiveArtifactPage();
   if (!pageId || !guard.ok) {
-    return { ok: false, error: guard.ok ? "当前没有打开页面" : guard.error };
+    return { ok: false, error: guard.ok ? t("noPageIsOpen") : guard.error };
   }
   if (insertBlocksAtEditorCursor(editorRef?.current?.editor ?? null, blocks)) {
     return { ok: true, pageId };

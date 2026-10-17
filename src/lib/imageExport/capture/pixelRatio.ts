@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/capture/pixelRatio.ts#localMessages:1">`
+zh-Hans:
+  theContentIsTooLongToExportAsOne: "内容过长，无法导出为单张图片，请缩小内容范围后重试"
+en:
+  theContentIsTooLongToExportAsOne: "The content is too long to export as one image. Select a smaller range and try again."
+`;
+const uiText = createTranslator(localMessages);
 const MAX_CAPTURE_PIXEL_RATIO = 3;
 const MIN_CAPTURE_PIXEL_RATIO = 0.1;
 const MAX_CAPTURE_EDGE = 16_384;
@@ -45,7 +54,7 @@ export function calculateSafePixelRatio(width: number, height: number): number {
   }
 
   if (!isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio)) {
-    throw new Error("内容过长，无法导出为单张图片，请缩小内容范围后重试");
+    throw new Error(uiText("theContentIsTooLongToExportAsOne"));
   }
   return ratio;
 }

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/mermaidCache.ts#localMessages:1">`
+zh-Hans:
+  theChartPreviewIsnTAValidSvg: "图表预览不是有效的 SVG"
+en:
+  theChartPreviewIsnTAValidSvg: "The chart preview isn’t a valid SVG"
+`;
+const uiText = createTranslator(localMessages);
 import { loadMermaid } from "./loadMermaid";
 import { persistPreview, previewCacheKey, readPersistedPreview } from "./mermaidPersistentCache";
 import { getMermaidInitConfig, stripMermaidInitDirectives, type MermaidInitOptions } from "./mermaidTheme";
@@ -21,7 +30,7 @@ function instantiate(svg: string): string {
   const root = document.documentElement.localName === "svg"
     ? document.documentElement
     : parser.parseFromString(svg, "text/html").querySelector("svg");
-  if (!root) throw new Error("图表预览不是有效的 SVG");
+  if (!root) throw new Error(uiText("theChartPreviewIsnTAValidSvg"));
   const elements = [root, ...root.querySelectorAll("*")];
   const prefix = `goose-diagram-${rendererIdentity}-${++nextInstance}-`;
   root.setAttribute("data-goose-diagram-prefix", prefix);

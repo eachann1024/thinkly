@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/export/zip/importMetadata.ts#localMessages:1">`
+zh-Hans:
+  theBackupMetadataIsDamagedImportStopped: "备份元数据已损坏，已停止导入"
+  theBackupMetadataFormatIsInvalidImportStopped: "备份元数据格式无效，已停止导入"
+en:
+  theBackupMetadataIsDamagedImportStopped: "The backup metadata is damaged. Import stopped."
+  theBackupMetadataFormatIsInvalidImportStopped: "The backup metadata format is invalid. Import stopped."
+`;
+const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";
 import { sanitizeFileName } from "./assetPaths";
 import { loadAssetsFromFolder } from "./importAssets";
@@ -16,11 +27,11 @@ export async function importMetadataZip(
       const metaText = await metaFile.async("text");
       meta = JSON.parse(metaText);
     } catch (error) {
-      throw new Error("备份元数据已损坏，已停止导入", { cause: error });
+      throw new Error(uiText("theBackupMetadataIsDamagedImportStopped"), { cause: error });
     }
 
     if (!meta || !Array.isArray(meta.notebooks) || !Array.isArray(meta.pages)) {
-      throw new Error("备份元数据格式无效，已停止导入");
+      throw new Error(uiText("theBackupMetadataFormatIsInvalidImportStopped"));
     }
 
     // 在产生任何 store 副作用前先把资源完整读入内存。此后若创建回调失败，

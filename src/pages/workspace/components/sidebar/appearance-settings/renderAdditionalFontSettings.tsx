@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/renderAdditionalFontSettings.tsx#localMessages:1">`
+zh-Hans:
+  fontCategory: "{{category}}字体"
+en:
+  fontCategory: "{{category}} font"
+`;
+const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";
 import {
   DEFAULT_FONT_NAMES,
@@ -21,7 +30,7 @@ export function renderAdditionalFontSettings(
           </Label>
           <LocalFontSelect
             id={`appearance-${type}-font`}
-            label={`${defaultLabels[type]}字体`}
+            label={uiText("fontCategory", { category: defaultLabels[type] })}
             value={customFonts[type].font || null}
             onChange={(value) => setCustomFont(type, value)}
             baseFont={DEFAULT_FONT_NAMES[type]}

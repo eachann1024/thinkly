@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const messages = i18nYaml<"src/lib/setupGuideAI.ts#messages:1">`
+zh-Hans:
+  redacted: "[已隐藏]"
+en:
+  redacted: "[redacted]"
+`;
+const t = createTranslator(messages);
+
 export interface SetupGuideAIConnection {
   providerId: string;
   baseURL: string;
@@ -81,7 +90,7 @@ export function redactSetupGuideAIError(
     // Keep raw-key scrubbing available even for malformed Unicode input.
   }
   for (const variant of variants) {
-    if (variant) safeMessage = safeMessage.split(variant).join("[已隐藏]");
+    if (variant) safeMessage = safeMessage.split(variant).join(t("redacted"));
   }
   return safeMessage.length > 240 ? `${safeMessage.slice(0, 237)}…` : safeMessage;
 }

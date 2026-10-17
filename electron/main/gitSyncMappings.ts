@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import { comparisonLocalPath, localPathsAreCaseInsensitive } from "../../src/lib/canonicalLocalPath";
 import { validateGitRepository, type GitRepositoryConfig, type GitRepositoryFolder } from "../../src/lib/git-sync-contract";
 import { checkedGitRoot } from "./gitSyncFolders";
@@ -28,14 +29,14 @@ export async function prepareGitFolderMappings(
     const old = history.find((entry) => entry.notebookId === folder.notebookId)
       ?? history.find((entry) => pathKey(entry.localPath) === pathKey(folder.localPath));
     if (old) {
-      if (pathKey(old.localPath) !== pathKey(folder.localPath)) throw new Error("原文件夹路径已变化，请重新选择文件夹恢复关联");
+      if (pathKey(old.localPath) !== pathKey(folder.localPath)) throw new Error(t("folderMoved"));
       folder.remotePath = old.remotePath;
       if (old.notebookId !== folder.notebookId) rebound.push({ old, next: folder });
     } else if (input.layout === "legacy-root") {
-      throw new Error("旧布局只能重新选择原文件夹");
+      throw new Error(t("legacyFolder"));
     }
     if (history.some((entry) => entry !== old && entry.remotePath.normalize("NFC").toLowerCase() === folder.remotePath.normalize("NFC").toLowerCase())) {
-      throw new Error("此远端子目录已保留给其他笔记本，请使用新名称");
+      throw new Error(t("reservedRemote"));
     }
   }
   const validated = validateGitRepository(input);

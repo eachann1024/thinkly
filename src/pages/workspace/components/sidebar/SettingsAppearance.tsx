@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsAppearance.tsx#localMessages:1">`
+zh-Hans:
+  fontsAndReading_6d3b: "字体与阅读"
+  interfaceAndSidebar_f3b6: "界面与侧栏调节"
+en:
+  fontsAndReading_6d3b: "Fonts and reading"
+  interfaceAndSidebar_f3b6: "Interface and sidebar"
+`;
+const uiText = createTranslator(localMessages);
 import { Disclosure, DisclosureSummary } from "@/components/ui/disclosure";
 import { renderAppearanceTheme } from "./appearance-settings/renderAppearanceTheme";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
@@ -59,7 +70,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
         {section !== "reading" && <SidebarDisplaySettings />}
         {section !== "appearance" && (
           <SettingsSectionCard
-            title="字体与阅读"
+            title={uiText("fontsAndReading_6d3b")}
             className="border border-border/60"
           >
             {section === "reading" ? (
@@ -68,8 +79,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
                 {readingSettings}
                 <Disclosure className="setup-guide-advanced-settings border-t border-border/60 pt-3">
                   <DisclosureSummary className="cursor-pointer rounded-md py-2 text-sm font-medium text-foreground">
-                    界面与侧栏调节
-                  </DisclosureSummary>
+                    {uiText("interfaceAndSidebar_f3b6")}</DisclosureSummary>
                   <div className="mt-4 space-y-4">
                     {interfaceFontSettings}
                     {additionalFontSettings}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCreateBlockNote, BlockNoteViewRaw as BlockNoteView } from "@blocknote/react";
-import { zh } from "@blocknote/core/locales";
+import { en, zh } from "@blocknote/core/locales";
 import * as GooseIcons from "@/components/ui/icons";
 import "@blocknote/react/style.css";
 import { useSettings } from "@/stores/useSettings";
@@ -15,6 +15,21 @@ import { cn } from "@/lib/utils";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import type { Page } from "@/types";
 import { EditorHostBridge } from "../editor-host/EditorHostBridge";
+import { i18nYaml, createTranslator, getLocale } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1">`
+zh-Hans:
+  thisNoteCannotBePreviewed: "此笔记无法预览"
+  thisVersionCannotBeDisplayed: "此历史版本无法显示"
+  theContentMayUseAnOlderFormatOr: "内容可能来自旧版格式或包含无法解析的数据。"
+  thisNoteCouldNotBeFoundSoIts: "找不到此笔记，无法预览历史版本。"
+en:
+  thisNoteCannotBePreviewed: "This note cannot be previewed"
+  thisVersionCannotBeDisplayed: "This version cannot be displayed"
+  theContentMayUseAnOlderFormatOr: "The content may use an older format or contain data that cannot be read."
+  thisNoteCouldNotBeFoundSoIts: "This note could not be found, so its history cannot be previewed."
+`;
+const t = createTranslator(messages);
+
 
 const ignoreReadOnlyContentChange = () => {};
 
@@ -62,7 +77,7 @@ export function HistoryReadOnlyEditor({
   const editor = useCreateBlockNote({
     initialContent: normalized as any,
     schema: editorSchema,
-    dictionary: zh,
+    dictionary: getLocale() === "zh-Hans" ? zh : en,
     domAttributes: {
       editor: {
         class: "goose-blocknote-editor",
@@ -114,9 +129,9 @@ export function HistoryReadOnlyEditor({
           <GooseIcons.FileWarning className="h-5 w-5" strokeWidth={1.75} />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">{sourcePage ? "此笔记无法预览" : "此历史版本无法显示"}</p>
+          <p className="text-sm font-medium text-foreground">{sourcePage ? t("thisNoteCannotBePreviewed") : t("thisVersionCannotBeDisplayed")}</p>
           <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-            内容可能来自旧版格式或包含无法解析的数据。
+            {t("theContentMayUseAnOlderFormatOr")}
           </p>
         </div>
       </div>
@@ -124,7 +139,7 @@ export function HistoryReadOnlyEditor({
   }
 
   if (!previewPage) {
-    return <p className="px-6 py-12 text-center text-sm text-muted-foreground">找不到此笔记，无法预览历史版本。</p>;
+    return <p className="px-6 py-12 text-center text-sm text-muted-foreground">{t("thisNoteCouldNotBeFoundSoIts")}</p>;
   }
 
   // 注入原页面路径与所选版本正文；只读回调不进入页面写入链。

@@ -1,3 +1,4 @@
+import { t } from "./i18n/nativeServices";
 import { app } from "electron";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -124,11 +125,11 @@ export function isAllowedPath(p: string): boolean {
 
 export function assertAllowed(p: string): string {
   if (hasUnsafeSegments(p)) {
-    throw new Error("路径不允许包含 ..");
+    throw new Error(t("parentPath"));
   }
   const resolved = normalizePath(p);
   if (!isAllowedPath(resolved)) {
-    throw new Error("路径不在允许的仓库或应用数据目录内");
+    throw new Error(t("outsideAllowed"));
   }
   return resolved;
 }

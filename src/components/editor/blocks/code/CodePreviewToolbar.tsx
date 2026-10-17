@@ -11,6 +11,33 @@ import {
   previewPointerHandlers,
 } from "@/lib/preview/previewAction";
 import type { CodeBlockToolbarProps, CodeCopyState } from "./codeToolbarTypes";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/code/CodePreviewToolbar.tsx#messages:1">`
+zh-Hans:
+  imageCopied: "已复制图片"
+  codeCopied: "已复制代码"
+  copyImage: "复制图片"
+  copyCode: "复制代码"
+  downloadImage: "下载图片"
+  codeBlockDisplayMode: "代码块显示模式"
+  showCode: "显示代码"
+  code: "代码"
+  showPreview: "显示预览"
+  preview: "预览"
+en:
+  imageCopied: "Image copied"
+  codeCopied: "Code copied"
+  copyImage: "Copy image"
+  copyCode: "Copy code"
+  downloadImage: "Download image"
+  codeBlockDisplayMode: "Code block display mode"
+  showCode: "Show code"
+  code: "Code"
+  showPreview: "Show preview"
+  preview: "Preview"
+`;
+const t = createTranslator(messages);
+
 
 export function CodePreviewToolbar({
   canPreview,
@@ -29,11 +56,11 @@ export function CodePreviewToolbar({
   const isCopyingImage = copiesImage && copyingImage;
   const copyLabel = copied
     ? copiesImage
-      ? "已复制图片"
-      : "已复制代码"
+      ? t("imageCopied")
+      : t("codeCopied")
     : copiesImage
-      ? "复制图片"
-      : "复制代码";
+      ? t("copyImage")
+      : t("copyCode");
   return (
     <>
       <Tooltip>
@@ -62,7 +89,7 @@ export function CodePreviewToolbar({
             type="button"
             variant="ghost"
             size="sm"
-            aria-label="下载图片"
+            aria-label={t("downloadImage")}
             onClick={onDownloadPreview}
             disabled={!canPreview}
             className={cn("h-7 w-7 p-0", chipClass)}
@@ -70,7 +97,7 @@ export function CodePreviewToolbar({
             <GooseIcons.Download className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>下载图片</TooltipContent>
+        <TooltipContent>{t("downloadImage")}</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -104,7 +131,7 @@ export function CodePreviewToolbar({
       <div
         className="goose-code-display-toggle inline-flex h-7 items-center gap-0.5 rounded-[12px] p-0.5"
         role="tablist"
-        aria-label="代码块显示模式"
+        aria-label={t("codeBlockDisplayMode")}
       >
         <Button
           type="button"
@@ -112,7 +139,7 @@ export function CodePreviewToolbar({
           size="sm"
           role="tab"
           aria-selected={previewMode === "code"}
-          aria-label="显示代码"
+          aria-label={t("showCode")}
           onClick={() => onPreviewModeChange?.("code")}
           className={cn(
             "goose-code-display-toggle-button h-6 px-2.5 text-xs",
@@ -120,7 +147,7 @@ export function CodePreviewToolbar({
             previewMode === "code" && "goose-code-action-active",
           )}
         >
-          代码
+          {t("code")}
         </Button>
         <Button
           type="button"
@@ -128,7 +155,7 @@ export function CodePreviewToolbar({
           size="sm"
           role="tab"
           aria-selected={previewMode === "preview"}
-          aria-label="显示预览"
+          aria-label={t("showPreview")}
           onClick={() => onPreviewModeChange?.("preview")}
           disabled={!canPreview}
           className={cn(
@@ -137,7 +164,7 @@ export function CodePreviewToolbar({
             previewMode === "preview" && "goose-code-action-active",
           )}
         >
-          预览
+          {t("preview")}
         </Button>
       </div>
     </>

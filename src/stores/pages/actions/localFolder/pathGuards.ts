@@ -1,3 +1,10 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/pathGuards.ts#block1:1">`
+zh-Hans:
+  nameUnavailable: "无法生成可用名称，请手动修改"
+en:
+  nameUnavailable: "Couldn’t generate an available name. Enter one manually."
+`);
 import type { Page } from "@/types";
 
 /** 统一本地路径比较口径，避免斜杠差异导致重复路径漏判。 */
@@ -108,5 +115,5 @@ export async function allocateUniqueLocalBaseName(
     }
   }
 
-  throw new Error("无法生成可用名称，请手动修改");
+  throw new Error(storeText("nameUnavailable"));
 }

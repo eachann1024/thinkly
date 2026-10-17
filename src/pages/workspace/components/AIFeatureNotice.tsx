@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/AIFeatureNotice.tsx#localMessages:1">`
+zh-Hans:
+  setUpTheAiWritingAssistant: "配置 AI 写作助手"
+  chooseAProviderSaveYourSettingsAnd: "选择服务商，保存配置并选择模型。"
+  setUpLater: "稍后配置"
+  openSettings: "打开完整设置"
+en:
+  setUpTheAiWritingAssistant: "Set up the AI writing assistant"
+  chooseAProviderSaveYourSettingsAnd: "Choose a provider, save your settings, and select a model."
+  setUpLater: "Set up later"
+  openSettings: "Open settings"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,8 +97,8 @@ export function AIFeatureNotice() {
     >
       <DialogContent className="writing-setup-prompt">
         <header className="writing-setup-prompt-header">
-          <DialogTitle>配置 AI 写作助手</DialogTitle>
-          <DialogDescription>选择服务商，保存配置并选择模型。</DialogDescription>
+          <DialogTitle>{uiText("setUpTheAiWritingAssistant")}</DialogTitle>
+          <DialogDescription>{uiText("chooseAProviderSaveYourSettingsAnd")}</DialogDescription>
         </header>
         <div className="writing-setup-prompt-form">
           <SettingsAI
@@ -101,8 +116,7 @@ export function AIFeatureNotice() {
         </div>
         <footer className="writing-setup-prompt-actions">
           <Button type="button" variant="ghost" onClick={close}>
-            稍后配置
-          </Button>
+            {uiText("setUpLater")}</Button>
           <Button
             type="button"
             variant="outline"
@@ -111,8 +125,7 @@ export function AIFeatureNotice() {
               openAISettings();
             }}
           >
-            打开完整设置
-          </Button>
+            {uiText("openSettings")}</Button>
         </footer>
       </DialogContent>
     </Dialog>

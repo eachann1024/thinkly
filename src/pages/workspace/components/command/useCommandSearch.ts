@@ -1,3 +1,14 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/command/useCommandSearch.ts#localMessages:1">`
+zh-Hans:
+  untitled: "无标题"
+  searchFailedTryDifferentKeywords: "搜索失败，请修改关键词后重试"
+en:
+  untitled: "Untitled"
+  searchFailedTryDifferentKeywords: "Search failed. Try different keywords."
+`;
+const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
@@ -86,7 +97,7 @@ export function useCommandSearch({
     let currentPage = page;
     while (currentPage) {
       const title = getPageTitle(currentPage);
-      if (title && title !== "无标题") breadcrumb.unshift(title);
+      if (title && title !== uiText("untitled")) breadcrumb.unshift(title);
       if (!currentPage.parentId) break;
       currentPage = pages[currentPage.parentId];
     }
@@ -130,7 +141,7 @@ export function useCommandSearch({
     })().catch((error: unknown) => {
       if (!isCurrent()) return;
       console.error("Command search failed", error);
-      setCompleted({ ...snapshot, matches: null, error: "搜索失败，请修改关键词后重试" });
+      setCompleted({ ...snapshot, matches: null, error: uiText("searchFailedTryDifferentKeywords") });
     });
     return () => { controller.abort(); };
   }, [enabled, ready, catalog, prepared.error, filteredPages, pages, notebooks, searchQuery, currentCompletion]);

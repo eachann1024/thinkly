@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/sections/shortcutConflict.tsx#localMessages:1">`
+zh-Hans:
+  sidebarShortcut_2aa4: "侧栏快捷键"
+  aiAssistantShortcut_8ea1: "AI 助手快捷键"
+  searchShortcut_3580: "搜索快捷键"
+  appearanceShortcut_d567: "外观快捷键"
+  backShortcut_47b7: "返回快捷键"
+  forwardShortcut_d31e: "前进快捷键"
+  newTabShortcut_b5a7: "新建标签页快捷键"
+  shortcutConflict_3ff0: "快捷键冲突"
+  shortcutInUse: "{{shortcut}} 已被其他操作使用。"
+  keyboardShortcuts_f7d2: "快捷键"
+  shortcutUpdated: "{{label}}已更新"
+  shortcutDisabled: "{{label}}已停用"
+en:
+  sidebarShortcut_2aa4: "Sidebar shortcut"
+  aiAssistantShortcut_8ea1: "AI assistant shortcut"
+  searchShortcut_3580: "Search shortcut"
+  appearanceShortcut_d567: "Appearance shortcut"
+  backShortcut_47b7: "Back shortcut"
+  forwardShortcut_d31e: "Forward shortcut"
+  newTabShortcut_b5a7: "New tab shortcut"
+  shortcutConflict_3ff0: "Shortcut conflict"
+  shortcutInUse: "{{shortcut}} is already assigned to another action."
+  keyboardShortcuts_f7d2: "Keyboard shortcuts"
+  shortcutUpdated: "{{label}} updated"
+  shortcutDisabled: "{{label}} disabled"
+`;
+const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { formatShortcut, isMacPlatform, type PlatformKind } from "@/lib/utils";
 import { normalizeShortcutForConflict } from "@/lib/shortcut-platform";
@@ -56,13 +87,13 @@ function getAllConfiguredShortcuts(
 }
 
 const APP_SHORTCUT_LABELS: Record<string, string> = {
-  toggleSidebar: "侧栏快捷键",
-  toggleAIPanel: "AI 助手快捷键",
-  openSearch: "搜索快捷键",
-  toggleTheme: "外观快捷键",
-  navBack: "返回快捷键",
-  navForward: "前进快捷键",
-  newTab: "新建标签页快捷键",
+  toggleSidebar: uiText("sidebarShortcut_2aa4"),
+  toggleAIPanel: uiText("aiAssistantShortcut_8ea1"),
+  openSearch: uiText("searchShortcut_3580"),
+  toggleTheme: uiText("appearanceShortcut_d567"),
+  navBack: uiText("backShortcut_47b7"),
+  navForward: uiText("forwardShortcut_d31e"),
+  newTab: uiText("newTabShortcut_b5a7"),
 };
 
 export function makeAppShortcutSetter(
@@ -90,15 +121,15 @@ export function makeAppShortcutSetter(
         desktopHotkeys,
       );
       if (existing.includes(normalizeShortcutForConflict(shortcut))) {
-        toast.warning("快捷键冲突", {
-          description: `${formatShortcut(shortcut)} 已被其他操作使用。`,
+        toast.warning(uiText("shortcutConflict_3ff0"), {
+          description: uiText("shortcutInUse", { shortcut: formatShortcut(shortcut) }),
         });
         return;
       }
     }
     setAppShortcut(id, shortcut);
-    const label = APP_SHORTCUT_LABELS[id] ?? "快捷键";
-    toast.success(shortcut ? `${label}已更新` : `${label}已停用`, {
+    const label = APP_SHORTCUT_LABELS[id] ?? uiText("keyboardShortcuts_f7d2");
+    toast.success(shortcut ? uiText("shortcutUpdated", { label }) : uiText("shortcutDisabled", { label }), {
       description: shortcut ? formatShortcut(shortcut) : undefined,
     });
   };

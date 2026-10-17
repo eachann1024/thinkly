@@ -12,6 +12,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSettings } from "@/stores/useSettings";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ModelSelectorPopover.tsx#messages:1">`
+zh-Hans:
+  switchModel: "切换模型"
+  default: "默认"
+  detailCurrentModel: "当前模型：{{value1}}"
+en:
+  switchModel: "Switch model"
+  default: "Default"
+  detailCurrentModel: "Current model: {{value1}}"
+`;
+const t = createTranslator(messages);
+
 
 interface ModelSelectorPopoverProps {
   disabled?: boolean;
@@ -60,8 +73,8 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
           type="button"
           disabled={disabled}
           className="notebook-ai-model-trigger flex shrink items-center rounded-[var(--goose-control-radius)] text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:text-disabled"
-          aria-label="切换模型"
-          title={`当前模型：${effectiveModel?.id ?? effectiveModelId}`}
+          aria-label={t("switchModel")}
+          title={t("detailCurrentModel", { value1: effectiveModel?.id ?? effectiveModelId })}
         >
           <span className="min-w-0 max-w-[12.5rem] truncate">
             {effectiveModel?.label ?? effectiveModelId}
@@ -96,7 +109,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                 </span>
                 {isDefault ? (
                   <span className="shrink-0 rounded-[4px] bg-[var(--goose-interactive-selected)] px-1.5 py-px text-[0.75rem] text-[var(--goose-interactive-selected-fg)]">
-                    默认
+                    {t("default")}
                   </span>
                 ) : null}
                 {isActive ? (

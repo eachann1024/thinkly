@@ -1,15 +1,14 @@
+import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
+const messages = i18nYaml<"src/lib/notebook-ai/messageTime.ts#messages:1">`
+zh-Hans:
+  yesterday: "昨天 {{time}}"
+en:
+  yesterday: "Yesterday {{time}}"
+`;
+const t = createTranslator(messages);
+
 /** 相邻消息间隔达到该值才再显示时间分隔条（微信风格） */
 export const CHAT_TIME_GAP_MS = 5 * 60 * 1000;
-
-const WEEKDAY_LABELS = [
-  "星期日",
-  "星期一",
-  "星期二",
-  "星期三",
-  "星期四",
-  "星期五",
-  "星期六",
-] as const;
 
 type MessageWithCreatedAt = {
   metadata?: { createdAt?: number };
@@ -23,12 +22,10 @@ function startOfLocalDay(date: Date): number {
   ).getTime();
 }
 
-function pad2(n: number): string {
-  return n < 10 ? `0${n}` : String(n);
-}
-
 function formatHm(date: Date): string {
-  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+  return new Intl.DateTimeFormat(getFormatLocale(), {
+    hour: "2-digit", minute: "2-digit",
+  }).format(date);
 }
 
 export function getMessageCreatedAt(
@@ -65,14 +62,11 @@ export function formatChatMessageTime(
   const hm = formatHm(date);
 
   if (dayDiff === 0) return hm;
-  if (dayDiff === 1) return `昨天 ${hm}`;
-  if (dayDiff >= 2 && dayDiff < 7) {
-    return `${WEEKDAY_LABELS[date.getDay()]} ${hm}`;
-  }
-  if (date.getFullYear() === nowDate.getFullYear()) {
-    return `${date.getMonth() + 1}月${date.getDate()}日 ${hm}`;
-  }
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${hm}`;
+  if (dayDiff === 1) return t("yesterday", { time: hm });
+  const options: Intl.DateTimeFormatOptions = dayDiff >= 2 && dayDiff < 7
+    ? { weekday: "long" }
+    : { month: "short", day: "numeric", ...(date.getFullYear() !== nowDate.getFullYear() ? { year: "numeric" as const } : {}) };
+  return `${new Intl.DateTimeFormat(getFormatLocale(), options).format(date)} ${hm}`;
 }
 
 /**

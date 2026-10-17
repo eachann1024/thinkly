@@ -20,6 +20,25 @@ import type { ImageAlignment } from "@/components/editor/image/imageUtils";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { toast } from "@/components/ui/sonner";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/blocks/video/videoBlock.tsx#messages:1">`
+zh-Hans:
+  savedToDownloads: "已保存到下载文件夹"
+  saveFailed: "保存失败"
+  processingVideo: "视频处理中…"
+  addVideo: "添加视频"
+  chooseALocalVideoToAutomaticallyCompressIt: "点击选择本地视频，将自动压缩为 MP4"
+  loadingVideo: "视频加载中…"
+en:
+  savedToDownloads: "Saved to Downloads"
+  saveFailed: "Save failed"
+  processingVideo: "Processing video…"
+  addVideo: "Add video"
+  chooseALocalVideoToAutomaticallyCompressIt: "Choose a local video to automatically compress it to MP4"
+  loadingVideo: "Loading video…"
+`;
+const t = createTranslator(messages);
+
 
 
 function ensureParagraphAfter(
@@ -148,8 +167,8 @@ function VideoBlockContent({
     try {
       const response = await fetch(resolvedSrc);
       const saved = await saveBlobAndReveal(await response.blob(), name);
-      if (saved) toast.success("已保存到下载文件夹");
-      else toast.error("保存失败");
+      if (saved) toast.success(t("savedToDownloads"));
+      else toast.error(t("saveFailed"));
     } catch (error) {
       console.error("[video] 保存失败，回退浏览器下载:", error);
       const link = document.createElement("a");
@@ -173,7 +192,7 @@ function VideoBlockContent({
   );
 
   if (showLoader) {
-    return <MediaLoadingPreview label="视频处理中…" />;
+    return <MediaLoadingPreview label={t("processingVideo")} />;
   }
 
   if (!block.props.url) {
@@ -182,15 +201,15 @@ function VideoBlockContent({
         variant="image"
         blockId={block.id}
         editor={editor}
-        title="添加视频"
-        hint="点击选择本地视频，将自动压缩为 MP4"
+        title={t("addVideo")}
+        hint={t("chooseALocalVideoToAutomaticallyCompressIt")}
         icon={<GooseIcons.Video size={22} strokeWidth={1.75} />}
       />
     );
   }
 
   if (!resolvedSrc) {
-    return <MediaLoadingPreview label="视频加载中…" />;
+    return <MediaLoadingPreview label={t("loadingVideo")} />;
   }
 
   return (

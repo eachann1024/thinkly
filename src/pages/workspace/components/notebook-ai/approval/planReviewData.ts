@@ -12,11 +12,20 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import type { Page } from "@/types";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/approval/planReviewData.ts#messages:1">`
+zh-Hans:
+  noteChangePlan: "笔记变更计划"
+en:
+  noteChangePlan: "Note change plan"
+`;
+const t = createTranslator(messages);
+
 
 export function readReviewPlan(part: { input?: unknown; toolCallId?: string }) {
   const input = normalizeBatchPlanInput(part.input, {
     fallbackRunId: part.toolCallId ? `batch-${part.toolCallId}` : undefined,
-    fallbackTitle: "笔记变更计划",
+    get fallbackTitle() { return t("noteChangePlan"); },
   });
   const journal =
     part.toolCallId && input?.runId

@@ -1,3 +1,30 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/useAIConnectionTest.tsx#localMessages:1">`
+zh-Hans:
+  theConnectionCheckTimedOutAfter_46bf: "连接测试超时（30 秒），请检查配置后重试。"
+  connectionSuccessful_517b: "连接成功。"
+  connectionFailedTheServiceDidNot_b320: "连接失败：服务未返回有效文本。"
+  connectionFailedCheckTheConfigurationAnd_9da2: "连接失败，请检查配置后重试。"
+  savingAndFetchingTheModelList_8623: "正在保存并读取模型列表"
+  enterABaseUrl_463f: "请填写 Base URL"
+  saveTheCurrentServiceConfigurationFirst_6e1e: "请先保存当前服务配置"
+  enableTheAiAssistantBeforeSelecting_ff9e: "先打开 AI 助手开关后才能选择模型"
+  fetchingTheModelListPleaseWait_e1a9: "模型列表读取中，请稍候"
+  enterAnApiKeyAndSave_d9dc: "请先填写 API Key 并保存配置"
+en:
+  theConnectionCheckTimedOutAfter_46bf: "The connection check timed out after 30 seconds. Check the configuration and try again."
+  connectionSuccessful_517b: "Connection successful."
+  connectionFailedTheServiceDidNot_b320: "Connection failed: the service did not return valid text."
+  connectionFailedCheckTheConfigurationAnd_9da2: "Connection failed. Check the configuration and try again."
+  savingAndFetchingTheModelList_8623: "Saving and fetching the model list"
+  enterABaseUrl_463f: "Enter a base URL"
+  saveTheCurrentServiceConfigurationFirst_6e1e: "Save the current service configuration first"
+  enableTheAiAssistantBeforeSelecting_ff9e: "Enable the AI assistant before selecting a model"
+  fetchingTheModelListPleaseWait_e1a9: "Fetching the model list. Please wait."
+  enterAnApiKeyAndSave_d9dc: "Enter an API key and save the configuration first"
+`;
+const uiText = createTranslator(localMessages);
 import { isModelRequestBusy } from "./aiRequestState";
 import { useEffect } from "react";
 import { runAIText } from "@/lib/ai-provider";
@@ -65,7 +92,7 @@ export function useAIConnectionTest(
       connectionTestControllerRef.current = null;
       connectionTestTimeoutRef.current = null;
       sendRequestEvent({ type: "test.resolved", requestId, result: "timeout",
-        message: "连接测试超时（30 秒），请检查配置后重试。" });
+        message: uiText("theConnectionCheckTimedOutAfter_46bf") });
     }, 30_000);
     connectionTestTimeoutRef.current = timeoutId;
 
@@ -99,9 +126,9 @@ export function useAIConnectionTest(
       }
 
       if (hasValidSetupGuideAIResponse(response)) {
-        sendRequestEvent({ type: "test.resolved", requestId, result: "success", message: "连接成功。" });
+        sendRequestEvent({ type: "test.resolved", requestId, result: "success", message: uiText("connectionSuccessful_517b") });
       } else {
-        sendRequestEvent({ type: "test.resolved", requestId, result: "failed", message: "连接失败：服务未返回有效文本。" });
+        sendRequestEvent({ type: "test.resolved", requestId, result: "failed", message: uiText("connectionFailedTheServiceDidNot_b320") });
       }
     } catch (error) {
       if (
@@ -112,13 +139,13 @@ export function useAIConnectionTest(
         return;
       }
       const rawMessage =
-        error instanceof Error ? error.message : "连接失败，请检查配置后重试。";
+        error instanceof Error ? error.message : uiText("connectionFailedCheckTheConfigurationAnd_9da2");
       const safeMessage = redactSetupGuideAIError(
         rawMessage,
         savedConnection.apiKey,
       );
       sendRequestEvent({ type: "test.resolved", requestId, result: "failed",
-        message: safeMessage || "连接失败，请检查配置后重试。" });
+        message: safeMessage || uiText("connectionFailedCheckTheConfigurationAnd_9da2") });
     } finally {
       if (requestId === connectionTestRequestIdRef.current) {
         clearTimeout(timeoutId);
@@ -163,11 +190,11 @@ export function useAIConnectionTest(
   };
 
   const saveButtonReason = savingCustomConfig
-    ? "正在保存并读取模型列表"
+    ? uiText("savingAndFetchingTheModelList_8623")
     : !apiKeyDraft.trim()
       ? CUSTOM_AI_KEY_HINT
       : allowCustomBaseURL && !customBaseURL.trim()
-        ? "请填写 Base URL"
+        ? uiText("enterABaseUrl_463f")
         : null;
 
   const modelButtonDisabled =
@@ -178,15 +205,15 @@ export function useAIConnectionTest(
 
   const modelButtonReason =
     isOnboarding && setupAIStatus.dirty
-      ? "请先保存当前服务配置"
+      ? uiText("saveTheCurrentServiceConfigurationFirst_6e1e")
       : !enabled
-        ? "先打开 AI 助手开关后才能选择模型"
+        ? uiText("enableTheAiAssistantBeforeSelecting_ff9e")
         : savingCustomConfig
-          ? "模型列表读取中，请稍候"
+          ? uiText("fetchingTheModelListPleaseWait_e1a9")
           : customSaveError
             ? customSaveError
             : customModels.length === 0
-              ? "请先填写 API Key 并保存配置"
+              ? uiText("enterAnApiKeyAndSave_d9dc")
               : null;
   return {
     ...input,

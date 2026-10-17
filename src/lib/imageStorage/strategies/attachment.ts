@@ -1,3 +1,15 @@
+import { formatDecimal } from "@/i18n/format";
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageStorage/strategies/attachment.ts#localMessages:1">`
+zh-Hans:
+  compressedImageTooLarge: "图片过大（约 {{size}}MB），压缩后仍超过 {{limit}}MB 上限"
+  imageAttachmentFailed: "图片写入附件存储失败: {{error}}"
+en:
+  compressedImageTooLarge: "The compressed image (about {{size}} MB) still exceeds the {{limit}} MB limit"
+  imageAttachmentFailed: "Couldn’t save the image as an attachment: {{error}}"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Attachment 存储策略
  * 用于 Electron 默认模式，使用 db.postAttachment 存储二进制图片
@@ -35,7 +47,7 @@ export class AttachmentStrategy implements IImageStorageStrategy {
 
     if (out.size > MAX_IMAGE_STORE_BYTES) {
       throw new Error(
-        `图片过大（约 ${(out.size / (1024 * 1024)).toFixed(1)}MB），压缩后仍超过 ${Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}MB 上限`,
+        uiText("compressedImageTooLarge", {size: formatDecimal(out.size / (1024 * 1024), 1), limit: Math.floor(MAX_IMAGE_STORE_BYTES / (1024 * 1024))}),
       )
     }
 
@@ -63,10 +75,10 @@ export class AttachmentStrategy implements IImageStorageStrategy {
           : result?.error
             ? JSON.stringify(result.error)
             : 'unknown'
-      if (detail.includes('上限')) {
+      if (/上限|\blimit\b/i.test(detail)) {
         throw new Error(detail)
       }
-      throw new Error(`图片写入附件存储失败: ${detail}`)
+      throw new Error(uiText("imageAttachmentFailed", {error: detail}))
     }
 
     return `${ATT_PREFIX}${id}`

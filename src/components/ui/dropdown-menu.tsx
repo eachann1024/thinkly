@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/components/ui/dropdown-menu.tsx#localMessages:1">`
+zh-Hans:
+  actions: "操作"
+en:
+  actions: "Actions"
+`;
+const uiText = createTranslator(localMessages);
 import * as React from "react";
 import { Dropdown, Popover as HeroPopover, Separator } from "@heroui/react";
 import { cn } from "@/lib/utils";
@@ -110,7 +119,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
         >
           <Dropdown.Menu
             data-goose-menu-slot="root"
-            aria-label="操作"
+            aria-label={uiText("actions")}
             className="outline-none"
           >
             {children}

@@ -1,3 +1,4 @@
+import { t } from "../i18n/nativeServices";
 import { clipboard, ipcMain, nativeImage } from "electron";
 import { printHtmlToPdf } from "../printPdf";
 import { isNetFetchAllowed } from "./common";
@@ -11,11 +12,11 @@ export function registerClipboardIpc(): void {
     const trimmed = String(dataUrl ?? "").trim();
     const match = /^data:image\/[^;]+;base64,(.+)$/i.exec(trimmed);
     if (!match) {
-      throw new Error("无效 PNG data URL");
+      throw new Error(t("invalidPng"));
     }
     const pngBuffer = Buffer.from(match[1], "base64");
     if (!pngBuffer.length) {
-      throw new Error("无效 PNG data URL");
+      throw new Error(t("invalidPng"));
     }
     const image = nativeImage.createFromBuffer(pngBuffer);
     if (process.platform === "darwin") {
@@ -44,7 +45,7 @@ export function registerClipboardIpc(): void {
       },
     ) => {
       if (!isNetFetchAllowed(url)) {
-        throw new Error("netFetch 仅允许 localhost/127.0.0.1 与 https");
+        throw new Error(t("netFetchOnly"));
       }
       const response = await fetch(url, {
         method: init?.method,

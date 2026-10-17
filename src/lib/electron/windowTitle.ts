@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/electron/windowTitle.ts#localMessages:1">`
+zh-Hans:
+  start: "开始"
+en:
+  start: "Start"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Electron 桌面端窗口标题同步（纯函数部分，保持轻量可被 unit 测试直接 import）。
  *
@@ -10,7 +19,7 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getGooseDesktop } from "./runtime";
 
 export const DEFAULT_WINDOW_TITLE = "Goose Note";
-export const WELCOME_WINDOW_TITLE = "开始";
+export const WELCOME_WINDOW_TITLE = uiText("start");
 export const TITLE_SYNC_DEBOUNCE_MS = 300;
 
 export function resolveWindowTitle(

@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/catalogConnection.ts#localMessages:1">`
+zh-Hans:
+  checkYourConfigurationInSettingsAiAssistantAiService: "请前往「设置 › AI 助手 › AI 服务」检查配置。"
+en:
+  checkYourConfigurationInSettingsAiAssistantAiService: "Check your configuration in Settings › AI assistant › AI service."
+`;
+const uiText = createTranslator(localMessages);
 import type {
   AIModelOption,
   AISettingsLike,
@@ -16,7 +25,7 @@ import {
 export const DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1";
 export const DEFAULT_CLAUDE_BASE_URL = "https://api.anthropic.com/v1";
 export const SETTINGS_ENTRY_HINT =
-  "请前往「设置 › AI 助手 › AI 服务」检查配置。";
+  uiText("checkYourConfigurationInSettingsAiAssistantAiService");
 export const ANTHROPIC_THINKING_BUDGET: Record<AIReasoningLevel, number> = {
   default: 0,
   low: 1024,

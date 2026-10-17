@@ -1,3 +1,26 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/sections/DesktopGlobalHotkeysCard.tsx#localMessages:1">`
+zh-Hans:
+  shortcutConflict_3ff0: "快捷键冲突"
+  shortcutInUse: "{{shortcut}} 已被其他操作使用。"
+  globalShortcuts_2205: "全局快捷键"
+  allowGooseNoteInAccessibilitySettings_4a8a: "允许 Goose Note 使用辅助功能后，才能在其他应用中唤出窗口。"
+  openAccessibilitySettings_1769: "打开辅助功能"
+  showMainWindow_61e7: "唤出主窗口"
+  showQuickNote_cd4c: "唤出速记"
+  showSearch_c05b: "唤出搜索"
+en:
+  shortcutConflict_3ff0: "Shortcut conflict"
+  shortcutInUse: "{{shortcut}} is already assigned to another action."
+  globalShortcuts_2205: "Global shortcuts"
+  allowGooseNoteInAccessibilitySettings_4a8a: "Allow Goose Note in Accessibility settings to open its windows from other apps."
+  openAccessibilitySettings_1769: "Open Accessibility settings"
+  showMainWindow_61e7: "Show main window"
+  showQuickNote_cd4c: "Show Quick Note"
+  showSearch_c05b: "Show search"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
@@ -85,8 +108,8 @@ export function DesktopGlobalHotkeysCard({
         },
       );
       if (existing.includes(normalizeShortcutForConflict(shortcut))) {
-        toast.warning("快捷键冲突", {
-          description: `${formatShortcut(shortcut)} 已被其他操作使用。`,
+        toast.warning(uiText("shortcutConflict_3ff0"), {
+          description: uiText("shortcutInUse", { shortcut: formatShortcut(shortcut) }),
         });
         return;
       }
@@ -95,14 +118,13 @@ export function DesktopGlobalHotkeysCard({
     };
 
   return (
-    <SettingsSectionCard title="全局快捷键">
+    <SettingsSectionCard title={uiText("globalShortcuts_2205")}>
       {macAccessibilityNeeded && (
         <div
           className={`flex items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
         >
           <p className="text-sm leading-relaxed text-foreground">
-            允许 Goose Note 使用辅助功能后，才能在其他应用中唤出窗口。
-          </p>
+            {uiText("allowGooseNoteInAccessibilitySettings_4a8a")}</p>
           <Button
             type="button"
             variant="outline"
@@ -112,14 +134,13 @@ export function DesktopGlobalHotkeysCard({
               void getGooseDesktop()?.requestAccessibility?.();
             }}
           >
-            打开辅助功能
-          </Button>
+            {uiText("openAccessibilitySettings_1769")}</Button>
         </div>
       )}
       <div className="space-y-3">
         <ShortcutField
           id="wake-hotkey"
-          title="唤出主窗口"
+          title={uiText("showMainWindow_61e7")}
           value={desktop.wakeHotkeyEnabled ? desktop.wakeHotkey : ""}
           onChange={makeDesktopSetter(
             "wake-hotkey",
@@ -130,7 +151,7 @@ export function DesktopGlobalHotkeysCard({
         />
         <ShortcutField
           id="quicknote-hotkey"
-          title="唤出速记"
+          title={uiText("showQuickNote_cd4c")}
           value={desktop.quicknoteHotkeyEnabled ? desktop.quicknoteHotkey : ""}
           onChange={makeDesktopSetter(
             "quicknote-hotkey",
@@ -141,7 +162,7 @@ export function DesktopGlobalHotkeysCard({
         />
         <ShortcutField
           id="search-hotkey"
-          title="唤出搜索"
+          title={uiText("showSearch_c05b")}
           value={desktop.searchHotkeyEnabled ? desktop.searchHotkey : ""}
           onChange={makeDesktopSetter(
             "search-hotkey",

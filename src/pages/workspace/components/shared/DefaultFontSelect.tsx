@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1">`
+zh-Hans:
+  textFont: "正文字体"
+en:
+  textFont: "Text font"
+`;
+const uiText = createTranslator(localMessages);
 import { Label } from "@/components/ui/label";
 import { LocalFontSelect } from "./LocalFontSelect";
 
@@ -13,10 +22,10 @@ export function DefaultFontSelect({
   return (
     <div className="default-font-select space-y-3">
       <div className="flex flex-col gap-3">
-        <Label htmlFor={id}>正文字体</Label>
+        <Label htmlFor={id}>{uiText("textFont")}</Label>
         <LocalFontSelect
           id={id}
-          label="正文字体"
+          label={uiText("textFont")}
           value={value}
           onChange={onChange}
         />

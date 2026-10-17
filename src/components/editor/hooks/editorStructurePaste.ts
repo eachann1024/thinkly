@@ -13,6 +13,15 @@ import {
   withoutBlockNoteClipboardIds,
   type Editor,
 } from "./editorPasteBlocks";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/components/editor/hooks/editorStructurePaste.ts#messages:1">`
+zh-Hans:
+  theNoteHasChangedPleasePasteAgain: "笔记内容已变化，请重新粘贴"
+en:
+  theNoteHasChangedPleasePasteAgain: "The note has changed. Please paste again."
+`;
+const t = createTranslator(messages);
+
 
 export function handleEditorStructurePaste(
   editor: Editor,
@@ -62,7 +71,7 @@ export function handleEditorStructurePaste(
         }
         if (!blocks || blocks.length === 0) return true;
         if (!restoreEditorSelection(editor.prosemirrorView, titleSelection)) {
-          toast.error("笔记内容已变化，请重新粘贴");
+          toast.error(t("theNoteHasChangedPleasePasteAgain"));
           return true;
         }
         const titleBlock = editor.document[0];

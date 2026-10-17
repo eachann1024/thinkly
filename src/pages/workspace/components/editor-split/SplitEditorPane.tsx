@@ -1,3 +1,20 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1">`
+zh-Hans:
+  thisNoteNoLongerExists: "页面已不存在"
+  noteNotFound: "找不到这篇笔记"
+  closeThisPane: "关闭此格"
+  theNoteCouldnTBeDisplayed: "正文暂时无法显示"
+  retry: "重试"
+en:
+  thisNoteNoLongerExists: "This note no longer exists"
+  noteNotFound: "Note not found"
+  closeThisPane: "Close this pane"
+  theNoteCouldnTBeDisplayed: "The note couldn’t be displayed"
+  retry: "Retry"
+`;
+const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { useCallback, useLayoutEffect, useRef } from "react";
@@ -41,7 +58,7 @@ export function SplitEditorPane({
   );
   const { cancelPendingRestoration } = useScrollRestoration(leaf.pageId, scrollElRef);
   const page = usePages((state) => state.pages[leaf.pageId]);
-  const title = page ? getPageTitle(page) : (leaf.title ?? "页面已不存在");
+  const title = page ? getPageTitle(page) : (leaf.title ?? uiText("thisNoteNoLongerExists"));
 
   useLayoutEffect(() => {
     registry.register(leaf.id, leaf.pageId, editorRef, scrollElRef.current);
@@ -59,14 +76,13 @@ export function SplitEditorPane({
           <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} missing />
         ) : null}
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-sm text-muted-foreground">
-          <p>找不到这篇笔记</p>
+          <p>{uiText("noteNotFound")}</p>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
             className="rounded-lg px-2 py-1 text-xs text-foreground"
             onClick={() => closeSplitPaneFromUi(tabId, leaf.id)}
           >
-            关闭此格
-          </Button>
+            {uiText("closeThisPane")}</Button>
         </div>
       </div>
     );
@@ -103,14 +119,13 @@ export function SplitEditorPane({
               resetKey={leaf.pageId}
               fallback={(_, reset) => (
                 <div className="flex min-h-[260px] items-center justify-center">
-                  <EmptyState title="正文暂时无法显示" role="alert" action={
+                  <EmptyState title={uiText("theNoteCouldnTBeDisplayed")} role="alert" action={
                   <Button contentStyle="preserve" variant="ghost" size={null}
                     type="button"
                     onClick={reset}
                     className="rounded-lg px-2 py-1 text-xs text-foreground"
                   >
-                    重试
-                  </Button>} />
+                    {uiText("retry")}</Button>} />
                 </div>
               )}
             >

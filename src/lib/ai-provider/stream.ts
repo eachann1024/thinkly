@@ -1,7 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/ai-provider/stream.ts#localMessages:1">`
+zh-Hans:
+  couldnTReadTheResponseStream: "无法读取底层数据流"
+en:
+  couldnTReadTheResponseStream: "Couldn’t read the response stream"
+`;
+const uiText = createTranslator(localMessages);
 // --- Native SSE Parser Utilities ---
 export async function* readSSELines(response: Response, signal: AbortSignal) {
   const reader = response.body?.getReader();
-  if (!reader) throw new Error("无法读取底层数据流");
+  if (!reader) throw new Error(uiText("couldnTReadTheResponseStream"));
 
   const decoder = new TextDecoder("utf-8");
   let buffer = "";

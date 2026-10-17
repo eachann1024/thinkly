@@ -1,3 +1,5 @@
+import { historyText as uiText } from "./messages";
+
 export interface HistoryLocation { relativePath: string; previousPaths: string[] }
 export interface HistoryLocations { version: 1; pages: Record<string, HistoryLocation> }
 
@@ -24,11 +26,11 @@ export function originalHistoryPath(pageId: string, workspaceId?: string): strin
 export function parseHistoryLocations(text: string | null): HistoryLocations {
   if (!text) return { version: 1, pages: Object.create(null) };
   const raw = JSON.parse(text);
-  if (raw.version !== 1 || !raw.pages || typeof raw.pages !== "object" || Array.isArray(raw.pages)) throw new Error("历史路径映射无效，原历史文件已保留");
+  if (raw.version !== 1 || !raw.pages || typeof raw.pages !== "object" || Array.isArray(raw.pages)) throw new Error(uiText("theHistoryPathMappingIsInvalidOriginalHistoryFiles"));
   const pages: Record<string, HistoryLocation> = Object.create(null);
   for (const [id, value] of Object.entries(raw.pages)) {
     const entry = value as HistoryLocation;
-    if (!validHistoryRelativePath(entry.relativePath) || !Array.isArray(entry.previousPaths) || !entry.previousPaths.every(validHistoryRelativePath)) throw new Error("历史路径映射包含无效路径，原历史文件已保留");
+    if (!validHistoryRelativePath(entry.relativePath) || !Array.isArray(entry.previousPaths) || !entry.previousPaths.every(validHistoryRelativePath)) throw new Error(uiText("theHistoryMappingContainsAnInvalidPathOriginalHistory"));
     pages[id] = { relativePath: entry.relativePath, previousPaths: entry.previousPaths };
   }
   return { version: 1, pages };

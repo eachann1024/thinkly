@@ -1,3 +1,34 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookIconSelector.tsx#localMessages:1">`
+zh-Hans:
+  all_a8b0: "全部"
+  notebookIcon_cdc6: "笔记本图标"
+  chooseIcon: "选择{{label}}"
+  searchIcon: "搜索{{label}}"
+  searchIcons_c320: "搜索图标"
+  iconCategories_7ee8: "图标分类"
+  availableIcons_29dd: "可选图标"
+  noMatchingIcons_f8cb: "没有匹配的图标"
+  randomizeIcon: "随机选择{{label}}"
+  random_3bde: "随机"
+  resetIcon: "恢复默认{{label}}"
+  resetToDefaults_7468: "恢复默认"
+en:
+  all_a8b0: "All"
+  notebookIcon_cdc6: "Notebook icon"
+  chooseIcon: "Choose {{label}}"
+  searchIcon: "Search {{label}}"
+  searchIcons_c320: "Search icons"
+  iconCategories_7ee8: "Icon categories"
+  availableIcons_29dd: "Available icons"
+  noMatchingIcons_f8cb: "No matching icons"
+  randomizeIcon: "Randomize {{label}}"
+  random_3bde: "Random"
+  resetIcon: "Reset {{label}}"
+  resetToDefaults_7468: "Reset to defaults"
+`;
+const uiText = createTranslator(localMessages);
 import { createElement, useId, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { Shuffle } from "lucide-react";
@@ -25,7 +56,7 @@ interface NotebookIconSelectorProps {
 }
 
 const categories: ReadonlyArray<{ id: NotebookIconFilter; label: string }> = [
-  { id: "all", label: "全部" },
+  { id: "all", label: uiText("all_a8b0") },
   ...NOTEBOOK_ICON_CATEGORIES,
 ];
 
@@ -34,7 +65,7 @@ export function NotebookIconSelector({
   defaultIcon,
   onChange,
   container,
-  label = "笔记本图标",
+  label = uiText("notebookIcon_cdc6"),
   compact = false,
 }: NotebookIconSelectorProps) {
   const savedValue = typeof value === "string" ? value : "";
@@ -118,7 +149,7 @@ export function NotebookIconSelector({
           variant="outline"
           contentStyle="preserve"
           className="notebook-icon-selector-trigger"
-          aria-label={`选择${label}`}
+          aria-label={uiText("chooseIcon", { label })}
           title={currentValue}
           style={compact ? { width: "1.5em", height: "1.5em", minWidth: "1.5em", padding: 0, border: 0, borderRadius: 4, background: "transparent", color: "inherit" } : undefined}
         >
@@ -134,7 +165,7 @@ export function NotebookIconSelector({
       <PopoverContent
         variant="menu"
         className="notebook-icon-selector"
-        aria-label={`选择${label}`}
+        aria-label={uiText("chooseIcon", { label })}
         align="start"
         side="bottom"
         collisionPadding={12}
@@ -150,9 +181,9 @@ export function NotebookIconSelector({
             ref={searchRef}
             value={query}
             maxLength={100}
-            aria-label={`搜索${label}`}
+            aria-label={uiText("searchIcon", { label })}
             aria-controls={resultsId}
-            placeholder="搜索图标"
+            placeholder={uiText("searchIcons_c320")}
             onChange={(event) => {
               setQuery(event.target.value);
               setCategory("all");
@@ -170,7 +201,7 @@ export function NotebookIconSelector({
             }}
           />
         </div>
-        <div className="notebook-icon-selector-categories" role="group" aria-label="图标分类">
+        <div className="notebook-icon-selector-categories" role="group" aria-label={uiText("iconCategories_7ee8")}>
           {categories.map((item) => (
             <Button
               key={item.id}
@@ -188,7 +219,7 @@ export function NotebookIconSelector({
         </div>
         <div className="notebook-icon-selector-results" id={resultsId}>
           {availableIcons.length ? (
-            <div ref={gridRef} className="notebook-icon-selector-grid" role="group" aria-label="可选图标">
+            <div ref={gridRef} className="notebook-icon-selector-grid" role="group" aria-label={uiText("availableIcons_29dd")}>
               {availableIcons.map((icon, index) => {
                 const Icon = resolvePageIcon(icon.name)!;
                 return (
@@ -213,25 +244,23 @@ export function NotebookIconSelector({
               })}
             </div>
           ) : (
-            <div className="notebook-icon-selector-empty" role="status">没有匹配的图标</div>
+            <div className="notebook-icon-selector-empty" role="status">{uiText("noMatchingIcons_f8cb")}</div>
           )}
         </div>
         <div className="notebook-icon-selector-actions">
-          <Button type="button" variant="ghost" contentStyle="preserve" onClick={handleRandom} aria-label={`随机选择${label}`}>
+          <Button type="button" variant="ghost" contentStyle="preserve" onClick={handleRandom} aria-label={uiText("randomizeIcon", { label })}>
             <Shuffle aria-hidden="true" />
-            随机
-          </Button>
+            {uiText("random_3bde")}</Button>
           <Button
             type="button"
             variant="ghost"
             contentStyle="preserve"
             onClick={() => selectIcon(defaultIcon)}
             disabled={currentValue === defaultIcon}
-            aria-label={`恢复默认${label}`}
+            aria-label={uiText("resetIcon", { label })}
           >
             <RotateCcw aria-hidden="true" />
-            恢复默认
-          </Button>
+            {uiText("resetToDefaults_7468")}</Button>
         </div>
       </PopoverContent>
     </Popover>

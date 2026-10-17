@@ -1,3 +1,46 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/shared.tsx#localMessages:1">`
+zh-Hans:
+  ocean_212e: "海蓝"
+  iris_8a32: "鸢尾"
+  pine_3fa7: "松绿"
+  vermilion_2107: "朱砂"
+  berry_10a3: "莓红"
+  grape_05b1: "葡萄"
+  leaf_461c: "叶脉"
+  earlyAutumn_c4e4: "浅秋"
+  paleCreamAndWarmWhiteLike_7eae: "浅奶油黄与暖白纸面，像秋日里的一点淡淡日光。"
+  wheatPaper_013e: "麦笺"
+  softWheatGrayAndIvoryLike_a5bb: "灰麦黄与米白纸面，像铅笔画在一张安静的素描纸上。"
+  flatWarmPaperWithTerracottaAccents_b6c6: "暖陶色点缀的平涂暖纸面，克制的 Claude 风格。"
+  serif_11e5: "衬线体"
+  monospace_5226: "等宽体"
+  defaultLayoutForNewNotes_3db8: "新笔记默认布局"
+  defaultLayout_64ce: "默认布局"
+  fullWidth_dc39: "全宽"
+  standard_544f: "标准"
+en:
+  ocean_212e: "Ocean"
+  iris_8a32: "Iris"
+  pine_3fa7: "Pine"
+  vermilion_2107: "Vermilion"
+  berry_10a3: "Berry"
+  grape_05b1: "Grape"
+  leaf_461c: "Leaf"
+  earlyAutumn_c4e4: "Early Autumn"
+  paleCreamAndWarmWhiteLike_7eae: "Pale cream and warm white, like a little autumn sunlight."
+  wheatPaper_013e: "Wheat Paper"
+  softWheatGrayAndIvoryLike_a5bb: "Soft wheat gray and ivory, like pencil on a quiet sketchbook page."
+  flatWarmPaperWithTerracottaAccents_b6c6: "Flat, warm paper with terracotta accents, in a restrained Claude-inspired style."
+  serif_11e5: "Serif"
+  monospace_5226: "Monospace"
+  defaultLayoutForNewNotes_3db8: "Default layout for new notes"
+  defaultLayout_64ce: "Default layout"
+  fullWidth_dc39: "Full width"
+  standard_544f: "Standard"
+`;
+const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { useSettings } from "@/stores/useSettings";
 import { type CSSProperties } from "react";
@@ -45,49 +88,49 @@ export type AccentOption = {
 const accentOptionDefinitions: Pick<AccentOption, "value" | "label" | "fullTheme" | "pro">[] = [
   {
     value: "ocean",
-    label: "海蓝",
+    label: uiText("ocean_212e"),
   },
   {
     value: "iris",
-    label: "鸢尾",
+    label: uiText("iris_8a32"),
   },
   {
     value: "pine",
-    label: "松绿",
+    label: uiText("pine_3fa7"),
   },
   {
     value: "coral",
-    label: "朱砂",
+    label: uiText("vermilion_2107"),
   },
   {
     value: "rose",
-    label: "莓红",
+    label: uiText("berry_10a3"),
   },
   {
     value: "grape",
-    label: "葡萄",
+    label: uiText("grape_05b1"),
   },
   {
     value: "mono",
-    label: "叶脉",
+    label: uiText("leaf_461c"),
     pro: true,
   },
   {
     value: "amber",
-    label: "浅秋",
-    fullTheme: "浅奶油黄与暖白纸面，像秋日里的一点淡淡日光。",
+    label: uiText("earlyAutumn_c4e4"),
+    fullTheme: uiText("paleCreamAndWarmWhiteLike_7eae"),
     pro: true,
   },
   {
     value: "wheat",
-    label: "麦笺",
-    fullTheme: "灰麦黄与米白纸面，像铅笔画在一张安静的素描纸上。",
+    label: uiText("wheatPaper_013e"),
+    fullTheme: uiText("softWheatGrayAndIvoryLike_a5bb"),
     pro: true,
   },
   {
     value: "claude",
     label: "Claude",
-    fullTheme: "暖陶色点缀的平涂暖纸面，克制的 Claude 风格。",
+    fullTheme: uiText("flatWarmPaperWithTerracottaAccents_b6c6"),
     pro: true,
   },
 ];
@@ -115,7 +158,7 @@ export type AccentOptionStyle = CSSProperties & {
   "--goose-accent-option-dark-focus": string;
 };
 
-export const defaultLabels = { serif: "衬线体", mono: "等宽体" };
+export const defaultLabels = { serif: uiText("serif_11e5"), mono: uiText("monospace_5226") };
 
 export const APPEARANCE_OPTION_ROW_CLASS =
   "goose-settings-option-row";
@@ -124,17 +167,17 @@ export function EditorLayoutSettings() {
   const layout = useSettings((state) => state.defaultPageLayout);
   return (
     <SettingsSectionCard
-      title="新笔记默认布局"
+      title={uiText("defaultLayoutForNewNotes_3db8")}
     >
       <div
         role="group"
-        aria-label="默认布局"
+        aria-label={uiText("defaultLayout_64ce")}
         className="grid grid-cols-1 gap-2 sm:grid-cols-2"
       >
         {(
           [
-            ["full", "全宽"],
-            ["standard", "标准"],
+            ["full", uiText("fullWidth_dc39")],
+            ["standard", uiText("standard_544f")],
           ] as const
         ).map(([value, label]) => (
           <SelectableCard

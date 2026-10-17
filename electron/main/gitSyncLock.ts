@@ -1,3 +1,4 @@
+import { t } from "./i18n/gitErrors";
 import path from "node:path";
 
 const lockedRoots = new Map<string, { done: Promise<void>; release: () => void }>();
@@ -31,5 +32,5 @@ export async function waitForGitSyncRead(target: string): Promise<void> {
 }
 
 export function assertGitSyncWritable(target: string): void {
-  if (isGitSyncPathLocked(target)) throw new Error("此笔记本正在同步，请稍后重试文件操作");
+  if (isGitSyncPathLocked(target)) throw new Error(t("locked"));
 }

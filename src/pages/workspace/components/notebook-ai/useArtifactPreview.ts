@@ -1,8 +1,24 @@
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import { openPreviewInSystem, previewPointerHandlers, type PreviewContent } from "@/lib/preview/previewAction";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
 import { artifactPreviewSnapshot, transitionArtifactPreview, type ArtifactPreviewEvent, type ArtifactPreviewState } from "./artifactPreviewState";
+import { i18nYaml, createTranslator } from "@/i18n";
+const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/useArtifactPreview.ts#messages:1">`
+zh-Hans:
+  previewUnavailable: "预览不可用"
+  unknownError: "未知错误"
+  previewError: "预览失败：{{error}}"
+  systemPreviewError: "系统预览失败：{{error}}"
+en:
+  previewUnavailable: "Preview unavailable"
+  unknownError: "Unknown error"
+  previewError: "Preview failed: {{error}}"
+  systemPreviewError: "System preview failed: {{error}}"
+`;
+const t = createTranslator(messages);
+
 
 type Input = Pick<ArtifactActionsProps, "onPreview" | "onPreviewImage"> & { identity: string; previewFilename: string };
 export function useArtifactPreview({ identity, onPreview, onPreviewImage, previewFilename }: Input) {
@@ -36,7 +52,7 @@ export function useArtifactPreview({ identity, onPreview, onPreviewImage, previe
         let content: PreviewContent;
         if (onPreview) content = await onPreview();
         else if (onPreviewImage) content = { kind: "image", data: await onPreviewImage(), fileName: previewFilename };
-        else throw new Error("预览不可用");
+        else throw new Error(t("previewUnavailable"));
         if (!current()) return;
         if (target === "internal") send({ type: "internal-resolved", id, content });
         else {
@@ -45,9 +61,9 @@ export function useArtifactPreview({ identity, onPreview, onPreviewImage, previe
         }
       } catch (error) {
         if (!current()) return;
-        const message = error instanceof Error ? error.message : "未知错误";
+        const message = error instanceof Error ? localizeNotebookAiDiagnostic(error.message) : t("unknownError");
         send({ type: "failed", id, error: message });
-        toast.error(`${target === "internal" ? "预览失败" : "系统预览失败"}：${message}`);
+        toast.error(target === "internal" ? t("previewError", { error: message }) : t("systemPreviewError", { error: message }));
       }
     })();
   };

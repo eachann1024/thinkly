@@ -1,3 +1,32 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1">`
+zh-Hans:
+  renameSlot: "重命名速记 {{slot}}"
+  renameLabel: "重命名速记"
+  renameNamedLabel: "{{name}} · 重命名速记"
+  saveToNotes: "保存到笔记"
+  emptyNote: "速记内容为空，无法保存"
+  quickNoteSettings: "速记设置"
+  rename: "重命名"
+  fontSize: "字号"
+  pixels: "{{size}} 像素"
+  clearAfterSave: "保存到笔记后，当前速记会清空。"
+  close: "关闭"
+en:
+  renameSlot: "Rename Quick Note {{slot}}"
+  renameLabel: "Rename Quick Note"
+  renameNamedLabel: "{{name}} · Rename Quick Note"
+  saveToNotes: "Save to notes"
+  emptyNote: "This Quick Note is empty"
+  quickNoteSettings: "Quick Note settings"
+  rename: "Rename"
+  fontSize: "Font size"
+  pixels: "{{size}} pixels"
+  clearAfterSave: "This Quick Note will be cleared after you save it to notes."
+  close: "Close"
+`;
+const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
@@ -51,7 +80,7 @@ export function renderQuickNoteHeader(
           ref={renameInputRef}
           value={rename.value}
           maxLength={24}
-          aria-label={`重命名便签 ${rename.slot}`}
+          aria-label={uiText("renameSlot", {slot: rename.slot})}
           className="quicknote-slot-name-input"
           style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
           onChange={(event) => editRename(rename.id, event.target.value)}
@@ -83,8 +112,8 @@ export function renderQuickNoteHeader(
         <div className="quicknote-titlebar-left">
           <Button contentStyle="preserve" variant="ghost"
             type="button"
-            aria-label="修改标签名称"
-            title={`${displaySlotName} · 修改标签名称`}
+            aria-label={uiText("renameLabel")}
+            title={uiText("renameNamedLabel", {name: displaySlotName})}
             className="quicknote-slot-name-display quicknote-titlebar-btn"
             style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
             onClick={() => startRename(activeSlot)}
@@ -115,11 +144,11 @@ export function renderQuickNoteHeader(
         <div className="quicknote-titlebar-actions">
           <Button contentStyle="preserve" variant="ghost"
             type="button"
-            aria-label="保存到笔记"
+            aria-label={uiText("saveToNotes")}
             title={
               occupiedSlots[activeSlot]
-                ? "保存到笔记"
-                : "便签内容为空，无法保存"
+                ? uiText("saveToNotes")
+                : uiText("emptyNote")
             }
             className="quicknote-titlebar-btn quicknote-save-btn"
             style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
@@ -135,8 +164,8 @@ export function renderQuickNoteHeader(
             <PopoverTrigger asChild>
               <Button contentStyle="preserve" variant="ghost"
                 type="button"
-                aria-label="便签设置"
-                title="便签设置"
+                aria-label={uiText("quickNoteSettings")}
+                title={uiText("quickNoteSettings")}
                 className={`quicknote-titlebar-btn quicknote-help-trigger ${helpOpen ? "goose-interactive--selected" : ""}`}
                 style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
               >
@@ -157,14 +186,14 @@ export function renderQuickNoteHeader(
                 onClick={() => startRename(activeSlot)}
               >
                 <Pencil className="h-3.5 w-3.5 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">重命名</span>
+                <span className="min-w-0 flex-1 truncate">{uiText("rename")}</span>
                 <span className="max-w-24 truncate text-muted-foreground">
                   {getQuickNoteSlotName(activeSlot, slotNames)}
                 </span>
               </Button>
               <div className="quicknote-font-control">
                 <div className="flex items-center justify-between gap-2">
-                  <label htmlFor="quicknote-font-size">字号</label>
+                  <label htmlFor="quicknote-font-size">{uiText("fontSize")}</label>
                   <span className="tabular-nums text-muted-foreground">
                     {Math.round(editorFontSize * zoom * 10) / 10} px
                   </span>
@@ -172,8 +201,8 @@ export function renderQuickNoteHeader(
                 <input
                   id="quicknote-font-size"
                   type="range"
-                  aria-label="字号"
-                  aria-valuetext={`${Math.round(editorFontSize * zoom * 10) / 10} 像素`}
+                  aria-label={uiText("fontSize")}
+                  aria-valuetext={uiText("pixels", {size: Math.round(editorFontSize * zoom * 10) / 10})}
                   min={QUICKNOTE_ZOOM_MIN}
                   max={QUICKNOTE_ZOOM_MAX}
                   step={0.01}
@@ -182,13 +211,12 @@ export function renderQuickNoteHeader(
                 />
               </div>
               <p className="quicknote-save-hint text-muted-foreground">
-                保存到笔记后，当前便签会清空。
-              </p>
+                {uiText("clearAfterSave")}</p>
             </PopoverContent>
           </Popover>
           <Button contentStyle="preserve" variant="ghost"
             type="button"
-            aria-label="关闭"
+            aria-label={uiText("close")}
             className="quicknote-titlebar-btn quicknote-close-btn"
             style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
             onClick={() => persistPlacementThenClose()}

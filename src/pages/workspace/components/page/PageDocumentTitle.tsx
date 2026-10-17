@@ -1,3 +1,16 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/PageDocumentTitle.tsx#localMessages:1">`
+zh-Hans:
+  createFailed: "新建失败：目标位置不可用或无写入权限"
+  renameFailed: "重命名失败，请重试"
+  noteTitle: "页面标题"
+en:
+  createFailed: "Couldn’t create the note: the destination is unavailable or you don’t have write permission"
+  renameFailed: "Couldn’t rename the note. Try again."
+  noteTitle: "Note title"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,14 +74,14 @@ export function PageDocumentTitle({ page, focused, editable }: {
         // 草稿首次命名即落盘，重名时由分配逻辑自动加后缀。
         flushEditorContent();
         const saved = await store.materializeUnsavedLocalPage(page.id, { title: name });
-        if (!saved) throw new Error("新建失败：目标位置不可用或无写入权限");
+        if (!saved) throw new Error(uiText("createFailed"));
         // 正文保存可能先一步以默认名落盘，此时再按标题重命名。
         if (displayTitle(usePages.getState().pages[page.id]) === name) return;
       }
       await usePages.getState().renameLocalPageFile(page.id, name);
     } catch (error) {
       setValue(committed);
-      toast.error(error instanceof Error ? error.message : "重命名失败，请重试");
+      toast.error(error instanceof Error ? error.message : uiText("renameFailed"));
     }
   };
 
@@ -83,7 +96,7 @@ export function PageDocumentTitle({ page, focused, editable }: {
       placeholder={UNTITLED_PAGE_TITLE}
       readOnly={!editable}
       spellCheck={false}
-      aria-label="页面标题"
+      aria-label={uiText("noteTitle")}
       onFocus={() => { editingRef.current = true; }}
       onChange={(event) => setValue(event.target.value.replace(/\n/g, ""))}
       onBlur={() => void commit()}

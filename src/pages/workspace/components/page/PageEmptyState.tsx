@@ -1,3 +1,18 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/PageEmptyState.tsx#localMessages:1">`
+zh-Hans:
+  openFolder: "打开一个笔记文件夹"
+  startNote: "从一篇笔记开始"
+  connectFolder: "关联本地文件夹，开始记录。"
+  chooseNote: "选择左侧笔记，或新建一篇。"
+en:
+  openFolder: "Open a notes folder"
+  startNote: "Start with a note"
+  connectFolder: "Connect a local folder to start taking notes."
+  chooseNote: "Select a note in the sidebar or create a new one."
+`;
+const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { FilePlus2, FolderOpen } from "@/components/ui/icons";
 import { usePageEmptyState } from "./empty-state/usePageEmptyState";
@@ -25,10 +40,10 @@ export function PageEmptyState() {
           draggable={false}
         />
         <h1 className="page-empty-state-title text-foreground">
-          {needsFolder ? "打开一个笔记文件夹" : "从一篇笔记开始"}
+          {needsFolder ? uiText("openFolder") : uiText("startNote")}
         </h1>
         <p className="page-empty-state-description text-muted-foreground">
-          {needsFolder ? "关联本地文件夹，开始记录。" : "选择左侧笔记，或新建一篇。"}
+          {needsFolder ? uiText("connectFolder") : uiText("chooseNote")}
         </p>
         {primary && (
           <Button type="button" size={null}

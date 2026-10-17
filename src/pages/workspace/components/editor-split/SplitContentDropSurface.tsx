@@ -1,3 +1,22 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1">`
+zh-Hans:
+  splitToTheLeft: "在左侧分屏"
+  splitToTheRight: "在右侧分屏"
+  splitAbove: "在上方分屏"
+  splitBelow: "在下方分屏"
+  couldnTOpenTheDroppedContentTry: "无法打开拖入内容，请重试"
+  youCanOpenUpToPanes: "最多只能分成 4 格"
+en:
+  splitToTheLeft: "Split to the left"
+  splitToTheRight: "Split to the right"
+  splitAbove: "Split above"
+  splitBelow: "Split below"
+  couldnTOpenTheDroppedContentTry: "Couldn’t open the dropped content. Try again."
+  youCanOpenUpToPanes: "You can open up to 4 panes"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
 import { GOOSE_FOLDER_MIME, GOOSE_PAGE_MIME, GOOSE_TEXT_MIME, hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
@@ -12,7 +31,7 @@ type SplitDropTarget = {
 };
 
 const labels: Record<SplitContentPlacement, string> = {
-  left: "在左侧分屏", right: "在右侧分屏", top: "在上方分屏", bottom: "在下方分屏",
+  left: uiText("splitToTheLeft"), right: uiText("splitToTheRight"), top: uiText("splitAbove"), bottom: uiText("splitBelow"),
 };
 
 function isFileDrag(data: DataTransfer): boolean {
@@ -97,7 +116,7 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       const payload = readWorkspaceDrag(data);
       if (!payload) return;
       void dropWorkspaceContent(tabId, target.paneId, target.placement as SplitContentPlacement, payload)
-        .catch(() => toast.error("无法打开拖入内容，请重试"));
+        .catch(() => toast.error(uiText("couldnTOpenTheDroppedContentTry")));
     };
     const leave = (event: DragEvent) => {
       if (!(event.relatedTarget instanceof Node) || !surface.contains(event.relatedTarget)) reset();
@@ -125,12 +144,12 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
         <div className="split-content-drop-layer" aria-hidden="true">
           <div className="split-content-drop-preview" data-placement={preview.placement}
             style={{ left: preview.left, top: preview.top, width: preview.width, height: preview.height }}>
-            <span className="split-content-drop-label">{full ? "最多只能分成 4 格" : labels[preview.placement]}</span>
+            <span className="split-content-drop-label">{full ? uiText("youCanOpenUpToPanes") : labels[preview.placement]}</span>
           </div>
         </div>
       ) : null}
       <span className="sr-only" role="status" aria-live="polite">
-        {preview ? full ? "最多只能分成 4 格" : labels[preview.placement as SplitContentPlacement] : ""}
+        {preview ? full ? uiText("youCanOpenUpToPanes") : labels[preview.placement as SplitContentPlacement] : ""}
       </span>
     </div>
   );

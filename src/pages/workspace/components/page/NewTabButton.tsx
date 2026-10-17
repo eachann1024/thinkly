@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/page/NewTabButton.tsx#localMessages:1">`
+zh-Hans:
+  newTab: "新标签页"
+en:
+  newTab: "New tab"
+`;
+const uiText = createTranslator(localMessages);
 import { IconButton } from "@/components/ui/icon-button";
 import { Plus } from "@/components/ui/icons";
 import {
@@ -18,12 +27,12 @@ export function NewTabButton({ onClick }: { onClick: () => void }) {
             type="button"
             className="shrink-0 text-muted-foreground"
             onClick={onClick}
-            aria-label="新标签页"
+            aria-label={uiText("newTab")}
           >
             <Plus className="h-4 w-4" />
           </IconButton>
         </TooltipTrigger>
-        <TooltipContent side="bottom">新标签页</TooltipContent>
+        <TooltipContent side="bottom">{uiText("newTab")}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );

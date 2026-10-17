@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n/core";
+
+const localMessages = i18nYaml<"src/lib/imageExport/timelineSvg.ts#localMessages:1">`
+zh-Hans:
+  timeline: "时间线"
+en:
+  timeline: "Timeline"
+`;
+const uiText = createTranslator(localMessages);
 /**
  * Mermaid timeline 自绘：竖轴 + 日期 + 右侧折行卡片。
  * Mermaid 自带时间轴会写死黑线和彩虹盒，且长文本溢出。
@@ -138,7 +147,7 @@ export function renderTimelineSvg(
   const firstDot = rows[0].cardTop + rows[0].cardH / 2;
   const lastRow = rows[rows.length - 1];
   const lastDot = lastRow.cardTop + lastRow.cardH / 2;
-  const label = escapeXml(model.title || "时间线");
+  const label = escapeXml(model.title || uiText("timeline"));
 
   const parts: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${height}" width="${WIDTH}" height="${height}" role="img" aria-label="${label}">`,

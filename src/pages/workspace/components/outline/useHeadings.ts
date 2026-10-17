@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/outline/useHeadings.ts#localMessages:1">`
+zh-Hans:
+  untitled: "无标题"
+en:
+  untitled: "Untitled"
+`;
+const uiText = createTranslator(localMessages);
 import { useEffect, useState, useCallback } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { isFoldableHeadingBlock } from "@/components/editor/core/headingSectionFold";
@@ -39,7 +48,7 @@ function collectHeadings(doc: any[]): HeadingItem[] {
         const item: HeadingItem = {
           id: block.id,
           level,
-          text: extractTextFromBlock(block) || "无标题",
+          text: extractTextFromBlock(block) || uiText("untitled"),
           // 标题折叠的唯一数据来源是 BlockNote heading.props.collapsed。
           // 兼容旧内容可能留下的字符串值，和编辑器折叠扩展保持一致。
           isCollapsed:

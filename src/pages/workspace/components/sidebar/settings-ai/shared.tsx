@@ -1,3 +1,12 @@
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/shared.tsx#localMessages:1">`
+zh-Hans:
+  addAnApiKeyInSettings_4457: "请前往「设置 › AI 助手 › AI 服务」补充 API Key"
+en:
+  addAnApiKeyInSettings_4457: "Add an API key in Settings › AI assistant › AI service"
+`;
+const uiText = createTranslator(localMessages);
 import { type ComponentType } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -36,7 +45,7 @@ export const SETTINGS_OPTION_ROW_CLASS =
   "goose-settings-option-row";
 
 export const CUSTOM_AI_KEY_HINT =
-  "请前往「设置 › AI 助手 › AI 服务」补充 API Key";
+  uiText("addAnApiKeyInSettings_4457");
 
 export const EMPTY_AI_MODEL_OPTIONS: AIModelOption[] = [];
 
