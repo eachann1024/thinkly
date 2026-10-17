@@ -24,7 +24,7 @@ export function S8Brand() {
         </div>
 
         <div style={{ position: "absolute", left: 96, right: 96, top: 902, textAlign: "center" }}>
-          <StaggerText parts={[{ text: "鹅的笔记" }]} fontSize={100} align="center" delay={-12} />
+          <StaggerText parts={[{ text: "思绪 · Thinkly" }]} fontSize={100} align="center" delay={-12} />
         </div>
 
         <div
@@ -38,7 +38,7 @@ export function S8Brand() {
           }}
         >
           <MonoLabel size={28} color={COLORS.inkSoft} style={{ letterSpacing: "0.28em" }}>
-            GOOSE NOTE
+            Thinkly
           </MonoLabel>
         </div>
 

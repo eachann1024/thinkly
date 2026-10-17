@@ -1,4 +1,4 @@
-# 鹅的笔记 · 全局搜索 + AI 介绍片
+# 思绪 · Thinkly · 全局搜索 + AI 介绍片
 
 竖屏产品介绍，独立 Remotion 工程；不进入应用依赖。成片输出 `out/search-ai-intro.mp4`。
 

@@ -6,7 +6,7 @@ const topCenter = { left: 0, right: 0, top: 110 };
 
 /** 字幕文案与位置（全局帧）；均放在各背景板的留白处，避开鹅。 */
 export const CAPTIONS: CaptionDef[] = [
-  { title: '早上好，这里是鹅的笔记', ...CAP.s1, box: topCenter },
+  { title: '早上好，这里是思绪 · Thinkly', ...CAP.s1, box: topCenter },
   {
     title: '想到什么，就写下什么',
     subtitle: '本地 Markdown，所写即所存',

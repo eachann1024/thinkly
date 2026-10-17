@@ -30,8 +30,8 @@ for scale in [1, 2] {
         let bounds = NSRect(x: centered ? 36 : 54, y: 640 - top - size * 1.5, width: centered ? 888 : 600, height: size * 1.5)
         string.draw(in: bounds)
     }
-    text("鹅的笔记", top: 44, size: 46, centered: false, serif: true)
-    text("Goose Note", top: 101, size: 27, centered: false, serif: true)
+    text("思绪", top: 44, size: 46, centered: false, serif: true)
+    text("Thinkly", top: 101, size: 27, centered: false, serif: true)
     text("01  拖入应用程序", top: 174, size: 24)
     text("02  双击下方「安装指令」，按提示输入密码", top: 370, size: 23)
     text("（暂未加入每年 99 美元的 Apple 开发者计划 🥺 首次打开请手动授权）", top: 414, size: 15)
