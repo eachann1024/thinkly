@@ -140,7 +140,7 @@ export function DesktopTitleBar({
     // 历史预览：不渲染导航/侧栏/置顶按钮和标签栏，仅保留 返回 + 标题 + 还原。
     return (
       <div
-        className={cn("electron-titlebar flex w-full shrink-0 items-center", !isFramelessElectron && "pr-4")}
+        className="electron-titlebar flex w-full shrink-0 items-center"
         data-history-mode
         data-sidebar-collapsed={sidebarCollapsed}
         onPointerDown={onTitleBarPointerDown}

@@ -45,7 +45,7 @@ export function HistoryToolbar() {
   } = useHistoryViewLogic();
 
   return (
-    <header className="history-toolbar h-11 min-w-0 shrink-0 grow px-3 flex items-center gap-3 bg-[hsl(var(--goose-editor-bg))] [-webkit-app-region:no-drag]">
+    <header className="history-toolbar h-11 min-w-0 shrink-0 grow pl-3 pr-4 flex items-center gap-3 bg-[hsl(var(--goose-editor-bg))] [-webkit-app-region:no-drag]">
       <Button
         variant="secondary"
         size="sm"
