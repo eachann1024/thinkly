@@ -11,7 +11,7 @@ import {
   collectMarkdownPathsFromArgv,
   isMarkdownDocumentPath,
 } from "./markdownOpenPaths";
-import { getMainWindow } from "./windows";
+import { getMainWindow, showOrCreateMainWindow } from "./windows";
 
 const OPEN_CHANNEL = "desktop:open-markdown-files";
 const TAKE_PENDING_CHANNEL = "desktop:takePendingOpenMarkdownFiles";
@@ -137,6 +137,16 @@ function processQueuedRaw(): void {
     if (accepted) pendingForRenderer.push(accepted);
   }
   deliverQueuedToRenderer();
+}
+
+/** 保存进笔记本后：抬起主窗口，并把这篇笔记交给它打开。路径无效时不抬窗。 */
+export function revealSavedMarkdownInWorkspace(rawPath: string): boolean {
+  const accepted = acceptMarkdownFile(rawPath);
+  if (!accepted) return false;
+  const win = showOrCreateMainWindow();
+  if (win.isDestroyed()) return false;
+  enqueueMarkdownOpenPaths([accepted]);
+  return true;
 }
 
 export function enqueueMarkdownOpenPaths(paths: string[]): void {

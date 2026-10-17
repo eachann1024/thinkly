@@ -22,7 +22,10 @@ zh-Hans:
   select: "选择"
   open: "打开"
   askAi: "询问 AI"
-  changeScope: "切换范围"
+  switchScope: "切换"
+  switchScopeHint: "切换{{name}}"
+  allNotebooks: "所有笔记本"
+  currentNotebook: "当前笔记本"
 en:
   searching: "Searching…"
   noteCount: "Notes: {{count}}"
@@ -43,7 +46,10 @@ en:
   select: "Select"
   open: "Open"
   askAi: "Ask AI"
-  changeScope: "Change scope"
+  switchScope: "Switch to"
+  switchScopeHint: "Switch to {{name}}"
+  allNotebooks: "all notebooks"
+  currentNotebook: "Current notebook"
 `;
 const uiText = createTranslator(localMessages);
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
@@ -53,6 +59,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { CircleAlert, FileX, Search, Sparkles, X } from "@/components/ui/icons";
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
@@ -72,6 +79,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   useLocale();
   const session = useSearchSession(useShallow(s => ({
     open: s.view.phase !== "closed", sheetOpen: s.view.phase === "sheet", query: s.query, scope: s.scope, titleOnly: s.titleOnly, sort: s.sort,
+    startingNotebookId: s.view.phase !== "closed" ? s.view.context.startingNotebookId : null,
     focusNonce: s.focusNonce, closeSearch: s.closeSearch, setQuery: s.setQuery, setScope: s.setScope,
   })));
   const visible = session.open && session.sheetOpen;
@@ -127,9 +135,16 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const openAiSettings = () => { close(); window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } })); };
   const askAi = () => {
     if (!aiQuery) return;
-    const latest = useSearchSession.getState();
-    const scopeNotebookId = latest.scope.kind === "current" ? latest.scope.notebookId : null;
-    void ask(aiQuery, getCandidates(), searchResults.all, scopeNotebookId ?? aiNotebookId);
+    const { scope } = useSearchSession.getState();
+    const candidates = getCandidates();
+    if (scope.kind === "all") {
+      const notebookIds = [...new Set(candidates.map(page => page.workspaceId))];
+      const label = `所有笔记本（${notebookIds.map(id => notebookNames[id] ?? id).join("、")}）`;
+      void ask(aiQuery, candidates, searchResults.all, { notebookId: aiNotebookId ?? notebookIds[0] ?? "", notebookIds, label });
+      return;
+    }
+    const notebookId = scope.notebookId ?? aiNotebookId ?? "";
+    void ask(aiQuery, candidates, searchResults.all, { notebookId, label: notebookNames[notebookId] ?? notebookId });
   };
   const continueInPanel = aiNotebookId && answer ? () => {
     skipRestore.current = true;
@@ -161,6 +176,10 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     if (!sheetRef.current?.contains(event.target as Node)) return;
     if (composing.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (answer) resetAnswer(); else close(); return; }
+    if (event.key === "Enter" && isPlatformPrimaryModifierEvent(event) && !event.shiftKey && !event.altKey) {
+      if (continueInPanel && answer?.status !== "loading") { event.preventDefault(); event.stopPropagation(); continueInPanel(); }
+      return;
+    }
     if (event.target !== inputRef.current) return;
     if (event.key === "Tab" && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
@@ -187,6 +206,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
 
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
+  const tabScopeName = scopeAll ? notebooks[session.startingNotebookId ?? ""]?.name || uiText("currentNotebook") : uiText("allNotebooks");
   const statusKind = searchError ? "error" : busy || results.length ? null : hasQuery ? "none" : "empty";
   const resultsKey = `${deferredQuery}|${session.scope.kind}|${session.titleOnly}|${session.sort}`;
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
@@ -225,11 +245,13 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>{uiText("loadMoreResults")}</Button>}
         {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}
       </div>}
-      <div className="search-sheet-footer" aria-hidden="true">
-        <span><kbd className="search-sheet-kbd">↑↓</kbd>{uiText("select")}</span>
-        <span><kbd className="search-sheet-kbd">↵</kbd>{uiText("open")}</span>
-        {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("askAi")}</span>}
-        <span><kbd className="search-sheet-kbd">Tab</kbd>{uiText("changeScope")}</span>
+      <div className="search-sheet-footer" data-hidden={answer ? "true" : undefined} aria-hidden="true">
+        <div className="search-sheet-footer-inner">
+          <span><kbd className="search-sheet-kbd">↑↓</kbd>{uiText("select")}</span>
+          <span><kbd className="search-sheet-kbd">↵</kbd>{uiText("open")}</span>
+          {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("askAi")}</span>}
+          <span className="search-sheet-scope-hint" title={uiText("switchScopeHint", {name: tabScopeName})}><kbd className="search-sheet-kbd">Tab</kbd>{uiText("switchScope")}<span className="search-sheet-scope-name">{tabScopeName}</span></span>
+        </div>
       </div>
     </div>
   </div></OverlayLayerProvider>;

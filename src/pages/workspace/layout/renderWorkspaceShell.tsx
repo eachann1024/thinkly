@@ -54,7 +54,6 @@ export function renderWorkspaceShell(
     aiPanelOpen,
     aiLayoutMode,
     setAiLayoutMode,
-    toggleAiPanel,
     closeAiPanel,
     aiPanelCapturedSelection,
     consumeAiPanelCapturedSelection,
@@ -78,7 +77,6 @@ export function renderWorkspaceShell(
     editorHostRef,
     closeSettings,
     handleSettingsOpenChange,
-    handleToggleAiPanel,
   } = context;
   return (
     <>
@@ -124,9 +122,6 @@ export function renderWorkspaceShell(
             }
             aiPanelOpen={!settingsOpen && (showFullscreenAi || showSideAiPanel)}
             aiLayoutMode={aiLayoutMode}
-            onToggleAiPanel={
-              aiAvailableForNotebook ? handleToggleAiPanel : undefined
-            }
           />
         )}
         {isDragging && (
@@ -204,7 +199,6 @@ export function renderWorkspaceShell(
                     openNewTabHandler={openNewTabHandler}
                     aiPanelOpen={showFullscreenAi || showSideAiPanel}
                     aiLayoutMode={aiLayoutMode}
-                    toggleAiPanel={handleToggleAiPanel}
                     showSideAiPanel={showSideAiPanel}
                     closeAiPanel={closeAiPanel}
                     editorRef={editorRef}
@@ -231,7 +225,6 @@ export function renderWorkspaceShell(
                   openNewTabHandler={openNewTabHandler}
                   aiPanelOpen={false}
                   aiLayoutMode={aiLayoutMode}
-                  toggleAiPanel={handleToggleAiPanel}
                   showSideAiPanel={false}
                   closeAiPanel={closeAiPanel}
                   editorRef={editorRef}

@@ -49,6 +49,24 @@ import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSear
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 import "./search-editor-bridge.css";
 
+/** 居中命中若会把正文标题切掉一截，则留在文首；放不下时整段滚出，避免半截标题。 */
+function placeSearchMatch(scroller: HTMLElement, target: HTMLElement) {
+  const hit = target.getBoundingClientRect();
+  const box = scroller.getBoundingClientRect();
+  const pad = 24;
+  const top = scroller.scrollTop + hit.top - box.top;
+  const view = scroller.clientHeight;
+  const minScroll = Math.max(0, top + hit.height + pad - view);
+  const maxScroll = Math.max(minScroll, top - pad);
+  let next = Math.min(Math.max(top - (view - hit.height) / 2, minScroll), maxScroll);
+  const title = scroller.querySelector<HTMLElement>(".page-document-title");
+  if (title) {
+    const titleEnd = scroller.scrollTop + title.getBoundingClientRect().bottom - box.top;
+    if (next > 0 && next < titleEnd) next = minScroll === 0 ? 0 : Math.min(maxScroll, Math.max(titleEnd, minScroll));
+  }
+  scroller.scrollTop = next;
+}
+
 export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, cancelPendingRestoration }: {
   pageId: string; focused: boolean; editorRef: RefObject<EditorRef | null>; scrollRef: RefObject<HTMLDivElement | null>;
   cancelPendingRestoration: () => void;
@@ -100,8 +118,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       const scroller = scrollRef.current;
       const target = (editor.prosemirrorView.dom as HTMLElement).querySelector<HTMLElement>(".goose-search-session-match--current");
       if (!scroller || !target) return;
-      const hit = target.getBoundingClientRect(), box = scroller.getBoundingClientRect();
-      scroller.scrollTop += hit.top - box.top - scroller.clientHeight / 2 + hit.height / 2;
+      placeSearchMatch(scroller, target);
     });
   };
   const step = (delta: number) => {

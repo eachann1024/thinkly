@@ -153,6 +153,28 @@ export function assertAllowed(p: string): string {
   return resolved;
 }
 
+/** 规范化本机绝对路径，供打开或探测存在性。不在仓库白名单内也不授予读写。 */
+export function normalizeLocalOpenPath(p: string): string | null {
+  if (hasUnsafeSegments(p)) return null;
+  const trimmed = p.trim();
+  if (!trimmed.startsWith("/") && !/^[A-Za-z]:[\\/]/.test(trimmed)) {
+    return null;
+  }
+  return normalizePath(trimmed);
+}
+
+/** 打开已存在的本机文件或文件夹，不要求落在仓库白名单内。不存在或含 .. 的路径拒绝。 */
+export function assertExistingOpenPath(p: string): string {
+  const resolved = normalizeLocalOpenPath(p);
+  if (!resolved) {
+    throw new Error(t("parentPath"));
+  }
+  if (!pathExists(resolved)) {
+    throw new Error(t("pathMissing"));
+  }
+  return resolved;
+}
+
 export function assertAllowedOpen(p: string): string {
   return assertAllowed(p);
 }

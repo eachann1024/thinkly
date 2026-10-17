@@ -19,7 +19,40 @@
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
   .goose-dialog-shell { padding: 0; grid-template-rows: auto minmax(0, 1fr) auto; }
-  .goose-dialog-shell-header { padding: var(--goose-overlay-inset); padding-bottom: 0; }
+  .goose-dialog-shell-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    min-width: 0;
+    padding: var(--goose-overlay-inset);
+    padding-bottom: 0;
+  }
+  .goose-dialog-shell-heading {
+    display: flex;
+    flex: 1 1 16rem;
+    flex-direction: column;
+    gap: 4px;
+    min-width: min(100%, 12rem);
+    text-align: start;
+  }
+  .goose-dialog-shell-heading > :not(.sr-only) {
+    min-width: 0;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+  .goose-dialog-shell-tools {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    max-width: 100%;
+    margin-left: auto;
+  }
+  .goose-dialog-shell-tools > * { flex-shrink: 0; }
   .goose-dialog-shell-body { min-height: 0; overflow: auto; padding: var(--goose-overlay-inset); }
   .goose-dialog-shell-footer { padding: var(--goose-overlay-inset); padding-top: 0; }
   .goose-dialog-shell-fullscreen .goose-dialog-shell-body { padding: 0; }

@@ -101,11 +101,18 @@ export function migrateSettingsPersistedState(
     state.editorLineHeight = EDITOR_LINE_HEIGHT_DEFAULT;
   }
 
+  // v14 正文行距默认改为 1.75。只迁移仍停在旧默认 1.5 的用户。
+  if (version < 14 && state.editorLineHeight === 1.5) {
+    state.editorLineHeight = EDITOR_LINE_HEIGHT_DEFAULT;
+  }
+
   // 极简工作区已成为固定交互，不再保留可切换设置。
   state.singleTabMode = true;
   if (typeof state.randomIconOnCreate !== "boolean") {
     state.randomIconOnCreate = false;
   }
+  // v13 起文件夹数量默认显示。更早写入的 false 是旧默认，不是用户关掉的。
+  if (version < 13) state.showSidebarFolderCount = true;
   delete state.showPinnedTitles;
 
   // 全宽、表格两端对齐已成为常规笔记的固定布局，不再保留可切换的持久化设置。

@@ -228,7 +228,7 @@
 .notebook-ai-message-text {
  font-family: var(--font-default);
  font-size: var(--editor-base-font-size, 17px);
- line-height: var(--editor-line-height, 1.5);
+ line-height: var(--editor-line-height, 1.75);
  box-sizing: border-box;
  min-width: 0;
  max-width: 100%;

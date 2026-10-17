@@ -15,6 +15,8 @@ import {
   assertAllowed,
   ensureParentDir,
   hasUnsafeSegments,
+  normalizeLocalOpenPath,
+  pathExists,
 } from "../allowlist";
 import { restoreFileFromTrash } from "../trashRestore";
 import { trashWithUndo, undoTrash } from "../trashUndo";
@@ -93,7 +95,9 @@ export function registerFilesystemIpc(undoRoot: string): void {
     try {
       target = assertAllowed(p);
     } catch {
-      return false;
+      // 行内绝对路径点击只读存在性，不授予仓库外的读写权限。
+      const openTarget = normalizeLocalOpenPath(p);
+      return openTarget ? pathExists(openTarget) : false;
     }
     await waitForGitSyncRead(target);
     try {

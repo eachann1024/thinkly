@@ -138,6 +138,8 @@ const gooseDesktop = {
   showMainWindow: (
     action?: "none" | "search" | "settings" | "ai-panel" | "new-note",
   ) => invoke("desktop:showMainWindow", action) as Promise<void>,
+  revealSavedNote: (filePath: string) =>
+    invoke("desktop:revealSavedNote", filePath) as Promise<boolean>,
   toggleQuicknote: () => invoke("desktop:toggleQuicknote") as Promise<void>,
   closeQuicknote: () => invoke("desktop:closeQuicknote") as Promise<void>,
   registerHotkeys: (k: { wake: string; quicknote: string; search: string }) =>

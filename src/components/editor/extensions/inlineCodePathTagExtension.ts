@@ -4,7 +4,7 @@
  * 本地文件夹笔记本里，行内代码内容是 ./ 或 ../ 开头的相对路径、解析后落在
  * 笔记本根目录内且磁盘上真实存在时，用 Decoration.inline 加
  * `goose-inline-code-path` class；按住 Cmd/Ctrl 时 hover 出下划线扫动动效，
- * 点击经 hostContext.onOpenAttachment 走 openResourceExternally 打开。
+ * 点击交给宿主：笔记内 .md 在应用内打开，绝对路径的文件或文件夹交给系统打开。
  *
  * 热路径保护：不在 apply 里同步全文档扫描；doc 变化或探测回填后统一走
  * 200ms 去抖重扫，结果经自定义 meta 事务写回（addToHistory: false）。
@@ -16,11 +16,12 @@ import type { Node as PMNode } from "@tiptap/pm/model";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { EditorView } from "@tiptap/pm/view";
 import {
+  isAbsoluteLocalPath,
   isInsideRoot,
   peekProbe,
   probePath,
   resolveCandidatePath,
-  toMarkdownTarget,
+  toOpenTarget,
 } from "@/components/editor/inline-code/localPathTarget";
 import { subscribeModifierClass } from "./modifierClassSubscription";
 
@@ -68,18 +69,18 @@ function buildDecorations(
 ): DecorationSet {
   const pagePath = deps.getPageLocalFilePath();
   const root = deps.getLocalFolderRoot();
-  if (!pagePath || !root || !deps.isFsAvailable()) {
-    return DecorationSet.empty;
-  }
+  if (!deps.isFsAvailable()) return DecorationSet.empty;
   const decorations: Decoration[] = [];
   for (const range of collectCodeRanges(doc)) {
-    // 候选文本先补成 Markdown 目标（无扩展名追加 .md），再解析探测。
-    const target = toMarkdownTarget(range.text);
+    // 绝对路径与文件夹按原文探测；相对笔记路径无扩展名时补 .md。
+    const target = toOpenTarget(range.text);
     if (!target) continue;
-    const absPath = resolveCandidatePath(target, pagePath);
+    const absolute = isAbsoluteLocalPath(range.text);
+    if (!absolute && (!pagePath || !root)) continue;
+    const absPath = resolveCandidatePath(target, pagePath ?? "/");
     if (!absPath) continue;
-    // 安全边界：越出笔记本根目录一律不渲染 tag（无声）。
-    if (!isInsideRoot(absPath, root)) continue;
+    // 相对路径仍限制在笔记本内；绝对路径只要磁盘上存在即可点击。
+    if (!absolute && (!root || !isInsideRoot(absPath, root))) continue;
     const state = peekProbe(absPath);
     if (state === "hit") {
       decorations.push(
@@ -121,11 +122,10 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
         if (!tag) return false;
         const rawText = tag.textContent?.trim() ?? "";
         if (!rawText) return false;
-        // DOM 里是用户写的原始文本（可能无后缀），必须补成 .md 目标再交给宿主。
-        const mdTarget = toMarkdownTarget(rawText);
-        if (!mdTarget) return false;
+        const openTarget = toOpenTarget(rawText);
+        if (!openTarget) return false;
         event.preventDefault();
-        deps.openPath(mdTarget);
+        deps.openPath(openTarget);
         return true;
       },
     },

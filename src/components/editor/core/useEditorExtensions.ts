@@ -49,9 +49,9 @@ import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKe
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorExtensions.ts#messages:1">`
 zh-Hans:
-  couldNotOpenThisMarkdownNote: "无法打开该 Markdown 笔记"
+  couldNotOpenThisPath: "无法打开该文件或文件夹"
 en:
-  couldNotOpenThisMarkdownNote: "Could not open this Markdown note"
+  couldNotOpenThisPath: "Could not open this file or folder"
 `;
 const t = createTranslator(messages);
 
@@ -84,7 +84,7 @@ export function useEditorExtensions(session: EditorSession) {
           if (!openMarkdown) return;
           void openMarkdown(rawText).then((opened) => {
             if (!opened) {
-              toast.error(t("couldNotOpenThisMarkdownNote"));
+              toast.error(t("couldNotOpenThisPath"));
             }
           });
         },

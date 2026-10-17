@@ -119,7 +119,7 @@
   > div:has(> input) {
   position: relative;
   align-self: flex-start;
-  height: calc(var(--editor-line-height, 1.5) * 1em);
+  height: calc(var(--editor-line-height, 1.75) * 1em);
   display: flex;
   align-items: center;
 }

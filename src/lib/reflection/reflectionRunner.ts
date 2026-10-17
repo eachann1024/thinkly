@@ -2,7 +2,7 @@ import { getAIAvailability } from "@/lib/ai-provider";
 import { getLocale } from "@/i18n/runtime";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
-import { useReflection } from "@/stores/useReflection";
+import { isReflectionAiConsented, useReflection } from "@/stores/useReflection";
 import { loadEditEvents } from "./editHistory";
 import { generateReflection } from "./generateReflection";
 import { computeReflectionStats, type ReflectionStats } from "./reflectionStats";
@@ -37,7 +37,8 @@ export async function ensureReflection(
   options: { force?: boolean; data?: ReflectionData } = {},
 ): Promise<boolean> {
   const store = useReflection.getState();
-  if (store.generatingKey || !store.aiConsent || !isReflectionAIReady()) return false;
+  const aiEnabled = useSettings.getState().ai.enabled;
+  if (store.generatingKey || !isReflectionAiConsented(store, aiEnabled) || !isReflectionAIReady()) return false;
   if (!options.force) {
     const cached = useReflection.getState();
     const key = scopeRange(scope).key;

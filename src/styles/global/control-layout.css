@@ -52,3 +52,12 @@
 }
 [data-goose-control="checkbox"] [data-goose-slot="check-content"],
 [data-goose-control="checkbox"] [data-slot="label"] { font: inherit; }
+
+/* 标签单独一行、控件在下一行时，两者之间留出空隙。 */
+.goose-field-group,
+label.flex-col {
+  gap: var(--goose-field-label-gap);
+}
+:is(.space-y-1, .space-y-1\.5, .space-y-2) > label + :not(p):not(span) {
+  margin-top: var(--goose-field-label-gap);
+}

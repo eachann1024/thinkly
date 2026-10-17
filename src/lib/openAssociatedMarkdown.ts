@@ -26,6 +26,7 @@ import { markAssociatedMarkdownOpened } from "@/lib/workspaceStartup";
 import type { Notebook } from "@/stores/useNotebooks";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
+import { useSidebarView } from "@/stores/useSidebarView";
 import { useTabs } from "@/stores/useTabs";
 
 function comparisonPath(filePath: string): string {
@@ -78,7 +79,11 @@ async function openPageInNotebook(
   closeNotebookAiIfFullscreen();
   await activateNotebook(notebookId);
   useTabs.getState().openTab(pageId);
-  await usePages.getState().setActivePage(pageId);
+  usePages.getState().setActivePage(pageId);
+  usePages.getState().setExpandPageId(pageId);
+  const sidebar = useSidebarView.getState();
+  sidebar.setSelected(notebookId, pageId);
+  sidebar.setFocused(notebookId, pageId);
 }
 
 export async function openAssociatedMarkdownFile(
@@ -86,6 +91,8 @@ export async function openAssociatedMarkdownFile(
 ): Promise<boolean> {
   const trimmed = filePath.trim();
   if (!trimmed) return false;
+  // 冷启动时恢复上次笔记的 effect 可能晚于这次打开，先占住选中，避免被盖掉。
+  markAssociatedMarkdownOpened();
 
   let notebook = findContainingLocalFolderNotebook(
     trimmed,

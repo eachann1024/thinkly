@@ -14,5 +14,4 @@ export interface DesktopTitleBarProps {
   onDelete?: () => void;
   aiPanelOpen?: boolean;
   aiLayoutMode?: NotebookAiLayoutMode;
-  onToggleAiPanel?: () => void;
 }
