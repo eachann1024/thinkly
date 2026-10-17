@@ -2,9 +2,9 @@ import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/imageExport/watermark.ts#localMessages:1">`
 zh-Hans:
-  gooseNotes: "鹅的笔记"
+  gooseNotes: "思绪 · Thinkly"
 en:
-  gooseNotes: "Goose Note"
+  gooseNotes: "Thinkly"
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "./themes";

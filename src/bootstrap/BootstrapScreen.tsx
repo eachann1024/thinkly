@@ -3,14 +3,14 @@ import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/bootstrap/BootstrapScreen.tsx#localMessages:1">`
 zh-Hans:
-  openFailed: "鹅的笔记暂时无法打开"
+  openFailed: "思绪 · Thinkly 暂时无法打开"
   restoring: "正在恢复速记"
-  opening: "正在打开鹅的笔记"
+  opening: "正在打开思绪 · Thinkly"
   reload: "重新加载"
 en:
-  openFailed: "Goose Note couldn’t open"
+  openFailed: "Thinkly couldn’t open"
   restoring: "Restoring Quick Note"
-  opening: "Opening Goose Note"
+  opening: "Opening Thinkly"
   reload: "Reload"
 `;
 const uiText = createTranslator(localMessages);

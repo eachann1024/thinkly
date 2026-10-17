@@ -1,3 +1,4 @@
+import commonMessages from "@/i18n/common.yaml";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { FIXED_SPLIT_SHORTCUTS } from "@/lib/fixed-app-shortcuts";
 import { formatShortcut } from "@/lib/utils";
@@ -18,11 +19,13 @@ import {
 
 const WELCOME_IMAGE =
   "https://goose-notion-1257312034.cos.ap-guangzhou.myqcloud.com/welcome-cover.png";
+const productName = commonMessages["zh-Hans"].productName;
+const slogan = commonMessages["zh-Hans"].slogan;
 
 export const onboardingPageContent: BlockNoteContent = [
-  heading(1, "鹅的笔记 · 新手指南"),
+  heading(1, `${productName} · 新手指南`),
   paragraph(
-    "欢迎使用鹅的笔记。这份文档不是功能堆砌，而是带你快速建立第一套使用习惯。",
+    `${slogan}。这份文档不是功能堆砌，而是带你快速建立第一套使用习惯。`,
   ),
   paragraph("先用 3 分钟扫完，再边试边改，你会比死记快捷键更快上手。"),
   callout(
@@ -122,7 +125,7 @@ export const onboardingPageContent: BlockNoteContent = [
   heading(2, "示例区块"),
   paragraph("下面这些示例块可以直接改，边改边熟悉编辑体验。"),
   quote("灵感先记下来，结构可以稍后再整理。"),
-  codeBlock('print("Hello, Goose Note")\nlog("记录想法，比回忆更可靠")'),
+  codeBlock(`print("Hello, ${commonMessages.en.productName}")\nlog("记录想法，比回忆更可靠")`),
   paragraph("行内公式示例：E=mc^2，适合穿插在普通句子里。"),
   codeBlock("f(x)=\\int_0^1 x^2 \, dx", "math"),
   codeBlock(
@@ -173,7 +176,7 @@ export const onboardingChildPageContent: BlockNoteContent = [
 export const onboardingThirdChildContent: BlockNoteContent = [
   heading(1, "生产 HTML 与图片指南"),
   paragraph(
-    "鹅的笔记支持本地存储与多种导出分享方式。你可以将选区或全文导出为长图卡片、单文件离线 HTML 网页，或借助 AI 创作可交互的 HTML 小组件。",
+    `${slogan}。支持本地存储与多种导出分享方式。你可以将选区或全文导出为长图卡片、单文件离线 HTML 网页，或借助 AI 创作可交互的 HTML 小组件。`,
   ),
   callout(
     "🎨",
