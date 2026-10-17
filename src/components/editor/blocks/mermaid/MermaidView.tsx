@@ -10,7 +10,7 @@ import {
 } from "./mermaidPreviewCache";
 
 import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/mermaid/MermaidView.tsx#messages:1">`
 zh-Hans:
   previewUnavailableCheckTheSource: "无法预览，请查看源码"
@@ -27,6 +27,7 @@ interface MermaidViewProps {
 }
 
 export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
+  useLocale();
   const [renderState, dispatch] = useReducer(previewRenderReducer, { phase: "idle" });
   const renderStateRef = useRef(renderState);
   renderStateRef.current = renderState;

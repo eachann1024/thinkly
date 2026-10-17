@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { ListRow } from "@/components/ui/list-row";
 import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
@@ -44,6 +45,7 @@ export /**
  * 退出按钮在主区 HistoryToolbar 上，这里不重复放。
  */
 function HistoryVersionList() {
+  useLocale();
   const {
     groups,
     isEmpty,

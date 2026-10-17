@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/data-panel/useDataPanelState.tsx#localMessages:1">`
@@ -30,6 +31,7 @@ export function useDataPanelState({
   onRestartGuide,
   onResetAndImport,
 }: SettingsDataPanelProps) {
+  const locale = useLocale();
   const selectedCount = selectedIds.length;
 
   const totalCount = notebookList.length;
@@ -111,14 +113,14 @@ export function useDataPanelState({
     return webdavLastUploadFilename
       ? `${time} (${webdavLastUploadFilename})`
       : uiText("notSyncedYet_e1d9");
-  }, [webdavLastUploadAt, webdavLastUploadFilename]);
+  }, [webdavLastUploadAt, webdavLastUploadFilename, locale]);
 
   const lastDownloadText = useMemo(() => {
     const time = formatRemoteTime(webdavLastDownloadAt);
     return webdavLastDownloadFilename
       ? `${time} (${webdavLastDownloadFilename})`
       : uiText("notSyncedYet_e1d9");
-  }, [webdavLastDownloadAt, webdavLastDownloadFilename]);
+  }, [webdavLastDownloadAt, webdavLastDownloadFilename, locale]);
   return {
     active,
     importing,

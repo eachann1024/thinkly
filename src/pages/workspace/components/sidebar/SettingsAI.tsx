@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsAI.tsx#localMessages:1">`
@@ -27,6 +28,7 @@ import { renderAIServiceSection } from "./settings-ai/renderAIServiceSection";
 import { renderAIConnectionTestSection } from "./settings-ai/renderAIConnectionTestSection";
 
 export function SettingsAI(props: SettingsAIProps) {
+  useLocale();
   const draft = useAISettingsDraft(props);
   const provider = useAIProviderConnection(draft);
   const connectionTest = useAIConnectionTest(provider);

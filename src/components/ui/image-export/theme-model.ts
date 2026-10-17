@@ -34,13 +34,13 @@ export const NOTEBOOK_CARD_BLOCKS: BlockNoteContent = [
   {
     type: "heading",
     props: { level: 1 },
-    content: [{ type: "text", text: uiText("sampleFile"), styles: {} }],
+    content: [{ type: "text", get text() { return uiText("sampleFile"); }, styles: {} }],
   },
   {
     type: "paragraph",
     content: [
-      { type: "text", text: uiText("sampleHeading"), styles: { bold: true } },
-      { type: "text", text: uiText("sampleEdition"), styles: {} },
+      { type: "text", get text() { return uiText("sampleHeading"); }, styles: { bold: true } },
+      { type: "text", get text() { return uiText("sampleEdition"); }, styles: {} },
     ],
   },
   {

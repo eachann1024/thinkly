@@ -5,7 +5,7 @@ import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { CodeBlockHeader } from "./CodeBlockHeader";
 import { CodeLatexHints } from "./CodeLatexHints";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockView.tsx#messages:1">`
 zh-Hans:
   formulaPreview: "公式预览"
@@ -16,6 +16,7 @@ const t = createTranslator(messages);
 
 
 export function CodeBlockView(props: CodeBlockViewProps) {
+  useLocale();
   const { language, wrap, collapsed, contentRef, isEditable, edit, preview } =
     props;
   const { rootRef } = edit;

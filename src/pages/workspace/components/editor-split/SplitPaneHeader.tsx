@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1">`
@@ -28,6 +29,7 @@ export function SplitPaneHeader({
   title: string;
   missing?: boolean;
 }) {
+  useLocale();
   return (
     <div data-split-chrome className="editor-split-header" data-missing={missing || undefined}>
       <span className="editor-split-header-title" title={title}>{title}</span>

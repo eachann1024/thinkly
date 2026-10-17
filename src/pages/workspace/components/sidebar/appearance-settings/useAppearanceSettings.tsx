@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useSettings } from "@/stores/useSettings";
 import { type KeyboardEvent, type PointerEvent } from "react";
 import { type SettingsAppearanceProps, accentOptions } from "./shared";
@@ -15,6 +16,7 @@ export function useAppearanceSettings({
   section = "all",
   showPreview = true,
 }: SettingsAppearanceProps) {
+  useLocale();
   const appearanceLayoutRef = useRef<HTMLDivElement>(null);
 
   const scaleDragCleanupRef = useRef<(() => void) | null>(null);

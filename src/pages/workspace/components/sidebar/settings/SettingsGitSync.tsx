@@ -1,22 +1,4 @@
-import { createTranslator, i18nYaml } from "@/i18n";
-
-const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsGitSync.tsx#localMessages:1">`
-zh-Hans:
-  saveSelectionAndSync_e9da: "保存选择并同步"
-  savingSettingsAutomatically_a7dc: "自动保存设置"
-  operationFailed: "{{action}}失败：{{error}}"
-  selectAtLeastOneFolderTo_0e62: "请先选择至少一个同步文件夹"
-  connectAndSync_9751: "连接并同步"
-  restoreFolder_5b9e: "恢复文件夹"
-en:
-  saveSelectionAndSync_e9da: "Save selection and sync"
-  savingSettingsAutomatically_a7dc: "Saving settings automatically"
-  operationFailed: "{{action}} failed: {{error}}"
-  selectAtLeastOneFolderTo_0e62: "Select at least one folder to sync"
-  connectAndSync_9751: "Connect and sync"
-  restoreFolder_5b9e: "Restore folder"
-`;
-const uiText = createTranslator(localMessages);
+import { useLocale } from "@/i18n";
 import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
@@ -24,9 +6,9 @@ import {
 
   availableFolderIds,
   emptyDraft,
-  messageOf,
   validateRepositoryInput,
 } from "./git-sync/gitSyncPresentation";
+import { captureGitFailureReason, formatGitUiFailure, type GitSyncAction, type GitSyncUiFailure } from "./git-sync/gitSyncUiState";
 import { GitSyncContent } from "./git-sync/GitSyncContent";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -43,6 +25,7 @@ import { type GitDraft } from "./git-sync/GitRepositoryForm";
 import { folderPathKey, gitFolderRows, reconcileFolderSelection } from "./git-sync/gitFolderRows";
 
 export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
+  useLocale();
   const notebooks = useNotebooks((store) => store.notebooks);
   const localNotebooks = useMemo(
     () => Object.values(notebooks).filter((item) => item.source === "local-folder" && item.localPath),
@@ -57,8 +40,8 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const [adding, setAdding] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, GitDraft>>({});
   const [folderDrafts, setFolderDrafts] = useState<Record<string, GitRepositoryFolder[]>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, GitSyncUiFailure | undefined>>({});
+  const [busy, setBusy] = useState<Record<string, GitSyncAction | undefined>>({});
   const notebookRevision = JSON.stringify(localNotebooks.map(({ id, localPath, localPathMissing }) => [id, localPath, localPathMissing]));
   useEffect(() => setErrors({}), [notebookRevision]);
   const locks = useRef(new Set<string>());
@@ -84,9 +67,9 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const syncing = status?.phase === "syncing";
   const disabled = loading || Boolean(loadError) || Boolean(pending) || syncing;
   const selectionDisabled =
-    loading || Boolean(loadError) || Boolean(pending && pending !== uiText("saveSelectionAndSync_e9da") && pending !== uiText("savingSettingsAutomatically_a7dc"));
+    loading || Boolean(loadError) || Boolean(pending && pending !== "save-selection" && pending !== "save-settings");
   const updateDraft = <K extends keyof GitDraft>(key: K, value: GitDraft[K]) => {
-    setErrors((current) => ({ ...current, [id]: "" }));
+    setErrors((current) => ({ ...current, [id]: undefined }));
     setDrafts((current) => ({
       ...current,
       [id]: {
@@ -101,22 +84,22 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
 
   async function run(
     repositoryId: string,
-    label: string,
+    action: GitSyncAction,
     operation: () => Promise<GitSyncState>,
     onSuccess?: () => void,
   ) {
     if (!bridge || locks.current.has(repositoryId)) return;
     locks.current.add(repositoryId);
-    setBusy((current) => ({ ...current, [repositoryId]: label }));
-    setErrors((current) => ({ ...current, [repositoryId]: "" }));
+    setBusy((current) => ({ ...current, [repositoryId]: action }));
+    setErrors((current) => ({ ...current, [repositoryId]: undefined }));
     try {
       applyState(await operation());
       onSuccess?.();
     } catch (error) {
-      setErrors((current) => ({ ...current, [repositoryId]: uiText("operationFailed", { action: label, error: messageOf(error) }) }));
+      setErrors((current) => ({ ...current, [repositoryId]: { kind: "operation", action, reason: captureGitFailureReason(error) } }));
     } finally {
       locks.current.delete(repositoryId);
-      setBusy((current) => ({ ...current, [repositoryId]: "" }));
+      setBusy((current) => ({ ...current, [repositoryId]: undefined }));
     }
   }
   const validate = (input: GitRepositoryInput) => validateRepositoryInput(input, state.configs);
@@ -131,7 +114,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     const timer = setTimeout(() => {
       void run(
         id,
-        folderSnapshot || reconciledFolders ? uiText("saveSelectionAndSync_e9da") : uiText("savingSettingsAutomatically_a7dc"),
+        folderSnapshot || reconciledFolders ? "save-selection" : "save-settings",
         () => bridge.save(validate({ ...config, ...draft, folders })),
         () => {
           setDrafts((current) => {
@@ -157,12 +140,12 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   function connect() {
     if (!bridge || disabled) return;
     if (!folders.length) {
-      setErrors((current) => ({ ...current, [id]: uiText("selectAtLeastOneFolderTo_0e62") }));
+      setErrors((current) => ({ ...current, [id]: { kind: "selection" } }));
       return;
     }
     void run(
       id,
-      uiText("connectAndSync_9751"),
+      "connect",
       () => bridge.save(validate({ id, ...draft, layout: "subfolders", folders })),
       () => {
         setDrafts((current) => {
@@ -188,7 +171,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       (checked && (!folderChecks[folder.localPath] || folderChecks[folder.localPath].error))
     )
       return;
-    setErrors((current) => ({ ...current, [id]: "" }));
+    setErrors((current) => ({ ...current, [id]: undefined }));
     const mapping = {
       ...folder,
       remotePath: config?.layout === "legacy-root" ? "" : folder.remotePath || gitNotebookDirectory(folder.localPath),
@@ -207,7 +190,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     if (!bridge || disabled) return;
     void run(
       id,
-      uiText("restoreFolder_5b9e"),
+      "restore",
       async () => {
         const localPath = await selectRecoveryPath(folder, relocate);
         if (!localPath) return bridge.getState();
@@ -229,7 +212,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     try {
       await getGooseDesktop()?.showItemInFolder(folderChecks[folder.localPath]?.path ?? folder.localPath);
     } catch (error) {
-      setErrors((current) => ({ ...current, [id]: messageOf(error) }));
+      setErrors((current) => ({ ...current, [id]: { kind: "raw", reason: captureGitFailureReason(error) } }));
     }
   }
   const rows = gitFolderRows(localNotebooks, folders, state.mappingHistory?.[id] ?? config?.folders ?? []);
@@ -257,7 +240,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       availableIds={availableIds}
       folderChecks={folderChecks}
       draft={draft}
-      error={errors[id] ?? ""}
+      error={formatGitUiFailure(errors[id])}
       unsavedFolders={Boolean(folderDrafts[id]) || reconciledFolders}
       unsavedSettings={Boolean(drafts[id])}
       removeConfirmation={removeConfirmation}

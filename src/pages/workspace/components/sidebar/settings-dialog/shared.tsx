@@ -35,13 +35,13 @@ export interface SettingsDialogProps {
 }
 
 export const SETTINGS_TABS: SettingsTabConfig[] = [
-  { id: "appearance", label: uiText("appearanceAndThemes_6902"), icon: GooseIcons.Laptop },
-  { id: "general", label: uiText("general_aa05"), icon: GooseIcons.Settings },
-  { id: "shortcuts", label: uiText("keyboardShortcuts_f7d2"), icon: GooseIcons.Keyboard },
-  { id: "local-folder", label: uiText("localFolders_497e"), icon: GooseIcons.FolderOpen },
-  { id: "git-sync", label: uiText("gitSync_fcb0"), icon: GooseIcons.GitBranch },
-  { id: "ai", label: uiText("aiAssistant_318e"), icon: GooseIcons.Sparkles },
-  { id: "data", label: uiText("dataAndBackups_e963"), icon: GooseIcons.Database },
+  { id: "appearance", get label() { return uiText("appearanceAndThemes_6902"); }, icon: GooseIcons.Laptop },
+  { id: "general", get label() { return uiText("general_aa05"); }, icon: GooseIcons.Settings },
+  { id: "shortcuts", get label() { return uiText("keyboardShortcuts_f7d2"); }, icon: GooseIcons.Keyboard },
+  { id: "local-folder", get label() { return uiText("localFolders_497e"); }, icon: GooseIcons.FolderOpen },
+  { id: "git-sync", get label() { return uiText("gitSync_fcb0"); }, icon: GooseIcons.GitBranch },
+  { id: "ai", get label() { return uiText("aiAssistant_318e"); }, icon: GooseIcons.Sparkles },
+  { id: "data", get label() { return uiText("dataAndBackups_e963"); }, icon: GooseIcons.Database },
 ];
 
 export const recordPreOverwriteHistory = async (id: string | undefined) => {

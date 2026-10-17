@@ -9,7 +9,7 @@ import {
   reconcilePageMentionSuggestionMenu,
 } from "@/components/editor/utils/slashMenuPolicy";
 import type { EditorRuntime } from "./useEditorSession";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorClipboard.ts#messages:1">`
 zh-Hans:
   imageCopiedTheNoteHasChangedSoThe: "图片已复制；笔记内容已变化，原图片已保留"
@@ -22,6 +22,7 @@ const t = createTranslator(messages);
 
 
 export function useEditorClipboard(runtime: EditorRuntime) {
+  useLocale();
   const {
     editor,
     editorContainerRef,

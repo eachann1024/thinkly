@@ -17,7 +17,7 @@ en:
 `;
 const t = createTranslator(messages);
 
-export const NOTEBOOK_AI_PLACEHOLDER_HINTS = [
+export const getNotebookAiPlaceholderHints = () => [
   t("askAiUseForCommandsOrSkillsOr"),
   t("askAiToCreateATrendChartFrom"),
   t("askAiToDrawAFlowchartOrArchitecture"),

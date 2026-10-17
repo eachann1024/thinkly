@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookSwitcher.tsx#localMessages:1">`
@@ -30,6 +31,7 @@ export function NotebookSwitcher(
     active?: boolean;
   } = {},
 ) {
+  useLocale();
   const switcher = useNotebookSwitcherState(props);
   const notebookSwitcherActionsContext = useNotebookSwitcherActions(switcher);
   const context = notebookSwitcherActionsContext;

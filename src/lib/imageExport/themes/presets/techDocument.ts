@@ -40,9 +40,9 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 1. Notion ────────────────────────────────────────────────
   {
     id: "notion",
-    name: uiText("minimalWhite"),
+    get name() { return uiText("minimalWhite"); },
     nameEn: "Minimal White",
-    description: uiText("cleanProfessionalDocumentStyling"),
+    get description() { return uiText("cleanProfessionalDocumentStyling"); },
     tags: [uiText("minimal"), uiText("document")],
     mode: "light",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -82,9 +82,9 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 2. Obsidian ──────────────────────────────────────────────
   {
     id: "obsidian",
-    name: uiText("deepNight"),
+    get name() { return uiText("deepNight"); },
     nameEn: "Deep Night",
-    description: uiText("aDarkThemeWithACodeEditorFeel"),
+    get description() { return uiText("aDarkThemeWithACodeEditorFeel"); },
     tags: [uiText("dark"), uiText("technical")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -124,9 +124,9 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 10. GitHub Light ─────────────────────────────────────────
   {
     id: "github-light",
-    name: uiText("githubLight"),
+    get name() { return uiText("githubLight"); },
     nameEn: "GitHub Light",
-    description: uiText("githubInspiredLightTheme"),
+    get description() { return uiText("githubInspiredLightTheme"); },
     tags: [uiText("light"), uiText("development")],
     mode: "light",
     titleFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
@@ -170,9 +170,9 @@ export const TECH_DOCUMENT: CardTheme[] = [
   // ── 11. GitHub Dark ──────────────────────────────────────────
   {
     id: "github-dark",
-    name: uiText("githubDark"),
+    get name() { return uiText("githubDark"); },
     nameEn: "GitHub Dark",
-    description: uiText("githubInspiredDarkThemeForFocusedReading"),
+    get description() { return uiText("githubInspiredDarkThemeForFocusedReading"); },
     tags: [uiText("dark"), uiText("development")],
     mode: "dark",
     titleFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",

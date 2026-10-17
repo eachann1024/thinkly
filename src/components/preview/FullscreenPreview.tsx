@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/preview/FullscreenPreview.tsx#localMessages:1">`
@@ -34,6 +35,7 @@ type FullscreenPreviewProps = {
 };
 
 export function FullscreenPreview(props: FullscreenPreviewProps) {
+  useLocale();
   // Closed previews exist in every code block. Keep their layout reads and
   // theme observers out of note navigation until a preview is actually opened.
   if (!props.open || !props.content || typeof document === "undefined") return null;
@@ -46,6 +48,7 @@ function ActiveFullscreenPreview({
   title = uiText("preview"),
   onClose,
 }: FullscreenPreviewProps) {
+  useLocale();
   const themeSurface = useThemeSurfaceSnapshot();
   const { imageSrc, zoomPercent, setZoomPercent, vectorFit, bodyRef, vectorRef, isVector, bodyClass } = useFullscreenPreview(open, content, onClose);
 
@@ -201,6 +204,7 @@ export function FullscreenImagePreview({
   title?: string;
   onClose: () => void;
 }) {
+  useLocale();
   return (
     <FullscreenPreview
       open={open}

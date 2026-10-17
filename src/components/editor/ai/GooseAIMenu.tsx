@@ -9,7 +9,7 @@ import {
   type GooseAiMenuTag,
 } from "./GoosePromptSuggestionMenu";
 import { formatAiMenuError } from "./formatAiMenuError";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/GooseAIMenu.tsx#messages:1">`
 zh-Hans:
   polish: "润色"
@@ -103,6 +103,7 @@ const ACTIONS = [
 ];
 
 export function GooseAIMenu() {
+  useLocale();
   const ai = useExtension(GooseAIExtension);
   const state = useExtensionState(GooseAIExtension, {
     selector: (value) => value.aiMenuState,

@@ -6,7 +6,7 @@ import { cn } from "@/components/editor/utils/cn";
 import type { AiReferenceSuggestionItem } from "@/components/editor/ai/composer/referenceLookup";
 import { useCenteredActiveItemScroll } from "@/components/editor/hooks/useCenteredActiveItemScroll";
 import { useComposerSuggestionsPosition } from "./useComposerSuggestionsPosition";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/ComposerSuggestionsList.tsx#messages:1">`
 zh-Hans:
   noMatchingNotes: "未找到匹配笔记"
@@ -39,6 +39,7 @@ export function ComposerSuggestionsList({
   onSelect,
   onMouseDownCapture,
 }: ComposerSuggestionsListProps) {
+  useLocale();
   const { floatingRef, style, maxWidth, maxHeight } = useComposerSuggestionsPosition(
     composerRef,
     anchorRect,

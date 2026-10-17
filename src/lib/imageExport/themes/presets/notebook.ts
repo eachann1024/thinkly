@@ -82,9 +82,9 @@ function notebookDecorations(accent: string, dots: string): CardDecoration[] {
 /** 静态浅色 fallback：无 DOM / 无页面上下文时仍可导出。 */
 export const NOTEBOOK_THEME: CardTheme = {
   id: "notebook",
-  name: uiText("notebook"),
+  get name() { return uiText("notebook"); },
   nameEn: "Notebook",
-  description: uiText("matchesYourEditor"),
+  get description() { return uiText("matchesYourEditor"); },
   tags: [uiText("current"), uiText("editor")],
   mode: "light",
   titleFont: LIGHT_PAGE_FONT,

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { ActionBarPrimitive, BranchPickerPrimitive } from "@assistant-ui/react";
 import { Copy, ChevronLeft, ChevronRight } from "@/components/ui/icons";
@@ -16,7 +17,7 @@ en:
 `;
 const t = createTranslator(messages);
 
-export const MessageActionBar = () => (
+export const MessageActionBar = () => { useLocale(); return ((
   <div className="notebook-ai-message-actions mt-1 flex h-6 min-h-6 items-center gap-1">
     <ActionBarPrimitive.Root
       hideWhenRunning
@@ -54,4 +55,4 @@ export const MessageActionBar = () => (
       </BranchPickerPrimitive.Next>
     </BranchPickerPrimitive.Root>
   </div>
-);
+)); };

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/outline/OutlinePanel.tsx#localMessages:1">`
@@ -43,6 +44,7 @@ export function OutlinePanel({
   emptyMessage = uiText("noHeadingsInThisNote"),
   emptyHint = null,
 }: OutlinePanelProps) {
+  useLocale();
   const itemHeight = useSidebarItemHeight();
   const [locallyCollapsedIds, setLocallyCollapsedIds] = useState<Set<string>>(
     () => new Set(),
@@ -112,6 +114,7 @@ function OutlineTreeNode({
   onHeadingToggle: (blockId: string) => void;
   onToggleLocalOutline: (blockId: string) => void;
 }) {
+  useLocale();
   const isActive = activeId === heading.id;
   const [hovered, setHovered] = useState(false);
   // 箭头只控制大纲树。正文折叠状态不参与大纲子项的可见性。

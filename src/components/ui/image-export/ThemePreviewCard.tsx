@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/ui/image-export/ThemePreviewCard.tsx#localMessages:1">`
@@ -38,6 +39,7 @@ export function ThemePreviewCard({
   sampleBlocks?: BlockNoteContent;
   watermarkConfig?: WatermarkConfig;
 }) {
+  const locale = useLocale();
   const previewTitle = uiText("sampleTitle");
   const previewBody = uiText("sampleBody");
   const notebookPreview = theme.id === "notebook";
@@ -50,7 +52,7 @@ export function ThemePreviewCard({
       mode: "page",
       watermarkConfig,
     });
-  }, [notebookPreview, sampleBlocks, theme, watermarkConfig]);
+  }, [notebookPreview, sampleBlocks, theme, watermarkConfig, locale]);
   const miniClass = `gs-mini-${theme.id}`;
   const deco = useMemo(
     () =>

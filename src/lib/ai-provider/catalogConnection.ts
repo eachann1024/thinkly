@@ -1,4 +1,4 @@
-import { createTranslator, i18nYaml } from "@/i18n/core";
+import { createTranslator, i18nYaml, subscribeLanguage } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/ai-provider/catalogConnection.ts#localMessages:1">`
 zh-Hans:
@@ -24,8 +24,8 @@ import {
 
 export const DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1";
 export const DEFAULT_CLAUDE_BASE_URL = "https://api.anthropic.com/v1";
-export const SETTINGS_ENTRY_HINT =
-  uiText("checkYourConfigurationInSettingsAiAssistantAiService");
+export let SETTINGS_ENTRY_HINT = uiText("checkYourConfigurationInSettingsAiAssistantAiService");
+subscribeLanguage(() => { SETTINGS_ENTRY_HINT = uiText("checkYourConfigurationInSettingsAiAssistantAiService"); });
 export const ANTHROPIC_THINKING_BUDGET: Record<AIReasoningLevel, number> = {
   default: 0,
   low: 1024,

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/shared/FontSelector.tsx#localMessages:1">`
@@ -28,17 +29,17 @@ interface FontSelectorProps {
 const defaultFonts = [
   {
     value: "default" as const,
-    label: uiText("default"),
+    get label() { return uiText("default"); },
     defaultFont: DEFAULT_FONT_NAMES.default,
   },
   {
     value: "serif" as const,
-    label: uiText("serif"),
+    get label() { return uiText("serif"); },
     defaultFont: DEFAULT_FONT_NAMES.serif,
   },
   {
     value: "mono" as const,
-    label: uiText("monospace"),
+    get label() { return uiText("monospace"); },
     defaultFont: DEFAULT_FONT_NAMES.mono,
   },
 ];
@@ -48,6 +49,7 @@ export function FontSelector({
   onChange,
   compact = false,
 }: FontSelectorProps) {
+  useLocale();
   const { customFonts } = useSettings();
 
   const selectFont = (fontFamily: Page["fontFamily"]) => {

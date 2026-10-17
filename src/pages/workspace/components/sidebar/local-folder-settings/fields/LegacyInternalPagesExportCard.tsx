@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-folder-settings/fields/LegacyInternalPagesExportCard.tsx#localMessages:1">`
@@ -52,6 +53,7 @@ function listLegacyInternalPages(): Page[] {
 
 export /** 桌面端专属：检测到旧内置（web-db）页面时，提供一次性导出为 .md 到当前仓库。 */
 function LegacyInternalPagesExportCard() {
+  useLocale();
   const [exporting, setExporting] = useState(false);
   const [legacyCount, setLegacyCount] = useState(
     () => listLegacyInternalPages().length,

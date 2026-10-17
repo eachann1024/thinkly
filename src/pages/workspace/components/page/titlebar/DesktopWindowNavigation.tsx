@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/titlebar/DesktopWindowNavigation.tsx#localMessages:1">`
@@ -31,6 +32,7 @@ export function DesktopWindowNavigation({
   onToggleSidebar?: () => void; toggleSidebarCollapsed: () => void;
   sidebarCollapsed: boolean; toggleSidebarShortcutLabel: string;
 }) {
+  useLocale();
   return (
     <div
       className="electron-window-controls flex shrink-0 items-center gap-1"

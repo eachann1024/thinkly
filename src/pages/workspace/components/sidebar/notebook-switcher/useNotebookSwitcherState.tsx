@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1">`
 zh-Hans:
@@ -21,6 +22,7 @@ export function useNotebookSwitcherState({
   variant?: "default" | "rail" | "header";
   active?: boolean;
 } = {}) {
+  useLocale();
   const {
     notebooks,
     activeNotebookId,

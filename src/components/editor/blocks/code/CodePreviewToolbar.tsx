@@ -7,11 +7,11 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
-  PREVIEW_ACTION_TOOLTIP,
+  getPreviewActionTooltip,
   previewPointerHandlers,
 } from "@/lib/preview/previewAction";
 import type { CodeBlockToolbarProps, CodeCopyState } from "./codeToolbarTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodePreviewToolbar.tsx#messages:1">`
 zh-Hans:
   imageCopied: "已复制图片"
@@ -52,6 +52,7 @@ export function CodePreviewToolbar({
   copyingImage,
   handleCopy,
 }: CodeBlockToolbarProps & CodeCopyState & { chipClass: string }) {
+  useLocale();
   const copiesImage = previewMode === "preview" && Boolean(onCopyPreview);
   const isCopyingImage = copiesImage && copyingImage;
   const copyLabel = copied
@@ -80,7 +81,7 @@ export function CodePreviewToolbar({
             <GooseIcons.Maximize2 className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{PREVIEW_ACTION_TOOLTIP}</TooltipContent>
+        <TooltipContent>{getPreviewActionTooltip()}</TooltipContent>
       </Tooltip>
 
       <Tooltip>

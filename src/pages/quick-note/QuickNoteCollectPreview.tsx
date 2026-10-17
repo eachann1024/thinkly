@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/quick-note/QuickNoteCollectPreview.tsx#localMessages:1">`
@@ -51,19 +52,16 @@ interface QuickNoteCollectPreviewProps {
 export function QuickNoteCollectPreview({
   variant,
 }: QuickNoteCollectPreviewProps) {
+  useLocale();
   const detectorRef = useRef<DoubleShiftDetectorState>(
     EMPTY_DOUBLE_SHIFT_STATE,
   );
   const [enabled, setEnabled] = useState(false);
   const [count, setCount] = useState(0);
-  const [recent, setRecent] = useState(uiText("emptyCollection"));
+  const recent = count > 0 ? uiText("sampleClip", { number: count }) : uiText("emptyCollection");
 
   const simulateCollect = useCallback(() => {
-    setCount((previous) => {
-      const next = previous + 1;
-      setRecent(uiText("sampleClip", {number: next}));
-      return next;
-    });
+    setCount((previous) => previous + 1);
     toast.success(uiText("collected"), {
       id: "quicknote-collect-preview",
       duration: 1200,

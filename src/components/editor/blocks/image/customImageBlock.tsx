@@ -14,7 +14,7 @@ import {
   normalizeParsedImageProps,
 } from "./imageCaption";
 import { ResolvedImagePreview } from "./ResolvedImagePreview";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/image/customImageBlock.tsx#messages:1">`
 zh-Hans:
   addImage: "添加图片"
@@ -33,6 +33,7 @@ function CustomImageBlockContent({
   block: any;
   editor: any;
 }) {
+  useLocale();
   const showLoader = useUploadLoading(block.id);
 
   if (showLoader) {

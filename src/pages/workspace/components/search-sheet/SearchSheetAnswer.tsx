@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1">`
@@ -52,6 +53,7 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBac
   onOpenSource: (id: string) => void;
   onContinue?: () => void;
 }) {
+  useLocale();
   const waiting = answer.status === "loading";
   const hint = pendingHint(answer);
   return <section className="search-sheet-answer" aria-live="polite" aria-busy={waiting || answer.status === "streaming"}>

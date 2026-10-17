@@ -36,9 +36,9 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 9. Poster ────────────────────────────────────────────────
   {
     id: "poster",
-    name: uiText("boldPoster"),
+    get name() { return uiText("boldPoster"); },
     nameEn: "Poster",
-    description: uiText("highImpactDesignForShortText"),
+    get description() { return uiText("highImpactDesignForShortText"); },
     tags: [uiText("poster"), uiText("impact")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -83,9 +83,9 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 15. Synthwave ────────────────────────────────────────────
   {
     id: "synthwave",
-    name: uiText("synthwave"),
+    get name() { return uiText("synthwave"); },
     nameEn: "Synthwave",
-    description: uiText("retroCyberpunkWithNeonColors"),
+    get description() { return uiText("retroCyberpunkWithNeonColors"); },
     tags: [uiText("dark"), uiText("vintage")],
     mode: "dark",
     titleFont: "'Space Grotesk', 'Inter', 'Noto Sans SC', sans-serif",
@@ -130,9 +130,9 @@ export const COLORFUL_THEMES: CardTheme[] = [
   // ── 18. Solarized Light ──────────────────────────────────────
   {
     id: "solarized-light",
-    name: uiText("solarizedLight"),
+    get name() { return uiText("solarizedLight"); },
     nameEn: "Solarized",
-    description: uiText("classicMutedColorsOnACalmCreamBackground"),
+    get description() { return uiText("classicMutedColorsOnACalmCreamBackground"); },
     tags: [uiText("light"), uiText("classic")],
     mode: "light",
     titleFont: "'Inter', 'IBM Plex Sans', 'Noto Sans SC', sans-serif",

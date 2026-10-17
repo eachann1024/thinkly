@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/NotebookIconSelector.tsx#localMessages:1">`
@@ -56,7 +57,7 @@ interface NotebookIconSelectorProps {
 }
 
 const categories: ReadonlyArray<{ id: NotebookIconFilter; label: string }> = [
-  { id: "all", label: uiText("all_a8b0") },
+  { id: "all", get label() { return uiText("all_a8b0"); } },
   ...NOTEBOOK_ICON_CATEGORIES,
 ];
 
@@ -68,6 +69,7 @@ export function NotebookIconSelector({
   label = uiText("notebookIcon_cdc6"),
   compact = false,
 }: NotebookIconSelectorProps) {
+  const locale = useLocale();
   const savedValue = typeof value === "string" ? value : "";
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -80,7 +82,7 @@ export function NotebookIconSelector({
   const resultsId = `${selectorId}-results`;
   const availableIcons = useMemo(
     () => filterNotebookIcons(query, category).filter((icon) => resolvePageIcon(icon.name)),
-    [query, category],
+    [query, category, locale],
   );
   const tabStop = availableIcons.find((icon) => icon.name === focusedIcon)?.name
     ?? availableIcons.find((icon) => icon.name === savedValue)?.name

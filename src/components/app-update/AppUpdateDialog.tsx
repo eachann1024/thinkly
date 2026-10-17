@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/components/app-update/AppUpdateDialog.tsx#localMessages:1">`
@@ -27,6 +28,7 @@ import { UpdateNotes } from "./UpdateNotes";
 import { updatePercent, updateStatusLabel } from "./updatePresentation";
 
 export function AppUpdateDialog() {
+  useLocale();
   const { open, setOpen, currentVersion, state, installing, installError, download, install, revealDownload } = useAppUpdate();
   const notes = selectUpdateNotes(currentVersion, state);
   const percent = updatePercent(state);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-ai/renderAIEnabledSection.tsx#localMessages:1">`
@@ -56,6 +57,7 @@ export function renderAIEnabledSection(
 }
 
 export function AIActivationView({ onEnable }: { onEnable: () => void }) {
+  useLocale();
   return (
     <section className="flex min-h-64 flex-col items-center justify-center gap-6 px-4 py-8">
       <GooseIcons.Sparkles

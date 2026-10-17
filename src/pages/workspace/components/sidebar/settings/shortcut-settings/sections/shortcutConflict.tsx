@@ -87,13 +87,13 @@ function getAllConfiguredShortcuts(
 }
 
 const APP_SHORTCUT_LABELS: Record<string, string> = {
-  toggleSidebar: uiText("sidebarShortcut_2aa4"),
-  toggleAIPanel: uiText("aiAssistantShortcut_8ea1"),
-  openSearch: uiText("searchShortcut_3580"),
-  toggleTheme: uiText("appearanceShortcut_d567"),
-  navBack: uiText("backShortcut_47b7"),
-  navForward: uiText("forwardShortcut_d31e"),
-  newTab: uiText("newTabShortcut_b5a7"),
+  get toggleSidebar() { return uiText("sidebarShortcut_2aa4"); },
+  get toggleAIPanel() { return uiText("aiAssistantShortcut_8ea1"); },
+  get openSearch() { return uiText("searchShortcut_3580"); },
+  get toggleTheme() { return uiText("appearanceShortcut_d567"); },
+  get navBack() { return uiText("backShortcut_47b7"); },
+  get navForward() { return uiText("forwardShortcut_d31e"); },
+  get newTab() { return uiText("newTabShortcut_b5a7"); },
 };
 
 export function makeAppShortcutSetter(

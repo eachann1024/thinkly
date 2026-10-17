@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/SetupGuide.tsx#localMessages:1">`
@@ -43,8 +44,8 @@ import "./setup-guide.css";
 import { useIntroVideo } from "@/stores/introVideo";
 
 const STEPS = [
-  { label: uiText("appearance"), title: uiText("customizeAppearance") },
-  { label: uiText("reading"), title: uiText("adjustReadingPreferences") },
+  { get label() { return uiText("appearance"); }, get title() { return uiText("customizeAppearance"); } },
+  { get label() { return uiText("reading"); }, get title() { return uiText("adjustReadingPreferences"); } },
 ] as const;
 
 type SetupStep = 0 | 1;
@@ -58,11 +59,13 @@ function getNativePlatform(): "mac" | "win" | "linux" | "web" {
 }
 
 export function SetupGuide() {
+  useLocale();
   const visible = useSettings((settings) => isSetupGuideVisible(settings));
   return visible ? <SetupGuideFlow /> : null;
 }
 
 function SetupGuideFlow() {
+  useLocale();
   const appearance = useSettings(
     useShallow((settings) => ({
       theme: settings.theme,

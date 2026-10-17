@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1">`
@@ -45,6 +46,7 @@ export function SplitEditorPane({
   focused: boolean;
   showChrome: boolean;
 }) {
+  useLocale();
   const registry = useEditorPaneRegistry();
   const defaultLayout = useSettings(state => state.defaultPageLayout);
   const editorRef = useRef<EditorRef | null>(null);

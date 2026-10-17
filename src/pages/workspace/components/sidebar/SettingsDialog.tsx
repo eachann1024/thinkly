@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { renderSettingsResetDialog } from "./settings-dialog/renderSettingsResetDialog";
 import { renderSettingsScaffold } from "./settings-dialog/renderSettingsScaffold";
 import { type SettingsDialogProps } from "./settings-dialog/shared";
@@ -7,6 +8,7 @@ import { useSettingsBackupRestore } from "./settings-dialog/useSettingsBackupRes
 import { useSettingsResetActions } from "./settings-dialog/useSettingsResetActions";
 
 export function SettingsDialog(props: SettingsDialogProps) {
+  useLocale();
   const settings = useSettingsDialogState(props);
   const importExport = useSettingsImportExport(settings);
   const backupRestore = useSettingsBackupRestore(importExport);

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsDataPanel.tsx#localMessages:1">`
@@ -29,6 +30,7 @@ import { useWebdavRemoteActions } from "./data-panel/useWebdavRemoteActions";
 import { useIntroVideo } from "@/stores/introVideo";
 
 export function SettingsDataPanel(props: SettingsDataPanelProps) {
+  useLocale();
   const replayIntro = useIntroVideo((state) => state.show);
   const data = useDataPanelState(props);
   const configuration = useWebdavConfiguration(data);

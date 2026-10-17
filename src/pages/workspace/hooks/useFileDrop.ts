@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/hooks/useFileDrop.ts#localMessages:1">`
@@ -90,6 +91,7 @@ async function openImportedPages(
 }
 
 export function useFileDrop() {
+  useLocale();
   const [isDragging, setIsDragging] = useState(false);
   const [dragIntent, setDragIntent] = useState<WorkspaceDragIntent>("file");
   const dragCounter = useRef(0);

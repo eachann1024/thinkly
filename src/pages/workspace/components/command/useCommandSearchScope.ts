@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/command/useCommandSearchScope.ts#localMessages:1">`
@@ -22,13 +23,14 @@ interface ScopeSnapshot {
   activeId: string | null;
   catalog: SearchCatalog | null;
   scope: Page[];
-  error: string | null;
+  error: "catalog-read-failed" | null;
 }
 
 export function useCommandSearchScope(
   pages: Record<string, Page>, notebooks: SearchNotebooks,
   all: boolean, activeId: string | null, enabled: boolean,
 ) {
+  useLocale();
   const [prepared, setPrepared] = useState<ScopeSnapshot | null>(null);
   useEffect(() => {
     if (!enabled) return;
@@ -46,7 +48,7 @@ export function useCommandSearchScope(
       if (controller.signal.aborted) return;
       console.error("Command search catalog failed", error);
       setPrepared({ ...snapshot, catalog: null, scope: EMPTY_PAGES,
-        error: uiText("couldnTReadTheSearchFolderClose") });
+        error: "catalog-read-failed" });
     });
     return () => { controller.abort(); };
   }, [pages, notebooks, all, activeId, enabled]);
@@ -58,7 +60,7 @@ export function useCommandSearchScope(
   return {
     scope: current?.scope ?? EMPTY_PAGES,
     catalog,
-    error: current?.error ?? null,
+    error: current?.error ? uiText("couldnTReadTheSearchFolderClose") : null,
     ready: Boolean(current),
   };
 }

@@ -4,7 +4,7 @@ import { toast } from "@/components/ui/sonner";
 import { useEditorPageContext } from "../platform/hostContext";
 import { getPageMentionMenuItems, getPageMentionTriggerRange, insertPageMentionFromMenu } from "./pageMentionMenuItems";
 import { snapshotEditorSelection, restoreEditorSelection } from "../utils/editorSelectionSnapshot";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/inline/usePageMentionItems.ts#messages:1">`
 zh-Hans:
   pageCreatedTheOriginalNoteHasChangedOpen: "新页面已创建；原笔记内容已变化，请从侧栏打开"
@@ -19,6 +19,7 @@ const t = createTranslator(messages);
 
 
 export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
+  const locale = useLocale();
   const { page, searchPages, createPageMentionTarget } = useEditorPageContext();
   const pageVisit = useRef({ id: page.id });
   if (pageVisit.current.id !== page.id) pageVisit.current = { id: page.id };
@@ -55,5 +56,5 @@ export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
       });
     }
     return result;
-  }, [editor, origin, searchPages, createPageMentionTarget]);
+  }, [editor, origin, searchPages, createPageMentionTarget, locale]);
 }

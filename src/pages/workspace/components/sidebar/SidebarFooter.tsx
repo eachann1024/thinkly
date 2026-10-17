@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarFooter.tsx#localMessages:1">`
@@ -23,6 +24,7 @@ export function SidebarFooter({
   isSettingsOpen,
   onOpenSettings,
 }: SidebarFooterProps) {
+  useLocale();
   const btnClass =
     "sidebar-footer-control inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg p-0 text-muted-foreground [&_svg]:block";
   const activeClass =

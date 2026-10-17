@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsAppearance.tsx#localMessages:1">`
@@ -27,6 +28,7 @@ import { CanvasSettings } from "./appearance-settings/CanvasSettings";
 import { SidebarDisplaySettings } from "./appearance-settings/SidebarDisplaySettings";
 
 export function SettingsAppearance(props: SettingsAppearanceProps) {
+  useLocale();
   const appearanceSettingsContext = useAppearanceSettings(props);
   const context = appearanceSettingsContext;
   const {

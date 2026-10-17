@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 /** 面板 UI 仅消费常驻会话，关闭面板不会停止生成。 */
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ en:
 const t = createTranslator(messages);
 
 export function NotebookAiPanel(props: NotebookAiPanelProps) {
+  const locale = useLocale();
   const {
     notebookId,
     editorRef: _editorRef,
@@ -58,7 +60,7 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
 
   const conversationSummary = useMemo(
     () => getConversationSummary(messages),
-    [messages],
+    [messages, locale],
   );
 
   const headerToolbar = usePanelHeader(props, commands, {

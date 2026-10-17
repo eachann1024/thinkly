@@ -30,14 +30,14 @@ export interface LocalFolderOpenAppCandidate {
 export const LOCAL_FOLDER_FILE_MANAGER_CANDIDATES: LocalFolderOpenAppCandidate[] = [
   {
     id: "finder",
-    label: uiText("finder"),
+    get label() { return uiText("finder"); },
     appName: "Finder",
     aliases: ["Finder"],
     kind: "file-manager",
   },
   {
     id: "explorer",
-    label: uiText("fileExplorer"),
+    get label() { return uiText("fileExplorer"); },
     appName: "Explorer",
     aliases: ["explorer"],
     commands: ["explorer"],
@@ -91,7 +91,7 @@ export const LOCAL_FOLDER_EDITOR_CANDIDATES: LocalFolderOpenAppCandidate[] = [
     kind: "editor",
   },
   { id: "windsurf", label: "Windsurf", appName: "Windsurf", commands: ["windsurf"], kind: "editor" },
-  { id: "notepad", label: uiText("notepad"), appName: "Notepad", commands: ["notepad"], kind: "editor" },
+  { id: "notepad", get label() { return uiText("notepad"); }, appName: "Notepad", commands: ["notepad"], kind: "editor" },
   { id: "notepadpp", label: "Notepad++", appName: "Notepad++", commands: ["notepad++"], kind: "editor" },
   { id: "typora", label: "Typora", appName: "Typora", commands: ["typora"], kind: "editor" },
   { id: "obsidian", label: "Obsidian", appName: "Obsidian", kind: "editor" },
@@ -112,8 +112,8 @@ export const LOCAL_FOLDER_EDITOR_CANDIDATES: LocalFolderOpenAppCandidate[] = [
 ];
 
 export const LOCAL_FOLDER_TERMINAL_CANDIDATES: LocalFolderOpenAppCandidate[] = [
-  { id: "terminal", label: uiText("terminal"), appName: "Terminal", aliases: ["Terminal"], kind: "terminal" },
-  { id: "cmd", label: uiText("commandPrompt"), appName: "Command Prompt", aliases: ["cmd"], commands: ["cmd"], kind: "terminal" },
+  { id: "terminal", get label() { return uiText("terminal"); }, appName: "Terminal", aliases: ["Terminal"], kind: "terminal" },
+  { id: "cmd", get label() { return uiText("commandPrompt"); }, appName: "Command Prompt", aliases: ["cmd"], commands: ["cmd"], kind: "terminal" },
   { id: "windows-terminal", label: "Windows Terminal", appName: "Windows Terminal", aliases: ["wt"], commands: ["wt"], kind: "terminal" },
   { id: "powershell", label: "PowerShell", appName: "PowerShell", commands: ["powershell", "pwsh"], kind: "terminal" },
   { id: "gnome-terminal", label: "GNOME Terminal", appName: "GNOME Terminal", commands: ["gnome-terminal"], kind: "terminal" },

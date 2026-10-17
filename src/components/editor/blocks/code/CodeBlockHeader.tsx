@@ -4,7 +4,7 @@ import { Input } from "@/components/editor/ui/input";
 import { cn } from "@/lib/utils";
 import { CodeBlockToolbar } from "./CodeBlockToolbar";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1">`
 zh-Hans:
   expandCodeBlock: "展开代码块"
@@ -27,6 +27,7 @@ export function CodeBlockHeader({
   edit,
   preview,
 }: CodeBlockViewProps) {
+  useLocale();
   const {
     isEditingSummary,
     setIsEditingSummary,

@@ -36,9 +36,9 @@ export const TECH_APPLICATION: CardTheme[] = [
   // ── 12. Vercel Geist ─────────────────────────────────────────
   {
     id: "vercel-dark",
-    name: uiText("vercelBlack"),
+    get name() { return uiText("vercelBlack"); },
     nameEn: "Vercel Geist",
-    description: uiText("minimalBlackWithAModernEdge"),
+    get description() { return uiText("minimalBlackWithAModernEdge"); },
     tags: [uiText("dark"), uiText("minimal")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",
@@ -82,9 +82,9 @@ export const TECH_APPLICATION: CardTheme[] = [
   // ── 13. Tokyo Night ──────────────────────────────────────────
   {
     id: "tokyo-night",
-    name: uiText("tokyoNight"),
+    get name() { return uiText("tokyoNight"); },
     nameEn: "Tokyo Night",
-    description: uiText("deepBluesAndPurplesInspiredByAClassicEditor"),
+    get description() { return uiText("deepBluesAndPurplesInspiredByAClassicEditor"); },
     tags: [uiText("dark"), uiText("code")],
     mode: "dark",
     titleFont: "'Inter', 'JetBrains Mono', 'Noto Sans SC', sans-serif",
@@ -130,7 +130,7 @@ export const TECH_APPLICATION: CardTheme[] = [
     id: "catppuccin",
     name: "Catppuccin",
     nameEn: "Macchiato",
-    description: uiText("aDarkThemeWithSoftPinkAccents"),
+    get description() { return uiText("aDarkThemeWithSoftPinkAccents"); },
     tags: [uiText("dark"), uiText("soft")],
     mode: "dark",
     titleFont: "'Inter', 'Noto Sans SC', sans-serif",
@@ -176,7 +176,7 @@ export const TECH_APPLICATION: CardTheme[] = [
     id: "linear",
     name: "Linear",
     nameEn: "Linear",
-    description: uiText("coolGeometricStylingWithATechnicalFeel"),
+    get description() { return uiText("coolGeometricStylingWithATechnicalFeel"); },
     tags: [uiText("light"), uiText("geometric")],
     mode: "light",
     titleFont: "'Inter', 'Noto Sans SC', -apple-system, sans-serif",

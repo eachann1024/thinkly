@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import * as GooseIcons from "@/components/ui/icons";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
@@ -30,6 +31,7 @@ const t = createTranslator(messages);
 
 
 export function HistoryToolbar() {
+  useLocale();
   const sidebarCollapsed = useEffectiveSidebarCollapsed();
   const openVersions = () => useSidebarView.getState().openSidebarPanel("engaged");
   const {

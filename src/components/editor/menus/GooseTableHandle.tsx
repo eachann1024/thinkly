@@ -14,7 +14,7 @@ import { getTableDeletionLabel } from "./tableDeletion";
 import { GooseTableColorMenu } from "./GooseTableColorMenu";
 import { useTableHandleDrag } from "./useTableHandleDrag";
 import { useGooseTableHandle } from "./useGooseTableHandle";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/GooseTableHandle.tsx#messages:1">`
 zh-Hans:
   rowActions: "行操作"
@@ -72,6 +72,7 @@ export function GooseTableHandle({
   orientation,
   hideOtherElements,
 }: TableHandleProps) {
+  useLocale();
   const { features } = useEditorSettings();
   const mergeNoteId = useId();
   const { isDragging, ...dragProps } = useTableHandleDrag(orientation, hideOtherElements);

@@ -46,7 +46,7 @@ import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/s
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
 import { gooseColumnLayoutExtension } from "../extensions/columnLayoutExtension";
 import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorExtensions.ts#messages:1">`
 zh-Hans:
   couldNotOpenThisMarkdownNote: "无法打开该 Markdown 笔记"
@@ -57,6 +57,7 @@ const t = createTranslator(messages);
 
 
 export function useEditorExtensions(session: EditorSession) {
+  useLocale();
   const {
     getActivePageLocalFilePathRef,
     getActivePageLocalFolderRootRef,

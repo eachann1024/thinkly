@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1">`
@@ -38,6 +39,7 @@ export function useMainTreeState({
   viewportHeight,
   itemHeight,
 }: SidebarMainTreeProps) {
+  useLocale();
   const pages = useStoreWithEqualityFn(
     usePages,
     (s) => s.pages,

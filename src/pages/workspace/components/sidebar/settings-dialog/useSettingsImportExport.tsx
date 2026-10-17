@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsImportExport.tsx#localMessages:1">`
@@ -33,6 +34,7 @@ import type { useSettingsDialogState } from "./useSettingsDialogState";
 export function useSettingsImportExport(
   input: ReturnType<typeof useSettingsDialogState>,
 ) {
+  useLocale();
   const {
     open,
     notebooks,

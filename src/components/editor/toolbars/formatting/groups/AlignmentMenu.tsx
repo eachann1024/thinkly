@@ -13,7 +13,7 @@ import {
   type SelectionMenuChange,
 } from "../useSelectionMenu";
 import { AlignGroup } from "./AlignGroup";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/AlignmentMenu.tsx#messages:1">`
 zh-Hans:
   alignment: "对齐方式"
@@ -34,6 +34,7 @@ export function AlignmentMenu({
   bindTooltip: BindTooltip;
   onOpenChange: SelectionMenuChange;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
   const menu = useSelectionMenu(editor, "alignment", onOpenChange);
   const Icon =

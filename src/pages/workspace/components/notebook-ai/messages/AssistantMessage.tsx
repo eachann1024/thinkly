@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { MessagePrimitive } from "@assistant-ui/react";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import { isNotebookAiToolPart } from "@/lib/notebook-ai/messageUtils";
@@ -39,6 +40,7 @@ export function AssistantMessage({
   isStreaming: boolean;
   toolRenderBase: Omit<AssistantToolRenderContextValue, "isStreaming">;
 }) {
+  useLocale();
   const progressToolParts = (msg.parts ?? [])
     .filter(isNotebookAiToolPart)
     .filter((part) => shouldShowToolPart(part, isStreaming));

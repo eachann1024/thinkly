@@ -4,7 +4,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeLatexHints.tsx#messages:1">`
 zh-Hans:
   fraction: "分数"
@@ -74,6 +74,7 @@ export function CodeLatexHints({
   language: string;
   isEditable: boolean;
 }) {
+  useLocale();
   const [showLatexHint, setShowLatexHint] = useState(false);
   return (
     <>

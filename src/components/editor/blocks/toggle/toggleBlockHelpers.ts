@@ -2,7 +2,7 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { createToggleWrapper, mergeParagraphs } from "@blocknote/core/blocks";
 import { DOMParser, Fragment, type Schema } from "prosemirror-model";
 import { readToggleCollapsed } from "../../core/toggleBlocks";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, subscribeLanguage } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/toggle/toggleBlockHelpers.ts#messages:1">`
 zh-Hans:
   expandOrCollapseChildBlocks: "展开或收起子块"
@@ -30,7 +30,26 @@ export function createPersistentToggleWrapper(
     button.setAttribute("aria-label", t("expandOrCollapseChildBlocks"));
     button.setAttribute("aria-expanded", String(!readToggleCollapsed(block)));
   }
-  return wrapper;
+  const refreshLanguage = () => {
+    button?.setAttribute("aria-label", t("expandOrCollapseChildBlocks"));
+    const add = wrapper.dom.querySelector<HTMLElement>(".bn-toggle-add-block-button");
+    if (add) add.textContent = editor.dictionary.toggle_blocks.add_block_button;
+  };
+  const unsubscribe = subscribeLanguage(refreshLanguage);
+  button?.addEventListener("click", refreshLanguage);
+  return {
+    ...wrapper,
+    ignoreMutation: (mutation: Parameters<NonNullable<typeof wrapper.ignoreMutation>>[0]) => {
+      const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+      if (target?.closest(".bn-toggle-button, .bn-toggle-add-block-button")) return true;
+      return wrapper.ignoreMutation?.(mutation) ?? false;
+    },
+    destroy: () => {
+      unsubscribe();
+      button?.removeEventListener("click", refreshLanguage);
+      wrapper.destroy?.();
+    },
+  };
 }
 
 /** details 的 summary 作为 inline，剩余节点作为真实 children，避免 HTML 导入拍平。 */

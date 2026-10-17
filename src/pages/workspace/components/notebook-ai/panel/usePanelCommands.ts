@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect, type KeyboardEvent } from "react";
 import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { OPEN_ESCAPE_LAYER_SELECTOR } from "@/lib/escape-close";
@@ -5,7 +6,7 @@ import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import type { AiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
 import type { NotebookAiImageAttachment } from "../Composer";
 import {
-  NOTEBOOK_AI_PLACEHOLDER_HINTS,
+  getNotebookAiPlaceholderHints,
   type NotebookAiSessionValue,
 } from "../NotebookAiSession";
 import type { NotebookAiPanelProps } from "./types";
@@ -25,6 +26,7 @@ export function usePanelCommands(
   session: NotebookAiSessionValue,
   isFullscreen: boolean,
 ) {
+  useLocale();
   const { onClose, capturedSelection, onConsumeCapturedSelection } = props;
   const {
     unavailableReason,
@@ -70,7 +72,7 @@ export function usePanelCommands(
     ? t("configureAnAiModelInSettingsFirst")
     : isBusy
       ? t("generating")
-      : NOTEBOOK_AI_PLACEHOLDER_HINTS[placeholderIndex];
+      : getNotebookAiPlaceholderHints()[placeholderIndex];
 
   const handleSend = useCallback(
     (

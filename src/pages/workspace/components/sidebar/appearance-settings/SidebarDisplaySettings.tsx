@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/SidebarDisplaySettings.tsx#localMessages:1">`
@@ -18,6 +19,7 @@ import { APPEARANCE_OPTION_ROW_CLASS } from "./shared";
 const SWITCH_CLASS = "data-[state=unchecked]:bg-[hsl(var(--foreground)/0.12)]";
 
 export function SidebarDisplaySettings() {
+  useLocale();
   const enabled = useSettings((state) => state.showSidebarFolderCount);
   const setEnabled = useSettings((state) => state.setShowSidebarFolderCount);
   return (

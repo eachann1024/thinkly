@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/shortcut-settings/sections/DesktopGlobalHotkeysCard.tsx#localMessages:1">`
@@ -50,6 +51,7 @@ export function DesktopGlobalHotkeysCard({
   searchPanelCloseShortcut: string;
   singleTabMode: boolean;
 }) {
+  useLocale();
   const desktop = useSettings((s) => s.desktop);
   const setWakeHotkey = useSettings((s) => s.setWakeHotkey);
   const setWakeHotkeyEnabled = useSettings((s) => s.setWakeHotkeyEnabled);

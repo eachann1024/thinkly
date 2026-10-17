@@ -3,7 +3,7 @@ import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 import { renderMathPreview } from "./mathPreviewCache";
 
 import { previewRenderReducer, previewRenderHTML } from "../shared/previewRenderState";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/math/MathView.tsx#messages:1">`
 zh-Hans:
   addFormula: "添加公式"
@@ -24,6 +24,7 @@ export const MathView: React.FC<MathViewProps> = ({
   value,
   displayMode = false,
 }) => {
+  useLocale();
   const { previewRef, activated } = usePreviewVisibility<HTMLSpanElement>(!displayMode);
   const [renderState, dispatch] = useReducer(previewRenderReducer, { phase: "idle" });
   const identity = JSON.stringify([value, displayMode]);

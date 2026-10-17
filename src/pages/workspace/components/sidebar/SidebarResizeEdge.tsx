@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SidebarResizeEdge.tsx#localMessages:1">`
@@ -28,6 +29,7 @@ export function SidebarResizeEdge({
   onPointerDown,
   onKeyDown,
 }: SidebarResizeEdgeProps) {
+  useLocale();
   return (
     <div
       className="absolute top-0 h-full z-[60] cursor-col-resize touch-none group/resize "

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 /**
  * showChart 工具的输出渲染卡片
@@ -74,6 +75,7 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 export function ChartIncompleteNotice({ title }: { title?: string }) {
+  useLocale();
   return (
     <div className="notebook-ai-canvas-card my-2 overflow-hidden">
       {title ? (
@@ -89,6 +91,7 @@ export function ChartIncompleteNotice({ title }: { title?: string }) {
 }
 
 export function ChartCard(props: ChartCardProps) {
+  useLocale();
   const themeSurface = useThemeSurfaceSnapshot();
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);

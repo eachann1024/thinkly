@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Image } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useCallback, useMemo, type RefObject } from "react";
@@ -46,6 +47,7 @@ function canvasFilename(title?: string) {
 }
 
 export function CanvasLoadingCard({ title }: { title?: string }) {
+  useLocale();
   return (
     <div
       className="notebook-ai-canvas-card my-2"
@@ -60,6 +62,7 @@ export function CanvasLoadingCard({ title }: { title?: string }) {
 }
 
 export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps) {
+  useLocale();
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);
   const isDark = resolvedTheme === "dark";

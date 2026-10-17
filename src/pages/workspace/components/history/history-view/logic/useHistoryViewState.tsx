@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import { useHistoryView } from "@/stores/useHistoryView";
@@ -26,6 +27,7 @@ const t = createTranslator(messages);
 
 
 export function useHistoryViewState() {
+  const locale = useLocale();
   const active = useHistoryView((s) => s.active);
 
   const selectedVersionId = useHistoryView((s) => s.selectedVersionId);
@@ -177,7 +179,7 @@ export function useHistoryViewState() {
       result[result.length - 1].items.push(v);
     }
     return result;
-  }, [visibleIndex]);
+  }, [visibleIndex, locale]);
 
   const selectedEntry = useMemo(
     () =>

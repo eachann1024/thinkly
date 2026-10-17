@@ -15,7 +15,7 @@ import {
 import { cn } from "@/components/editor/utils/cn";
 import { isTableExtendPointerClick } from "./tableExtendClick";
 import { getTableColumnCount } from "./tableHandleSizing";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/menus/GooseTableExtendButton.tsx#messages:1">`
 zh-Hans:
   addColumn: "添加列"
@@ -44,6 +44,7 @@ export function GooseTableExtendButton({
   orientation,
   hideOtherElements,
 }: TableExtendButtonProps) {
+  useLocale();
   const editor = useBlockNoteEditor<any, any, any>();
   const tableHandles = useExtension(TableHandlesExtension);
   const block = useExtensionState(TableHandlesExtension, {

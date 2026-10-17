@@ -13,6 +13,7 @@ import {
 import type { JSONContent } from "@/types";
 import {
   createImagePreviewPortal,
+  refreshComposerImageLabels,
   IMAGE_PREVIEW_HIDE_MS,
   type ComposerImageRegistry,
 } from "./composerImageChip";
@@ -22,8 +23,9 @@ import {
   readTokensFromDom,
   setDomFromJsonContent,
 } from "./composerTokens";
+import { refreshSelectionQuoteLabels } from "./selectionQuoteDom";
 import type { ComposerNativeHandlers } from "./composerInputTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/useComposerNativeEditor.ts#messages:1">`
 zh-Hans:
   aiInput: "AI 输入"
@@ -50,6 +52,7 @@ export function useComposerEditor(options: {
   setIsEmpty: Dispatch<SetStateAction<boolean>>;
   onIsEmptyChange?: (isEmpty: boolean) => void;
 }) {
+  const locale = useLocale();
   const {
     editorHostRef,
     editorRef,
@@ -195,6 +198,14 @@ export function useComposerEditor(options: {
     // variant 固定按实例；禁止依赖变化重建节点
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useLayoutEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    el.setAttribute("aria-label", t("aiInput"));
+    refreshComposerImageLabels(el);
+    refreshSelectionQuoteLabels(el);
+  }, [editorRef, locale]);
 
   // disabled 只改属性，不重建节点、不碰 className 整串
   useEffect(() => {

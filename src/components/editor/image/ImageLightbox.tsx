@@ -3,14 +3,14 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { Zoom } from "yet-another-react-lightbox/plugins";
 import { Copy, Download, X, ZoomIn, ZoomOut } from "@/components/ui/icons";
-import { PREVIEW_ACTION_TOOLTIP } from "@/lib/preview/previewAction";
+import { getPreviewActionTooltip } from "@/lib/preview/previewAction";
 import { ImageToolbar } from "./ImageToolbar";
 import { useLightboxSlides } from "./useLightboxSlides";
 import { useLightboxActions } from "./useLightboxActions";
 import { useSelectedImage } from "./useSelectedImage";
 import type { ImageLightboxProps } from "./lightboxTypes";
 import { OverlayLayerProvider, useModalLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/image/ImageLightbox.tsx#messages:1">`
 zh-Hans:
   zoomIn: "放大"
@@ -39,6 +39,7 @@ export function ImageLightbox({
   editorContainerRef,
   editable = true,
 }: ImageLightboxProps) {
+  useLocale();
   const {
     open,
     closeLightbox,
@@ -82,7 +83,7 @@ export function ImageLightbox({
           handleSelectedImageSystemPreview={handleSelectedImageSystemPreview}
           handleSelectedImageCopy={handleSelectedImageCopy}
           handleSelectedImageDownload={handleSelectedImageDownload}
-          openImageLabel={PREVIEW_ACTION_TOOLTIP}
+          openImageLabel={getPreviewActionTooltip()}
           floatingBoundary={
             !__GOOSE_EDITOR_COMPACT__ ? editorContainerRef.current : undefined
           }

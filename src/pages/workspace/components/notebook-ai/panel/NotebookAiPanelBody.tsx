@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { useSettings } from "@/stores/useSettings";
 import { AiUnavailableState } from "./AiUnavailableState";
@@ -41,6 +42,7 @@ export function NotebookAiPanelBody({
   isFullscreen: boolean;
   streamingMessageId?: string;
 }) {
+  useLocale();
   const { notebookId, onClose, editorRef: _editorRef } = props;
   const { bodyReady, composerDockRef, composerRef } = surface;
   const {

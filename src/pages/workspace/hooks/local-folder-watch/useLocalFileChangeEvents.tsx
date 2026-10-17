@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import {
   readSharedMarkdown,
   withMarkdownReadHandoff,
@@ -29,6 +30,7 @@ export function useLocalFileChangeEvents({
   activePageId,
   page,
 }: UseLocalFolderWatchOptions) {
+  useLocale();
   // 增量 rename/delete 事件去抖：同一目录连发事件合并，300ms 内只触发一次
   const renameDebounceTimers = useRef<
     Map<string, ReturnType<typeof setTimeout>>

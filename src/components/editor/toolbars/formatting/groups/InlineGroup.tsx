@@ -6,7 +6,7 @@ import { ToolbarTooltip, type BindTooltip } from "../ToolbarTooltip";
 import { withPreservedSelection } from "../selectionRestore";
 import type { RunToolbarAction } from "../useSelectionMenu";
 import type { BooleanMarkState } from "../selectionMarkStates";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/groups/InlineGroup.tsx#messages:1">`
 zh-Hans:
   underlineMixedFormatting: "下划线（混合格式）"
@@ -39,6 +39,7 @@ export function InlineGroup({
   items?: readonly ("underline" | "code")[];
   runAction?: RunToolbarAction;
 }) {
+  useLocale();
   const editor = useBlockNoteEditor();
 
   if (hideMarks) return null;

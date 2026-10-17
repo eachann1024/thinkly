@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { toast } from "@/components/ui/sonner";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import {
@@ -42,6 +43,7 @@ const t = createTranslator(messages);
 export function useHistoryRestoreActions(
   input: ReturnType<typeof useHistoryViewState>,
 ) {
+  useLocale();
   const {
     selectedVersionId,
     exit,
@@ -86,7 +88,7 @@ export function useHistoryRestoreActions(
       .then((result) => {
         if (!result || result.content == null) {
           toast.error(t("thisVersionCouldNotBeRead"), {
-            get description() { return t("theVersionFileIsEmptyOrUnreadableIf"); },
+            description: t("theVersionFileIsEmptyOrUnreadableIf"),
           });
           setIsRestoring(false);
           return;

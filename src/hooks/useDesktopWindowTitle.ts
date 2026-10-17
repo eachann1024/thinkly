@@ -3,17 +3,19 @@
  * 仅 Electron 构建有效（Electron 构建 effect 内部直接 return）。
  */
 import { useEffect } from "react";
+import { useLocale } from "@/i18n";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import {
   DEFAULT_WINDOW_TITLE,
   TITLE_SYNC_DEBOUNCE_MS,
-  WELCOME_WINDOW_TITLE,
+  getWelcomeWindowTitle,
   syncDesktopWindowTitle,
 } from "@/lib/electron/windowTitle";
 
 export function useDesktopWindowTitleSync(): void {
+  const locale = useLocale();
   const activePageId = usePages((s) => s.activePageId);
   // 选择器只取标题字符串：内容保存产生的新 page 对象不会触发重渲染。
   const pageTitle = usePages((s) => {
@@ -28,10 +30,10 @@ export function useDesktopWindowTitleSync(): void {
   useEffect(() => {
 
     const title =
-      pageTitle ?? (isWelcomeTab ? WELCOME_WINDOW_TITLE : DEFAULT_WINDOW_TITLE);
+      pageTitle ?? (isWelcomeTab ? getWelcomeWindowTitle() : DEFAULT_WINDOW_TITLE);
     const timer = window.setTimeout(() => {
       void syncDesktopWindowTitle(title);
     }, TITLE_SYNC_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
-  }, [pageTitle, isWelcomeTab]);
+  }, [pageTitle, isWelcomeTab, locale]);
 }

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
@@ -22,6 +23,7 @@ const t = createTranslator(messages);
 
 type Input = Pick<ArtifactActionsProps, "onPreview" | "onPreviewImage"> & { identity: string; previewFilename: string };
 export function useArtifactPreview({ identity, onPreview, onPreviewImage, previewFilename }: Input) {
+  useLocale();
   const [preview, dispatch] = useReducer(transitionArtifactPreview, { phase: "idle" });
   const previewRef = useRef<ArtifactPreviewState>(preview);
   const sequence = useRef(0);

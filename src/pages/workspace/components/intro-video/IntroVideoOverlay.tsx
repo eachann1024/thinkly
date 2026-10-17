@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx#localMessages:1">`
@@ -26,6 +27,7 @@ const POSTER_FALLBACK_MS = 600;
 const base = import.meta.env.BASE_URL;
 
 function IntroVideoLayer() {
+  useLocale();
   const hide = useIntroVideo((state) => state.hide);
   const videoRef = useRef<HTMLVideoElement>(null);
   const stopMusic = useRef<(() => void) | undefined>(undefined);
@@ -108,6 +110,7 @@ function IntroVideoLayer() {
 }
 
 function IntroVideoSequence() {
+  useLocale();
   const [prepared, setPrepared] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +131,7 @@ function IntroVideoSequence() {
 }
 
 export function IntroVideoOverlay() {
+  useLocale();
   const open = useIntroVideo((state) => state.open);
   return open ? createPortal(<IntroVideoSequence />, document.body) : null;
 }

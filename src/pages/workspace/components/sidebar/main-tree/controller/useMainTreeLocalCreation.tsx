@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1">`
@@ -24,6 +25,7 @@ import type { useMainTreeState } from "./useMainTreeState";
 export function useMainTreeLocalCreation(
   input: ReturnType<typeof useMainTreeState>,
 ) {
+  useLocale();
   const {
     activeNotebookId,
     pages,

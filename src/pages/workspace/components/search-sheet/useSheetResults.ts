@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { usePages } from "@/stores/usePages";
@@ -16,6 +17,7 @@ const isTitleMatch = (page: SearchResultPage) =>
 
 /** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
 export function useSheetResults() {
+  useLocale();
   const s = useSearchSession(useShallow(state => ({ open: state.view.phase !== "closed", query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort })));
   const pages = usePages(state => s.open ? state.pages : EMPTY_PAGES);
   const showRecent = useSettings(state => state.showRecentInSearch);

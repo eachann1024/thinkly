@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback } from "react";
 import { toast } from "@/components/ui/sonner";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
@@ -27,6 +28,7 @@ const t = createTranslator(messages);
 
 
 export function useConversationCompaction(state: SessionState) {
+  useLocale();
   const {
     isBusy,
     unavailableReason,
@@ -92,20 +94,7 @@ export function useConversationCompaction(state: SessionState) {
           finishCompaction(scope, requestId);
         }
       });
-  }, [
-    isBusy,
-    unavailableReason,
-    messagesRef,
-    compactAbortRef,
-    currentSessionScope,
-    beginCompaction,
-    finishCompaction,
-    clearError,
-    isCurrentSession,
-    setMessages,
-    notebookId,
-    conversationId,
-  ]);
+  }, [isBusy, unavailableReason, messagesRef, compactAbortRef, currentSessionScope, beginCompaction, finishCompaction, clearError, isCurrentSession, setMessages, notebookId, conversationId]);
 
   return compactConversation;
 }

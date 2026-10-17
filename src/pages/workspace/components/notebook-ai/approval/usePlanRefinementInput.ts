@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useEffect, type RefObject } from "react";
 import type { AiComposerInputHandle } from "@/components/editor/ai/composer/AiComposerInput";
 import { toast } from "@/components/ui/sonner";
@@ -18,6 +19,7 @@ export function usePlanRefinementInput(
   inputRef: RefObject<AiComposerInputHandle | null>,
   disabled?: boolean,
 ) {
+  useLocale();
   useEffect(() => {
     const insert = (request: RefinePlanRequest | null | undefined) => {
       if (request?.notebookId !== notebookId || !request.text) return;

@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/AppearanceEditorPreview.tsx#localMessages:1">`
@@ -64,6 +65,7 @@ function EditorSample({
   showDemoEnglish = true,
   editorOnly = false,
 }: Props) {
+  useLocale();
   const layout = useSettings((state) => state.defaultPageLayout);
   return (
     <div
@@ -166,6 +168,7 @@ function EditorSample({
 }
 
 export function AppearanceEditorPreview(props: Props) {
+  useLocale();
   return (
     <section
       aria-label={uiText("liveEditorPreview_d9e9")}

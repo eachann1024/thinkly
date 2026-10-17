@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/appearance-settings/CanvasSettings.tsx#localMessages:1">`
@@ -23,12 +24,13 @@ import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { APPEARANCE_OPTION_ROW_CLASS } from "./shared";
 
 const GRID_OPTIONS = [
-  { value: "off", label: uiText("none_d81b") },
-  { value: "grid", label: uiText("grid_5340") },
-  { value: "dots", label: uiText("dots_f4a6") },
+  { value: "off", get label() { return uiText("none_d81b"); } },
+  { value: "grid", get label() { return uiText("grid_5340"); } },
+  { value: "dots", get label() { return uiText("dots_f4a6"); } },
 ];
 
 export function CanvasSettings() {
+  useLocale();
   const editorGridMode = useSettings((state) => state.editorGridMode);
   const setEditorGridMode = useSettings((state) => state.setEditorGridMode);
   return (

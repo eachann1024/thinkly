@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsAppUpdate.tsx#localMessages:1">`
@@ -19,6 +20,7 @@ import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { SettingsSectionCard } from "./SettingsSectionCard";
 
 export function SettingsAppUpdate() {
+  useLocale();
   const { currentVersion, state, installing, installError, setOpen } = useAppUpdate();
   const statusLabel = updateStatusLabel(state, installing, installError);
   if (!hasNewAppUpdate(currentVersion, state)) return null;

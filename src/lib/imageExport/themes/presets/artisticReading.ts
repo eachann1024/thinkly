@@ -44,9 +44,9 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 3. Medium ────────────────────────────────────────────────
   {
     id: "medium",
-    name: uiText("mediumMagazine"),
+    get name() { return uiText("mediumMagazine"); },
     nameEn: "Medium",
-    description: uiText("largeSerifHeadingsForComfortableReading"),
+    get description() { return uiText("largeSerifHeadingsForComfortableReading"); },
     tags: [uiText("magazine"), uiText("reading")],
     mode: "light",
     titleFont: "'Noto Serif SC', 'Georgia', 'Times New Roman', serif",
@@ -91,9 +91,9 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 4. Kenya Hara ────────────────────────────────────────────
   {
     id: "kenya-hara",
-    name: uiText("haraWhite"),
+    get name() { return uiText("haraWhite"); },
     nameEn: "Kenya Hara",
-    description: uiText("generousWhiteSpaceWithAQuietMinimalFeel"),
+    get description() { return uiText("generousWhiteSpaceWithAQuietMinimalFeel"); },
     tags: [uiText("minimal"), uiText("design")],
     mode: "light",
     titleFont: "'Noto Sans SC', 'Helvetica Neue', sans-serif",
@@ -138,9 +138,9 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 5. Typewriter ────────────────────────────────────────────
   {
     id: "typewriter",
-    name: uiText("vintageTypewriter"),
+    get name() { return uiText("vintageTypewriter"); },
     nameEn: "Typewriter",
-    description: uiText("creamPaperWithALiteraryFeel"),
+    get description() { return uiText("creamPaperWithALiteraryFeel"); },
     tags: [uiText("vintage"), uiText("literary")],
     mode: "light",
     titleFont: "'Courier Prime', 'Noto Serif SC', 'Songti SC', serif",
@@ -186,9 +186,9 @@ export const ARTISTIC_READING: CardTheme[] = [
   // ── 7. Academic ──────────────────────────────────────────────
   {
     id: "academic",
-    name: uiText("academicLatex"),
+    get name() { return uiText("academicLatex"); },
     nameEn: "Academic",
-    description: uiText("preciseTypesettingInspiredByAcademicPapers"),
+    get description() { return uiText("preciseTypesettingInspiredByAcademicPapers"); },
     tags: [uiText("academic"), uiText("formal")],
     mode: "light",
     titleFont: "'Noto Serif SC', 'Times New Roman', 'Georgia', serif",

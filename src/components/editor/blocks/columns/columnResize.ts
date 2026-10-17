@@ -1,4 +1,4 @@
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, subscribeLanguage } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/columns/columnResize.ts#messages:1">`
 zh-Hans:
   resizeColumns: "调整第 {{first}}、{{second}} 栏宽度"
@@ -103,6 +103,11 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
     handles.push(handle);
     dom.appendChild(handle);
   }
+  const unsubscribeLanguage = subscribeLanguage(() => {
+    handles.forEach((handle, index) => handle.setAttribute(
+      "aria-label", t("resizeColumns", { first: index + 1, second: index + 2 }),
+    ));
+  });
   const observer = new ResizeObserver(paint);
   const attach = () => {
     if (disposed || !dom.isConnected) return false;
@@ -123,6 +128,7 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
     dom,
     destroy() {
       disposed = true;
+      unsubscribeLanguage();
       cancelDrag?.();
       connection.disconnect();
       observer.disconnect();

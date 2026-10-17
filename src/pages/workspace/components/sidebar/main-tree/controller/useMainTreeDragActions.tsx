@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeDragActions.tsx#localMessages:1">`
@@ -24,6 +25,7 @@ import type { useMainTreeView } from "./useMainTreeView";
 export function useMainTreeDragActions(
   input: ReturnType<typeof useMainTreeView>,
 ) {
+  useLocale();
   const {
     activeNotebookId,
     pages,

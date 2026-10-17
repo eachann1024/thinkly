@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { PortalHoverTip } from "./history/PortalHoverTip";
 import { requestDeleteConversation } from "./history/historyActions";
@@ -86,6 +87,7 @@ export function ConversationHistoryList({
   className,
   compact = false,
 }: ConversationHistoryListProps) {
+  useLocale();
   const notebookChatState = useNotebookAiChats(
     (state) => state.chats[notebookId],
   );
@@ -215,6 +217,7 @@ export function ConversationHistoryPopover({
   onSelectConversation,
   disabled = false,
 }: ConversationHistoryPopoverProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
 
   return (

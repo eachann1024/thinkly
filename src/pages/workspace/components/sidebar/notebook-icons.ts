@@ -13,7 +13,11 @@ export type NotebookIconFilter = NotebookIconCategoryId | "all";
 export const NOTEBOOK_ICON_CATEGORIES = [documents, symbols, things];
 
 export const NOTEBOOK_ICONS = NOTEBOOK_ICON_CATEGORIES.flatMap((category) =>
-  category.icons.map((icon) => ({ ...icon, category: category.id })),
+  category.icons.map((icon) => ({
+    ...icon, category: category.id,
+    get label() { return icon.label; },
+    get keywords() { return icon.keywords; },
+  })),
 );
 
 export const getNotebookIconCategory = (value: string): NotebookIconFilter =>

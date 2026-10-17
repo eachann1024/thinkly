@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useState } from "react";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { setPageMentionOpenHandler } from "@/components/editor/inline/pageMentionBridge";
@@ -20,6 +21,7 @@ export function useEditorPresentation(
   isActiveEditor: boolean,
   hiddenSlashItemTitles?: string[],
 ) {
+  const locale = useLocale();
   const { editor, aiSettingsRef, settingsRef, page, onOpenPageRef, theme } =
     runtime;
   const getSlashItems = useCallback(
@@ -60,7 +62,7 @@ export function useEditorPresentation(
       }
       return filterSlashMenuItems(items, query);
     },
-    [editor, hiddenSlashItemTitles, page],
+    [editor, hiddenSlashItemTitles, page, locale],
   );
   useEffect(() => {
     const warm = () => {

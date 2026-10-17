@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import "./styles/index.css";
 import "./styles/desktop-material.css";
 import { useEffect, useMemo } from "react";
@@ -38,6 +39,7 @@ function PageHistoryBinder() {
 }
 
 export function WorkspacePage() {
+  useLocale();
   const { activePageId, getPage } = usePages(useShallow((s) => ({ activePageId: s.activePageId, getPage: s.getPage })));
   const { activeNotebookId, notebooks } = useNotebooks(useShallow((s) => ({ activeNotebookId: s.activeNotebookId, notebooks: s.notebooks })));
 

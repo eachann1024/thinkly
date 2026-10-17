@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { usePages } from "@/stores/usePages";
 import { usePlanReviewSelection } from "./PlanReviewContext";
@@ -47,6 +48,7 @@ export function ReviewProposal({
     approval?: { approved?: boolean };
   };
 }) {
+  useLocale();
   // 页面标题、路径与可导航状态跟随目标笔记的变化。
   usePages((state) => state.pages);
   const { input, journal } = readReviewPlan(part);

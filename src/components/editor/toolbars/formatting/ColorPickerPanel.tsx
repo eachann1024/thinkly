@@ -10,7 +10,7 @@ import { isColorSwatchSelected } from "./heldColorSelection";
 import type { useColorPanelState } from "./useColorPanelState";
 import type { useColorActions } from "./useColorActions";
 import { useOverlayLayer } from "@/components/ui/overlay-layer";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/ColorPickerPanel.tsx#messages:1">`
 zh-Hans:
   textColor: "文本颜色"
@@ -29,6 +29,7 @@ export function ColorPickerPanel({
   panel: ReturnType<typeof useColorPanelState>;
   actions: ReturnType<typeof useColorActions>;
 }) {
+  useLocale();
   const layer = useOverlayLayer("menu");
   const {
     isMounted,

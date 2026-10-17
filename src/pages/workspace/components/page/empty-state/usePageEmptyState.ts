@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/page/empty-state/usePageEmptyState.ts#localMessages:1">`
@@ -24,6 +25,7 @@ import { dialogs } from "@/lib/electron-platform/dialogs";
 import { useTabs } from "@/stores/useTabs";
 
 export function usePageEmptyState() {
+  const locale = useLocale();
   const {
     loadLocalFolderPages,
   } = usePages();
@@ -57,14 +59,7 @@ export function usePageEmptyState() {
     const newPageId = await createNamedPage(undefined, notebookId);
     if (newPageId) openInCurrentTab(newPageId);
     return newPageId;
-  }, [
-    activeNotebook,
-    activeNotebookId,
-    notebooks,
-    createNotebook,
-    setActiveNotebook,
-    openInCurrentTab,
-  ]);
+  }, [activeNotebook, activeNotebookId, notebooks, createNotebook, setActiveNotebook, openInCurrentTab]);
 
   const onCreatePage = useCallback(async () => {
     await activateOrCreatePage();
@@ -131,6 +126,7 @@ export function usePageEmptyState() {
     isLocalFolder,
     onCreatePage,
     onOpenLocalFolder,
+  locale,
   ]);
 
   return { isLocalFolder, actions };

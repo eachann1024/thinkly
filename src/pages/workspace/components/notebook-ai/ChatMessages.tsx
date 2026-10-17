@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 /** 消息列表：线程布局与时间分隔，渲染职责在 messages/。 */
@@ -53,6 +54,7 @@ export function ChatMessages({
   onBatchApproval,
   onBatchUndo,
 }: ChatMessagesProps) {
+  const locale = useLocale();
   const isFullscreen = layout === "fullscreen";
   const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
     null,
@@ -85,7 +87,7 @@ export function ChatMessages({
       if (label) map.set(current.id, label);
     }
     return map;
-  }, [messages]);
+  }, [messages, locale]);
 
   const toolRenderBase = useMemo(
     () => ({

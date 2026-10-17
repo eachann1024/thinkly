@@ -18,7 +18,7 @@ import {
 import { CodeLanguagePicker } from "./CodeLanguagePicker";
 import { CodePreviewToolbar } from "./CodePreviewToolbar";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
+import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockToolbar.tsx#messages:1">`
 zh-Hans:
   codeActions: "代码操作"
@@ -56,6 +56,7 @@ export function CodeBlockToolbar({
   onCopyPreview,
   canPreview = false,
 }: CodeBlockToolbarProps) {
+  useLocale();
   const [copiedKind, setCopiedKind] = useState<"code" | "image" | null>(null);
   const copyKind = previewMode === "preview" && onCopyPreview ? "image" : "code";
   const copied = copiedKind === copyKind;

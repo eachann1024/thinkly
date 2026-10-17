@@ -1,3 +1,4 @@
+import { useLocale } from "@/i18n";
 import { type RefObject, useLayoutEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ export function NotebookEditorSplitColumn({
   setAiLayoutMode: ReturnType<typeof useNotebookAiPanel>["setLayoutMode"];
   closeAiPanel: () => void;
 }) {
+  useLocale();
   const { activeTabId } = useTabs(
     useShallow((s) => ({ activeTabId: s.activeTabId })),
   );
