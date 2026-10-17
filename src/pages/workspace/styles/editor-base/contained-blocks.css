@@ -25,3 +25,14 @@
   margin-bottom: 0;
   padding-bottom: 3px;
 }
+
+/* 引用首行保留透明边框占位；子块与首行正文使用同一输入起点。 */
+.bn-editor .goose-content-container[data-container-type="quote"] > .bn-block {
+  --goose-quote-content-inset: calc(1em + 2px);
+}
+[data-page-layout] .bn-editor .goose-content-container[data-container-type="quote"] > .bn-block {
+  --goose-quote-content-inset: 16px;
+}
+.bn-editor .goose-content-container[data-container-type="quote"] > .bn-block > .bn-block-group {
+  margin-left: var(--goose-quote-content-inset);
+}
