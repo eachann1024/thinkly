@@ -10,8 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourcemap =
   process.env.GOOSE_DEBUG === "1" || Boolean(process.env.ELECTRON_RENDERER_URL);
 
-const { stale } = await collectCatalog(root, false);
-if (stale.length) throw new Error("i18n declarations are stale. Run node scripts/i18n/check.mjs --generate.");
+await collectCatalog(root, true);
 
 mkdirSync(resolve(root, "dist-electron/main"), { recursive: true });
 mkdirSync(resolve(root, "dist-electron/preload"), { recursive: true });

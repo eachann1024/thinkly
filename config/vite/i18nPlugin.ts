@@ -4,19 +4,15 @@ import { collectCatalog } from "../../scripts/i18n/catalog.mjs";
 
 export function createI18nPlugin(): Plugin {
   let root = process.cwd();
-  let development = false;
   let generation = Promise.resolve();
   const refresh = () => {
-    generation = generation.catch(() => undefined).then(async () => {
-      const { stale } = await collectCatalog(root, development);
-      if (stale.length) throw new Error("i18n declarations are stale. Run node scripts/i18n/check.mjs --generate.");
-    });
+    generation = generation.catch(() => undefined).then(() => collectCatalog(root, true));
     return generation;
   };
   return {
     name: "goose-i18n",
     enforce: "pre",
-    configResolved(config) { root = config.root; development = config.command === "serve"; },
+    configResolved(config) { root = config.root; },
     buildStart: refresh,
     async handleHotUpdate(context) {
       if (/\.(?:[jt]sx?|ya?ml)$/.test(context.file) && !context.file.endsWith(".d.ts")) await refresh();
