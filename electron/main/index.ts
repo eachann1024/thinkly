@@ -3,7 +3,7 @@ import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
 import { app, protocol } from "electron";
 import { initializeLanguage, getLanguageSnapshot } from "./i18n/store";
 import { registerLanguageIpc } from "./i18n/ipc";
-import { installMenu } from "./i18n/menu";
+import { installMenu, localizedAppName } from "./i18n/menu";
 import { setLanguageSnapshot } from "../../src/i18n/core";
 import { loadVaultRoots } from "./allowlist";
 import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
@@ -89,6 +89,7 @@ function startApp(): void {
     setLanguageSnapshot(getLanguageSnapshot());
     registerLanguageIpc();
     languageReady = true;
+    app.setName(localizedAppName());
     installMenu();
     loadVaultRoots();
     enqueueMarkdownPathsFromArgv(process.argv);
