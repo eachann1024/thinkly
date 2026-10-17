@@ -123,17 +123,13 @@ export const gooseCollapsedToggleEnterExtension = createExtension({
       editor.transact(() => {
         if (selection.$from.parentOffset === 0) {
           // 行首仅在前面加空行，子树始终留在原块。
-          editor.insertBlocks([block.type === "heading"
-            ? { type: "paragraph" }
-            : { type: "toggleListItem", props: { collapsed: false } }], block, "before");
+          editor.insertBlocks([{ type: "paragraph" }], block, "before");
           editor.setTextCursorPosition(block, "start");
           return;
         }
         editor.updateBlock(block, { content: before as any });
         if (readToggleCollapsed(block)) {
-          const [inserted] = editor.insertBlocks([block.type === "heading"
-            ? { type: "paragraph", content: after }
-            : { type: "toggleListItem", props: { collapsed: false }, content: after } as any], block, "after");
+          const [inserted] = editor.insertBlocks([{ type: "paragraph", content: after } as any], block, "after");
           editor.setTextCursorPosition(inserted, "start");
         } else if (block.children.length) {
           const [inserted] = editor.insertBlocks([{ type: "paragraph", content: after } as any], block.children[0], "before");

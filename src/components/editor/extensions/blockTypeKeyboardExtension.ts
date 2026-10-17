@@ -5,11 +5,12 @@ import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { getBlocksToMove } from "./moveBlockExtension";
 
-const TYPES = ["paragraph", "heading", "heading", "heading", "checkListItem", "bulletListItem", "numberedListItem", "toggleListItem", "codeBlock"] as const;
+const TYPES = ["paragraph", "heading", "heading", "heading", "checkListItem", "bulletListItem", "numberedListItem", null, "codeBlock"] as const;
 
 /** Notion 官方映射：Mac ⌘⌥0–8；Windows/Linux Ctrl+Shift+0–8。 */
 export function changeSelectedBlockType(editor: BlockNoteEditor<any, any, any>, digit: number, defaultCodeWrap: boolean): boolean {
-  if (!editor.isEditable || editor.prosemirrorView.composing || !TYPES[digit]) return false;
+  const type = TYPES[digit];
+  if (!editor.isEditable || editor.prosemirrorView.composing || !type) return false;
   const title = getProtectedTitleBlockId(editor);
   const blocks = (getBlocksToMove(editor) as any[]).filter((block) => (
     block.id !== title && editor.schema.blockSchema[block.type]?.content === "inline"
@@ -24,11 +25,9 @@ export function changeSelectedBlockType(editor: BlockNoteEditor<any, any, any>, 
     return true;
   });
   editor.transact(() => roots.forEach((block) => {
-    const type = TYPES[digit];
     const props = type === "heading" ? { level: digit, isToggleable: false, collapsed: false }
-      : type === "toggleListItem" ? { collapsed: false }
-        : type === "codeBlock" && block.type !== "codeBlock" ? { language: "text", wrap: defaultCodeWrap }
-          : {};
+      : type === "codeBlock" && block.type !== "codeBlock" ? { language: "text", wrap: defaultCodeWrap }
+        : {};
     editor.updateBlock(block, { type, props });
   }));
   return true;
