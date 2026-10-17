@@ -10,6 +10,7 @@ en:
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
@@ -39,10 +40,12 @@ export function renderAIEnabledSection(
               htmlFor="ai-enabled"
               className="cursor-pointer text-sm font-medium text-foreground"
             >
-              {uiText("enableAiAssistant_c698")}</Label>
+              {uiText("enableAiAssistant_c698")}
+            </Label>
           </div>
           <div className="text-sm leading-relaxed text-muted-foreground">
-            {uiText("turningThisOffStopsAnyResponse_42a7")}</div>
+            {uiText("turningThisOffStopsAnyResponse_42a7")}
+          </div>
         </div>
         <Switch
           id="ai-enabled"
@@ -51,5 +54,20 @@ export function renderAIEnabledSection(
         />
       </div>
     </SettingsSectionCard>
+  );
+}
+
+export function AIActivationView({ onEnable }: { onEnable: () => void }) {
+  return (
+    <section className="flex min-h-64 flex-col items-center justify-center gap-6 px-4 py-8">
+      <GooseIcons.Sparkles
+        className="h-8 w-8 text-muted-foreground"
+        aria-hidden
+      />
+      <Button type="button" onClick={onEnable}>
+        {uiText("enableAiAssistant_c698")}
+        <GooseIcons.ArrowRight className="h-4 w-4" aria-hidden />
+      </Button>
+    </section>
   );
 }

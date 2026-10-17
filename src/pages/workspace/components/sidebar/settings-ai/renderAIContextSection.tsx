@@ -19,12 +19,15 @@ import { Label } from "@/components/ui/label";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
+import type { AIContextAvailability } from "./useAIContextAvailability";
 import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 export function renderAIContextSection(
   context: ReturnType<typeof useAIModelRefresh>,
+  { hasGlobalPrompt, hasLocalSkills }: AIContextAvailability,
 ) {
   const { ai, setReadGlobalPrompt, setReadLocalSkills, isOnboarding } = context;
+  if (!hasGlobalPrompt && !hasLocalSkills) return null;
   return (
     <SettingsSectionCard
       className={isOnboarding ? "p-4" : undefined}
@@ -34,49 +37,56 @@ export function renderAIContextSection(
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          {uiText("promptsAndSkills_aace")}</span>
+          {uiText("promptsAndSkills_aace")}
+        </span>
       }
       description={uiText("whenEnabledRelevantLocalContentIs_8628")}
     >
       <div className="space-y-2">
-        <div
-          className={cn(
-            "flex items-center justify-between gap-4 p-4",
-            SETTINGS_OPTION_ROW_CLASS,
-          )}
-        >
-          <div className="space-y-1">
-            <Label
-              htmlFor="ai-read-global-prompt"
-              className="cursor-pointer text-sm font-medium text-foreground"
-            >
-              {uiText("readGlobalPrompts_1b07")}</Label>
+        {hasGlobalPrompt && (
+          <div
+            className={cn(
+              "flex items-center justify-between gap-4 p-4",
+              SETTINGS_OPTION_ROW_CLASS,
+            )}
+          >
+            <div className="space-y-1">
+              <Label
+                htmlFor="ai-read-global-prompt"
+                className="cursor-pointer text-sm font-medium text-foreground"
+              >
+                {uiText("readGlobalPrompts_1b07")}
+              </Label>
+            </div>
+            <Switch
+              id="ai-read-global-prompt"
+              checked={ai.readGlobalPrompt}
+              onCheckedChange={setReadGlobalPrompt}
+            />
           </div>
-          <Switch
-            id="ai-read-global-prompt"
-            checked={ai.readGlobalPrompt}
-            onCheckedChange={setReadGlobalPrompt}
-          />
-        </div>
-        <div
-          className={cn(
-            "flex items-center justify-between gap-4 p-4",
-            SETTINGS_OPTION_ROW_CLASS,
-          )}
-        >
-          <div className="space-y-1">
-            <Label
-              htmlFor="ai-read-local-skills"
-              className="cursor-pointer text-sm font-medium text-foreground"
-            >
-              {uiText("readLocalSkills_b400")}</Label>
+        )}
+        {hasLocalSkills && (
+          <div
+            className={cn(
+              "flex items-center justify-between gap-4 p-4",
+              SETTINGS_OPTION_ROW_CLASS,
+            )}
+          >
+            <div className="space-y-1">
+              <Label
+                htmlFor="ai-read-local-skills"
+                className="cursor-pointer text-sm font-medium text-foreground"
+              >
+                {uiText("readLocalSkills_b400")}
+              </Label>
+            </div>
+            <Switch
+              id="ai-read-local-skills"
+              checked={ai.readLocalSkills}
+              onCheckedChange={setReadLocalSkills}
+            />
           </div>
-          <Switch
-            id="ai-read-local-skills"
-            checked={ai.readLocalSkills}
-            onCheckedChange={setReadLocalSkills}
-          />
-        </div>
+        )}
       </div>
     </SettingsSectionCard>
   );
