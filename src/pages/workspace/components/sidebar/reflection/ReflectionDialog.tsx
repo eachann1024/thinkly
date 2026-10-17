@@ -84,15 +84,18 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      contentClassName="sm:max-w-3xl"
-      bodyClassName="space-y-10 p-8"
+      contentClassName="max-h-[calc(100dvh-64px)] w-[min(calc(100vw-32px),max(640px,68vw))] max-w-[1080px] sm:max-w-[1080px]"
+      bodyClassName="flex flex-col overflow-hidden p-0"
     >
-      <ReflectionHeader
-        scope={scope}
-        busy={loading || generating}
-        onScopeChange={setScope}
-        onRefresh={() => void refresh()}
-      />
+      <div className="shrink-0 px-8 pb-5 pt-8">
+        <ReflectionHeader
+          scope={scope}
+          busy={loading || generating}
+          onScopeChange={setScope}
+          onRefresh={() => void refresh()}
+        />
+      </div>
+      <div className="min-h-0 flex-1 space-y-10 overflow-y-auto px-8 pb-8">
       {data && !hasEdits ? <p className="text-sm text-muted-foreground">{uiText("empty")}</p> : null}
       {data && hasEdits ? (
         <>
@@ -111,6 +114,7 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
           <ReflectionNoteList variant="stalled" notes={data.stats.stalled} pages={pages} onOpen={(id) => void openNote(id)} />
         </>
       ) : null}
+      </div>
     </DialogShell>
   );
 }
