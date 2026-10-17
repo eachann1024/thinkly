@@ -15,8 +15,12 @@ import { useAISettingsDraft } from "./settings-ai/useAISettingsDraft";
 import { useAIProviderConnection } from "./settings-ai/useAIProviderConnection";
 import { useAIConnectionTest } from "./settings-ai/useAIConnectionTest";
 import { useAIModelRefresh } from "./settings-ai/useAIModelRefresh";
-import { renderAIEnabledSection } from "./settings-ai/renderAIEnabledSection";
+import {
+  AIActivationView,
+  renderAIEnabledSection,
+} from "./settings-ai/renderAIEnabledSection";
 import { renderAIModelSection } from "./settings-ai/renderAIModelSection";
+import { useAIContextAvailability } from "./settings-ai/useAIContextAvailability";
 import { renderAIContextSection } from "./settings-ai/renderAIContextSection";
 import { renderAIServiceSection } from "./settings-ai/renderAIServiceSection";
 import { renderAIConnectionTestSection } from "./settings-ai/renderAIConnectionTestSection";
@@ -27,13 +31,29 @@ export function SettingsAI(props: SettingsAIProps) {
   const connectionTest = useAIConnectionTest(provider);
   const aIModelRefreshContext = useAIModelRefresh(connectionTest);
   const context = aIModelRefreshContext;
-  const { isOnboarding } = context;
+  const { isOnboarding, enabled, setEnabled } = context;
+  const availability = useAIContextAvailability(
+    enabled && (props.visible ?? true),
+  );
+
+  if (!enabled) {
+    return (
+      <div className={isOnboarding ? "mx-auto w-full max-w-xl" : "space-y-6"}>
+        {!isOnboarding && (
+          <h3 className="text-xl font-semibold tracking-tight text-foreground">
+            {uiText("aiAssistant_318e")}
+          </h3>
+        )}
+        <AIActivationView onEnable={() => setEnabled(true)} />
+      </div>
+    );
+  }
 
   const enabledSection = renderAIEnabledSection(context);
 
   const modelSection = renderAIModelSection(context);
 
-  const contextSection = renderAIContextSection(context);
+  const contextSection = renderAIContextSection(context, availability);
 
   const serviceSection = renderAIServiceSection(context);
 
@@ -46,11 +66,14 @@ export function SettingsAI(props: SettingsAIProps) {
         {serviceSection}
         {modelSection}
         {connectionTestSection}
-        <Disclosure className="rounded-lg border border-border bg-background/50 p-3">
-          <DisclosureSummary className="cursor-pointer text-sm font-medium text-foreground ">
-            {uiText("advancedOptions_1083")}</DisclosureSummary>
-          <div className="pt-3">{contextSection}</div>
-        </Disclosure>
+        {contextSection && (
+          <Disclosure className="rounded-lg border border-border bg-background/50 p-3">
+            <DisclosureSummary className="cursor-pointer text-sm font-medium text-foreground ">
+              {uiText("advancedOptions_1083")}
+            </DisclosureSummary>
+            <div className="pt-3">{contextSection}</div>
+          </Disclosure>
+        )}
       </div>
     );
   }
@@ -58,7 +81,8 @@ export function SettingsAI(props: SettingsAIProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold tracking-tight text-foreground">
-        {uiText("aiAssistant_318e")}</h3>
+        {uiText("aiAssistant_318e")}
+      </h3>
       <div className="settings-card-columns">
         <div className="space-y-5">
           {enabledSection}
