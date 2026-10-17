@@ -8,8 +8,8 @@ import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import {
-  DEFAULT_WINDOW_TITLE,
   TITLE_SYNC_DEBOUNCE_MS,
+  getDefaultWindowTitle,
   getWelcomeWindowTitle,
   syncDesktopWindowTitle,
 } from "@/lib/electron/windowTitle";
@@ -30,7 +30,7 @@ export function useDesktopWindowTitleSync(): void {
   useEffect(() => {
 
     const title =
-      pageTitle ?? (isWelcomeTab ? getWelcomeWindowTitle() : DEFAULT_WINDOW_TITLE);
+      pageTitle ?? (isWelcomeTab ? getWelcomeWindowTitle() : getDefaultWindowTitle());
     const timer = window.setTimeout(() => {
       void syncDesktopWindowTitle(title);
     }, TITLE_SYNC_DEBOUNCE_MS);

@@ -1,3 +1,4 @@
+import { common } from "@/i18n/common";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import type { LocalFolderOpenAppCandidate } from "@/lib/local-folder-open-apps";
 const cached = new Map<
@@ -29,7 +30,7 @@ export const shell = {
     void getGooseDesktop()?.writeImage?.(dataUrl);
   },
   showNotification: (body: string) => {
-    void getGooseDesktop()?.notify({ title: "Goose Note", body });
+    void getGooseDesktop()?.notify({ title: common("productName"), body });
   },
   openUrl: (url: string) => {
     void getGooseDesktop()?.openUrl(url);
