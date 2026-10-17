@@ -47,7 +47,14 @@ function noteText(version) {
 }
 
 function isFile(item, name) {
-  return item?.fid && item.file_name === name && item.file !== false && item.dir !== true && item.file_type !== 0;
+  return listed(item) && item.file_name === name;
+}
+
+function listed(item) {
+  if (!item?.fid || !item.file_name) return false;
+  if (item.dir === true || item.file === false) return false;
+  if (item.file_type === 0 && item.file !== true) return false;
+  return true;
 }
 
 function knownFiles(entries) {
@@ -60,7 +67,67 @@ function fileSize(item) {
 }
 
 function folderFiles(entries) {
-  return entries.filter((item) => item?.fid && item.file_name && item.file !== false && item.dir !== true && item.file_type !== 0);
+  return entries.filter((item) => listed(item));
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function fileRole(canonical, fileName) {
+  const suffix = "(?:\\(\\d+\\))?";
+  const status = "(?:\\.(uploading|previous))?";
+  const direct = new RegExp(`^${escapeRegExp(canonical)}${suffix}${status}${suffix}$`).exec(fileName);
+  if (direct) return direct[1] ?? "final";
+  const dot = canonical.lastIndexOf(".");
+  if (dot <= 0) return "";
+  const stem = escapeRegExp(canonical.slice(0, dot));
+  const ext = escapeRegExp(canonical.slice(dot));
+  const split = new RegExp(`^${stem}${suffix}${ext}${status}${suffix}$`).exec(fileName);
+  return split ? (split[1] ?? "final") : "";
+}
+
+function related(entries, name) {
+  return entries.filter((item) => listed(item) && fileRole(name, item.file_name));
+}
+
+function newest(items) {
+  return [...items].sort((left, right) => Number(right.l_updated_at ?? right.updated_at ?? 0) - Number(left.l_updated_at ?? left.updated_at ?? 0))[0];
+}
+
+function withReason(error, reason) {
+  if (error && !error.reason) error.reason = reason;
+  return error;
+}
+
+async function pause(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function pollUploaded(cookie, folderId, name, localSize, existingFids) {
+  for (let attempt = 1; attempt <= 6; attempt += 1) {
+    const found = newest(related(await listChildren(cookie, folderId), name)
+      .filter((item) => fileSize(item) === localSize && !existingFids.has(item.fid)));
+    if (found?.fid) return String(found.fid);
+    if (attempt < 6) await pause(2000);
+  }
+  return "";
+}
+
+async function commitReplacement(cookie, folderId, name, fid) {
+  const files = related(await listChildren(cookie, folderId), name).filter((item) => item.fid !== fid);
+  const kept = files.find((item) => item.file_name === name);
+  if (kept) await renameFile(cookie, kept.fid, `${name}.previous`);
+  try {
+    const extras = files.filter((item) => item.fid !== kept?.fid && item.file_name === name);
+    if (extras.length) await deleteFiles(cookie, extras.map((item) => item.fid));
+    await renameFile(cookie, fid, name);
+  } catch (error) {
+    if (kept) await renameFile(cookie, kept.fid, name);
+    throw withReason(error, "rename_failed");
+  }
+  const after = related(await listChildren(cookie, folderId), name);
+  await deleteFiles(cookie, [kept?.fid, ...after.filter((item) => item.fid !== fid).map((item) => item.fid)]);
 }
 
 function logFolder(entries) {
@@ -74,34 +141,45 @@ function logFolder(entries) {
 
 async function uploadReplacing(cookie, folderId, source, name) {
   const localSize = statSync(source).size;
-  const tempName = `${name}.uploading`;
-  const backupName = `${name}.previous`;
-  let entries = await listChildren(cookie, folderId);
-  const existing = entries.filter((item) => isFile(item, name));
-  if (existing.some((item) => fileSize(item) === localSize)) {
+  const files = related(await listChildren(cookie, folderId), name);
+  const exact = files.find((item) => item.file_name === name && fileSize(item) === localSize);
+  const alias = newest(files.filter((item) => fileRole(name, item.file_name) === "final" && item.file_name !== name && fileSize(item) === localSize));
+  const reusable = newest(files.filter((item) => fileRole(name, item.file_name) === "uploading" && fileSize(item) === localSize));
+  const restored = files.some((item) => fileRole(name, item.file_name) === "final")
+    ? undefined
+    : newest(files.filter((item) => fileRole(name, item.file_name) === "previous" && fileSize(item) === localSize));
+  const chosen = exact ?? alias ?? restored;
+  if (chosen) {
+    if (chosen.file_name !== name) await commitReplacement(cookie, folderId, name, chosen.fid);
+    else await deleteFiles(cookie, files.filter((item) => item.fid !== chosen.fid).map((item) => item.fid));
     console.log(`跳过同名同大小 ${name} ${localSize}`);
     return;
   }
-  const orphan = entries.find((item) => isFile(item, backupName) && !entries.some((entry) => isFile(entry, name)));
-  if (orphan) await renameFile(cookie, orphan.fid, name);
-  entries = await listChildren(cookie, folderId);
-  const temps = entries.filter((item) => isFile(item, tempName) || (isFile(item, backupName) && entries.some((entry) => isFile(entry, name))));
-  if (temps.length) await deleteFiles(cookie, temps.map((item) => item.fid));
-  const current = (await listChildren(cookie, folderId)).filter((item) => isFile(item, name));
-  console.log(current.length ? `覆盖已有文件 ${name}` : `上传 ${name}`);
-  if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
-  await uploadFile(cookie, folderId, source, tempName);
-  const uploaded = (await listChildren(cookie, folderId)).find((item) => isFile(item, tempName));
-  if (!uploaded) throw new QuarkFailure(`上传后未找到临时文件：${name}`);
-  const kept = current[0];
-  if (kept) await renameFile(cookie, kept.fid, backupName);
-  try {
-    await renameFile(cookie, uploaded.fid, name);
-  } catch (error) {
-    if (kept) await renameFile(cookie, kept.fid, name);
-    throw error;
+  if (reusable && !files.some((item) => item.file_name === name)) {
+    await commitReplacement(cookie, folderId, name, reusable.fid);
+    console.log(`沿用已上传文件 ${name} ${localSize}`);
+    return;
   }
-  if (kept) await deleteFiles(cookie, [kept.fid]);
+  const orphan = files.find((item) => fileRole(name, item.file_name) === "previous" && !files.some((entry) => fileRole(name, entry.file_name) === "final"));
+  if (orphan) await renameFile(cookie, orphan.fid, name);
+  await deleteFiles(cookie, files.filter((item) => fileRole(name, item.file_name) === "uploading").map((item) => item.fid));
+  const current = orphan ? [] : files.filter((item) => item.file_name === name);
+  if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
+  console.log(orphan || current.length ? `覆盖已有文件 ${name}` : `上传 ${name}`);
+  let fid = "";
+  let pending;
+  const existingFids = new Set(files.map((item) => item.fid));
+  try {
+    fid = (await uploadFile(cookie, folderId, source, `${name}.uploading`)).fid ?? "";
+  } catch (error) {
+    if (error?.reason !== "rename_target_missing") throw error;
+    pending = error;
+    console.log(`完成确认没有文件编号，改为轮询列表 ${name}`);
+  }
+  if (!fid) fid = await pollUploaded(cookie, folderId, name, localSize, existingFids);
+  if (!fid) throw pending ?? withReason(new QuarkFailure(`上传后没有文件编号：${name}`), "rename_target_missing");
+  console.log(`按文件编号重命名 ${name}`);
+  await commitReplacement(cookie, folderId, name, fid);
 }
 
 async function retainLatest(cookie, folderId, version) {
@@ -146,6 +224,9 @@ function failureReason(error) {
   if (message.includes("分片") && status) return `part_upload_http_${status}`;
   if (message.includes("完成分片") && status) return `complete_upload_http_${status}`;
   if (message.includes("超时")) return "timeout";
+  if (message.includes("没有文件编号") || message.includes("未找到临时文件")) return "rename_target_missing";
+  if (message.includes("未确认")) return "finish_not_ready";
+  if (message.includes("重命名")) return "rename_failed";
   if (message.includes("缺少安装包")) return "missing_installers";
   if (message.includes("版本号")) return "bad_version";
   if (message.includes("网络")) return "network";
