@@ -132,9 +132,9 @@ export function DesktopGlobalHotkeysCard({
     <SettingsSectionCard title={uiText("globalShortcuts_2205")}>
       {macAccessibilityNeeded && (
         <div
-          className={`flex items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
+          className={`flex items-center justify-between gap-4 ${SETTINGS_OPTION_ROW_CLASS} ${SETTINGS_OPTION_ROW_CLASS}--stack`}
         >
-          <p className="text-sm leading-relaxed text-foreground">
+          <p className="text-sm leading-5 text-foreground">
             {uiText("allowGooseNoteInAccessibilitySettings_4a8a")}</p>
           <Button
             type="button"

@@ -17,7 +17,7 @@ import {
 } from "@/lib/fontLoader";
 import { LocalFontSelect } from "../../shared/LocalFontSelect";
 import type { useAppearanceSettings } from "./useAppearanceSettings";
-import { defaultLabels } from "./shared";
+import { APPEARANCE_OPTION_ROW_CLASS, defaultLabels } from "./shared";
 
 export function renderAdditionalFontSettings(
   context: ReturnType<typeof useAppearanceSettings>,
@@ -26,8 +26,8 @@ export function renderAdditionalFontSettings(
   return (
     <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
       {(["serif", "mono"] as const).map((type) => (
-        <div key={type} className="flex min-w-0 flex-col gap-3">
-          <Label htmlFor={`appearance-${type}-font`}>
+        <div key={type} className={`flex min-w-0 flex-col gap-3 ${APPEARANCE_OPTION_ROW_CLASS} goose-settings-option-row--stack`}>
+          <Label htmlFor={`appearance-${type}-font`} className="leading-5">
             {defaultLabels[type]}
           </Label>
           <LocalFontSelect

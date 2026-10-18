@@ -135,7 +135,7 @@ export function SettingsLocalFolder(props: SettingsLocalFolderProps) {
 
           <SettingsSectionCard title={uiText("storageMaintenance_aa18")}>
             <div
-              className={`settings-local-folder-pick-row flex items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
+              className={`settings-local-folder-pick-row flex items-center justify-between gap-3 ${SETTINGS_OPTION_ROW_CLASS} goose-settings-option-row--stack`}
             >
               <div>
                 <div className="flex items-center gap-3">

@@ -49,10 +49,10 @@ export function SettingsLanguage() {
   };
   return (
     <div>
-      <div className="goose-settings-option-row flex flex-wrap items-center justify-between gap-4 p-4">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="goose-settings-option-row flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <Globe className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-          <Label id="app-language-label" htmlFor="app-language">{t("language")}</Label>
+          <Label id="app-language-label" htmlFor="app-language" className="text-sm font-normal leading-5">{t("language")}</Label>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

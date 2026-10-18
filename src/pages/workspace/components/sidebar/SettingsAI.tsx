@@ -73,8 +73,8 @@ export function SettingsAI(props: SettingsAIProps) {
         {modelSection}
         {connectionTestSection}
         {contextSection && (
-          <Disclosure className="rounded-lg border border-border bg-background/50 p-3">
-            <DisclosureSummary className="cursor-pointer text-sm font-medium text-foreground ">
+          <Disclosure className="rounded-lg border border-border bg-background/50">
+            <DisclosureSummary className="cursor-pointer text-sm font-medium leading-5 text-foreground">
               {uiText("advancedOptions_1083")}
             </DisclosureSummary>
             <div className="pt-3">{contextSection}</div>

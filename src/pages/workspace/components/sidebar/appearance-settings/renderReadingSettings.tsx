@@ -12,7 +12,7 @@ export function renderReadingSettings(
     setEditorFontSize,
   } = context;
   return (
-    <div className={`p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
+    <div className={`${APPEARANCE_OPTION_ROW_CLASS} goose-settings-option-row--stack`}>
       <ReadingPreferences
         showPreview={false}
         fontSize={editorFontSize}

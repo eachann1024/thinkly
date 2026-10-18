@@ -66,14 +66,14 @@ export function renderAIServiceSection(
         <div className="space-y-3">
           <div
             className={cn(
-              "settings-ai-pick-row flex items-center justify-between gap-4 p-4",
+              "settings-ai-pick-row flex items-center justify-between gap-3",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
             <div className="flex items-center gap-3">
               <ProviderIconTile providerId={providerId} />
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">
+                <Label className="text-sm font-medium leading-5 text-foreground">
                   {uiText("provider_bab2")}</Label>
               </div>
             </div>
@@ -128,7 +128,7 @@ export function renderAIServiceSection(
             </DropdownMenu>
           </div>
           {allowCustomBaseURL ? (
-            <div className={cn("space-y-3 p-4", SETTINGS_OPTION_ROW_CLASS)}>
+            <div className={cn("space-y-3", SETTINGS_OPTION_ROW_CLASS, "goose-settings-option-row--stack")}>
               <div className="flex items-center gap-3">
                 <GooseIcons.Globe
                   className="h-4 w-4 shrink-0 text-muted-foreground"
@@ -136,7 +136,7 @@ export function renderAIServiceSection(
                 />
                 <Label
                   htmlFor="custom-ai-base-url"
-                  className="text-sm font-medium text-foreground"
+                  className="text-sm font-medium leading-5 text-foreground"
                 >
                   Base URL
                 </Label>
@@ -162,7 +162,7 @@ export function renderAIServiceSection(
               />
             </div>
           ) : null}
-          <div className={cn("space-y-3 p-4", SETTINGS_OPTION_ROW_CLASS)}>
+          <div className={cn("space-y-3", SETTINGS_OPTION_ROW_CLASS, "goose-settings-option-row--stack")}>
             <div className="flex items-center gap-3">
               <GooseIcons.KeyRound
                 className="h-4 w-4 shrink-0 text-muted-foreground"
@@ -170,7 +170,7 @@ export function renderAIServiceSection(
               />
               <Label
                 htmlFor="custom-ai-api-key"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-medium leading-5 text-foreground"
               >
                 API Key
               </Label>
@@ -212,7 +212,7 @@ export function renderAIServiceSection(
           </div>
           <div
             className={cn(
-              "flex items-center justify-between gap-4 p-4",
+              "flex items-center justify-between gap-3",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
@@ -222,7 +222,7 @@ export function renderAIServiceSection(
                 strokeWidth={1.75}
               />
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">
+                <Label className="text-sm font-medium leading-5 text-foreground">
                   {uiText("saveConfiguration_ed75")}</Label>
               </div>
             </div>

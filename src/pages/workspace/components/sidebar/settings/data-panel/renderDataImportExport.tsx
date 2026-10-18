@@ -11,7 +11,7 @@ zh-Hans:
   exportFormat_230a: "导出格式"
   exporting_caeb: "正在导出…"
   export_c9e7: "开始导出"
-  resetAllData_b749: "重置所有数据"
+  resetAllData_b749: "重置设置"
   selectedCount: "已选 {{selected}}/{{total}}"
 en:
   importAndExport_3a3a: "Import and export"
@@ -23,7 +23,7 @@ en:
   exportFormat_230a: "Export format"
   exporting_caeb: "Exporting…"
   export_c9e7: "Export"
-  resetAllData_b749: "Reset all data"
+  resetAllData_b749: "Reset settings"
   selectedCount: "Selected: {{selected}}/{{total}}"
 ja:
   importAndExport_3a3a: "インポートとエクスポート"
@@ -35,7 +35,7 @@ ja:
   exportFormat_230a: "エクスポート形式"
   exporting_caeb: "エクスポート中…"
   export_c9e7: "エクスポート"
-  resetAllData_b749: "すべてのデータをリセット"
+  resetAllData_b749: "設定をリセット"
   selectedCount: "{{selected}}/{{total}} 件選択中"
 `;
 const uiText = createTranslator(localMessages);
@@ -94,7 +94,7 @@ export function renderDataImportExport(
           </Button>
         }
       >
-        <div className="space-y-3">
+        <div className="goose-settings-option-row goose-settings-option-row--stack space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("selectNotebooks_d119")}</Label>

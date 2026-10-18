@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
+import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 export function renderAIConnectionTestSection(
   context: ReturnType<typeof useAIModelRefresh>,
@@ -62,56 +63,58 @@ export function renderAIConnectionTestSection(
       title={uiText("connectionCheck_58bb")}
       description={uiText("thisCheckDoesNotReadNotes_a76b")}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          disabled={!canTestConnection}
-          onClick={() => void handleTestConnection()}
-        >
-          {testingConnection ? (
-            <GooseIcons.LoaderCircle className="h-4 w-4 animate-spin" />
-          ) : (
-            <GooseIcons.PlugZap className="h-4 w-4" />
-          )}
-          {testingConnection ? uiText("checking_2ff3") : uiText("checkConnection_69e7")}
-        </Button>
-        {testingConnection ? (
+      <div className={cn(SETTINGS_OPTION_ROW_CLASS, "goose-settings-option-row--stack space-y-3")}>
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
-            onClick={cancelConnectionTest}
+            disabled={!canTestConnection}
+            onClick={() => void handleTestConnection()}
           >
-            {uiText("cancelCheck_ca80")}</Button>
-        ) : null}
+            {testingConnection ? (
+              <GooseIcons.LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <GooseIcons.PlugZap className="h-4 w-4" />
+            )}
+            {testingConnection ? uiText("checking_2ff3") : uiText("checkConnection_69e7")}
+          </Button>
+          {testingConnection ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={cancelConnectionTest}
+            >
+              {uiText("cancelCheck_ca80")}</Button>
+          ) : null}
+        </div>
+        <p
+          className={cn(
+            "text-[13px] leading-5",
+            connectionTestResult === "success"
+              ? "text-foreground"
+              : connectionTestResult === "failed" ||
+                  connectionTestResult === "timeout"
+                ? "text-danger"
+                : "text-muted-foreground",
+          )}
+          role="status"
+          aria-live="polite"
+        >
+          {testingConnection
+            ? uiText("checkingConnection_3d70")
+            : connectionTestResult !== "idle"
+              ? connectionTestMessage
+              : !enabled
+                ? uiText("enableTheAiAssistantSaveA_9011")
+                : setupAIStatus.dirty
+                  ? uiText("saveTheCurrentProviderConfigurationFirst_3c68")
+                  : !setupAIStatus.ready
+                    ? uiText("saveTheConfigurationAndFetchAvailable_11da")
+                    : uiText("readyToCheckTheConnection_542d")}
+        </p>
       </div>
-      <p
-        className={cn(
-          "mt-3 text-sm",
-          connectionTestResult === "success"
-            ? "text-foreground"
-            : connectionTestResult === "failed" ||
-                connectionTestResult === "timeout"
-              ? "text-danger"
-              : "text-muted-foreground",
-        )}
-        role="status"
-        aria-live="polite"
-      >
-        {testingConnection
-          ? uiText("checkingConnection_3d70")
-          : connectionTestResult !== "idle"
-            ? connectionTestMessage
-            : !enabled
-              ? uiText("enableTheAiAssistantSaveA_9011")
-              : setupAIStatus.dirty
-                ? uiText("saveTheCurrentProviderConfigurationFirst_3c68")
-                : !setupAIStatus.ready
-                  ? uiText("saveTheConfigurationAndFetchAvailable_11da")
-                  : uiText("readyToCheckTheConnection_542d")}
-      </p>
     </SettingsSectionCard>
   ) : null;
 }

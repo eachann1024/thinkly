@@ -55,13 +55,13 @@ export function renderAppearanceTheme(
   } = context;
   return (
     <SettingsSectionCard title={uiText("theme_9970")} className="border border-border/60">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <GooseIcons.SunMoon
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
-          <Label>{uiText("themeMode_b0bb")}</Label>
+          <Label className="leading-5">{uiText("themeMode_b0bb")}</Label>
         </div>
         <div className="flex items-center gap-1 rounded-control bg-[hsl(var(--goose-selected-bg)/0.76)] p-1">
           <TooltipProvider delayDuration={600}>
@@ -129,7 +129,7 @@ export function renderAppearanceTheme(
         </div>
       </div>
 
-      <div className={`p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
+      <div className={`${APPEARANCE_OPTION_ROW_CLASS} goose-settings-option-row--stack`}>
         <div className="mb-3 flex items-center gap-3">
           <GooseIcons.Palette
             className="h-4 w-4 shrink-0 self-center text-muted-foreground"
@@ -137,7 +137,7 @@ export function renderAppearanceTheme(
           />
           <div
             id="appearance-accent-color-label"
-            className="text-sm font-medium text-foreground"
+            className="text-sm font-medium leading-5 text-foreground"
           >
             {uiText("colorsAndThemes_05fe")}</div>
         </div>

@@ -14,63 +14,38 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
+import type { useAIModelRefresh } from "./useAIModelRefresh";
+import { ModuleActivation, ModuleEnabledRow } from "../settings/ModuleActivation";
 import { DotDecor } from "@/components/ui/dot-matrix";
 import { DotMatrixSparkle } from "./DotMatrixSparkle";
-import { Switch, SwitchRow } from "@/components/ui/switch";
-import { SettingsSectionCard } from "../settings/SettingsSectionCard";
-import { cn } from "@/lib/utils";
-import type { useAIModelRefresh } from "./useAIModelRefresh";
-import { SETTINGS_OPTION_ROW_CLASS } from "./shared";
 
 export function renderAIEnabledSection(
   context: ReturnType<typeof useAIModelRefresh>,
 ) {
   const { enabled, setEnabled, isOnboarding } = context;
   return (
-    <SettingsSectionCard
-      className={isOnboarding ? "p-4" : undefined}
+    <ModuleEnabledRow
+      id="ai-enabled"
+      icon={GooseIcons.Sparkles}
+      label={uiText("enableAiAssistant_c698")}
+      description={uiText("turningThisOffStopsAnyResponse_42a7")}
+      checked={enabled}
+      onCheckedChange={setEnabled}
+      cardClassName={isOnboarding ? "p-4" : undefined}
       contentClassName={isOnboarding ? "space-y-3" : undefined}
-    >
-      <SwitchRow
-        className={cn(
-          "flex items-center justify-between gap-4 p-4",
-          SETTINGS_OPTION_ROW_CLASS,
-        )}
-      >
-        <span className="block space-y-1.5">
-          <span className="flex items-center gap-2">
-            <GooseIcons.Sparkles className="h-4 w-4 text-current" />
-            <span
-              className="text-sm font-medium leading-none text-foreground"
-            >
-              {uiText("enableAiAssistant_c698")}
-            </span>
-          </span>
-          <span className="block text-sm leading-relaxed text-muted-foreground">
-            {uiText("turningThisOffStopsAnyResponse_42a7")}
-          </span>
-        </span>
-        <Switch
-          id="ai-enabled"
-          checked={enabled}
-          onCheckedChange={setEnabled}
-        />
-      </SwitchRow>
-    </SettingsSectionCard>
+    />
   );
 }
 
 export function AIActivationView({ onEnable }: { onEnable: () => void }) {
   useLocale();
   return (
-    <section className="relative flex min-h-64 flex-col items-center justify-center gap-6 overflow-hidden px-4 py-8">
-      <DotDecor preset="aiGate" />
-      <DotMatrixSparkle className="relative block shrink-0 text-foreground" />
-      <Button type="button" onClick={onEnable}>
-        {uiText("enableAiAssistant_c698")}
-        <GooseIcons.ArrowRight className="h-4 w-4" aria-hidden />
-      </Button>
-    </section>
+    <ModuleActivation
+      icon={GooseIcons.Sparkles}
+      label={uiText("enableAiAssistant_c698")}
+      onEnable={onEnable}
+      illustration={<DotMatrixSparkle className="block shrink-0 text-foreground" />}
+      decoration={<DotDecor preset="aiGate" />}
+    />
   );
 }
