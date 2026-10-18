@@ -66,7 +66,7 @@ export function MainTreeDragBetweenLine({
         marginLeft: lineStart,
         marginRight: 8,
       }}
-      className="main-tree-drop-between-line h-[2px] rounded-marker"
+      className="main-tree-drop-between-line h-[2px]"
     />
   );
 }
