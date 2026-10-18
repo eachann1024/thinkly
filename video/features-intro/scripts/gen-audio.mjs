@@ -2,9 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 const SR = 48000;
+const FPS = 60;
 const BPM = 120;
-const DURATION = 48;
-const TOTAL = SR * DURATION;
+const DURATION = 3360 / FPS;
+const TOTAL = Math.round(SR * DURATION);
 const BEAT = 60 / BPM;
 const BAR = BEAT * 4;
 
@@ -14,102 +15,87 @@ const midi = (note) => 440 * Math.pow(2, (note - 69) / 12);
 function addTone(start, duration, render, gain) {
   const from = Math.max(0, Math.floor(start * SR));
   const to = Math.min(TOTAL, Math.floor((start + duration) * SR));
-  for (let i = from; i < to; i += 1) {
-    const t = i / SR - start;
-    mix[i] += render(t) * gain;
-  }
+  for (let i = from; i < to; i += 1) mix[i] += render(i / SR - start) * gain;
 }
 
-function attackRelease(t, duration, attack = 0.008, release = 0.12) {
+function env(t, duration, attack = 0.008, release = 0.12) {
   if (t < attack) return t / attack;
   const left = duration - t;
-  if (left < release) return Math.max(0, left / release);
-  return 1;
+  return left < release ? Math.max(0, left / release) : 1;
 }
 
-// 固定随机序列，保证重渲染一致。
-let seed = 20261108;
-Math.random = () => {
+let seed = 20261019;
+const rand = () => {
   seed = (seed * 1664525 + 1013904223) % 4294967296;
   return seed / 4294967296;
 };
 
 const CHORDS = [
-  { bass: 36, tones: [60, 64, 67, 71] },
-  { bass: 45, tones: [57, 60, 64, 67] },
-  { bass: 41, tones: [53, 57, 60, 64] },
-  { bass: 43, tones: [55, 59, 62, 64] },
+  { bass: 41, tones: [57, 60, 64, 67] },
+  { bass: 43, tones: [55, 59, 62, 67] },
+  { bass: 45, tones: [57, 60, 64, 69] },
+  { bass: 40, tones: [55, 59, 64, 67] },
 ];
+const LEAD = [0, 2, 3, 1, 2, 3, 1, 2];
 
-const LEAD_PATTERN = [0, 2, 1, 3, 2, 1, 3, 2];
+const bars = Math.ceil(DURATION / BAR);
+for (let bar = 0; bar < bars; bar += 1) {
+  const chord = CHORDS[bar % 4];
+  const start = bar * BAR;
+  const intro = bar < 2;
+  const outro = start >= 3000 / FPS;
 
-function renderLoop(loopStart) {
-  for (let bar = 0; bar < 4; bar += 1) {
-    const chord = CHORDS[bar];
-    const barStart = loopStart + bar * BAR;
-
-    // 三角波贝斯：第 1、3 拍。
+  // 柔和铺底：四个和弦音的正弦长音。
+  for (const note of chord.tones) {
+    const freq = midi(note);
+    addTone(start, BAR, (t) => Math.sin(2 * Math.PI * freq * t) * env(t, BAR, 0.4, 0.6), 0.018);
+  }
+  // 三角波贝斯：1、3 拍。
+  if (!intro) {
     for (const beat of [0, 2]) {
       const freq = midi(chord.bass);
-      const start = barStart + beat * BEAT;
-      addTone(
-        start,
-        BEAT * 0.92,
-        (t) => {
-          const phase = (t * freq) % 1;
-          const tri = 4 * Math.abs(phase - 0.5) - 1;
-          return tri * attackRelease(t, BEAT * 0.92, 0.006, 0.24);
-        },
-        0.11,
-      );
+      addTone(start + beat * BEAT, BEAT * 0.9, (t) => (4 * Math.abs(((t * freq) % 1) - 0.5) - 1) * env(t, BEAT * 0.9, 0.006, 0.22), 0.1);
     }
-
-    // 正弦主音：四小节循环的八分音符走句。
-    for (let step = 0; step < 8; step += 1) {
-      const note = chord.tones[LEAD_PATTERN[step]] + 12;
-      const freq = midi(note);
-      const start = barStart + step * (BEAT / 2);
-      const duration = BEAT * 0.46;
-      addTone(
-        start,
-        duration,
-        (t) => Math.sin(2 * Math.PI * freq * t) * attackRelease(t, duration, 0.01, 0.16),
-        0.072,
-      );
-    }
-
-    // 白噪声 hi-hat：反拍。
-    for (let step = 0; step < 8; step += 1) {
-      if (step % 2 === 0) continue;
-      const start = barStart + step * (BEAT / 2);
-      addTone(start, 0.04, (t) => (Math.random() * 2 - 1) * Math.exp(-t * 90), 0.03);
+  }
+  // 正弦八分音符走句。
+  for (let step = 0; step < 8; step += 1) {
+    if (intro && step % 2) continue;
+    const freq = midi(chord.tones[LEAD[step]] + 12);
+    const d = BEAT * 0.42;
+    addTone(start + step * (BEAT / 2), d, (t) => Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 7) * env(t, d, 0.005, 0.1), outro ? 0.05 : 0.065);
+  }
+  // 反拍白噪声 hi-hat。
+  if (!intro && !outro) {
+    for (let step = 1; step < 8; step += 2) {
+      addTone(start + step * (BEAT / 2), 0.04, (t) => (rand() * 2 - 1) * Math.exp(-t * 95), 0.028);
     }
   }
 }
 
-for (let loop = 0; loop < DURATION / (BAR * 4); loop += 1) {
-  renderLoop(loop * BAR * 4);
+// 操作音：点击与落位，各一下 8ms 1200Hz 正弦。
+const CLICKS = [
+  400, 510, 568, 684,
+  780, 948, 1142,
+  1230, 1496,
+  1754, 1826, 1962,
+  2176, 2212, 2336, 2382, 2428, 2460,
+  2628, 2670, 2740, 2812, 2884,
+  3060,
+];
+for (const frame of CLICKS) {
+  addTone(frame / FPS, 0.008, (t) => Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-t * 700), 0.2);
 }
 
-// 强调物件落位与品牌定格：各一次 8ms 1200Hz 正弦 click。
-for (const frame of [2380, 2610]) {
-  const start = frame / 60;
-  addTone(start, 0.008, (t) => Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-t * 900), 0.22);
-}
-
-// 软限幅后硬切收尾，不做淡出。
-const samples = new Float32Array(TOTAL);
 let peak = 0;
+const out = new Float32Array(TOTAL);
 for (let i = 0; i < TOTAL; i += 1) {
-  samples[i] = Math.tanh(mix[i] * 1.15);
-  peak = Math.max(peak, Math.abs(samples[i]));
+  const fade = Math.min(1, (TOTAL - i) / (SR * 1.2));
+  out[i] = Math.tanh(mix[i] * 1.1) * fade;
+  peak = Math.max(peak, Math.abs(out[i]));
 }
-
 const gain = peak > 0 ? 0.55 / peak : 1;
 const pcm = Buffer.alloc(TOTAL * 2);
-for (let i = 0; i < TOTAL; i += 1) {
-  pcm.writeInt16LE(Math.round(samples[i] * gain * 32767), i * 2);
-}
+for (let i = 0; i < TOTAL; i += 1) pcm.writeInt16LE(Math.round(out[i] * gain * 32767), i * 2);
 
 const header = Buffer.alloc(44);
 header.write("RIFF", 0);
@@ -126,7 +112,7 @@ header.writeUInt16LE(16, 34);
 header.write("data", 36);
 header.writeUInt32LE(pcm.length, 40);
 
-const out = path.resolve("public/audio/bed.wav");
-fs.mkdirSync(path.dirname(out), { recursive: true });
-fs.writeFileSync(out, Buffer.concat([header, pcm]));
-console.log(`${out} · ${(pcm.length / 1024 / 1024).toFixed(1)} MB · peak ${peak.toFixed(2)}`);
+const file = path.resolve("public/audio/bed.wav");
+fs.mkdirSync(path.dirname(file), { recursive: true });
+fs.writeFileSync(file, Buffer.concat([header, pcm]));
+console.log(`${file} · ${(pcm.length / 1024 / 1024).toFixed(1)} MB`);
