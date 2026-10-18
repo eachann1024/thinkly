@@ -30,6 +30,11 @@ import {
   findLeaf,
 } from "@/lib/editor-split/tree";
 import { useStoreWithEqualityFn } from "zustand/traditional";
+import {
+  maximizedPaneAfterTreeChange,
+  toggleMaximizedPaneId,
+  writeMaximizedPane,
+} from "@/lib/editor-split/paneMaximize";
 
 function patchTab(
   byTabId: Record<string, SplitState>,
@@ -46,9 +51,9 @@ function patchTab(
 }
 
 const persisted = loadPersisted();
-
 export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   byTabId: persisted.byTabId,
+  maximizedPaneIdByTab: {},
 
   getStateForTab: (tabId) => get().byTabId[tabId] ?? null,
 
@@ -76,7 +81,11 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
     const current = get().byTabId[tabId];
     if (!current) return { kind: "last-pane" };
     const result = closeLeaf(current, leafId);
-    if (result.kind === "last-pane") return { kind: "last-pane" };
+    if (result.kind === "last-pane") {
+      const map = writeMaximizedPane(get().maximizedPaneIdByTab, tabId, null);
+      if (map !== get().maximizedPaneIdByTab) set({ maximizedPaneIdByTab: map });
+      return { kind: "last-pane" };
+    }
     if (result.state === current) {
       return {
         kind: "updated",
@@ -84,7 +93,17 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
       };
     }
     runWithPresence(() => {
-      set({ byTabId: patchTab(get().byTabId, tabId, result.state) });
+      set((store) => ({
+        byTabId: patchTab(store.byTabId, tabId, result.state),
+        maximizedPaneIdByTab: writeMaximizedPane(
+          store.maximizedPaneIdByTab,
+          tabId,
+          maximizedPaneAfterTreeChange(
+            result.state,
+            store.maximizedPaneIdByTab[tabId] ?? null,
+          ),
+        ),
+      }));
     });
     return {
       kind: "updated",
@@ -141,6 +160,19 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
     set({ byTabId: patchTab(get().byTabId, tabId, toggleZoomTree(current)) });
   },
 
+  toggleMaximizePane: (tabId, paneId) => {
+    const current = get().byTabId[tabId];
+    if (!current) return;
+    const next = toggleMaximizedPaneId(
+      current,
+      get().maximizedPaneIdByTab[tabId] ?? null,
+      paneId,
+    );
+    const map = writeMaximizedPane(get().maximizedPaneIdByTab, tabId, next);
+    if (map === get().maximizedPaneIdByTab) return;
+    set({ maximizedPaneIdByTab: map });
+  },
+
   setPanePage: (tabId, paneId, pageId) => {
     const current = get().byTabId[tabId];
     if (!current) return;
@@ -168,8 +200,14 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   },
 
   clearTab: (tabId) => {
-    if (!(tabId in get().byTabId)) return;
-    set({ byTabId: patchTab(get().byTabId, tabId, null) });
+    const { byTabId, maximizedPaneIdByTab } = get();
+    const hasTree = tabId in byTabId;
+    const nextMaximized = writeMaximizedPane(maximizedPaneIdByTab, tabId, null);
+    if (!hasTree && nextMaximized === maximizedPaneIdByTab) return;
+    set({
+      ...(hasTree ? { byTabId: patchTab(byTabId, tabId, null) } : {}),
+      ...(nextMaximized === maximizedPaneIdByTab ? {} : { maximizedPaneIdByTab: nextMaximized }),
+    });
   },
 
   focusedPageId: (tabId) => {
@@ -191,6 +229,10 @@ export function useEditorSplitSelector<T>(
   equalityFn: (a: T, b: T) => boolean,
 ): T {
   return useStoreWithEqualityFn(useEditorSplit, selector, equalityFn);
+}
+
+export function toggleMaximizePane(tabId: string, paneId: string) {
+  useEditorSplit.getState().toggleMaximizePane(tabId, paneId);
 }
 
 export function findTabLeaf(tabId: string, paneId: string) {

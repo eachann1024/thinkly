@@ -19,6 +19,8 @@ export type PersistedSplits = {
 
 export type EditorSplitStore = {
   byTabId: Record<string, SplitState>;
+  /** 临时放大，按 tabId 记格子。不写入布局树，也不进持久化。 */
+  maximizedPaneIdByTab: Record<string, string>;
   getStateForTab: (tabId: string) => SplitState | null;
   splitFocused: (input: SplitFocusedInput) => SplitFocusedResult;
   closeFocused: (tabId: string) => CloseFocusedResult;
@@ -33,6 +35,7 @@ export type EditorSplitStore = {
   focusNeighbor: (tabId: string, dir: SplitNeighborDirection) => string | null;
   setGroupSizes: (tabId: string, groupId: string, sizes: number[]) => void;
   toggleZoom: (tabId: string) => void;
+  toggleMaximizePane: (tabId: string, paneId: string) => void;
   setPanePage: (tabId: string, paneId: string, pageId: string) => void;
   ensureTab: (tabId: string, pageId: string) => void;
   clearTab: (tabId: string) => void;
