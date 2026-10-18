@@ -26,6 +26,7 @@ import {
   subscribePageTitleFocus,
 } from "@/lib/page-title-focus";
 import { normalizeNewFileName } from "@/lib/new-page-name";
+import { enterDocumentBody, isPlainDocumentNavigation } from "@/lib/document-title-keyboard";
 import { flushEditorContent } from "@/stores/pages/actions/flushEditor";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
@@ -54,15 +55,22 @@ export function PageDocumentTitle({ page, focused, editable }: {
 
   useEffect(() => {
     if (!focused || !editable) return;
+    let frame: number | undefined;
     const focusTitle = (pageId: string) => {
       if (pageId !== page.id || !isPageTitleFocusRequested(pageId)) return;
-      requestAnimationFrame(() => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (!isPageTitleFocusRequested(pageId)) return;
         fieldRef.current?.focus();
         completePageTitleFocus(pageId);
       });
     };
     focusTitle(page.id);
-    return subscribePageTitleFocus(focusTitle);
+    const unsubscribe = subscribePageTitleFocus(focusTitle);
+    return () => {
+      unsubscribe();
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
   }, [editable, focused, page.id]);
 
   const commit = async () => {
@@ -107,11 +115,11 @@ export function PageDocumentTitle({ page, focused, editable }: {
       onChange={(event) => setValue(event.target.value.replace(/\n/g, ""))}
       onBlur={() => void commit()}
       onKeyDown={(event) => {
-        if (event.nativeEvent.isComposing) return;
+        if (!editable || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
         if (event.key === "Enter") {
+          const navigate = isPlainDocumentNavigation(event.nativeEvent);
           event.preventDefault();
-          fieldRef.current?.blur();
-          window.dispatchEvent(new Event("goose-note:focus-editor-start"));
+          if (!event.repeat && navigate) enterDocumentBody(event.currentTarget, page.id);
         } else if (event.key === "Escape") {
           event.preventDefault();
           discardRef.current = true;
