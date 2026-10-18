@@ -2,12 +2,14 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1": { "theContentMayUseAnOlderFormatOr": {  }; "thisNoteCannotBePreviewed": {  }; "thisNoteCouldNotBeFoundSoIts": {  }; "thisVersionCannotBeDisplayed": {  } };
+    "src/pages/workspace/components/history/history-view/HistoryReader.tsx#messages:1": { "ifYouUseCloudStorageSignInAnd": {  }; "loadingVersion": {  }; "noVersionHistory": {  }; "retry": {  }; "selectAVersionOnTheLeft": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormat": {  }; "thisVersionIsTemporarilyUnavailable": {  }; "versionHistoryCouldNotBeLoaded": {  } };
     "src/pages/workspace/components/history/history-view/HistoryToolbar.tsx#messages:1": { "back": {  }; "backToEditor": {  }; "loading": {  }; "loadingVersion": {  }; "restoreThisVersion": {  }; "restoring": {  }; "restoringVersion": {  }; "selectAVersion": {  }; "version": {  } };
     "src/pages/workspace/components/history/history-view/HistoryVersionList.tsx#messages:1": { "changeCount": { "count": string | number }; "characterCount": { "count": number }; "markAsMilestone": {  }; "markingMilestone": {  }; "milestone": {  }; "noVersionHistory": {  }; "removeMilestone": {  }; "removingMilestone": {  }; "selectAVersionToPreviewAndRestore": {  }; "versionHistory": {  }; "viewVersionAt": { "date": string | number; "time": string | number } };
     "src/pages/workspace/components/history/history-view/historyViewPresentation.tsx#messages:1": { "automatic": {  }; "beforeChanges": {  }; "daysAgo": { "count": string | number }; "manual": {  }; "today": {  }; "yesterday": {  } };
     "src/pages/workspace/components/history/history-view/logic/useHistoryRestoreActions.tsx#messages:1": { "confirmRemoveMilestone": {  }; "confirmRestore": {  }; "couldNotMarkMilestone": {  }; "couldNotRemoveMilestone": {  }; "milestoneMarkedThisVersionWillBeKeptIndefinitely": {  }; "milestoneRemoved": {  }; "theVersionFileIsEmptyOrUnreadableIf": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormatAndCannot": {  }; "thisVersionHasDamagedMetadataAndCannotBe": {  }; "versionRestoredThePreviousContentWasSavedAs": {  } };
     "src/pages/workspace/components/history/history-view/logic/useHistoryViewState.tsx#messages:1": { "untitled": {  } };
-    "src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx#localMessages:1": { "closeWelcomeAnimation": {  }; "closeWelcomeAnimationEsc": {  }; "welcomeVideo": {  } };
+    "src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx#localMessages:1": { "closeWelcomeAnimation": {  }; "closeWelcomeAnimationEsc": {  }; "muteWelcomeAnimation": {  }; "unmuteWelcomeAnimation": {  }; "welcomeVideo": {  } };
     "src/pages/workspace/components/notebook-ai/AiPanelResizeEdge.tsx#messages:1": { "detailPixels": { "value1": string | number }; "resizeAiPanel": {  }; "resizeAiPanelLeftAndRightArrowsHome": {  } };
     "src/pages/workspace/components/notebook-ai/ArtifactActions.tsx#messages:1": { "copyImage": {  }; "copySource": {  }; "detailCopyFailed": { "value1": string | number }; "detailDownloadFailed": { "value1": string | number }; "download": {  }; "downloadImage": {  }; "insertIntoCurrentNote": {  }; "insertedIntoCurrentNote": {  }; "saved": {  }; "unknownError": {  } };
     "src/pages/workspace/components/notebook-ai/ArtifactPanZoom.tsx#messages:1": { "diagramPreview": {  }; "fitToWindow": {  }; "zoomIn": {  }; "zoomInThenDragOrScrollToPan": {  }; "zoomOut": {  }; "zoomedDiagramDragOrScrollToPan": {  } };
@@ -101,6 +103,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/SidebarResizeEdge.tsx#localMessages:1": { "resizeSidebarUseLeftAndRight_2431": {  }; "resizeSidebar_7141": {  }; "widthPixels": { "width": string | number } };
     "src/pages/workspace/components/sidebar/SidebarSectionHeader.tsx#localMessages:1": { "collapseAllPages_a4fb": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/CanvasSettings.tsx#localMessages:1": { "canvas_4d7f": {  }; "dots_f4a6": {  }; "editorGrid_47a6": {  }; "grid_5340": {  }; "none_d81b": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/CharacterSettings.tsx#localMessages:1": { "character": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/SidebarDisplaySettings.tsx#localMessages:1": { "showFolderCounts_f654": {  }; "sidebar_63f4": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/renderAdditionalFontSettings.tsx#localMessages:1": { "fontCategory": { "category": string | number } };
     "src/pages/workspace/components/sidebar/appearance-settings/renderAppearanceTheme.tsx#localMessages:1": { "automatic_3aed": {  }; "colorsAndThemes_05fe": {  }; "darkMode_18d1": {  }; "fullTheme": { "theme": string | number }; "lightMode_8755": {  }; "themeMode_b0bb": {  }; "theme_9970": {  }; "useSystemSetting_71bb": {  } };
@@ -119,8 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1": { "couldNotCreateItemTheName_2735": {  }; "folderCreated_1541": {  }; "newFolder_f3a4": {  }; "theDestinationFolderNoLongerExists_0e13": {  } };
     "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1": { "itemCount": { "count": string | number } };
-    "src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1": { "couldNotCreateItemPleaseTry_db8e": {  }; "fileName_d2e2": {  }; "folderName_a984": {  }; "newFolder_f3a4": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };
   }
 }
