@@ -5,16 +5,14 @@ import {
   inputMatchesAccelerator,
   toElectronAccelerator,
 } from "../../src/lib/electron/accelerator";
+import { onBrowserWindowCreated } from "./windows";
 import {
-  getMainWindow,
-  getQuicknoteWindow,
-  onBrowserWindowCreated,
-  showOrCreateMainWindow,
-  toggleQuicknoteWindow,
-  toggleWindow,
-} from "./windows";
+  dispatchRegisteredGlobalHotkey,
+  type HotkeySlot,
+  type HotkeySourceKind,
+} from "./hotkeyDispatch";
 
-export { toElectronAccelerator };
+export { toElectronAccelerator, dispatchRegisteredGlobalHotkey };
 
 const registered = {
   wake: "",
@@ -22,31 +20,7 @@ const registered = {
   search: "",
 };
 
-type HotkeySlot = "wake" | "quicknote" | "search";
 type HotkeyRequest = { wake: string; quicknote: string; search: string };
-type HotkeySourceKind = "workspace" | "quicknote";
-
-const HOTKEY_DEDUP_MS = 80;
-let lastHotkeyAt = 0;
-let lastHotkeySlot: HotkeySlot | "" = "";
-
-function acceptHotkey(slot: HotkeySlot): boolean {
-  const now = Date.now();
-  if (slot === lastHotkeySlot && now - lastHotkeyAt < HOTKEY_DEDUP_MS) {
-    return false;
-  }
-  lastHotkeyAt = now;
-  lastHotkeySlot = slot;
-  return true;
-}
-
-function focusedWindowKind(): HotkeySourceKind {
-  const quicknote = getQuicknoteWindow();
-  if (quicknote && !quicknote.isDestroyed() && quicknote.isFocused()) {
-    return "quicknote";
-  }
-  return "workspace";
-}
 
 export function matchRegisteredGlobalHotkey(input: {
   type?: string;
@@ -67,29 +41,6 @@ export function matchRegisteredGlobalHotkey(input: {
     }
   }
   return null;
-}
-
-export function dispatchRegisteredGlobalHotkey(
-  slot: HotkeySlot,
-  sourceKind: HotkeySourceKind = focusedWindowKind(),
-): void {
-  if (!acceptHotkey(slot)) return;
-  if (slot === "quicknote") {
-    void toggleQuicknoteWindow();
-    return;
-  }
-  if (slot === "search") {
-    const win = showOrCreateMainWindow();
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("desktop:open-search");
-    }
-    return;
-  }
-  if (sourceKind === "quicknote") {
-    showOrCreateMainWindow();
-    return;
-  }
-  void toggleWindow(getMainWindow());
 }
 
 function bindGlobalHotkeyInput(

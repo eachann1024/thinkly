@@ -17,6 +17,7 @@ import {
   type WindowBounds,
   type WindowTabSnapshot,
 } from "../windowLayout";
+import type { WindowKind } from "../windowRegistry";
 import { windowState } from "./state";
 
 export const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -52,7 +53,9 @@ export function rendererDevUrl(): string | null {
   return url ? url.replace(/\/$/, "") : null;
 }
 
-export function rendererFile(name: "index.html" | "quicknote.html"): string {
+export function rendererFile(
+  name: "index.html" | "quicknote.html" | "search.html",
+): string {
   return path.join(__dirname, "../renderer", name);
 }
 
@@ -86,7 +89,7 @@ export const sharedWebPrefs =
 
 export function windowWebPrefs(
   windowId: string,
-  kind: "workspace" | "quicknote",
+  kind: WindowKind,
 ): BrowserWindowConstructorOptions["webPreferences"] {
   return {
     ...sharedWebPrefs(),

@@ -32,26 +32,15 @@ import {
 } from "./layout";
 import { appQuitting, getQuicknoteWindow } from "./registry";
 import { bindCloseTabAccelerator } from "./close";
-import { registry, QUICKNOTE_IDLE_DESTROY_MS, windowState } from "./state";
+import { registry, QUICKNOTE_IDLE_DESTROY_MS } from "./state";
+import { clearIdleDestroyTimer, scheduleIdleDestroy } from "./idleDestroy";
 
 export function clearQuicknoteDestroyTimer(): void {
-  if (!windowState.quicknoteDestroyTimer) return;
-  clearTimeout(windowState.quicknoteDestroyTimer);
-  windowState.quicknoteDestroyTimer = null;
+  clearIdleDestroyTimer("quicknoteDestroyTimer");
 }
 
 export function scheduleQuicknoteIdleDestroy(win: BrowserWindow): void {
-  clearQuicknoteDestroyTimer();
-  if (win.isDestroyed() || appQuitting()) return;
-  const timer = setTimeout(() => {
-    windowState.quicknoteDestroyTimer = null;
-    if (appQuitting()) return;
-    if (win.isDestroyed()) return;
-    if (win.isVisible()) return;
-    win.destroy();
-  }, QUICKNOTE_IDLE_DESTROY_MS);
-  timer.unref();
-  windowState.quicknoteDestroyTimer = timer;
+  scheduleIdleDestroy(win, "quicknoteDestroyTimer", QUICKNOTE_IDLE_DESTROY_MS);
 }
 
 export function resolveQuicknoteBounds(): Partial<WindowBounds> {

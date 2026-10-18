@@ -3,7 +3,7 @@
  *
  * 主进程给每个 BrowserWindow 注入 additionalArguments：
  *   --goose-window-id=<uuid>
- *   --goose-window-kind=workspace|quicknote
+ *   --goose-window-kind=workspace|quicknote|search
  *
  * 读取顺序：
  * 1. 当前进程 argv（preload / 未沙箱时可直接读 process.argv）
@@ -25,7 +25,11 @@ export const TABS_PERSIST_KEY_PREFIX = "goose-note:open-tabs:v1";
 export const GOOSE_WINDOW_ID_PREFIX = "--goose-window-id=";
 export const GOOSE_WINDOW_KIND_PREFIX = "--goose-window-kind=";
 
-export type GooseWindowKind = "workspace" | "quicknote";
+export type GooseWindowKind = "workspace" | "quicknote" | "search";
+
+export function isGooseWindowKind(value: unknown): value is GooseWindowKind {
+  return value === "workspace" || value === "quicknote" || value === "search";
+}
 
 export type GooseWindowContext = {
   windowId: string;
@@ -76,7 +80,7 @@ export function parseGooseWindowArgs(argv: string[]): GooseWindowContext | null 
       windowId = arg.slice(GOOSE_WINDOW_ID_PREFIX.length).trim();
     } else if (arg.startsWith(GOOSE_WINDOW_KIND_PREFIX)) {
       const value = arg.slice(GOOSE_WINDOW_KIND_PREFIX.length).trim();
-      if (value === "workspace" || value === "quicknote") kind = value;
+      if (isGooseWindowKind(value)) kind = value;
     }
   }
   if (!windowId || !kind) return null;
@@ -150,7 +154,7 @@ export async function resolveWindowContext(): Promise<GooseWindowContext> {
         const next: GooseWindowContext = ctx?.windowId
           ? {
               windowId: ctx.windowId,
-              kind: ctx.kind === "quicknote" ? "quicknote" : "workspace",
+              kind: isGooseWindowKind(ctx.kind) ? ctx.kind : "workspace",
             }
           : fallbackContext();
         emitWindowContext(next);

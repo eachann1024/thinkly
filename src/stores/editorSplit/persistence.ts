@@ -15,7 +15,10 @@ export const argvWindowContext = readWindowContextFromArgv();
 
 export let splitWindowId = argvWindowContext?.windowId ?? getWindowId();
 
-export let persistReady = Boolean(argvWindowContext) || !isElectronRuntime();
+// 浮动搜索窗没有标签：不读写任何窗口级标签 / 分栏持久化，避免每次重建留下新键。
+export let persistReady =
+  (Boolean(argvWindowContext) && argvWindowContext?.kind !== "search") ||
+  !isElectronRuntime();
 
 export function parseSplitState(raw: unknown): SplitState | null {
   if (!raw || typeof raw !== "object") return null;
@@ -171,6 +174,7 @@ export function startEditorSplitPersistence() {
       mergePersistedSplitsFromStorage();
     });
     void resolveWindowContext().then((ctx) => {
+      if (ctx.kind === "search") return;
       persistReady = true;
       const prevId = splitWindowId;
       splitWindowId = ctx.windowId;

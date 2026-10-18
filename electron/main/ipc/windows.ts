@@ -42,7 +42,7 @@ export function registerWindowsIpc(): void {
       const win = senderWindow(event);
       if (!win || win.isDestroyed()) return;
       const context = lookupWindowContext(win);
-      if (context?.kind === "quicknote") return;
+      if (context?.kind !== "workspace") return;
       setMainWindowTitleBarHeight(win, height);
     },
   );

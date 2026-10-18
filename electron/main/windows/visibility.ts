@@ -1,4 +1,5 @@
 import { BrowserWindow } from "electron";
+import type { WindowKind } from "../windowRegistry";
 import {
   registry,
   visibilityListeners,
@@ -19,7 +20,7 @@ export function onBrowserWindowCreated(
 
 export function notifyBrowserWindowCreated(
   win: BrowserWindow,
-  kind: "workspace" | "quicknote",
+  kind: WindowKind,
 ): void {
   for (const listener of windowCreatedListeners) listener(win, kind);
 }

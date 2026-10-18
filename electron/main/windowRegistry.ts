@@ -8,7 +8,7 @@ import {
   WINDOW_LAYOUT_VERSION,
 } from "./windowLayout";
 
-export type WindowKind = "workspace" | "quicknote";
+export type WindowKind = "workspace" | "quicknote" | "search";
 
 export type WindowRecord<T = unknown> = {
   id: string;
@@ -82,6 +82,10 @@ export class WindowRegistry<T = unknown> {
 
   quicknote(): WindowRecord<T> | undefined {
     return this.all().find((record) => record.kind === "quicknote");
+  }
+
+  search(): WindowRecord<T> | undefined {
+    return this.all().find((record) => record.kind === "search");
   }
 
   markFocused(id: string): void {

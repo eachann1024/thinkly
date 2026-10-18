@@ -1,6 +1,7 @@
 import "./language";
 import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync } from "./services";
+import { searchWindow } from "./search";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";
 import type { AppUpdateCheckResult, AppUpdateState } from "../../src/lib/appUpdateTypes";
 import type {
@@ -23,6 +24,7 @@ const gooseDesktop = {
   renderMermaidPreview: (request: import("../../src/lib/preview-renderer/contract").MermaidPreviewRequest) =>
     invoke("desktop:renderMermaidPreview", request) as Promise<string>,
   appearance,
+  ...searchWindow,
   gitSync,
   assetMaintenance,
   selectDirectory: (opts?: DirectoryDialogOptions) =>
@@ -204,7 +206,7 @@ const gooseDesktop = {
   getWindowContext: () =>
     invoke("desktop:getWindowContext") as Promise<{
       windowId: string;
-      kind: "workspace" | "quicknote";
+      kind: "workspace" | "quicknote" | "search";
     }>,
   createWindow: (opts: {
     mode: "blank" | "currentTab";

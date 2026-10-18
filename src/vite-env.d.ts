@@ -133,7 +133,12 @@ declare global {
     takePendingOpenMarkdownFiles: () => Promise<string[]>
     onOpenMarkdownFiles: (cb: (files: string[]) => void) => () => void
     notify: (n: { title: string; body: string }) => Promise<void>
-    getWindowContext: () => Promise<{ windowId: string; kind: "workspace" | "quicknote" }>
+    getWindowContext: () => Promise<{ windowId: string; kind: "workspace" | "quicknote" | "search" }>
+    hideSearchWindow: () => Promise<void>
+    searchWindowReady: () => Promise<void>
+    openSearchResult: (payload: { pageId: string; query: string; localFilePath?: string }) => Promise<boolean>
+    onSearchWindowShown: (cb: () => void) => () => void
+    onOpenSearchResult: (cb: (payload: { pageId: string; query: string; localFilePath?: string }) => void) => () => void
     createWindow: (opts: {
       mode: "blank" | "currentTab"
       tab?: { id: string; pageId: string; type?: string; workspaceId?: string }

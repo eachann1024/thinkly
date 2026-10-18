@@ -37,6 +37,8 @@ export interface LocalFolderScannerOptions {
   gooseFs: GooseFs;
   hiddenFolders?: string[];
   forceRead?: boolean;
+  /** 只读扫描（浮动搜索窗）：不写 id 映射、不触碰历史目录布局。 */
+  readOnly?: boolean;
 }
 
 export interface LocalFolderEntry {
