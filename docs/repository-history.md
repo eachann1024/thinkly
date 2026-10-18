@@ -37,4 +37,4 @@ git show history/goose-note/v7:README.md
 
 `goose-notion` 原为私有仓库，其历史公开已获得仓库所有者确认。旧仓库历史经 Gitleaks 扫描未发现命中项。
 
-当前仓库已更名为 `eachann1024/goose-note`，本地目录为 `goose-note`；下文旧名称用于历史追溯，后续开发以当前仓库为准。
+当前仓库曾用名 `eachann1024/goose-notes`，之后改为 `eachann1024/goose-note`。2026-10-18 再改为 `eachann1024/thinkly`。下文旧名称用于历史追溯。

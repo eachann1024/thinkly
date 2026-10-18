@@ -11,11 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eachann1024/goose-note.git"
+    "url": "git+https://github.com/eachann1024/thinkly.git"
   },
-  "homepage": "https://github.com/eachann1024/goose-note",
+  "homepage": "https://github.com/eachann1024/thinkly",
   "bugs": {
-    "url": "https://github.com/eachann1024/goose-note/issues"
+    "url": "https://github.com/eachann1024/thinkly/issues"
   },
   "license": "MIT",
   "engines": {

@@ -27,4 +27,4 @@ sudo xattr -r -s -d com.apple.quarantine "/Applications/Goose Note.app"
 
 此操作不能修复损坏的安装包。如果系统提示恶意软件、文件已损坏，或校验和不符，请停止操作并重新获取官方安装包。受组织管理的 Mac 可能禁止手动放行，需要联系管理员。
 
-以各版本 Release 页的签名状态为准。[官方安装包](https://github.com/eachann1024/goose-note/releases/latest) · [Apple 打开未公证应用说明](https://support.apple.com/zh-cn/102445) · [Apple Developer Program](https://developer.apple.com/programs/)
+以各版本 Release 页的签名状态为准。[官方安装包](https://github.com/eachann1024/thinkly/releases/latest) · [Apple 打开未公证应用说明](https://support.apple.com/zh-cn/102445) · [Apple Developer Program](https://developer.apple.com/programs/)

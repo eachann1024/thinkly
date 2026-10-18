@@ -43,7 +43,7 @@ function compareSemver(left, right) {
 }
 
 function noteText(version) {
-  return `思绪 · Thinkly 桌面版安装包。当前版本 v${version}。macOS 选 .dmg（Apple 芯片 arm64 / Intel x64），Windows 选 .exe（x64 / arm64），Linux 选 AppImage / deb / pacman。macOS 首次打开请看 https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/goose-note/releases\n`;
+  return `思绪 · Thinkly 桌面版安装包。当前版本 v${version}。macOS 选 .dmg（Apple 芯片 arm64 / Intel x64），Windows 选 .exe（x64 / arm64），Linux 选 AppImage / deb / pacman。macOS 首次打开请看 https://github.com/eachann1024/thinkly/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/thinkly/releases\n`;
 }
 
 function isFile(item, name) {
