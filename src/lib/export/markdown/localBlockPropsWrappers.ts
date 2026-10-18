@@ -7,6 +7,7 @@ const LOCAL_WRAPPABLE_BLOCK_TYPES = new Set(
   [...INLINE_BLOCK_TYPES].filter((type) => type !== "toggleListItem"),
 );
 export const LOCAL_BLOCK_PROPS_WRAPPER_STYLE = "__gooseLocalBlockPropsWrapperStyle";
+const LOCAL_PRESERVE_EMPTY_PARAGRAPH = "__gooseLocalPreserveEmptyParagraph";
 const LOCAL_TEXT_COLOR_CSS = documentTextColors("light");
 // 仅用于识别旧文档的 canonical wrapper，生成新文档始终使用全局文字色表。
 const LEGACY_LOCAL_TEXT_COLOR_CSS: Record<string, string> = {
@@ -47,18 +48,26 @@ function localWrapperStyle(metadata: PersistedBlockProps, textPalette = LOCAL_TE
  * 本地文件夹专用：让 Obsidian 等 Markdown 预览器真实应用块级样式。
  * 只包文本型块，媒体、代码和表格仍走各自已有的 Markdown 表示。
  */
-export function encodeLocalBlockPropsWrappers(blocks: BlockNoteContent): BlockNoteContent {
+export function encodeLocalBlockPropsWrappers(
+  blocks: BlockNoteContent,
+  { preserveEmptyParagraphs = false } = {},
+): BlockNoteContent {
   return (blocks as MarkdownBlock[]).map((block) => {
     const children = Array.isArray(block.children)
-      ? encodeLocalBlockPropsWrappers(block.children as BlockNoteContent)
+      ? encodeLocalBlockPropsWrappers(block.children as BlockNoteContent, { preserveEmptyParagraphs })
       : undefined;
     const metadata = block.type && (LOCAL_WRAPPABLE_BLOCK_TYPES.has(block.type) || block.type === "toggleListItem")
       ? pickPersistedBlockProps(block.props)
       : {};
+    const hasStyle = Object.keys(metadata).length > 0;
     return {
       ...block,
-      ...(Object.keys(metadata).length > 0
-        ? { props: { ...(block.props ?? {}), [LOCAL_BLOCK_PROPS_WRAPPER_STYLE]: localWrapperStyle(metadata) } }
+      ...(hasStyle || (preserveEmptyParagraphs && block.type === "paragraph")
+        ? { props: {
+          ...(block.props ?? {}),
+          ...(hasStyle ? { [LOCAL_BLOCK_PROPS_WRAPPER_STYLE]: localWrapperStyle(metadata) } : {}),
+          ...(preserveEmptyParagraphs && block.type === "paragraph" ? { [LOCAL_PRESERVE_EMPTY_PARAGRAPH]: true } : {}),
+        } }
         : {}),
       ...(children ? { children } : {}),
     };
@@ -68,7 +77,11 @@ export function encodeLocalBlockPropsWrappers(blocks: BlockNoteContent): BlockNo
 /** 仅由本地 writer 调用：在最终 Markdown 行形成后包上完整可见 wrapper。 */
 export function wrapLocalBlockPropsMarkdown(block: MarkdownBlock, markdown: string): string {
   const style = block.props?.[LOCAL_BLOCK_PROPS_WRAPPER_STYLE];
-  if (typeof style !== "string" || !parseLocalWrapperStyle(style)) return markdown;
+  if (typeof style !== "string" || !parseLocalWrapperStyle(style)) {
+    // Markdown 空白没有块身份，复用既有空段标记，保证本地文件重开不丢首段。
+    return markdown === "" && block.type === "paragraph" && block.props?.[LOCAL_PRESERVE_EMPTY_PARAGRAPH]
+      ? "<!-- goose-note:empty-block=paragraph -->" : markdown;
+  }
   const open = `<span data-goose-note-block-props="v1" style="${style}">`;
   if (block.type === "toggleListItem" || (block.type === "heading" && block.props?.isToggleable)) {
     return markdown.replace(
