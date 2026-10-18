@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 
-APP_NAME = "Goose Note"
+APP_NAME = "Thinkly"
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,7 +43,7 @@ INSTALL_BIN_MAC = f"{APP_NAME}.app/Contents/MacOS/{APP_NAME}"
 INSTALL_BIN_WIN = f"{APP_NAME}.exe"
 
 
-INSTALL_BIN_LINUX = "goose-note-app"
+INSTALL_BIN_LINUX = "thinkly"
 
 
 KILL_GRACE_SECONDS = 10

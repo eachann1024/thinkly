@@ -13,8 +13,8 @@ import time
 import tempfile
 from pathlib import Path
 
-APP_NAME = "Goose Note"
-BUNDLE_ID = "com.goosenote.desktop"
+APP_NAME = "Thinkly"
+BUNDLE_ID = "com.thinkly.desktop"
 ROOT = Path(__file__).resolve().parent
 BUILT_APP = ROOT / "dist-desktop" / f"{APP_NAME}.app"
 INSTALLED_APP = Path("/Applications") / f"{APP_NAME}.app"
@@ -32,7 +32,7 @@ def refresh_app_registration() -> None:
     paths = set()
     # Each LaunchServices bundle record starts with its own bundle id.
     for record in re.split(r"(?m)^bundle id:", dump):
-        if not re.search(r"(?m)^identifier:\s+com\.goosenote\.desktop\s*$", record):
+        if not re.search(rf"(?m)^identifier:\s+{re.escape(BUNDLE_ID)}\s*$", record):
             continue
         match = re.search(r"(?m)^path:\s+(.+?)\s+\(0x[0-9a-f]+\)\s*$", record)
         if match and Path(match[1]) != INSTALLED_APP:
@@ -120,7 +120,7 @@ def remove_build_copies() -> None:
             raise RuntimeError(f"拒绝清理符号链接：{candidate}")
         with (candidate / "Contents/Info.plist").open("rb") as source:
             info = plistlib.load(source)
-        if info.get("CFBundleIdentifier") != "com.goosenote.desktop":
+        if info.get("CFBundleIdentifier") != BUNDLE_ID:
             raise RuntimeError(f"构建产物标识不匹配，保留：{candidate}")
         # A never-registered intermediate bundle returns -10814; removal is still valid.
         subprocess.run(
