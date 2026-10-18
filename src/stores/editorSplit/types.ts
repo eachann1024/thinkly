@@ -41,4 +41,7 @@ export type EditorSplitStore = {
   clearTab: (tabId: string) => void;
   focusedPageId: (tabId: string) => string | null;
   isSplit: (tabId: string) => boolean;
+  /** 缺省为关。只存打开的标签。 */
+  syncScrollByTabId: Record<string, true>;
+  toggleSyncScroll: (tabId: string) => void;
 };
