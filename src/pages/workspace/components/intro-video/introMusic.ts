@@ -1,4 +1,15 @@
 // Original 60-second pastoral score, synthesized locally without media downloads.
+/** Welcome score level, where 1 is full scale. */
+export const INTRO_MUSIC_GAIN = 0.25;
+
+export function introOutputGain(muted: boolean): number {
+  return muted ? 0 : INTRO_MUSIC_GAIN;
+}
+
+export type IntroMusicHandle = {
+  stop: () => void;
+  setMuted: (muted: boolean) => void;
+};
 let preparedContext: AudioContext | undefined;
 
 /** Call directly from the onboarding completion click to unlock Web Audio. */
@@ -61,10 +72,10 @@ function makeScore(): Note[] {
 const score = makeScore();
 
 /** Follow actual video playback, including buffering, pauses, seeks and dismissal. */
-export function startIntroMusic(video: HTMLVideoElement): () => void {
+export function startIntroMusic(video: HTMLVideoElement): IntroMusicHandle {
   if (!preparedContext || preparedContext.state === "closed") prepareIntroMusic();
   const context = preparedContext;
-  if (!context) return () => undefined;
+  if (!context) return { stop() {}, setMuted() {} };
   preparedContext = undefined;
 
   const output = context.createGain();
@@ -75,6 +86,14 @@ export function startIntroMusic(video: HTMLVideoElement): () => void {
   let cursor = 0;
   let disposed = false;
   let generation = 0;
+  let muted = false;
+
+  function rampGain(target: number, seconds: number): void {
+    const now = context!.currentTime;
+    output.gain.cancelScheduledValues(now);
+    output.gain.setValueAtTime(output.gain.value, now);
+    output.gain.linearRampToValueAtTime(target, now + seconds);
+  }
 
   function playNote(note: Note, when: number): void {
     const envelope = context!.createGain();
@@ -142,7 +161,7 @@ export function startIntroMusic(video: HTMLVideoElement): () => void {
       const now = context!.currentTime;
       output.gain.cancelScheduledValues(now);
       output.gain.setValueAtTime(0, now);
-      output.gain.linearRampToValueAtTime(0.22, now + 0.5);
+      output.gain.linearRampToValueAtTime(introOutputGain(muted), now + 0.5);
       schedule();
       interval = window.setInterval(schedule, 100);
     }).catch(() => undefined);
@@ -154,15 +173,22 @@ export function startIntroMusic(video: HTMLVideoElement): () => void {
   playEvents.forEach((event) => video.addEventListener(event, play));
   if (!video.paused && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) play();
 
-  return () => {
-    if (disposed) return;
-    disposed = true;
-    pauseEvents.forEach((event) => video.removeEventListener(event, pause));
-    playEvents.forEach((event) => video.removeEventListener(event, play));
-    pause();
-    window.setTimeout(() => {
-      output.disconnect();
-      void context.close().catch(() => undefined);
-    }, 160);
+  return {
+    setMuted(next: boolean) {
+      muted = next;
+      if (disposed || video.paused || video.ended) return;
+      rampGain(introOutputGain(muted), 0.12);
+    },
+    stop() {
+      if (disposed) return;
+      disposed = true;
+      pauseEvents.forEach((event) => video.removeEventListener(event, pause));
+      playEvents.forEach((event) => video.removeEventListener(event, play));
+      pause();
+      window.setTimeout(() => {
+        output.disconnect();
+        void context.close().catch(() => undefined);
+      }, 160);
+    },
   };
 }
