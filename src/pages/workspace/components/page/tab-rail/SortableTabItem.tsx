@@ -38,6 +38,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { useRef } from "react";
+import { presenceName } from "@/lib/ui/presence";
 import type { Page } from "@/types";
 import { type TabItem } from "@/stores/useTabs";
 import { useSortable } from "@dnd-kit/sortable";
@@ -104,6 +105,7 @@ export function SortableTabItem({
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition,
+    viewTransitionName: presenceName("tab", tab.id),
   };
   const title =
     tab.type === "welcome"

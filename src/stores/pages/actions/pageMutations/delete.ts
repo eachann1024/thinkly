@@ -7,6 +7,7 @@ import {
   persistPageSnapshots,
   removePersistedPageSnapshots,
 } from "../../persistence";
+import { runWithPresence } from "@/lib/ui/presence";
 
 /**
  * 删除后把侧栏的键盘焦点/选中同步到新的合理行。
@@ -103,7 +104,7 @@ export const deletePageAction = async (
         : await window.gooseFs.deleteFile(targetPath);
     if (!removeOk) return false;
 
-    set((state) => {
+    runWithPresence(() => set((state) => {
       const newPages = { ...state.pages };
       removedIds.forEach((pid) => delete newPages[pid]);
 
@@ -125,7 +126,7 @@ export const deletePageAction = async (
         pages: newPages,
         activePageId: nextActivePageId,
       };
-    });
+    }));
 
     syncSidebarSelectionAfterDelete(
       page.workspaceId,
@@ -145,7 +146,7 @@ export const deletePageAction = async (
   const changedIds: string[] = [];
   const removedIdsForSync = new Set<string>();
 
-  set((state) => {
+  runWithPresence(() => set((state) => {
     const removedIds = new Set<string>();
     const stack = [id];
     while (stack.length) {
@@ -192,7 +193,7 @@ export const deletePageAction = async (
       pages: newPages,
       activePageId: newActivePageId,
     };
-  });
+  }));
 
   syncSidebarSelectionAfterDelete(workspaceId, removedIdsForSync, get);
 

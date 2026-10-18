@@ -28,6 +28,7 @@ import { isExternalFileDrag } from "@/lib/local-folder-target";
 import { setLocalFolderFileDropTarget } from "@/lib/local-folder-file-drop-target";
 import { MainTreeRowDisclosure, MainTreeRowShell } from "../MainTreeRowShell";
 import { INDENT, ROW_PADDING_LEFT } from "./mainTreeRowConfig";
+import { presenceName } from "@/lib/ui/presence";
 
 export function TreeRowIcon({
   page,
@@ -171,7 +172,10 @@ export function MainTreeRow({
       )}
       active={!isPendingCreate && isActive}
       hovered={false}
-      style={{ paddingLeft: depth * INDENT + ROW_PADDING_LEFT + 4 }}
+      style={{
+        paddingLeft: depth * INDENT + ROW_PADDING_LEFT + 4,
+        viewTransitionName: presenceName("tree", itemIndex),
+      }}
     >
       {children}
     </MainTreeRowShell>

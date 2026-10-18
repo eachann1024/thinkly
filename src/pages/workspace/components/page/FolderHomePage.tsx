@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/icons";
 import { toast } from "@/components/ui/sonner";
 import { getPageTitle } from "@/components/editor/utils/page-title";
+import { presenceName } from "@/lib/ui/presence";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useTabs } from "@/stores/useTabs";
@@ -240,6 +241,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               <Button contentStyle="preserve" variant="ghost" size={null}
                 key={child.id}
                 type="button"
+                style={{ viewTransitionName: presenceName("home", child.id) }}
                 onClick={() => handleOpenChild(child)}
                 className="goose-list-row flex w-full items-center justify-start gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-foreground"
               >

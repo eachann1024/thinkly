@@ -201,7 +201,33 @@
   }
 }
 
+/* 删除或移动时，只淡出真正消失的项，只淡入新出现的项。未变化的项不闪。 */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(*):only-child {
+  animation: goose-floating-fade-out 150ms ease both;
+}
+
+::view-transition-new(*):only-child {
+  animation: goose-floating-fade-in 150ms ease both;
+}
+
+::view-transition-group(*):has(::view-transition-old(*):only-child),
+::view-transition-group(*):has(::view-transition-new(*):only-child) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation: none !important;
+  }
+
   [data-goose-floating-content].dropdown__popover[data-entering="true"] {
     animation: goose-floating-fade-in 150ms ease both !important;
   }

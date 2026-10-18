@@ -7,6 +7,7 @@ en:
 ja:
   paneMissing: "現在の分割ペインが見つかりません"
 `);
+import { runWithPresence } from "@/lib/ui/presence";
 import type { SplitState } from "@/lib/editor-split/types";
 import { moveLeaf } from "@/lib/editor-split/move";
 import {
@@ -82,7 +83,9 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
         focusedPageId: focusedPageIdOf(current),
       };
     }
-    set({ byTabId: patchTab(get().byTabId, tabId, result.state) });
+    runWithPresence(() => {
+      set({ byTabId: patchTab(get().byTabId, tabId, result.state) });
+    });
     return {
       kind: "updated",
       focusedPageId: focusedPageIdOf(result.state),
