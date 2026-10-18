@@ -36,6 +36,7 @@ import { useEditorComposerToolbar } from "./useEditorComposerToolbar";
 import { EditorLinkPopover } from "./EditorLinkPopover";
 import type { EditorComposerProps } from "./editorComposerTypes";
 import { useEditorDragSource } from "./useEditorDragSource";
+import { programmaticRead, tableWindowPaint } from "./programmaticRead";
 
 export {
   normalizeClipboardLineEndings,
@@ -154,6 +155,7 @@ export function EditorComposer({
         tableHandles={false}
         filePanel={false}
         onChange={() => {
+          if (programmaticRead(editor) || tableWindowPaint()) return;
           const safePageId = pageIdForUpdateRef.current;
           if (!safePageId) return;
           // raw 文档跳过 normalizePageContent（含 ensureFirstTitleHeading），

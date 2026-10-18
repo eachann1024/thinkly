@@ -8,9 +8,11 @@ export type PreviewRenderState =
 export type PreviewRenderEvent =
   | { type: "render-requested"; identity: string }
   | { type: "rendered"; identity: string; html: string }
-  | { type: "empty" | "failed"; identity: string };
+  | { type: "empty" | "failed"; identity: string }
+  | { type: "release" };
 
 export function previewRenderReducer(state: PreviewRenderState, event: PreviewRenderEvent): PreviewRenderState {
+  if (event.type === "release") return { phase: "idle" };
   if (event.type === "render-requested") {
     return { phase: "loading", identity: event.identity,
       previous: state.phase === "loading" ? state.previous : state.phase === "idle" ? undefined : state };

@@ -1,6 +1,6 @@
 import { createExtension, type BlockNoteEditor } from "@blocknote/core";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
-import { currentBlockNode, GooseBlockSelection, isBlockNodeSelection, selectedBlockRoots } from "./blockSelectionModel";
+import { currentBlockNode, findBlockPositions, GooseBlockSelection, isBlockNodeSelection, selectedBlockRoots } from "./blockSelectionModel";
 
 type MoveDirection = "up" | "down";
 
@@ -140,10 +140,7 @@ export function moveSelectedBlocksByShortcut(
       editor.transact((tr) => {
         editor.removeBlocks(blocks);
         editor.insertBlocks(blocks, placement.referenceBlock, placement.placement);
-        const positions = new Map<string, number>();
-        tr.doc.descendants((node, pos) => {
-          if (node.type.name === "blockContainer") positions.set(String(node.attrs.id), pos);
-        });
+        const positions = findBlockPositions(tr.doc, new Set([first.id, last.id]));
         const start = positions.get(first.id), end = positions.get(last.id);
         if (start !== undefined && end !== undefined) {
           tr.setSelection(GooseBlockSelection.create(tr.doc, start, end));

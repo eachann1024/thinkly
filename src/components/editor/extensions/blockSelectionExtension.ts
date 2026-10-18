@@ -2,7 +2,7 @@ import { createExtension } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { Plugin, PluginKey, TextSelection } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
-import { GooseBlockSelection, currentBlockNode, selectedBlockRoots, isBlockNodeSelection } from "./blockSelectionModel";
+import { GooseBlockSelection, adjacentBlock, currentBlockNode, selectedBlockRoots, isBlockNodeSelection } from "./blockSelectionModel";
 import { deleteSelectionSafely } from "./selectionDelete";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 
@@ -43,13 +43,7 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
         const direction = ["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 :
           ["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : 0;
         if (direction) {
-          const candidates: { pos: number; size: number }[] = [];
-          state.doc.descendants((node, pos) => {
-            if (node.type.name === "blockContainer") candidates.push({ pos, size: node.nodeSize });
-          });
-          const target = direction > 0
-            ? candidates.find((item) => item.pos >= block.pos + block.node.nodeSize)
-            : candidates.filter((item) => item.pos < block.pos && item.pos + item.size <= block.pos).pop();
+          const target = adjacentBlock(state.doc, block.pos, block.node.nodeSize, direction);
           if (!target) return true;
           const anchor = event.shiftKey && state.selection instanceof GooseBlockSelection
             ? state.selection.anchorBlockPos : block.pos;

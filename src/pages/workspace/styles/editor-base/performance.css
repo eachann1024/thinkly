@@ -1,0 +1,22 @@
+/* 屏外块不排版。大表用行数撑开滚动高度，避免滑到表格时整页跳动。 */
+.bn-editor .bn-block-outer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+}
+
+.bn-editor .bn-block-outer.goose-sized-block {
+  contain-intrinsic-size: auto
+    calc(var(--goose-intrinsic-rows) * var(--goose-intrinsic-row, 44px) * var(--editor-scale, 1));
+}
+
+.goose-drag-ghost {
+  position: fixed;
+  top: -1000px;
+  left: 0;
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--goose-accent-focus, currentColor);
+  opacity: 0.85;
+  pointer-events: none;
+}

@@ -36,6 +36,87 @@ export function currentBlockNode(state: EditorState): SelectedBlockNode | null {
     blockNodeAt(state.doc, 1);
 }
 
+function lastBlockInside(node: PMNode, pos: number): SelectedBlockNode | null {
+  if (node.type.name === "blockContainer") {
+    let cursor = pos + 1;
+    let nested: SelectedBlockNode | null = null;
+    for (let i = 0; i < node.childCount; i += 1) {
+      const child = node.child(i);
+      if (child.type.name === "blockGroup") nested = lastBlockInside(child, cursor);
+      cursor += child.nodeSize;
+    }
+    return nested ?? { node, pos };
+  }
+  if (node.type.name !== "blockGroup") return null;
+  let cursor = pos + 1;
+  let last: SelectedBlockNode | null = null;
+  for (let i = 0; i < node.childCount; i += 1) {
+    const child = node.child(i);
+    if (child.type.name === "blockContainer") last = lastBlockInside(child, cursor);
+    cursor += child.nodeSize;
+  }
+  return last;
+}
+
+/** 下一块 / 上一块。只看相邻容器，不扫整篇文档。 */
+export function adjacentBlock(
+  doc: PMNode,
+  pos: number,
+  size: number,
+  direction: 1 | -1,
+): SelectedBlockNode | null {
+  if (direction > 0) {
+    const after = pos + size;
+    if (after > doc.content.size) return null;
+    const $after = doc.resolve(after);
+    const next = $after.nodeAfter;
+    if (next?.type.name === "blockContainer") return { node: next, pos: after };
+    for (let depth = $after.depth; depth > 0; depth -= 1) {
+      if ($after.node(depth).type.name !== "blockContainer") continue;
+      return adjacentBlock(doc, $after.before(depth), $after.node(depth).nodeSize, 1);
+    }
+    return null;
+  }
+  const $pos = doc.resolve(pos);
+  const before = $pos.nodeBefore;
+  if (before?.type.name === "blockContainer") {
+    return lastBlockInside(before, pos - before.nodeSize);
+  }
+  for (let depth = $pos.depth; depth > 0; depth -= 1) {
+    if ($pos.node(depth).type.name !== "blockContainer") continue;
+    return adjacentBlock(doc, $pos.before(depth), $pos.node(depth).nodeSize, -1);
+  }
+  return null;
+}
+
+export function findBlockPositions(doc: PMNode, ids: ReadonlySet<string>): Map<string, number> {
+  const found = new Map<string, number>();
+  const visit = (node: PMNode, pos: number): boolean => {
+    if (found.size >= ids.size) return true;
+    if (node.type.name === "blockContainer") {
+      const id = node.attrs?.id;
+      if (typeof id === "string" && ids.has(id)) found.set(id, pos);
+      let cursor = pos + 1;
+      for (let index = 0; index < node.childCount; index += 1) {
+        const child = node.child(index);
+        if (child.type.name === "blockGroup" && visit(child, cursor)) return true;
+        cursor += child.nodeSize;
+      }
+      return found.size >= ids.size;
+    }
+    if (node.type.name !== "blockGroup" && node.type.name !== "doc") return false;
+    let cursor = node.type.name === "doc" ? 0 : pos + 1;
+    for (let index = 0; index < node.childCount; index += 1) {
+      const child = node.child(index);
+      if (visit(child, cursor)) return true;
+      cursor += child.nodeSize;
+    }
+    return found.size >= ids.size;
+  };
+  visit(doc, 0);
+  return found;
+}
+
 export function selectedBlockRoots(state: Pick<EditorState, "doc" | "selection">): SelectedBlockNode[] {
   const { from, to } = state.selection;
   const roots: SelectedBlockNode[] = [];
