@@ -1,6 +1,5 @@
 import { useLocale } from "@/i18n";
 import { type CSSProperties } from "react";
-import "@/components/ui/sonner";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { Editor } from "@/components/editor/core/Editor";
 import { Toaster } from "@/components/ui/sonner";
@@ -67,13 +66,6 @@ export function QuickNoteApp() {
         placement="center"
         offset={{ bottom: 30, left: 24, right: 24 }}
         mobileOffset={{ bottom: 30, left: 24, right: 24 }}
-        toastOptions={{
-          classNames: {
-            toast: "!min-w-0 !pr-10",
-            // 速记小窗单行 toast：关闭按钮保持垂直居中。
-            closeButton: "!right-2.5 !top-1/2 !-translate-y-1/2",
-          },
-        }}
       />
     </div>
   );

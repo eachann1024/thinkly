@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { Toaster as Sonner, toast as sonnerToast } from "sonner";
 import type { ExternalToast } from "sonner";
 import { CircleCheck, X } from "@/components/ui/icons";
@@ -9,6 +9,7 @@ import { buttonVariants } from "./button";
 import { iconButtonVariants } from "./icon-button";
 import { createPortal } from "react-dom";
 import { UI_LAYERS } from "@/lib/uiLayers";
+import { toastLayoutCssVars } from "./toast-layout";
 
 type ToasterProps = React.ComponentProps<typeof Sonner> & {
   placement?: "edge" | "center";
@@ -22,17 +23,17 @@ const defaultToastClassNames = {
   //    并让关闭按钮点击失效。
   // 2. 不要加 !opacity-100 —— sonner 靠 opacity:0 隐藏过期/超出堆叠数的
   //    toast（data-visible=false），强制不透明会让"幽灵 toast"留在屏幕上且点不动。
-  // 3. 宽度由 goose-toast.css 控制：max-content + max-width，避免固定 356px。
+  // 3. 宽度与布局由 styles/toast/layout.css 控制；数值以 ./toast-layout.ts 为准。
   toast:
     // Electron 旧内核不支持 hsl(var(--x)/alpha)，避免 bg-*/95、border-*/70 退化成实色
     "group goose-toast goose-toast-surface !text-sm !overflow-visible",
-  title: "!text-foreground !opacity-100 !font-medium !text-[14px] !leading-5",
-  description: "!text-[13px] !leading-5 !text-muted-foreground",
+  title: "!text-foreground !opacity-100 !font-medium !text-[14px]",
+  description: "!text-[13px] !text-muted-foreground",
   actionButton: cn(buttonVariants({ size: "sm" }), "!text-xs !font-medium"),
   cancelButton: cn(buttonVariants({ variant: "ghost", size: "sm" }), "!text-xs"),
   // Sonner owns the close button and dismissal; share the IconButton recipe.
-  closeButton: cn(iconButtonVariants({ tone: "muted", size: "xs" }),
-    "[&_svg]:size-3.5 goose-toast-close !absolute !left-auto !right-1.5 !top-2 !transform-none !translate-x-0 !translate-y-0 !border-0 !bg-transparent !opacity-100 !cursor-pointer !shadow-none"),
+  // 尺寸与位置只由 toast/layout.css 的 --goose-toast-* 变量决定，这里和业务侧都不得再覆盖。
+  closeButton: cn(iconButtonVariants({ tone: "muted", size: "xs" }), "goose-toast-close [&_svg]:size-4"),
   error:
     "goose-toast-error",
   success: "goose-toast-success",
@@ -48,11 +49,11 @@ function ErrorToastIcon() {
 }
 
 function SuccessToastIcon() {
-  return <CircleCheck className="size-5 shrink-0 text-[var(--goose-color-success)]" aria-hidden="true" />;
+  return <CircleCheck className="size-[var(--goose-toast-icon)] shrink-0 text-[var(--goose-color-success)]" aria-hidden="true" />;
 }
 
 function CloseToastIcon() {
-  return <X className="pointer-events-none h-4 w-4" aria-hidden="true" strokeWidth={2.25} />;
+  return <X className="pointer-events-none" aria-hidden="true" strokeWidth={2.25} />;
 }
 
 function successToast(message: ToastMessage, data?: ExternalToast) {
@@ -103,7 +104,7 @@ const Toaster = ({
       closeButton
       swipeDirections={["left", "right", "top"]}
       className={cn("toaster group goose-toaster", placement === "center" && "goose-toaster-center", className)}
-      style={{ ...style, zIndex: UI_LAYERS.toast }}
+      style={{ ...(toastLayoutCssVars() as CSSProperties), ...style, zIndex: UI_LAYERS.toast }}
       // 关闭 sonner 默认 richColors，错误视觉完全由全局 goose-toast-error 接管
       richColors={false}
       icons={{
@@ -163,7 +164,7 @@ const Toaster = ({
 /**
  * 全局唯一 toast 入口。
  * 错误态强制走 goose-toast-error（红字 + 圆底!，干净无装饰纹理），
- * 业务侧不得绕过这套视觉。
+ * 业务侧不得绕过这套视觉；不提供 custom，自绘内容无法共享图标 / 关闭按钮对齐。
  */
 const toast = Object.assign(
   (message: ToastMessage, data?: ExternalToast) => sonnerToast(message, data),
@@ -184,16 +185,6 @@ const toast = Object.assign(
           ...rest.classNames,
           toast: cn("goose-toast-error", rest.classNames?.toast),
           error: cn("goose-toast-error", rest.classNames?.error),
-          title: cn("goose-toast-error-title", rest.classNames?.title),
-          description: cn(
-            "goose-toast-error-description",
-            rest.classNames?.description,
-          ),
-          icon: cn("goose-toast-icon", rest.classNames?.icon),
-          closeButton: cn(
-            "goose-toast-error-close",
-            rest.classNames?.closeButton,
-          ),
         },
       });
     },
@@ -201,7 +192,6 @@ const toast = Object.assign(
       sonnerToast.message(message, data),
     loading: (message: ToastMessage, data?: ExternalToast) =>
       sonnerToast.loading(message, data),
-    custom: sonnerToast.custom.bind(sonnerToast),
     promise: sonnerToast.promise.bind(sonnerToast),
     dismiss: sonnerToast.dismiss.bind(sonnerToast),
     getHistory: sonnerToast.getHistory.bind(sonnerToast),
@@ -209,4 +199,4 @@ const toast = Object.assign(
   },
 );
 
-export { Toaster, toast, SuccessToastIcon };
+export { Toaster, toast };

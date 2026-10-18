@@ -107,7 +107,7 @@ declare module "../types" {
     "src/components/editor/utils/uploadEditorFile.ts#messages:1": { "thisNotebookDoesNotSupportUploadingAttachments": {  } };
     "src/components/preview/FullscreenPreview.tsx#localMessages:1": { "closePreview": {  }; "preview": {  }; "resetZoom": {  }; "zoomIn": {  }; "zoomOut": {  } };
     "src/components/ui/command.tsx#localMessages:1": { "chooseFolder": {  }; "findFolder": {  } };
-    "src/components/ui/delete-receipt.tsx#localMessages:1": { "deleteResult": {  }; "deletedItem": { "destination": string | number; "title": string | number }; "deletedMany": { "destination": string | number; "done": string | number }; "dismissResult": {  }; "failedDelete": { "failed": string | number }; "partialDelete": { "done": string | number; "failed": string | number }; "restoreManually": { "destination": string | number }; "systemRecycle": {  }; "systemTrash": {  }; "trash": {  }; "undo": {  }; "undoDelete": {  }; "undoFailed": {  } };
+    "src/components/ui/delete-receipt.tsx#localMessages:1": { "deletedItem": { "destination": string | number; "title": string | number }; "deletedMany": { "destination": string | number; "done": string | number }; "failedDelete": { "failed": string | number }; "partialDelete": { "done": string | number; "failed": string | number }; "restoreManually": { "destination": string | number }; "systemRecycle": {  }; "systemTrash": {  }; "trash": {  }; "undo": {  }; "undoFailed": {  } };
     "src/components/ui/dialog-shell.tsx#localMessages:1": { "dialog": {  }; "dialogContent": {  } };
     "src/components/ui/dropdown-menu.tsx#localMessages:1": { "actions": {  } };
     "src/components/ui/empty-state.tsx#localMessages:1": { "details": {  } };
