@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
-export const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/goose-note";
+export const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/thinkly";
 
 export function gh(args, input) {
   return execFileSync("gh", args, {

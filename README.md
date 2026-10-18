@@ -54,7 +54,7 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 ## 下载安装
 
-前往 [GitHub Releases](https://github.com/eachann1024/goose-note/releases/latest) 下载最新版本安装包：
+前往 [GitHub Releases](https://github.com/eachann1024/thinkly/releases/latest) 下载最新版本安装包：
 
 | 系统平台 | 安装包名称 | 架构说明与推荐 |
 | :--- | :--- | :--- |
@@ -81,8 +81,8 @@ Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「�
 <summary>macOS 亦可通过 Homebrew 安装</summary>
 
 ```bash
-brew tap eachann1024/goose-note https://github.com/eachann1024/goose-note
-brew install --cask eachann1024/goose-note/goose-note
+brew tap eachann1024/thinkly https://github.com/eachann1024/thinkly
+brew install --cask eachann1024/thinkly/goose-note
 # 升级
 brew upgrade --cask goose-note
 ```

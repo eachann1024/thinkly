@@ -94,7 +94,7 @@ writeFileSync(
       description: pkg.description,
       author: pkg.author,
       repository: pkg.repository,
-      homepage: pkg.homepage || "https://github.com/eachann1024/goose-note",
+      homepage: pkg.homepage || "https://github.com/eachann1024/thinkly",
       bugs: pkg.bugs,
       license: pkg.license,
       private: true,

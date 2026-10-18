@@ -19,7 +19,7 @@ import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/goose-note";
+const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/thinkly";
 
 // The get-release-by-tag endpoint never returns drafts, so look releases up in the full list.
 export function pickRelease(lines, tag) {

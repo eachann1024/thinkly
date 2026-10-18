@@ -1,6 +1,6 @@
 # Code signing policy
 
-Thinkly installers are published from the public repository [eachann1024/goose-note](https://github.com/eachann1024/goose-note).
+Thinkly installers are published from the public repository [eachann1024/thinkly](https://github.com/eachann1024/thinkly).
 
 ## What is signed
 

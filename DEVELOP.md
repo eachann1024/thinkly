@@ -7,8 +7,8 @@
 使用 `package.json` 指定的 Bun 版本；Node.js 需要 20 或以上。
 
 ```bash
-git clone https://github.com/eachann1024/goose-note.git
-cd goose-note
+git clone https://github.com/eachann1024/thinkly.git
+cd thinkly
 bun install --frozen-lockfile
 bun run dev          # 浏览器开发，端口 6001
 bun run typecheck
@@ -26,7 +26,7 @@ bun run linux        # Linux 包
 
 各平台命令自动编译 renderer、Electron main/preload，准备 `dist-electron/app-pack` 后打包。CI 和 Python 构建脚本通过 `node scripts/run-task.mjs build` 调用公共编译流程；需要调试信息时设置环境变量 `GOOSE_DEBUG=1`。
 
-仓库与源码目录统一为 `goose-note`，中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、数据目录名 Goose Note、安装包文件名、Linux 包名及可执行文件名 `goose-note-app`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单中的安装包继续使用旧仓库下载别名，由 GitHub 重定向；客户端同时校验新旧仓库地址。请勿复用旧仓库名，以免中断旧版更新。
+GitHub 仓库是 `eachann1024/thinkly`。中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、数据目录名 Goose Note、安装包文件名、Linux 包名及可执行文件名 `goose-note-app`、npm 包名 `goose-note`、Homebrew cask 名 `goose-note`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单里的安装包下载地址继续用 `eachann1024/goose-notes`，由 GitHub 重定向到本仓库；客户端同时接受 `thinkly`、`goose-note` 和 `goose-notes`。不要再占用这些旧仓库名，以免已安装的版本无法更新。
 
 跨平台单入口脚本（参考 1Panel build.py 思路，三平台通用）：
 
