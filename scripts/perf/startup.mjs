@@ -13,6 +13,7 @@
  *   app-ready          Chromium 引导完成，可以建窗
  *   language-init-end  语言包读完（当前代码在建窗之前）
  *   restore-windows-end 窗口已创建、开始加载 HTML
+ *   window-shown       窗口真正显示（用户感知的"打开"）
  *   did-finish-load    HTML 与首屏脚本执行完
  *   renderer-rendered   React 已提交首帧
  *   first-stable-frame 首帧稳定（双 rAF 之后）
@@ -157,6 +158,8 @@ const ORDER = [
   "web-contents:workspace",
   "dom-ready:workspace",
   "restore-windows-end",
+  "ready-to-show:workspace",
+  "window-shown:workspace",
   "did-finish-load:workspace",
   "renderer-rendered:workspace",
   "first-stable-frame:workspace",
