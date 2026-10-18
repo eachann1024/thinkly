@@ -57,11 +57,11 @@ export const FONT = {
   mono: '"JetBrains Mono", "SF Mono", "Menlo", monospace',
 } as const;
 
-/** 16:9 版式：左栏文案，右栏演示，点阵小人固定左下。 */
+/** 16:9 版式：左栏文案，右栏演示，主角半身像贴左下画框底边。 */
 export const LAYOUT = {
   safe: 120,
   text: { left: 120, top: 236, width: 620 },
   mock: { left: 820, top: 148, width: 980, height: 764, radius: 22 },
-  figure: { left: 128, top: 596 },
+  figure: { left: 120, top: 696 },
   eyebrow: { top: 72, left: 120, right: 120 },
 } as const;

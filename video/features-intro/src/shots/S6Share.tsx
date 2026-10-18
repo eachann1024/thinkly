@@ -2,7 +2,6 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { COLORS, FONT, LAYOUT } from "../theme";
 import { progressAt, scrollLinear } from "../motion";
 import { BodyText, CARD_BORDER, Chip, Window } from "../components/Kit";
-import { PixelArt } from "../components/PixelArt";
 import { Eyebrow, MonoLabel, StaggerText } from "../components/Text";
 
 const VIEW_HEIGHT = LAYOUT.mock.height - 56 - 66;
@@ -43,12 +42,9 @@ export function S6Share() {
                 gap: 26,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <PixelArt kind="goose" pitch={2.6} radius={1.2} />
-                <MonoLabel color={COLORS.inkSoft} size={19}>
-                  思绪 · Thinkly
-                </MonoLabel>
-              </div>
+              <MonoLabel color={COLORS.inkSoft} size={19}>
+                思绪 · Thinkly
+              </MonoLabel>
 
               <BodyText size={44} weight={700} color={COLORS.ink} style={{ letterSpacing: "-0.03em" }}>
                 给注意力留一点空间
