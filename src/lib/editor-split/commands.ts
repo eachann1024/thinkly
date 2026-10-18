@@ -5,7 +5,7 @@ const uiText = createTranslator(localMessages);
  * 常规笔记本分屏命令。快捷键代理只应调用这里。
  * - splitRight() / splitDown()
  * - closePaneOrTab() → "closed-pane" | "close-tab"
- * - focusNeighbor(...) / toggleZoom()
+ * - focusNeighbor(...) / toggleZoom()（与临时放大同一状态）
  */
 import { toast } from "@/components/ui/sonner";
 import {

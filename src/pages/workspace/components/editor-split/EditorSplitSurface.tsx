@@ -18,7 +18,6 @@ import {
   type Layout,
 } from "react-resizable-panels";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import { findLeaf } from "@/lib/editor-split/tree";
 import type { SplitGroup, SplitLeaf, SplitState } from "@/lib/editor-split/types";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
@@ -222,25 +221,6 @@ function EditorSplitLayout({
   );
 
   if (!splitState) return null;
-
-  const zoomedLeaf = splitState.zoomedLeafId
-    ? findLeaf(splitState.root, splitState.zoomedLeafId)
-    : null;
-
-  if (zoomedLeaf) {
-    return (
-      <div className="editor-split-surface editor-split-surface--zoomed" data-editor-split="true">
-        <SplitPane
-          tabId={tabId}
-          leaf={zoomedLeaf}
-          focused
-          zoomed
-          renderPane={renderPane}
-          onContextMenu={onContextMenu}
-        />
-      </div>
-    );
-  }
 
   if (splitState.root.kind === "leaf") {
     return (

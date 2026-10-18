@@ -1,4 +1,4 @@
-import { closeLeaf, countLeaves, findLeaf, focusedPageIdOf } from "./tree";
+import { closeLeaf, countLeaves, findLeaf, focusLeaf, focusedPageIdOf } from "./tree";
 import type { SplitLeaf, SplitState } from "./types";
 
 /** 放大 id 不进布局树。只剩一格、格子不存在，或再次点同一格时还原。 */
@@ -12,6 +12,61 @@ export function toggleMaximizedPaneId(
     return current && findLeaf(state.root, current) ? current : null;
   }
   return current === paneId ? null : paneId;
+}
+
+/** 放大时换焦点，占满跟着新格走。没放大则保持空。 */
+export function maximizedPaneAfterFocus(
+  state: SplitState,
+  current: string | null,
+  paneId: string,
+): string | null {
+  if (!current) return null;
+  if (countLeaves(state.root) <= 1) return null;
+  if (!findLeaf(state.root, paneId)) {
+    return findLeaf(state.root, current) ? current : null;
+  }
+  return paneId;
+}
+
+/**
+ * 旧的 `zoomedLeafId` 会卸掉其它格。读入时并进临时放大，树里不再留缩放。
+ * 只剩一格时直接还原。
+ */
+export function adoptLegacyZoom(byTabId: Record<string, SplitState>): {
+  byTabId: Record<string, SplitState>;
+  maximizedPaneIdByTab: Record<string, string>;
+} {
+  const maximizedPaneIdByTab: Record<string, string> = {};
+  let next = byTabId;
+  for (const [tabId, state] of Object.entries(byTabId)) {
+    if (!state.zoomedLeafId) continue;
+    if (next === byTabId) next = { ...byTabId };
+    const paneId = toggleMaximizedPaneId(state, null, state.zoomedLeafId);
+    next[tabId] = { ...state, zoomedLeafId: null };
+    if (paneId) maximizedPaneIdByTab[tabId] = paneId;
+  }
+  return { byTabId: next, maximizedPaneIdByTab };
+}
+
+/** 焦点落到指定格，放大跟着走。没有变化时返回 null。 */
+export function focusedPanePatch(
+  store: { byTabId: Record<string, SplitState>; maximizedPaneIdByTab: Record<string, string> },
+  tabId: string,
+  paneId: string,
+): { byTabId: Record<string, SplitState>; maximizedPaneIdByTab: Record<string, string> } | null {
+  const current = store.byTabId[tabId];
+  if (!current) return null;
+  const next = focusLeaf(current, paneId);
+  const maximizedPaneIdByTab = writeMaximizedPane(
+    store.maximizedPaneIdByTab,
+    tabId,
+    maximizedPaneAfterFocus(next, store.maximizedPaneIdByTab[tabId] ?? null, paneId),
+  );
+  if (next === current && maximizedPaneIdByTab === store.maximizedPaneIdByTab) return null;
+  return {
+    byTabId: next === current ? store.byTabId : { ...store.byTabId, [tabId]: next },
+    maximizedPaneIdByTab,
+  };
 }
 
 /** 关掉被放大的格，或树里只剩一格时必须还原。不改传入的树。 */

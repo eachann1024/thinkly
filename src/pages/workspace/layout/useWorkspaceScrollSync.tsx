@@ -18,7 +18,8 @@ export function useWorkspaceScrollSync(
 
   const hasVisibleSplit = useEditorSplitSelector((state) => {
     const split = activeTabId ? state.byTabId[activeTabId] : null;
-    return Boolean(split && !split.zoomedLeafId && countLeaves(split.root) > 1);
+    if (!split || split.zoomedLeafId || countLeaves(split.root) <= 1) return false;
+    return !activeTabId || !state.maximizedPaneIdByTab[activeTabId];
   }, Object.is);
   const workspaceStageRef = useWorkspaceSplitSpacing(
     hasVisibleSplit && !input.settingsOpen && !showFullscreenAi &&

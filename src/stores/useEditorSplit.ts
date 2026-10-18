@@ -29,10 +29,8 @@ import {
   splitLeaf,
   closeLeaf,
   focusedPageIdOf,
-  focusLeaf,
   neighborLeaf,
   replaceSizes,
-  toggleZoom as toggleZoomTree,
   setLeafPage,
   createSingleLeafState,
   isSplitState,
@@ -40,6 +38,8 @@ import {
 } from "@/lib/editor-split/tree";
 import { useStoreWithEqualityFn } from "zustand/traditional";
 import {
+  adoptLegacyZoom,
+  focusedPanePatch,
   maximizedPaneAfterTreeChange,
   toggleMaximizedPaneId,
   writeMaximizedPane,
@@ -60,11 +60,12 @@ function patchTab(
 }
 
 const persisted = loadPersisted();
+const adoptedZoom = adoptLegacyZoom(persisted.byTabId);
 const syncScrollByTabId = loadInitialSyncScroll();
 
 export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
-  byTabId: persisted.byTabId,
-  maximizedPaneIdByTab: {},
+  byTabId: adoptedZoom.byTabId,
+  maximizedPaneIdByTab: adoptedZoom.maximizedPaneIdByTab,
   syncScrollByTabId,
 
   getStateForTab: (tabId) => get().byTabId[tabId] ?? null,
@@ -132,7 +133,7 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   movePane: (tabId, sourceId, targetId, placement) => {
     const { byTabId } = get();
     const current = byTabId[tabId];
-    if (!current) return false;
+    if (!current || get().maximizedPaneIdByTab[tabId]) return false;
     const next = moveLeaf(current, sourceId, targetId, placement);
     if (next === current) return false;
     set({ byTabId: patchTab(byTabId, tabId, next) });
@@ -140,11 +141,8 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   },
 
   focusPane: (tabId, paneId) => {
-    const current = get().byTabId[tabId];
-    if (!current) return;
-    const next = focusLeaf(current, paneId);
-    if (next === current) return;
-    set({ byTabId: patchTab(get().byTabId, tabId, next) });
+    const patch = focusedPanePatch(get(), tabId, paneId);
+    if (patch) set(patch);
   },
 
   focusNeighbor: (tabId, dir) => {
@@ -152,9 +150,8 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
     if (!current) return null;
     const neighbor = neighborLeaf(current, current.focusedLeafId, dir);
     if (!neighbor) return null;
-    set({
-      byTabId: patchTab(get().byTabId, tabId, focusLeaf(current, neighbor.id)),
-    });
+    const patch = focusedPanePatch(get(), tabId, neighbor.id);
+    if (patch) set(patch);
     return neighbor.id;
   },
 
@@ -169,7 +166,10 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   toggleZoom: (tabId) => {
     const current = get().byTabId[tabId];
     if (!current) return;
-    set({ byTabId: patchTab(get().byTabId, tabId, toggleZoomTree(current)) });
+    if (current.zoomedLeafId) {
+      set({ byTabId: patchTab(get().byTabId, tabId, { ...current, zoomedLeafId: null }) });
+    }
+    get().toggleMaximizePane(tabId, (get().byTabId[tabId] ?? current).focusedLeafId);
   },
 
   toggleMaximizePane: (tabId, paneId) => {

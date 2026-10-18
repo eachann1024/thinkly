@@ -71,8 +71,9 @@ export function useSplitPaneDrag(tabId: string) {
     if (!surface) return;
     let session: DragSession | null = null;
     const enabled = () => {
-      const state = useEditorSplit.getState().getStateForTab(tabId);
-      return state?.root.kind === "group" && !state.zoomedLeafId;
+      const store = useEditorSplit.getState();
+      const state = store.getStateForTab(tabId);
+      return state?.root.kind === "group" && !state.zoomedLeafId && !store.maximizedPaneIdByTab[tabId];
     };
     const finish = (commit: boolean, restoreFocus = true) => {
       const current = session;
@@ -204,7 +205,7 @@ export function useSplitPaneDrag(tabId: string) {
       if (next.activeTabId !== previous.activeTabId) cancel();
     });
     const unsubscribeSplit = useEditorSplit.subscribe((next, previous) => {
-      if (session && (next.byTabId[tabId]?.root !== previous.byTabId[tabId]?.root || next.byTabId[tabId]?.zoomedLeafId)) cancel();
+      if (session && (next.byTabId[tabId]?.root !== previous.byTabId[tabId]?.root || next.byTabId[tabId]?.zoomedLeafId || next.maximizedPaneIdByTab[tabId] !== previous.maximizedPaneIdByTab[tabId])) cancel();
     });
     return () => {
       finish(false, false);
