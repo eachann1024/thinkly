@@ -15,15 +15,9 @@ export function isPasteableClipboardImageFile(
 export function clipboardHasPasteableImage(
   data: DataTransfer | null | undefined,
 ): boolean {
-  if (!data?.items?.length) return false;
-  for (let i = 0; i < data.items.length; i++) {
-    const item = data.items[i];
-    if (item.kind !== "file") continue;
-    const file = item.getAsFile();
-    if (!file) continue;
-    if (isPasteableClipboardImageFile(file, item.type)) return true;
-  }
-  return false;
+  return extractClipboardFiles(data).some(({ file, mime }) =>
+    isPasteableClipboardImageFile(file, mime),
+  );
 }
 
 /**
@@ -38,6 +32,19 @@ export type ClipboardImageSource = {
   }> | null;
   files?: ArrayLike<File> | null;
 };
+
+/** 在粘贴事件仍有效时取得文件；items/files 是同一批内容的两种表示。 */
+export function extractClipboardFiles(
+  data: ClipboardImageSource | null | undefined,
+): { file: File; mime: string }[] {
+  const files: { file: File; mime: string }[] = [];
+  for (const item of Array.from(data?.items ?? [])) {
+    const file = item.kind === "file" ? item.getAsFile() : null;
+    if (file) files.push({ file, mime: item.type || file.type });
+  }
+  if (files.length) return files;
+  return Array.from(data?.files ?? []).map((file) => ({ file, mime: file.type }));
+}
 
 /**
  * 从剪贴板/拖放数据提取图片 File。
@@ -99,18 +106,10 @@ export function isPasteableClipboardVideoFile(
 export function clipboardHasPasteableMedia(
   data: DataTransfer | null | undefined,
 ): boolean {
-  if (!data?.items?.length) return false;
-  for (let i = 0; i < data.items.length; i++) {
-    const item = data.items[i];
-    const file = item.kind === "file" ? item.getAsFile() : null;
-    if (
-      file &&
-      (isPasteableClipboardImageFile(file, item.type) ||
-        isPasteableClipboardVideoFile(file, item.type))
-    )
-      return true;
-  }
-  return false;
+  return extractClipboardFiles(data).some(({ file, mime }) =>
+    isPasteableClipboardImageFile(file, mime) ||
+    isPasteableClipboardVideoFile(file, mime),
+  );
 }
 
 /** 上传路径是否应按图片走 imageStorage（含剪贴板 type 为空的 Mac 截图，需有图片扩展名） */

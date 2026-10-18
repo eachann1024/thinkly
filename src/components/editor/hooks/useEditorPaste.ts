@@ -4,7 +4,7 @@ import {
   normalizeMarkdownPasteText,
   looksLikeMermaidDiagram,
 } from "../utils/clipboard";
-import { clipboardHasPasteableImage } from "../utils/pasteClipboardImage";
+import { clipboardHasPasteableImage, clipboardHasPasteableMedia } from "../utils/pasteClipboardImage";
 import { handleEditorStructurePaste } from "./editorStructurePaste";
 import { handleEditorTextPaste } from "./editorTextPaste";
 import {
@@ -41,6 +41,7 @@ export function useEditorPaste({
     (event: React.ClipboardEvent<HTMLDivElement>) => {
       if (!editable) return;
       if (clipboardHasPasteableImage(event.clipboardData)) return;
+      if (!__GOOSE_EDITOR_COMPACT__ && clipboardHasPasteableMedia(event.clipboardData)) return;
       if (event.defaultPrevented) return;
       if (
         (event.target as HTMLElement | null)?.closest(".goose-code-block-node")
