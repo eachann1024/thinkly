@@ -3,7 +3,6 @@ import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
 import { IntroVideoOverlay } from "@/pages/workspace/components/intro-video/IntroVideoOverlay";
 import { useIntroVideo } from "@/stores/introVideo";
 import { useEffect, useState } from "react";
-import { useTextCaret } from "@/hooks/useTextCaret";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { useShallow } from "zustand/react/shallow";
 import { applyEditorCanvasAttributes } from "@/lib/editorCanvas";
@@ -55,7 +54,6 @@ function AppearanceSync() {
 
 function App() {
   useLocale();
-  useTextCaret();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
   const showSetupGuide = useSettings(isSetupGuideVisible);
   const introVideoOpen = useIntroVideo((state) => state.open);
