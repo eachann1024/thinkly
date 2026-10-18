@@ -53,5 +53,6 @@ export {
   isSearchWindowVisible,
   markSearchRendererReady,
   openSearchResultInWorkspace,
+  dispatchSearchWindowCommand,
 } from "./windows/search";
 export { requestCloseActiveTab } from "./windows/close";

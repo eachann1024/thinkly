@@ -1,6 +1,8 @@
 import { ipcMain } from "electron";
-import { parseOpenSearchResultPayload } from "../../../src/lib/electron/searchWindow";
+import { parseOpenSearchResultPayload, parseSearchWindowCommand } from "../../../src/lib/electron/searchWindow";
 import {
+  dispatchSearchWindowCommand,
+  getMainWindow,
   getSearchWindow,
   hideSearchWindow,
   markSearchRendererReady,
@@ -30,5 +32,15 @@ export function registerSearchWindowIpc(): void {
     // 先把结果回给搜索窗，再收起它并唤出主窗。
     setImmediate(() => openSearchResultInWorkspace(payload));
     return true;
+  });
+
+  ipcMain.handle("desktop:searchWindowCommand", async (event, value: unknown) => {
+    if (!fromSearchWindow(event)) return false;
+    const command = parseSearchWindowCommand(value);
+    if (!command) return false;
+    const main = getMainWindow();
+    const mainAlive = Boolean(main && !main.isDestroyed());
+    setImmediate(() => dispatchSearchWindowCommand(command));
+    return command.type === "hide-recent" || command.type === "archive-ai" ? mainAlive : true;
   });
 }

@@ -3,13 +3,15 @@
  *
  * - resolveSearchHotkeySurface：全局搜索热键该打开应用内搜索面板，还是切换浮动搜索窗；
  * - centeredSearchWindowBounds：在光标所在屏的工作区内水平居中、偏上三分之一放置；
- * - parseOpenSearchResultPayload：校验浮动窗发往主进程的「打开结果」载荷。
+ * - parseOpenSearchResultPayload：校验浮动窗发往主进程的「打开结果」载荷；
+ * - parseSearchWindowCommand：校验续聊、打开设置、隐藏最近与分屏等主窗动作。
  */
 
 export const SEARCH_WINDOW_WIDTH = 680;
 export const SEARCH_WINDOW_HEIGHT = 460;
 export const OPEN_SEARCH_RESULT_CHANNEL = "desktop:open-search-result";
 export const SEARCH_WINDOW_SHOWN_CHANNEL = "desktop:search-window-shown";
+export const SEARCH_WINDOW_COMMAND_CHANNEL = "desktop:search-window-command";
 
 export type SearchHotkeySource = "workspace" | "quicknote" | "search";
 
@@ -97,4 +99,84 @@ export function resolveSearchResultPageId(
     if (page && !page.isFolder && page.localFilePath === payload.localFilePath) return page.id;
   }
   return null;
+}
+
+export const SEARCH_SPLIT_ACTIONS = ["split-right", "split-down", "split-zoom", "split-close"] as const;
+export type SearchSplitAction = (typeof SEARCH_SPLIT_ACTIONS)[number];
+
+export type SearchAiSourcePayload = { id: string; title: string; index: number | null };
+
+type SearchAiBody = {
+  token: string;
+  notebookId: string;
+  question: string;
+  text: string;
+  sources: SearchAiSourcePayload[];
+};
+
+/** 浮动搜索窗不能自己写聊天记录、设置或分屏，这些动作交给主窗。 */
+export type SearchWindowCommand =
+  | ({ type: "archive-ai" } & SearchAiBody)
+  | ({ type: "continue-ai" } & SearchAiBody)
+  | { type: "ask-ai"; notebookId: string; question: string }
+  | { type: "open-settings"; tab: "ai" }
+  | { type: "hide-recent" }
+  | { type: "split"; action: SearchSplitAction };
+
+const MAX_QUESTION_LENGTH = 4_000;
+const MAX_ANSWER_LENGTH = 20_000;
+const MAX_SOURCES = 12;
+const MAX_TITLE_LENGTH = 500;
+const MAX_TOKEN_LENGTH = 80;
+
+function parseAiSource(value: unknown): SearchAiSourcePayload | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const id = typeof record.id === "string" ? record.id.trim() : "";
+  const title = typeof record.title === "string" ? record.title.trim() : "";
+  if (!id || id.length > MAX_ID_LENGTH || !title || title.length > MAX_TITLE_LENGTH) return null;
+  const index = record.index;
+  if (index !== null && (typeof index !== "number" || !Number.isInteger(index) || index < 1 || index > 99)) return null;
+  return { id, title, index };
+}
+
+function parseAiBody(record: Record<string, unknown>): SearchAiBody | null {
+  const token = typeof record.token === "string" ? record.token.trim() : "";
+  const notebookId = typeof record.notebookId === "string" ? record.notebookId.trim() : "";
+  if (!token || token.length > MAX_TOKEN_LENGTH || !notebookId || notebookId.length > MAX_ID_LENGTH) return null;
+  if (typeof record.question !== "string" || !record.question.trim() || typeof record.text !== "string") return null;
+  if (!Array.isArray(record.sources) || record.sources.length > MAX_SOURCES) return null;
+  const sources: SearchAiSourcePayload[] = [];
+  for (const item of record.sources) {
+    const source = parseAiSource(item);
+    if (!source) return null;
+    sources.push(source);
+  }
+  return {
+    token,
+    notebookId,
+    question: record.question.slice(0, MAX_QUESTION_LENGTH),
+    text: record.text.slice(0, MAX_ANSWER_LENGTH),
+    sources,
+  };
+}
+
+export function parseSearchWindowCommand(value: unknown): SearchWindowCommand | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  if (record.type === "hide-recent") return { type: "hide-recent" };
+  if (record.type === "open-settings") return record.tab === "ai" ? { type: "open-settings", tab: "ai" } : null;
+  if (record.type === "split") {
+    return typeof record.action === "string" && (SEARCH_SPLIT_ACTIONS as readonly string[]).includes(record.action)
+      ? { type: "split", action: record.action as SearchSplitAction }
+      : null;
+  }
+  if (record.type === "ask-ai") {
+    const notebookId = typeof record.notebookId === "string" ? record.notebookId.trim() : "";
+    if (!notebookId || notebookId.length > MAX_ID_LENGTH || typeof record.question !== "string" || !record.question.trim()) return null;
+    return { type: "ask-ai", notebookId, question: record.question.slice(0, MAX_QUESTION_LENGTH) };
+  }
+  if (record.type !== "continue-ai" && record.type !== "archive-ai") return null;
+  const body = parseAiBody(record);
+  return body ? { type: record.type, ...body } : null;
 }
