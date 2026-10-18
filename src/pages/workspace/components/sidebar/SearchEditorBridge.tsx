@@ -61,6 +61,7 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/components/editor/core/headingSectionFold";
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
+import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 import "./search-editor-bridge.css";
 
@@ -88,9 +89,11 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
 }) {
   useLocale();
   const session = useSearchSession(useShallow(s => ({
-    open: s.view.phase !== "closed", query: s.query, scope: s.scope,
+    phase: s.view.phase, query: s.query, scope: s.scope,
     requestNonce: s.navigation.phase === "target" ? s.navigation.id : 0,
-    origin: s.view.phase !== "closed" ? s.view.context : null,
+    resultPageId: s.view.phase === "closed" ? null : s.view.context.resultPageId,
+    originPageId: s.view.phase === "closed" ? null : s.view.context.originPageId,
+    originScrollTop: s.view.phase === "closed" ? 0 : s.view.context.originScrollTop,
   })));
   const page = usePages(s => s.pages[pageId]);
   const pages = usePages(s => s.pages);
@@ -103,11 +106,12 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   const handled = useRef(0);
   const previouslyVisible = useRef(false);
   const navigationReadyAt = useRef(0);
-  const visible = session.open && focused;
+  const attached = session.phase !== "closed" && session.resultPageId === pageId;
+  const showChrome = session.phase === "reader" && attached;
   const key = searchMemoryKey(pageId, session.query, session.scope);
   const close = () => {
     useSearchSession.getState().closeSearch();
-    requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.sidebar-mode-rail-button[data-sidebar-view="search"]')?.focus({ preventScroll: true }));
+    requestAnimationFrame(() => scrollRef.current?.focus({ preventScroll: true }));
   };
   const locate = () => {
     const editor = editorRef.current?.editor;
@@ -129,7 +133,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     }
     cancelAnimationFrame(frame.current);
     frame.current = requestAnimationFrame(() => {
-      if (useSearchSession.getState().view.phase === "closed" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
+      if (useSearchSession.getState().view.phase !== "reader" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const scroller = scrollRef.current;
       const target = (editor.prosemirrorView.dom as HTMLElement).querySelector<HTMLElement>(".goose-search-session-match--current");
       if (!scroller || !target) return;
@@ -154,8 +158,8 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   };
   useEffect(() => {
     let cancelled = false;
-    if (visible && !previouslyVisible.current) navigationReadyAt.current = performance.now() + 200;
-    previouslyVisible.current = visible;
+    if (attached && !previouslyVisible.current) navigationReadyAt.current = performance.now() + 200;
+    previouslyVisible.current = attached;
     const apply = () => {
       if (cancelled) return;
       const editor = editorRef.current?.editor;
@@ -163,30 +167,26 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       // Editor stamps this only after replacing the document for this page.
       if (editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const latest = useSearchSession.getState();
-      if (latest.query !== session.query || latest.scope !== session.scope || (latest.view.phase !== "closed") !== session.open) return;
+      const latestAttached = latest.view.phase !== "closed" && latest.view.context.resultPageId === pageId;
+      if (latest.query !== session.query || latest.scope !== session.scope || latestAttached !== attached) return;
       const previous = getSearchSessionHighlightState(editor);
-      const query = visible ? session.query.trim() : "";
+      const query = attached ? session.query.trim() : "";
       if (previous?.query !== query) {
         const saved = useSearchSession.getState().memories[key] ?? 0;
         setSearchSessionHighlightQuery(editor, query, false, saved);
       }
       const state = getSearchSessionHighlightState(editor);
       setCount(state?.matches.length ?? 0); setCurrent((state?.current ?? -1) + 1);
-      const request = useSearchSession.getState().navigation;
-      if (visible && request.phase === "target" && request.pageId === pageId && request.id !== handled.current) {
-        handled.current = request.id;
-        // Explicit search navigation takes priority over the page's saved scroll position.
-        const titleMatch = query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
-        if (request.restoreTop !== null || state?.matches.length || titleMatch) cancelPendingRestoration();
-        if (request.restoreTop !== null && scrollRef.current) scrollRef.current.scrollTop = request.restoreTop;
-        else locate();
-        if (request.enterReader) {
-          scrollRef.current?.focus({ preventScroll: true });
-        }
-        if (request.enterReader) {
-          window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
-        }
-      }
+      const request = latest.navigation;
+      if (latest.view.phase === "closed" || request.phase !== "target" || request.pageId !== pageId || request.id === handled.current) return;
+      handled.current = request.id;
+      // Explicit search navigation takes priority over the page's saved scroll position.
+      const titleMatch = attached && query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
+      if (request.restoreTop !== null || (attached && (state?.matches.length || titleMatch))) cancelPendingRestoration();
+      if (request.restoreTop !== null && scrollRef.current) scrollRef.current.scrollTop = request.restoreTop;
+      else if (attached) locate();
+      if (attached) scrollRef.current?.focus({ preventScroll: true });
+      if (request.enterReader) window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
     };
     const refresh = () => {
       const editor = editorRef.current?.editor;
@@ -198,7 +198,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       if (editorRef.current?.editor?.prosemirrorView === view) refresh();
     });
     const navigation = useSearchSession.getState().navigation;
-    const immediate = !visible || !session.query.trim() ||
+    const immediate = !attached || !session.query.trim() ||
       (navigation.phase === "target" && navigation.pageId === pageId && navigation.id !== handled.current);
     const applyAfter = performance.now() + (immediate ? 0 : Math.max(120, navigationReadyAt.current - performance.now()));
     let timer = 0;
@@ -212,13 +212,18 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     ready();
     window.addEventListener("goose-note:search-editor-ready", ready);
     return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };
-  }, [visible, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration]);
+  }, [attached, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration]);
   useEffect(() => () => {
     const editor = editorRef.current?.editor;
     if (editor && !editor._tiptapEditor.isDestroyed) clearSearchSessionHighlight(editor);
   }, [editorRef]);
+  const paneFocused = useRef(focused);
+  paneFocused.current = focused;
   useEffect(() => {
-    if (!visible) { setPathOpen(false); return; }
+    if (showChrome && paneFocused.current) scrollRef.current?.focus({ preventScroll: true });
+  }, [showChrome, scrollRef]);
+  useEffect(() => {
+    if (!showChrome || !focused) { setPathOpen(false); return; }
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || event.keyCode === 229) return;
       if (document.querySelector('[role="dialog"], [role="menu"]')) return;
@@ -227,21 +232,24 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [visible, pathOpen, key]);
-  if (!visible || !page) return null;
+  }, [showChrome, focused, pathOpen, key]);
+  if (!showChrome || !page) return null;
   const crumbs = [getPageTitle(page)];
   const seen = new Set([page.id]); let parentId = page.parentId;
   while (parentId && pages[parentId] && !seen.has(parentId)) { seen.add(parentId); crumbs.unshift(getPageTitle(pages[parentId])); parentId = pages[parentId].parentId; }
   crumbs.unshift(notebooks[page.workspaceId]?.name ?? uiText("notebook_1873"));
   const titleOnly = !count && session.query.trim() && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase());
+  const originId = session.originPageId;
+  const canReturn = Boolean(originId && originId !== pageId && pages[originId]);
   return <>
     <div className="search-editor-path"><Popover open={pathOpen} onOpenChange={setPathOpen}><PopoverTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("showFullNotePath_cbcb")} title={crumbs.join(" / ")}>{crumbs.length > 2 ? `${crumbs[0]} / ${crumbs.at(-2)}` : crumbs.join(" / ")}</Button></PopoverTrigger><PopoverContent align="end" className="max-w-[min(24rem,85vw)] break-words text-sm">{crumbs.join(" / ")}</PopoverContent></Popover></div>
     <div className="search-editor-matchbar" aria-label={uiText("searchMatchNavigation_00ab")}>
-      <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("backToSearchResults_69e3")} onClick={() => window.dispatchEvent(new CustomEvent("goose-note:open-search"))}><ArrowLeft size={16}/><span>{uiText("searchResults_098f")}</span></Button>
+      <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("backToSearchResults_69e3")} onClick={() => { closeNotebookAiIfFullscreen(); useSearchSession.getState().reopenSheet(); }}><ArrowLeft size={16}/><span>{uiText("searchResults_098f")}</span></Button>
       <span role="status">{count ? uiText("matchPosition", { current, count }) : titleOnly ? uiText("titleMatch_92f9") : uiText("noMatchesInNoteContent_997e")}</span>
-      <IconButton size="xs" className="p-0" aria-label={uiText("previousMatch_cd54")} disabled={!count} onClick={() => step(-1)}><ChevronUp size={16}/></IconButton><IconButton size="xs" className="p-0" aria-label={uiText("nextMatch_98c3")} disabled={!count} onClick={() => step(1)}><ChevronDown size={16}/></IconButton>
+      {count > 1 && <IconButton size="xs" className="p-0" aria-label={uiText("previousMatch_cd54")} onClick={() => step(-1)}><ChevronUp size={16}/></IconButton>}
+      {count > 1 && <IconButton size="xs" className="p-0" aria-label={uiText("nextMatch_98c3")} onClick={() => step(1)}><ChevronDown size={16}/></IconButton>}
       <span className="search-match-message" aria-live="polite">{message}</span>
-      <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" disabled={!session.origin?.originPageId || !pages[session.origin?.originPageId]} onClick={() => session.origin?.originPageId && useSearchSession.getState().targetPage(session.origin?.originPageId, true, session.origin.originScrollTop)}>{uiText("backToOriginalNote_7521")}</Button>
+      {canReturn && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" onClick={() => originId && useSearchSession.getState().targetPage(originId, false, session.originScrollTop)}>{uiText("backToOriginalNote_7521")}</Button>}
       <IconButton size="xs" className="p-0" aria-label={uiText("exitSearch_3633")} onClick={close}><X size={16}/></IconButton>
     </div>
   </>;

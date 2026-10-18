@@ -5,6 +5,8 @@ export type { SearchScope, SearchSort } from "./searchSessionState";
 type SearchSession = SearchSessionState & {
   openSearch: (notebookId: string | null, pageId: string | null, scrollTop: number) => void;
   closeSearch: () => void;
+  reopenSheet: () => void;
+  dismissSheet: () => void;
   setTitleOnly: (titleOnly: boolean) => void;
   setSort: (sort: SearchSort) => void;
   setQuery: (query: string) => void;
@@ -20,6 +22,8 @@ export const useSearchSession = create<SearchSession>((set) => {
   return { ...initialSearchSession,
     openSearch: (notebookId, pageId, scrollTop) => send({ type: "opened", notebookId, pageId, scrollTop }),
     closeSearch: () => send({ type: "closed" }),
+    reopenSheet: () => send({ type: "sheet-reopened" }),
+    dismissSheet: () => send({ type: "sheet-dismissed" }),
     setTitleOnly: titleOnly => send({ type: "title-filter-edited", titleOnly }),
     setSort: sort => send({ type: "sort-edited", sort }),
     setQuery: query => send({ type: "query-edited", query }),
