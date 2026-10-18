@@ -1,6 +1,18 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 
-/** 保留预览文档和字体，只替换发生变化的卡片区域，避免开关触发 iframe 导航。 */
+function between(html: string, start: string, end: string): string {
+  const from = html.indexOf(start);
+  if (from < 0) return "";
+  const begin = from + start.length;
+  const to = html.indexOf(end, begin);
+  return to < 0 ? "" : html.slice(begin, to);
+}
+
+/** 主题弹层在当前文档里画预览，不等 iframe 和网络字体。 */
+function previewMarkup(html: string): string {
+  return `<style>${between(html, "<style>", "</style>")}</style>${between(html, "<body>", "</body>")}`;
+}
+
 export function PreviewFrame({
   html,
   title,
@@ -14,69 +26,34 @@ export function PreviewFrame({
   style: CSSProperties;
   onHeightChange?: (height: number) => void;
 }) {
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const [initialHtml] = useState(() => html);
+  const hostRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
+    const host = hostRef.current;
+    if (!host) return;
+    const root = host.shadowRoot ?? host.attachShadow({ mode: "open" });
+    root.innerHTML = previewMarkup(html);
     let observer: ResizeObserver | undefined;
     let active = true;
     const measure = () => {
-      if (!active) return;
-      const card = frame.contentDocument?.querySelector<HTMLElement>(
-        ".gooseshot-container",
-      );
+      if (!active || !onHeightChange) return;
+      const card = root.querySelector<HTMLElement>(".gooseshot-container");
       if (!card) return;
       const height = Math.ceil(Math.max(card.scrollHeight, card.offsetHeight));
-      if (height > 0) onHeightChange?.(height);
+      if (height > 0) onHeightChange(height);
     };
-    const update = () => {
-      const doc = frame.contentDocument;
-      const card = doc?.querySelector(".gooseshot-card");
-      const stylesheet = doc?.querySelector("style");
-      if (!doc || !card || !stylesheet) return;
-      const next = new DOMParser().parseFromString(html, "text/html");
-      const css = next.querySelector("style")?.textContent ?? "";
-      if (stylesheet.textContent !== css) stylesheet.textContent = css;
-      for (const region of ["header", "content", "watermark"]) {
-        const selector = `.gooseshot-${region}`;
-        const current = card.querySelector(selector);
-        const replacement = next.querySelector(selector);
-        if (current?.outerHTML === replacement?.outerHTML) continue;
-        if (current) {
-          if (replacement) current.replaceWith(replacement);
-          else current.remove();
-        } else if (replacement) {
-          if (region === "header") card.prepend(replacement);
-          else card.append(replacement);
-        }
-      }
-      measure();
-      observer?.disconnect();
-      if (onHeightChange) {
-        observer = new ResizeObserver(measure);
-        observer.observe(doc.body);
-        void doc.fonts.ready.then(measure);
-      }
-    };
-    frame.addEventListener("load", update);
-    update();
+    measure();
+    const card = root.querySelector<HTMLElement>(".gooseshot-container");
+    if (onHeightChange && card) {
+      observer = new ResizeObserver(measure);
+      observer.observe(card);
+      void document.fonts?.ready.then(measure);
+    }
     return () => {
       active = false;
-      frame.removeEventListener("load", update);
       observer?.disconnect();
     };
   }, [html, onHeightChange]);
 
-  return (
-    <iframe
-      ref={frameRef}
-      title={title}
-      srcDoc={initialHtml}
-      sandbox="allow-same-origin"
-      className={className}
-      style={style}
-    />
-  );
+  return <div ref={hostRef} aria-label={title} className={className} style={style} />;
 }
