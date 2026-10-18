@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/lib/ai-provider/modelCatalog.ts#localMessages:1": { "authenticationFailed": { "hint": string | number; "provider": string | number }; "customAnthropicProvider": {  }; "customOpenaiCompatibleProvider": {  }; "customOpenaiResponsesProvider": {  }; "enableTheAiAssistantInSettingsFirst": {  }; "missingApiKey": { "hint": string | number }; "saveYourCustomAiConfigurationAndLoadTheModel": {  } };
     "src/lib/ai-provider/presets.ts#localMessages:1": { "chatCompletionsCompatible": {  }; "claudeMessagesCompatible": {  }; "customAnthropic": {  }; "customOpenaiCompatible": {  }; "customOpenaiResponses": {  }; "glmZhipu": {  }; "officialApiEnterYourApiKey": {  }; "officialApiPlatform": {  }; "openaiResponsesCompatible": {  }; "zhipuBigmodelPlatform": {  } };
     "src/lib/ai-provider/providers/claude.ts#localMessages:1": { "theCustomAnthropicModelRequestFailed": {  } };
     "src/lib/ai-provider/providers/openai.ts#localMessages:1": { "theCustomOpenaiModelRequestFailed": {  } };
@@ -108,6 +109,7 @@ declare module "../types" {
     "src/pages/workspace/components/AIFeatureNotice.tsx#localMessages:1": { "chooseAProviderSaveYourSettingsAnd": {  }; "openSettings": {  }; "setUpLater": {  }; "setUpTheAiWritingAssistant": {  } };
     "src/pages/workspace/components/ReadingPreferences.tsx#localMessages:1": { "aLittleSpaceBetweenTheLinesMakes": {  }; "giveYourWordsRoomToBreathe": {  }; "lineSpacing": {  }; "lineSpacingPresets": {  }; "livePreview": {  }; "readingPreview": {  }; "relaxed": {  }; "standard": {  }; "textSize": {  }; "times": {  }; "writeDownSomethingWorthRememberingTodayThere": {  } };
     "src/pages/workspace/components/SetupGuide.tsx#localMessages:1": { "adjustReadingPreferences": {  }; "appearance": {  }; "appearancePreview": {  }; "back": {  }; "customizeAppearance": {  }; "exitSetup": {  }; "finishSetup": {  }; "next": {  }; "progress": { "step": string | number; "total": string | number }; "reading": {  }; "setupGuide": {  }; "setupSteps": {  } };
+    "src/pages/workspace/components/character-onboarding/CharacterOnboarding.tsx#localMessages:1": { "characters": {  }; "confirm": {  }; "title": {  } };
     "src/pages/workspace/components/command/pageSearchIndex.ts#localMessages:1": { "untitled": {  } };
     "src/pages/workspace/components/command/searchPageFilter.ts#localMessages:1": { "untitled": {  } };
     "src/pages/workspace/components/command/splitPaletteActions.ts#localMessages:1": { "closePane": {  }; "maximizePane": {  }; "splitDown": {  }; "splitRight": {  } };
@@ -120,7 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1": { "closeThisPane": {  }; "dragToRearrangePanes": {  }; "dragToTheEdgeOfAnotherPane": {  }; "movePane": { "title": string | number } };
     "src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1": { "moveAbove": {  }; "moveBelow": {  }; "moveLeft": {  }; "moveRight": {  }; "swapPositions": {  } };
     "src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1": { "edgeTarget": { "name": string | number }; "moveCanceled": {  }; "movingPane": { "title": string | number }; "pane": {  }; "panesRearranged": {  }; "swapPositions": {  }; "swapTarget": { "name": string | number }; "untitled": {  } };
-    "src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1": { "theContentMayUseAnOlderFormatOr": {  }; "thisNoteCannotBePreviewed": {  }; "thisNoteCouldNotBeFoundSoIts": {  }; "thisVersionCannotBeDisplayed": {  } };
-    "src/pages/workspace/components/history/history-view/HistoryReader.tsx#messages:1": { "ifYouUseCloudStorageSignInAnd": {  }; "loadingVersion": {  }; "noVersionHistory": {  }; "retry": {  }; "selectAVersionOnTheLeft": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormat": {  }; "thisVersionIsTemporarilyUnavailable": {  }; "versionHistoryCouldNotBeLoaded": {  } };
   }
 }
