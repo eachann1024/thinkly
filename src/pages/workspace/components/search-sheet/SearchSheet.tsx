@@ -235,7 +235,6 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   // 尚无可展示的行时用骨架占位；保留旧结果刷新时不替换。
   const awaitingRows = !searchError && !results.length && (busy || (!hasQuery && showRecent && isSearching));
   const statusKind = searchError ? "error" : awaitingRows || results.length ? null : hasQuery ? "none" : "empty";
-  const resultsKey = `${deferredQuery}|${session.scope.kind}|${session.titleOnly}|${session.sort}`;
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
   return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
     <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>
@@ -254,7 +253,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
       {answer ? <div className="search-sheet-list" data-answer="true">
         <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
       </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
-        <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
+        <div key={deferredQuery} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}
           {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>{uiText("recentlyOpened")}</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>{uiText("hide")}</Button></div>}
           {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>{uiText("notes")}</span></div>}

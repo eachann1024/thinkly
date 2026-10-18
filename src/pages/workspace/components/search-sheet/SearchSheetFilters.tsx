@@ -57,7 +57,7 @@ export function SearchSheetFilters({ count }: { count: string }) {
   return <div className="search-sheet-filters">
     <DropdownMenu><DropdownMenuTrigger asChild>
       <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-chip" aria-label={uiText("searchScope", {scope: scopeLabel})}><FolderOpen size={14} aria-hidden="true"/>{scopeLabel}<ChevronDown size={12} aria-hidden="true"/></Button>
-    </DropdownMenuTrigger><DropdownMenuContent align="start" className="w-64">
+    </DropdownMenuTrigger><DropdownMenuContent align="start" className="w-64" motion="instant">
       <DropdownMenuRadioGroup value={scopeValue} onValueChange={value => s.setScope(value === "all" ? { kind: "all" } : value === "current" ? { kind: "current", notebookId: s.startingNotebookId } : { kind: "notebook", notebookId: value.slice(9) })}>
         <DropdownMenuRadioItem value="current">{uiText("currentNamed", {name: currentName})}</DropdownMenuRadioItem>
         <DropdownMenuRadioItem value="all">{uiText("allNotebooks")}</DropdownMenuRadioItem>
@@ -67,7 +67,7 @@ export function SearchSheetFilters({ count }: { count: string }) {
     <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-chip" data-active={s.titleOnly} aria-pressed={s.titleOnly} onClick={() => s.setTitleOnly(!s.titleOnly)}><Type size={14} aria-hidden="true"/>{uiText("searchTitlesOnly")}</Button>
     <DropdownMenu><DropdownMenuTrigger asChild>
       <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-chip" aria-label={uiText("sortBy", {sort: SORT_LABELS[s.sort]})}>{SORT_LABELS[s.sort]}<ChevronDown size={12} aria-hidden="true"/></Button>
-    </DropdownMenuTrigger><DropdownMenuContent align="start">
+    </DropdownMenuTrigger><DropdownMenuContent align="start" motion="instant">
       <DropdownMenuRadioGroup value={s.sort} onValueChange={value => s.setSort(value as SearchSort)}>
         <DropdownMenuRadioItem value="best">{uiText("bestMatch")}</DropdownMenuRadioItem>
         <DropdownMenuRadioItem value="recent">{uiText("recentlyEdited")}</DropdownMenuRadioItem>
