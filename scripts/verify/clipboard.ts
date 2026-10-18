@@ -20,6 +20,21 @@ const video = new File(["video bytes"], "clip.mp4", { type: "video/mp4" });
 const transfer = (files: File[], items: unknown[] = []) => ({ files, items }) as unknown as DataTransfer;
 const item = (file: File, type = file.type) => ({ kind: "file", type, getAsFile: () => file });
 const texts = (value: any[]): string => value.map(part => part.text ?? "").join("");
+const inlineText = (value: any): string => typeof value === "string" ? value :
+  Array.isArray(value) ? value.map(inlineText).join("") : value?.text ?? inlineText(value?.content ?? "");
+function shape(block: any): unknown {
+  return {
+    type: block.type,
+    content: block.type === "table"
+      ? block.content.rows.map((row: any) => row.cells.map(inlineText))
+      : inlineText(block.content),
+    children: (block.children ?? []).map(shape),
+    ...(block.type === "heading" ? { level: block.props?.level ?? 1 } : {}),
+    ...(block.type === "numberedListItem" ? { start: block.props?.start ?? 1 } : {}),
+    ...(block.type === "checkListItem" ? { checked: block.props?.checked ?? false } : {}),
+    ...(block.props?.url ? { url: block.props.url } : {}),
+  };
+}
 
 function create(initialContent: any[]) {
   const uploaded: { file: File; blockId?: string }[] = [];
@@ -70,7 +85,7 @@ export default async function run() {
     return texts(editor.document[0].content as any[]) === "保留原文" &&
       editor.document[1]?.type === "video" && Boolean(editor.document[1].props.url) && uploaded.length === 1;
   });
-  await verify("图片使用真实字节 MIME，空 file.type 的 SVG 不误标成 PNG", async () => {
+  await verify("采用剪贴板 MIME，空 file.type 的 SVG 不误标成 PNG", async () => {
     const { editor, uploaded } = create([{ type: "paragraph" }]);
     const svg = new File(['<svg xmlns="http://www.w3.org/2000/svg"/>'], "capture");
     await pasteClipboardMedia(editor, [{ file: svg, mime: "image/svg+xml" }]);
@@ -115,7 +130,7 @@ export default async function run() {
       const { editor } = create([{ type: "paragraph" }]);
       pasteBlocksAtCursor(editor as any, withoutCopiedBlockIds([{ id: "source", ...sample }]), editor.document[0]);
       const pasted = editor.document[0];
-      if (pasted.type !== sample.type || pasted.id === "source") return false;
+      if (editor.document.length !== 1 || pasted.type !== sample.type || pasted.id === "source") return false;
       const markdown = jsonContentToMarkdown(encodeLocalBlockPropsWrappers(editor.document as any, { preserveEmptyParagraphs: true }));
       // 这三类写为 HTML，读回依赖真实 DOMParser；Node 只验真实序列化
       // 输出及 BlockNote JSON 重建，不用伪造 DOM 解析器冒充宿主验收。
@@ -124,13 +139,13 @@ export default async function run() {
         ? create(JSON.parse(JSON.stringify(editor.document))).editor.document
         : markdownToJsonContent(markdown);
       if (htmlType && !markdown.includes(`<${sample.type}`)) return false;
-      if (restored[0]?.type !== sample.type) return false;
+      if (JSON.stringify(restored.map(shape)) !== JSON.stringify(editor.document.map(shape))) return false;
       if (sample.props?.url && (restored[0].props.url !== sample.props.url || !markdown.includes(sample.props.url))) return false;
       const { editor: container } = create([{ type: "quote", content: "容器" }]);
       let ids: string[] | null = null;
       container.transact(() => { ids = insertContainedBlocks(container, [sample]); });
-      return Boolean(ids?.length) && container.document[0].children[0]?.type === sample.type &&
-        (!sample.children || container.document[0].children[0].children.length === sample.children.length);
+      return Boolean(ids?.length) &&
+        JSON.stringify(shape(container.document[0].children[0])) === JSON.stringify(shape(pasted));
     });
   }
   return checker.failed;
