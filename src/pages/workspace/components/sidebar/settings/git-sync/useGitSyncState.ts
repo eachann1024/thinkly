@@ -15,7 +15,7 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import type { GitSyncBridge, GitSyncState } from "@/lib/git-sync-contract";
 import { gitSyncLoadReducer } from "./gitSyncLoadState";
 
-const EMPTY_STATE: GitSyncState = { configs: [], statuses: [] };
+const EMPTY_STATE: GitSyncState = { configs: [], statuses: [], moduleEnabled: false };
 export function useGitSyncState(bridge: GitSyncBridge | undefined, visible: boolean) {
   useLocale();
   const [request, dispatch] = useReducer(gitSyncLoadReducer, bridge

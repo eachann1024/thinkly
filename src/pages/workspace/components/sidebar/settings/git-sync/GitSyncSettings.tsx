@@ -62,11 +62,11 @@ export function GitSyncSettings({
   useLocale();
   if (!config) return null;
   return (
-    <SettingsSectionCard className="overflow-hidden p-2">
-      <GitDetails title={uiText("syncSettings_1cbb")} spacious>
-        <div className="px-3 pb-1">
-          <div className="max-w-[740px] divide-y divide-border">
-            <div className="py-5">
+    <SettingsSectionCard className="overflow-hidden p-0">
+      <GitDetails className="[&>button]:!rounded-none" title={uiText("syncSettings_1cbb")}>
+        <div className="max-w-[740px] px-3 pb-3">
+          <div className="divide-y divide-border">
+            <div className="py-3">
               <GitRepositoryForm
                 draft={draft}
                 adding={false}
@@ -75,9 +75,9 @@ export function GitSyncSettings({
                 onChange={updateDraft}
               />
             </div>
-            <section className="space-y-4 py-5">
-              <h4 className="text-base font-semibold">{uiText("repositoryDetails_22cd")}</h4>
-              <dl className="grid grid-cols-[72px_minmax(0,1fr)] gap-x-4 gap-y-3 text-[15px]">
+            <section className="space-y-3 py-3">
+              <h4 className="text-[15px] font-semibold leading-[22px]">{uiText("repositoryDetails_22cd")}</h4>
+              <dl className="grid grid-cols-[72px_minmax(0,1fr)] gap-x-4 gap-y-3 text-sm">
                 <dt className="text-muted-foreground">{uiText("branch_bfc0")}</dt>
                 <dd className="break-words">{config.branch}</dd>
                 <dt className="text-muted-foreground">{uiText("sshUrl_4436")}</dt>
@@ -86,10 +86,10 @@ export function GitSyncSettings({
                 </dd>
               </dl>
             </section>
-            <div className="py-4">
+            <div className="pt-3">
               <div className="flex justify-end">
                 <Button
-                  className="min-h-[44px] text-danger"
+                  className="text-danger"
                   variant="ghost"
                   disabled={actionDisabled}
                   onClick={() => setRemoveConfirmation(config.id)}
@@ -102,14 +102,12 @@ export function GitSyncSettings({
                     {uiText("removeThisSyncConfigurationLocalAnd_4136")}</p>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      className="min-h-[44px]"
                       variant="destructive"
                       disabled={actionDisabled}
                       onClick={onRemove}
                     >
                       {uiText("remove_e2cf")}</Button>
                     <Button
-                      className="min-h-[44px]"
                       variant="outline"
                       disabled={disabled}
                       onClick={() => setRemoveConfirmation("")}

@@ -6,6 +6,7 @@ import { lstat, realpath } from "node:fs/promises";
 import { type GitSyncConfig, validateGitSyncConfig } from "../../src/lib/git-sync-contract";
 import { gitFailureMessage } from "./gitSyncErrors";
 import { describeGitSyncChanges } from "./gitSyncCommit";
+import { gitExecutable } from "./gitBinary";
 
 const execFile = promisify(nodeExecFile);
 const REMOTE = "goose-sync";
@@ -14,8 +15,10 @@ const SSH_COMMAND = "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o Number
 
 export async function gitBytes(cwd: string, args: string[], timeout = TIMEOUT_MS): Promise<Buffer> {
   try {
+    const binary = gitExecutable();
+    if (!binary) throw Object.assign(new Error("git missing"), { code: "ENOENT" });
     const inheritedEnvironment = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("GIT_")));
-    const { stdout } = await execFile("git", [
+    const { stdout } = await execFile(binary, [
       "-c", "core.hooksPath=/dev/null",
       "-c", "core.fsmonitor=false",
       "-c", "user.name=Thinkly",

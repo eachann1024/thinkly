@@ -1,5 +1,5 @@
-import { useLocale } from "@/i18n";
-import { createTranslator, i18nYaml } from "@/i18n";
+import { createTranslator, i18nYaml, useLocale } from "@/i18n";
+import { getGooseDesktop } from "@/lib/electron/runtime";
 
 const localMessages = i18nYaml<"src/pages/workspace/hooks/useFileDrop.ts#localMessages:1">`
 zh-Hans:
@@ -157,6 +157,7 @@ export function useFileDrop() {
       if (!folderPath) continue;
 
       const folderName = folderPath.split(/[\\/]/).pop() || "Unknown";
+      await getGooseDesktop()?.gitSync?.rememberNotebookRoot(folderPath);
       const notebookId = useNotebooks
         .getState()
         .createLocalFolderNotebook(folderName, folderPath);

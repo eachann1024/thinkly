@@ -3,13 +3,14 @@ import { gitNotebookDirectory } from "@/lib/git-notebook-directory";
 import { useGitSyncState } from "./git-sync/useGitSyncState";
 import {
   gitSyncSummary,
-
   availableFolderIds,
   emptyDraft,
   validateRepositoryInput,
+  notebookUnavailableReason,
 } from "./git-sync/gitSyncPresentation";
 import { captureGitFailureReason, formatGitUiFailure, type GitSyncAction, type GitSyncUiFailure } from "./git-sync/gitSyncUiState";
 import { GitSyncContent } from "./git-sync/GitSyncContent";
+import { GitModuleActivation, GitModuleSwitch } from "./git-sync/GitModuleGate";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type GitRepositoryFolder,
@@ -52,7 +53,8 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   }, []);
   const [removeConfirmation, setRemoveConfirmation] = useState("");
   const config = adding ? undefined : (state.configs.find((item) => item.id === selectedId) ?? state.configs[0]);
-  const { checks: folderChecks, recheck } = useGitFolderChecks(bridge, visible && Boolean(config || adding), [
+  const moduleReady = Boolean(bridge) && !loading && !loadError && state.moduleEnabled;
+  const { checks: folderChecks, recheck } = useGitFolderChecks(bridge, visible && moduleReady && Boolean(config || adding), [
     ...localNotebooks.map((notebook) => notebook.localPath!),
     ...(config?.folders ?? []).map((folder) => folder.localPath),
   ], notebookRevision);
@@ -88,7 +90,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     operation: () => Promise<GitSyncState>,
     onSuccess?: () => void,
   ) {
-    if (!bridge || locks.current.has(repositoryId)) return;
+    if (!bridge || !state.moduleEnabled || locks.current.has(repositoryId)) return;
     locks.current.add(repositoryId);
     setBusy((current) => ({ ...current, [repositoryId]: action }));
     setErrors((current) => ({ ...current, [repositoryId]: undefined }));
@@ -106,7 +108,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   // Snapshot identity prevents an older save from discarding a newer selection.
   useEffect(() => {
     clearTimeout(saveTimers.current.get(id));
-    if (!bridge || !config || (!drafts[id] && !folderDrafts[id] && !reconciledFolders) || locks.current.has(id) || syncing || errors[id])
+    if (!state.moduleEnabled || !bridge || !config || (!drafts[id] && !folderDrafts[id] && !reconciledFolders) || locks.current.has(id) || syncing || errors[id])
       return;
     if (!Number.isInteger(draft.intervalMinutes) || draft.intervalMinutes < 1 || draft.intervalMinutes > 1440) return;
     const draftSnapshot = drafts[id];
@@ -135,7 +137,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     saveTimers.current.set(id, timer);
     // Derived snapshots update together; per-repository timers survive switching repositories.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridge, config, id, drafts, folderDrafts, folders, reconciledFolders, busy, syncing, errors]);
+  }, [bridge, config, id, drafts, folderDrafts, folders, reconciledFolders, busy, syncing, errors, state.moduleEnabled]);
 
   function connect() {
     if (!bridge || disabled) return;
@@ -217,12 +219,25 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   }
   const rows = gitFolderRows(localNotebooks, folders, state.mappingHistory?.[id] ?? config?.folders ?? []);
   const availableIds = availableFolderIds(localNotebooks, folders);
-  const selectedFolderError = folders.filter(
-    (folder) => !availableIds.has(folder.notebookId) || Boolean(folderChecks[folder.localPath]?.error),
-  ).length;
-  const summary = gitSyncSummary(status, pending, selectedFolderError, folders.length, Boolean(config?.enabled));
+  const folderIssues = folders.flatMap((folder) => {
+    const reason = !availableIds.has(folder.notebookId)
+      ? notebookUnavailableReason()
+      : folderChecks[folder.localPath]?.error;
+    return reason ? [{ name: folder.name, reason }] : [];
+  });
+  const summary = gitSyncSummary(status, pending, folderIssues, folders.length, Boolean(config?.enabled));
+  if (bridge && !loading && !loadError && !state.moduleEnabled) {
+    return <GitModuleActivation onEnable={() => bridge.setModuleEnabled(true).then(applyState)} />;
+  }
+  const moduleBusy = state.statuses.some((item) => item.phase === "syncing");
   return (
     <GitSyncContent
+      moduleSwitch={bridge && state.moduleEnabled ? (
+        <GitModuleSwitch
+          disabled={moduleBusy}
+          onDisable={() => bridge.setModuleEnabled(false).then(applyState)}
+        />
+      ) : null}
       bridge={bridge}
       state={state}
       config={config}
@@ -234,7 +249,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       selectionDisabled={selectionDisabled}
       status={status}
       summary={summary}
-      folderErrorCount={selectedFolderError}
+      folderIssues={folderIssues}
       rows={rows}
       folders={folders}
       availableIds={availableIds}
