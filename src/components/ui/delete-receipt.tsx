@@ -63,7 +63,7 @@ export function showDeleteReceipt(
   // 标准 toast：图标、关闭按钮与其它通知共用同一套对齐；撤回成功才关闭，失败保留回执。
   let id: string | number = "";
   const action = done > 0 && onUndo ? {
-    label: <><RotateCcw className="size-4" aria-hidden="true" />{uiText("undo")}</>,
+    label: <><RotateCcw className="size-3.5" aria-hidden="true" />{uiText("undo")}</>,
     onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       if (undoing) return;

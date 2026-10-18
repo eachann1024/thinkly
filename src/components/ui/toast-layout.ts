@@ -20,8 +20,10 @@ export const TOAST_LAYOUT = {
   closeGap: 8,
   /** 图标与文案之间的间距 */
   gap: 12,
-  /** 文案与换行后操作按钮之间的间距 */
+  /** 多行文案之间的间距 */
   rowGap: 8,
+  /** 操作按钮高度：与关闭按钮同高，和文案同排靠右 */
+  action: 24,
   /** 外壳描边 */
   border: 1,
 } as const;
@@ -31,6 +33,11 @@ export type ToastLayout = typeof TOAST_LAYOUT;
 /** 图标相对内容区顶部的偏移：与第一行中线对齐。 */
 export function toastIconOffset(layout: ToastLayout = TOAST_LAYOUT): number {
   return (layout.line - layout.icon) / 2;
+}
+
+/** 操作按钮上下外边距：按钮中心落在第一行中线，且不撑高这一行。 */
+export function toastActionMargin(layout: ToastLayout = TOAST_LAYOUT): number {
+  return (layout.line - layout.action) / 2;
 }
 
 /** 关闭按钮相对 padding box 顶部的位置：与第一行中线对齐。 */
@@ -60,14 +67,15 @@ export function toastLayoutCssVars(layout: ToastLayout = TOAST_LAYOUT): Record<s
     "--goose-toast-content-reserve": `${toastContentReserve(layout)}px`,
     "--goose-toast-gap": `${layout.gap}px`,
     "--goose-toast-row-gap": `${layout.rowGap}px`,
+    "--goose-toast-action": `${layout.action}px`,
   };
 }
 
 export type ToastGeometryInput = {
   /** 文案（标题 + 描述）总行数 */
   lines: number;
-  /** 操作按钮高度；有值时按钮换到下一整行 */
-  actionHeight?: number;
+  /** 是否带操作按钮（与文案同排靠右） */
+  action?: boolean;
 };
 
 export type ToastGeometry = {
@@ -76,16 +84,18 @@ export type ToastGeometry = {
   iconCenter: number;
   closeTop: number;
   closeCenter: number;
+  actionCenter?: number;
 };
 
 /** 按 CSS 规则推算一条 toast 的几何（坐标相对 border box 顶部）。 */
 export function toastGeometry(
-  { lines, actionHeight }: ToastGeometryInput,
+  { lines, action }: ToastGeometryInput,
   layout: ToastLayout = TOAST_LAYOUT,
 ): ToastGeometry {
   const textHeight = Math.max(lines, 1) * layout.line;
   const row1 = Math.max(textHeight, toastIconOffset(layout) + layout.icon);
-  const body = actionHeight ? row1 + layout.rowGap + actionHeight : row1;
+  // 按钮上下负外边距抵消超出行高的部分，占位高度 = 行高。
+  const body = action ? Math.max(row1, layout.action + toastActionMargin(layout) * 2) : row1;
   const contentTop = layout.border + layout.padY;
   const closeTop = toastCloseTop(layout);
   return {
@@ -94,5 +104,6 @@ export function toastGeometry(
     iconCenter: contentTop + toastIconOffset(layout) + layout.icon / 2,
     closeTop,
     closeCenter: layout.border + closeTop + layout.close / 2,
+    actionCenter: action ? contentTop + toastActionMargin(layout) + layout.action / 2 : undefined,
   };
 }
