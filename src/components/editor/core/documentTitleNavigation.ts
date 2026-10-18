@@ -47,3 +47,21 @@ export function canReturnToDocumentTitle(editor: Editor): boolean {
     editor.schema.blockSpecs[first.type]?.config.content === "inline" &&
     isFirstBodyTextStart(editor.prosemirrorState.selection, first.id));
 }
+
+function paragraphHasInlineContent(block: { content?: unknown }): boolean {
+  return Array.isArray(block.content) && block.content.length > 0;
+}
+
+/**
+ * 正文退格回到标题末尾：正文为空，或光标已在首段文字起点。
+ * 起点前面没有字符，退格不会改掉已有文字。
+ * 后面还有块的空首段、带子块的空段，以及列表／标题，仍走原来的退格。
+ */
+export function shouldBackspaceToDocumentTitle(editor: Editor): boolean {
+  if (!canReturnToDocumentTitle(editor)) return false;
+  const { first, header } = bodyStart(editor);
+  if (!first || first.type !== "paragraph") return false;
+  if (paragraphHasInlineContent(first)) return true;
+  if (first.children?.length) return false;
+  return editor.document.length - (header ? 2 : 1) === 0;
+}

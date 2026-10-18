@@ -3,7 +3,11 @@ import { SuggestionMenu } from "@blocknote/core/extensions";
 import { completePageTitleFocus, hasDocumentTitle } from "@/lib/page-title-focus";
 import { ENTER_DOCUMENT_BODY_EVENT, isPlainDocumentNavigation } from "@/lib/document-title-keyboard";
 import { markUserInteraction } from "@/lib/editor-interaction-signal";
-import { canReturnToDocumentTitle, enterFirstBodyParagraph } from "./documentTitleNavigation";
+import {
+  canReturnToDocumentTitle,
+  enterFirstBodyParagraph,
+  shouldBackspaceToDocumentTitle,
+} from "./documentTitleNavigation";
 import type { EditorRuntime } from "./useEditorSession";
 
 /** 标题与编辑器只通过各自的文档容器通信，同页双开也不会互相抢焦点。 */
@@ -36,18 +40,21 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       }
     };
     const returnToTitle = (event: KeyboardEvent) => {
-      if (event.key !== "ArrowUp" || !isPlainDocumentNavigation(event) ||
+      const backspace = event.key === "Backspace";
+      if ((event.key !== "ArrowUp" && !backspace) || !isPlainDocumentNavigation(event) ||
         !canNavigate() || editor.prosemirrorView.composing || !editor.isFocused()) return;
       const target = event.target;
       if (!(target instanceof Node) || !editor.domElement?.contains(target)) return;
       if (target instanceof Element && target.closest("input, textarea, select, [contenteditable='false']")) return;
       if (editor.getExtension(SuggestionMenu)?.shown()) return;
-      // 表格、代码、分栏和原子块继续使用自身的导航规则。
-      if (!canReturnToDocumentTitle(editor)) return;
+      // 上方向键沿用首块文字起点。退格只在空正文或首段文字起点回到标题，
+      // 避免吃掉正文中间删除、空段合并，以及列表和标题自己的退格。
+      if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : canReturnToDocumentTitle(editor))) return;
       event.preventDefault();
       event.stopPropagation();
       title.focus();
-      title.setSelectionRange(title.value.length, title.value.length);
+      const end = title.value.length;
+      title.setSelectionRange(end, end);
     };
     scope.addEventListener(ENTER_DOCUMENT_BODY_EVENT, enterBody);
     container.addEventListener("keydown", returnToTitle, true);
