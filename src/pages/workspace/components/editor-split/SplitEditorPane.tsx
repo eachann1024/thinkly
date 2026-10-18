@@ -37,6 +37,7 @@ import { hasDocumentTitle } from "@/lib/page-title-focus";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { useScrollRestoration } from "@/pages/workspace/hooks/useScrollRestoration";
 import { usePages } from "@/stores/usePages";
+import { bindSplitSyncScroll } from "./bindSplitSyncScroll";
 import { useEditorPaneRegistry } from "./editorPaneRegistry";
 import { useSettings } from "@/stores/useSettings";
 import { SearchEditorBridge } from "../sidebar/SearchEditorBridge";
@@ -58,6 +59,14 @@ export function SplitEditorPane({
   const defaultLayout = useSettings(state => state.defaultPageLayout);
   const editorRef = useRef<EditorRef | null>(null);
   const scrollElRef = useRef<HTMLDivElement | null>(null);
+  const scrollBind = useRef({ tabId, paneId: leaf.id, pageId: leaf.pageId });
+  scrollBind.current = { tabId, paneId: leaf.id, pageId: leaf.pageId };
+  const setScrollEl = useCallback((el: HTMLDivElement | null) => {
+    scrollElRef.current = el;
+    const current = scrollBind.current;
+    bindSplitSyncScroll(current.tabId, current.paneId, current.pageId, el);
+    if (el) registry.register(current.paneId, current.pageId, editorRef, el);
+  }, [registry]);
   const setEditorRef = useCallback(
     (instance: EditorRef | null) => {
       editorRef.current = instance;
@@ -77,6 +86,10 @@ export function SplitEditorPane({
   useLayoutEffect(() => {
     return () => registry.unregister(leaf.id);
   }, [leaf.id, registry]);
+
+  useLayoutEffect(() => {
+    if (scrollElRef.current) bindSplitSyncScroll(tabId, leaf.id, leaf.pageId, scrollElRef.current);
+  }, [tabId, leaf.id, leaf.pageId]);
 
   if (!page) {
     return (
@@ -115,10 +128,7 @@ export function SplitEditorPane({
       <EditorHostBridge page={page} isEditorFullWidth>
         <div className="page-layout-body flex min-h-0 min-w-0 flex-1">
         <div
-          ref={(el) => {
-            scrollElRef.current = el;
-            if (el) registry.register(leaf.id, leaf.pageId, editorRef, el);
-          }}
+          ref={setScrollEl}
           tabIndex={-1}
           className="page-scroll-container h-full min-h-0 min-w-0 flex-1 overflow-y-auto outline-none [background:var(--goose-editor-surface)]"
         >

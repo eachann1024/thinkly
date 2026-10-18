@@ -11,9 +11,18 @@ import { runWithPresence } from "@/lib/ui/presence";
 import type { SplitState } from "@/lib/editor-split/types";
 import { moveLeaf } from "@/lib/editor-split/move";
 import {
+  syncScrollAvailable,
+  toggleSyncScrollFlag,
+  withoutSyncScrollFlag,
+} from "@/lib/editor-split/syncScroll";
+import {
   loadPersisted,
   startEditorSplitPersistence,
 } from "./editorSplit/persistence";
+import {
+  loadInitialSyncScroll,
+  startSyncScrollPersistence,
+} from "./editorSplit/syncScrollPersistence";
 import { create } from "zustand";
 import type { EditorSplitStore } from "./editorSplit/types";
 import {
@@ -51,9 +60,12 @@ function patchTab(
 }
 
 const persisted = loadPersisted();
+const syncScrollByTabId = loadInitialSyncScroll();
+
 export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   byTabId: persisted.byTabId,
   maximizedPaneIdByTab: {},
+  syncScrollByTabId,
 
   getStateForTab: (tabId) => get().byTabId[tabId] ?? null,
 
@@ -199,13 +211,20 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
     set({ byTabId: patchTab(get().byTabId, tabId, next) });
   },
 
+  toggleSyncScroll: (tabId) => {
+    if (!tabId) return;
+    set({ syncScrollByTabId: toggleSyncScrollFlag(get().syncScrollByTabId, tabId) });
+  },
+
   clearTab: (tabId) => {
-    const { byTabId, maximizedPaneIdByTab } = get();
+    const { byTabId, syncScrollByTabId: flags, maximizedPaneIdByTab } = get();
     const hasTree = tabId in byTabId;
+    const nextFlags = withoutSyncScrollFlag(flags, tabId);
     const nextMaximized = writeMaximizedPane(maximizedPaneIdByTab, tabId, null);
-    if (!hasTree && nextMaximized === maximizedPaneIdByTab) return;
+    if (!hasTree && nextFlags === flags && nextMaximized === maximizedPaneIdByTab) return;
     set({
       ...(hasTree ? { byTabId: patchTab(byTabId, tabId, null) } : {}),
+      ...(nextFlags === flags ? {} : { syncScrollByTabId: nextFlags }),
       ...(nextMaximized === maximizedPaneIdByTab ? {} : { maximizedPaneIdByTab: nextMaximized }),
     });
   },
@@ -240,6 +259,14 @@ export function findTabLeaf(tabId: string, paneId: string) {
   return state ? findLeaf(state.root, paneId) : null;
 }
 
+export function isSyncScrollAvailable(tabId: string): boolean {
+  return syncScrollAvailable(useEditorSplit.getState().getStateForTab(tabId));
+}
+
+export function isSyncScrollEnabled(tabId: string): boolean {
+  return useEditorSplit.getState().syncScrollByTabId[tabId] === true;
+}
+
 export {
   EDITOR_SPLIT_PERSIST_KEY_PREFIX,
   editorSplitPersistKey,
@@ -251,3 +278,4 @@ export {
 } from "./editorSplit/persistence";
 
 startEditorSplitPersistence();
+startSyncScrollPersistence();

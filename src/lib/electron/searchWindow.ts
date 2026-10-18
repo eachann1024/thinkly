@@ -101,7 +101,7 @@ export function resolveSearchResultPageId(
   return null;
 }
 
-export const SEARCH_SPLIT_ACTIONS = ["split-right", "split-down", "split-zoom", "split-close", "split-columns", "split-rows", "split-grid", "split-equalize"] as const;
+export const SEARCH_SPLIT_ACTIONS = ["split-right", "split-down", "split-zoom", "split-close", "split-columns", "split-rows", "split-grid", "split-equalize", "split-sync-scroll"] as const;
 export type SearchSplitAction = (typeof SEARCH_SPLIT_ACTIONS)[number];
 
 export type SearchAiSourcePayload = { id: string; title: string; index: number | null };

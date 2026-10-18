@@ -6,16 +6,19 @@ zh-Hans:
   splitDown: "向下分屏"
   maximizePane: "最大化分屏格"
   closePane: "关闭分屏格"
+  syncScroll: "同步滚动"
 en:
   splitRight: "Split right"
   splitDown: "Split down"
   maximizePane: "Maximize pane"
   closePane: "Close pane"
+  syncScroll: "Sync scrolling"
 ja:
   splitRight: "右に分割"
   splitDown: "下に分割"
   maximizePane: "ペインを最大化"
   closePane: "ペインを閉じる"
+  syncScroll: "スクロールを同期"
 `;
 const uiText = createTranslator(localMessages);
 import {
@@ -26,9 +29,10 @@ import {
 } from "@/lib/editor-split/commands";
 import { runSplitLayout } from "@/lib/editor-split/layoutCommands";
 import { layoutText } from "@/lib/editor-split/layoutLabels";
+import { syncScrollCommandAvailable, toggleActiveSyncScroll } from "@/lib/editor-split/syncScrollCommand";
 
 export type SplitPaletteAction = {
-  id: "split-right" | "split-down" | "split-zoom" | "split-close" | "split-columns" | "split-rows" | "split-grid" | "split-equalize";
+  id: "split-right" | "split-down" | "split-zoom" | "split-close" | "split-sync-scroll" | "split-columns" | "split-rows" | "split-grid" | "split-equalize";
   label: string;
   keywords: string;
   shortcutId?: "splitRight" | "splitDown" | "splitZoom" | "closeSplitPane" | "splitEqualize";
@@ -73,6 +77,13 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
     run: () => {
       closePaneOrTab();
     },
+  },
+  {
+    id: "split-sync-scroll",
+    get label() { return uiText("syncScroll"); },
+    keywords: "同步滚动 sync scroll 分屏",
+    available: syncScrollCommandAvailable,
+    run: toggleActiveSyncScroll,
   },
   {
     id: "split-columns",
