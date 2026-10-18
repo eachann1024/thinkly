@@ -258,7 +258,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
         <SearchSheetQuery key={session.focusNonce} ref={queryRef} seed={session.query} placeholder={uiText("searchNotesOrAskAi")} label={uiText("searchNotes")}
           notebookId={mentionNotebookId} scopeAll={scopeAll} listId="search-sheet-results" expanded={visible}
           activeDescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
-          composingRef={composing} onSearchText={onSearchText} onPrompt={onPromptChange} onSubmit={confirmSelection}
+          composingRef={composing} onSearchText={onSearchText} onPrompt={onPromptChange} onSubmit={confirmSelection} onOpenResult={onOpenResult}
           onEscape={() => { if (answer) resetAnswer(); else dismissSheet(); }} onEmptyChange={setQueryEmpty}/>
         {queryEmpty ? <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd> : <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton>}
       </div>

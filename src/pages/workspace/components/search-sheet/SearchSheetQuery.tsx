@@ -7,6 +7,7 @@ import { GOOSE_FOLDER_MIME, hasWorkspaceDrag } from "@/lib/workspace-drag";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { collapseComposerSearchText, composerDocFromPlainText } from "./searchQueryText";
+import { SearchComposerHost } from "./searchComposerHost";
 
 const MAX_IMAGE_ATTACHMENTS = 4;
 const MAX_IMAGE_FILE_BYTES = 10 * 1024 * 1024;
@@ -33,11 +34,12 @@ type SearchSheetQueryProps = {
   onSubmit: () => void;
   onEscape: () => void;
   onEmptyChange: (empty: boolean) => void;
+  onOpenResult?: (page: { id: string; localFilePath?: string }) => void;
 };
 
 export const SearchSheetQuery = forwardRef<SearchSheetQueryHandle, SearchSheetQueryProps>(function SearchSheetQuery({
   seed, placeholder, label, notebookId, scopeAll, listId, expanded, activeDescendant, composingRef,
-  onSearchText, onPrompt, onSubmit, onEscape, onEmptyChange,
+  onSearchText, onPrompt, onSubmit, onEscape, onEmptyChange, onOpenResult,
 }, ref) {
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<AiComposerInputHandle>(null);
@@ -130,10 +132,10 @@ export const SearchSheetQuery = forwardRef<SearchSheetQueryHandle, SearchSheetQu
       setDropActive(false);
     }} onDrop={onDrop}
     onCompositionStart={() => { composingRef.current = true; }} onCompositionEnd={() => { composingRef.current = false; }}>
-    <AiComposerInput ref={inputRef} placeholder={placeholder} autoFocusToken={0} initialContent={initialContent}
+    <SearchComposerHost notebookId={notebookId} onOpenResult={onOpenResult}><AiComposerInput ref={inputRef} placeholder={placeholder} autoFocusToken={0} initialContent={initialContent}
       onContentChange={publish} onSubmit={onSubmit} onEscape={onEscape} onIsEmptyChange={onEmptyChange}
       className="search-sheet-composer-input" searchPages={searchPages} referencePlacement="inline" variant="panel"
       notebookId={notebookId ?? undefined} maxImageBytes={MAX_IMAGE_FILE_BYTES} maxImageCount={MAX_IMAGE_ATTACHMENTS}
-      onImageRejected={(message) => toast.error(message)}/>
+      onImageRejected={(message) => toast.error(message)}/></SearchComposerHost>
   </div>;
 });
