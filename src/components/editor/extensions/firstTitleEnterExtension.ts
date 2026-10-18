@@ -77,6 +77,13 @@ function applyHeadingEnter(
   const firstBlockId = getProtectedTitleBlockId(editor);
   const isFirstTitle = headingBlock.id === firstBlockId;
 
+  // 空标题回车原地降级成段落；否则会留下一个空标题加一行空段。
+  if (contentSize === 0 && !isFirstTitle) {
+    editor.updateBlock(headingBlock, { type: "paragraph", props: {} });
+    editor.setTextCursorPosition(headingBlock, "start");
+    return true;
+  }
+
   // 非空标题行首：在前面插空段落，原内容下移；空标题仍走下方插入。
   if (atStart && (!isFirstTitle || contentSize > 0)) {
     return insertEmptyParagraphBeforeHeading(editor, headingBlock);

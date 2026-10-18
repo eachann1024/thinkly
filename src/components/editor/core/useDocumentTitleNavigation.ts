@@ -6,6 +6,7 @@ import { markUserInteraction } from "@/lib/editor-interaction-signal";
 import {
   canReturnToDocumentTitle,
   enterFirstBodyParagraph,
+  removeEmptyFirstBodyParagraph,
   shouldBackspaceToDocumentTitle,
 } from "./documentTitleNavigation";
 import type { EditorRuntime } from "./useEditorSession";
@@ -52,6 +53,8 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : canReturnToDocumentTitle(editor))) return;
       event.preventDefault();
       event.stopPropagation();
+      // 空的正文首段连同这行空行一起收掉，光标直接落到标题末尾。
+      if (backspace) removeEmptyFirstBodyParagraph(editor);
       title.focus();
       const end = title.value.length;
       title.setSelectionRange(end, end);
