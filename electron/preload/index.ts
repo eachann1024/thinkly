@@ -223,6 +223,8 @@ const gooseDesktop = {
     invoke("desktop:isWindowMaximized") as Promise<boolean>,
   prepareWelcomeWindow: (reducedMotion?: boolean) =>
     invoke("desktop:prepareWelcomeWindow", reducedMotion) as Promise<void>,
+  restoreWelcomeWindow: () =>
+    invoke("desktop:restoreWelcomeWindow") as Promise<void>,
   finishTabDrag: (opts: {
     tab: WindowTabSnapshot;
     cursor: { x: number; y: number };
