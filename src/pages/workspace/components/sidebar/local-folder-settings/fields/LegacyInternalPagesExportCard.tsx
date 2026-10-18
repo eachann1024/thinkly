@@ -135,7 +135,7 @@ function LegacyInternalPagesExportCard() {
 
   return (
     <SettingsSectionCard title={uiText("legacyDataMigration_20ff")}>
-      <div className="flex items-start justify-between gap-4 goose-settings-option-row px-4 py-3">
+      <div className="flex items-start justify-between gap-3 goose-settings-option-row goose-settings-option-row--stack">
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-medium text-foreground">
             {uiText("legacyFound", { count: legacyCount })}

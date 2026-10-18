@@ -126,7 +126,7 @@ export function renderAIModelSection(
         <div className="space-y-3">
           <div
             className={cn(
-              "settings-ai-pick-row flex items-center justify-between gap-4 p-4",
+              "settings-ai-pick-row flex items-center justify-between gap-3",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
@@ -136,7 +136,7 @@ export function renderAIModelSection(
                 strokeWidth={1.75}
               />
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">
+                <Label className="text-sm font-medium leading-5 text-foreground">
                   {uiText("defaultModel_b11d")}</Label>
               </div>
             </div>

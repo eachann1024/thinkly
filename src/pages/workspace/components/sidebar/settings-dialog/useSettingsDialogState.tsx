@@ -130,6 +130,8 @@ export function useSettingsDialogState({
 
   const dataOperation = useSettingsDataOperation();
   const [resetInput, setResetInput] = useState("");
+  const [clearHistory, setClearHistory] = useState(false);
+  const [clearAiChats, setClearAiChats] = useState(false);
 
   const notebookList = sortNotebooksByOrder(notebooks).filter(
     (n) => n.source !== "local-folder",
@@ -213,6 +215,10 @@ export function useSettingsDialogState({
     ...dataOperation,
     resetInput,
     setResetInput,
+    clearHistory,
+    setClearHistory,
+    clearAiChats,
+    setClearAiChats,
     notebookList,
     createNotebook,
     resetPhrase,

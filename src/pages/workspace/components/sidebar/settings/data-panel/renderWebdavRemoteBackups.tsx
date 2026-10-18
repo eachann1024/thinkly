@@ -118,11 +118,11 @@ export function renderWebdavRemoteBackups(
                 return (
                   <div
                     key={file.basename}
-                    className="flex flex-col gap-2 rounded-[var(--goose-control-radius)] border p-3 bg-[hsl(var(--goose-selected-bg)/0.38)] dark:bg-[hsl(var(--foreground)/0.04)] sm:flex-row sm:items-center sm:justify-between"
+                    className="goose-settings-option-row goose-settings-option-row--stack flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="space-y-1">
                       <p
-                        className="text-sm font-medium truncate max-w-[280px] sm:max-w-[400px]"
+                        className="text-sm font-normal leading-5 truncate max-w-[280px] sm:max-w-[400px]"
                         title={file.basename}
                       >
                         {file.basename}
@@ -165,18 +165,16 @@ export function renderWebdavRemoteBackups(
               })}
 
               {remoteFiles.length > 3 && (
-                <div className="flex justify-center pt-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAllRemote((prev) => !prev)}
-                    className="text-sm hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-                  >
-                    {showAllRemote
-                      ? uiText("showFewerBackups_2fbc")
-                      : uiText("showAllBackups", { count: remoteFiles.length - 3 })}
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  contentStyle="preserve"
+                  onClick={() => setShowAllRemote((prev) => !prev)}
+                  className="goose-settings-option-row flex w-full items-center text-left text-sm font-normal leading-5 hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
+                >
+                  {showAllRemote
+                    ? uiText("showFewerBackups_2fbc")
+                    : uiText("showAllBackups", { count: remoteFiles.length - 3 })}
+                </Button>
               )}
             </div>
           )}

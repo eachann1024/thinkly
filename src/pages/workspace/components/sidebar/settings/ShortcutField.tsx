@@ -128,16 +128,16 @@ export function ShortcutField({
   }
 
   return (
-    <div className={`space-y-2 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}>
+    <div className={`space-y-2 ${SETTINGS_OPTION_ROW_CLASS} ${SETTINGS_OPTION_ROW_CLASS}--stack`}>
       <div>
         <div className="flex items-center gap-3">
           <GooseIcons.Keyboard className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-          <Label htmlFor={id} className="cursor-pointer">
+          <Label htmlFor={id} className="cursor-pointer leading-5">
             {title}
           </Label>
         </div>
         {description ? (
-          <p className="mt-1 pl-7 text-sm leading-relaxed text-muted-foreground">{description}</p>
+          <p className="mt-1 pl-7 text-sm leading-5 text-muted-foreground">{description}</p>
         ) : null}
       </div>
       <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export function ShortcutField({
           data-shortcut-recorder
           placeholder={isCapturing ? uiText("pressAShortcutEscToCancel_f78c") : uiText("clickThenPressAShortcut_b24f")}
           className={cn(
-            "h-9 text-sm transition-colors",
+            "h-10 text-sm transition-colors",
             isCapturing && "placeholder:text-[var(--goose-color-capture-hint)]",
           )}
           onFocus={() => {
@@ -259,7 +259,7 @@ export function ShortcutField({
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
+            className="h-10 shrink-0 rounded-[var(--goose-control-radius)]"
             onClick={() => onChange(resetValue)}
           >
             {uiText("resetToDefaults_7468")}</Button>
@@ -268,7 +268,7 @@ export function ShortcutField({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-9 shrink-0 rounded-[var(--goose-control-radius)]"
+          className="h-10 shrink-0 rounded-[var(--goose-control-radius)]"
           onClick={() => onChange("")}
         >
           {uiText("clear_288f")}</Button>

@@ -20,14 +20,9 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { resetLanguagePreference } from "@/i18n";
+import { historyRepository } from "@/lib/history/repository";
+import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { useSettings } from "@/stores/useSettings";
-import {
-  QUICKNOTE_DEFAULT_HEIGHT,
-  QUICKNOTE_DEFAULT_WIDTH,
-  createEmptyQuickNoteDrafts,
-  useQuickNote,
-} from "@/stores/useQuickNote";
-import { createEmptySlotStacks } from "@/lib/quicknote/undoHistory";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { AI_INITIAL_STATE } from "@/stores/settings/slices/aiSlice";
 import { APPEARANCE_INITIAL_STATE } from "@/stores/settings/slices/appearanceSlice";
@@ -50,8 +45,8 @@ export function useSettingsResetActions(
     sendDataEvent,
     beginDataOperation,
     canReset,
-    clearCurrentContent,
-    createDefaultNotebook,
+    clearHistory,
+    clearAiChats,
     restoreBackupWithRollback,
   } = input;
 
@@ -71,20 +66,6 @@ export function useSettingsResetActions(
   };
 
   const resetAuxiliaryAppState = () => {
-    useQuickNote.persist.clearStorage();
-    useQuickNote.setState({
-      activeSlot: 1,
-      drafts: createEmptyQuickNoteDrafts(),
-      undoStacks: createEmptySlotStacks(),
-      redoStacks: createEmptySlotStacks(),
-      pinned: true,
-      editorZoom: 1,
-      windowWidth: QUICKNOTE_DEFAULT_WIDTH,
-      windowHeight: QUICKNOTE_DEFAULT_HEIGHT,
-      windowX: undefined,
-      windowY: undefined,
-    });
-
     useSidebarView.persist.clearStorage();
     useSidebarView.setState({
       expandedByNotebook: {},
@@ -108,8 +89,8 @@ export function useSettingsResetActions(
     const id = beginDataOperation("reset");
     if (id === null) return;
     try {
-      await clearCurrentContent();
-      createDefaultNotebook();
+      if (clearHistory) historyRepository.clearAll();
+      if (clearAiChats) useNotebookAiChats.getState().clearAllChats();
       await resetSettingsToDefaults();
       resetAuxiliaryAppState();
       // Only change next-startup language after the other reset steps succeed.

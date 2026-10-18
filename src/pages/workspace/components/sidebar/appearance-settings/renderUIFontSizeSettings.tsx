@@ -35,9 +35,9 @@ export function renderUIFontSizeSettings(
     lockScaleDragLayout,
   } = context;
   return (
-    <div className={`space-y-4 p-4 ${APPEARANCE_OPTION_ROW_CLASS}`}>
+    <div className={`space-y-4 ${APPEARANCE_OPTION_ROW_CLASS} goose-settings-option-row--stack`}>
       <div className="flex items-center justify-between gap-3">
-        <Label htmlFor="interface-scale" className="flex items-center gap-3">
+        <Label htmlFor="interface-scale" className="flex items-center gap-3 leading-5">
           <GooseIcons.AppWindow
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}

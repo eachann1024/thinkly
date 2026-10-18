@@ -50,16 +50,12 @@ export function renderAIContextSection(
         {hasGlobalPrompt && (
           <SwitchRow
             className={cn(
-              "flex items-center justify-between gap-4 p-4",
+              "flex items-center justify-between gap-3",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
-            <span className="block space-y-1">
-              <span
-                className="text-sm font-medium leading-none text-foreground"
-              >
-                {uiText("readGlobalPrompts_1b07")}
-              </span>
+            <span className="text-sm font-medium leading-5 text-foreground">
+              {uiText("readGlobalPrompts_1b07")}
             </span>
             <Switch
               id="ai-read-global-prompt"
@@ -71,16 +67,12 @@ export function renderAIContextSection(
         {hasLocalSkills && (
           <SwitchRow
             className={cn(
-              "flex items-center justify-between gap-4 p-4",
+              "flex items-center justify-between gap-3",
               SETTINGS_OPTION_ROW_CLASS,
             )}
           >
-            <span className="block space-y-1">
-              <span
-                className="text-sm font-medium leading-none text-foreground"
-              >
-                {uiText("readLocalSkills_b400")}
-              </span>
+            <span className="text-sm font-medium leading-5 text-foreground">
+              {uiText("readLocalSkills_b400")}
             </span>
             <Switch
               id="ai-read-local-skills"

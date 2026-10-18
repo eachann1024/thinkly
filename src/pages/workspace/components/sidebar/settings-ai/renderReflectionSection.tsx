@@ -27,8 +27,8 @@ export function ReflectionAISection() {
   const setAiConsent = useReflection((s) => s.setAiConsent);
   return (
     <SettingsSectionCard title={uiText("weeklyReflection")}>
-      <SwitchRow className={cn("flex items-center justify-between gap-4 p-4", SETTINGS_OPTION_ROW_CLASS)}>
-        <span className="block text-sm font-medium text-foreground">{uiText("sendLastWeekNotes")}</span>
+      <SwitchRow className={cn("flex items-center justify-between gap-3", SETTINGS_OPTION_ROW_CLASS)}>
+        <span className="min-w-0 text-sm font-medium leading-5 text-foreground">{uiText("sendLastWeekNotes")}</span>
         <Switch id="ai-weekly-reflection" checked={aiConsent} onCheckedChange={setAiConsent} />
       </SwitchRow>
     </SettingsSectionCard>
