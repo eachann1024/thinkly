@@ -24,7 +24,10 @@ export function useEditorLocale(
     const { default: defaultText, emptyDocument, ...blocks } = getEditorPlaceholders(profile);
     // BlockNote's built-in extension snapshots CSS at mount. Scope overrides to
     // this instance, retaining its original focus/empty-block decoration contract.
+    // 折叠标题的正文在箭头 wrapper 内；占位必须跟随真正的标题行，不能作为外层 flex 项。
+    const toggleHeading = `[${attribute}="${id}"].bn-editor:focus .bn-block-content[data-content-type="heading"][data-is-toggleable="true"][data-is-empty-and-focused] .bn-inline-content:has(> .ProseMirror-trailingBreak:only-child)::before`;
     style.textContent = [
+      `${toggleHeading} { content: ${JSON.stringify(blocks.heading ?? defaultText ?? "")}; }`,
       rule("[data-is-empty-and-focused]", defaultText),
       ...(emptyDocument === undefined ? [] : [rule("[data-is-only-empty-block]", emptyDocument)]),
       ...Object.entries(blocks).filter(([, text]) => text !== undefined)

@@ -1,0 +1,24 @@
+/* 折叠标题还包含箭头和「添加区块」按钮，不能在外层 flex 项排版占位文字。 */
+.bn-editor .bn-block-content[data-content-type="heading"][data-is-toggleable="true"]::after {
+  display: none;
+}
+.bn-editor .bn-block-content[data-content-type="heading"][data-is-toggleable="true"] > div {
+  flex: 1;
+  min-width: 0;
+}
+.bn-editor .bn-block-content[data-content-type="heading"][data-is-toggleable="true"] .bn-inline-content {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 占位覆盖实际标题行盒，继承字号、行高和对齐；不占正文宽度、不截获点击。
+ * content 由 useEditorLocale 按实例、语言和真实焦点注入。 */
+.bn-editor .bn-block-content[data-content-type="heading"][data-is-toggleable="true"] .bn-inline-content::before {
+  position: absolute;
+  inset: 0;
+  color: var(--bn-colors-side-menu);
+  font-style: normal;
+  white-space: nowrap;
+  pointer-events: none;
+}
