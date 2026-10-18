@@ -9,6 +9,8 @@ zh-Hans:
   openInNewTab: "在新标签页打开"
   closeOthers: "关闭其他分屏"
   copyLink: "复制笔记链接"
+  syncScroll: "同步滚动"
+  layout: "布局"
   maximize: "放大"
   restore: "还原"
 en:
@@ -18,6 +20,8 @@ en:
   openInNewTab: "Open in new tab"
   closeOthers: "Close other panes"
   copyLink: "Copy note link"
+  syncScroll: "Sync scrolling"
+  layout: "Layout"
   maximize: "Maximize"
   restore: "Restore"
 ja:
@@ -27,6 +31,8 @@ ja:
   openInNewTab: "新しいタブで開く"
   closeOthers: "他のペインを閉じる"
   copyLink: "ノートのリンクをコピー"
+  syncScroll: "スクロールを同期"
+  layout: "レイアウト"
   maximize: "拡大"
   restore: "元に戻す"
 `;
@@ -37,10 +43,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Columns2, Link, Maximize2, Minimize2, MoreHorizontal, PanelTopOpen, Rows2 } from "@/components/ui/icons";
+import { Check, ChevronRight, Columns2, Link, Maximize2, Minimize2, MoreHorizontal, PanelTopOpen, Rows2 } from "@/components/ui/icons";
 import { focusSplitPane, splitDown, splitRight } from "@/lib/editor-split/commands";
+import { runSplitLayout } from "@/lib/editor-split/layoutCommands";
+import { layoutText } from "@/lib/editor-split/layoutLabels";
+import type { SplitLayoutMenuAction } from "@/lib/editor-split/layoutMenu";
 import { MAX_SPLIT_LEAVES, countLeaves } from "@/lib/editor-split/tree";
 import {
   closeOtherSplitPanes,
@@ -48,7 +58,7 @@ import {
   moveSplitPaneToNewTab,
 } from "@/lib/editor-split/paneMenuActions";
 import { useEffectiveSingleTabMode } from "@/lib/tabMode";
-import { toggleMaximizePane, useEditorSplit } from "@/stores/useEditorSplit";
+import { isSyncScrollAvailable, isSyncScrollEnabled, toggleMaximizePane, useEditorSplit } from "@/stores/useEditorSplit";
 import type { Page } from "@/types";
 
 export function SplitPaneMoreMenu({
@@ -75,10 +85,16 @@ export function SplitPaneMoreMenu({
   const maximized = useEditorSplit(
     (state) => state.maximizedPaneIdByTab[tabId] === leafId,
   );
+  const syncAvailable = useEditorSplit(() => isSyncScrollAvailable(tabId));
+  const syncOn = useEditorSplit(() => isSyncScrollEnabled(tabId));
   const atLimit = leafCount >= MAX_SPLIT_LEAVES;
   const splitThisPane = (run: () => Promise<boolean>) => {
     focusSplitPane(tabId, leafId, { focusEditor: false });
     void run();
+  };
+  const applyLayout = (action: SplitLayoutMenuAction) => {
+    focusSplitPane(tabId, leafId, { focusEditor: false });
+    void runSplitLayout(action);
   };
 
   return (
@@ -128,6 +144,40 @@ export function SplitPaneMoreMenu({
           {uiText("copyLink")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {syncAvailable ? (
+          <DropdownMenuItem
+            aria-checked={syncOn}
+            onSelect={() => {
+              if (!isSyncScrollAvailable(tabId)) return;
+              useEditorSplit.getState().toggleSyncScroll(tabId);
+            }}
+          >
+            <span className="min-w-0 flex-1">{uiText("syncScroll")}</span>
+            <Check className={`ml-auto h-4 w-4 shrink-0 ${syncOn ? "" : "invisible"}`} />
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuSub>
+          <DropdownMenuItem textValue={uiText("layout")}>
+            <span className="min-w-0 flex-1">{uiText("layout")}</span>
+            <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+          </DropdownMenuItem>
+          <DropdownMenuContent side="right" align="start" sideOffset={2}>
+            <DropdownMenuItem onSelect={() => applyLayout("columns")}>
+              <Columns2 className="h-4 w-4" />
+              {layoutText("columns")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => applyLayout("rows")}>
+              <Rows2 className="h-4 w-4" />
+              {layoutText("rows")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => applyLayout("grid")}>
+              {layoutText("grid")}
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={leafCount < 2} onSelect={() => applyLayout("equalize")}>
+              {layoutText("equalize")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenuSub>
         <DropdownMenuItem
           disabled={leafCount < 2}
           onSelect={() => toggleMaximizePane(tabId, leafId)}

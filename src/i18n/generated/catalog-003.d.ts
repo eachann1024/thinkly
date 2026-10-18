@@ -6,7 +6,7 @@ declare module "../types" {
     "src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1": { "couldnTOpenTheDroppedContentTry": {  }; "splitAbove": {  }; "splitBelow": {  }; "splitToTheLeft": {  }; "splitToTheRight": {  }; "youCanOpenUpToPanes": {  } };
     "src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1": { "closeThisPane": {  }; "noteNotFound": {  }; "retry": {  }; "theNoteCouldnTBeDisplayed": {  }; "thisNoteNoLongerExists": {  } };
     "src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1": { "closeThisPane": {  }; "dragToRearrangePanes": {  }; "dragToTheEdgeOfAnotherPane": {  }; "movePane": { "title": string | number } };
-    "src/pages/workspace/components/editor-split/SplitPaneMoreMenu.tsx#localMessages:1": { "closeOthers": {  }; "copyLink": {  }; "maximize": {  }; "more": {  }; "openInNewTab": {  }; "restore": {  }; "splitDown": {  }; "splitRight": {  } };
+    "src/pages/workspace/components/editor-split/SplitPaneMoreMenu.tsx#localMessages:1": { "closeOthers": {  }; "copyLink": {  }; "layout": {  }; "maximize": {  }; "more": {  }; "openInNewTab": {  }; "restore": {  }; "splitDown": {  }; "splitRight": {  }; "syncScroll": {  } };
     "src/pages/workspace/components/editor-split/SplitPanePageMenu.tsx#localMessages:1": { "switchNotebookRoot": {  }; "switchSibling": {  } };
     "src/pages/workspace/components/editor-split/commitSidebarPageDrop.ts#localMessages:1": { "thisNoteIsNoLongerAvailable": {  }; "youCanOpenUpToPanes": {  } };
     "src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1": { "moveAbove": {  }; "moveBelow": {  }; "moveLeft": {  }; "moveRight": {  }; "swapPositions": {  } };
