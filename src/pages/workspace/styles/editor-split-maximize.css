@@ -11,3 +11,7 @@
 .editor-split-pane[data-maximized="true"] {
   z-index: 5;
 }
+
+.editor-split-surface[data-maximized-pane] .editor-split-drag-handle {
+  visibility: hidden;
+}

@@ -5,6 +5,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
+  adoptLegacyZoom,
+  maximizedPaneAfterFocus,
   maximizedPaneAfterTreeChange,
   planMovePaneToNewTab,
   retainOnlyPane,
@@ -60,6 +62,15 @@ export default async function run(): Promise<number> {
   check("放大只记下格子，树和尺寸不动", maximized === "right" && JSON.stringify(pair) === before && pair.root.kind === "group" && pair.root.sizes.join(",") === "40,60");
   check("同一格再切换就还原", toggleMaximizedPaneId(pair, maximized, "right") === null && JSON.stringify(pair) === before);
   check("只剩一格不能放大", toggleMaximizedPaneId({ ...pair, root: pair.root.kind === "group" ? pair.root.children[0] : pair.root }, null, "left") === null);
+  check("放大时焦点换到别的格，占满跟着走", maximizedPaneAfterFocus(pair, "left", "right") === "right");
+  check("没放大时换焦点不产生占满", maximizedPaneAfterFocus(pair, null, "right") === null);
+  const legacy = { ...pair, zoomedLeafId: "left" as const };
+  const adopted = adoptLegacyZoom({ tab: legacy });
+  check("旧缩放并进临时放大，树和尺寸不动", adopted.maximizedPaneIdByTab.tab === "left" && adopted.byTabId.tab?.zoomedLeafId === null && legacy.zoomedLeafId === "left" && adopted.byTabId.tab.root === pair.root);
+  const adoptedOne = adoptLegacyZoom({
+    tab: { root: { kind: "leaf", id: "only", pageId: "page-a" }, focusedLeafId: "only", zoomedLeafId: "only" },
+  });
+  check("只剩一格的旧缩放直接还原", adoptedOne.maximizedPaneIdByTab.tab === undefined && adoptedOne.byTabId.tab?.zoomedLeafId === null);
 
   console.log("· 关闭后自动还原");
   const closedMaximized = closeLeaf(triple, "mid");
@@ -109,6 +120,18 @@ export default async function run(): Promise<number> {
   ], "tab-1"));
   const source = readFileSync(path.join(process.cwd(), "src/lib/editor-split/replacePanePage.ts"), "utf8");
   check("换页会先问是否仍被引用", source.includes("replacedDraftStillReferenced") && source.includes("collectOpenedPagePlaces"));
+
+  console.log("· 放大只有一套状态");
+  const storeSource = readFileSync(path.join(process.cwd(), "src/stores/useEditorSplit.ts"), "utf8");
+  const zoomStart = storeSource.indexOf("toggleZoom:");
+  const zoomFn = storeSource.slice(zoomStart, storeSource.indexOf("toggleMaximizePane:", zoomStart));
+  const surface = readFileSync(path.join(process.cwd(), "src/pages/workspace/components/editor-split/EditorSplitSurface.tsx"), "utf8");
+  const commands = readFileSync(path.join(process.cwd(), "src/lib/editor-split/commands.ts"), "utf8");
+  const hotkeys = readFileSync(path.join(process.cwd(), "src/hooks/appHotkeys/split.ts"), "utf8");
+  const menu = readFileSync(path.join(process.cwd(), "src/pages/workspace/components/editor-split/SplitPaneMoreMenu.tsx"), "utf8");
+  check("旧快捷键和命令写入临时放大", zoomFn.includes("get().toggleMaximizePane") && commands.includes("useEditorSplit.getState().toggleZoom(tab.id)") && hotkeys.includes("toggleZoom()"));
+  check("放大不再卸掉其它格", !surface.includes("editor-split-surface--zoomed"));
+  check("菜单放大仍走同一入口", menu.includes("toggleMaximizePane(tabId, leafId)"));
 
   return checker.failed;
 }

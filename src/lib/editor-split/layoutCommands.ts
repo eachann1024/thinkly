@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/sonner";
 import { flushEditorContent, usePages } from "@/stores/usePages";
 import { isSpecialTab, useTabs } from "@/stores/useTabs";
 import { useEditorSplit, toggleMaximizePane } from "@/stores/useEditorSplit";
+import { maximizedPaneAfterTreeChange, writeMaximizedPane } from "./paneMaximize";
 import { walkLeaves } from "./tree";
 import { neighborLeaf } from "./treeGeometry";
 import type { SplitNeighborDirection, SplitState } from "./types";
@@ -29,7 +30,15 @@ function commitTabSplit(tabId: string, next: SplitState) {
   useEditorSplit.setState((current) => {
     const previous = current.byTabId[tabId];
     if (!previous || previous === next) return current;
-    return { byTabId: { ...current.byTabId, [tabId]: next } };
+    const maximizedPaneIdByTab = writeMaximizedPane(
+      current.maximizedPaneIdByTab,
+      tabId,
+      maximizedPaneAfterTreeChange(next, current.maximizedPaneIdByTab[tabId] ?? null),
+    );
+    return {
+      byTabId: { ...current.byTabId, [tabId]: next },
+      ...(maximizedPaneIdByTab === current.maximizedPaneIdByTab ? {} : { maximizedPaneIdByTab }),
+    };
   });
 }
 
