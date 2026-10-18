@@ -17,8 +17,10 @@ export function releaseAssets(version) {
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
-  // Published clients require the legacy prefix; GitHub redirects it to the renamed repository.
-  const downloadRepo = repo === "eachann1024/goose-note" ? "eachann1024/goose-notes" : repo;
+  // Already shipped clients only accept the legacy download prefix. GitHub redirects it here.
+  const downloadRepo = repo === "eachann1024/thinkly" || repo === "eachann1024/goose-note"
+    ? "eachann1024/goose-notes"
+    : repo;
   return {
     tag_name: tag, html_url: `https://github.com/${repo}/releases/tag/${tag}`,
     releaseNotes, publishedAt,
@@ -57,7 +59,7 @@ export function createCask(version, tag, hashes, repo = REPO, signed = false) {
     Homebrew installs the app only; it does not install the DMG's command helper.
     For the trusted official app, a manual fallback in Terminal is:
       sudo xattr -r -s -d com.apple.quarantine "/Applications/Goose Note.app"
-    Guide: https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md
+    Guide: https://github.com/eachann1024/thinkly/blob/main/docs/macos-installation.md
   EOS`}
 end
 `;

@@ -11,4 +11,4 @@
 
 仅在确认安装包来自 Thinkly 官方发布且未被篡改时使用。此操作不是代码签名或公证，也不能修复真正损坏的安装包。受组织管理的 Mac 可能不允许手动放行，请联系管理员。
 
-官方发布：https://github.com/eachann1024/goose-note/releases
+官方发布：https://github.com/eachann1024/thinkly/releases

@@ -1,5 +1,5 @@
 Thinkly — Copyright (c) 2026 eachann1024
-Project: https://github.com/eachann1024/goose-note
+Project: https://github.com/eachann1024/thinkly
 Current project license: MIT (see LICENSE).
 No warranty. Third-party portions retain their original notices and licenses.
 This inventory includes installed production dependencies and their dependency declarations; not every entry is necessarily included in every build.
