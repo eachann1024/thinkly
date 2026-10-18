@@ -174,7 +174,10 @@ mac:
       arch:
         - arm64
         - x64
+  # 只改压缩包文件名。.app 仍由 productName 决定。x64 的 CI 会去掉 -\${arch}，避免 -x64.dmg。
+  artifactName: Thinkly-\${version}-\${arch}-mac.\${ext}
 dmg:
+  artifactName: Thinkly-\${version}-\${arch}.\${ext}
   title: Thinkly
   background: dmg-assets/background.tiff
   window:
@@ -212,7 +215,7 @@ nsis:
   # 安装包文件名用 productName（Thinkly）。
   shortcutName: Thinkly
   uninstallDisplayName: Thinkly
-  artifactName: \${productName}-\${version}-\${arch}-setup.\${ext}
+  artifactName: Thinkly-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
   executableName: thinkly
@@ -233,12 +236,14 @@ linux:
       Categories: Office;Note;
       MimeType: text/markdown;text/x-markdown;
       StartupWMClass: thinkly
+appImage:
+  artifactName: Thinkly-\${version}.\${ext}
 deb:
   packageName: thinkly
-  artifactName: thinkly_\${version}_\${arch}.\${ext}
+  artifactName: Thinkly_\${version}_\${arch}.\${ext}
 pacman:
   packageName: thinkly
-  artifactName: thinkly-\${version}.\${ext}
+  artifactName: Thinkly-\${version}.\${ext}
   depends:
     - gtk3
     - nss

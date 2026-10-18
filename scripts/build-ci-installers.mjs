@@ -28,9 +28,19 @@ const signDir = resolve(root, 'dist-signpath');
 const unpacked = resolve(packaged, platform === 'win' ? (arch === 'arm64' ? 'win-arm64-unpacked' : 'win-unpacked') : 'linux-unpacked');
 const appExe = 'Thinkly.exe';
 
+function macNameArgs() {
+  if (platform !== 'mac') return [];
+  // 用户指定 artifactName 后，electron-builder 不再为默认架构 x64 去掉 ${arch}。
+  const archSuffix = arch === 'arm64' ? '-arm64' : '';
+  return [
+    `--config.dmg.artifactName=Thinkly-\${version}${archSuffix}.\${ext}`,
+    `--config.mac.artifactName=Thinkly-\${version}${archSuffix}-mac.\${ext}`,
+  ];
+}
+
 function builder(...args) {
   execFileSync(process.execPath, [
-    resolve(root, 'node_modules/electron-builder/out/cli/cli.js'), ...args, `--${arch}`, '--publish', 'never',
+    resolve(root, 'node_modules/electron-builder/out/cli/cli.js'), ...args, ...macNameArgs(), `--${arch}`, '--publish', 'never',
   ], { cwd: pack, stdio: 'inherit', env: { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' } });
 }
 
