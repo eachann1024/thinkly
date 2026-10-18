@@ -45,8 +45,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import { createElement, useId, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
-import { Shuffle } from "lucide-react";
-import { RotateCcw, Search } from "@/components/ui/icons";
+import { RotateCcw, Search, Shuffle } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
