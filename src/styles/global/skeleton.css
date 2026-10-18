@@ -1,0 +1,117 @@
+/* 加载骨架：中性占位块 + 缓慢横扫高光（transform 驱动）；减少动态效果时保持静态。 */
+.goose-skeleton {
+  position: relative;
+  display: block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: var(--goose-skeleton-bg);
+}
+
+.goose-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, transparent, var(--goose-skeleton-shine), transparent);
+  transform: translateX(-100%);
+  animation: goose-skeleton-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes goose-skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-skeleton::after {
+    display: none;
+    animation: none;
+  }
+}
+
+.goose-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--goose-menu-row-gap);
+}
+
+.goose-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  padding: 0.5rem 0.625rem;
+}
+
+.goose-skeleton-row[data-lines="2"] {
+  align-items: flex-start;
+}
+
+.goose-skeleton-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 6px;
+}
+
+.goose-skeleton-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.goose-skeleton-title {
+  height: 1.125rem;
+  border-radius: 6px;
+}
+
+.goose-skeleton-subtitle {
+  height: 0.75rem;
+}
+
+/* 紧凑行：与侧栏文件树行高一致，行间不留空隙。 */
+.goose-skeleton-list[data-density="compact"] {
+  gap: 0;
+}
+
+.goose-skeleton-list[data-density="compact"] .goose-skeleton-row {
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--main-tree-row-height, 32px);
+  padding: 0 0.5rem;
+}
+
+.goose-skeleton-list[data-density="compact"] .goose-skeleton-row .goose-skeleton-icon {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 4px;
+}
+
+.goose-skeleton-list[data-density="compact"] .goose-skeleton-row .goose-skeleton-text {
+  padding-top: 0;
+}
+
+.goose-skeleton-list[data-density="compact"] .goose-skeleton-row .goose-skeleton-title {
+  height: 0.75rem;
+  border-radius: 4px;
+}
+
+.goose-skeleton-document {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.goose-skeleton-heading {
+  width: 45%;
+  height: 1.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+}
+
+.goose-skeleton-line {
+  height: 1rem;
+}

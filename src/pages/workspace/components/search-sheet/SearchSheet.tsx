@@ -83,6 +83,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { CircleAlert, FileX, Search, Sparkles, X } from "@/components/ui/icons";
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
@@ -231,7 +232,9 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
   const tabScopeName = scopeAll ? notebooks[session.startingNotebookId ?? ""]?.name || uiText("currentNotebook") : uiText("allNotebooks");
-  const statusKind = searchError ? "error" : busy || results.length ? null : hasQuery ? "none" : "empty";
+  // 尚无可展示的行时用骨架占位；保留旧结果刷新时不替换。
+  const awaitingRows = !searchError && !results.length && (busy || (!hasQuery && showRecent && isSearching));
+  const statusKind = searchError ? "error" : awaitingRows || results.length ? null : hasQuery ? "none" : "empty";
   const resultsKey = `${deferredQuery}|${session.scope.kind}|${session.titleOnly}|${session.sort}`;
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
   return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
@@ -257,6 +260,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
           {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>{uiText("notes")}</span></div>}
           <SearchSheetResults results={results} query={deferredQuery} selectedId={selectedId} notebookNames={notebookNames} pages={pages} openResult={openResult} removeRecent={removeRecent}/>
         </div>
+        {awaitingRows && visible && <SkeletonList label={uiText("searching")}/>}
         {loadError && <div className="search-sheet-status" role="alert">{uiText("someNotebooksCouldnTBeRead")}<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>{uiText("tryAgain")}</Button></div>}
         {statusKind && <div key={statusKind} className="search-sheet-status" role={statusKind === "error" ? "alert" : "status"} data-state={statusKind}>
           <span className="search-sheet-status-glyph" aria-hidden="true">{statusKind === "error" ? <CircleAlert size={20}/> : statusKind === "none" ? <FileX size={20}/> : <Search size={20}/>}</span>

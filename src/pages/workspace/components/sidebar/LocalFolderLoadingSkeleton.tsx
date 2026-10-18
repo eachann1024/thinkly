@@ -10,10 +10,10 @@ ja:
   loadingFolder_c7a5: "フォルダを読み込んでいます"
 `;
 const uiText = createTranslator(localMessages);
-import { Folder } from "@/components/ui/icons";
-import { EmptyState } from "@/components/ui/empty-state";
+import { SkeletonList } from "@/components/ui/skeleton";
 
+/** 本地文件夹首次读取：以文件树行高的骨架占位，读屏仍播报读取状态。 */
 export function LocalFolderLoadingSkeleton() {
   useLocale();
-  return <EmptyState icon={Folder} title={uiText("loadingFolder_c7a5")} className="px-3 py-3" />;
+  return <SkeletonList density="compact" lines={1} label={uiText("loadingFolder_c7a5")} className="px-2 py-1" />;
 }

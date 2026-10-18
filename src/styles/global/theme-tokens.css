@@ -46,6 +46,9 @@
     --goose-block-subtle-hover: #ebeae8;
     --goose-table-control-hover: var(--goose-block-subtle-hover);
     --goose-block-subtle-inset: #f7f6f5;
+    /* 加载骨架：占位底色跟随区块浅底，高光只做轻微提亮 */
+    --goose-skeleton-bg: var(--goose-block-subtle-hover);
+    --goose-skeleton-shine: rgba(255, 255, 255, 0.6);
     /* 当前行底：实色，避免 Electron 旧内核解析 hsl(var(...)/alpha) 失败 */
     --goose-active-line-bg: #f4f5f7;
     /* 与标题色条左右外扩对齐；文字/光标仍落在原基线 */
