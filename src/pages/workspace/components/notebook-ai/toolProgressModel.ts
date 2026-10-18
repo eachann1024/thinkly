@@ -2,6 +2,7 @@ import { getToolProgressStepText } from "./toolProgressText";
 import { readObject } from "./toolProgressValues";
 export { getToolProgressStepText } from "./toolProgressText";
 import { isDefaultChatSkillPart } from "./toolProgressVisibility";
+import { toInfoCard, type WebResultsCardData } from "@/lib/notebook-ai/cards/types";
 
 export interface ToolProgressPart {
   type: string;
@@ -16,6 +17,8 @@ export interface ToolProgressPart {
 export interface ProgressStep {
   label: string;
   detail: string;
+  /** searchWeb 完成后的网页来源，展开步骤时紧凑列出 */
+  webResults?: WebResultsCardData;
   status:
     | "running"
     | "done"
@@ -78,10 +81,15 @@ export function buildToolProgressSteps(
 ): ProgressStep[] {
   return parts
     .filter((part) => !isDefaultChatSkillPart(part))
-    .map((part) => ({
-      ...getToolProgressStepText(part),
-      status: getToolProgressStepStatus(part, isMessageStreaming),
-    }));
+    .map((part) => {
+      const step: ProgressStep = {
+        ...getToolProgressStepText(part),
+        status: getToolProgressStepStatus(part, isMessageStreaming),
+      };
+      if (part.type !== "tool-searchWeb" || part.state !== "output-available") return step;
+      const card = toInfoCard("searchWeb", part.output);
+      return card?.kind === "webResults" ? { ...step, webResults: card } : step;
+    });
 }
 
 function buildSummary(steps: ProgressStep[]) {

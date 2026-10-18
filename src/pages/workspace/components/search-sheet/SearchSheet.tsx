@@ -89,6 +89,7 @@ import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
 import { useSearchSession } from "../sidebar/useSearchSession";
 import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
+import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import type { SearchResultPage } from "../command/useCommandSearch";
 import { AI_ROW_ID, AskAiRow, SearchSheetResults } from "./SearchSheetResults";
 import { SearchSheetFilters } from "./SearchSheetFilters";
@@ -110,6 +111,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const sheetRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const answerListRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const skipRestore = useRef(false);
   const composing = useRef(false);
@@ -170,12 +172,15 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
     const notebookId = scope.notebookId ?? aiNotebookId ?? "";
     void ask(aiQuery, candidates, searchResults.all, { notebookId, label: notebookNames[notebookId] ?? notebookId });
   };
-  const continueInPanel = aiNotebookId && answer ? () => {
+  // followUp：卡片点选的下一句话；有落库会话时切过去自动发出，否则填进输入框
+  const continueInPanel = aiNotebookId && answer ? (followUp?: string) => {
     skipRestore.current = true;
     session.closeSearch();
     const saved = savedConversation.current;
-    if (saved?.requestId === answer.requestId) openSheetConversation(aiNotebookId, saved.id);
-    else askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
+    if (saved?.requestId === answer.requestId) {
+      if (followUp) queueCardSend({ notebookId: aiNotebookId, conversationId: saved.id, text: followUp });
+      openSheetConversation(aiNotebookId, saved.id);
+    } else askNotebookAi({ notebookId: aiNotebookId, text: followUp ?? answer.question });
   } : undefined;
   const openSource = (id: string) => {
     returnFocus.current = null;
@@ -248,8 +253,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {draft ? <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
       </div>
       <SearchSheetFilters count={count}/>
-      {answer ? <div className="search-sheet-list" data-answer="true">
-        <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
+      {answer ? <div ref={answerListRef} className="search-sheet-list" data-answer="true">
+        <SearchSheetAnswer key={answer.requestId} answer={answer} scrollRef={answerListRef} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
       </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
         <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}

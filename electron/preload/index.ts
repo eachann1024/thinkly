@@ -1,6 +1,6 @@
 import "./language";
 import { appearance } from "./appearance";
-import { invoke, assetMaintenance, gitSync } from "./services";
+import { invoke, assetMaintenance, gitSync, web } from "./services";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";
 import type { AppUpdateCheckResult, AppUpdateState } from "../../src/lib/appUpdateTypes";
 import type {
@@ -25,6 +25,7 @@ const gooseDesktop = {
   appearance,
   gitSync,
   assetMaintenance,
+  web,
   selectDirectory: (opts?: DirectoryDialogOptions) =>
     invoke("desktop:selectDirectory", opts) as Promise<string | null>,
   showOpenDialog: (opts?: OpenFileDialogOptions) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,

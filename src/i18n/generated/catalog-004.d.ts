@@ -2,6 +2,28 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/sidebar/appearance-settings/CanvasSettings.tsx#localMessages:1": { "canvas_4d7f": {  }; "dots_f4a6": {  }; "editorGrid_47a6": {  }; "grid_5340": {  }; "none_d81b": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/SidebarDisplaySettings.tsx#localMessages:1": { "showFolderCounts_f654": {  }; "sidebar_63f4": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/renderAdditionalFontSettings.tsx#localMessages:1": { "fontCategory": { "category": string | number } };
+    "src/pages/workspace/components/sidebar/appearance-settings/renderAppearanceTheme.tsx#localMessages:1": { "automatic_3aed": {  }; "colorsAndThemes_05fe": {  }; "darkMode_18d1": {  }; "fullTheme": { "theme": string | number }; "lightMode_8755": {  }; "themeMode_b0bb": {  }; "theme_9970": {  }; "useSystemSetting_71bb": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/renderInterfaceFontSettings.tsx#localMessages:1": { "interfaceFont_5f15": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/renderUIFontSizeSettings.tsx#localMessages:1": { "interfaceScale_b560": {  }; "resetToDefault100_b566": {  }; "scaleTheTitleBarSidebarAnd_4d3f": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/shared.tsx#localMessages:1": { "berry_10a3": {  }; "defaultLayoutForNewNotes_3db8": {  }; "defaultLayout_64ce": {  }; "earlyAutumn_c4e4": {  }; "flatWarmPaperWithTerracottaAccents_b6c6": {  }; "fullWidth_dc39": {  }; "grape_05b1": {  }; "iris_8a32": {  }; "leaf_461c": {  }; "monospace_5226": {  }; "ocean_212e": {  }; "paleCreamAndWarmWhiteLike_7eae": {  }; "pine_3fa7": {  }; "serif_11e5": {  }; "softWheatGrayAndIvoryLike_a5bb": {  }; "standard_544f": {  }; "vermilion_2107": {  }; "wheatPaper_013e": {  } };
+    "src/pages/workspace/components/sidebar/local-file-icon.tsx#localMessages:1": { "couldNotReadMarkdownFile_6724": {  } };
+    "src/pages/workspace/components/sidebar/local-folder-settings/fields/HiddenFoldersField.tsx#localMessages:1": { "addHiddenFolder_50c3": {  }; "add_b58c": {  }; "builtInRulesAlwaysHidden_74ff": {  }; "display": {  }; "eGObsidian_55c9": {  }; "enterAFolderName_4a86": {  }; "folderName_a984": {  }; "hiddenCount": { "count": string | number }; "hiddenFolders_0e77": {  }; "hideAllFoldersWithMatchingNames_2052": {  }; "noHiddenFolders_8f82": {  }; "removeFolder": { "folder": string | number }; "resetToDefaults_7468": {  }; "thisFolderIsAlreadyHidden_1674": {  } };
+    "src/pages/workspace/components/sidebar/local-folder-settings/fields/LegacyInternalPagesExportCard.tsx#localMessages:1": { "exportAsMarkdownToTheCurrent_f443": {  }; "exportDestination": { "path": string | number }; "exportFailedPleaseTryAgain_28ce": {  }; "exportToCurrentFolder_958f": {  }; "exporting_86f9": {  }; "legacyDataMigration_20ff": {  }; "legacyFound": { "count": string | number }; "legacyNotesExported": { "count": string | number }; "openALocalFolderFirst_f657": {  }; "switchToTheDestinationFolderBefore_69bc": {  }; "untitled_44a7": {  } };
+    "src/pages/workspace/components/sidebar/local-folder-settings/fields/OpenAppField.tsx#localMessages:1": { "applicationName": { "title": string | number }; "custom_f1d4": {  } };
+    "src/pages/workspace/components/sidebar/local-folder-settings/fields/localFolderSettingsConfig.tsx#localMessages:1": { "defaultCommandPrompt_6c00": {  }; "defaultFileExplorer_3dda": {  }; "defaultFileManager_77ea": {  }; "defaultFinder_1bce": {  }; "defaultTerminal_6a94": {  } };
+    "src/pages/workspace/components/sidebar/local-folder-settings/useLocalFolderSettings.tsx#localMessages:1": { "attachmentCleanupRequiresTheDesktopApp_0b32": {  }; "couldNotOpenTheAttachmentCleanup_59de": {  }; "couldNotRefreshHiddenFolders_1ba7": {  }; "someLocalFoldersHaveUnsavedChanges_5f18": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/SidebarMainTree.tsx#localMessages:1": { "couldNotLoadLocalFolder_538d": {  }; "folderRefreshFailedShowingThePrevious_ed5e": {  }; "newFile_e48a": {  }; "newFolder_f3a4": {  }; "new_26bb": {  }; "reload_64ca": {  }; "retry_132c": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/renderMainTreeSurface.tsx#localMessages:1": { "fileName_d2e2": {  }; "page_59ce": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeDragActions.tsx#localMessages:1": { "moveFailed": { "error": string | number } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1": { "couldNotCreateItemTheName_2735": {  }; "folderCreated_1541": {  }; "newFolder_f3a4": {  }; "theDestinationFolderNoLongerExists_0e13": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1": { "itemCount": { "count": string | number } };
+    "src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1": { "couldNotCreateItemPleaseTry_db8e": {  }; "fileName_d2e2": {  }; "folderName_a984": {  }; "newFolder_f3a4": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/renderNotebookMenu.tsx#localMessages:1": { "actions_2b6b": {  }; "addNotebook": { "kind": string | number }; "notebookList": { "kind": string | number }; "switchNotebook": { "kind": string | number } };
     "src/pages/workspace/components/sidebar/notebook-switcher/shared.tsx#localMessages:1": { "editNotebook_ed4e": {  }; "pathUnavailable_ddd1": {  }; "removeLocalFolder_505d": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "pickerUnavailable": {  }; "renameFailed_37ba": {  } };
@@ -100,11 +122,5 @@ declare module "../types" {
     "src/stores/quicknote/slotNames.ts#localMessages:1": { "defaultName": { "slot": string | number } };
     "src/stores/settings/slices/shortcutsSlice.ts#block1:1": { "quicknoteDisabled": {  }; "searchDisabled": {  }; "wakeDisabled": {  } };
     "src/stores/settings/types/search.ts#block1:1": { "enterSearchUrl": {  }; "invalidUrl": {  }; "searchPlaceholder": {  }; "searchProtocol": {  } };
-    "src/stores/tabs/helpers.ts#block1:1": { "saveFailed": { "title": string | number }; "saveIncomplete": { "id": string | number } };
-    "src/stores/tabs/replacementContext.ts#block1:1": { "saveIncomplete": { "id": string | number } };
-    "src/stores/tabs/replacementContext.ts#block2:2": { "currentSaveFailed": {  }; "resolveSaveFirst": {  } };
-    "src/stores/tabs/specialActions.ts#block1:1": { "blankTabFailed": {  } };
-    "src/stores/useEditorSplit.ts#block1:1": { "paneMissing": {  } };
-    "src/stores/useQuickNote.ts#block1:1": { "quicknoteDraftSeparate": {  }; "quicknoteNewer": {  }; "quicknoteRecovered": {  }; "quicknoteRecoveredDetail": {  } };
   }
 }
