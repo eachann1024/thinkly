@@ -210,3 +210,10 @@
     animation: goose-floating-fade-out 150ms ease both !important;
   }
 }
+
+/* 高频操作可跳过浮层和菜单项的过渡，其他菜单仍使用共享动效。 */
+[data-goose-floating-content].dropdown__popover.goose-menu-surface[data-goose-motion="instant"] {
+  --goose-control-motion-duration: 0ms;
+  animation: none !important;
+  transition: none !important;
+}

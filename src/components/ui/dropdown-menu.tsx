@@ -71,6 +71,8 @@ type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   alignOffset?: number;
   collisionPadding?: number;
   editorContext?: boolean;
+  /** 高频筛选控件可直接显示菜单，避免入场和退场动画等待。 */
+  motion?: "default" | "instant";
   /** 设置选项保留选择指示；所有菜单共用同一套外观。 */
   variant?: DropdownVariant;
 };
@@ -87,6 +89,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       alignOffset = 0,
       collisionPadding = 8,
       editorContext: _editorContext,
+      motion = "default",
       variant = "dropdown",
       ...props
     },
@@ -112,6 +115,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
                 : `${side} ${align === "start" ? "top" : "bottom"}`
           }
           data-goose-floating-content=""
+          data-goose-motion={motion === "instant" ? motion : undefined}
           data-goose-layer={layer}
           data-react-aria-top-layer={topLayer || undefined}
           className={cn(
