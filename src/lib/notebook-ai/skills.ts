@@ -6,11 +6,13 @@ import searchNotesSkill from "@/agent/searchNotes/SKILL.md?raw";
 import updateNoteSkill from "@/agent/updateNote/SKILL.md?raw";
 import visualSkill from "@/agent/visual/SKILL.md?raw";
 import webResearchSkill from "@/agent/webResearch/SKILL.md?raw";
+import liveInfoSkill from "@/agent/liveInfo/SKILL.md?raw";
 import type { NotebookSkillId } from "./skillIds";
+import { CARD_GUIDE } from "./cardGuide";
 
 export type { NotebookSkillId } from "./skillIds";
 
-export const NOTEBOOK_AGENT_INSTRUCTIONS = agentInstructions.trim();
+export const NOTEBOOK_AGENT_INSTRUCTIONS = agentInstructions.replace("{{CARD_GUIDE}}", CARD_GUIDE).trim();
 
 export const NOTEBOOK_SKILLS = {
   createNoote: {
@@ -52,6 +54,11 @@ export const NOTEBOOK_SKILLS = {
     description: "读取网页、联网搜索并基于来源研究",
     content: webResearchSkill.trim(),
     tools: ["searchWeb", "readWebPage"],
+  },
+  liveInfo: {
+    description: "天气、汇率、世界时间等实时信息卡片",
+    content: liveInfoSkill.trim(),
+    tools: ["getWeather", "getExchangeRate", "getWorldTime", "searchWeb"],
   },
 } as const;
 

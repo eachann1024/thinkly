@@ -7,6 +7,7 @@ import {
   truncate,
   SKILL_LABELS,
 } from "./toolProgressValues";
+import { getInfoToolStepText, withSubject } from "./toolProgressInfoText";
 import messages from "./toolProgressText.messages.yaml";
 import { createTranslator } from "@/i18n";
 const t = createTranslator(messages);
@@ -27,6 +28,9 @@ export function getToolProgressStepText(
     asString(output?.title) ||
     asString(input?.pageId) ||
     asString(output?.pageId);
+
+  const infoText = getInfoToolStepText(part);
+  if (infoText) return infoText;
 
   if (part.type === "tool-loadSkill") {
     const skill = asString(input?.skill);
@@ -60,7 +64,7 @@ export function getToolProgressStepText(
   if (part.type === "tool-searchNotes") {
     const query = truncate(asString(input?.query) || t("keyword"));
     return {
-      get label() { return t("searchNotes"); },
+      get label() { return withSubject(t("searchNotes"), asString(input?.query)); },
       detail:
         outputCount === undefined
           ? t("detailSearchingFor", { value1: query })
@@ -71,12 +75,18 @@ export function getToolProgressStepText(
   }
 
   if (part.type === "tool-searchWeb") {
-    const query = truncate(asString(input?.query) || t("keyword"));
+    const rawQuery = asString(input?.query);
+    const query = truncate(rawQuery || t("keyword"));
+    const webCount = Array.isArray(output?.results) ? output.results.length : undefined;
     if (outputError)
-      return { get label() { return t("searchTheWeb"); }, detail: formatNotebookAiError(outputError) };
+      return { get label() { return withSubject(t("searchTheWeb"), rawQuery); }, detail: formatNotebookAiError(outputError) };
     return {
-      get label() { return t("searchTheWeb"); },
-      detail: output ? t("detailWebSearchForComplete", { value1: query }) : t("detailSearchingFor", { value1: query }),
+      get label() { return withSubject(t("searchTheWeb"), rawQuery); },
+      detail: !output
+        ? t("detailSearchingFor", { value1: query })
+        : webCount
+          ? t("detailResultsFor", { value1: query, value2: webCount })
+          : t("detailWebSearchForComplete", { value1: query }),
     };
   }
 
@@ -89,10 +99,11 @@ export function getToolProgressStepText(
         return t("webPage");
       }
     })();
+    const subject = url ? host : "";
     if (outputError)
-      return { get label() { return t("readWebPage"); }, detail: formatNotebookAiError(outputError) };
+      return { get label() { return withSubject(t("readWebPage"), subject); }, detail: formatNotebookAiError(outputError) };
     return {
-      get label() { return t("readWebPage"); },
+      get label() { return withSubject(t("readWebPage"), subject); },
       detail: output
         ? t("detailRead", { value1: truncate(host) })
         : t("detailReading", { value1: truncate(host) }),
@@ -103,7 +114,7 @@ export function getToolProgressStepText(
     if (outputError)
       return { get label() { return t("readNote"); }, detail: formatNotebookAiError(outputError) };
     return {
-      get label() { return t("readNote"); },
+      get label() { return withSubject(t("readNote"), asString(input?.title) || asString(output?.title)); },
       detail: title ? t("detailRead10", { value1: truncate(title) }) : t("readingTheCurrentNote"),
     };
   }

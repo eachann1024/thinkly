@@ -3,3 +3,4 @@ import "./generated/catalog-001";
 import "./generated/catalog-002";
 import "./generated/catalog-003";
 import "./generated/catalog-004";
+import "./generated/catalog-005";

@@ -94,6 +94,17 @@
   margin: 0 0 12px;
 }
 
+.notebook-ai-work-toggle-label { position: relative; }
+.notebook-ai-work-toggle-text { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+
+.notebook-ai-work-step { gap: 8px; align-items: flex-start; }
+.notebook-ai-work-step-mark { display: flex; flex: 0 0 12px; align-items: center; justify-content: center; height: 18px; color: hsl(var(--muted-foreground)); }
+.notebook-ai-work-step[data-status="done"] .notebook-ai-work-step-mark { color: var(--goose-text-success); }
+.notebook-ai-work-step[data-status="running"] .notebook-ai-work-step-mark { color: var(--goose-accent-solid); }
+.notebook-ai-work-step-mark::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .5; }
+.notebook-ai-work-step-mark:has(svg)::before { display: none; }
+.notebook-ai-work-step-links { margin: 2px 0 4px; }
+
 @media (prefers-reduced-motion: reduce) {
   .notebook-ai-work-status-spinner {
     animation: none;
