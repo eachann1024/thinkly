@@ -4,17 +4,19 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile } from "./quark-api.mjs";
 import { uploadFile } from "./quark-oss.mjs";
+import { releaseInstallers } from "./desktop-download-metadata.mjs";
 
 const FOLDER_NAME = "Thinkly 安装包";
 const LEGACY_FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
+// 新文件名用于上传；旧文件名只用于识别上一版，全部上传成功后由 retainLatest 删除。
 const INSTALLERS = [
   /^Thinkly-(\d+\.\d+\.\d+)-arm64\.dmg$/,
   /^Thinkly-(\d+\.\d+\.\d+)\.dmg$/,
   /^Thinkly-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
   /^Thinkly-(\d+\.\d+\.\d+)\.AppImage$/,
-  /^thinkly_(\d+\.\d+\.\d+)_amd64\.deb$/,
-  /^thinkly-(\d+\.\d+\.\d+)\.pacman$/,
+  /^Thinkly_(\d+\.\d+\.\d+)_amd64\.deb$/,
+  /^Thinkly-(\d+\.\d+\.\d+)\.pacman$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)-arm64\.dmg$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)\.dmg$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
@@ -24,12 +26,7 @@ const INSTALLERS = [
 ];
 
 function expectedInstallers(version) {
-  return [
-    `Thinkly-${version}-arm64.dmg`, `Thinkly-${version}.dmg`,
-    `Thinkly-${version}-x64-setup.exe`, `Thinkly-${version}-arm64-setup.exe`,
-    `Thinkly-${version}.AppImage`, `thinkly_${version}_amd64.deb`,
-    `thinkly-${version}.pacman`,
-  ];
+  return releaseInstallers(version).filter((name) => !name.endsWith(".zip"));
 }
 
 function installerVersion(name) {
@@ -227,7 +224,7 @@ async function main() {
   if (missing.length) throw new QuarkFailure(`缺少安装包：${missing.join("、")}`);
   const folderId = await openInstallFolder(cookie);
   for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
-  const noteDir = mkdtempSync(join(tmpdir(), "goose-quark-"));
+  const noteDir = mkdtempSync(join(tmpdir(), "thinkly-quark-"));
   const note = join(noteDir, NOTE_NAME);
   writeFileSync(note, noteText(version));
   await uploadReplacing(cookie, folderId, note, NOTE_NAME);

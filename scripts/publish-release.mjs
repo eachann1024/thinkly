@@ -49,7 +49,7 @@ async function main() {
   assertPublishVersion(version, tag, releases);
   const releaseNotes = versionReleaseNotes(readFileSync(join(ROOT, "CHANGELOG.md"), "utf8"), version);
   const input = join(ROOT, "artifacts");
-  const stage = mkdtempSync(join(tmpdir(), "goose-release-"));
+  const stage = mkdtempSync(join(tmpdir(), "thinkly-release-"));
   try {
     const builds = verifyBuildRecords(input, version, sha);
     const signed = ["arm64", "x64"].every((arch) =>
@@ -82,8 +82,8 @@ async function main() {
       `| **Windows** | [Thinkly-${version}-x64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
       `| | [Thinkly-${version}-arm64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
       `| **Linux** | [Thinkly-${version}.AppImage](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
-      `| | [thinkly_${version}_amd64.deb](${baseDownloadUrl}/thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
-      `| | [thinkly-${version}.pacman](${baseDownloadUrl}/thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./thinkly-${version}.pacman\`） |`,
+      `| | [Thinkly_${version}_amd64.deb](${baseDownloadUrl}/Thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
+      `| | [Thinkly-${version}.pacman](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./Thinkly-${version}.pacman\`） |`,
       "",
       "### macOS 安装说明",
       "",

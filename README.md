@@ -63,8 +63,10 @@ https://github.com/user-attachments/assets/3b1b91cb-34ca-4a10-9b8b-8a1de7f8d60d
 | **Windows** | `Thinkly-*-x64-setup.exe` | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选此项）** |
 | | `Thinkly-*-arm64-setup.exe` | 骁龙 / ARM 架构 Windows 设备 |
 | **Linux** | `Thinkly-*.AppImage` | 免安装通用版（双击运行，部分发行版需 FUSE） |
-| | `thinkly_*_amd64.deb` | Debian / Ubuntu 等系统 |
-| | `thinkly-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+| | `Thinkly_*_amd64.deb` | Debian / Ubuntu 等系统 |
+| | `Thinkly-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+
+1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`。磁盘上的应用仍是 `Goose Note.app`，Linux 包名仍是 `goose-note-app`。
 
 ### macOS 首次安装
 
@@ -83,7 +85,7 @@ Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「�
 ```bash
 brew tap eachann1024/thinkly https://github.com/eachann1024/thinkly
 brew install --cask eachann1024/thinkly/thinkly
-# 升级
+# 升级。已装 goose-note 的，brew update 后按 cask_renames.json 迁到 thinkly
 brew upgrade --cask thinkly
 ```
 
