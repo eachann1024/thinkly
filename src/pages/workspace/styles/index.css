@@ -6,6 +6,7 @@
 @import "./beautiful-ui.css";
 @import "./editor-split.css";
 @import "./editor-split-drag.css";
+@import "./editor-split-maximize.css";
 @import "./page-layout.css";
 
 /* Preserve the original cascade through ordered domain imports. */
