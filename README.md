@@ -66,7 +66,7 @@ https://github.com/user-attachments/assets/3b1b91cb-34ca-4a10-9b8b-8a1de7f8d60d
 | | `Thinkly_*_amd64.deb` | Debian / Ubuntu 等系统 |
 | | `Thinkly-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
 
-1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`。磁盘上的应用仍是 `Goose Note.app`，Linux 包名仍是 `goose-note-app`。
+1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`，磁盘上的应用是 `Goose Note.app`；从下一版起是 `Thinkly.app`，需要手动安装一次。
 
 ### macOS 首次安装
 
