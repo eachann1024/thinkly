@@ -6,6 +6,7 @@ export const NOTEBOOK_SKILL_IDS = [
   "chat",
   "visual",
   "webResearch",
+  "liveInfo",
 ] as const;
 
 export type NotebookSkillId = (typeof NOTEBOOK_SKILL_IDS)[number];

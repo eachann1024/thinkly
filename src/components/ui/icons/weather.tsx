@@ -1,0 +1,20 @@
+import { CloudFogIcon } from "@phosphor-icons/react/dist/csr/CloudFog";
+import { CloudLightningIcon } from "@phosphor-icons/react/dist/csr/CloudLightning";
+import { CloudMoonIcon } from "@phosphor-icons/react/dist/csr/CloudMoon";
+import { CloudRainIcon } from "@phosphor-icons/react/dist/csr/CloudRain";
+import { CloudSnowIcon } from "@phosphor-icons/react/dist/csr/CloudSnow";
+import { CloudSunIcon } from "@phosphor-icons/react/dist/csr/CloudSun";
+import { DropIcon } from "@phosphor-icons/react/dist/csr/Drop";
+import { ThermometerIcon } from "@phosphor-icons/react/dist/csr/Thermometer";
+import { WindIcon } from "@phosphor-icons/react/dist/csr/Wind";
+import { createIcon } from "./createIcon";
+
+export const CloudFog = createIcon(CloudFogIcon, "CloudFog");
+export const CloudLightning = createIcon(CloudLightningIcon, "CloudLightning");
+export const CloudMoon = createIcon(CloudMoonIcon, "CloudMoon");
+export const CloudRain = createIcon(CloudRainIcon, "CloudRain");
+export const CloudSnow = createIcon(CloudSnowIcon, "CloudSnow");
+export const CloudSun = createIcon(CloudSunIcon, "CloudSun");
+export const Droplet = createIcon(DropIcon, "Drop");
+export const Thermometer = createIcon(ThermometerIcon, "Thermometer");
+export const Wind = createIcon(WindIcon, "Wind");

@@ -100,6 +100,8 @@ export function retrieveNotes(question: string, candidates: Page[], ranked: Page
   });
 }
 
+import { CARD_GUIDE } from "@/lib/notebook-ai/cardGuide";
+
 /** 预检索的笔记摘录作为起点，其余信息交给只读工具按需获取；范围由调用方给出，不默认「当前笔记本」。 */
 export function buildAgentPrompt(question: string, sources: NoteSource[], scopeLabel: string, allNotebooks: boolean) {
   const context = sources.length
@@ -111,7 +113,8 @@ export function buildAgentPrompt(question: string, sources: NoteSource[], scopeL
   const system = [
     "你是笔记搜索面板里的问答助手，可以多步调用只读工具完成回答，不能修改笔记。",
     scope,
-    "先看给出的笔记摘录，摘录只是按相关度挑出的片段，与问题无关的直接忽略；不够时再用笔记工具查找，问题涉及笔记以外的事实（天气、新闻、资料等）时用 searchWeb，必要时 readWebPage 读原文。",
+    "先看给出的笔记摘录，摘录只是按相关度挑出的片段，与问题无关的直接忽略；不够时再用笔记工具查找，问题涉及笔记以外的事实时联网：天气 getWeather、汇率 getExchangeRate、时间时差 getWorldTime、币价 getCryptoPrice，其他资料、新闻用 searchWeb，必要时 readWebPage 读原文。",
+    CARD_GUIDE,,
     "回答用用户提问的语言，先给结论，简洁分点；引用摘录时在句末标注其编号如 [1]，只标注真正用到的；通过 readPage 读到的其他页面直接写出页面标题，不要自编编号；引用网页时附上链接。",
     "确实查不到就直接说明，不要编造。",
   ].join("\n");
