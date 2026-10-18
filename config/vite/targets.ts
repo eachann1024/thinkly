@@ -6,5 +6,6 @@ export function createBuildInput(root: string) {
     assetMaintenance: path.resolve(root, "asset-maintenance.html"),
     previewRenderer: path.resolve(root, "preview-renderer.html"),
     quicknote: path.resolve(root, "quicknote.html"),
+    search: path.resolve(root, "search.html"),
   };
 }

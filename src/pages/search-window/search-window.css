@@ -1,0 +1,2 @@
+html, body, #root { height:100%; overflow:hidden; background-color:hsl(var(--goose-menu-surface)); }
+.search-window-root { position:relative; height:100vh; width:100vw; overflow:hidden; }

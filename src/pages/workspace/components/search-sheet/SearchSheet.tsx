@@ -89,24 +89,34 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
 import { useSearchSession } from "../sidebar/useSearchSession";
-import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
 import type { SearchResultPage } from "../command/useCommandSearch";
 import { AI_ROW_ID, AskAiRow, SearchSheetResults } from "./SearchSheetResults";
 import { SearchSheetFilters } from "./SearchSheetFilters";
 import { useSheetResults } from "./useSheetResults";
+import type { SearchFolderSource } from "../sidebar/useSearchFolderRefresh";
 import { useSheetDrag } from "./useSheetDrag";
 import { useSearchAiAvailable, useSheetAnswer } from "./useSheetAnswer";
 import { SearchSheetAnswer } from "./SearchSheetAnswer";
-import { openSheetConversation, saveSheetConversation } from "./saveSheetConversation";
+import { useSheetActions } from "./useSheetActions";
 import "./search-sheet.css";
 
-export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNotebookId: string | null }) {
+/** variant="window"：浮动搜索窗，铺满窗口；打开结果与关闭交给窗口回调，不提供 AI 与本窗编辑动作。 */
+type SearchSheetProps = {
+  aiNotebookId: string | null;
+  variant?: "sheet" | "window";
+  onOpenResult?: (page: SearchResultPage) => void;
+  onClose?: () => void;
+  folderSource?: SearchFolderSource;
+};
+
+export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "sheet", onOpenResult, onClose, folderSource }: SearchSheetProps) {
   useLocale();
   const session = useSearchSession(useShallow(s => ({
     open: s.view.phase !== "closed", sheetOpen: s.view.phase === "sheet", query: s.query, scope: s.scope, titleOnly: s.titleOnly, sort: s.sort,
     startingNotebookId: s.view.phase !== "closed" ? s.view.context.startingNotebookId : null,
     focusNonce: s.focusNonce, closeSearch: s.closeSearch, setQuery: s.setQuery, setScope: s.setScope,
   })));
+  const windowed = variant === "window";
   const visible = session.open && session.sheetOpen;
   const sheetRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -118,16 +128,11 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const [activeId, setActiveId] = useState<string | null>(null);
   const notebooks = useNotebooks(s => s.notebooks);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
-  const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults();
-  const aiReady = useSearchAiAvailable();
+  const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults(folderSource);
+  const aiReady = useSearchAiAvailable() && !windowed;
   const { answer, ask, reset: resetAnswer } = useSheetAnswer();
-  const savedConversation = useRef<{ requestId: number; id: string } | null>(null);
-  useEffect(() => {
-    if (!aiNotebookId || answer?.status !== "done" || !answer.text || savedConversation.current?.requestId === answer.requestId) return;
-    savedConversation.current = { requestId: answer.requestId, id: saveSheetConversation(aiNotebookId, answer) };
-  }, [aiNotebookId, answer]);
   const layer = useModalLayer(visible);
-  const close = useCallback(() => useSearchSession.getState().closeSearch(), []);
+  const close = useCallback(() => onClose ? onClose() : useSearchSession.getState().closeSearch(), [onClose]);
   const drag = useSheetDrag(sheetRef, close);
 
   useEffect(() => { if (!composing.current) setDraft(session.query); }, [session.query]);
@@ -158,37 +163,10 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
 
   const openAiSettings = () => { close(); window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } })); };
-  const askAi = () => {
-    if (!aiQuery) return;
-    const { scope } = useSearchSession.getState();
-    const candidates = getCandidates();
-    if (scope.kind === "all") {
-      const notebookIds = [...new Set(candidates.map(page => page.workspaceId))];
-      const label = `所有笔记本（${notebookIds.map(id => notebookNames[id] ?? id).join("、")}）`;
-      void ask(aiQuery, candidates, searchResults.all, { notebookId: aiNotebookId ?? notebookIds[0] ?? "", notebookIds, label });
-      return;
-    }
-    const notebookId = scope.notebookId ?? aiNotebookId ?? "";
-    void ask(aiQuery, candidates, searchResults.all, { notebookId, label: notebookNames[notebookId] ?? notebookId });
-  };
-  const continueInPanel = aiNotebookId && answer ? () => {
-    skipRestore.current = true;
-    session.closeSearch();
-    const saved = savedConversation.current;
-    if (saved?.requestId === answer.requestId) openSheetConversation(aiNotebookId, saved.id);
-    else askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
-  } : undefined;
-  const openSource = (id: string) => {
-    returnFocus.current = null;
-    const latest = useSearchSession.getState();
-    latest.targetPage(id, true);
-  };
-  const openResult = useCallback((page: SearchResultPage) => {
-    const latest = useSearchSession.getState();
-    if (pending || composing.current || latest.view.phase === "closed" || latest.query !== deferredQuery || latest.scope !== session.scope) return;
-    returnFocus.current = null;
-    latest.targetPage(page.id, true);
-  }, [deferredQuery, session.scope, pending]);
+  const { askAi, continueInPanel, openSource, openResult } = useSheetActions({
+    aiNotebookId, aiQuery, notebookNames, getCandidates, ranked: searchResults.all, answer, ask, pending, deferredQuery,
+    scope: session.scope, composingRef: composing, returnFocusRef: returnFocus, skipRestoreRef: skipRestore, onOpenResult,
+  });
   const clearSearch = () => {
     if (composing.current) inputRef.current?.blur();
     composing.current = false;
@@ -236,11 +214,11 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const awaitingRows = !searchError && !results.length && (busy || (!hasQuery && showRecent && isSearching));
   const statusKind = searchError ? "error" : awaitingRows || results.length ? null : hasQuery ? "none" : "empty";
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
-  return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} style={{ zIndex: layer }} onKeyDown={keydown}>
-    <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>
+  return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} data-variant={variant} style={{ zIndex: layer }} onKeyDown={keydown}>
+    {!windowed && <div className="search-sheet-scrim" aria-hidden="true" onClick={close}/>}
     <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label={uiText("searchNotes")} inert={!visible} data-dragging={drag.dragging}
       style={drag.offset ? { "--search-sheet-drag": `${drag.offset}px` } as CSSProperties : undefined}>
-      <div className="search-sheet-grab" aria-hidden="true" {...drag.handlers}/>
+      {!windowed && <div className="search-sheet-grab" aria-hidden="true" {...drag.handlers}/>}
       <div className="search-sheet-query">
         <Search size={20} aria-hidden="true"/>
         <Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label={uiText("searchNotes")} aria-controls="search-sheet-results" aria-expanded={visible} aria-autocomplete="list" aria-activedescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
@@ -255,7 +233,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
       </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
         <div key={deferredQuery} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}
-          {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>{uiText("recentlyOpened")}</span><Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>{uiText("hide")}</Button></div>}
+          {!hasQuery && showRecent && results.length > 0 && <div className="search-sheet-label"><span>{uiText("recentlyOpened")}</span>{!windowed && <Button contentStyle="preserve" variant="ghost" size="sm" onClick={() => setShowRecent(false)}>{uiText("hide")}</Button>}</div>}
           {hasQuery && results.length > 0 && <div className="search-sheet-label"><span>{uiText("notes")}</span></div>}
           <SearchSheetResults results={results} query={deferredQuery} selectedId={selectedId} notebookNames={notebookNames} pages={pages} openResult={openResult} removeRecent={removeRecent}/>
         </div>
@@ -266,11 +244,11 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
           <strong>{statusKind === "error" ? searchError : statusKind === "none" ? uiText("noMatchingNotes") : scopeAll ? uiText("searchAllNotebooks") : uiText("searchCurrentNotebook")}</strong>
           {statusKind === "none" && <div className="search-sheet-status-actions">
             <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? uiText("clearSearch") : uiText("searchAllNotebooks")}</Button>
-            {!aiReady && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>{uiText("enableAiAnswers")}</Button>}
+            {!aiReady && !windowed && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>{uiText("enableAiAnswers")}</Button>}
           </div>}
         </div>}
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>{uiText("loadMoreResults")}</Button>}
-        {matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}
+        {!windowed && matchingSplitPaletteActions(session.query).map(action => <Button contentStyle="preserve" variant="ghost" size="sm" key={action.id} className="search-sheet-link" onClick={() => { action.run(); close(); }}>{action.label}</Button>)}
       </div>}
       <div className="search-sheet-footer" data-hidden={answer ? "true" : undefined} aria-hidden="true">
         <div className="search-sheet-footer-inner">

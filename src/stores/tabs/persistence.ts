@@ -26,7 +26,10 @@ export const argvWindowContext = readWindowContextFromArgv();
 export let tabsWindowId = argvWindowContext?.windowId ?? getWindowId();
 
 /** Electron 在 IPC 给出真实 windowId 前不要读写无后缀 / `:main` 键，避免多窗抢同一份 persist。 */
-export let persistReady = Boolean(argvWindowContext) || !isElectronRuntime();
+// 浮动搜索窗没有标签：不读写任何窗口级标签 / 分栏持久化，避免每次重建留下新键。
+export let persistReady =
+  (Boolean(argvWindowContext) && argvWindowContext?.kind !== "search") ||
+  !isElectronRuntime();
 
 export interface PersistedTabs {
   openTabs: TabItem[];
@@ -212,6 +215,7 @@ export function startTabsPersistence(
       useTabs.getState().activeTabId,
     );
     void resolveWindowContext().then((ctx) => {
+      if (ctx.kind === "search") return;
       persistReady = true;
       const prevId = tabsWindowId;
       tabsWindowId = ctx.windowId;

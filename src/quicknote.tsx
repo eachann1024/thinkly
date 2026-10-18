@@ -25,7 +25,7 @@ import "./pages/quick-note/quicknote.css";
 import "./pages/quick-note/quicknote-save-status.css";
 
 void bootstrap(() => <QuickNoteApp />, {
-  lean: true,
+  mode: "lean",
   // useQuickNote 持久化了 drafts / activeSlot / pinned / 窗口尺寸，需在渲染前 rehydrate，
   // 否则草稿 page 拿不到已有草稿内容。放进 bootstrap 的错误边界流程，失败时不再白屏。
   beforeInit: () => useQuickNote.persist.rehydrate(),
