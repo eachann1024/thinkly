@@ -117,7 +117,7 @@ UI 根字号基线为 14px，实际渲染随用户界面缩放调整。令牌定
 | 行内编辑 | 继承展示态字体、字号、行高与坐标，无额外边框、背景及固定高，禁止引入表单输入的内边距。 |
 | 设置卡片 | 使用既有表面与细线描边分组，按真实层级使用阴影，禁止多层卡片嵌套或突兀的大圆角。 |
 | 浮层与弹窗 | 具真实背景与视口边界保护，沿用共享阴影；选项描边与外壳边界分明，禁止重复套框。 |
-| 状态反馈 | 复用现有加载与空状态组件；空状态仅保留必要指引，错误提示紧贴问题源头，禁止装饰插画或循环动画。 |
+| 状态反馈 | 复用现有加载与空状态组件；空状态仅保留必要指引，错误提示紧贴问题源头。缺省图统一使用点阵插画与缓慢循环动效，见 §6「缺省图插画与动效」。 |
 
 ### 菜单统一契约
 
@@ -155,7 +155,21 @@ UI 根字号基线为 14px，实际渲染随用户界面缩放调整。令牌定
 
 - **节奏**：控件颜色过渡为 150ms（`--goose-control-motion-duration`）；菜单与浮层进场 200ms、退场 150ms（位移 ≤ 6px，缩放比例 0.96 至 1）。
 - **性能与无障碍**：位移与缩放仅使用 `transform` 与 `opacity`，禁止对布局属性（`top`/`left`/`width`/`height`）做过渡动画；全面支持系统减少动态效果偏好。
-- **禁止滥用**：严禁常驻脉冲、打字机特效或列表级联入场动画；拖拽与悬停光标需即时还原，避免悬挂残留。
+- **禁止滥用**：严禁常驻脉冲、打字机特效或列表级联入场动画（缺省图点阵插画按下节例外处理）；拖拽与悬停光标需即时还原，避免悬挂残留。
+
+### 缺省图插画与动效
+
+用户已决定：缺省图改为点阵插画 + 缓慢无限循环动效，原「禁止装饰插画／循环动画／循环呼吸」的规定对缺省图失效。目标是「缓慢、无限循环、极其克制」：扫一眼像静止，细看才发现在动。设计稿见 [docs/mockups/empty-states-final.html](docs/mockups/empty-states-final.html)，落地说明见 [dot-matrix-impl-notes.md](docs/mockups/dot-matrix-impl-notes.md)。
+
+| 项目 | 规则 |
+| --- | --- |
+| 插画 | 一律复用共享模块 [dot-matrix](src/components/ui/dot-matrix/)；中性点用 `currentColor`，品牌点用 `--goose-accent-solid`；坐标在模块加载时一次算好。 |
+| 周期 | 静态语义 6–14s，各组错峰；进行中（加载、同步）3–5s；曲线 ease-in-out／正弦。 |
+| 幅度 | 透明度 0.55–1，位移 ≤ 2px，缩放 0.97–1.03。 |
+| 语义 | 光晕缓慢呼吸；点阵波纹从中心慢慢扩散；品牌蓝点偶尔微亮；提交图节点慢慢流过；波浪慢慢起伏。 |
+| 错误态 | 先一次短促反馈（≤ 320ms、位移 ≤ 2px），之后转入同样缓慢的循环。 |
+| 入场 | 首次进入视口一次性由内向外聚合显现，≤ 600ms。 |
+| 性能 | 只动 `transform`／`opacity`；点按组包 `<g>` 由 CSS keyframes 驱动、CSS 变量错峰，禁止逐点 JS／rAF；离开视口或 `document.hidden` 时暂停；减少动效偏好下只保留静态画面。 |
 
 ### 交互红线
 
@@ -168,7 +182,7 @@ UI 根字号基线为 14px，实际渲染随用户界面缩放调整。令牌定
 ## 7. 禁用模式与红线清单
 
 - **拒绝网页模板化**：严禁营销式 Hero 横幅、展示性三列卡片拼贴、大尺寸看板或“向下滚动”提示。
-- **拒绝过度视觉装饰**：严禁霓虹荧光色、大标题渐变字、发光外边框、纯黑（`#000000`）背景或循环呼吸动画。
+- **拒绝过度视觉装饰**：严禁霓虹荧光色、大标题渐变字、发光外边框、纯黑（`#000000`）背景或循环呼吸动画（缺省图点阵插画除外，见 §6）。
 - **保护核心资产**：严禁替换系统字体栈、禁用 Georgia 衬线阅读模式，或重置用户既有外观偏好。
 - **保护可用性边界**：严禁盲目删除禁用项、必要边框或语义色彩；焦点不额外描边，统一遵循全局 `focus-reset.css`；严禁为纯视觉目的遮挡正文或缩小点击区域。
 - **杜绝虚假修饰**：严禁在空状态或界面中引入虚拟数据、虚假指标或空泛宣传文案。
@@ -186,6 +200,7 @@ UI 根字号基线为 14px，实际渲染随用户界面缩放调整。令牌定
 | 控件几何与状态 | [控件变量](src/styles/global/control-tokens.css)、[共享配方](src/components/ui/control-recipes.ts)、[控件状态](src/styles/global/control-states.css)、[选中与焦点](src/styles/workspace-accent-outline.css) |
 | 菜单与浮层 | [菜单项样式](src/styles/global/menu-items.css)、[浮层外壳](src/styles/global/floating-surfaces.css)、[右键菜单](src/components/ui/context-menu/)、[下拉菜单](src/components/ui/dropdown-menu.tsx) |
 | 阴影与动效 | [浮层基础](src/styles/global/foundation.css)、[浮层动效](src/components/ui/floating-menu-motion.ts)、[弹窗与提示](src/styles/global/overlay-controls.css) |
+| 缺省图点阵 | [点阵模块](src/components/ui/dot-matrix/)（生成工具、角落装饰、动效容器、[动效样式](src/components/ui/dot-matrix/dot-matrix.css)） |
 | 字体与外观同步 | [字体定义](src/lib/fonts/families.ts)、[字体加载](src/lib/fontLoader.ts)、[缩放控制](src/lib/appearance.ts)、[外观类型](src/stores/settings/types/appearance.ts)、[外观切片](src/stores/settings/slices/appearanceSlice.ts)、[多窗同步](src/lib/appearanceSync.ts) |
 | 导航图标与设置 | [导航图标](src/pages/workspace/components/sidebar/SidebarRailIcon.tsx)、[设置脚手架](src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx)、[设置布局](src/pages/workspace/components/sidebar/settings/settings-layout.css) |
 | 编辑区与响应式 | [页面布局](src/pages/workspace/styles/page-layout.css)、[表格控件](src/pages/workspace/styles/editor-base/tables-callouts/table-controls.css)、[视口边界](src/lib/workspaceViewport.ts)、[弹窗边界计算](src/components/ui/useEditorDialogBounds.ts) |
@@ -219,3 +234,4 @@ UI 根字号基线为 14px，实际渲染随用户界面缩放调整。令牌定
 | 小窗与标签 | 小窗圆角对齐主界面，选中带强调色；单标签不添加选中底色 | 区分单/多标签交互，保持壳层圆角统一 |
 | 表格控件 | 表格与正文左边缘起始对齐；采用把手外置方案（方案 A） | 表格左齐正文，收敛顶部多余留白 |
 | 窄窗与兼容性 | 极窄视图下浮动面板紧密贴合主编辑器外框；强制设置实体背景色 | 窄窗边界对齐，消除跨平台透明穿透隐患 |
+| 缺省图 | 改为点阵插画 + 缓慢无限循环（原禁令失效） | 周期 6–14s、透明度 ≥ 0.55、位移 ≤ 2px、缩放 0.97–1.03，只动 transform／opacity |

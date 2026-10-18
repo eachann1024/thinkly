@@ -1,5 +1,7 @@
 import { useLocale } from "@/i18n";
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
+import { CharacterOnboarding } from "@/pages/workspace/components/character-onboarding/CharacterOnboarding";
+import { isCharacterGuideVisible } from "@/lib/characterGuide";
 import { IntroVideoOverlay } from "@/pages/workspace/components/intro-video/IntroVideoOverlay";
 import { useIntroVideo } from "@/stores/introVideo";
 import { useEffect, useState } from "react";
@@ -55,14 +57,17 @@ function AppearanceSync() {
 function App() {
   useLocale();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
+  const showCharacterGuide = useSettings(isCharacterGuideVisible);
   const showSetupGuide = useSettings(isSetupGuideVisible);
+  // 形象引导先于设置引导；两者任一可见时工作区隐藏。
+  const guideVisible = showCharacterGuide || showSetupGuide;
   const introVideoOpen = useIntroVideo((state) => state.open);
   const [workspaceOpened, setWorkspaceOpened] = useState(false);
-  const mountWorkspace = workspaceOpened || (settingsHydrated && !showSetupGuide);
+  const mountWorkspace = workspaceOpened || (settingsHydrated && !guideVisible);
 
   useEffect(() => {
-    if (settingsHydrated && !showSetupGuide) setWorkspaceOpened(true);
-  }, [settingsHydrated, showSetupGuide]);
+    if (settingsHydrated && !guideVisible) setWorkspaceOpened(true);
+  }, [settingsHydrated, guideVisible]);
   const privacy = useSettings((state) => state.privacy);
   const singleTabModeSetting = useSettings((state) => state.singleTabMode);
   const hydrated = usePages((s) => s.hydrated);
@@ -149,12 +154,13 @@ function App() {
       <AppearanceSync />
       <PencilIconDefinitions />
       {mountWorkspace && (
-        <div hidden={showSetupGuide} inert={showSetupGuide || introVideoOpen} className="h-full">
+        <div hidden={guideVisible} inert={guideVisible || introVideoOpen} className="h-full">
           {/* Keep an existing editor mounted when reopening the guide. */}
           <WorkspacePage />
         </div>
       )}
-      <SetupGuide />
+      <CharacterOnboarding />
+      {!showCharacterGuide && <SetupGuide />}
       <IntroVideoOverlay />
       <AppUpdateDialog />
       <Toaster />

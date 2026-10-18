@@ -1,0 +1,69 @@
+/* 首启形象引导：标题、选择器与主按钮组成一个居中整体，点阵装饰铺在四角与边缘。 */
+.setup-guide.character-onboarding {
+  position: relative;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.character-onboarding-stage {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  place-items: center;
+}
+.character-onboarding-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 24px 40px;
+}
+.character-onboarding-title {
+  margin: 0 0 28px;
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+.character-onboarding-title:focus {
+  outline: none;
+}
+.character-onboarding-picker {
+  --character-card-gap: 12px;
+  --character-group-gap: 20px;
+}
+.character-onboarding-confirm {
+  min-width: 168px;
+  margin-top: 32px;
+}
+
+/* 装饰随窗口收缩：先整体缩小并隐藏次要项，再完全隐藏，始终不压到中间内容。 */
+@media (max-width: 860px), (max-height: 640px) {
+  .character-onboarding-decor .goose-dm-decor-item > .goose-dm {
+    scale: 0.72;
+  }
+  .character-onboarding-decor .goose-dm-decor-item[data-minor] {
+    display: none;
+  }
+}
+@media (max-width: 720px), (max-height: 580px) {
+  .character-onboarding-decor .goose-dm-decor-item > .goose-dm {
+    scale: 0.56;
+  }
+}
+@media (max-width: 600px), (max-height: 520px) {
+  .character-onboarding-decor {
+    display: none;
+  }
+  .character-onboarding-title {
+    margin-bottom: 20px;
+  }
+  .character-onboarding-confirm {
+    margin-top: 24px;
+  }
+}
