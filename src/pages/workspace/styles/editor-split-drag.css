@@ -1,40 +1,126 @@
-/* 分屏标题栏：中线上的八点把手，强调色只用于交互状态。 */
+/* 分屏标题栏：左侧笔记本与笔记，右侧把手和关闭。强调色只用于交互状态。 */
 .editor-split-header {
   position: relative;
   display: flex;
   align-items: center;
   flex-shrink: 0;
   height: 32px;
-  padding: 0 10px 0 12px;
+  padding: 0 6px 0 10px;
   gap: 8px;
   border-bottom: 1px solid hsl(var(--border));
   -webkit-app-region: no-drag;
 }
 
-.editor-split-header-title {
+.editor-split-header-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
   min-width: 0;
-  max-width: calc(50% - 34px);
+  overflow: hidden;
+}
+
+.editor-split-notebook-mark {
+  display: inline-flex;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.editor-split-notebook-mark svg {
+  width: 12px;
+  height: 12px;
+}
+
+.editor-split-notebook-mark > span {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.editor-split-header-notebook,
+.editor-split-header-page {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.editor-split-header-notebook {
+  flex: 0 1 auto;
+  max-width: 42%;
+  color: var(--goose-text-secondary);
+  font-weight: 400;
+}
+
+.editor-split-header-page,
+.editor-split-header > .editor-split-header-title {
+  flex: 1 1 auto;
+  color: var(--goose-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.editor-split-header > .editor-split-header-title {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.editor-split-header-sep {
+  flex: none;
+  color: var(--goose-text-secondary);
   font-size: 13px;
-  font-weight: var(--font-weight-medium);
-  color: hsl(var(--foreground));
+  line-height: 20px;
+}
+
+.editor-split-header .editor-split-header-notebook:is(:hover, :focus-visible) {
+  color: var(--goose-text-primary);
+  background: transparent;
+}
+
+.editor-split-header .editor-split-header-page:is(:hover, :focus-visible) {
+  background: transparent;
 }
 
 .editor-split-header[data-missing] .editor-split-header-title {
   color: hsl(var(--muted-foreground));
+  font-weight: var(--font-weight-medium);
+}
+
+.editor-split-header-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.editor-split-page-menu {
+  min-width: 12rem;
+  max-width: 16rem;
 }
 
 .editor-split-drag-handle {
-  position: absolute;
-  left: 50%;
-  top: 3px;
-  transform: translateX(-50%);
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 26px;
+  width: 28px;
+  height: 24px;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 8px;
@@ -87,13 +173,6 @@
 }
 
 .editor-split-close {
-  margin-left: auto;
-  opacity: 0;
-}
-
-.editor-split-header:hover .editor-split-close,
-.editor-split-header:focus-within .editor-split-close,
-.editor-split-header[data-missing] .editor-split-close {
   opacity: 1;
 }
 
@@ -180,10 +259,6 @@
 @keyframes split-drop-appear {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@media (hover: none) {
-  .editor-split-close { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

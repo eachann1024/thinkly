@@ -19,56 +19,90 @@ ja:
   closeThisPane: "このペインを閉じる"
 `;
 const uiText = createTranslator(localMessages);
+import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { X } from "@/components/ui/icons";
 import { closeSplitPaneFromUi } from "@/lib/editor-split/commands";
+import { NotebookName } from "@/pages/workspace/components/sidebar/notebook-switcher/NotebookName";
+import { useNotebooks } from "@/stores/useNotebooks";
+import type { Page } from "@/types";
+import { NotebookMark } from "./NotebookMark";
+import { SplitPanePageMenu } from "./SplitPanePageMenu";
 
 export function SplitPaneHeader({
   tabId,
   leafId,
   title,
+  page,
   missing = false,
 }: {
   tabId: string;
   leafId: string;
   title: string;
+  page?: Page;
   missing?: boolean;
 }) {
   useLocale();
+  const notebook = useNotebooks((state) =>
+    page ? state.notebooks[page.workspaceId] : undefined,
+  );
   return (
     <div data-split-chrome className="editor-split-header" data-missing={missing || undefined}>
-      <span className="editor-split-header-title" title={title}>{title}</span>
-      <IconButton
-        size="sm"
-        tone="muted"
-        type="button"
-        className="editor-split-drag-handle"
-        data-split-drag-handle={leafId}
-        aria-label={uiText("movePane", {title})}
-        aria-describedby={`split-drag-help-${leafId}`}
-        title={uiText("dragToRearrangePanes")}
-      >
-        <span className="editor-split-grip" aria-hidden="true">
-          {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
-        </span>
-      </IconButton>
-      <span id={`split-drag-help-${leafId}`} className="sr-only">
-        {uiText("dragToTheEdgeOfAnotherPane")}</span>
-      <IconButton
-        size="xs"
-        tone="muted"
-        type="button"
-        aria-label={uiText("closeThisPane")}
-        className="editor-split-close"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          closeSplitPaneFromUi(tabId, leafId);
-        }}
-      >
-        <X className="h-3.5 w-3.5" />
-      </IconButton>
+      {page ? (
+        <div className="editor-split-header-crumb">
+          {notebook ? (
+            <>
+              <NotebookMark notebook={notebook} />
+              <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="notebook-root">
+                <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-notebook">
+                  <NotebookName name={notebook.name} />
+                </Button>
+              </SplitPanePageMenu>
+              <span className="editor-split-header-sep" aria-hidden="true">/</span>
+            </>
+          ) : null}
+          <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="siblings">
+            <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-page editor-split-header-title">
+              <NotebookName name={title} />
+            </Button>
+          </SplitPanePageMenu>
+        </div>
+      ) : (
+        <span className="editor-split-header-title" title={title}>{title}</span>
+      )}
+      <div className="editor-split-header-actions">
+        <IconButton
+          size="sm"
+          tone="muted"
+          type="button"
+          className="editor-split-drag-handle"
+          data-split-drag-handle={leafId}
+          aria-label={uiText("movePane", { title })}
+          aria-describedby={`split-drag-help-${leafId}`}
+          title={uiText("dragToRearrangePanes")}
+        >
+          <span className="editor-split-grip" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
+          </span>
+        </IconButton>
+        <span id={`split-drag-help-${leafId}`} className="sr-only">
+          {uiText("dragToTheEdgeOfAnotherPane")}</span>
+        <IconButton
+          size="xs"
+          tone="muted"
+          type="button"
+          aria-label={uiText("closeThisPane")}
+          className="editor-split-close"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeSplitPaneFromUi(tabId, leafId);
+          }}
+        >
+          <X className="h-3.5 w-3.5" />
+        </IconButton>
+      </div>
     </div>
   );
 }
