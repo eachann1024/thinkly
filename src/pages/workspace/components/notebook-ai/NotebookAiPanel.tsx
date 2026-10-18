@@ -1,14 +1,16 @@
 import { useLocale } from "@/i18n";
 /** 面板 UI 仅消费常驻会话，关闭面板不会停止生成。 */
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { ChatChrome } from "./beautiful-ui/ChatChrome";
 import { AiPanelResizeEdge } from "./AiPanelResizeEdge";
 import { isFullscreenAiLayout } from "./useNotebookAiPanel";
 import { useNotebookAiSession } from "./NotebookAiSession";
-import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
+import { NotebookAiSessionContext } from "./session/context";
+import { NotebookAiAssistantRuntimeProvider } from "./AssistantUiRuntimeProvider";
 import type { NotebookAiPanelProps } from "./panel/types";
+import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { usePanelSurface } from "./panel/usePanelSurface";
 import { usePanelComposerSeed } from "./panel/usePanelComposerSeed";
 import { usePanelCommands } from "./panel/usePanelCommands";
@@ -27,6 +29,12 @@ ja:
 const t = createTranslator(messages);
 
 export function NotebookAiPanel(props: NotebookAiPanelProps) {
+  const session = useContext(NotebookAiSessionContext);
+  if (!session) return null;
+  return <NotebookAiPanelReady {...props} />;
+}
+
+function NotebookAiPanelReady(props: NotebookAiPanelProps) {
   const locale = useLocale();
   const {
     notebookId,
@@ -50,7 +58,7 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
     onDragHandlePointerDown,
   } = surface;
   const session = useNotebookAiSession();
-  const { messages, isStreaming, isBusy } = session;
+  const { messages, isStreaming, isBusy, unavailableReason, stop } = session;
   const drag = usePanelWorkspaceDrag(panelRootRef);
   const seed = usePanelComposerSeed(notebookId, session, surface);
   const commands = usePanelCommands(props, session, isFullscreen);
@@ -73,6 +81,12 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
     conversationSummary,
   });
   return (
+    <NotebookAiAssistantRuntimeProvider
+      messages={messages}
+      isRunning={isBusy}
+      isDisabled={Boolean(unavailableReason)}
+      onCancel={stop}
+    >
     <div
       ref={panelRootRef}
       onDragEnter={drag.onDragOver}
@@ -122,5 +136,6 @@ export function NotebookAiPanel(props: NotebookAiPanelProps) {
         />
       </ChatChrome>
     </div>
+    </NotebookAiAssistantRuntimeProvider>
   );
 }
