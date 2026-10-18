@@ -136,13 +136,17 @@ export async function exportSelectionToImage(
   pageTitle?: string,
   themeId: CardThemeId = "notebook",
   watermarkConfig?: WatermarkConfig,
-  page?: Pick<Page, "fontFamily" | "localFilePath"> | null,
+  page?: Pick<Page, "content" | "fontFamily" | "isFolder" | "localFilePath"> | null,
 ) {
   if (!Array.isArray(selectionBlocks) || selectionBlocks.length === 0) return;
 
   const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
   const wm = normalizeWatermarkConfig(watermarkConfig);
-  const title = pageTitle || uiText("selectedContent");
+  // 与预览同一条标题：本地文件用文件名。不能用 extractBlockNoteTitle，
+  // 它会把没有 H1 的正文第一段提升成标题，导出就和预览不一致。
+  const title = page
+    ? getPageTitle(page as Page)
+    : pageTitle || uiText("selectedContent");
 
   const clonedBlocks = cloneExportBlocks(selectionBlocks, {
     ensureFirstTitle: false,
