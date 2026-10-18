@@ -34,6 +34,11 @@ app.setPath("userData", legacyUserData);
 app.setName("Goose Note");
 // 禁止触控板捏合缩放整页；键盘 Cmd/Ctrl+/- 由渲染进程改编辑器字号。
 app.commandLine.appendSwitch("disable-pinch");
+// 笔记应用不用浏览器后退缓存，也不预留空闲渲染进程。
+app.commandLine.appendSwitch(
+  "disable-features",
+  "SpareRendererForSitePerProcess,BackForwardCache",
+);
 
 if (process.platform === "linux") {
   // ponytail: Omarchy/Hyprland sets ELECTRON_OZONE_PLATFORM_HINT=wayland.

@@ -5,7 +5,7 @@ import { codeSplittingGroups } from "./chunkGroups";
 export function createBuildOptions(root: string): BuildOptions {
   return {
     outDir: "dist-electron/renderer",
-    // 正式 'hidden'（写盘后由 electron-build 删）；GOOSE_DEBUG=1 时 true（保留，供 DevTools 还原 src/）
+    // 正式不写 sourcemap；GOOSE_DEBUG=1 时 true（DevTools 还原 src/）
     sourcemap: debugSourcemap,
     minify: debugMinify,
     rolldownOptions: {

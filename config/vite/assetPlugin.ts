@@ -7,6 +7,33 @@ import {
   rmSync,
 } from "node:fs";
 import type { Plugin } from "vite";
+
+function stripLegacyKatexFonts(dir: string) {
+  const stack = [dir];
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current) continue;
+    let entries;
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(full);
+      } else if (
+        entry.name.startsWith("KaTeX_") &&
+        path.basename(current) !== "fonts" &&
+        (entry.name.endsWith(".ttf") || entry.name.endsWith(".woff") || entry.name.endsWith(".woff2"))
+      ) {
+        rmSync(full, { force: true });
+      }
+    }
+  }
+}
+
 export function createAssetPlugin(root: string): Plugin {
   return {
     name: "exclude-guide-assets-from-electron",
@@ -33,6 +60,7 @@ export function createAssetPlugin(root: string): Plugin {
           );
         }
       }
+      stripLegacyKatexFonts(path.resolve(root, outDir));
     },
   };
 }

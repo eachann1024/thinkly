@@ -253,4 +253,3 @@ pacman:
     - libappindicator-gtk3
 `,
 );
-console.log("[electron] packed app dir → dist-electron/app-pack");
