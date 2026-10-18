@@ -1,7 +1,8 @@
 import { AbsoluteFill, Audio, Sequence, interpolateColors, staticFile, useCurrentFrame } from "remotion";
 import { COLORS, DURATION, LAYOUT, SCENE, SHOTS, type ShotKey } from "./theme";
-import { EASE_BG, progressAt } from "./motion";
-import { PixelArt, type Pose } from "./components/PixelArt";
+import { progressAt } from "./motion";
+import { Hero } from "./components/PixelArt";
+import { poseAt } from "./poses";
 import { S1Question } from "./shots/S1Question";
 import { S2Blocks } from "./shots/S2Blocks";
 import { S3Ai } from "./shots/S3Ai";
@@ -27,18 +28,6 @@ const ORDER: ShotKey[] = [
 /** 底色只在转场时整屏交叉淡化；黑场与品牌卡是硬切。 */
 const SOFT_BOUNDS = [270, 630, 990, 1320, 1680, 2010];
 const HALF = 6;
-
-const POSES: Record<ShotKey, Pose> = {
-  question: "ask",
-  blocks: "type",
-  ai: "point",
-  quick: "ask",
-  split: "type",
-  share: "point",
-  history: "ask",
-  promise: "raise",
-  brand: "ask",
-};
 
 function shotIndexAt(frame: number) {
   let index = 0;
@@ -107,7 +96,7 @@ export function FeaturesIntro() {
     <AbsoluteFill style={{ background: bgAt(frame), overflow: "hidden" }}>
       {frame < SHOTS.brand.start ? (
         <div style={{ position: "absolute", ...LAYOUT.figure }}>
-          <PixelArt kind="person" pose={POSES[shotKey]} pitch={6} radius={2.4} color={dark ? COLORS.white : COLORS.ink} />
+          <Hero pose={poseAt(frame)} dark={dark} />
         </div>
       ) : null}
 
