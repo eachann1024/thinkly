@@ -10,10 +10,8 @@ import {
 import { ImageExportThemeSelector } from "@/components/ui/image-export-theme-selector";
 import type { CardThemeId, WatermarkConfig } from "@/lib/imageExport";
 import { exportSelectionToImage } from "@/lib/imageExport";
-import {
-  extractBlockNoteTitle,
-  type BlockNoteContent,
-} from "@/components/editor/utils/blocknote-content";
+import { type BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { getPageTitle } from "@/components/editor/utils/page-title";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { resolveCopyBlockSelection } from "@/components/editor/extensions/copyCurrentBlockExtension";
 import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard";
@@ -149,7 +147,7 @@ export function EditorContextMenu({
   ) => {
     const blocks = selectedBlocksRef.current;
     if (!Array.isArray(blocks) || blocks.length === 0) return;
-    const title = extractBlockNoteTitle(page?.content) || t("selectedContent");
+    const title = page ? getPageTitle(page) : t("selectedContent");
     exportSelectionToImage(blocks, title, themeId, watermarkConfig, page);
   };
 

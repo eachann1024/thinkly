@@ -15,7 +15,6 @@ zh-Hans:
   exported: "{{format}} 已导出"
   exportError: "{{format}} 导出失败：{{error}}"
   exportFailed: "{{format}} 导出失败"
-  selection: "选中内容"
 en:
   noFile: "No file selected"
   importFailed: "Import failed"
@@ -29,7 +28,6 @@ en:
   exported: "{{format}} exported"
   exportError: "Couldn’t export {{format}}: {{error}}"
   exportFailed: "Couldn’t export {{format}}"
-  selection: "Selected content"
 ja:
   noFile: "ファイルが選択されていません"
   importFailed: "インポートに失敗しました"
@@ -43,7 +41,6 @@ ja:
   exported: "{{format}} を書き出しました"
   exportError: "{{format}} を書き出せませんでした：{{error}}"
   exportFailed: "{{format}} を書き出せませんでした"
-  selection: "選択した内容"
 `;
 const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";
@@ -51,7 +48,7 @@ import { useEffect, useRef, useState } from "react";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { CardThemeId, WatermarkConfig } from "@/lib/imageExport";
 import { exportPageToImage, exportSelectionToImage } from "@/lib/imageExport";
-import { extractBlockNoteTitle } from "@/components/editor/utils/blocknote-content";
+import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getActiveGooseNoteEditor, getEditorSelectedBlocksForExport } from "@/components/editor/utils/selection";
 import { toast } from "@/components/ui/sonner";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
@@ -209,7 +206,7 @@ export function usePageMenu() {
     if (blocks.length > 0) {
       exportSelectionToImage(
         blocks,
-        extractBlockNoteTitle(page.content) || uiText("selection"),
+        getPageTitle(page),
         themeId,
         watermarkConfig,
         page,
