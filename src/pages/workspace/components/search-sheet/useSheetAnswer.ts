@@ -14,7 +14,9 @@ import { useCallback, useEffect, useRef, useReducer } from "react";
 import { getAIAvailability } from "@/lib/ai-provider";
 import { useSettings } from "@/stores/useSettings";
 import type { Page } from "@/types";
-import { buildAgentPrompt, retrieveNotes, type NoteSource } from "./retrieveNotes";
+import { toInfoCard } from "@/lib/notebook-ai/cards/types";
+import { buildAgentPrompt, retrieveNotes } from "./retrieveNotes";
+import { readPageSource, toolEndInfo, toolStartSubject } from "./sheetToolSteps";
 
 import { sheetAnswerReducer } from "./sheetAnswerState";
 export type { SheetAnswer } from "./sheetAnswerState";
@@ -24,12 +26,6 @@ export type SheetAskScope = { notebookId: string; notebookIds?: string[]; label:
 
 export function useSearchAiAvailable() {
   return useSettings(s => getAIAvailability(s.ai).ok);
-}
-
-function readPageSource(result: unknown): NoteSource | null {
-  const page = result as { pageId?: unknown; title?: unknown; markdown?: unknown } | null;
-  if (typeof page?.pageId !== "string" || typeof page.title !== "string") return null;
-  return { id: page.pageId, title: page.title, excerpt: typeof page.markdown === "string" ? page.markdown.slice(0, 200) : "" };
 }
 
 /** 搜索面板内的就地问答：先让模型改写检索词，再本地预检索笔记，再用只读 Pi Agent 多步调用工具，流式生成回答。 */
@@ -54,12 +50,15 @@ export function useSheetAnswer() {
     const requestId = ++sequence.current;
     dispatch({ type: "ask", requestId, question });
     try {
-      dispatch({ type: "tool", requestId, tool: "understand" });
+      const live = () => !abort.signal.aborted;
+      dispatch({ type: "stepStart", requestId, name: "understand" });
       const { expandQueryTerms } = await import("./expandQuery");
       const extraTerms = await expandQueryTerms(question, abort.signal);
-      if (abort.signal.aborted) return;
-      dispatch({ type: "tool", requestId, tool: null });
+      if (!live()) return;
+      dispatch({ type: "stepEnd", requestId, name: "understand" });
       const sources = retrieveNotes(question, candidates, ranked, extraTerms);
+      dispatch({ type: "stepStart", requestId, name: "retrieve" });
+      dispatch({ type: "stepEnd", requestId, name: "retrieve", count: sources.length });
       dispatch({ type: "retrieved", requestId, sources });
       const { system, prompt } = buildAgentPrompt(question, sources, scope.label, Boolean(scope.notebookIds));
       const { runPiReadOnlyAgent } = await import("@/lib/notebook-ai/pi/readOnlyAgent");
@@ -70,13 +69,17 @@ export function useSheetAnswer() {
         prompt,
         signal: abort.signal,
         handlers: {
-          onText: text => { if (!abort.signal.aborted) dispatch({ type: "chunk", requestId, text }); },
-          onToolStart: tool => { if (!abort.signal.aborted) dispatch({ type: "tool", requestId, tool }); },
+          onText: text => { if (live()) dispatch({ type: "chunk", requestId, text }); },
+          onThinking: text => { if (live() && text.trim()) dispatch({ type: "thinking", requestId, text }); },
+          onToolStart: (tool, args) => { if (live()) dispatch({ type: "stepStart", requestId, name: tool, subject: toolStartSubject(tool, args) }); },
           onToolEnd: (tool, result, isError) => {
-            if (abort.signal.aborted) return;
-            dispatch({ type: "tool", requestId, tool: null });
-            const source = tool === "readPage" && !isError ? readPageSource(result) : null;
+            if (!live()) return;
+            dispatch({ type: "stepEnd", requestId, name: tool, ...toolEndInfo(tool, result, isError) });
+            if (isError) return;
+            const source = tool === "readPage" ? readPageSource(result) : null;
             if (source) dispatch({ type: "source", requestId, source });
+            const card = toInfoCard(tool, result);
+            if (card) dispatch({ type: "card", requestId, card });
           },
         },
       });

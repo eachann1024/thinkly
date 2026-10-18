@@ -11,6 +11,7 @@ import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { SPLIT_PALETTE_ACTIONS } from "../command/splitPaletteActions";
 import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
+import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import { openSheetConversation, saveSearchAiTranscript } from "../search-sheet/saveSheetConversation";
 import { useSearchSession } from "./useSearchSession";
 
@@ -104,7 +105,9 @@ function applySearchWindowCommand(command: SearchWindowCommand): void {
     return;
   }
   void rememberSearchAi(command).then((record) => {
-    if (record) openSheetConversation(record.notebookId, record.conversationId);
+    if (!record) return;
+    if (command.type === "continue-ai" && command.followUp) queueCardSend({ notebookId: record.notebookId, conversationId: record.conversationId, text: command.followUp });
+    openSheetConversation(record.notebookId, record.conversationId);
   });
 }
 

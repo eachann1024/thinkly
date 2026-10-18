@@ -5,12 +5,22 @@ import { ChartCard, ChartIncompleteNotice } from "../ChartCard";
 import { DiagramCard } from "../DiagramCard";
 import { CanvasLoadingCard, SvgArtifactCard } from "../SvgArtifactCard";
 import type { ToolDisplayPart } from "../toolProgressVisibility";
+import { InfoCard } from "../../ai-cards/InfoCard";
+import { CARD_TOOL_NAMES, toInfoCard } from "@/lib/notebook-ai/cards/types";
+
+const CARD_TOOL_PARTS = new Set<string>(CARD_TOOL_NAMES.map((name) => `tool-${name}`));
 export function renderToolVisual(
   part: ToolDisplayPart,
   key: string | number,
   editorRef: RefObject<EditorRef | null> | undefined,
   isStreaming: boolean,
 ) {
+  // 天气 / 汇率 / 时间：输出即卡片数据；出错时只在处理进度里显示原因
+  if (CARD_TOOL_PARTS.has(part.type) && part.state === "output-available") {
+    const card = toInfoCard(part.type.slice("tool-".length), part.output);
+    return card ? <InfoCard key={key} card={card} /> : null;
+  }
+
   if (
     part.type === "tool-showTable" &&
     part.state === "output-available" &&

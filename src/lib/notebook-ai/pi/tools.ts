@@ -1,49 +1,8 @@
-import { createTranslator, i18nYaml } from "@/i18n";
-const messages = i18nYaml<"src/lib/notebook-ai/pi/tools.ts#messages:1">`
-zh-Hans:
-  loadSkill: "加载 Skill"
-  searchWeb: "联网搜索"
-  readWebPage: "读取网页"
-  listNotebooks: "列出笔记本"
-  listPages: "列出页面"
-  searchNotes: "搜索笔记"
-  readPage: "读取页面"
-  executeBatchPlan: "变更计划"
-  showTable: "表格"
-  showChart: "图表"
-  showDiagram: "流程图"
-  showSvg: "图片"
-en:
-  loadSkill: "Load skill"
-  searchWeb: "Search the web"
-  readWebPage: "Read web page"
-  listNotebooks: "List notebooks"
-  listPages: "List notes"
-  searchNotes: "Search notes"
-  readPage: "Read note"
-  executeBatchPlan: "Change plan"
-  showTable: "Table"
-  showChart: "Chart"
-  showDiagram: "Diagram"
-  showSvg: "Image"
-ja:
-  loadSkill: "Skill を読み込む"
-  searchWeb: "Web 検索"
-  readWebPage: "Web ページを読み取る"
-  listNotebooks: "ノートブック一覧"
-  listPages: "ページ一覧"
-  searchNotes: "ノートを検索"
-  readPage: "ページを読み取る"
-  executeBatchPlan: "変更プラン"
-  showTable: "表"
-  showChart: "グラフ"
-  showDiagram: "フローチャート"
-  showSvg: "画像"
-`;
-const t = createTranslator(messages);
+import { toolLabel } from "./toolLabels";
 import { Type, type Static, type TSchema } from "@earendil-works/pi-ai";
 import type { AgentTool, AgentToolResult } from "@earendil-works/pi-agent-core";
-import { notebookAiTools } from "../tools";
+import { z } from "zod";
+import { ALWAYS_ON_CARD_TOOLS, notebookAiTools } from "../tools";
 import { getSkillToolNames, type NotebookSkillId } from "../skills";
 import { repairExecuteBatchPlanInput } from "../batch-plan/tool";
 import type { NotebookAiAgentContext } from "../types";
@@ -52,7 +11,7 @@ import { isNotebookSkillId } from "../skillIds";
 type SdkTool = (typeof notebookAiTools)[keyof typeof notebookAiTools];
 
 /** 与 AI SDK 工具描述对齐的 TypeBox 参数（给模型看）。 */
-const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
+const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = {
   loadSkill: Type.Object({
     skill: Type.Union(
       [
@@ -63,6 +22,7 @@ const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
         Type.Literal("chat"),
         Type.Literal("visual"),
         Type.Literal("webResearch"),
+        Type.Literal("liveInfo"),
       ],
       { description: "要加载的 Skill" },
     ),
@@ -72,6 +32,23 @@ const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
   }),
   readWebPage: Type.Object({
     url: Type.String({ description: "网页 URL" }),
+  }),
+  getWeather: Type.Object({
+    location: Type.String({ description: "城市或地区名" }),
+  }),
+  getExchangeRate: Type.Object({
+    from: Type.String({ description: "源货币 ISO 代码，如 USD" }),
+    to: Type.String({ description: "目标货币 ISO 代码，如 CNY" }),
+    amount: Type.Optional(Type.Number({ description: "换算金额，默认 1" })),
+  }),
+  getWorldTime: Type.Object({
+    places: Type.Array(
+      Type.Object({
+        label: Type.String({ description: "显示名称，如 纽约" }),
+        timeZone: Type.String({ description: "IANA 时区，如 America/New_York" }),
+      }),
+      { minItems: 1, maxItems: 6 },
+    ),
   }),
   listNotebooks: Type.Object({}),
   listPages: Type.Object({
@@ -144,6 +121,15 @@ const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
   }),
 };
 
+/** 没有手写 TypeBox 的工具（卡片类）直接由 zod 生成 JSON Schema，pi-ai 同样能校验。 */
+function toolParameters(name: keyof typeof notebookAiTools): TSchema {
+  const manual = TOOL_PARAMETERS[name];
+  if (manual) return manual;
+  const schema = notebookAiTools[name].inputSchema as z.ZodType;
+  const { $schema: _ignored, ...json } = z.toJSONSchema(schema, { io: "input" }) as Record<string, unknown>;
+  return json as unknown as TSchema;
+}
+
 function resultToAgentToolResult(value: unknown): AgentToolResult<unknown> {
   const text =
     typeof value === "string" ? value : JSON.stringify(value ?? null, null, 0);
@@ -208,10 +194,10 @@ export function buildPiDomainTools(
 
   return names.map((name) => {
     const sdkTool = notebookAiTools[name];
-    const parameters = TOOL_PARAMETERS[name];
+    const parameters = toolParameters(name);
     return {
       name,
-      label: t(name),
+      label: toolLabel(name),
       description: sdkTool.description ?? name,
       parameters,
       execute: async (toolCallId, params, signal) =>
@@ -233,6 +219,7 @@ export function getActivePiTools(
 ): AgentTool[] {
   const activeNames = new Set<string>([
     "loadSkill",
+    ...ALWAYS_ON_CARD_TOOLS,
     ...getSkillToolNames(agentContext.loadedSkills),
   ]);
   return allTools.filter((tool) => activeNames.has(tool.name));
