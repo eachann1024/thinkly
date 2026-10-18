@@ -261,6 +261,18 @@ function DropdownMenuRadioItem({
     </DropdownMenuItem>
   );
 }
+function DropdownMenuSub({
+  children,
+}: {
+  children: [React.ReactElement, React.ReactElement];
+}) {
+  return (
+    <Dropdown.SubmenuTrigger>
+      {children[0]}
+      {children[1]}
+    </Dropdown.SubmenuTrigger>
+  );
+}
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 DropdownMenuContent.displayName = "DropdownMenuContent";
 DropdownMenuItem.displayName = "DropdownMenuItem";
@@ -273,4 +285,5 @@ export {
   DropdownMenuRadioItem,
   DropdownMenuRadioGroup,
   DropdownMenuSeparator,
+  DropdownMenuSub,
 };
