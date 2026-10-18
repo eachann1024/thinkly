@@ -1,8 +1,8 @@
 cask "goose-note" do
   arch arm: "-arm64", intel: ""
-  version "1.7.316,8e35835"
-  sha256 arm: "27728745a103ecee5b6c0e66eeb637298d2d2075746c3d02ff25cf1fcae72c00",
-         intel: "eac147bebf6bb350e4a7628f502a6cb8b87ac2f40e9d855c07b000d90b9d7ec2"
+  version "1.7.317,6e3ebc5"
+  sha256 arm: "ff64a0817d5f1fcfa6abf193359400b352d5c90ac58715a81cfb2a6955256c3b",
+         intel: "8e0dc776ad33b021671f109d8c0d6129e63704817b0c86d58d75f2571feb3730"
   url "https://github.com/eachann1024/goose-note/releases/download/v#{version.csv.first}-#{version.csv.second}/Goose.Note-#{version.csv.first}#{arch}.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
