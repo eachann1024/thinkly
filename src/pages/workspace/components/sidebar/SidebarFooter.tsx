@@ -20,7 +20,7 @@ import { ReflectionButton } from "./reflection/ReflectionButton";
 import { SidebarRailIcon } from "./SidebarRailIcon";
 import { CharacterAvatar, useHasCharacter } from "./CharacterAvatar";
 import "./sidebar-footer-labels.css";
-import "../settings/settings-layout.css";
+import "./settings/settings-layout.css";
 
 export interface SidebarFooterProps {
   isSettingsOpen: boolean;
