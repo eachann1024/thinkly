@@ -73,13 +73,15 @@ node scripts/perf/startup.mjs --app dist-desktop/Thinkly.app --runs 7
 
 `startup.mjs` 启动真实应用若干次，以 `process.getCreationTime()` 为零点汇总 p50/p95：`app-ready`、`did-finish-load`、`renderer-rendered`、`first-stable-frame`，以及各进程工作集内存。它复制一份真实配置目录（`--profile empty` 用空目录、`--profile real` 直接用当前配置）并通过 `GOOSE_PERF_USERDATA` 隔离，不会与正在运行的实例抢单实例锁。实测刻度：
 
-| 阶段 | 1.7.318 基线 | 现在 |
+| 阶段（p50，7 次） | 1.7.318 基线 | 现在 |
 | --- | --- | --- |
-| 窗口创建 | 332ms | 296ms |
-| 首屏脚本执行完 | 869ms | 502ms |
-| 界面画出来 | 1097ms | 721ms |
-| 首帧稳定 | 1139ms | 787ms |
-| 工作集内存 | 725MB | 642MB |
+| app-ready | 219ms | 181ms |
+| 窗口创建 | 332ms | 286ms |
+| 窗口真正显示（用户感知的"打开"） | ≈570ms（当时无此打点，dom-ready 为 521ms） | 495ms |
+| 首屏脚本执行完 | 869ms | 498ms |
+| 界面画出来 | 1097ms | 711ms |
+| 首帧稳定 | 1139ms | 779ms |
+| 工作集内存 | 725MB | 639MB |
 
 不设 `GOOSE_PERF_LOG` 时 `electron/main/perf.ts` 全部函数立即返回，不注册监听、不开定时器、不写盘。首帧探测用的是渲染进程已有的 `data-startup-settling` 标记（bootstrap 渲染前设置、App 挂载后双 rAF 移除），不改渲染端行为。新建产物后的第一次启动额外包含系统签名校验与 Spotlight 索引，不计入常态口径。
 
