@@ -29,8 +29,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
 import { GOOSE_FOLDER_MIME, GOOSE_PAGE_MIME, GOOSE_TEXT_MIME, hasWorkspaceDrag, readWorkspaceDrag } from "@/lib/workspace-drag";
 import { dropWorkspaceContent, type SplitContentPlacement } from "@/lib/editor-split/drop";
+import { isSidebarPageDrag } from "@/lib/editor-split/sidebarPageDrop";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { countLeaves, MAX_SPLIT_LEAVES } from "@/lib/editor-split/tree";
+import { SidebarPageDrop } from "./SidebarPageDrop";
 import "./split-content-drop.css";
 
 type SplitDropTarget = {
@@ -91,6 +93,8 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
     const over = (event: DragEvent) => {
       const data = event.dataTransfer;
       if (!data || !(event.target instanceof Node) || !surface.contains(event.target)) return;
+      // 侧栏笔记的边缘/中央由 SidebarPageDrop 消费，这里继续处理正文和文件夹。
+      if (isSidebarPageDrag(Array.from(data.types))) return;
       if (isEditorDrag(data)) { reset(); return; }
       const canSplit = hasWorkspaceDrag(data);
       if (!canSplit && !isFileDrag(data)) return;
@@ -111,7 +115,7 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       reset();
       if (!(event.target instanceof Node) || !surface.contains(event.target)) return;
       const data = event.dataTransfer;
-      if (!data || isEditorDrag(data)) return;
+      if (!data || isSidebarPageDrag(Array.from(data.types)) || isEditorDrag(data)) return;
       const canSplit = hasWorkspaceDrag(data);
       if (!canSplit && !isFileDrag(data)) return;
       const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
@@ -149,6 +153,7 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
   return (
     <div ref={surfaceRef} className="relative h-full min-h-0" data-split-content-drop="">
       {children}
+      <SidebarPageDrop tabId={tabId} surfaceRef={surfaceRef} />
       {preview ? (
         <div className="split-content-drop-layer" aria-hidden="true">
           <div className="split-content-drop-preview" data-placement={preview.placement}
