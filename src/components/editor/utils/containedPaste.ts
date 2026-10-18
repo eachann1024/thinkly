@@ -27,7 +27,7 @@ type Editor = BlockNoteEditor<any, any, any>;
 const CONTAINERS = new Set(["callout", "quote"]);
 
 /** Only a text selection within one inline block can imply continuing that block. */
-export function containedPasteTarget(state: EditorState) {
+export function containedPasteTarget(state: Pick<EditorState, "selection">) {
   const { selection } = state;
   if (!(selection instanceof TextSelection)) return null;
   const { $from, $to } = selection;
@@ -58,27 +58,31 @@ function freshBlocks(blocks: any[]): any[] {
 
 /** Insert real child blocks at the caret, retaining the suffix and existing children. */
 export function insertContainedBlocks(editor: Editor, blocks: any[]): string[] | null {
-  const state = editor.prosemirrorState;
-  const target = containedPasteTarget(state);
-  if (!target || !blocks.length) return null;
-  const nodes = freshBlocks(blocks).map((block) => blockToEditorNode(block, state.schema));
-  const { $from, $to } = state.selection;
-  const suffix = $to.parent.content.cut($to.parentOffset);
-  const children = [...nodes];
-  if (suffix.size) {
-    const tail = blockToEditorNode({ type: "paragraph" }, state.schema);
-    children.push(tail.copy(Fragment.from(tail.firstChild!.copy(suffix))));
-  }
-  const prefix = $from.parent.content.cut(0, $from.parentOffset);
-  const content = $from.parent.copy(prefix);
-  const oldChildren = target.block.childCount > 1 ? target.block.child(1).content : Fragment.empty;
-  const group = state.schema.nodes.blockGroup.create(null, Fragment.fromArray(children).append(oldChildren));
-  const replacement = target.block.copy(Fragment.fromArray([content, group]));
-  const tr = state.tr.replaceWith(target.pos, target.pos + target.block.nodeSize, replacement);
-  const end = target.pos + 1 + content.nodeSize + 1 + nodes.reduce((sum, node) => sum + node.nodeSize, 0);
-  tr.setSelection(Selection.near(tr.doc.resolve(end - 1), -1));
-  editor.prosemirrorView.dispatch(tr.scrollIntoView());
-  return nodes.map((node) => String(node.attrs.id));
+  // 媒体占位块会在外层 transact 中调用；必须复用当前事务，不能读取
+  // prosemirrorState 或自行 dispatch，否则 BlockNote 会在上传前抛错。
+  return editor.transact((tr) => {
+    const target = containedPasteTarget(tr);
+    if (!target || !blocks.length) return null;
+    const schema = tr.doc.type.schema;
+    const nodes = freshBlocks(blocks).map((block) => blockToEditorNode(block, schema));
+    const { $from, $to } = tr.selection;
+    const suffix = $to.parent.content.cut($to.parentOffset);
+    const children = [...nodes];
+    if (suffix.size) {
+      const tail = blockToEditorNode({ type: "paragraph" }, schema);
+      children.push(tail.copy(Fragment.from(tail.firstChild!.copy(suffix))));
+    }
+    const prefix = $from.parent.content.cut(0, $from.parentOffset);
+    const content = $from.parent.copy(prefix);
+    const oldChildren = target.block.childCount > 1 ? target.block.child(1).content : Fragment.empty;
+    const group = schema.nodes.blockGroup.create(null, Fragment.fromArray(children).append(oldChildren));
+    const replacement = target.block.copy(Fragment.fromArray([content, group]));
+    tr.replaceWith(target.pos, target.pos + target.block.nodeSize, replacement);
+    const end = target.pos + 1 + content.nodeSize + 1 + nodes.reduce((sum, node) => sum + node.nodeSize, 0);
+    tr.setSelection(Selection.near(tr.doc.resolve(end - 1), -1));
+    tr.scrollIntoView();
+    return nodes.map((node) => String(node.attrs.id));
+  });
 }
 
 /** Shared by native keyboard paste and the context menu; parsing is synchronous. */
