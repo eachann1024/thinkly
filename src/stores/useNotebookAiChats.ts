@@ -16,7 +16,7 @@ export const useNotebookAiChats = create<NotebookAiChatsState>()(
       ...createContentChatActions(set, get),
     }),
     {
-      name: "goose-note-notebook-ai-chats",
+      name: "thinkly-notebook-ai-chats",
       version: NOTEBOOK_AI_CHATS_STORAGE_VERSION,
       storage: createJSONStorage(() => localStorageAdapter),
       skipHydration: true,

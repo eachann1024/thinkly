@@ -14,7 +14,7 @@ import {
   toDiskWriteError,
 } from "@/lib/diskWriteError";
 
-const LAST_DIRECTORY_KEY = "goose-note:electron-last-directory";
+const LAST_DIRECTORY_KEY = "thinkly:electron-last-directory";
 
 export const existsCache = new Map<string, boolean>();
 export const rememberExists = (path: string, value: boolean) => {

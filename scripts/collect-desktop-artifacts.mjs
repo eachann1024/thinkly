@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 把桌面端最终产物收集到顶层 dist-desktop/（不再套 mac/arm64、win、linux 子目录）：
-//   dist-desktop/Goose Note.app
+//   dist-desktop/Thinkly.app
 //   dist-desktop/*.exe
 import { execSync } from "node:child_process";
 import {

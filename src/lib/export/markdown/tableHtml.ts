@@ -1,6 +1,7 @@
 import { documentTextColors } from "@/lib/textColors";
 import { sanitizeCssColor } from "./blockPropsProperties";
 import { sanitizePageMentionProps, pageMentionLabel, serializePageMentionHref, pageMentionFromMarkdownLink } from "@/components/editor/inline/pageMention";
+import { dataAttr, readDataAttr } from "./persistedNames";
 import { escapeHtmlAttribute } from "./serialize/inline";
 
 const backgrounds: Record<string, string> = {
@@ -32,7 +33,7 @@ export function tableInlineHtml(content: any): string {
     if (item.type === "link") return `<a href="${tableHtmlEscape(item.href || "")}">${tableInlineHtml(item.content)}</a>`;
     if (item.type === "pageMention") {
       const props = sanitizePageMentionProps(item);
-      return props ? `<a href="${tableHtmlEscape(serializePageMentionHref(props))}" data-goose-page-mention="${encodeURIComponent(JSON.stringify(props))}">${tableHtmlEscape(pageMentionLabel(props))}</a>` : "";
+      return props ? `<a href="${tableHtmlEscape(serializePageMentionHref(props))}" ${dataAttr("page-mention")}="${encodeURIComponent(JSON.stringify(props))}">${tableHtmlEscape(pageMentionLabel(props))}</a>` : "";
     }
     let text = tableInlineHtml(item.text || "");
     const styles = item.styles || {};
@@ -42,7 +43,7 @@ export function tableInlineHtml(content: any): string {
     const color = sanitizeCssColor(styles.textColor);
     const background = sanitizeCssColor(styles.backgroundColor);
     if (color || background) {
-      text = `<span${color ? ` data-goose-text-color="${tableHtmlEscape(color)}"` : ""}${background ? ` data-goose-background-color="${tableHtmlEscape(background)}"` : ""} style="${tableHtmlEscape(tableColorStyle(styles))}">${text}</span>`;
+      text = `<span${color ? ` ${dataAttr("text-color")}="${tableHtmlEscape(color)}"` : ""}${background ? ` ${dataAttr("background-color")}="${tableHtmlEscape(background)}"` : ""} style="${tableHtmlEscape(tableColorStyle(styles))}">${text}</span>`;
     }
     return text;
   }).join("");
@@ -58,10 +59,10 @@ export function parseTableInlineHtml(node: Node, styles: Record<string, unknown>
   const mark = ({ strong: "bold", b: "bold", em: "italic", i: "italic", u: "underline", del: "strike", s: "strike", code: "code" } as Record<string, string>)[tag];
   if (mark) extra[mark] = true;
   for (const property of ["textColor", "backgroundColor"] as const) {
-    const color = sanitizeCssColor(node.getAttribute(property === "textColor" ? "data-goose-text-color" : "data-goose-background-color"));
+    const color = sanitizeCssColor(readDataAttr(node, property === "textColor" ? "text-color" : "background-color"));
     if (color) extra[property] = color;
   }
-  const mention = node.getAttribute("data-goose-page-mention");
+  const mention = readDataAttr(node, "page-mention");
   if (mention) {
     try {
       const props = sanitizePageMentionProps(JSON.parse(decodeURIComponent(mention)));

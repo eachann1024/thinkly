@@ -12,7 +12,7 @@ import { useCommandSearchIndexWarmup } from "@/pages/workspace/components/comman
 import { Toaster } from "@/components/ui/sonner";
 import "./search-window.css";
 
-const SETTINGS_KEY = "goose-note-settings";
+const SETTINGS_KEY = "thinkly-settings";
 
 /** 主窗不在时，只改共享设置里的「搜索显示最近」字段，避免用本窗旧快照覆盖整份设置。 */
 function patchPersistedShowRecent(enabled: boolean): void {

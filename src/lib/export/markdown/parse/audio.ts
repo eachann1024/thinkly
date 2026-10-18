@@ -1,3 +1,4 @@
+import { readDataAttr } from "../persistedNames";
 import { sanitizeCssColor } from "../blockPropsProperties";
 
 // 与自然媒体 HTML 共用入口，保留旧版只包含 src 的 video 文档。
@@ -12,9 +13,9 @@ export function parseAudioBlock(lines: string[], start: number) {
   return {
     block: { type, props: {
       url: element.getAttribute("src") || "",
-      name: element.getAttribute("data-goose-name") || "",
-      caption: element.getAttribute("data-goose-caption") || "",
-      showPreview: element.getAttribute("data-goose-show-preview") !== "false",
+      name: readDataAttr(element, "name") || "",
+      caption: readDataAttr(element, "caption") || "",
+      showPreview: readDataAttr(element, "show-preview") !== "false",
       backgroundColor: sanitizeCssColor(element.getAttribute("data-background-color")) || "default",
       ...(type === "video" && Number.isFinite(width) && width > 0 ? { previewWidth: width } : {}),
       ...(type === "video" && alignment && ["left", "center", "right"].includes(alignment)

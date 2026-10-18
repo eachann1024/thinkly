@@ -74,7 +74,7 @@ export function useWebdavSyncActions(
       if (!isCurrentActivation(epoch)) return;
       const now = new Date();
       const pad = (n: number) => n.toString().padStart(2, "0");
-      const fileName = `goose-note-export-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.zip`;
+      const fileName = `thinkly-export-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.zip`;
       const result = await uploadWebdavBackup(
         webdavUrl,
         webdavUsername,

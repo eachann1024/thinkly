@@ -1,3 +1,4 @@
+import { dataAttr } from "../persistedNames";
 import { blockNoteInlineToText, escapePipeInCell } from "./inline";
 import { tableColorStyle, tableHtmlEscape, tableInlineHtml } from "../tableHtml";
 
@@ -34,7 +35,7 @@ export function serializeTable(block: any): string {
   const headerCols = content?.headerCols || 0;
   const widths: (number | undefined)[] = content?.columnWidths ?? [];
   const color = block.props?.textColor;
-  const opening = `<table data-goose-table="v1" data-header-rows="${headerRows}" data-header-cols="${headerCols}"${color && color !== "default" ? ` data-goose-text-color="${tableHtmlEscape(color)}" style="${tableHtmlEscape(tableColorStyle(block.props))}"` : ""}>`;
+  const opening = `<table ${dataAttr("table")}="v1" data-header-rows="${headerRows}" data-header-cols="${headerCols}"${color && color !== "default" ? ` ${dataAttr("text-color")}="${tableHtmlEscape(color)}" style="${tableHtmlEscape(tableColorStyle(block.props))}"` : ""}>`;
   const columns = widths.length ? `<colgroup>${widths.map((width) => typeof width === "number" && Number.isFinite(width) && width > 0 ? `<col style="width:${width}px">` : "<col>").join("")}</colgroup>` : "";
   const htmlRows = rows.map((row, rowIndex) => {
     let column = 0;
@@ -45,7 +46,7 @@ export function serializeTable(block: any): string {
       const tag = rowIndex < headerRows || column < headerCols ? "th" : "td";
       column += colspan;
       const attrs = [`colspan="${colspan}"`, `rowspan="${rowspan}"`];
-      for (const [key, attribute] of [["textColor", "data-goose-text-color"], ["backgroundColor", "data-goose-background-color"], ["textAlignment", "data-goose-text-alignment"]]) {
+      for (const [key, attribute] of [["textColor", dataAttr("text-color")], ["backgroundColor", dataAttr("background-color")], ["textAlignment", dataAttr("text-alignment")]]) {
         if (props[key] && props[key] !== "default") attrs.push(`${attribute}="${tableHtmlEscape(props[key])}"`);
       }
       const style = tableColorStyle(props);

@@ -11,7 +11,7 @@ zh-Hans:
   theRemoteWebdavFolderCanTContainEmptyPath: "WebDAV 远端目录不能包含空路径段"
   theRemoteWebdavFolderHasInvalidEncoding: "WebDAV 远端目录编码无效"
   theRemoteWebdavFolderCanTContainParentDirectory: "WebDAV 远端目录不能包含路径穿越片段"
-  theParentFolderDoesnTExistMakeSureThe: "检测到上级目录不存在，请确认“远端目录”填写的是服务端已经存在的路径。部分 WebDAV 服务不支持直接在根目录创建文件夹，例如 Nextcloud、ownCloud、坚果云或部分 NAS 场景通常需要先在服务端创建同步目录，再在这里填写对应路径（如“backups/goose-note-app”）。"
+  theParentFolderDoesnTExistMakeSureThe: "检测到上级目录不存在，请确认“远端目录”填写的是服务端已经存在的路径。部分 WebDAV 服务不支持直接在根目录创建文件夹，例如 Nextcloud、ownCloud、坚果云或部分 NAS 场景通常需要先在服务端创建同步目录，再在这里填写对应路径（如“backups/Thinkly”）。"
 en:
   enterAWebdavUrl: "Enter a WebDAV URL"
   theWebdavUrlMustStartWithHttpOrHttps: "The WebDAV URL must start with http or https"
@@ -22,7 +22,7 @@ en:
   theRemoteWebdavFolderCanTContainEmptyPath: "The remote WebDAV folder can’t contain empty path segments"
   theRemoteWebdavFolderHasInvalidEncoding: "The remote WebDAV folder has invalid encoding"
   theRemoteWebdavFolderCanTContainParentDirectory: "The remote WebDAV folder can’t contain parent-directory traversal segments"
-  theParentFolderDoesnTExistMakeSureThe: "The parent folder doesn’t exist. Make sure the remote folder points to an existing path on the server. Some WebDAV services, including Nextcloud, ownCloud, Nutstore, and some NAS setups, require you to create the sync folder on the server first, then enter its path here (for example, backups/goose-note-app)."
+  theParentFolderDoesnTExistMakeSureThe: "The parent folder doesn’t exist. Make sure the remote folder points to an existing path on the server. Some WebDAV services, including Nextcloud, ownCloud, Nutstore, and some NAS setups, require you to create the sync folder on the server first, then enter its path here (for example, backups/Thinkly)."
 ja:
   enterAWebdavUrl: "WebDAV の URL を入力してください"
   theWebdavUrlMustStartWithHttpOrHttps: "WebDAV の URL は http または https で始まる必要があります"
@@ -33,7 +33,7 @@ ja:
   theRemoteWebdavFolderCanTContainEmptyPath: "WebDAV のリモートフォルダに空のパスセグメントは使用できません"
   theRemoteWebdavFolderHasInvalidEncoding: "WebDAV のリモートフォルダのエンコードが無効です"
   theRemoteWebdavFolderCanTContainParentDirectory: "WebDAV のリモートフォルダに親ディレクトリへの移動を含むパスは使用できません"
-  theParentFolderDoesnTExistMakeSureThe: "親フォルダが存在しません。「リモートフォルダ」に、サーバー上に実在するパスを入力しているか確認してください。WebDAV サービスによっては、ルートに直接フォルダを作成できません。Nextcloud、ownCloud、Jianguoyun（坚果云）、一部の NAS などでは、先にサーバー側で同期用フォルダを作成してから、ここに対応するパス（例：「backups/goose-note-app」）を入力する必要があります。"
+  theParentFolderDoesnTExistMakeSureThe: "親フォルダが存在しません。「リモートフォルダ」に、サーバー上に実在するパスを入力しているか確認してください。WebDAV サービスによっては、ルートに直接フォルダを作成できません。Nextcloud、ownCloud、Jianguoyun（坚果云）、一部の NAS などでは、先にサーバー側で同期用フォルダを作成してから、ここに対応するパス（例：「backups/Thinkly」）を入力する必要があります。"
 `;
 const uiText = createTranslator(localMessages);
 export function normalizeBaseUrl(raw: string): string {
@@ -122,7 +122,7 @@ export function isBackupFileName(fileName: string): boolean {
     return false;
   }
   const backupPattern =
-    /^goose-note-export-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.zip$/;
+    /^(?:thinkly|goose-note)-export-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.zip$/;
   return backupPattern.test(trimmed);
 }
 

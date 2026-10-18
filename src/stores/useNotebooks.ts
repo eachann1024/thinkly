@@ -21,7 +21,7 @@ export const useNotebooks = create<NotebooksState>()(
       ...createMetadataNotebookActions(set, get),
     }),
     {
-      name: "goose-note-notebooks",
+      name: "thinkly-notebooks",
       version: 4,
       storage: createJSONStorage(() => localStorageAdapter),
       partialize: (state) => ({

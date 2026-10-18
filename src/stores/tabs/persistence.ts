@@ -19,7 +19,7 @@ import { usePages } from "../usePages";
 import { applyPersistedTabSplit } from "../useEditorSplit";
 import { transitionTabsStartup, type TabsStartupState, type TabsStartupEvent } from "./startupState";
 
-export const LEGACY_TABS_PERSIST_KEY = "goose-note:open-tabs:v1";
+export const LEGACY_TABS_PERSIST_KEY = "thinkly:open-tabs:v1";
 
 export const argvWindowContext = readWindowContextFromArgv();
 

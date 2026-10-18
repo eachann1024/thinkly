@@ -20,7 +20,7 @@
  */
 export const FALLBACK_WINDOW_ID = "main";
 
-export const TABS_PERSIST_KEY_PREFIX = "goose-note:open-tabs:v1";
+export const TABS_PERSIST_KEY_PREFIX = "thinkly:open-tabs:v1";
 
 export const GOOSE_WINDOW_ID_PREFIX = "--goose-window-id=";
 export const GOOSE_WINDOW_KIND_PREFIX = "--goose-window-kind=";

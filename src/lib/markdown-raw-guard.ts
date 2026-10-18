@@ -1,7 +1,8 @@
 import { serializeFencedCode } from "./export/markdown/serialize/codeFence";
 
-const RAW_BLOCK_LANGUAGE = "goose-raw-block";
-const RAW_BLOCK_MARKER = "<!-- goose-note:raw-block -->";
+const RAW_BLOCK_LANGUAGE = "thinkly-raw-block";
+const LEGACY_RAW_BLOCK_LANGUAGE = "goose-raw-block";
+const RAW_BLOCK_MARKER = "<!-- thinkly:raw-block -->";
 
 const INLINE_HTML_ALLOWLIST = new Set([
   "details",
@@ -161,9 +162,10 @@ export function decodeUnsupportedMarkdownForDisk(markdown: string): string {
     if (!fence) { output.push(lines[index]); continue; }
     const end = fenceEnd(lines, index, fence[1]);
     if (end >= lines.length) { output.push(...lines.slice(index)); break; }
-    if (fence[2].trim().split(/\s+/)[0] === RAW_BLOCK_LANGUAGE) {
+    const fenceLanguage = fence[2].trim().split(/\s+/)[0];
+    if (fenceLanguage === RAW_BLOCK_LANGUAGE || fenceLanguage === LEGACY_RAW_BLOCK_LANGUAGE) {
       const body = lines.slice(index + 1, end);
-      if (/^\s*<!--\s*goose-note:raw-block\s*-->$/.test(body[0] || "")) body.shift();
+      if (/^\s*<!--\s*(?:thinkly|goose-note):raw-block\s*-->$/.test(body[0] || "")) body.shift();
       output.push(...body);
     } else {
       // 其他围栏中的 raw 示例仍然是代码，不能递归解包。

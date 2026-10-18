@@ -23,7 +23,7 @@ export async function assertQuickNoteSaved(): Promise<void> {
   const current = quickNote.useQuickNote.getState().drafts;
   let persisted: Partial<Record<QuickNoteSlot, JSONContent | null>> = {};
   try {
-    const raw = storage.getDbStorageItem("goose-note:quicknote");
+    const raw = storage.getDbStorageItem("thinkly:quicknote");
     if (raw) persisted = JSON.parse(raw)?.state?.drafts ?? {};
   } catch {
     // 下方只对真正非空或有删除变更的草稿阻止重启。

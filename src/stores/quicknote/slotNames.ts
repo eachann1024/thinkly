@@ -22,7 +22,7 @@ import { getDbStorageItem, setDbStorageItem } from "@/lib/storage";
  * Electron 的数据库调用是同步的；主文档较大时，这种无关的整包写入会直接堵住旧渲染进程。
  */
 export const QUICKNOTE_SLOT_NAMES_STORAGE_KEY =
-  "goose-note:quicknote-slot-names";
+  "thinkly:quicknote-slot-names";
 
 export interface PersistedQuickNoteSlotNames {
   version: 1;

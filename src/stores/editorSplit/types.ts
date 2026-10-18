@@ -7,7 +7,7 @@ import type {
   SplitDropPlacement,
 } from "@/lib/editor-split/types";
 
-export const EDITOR_SPLIT_PERSIST_KEY_PREFIX = "goose-note:editor-split:v1";
+export const EDITOR_SPLIT_PERSIST_KEY_PREFIX = "thinkly:editor-split:v1";
 
 export function editorSplitPersistKey(windowId: string): string {
   return `${EDITOR_SPLIT_PERSIST_KEY_PREFIX}:${windowId}`;

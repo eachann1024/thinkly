@@ -1,11 +1,12 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { NOTE_MARK_PATTERN, noteComment } from "./persistedNames";
 import { INLINE_BLOCK_TYPES, pickPersistedBlockProps, restorePersistedBlockProps, type MarkdownBlock, type PersistedBlockProps } from "./blockPropsProperties";
 export { pickPersistedBlockProps, sanitizeCssColor } from "./blockPropsProperties";
 export type { PersistedBlockProps } from "./blockPropsProperties";
 export { LOCAL_BLOCK_PROPS_WRAPPER_STYLE, encodeLocalBlockPropsWrappers, wrapLocalBlockPropsMarkdown, unwrapLocalBlockPropsWrappers } from "./localBlockPropsWrappers";
 
-const BLOCK_PROPS_MARKER = /^<!--[ \t]*goose-note:block-props=([^\s]+)[ \t]*-->/i;
-const LEGACY_BLOCK_PROPS_MARKER = /^<!--[ \t]*goose-note:native-block-props=([^\s]+)[ \t]*-->/i;
+const BLOCK_PROPS_MARKER = new RegExp(`^<!--[ \\t]*${NOTE_MARK_PATTERN}:block-props=([^\\s]+)[ \\t]*-->`, "i");
+const LEGACY_BLOCK_PROPS_MARKER = new RegExp(`^<!--[ \\t]*${NOTE_MARK_PATTERN}:native-block-props=([^\\s]+)[ \\t]*-->`, "i");
 
 function prependInlineMarker(content: unknown, marker: string): unknown[] {
   if (Array.isArray(content)) return [marker, ...content];
@@ -53,14 +54,14 @@ function decodeMarker(encoded: string, isCurrent: boolean): PersistedBlockProps 
 /** editor 的 lossless 比较将可恢复的旧命名空间归一为 v1 标记。 */
 export function canonicalizeBlockPropsMarkers(markdown: string): string {
   return markdown.replace(
-    /<!--[ \t]*goose-note:(native-)?block-props=([^\s]+)[ \t]*-->/gi,
+    new RegExp(`<!--[ \\t]*${NOTE_MARK_PATTERN}:(native-)?block-props=([^\\s]+)[ \\t]*-->`, "gi"),
     (source, legacyNamespace: string | undefined, encoded: string) => {
       try {
         const parsed = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>;
         if (!legacyNamespace && parsed.v !== 1) return source;
         const metadata = restorePersistedBlockProps(parsed);
         if (Object.keys(metadata).length === 0) return source;
-        return `<!-- goose-note:block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))} -->`;
+        return noteComment(`block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))}`);
       } catch {
         return source;
       }
@@ -79,7 +80,7 @@ export function encodeBlockPropsMarkers(blocks: BlockNoteContent): BlockNoteCont
     return {
       ...block,
       ...(Object.keys(metadata).length > 0
-        ? { content: prependInlineMarker(block.content, `<!-- goose-note:block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))} -->`) }
+        ? { content: prependInlineMarker(block.content, noteComment(`block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))}`)) }
         : {}),
       ...(children ? { children } : {}),
     };
