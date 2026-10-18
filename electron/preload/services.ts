@@ -29,8 +29,11 @@ export const assetMaintenance: AssetMaintenanceBridge = {
 };
 
 export const gitSync: GitSyncBridge = {
+  gitAvailable: () => invoke("git-sync:available"),
+  setModuleEnabled: (enabled) => invoke("git-sync:set-module", enabled),
   getState: () => invoke("git-sync:state"),
   checkFolder: (localPath) => invoke("git-sync:check-folder", localPath),
+  rememberNotebookRoot: (localPath) => invoke("git-sync:remember-root", localPath),
   save: (config) => invoke("git-sync:save", config),
   remove: (notebookId) => invoke("git-sync:remove", notebookId),
   syncNow: (notebookId) => invoke("git-sync:now", notebookId),

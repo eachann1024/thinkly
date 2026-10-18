@@ -88,11 +88,16 @@ export interface GitSyncState {
   configs: GitRepositoryConfig[];
   statuses: GitSyncStatus[];
   mappingHistory?: Record<string, GitRepositoryFolder[]>;
+  /** 大模块开关。旧配置缺省时由主进程按是否已有仓库补上。 */
+  moduleEnabled: boolean;
 }
 
 export interface GitSyncBridge {
+  gitAvailable: () => Promise<boolean>;
+  setModuleEnabled: (enabled: boolean) => Promise<GitSyncState>;
   getState: () => Promise<GitSyncState>;
   checkFolder: (localPath: string) => Promise<GitFolderCheck>;
+  rememberNotebookRoot: (localPath: string) => Promise<boolean>;
   save: (config: GitRepositoryInput) => Promise<GitSyncState>;
   remove: (repositoryId: string) => Promise<GitSyncState>;
   syncNow: (repositoryId: string) => Promise<GitSyncState>;

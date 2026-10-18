@@ -15,6 +15,7 @@ zh-Hans:
   duplicateBranch: "此仓库分支已有同步配置"
   invalidConflict: "冲突记录无效，请重新同步"
   configRemoved: "同步配置已移除"
+  moduleOff: "Git 同步已关闭"
 en:
   failed: "Sync failed. Check your folders, SSH access, and network connection, then try again."
   notification: "Thinkly · Git sync failed"
@@ -32,6 +33,7 @@ en:
   duplicateBranch: "This repository branch already has a sync configuration."
   invalidConflict: "The conflict record is invalid. Please sync again."
   configRemoved: "The sync configuration was removed."
+  moduleOff: "Git sync is off."
 ja:
   failed: "同期に失敗しました。フォルダ、SSH の権限、ネットワークを確認してから、もう一度お試しください"
   notification: "Thinkly · Git 同期エラー"
@@ -49,3 +51,4 @@ ja:
   duplicateBranch: "このリポジトリのブランチには、すでに同期設定があります"
   invalidConflict: "競合の記録が無効です。もう一度同期してください"
   configRemoved: "同期設定を削除しました"
+  moduleOff: "Git 同期はオフです。"

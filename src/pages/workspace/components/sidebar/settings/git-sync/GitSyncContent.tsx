@@ -6,8 +6,8 @@ const uiText = createTranslator(localMessages);
 import { localizeGitUiReason, type GitSyncAction } from "./gitSyncUiState";
 import { GitDetails } from "./GitDetails";
 import { GitSyncSettings } from "./GitSyncSettings";
-import { repositoryLabel, shortSyncError } from "./gitSyncPresentation";
-import type { Dispatch, SetStateAction } from "react";
+import { formatFolderIssue, repositoryLabel, shortSyncError } from "./gitSyncPresentation";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { DotDecor, SettingsDotIcon } from "@/components/ui/dot-matrix";
 import type {
@@ -23,6 +23,7 @@ import { GitRepositoryForm, type GitDraft } from "./GitRepositoryForm";
 import { GitFolderList } from "./GitFolderList";
 import { GitConflicts } from "./GitConflicts";
 export interface GitSyncContentProps {
+  moduleSwitch?: ReactNode;
   bridge: GitSyncBridge | undefined;
   state: GitSyncState;
   config: GitRepositoryConfig | undefined;
@@ -34,7 +35,7 @@ export interface GitSyncContentProps {
   selectionDisabled: boolean;
   status: GitSyncStatus | undefined;
   summary: string;
-  folderErrorCount: number;
+  folderIssues: { name: string; reason: string }[];
   rows: GitRepositoryFolder[];
   folders: GitRepositoryFolder[];
   availableIds: Set<string>;
@@ -59,6 +60,7 @@ export interface GitSyncContentProps {
   onFolderCheck: () => void;
 }
 export function GitSyncContent({
+  moduleSwitch,
   bridge,
   state,
   config,
@@ -70,7 +72,7 @@ export function GitSyncContent({
   selectionDisabled,
   status,
   summary,
-  folderErrorCount,
+  folderIssues,
   rows,
   folders,
   availableIds,
@@ -98,7 +100,9 @@ export function GitSyncContent({
   const actionDisabled = disabled || unsavedFolders || unsavedSettings;
   const conflicts = status?.conflicts ?? [];
   const syncError = status?.error ? localizeGitUiReason(status.error) : undefined;
-  const folderError = folderErrorCount > 0;
+  const folderError = folderIssues.length > 0;
+  const syncRepeatsFolderIssue = Boolean(syncError && folderIssues.some((issue) => syncError.includes(issue.reason)));
+  const reportedFailure = error || (syncRepeatsFolderIssue ? "" : syncError ?? "");
   const settingsProps = {
     config,
     draft,
@@ -114,6 +118,7 @@ export function GitSyncContent({
   };
   return (
     <div className="w-full max-w-[860px] min-w-0 space-y-5">
+      {moduleSwitch}
       {!bridge ? (
         <SettingsSectionCard>
           <p className="text-sm text-muted-foreground">{uiText("gitSyncIsAvailableInThe_bf2b")}</p>
@@ -137,7 +142,6 @@ export function GitSyncContent({
               <Button
                 variant="outline"
                 size="sm"
-                className="min-h-[44px]"
                 disabled={loading || Boolean(loadError) || adding}
                 onClick={onAdd}
               >
@@ -156,9 +160,9 @@ export function GitSyncContent({
                     variant={config?.id === item.id ? "secondary" : "outline"}
                     aria-pressed={config?.id === item.id}
                     onClick={() => onSelect(item.id)}
-                    className="goose-accent-selection h-auto min-h-[44px] w-full min-w-0 justify-start gap-2 rounded-lg p-3 text-left"
+                    className="goose-accent-selection w-full min-w-0 justify-start gap-2 text-left"
                   >
-                    <span className="min-w-0 flex-1 truncate" title={item.remoteUrl}>
+                    <span className="min-w-0 flex-1 truncate text-sm" title={item.remoteUrl}>
                       {name}
                       {differentProvider ? ` · ${item.provider === "github" ? "GitHub" : "Gitee"}` : ""}
                       {sameRepository ? ` · ${item.branch}` : ""}
@@ -179,7 +183,7 @@ export function GitSyncContent({
             <SettingsSectionCard>
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div role="status" aria-live="polite" className="space-y-2 text-sm">
-                  <p className="text-base font-semibold">{summary}</p>
+                  <p className="text-[15px] font-semibold leading-[22px]">{summary}</p>
                   <p className="text-muted-foreground">
                     {uiText("lastSuccessfulSync_28c1")}{status?.lastSyncedAt ? new Date(status.lastSyncedAt).toLocaleString(getFormatLocale()) : uiText("noHistoryYet_5dbb")}
                   </p>
@@ -187,24 +191,32 @@ export function GitSyncContent({
                 {!conflicts.length && (
                   <Button
                     variant="outline"
-                    className="min-h-[44px]"
-                    disabled={actionDisabled || !folders.length}
+                    disabled={disabled || !folders.length}
                     onClick={() => {
                       onFolderCheck();
                       void run(id, "sync", () => bridge.syncNow(id));
                     }}
                   >
-                    {status?.phase === "error" || folderError ? uiText("retry_132c") : uiText("syncNow_5f71")}
+                    {status?.phase === "error" || folderError || error ? uiText("retry_132c") : uiText("syncNow_5f71")}
                   </Button>
                 )}
               </div>
-              {syncError && !conflicts.length && !folderError && (
-                <div className="space-y-2 text-sm">
-                  <p className="text-danger">{shortSyncError(syncError)}</p>
-                  <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
-                    <p className="mt-2 whitespace-pre-wrap break-words">{syncError}</p>
-                  </GitDetails>
+              {folderIssues.length > 1 && (
+                <div className="space-y-1 text-sm">
+                  {folderIssues.map((issue) => (
+                    <p key={`${issue.name}:${issue.reason}`} className="text-danger">
+                      {formatFolderIssue(issue.name, issue.reason)}
+                    </p>
+                  ))}
                 </div>
+              )}
+              {reportedFailure && !conflicts.length && shortSyncError(reportedFailure) !== summary && (
+                <p className="text-sm text-danger">{shortSyncError(reportedFailure)}</p>
+              )}
+              {reportedFailure && !conflicts.length && reportedFailure !== shortSyncError(reportedFailure) && (
+                <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
+                  <p className="mt-2 whitespace-pre-wrap break-words">{reportedFailure}</p>
+                </GitDetails>
               )}
               {conflicts.length > 0 && (
                 <GitConflicts
@@ -238,12 +250,11 @@ export function GitSyncContent({
               {adding && (
                 <div className="flex gap-2">
                   <Button
-                    className="min-h-[44px]"
                     disabled={disabled || !draft.remoteUrl.trim() || !folders.length}
                     onClick={connect}
                   >
                     {uiText("connectAndSync_9751")}</Button>
-                  <Button className="min-h-[44px]" variant="ghost" disabled={disabled} onClick={onCancel}>
+                  <Button variant="ghost" disabled={disabled} onClick={onCancel}>
                     {uiText("cancel_625f")}</Button>
                 </div>
               )}

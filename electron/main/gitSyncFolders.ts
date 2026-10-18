@@ -5,8 +5,22 @@ import { t } from "./i18n/gitErrors";
 import { lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import type { GitFolderCheck } from "../../src/lib/git-sync-contract";
-import { assertAllowed, findVaultRootContaining, normalizePath } from "./allowlist";
+import { addVaultRoot, assertAllowed, findVaultRootContaining, hasUnsafeSegments, normalizePath } from "./allowlist";
 import { validateGitSyncFolder } from "./gitRepositoryEngine";
+
+/** 应用里已经打开的笔记本根目录必须能同步。漏登记是程序问题，不拿来提示用户。 */
+export async function rememberNotebookRoot(localPath: unknown): Promise<boolean> {
+  if (typeof localPath !== "string" || hasUnsafeSegments(localPath)) return false;
+  let resolved: string;
+  try { resolved = normalizePath(localPath); } catch { return false; }
+  if (resolved === path.parse(resolved).root) return false;
+  const stat = await lstat(resolved).catch(() => null);
+  if (!stat?.isDirectory() || stat.isSymbolicLink()) return false;
+  const real = await realpath(resolved).catch(() => null);
+  if (!real || normalizePath(real) !== resolved) return false;
+  addVaultRoot(resolved);
+  return true;
+}
 
 export async function checkedGitRoot(localPath: string) {
   const allowed = assertAllowed(localPath);
@@ -21,6 +35,7 @@ export async function checkedGitRoot(localPath: string) {
 
 export async function checkGitFolder(localPath: unknown): Promise<GitFolderCheck> {
   if (typeof localPath !== "string") return { error: t("invalidPath") };
+  await rememberNotebookRoot(localPath);
   try {
     await validateGitSyncFolder(await checkedGitRoot(localPath));
     return { error: null };

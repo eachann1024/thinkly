@@ -7,15 +7,11 @@ export function GitDetails({
   children,
   className = "",
   description,
-  spacious = false,
-  compact = false,
 }: {
   title: string;
   children: ReactNode;
   className?: string;
   description?: string;
-  spacious?: boolean;
-  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const contentId = useId();
@@ -25,41 +21,26 @@ export function GitDetails({
         type="button"
         variant="ghost"
         contentStyle="preserve"
-        size={compact ? "sm" : undefined}
         className={
-          "group relative flex w-full items-center justify-between gap-3 rounded-lg border-0 text-left text-inherit " +
-          (compact
-            ? "py-1"
-            : spacious
-              ? "h-auto min-h-[64px] px-3 py-3"
-              : "h-auto min-h-[44px] px-3 py-2")
+          "group relative flex w-full items-center justify-between gap-3 border-0 text-left text-inherit goose-settings-option-row" +
+          (description ? " goose-settings-option-row--stack" : "")
         }
         aria-expanded={open}
         aria-controls={contentId}
         onClick={() => setOpen(!open)}
       >
         <span className="min-w-0 flex-1">
-          <span
-            className={
-              compact
-                ? "block text-[length:var(--goose-control-font-size,14px)] font-normal"
-                : spacious
-                  ? "block text-base font-semibold"
-                  : "block text-[15px]"
-            }
-          >
-            {title}
-          </span>
-          {description && (
-            <span className="mt-1 block text-sm font-normal text-muted-foreground">
+          <span className="block text-sm font-normal leading-5">{title}</span>
+          {description ? (
+            <span className="mt-1 block text-[13px] leading-5 text-muted-foreground">
               {description}
             </span>
-          )}
+          ) : null}
         </span>
         <ChevronRight
           aria-hidden="true"
           className={
-            "size-4 shrink-0 transition-transform motion-reduce:transition-none " +
+            "size-4 shrink-0 self-center transition-transform motion-reduce:transition-none " +
             (open ? "rotate-90" : "")
           }
         />
