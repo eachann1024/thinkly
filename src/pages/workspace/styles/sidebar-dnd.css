@@ -87,27 +87,27 @@
     box-shadow 120ms ease;
 }
 
+/* 落点线沿用侧栏拖宽把手的激活态（shell.css 的 --workspace-resize-line-active）：
+   沿长边 22%–78% 为选中文字色，两端淡出。不画左端方头、不加发光，
+   否则文件列表底部会看成一条坏掉的横向滚动条。方向改成横向。 */
+.sidebar-tree-drop-line,
+.sidebar-drop-line,
+.main-tree-drop-between-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--goose-interactive-selected-fg) 22%,
+    var(--goose-interactive-selected-fg) 78%,
+    transparent 100%
+  );
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .sidebar-tree-drop-line {
-  background: var(--goose-accent-solid);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.64),
-    0 0 7px var(--sidebar-dnd-accent-medium);
   transition:
     transform 120ms ease,
     opacity 120ms ease;
-}
-
-.sidebar-tree-drop-line::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-marker);
-  background: var(--goose-accent-solid);
-  box-shadow: 0 0 0 2px var(--sidebar-dnd-overlay-bg);
-  transform: translate(-50%, -50%);
 }
 
 .sidebar-tree-nest-label {
@@ -206,28 +206,7 @@
 .sidebar-drop-line {
   flex: 1;
   height: 2px;
-  background: var(--workspace-drag-line-color, hsl(var(--primary)));
-  border-radius: var(--radius-marker);
-  box-shadow: var(
-    --workspace-drag-line-glow,
-    0 0 8px hsl(var(--primary) / 0.4)
-  );
   position: relative;
-}
-
-/* Square head for the line */
-.sidebar-drop-line::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: var(--workspace-drag-line-color, hsl(var(--primary)));
-  border: 2px solid hsl(var(--background));
-  border-radius: var(--radius-marker);
-  box-shadow: 0 0 0 1px var(--workspace-drag-line-color, hsl(var(--primary)));
 }
 
 /* 描边不占行尺寸，也不依赖会被全局/RCT 焦点 reset 清掉的 box-shadow。 */
