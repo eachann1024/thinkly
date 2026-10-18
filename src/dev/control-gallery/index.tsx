@@ -5,11 +5,9 @@ import { Field } from "@/components/ui/field";
 import { GalleryForms } from "./forms";
 import { GalleryMenus } from "./menus";
 import { GalleryComposer } from "./composer";
-import { useTextCaret } from "@/hooks/useTextCaret";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 
 export function ControlGallery() {
-  useTextCaret();
   const settings = useSettings();
   useResolvedTheme(settings.theme);
   return <main className="h-screen overflow-auto bg-background p-6 text-foreground">
