@@ -47,7 +47,7 @@ export function verifyBuildRecords(input, version, sha) {
   const records = new Map();
   for (const [platform, arch] of [["mac", "arm64"], ["mac", "x64"], ["win", "x64"], ["win", "arm64"], ["linux", "x64"]]) {
     const key = `${platform}-${arch}`;
-    const record = JSON.parse(readFileSync(resolve(input, `goose-note-${key}-BUILD.json`), "utf8"));
+    const record = JSON.parse(readFileSync(resolve(input, `thinkly-${key}-BUILD.json`), "utf8"));
     assert.equal(record.commit, sha, `${key} was built from a different commit`);
     assert.equal(record.version, version, `${key} has a different app version`);
     assert.equal(record.platform, platform, `${key} has a different platform`);

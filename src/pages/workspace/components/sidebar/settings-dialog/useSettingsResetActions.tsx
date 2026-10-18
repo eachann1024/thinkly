@@ -76,9 +76,9 @@ export function useSettingsResetActions(
     });
 
     [
-      "goose-recent-excludes",
-      "goose-note-ai-panel-open",
-      "goose-note-ai-panel-width",
+      "thinkly-recent-excludes",
+      "thinkly-ai-panel-open",
+      "thinkly-ai-panel-width",
       "sidebar-width",
       "settings-sidebar-width",
     ].forEach((key) => window.localStorage.removeItem(key));

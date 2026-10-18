@@ -6,7 +6,7 @@ import type {
   HostRemoveResult,
 } from "./types";
 
-const WEB_DB_STORAGE_KEY = "goose-note:web-db";
+const WEB_DB_STORAGE_KEY = "thinkly:web-db";
 
 const readWebDb = (): Record<string, HostDoc<unknown>> => {
   if (typeof window === "undefined") throw new Error("local-storage-unavailable");

@@ -11,17 +11,17 @@ import type { VerifiedUpdate } from "./release";
 
 const exec = promisify(execFile);
 const installedApp = () => path.resolve(process.execPath, "../../..");
-const unpackedApp = (update: VerifiedUpdate) => path.join(path.dirname(update.path), "unpacked", "Goose Note.app");
+const unpackedApp = (update: VerifiedUpdate) => path.join(path.dirname(update.path), "unpacked", "Thinkly.app");
 const stageRecord = () => path.join(app.getPath("userData"), "app-updates", "install-stage.json");
 
 async function validateBundle(bundle: string, version: string): Promise<void> {
   if (!(await lstat(bundle)).isDirectory() || await realpath(bundle) !== bundle) throw new Error(t("invalidBundle"));
   const plist = path.join(bundle, "Contents", "Info.plist");
   const value = async (key: string) => (await exec("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", plist])).stdout.trim();
-  if (await value("CFBundleIdentifier") !== "com.goosenote.desktop" || await value("CFBundleShortVersionString") !== version) {
+  if (await value("CFBundleIdentifier") !== "com.thinkly.desktop" || await value("CFBundleShortVersionString") !== version) {
     throw new Error(t("identityMismatch"));
   }
-  const executable = path.join(bundle, "Contents", "MacOS", "Goose Note");
+  const executable = path.join(bundle, "Contents", "MacOS", "Thinkly");
   const arch = (await exec("/usr/bin/lipo", ["-archs", executable])).stdout.trim().split(/\s+/);
   if (!arch.includes(process.arch === "arm64" ? "arm64" : "x86_64")) throw new Error(t("architectureMismatch"));
 }

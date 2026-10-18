@@ -1,9 +1,10 @@
 import { normalizeColumnLayout } from "@/components/editor/blocks/columns/columnModel";
+import { NOTE_MARK_PATTERN } from "../persistedNames";
 
-const OPEN = /^<!--\s*goose-note:columns(?:\s+widths="([\d.,\s]+)")?\s*-->$/i;
-const CLOSE = /^<!--\s*\/goose-note:columns\s*-->$/i;
-const COLUMN = /^<!--\s*goose-note:column\s*-->$/i;
-const END_COLUMN = /^<!--\s*\/goose-note:column\s*-->$/i;
+const OPEN = new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:columns(?:\\s+widths="([\\d.,\\s]+)")?\\s*-->$`, "i");
+const CLOSE = new RegExp(`^<!--\\s*\\/${NOTE_MARK_PATTERN}:columns\\s*-->$`, "i");
+const COLUMN = new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:column\\s*-->$`, "i");
+const END_COLUMN = new RegExp(`^<!--\\s*\\/${NOTE_MARK_PATTERN}:column\\s*-->$`, "i");
 
 /** 配对布局与每栏边界；围栏中的示例标记是文本，不参与结构扫描。 */
 export function parseColumnsBlock(lines: string[], start: number, parseMarkdown: (markdown: string) => any[]) {

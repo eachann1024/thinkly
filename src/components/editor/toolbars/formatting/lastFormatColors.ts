@@ -9,7 +9,7 @@ import { TEXT_COLORS, HIGHLIGHT_COLORS } from "./colorPalette";
  * - 两者都没有记录时 no-op
  * 使用 localStorage，跨笔记 / 重启可复用；读写对 SSR / 无 window 安全。
  */
-const LAST_FORMAT_COLORS_KEY = "goose-note:last-format-colors";
+const LAST_FORMAT_COLORS_KEY = "thinkly:last-format-colors";
 
 const KNOWN_TEXT_COLORS = new Set(TEXT_COLORS.map((item) => item.color));
 const KNOWN_BG_COLORS = new Set(HIGHLIGHT_COLORS.map((item) => item.color));

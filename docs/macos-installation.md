@@ -16,10 +16,10 @@
 如果仍因下载隔离而无法打开，确认下载的是可信的官方安装包后，在「终端」执行以下命令：
 
 ```sh
-sudo xattr -r -s -d com.apple.quarantine "/Applications/Goose Note.app"
+sudo xattr -r -s -d com.apple.quarantine "/Applications/Thinkly.app"
 ```
 
-按提示输入管理员密码；终端不显示密码字符，这是正常行为。完成后从「应用程序」打开思绪 · Thinkly。命令里的 `Goose Note.app` 是磁盘上的包名，空格必须保留；若安装在其他目录，需要改成实际路径。
+按提示输入管理员密码；终端不显示密码字符，这是正常行为。完成后从「应用程序」打开思绪 · Thinkly。若安装在其他目录，需要改成实际路径。
 
 ## 授权的作用
 

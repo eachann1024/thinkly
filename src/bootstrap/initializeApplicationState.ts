@@ -1,6 +1,7 @@
 import { applyFontVariables } from "@/lib/fontLoader";
 import { applyAppearanceScaleVariables } from "@/lib/appearance";
 import { migrateLegacyStorage } from "@/lib/storage/migrateLegacyStorage";
+import { migrateStorageNames } from "@/lib/storage/migrateStorageNames";
 import { HostAdapter } from "@/lib/host/adapter";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useReflection } from "@/stores/useReflection";
@@ -22,12 +23,11 @@ export async function initializeApplicationState(
   beforeInit?: () => Promise<void> | void,
 ) {
   const lean = mode !== "full";
+  if (!lean) await migrateLegacyStorage();
+  migrateStorageNames();
   await beforeInit?.();
   await HostAdapter.ensureGooseFs();
   if (mode === "search") installReadOnlyPersistence();
-  if (!lean) {
-    await migrateLegacyStorage();
-  }
   await Promise.all([
     useSettings.persist.rehydrate(),
     useNotebooks.persist.rehydrate(),

@@ -8,7 +8,7 @@ import { HostAdapter } from "../host/adapter";
 
 export const PAGE_DOC_PREFIX = "gn:page:";
 export const LOCAL_PAGE_META_DOC_PREFIX = "gn:local-meta:";
-export const PAGES_META_STORAGE_KEY = "goose-note-pages-meta";
+export const PAGES_META_STORAGE_KEY = "thinkly-pages-meta";
 
 const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 

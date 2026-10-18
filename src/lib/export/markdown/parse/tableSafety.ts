@@ -1,11 +1,14 @@
+import { readDataAttr } from "../persistedNames";
 import { tableColorStyle } from "../tableHtml";
 
+const COLOR_ATTRS = ["data-thinkly-text-color", "data-goose-text-color", "data-thinkly-background-color", "data-goose-background-color"];
+const ALIGN_ATTRS = ["data-thinkly-text-alignment", "data-goose-text-alignment"];
 const ATTRIBUTES: Record<string, string[]> = {
-  table: ["data-goose-table", "data-header-rows", "data-header-cols", "data-goose-text-color", "style"],
+  table: ["data-thinkly-table", "data-goose-table", "data-header-rows", "data-header-cols", ...COLOR_ATTRS, "style"],
   colgroup: [], col: ["style"], tbody: [], tr: [],
-  td: ["colspan", "rowspan", "data-goose-text-color", "data-goose-background-color", "data-goose-text-alignment", "style"],
-  th: ["colspan", "rowspan", "data-goose-text-color", "data-goose-background-color", "data-goose-text-alignment", "style"],
-  a: ["href", "data-goose-page-mention"], span: ["data-goose-text-color", "data-goose-background-color", "style"],
+  td: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
+  th: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
+  a: ["href", "data-thinkly-page-mention", "data-goose-page-mention"], span: [...COLOR_ATTRS, "style"],
   strong: [], b: [], em: [], i: [], u: [], del: [], s: [], code: [], br: [],
 };
 
@@ -25,9 +28,9 @@ export function isLosslessTableDocument(document: Document, table: HTMLTableElem
         if (!/^width:\s*\d+(?:\.\d+)?px;?$/.test(element.getAttribute("style") || "")) return false;
       } else {
         const expected = tableColorStyle({
-          textColor: element.getAttribute("data-goose-text-color"),
-          backgroundColor: element.getAttribute("data-goose-background-color"),
-          textAlignment: element.getAttribute("data-goose-text-alignment"),
+          textColor: readDataAttr(element, "text-color"),
+          backgroundColor: readDataAttr(element, "background-color"),
+          textAlignment: readDataAttr(element, "text-alignment"),
         });
         if (element.getAttribute("style") !== expected) return false;
       }

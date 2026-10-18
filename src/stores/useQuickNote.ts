@@ -37,7 +37,7 @@ import { toast } from "@/components/ui/sonner";
 
 export const useQuickNote = create<QuickNoteState>()(
   persist(createQuickNoteState, {
-    name: "goose-note:quicknote",
+    name: "thinkly:quicknote",
     version: 3,
     storage: createJSONStorage(() => quickNoteStorage),
     partialize: (state) => ({

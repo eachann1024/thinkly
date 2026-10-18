@@ -26,7 +26,7 @@ const pack = resolve(root, 'dist-electron/app-pack');
 const packaged = resolve(root, 'dist-electron/packaged');
 const signDir = resolve(root, 'dist-signpath');
 const unpacked = resolve(packaged, platform === 'win' ? (arch === 'arm64' ? 'win-arm64-unpacked' : 'win-unpacked') : 'linux-unpacked');
-const appExe = 'Goose Note.exe';
+const appExe = 'Thinkly.exe';
 
 function builder(...args) {
   execFileSync(process.execPath, [
@@ -94,7 +94,7 @@ const builderRequire = createRequire(resolve(root, 'node_modules/electron-builde
 const appBuilderRequire = createRequire(builderRequire.resolve('app-builder-lib/package.json'));
 const { extractFile } = appBuilderRequire('@electron/asar');
 const appAsar = platform === 'mac'
-  ? resolve(packaged, arch === 'arm64' ? 'mac-arm64' : 'mac', 'Goose Note.app/Contents/Resources/app.asar')
+  ? resolve(packaged, arch === 'arm64' ? 'mac-arm64' : 'mac', 'Thinkly.app/Contents/Resources/app.asar')
   : resolve(unpacked, 'resources/app.asar');
 if (!extractFile(appAsar, 'icon.png').equals(readFileSync(resolve(root, 'electron/icons/icon.png')))) {
   throw new Error('Packaged BrowserWindow icon does not match the application icon');

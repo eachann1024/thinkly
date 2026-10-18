@@ -187,7 +187,7 @@ export const useSidebarView = create<State>()(
       },
     }),
     {
-      name: "goose-sidebar-view",
+      name: "thinkly-sidebar-view",
       version: 1,
       storage: createJSONStorage(() => idleLocalStorage),
       partialize: (state) => ({

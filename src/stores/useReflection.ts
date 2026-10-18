@@ -61,7 +61,7 @@ export const useReflection = create<ReflectionState>()(
       setFailed: (key, message) => set({ generatingKey: null, failure: { key, message } }),
     }),
     {
-      name: "goose-note-reflection",
+      name: "thinkly-reflection",
       version: 3,
       storage: createJSONStorage(() => localStorageAdapter),
       skipHydration: true,

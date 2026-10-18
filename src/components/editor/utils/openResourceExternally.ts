@@ -2,7 +2,8 @@ import type { EditorPlatform } from "@/components/editor/platform/types";
 import messages from "./openResourceExternally.messages.yaml";
 import { createTranslator } from "@/i18n";
 const t = createTranslator(messages);
-const TEMP_RESOURCE_PREFIX = "goose-note/opened-resources";
+const TEMP_RESOURCE_PREFIX = "thinkly/opened-resources";
+const LEGACY_TEMP_RESOURCE_PREFIX = "goose-note/opened-resources";
 const TEMP_RESOURCE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const MAX_MATERIALIZED_RESOURCE_SIZE = 100 * 1024 * 1024;
 export type OpenExternalResourceResult = {
@@ -259,10 +260,8 @@ async function openResourceOnce(
   if (!cleanedPlatforms.has(platform)) {
     cleanedPlatforms.add(platform);
     try {
-      await platform.fs.cleanupTempFiles(
-        TEMP_RESOURCE_PREFIX,
-        TEMP_RESOURCE_MAX_AGE_MS,
-      );
+      for (const prefix of [LEGACY_TEMP_RESOURCE_PREFIX, TEMP_RESOURCE_PREFIX])
+        await platform.fs.cleanupTempFiles(prefix, TEMP_RESOURCE_MAX_AGE_MS);
     } catch {
       // 清理失败不阻断本次打开；下次启动仍会重试。
     }

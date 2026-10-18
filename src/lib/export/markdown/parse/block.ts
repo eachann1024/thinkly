@@ -10,6 +10,7 @@ import {
   isThematicBreakLine,
   parseTableBlock,
 } from "./blockHelpers";
+import { NOTE_MARK_PATTERN } from "../persistedNames";
 import {
   isBlockChildrenMarker,
   shouldSkipListSpacer,
@@ -65,7 +66,7 @@ export function markdownToJsonContent(markdown: string): any {
     const line = lines[i];
     const trimmedLine = line.trim();
 
-    if (trimmedLine === "<!-- goose-note:empty-block=paragraph -->") {
+    if (new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:empty-block=paragraph\\s*-->$`).test(trimmedLine)) {
       content.push({ type: "paragraph" });
       i++;
       continue;
@@ -154,7 +155,7 @@ export function markdownToJsonContent(markdown: string): any {
       if (calloutMatch) {
         let icon = calloutMatch[1];
         let firstContent = calloutMatch[2];
-        const iconMarker = firstContent.match(/^<!-- goose-note:callout-icon=([^\s]+) -->/);
+        const iconMarker = firstContent.match(new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:callout-icon=([^\\s]+)\\s*-->`));
         if (iconMarker) {
           try { icon = decodeURIComponent(iconMarker[1]); firstContent = firstContent.slice(iconMarker[0].length); } catch { /* 保留原文。 */ }
         }
@@ -256,8 +257,8 @@ export function markdownToJsonContent(markdown: string): any {
             currentLine.match(/^\[📎/) ||
             trimmed.match(/^<video\s+src=/) ||
             /^<details(?:\s|>)/i.test(trimmed) ||
-            /^<!--\s*goose-note:(?:columns|column)\b/i.test(trimmed) ||
-            /^<table\s+data-goose-table="v1"(?:\s|>)/i.test(trimmed) ||
+            new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:(?:columns|column)\\b`, "i").test(trimmed) ||
+            /^<table\s+data-(?:thinkly|goose)-table="v1"(?:\s|>)/i.test(trimmed) ||
             /^<audio\s+src=/i.test(trimmed)
           ) {
             break;
