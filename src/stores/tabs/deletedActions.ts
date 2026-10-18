@@ -10,6 +10,7 @@ import {
 } from "./helpers";
 import { useEditorSplit } from "../useEditorSplit";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
+import { runWithPresence } from "@/lib/ui/presence";
 
 export function createDeletedTabActions(
   set: TabSet,
@@ -19,6 +20,7 @@ export function createDeletedTabActions(
   const { syncHistoryWithOpenTabs, resolveTabIdInHistory } = context;
   return {
     removeDeletedPage: (pageId: string) => {
+      runWithPresence(() => {
       const { openTabs, activeTabId } = get();
       const deletedPage = usePages.getState().getPage(pageId);
       const preferredPageId = usePages.getState().activePageId;
@@ -121,6 +123,7 @@ export function createDeletedTabActions(
         get().syncNotebookForPage(null);
         void scheduleSetActivePage(null);
       }
+      });
     },
   };
 }

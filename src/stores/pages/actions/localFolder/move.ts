@@ -1,3 +1,4 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import { createTranslator as extraTranslator } from "@/i18n/core";
 const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/move.ts#block1:1">`
 zh-Hans:
@@ -255,7 +256,7 @@ export async function moveLocalPageAction(
       migrateLocalPageIdMapEntry(page.workspaceId, oldRel, newRel, pageId);
 
       // 更新 store
-      set((state) => {
+      runWithPresence(() => set((state) => {
         const current = state.pages[pageId];
         if (!current) return state;
         return {
@@ -269,7 +270,7 @@ export async function moveLocalPageAction(
             },
           },
         };
-      });
+      }));
     }
 
     const historyPaths = Object.fromEntries(

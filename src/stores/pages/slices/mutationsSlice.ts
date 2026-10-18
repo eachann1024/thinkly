@@ -11,6 +11,7 @@ import {
   persistPageSnapshots,
   removePersistedPageSnapshots,
 } from "../persistence";
+import { runWithPresence } from "@/lib/ui/presence";
 
 export function createMutationsPageSlice(
   set: import("zustand").StoreApi<PagesState>["setState"],
@@ -37,7 +38,7 @@ export function createMutationsPageSlice(
     permanentlyDeletePage: (id) => permanentlyDeletePageAction(set, get, id),
 
     reorderPages: (ids, parentId) => {
-      set((state) => {
+      runWithPresence(() => set((state) => {
         const newPages = { ...state.pages };
 
         ids.forEach((id, index) => {
@@ -51,7 +52,7 @@ export function createMutationsPageSlice(
         });
 
         return { pages: newPages };
-      });
+      }));
       persistPageSnapshots(get().pages, ids);
     },
 
@@ -72,6 +73,7 @@ export function createMutationsPageSlice(
       persistPageSnapshots(get().pages, ids);
     },
 
+    // 移动需要同步拿到结果（成功标记与撤回快照），不能放进视图过渡回调里。
     movePageTreeToNotebook: (pageId, targetNotebookId) =>
       movePageTreeToNotebookAction(set, get, pageId, targetNotebookId),
 

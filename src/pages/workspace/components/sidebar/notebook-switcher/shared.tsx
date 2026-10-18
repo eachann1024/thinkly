@@ -23,6 +23,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { type Notebook } from "@/stores/useNotebooks";
 import { renderNotebookIcon } from "../notebookUtils";
 import { NotebookMenuItemContent, notebookMenuRowClassName } from "./NotebookMenuItem";
+import { presenceName } from "@/lib/ui/presence";
 
 export interface SortableNotebookItemProps {
   notebook: Notebook;
@@ -57,6 +58,7 @@ export function SortableNotebookItem({
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition,
+    viewTransitionName: presenceName("notebook", notebook.id),
   };
 
   return (

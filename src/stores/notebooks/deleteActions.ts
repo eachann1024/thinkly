@@ -1,5 +1,7 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import type { NotebooksState } from "./types";
 import { usePages } from "../usePages";
+import { useTabs } from "../useTabs";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import { removeLocalPageMetaByWorkspaceId } from "@/lib/storage/pageRepository";
 import { removeLocalFolderOrders } from "../localFolderOrder";
@@ -81,20 +83,22 @@ export function createDeleteNotebookActions(
         }
       }
 
-      pagesStore.removePagesByWorkspaceId(id, { purgePersistence: true });
-      if (deletedNotebook?.source === "local-folder") {
-        removeLocalPageMetaByWorkspaceId(id);
-        removeLocalFolderOrders(id);
-      }
-      useTabs.setState({
-        openTabs: remainingTabs,
-        activeTabId: nextActiveTabId,
-      });
-      set({
-        notebooks: remainingNotebooks,
-        lastActivePageByNotebook: remainingLastActive,
-        localFolderLoadStates: remainingLoadStates,
-        activeNotebookId: nextActiveNotebookId,
+      runWithPresence(() => {
+        pagesStore.removePagesByWorkspaceId(id, { purgePersistence: true });
+        if (deletedNotebook?.source === "local-folder") {
+          removeLocalPageMetaByWorkspaceId(id);
+          removeLocalFolderOrders(id);
+        }
+        useTabs.setState({
+          openTabs: remainingTabs,
+          activeTabId: nextActiveTabId,
+        });
+        set({
+          notebooks: remainingNotebooks,
+          lastActivePageByNotebook: remainingLastActive,
+          localFolderLoadStates: remainingLoadStates,
+          activeNotebookId: nextActiveNotebookId,
+        });
       });
 
       if (

@@ -27,6 +27,7 @@ import {
 import { PopoverContent, PopoverAction } from "@/components/ui/popover";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
+import { runWithPresence } from "@/lib/ui/presence";
 import type { useNotebookSwitcherActions } from "./useNotebookSwitcherActions";
 import { SortableNotebookItem } from "./shared";
 
@@ -152,7 +153,7 @@ export function renderNotebookMenu(
                   setIsOpen(false);
                 }}
                 onEdit={handleEdit}
-                onDeleteLocal={deleteNotebook}
+                onDeleteLocal={(id) => runWithPresence(() => { deleteNotebook(id); })}
               />
             ))}
           </SortableContext>

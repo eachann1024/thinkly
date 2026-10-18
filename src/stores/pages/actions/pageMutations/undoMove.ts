@@ -1,3 +1,4 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
 import { persistPageSnapshots } from "../../persistence";
@@ -31,7 +32,7 @@ export const undoMovePageTreeAction = (
   if (restorable.length === 0) return false;
 
   const restoredIds: string[] = [];
-  set((state) => {
+  runWithPresence(() => set((state) => {
     const newPages = { ...state.pages };
     restorable.forEach((snap) => {
       const current = newPages[snap.id];
@@ -45,7 +46,7 @@ export const undoMovePageTreeAction = (
       restoredIds.push(snap.id);
     });
     return { pages: newPages };
-  });
+  }));
 
   if (restoredIds.length === 0) return false;
 
