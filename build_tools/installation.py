@@ -68,8 +68,8 @@ def installed_app_command() -> list[str] | None:
         return ["open", str(app)] if app.is_dir() else None
     if IS_LINUX:
         for base in (Path("/usr/share/applications"), Path.home() / ".local" / "share" / "applications"):
-            if (base / "goose-note-app.desktop").is_file():
-                return ["gtk-launch", "goose-note-app"]
+            if (base / "thinkly.desktop").is_file():
+                return ["gtk-launch", "thinkly"]
         return None
     exe = Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / APP_NAME / f"{APP_NAME}.exe"
     return [str(exe)] if exe.is_file() else None
