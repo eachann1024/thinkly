@@ -73,6 +73,8 @@ export function useHistoryViewState() {
 
   // Provider 常驻；离开历史或切到另一笔记时不复用前一页的索引。
   const visibleIndex = index?.pageId === pageId ? index : null;
+  // 首次读取索引、尚无可展示的版本时才算加载中；刷新期间保留旧列表。
+  const indexLoading = Boolean(pageId) && !visibleIndex && !indexError;
 
   // 加载版本索引
   useEffect(() => {
@@ -203,6 +205,7 @@ export function useHistoryViewState() {
     index,
     applyMilestone,
     indexError,
+    indexLoading,
     selectedContent,
     selectedStatus,
     isRestoring,
