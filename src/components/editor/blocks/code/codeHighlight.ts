@@ -118,6 +118,7 @@ const shellCommandParser: Parser = ({ content, pos }) =>
 
 const codeBlockHighlightParser: Parser = (options) => {
   const language = normalizeHighlightLanguage(options.language);
+  if (options.content.length > 12000) return [];
 
   if (PLAIN_TEXT_LANGUAGES.has(language)) return [];
   if (language === "mermaid") return mermaidParser(options);

@@ -4,7 +4,7 @@ import {
   type EditorState,
   type Transaction,
 } from "prosemirror-state";
-import type { ResolvedPos } from "prosemirror-model";
+import type { Node, ResolvedPos } from "prosemirror-model";
 import { CellSelection, inSameTable } from "prosemirror-tables";
 
 export function cellPosFromResolved($pos: ResolvedPos): number | null {
@@ -25,23 +25,6 @@ function findTableDepth($pos: ResolvedPos): number {
 export function tablePosFromResolved($pos: ResolvedPos): number | null {
   const depth = findTableDepth($pos);
   return depth >= 0 ? $pos.before(depth) : null;
-}
-
-function blockContainerRangeAroundTable(
-  $pos: ResolvedPos,
-): { from: number; to: number } | null {
-  const tableDepth = findTableDepth($pos);
-  if (tableDepth < 0) return null;
-  for (let d = tableDepth; d > 0; d -= 1) {
-    if ($pos.node(d).type.name === "blockContainer") {
-      return { from: $pos.before(d), to: $pos.after(d) };
-    }
-  }
-  const tablePos = $pos.before(tableDepth);
-  return {
-    from: tablePos,
-    to: tablePos + $pos.node(tableDepth).nodeSize,
-  };
 }
 
 export function textSelectionAt(
@@ -96,35 +79,33 @@ export function isSpanningTableSelection(sel: {
   return containsTable;
 }
 
+/** 表外一端停在原处，表内一端停在指针所在格子的文字位置，不扩成整表。 */
 export function createSelectionLeavingTable(
   $inTable: ResolvedPos,
   $outside: ResolvedPos,
   inTableIsAnchor = true,
 ) {
-  const range = blockContainerRangeAroundTable($inTable);
-  if (!range) {
-    return inTableIsAnchor
-      ? TextSelection.between($inTable, $outside)
-      : TextSelection.between($outside, $inTable);
-  }
   const doc = $inTable.doc;
-  if ($outside.pos <= range.from) {
-    const tableEnd = TextSelection.near(doc.resolve(range.to), -1).head;
-    return textSelectionAt(
-      doc,
-      inTableIsAnchor ? tableEnd : $outside.pos,
-      inTableIsAnchor ? $outside.pos : tableEnd,
-    );
-  }
-  if ($outside.pos >= range.to) {
-    const tableStart = TextSelection.near(doc.resolve(range.from), 1).head;
-    return textSelectionAt(
-      doc,
-      inTableIsAnchor ? tableStart : $outside.pos,
-      inTableIsAnchor ? $outside.pos : tableStart,
-    );
-  }
-  return null;
+  const inside = $inTable.pos;
+  const outside = $outside.pos;
+  return textSelectionAt(
+    doc,
+    inTableIsAnchor ? inside : outside,
+    inTableIsAnchor ? outside : inside,
+  );
+}
+
+export function selectionBetweenPointer(
+  doc: ResolvedPos["doc"],
+  anchor: number,
+  head: number,
+) {
+  const max = doc.content.size;
+  const from = Math.max(0, Math.min(anchor, max));
+  const to = Math.max(0, Math.min(head, max));
+  const $anchor = doc.resolve(from);
+  const $head = doc.resolve(to);
+  return createTableAwareSelection($anchor, $head) ?? textSelectionAt(doc, from, to);
 }
 
 export function createTableAwareSelection(
@@ -201,6 +182,51 @@ export function keepSpanningSelection(tr: Transaction, state: EditorState) {
     return false;
   }
   return !(next instanceof TextSelection);
+}
+
+export type CoveredCell = { pos: number; size: number };
+
+function textblockSpan(node: Node, pos: number): { from: number; to: number } | null {
+  let from = Infinity;
+  let to = -1;
+  node.descendants((child, offset) => {
+    if (!child.isTextblock) return !child.isLeaf;
+    const start = pos + 1 + offset + 1;
+    const end = start + child.content.size;
+    if (start < from) from = start;
+    if (end > to) to = end;
+    return false;
+  });
+  return to < 0 ? null : { from, to };
+}
+
+/** 选区完整盖住的格子。指针所在、只盖住一部分文字的格子不在这里。 */
+export function fullyCoveredCells(
+  doc: ResolvedPos["doc"],
+  from: number,
+  to: number,
+  paintRow?: (row: Node, pos: number) => boolean,
+): CoveredCell[] {
+  if (from > to) {
+    const swap = from;
+    from = to;
+    to = swap;
+  }
+  const cells: CoveredCell[] = [];
+  doc.nodesBetween(from, to, (node, pos) => {
+    const role = node.type.spec?.tableRole;
+    if (role === "table") return true;
+    if (role === "row") return paintRow ? paintRow(node, pos) : true;
+    if (role === "cell" || role === "header_cell") {
+      const span = textblockSpan(node, pos);
+      if (span && from <= span.from && to >= span.to) {
+        cells.push({ pos, size: node.nodeSize });
+      }
+      return false;
+    }
+    return !node.isTextblock && !node.isLeaf;
+  });
+  return cells;
 }
 
 /** 表外拖选命中或跨过表格后接管，普通文本拖选继续使用原生行为。 */

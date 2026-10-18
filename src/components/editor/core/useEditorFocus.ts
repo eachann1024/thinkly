@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { needsBodyParagraphAfterTitle } from "@/components/editor/utils/blocknote-content";
+import { armBottomBlankSelectionDrag } from "@/components/editor/extensions/trailingBlankDrag";
 import { isBottomEditorBlankClick } from "@/components/editor/utils/selection";
 import { useEditorPageTasks } from "./useEditorPageTasks";
 import type { EditorRuntime } from "./useEditorSession";
@@ -89,18 +90,28 @@ export function useEditorFocus(
     focusEditorSafely();
   }, [editor, focusEditorSafely, usesRawEditorContentRef]);
 
+  const beginBottomBlankSelection = useCallback(
+    (event: MouseEvent) => {
+      suppressFormattingToolbarRef.current = true;
+      setSuppressFormattingToolbar(true);
+      event.preventDefault();
+      focusEditorEnd();
+      const view = editor.prosemirrorView;
+      if (!view || view.isDestroyed) return;
+      // 光标已经在文末。从这里跟鼠标向上拖，才能跨行选中。
+      armBottomBlankSelectionDrag(view, event, view.state.selection.head);
+    },
+    [editor, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef],
+  );
+
   const handleEditorBlankMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!editable || event.button !== 0) return;
       const container = editorContainerRef.current;
       if (!container || !isBottomEditorBlankClick(event, container)) return;
-
-      suppressFormattingToolbarRef.current = true;
-      setSuppressFormattingToolbar(true);
-      event.preventDefault();
-      focusEditorEnd();
+      beginBottomBlankSelection(event.nativeEvent);
     },
-    [editable, editorContainerRef, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef],
+    [beginBottomBlankSelection, editable, editorContainerRef],
   );
 
   // 补丁：EditorContextMenu 容器高度 = 内容高度（flex-1 min-h-0），
@@ -129,18 +140,14 @@ export function useEditorFocus(
       if (!lastBlock) return;
       if (event.clientY < lastBlock.getBoundingClientRect().bottom) return;
 
-      // 点击确实在末块之下，阻止默认行为并聚焦末尾
-      suppressFormattingToolbarRef.current = true;
-      setSuppressFormattingToolbar(true);
-      event.preventDefault();
-      focusEditorEnd();
+      beginBottomBlankSelection(event);
     };
 
     document.addEventListener("mousedown", handleDocMouseDown, true);
     return () => {
       document.removeEventListener("mousedown", handleDocMouseDown, true);
     };
-  }, [editable, editorContainerRef, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef]);
+  }, [beginBottomBlankSelection, editable, editorContainerRef]);
 
   // 消闪 mouseup 清理：空白区域 mousedown 后抑制格式化工具栏，mouseup 时恢复。
   // 兜底 blur：鼠标拖出窗口松开时 document mouseup 不触发，window blur 覆盖此场景。

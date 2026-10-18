@@ -7,6 +7,7 @@ import type { EditorSession } from "./useEditorSession";
 import { gooseBlockSelectionExtension } from "@/components/editor/extensions/blockSelectionExtension";
 import { gooseSelectAllExtension } from "@/components/editor/extensions/selectAllExtension";
 import { gooseTableCellSelectionExtension } from "@/components/editor/extensions/tableCellSelectionExtension";
+import { gooseTableWindowExtension } from "@/components/editor/extensions/tableWindowExtension";
 import { gooseCopyCurrentBlockExtension } from "@/components/editor/extensions/copyCurrentBlockExtension";
 import { gooseMoveBlockExtension } from "@/components/editor/extensions/moveBlockExtension";
 import { createGooseLinkKeyboardExtension } from "@/components/editor/extensions/linkKeyboardExtension";
@@ -22,6 +23,7 @@ import { gooseCollapsedToggleEnterExtension } from "@/components/editor/extensio
 import { gooseHeadingSectionFoldExtension } from "@/components/editor/extensions/headingSectionFoldExtension";
 import { gooseCrossBlockDeleteExtension } from "@/components/editor/extensions/crossBlockDeleteExtension";
 import { gooseEmptyBlockBackspaceExtension } from "@/components/editor/extensions/emptyBlockBackspaceExtension";
+import { gooseBlockPresenceExtension } from "@/components/editor/extensions/blockPresenceExtension";
 import { createGooseNumberedListStartNormalizationExtension } from "@/components/editor/extensions/numberedListStartNormalizationExtension";
 import { createGooseBodyParagraphGuardExtension } from "@/components/editor/extensions/bodyParagraphGuardExtension";
 import { createGooseFirstTitleGuardExtension } from "@/components/editor/inputrules/firstTitleGuard";
@@ -125,6 +127,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseTableEnterExtension,
     gooseBlockSelectionExtension(),
     gooseSelectAllExtension,
+    gooseTableWindowExtension,
     gooseTableCellSelectionExtension,
     gooseCopyCurrentBlockExtension,
     gooseMoveBlockExtension,
@@ -140,6 +143,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseHeadingSectionFoldExtension,
     gooseCrossBlockDeleteExtension,
     gooseEmptyBlockBackspaceExtension,
+    gooseBlockPresenceExtension,
     createGooseNumberedListStartNormalizationExtension(usesRawEditorContentRef),
     createGooseSlashMenuReconcileExtension(
       usesRawEditorContentRef,

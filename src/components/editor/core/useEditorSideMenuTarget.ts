@@ -20,9 +20,6 @@ import {
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 
 const SIDEBAR_INTERACTION_SELECTOR = ".workspace-sidebar-pane, .rct-main-tree";
-const SIDEBAR_HOVER_SELECTOR =
-  ".workspace-sidebar-pane:hover, .rct-main-tree:hover";
-
 export function useEditorSideMenuTarget(
   editor: BlockNoteEditor<any, any, any>,
   isDragging: boolean,
@@ -128,8 +125,10 @@ export function useEditorSideMenuTarget(
       const activeElement = document.activeElement;
       const next =
         Boolean(element?.closest(SIDEBAR_INTERACTION_SELECTOR)) ||
-        Boolean(activeElement?.closest?.(SIDEBAR_INTERACTION_SELECTOR)) ||
-        Boolean(document.querySelector(SIDEBAR_HOVER_SELECTOR));
+        Boolean(
+          activeElement instanceof Element &&
+            activeElement.closest(SIDEBAR_INTERACTION_SELECTOR),
+        );
       setSidebarInteracting(next);
     };
 

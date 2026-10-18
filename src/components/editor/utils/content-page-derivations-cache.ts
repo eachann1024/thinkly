@@ -71,6 +71,11 @@ function getEntry(page: PageContentVersion): { entry: Entry; token?: number } {
   return { entry, token };
 }
 
+export function clearContentDerivationsCache(): void {
+  entries.clear();
+  retainedChars = 0;
+}
+
 export function getContentDerivationsForPage(page: PageContentVersion): ContentDerivations {
   return getEntry(page).entry.value;
 }

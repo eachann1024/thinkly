@@ -1,4 +1,4 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, useRef } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/react/style.css";
 import { createEditorSafeContent } from "@/components/editor/utils/blocknote-content";
@@ -12,6 +12,7 @@ import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/
 import { useEditorLocale } from "./useEditorLocale";
 import { createEditorOptions } from "./createEditorOptions";
 import { getCachedContentSignature } from "./editorContentPolicy";
+import { noteFastOpen, sourceLooksHeavy } from "./fastBlockToNode";
 import { useEditorContentCommit } from "./useEditorContentCommit";
 import { useEditorPageLifecycle } from "./useEditorPageLifecycle";
 import { useEditorFocus } from "./useEditorFocus";
@@ -40,8 +41,11 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     syncedContentSignatureRef,
     editorInstanceRef,
   } = session;
+  const fastOpen = useRef(sourceLooksHeavy(page?.content));
   const [initialContent] = useState(() =>
-    createEditorSafeContent(normalizeContent(page?.content), editorSchema),
+    fastOpen.current
+      ? [{ type: "paragraph", content: "" }] as ReturnType<typeof createEditorSafeContent>
+      : createEditorSafeContent(normalizeContent(page?.content), editorSchema),
   );
   // 初次 mount 时给 syncedContentSignatureRef 设置基线，
   // 否则切走时 flush 会把"只读打开"误判成编辑、刷新 updatedAt。
@@ -61,6 +65,10 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   );
   useEditorLocale(editor, isQuickNoteEditorPage(page) ? "quicknote" : "note");
   editorInstanceRef.current = editor;
+  if (fastOpen.current) {
+    fastOpen.current = false;
+    noteFastOpen(editor, page?.content);
+  }
   const runtime = { ...session, editor };
   useDocumentTitleNavigation(runtime, editable);
   const contentCommit = useEditorContentCommit(runtime);

@@ -56,6 +56,11 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
   }, [svg, identity, previewRef]);
 
   useEffect(() => {
+    if (near) return;
+    dispatch({ type: "release" });
+  }, [near]);
+
+  useEffect(() => {
     if (!activated || !near) return;
     const completed = renderStateRef.current;
     if ((completed.phase === "success" || completed.phase === "empty") && completed.identity === identity) return;
