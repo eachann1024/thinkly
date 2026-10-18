@@ -33,7 +33,7 @@ const linuxMaintainer =
   (pkg.author?.email
     ? `${pkg.author.name} <${pkg.author.email}>`.trim()
     : undefined) ||
-  "Thinkly <goose-note@users.noreply.github.com>";
+  "Thinkly <thinkly@users.noreply.github.com>";
 
 rmSync(pack, { recursive: true, force: true });
 mkdirSync(pack, { recursive: true });
@@ -100,7 +100,7 @@ writeFileSync(
       private: true,
       type: "module",
       main: "main/index.js",
-      productName: "Goose Note",
+      productName: "Thinkly",
     },
     null,
     2,
@@ -109,9 +109,9 @@ writeFileSync(
 
 writeFileSync(
   resolve(pack, "electron-builder.yml"),
-  `appId: com.goosenote.desktop
+  `appId: com.thinkly.desktop
 # productName 决定 .app、可执行文件和安装目录。显示名走 InfoPlist / setName / 快捷方式名。
-productName: Goose Note
+productName: Thinkly
 copyright: Copyright © 2026 eachann1024
 directories:
   output: ../packaged
@@ -165,7 +165,7 @@ mac:
     LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
     CFBundleDisplayName: Thinkly
-    # 不要写 CFBundleName。Electron 用它找 Helper.app，必须等于 productName（磁盘上的 Goose Note）。
+    # 不要写 CFBundleName。Electron 用它找 Helper.app，必须等于 productName（磁盘上的 Thinkly）。
     # 用户看到的名字是 CFBundleDisplayName、macos-l10n 和 app.setName，已经是思绪 · Thinkly。
     NSAppleEventsUsageDescription: Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.
     NSAccessibilityUsageDescription: Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.
@@ -209,13 +209,13 @@ nsis:
   installerIcon: icon.ico
   uninstallerIcon: icon.ico
   installerHeaderIcon: icon.ico
-  # 安装包文件名继续用 productName（Goose Note），发布时再收成 Goose.Note-*。
+  # 安装包文件名用 productName（Thinkly）。
   shortcutName: Thinkly
   uninstallDisplayName: Thinkly
   artifactName: \${productName}-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
-  executableName: goose-note-app
+  executableName: thinkly
   category: Utility
   vendor: ${pkg.author?.name || "Thinkly"}
   synopsis: ${JSON.stringify(pkg.description || "Local-first note taking app")}
@@ -232,15 +232,13 @@ linux:
       "Comment[zh_CN]": "思绪 Thinkly：安放每一瞬念头，随时向过去提问"
       Categories: Office;Note;
       MimeType: text/markdown;text/x-markdown;
-      # 打包版 WM_CLASS 是 productName 的小写中划线形式 "goose-note"（实测 AppImage/deb）；
-      # 开发实例使用 package.json name "goose-note"；保留旧可执行文件名以兼容已安装包。
-      StartupWMClass: goose-note
+      StartupWMClass: thinkly
 deb:
-  packageName: goose-note-app
-  artifactName: goose-note-app_\${version}_\${arch}.\${ext}
+  packageName: thinkly
+  artifactName: thinkly_\${version}_\${arch}.\${ext}
 pacman:
-  packageName: goose-note-app
-  artifactName: goose-note-app-\${version}.\${ext}
+  packageName: thinkly
+  artifactName: thinkly-\${version}.\${ext}
   depends:
     - gtk3
     - nss

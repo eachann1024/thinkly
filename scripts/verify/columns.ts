@@ -63,11 +63,15 @@ export default async function run(): Promise<number> {
 
   // 1. 保存成 .md 再读回
   const markdown = jsonContentToMarkdown(SAMPLE as any);
-  check("保存：写出分栏注释标记", /<!-- goose-note:columns widths="60,40" -->/.test(markdown), markdown);
+  check("保存：写出分栏注释标记", /<!-- thinkly:columns widths="60,40" -->/.test(markdown), markdown);
   const reread = importMarkdownFragment(markdown);
   check("读取：栏宽与每栏内容原样还原",
     JSON.stringify(layoutShape(findLayout(reread as any[]))) === JSON.stringify(expected),
     layoutShape(findLayout(reread as any[])));
+  const legacy = importMarkdownFragment(markdown.replaceAll("thinkly:", "goose-note:"));
+  check("读取：旧 goose-note 分栏标记仍能还原",
+    JSON.stringify(layoutShape(findLayout(legacy as any[]))) === JSON.stringify(expected),
+    layoutShape(findLayout(legacy as any[])));
 
   // 2. 外部复制的分栏 Markdown 源码粘贴（粘贴识别 + 本地解析）
   const pasted = markdown.split("\n").slice(2).join("\n");

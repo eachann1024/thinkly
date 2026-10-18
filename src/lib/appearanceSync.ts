@@ -102,7 +102,7 @@ export function startAppearanceSync(): void {
   });
   window.gooseDesktop?.appearance?.onChanged(applyAppearanceSnapshot);
   window.addEventListener("storage", (event) => {
-    if (event.key !== "goose-note-settings" || !event.newValue) return;
+    if (event.key !== "thinkly-settings" || !event.newValue) return;
     try {
       const state = JSON.parse(event.newValue).state;
       if (state?.theme && state?.customFonts) applyAppearanceSnapshot(state);

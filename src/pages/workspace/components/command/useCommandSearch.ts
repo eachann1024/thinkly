@@ -78,7 +78,7 @@ export function useCommandSearch({
   const displayLimit = scopeChanged ? SEARCH_RESULT_PAGE_SIZE : pagination.limit;
   const [removedRecentIds, setRemovedRecentIds] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem("goose-recent-excludes");
+      const saved = localStorage.getItem("thinkly-recent-excludes");
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -91,11 +91,11 @@ export function useCommandSearch({
   const removeRecent = useCallback((id: string) => {
     const nextIds = [...removedRecentIds, id];
     runWithPresence(() => setRemovedRecentIds(nextIds));
-    localStorage.setItem("goose-recent-excludes", JSON.stringify(nextIds));
+    localStorage.setItem("thinkly-recent-excludes", JSON.stringify(nextIds));
   }, [removedRecentIds]);
   useEffect(() => {
     const sync = (event: StorageEvent) => {
-      if (event.key !== "goose-recent-excludes") return;
+      if (event.key !== "thinkly-recent-excludes") return;
       try {
         const next = event.newValue ? JSON.parse(event.newValue) : [];
         if (Array.isArray(next) && next.every((id) => typeof id === "string")) setRemovedRecentIds(next);

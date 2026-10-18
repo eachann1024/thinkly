@@ -1,4 +1,4 @@
-const CODE_BLOCK_META_PREFIX = "goose-note=";
+const CODE_BLOCK_META_PREFIXES = ["thinkly=", "goose-note="];
 
 /**
  * CommonMark thematic break：至少三个相同的 `-` / `*` / `_`，中间可夹空格。
@@ -13,7 +13,7 @@ export function isThematicBreakLine(line: string): boolean {
 }
 
 export function isLegacyCodeBlockMetaComment(line: string): boolean {
-  return /^<!--\s*goose-note:codeblock\s+.+?\s*-->$/.test(line);
+  return /^<!--\s*(?:thinkly|goose-note):codeblock\s+.+?\s*-->$/.test(line);
 }
 
 function normalizeCodeBlockSummary(value: unknown): string {
@@ -34,8 +34,9 @@ export function parseCodeFenceInfo(infoLine: string): {
   let wrap = false;
 
   for (const token of tokens) {
-    if (token.startsWith(CODE_BLOCK_META_PREFIX)) {
-      const encoded = token.slice(CODE_BLOCK_META_PREFIX.length);
+    const metaPrefix = CODE_BLOCK_META_PREFIXES.find((prefix) => token.startsWith(prefix));
+    if (metaPrefix) {
+      const encoded = token.slice(metaPrefix.length);
       if (!encoded) continue;
 
       try {

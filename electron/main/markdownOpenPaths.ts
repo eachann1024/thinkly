@@ -23,7 +23,7 @@ function looksLikeFlag(arg: string): boolean {
 
 /**
  * 开发态 argv：`electron dist-electron/main/index.js [files...]`
- * 包装态 argv：`Goose Note.exe [files...]`（macOS 文件走 open-file，不依赖 argv）
+ * 包装态 argv：`Thinkly.exe [files...]`（macOS 文件走 open-file，不依赖 argv）
  */
 export function collectMarkdownPathsFromArgv(
   argv: string[],

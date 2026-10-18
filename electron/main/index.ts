@@ -1,8 +1,6 @@
 import { registerAppearanceIpc } from "./appearance";
 import { registerGitSyncIpc, startGitSync, stopGitSync } from "./gitSync";
 import { app, protocol } from "electron";
-import { mkdirSync } from "node:fs";
-import path from "node:path";
 import { initializeLanguage, getLanguageSnapshot } from "./i18n/store";
 import { registerLanguageIpc } from "./i18n/ipc";
 import { localizedAppName } from "./i18n/appName";
@@ -19,6 +17,7 @@ import {
   registerOpenFileEvent,
 } from "./openMarkdownFiles";
 import { lockWebContentsPageZoom } from "./pageZoom";
+import { pinUserDataDirectory } from "./migrateUserData";
 import { createWorkspaceWindow, getMainWindow, markQuitting, restoreWorkspaceWindows, shouldSuppressWorkspaceActivate } from "./windows";
 
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
@@ -27,11 +26,9 @@ const DEFAULT_QUICKNOTE = "Alt+N";
 protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 
 // 显示名在语言就绪后才会换成「思绪 · Thinkly」或 Thinkly。
-// 数据目录必须先钉在旧路径，否则 setName 会让升级后的笔记进新文件夹。
-const legacyUserData = path.join(app.getPath("appData"), "Goose Note");
-mkdirSync(legacyUserData, { recursive: true });
-app.setPath("userData", legacyUserData);
-app.setName("Goose Note");
+// 数据目录先钉死，否则后面的 setName 会把笔记写进另一份文件夹。
+pinUserDataDirectory();
+app.setName("Thinkly");
 // 禁止触控板捏合缩放整页；键盘 Cmd/Ctrl+/- 由渲染进程改编辑器字号。
 app.commandLine.appendSwitch("disable-pinch");
 // 笔记应用不用浏览器后退缓存，也不预留空闲渲染进程。

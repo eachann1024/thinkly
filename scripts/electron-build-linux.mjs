@@ -30,15 +30,17 @@ function stopRunningApp() {
     }
   };
   try {
-    const proc = shell("pgrep -x goose-note-app || true");
+    const proc = shell("pgrep -x thinkly || pgrep -x goose-note-app || true");
     if (!proc) return;
+    shell("pkill -x thinkly || true");
     shell("pkill -x goose-note-app || true");
     // 等待进程退出，最多 15 秒（SIGTERM 后仍未退则 SIGKILL）。
     const deadline = Date.now() + 15000;
     while (Date.now() < deadline) {
-      if (!shell("pgrep -x goose-note-app || true")) return;
+      if (!shell("pgrep -x thinkly || pgrep -x goose-note-app || true")) return;
       shell("sleep 0.5");
     }
+    shell("pkill -9 -x thinkly || true");
     shell("pkill -9 -x goose-note-app || true");
   } catch (err) {
     console.warn(

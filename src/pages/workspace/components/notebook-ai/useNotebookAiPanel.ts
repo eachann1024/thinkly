@@ -10,8 +10,8 @@ import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { useTabs, isNotebookAiTab } from "@/stores/useTabs";
 import { FILE_NAV_AI_PANEL, useFileNavHistory } from "@/stores/useFileNavHistory";
 
-const OPEN_STORAGE_KEY = "goose-note-ai-panel-open";
-const LAYOUT_STORAGE_KEY = "goose-note-ai-layout-mode";
+const OPEN_STORAGE_KEY = "thinkly-ai-panel-open";
+const LAYOUT_STORAGE_KEY = "thinkly-ai-layout-mode";
 
 /** tab 为历史取值，等同 fullscreen */
 export type NotebookAiLayoutMode = "side-panel" | "fullscreen" | "tab";

@@ -1,3 +1,4 @@
+import { dataAttr } from "../persistedNames";
 import { escapeHtmlAttribute } from "./inline";
 
 function serializeMedia(block: any, type: "audio" | "video"): string {
@@ -5,9 +6,9 @@ function serializeMedia(block: any, type: "audio" | "video"): string {
   const escape = (value: string) => escapeHtmlAttribute(value).replace(/\r/g, "&#13;").replace(/\n/g, "&#10;");
   const attr = (name: string, value: unknown) => typeof value === "string" && value
     ? ` ${name}="${escape(value)}"` : "";
-  let metadata = attr("data-goose-name", props.name) + attr("data-goose-caption", props.caption);
+  let metadata = attr(dataAttr("name"), props.name) + attr(dataAttr("caption"), props.caption);
   metadata += attr("data-background-color", props.backgroundColor);
-  if (props.showPreview === false) metadata += ' data-goose-show-preview="false"';
+  if (props.showPreview === false) metadata += ` ${dataAttr("show-preview")}="false"`;
   if (type === "video") {
     const width = Number(props.previewWidth);
     if (Number.isFinite(width) && width > 0) metadata += ` width="${width}"`;

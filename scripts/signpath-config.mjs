@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const SIGNPATH_DEFAULTS = {
-  projectSlug: "goose-notes",
+  projectSlug: "thinkly",
   signingPolicySlug: "release-signing",
   appArtifactConfigurationSlug: "app-exe",
   installerArtifactConfigurationSlug: "installer",

@@ -47,7 +47,7 @@ interface RecoveryJournalDoc {
   acknowledgedRevision?: number;
 }
 
-export const RECOVERY_JOURNAL_STORAGE_KEY = "goose-note:recovery-journal:v1";
+export const RECOVERY_JOURNAL_STORAGE_KEY = "thinkly:recovery-journal:v1";
 export const RECOVERY_JOURNAL_DOC_PREFIX = "gn:recovery:v2:";
 
 const docId = (source: RecoverySource, id: string) =>

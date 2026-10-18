@@ -61,14 +61,14 @@ export function shouldPasteClipboardAsBlocks(
 
 /** 外部复制的 .md 源码带分栏标记时，必须走本地解析才能还原左右栏。 */
 export function plainHasGooseColumnMarkers(plain: string): boolean {
-  return /<!--\s*goose-note:columns\b/i.test(plain);
+  return /<!--\s*(?:thinkly|goose-note):columns\b/i.test(plain);
 }
 
 /** plain 含 Goose 块属性标记或 style 颜色 span 时优先 importMarkdownFragment。 */
 export function plainHasGooseMarkdownMarkers(plain: string): boolean {
   return (
     plainHasGooseColumnMarkers(plain) ||
-    /goose-note:block-props|data-goose-note-block-props/i.test(plain) ||
+    /(?:thinkly|goose-note):block-props|data-(?:thinkly|goose)-note-block-props/i.test(plain) ||
     /<span[^>]*style\s*=/i.test(plain)
   );
 }

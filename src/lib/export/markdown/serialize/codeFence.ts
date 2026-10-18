@@ -1,4 +1,4 @@
-const CODE_BLOCK_META_PREFIX = "goose-note=";
+const CODE_BLOCK_META_PREFIX = "thinkly=";
 
 function normalizeCodeBlockSummary(value: unknown): string {
   if (typeof value !== "string") return "";

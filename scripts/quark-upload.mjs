@@ -5,9 +5,16 @@ import { fileURLToPath } from "node:url";
 import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile } from "./quark-api.mjs";
 import { uploadFile } from "./quark-oss.mjs";
 
-const FOLDER_NAME = "鹅的笔记安装包";
+const FOLDER_NAME = "Thinkly 安装包";
+const LEGACY_FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
 const INSTALLERS = [
+  /^Thinkly-(\d+\.\d+\.\d+)-arm64\.dmg$/,
+  /^Thinkly-(\d+\.\d+\.\d+)\.dmg$/,
+  /^Thinkly-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
+  /^Thinkly-(\d+\.\d+\.\d+)\.AppImage$/,
+  /^thinkly_(\d+\.\d+\.\d+)_amd64\.deb$/,
+  /^thinkly-(\d+\.\d+\.\d+)\.pacman$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)-arm64\.dmg$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)\.dmg$/,
   /^Goose\.Note-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
@@ -18,10 +25,10 @@ const INSTALLERS = [
 
 function expectedInstallers(version) {
   return [
-    `Goose.Note-${version}-arm64.dmg`, `Goose.Note-${version}.dmg`,
-    `Goose.Note-${version}-x64-setup.exe`, `Goose.Note-${version}-arm64-setup.exe`,
-    `Goose.Note-${version}.AppImage`, `goose-note-app_${version}_amd64.deb`,
-    `goose-note-app-${version}.pacman`,
+    `Thinkly-${version}-arm64.dmg`, `Thinkly-${version}.dmg`,
+    `Thinkly-${version}-x64-setup.exe`, `Thinkly-${version}-arm64-setup.exe`,
+    `Thinkly-${version}.AppImage`, `thinkly_${version}_amd64.deb`,
+    `thinkly-${version}.pacman`,
   ];
 }
 
@@ -192,6 +199,22 @@ async function retainLatest(cookie, folderId, version) {
   console.log(`保留版本 ${[...keep].join("、") || version}`);
 }
 
+function isQuarkDirectory(item) {
+  return item?.file === false || item?.dir === true || item?.file_type === 0;
+}
+
+async function openInstallFolder(cookie) {
+  const root = await listChildren(cookie, "0");
+  const next = root.find((item) => item.file_name === FOLDER_NAME && isQuarkDirectory(item));
+  if (next?.fid) return String(next.fid);
+  const legacy = root.find((item) => item.file_name === LEGACY_FOLDER_NAME && isQuarkDirectory(item));
+  if (legacy?.fid) {
+    await renameFile(cookie, String(legacy.fid), FOLDER_NAME);
+    return String(legacy.fid);
+  }
+  return ensureFolder(cookie, FOLDER_NAME);
+}
+
 async function main() {
   const cookie = readCookie();
   await assertCookie(cookie);
@@ -202,7 +225,7 @@ async function main() {
   const names = expectedInstallers(version);
   const missing = names.filter((name) => !present.has(name));
   if (missing.length) throw new QuarkFailure(`缺少安装包：${missing.join("、")}`);
-  const folderId = await ensureFolder(cookie, FOLDER_NAME);
+  const folderId = await openInstallFolder(cookie);
   for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
   const noteDir = mkdtempSync(join(tmpdir(), "goose-quark-"));
   const note = join(noteDir, NOTE_NAME);

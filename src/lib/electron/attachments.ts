@@ -32,7 +32,7 @@ import { getGooseDesktop } from "./runtime";
 
 export const ELECTRON_MAX_ATTACHMENT_SIZE = 50 * 1024 * 1024;
 
-const WEB_ATT_STORAGE_PREFIX = "goose-note:web-att:";
+const WEB_ATT_STORAGE_PREFIX = "thinkly:web-att:";
 const ATTACHMENTS_DIR = "attachments";
 const META_SUFFIX = ".meta";
 

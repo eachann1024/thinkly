@@ -71,7 +71,7 @@ export function useSettingsBackupRestore(
 
     // 本地文件夹内容属于用户磁盘数据，先落盘但绝不删除磁盘文件或 .goose/history。
     await usePages.getState().flushPendingLocalSaves();
-    dataStorage.removeItem("goose-note-notebooks");
+    dataStorage.removeItem("thinkly-notebooks");
     historyRepository.clearAll();
     if (preserveLocalFolders) {
       clearPersistedInternalPages();
@@ -86,7 +86,7 @@ export function useSettingsBackupRestore(
     if (!preserveWorkspaceState) {
       useNotebookAiChats.getState().clearAllChats();
       useTabs.getState().clearAllTabs();
-      window.localStorage.removeItem("goose-note-ai-panel-open");
+      window.localStorage.removeItem("thinkly-ai-panel-open");
     }
     useNotebooks.setState({
       notebooks: localNotebooks,

@@ -1,4 +1,5 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { NOTE_MARK_PATTERN, dataAttr, noteComment } from "./persistedNames";
 import { documentTextColors } from "@/lib/textColors";
 import { INLINE_BLOCK_TYPES, pickPersistedBlockProps, sanitizeCssColor, type MarkdownBlock, type PersistedBlockProps } from "./blockPropsProperties";
 
@@ -80,9 +81,9 @@ export function wrapLocalBlockPropsMarkdown(block: MarkdownBlock, markdown: stri
   if (typeof style !== "string" || !parseLocalWrapperStyle(style)) {
     // Markdown 空白没有块身份，复用既有空段标记，保证本地文件重开不丢首段。
     return markdown === "" && block.type === "paragraph" && block.props?.[LOCAL_PRESERVE_EMPTY_PARAGRAPH]
-      ? "<!-- goose-note:empty-block=paragraph -->" : markdown;
+      ? noteComment("empty-block=paragraph") : markdown;
   }
-  const open = `<span data-goose-note-block-props="v1" style="${style}">`;
+  const open = `<span ${dataAttr("note-block-props")}="v1" style="${style}">`;
   if (block.type === "toggleListItem" || (block.type === "heading" && block.props?.isToggleable)) {
     return markdown.replace(
       /^(<summary>(?:<h[1-3]>)?)([^\n]*?)((?:<\/h[1-3]>)?<\/summary>)$/m,
@@ -137,10 +138,10 @@ export function unwrapLocalBlockPropsWrappers(markdown: string): string {
   const lines = markdown.split("\n");
   const output: string[] = [];
   const prefix = "\\s*(?:(?:#{1,6}\\s+)|(?:[-*+]\\s+(?:\\[[ xX]\\]\\s+)?|\\d+\\.\\s+)|(?:>\\s+(?:\\[![A-Z]+\\]\\s+\\S+\\s+)?))?";
-  const openPattern = new RegExp(`^(${prefix})(<span data-goose-note-block-props="v1" style="([^"]+)">)(.*)$`);
-  const blockBoundary = /^(?:\s*$|\s*#{1,6}\s+|\s*>|\s*(?:[-*+]\s+|\d+\.\s+)|\s*(?:`{3,}|~{3,})|\s*<details(?:\s|>)|\s*<!--\s*goose-note:columns\b)/;
+  const openPattern = new RegExp(`^(${prefix})(<span data-(?:thinkly|goose)-note-block-props="v1" style="([^"]+)">)(.*)$`);
+  const blockBoundary = new RegExp(`^(?:\\s*$|\\s*#{1,6}\\s+|\\s*>|\\s*(?:[-*+]\\s+|\\d+\\.\\s+)|\\s*(?:\`{3,}|~{3,})|\\s*<details(?:\\s|>)|\\s*<!--\\s*${NOTE_MARK_PATTERN}:columns\\b)`);
   const marker = (metadata: PersistedBlockProps) =>
-    `<!-- goose-note:block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))} -->`;
+    noteComment(`block-props=${encodeURIComponent(JSON.stringify({ v: 1, ...metadata }))}`);
   let fence: { char: "`" | "~"; length: number } | null = null;
   let previousQuoteStyle: string | null = null;
 
@@ -161,7 +162,7 @@ export function unwrapLocalBlockPropsWrappers(markdown: string): string {
       continue;
     }
 
-    const summary = line.match(/^(<summary>(?:<h[1-3]>)?)<span data-goose-note-block-props="v1" style="([^"]+)">(.*)<\/span>((?:<\/h[1-3]>)?<\/summary>)$/);
+    const summary = line.match(/^(<summary>(?:<h[1-3]>)?)<span data-(?:thinkly|goose)-note-block-props="v1" style="([^"]+)">(.*)<\/span>((?:<\/h[1-3]>)?<\/summary>)$/);
     if (summary) {
       const metadata = parseLocalWrapperStyle(summary[2]);
       output.push(metadata ? `${summary[1]}${marker(metadata)}${summary[3]}${summary[4]}` : line);

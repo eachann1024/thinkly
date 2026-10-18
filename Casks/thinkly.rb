@@ -1,4 +1,4 @@
-cask "goose-note" do
+cask "thinkly" do
   arch arm: "-arm64", intel: ""
   version "1.7.317,6e3ebc5"
   sha256 arm: "ff64a0817d5f1fcfa6abf193359400b352d5c90ac58715a81cfb2a6955256c3b",
@@ -10,9 +10,13 @@ cask "goose-note" do
   depends_on :macos
   app "Goose Note.app"
   zap trash: [
+    "~/Library/Application Support/Thinkly",
     "~/Library/Application Support/Goose Note",
+    "~/Library/Logs/Thinkly",
     "~/Library/Logs/Goose Note",
+    "~/Library/Preferences/com.thinkly.desktop.plist",
     "~/Library/Preferences/com.goosenote.desktop.plist",
+    "~/Library/Saved Application State/com.thinkly.desktop.savedState",
     "~/Library/Saved Application State/com.goosenote.desktop.savedState",
   ]
   caveats <<~EOS

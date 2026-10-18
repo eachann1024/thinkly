@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 
-const STORAGE_KEY = "goose-note-ai-panel-width";
+const STORAGE_KEY = "thinkly-ai-panel-width";
 export const PANEL_WIDTH_MIN = 320;
 const DEFAULT_WIDTH = 338;
 

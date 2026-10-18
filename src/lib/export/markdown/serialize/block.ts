@@ -11,6 +11,7 @@ import { serializeToggleDetails } from "./toggleDetails";
 import { CHILDREN_CONSUMED_TYPES } from "./lists";
 import { legacyItemInline, serializeLegacyListItem } from "./legacyLists";
 import { wrapBlockChildrenMarkdown } from "../blockChildrenWrapper";
+import { noteComment } from "../persistedNames";
 
 export function blockNoteBlockToMarkdown(
   block: any, indent: string,
@@ -82,7 +83,7 @@ export function blockNoteBlockToMarkdown(
 
     case "callout": {
       const icon = block.props?.icon ?? block.attrs?.emoji;
-      const iconMarker = typeof icon === "string" ? `<!-- goose-note:callout-icon=${encodeURIComponent(icon)} -->` : "";
+      const iconMarker = typeof icon === "string" ? noteComment(`callout-icon=${encodeURIComponent(icon)}`) : "";
       const emoji = resolveCalloutIcon(icon);
       result = text
         .split("\n")
@@ -212,7 +213,7 @@ export function blockNoteBlockToMarkdown(
     const childMd = serializeBlocks(block.children, indent);
     if (childMd) {
       if (!result && block.type === "paragraph") {
-        result = "<!-- goose-note:empty-block=paragraph -->";
+        result = noteComment("empty-block=paragraph");
       }
       result += (result ? "\n\n" : "") + wrapBlockChildrenMarkdown(childMd);
     }

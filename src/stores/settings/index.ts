@@ -51,7 +51,7 @@ export const useSettings = create<SettingsState>()(
       setupGuideOpen: false,
     }),
     {
-      name: "goose-note-settings",
+      name: "thinkly-settings",
       version: 14,
       merge: (persisted, current) => {
         const { sidebarTint: _removedSidebarTint, ...saved } =
