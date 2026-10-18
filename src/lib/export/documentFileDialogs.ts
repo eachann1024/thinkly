@@ -13,6 +13,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { getGooseDesktop, isElectronRuntime } from "@/lib/electron/runtime";
+import { clampFilename } from "@/lib/filenameLimits";
 import { sanitizeFilenameSegment } from "@/lib/local-title-binding";
 import type { OpenFileDialogOptions } from "@/lib/native-dialog-contract";
 
@@ -52,7 +53,7 @@ export async function saveDocumentBlobAndReveal(
   if (!desktop) throw new Error(uiText("couldnTOpenTheSaveDialogRestartTheDesktop"));
   const suffix = filename.match(/(\.[a-z0-9]{1,12})$/i)?.[1] || "";
   const stem = suffix ? filename.slice(0, -suffix.length) : filename;
-  const safeName = `${sanitizeFilenameSegment(stem) || "untitled"}${suffix}`;
+  const safeName = clampFilename(`${sanitizeFilenameSegment(stem) || "untitled"}${suffix}`);
   const extension = suffix.slice(1).toLowerCase();
   const path = await desktop.showSaveDialog({
     defaultPath: safeName,

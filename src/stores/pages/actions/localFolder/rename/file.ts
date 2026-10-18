@@ -76,14 +76,19 @@ export async function renameLocalPageFileAction(
   ) {
     throw new Error(storeText("invalidName"));
   }
-  const sanitized = sanitizeFilenameSegment(newBaseName);
+  const located = splitFilePath(page.localFilePath);
+  // 重名时会再拼 ` (99)`，和扩展名一起从 255 字节里扣掉。
+  const sanitized = sanitizeFilenameSegment(
+    newBaseName,
+    page.isFolder ? "" : ` (99)${located.ext}`,
+  );
   if (!sanitized) {
     throw new Error(storeText("emptyName"));
   }
 
   if (page.isFolder) return renameLocalDirectory(set, get, pageId, sanitized);
 
-  const { dir, base, ext } = splitFilePath(page.localFilePath);
+  const { dir, base, ext } = located;
   if (sanitized === base) {
     // 名称未变，无需操作
     return pageId;

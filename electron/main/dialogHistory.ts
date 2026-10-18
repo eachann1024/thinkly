@@ -1,3 +1,4 @@
+import { clampSaveFilename } from "../../src/lib/filenameLimits";
 import { app } from "electron";
 import { constants } from "node:fs";
 import { access, mkdir, readFile, stat } from "node:fs/promises";
@@ -78,7 +79,11 @@ export async function saveDialogPath(defaultPath?: string) {
   const absolute = absolutePath(suggested);
   const directory = await dialogDirectory("export", absolute ? path.dirname(suggested) : undefined);
   const filename = path.basename(suggested);
-  return filename && filename !== "." ? path.join(directory ?? app.getPath("documents"), filename) : directory;
+  if (!filename || filename === "." || filename === "..") return directory;
+  const dir = directory ?? app.getPath("documents");
+  return clampSaveFilename(dir, filename, process.platform, (directoryPath, name) =>
+    path.join(directoryPath, name),
+  );
 }
 
 /** Serialize different windows' confirmations, and persist before the picker is released. */

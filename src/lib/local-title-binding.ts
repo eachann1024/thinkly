@@ -1,4 +1,5 @@
 import type { PartialBlock } from "@blocknote/core";
+import { MAX_FILENAME_BYTES, filenameByteLength, truncateToBytes } from "./filenameLimits";
 
 /**
  * 本地文件夹模式下，文件名 ↔ 编辑器首块 H1 双向绑定。
@@ -69,20 +70,20 @@ const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g;
 /**
  * Windows/Mac/Linux 文件名兼容清洗。空白塞回为空格、保留中文/Emoji，
  * 控制字符与跨平台禁用符替换为 `-`。
+ * `reservedSuffix` 是调用方还要拼上的扩展名（以及重名序号），字节数从 255 里扣掉。
  */
-export function sanitizeFilenameSegment(value: string): string {
+export function sanitizeFilenameSegment(value: string, reservedSuffix = ""): string {
   const trimmed = (value || "").trim();
   if (!trimmed) return "";
-  let cleaned = trimmed
+  const cleaned = trimmed
     // eslint-disable-next-line no-control-regex -- 有意匹配控制字符以清洗文件名
     .replace(/[\x00-\x1f\x7f]/g, "")
     .replace(INVALID_FILENAME_CHARS, "-")
     .replace(/\s+/g, " ")
-    .trim();
-  // Windows 禁止以点结尾
-  cleaned = cleaned.replace(/[.\s]+$/g, "");
-  if (cleaned.length > 120) cleaned = cleaned.slice(0, 120).trim();
-  return cleaned;
+    .replace(/^\s+/g, "")
+    .replace(/[.\s]+$/g, "");
+  const budget = Math.max(1, MAX_FILENAME_BYTES - filenameByteLength(reservedSuffix));
+  return truncateToBytes(cleaned, budget);
 }
 
 export function splitFilePath(filePath: string): {
