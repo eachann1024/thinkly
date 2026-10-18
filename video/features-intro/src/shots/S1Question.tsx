@@ -1,7 +1,7 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { LAYOUT } from "../theme";
 import { textSpring } from "../motion";
-import { PixelArt } from "../components/PixelArt";
+import { QuestionMark } from "../components/PixelArt";
 import { Eyebrow, MonoLabel, StaggerText } from "../components/Text";
 
 /** 提问：点阵问号与文案一起升起，主运动=升起。 */
@@ -31,10 +31,10 @@ export function S1Question() {
           left: 1120,
           top: 236,
           opacity: Math.min(1, q * 1.6),
-          transform: `translateY(${(1 - q) * 120}px)`,
+          transform: `translateY(${Math.round((1 - q) * 120)}px)`,
         }}
       >
-        <PixelArt kind="question" pitch={12} radius={2.2} />
+        <QuestionMark />
       </div>
     </AbsoluteFill>
   );

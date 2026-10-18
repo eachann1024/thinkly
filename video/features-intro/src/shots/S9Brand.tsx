@@ -1,27 +1,38 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { COLORS, FONT } from "../theme";
 import { textSpring } from "../motion";
-import { PixelArt } from "../components/PixelArt";
+import { Sprite } from "../components/PixelArt";
+import type { SpriteKey } from "../sprites";
 
-/** 品牌定格：最后 234 帧完全静止。 */
+/** 品牌定格：三个形象从画框底边升起，切帧挥手，最后 234 帧完全静止。 */
 const FREEZE = 66;
+const WAVE_AT = 36;
+const CAST: Array<{ id: "a" | "b" | "g"; left: number; delay: number }> = [
+  { id: "b", left: 328, delay: 6 },
+  { id: "a", left: 768, delay: 0 },
+  { id: "g", left: 1208, delay: 10 },
+];
 
 export function S9Brand() {
   const frame = Math.min(useCurrentFrame(), FREEZE);
-  const goose = textSpring(frame, 0);
   const name = textSpring(frame, 12);
   const meta = textSpring(frame, 26);
 
   return (
-    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ opacity: goose, transform: `translateY(${(1 - goose) * 40}px)` }}>
-          <PixelArt kind="goose" pitch={7} radius={2.8} />
-        </div>
-
+    <AbsoluteFill>
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 300,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <div
           style={{
-            marginTop: 34,
             display: "flex",
             alignItems: "baseline",
             gap: 20,
@@ -33,7 +44,7 @@ export function S9Brand() {
             思绪
           </span>
           <span style={{ width: 2, height: 72, background: "rgba(27,26,23,0.16)", display: "block" }} />
-          <span style={{ fontFamily: FONT.serif, fontStyle: "italic", fontSize: 104, color: COLORS.ink }}>
+          <span style={{ fontFamily: FONT.serif, fontStyle: "italic", fontSize: 104, color: COLORS.ink, paddingRight: 12 }}>
             Thinkly
           </span>
         </div>
@@ -44,6 +55,19 @@ export function S9Brand() {
           </div>
         </div>
       </div>
+
+      {CAST.map(({ id, left, delay }) => {
+        const p = textSpring(frame, delay);
+        const pose = frame >= WAVE_AT + delay / 2 ? "wave" : "main";
+        return (
+          <div
+            key={id}
+            style={{ position: "absolute", left, top: 696, transform: `translateY(${Math.round((1 - p) * 400)}px)` }}
+          >
+            <Sprite name={`${id}-${pose}` as SpriteKey} />
+          </div>
+        );
+      })}
     </AbsoluteFill>
   );
 }
