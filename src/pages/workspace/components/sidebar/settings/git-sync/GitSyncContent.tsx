@@ -9,6 +9,7 @@ import { GitSyncSettings } from "./GitSyncSettings";
 import { repositoryLabel, shortSyncError } from "./gitSyncPresentation";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
+import { DotDecor, SettingsDotIcon } from "@/components/ui/dot-matrix";
 import type {
   GitRepositoryConfig,
   GitRepositoryFolder,
@@ -166,7 +167,11 @@ export function GitSyncContent({
                 );
               })}
               {!loading && !loadError && !state.configs.length && (
-                <p className="text-sm text-muted-foreground">{uiText("addARepositoryChooseFoldersThen_a359")}</p>
+                <div className="relative flex flex-col items-center gap-2.5 overflow-hidden py-8 text-center">
+                  <DotDecor preset="gitRepos" compact />
+                  <SettingsDotIcon name="branch" size={32} className="relative" />
+                  <p className="relative text-sm text-muted-foreground">{uiText("addARepositoryChooseFoldersThen_a359")}</p>
+                </div>
               )}
             </div>
           </SettingsSectionCard>

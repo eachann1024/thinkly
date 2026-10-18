@@ -1,6 +1,7 @@
 import { useLocale } from "@/i18n";
 import { Sparkles } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DotDecor, DotIconArt, type DotIconMotion } from "@/components/ui/dot-matrix";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/stores/useSettings";
 import { isRetryableAvailabilityError } from "@/lib/notebook-ai/availabilityError";
@@ -63,12 +64,18 @@ export function AiUnavailableState({
       ? t("aiAssistantIsOff")
       : needsModel ? t("noModelSelected") : t("aiIsTemporarilyUnavailable");
   const canRetry = retryable && enabled;
+  // 读取中为进行中；助手开启但不可用（且非缺模型）为错误态
+  const motion: DotIconMotion = !hydrated ? "progress" : enabled && !needsModel ? "alert" : "idle";
+  // 紧凑条（已有消息时）保持单行图标，不放插画
+  const art = compact ? undefined
+    : <DotIconArt icon="sparkleOff" size={52} width={136} height={96} halo motion={motion} className="-my-2" />;
   const openSettings = () => window.dispatchEvent(
     new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } }),
   );
   return (
-    <section className={`flex shrink-0 items-center justify-center px-5 ${compact ? "py-4" : "min-h-0 flex-1 py-8"}`} aria-label={t("aiStatus")}>
-      <EmptyState icon={Sparkles} title={title}
+    <section className={`relative flex shrink-0 items-center justify-center px-5 ${compact ? "py-4" : "min-h-0 flex-1 overflow-hidden py-8 [&>.goose-empty-state]:relative"}`} aria-label={t("aiStatus")}>
+      {compact ? null : <DotDecor preset="aiOff" />}
+      <EmptyState icon={Sparkles} illustration={art} title={title}
         details={hydrated && enabled && !needsModel && reason
           ? /^(构造|could not create .*model)/i.test(reason) ? t("checkTheServiceAndModelInAiSettings") : reason
           : undefined}

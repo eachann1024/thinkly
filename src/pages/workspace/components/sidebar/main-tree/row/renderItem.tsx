@@ -16,6 +16,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { TreeBranch } from "../TreeBranch";
+import { WorkspaceDotIcon } from "@/components/ui/dot-matrix";
 import { type HTMLProps } from "react";
 import { SidebarContextMenu } from "../../SidebarContextMenu";
 import { SidebarInlineRename } from "../../SidebarInlineRename";
@@ -270,13 +271,14 @@ export function renderItem({
         {children}
         {showEmptyFolderPlaceholder ? (
           <div
-            className="flex items-center text-[13px] text-muted-foreground"
+            className="flex items-center gap-2 text-[13px] text-muted-foreground"
             style={{
               paddingLeft:
-                (depth + 1) * INDENT + ROW_PADDING_LEFT + CHILD_TITLE_OFFSET,
+                (depth + 1) * INDENT + ROW_PADDING_LEFT + CHILD_TITLE_OFFSET - 22,
               minHeight: "var(--main-tree-row-height)",
             }}
           >
+            <WorkspaceDotIcon icon="dots" size={14} motion="ripple" className="shrink-0 text-foreground" />
             {uiText("noFilesYet_4b78")}</div>
         ) : null}
       </TreeBranch>

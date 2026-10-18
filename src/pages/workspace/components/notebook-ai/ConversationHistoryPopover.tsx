@@ -7,7 +7,6 @@ import {
   Check,
   Clock3,
   History as HistoryIcon,
-  MessageSquareText,
   Trash2,
 } from "@/components/ui/icons";
 import {
@@ -18,6 +17,7 @@ import {
 import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { cn } from "@/lib/utils";
+import { DotIconArt } from "@/components/ui/dot-matrix";
 import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1">`
 zh-Hans:
@@ -133,7 +133,7 @@ export function ConversationHistoryList({
           "flex flex-col items-center justify-center gap-2 px-4 py-8 text-center text-muted-foreground"
         }
       >
-        <MessageSquareText className="h-5 w-5" strokeWidth={1.5} />
+        <DotIconArt icon="chat" size={24} width={24} height={24} />
         <span className="text-xs">{t("noPreviousConversations")}</span>
       </div>
     );

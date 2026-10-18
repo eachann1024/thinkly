@@ -66,9 +66,11 @@
 .search-sheet-layer { --search-sheet-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 /* 空、无结果与错误状态：图形与标题一同浮起，居于列表剩余空间中心。 */
 .search-sheet-list:has(> .search-sheet-status[data-state]) { display:flex; flex-direction:column; }
-.search-sheet-status[data-state] { flex:1; justify-content:center; padding:1.5rem .75rem 3rem; gap:.875rem; }
+.search-sheet-status[data-state] { position:relative; flex:1; justify-content:center; padding:1.5rem .75rem 3rem; gap:.875rem; }
+.search-sheet-status[data-state] > :not(.goose-dm-decor) { position:relative; }
 .search-sheet-status-glyph { display:flex; align-items:center; justify-content:center; width:2.75rem; height:2.75rem; border:1px solid hsl(var(--border)); border-radius:var(--goose-floating-radius); background:var(--goose-interactive-hover); color:var(--goose-text-secondary); }
 .search-sheet-status[data-state="error"] .search-sheet-status-glyph { color:hsl(var(--destructive)); }
+.search-sheet-status-art { display:flex; justify-content:center; margin:-.75rem 0; }
 .search-sheet-status[data-state] > strong { letter-spacing:.02em; }
 .search-sheet-status[data-state] > * { animation:search-sheet-settle 420ms cubic-bezier(.22,1,.36,1) 80ms both; }
 .search-sheet-status[data-state] > .search-sheet-status-glyph { animation-name:search-sheet-pop; animation-delay:0ms; }
