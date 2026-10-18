@@ -5,6 +5,8 @@
 export {}
 declare global {
   const EDITOR_ONLY_FIXED_SHORTCUTS: typeof import('../lib/shortcut-platform').EDITOR_ONLY_FIXED_SHORTCUTS
+  const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
+  const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
   const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const ONBOARDING_THIRD_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_THIRD_CHILD_CONTENT
   const SIDEBAR_PAGE_LIST_SELECTOR: typeof import('../lib/sidebarListCollapse').SIDEBAR_PAGE_LIST_SELECTOR
@@ -106,6 +108,7 @@ declare global {
   const renderWorkspaceAfterStartup: typeof import('../lib/workspaceStartup').renderWorkspaceAfterStartup
   const requestPageTitleFocus: typeof import('../lib/page-title-focus').requestPageTitleFocus
   const resolveModModifier: typeof import('../lib/shortcut-platform').resolveModModifier
+  const resolveNotebookLandingPageId: typeof import('../lib/notebookNavigation').resolveNotebookLandingPageId
   const resolvePageIcon: typeof import('../lib/resolvePageIcon').resolvePageIcon
   const resolvePageMentionNavigation: typeof import('../lib/pageMentionNavigation').resolvePageMentionNavigation
   const resolveSidebarCollapseTargetId: typeof import('../lib/sidebarListCollapse').resolveSidebarCollapseTargetId
@@ -131,6 +134,7 @@ declare global {
   const uploadWebdavBackup: typeof import('../lib/webdavSync').uploadWebdavBackup
   const useEffectiveSingleTabMode: typeof import('../lib/tabMode').useEffectiveSingleTabMode
   const videoStorage: typeof import('../lib/videoStorage').videoStorage
+  const warmPinyinMatcher: typeof import('../lib/pinyin-search').warmPinyinMatcher
   const wikiKeysForLocalPath: typeof import('../lib/wikiLink').wikiKeysForLocalPath
   const wikiLinkDisplayTitle: typeof import('../lib/wikiLink').wikiLinkDisplayTitle
   const wikiPathKey: typeof import('../lib/wikiLink').wikiPathKey

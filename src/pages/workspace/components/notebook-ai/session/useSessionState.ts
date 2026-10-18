@@ -7,7 +7,8 @@ import {
   useNotebookAiChats,
   composerDraftHasContent,
 } from "@/stores/useNotebookAiChats";
-import { buildTransport } from "@/lib/notebook-ai/transport";
+// transport → agent → ai / @earendil-works 的工具链约 350KB，只有真正发消息时才需要；
+// 静态引用它会把整个 SDK 链拉进首帧。
 import { buildLanguageModel } from "@/lib/notebook-ai/model";
 import { getCurrentNotebookAiPageId } from "@/lib/notebook-ai/context";
 import { prepareNotebookAiMessagesForModel } from "@/lib/notebook-ai/messageUtils";
@@ -93,7 +94,10 @@ export function useSessionState(notebookId: string) {
         const currentPageId =
           requestCurrentPageIdRef.current ??
           getCurrentNotebookAiPageId(notebookId);
-        const result = buildTransport(notebookId, currentPageId);
+        const result = (await import("@/lib/notebook-ai/transport")).buildTransport(
+          notebookId,
+          currentPageId,
+        );
         if (!result.ok) {
           throw new Error(result.reason);
         }
@@ -107,7 +111,10 @@ export function useSessionState(notebookId: string) {
         const currentPageId =
           requestCurrentPageIdRef.current ??
           getCurrentNotebookAiPageId(notebookId);
-        const result = buildTransport(notebookId, currentPageId);
+        const result = (await import("@/lib/notebook-ai/transport")).buildTransport(
+          notebookId,
+          currentPageId,
+        );
         if (!result.ok) {
           throw new Error(result.reason);
         }

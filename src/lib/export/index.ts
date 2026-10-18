@@ -32,35 +32,88 @@ import type { CustomFonts } from "@/stores/useSettings";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
 import {
-  normalizePageContent,
-  createEmptyBlockNoteContent,
-} from "@/components/editor/utils/blocknote-content";
-import { importFromMarkdown, type ImportResult } from "./markdown/parse";
-import { pickImportFile, saveDocumentBlobAndReveal } from "./documentFileDialogs";
-import {
-  buildSinglePageExport,
-  type SinglePageExportFormat,
-} from "./pageWithAttachments";
+  pickImportFile,
+  saveDocumentBlobAndReveal,
+} from "./documentFileDialogs";
 
+type BlockNoteSerializer = typeof import("./blocknoteSerializer");
+type MarkdownParser = typeof import("./markdown/parse");
+type ZipBundle = typeof import("./zipBundle");
+type PageExport = typeof import("./pageWithAttachments");
+
+// 下面这些不再静态重导出：docx / react-pdf / rehype-katex / jszip 加起来约 2MB，
+// 以前经本文件被 stores、设置面板和页面菜单静态引用，整条链都被塞进冷启动首屏。
+// 改成调用时才 import，行为不变，只有真正导出/导入的那一刻才下载解析这些模块。
 export { jsonContentToMarkdown } from "./markdown/serialize";
-export { blocksToMarkdown, blocksToHTML } from "./blocknoteSerializer";
-export {
-  importFromMarkdown,
-  importMarkdownFragment,
-  type ImportResult,
-} from "./markdown/parse";
-export {
-  exportNotebooks,
-  generateExportZip,
-  inspectNotebookImportZip,
-  importNotebooksFromZip,
-  type ExportOptions,
-} from "./zipBundle";
 export { saveBlobAndReveal } from "./fileSave";
-export {
-  buildSinglePageExport,
-  pageHasLocalSidecarAttachments,
-} from "./pageWithAttachments";
+export type { ImportResult } from "./markdown/parse";
+export type { SinglePageExportFormat } from "./pageWithAttachments";
+export type { ExportOptions } from "./zipBundle";
+
+export const blocksToMarkdown = (
+  ...args: Parameters<BlockNoteSerializer["blocksToMarkdown"]>
+): ReturnType<BlockNoteSerializer["blocksToMarkdown"]> =>
+  import("./blocknoteSerializer").then((mod) => mod.blocksToMarkdown(...args));
+
+export const blocksToHTML = (
+  ...args: Parameters<BlockNoteSerializer["blocksToHTML"]>
+): ReturnType<BlockNoteSerializer["blocksToHTML"]> =>
+  import("./blocknoteSerializer").then((mod) => mod.blocksToHTML(...args));
+
+type ImportedMarkdown = Awaited<ReturnType<MarkdownParser["importFromMarkdown"]>>;
+type ImportedFragment = Awaited<ReturnType<MarkdownParser["importMarkdownFragment"]>>;
+
+/** 原本是同步函数，这里改成 Promise；调用方都在 async 流程里，已一并加 await。 */
+export const importFromMarkdown = async (
+  ...args: Parameters<MarkdownParser["importFromMarkdown"]>
+): Promise<ImportedMarkdown> => {
+  const { importFromMarkdown: run } = await import("./markdown/parse");
+  return run(...args);
+};
+
+export const importMarkdownFragment = async (
+  ...args: Parameters<MarkdownParser["importMarkdownFragment"]>
+): Promise<ImportedFragment> => {
+  const { importMarkdownFragment: run } = await import("./markdown/parse");
+  return run(...args);
+};
+
+export const exportNotebooks = (
+  ...args: Parameters<ZipBundle["exportNotebooks"]>
+): ReturnType<ZipBundle["exportNotebooks"]> =>
+  import("./zipBundle").then((mod) => mod.exportNotebooks(...args));
+
+export const generateExportZip = (
+  ...args: Parameters<ZipBundle["generateExportZip"]>
+): ReturnType<ZipBundle["generateExportZip"]> =>
+  import("./zipBundle").then((mod) => mod.generateExportZip(...args));
+
+export const inspectNotebookImportZip = (
+  ...args: Parameters<ZipBundle["inspectNotebookImportZip"]>
+): ReturnType<ZipBundle["inspectNotebookImportZip"]> =>
+  import("./zipBundle").then((mod) => mod.inspectNotebookImportZip(...args));
+
+export const importNotebooksFromZip = (
+  ...args: Parameters<ZipBundle["importNotebooksFromZip"]>
+): ReturnType<ZipBundle["importNotebooksFromZip"]> =>
+  import("./zipBundle").then((mod) => mod.importNotebooksFromZip(...args));
+
+export const buildSinglePageExport = (
+  ...args: Parameters<PageExport["buildSinglePageExport"]>
+): ReturnType<PageExport["buildSinglePageExport"]> =>
+  import("./pageWithAttachments").then((mod) => mod.buildSinglePageExport(...args));
+
+/** 同步方法的懒加载包装：调用方全部在 async 流程里，改成 Promise 不影响时序。 */
+export const pageHasLocalSidecarAttachments = (
+  ...args: Parameters<PageExport["pageHasLocalSidecarAttachments"]>
+): Promise<boolean> =>
+  import("./pageWithAttachments").then((mod) => mod.pageHasLocalSidecarAttachments(...args));
+
+export const renderExportHtml = (
+  ...args: Parameters<typeof import("./exportHtmlDocument")["renderExportHtml"]>
+): ReturnType<typeof import("./exportHtmlDocument")["renderExportHtml"]> =>
+  import("./exportHtmlDocument").then((mod) => mod.renderExportHtml(...args));
+
 async function exportPage(
   page: Page,
   format: SinglePageExportFormat,
@@ -88,7 +141,6 @@ export async function exportToPDF(page: Page, customFonts?: CustomFonts) {
   return exportPage(page, "pdf", pdfBlob);
 }
 
-export { renderExportHtml } from "./exportHtmlDocument";
 
 export function importFromJSON(
   jsonString: string,
@@ -158,7 +210,7 @@ export async function importFile(options?: {
     const filename = file.name.replace(/\.[^/.]+$/, "");
     if (ext === "json") return importFromJSON(text, filename);
     if (ext === "md" || ext === "markdown" || ext === "txt") {
-      return importFromMarkdown(text, filename, {
+      return await importFromMarkdown(text, filename, {
         preserveStructure: options?.preserveStructure === true,
       });
     }

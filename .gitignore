@@ -71,6 +71,8 @@ scripts/*
 !scripts/i18n/**
 !scripts/verify/
 !scripts/verify/**
+!scripts/perf/
+!scripts/perf/**
 !scripts/collect-desktop-artifacts.mjs
 !scripts/compile-electron.mjs
 !scripts/spawn-quiet.mjs
