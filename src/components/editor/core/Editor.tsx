@@ -17,6 +17,7 @@ import { useEditorContentCommit } from "./useEditorContentCommit";
 import { useEditorPageLifecycle } from "./useEditorPageLifecycle";
 import { useEditorFocus } from "./useEditorFocus";
 import { useEditorClipboard } from "./useEditorClipboard";
+import { useEditorFileDrop } from "./useEditorFileDrop";
 import { useEditorHostEvents } from "./useEditorHostEvents";
 import { useDocumentTitleNavigation } from "./useDocumentTitleNavigation";
 import { useEditorPresentation } from "./useEditorPresentation";
@@ -70,6 +71,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     noteFastOpen(editor, page?.content);
   }
   const runtime = { ...session, editor };
+  useEditorFileDrop(runtime, editable);
   useDocumentTitleNavigation(runtime, editable);
   const contentCommit = useEditorContentCommit(runtime);
   useEditorPageLifecycle(runtime, contentCommit, editable, isActiveEditor);

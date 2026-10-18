@@ -2,6 +2,9 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
+    "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
+    "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
     "src/lib/ai-provider/modelCatalog.ts#localMessages:1": { "authenticationFailed": { "hint": string | number; "provider": string | number }; "customAnthropicProvider": {  }; "customOpenaiCompatibleProvider": {  }; "customOpenaiResponsesProvider": {  }; "enableTheAiAssistantInSettingsFirst": {  }; "missingApiKey": { "hint": string | number }; "saveYourCustomAiConfigurationAndLoadTheModel": {  } };
     "src/lib/ai-provider/presets.ts#localMessages:1": { "chatCompletionsCompatible": {  }; "claudeMessagesCompatible": {  }; "customAnthropic": {  }; "customOpenaiCompatible": {  }; "customOpenaiResponses": {  }; "glmZhipu": {  }; "officialApiEnterYourApiKey": {  }; "officialApiPlatform": {  }; "openaiResponsesCompatible": {  }; "zhipuBigmodelPlatform": {  } };
     "src/lib/ai-provider/providers/claude.ts#localMessages:1": { "theCustomAnthropicModelRequestFailed": {  } };
@@ -64,6 +67,7 @@ declare module "../types" {
     "src/lib/imageProcessor.ts#localMessages:1": { "compressedImageTooLarge": { "limit": string | number; "size": string | number }; "couldnTConvertTheImageToPng": {  }; "couldnTCreateACanvasToConvertTheImage": {  }; "couldnTCreateACanvasToProcessTheImage": {  }; "imageDecodeFailed": { "size": string | number; "type": string | number }; "imageDecodingIsUnavailableCreateimagebitmapIsMissing": {  }; "imageTooLarge": { "limit": string | number; "size": string | number }; "webpEncodingFailed": {  } };
     "src/lib/imageStorage/strategies/attachment.ts#localMessages:1": { "compressedImageTooLarge": { "limit": string | number; "size": string | number }; "imageAttachmentFailed": { "error": string | number } };
     "src/lib/imageStorage/strategies/file-system.ts#localMessages:1": { "couldnTSaveTheImageToTheLocalFolder": {  } };
+    "src/lib/local-file-assets.ts#block1:1": { "copyFailed": {  }; "empty": {  }; "tooLarge": {  }; "unavailable": {  } };
     "src/lib/local-folder-asset-maintenance.ts#localMessages:1": { "chooseALocalFolderNotebook": {  } };
     "src/lib/local-folder-assets/filesystem.ts#localMessages:1": { "directoryCycle": { "path": string | number }; "pathOutsideNotebook": { "path": string | number }; "readDirectoryFailed": { "path": string | number }; "readMarkdownFailed": { "path": string | number } };
     "src/lib/local-folder-file-actions.ts#localMessages:1": { "copyFailed": {  }; "couldnTOpenTheFileCheckYourExternalApp": {  }; "couldnTOpenTheFolderCheckYourFileManager": {  }; "couldnTOpenTheTerminalCheckYourTerminalSettings": {  }; "filePathCopied": {  }; "folderPathCopied": {  } };
@@ -118,9 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1": { "noteNotFound": {  }; "thisNoteIsInTrash": {  } };
     "src/pages/workspace/components/editor-host/editorPageLinks.ts#localMessages:1": { "couldnTCreateThePageYourOriginal": {  }; "pageCreatedOpenItFromTheSidebar": {  }; "theFolderHasChangedChooseALocation": {  }; "thisNoteIsnTEditableNoPage": {  }; "thisNotebookDoesnTSupportCreatingLocal": {  } };
     "src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1": { "couldnTOpenTheDroppedContentTry": {  }; "splitAbove": {  }; "splitBelow": {  }; "splitToTheLeft": {  }; "splitToTheRight": {  }; "youCanOpenUpToPanes": {  } };
-    "src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1": { "closeThisPane": {  }; "noteNotFound": {  }; "retry": {  }; "theNoteCouldnTBeDisplayed": {  }; "thisNoteNoLongerExists": {  } };
-    "src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1": { "closeThisPane": {  }; "dragToRearrangePanes": {  }; "dragToTheEdgeOfAnotherPane": {  }; "movePane": { "title": string | number } };
-    "src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1": { "moveAbove": {  }; "moveBelow": {  }; "moveLeft": {  }; "moveRight": {  }; "swapPositions": {  } };
-    "src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1": { "edgeTarget": { "name": string | number }; "moveCanceled": {  }; "movingPane": { "title": string | number }; "pane": {  }; "panesRearranged": {  }; "swapPositions": {  }; "swapTarget": { "name": string | number }; "untitled": {  } };
   }
 }

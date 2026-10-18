@@ -22,9 +22,12 @@ import { restoreFileFromTrash } from "../trashRestore";
 import { trashWithUndo, undoTrash } from "../trashUndo";
 import { markRecentWrite, withSelfWriteMark } from "./watchEvents";
 import { hideGooseDirectory, registerGooseInternalIpc } from "./gooseInternal";
+import { saveNotebookAsset } from "../localFileAssets";
+import type { SaveLocalAssetRequest } from "../../../src/lib/local-file-asset-contract";
 
 export function registerFilesystemIpc(undoRoot: string): void {
   registerGooseInternalIpc();
+  ipcMain.handle("desktop:fsSaveAsset", (_event, input: SaveLocalAssetRequest) => saveNotebookAsset(input));
   ipcMain.handle("desktop:fsReadText", async (_event, p: string) => {
     const target = assertAllowed(p);
     await waitForGitSyncRead(target);

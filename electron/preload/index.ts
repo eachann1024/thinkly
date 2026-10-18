@@ -35,6 +35,8 @@ const gooseDesktop = {
   fsWriteText: (p: string, data: string) =>
     invoke("desktop:fsWriteText", p, data) as Promise<void>,
   fsRead: (p: string) => invoke("desktop:fsRead", p) as Promise<Uint8Array>,
+  fsSaveAsset: (input: import("../../src/lib/local-file-asset-contract").SaveLocalAssetRequest) =>
+    invoke("desktop:fsSaveAsset", input) as Promise<import("../../src/lib/local-file-asset-contract").SavedLocalAssetPath>,
   fsWrite: (p: string, data: Uint8Array) =>
     invoke("desktop:fsWrite", p, data) as Promise<void>,
   fsReadDir: (p: string) =>

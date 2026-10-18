@@ -26,6 +26,7 @@ import {
 } from "@/lib/currentLocalPagePath";
 import { base64ToBlob, blobToBase64 } from "@/lib/imageStorage/utils";
 import { resolveToAbsolute } from "@/lib/imageStorage/strategies/file-system";
+import { guessMime } from "@/lib/imageStorage/strategies/fileMime";
 import {
   transcodeVideo,
   VIDEO_OUTPUT_MIME,
@@ -33,18 +34,6 @@ import {
 } from "@/lib/videoProcessor";
 
 const VIDEO_ATTACHMENT_PREFIX = "att-video:";
-const VIDEO_MIME_TYPES: Record<string, string> = {
-  mp4: "video/mp4",
-  m4v: "video/x-m4v",
-  mov: "video/quicktime",
-  webm: "video/webm",
-};
-
-function videoMimeType(path: string): string {
-  const extension = path.split(/[?#]/, 1)[0].split(".").pop()?.toLowerCase();
-  return VIDEO_MIME_TYPES[extension || ""] || "application/octet-stream";
-}
-
 function attachmentId(ref: string): string {
   return ref.replace(VIDEO_ATTACHMENT_PREFIX, "");
 }
@@ -113,13 +102,13 @@ export const videoStorage = {
     const data = new Uint8Array(binary.length);
     for (let index = 0; index < binary.length; index += 1)
       data[index] = binary.charCodeAt(index);
-    return new Blob([data], { type: videoMimeType(path) });
+    return new Blob([data], { type: guessMime(path) });
   },
 
   canHandle(ref: string): boolean {
     return (
       ref.startsWith(VIDEO_ATTACHMENT_PREFIX) ||
-      /\.(mp4|m4v|mov|webm)$/i.test(ref)
+      /\.(mp4|m4v|mov|webm|ogv)$/i.test(ref)
     );
   },
 };

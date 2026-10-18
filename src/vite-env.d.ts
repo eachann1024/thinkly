@@ -74,6 +74,7 @@ declare global {
     fsReadText: (p: string) => Promise<string>
     fsWriteText: (p: string, data: string) => Promise<void>
     fsRead: (p: string) => Promise<Uint8Array>
+    fsSaveAsset: (input: import("./lib/local-file-asset-contract").SaveLocalAssetRequest) => Promise<import("./lib/local-file-asset-contract").SavedLocalAssetPath>
     fsWrite: (p: string, data: Uint8Array) => Promise<void>
     fsReadDir: (p: string) => Promise<{ name: string; isDirectory: boolean; path: string }[]>
     fsMkdir: (p: string) => Promise<void>
