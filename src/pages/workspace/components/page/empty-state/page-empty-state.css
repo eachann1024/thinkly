@@ -1,10 +1,12 @@
 .workspace-page-empty {
+  position: relative;
   display: grid;
   place-items: center;
   padding: 2rem 1.5rem;
 }
 
 .page-empty-state {
+  position: relative;
   display: flex;
   width: 100%;
   max-width: 28rem;
@@ -15,7 +17,7 @@
 
 .page-empty-state-illustration {
   display: block;
-  width: clamp(9rem, 24vh, 13.428571rem);
+  width: clamp(11rem, 30vh, 16rem);
   max-width: 100%;
   height: auto;
   margin-bottom: 1.285714rem;

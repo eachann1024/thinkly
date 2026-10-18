@@ -22,13 +22,20 @@ const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileText } from "@/components/ui/icons";
+// 首屏直接引入单个插画，避免经由索引带入其他插画
+import { DotIconArt } from "@/components/ui/dot-matrix/illustrations/DotIconArt";
+import { DotDecor } from "@/components/ui/dot-matrix/decor";
 
 export function BootstrapScreen({ lean, error }: { lean: boolean; error?: unknown }) {
   useLocale();
   const message = error instanceof Error ? error.message : error ? String(error) : undefined;
   return (
-    <main className="bootstrap-screen">
-      <EmptyState icon={FileText} role={error ? "alert" : "status"}
+    <main className="bootstrap-screen relative overflow-hidden">
+      <DotDecor preset="bootstrap" />
+      <EmptyState className="relative" icon={FileText} role={error ? "alert" : "status"}
+        illustration={error
+          ? <DotIconArt key="failed" icon="docErr" size={44} width={120} height={84} halo motion="alert" />
+          : <DotIconArt key="loading" icon="doc" size={44} width={120} height={84} halo motion={lean ? "progress-reverse" : "progress"} />}
         title={error ? uiText("openFailed") : lean ? uiText("restoring") : uiText("opening")}
         details={message}
         action={error ? (

@@ -15,6 +15,8 @@ ja:
 const uiText = createTranslator(localMessages);
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { DotDecor } from "@/components/ui/dot-matrix";
+import { DotMatrixSparkle } from "./DotMatrixSparkle";
 import { Switch, SwitchRow } from "@/components/ui/switch";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
@@ -62,11 +64,9 @@ export function renderAIEnabledSection(
 export function AIActivationView({ onEnable }: { onEnable: () => void }) {
   useLocale();
   return (
-    <section className="flex min-h-64 flex-col items-center justify-center gap-6 px-4 py-8">
-      <GooseIcons.Sparkles
-        className="h-8 w-8 text-muted-foreground"
-        aria-hidden
-      />
+    <section className="relative flex min-h-64 flex-col items-center justify-center gap-6 overflow-hidden px-4 py-8">
+      <DotDecor preset="aiGate" />
+      <DotMatrixSparkle className="relative block shrink-0 text-foreground" />
       <Button type="button" onClick={onEnable}>
         {uiText("enableAiAssistant_c698")}
         <GooseIcons.ArrowRight className="h-4 w-4" aria-hidden />

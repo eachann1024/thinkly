@@ -55,6 +55,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CornerTriangle, SettingsDotIcon } from "@/components/ui/dot-matrix";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "../../settings/SettingsSectionCard";
 import {
@@ -100,6 +101,7 @@ export function HiddenFoldersField({
 
   return (
     <SettingsSectionCard
+      className={folders.length === 0 ? "relative overflow-hidden" : undefined}
       title={uiText("display")}
       actions={
         <span className="text-sm text-muted-foreground">
@@ -134,7 +136,8 @@ export function HiddenFoldersField({
       </div>
 
       {folders.length === 0 && (
-        <p className={`p-4 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
+        <p className={`flex items-center gap-2 p-4 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
+          <SettingsDotIcon name="folderOff" size={18} />
           {uiText("noHiddenFolders_8f82")}</p>
       )}
       {folders.map((folder) => {
@@ -211,6 +214,9 @@ export function HiddenFoldersField({
           )}
         </form>
       </Disclosure>
+      {folders.length === 0 && (
+        <CornerTriangle position="bottom-right" size={56} pitch={7} max={0.18} />
+      )}
     </SettingsSectionCard>
   );
 }

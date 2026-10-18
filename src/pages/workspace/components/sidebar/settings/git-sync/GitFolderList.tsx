@@ -46,6 +46,7 @@ const uiText = createTranslator(localMessages);
 import { GitFolderIssue } from "./GitFolderIssue";
 import { Check } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { DotFrameBox, SettingsDotIcon } from "@/components/ui/dot-matrix";
 import type {
   GitFolderCheck,
   GitRepositoryFolder,
@@ -117,8 +118,11 @@ export function GitFolderList({
           {uiText("legacyRepositoriesSupportOnlyOneFolder_76b4")}</p>
       )}
       {!rows.length && (
-        <p className="text-sm text-muted-foreground">
-          {uiText("noLocalFoldersAddALocal_8faf")}</p>
+        <DotFrameBox className="flex max-w-[300px] flex-col items-start gap-2 p-3.5">
+          <SettingsDotIcon name="folderPlus" size={22} className="relative" />
+          <p className="relative text-sm text-muted-foreground">
+            {uiText("noLocalFoldersAddALocal_8faf")}</p>
+        </DotFrameBox>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] items-start gap-2">
         {rows.map((folder) => {

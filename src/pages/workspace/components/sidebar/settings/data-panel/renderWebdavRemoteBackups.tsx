@@ -36,12 +36,12 @@ const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import {
   Download,
-  CloudOff,
   RefreshCw,
   ChevronRight,
   Trash2,
 } from "@/components/ui/icons";
 import { SkeletonList } from "@/components/ui/skeleton";
+import { DotDecor, SettingsDotIcon } from "@/components/ui/dot-matrix";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 import type { useWebdavRemoteActions } from "./useWebdavRemoteActions";
 import { formatFileSize, formatRemoteTime } from "./shared";
@@ -104,12 +104,10 @@ export function renderWebdavRemoteBackups(
           {remoteLoading ? (
             <SkeletonList rows={3} icon={false} label={uiText("loadingRemoteBackups_8208")} />
           ) : remoteFiles.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 border border-dashed rounded-[var(--goose-control-radius)] border-muted py-6 text-center">
-              <CloudOff
-                className="h-6 w-6 text-muted-foreground"
-                strokeWidth={1.75}
-              />
-              <p className="text-sm font-medium text-foreground">
+            <div className="relative flex flex-col items-center gap-2.5 overflow-hidden border border-dashed rounded-[var(--goose-control-radius)] border-muted py-10 text-center">
+              <DotDecor preset="webdav" compact />
+              <SettingsDotIcon name="cloudOff" size={40} className="relative" />
+              <p className="relative text-sm font-medium text-foreground">
                 {uiText("noRemoteBackups_5d1a")}</p>
             </div>
           ) : (

@@ -23,6 +23,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";
+import { DotDecor, DotIconArt, GlitchArt } from "@/components/ui/dot-matrix";
 import { Button } from "@/components/ui/button";
 import { useCallback, useLayoutEffect, useRef } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -83,7 +84,9 @@ export function SplitEditorPane({
         {showChrome ? (
           <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} missing />
         ) : null}
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-sm text-muted-foreground">
+        <div className="relative flex flex-1 flex-col items-center justify-center gap-3 overflow-hidden px-4 text-sm text-muted-foreground [&>:not(.goose-dm-decor)]:relative">
+          <DotDecor preset="splitMissing" />
+          <DotIconArt icon="docQuestion" size={52} width={136} height={92} halo className="-my-2" />
           <p>{uiText("noteNotFound")}</p>
           <Button contentStyle="preserve" variant="ghost" size={null}
             type="button"
@@ -126,10 +129,11 @@ export function SplitEditorPane({
             <ErrorBoundary
               resetKey={leaf.pageId}
               fallback={(_, reset) => (
-                <div className="flex min-h-[260px] items-center justify-center">
-                  <EmptyState title={uiText("theNoteCouldnTBeDisplayed")} role="alert" action={
+                <div className="goose-glitch-host relative flex min-h-[260px] items-center justify-center overflow-hidden">
+                  <DotDecor preset="splitError" />
+                  <EmptyState className="relative" title={uiText("theNoteCouldnTBeDisplayed")} role="alert" illustration={<GlitchArt scale={1.3} />} action={
                   <Button contentStyle="preserve" variant="ghost" size={null}
-                    type="button"
+                    type="button" data-dm-arm
                     onClick={reset}
                     className="rounded-lg px-2 py-1 text-xs text-foreground"
                   >
