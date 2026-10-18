@@ -29,6 +29,7 @@ declare global {
   const ensureBodyParagraphAfterTitle: typeof import('../components/editor/utils/blocknote-content/index').ensureBodyParagraphAfterTitle
   const ensureFirstTitleHeading: typeof import('../components/editor/utils/blocknote-content/index').ensureFirstTitleHeading
   const extractBlockNoteTitle: typeof import('../components/editor/utils/blocknote-content/index').extractBlockNoteTitle
+  const extractClipboardFiles: typeof import('../components/editor/utils/pasteClipboardImage').extractClipboardFiles
   const extractClipboardImageFiles: typeof import('../components/editor/utils/pasteClipboardImage').extractClipboardImageFiles
   const extractPlainText: typeof import('../components/editor/utils/blocknote-content/index').extractPlainText
   const extractStructureSummary: typeof import('../components/editor/utils/content-text-extractor').extractStructureSummary

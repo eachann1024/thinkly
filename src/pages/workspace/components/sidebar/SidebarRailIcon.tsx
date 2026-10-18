@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type SidebarRailIconName = "folder" | "ai" | "outline" | "search" | "calendar" | "settings";
+export type SidebarRailIconName = "folder" | "ai" | "outline" | "search" | "calendar" | "settings" | "feedback";
 
 // Geometry follows concept 04's 246px preview crops, normalized to 24px.
 // The back sheet is open so no hidden edges show through the front page.
@@ -18,6 +18,8 @@ const outlineLinesPath = "M6.85 7H21.5M6.85 12.05H15.2M6.85 17.05H21.5";
 const searchHandlePath = "M15.4 15.3L20.9 21";
 const aiSparklePath =
   "M10.2 4.3Q11 11.3 17.9 13.1Q11 14.9 10.2 21.9Q9.4 14.9 2.5 13.1Q9.4 11.3 10.2 4.3Z M18.2 2.1Q18.6 5 21.5 5.4Q18.6 5.8 18.2 8.7Q17.8 5.8 14.9 5.4Q17.8 5 18.2 2.1Z";
+const feedbackPath =
+  "M5 6.2H19Q20.8 6.2 20.8 8V15.2Q20.8 17 19 17H10.2L6.2 20.2V17H5Q3.2 17 3.2 15.2V8Q3.2 6.2 5 6.2Z";
 const settingsPath = [
   "M8.81 5.71 Q9.23 5.46 9.48 4.83 L9.88 3.83 Q10.13 3.2 11.18 3.2",
   "L12.82 3.2 Q13.87 3.2 14.12 3.83 L14.52 4.83 Q14.77 5.46 15.19 5.71",
@@ -67,6 +69,7 @@ const outlineIcons: Record<SidebarRailIconName, ReactNode> = {
       <circle cx="12" cy="12" r="2.35" />
     </>
   ),
+  feedback: <path d={feedbackPath} />,
 };
 
 const solidIcons: Record<SidebarRailIconName, ReactNode> = {
@@ -105,6 +108,7 @@ const solidIcons: Record<SidebarRailIconName, ReactNode> = {
       fillRule="evenodd"
     />
   ),
+  feedback: <path d={feedbackPath} />,
 };
 
 export function SidebarRailIcon({

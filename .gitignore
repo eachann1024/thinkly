@@ -142,3 +142,14 @@ dist-signpath/
 
 # 本地设计草稿
 /design-drafts/
+
+# 视频工程与成片素材（Remotion 工程、成片、配音）不进代码库
+/video/
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.wav
+*.mp3
+*.m4a
+!public/intro/goose-intro.mp4

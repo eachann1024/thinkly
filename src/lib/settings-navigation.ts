@@ -12,7 +12,7 @@ export function activateWorkspace(host: Window = window): void {
 }
 
 export function isSettingsTab(value: unknown): value is SettingsTab {
-  return typeof value === "string" && ["appearance", "general", "shortcuts", "local-folder", "git-sync", "ai", "data"].includes(value);
+  return typeof value === "string" && ["appearance", "general", "shortcuts", "local-folder", "git-sync", "ai", "data", "feedback"].includes(value);
 }
 
 const SETTINGS_HOTKEYS = new Set([

@@ -9,6 +9,7 @@ zh-Hans:
   gitSync_fcb0: "Git 同步"
   aiAssistant_318e: "AI 助手"
   dataAndBackups_e963: "数据与备份"
+  feedback_4c2a: "反馈"
   localVersionBeforeBackupRestore_8346: "备份覆盖前本地版本"
 en:
   appearanceAndThemes_6902: "Appearance and themes"
@@ -18,6 +19,7 @@ en:
   gitSync_fcb0: "Git sync"
   aiAssistant_318e: "AI assistant"
   dataAndBackups_e963: "Data and backups"
+  feedback_4c2a: "Feedback"
   localVersionBeforeBackupRestore_8346: "Local version before backup restore"
 ja:
   appearanceAndThemes_6902: "外観とテーマ"
@@ -27,6 +29,7 @@ ja:
   gitSync_fcb0: "Git 同期"
   aiAssistant_318e: "AI アシスタント"
   dataAndBackups_e963: "データとバックアップ"
+  feedback_4c2a: "フィードバック"
   localVersionBeforeBackupRestore_8346: "バックアップ復元前のローカルバージョン"
 `;
 const uiText = createTranslator(localMessages);
@@ -51,6 +54,7 @@ export const SETTINGS_TABS: SettingsTabConfig[] = [
   { id: "git-sync", get label() { return uiText("gitSync_fcb0"); }, icon: GooseIcons.GitBranch },
   { id: "ai", get label() { return uiText("aiAssistant_318e"); }, icon: GooseIcons.Sparkles },
   { id: "data", get label() { return uiText("dataAndBackups_e963"); }, icon: GooseIcons.Database },
+  { id: "feedback", get label() { return uiText("feedback_4c2a"); }, icon: GooseIcons.MessageSquare },
 ];
 
 export const recordPreOverwriteHistory = async (id: string | undefined) => {

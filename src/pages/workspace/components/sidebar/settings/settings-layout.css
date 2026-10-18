@@ -128,3 +128,59 @@
   .settings-local-folder-pick-row button { width: 100%; min-width: 0; }
   .settings-local-folder-pick-row button { max-width: none; }
 }
+
+@keyframes feedback-sheen-sweep {
+  from { transform: translateX(-150%); }
+  to { transform: translateX(280%); }
+}
+.feedback-sheen-target,
+.feedback-sheen-title,
+.feedback-rail-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.feedback-sheen-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.feedback-sheen-target.is-on::after,
+.feedback-sheen-title.is-on::after,
+.feedback-rail-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 72%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.28) 28%, hsl(var(--foreground) / 0.96) 50%, hsl(var(--foreground) / 0.28) 72%, transparent);
+  animation: feedback-sheen-sweep 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.feedback-rail-sheen::after { animation-delay: 0.28s; }
+.feedback-picks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.feedback-pick {
+  display: flex;
+  min-height: 76px;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  border: 1px dashed hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+}
+.feedback-pick svg { width: 18px; height: 18px; }
+.feedback-pick input { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .feedback-sheen-target.is-on::after,
+  .feedback-sheen-title.is-on::after,
+  .feedback-rail-sheen::after { content: none; animation: none; }
+}
