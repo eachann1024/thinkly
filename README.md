@@ -24,7 +24,7 @@
 
 ## 演示视频
 
-https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
+https://github.com/user-attachments/assets/3b1b91cb-34ca-4a10-9b8b-8a1de7f8d60d
 
 <p align="center"><sub>产品展示以视频为准。</sub></p>
 
