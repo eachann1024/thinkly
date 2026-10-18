@@ -49,6 +49,7 @@ declare global {
   const DropdownMenuRadioGroup: typeof import('../components/ui/dropdown-menu').DropdownMenuRadioGroup
   const DropdownMenuRadioItem: typeof import('../components/ui/dropdown-menu').DropdownMenuRadioItem
   const DropdownMenuSeparator: typeof import('../components/ui/dropdown-menu').DropdownMenuSeparator
+  const DropdownMenuSub: typeof import('../components/ui/dropdown-menu').DropdownMenuSub
   const DropdownMenuTrigger: typeof import('../components/ui/dropdown-menu').DropdownMenuTrigger
   const FLOATING_MENU_CLOSE_MS: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_CLOSE_MS
   const FLOATING_MENU_EASE_IN: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_EASE_IN

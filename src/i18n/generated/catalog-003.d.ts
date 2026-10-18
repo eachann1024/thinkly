@@ -2,8 +2,13 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/editor-split/SidebarPageDrop.tsx#localMessages:1": { "replaceThisNote": {  }; "splitAbove": {  }; "splitBelow": {  }; "splitToTheLeft": {  }; "splitToTheRight": {  } };
+    "src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1": { "couldnTOpenTheDroppedContentTry": {  }; "splitAbove": {  }; "splitBelow": {  }; "splitToTheLeft": {  }; "splitToTheRight": {  }; "youCanOpenUpToPanes": {  } };
     "src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1": { "closeThisPane": {  }; "noteNotFound": {  }; "retry": {  }; "theNoteCouldnTBeDisplayed": {  }; "thisNoteNoLongerExists": {  } };
     "src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1": { "closeThisPane": {  }; "dragToRearrangePanes": {  }; "dragToTheEdgeOfAnotherPane": {  }; "movePane": { "title": string | number } };
+    "src/pages/workspace/components/editor-split/SplitPaneMoreMenu.tsx#localMessages:1": { "closeOthers": {  }; "copyLink": {  }; "maximize": {  }; "more": {  }; "openInNewTab": {  }; "restore": {  }; "splitDown": {  }; "splitRight": {  } };
+    "src/pages/workspace/components/editor-split/SplitPanePageMenu.tsx#localMessages:1": { "switchNotebookRoot": {  }; "switchSibling": {  } };
+    "src/pages/workspace/components/editor-split/commitSidebarPageDrop.ts#localMessages:1": { "thisNoteIsNoLongerAvailable": {  }; "youCanOpenUpToPanes": {  } };
     "src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1": { "moveAbove": {  }; "moveBelow": {  }; "moveLeft": {  }; "moveRight": {  }; "swapPositions": {  } };
     "src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1": { "edgeTarget": { "name": string | number }; "moveCanceled": {  }; "movingPane": { "title": string | number }; "pane": {  }; "panesRearranged": {  }; "swapPositions": {  }; "swapTarget": { "name": string | number }; "untitled": {  } };
     "src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1": { "theContentMayUseAnOlderFormatOr": {  }; "thisNoteCannotBePreviewed": {  }; "thisNoteCouldNotBeFoundSoIts": {  }; "thisVersionCannotBeDisplayed": {  } };
@@ -101,7 +106,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/SettingsAppearance.tsx#localMessages:1": { "fontsAndReading_6d3b": {  }; "interfaceAndSidebar_f3b6": {  } };
     "src/pages/workspace/components/sidebar/SettingsGeneral.tsx#messages:1": { "autoOpen": {  }; "common": {  }; "general": {  }; "hover": {  }; "recent": {  }; "search": {  } };
     "src/pages/workspace/components/sidebar/SettingsLocalFolder.tsx#localMessages:1": { "afterConfirmationUnusedImagesAudioAnd_e2b6": {  }; "cleanUpUnusedAttachments_4503": {  }; "default_18c6": {  }; "eGCursorZedCodeR_de88": {  }; "eGGhosttyItermWezterm_1db3": {  }; "eGPathFinder_d4e9": {  }; "editor_5373": {  }; "fileManager_7d1d": {  }; "localFolders_497e": {  }; "openCleanup_9813": {  }; "openWith_14ae": {  }; "storageMaintenance_aa18": {  }; "terminal_4722": {  } };
-    "src/pages/workspace/components/sidebar/SidebarFooter.tsx#localMessages:1": { "settings_e366": {  } };
+    "src/pages/workspace/components/sidebar/SidebarFooter.tsx#localMessages:1": { "feedback_4c2a": {  }; "settings_e366": {  } };
     "src/pages/workspace/components/sidebar/SidebarInlineRename.tsx#localMessages:1": { "namesCannotContainPathSeparatorsOr_26f3": {  }; "pressTabOrClickElsewhereTo_7735": {  }; "renameEnterToConfirmEscapeTo_4d0a": {  }; "renameFailed_37ba": {  }; "thisItemNoLongerExists_0117": {  } };
     "src/pages/workspace/components/sidebar/SidebarOutline.tsx#localMessages:1": { "foldersDoNotHaveAnOutline_45b6": {  }; "loadingOutline_1285": {  }; "noteContentIsTemporarilyUnavailable_0257": {  }; "selectANoteToViewIts_13a8": {  }; "thisNoteIsUnavailable_0618": {  } };
     "src/pages/workspace/components/sidebar/SidebarResizeEdge.tsx#localMessages:1": { "resizeSidebarUseLeftAndRight_2431": {  }; "resizeSidebar_7141": {  }; "widthPixels": { "width": string | number } };
@@ -117,10 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/local-file-icon.tsx#localMessages:1": { "couldNotReadMarkdownFile_6724": {  } };
     "src/pages/workspace/components/sidebar/local-folder-settings/fields/HiddenFoldersField.tsx#localMessages:1": { "addHiddenFolder_50c3": {  }; "add_b58c": {  }; "builtInRulesAlwaysHidden_74ff": {  }; "display": {  }; "eGObsidian_55c9": {  }; "enterAFolderName_4a86": {  }; "folderName_a984": {  }; "hiddenCount": { "count": string | number }; "hiddenFolders_0e77": {  }; "hideAllFoldersWithMatchingNames_2052": {  }; "noHiddenFolders_8f82": {  }; "removeFolder": { "folder": string | number }; "resetToDefaults_7468": {  }; "thisFolderIsAlreadyHidden_1674": {  } };
     "src/pages/workspace/components/sidebar/local-folder-settings/fields/LegacyInternalPagesExportCard.tsx#localMessages:1": { "exportAsMarkdownToTheCurrent_f443": {  }; "exportDestination": { "path": string | number }; "exportFailedPleaseTryAgain_28ce": {  }; "exportToCurrentFolder_958f": {  }; "exporting_86f9": {  }; "legacyDataMigration_20ff": {  }; "legacyFound": { "count": string | number }; "legacyNotesExported": { "count": string | number }; "openALocalFolderFirst_f657": {  }; "switchToTheDestinationFolderBefore_69bc": {  }; "untitled_44a7": {  } };
-    "src/pages/workspace/components/sidebar/local-folder-settings/fields/OpenAppField.tsx#localMessages:1": { "applicationName": { "title": string | number }; "custom_f1d4": {  } };
-    "src/pages/workspace/components/sidebar/local-folder-settings/fields/localFolderSettingsConfig.tsx#localMessages:1": { "defaultCommandPrompt_6c00": {  }; "defaultFileExplorer_3dda": {  }; "defaultFileManager_77ea": {  }; "defaultFinder_1bce": {  }; "defaultTerminal_6a94": {  } };
-    "src/pages/workspace/components/sidebar/local-folder-settings/useLocalFolderSettings.tsx#localMessages:1": { "attachmentCleanupRequiresTheDesktopApp_0b32": {  }; "couldNotOpenTheAttachmentCleanup_59de": {  }; "couldNotRefreshHiddenFolders_1ba7": {  }; "someLocalFoldersHaveUnsavedChanges_5f18": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/SidebarMainTree.tsx#localMessages:1": { "couldNotLoadLocalFolder_538d": {  }; "folderRefreshFailedShowingThePrevious_ed5e": {  }; "newFile_e48a": {  }; "newFolder_f3a4": {  }; "new_26bb": {  }; "reload_64ca": {  }; "retry_132c": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/controller/renderMainTreeSurface.tsx#localMessages:1": { "fileName_d2e2": {  }; "page_59ce": {  } };
   }
 }

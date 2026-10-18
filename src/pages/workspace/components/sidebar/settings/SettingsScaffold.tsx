@@ -20,8 +20,8 @@ import { IconButton } from "@/components/ui/icon-button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { X, ChevronDown } from "@/components/ui/icons";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { X, ChevronDown, MessageSquare } from "@/components/ui/icons";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import type { SettingsTab, SettingsTabConfig } from "./types";
 import { cn } from "@/lib/utils";
@@ -69,6 +69,24 @@ export function SettingsScaffold({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionsRef = useRef<Partial<Record<SettingsTab, number>>>({});
   const previousActiveTabRef = useRef<SettingsTab>(activeTab);
+  const [navSheen, setNavSheen] = useState(false);
+  const [titleSheen, setTitleSheen] = useState(false);
+  useEffect(() => {
+    if (!visible) return;
+    setNavSheen(true);
+    const id = window.setTimeout(() => setNavSheen(false), 1300);
+    return () => window.clearTimeout(id);
+  }, [visible]);
+  useEffect(() => {
+    if (!visible || activeTab !== "feedback") return;
+    setNavSheen(true);
+    setTitleSheen(true);
+    const id = window.setTimeout(() => {
+      setNavSheen(false);
+      setTitleSheen(false);
+    }, 1300);
+    return () => window.clearTimeout(id);
+  }, [visible, activeTab]);
 
   useLayoutEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -114,10 +132,13 @@ export function SettingsScaffold({
                     type="button"
                     aria-current={activeTab === tab.id ? "page" : undefined}
                     data-selected={activeTab === tab.id || undefined}
+                    data-settings-tab={tab.id}
                     onClick={() => handleTabChange(tab.id)}
                     className={cn(
                       "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm",
                       activeTab !== tab.id && "text-muted-foreground",
+                      tab.id === "feedback" && "feedback-sheen-target",
+                      tab.id === "feedback" && navSheen && "is-on",
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -174,7 +195,12 @@ export function SettingsScaffold({
               >
                 <div className="settings-panel min-h-0">
                   <header className="settings-page-header">
-                    <h2 className="text-3xl font-semibold tracking-tight">
+                    <h2 className={cn(
+                      "text-3xl font-semibold tracking-tight",
+                      activeTab === "feedback" && "feedback-sheen-title",
+                      activeTab === "feedback" && titleSheen && "is-on",
+                    )}>
+                      {activeTab === "feedback" ? <MessageSquare className="h-7 w-7 shrink-0" aria-hidden="true" /> : null}
                       {tabs.find((tab) => tab.id === activeTab)?.label}
                     </h2>
                     {feedbackBanner ? (

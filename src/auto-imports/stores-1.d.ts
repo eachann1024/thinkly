@@ -85,6 +85,7 @@ declare global {
   const sortLocalFolderChildren: typeof import('../stores/localFolderOrder').sortLocalFolderChildren
   const sortNotebooksByOrder: typeof import('../stores/useNotebooks').sortNotebooksByOrder
   const stripComposerDraftImages: typeof import('../stores/useNotebookAiChats').stripComposerDraftImages
+  const toggleMaximizePane: typeof import('../stores/useEditorSplit').toggleMaximizePane
   const toggleSidebarFolder: typeof import('../stores/useSidebarView').toggleSidebarFolder
   const transitionLocalFolderTargetPicker: typeof import('../stores/useLocalFolderTargetPicker').transitionLocalFolderTargetPicker
   const updateQuickNoteSlotName: typeof import('../stores/useQuickNote').updateQuickNoteSlotName

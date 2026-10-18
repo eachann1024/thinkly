@@ -7,7 +7,8 @@ export type SettingsTab =
   | "local-folder"
   | "git-sync"
   | "ai"
-  | "data";
+  | "data"
+  | "feedback";
 
 export interface SettingsTabConfig {
   id: SettingsTab;

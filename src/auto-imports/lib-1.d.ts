@@ -40,7 +40,6 @@ declare global {
   const NOTEBOOK_THEME: typeof import('../lib/imageExport/index').NOTEBOOK_THEME
   const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
   const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
-  const ONBOARDING_SECOND_CHILD_CONTENT: typeof import('../lib/onboarding').ONBOARDING_SECOND_CHILD_CONTENT
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
@@ -139,6 +138,7 @@ declare global {
   const hasCurrentLocalFolderPage: typeof import('../lib/local-folder-file-actions').hasCurrentLocalFolderPage
   const holdGitSyncWrites: typeof import('../lib/git-sync-write-barrier').holdGitSyncWrites
   const importFile: typeof import('../lib/export/index').importFile
+  const importFilesToLocalFolder: typeof import('../lib/local-folder-import').importFilesToLocalFolder
   const importFromJSON: typeof import('../lib/export/index').importFromJSON
   const importFromMarkdown: typeof import('../lib/export/index').importFromMarkdown
   const importMarkdownFragment: typeof import('../lib/export/index').importMarkdownFragment
