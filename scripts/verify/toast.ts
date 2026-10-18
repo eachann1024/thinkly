@@ -54,8 +54,9 @@ export default async function run(): Promise<number> {
     check(`${lines} 行：关闭按钮不再是整条居中`, g.closeCenter < g.height / 2, g);
   }
   for (const lines of [1, 2]) {
-    const g = toastGeometry({ lines, actionHeight: 28 });
-    check(`带操作按钮（${lines} 行）：关闭按钮与图标对齐第一行中线`, g.closeCenter === g.firstLineCenter && g.iconCenter === g.firstLineCenter && g.closeTop > 0, g);
+    const g = toastGeometry({ lines, action: true });
+    check(`带操作按钮（${lines} 行）：按钮、关闭按钮与图标对齐第一行中线`, g.actionCenter === g.firstLineCenter && g.closeCenter === g.firstLineCenter && g.iconCenter === g.firstLineCenter && g.closeTop > 0, g);
+    check(`带操作按钮（${lines} 行）：按钮同排不增加高度`, g.height === toastGeometry({ lines }).height, g);
   }
   check("关闭按钮 X 图形右缘落在内边距线上", toastCloseRight() + (L.close - L.closeGlyph) / 2 === L.padX);
   check("内容区为关闭按钮留出空间", L.padX + toastContentReserve() === toastCloseRight() + L.close + L.closeGap, toastContentReserve());

@@ -1,9 +1,9 @@
-/* Sonner 自带无边框实色按钮；内描边保留它的现有尺寸与文字位置。 */
+/* 操作按钮：浅染底、无描边，与文案同排的紧凑文字按钮。 */
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action] {
   --goose-toast-action-bg: var(--goose-interactive-hover);
   --goose-toast-action-active: var(--goose-interactive-selected);
   --goose-toast-action-fg: var(--goose-interactive-selected-fg);
-  --goose-toast-action-border: var(--goose-accent-solid);
+  --goose-toast-action-border: transparent;
   --goose-toast-action-focus: var(--goose-accent-outline-focus);
   background: var(--goose-toast-action-bg);
   color: var(--goose-toast-action-fg);

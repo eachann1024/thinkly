@@ -2,7 +2,7 @@
  * 唯一布局真相：Toaster 根上的 --goose-toast-* 变量（数值以
  * src/components/ui/toast-layout.ts 为准，sonner.tsx 会写到 style 上；这里的值只是同值兜底）。
  * 图标与关闭按钮都对齐“第一行中线”：单行时等于整条 toast 垂直居中，
- * 多行或带操作按钮换行时仍对齐第一行，不贴顶。所有 toast 类型共用，禁止按类型另写偏移。
+ * 多行时仍对齐第一行，不贴顶；操作按钮与文案同排靠右，同样对齐第一行。所有 toast 类型共用，禁止按类型另写偏移。
  *
  * Electron 旧内核注意：不要用 hsl(var(--token)/alpha) 或 Tailwind 的
  * bg-foreground/8 一类写法，会退化成实心前景色（关闭按钮 hover 变黑圆）。
@@ -18,6 +18,7 @@
  --goose-toast-content-reserve: 28px;
  --goose-toast-gap: 12px;
  --goose-toast-row-gap: 8px;
+ --goose-toast-action: 24px;
  --goose-toast-close-fg: var(--goose-text-secondary);
  --goose-toast-close-hover-fg: var(--goose-text-primary);
  --goose-toast-close-hover-bg: var(--goose-interactive-hover);
@@ -125,28 +126,30 @@
  color: var(--goose-toast-close-hover-fg) !important;
 }
 
+/* 操作按钮：与文案同排、在关闭按钮左侧，高度同关闭按钮，中心对齐第一行中线且不撑高。 */
 .goose-toaster [data-sonner-toast] [data-button] {
  flex: 0 0 auto;
- margin-left: 0 !important;
+ align-self: flex-start;
+ order: 2;
+ height: var(--goose-toast-action) !important;
+ margin: calc((var(--goose-toast-line) - var(--goose-toast-action)) / 2) 0 !important;
+ padding: 0 8px !important;
 }
 
-/* 有按钮时按钮换到文案下方整行；图标与关闭按钮仍对齐第一行中线。 */
+.goose-toaster [data-sonner-toast]:has([data-button]) [data-content] {
+ order: 1;
+ padding-right: 0;
+}
+
 .goose-toaster [data-sonner-toast]:has([data-button]) {
- width: min(356px, calc(100vw - 32px)) !important;
- flex-wrap: wrap !important;
+ padding-right: calc(var(--goose-toast-pad-x) + var(--goose-toast-content-reserve)) !important;
 }
 
-.goose-toaster [data-sonner-toast]:has([data-button]) [data-button] {
- flex: 1 0 100%;
- margin-top: 0;
-}
-
-/* 删除回执：标准 toast + 撤回操作；长标题最多两行，旧回执等前一条关闭才显示。 */
+/* 删除回执：标准 toast + 撤回操作；标题单行省略，旧回执等前一条关闭才显示。 */
 .goose-toaster [data-sonner-toast].goose-delete-receipt-toast [data-title] {
- display: -webkit-box;
- -webkit-box-orient: vertical;
- -webkit-line-clamp: 2;
  overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
 }
 
 .goose-toaster [data-sonner-toast].goose-delete-receipt-toast[data-front="false"] {
