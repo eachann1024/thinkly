@@ -18,6 +18,7 @@ import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { cn } from "@/lib/utils";
 import { DotIconArt } from "@/components/ui/dot-matrix";
+import { presenceName, runWithPresence } from "@/lib/ui/presence";
 import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1">`
 zh-Hans:
@@ -121,7 +122,7 @@ export function ConversationHistoryList({
     event.preventDefault();
     if (!onDeleteConversation) return;
     requestDeleteConversation(conversationId, summary, () => {
-      onDeleteConversation(conversationId);
+      runWithPresence(() => onDeleteConversation(conversationId));
     });
   };
 
@@ -151,6 +152,7 @@ export function ConversationHistoryList({
               <div
                 role="button"
                 tabIndex={0}
+                style={{ viewTransitionName: presenceName("chat", conversation.id) }}
                 onClick={() => selectConversation(conversation.id)}
                 onKeyDown={(event) => {
                   if (event.target !== event.currentTarget) return;

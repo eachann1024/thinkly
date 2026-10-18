@@ -1,16 +1,15 @@
-import { useLocale } from "@/i18n";
-/** AI 会话在 Workspace 常驻，面板开关不改变请求生命周期。 */
-import { useMemo, type ReactNode, type RefObject } from "react";
+/** 外壳始终包住编辑器。AI 运行时等第一次打开面板再加载，避免启动时解析 SDK。 */
+import { lazy, Suspense, useCallback, useState, type ReactNode, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
-import { NotebookAiAssistantRuntimeProvider } from "./AssistantUiRuntimeProvider";
 import { NotebookAiSessionContext } from "./session/context";
 import type { NotebookAiSessionValue } from "./session/types";
-import { useSessionState } from "./session/useSessionState";
-import { useStreamLifecycle } from "./session/useStreamLifecycle";
-import { useSendMessage } from "./session/useSendMessage";
-import { useConversationActions } from "./session/useConversationActions";
-import { useConversationCompaction } from "./session/useConversationCompaction";
-import { useBatchApprovalActions } from "./session/useBatchApprovalActions";
+
+const NotebookAiSessionBinder = lazy(() =>
+  import("./NotebookAiSessionBinder").then((mod) => ({
+    default: mod.NotebookAiSessionBinder,
+  })),
+);
+
 export { useNotebookAiSession } from "./session/context";
 export {
   getNotebookAiPlaceholderHints,
@@ -21,75 +20,40 @@ export type { NotebookAiSessionValue } from "./session/types";
 interface NotebookAiSessionProviderProps {
   notebookId: string;
   editorRef?: RefObject<EditorRef | null>;
+  /** 面板当前可见。一旦为真就保持运行时，关闭面板不中止请求。 */
+  panelOpen?: boolean;
   children: ReactNode;
 }
 
 export function NotebookAiSessionProvider({
   notebookId,
+  panelOpen = false,
   children,
 }: NotebookAiSessionProviderProps) {
-  useLocale();
-  const state = useSessionState(notebookId);
-  const {
-    conversationId,
-    messages,
-    status,
-    error,
-    clearError,
-    isStreaming,
-    isBusy,
-    unavailableReason,
-    placeholderIndex,
-    composerRevision,
-  } = state;
-  const stopAll = useStreamLifecycle(state);
-  const send = useSendMessage(state);
-  const {
-    newConversation,
-    ensureFreshConversation,
-    selectConversation,
-    deleteConversation,
-    searchPages,
-  } = useConversationActions(state);
-  const compactConversation = useConversationCompaction(state);
-  const { onBatchApproval, onBatchUndo } = useBatchApprovalActions(state);
-  const value = useMemo<NotebookAiSessionValue>(
-    () => ({
-      notebookId,
-      conversationId,
-      messages,
-      status,
-      error,
-      clearError,
-      stop: stopAll,
-      isStreaming,
-      isBusy,
-      unavailableReason,
-      placeholderIndex,
-      composerRevision,
-      send,
-      newConversation,
-      ensureFreshConversation,
-      compactConversation,
-      selectConversation,
-      deleteConversation,
-      searchPages,
-      onBatchApproval,
-      onBatchUndo,
-    }),
-    [notebookId, conversationId, messages, status, error, clearError, stopAll, isStreaming, isBusy, unavailableReason, placeholderIndex, composerRevision, send, newConversation, ensureFreshConversation, compactConversation, selectConversation, deleteConversation, searchPages, onBatchApproval, onBatchUndo],
-  );
+  const [held, setHeld] = useState(false);
+  const [session, setSession] = useState<NotebookAiSessionValue | null>(null);
+  if (panelOpen && !held) setHeld(true);
+  const publish = useCallback((value: NotebookAiSessionValue) => {
+    setSession((prev) => (prev === value ? prev : value));
+  }, []);
+  const releaseRuntime = useCallback(() => {
+    setHeld(false);
+    setSession(null);
+  }, []);
 
   return (
-    <NotebookAiAssistantRuntimeProvider
-      messages={messages}
-      isRunning={isBusy}
-      isDisabled={Boolean(unavailableReason)}
-      onCancel={stopAll}
-    >
-      <NotebookAiSessionContext.Provider value={value}>
-        {children}
-      </NotebookAiSessionContext.Provider>
-    </NotebookAiAssistantRuntimeProvider>
+    <NotebookAiSessionContext.Provider value={session}>
+      {held ? (
+        <Suspense fallback={null}>
+          <NotebookAiSessionBinder
+            notebookId={notebookId}
+            panelOpen={panelOpen}
+            publish={publish}
+            onRelease={releaseRuntime}
+          />
+        </Suspense>
+      ) : null}
+      {children}
+    </NotebookAiSessionContext.Provider>
   );
 }
