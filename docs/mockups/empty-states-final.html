@@ -1,0 +1,1327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>缺省图 · 定稿</title>
+<style>
+  :root {
+    --shell: #f1f1f1; --sidebar: #fafafa; --editor: #ffffff; --menu: #ffffff; --settings: #f8f8f8;
+    --bg: #f8f8f8; --card: #f8f8f8; --border: #e5e5e5; --input: #dfe2e7;
+    --text: #20242c; --text-2: #526071; --text-3: #8a8983; --dot: #20242c;
+    --accent: #547dd0; --hover: #eef3fc; --selected: #e5edfc; --btn-bg: #eef3fc; --btn-hover: #e5edfc;
+    --danger: #c94a4a;
+    --shadow: 0 8px 28px rgba(20, 24, 32, .10), 0 1px 3px rgba(20, 24, 32, .06);
+    --font-ui: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --shell: #343434; --sidebar: #222222; --editor: #181818; --menu: #222222; --settings: #181818;
+    --bg: #181818; --card: #181818; --border: #2e2e2e; --input: #3a3a3a;
+    --text: #ececec; --text-2: #b4b4b4; --text-3: #8f8e88; --dot: #ececec;
+    --accent: #779de8; --hover: #2c2c2c; --selected: #343434;
+    --btn-bg: rgba(119, 157, 232, 0.12); --btn-hover: rgba(119, 157, 232, 0.2);
+    --danger: #e57373;
+    --shadow: 0 8px 28px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .3);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-ui); font-size: 14px; line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+  p { margin: 0; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+  h1 { margin: 0 0 20px; font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 6px; height: 2.25rem; padding: 0 12px;
+    font: 460 13px/20px var(--font-ui); color: var(--text-2);
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--text); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+
+  /* 目录 */
+  .toc { width: 100%; border-collapse: collapse; margin-bottom: 48px; font-size: 13px; }
+  .toc th, .toc td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .toc th { font-weight: 560; color: var(--text-2); font-size: 12px; }
+  .toc td:first-child, .toc th:first-child { width: 48px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .toc tbody tr { cursor: pointer; }
+  .toc tbody tr:hover { background: var(--hover); }
+  .toc a { color: var(--text); text-decoration: none; font-weight: 460; }
+  .toc code { font: 12px/18px "JetBrains Mono", ui-monospace, monospace; color: var(--text-2); word-break: break-all; }
+
+  /* 区块 */
+  .block { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .bh { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .bh .no { font: 560 12px/16px var(--font-ui); color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .bh h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 560; }
+  .bh .loc { color: var(--text-2); font-size: 13px; }
+  .bh-end { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+  .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 8px; }
+  .seg button { height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); font: 460 12px/16px var(--font-ui); cursor: pointer; }
+  .seg button:hover { background: var(--hover); }
+  .seg button[aria-pressed="true"] { background: var(--selected); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
+  .rp { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text-2); cursor: pointer; }
+  .rp:hover { background: var(--hover); color: var(--text); }
+  .rp .li { width: 15px; height: 15px; }
+  .v { margin: 0; min-width: 0; max-width: 720px; }
+  .stage { display: flex; align-items: center; justify-content: center; min-height: 200px; padding: 24px; background: var(--shell); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .stage.top { align-items: flex-start; }
+
+  /* 真实尺寸外壳 */
+  .fr { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 8px; }
+  .f-main { width: 100%; background: var(--editor); }
+  .f-side { width: 248px; background: var(--sidebar); }
+  .f-panel { width: 360px; background: var(--editor); display: flex; flex-direction: column; }
+  .f-settings { width: 100%; background: var(--settings); }
+  .f-menu { background: var(--menu); border-radius: 12px; box-shadow: var(--shadow); }
+  .corner { position: absolute; pointer-events: none; color: var(--dot); }
+  .tl { top: 0; left: 0; } .tr { top: 0; right: 0; } .bl { bottom: 0; left: 0; } .br { bottom: 0; right: 0; }
+  .art { display: block; color: var(--dot); flex-shrink: 0; position: relative; overflow: visible; }
+  .d { fill: currentColor; } .a { fill: var(--accent); } .e { fill: var(--danger); }
+
+  /* 共享控件 */
+  .li { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .btn, .ghost, .outline, .ibtn, .ss-act, .ai-sug, .seg button, .rp, .chip, .intro-ctl button, .theme-toggle {
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+  }
+  button:focus-visible { background-color: var(--hover); }
+  .theme-toggle:active, .chip:active { transform: scale(.98); }
+  .btn:active, .ghost:active, .outline:active, .ibtn:active, .ss-act:active, .ai-sug:active, .seg button:active, .rp:active, .intro-ctl button:active { transform: scale(.97); }
+  .btn {
+    position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 2.25rem; padding: 0 16px; font: 460 14px/20px var(--font-ui); color: var(--accent);
+    background: var(--btn-bg); border: 1px solid var(--accent); border-radius: 8px; cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: var(--btn-hover); }
+  .btn-lg { height: auto; min-height: 42px; padding: 10px 24px; border-radius: 10px; gap: 10px; }
+  .btn-lg .li { width: 20px; height: 20px; }
+  .btn .li { transition: transform 140ms ease; }
+  .btn:hover .li[data-nudge] { transform: translateX(2px); }
+  .ghost {
+    position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px;
+    font: 460 12px/16px var(--font-ui); color: var(--text); background: transparent; border: 0; border-radius: 8px; cursor: pointer; white-space: nowrap;
+  }
+  .ghost:hover { background: var(--hover); }
+  .ghost.muted { color: var(--text-2); font-size: 13px; padding: 6px 8px; }
+  .ghost.muted:hover { color: var(--text); }
+  .outline {
+    position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    font: 460 12px/16px var(--font-ui); color: var(--text); background: var(--editor); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; white-space: nowrap;
+  }
+  .outline:hover { background: var(--hover); }
+  .outline .li { width: 14px; height: 14px; }
+  .ibtn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); cursor: pointer; }
+  .ibtn:hover { background: var(--hover); color: var(--text); }
+  .ibtn.on { background: var(--selected); color: var(--text); }
+  .muted { color: var(--text-2); }
+  .xs { font-size: 12px; line-height: 16px; }
+  .sm { font-size: 13px; line-height: 20px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .col { display: flex; flex-direction: column; align-items: center; }
+  .center { display: flex; align-items: center; justify-content: center; }
+
+  /* 1 页面空态 */
+  .pe { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 28rem; }
+  .pe-title { margin: 0; font-size: 22px; line-height: 30px; font-weight: 560; }
+  .pe-desc { margin: 10px 0 26px; font-size: 14px; line-height: 22px; color: var(--text-2); }
+  .pe-sec { display: flex; gap: 4px 10px; margin-top: 12px; min-height: 32px; }
+
+  /* 2 文件夹主页 */
+  .fh { display: flex; flex-direction: column; gap: 16px; height: 100%; padding: 28px 32px; }
+  .fh-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .fh-title { font-size: 20px; line-height: 28px; font-weight: 560; letter-spacing: -.01em; }
+  .fh-empty { position: relative; overflow: hidden; flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 44px 20px 40px; text-align: center; border: 1px dashed var(--border); border-radius: 11px; background: var(--editor); }
+
+  /* 侧栏 */
+  .sb-head { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 10px 0 16px; font-weight: 460; }
+  .sb-heading { padding: 14px 16px 6px; font-size: 12px; line-height: 16px; }
+  .sb-heading strong { font-weight: 560; color: var(--text-2); }
+  .tree-row { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; margin: 0 6px; border-radius: 6px; font-size: 13px; }
+  .tree-row .li { width: 15px; height: 15px; color: var(--text-2); }
+
+  /* AI 面板 */
+  .ai-head { display: flex; align-items: center; justify-content: flex-end; gap: 2px; height: 44px; padding: 0 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .ai-empty { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; padding: 24px 16px 28px; }
+  .ai-empty-title { margin: 12px 0 0; font-size: 17px; line-height: 1.5; font-weight: 550; }
+  .ai-sugs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .ai-sug { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px; border: 1px solid var(--input); border-radius: 8px; background: var(--editor); color: var(--text-2); font-size: 15px; line-height: 1.5; cursor: pointer; }
+  .ai-sug:hover { background: var(--hover); color: var(--text); }
+  .composer { position: relative; z-index: 1; margin: 0 12px 12px; height: 84px; border: 1px solid var(--input); border-radius: 12px; background: var(--editor); display: flex; align-items: flex-end; justify-content: space-between; padding: 8px; }
+  .send { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--hover); color: var(--text-2); }
+  .pop { position: absolute; top: 48px; right: 10px; width: 264px; padding: 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--menu); box-shadow: var(--shadow); overflow: hidden; z-index: 3; }
+
+  /* 设置 */
+  .set-pad { padding: 24px 28px; }
+  .card-s { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--editor); }
+  .card-s-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; }
+  .card-s-h .t { font-size: 15px; line-height: 22px; font-weight: 560; display: inline-flex; align-items: center; gap: 6px; }
+  .card-s-b { padding: 0 16px 16px; }
+  .dash { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 0; text-align: center; border: 1px dashed var(--border); border-radius: 8px; }
+  .gate { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; min-height: 340px; padding: 32px 16px; }
+  .dotbox { position: relative; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 14px; border-radius: 8px; }
+  .dotbox > svg.fill { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .dotbox.clk { cursor: pointer; }
+  .dotbox.clk .fg { opacity: .72; transition: opacity 140ms ease; }
+  .dotbox.clk:hover .fg { opacity: 1; }
+
+  /* 搜索面板 */
+  .ss { width: 100%; max-width: 600px; height: 440px; display: flex; flex-direction: column; overflow: hidden; }
+  .ss-q { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; color: var(--text-2); }
+  .ss-q .q { flex: 1; font-size: 16px; color: var(--text); }
+  .ss-q .q.ph { color: var(--text-3); }
+  .kbd { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border: 1px solid var(--border); border-radius: 5px; font: 460 11px/16px var(--font-ui); color: var(--text-2); }
+  .ss-f { display: flex; align-items: center; gap: 4px; padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
+  .chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border-radius: 6px; font-size: 12px; color: var(--text-2); }
+  .chip:hover { background: var(--hover); }
+  .chip .li { width: 13px; height: 13px; }
+  .ss-f .cnt { margin-left: auto; padding-right: 6px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .ss-list { position: relative; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .ss-status { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 12px 48px; text-align: center; font-size: 13px; color: var(--text-2); }
+  .ss-status strong { font-size: 15px; font-weight: 500; color: var(--text); letter-spacing: .02em; }
+  .ss-acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+  .ss-act { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--menu); color: var(--text); font: 460 13px/20px var(--font-ui); cursor: pointer; }
+  .ss-act[data-quiet] { border-color: transparent; color: var(--text-2); }
+  .ss-act:hover { background: var(--hover); }
+  .ss-act .li { width: 14px; height: 14px; }
+  .ss-foot { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
+  .ss-foot span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* 历史 */
+  .hist { display: grid; grid-template-columns: 210px 1fr; height: 400px; }
+  .hist-list { border-right: 1px solid var(--border); background: var(--sidebar); }
+  .hist-row { display: flex; align-items: center; height: 32px; margin: 0 6px; padding: 0 10px; border-radius: 6px; font-size: 13px; font-variant-numeric: tabular-nums; transition: background-color 140ms ease; }
+  .hist-row:hover { background: var(--hover); }
+  .hist-main { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0 24px; }
+
+  /* 弹窗 */
+  .dlg { width: 100%; max-width: 620px; }
+  .dlg-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 24px 12px; }
+  .dlg-h .t { font-size: 17px; line-height: 24px; font-weight: 560; }
+  .dlg-b { position: relative; padding: 12px 24px 32px; }
+  .select { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
+  .select .li { width: 14px; height: 14px; color: var(--text-2); }
+
+  /* 编辑区 */
+  .doc-title { padding: 40px 48px 0; font-size: 28px; line-height: 36px; font-weight: 600; letter-spacing: -.01em; }
+  .pane-head { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+
+  /* 欢迎动画 */
+  .intro { position: relative; height: 420px; background: var(--editor); display: flex; align-items: center; justify-content: center; }
+  .intro-ctl { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 2; }
+  .intro-ctl button { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--menu); color: var(--text-2); cursor: pointer; }
+  .intro-ctl button:hover { color: var(--text); }
+
+  /* ================= 动效：只动 transform / opacity ================= */
+  .dm .rg { transform-box: view-box; transform-origin: var(--ox, 50%) var(--oy, 50%); }
+  .dm .fn, .dm .k-a, .dm .k-sp, .dm .k-e, .dm .hdv { transform-box: fill-box; transform-origin: center; }
+  .dm.pre .rg { opacity: 0; }
+  /* 入场：由内向外按环错峰聚合，≤600ms */
+  .dm.in .rg { animation: rg-in var(--dur, 400ms) var(--ease-out) calc(var(--i) * var(--st, 24ms)) backwards; }
+  .dm.in.quick .rg { --dur: 170ms; --st: 7ms; }
+  @keyframes rg-in { from { opacity: 0; transform: scale(.985); } }
+  /* 完成：外环先到，一次性收束 */
+  .dm.conv.in .rg { animation-name: rg-conv; --dur: 520ms; --st: 34ms; }
+  @keyframes rg-conv { from { opacity: 0; transform: scale(1.015); } }
+  /* ===== 常驻循环：负延迟直接进入不同相位；6–14s 错峰；低反差、亚像素位移 ===== */
+  .dm { --ld: -6s; }
+  /* 波纹 / 呼吸：按环（--li 为距中心的环序）由内向外错峰 */
+  .dm.in .lp-r { animation: lp-r var(--rp, 11s) ease-in-out calc(var(--ld) + var(--li) * var(--rs, .5s)) infinite; }
+  @keyframes lp-r { 0%, 100% { opacity: 1; } 50% { opacity: var(--ro, .9); } }
+  .corner { --rp: 14s; --rs: 1.2s; --ro: .92; }
+  /* 主体轻微浮动 / 缩放呼吸 */
+  .dm.in .lp-f { animation: lp-f var(--fp, 9s) ease-in-out var(--ld) infinite; }
+  @keyframes lp-f { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(var(--fy, -.65px)); } }
+  .dm .lp-s { transform-box: view-box; transform-origin: var(--ox, 50%) var(--oy, 50%); }
+  .dm.in .lp-s { animation: lp-s var(--fp, 10s) ease-in-out var(--ld) infinite; }
+  @keyframes lp-s { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.006); } }
+  /* 一束点阵光自左向右扫过（按列错峰，平时 .94，光带经过时回到 1） */
+  .dm.in .lp-w { animation: lp-w var(--wp, 12s) ease-in-out calc(var(--ld) + 1.5s + var(--c) * var(--ws, .26s)) infinite; }
+  @keyframes lp-w { 0%, 100% { opacity: 1; } 50% { opacity: .94; } }
+  /* 品牌蓝点 / 小星：不规则的缓慢微亮 */
+  .dm.in .k-a { animation: lp-a var(--ap, 9.4s) ease-in-out calc(var(--ld) + .6s) infinite; }
+  .dm.in .k-sp { animation: lp-a var(--spp, 7.3s) ease-in-out calc(var(--ld) + var(--twd, 2.2s)) infinite; }
+  @keyframes lp-a { 0%, 100% { opacity: 1; } 28% { opacity: .92; } 68% { opacity: .96; } }
+  /* 进行中：行扫描循环（3.6s，平滑） */
+  .dm.in .sc { animation: sc 3.6s ease-in-out calc(400ms + var(--r) * 180ms) infinite; }
+  [data-state="restoring"] .dm.in .sc { animation-delay: calc(400ms + var(--rr) * 180ms); }
+  @keyframes sc { 0%, 100% { opacity: 1; } 50% { opacity: .82; } }
+  /* 错误：一次轻微水平反馈，之后保留缓慢循环 */
+  .dm.in .shk { animation: shk 280ms cubic-bezier(.36, .07, .19, .97) var(--ed, 420ms) backwards; }
+  .dm.in.quick .shk, .dm.in.quick .k-e, .dm.in.quick .blk { --ed: 190ms; }
+  @keyframes shk { 20% { transform: translateX(-.8px); } 40% { transform: translateX(.8px); } 60% { transform: translateX(-.4px); } 80% { transform: translateX(.2px); } }
+  .dm.in .k-e, .dm.in .blk, [data-state="down"] .dm.in .k-a { animation: blk 300ms ease-in-out var(--ed, 420ms) backwards, lp-a var(--ap, 9.4s) ease-in-out calc(var(--ed, 420ms) + 1.2s) infinite; }
+  @keyframes blk { 0% { opacity: 1; } 30% { opacity: .88; } 62% { opacity: 1; } }
+  /* 16 错位段：抖动一次后，极缓地左右漂移 */
+  .dm.in .shk.dr { animation: shk 280ms cubic-bezier(.36, .07, .19, .97) var(--ed, 420ms) backwards, lp-x 9s ease-in-out calc(var(--ed, 420ms) + 1.2s) infinite; }
+  @keyframes lp-x { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(.5px); } }
+  /* 11 波浪：平滑正弦起伏（7s 往返，峰谷 0.7px），按列负延迟形成行波 */
+  .dm.in .wv { animation: wv 7s ease-in-out calc(var(--w) * -7s) infinite; }
+  @keyframes wv { 0%, 100% { transform: translateY(-.35px); } 50% { transform: translateY(.35px); } }
+  /* 14 Git：沿分支流动，节点依次点亮，汇合点最后收束；之后一束暗波沿分支缓慢流过（12s） */
+  .dm.in .fl { animation: fl 300ms ease-out calc(var(--fd, 420ms) + var(--t)) backwards, gf 12s ease-in-out calc(-12s + var(--t) * 4) infinite; }
+  .dm.in .fn { animation: fn 380ms cubic-bezier(.34, 1.5, .64, 1) calc(var(--fd, 420ms) + var(--t)) backwards, gn 12s ease-in-out calc(-12s + var(--t) * 4) infinite; }
+  @keyframes gf { 0%, 100% { opacity: 1; } 50% { opacity: .88; } }
+  @keyframes gn { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .9; transform: scale(.994); } }
+  .dm.in.quick { --fd: 180ms; }
+  /* 仅入场：不做依次点亮，直接接入同样缓慢的分支流动 */
+  [data-state="enter"] .dm.in .fl { animation: gf 12s ease-in-out calc(-12s + var(--t) * 4) infinite; }
+  [data-state="enter"] .dm.in .fn { animation: gn 12s ease-in-out calc(-12s + var(--t) * 4) infinite; }
+  @keyframes fl { from { opacity: .86; } }
+  @keyframes fn { from { opacity: .86; transform: scale(.99); } }
+  /* 交互预备态 */
+  .dm .hdv, .dm .k-sp, .dm .gfix, .dm .k-a { transition: transform 160ms ease; }
+  .gate:has(.btn:hover) .dm .hdv, .gate:has(.btn:hover) .dm .k-sp { transform: scale(1.02); }
+  .dotbox.clk:hover .dm .k-a { transform: scale(1.02); }
+  .s16:has(.retry:hover) .dm .gfix { transform: translateY(-1px); }
+  .s16:has(.retry:hover) .dm .k-a { transform: scale(1.02); }
+  /* 状态切换：旧图形淡出缩回，新图形聚合进入（合计约 260ms） */
+  .block .dm:not(.corner), .block [data-s]:not(svg) { transition: opacity 90ms ease, transform 90ms ease; }
+  .swap-out .dm:not(.corner) { opacity: 0; transform: scale(.94); }
+  .swap-out [data-s]:not(svg) { opacity: 0; }
+  .swap-in [data-s]:not([hidden]):not(svg) { animation: txt-in 170ms ease-out backwards; }
+  @keyframes txt-in { from { opacity: 0; transform: translateY(2px); } }
+  /* 离开视口 / 页面隐藏时暂停 */
+  .dm.off *, .hid .dm * { animation-play-state: paused !important; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .dm.pre .rg { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></symbol>
+  <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-volume-x" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6a1.4 1.4 0 0 1-1 .4H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.9 15.5a2 2 0 0 0-1.4-1.4l-6.1-1.6a.5.5 0 0 1 0-1l6.1-1.6a2 2 0 0 0 1.4-1.4l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a1 1 0 0 1 3 3l-9 9a2 2 0 0 1-.9.5l-2.9.8a.5.5 0 0 1-.6-.6l.8-2.9a2 2 0 0 1 .5-.8z"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></symbol>
+</svg>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="切换浅色/深色">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11a5.5 5.5 0 0 0 0-11z" fill="currentColor"/></svg>
+  <span id="themeLabel">深色</span>
+</button>
+
+<main class="page">
+  <h1>缺省图 · 定稿</h1>
+
+  <table class="toc">
+    <thead><tr><th>序号</th><th>缺省图名称</th><th>出现位置（界面＋触发条件）</th><th>源码文件:行号</th></tr></thead>
+    <tbody>
+      <tr data-go="s1"><td>01</td><td><a href="#s1">无打开页面</a></td><td>主编辑区 · 未打开任何笔记（未关联文件夹／已关联未选笔记）</td><td><code>src/pages/workspace/components/page/PageEmptyState.tsx:32</code></td></tr>
+      <tr data-go="s2"><td>02</td><td><a href="#s2">空文件夹主页</a></td><td>主编辑区 · 打开本地文件夹目录主页且没有子项</td><td><code>src/pages/workspace/components/page/FolderHomePage.tsx:207</code></td></tr>
+      <tr data-go="s3"><td>03</td><td><a href="#s3">侧栏笔记树为空</a></td><td>侧栏文件树 · 笔记本内无笔记／未关联本地文件夹</td><td><code>src/pages/workspace/components/sidebar/tree/TreeEmptyState.tsx:24</code></td></tr>
+      <tr data-go="s4"><td>04</td><td><a href="#s4">AI 新会话</a></td><td>AI 面板对话区 · 当前会话还没有消息</td><td><code>src/pages/workspace/components/notebook-ai/ChatMessages.tsx:127</code></td></tr>
+      <tr data-go="s5"><td>05</td><td><a href="#s5">AI 助手未启用</a></td><td>设置 › AI · AI 助手开关未开启</td><td><code>src/pages/workspace/components/sidebar/settings-ai/renderAIEnabledSection.tsx:39</code></td></tr>
+      <tr data-go="s6"><td>06</td><td><a href="#s6">AI 不可用</a></td><td>AI 面板 · 助手已关闭／未选模型／服务暂不可用</td><td><code>src/pages/workspace/components/notebook-ai/panel/AiUnavailableState.tsx:44</code></td></tr>
+      <tr data-go="s7"><td>07</td><td><a href="#s7">AI 历史会话为空</a></td><td>AI 面板 · 打开历史会话弹层且无历史</td><td><code>src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx:129</code></td></tr>
+      <tr data-go="s8"><td>08</td><td><a href="#s8">搜索空查询／无结果</a></td><td>搜索面板 · 未输入关键词／关键词无匹配（当前或所有笔记本）</td><td><code>src/pages/workspace/components/search-sheet/SearchSheet.tsx:242</code></td></tr>
+      <tr data-go="s9"><td>09</td><td><a href="#s9">历史版本为空／未选择</a></td><td>页面历史视图 · 无历史版本／尚未选中版本</td><td><code>src/pages/workspace/components/history/history-view/HistoryReader.tsx:89</code><br><code>src/pages/workspace/components/history/history-view/HistoryVersionList.tsx:90</code></td></tr>
+      <tr data-go="s10"><td>10</td><td><a href="#s10">大纲为空</a></td><td>侧栏大纲 · 当前笔记正文没有标题</td><td><code>src/pages/workspace/components/outline/OutlinePanel.tsx:67</code></td></tr>
+      <tr data-go="s11"><td>11</td><td><a href="#s11">反思无记录</a></td><td>反思弹窗 · 所选时间范围内没有编辑</td><td><code>src/pages/workspace/components/sidebar/reflection/ReflectionDialog.tsx:108</code></td></tr>
+      <tr data-go="s12"><td>12</td><td><a href="#s12">启动加载／失败</a></td><td>应用启动首屏 · 正在打开／恢复速记／初始化失败</td><td><code>src/bootstrap/BootstrapScreen.tsx:26</code></td></tr>
+      <tr data-go="s13"><td>13</td><td><a href="#s13">WebDAV 无远端备份</a></td><td>设置 › 数据 · 展开远端备份且列表为空</td><td><code>src/pages/workspace/components/sidebar/settings/data-panel/renderWebdavRemoteBackups.tsx:106</code></td></tr>
+      <tr data-go="s14"><td>14</td><td><a href="#s14">Git 同步未启用</a></td><td>设置 › Git 同步 · 模块未启用</td><td><code>src/pages/workspace/components/sidebar/settings/git-sync/GitModuleGate.tsx:23</code></td></tr>
+      <tr data-go="s15"><td>15</td><td><a href="#s15">Git 仓库列表为空</a></td><td>设置 › Git 同步 · 已启用但未添加仓库</td><td><code>src/pages/workspace/components/sidebar/settings/git-sync/GitSyncContent.tsx:170</code></td></tr>
+      <tr data-go="s16"><td>16</td><td><a href="#s16">正文渲染失败</a></td><td>分栏编辑区 · 编辑器渲染抛错（ErrorBoundary 回退）</td><td><code>src/pages/workspace/components/editor-split/SplitEditorPane.tsx:128</code></td></tr>
+      <tr data-go="s17"><td>17</td><td><a href="#s17">分栏笔记不存在</a></td><td>分栏编辑区 · 分栏指向的笔记已删除</td><td><code>src/pages/workspace/components/editor-split/SplitEditorPane.tsx:80</code></td></tr>
+      <tr data-go="s18"><td>18</td><td><a href="#s18">欢迎动画</a></td><td>全窗口覆盖层 · 首次完成设置引导后播放（原为 goose-intro.mp4 视频）</td><td><code>src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx:182</code></td></tr>
+      <tr data-go="s19"><td>19</td><td><a href="#s19">树内空文件夹</a></td><td>侧栏文件树 · 展开的文件夹没有子项</td><td><code>src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx:271</code></td></tr>
+      <tr data-go="s20"><td>20</td><td><a href="#s20">Git 同步文件夹为空</a></td><td>设置 › Git 同步 · 仓库详情中没有可选的本地笔记本</td><td><code>src/pages/workspace/components/sidebar/settings/git-sync/GitFolderList.tsx:119</code></td></tr>
+      <tr data-go="s21"><td>21</td><td><a href="#s21">隐藏文件夹为空</a></td><td>本地文件夹设置 · 隐藏文件夹列表为空</td><td><code>src/pages/workspace/components/sidebar/local-folder-settings/fields/HiddenFoldersField.tsx:137</code></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 01 · V2 -->
+  <section class="block" id="s1" data-state="nofolder">
+    <div class="bh"><span class="no">01</span><h2>无打开页面</h2><span class="loc">主编辑区 · 未打开任何笔记</span>
+      <div class="bh-end"><div class="seg"><button data-set="nofolder" aria-pressed="true">未关联文件夹</button><button data-set="folder">已关联文件夹</button></div></div></div>
+    <figure class="v">
+      <div class="fr f-main center" style="height:480px" data-corners="tr" data-cs="150">
+        <div class="pe">
+          <svg class="art" data-art="book" data-tw="1" width="200" height="164" style="margin-bottom:20px"></svg>
+          <h3 class="pe-title" data-s="nofolder">打开一个笔记文件夹</h3><h3 class="pe-title" data-s="folder">从一篇笔记开始</h3>
+          <p class="pe-desc" data-s="nofolder">关联本地文件夹，开始记录。</p><p class="pe-desc" data-s="folder">选择左侧笔记，或新建一篇。</p>
+          <button class="btn btn-lg" data-s="nofolder"><svg class="li"><use href="#i-folder-open"/></svg>打开本地文件夹</button>
+          <button class="btn btn-lg" data-s="folder"><svg class="li"><use href="#i-file-plus"/></svg>新建笔记</button>
+          <div class="pe-sec"><button class="ghost muted" data-s="folder"><svg class="li"><use href="#i-folder-open"/></svg>打开本地文件夹</button></div>
+        </div>
+      </div></figure>
+  </section>
+
+  <!-- 02 · V1 -->
+  <section class="block" id="s2">
+    <div class="bh"><span class="no">02</span><h2>空文件夹主页</h2><span class="loc">主编辑区 · 打开本地文件夹目录主页且没有子项</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-main" style="height:440px"><div class="fh">
+        <div class="fh-head"><span class="fh-title">读书笔记</span><span class="row">
+          <button class="outline"><svg class="li"><use href="#i-folder-plus"/></svg>新建子文件夹</button>
+          <button class="outline"><svg class="li"><use href="#i-file-plus"/></svg>新建文件</button></span></div>
+        <div class="fh-empty">
+          <svg class="art" data-icon="folderOpen" data-size="60" data-halo="1" width="150" height="96" style="margin-bottom:6px"></svg>
+          <p class="sm" style="font-weight:560">这个文件夹还是空的</p>
+          <p class="xs muted" style="margin-bottom:12px">在「读书笔记」里创建第一个文件或子文件夹</p>
+          <div class="row"><button class="outline"><svg class="li"><use href="#i-file-plus"/></svg>新建文件</button><button class="outline"><svg class="li"><use href="#i-folder-plus"/></svg>新建子文件夹</button></div>
+        </div>
+      </div></div></figure>
+  </section>
+
+  <!-- 03 · V2 -->
+  <section class="block" id="s3" data-state="local">
+    <div class="bh"><span class="no">03</span><h2>侧栏笔记树为空</h2><span class="loc">侧栏文件树 · 笔记本内无笔记／未关联本地文件夹</span>
+      <div class="bh-end"><div class="seg"><button data-set="local" aria-pressed="true">已关联</button><button data-set="nolocal">未关联</button></div></div></div>
+    <figure class="v">
+      <div class="stage top"><div class="fr f-side" style="height:360px">
+        <div class="sb-head"><span>我的笔记</span><button class="ibtn" style="position:relative;z-index:1"><svg class="li"><use href="#i-plus"/></svg></button></div>
+        <svg class="art" data-art="trail" width="248" height="90" data-s="local" style="position:absolute;top:0;left:0"></svg>
+        <div style="padding:12px 16px 0;position:relative">
+          <p class="sm muted" data-s="local">暂无笔记，点击上方 ＋ 新建</p><p class="sm muted" data-s="nolocal">请先关联本地文件夹</p>
+        </div>
+        <svg class="art" data-art="sideFade" width="248" height="120" style="position:absolute;bottom:0;left:0"></svg>
+      </div></div></figure>
+  </section>
+
+  <!-- 04 · V2 + V1 双引号 + 左上角点阵 -->
+  <section class="block" id="s4">
+    <div class="bh"><span class="no">04</span><h2>AI 新会话</h2><span class="loc">AI 面板对话区 · 当前会话还没有消息</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="stage"><div class="fr f-panel" style="height:520px">
+        <div class="ai-head"><button class="ibtn"><svg class="li"><use href="#i-history"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-pen"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-panel"/></svg></button></div>
+        <div style="position:relative;flex:1;display:flex;align-items:center" data-corners="tl" data-cs="64" data-cp="8" data-cm=".22">
+          <svg class="art" data-art="bandFade" width="360" height="150" style="position:absolute;left:0;bottom:0"></svg>
+          <div class="ai-empty">
+            <svg class="art" data-icon="quote" data-size="32" data-halo="1" width="64" height="52" style="margin:-10px 0 -10px -16px"></svg>
+            <h3 class="ai-empty-title">想怎么修改这篇笔记？</h3>
+            <div class="ai-sugs"><span class="ai-sug">润色这段文字</span><span class="ai-sug">整理成清单</span><span class="ai-sug">提炼要点</span></div>
+          </div>
+        </div>
+        <div class="composer"><button class="ibtn"><svg class="li"><use href="#i-plus"/></svg></button><span class="send"><svg class="li" style="width:15px;height:15px"><use href="#i-arrow-up"/></svg></span></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 05 · 已落地 A 版（源码复刻） -->
+  <section class="block" id="s5">
+    <div class="bh"><span class="no">05</span><h2>AI 助手未启用</h2><span class="loc">设置 › AI · AI 助手开关未开启</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-settings"><div class="gate" data-corners="tl br">
+        <svg class="art" data-art="aiStar" data-tw="1" width="220" height="190"></svg>
+        <button class="btn">启用 AI 助手<svg class="li" data-nudge><use href="#i-arrow-right"/></svg></button>
+      </div></div></figure>
+  </section>
+
+  <!-- 06 · V2 -->
+  <section class="block" id="s6" data-state="off">
+    <div class="bh"><span class="no">06</span><h2>AI 不可用</h2><span class="loc">AI 面板 · 助手已关闭／未选模型／服务暂不可用</span>
+      <div class="bh-end"><div class="seg"><button data-set="off" aria-pressed="true">已关闭</button><button data-set="nomodel">未选模型</button><button data-set="down">暂不可用</button></div></div></div>
+    <figure class="v">
+      <div class="stage"><div class="fr f-panel" style="height:340px">
+        <div class="ai-head"><button class="ibtn"><svg class="li"><use href="#i-history"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-pen"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-panel"/></svg></button></div>
+        <div class="col" style="flex:1;justify-content:center;gap:10px;padding:32px 20px">
+          <svg class="art" data-icon="sparkleOff" data-size="40" data-halo="1" width="96" height="72"></svg>
+          <p class="sm" style="font-weight:460" data-s="off">AI 助手已关闭</p><p class="sm" style="font-weight:460" data-s="nomodel">尚未选择模型</p><p class="sm" style="font-weight:460" data-s="down">AI 暂不可用</p>
+          <button class="ghost" style="border:1px solid var(--border);padding:5px 12px">设置 AI</button>
+        </div>
+      </div></div></figure>
+  </section>
+
+  <!-- 07 · V1 -->
+  <section class="block" id="s7">
+    <div class="bh"><span class="no">07</span><h2>AI 历史会话为空</h2><span class="loc">AI 面板 · 打开历史会话弹层且无历史</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="stage top"><div class="fr f-panel" style="height:260px">
+        <div class="ai-head"><button class="ibtn on"><svg class="li"><use href="#i-history"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-pen"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-panel"/></svg></button></div>
+        <div class="pop"><div class="col" style="gap:8px;padding:32px 16px">
+          <svg class="art" data-icon="chat" data-size="26" width="26" height="26"></svg>
+          <span class="xs muted">暂无历史会话</span></div></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 08 · V2 -->
+  <section class="block" id="s8" data-state="empty">
+    <div class="bh"><span class="no">08</span><h2>搜索空查询／无结果</h2><span class="loc">搜索面板 · 未输入关键词／关键词无匹配</span>
+      <div class="bh-end"><div class="seg"><button data-set="empty" aria-pressed="true">空查询</button><button data-set="none">无结果 · 当前笔记本</button><button data-set="noneall">无结果 · 所有笔记本</button></div></div></div>
+    <figure class="v">
+      <div class="stage"><div class="fr f-menu ss">
+        <div class="ss-q"><svg class="li" style="width:20px;height:20px"><use href="#i-search"/></svg>
+          <span class="q ph" data-s="empty">搜索笔记…</span><span class="q" data-s="none noneall">季度复盘</span>
+          <span class="kbd" data-s="empty">Esc</span><button class="ibtn" data-s="none noneall" style="width:22px;height:22px"><svg class="li"><use href="#i-x"/></svg></button></div>
+        <div class="ss-f"><span class="chip"><svg class="li"><use href="#i-folder-open"/></svg><span data-s="empty none">我的笔记</span><span data-s="noneall">所有笔记本</span><svg class="li" style="width:12px;height:12px"><use href="#i-down"/></svg></span><span class="chip">最佳匹配<svg class="li" style="width:12px;height:12px"><use href="#i-down"/></svg></span><span class="cnt" data-s="none noneall">0 篇</span></div>
+        <div class="ss-list">
+          <div class="ss-status" data-s="empty"><svg class="art" data-icon="search" data-size="52" data-halo="1" width="132" height="92"></svg><strong>搜索当前笔记本</strong></div>
+          <div class="ss-status" data-s="none noneall"><svg class="art" data-icon="fileX" data-size="52" data-halo="1" width="132" height="92"></svg><strong>未找到相关笔记</strong>
+            <div class="ss-acts"><button class="ss-act" data-s="none">搜索所有笔记本</button><button class="ss-act" data-s="noneall">清空搜索</button><button class="ss-act" data-quiet><svg class="li"><use href="#i-sparkles"/></svg>启用 AI 问答</button></div></div>
+        </div>
+        <div class="ss-foot"><span><span class="kbd">↑↓</span>选择</span><span><span class="kbd">↵</span>打开</span><span><span class="kbd">Tab</span>切换<span data-s="empty none">所有笔记本</span><span data-s="noneall">我的笔记</span></span></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 09 · V1 -->
+  <section class="block" id="s9" data-state="none">
+    <div class="bh"><span class="no">09</span><h2>历史版本为空／未选择</h2><span class="loc">页面历史视图 · 无历史版本／尚未选中版本</span>
+      <div class="bh-end"><div class="seg"><button data-set="none" aria-pressed="true">暂无历史</button><button data-set="pick">未选择版本</button></div></div></div>
+    <figure class="v">
+      <div class="fr f-main"><div class="hist">
+        <div class="hist-list">
+          <div style="padding:14px 16px 8px"><p class="sm" style="font-weight:560">页面历史</p><p class="xs muted" data-s="pick">选择时间点预览后还原</p></div>
+          <p class="xs muted" style="padding:8px 16px 0" data-s="none">暂无历史版本</p>
+          <div data-s="pick"><div class="hist-row">今天 14:32</div><div class="hist-row">今天 09:15</div><div class="hist-row">昨天 21:48</div><div class="hist-row">10月12日 16:05</div></div>
+        </div>
+        <div class="hist-main"><div class="col" style="gap:12px">
+          <svg class="art" data-icon="history" data-size="56" data-halo="1" width="150" height="104"></svg>
+          <p class="xs muted" data-s="none">暂无历史版本</p><p class="xs muted" data-s="pick">选择左侧的历史版本</p>
+        </div></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 10 · V2 -->
+  <section class="block" id="s10">
+    <div class="bh"><span class="no">10</span><h2>大纲为空</h2><span class="loc">侧栏大纲 · 当前笔记正文没有标题</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="stage top"><div class="fr f-side" style="height:280px">
+        <div class="sb-heading"><strong>文档大纲</strong></div>
+        <div style="padding:12px 16px">
+          <svg class="art" data-icon="outline" data-size="40" width="40" height="40" style="margin:0 0 8px -4px"></svg>
+          <p class="sm muted">正文暂无标题</p></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 11 · V1 + 波浪 -->
+  <section class="block" id="s11">
+    <div class="bh"><span class="no">11</span><h2>反思无记录</h2><span class="loc">反思弹窗 · 所选时间范围内没有编辑</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="stage"><div class="fr f-menu dlg">
+        <div class="dlg-h"><div><p class="t">反思</p><p class="sm muted">基于你的笔记编辑历史</p></div>
+          <div class="row"><span class="select">过去 7 天<svg class="li"><use href="#i-down"/></svg></span><button class="ibtn"><svg class="li"><use href="#i-refresh"/></svg></button><button class="ibtn"><svg class="li"><use href="#i-x"/></svg></button></div></div>
+        <div class="dlg-b"><svg class="art" data-art="flatline" width="300" height="72" style="margin-bottom:14px"></svg><p class="sm muted">这段时间没有编辑记录</p></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 12 · V1 -->
+  <section class="block" id="s12" data-state="opening">
+    <div class="bh"><span class="no">12</span><h2>启动加载／失败</h2><span class="loc">应用启动首屏 · 正在打开／恢复速记／初始化失败</span>
+      <div class="bh-end"><div class="seg"><button data-set="opening" aria-pressed="true">正在打开</button><button data-set="restoring">恢复速记</button><button data-set="failed">打开失败</button></div></div></div>
+    <figure class="v">
+      <div class="fr f-main center" style="height:380px"><div class="col" style="gap:14px">
+        <svg class="art" data-icon="doc" data-size="44" data-halo="1" data-fx="scan" width="120" height="84" data-s="opening restoring"></svg>
+        <svg class="art" data-icon="docErr" data-size="44" data-halo="1" data-fx="err" width="120" height="84" data-s="failed"></svg>
+        <div class="row xs muted"><p data-s="opening">正在打开思绪 · Thinkly</p><p data-s="restoring">正在恢复速记</p><p data-s="failed">思绪 · Thinkly 暂时无法打开</p><button class="ghost" data-s="failed">重新加载</button></div>
+        <span class="xs muted" data-s="failed" style="text-decoration:underline dotted;cursor:pointer">详情</span>
+      </div></div></figure>
+  </section>
+
+  <!-- 13 · V1 -->
+  <section class="block" id="s13">
+    <div class="bh"><span class="no">13</span><h2>WebDAV 无远端备份</h2><span class="loc">设置 › 数据 · 展开远端备份且列表为空</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-settings set-pad"><div class="card-s">
+        <div class="card-s-h"><span class="t"><svg class="li" style="transform:rotate(90deg);color:var(--text-2)"><use href="#i-right"/></svg>远端备份</span><button class="ibtn"><svg class="li"><use href="#i-refresh"/></svg></button></div>
+        <div class="card-s-b"><div class="dash">
+          <svg class="art" data-icon="cloudOff" data-size="28" width="28" height="28"></svg>
+          <p class="sm" style="font-weight:460">暂无远端备份</p></div></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 14 · V1（源码 DotMatrixCommitGraph） -->
+  <section class="block" id="s14" data-state="flow">
+    <div class="bh"><span class="no">14</span><h2>Git 同步未启用</h2><span class="loc">设置 › Git 同步 · 模块未启用</span>
+      <div class="bh-end"><div class="seg"><button data-set="flow" aria-pressed="true">依次点亮</button><button data-set="enter">仅入场</button></div></div></div>
+    <figure class="v">
+      <div class="fr f-settings"><div class="gate" data-corners="tl br">
+        <svg class="art" data-art="git" data-tw="1" width="240" height="190" style="--twd:2.6s"></svg>
+        <button class="btn">启用 Git 同步<svg class="li" data-nudge><use href="#i-arrow-right"/></svg></button>
+      </div></div></figure>
+  </section>
+
+  <!-- 15 · V1 -->
+  <section class="block" id="s15">
+    <div class="bh"><span class="no">15</span><h2>Git 仓库列表为空</h2><span class="loc">设置 › Git 同步 · 已启用但未添加仓库</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-settings set-pad"><div class="card-s">
+        <div class="card-s-h"><span class="t">仓库</span><button class="outline">添加仓库</button></div>
+        <div class="card-s-b row" style="gap:8px"><svg class="art" data-icon="branch" data-size="18" width="18" height="18"></svg><p class="sm muted">添加仓库，选择文件夹后连接并同步。</p></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 16 · V2 + 错误态 -->
+  <section class="block s16" id="s16">
+    <div class="bh"><span class="no">16</span><h2>正文渲染失败</h2><span class="loc">分栏编辑区 · 编辑器渲染抛错（ErrorBoundary 回退）</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-main" style="height:360px"><div class="doc-title">季度复盘</div>
+        <div class="center" style="min-height:260px"><div class="col" style="gap:14px">
+          <svg class="art" data-art="glitch" width="200" height="70"></svg>
+          <div class="row xs muted"><p>正文暂时无法显示</p><button class="ghost retry">重试</button></div></div></div>
+      </div></figure>
+  </section>
+
+  <!-- 17 · V2 + V1 图标 -->
+  <section class="block" id="s17">
+    <div class="bh"><span class="no">17</span><h2>分栏笔记不存在</h2><span class="loc">分栏编辑区 · 分栏指向的笔记已删除</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-main" style="height:320px;display:flex;flex-direction:column">
+        <div class="pane-head"><span>页面已不存在</span><button class="ibtn"><svg class="li"><use href="#i-x"/></svg></button></div>
+        <div class="col" style="flex:1;justify-content:center;gap:12px;padding:0 16px">
+          <svg class="art" data-icon="docQuestion" data-size="48" data-halo="1" width="120" height="80"></svg>
+          <p class="sm muted">找不到这篇笔记</p><button class="ghost">关闭此格</button></div>
+      </div></figure>
+  </section>
+
+  <!-- 18 · V1（鹅原样保留） -->
+  <section class="block" id="s18">
+    <div class="bh"><span class="no">18</span><h2>欢迎动画</h2><span class="loc">全窗口覆盖层 · 首次完成设置引导后播放一次</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr intro"><div class="intro-ctl"><button aria-label="静音"><svg class="li"><use href="#i-volume-x"/></svg></button><button aria-label="关闭欢迎动画"><svg class="li"><use href="#i-x"/></svg></button></div>
+        <svg class="art" data-art="goose" data-seed="15" data-fx="conv" width="264" height="240"></svg>
+      </div></figure>
+  </section>
+
+  <!-- 19 · V1 -->
+  <section class="block" id="s19">
+    <div class="bh"><span class="no">19</span><h2>树内空文件夹</h2><span class="loc">侧栏文件树 · 展开的文件夹没有子项</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="stage top"><div class="fr f-side" style="height:200px;padding-top:8px">
+        <div class="tree-row"><svg class="li" style="transform:rotate(90deg)"><use href="#i-right"/></svg><svg class="li"><use href="#i-folder-open"/></svg>读书笔记</div>
+        <div class="tree-row" style="padding-left:48px;gap:8px"><svg class="art" data-icon="dots" data-size="14" data-fx="ltr" width="14" height="14"></svg><span class="muted">暂无文件</span></div>
+        <div class="tree-row"><svg class="li"><use href="#i-right"/></svg><svg class="li"><use href="#i-folder"/></svg>项目</div>
+        <div class="tree-row"><span style="width:15px"></span><svg class="li"><use href="#i-file"/></svg>随手记</div>
+      </div></div></figure>
+  </section>
+
+  <!-- 20 · V2 -->
+  <section class="block" id="s20">
+    <div class="bh"><span class="no">20</span><h2>Git 同步文件夹为空</h2><span class="loc">设置 › Git 同步 · 仓库详情中没有可选的本地笔记本</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-settings set-pad"><div class="card-s">
+        <div class="card-s-h"><span class="t">同步文件夹</span></div>
+        <div class="card-s-b"><div class="dotbox clk" style="max-width:300px;flex-direction:column;align-items:flex-start;gap:8px;padding:14px"><svg class="art fill" data-art="dotFrame"></svg>
+          <svg class="art" data-icon="folderPlus" data-size="22" width="22" height="22"></svg><p class="sm muted" style="position:relative">暂无本地文件夹，请先在侧栏添加本地笔记本。</p></div></div>
+      </div></div></figure>
+  </section>
+
+  <!-- 21 · V2 -->
+  <section class="block" id="s21">
+    <div class="bh"><span class="no">21</span><h2>隐藏文件夹为空</h2><span class="loc">本地文件夹设置 · 隐藏文件夹列表为空</span><div class="bh-end"></div></div>
+    <figure class="v">
+      <div class="fr f-settings set-pad"><div class="card-s" data-corners="br" data-cs="56" data-cp="7" data-cm=".18">
+        <div class="card-s-h"><span class="t">隐藏文件夹</span><button class="ghost muted">恢复默认</button></div>
+        <div class="card-s-b row" style="gap:8px;min-height:40px"><svg class="art" data-icon="folderOff" data-size="18" width="18" height="18"></svg><p class="sm muted">暂无隐藏文件夹</p></div>
+      </div></div></figure>
+  </section>
+</main>
+
+<script>
+(() => {
+  /* ================= 点阵生成器 ================= */
+  const NS = 'http://www.w3.org/2000/svg';
+  const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+  let MOTION = !motionPreference.matches;
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  let seed = 7;
+  const reseed = (s) => { seed = 7 + (s % 997); };
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const hash = (str) => { let h = 0; for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
+  // 4×4 有序抖动：渐隐密度均匀、贴合网格，不再随机散点
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+  const bayer = (i, j) => BAYER[(((i % 4) + 4) % 4) + (((j % 4) + 4) % 4) * 4];
+
+  const el = (tag, cls, parent) => { const n = document.createElementNS(NS, tag); if (cls) n.setAttribute('class', cls); if (parent) parent.appendChild(n); return n; };
+  function dot(svg, x, y, r, o, cls = 'd') {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', x.toFixed(2));
+    c.setAttribute('cy', y.toFixed(2));
+    c.setAttribute('r', Math.max(r, 0.3).toFixed(2));
+    c.setAttribute('class', cls);
+    c.setAttribute('fill-opacity', o.toFixed(3));
+    svg.appendChild(c);
+    return c;
+  }
+  function grid(svg, w, h, step, fn, ox = 0, oy = 0) {
+    let j = 0;
+    for (let y = step / 2 + oy; y < h; y += step, j++) {
+      let i = 0;
+      for (let x = step / 2 + ox; x < w; x += step, i++) {
+        const p = fn(x, y, i, j);
+        if (p) dot(svg, x, y, p.r, p.o, p.cls);
+      }
+    }
+  }
+  // 以 (cx, cy) 为网格原点对齐
+  const gridAt = (svg, w, h, step, cx, cy, fn) => {
+    const ox = (((cx - step / 2) % step) + step) % step, oy = (((cy - step / 2) % step) + step) % step;
+    const i0 = Math.round((step / 2 + ox - cx) / step), j0 = Math.round((step / 2 + oy - cy) / step);
+    grid(svg, w, h, step, (x, y, i, j) => fn(x, y, i + i0, j + j0), ox, oy);
+  };
+  const astroid = (dx, dy, R) => Math.pow(Math.abs(dx) / R, 2 / 3) + Math.pow(Math.abs(dy) / R, 2 / 3);
+  function sample(segs, gap) {
+    const pts = [];
+    let acc = gap, px, py;
+    for (const [p0, p1, p2, p3] of segs) {
+      for (let i = 0; i <= 200; i++) {
+        const t = i / 200, u = 1 - t;
+        const x = u*u*u*p0[0] + 3*u*u*t*p1[0] + 3*u*t*t*p2[0] + t*t*t*p3[0];
+        const y = u*u*u*p0[1] + 3*u*u*t*p1[1] + 3*u*t*t*p2[1] + t*t*t*p3[1];
+        if (px != null) acc += Math.hypot(x - px, y - py);
+        px = x; py = y;
+        if (acc >= gap) { pts.push([x, y]); acc = 0; }
+      }
+    }
+    return pts;
+  }
+  const line = (a, b) => [a, [a[0] + (b[0] - a[0]) / 3, a[1] + (b[1] - a[1]) / 3], [a[0] + (b[0] - a[0]) * 2 / 3, a[1] + (b[1] - a[1]) * 2 / 3], b];
+  const nearNode = (x, y, nodes, pad) => nodes.some((n) => Math.hypot(x - n.x, y - n.y) < n.r + pad);
+
+  // 精修光晕：网格对齐 + 有序抖动 + smoothstep 渐隐 + 三档点径
+  function halo(svg, w, h, cx, cy, R, skip, pitch = 6, max = 0.16, dens = 1) {
+    gridAt(svg, w, h, pitch, cx, cy, (x, y, i, j) => {
+      if (skip(x, y)) return null;
+      const d = Math.hypot((x - cx) * 0.85, y - cy);
+      if (d >= R) return null;
+      const t = 1 - d / R, s = t * t * (3 - 2 * t);
+      if (bayer(i, j) > (0.16 + s * 0.7) * dens) return null;
+      const tier = s > 0.6 ? 1 : s > 0.3 ? 0.84 : 0.68;
+      return { r: tier * pitch / 6, o: 0.04 + s * max };
+    });
+  }
+  // 原随机光晕：仅供鹅（原样保留）
+  function haloRand(svg, w, h, cx, cy, R, skip, pitch = 6, max = 0.17) {
+    grid(svg, w, h, pitch, (x, y) => {
+      if (skip(x, y)) return null;
+      const d = Math.hypot((x - cx) * 0.85, y - cy);
+      if (d >= R) return null;
+      const t = 1 - d / R;
+      if (rand() > 0.3 + t * 0.6) return null;
+      return { r: (0.55 + t * 0.5) * pitch / 6, o: 0.05 + t * max };
+    });
+  }
+  // 品牌蓝四角星（类名 sp 用于空闲闪烁）
+  function sparkle(svg, w, h, sx, sy, sR, pitch = 4) {
+    grid(svg, w, h, pitch, (x, y) => {
+      const k = astroid(x - sx, y - sy, sR);
+      if (k > 1) return null;
+      const t = 1 - k;
+      return { r: (0.7 + t * 1.1) * pitch / 4, o: 0.55 + t * 0.45, cls: 'a sp' };
+    }, sx % pitch, sy % pitch);
+  }
+
+  /* ---------- 分组：按环 / 斜带 / 行 / 列打包成 <g>，只给组加 CSS 动画 ---------- */
+  function ringify(svg, opt = {}) {
+    const vb = svg.viewBox.baseVal, W = vb.width, H = vb.height;
+    const cx = opt.cx ?? W / 2, cy = opt.cy ?? H / 2, n = opt.n ?? 8;
+    const items = opt.items || [...svg.querySelectorAll('circle')].filter((c) => !c.closest('.rg'));
+    if (!items.length) return [];
+    const pos = (c) => [+c.getAttribute('cx'), +c.getAttribute('cy')];
+    const dist = opt.dist || ((x, y) => Math.hypot(x - cx, y - cy));
+    let maxD = opt.maxD || 0;
+    const ds = items.map((c) => { const d = dist(...pos(c), c); if (!opt.maxD && d > maxD) maxD = d; return d; });
+    // 光扫：中性点再按列分箱，每列一个 .lp-w
+    const bins = opt.bins || 10;
+    let x0 = 0, bw = 1;
+    if (opt.loop === 'w') { const xs = items.map((c) => pos(c)[0]); x0 = Math.min(...xs); bw = (Math.max(...xs) - x0) / bins || 1; }
+    const buckets = new Map();
+    items.forEach((c, k) => {
+      const cl = c.classList;
+      const key = cl.contains('sp') ? 'sp' : cl.contains('e') ? 'e' : cl.contains('a') ? 'a' : 'n' + Math.min(n - 1, Math.floor(ds[k] / (maxD || 1) * n));
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(c);
+    });
+    const order = [...Array(n).keys()].map((b) => 'n' + b).concat(['a', 'e', 'sp']);
+    const groups = [];
+    const host = opt.into || svg;
+    order.forEach((key) => {
+      const list = buckets.get(key);
+      if (!list) return;
+      const b = key[0] === 'n' ? +key.slice(1) : key === 'sp' ? n : n - 1;
+      const i = opt.rev && key[0] === 'n' ? n - 1 - b : b;
+      const g = el('g', 'rg');
+      g.style.setProperty('--i', i);
+      const neutral = key[0] === 'n';
+      // 入场动画挂在 .rg 上，常驻循环挂在内层，二者互不覆盖
+      const inner = el('g', neutral ? (opt.loop === 'r' ? 'lp-r' : null) : 'k-' + key, g);
+      if (neutral) inner.style.setProperty('--li', b);
+      if (neutral && opt.loop === 'w') {
+        const cols = new Map();
+        list.forEach((c) => {
+          const k = Math.min(bins - 1, Math.floor((pos(c)[0] - x0) / bw));
+          if (!cols.has(k)) { const s = el('g', 'lp-w'); s.style.setProperty('--c', k); cols.set(k, s); }
+          cols.get(k).appendChild(c);
+        });
+        [...cols.keys()].sort((p, q) => p - q).forEach((k) => inner.appendChild(cols.get(k)));
+      } else list.forEach((c) => inner.appendChild(c));
+      host.appendChild(g);
+      groups.push(g);
+    });
+    svg.style.setProperty('--ox', (opt.ox ?? cx / W * 100) + '%');
+    svg.style.setProperty('--oy', (opt.oy ?? cy / H * 100) + '%');
+    svg.querySelectorAll('g:not(.rg):not([class])').forEach((g) => { if (!g.childElementCount) g.remove(); });
+    return groups;
+  }
+  // 多部分共享同一环距（保持原入场节奏），各部分可放进不同宿主、挂不同循环
+  function ringParts(svg, opt, parts) {
+    const vb = svg.viewBox.baseVal, cx = opt.cx ?? vb.width / 2, cy = opt.cy ?? vb.height / 2;
+    const dist = opt.dist || ((x, y) => Math.hypot(x - cx, y - cy));
+    let maxD = 0;
+    parts.forEach((p) => p.items.forEach((c) => { const d = dist(+c.getAttribute('cx'), +c.getAttribute('cy'), c); if (d > maxD) maxD = d; }));
+    return parts.flatMap((p) => p.items.length ? ringify(svg, { ...opt, ...p, maxD }) : []);
+  }
+  function cornerSvg(host, pos, w, h) {
+    const s = el('svg', 'corner dm ' + pos, host);
+    s.setAttribute('width', w); s.setAttribute('height', h);
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    s.setAttribute('aria-hidden', 'true');
+    return s;
+  }
+  // 角落渐隐点阵三角（与源码 DotMatrixCorners 同参：132 / 10 / .22），由角向外按斜带显现
+  function corners(host, list, size = 132, pitch = 10, max = 0.22) {
+    list.forEach((pos) => {
+      const s = cornerSvg(host, pos, size, size);
+      vary(s, vk++);
+      const L = pos[1] === 'l', T = pos[0] === 't';
+      grid(s, size, size, pitch, (x, y) => {
+        const u = L ? x : size - x, v = T ? y : size - y;
+        const k = (u + v) / size;
+        if (k > 1) return null;
+        const t = 1 - k;
+        return { r: (0.6 + t * 0.9) * pitch / 10, o: 0.06 + t * max };
+      });
+      ringify(s, { n: 5, loop: 'r', dist: (x, y) => (L ? x : size - x) + (T ? y : size - y), ox: L ? 0 : 100, oy: T ? 0 : 100 });
+    });
+  }
+
+  /* ---------- 形状谓词 ---------- */
+  const dSeg = (x, y, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy; const t = l ? clamp(((x - ax) * dx + (y - ay) * dy) / l) : 0; return Math.hypot(x - ax - t * dx, y - ay - t * dy); };
+  const C = (cx, cy, r) => (x, y) => Math.hypot(x - cx, y - cy) <= r;
+  const E = (cx, cy, rx, ry) => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+  const RING = (cx, cy, r, w) => (x, y) => Math.abs(Math.hypot(x - cx, y - cy) - r) <= w / 2;
+  const S = (ax, ay, bx, by, w) => (x, y) => dSeg(x, y, ax, ay, bx, by) <= w / 2;
+  const RR = (l, t, w, h, r) => (x, y) => {
+    if (x < l || x > l + w || y < t || y > t + h) return false;
+    const qx = Math.max(l + r - x, 0, x - (l + w - r)), qy = Math.max(t + r - y, 0, y - (t + h - r));
+    return qx * qx + qy * qy <= r * r;
+  };
+  const RRS = (l, t, w, h, r, s) => { const o = RR(l, t, w, h, r), i = RR(l + s, t + s, w - 2 * s, h - 2 * s, Math.max(r - s, 0)); return (x, y) => o(x, y) && !i(x, y); };
+  const POLY = (pts) => (x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const AST = (cx, cy, R) => (x, y) => astroid(x - cx, y - cy, R) <= 1;
+  const OR = (...f) => (x, y) => f.some((g) => g(x, y));
+  const NOT = (a, b) => (x, y) => a(x, y) && !b(x, y);
+  const ARC = (cx, cy, r, w, a0, a1) => (x, y) => {
+    if (Math.abs(Math.hypot(x - cx, y - cy) - r) > w / 2) return false;
+    let a = Math.atan2(y - cy, x - cx) * 180 / Math.PI;
+    if (a < a0) a += 360;
+    return a <= a1;
+  };
+
+  /* ---------- 小点阵图标（24 单位坐标；[谓词, 色类, 透明度] 取第一个命中） ---------- */
+  const docBody = RRS(4.5, 2.5, 15, 19, 2.6, 2);
+  const docLines = OR(S(8.5, 9, 15.5, 9, 1.6), S(8.5, 12.5, 15.5, 12.5, 1.6), S(8.5, 16, 12.5, 16, 1.6));
+  const cloud = OR(C(8, 14.5, 4.6), C(13, 10.5, 5.8), C(17.5, 14.5, 4.2), RR(3.5, 13, 18, 6.4, 3.2));
+  const cloudIn = OR(C(8, 14.5, 2.6), C(13, 10.5, 3.8), C(17.5, 14.5, 2.2), RR(5.5, 14.8, 14, 2.6, 1.3));
+  const folderShape = OR(RRS(3, 8, 18, 12, 2.6, 2), RR(3, 5.5, 8, 4.5, 1.6));
+  const qMark = (cx, cy) => OR(C(cx, cy, 3.6), S(cx - 3.1, cy - 0.8, cx + 0.6, cy - 8.8, 2.3));
+  const ICONS = {
+    folder: [[folderShape, 'd', .78]],
+    folderOpen: [[POLY([[2.5, 20], [6.2, 11.5], [22.5, 11.5], [19, 20]]), 'd', .5], [OR(RRS(3, 5.5, 16, 14.5, 2.4, 2), RR(3, 4, 7, 3, 1.2)), 'd', .82]],
+    folderPlus: [[OR(S(18, 14.2, 18, 21.8, 2.3), S(14.2, 18, 21.8, 18, 2.3)), 'a', 1], [NOT(OR(RRS(2, 7, 17, 12, 2.6, 2), RR(2, 4.5, 7.5, 4.5, 1.6)), C(18, 18, 5.2)), 'd', .78]],
+    folderOff: [[S(3, 3, 21, 21, 1.9), 'd', .85], [NOT(folderShape, S(3, 3, 21, 21, 4.4)), 'd', .55]],
+    doc: [[docLines, 'd', .55], [docBody, 'd', .85]],
+    docErr: [[OR(S(12, 7, 12, 13, 2.2), C(12, 16.6, 1.3)), 'e', 1], [docBody, 'd', .8]],
+    docQuestion: [[C(12, 17.4, 1.2), 'a', 1], [OR(ARC(12, 10, 3, 1.8, -180, 60), S(12, 12.8, 12, 14.4, 1.8)), 'd', .85], [docBody, 'd', .45]],
+    fileX: [[OR(S(9.2, 10.5, 14.8, 16.5, 1.9), S(14.8, 10.5, 9.2, 16.5, 1.9)), 'a', 1], [docBody, 'd', .85]],
+    chat: [[OR(S(8, 8.5, 16, 8.5, 1.6), S(8, 12, 13, 12, 1.6)), 'd', .5], [OR(RRS(3, 3.5, 18, 13.5, 3.2, 2), POLY([[6.5, 16], [6.5, 21], [12, 16.5]])), 'd', .82]],
+    search: [[C(8.2, 8.2, 1.5), 'a', 1], [OR(RING(10.5, 10.5, 6.6, 2.1), S(15.4, 15.4, 20.6, 20.6, 2.6)), 'd', .85], [C(10.5, 10.5, 5.3), 'd', .12]],
+    history: [[C(12, 12, 1.6), 'a', 1], [OR(ARC(12, 12, 8.5, 2, -150, 180), S(12, 12, 12, 7.2, 1.9), S(12, 12, 15.2, 13.8, 1.9), POLY([[1.4, 6.6], [7.6, 7.2], [3.8, 11.8]])), 'd', .85]],
+    cloudOff: [[S(3, 3, 21, 21, 1.9), 'd', .85], [NOT(NOT(cloud, cloudIn), S(3, 3, 21, 21, 4.4)), 'd', .85], [NOT(cloudIn, S(3, 3, 21, 21, 4.4)), 'd', .14]],
+    sparkleOff: [[AST(19.8, 4.2, 3.2), 'a', .95], [AST(11, 13, 9.5), 'd', .38]],
+    quote: [[qMark(7.5, 15), 'a', 1], [qMark(16.5, 15), 'a', .8]],
+    outline: [[S(3, 6, 5.5, 6, 2), 'a', 1], [S(8, 6, 21, 6, 2), 'd', .55], [OR(S(6, 12, 18, 12, 1.8), S(6, 18, 15, 18, 1.8)), 'd', .28]],
+    branch: [[RING(18, 7, 2.4, 1.9), 'a', 1], [OR(RING(6, 5.5, 2.4, 1.9), RING(6, 18.5, 2.4, 1.9), S(6, 8, 6, 16, 1.9), S(18, 9.5, 18, 10.6, 1.9), S(18, 10.6, 8.2, 16.6, 1.9)), 'd', .85]],
+    dots: [[C(4, 12, 2), 'a', 1], [C(12, 12, 2), 'd', .45], [C(20, 12, 2), 'd', .25]],
+  };
+  // 统一点距：按显示尺寸取整到 0.2px，点径两档（中性 .34 / 强调 .40），统一左上受光
+  function iconPitch(size) { return size <= 20 ? 1.9 : size <= 32 ? 2.2 : size <= 44 ? 2.6 : 3; }
+  function drawIcon(svg, name, x0, y0, size) {
+    const parts = ICONS[name];
+    const pitch = iconPitch(size), k = size / 24, st = pitch / k;
+    const off = (24 - Math.floor(24 / st) * st) / 2 + st / 2;
+    for (let v = off; v < 24; v += st)
+      for (let u = off; u < 24; u += st)
+        for (const [f, cls, o] of parts) {
+          if (!f(u, v)) continue;
+          const light = clamp(0.5 + ((12 - u) + (12 - v)) / 36);
+          const nd = cls === 'd';
+          dot(svg, x0 + u * k, y0 + v * k, pitch * (nd ? 0.34 : 0.4) * (nd ? 0.9 + light * 0.2 : 1), o * (nd ? 0.74 + light * 0.26 : 1), cls);
+          break;
+        }
+    return (x, y) => { const u = (x - x0) / k, v = (y - y0) / k; return u >= 0 && u <= 24 && v >= 0 && v <= 24 && parts.some(([f]) => f(u, v)); };
+  }
+
+  /* ---------- 大图 ---------- */
+  const ARTS = {};
+
+  // 点阵鹅：原样保留（另有专人重绘），仅做分组动画
+  ARTS.goose = (svg, W, H, ds) => {
+    svg.setAttribute('viewBox', '0 0 220 200');
+    const p = +ds.pitch || 5, headOnly = ds.head === '1';
+    const head = E(110, 86, 54, 56), body = OR(head, C(101, 31, 12), C(119, 26, 9));
+    const eyes = OR(E(89, 92, 6.5, 8.5), E(131, 92, 6.5, 8.5)), beak = E(110, 113, 16, 9.5);
+    const book = RR(34, 122, 152, 70, 8), label = RR(124, 150, 44, 18, 4), mark = RR(140, 104, 16, 24, 3);
+    const wings = OR(E(38, 164, 17, 20), E(182, 164, 17, 20));
+    const edge = (f, x, y) => !f(x - p, y) || !f(x + p, y) || !f(x, y - p) || !f(x, y + p);
+    const any = (x, y) => body(x, y) || (!headOnly && (book(x, y) || wings(x, y) || mark(x, y)));
+    const hG = el('g', null, svg), bG = el('g', null, svg), sG = el('g', null, svg);
+    haloRand(hG, 220, 200, 110, headOnly ? 88 : 112, headOnly ? 100 : 118, any, 6, 0.16);
+    grid(bG, 220, 200, p, (x, y) => {
+      if (!headOnly) {
+        if (wings(x, y)) {
+          const L = clamp(0.5 + ((x < 110 ? 38 : 182) - x + 164 - y) / 60);
+          return edge(wings, x, y) ? { r: p * 0.25, o: 0.62 } : { r: p * (0.14 + L * 0.08), o: 0.25 + L * 0.25 };
+        }
+        if (mark(x, y)) return { r: p * 0.27, o: 0.95, cls: 'a' };
+        if (book(x, y)) {
+          if (edge(book, x, y)) return { r: p * 0.25, o: 0.62 };
+          if (Math.abs(x - 110) < p * 0.6) return { r: p * 0.22, o: 0.5 };
+          if (label(x, y)) return edge(label, x, y) ? { r: p * 0.2, o: 0.45 } : null;
+          const L = clamp(0.6 - (x - 34) / 300 - (y - 122) / 200);
+          return { r: p * (0.14 + L * 0.08), o: 0.16 + L * 0.24 };
+        }
+      }
+      if (eyes(x, y)) return null;
+      if (beak(x, y)) return { r: p * 0.25, o: 0.8 };
+      if (body(x, y)) {
+        if (edge(body, x, y)) return { r: p * 0.24, o: 0.58 };
+        const t = 1 - Math.sqrt(((x - 110) / 54) ** 2 + ((y - 86) / 56) ** 2);
+        const L = clamp(0.5 + ((110 - x) + (86 - y)) / 150);
+        return { r: p * (0.12 + clamp(t) * 0.1 + L * 0.06), o: clamp(0.14 + clamp(t) * 0.3 + L * 0.25) };
+      }
+      return null;
+    });
+    grid(bG, 220, 200, p * 0.6, (x, y) => eyes(x, y) ? { r: p * 0.2, o: 0.95 } : null);
+    sparkle(sG, 220, 200, headOnly ? 178 : 188, headOnly ? 34 : 50, headOnly ? 13 : 14, Math.max(3, p * 0.8));
+    sparkle(sG, 220, 200, headOnly ? 197 : 206, headOnly ? 58 : 74, 6.5, Math.max(3, p * 0.6));
+    // 光晕由中心向外缓慢波动；鹅身整体轻微浮动；小星不规则微亮
+    svg.style.setProperty('--fp', '10s');
+    ringParts(svg, { cx: 110, cy: 110, n: 9, rev: true }, [
+      { items: [...hG.children], loop: 'r' },
+      { items: [...bG.children], into: el('g', 'lp-f', svg) },
+      { items: [...sG.children] },
+    ]);
+    return true;
+  };
+
+  // 01：展开书本 + 品牌蓝书签（4px 网格；正文行贴页面斜率；页面底纹有序抖动）
+  ARTS.book = (svg) => {
+    const W = 220, H = 180, p = 4;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const left = POLY([[24, 58], [106, 70], [106, 156], [24, 144]]), right = POLY([[114, 70], [196, 58], [196, 144], [114, 156]]);
+    const page = OR(left, right);
+    const ribbon = POLY([[162, 54], [174, 52], [174, 108], [168, 100], [162, 108]]);
+    const edge = (f, x, y) => !f(x - p, y) || !f(x + p, y) || !f(x, y - p) || !f(x, y + p);
+    const topL = (x) => 58 + (x - 24) * 12 / 82, topR = (x) => 70 - (x - 114) * 12 / 82;
+    const hG = el('g', null, svg), bG = el('g', null, svg), sG = el('g', null, svg);
+    halo(hG, W, H, 110, 106, 108, (x, y) => page(x, y) || ribbon(x, y) || (x > 104 && x < 116 && y > 62 && y < 162), 7, 0.15, 0.85);
+    grid(bG, W, H, p, (x, y, i, j) => {
+      if (ribbon(x, y)) return { r: 1.2, o: 0.95, cls: 'a' };
+      if (x > 106 && x < 114 && y > 66 && y < 160) return { r: 1.05, o: 0.5 };
+      if (!page(x, y)) return null;
+      if (edge(page, x, y)) return { r: 1.1, o: 0.6 };
+      const isL = x < 110, d = y - (isL ? topL(x) : topR(x));
+      const rows = [16, 28, 40, 52, 64], xs = isL ? [34, 98] : [122, 186];
+      for (let r = 0; r < rows.length; r++) {
+        const end = r === rows.length - 1 ? xs[0] + (xs[1] - xs[0]) * 0.55 : xs[1];
+        if (Math.abs(d - rows[r]) < p / 2 && x > xs[0] && x < end) return { r: 0.95, o: 0.42 };
+      }
+      if (bayer(i, j) > 0.26) return null;
+      const L = clamp(0.55 - (x - 24) / 400 - (y - 58) / 260);
+      return { r: 0.6, o: 0.07 + L * 0.1 };
+    });
+    sparkle(sG, W, H, 196, 30, 13);
+    sparkle(sG, W, H, 178, 16, 5, 3);
+    // 光晕波纹外扩；书本浮动 + 光束扫过；书签与小星微亮
+    ringParts(svg, { cx: 110, cy: 104 }, [
+      { items: [...hG.children], loop: 'r' },
+      { items: [...bG.children], into: el('g', 'lp-f', svg), loop: 'w', bins: 14 },
+      { items: [...sG.children] },
+    ]);
+    return true;
+  };
+
+  // 05：源码 DotMatrixSparkle 复刻（seed 7，星芒点各消耗两次随机数）
+  ARTS.aiStar = (svg) => {
+    svg.setAttribute('viewBox', '0 0 220 190');
+    seed = 7;
+    const skip = () => { rand(); rand(); };
+    const cx = 104, cy = 100, R = 78, sx = 172, sy = 42, sR = 24;
+    grid(svg, 220, 190, 6, (x, y) => {
+      const ks = astroid(x - sx, y - sy, sR);
+      if (ks <= 1) { const t = 1 - ks; skip(); return { r: 0.9 + t * 1.3, o: 0.55 + t * 0.45, cls: 'a sp' }; }
+      const k = astroid(x - cx, y - cy, R);
+      if (k <= 1) {
+        const t = 1 - k; skip();
+        const light = clamp(0.5 + (cx - x + (cy - y)) / (R * 3));
+        return { r: 0.8 + t * 1.5, o: clamp(0.18 + t * 0.55 + light * 0.25), cls: 'd st' };
+      }
+      const d = Math.hypot(x - cx, y - cy);
+      if (d < 92) { const t = 1 - d / 92; if (rand() > 0.35 + t * 0.6) return null; return { r: 0.55 + t * 0.5, o: 0.05 + t * 0.18 }; }
+      return null;
+    });
+    // 光晕波纹外扩；主星极缓缩放呼吸；品牌蓝小星微亮
+    const cs = [...svg.querySelectorAll('circle')], is = (k) => (c) => c.classList.contains(k);
+    ringParts(svg, { cx, cy }, [
+      { items: cs.filter((c) => !is('st')(c) && !is('sp')(c)), loop: 'r' },
+      { items: cs.filter(is('st')), into: el('g', 'lp-s', svg) },
+      { items: cs.filter(is('sp')) },
+    ]);
+    return true;
+  };
+
+  // 14：源码 DotMatrixCommitGraph 复刻 + 沿分支流动
+  ARTS.git = (svg) => {
+    const W = 240, H = 190, my = 124, by = 64, V = 4; // V：流速 ms/px
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    seed = 7;
+    const nodes = [
+      { x: 46, y: my, r: 8, kind: 'solid' }, { x: 88, y: my, r: 8, kind: 'solid' }, { x: 142, y: my, r: 8, kind: 'solid' },
+      { x: 126, y: by, r: 8, kind: 'ring' }, { x: 162, y: by, r: 8, kind: 'ring' }, { x: 196, y: my, r: 11, kind: 'head' },
+    ];
+    const inArt = (x, y) => Math.abs(y - my) < 6 || nearNode(x, y, nodes, 4) || (x > 88 && x < 200 && y > by - 6 && y < my);
+    const haloG = el('g', null, svg);
+    grid(haloG, W, H, 6, (x, y) => {
+      if (inArt(x, y)) return null;
+      const d = Math.hypot((x - 120) * 0.85, y - 98);
+      if (d >= 104) return null;
+      const t = 1 - d / 104;
+      if (rand() > 0.3 + t * 0.6) return null;
+      return { r: 0.55 + t * 0.5, o: 0.05 + t * 0.17 };
+    });
+    const haloDots = [...haloG.children];
+    // 到达时间：主干从左向右；分支自 88 节点分出，经上方两个提交回到汇合点
+    const branchPts = sample([[[88, my], [88, 88], [100, by], [126, by]], line([126, by], [162, by]), [[162, by], [186, by], [196, 90], [196, my]]], 5);
+    const tMain = (x) => (x - 10) * V, t88 = tMain(88);
+    const tBranch = (k) => t88 + (k + 1) * 5 * V;
+    const tHead = Math.max(tMain(196), tBranch(branchPts.length - 1)) + 40;
+    const graph = el('g', 'rg', svg);
+    graph.style.setProperty('--i', 0);
+    const bins = new Map();
+    const bin = (t) => { const key = Math.round(t / 48); if (!bins.has(key)) { const g = el('g', 'fl'); g.style.setProperty('--t', (key * 48) + 'ms'); bins.set(key, g); } return bins.get(key); };
+    sample([line([10, my], [230, my])], 5).forEach(([x, y]) => {
+      if (nearNode(x, y, nodes, 3)) return;
+      const fade = clamp(Math.min(x - 10, 230 - x) / 34);
+      dot(bin(x > 196 ? tHead + (x - 196) * V : tMain(x)), x, y, 0.75 + fade * 0.45, 0.12 + fade * 0.48);
+    });
+    branchPts.forEach(([x, y], k) => { if (!nearNode(x, y, nodes, 3)) dot(bin(tBranch(k)), x, y, 1.05, 0.5); });
+    [...bins.keys()].sort((a, b) => a - b).forEach((k) => graph.appendChild(bins.get(k)));
+    nodes.forEach((n) => {
+      let t;
+      if (n.kind === 'head') t = tHead;
+      else if (n.y === my) t = tMain(n.x);
+      else { let best = 0, bd = 1e9; branchPts.forEach(([x, y], k) => { const d = Math.hypot(x - n.x, y - n.y); if (d < bd) { bd = d; best = k; } }); t = tBranch(best); }
+      const g = el('g', 'fn' + (n.kind === 'head' ? ' hd' : ''), graph);
+      g.style.setProperty('--t', Math.round(t) + 'ms');
+      const target = n.kind === 'head' ? el('g', 'hdv', g) : g;
+      grid(target, W, H, 3.2, (x, y) => {
+        const d = Math.hypot(x - n.x, y - n.y);
+        if (d > n.r) return null;
+        const light = clamp(0.5 + (n.x - x + (n.y - y)) / (n.r * 3));
+        if (n.kind === 'ring') return d > n.r - 3.4 ? { r: 0.9, o: 0.4 + light * 0.3 } : null;
+        const tt = 1 - d / n.r;
+        if (n.kind === 'head') return { r: 0.7 + tt * 0.8, o: 0.6 + tt * 0.4, cls: 'a' };
+        return { r: 0.6 + tt * 0.7, o: clamp(0.3 + tt * 0.35 + light * 0.25) };
+      }, n.x % 3.2, n.y % 3.2);
+    });
+    const spG = el('g', null, svg);
+    // 源码 sparkle：4px 网格、无偏移
+    [[214, 40, 13], [196, 26, 6]].forEach(([sx, sy, sR]) => grid(spG, W, H, 4, (x, y) => {
+      const k = astroid(x - sx, y - sy, sR);
+      if (k > 1) return null;
+      const t = 1 - k;
+      return { r: 0.7 + t * 1.1, o: 0.55 + t * 0.45, cls: 'a sp' };
+    }));
+    const haloGroups = ringify(svg, { cx: 120, cy: 98, items: haloDots, loop: 'r' });
+    haloGroups.forEach((g) => svg.insertBefore(g, graph));
+    ringify(svg, { cx: 120, cy: 98, items: [...spG.children] });
+    haloG.remove(); spG.remove();
+    return true;
+  };
+
+  // 11：平静的趋势底座，末端品牌蓝；底线按列做正弦行波
+  ARTS.flatline = (svg) => {
+    const W = 300, H = 72;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const field = el('g', null, svg);
+    const base = [];
+    grid(field, W, H, 10, (x, y, i, j) => {
+      const fade = clamp(x / W * 1.4);
+      if (y > 60) { base.push([x, y, fade]); return null; }
+      const v = (0.03 + fade * 0.07) * (y / H + 0.3);
+      if (j < 3 && bayer(i, j) > 0.5 + y / H) return null;
+      return { r: 0.7, o: v };
+    });
+    ringify(svg, { items: [...field.children], cx: W / 2, cy: H, n: 6, loop: 'r' });
+    field.remove();
+    const wrap = el('g', 'rg', svg);
+    wrap.style.setProperty('--i', 2);
+    base.forEach(([x, y, fade], c) => {
+      const g = el('g', 'wv', wrap);
+      g.style.setProperty('--w', (c / 18).toFixed(3));
+      if (x > W - 10) dot(el('g', 'k-a', g), x, y, 2.2, 0.95, 'a');
+      else dot(g, x, y, 1.1, 0.12 + fade * 0.38);
+    });
+    return true;
+  };
+
+  // 16：错位断裂的正文行；断裂段可在「重试」悬停时预备归位
+  ARTS.glitch = (svg) => {
+    const W = 200, H = 70, p = 5;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const flat = el('g', null, svg);
+    const shifted = [];
+    const rows = [{ y: 8, e: 190 }, { y: 24, e: 170 }, { y: 40, e: 180 }, { y: 56, e: 112 }];
+    rows.forEach(({ y, e }, i) => {
+      for (let x = p / 2; x < e; x += p) {
+        if (i === 2 && x > 72 && x < 94) continue;
+        const fade = clamp((e - x) / 40);
+        if (i === 2 && x >= 94) { shifted.push([x, y + 4, 0.26 * (0.35 + fade * 0.65)]); continue; }
+        dot(flat, x, y, 1.15, 0.5 * (0.35 + fade * 0.65));
+      }
+    });
+    dot(flat, 83, 40, 2.1, 0.95, 'a');
+    ringify(svg, { items: [...flat.children], cx: 83, cy: 40, n: 6, loop: 'r' });
+    flat.remove();
+    const g = el('g', 'rg', svg);
+    g.style.setProperty('--i', 3);
+    const fix = el('g', 'gfix', el('g', 'shk dr', g));
+    shifted.forEach(([x, y, o]) => dot(fix, x, y, 1.15, o));
+    svg.querySelector('.k-a').classList.add('blk');
+    return true;
+  };
+
+  // 03：从空态文字指向上方 ＋ 的点阵轨迹（沿路径显现）
+  ARTS.trail = (svg) => {
+    svg.setAttribute('viewBox', '0 0 248 90');
+    const pts = sample([[[196, 66], [222, 66], [224, 52], [224, 38]]], 5);
+    pts.forEach(([x, y], i) => { const t = i / (pts.length - 1); dot(svg, x, y, 0.8 + t * 0.4, 0.14 + t * 0.4); });
+    dot(svg, 224, 33.5, 1.6, 0.95, 'a');
+    // 沿轨迹由文字向 ＋ 缓慢流动
+    svg.style.setProperty('--rp', '8s'); svg.style.setProperty('--rs', '.45s'); svg.style.setProperty('--ro', '.9');
+    ringify(svg, { cx: 196, cy: 66, n: 6, loop: 'r' });
+    return true;
+  };
+  // 03：侧栏底部渐隐点阵（由左下角显现）
+  ARTS.sideFade = (svg) => {
+    svg.setAttribute('viewBox', '0 0 248 120');
+    grid(svg, 248, 120, 10, (x, y, i, j) => {
+      const t = clamp((y - 20) / 100) * clamp(1 - x / 300);
+      if (t <= 0.02 || bayer(i, j) > 0.35 + t * 0.9) return null;
+      return { r: t > 0.5 ? 1.1 : t > 0.25 ? 0.9 : 0.7, o: 0.03 + t * 0.15 };
+    });
+    ringify(svg, { cx: 0, cy: 120, n: 5, loop: 'r' });
+    return true;
+  };
+  // 04：对话区底部渐隐点阵带（由右下角显现）
+  ARTS.bandFade = (svg) => {
+    svg.setAttribute('viewBox', '0 0 360 150');
+    grid(svg, 360, 150, 10, (x, y, i, j) => {
+      const t = clamp((y - 10) / 140) * clamp(0.3 + x / 360);
+      if (t <= 0.03 || bayer(i, j) > 0.3 + t * 0.9) return null;
+      return { r: t > 0.55 ? 1.1 : t > 0.3 ? 0.9 : 0.7, o: 0.03 + t * 0.14 };
+    });
+    ringify(svg, { cx: 360, cy: 150, n: 6, loop: 'r' });
+    return true;
+  };
+  // 20：点阵圆角虚框（按实际尺寸，沿周长显现）
+  ARTS.dotFrame = (svg) => {
+    const r = svg.getBoundingClientRect();
+    const W = Math.round(r.width) || 300, H = Math.round(r.height) || 44, rad = 8, gap = 5, i = 1;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const L = i, T = i, R = W - i, B = H - i;
+    const k = 0.5523 * rad;
+    const segs = [
+      line([L + rad, T], [R - rad, T]), [[R - rad, T], [R - rad + k, T], [R, T + rad - k], [R, T + rad]],
+      line([R, T + rad], [R, B - rad]), [[R, B - rad], [R, B - rad + k], [R - rad + k, B], [R - rad, B]],
+      line([R - rad, B], [L + rad, B]), [[L + rad, B], [L + rad - k, B], [L, B - rad + k], [L, B - rad]],
+      line([L, B - rad], [L, T + rad]), [[L, T + rad], [L, T + rad - k], [L + rad - k, T], [L + rad, T]],
+    ];
+    const fg = el('g', 'fg', svg);
+    const idx = new Map();
+    sample(segs, gap).forEach(([x, y], n) => idx.set(dot(fg, x, y, 0.8, 0.32), n));
+    // 沿周长缓慢绕行的明暗
+    svg.style.setProperty('--rp', '12s'); svg.style.setProperty('--rs', '.6s');
+    ringify(svg, { into: fg, items: [...fg.children], dist: (x, y, c) => idx.get(c), ox: 0, oy: 0, loop: 'r' });
+    return true;
+  };
+
+  /* ---------- 挂载 ---------- */
+  // 各图循环周期按黄金比错开（6–14s 区间内），避免整页同步
+  const vary = (svg, k) => {
+    const f = (n) => (k * 0.618034 * n + 0.37) % 1, st = svg.style;
+    st.setProperty('--ld', (-6 - f(4) * 7).toFixed(2) + 's');
+    st.setProperty('--rp', (9 + f(1) * 5).toFixed(1) + 's');
+    st.setProperty('--fp', (8 + f(2) * 4).toFixed(1) + 's');
+    st.setProperty('--ap', (7.5 + f(3) * 5).toFixed(1) + 's');
+    st.setProperty('--spp', (6.5 + f(5) * 3).toFixed(1) + 's');
+    st.setProperty('--wp', (10.5 + f(7) * 3.5).toFixed(1) + 's');
+  };
+  let vk = 1;
+  const sizeOf = (svg) => [+svg.getAttribute('width') || 0, +svg.getAttribute('height') || 0];
+  document.querySelectorAll('svg[data-icon]').forEach((svg, idx) => {
+    reseed(hash(svg.dataset.icon) + idx);
+    const [W, H] = sizeOf(svg), size = +svg.dataset.size || W;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('aria-hidden', 'true');
+    svg.classList.add('dm');
+    vary(svg, vk++);
+    const x0 = (W - size) / 2, y0 = (H - size) / 2;
+    const ig = el('g', null, svg);
+    const hit = drawIcon(ig, svg.dataset.icon, x0, y0, size);
+    let hg = null;
+    if (svg.dataset.halo) {
+      hg = el('g', null);
+      svg.insertBefore(hg, ig);
+      halo(hg, W, H, W / 2, H / 2, Math.min(W * 0.62, H * 0.9), hit, size >= 48 ? 6 : 5, 0.15);
+    }
+    const fx = svg.dataset.fx;
+    if (fx === 'scan') {
+      // 进行中：图标按行打包，行扫描循环
+      const halos = hg ? ringify(svg, { items: [...hg.children], loop: 'r' }) : [];
+      const wrap = el('g', 'rg', svg);
+      wrap.style.setProperty('--i', 0);
+      const rows = new Map();
+      [...ig.children].forEach((c) => { const y = c.getAttribute('cy'); if (!rows.has(y)) rows.set(y, []); rows.get(y).push(c); });
+      const keys = [...rows.keys()].sort((a, b) => a - b);
+      keys.forEach((y, r) => { const g = el('g', 'sc', wrap); g.style.setProperty('--r', r); g.style.setProperty('--rr', keys.length - 1 - r); rows.get(y).forEach((c) => g.appendChild(c)); });
+      halos.forEach((g) => svg.insertBefore(g, wrap));
+      ig.remove(); if (hg) hg.remove();
+    } else {
+      // 错误：入场后整体一次水平抖动，感叹号闪断一次，之后接入同样缓慢的循环
+      const host = fx === 'err' ? el('g', 'shk', svg) : svg;
+      // 文件夹 / 云 / 大纲：浮动 + 光束扫过；其余：浮动，无光晕的小图标自身做波纹
+      const sweep = /^(folder|cloud|outline)/.test(svg.dataset.icon);
+      if (size <= 28) svg.style.setProperty('--fy', '-.35px');
+      const parts = [];
+      if (hg) parts.push({ items: [...hg.children], into: host, loop: 'r' });
+      parts.push({ items: [...ig.children], into: el('g', 'lp-f', host), loop: sweep ? 'w' : hg ? null : 'r', bins: 8 });
+      ringParts(svg, fx === 'ltr' ? { cx: 0, cy: H / 2, n: 3 } : {}, parts);
+    }
+  });
+  document.querySelectorAll('svg[data-art]').forEach((svg, idx) => {
+    reseed(hash(svg.dataset.art) + (svg.dataset.seed != null ? +svg.dataset.seed : idx));
+    const [W, H] = sizeOf(svg);
+    svg.setAttribute('aria-hidden', 'true');
+    svg.classList.add('dm');
+    vary(svg, vk++);
+    if (svg.dataset.fx === 'conv') svg.classList.add('conv');
+    if (!ARTS[svg.dataset.art](svg, W, H, svg.dataset)) ringify(svg, { loop: 'r' });
+  });
+  document.querySelectorAll('[data-corners]').forEach((host) => {
+    corners(host, host.dataset.corners.split(' '), +host.dataset.cs || 132, +host.dataset.cp || 10, +host.dataset.cm || 0.22);
+  });
+
+  /* ---------- 播放：首次进入视口播放入场；离开视口暂停循环 ---------- */
+  const play = (svg, quick = false) => {
+    svg.classList.remove('in');
+    svg.classList.toggle('quick', quick);
+    void svg.getBoundingClientRect();
+    svg.classList.remove('pre');
+    svg.classList.add('in');
+    svg.dataset.played = '1';
+  };
+  const all = [...document.querySelectorAll('.dm')];
+  if (MOTION) all.forEach((s) => s.classList.add('pre'));
+  else all.forEach((s) => { s.classList.add('in'); s.dataset.played = '1'; });
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    const s = e.target;
+    s.classList.toggle('off', !e.isIntersecting);
+    if (e.isIntersecting && !s.dataset.played && MOTION) play(s);
+  }), { threshold: 0.2 });
+  all.forEach((s) => io.observe(s));
+  const root = document.documentElement;
+  const syncVisibility = () => root.classList.toggle('hid', document.hidden);
+  syncVisibility();
+  document.addEventListener('visibilitychange', syncVisibility);
+  motionPreference.addEventListener('change', (e) => {
+    MOTION = !e.matches;
+    // 偏好改变不重播入场；避免屏外插画残留 pre 而在恢复动效时消失。
+    all.forEach((s) => { s.classList.remove('pre'); s.classList.add('in'); s.dataset.played = '1'; });
+  });
+
+  const replay = (sec, quick) => sec.querySelectorAll('.dm').forEach((s) => {
+    if (quick && s.classList.contains('corner')) return;
+    if (s.closest('[hidden]')) { delete s.dataset.played; s.classList.add('pre'); s.classList.remove('in'); return; }
+    play(s, quick);
+  });
+
+  /* ---------- 状态切换（淡出缩回 90ms → 聚合进入 ≈ 230ms）---------- */
+  function applyState(sec) {
+    const s = sec.dataset.state;
+    sec.querySelectorAll('[data-s]').forEach((n) => { n.toggleAttribute('hidden', !n.dataset.s.split(' ').includes(s)); });
+    sec.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.set === s)));
+  }
+  function switchTo(sec, s) {
+    if (sec.dataset.state === s) return;
+    const done = () => {
+      sec.dataset.state = s;
+      applyState(sec);
+      sec.classList.remove('swap-out', 'swap-in');
+      if (!MOTION) return;
+      void sec.offsetWidth;
+      sec.classList.add('swap-in');
+      replay(sec, true);
+    };
+    if (!MOTION) return done();
+    sec.classList.add('swap-out');
+    setTimeout(done, 90);
+  }
+  document.querySelectorAll('.block[data-state]').forEach((sec) => {
+    applyState(sec);
+    sec.querySelector('.seg').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-set]');
+      if (b) switchTo(sec, b.dataset.set);
+    });
+  });
+
+  /* ---------- 重播按钮（每块） ---------- */
+  document.querySelectorAll('.block').forEach((sec) => {
+    const b = document.createElement('button');
+    b.className = 'rp'; b.type = 'button'; b.setAttribute('aria-label', '重播');
+    b.innerHTML = '<svg class="li"><use href="#i-replay"/></svg>';
+    b.addEventListener('click', () => { if (MOTION) replay(sec, false); });
+    sec.querySelector('.bh-end').appendChild(b);
+    const retry = sec.querySelector('.retry');
+    if (retry) retry.addEventListener('click', () => { if (MOTION) replay(sec, true); });
+  });
+
+  /* ---------- 目录跳转 ---------- */
+  document.querySelectorAll('.toc tr[data-go]').forEach((tr) => tr.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    document.getElementById(tr.dataset.go).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.replaceState(null, '', '#' + tr.dataset.go);
+  }));
+
+  /* ---------- 主题切换 ---------- */
+  const label = document.getElementById('themeLabel');
+  const apply = (t) => { root.dataset.theme = t; label.textContent = t === 'dark' ? '浅色' : '深色'; };
+  apply(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.getElementById('themeToggle').addEventListener('click', () => apply(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+})();
+</script>
+</body>
+</html>
