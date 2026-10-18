@@ -7,7 +7,12 @@ import {
 import { clipboardHasPasteableImage } from "../utils/pasteClipboardImage";
 import { handleEditorStructurePaste } from "./editorStructurePaste";
 import { handleEditorTextPaste } from "./editorTextPaste";
-import type { Editor } from "./editorPasteBlocks";
+import {
+  cachePasteTarget,
+  plainHasGooseColumnMarkers,
+  tryPasteGooseMarkdownFragment,
+  type Editor,
+} from "./editorPasteBlocks";
 export {
   shouldPasteHtmlAsBlocks,
   shouldPasteClipboardAsBlocks,
@@ -63,6 +68,14 @@ export function useEditorPaste({
       if (handleEditorStructurePaste(editor, event, plainText, htmlText))
         return;
       if (!plainText) return;
+      if (plainHasGooseColumnMarkers(plainText)) {
+        const target = cachePasteTarget(editor);
+        if (target && tryPasteGooseMarkdownFragment(editor, plainText, target)) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+      }
       handleEditorTextPaste(editor, event, plainText, htmlText);
     },
     [editable, editor],

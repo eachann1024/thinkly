@@ -9,11 +9,12 @@ function scaleImage(
   width: number,
   height: number,
   previewWidth?: number,
+  contentWidth = DOCX_CONTENT_WIDTH_PX,
 ): { width: number; height: number } {
   const maxWidth =
     Number.isFinite(previewWidth) && previewWidth && previewWidth > 0
-      ? Math.min(previewWidth, DOCX_CONTENT_WIDTH_PX)
-      : DOCX_CONTENT_WIDTH_PX;
+      ? Math.min(previewWidth, contentWidth)
+      : contentWidth;
   if (width <= maxWidth) return { width, height };
   const ratio = maxWidth / width;
   return {
@@ -63,7 +64,7 @@ export async function imageParagraph(
       padX: 0,
     });
   }
-  const size = scaleImage(image.width, image.height, options?.previewWidth);
+  const size = scaleImage(image.width, image.height, options?.previewWidth, ctx.contentWidthPx);
   const paragraphs: Paragraph[] = [
     tightParagraph({
       alignment: alignmentFromBlock(options?.alignment) ?? AlignmentType.CENTER,

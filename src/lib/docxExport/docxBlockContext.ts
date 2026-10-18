@@ -10,6 +10,8 @@ export type DocxExportContext = {
   font: DocxFontConfig;
   pageLocalFilePath?: string | null;
   numbering: DocxNumberingState;
+  /** 分栏内的可用宽度（px）；缺省为整页正文宽度。 */
+  contentWidthPx?: number;
 };
 
 export const HEADING_LEVELS: Record<number, (typeof HeadingLevel)[keyof typeof HeadingLevel]> = {

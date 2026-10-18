@@ -8,6 +8,7 @@ import { asRecord, blockProps, paragraphShading, isCheckedProp, type DocxExportC
 import { imageParagraph, placeholderParagraph, mediaLabel } from "./docxMedia";
 import { blockToTable } from "./docxTable";
 import { codeBlockToChildren } from "./docxCodeBlock";
+import { columnsToTable } from "./docxColumns";
 export { blockToTable } from "./docxTable";
 export type { DocxBlockChild } from "./docxLayout";
 export type { DocxNumberingState, DocxExportContext } from "./docxBlockContext";
@@ -211,6 +212,12 @@ export async function processBlockChildren(
         }
         break;
       }
+      case "columnLayout":
+        result.push(...(await columnsToTable(block, ctx, (items, inner) => processBlockChildren(items, depth, inner))));
+        break;
+      case "columnSection":
+        result.push(...(await processBlockChildren(children, depth, ctx, extras)));
+        break;
       case "file":
       case "audio":
       case "video": {

@@ -7,7 +7,7 @@ import { getSelectedImageUrl } from "../utils/selection";
 import { copyImageSrcToClipboard } from "../image/imageUtils";
 import { deleteCutSelection, normalizeBlockNoteClipboardHtml } from "../extensions/copyBlockClipboard";
 import { snapshotEditorSelection, restoreEditorSelection, type EditorSelectionSnapshot } from "../utils/editorSelectionSnapshot";
-import { withoutBlockNoteClipboardIds, withoutCopiedBlockIds, shouldIsolateTitleStructurePaste } from "../hooks/editorPasteBlocks";
+import { cachePasteTarget, plainHasGooseColumnMarkers, tryPasteGooseMarkdownFragment, withoutBlockNoteClipboardIds, withoutCopiedBlockIds, shouldIsolateTitleStructurePaste } from "../hooks/editorPasteBlocks";
 import { looksLikeBlockStructure, looksLikeMarkdownFragment, normalizeMarkdownPasteText } from "../utils/clipboard";
 import { htmlLooksLikeBlockNoteClipboard } from "../utils/multilinePaste";
 import { focusPastedBlock } from "../utils/pasteAtCursor";
@@ -92,6 +92,11 @@ export function useEditorContextClipboard(
         return;
       }
       // 原生 paste 使用缓存的精确选区和 data-pm-slice 开放边界，部分文字不会变整块追加。
+      const columnTarget = !internal && plainHasGooseColumnMarkers(plain) ? cachePasteTarget(editor) : null;
+      if (columnTarget && tryPasteGooseMarkdownFragment(editor, plain, columnTarget)) {
+        editor.focus();
+        return;
+      }
       if (internal) editor.pasteHTML(withoutBlockNoteClipboardIds(internal), true);
       else if (html) editor.pasteHTML(html);
       else if (looksLikeMarkdownFragment(plain)) editor.pasteMarkdown(plain);

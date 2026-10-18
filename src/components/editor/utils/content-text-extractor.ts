@@ -11,9 +11,18 @@ export function extractTitleFromContent(content: JSONContent): string {
   return extractBlockNoteTitle(content);
 }
 
+/** 分栏只是排版外壳，栏内块对摘要来说等同顶层块。 */
+function flattenColumnBlocks(blocks: any[]): any[] {
+  return blocks.flatMap((block) =>
+    block?.type === "columnLayout" || block?.type === "columnSection"
+      ? flattenColumnBlocks(Array.isArray(block.children) ? block.children : [])
+      : [block],
+  );
+}
+
 function getTopLevelBlocks(content: JSONContent): any[] {
-  if (Array.isArray(content)) return content;
-  return Array.isArray(content?.content) ? content.content : [];
+  if (Array.isArray(content)) return flattenColumnBlocks(content);
+  return Array.isArray(content?.content) ? flattenColumnBlocks(content.content) : [];
 }
 
 function getBlockLevel(block: any): number | undefined {
