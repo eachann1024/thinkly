@@ -14,6 +14,8 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
+APP_BUNDLE = 'Thinkly.app'
+BUNDLE_ID = 'com.thinkly.desktop'
 
 
 def run(*args, **kwargs):
@@ -63,7 +65,7 @@ def write_layout(mount, alias_type, store_type):
                                  showItemInfo=False, labelOnBottom=True, textSize=16.,
                                  iconSize=88., scrollPositionX=0., scrollPositionY=0.)
         store['.']['icvl'] = ('type', b'icnv')
-        for name, position in {'Goose Note.app': (240, 270), 'Applications': (720, 270),
+        for name, position in {APP_BUNDLE: (240, 270), 'Applications': (720, 270),
                                '安装指令.command': (480, 520), '.background.tiff': (10000, 10000),
                                '.VolumeIcon.icns': (10180, 10000), '.DS_Store': (10360, 10000)}.items():
             store[name]['Iloc'] = position
@@ -95,11 +97,11 @@ def attach(image, readonly=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--app', type=Path, default=ROOT / 'dist-electron/packaged/mac-arm64/Goose Note.app')
+    parser.add_argument('--app', type=Path, default=ROOT / 'dist-electron/packaged/mac-arm64' / APP_BUNDLE)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     info = plistlib.loads((args.app / 'Contents/Info.plist').read_bytes())
-    if info.get('CFBundleIdentifier') != 'com.goosenote.desktop':
+    if info.get('CFBundleIdentifier') != BUNDLE_ID:
         raise RuntimeError('Unexpected application bundle')
     title = 'Thinkly ' + info['CFBundleShortVersionString'] + ' Clean'
     if not title.isascii() or len(title.encode()) > 27:
@@ -122,7 +124,7 @@ def main():
         run('diskutil', 'image', 'create', 'blank', '--format', 'RAW', '--size', '1g',
             '--volumeName', title, '--fs', 'APFS', raw, timeout=240)
         with attach(raw) as mount:
-            run('ditto', args.app, mount / 'Goose Note.app')
+            run('ditto', args.app, mount / APP_BUNDLE)
             for source, name in [('electron/installer/background.tiff', '.background.tiff'),
                                  ('electron/icons/icon.icns', '.VolumeIcon.icns'),
                                  ('electron/installer/安装指令.command', '安装指令.command')]:
@@ -132,7 +134,7 @@ def main():
             (mount / 'Applications').symlink_to('/Applications')
             write_layout(mount, Alias, DSStore)
             run('SetFile', '-a', 'C', mount)
-            run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
+            run('codesign', '--verify', '--deep', '--strict', mount / APP_BUNDLE)
         run('diskutil', 'image', 'create', 'from', '--format', 'UDZO', raw, result, timeout=180)
         run('hdiutil', 'verify', result, timeout=60)
         with attach(result, readonly=True) as mount:
@@ -155,7 +157,7 @@ def main():
             if not run('/usr/bin/xattr', '-px', 'com.apple.ResourceFork', command,
                        capture_output=True).stdout.strip():
                 raise RuntimeError('Installation command custom icon data is missing')
-            run('codesign', '--verify', '--deep', '--strict', mount / 'Goose Note.app')
+            run('codesign', '--verify', '--deep', '--strict', mount / APP_BUNDLE)
         hasher = hashlib.sha256()
         with result.open('rb') as image_file:
             for chunk in iter(lambda: image_file.read(1024 * 1024), b''):
