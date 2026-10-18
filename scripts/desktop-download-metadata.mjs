@@ -19,11 +19,7 @@ export function releaseAssets(version) {
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
-  // 已发布客户端按后缀选包，不看 Goose.Note 前缀。信任校验比对的是这条地址原文，不跟随重定向：
-  // v1.7.240 起只接受 goose-notes，v1.7.317 同时接受 goose-note。下载本身由 fetch 跟随 301 到 thinkly。
-  const downloadRepo = repo === "eachann1024/thinkly" || repo === "eachann1024/goose-note"
-    ? "eachann1024/goose-notes"
-    : repo;
+  const downloadRepo = repo;
   return {
     tag_name: tag, html_url: `https://github.com/${repo}/releases/tag/${tag}`,
     releaseNotes, publishedAt,
