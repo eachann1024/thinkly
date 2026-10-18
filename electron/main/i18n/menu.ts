@@ -3,6 +3,7 @@ import { createTranslator, i18nYaml } from "../../../src/i18n/core";
 import { CLOSE_TAB_ACCELERATOR, CLOSE_WINDOW_ACCELERATOR } from "../closeTabAccelerator";
 import { createWorkspaceWindow, getMainWindow, requestCloseActiveTab } from "../windows";
 import { localizedAppName } from "./appName";
+import { splitLayoutViewItems } from "./splitLayoutMenu";
 
 const t = createTranslator(i18nYaml<"electron/main/i18n/menu.ts#block1:1">`
 zh-Hans:
@@ -33,6 +34,10 @@ zh-Hans:
   forceReload: 强制重新加载
   devTools: 开发者工具
   fullscreen: 切换全屏
+  splitColumns: 左右两栏
+  splitRows: 上下两栏
+  splitGrid: 四宫格
+  splitEqualize: 均分各格
   window: 窗口
   minimize: 最小化
   zoom: 缩放
@@ -65,6 +70,10 @@ en:
   forceReload: Force Reload
   devTools: Developer Tools
   fullscreen: Toggle Full Screen
+  splitColumns: Two Columns
+  splitRows: Two Rows
+  splitGrid: Four Panes
+  splitEqualize: Equalize Panes
   window: Window
   minimize: Minimize
   zoom: Zoom
@@ -97,6 +106,10 @@ ja:
   forceReload: "強制的に再読み込み"
   devTools: "開発者ツール"
   fullscreen: "フルスクリーンを切り替え"
+  splitColumns: "左右 2 列"
+  splitRows: "上下 2 段"
+  splitGrid: "4 分割"
+  splitEqualize: "各ペインを均等に"
   window: "ウィンドウ"
   minimize: "最小化"
   zoom: "拡大/縮小"
@@ -133,6 +146,7 @@ export function installMenu(): void {
       { role: "reload", label: t("reload") }, { role: "forceReload", label: t("forceReload") },
       { role: "toggleDevTools", label: t("devTools") }, { type: "separator" },
       { role: "togglefullscreen", label: t("fullscreen") },
+      ...splitLayoutViewItems(t),
     ] },
     { role: "window", label: t("window"), submenu: [
       { role: "minimize", label: t("minimize") }, { role: "zoom", label: t("zoom") },
