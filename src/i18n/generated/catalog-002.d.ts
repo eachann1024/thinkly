@@ -116,7 +116,7 @@ declare module "../types" {
     "src/pages/workspace/components/character-onboarding/CharacterOnboarding.tsx#localMessages:1": { "characters": {  }; "confirm": {  }; "title": {  } };
     "src/pages/workspace/components/command/pageSearchIndex.ts#localMessages:1": { "untitled": {  } };
     "src/pages/workspace/components/command/searchPageFilter.ts#localMessages:1": { "untitled": {  } };
-    "src/pages/workspace/components/command/splitPaletteActions.ts#localMessages:1": { "closePane": {  }; "maximizePane": {  }; "splitDown": {  }; "splitRight": {  } };
+    "src/pages/workspace/components/command/splitPaletteActions.ts#localMessages:1": { "closePane": {  }; "maximizePane": {  }; "splitDown": {  }; "splitRight": {  }; "syncScroll": {  } };
     "src/pages/workspace/components/command/useCommandSearch.ts#localMessages:1": { "searchFailedTryDifferentKeywords": {  }; "untitled": {  } };
     "src/pages/workspace/components/command/useCommandSearchScope.ts#localMessages:1": { "couldnTReadTheSearchFolderClose": {  } };
     "src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1": { "noteNotFound": {  }; "thisNoteIsInTrash": {  } };

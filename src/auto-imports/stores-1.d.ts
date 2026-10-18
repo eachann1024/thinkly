@@ -65,6 +65,8 @@ declare global {
   const isNotebookAiTab: typeof import('../stores/useTabs').isNotebookAiTab
   const isQuickNoteDraftEmpty: typeof import('../stores/useQuickNote').isQuickNoteDraftEmpty
   const isSpecialTab: typeof import('../stores/useTabs').isSpecialTab
+  const isSyncScrollAvailable: typeof import('../stores/useEditorSplit').isSyncScrollAvailable
+  const isSyncScrollEnabled: typeof import('../stores/useEditorSplit').isSyncScrollEnabled
   const loadQuickNoteSlotNames: typeof import('../stores/useQuickNote').loadQuickNoteSlotNames
   const migrateNotebookAiChatsState: typeof import('../stores/useNotebookAiChats').migrateNotebookAiChatsState
   const pageFileNavKey: typeof import('../stores/useFileNavHistory').pageFileNavKey
