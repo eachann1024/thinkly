@@ -2,6 +2,7 @@ import { createChecker } from "./lib/check";
 import {
   centeredSearchWindowBounds,
   parseOpenSearchResultPayload,
+  parseSearchWindowCommand,
   resolveSearchHotkeySurface,
   resolveSearchResultPageId,
   SEARCH_WINDOW_HEIGHT,
@@ -70,6 +71,29 @@ export default async function run(): Promise<number> {
   check("按 id 命中", resolveSearchResultPageId(pages, { pageId: "local-nb-a.md", query: "" }) === "local-nb-a.md");
   check("id 不一致时按文件路径回退", resolveSearchResultPageId(pages, { pageId: "local-nb-b.md", query: "", localFilePath: "/notes/b.md" }) === "local-nb-b.md~2");
   check("尚未加载时返回空", resolveSearchResultPageId(pages, { pageId: "missing", query: "", localFilePath: "/notes/c.md" }) === null);
+
+  console.log("· 主窗动作");
+  const continued = parseSearchWindowCommand({
+    type: "continue-ai",
+    token: " t1 ",
+    notebookId: " nb ",
+    question: " 周报里写了什么 ",
+    text: "写了进度。",
+    sources: [{ id: "p1", title: "周报", index: 1 }, { id: "p2", title: "附录", index: null }],
+  });
+  check("续聊保留记号、笔记本、问题、正文与来源", continued?.type === "continue-ai" && continued.token === "t1" && continued.notebookId === "nb" && continued.question === " 周报里写了什么 " && continued.text === "写了进度。" && continued.sources.length === 2 && continued.sources[1].index === null, continued);
+  check("回答完成可静默归档", parseSearchWindowCommand({ type: "archive-ai", token: "t1", notebookId: "nb", question: "q", text: "a", sources: [] })?.type === "archive-ai");
+  check("过长问题截断", parseSearchWindowCommand({ type: "continue-ai", token: "t", notebookId: "nb", question: "q".repeat(5000), text: "", sources: [] })?.type === "continue-ai" && (parseSearchWindowCommand({ type: "continue-ai", token: "t", notebookId: "nb", question: "q".repeat(5000), text: "", sources: [] }) as { question: string }).question.length === 4000);
+  check("空问题拒绝", parseSearchWindowCommand({ type: "continue-ai", token: "t", notebookId: "nb", question: "  ", text: "", sources: [] }) === null);
+  check("缺少记号拒绝", parseSearchWindowCommand({ type: "archive-ai", notebookId: "nb", question: "q", text: "a", sources: [] }) === null);
+  check("流式续问只保留问题", parseSearchWindowCommand({ type: "ask-ai", notebookId: " nb ", question: "周报" })?.type === "ask-ai");
+  check("坏来源拒绝", parseSearchWindowCommand({ type: "continue-ai", notebookId: "nb", question: "q", text: "", sources: [{ id: "", title: "周报", index: 1 }] }) === null);
+  check("打开 AI 设置", parseSearchWindowCommand({ type: "open-settings", tab: "ai" })?.type === "open-settings");
+  check("其他设置页拒绝", parseSearchWindowCommand({ type: "open-settings", tab: "general" }) === null);
+  check("隐藏最近", parseSearchWindowCommand({ type: "hide-recent" })?.type === "hide-recent");
+  check("分屏动作", parseSearchWindowCommand({ type: "split", action: "split-right" })?.type === "split");
+  check("未知分屏拒绝", parseSearchWindowCommand({ type: "split", action: "equalize" }) === null);
+  check("未知命令拒绝", [null, "continue-ai", { type: "ask" }].every((value) => parseSearchWindowCommand(value) === null));
 
   return checker.failed;
 }

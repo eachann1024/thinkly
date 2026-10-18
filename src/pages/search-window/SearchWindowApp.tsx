@@ -2,14 +2,31 @@ import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useState } from "react";
 import { refreshReadOnlyPersistence } from "@/bootstrap/readOnlyPersistence";
 import { getGooseDesktop } from "@/lib/electron/runtime";
+import type { SearchWindowCommand } from "@/lib/electron/searchWindow";
 import { useNotebooks } from "@/stores/useNotebooks";
+import { useSettings } from "@/stores/useSettings";
 import { SearchSheet } from "@/pages/workspace/components/search-sheet/SearchSheet";
 import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearchSession";
 import { readOnlySearchFolderSource } from "@/pages/workspace/components/sidebar/readOnlySearchFolderSource";
 import { useCommandSearchIndexWarmup } from "@/pages/workspace/components/command/useCommandSearchIndexWarmup";
-import type { SearchResultPage } from "@/pages/workspace/components/command/useCommandSearch";
 import { Toaster } from "@/components/ui/sonner";
 import "./search-window.css";
+
+const SETTINGS_KEY = "goose-note-settings";
+
+/** 主窗不在时，只改共享设置里的「搜索显示最近」字段，避免用本窗旧快照覆盖整份设置。 */
+function patchPersistedShowRecent(enabled: boolean): void {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as { state?: Record<string, unknown> };
+    if (!parsed.state || typeof parsed.state !== "object") return;
+    parsed.state.showRecentInSearch = enabled;
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
+  } catch {
+    // 写失败时本窗内存已更新，下次唤出再跟主窗对齐。
+  }
+}
 
 /** 每次唤出重开会话：拿最新的当前笔记本作起点，并以新的来源引用触发一次后台重扫。 */
 function reopenSession(): void {
@@ -19,8 +36,8 @@ function reopenSession(): void {
 }
 
 /**
- * 浮动搜索窗根组件：复用应用内搜索面板，会话常开（窗口自身负责显隐），
- * 打开结果交给主窗，Esc / 关闭只收起窗口。
+ * 浮动搜索窗根组件：复用应用内搜索面板，会话常开（窗口自身负责显隐）。
+ * 打开结果、续聊、设置与分屏交给主窗；Esc / 关闭只收起窗口。
  */
 export function SearchWindowApp() {
   useLocale();
@@ -62,7 +79,7 @@ export function SearchWindowApp() {
     void getGooseDesktop()?.hideSearchWindow?.();
   }, []);
 
-  const openResult = useCallback((page: SearchResultPage) => {
+  const openResult = useCallback((page: { id: string; localFilePath?: string }) => {
     const { query } = useSearchSession.getState();
     void getGooseDesktop()?.openSearchResult?.({
       pageId: page.id,
@@ -71,12 +88,22 @@ export function SearchWindowApp() {
     });
   }, []);
 
+  const sendCommand = useCallback((command: SearchWindowCommand) => {
+    if (command.type === "hide-recent") useSettings.getState().setShowRecentInSearch(false);
+    void getGooseDesktop()?.searchWindowCommand?.(command).then((delivered) => {
+      if (command.type === "hide-recent" && !delivered) patchPersistedShowRecent(false);
+    });
+  }, []);
+
+  const aiNotebookId = useNotebooks((state) => state.activeNotebookId || Object.keys(state.notebooks)[0] || null);
+
   return (
     <div className="search-window-root">
       <SearchSheet
-        aiNotebookId={null}
+        aiNotebookId={aiNotebookId}
         variant="window"
         onOpenResult={openResult}
+        onCommand={sendCommand}
         onClose={close}
         folderSource={folderSource}
       />
