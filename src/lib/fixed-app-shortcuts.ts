@@ -14,6 +14,12 @@ export const FIXED_SPLIT_SHORTCUTS = {
   splitFocusPrevious: "Mod+Alt+[",
   splitFocusNext: "Mod+Alt+]",
   splitZoom: "Mod+Shift+Enter",
+  splitMoveLeft: "Mod+Alt+Shift+ArrowLeft",
+  splitMoveRight: "Mod+Alt+Shift+ArrowRight",
+  splitMoveUp: "Mod+Alt+Shift+ArrowUp",
+  splitMoveDown: "Mod+Alt+Shift+ArrowDown",
+  splitEqualize: "Mod+Alt+E",
+  splitMaximize: "Mod+Alt+Enter",
   // 关闭分屏统一交给 Mod+W 的分层关闭，不注册独立动作。
   closeSplitPane: "",
 } as const;

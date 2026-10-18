@@ -7,6 +7,7 @@ import {
   splitRight,
   toggleZoom,
 } from "@/lib/editor-split/commands";
+import { createSplitLayoutHotkeys } from "./splitLayout";
 import type { HotkeyEntry } from "./types";
 import type { AppHotkeyActions } from "./actions";
 
@@ -136,5 +137,6 @@ export function createSplitHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         toggleZoom();
       },
     },
+    ...createSplitLayoutHotkeys(actions),
   ];
 }
