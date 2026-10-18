@@ -121,6 +121,12 @@ export function installPerfInstrumentation(): void {
   if (!perfEnabled) return;
   markStartup("main-module");
   app.once("ready", () => markStartup("app-ready"));
+  // 用户真正看到窗口的时刻：窗口在 ready-to-show 之后才 show，之前是隐藏的。
+  // 必须在 browser-window-created 上挂，web-contents-created 时 BrowserWindow 还没构造完。
+  app.on("browser-window-created", (_event, win) => {
+    win.once("ready-to-show", () => markStartup("ready-to-show:workspace"));
+    win.once("show", () => markStartup("window-shown:workspace"));
+  });
   app.on("web-contents-created", (_event, contents) => {
     if (contents.getType() !== "window") return;
     const kind = "workspace";
