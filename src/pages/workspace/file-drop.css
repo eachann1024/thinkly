@@ -1,0 +1,15 @@
+.workspace-shell[data-file-drop-target="editor"] .workspace-editor-surface,
+.workspace-shell[data-file-drop-target="sidebar"] .workspace-sidebar-pane {
+  box-shadow: inset 0 0 0 2px hsl(var(--primary));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-editor-surface, .workspace-sidebar-pane {
+    transition: box-shadow 120ms ease;
+  }
+}
+.workspace-shell[data-file-drop-target="rejected"] .workspace-sidebar-pane {
+  box-shadow: inset 0 0 0 2px hsl(var(--destructive));
+}
+.workspace-shell[data-file-drop-target="pending"] .workspace-sidebar-pane {
+  box-shadow: inset 0 0 0 1px hsl(var(--border));
+}

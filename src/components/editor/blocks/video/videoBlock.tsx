@@ -27,21 +27,21 @@ zh-Hans:
   saveFailed: "保存失败"
   processingVideo: "视频处理中…"
   addVideo: "添加视频"
-  chooseALocalVideoToAutomaticallyCompressIt: "点击选择本地视频，将自动压缩为 MP4"
+  chooseALocalVideoToAutomaticallyCompressIt: "选择本地视频"
   loadingVideo: "视频加载中…"
 en:
   savedToDownloads: "Saved to Downloads"
   saveFailed: "Save failed"
   processingVideo: "Processing video…"
   addVideo: "Add video"
-  chooseALocalVideoToAutomaticallyCompressIt: "Choose a local video to automatically compress it to MP4"
+  chooseALocalVideoToAutomaticallyCompressIt: "Choose a local video"
   loadingVideo: "Loading video…"
 ja:
   savedToDownloads: "ダウンロードフォルダに保存しました"
   saveFailed: "保存に失敗しました"
   processingVideo: "ビデオを処理中…"
   addVideo: "ビデオを追加"
-  chooseALocalVideoToAutomaticallyCompressIt: "クリックしてローカルのビデオを選択すると、自動的に MP4 に圧縮されます"
+  chooseALocalVideoToAutomaticallyCompressIt: "ローカルのビデオを選択"
   loadingVideo: "ビデオを読み込み中…"
 `;
 const t = createTranslator(messages);
@@ -162,7 +162,7 @@ function VideoBlockContent({
   }, [selected, updateToolbarRect]);
 
   const handleEnterBelow = useCallback(() => {
-    ensureParagraphAfter(editor, block);
+    if (editor.isEditable) ensureParagraphAfter(editor, block);
   }, [block, editor]);
 
   const handleReplace = useCallback(() => {
@@ -236,7 +236,7 @@ function VideoBlockContent({
         window.requestAnimationFrame(updateToolbarRect);
       }}
     >
-      <GooseVideoPlayer src={resolvedSrc} onEnterBelow={handleEnterBelow} />
+      <GooseVideoPlayer src={resolvedSrc} onEnterBelow={handleEnterBelow} onDownload={handleDownload} />
       {selected &&
         toolbarRect &&
         editor.isEditable &&

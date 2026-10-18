@@ -1,3 +1,4 @@
+import { captureLocalAssetTarget, isLocalAssetTargetCurrent } from "@/lib/local-file-assets";
 import type { BlockNoteEditorOptions } from "@blocknote/core";
 import { normalizeExternalUrl } from "@/lib/openExternalUrl";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
@@ -52,7 +53,13 @@ export function createEditorOptions(
       },
     },
     uploadFile: async (file, blockId) => {
+      const pageId = session.pageIdForUpdateRef.current;
+      const target = pageId ? captureLocalAssetTarget(pageId) : null;
       return uploadEditorFile(file, blockId, {
+        localAssetTarget: target,
+        requireLocalAssetTarget: Boolean(session.pageRef.current?.localFilePath),
+        isTargetCurrent: () => session.pageIdForUpdateRef.current === pageId &&
+          session.inlineAiScopeRef.current().editable && (!target || isLocalAssetTargetCurrent(target)),
         getBlock: (id) => editorInstanceRef.current?.getBlock(id),
         imageStorage: platformRef.current.imageStorage,
         fileStorage,

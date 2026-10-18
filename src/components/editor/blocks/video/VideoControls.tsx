@@ -1,4 +1,5 @@
 import { EditorAction } from "@/components/editor/ui/button";
+import { useState } from "react";
 import {
   Maximize2,
   Minimize2,
@@ -9,6 +10,8 @@ import {
 } from "@/components/ui/icons";
 import { formatTime } from "./videoTime";
 import type { useVideoPlayback } from "./useVideoPlayback";
+import type { useVideoPlaybackRate } from "./useVideoPlaybackRate";
+import { VideoSpeedMenu } from "./VideoSpeedMenu";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/video/VideoControls.tsx#messages:1">`
 zh-Hans:
@@ -41,10 +44,13 @@ const t = createTranslator(messages);
 
 export function VideoControls({
   playback,
+  playbackRate,
 }: {
   playback: ReturnType<typeof useVideoPlayback>;
+  playbackRate: ReturnType<typeof useVideoPlaybackRate>;
 }) {
   useLocale();
+  const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
   const {
     playing,
     current,
@@ -60,7 +66,7 @@ export function VideoControls({
     progress,
   } = playback;
   return (
-    <div className="goose-video-player__chrome">
+    <div className="goose-video-player__chrome" data-menu-open={speedMenuOpen ? "true" : "false"}>
       <div className="goose-video-player__gradient" aria-hidden="true" />
 
       <div
@@ -145,6 +151,9 @@ export function VideoControls({
         </div>
 
         <div className="goose-video-player__bar-right">
+          <VideoSpeedMenu rate={playbackRate.selectedRate} onSelect={playbackRate.selectRate}
+            portalContainer={isFullscreen ? playback.rootRef.current ?? undefined : undefined}
+            onOpenChange={(open) => { setSpeedMenuOpen(open); playback.revealControls(); }} />
           <EditorAction context="media"
             type="button"
             className="goose-video-player__btn"

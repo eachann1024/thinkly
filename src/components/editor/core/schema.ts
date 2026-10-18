@@ -1,3 +1,4 @@
+import { customAudioBlock } from "../blocks/audioBlock";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core/blocks";
 import { gooseTableBlockSpec } from "../blocks/table/gooseTableBlockSpec";
 import { gooseHeadingBlockSpec } from "@/components/editor/blocks/heading/headingBlockSpec";
@@ -24,6 +25,7 @@ export const editorSchema = BlockNoteSchema.create({
     callout: calloutBlock,
     image: customImageBlock,
     video: customVideoBlock,
+    audio: customAudioBlock,
     file: customFileBlock,
     codeBlock: codeBlockSpec,
   },

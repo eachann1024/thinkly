@@ -2,6 +2,10 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/editor-split/SplitEditorPane.tsx#localMessages:1": { "closeThisPane": {  }; "noteNotFound": {  }; "retry": {  }; "theNoteCouldnTBeDisplayed": {  }; "thisNoteNoLongerExists": {  } };
+    "src/pages/workspace/components/editor-split/SplitPaneHeader.tsx#localMessages:1": { "closeThisPane": {  }; "dragToRearrangePanes": {  }; "dragToTheEdgeOfAnotherPane": {  }; "movePane": { "title": string | number } };
+    "src/pages/workspace/components/editor-split/splitDropGeometry.ts#localMessages:1": { "moveAbove": {  }; "moveBelow": {  }; "moveLeft": {  }; "moveRight": {  }; "swapPositions": {  } };
+    "src/pages/workspace/components/editor-split/useSplitPaneDrag.ts#localMessages:1": { "edgeTarget": { "name": string | number }; "moveCanceled": {  }; "movingPane": { "title": string | number }; "pane": {  }; "panesRearranged": {  }; "swapPositions": {  }; "swapTarget": { "name": string | number }; "untitled": {  } };
     "src/pages/workspace/components/history/HistoryReadOnlyEditor.tsx#messages:1": { "theContentMayUseAnOlderFormatOr": {  }; "thisNoteCannotBePreviewed": {  }; "thisNoteCouldNotBeFoundSoIts": {  }; "thisVersionCannotBeDisplayed": {  } };
     "src/pages/workspace/components/history/history-view/HistoryReader.tsx#messages:1": { "ifYouUseCloudStorageSignInAnd": {  }; "loadingVersion": {  }; "noVersionHistory": {  }; "retry": {  }; "selectAVersionOnTheLeft": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormat": {  }; "thisVersionIsTemporarilyUnavailable": {  }; "versionHistoryCouldNotBeLoaded": {  } };
     "src/pages/workspace/components/history/history-view/HistoryToolbar.tsx#messages:1": { "back": {  }; "backToEditor": {  }; "loading": {  }; "loadingVersion": {  }; "restoreThisVersion": {  }; "restoring": {  }; "restoringVersion": {  }; "selectAVersion": {  }; "version": {  } };
@@ -118,9 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/local-folder-settings/useLocalFolderSettings.tsx#localMessages:1": { "attachmentCleanupRequiresTheDesktopApp_0b32": {  }; "couldNotOpenTheAttachmentCleanup_59de": {  }; "couldNotRefreshHiddenFolders_1ba7": {  }; "someLocalFoldersHaveUnsavedChanges_5f18": {  } };
     "src/pages/workspace/components/sidebar/main-tree/SidebarMainTree.tsx#localMessages:1": { "couldNotLoadLocalFolder_538d": {  }; "folderRefreshFailedShowingThePrevious_ed5e": {  }; "newFile_e48a": {  }; "newFolder_f3a4": {  }; "new_26bb": {  }; "reload_64ca": {  }; "retry_132c": {  } };
     "src/pages/workspace/components/sidebar/main-tree/controller/renderMainTreeSurface.tsx#localMessages:1": { "fileName_d2e2": {  }; "page_59ce": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeDragActions.tsx#localMessages:1": { "moveFailed": { "error": string | number } };
-    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1": { "couldNotCreateItemTheName_2735": {  }; "folderCreated_1541": {  }; "newFolder_f3a4": {  }; "theDestinationFolderNoLongerExists_0e13": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
-    "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
   }
 }

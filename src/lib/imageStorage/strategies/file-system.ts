@@ -26,7 +26,7 @@ import { fs } from "@/lib/electron-platform/fs";
 import { isInternalAssetRef } from "@/lib/internalAssetRef";
 
 const LOCAL_FILE_EXTENSIONS =
-  /\.(png|jpe?g|gif|webp|svg|bmp|ico|tiff?|html?|pdf|txt|md|markdown|json|csv|zip)$/i;
+  /\.(png|jpe?g|gif|webp|svg|bmp|ico|avif|tiff?|html?|pdf|txt|md|markdown|json|csv|zip|mp3|m4a|wav|ogg|oga|flac|aac|opus|weba|mp4|m4v|mov|webm|ogv)$/i;
 
 import { guessMime } from "./fileMime";
 

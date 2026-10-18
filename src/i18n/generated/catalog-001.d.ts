@@ -30,6 +30,7 @@ declare module "../types" {
     "src/components/editor/ai/pageInlineRewriteSession.ts#messages:1": { "aiDidNotReturnAnyContentThatCould": {  }; "generatingWithPrefix": { "prefix": string | number } };
     "src/components/editor/ai/selectionPrivacy.ts#messages:1": { "aiDidNotReturnAnyContentThatCould": {  }; "selectTextFromBodyBlocksAtTheSame": {  }; "theSelectionContainsATableOrNonText": {  }; "theSelectionContainsNonTextBlocksSelectA": {  } };
     "src/components/editor/ai/transport/runInlineMarkdownRewrite.ts#messages:1": { "aiDidNotReturnAnyContentThatCould": {  } };
+    "src/components/editor/blocks/audioBlock.tsx#block1:1": { "add": {  }; "download": {  }; "failed": {  }; "saveFailed": {  } };
     "src/components/editor/blocks/callout/calloutBlock.tsx#messages:1": { "calloutIcon": {  } };
     "src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1": { "addCodeCaption": {  }; "collapseCodeBlock": {  }; "expandCodeBlock": {  } };
     "src/components/editor/blocks/code/CodeBlockToolbar.tsx#messages:1": { "codeActions": {  }; "codeCopied": {  }; "copied": {  }; "copyCode": {  }; "formatCode": {  }; "turnOffLineWrapping": {  }; "wrapLines": {  } };
@@ -47,8 +48,9 @@ declare module "../types" {
     "src/components/editor/blocks/mermaid/MermaidView.tsx#messages:1": { "loadingDiagram": {  }; "previewUnavailableCheckTheSource": {  } };
     "src/components/editor/blocks/shared/MediaPlaceholder.tsx#messages:1": { "uploading": {  } };
     "src/components/editor/blocks/toggle/toggleBlockHelpers.ts#messages:1": { "expandOrCollapseChildBlocks": {  } };
-    "src/components/editor/blocks/video/GooseVideoPlayer.tsx#messages:1": { "pause": {  }; "play": {  }; "theVideoCouldNotBeReadReplaceIt": {  }; "videoPlayer": {  } };
+    "src/components/editor/blocks/video/GooseVideoPlayer.tsx#messages:1": { "download": {  }; "pause": {  }; "play": {  }; "theVideoCouldNotBeReadReplaceIt": {  }; "videoPlayer": {  } };
     "src/components/editor/blocks/video/VideoControls.tsx#messages:1": { "exitFullScreen": {  }; "fullScreen": {  }; "mute": {  }; "pause": {  }; "play": {  }; "playbackProgress": {  }; "unmute": {  } };
+    "src/components/editor/blocks/video/VideoSpeedMenu.tsx#messages:1": { "holdForTripleSpeed": {  }; "playbackSpeed": {  } };
     "src/components/editor/blocks/video/VideoToolbar.tsx#messages:1": { "alignCenter": {  }; "alignLeft": {  }; "alignRight": {  }; "deleteVideo": {  }; "downloadVideo": {  }; "replaceVideo": {  }; "videoActions": {  } };
     "src/components/editor/blocks/video/videoBlock.tsx#messages:1": { "addVideo": {  }; "chooseALocalVideoToAutomaticallyCompressIt": {  }; "loadingVideo": {  }; "processingVideo": {  }; "saveFailed": {  }; "savedToDownloads": {  } };
     "src/components/editor/core/EditorLinkPopover.tsx#messages:1": { "confirm": {  } };
@@ -61,6 +63,7 @@ declare module "../types" {
     "src/components/editor/core/editorLocale.ts#messages:1": { "quote": {  }; "typeToInsertABlock": {  } };
     "src/components/editor/core/useEditorClipboard.ts#messages:1": { "couldNotCopyTheImageToTheClipboard": {  }; "imageCopiedTheNoteHasChangedSoThe": {  } };
     "src/components/editor/core/useEditorExtensions.ts#messages:1": { "couldNotOpenThisPath": {  } };
+    "src/components/editor/core/useEditorFileDrop.ts#block1:1": { "changed": {  }; "failed": {  }; "saved": { "count": string | number }; "skipped": { "count": string | number }; "unavailable": {  } };
     "src/components/editor/extensions/copyBlockClipboard.ts#messages:1": { "couldNotWriteToTheClipboardYourOriginal": {  } };
     "src/components/editor/hooks/editorPasteBlocks.ts#messages:1": { "theNoteHasChangedPleasePasteAgain": {  } };
     "src/components/editor/hooks/editorStructurePaste.ts#messages:1": { "theNoteHasChangedPleasePasteAgain": {  } };
@@ -119,8 +122,5 @@ declare module "../types" {
     "src/components/ui/image-export/theme-model.ts#localMessages:1": { "sampleEdition": {  }; "sampleFile": {  }; "sampleHeading": {  } };
     "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
     "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
-    "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
-    "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
-    "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
   }
 }

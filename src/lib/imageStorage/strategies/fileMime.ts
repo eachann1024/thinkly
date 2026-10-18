@@ -20,9 +20,20 @@ const MIME_MAP: Record<string, string> = {
   m4v: "video/x-m4v",
   mov: "video/quicktime",
   webm: "video/webm",
+  ogv: "video/ogg",
+  mp3: "audio/mpeg",
+  m4a: "audio/mp4",
+  wav: "audio/wav",
+  ogg: "audio/ogg",
+  oga: "audio/ogg",
+  flac: "audio/flac",
+  aac: "audio/aac",
+  opus: "audio/ogg",
+  weba: "audio/webm",
+  avif: "image/avif",
 };
 
 export function guessMime(filePath: string): string {
-  const ext = filePath.split(".").pop()?.toLowerCase() || "png";
-  return MIME_MAP[ext] || "image/png";
+  const ext = filePath.split(/[?#]/, 1)[0].split(".").pop()?.toLowerCase() || "";
+  return MIME_MAP[ext] || "application/octet-stream";
 }

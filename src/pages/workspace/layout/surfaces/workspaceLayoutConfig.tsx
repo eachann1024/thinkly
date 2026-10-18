@@ -8,7 +8,7 @@ const isElectronChrome = isElectronRuntime();
 
 export interface WorkspaceLayoutProps {
   isDragging: boolean;
-  dragIntent: "folder" | "text-file" | "file";
+  dragIntent: "folder" | "text-file" | "file" | "editor" | "sidebar" | "rejected" | "pending";
   onDragEnter: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;

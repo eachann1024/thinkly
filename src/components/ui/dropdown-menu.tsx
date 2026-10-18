@@ -75,6 +75,8 @@ type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   motion?: "default" | "instant";
   /** 设置选项保留选择指示；所有菜单共用同一套外观。 */
   variant?: DropdownVariant;
+  /** Keep menus inside a fullscreen element when the browser restricts its top layer. */
+  portalContainer?: Element;
 };
 const menuSurfaceClass =
   "goose-menu-surface text-popover-foreground";
@@ -91,6 +93,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       editorContext: _editorContext,
       motion = "default",
       variant = "dropdown",
+      portalContainer,
       ...props
     },
     ref,
@@ -103,6 +106,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       <DropdownVariantContext.Provider value={variant}>
         <Dropdown.Popover
           {...props}
+          UNSTABLE_portalContainer={portalContainer}
           ref={ref}
           offset={sideOffset}
           crossOffset={alignOffset}

@@ -73,6 +73,10 @@
   color: var(--goose-text-on-dark-secondary);
 }
 
+.goose-video-player__error button {
+  pointer-events: auto;
+}
+
 .goose-video-player__center-play {
   position: absolute;
   inset: 0;

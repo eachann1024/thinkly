@@ -1,3 +1,4 @@
+import { discardSavedLocalAsset, saveLocalAsset, type LocalAssetTarget } from "@/lib/local-file-assets";
 import type { FileAttachmentAttrs } from "@/types";
 import {
   resolveImageMimeForUpload,
@@ -18,6 +19,9 @@ const t = createTranslator(messages);
 
 
 export interface EditorFileUploadDeps {
+  localAssetTarget?: LocalAssetTarget | null;
+  requireLocalAssetTarget?: boolean;
+  isTargetCurrent?: () => boolean;
   getBlock: ((id: string) => { type?: string } | null | undefined) | null;
   imageStorage: {
     save: (blob: Blob, mimeType: string) => Promise<string>;
@@ -33,10 +37,22 @@ export async function uploadEditorFile(
   blockId: string | undefined,
   deps: EditorFileUploadDeps,
 ): Promise<string> {
+  if (deps.requireLocalAssetTarget && !deps.localAssetTarget) {
+    throw new Error(t("thisNotebookDoesNotSupportUploadingAttachments"));
+  }
   const getBlock = deps.getBlock
     ? (id: string) => deps.getBlock?.(id) ?? undefined
     : null;
   const targetBlock = blockId && getBlock ? getBlock(blockId) : undefined;
+
+  if (deps.localAssetTarget) {
+    const saved = await saveLocalAsset(file, deps.localAssetTarget);
+    if (deps.isTargetCurrent?.() === false || (blockId && (!getBlock?.(blockId) || getBlock(blockId)?.type !== targetBlock?.type))) {
+      await discardSavedLocalAsset(saved);
+      throw new Error(t("thisNotebookDoesNotSupportUploadingAttachments"));
+    }
+    return saved.url;
+  }
 
   if (
     targetBlock?.type !== "file" &&
