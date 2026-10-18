@@ -110,11 +110,11 @@ export function renderWebdavConfiguration(
       className="pb-3"
     >
       <div className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="goose-settings-option-row goose-settings-option-row--stack space-y-1.5">
           <Label className="text-sm font-normal leading-5 text-foreground">
             {uiText("serverUrl_f562")}</Label>
           <Input
-            className="h-9 bg-transparent py-1 text-sm"
+            className="h-10 bg-transparent py-1 text-sm"
             value={tempUrl}
             disabled={busy}
             onChange={(e) => setTempUrl(e.target.value)}
@@ -123,21 +123,21 @@ export function renderWebdavConfiguration(
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
+          <div className="goose-settings-option-row goose-settings-option-row--stack space-y-1.5">
             <Label className="text-sm font-normal leading-5 text-foreground">{uiText("account_7035")}</Label>
             <Input
-              className="h-9 bg-transparent py-1 text-sm"
+              className="h-10 bg-transparent py-1 text-sm"
               value={tempUsername}
               disabled={busy}
               onChange={(e) => setTempUsername(e.target.value)}
               placeholder={uiText("emailOrUsername_515b")}
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="goose-settings-option-row goose-settings-option-row--stack space-y-1.5">
             <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("remoteFolder_98d0")}</Label>
             <Input
-              className="h-9 bg-transparent py-1 text-sm"
+              className="h-10 bg-transparent py-1 text-sm"
               value={tempRemoteDir}
               disabled={busy}
               onChange={(e) => setTempRemoteDir(e.target.value)}
@@ -147,12 +147,12 @@ export function renderWebdavConfiguration(
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
+          <div className="goose-settings-option-row goose-settings-option-row--stack space-y-1.5">
             <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("appPassword_1976")}</Label>
             <Input
               type="password"
-              className="h-9 bg-transparent py-1 text-sm"
+              className="h-10 bg-transparent py-1 text-sm"
               value={tempPassword}
               disabled={busy}
               onChange={(e) => setTempPassword(e.target.value)}
@@ -161,30 +161,30 @@ export function renderWebdavConfiguration(
               }
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="goose-settings-option-row goose-settings-option-row--stack space-y-1.5">
             <Label className="text-sm font-normal leading-5 text-foreground">
               {uiText("cloudBackupRetentionDays_54eb")}</Label>
             <Input
               type="number"
               min={1}
               max={365}
-              className="h-9 bg-transparent py-1 text-sm"
+              className="h-10 bg-transparent py-1 text-sm"
               value={tempRetentionDays}
               disabled={busy}
               onChange={(e) =>
                 setTempRetentionDays(parseInt(e.target.value) || 30)
               }
             />
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <p className="text-[13px] leading-5 text-muted-foreground">
               {uiText("afterUploadingABackupCloudBackups_2113")}</p>
           </div>
         </div>
 
-        <SwitchRow className="flex items-center justify-between rounded-[var(--goose-control-radius)] border border-muted/20 p-3 bg-muted/10">
-          <span className="block space-y-0.5 pr-4">
-            <span className="text-sm font-medium leading-none text-foreground">
+        <SwitchRow className="goose-settings-option-row goose-settings-option-row--stack flex items-center justify-between gap-3">
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-normal leading-5 text-foreground">
               {uiText("automaticCloudBackups_c110")}</span>
-            <span className="block text-sm leading-relaxed text-muted-foreground">
+            <span className="mt-1 block text-[13px] leading-5 text-muted-foreground">
               {uiText("backUpWhileTheAppIs_48b5")}</span>
           </span>
           <Switch
@@ -194,7 +194,7 @@ export function renderWebdavConfiguration(
           />
         </SwitchRow>
 
-        <div className="rounded-[var(--goose-control-radius)] border border-transparent bg-[hsl(var(--goose-selected-bg)/0.58)] p-3 text-xs text-foreground dark:bg-[hsl(var(--foreground)/0.08)]">
+        <div className="goose-settings-option-row goose-settings-option-row--stack text-sm leading-5 text-foreground">
           <div className="flex flex-col gap-1.5">
             <div>
               <strong>{uiText("lastUpload_65db")}</strong>

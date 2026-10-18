@@ -57,14 +57,14 @@ export function SettingsGeneral({
       <div className="space-y-5">
         <SettingsSectionCard title={t("common")}>
           <SettingsLanguage />
-          <SwitchRow className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
+          <SwitchRow className={`flex items-center justify-between gap-3 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.FileClock className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
               <span className="text-sm font-normal leading-5">{t("autoOpen")}</span>
             </span>
             <Switch id="auto-open-last-note" checked={autoOpenLastNote} onCheckedChange={setAutoOpenLastNote} className={SWITCH_CLASS} />
           </SwitchRow>
-          <SwitchRow className={`mt-2 flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
+          <SwitchRow className={`mt-2 flex items-center justify-between gap-3 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.MousePointer2 className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
               <span className="text-sm font-normal leading-5">{t("hover")}</span>
@@ -73,7 +73,7 @@ export function SettingsGeneral({
           </SwitchRow>
         </SettingsSectionCard>
         <SettingsSectionCard title={t("search")}>
-          <SwitchRow className={`flex items-center justify-between gap-4 p-4 ${ROW_CLASS}`}>
+          <SwitchRow className={`flex items-center justify-between gap-3 ${ROW_CLASS}`}>
             <span className="flex items-center gap-3">
               <GooseIcons.History className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
               <span className="text-sm font-normal leading-5">{t("recent")}</span>

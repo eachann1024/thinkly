@@ -40,7 +40,7 @@ export function CollapsibleShortcutGroups({
               type="button"
               aria-expanded={open}
               onClick={() => setOpenId(open ? "" : group.id)}
-              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-4 text-left hover:bg-[var(--goose-interactive-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--goose-focus)]"
+              className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-left hover:bg-[var(--goose-interactive-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--goose-focus)]"
             >
               <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
                 {group.title}

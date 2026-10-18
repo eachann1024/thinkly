@@ -30,18 +30,20 @@ export function SettingsAppUpdate() {
   if (!hasNewAppUpdate(currentVersion, state)) return null;
   return (
     <SettingsSectionCard title={uiText("appUpdates_3f91")}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 text-sm">
-          <GooseIcons.Download aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
-          <span>{uiText("currentVersion", { version: currentVersion })}</span>
+      <div className={`goose-settings-option-row flex flex-col justify-center${statusLabel ? " goose-settings-option-row--stack" : ""}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3 text-sm font-normal leading-5">
+            <GooseIcons.Download aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0">{uiText("currentVersion", { version: currentVersion })}</span>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>{uiText("updateVersion", { version: state.version ?? "" })}</Button>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>{uiText("updateVersion", { version: state.version ?? "" })}</Button>
+        {statusLabel ? (
+          <p role="status" aria-live="polite" className={`text-sm font-normal leading-5 ${installError || state.status === "error" || (state.status === "ready" && state.message) ? "text-destructive" : "text-muted-foreground"}`}>
+            {statusLabel}
+          </p>
+        ) : null}
       </div>
-      {statusLabel && (
-        <p role="status" aria-live="polite" className={`text-sm ${installError || state.status === "error" || (state.status === "ready" && state.message) ? "text-destructive" : "text-muted-foreground"}`}>
-          {statusLabel}
-        </p>
-      )}
     </SettingsSectionCard>
   );
 }

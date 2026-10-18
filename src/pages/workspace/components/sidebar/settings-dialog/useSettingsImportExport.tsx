@@ -54,6 +54,8 @@ export function useSettingsImportExport(
     beginDataOperation,
     resetDialogOpen,
     setResetInput,
+    setClearHistory,
+    setClearAiChats,
     createNotebook,
   } = input;
 
@@ -146,7 +148,9 @@ export function useSettingsImportExport(
     if (!open) sendDataEvent({ type: "settings.closed" });
     if (!open || !resetDialogOpen) {
       setResetInput("");
+      setClearHistory(false);
+      setClearAiChats(false);
     }
-  }, [open, resetDialogOpen, sendDataEvent, setResetInput]);
+  }, [open, resetDialogOpen, sendDataEvent, setResetInput, setClearHistory, setClearAiChats]);
   return { ...input, handleExport, handleImport };
 }

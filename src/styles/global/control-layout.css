@@ -21,9 +21,18 @@
   border-block: calc(var(--goose-list-row-gap) / 2) solid transparent;
   background-clip: padding-box;
 }
+/* 单行设置项与控件同高。说明、滑杆、表单用 --stack，不要再用 p-4 把一行撑高。 */
 .goose-settings-option-row {
+  box-sizing: border-box;
+  min-height: var(--goose-control-height);
+  padding-block: 0;
+  padding-inline: 12px;
   border-radius: var(--goose-settings-option-radius, 12px);
   background: var(--goose-settings-option-bg);
+}
+.goose-settings-option-row--stack {
+  min-height: 0;
+  padding-block: 10px;
 }
 .goose-settings-option-row--joined { border-radius: 0; }
 

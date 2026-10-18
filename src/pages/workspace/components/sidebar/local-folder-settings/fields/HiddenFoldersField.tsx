@@ -71,6 +71,7 @@ export function HiddenFoldersField({
   useLocale();
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
+  const [addFolderOpen, setAddFolderOpen] = useState(false);
 
   const addFolder = (raw: string) => {
     const name = raw.trim();
@@ -110,7 +111,7 @@ export function HiddenFoldersField({
       }
     >
       <div
-        className={`flex flex-wrap items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
+        className={`flex flex-wrap items-center justify-between gap-3 ${SETTINGS_OPTION_ROW_CLASS} goose-settings-option-row--stack`}
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
@@ -136,7 +137,7 @@ export function HiddenFoldersField({
       </div>
 
       {folders.length === 0 && (
-        <p className={`flex items-center gap-2 p-4 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
+        <p className={`flex items-center gap-2 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
           <SettingsDotIcon name="folderOff" size={18} />
           {uiText("noHiddenFolders_8f82")}</p>
       )}
@@ -145,14 +146,14 @@ export function HiddenFoldersField({
         return (
           <div
             key={folder}
-            className={`flex flex-wrap items-center justify-between gap-4 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}
+            className={`flex flex-wrap items-center justify-between gap-3 ${SETTINGS_OPTION_ROW_CLASS}`}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <GooseIcons.FolderClosed
                 className="h-4 w-4 shrink-0 text-muted-foreground"
                 strokeWidth={1.75}
               />
-              <span className="min-w-0 break-all text-sm font-medium">
+              <span className="min-w-0 break-all text-sm font-normal">
                 {folder}
               </span>
             </div>
@@ -174,15 +175,18 @@ export function HiddenFoldersField({
         );
       })}
 
-      <Disclosure className={`p-4 ${SETTINGS_OPTION_ROW_CLASS}`}>
-        <DisclosureSummary className="flex cursor-pointer list-none items-center gap-3 rounded-md text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
+      <Disclosure
+        onToggle={(event) => setAddFolderOpen(event.currentTarget.open)}
+        className={`flex ${addFolderOpen ? "flex-col goose-settings-option-row--stack" : "items-center"} ${SETTINGS_OPTION_ROW_CLASS}`}
+      >
+        <DisclosureSummary className="flex min-h-0 w-full cursor-pointer list-none items-center gap-3 self-stretch rounded-md text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
           <GooseIcons.Plus
             className="h-4 w-4 shrink-0 text-muted-foreground"
             strokeWidth={1.75}
           />
           {uiText("addHiddenFolder_50c3")}</DisclosureSummary>
         <form
-          className="space-y-2 pt-3"
+          className="space-y-2 pb-2.5 pt-3"
           onSubmit={(event) => {
             event.preventDefault();
             addFolder(inputValue);
@@ -202,9 +206,9 @@ export function HiddenFoldersField({
                 setError("");
               }}
               placeholder={uiText("eGObsidian_55c9")}
-              className="h-9 min-w-36 flex-1 text-sm"
+              className="h-10 min-w-36 flex-1 text-sm"
             />
-            <Button type="submit" size="sm" className="h-9 shrink-0">
+            <Button type="submit" size="sm" className="h-10 shrink-0">
               {uiText("add_b58c")}</Button>
           </div>
           {error && (

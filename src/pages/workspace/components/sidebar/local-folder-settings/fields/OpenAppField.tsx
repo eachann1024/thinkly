@@ -103,8 +103,8 @@ export function OpenAppField({
   };
 
   return (
-    <div className={`space-y-3 p-4 ${SETTINGS_OPTION_ROW_CLASS}`}>
-      <div className="settings-local-folder-pick-row flex items-center justify-between gap-4">
+    <div className={`space-y-3 ${SETTINGS_OPTION_ROW_CLASS} goose-settings-option-row--stack`}>
+      <div className="settings-local-folder-pick-row flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             <Icon
@@ -174,7 +174,7 @@ export function OpenAppField({
             onChange={(event) => onChange(event.target.value)}
             onBlur={(event) => onChange(event.target.value.trim())}
             placeholder={customPlaceholder}
-            className="h-9 text-sm"
+            className="h-10 text-sm"
           />
         </div>
       )}

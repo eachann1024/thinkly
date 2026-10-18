@@ -11,9 +11,11 @@ import { effectiveSingleTabMode } from "@/lib/tabMode";
 import type { useSettingsResetActions } from "./useSettingsResetActions";
 import { SETTINGS_TABS } from "./shared";
 import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
+import type { GitAvailability } from "../settings/useGitAvailability";
 
 export function renderSettingsScaffold(
   context: ReturnType<typeof useSettingsResetActions>,
+  gitAvailability: GitAvailability,
 ) {
   const {
     open,
@@ -79,14 +81,14 @@ export function renderSettingsScaffold(
       activeTab={activeTab}
       onTabChange={onTabChange}
       onClose={() => onOpenChange(false)}
-      tabs={SETTINGS_TABS}
+      tabs={gitAvailability === "ready" ? SETTINGS_TABS : SETTINGS_TABS.filter((tab) => tab.id !== "git-sync")}
       sidebarContainer={sidebarContainer}
       mainContainer={mainContainer}
       visible={open}
       feedbackBanner={null}
 
     >
-      <WorkspaceViewActivity visible={open && activeTab === "general"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "general"}>
         <div className="settings-groups">
           <SettingsGeneral
             autoOpenLastNote={privacy.autoOpenLastNote}
@@ -99,7 +101,7 @@ export function renderSettingsScaffold(
         </div>
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "shortcuts"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "shortcuts"}>
         <div className="settings-groups">
           <SettingsShortcuts
             closeTabShortcut={closeTabShortcut}
@@ -114,7 +116,7 @@ export function renderSettingsScaffold(
         </div>
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "local-folder"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "local-folder"}>
         <div className="settings-groups">
           <SettingsLocalFolder
             visible={open && activeTab === "local-folder"}
@@ -130,7 +132,7 @@ export function renderSettingsScaffold(
         </div>
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "appearance"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "appearance"}>
         <SettingsAppearance
           theme={theme}
           setTheme={setTheme}
@@ -146,7 +148,7 @@ export function renderSettingsScaffold(
         />
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "ai"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "ai"}>
         <div className="settings-groups">
           <SettingsAI
             visible={open && activeTab === "ai"}
@@ -162,11 +164,11 @@ export function renderSettingsScaffold(
         </div>
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "git-sync"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "git-sync" && gitAvailability === "ready"}>
         <SettingsGitSync visible={open && activeTab === "git-sync"} />
       </WorkspaceViewActivity>
 
-      <WorkspaceViewActivity visible={open && activeTab === "data"}>
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "data"}>
         <div className="settings-groups">
           <SettingsDataPanel
             active={open && activeTab === "data"}
