@@ -1,0 +1,9 @@
+{
+  "includeCoAuthoredBy": false,
+  "attribution": { "commit": "", "pr": "" },
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/.githooks/setup-identity.sh\"" }] }
+    ]
+  }
+}

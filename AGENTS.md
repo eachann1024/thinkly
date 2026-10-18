@@ -10,3 +10,7 @@
 ## 版本与代码组织
 
 - 手写实现按独立职责拆分，主要模块约 200–300 行，每个文件不超过 300 行；入口、类型和纯工具允许更短。
+
+## 提交规范
+
+- 提交的作者和提交者一律用用户本人身份 `Eachann <each1024@qq.com>`，提交信息和 PR 描述里不加 Co-Authored-By、Claude-Session 等任何 AI 署名；`.claude/settings.json` 会在 AI 会话启动时自动设好身份并启用 `.githooks/`，其中 commit-msg 钩子会去掉署名行并拦下以 Claude 身份发起的提交。
