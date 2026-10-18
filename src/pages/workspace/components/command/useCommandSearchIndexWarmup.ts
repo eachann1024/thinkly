@@ -6,12 +6,13 @@ import { syncSearchCatalog } from "./pageSearchCatalog";
 import { syncIndex } from "./pageSearchIndex";
 
 /**
- * 主窗挂载后在空闲时预热搜索目录/倒排索引，使 ⌘K 打开时不必现抽全文。
+ * 搜索打开后才在空闲时建目录和倒排索引。关掉两分钟且没有再次打开，会由调用方拆掉。
  * 只订 pages / notebooks 引用变化，不驱动 CommandPalette 重渲染。
  */
-export function useCommandSearchIndexWarmup(): void {
+export function useCommandSearchIndexWarmup(enabled = true): void {
   useLocale();
   useEffect(() => {
+    if (!enabled) return;
     let idleId = 0;
     let timeoutId = 0;
     let revision = 0;
@@ -65,5 +66,5 @@ export function useCommandSearchIndexWarmup(): void {
       unsubPages();
       unsubNotebooks();
     };
-  }, []);
+  }, [enabled]);
 }

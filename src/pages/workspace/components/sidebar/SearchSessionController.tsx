@@ -1,15 +1,29 @@
 import { useLocale } from "@/i18n";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchSession } from "./useSearchSession";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { tryShowPageInFocusedSplit } from "@/lib/editor-split/commands";
 import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { useCommandSearchIndexWarmup } from "../command/useCommandSearchIndexWarmup";
+import { resetSearchCatalog } from "../command/pageSearchCatalog";
+
+const RELEASE_INDEX_MS = 120_000;
 
 export function SearchSessionController() {
   useLocale();
-  useCommandSearchIndexWarmup();
+  const searchOpen = useSearchSession((state) => state.view.phase !== "closed");
+  const [indexArmed, setIndexArmed] = useState(false);
+  if (searchOpen && !indexArmed) setIndexArmed(true);
+  useCommandSearchIndexWarmup(indexArmed);
+  useEffect(() => {
+    if (searchOpen || !indexArmed) return;
+    const timer = window.setTimeout(() => {
+      resetSearchCatalog();
+      setIndexArmed(false);
+    }, RELEASE_INDEX_MS);
+    return () => window.clearTimeout(timer);
+  }, [searchOpen, indexArmed]);
   const nonce = useSearchSession(s => s.navigation.phase === "target" ? s.navigation.id : 0);
   const handled = useRef(0);
   useEffect(() => {
