@@ -11,6 +11,7 @@ const skillIdSchema = z.enum([
   "chat",
   "visual",
   "webResearch",
+  "liveInfo",
 ]);
 
 const skillCatalog = skillIdSchema.options

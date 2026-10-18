@@ -66,3 +66,11 @@ export const gitSync: GitSyncBridge = {
     return () => ipcRenderer.removeListener("git-sync:finish", listener);
   },
 };
+
+export const web = {
+  search: (query: string, limit?: number) =>
+    invoke("desktop:web-search", query, limit) as Promise<{ engine: string; results: { title: string; url: string; snippet: string }[] }>,
+  read: (url: string) =>
+    invoke("desktop:web-read", url) as Promise<{ url: string; title: string; content: string }>,
+  json: (url: string) => invoke("desktop:web-json", url) as Promise<unknown>,
+};

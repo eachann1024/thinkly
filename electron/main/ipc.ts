@@ -15,6 +15,7 @@ import { registerClipboardIpc } from "./ipc/clipboard";
 import { registerWindowsIpc } from "./ipc/windows";
 import { registerHotkeysIpc } from "./ipc/hotkeys";
 import { registerSearchWindowIpc } from "./ipc/searchWindow";
+import { registerWebIpc } from "./ipc/web";
 
 export { closeAllWatchers } from "./ipc/watchEvents";
 
@@ -36,5 +37,6 @@ export function registerIpcHandlers(): void {
   registerWindowsIpc();
   registerHotkeysIpc();
   registerSearchWindowIpc();
+  registerWebIpc();
   void attachmentsRoot;
 }

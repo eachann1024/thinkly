@@ -68,6 +68,11 @@ declare global {
     appearance: import("./lib/appearance-contract").AppearanceBridge;
     gitSync: import("./lib/git-sync-contract").GitSyncBridge;
     assetMaintenance: import("./lib/asset-maintenance-contract").AssetMaintenanceBridge;
+    web: {
+      search: (query: string, limit?: number) => Promise<{ engine: string; results: { title: string; url: string; snippet: string }[] }>;
+      read: (url: string) => Promise<{ url: string; title: string; content: string }>;
+      json: (url: string) => Promise<unknown>;
+    };
     selectDirectory: (opts?: import("./lib/native-dialog-contract").DirectoryDialogOptions) => Promise<string | null>
     showOpenDialog: (opts?: import("./lib/native-dialog-contract").OpenFileDialogOptions) => Promise<string[] | null>
     showSaveDialog: (opts?: import("./lib/native-dialog-contract").SaveFileDialogOptions) => Promise<string | null>

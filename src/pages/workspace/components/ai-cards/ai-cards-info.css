@@ -1,0 +1,110 @@
+/* 展示类 AI 卡片：时间线、对比、指标、菜谱、词条、小组件、行情。外壳沿用 ai-cards.css 的 .ai-card。 */
+.ai-chip { display: inline-flex; flex: none; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border: 1px solid hsl(var(--border)); border-radius: 999px;
+  color: var(--goose-text-secondary); font-size: 12px; line-height: 18px; white-space: nowrap; }
+
+/* 时间线：竖线贯穿圆点中心，圆点描边绘入后填充。 */
+.ai-tl { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.ai-tl-item { position: relative; display: grid; grid-template-columns: 12px minmax(0, 1fr); column-gap: 10px; padding-bottom: 10px; }
+.ai-tl-item:last-child { padding-bottom: 0; }
+.ai-tl-item:not(:last-child)::before { content: ""; position: absolute; top: 16px; bottom: -2px; left: 5.5px; width: 1px; background: hsl(var(--border)); }
+.ai-tl-rail { display: flex; justify-content: center; padding-top: 4px; }
+.ai-tl-dot { display: block; overflow: visible; color: var(--goose-accent-solid); }
+.ai-tl-body { display: flex; flex-direction: column; min-width: 0; }
+.ai-tl-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; }
+.ai-tl-time { flex: none; color: var(--goose-text-secondary); font-size: 12px; }
+.ai-tl-title { min-width: 0; font-weight: var(--font-weight-medium); }
+.ai-tl-detail { margin: 2px 0 0; color: var(--goose-text-secondary); overflow: hidden; }
+.ai-tl-detail[data-clamped] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.ai-tl-toggle { display: inline-flex; align-self: flex-start; align-items: center; gap: 2px; height: 20px; margin: 2px -4px 0; padding: 0 4px; border: 0; border-radius: 4px;
+  background: transparent; color: var(--goose-accent-solid); font-size: 12px; cursor: pointer; transition: background-color var(--goose-control-motion-duration) ease; }
+.ai-tl-toggle:hover, .ai-tl-toggle:focus-visible { background: var(--goose-interactive-hover); outline: none; }
+.ai-tl-toggle svg { transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.ai-tl-toggle svg[data-open] { transform: rotate(180deg); }
+
+/* 对比：表格可横向滚动；推荐列以主题轮廓和极淡底色标出。 */
+.ai-cmp-scroll { margin: 0 -6px; padding: 0 6px 2px; overflow-x: auto; overscroll-behavior-x: contain; }
+.ai-cmp-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 13px; line-height: 18px; }
+.ai-cmp-table th, .ai-cmp-table td { padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.ai-cmp-table thead th { padding-top: 4px; padding-bottom: 6px; border-bottom: 1px solid hsl(var(--border)); font-weight: var(--font-weight-medium); }
+.ai-cmp-corner { width: 6rem; }
+.ai-cmp-table tbody th { color: var(--goose-text-secondary); font-weight: 400; }
+.ai-cmp-table tbody tr { transition: background-color var(--goose-control-motion-duration) ease; }
+.ai-cmp-table tbody tr:hover { background: var(--goose-interactive-hover); }
+.ai-cmp-colname { display: block; overflow: hidden; text-overflow: ellipsis; }
+.ai-cmp-table [data-rec] { background: color-mix(in srgb, var(--goose-accent-solid) 6%, transparent);
+  box-shadow: inset 1px 0 0 var(--goose-accent-solid), inset -1px 0 0 var(--goose-accent-solid); }
+.ai-cmp-table thead [data-rec] { border-radius: 8px 8px 0 0; border-bottom-color: color-mix(in srgb, var(--goose-accent-solid) 40%, hsl(var(--border)));
+  box-shadow: inset 1px 0 0 var(--goose-accent-solid), inset -1px 0 0 var(--goose-accent-solid), inset 0 1px 0 var(--goose-accent-solid); }
+.ai-cmp-table td[data-last] { border-radius: 0 0 8px 8px;
+  box-shadow: inset 1px 0 0 var(--goose-accent-solid), inset -1px 0 0 var(--goose-accent-solid), inset 0 -1px 0 var(--goose-accent-solid); }
+.ai-cmp-badge { display: inline-flex; align-items: center; height: 18px; margin-top: 2px; padding: 0 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--goose-accent-solid) 14%, transparent); color: var(--goose-accent-solid); font-size: 11px; line-height: 16px; }
+.ai-cmp-verdict { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0 0; padding-top: 8px; border-top: 1px solid hsl(var(--border)); }
+.ai-cmp-verdict > svg { flex: none; margin-top: 3px; color: var(--goose-text-warning); }
+
+/* 指标：自适应栅格，数值大号细体，涨跌走语义色。 */
+.ai-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ai-stat { display: flex; flex-direction: column; min-width: 0; padding: 8px 10px; border: 1px solid hsl(var(--border)); border-radius: 8px;
+  background: color-mix(in srgb, var(--goose-text-primary) 2%, transparent); }
+.ai-stat-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--goose-text-secondary); font-size: 12px; line-height: 16px; }
+.ai-stat-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; font-size: 22px; line-height: 28px; font-weight: 400; letter-spacing: -0.01em; }
+.ai-stat-delta { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; line-height: 16px; color: var(--goose-text-secondary); }
+.ai-stat-delta[data-trend="up"], .ai-coin-change[data-trend="up"] { color: var(--goose-text-success); }
+.ai-stat-delta[data-trend="down"], .ai-coin-change[data-trend="down"] { color: var(--goose-text-danger); }
+
+/* 菜谱：份数步进器、可勾选食材与步骤，完成项降为次级色并划线。 */
+.ai-recipe { display: flex; flex-direction: column; gap: 8px; }
+.ai-recipe-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ai-stepper { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; padding: 1px; border: 1px solid hsl(var(--border)); border-radius: 8px; }
+.ai-stepper-value { min-width: 4.5rem; text-align: center; font-size: 12px; font-weight: var(--font-weight-medium); }
+.ai-recipe-list, .ai-recipe-steps { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.ai-recipe-list { padding-bottom: 8px; border-bottom: 1px solid hsl(var(--border)); }
+.ai-recipe-check { display: flex; align-items: flex-start; gap: 8px; width: 100%; margin: 0 -6px; padding: 4px 6px; border-radius: 6px; cursor: pointer;
+  transition: background-color var(--goose-control-motion-duration) ease; box-sizing: content-box; }
+.ai-recipe-check:hover { background: var(--goose-interactive-hover); }
+.ai-recipe-check > [data-goose-slot="check-control"] { flex: none; margin-top: 2px; }
+.ai-recipe-name, .ai-recipe-step { flex: 1; min-width: 0; transition: color 200ms ease; }
+.ai-recipe-amount { flex: none; color: var(--goose-text-secondary); white-space: nowrap; }
+.ai-recipe-index { flex: none; width: 1.25rem; color: var(--goose-text-secondary); text-align: right; }
+[data-done] > .ai-recipe-check .ai-recipe-name, [data-done] > .ai-recipe-check .ai-recipe-step {
+  color: var(--goose-text-secondary); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--goose-text-secondary) 60%, transparent); }
+
+/* 词条 */
+.ai-def { display: flex; flex-direction: column; gap: 6px; }
+.ai-def-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
+.ai-def-term { min-width: 0; font-size: 22px; line-height: 30px; font-weight: var(--font-weight-semibold); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.ai-def-phonetic { color: var(--goose-text-secondary); font-family: var(--font-mono); font-size: 13px; }
+.ai-def-copy { margin-left: auto; }
+.ai-def-copy-icon { display: inline-flex; }
+.ai-def-list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.ai-def-list > li { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); column-gap: 4px; }
+.ai-def-index { color: var(--goose-text-secondary); }
+.ai-def-examples { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 0; padding: 0; list-style: none; }
+.ai-def-examples > li { padding: 2px 0 2px 10px; border-left: 2px solid color-mix(in srgb, var(--goose-accent-solid) 45%, hsl(var(--border)));
+  color: var(--goose-text-secondary); font-style: italic; }
+
+/* 小组件：沙箱 iframe，首个高度消息到达前显示占位扫光。 */
+.ai-widget { position: relative; margin: 0 -2px; }
+.ai-widget-frame { position: relative; overflow: hidden; border-radius: 6px; }
+.ai-widget-iframe { display: block; width: 100%; border: 0; background: transparent; color-scheme: normal; opacity: 0; transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.ai-widget[data-ready] .ai-widget-iframe { opacity: 1; }
+.ai-widget-shimmer { position: absolute; inset: 2px; border-radius: 6px; background-color: color-mix(in srgb, var(--goose-text-secondary) 8%, transparent);
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--goose-text-secondary) 10%, transparent) 50%, transparent 70%);
+  background-size: 250% 100%; animation: ai-shimmer-sweep 1.6s cubic-bezier(0.37, 0, 0.63, 1) infinite; }
+.ai-widget-reload { position: absolute; top: 4px; right: 4px; background: var(--goose-menu-surface); opacity: 0; transition: opacity 160ms ease; }
+.ai-widget:hover .ai-widget-reload, .ai-widget-reload:focus-visible { opacity: 1; }
+
+/* 行情 */
+.ai-coins { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.ai-coin { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 4.5rem; align-items: center; column-gap: 10px; min-height: 40px; }
+.ai-coin + .ai-coin { border-top: 1px solid hsl(var(--border)); }
+.ai-coin-badge { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  background: color-mix(in srgb, var(--goose-accent-solid) 12%, transparent); color: var(--goose-accent-solid); font-size: 12px; font-weight: var(--font-weight-semibold); }
+.ai-coin-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--font-weight-medium); }
+.ai-coin-price { font-size: 16px; line-height: 22px; }
+.ai-coin-change { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; font-size: 12px; color: var(--goose-text-secondary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-widget-shimmer { animation: none; }
+  .ai-tl-toggle svg, .ai-widget-iframe, .ai-recipe-check { transition: none; }
+}
