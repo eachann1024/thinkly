@@ -6,12 +6,15 @@ export default function run() {
   const space = Number(process.env.CARET_SPACE);
   if (!space) throw new Error("请设置 CARET_SPACE 为本次验收的 ego TaskSpace ID");
   const phase = process.env.CARET_PHASE ?? "inline";
-  if (!["inline", "placeholder", "structures", "boundaries"].includes(phase)) throw new Error("未知验收阶段");
+  if (!["inline", "placeholder", "structures", "boundaries", "interactions", "layout"].includes(phase))
+    throw new Error("未知验收阶段");
   const options = {
     space,
     url: process.env.CARET_URL ?? "http://127.0.0.1:6001/?caret-gallery=1",
     start: Number(process.env.CARET_START ?? 0),
     end: Number(process.env.CARET_END ?? 99),
+    inlineOnly: process.env.CARET_INLINE_ONLY === "1",
+    quicknoteOnly: process.env.CARET_LAYOUT_QUICKNOTE_ONLY === "1",
     output: process.env.CARET_OUTPUT ?? `/tmp/goose-caret-${phase}.json`,
   };
   const file = path.join(process.cwd(), `scripts/verify/browser/caret-${phase}.mjs`);
