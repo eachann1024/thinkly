@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection } from "@tiptap/pm/state";
-import { shouldBackspaceToDocumentTitle } from "../../src/components/editor/core/documentTitleNavigation";
+import { shouldBackspaceToDocumentTitle, removeEmptyFirstBodyParagraph } from "../../src/components/editor/core/documentTitleNavigation";
 import { isPlainDocumentNavigation } from "../../src/lib/document-title-keyboard";
 
 let failed = false;
@@ -49,12 +49,32 @@ verify("正文中间、选区、后续块退格不回标题", () => {
   assert.equal(textOf(editor.document[0]), "首段");
 });
 
-verify("空首段后面还有正文时退格不回标题", () => {
+verify("空首段后面还有正文时退格回标题，并收掉这行空段", () => {
   const editor = create([{ type: "paragraph" }, { type: "paragraph", content: "还有内容" }]);
   editor.setTextCursorPosition(editor.document[0], "start");
-  assert.equal(shouldBackspaceToDocumentTitle(editor), false);
-  assert.equal(editor.document.length, 2);
-  assert.equal(textOf(editor.document[1]), "还有内容");
+  assert.equal(shouldBackspaceToDocumentTitle(editor), true);
+  assert.equal(removeEmptyFirstBodyParagraph(editor), true);
+  assert.equal(editor.document.length, 1);
+  assert.equal(textOf(editor.document[0]), "还有内容");
+});
+
+verify("唯一的空首段退格回标题但保留段落", () => {
+  const editor = create([{ type: "paragraph" }]);
+  editor.setTextCursorPosition(editor.document[0], "start");
+  assert.equal(shouldBackspaceToDocumentTitle(editor), true);
+  assert.equal(removeEmptyFirstBodyParagraph(editor), false);
+  assert.equal(editor.document.length, 1);
+  assert.equal(textOf(editor.document[0]), "");
+});
+
+verify("带子块的空首段退格不收空段", () => {
+  const editor = create([
+    { type: "paragraph", children: [{ type: "paragraph", content: "子块" }] },
+    { type: "paragraph", content: "下一段" },
+  ]);
+  editor.setTextCursorPosition(editor.document[0], "start");
+  assert.equal(removeEmptyFirstBodyParagraph(editor), false);
+  assert.equal(editor.document[0].children.length, 1);
 });
 
 verify("列表、标题和带子块的空段保持原来的退格", () => {
@@ -70,7 +90,7 @@ verify("列表、标题和带子块的空段保持原来的退格", () => {
   assert.equal(textOf(nested.document[0].children[0]), "子块");
 });
 
-verify("只有属性头和空正文时退格回到标题，属性后还有正文则不跳", () => {
+verify("只有属性头和空正文时退格回到标题，属性后还有正文时只收空段", () => {
   const only = create([
     { type: "codeBlock", props: { language: "yaml-frontmatter" }, content: "author: example" },
     { type: "paragraph" },
@@ -84,7 +104,11 @@ verify("只有属性头和空正文时退格回到标题，属性后还有正文
     { type: "paragraph", content: "正文" },
   ]);
   more.setTextCursorPosition(more.document[1], "start");
-  assert.equal(shouldBackspaceToDocumentTitle(more), false);
+  assert.equal(shouldBackspaceToDocumentTitle(more), true);
+  assert.equal(removeEmptyFirstBodyParagraph(more), true);
+  assert.equal(more.document.length, 2);
+  assert.equal(more.document[0].props.language, "yaml-frontmatter");
+  assert.equal(textOf(more.document[1]), "正文");
 });
 
 verify("带修饰键或输入法的退格不跨标题边界", () => {

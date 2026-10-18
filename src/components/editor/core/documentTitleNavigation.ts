@@ -55,13 +55,25 @@ function paragraphHasInlineContent(block: { content?: unknown }): boolean {
 /**
  * 正文退格回到标题末尾：正文为空，或光标已在首段文字起点。
  * 起点前面没有字符，退格不会改掉已有文字。
- * 后面还有块的空首段、带子块的空段，以及列表／标题，仍走原来的退格。
+ * 带子块的空段，以及列表／标题，仍走原来的退格。
  */
 export function shouldBackspaceToDocumentTitle(editor: Editor): boolean {
   if (!canReturnToDocumentTitle(editor)) return false;
-  const { first, header } = bodyStart(editor);
+  const { first } = bodyStart(editor);
   if (!first || first.type !== "paragraph") return false;
   if (paragraphHasInlineContent(first)) return true;
-  if (first.children?.length) return false;
-  return editor.document.length - (header ? 2 : 1) === 0;
+  return !first.children?.length;
+}
+
+/**
+ * 首段是空段落且正文还有别的块时，退格把这行空段直接删掉，
+ * 光标交给标题末尾；正文只剩这一个空段时保留它，标题回车还能继续用。
+ */
+export function removeEmptyFirstBodyParagraph(editor: Editor): boolean {
+  const { first, header } = bodyStart(editor);
+  if (!first || first.type !== "paragraph") return false;
+  if (paragraphHasInlineContent(first) || first.children?.length) return false;
+  if (editor.document.length - (header ? 1 : 0) <= 1) return false;
+  editor.removeBlocks([first]);
+  return true;
 }
