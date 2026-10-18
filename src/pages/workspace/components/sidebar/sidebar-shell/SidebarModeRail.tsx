@@ -151,6 +151,12 @@ export function SidebarModeRail({
       </TooltipProvider>
       <SidebarFooter
         isSettingsOpen={settingsOpen}
+        feedbackActive={settingsOpen && context.settingsTab === "feedback"}
+        onOpenFeedback={() => {
+          if (inHistoryMode) exitHistoryView();
+          context.dismissAfterNavigation();
+          window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "feedback" } }));
+        }}
         onOpenSettings={() => {
           if (inHistoryMode) exitHistoryView();
           context.dismissAfterNavigation();

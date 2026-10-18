@@ -26,6 +26,7 @@ declare module "../types" {
     "src/lib/editor-split/commandContext.ts#localMessages:1": { "splitViewIsnTAvailableInFullScreenAi": {  }; "splitViewIsnTAvailableInThisView": {  }; "splitViewIsnTAvailableInVersionHistory": {  } };
     "src/lib/editor-split/createBlankPage.ts#localMessages:1": { "couldnTCreateANoteInSplitView": {  }; "theSourceNoteOrItsNotebookNoLongerExists": {  } };
     "src/lib/editor-split/drop.ts#localMessages:1": { "thisNoteIsNoLongerAvailable": {  }; "youCanOpenUpToPanes": {  } };
+    "src/lib/editor-split/paneMenuActions.ts#localMessages:1": { "copyFailed": {  }; "linkCopied": {  } };
     "src/lib/editor-split/tree.ts#localMessages:1": { "theCurrentPaneCouldnTBeFound": {  }; "youCanOpenUpToPanes": {  } };
     "src/lib/electron/attachments.ts#localMessages:1": { "attachmentTooLarge": { "size": string | number }; "attachmentWriteFailed": { "error": string | number }; "desktopIntegrationIsUnavailable": {  } };
     "src/lib/electron/globalHotkeys.ts#localMessages:1": { "couldnTDisableTheShortcutTryAgain": {  }; "desktopIntegrationIsUnavailable": {  }; "finishRecordingBeforeRegisteringTheGlobalShortcut": {  }; "invalidShortcutRecordItAgain": {  }; "theShortcutIsInvalidOrAlreadyUsedByAnother": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/command/useCommandSearchScope.ts#localMessages:1": { "couldnTReadTheSearchFolderClose": {  } };
     "src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1": { "noteNotFound": {  }; "thisNoteIsInTrash": {  } };
     "src/pages/workspace/components/editor-host/editorPageLinks.ts#localMessages:1": { "couldnTCreateThePageYourOriginal": {  }; "pageCreatedOpenItFromTheSidebar": {  }; "theFolderHasChangedChooseALocation": {  }; "thisNoteIsnTEditableNoPage": {  }; "thisNotebookDoesnTSupportCreatingLocal": {  } };
-    "src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx#localMessages:1": { "couldnTOpenTheDroppedContentTry": {  }; "splitAbove": {  }; "splitBelow": {  }; "splitToTheLeft": {  }; "splitToTheRight": {  }; "youCanOpenUpToPanes": {  } };
   }
 }

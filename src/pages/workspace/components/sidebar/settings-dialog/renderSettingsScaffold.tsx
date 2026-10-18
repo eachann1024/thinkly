@@ -4,6 +4,7 @@ import { SettingsShortcuts } from "../settings/SettingsShortcuts";
 import { SettingsLocalFolder } from "../SettingsLocalFolder";
 import { SettingsGitSync } from "../settings/SettingsGitSync";
 import { SettingsDataPanel } from "../settings/SettingsDataPanel";
+import { SettingsFeedback } from "../settings/SettingsFeedback";
 import { SettingsAI } from "../SettingsAI";
 import { SettingsScaffold } from "../settings/SettingsScaffold";
 import { useSettings } from "@/stores/useSettings";
@@ -190,6 +191,10 @@ export function renderSettingsScaffold(
             onResetAndImport={handleReset}
           />
         </div>
+      </WorkspaceViewActivity>
+
+      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "feedback"}>
+        <SettingsFeedback />
       </WorkspaceViewActivity>
     </SettingsScaffold>
   );
