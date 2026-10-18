@@ -10,12 +10,9 @@ zh-Hans:
   failedDelete: "{{failed}} 项未完成"
   deletedItem: "已移入{{destination}} · {{title}}"
   deletedMany: "{{done}} 项已移入{{destination}}"
-  deleteResult: "删除回执"
-  undoDelete: "撤回删除"
   undoFailed: "撤回失败"
   restoreManually: "请稍后重试，或前往{{destination}}手动恢复"
   undo: "撤回"
-  dismissResult: "关闭删除回执"
 en:
   systemTrash: "Trash"
   systemRecycle: "Recycle Bin"
@@ -24,12 +21,9 @@ en:
   failedDelete: "Couldn’t move {{failed}}"
   deletedItem: "Moved to {{destination}} · {{title}}"
   deletedMany: "Moved to {{destination}}: {{done}}"
-  deleteResult: "Deletion result"
-  undoDelete: "Undo deletion"
   undoFailed: "Couldn’t undo deletion"
   restoreManually: "Try again later, or restore the items from {{destination}}."
   undo: "Undo"
-  dismissResult: "Dismiss deletion result"
 ja:
   systemTrash: "システムのゴミ箱"
   systemRecycle: "システムのごみ箱"
@@ -38,18 +32,13 @@ ja:
   failedDelete: "{{failed}} 件は未完了です"
   deletedItem: "{{destination}}に移動しました · {{title}}"
   deletedMany: "{{done}} 件を{{destination}}に移動しました"
-  deleteResult: "削除の結果"
-  undoDelete: "削除を元に戻す"
   undoFailed: "元に戻せませんでした"
   restoreManually: "しばらくしてからもう一度お試しいただくか、{{destination}}から手動で復元してください"
   undo: "元に戻す"
-  dismissResult: "削除の結果を閉じる"
 `;
 const uiText = createTranslator(localMessages);
-import { CircleAlert, RotateCcw, X } from "@/components/ui/icons";
-import { Button } from "./button";
-import { IconButton } from "./icon-button";
-import { SuccessToastIcon, toast } from "./sonner";
+import { RotateCcw } from "@/components/ui/icons";
+import { toast } from "./sonner";
 
 type ReceiptItem = { title: string; deleted: boolean };
 
@@ -71,39 +60,30 @@ export function showDeleteReceipt(
       ? uiText("deletedItem", {destination, title: items[0].title})
       : uiText("deletedMany", {done, destination});
 
-  toast.custom(
-    (id) => (
-      <section
-        aria-label={uiText("deleteResult")}
-        role="status"
-        className="flex w-full items-center gap-3 text-foreground"
-      >
-        {failed ? (
-          <CircleAlert className="size-5 shrink-0 text-danger" aria-hidden="true" />
-        ) : (
-          <SuccessToastIcon />
-        )}
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold" title={label}>{label}</p>
-        {done > 0 && onUndo && (
-          <Button size="sm" type="button" aria-label={uiText("undoDelete")} onClick={async () => {
-            if (undoing) return;
-            undoing = true;
-            try {
-              await onUndo();
-              toast.dismiss(id);
-            } catch (error) {
-              toast.error(uiText("undoFailed"), { description: error instanceof Error ? error.message : uiText("restoreManually", { destination }) });
-            } finally {
-              undoing = false;
-            }
-          }} className="shrink-0 text-xs">
-            <RotateCcw className="size-4" aria-hidden="true" />{uiText("undo")}</Button>
-        )}
-        <IconButton type="button" tone="muted" aria-label={uiText("dismissResult")} onClick={() => toast.dismiss(id)} >
-          <X className="size-4" aria-hidden="true" />
-        </IconButton>
-      </section>
-    ),
-    { duration: 8000, closeButton: false, className: "goose-delete-receipt-toast" },
-  );
+  // 标准 toast：图标、关闭按钮与其它通知共用同一套对齐；撤回成功才关闭，失败保留回执。
+  let id: string | number = "";
+  const action = done > 0 && onUndo ? {
+    label: <><RotateCcw className="size-4" aria-hidden="true" />{uiText("undo")}</>,
+    onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      if (undoing) return;
+      undoing = true;
+      void (async () => {
+        try {
+          await onUndo();
+          toast.dismiss(id);
+        } catch (error) {
+          toast.error(uiText("undoFailed"), { description: error instanceof Error ? error.message : uiText("restoreManually", { destination }) });
+        } finally {
+          undoing = false;
+        }
+      })();
+    },
+  } : undefined;
+  const options = {
+    duration: 8000,
+    className: "goose-delete-receipt-toast",
+    action,
+  };
+  id = failed ? toast.error(label, options) : toast.success(label, options);
 }

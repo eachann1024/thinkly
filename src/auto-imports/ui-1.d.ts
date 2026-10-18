@@ -56,7 +56,6 @@ declare global {
   const FLOATING_MENU_OPEN_MS: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_OPEN_MS
   const FLOATING_MENU_SCALE: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_SCALE
   const FLOATING_MENU_SHIFT_PX: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_SHIFT_PX
-  const FeatureToastCard: typeof import('../components/ui/feature-toast-card').FeatureToastCard
   const Field: typeof import('../components/ui/field').Field
   const IconButton: typeof import('../components/ui/icon-button').IconButton
   const ImageExportThemeSelector: typeof import('../components/ui/image-export-theme-selector').ImageExportThemeSelector
@@ -81,7 +80,6 @@ declare global {
   const Select: typeof import('../components/ui/select').Select
   const SelectableCard: typeof import('../components/ui/selectable-card').SelectableCard
   const Separator: typeof import('../components/ui/separator').Separator
-  const SuccessToastIcon: typeof import('../components/ui/sonner').SuccessToastIcon
   const Switch: typeof import('../components/ui/switch').Switch
   const SwitchRow: typeof import('../components/ui/switch').SwitchRow
   const THINKING_PLACEHOLDER_MIN_MS: typeof import('../components/ui/ai-motion').THINKING_PLACEHOLDER_MIN_MS
