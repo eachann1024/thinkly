@@ -7,6 +7,9 @@ import {
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { toEditorBlocks } from "./editorContentPolicy";
+import { replacePageContent } from "./replacePageContent";
+import { markProgrammaticRead } from "./programmaticRead";
+import type { Transaction } from "@tiptap/pm/state";
 import { useEditorHostFocus } from "./useEditorHostFocus";
 import { useEditorPageTasks } from "./useEditorPageTasks";
 import type { EditorRuntime } from "./useEditorSession";
@@ -84,7 +87,8 @@ export function useEditorHostEvents(
       debouncedUpdate.cancel();
       pendingEditorChangeRef.current = false;
       try {
-        editor.replaceBlocks(editor.document, nextEditorContent as any);
+        markProgrammaticRead(editor);
+        editor.transact((tr: Transaction) => replacePageContent(tr, nextEditorContent as any));
       } catch (error) {
         console.error(
           "[goose-note] replace editor blocks failed during reload",
@@ -97,7 +101,7 @@ export function useEditorHostEvents(
           undefined,
           editor.schema,
         );
-        editor.replaceBlocks(editor.document, fallbackContent as any);
+        editor.transact((tr: Transaction) => replacePageContent(tr, fallbackContent as any));
       }
       // 基线与 EditorComposer.onChange 的计算方式保持一致（见切页 effect 注释）
       const reloadedRaw = clonePageContent(editor.document as BlockNoteContent);

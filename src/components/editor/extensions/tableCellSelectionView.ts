@@ -21,6 +21,7 @@ import {
   textSelectionAt,
   shouldTakeOverOutsideTableDrag,
 } from "./tableCellSelectionModel";
+import { isBlankDragActive } from "./trailingBlankDrag";
 
 export function createTableCellSelectionView(view: EditorView) {
   let startCell: HTMLTableCellElement | null = null;
@@ -30,9 +31,6 @@ export function createTableCellSelectionView(view: EditorView) {
   let draggingCells = false;
   let draggingDoc = false;
   let mouseDown = false;
-  let moveFrame: number | null = null;
-  let pendingMove: Event | null = null;
-  const frameWindow = view.dom.ownerDocument.defaultView ?? window;
 
   const eventRoot: EventTarget =
     (view.root as Document | ShadowRoot | null) ?? window;
@@ -80,7 +78,7 @@ export function createTableCellSelectionView(view: EditorView) {
   };
 
   const handlePointerMove = (event: Event) => {
-    if (!mouseDown || startDocPos == null) return;
+    if (!mouseDown || startDocPos == null || isBlankDragActive(view)) return;
     const mouse = event as MouseEvent;
     const targetCell = tableCellFromTarget(mouse.target, view.dom);
     if (
@@ -99,13 +97,13 @@ export function createTableCellSelectionView(view: EditorView) {
       const currentTablePos = tablePosFromResolved(
         view.state.doc.resolve(headDocPos),
       );
-      // Electron can coalesce fast pointer moves, so the first move after
-      // mousedown may already be on the paragraph beyond the table. Detect
-      // the crossed table from the document range instead of requiring an
-      // intermediate mousemove whose target is inside a cell.
-      const spansTable = isSpanningTableSelection(
-        textSelectionAt(view.state.doc, startDocPos, headDocPos),
-      );
+      // 指针已经在某一行里时不再扫整段文档。只有跳过表格时才看区间里有没有表。
+      let spansTable = false;
+      if (currentTablePos == null && !draggingDoc) {
+        spansTable = isSpanningTableSelection(
+          textSelectionAt(view.state.doc, startDocPos, headDocPos),
+        );
+      }
       if (
         !shouldTakeOverOutsideTableDrag(
           draggingDoc,
@@ -159,40 +157,11 @@ export function createTableCellSelectionView(view: EditorView) {
   };
 
   const queuePointerMove = (event: Event) => {
-    if (!mouseDown) return;
-    const cell = tableCellFromTarget(event.target, view.dom);
-    // Boundary transitions must stay synchronous: leaving and returning within
-    // one frame still switches to the document-selection gesture.
-    if (
-      !startCell || draggingDoc || !cell ||
-      closestTable(cell) !== closestTable(startCell)
-    ) {
-      cancelMove();
-      handlePointerMove(event);
-      return;
-    }
-    if (draggingCells || cell !== startCell) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    pendingMove = event;
-    if (moveFrame !== null) return;
-    moveFrame = frameWindow.requestAnimationFrame(() => {
-      moveFrame = null;
-      const move = pendingMove;
-      pendingMove = null;
-      if (move) handlePointerMove(move);
-    });
-  };
-
-  const cancelMove = () => {
-    if (moveFrame !== null) frameWindow.cancelAnimationFrame(moveFrame);
-    moveFrame = null;
-    pendingMove = null;
+    if (!mouseDown || isBlankDragActive(view)) return;
+    handlePointerMove(event);
   };
 
   const onMouseDown = (event: Event) => {
-    cancelMove();
     const mouse = event as MouseEvent;
     if (mouse.button !== 0 || mouse.ctrlKey || mouse.metaKey) return;
     const cell = tableCellFromTarget(mouse.target, view.dom);
@@ -243,9 +212,7 @@ export function createTableCellSelectionView(view: EditorView) {
     event.preventDefault();
   };
 
-  const onMouseUp = (event: Event) => {
-    if (pendingMove) handlePointerMove(event);
-    cancelMove();
+  const onMouseUp = () => {
     mouseDown = false;
     startCell = null;
     startDocPos = null;
@@ -271,7 +238,6 @@ export function createTableCellSelectionView(view: EditorView) {
       syncSelectionClasses(view, draggingCells, draggingDoc);
     },
     destroy() {
-      cancelMove();
       view.dom.removeEventListener("mousedown", onMouseDown, true);
       view.dom.removeEventListener("dragstart", onDragStart, true);
       view.dom.removeEventListener("selectstart", onSelectStart, true);

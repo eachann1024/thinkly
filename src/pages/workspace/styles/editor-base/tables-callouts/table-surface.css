@@ -79,17 +79,8 @@
   color: inherit;
 }
 
-/* 文档跨表选区保留强调底色。 */
-:root
-  .workspace-editor-surface
-  .bn-editor.goose-table-span-select
-  [data-content-type="table"]
-  th,
-:root
-  .workspace-editor-surface
-  .bn-editor.goose-table-span-select
-  [data-content-type="table"]
-  td {
+/* 跨表拖选只铺选区完整盖住的格子。指针所在那一格留原生文字选区，不整表铺色。 */
+:root .workspace-editor-surface .bn-editor .goose-table-span-cell {
   background-image: linear-gradient(
     var(--goose-table-selection-fill),
     var(--goose-table-selection-fill)
@@ -146,18 +137,8 @@
   }
 }
 
-/* 跨表格文档选区用单元格背景连成一片；同时压住文字级
-   ::selection，避免 token 背景被重复叠加。 */
-:root
-  .workspace-editor-surface
-  .bn-editor.goose-table-span-select
-  [data-content-type="table"]
-  ::selection,
-:root
-  .workspace-editor-surface
-  .bn-editor.goose-table-span-select
-  [data-content-type="table"]
-  *::selection {
+/* 整格已铺选区底，压住格内 ::selection，避免和底色叠两层。 */
+:root .workspace-editor-surface .bn-editor .goose-table-span-cell ::selection {
   background: transparent;
   background-color: transparent;
   color: inherit;

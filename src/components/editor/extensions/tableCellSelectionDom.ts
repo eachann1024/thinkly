@@ -154,11 +154,84 @@ export function cellsFromPoint(
 }
 
 export function coordsPos(view: EditorView, event: MouseEvent): number | null {
-  const coords = view.posAtCoords({
-    left: event.clientX,
-    top: event.clientY,
-  });
-  return coords?.pos ?? null;
+  return docPosAtClient(view, event.clientX, event.clientY);
+}
+
+function hitRoot(view: EditorView): Document | ShadowRoot {
+  const root = view.root as Document | ShadowRoot | null;
+  return root && "elementFromPoint" in root ? root : document;
+}
+
+function textPosInCell(
+  view: EditorView,
+  cell: HTMLTableCellElement,
+  clientX: number,
+): number | null {
+  let origin: number;
+  try {
+    origin = view.posAtDOM(cell, 0);
+  } catch {
+    return null;
+  }
+  const $pos = view.state.doc.resolve(origin);
+  let start = -1;
+  let end = -1;
+  for (let depth = $pos.depth; depth > 0; depth -= 1) {
+    if (!$pos.node(depth).isTextblock) continue;
+    start = $pos.start(depth);
+    end = $pos.end(depth);
+    break;
+  }
+  if (start < 0 || start >= end) return origin;
+  let lo = start;
+  let hi = end;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    let left: number;
+    try {
+      left = view.coordsAtPos(mid).left;
+    } catch {
+      return origin;
+    }
+    if (left <= clientX) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
+/** 指针下的文档位置。已经在格子里就只用一次 posAtCoords。 */
+export function docPosAtClient(
+  view: EditorView,
+  clientX: number,
+  clientY: number,
+): number | null {
+  const hit = view.posAtCoords({ left: clientX, top: clientY });
+  const direct = hit?.pos ?? null;
+  if (direct != null && cellPosFromResolved(view.state.doc.resolve(direct)) != null) {
+    return direct;
+  }
+  const cell = tableCellFromTarget(
+    hitRoot(view).elementFromPoint(clientX, clientY),
+    view.dom,
+  );
+  if (!cell) return direct;
+  const rect = cell.getBoundingClientRect();
+  const left = rect.left + 1;
+  const right = rect.right - 1;
+  const top = rect.top + 1;
+  const bottom = rect.bottom - 1;
+  const x = Math.min(Math.max(clientX, left), Math.max(left, right));
+  const y = Math.min(Math.max(clientY, top), Math.max(top, bottom));
+  if (x !== clientX || y !== clientY) {
+    const nudged = view.posAtCoords({ left: x, top: y });
+    if (
+      nudged &&
+      cellPosFromResolved(view.state.doc.resolve(nudged.pos)) != null
+    ) {
+      return nudged.pos;
+    }
+  }
+  return textPosInCell(view, cell, x) ?? direct;
 }
 
 export function isDocPosInTable(
@@ -186,5 +259,5 @@ export function syncSelectionClasses(
     !spanning &&
       (draggingCells || view.state.selection instanceof CellSelection),
   );
-  view.dom.classList.toggle(SPAN_CLASS, spanning);
+  if (!spanning) view.dom.classList.remove(SPAN_CLASS);
 }

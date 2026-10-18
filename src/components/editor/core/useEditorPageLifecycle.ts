@@ -10,12 +10,14 @@ import {
 } from "@/components/editor/utils/blocknote-content";
 import { pageUndoHistory } from "./pageUndoHistory";
 import { replacePageContent } from "./replacePageContent";
+import { markProgrammaticRead } from "./programmaticRead";
 import {
   toEditorBlocks,
   getCachedContentSignature,
 } from "./editorContentPolicy";
 import type { EditorRuntime } from "./useEditorSession";
 import type { EditorContentCommit } from "./useEditorContentCommit";
+import { sourceLooksHeavy, takeFastOpen } from "./fastBlockToNode";
 
 export function useEditorPageLifecycle(
   runtime: EditorRuntime,
@@ -58,11 +60,13 @@ export function useEditorPageLifecycle(
     const id = prevPageIdRef.current;
     if (!id) return;
     const source = getLatestPage?.(id) ?? sourceRef.current.page;
-    const blocks = editor.document as BlockNoteContent;
-    const signature = getContentSignature(blocks);
     const mode = sourceRef.current.mode;
-    const syncedSignature = mode === "raw"
-      ? signature : getCachedContentSignature(normalizePageContent(blocks));
+    const untouched = !userInteractedRef.current && syncedContentSignatureRef.current;
+    const blocks = untouched ? null : editor.document as BlockNoteContent;
+    const signature = untouched ? syncedContentSignatureRef.current! : getContentSignature(blocks);
+    const syncedSignature = untouched
+      ? syncedContentSignatureRef.current
+      : mode === "raw" ? signature : getCachedContentSignature(normalizePageContent(blocks));
     // A watcher may update host content before its editor reload. Never pair that new
     // source with the old document; only an exact content baseline enables the fast path.
     const cachedSource = source && getCachedContentSignature(source.content) === syncedSignature
@@ -75,17 +79,34 @@ export function useEditorPageLifecycle(
     if (__GOOSE_EDITOR_AI__)
       editor.getExtension(GooseAIExtension)?.detachPage();
     if (activePageId === prevPageIdRef.current) {
+      const pending = takeFastOpen(editor);
+      if (pending !== undefined) {
+        const isLocalPage = contentModeRef.current === "raw";
+        const nextContent = isLocalPage ? toEditorBlocks(pending) : normalizePageContent(pending);
+        const blocks = createEditorSafeContent(nextContent, editor.schema);
+        syncedContentSignatureRef.current = getCachedContentSignature(
+          sourceLooksHeavy(pending) ? pending : blocks,
+        );
+        markProgrammaticRead(editor);
+        editor.transact((tr: Transaction) => replacePageContent(tr, blocks as any));
+      }
       if (activePageId) {
         const view = editor.prosemirrorView;
+        const signature = !userInteractedRef.current && syncedContentSignatureRef.current
+          ? syncedContentSignatureRef.current
+          : getContentSignature(editor.document);
         const restored = pageUndoHistory.restore(
           activePageId,
           view.state,
-          getContentSignature(editor.document),
+          signature,
         );
         // 首次打开、且该页没有历史快照时 restore 原样返回 view.state。重复
         // updateState 会强制 React NodeView 重建；嵌套 image 正在挂载时其 getPos
         // 已失效，继而触发 Cannot find node position。
-        if (restored !== view.state) view.updateState(restored);
+        if (restored !== view.state) {
+          markProgrammaticRead(editor);
+          view.updateState(restored);
+        }
       }
       return;
     }
@@ -108,6 +129,7 @@ export function useEditorPageLifecycle(
     if (cached) {
       // Rebuild plugin state once against the cached document, avoiding two NodeView mounts.
       syncedContentSignatureRef.current = cached.syncedSignature;
+      markProgrammaticRead(editor);
       view.updateState(cached.state);
       return;
     }
@@ -124,14 +146,18 @@ export function useEditorPageLifecycle(
       nextContent,
       editor.schema,
     );
-    const nextSig = getCachedContentSignature(nextEditorContent);
+    const heavySource = sourceLooksHeavy(p?.content ?? nextContent);
+    const nextSig = getCachedContentSignature(heavySource ? (p?.content ?? nextContent) : nextEditorContent);
 
     syncedContentSignatureRef.current = nextSig;
 
+    markProgrammaticRead(editor);
+    let replacedSize = 0;
     try {
-      editor.transact((tr: Transaction) =>
-        replacePageContent(tr, nextEditorContent as any),
-      );
+      editor.transact((tr: Transaction) => {
+        replacePageContent(tr, nextEditorContent as any);
+        replacedSize = tr.doc.nodeSize;
+      });
     } catch (error) {
       console.error(
         "[goose-note] replace editor blocks failed during page switch",
@@ -142,18 +168,28 @@ export function useEditorPageLifecycle(
       );
       const fallbackContent = createEditorSafeContent(undefined, editor.schema);
       editor.replaceBlocks(editor.document, fallbackContent as any);
+      replacedSize = 0;
     }
 
-    // replaceBlocks 后 appendTransaction（firstTitleGuard 等）可能已修改文档。
-    // 用编辑器实际文档的签名更新基线，防止初始化触发的 onChange 误判为真实编辑。
-    // 基线计算必须与 EditorComposer.onChange 完全一致（local 用 raw 文档，
-    // 内部页面经 normalizePageContent），否则签名比较永不相等、打开即触发保存。
-    const postReplaceRaw = clonePageContent(
-      editor.document as BlockNoteContent,
-    );
-    syncedContentSignatureRef.current = getCachedContentSignature(
-      isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
-    );
+    // 大文档的块树签名放到空闲时再算，切页本身不等整表 JSON。
+    const heavy = replacedSize > 20000;
+    const pageId = p?.id ?? null;
+    if (!heavy) {
+      const postReplaceRaw = clonePageContent(editor.document as BlockNoteContent);
+      syncedContentSignatureRef.current = getCachedContentSignature(
+        isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
+      );
+    } else {
+      const reconcile = () => {
+        if (pageIdForUpdateRef.current !== pageId || userInteractedRef.current) return;
+        const postReplaceRaw = clonePageContent(editor.document as BlockNoteContent);
+        syncedContentSignatureRef.current = getCachedContentSignature(
+          isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
+        );
+      };
+      if (typeof requestIdleCallback === "function") requestIdleCallback(reconcile, { timeout: 1500 });
+      else window.setTimeout(reconcile, 300);
+    }
 
     // 新笔记独立建栈；最近访问过且正文未在外部变化的笔记恢复自己的历史。
     if (view) {
@@ -166,7 +202,7 @@ export function useEditorPageLifecycle(
           ? pageUndoHistory.restore(
               activePageId,
               newState,
-              getContentSignature(editor.document),
+              syncedContentSignatureRef.current ?? nextSig,
             )
           : newState,
       );

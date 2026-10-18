@@ -11,6 +11,10 @@ import {
   pickTrailingBlankContentEl,
   type BlockHitRect,
 } from "./trailingBlankClickBlocks";
+import {
+  isClickBelowTextPosition,
+  startBlankDragFromPos,
+} from "./trailingBlankDrag";
 export {
   TRAILING_BLANK_CLICK_SLOP_PX,
   isClickPastTextRight,
@@ -43,6 +47,8 @@ export {
  *
  * 块间空隙：不改选区，并拦住默认点击。
  * 行尾空白：仍钉到该行行尾。点在字上仍交给默认。
+ * 文字下方的空白：按下后向上拖要能跨行选中。这里拦住 ProseMirror
+ * 的拖选状态，否则它会推迟把选区画出来，底部按住再往上拖只剩光标。
  */
 
 const INTERACTIVE_CLICK_SELECTOR = [
@@ -207,7 +213,23 @@ export const gooseTrailingBlankClickExtension = createExtension({
             if (shouldIgnoreTrailingBlankEvent(view, event)) return false;
             const nextPos = resolveTrailingBlankClickPos(view, event);
             if (nextPos == null) return false;
-            // 不拦截默认 mousedown（拖选用），在同一轮任务末尾、绘制前把塌缩光标钉到行尾。
+            if (isClickBelowTextPosition(view, event.clientY, nextPos)) {
+              // 拦住浏览器和 ProseMirror 的拖选，否则底部按下再往上拖时选区不会跨行。
+              event.preventDefault();
+              const target = event.target;
+              const insideBlock =
+                target instanceof Element &&
+                Boolean(target.closest(".bn-block-outer, .bn-block-content"));
+              const blocks = view.dom.querySelectorAll<HTMLElement>(".bn-block-outer");
+              const lastBlock = blocks[blocks.length - 1];
+              const belowLastBlock =
+                !insideBlock &&
+                (!lastBlock || event.clientY >= lastBlock.getBoundingClientRect().bottom);
+              // 末块之下交给外层：先把光标放到文末，再从那里向上拖。
+              if (!belowLastBlock) startBlankDragFromPos(view, event, nextPos);
+              return true;
+            }
+            // 不拦截默认 mousedown（行尾拖选用），在同一轮任务末尾、绘制前把塌缩光标钉到行尾。
             queueMicrotask(() => {
               applyTrailingBlankSelection(view, nextPos);
             });

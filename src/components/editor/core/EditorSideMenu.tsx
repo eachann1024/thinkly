@@ -6,6 +6,7 @@ import { SideMenuExtension } from "@blocknote/core/extensions";
 import { Plus, GripVertical, ChevronRight } from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { ensureBlockMoveDragging } from "@/components/editor/core/ensureBlockMoveDragging";
+import { startHeavyBlockDrag } from "@/components/editor/core/lightweightBlockDrag";
 import {
   Tooltip,
   TooltipContent,
@@ -88,6 +89,7 @@ export function EditorSideMenu() {
       if (!block || !sideMenu) return;
       setAddTipOpen(false);
       setIsDragging(true);
+      if (e.dataTransfer && startHeavyBlockDrag(editor.prosemirrorView, e.dataTransfer, block.id)) return;
       sideMenu.blockDragStart(
         { dataTransfer: e.dataTransfer, clientY: e.clientY },
         block,

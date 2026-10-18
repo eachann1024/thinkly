@@ -25,11 +25,12 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
   let widths = readColumnWidths(block.props.widths, count);
   let owner: HTMLElement | null = null;
   let disposed = false;
+  let frozenWidth: number | null = null;
   let cancelDrag: (() => void) | undefined;
   const handles: HTMLButtonElement[] = [];
   const paint = () => {
     if (disposed || !owner || !dom.isConnected) return;
-    const { width } = owner.getBoundingClientRect();
+    const width = frozenWidth ?? owner.getBoundingClientRect().width;
     // 仅修改本 NodeView 的 chrome。外层 blockContainer 属于 PM，写它的
     // style/data-* 会被 DOMObserver 当作内容修改并不断重建 NodeView。
     const css = `${ownerSelector} > .bn-block-group { grid-template-columns: ${widths.map((part) => `minmax(0, ${part}fr)`).join(" ")}; }`;
@@ -84,11 +85,13 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
       cancelDrag?.();
       const startX = event.clientX;
       const base = [...widths];
-      const available = Math.max(1, owner.getBoundingClientRect().width - GAP * (count - 1));
+      frozenWidth = owner.getBoundingClientRect().width;
+      const available = Math.max(1, frozenWidth - GAP * (count - 1));
       const controller = new AbortController();
       dom.dataset.columnsResizing = "true";
       const finish = (save: boolean) => {
         controller.abort();
+        frozenWidth = null;
         delete dom.dataset.columnsResizing;
         cancelDrag = undefined;
         if (save) commit();

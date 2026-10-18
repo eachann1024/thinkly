@@ -1,4 +1,5 @@
-import { blockToNode, type BlockNoteEditor } from "@blocknote/core";
+import { blockToEditorNode } from "@/components/editor/core/fastBlockToNode";
+import type { BlockNoteEditor } from "@blocknote/core";
 import { Fragment, Slice } from "@tiptap/pm/model";
 import { TextSelection, Selection, type EditorState } from "@tiptap/pm/state";
 import { normalizeBlockNoteClipboardHtml } from "../extensions/copyBlockClipboard";
@@ -60,12 +61,12 @@ export function insertContainedBlocks(editor: Editor, blocks: any[]): string[] |
   const state = editor.prosemirrorState;
   const target = containedPasteTarget(state);
   if (!target || !blocks.length) return null;
-  const nodes = freshBlocks(blocks).map((block) => blockToNode(block, state.schema));
+  const nodes = freshBlocks(blocks).map((block) => blockToEditorNode(block, state.schema));
   const { $from, $to } = state.selection;
   const suffix = $to.parent.content.cut($to.parentOffset);
   const children = [...nodes];
   if (suffix.size) {
-    const tail = blockToNode({ type: "paragraph" }, state.schema);
+    const tail = blockToEditorNode({ type: "paragraph" }, state.schema);
     children.push(tail.copy(Fragment.from(tail.firstChild!.copy(suffix))));
   }
   const prefix = $from.parent.content.cut(0, $from.parentOffset);
@@ -120,7 +121,7 @@ export function pasteInsideCurrentBlock(
       let content = Fragment.empty;
       freshBlocks(blocks).forEach((block, index) => {
         if (index) content = content.append(Fragment.from(state.schema.nodes.hardBreak.create()));
-        content = content.append(blockToNode(block, state.schema).firstChild!.content);
+        content = content.append(blockToEditorNode(block, state.schema).firstChild!.content);
       });
       editor.prosemirrorView.dispatch(state.tr.replaceSelection(new Slice(content, 0, 0)).scrollIntoView());
     } else {

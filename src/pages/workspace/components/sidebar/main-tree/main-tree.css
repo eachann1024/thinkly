@@ -158,6 +158,12 @@
   background-color: var(--sidebar-dnd-accent-soft) !important;
 }
 
+/* 笔记行是 relative z-10。线的绝对定位外壳不设层级时，整条线（含方头）
+   画在行下面。外壳提层后，按住拖动时落点线盖住笔记。 */
+.rct-main-tree > div:has(> .main-tree-drop-between-line) {
+  z-index: 30;
+}
+
 .main-tree-drop-between-line {
   position: relative;
   background: var(--goose-accent-solid);

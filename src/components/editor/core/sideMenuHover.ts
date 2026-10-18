@@ -73,14 +73,69 @@ function hitsWrappedText(
   return false;
 }
 
-/** 整行空白不算内容：只有文字、控件或媒体才显示把手。 */
+const HEAVY_CHILD_COUNT = 48;
+const HEAVY_TEXT_CHARS = 4000;
+const lineCache = new WeakMap<HTMLElement, { width: number; height: number; lines: LineBox[] }>();
+
+function heavyInline(inline: HTMLElement): boolean {
+  if (inline.childNodes.length > HEAVY_CHILD_COUNT) return true;
+  const first = inline.firstChild;
+  return first?.nodeType === Node.TEXT_NODE && (first.textContent?.length ?? 0) > HEAVY_TEXT_CHARS;
+}
+
+function relativeLines(
+  inline: HTMLElement,
+  bounds: Pick<DOMRect, "left" | "top" | "width" | "height">,
+): LineBox[] {
+  const cached = lineCache.get(inline);
+  if (cached && cached.width === bounds.width && cached.height === bounds.height) return cached.lines;
+  if (inline.childNodes.length > HEAVY_CHILD_COUNT) {
+    lineCache.set(inline, { width: bounds.width, height: bounds.height, lines: [] });
+    return [];
+  }
+  const range = document.createRange();
+  range.selectNodeContents(inline);
+  if (!range.toString().trim()) {
+    lineCache.set(inline, { width: bounds.width, height: bounds.height, lines: [] });
+    return [];
+  }
+  const lines = wrappedLineBoxes(range.getClientRects()).map((line) => ({
+    left: line.left - bounds.left,
+    right: line.right - bounds.left,
+    top: line.top - bounds.top,
+    bottom: line.bottom - bounds.top,
+  }));
+  lineCache.set(inline, { width: bounds.width, height: bounds.height, lines });
+  return lines;
+}
+
+/** 整行空白不算内容：只有文字、控件或媒体才显示把手。大块只量一次外框。 */
 export function isPointerOverBlockContent(content: HTMLElement, x: number, y: number): boolean {
   const inline = content.querySelector<HTMLElement>(".bn-inline-content");
   if (!inline) return isPointerInRects([content.getBoundingClientRect()], x, y);
-  const range = document.createRange();
-  range.selectNodeContents(inline);
-  if (range.toString().trim() && hitsWrappedText(range.getClientRects(), inline.getBoundingClientRect(), x, y)) {
-    return true;
+  const bounds = inline.getBoundingClientRect();
+  if (heavyInline(inline)) {
+    if (x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom) return true;
+  } else {
+    const lines = relativeLines(inline, bounds);
+    if (
+      lines.length > 0 &&
+      hitsWrappedText(
+        lines.map((line) => ({
+          left: bounds.left + line.left,
+          right: bounds.left + line.right,
+          top: bounds.top + line.top,
+          bottom: bounds.top + line.bottom,
+          width: line.right - line.left,
+          height: line.bottom - line.top,
+        })),
+        bounds,
+        x,
+        y,
+      )
+    ) {
+      return true;
+    }
   }
   return isPointerInRects(
     Array.from(content.querySelectorAll("input, img, video, canvas"), (element) => element.getBoundingClientRect()),
