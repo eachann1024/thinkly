@@ -38,8 +38,6 @@ declare global {
   const MINIMAX_BASE_URL: typeof import('../lib/ai-provider/index').MINIMAX_BASE_URL
   const NON_CUSTOMIZABLE_APP_SHORTCUT_IDS: typeof import('../lib/fixed-app-shortcuts').NON_CUSTOMIZABLE_APP_SHORTCUT_IDS
   const NOTEBOOK_THEME: typeof import('../lib/imageExport/index').NOTEBOOK_THEME
-  const ONBOARDING_CHILD_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_CHILD_PAGE_CONTENT
-  const ONBOARDING_PAGE_CONTENT: typeof import('../lib/onboarding').ONBOARDING_PAGE_CONTENT
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
@@ -213,7 +211,6 @@ declare global {
   const resolveDropTargetParentId: typeof import('../lib/local-folder-target').resolveDropTargetParentId
   const resolveImportParentForDrop: typeof import('../lib/local-folder-import').resolveImportParentForDrop
   const resolveLocalFolderImportParentId: typeof import('../lib/local-folder-target').resolveLocalFolderImportParentId
-  const resolveNotebookLandingPageId: typeof import('../lib/notebookNavigation').resolveNotebookLandingPageId
   const resolveOrCreateStableId: typeof import('../lib/local-page-idmap').resolveOrCreateStableId
   const resolveProtocolForProvider: typeof import('../lib/ai-provider/index').resolveProtocolForProvider
   const restoreMissingReferencedLocalAssets: typeof import('../lib/local-folder-asset-maintenance').restoreMissingReferencedLocalAssets
@@ -264,6 +261,9 @@ declare global {
   // @ts-ignore
   export type { DiskWriteError } from '../lib/diskWriteError'
   import('../lib/diskWriteError')
+  // @ts-ignore
+  export type { ExportOptions, ImportResult, SinglePageExportFormat } from '../lib/export/index'
+  import('../lib/export/index')
   // @ts-ignore
   export type { FixedAppShortcutId } from '../lib/fixed-app-shortcuts'
   import('../lib/fixed-app-shortcuts')

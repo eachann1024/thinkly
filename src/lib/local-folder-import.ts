@@ -34,7 +34,7 @@ export async function importTextFilesToLocalFolder(options: {
       if (!target || !current || current.pageLocalFilePath !== target.pageLocalFilePath ||
           current.notebookRoot !== target.notebookRoot) throw new Error("Import destination changed");
       const filename = file.name.replace(/\.[^/.]+$/, "");
-      const result = importFromMarkdown(text, filename, {
+      const result = await importFromMarkdown(text, filename, {
         preserveStructure: true,
       });
       if (!result.success) {

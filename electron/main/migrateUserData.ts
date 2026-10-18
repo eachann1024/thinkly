@@ -12,6 +12,14 @@ function moveIfMissing(from: string, to: string): void {
 
 /** 把「Goose Note」数据目录改名为 Thinkly。失败时仍指向已有目录。 */
 export function pinUserDataDirectory(): string {
+  // 性能测量（scripts/perf/startup.mjs）用独立配置目录启动，避免与正在运行
+  // 的正式实例抢单实例锁，也不往用户真实数据里写窗口布局。不设变量时行为不变。
+  const overridden = process.env.GOOSE_PERF_USERDATA;
+  if (overridden) {
+    mkdirSync(overridden, { recursive: true });
+    app.setPath("userData", overridden);
+    return overridden;
+  }
   const next = path.join(app.getPath("appData"), NEXT_NAME);
   const previous = path.join(app.getPath("appData"), PREVIOUS_NAME);
   moveIfMissing(previous, next);

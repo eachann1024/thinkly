@@ -18,16 +18,20 @@ import {
 } from "./openMarkdownFiles";
 import { lockWebContentsPageZoom } from "./pageZoom";
 import { pinUserDataDirectory } from "./migrateUserData";
+import { installPerfInstrumentation, markStartup, timeStartupPhase } from "./perf";
 import { createWorkspaceWindow, getMainWindow, markQuitting, restoreWorkspaceWindows, shouldSuppressWorkspaceActivate } from "./windows";
 
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
 const DEFAULT_QUICKNOTE = "Alt+N";
 
 protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
+// GOOSE_PERF_LOG 未设置时全部 no-op；设置了就记录启动各阶段与首帧稳定时刻。
+installPerfInstrumentation();
 
 // 显示名在语言就绪后才会换成「思绪 · Thinkly」或 Thinkly。
 // 数据目录先钉死，否则后面的 setName 会把笔记写进另一份文件夹。
 pinUserDataDirectory();
+markStartup("userdata-pinned");
 app.setName("Thinkly");
 // 禁止触控板捏合缩放整页；键盘 Cmd/Ctrl+/- 由渲染进程改编辑器字号。
 app.commandLine.appendSwitch("disable-pinch");
@@ -51,6 +55,7 @@ if (process.platform === "linux") {
 registerOpenFileEvent();
 
 const gotLock = app.requestSingleInstanceLock();
+markStartup("single-instance-lock", { gotLock });
 if (!gotLock) {
   // quit() 异步，后续 whenReady 仍会建窗，Dock 会冒出第二个图标。
   app.exit(0);
@@ -95,15 +100,19 @@ function startApp(): void {
   registerGitSyncIpc();
 
   app.whenReady().then(async () => {
+    markStartup("language-init-start");
     await initializeLanguage();
     setLanguageSnapshot(getLanguageSnapshot());
     registerLanguageIpc();
     languageReady = true;
+    markStartup("language-init-end");
     app.setName(localizedAppName());
-    installMenu();
-    loadVaultRoots();
+    timeStartupPhase("install-menu", installMenu);
+    timeStartupPhase("load-vault-roots", loadVaultRoots);
     enqueueMarkdownPathsFromArgv(process.argv);
+    markStartup("restore-windows-start");
     restoreWorkspaceWindows();
+    markStartup("restore-windows-end");
     flushQueuedMarkdownOpenPaths();
     registerHotkeys({
       wake: DEFAULT_WAKE,

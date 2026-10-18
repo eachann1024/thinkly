@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { SidebarModeRail } from "./sidebar-shell/SidebarModeRail";
 import { useSidebarHover } from "./sidebar-shell/useSidebarHover";
 import { renderSidebarViews } from "./sidebar-shell/renderSidebarViews";
-import { SettingsDialog } from "./SettingsDialog";
+import { LazySettingsDialog } from "./LazySettingsDialog";
 import { SidebarResizeEdge } from "./SidebarResizeEdge";
 import "./sidebar-layout.css";
 import "./sidebar-hover.css";
@@ -87,7 +87,7 @@ export function Sidebar(props: SidebarProps) {
           }}
         >
           {renderSidebarViews(context)}
-          <SettingsDialog
+          <LazySettingsDialog
             open={settingsOpen}
             onOpenChange={onSettingsOpenChange}
             activeTab={settingsTab}

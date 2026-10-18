@@ -215,7 +215,13 @@ export function PageMenu() {
                 runExport("Markdown", () => exportToMarkdown(page))
               }
               onExportHtml={() => runExport("HTML", () => exportToHTML(page))}
-              onExportWord={() => runExport("Word", () => exportToWord(page))}
+              onExportWord={() =>
+                runExport("Word", async () => {
+                  // docx 与它带的 PDF 视觉链路合计近 1MB，只在真正导出 Word 时加载。
+                  const { exportToWord } = await import("@/lib/docxExport");
+                  return exportToWord(page);
+                })
+              }
               onExportPdf={() => runExport("PDF", () => exportToPDF(page))}
             />
 
