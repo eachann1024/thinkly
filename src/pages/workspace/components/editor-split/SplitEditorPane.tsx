@@ -110,7 +110,7 @@ export function SplitEditorPane({
       data-local-file-page={isLocalFilePage ? "true" : undefined}
     >
       {showChrome ? (
-        <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} />
+        <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} page={page} />
       ) : null}
       <EditorHostBridge page={page} isEditorFullWidth>
         <div className="page-layout-body flex min-h-0 min-w-0 flex-1">

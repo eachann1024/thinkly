@@ -17,6 +17,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import { isNotebookAiFullscreenOpen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import type { Page } from "@/types";
+import { splitPaneAcceptsPage } from "@/lib/editor-split/panePage";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useHistoryView } from "@/stores/useHistoryView";
@@ -85,7 +86,7 @@ export function syncNotebookForSplitPage(pageId: string) {
 }
 
 export function isLiveEditorPage(page: Page | undefined): page is Page {
-  return Boolean(page && !page.isFolder && !page.trashedAt);
+  return splitPaneAcceptsPage(page);
 }
 
 export function isHistoryPreviewSurface(): boolean {
