@@ -1,6 +1,7 @@
 import { t } from "./i18n/gitErrors";
 import { createHash } from "node:crypto";
 import { idleGitSyncStatus, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
+import { inferGitModuleEnabled } from "../../src/lib/git-module";
 import { normalizedGitRemote, validateGitRepository, validateGitSyncConfig, type GitRepositoryConfig, type GitSyncState } from "../../src/lib/git-sync-contract";
 
 export interface GitMappingHistory { [repositoryId: string]: GitRepositoryConfig["folders"] }
@@ -39,7 +40,7 @@ export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
     }
   }
   for (const config of configs) mappingHistory[config.id] ??= config.folders;
-  return { version: 2, configs, statuses, mappingHistory };
+  return { version: 2, configs, statuses, mappingHistory, moduleEnabled: inferGitModuleEnabled(saved, configs.length) };
 }
 
 export class GitSyncSerialQueue {

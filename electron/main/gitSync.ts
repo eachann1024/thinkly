@@ -14,9 +14,11 @@ import { gitSyncPreparationFailure, isGitPreparationMessage } from "../../src/li
 import { broadcast, lookupWindowContext } from "./windows";
 import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
 import { retainGitConflicts } from "./gitSyncConflict";
-import { checkedGitRoot as checkedRoot, checkGitFolder } from "./gitSyncFolders";
+import { checkedGitRoot as checkedRoot, checkGitFolder, rememberNotebookRoot } from "./gitSyncFolders";
 import { rebindGitFolder } from "./gitSyncRebind";
 import { lockGitSyncPath } from "./gitSyncLock";
+import { gitExecutable, gitProbeSettled, probeGitBinary } from "./gitBinary";
+import { t as gitError } from "./i18n/gitErrors";
 import { GitSyncSerialQueue, migrateGitSyncState, type GitMappingHistory } from "./gitSyncStore";
 import { durableAtomicWrite } from "./gitSyncDisk";
 import { prepareGitFolderMappings, sameGitFolderTargets } from "./gitSyncMappings";
@@ -30,13 +32,14 @@ const nextRun = new Map<string, number>();
 const notifications = new Map<string, string>();
 const queue = new GitSyncSerialQueue();
 let mappingHistory: GitMappingHistory = Object.create(null);
+let moduleEnabled = false;
 const pendingReplies = new Map<string, { senderId: number; finish: (error: string | null) => void }>();
 let scheduler: GitSchedulerState = { phase: "stopped" };
 let loading: GitLoadState = { phase: "unread" };
 let timer: NodeJS.Timeout | undefined;
 let loadPromise: Promise<void> | undefined;
 const configFile = () => path.join(app.getPath("userData"), "git-sync.json");
-const rawState = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory });
+const rawState = (): GitSyncState => structuredClone({ configs: [...configs.values()], statuses: [...statuses.values()], mappingHistory, moduleEnabled });
 const state = (): GitSyncState => {
   const view = rawState();
   for (const status of view.statuses) if (status.error) status.error = localizeSavedGitError(status.error);
@@ -63,6 +66,7 @@ async function load() {
     loadPromise = (async () => {
       try {
         const saved = migrateGitSyncState(JSON.parse(await readFile(configFile(), "utf8")));
+        moduleEnabled = saved.moduleEnabled;
         mappingHistory = saved.mappingHistory;
         for (const config of saved.configs) { configs.set(config.id, config); nextRun.set(config.id, Date.now() + config.intervalMinutes * 60_000); }
         for (const status of saved.statuses) statuses.set(status.repositoryId, status);
@@ -73,7 +77,7 @@ async function load() {
         }
         await persist();
       } catch (error) {
-        configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null);
+        configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null); moduleEnabled = false;
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error(t("configUnreadable")), { cause: error });
       }
       // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
@@ -119,6 +123,9 @@ function prepareWindow(win: BrowserWindow, roots: string[], requestId: string) {
 }
 
 async function sync(repositoryId: string): Promise<GitSyncState> {
+  if (!moduleEnabled) throw new Error(t("moduleOff"));
+  if (!gitProbeSettled()) await probeGitBinary();
+  if (!gitExecutable()) throw new Error(gitError("gitMissing"));
   const found = configs.get(repositoryId);
   if (!found) throw new Error(t("saveFirst"));
   const config = structuredClone(found);
@@ -128,7 +135,11 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
   const roots: string[] = [];
   const prepared: { win: BrowserWindow; requestId: string }[] = [];
   try {
-    for (const folder of config.folders) { folder.localPath = await checkedRoot(folder.localPath); roots.push(folder.localPath); }
+    for (const folder of config.folders) {
+      await rememberNotebookRoot(folder.localPath);
+      folder.localPath = await checkedRoot(folder.localPath);
+      roots.push(folder.localPath);
+    }
     const windows = BrowserWindow.getAllWindows().filter((win) => lookupWindowContext(win)?.kind === "workspace");
     if (!windows.length && roots.length) throw new Error(t("keepWorkspaceOpen"));
     const requests = windows.map((win) => ({ win, requestId: randomUUID() }));
@@ -162,6 +173,8 @@ async function tick() {
   try {
     await queue.run(async () => {
       await load(); if (scheduler.phase === "stopped" || scheduler.phase === "stopping") return;
+      if (!gitProbeSettled()) await probeGitBinary();
+      if (!moduleEnabled || !gitExecutable()) return;
       const due = [...configs.values()].find((config) => config.enabled && config.folders.length && (nextRun.get(config.id) ?? 0) <= Date.now());
       if (due) await sync(due.id);
     });
@@ -170,6 +183,7 @@ async function tick() {
 }
 
 export function startGitSync() {
+  void probeGitBinary();
   scheduler = gitSchedulerTransition(scheduler, "scheduler.started");
   if (timer) return;
   timer = setInterval(() => { void tick(); }, 5000); timer.unref();
@@ -210,13 +224,21 @@ async function save(raw: GitRepositoryInput) {
   nextRun.set(input.id, Date.now() + input.intervalMinutes * 60_000); publish();
   // This runs inside the same serialized operation: saving a newly selected folder always
   // gets its own sync attempt, including while automatic sync is disabled.
-  return added ? sync(input.id) : state();
+  return added && moduleEnabled ? sync(input.id) : state();
 }
 
 export function registerGitSyncIpc() {
+  ipcMain.handle("git-sync:available", async (event) => {
+    assertWorkspace(event);
+    return Boolean(await probeGitBinary(true));
+  });
   ipcMain.handle("git-sync:check-folder", async (event, localPath: unknown) => {
     assertWorkspace(event);
     return checkGitFolder(localPath);
+  });
+  ipcMain.handle("git-sync:remember-root", async (event, localPath: unknown) => {
+    assertWorkspace(event);
+    return rememberNotebookRoot(localPath);
   });
   ipcMain.on("git-sync:prepare-reply", (event, requestId: string, error: string | null) => {
     if (typeof requestId !== "string") return;
@@ -233,6 +255,16 @@ export function registerGitSyncIpc() {
     });
   };
   handle("git-sync:state", async () => state());
+  handle("git-sync:set-module", async (value) => {
+    const enabled = value as unknown;
+    if (typeof enabled !== "boolean") throw new Error(t("failed"));
+    const previous = moduleEnabled;
+    moduleEnabled = enabled;
+    try { await persist(); }
+    catch (error) { moduleEnabled = previous; throw error; }
+    publish();
+    return state();
+  });
   handle("git-sync:save", save);
   handle("git-sync:now", async (value) => sync(validateRepositoryId(value)));
   handle("git-sync:rebind", async (request) => sync(await rebindGitFolder(request, { configs, mappingHistory, storageRoot: path.join(app.getPath("userData"), "git-sync-repositories"), persist, publish })));

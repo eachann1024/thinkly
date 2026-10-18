@@ -33,6 +33,15 @@ export async function initializeApplicationState(
     useNotebooks.persist.rehydrate(),
   ]);
   if (!lean) {
+    const { getGooseDesktop } = await import("@/lib/electron/runtime");
+    const remember = getGooseDesktop()?.gitSync?.rememberNotebookRoot;
+    if (remember) {
+      await Promise.all(Object.values(useNotebooks.getState().notebooks).map((notebook) => (
+        notebook.source === "local-folder" && notebook.localPath
+          ? remember(notebook.localPath).catch(() => false)
+          : false
+      )));
+    }
     // NotebookAiChats 持久化 store（skipHydration=true，需手动水合）。主应用 AI 聊天记录，小窗不需要。
     const { useNotebookAiChats } = await import("@/stores/useNotebookAiChats");
     useNotebookAiChats.persist.rehydrate();

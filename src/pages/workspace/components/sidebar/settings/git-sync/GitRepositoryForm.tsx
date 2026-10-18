@@ -66,21 +66,19 @@ function AutomaticSync({
     <section className="space-y-3">
       <Label
         htmlFor="git-sync-enabled"
-        className="flex min-h-[64px] w-full cursor-pointer items-center justify-between gap-4"
+        className="goose-settings-option-row flex w-full cursor-pointer items-center justify-between gap-4"
       >
-        <span className="flex flex-1 flex-col justify-center">
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] font-medium">
-            {uiText("automaticBackgroundSync_2b6d")}{saving &&
-              Number.isInteger(draft.intervalMinutes) &&
-              draft.intervalMinutes >= 1 &&
-              draft.intervalMinutes <= 1440 && (
-                <span
-                  role="status"
-                  className="text-sm font-normal text-muted-foreground"
-                >
-                  {uiText("saving_9b80")}</span>
-              )}
-          </span>
+        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-sm font-normal leading-5">
+          {uiText("automaticBackgroundSync_2b6d")}{saving &&
+            Number.isInteger(draft.intervalMinutes) &&
+            draft.intervalMinutes >= 1 &&
+            draft.intervalMinutes <= 1440 && (
+              <span
+                role="status"
+                className="text-sm font-normal text-muted-foreground"
+              >
+                {uiText("saving_9b80")}</span>
+            )}
         </span>
         <Switch
           id="git-sync-enabled"
@@ -89,13 +87,13 @@ function AutomaticSync({
           onCheckedChange={(checked) => onChange("enabled", checked)}
         />
       </Label>
-      <div className="flex min-h-[44px] items-center justify-between gap-4">
-        <Label htmlFor="git-sync-interval" className="text-[15px]">
+      <div className="goose-settings-option-row flex items-center justify-between gap-4">
+        <Label htmlFor="git-sync-interval" className="text-sm font-normal leading-5">
           {uiText("syncInterval_2543")}</Label>
         <div className="flex shrink-0 items-center gap-2">
           <Input
             id="git-sync-interval"
-            className="h-[44px] w-[88px] text-base"
+            className="h-10 w-[88px] text-sm"
             type="number"
             min={1}
             max={1440}
@@ -128,7 +126,7 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
         <Label htmlFor="git-sync-remote">{uiText("sshRepositoryUrl_79e4")}</Label>
         <Input
           id="git-sync-remote"
-          className="h-[44px]"
+          className="h-10 text-sm"
           value={draft.remoteUrl}
           disabled={disabled}
           onChange={(event) => onChange("remoteUrl", event.target.value)}
@@ -142,7 +140,7 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
             <Label htmlFor="git-sync-branch">{uiText("branch_bfc0")}</Label>
             <Input
               id="git-sync-branch"
-              className="h-[44px]"
+              className="h-10 text-sm"
               value={draft.branch}
               disabled={disabled}
               onChange={(event) => onChange("branch", event.target.value)}
