@@ -45,8 +45,9 @@ export const codeSplittingGroups: ChunkGroup[] = [
   // AI SDK — 较大，单独隔离方便缓存
   {
     name: "vendor-ai",
-    test: /[\\/]node_modules[\\/](ai|@ai-sdk[\\/][^\\/]+)[\\/]/,
+    test: /[\\/]node_modules[\\/](ai|openai|typebox|@ai-sdk[\\/][^\\/]+|@earendil-works[\\/][^\\/]+|@anthropic-ai[\\/]sdk|@assistant-ui[\\/][^\\/]+)[\\/]/,
     priority: 30,
+    entriesAware: true,
   },
   // Mermaid（源码里 MermaidView 用 `await import("mermaid")` 懒加载）。
   // 必须 entriesAware:true，否则会被下面的兜底 vendor 组卷进 eager vendor.js（曾达 7MB），
@@ -120,5 +121,6 @@ export const codeSplittingGroups: ChunkGroup[] = [
     name: "vendor",
     test: /[\\/]node_modules[\\/]/,
     priority: 1,
+    entriesAware: true,
   },
 ];

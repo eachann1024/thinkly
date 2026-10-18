@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { spawnQuiet } from "./spawn-quiet.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const [task, ...args] = process.argv.slice(2);
@@ -35,15 +36,26 @@ if (!Object.hasOwn(tasks, task)) {
 }
 
 const env = { ...process.env };
+const quiet = task !== "dev" && process.env.GOOSE_DEBUG !== "1";
+const run = quiet ? spawnQuiet : spawnSync;
 
 for (const command of tasks[task]) {
-  const result = spawnSync(process.execPath, command, {
+  const result = run(process.execPath, command, {
     cwd: root,
     env,
-    stdio: "inherit",
+    ...(quiet ? {} : { stdio: "inherit" }),
   });
-  if (result.error) {
+  if (!quiet && result.error) {
     console.error(`[${task}] ${command[0]}: ${result.error.message}`);
   }
   if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
+if (quiet && process.env.GOOSE_QUIET !== "1") {
+  const done = {
+    build: "✓ 构建完成",
+    window: "✓ Windows 安装包",
+    linux: "✓ Linux 安装包",
+  };
+  console.log(done[task]);
 }

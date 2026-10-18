@@ -11,7 +11,7 @@ import { createBuildOptions } from "./config/vite/buildOptions";
 import { createI18nPlugin } from "./config/vite/i18nPlugin";
 import { optimizeDeps } from "./config/vite/optimizeDeps";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   customLogger: createAppLogger(),
   base: "./",
   define: {
@@ -21,11 +21,13 @@ export default defineConfig({
   plugins: [
     createI18nPlugin(),
     createAssetPlugin(__dirname),
-    codeInspectorPlugin({
-      bundler: "vite",
-      hideConsole: true,
-      hideDomPathAttr: true,
-    }),
+    ...(command === "serve"
+      ? [codeInspectorPlugin({
+        bundler: "vite" as const,
+        hideConsole: true,
+        hideDomPathAttr: true,
+      })]
+      : []),
     react(),
     ...createAutoImportPlugins(),
     createIconMiddleware(),
@@ -34,5 +36,5 @@ export default defineConfig({
   optimizeDeps,
   server: { host: "0.0.0.0", port: 6001, sourcemapIgnoreList: false },
   build: createBuildOptions(__dirname),
-  logLevel: isDebugBuild ? "info" : "warn",
-});
+  logLevel: isDebugBuild ? "info" : "error",
+}));

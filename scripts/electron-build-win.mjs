@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
+import { spawnQuiet } from "./spawn-quiet.mjs";
 import { delimiter, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:process";
@@ -25,10 +26,7 @@ const env = {
   PATH: `${resolve(root, "node_modules/.bin")}${delimiter}${process.env.PATH ?? ""}`,
   CSC_IDENTITY_AUTO_DISCOVERY: "false",
 };
-console.log("[win] electron-builder --win nsis --x64（未签名）");
-execSync("electron-builder --win nsis --x64", {
-  stdio: "inherit",
-  env,
-  shell: true,
-  cwd: pack,
-});
+const cli = resolve(root, "node_modules/electron-builder/out/cli/cli.js");
+const result = spawnQuiet(process.execPath, [cli, "--win", "nsis", "--x64"], { env, cwd: pack });
+if (result.status !== 0) process.exit(result.status ?? 1);
+if (process.env.GOOSE_QUIET !== "1") console.log("✓ Windows 安装包");

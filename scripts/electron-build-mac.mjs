@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { execSync } from "node:child_process";
 import { delimiter, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:process";
+import { spawnQuiet } from "./spawn-quiet.mjs";
 
 if (platform !== "darwin") {
   console.error("[mac] bun run mac 仅支持 macOS（产出 Apple Silicon arm64 .app）");
@@ -17,10 +17,10 @@ const env = {
   PATH: `${resolve(root, "node_modules/.bin")}${delimiter}${process.env.PATH ?? ""}`,
   CSC_IDENTITY_AUTO_DISCOVERY: "false",
 };
-console.log("[mac] electron-builder --mac --arm64（dir 目标；无证书时使用免费 ad-hoc 签名，未经 Apple 公证）");
-execSync("electron-builder --mac --arm64 --config.mac.target=dir", {
-  stdio: "inherit",
+const cli = resolve(root, "node_modules/electron-builder/out/cli/cli.js");
+const result = spawnQuiet(process.execPath, [cli, "--mac", "--arm64", "--config.mac.target=dir"], {
   env,
-  shell: true,
   cwd: pack,
 });
+if (result.status !== 0) process.exit(result.status ?? 1);
+if (process.env.GOOSE_QUIET !== "1") console.log("✓ macOS 应用");

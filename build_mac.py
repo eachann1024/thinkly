@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import plistlib
 import re
 import shutil
@@ -13,6 +14,7 @@ import tempfile
 from pathlib import Path
 
 APP_NAME = "Goose Note"
+BUNDLE_ID = "com.goosenote.desktop"
 ROOT = Path(__file__).resolve().parent
 BUILT_APP = ROOT / "dist-desktop" / f"{APP_NAME}.app"
 INSTALLED_APP = Path("/Applications") / f"{APP_NAME}.app"
@@ -37,8 +39,7 @@ def refresh_app_registration() -> None:
             paths.add(match[1])
     for path in sorted(paths):
         subprocess.run([str(LSREGISTER), "-u", path], check=True)
-    subprocess.run([str(LSREGISTER), "-f", str(INSTALLED_APP)], check=True)
-    print(f"[mac] 已清理 {len(paths)} 个重复注册，仅注册正式安装位置")
+        subprocess.run([str(LSREGISTER), "-f", str(INSTALLED_APP)], check=True)
 
 
 def is_app_running() -> bool:
@@ -54,29 +55,42 @@ def quit_running_app() -> bool:
     was_running = is_app_running()
     if not was_running:
         return False
-    print(f"[mac] 正在运行 {APP_NAME}，先退出旧应用")
-    subprocess.run(
-        ["osascript", "-e", f'tell application "{APP_NAME}" to quit'],
+    result = subprocess.run(
+        ["osascript", "-e", f'tell application id "{BUNDLE_ID}" to quit'],
         check=False,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
     )
     deadline = time.monotonic() + 15
     while is_app_running() and time.monotonic() < deadline:
         time.sleep(0.25)
     if is_app_running():
-        raise RuntimeError(f"{APP_NAME} 未能在 15 秒内退出，已停止安装以避免覆盖运行中的应用")
+        detail = (result.stderr or result.stdout or "").strip()
+        message = f"{APP_NAME} 未能在 15 秒内退出，已停止安装以避免覆盖运行中的应用"
+        if detail:
+            message = f"{message}（{detail}）"
+        raise RuntimeError(message)
     return was_running
 
 
 def run_build() -> None:
+    env = os.environ.copy()
+    env["GOOSE_QUIET"] = "1"
     commands = [
         ["node", "scripts/run-task.mjs", "build"],
         ["node", "scripts/electron-build-mac.mjs"],
         ["node", "scripts/collect-desktop-artifacts.mjs"],
     ]
     for command in commands:
-        subprocess.run(command, cwd=ROOT, check=True)
+        result = subprocess.run(
+            command, cwd=ROOT, env=env, capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            if result.stdout:
+                print(result.stdout, file=sys.stderr, end="" if result.stdout.endswith("\n") else "\n")
+            if result.stderr:
+                print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
+            raise subprocess.CalledProcessError(result.returncode, command)
 
 
 def archive_build() -> Path:
@@ -122,15 +136,11 @@ def install_copy(*, reopen: bool) -> None:
     archive = archive_build()
     quit_running_app()
     if INSTALLED_APP.exists():
-        print(f"[mac] 删除旧副本：{INSTALLED_APP}")
         shutil.rmtree(INSTALLED_APP)
-    print(f"[mac] 复制到：{INSTALLED_APP}")
     shutil.copytree(BUILT_APP, INSTALLED_APP, symlinks=True)
     remove_build_copies()
     refresh_app_registration()
-    print(f"[mac] 构建副本已清理，仅保留最新压缩包：{archive}")
     if reopen:
-        print(f"[mac] 重新打开：{INSTALLED_APP}")
         subprocess.run(["open", str(INSTALLED_APP)], cwd=ROOT, check=True)
 
 
@@ -140,14 +150,12 @@ def main() -> int:
         return 1
     try:
         was_running = quit_running_app()
-        if not was_running:
-            print(f"[mac] {APP_NAME} 未运行，安装完成后保持关闭")
         run_build()
         install_copy(reopen=was_running)
     except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
-        print(f"[mac] 失败：{error}", file=sys.stderr)
+        print(f"✗ {error}", file=sys.stderr)
         return 1
-    print(f"[mac] 已安装（构建产物以单个 ZIP 保留）：{INSTALLED_APP}")
+    print("✓ Thinkly")
     return 0
 
 
