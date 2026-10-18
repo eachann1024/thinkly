@@ -4,6 +4,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { triggerLabel, formatTime } from "./historyViewPresentation";
 import "./history-controls.css";
@@ -62,6 +63,7 @@ function HistoryVersionList() {
     groups,
     isEmpty,
     indexError,
+    indexLoading,
     selectedVersionId,
     pendingMilestoneVersionId,
     select,
@@ -83,7 +85,9 @@ function HistoryVersionList() {
           </p>
         )}
       </div>
-      {isEmpty ? (
+      {isEmpty && indexLoading ? (
+        <SkeletonList rows={6} icon={false} label={t("versionHistory")} className="px-2 py-1" />
+      ) : isEmpty ? (
         <p className="px-3 pt-2 text-xs text-muted-foreground">
           {indexError ?? t("noVersionHistory")}
         </p>

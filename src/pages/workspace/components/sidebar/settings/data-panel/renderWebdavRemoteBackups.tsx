@@ -41,6 +41,7 @@ import {
   ChevronRight,
   Trash2,
 } from "@/components/ui/icons";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 import type { useWebdavRemoteActions } from "./useWebdavRemoteActions";
 import { formatFileSize, formatRemoteTime } from "./shared";
@@ -101,10 +102,7 @@ export function renderWebdavRemoteBackups(
       {isRemoteListOpen && (
         <div className="space-y-3 pt-2">
           {remoteLoading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              <span>{uiText("loadingRemoteBackups_8208")}</span>
-            </div>
+            <SkeletonList rows={3} icon={false} label={uiText("loadingRemoteBackups_8208")} />
           ) : remoteFiles.length === 0 ? (
             <div className="flex flex-col items-center gap-2 border border-dashed rounded-[var(--goose-control-radius)] border-muted py-6 text-center">
               <CloudOff

@@ -66,6 +66,7 @@
   --goose-block-subtle-border: #3c3c3c;
   --goose-block-subtle-hover: #2c2c2c;
   --goose-block-subtle-inset: #1c1c1c;
+  --goose-skeleton-shine: rgba(255, 255, 255, 0.05);
   --goose-table-control-hover: #343434;
   --goose-active-line-bg: #222222;
   --goose-callout-bg: #222222;

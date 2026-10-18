@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import type { GooseIcon } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SkeletonDocument } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { HistoryReadOnlyEditor } from "../HistoryReadOnlyEditor";
@@ -73,13 +74,14 @@ function HistoryReader() {
     selectedStatus,
     isEmpty,
     indexError,
+    indexLoading,
   } = useHistoryViewLogic();
 
-  if (selectedStatus === "loading") {
+  if (selectedStatus === "loading" || (isEmpty && indexLoading)) {
     return (
-      <HistoryReaderState
-        icon={GooseIcons.LoaderCircle}
-        title={t("loadingVersion")}
+      <SkeletonDocument
+        label={t("loadingVersion")}
+        className="mx-auto w-full max-w-[720px] pt-12"
       />
     );
   }
