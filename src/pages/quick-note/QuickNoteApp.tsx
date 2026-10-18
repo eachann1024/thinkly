@@ -1,6 +1,5 @@
 import { useLocale } from "@/i18n";
 import { type CSSProperties } from "react";
-import { useTextCaret } from "@/hooks/useTextCaret";
 import "@/components/ui/sonner";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
 import { Editor } from "@/components/editor/core/Editor";
@@ -15,7 +14,6 @@ import { renderQuickNoteHeader } from "./quick-note-app/renderQuickNoteHeader";
 
 export function QuickNoteApp() {
   useLocale();
-  useTextCaret();
   const draft = useQuickNoteDraftState();
   const editor = useQuickNoteEditorActions(draft);
   const save = useQuickNoteSaveActions(editor);
