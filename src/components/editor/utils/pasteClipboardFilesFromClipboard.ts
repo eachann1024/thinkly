@@ -5,6 +5,7 @@ import { materializeImageBlob } from "@/lib/imageProcessor";
 import {
   isPasteableClipboardImageFile,
   isPasteableClipboardVideoFile,
+  extractClipboardFiles,
   resolveImageMimeForUpload,
 } from "./pasteClipboardImage";
 import { toast } from "@/components/ui/sonner";
@@ -100,18 +101,11 @@ export async function pasteClipboardFilesFromClipboard(
   event: ClipboardEvent,
   editor: BlockNoteEditor<any, any, any>,
 ): Promise<void> {
-  const data = event.clipboardData;
-  if (!data?.items?.length || !editor.uploadFile) return;
+  const files = extractClipboardFiles(event.clipboardData);
+  if (!files.length || !editor.uploadFile) return;
 
   event.preventDefault();
 
-  const files: { file: File; mime: string }[] = [];
-  for (let i = 0; i < data.items.length; i++) {
-    const item = data.items[i];
-    if (item.kind !== "file") continue;
-    const file = item.getAsFile();
-    if (file) files.push({ file, mime: item.type });
-  }
   await pasteClipboardMedia(editor, files);
 }
 
@@ -151,21 +145,14 @@ export async function pasteClipboardMedia(
 
   for (const { file, mime, isVideo, insertedBlockId } of uploads) {
     try {
-      // 图片需先固化字节并修正 MIME；视频直接交给 FFmpeg 转码。
-      const uploadFile = isVideo
-        ? file
-        : new File(
-            [
-              await materializeImageBlob(
-                file,
-                resolveImageMimeForUpload(file) || mime || "image/png",
-              ),
-            ],
-            file.name || `paste-${Date.now()}.png`,
-            {
-              type: resolveImageMimeForUpload(file) || mime || "image/png",
-            },
-          );
+      // 固化剪贴板字节；具体资源保存策略由当前编辑器的 uploadFile 决定。
+      const materialized = isVideo ? file : await materializeImageBlob(
+        file, mime.startsWith("image/") ? mime : resolveImageMimeForUpload(file),
+      );
+      const uploadFile = isVideo ? file : new File(
+        [materialized], file.name || `paste-${Date.now()}.png`,
+        { type: materialized.type },
+      );
       const updateData = await editor.uploadFile(uploadFile, insertedBlockId);
       if (!editor.getBlock(insertedBlockId)) continue;
       const updatedFileBlock =
