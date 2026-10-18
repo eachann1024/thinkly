@@ -69,6 +69,8 @@ tasks/
 scripts/*
 !scripts/i18n/
 !scripts/i18n/**
+!scripts/verify/
+!scripts/verify/**
 !scripts/collect-desktop-artifacts.mjs
 !scripts/compile-electron.mjs
 !scripts/electron-build-linux.mjs
