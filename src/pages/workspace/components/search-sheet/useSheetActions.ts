@@ -12,6 +12,8 @@ import { openSheetConversation, saveSheetConversation } from "./saveSheetConvers
 type SheetActionsInput = {
   aiNotebookId: string | null;
   aiQuery: string;
+  /** 询问 AI 用完整输入（含 @、Skill、图片名）；缺省时退回检索词。 */
+  getQuestion?: () => string;
   notebookNames: Record<string, string>;
   getCandidates: () => Page[];
   ranked: Page[];
@@ -31,7 +33,7 @@ type SheetActionsInput = {
 
 /** 搜索面板的打开结果、提问 AI 与转入 AI 面板动作。 */
 export function useSheetActions(input: SheetActionsInput) {
-  const { aiNotebookId, aiQuery, notebookNames, getCandidates, ranked, answer, ask, pending, deferredQuery, scope, composingRef, returnFocusRef, skipRestoreRef, onOpenResult, onCommand } = input;
+  const { aiNotebookId, aiQuery, getQuestion, notebookNames, getCandidates, ranked, answer, ask, pending, deferredQuery, scope, composingRef, returnFocusRef, skipRestoreRef, onOpenResult, onCommand } = input;
   const savedConversation = useRef<{ requestId: number; id: string } | null>(null);
   const handedOff = useRef<{ requestId: number; token: string } | null>(null);
   const reasked = useRef<number | null>(null);
@@ -54,17 +56,18 @@ export function useSheetActions(input: SheetActionsInput) {
   }, [onCommand, aiNotebookId, answer]);
 
   const askAi = () => {
-    if (!aiQuery) return;
+    const question = (getQuestion?.() || aiQuery).trim();
+    if (!question) return;
     const latestScope = useSearchSession.getState().scope;
     const candidates = getCandidates();
     if (latestScope.kind === "all") {
       const notebookIds = [...new Set(candidates.map(page => page.workspaceId))];
       const label = `所有笔记本（${notebookIds.map(id => notebookNames[id] ?? id).join("、")}）`;
-      void ask(aiQuery, candidates, ranked, { notebookId: aiNotebookId ?? notebookIds[0] ?? "", notebookIds, label });
+      void ask(question, candidates, ranked, { notebookId: aiNotebookId ?? notebookIds[0] ?? "", notebookIds, label });
       return;
     }
     const notebookId = latestScope.notebookId ?? aiNotebookId ?? "";
-    void ask(aiQuery, candidates, ranked, { notebookId, label: notebookNames[notebookId] ?? notebookId });
+    void ask(question, candidates, ranked, { notebookId, label: notebookNames[notebookId] ?? notebookId });
   };
   const continueInPanel = aiNotebookId && answer ? () => {
     skipRestoreRef.current = true;

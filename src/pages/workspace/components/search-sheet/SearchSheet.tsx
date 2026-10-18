@@ -6,7 +6,8 @@ zh-Hans:
   searching: "搜索中…"
   noteCount: "{{count}} 篇"
   searchNotes: "搜索笔记…"
-  searchNotesOrAskAi: "搜索笔记、提问 AI…"
+  searchNotesOrAskAi: "搜索笔记，/ 调用 Skill，@ 引用笔记或文件…"
+  newLine: "换行"
   clearSearch: "清空搜索"
   searchResults: "搜索结果"
   recentlyOpened: "最近访问"
@@ -30,7 +31,8 @@ en:
   searching: "Searching…"
   noteCount: "Notes: {{count}}"
   searchNotes: "Search notes…"
-  searchNotesOrAskAi: "Search notes or ask AI…"
+  searchNotesOrAskAi: "Search notes, / for skills, @ for notes or files…"
+  newLine: "New line"
   clearSearch: "Clear search"
   searchResults: "Search results"
   recentlyOpened: "Recently opened"
@@ -54,7 +56,8 @@ ja:
   searching: "検索中…"
   noteCount: "{{count}} 件"
   searchNotes: "ノートを検索…"
-  searchNotesOrAskAi: "ノートを検索、AI に質問…"
+  searchNotesOrAskAi: "ノートを検索、/ でスキル、@ でノートやファイル…"
+  newLine: "改行"
   clearSearch: "検索をクリア"
   searchResults: "検索結果"
   recentlyOpened: "最近開いた項目"
@@ -80,7 +83,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProper
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Input } from "@/components/ui/input";
 import { Search, Sparkles, X } from "@/components/ui/icons";
 import { DotDecor, DotIconArt, type DotIconArtSpec, type DotIconMotion } from "@/components/ui/dot-matrix";
 
@@ -103,6 +105,7 @@ import { SearchSheetFilters } from "./SearchSheetFilters";
 import { useSheetResults } from "./useSheetResults";
 import type { SearchFolderSource } from "../sidebar/useSearchFolderRefresh";
 import { useSheetDrag } from "./useSheetDrag";
+import { SearchSheetQuery, type SearchSheetQueryHandle } from "./SearchSheetQuery";
 import { useSearchAiAvailable, useSheetAnswer } from "./useSheetAnswer";
 import { SearchSheetAnswer } from "./SearchSheetAnswer";
 import { useSheetActions } from "./useSheetActions";
@@ -128,13 +131,21 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const windowed = variant === "window";
   const visible = session.open && session.sheetOpen;
   const sheetRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const queryRef = useRef<SearchSheetQueryHandle>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const skipRestore = useRef(false);
   const composing = useRef(false);
-  const [draft, setDraft] = useState(session.query);
+  const focusSeen = useRef(session.focusNonce);
+  const [prompt, setPrompt] = useState(session.query);
+  const [queryEmpty, setQueryEmpty] = useState(!session.query.trim());
   const [activeId, setActiveId] = useState<string | null>(null);
+  if (focusSeen.current !== session.focusNonce) {
+    focusSeen.current = session.focusNonce;
+    const next = session.query.trim();
+    if (prompt !== next) setPrompt(next);
+    if (queryEmpty !== !next) setQueryEmpty(!next);
+  }
   const notebooks = useNotebooks(s => s.notebooks);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
   const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults(folderSource);
@@ -145,20 +156,20 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const dismissSheet = useCallback(() => onClose ? onClose() : useSearchSession.getState().dismissSheet(), [onClose]);
   const drag = useSheetDrag(sheetRef, dismissSheet);
 
-  useEffect(() => { if (!composing.current) setDraft(session.query); }, [session.query]);
+  const onSearchText = useCallback((text: string) => { if (useSearchSession.getState().query !== text) useSearchSession.getState().setQuery(text); }, []);
+  const onPromptChange = useCallback((next: string) => setPrompt(current => current === next ? current : next), []);
+  const getQuestion = useCallback(() => queryRef.current?.getQuestion() ?? "", []);
   useEffect(() => { if (!visible) resetAnswer(); }, [visible, resetAnswer]);
-  useEffect(() => { if (answer && answer.question !== session.query.trim()) resetAnswer(); }, [answer, session.query, resetAnswer]);
+  useEffect(() => { if (answer && answer.question !== prompt.trim()) resetAnswer(); }, [answer, prompt, resetAnswer]);
   useEffect(() => { setActiveId(null); listRef.current?.scrollTo({ top: 0 }); }, [deferredQuery, session.scope, session.titleOnly, session.sort]);
   useEffect(() => {
     if (!visible) return;
     const active = document.activeElement;
     if (active instanceof HTMLElement && !sheetRef.current?.contains(active)) returnFocus.current = active;
-    inputRef.current?.focus({ preventScroll: true });
-    inputRef.current?.select();
+    queryRef.current?.focus(true);
   }, [visible, session.focusNonce]);
   useEffect(() => {
     if (visible || session.open) return;
-    // 打开结果或转交 AI 时由目标接管焦点，只有直接关闭才归还。
     const target = returnFocus.current;
     returnFocus.current = null;
     if (skipRestore.current) { skipRestore.current = false; return; }
@@ -166,8 +177,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   }, [visible, session.open]);
 
   const hasQuery = Boolean(session.query.trim());
-  const pending = isSearching || draft !== session.query || session.query !== deferredQuery;
-  const aiQuery = aiReady ? session.query.trim() : "";
+  const pending = isSearching || session.query !== deferredQuery;
+  const aiQuery = aiReady ? prompt.trim() : "";
   const notebookNames = useMemo(() => Object.fromEntries(Object.values(notebooks).map(n => [n.id, n.name])), [notebooks]);
   const optionIds = useMemo(() => [...(aiQuery ? [AI_ROW_ID] : []), ...results.map(p => p.id)], [aiQuery, results]);
   const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
@@ -178,26 +189,37 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
     window.dispatchEvent(new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } }));
   };
   const { askAi, continueInPanel, openSource, openResult } = useSheetActions({
-    aiNotebookId, aiQuery, notebookNames, getCandidates, ranked: searchResults.all, answer, ask, pending, deferredQuery,
+    aiNotebookId, aiQuery, getQuestion, notebookNames, getCandidates, ranked: searchResults.all, answer, ask, pending, deferredQuery,
     scope: session.scope, composingRef: composing, returnFocusRef: returnFocus, skipRestoreRef: skipRestore, onOpenResult, onCommand,
   });
+  const confirmSelection = () => {
+    if (answer) return;
+    if (selectedId === AI_ROW_ID) { askAi(); return; }
+    const page = results.find(p => p.id === selectedId);
+    if (page) openResult(page);
+  };
   const clearSearch = () => {
-    if (composing.current) inputRef.current?.blur();
     composing.current = false;
-    setDraft("");
-    session.setQuery("");
-    inputRef.current?.focus({ preventScroll: true });
+    queryRef.current?.clear();
+    setPrompt("");
+    setQueryEmpty(true);
+    if (useSearchSession.getState().query) session.setQuery("");
+    queryRef.current?.focus();
   };
   const reveal = (id: string) => document.getElementById(id === AI_ROW_ID ? id : `search-result-${id}`)?.scrollIntoView({ block: "nearest" });
+  const keydownCapture = (event: KeyboardEvent<HTMLDivElement>) => {
+    const native = event.nativeEvent;
+    if ((native.isComposing || native.keyCode === 229) && event.key === "Enter" && !event.shiftKey) { event.stopPropagation(); return; }
+    if (event.key === "Enter" && isPlatformPrimaryModifierEvent(event) && !event.shiftKey && !event.altKey) {
+      event.preventDefault(); event.stopPropagation();
+      if (continueInPanel && answer?.status !== "loading") continueInPanel();
+    }
+  };
   const keydown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!sheetRef.current?.contains(event.target as Node)) return;
+    if (!sheetRef.current?.contains(event.target as Node) || event.defaultPrevented) return;
     if (composing.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (answer) resetAnswer(); else dismissSheet(); return; }
-    if (event.key === "Enter" && isPlatformPrimaryModifierEvent(event) && !event.shiftKey && !event.altKey) {
-      if (continueInPanel && answer?.status !== "loading") { event.preventDefault(); event.stopPropagation(); continueInPanel(); }
-      return;
-    }
-    if (event.target !== inputRef.current) return;
+    if (!queryRef.current?.containsTarget(event.target)) return;
     if (event.key === "Tab" && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       const latest = useSearchSession.getState();
@@ -213,12 +235,9 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
       requestAnimationFrame(() => reveal(optionIds[next]));
       return;
     }
-    if (event.key !== "Enter") return;
+    if (event.key !== "Enter" || event.shiftKey) return;
     event.preventDefault();
-    if (answer) return;
-    if ((event.shiftKey && aiQuery) || selectedId === AI_ROW_ID) { askAi(); return; }
-    const page = results.find(p => p.id === selectedId);
-    if (page) openResult(page);
+    confirmSelection();
   };
 
   const busy = hasQuery && (loading || pending);
@@ -228,18 +247,20 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const awaitingRows = !searchError && !results.length && (busy || (!hasQuery && showRecent && isSearching));
   const statusKind = searchError ? "error" : awaitingRows || results.length ? null : hasQuery ? "none" : "empty";
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});
-  return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} data-variant={variant} style={{ zIndex: layer }} onKeyDown={keydown}>
+  const mentionNotebookId = session.scope.kind === "all" ? session.startingNotebookId ?? aiNotebookId : session.scope.notebookId ?? aiNotebookId;
+  return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} data-variant={variant} style={{ zIndex: layer }} onKeyDownCapture={keydownCapture} onKeyDown={keydown}>
     {!windowed && <div className="search-sheet-scrim" aria-hidden="true" onClick={dismissSheet}/>}
     <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label={uiText("searchNotes")} inert={!visible} data-dragging={drag.dragging}
       style={drag.offset ? { "--search-sheet-drag": `${drag.offset}px` } as CSSProperties : undefined}>
       {!windowed && <div className="search-sheet-grab" aria-hidden="true" {...drag.handlers}/>}
       <div className="search-sheet-query">
         <Search size={20} aria-hidden="true"/>
-        <Input variant="inline" context="shell" className="goose-inline-input" ref={inputRef} role="combobox" aria-label={uiText("searchNotes")} aria-controls="search-sheet-results" aria-expanded={visible} aria-autocomplete="list" aria-activedescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
-          value={draft} placeholder={aiReady ? uiText("searchNotesOrAskAi") : uiText("searchNotes")} autoComplete="off" spellCheck={false}
-          onChange={e => { setDraft(e.target.value); if (!composing.current) session.setQuery(e.target.value); }}
-          onCompositionStart={() => { composing.current = true; }} onCompositionEnd={e => { composing.current = false; session.setQuery(e.currentTarget.value); }}/>
-        {draft ? <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
+        <SearchSheetQuery key={session.focusNonce} ref={queryRef} seed={session.query} placeholder={uiText("searchNotesOrAskAi")} label={uiText("searchNotes")}
+          notebookId={mentionNotebookId} scopeAll={scopeAll} listId="search-sheet-results" expanded={visible}
+          activeDescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
+          composingRef={composing} onSearchText={onSearchText} onPrompt={onPromptChange} onSubmit={confirmSelection}
+          onEscape={() => { if (answer) resetAnswer(); else dismissSheet(); }} onEmptyChange={setQueryEmpty}/>
+        {queryEmpty ? <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd> : <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton>}
       </div>
       <SearchSheetFilters count={count}/>
       {answer ? <div className="search-sheet-list" data-answer="true">
@@ -269,7 +290,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
         <div className="search-sheet-footer-inner">
           <span><kbd className="search-sheet-kbd">↑↓</kbd>{uiText("select")}</span>
           <span><kbd className="search-sheet-kbd">↵</kbd>{uiText("open")}</span>
-          {aiReady && <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("askAi")}</span>}
+          <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("newLine")}</span>
           <span className="search-sheet-scope-hint" title={uiText("switchScopeHint", {name: tabScopeName})}><kbd className="search-sheet-kbd">Tab</kbd>{uiText("switchScope")}<span className="search-sheet-scope-name">{tabScopeName}</span></span>
         </div>
       </div>
