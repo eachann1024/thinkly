@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { REPO, versionFromTag } from "./desktop-release-support.mjs";
 import { publishedReleaseNotes } from "./desktop-release-notes.mjs";
 
@@ -7,8 +9,8 @@ export function releaseInstallers(version) {
     `Thinkly-${version}-arm64.dmg`, `Thinkly-${version}.dmg`,
     `Thinkly-${version}-arm64-mac.zip`, `Thinkly-${version}-mac.zip`,
     `Thinkly-${version}-x64-setup.exe`, `Thinkly-${version}-arm64-setup.exe`,
-    `Thinkly-${version}.AppImage`, `thinkly_${version}_amd64.deb`,
-    `thinkly-${version}.pacman`,
+    `Thinkly-${version}.AppImage`, `Thinkly_${version}_amd64.deb`,
+    `Thinkly-${version}.pacman`,
   ];
 }
 
@@ -17,7 +19,11 @@ export function releaseAssets(version) {
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
-  const downloadRepo = repo;
+  // 已发布客户端按后缀选包，不看 Goose.Note 前缀。信任校验比对的是这条地址原文，不跟随重定向：
+  // v1.7.240 起只接受 goose-notes，v1.7.317 同时接受 goose-note。下载本身由 fetch 跟随 301 到 thinkly。
+  const downloadRepo = repo === "eachann1024/thinkly" || repo === "eachann1024/goose-note"
+    ? "eachann1024/goose-notes"
+    : repo;
   return {
     tag_name: tag, html_url: `https://github.com/${repo}/releases/tag/${tag}`,
     releaseNotes, publishedAt,
@@ -102,4 +108,15 @@ export function publishedDownloadMetadata(release) {
   const signed = (release.body ?? "").includes("macOS 安装包已完成代码签名与公证。");
   return downloadMetadata(version, release.tag_name, hashes, signed, release.published_at,
     publishedReleaseNotes(release.body));
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const version = /^\d+\.\d+\.\d+$/.test(process.argv[2] ?? "") ? process.argv[2] : "1.7.317";
+  const tag = `v${version}-example1`;
+  const hashes = new Map(releaseInstallers(version).map((name) => [name, "a".repeat(64)]));
+  const files = downloadMetadata(version, tag, hashes, false, "2026-10-18T00:00:00.000Z", "example");
+  for (const [path, content] of Object.entries(files)) {
+    console.log(`----- ${path} -----`);
+    console.log(content);
+  }
 }
