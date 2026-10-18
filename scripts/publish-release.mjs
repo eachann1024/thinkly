@@ -18,6 +18,51 @@ import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./d
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
+const MANUAL_UPGRADE_VERSION = "1.7.318";
+
+function manualUpgradeNotes(version) {
+  if (version !== MANUAL_UPGRADE_VERSION) return [];
+  return [
+    "### 从 1.7.317 升级",
+    "",
+    "应用已正式改名为 Thinkly（磁盘上是 Thinkly.app，安装包文件名 Thinkly-*）。",
+    "",
+    "- 1.7.317 及更早版本无法在应用内自动升级，请到官网或 GitHub Release 手动下载安装一次；装好后可以删掉旧的 Goose Note.app。",
+    "- macOS 辅助功能等系统权限需要重新授权。",
+    "- 首次启动会自动把原数据目录迁移过来，笔记和设置不受影响。",
+    "- Homebrew 用户 `brew update && brew upgrade` 会自动迁到 thinkly cask。",
+    "",
+  ];
+}
+
+export function formatReleaseBody({ version, releaseNotes, repo, tag, signed, macHelper, windowsSigned }) {
+  const baseDownloadUrl = `https://github.com/${repo}/releases/download/${tag}`;
+  return [
+    markedReleaseNotes(releaseNotes),
+    "",
+    ...manualUpgradeNotes(version),
+    `### 📥 安装包下载`,
+    "",
+    "| 平台 | 安装包直接下载 | 架构与说明 |",
+    "| :--- | :--- | :--- |",
+    `| **macOS** | [Thinkly-${version}-arm64.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
+    `| | [Thinkly-${version}.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
+    `| **Windows** | [Thinkly-${version}-x64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
+    `| | [Thinkly-${version}-arm64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
+    `| **Linux** | [Thinkly-${version}.AppImage](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
+    `| | [Thinkly_${version}_amd64.deb](${baseDownloadUrl}/Thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
+    `| | [Thinkly-${version}.pacman](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./Thinkly-${version}.pacman\`） |`,
+    "",
+    "### macOS 安装说明",
+    "",
+    ...(signed ? [MAC_SIGNED] : macInstallParagraphs(macHelper)),
+    ...(macHelper ? [MAC_HELPER_MARKER] : []),
+    `[完整安装说明（含旧版 DMG、ZIP 与 Homebrew）](${MAC_INSTALL_GUIDE})`,
+    "",
+    windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。",
+  ].join("\n");
+}
+
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/thinkly";
 
@@ -69,30 +114,9 @@ async function main() {
     }
     writeFileSync(join(stage, "SHA256SUMS.txt"), installers.map((name) => `${hashes.get(name)}  ${name}\n`).join(""));
     assert.deepEqual(readdirSync(stage).sort(), releaseAssets(version));
-    const baseDownloadUrl = `https://github.com/${REPO}/releases/download/${tag}`;
-    const notes = [
-      markedReleaseNotes(releaseNotes),
-      "",
-      `### 📥 安装包下载`,
-      "",
-      "| 平台 | 安装包直接下载 | 架构与说明 |",
-      "| :--- | :--- | :--- |",
-      `| **macOS** | [Thinkly-${version}-arm64.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
-      `| | [Thinkly-${version}.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
-      `| **Windows** | [Thinkly-${version}-x64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
-      `| | [Thinkly-${version}-arm64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
-      `| **Linux** | [Thinkly-${version}.AppImage](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
-      `| | [Thinkly_${version}_amd64.deb](${baseDownloadUrl}/Thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
-      `| | [Thinkly-${version}.pacman](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./Thinkly-${version}.pacman\`） |`,
-      "",
-      "### macOS 安装说明",
-      "",
-      ...(signed ? [MAC_SIGNED] : macInstallParagraphs(macHelper)),
-      ...(macHelper ? [MAC_HELPER_MARKER] : []),
-      `[完整安装说明（含旧版 DMG、ZIP 与 Homebrew）](${MAC_INSTALL_GUIDE})`,
-      "",
-      windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。",
-    ].join("\n");
+    const notes = formatReleaseBody({
+      version, releaseNotes, repo: REPO, tag, signed, macHelper, windowsSigned,
+    });
     const existing = findRelease(tag);
     if (!existing) {
       gh(["release", "create", tag, "--repo", REPO, "--target", sha,
