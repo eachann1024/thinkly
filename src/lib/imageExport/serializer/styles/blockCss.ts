@@ -167,6 +167,15 @@ export function buildBlockCss(t: CardTheme): string {
   margin-left: 22px;
   margin-top: 6px;
 }
+.gooseshot-content .export-columns {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+  margin: 8px 0;
+}
+.gooseshot-content .export-column { min-width: 0; }
+.gooseshot-content .export-column > *:first-child { margin-top: 0; }
+.gooseshot-content .export-column > *:last-child { margin-bottom: 0; }
 .gooseshot-content .toggle-summary {
   display: flex;
   align-items: flex-start;

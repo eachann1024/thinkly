@@ -3,6 +3,7 @@ import { buildBlockStyleAttr } from "./blockStyles";
 import { renderMediaBlock } from "./mediaBlocks";
 import { renderTableBlock } from "./tableBlock";
 import { renderTextBlock } from "./textBlocks";
+import { renderColumnsBlock } from "./columnsBlock";
 export { collectBlockInlineStyles } from "./blockStyles";
 export { renderInline, extractInlineText, extractCellTextForHtml } from "./inline";
 
@@ -52,6 +53,8 @@ export function renderBlock(block: any, theme: CardTheme): string {
   if (["image", "imageResize", "file", "video", "audio"].includes(block.type)) {
     return renderMediaBlock(block, theme, buildBlockStyleAttr(block, theme));
   }
+  if (block.type === "columnLayout") return renderColumnsBlock(block, theme, renderBlocks);
+  if (block.type === "columnSection") return renderBlocks(block.children ?? [], theme);
   if (block.type === "table") {
     return renderTableBlock(block, theme, buildBlockStyleAttr(block, theme));
   }

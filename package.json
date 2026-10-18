@@ -26,7 +26,8 @@
     "linux": "node scripts/run-task.mjs linux",
     "mac": "python3 build_mac.py",
     "window": "node scripts/run-task.mjs window",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "verify": "node scripts/verify/run.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "3.0.81",
