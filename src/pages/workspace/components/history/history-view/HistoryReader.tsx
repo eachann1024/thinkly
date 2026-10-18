@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import type { GooseIcon } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DotDecor, DotIconArt } from "@/components/ui/dot-matrix";
 import { SkeletonDocument } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -44,20 +45,26 @@ ja:
 const t = createTranslator(messages);
 
 
+/** 09 无版本／未选中：时钟点阵 + 光晕，静态缺省循环。 */
+const HISTORY_ART = <DotIconArt icon="history" size={64} width={168} height={116} halo className="-my-2" />;
+
 export function HistoryReaderState({
   icon: Icon,
   title,
   description,
   action,
+  illustration,
 }: {
   icon: GooseIcon;
   title: string;
   description?: string;
   action?: ReactNode;
+  illustration?: ReactNode;
 }) {
   return (
-    <div className="flex h-full min-h-[280px] items-center justify-center px-6">
-      <EmptyState icon={Icon} title={title} details={description} action={action} />
+    <div className="relative flex h-full min-h-[280px] items-center justify-center overflow-hidden px-6">
+      {illustration ? <DotDecor preset="history" /> : null}
+      <EmptyState icon={Icon} illustration={illustration} title={title} details={description} action={action} className="relative" />
     </div>
   );
 }
@@ -92,6 +99,7 @@ function HistoryReader() {
         icon={indexError ? GooseIcons.FileWarning : GooseIcons.History}
         title={indexError ? t("versionHistoryCouldNotBeLoaded") : t("noVersionHistory")}
         description={indexError ?? undefined}
+        illustration={indexError ? undefined : HISTORY_ART}
       />
     );
   }
@@ -120,6 +128,7 @@ function HistoryReader() {
       <HistoryReaderState
         icon={GooseIcons.MousePointerClick}
         title={t("selectAVersionOnTheLeft")}
+        illustration={HISTORY_ART}
       />
     );
   }

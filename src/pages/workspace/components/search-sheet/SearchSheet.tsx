@@ -81,7 +81,15 @@ import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
-import { CircleAlert, FileX, Search, Sparkles, X } from "@/components/ui/icons";
+import { Search, Sparkles, X } from "@/components/ui/icons";
+import { DotDecor, DotIconArt, type DotIconArtSpec, type DotIconMotion } from "@/components/ui/dot-matrix";
+
+/** 空查询／无结果静态缺省，搜索出错一次轻抖后缓慢呼吸。 */
+const STATUS_ART: Record<"empty" | "none" | "error", { icon: DotIconArtSpec["icon"]; motion: DotIconMotion }> = {
+  empty: { icon: "search", motion: "idle" },
+  none: { icon: "fileX", motion: "idle" },
+  error: { icon: "docErr", motion: "alert" },
+};
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
@@ -240,7 +248,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
         {awaitingRows && visible && <SkeletonList label={uiText("searching")}/>}
         {loadError && <div className="search-sheet-status" role="alert">{uiText("someNotebooksCouldnTBeRead")}<Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={retryLoad}>{uiText("tryAgain")}</Button></div>}
         {statusKind && <div key={statusKind} className="search-sheet-status" role={statusKind === "error" ? "alert" : "status"} data-state={statusKind}>
-          <span className="search-sheet-status-glyph" aria-hidden="true">{statusKind === "error" ? <CircleAlert size={20}/> : statusKind === "none" ? <FileX size={20}/> : <Search size={20}/>}</span>
+          <DotDecor preset="search"/>
+          <span className="search-sheet-status-art" aria-hidden="true"><DotIconArt {...STATUS_ART[statusKind]} size={52} width={136} height={92} halo/></span>
           <strong>{statusKind === "error" ? searchError : statusKind === "none" ? uiText("noMatchingNotes") : scopeAll ? uiText("searchAllNotebooks") : uiText("searchCurrentNotebook")}</strong>
           {statusKind === "none" && <div className="search-sheet-status-actions">
             <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? uiText("clearSearch") : uiText("searchAllNotebooks")}</Button>

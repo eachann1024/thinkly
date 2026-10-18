@@ -32,17 +32,36 @@ import { toast } from "@/components/ui/sonner";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
 
+/** 打开本地文件夹：弹出目录选择器，创建本地文件夹笔记本并加载页面。 */
+export function useOpenLocalFolder() {
+  const { loadLocalFolderPages } = usePages();
+  const createLocalFolderNotebook = useNotebooks((state) => state.createLocalFolderNotebook);
+  return useCallback(async () => {
+    const desktop = getGooseDesktop();
+    if (!desktop) {
+      toast.error(uiText("openFailed") + uiText("pickerUnavailable"));
+      return;
+    }
+    try {
+      const path = await desktop.selectDirectory({ purpose: "notebook" });
+      if (!path) return;
+      const folderName = path.split(/[\\/]/).pop() || "Unknown";
+      const notebookId = createLocalFolderNotebook(folderName, path);
+      await loadLocalFolderPages(notebookId, path, { showWelcome: true });
+    } catch (e) {
+      console.error(e);
+      toast.error(uiText("openFailed") + String(e));
+    }
+  }, [createLocalFolderNotebook, loadLocalFolderPages]);
+}
+
 export function usePageEmptyState() {
   const locale = useLocale();
-  const {
-    loadLocalFolderPages,
-  } = usePages();
   const {
     activeNotebookId,
     notebooks,
     createNotebook,
     setActiveNotebook,
-    createLocalFolderNotebook,
   } = useNotebooks();
   const openInCurrentTab = useTabs((state) => state.openInCurrentTab);
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
@@ -73,23 +92,7 @@ export function usePageEmptyState() {
     await activateOrCreatePage();
   }, [activateOrCreatePage]);
 
-  const onOpenLocalFolder = useCallback(async () => {
-    const desktop = getGooseDesktop();
-    if (!desktop) {
-      toast.error(uiText("openFailed") + uiText("pickerUnavailable"));
-      return;
-    }
-    try {
-      const path = await desktop.selectDirectory({ purpose: "notebook" });
-      if (!path) return;
-      const folderName = path.split(/[\\/]/).pop() || "Unknown";
-      const notebookId = createLocalFolderNotebook(folderName, path);
-      await loadLocalFolderPages(notebookId, path, { showWelcome: true });
-    } catch (e) {
-      console.error(e);
-      toast.error(uiText("openFailed") + String(e));
-    }
-  }, [createLocalFolderNotebook, loadLocalFolderPages]);
+  const onOpenLocalFolder = useOpenLocalFolder();
 
   // 全局快捷键监听
   useEffect(() => {

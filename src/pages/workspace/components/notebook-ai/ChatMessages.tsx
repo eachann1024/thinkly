@@ -3,7 +3,8 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 /** 消息列表：线程布局与时间分隔，渲染职责在 messages/。 */
 import { useMemo, useState } from "react";
-import { ArrowDown, Quote } from "@/components/ui/icons";
+import { ArrowDown } from "@/components/ui/icons";
+import { DotDecor, DotIconArt } from "@/components/ui/dot-matrix";
 import { ThreadPrimitive } from "@assistant-ui/react";
 import {
   formatChatMessageTime,
@@ -44,6 +45,9 @@ ja:
   detailSendSuggestion: "提案を送信：{{value1}}"
 `;
 const t = createTranslator(messages);
+
+/** 新会话双引号：不加光晕，与左上角收窄的点阵三角之间留出干净空白。 */
+const EMPTY_QUOTE = { icon: "quote", size: 36, width: 36, height: 36 } as const;
 
 export { buildUserMessageSegments } from "@/lib/notebook-ai/userMessageSegments";
 export {
@@ -127,12 +131,13 @@ export function ChatMessages({
         {messages.length === 0 ? (
           <div
             className={cn(
-              "notebook-ai-empty-state w-full min-w-0",
+              "notebook-ai-empty-state relative w-full min-w-0",
               isFullscreen && "notebook-ai-empty-state-fullscreen",
             )}
           >
+            <DotDecor preset="aiChat" compact />
             <div className="notebook-ai-empty-mark" aria-hidden="true">
-              <Quote size={26} fill="currentColor" />
+              <DotIconArt {...EMPTY_QUOTE} />
             </div>
             <h2 className="notebook-ai-empty-title text-foreground">
               {t("howWouldYouLikeToEditThisNote")}

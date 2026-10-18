@@ -1,0 +1,19 @@
+/* 16 渲染失败插画的悬停预备态：只动 transform，位移 ≤ 2px */
+.goose-glitch-fix,
+.goose-glitch-gap {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 160ms var(--dm-ease, ease);
+}
+.goose-glitch-host:has([data-dm-arm]:is(:hover, :focus-visible)) .goose-glitch-fix {
+  transform: translateY(-2px);
+}
+.goose-glitch-host:has([data-dm-arm]:is(:hover, :focus-visible)) .goose-glitch-gap {
+  transform: scale(1.03);
+}
+@media (prefers-reduced-motion: reduce) {
+  .goose-glitch-fix,
+  .goose-glitch-gap {
+    transition: none;
+  }
+}

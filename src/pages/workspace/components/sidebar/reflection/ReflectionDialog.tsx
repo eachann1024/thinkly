@@ -2,6 +2,7 @@ import { useLocale } from "@/i18n";
 import { useEffect, useMemo, useState } from "react";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { DialogShell } from "@/components/ui/dialog-shell";
+import { FlatlineArt } from "@/components/ui/dot-matrix";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { useSettings } from "@/stores/useSettings";
@@ -105,7 +106,12 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
       contentClassName="max-h-[calc(100dvh-64px)] w-[min(calc(100vw-32px),max(640px,68vw))] max-w-[1080px] sm:max-w-[1080px]"
       bodyClassName="space-y-10"
     >
-      {data && !hasEdits ? <p className="text-sm text-muted-foreground">{uiText("empty")}</p> : null}
+      {data && !hasEdits ? (
+        <div>
+          <FlatlineArt className="mb-3.5 block max-w-full text-foreground" />
+          <p className="text-sm text-muted-foreground">{uiText("empty")}</p>
+        </div>
+      ) : null}
       {data && hasEdits ? (
         <>
           <ReflectionNarrative

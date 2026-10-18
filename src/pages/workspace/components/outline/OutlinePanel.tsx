@@ -20,6 +20,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";
+import { DotDecor, OutlineArt } from "@/components/ui/dot-matrix";
 import { useCallback, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { MainTreeRowShell } from "../sidebar/main-tree/MainTreeRowShell";
@@ -69,6 +70,8 @@ export function OutlinePanel({
       <section className="outline-panel" aria-label={uiText("documentOutline")}>
         <div className="sidebar-search-heading"><strong>{uiText("documentOutline")}</strong></div>
         <div className="outline-empty" role="status">
+          <DotDecor preset="outline" />
+          <OutlineArt className="outline-empty-art" />
           <p>{emptyMessage}</p>
           {emptyHint ? <p className="outline-empty-hint">{emptyHint}</p> : null}
         </div>

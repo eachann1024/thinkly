@@ -36,6 +36,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
+import { DotDecor, FolderEmptyArt } from "@/components/ui/dot-matrix";
 /**
  * FolderHomePage —— 本地文件夹「目录主页」（方案 B：Finder 式）。
  *
@@ -205,10 +206,9 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
 
         {count === 0 ? (
           /* 空文件夹：居中空态，创建入口前置 */
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 rounded-[11px] border border-dashed border-border bg-background px-5 pb-10 pt-11 text-center ">
-            <span className="mb-2 flex h-[46px] w-[46px] items-center justify-center rounded-[11px] bg-[hsl(var(--goose-selected-bg))] text-muted-foreground">
-              <FolderOpen className="h-5 w-5" />
-            </span>
+          <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-1 overflow-hidden rounded-[11px] border border-dashed border-border bg-background px-5 pb-10 pt-11 text-center [&>:not(.goose-dm-decor)]:relative">
+            <DotDecor preset="folder" />
+            <FolderEmptyArt className="mb-2 text-foreground" />
             <p className="m-0 text-sm font-semibold text-foreground">
               {uiText("emptyFolder")}</p>
             <p className="m-0 mb-3 text-xs text-muted-foreground">
