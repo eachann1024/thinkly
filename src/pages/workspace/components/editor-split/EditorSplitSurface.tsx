@@ -18,10 +18,11 @@ import {
   type Layout,
 } from "react-resizable-panels";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import { findLeaf, normalizeSizes } from "@/lib/editor-split/tree";
+import { findLeaf } from "@/lib/editor-split/tree";
 import type { SplitGroup, SplitLeaf, SplitState } from "@/lib/editor-split/types";
 import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
+import { equalLayout, layoutToSizes, sizesToLayout, useApplyStoredGroupLayout } from "./splitGroupLayout";
 import { SplitPaneDragSurface } from "./SplitPaneDragSurface";
 import { SplitContentDropSurface } from "./SplitContentDropSurface";
 
@@ -35,31 +36,6 @@ export type EditorSplitSurfaceProps = {
   renderPane: (leaf: SplitLeaf, ctx: EditorSplitPaneRenderContext) => ReactNode;
   onContextMenu?: (event: MouseEvent, leaf: SplitLeaf) => void;
 };
-
-function sizesToLayout(group: SplitGroup): Layout {
-  const sizes = normalizeSizes(group.sizes, group.children.length);
-  const layout: Layout = {};
-  for (let i = 0; i < group.children.length; i += 1) {
-    layout[group.children[i].id] = sizes[i] ?? 0;
-  }
-  return layout;
-}
-
-function layoutToSizes(group: SplitGroup, layout: Layout): number[] {
-  return normalizeSizes(
-    group.children.map((child) => layout[child.id] ?? 0),
-    group.children.length,
-  );
-}
-
-function equalLayout(group: SplitGroup): Layout {
-  const each = 100 / group.children.length;
-  const layout: Layout = {};
-  for (const child of group.children) {
-    layout[child.id] = each;
-  }
-  return layout;
-}
 
 function syncSashValueText(el: HTMLDivElement | null) {
   if (!el) return;
@@ -170,6 +146,7 @@ function SplitGroupView({
 }) {
   const groupRef = useGroupRef();
   const [dragging, setDragging] = useState(false);
+  useApplyStoredGroupLayout(groupRef, group);
 
   const persistLayout = useCallback(
     (layout: Layout) => {

@@ -2,6 +2,7 @@ import { createTranslator } from "@/i18n";
 import localMessages from "./shortcutGroups.messages.yaml";
 
 const uiText = createTranslator(localMessages);
+import { layoutText } from "@/lib/editor-split/layoutLabels";
 import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 import {
   FIXED_CLOSE_SHORTCUT,
@@ -124,9 +125,15 @@ export function splitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
     [uiText("focusRight_f580"), FIXED_SPLIT_SHORTCUTS.splitFocusRight],
     [uiText("focusAbove_e3a3"), FIXED_SPLIT_SHORTCUTS.splitFocusUp],
     [uiText("focusBelow_233a"), FIXED_SPLIT_SHORTCUTS.splitFocusDown],
+    [layoutText("moveLeft"), FIXED_SPLIT_SHORTCUTS.splitMoveLeft],
+    [layoutText("moveRight"), FIXED_SPLIT_SHORTCUTS.splitMoveRight],
+    [layoutText("moveUp"), FIXED_SPLIT_SHORTCUTS.splitMoveUp],
+    [layoutText("moveDown"), FIXED_SPLIT_SHORTCUTS.splitMoveDown],
     [uiText("previousSplit_9249"), FIXED_SPLIT_SHORTCUTS.splitFocusPrevious],
     [uiText("nextSplit_b54f"), FIXED_SPLIT_SHORTCUTS.splitFocusNext],
     [uiText("maximizeCurrentSplit_4a67"), FIXED_SPLIT_SHORTCUTS.splitZoom],
+    [layoutText("maximize"), FIXED_SPLIT_SHORTCUTS.splitMaximize],
+    [layoutText("equalize"), FIXED_SPLIT_SHORTCUTS.splitEqualize],
     [uiText("closeCurrentSplit_b27d"), FIXED_CLOSE_SHORTCUT],
   ]
     .filter((entry): entry is [string, string] => Boolean(entry[1]))

@@ -24,18 +24,20 @@ import {
   splitRight,
   toggleZoom,
 } from "@/lib/editor-split/commands";
+import { runSplitLayout } from "@/lib/editor-split/layoutCommands";
+import { layoutText } from "@/lib/editor-split/layoutLabels";
 
 export type SplitPaletteAction = {
-  id: "split-right" | "split-down" | "split-zoom" | "split-close";
+  id: "split-right" | "split-down" | "split-zoom" | "split-close" | "split-columns" | "split-rows" | "split-grid" | "split-equalize";
   label: string;
   keywords: string;
-  shortcutId: "splitRight" | "splitDown" | "splitZoom" | "closeSplitPane";
+  shortcutId?: "splitRight" | "splitDown" | "splitZoom" | "closeSplitPane" | "splitEqualize";
+  available?: () => boolean;
   run: () => void;
 };
 
 /**
  * 命令面板分屏动作。空查询不出现，避免盖住「输入关键词开始搜索」空态。
- * 均分：useEditorSplit 没有 equalize API（仅分隔条双击均分当前组），不暴露。
  */
 export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   {
@@ -72,6 +74,39 @@ export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
       closePaneOrTab();
     },
   },
+  {
+    id: "split-columns",
+    get label() { return layoutText("columns"); },
+    keywords: "分屏 左右 两栏 columns",
+    run: () => {
+      void runSplitLayout("columns");
+    },
+  },
+  {
+    id: "split-rows",
+    get label() { return layoutText("rows"); },
+    keywords: "分屏 上下 两栏 rows",
+    run: () => {
+      void runSplitLayout("rows");
+    },
+  },
+  {
+    id: "split-grid",
+    get label() { return layoutText("grid"); },
+    keywords: "分屏 四宫格 grid",
+    run: () => {
+      void runSplitLayout("grid");
+    },
+  },
+  {
+    id: "split-equalize",
+    get label() { return layoutText("equalize"); },
+    keywords: "分屏 均分 equalize",
+    shortcutId: "splitEqualize",
+    run: () => {
+      void runSplitLayout("equalize");
+    },
+  },
 ];
 
 export function matchingSplitPaletteActions(
@@ -80,6 +115,7 @@ export function matchingSplitPaletteActions(
   const q = query.trim().toLowerCase();
   if (!q) return [];
   return SPLIT_PALETTE_ACTIONS.filter((action) => {
+    if (action.available && !action.available()) return false;
     const hay = `${action.label} ${action.keywords}`.toLowerCase();
     return hay.includes(q);
   });

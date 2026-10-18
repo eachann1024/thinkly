@@ -264,9 +264,6 @@ export function focusSplitPane(
 /**
  * 当前 tab 已分屏时，把页面放到聚焦格（或聚焦已展示该页的格）。
  * 返回 true 表示已处理，调用方不要再开/切 tab。
- *
- * 均分：store 只有 setGroupSizes，没有 equalize API（分隔条双击才均分当前组），
- * 命令面板 / 热键不暴露「均分」。
  */
 export function tryShowPageInFocusedSplit(pageId: string): boolean {
   if (isHistoryPreviewSurface()) return false;

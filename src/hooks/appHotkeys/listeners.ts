@@ -26,6 +26,7 @@ import { createEditorHotkeys } from "./editor";
 import { createWorkspaceHotkeys } from "./workspace";
 import { createSplitHotkeys } from "./split";
 import { createTabsHotkeys } from "./tabs";
+import { installSplitLayoutMenuBridge } from "@/lib/editor-split/layoutCommands";
 
 export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
   const { appShortcutsRef, openTabsRef, activeTabIdRef } = refs;
@@ -192,6 +193,7 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
   };
 
   window.addEventListener("goose-note:new-note", handleNewNoteEvent);
+  const uninstallSplitLayoutMenu = installSplitLayoutMenuBridge();
 
   const unsubscribeCloseActiveTab = getGooseDesktop()?.onCloseActiveTab?.(() =>
     runUnifiedClose(),
@@ -207,5 +209,6 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
     window.removeEventListener("mouseup", suppressMouseSideButton, true);
     window.removeEventListener("auxclick", suppressMouseSideButton, true);
     window.removeEventListener("goose-note:new-note", handleNewNoteEvent);
+    uninstallSplitLayoutMenu();
   };
 }
