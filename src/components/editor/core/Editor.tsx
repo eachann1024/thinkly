@@ -17,6 +17,7 @@ import { useEditorPageLifecycle } from "./useEditorPageLifecycle";
 import { useEditorFocus } from "./useEditorFocus";
 import { useEditorClipboard } from "./useEditorClipboard";
 import { useEditorHostEvents } from "./useEditorHostEvents";
+import { useDocumentTitleNavigation } from "./useDocumentTitleNavigation";
 import { useEditorPresentation } from "./useEditorPresentation";
 import type { EditorRef, EditorProps } from "./editorTypes";
 export type { EditorRef } from "./editorTypes";
@@ -61,6 +62,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   useEditorLocale(editor, isQuickNoteEditorPage(page) ? "quicknote" : "note");
   editorInstanceRef.current = editor;
   const runtime = { ...session, editor };
+  useDocumentTitleNavigation(runtime, editable);
   const contentCommit = useEditorContentCommit(runtime);
   useEditorPageLifecycle(runtime, contentCommit, editable, isActiveEditor);
   const { handleEditorBlankMouseDown, focusEditorSafely } = useEditorFocus(
