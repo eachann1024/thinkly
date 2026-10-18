@@ -117,7 +117,7 @@ type SearchAiBody = {
 /** 浮动搜索窗不能自己写聊天记录、设置或分屏，这些动作交给主窗。 */
 export type SearchWindowCommand =
   | ({ type: "archive-ai" } & SearchAiBody)
-  | ({ type: "continue-ai" } & SearchAiBody)
+  | ({ type: "continue-ai"; followUp?: string } & SearchAiBody)
   | { type: "ask-ai"; notebookId: string; question: string }
   | { type: "open-settings"; tab: "ai" }
   | { type: "hide-recent" }
@@ -178,5 +178,8 @@ export function parseSearchWindowCommand(value: unknown): SearchWindowCommand | 
   }
   if (record.type !== "continue-ai" && record.type !== "archive-ai") return null;
   const body = parseAiBody(record);
-  return body ? { type: record.type, ...body } : null;
+  if (!body) return null;
+  if (record.type === "archive-ai") return { type: "archive-ai", ...body };
+  const followUp = typeof record.followUp === "string" ? record.followUp.slice(0, MAX_QUESTION_LENGTH) : "";
+  return { type: "continue-ai", ...body, ...(followUp.trim() ? { followUp } : {}) };
 }

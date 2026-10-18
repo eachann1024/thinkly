@@ -2,15 +2,18 @@ import { Agent, type AgentEvent } from "@earendil-works/pi-agent-core";
 import type { NotebookAiAgentContext } from "../types";
 import { buildPiLanguageModel } from "./model";
 import { buildPiDomainTools } from "./tools";
+import { ALWAYS_ON_CARD_TOOLS } from "../tools";
 
 /** 只读工具白名单：不含 executeBatchPlan 等写入类工具，也不需要 loadSkill 渐进开放。 */
-export const READ_ONLY_TOOL_NAMES = ["searchNotes", "readPage", "listPages", "searchWeb", "readWebPage"] as const;
+export const READ_ONLY_TOOL_NAMES = ["searchNotes", "readPage", "listPages", "searchWeb", "readWebPage", ...ALWAYS_ON_CARD_TOOLS] as const;
 export type ReadOnlyToolName = (typeof READ_ONLY_TOOL_NAMES)[number];
 
 const MAX_TURNS = 8;
 
 export type ReadOnlyAgentHandlers = {
   onText: (text: string) => void;
+  /** 推理文本（累计值）；模型不输出推理时不会触发 */
+  onThinking?: (text: string) => void;
   onToolStart: (name: string, args: unknown) => void;
   onToolEnd: (name: string, result: unknown, isError: boolean) => void;
 };
@@ -46,11 +49,17 @@ export async function runPiReadOnlyAgent(options: {
   let text = "";
   let turns = 0;
   let messageHasText = false;
+  let thinking = "";
   const unsub = agent.subscribe(async (event: AgentEvent) => {
     if (event.type === "turn_start" && ++turns > MAX_TURNS) agent.abort();
     if (event.type === "message_start") messageHasText = false;
     if (event.type === "message_update") {
       const update = event.assistantMessageEvent;
+      if (update.type === "thinking_delta" && update.delta) {
+        thinking += update.delta;
+        handlers.onThinking?.(thinking);
+        return;
+      }
       if (update.type !== "text_delta" || !update.delta) return;
       if (!messageHasText && text) text += "\n\n";
       messageHasText = true;

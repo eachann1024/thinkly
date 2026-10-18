@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, type MutableRefObject } from "react";
 import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
+import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import { useSearchSession, type SearchScope } from "../sidebar/useSearchSession";
 import type { SearchResultPage } from "../command/useCommandSearch";
 import type { SearchWindowCommand } from "@/lib/electron/searchWindow";
@@ -69,21 +70,24 @@ export function useSheetActions(input: SheetActionsInput) {
     const notebookId = latestScope.notebookId ?? aiNotebookId ?? "";
     void ask(question, candidates, ranked, { notebookId, label: notebookNames[notebookId] ?? notebookId });
   };
-  const continueInPanel = aiNotebookId && answer ? () => {
+  /** followUp：卡片点选的下一句话，带会话时切过去自动发出。 */
+  const continueInPanel = aiNotebookId && answer ? (followUp?: string) => {
     skipRestoreRef.current = true;
     if (onCommand) {
       const token = tokenFor(answer.requestId);
       const sources = visibleSources(answer).map(({ index, source }) => ({ index, id: source.id, title: source.title }));
       if (answer.status !== "done") reasked.current = answer.requestId;
       void onCommand(answer.status === "done"
-        ? { type: "continue-ai", token, notebookId: aiNotebookId, question: answer.question, text: answer.text, sources }
-        : { type: "ask-ai", notebookId: aiNotebookId, question: answer.question });
+        ? { type: "continue-ai", token, notebookId: aiNotebookId, question: answer.question, text: answer.text, sources, ...(followUp ? { followUp } : {}) }
+        : { type: "ask-ai", notebookId: aiNotebookId, question: followUp ?? answer.question });
       return;
     }
     useSearchSession.getState().closeSearch();
     const saved = savedConversation.current;
-    if (saved?.requestId === answer.requestId) openSheetConversation(aiNotebookId, saved.id);
-    else askNotebookAi({ notebookId: aiNotebookId, text: answer.question });
+    if (saved?.requestId === answer.requestId) {
+      if (followUp) queueCardSend({ notebookId: aiNotebookId, conversationId: saved.id, text: followUp });
+      openSheetConversation(aiNotebookId, saved.id);
+    } else askNotebookAi({ notebookId: aiNotebookId, text: followUp ?? answer.question });
   } : undefined;
   const openSource = (id: string) => {
     returnFocusRef.current = null;

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
  * 工具调用与思考汇总成一行；思考只在行内截成一句，不另开折叠。
  */
 import { useMemo, useState, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PlanReviewProvider } from "./approval/PlanReviewContext";
 import { visibleBusyTickerLine } from "@/components/editor/ai/inlineBusyTicker";
 import {
@@ -22,6 +23,7 @@ import {
 } from "./toolProgressModel";
 import { getWorkCardHeading, getWorkCardPhase } from "./workCardHeading";
 import { WorkCardStatus } from "./WorkCardStatus";
+import { ToolProgressSteps } from "./ToolProgressSteps";
 import {
   WorkCardStatusContext,
   type WorkCardStatusData,
@@ -111,19 +113,35 @@ function WorkCardTraceRow({
   open,
   label,
   thinkingLine,
+  running,
   onToggle,
 }: {
   foldable: boolean;
   open: boolean;
   label: string;
   thinkingLine: string;
+  running: boolean;
   onToggle: () => void;
 }) {
+  const reduce = useReducedMotion();
   const body = (
     <>
       {foldable ? <FoldChevron /> : null}
       {label ? (
-        <span className="notebook-ai-work-toggle-label">{label}</span>
+        <span className="notebook-ai-work-toggle-label">
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={label}
+              className={cn("notebook-ai-work-toggle-text", running && "ai-shimmer-text")}
+              initial={reduce ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: "spring", stiffness: 480, damping: 38 }}
+            >
+              {label}
+            </motion.span>
+          </AnimatePresence>
+        </span>
       ) : null}
       {thinkingLine ? (
         <span
@@ -218,41 +236,15 @@ export function ToolProgressCard({
               open={open}
               label={traceLabel}
               thinkingLine={thinkingLine}
+              running={showProcessing}
               onToggle={() => setOpen((value) => !value)}
             />
           ) : null}
-          {foldable && open ? (
-            <ul className="notebook-ai-work-steps">
-              {steps.map((step, index) => (
-                <li
-                  key={`${step.label}-${index}`}
-                  className="notebook-ai-work-step"
-                >
-                  <div className="notebook-ai-work-step-body">
-                    <div className="notebook-ai-work-step-row">
-                      <span className="notebook-ai-work-step-label">
-                        {step.label}
-                      </span>
-                      <span
-                        className={cn(
-                          "notebook-ai-work-step-st",
-                          step.status === "error" &&
-                            "text-[var(--goose-color-danger-focus)]",
-                        )}
-                      >
-                        {stepStatusLabel(step.status)}
-                      </span>
-                    </div>
-                    {step.status === "error" && step.detail ? (
-                      <p className="notebook-ai-work-step-detail">
-                        {step.detail}
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {foldable && open ? (
+              <ToolProgressSteps key="steps" steps={steps} statusLabel={stepStatusLabel} />
+            ) : null}
+          </AnimatePresence>
           {children ? (
             <div
               className={cn(
