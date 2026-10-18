@@ -23,6 +23,7 @@ import { syncIndex } from "./pageSearchIndex";
 import { useCommandSearchScope } from "./useCommandSearchScope";
 import { useCommandSearchRecent } from "./useCommandSearchRecent";
 import { isCommandSearchablePage, shouldIncludePageInCommandScope } from "./searchPageFilter";
+import { runWithPresence } from "@/lib/ui/presence";
 
 export { getContentSnippet, countLiteralMatches } from "./commandSearchText";
 export { getCachedText, getSearchBodyText } from "./searchBodyCache";
@@ -89,9 +90,20 @@ export function useCommandSearch({
   }, []);
   const removeRecent = useCallback((id: string) => {
     const nextIds = [...removedRecentIds, id];
-    setRemovedRecentIds(nextIds);
+    runWithPresence(() => setRemovedRecentIds(nextIds));
     localStorage.setItem("goose-recent-excludes", JSON.stringify(nextIds));
   }, [removedRecentIds]);
+  useEffect(() => {
+    const sync = (event: StorageEvent) => {
+      if (event.key !== "goose-recent-excludes") return;
+      try {
+        const next = event.newValue ? JSON.parse(event.newValue) : [];
+        if (Array.isArray(next) && next.every((id) => typeof id === "string")) setRemovedRecentIds(next);
+      } catch { /* 另一扇窗口写入了坏数据时保留本窗列表。 */ }
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
 
   const prepared = useCommandSearchScope(
     pages, notebooks, searchAllNotebooks, activeNotebookId, enabled,

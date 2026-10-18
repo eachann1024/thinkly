@@ -4,10 +4,12 @@ import { BrowserWindow, screen } from "electron";
 import {
   centeredSearchWindowBounds,
   OPEN_SEARCH_RESULT_CHANNEL,
+  SEARCH_WINDOW_COMMAND_CHANNEL,
   SEARCH_WINDOW_HEIGHT,
   SEARCH_WINDOW_SHOWN_CHANNEL,
   SEARCH_WINDOW_WIDTH,
   type OpenSearchResultPayload,
+  type SearchWindowCommand,
 } from "../../../src/lib/electron/searchWindow";
 import {
   rendererDevUrl,
@@ -23,7 +25,7 @@ import {
   markQuicknoteActivateSuppressed,
 } from "./visibility";
 import { allocWindowId } from "./layout";
-import { appQuitting, getSearchWindow } from "./registry";
+import { appQuitting, getMainWindow, getSearchWindow } from "./registry";
 import { bindCloseTabAccelerator } from "./close";
 import { clearIdleDestroyTimer, scheduleIdleDestroy } from "./idleDestroy";
 import {
@@ -219,4 +221,19 @@ export function openSearchResultInWorkspace(payload: OpenSearchResultPayload): v
   const win = showOrCreateMainWindow();
   if (win.isDestroyed()) return;
   sendWhenLoaded(win, OPEN_SEARCH_RESULT_CHANNEL, payload);
+}
+
+/** 隐藏最近、归档问答只通知已存在的主窗，不把主窗带到前台。其余动作先收起搜索窗再唤出主窗。 */
+export function dispatchSearchWindowCommand(command: SearchWindowCommand): boolean {
+  if (command.type === "hide-recent" || command.type === "archive-ai") {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return false;
+    sendWhenLoaded(win, SEARCH_WINDOW_COMMAND_CHANNEL, command);
+    return true;
+  }
+  hideSearchWindow();
+  const win = showOrCreateMainWindow();
+  if (win.isDestroyed()) return false;
+  sendWhenLoaded(win, SEARCH_WINDOW_COMMAND_CHANNEL, command);
+  return true;
 }

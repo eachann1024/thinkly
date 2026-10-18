@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import type { AppUpdateCheckResult, AppUpdateState } from "./lib/appUpdateTypes";
+import type { SearchWindowCommand } from "./lib/electron/searchWindow";
 export {}
 
 interface ImportMetaEnv {
@@ -137,8 +138,10 @@ declare global {
     hideSearchWindow: () => Promise<void>
     searchWindowReady: () => Promise<void>
     openSearchResult: (payload: { pageId: string; query: string; localFilePath?: string }) => Promise<boolean>
+    searchWindowCommand: (command: SearchWindowCommand) => Promise<boolean>
     onSearchWindowShown: (cb: () => void) => () => void
     onOpenSearchResult: (cb: (payload: { pageId: string; query: string; localFilePath?: string }) => void) => () => void
+    onSearchWindowCommand: (cb: (command: SearchWindowCommand) => void) => () => void
     createWindow: (opts: {
       mode: "blank" | "currentTab"
       tab?: { id: string; pageId: string; type?: string; workspaceId?: string }
@@ -150,6 +153,7 @@ declare global {
     toggleMaximizeWindow: () => Promise<boolean>
     isWindowMaximized: () => Promise<boolean>
     prepareWelcomeWindow: (reducedMotion?: boolean) => Promise<void>
+    restoreWelcomeWindow: () => Promise<void>
     finishTabDrag: (opts: {
       tab: { id: string; pageId: string; type?: string; workspaceId?: string }
       cursor: { x: number; y: number }
