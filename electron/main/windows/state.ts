@@ -1,12 +1,15 @@
 import { BrowserWindow } from "electron";
 import { DEFAULT_TITLE_BAR_HEIGHT_PX } from "../../../src/lib/electron/titlebarLayout";
 import { type QuicknoteLayout } from "../windowLayout";
-import { WindowRegistry } from "../windowRegistry";
+import { WindowRegistry, type WindowKind } from "../windowRegistry";
 import { createQuicknoteActivateSuppression } from "../quicknoteActivateSuppression";
 
 export const registry = new WindowRegistry<BrowserWindow>();
 
 export const QUICKNOTE_IDLE_DESTROY_MS = 5 * 60 * 1000;
+
+/** 浮动搜索窗隐藏后保留更久：再次唤出无需重建 renderer 与重扫笔记。 */
+export const SEARCH_IDLE_DESTROY_MS = 15 * 60 * 1000;
 
 export const LAYOUT_PERSIST_DEBOUNCE_MS = 300;
 
@@ -14,7 +17,7 @@ export const visibilityListeners = new Set<() => void>();
 
 export type WindowCreatedListener = (
   win: BrowserWindow,
-  kind: "workspace" | "quicknote",
+  kind: WindowKind,
 ) => void;
 
 export const windowCreatedListeners = new Set<WindowCreatedListener>();
@@ -31,6 +34,7 @@ export const windowState = {
   persistTimer: null as NodeJS.Timeout | null,
   rememberedQuicknote: undefined as QuicknoteLayout | null | undefined,
   quicknoteDestroyTimer: null as NodeJS.Timeout | null,
+  searchDestroyTimer: null as NodeJS.Timeout | null,
   lastEmittedVisible: false,
   quitting: false,
 };

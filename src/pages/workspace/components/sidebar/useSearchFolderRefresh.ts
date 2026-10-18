@@ -14,7 +14,26 @@ function scheduleRefresh(run: () => void): () => void {
   return () => controller.abort();
 }
 
-export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
+/** 搜索打开时刷新本地文件夹页面的来源：主窗走 store 的完整加载，浮动搜索窗走只读扫描。 */
+export type SearchFolderSource = {
+  isReady: (notebookId: string) => boolean;
+  /** 有实时文件监听：已就绪时无需后台重扫。 */
+  isLive: (notebookId: string) => boolean;
+  load: (notebookId: string, basePath: string) => Promise<void>;
+};
+
+export const workspaceSearchFolderSource: SearchFolderSource = {
+  isReady: (id) => useNotebooks.getState().localFolderLoadStates[id]?.status === "ready",
+  // Only the active notebook has a live filesystem watcher.
+  isLive: (id) => useNotebooks.getState().activeNotebookId === id,
+  load: (id, basePath) => usePages.getState().loadLocalFolderPages(id, basePath),
+};
+
+export function useSearchFolderRefresh(
+  open: boolean,
+  scope: SearchScope,
+  source: SearchFolderSource = workspaceSearchFolderSource,
+) {
   const [refresh, dispatch] = useReducer(folderRefreshReducer, { status: "idle" });
   const loading = refresh.status === "refreshing" && refresh.blocking;
   const loadError = refresh.status !== "idle" && refresh.failedIds.length > 0;
@@ -29,16 +48,16 @@ export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
     const forceReload = retry !== handledRetry.current;
     handledRetry.current = retry;
     const state = useNotebooks.getState();
+    const skippable = (id: string) => !forceReload && source.isLive(id) && source.isReady(id);
     const targets = Object.values(state.notebooks).filter((notebook) => {
       if (notebook.source !== "local-folder" || !notebook.localPath) return false;
       if (scope.kind !== "all" && notebook.id !== scopedId) return false;
-      // Only the active notebook has a live filesystem watcher. Other notebooks
-      // still refresh in the background so external edits remain searchable.
-      return forceReload || notebook.id !== state.activeNotebookId ||
-        state.localFolderLoadStates[notebook.id]?.status !== "ready";
+      // Notebooks without a live watcher still refresh in the background so
+      // external edits remain searchable.
+      return !skippable(notebook.id);
     });
     dispatch({ type: "start", blocking: targets.some(notebook => forceReload ||
-      state.localFolderLoadStates[notebook.id]?.status !== "ready") });
+      !source.isReady(notebook.id)) });
 
     const refreshNext = (index: number) => {
       if (cancelled) return;
@@ -55,12 +74,11 @@ export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
           refreshNext(index + 1);
           return;
         }
-        if (!forceReload && current.activeNotebookId === notebook.id &&
-          current.localFolderLoadStates[notebook.id]?.status === "ready") {
+        if (skippable(notebook.id)) {
           refreshNext(index + 1);
           return;
         }
-        void usePages.getState().loadLocalFolderPages(notebook.id, notebook.localPath!)
+        void source.load(notebook.id, notebook.localPath!)
           .catch(() => { if (!cancelled) dispatch({ type: "failed", notebookId: notebook.id }); })
           .finally(() => refreshNext(index + 1));
       });
@@ -70,7 +88,7 @@ export function useSearchFolderRefresh(open: boolean, scope: SearchScope) {
       cancelled = true;
       cancelScheduled();
     };
-  }, [open, scope.kind, scopedId, retry]);
+  }, [open, scope.kind, scopedId, retry, source]);
 
   return { loading, loadError, retryLoad: () => setRetry((value) => value + 1) };
 }

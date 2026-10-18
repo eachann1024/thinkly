@@ -36,6 +36,7 @@ export {
   closeWorkspaceWindow,
   getMainWindow,
   getQuicknoteWindow,
+  getSearchWindow,
   broadcast,
 } from "./windows/registry";
 export {
@@ -44,5 +45,13 @@ export {
   closeQuicknote,
   showAndFocusMainWindow,
   showOrCreateMainWindow,
+  focusedWorkspaceWindow,
 } from "./windows/activation";
+export {
+  toggleSearchWindow,
+  hideSearchWindow,
+  isSearchWindowVisible,
+  markSearchRendererReady,
+  openSearchResultInWorkspace,
+} from "./windows/search";
 export { requestCloseActiveTab } from "./windows/close";

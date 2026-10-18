@@ -7,7 +7,7 @@ import { markQuicknoteActivateSuppressed } from "./visibility";
 import { getAssetMaintenanceWindow } from "./maintenance";
 import { lookupWindowContext } from "./registry";
 
-/** Cmd/Ctrl+W：工作区交给渲染层决定关标签或关窗；速记小窗直接关闭。 */
+/** Cmd/Ctrl+W：工作区交给渲染层决定关标签或关窗；速记小窗直接关闭，搜索窗收起。 */
 export function requestCloseActiveTab(
   win: BrowserWindow | null | undefined,
 ): void {
@@ -17,6 +17,11 @@ export function requestCloseActiveTab(
     return;
   }
   const context = lookupWindowContext(win);
+  if (context?.kind === "search") {
+    markQuicknoteActivateSuppressed();
+    win.hide();
+    return;
+  }
   if (context?.kind === "quicknote") {
     markQuicknoteActivateSuppressed();
     win.close();

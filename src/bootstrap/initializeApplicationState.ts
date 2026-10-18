@@ -8,13 +8,23 @@ import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { setupSaveGuards } from "./saveGuards";
 import { applyEditorCanvasAttributes } from "@/lib/editorCanvas";
+import { installReadOnlyPersistence } from "./readOnlyPersistence";
+
+/**
+ * full：主工作区；lean：速记小窗，跳过笔记加载与迁移；
+ * search：浮动搜索窗，在 lean 基础上把设置与笔记本持久化改为只读，
+ * 页面由搜索面板按需只读扫描本地文件夹得到。
+ */
+export type BootstrapMode = "full" | "lean" | "search";
 
 export async function initializeApplicationState(
-  lean: boolean,
+  mode: BootstrapMode,
   beforeInit?: () => Promise<void> | void,
 ) {
+  const lean = mode !== "full";
   await beforeInit?.();
   await HostAdapter.ensureGooseFs();
+  if (mode === "search") installReadOnlyPersistence();
   if (!lean) {
     await migrateLegacyStorage();
   }

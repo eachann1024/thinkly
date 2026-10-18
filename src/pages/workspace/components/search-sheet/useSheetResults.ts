@@ -7,7 +7,7 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { isCommandSearchablePage, shouldIncludePageInCommandScope } from "../command/searchPageFilter";
 import { useCommandSearch, type SearchResultPage } from "../command/useCommandSearch";
 import { useSearchSession } from "../sidebar/useSearchSession";
-import { useSearchFolderRefresh } from "../sidebar/useSearchFolderRefresh";
+import { useSearchFolderRefresh, type SearchFolderSource } from "../sidebar/useSearchFolderRefresh";
 import type { Page } from "@/types";
 
 const EMPTY_PAGES: Record<string, Page> = {};
@@ -16,7 +16,7 @@ const isTitleMatch = (page: SearchResultPage) =>
   page.matchKind === "title" || page.matchKind === "pinyin" || (page.titleMatchCount ?? 0) > 0;
 
 /** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
-export function useSheetResults() {
+export function useSheetResults(folderSource?: SearchFolderSource) {
   useLocale();
   const s = useSearchSession(useShallow(state => ({
     open: state.view.phase !== "closed", query: state.query, scope: state.scope, titleOnly: state.titleOnly, sort: state.sort,
@@ -24,7 +24,7 @@ export function useSheetResults() {
   })));
   const pages = usePages(state => s.open ? state.pages : EMPTY_PAGES);
   const showRecent = useSettings(state => state.showRecentInSearch);
-  const { loading, loadError, retryLoad } = useSearchFolderRefresh(s.open, s.scope);
+  const { loading, loadError, retryLoad } = useSearchFolderRefresh(s.open, s.scope, folderSource);
   const scopedId = s.scope.kind === "all" ? null : s.scope.notebookId;
   const search = useCommandSearch({
     enabled: s.open, searchQuery: s.query, pages, searchAllNotebooks: s.scope.kind === "all",

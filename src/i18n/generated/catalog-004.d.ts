@@ -72,6 +72,7 @@ declare module "../types" {
     "src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1": { "dropToCheckFile": {  }; "dropToImportIntoTheCurrentFolder": {  }; "dropToImportTextFile": {  }; "dropToOpenFolder": {  }; "opensAsALocalFolderNotebook": {  }; "supportsMdMarkdownAndTxt": {  } };
     "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
     "src/quicknote.tsx#block1:1": { "title": {  } };
+    "src/search.tsx#block1:1": { "title": {  } };
     "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
     "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
     "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };

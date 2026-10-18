@@ -10,12 +10,14 @@ import "./sidebar-navigation.css";
 import { type SidebarProps } from "./sidebar-shell/shared";
 import { useSidebarLayout } from "./sidebar-shell/useSidebarLayout";
 import { useSidebarNavigation } from "./sidebar-shell/useSidebarNavigation";
+import { useSearchWindowHandoff } from "./useSearchWindowHandoff";
 import { useSidebarLifecycle } from "./sidebar-shell/useSidebarLifecycle";
 
 export function Sidebar(props: SidebarProps) {
   useLocale();
   const layout = useSidebarLayout(props);
   const navigation = useSidebarNavigation(layout);
+  useSearchWindowHandoff();
   const sidebarLifecycleContext = useSidebarLifecycle(navigation);
   const context = useSidebarHover(sidebarLifecycleContext);
   const {

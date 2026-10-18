@@ -1,5 +1,6 @@
 import { BrowserWindow } from "electron";
 import { type WindowBounds } from "../windowLayout";
+import type { WindowKind } from "../windowRegistry";
 import { persistWindowLayout } from "./layout";
 import { clearQuicknoteDestroyTimer } from "./quicknote";
 import { registry, windowState } from "./state";
@@ -12,6 +13,10 @@ export function markQuitting(): void {
     windowState.persistTimer = null;
   }
   clearQuicknoteDestroyTimer();
+  if (windowState.searchDestroyTimer) {
+    clearTimeout(windowState.searchDestroyTimer);
+    windowState.searchDestroyTimer = null;
+  }
 }
 
 export function appQuitting(): boolean {
@@ -20,7 +25,7 @@ export function appQuitting(): boolean {
 
 export function lookupWindowContext(
   win: BrowserWindow | null,
-): { windowId: string; kind: "workspace" | "quicknote" } | null {
+): { windowId: string; kind: WindowKind } | null {
   if (!win || win.isDestroyed()) return null;
   const record = registry.findByWin(win);
   if (!record) return null;
@@ -123,9 +128,9 @@ export function getMainWindow(): BrowserWindow | null {
   return record.win.isDestroyed() ? null : record.win;
 }
 
-export function getQuicknoteWindow(): BrowserWindow | null {
+function findWindowOfKind(kind: WindowKind): BrowserWindow | null {
   for (const record of registry.all()) {
-    if (record.kind !== "quicknote") continue;
+    if (record.kind !== kind) continue;
     if (record.win.isDestroyed()) {
       registry.unregister(record.id);
       continue;
@@ -133,6 +138,14 @@ export function getQuicknoteWindow(): BrowserWindow | null {
     return record.win;
   }
   return null;
+}
+
+export function getQuicknoteWindow(): BrowserWindow | null {
+  return findWindowOfKind("quicknote");
+}
+
+export function getSearchWindow(): BrowserWindow | null {
+  return findWindowOfKind("search");
 }
 
 export function broadcast(channel: string, payload: unknown): void {

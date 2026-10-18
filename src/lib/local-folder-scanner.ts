@@ -39,11 +39,12 @@ export async function scanLocalFolderPages({
   gooseFs,
   hiddenFolders = [],
   forceRead = false,
+  readOnly = false,
 }: LocalFolderScannerOptions): Promise<Page[]> {
   // 读取一次映射表，整个扫描过程共享（避免逐文件 IO）。
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
   let idMapDirty = false;
-  const portable = await portableHistoryIds(basePath);
+  const portable = readOnly ? {} : await portableHistoryIds(basePath);
   for (const [path, id] of Object.entries(portable)) {
     if (!idMap[path] && !Object.values(idMap).includes(id)) { idMap[path] = id; idMapDirty = true; }
   }
@@ -184,6 +185,7 @@ export async function scanLocalFolderPages({
   );
 
   // 扫描结束后统一处理映射表持久化与剪枝。
+  if (readOnly) return pages;
   if (idMapDirty) {
     writeLocalPageIdMap(notebookId, idMap);
   }

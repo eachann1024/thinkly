@@ -91,10 +91,10 @@ export function restoreHiddenWorkspaces(hidden: BrowserWindow[]): void {
 }
 
 /**
- * 只抬速记窗，不激活整个应用。
+ * 只抬浮动小窗（速记、搜索），不激活整个应用。
  * macOS 上 win.show() / app.focus({ steal }) 会 unhide 同 app 里已 hide 的 workspace。
  */
-export function raiseQuicknoteWindow(win: BrowserWindow): void {
+export function raiseFloatingWindow(win: BrowserWindow): void {
   markQuicknoteActivateSuppressed();
   const workspace = focusedWorkspaceWindow();
   const hiddenWorkspaces = listHiddenWorkspaceWindows();
@@ -158,14 +158,14 @@ export async function toggleQuicknoteWindow(): Promise<void> {
     win = createQuicknoteWindow();
     await waitReadyToShow(win);
     if (win.isDestroyed()) return;
-    raiseQuicknoteWindow(win);
+    raiseFloatingWindow(win);
     return;
   }
   if (win.isVisible()) {
     closeQuicknote();
     return;
   }
-  raiseQuicknoteWindow(win);
+  raiseFloatingWindow(win);
 }
 
 export function closeQuicknote(): void {

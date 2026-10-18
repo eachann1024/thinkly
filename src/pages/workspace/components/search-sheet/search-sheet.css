@@ -101,3 +101,7 @@
 @keyframes search-sheet-pop { from { opacity:0; transform:translateY(8px) scale(.9); } 60% { opacity:1; } to { opacity:1; transform:none; } }
 @keyframes search-sheet-wait { from { opacity:1; } to { opacity:.45; } }
 @media (prefers-reduced-motion:reduce) { .search-sheet,.search-sheet-scrim { transition-duration:0s !important; } .search-sheet *,.search-sheet *::before { animation:none !important; transition-duration:0s !important; } }
+/* 浮动搜索窗：面板铺满独立窗口，窗口自身负责显隐、圆角与阴影。 */
+.search-sheet-layer[data-variant="window"] { pointer-events:auto; }
+.search-sheet-layer[data-variant="window"] .search-sheet { position:absolute; inset:0; width:auto; height:auto; min-height:0; padding-top:.75rem; border:0; border-radius:0; box-shadow:none; transform:none; visibility:visible; transition:none; }
+.search-sheet-layer[data-variant="window"] .search-sheet-footer { display:grid; }
