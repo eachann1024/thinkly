@@ -2,6 +2,10 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeDragActions.tsx#localMessages:1": { "moveFailed": { "error": string | number } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1": { "couldNotCreateItemTheName_2735": {  }; "folderCreated_1541": {  }; "newFolder_f3a4": {  }; "theDestinationFolderNoLongerExists_0e13": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeState.tsx#localMessages:1": { "couldNotReadLocalFolder_198b": {  }; "nameSortingRestored_df43": {  }; "sortByName_5b70": {  } };
+    "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRow.tsx#localMessages:1": { "collapseChildren_2995": {  }; "expandChildren_62f2": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/MainTreeRowTitle.tsx#localMessages:1": { "itemCount": { "count": string | number } };
     "src/pages/workspace/components/sidebar/main-tree/row/PendingCreateNameInput.tsx#localMessages:1": { "couldNotCreateItemPleaseTry_db8e": {  }; "fileName_d2e2": {  }; "folderName_a984": {  }; "newFolder_f3a4": {  } };
     "src/pages/workspace/components/sidebar/main-tree/row/renderItem.tsx#localMessages:1": { "fileName_d2e2": {  }; "noFilesYet_4b78": {  }; "untitled_44a7": {  } };

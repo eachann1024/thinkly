@@ -3,28 +3,27 @@ import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1">`
 zh-Hans:
   dropToOpenFolder: "松手打开文件夹"
-  dropToImportIntoTheCurrentFolder: "松开以导入到当前文件夹 · 按住 ⌥ 选择位置"
-  dropToImportTextFile: "松手导入文本文件"
-  dropToCheckFile: "松手后检查文件"
+  dropToImportIntoTheCurrentFolder: "松手导入 Markdown 到侧边栏"
+  dropToImportTextFile: "松手插入到笔记"
+  dropToCheckFile: "侧边栏仅接收 Markdown；其他文件请拖入编辑器"
   opensAsALocalFolderNotebook: "会作为本地文件夹笔记本载入"
-  supportsMdMarkdownAndTxt: "支持 .md、.markdown、.txt"
+  supportsMdMarkdownAndTxt: "支持 .md、.markdown"
 en:
   dropToOpenFolder: "Drop to open folder"
-  dropToImportIntoTheCurrentFolder: "Drop to import into the current folder · Hold Alt/Option to choose a location"
-  dropToImportTextFile: "Drop to import text file"
-  dropToCheckFile: "Drop to check file"
+  dropToImportIntoTheCurrentFolder: "Drop to import Markdown into sidebar"
+  dropToImportTextFile: "Drop to insert into note"
+  dropToCheckFile: "Markdown only in sidebar · Drop other files into editor"
   opensAsALocalFolderNotebook: "Opens as a local folder notebook"
-  supportsMdMarkdownAndTxt: "Supports .md, .markdown, and .txt"
+  supportsMdMarkdownAndTxt: "Supports .md and .markdown"
 ja:
   dropToOpenFolder: "ドロップしてフォルダを開く"
-  dropToImportIntoTheCurrentFolder: "ドロップして現在のフォルダに読み込む · ⌥ を押しながら場所を選択"
-  dropToImportTextFile: "ドロップしてテキストファイルを読み込む"
-  dropToCheckFile: "ドロップしてファイルを確認"
+  dropToImportIntoTheCurrentFolder: "ドロップしてサイドバーに Markdown を読み込む"
+  dropToImportTextFile: "ドロップしてノートに挿入"
+  dropToCheckFile: "サイドバーは Markdown のみ · 他のファイルはエディターへ"
   opensAsALocalFolderNotebook: "ローカルフォルダのノートブックとして読み込まれます"
-  supportsMdMarkdownAndTxt: ".md、.markdown、.txt に対応"
+  supportsMdMarkdownAndTxt: ".md、.markdown に対応"
 `;
 const uiText = createTranslator(localMessages);
-import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SearchSessionController } from "../components/sidebar/SearchSessionController";
 import { Sidebar } from "../components/sidebar/Sidebar";
@@ -68,7 +67,6 @@ export function renderWorkspaceShell(
     showFullscreenAi,
     singleTabMode,
     inHistoryMode,
-    showElectronLocalImportHint,
     page,
     isLocalFolderPage,
     aiAvailableForNotebook,
@@ -91,6 +89,7 @@ export function renderWorkspaceShell(
         className="workspace-shell window-shell-safe-top flex overflow-hidden bg-background text-foreground"
         data-electron-chrome={isElectronChrome || undefined}
         data-settings={settingsOpen || undefined}
+        data-file-drop-target={isDragging ? dragIntent : undefined}
         onDragEnter={onDragEnter}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -132,30 +131,8 @@ export function renderWorkspaceShell(
           />
         )}
         {isDragging && (
-          <div className="fixed inset-0 z-[25000] flex items-center justify-center bg-[hsl(var(--goose-editor-bg)/0.96)] animate-in fade-in duration-150">
-            <div className="flex min-h-[188px] min-w-[312px] flex-col items-center justify-center rounded-[14px] border border-border/70 bg-[hsl(var(--goose-shell-bg)/0.98)] px-10 py-8 text-center shadow-[0_18px_42px_rgba(15,23,42,0.12),0_1px_3px_rgba(15,23,42,0.06)] dark:border-white/10 dark:shadow-[0_18px_42px_rgba(0,0,0,0.32)]">
-              {dragIntent === "folder" ? (
-                <GooseIcons.FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-              ) : dragIntent === "text-file" ? (
-                <GooseIcons.FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-              ) : (
-                <GooseIcons.FileQuestion className="mb-4 h-12 w-12 text-muted-foreground" />
-              )}
-              <p className="text-base font-medium text-foreground">
-                {dragIntent === "folder"
-                  ? uiText("dropToOpenFolder")
-                  : dragIntent === "text-file"
-                    ? showElectronLocalImportHint
-                      ? uiText("dropToImportIntoTheCurrentFolder")
-                      : uiText("dropToImportTextFile")
-                    : uiText("dropToCheckFile")}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {dragIntent === "folder"
-                  ? uiText("opensAsALocalFolderNotebook")
-                  : uiText("supportsMdMarkdownAndTxt")}
-              </p>
-            </div>
+          <div className="pointer-events-none fixed bottom-6 left-1/2 z-[25000] -translate-x-1/2 rounded-md border border-border bg-background px-4 py-2 text-sm text-foreground" role="status">
+            {(dragIntent === "rejected" || dragIntent === "pending") ? uiText("dropToCheckFile") : dragIntent === "editor" ? uiText("dropToImportTextFile") : uiText("dropToImportIntoTheCurrentFolder")}
           </div>
         )}
         <SearchSessionController />

@@ -3,10 +3,12 @@ import { importFromMarkdown } from "@/lib/export";
 import { usePages } from "@/stores/usePages";
 import { resolveLocalFolderImportParentId } from "@/lib/local-folder-target";
 import { getLocalFolderFileDropTarget } from "@/lib/local-folder-file-drop-target";
+import { resolveLocalFolderImportTarget } from "@/lib/local-folder-import-target";
+import { canAcceptLocalAssetBytes } from "@/lib/local-file-asset-contract";
 
 export function isSupportedTextImportFile(file: File): boolean {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  return ext === "md" || ext === "markdown" || ext === "txt";
+  return ext === "md" || ext === "markdown";
 }
 
 export async function importTextFilesToLocalFolder(options: {
@@ -17,10 +19,20 @@ export async function importTextFilesToLocalFolder(options: {
   const { workspaceId, files, parentId } = options;
   const importedIds: string[] = [];
   let failedCount = 0;
+  const target = resolveLocalFolderImportTarget(workspaceId, parentId);
+  let acceptedBytes = 0;
 
   for (const file of files) {
     try {
+      if (!isSupportedTextImportFile(file) || !canAcceptLocalAssetBytes(file.size, acceptedBytes)) {
+        failedCount++;
+        continue;
+      }
+      acceptedBytes += file.size;
       const text = await file.text();
+      const current = resolveLocalFolderImportTarget(workspaceId, parentId);
+      if (!target || !current || current.pageLocalFilePath !== target.pageLocalFilePath ||
+          current.notebookRoot !== target.notebookRoot) throw new Error("Import destination changed");
       const filename = file.name.replace(/\.[^/.]+$/, "");
       const result = importFromMarkdown(text, filename, {
         preserveStructure: true,
@@ -54,4 +66,13 @@ export function resolveImportParentForDrop(workspaceId: string): string | undefi
     workspaceId,
     getLocalFolderFileDropTarget(),
   );
+}
+
+/** Sidebar imports only Markdown copies; all other files belong to the editor drop target. */
+export async function importFilesToLocalFolder(options: {
+  workspaceId: string;
+  files: File[];
+  parentId?: string;
+}): Promise<{ importedIds: string[]; failedCount: number }> {
+  return importTextFilesToLocalFolder(options);
 }

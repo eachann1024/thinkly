@@ -106,6 +106,36 @@
   margin-left: 1px;
 }
 
+.goose-video-player__speed {
+  width: auto;
+  min-width: 42px;
+  padding-inline: 6px;
+  font-size: var(--goose-footnote-font-size, 12px);
+  font-variant-numeric: tabular-nums;
+}
+
+.goose-video-player__boost {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 4;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: var(--goose-control-radius);
+  color: var(--goose-text-primary);
+  background: var(--goose-menu-surface);
+  font-size: var(--goose-control-font-size, 14px);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.goose-video-player[data-playing="true"][data-controls="hidden"] .goose-video-player__chrome[data-menu-open="true"],
+.goose-video-player[data-playing="true"][data-controls="hidden"][data-boosting="true"] .goose-video-player__chrome,
+.goose-video-player[data-playing="true"][data-controls="hidden"]:focus-within .goose-video-player__chrome {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .goose-video-player__time {
   display: inline-flex;
   align-items: baseline;
