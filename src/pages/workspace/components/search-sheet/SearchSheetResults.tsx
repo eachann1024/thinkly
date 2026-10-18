@@ -29,6 +29,7 @@ import { Clock3, FileText, Sparkles, X } from "@/components/ui/icons";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import type { SearchResultPage } from "../command/useCommandSearch";
 import type { Page } from "@/types";
+import { presenceName } from "@/lib/ui/presence";
 
 export const AI_ROW_ID = "search-sheet-ai";
 
@@ -75,7 +76,7 @@ export const SearchSheetResults = memo(function SearchSheetResults({ results, qu
     const parent = page.parentId ? pages[page.parentId] : undefined;
     const path = [notebookNames[page.workspaceId], parent ? getPageTitle(parent) : ""].filter(Boolean).join(" / ");
     const snippet = page.matchKind === "title" || page.matchKind === "pinyin" ? "" : page.contentSnippet ?? "";
-    return <div className="search-sheet-row-wrap" key={page.id}>
+    return <div className="search-sheet-row-wrap" key={page.id} style={{ viewTransitionName: presenceName("search", page.id) }}>
       <Button contentStyle="preserve" variant="ghost" size="sm" id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selectedId} className="search-sheet-row" onClick={() => openResult(page)}>
         <span className="search-sheet-row-icon">{hasQuery ? <FileText size={16} aria-hidden="true"/> : <Clock3 size={16} aria-hidden="true"/>}</span>
         <span className="search-sheet-row-title"><Highlight text={title} query={query}/></span>

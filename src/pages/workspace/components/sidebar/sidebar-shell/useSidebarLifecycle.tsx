@@ -167,9 +167,18 @@ export function useSidebarLifecycle(
   };
 
   const handleOpenSearch = () => {
+    const phase = useSearchSession.getState().view.phase;
+    if (phase === "sheet") {
+      useSearchSession.getState().dismissSheet();
+      return;
+    }
     activateWorkspace();
     if (inHistoryMode) exitHistoryView();
     closeNotebookAiIfFullscreen();
+    if (phase === "reader") {
+      useSearchSession.getState().reopenSheet();
+      return;
+    }
     openSearchSession(
       activeNotebookId,
       activePageId,

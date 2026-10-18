@@ -1,6 +1,7 @@
 /** Shared immutable search snapshots, maintained outside React render. */
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
+import { clearContentDerivationsCache } from "@/components/editor/utils/content-page-derivations-cache";
 import { clearSearchBodyCache, pruneSearchBodyCache } from "./searchBodyCache";
 import { cancelIndexSync, resetIndex } from "./pageSearchIndex";
 import { createSearchTaskBudget, sortSearchCatalog, yieldSearchTask } from "./searchTaskScheduling";
@@ -59,6 +60,7 @@ export function resetSearchCatalog(): void {
   metadata = new Map();
   notebookKey = "";
   clearSearchBodyCache();
+  clearContentDerivationsCache();
   resetIndex();
   catalog = {
     pagesRef: null, notebooksRef: null, sortedByTitle: [], pageIdsWithChildren: new Set(),

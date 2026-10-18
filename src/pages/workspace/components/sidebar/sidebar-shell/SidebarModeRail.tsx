@@ -108,7 +108,7 @@ export function SidebarModeRail({
             ? searchSelectionRef.current
             : readSearchSelection();
           searchSelectionRef.current = "";
-          if (query) useSearchSession.getState().setQuery(query);
+          if (query && useSearchSession.getState().view.phase === "closed") useSearchSession.getState().setQuery(query);
         }
         openSidebarView(view, event.detail === 0);
       },

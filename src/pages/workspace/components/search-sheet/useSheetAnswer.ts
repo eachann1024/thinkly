@@ -12,11 +12,9 @@ ja:
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect, useRef, useReducer } from "react";
 import { getAIAvailability } from "@/lib/ai-provider";
-import { runPiReadOnlyAgent } from "@/lib/notebook-ai/pi/readOnlyAgent";
 import { useSettings } from "@/stores/useSettings";
 import type { Page } from "@/types";
 import { buildAgentPrompt, retrieveNotes, type NoteSource } from "./retrieveNotes";
-import { expandQueryTerms } from "./expandQuery";
 
 import { sheetAnswerReducer } from "./sheetAnswerState";
 export type { SheetAnswer } from "./sheetAnswerState";
@@ -57,12 +55,14 @@ export function useSheetAnswer() {
     dispatch({ type: "ask", requestId, question });
     try {
       dispatch({ type: "tool", requestId, tool: "understand" });
+      const { expandQueryTerms } = await import("./expandQuery");
       const extraTerms = await expandQueryTerms(question, abort.signal);
       if (abort.signal.aborted) return;
       dispatch({ type: "tool", requestId, tool: null });
       const sources = retrieveNotes(question, candidates, ranked, extraTerms);
       dispatch({ type: "retrieved", requestId, sources });
       const { system, prompt } = buildAgentPrompt(question, sources, scope.label, Boolean(scope.notebookIds));
+      const { runPiReadOnlyAgent } = await import("@/lib/notebook-ai/pi/readOnlyAgent");
       const text = await runPiReadOnlyAgent({
         notebookId: scope.notebookId,
         notebookIds: scope.notebookIds,

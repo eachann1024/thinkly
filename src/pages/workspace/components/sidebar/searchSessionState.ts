@@ -7,6 +7,8 @@ type SearchContext = {
   startingNotebookId: string | null;
   originPageId: string | null;
   originScrollTop: number;
+  /** 从搜索结果打开的那一篇。底栏和高亮只属于它，其它笔记保持原样。 */
+  resultPageId: string | null;
 };
 export type SearchView =
   | { phase: "closed" }
@@ -34,6 +36,8 @@ export type SearchSessionEvent =
   | { type: "sort-edited"; sort: SearchSort }
   | { type: "scope-edited"; scope: SearchScope }
   | { type: "target-requested"; pageId: string; enterReader: boolean; restoreTop: number | null }
+  | { type: "sheet-reopened" }
+  | { type: "sheet-dismissed" }
   | { type: "match-remembered"; key: string; index: number };
 export const initialSearchSession: SearchSessionState = {
   view: { phase: "closed" }, navigation: { phase: "none" }, query: "",
@@ -47,9 +51,19 @@ export function transitionSearchSession(s: SearchSessionState, event: SearchSess
       return { ...s, focusNonce: s.focusNonce + 1, scope: { kind: "all" },
         view: { phase: "sheet", context: s.view.phase !== "closed" ? s.view.context : {
           startingNotebookId: event.notebookId, originPageId: event.pageId, originScrollTop: event.scrollTop,
+          resultPageId: null,
         } } };
     case "closed":
       return { ...s, view: { phase: "closed" }, navigation: { phase: "none" } };
+    case "sheet-reopened":
+      return s.view.phase === "reader"
+        ? { ...s, focusNonce: s.focusNonce + 1, view: { phase: "sheet", context: s.view.context } }
+        : s;
+    case "sheet-dismissed":
+      if (s.view.phase !== "sheet") return s;
+      return s.view.context.resultPageId
+        ? { ...s, view: { phase: "reader", context: s.view.context } }
+        : { ...s, view: { phase: "closed" }, navigation: { phase: "none" } };
     case "query-edited":
       return { ...s, query: event.query };
     case "title-filter-edited":
@@ -58,12 +72,15 @@ export function transitionSearchSession(s: SearchSessionState, event: SearchSess
       return { ...s, sort: event.sort };
     case "scope-edited":
       return { ...s, scope: event.scope };
-    case "target-requested":
+    case "target-requested": {
       if (s.view.phase === "closed") return s;
-      return { ...s, requestSequence: s.requestSequence + 1,
-        view: event.enterReader ? { phase: "reader", context: s.view.context } : s.view,
-        navigation: { phase: "target", pageId: event.pageId, id: s.requestSequence + 1,
-          enterReader: event.enterReader, restoreTop: event.restoreTop } };
+      const id = s.requestSequence + 1;
+      const navigation = { phase: "target" as const, pageId: event.pageId, id, enterReader: event.enterReader, restoreTop: event.restoreTop };
+      if (!event.enterReader) return { ...s, requestSequence: id, navigation };
+      if (!s.query.trim()) return { ...s, requestSequence: id, view: { phase: "closed" }, navigation };
+      return { ...s, requestSequence: id, navigation,
+        view: { phase: "reader", context: { ...s.view.context, resultPageId: event.pageId } } };
+    }
     case "match-remembered":
       return s.memories[event.key] === event.index ? s : {
         ...s, memories: { ...s.memories, [event.key]: event.index },
