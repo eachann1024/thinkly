@@ -19,15 +19,19 @@ ja:
   closeThisPane: "このペインを閉じる"
 `;
 const uiText = createTranslator(localMessages);
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { X } from "@/components/ui/icons";
 import { closeSplitPaneFromUi } from "@/lib/editor-split/commands";
 import { NotebookName } from "@/pages/workspace/components/sidebar/notebook-switcher/NotebookName";
+import { toggleMaximizePane } from "@/stores/useEditorSplit";
 import { useNotebooks } from "@/stores/useNotebooks";
 import type { Page } from "@/types";
 import { NotebookMark } from "./NotebookMark";
+import { SplitPaneMoreMenu } from "./SplitPaneMoreMenu";
 import { SplitPanePageMenu } from "./SplitPanePageMenu";
+import { isSplitHeaderBlankTarget, useSplitPaneMaximize } from "./useSplitPaneMaximize";
 
 export function SplitPaneHeader({
   tabId,
@@ -43,11 +47,27 @@ export function SplitPaneHeader({
   missing?: boolean;
 }) {
   useLocale();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useSplitPaneMaximize(tabId, leafId);
   const notebook = useNotebooks((state) =>
     page ? state.notebooks[page.workspaceId] : undefined,
   );
   return (
-    <div data-split-chrome className="editor-split-header" data-missing={missing || undefined}>
+    <div
+      ref={headerRef}
+      data-split-chrome
+      className="editor-split-header"
+      data-missing={missing || undefined}
+      onDoubleClick={(event) => {
+        if (!isSplitHeaderBlankTarget(event.target)) return;
+        toggleMaximizePane(tabId, leafId);
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setMenuOpen(true);
+      }}
+    >
       {page ? (
         <div className="editor-split-header-crumb">
           {notebook ? (
@@ -87,6 +107,14 @@ export function SplitPaneHeader({
         </IconButton>
         <span id={`split-drag-help-${leafId}`} className="sr-only">
           {uiText("dragToTheEdgeOfAnotherPane")}</span>
+        <SplitPaneMoreMenu
+          tabId={tabId}
+          leafId={leafId}
+          page={page}
+          missing={missing}
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+        />
         <IconButton
           size="xs"
           tone="muted"
