@@ -190,13 +190,14 @@ export function renderWorkspaceShell(
               )}
             >
               {/*
-                会话运行时与面板 UI 解耦：Provider 在 AI 可用时常驻，
+                第一次打开面板才加载会话运行时。之后 Provider 常驻，
                 关面板 / 切页不卸载 useChat，顶栏动画可跟到请求真正结束。
               */}
               {aiAvailableForNotebook && aiNotebookId ? (
                 <NotebookAiSessionProvider
                   notebookId={aiNotebookId}
                   editorRef={editorRef}
+                  panelOpen={showFullscreenAi || showSideAiPanel}
                 >
                   <NotebookAiWorkspaceBody
                     showFullscreenAi={showFullscreenAi}

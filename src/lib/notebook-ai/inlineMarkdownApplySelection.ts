@@ -1,4 +1,5 @@
-import { blockToNode, nodeToBlock, type BlockNoteEditor } from "@blocknote/core";
+import { nodeToBlock, type BlockNoteEditor } from "@blocknote/core";
+import { blockToEditorNode } from "@/components/editor/core/fastBlockToNode";
 import { Fragment, type Node as ProseMirrorNode } from "prosemirror-model";
 import { TextSelection, type SelectionBookmark } from "prosemirror-state";
 import { closeHistory } from "@tiptap/pm/history";
@@ -110,8 +111,8 @@ export function preparePrivateInlineDraft(
     const normalized = normalizeAiMarkdown(values[index]).trim();
     if (!normalized) throw new Error(t("aiDidNotReturnAnyContentThatCould"));
     const parsed = inheritPresentationFromSource([editor.getBlock(part.blockId)], parseMarkdownToBlocks(editor, normalized));
-    const nodes = parsed.map((block) => blockToNode(withoutIds(block) as Parameters<typeof blockToNode>[0],
-      editor.prosemirrorState.schema, editor.schema.styleSchema));
+    const nodes = parsed.map((block) => blockToEditorNode(withoutIds(block) as Parameters<typeof blockToEditorNode>[0],
+      editor.prosemirrorState.schema));
     for (const node of nodes) {
       const check = (value: ProseMirrorNode) => {
         if (value.type.name === "blockContainer" && !value.firstChild?.isTextblock)

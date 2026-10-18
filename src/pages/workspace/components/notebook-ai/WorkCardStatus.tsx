@@ -5,7 +5,7 @@ import {
   LoaderCircle,
   RotateCcw,
   X,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import "./tool-progress.css";
 

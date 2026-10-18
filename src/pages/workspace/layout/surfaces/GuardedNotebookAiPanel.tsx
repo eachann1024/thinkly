@@ -15,12 +15,18 @@ ja:
 const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { type ComponentProps } from "react";
-import { NotebookAiPanel } from "../../components/notebook-ai/NotebookAiPanel";
+import { lazy, Suspense, type ComponentProps } from "react";
+import type { NotebookAiPanel as NotebookAiPanelType } from "../../components/notebook-ai/NotebookAiPanel";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
+const NotebookAiPanel = lazy(() =>
+  import("../../components/notebook-ai/NotebookAiPanel").then((mod) => ({
+    default: mod.NotebookAiPanel,
+  })),
+);
+
 export function GuardedNotebookAiPanel(
-  props: ComponentProps<typeof NotebookAiPanel>,
+  props: ComponentProps<typeof NotebookAiPanelType>,
 ) {
   useLocale();
   return (
@@ -38,7 +44,9 @@ export function GuardedNotebookAiPanel(
         </div>
       )}
     >
-      <NotebookAiPanel {...props} />
+      <Suspense fallback={null}>
+        <NotebookAiPanel {...props} />
+      </Suspense>
     </ErrorBoundary>
   );
 }
