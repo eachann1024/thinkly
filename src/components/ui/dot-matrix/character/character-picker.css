@@ -1,0 +1,80 @@
+/* 形象选择：男生、女生各一组，组内卡片等宽居中；组间留白大于卡片间距。 */
+.goose-character-picker {
+  --character-card-gap: 10px;
+  --character-group-gap: 18px;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--character-group-gap);
+}
+.goose-character-group {
+  display: flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--character-card-gap);
+}
+.goose-character-option {
+  position: relative;
+  display: flex;
+  width: calc(var(--character-sprite-size, 96px) + 28px);
+  min-width: 0;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  padding: 14px 8px 10px;
+  border-width: 1px;
+  border-color: hsl(var(--border) / 0.7);
+  text-align: center;
+}
+.goose-character-option:hover {
+  border-color: hsl(var(--border));
+}
+.goose-character-option[aria-checked="true"],
+.goose-character-option[aria-checked="true"]:hover {
+  border-color: var(--goose-interactive-selected-border);
+  box-shadow: 0 0 0 1px var(--goose-interactive-selected-border);
+}
+.goose-character-option:focus-visible {
+  outline: none;
+  background-color: var(--goose-interactive-hover);
+}
+.goose-character-option[aria-checked="true"]:focus-visible {
+  background-color: var(--goose-interactive-selected);
+}
+.goose-character-option > .goose-cs {
+  position: relative;
+  z-index: 1;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.goose-character-option:hover > .goose-cs,
+.goose-character-option[aria-checked="true"] > .goose-cs {
+  transform: translateY(-2px);
+}
+.goose-character-option > .goose-dm {
+  color: var(--goose-interactive-selected-border);
+}
+.goose-character-option-name {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--goose-text-secondary, hsl(var(--muted-foreground)));
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.goose-character-option[aria-checked="true"] .goose-character-option-name {
+  color: var(--goose-interactive-selected-fg, hsl(var(--foreground)));
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .goose-character-option > .goose-cs {
+    transition: none;
+    transform: none !important;
+  }
+}
