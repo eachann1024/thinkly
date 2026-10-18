@@ -46,7 +46,6 @@ export const autoImportEntries = [
   "src/components/ui/dialog-shell.tsx",
   "src/components/ui/dialog.tsx",
   "src/components/ui/dropdown-menu.tsx",
-  "src/components/ui/feature-toast-card.tsx",
   "src/components/ui/floating-menu-motion.ts",
   "src/components/ui/icon-button.tsx",
   "src/components/ui/image-export-theme-selector.tsx",

@@ -12,7 +12,7 @@ ja:
   togglePinFailed: "ウィンドウの最前面表示を切り替えられませんでした。もう一度お試しください"
 `);
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import {
   getDesktopAlwaysOnTop,
   setDesktopAlwaysOnTop,

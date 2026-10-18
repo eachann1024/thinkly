@@ -8,6 +8,7 @@ import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearch
 import { readOnlySearchFolderSource } from "@/pages/workspace/components/sidebar/readOnlySearchFolderSource";
 import { useCommandSearchIndexWarmup } from "@/pages/workspace/components/command/useCommandSearchIndexWarmup";
 import type { SearchResultPage } from "@/pages/workspace/components/command/useCommandSearch";
+import { Toaster } from "@/components/ui/sonner";
 import "./search-window.css";
 
 /** 每次唤出重开会话：拿最新的当前笔记本作起点，并以新的来源引用触发一次后台重扫。 */
@@ -79,6 +80,8 @@ export function SearchWindowApp() {
         onClose={close}
         folderSource={folderSource}
       />
+      {/* 浮窗尺寸小：与速记小窗一致，居中只显示一条。 */}
+      <Toaster placement="center" />
     </div>
   );
 }
