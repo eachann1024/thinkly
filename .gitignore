@@ -73,6 +73,7 @@ scripts/*
 !scripts/verify/**
 !scripts/collect-desktop-artifacts.mjs
 !scripts/compile-electron.mjs
+!scripts/spawn-quiet.mjs
 !scripts/electron-build-linux.mjs
 !scripts/electron-build-mac.mjs
 !scripts/electron-build-win.mjs
@@ -87,6 +88,10 @@ scripts/*
 !scripts/quark-upload.mjs
 # stray verification screenshots in repo root
 /*.png
+# 打包分块误落到仓库根目录时的兜底（真实配置除外）
+/*.js
+!/eslint.config.js
+!/postcss.config.js
 
 未命名/
 

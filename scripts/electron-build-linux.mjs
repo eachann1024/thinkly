@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
+import { spawnQuiet } from "./spawn-quiet.mjs";
 import { delimiter, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:process";
@@ -30,24 +31,14 @@ function stopRunningApp() {
   };
   try {
     const proc = shell("pgrep -x goose-note-app || true");
-    if (!proc) {
-      console.log("[linux] 未检测到正在运行的思绪 · Thinkly，跳过停止。");
-      return;
-    }
-    console.log(
-      `[linux] 检测到正在运行的思绪 · Thinkly（PID: ${proc.split(/\n/).join(", ")}），强制停止…`,
-    );
+    if (!proc) return;
     shell("pkill -x goose-note-app || true");
     // 等待进程退出，最多 15 秒（SIGTERM 后仍未退则 SIGKILL）。
     const deadline = Date.now() + 15000;
     while (Date.now() < deadline) {
-      if (!shell("pgrep -x goose-note-app || true")) {
-        console.log("[linux] 旧实例已停止。");
-        return;
-      }
+      if (!shell("pgrep -x goose-note-app || true")) return;
       shell("sleep 0.5");
     }
-    console.log("[linux] 旧实例未在宽限期内退出，强制 SIGKILL…");
     shell("pkill -9 -x goose-note-app || true");
   } catch (err) {
     console.warn(
@@ -64,18 +55,7 @@ const env = {
   PATH: `${resolve(root, "node_modules/.bin")}${delimiter}${process.env.PATH ?? ""}`,
   CSC_IDENTITY_AUTO_DISCOVERY: "false",
 };
-console.log("[linux] electron-builder --linux（AppImage / deb / pacman，未签名）");
-try {
-  execSync("electron-builder --linux", {
-    stdio: "inherit",
-    env,
-    shell: true,
-    cwd: pack,
-  });
-} catch (err) {
-  console.error(
-    "[linux] electron-builder 打包失败：",
-    err.message || String(err),
-  );
-  process.exit(1);
-}
+const cli = resolve(root, "node_modules/electron-builder/out/cli/cli.js");
+const result = spawnQuiet(process.execPath, [cli, "--linux"], { env, cwd: pack });
+if (result.status !== 0) process.exit(result.status ?? 1);
+if (process.env.GOOSE_QUIET !== "1") console.log("✓ Linux 安装包");

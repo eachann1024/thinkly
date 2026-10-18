@@ -26,7 +26,7 @@ await esbuild.build({
   outfile: resolve(root, "dist-electron/main/index.js"),
   external: ["electron"],
   sourcemap,
-  logLevel: "info",
+  logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
 });
 
 await esbuild.build({
@@ -41,7 +41,5 @@ await esbuild.build({
   outExtension: { ".js": ".cjs" },
   external: ["electron"],
   sourcemap,
-  logLevel: "info",
+  logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
 });
-
-console.log("[electron] compiled main + preload");
