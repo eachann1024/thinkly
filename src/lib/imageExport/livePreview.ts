@@ -13,7 +13,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { cloneExportBlocks } from "@/lib/export/prepareExportBlocks";
 import type { Page } from "@/types";
@@ -22,6 +21,7 @@ import {
   collectBlockInlineStyles,
   renderBlocks,
 } from "./domSerializer";
+import { takeBlocksForPreview } from "./previewBudget";
 import type { CardTheme } from "./themes";
 import type { WatermarkConfig } from "./watermark";
 import { normalizeWatermarkConfig } from "./watermark";
@@ -41,6 +41,38 @@ export function shouldShowImageExportOptionsCorner(width: number): boolean {
   return Number.isFinite(width) && width >= IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH;
 }
 
+function firstInlineText(content: unknown): string {
+  if (typeof content === "string") return content.trim().slice(0, 80);
+  if (!Array.isArray(content)) return "";
+  let out = "";
+  for (const part of content) {
+    if (out.length >= 80) break;
+    if (typeof part === "string") out += part;
+    else if (part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string") {
+      out += (part as { text: string }).text;
+    }
+  }
+  return out.trim().slice(0, 80);
+}
+
+/** 长文只读文件名或开头标题，避免为了标题把全文规范化。 */
+function previewTitle(
+  page: Pick<Page, "content" | "localFilePath"> | null | undefined,
+  fallback: string,
+): string {
+  if (!page) return fallback;
+  if (page.localFilePath) return getPageTitle(page as Page) || fallback;
+  const content = page.content;
+  const first = Array.isArray(content) ? content[0] : undefined;
+  const heading =
+    first && typeof first === "object" && (first as { type?: string }).type === "heading"
+      ? firstInlineText((first as { content?: unknown }).content)
+      : "";
+  if (heading) return heading;
+  if (!Array.isArray(content) || content.length > 80) return fallback;
+  return getPageTitle(page as Page) || fallback;
+}
+
 export function getImageExportPreviewSource(params: {
   mode: "page" | "selection";
   page?: Pick<Page, "content" | "localFilePath"> | null;
@@ -49,21 +81,20 @@ export function getImageExportPreviewSource(params: {
   const page = params.page;
   const selection = Array.isArray(params.blocks) ? params.blocks : [];
   if (params.mode === "selection" && selection.length > 0) {
-    const title =
-      (page ? getPageTitle(page as Page) : "") ||
-      extractTitleFromContent(page?.content) ||
-      uiText("selectedContent");
-    return { title, blocks: selection };
+    return {
+      title: previewTitle(page, uiText("selectedContent")),
+      blocks: takeBlocksForPreview(selection) as BlockNoteContent,
+    };
   }
 
-  const content = cloneExportBlocks(page?.content, {
-    ensureFirstTitle: !page?.localFilePath,
-  });
-  const title =
-    (page ? getPageTitle(page as Page) : "") ||
-    extractTitleFromContent(content) ||
-    uiText("untitled");
-  return { title, blocks: content };
+  const raw = page?.content;
+  const blocks = Array.isArray(raw)
+    ? raw
+    : cloneExportBlocks(raw, { ensureFirstTitle: !page?.localFilePath });
+  return {
+    title: previewTitle(page, uiText("untitled")),
+    blocks: takeBlocksForPreview(blocks) as BlockNoteContent,
+  };
 }
 
 export function buildImageExportPreviewHtml(params: {
@@ -74,7 +105,9 @@ export function buildImageExportPreviewHtml(params: {
   watermarkConfig?: WatermarkConfig;
 }): string {
   const wm = normalizeWatermarkConfig(params.watermarkConfig);
-  const prepared = cloneExportBlocks(params.blocks, { ensureFirstTitle: false });
+  const prepared = cloneExportBlocks(takeBlocksForPreview(params.blocks), {
+    ensureFirstTitle: false,
+  });
   const { blocks: blocksToRender, titleBlock } = splitImageExportTitle({
     blocks: prepared,
     pageTitle: params.title,

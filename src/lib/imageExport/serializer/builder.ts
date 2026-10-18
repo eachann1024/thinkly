@@ -92,7 +92,7 @@ export function buildStyledHTML(params: {
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="${getGoogleFontsUrl()}">
+${params.preview ? "" : `<link rel="stylesheet" href="${getGoogleFontsUrl()}">`}
 <style>
 ${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleStyle })}${buildBlockCss(t)}${buildFooterCss(t)}${buildDecorationCss(t)}
 </style>

@@ -53,6 +53,11 @@ body {
   max-width: 1200px;
   position: relative;
   overflow: hidden;
+  font-family: ${t.bodyFont};
+  color: ${t.textColor};
+  line-height: ${t.bodyLineHeight};
+  font-size: ${t.bodyFontSize}px;
+  letter-spacing: ${t.bodyLetterSpacing};
 }
 ${decoStyle}
 .gooseshot-card {
