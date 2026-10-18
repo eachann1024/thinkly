@@ -30,6 +30,7 @@ export function hydrateSettings(state?: SettingsState) {
         : 180,
       setupGuideSeen: state.setupGuideSeen === true,
       setupGuideOpen: false,
+      characterId: typeof state.characterId === "string" ? state.characterId : null,
     });
   }
   const theme = state?.theme || "system";

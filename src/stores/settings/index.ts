@@ -24,6 +24,8 @@ const getApply = () => applyFns;
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
+      characterId: null,
+      setCharacterId: (characterId: string) => set({ characterId }),
       ...createAISlice(set as Parameters<typeof createAISlice>[0]),
       ...createAppearanceSlice(
         set as Parameters<typeof createAppearanceSlice>[0],

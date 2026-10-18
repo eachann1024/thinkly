@@ -63,7 +63,7 @@ const STEPS = [
 
 type SetupStep = 0 | 1;
 
-function getNativePlatform(): "mac" | "win" | "linux" | "web" {
+export function getNativePlatform(): "mac" | "win" | "linux" | "web" {
   if (!isElectronRuntime() || typeof navigator === "undefined") return "web";
   if (/Mac/i.test(navigator.platform)) return "mac";
   if (/Win/i.test(navigator.platform)) return "win";

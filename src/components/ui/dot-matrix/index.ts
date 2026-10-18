@@ -13,6 +13,17 @@ export { TreeFadeArt, TreeTrailArt } from "./illustrations/TreeEmptyArt";
 export { WorkspaceDotIcon, type WorkspaceDotIconMotion } from "./illustrations/WorkspaceDotIcon";
 export { DotIconArt, DotIconBody, buildDotIconArt, type DotIconArtSpec, type DotIconMotion } from "./illustrations/DotIconArt";
 export { GlitchArt } from "./illustrations/GlitchArt";
+export { CharacterSprite, type CharacterCrop } from "./character/CharacterSprite";
+export { CharacterPicker } from "./character/CharacterPicker";
+export {
+  CHARACTERS,
+  CHARACTER_POSES,
+  DEFAULT_CHARACTER_ID,
+  findCharacter,
+  type CharacterDef,
+  type CharacterPose,
+  type CharacterTone,
+} from "./character/registry";
 export { DecorScatter, DecorShard, DecorTicks } from "./decorShapes";
 export { DotDecor, type DotDecorPreset } from "./decor";
 export { OutlineArt } from "./illustrations/OutlineArt";

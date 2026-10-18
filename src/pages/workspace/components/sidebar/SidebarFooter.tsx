@@ -15,6 +15,7 @@ import { AppUpdateButton } from "@/components/app-update/AppUpdateButton";
 import { cn } from "@/lib/utils";
 import { ReflectionButton } from "./reflection/ReflectionButton";
 import { SidebarRailIcon } from "./SidebarRailIcon";
+import { CharacterAvatar, useHasCharacter } from "./CharacterAvatar";
 import "./sidebar-footer-labels.css";
 
 export interface SidebarFooterProps {
@@ -27,6 +28,7 @@ export function SidebarFooter({
   onOpenSettings,
 }: SidebarFooterProps) {
   useLocale();
+  const hasCharacter = useHasCharacter();
   const btnClass =
     "sidebar-footer-control inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg p-0 text-muted-foreground [&_svg]:block";
   const activeClass =
@@ -47,7 +49,7 @@ export function SidebarFooter({
               aria-pressed={isSettingsOpen}
               onClick={onOpenSettings}
             >
-              <SidebarRailIcon name="settings" selected={isSettingsOpen} />
+              {hasCharacter ? <CharacterAvatar /> : <SidebarRailIcon name="settings" selected={isSettingsOpen} />}
             </IconButton>
           </TooltipTrigger>
           <TooltipContent side="right">{uiText("settings_e366")}</TooltipContent>

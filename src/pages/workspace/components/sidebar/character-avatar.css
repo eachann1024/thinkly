@@ -1,0 +1,14 @@
+/* 设置入口头像：28px 圆框，比 16px 图标略大以容纳五官，仍在按钮内居中。 */
+.sidebar-character-avatar {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  background: hsl(var(--goose-raised-bg));
+}

@@ -18,4 +18,7 @@ export type SettingsState = AISlice &
     contentsWidth: number;
     setupGuideSeen: boolean;
     setupGuideOpen: boolean;
+    /** 所选形象 id；null 表示尚未在首启引导中选择。 */
+    characterId: string | null;
+    setCharacterId: (id: string) => void;
   };

@@ -1,0 +1,90 @@
+/*
+ * 点阵形象：底帧 + 眨眼帧叠放，动画只改 transform / opacity。
+ * 播放状态复用 useDotMotion 写入的 data-dm-phase / data-dm-paused。
+ */
+.goose-cs {
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+}
+.goose-cs-float,
+.goose-cs-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.goose-cs-img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+.goose-cs-shut {
+  opacity: 0;
+}
+
+/* 呼吸：整像素阶梯起伏，8s 一轮，位移 ≤ 2px */
+.goose-cs[data-dm-phase="in"]:not([data-cs-still]) .goose-cs-float {
+  animation: goose-cs-float-lg 8s steps(1, end) var(--cs-float-delay, 0s) infinite;
+}
+.goose-cs[data-dm-phase="in"][data-cs-size="sm"]:not([data-cs-still]) .goose-cs-float {
+  animation-name: goose-cs-float-sm;
+}
+/* 眨眼：每周期末尾闭眼约 2%（≈140ms），部分实例连眨两下 */
+.goose-cs[data-dm-phase="in"] .goose-cs-shut {
+  animation: goose-cs-blink var(--cs-blink-period, 7s) step-end var(--cs-blink-delay, 0s) infinite;
+}
+.goose-cs[data-dm-phase="in"] .goose-cs-open {
+  animation: goose-cs-blink-open var(--cs-blink-period, 7s) step-end var(--cs-blink-delay, 0s) infinite;
+}
+.goose-cs[data-dm-phase="in"][data-cs-twice] .goose-cs-shut {
+  animation-name: goose-cs-blink-twice;
+}
+.goose-cs[data-dm-phase="in"][data-cs-twice] .goose-cs-open {
+  animation-name: goose-cs-blink-twice-open;
+}
+
+@keyframes goose-cs-float-lg {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  50% { transform: translateY(-2px); }
+  75% { transform: translateY(-1px); }
+}
+@keyframes goose-cs-float-sm {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+@keyframes goose-cs-blink {
+  0% { opacity: 0; }
+  98% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes goose-cs-blink-open {
+  0% { opacity: 1; }
+  98% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes goose-cs-blink-twice {
+  0% { opacity: 0; }
+  94% { opacity: 1; }
+  96% { opacity: 0; }
+  98% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes goose-cs-blink-twice-open {
+  0% { opacity: 1; }
+  94% { opacity: 0; }
+  96% { opacity: 1; }
+  98% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.goose-cs[data-dm-paused] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-cs * {
+    animation: none !important;
+  }
+}
