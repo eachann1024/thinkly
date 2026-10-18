@@ -165,7 +165,8 @@ mac:
     LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
     CFBundleDisplayName: Thinkly
-    CFBundleName: Thinkly
+    # 不要写 CFBundleName。Electron 用它找 Helper.app，必须等于 productName（磁盘上的 Goose Note）。
+    # 用户看到的名字是 CFBundleDisplayName、macos-l10n 和 app.setName，已经是思绪 · Thinkly。
     NSAppleEventsUsageDescription: Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.
     NSAccessibilityUsageDescription: Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.
   target:
