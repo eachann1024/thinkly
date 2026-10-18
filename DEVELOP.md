@@ -60,6 +60,31 @@ Windows 下载包必须匹配“设置 → 系统 → 关于”中的系统类�
 
 不编写、不运行 TDD、ERE、单元或 E2E 用例，不建设测试桥、fixture 或覆盖率门槛。PR 的截图与验收要求统一见 [贡献指南](CONTRIBUTING.md)。一次性原型、截图和实操记录保存在仓库外，通过 PR 附件提供，不进入源码提交。生产构建、正式视频与安装包按实际用途归档，不当成无用缓存整目录删除。
 
+## 性能与体积
+
+两个固定入口，不靠主观判断：
+
+```bash
+bun run verify perf                                  # 静态预算：首屏 JS、懒加载块、sourcemap 残留
+node scripts/perf/startup.mjs --app dist-desktop/Thinkly.app --runs 7
+```
+
+`verify perf` 的预算取达成值向上取整：首屏 JS（`index.html` 里的 entry + modulepreload）≤ 5600KB、modulepreload ≤ 62 条、单个首屏块 ≤ 830KB，且 echarts／mermaid／prettier／react-pdf 不得进入首屏（按块体积判定，避开几百字节的空壳 chunk）。任何提交把这些重库拖回首屏都会红。
+
+`startup.mjs` 启动真实应用若干次，以 `process.getCreationTime()` 为零点汇总 p50/p95：`app-ready`、`did-finish-load`、`renderer-rendered`、`first-stable-frame`，以及各进程工作集内存。它复制一份真实配置目录（`--profile empty` 用空目录、`--profile real` 直接用当前配置）并通过 `GOOSE_PERF_USERDATA` 隔离，不会与正在运行的实例抢单实例锁。实测刻度：
+
+| 阶段 | 1.7.318 基线 | 现在 |
+| --- | --- | --- |
+| 窗口创建 | 332ms | 296ms |
+| 首屏脚本执行完 | 869ms | 502ms |
+| 界面画出来 | 1097ms | 721ms |
+| 首帧稳定 | 1139ms | 787ms |
+| 工作集内存 | 725MB | 642MB |
+
+不设 `GOOSE_PERF_LOG` 时 `electron/main/perf.ts` 全部函数立即返回，不注册监听、不开定时器、不写盘。首帧探测用的是渲染进程已有的 `data-startup-settling` 标记（bootstrap 渲染前设置、App 挂载后双 rAF 移除），不改渲染端行为。新建产物后的第一次启动额外包含系统签名校验与 Spotlight 索引，不计入常态口径。
+
+体积已到平台下限：Electron 框架占 `.app` 的 87%（214MB），仓库侧只有 `app.asar`（29MB）可调，其中开场视频 6.8MB；多语言包、SwiftShader、DevTools 资源在上游已裁掉，`.app` 已是单 arm64 架构，没有多架构冗余。
+
 手写实现按独立职责拆到不超过 300 行，主要模块约 200–300 行，入口、类型和纯工具可以更短。生成声明通过生成步骤分片；持久化格式、迁移、恢复、路径保护和事件顺序不能因拆分而改变。
 
 ## 项目状态

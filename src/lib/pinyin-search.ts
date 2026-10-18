@@ -1,4 +1,22 @@
-import { match } from "pinyin-pro";
+type PinyinMatch = typeof import("pinyin-pro").match;
+
+// pinyin-pro 约 290KB，只在命令搜索里为中文标题做拼音匹配。首帧不需要它，
+// 因此改成按需加载：首帧之后在空闲时预热，未就绪时退回子串匹配。
+let pinyinMatch: PinyinMatch | null = null;
+let preloading = false;
+
+/** 空闲时预热拼音匹配器（首帧之后调用，不阻塞启动）。 */
+export function warmPinyinMatcher(): void {
+  if (pinyinMatch || preloading) return;
+  preloading = true;
+  void import("pinyin-pro")
+    .then((mod) => {
+      pinyinMatch = mod.match;
+    })
+    .catch(() => {
+      preloading = false;
+    });
+}
 
 const matchCache = new Map<string, readonly number[] | null>();
 const MAX_MATCHES = 1024;
@@ -26,7 +44,7 @@ export function pinyinMatchIndices(text: string, query: string): number[] | null
     matchCache.set(key, cached);
     return cached ? [...cached] : null;
   }
-  const result = match(text, query, { continuous: true, precision: "start" }) ?? null;
+  const result = pinyinMatch?.(text, query, { continuous: true, precision: "start" }) ?? null;
   matchCache.set(key, result ? [...result] : null);
   if (matchCache.size > MAX_MATCHES) matchCache.delete(matchCache.keys().next().value!);
   return result;

@@ -27,7 +27,7 @@ const uiText = createTranslator(localMessages);
 import { cn } from "@/lib/utils";
 import { SearchSessionController } from "../components/sidebar/SearchSessionController";
 import { Sidebar } from "../components/sidebar/Sidebar";
-import { SearchSheet } from "../components/search-sheet/SearchSheet";
+import { LazySearchSheet } from "../components/search-sheet/LazySearchSheet";
 import { DesktopTitleBar } from "../components/page/DesktopTitleBar";
 import { LocalFolderTargetPicker } from "../components/sidebar/LocalFolderTargetPicker";
 import { AIFeatureNotice } from "../components/AIFeatureNotice";
@@ -231,7 +231,7 @@ export function renderWorkspaceShell(
           </main>
         </div>
       </div>
-      <SearchSheet aiNotebookId={aiAvailableForNotebook ? aiNotebookId : null} />
+      <LazySearchSheet aiNotebookId={aiAvailableForNotebook ? aiNotebookId : null} />
     </>
   );
 }

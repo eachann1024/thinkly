@@ -88,7 +88,7 @@ export async function parseLocalMarkdownContent(
     unwrapLocalBlockPropsWrappers(markdown),
   );
   const { importFromMarkdown } = await import("@/lib/export");
-  const imported = importFromMarkdown(encodedMd, fallbackTitle, {
+  const imported = await importFromMarkdown(encodedMd, fallbackTitle, {
     preserveStructure: true,
   });
   const importedBlocks = Array.isArray(imported.content)

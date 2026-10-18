@@ -1,8 +1,10 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { blocksToMarkdown } from "./blocknoteSerializer";
 import { blocksToEditorHtml } from "./blocksToEditorHtml";
+
+// blocksToMarkdown 经 blocknoteSerializer 带入 rehype-katex（含一份 katex），
+// 约 500KB。本文件被编辑器静态引用（只用 stripFirstH1），所以不能在顶层引入它。
 
 function isFirstBlockH1(block: unknown): boolean {
   if (!block || typeof block !== "object" || !("type" in block)) return false;
@@ -31,6 +33,7 @@ export async function buildExportMarkdown(
   blocks: BlockNoteContent,
   options: BuildExportMarkdownOptions = {},
 ): Promise<string> {
+  const { blocksToMarkdown } = await import("./blocknoteSerializer");
   if (page.localFilePath) {
     return blocksToMarkdown(blocks);
   }
