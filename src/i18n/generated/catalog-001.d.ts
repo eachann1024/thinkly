@@ -109,6 +109,7 @@ declare module "../types" {
     "src/components/ui/command.tsx#localMessages:1": { "chooseFolder": {  }; "findFolder": {  } };
     "src/components/ui/delete-receipt.tsx#localMessages:1": { "deletedItem": { "destination": string | number; "title": string | number }; "deletedMany": { "destination": string | number; "done": string | number }; "failedDelete": { "failed": string | number }; "partialDelete": { "done": string | number; "failed": string | number }; "restoreManually": { "destination": string | number }; "systemRecycle": {  }; "systemTrash": {  }; "trash": {  }; "undo": {  }; "undoFailed": {  } };
     "src/components/ui/dialog-shell.tsx#localMessages:1": { "dialog": {  }; "dialogContent": {  } };
+    "src/components/ui/dot-matrix/character/registry.ts#localMessages:1": { "a": {  }; "b": {  }; "c": {  }; "d": {  }; "e": {  }; "f": {  }; "g": {  } };
     "src/components/ui/dropdown-menu.tsx#localMessages:1": { "actions": {  } };
     "src/components/ui/empty-state.tsx#localMessages:1": { "details": {  } };
     "src/components/ui/image-export-theme-selector.tsx#localMessages:1": { "chooseTheme": {  }; "current": {  }; "dark": {  }; "description": { "mode": string | number; "count": string | number }; "generateImage": {  }; "light": {  }; "selection": {  }; "wholePage": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
     "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
     "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
-    "src/lib/ai-provider/modelCatalog.ts#localMessages:1": { "authenticationFailed": { "hint": string | number; "provider": string | number }; "customAnthropicProvider": {  }; "customOpenaiCompatibleProvider": {  }; "customOpenaiResponsesProvider": {  }; "enableTheAiAssistantInSettingsFirst": {  }; "missingApiKey": { "hint": string | number }; "saveYourCustomAiConfigurationAndLoadTheModel": {  } };
   }
 }
