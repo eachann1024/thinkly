@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n";
+import { runWithPresence } from "@/lib/ui/presence";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/main-tree/controller/useMainTreeLocalCreation.tsx#localMessages:1">`
@@ -104,7 +105,9 @@ export function useMainTreeLocalCreation(
 
   const cancelPendingCreate = useCallback((id: string) => {
     if (committingRef.current) return;
-    setPendingCreate((current) => (current?.id === id ? null : current));
+    runWithPresence(() => {
+      setPendingCreate((current) => (current?.id === id ? null : current));
+    });
   }, [setPendingCreate]);
 
   const commitPendingCreate = useCallback(

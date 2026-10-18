@@ -1,6 +1,7 @@
 import type { TabSet, TabGet, TabsState, TabItem } from "./types";
 import type { TabsActionContext } from "./context";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
+import { runWithPresence } from "@/lib/ui/presence";
 import {
   findTabByPageId,
   stampTabAccess,
@@ -109,12 +110,14 @@ export function createTransferTabActions(
 
       const nextTabs = openTabs.filter((tab) => tab.id !== tabId);
       if (nextTabs.length === 0) {
-        set({
-          openTabs: [],
-          activeTabId: null,
-          ...syncHistoryWithOpenTabs([]),
+        runWithPresence(() => {
+          set({
+            openTabs: [],
+            activeTabId: null,
+            ...syncHistoryWithOpenTabs([]),
+          });
+          useEditorSplit.getState().clearTab(tabId);
         });
-        useEditorSplit.getState().clearTab(tabId);
         return { emptied: true };
       }
 
@@ -133,12 +136,14 @@ export function createTransferTabActions(
           ? historyState.tabHistory[historyState.tabHistoryIndex]
           : null);
 
-      set({
-        openTabs: nextTabs,
-        activeTabId: fallbackActiveId,
-        ...historyState,
+      runWithPresence(() => {
+        set({
+          openTabs: nextTabs,
+          activeTabId: fallbackActiveId,
+          ...historyState,
+        });
+        useEditorSplit.getState().clearTab(tabId);
       });
-      useEditorSplit.getState().clearTab(tabId);
       const nextActiveTab = nextTabs.find((tab) => tab.id === fallbackActiveId);
       if (nextActiveTab && !isSpecialTab(nextActiveTab)) {
         const pageId = workspaceTabPageId(nextActiveTab);

@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n";
+import { presenceName } from "@/lib/ui/presence";
 import {
   Fragment,
   useCallback,
@@ -131,6 +132,7 @@ function SplitPane({
       role="region"
       aria-label={leaf.title ?? leaf.pageId}
       className="editor-split-pane"
+      style={{ viewTransitionName: presenceName("pane", leaf.id) }}
       data-focused={focused ? "true" : "false"}
       data-zoomed={zoomed ? "true" : "false"}
       data-pane-id={leaf.id}

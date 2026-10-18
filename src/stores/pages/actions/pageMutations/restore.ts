@@ -1,3 +1,4 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/pageMutations/restore.ts#block1:1">`
 zh-Hans:
@@ -66,7 +67,7 @@ export const restorePageAction = (
 
   let restoredCount = 0;
   const restoredIds: string[] = [];
-  set((state) => {
+  runWithPresence(() => set((state) => {
     const currentPage = state.pages[id];
     if (!currentPage || !currentPage.trashedAt) return state;
 
@@ -107,7 +108,7 @@ export const restorePageAction = (
     return {
       pages: restoredPages,
     };
-  });
+  }));
 
   persistPageSnapshots(get().pages, restoredIds);
 

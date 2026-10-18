@@ -16,6 +16,7 @@ import {
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import { useNotebooks } from "../useNotebooks";
+import { runWithPresence } from "@/lib/ui/presence";
 
 export function createClosingTabActions(
   set: TabSet,
@@ -29,6 +30,8 @@ export function createClosingTabActions(
   return {
     closeTab: (tabId: string) => {
       if (effectiveSingleTabMode()) return;
+      if (!get().openTabs.some((tab) => tab.id === tabId)) return;
+      runWithPresence(() => {
       const { openTabs, activeTabId, recentlyClosedPageIds } = get();
       const index = openTabs.findIndex((tab) => tab.id === tabId);
       if (index === -1) return;
@@ -104,9 +107,10 @@ export function createClosingTabActions(
           notebookStore.setActiveNotebook(nextActiveTab.workspaceId);
         }
       }
+      });
     },
 
-    closeOtherTabs: (tabId: string) => {
+    closeOtherTabs: (tabId: string) => runWithPresence(() => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentTab = openTabs.find((tab) => tab.id === tabId);
@@ -128,9 +132,9 @@ export function createClosingTabActions(
       });
       get().syncNotebookForPage(workspaceTabPageId(currentTab));
       void scheduleSetActivePage(workspaceTabPageId(currentTab));
-    },
+    }),
 
-    closeTabsToLeft: (tabId: string) => {
+    closeTabsToLeft: (tabId: string) => runWithPresence(() => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
@@ -162,9 +166,9 @@ export function createClosingTabActions(
         : null;
       get().syncNotebookForPage(nextPageId);
       void scheduleSetActivePage(nextPageId);
-    },
+    }),
 
-    closeTabsToRight: (tabId: string) => {
+    closeTabsToRight: (tabId: string) => runWithPresence(() => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
@@ -196,6 +200,6 @@ export function createClosingTabActions(
         : null;
       get().syncNotebookForPage(nextPageId);
       void scheduleSetActivePage(nextPageId);
-    },
+    }),
   };
 }

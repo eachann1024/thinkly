@@ -1,3 +1,4 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/directory.ts#block1:1">`
 zh-Hans:
@@ -177,7 +178,7 @@ export async function relocateLocalPageTree(
     }
     markSelfMoved(oldPath);
     markSelfMoved(nextPath);
-    set((state) => {
+    runWithPresence(() => set((state) => {
       const pages = { ...state.pages };
       for (const p of related) {
         const current = pages[p.id];
@@ -197,7 +198,7 @@ export async function relocateLocalPageTree(
         };
       }
       return { pages };
-    });
+    }));
     const movedPages = related.filter((p) =>
       inside(p.localFilePath!.replace(/\\/g, "/")),
     );

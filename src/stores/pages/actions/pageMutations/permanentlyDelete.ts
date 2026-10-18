@@ -1,3 +1,4 @@
+import { runWithPresence } from "@/lib/ui/presence";
 import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
 import {
@@ -72,7 +73,7 @@ export const permanentlyDeletePageAction = async (
       clearPendingLocalSaveContent(pid);
     });
 
-    set((state) => {
+    runWithPresence(() => set((state) => {
       const newPages = { ...state.pages };
       removedIds.forEach((pid) => delete newPages[pid]);
 
@@ -91,7 +92,7 @@ export const permanentlyDeletePageAction = async (
         activePageId: nextActivePageId,
         dirtyLocalPageIds: newDirtyLocalPageIds,
       };
-    });
+    }));
     removePersistedPageSnapshots(snapshotPages, removedIds);
     return;
   }
@@ -105,7 +106,7 @@ export const permanentlyDeletePageAction = async (
   // 清理自动保存计时器与待写队列（对非本地页面无害，统一处理）。
   clearLocalSaveTimers(id);
   clearPendingLocalSaveContent(id);
-  set((state) => {
+  runWithPresence(() => set((state) => {
     const page = state.pages[id];
     if (!page) return state;
     const workspaceId = page.workspaceId;
@@ -176,6 +177,6 @@ export const permanentlyDeletePageAction = async (
       activePageId: newActivePageId,
       dirtyLocalPageIds: newDirtyLocalPageIds,
     };
-  });
+  }));
   removePersistedPageSnapshot(targetPage, id);
 };
