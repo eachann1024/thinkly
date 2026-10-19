@@ -72,21 +72,22 @@ export function SettingsScaffold({
   const [navSheen, setNavSheen] = useState(false);
   const [titleSheen, setTitleSheen] = useState(false);
   useEffect(() => {
+    setNavSheen(false);
+    setTitleSheen(false);
     if (!visible) return;
-    setNavSheen(true);
-    const id = window.setTimeout(() => setNavSheen(false), 1300);
-    return () => window.clearTimeout(id);
-  }, [visible]);
-  useEffect(() => {
-    if (!visible || activeTab !== "feedback") return;
-    setNavSheen(true);
-    setTitleSheen(true);
-    const id = window.setTimeout(() => {
+    const start = window.setTimeout(() => {
+      setNavSheen(true);
+      setTitleSheen(activeTab === "feedback");
+    }, 1500);
+    const end = window.setTimeout(() => {
       setNavSheen(false);
       setTitleSheen(false);
-    }, 1300);
-    return () => window.clearTimeout(id);
-  }, [visible, activeTab]);
+    }, 4500);
+    return () => {
+      window.clearTimeout(start);
+      window.clearTimeout(end);
+    };
+  }, [visible, activeTab === "feedback"]);
 
   useLayoutEffect(() => {
     const scrollContainer = scrollContainerRef.current;

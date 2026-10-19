@@ -9,7 +9,7 @@ zh-Hans:
   gitSync_fcb0: "Git 同步"
   aiAssistant_318e: "AI 助手"
   dataAndBackups_e963: "数据与备份"
-  feedback_4c2a: "反馈"
+  feedback_4c2a: "快速反馈"
   localVersionBeforeBackupRestore_8346: "备份覆盖前本地版本"
 en:
   appearanceAndThemes_6902: "Appearance and themes"
@@ -19,7 +19,7 @@ en:
   gitSync_fcb0: "Git sync"
   aiAssistant_318e: "AI assistant"
   dataAndBackups_e963: "Data and backups"
-  feedback_4c2a: "Feedback"
+  feedback_4c2a: "Quick feedback"
   localVersionBeforeBackupRestore_8346: "Local version before backup restore"
 ja:
   appearanceAndThemes_6902: "外観とテーマ"
@@ -29,7 +29,7 @@ ja:
   gitSync_fcb0: "Git 同期"
   aiAssistant_318e: "AI アシスタント"
   dataAndBackups_e963: "データとバックアップ"
-  feedback_4c2a: "フィードバック"
+  feedback_4c2a: "クイックフィードバック"
   localVersionBeforeBackupRestore_8346: "バックアップ復元前のローカルバージョン"
 `;
 const uiText = createTranslator(localMessages);
