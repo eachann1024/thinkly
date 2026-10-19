@@ -12,7 +12,7 @@ zh-Hans:
   thanks_3c88: "感谢您的反馈"
   needBody_4aa1: "请填写正文"
   offline_5d12: "反馈服务没开"
-  tooManyImages_0e77: "图片最多 4 张"
+  tooManyImages_0e77: "图片最多 1 张"
   imageTooBig_2b63: "图片不能超过 8MB"
   videoTooBig_91c4: "视频不能超过 15MB"
   removeFile_c0a8: "移除{{name}}"
@@ -26,7 +26,7 @@ en:
   thanks_3c88: "感谢您的反馈"
   needBody_4aa1: "Write a message first"
   offline_5d12: "Feedback service is not running"
-  tooManyImages_0e77: "Up to 4 images"
+  tooManyImages_0e77: "Up to 1 image"
   imageTooBig_2b63: "Each image must be 8MB or smaller"
   videoTooBig_91c4: "Video must be 15MB or smaller"
   removeFile_c0a8: "Remove {{name}}"
@@ -40,7 +40,7 @@ ja:
   thanks_3c88: "感谢您的反馈"
   needBody_4aa1: "本文を入力してください"
   offline_5d12: "フィードバックサービスが起動していません"
-  tooManyImages_0e77: "画像は 4 枚まで"
+  tooManyImages_0e77: "画像は 1 枚まで"
   imageTooBig_2b63: "画像は 8MB まで"
   videoTooBig_91c4: "動画は 15MB まで"
   removeFile_c0a8: "{{name}} を削除"
@@ -73,8 +73,9 @@ export function SettingsFeedback() {
   const [busy, setBusy] = useState(false);
 
   const onImages = (list: FileList | null) => {
-    const next = [...images, ...Array.from(list ?? [])];
-    if (next.length > 4) { setNotice(uiText("tooManyImages_0e77")); return; }
+    const file = list?.[0];
+    if (!file) return;
+    const next = [file];
     if (next.some((file) => file.size > imageLimit)) { setNotice(uiText("imageTooBig_2b63")); return; }
     setImages(next);
     setNotice("");
@@ -142,7 +143,7 @@ export function SettingsFeedback() {
         <label className="feedback-pick">
           <UploadMark />
           <span>{uiText("images_8d44")}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" multiple onChange={(event) => { onImages(event.target.files); event.target.value = ""; }} />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" onChange={(event) => { onImages(event.target.files); event.target.value = ""; }} />
         </label>
         <label className="feedback-pick">
           <UploadMark />
