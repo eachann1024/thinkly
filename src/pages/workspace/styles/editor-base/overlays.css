@@ -25,6 +25,8 @@ body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .bn-suggestion-m
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .bn-grid-suggestion-menu,
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .bn-table-handle,
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .bn-table-cell-handle,
+body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .goose-table-chrome-left,
+body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .goose-table-chrome-top,
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) .bn-table-handle-menu,
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) [data-streamdown="table-fullscreen"],
 body:is([data-goose-settings-open], [data-goose-ai-fullscreen]) [data-streamdown="link-safety-modal"] {

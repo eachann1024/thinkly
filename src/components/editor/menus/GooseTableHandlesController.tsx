@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { getNodeById } from "@blocknote/core";
 import { TableHandlesExtension } from "@blocknote/core/extensions";
 import {
@@ -9,7 +9,52 @@ import {
 import { offset, size, type Placement } from "@floating-ui/react";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { GooseTableExtendButton, GooseTableHandle } from "./GooseTableHandle";
+import { tableRowUnderPointer } from "@/components/editor/extensions/tableCellSelectionDom";
 import { tableHandleRect, releaseTableChrome } from "./tableHandleGeometry";
+
+/** 行/列把手要画出内容列。编辑器表面是 overflow:clip，挂在里面会被裁掉。 */
+const TABLE_CHROME_PORTAL =
+  typeof document === "undefined" ? null : document.body;
+
+let pointer = { x: -1, y: -1 };
+let pointerFrame = 0;
+const pointerListeners = new Set<() => void>();
+
+if (typeof document !== "undefined") {
+  document.addEventListener("pointermove", (event) => {
+    pointer = { x: event.clientX, y: event.clientY };
+    if (pointerFrame || pointerListeners.size === 0) return;
+    pointerFrame = requestAnimationFrame(() => {
+      pointerFrame = 0;
+      pointerListeners.forEach((listener) => listener());
+    });
+  }, { passive: true });
+}
+
+/** 表格控件显示期间跟随指针。同一帧内多次移动只刷新一次。 */
+function usePointerFollow(active: boolean) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const follow = () => setTick((value) => (value + 1) % 100000);
+    pointerListeners.add(follow);
+    return () => {
+      pointerListeners.delete(follow);
+    };
+  }, [active]);
+}
+
+/** 指针在表内，或正停在已经弹出的行/列把手上。 */
+function pointerOwnsTable(table: HTMLElement): boolean {
+  if (pointer.x < 0) return false;
+  const bounds = table.getBoundingClientRect();
+  if (
+    pointer.x >= bounds.left && pointer.x <= bounds.right &&
+    pointer.y >= bounds.top && pointer.y <= bounds.bottom
+  ) return true;
+  const hit = document.elementFromPoint(pointer.x, pointer.y);
+  return Boolean(hit?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle, .goose-table-menu"));
+}
 
 type Chrome =
   | "row"
@@ -79,6 +124,7 @@ function TableChrome({
       }}
       focusManagerProps={{ disabled: true }}
       useTransitionStylesProps={{ duration: 0 }}
+      portalElement={TABLE_CHROME_PORTAL}
       elementProps={{ className: `goose-table-chrome-${placement}`, style: { zIndex: 10 } }}
     >
       {children}
@@ -90,6 +136,7 @@ function TableChrome({
 export function GooseTableHandlesController() {
   const editor = useBlockNoteEditor<any, any, any>();
   const state = useExtensionState(TableHandlesExtension);
+  usePointerFollow(Boolean(state?.show));
   const [only, setOnly] = useState<Chrome>();
   const hide = useMemo(
     () =>
@@ -119,6 +166,8 @@ export function GooseTableHandlesController() {
     "table",
   );
   if (!table) return null;
+  // 移出表格后 BlockNote 仍保留上次的 show。只有指针还在表上或把手上才显示。
+  if (!state.draggingState && !pointerOwnsTable(table)) return null;
   const rowIndex = state.rowIndex;
   const colIndex = state.colIndex;
   const cell =
@@ -126,12 +175,25 @@ export function GooseTableHandlesController() {
       ? undefined
       : table.rows[rowIndex]?.cells[colIndex];
   const visible = (key: Chrome) => !only || only === key;
-  const handleRect = (axis: "row" | "column") => () =>
+  // 列把手仍跟指针下的格子。行把手跟整行：行间边框缝归到最近一行。
+  const rowRect = () => {
+    const tableRect = table.getBoundingClientRect();
+    const dragging = state.draggingState?.draggedCellOrientation === "row";
+    const row = dragging
+      ? table.rows[rowIndex ?? -1]
+      : tableRowUnderPointer(table, tableRect.left + 1, pointer.y);
+    const rect = (row ?? cell)?.getBoundingClientRect();
+    if (!rect) return new DOMRect();
+    return DOMRect.fromRect(
+      tableHandleRect(tableRect, rect, "row", dragging ? state.draggingState : undefined),
+    );
+  };
+  const columnRect = () =>
     DOMRect.fromRect(
       tableHandleRect(
         table.getBoundingClientRect(),
         cell!.getBoundingClientRect(),
-        axis,
+        "column",
         state.draggingState,
       ),
     );
@@ -140,7 +202,7 @@ export function GooseTableHandlesController() {
       {cell && visible("row") && (
         <TableChrome
           element={table}
-          getRect={handleRect("row")}
+          getRect={rowRect}
           placement="left"
           gap={4}
         >
@@ -150,7 +212,7 @@ export function GooseTableHandlesController() {
       {cell && visible("column") && (
         <TableChrome
           element={table}
-          getRect={handleRect("column")}
+          getRect={columnRect}
           placement="top"
           gap={4}
         >

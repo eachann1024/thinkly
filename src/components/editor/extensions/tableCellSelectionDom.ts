@@ -43,6 +43,35 @@ export function closestTable(
   return cell?.closest("table") ?? null;
 }
 
+/**
+ * 行把手要覆盖指针所在的整行，而不是只覆盖指针下那一格。
+ * 行与行的边框缝也归到最近的一行。表外返回 null。
+ */
+export function tableRowUnderPointer(
+  table: HTMLTableElement,
+  clientX: number,
+  clientY: number,
+): HTMLTableRowElement | null {
+  const rows = table.rows;
+  if (!rows.length) return null;
+  const bounds = table.getBoundingClientRect();
+  if (clientX < bounds.left || clientX > bounds.right) return null;
+  let nearest: HTMLTableRowElement | null = null;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index];
+    const rect = row.getBoundingClientRect();
+    if (rect.height <= 0) continue;
+    if (clientY >= rect.top && clientY <= rect.bottom) return row;
+    const distance = clientY < rect.top ? rect.top - clientY : clientY - rect.bottom;
+    if (distance < nearestDistance) {
+      nearest = row;
+      nearestDistance = distance;
+    }
+  }
+  return nearest;
+}
+
 /** True when two pointer targets sit in different TD/TH cells. */
 export function isCrossCellPointer(
   startEl: EventTarget | null,
