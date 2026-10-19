@@ -2,12 +2,10 @@ import { appendFileSync, mkdtempSync, readdirSync, statSync, writeFileSync } fro
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile } from "./quark-api.mjs";
+import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, redactSecrets, renameFile } from "./quark-api.mjs";
 import { uploadFile } from "./quark-oss.mjs";
-import { releaseInstallers } from "./desktop-download-metadata.mjs";
+import { INSTALL_FOLDER as FOLDER_NAME, LEGACY_INSTALL_FOLDER as LEGACY_FOLDER_NAME, expectedInstallers } from "./quark-preflight.mjs";
 
-const FOLDER_NAME = "Thinkly 安装包";
-const LEGACY_FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
 // 新文件名用于上传；旧文件名只用于识别上一版，全部上传成功后由 retainLatest 删除。
 const INSTALLERS = [
@@ -24,10 +22,6 @@ const INSTALLERS = [
   /^goose-note-app_(\d+\.\d+\.\d+)_amd64\.deb$/,
   /^goose-note-app-(\d+\.\d+\.\d+)\.pacman$/,
 ];
-
-function expectedInstallers(version) {
-  return releaseInstallers(version).filter((name) => !name.endsWith(".zip"));
-}
 
 function installerVersion(name) {
   for (const pattern of INSTALLERS) {
@@ -255,12 +249,12 @@ function failureReason(error) {
 
 function reportFailure(version, error) {
   const safeVersion = /^\d+\.\d+\.\d+$/.test(version) ? version : "unknown";
-  const reason = failureReason(error).replace(/\s+/g, "_");
-  const line = `QUARK_UPLOAD_FAILED version=${safeVersion} reason=${reason}`;
+  const reason = redactSecrets(failureReason(error)).replace(/\s+/g, "_");
+  const line = redactSecrets(`QUARK_UPLOAD_FAILED version=${safeVersion} reason=${reason}`);
   console.error(line);
   const summary = process.env.GITHUB_STEP_SUMMARY;
   if (summary) appendFileSync(summary, `${line}\n`);
-  const message = error instanceof Error ? error.message : "夸克上传失败";
+  const message = redactSecrets(error instanceof Error ? error.message : "夸克上传失败");
   if (message !== line) console.error(message);
 }
 
