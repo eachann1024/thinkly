@@ -14,6 +14,16 @@ export function sanitize(message) {
   return String(message).replace(/https?:\/\/\S+/g, "[url]").replace(/auth_key[=:][^\s,]+/gi, "auth_key=[redacted]").slice(0, 300);
 }
 
+export function redactSecrets(text) {
+  let output = String(text);
+  for (const key of ["QUARK_COOKIE", "GH_TOKEN", "GITHUB_TOKEN"]) {
+    const secret = process.env[key]?.trim();
+    if (!secret || secret.length < 8) continue;
+    output = output.split(secret).join("[redacted]");
+  }
+  return output.replace(/https?:\/\/\S+/g, "[url]").replace(/auth_key[=:][^\s,]+/gi, "auth_key=[redacted]");
+}
+
 export async function call(url, options, timeoutMs) {
   try {
     return await fetch(url, { ...options, redirect: "manual", signal: AbortSignal.timeout(timeoutMs) });

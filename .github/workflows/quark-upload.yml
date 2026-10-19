@@ -1,6 +1,9 @@
 name: Upload installers to Quark
 
 on:
+  schedule:
+    # 每天北京时间 06:00（UTC 22:00）同步一次最新正式版。
+    - cron: '0 22 * * *'
   workflow_dispatch:
     inputs:
       release_tag:
@@ -17,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
-      group: thinkly-publish-${{ github.ref }}
+      group: thinkly-quark-${{ github.ref }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -26,12 +29,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
-      - name: Download a published release and upload to Quark
+      - name: Upload published installers to Quark unless already present
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           QUARK_COOKIE: ${{ secrets.QUARK_COOKIE }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'latest' }}
         run: |
           set -euo pipefail
           version=unknown
@@ -42,8 +45,24 @@ jobs:
             exit 1
           }
           tag="$RELEASE_TAG"
+          require_stable=0
           if [ -z "$tag" ] || [ "$tag" = "latest" ]; then
+            require_stable=1
             tag="$(gh release view --repo "$GH_REPO" --json tagName --jq .tagName)" || fail release_lookup_failed
+          fi
+          if [ -z "$tag" ]; then fail release_lookup_failed; fi
+          parsed="$(node --input-type=module -e 'const match=/^v(\d+\.\d+\.\d+)(?:-|$)/.exec(process.argv[1] ?? ""); if (!match) process.exit(1); console.log(match[1])' "$tag")" || fail bad_version
+          version="$parsed"
+          gh release view "$tag" --repo "$GH_REPO" --json tagName,isDraft,isPrerelease,assets > release-meta.json || fail release_lookup_failed
+          set +e
+          node scripts/quark-preflight.mjs release-meta.json "$version" "$require_stable" 2>preflight.err
+          code=$?
+          set -e
+          if [ -s preflight.err ]; then cat preflight.err >&2; fi
+          if [ "$code" -eq 0 ]; then exit 0; fi
+          if [ "$code" -ne 10 ]; then
+            if ! grep -q 'QUARK_UPLOAD_FAILED' preflight.err; then fail preflight_failed; fi
+            exit 1
           fi
           mkdir -p quark-assets
           downloaded=0
@@ -55,5 +74,4 @@ jobs:
             sleep 5
           done
           if [ "$downloaded" != 1 ]; then fail release_download_failed; fi
-          version="$(node --input-type=module -e 'const match=/^v(\d+\.\d+\.\d+)(?:-|$)/.exec(process.argv[1] ?? ""); if (!match) process.exit(1); console.log(match[1])' "$tag")" || fail bad_version
           node scripts/quark-upload.mjs quark-assets "$version"
