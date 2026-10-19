@@ -11,6 +11,7 @@ zh-Hans:
   newTab_b52d: "新建标签页"
   inApp_ce8e: "应用内"
   splitView_37e2: "分屏"
+  advancedSplit_4c91: "进阶用法"
   close_b15d: "关闭"
   closeCurrentSplitOrTab_1409: "关闭当前分屏或标签页"
   exitEditingSearchOrDialog_6898: "退出编辑、搜索或弹窗"
@@ -25,6 +26,7 @@ en:
   newTab_b52d: "New tab"
   inApp_ce8e: "In app"
   splitView_37e2: "Split view"
+  advancedSplit_4c91: "Advanced"
   close_b15d: "Close"
   closeCurrentSplitOrTab_1409: "Close current split or tab"
   exitEditingSearchOrDialog_6898: "Exit editing, search, or dialog"
@@ -39,6 +41,7 @@ ja:
   newTab_b52d: "新規タブ"
   inApp_ce8e: "アプリ内"
   splitView_37e2: "分割表示"
+  advancedSplit_4c91: "上級の使い方"
   close_b15d: "閉じる"
   closeCurrentSplitOrTab_1409: "現在の分割表示またはタブを閉じる"
   exitEditingSearchOrDialog_6898: "編集、検索、ダイアログを終了"
@@ -54,9 +57,11 @@ import { DesktopGlobalHotkeysCard } from "./shared";
 import { FixedShortcutRow } from "./sections/ShortcutDisplay";
 import {
   CollapsibleShortcutGroups,
+  CollapsibleShortcutSection,
   ShortcutReference,
 } from "./sections/FixedShortcutGroups";
 import {
+  advancedSplitShortcutsForCurrentPlatform,
   currentShortcutPlatform,
   fixedShortcutsForCurrentPlatform,
   splitShortcutsForCurrentPlatform,
@@ -112,6 +117,10 @@ export function renderShortcutSettingsColumns(
 
         <SettingsSectionCard title={uiText("splitView_37e2")}>
           <ShortcutReference items={splitShortcutsForCurrentPlatform()} />
+          <CollapsibleShortcutSection
+            title={uiText("advancedSplit_4c91")}
+            items={advancedSplitShortcutsForCurrentPlatform()}
+          />
         </SettingsSectionCard>
       </div>
 

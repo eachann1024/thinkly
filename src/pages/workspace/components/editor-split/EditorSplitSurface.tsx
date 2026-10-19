@@ -23,6 +23,7 @@ import { focusSplitPane } from "@/lib/editor-split/commands";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { equalLayout, layoutToSizes, sizesToLayout, useApplyStoredGroupLayout } from "./splitGroupLayout";
 import { SplitPaneDragSurface } from "./SplitPaneDragSurface";
+import { PaneSplitMenu } from "./PaneSplitMenu";
 import { SplitContentDropSurface } from "./SplitContentDropSurface";
 
 export type EditorSplitPaneRenderContext = {
@@ -125,7 +126,11 @@ function SplitPane({
           : undefined
       }
     >
-      <div className="editor-split-pane-body">{renderPane(leaf, { focused, zoomed })}</div>
+      <div className="editor-split-pane-body">
+        <PaneSplitMenu tabId={tabId} leaf={leaf}>
+          {renderPane(leaf, { focused, zoomed })}
+        </PaneSplitMenu>
+      </div>
     </div>
   );
 }
