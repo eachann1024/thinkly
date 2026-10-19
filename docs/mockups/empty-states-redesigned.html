@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>缺省图 · 全新设计</title>
+<style>
+:root{color-scheme:light;--bg:#f5f5f3;--paper:#fff;--ink:#454a52;--muted:#737780;--line:#e5e6e4;--accent:#547dd0;--danger:#c35c58}
+:root[data-theme=dark]{color-scheme:dark;--bg:#181818;--paper:#222;--ink:#d2d3d6;--muted:#a0a2a8;--line:#343434;--accent:#779de8;--danger:#df827a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+main{max-width:860px;margin:auto;padding:28px 24px 64px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}h1{font-size:18px;font-weight:560;margin:0}.tools{display:flex;align-items:center;gap:16px}.swatches{display:flex;gap:10px}button{font:inherit;cursor:pointer;color:inherit}.swatch{width:16px;height:16px;border:0;border-radius:50%;background:var(--c);padding:0}.swatch[aria-pressed=true]{outline:1px solid var(--c);outline-offset:3px}.theme{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}figure{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;min-height:238px;padding:22px}figcaption{margin-top:12px;font-size:13px}svg{display:block;width:220px;max-width:100%;height:auto;overflow:visible}.ink{fill:var(--ink)}.accent{fill:var(--accent)}.danger{fill:var(--danger)}.soft{opacity:.24}.secondary{opacity:.5}.body{opacity:.8}.motion{transform-box:fill-box;transform-origin:center;animation:float 8s ease-in-out infinite}.signal{animation:breathe 7s ease-in-out infinite}.late{animation-delay:-3s}.paused *{animation-play-state:paused!important}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}@keyframes breathe{0%,100%{opacity:.6}50%{opacity:1}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}@media(max-width:560px){main{padding:20px 16px 36px}header{flex-wrap:wrap}.tools{gap:12px}.grid{grid-template-columns:1fr}figure{min-height:220px}}
+</style>
+<main><header><h1>缺省图</h1><div class="tools"><div class="swatches" aria-label="强调色"></div><button class="theme" type="button">深色</button></div></header><div class="grid"></div></main>
+<script>
+const ns='http://www.w3.org/2000/svg';
+function el(tag,attrs={},parent){const n=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);parent?.append(n);return n}
+function group(parent,cls){return el('g',{class:cls},parent)}
+function dot(g,x,y,r=1.45){el('circle',{cx:x,cy:y,r},g)}
+// Paths are sampled once into round dots; only whole groups animate.
+function path(g,d,pitch=5.2){const p=el('path',{d,fill:'none',stroke:'none'},g);const length=p.getTotalLength();const count=Math.max(1,Math.round(length/pitch));for(let i=0;i<=count;i++){const q=p.getPointAtLength(length*i/count);dot(g,q.x,q.y)}p.remove()}
+function line(g,x,y,x2,y2){path(g,`M${x} ${y}L${x2} ${y2}`)}
+function ring(g,x,y,r){const count=Math.round(2*Math.PI*r/5.2);for(let i=0;i<count;i++){const a=i/count*Math.PI*2;dot(g,x+Math.cos(a)*r,y+Math.sin(a)*r)}}
+function page(g,x,y,w=48,h=62){path(g,`M${x+8} ${y}H${x+w-12}L${x+w} ${y+12}V${y+h-6}Q${x+w} ${y+h} ${x+w-6} ${y+h}H${x+6}Q${x} ${y+h} ${x} ${y+h-6}V${y+6}Q${x} ${y} ${x+8} ${y}`);path(g,`M${x+w-12} ${y+2}V${y+12}H${x+w-2}`)}
+function baseline(svg){const g=group(svg,'ink soft');line(g,69,119,151,119)}
+const scenes=[
+['助手未开启',svg=>{
+ const shell=group(svg,'ink body motion');path(shell,'M77 42H143Q153 42 153 52V83Q153 93 143 93H100L86 104V93H77Q67 93 67 83V52Q67 42 77 42');
+ const eyes=group(shell,'ink secondary');line(eyes,85,66,95,66);line(eyes,125,66,135,66);
+ const power=group(svg,'accent signal');path(power,'M105 26A11 11 0 1 0 115 26');line(power,110,19,110,30);baseline(svg);
+}],
+['没有匹配的笔记',svg=>{
+ const back=group(svg,'ink soft');page(back,66,32,49,65);
+ const lens=group(svg,'accent motion');ring(lens,124,75,26);path(lens,'M143 94L162 113');
+ const blank=group(svg,'ink secondary');line(blank,78,49,98,49);line(blank,78,59,93,59);baseline(svg);
+}],
+['笔记无法显示',svg=>{
+ const top=group(svg,'ink body');path(top,'M79 66V29H126L143 46V64');path(top,'M126 29V46H143');line(top,92,46,112,46);line(top,92,56,125,56);
+ const bottom=group(svg,'ink body motion');path(bottom,'M79 83V108H143V81');
+ const seam=group(svg,'accent signal');path(seam,'M79 72L93 65L107 77L124 69L143 73');
+ const text=group(bottom,'ink secondary');line(text,92,94,126,94);
+}],
+['助手空对话',svg=>{
+ const back=group(svg,'ink soft');path(back,'M126 49H155Q163 49 163 57V88Q163 96 155 96H146V105L134 96H121');
+ const bubble=group(svg,'ink body motion');path(bubble,'M66 33H127Q139 33 139 45V75Q139 87 127 87H91L77 99V87H66Q54 87 54 75V45Q54 33 66 33');
+ const cursor=group(bubble,'accent signal');line(cursor,94,52,94,68);line(cursor,89,52,99,52);line(cursor,89,68,99,68);baseline(svg);
+}],
+['分屏找不到笔记',svg=>{
+ const frame=group(svg,'ink body');path(frame,'M53 35H167V104H53Z');line(frame,105,37,105,102);
+ const left=group(svg,'ink secondary');line(left,65,51,90,51);line(left,65,61,86,61);line(left,65,71,92,71);
+ const ghost=group(svg,'accent motion');
+ // Four separated corners read as a vacant document slot.
+ path(ghost,'M119 58V49H129');path(ghost,'M143 49H153V58');path(ghost,'M119 82V91H129');path(ghost,'M143 91H153V82');
+ const mark=group(ghost,'accent signal');line(mark,132,70,140,70);baseline(svg);
+}],
+['搜索出错',svg=>{
+ const lens=group(svg,'ink body');ring(lens,99,63,31);path(lens,'M121 86L145 110');
+ const badge=group(svg,'danger signal');ring(badge,143,51,15);line(badge,143,43,143,52);dot(badge,143,59,1.8);
+ const trace=group(svg,'ink soft');line(trace,82,63,88,63);line(trace,96,63,102,63);line(trace,110,63,116,63);baseline(svg);
+}]
+];
+for(const [name,draw]of scenes){const figure=document.createElement('figure');document.querySelector('.grid').append(figure);const svg=el('svg',{viewBox:'0 0 220 136',role:'img','aria-label':name},figure);draw(svg);const caption=document.createElement('figcaption');caption.textContent=name;figure.append(caption)}
+let dark=false,selected=0;
+const colors=[['海蓝','#547dd0','#779de8'],['鸢尾','#8771bc','#b3a0df'],['松绿','#48846e','#7fbaa2'],['陶土','#b47754','#dca582']];
+function apply(){document.querySelectorAll('.swatch').forEach((n,i)=>n.style.setProperty('--c',colors[i][dark?2:1]));document.documentElement.dataset.theme=dark?'dark':'light';document.documentElement.style.setProperty('--accent',colors[selected][dark?2:1]);document.querySelector('.theme').textContent=dark?'浅色':'深色'}
+colors.forEach(([name,color],i)=>{const b=document.createElement('button');b.className='swatch';b.type='button';b.style.setProperty('--c',color);b.setAttribute('aria-label',name);b.setAttribute('aria-pressed',String(i===selected));b.onclick=()=>{selected=i;document.querySelectorAll('.swatch').forEach((n,j)=>n.setAttribute('aria-pressed',String(i===j)));apply()};document.querySelector('.swatches').append(b)});
+document.querySelector('.theme').onclick=()=>{dark=!dark;apply()};
+const visible=new Set();
+function pause(){document.querySelectorAll('figure').forEach(n=>n.classList.toggle('paused',document.hidden||!visible.has(n)))}
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>e.isIntersecting?visible.add(e.target):visible.delete(e.target));pause()});
+document.querySelectorAll('figure').forEach(n=>observer.observe(n));document.addEventListener('visibilitychange',pause);
+</script>
+</html>
