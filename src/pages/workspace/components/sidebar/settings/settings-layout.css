@@ -158,6 +158,11 @@
   background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.28) 28%, hsl(var(--foreground) / 0.96) 50%, hsl(var(--foreground) / 0.28) 72%, transparent);
   animation: feedback-sheen-sweep 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+.feedback-sheen-target.is-on::after,
+.feedback-sheen-title.is-on::after {
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+}
 .feedback-rail-sheen::after { animation-delay: 0.28s; }
 .feedback-picks {
   display: grid;
