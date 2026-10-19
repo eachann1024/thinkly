@@ -34,6 +34,8 @@ export const DOT_MOTION = {
   alert: { durationMs: 280, translatePx: 0.8 },
   /** 正弦近似的 ease-in-out。 */
   easing: "cubic-bezier(0.45, 0, 0.55, 1)",
+  /** 循环在相邻关键帧之间分两步取样；周期、幅度与错峰保持不变。 */
+  loopEasing: "steps(2, end)",
 } as const;
 
 /**

@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef } from "react";
+import { pauseDotLoops, releaseDotLoops, resumeDotLoops } from "./dotLoopController";
 
 /**
  * 点阵动效的播放控制：直接改宿主元素的 data 属性，不触发 React 重渲染。
  * - data-dm-phase="pre"：尚未进入视口，入场组隐藏，循环不启动
  * - data-dm-phase="in"：入场完成后持续循环
  * - data-dm-phase="static"：系统减少动效，仅静态画面
- * - data-dm-paused：不可见时暂停（animation-play-state）
+ * - data-dm-paused：不可见时冻结循环时钟，入场与反馈由 CSS 暂停
  *
- * 离开视口或文档隐藏时保留 phase=in，只暂停 animation-play-state；恢复后从原进度继续。
+ * 离开视口或文档隐藏时保留 phase=in，冻结逻辑时钟；恢复后从原进度继续。
  * React <Activity> 隐藏时会清理并在显示时重跑 effect，重新注册会保留已播放状态。
  */
 
@@ -38,6 +39,7 @@ function flush() {
     const entry = entries.get(el);
     if (!entry || el.getAttribute("data-dm-phase") !== "pre") return;
     el.setAttribute("data-dm-phase", "in");
+    resumeDotLoops(el);
     if (entry.entryGroups === 0) {
       played.add(el);
       el.setAttribute("data-dm-played", "");
@@ -50,17 +52,20 @@ function apply(entry: Entry) {
   const { el, visible } = entry;
   const phase = el.getAttribute("data-dm-phase");
   if (reducedMotion()) {
+    releaseDotLoops(el);
     pending.delete(el);
     el.setAttribute("data-dm-phase", "static");
     el.removeAttribute("data-dm-paused");
     return;
   }
   if (!visible || document.hidden) {
+    pauseDotLoops(el);
     pending.delete(el);
     el.setAttribute("data-dm-paused", "");
     return;
   }
   el.removeAttribute("data-dm-paused");
+  if (phase === "in") resumeDotLoops(el);
   if (phase === "pre" && !pending.has(el)) {
     pending.add(el);
     if (!frame) frame = requestAnimationFrame(flush);
@@ -76,6 +81,7 @@ function onMotionPreferenceChange() {
   entries.forEach((entry) => {
     const { el } = entry;
     if (staticMotion) {
+      releaseDotLoops(el);
       pending.delete(el);
       if (el.getAttribute("data-dm-phase") === "in") {
         played.add(el);
@@ -165,6 +171,7 @@ function register(el: Element) {
   // preserves an existing `in` phase without replaying its entrance on reattach.
   apply(entry);
   return () => {
+    releaseDotLoops(el);
     el.setAttribute("data-dm-paused", "");
     io?.unobserve(el);
     el.removeEventListener(
@@ -173,6 +180,10 @@ function register(el: Element) {
     );
     entries.delete(el);
     pending.delete(el);
+    if (!pending.size && frame) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
     if (entries.size === 0 && visibilityBound) {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       visibilityBound = false;
