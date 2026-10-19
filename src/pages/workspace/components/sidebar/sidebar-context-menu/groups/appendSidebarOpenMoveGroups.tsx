@@ -4,6 +4,8 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/sidebar-c
 zh-Hans:
   open_d709: "打开"
   openInNewTab_7e9c: "在新标签页打开"
+  openSplitRight_6a21: "在右侧打开分屏"
+  openSplitDown_8d44: "在下方打开分屏"
   click_b1f2: "+点击"
   organize_1b6c: "整理"
   duplicate_afb9: "创建副本"
@@ -12,6 +14,8 @@ zh-Hans:
 en:
   open_d709: "Open"
   openInNewTab_7e9c: "Open in new tab"
+  openSplitRight_6a21: "Open in split to the right"
+  openSplitDown_8d44: "Open in split below"
   click_b1f2: "+click"
   organize_1b6c: "Organize"
   duplicate_afb9: "Duplicate"
@@ -20,6 +24,8 @@ en:
 ja:
   open_d709: "開く"
   openInNewTab_7e9c: "新規タブで開く"
+  openSplitRight_6a21: "右に分割して開く"
+  openSplitDown_8d44: "下に分割して開く"
   click_b1f2: "+クリック"
   organize_1b6c: "整理"
   duplicate_afb9: "複製を作成"
@@ -37,6 +43,7 @@ import {
   openLocalFolderPageInTerminal,
   revealLocalFolderPageInFileManager,
 } from "@/lib/local-folder-file-actions";
+import { openPageBeside } from "@/lib/editor-split/openPageBeside";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import { SidebarMoveSubmenu } from "../SidebarMoveSubmenu";
 import {
@@ -68,7 +75,8 @@ export function appendSidebarOpenMoveGroups(
     sections,
   } = input;
 
-  if (showOpen) {
+  const showSplit = !page.isFolder;
+  if (showOpen || showSplit) {
     sections.push(
       <ContextMenuGroup key="open">
         <ContextMenuLabel>{uiText("open_d709")}</ContextMenuLabel>
@@ -85,6 +93,24 @@ export function appendSidebarOpenMoveGroups(
             <span className="min-w-0 truncate">{uiText("openInNewTab_7e9c")}</span>
             <span className="goose-menu-shortcut">
               {formatShortcut("Mod")}{uiText("click_b1f2")}</span>
+          </ContextMenuItem>
+        ) : null}
+        {!page.isFolder ? (
+          <ContextMenuItem
+            onSelect={() => openPageBeside(page.id, "right")}
+            disabled={isTrashed}
+          >
+            <GooseIcons.Columns2 className="h-4 w-4" />
+            <span className="min-w-0 truncate">{uiText("openSplitRight_6a21")}</span>
+          </ContextMenuItem>
+        ) : null}
+        {!page.isFolder ? (
+          <ContextMenuItem
+            onSelect={() => openPageBeside(page.id, "bottom")}
+            disabled={isTrashed}
+          >
+            <GooseIcons.Rows2 className="h-4 w-4" />
+            <span className="min-w-0 truncate">{uiText("openSplitDown_8d44")}</span>
           </ContextMenuItem>
         ) : null}
         {showLocalOpen ? (

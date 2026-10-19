@@ -117,10 +117,28 @@ export function fixedShortcutsForCurrentPlatform(
   ].filter((group) => group.items.length > 0);
 }
 
+function shortcutItems(
+  entries: Array<[string, string]>,
+): ShortcutGroupItem[] {
+  return entries
+    .filter((entry): entry is [string, string] => Boolean(entry[1]))
+    .map(([label, shortcut]) => ({ label, shortcut }));
+}
+
 export function splitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
-  return [
+  return shortcutItems([
     [uiText("splitRight_8a36"), FIXED_SPLIT_SHORTCUTS.splitRight],
     [uiText("splitDown_f004"), FIXED_SPLIT_SHORTCUTS.splitDown],
+    [uiText("maximizeCurrentSplit_4a67"), FIXED_SPLIT_SHORTCUTS.splitZoom],
+    [layoutText("maximize"), FIXED_SPLIT_SHORTCUTS.splitMaximize],
+    [layoutText("equalize"), FIXED_SPLIT_SHORTCUTS.splitEqualize],
+    [uiText("closeCurrentSplit_b27d"), FIXED_CLOSE_SHORTCUT],
+  ]);
+}
+
+/** 焦点移动、交换和循环是进阶用法，默认折叠在分屏列表下面。 */
+export function advancedSplitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
+  return shortcutItems([
     [uiText("focusLeft_4e1e"), FIXED_SPLIT_SHORTCUTS.splitFocusLeft],
     [uiText("focusRight_f580"), FIXED_SPLIT_SHORTCUTS.splitFocusRight],
     [uiText("focusAbove_e3a3"), FIXED_SPLIT_SHORTCUTS.splitFocusUp],
@@ -131,11 +149,5 @@ export function splitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
     [layoutText("moveDown"), FIXED_SPLIT_SHORTCUTS.splitMoveDown],
     [uiText("previousSplit_9249"), FIXED_SPLIT_SHORTCUTS.splitFocusPrevious],
     [uiText("nextSplit_b54f"), FIXED_SPLIT_SHORTCUTS.splitFocusNext],
-    [uiText("maximizeCurrentSplit_4a67"), FIXED_SPLIT_SHORTCUTS.splitZoom],
-    [layoutText("maximize"), FIXED_SPLIT_SHORTCUTS.splitMaximize],
-    [layoutText("equalize"), FIXED_SPLIT_SHORTCUTS.splitEqualize],
-    [uiText("closeCurrentSplit_b27d"), FIXED_CLOSE_SHORTCUT],
-  ]
-    .filter((entry): entry is [string, string] => Boolean(entry[1]))
-    .map(([label, shortcut]) => ({ label, shortcut }));
+  ]);
 }
