@@ -1,0 +1,14 @@
+.goose-empty-art {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+  color: var(--goose-text-primary);
+  fill: currentColor;
+}
+.goose-empty-art-ink { fill: currentColor; }
+.goose-empty-art-accent { fill: var(--goose-accent-solid); }
+.goose-empty-art-danger { fill: var(--goose-color-danger); }
+.goose-empty-art-soft { opacity: 0.24; }
+.goose-empty-art-secondary { opacity: 0.5; }
+.goose-empty-art-body { opacity: 0.8; }
