@@ -1,13 +1,15 @@
 import { useEffect } from "react";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { completePageTitleFocus, hasDocumentTitle } from "@/lib/page-title-focus";
-import { ENTER_DOCUMENT_BODY_EVENT, isPlainDocumentNavigation, type DocumentTitleSplit } from "@/lib/document-title-keyboard";
+import { ENTER_DOCUMENT_BODY_EVENT, saveDocumentTitle, isPlainDocumentNavigation, type DocumentTitleSplit } from "@/lib/document-title-keyboard";
 import { createDocumentTitleHistoryPlugin } from "./documentTitleHistory";
 import { markUserInteraction } from "@/lib/editor-interaction-signal";
 import {
   canReturnToDocumentTitle,
   enterFirstBodyParagraph,
-  removeEmptyFirstBodyParagraph,
+  focusFirstBodyBlock,
+  mergeFirstBodyParagraph,
+  mergedFirstBodyTitle,
   shouldBackspaceToDocumentTitle,
 } from "./documentTitleNavigation";
 import type { EditorRuntime } from "./useEditorSession";
@@ -44,9 +46,38 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
         editor.focus();
       }
     };
-    const returnToTitle = (event: KeyboardEvent) => {
+    let focusFrame: number | undefined;
+    const placeTitleCursor = (offset: number) => {
+      title.focus();
+      title.setSelectionRange(offset, offset);
+      if (focusFrame !== undefined) cancelAnimationFrame(focusFrame);
+      // React 提交新的 textarea value 后，再固定到拼接点。
+      focusFrame = requestAnimationFrame(() => {
+        if (document.activeElement === title) title.setSelectionRange(offset, offset);
+      });
+    };
+    let mergedFromTitle = false;
+    const resetTitleHistory = () => { mergedFromTitle = false; };
+    const titleKeyDown = (event: KeyboardEvent) => {
+      if (!canNavigate() || event.isComposing || event.keyCode === 229) return;
+      if (mergedFromTitle && (event.metaKey || event.ctrlKey) && !event.altKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.shiftKey) editor.redo(); else editor.undo();
+        return;
+      }
+      if (!isPlainDocumentNavigation(event) || title.selectionStart !== title.selectionEnd ||
+        title.selectionEnd !== title.value.length) return;
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        if (!focusFirstBodyBlock(editor)) return;
+      } else return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    let mergePending = false;
+    const returnToTitle = async (event: KeyboardEvent) => {
       const backspace = event.key === "Backspace";
-      if ((event.key !== "ArrowUp" && !backspace) || !isPlainDocumentNavigation(event) ||
+      if ((event.key !== "ArrowUp" && event.key !== "ArrowLeft" && !backspace) || !isPlainDocumentNavigation(event) ||
         !canNavigate() || editor.prosemirrorView.composing || !editor.isFocused()) return;
       const target = event.target;
       if (!(target instanceof Node) || !editor.domElement?.contains(target)) return;
@@ -57,15 +88,36 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : canReturnToDocumentTitle(editor))) return;
       event.preventDefault();
       event.stopPropagation();
-      // 空的正文首段连同这行空行一起收掉，光标直接落到标题末尾。
-      if (backspace) removeEmptyFirstBodyParagraph(editor);
-      title.focus();
       const end = title.value.length;
-      title.setSelectionRange(end, end);
+      if (backspace) {
+        userInteractedRef.current = true;
+        markUserInteraction();
+        if (mergePending) return;
+        const before = title.value;
+        const after = mergedFirstBodyTitle(editor, before);
+        if (after === null) return;
+        const documentBefore = editor.prosemirrorState.doc;
+        const selectionBefore = editor.prosemirrorState.selection;
+        mergePending = true;
+        const saved = after === before || await saveDocumentTitle(title, activePageId, after);
+        mergePending = false;
+        // 保存期间若切页或继续编辑正文，保留原段，不能移除新的内容。
+        if (!saved || !canNavigate() || pageRef.current?.id !== activePageId ||
+          !editor.isFocused() || !editor.prosemirrorState.selection.eq(selectionBefore) ||
+          !editor.prosemirrorState.doc.eq(documentBefore)) return;
+        if (!mergeFirstBodyParagraph(editor, activePageId, before)) return;
+        mergedFromTitle = true;
+      }
+      placeTitleCursor(end);
     };
+    title.addEventListener("keydown", titleKeyDown);
+    title.addEventListener("input", resetTitleHistory);
     scope.addEventListener(ENTER_DOCUMENT_BODY_EVENT, enterBody);
     container.addEventListener("keydown", returnToTitle, true);
     return () => {
+      if (focusFrame !== undefined) cancelAnimationFrame(focusFrame);
+      title.removeEventListener("keydown", titleKeyDown);
+      title.removeEventListener("input", resetTitleHistory);
       scope.removeEventListener(ENTER_DOCUMENT_BODY_EVENT, enterBody);
       container.removeEventListener("keydown", returnToTitle, true);
       if (!editor._tiptapEditor.isDestroyed) editor._tiptapEditor.unregisterPlugin(historyPlugin.spec.key!);

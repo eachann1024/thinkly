@@ -1,7 +1,7 @@
 import type { Node, Schema } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Step, StepResult } from "@tiptap/pm/transform";
-import { UPDATE_DOCUMENT_TITLE_EVENT } from "@/lib/document-title-keyboard";
+import { saveDocumentTitle, UPDATE_DOCUMENT_TITLE_EVENT } from "@/lib/document-title-keyboard";
 
 /** 标题虽在正文外，回车搬移文字仍须和正文共享可逆事务。 */
 export class DocumentTitleStep extends Step {
@@ -33,7 +33,27 @@ if (!import.meta.hot?.data.documentTitleStepRegistered) {
 const titleHistoryKey = new PluginKey<DocumentTitleStep | null>("goose-document-title-history");
 
 export function createDocumentTitleHistoryPlugin(title: HTMLTextAreaElement) {
+  let viewRef: import("@tiptap/pm/view").EditorView | undefined;
+  let saving = false;
   return new Plugin<DocumentTitleStep | null>({
+    filterTransaction(tr, state) {
+      if (tr.getMeta("document-title-persisted")) return true;
+      const move = tr.steps.find((step) => step instanceof DocumentTitleStep &&
+        step.after.length > step.before.length) as DocumentTitleStep | undefined;
+      // 撤销拆分/重做合并也可能把正文搬回文件名，必须先保存再删正文。
+      if (!move || !tr.docChanged || tr.doc.eq(state.doc)) return true;
+      if (!saving) {
+        saving = true;
+        void saveDocumentTitle(title, move.pageId, move.after).then((saved) => {
+          saving = false;
+          const view = viewRef;
+          if (saved && view && !view.isDestroyed && view.state === state) {
+            view.dispatch(tr.setMeta("document-title-persisted", true));
+          }
+        });
+      }
+      return false;
+    },
     key: titleHistoryKey,
     state: {
       init: () => null,
@@ -45,7 +65,10 @@ export function createDocumentTitleHistoryPlugin(title: HTMLTextAreaElement) {
         return next;
       },
     },
-    view: () => ({
+    view: (view) => {
+      viewRef = view;
+      return ({
+      destroy() { viewRef = undefined; },
       update(view, previousState) {
         const step = titleHistoryKey.getState(view.state);
         if (!step || step === titleHistoryKey.getState(previousState)) return;
@@ -53,6 +76,6 @@ export function createDocumentTitleHistoryPlugin(title: HTMLTextAreaElement) {
           detail: { pageId: step.pageId, title: step.after },
         }));
       },
-    }),
+    }); },
   });
 }
