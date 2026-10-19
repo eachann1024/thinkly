@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { Sparkles } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DotDecor, DotIconArt, type DotIconMotion } from "@/components/ui/dot-matrix";
+import { DotDecor, DotIconArt, EmptyStateArt, type DotIconMotion } from "@/components/ui/dot-matrix";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/stores/useSettings";
 import { isRetryableAvailabilityError } from "@/lib/notebook-ai/availabilityError";
@@ -68,6 +68,7 @@ export function AiUnavailableState({
   const motion: DotIconMotion = !hydrated ? "progress" : enabled && !needsModel ? "alert" : "idle";
   // 紧凑条（已有消息时）保持单行图标，不放插画
   const art = compact ? undefined
+    : hydrated && !enabled ? <EmptyStateArt kind="assistantOff" className="-my-2" />
     : <DotIconArt icon="sparkleOff" size={52} width={136} height={96} halo motion={motion} className="-my-2" />;
   const openSettings = () => window.dispatchEvent(
     new CustomEvent("goose-note:open-settings", { detail: { tab: "ai" } }),

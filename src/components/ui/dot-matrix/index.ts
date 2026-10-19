@@ -28,3 +28,4 @@ export { DecorScatter, DecorShard, DecorTicks } from "./decorShapes";
 export { DotDecor, type DotDecorPreset } from "./decor";
 export { OutlineArt } from "./illustrations/OutlineArt";
 export { NoFolderFadeArt, NoFolderScatterArt, NoFolderTreeArt, NoFolderTrailArt } from "./illustrations/NoFolderArt";
+export { EmptyStateArt, type EmptyStateArtKind } from "./illustrations/EmptyStateArt";
