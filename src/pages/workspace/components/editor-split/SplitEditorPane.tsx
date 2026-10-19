@@ -134,7 +134,7 @@ export function SplitEditorPane({
         >
           <div className="page-layout-document flex min-h-full flex-col">
             {hasDocumentTitle(page) ? (
-              <PageDocumentTitle page={page} focused={focused} editable={editable} />
+              <PageDocumentTitle key={page.id} page={page} focused={focused} editable={editable} />
             ) : null}
             <ErrorBoundary
               resetKey={leaf.pageId}

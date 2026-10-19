@@ -1,6 +1,8 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection, type Selection } from "@tiptap/pm/state";
 import { closeHistory } from "@tiptap/pm/history";
+import { DocumentTitleStep } from "./documentTitleHistory";
+import type { DocumentTitleSplit } from "@/lib/document-title-keyboard";
 
 type Editor = BlockNoteEditor<any, any, any>;
 
@@ -24,20 +26,26 @@ export function isFirstBodyTextStart(selection: Selection, firstBlockId: string)
   return false;
 }
 
-/** 标题回车进入正文：复用已有空首段，其余情况在最前面补段落，保留原块。 */
-export function enterFirstBodyParagraph(editor: Editor): boolean {
+/** 标题按光标拆分；原正文与属性头保留，拆分和标题变化共用一次撤销。 */
+export function enterFirstBodyParagraph(editor: Editor, split?: DocumentTitleSplit): boolean {
   const { first, header } = bodyStart(editor);
   if (!first && !header) return false;
   const reusable = first?.type === "paragraph" && Array.isArray(first.content) &&
     first.content.length === 0 && !first.children?.length;
   editor.transact((tr) => {
+    closeHistory(tr);
     let target = first;
+    const content = split?.body ?? "";
     if (!reusable) {
-      closeHistory(tr);
-      [target] = editor.insertBlocks([{ type: "paragraph", content: [] }], first ?? header!, first ? "before" : "after");
+      [target] = editor.insertBlocks([{ type: "paragraph", content }], first ?? header!, first ? "before" : "after");
+    } else if (content) {
+      editor.updateBlock(first, { content });
     }
+    if (split && split.before !== split.title) tr.step(new DocumentTitleStep(split.pageId, split.before, split.title));
     editor.setTextCursorPosition(target, "start");
   });
+  // 随后输入正文另起一次历史记录，避免撤销打字时连同拆分一起撤销。
+  editor.transact((tr) => { closeHistory(tr); });
   return true;
 }
 

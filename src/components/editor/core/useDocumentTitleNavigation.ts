@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { completePageTitleFocus, hasDocumentTitle } from "@/lib/page-title-focus";
-import { ENTER_DOCUMENT_BODY_EVENT, isPlainDocumentNavigation } from "@/lib/document-title-keyboard";
+import { ENTER_DOCUMENT_BODY_EVENT, isPlainDocumentNavigation, type DocumentTitleSplit } from "@/lib/document-title-keyboard";
+import { createDocumentTitleHistoryPlugin } from "./documentTitleHistory";
 import { markUserInteraction } from "@/lib/editor-interaction-signal";
 import {
   canReturnToDocumentTitle,
@@ -20,6 +21,8 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
     if (!container || !scope) return;
     const title = scope.querySelector<HTMLTextAreaElement>("textarea.page-document-title");
     if (!title) return;
+    const historyPlugin = createDocumentTitleHistoryPlugin(title);
+    editor._tiptapEditor.registerPlugin(historyPlugin);
     const canNavigate = () => {
       const page = pageRef.current;
       return editable && editor.isEditable && !editor._tiptapEditor.isDestroyed &&
@@ -28,14 +31,15 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
         page?.localReadState !== "error" && !title.readOnly;
     };
     const enterBody = (event: Event) => {
-      const pageId = (event as CustomEvent<{ pageId?: string }>).detail?.pageId;
+      const split = (event as CustomEvent<DocumentTitleSplit>).detail;
+      const pageId = split?.pageId;
       if (event.target !== title || document.activeElement !== title ||
         pageId !== pageRef.current?.id || !canNavigate()) return;
       // 在插入事务之前标记，确保 raw 文档走正常保存；focus 引发的标题 blur
       // 发生在插入之后，草稿首次命名的 flush 也能拿到完整正文。
       userInteractedRef.current = true;
       markUserInteraction();
-      if (enterFirstBodyParagraph(editor)) {
+      if (enterFirstBodyParagraph(editor, split)) {
         completePageTitleFocus(pageId!);
         editor.focus();
       }
@@ -64,6 +68,7 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
     return () => {
       scope.removeEventListener(ENTER_DOCUMENT_BODY_EVENT, enterBody);
       container.removeEventListener("keydown", returnToTitle, true);
+      if (!editor._tiptapEditor.isDestroyed) editor._tiptapEditor.unregisterPlugin(historyPlugin.spec.key!);
     };
   }, [activePageId, contentModeRef, editable, editor, editorContainerRef, pageRef, userInteractedRef]);
 }
