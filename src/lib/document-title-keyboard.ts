@@ -1,4 +1,21 @@
 export const ENTER_DOCUMENT_BODY_EVENT = "goose-note:enter-document-body";
+export const UPDATE_DOCUMENT_TITLE_EVENT = "goose-note:update-document-title";
+
+export type DocumentTitleSplit = {
+  pageId: string;
+  before: string;
+  title: string;
+  body: string;
+};
+
+export function splitDocumentTitle(field: HTMLTextAreaElement, pageId: string): DocumentTitleSplit {
+  return {
+    pageId,
+    before: field.value,
+    title: field.value.slice(0, field.selectionStart),
+    body: field.value.slice(field.selectionEnd),
+  };
+}
 
 type NavigationKey = {
   defaultPrevented: boolean;
@@ -19,6 +36,6 @@ export function isPlainDocumentNavigation(event: NavigationKey): boolean {
 export function enterDocumentBody(field: HTMLTextAreaElement, pageId: string) {
   field.dispatchEvent(new CustomEvent(ENTER_DOCUMENT_BODY_EVENT, {
     bubbles: true,
-    detail: { pageId },
+    detail: splitDocumentTitle(field, pageId),
   }));
 }
