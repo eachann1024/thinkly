@@ -26,7 +26,7 @@ import {
   subscribePageTitleFocus,
 } from "@/lib/page-title-focus";
 import { normalizeNewFileName } from "@/lib/new-page-name";
-import { enterDocumentBody, isPlainDocumentNavigation, UPDATE_DOCUMENT_TITLE_EVENT } from "@/lib/document-title-keyboard";
+import { enterDocumentBody, isPlainDocumentNavigation, UPDATE_DOCUMENT_TITLE_EVENT, SAVE_DOCUMENT_TITLE_EVENT, type DocumentTitleSave } from "@/lib/document-title-keyboard";
 import { flushEditorContent } from "@/stores/pages/actions/flushEditor";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
@@ -49,7 +49,7 @@ export function PageDocumentTitle({ page, focused, editable }: {
   const editingRef = useRef(false);
   const discardRef = useRef(false);
   const fieldRef = useRef<HTMLTextAreaElement | null>(null);
-  const saveQueueRef = useRef(Promise.resolve());
+  const saveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
   const pendingSavesRef = useRef(0);
   const allowEmptyRef = useRef(false);
 
@@ -90,22 +90,23 @@ export function PageDocumentTitle({ page, focused, editable }: {
     if (discardRef.current || (!next && !allowEmpty)) {
       discardRef.current = false;
       updateValue(committed);
-      return;
+      return Promise.resolve(false);
     }
     // 连续回车、撤销/重做必须按顺序改名，不能并发使用同一个旧文件路径。
     pendingSavesRef.current += 1;
-    saveQueueRef.current = saveQueueRef.current.then(async () => {
+    const save = saveQueueRef.current.then(async () => {
       let succeeded = true;
       try {
         const store = usePages.getState();
         const current = store.pages[page.id];
-        if (!current || next === displayTitle(current)) return;
+        if (!current) return false;
+        if (next === displayTitle(current)) return true;
         const name = normalizeNewFileName(next || UNTITLED_PAGE_TITLE);
         if (!current.localFilePath) {
           flushEditorContent();
           const saved = await store.materializeUnsavedLocalPage(page.id, { title: name });
           if (!saved) throw new Error(uiText("createFailed"));
-          if (getPageTitle(usePages.getState().pages[page.id]) === name) return;
+          if (getPageTitle(usePages.getState().pages[page.id]) === name) return true;
         }
         await usePages.getState().renameLocalPageFile(page.id, name);
       } catch (error) {
@@ -117,7 +118,10 @@ export function PageDocumentTitle({ page, focused, editable }: {
         // 失败时保留输入，尤其不能抹掉撤销刚从正文恢复的原标题。
         if (succeeded && !pendingSavesRef.current && !editingRef.current && latest) updateValue(displayTitle(latest));
       }
+      return succeeded;
     });
+    saveQueueRef.current = save;
+    return save;
   };
   const commitRef = useRef(commit);
   commitRef.current = commit;
@@ -133,8 +137,24 @@ export function PageDocumentTitle({ page, focused, editable }: {
       // 首次拆分由随后的 blur 提交；正文内撤销/重做则立即同步文件名。
       if (document.activeElement !== field) commitRef.current();
     };
+    const saveFromEditor = (event: Event) => {
+      const detail = (event as CustomEvent<DocumentTitleSave>).detail;
+      if (detail.pageId !== page.id) return;
+      event.preventDefault();
+      const previous = valueRef.current;
+      updateValue(detail.title);
+      void commitRef.current().then((saved) => {
+        if (!saved && valueRef.current === detail.title) updateValue(previous);
+        const current = usePages.getState().pages[page.id];
+        detail.complete(saved && Boolean(current && displayTitle(current) === detail.title));
+      });
+    };
     field.addEventListener(UPDATE_DOCUMENT_TITLE_EVENT, updateFromEditor);
-    return () => field.removeEventListener(UPDATE_DOCUMENT_TITLE_EVENT, updateFromEditor);
+    field.addEventListener(SAVE_DOCUMENT_TITLE_EVENT, saveFromEditor);
+    return () => {
+      field.removeEventListener(UPDATE_DOCUMENT_TITLE_EVENT, updateFromEditor);
+      field.removeEventListener(SAVE_DOCUMENT_TITLE_EVENT, saveFromEditor);
+    };
   }, [page.id]);
 
   return (

@@ -2,6 +2,8 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection, type Selection } from "@tiptap/pm/state";
 import { closeHistory } from "@tiptap/pm/history";
 import { DocumentTitleStep } from "./documentTitleHistory";
+import { normalizeNewFileName } from "@/lib/new-page-name";
+import { sanitizeFilenameSegment } from "@/lib/local-title-binding";
 import type { DocumentTitleSplit } from "@/lib/document-title-keyboard";
 
 type Editor = BlockNoteEditor<any, any, any>;
@@ -83,5 +85,60 @@ export function removeEmptyFirstBodyParagraph(editor: Editor): boolean {
   if (paragraphHasInlineContent(first) || first.children?.length) return false;
   if (editor.document.length - (header ? 1 : 0) <= 1) return false;
   editor.removeBlocks([first]);
+  return true;
+}
+
+/** 方向键只移动光标，不复用回车的插入/拆分行为。 */
+export function focusFirstBodyBlock(editor: Editor): boolean {
+  const { first } = bodyStart(editor);
+  if (!first) return false;
+  editor.setTextCursorPosition(first, "start");
+  editor.focus();
+  return true;
+}
+
+/** 先验证合并后的文件名，不能截断或清洗搬入的正文。 */
+export function mergedFirstBodyTitle(editor: Editor, title: string): string | null {
+  const { first } = bodyStart(editor);
+  if (!first || first.type !== "paragraph") return null;
+  // 标题只能承载文字；自定义行内节点不能在转换时静默丢失。
+  const inlineText = (content: any[]): string | null => {
+    let text = "";
+    for (const item of content) {
+      if (item.type === "text") text += item.text;
+      else if (item.type === "link") {
+        const nested = inlineText(item.content);
+        if (nested === null) return null;
+        text += nested;
+      } else return null;
+    }
+    return text;
+  };
+  const text = inlineText(first.content as any[]);
+  if (text === null) return null;
+  const after = title + text;
+  if (text) {
+    // 文件名绑定的标题不能截断或清洗搬入的正文。
+    try {
+      if (normalizeNewFileName(after) !== after || sanitizeFilenameSegment(after, " (99).markdown") !== after) return null;
+    } catch { return null; }
+  }
+  return after;
+}
+
+/** 调用方先保存标题成功，再把正文移除；二者共享撤销事务。 */
+export function mergeFirstBodyParagraph(editor: Editor, pageId: string, title: string): boolean {
+  const { first, header } = bodyStart(editor);
+  const after = mergedFirstBodyTitle(editor, title);
+  if (!first || after === null) return false;
+  editor.transact((tr) => {
+    closeHistory(tr);
+    if (first.children?.length) editor.replaceBlocks([first], first.children);
+    else if (editor.document.length - (header ? 1 : 0) > 1) editor.removeBlocks([first]);
+    else editor.updateBlock(first, { content: [] });
+    tr.setMeta("document-title-persisted", true);
+    if (after !== title) tr.step(new DocumentTitleStep(pageId, title, after));
+  });
+  editor.transact((tr) => { closeHistory(tr); });
   return true;
 }

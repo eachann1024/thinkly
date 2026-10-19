@@ -1,4 +1,16 @@
 export const ENTER_DOCUMENT_BODY_EVENT = "goose-note:enter-document-body";
+export const SAVE_DOCUMENT_TITLE_EVENT = "goose-note:save-document-title";
+export type DocumentTitleSave = { pageId: string; title: string; complete: (saved: boolean) => void };
+
+export function saveDocumentTitle(field: HTMLTextAreaElement, pageId: string, title: string): Promise<boolean> {
+  return new Promise((complete) => {
+    const handled = !field.dispatchEvent(new CustomEvent<DocumentTitleSave>(SAVE_DOCUMENT_TITLE_EVENT, {
+      cancelable: true, detail: { pageId, title, complete },
+    }));
+    if (!handled) complete(false);
+  });
+}
+
 export const UPDATE_DOCUMENT_TITLE_EVENT = "goose-note:update-document-title";
 
 export type DocumentTitleSplit = {
