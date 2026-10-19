@@ -6,6 +6,8 @@ zh-Hans:
   more: "更多"
   splitRight: "向右拆分"
   splitDown: "向下拆分"
+  openRight: "在右侧打开此笔记"
+  openDown: "在下方打开此笔记"
   openInNewTab: "在新标签页打开"
   closeOthers: "关闭其他分屏"
   copyLink: "复制笔记链接"
@@ -17,6 +19,8 @@ en:
   more: "More"
   splitRight: "Split right"
   splitDown: "Split down"
+  openRight: "Open this note to the right"
+  openDown: "Open this note below"
   openInNewTab: "Open in new tab"
   closeOthers: "Close other panes"
   copyLink: "Copy note link"
@@ -28,6 +32,8 @@ ja:
   more: "その他"
   splitRight: "右に分割"
   splitDown: "下に分割"
+  openRight: "このノートを右に開く"
+  openDown: "このノートを下に開く"
   openInNewTab: "新しいタブで開く"
   closeOthers: "他のペインを閉じる"
   copyLink: "ノートのリンクをコピー"
@@ -48,6 +54,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Check, ChevronRight, Columns2, Link, Maximize2, Minimize2, MoreHorizontal, PanelTopOpen, Rows2 } from "@/components/ui/icons";
 import { focusSplitPane, splitDown, splitRight } from "@/lib/editor-split/commands";
+import { openPageBeside } from "@/lib/editor-split/openPageBeside";
 import { runSplitLayout } from "@/lib/editor-split/layoutCommands";
 import { layoutText } from "@/lib/editor-split/layoutLabels";
 import type { SplitLayoutMenuAction } from "@/lib/editor-split/layoutMenu";
@@ -119,6 +126,20 @@ export function SplitPaneMoreMenu({
         <DropdownMenuItem disabled={atLimit} onSelect={() => splitThisPane(splitDown)}>
           <Rows2 className="h-4 w-4" />
           {uiText("splitDown")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={atLimit || missing || !page}
+          onSelect={() => page && openPageBeside(page.id, "right")}
+        >
+          <Columns2 className="h-4 w-4" />
+          {uiText("openRight")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={atLimit || missing || !page}
+          onSelect={() => page && openPageBeside(page.id, "bottom")}
+        >
+          <Rows2 className="h-4 w-4" />
+          {uiText("openDown")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

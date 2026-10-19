@@ -81,6 +81,34 @@ export function applySelectionTextAlignment(
   });
 }
 
+const CLEARABLE_MARKS = [
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "code",
+  "textColor",
+  "backgroundColor",
+] as const;
+
+/**
+ * 清格式必须改当前事务。removeStyles 会另开一条 TipTap 事务，
+ * 包在 editor.transact 里时修改到不了文档。
+ */
+function clearMarksInTransaction(editor: BlockNoteEditor<any, any, any>): void {
+  editor.transact((tr) => {
+    const types = CLEARABLE_MARKS.map((name) => editor.pmSchema.marks[name]).filter(Boolean);
+    if (!tr.selection.empty) {
+      for (const range of tr.selection.ranges) {
+        for (const type of types) tr.removeMark(range.$from.pos, range.$to.pos, type);
+      }
+    }
+    if (tr.storedMarks) {
+      tr.setStoredMarks(tr.storedMarks.filter((mark) => !types.includes(mark.type)));
+    }
+  });
+}
+
 /**
  * Clear inline marks / colors and reset text alignment on the selection.
  */
@@ -90,20 +118,8 @@ export function clearSelectionFormatting(
   const blocks = getSelectedBlocksSafe(editor);
   const cellSelection = getCellSelectionSafe(editor);
   withPreservedSelection(editor, () => {
+    clearMarksInTransaction(editor);
     editor.transact(() => {
-      try {
-        editor.removeStyles({
-          bold: true,
-          italic: true,
-          underline: true,
-          strike: true,
-          code: true,
-          textColor: true,
-          backgroundColor: true,
-        } as any);
-      } catch {
-        /* ignore */
-      }
       applyAlignmentToSelection(editor, "left", blocks, cellSelection);
     });
   });
