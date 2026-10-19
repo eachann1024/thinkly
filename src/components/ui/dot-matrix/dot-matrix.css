@@ -5,6 +5,8 @@
 .goose-dm {
   --dm-ease: cubic-bezier(0.45, 0, 0.55, 1);
   --dm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 每段关键帧分两步取样，保留微幅循环，避免持续逐帧更新。 */
+  --dm-loop-ease: steps(2, end);
   overflow: visible;
   transform-box: view-box;
   transform-origin: var(--dm-ox, 50%) var(--dm-oy, 50%);
@@ -15,13 +17,13 @@
 
 /* The whole picture keeps a barely visible drift while it is in the viewport. */
 .goose-dm[data-dm-phase="in"].goose-dm-main {
-  animation: goose-dm-main-drift 12s var(--dm-ease) -6s infinite both;
+  animation: goose-dm-main-drift 12s var(--dm-loop-ease) -6s infinite both;
 }
 .goose-dm[data-dm-phase="in"].goose-dm-small {
-  animation: goose-dm-small-drift 11s var(--dm-ease) -5.5s infinite both;
+  animation: goose-dm-small-drift 11s var(--dm-loop-ease) -5.5s infinite both;
 }
 .goose-dm[data-dm-phase="in"].goose-dm-corner {
-  animation: goose-dm-corner-drift 14s var(--dm-ease) -7s infinite both;
+  animation: goose-dm-corner-drift 14s var(--dm-loop-ease) -7s infinite both;
 }
 @keyframes goose-dm-main-drift {
   0%,
@@ -78,34 +80,34 @@
   transform-origin: center;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-breathe {
-  animation: goose-dm-breathe var(--dm-period, 12s) var(--dm-ease)
+  animation: goose-dm-breathe var(--dm-period, 12s) var(--dm-loop-ease)
     var(--dm-delay, -6s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-ripple {
-  animation: goose-dm-ripple var(--dm-period, 12s) var(--dm-ease)
+  animation: goose-dm-ripple var(--dm-period, 12s) var(--dm-loop-ease)
     var(--dm-delay, -6s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-glint {
-  animation: goose-dm-glint var(--dm-period, 9s) var(--dm-ease)
+  animation: goose-dm-glint var(--dm-period, 9s) var(--dm-loop-ease)
     var(--dm-delay, -7s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-flow {
-  animation: goose-dm-flow var(--dm-period, 10s) var(--dm-ease)
+  animation: goose-dm-flow var(--dm-period, 10s) var(--dm-loop-ease)
     var(--dm-delay, -5s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-wave {
-  animation: goose-dm-wave var(--dm-period, 10s) var(--dm-ease)
+  animation: goose-dm-wave var(--dm-period, 10s) var(--dm-loop-ease)
     var(--dm-delay, -5s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-progress {
-  animation: goose-dm-progress var(--dm-period, 4s) var(--dm-ease)
+  animation: goose-dm-progress var(--dm-period, 4s) var(--dm-loop-ease)
     var(--dm-delay, -2s) infinite both;
 }
 .goose-dm[data-dm-phase="in"] .goose-dm-alert {
   animation:
     goose-dm-shake 280ms cubic-bezier(0.36, 0.07, 0.19, 0.97)
       var(--dm-alert-delay, 0.4s) 1 backwards,
-    goose-dm-breathe var(--dm-period, 10s) var(--dm-ease) var(--dm-delay, -6s)
+    goose-dm-breathe var(--dm-period, 10s) var(--dm-loop-ease) var(--dm-delay, -6s)
       infinite both;
 }
 

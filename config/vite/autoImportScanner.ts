@@ -1,42 +1,74 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
+import { readFile, realpath } from "node:fs/promises";
 import ts from "typescript";
-import { scanDirExports, type Import } from "unimport";
+import { dedupeDtsExports, normalizeScanDirs, scanDirExports, scanExports, scanFilesFromDir, type Import } from "unimport";
+
+export type PublicImportScanMetrics = { entryScans: number; dependencyReads: number; typeParses: number };
+type EntryScan = { imports: Import[]; mixed: Import[]; dependencies: Set<string> };
+const absolute = (root: string, file: string) => path.resolve(root, file).replaceAll("\\", "/");
+async function dependencyPaths(root: string, files: string[]) {
+  const paths = files.map((file) => absolute(root, file));
+  const resolved = await Promise.all(paths.map((file) => realpath(file).catch(() => file)));
+  return new Set([...paths, ...resolved.map((file) => absolute(root, file))]);
+}
+
+async function mixedTypes(from: string): Promise<Import[]> {
+  const imports: Import[] = [];
+  const source = ts.createSourceFile(from, await readFile(from, "utf8"), ts.ScriptTarget.Latest, true);
+  for (const statement of source.statements) {
+    if (!ts.isExportDeclaration(statement) || !statement.exportClause || !ts.isNamedExports(statement.exportClause)) continue;
+    for (const item of statement.exportClause.elements) {
+      if (statement.isTypeOnly || item.isTypeOnly) imports.push({ from, name: item.name.text, as: item.name.text, type: true });
+    }
+  }
+  return imports;
+}
+
+function appendMixed(imports: Import[], mixed: Import[][]): Import[] {
+  const result = [...imports];
+  const known = new Set(imports.map((item) => `${item.from}:${item.name}:${Boolean(item.type)}`));
+  for (const items of mixed) for (const item of items) {
+    const key = `${item.from}:${item.name}:true`;
+    if (!known.has(key)) { known.add(key); result.push(item); }
+  }
+  return result;
+}
 
 /** unimport 会忽略混合 export 列表中的 type 项；补回公开入口原有类型。 */
 export async function scanPublicImports(
   entries: string[],
   root: string,
 ): Promise<Import[]> {
-  const imports = await scanDirExports(entries, { cwd: root });
-  const known = new Set(
-    imports.map((item) => `${item.from}:${item.name}:${Boolean(item.type)}`),
-  );
-  for (const entry of entries) {
-    // 与 unimport 的正斜杠路径保持一致，避免 Windows 同一入口重复判重。
-    const from = path.resolve(root, entry).replaceAll("\\", "/");
-    const source = ts.createSourceFile(
-      from,
-      await readFile(from, "utf8"),
-      ts.ScriptTarget.Latest,
-      true,
-    );
-    for (const statement of source.statements) {
-      if (
-        !ts.isExportDeclaration(statement) ||
-        !statement.exportClause ||
-        !ts.isNamedExports(statement.exportClause)
-      )
-        continue;
-      for (const item of statement.exportClause.elements) {
-        if (!statement.isTypeOnly && !item.isTypeOnly) continue;
-        const name = item.name.text;
-        const key = `${from}:${name}:true`;
-        if (known.has(key)) continue;
-        known.add(key);
-        imports.push({ from, name, as: name, type: true });
-      }
-    }
-  }
-  return imports;
+  return appendMixed(await scanDirExports(entries, { cwd: root }),
+    await Promise.all(entries.map((entry) => mixedTypes(absolute(root, entry)))));
+}
+
+/** Keep unimport's scanner authoritative; its seen set records every resolved export-star dependency. */
+export function createPublicImportScanner(entries: string[], root: string, metrics: PublicImportScanMetrics) {
+  let order: string[] | undefined, records = new Map<string, EntryScan>(), previous: Import[] = [];
+  return {
+    async scan(paths: string[] | null = null): Promise<Import[]> {
+      const full = paths === null || !order;
+      const files = full ? await scanFilesFromDir(normalizeScanDirs(entries, { cwd: root }), { cwd: root }) : order!;
+      const dirty = await dependencyPaths(root, paths ?? []);
+      const affected = files.filter((file) => full || [...records.get(file)!.dependencies].some((dependency) => dirty.has(dependency)));
+      if (!affected.length && order) return previous;
+      const settled = await Promise.allSettled(affected.map(async (file): Promise<[string, EntryScan]> => {
+        metrics.entryScans++;
+        const seen = new Set<string>();
+        // scanDirExports defaults to types:true; false would lose pure type exports.
+        const imports = await scanExports(file, true, seen);
+        metrics.dependencyReads += seen.size; metrics.typeParses++;
+        return [file, { imports, mixed: await mixedTypes(file), dependencies: await dependencyPaths(root, [...seen]) }];
+      }));
+      const failure = settled.find((result) => result.status === "rejected");
+      if (failure?.status === "rejected") throw failure.reason;
+      const updated = settled.map((result) => (result as PromiseFulfilledResult<[string, EntryScan]>).value);
+      const next = full ? new Map(updated) : new Map([...records, ...updated]);
+      const imports = appendMixed(dedupeDtsExports(files.flatMap((file) => next.get(file)!.imports)),
+        entries.map((entry) => next.get(absolute(root, entry))!.mixed));
+      records = next; order = files; previous = imports;
+      return imports;
+    },
+  };
 }
