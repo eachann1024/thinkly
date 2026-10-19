@@ -6,6 +6,7 @@ import { Schema } from "prosemirror-model";
 import { TextSelection } from "prosemirror-state";
 import { CellSelection } from "prosemirror-tables";
 import { readFileSync } from "node:fs";
+import { tableRowUnderPointer } from "@/components/editor/extensions/tableCellSelectionDom";
 import {
   fullyCoveredCells,
   selectionBetweenPointer,
@@ -96,6 +97,27 @@ export default function run() {
   checker.check(
     "表外向上拖在进入行后不再整段扫描文档",
     view.includes("currentTablePos == null && !draggingDoc"),
+  );
+
+  const rowStarted = performance.now();
+  let rowHits = 0;
+  const fakeTable = {
+    rows: Array.from({ length: 4 }, (_, index) => ({
+      getBoundingClientRect: () => ({ top: index * 44, bottom: index * 44 + 43, height: 43 }),
+    })),
+    getBoundingClientRect: () => ({ left: 0, right: 400 }),
+  } as unknown as HTMLTableElement;
+  for (let i = 0; i < 200; i += 1) {
+    if (tableRowUnderPointer(fakeTable, 12, 44 * 2 + 0.4)) rowHits += 1;
+  }
+  const rowEach = (performance.now() - rowStarted) / 200;
+  checker.check("行间边框缝归到下一行", rowHits === 200);
+  checker.check("行定位单次低于 1 毫秒", rowEach < 1, `${rowEach.toFixed(3)}ms`);
+  checker.check("表外不定位行", tableRowUnderPointer(fakeTable, -8, 20) === null);
+  const controller = readFileSync("src/components/editor/menus/GooseTableHandlesController.tsx", "utf8");
+  checker.check(
+    "表格把手挂到 body，避开编辑器的裁切",
+    controller.includes("document.body") && controller.includes("tableRowUnderPointer"),
   );
   return checker.failed;
 }

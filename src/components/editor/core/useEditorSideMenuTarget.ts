@@ -148,6 +148,9 @@ export function useEditorSideMenuTarget(
       )
         return;
       const content = target?.closest<HTMLElement>(".bn-block-content");
+      // 表格的行/列把手是 portal，不在块内。指针停在把手上时保持当前块，
+      // 否则菜单先卸掉，行把手跟着一起消失。
+      if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return;
       if (
         content &&
         editor.prosemirrorView.dom.contains(content) &&
