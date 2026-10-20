@@ -77,8 +77,12 @@ function tableNode(block: PartialBlock, schema: Schema, spec: NonNullable<Return
       colwidth: width ? [width] : null,
     }, paragraph);
   })));
-  const textColor = (block.props as { textColor?: string } | undefined)?.textColor || "default";
-  const table = schema.nodes.table.create({ textColor }, rows);
+  const props = block.props as { textColor?: string; sequenceColumn?: boolean } | undefined;
+  const textColor = props?.textColor || "default";
+  const table = schema.nodes.table.create({
+    textColor,
+    sequenceColumn: props?.sequenceColumn === true,
+  }, rows);
   const children = (block.children ?? []).map((child) => blockToEditorNode(child, schema));
   const group = children.length ? schema.nodes.blockGroup.create(null, children) : null;
   return schema.nodes.blockContainer.create(
