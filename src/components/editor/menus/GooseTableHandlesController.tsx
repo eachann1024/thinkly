@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getNodeById } from "@blocknote/core";
 import { TableHandlesExtension } from "@blocknote/core/extensions";
 import {
@@ -10,6 +10,7 @@ import { offset, size, type Placement } from "@floating-ui/react";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { GooseTableExtendButton, GooseTableHandle } from "./GooseTableHandle";
 import { tableRowUnderPointer } from "@/components/editor/extensions/tableCellSelectionDom";
+import { isPointerInTableChromeReach } from "@/components/editor/core/sideMenuHover";
 import { tableHandleRect, releaseTableChrome } from "./tableHandleGeometry";
 
 /** 行/列把手要画出内容列。编辑器表面是 overflow:clip，挂在里面会被裁掉。 */
@@ -48,10 +49,8 @@ function usePointerFollow(active: boolean) {
 function pointerOwnsTable(table: HTMLElement): boolean {
   if (pointer.x < 0) return false;
   const bounds = table.getBoundingClientRect();
-  if (
-    pointer.x >= bounds.left && pointer.x <= bounds.right &&
-    pointer.y >= bounds.top && pointer.y <= bounds.bottom
-  ) return true;
+  const scale = Number.parseFloat(getComputedStyle(table).getPropertyValue("--editor-scale")) || 1;
+  if (isPointerInTableChromeReach(bounds, pointer.x, pointer.y, scale)) return true;
   const hit = document.elementFromPoint(pointer.x, pointer.y);
   return Boolean(hit?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle, .goose-table-menu"));
 }
@@ -99,8 +98,11 @@ function TableChrome({
         whileElementsMounted: onMount,
         middleware: [
           offset(gap),
-          ...(placement === "left" ? [size({
-            apply({ elements }) {
+          ...(placement === "left" || placement === "top" ? [size({
+            apply({ rects, elements }) {
+              const span = placement === "top" ? rects.reference.width : rects.reference.height;
+              elements.floating.style.setProperty("--goose-table-chrome-span", `${span}px`);
+              if (placement !== "left") return;
               // Floating UI rects are offset-parent relative; gutter space is viewport relative.
               const left = (getRect?.() ?? element.getBoundingClientRect()).left;
               elements.floating.style.setProperty(
@@ -136,7 +138,9 @@ function TableChrome({
 export function GooseTableHandlesController() {
   const editor = useBlockNoteEditor<any, any, any>();
   const state = useExtensionState(TableHandlesExtension);
-  usePointerFollow(Boolean(state?.show));
+  // BlockNote 在指针碰到表外标题时会把 show 关掉。把手还在边框外时继续跟指针，避免方块先消失。
+  const sticky = useRef(false);
+  usePointerFollow(Boolean(state?.show) || sticky.current);
   const [only, setOnly] = useState<Chrome>();
   const hide = useMemo(
     () =>
@@ -158,16 +162,32 @@ export function GooseTableHandlesController() {
       ) as Record<Chrome, (hidden: boolean) => void>,
     [],
   );
-  if (!state?.show || !editor.isEditable) return null;
+  if (!state?.block || !editor.isEditable) {
+    sticky.current = false;
+    return null;
+  }
   const node = getNodeById(state.block.id, editor.prosemirrorState.doc);
-  if (!node) return null;
+  if (!node) {
+    sticky.current = false;
+    return null;
+  }
   const dom = editor.prosemirrorView.domAtPos(node.posBeforeNode + 3).node;
   const table = (dom instanceof Element ? dom : dom.parentElement)?.closest(
     "table",
   );
-  if (!table) return null;
-  // 移出表格后 BlockNote 仍保留上次的 show。只有指针还在表上或把手上才显示。
-  if (!state.draggingState && !pointerOwnsTable(table)) return null;
+  if (!table) {
+    sticky.current = false;
+    return null;
+  }
+  // 移出表格后 BlockNote 仍保留上次的 show，碰到上方标题时又会把 show 关掉。
+  // 指针还在表上、缝里或把手上就继续画。
+  const owns = pointerOwnsTable(table);
+  if (!state.draggingState && !owns) {
+    sticky.current = false;
+    return null;
+  }
+  if (!state.show && !owns) return null;
+  sticky.current = true;
   const rowIndex = state.rowIndex;
   const colIndex = state.colIndex;
   const cell =
