@@ -11,6 +11,42 @@ export const HEADING_SIDE_MENU_EXTRA_GAP = 8;
  */
 export const TABLE_SIDE_MENU_INSET = 9;
 
+/** 行/列把手伸出表格的距离：24px 按钮 + 4px 间距，再留 2px，避免缝里卸掉。 */
+const TABLE_CHROME_REACH = 30;
+
+/** 表格块把手没有折叠钮：两枚 22px 按钮、2px 间距、左右各 4px 内边距，再留 4px。 */
+export function tableSideMenuWidth(scale: number): number {
+  return (22 * 2 + 2 + 8 + 4) * scale;
+}
+
+/**
+ * 行/列把手和块把手都画在表格边框外。标题和表格之间往往只有一行间距，
+ * 指针移向左上角方块时会先落到标题上，于是把手先消失。
+ * 边框外这一圈，以及左上角块把手所占的位置，仍算这张表。
+ */
+export function isPointerInTableChromeReach(
+  table: Pick<DOMRect, "left" | "right" | "top" | "bottom">,
+  x: number,
+  y: number,
+  scale = 1,
+): boolean {
+  const reach = TABLE_CHROME_REACH * scale;
+  if (
+    x >= table.left - reach &&
+    x <= table.right + reach &&
+    y >= table.top - reach &&
+    y <= table.bottom + reach
+  ) {
+    return true;
+  }
+  const menuTop = table.top - (16 * scale + 4) - ((24 + 6) * scale) / 2 - 4 * scale;
+  if (x < table.left - SIDE_MENU_CONTENT_GAP - tableSideMenuWidth(scale)) return false;
+  if (x > table.left) return false;
+  if (y < menuTop) return false;
+  if (y > table.top + reach) return false;
+  return true;
+}
+
 export function isPointerInRects(
   rects: Iterable<Pick<DOMRect, "left" | "right" | "top" | "bottom">>,
   x: number,
