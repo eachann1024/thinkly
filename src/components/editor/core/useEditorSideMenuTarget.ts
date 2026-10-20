@@ -14,8 +14,10 @@ import {
   HEADING_SIDE_MENU_EXTRA_GAP,
   SIDE_MENU_CONTENT_GAP,
   isPointerInSideMenuCorridor,
+  isPointerInTableChromeReach,
   isPointerOverBlockContent,
   isPointerInRects,
+  tableSideMenuWidth,
 } from "./sideMenuHover";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 
@@ -34,7 +36,13 @@ export function useEditorSideMenuTarget(
   const blockId = isDragging ? dragBlockId.current : hoveredBlockId;
   const block = blockId ? editor.getBlock(blockId) : undefined;
   const [referencePos, setReferencePos] = useState<DOMRect | null>(null);
-  const [tablePlacement, setTablePlacement] = useState<{ top: number; gap: number; corridorTop: number }>();
+  const [tablePlacement, setTablePlacement] = useState<{
+    top: number;
+    gap: number;
+    corridorTop: number;
+    menuReach: number;
+  }>();
+  const tableHold = useRef<{ rect: DOMRect; scale: number } | null>(null);
   const corridor = useRef<{ rect: DOMRect | null; gap: number }>({
     rect: null,
     gap: 0,
@@ -48,6 +56,7 @@ export function useEditorSideMenuTarget(
         `[data-node-type="blockContainer"][data-id="${CSS.escape(blockId)}"]`,
       );
     if (!element) {
+      tableHold.current = null;
       setReferencePos(null);
       setTablePlacement(undefined);
       return;
@@ -67,16 +76,19 @@ export function useEditorSideMenuTarget(
       setReferencePos(new DOMRect(left, rect.top, rect.width, rect.height));
       const table = content.querySelector<HTMLTableElement>(":scope > .tableWrapper table");
       if (!table) {
+        tableHold.current = null;
         setTablePlacement(undefined);
         return;
       }
       const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;
       const tableRect = table.getBoundingClientRect();
+      tableHold.current = { rect: tableRect, scale };
       setTablePlacement({
         // Keep block controls above the row grip, independent of sidebar width.
         top: tableRect.top - 16 * scale - 4,
         gap: SIDE_MENU_CONTENT_GAP,
         corridorTop: tableRect.top - 32 * scale - 6,
+        menuReach: tableSideMenuWidth(scale),
       });
     };
     update();
@@ -115,7 +127,8 @@ export function useEditorSideMenuTarget(
     rect: referencePos && corridorTop !== undefined
       ? new DOMRect(referencePos.left, corridorTop, referencePos.width, referencePos.bottom - corridorTop)
       : referencePos,
-    gap: sideMenuGap,
+    // 块把手用 translate(-100%) 画在间距左侧。走廊要盖住整枚 pill，否则移上去会先卸掉。
+    gap: sideMenuGap + (tablePlacement?.menuReach ?? 0),
   };
   useEffect(() => {
     const updateSidebarInteracting = (
@@ -151,6 +164,13 @@ export function useEditorSideMenuTarget(
       // 表格的行/列把手是 portal，不在块内。指针停在把手上时保持当前块，
       // 否则菜单先卸掉，行把手跟着一起消失。
       if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return;
+      const hold = tableHold.current;
+      if (
+        hold &&
+        isPointerInTableChromeReach(hold.rect, event.clientX, event.clientY, hold.scale)
+      ) {
+        return;
+      }
       if (
         content &&
         editor.prosemirrorView.dom.contains(content) &&
