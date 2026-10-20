@@ -72,6 +72,16 @@ export function markdownToJsonContent(markdown: string): any {
       continue;
     }
 
+    if (new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:table-sequence\\s*-->$`).test(trimmedLine)) {
+      const tableResult = parseTableHtmlBlock(lines, i + 1) ?? parseTableBlock(lines, i + 1, parseInlineMarkdown);
+      if (tableResult) {
+        tableResult.block.props = { ...(tableResult.block.props ?? {}), sequenceColumn: true };
+        content.push(tableResult.block);
+        i = tableResult.nextIndex;
+        continue;
+      }
+    }
+
     const childWrapper = tryAttachBlockChildren(lines, i, content, markdownToJsonContent);
     if (childWrapper) {
       i = childWrapper.nextIndex;
