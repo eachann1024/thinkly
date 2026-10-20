@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/editor/ui/dropdown-menu";
 import { EditorSubmenuTrigger } from "@/components/editor/ui/vendor-menu";
+import { toggleTableSequence } from "../extensions/tableSequenceExtension";
 import { editTableDimension, hasMergedTableCells } from "./tableMenuActions";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { getTableDeletionLabel } from "./tableDeletion";
@@ -27,6 +28,7 @@ zh-Hans:
   rowsAndColumnsWithMergedCellsCannotBe: "含合并单元格，暂不支持复制行列"
   clearContents: "清空内容"
   tableOptions: "表格选项"
+  orderedNumbers: "自动追加编号"
   headerRow: "标题行"
   headerColumn: "标题列"
   enabled: "已启用"
@@ -48,6 +50,7 @@ en:
   rowsAndColumnsWithMergedCellsCannotBe: "Rows and columns with merged cells cannot be duplicated yet"
   clearContents: "Clear contents"
   tableOptions: "Table options"
+  orderedNumbers: "Auto-number rows"
   headerRow: "Header row"
   headerColumn: "Header column"
   enabled: "Enabled"
@@ -69,6 +72,7 @@ ja:
   rowsAndColumnsWithMergedCellsCannotBe: "結合されたセルを含むため、行・列のコピーには対応していません"
   clearContents: "内容を消去"
   tableOptions: "表のオプション"
+  orderedNumbers: "行に連番を付ける"
   headerRow: "ヘッダー行"
   headerColumn: "ヘッダー列"
   enabled: "オン"
@@ -192,6 +196,18 @@ export function GooseTableHandle({
           index={index}
           onAction={runMenuAction}
         />
+        <DropdownMenuItem
+          textValue={`${t("orderedNumbers")}，${state.block.props?.sequenceColumn ? t("enabled") : t("disabled")}`}
+          onSelect={() => runMenuAction(() => toggleTableSequence(editor, state.block.id))}
+        >
+          <GooseIcons.ListOrdered /> {t("orderedNumbers")}
+          <span className="sr-only">
+            {state.block.props?.sequenceColumn ? t("enabled") : t("disabled")}
+          </span>
+          {state.block.props?.sequenceColumn === true && (
+            <GooseIcons.Check className="ml-auto" />
+          )}
+        </DropdownMenuItem>
         {features.tablePresentationControls && (
           <>
             <EditorSubmenuTrigger>

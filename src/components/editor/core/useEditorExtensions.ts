@@ -25,6 +25,7 @@ import { gooseCrossBlockDeleteExtension } from "@/components/editor/extensions/c
 import { gooseEmptyBlockBackspaceExtension } from "@/components/editor/extensions/emptyBlockBackspaceExtension";
 import { gooseBlockPresenceExtension } from "@/components/editor/extensions/blockPresenceExtension";
 import { createGooseNumberedListStartNormalizationExtension } from "@/components/editor/extensions/numberedListStartNormalizationExtension";
+import { createGooseTableSequenceExtension } from "@/components/editor/extensions/tableSequenceExtension";
 import { createGooseBodyParagraphGuardExtension } from "@/components/editor/extensions/bodyParagraphGuardExtension";
 import { createGooseFirstTitleGuardExtension } from "@/components/editor/inputrules/firstTitleGuard";
 import { gooseMarkdownInputRulesExtension } from "@/components/editor/inputrules/markdownInputRules";
@@ -145,6 +146,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseEmptyBlockBackspaceExtension,
     gooseBlockPresenceExtension,
     createGooseNumberedListStartNormalizationExtension(usesRawEditorContentRef),
+    createGooseTableSequenceExtension(usesRawEditorContentRef),
     createGooseSlashMenuReconcileExtension(
       usesRawEditorContentRef,
       editorInstanceRef,

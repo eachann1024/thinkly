@@ -1,4 +1,5 @@
 import { insertParagraphAfterBlock } from "../extensions/containedBlockKeyboard";
+import { toggleTableSequence } from "../extensions/tableSequenceExtension";
 import { useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import {
@@ -26,6 +27,7 @@ zh-Hans:
   copy: "复制"
   paste: "粘贴"
   insertParagraphBelow: "在块下方插入段落"
+  orderedNumbers: "自动追加编号"
   exportSelectionAsImage: "导出所选内容为图片"
 en:
   selectedContent: "Selected content"
@@ -33,6 +35,7 @@ en:
   copy: "Copy"
   paste: "Paste"
   insertParagraphBelow: "Insert paragraph below"
+  orderedNumbers: "Auto-number rows"
   exportSelectionAsImage: "Export selection as image"
 ja:
   selectedContent: "選択した内容"
@@ -40,6 +43,7 @@ ja:
   copy: "コピー"
   paste: "貼り付け"
   insertParagraphBelow: "ブロックの下に段落を挿入"
+  orderedNumbers: "行に連番を付ける"
   exportSelectionAsImage: "選択範囲を画像として書き出す"
 `;
 const t = createTranslator(messages);
@@ -106,6 +110,7 @@ export function EditorContextMenu({
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
   const [canCopy, setCanCopy] = useState(false);
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
+  const [tableSequence, setTableSequence] = useState<{ id: string; enabled: boolean } | null>(null);
   const contextBlockIdRef = useRef<string | null>(null);
   const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const selectedTextRef = useRef("");
@@ -176,8 +181,21 @@ export function EditorContextMenu({
             onPasteCapture={handleEditorPasteCapture}
             onKeyDownCapture={handleEditorKeyDownCapture}
             onContextMenuCapture={(e) => {
-              contextBlockIdRef.current = (e.target as HTMLElement)
+              const blockId = (e.target as HTMLElement)
                 .closest(".bn-block-outer[data-id]")?.getAttribute("data-id") ?? null;
+              contextBlockIdRef.current = blockId;
+              if (!editable || !blockId) {
+                setTableSequence(null);
+              } else {
+                try {
+                  const block = editor.getBlock(blockId);
+                  setTableSequence(block?.type === "table"
+                    ? { id: blockId, enabled: block.props?.sequenceColumn === true }
+                    : null);
+                } catch {
+                  setTableSequence(null);
+                }
+              }
               rememberContextSelection();
               if (isExcludedBlockTarget(e.target as HTMLElement)) {
                 e.preventDefault();
@@ -226,6 +244,17 @@ export function EditorContextMenu({
             <ContextMenuItem onSelect={() => insertParagraphAfterBlock(editor, contextBlockIdRef.current!)}>
               <GooseIcons.Plus className="size-4" />
               {t("insertParagraphBelow")}
+            </ContextMenuItem>
+          )}
+          {tableSequence && (
+            <ContextMenuItem onSelect={() => {
+              const target = tableSequence;
+              if (!target) return;
+              toggleTableSequence(editor, target.id);
+            }}>
+              <GooseIcons.ListOrdered className="size-4" />
+              {t("orderedNumbers")}
+              {tableSequence.enabled && <GooseIcons.Check className="ml-auto" />}
             </ContextMenuItem>
           )}
           {showSelectionImageExport && selectedBlocks.length > 0 && (

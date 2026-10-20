@@ -32,10 +32,15 @@ export function parseTableHtmlBlock(lines: string[], start: number) {
     return width > 0 && Number.isFinite(width) ? width : undefined;
   });
   const textColor = sanitizeCssColor(readDataAttr(table, "text-color"));
+  const sequenceColumn = readDataAttr(table, "sequence-column") === "true";
+  const props = {
+    ...(textColor ? { textColor } : {}),
+    ...(sequenceColumn ? { sequenceColumn: true } : {}),
+  };
   return {
     block: {
       type: "table",
-      ...(textColor ? { props: { textColor } } : {}),
+      ...(Object.keys(props).length ? { props } : {}),
       content: {
         type: "tableContent", rows,
         ...(columnWidths.length ? { columnWidths } : {}),
