@@ -1,4 +1,4 @@
-import { dataAttr } from "../persistedNames";
+import { dataAttr, noteComment } from "../persistedNames";
 import { blockNoteInlineToText, escapePipeInCell } from "./inline";
 import { tableColorStyle, tableHtmlEscape, tableInlineHtml } from "../tableHtml";
 
@@ -29,13 +29,13 @@ export function serializeTable(block: any): string {
   if (!rich) {
     const count = Math.max(...rows.map((row) => row.length), 1);
     const rowText = (cells: any[]) => `| ${Array.from({ length: count }, (_, index) => escapePipeInCell(blockNoteInlineToText(cells[index]))).join(" | ")} |`;
-    return [rowText(rows[0]), `| ${new Array(count).fill("---").join(" | ")} |`, ...rows.slice(1).map(rowText)].join("\n");
+    return withSequenceMark(block, [rowText(rows[0]), `| ${new Array(count).fill("---").join(" | ")} |`, ...rows.slice(1).map(rowText)].join("\n"));
   }
   const headerRows = content?.headerRows || 0;
   const headerCols = content?.headerCols || 0;
   const widths: (number | undefined)[] = content?.columnWidths ?? [];
   const color = block.props?.textColor;
-  const opening = `<table ${dataAttr("table")}="v1" data-header-rows="${headerRows}" data-header-cols="${headerCols}"${color && color !== "default" ? ` ${dataAttr("text-color")}="${tableHtmlEscape(color)}" style="${tableHtmlEscape(tableColorStyle(block.props))}"` : ""}>`;
+  const opening = `<table ${dataAttr("table")}="v1" data-header-rows="${headerRows}" data-header-cols="${headerCols}"${block.props?.sequenceColumn === true ? ` ${dataAttr("sequence-column")}="true"` : ""}${color && color !== "default" ? ` ${dataAttr("text-color")}="${tableHtmlEscape(color)}" style="${tableHtmlEscape(tableColorStyle(block.props))}"` : ""}>`;
   const columns = widths.length ? `<colgroup>${widths.map((width) => typeof width === "number" && Number.isFinite(width) && width > 0 ? `<col style="width:${width}px">` : "<col>").join("")}</colgroup>` : "";
   const htmlRows = rows.map((row, rowIndex) => {
     let column = 0;
@@ -54,5 +54,10 @@ export function serializeTable(block: any): string {
       return `<${tag} ${attrs.join(" ")}>${tableInlineHtml(cell)}</${tag}>`;
     }).join("")}</tr>`;
   });
-  return [opening, ...(columns ? [columns] : []), "<tbody>", ...htmlRows, "</tbody>", "</table>"].join("\n");
+  return withSequenceMark(block, [opening, ...(columns ? [columns] : []), "<tbody>", ...htmlRows, "</tbody>", "</table>"].join("\n"));
+}
+
+function withSequenceMark(block: { props?: { sequenceColumn?: boolean } }, body: string) {
+  if (block.props?.sequenceColumn !== true) return body;
+  return `${noteComment("table-sequence")}\n${body}`;
 }
