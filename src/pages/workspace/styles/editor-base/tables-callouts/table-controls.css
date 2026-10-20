@@ -81,6 +81,26 @@
   width: calc(28px * var(--editor-scale, 1));
   height: calc(20px * var(--editor-scale, 1));
 }
+/* 把手和表格之间有 4px 空隙。补一条透明桥，移向方块时命中把手，而不是上方标题。 */
+.goose-table-chrome-left::after,
+.goose-table-chrome-top::after {
+  content: "";
+  position: absolute;
+}
+.goose-table-chrome-left::after {
+  top: 50%;
+  left: 100%;
+  width: 8px;
+  height: var(--goose-table-chrome-span, 100%);
+  transform: translateY(-50%);
+}
+.goose-table-chrome-top::after {
+  left: 50%;
+  top: 100%;
+  width: var(--goose-table-chrome-span, 100%);
+  height: 8px;
+  transform: translateX(-50%);
+}
 .goose-table-chrome-left .goose-table-handle-btn,
 .goose-table-chrome-top .goose-table-handle-btn {
   background: hsl(var(--popover));
