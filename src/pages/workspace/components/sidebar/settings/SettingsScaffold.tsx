@@ -78,11 +78,11 @@ export function SettingsScaffold({
     const start = window.setTimeout(() => {
       setNavSheen(true);
       setTitleSheen(activeTab === "feedback");
-    }, 1500);
+    }, 500);
     const end = window.setTimeout(() => {
       setNavSheen(false);
       setTitleSheen(false);
-    }, 4500);
+    }, 3500);
     return () => {
       window.clearTimeout(start);
       window.clearTimeout(end);
