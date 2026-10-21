@@ -174,14 +174,15 @@ export const electronGooseFs = {
 
   trashWithUndo: async (path: string) => {
     const api = getGooseDesktop();
-    if (!api?.fsTrashWithUndo) return null;
+    if (!api?.fsTrashWithUndo) throw new Error("desktop-unavailable");
     try {
       const token = await api.fsTrashWithUndo(path);
+      if (!token) throw new Error("trash-failed");
       rememberExists(path, false);
       return token;
     } catch (error) {
       console.warn("[electron-gooseFs] trashWithUndo failed", path, error);
-      return null;
+      throw error;
     }
   },
 
