@@ -73,6 +73,10 @@ export default async function run(): Promise<number> {
   const iconRules = cssRules(layoutCss, "[data-icon]").join("\n");
   check("图标 margin-top 用共享公式", iconRules.includes("calc((var(--goose-toast-line) - var(--goose-toast-icon)) / 2)"));
   check("标题行高用共享变量", cssRules(layoutCss, "[data-title]").some(body => body.includes("line-height: var(--goose-toast-line)")));
+  check("标题与描述允许无空格长串断行", cssRules(layoutCss, "[data-description]").some(body => body.includes("overflow-wrap: anywhere")));
+  const clampRules = cssRules(layoutCss, ":not(.goose-delete-receipt-toast) [data-title]").join("\n");
+  check("多行文案最多 4 行并隐藏溢出，删除回执不参与", /-webkit-line-clamp: var\(--goose-toast-max-lines, 4\)/.test(clampRules) && clampRules.includes("overflow: hidden"));
+  check("删除失败文案不再用 overflow: visible 冲掉行数上限", !cssRules(layoutCss, ".goose-delete-failure-toast").some(body => /overflow:\s*visible/.test(body)));
 
   console.log("· 统一入口");
   const sources = walk("src").filter(file => /\.(tsx?|mts)$/.test(file) && !file.endsWith(".d.ts"));
