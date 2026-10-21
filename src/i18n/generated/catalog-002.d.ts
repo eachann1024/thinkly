@@ -26,6 +26,7 @@ declare module "../types" {
     "src/lib/editor-split/commandContext.ts#localMessages:1": { "splitViewIsnTAvailableInFullScreenAi": {  }; "splitViewIsnTAvailableInThisView": {  }; "splitViewIsnTAvailableInVersionHistory": {  } };
     "src/lib/editor-split/createBlankPage.ts#localMessages:1": { "couldnTCreateANoteInSplitView": {  }; "theSourceNoteOrItsNotebookNoLongerExists": {  } };
     "src/lib/editor-split/drop.ts#localMessages:1": { "thisNoteIsNoLongerAvailable": {  }; "youCanOpenUpToPanes": {  } };
+    "src/lib/editor-split/openPageBeside.ts#localMessages:1": { "thisNoteIsNoLongerAvailable": {  }; "youCanOpenUpToPanes": {  } };
     "src/lib/editor-split/paneMenuActions.ts#localMessages:1": { "copyFailed": {  }; "linkCopied": {  } };
     "src/lib/editor-split/tree.ts#localMessages:1": { "theCurrentPaneCouldnTBeFound": {  }; "youCanOpenUpToPanes": {  } };
     "src/lib/electron/attachments.ts#localMessages:1": { "attachmentTooLarge": { "size": string | number }; "attachmentWriteFailed": { "error": string | number }; "desktopIntegrationIsUnavailable": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
     "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
     "src/pages/workspace/components/ai-cards/FlashcardsCard.tsx#messages:1": { "flip": {  }; "next": {  }; "previous": {  }; "shuffle": {  } };
-    "src/pages/workspace/components/ai-cards/InfoCard.tsx#messages:1": { "crypto": {  }; "exchange": {  }; "stats": {  }; "unitConverter": {  }; "weather": {  }; "webResults": {  }; "worldTime": {  } };
   }
 }
