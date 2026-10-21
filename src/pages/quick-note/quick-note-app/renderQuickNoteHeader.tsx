@@ -12,8 +12,6 @@ zh-Hans:
   close: "关闭"
   helpLabel: "使用说明"
   helpTitle: "速记"
-  helpIntro: "保存后会打开主窗口，定位到这篇笔记。侧栏选中会切过去，文件夹件数一并算上它。这张速记会清空。"
-  helpSlots: "顶部 1–5 是五张各自独立的速记。"
 en:
   renameSlot: "Rename Quick Note {{slot}}"
   renameLabel: "Rename Quick Note"
@@ -25,8 +23,6 @@ en:
   close: "Close"
   helpLabel: "How to use"
   helpTitle: "Quick Note"
-  helpIntro: "Saving opens the main window and focuses that note. The sidebar selects it, and the folder count updates with it. This Quick Note is cleared."
-  helpSlots: "The numbers 1–5 are five separate notes."
 ja:
   renameSlot: "クイックノート {{slot}} の名前を変更"
   renameLabel: "クイックノートの名前を変更"
@@ -38,8 +34,6 @@ ja:
   close: "閉じる"
   helpLabel: "使い方"
   helpTitle: "クイックノート"
-  helpIntro: "保存するとメインウィンドウが開き、このノートが表示されます。サイドバーの選択もそのノートに切り替わり、フォルダの件数にも加算されます。このクイックノートは空になります。"
-  helpSlots: "上部の 1〜5 は、それぞれ独立した 5 つのクイックノートです。"
 `;
 const uiText = createTranslator(localMessages);
 import { Input } from "@/components/ui/input";
@@ -57,6 +51,8 @@ import {
 } from "@/components/ui/popover";
 import { QuickNoteSlotSwitcher } from "../QuickNoteSlotSwitcher";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
+import { getPlatformKind } from "@/lib/utils";
+import { quickNoteHelpLines } from "../quickNoteHelpCopy";
 import type { useQuickNoteWindowPlacement } from "./useQuickNoteWindowPlacement";
 
 export function renderQuickNoteHeader(
@@ -84,6 +80,7 @@ export function renderQuickNoteHeader(
     handlePreviewSlot,
     persistPlacementThenClose,
   } = context;
+  const [helpSlots, helpSwitch] = quickNoteHelpLines(getPlatformKind());
   return (
     <div
       className="quicknote-titlebar-reveal-zone"
@@ -196,8 +193,10 @@ export function renderQuickNoteHeader(
             >
               <div className="quicknote-help-heading">
                 <div className="text-sm font-medium">{uiText("helpTitle")}</div>
-                <p>{uiText("helpIntro")}</p>
-                <p>{uiText("helpSlots")}</p>
+                <ol className="quicknote-help-list goose-tabular">
+                  <li>{helpSlots}</li>
+                  <li>{helpSwitch}</li>
+                </ol>
               </div>
               <div className="quicknote-font-control">
                 <div className="flex items-center justify-between gap-2">

@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/stores/pages/actions/localFolder/moveToNotebook.ts#block1:1": { "nameExists": { "name": string | number } };
     "src/stores/pages/actions/localFolder/moveToNotebook.ts#block2:2": { "cannotMove": {  }; "moveIntoSelf": {  }; "sameFolder": {  }; "sameNotebook": {  }; "targetNotebookFolderMissing": {  }; "targetUnavailable": {  } };
     "src/stores/pages/actions/localFolder/pathGuards.ts#block1:1": { "nameUnavailable": {  } };
     "src/stores/pages/actions/localFolder/rename/directory.ts#block1:1": { "folderMissing": {  }; "fsUnavailable": {  }; "moveIncomplete": {  }; "moveRollbackPartial": {  }; "nameExists": {  }; "pathChanged": {  }; "readStoppedFolderMove": {  }; "resourceRefsFailed": {  }; "targetNotebookMissing": {  } };
