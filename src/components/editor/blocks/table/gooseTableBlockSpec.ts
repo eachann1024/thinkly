@@ -1,5 +1,12 @@
 import { defaultBlockSpecs } from "@blocknote/core/blocks";
-import type { Extension, ExtensionFactoryInstance } from "@blocknote/core";
+import type {
+  BlockFromConfigNoChildren,
+  Extension,
+  ExtensionFactoryInstance,
+  InlineContentSchema,
+  StyleSchema,
+} from "@blocknote/core";
+import type { TableHandlesState } from "@blocknote/core/extensions";
 import type { Node } from "@tiptap/core";
 
 function allowCoveredRows(extension: Extension): Extension {
@@ -45,3 +52,12 @@ export const gooseTableBlockSpec = {
     ? (context: Parameters<ExtensionFactoryInstance>[0]) => allowCoveredRows(original(context))
     : allowCoveredRows(original)),
 };
+
+export type GooseTableBlock = BlockFromConfigNoChildren<
+  typeof gooseTableBlockSpec.config,
+  InlineContentSchema,
+  StyleSchema
+>;
+
+// BlockNote 的 TableHandlesState 把 block 固定为默认表格 schema，看不到这里新增的 props。
+export type GooseTableHandlesState = Omit<TableHandlesState, "block"> & { block: GooseTableBlock };
