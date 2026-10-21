@@ -47,11 +47,15 @@ export function formatChangelogBullets(subjects) {
   return subjects.map((subject) => `- ${stripConventionalPrefix(subject)}`);
 }
 
+export function hasChangelogSection(changelog, version) {
+  return new RegExp(`^##[ \\t]+${version.replaceAll(".", "\\.")}[ \\t]*$`, "m")
+    .test(changelog.replace(/\r\n?/g, "\n"));
+}
+
 export function prependChangelogSection(changelog, version, bullets) {
   assert.ok(bullets.length > 0, "auto-release changelog needs at least one bullet");
   const text = changelog.replace(/\r\n?/g, "\n");
-  assert.ok(!new RegExp(`^##[ \\t]+${version.replaceAll(".", "\\.")}[ \\t]*$`, "m").test(text),
-    `CHANGELOG.md already has ## ${version}`);
+  assert.ok(!hasChangelogSection(text, version), `CHANGELOG.md already has ## ${version}`);
   const section = `## ${version}\n\n${bullets.join("\n")}\n`;
   if (text.startsWith("# 更新日志\n")) {
     return text.replace("# 更新日志\n", `# 更新日志\n\n${section}`);
@@ -59,11 +63,25 @@ export function prependChangelogSection(changelog, version, bullets) {
   return `${section}\n${text}`;
 }
 
+/** Insert the release section on tip CHANGELOG; keep tip content if the heading already exists. */
+export function ensureChangelogSection(changelog, version, bullets) {
+  const text = changelog.replace(/\r\n?/g, "\n");
+  if (hasChangelogSection(text, version)) return text;
+  return prependChangelogSection(text, version, bullets);
+}
+
+/** Change only the top-level "version" field; keep tip formatting and other keys. */
+export function setPackageJsonVersion(text, version) {
+  assert.match(version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+  assert.ok(/^[ \t]*"version"[ \t]*:/m.test(text), "package.json is missing a version field");
+  const updated = text.replace(/^([ \t]*"version"[ \t]*:[ \t]*)"(?:\\.|[^"\\])*"/m, `$1"${version}"`);
+  assert.equal(JSON.parse(updated).version, version, "failed to set package.json version");
+  return updated;
+}
+
 export function writePackageVersion(root, version) {
   const path = resolve(root, "package.json");
-  const pkg = JSON.parse(readFileSync(path, "utf8"));
-  pkg.version = version;
-  writeFileSync(path, `${JSON.stringify(pkg, null, 2)}\n`);
+  writeFileSync(path, setPackageJsonVersion(readFileSync(path, "utf8"), version));
 }
 
 export function writeReleasePlan(root, plan) {
@@ -78,9 +96,7 @@ export function applyReleasePlan(root, plan) {
   if (!plan.autoBump) return;
   assert.ok(Array.isArray(plan.bullets) && plan.bullets.length > 0, "autoBump plan needs changelog bullets");
   const changelogPath = resolve(root, "CHANGELOG.md");
-  const current = readFileSync(changelogPath, "utf8");
-  if (new RegExp(`^##[ \\t]+${plan.version.replaceAll(".", "\\.")}[ \\t]*$`, "m").test(current)) return;
-  writeFileSync(changelogPath, prependChangelogSection(current, plan.version, plan.bullets));
+  writeFileSync(changelogPath, ensureChangelogSection(readFileSync(changelogPath, "utf8"), plan.version, plan.bullets));
 }
 
 function git(root, args) {
