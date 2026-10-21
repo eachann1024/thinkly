@@ -5,8 +5,6 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/SearchEdi
 zh-Hans:
   backToTheFirstMatch_2870: "已回到第一处"
   backToTheLastMatch_e02d: "已回到最后一处"
-  notebook_1873: "笔记本"
-  showFullNotePath_cbcb: "查看笔记完整路径"
   searchMatchNavigation_00ab: "搜索命中导航"
   backToSearchResults_69e3: "返回搜索结果"
   searchResults_098f: "搜索结果"
@@ -20,8 +18,6 @@ zh-Hans:
 en:
   backToTheFirstMatch_2870: "Back to the first match"
   backToTheLastMatch_e02d: "Back to the last match"
-  notebook_1873: "Notebook"
-  showFullNotePath_cbcb: "Show full note path"
   searchMatchNavigation_00ab: "Search match navigation"
   backToSearchResults_69e3: "Back to search results"
   searchResults_098f: "Search results"
@@ -35,8 +31,6 @@ en:
 ja:
   backToTheFirstMatch_2870: "最初の一致に戻りました"
   backToTheLastMatch_e02d: "最後の一致に戻りました"
-  notebook_1873: "ノートブック"
-  showFullNotePath_cbcb: "ノートの完全なパスを表示"
   searchMatchNavigation_00ab: "検索一致のナビゲーション"
   backToSearchResults_69e3: "検索結果に戻る"
   searchResults_098f: "検索結果"
@@ -55,9 +49,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { ArrowLeft, ChevronDown, ChevronUp, X } from "@/components/ui/icons";
 import type { EditorRef } from "@/components/editor/core/Editor";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePages } from "@/stores/usePages";
-import { useNotebooks } from "@/stores/useNotebooks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/components/editor/core/headingSectionFold";
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
@@ -97,11 +89,9 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
   })));
   const page = usePages(s => s.pages[pageId]);
   const pages = usePages(s => s.pages);
-  const notebooks = useNotebooks(s => s.notebooks);
   const [count, setCount] = useState(0);
   const [current, setCurrent] = useState(0);
   const [message, setMessage] = useState("");
-  const [pathOpen, setPathOpen] = useState(false);
   const frame = useRef(0);
   const handled = useRef(0);
   const previouslyVisible = useRef(false);
@@ -223,26 +213,21 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     if (showChrome && paneFocused.current) scrollRef.current?.focus({ preventScroll: true });
   }, [showChrome, scrollRef]);
   useEffect(() => {
-    if (!showChrome || !focused) { setPathOpen(false); return; }
+    if (!showChrome || !focused) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || event.keyCode === 229) return;
       if (document.querySelector('[role="dialog"], [role="menu"]')) return;
       if (event.key === "F3" && !document.querySelector("[data-goose-find-in-page]")) { event.preventDefault(); step(event.shiftKey ? -1 : 1); }
-      if (event.key === "Escape" && !pathOpen && !document.querySelector("[data-goose-find-in-page]")) { event.preventDefault(); close(); }
+      if (event.key === "Escape" && !document.querySelector("[data-goose-find-in-page]")) { event.preventDefault(); close(); }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [showChrome, focused, pathOpen, key]);
+  }, [showChrome, focused, key]);
   if (!showChrome || !page) return null;
-  const crumbs = [getPageTitle(page)];
-  const seen = new Set([page.id]); let parentId = page.parentId;
-  while (parentId && pages[parentId] && !seen.has(parentId)) { seen.add(parentId); crumbs.unshift(getPageTitle(pages[parentId])); parentId = pages[parentId].parentId; }
-  crumbs.unshift(notebooks[page.workspaceId]?.name ?? uiText("notebook_1873"));
   const titleOnly = !count && session.query.trim() && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase());
   const originId = session.originPageId;
   const canReturn = Boolean(originId && originId !== pageId && pages[originId]);
-  return <>
-    <div className="search-editor-path"><Popover open={pathOpen} onOpenChange={setPathOpen}><PopoverTrigger asChild><Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("showFullNotePath_cbcb")} title={crumbs.join(" / ")}>{crumbs.length > 2 ? `${crumbs[0]} / ${crumbs.at(-2)}` : crumbs.join(" / ")}</Button></PopoverTrigger><PopoverContent align="end" className="max-w-[min(24rem,85vw)] break-words text-sm">{crumbs.join(" / ")}</PopoverContent></Popover></div>
+  return (
     <div className="search-editor-matchbar" aria-label={uiText("searchMatchNavigation_00ab")}>
       <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("backToSearchResults_69e3")} onClick={() => { closeNotebookAiIfFullscreen(); useSearchSession.getState().reopenSheet(); }}><ArrowLeft size={16}/><span>{uiText("searchResults_098f")}</span></Button>
       <span role="status">{count ? uiText("matchPosition", { current, count }) : titleOnly ? uiText("titleMatch_92f9") : uiText("noMatchesInNoteContent_997e")}</span>
@@ -252,5 +237,5 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       {canReturn && <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" onClick={() => originId && useSearchSession.getState().targetPage(originId, false, session.originScrollTop)}>{uiText("backToOriginalNote_7521")}</Button>}
       <IconButton size="xs" className="p-0" aria-label={uiText("exitSearch_3633")} onClick={close}><X size={16}/></IconButton>
     </div>
-  </>;
+  );
 }
