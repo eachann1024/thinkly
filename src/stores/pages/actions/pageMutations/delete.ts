@@ -8,6 +8,15 @@ import {
   removePersistedPageSnapshots,
 } from "../../persistence";
 import { runWithPresence } from "@/lib/ui/presence";
+import {
+  clearDeleteFailure,
+  isMissingFileError,
+  rememberDeleteFailure,
+} from "@/lib/delete-failure";
+import {
+  acquireLocalPageFileOperation,
+  discardPendingLocalSave,
+} from "../../folderSync";
 
 /**
  * 删除后把侧栏的键盘焦点/选中同步到新的合理行。
@@ -44,6 +53,7 @@ export const deletePageAction = async (
   options?: { trashBatchId?: string; onLocalTrash?: (token: string) => void },
 ): Promise<boolean> => {
   flushEditorContent();
+  clearDeleteFailure();
   const page = get().pages[id];
   if (!page) return false;
 
@@ -64,82 +74,111 @@ export const deletePageAction = async (
       }
     };
 
-    // 路径优先从 page.localFilePath 取（稳定 id 后是主路径来源）。
-    const targetPath = page.localFilePath || resolvePathFromId(id);
-    if (!targetPath || !window.gooseFs) return false;
+    // 新建会先把笔记放进侧栏，文件可能还在写。先丢掉未发出的保存，再等当前写盘结束。
+    discardPendingLocalSave(id);
+    const releaseFileOperation = await acquireLocalPageFileOperation(id);
+    try {
+      const current = get().pages[id];
+      if (!current) return true;
+      if (!window.gooseFs) {
+        rememberDeleteFailure(new Error("desktop-unavailable"));
+        return false;
+      }
+      // 路径优先从 page.localFilePath 取（稳定 id 后是主路径来源）。
+      const targetPath = current.localFilePath || resolvePathFromId(id);
 
-    const removedIds = new Set<string>();
-    const stack = [id];
-    const snapshotPages = get().pages;
-    const expandedIds =
-      useSidebarView.getState().expandedByNotebook[page.workspaceId] ?? [];
-    while (stack.length) {
-      const currentId = stack.pop()!;
-      removedIds.add(currentId);
-      Object.values(snapshotPages).forEach((p) => {
-        if (p.parentId === currentId) stack.push(p.id);
-      });
-    }
-    const sidebarView = useSidebarView.getState();
-    const removedFocusedOrSelected =
-      removedIds.has(sidebarView.focusedByNotebook[page.workspaceId] || "") ||
-      removedIds.has(sidebarView.selectedByNotebook[page.workspaceId] || "");
-    const nextSelectionPageId = removedFocusedOrSelected
-      ? resolveVisibleRowAfterDeletion({
-          pages: snapshotPages,
-          currentPage: page,
-          removedIds,
-          isLocalNotebook: true,
-          expandedIds,
-        })
-      : undefined;
-
-    const token = window.gooseFs.trashWithUndo
-      ? await window.gooseFs.trashWithUndo(targetPath)
-      : null;
-    const removeOk = window.gooseFs.trashWithUndo
-      ? Boolean(token)
-      : page.isFolder
-        ? await window.gooseFs.deleteDir(targetPath)
-        : await window.gooseFs.deleteFile(targetPath);
-    if (!removeOk) return false;
-
-    runWithPresence(() => set((state) => {
-      const newPages = { ...state.pages };
-      removedIds.forEach((pid) => delete newPages[pid]);
-
-      let nextActivePageId = state.activePageId;
-      if (removedIds.has(state.activePageId || "")) {
-        nextActivePageId = resolveVisibleRowAfterDeletion({
-          pages: state.pages,
-          currentPage: page,
-          removedIds,
-          isLocalNotebook: true,
-          expandedIds,
+      const removedIds = new Set<string>();
+      const stack = [id];
+      const snapshotPages = get().pages;
+      const expandedIds =
+        useSidebarView.getState().expandedByNotebook[current.workspaceId] ?? [];
+      while (stack.length) {
+        const currentId = stack.pop()!;
+        removedIds.add(currentId);
+        Object.values(snapshotPages).forEach((p) => {
+          if (p.parentId === currentId) stack.push(p.id);
         });
-        useNotebooks
-          .getState()
-          .setLastActivePage(page.workspaceId, nextActivePageId);
+      }
+      const sidebarView = useSidebarView.getState();
+      const removedFocusedOrSelected =
+        removedIds.has(sidebarView.focusedByNotebook[current.workspaceId] || "") ||
+        removedIds.has(sidebarView.selectedByNotebook[current.workspaceId] || "");
+      const nextSelectionPageId = removedFocusedOrSelected
+        ? resolveVisibleRowAfterDeletion({
+            pages: snapshotPages,
+            currentPage: current,
+            removedIds,
+            isLocalNotebook: true,
+            expandedIds,
+          })
+        : undefined;
+
+      const fileExists = targetPath
+        ? window.gooseFs.existsAsync
+          ? await window.gooseFs.existsAsync(targetPath)
+          : window.gooseFs.exists(targetPath)
+        : false;
+      let token: string | null = null;
+      if (targetPath && fileExists) {
+        try {
+          if (window.gooseFs.trashWithUndo) {
+            token = await window.gooseFs.trashWithUndo(targetPath);
+            if (!token) throw new Error("trash-failed");
+          } else {
+            const removedFile = current.isFolder
+              ? await window.gooseFs.deleteDir(targetPath)
+              : await window.gooseFs.deleteFile(targetPath);
+            if (!removedFile) throw new Error("trash-failed");
+          }
+        } catch (error) {
+          const stillThere = window.gooseFs.existsAsync
+            ? await window.gooseFs.existsAsync(targetPath)
+            : window.gooseFs.exists(targetPath);
+          if (!isMissingFileError(error) && stillThere) {
+            rememberDeleteFailure(error);
+            return false;
+          }
+        }
       }
 
-      return {
-        pages: newPages,
-        activePageId: nextActivePageId,
-      };
-    }));
+      runWithPresence(() => set((state) => {
+        const newPages = { ...state.pages };
+        removedIds.forEach((pid) => delete newPages[pid]);
 
-    syncSidebarSelectionAfterDelete(
-      page.workspaceId,
-      removedIds,
-      get,
-      nextSelectionPageId,
-    );
+        let nextActivePageId = state.activePageId;
+        if (removedIds.has(state.activePageId || "")) {
+          nextActivePageId = resolveVisibleRowAfterDeletion({
+            pages: state.pages,
+            currentPage: current,
+            removedIds,
+            isLocalNotebook: true,
+            expandedIds,
+          });
+          useNotebooks
+            .getState()
+            .setLastActivePage(current.workspaceId, nextActivePageId);
+        }
 
-    removePersistedPageSnapshots(snapshotPages, removedIds);
+        return {
+          pages: newPages,
+          activePageId: nextActivePageId,
+        };
+      }));
 
-    if (token) options?.onLocalTrash?.(token);
+      syncSidebarSelectionAfterDelete(
+        current.workspaceId,
+        removedIds,
+        get,
+        nextSelectionPageId,
+      );
 
-    return true;
+      removePersistedPageSnapshots(snapshotPages, removedIds);
+
+      if (token) options?.onLocalTrash?.(token);
+      return true;
+    } finally {
+      releaseFileOperation();
+    }
   }
 
   const workspaceId = page.workspaceId;
