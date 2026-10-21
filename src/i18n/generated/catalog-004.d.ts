@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/sidebar/LocalFolderTargetPicker.tsx#localMessages:1": { "filesImported": { "count": string | number }; "filesSkipped": { "count": string | number }; "importFailed_fddc": {  }; "importTo_5a85": {  }; "moveTo_86ed": {  }; "noMatchingFolders_6b46": {  }; "noOtherNotebooksAvailable_35ba": {  }; "searchFoldersOrPaths_40c6": {  }; "searchOtherNotebooks_c47c": {  }; "textFileImported_376b": {  }; "theFileCouldNotBeParsed_8954": {  } };
     "src/pages/workspace/components/sidebar/NotebookEditDialog.tsx#localMessages:1": { "cancel_625f": {  }; "changeTheNotebookNameIconAnd_0816": {  }; "deleteThisNotebook_8601": {  }; "delete_631c": {  }; "editNotebook_ed4e": {  }; "enterANotebookName_9843": {  }; "excludeFromGlobalSearch_0025": {  }; "excludeThisNotebookWhenSearchingAll_add2": {  }; "notebookName_1be5": {  }; "permanentlyDeleteNotebook_f65f": {  }; "removeLocalFolder_505d": {  }; "removeThisNotebook_54d3": {  }; "remove_e2cf": {  }; "save_be5f": {  }; "thisActionCannotBeUndone_a002": {  }; "thisOnlyRemovesTheFolderFrom_f45b": {  } };
     "src/pages/workspace/components/sidebar/NotebookIconSelector.tsx#localMessages:1": { "all_a8b0": {  }; "availableIcons_29dd": {  }; "chooseIcon": { "label": string | number }; "iconCategories_7ee8": {  }; "noMatchingIcons_f8cb": {  }; "notebookIcon_cdc6": {  }; "random_3bde": {  }; "randomizeIcon": { "label": string | number }; "resetIcon": { "label": string | number }; "resetToDefaults_7468": {  }; "searchIcon": { "label": string | number }; "searchIcons_c320": {  } };
     "src/pages/workspace/components/sidebar/NotebookSwitcher.tsx#localMessages:1": { "currentNotebook": { "kind": string | number; "name": string | number }; "notebook_0021": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };
     "src/stores/pages/actions/localFolder/move.ts#block1:1": { "moveFailed": { "reason": string | number }; "nameExists": { "name": string | number } };
     "src/stores/pages/actions/localFolder/move.ts#block2:2": { "fsUnavailable": {  }; "moveFailed": {  }; "moveIntoSelf": {  }; "notebookMissing": {  }; "pageUnavailable": {  }; "readStoppedMove": {  }; "resourceMoved": {  }; "resourceRolledBack": {  }; "targetFolderMissing": {  }; "writeResourceFailed": {  } };
-    "src/stores/pages/actions/localFolder/moveToNotebook.ts#block1:1": { "nameExists": { "name": string | number } };
   }
 }
