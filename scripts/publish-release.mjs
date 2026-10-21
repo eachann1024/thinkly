@@ -148,7 +148,14 @@ async function main() {
     if (uploaded.draft) gh(["release", "edit", tag, "--repo", REPO, "--draft=false", "--latest"]);
     const published = findRelease(tag);
     verifyReleaseSource(published, tag, sha);
-    publishMetadata(publishedDownloadMetadata(published), tag);
+    const files = publishedDownloadMetadata(published);
+    // Auto-bump builds from a source commit that still has the old package.json; write the
+    // effective version and generated CHANGELOG back with the download manifests.
+    if (process.env.AUTO_BUMP === "true") {
+      files["package.json"] = readFileSync(join(ROOT, "package.json"), "utf8");
+      files["CHANGELOG.md"] = readFileSync(join(ROOT, "CHANGELOG.md"), "utf8");
+    }
+    publishMetadata(files, tag);
     console.log(`Published and verified ${tag} in ${REPO}.`);
   } finally {
     rmSync(stage, { recursive: true, force: true });
