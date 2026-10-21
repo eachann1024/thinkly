@@ -34,7 +34,7 @@ export function SidebarMoveSubmenu({
       </ContextMenuSubTrigger>
       <ContextMenuSubContent
         aria-label={uiText("moveToAnotherNotebook_da86")}
-        className="goose-sidebar-context-menu w-[var(--goose-menu-min-width)] max-h-[min(18rem,calc(100dvh-16px))]"
+        className="goose-sidebar-context-menu max-h-[min(18rem,calc(100dvh-16px))]"
       >
         {notebooks.map((notebook) => (
           <ContextMenuItem
