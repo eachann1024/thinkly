@@ -38,37 +38,16 @@
   flex: 0 0 auto;
 }
 
-.quicknote-help-heading p {
-  margin: 4px 0 0;
-  color: hsl(var(--muted-foreground));
-}
-
 .quicknote-help-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  margin: 0;
-  padding: 0 4px 0 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 0 0 1.5em;
+  color: hsl(var(--muted-foreground));
+  list-style: decimal;
+  list-style-position: outside;
 }
 
 .quicknote-help-list li + li {
-  margin-top: 8px;
-}
-
-.quicknote-help-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.quicknote-help-list::-webkit-scrollbar-thumb {
-  border-radius: 3px;
-  background: hsl(var(--muted-foreground) / 0.25);
-}
-
-.quicknote-help-list::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+  margin-top: 4px;
 }
 
 .quicknote-font-control {
