@@ -108,7 +108,7 @@ export const SidebarMainTree = memo(function SidebarMainTree(props: SidebarMainT
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent
-          className="goose-sidebar-context-menu w-48"
+          className="goose-sidebar-context-menu"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
           <ContextMenuGroup>
@@ -158,7 +158,7 @@ export const SidebarMainTree = memo(function SidebarMainTree(props: SidebarMainT
         {renderMainTreeSurface(context)}
         {isLocalFolder && activeNotebookId && (
           <ContextMenuContent
-            className="goose-sidebar-context-menu w-48"
+            className="goose-sidebar-context-menu"
             onCloseAutoFocus={(event) => event.preventDefault()}
           >
             <ContextMenuGroup>

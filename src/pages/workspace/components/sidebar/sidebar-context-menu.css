@@ -1,3 +1,8 @@
+/* 宽度跟着标签和快捷键走。外壳另有最小宽度，macOS 短快捷键不会把菜单拉宽。 */
+.goose-sidebar-context-menu {
+  width: max-content;
+}
+
 .goose-sidebar-context-menu .goose-menu-item {
   display: flex;
   align-items: center;
@@ -13,4 +18,17 @@
 .goose-sidebar-context-menu .goose-menu-item > span {
   align-self: center;
   line-height: var(--goose-menu-item-line-height);
+}
+
+.goose-sidebar-context-menu .goose-menu-shortcut {
+  white-space: nowrap;
+}
+
+/* 带快捷键的标签不收缩、不省略；放不下时由菜单的 max-content 把宽度撑开。 */
+.goose-sidebar-context-menu .goose-menu-item:has(> .goose-menu-shortcut) > span:not(.goose-menu-shortcut) {
+  flex-shrink: 0;
+  min-width: max-content;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
