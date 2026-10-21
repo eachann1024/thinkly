@@ -124,7 +124,7 @@ export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
 
     const tagName = getHtmlTagName(trimmed);
     // 仅放行本应用可无损解析的表格，整段跳过，避免 tbody/tr 被逐行包成 raw。
-    if (tagName === "table" && /^<table\s+data-goose-table="v1"(?:\s|>)/i.test(trimmed)) {
+    if (tagName === "table" && /^<table\s+data-(?:thinkly|goose)-table="v1"(?:\s|>)/i.test(trimmed)) {
       let end = index;
       while (end < lines.length && !/<\/table>\s*$/i.test(lines[end].trim())) end += 1;
       if (end < lines.length) {
