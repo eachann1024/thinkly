@@ -264,6 +264,8 @@ export function DesktopTitleBar({
           {aiHeaderActions}
         </div>
       )}
+      {/* 设置页不渲染标题行；占位把最小化/最大化/关闭留在顶栏右侧。 */}
+      {settingsOpen ? <div className="min-w-0 flex-1" /> : null}
       {isFramelessElectron ? <WinWindowControls /> : null}
     </div>
   );
