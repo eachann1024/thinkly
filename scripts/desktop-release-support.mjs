@@ -74,15 +74,24 @@ export function verifyReleaseSource(release, tag, sha) {
     "Release tag must point to the selected source commit");
 }
 
-// Commit the download manifests together; a concurrent main push is retried without overwriting it.
-export function publishMetadata(files, tag) {
+export function readRepoFile(ref, path) {
+  const encoded = path.split("/").map(encodeURIComponent).join("/");
+  const data = JSON.parse(gh(["api", `repos/${REPO}/contents/${encoded}?ref=${encodeURIComponent(ref)}`]));
+  assert.equal(data.encoding, "base64", `expected base64 content for ${path}`);
+  return Buffer.from(String(data.content).replaceAll("\n", ""), "base64").toString("utf8");
+}
+
+// Commit download manifests together. Concurrent main pushes retry up to 3 times.
+// options.resolveFiles(head) may re-read tip files each attempt (auto-bump version writeback).
+export function publishMetadata(files, tag, options = {}) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     assertPublishVersion(versionFromTag(tag), tag, getReleases().filter((release) => !release.draft));
     const head = JSON.parse(gh(["api", `repos/${REPO}/git/ref/heads/main`])).object.sha;
     const commit = JSON.parse(gh(["api", `repos/${REPO}/git/commits/${head}`]));
+    const payload = { ...files, ...(options.resolveFiles?.(head) ?? {}) };
     const tree = JSON.parse(gh(["api", "--method", "POST", `repos/${REPO}/git/trees`, "--input", "-"], JSON.stringify({
       base_tree: commit.tree.sha,
-      tree: Object.entries(files).map(([path, content]) => ({ path, mode: "100644", type: "blob", content })),
+      tree: Object.entries(payload).map(([path, content]) => ({ path, mode: "100644", type: "blob", content })),
     })));
     if (tree.sha === commit.tree.sha) return;
     const next = JSON.parse(gh(["api", "--method", "POST", `repos/${REPO}/git/commits`, "--input", "-"], JSON.stringify({

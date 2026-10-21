@@ -13,7 +13,8 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertPublishVersion, compareVersions, getReleases, gh, publishMetadata, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
+import { ensureChangelogSection, setPackageJsonVersion } from "./desktop-auto-release.mjs";
+import { assertPublishVersion, compareVersions, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
@@ -149,13 +150,19 @@ async function main() {
     const published = findRelease(tag);
     verifyReleaseSource(published, tag, sha);
     const files = publishedDownloadMetadata(published);
-    // Auto-bump builds from a source commit that still has the old package.json; write the
-    // effective version and generated CHANGELOG back with the download manifests.
+    // Auto-bump: each writeback attempt reads tip package.json / CHANGELOG from main and only
+    // sets version / prepends the new section, so mid-build main edits are kept.
+    let resolveFiles;
     if (process.env.AUTO_BUMP === "true") {
-      files["package.json"] = readFileSync(join(ROOT, "package.json"), "utf8");
-      files["CHANGELOG.md"] = readFileSync(join(ROOT, "CHANGELOG.md"), "utf8");
+      const plan = JSON.parse(readFileSync(join(ROOT, "release-plan.json"), "utf8"));
+      assert.equal(plan.version, version, "release-plan version must match the published build");
+      assert.ok(Array.isArray(plan.bullets) && plan.bullets.length > 0, "autoBump writeback needs changelog bullets");
+      resolveFiles = (head) => ({
+        "package.json": setPackageJsonVersion(readRepoFile(head, "package.json"), version),
+        "CHANGELOG.md": ensureChangelogSection(readRepoFile(head, "CHANGELOG.md"), version, plan.bullets),
+      });
     }
-    publishMetadata(files, tag);
+    publishMetadata(files, tag, resolveFiles ? { resolveFiles } : {});
     console.log(`Published and verified ${tag} in ${REPO}.`);
   } finally {
     rmSync(stage, { recursive: true, force: true });
