@@ -4,7 +4,9 @@ import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/SettingsFeedback.tsx#localMessages:1">`
 zh-Hans:
   body_2c1e: "正文"
+  bodyPlaceholder_4f2a: "描述问题或建议"
   replyEmail_7a10: "回复邮箱"
+  replyEmailPlaceholder_8c19: "name@example.com"
   images_8d44: "图片"
   video_9b21: "视频"
   send_6e02: "发送"
@@ -18,7 +20,9 @@ zh-Hans:
   removeFile_c0a8: "移除{{name}}"
 en:
   body_2c1e: "Message"
+  bodyPlaceholder_4f2a: "Describe an issue or suggestion"
   replyEmail_7a10: "Reply email"
+  replyEmailPlaceholder_8c19: "name@example.com"
   images_8d44: "Images"
   video_9b21: "Video"
   send_6e02: "Send"
@@ -32,7 +36,9 @@ en:
   removeFile_c0a8: "Remove {{name}}"
 ja:
   body_2c1e: "本文"
+  bodyPlaceholder_4f2a: "問題や提案を入力"
   replyEmail_7a10: "返信メール"
+  replyEmailPlaceholder_8c19: "name@example.com"
   images_8d44: "画像"
   video_9b21: "動画"
   send_6e02: "送信"
@@ -125,6 +131,7 @@ export function SettingsFeedback() {
           rows={6}
           maxLength={4000}
           value={body}
+          placeholder={uiText("bodyPlaceholder_4f2a")}
           onChange={(event) => setBody(event.target.value)}
           className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
@@ -135,6 +142,7 @@ export function SettingsFeedback() {
           name="contact"
           type="email"
           value={contact}
+          placeholder={uiText("replyEmailPlaceholder_8c19")}
           onChange={(event) => setContact(event.target.value)}
           className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
         />
