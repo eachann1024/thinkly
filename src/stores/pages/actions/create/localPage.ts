@@ -28,7 +28,7 @@ export const createLocalPageAction = async (
   const id = await get().createLocalPageRecord({
     workspaceId, parentId, title: UNTITLED_PAGE_TITLE, content: createEmptyLocalPageContent(),
   });
-  if (!id) return null;
+  if (!id || !get().pages[id]) return null;
   set({ activePageId: id });
   useNotebooks.getState().setLastActivePage(workspaceId, id);
   focusNewPage(id);
@@ -179,8 +179,10 @@ export const createLocalPageRecordAction = async (
     return null;
   }
 
-  persistPageSnapshot(get().pages[id]);
-  // 手动顺序目录：新建条目追加到末尾，位置从此稳定
-  appendLocalFolderOrderEntries(workspaceId, [get().pages[id]]);
+  const persisted = get().pages[id];
+  // 写盘期间笔记已被删掉时，不要再写回顺序或激活它。
+  if (!persisted) return null;
+  persistPageSnapshot(persisted);
+  appendLocalFolderOrderEntries(workspaceId, [persisted]);
   return id;
 };

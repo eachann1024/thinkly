@@ -168,11 +168,16 @@ export const saveLocalPageContentUnlocked = async (
   // 保存前 diff 兜底：与磁盘快照比较（规范化后），完全相同则跳过写盘。
   // 防止「打开即写盘」——仅 normalize 或 frontmatter 无变化的情况触发的无意义落盘。
   if (isLocalMdUnchanged(filePath, diskContent)) {
-    // 内容未变，按成功处理，清除脏标记（如果有的话）。
-    set((s) => ({
-      dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
-    }));
-    return true;
+    const alreadyOnDisk = gooseFs.existsAsync
+      ? await gooseFs.existsAsync(filePath)
+      : gooseFs.exists(filePath);
+    // 快照还在、文件却没了（刚删掉又建同名空笔记）时必须重新写盘。
+    if (alreadyOnDisk) {
+      set((s) => ({
+        dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
+      }));
+      return true;
+    }
   }
 
   // ── 写盘前冲突检查 ──────────────────────────────────────────────────────────

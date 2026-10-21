@@ -40,7 +40,7 @@ const uiText = createTranslator(localMessages);
 import { RotateCcw } from "@/components/ui/icons";
 import { toast } from "./sonner";
 
-type ReceiptItem = { title: string; deleted: boolean };
+type ReceiptItem = { title: string; deleted: boolean; reason?: string };
 
 /** One receipt for one or many deletions; undo appears only when a real restore is available. */
 export function showDeleteReceipt(
@@ -51,11 +51,14 @@ export function showDeleteReceipt(
   if (!items.length) return;
   const done = items.filter((item) => item.deleted).length;
   const failed = items.length - done;
+  const failureReason = items.find((item) => !item.deleted && item.reason)?.reason;
   const destination = isLocalFolder ? uiText(getPlatformKind() === "windows" ? "systemRecycle" : "systemTrash") : uiText("trash");
   let undoing = false;
-  // ponytail: the receipt shows only outcome and undo; add a detail view if item-level diagnostics become necessary.
+  // 全部失败时直接展示具体原因；不要只说「N 项未完成」。
   const label = failed
-    ? done ? uiText("partialDelete", {done, failed}) : uiText("failedDelete", {failed})
+    ? !done && failureReason
+      ? failureReason
+      : done ? uiText("partialDelete", {done, failed}) : uiText("failedDelete", {failed})
     : items.length === 1
       ? uiText("deletedItem", {destination, title: items[0].title})
       : uiText("deletedMany", {done, destination});
@@ -82,7 +85,9 @@ export function showDeleteReceipt(
   } : undefined;
   const options = {
     duration: 8000,
-    className: "goose-delete-receipt-toast",
+    className: failed && !done && failureReason
+      ? "goose-delete-receipt-toast goose-delete-failure-toast"
+      : "goose-delete-receipt-toast",
     action,
   };
   id = failed ? toast.error(label, options) : toast.success(label, options);

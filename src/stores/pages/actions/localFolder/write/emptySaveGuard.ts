@@ -32,7 +32,7 @@ import type { JSONContent, Page } from "@/types";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { DiskWriteError } from "@/lib/diskWriteError";
 import { extractFrontmatter } from "@/lib/markdown-raw-guard";
-import { getLocalMdSnapshot, isDiskContentMatchingSnapshot } from "@/lib/local-md-snapshot";
+import { isDiskContentMatchingSnapshot } from "@/lib/local-md-snapshot";
 import { getRecoveryEntry } from "@/lib/storage/recoveryJournal";
 import { cloneLocalPageContent } from "../../create/content";
 import type { StoreGet } from "../../hydrate";
@@ -89,8 +89,8 @@ export async function prepareEmptyLocalWrite(
   try {
     const exists = gooseFs.existsAsync
       ? await gooseFs.existsAsync(filePath) : gooseFs.exists(filePath);
-    const previouslyRead = page.localReadState === "ready" || getLocalMdSnapshot(filePath) !== undefined;
-    if (exists || previouslyRead) {
+    // 文件已经不在磁盘上时没有原文可保护。残留快照不能拦住同名空笔记重新写盘。
+    if (exists) {
       const read = gooseFs.readFileAsync
         ? await gooseFs.readFileAsync(filePath) : gooseFs.readFile(filePath);
       if (typeof read !== "string") throw new Error("markdown-read-failed");
