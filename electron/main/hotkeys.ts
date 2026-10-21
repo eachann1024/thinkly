@@ -1,10 +1,10 @@
 import { globalShortcut, type BrowserWindow } from "electron";
 import {
-  electronAcceleratorAliases,
   electronAcceleratorsMatch,
   inputMatchesAccelerator,
   toElectronAccelerator,
 } from "../../src/lib/electron/accelerator";
+import { registerPlannedAccelerator } from "../../src/lib/electron/globalShortcutPlan";
 import { onBrowserWindowCreated } from "./windows";
 import {
   dispatchRegisteredGlobalHotkey,
@@ -103,17 +103,9 @@ function tryRegisterAccelerator(
   accelerator: string,
   callback: () => void,
 ): string {
-  for (const candidate of electronAcceleratorAliases(
-    accelerator,
-    process.platform,
-  )) {
-    try {
-      if (globalShortcut.register(candidate, callback)) return candidate;
-    } catch {
-      // try the next alias
-    }
-  }
-  return "";
+  return registerPlannedAccelerator(accelerator, process.platform, (candidate) =>
+    globalShortcut.register(candidate, callback),
+  );
 }
 
 function applyRegistration(keys: HotkeyRequest): {
