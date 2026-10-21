@@ -31,6 +31,14 @@ import type { Page } from "@/types";
 import { NotebookMark } from "./NotebookMark";
 import { SplitPaneMoreMenu } from "./SplitPaneMoreMenu";
 import { SplitPanePageMenu } from "./SplitPanePageMenu";
+import {
+  paneTitleChrome,
+  paneTitleGripBlur,
+  paneTitleGripFocus,
+  paneTitlePointerEnter,
+  paneTitlePointerIdle,
+  paneTitlePointerLeave,
+} from "./paneTitleChrome";
 import { isSplitHeaderBlankTarget, useSplitPaneMaximize } from "./useSplitPaneMaximize";
 
 export function SplitPaneHeader({
@@ -48,9 +56,50 @@ export function SplitPaneHeader({
 }) {
   useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pointer, setPointer] = useState(paneTitlePointerIdle);
+  const chrome = paneTitleChrome(pointer);
   const headerRef = useSplitPaneMaximize(tabId, leafId);
   const notebook = useNotebooks((state) =>
     page ? state.notebooks[page.workspaceId] : undefined,
+  );
+  const titleSlot = (
+    <div
+      className="editor-split-header-title-slot"
+      data-pane-title-chrome={chrome}
+      onPointerEnter={() => setPointer(paneTitlePointerEnter)}
+      onPointerLeave={() => setPointer(paneTitlePointerLeave)}
+    >
+      {page ? (
+        <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="siblings">
+          <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-page editor-split-header-title">
+            <NotebookName name={title} />
+          </Button>
+        </SplitPanePageMenu>
+      ) : (
+        <span className="editor-split-header-title" title={title}>{title}</span>
+      )}
+      <IconButton
+        size="sm"
+        tone="muted"
+        type="button"
+        className="editor-split-drag-handle"
+        data-split-drag-handle={leafId}
+        aria-label={uiText("movePane", { title })}
+        aria-describedby={`split-drag-help-${leafId}`}
+        title={uiText("dragToRearrangePanes")}
+        onFocus={(event) => {
+          const focusVisible = event.currentTarget.matches(":focus-visible");
+          setPointer((state) => paneTitleGripFocus(state, focusVisible));
+        }}
+        onBlur={() => setPointer(paneTitleGripBlur)}
+      >
+        <span className="editor-split-grip" aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
+        </span>
+      </IconButton>
+      <span id={`split-drag-help-${leafId}`} className="sr-only">
+        {uiText("dragToTheEdgeOfAnotherPane")}</span>
+    </div>
   );
   return (
     <div
@@ -81,32 +130,10 @@ export function SplitPaneHeader({
               <span className="editor-split-header-sep" aria-hidden="true">/</span>
             </>
           ) : null}
-          <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="siblings">
-            <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-page editor-split-header-title">
-              <NotebookName name={title} />
-            </Button>
-          </SplitPanePageMenu>
+          {titleSlot}
         </div>
-      ) : (
-        <span className="editor-split-header-title" title={title}>{title}</span>
-      )}
+      ) : titleSlot}
       <div className="editor-split-header-actions">
-        <IconButton
-          size="sm"
-          tone="muted"
-          type="button"
-          className="editor-split-drag-handle"
-          data-split-drag-handle={leafId}
-          aria-label={uiText("movePane", { title })}
-          aria-describedby={`split-drag-help-${leafId}`}
-          title={uiText("dragToRearrangePanes")}
-        >
-          <span className="editor-split-grip" aria-hidden="true">
-            {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
-          </span>
-        </IconButton>
-        <span id={`split-drag-help-${leafId}`} className="sr-only">
-          {uiText("dragToTheEdgeOfAnotherPane")}</span>
         <SplitPaneMoreMenu
           tabId={tabId}
           leafId={leafId}
