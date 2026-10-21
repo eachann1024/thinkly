@@ -152,6 +152,13 @@
  white-space: nowrap;
 }
 
+/* 失败原因是完整句子，换行显示，避免被收成看不懂的省略号。 */
+.goose-toaster [data-sonner-toast].goose-delete-failure-toast [data-title] {
+ overflow: visible;
+ text-overflow: unset;
+ white-space: normal;
+}
+
 .goose-toaster [data-sonner-toast].goose-delete-receipt-toast[data-front="false"] {
  visibility: hidden;
 }

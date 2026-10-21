@@ -68,6 +68,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { showDeleteReceipt } from "@/components/ui/delete-receipt";
+import { consumeDeleteFailureMessage, describeDeleteFailure, rememberDeleteFailure } from "@/lib/delete-failure";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useTabs } from "@/stores/useTabs";
@@ -181,9 +182,18 @@ export async function deletePageWithUndo(pageId: string) {
     });
   } catch (error) {
     console.error("[page-delete] delete failed", error);
+    rememberDeleteFailure(error);
   }
   if (!deleted) {
-    showDeleteReceipt([{ title: pageTitle, deleted: false }], isLocalFolder);
+    if (!usePages.getState().pages[pageId]) return;
+    showDeleteReceipt(
+      [{
+        title: pageTitle,
+        deleted: false,
+        reason: consumeDeleteFailureMessage() ?? describeDeleteFailure(new Error("trash-failed")),
+      }],
+      isLocalFolder,
+    );
     return;
   }
 
