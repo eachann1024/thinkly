@@ -20,9 +20,10 @@ const root = process.cwd();
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
 function ruleBodies(css: string, selector: string): string[] {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const bodies: string[] = [];
   const re = /([^{}]+)\{([^{}]*)\}/g;
-  for (let match = re.exec(css); match; match = re.exec(css)) {
+  for (let match = re.exec(clean); match; match = re.exec(clean)) {
     const selectors = match[1].split(",").map((item) => item.trim());
     if (selectors.includes(selector)) bodies.push(match[2]);
   }
@@ -67,7 +68,11 @@ export default async function run(): Promise<number> {
   check("更多和关闭仍留在页签右侧", actions.includes("SplitPaneMoreMenu") && actions.includes("editor-split-close"));
   check("操作组里没有拖拽把手", !actions.includes("editor-split-drag-handle") && !actions.includes("data-split-drag-handle"));
   check("名称槽用悬停状态切换", header.includes("data-pane-title-chrome={chrome}") && header.includes("paneTitlePointerEnter") && header.includes("paneTitlePointerLeave"));
-  check("没有页面路径条时名称槽仍然单独渲染", header.includes(": titleSlot"));
+  const returned = header.slice(header.indexOf("return ("));
+  const crumbBlock = returned.match(/editor-split-header-crumb[\s\S]*?<\/div>/);
+  const slotUse = returned.indexOf("{titleSlot}");
+  const actionsUse = returned.indexOf('className="editor-split-header-actions"');
+  check("名称槽在左侧路径和右侧操作之间，不嵌进路径", Boolean(crumbBlock) && !crumbBlock![0].includes("titleSlot") && slotUse > 0 && slotUse < actionsUse);
 
   console.log("· 样式");
   const css = read("src/pages/workspace/styles/editor-split-drag.css");
@@ -77,7 +82,10 @@ export default async function run(): Promise<number> {
   check("默认把手不占点击、透明收起", /opacity:\s*0/.test(hidden) && /pointer-events:\s*none/.test(hidden));
   check("悬停后把手出现并可拖", /opacity:\s*1/.test(shown) && /pointer-events:\s*auto/.test(shown));
   check("悬停后名称隐藏", /opacity:\s*0/.test(titleHidden));
-  check("把手叠在名称上，不挤进右侧操作", /position:\s*absolute/.test(hidden) && !css.includes(".editor-split-header-actions .editor-split-drag-handle"));
+  const slot = ruleBodies(css, ".editor-split-header-title-slot").join("\n");
+  const headerRule = ruleBodies(css, ".editor-split-header").join("\n");
+  check("页签左右等分，名称槽居中", /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\)/.test(headerRule) && /justify-self:\s*center/.test(slot));
+  check("把手在页签正中，不靠左也不靠右", /left:\s*50%/.test(hidden) && /translateX\(-50%\)/.test(hidden) && !/left:\s*0/.test(hidden) && !css.includes(".editor-split-header-actions .editor-split-drag-handle"));
 
   return checker.failed;
 }
