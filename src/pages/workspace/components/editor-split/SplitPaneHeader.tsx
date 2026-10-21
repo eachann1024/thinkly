@@ -117,22 +117,20 @@ export function SplitPaneHeader({
         setMenuOpen(true);
       }}
     >
-      {page ? (
-        <div className="editor-split-header-crumb">
-          {notebook ? (
-            <>
-              <NotebookMark notebook={notebook} />
-              <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="notebook-root">
-                <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-notebook">
-                  <NotebookName name={notebook.name} />
-                </Button>
-              </SplitPanePageMenu>
-              <span className="editor-split-header-sep" aria-hidden="true">/</span>
-            </>
-          ) : null}
-          {titleSlot}
-        </div>
-      ) : titleSlot}
+      <div className="editor-split-header-crumb">
+        {page && notebook ? (
+          <>
+            <NotebookMark notebook={notebook} />
+            <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="notebook-root">
+              <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-notebook">
+                <NotebookName name={notebook.name} />
+              </Button>
+            </SplitPanePageMenu>
+            <span className="editor-split-header-sep" aria-hidden="true">/</span>
+          </>
+        ) : null}
+      </div>
+      {titleSlot}
       <div className="editor-split-header-actions">
         <SplitPaneMoreMenu
           tabId={tabId}
