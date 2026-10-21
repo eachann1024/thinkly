@@ -27,6 +27,7 @@ import {
   getBlockElementWidth,
   getEvenColumnWidths,
 } from "./tableHandleSizing";
+import type { GooseTableHandlesState } from "../blocks/table/gooseTableBlockSpec";
 
 function deleteTableBlock(editor: any, block: any) {
   const previousBlock = editor.getPrevBlock(block);
@@ -55,7 +56,7 @@ export function useGooseTableHandle(
 ) {
   const editor = useBlockNoteEditor<any, any, any>();
   const tableHandles = useExtension(TableHandlesExtension);
-  const state = useExtensionState(TableHandlesExtension);
+  const state = useExtensionState(TableHandlesExtension) as GooseTableHandlesState | undefined;
   const [open, setOpen] = useState(false);
   const [deletionSnapshot, setDeletionSnapshot] =
     useState<TableDeletionSnapshot>();
