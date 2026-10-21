@@ -24,6 +24,7 @@ dist-ssr
 dist-editor/
 dist-electron/
 dist-desktop/
+release-plan.json
 default.profraw
 # Vite stubs live in src/lib/vite-stubs/ (NOT src/lib/build/).
 # Global ~/.gitignore_global has `build/`; a folder named build is dropped by
@@ -126,6 +127,8 @@ public/fonts/*.otf
 !scripts/publish-release.mjs
 !scripts/desktop-release-support.mjs
 !scripts/desktop-release-notes.mjs
+!scripts/desktop-auto-release.mjs
+!scripts/apply-desktop-release-plan.mjs
 !scripts/select-desktop-release.mjs
 !scripts/release-desktop.mjs
 !scripts/desktop-download-metadata.mjs

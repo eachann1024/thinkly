@@ -2,7 +2,8 @@ name: Desktop installers
 
 on:
   schedule:
-    # 每小时整点检查；已有同版本 release 则只跑判断。
+    # 每小时整点检查；同版本且无面向用户的新提交则只跑判断。
+    # 同版本但有面向用户提交时自动 patch+1，构建期写入生效版本，发版时与 updates/Casks 一并写回 main。
     - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
@@ -22,6 +23,7 @@ on:
 permissions:
   contents: read
 
+# schedule 与 workflow_dispatch 共用，避免并行跑出发两个版本。
 concurrency:
   group: desktop-installers-${{ github.ref }}
   cancel-in-progress: false
@@ -40,11 +42,14 @@ jobs:
       publish: ${{ steps.check.outputs.publish }}
       repair: ${{ steps.check.outputs.repair }}
       release_tag: ${{ steps.check.outputs.release_tag }}
+      version: ${{ steps.check.outputs.version }}
+      auto_bump: ${{ steps.check.outputs.auto_bump }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
+          fetch-depth: 0
       - name: Check version and choose publication
         id: check
         env:
@@ -53,6 +58,13 @@ jobs:
           FORCE: ${{ inputs.force == true }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: node scripts/select-desktop-release.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.check.outputs.should_build == 'true'
+        with:
+          name: release-plan-${{ env.SOURCE_SHA }}
+          path: release-plan.json
+          if-no-files-found: error
+          retention-days: 5
 
   source:
     name: Source archive
@@ -126,6 +138,12 @@ jobs:
       - name: Verify selected source commit
         shell: bash
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-plan-${{ env.SOURCE_SHA }}
+          path: .
+      - name: Apply effective release version before packaging
+        run: node scripts/apply-desktop-release-plan.mjs
       - name: Install Linux packaging tools
         if: matrix.platform == 'linux'
         run: sudo apt-get update && sudo apt-get install -y libarchive-tools
@@ -257,12 +275,17 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: downloaded-artifacts/
+      - name: Apply effective release version and changelog
+        run: |
+          cp downloaded-artifacts/release-plan-${SOURCE_SHA}/release-plan.json ./release-plan.json
+          node scripts/apply-desktop-release-plan.mjs
       - name: Collect exact build assets for publication
         run: node scripts/collect-release-assets.mjs
       - name: Publish installers, source and update feeds
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          AUTO_BUMP: ${{ needs.prepare.outputs.auto_bump }}
         run: node scripts/publish-release.mjs
 
   repair:
