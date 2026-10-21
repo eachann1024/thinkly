@@ -13,15 +13,16 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertPublishVersion, getReleases, gh, publishMetadata, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
+import { assertPublishVersion, compareVersions, getReleases, gh, publishMetadata, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
+// 1.7.317 及更早版本无法应用内升级，这些用户手动下载时拿到的是当时最新版，所以之后的版本都要带上。
 const MANUAL_UPGRADE_VERSION = "1.7.318";
 
 function manualUpgradeNotes(version) {
-  if (version !== MANUAL_UPGRADE_VERSION) return [];
+  if (compareVersions(version, MANUAL_UPGRADE_VERSION) < 0) return [];
   return [
     "### 从 1.7.317 升级",
     "",
