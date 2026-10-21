@@ -37,12 +37,30 @@ export function waitReadyToShow(
   });
 }
 
+/**
+ * Windows 前台锁会丢掉 globalShortcut 回调里的 show/focus，窗口停在后面。
+ * 先置顶再聚焦，SetForegroundWindow 才会生效；主窗随后取消置顶。
+ */
+function claimWindowsForeground(win: BrowserWindow): void {
+  const keepOnTop = win.isAlwaysOnTop();
+  win.setAlwaysOnTop(true);
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.moveTop();
+  win.focus();
+  if (!keepOnTop && !win.isDestroyed()) win.setAlwaysOnTop(false);
+}
+
 /** 全局热键唤出时必须抢前台；macOS 不 steal 时 frameless 小窗常常不出现。 */
 export function raiseWindow(win: BrowserWindow): void {
   if (win.isDestroyed()) return;
   workspacesHeldHidden.delete(win);
   if (win.isMinimized()) win.restore();
   setHiddenThrottle(win, false);
+  if (process.platform === "win32") {
+    claimWindowsForeground(win);
+    return;
+  }
   win.show();
   win.moveTop();
   win.focus();
@@ -108,6 +126,8 @@ export function raiseFloatingWindow(win: BrowserWindow): void {
     win.showInactive();
     win.moveTop();
     win.focus();
+  } else if (process.platform === "win32") {
+    claimWindowsForeground(win);
   } else {
     win.show();
     win.moveTop();

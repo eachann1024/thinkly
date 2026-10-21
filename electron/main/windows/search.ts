@@ -37,6 +37,14 @@ import { registry, SEARCH_IDLE_DESTROY_MS } from "./state";
 
 /** 渲染层首帧挂载完成后才显示，避免空白 root 闪一下。 */
 const RENDERER_READY_TIMEOUT_MS = 4000;
+/** Windows 上 show 常常先 blur 一次，失焦收起会把刚唤出的搜索窗立刻关掉。 */
+const SEARCH_SHOW_BLUR_GRACE_MS = 600;
+let suppressSearchBlurUntil = 0;
+
+function armSearchShowGuard(): void {
+  if (process.platform !== "win32") return;
+  suppressSearchBlurUntil = Date.now() + SEARCH_SHOW_BLUR_GRACE_MS;
+}
 const rendererReady = new WeakMap<BrowserWindow, { promise: Promise<void>; resolve: () => void }>();
 
 function trackRendererReady(win: BrowserWindow): void {
@@ -134,6 +142,7 @@ export function createSearchWindow(): BrowserWindow {
   // 焦点已离开，收起不会再触发 activate；点 Dock 带来的 activate 是真实意图，不压制。
   win.on("blur", () => {
     if (win.webContents.isDevToolsOpened()) return;
+    if (Date.now() < suppressSearchBlurUntil) return;
     hideSearchWindow({ suppressActivate: false });
   });
 
@@ -182,6 +191,7 @@ export async function showSearchWindow(): Promise<void> {
     win = created;
   }
   placeOnCursorDisplay(win);
+  armSearchShowGuard();
   raiseFloatingWindow(win);
   if (!win.webContents.isDestroyed()) win.webContents.send(SEARCH_WINDOW_SHOWN_CHANNEL);
 }
