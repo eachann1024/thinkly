@@ -78,6 +78,18 @@
 .goose-toaster [data-sonner-toast] [data-title],
 .goose-toaster [data-sonner-toast] [data-description] {
  line-height: var(--goose-toast-line) !important;
+ /* 无空格长串（路径、URL）也能断行，不撑破最大宽度。 */
+ overflow-wrap: anywhere;
+}
+
+/* 多行文案最多 4 行，超出省略，避免通知无限变高；单行省略的删除回执不参与。 */
+.goose-toaster [data-sonner-toast]:not(.goose-delete-receipt-toast) [data-title],
+.goose-toaster [data-sonner-toast]:not(.goose-delete-receipt-toast) [data-description] {
+ display: -webkit-box;
+ -webkit-box-orient: vertical;
+ -webkit-line-clamp: var(--goose-toast-max-lines, 4);
+ line-clamp: var(--goose-toast-max-lines, 4);
+ overflow: hidden;
 }
 
 /* 图标：固定盒尺寸，margin-top 让图标中心落在第一行中线。 */
@@ -152,9 +164,8 @@
  white-space: nowrap;
 }
 
-/* 失败原因是完整句子，换行显示，避免被收成看不懂的省略号。 */
+/* 失败原因是完整句子，换行显示（仍受 4 行上限），避免被收成看不懂的单行省略号。 */
 .goose-toaster [data-sonner-toast].goose-delete-failure-toast [data-title] {
- overflow: visible;
  text-overflow: unset;
  white-space: normal;
 }
