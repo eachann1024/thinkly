@@ -1,7 +1,8 @@
-/* 分屏标题栏：左侧笔记本与笔记，右侧更多和关闭。拖拽把手平时收起，悬停名称时顶替名称。 */
+/* 分屏标题栏：左侧笔记本，名称在正中；悬停时把手顶替名称，仍在正中。右侧是更多和关闭。 */
 .editor-split-header {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   flex-shrink: 0;
   height: 32px;
@@ -14,8 +15,8 @@
 .editor-split-header-crumb {
   display: flex;
   align-items: center;
+  justify-self: start;
   gap: 6px;
-  flex: 1;
   min-width: 0;
   overflow: hidden;
 }
@@ -72,28 +73,36 @@
 .editor-split-header-title-slot {
   position: relative;
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
+  justify-content: center;
+  justify-self: center;
   align-self: stretch;
   min-width: 0;
+  max-width: 100%;
 }
 
 .editor-split-header-title-slot > :not(.editor-split-drag-handle, .sr-only) {
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
+  justify-content: center;
   min-width: 0;
+  max-width: 100%;
 }
 
 .editor-split-header-page,
 .editor-split-header-title-slot .editor-split-header-title {
-  flex: 1 1 auto;
+  justify-content: center;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: var(--goose-text-primary);
   font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.editor-split-header-title-slot .goose-notebook-name {
+  flex: 0 1 auto;
 }
 
 .editor-split-header-sep {
@@ -119,7 +128,7 @@
 
 .editor-split-header-actions {
   display: flex;
-  flex: none;
+  justify-self: end;
   align-items: center;
   gap: 2px;
 }
@@ -148,13 +157,14 @@
 
 .editor-split-header-title-slot .editor-split-drag-handle {
   position: absolute;
-  left: 0;
+  left: 50%;
   top: 0;
   bottom: 0;
   z-index: 1;
   margin-block: auto;
   opacity: 0;
   pointer-events: none;
+  transform: translateX(-50%);
 }
 
 .editor-split-header-title-slot[data-pane-title-chrome="grip"] .editor-split-drag-handle {
@@ -212,17 +222,14 @@
 .editor-split-surface--zoomed .editor-split-drag-handle {
   visibility: hidden;
 }
-
 .editor-split-rearranging,
 .editor-split-rearranging * {
   cursor: grabbing !important;
   user-select: none !important;
 }
-
 .editor-split-surface[data-pane-dragging] .editor-split-pane-body {
   pointer-events: none;
 }
-
 .editor-split-drag-layer {
   position: absolute;
   inset: 0;
@@ -231,7 +238,6 @@
   overflow: hidden;
   border-radius: 12px;
 }
-
 .editor-split-drop-preview {
   position: absolute;
   display: grid;
@@ -243,7 +249,6 @@
   box-shadow: inset 0 0 0 1px hsl(var(--background) / 0.45);
   animation: split-drop-appear 120ms ease-out;
 }
-
 .editor-split-drop-label {
   max-width: calc(100% - 12px);
   overflow: hidden;
@@ -258,7 +263,6 @@
   font-weight: var(--font-weight-medium);
   box-shadow: 0 3px 12px hsl(var(--foreground) / 0.06);
 }
-
 .editor-split-drag-ghost {
   position: absolute;
   display: flex;
@@ -274,13 +278,11 @@
   box-shadow: 0 7px 24px hsl(var(--foreground) / 0.13), 0 1px 3px hsl(var(--foreground) / 0.06);
   font-size: 12px;
 }
-
 .editor-split-drag-ghost > span:last-child {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .editor-split-ghost-grip {
   flex: none;
   width: 9px;
@@ -288,12 +290,10 @@
   color: var(--goose-accent-text);
   background: radial-gradient(circle, currentColor 1px, transparent 1.5px) 0 0 / 5px 5px;
 }
-
 @keyframes split-drop-appear {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .editor-split-drag-handle { transition: none; }
   .editor-split-drop-preview { animation: none; }
