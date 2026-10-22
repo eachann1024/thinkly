@@ -24,7 +24,20 @@ export {
 export { isCrossCellPointer } from "./tableCellSelectionDom";
 
 type CellRect = { top: number; right: number; bottom: number; left: number };
+const ANCHOR_FRAME = "goose-table-selection-anchor";
 const tableRects = new WeakMap<Node, Map<number, CellRect>>();
+
+/** 多格选区只描外轮廓。锚点内框会在选区左上角再叠一层，只留给单独一格。 */
+export function tableCellPaintsAnchorFrame(anchorPos: number, headPos: number): boolean {
+  return anchorPos === headPos;
+}
+
+function selectionFrameClass(edges: Array<string | false>, anchorFrame: boolean): string {
+  return [
+    ...edges.filter((edge): edge is string => Boolean(edge)).map((edge) => `goose-table-selection-${edge}`),
+    anchorFrame && ANCHOR_FRAME,
+  ].filter(Boolean).join(" ");
+}
 
 function getCellRects(table: Node, map: TableMap) {
   const cached = tableRects.get(table);
@@ -65,6 +78,7 @@ function windowedCellDecorations(state: EditorState, selection: CellSelection): 
     }
   }
   const anchorPos = selection.$anchorCell.pos;
+  const singleCell = tableCellPaintsAnchorFrame(anchorPos, selection.$headCell.pos);
   const decorations: Decoration[] = [];
   rows.forEach((row) => {
     for (let col = rect.left; col < rect.right; col += 1) {
@@ -80,10 +94,7 @@ function windowedCellDecorations(state: EditorState, selection: CellSelection): 
         col === rect.left && "left",
       ].filter(Boolean);
       decorations.push(Decoration.node(pos, pos + node.nodeSize, {
-        class: [
-          ...edges.map((edge) => `goose-table-selection-${edge}`),
-          pos === anchorPos && "goose-table-selection-anchor",
-        ].filter(Boolean).join(" "),
+        class: selectionFrameClass(edges, pos === anchorPos && singleCell),
       }));
     }
   });
@@ -107,7 +118,8 @@ function fullCellDecorations(state: EditorState) {
     cells.push({ pos, size: node.nodeSize });
   });
   const selected = new Set(cells.map(({ pos }) => pos - tableStart));
-  const anchorPos = (state.selection as CellSelection).$anchorCell.pos;
+  const anchorPos = selection.$anchorCell.pos;
+  const singleCell = tableCellPaintsAnchorFrame(anchorPos, selection.$headCell.pos);
   const decorations = cells.map(({ pos, size }) => {
     const { top, right, bottom, left } = rects.get(pos - tableStart)!;
     const outside = (row: number, col: number) =>
@@ -127,13 +139,17 @@ function fullCellDecorations(state: EditorState) {
       rows.every((row) => outside(row, left - 1)) && "left",
     ].filter(Boolean);
     return Decoration.node(pos, pos + size, {
-      class: [
-        ...edges.map((edge) => `goose-table-selection-${edge}`),
-        pos === anchorPos && "goose-table-selection-anchor",
-      ].filter(Boolean).join(" "),
+      class: selectionFrameClass(edges, pos === anchorPos && singleCell),
     });
   });
   return DecorationSet.create(state.doc, decorations);
+}
+
+export function tableSelectionFrameClasses(state: EditorState): string[] {
+  return tableCellSelectionDecorations(state).find().map((decoration) => {
+    const attrs = (decoration as unknown as { type?: { attrs?: { class?: string } } }).type?.attrs;
+    return attrs?.class ?? "";
+  });
 }
 
 const SPAN_CELL_CLASS = "goose-table-span-cell";
