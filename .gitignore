@@ -159,4 +159,3 @@ dist-signpath/
 *.wav
 *.mp3
 *.m4a
-!public/intro/goose-intro.mp4

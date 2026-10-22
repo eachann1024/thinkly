@@ -1,11 +1,8 @@
 import { useLocale } from "@/i18n";
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
 import { CharacterOnboarding } from "@/pages/workspace/components/character-onboarding/CharacterOnboarding";
-import { isCharacterGuideVisible } from "@/lib/characterGuide";
-import { IntroVideoOverlay } from "@/pages/workspace/components/intro-video/IntroVideoOverlay";
-import { useIntroVideo } from "@/stores/introVideo";
+import { firstRunSurface } from "@/lib/characterGuide";
 import { useEffect, useState } from "react";
-import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { useShallow } from "zustand/react/shallow";
 import { applyEditorCanvasAttributes } from "@/lib/editorCanvas";
 import { WorkspacePage } from "./pages/workspace/WorkspacePage";
@@ -57,11 +54,9 @@ function AppearanceSync() {
 function App() {
   useLocale();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
-  const showCharacterGuide = useSettings(isCharacterGuideVisible);
-  const showSetupGuide = useSettings(isSetupGuideVisible);
-  // 形象引导先于设置引导；两者任一可见时工作区隐藏。
-  const guideVisible = showCharacterGuide || showSetupGuide;
-  const introVideoOpen = useIntroVideo((state) => state.open);
+  // 没选过形象时先弹出选择，然后才是设置引导。欢迎动画已移除。
+  const surface = useSettings(firstRunSurface);
+  const guideVisible = surface !== "app";
   const [workspaceOpened, setWorkspaceOpened] = useState(false);
   const mountWorkspace = workspaceOpened || (settingsHydrated && !guideVisible);
 
@@ -154,14 +149,13 @@ function App() {
       <AppearanceSync />
       <PencilIconDefinitions />
       {mountWorkspace && (
-        <div hidden={guideVisible} inert={guideVisible || introVideoOpen} className="h-full">
+        <div hidden={guideVisible} inert={guideVisible} className="h-full">
           {/* Keep an existing editor mounted when reopening the guide. */}
           <WorkspacePage />
         </div>
       )}
-      <CharacterOnboarding />
-      {!showCharacterGuide && <SetupGuide />}
-      <IntroVideoOverlay />
+      {surface === "character" && <CharacterOnboarding />}
+      {surface === "setup" && <SetupGuide />}
       <AppUpdateDialog />
       <Toaster />
     </>

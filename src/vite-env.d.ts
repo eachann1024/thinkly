@@ -158,8 +158,6 @@ declare global {
     maximizeWindow: () => Promise<void>
     toggleMaximizeWindow: () => Promise<boolean>
     isWindowMaximized: () => Promise<boolean>
-    prepareWelcomeWindow: (reducedMotion?: boolean) => Promise<void>
-    restoreWelcomeWindow: () => Promise<void>
     finishTabDrag: (opts: {
       tab: { id: string; pageId: string; type?: string; workspaceId?: string }
       cursor: { x: number; y: number }

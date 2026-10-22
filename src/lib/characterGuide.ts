@@ -1,11 +1,38 @@
-import { CHARACTERS, findCharacter } from "@/components/ui/dot-matrix/character/registry";
+import { CHARACTERS } from "@/components/ui/dot-matrix/character/registry";
+import {
+  characterGuideShouldShow,
+  firstRunSurface as chooseFirstRunSurface,
+  type FirstRunSurface,
+} from "@/lib/characterChoice";
+
+export {
+  characterGuideShouldShow,
+  resolveStoredCharacterId,
+  type FirstRunSurface,
+} from "@/lib/characterChoice";
+
+export const KNOWN_CHARACTER_IDS: readonly string[] = CHARACTERS.map((item) => item.id);
 
 /** 首启形象引导：设置水合后，尚未选择（或所选形象已移除）时显示。 */
 export function isCharacterGuideVisible(settings: {
   _hasHydrated: boolean;
   characterId: string | null;
 }): boolean {
-  return settings._hasHydrated && CHARACTERS.length > 0 && !findCharacter(settings.characterId);
+  return characterGuideShouldShow({
+    hydrated: settings._hasHydrated,
+    characterId: settings.characterId,
+    knownCharacterIds: KNOWN_CHARACTER_IDS,
+  });
+}
+
+/** 新用户先选形象，再进设置引导。欢迎动画已去掉。 */
+export function firstRunSurface(settings: {
+  _hasHydrated: boolean;
+  characterId: string | null;
+  setupGuideSeen: boolean;
+  setupGuideOpen: boolean;
+}): FirstRunSurface {
+  return chooseFirstRunSurface(settings, KNOWN_CHARACTER_IDS);
 }
 
 export const CHARACTER_SETTINGS_ANCHOR = "character";

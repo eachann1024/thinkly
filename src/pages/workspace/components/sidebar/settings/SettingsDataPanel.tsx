@@ -5,21 +5,18 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/
 zh-Hans:
   dataManagement_2d71: "数据管理"
   gettingStarted_9a32: "新手引导"
-  replayAnimation_b9c4: "重播动画"
   restartSetupGuide_8ab0: "重新开始引导"
   cancel_625f: "取消"
   confirm_38cf: "确定"
 en:
   dataManagement_2d71: "Data management"
   gettingStarted_9a32: "Getting started"
-  replayAnimation_b9c4: "Replay animation"
   restartSetupGuide_8ab0: "Restart setup guide"
   cancel_625f: "Cancel"
   confirm_38cf: "Confirm"
 ja:
   dataManagement_2d71: "データ管理"
   gettingStarted_9a32: "はじめに"
-  replayAnimation_b9c4: "アニメーションを再生"
   restartSetupGuide_8ab0: "ガイドを最初からやり直す"
   cancel_625f: "キャンセル"
   confirm_38cf: "OK"
@@ -34,11 +31,9 @@ import { useDataPanelState } from "./data-panel/useDataPanelState";
 import { useWebdavConfiguration } from "./data-panel/useWebdavConfiguration";
 import { useWebdavSyncActions } from "./data-panel/useWebdavSyncActions";
 import { useWebdavRemoteActions } from "./data-panel/useWebdavRemoteActions";
-import { useIntroVideo } from "@/stores/introVideo";
 
 export function SettingsDataPanel(props: SettingsDataPanelProps) {
   useLocale();
-  const replayIntro = useIntroVideo((state) => state.show);
   const data = useDataPanelState(props);
   const configuration = useWebdavConfiguration(data);
   const sync = useWebdavSyncActions(configuration);
@@ -61,8 +56,6 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
         title={uiText("gettingStarted_9a32")}
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={replayIntro}>
-              {uiText("replayAnimation_b9c4")}</Button>
             <Button variant="outline" onClick={onRestartGuide}>
               {uiText("restartSetupGuide_8ab0")}</Button>
           </div>
