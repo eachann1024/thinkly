@@ -43,8 +43,9 @@ export function shouldRaiseMainWindow(state: {
 }
 
 /**
- * 唤出速记不得把此前已 hide 的 workspace 带回来。
- * 最小化不算 hide，由系统自己保持；只回收「不可见」的工作区窗。
+ * 唤出浮动窗不得把此前已 hide 的 workspace 带回来。
+ * 最小化不算 hide。macOS 上最小化窗口的 isVisible 也是 false，调用方必须先看 minimized，
+ * 见 floatingRaise.parkedWorkspaceKind。
  */
 export function shouldKeepWorkspaceHiddenAfterQuicknote(state: {
   visible: boolean;
