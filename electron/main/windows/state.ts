@@ -26,8 +26,14 @@ export const windowCreatedListeners = new Set<WindowCreatedListener>();
 export const quicknoteActivateSuppression =
   createQuicknoteActivateSuppression();
 
-/** 唤出速记时已 hide 的 workspace；macOS 随后 unhide 也必须再藏回去。 */
+/** 唤出浮动窗时已 hide 的 workspace；macOS 随后 unhide 也必须再藏回去。 */
 export const workspacesHeldHidden = new WeakSet<BrowserWindow>();
+
+/** 唤出浮动窗时已最小化的 workspace；macOS 激活应用会 deminiaturize，必须再最小化。 */
+export const workspacesHeldMinimized = new WeakSet<BrowserWindow>();
+
+/** minimize / hide 同步再触发 show 时，避免来回停放。 */
+export const workspaceParkLock = new WeakSet<BrowserWindow>();
 
 export const windowState = {
   lastTitleBarHeight: DEFAULT_TITLE_BAR_HEIGHT_PX,
