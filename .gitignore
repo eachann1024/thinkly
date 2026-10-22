@@ -84,6 +84,7 @@ scripts/*
 !scripts/generate-license-notices.mjs
 !scripts/generate-text-colors.mjs
 !scripts/run-task.mjs
+!scripts/typecheck.mjs
 !scripts/signpath-config.mjs
 !scripts/quark-api.mjs
 !scripts/quark-hash.mjs
