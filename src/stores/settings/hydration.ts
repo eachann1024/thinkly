@@ -20,6 +20,7 @@ import { normalizeLocalFontName } from "@/lib/fontLoader";
 import type { AISettings, DesktopSettings } from "./types";
 import { DEFAULT_WEBDAV_REMOTE_DIR } from "./slices/webdavSlice";
 import { normalizeWatermarkConfig } from "@/lib/imageExport";
+import { resolveStoredCharacterId } from "@/lib/characterChoice";
 
 export function hydrateSettings(state?: SettingsState) {
   if (state) {
@@ -30,7 +31,7 @@ export function hydrateSettings(state?: SettingsState) {
         : 180,
       setupGuideSeen: state.setupGuideSeen === true,
       setupGuideOpen: false,
-      characterId: typeof state.characterId === "string" ? state.characterId : null,
+      characterId: resolveStoredCharacterId(state.characterId),
     });
   }
   const theme = state?.theme || "system";
