@@ -36,7 +36,8 @@ import {
 } from "./layout";
 import { appQuitting } from "./registry";
 import { bindCloseTabAccelerator } from "./close";
-import { registry, workspacesHeldHidden, windowState } from "./state";
+import { restrainParkedWorkspace } from "./park";
+import { registry, windowState } from "./state";
 
 export function attachWorkspaceChrome(
   win: BrowserWindow,
@@ -58,10 +59,7 @@ export function attachWorkspaceChrome(
   });
 
   win.on("show", () => {
-    if (workspacesHeldHidden.has(win)) {
-      win.hide();
-      return;
-    }
+    if (restrainParkedWorkspace(win)) return;
     applyTrafficLightPosition(win);
     setHiddenThrottle(win, false);
     emitVisibilityChange();
@@ -89,6 +87,7 @@ export function attachWorkspaceChrome(
   });
 
   win.on("restore", () => {
+    if (restrainParkedWorkspace(win)) return;
     setHiddenThrottle(win, false);
     emitVisibilityChange();
   });
