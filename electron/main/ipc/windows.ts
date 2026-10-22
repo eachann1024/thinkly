@@ -15,7 +15,6 @@ import {
 } from "../windows";
 import { revealSavedMarkdownInWorkspace } from "../openMarkdownFiles";
 import { senderWindow } from "./common";
-import { prepareWelcomeWindow, restoreWelcomeWindow } from "../windows/welcome";
 
 export function registerWindowsIpc(): void {
   ipcMain.handle("desktop:setTitle", async (event, t: string) => {
@@ -105,18 +104,6 @@ export function registerWindowsIpc(): void {
   ipcMain.handle("desktop:isWindowMaximized", async (event) => {
     const win = senderWindow(event);
     return Boolean(win && !win.isDestroyed() && win.isMaximized());
-  });
-
-  ipcMain.handle("desktop:prepareWelcomeWindow", async (event, reducedMotion?: boolean) => {
-    const win = senderWindow(event);
-    if (!win || win.isDestroyed() || lookupWindowContext(win)?.kind !== "workspace") return;
-    await prepareWelcomeWindow(win, reducedMotion === true);
-  });
-
-  ipcMain.handle("desktop:restoreWelcomeWindow", async (event) => {
-    const win = senderWindow(event);
-    if (!win || win.isDestroyed() || lookupWindowContext(win)?.kind !== "workspace") return;
-    await restoreWelcomeWindow(win);
   });
 
   ipcMain.handle("desktop:finishTabDrag", async (event, payload) => {

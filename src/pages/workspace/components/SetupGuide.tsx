@@ -54,8 +54,6 @@ import { AppearanceEditorPreview } from "./sidebar/AppearanceEditorPreview";
 import { SettingsAppearance } from "./sidebar/SettingsAppearance";
 import { WinWindowControls } from "./page/WinWindowControls";
 import "./setup-guide.css";
-import { useIntroVideo } from "@/stores/introVideo";
-
 const STEPS = [
   { get label() { return uiText("appearance"); }, get title() { return uiText("customizeAppearance"); } },
   { get label() { return uiText("reading"); }, get title() { return uiText("adjustReadingPreferences"); } },
@@ -105,10 +103,8 @@ function SetupGuideFlow() {
     if (controlsRef.current) controlsRef.current.scrollTop = 0;
   }, [step]);
 
-  const closeGuide = (playIntro = false) => {
-    const firstRun = !useSettings.getState().setupGuideSeen;
+  const closeGuide = () => {
     useSettings.setState({ setupGuideSeen: true, setupGuideOpen: false });
-    if (firstRun && playIntro) useIntroVideo.getState().show();
   };
 
   const moveToStep = (nextStep: SetupStep) => {
@@ -214,7 +210,7 @@ function SetupGuideFlow() {
             <Button type="button" onClick={() => moveToStep(1)}>
               {uiText("next")}</Button>
           ) : (
-            <Button type="button" onClick={() => closeGuide(true)}>
+            <Button type="button" onClick={() => closeGuide()}>
               {uiText("finishSetup")}</Button>
           )}
         </div>

@@ -17,20 +17,23 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { CharacterPicker, DEFAULT_CHARACTER_ID, DotDecor } from "@/components/ui/dot-matrix";
 import { isCharacterGuideVisible } from "@/lib/characterGuide";
+import { UI_LAYERS } from "@/lib/uiLayers";
 import { useSettings } from "@/stores/useSettings";
 import { WinWindowControls } from "../page/WinWindowControls";
 import { getNativePlatform } from "../SetupGuide";
 import "../setup-guide.css";
 import "./character-onboarding.css";
 
-/** 首启形象引导：确认后写入设置，之后不再出现；随后接现有设置引导与欢迎动画。 */
+/** 首启形象引导：确认后写入设置，之后不再出现；随后接现有设置引导。 */
 export function CharacterOnboarding() {
   useLocale();
   const visible = useSettings(isCharacterGuideVisible);
-  return visible ? <CharacterOnboardingFlow /> : null;
+  if (!visible || typeof document === "undefined") return null;
+  return createPortal(<CharacterOnboardingFlow />, document.body);
 }
 
 const subscribeResize = (notify: () => void) => {
@@ -60,6 +63,7 @@ function CharacterOnboardingFlow() {
   return (
     <main
       className="setup-guide character-onboarding"
+      style={{ zIndex: UI_LAYERS.modal }}
       data-native-platform={nativePlatform}
       aria-labelledby="character-onboarding-title"
     >
