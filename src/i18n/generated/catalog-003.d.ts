@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
     "src/pages/workspace/components/ai-cards/FlashcardsCard.tsx#messages:1": { "flip": {  }; "next": {  }; "previous": {  }; "shuffle": {  } };
     "src/pages/workspace/components/ai-cards/InfoCard.tsx#messages:1": { "crypto": {  }; "exchange": {  }; "stats": {  }; "unitConverter": {  }; "weather": {  }; "webResults": {  }; "worldTime": {  } };
     "src/pages/workspace/components/ai-cards/QuizCard.tsx#messages:1": { "correct": {  }; "next": {  }; "result": {  }; "retry": {  }; "score": { "correct": string | number; "total": string | number }; "wrong": {  } };
@@ -40,7 +41,6 @@ declare module "../types" {
     "src/pages/workspace/components/history/history-view/historyViewPresentation.tsx#messages:1": { "automatic": {  }; "beforeChanges": {  }; "daysAgo": { "count": string | number }; "manual": {  }; "today": {  }; "yesterday": {  } };
     "src/pages/workspace/components/history/history-view/logic/useHistoryRestoreActions.tsx#messages:1": { "confirmRemoveMilestone": {  }; "confirmRestore": {  }; "couldNotMarkMilestone": {  }; "couldNotRemoveMilestone": {  }; "milestoneMarkedThisVersionWillBeKeptIndefinitely": {  }; "milestoneRemoved": {  }; "theVersionFileIsEmptyOrUnreadableIf": {  }; "thisVersionCouldNotBeRead": {  }; "thisVersionHasAnInvalidFormatAndCannot": {  }; "thisVersionHasDamagedMetadataAndCannotBe": {  }; "versionRestoredThePreviousContentWasSavedAs": {  } };
     "src/pages/workspace/components/history/history-view/logic/useHistoryViewState.tsx#messages:1": { "untitled": {  } };
-    "src/pages/workspace/components/intro-video/IntroVideoOverlay.tsx#localMessages:1": { "closeWelcomeAnimation": {  }; "closeWelcomeAnimationEsc": {  }; "muteWelcomeAnimation": {  }; "unmuteWelcomeAnimation": {  }; "welcomeVideo": {  } };
     "src/pages/workspace/components/notebook-ai/AiPanelResizeEdge.tsx#messages:1": { "detailPixels": { "value1": string | number }; "resizeAiPanel": {  }; "resizeAiPanelLeftAndRightArrowsHome": {  } };
     "src/pages/workspace/components/notebook-ai/ArtifactActions.tsx#messages:1": { "copyImage": {  }; "copySource": {  }; "detailCopyFailed": { "value1": string | number }; "detailDownloadFailed": { "value1": string | number }; "download": {  }; "downloadImage": {  }; "insertIntoCurrentNote": {  }; "insertedIntoCurrentNote": {  }; "saved": {  }; "unknownError": {  } };
     "src/pages/workspace/components/notebook-ai/ArtifactPanZoom.tsx#messages:1": { "diagramPreview": {  }; "fitToWindow": {  }; "zoomIn": {  }; "zoomInThenDragOrScrollToPan": {  }; "zoomOut": {  }; "zoomedDiagramDragOrScrollToPan": {  } };
