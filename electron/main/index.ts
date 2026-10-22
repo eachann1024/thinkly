@@ -19,7 +19,9 @@ import {
 import { lockWebContentsPageZoom } from "./pageZoom";
 import { pinUserDataDirectory } from "./migrateUserData";
 import { installPerfInstrumentation, markStartup, timeStartupPhase } from "./perf";
+import { releaseHeldWorkspace } from "../../src/lib/electron/heldWorkspace";
 import { createWorkspaceWindow, getMainWindow, markQuitting, restoreWorkspaceWindows, shouldSuppressWorkspaceActivate } from "./windows";
+import { workspacesHeldHidden } from "./windows/state";
 
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
 const DEFAULT_QUICKNOTE = "Alt+N";
@@ -81,6 +83,8 @@ function startApp(): void {
       }
       return;
     }
+    // 浮动窗把工作区按在隐藏集合里时，show 会立刻再藏回去。
+    releaseHeldWorkspace(workspacesHeldHidden, win);
     if (win.isMinimized()) win.restore();
     win.show();
     win.moveTop();
