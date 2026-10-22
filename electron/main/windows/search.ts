@@ -116,7 +116,11 @@ export function createSearchWindow(): BrowserWindow {
   bindWindowAppearance(win, false, false);
   if (isMac) {
     win.setWindowButtonVisibility(false);
-    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // 面板自己会加入全部空间。不改进程激活策略，避免 DockHide 把已最小化的主窗放出来。
+    win.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: true,
+      skipTransformProcessType: true,
+    });
     win.setAlwaysOnTop(true, "floating");
   }
 
