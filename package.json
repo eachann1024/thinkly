@@ -26,7 +26,7 @@
     "linux": "node scripts/run-task.mjs linux",
     "mac": "python3 build_mac.py",
     "window": "node scripts/run-task.mjs window",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "node scripts/typecheck.mjs -b --noEmit",
     "verify": "node scripts/verify/run.mjs"
   },
   "dependencies": {
@@ -137,6 +137,7 @@
     "magic-string": "^1.4.3",
     "postcss": "8.5.15",
     "tailwindcss": "^4",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1",
     "unimport": "5.6.0",
