@@ -1,13 +1,14 @@
 import { t } from "../i18n/updates";
 import { app } from "electron";
 import { execFile, spawn } from "node:child_process";
-import { access, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { access, lstat, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { constants, openSync, closeSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 import { markQuitting } from "../windows";
 import { flushBeforeUpdate } from "./save";
 import type { VerifiedUpdate } from "./release";
+import { describeFsError, discardDirectory, isMissingFile, replaceUpdateDirectory } from "./staging";
 
 const exec = promisify(execFile);
 const installedApp = () => path.resolve(process.execPath, "../../..");
@@ -28,10 +29,10 @@ async function validateBundle(bundle: string, version: string): Promise<void> {
 
 export async function prepareMacUpdate(update: VerifiedUpdate): Promise<void> {
   const directory = path.dirname(unpackedApp(update));
-  await rm(directory, { recursive: true, force: true });
-  await mkdir(directory, { recursive: true, mode: 0o700 });
-  await exec("/usr/bin/ditto", ["-x", "-k", update.path, directory]);
-  await validateBundle(unpackedApp(update), update.version);
+  await replaceUpdateDirectory(directory, async () => {
+    await exec("/usr/bin/ditto", ["-x", "-k", update.path, directory]);
+    await validateBundle(unpackedApp(update), update.version);
+  });
 }
 
 // Arguments stay separate from shell source, including app paths containing spaces.
@@ -97,7 +98,9 @@ async function installMac(update: VerifiedUpdate): Promise<void> {
       child.unref();
     } finally { closeSync(log); }
   } catch (error) {
-    await rm(stage, { recursive: true, force: true });
+    await discardDirectory(stage, { strict: false }).catch((cleanupError: unknown) => {
+      console.error(`[update] could not remove the install stage: ${describeFsError(cleanupError)}`);
+    });
     throw error;
   }
   markQuitting();
@@ -125,5 +128,7 @@ export async function cleanInstalledUpdate(update: VerifiedUpdate): Promise<void
       await writeFile(path.join(record.path, "started"), String(process.pid), { mode: 0o600 });
       await rm(stageRecord(), { force: true });
     }
-  } catch { /* No completed installation to clean up. */ }
+  } catch (error) {
+    if (!isMissingFile(error)) console.error(`[update] could not finish the install stage: ${describeFsError(error)}`);
+  }
 }
