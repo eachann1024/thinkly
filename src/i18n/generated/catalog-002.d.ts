@@ -20,6 +20,7 @@ declare module "../types" {
     "src/lib/asset-maintenance-snapshot.ts#localMessages:1": { "couldnTReadTheEditor": {  } };
     "src/lib/asset-maintenance-state.ts#localMessages:1": { "cleanupDone": { "count": string | number } };
     "src/lib/create-named-page.ts#localMessages:1": { "couldnTCreateTheNoteTheDestinationIsUnavailable": {  } };
+    "src/lib/delete-failure.ts#localMessages:1": { "busy": {  }; "desktopUnavailable": {  }; "disk": {  }; "nameTooLong": {  }; "noSpace": {  }; "outsideNotebook": {  }; "pathMismatch": {  }; "permission": {  }; "readOnly": {  }; "syncLocked": {  }; "trashUnsupported": {  }; "unknown": {  } };
     "src/lib/diskWriteError.ts#localMessages:1": { "aDiskErrorOccurredCheckYourDriveOrCloud": {  }; "cloudPermission": {  }; "couldnTSaveTheNoteToDiskCheckThat": {  }; "couldnTSaveTheNoteToDiskTryAgain": {  }; "theFileSystemIsBusyTrySavingAgainIn": {  }; "theNotesFolderIsReadOnlyChangesCouldnT": {  }; "theSaveLocationNoLongerExistsItsFolderMay": {  }; "thereIsnTEnoughDiskSpaceToSaveYour": {  }; "youDonTHaveWriteAccessToTheNotes": {  } };
     "src/lib/docxExport/index.ts#localMessages:1": { "theGeneratedWordDocumentIsEmpty": {  } };
     "src/lib/editor-platform/electron.ts#localMessages:1": { "copyingImagesIsnTSupportedOnThisSystem": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
     "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
-    "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
   }
 }

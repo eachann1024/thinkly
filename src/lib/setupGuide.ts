@@ -1,4 +1,4 @@
-import { isCharacterGuideVisible } from "./characterGuide";
+import { firstRunSurface } from "./characterGuide";
 
 /**
  * A reopened guide is visible without resetting the saved first-run flag.
@@ -10,6 +10,6 @@ export function isSetupGuideVisible(settings: {
   setupGuideSeen: boolean;
   characterId: string | null;
 }): boolean {
-  return settings._hasHydrated &&
-    (settings.setupGuideOpen || !settings.setupGuideSeen || isCharacterGuideVisible(settings));
+  const surface = firstRunSurface(settings);
+  return surface === "character" || surface === "setup";
 }

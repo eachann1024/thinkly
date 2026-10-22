@@ -1,7 +1,12 @@
 /* 首启形象引导：标题、选择器与主按钮组成一个居中整体，点阵装饰铺在四角与边缘。 */
 .setup-guide.character-onboarding {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
   grid-template-rows: auto minmax(0, 1fr);
+  background: hsl(var(--background));
 }
 .character-onboarding-stage {
   position: relative;
