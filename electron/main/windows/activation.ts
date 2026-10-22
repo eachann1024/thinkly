@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from "electron";
+import { shouldOrderFloatingWithFocusedWorkspace } from "../../../src/lib/electron/floatingRaise";
 import {
   resolveWindowToggleAction,
-  shouldKeepWorkspaceHiddenAfterQuicknote,
   shouldRaiseMainWindow,
 } from "../../../src/lib/electron/windowToggle";
 import { setHiddenThrottle } from "./configuration";
@@ -9,7 +9,13 @@ import { markQuicknoteActivateSuppressed } from "./visibility";
 import { createWorkspaceWindow } from "./workspace";
 import { createQuicknoteWindow } from "./quicknote";
 import { getMainWindow, getQuicknoteWindow } from "./registry";
-import { registry, workspacesHeldHidden } from "./state";
+import { registry } from "./state";
+import {
+  captureParkedWorkspaces,
+  forgetParkedWorkspaces,
+  releaseWorkspacePark,
+  settleParkedWorkspaces,
+} from "./park";
 
 export function waitReadyToShow(
   win: BrowserWindow,
@@ -54,7 +60,7 @@ function claimWindowsForeground(win: BrowserWindow): void {
 /** 全局热键唤出时必须抢前台；macOS 不 steal 时 frameless 小窗常常不出现。 */
 export function raiseWindow(win: BrowserWindow): void {
   if (win.isDestroyed()) return;
-  workspacesHeldHidden.delete(win);
+  releaseWorkspacePark(win);
   if (win.isMinimized()) win.restore();
   setHiddenThrottle(win, false);
   if (process.platform === "win32") {
@@ -67,22 +73,6 @@ export function raiseWindow(win: BrowserWindow): void {
   if (process.platform === "darwin") {
     app.focus({ steal: true });
   }
-}
-
-export function listHiddenWorkspaceWindows(): BrowserWindow[] {
-  const hidden: BrowserWindow[] = [];
-  for (const record of registry.workspaces()) {
-    const workspace = record.win;
-    if (!workspace || workspace.isDestroyed()) continue;
-    if (
-      shouldKeepWorkspaceHiddenAfterQuicknote({
-        visible: workspace.isVisible(),
-      })
-    ) {
-      hidden.push(workspace);
-    }
-  }
-  return hidden;
 }
 
 export function focusedWorkspaceWindow(): BrowserWindow | null {
@@ -101,31 +91,24 @@ export function focusedWorkspaceWindow(): BrowserWindow | null {
   return null;
 }
 
-export function restoreHiddenWorkspaces(hidden: BrowserWindow[]): void {
-  for (const workspace of hidden) {
-    if (workspace.isDestroyed() || !workspace.isVisible()) continue;
-    workspace.hide();
-  }
-}
-
 /**
- * 只抬浮动小窗（速记、搜索），不激活整个应用。
- * macOS 上 win.show() / app.focus({ steal }) 会 unhide 同 app 里已 hide 的 workspace。
+ * 只抬浮动小窗（速记、搜索），不激活整个应用，也不 show / restore 主窗。
+ * macOS 上 moveTop（orderWindow）和普通 show / focus 会把已最小化或藏在后面的 workspace 一起带出来。
  */
 export function raiseFloatingWindow(win: BrowserWindow): void {
   markQuicknoteActivateSuppressed();
-  const workspace = focusedWorkspaceWindow();
-  const hiddenWorkspaces = listHiddenWorkspaceWindows();
-  for (const workspace of hiddenWorkspaces) {
-    workspacesHeldHidden.add(workspace);
+  const focused = focusedWorkspaceWindow();
+  const parked = captureParkedWorkspaces();
+  if (win.isDestroyed()) {
+    forgetParkedWorkspaces(parked);
+    return;
   }
-  if (win.isDestroyed()) return;
+  // 只还原浮动窗自己。workspace 的最小化交给停放逻辑。
   if (win.isMinimized()) win.restore();
   setHiddenThrottle(win, false);
   if (process.platform === "darwin") {
     win.showInactive();
-    win.moveTop();
-    win.focus();
+    if (!win.isDestroyed()) win.focus();
   } else if (process.platform === "win32") {
     claimWindowsForeground(win);
   } else {
@@ -133,23 +116,25 @@ export function raiseFloatingWindow(win: BrowserWindow): void {
     win.moveTop();
     win.focus();
   }
-  restoreHiddenWorkspaces(hiddenWorkspaces);
-  // panel 获得焦点后，macOS 可能把原本在前面的 workspace 降到别的应用后面；
-  // 恢复普通窗层级，再让 floating panel 保持在它上面。
-  if (workspace && !workspace.isDestroyed()) {
-    workspace.moveTop();
-    win.moveTop();
+  settleParkedWorkspaces(parked);
+  // 主窗本来就在前台时，panel 获焦可能把它压到别的应用后面；排回普通层，再让浮动窗叠在上面。
+  if (
+    focused &&
+    !focused.isDestroyed() &&
+    shouldOrderFloatingWithFocusedWorkspace(true)
+  ) {
+    focused.moveTop();
+    if (!win.isDestroyed()) win.moveTop();
   }
-  if (hiddenWorkspaces.length === 0) return;
+  if (parked.minimized.length === 0 && parked.hidden.length === 0) return;
   setImmediate(() => {
     markQuicknoteActivateSuppressed();
-    restoreHiddenWorkspaces(hiddenWorkspaces);
+    settleParkedWorkspaces(parked);
   });
-  setTimeout(() => {
-    for (const workspace of hiddenWorkspaces) {
-      workspacesHeldHidden.delete(workspace);
-    }
-  }, 1_500);
+  // deminiaturize 可能晚于这次调用才落地。
+  setTimeout(() => settleParkedWorkspaces(parked), 50);
+  setTimeout(() => settleParkedWorkspaces(parked), 300);
+  setTimeout(() => forgetParkedWorkspaces(parked), 1_500);
 }
 
 export async function toggleWindow(win: BrowserWindow | null): Promise<void> {
@@ -209,7 +194,7 @@ export function showOrCreateMainWindow(): BrowserWindow {
   if (!win || win.isDestroyed()) {
     win = createWorkspaceWindow({ mode: "blank" });
   }
-  workspacesHeldHidden.delete(win);
+  releaseWorkspacePark(win);
   if (
     shouldRaiseMainWindow({
       visible: win.isVisible(),
