@@ -96,7 +96,11 @@
   );
 }
 
-:root .workspace-editor-surface .bn-editor .selectedCell.goose-table-selection-anchor {
+/* 锚点内框只画在单独一格上。多行或多格时，它会在选区左上角再叠一层框。 */
+:root
+  .workspace-editor-surface
+  .bn-editor
+  .selectedCell.goose-table-selection-anchor.goose-table-selection-top.goose-table-selection-right.goose-table-selection-bottom.goose-table-selection-left {
   box-shadow: inset 0 0 0 1px var(--goose-table-selection-active);
 }
 
@@ -131,7 +135,10 @@
     border-color: Highlight;
     forced-color-adjust: none;
   }
-  :root .workspace-editor-surface .bn-editor .selectedCell.goose-table-selection-anchor {
+  :root
+    .workspace-editor-surface
+    .bn-editor
+    .selectedCell.goose-table-selection-anchor.goose-table-selection-top.goose-table-selection-right.goose-table-selection-bottom.goose-table-selection-left {
     outline: 1px solid Highlight;
     outline-offset: -3px;
   }
