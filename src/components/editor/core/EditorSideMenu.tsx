@@ -7,6 +7,7 @@ import { Plus, GripVertical, ChevronRight } from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { ensureBlockMoveDragging } from "@/components/editor/core/ensureBlockMoveDragging";
 import { startHeavyBlockDrag } from "@/components/editor/core/lightweightBlockDrag";
+import { beginBlockHandleDrag, endBlockHandleDrag, markBlockHandleDrag } from "@/lib/editor-split/blockHandleDrag";
 import {
   Tooltip,
   TooltipContent,
@@ -87,6 +88,7 @@ export function EditorSideMenu() {
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
       if (!block || !sideMenu) return;
+      beginBlockHandleDrag();
       setAddTipOpen(false);
       setIsDragging(true);
       if (e.dataTransfer && startHeavyBlockDrag(editor.prosemirrorView, e.dataTransfer, block.id)) return;
@@ -94,12 +96,14 @@ export function EditorSideMenu() {
         { dataTransfer: e.dataTransfer, clientY: e.clientY },
         block,
       );
+      if (e.dataTransfer) markBlockHandleDrag(e.dataTransfer);
       ensureBlockMoveDragging(editor.prosemirrorView, e.dataTransfer);
     },
     [block, editor, sideMenu],
   );
 
   const handleDragEnd = useCallback(() => {
+    endBlockHandleDrag();
     pressedHandle.current = false;
     setIsDragging(false);
     sideMenu?.blockDragEnd?.();

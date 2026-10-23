@@ -3,6 +3,7 @@ import { NodeSelection } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import { GooseBlockSelection, selectedBlockRoots } from "@/components/editor/extensions/blockSelectionModel";
 import { editorViewForTarget } from "@/components/editor/extensions/tableWindowExtension";
+import { markBlockHandleDrag } from "@/lib/editor-split/blockHandleDrag";
 
 type PendingDrag = {
   view: EditorView;
@@ -99,6 +100,7 @@ export function startHeavyBlockDrag(view: EditorView, data: DataTransfer, blockI
   pending = { view, ids, slice, node };
   data.effectAllowed = "move";
   data.setData("text/plain", (found.node.textContent || " ").slice(0, 80));
+  markBlockHandleDrag(data);
   ghost?.remove();
   const preview = !blockIsHeavy(found.node) ? view.nodeDOM(found.pos) : null;
   if (preview instanceof HTMLElement) {
