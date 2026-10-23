@@ -20,6 +20,7 @@ import { GooseAIMenu } from "@/components/editor/ai/GooseAIMenu";
 import { GooseAIMenuController } from "@/components/editor/ai/GooseAIMenuController";
 import { FormattingToolbarHoldContext } from "@/components/editor/state/formattingToolbarHold";
 import { EditorSideMenu } from "./EditorSideMenu";
+import { EditorTrailingAdd } from "./EditorTrailingAdd";
 import { ImageLightbox } from "@/components/editor/image/ImageLightbox";
 import { EditorLinkToolbar } from "@/components/editor/toolbars/link/EditorLinkToolbar";
 import { FindInPageBar } from "@/components/editor/find/FindInPageBar";
@@ -184,6 +185,7 @@ export function EditorComposer({
         }}
       >
         {showSideMenu && editable ? <EditorSideMenu /> : null}
+        {showSideMenu && editable ? <EditorTrailingAdd /> : null}
         {editable ? <GooseTableHandlesController /> : null}
         <FormattingToolbarHoldContext.Provider value={holdFormattingToolbar}>
           {__GOOSE_EDITOR_COMPACT__ || isQuickNoteEditorPage(page) ? (

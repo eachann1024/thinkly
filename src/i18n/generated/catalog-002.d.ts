@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
     "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
     "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
     "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
     "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
     "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
-    "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
   }
 }

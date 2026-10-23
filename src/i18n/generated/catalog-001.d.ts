@@ -55,6 +55,7 @@ declare module "../types" {
     "src/components/editor/blocks/video/videoBlock.tsx#messages:1": { "addVideo": {  }; "chooseALocalVideoToAutomaticallyCompressIt": {  }; "loadingVideo": {  }; "processingVideo": {  }; "saveFailed": {  }; "savedToDownloads": {  } };
     "src/components/editor/core/EditorLinkPopover.tsx#messages:1": { "confirm": {  } };
     "src/components/editor/core/EditorSideMenu.tsx#messages:1": { "addBlock": {  }; "addBlockAbove": {  }; "addBlockBelow": {  }; "click": {  }; "collapseSection": {  }; "dragToMoveBlock": {  }; "expandSection": {  } };
+    "src/components/editor/core/EditorTrailingAdd.tsx#messages:1": { "addBlock": {  } };
     "src/components/editor/core/blocknoteColumnSlashItems.tsx#messages:1": { "columns": { "count": string | number } };
     "src/components/editor/core/blocknoteCommandSlashItems.ts#messages:1": { "bulletedList": {  }; "callout": {  }; "checklist": {  }; "codeBlock": {  }; "heading1": {  }; "heading2": {  }; "heading3": {  }; "numberedList": {  }; "quote": {  }; "text": {  }; "toggleHeading1": {  }; "toggleHeading2": {  }; "toggleHeading3": {  }; "turnIntoBlock": { "label": string | number } };
     "src/components/editor/core/blocknoteMediaSlashItems.ts#messages:1": { "audio": {  }; "file": {  }; "image": {  }; "video": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/components/ui/image-export/ThemePreviewCard.tsx#localMessages:1": { "sampleBody": {  }; "sampleFile": {  }; "sampleTitle": {  } };
     "src/components/ui/image-export/theme-model.ts#localMessages:1": { "sampleEdition": {  }; "sampleFile": {  }; "sampleHeading": {  } };
     "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
-    "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
   }
 }
