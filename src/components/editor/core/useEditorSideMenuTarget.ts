@@ -145,11 +145,19 @@ export function useEditorSideMenuTarget(
       setSidebarInteracting(next);
     };
 
+    // 离开块后稍等再卸载，移到相邻块时把手能从旧位置滑过去。
+    let leaveTimer: number | undefined;
+    const hover = (id: string | undefined) => {
+      window.clearTimeout(leaveTimer);
+      if (id) setHoveredBlockId(id);
+      else leaveTimer = window.setTimeout(() => setHoveredBlockId(undefined), 120);
+    };
     const handlePointerMove = (event: PointerEvent) => {
       updateSidebarInteracting(event.target);
       if (pressedHandle.current) return;
       const target = event.target instanceof Element ? event.target : null;
-      if (menuRef.current?.contains(target)) return;
+      const keep = () => window.clearTimeout(leaveTimer);
+      if (menuRef.current?.contains(target)) return keep();
       if (
         isPointerInSideMenuCorridor(
           event.clientX,
@@ -159,17 +167,17 @@ export function useEditorSideMenuTarget(
           32,
         )
       )
-        return;
+        return keep();
       const content = target?.closest<HTMLElement>(".bn-block-content");
       // 表格的行/列把手是 portal，不在块内。指针停在把手上时保持当前块，
       // 否则菜单先卸掉，行把手跟着一起消失。
-      if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return;
+      if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return keep();
       const hold = tableHold.current;
       if (
         hold &&
         isPointerInTableChromeReach(hold.rect, event.clientX, event.clientY, hold.scale)
       ) {
-        return;
+        return keep();
       }
       if (
         content &&
@@ -178,12 +186,12 @@ export function useEditorSideMenuTarget(
           ? isPointerInRects([content.getBoundingClientRect()], event.clientX, event.clientY)
           : isPointerOverBlockContent(content, event.clientX, event.clientY))
       ) {
-        setHoveredBlockId(
+        hover(
           content.closest<HTMLElement>('[data-node-type="blockContainer"]')
             ?.dataset.id,
         );
       } else {
-        setHoveredBlockId(undefined);
+        hover(undefined);
       }
     };
     const handleFocusChange = (event: FocusEvent) => {
@@ -191,6 +199,7 @@ export function useEditorSideMenuTarget(
     };
     const handleWindowBlur = () => {
       pressedHandle.current = false;
+      window.clearTimeout(leaveTimer);
       setHoveredBlockId(undefined);
     };
     const handlePointerUp = () => {
@@ -203,6 +212,7 @@ export function useEditorSideMenuTarget(
     document.addEventListener("focusin", handleFocusChange, true);
     document.addEventListener("focusout", handleFocusChange, true);
     return () => {
+      window.clearTimeout(leaveTimer);
       window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("pointermove", handlePointerMove, true);
       document.removeEventListener("pointerup", handlePointerUp, true);
