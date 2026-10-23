@@ -1,5 +1,21 @@
 # 更新日志
 
+## 1.7.326
+
+- 去掉表格多行选中时叠在锚点格上的内框
+- 修复 macOS 全局搜索把主窗口一起带出来
+- Remove the welcome animation and open the character picker first
+- List character-guide in the verification scripts
+- drop the hide hold when focusing an existing workspace
+- 让搜索窗跟上工作区 AI，并补上剪贴板读图和跨行匹配。
+- keep block-handle drags from opening a split (#92)
+- 放大分屏拖放时的落区提示标签 (#93)
+- 编辑区左侧留白始终放得下块把手，不再压到侧栏
+- 编辑器末尾空白显示加号，悬停或点击在文末打开块菜单
+- 块把手换块时滑动过去，离开块稍等再隐藏
+- 侧栏拖拽落点线跟随当前强调色。
+- switch back to note in one click from fullscreen AI rail (#95)
+
 ## 1.7.325
 
 - Retry Quark uploads on transient network failures (#84)
