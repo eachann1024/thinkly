@@ -83,10 +83,9 @@ export function createQuicknoteWindow(): BrowserWindow {
     backgroundColor: appearanceBackgroundColor(),
     transparent: false,
     ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
-    // panel 浮在当前空间，show 时不激活整个应用，避免把已 hide 的 workspace 一起放出来。
+    // 不用 panel。macOS 的 panel 一显示就会把同应用的普通窗口收起。
     ...(isMac
       ? {
-          type: "panel" as const,
           titleBarStyle: "hidden" as const,
           roundedCorners: true,
           hiddenInMissionControl: true,
@@ -101,7 +100,8 @@ export function createQuicknoteWindow(): BrowserWindow {
   bindWindowAppearance(win);
   if (isMac) {
     win.setWindowButtonVisibility(false);
-    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // 默认会把进程切成 UIElement，主窗口和 Dock 会一起被藏起来。
+    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
     win.setAlwaysOnTop(true, "floating");
   }
 

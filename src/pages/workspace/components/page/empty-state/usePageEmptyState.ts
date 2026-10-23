@@ -25,6 +25,7 @@ const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useEffect, useCallback, useMemo } from "react";
@@ -99,8 +100,8 @@ export function usePageEmptyState() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.repeat || isImeKeyboardEvent(e)) return;
       if ((e.target as HTMLElement | null)?.closest?.("[data-shortcut-recorder]")) return;
-      // Cmd+Option+P: 新建页面
-      if ((e.metaKey || e.ctrlKey) && e.altKey && e.key === "p") {
+      // 当前系统主键 + Alt + P：新建页面
+      if (isPlatformPrimaryModifierEvent(e) && e.altKey && e.key === "p") {
         e.preventDefault();
         activateWorkspace();
         onCreatePage();

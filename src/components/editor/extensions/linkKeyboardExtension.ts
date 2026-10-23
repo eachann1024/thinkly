@@ -11,13 +11,13 @@ import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 import { useSettings } from "@/stores/useSettings";
 import { subscribeModifierClass } from "./modifierClassSubscription";
 
-/** 按住 Cmd/Ctrl 时编辑器进入可打开链接的提示态，与 links.onClick 判定一致。 */
+/** 按住当前系统主键时编辑器进入可打开链接的提示态，与 links.onClick 判定一致。 */
 export const LINK_ARMED_CLASS = "goose-link-armed";
 
 export function shouldArmLinkOpenHint(
   event: Pick<KeyboardEvent | MouseEvent, "metaKey" | "ctrlKey">,
 ): boolean {
-  return Boolean(event.metaKey || event.ctrlKey);
+  return isPlatformPrimaryModifierEvent(event);
 }
 
 type LinkShortcutEvent = Pick<

@@ -102,6 +102,8 @@ export function resolveSearchResultPageId(
 }
 
 export const SEARCH_SPLIT_ACTIONS = ["split-right", "split-down", "split-zoom", "split-close", "split-columns", "split-rows", "split-grid", "split-equalize", "split-sync-scroll"] as const;
+export const OPEN_BESIDE_PLACEMENTS = ["left", "right", "top", "bottom"] as const;
+export type OpenBesidePlacement = (typeof OPEN_BESIDE_PLACEMENTS)[number];
 export type SearchSplitAction = (typeof SEARCH_SPLIT_ACTIONS)[number];
 
 export type SearchAiSourcePayload = { id: string; title: string; index: number | null };
@@ -119,9 +121,16 @@ export type SearchWindowCommand =
   | ({ type: "archive-ai" } & SearchAiBody)
   | ({ type: "continue-ai"; followUp?: string } & SearchAiBody)
   | { type: "ask-ai"; notebookId: string; question: string }
+  | { type: "ai-slash"; id: "new" | "compact" }
   | { type: "open-settings"; tab: "ai" }
   | { type: "hide-recent" }
-  | { type: "split"; action: SearchSplitAction };
+  | { type: "split"; action: SearchSplitAction }
+  | { type: "open-beside"; pageId: string; placement: OpenBesidePlacement; query: string; localFilePath?: string };
+
+/** 隐藏最近和归档问答只通知已有主窗；其余动作才把它带到前台。与唤出小窗无关。 */
+export function searchCommandRaisesMainWindow(type: SearchWindowCommand["type"]): boolean {
+  return type !== "hide-recent" && type !== "archive-ai";
+}
 
 const MAX_QUESTION_LENGTH = 4_000;
 const MAX_ANSWER_LENGTH = 20_000;
@@ -170,6 +179,26 @@ export function parseSearchWindowCommand(value: unknown): SearchWindowCommand | 
     return typeof record.action === "string" && (SEARCH_SPLIT_ACTIONS as readonly string[]).includes(record.action)
       ? { type: "split", action: record.action as SearchSplitAction }
       : null;
+  }
+  if (record.type === "open-beside") {
+    const pageId = typeof record.pageId === "string" ? record.pageId.trim() : "";
+    const placement = record.placement;
+    if (!pageId || pageId.length > MAX_ID_LENGTH) return null;
+    if (typeof placement !== "string" || !(OPEN_BESIDE_PLACEMENTS as readonly string[]).includes(placement)) return null;
+    if (record.query !== undefined && typeof record.query !== "string") return null;
+    const filePath = record.localFilePath;
+    return {
+      type: "open-beside",
+      pageId,
+      placement: placement as OpenBesidePlacement,
+      query: typeof record.query === "string" ? record.query.slice(0, MAX_QUERY_LENGTH) : "",
+      ...(typeof filePath === "string" && filePath && filePath.length <= MAX_ID_LENGTH
+        ? { localFilePath: filePath }
+        : {}),
+    };
+  }
+  if (record.type === "ai-slash") {
+    return record.id === "new" || record.id === "compact" ? { type: "ai-slash", id: record.id } : null;
   }
   if (record.type === "ask-ai") {
     const notebookId = typeof record.notebookId === "string" ? record.notebookId.trim() : "";

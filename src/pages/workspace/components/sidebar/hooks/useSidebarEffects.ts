@@ -8,6 +8,7 @@ import { usePages } from "@/stores/usePages";
 import { useSidebarView } from "@/stores/useSidebarView";
 import type { SettingsTab } from "../settings/types";
 import { isSettingsTab, isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 
 interface UseSidebarEffectsOptions {
   activePageId?: string | null | undefined;
@@ -60,7 +61,7 @@ export function useSidebarEffects({
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA";
 
-      if ((e.metaKey || e.ctrlKey) && e.key === "Backspace") {
+      if (isPlatformPrimaryModifierEvent(e) && e.key === "Backspace") {
         const deleteTargetPageId = resolveDeleteTargetPageId(target);
         if (deleteTargetPageId && !isInEditor && currentView === "pages") {
           e.preventDefault();

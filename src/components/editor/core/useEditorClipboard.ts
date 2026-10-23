@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { getSelectedImageUrl } from "@/components/editor/utils/selection";
 import { copyImageSrcToClipboard } from "@/components/editor/image/imageUtils";
 import { snapshotEditorSelection, restoreEditorSelection } from "../utils/editorSelectionSnapshot";
-import { deleteCutSelection } from "../extensions/copyBlockClipboard";
+import { deleteCutSelection, getSelectionClipboardPayload, writeClipboardPayload } from "../extensions/copyBlockClipboard";
 import { toast } from "@/components/ui/sonner";
 import {
   reconcileSlashSuggestionMenu,
@@ -43,13 +43,21 @@ export function useEditorClipboard(runtime: EditorRuntime) {
       if (!(event.target instanceof Node) || !view.dom.contains(event.target)) return;
       const image = getSelectedImageUrl(view.state);
       if (!image) return;
+      let payload: { html: string; plain: string } | null = null;
+      try {
+        payload = getSelectionClipboardPayload(view);
+      } catch (error) {
+        console.error("[editor] Failed to serialize selected image block", error);
+      }
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (payload && event.clipboardData) writeClipboardPayload(event.clipboardData, payload);
       const snapshot = snapshotEditorSelection(view.state);
       void (async () => {
         try {
           await copyImageSrcToClipboard(
             image, platformRef.current, getActivePageLocalFilePathRef.current(),
+            payload ? { html: payload.html, text: payload.plain } : undefined,
           );
           if (event.type !== "cut" || !view.editable) return;
           if (!restoreEditorSelection(view, snapshot)) {

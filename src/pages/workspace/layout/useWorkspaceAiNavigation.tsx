@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { cancelPendingAiSlashCommand } from "../components/notebook-ai/session/slashCommandRequest";
 import { isFullscreenAiLayout } from "../components/notebook-ai/useNotebookAiPanel";
 import { subscribePageTitleFocus } from "@/lib/page-title-focus";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
@@ -92,7 +93,10 @@ export function useWorkspaceAiNavigation(
   // 使用 open 而非 toggle，重复触发不会把已经打开的面板关掉。
   useEffect(() => {
     const onOpen = (event: Event) => {
-      if (!aiAvailableForNotebook) return;
+      if (!aiAvailableForNotebook) {
+        cancelPendingAiSlashCommand();
+        return;
+      }
       const detail = (event as CustomEvent<unknown>).detail;
       const record =
         detail && typeof detail === "object"

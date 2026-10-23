@@ -3,11 +3,9 @@ import type { BlockNoteEditorOptions } from "@blocknote/core";
 import { normalizeExternalUrl } from "@/lib/openExternalUrl";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { shouldArmLinkOpenHint } from "@/components/editor/extensions/linkKeyboardExtension";
-import { pasteClipboardFilesFromClipboard } from "@/components/editor/utils/pasteClipboardFilesFromClipboard";
-import {
-  clipboardHasPasteableImage,
-  clipboardHasPasteableMedia,
-} from "@/components/editor/utils/pasteClipboardImage";
+import { pasteClipboardFilesFromClipboard, pasteNativeClipboardImage } from "@/components/editor/utils/pasteClipboardFilesFromClipboard";
+import { resolveClipboardPasteRoute, shouldReadNativeClipboardImage } from "@/components/editor/utils/pasteClipboardImage";
+import { withoutBlockNoteClipboardIds } from "@/components/editor/hooks/editorPasteBlocks";
 import { uploadEditorFile } from "@/components/editor/utils/uploadEditorFile";
 import { fileStorage } from "@/lib/fileStorage";
 import { getFileUploadAvailability } from "@/lib/fileUploadAvailability";
@@ -67,12 +65,23 @@ export function createEditorOptions(
       });
     },
     pasteHandler: ({ event, editor: ed, defaultPasteHandler }) => {
-      if (
-        clipboardHasPasteableImage(event.clipboardData) ||
-        (!__GOOSE_EDITOR_COMPACT__ &&
-          clipboardHasPasteableMedia(event.clipboardData))
-      ) {
+      const route = resolveClipboardPasteRoute(
+        event.clipboardData,
+        !__GOOSE_EDITOR_COMPACT__,
+      );
+      if (route === "media-files") {
         void pasteClipboardFilesFromClipboard(event, ed);
+        return true;
+      }
+      if (route === "blocks" && !event.clipboardData?.getData("blocknote/html")) {
+        const html = event.clipboardData?.getData("text/html") ?? "";
+        if (html) {
+          ed.pasteHTML(withoutBlockNoteClipboardIds(html), true);
+          return true;
+        }
+      }
+      if (route === "default" && shouldReadNativeClipboardImage(event.clipboardData)) {
+        void pasteNativeClipboardImage(ed, () => platformRef.current.clipboard.readImage());
         return true;
       }
       return defaultPasteHandler();

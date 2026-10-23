@@ -46,6 +46,7 @@ export {
   showAndFocusMainWindow,
   showOrCreateMainWindow,
   focusedWorkspaceWindow,
+  releaseHeldWorkspace,
 } from "./windows/activation";
 export {
   toggleSearchWindow,

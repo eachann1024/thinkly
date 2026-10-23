@@ -57,22 +57,16 @@ import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 import "./search-editor-bridge.css";
 
-/** 居中命中若会把正文标题切掉一截，则留在文首；放不下时整段滚出，避免半截标题。 */
+/** 命中顶到可视区首行；表格内容滚整行。滚不动（文首或已到底）时保持原位。 */
 function placeSearchMatch(scroller: HTMLElement, target: HTMLElement) {
-  const hit = target.getBoundingClientRect();
+  const row = target.closest("tr, li, [data-id]") as HTMLElement | null;
+  const anchor = row && scroller.contains(row) ? row : target;
+  const hit = anchor.getBoundingClientRect();
   const box = scroller.getBoundingClientRect();
-  const pad = 24;
-  const top = scroller.scrollTop + hit.top - box.top;
-  const view = scroller.clientHeight;
-  const minScroll = Math.max(0, top + hit.height + pad - view);
-  const maxScroll = Math.max(minScroll, top - pad);
-  let next = Math.min(Math.max(top - (view - hit.height) / 2, minScroll), maxScroll);
-  const title = scroller.querySelector<HTMLElement>(".page-document-title");
-  if (title) {
-    const titleEnd = scroller.scrollTop + title.getBoundingClientRect().bottom - box.top;
-    if (next > 0 && next < titleEnd) next = minScroll === 0 ? 0 : Math.min(maxScroll, Math.max(titleEnd, minScroll));
-  }
-  scroller.scrollTop = next;
+  const pad = 12;
+  const top = scroller.scrollTop + hit.top - box.top - pad;
+  const limit = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+  scroller.scrollTop = Math.min(Math.max(0, top), limit);
 }
 
 export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, cancelPendingRestoration }: {
@@ -122,13 +116,14 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       }
     }
     cancelAnimationFrame(frame.current);
-    frame.current = requestAnimationFrame(() => {
+    const paint = () => {
       if (useSearchSession.getState().view.phase !== "reader" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const scroller = scrollRef.current;
       const target = (editor.prosemirrorView.dom as HTMLElement).querySelector<HTMLElement>(".goose-search-session-match--current");
       if (!scroller || !target) return;
       placeSearchMatch(scroller, target);
-    });
+    };
+    frame.current = requestAnimationFrame(() => { paint(); frame.current = requestAnimationFrame(paint); });
   };
   const step = (delta: number) => {
     const editor = editorRef.current?.editor;

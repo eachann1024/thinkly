@@ -65,8 +65,10 @@ export function useComposerKeyboard(
         nativeEvent: event,
       } as unknown as React.KeyboardEvent<HTMLDivElement>;
 
-      if (handleMentionKeyDown(reactLike)) return;
-      if (handleCommandKeyDown(reactLike)) return;
+      if (handleMentionKeyDown(reactLike) || handleCommandKeyDown(reactLike)) {
+        event.stopPropagation();
+        return;
+      }
 
       if (event.key === "Escape") {
         event.preventDefault();

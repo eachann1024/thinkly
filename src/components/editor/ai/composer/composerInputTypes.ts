@@ -62,6 +62,8 @@ export interface AiComposerInputProps {
  notebookId?: string;
  /** 选择或发送 /新会话、/压缩 等内置指令 */
  onSlashCommand?: (id: ComposerSlashBuiltinId) => void;
+ /** @ 或 / 建议菜单打开、切换或关闭 */
+ onSuggestionsChange?: (kind: "mention" | "command" | null) => void;
 }
 
 export interface ComposerNativeHandlers {

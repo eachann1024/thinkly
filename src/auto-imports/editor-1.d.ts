@@ -68,6 +68,7 @@ declare global {
   const inspectPasteContainer: typeof import('../components/editor/utils/multilinePaste').inspectPasteContainer
   const isBlockNoteContent: typeof import('../components/editor/utils/blocknote-content/index').isBlockNoteContent
   const isBottomEditorBlankClick: typeof import('../components/editor/utils/selection').isBottomEditorBlankClick
+  const isClipboardImageType: typeof import('../components/editor/utils/pasteClipboardImage').isClipboardImageType
   const isEmptyInlineBlock: typeof import('../components/editor/utils/pasteAtCursor').isEmptyInlineBlock
   const isImageUploadFile: typeof import('../components/editor/utils/pasteClipboardImage').isImageUploadFile
   const isInteractiveEditorTarget: typeof import('../components/editor/utils/selection').isInteractiveEditorTarget
@@ -101,6 +102,7 @@ declare global {
   const pasteClipboardHtmlAsBlocks: typeof import('../components/editor/hooks/useEditorPaste').pasteClipboardHtmlAsBlocks
   const pasteClipboardMedia: typeof import('../components/editor/utils/pasteClipboardFilesFromClipboard').pasteClipboardMedia
   const pasteLinesAsBlocks: typeof import('../components/editor/hooks/useEditorPaste').pasteLinesAsBlocks
+  const pasteNativeClipboardImage: typeof import('../components/editor/utils/pasteClipboardFilesFromClipboard').pasteNativeClipboardImage
   const plainHasGooseMarkdownMarkers: typeof import('../components/editor/hooks/useEditorPaste').plainHasGooseMarkdownMarkers
   const planMultilinePaste: typeof import('../components/editor/utils/multilinePaste').planMultilinePaste
   const readLiveEditorSelectedBlocks: typeof import('../components/editor/utils/selection').readLiveEditorSelectedBlocks
@@ -108,6 +110,7 @@ declare global {
   const reconcileSlashSuggestionMenu: typeof import('../components/editor/utils/slashMenuPolicy').reconcileSlashSuggestionMenu
   const rememberEditorSelectedBlocks: typeof import('../components/editor/utils/selection').rememberEditorSelectedBlocks
   const rememberFormattingToolbarRect: typeof import('../components/editor/utils/formattingToolbarReference').rememberFormattingToolbarRect
+  const resolveClipboardPasteRoute: typeof import('../components/editor/utils/pasteClipboardImage').resolveClipboardPasteRoute
   const resolveImageMimeForUpload: typeof import('../components/editor/utils/pasteClipboardImage').resolveImageMimeForUpload
   const resolveInheritedPasteBlockType: typeof import('../components/editor/utils/multilinePaste').resolveInheritedPasteBlockType
   const resolvePasteAnchor: typeof import('../components/editor/hooks/useEditorPaste').resolvePasteAnchor
@@ -115,6 +118,7 @@ declare global {
   const resolvePhysicalResourcePath: typeof import('../components/editor/utils/openResourceExternally').resolvePhysicalResourcePath
   const serializeDocRangePlainText: typeof import('../components/editor/utils/clipboardPlainText').serializeDocRangePlainText
   const serializeSlicePlainText: typeof import('../components/editor/utils/clipboardPlainText').serializeSlicePlainText
+  const shouldDeferPasteToMediaHandler: typeof import('../components/editor/utils/pasteClipboardImage').shouldDeferPasteToMediaHandler
   const shouldIsolateTitleStructurePaste: typeof import('../components/editor/hooks/useEditorPaste').shouldIsolateTitleStructurePaste
   const shouldOpenPageMentionSuggestionMenu: typeof import('../components/editor/utils/slashMenuPolicy').shouldOpenPageMentionSuggestionMenu
   const shouldOpenSlashSuggestionMenu: typeof import('../components/editor/utils/slashMenuPolicy').shouldOpenSlashSuggestionMenu
@@ -122,6 +126,7 @@ declare global {
   const shouldPasteHtmlAsBlocks: typeof import('../components/editor/hooks/useEditorPaste').shouldPasteHtmlAsBlocks
   const shouldPreferPlainMultilinePaste: typeof import('../components/editor/utils/multilinePaste').shouldPreferPlainMultilinePaste
   const shouldPreferVisibleSelectionText: typeof import('../components/editor/utils/clipboardMarkdown').shouldPreferVisibleSelectionText
+  const shouldReadNativeClipboardImage: typeof import('../components/editor/utils/pasteClipboardImage').shouldReadNativeClipboardImage
   const shouldSplitMultilinePaste: typeof import('../components/editor/utils/multilinePaste').shouldSplitMultilinePaste
   const shouldUploadViaImageStorage: typeof import('../components/editor/utils/pasteClipboardImage').shouldUploadViaImageStorage
   const simpleExtractText: typeof import('../components/editor/utils/blocknote-content/index').simpleExtractText
@@ -170,7 +175,7 @@ declare global {
   export type { PasteAtCursorEditor } from '../components/editor/utils/pasteAtCursor'
   import('../components/editor/utils/pasteAtCursor')
   // @ts-ignore
-  export type { ClipboardImageSource } from '../components/editor/utils/pasteClipboardImage'
+  export type { ClipboardImageSource, ClipboardPasteRoute } from '../components/editor/utils/pasteClipboardImage'
   import('../components/editor/utils/pasteClipboardImage')
   // @ts-ignore
   export type { SlashMenuPagePolicy } from '../components/editor/utils/slashMenuPolicy'

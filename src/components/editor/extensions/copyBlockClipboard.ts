@@ -5,7 +5,7 @@ import { CellSelection } from "prosemirror-tables";
 import { toast } from "@/components/ui/sonner";
 import { isGeneratedDataImageName } from "../blocks/image/imageCaption";
 import { serializeDocRangePlainText, serializeSlicePlainText } from "../utils/clipboard";
-import { getSelectedCellPlainText, getSelectedImageUrl, isWholeTableCellSelection } from "../utils/selection";
+import { getSelectedCellPlainText, isWholeTableCellSelection } from "../utils/selection";
 import { resolveCopyBlockSelection, getTableBlockContainerSelection } from "./copyBlockSelection";
 import { deleteSelectionSafely } from "./selectionDelete";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -62,21 +62,25 @@ export function getSelectionClipboardPayload(view: EditorView): { html: string; 
   return { html: dom.innerHTML, plain: copySelectionPlainText(view.state, selection) };
 }
 
+export function writeClipboardPayload(
+  clipboard: DataTransfer,
+  payload: { html: string; plain: string },
+): void {
+  clipboard.clearData();
+  clipboard.setData("blocknote/html", payload.html);
+  clipboard.setData("text/html", payload.html);
+  clipboard.setData("text/plain", payload.plain);
+  clipboard.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "1");
+}
+
 /** 同步事件剪贴板写入失败时接管事件但不剪切，避免原生 handler 继续删除原文。 */
 export function writeSelectionClipboard(view: EditorView, event: ClipboardEvent): boolean {
   if (event.defaultPrevented || !event.clipboardData) return false;
-  // 单张图片由容器 capture handler 等待系统位图写入完成。
-  if (getSelectedImageUrl(view.state)) return false;
   try {
     const payload = getSelectionClipboardPayload(view);
     if (!payload) return false;
     event.preventDefault();
-    const clipboard = event.clipboardData;
-    clipboard.clearData();
-    clipboard.setData("blocknote/html", payload.html);
-    clipboard.setData("text/html", payload.html);
-    clipboard.setData("text/plain", payload.plain);
-    clipboard.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "1");
+    writeClipboardPayload(event.clipboardData, payload);
     return true;
   } catch (error) {
     event.preventDefault();

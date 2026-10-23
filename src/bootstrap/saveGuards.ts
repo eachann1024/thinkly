@@ -19,6 +19,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -94,7 +95,7 @@ export const setupSaveGuards = () => {
   const handleManualSave = (event: KeyboardEvent) => {
     if (event.defaultPrevented) return;
     if (event.isComposing || event.keyCode === 229) return;
-    if (!event.metaKey && !event.ctrlKey) return;
+    if (!isPlatformPrimaryModifierEvent(event)) return;
     if (event.altKey || event.shiftKey || event.repeat) return;
     if (event.key.toLowerCase() !== "s") return;
 

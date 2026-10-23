@@ -1,5 +1,5 @@
 import { createChecker } from "./lib/check";
-import { collapseComposerSearchText, composerDocFromPlainText } from "../../src/pages/workspace/components/search-sheet/searchQueryText";
+import { collapseComposerSearchText, composerDocFromPlainText, searchTextOutsideSlashCommand } from "../../src/pages/workspace/components/search-sheet/searchQueryText";
 
 /** 搜索输入：换行折成检索词，种回输入框时保留分段。 */
 export default async function run(): Promise<number> {
@@ -11,5 +11,7 @@ export default async function run(): Promise<number> {
   const lines = doc?.content ?? [];
   check("换行种成两段", doc?.type === "doc" && lines.length === 2 && lines[0]?.content?.[0]?.text === "第一行" && lines[1]?.content?.[0]?.text === "第二行");
   check("空查询不种文档", composerDocFromPlainText("") === null);
+  check("斜杠指令不进检索", searchTextOutsideSlashCommand("/") === "" && searchTextOutsideSlashCommand("/新会话") === "" && searchTextOutsideSlashCommand("周报 /压缩") === "周报");
+  check("路径里的斜杠仍可检索", searchTextOutsideSlashCommand("notes/a.md") === "notes/a.md");
   return checker.failed;
 }
