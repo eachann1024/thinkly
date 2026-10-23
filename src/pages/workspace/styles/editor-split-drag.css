@@ -250,16 +250,16 @@
   animation: split-drop-appear 120ms ease-out;
 }
 .editor-split-drop-label {
-  max-width: calc(100% - 12px);
+  max-width: calc(100% - 16px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 6px 11px;
+  padding: 8px 14px;
   border: 1px solid color-mix(in srgb, var(--goose-accent-solid) 42%, transparent);
-  border-radius: 7px;
+  border-radius: var(--goose-control-radius);
   background: hsl(var(--background) / 0.94);
   color: var(--goose-accent-text);
-  font-size: 12px;
+  font-size: var(--goose-type-control); line-height: var(--goose-leading-control);
   font-weight: var(--font-weight-medium);
   box-shadow: 0 3px 12px hsl(var(--foreground) / 0.06);
 }
