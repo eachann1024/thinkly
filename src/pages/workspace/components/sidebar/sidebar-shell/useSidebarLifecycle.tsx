@@ -25,6 +25,7 @@ const uiText = createTranslator(localMessages);
 import { createNamedPage } from "@/lib/create-named-page";
 import { useSearchSession } from "../useSearchSession";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
+import { viewClickLeavesFullscreenAi } from "./railClick";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { type SidebarView } from "./shared";
 import type { useSidebarNavigation } from "./useSidebarNavigation";
@@ -189,7 +190,8 @@ export function useSidebarLifecycle(
   const switchSidebarView = (view: SidebarView) => {
     activateWorkspace();
     if (inHistoryMode) exitHistoryView();
-    if (view === "outline") closeNotebookAiIfFullscreen();
+    // 大纲和文件列表同一条规则：全屏 AI 下一次点击就回到笔记。
+    if (viewClickLeavesFullscreenAi(view)) closeNotebookAiIfFullscreen();
     setCurrentView(view);
   };
 

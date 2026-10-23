@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import { isNotebookAiFullscreenOpen } from "../../notebook-ai/useNotebookAiPanel";
 import { hasSidebarInteraction } from "./sidebarInteraction";
+import { sidebarViewClickAction } from "./railClick";
 import { useSidebarNavigationDismiss } from "./useSidebarNavigationDismiss";
 import type { SidebarView } from "./shared";
 import type { useSidebarLifecycle } from "./useSidebarLifecycle";
@@ -39,12 +41,21 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   };
   const openSidebarView = (view: SidebarView, keyboard = false) => {
     keepSidebarOpen();
-    if (view === "search") {
+    const action = sidebarViewClickAction({
+      view,
+      alreadyShowing: currentView === view,
+      sidebarCollapsed,
+      settingsOpen,
+      inHistoryMode,
+      preview: forceCollapseLeft && mode === "preview",
+      // 全屏盖住正文时，再点当前的大纲/文件列表也要切回笔记，而不是只收起侧栏。
+      aiFullscreenOpen: isNotebookAiFullscreenOpen(),
+    });
+    if (action === "search") {
       handleOpenSearch();
       return;
     }
-    const preview = forceCollapseLeft && mode === "preview";
-    if (!sidebarCollapsed && currentView === view && !settingsOpen && !inHistoryMode && !preview) {
+    if (action === "collapse") {
       closeSidebarOverlay();
       return;
     }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { cancelPendingAiSlashCommand } from "../components/notebook-ai/session/slashCommandRequest";
+import { aiToggleSteps } from "../components/sidebar/sidebar-shell/railClick";
 import { isFullscreenAiLayout } from "../components/notebook-ai/useNotebookAiPanel";
 import { subscribePageTitleFocus } from "@/lib/page-title-focus";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
@@ -16,8 +17,6 @@ export function useWorkspaceAiNavigation(
     toggleAiPanel,
     closeAiPanel,
     aiFullscreen,
-    forceCollapseRight,
-    rightExpandOverride,
     aiAvailableForNotebook,
     settingsOpen,
     focusAiAfterSettingsCloseRef,
@@ -25,36 +24,37 @@ export function useWorkspaceAiNavigation(
   } = input;
 
   const handleToggleAiPanel = useCallback(() => {
-    if (!aiAvailableForNotebook) return;
     // Mark the handoff before closing. The close listener and this handler
     // can both run in one turn; the layout effect consumes the flag after
     // settings are actually gone.
     if (settingsOpen) focusAiAfterSettingsCloseRef.current = true;
-    closeSettings();
     const vp = useWorkspaceViewport.getState();
-    if (settingsOpen) {
-      if (!aiPanelOpen) openAiPanel();
-      if (!aiFullscreen && vp.forceCollapseRight) {
+    const steps = aiToggleSteps({
+      available: aiAvailableForNotebook,
+      settingsOpen,
+      aiFullscreen,
+      panelOpen: aiPanelOpen,
+      forceCollapseRight: vp.forceCollapseRight,
+      rightExpandOverride: vp.rightExpandOverride,
+    });
+    if (steps.some((step) => step.type === "ignore")) return;
+    closeSettings();
+    let focusComposer = false;
+    for (const step of steps) {
+      if (step.type === "open") openAiPanel();
+      else if (step.type === "close") closeAiPanel();
+      else if (step.type === "toggle") {
+        toggleAiPanel();
+        if (!aiPanelOpen) focusComposer = true;
+      } else if (step.type === "expand-right") {
         vp.setRightExpandOverride(true);
+        if (!settingsOpen) focusComposer = true;
+      } else if (step.type === "set-right-override") {
+        vp.setRightExpandOverride(step.value);
+        if (step.value) focusComposer = true;
       }
-      return;
     }
-    if (!aiFullscreen && vp.forceCollapseRight) {
-      if (!aiPanelOpen) {
-        openAiPanel();
-        vp.setRightExpandOverride(true);
-        window.dispatchEvent(new CustomEvent("goose-note:focus-ai-composer"));
-        return;
-      }
-      const nextOverride = !vp.rightExpandOverride;
-      vp.setRightExpandOverride(nextOverride);
-      if (nextOverride) {
-        window.dispatchEvent(new CustomEvent("goose-note:focus-ai-composer"));
-      }
-      return;
-    }
-    toggleAiPanel();
-    if (!aiPanelOpen) {
+    if (focusComposer) {
       window.dispatchEvent(new CustomEvent("goose-note:focus-ai-composer"));
     }
   }, [
@@ -64,6 +64,7 @@ export function useWorkspaceAiNavigation(
     aiFullscreen,
     aiPanelOpen,
     openAiPanel,
+    closeAiPanel,
     toggleAiPanel,
   ]);
 
