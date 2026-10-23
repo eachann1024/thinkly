@@ -6,6 +6,8 @@
   --page-layout-top: 24px;
   --page-paragraph-gap: 4px;
   --page-title-gap: 37px;
+  /* 块把手（三枚按钮胶囊 + 标题额外间距）画在正文左侧，留白再窄也要放得下。 */
+  --page-handle-room: calc(80px * var(--editor-scale, 1) + 16px);
 }
 /* 预览含模拟侧栏，留白断点只看正文的可用宽度。 */
 [data-page-layout] .page-layout-body {
@@ -96,6 +98,9 @@
 }
 @container page-layout (max-width: 400px) {
   [data-page-layout="full"] .page-layout-document { padding-inline: 24px; }
+}
+[data-page-layout] .page-layout-document.page-layout-document {
+  padding-left: max(var(--page-handle-room), clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter)));
 }
 
 [data-page-layout][data-font-family="default"] { --goose-document-font: var(--font-default); }
