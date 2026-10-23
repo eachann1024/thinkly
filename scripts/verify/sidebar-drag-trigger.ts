@@ -1,5 +1,5 @@
 /**
- * 侧栏拖拽落点线与拖宽把手激活态同一套淡出，不再画左端方头。
+ * 侧栏拖拽落点线与拖宽把手静止色同一套淡出，颜色跟随强调色，不再画左端方头。
  * 运行：node scripts/verify/run.mjs sidebar-drag-trigger
  */
 import { readFileSync } from "node:fs";
@@ -51,8 +51,8 @@ export default function run() {
   const line = read("src/pages/workspace/components/sidebar/main-tree/row/mainTreeContainers.tsx");
   const edge = read("src/pages/workspace/components/sidebar/main-tree/MainTreeEdgeDropWatcher.tsx");
 
-  const handle = gradientAt(shell, "--workspace-resize-line-active:");
-  const handleDark = gradientAt(shell, "--workspace-resize-line-active:", 1);
+  const handle = gradientAt(shell, "--workspace-resize-line:");
+  const handleDark = gradientAt(shell, "--workspace-resize-line:", 1);
   const drop = gradientAt(
     dnd,
     ".sidebar-tree-drop-line,\n.sidebar-drop-line,\n.main-tree-drop-between-line",
@@ -63,7 +63,7 @@ export default function run() {
   checker.check("落点线沿用拖宽把手的色标", handleStops.length === 4 && dropStops.join("|") === handleStops.join("|") && handleDark === handle, dropStops);
   checker.check("拖宽把手仍是竖向", gradientDirection(handle) === "180deg");
   checker.check("落点线改成横向", gradientDirection(drop) === "90deg");
-  checker.check("落点线用选中文字色，不另写蓝色", drop.includes("var(--goose-interactive-selected-fg)") && !drop.includes("#") && !drop.includes("goose-accent-solid"));
+  checker.check("落点线跟随强调色，不写死色值", drop.includes("var(--goose-accent-drag-line)") && !drop.includes("#") && !drop.includes("goose-interactive-selected-fg"));
   checker.check("落点线不发光", /box-shadow:\s*none/.test(dnd.slice(dnd.indexOf(".sidebar-tree-drop-line,"), dnd.indexOf(".sidebar-tree-nest-label"))));
   checker.check("落点线不留方头", !dnd.includes(".sidebar-drop-line::before") && !dnd.includes(".sidebar-tree-drop-line::before") && !dnd.includes(".main-tree-drop-between-line::before") && !tree.includes(".main-tree-drop-between-line::before"));
   const treeLineRules = [...tree.matchAll(/\.main-tree-drop-between-line\s*\{([^}]*)\}/g)].map((match) => match[1]);
