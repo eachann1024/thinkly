@@ -79,8 +79,16 @@ export function normalizeAIReasoningLevel(value: unknown): AIReasoningLevel {
   return "default";
 }
 
+/** 跨窗快照和旧持久化里，推理档、供应商 id 可能是任意字符串，函数内再收成合法值。 */
+type NormalizableAISettings = Partial<
+  Omit<AISettings, "workspaceReasoningLevel" | "customProviderId">
+> & {
+  workspaceReasoningLevel?: string;
+  customProviderId?: string;
+};
+
 export function normalizeAISettings(
-  ai: Partial<AISettings> | undefined,
+  ai: NormalizableAISettings | undefined,
 ): AISettings {
   const customModelOptions = normalizeAIModelOptions(ai?.customModelOptions);
   const storedSelectedModelId =
