@@ -27,6 +27,7 @@ import {
   isFoldableHeadingBlock,
   toggleHeadingCollapsed,
 } from "@/components/editor/core/headingSectionFold";
+import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { OutlinePanel } from "../outline/OutlinePanel";
 import { useHeadings } from "../outline/useHeadings";
 import type { HeadingItem } from "../outline/useHeadings";
@@ -113,6 +114,8 @@ export function SidebarOutline({
 
   const handleHeadingClick = useCallback(
     (blockId: string) => {
+      // 与点文件列表一样：全屏 AI 下点大纲条目就回到这篇笔记。
+      closeNotebookAiIfFullscreen();
       const container = focusedScrollRef.current;
       if (!container) return;
       const el = getHeadingAnchorElement(container, blockId);
