@@ -7,6 +7,8 @@ import { useSendMessage } from "./session/useSendMessage";
 import { useConversationActions } from "./session/useConversationActions";
 import { useConversationCompaction } from "./session/useConversationCompaction";
 import { useBatchApprovalActions } from "./session/useBatchApprovalActions";
+import { AI_SLASH_COMMAND_EVENT, takePendingAiSlashCommand } from "./session/slashCommandRequest";
+import type { ComposerSlashBuiltinId } from "@/lib/notebook-ai/composerSlashCommands";
 import type { NotebookAiSessionValue } from "./session/types";
 
 const RELEASE_IDLE_MS = 30_000;
@@ -77,6 +79,21 @@ export function NotebookAiSessionBinder({
   useLayoutEffect(() => {
     publish(value);
   }, [publish, value]);
+
+  useEffect(() => {
+    const run = (id: ComposerSlashBuiltinId) => {
+      if (id === "new") newConversation();
+      else compactConversation();
+    };
+    const queued = takePendingAiSlashCommand();
+    if (queued) run(queued);
+    const onCommand = () => {
+      const id = takePendingAiSlashCommand();
+      if (id) run(id);
+    };
+    window.addEventListener(AI_SLASH_COMMAND_EVENT, onCommand);
+    return () => window.removeEventListener(AI_SLASH_COMMAND_EVENT, onCommand);
+  }, [newConversation, compactConversation]);
 
   useEffect(() => {
     if (panelOpen || isBusy) return;

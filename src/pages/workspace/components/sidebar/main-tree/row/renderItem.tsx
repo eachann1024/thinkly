@@ -37,6 +37,7 @@ import { TreeRowIcon, MainTreeRow } from "./MainTreeRow";
 import { PendingCreateNameInput } from "./PendingCreateNameInput";
 import { MainTreeRowTitle } from "./MainTreeRowTitle";
 import { writeFolderDrag, writePageDrag } from "@/lib/workspace-drag";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 
 export let activeMainTreeDragId: string | null = null;
 
@@ -195,7 +196,7 @@ export function renderItem({
     // 已选中再点时 tree 可能不触发 onSelectItems；全屏 AI 下仍需回到该页标签
     const pageId = String(item.index);
     if (pageId && pageId !== "root") {
-      const permanent = e.metaKey || e.ctrlKey;
+      const permanent = isPlatformPrimaryModifierEvent(e);
       openPageFromSidebar(pageId, permanent ? "permanent" : "preview", {
         newTab: permanent,
       });

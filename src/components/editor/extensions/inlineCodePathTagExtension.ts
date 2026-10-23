@@ -3,7 +3,7 @@
  *
  * 本地文件夹笔记本里，行内代码内容是 ./ 或 ../ 开头的相对路径、解析后落在
  * 笔记本根目录内且磁盘上真实存在时，用 Decoration.inline 加
- * `goose-inline-code-path` class；按住 Cmd/Ctrl 时 hover 出下划线扫动动效，
+ * `goose-inline-code-path` class；按住当前系统主键时 hover 出下划线扫动动效，
  * 点击交给宿主：笔记内 .md 在应用内打开，绝对路径的文件或文件夹交给系统打开。
  *
  * 热路径保护：不在 apply 里同步全文档扫描；doc 变化或探测回填后统一走
@@ -15,6 +15,7 @@ import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { EditorView } from "@tiptap/pm/view";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import {
   isAbsoluteLocalPath,
   isInsideRoot,
@@ -116,7 +117,7 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
         return pathTagKey.getState(state)?.decorations ?? null;
       },
       handleClick(view: EditorView, _pos: number, event: MouseEvent): boolean {
-        if (!event.metaKey && !event.ctrlKey) return false;
+        if (!isPlatformPrimaryModifierEvent(event)) return false;
         const target = event.target as HTMLElement | null;
         const tag = target?.closest<HTMLElement>(".goose-inline-code-path");
         if (!tag) return false;

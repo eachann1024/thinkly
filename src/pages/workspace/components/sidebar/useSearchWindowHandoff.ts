@@ -5,18 +5,33 @@ import {
   type OpenSearchResultPayload,
   type SearchWindowCommand,
 } from "@/lib/electron/searchWindow";
+import { parseSearchAISettings, shouldPublishWorkspaceAI } from "@/lib/electron/searchAISettings";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
+import { openPageBeside } from "@/lib/editor-split/openPageBeside";
 import { SPLIT_PALETTE_ACTIONS } from "../command/splitPaletteActions";
 import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
+import { requestAiSlashCommand } from "../notebook-ai/session/slashCommandRequest";
 import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import { openSheetConversation, saveSearchAiTranscript } from "../search-sheet/saveSheetConversation";
 import { useSearchSession } from "./useSearchSession";
 
 /** 新开的主窗只先加载当前笔记本，其余本地文件夹在后台陆续加载；等这么久仍找不到就停在搜索结果。 */
 const TARGET_WAIT_MS = 20_000;
+const SETTINGS_KEY = "thinkly-settings";
+
+function readPersistedSearchAI() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: { ai?: unknown } };
+    return parseSearchAISettings(parsed.state?.ai);
+  } catch {
+    return null;
+  }
+}
 
 function waitForTarget(payload: OpenSearchResultPayload, open: (pageId: string) => void): () => void {
   const found = resolveSearchResultPageId(usePages.getState().pages, payload);
@@ -95,6 +110,10 @@ function applySearchWindowCommand(command: SearchWindowCommand): void {
     SPLIT_PALETTE_ACTIONS.find((action) => action.id === command.action)?.run();
     return;
   }
+  if (command.type === "ai-slash") {
+    requestAiSlashCommand(command.id);
+    return;
+  }
   if (command.type === "ask-ai") {
     const notebookId = notebookForAi(command.notebookId);
     if (notebookId) askNotebookAi({ notebookId, text: command.question });
@@ -132,11 +151,33 @@ export function useSearchWindowHandoff(): void {
         useSearchSession.getState().targetPage(pageId, true);
       });
     });
-    const unsubscribeCommand = api.onSearchWindowCommand?.((command) => applySearchWindowCommand(command));
+    const unsubscribeCommand = api.onSearchWindowCommand?.((command) => {
+      if (command.type !== "open-beside") {
+        applySearchWindowCommand(command);
+        return;
+      }
+      cancelWait();
+      cancelWait = waitForTarget(command, (pageId) => {
+        openPageBeside(pageId, command.placement);
+      });
+    });
+    const publishAISettings = () => {
+      const state = useSettings.getState();
+      if (!state._hasHydrated) return;
+      const memory = parseSearchAISettings({ ...state.ai, hydrated: true });
+      if (!shouldPublishWorkspaceAI(memory, readPersistedSearchAI())) return;
+      api.publishWorkspaceAISettings?.(memory);
+    };
+    publishAISettings();
+    const unsubscribeAI = useSettings.subscribe((state, prev) => {
+      if (state._hasHydrated === prev._hasHydrated && state.ai === prev.ai) return;
+      publishAISettings();
+    });
     return () => {
       cancelWait();
       unsubscribe();
       unsubscribeCommand?.();
+      unsubscribeAI();
     };
   }, []);
 }

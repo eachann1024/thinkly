@@ -119,9 +119,10 @@ const gooseDesktop = {
       path: string;
     }>,
   writeText: (t: string) => invoke("desktop:writeText", t) as Promise<void>,
-  writeImage: (dataUrl: string) =>
-    invoke("desktop:writeImage", dataUrl) as Promise<void>,
+  writeImage: (dataUrl: string, extras?: { html?: string; text?: string }) =>
+    invoke("desktop:writeImage", dataUrl, extras) as Promise<void>,
   readText: () => invoke("desktop:readText") as Promise<string>,
+  readImage: () => invoke("desktop:readImage") as Promise<string | null>,
   printHtmlToPdf: (html: string) =>
     invoke("desktop:printHtmlToPdf", html) as Promise<string | null>,
   netFetch: (

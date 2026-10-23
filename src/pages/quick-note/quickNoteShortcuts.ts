@@ -1,6 +1,7 @@
 import type { QuickNoteSlot } from "@/stores/useQuickNote";
 import { getPlatformKind } from "@/lib/utils";
 import { matchShortcut } from "@/lib/shortcut-match";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
 import type { DesktopWorkspaceAction } from "@/lib/electron/windowToggle";
 
@@ -48,7 +49,7 @@ export function getQuickNoteSlotShortcut(
   const slotText = codeMatch?.[1] ?? keyMatch?.[1];
   if (!slotText) return null;
 
-  const commandShortcut = (event.metaKey || event.ctrlKey) && !event.altKey;
+  const commandShortcut = isPlatformPrimaryModifierEvent(event) && !event.altKey;
   const windowsAltShortcut =
     isWindows && event.altKey && !event.metaKey && !event.ctrlKey;
   if (!commandShortcut && !windowsAltShortcut) return null;

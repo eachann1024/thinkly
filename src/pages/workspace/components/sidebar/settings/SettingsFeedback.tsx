@@ -15,8 +15,8 @@ zh-Hans:
   needBody_4aa1: "请填写正文"
   offline_5d12: "反馈服务没开"
   tooManyImages_0e77: "图片最多 1 张"
-  imageTooBig_2b63: "图片不能超过 8MB"
-  videoTooBig_91c4: "视频不能超过 15MB"
+  imageTooBig_2b63: "图片不能超过 20MB"
+  videoTooBig_91c4: "视频不能超过 200MB"
   removeFile_c0a8: "移除{{name}}"
 en:
   body_2c1e: "Message"
@@ -31,8 +31,8 @@ en:
   needBody_4aa1: "Write a message first"
   offline_5d12: "Feedback service is not running"
   tooManyImages_0e77: "Up to 1 image"
-  imageTooBig_2b63: "Each image must be 8MB or smaller"
-  videoTooBig_91c4: "Video must be 15MB or smaller"
+  imageTooBig_2b63: "Each image must be 20MB or smaller"
+  videoTooBig_91c4: "Video must be 200MB or smaller"
   removeFile_c0a8: "Remove {{name}}"
 ja:
   body_2c1e: "本文"
@@ -47,30 +47,27 @@ ja:
   needBody_4aa1: "本文を入力してください"
   offline_5d12: "フィードバックサービスが起動していません"
   tooManyImages_0e77: "画像は 1 枚まで"
-  imageTooBig_2b63: "画像は 8MB まで"
-  videoTooBig_91c4: "動画は 15MB まで"
+  imageTooBig_2b63: "画像は 20MB まで"
+  videoTooBig_91c4: "動画は 200MB まで"
   removeFile_c0a8: "{{name}} を削除"
 `;
 const uiText = createTranslator(localMessages);
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
+import { celebrate } from "@/lib/celebrate";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-const endpoint = "http://127.0.0.1:8787/api/feedback";
-const imageLimit = 8 * 1024 * 1024;
-const videoLimit = 15 * 1024 * 1024;
-
-function UploadMark() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 16V6" />
-      <path d="M8 9.5 12 5.5 16 9.5" />
-      <path d="M5 16.5v1.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.5" />
-    </svg>
-  );
-}
+const endpoint = "https://feedback-api.cooool.top/api/feedback";
+const imageLimit = 20 * 1024 * 1024;
+const videoLimit = 200 * 1024 * 1024;
 
 export function SettingsFeedback() {
   useLocale();
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [contact, setContact] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -99,9 +96,10 @@ export function SettingsFeedback() {
     const message = body.trim();
     if (!message) { setNotice(uiText("needBody_4aa1")); return; }
     const form = new FormData();
+    form.set("project", "thinkly");
     form.set("message", message);
     if (contact.trim()) form.set("contact", contact.trim());
-    form.set("company", "");
+    form.set("leave_blank", "");
     for (const file of images) form.append("images", file);
     if (video) form.set("video", video);
     setBusy(true);
@@ -113,7 +111,9 @@ export function SettingsFeedback() {
       setContact("");
       setImages([]);
       setVideo(null);
-      setNotice(uiText("thanks_3c88"));
+      setNotice("");
+      toast.success("已收到");
+      celebrate();
     } catch {
       setNotice(uiText("offline_5d12"));
     } finally {
@@ -123,9 +123,8 @@ export function SettingsFeedback() {
 
   return (
     <form className="grid max-w-xl gap-4" onSubmit={submit}>
-      <label className="grid gap-2 text-sm">
-        {uiText("body_2c1e")}
-        <textarea
+      <Field label={uiText("body_2c1e")} required>
+        <Textarea
           name="message"
           required
           rows={6}
@@ -133,45 +132,58 @@ export function SettingsFeedback() {
           value={body}
           placeholder={uiText("bodyPlaceholder_4f2a")}
           onChange={(event) => setBody(event.target.value)}
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
-      </label>
-      <label className="grid gap-2 text-sm">
-        {uiText("replyEmail_7a10")}
-        <input
+      </Field>
+      <Field label={uiText("replyEmail_7a10")}>
+        <Input
           name="contact"
           type="email"
           value={contact}
           placeholder={uiText("replyEmailPlaceholder_8c19")}
           onChange={(event) => setContact(event.target.value)}
-          className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
         />
-      </label>
-      <div className="feedback-picks">
-        <label className="feedback-pick">
-          <UploadMark />
-          <span>{uiText("images_8d44")}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" onChange={(event) => { onImages(event.target.files); event.target.value = ""; }} />
-        </label>
-        <label className="feedback-pick">
-          <UploadMark />
-          <span>{uiText("video_9b21")}</span>
-          <input type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" onChange={(event) => { onVideo(event.target.files); event.target.value = ""; }} />
-        </label>
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" onClick={() => imageRef.current?.click()}>
+          {uiText("images_8d44")}{images.length ? ` ${images.length}` : ""}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => videoRef.current?.click()}>
+          {video ? video.name : uiText("video_9b21")}
+        </Button>
       </div>
-      <input name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+      <Input
+        ref={imageRef}
+        className="sr-only"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+        aria-label={uiText("images_8d44")}
+        onChange={(event) => { onImages(event.target.files); event.target.value = ""; }}
+      />
+      <Input
+        ref={videoRef}
+        className="sr-only"
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+        aria-label={uiText("video_9b21")}
+        onChange={(event) => { onVideo(event.target.files); event.target.value = ""; }}
+      />
+      <Input name="leave_blank" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
       {images.length || video ? (
-        <ul className="grid gap-1 text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-2">
           {images.map((file) => (
-            <li key={`${file.name}-${file.size}`}>
-              <button type="button" onClick={() => setImages(images.filter((item) => item !== file))}>{uiText("removeFile_c0a8", { name: file.name })}</button>
-            </li>
+            <Button key={`${file.name}-${file.size}`} type="button" variant="ghost" onClick={() => setImages(images.filter((item) => item !== file))}>
+              {uiText("removeFile_c0a8", { name: file.name })}
+            </Button>
           ))}
-          {video ? <li><button type="button" onClick={() => setVideo(null)}>{uiText("removeFile_c0a8", { name: video.name })}</button></li> : null}
-        </ul>
+          {video ? (
+            <Button type="button" variant="ghost" onClick={() => setVideo(null)}>
+              {uiText("removeFile_c0a8", { name: video.name })}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={busy}>{busy ? uiText("sending_1f90") : uiText("send_6e02")}</Button>
+        <Button type="submit" busy={busy} disabled={busy}>{busy ? uiText("sending_1f90") : uiText("send_6e02")}</Button>
         <p aria-live="polite" className="text-sm">{notice}</p>
       </div>
     </form>

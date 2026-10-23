@@ -6,7 +6,8 @@ import { extractClipboardImageFiles } from "@/components/editor/utils/pasteClipb
 import { GOOSE_FOLDER_MIME, hasWorkspaceDrag } from "@/lib/workspace-drag";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
-import { collapseComposerSearchText, composerDocFromPlainText } from "./searchQueryText";
+import type { ComposerSlashBuiltinId } from "@/lib/notebook-ai/composerSlashCommands";
+import { collapseComposerSearchText, composerDocFromPlainText, searchTextOutsideSlashCommand } from "./searchQueryText";
 import { SearchComposerHost } from "./searchComposerHost";
 
 const MAX_IMAGE_ATTACHMENTS = 4;
@@ -34,22 +35,34 @@ type SearchSheetQueryProps = {
   onSubmit: () => void;
   onEscape: () => void;
   onEmptyChange: (empty: boolean) => void;
+  onSuggestions?: (kind: "mention" | "command" | null) => void;
+  onSlashCommand?: (id: ComposerSlashBuiltinId) => void;
   onOpenResult?: (page: { id: string; localFilePath?: string }) => void;
 };
 
 export const SearchSheetQuery = forwardRef<SearchSheetQueryHandle, SearchSheetQueryProps>(function SearchSheetQuery({
   seed, placeholder, label, notebookId, scopeAll, listId, expanded, activeDescendant, composingRef,
-  onSearchText, onPrompt, onSubmit, onEscape, onEmptyChange, onOpenResult,
+  onSearchText, onPrompt, onSubmit, onEscape, onEmptyChange, onOpenResult, onSuggestions, onSlashCommand,
 }, ref) {
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<AiComposerInputHandle>(null);
+  const suggestionKind = useRef<"mention" | "command" | null>(null);
   const [initialContent] = useState(() => composerDocFromPlainText(seed));
   const [dropActive, setDropActive] = useState(false);
   const publish = useCallback(() => {
     const payload = inputRef.current?.getPayload();
-    onSearchText(collapseComposerSearchText(payload?.freeformText ?? ""));
-    onPrompt(payload?.promptText.trim() ?? "");
+    const command = suggestionKind.current === "command";
+    const freeform = payload?.freeformText ?? "";
+    const promptText = payload?.promptText.trim() ?? "";
+    onSearchText(command ? searchTextOutsideSlashCommand(freeform) : collapseComposerSearchText(freeform));
+    onPrompt(command ? searchTextOutsideSlashCommand(promptText) : promptText);
   }, [onPrompt, onSearchText]);
+  const onComposerSuggestions = useCallback((kind: "mention" | "command" | null) => {
+    const previous = suggestionKind.current;
+    suggestionKind.current = kind;
+    onSuggestions?.(kind);
+    if (previous !== kind) publish();
+  }, [onSuggestions, publish]);
   const searchPages = useCallback((query: string) => {
     const pages = usePages.getState().pages;
     const notebooks = useNotebooks.getState().notebooks;
@@ -134,6 +147,7 @@ export const SearchSheetQuery = forwardRef<SearchSheetQueryHandle, SearchSheetQu
     onCompositionStart={() => { composingRef.current = true; }} onCompositionEnd={() => { composingRef.current = false; }}>
     <SearchComposerHost notebookId={notebookId} onOpenResult={onOpenResult}><AiComposerInput ref={inputRef} placeholder={placeholder} autoFocusToken={0} initialContent={initialContent}
       onContentChange={publish} onSubmit={onSubmit} onEscape={onEscape} onIsEmptyChange={onEmptyChange}
+      onSuggestionsChange={onComposerSuggestions} onSlashCommand={onSlashCommand}
       className="search-sheet-composer-input" searchPages={searchPages} referencePlacement="inline" variant="panel"
       notebookId={notebookId ?? undefined} maxImageBytes={MAX_IMAGE_FILE_BYTES} maxImageCount={MAX_IMAGE_ATTACHMENTS}
       onImageRejected={(message) => toast.error(message)}/></SearchComposerHost>

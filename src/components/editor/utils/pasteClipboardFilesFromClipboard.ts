@@ -97,6 +97,23 @@ function commitPastedMediaWithoutHistory(
  * Mac 剪贴板常无 dataTransfer.types 中的 "Files"（仅有 image/png 等），
  * BlockNote handleFileInsertion 会直接 return；此处遍历 items 插入并 uploadFile。
  */
+/** 粘贴事件没有文件时，从系统剪贴板读取 Shottr / 截图的 PNG。 */
+export async function pasteNativeClipboardImage(
+  editor: BlockNoteEditor<any, any, any>,
+  readImage: () => Promise<string | null>,
+): Promise<void> {
+  const dataUrl = await readImage();
+  if (!dataUrl) return;
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  if (!blob.size) return;
+  const type = blob.type.startsWith("image/") ? blob.type : "image/png";
+  await pasteClipboardMedia(editor, [{
+    file: new File([blob], "pasted.png", { type }),
+    mime: type,
+  }]);
+}
+
 export async function pasteClipboardFilesFromClipboard(
   event: ClipboardEvent,
   editor: BlockNoteEditor<any, any, any>,

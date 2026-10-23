@@ -65,6 +65,7 @@ declare global {
   const Label: typeof import('../components/ui/label').Label
   const ListRow: typeof import('../components/ui/list-row').ListRow
   const NOTEBOOK_MENU_CLOSE_MS: typeof import('../components/ui/floating-menu-motion').NOTEBOOK_MENU_CLOSE_MS
+  const NOTEBOOK_MENU_EASE: typeof import('../components/ui/floating-menu-motion').NOTEBOOK_MENU_EASE
   const NOTEBOOK_MENU_OPEN_MS: typeof import('../components/ui/floating-menu-motion').NOTEBOOK_MENU_OPEN_MS
   const NativeSelect: typeof import('../components/ui/select').NativeSelect
   const ORB_PHASE_HOLD_MS: typeof import('../components/ui/ai-motion').ORB_PHASE_HOLD_MS

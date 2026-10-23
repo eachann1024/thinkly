@@ -1,3 +1,5 @@
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+
 type ModifierState = Pick<KeyboardEvent, "metaKey" | "ctrlKey">;
 type ModifierListener = (state: ModifierState) => void;
 
@@ -49,7 +51,7 @@ function createModifierSubscription(doc: Document): ModifierSubscription | null 
   };
 }
 
-const hasOpenModifier = (state: ModifierState) => state.metaKey || state.ctrlKey;
+const hasOpenModifier = (state: ModifierState) => isPlatformPrimaryModifierEvent(state);
 
 export function subscribeModifierClass(
   dom: HTMLElement,

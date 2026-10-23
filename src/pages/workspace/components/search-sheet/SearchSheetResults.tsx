@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Clock3, FileText, Sparkles, X } from "@/components/ui/icons";
 import { getPageTitle } from "@/components/editor/utils/page-title";
+import { looseMatchRanges } from "../command/commandSearchText";
 import type { SearchResultPage } from "../command/useCommandSearch";
 import type { Page } from "@/types";
 import { presenceName } from "@/lib/ui/presence";
@@ -34,13 +35,14 @@ import { presenceName } from "@/lib/ui/presence";
 export const AI_ROW_ID = "search-sheet-ai";
 
 function Highlight({ text, query }: { text: string; query: string }) {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return <>{text}</>;
-  const haystack = text.toLowerCase();
-  const parts = []; let cursor = 0, index = haystack.indexOf(needle);
-  while (index >= 0) {
-    parts.push(<Fragment key={index}>{text.slice(cursor, index)}<mark>{text.slice(index, index + needle.length)}</mark></Fragment>);
-    cursor = index + needle.length; index = haystack.indexOf(needle, cursor);
+  const ranges = looseMatchRanges(text, query);
+  if (!ranges.length) return <>{text}</>;
+  const parts = [];
+  let cursor = 0;
+  for (const range of ranges) {
+    if (range.start < cursor) continue;
+    parts.push(<Fragment key={range.start}>{text.slice(cursor, range.start)}<mark>{text.slice(range.start, range.end)}</mark></Fragment>);
+    cursor = range.end;
   }
   return <>{parts}{text.slice(cursor)}</>;
 }

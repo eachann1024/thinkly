@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "@/components/ui/icons";
 import { clampPreviewZoomPercent, PREVIEW_ZOOM_STEP_PERCENT, toImageDataUrl, type PreviewContent } from "@/lib/preview/previewAction";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 
 function isZoomInKey(event: KeyboardEvent) {
   return (
@@ -49,7 +50,7 @@ export function useFullscreenPreview(open: boolean, content: PreviewContent | nu
       return;
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      if (!isPlatformPrimaryModifierEvent(event) || event.altKey) return;
       if (isZoomInKey(event)) {
         event.preventDefault();
         event.stopPropagation();
