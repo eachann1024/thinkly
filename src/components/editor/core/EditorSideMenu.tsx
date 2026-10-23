@@ -21,6 +21,7 @@ import {
 } from "@/components/editor/core/toggleHeadingGutter";
 import { getSectionInsertAnchorId } from "@/components/editor/core/headingSectionFold";
 import { useEditorSideMenuTarget } from "./useEditorSideMenuTarget";
+import { useSideMenuGlide } from "./useSideMenuGlide";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/EditorSideMenu.tsx#messages:1">`
@@ -74,6 +75,7 @@ export function EditorSideMenu() {
     tableMenuTop,
     setFoldTick,
   } = useEditorSideMenuTarget(editor, isDragging, menuRef, pressedHandle);
+  const gliding = useSideMenuGlide(shouldShow ? block?.id : undefined);
 
   const handleToggleHeading = useCallback(
     (e: React.MouseEvent) => {
@@ -175,7 +177,9 @@ export function EditorSideMenu() {
       ref={menuRef}
       className={cn(
         "bn-side-menu fixed z-[70]",
-        "transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+        gliding
+          ? "transition-[opacity,transform,top,left] duration-150 ease-out motion-reduce:transition-none"
+          : "transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
         "[body[data-scroll-locked]_&]:!opacity-0 [body[data-scroll-locked]_&]:!pointer-events-none",
       )}
       data-heading-gutter={block.type !== "table" ? "true" : undefined}
