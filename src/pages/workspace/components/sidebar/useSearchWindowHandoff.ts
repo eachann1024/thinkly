@@ -97,7 +97,7 @@ async function rememberSearchAi(command: SearchAiCommand): Promise<{ notebookId:
   return record;
 }
 
-function applySearchWindowCommand(command: SearchWindowCommand): void {
+function applySearchWindowCommand(command: Exclude<SearchWindowCommand, { type: "open-beside" }>): void {
   if (command.type === "hide-recent") {
     useSettings.getState().setShowRecentInSearch(false);
     return;
