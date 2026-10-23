@@ -1,5 +1,9 @@
 # 更新日志
 
+## 1.7.327
+
+- accept search-window AI snapshot and continue-ai handoff (#96)
+
 ## 1.7.326
 
 - 去掉表格多行选中时叠在锚点格上的内框
