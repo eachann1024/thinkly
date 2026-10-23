@@ -87,8 +87,8 @@
     box-shadow 120ms ease;
 }
 
-/* 落点线沿用侧栏拖宽把手的激活态（shell.css 的 --workspace-resize-line-active）：
-   沿长边 22%–78% 为选中文字色，两端淡出。不画左端方头、不加发光，
+/* 落点线沿用侧栏拖宽把手的静止色（shell.css 的 --workspace-resize-line）：
+   沿长边 22%–78% 为当前强调色的拖拽线，两端淡出。不画左端方头、不加发光，
    否则文件列表底部会看成一条坏掉的横向滚动条。方向改成横向。 */
 .sidebar-tree-drop-line,
 .sidebar-drop-line,
@@ -96,8 +96,8 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--goose-interactive-selected-fg) 22%,
-    var(--goose-interactive-selected-fg) 78%,
+    var(--goose-accent-drag-line) 22%,
+    var(--goose-accent-drag-line) 78%,
     transparent 100%
   );
   border-radius: 0;
