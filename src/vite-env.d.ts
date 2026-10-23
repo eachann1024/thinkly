@@ -1,10 +1,12 @@
 /// <reference types="vite/client" />
 import type { AppUpdateCheckResult, AppUpdateState } from "./lib/appUpdateTypes";
+import type { SearchAISettingsSnapshot } from "./lib/electron/searchAISettings";
 import type { SearchWindowCommand } from "./lib/electron/searchWindow";
 export {}
 
 interface ImportMetaEnv {
   readonly VITE_APP_VERSION?: string;
+  readonly VITE_FEEDBACK_API?: string;
   readonly VITE_TINYFISH_API_KEY_A?: string;
   readonly VITE_TINYFISH_API_KEY_B?: string;
 }
@@ -116,8 +118,9 @@ declare global {
     replyBeforeUpdate: (requestId: string, error: string | null) => void
     onUpdateReady: (cb: (version: string) => void) => () => void
     writeText: (t: string) => Promise<void>
-    writeImage: (dataUrl: string) => Promise<void>
+    writeImage: (dataUrl: string, extras?: { html?: string; text?: string }) => Promise<void>
     readText: () => Promise<string>
+    readImage: () => Promise<string | null>
     printHtmlToPdf: (html: string) => Promise<string | null>
     netFetch: (url: string, init?: { method?: string; headers?: Record<string,string>; body?: string }) => Promise<{ status: number; headers: Record<string,string>; body: string }>
     setTitle: (t: string) => Promise<void>
@@ -145,6 +148,9 @@ declare global {
     searchWindowReady: () => Promise<void>
     openSearchResult: (payload: { pageId: string; query: string; localFilePath?: string }) => Promise<boolean>
     searchWindowCommand: (command: SearchWindowCommand) => Promise<boolean>
+    pullWorkspaceAISettings: () => Promise<SearchAISettingsSnapshot | null>
+    publishWorkspaceAISettings: (settings: SearchAISettingsSnapshot | null) => void
+    onWorkspaceAISettings: (cb: (settings: SearchAISettingsSnapshot) => void) => () => void
     onSearchWindowShown: (cb: () => void) => () => void
     onOpenSearchResult: (cb: (payload: { pageId: string; query: string; localFilePath?: string }) => void) => () => void
     onSearchWindowCommand: (cb: (command: SearchWindowCommand) => void) => () => void

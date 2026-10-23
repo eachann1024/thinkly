@@ -107,10 +107,11 @@ export function SortableNotebookItem({
           <span className="shrink-0 whitespace-nowrap text-xs text-danger">{uiText("pathUnavailable_ddd1")}</span>
         )}
       </NotebookMenuItemContent>
-      <div
-        className="goose-notebook-row-actions items-center gap-1 shrink-0"
-        onPointerDown={(e) => e.stopPropagation()}
-      >
+      <div className="goose-notebook-row-end">
+        <div
+          className="goose-notebook-row-actions items-center gap-1 shrink-0"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
         {notebook.source === "local-folder" && canDeleteNotebook && (
           <TooltipProvider delayDuration={600}>
             <Tooltip>
@@ -149,8 +150,9 @@ export function SortableNotebookItem({
             <TooltipContent side="bottom">{uiText("editNotebook_ed4e")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        </div>
+        <GooseIcons.Check className={isActive ? "h-4 w-4 shrink-0" : "invisible h-4 w-4 shrink-0"} />
       </div>
-      {isActive && <GooseIcons.Check className="h-4 w-4 shrink-0" />}
     </div>
   );
 }

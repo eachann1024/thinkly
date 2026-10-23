@@ -8,6 +8,7 @@ import {
   cachePasteTarget,
   shouldIsolateTitleStructurePaste,
   shouldPasteClipboardAsBlocks,
+  clipboardHtmlDroppedMedia,
   pasteClipboardHtmlAsBlocks,
   withoutCopiedBlockIds,
   withoutBlockNoteClipboardIds,
@@ -70,6 +71,23 @@ export function handleEditorStructurePaste(
           }
         } catch {
           blocks = [];
+        }
+        const sourceHtml = normalizedBlockNoteHtml || htmlText;
+        const internal = Boolean(normalizedBlockNoteHtml) || htmlLooksLikeBlockNoteClipboard(htmlText);
+        if (internal && (!blocks?.length || clipboardHtmlDroppedMedia(sourceHtml, blocks))) {
+          if (!restoreEditorSelection(editor.prosemirrorView, titleSelection)) {
+            toast.error(t("theNoteHasChangedPleasePasteAgain"));
+            return true;
+          }
+          const titleBlock = editor.document[0];
+          if (!titleBlock) return true;
+          if (!editor.document[1]) {
+            editor.insertBlocks([{ type: "paragraph", content: "" }], titleBlock, "after");
+          }
+          const anchor = editor.document[1];
+          if (anchor) editor.setTextCursorPosition(anchor, "start");
+          editor.pasteHTML(withoutBlockNoteClipboardIds(sourceHtml), true);
+          return true;
         }
         if (!blocks || blocks.length === 0) return true;
         if (!restoreEditorSelection(editor.prosemirrorView, titleSelection)) {

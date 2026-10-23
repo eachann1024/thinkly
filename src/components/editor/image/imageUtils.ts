@@ -32,6 +32,7 @@ export async function copyImageSrcToClipboard(
   src: string,
   platform: EditorPlatform,
   pageLocalFilePath?: string | null,
+  extras?: { html?: string; text?: string },
 ): Promise<void> {
   let resolvedObjectUrl: string | null = null;
   try {
@@ -45,7 +46,7 @@ export async function copyImageSrcToClipboard(
     }
     const sourceBlob = await response.blob();
     const pngBlob = await convertImageBlobToPng(sourceBlob);
-    await platform.clipboard.copyImage(await blobToBase64(pngBlob));
+    await platform.clipboard.copyImage(await blobToBase64(pngBlob), extras);
   } finally {
     if (resolvedObjectUrl) URL.revokeObjectURL(resolvedObjectUrl);
   }

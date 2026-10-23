@@ -1,5 +1,8 @@
+import { htmlLooksLikeBlockNoteClipboard } from "./multilinePaste";
+
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|heic|heif|tiff?)$/i;
 const VIDEO_EXT = /\.(mp4|m4v|mov|webm|avi|mkv|flv|wmv)$/i;
+const clipboardFileCache = new WeakMap<object, { file: File; mime: string }[]>();
 
 /** 剪贴板 file item 是否应按图片块粘贴（含 Mac 空 file.type、靠 item.type/扩展名判断） */
 export function isPasteableClipboardImageFile(
@@ -33,17 +36,105 @@ export type ClipboardImageSource = {
   files?: ArrayLike<File> | null;
 };
 
-/** 在粘贴事件仍有效时取得文件；items/files 是同一批内容的两种表示。 */
+/** 在粘贴事件仍有效时取得文件；items/files 是同一批内容的两种表示。同一事件只读一次。 */
 export function extractClipboardFiles(
   data: ClipboardImageSource | null | undefined,
 ): { file: File; mime: string }[] {
+  if (data && clipboardFileCache.has(data)) return clipboardFileCache.get(data)!;
   const files: { file: File; mime: string }[] = [];
   for (const item of Array.from(data?.items ?? [])) {
     const file = item.kind === "file" ? item.getAsFile() : null;
     if (file) files.push({ file, mime: item.type || file.type });
   }
-  if (files.length) return files;
-  return Array.from(data?.files ?? []).map((file) => ({ file, mime: file.type }));
+  const resolved = files.length
+    ? files
+    : Array.from(data?.files ?? []).map((file) => ({ file, mime: file.type }));
+  // 空结果不缓存。捕获阶段读不到文件时，不能把后面的粘贴处理也锁死。
+  if (data && resolved.length) clipboardFileCache.set(data, resolved);
+  return resolved;
+}
+
+export function isClipboardImageType(type: string): boolean {
+  return type.startsWith("image/") || type === "public.png" || type === "public.tiff" || type === "image/tiff";
+}
+
+/** 捕获阶段只看类型，不调用 getAsFile，避免把文件读丢。 */
+export function shouldDeferPasteToMediaHandler(
+  data: { types?: ArrayLike<string> } | null | undefined,
+  allowVideo: boolean,
+): boolean {
+  const types = data?.types;
+  if (!types?.length) return false;
+  let media = false;
+  for (const type of Array.from(types)) {
+    if (type === "blocknote/html") return false;
+    if (type === "Files" || isClipboardImageType(type) || (allowVideo && type.startsWith("video/"))) media = true;
+  }
+  return media;
+}
+
+export type ClipboardPasteRoute = "blocks" | "media-files" | "default";
+
+/** 笔记内块优先无损还原；只有外部图片/视频文件才走上传。文件只读取一次。 */
+export function resolveClipboardPasteRoute(
+  data: (ClipboardImageSource & { getData?: (type: string) => string }) | null | undefined,
+  allowVideo: boolean,
+): ClipboardPasteRoute {
+  if (!data) return "default";
+  const types = (data as { types?: ArrayLike<string> }).types;
+  if (types && types.length) {
+    let interesting = false;
+    for (const type of Array.from(types)) {
+      if (
+        type === "Files" || type === "text/html" || type === "blocknote/html" ||
+        isClipboardImageType(type) || type.startsWith("video/")
+      ) {
+        interesting = true;
+        break;
+      }
+    }
+    if (!interesting) return "default";
+  }
+  const files = extractClipboardFiles(data);
+  const read = (type: string) => {
+    try {
+      return data.getData?.(type) ?? "";
+    } catch {
+      return "";
+    }
+  };
+  if (read("blocknote/html") || htmlLooksLikeBlockNoteClipboard(read("text/html"))) return "blocks";
+  const hasImage = files.some(({ file, mime }) => isPasteableClipboardImageFile(file, mime));
+  const hasVideo = allowVideo && files.some(({ file, mime }) => isPasteableClipboardVideoFile(file, mime));
+  return hasImage || hasVideo ? "media-files" : "default";
+}
+
+/**
+ * 粘贴事件里没有文件，但系统剪贴板有图片。Shottr / 截图在 Electron 里经常是这种形态。
+ * 有正文时不读，避免把一段文字粘贴换成旧图片。
+ */
+export function shouldReadNativeClipboardImage(
+  data: (ClipboardImageSource & { types?: ArrayLike<string>; getData?: (type: string) => string }) | null | undefined,
+): boolean {
+  if (!data) return false;
+  const types = Array.from(data.types ?? []);
+  const imageType = types.some(isClipboardImageType);
+  const filesType = types.includes("Files");
+  const emptyEvent = types.length === 0;
+  if (!imageType && !filesType && !emptyEvent) return false;
+  const files = extractClipboardFiles(data);
+  if (files.some(({ file, mime }) => isPasteableClipboardImageFile(file, mime))) return false;
+  if (imageType || (filesType && files.length === 0)) return true;
+  if (!emptyEvent) return false;
+  let plain = "";
+  let html = "";
+  try {
+    plain = data.getData?.("text/plain") ?? "";
+    html = data.getData?.("text/html") ?? "";
+  } catch {
+    return true;
+  }
+  return !plain.trim() && !html.trim();
 }
 
 /**

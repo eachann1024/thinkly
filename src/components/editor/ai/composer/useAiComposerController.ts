@@ -1,4 +1,4 @@
-import { useEffect, type ForwardedRef } from "react";
+import { useEffect, useLayoutEffect, type ForwardedRef } from "react";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { useSettings } from "@/stores/useSettings";
 import { warmLocalSkillsCache } from "@/lib/notebook-ai/localContext";
@@ -31,6 +31,7 @@ export function useAiComposerController(
     referencePlacement = "inline",
     notebookId,
     onSlashCommand,
+    onSuggestionsChange,
     maxImageBytes,
     maxImageCount,
     onImageRejected,
@@ -93,6 +94,10 @@ export function useAiComposerController(
     onContentMutation: emitCurrentContent,
     onBuiltinCommand: onSlashCommand,
   });
+  const suggestionKind = command.phase === "active" ? "command" : mention.phase === "active" ? "mention" : null;
+  useLayoutEffect(() => {
+    onSuggestionsChange?.(suggestionKind);
+  }, [onSuggestionsChange, suggestionKind]);
 
   const {
     imeSessionRef,

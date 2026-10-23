@@ -8,6 +8,7 @@
  * 真实平台能力由各宿主注入对应实现。
  *
  */
+import { readNavigatorClipboardImage } from "./navigatorClipboardImage";
 import type {
   EditorPlatform,
   EditorPlatformAi,
@@ -88,7 +89,7 @@ const clipboard: EditorPlatformClipboard = {
     }
     await navigator.clipboard.writeText(text);
   },
-  copyImage: async (dataUrl) => {
+  copyImage: async (dataUrl, extras) => {
     if (
       typeof navigator === "undefined" ||
       !navigator.clipboard ||
@@ -98,7 +99,10 @@ const clipboard: EditorPlatformClipboard = {
     }
     const response = await fetch(dataUrl);
     const blob = await response.blob();
-    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    const item: Record<string, Blob> = { [blob.type || "image/png"]: blob };
+    if (extras?.html) item["text/html"] = new Blob([extras.html], { type: "text/html" });
+    if (extras?.text) item["text/plain"] = new Blob([extras.text], { type: "text/plain" });
+    await navigator.clipboard.write([new ClipboardItem(item)]);
   },
   readText: async () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -106,6 +110,7 @@ const clipboard: EditorPlatformClipboard = {
     }
     return "";
   },
+  readImage: async () => readNavigatorClipboardImage(),
 };
 
 const ai: EditorPlatformAi = {};

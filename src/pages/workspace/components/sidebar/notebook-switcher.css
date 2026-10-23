@@ -151,14 +151,26 @@
   height: 16px;
 }
 .goose-notebook-row .goose-notebook-monogram svg { width: 100%; height: 100%; }
-.goose-notebook-row-actions {
-  display: none;
+/* 选中和悬停当帧换色。拖拽换位的 transition 写在行内，这里不加 !important。 */
+.goose-notebook-menu-surface :is(.goose-notebook-row, .goose-notebook-add-action) {
+  transition: none;
 }
-.goose-notebook-row:is(:hover, :focus-within) > .goose-notebook-row-actions {
+.goose-notebook-row-end {
   display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+.goose-notebook-row-actions {
+  display: flex;
+  visibility: hidden;
+}
+.goose-notebook-row:is(:hover, :focus-within) > .goose-notebook-row-end > .goose-notebook-row-actions {
+  visibility: visible;
 }
 @media (hover: none) {
-  .goose-notebook-row-actions { display: flex; }
+  .goose-notebook-row-actions { visibility: visible; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sidebar-notebook-trigger > .goose-notebook-monogram,

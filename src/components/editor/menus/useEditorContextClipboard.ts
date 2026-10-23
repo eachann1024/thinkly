@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/sonner";
 import { useEditorPlatform } from "../platform/context";
 import { getSelectedImageUrl } from "../utils/selection";
 import { copyImageSrcToClipboard } from "../image/imageUtils";
-import { deleteCutSelection, normalizeBlockNoteClipboardHtml } from "../extensions/copyBlockClipboard";
+import { deleteCutSelection, getSelectionClipboardPayload, normalizeBlockNoteClipboardHtml } from "../extensions/copyBlockClipboard";
 import { snapshotEditorSelection, restoreEditorSelection, type EditorSelectionSnapshot } from "../utils/editorSelectionSnapshot";
 import { cachePasteTarget, plainHasGooseColumnMarkers, tryPasteGooseMarkdownFragment, withoutBlockNoteClipboardIds, withoutCopiedBlockIds, shouldIsolateTitleStructurePaste } from "../hooks/editorPasteBlocks";
 import { looksLikeBlockStructure, looksLikeMarkdownFragment, normalizeMarkdownPasteText } from "../utils/clipboard";
@@ -117,7 +117,18 @@ export function useEditorContextClipboard(
     if (document.execCommand(cut ? "cut" : "copy")) return;
     try {
       const image = getSelectedImageUrl(editor.prosemirrorState);
-      if (image) await copyImageSrcToClipboard(image, platform);
+      if (image) {
+        let payload: { html: string; plain: string } | null = null;
+        try {
+          payload = getSelectionClipboardPayload(editor.prosemirrorView);
+        } catch (error) {
+          console.error("[editor] Failed to serialize selected image block", error);
+        }
+        await copyImageSrcToClipboard(
+          image, platform, undefined,
+          payload ? { html: payload.html, text: payload.plain } : undefined,
+        );
+      }
       else await writeContextClipboard(editor.prosemirrorView);
       if (cut && restore(snapshot)) deleteCutSelection(editor.prosemirrorView);
     } catch (error) {

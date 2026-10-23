@@ -110,6 +110,38 @@ export function finishPasteAtAnchor(
   return last !== null;
 }
 
+const MEDIA_CLIPBOARD_TYPE = /data-content-type\s*=\s*["'](imageResize|image|video|audio|file|divider)["']/gi;
+
+function containsClaimedTypes(blocks: unknown[], claimed: Set<string>): boolean {
+  let pending = claimed.size;
+  const seen = new Set<string>();
+  const walk = (list: unknown[]): boolean => {
+    for (let index = 0; index < list.length; index += 1) {
+      const block = list[index];
+      if (!block || typeof block !== "object") continue;
+      const record = block as { type?: unknown; children?: unknown };
+      const type = record.type;
+      if (typeof type === "string" && claimed.has(type) && !seen.has(type)) {
+        seen.add(type);
+        pending -= 1;
+        if (pending === 0) return true;
+      }
+      if (Array.isArray(record.children) && walk(record.children)) return true;
+    }
+    return false;
+  };
+  return walk(blocks);
+}
+
+/** 内部 HTML 声明了媒体块，但解析结果里没有。这时必须改走无损 paste。 */
+export function clipboardHtmlDroppedMedia(html: string, blocks: unknown[]): boolean {
+  const claimed = new Set<string>();
+  MEDIA_CLIPBOARD_TYPE.lastIndex = 0;
+  for (const match of html.matchAll(MEDIA_CLIPBOARD_TYPE)) claimed.add(match[1]);
+  if (!claimed.size) return false;
+  return !containsClaimedTypes(blocks, claimed);
+}
+
 /** 剪贴板 HTML 带有源块 ID；粘贴是副本，需由编辑器重新分配块 ID。 */
 export function withoutCopiedBlockIds(blocks: unknown[]): unknown[] {
   return blocks.map((block) => {
@@ -160,6 +192,15 @@ export async function pasteClipboardHtmlAsBlocks(
     blocks = await editor.tryParseHTMLToBlocks(htmlText);
   } catch {
     blocks = [];
+  }
+  const internal = htmlLooksLikeBlockNoteClipboard(htmlText);
+  if (internal && (!blocks.length || clipboardHtmlDroppedMedia(htmlText, blocks))) {
+    if (target.selection && !restoreEditorSelection(editor.prosemirrorView, target.selection)) {
+      toast.error(t("theNoteHasChangedPleasePasteAgain"));
+      return false;
+    }
+    editor.pasteHTML(withoutBlockNoteClipboardIds(htmlText), true);
+    return true;
   }
   if (!blocks || blocks.length === 0) return false;
   return finishPasteAtAnchor(editor, withoutCopiedBlockIds(blocks), target);

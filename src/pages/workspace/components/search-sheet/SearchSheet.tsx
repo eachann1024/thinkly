@@ -22,6 +22,7 @@ zh-Hans:
   loadMoreResults: "加载更多结果"
   select: "选择"
   open: "打开"
+  splitOpen: "分屏"
   askAi: "询问 AI"
   switchScope: "切换"
   switchScopeHint: "切换{{name}}"
@@ -47,6 +48,7 @@ en:
   loadMoreResults: "Load more results"
   select: "Select"
   open: "Open"
+  splitOpen: "Split"
   askAi: "Ask AI"
   switchScope: "Switch to"
   switchScopeHint: "Switch to {{name}}"
@@ -72,6 +74,7 @@ ja:
   loadMoreResults: "さらに読み込む"
   select: "選択"
   open: "開く"
+  splitOpen: "分割"
   askAi: "AI に質問"
   switchScope: "切り替え"
   switchScopeHint: "{{name}}に切り替え"
@@ -89,7 +92,7 @@ import { DotDecor, DotIconArt, EmptyStateArt } from "@/components/ui/dot-matrix"
 import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-layer";
 import { SkeletonList } from "@/components/ui/skeleton";
 import type { SearchWindowCommand } from "@/lib/electron/searchWindow";
-import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import { formatShortcut } from "@/lib/utils";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
@@ -100,8 +103,12 @@ import { useSheetResults } from "./useSheetResults";
 import type { SearchFolderSource } from "../sidebar/useSearchFolderRefresh";
 import { useSheetDrag } from "./useSheetDrag";
 import { SearchSheetQuery, type SearchSheetQueryHandle } from "./SearchSheetQuery";
+import type { ComposerSlashBuiltinId } from "@/lib/notebook-ai/composerSlashCommands";
+import { requestAiSlashCommand } from "../notebook-ai/session/slashCommandRequest";
+import { searchAiEmptyChrome } from "./searchAiChrome";
 import { useSearchAiAvailable, useSheetAnswer } from "./useSheetAnswer";
 import { SearchSheetAnswer } from "./SearchSheetAnswer";
+import { handleSearchSheetKeyDown, handleSearchSheetKeyDownCapture } from "./searchSheetKeyboard";
 import { useSheetActions } from "./useSheetActions";
 import "./search-sheet.css";
 
@@ -134,6 +141,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const focusSeen = useRef(session.focusNonce);
   const [prompt, setPrompt] = useState(session.query);
   const [queryEmpty, setQueryEmpty] = useState(!session.query.trim());
+  const [menu, setMenu] = useState<null | "mention" | "command">(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   if (focusSeen.current !== session.focusNonce) {
     focusSeen.current = session.focusNonce;
@@ -144,7 +152,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const notebooks = useNotebooks(s => s.notebooks);
   const setShowRecent = useSettings(s => s.setShowRecentInSearch);
   const { results, total, hasMore, pages, loading, loadError, retryLoad, showRecent, deferredQuery, isSearching, searchError, loadMoreResults, removeRecent, getCandidates, searchResults } = useSheetResults(folderSource);
-  const aiReady = useSearchAiAvailable();
+  const ai = useSearchAiAvailable();
   const { answer, ask, reset: resetAnswer } = useSheetAnswer();
   const layer = useModalLayer(visible);
   const endSearch = useCallback(() => onClose ? onClose() : useSearchSession.getState().closeSearch(), [onClose]);
@@ -173,10 +181,12 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
 
   const hasQuery = Boolean(session.query.trim());
   const pending = isSearching || session.query !== deferredQuery;
-  const aiQuery = aiReady ? prompt.trim() : "";
+  const aiChrome = searchAiEmptyChrome(ai);
+  const menuOpen = menu !== null;
+  const aiQuery = menu === "command" || !aiChrome.showAsk ? "" : prompt.trim();
   const notebookNames = useMemo(() => Object.fromEntries(Object.values(notebooks).map(n => [n.id, n.name])), [notebooks]);
   const optionIds = useMemo(() => [...(aiQuery ? [AI_ROW_ID] : []), ...results.map(p => p.id)], [aiQuery, results]);
-  const selectedId = activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
+  const selectedId = menuOpen ? undefined : activeId && optionIds.includes(activeId) ? activeId : results[0]?.id ?? optionIds[0];
 
   const openAiSettings = () => {
     if (onCommand) { onCommand({ type: "open-settings", tab: "ai" }); return; }
@@ -202,38 +212,15 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
     queryRef.current?.focus();
   };
   const reveal = (id: string) => document.getElementById(id === AI_ROW_ID ? id : `search-result-${id}`)?.scrollIntoView({ block: "nearest" });
-  const keydownCapture = (event: KeyboardEvent<HTMLDivElement>) => {
-    const native = event.nativeEvent;
-    if ((native.isComposing || native.keyCode === 229) && event.key === "Enter" && !event.shiftKey) { event.stopPropagation(); return; }
-    if (event.key === "Enter" && isPlatformPrimaryModifierEvent(event) && !event.shiftKey && !event.altKey) {
-      event.preventDefault(); event.stopPropagation();
-      if (continueInPanel && answer?.status !== "loading") continueInPanel();
-    }
+  const keyContext = {
+    answer, selectedId, results, optionIds, hasMore, aiRowId: AI_ROW_ID,
+    composingRef: composing, suggestionsOpen: menuOpen,
+    containsQueryTarget: (target: EventTarget | null) => queryRef.current?.containsTarget(target) ?? false,
+    containsSheetTarget: (target: EventTarget | null) => sheetRef.current?.contains(target as Node) ?? false,
+    continueInPanel, onCommand, endSearch, resetAnswer, dismissSheet, loadMoreResults, setActiveId, confirmSelection, reveal,
   };
-  const keydown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!sheetRef.current?.contains(event.target as Node) || event.defaultPrevented) return;
-    if (composing.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
-    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (answer) resetAnswer(); else dismissSheet(); return; }
-    if (!queryRef.current?.containsTarget(event.target)) return;
-    if (event.key === "Tab" && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
-      event.preventDefault();
-      const latest = useSearchSession.getState();
-      latest.setScope(latest.scope.kind === "all" ? { kind: "current", notebookId: latest.view.phase !== "closed" ? latest.view.context.startingNotebookId : null } : { kind: "all" });
-      return;
-    }
-    if ((event.key === "ArrowDown" || event.key === "ArrowUp") && optionIds.length && !answer) {
-      event.preventDefault();
-      const index = optionIds.indexOf(selectedId ?? "");
-      const next = Math.max(0, Math.min(optionIds.length - 1, index + (event.key === "ArrowDown" ? 1 : -1)));
-      if (next >= optionIds.length - 2 && hasMore) loadMoreResults();
-      setActiveId(optionIds[next]);
-      requestAnimationFrame(() => reveal(optionIds[next]));
-      return;
-    }
-    if (event.key !== "Enter" || event.shiftKey) return;
-    event.preventDefault();
-    confirmSelection();
-  };
+  const keydownCapture = (event: KeyboardEvent<HTMLDivElement>) => handleSearchSheetKeyDownCapture(event, keyContext);
+  const keydown = (event: KeyboardEvent<HTMLDivElement>) => handleSearchSheetKeyDown(event, keyContext);
 
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
@@ -254,6 +241,12 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
           notebookId={mentionNotebookId} scopeAll={scopeAll} listId="search-sheet-results" expanded={visible}
           activeDescendant={selectedId ? (selectedId === AI_ROW_ID ? AI_ROW_ID : `search-result-${selectedId}`) : undefined}
           composingRef={composing} onSearchText={onSearchText} onPrompt={onPromptChange} onSubmit={confirmSelection} onOpenResult={onOpenResult}
+          onSuggestions={setMenu} onSlashCommand={(id: ComposerSlashBuiltinId) => {
+            if (onCommand) { onCommand({ type: "ai-slash", id }); return; }
+            skipRestore.current = true;
+            dismissSheet();
+            requestAiSlashCommand(id);
+          }}
           onEscape={() => { if (answer) resetAnswer(); else dismissSheet(); }} onEmptyChange={setQueryEmpty}/>
         {queryEmpty ? <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd> : <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton>}
       </div>
@@ -275,7 +268,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
           <strong>{statusKind === "error" ? searchError : statusKind === "none" ? uiText("noMatchingNotes") : scopeAll ? uiText("searchAllNotebooks") : uiText("searchCurrentNotebook")}</strong>
           {statusKind === "none" && <div className="search-sheet-status-actions">
             <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={() => scopeAll ? clearSearch() : session.setScope({ kind: "all" })}>{scopeAll ? uiText("clearSearch") : uiText("searchAllNotebooks")}</Button>
-            {!aiReady && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>{uiText("enableAiAnswers")}</Button>}
+            {aiChrome.showEnable && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" data-quiet="true" onClick={openAiSettings}><Sparkles size={14} aria-hidden="true"/>{uiText("enableAiAnswers")}</Button>}
           </div>}
         </div>}
         {hasMore && <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-link" onClick={loadMoreResults}>{uiText("loadMoreResults")}</Button>}
@@ -285,6 +278,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
         <div className="search-sheet-footer-inner">
           <span><kbd className="search-sheet-kbd">↑↓</kbd>{uiText("select")}</span>
           <span><kbd className="search-sheet-kbd">↵</kbd>{uiText("open")}</span>
+          <span><kbd className="search-sheet-kbd">{formatShortcut("Mod")}↑↓←→</kbd>{uiText("splitOpen")}</span>
           <span><kbd className="search-sheet-kbd">⇧↵</kbd>{uiText("newLine")}</span>
           <span className="search-sheet-scope-hint" title={uiText("switchScopeHint", {name: tabScopeName})}><kbd className="search-sheet-kbd">Tab</kbd>{uiText("switchScope")}<span className="search-sheet-scope-name">{tabScopeName}</span></span>
         </div>

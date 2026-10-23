@@ -13,6 +13,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { type CSSProperties } from "react";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import {
   ControlledTreeEnvironment,
   InteractionMode,
@@ -204,7 +205,7 @@ export function renderMainTreeSurface(
               toggleLocalDirectory(last);
             }
             const { meta, ctrl } = lastClickModRef.current;
-            if (meta || ctrl) {
+            if (isPlatformPrimaryModifierEvent({ metaKey: meta, ctrlKey: ctrl })) {
               openPageFromSidebar(last, "permanent", { newTab: true });
             } else {
               openPageFromSidebar(last, "preview");

@@ -12,6 +12,7 @@ import {
 import { showDesktopMainWindow } from "@/lib/electron/windowToggle";
 import { getFixedAppShortcuts } from "@/lib/fixed-app-shortcuts";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { useSettings } from "@/stores/settings";
 import type { useQuickNoteSaveActions } from "./useQuickNoteSaveActions";
 
@@ -63,8 +64,8 @@ export function useQuickNoteShortcuts(
         return;
       }
 
-      // 仅在按下 Cmd（macOS）/ Ctrl 时处理缩放与撤销。
-      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      // macOS 只认 ⌘，Windows / Linux 只认 Ctrl。
+      if (!isPlatformPrimaryModifierEvent(e) || e.altKey) return;
 
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 

@@ -1,6 +1,7 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { selectionTouchesProtectedTitle } from "../utils/documentTitlePolicy";
 
 /**
@@ -21,7 +22,7 @@ function headingMarkSuppressPlugin() {
       handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
         if (!selectionTouchesProtectedTitle(view.state)) return false;
 
-        const mod = event.metaKey || event.ctrlKey;
+        const mod = isPlatformPrimaryModifierEvent(event);
         if (!mod) return false;
 
         const key = event.key.toLowerCase();

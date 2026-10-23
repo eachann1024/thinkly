@@ -2,9 +2,11 @@ import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useState } from "react";
 import { refreshReadOnlyPersistence } from "@/bootstrap/readOnlyPersistence";
 import { getGooseDesktop } from "@/lib/electron/runtime";
+import { parseSearchAISettings, shouldApplySearchAISettings } from "@/lib/electron/searchAISettings";
 import type { SearchWindowCommand } from "@/lib/electron/searchWindow";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
+import { normalizeAISettings } from "@/stores/settings/types/ai";
 import { SearchSheet } from "@/pages/workspace/components/search-sheet/SearchSheet";
 import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearchSession";
 import { readOnlySearchFolderSource } from "@/pages/workspace/components/sidebar/readOnlySearchFolderSource";
@@ -28,6 +30,38 @@ function patchPersistedShowRecent(enabled: boolean): void {
   }
 }
 
+/** 只采纳主窗已经恢复完成的快照。拉取本身不在这里等待。 */
+function applyWorkspaceAISnapshot(raw: unknown): void {
+  const snapshot = parseSearchAISettings(raw);
+  const current = parseSearchAISettings(useSettings.getState().ai);
+  if (!snapshot || !shouldApplySearchAISettings(current, snapshot)) return;
+  useSettings.setState({ ai: normalizeAISettings(snapshot) });
+}
+
+/** 与本地恢复并行发起。恢复结束时若缓存已到就立刻套用，否则等它晚到，不挡住窗口显示。 */
+function pullWorkspaceAISettings(): { settled: boolean; value: unknown; done: Promise<unknown> } {
+  const slot: { settled: boolean; value: unknown; done: Promise<unknown> } = {
+    settled: false,
+    value: null,
+    done: Promise.resolve(null),
+  };
+  const request = getGooseDesktop()?.pullWorkspaceAISettings?.();
+  if (!request) {
+    slot.settled = true;
+    return slot;
+  }
+  slot.done = request.then((value) => {
+    slot.settled = true;
+    slot.value = value;
+    return value;
+  }, () => {
+    slot.settled = true;
+    slot.value = null;
+    return null;
+  });
+  return slot;
+}
+
 /** 每次唤出重开会话：拿最新的当前笔记本作起点，并以新的来源引用触发一次后台重扫。 */
 function reopenSession(): void {
   const session = useSearchSession.getState();
@@ -48,12 +82,17 @@ export function SearchWindowApp() {
     const api = getGooseDesktop();
     let disposed = false;
     const refresh = async () => {
+      const pulled = pullWorkspaceAISettings();
       try {
         await refreshReadOnlyPersistence();
       } catch (error) {
         console.error("[search-window] 读取设置或笔记本失败", error);
       }
       if (disposed) return;
+      if (pulled.settled) applyWorkspaceAISnapshot(pulled.value);
+      else void pulled.done.then((value) => {
+        if (!disposed) applyWorkspaceAISnapshot(value);
+      });
       reopenSession();
       setFolderSource({ ...readOnlySearchFolderSource });
     };
@@ -62,6 +101,9 @@ export function SearchWindowApp() {
       if (!disposed) void api?.searchWindowReady?.();
     });
     const unsubscribe = api?.onSearchWindowShown?.(() => void refresh());
+    const unsubscribeAI = api?.onWorkspaceAISettings?.((settings) => {
+      if (!disposed) applyWorkspaceAISnapshot(settings);
+    });
     // 焦点不在面板内（如点到空白处）时 Esc 仍收起窗口；面板内的 Esc 由面板自己处理。
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
@@ -71,6 +113,7 @@ export function SearchWindowApp() {
     return () => {
       disposed = true;
       unsubscribe?.();
+      unsubscribeAI?.();
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);

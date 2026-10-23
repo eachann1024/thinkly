@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { formatShortcut } from "@/lib/utils";
+import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { useEditorUiScale } from "@/components/editor/hooks/useEditorUiScale";
 import { getScaledEditorUiPx } from "@/components/editor/utils/editorContextUi";
@@ -254,10 +255,7 @@ export function FindInPageBar({
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     event.preventDefault();
-                    if (
-                      event.altKey &&
-                      (event.metaKey || event.ctrlKey)
-                    ) {
+                    if (event.altKey && isPlatformPrimaryModifierEvent(event)) {
                       handleReplaceAll();
                     } else {
                       handleReplace();

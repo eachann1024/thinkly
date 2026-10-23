@@ -110,8 +110,9 @@ export interface EditorPlatformDialog {
 // ── clipboard ─────────────────────────────
 export interface EditorPlatformClipboard {
   copyText(text: string): Promise<void>;
-  copyImage(dataUrl: string): Promise<void>;
+  copyImage(dataUrl: string, extras?: { html?: string; text?: string }): Promise<void>;
   readText(): Promise<string>;
+  readImage(): Promise<string | null>;
 }
 
 // ── ai（仅保留自定义协议所需的平台 fetch）──

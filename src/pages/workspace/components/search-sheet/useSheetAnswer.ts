@@ -25,7 +25,9 @@ export type { SheetAnswer } from "./sheetAnswerState";
 export type SheetAskScope = { notebookId: string; notebookIds?: string[]; label: string };
 
 export function useSearchAiAvailable() {
-  return useSettings(s => getAIAvailability(s.ai).ok);
+  const enabled = useSettings(s => s.ai.enabled);
+  const ready = useSettings(s => getAIAvailability(s.ai).ok);
+  return { enabled, ready };
 }
 
 /** 搜索面板内的就地问答：先让模型改写检索词，再本地预检索笔记，再用只读 Pi Agent 多步调用工具，流式生成回答。 */

@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 
-export const NOTEBOOK_MENU_OPEN_MS = 360;
-export const NOTEBOOK_MENU_CLOSE_MS = 220;
+/** 与菜单基线一致。关闭用快启动，点选后马上退场。 */
+export const NOTEBOOK_MENU_OPEN_MS = 200;
+export const NOTEBOOK_MENU_CLOSE_MS = 150;
+export const NOTEBOOK_MENU_EASE = "cubic-bezier(.22,1,.36,1)";
 
 export const FLOATING_MENU_OPEN_MS = 200;
 export const FLOATING_MENU_CLOSE_MS = 150;
@@ -80,8 +82,10 @@ export function floatingMenuMotionStyle(
         : closedTransform,
     transitionProperty: reduced ? "opacity" : "opacity, transform",
     transitionDuration: `${duration}ms`,
-    transitionTimingFunction: visuallyOpen
-      ? options?.notebook ? "cubic-bezier(.22,1,.36,1)" : FLOATING_MENU_EASE_OUT
-      : options?.notebook ? "cubic-bezier(.4,0,1,1)" : FLOATING_MENU_EASE_IN,
+    transitionTimingFunction: options?.notebook
+      ? NOTEBOOK_MENU_EASE
+      : visuallyOpen
+        ? FLOATING_MENU_EASE_OUT
+        : FLOATING_MENU_EASE_IN,
   };
 }

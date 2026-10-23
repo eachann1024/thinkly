@@ -1,3 +1,4 @@
+import { readNavigatorClipboardImage } from "@/components/editor/platform/navigatorClipboardImage";
 import { common } from "@/i18n/common";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 
@@ -203,11 +204,11 @@ const clipboard: EditorPlatformClipboard = {
     }
     await navigator.clipboard?.writeText(text);
   },
-  copyImage: async (dataUrl) => {
+  copyImage: async (dataUrl, extras) => {
     const api = getGooseDesktop();
     if (api?.writeImage) {
       try {
-        await api.writeImage(dataUrl);
+        await api.writeImage(dataUrl, extras);
         return;
       } catch {
         // fall through
@@ -218,9 +219,10 @@ const clipboard: EditorPlatformClipboard = {
     }
     const response = await fetch(dataUrl);
     const blob = await response.blob();
-    await navigator.clipboard.write([
-      new ClipboardItem({ [blob.type || "image/png"]: blob }),
-    ]);
+    const item: Record<string, Blob> = { [blob.type || "image/png"]: blob };
+    if (extras?.html) item["text/html"] = new Blob([extras.html], { type: "text/html" });
+    if (extras?.text) item["text/plain"] = new Blob([extras.text], { type: "text/plain" });
+    await navigator.clipboard.write([new ClipboardItem(item)]);
   },
   readText: async () => {
     const api = getGooseDesktop();
@@ -232,6 +234,17 @@ const clipboard: EditorPlatformClipboard = {
       }
     }
     return (await navigator.clipboard?.readText()) ?? "";
+  },
+  readImage: async () => {
+    const api = getGooseDesktop();
+    if (api?.readImage) {
+      try {
+        return await api.readImage();
+      } catch {
+        // 主进程读不到时再试页面剪贴板。
+      }
+    }
+    return readNavigatorClipboardImage();
   },
 };
 
