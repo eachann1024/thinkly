@@ -1,5 +1,10 @@
 # 更新日志
 
+## 1.7.325
+
+- Retry Quark uploads on transient network failures (#84)
+- keep macOS update install from failing on app.asar (#88)
+
 ## 1.7.324
 
 - Require Node.js 22 (#87)
