@@ -6,6 +6,7 @@ import { useSearchSession } from "../useSearchSession";
 import { readSearchSelection } from "../readSearchSelection";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
+import { viewClickLeavesFullscreenAi } from "./railClick";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import { type SidebarView } from "./shared";
 import type { useSidebarLayout } from "./useSidebarLayout";
@@ -115,7 +116,7 @@ export function useSidebarNavigation(
       if (view === "search") onOpen(event);
       else if (view === "pages" || view === "outline") {
         activateWorkspace();
-        if (view === "outline") closeNotebookAiIfFullscreen();
+        if (viewClickLeavesFullscreenAi(view)) closeNotebookAiIfFullscreen();
         setCurrentView(view);
         if (workspaceSidebarCollapsed) useSidebarView.getState().openSidebarPanel("engaged");
         if (inHistoryMode) exitHistoryView();
