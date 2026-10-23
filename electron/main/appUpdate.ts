@@ -10,6 +10,7 @@ import { updateLifecycleTransition, automaticUpdatesTransition, type UpdateLifec
 import { fetchRelease, type ReleaseDetails, type VerifiedUpdate } from "./updates/release";
 import { downloadVerifiedUpdate, verifyUpdateFile } from "./updates/download";
 import { installUpdate, prepareMacUpdate, cleanInstalledUpdate } from "./updates/install";
+import { cleanVersionDirectories, describeFsError, discardDirectory, isFilesystemError, isMissingFile } from "./updates/staging";
 
 export { getUpdateState } from "./updates/state";
 export type UpdateCheckResult = AppUpdateCheckResult;
@@ -120,45 +121,100 @@ function notifyReady(update: VerifiedUpdate): void {
   for (const win of BrowserWindow.getAllWindows()) win.webContents.send("desktop:update-ready", update.version);
 }
 
+async function clearReadyRecord(): Promise<void> {
+  await rm(recordPath(), { force: true }).catch((error: unknown) => {
+    console.error(`[update] could not clear the ready update: ${describeFsError(error)}`);
+  });
+}
+
+function unpackedStaging(update: VerifiedUpdate): string | null {
+  const versionDir = path.dirname(update.path);
+  if (path.basename(versionDir) !== update.version || path.basename(path.dirname(versionDir)) !== "app-updates") return null;
+  return path.join(versionDir, "unpacked");
+}
+
+async function forgetReadyUpdate(update: VerifiedUpdate): Promise<void> {
+  await clearReadyRecord();
+  const unpacked = unpackedStaging(update);
+  if (unpacked) await discardDirectory(unpacked, { strict: false });
+}
+
 export async function installReadyUpdate(): Promise<void> {
   const current = lifecycle;
   if (current.phase === "installing" || current.phase === "invalidating") return;
   if (current.phase !== "ready" || !app.isPackaged) throw new Error(t("noReadyUpdate"));
   const update = current.update;
   sendLifecycle({ type: "install.started" });
+  let recover = false;
+  let failure = "";
   try {
     try { await verifyUpdateFile(update); }
     catch (error) {
       sendLifecycle({ type: "install.invalidated" });
-      await rm(recordPath(), { force: true });
+      await clearReadyRecord();
       throw error;
     }
     await installUpdate(update);
   } catch (error) {
+    failure = error instanceof Error ? describeFsError(error) : t("installFailed");
+    const filesystem = lifecycle.phase === "installing" && isFilesystemError(error);
+    if (filesystem) {
+      sendLifecycle({ type: "install.invalidated" });
+      await forgetReadyUpdate(update);
+      recover = true;
+    }
     sendUpdateEvent({ type: "install.failed", target: updateTarget(update.version, update.asset, update),
-      path: lifecycle.phase === "installing" ? update.path : undefined,
-      message: error instanceof Error ? error.message : t("installFailed") });
-    throw error;
-  } finally { sendLifecycle({ type: "install.finished" }); }
+      path: filesystem || lifecycle.phase !== "installing" ? undefined : update.path,
+      message: failure });
+    throw error instanceof Error ? error : new Error(failure);
+  } finally {
+    sendLifecycle({ type: "install.finished" });
+    if (recover && lifecycle.phase === "empty" && update.asset.browser_download_url && update.asset.name) {
+      console.error(`[update] install failed, downloading again: ${failure}`);
+      void downloadAppUpdate(update.asset.browser_download_url, update.asset.name)
+        .catch((downloadError: unknown) => console.error("[update]", downloadError));
+    }
+  }
+}
+
+function parseReadyUpdate(raw: string, root: string): VerifiedUpdate | null {
+  const update = JSON.parse(raw) as VerifiedUpdate;
+  if (!update || typeof update.version !== "string" || !/^\d+\.\d+\.\d+$/.test(update.version)) return null;
+  if (!update.asset || typeof update.asset.name !== "string" || typeof update.path !== "string") return null;
+  const expectedDir = path.join(root, update.version);
+  if (path.dirname(update.path) !== expectedDir || path.basename(update.path) !== update.asset.name) return null;
+  return update;
 }
 
 async function restoreReady(): Promise<void> {
-  await mkdir(path.dirname(recordPath()), { recursive: true });
+  const root = path.dirname(recordPath());
+  await mkdir(root, { recursive: true });
+  let pending: VerifiedUpdate | null = null;
+  let sawRecord = false;
   try {
-    const update = JSON.parse(await readFile(recordPath(), "utf8")) as VerifiedUpdate;
-    if (!/^\d+\.\d+\.\d+$/.test(update.version)) return;
-    const expectedDir = path.join(path.dirname(recordPath()), update.version);
-    if (path.dirname(update.path) !== expectedDir || path.basename(update.path) !== update.asset.name) return;
-    if (compareSemver(update.version, getAppVersion()) <= 0) {
-      await cleanInstalledUpdate(update);
-      await rm(expectedDir, { recursive: true, force: true });
-      await rm(recordPath(), { force: true });
-      return;
-    }
-    await verifyUpdateFile(update);
-    sendLifecycle({ type: "update.ready", update });
-    notifyReady(update);
-  } catch { /* An incomplete or deleted download is fetched again on the next check. */ }
+    const raw = await readFile(recordPath(), "utf8");
+    sawRecord = true;
+    pending = parseReadyUpdate(raw, root);
+  } catch (error) {
+    if (!isMissingFile(error)) console.error(`[update] could not read the downloaded update: ${describeFsError(error)}`);
+  }
+  if (sawRecord && !pending) await clearReadyRecord();
+  const keep = pending && compareSemver(pending.version, getAppVersion()) > 0 ? pending.version : null;
+  await cleanVersionDirectories(root, keep);
+  if (!pending) return;
+  if (!keep) {
+    await cleanInstalledUpdate(pending);
+    await clearReadyRecord();
+    return;
+  }
+  try {
+    await verifyUpdateFile(pending);
+  } catch (error) {
+    console.error(`[update] downloaded update failed verification: ${describeFsError(error)}`);
+    return;
+  }
+  sendLifecycle({ type: "update.ready", update: pending });
+  notifyReady(pending);
 }
 
 export function startAutomaticUpdates(): void {

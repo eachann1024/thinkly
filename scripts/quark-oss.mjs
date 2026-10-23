@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { open, stat } from "node:fs/promises";
 import { basename } from "node:path";
-import { api, call, QuarkFailure, sanitize } from "./quark-api.mjs";
+import { api, call, httpFailure, QuarkFailure, sanitize, withRetry, withUploadFile } from "./quark-api.mjs";
 import { createSha1State, sha1Context, sha1Write } from "./quark-hash.mjs";
 
 const PART_OSS_UA = "aliyun-sdk-js/1.0.0 Chrome Mobile 139.0.0.0 on Google Nexus 5 (Android 6.0)";
@@ -91,38 +91,26 @@ function etagFrom(response, body) {
 }
 
 async function putPart(cookie, session, partNumber, bytes, hashCtx) {
-  let last = "分片上传失败";
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const date = ossDate();
-      const authKey = await authorize(cookie, session.taskId, session.authInfo, partAuthMeta(session, partNumber, date, hashCtx));
-      const headers = {
-        Authorization: authKey,
-        "Content-Type": session.mime,
-        "Content-Length": String(bytes.length),
-        Referer: "https://pan.quark.cn/",
-        "x-oss-date": date,
-        "x-oss-user-agent": PART_OSS_UA,
-      };
-      if (hashCtx) headers["x-oss-hash-ctx"] = hashCtx;
-      const response = await call(ossTarget(session.bucket, session.objKey, {
-        partNumber, uploadId: session.uploadId,
-      }), { method: "PUT", headers, body: bytes }, 300_000);
-      const body = await response.text();
-      const etag = etagFrom(response, body);
-      if (!etag) {
-        const failure = new QuarkFailure(`分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
-        failure.reason = `part_upload_http_${response.status}`;
-        throw failure;
-      }
-      return etag;
-    } catch (error) {
-      if (error?.cookie || String(error?.message).includes("夸克 Cookie")) throw error;
-      last = sanitize(error instanceof Error ? error.message : last);
-      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
-    }
-  }
-  throw new QuarkFailure(`分片 ${partNumber} 上传失败：${last}`);
+  return withRetry({ step: `分片上传 #${partNumber}` }, async () => {
+    const date = ossDate();
+    const authKey = await authorize(cookie, session.taskId, session.authInfo, partAuthMeta(session, partNumber, date, hashCtx));
+    const headers = {
+      Authorization: authKey,
+      "Content-Type": session.mime,
+      "Content-Length": String(bytes.length),
+      Referer: "https://pan.quark.cn/",
+      "x-oss-date": date,
+      "x-oss-user-agent": PART_OSS_UA,
+    };
+    if (hashCtx) headers["x-oss-hash-ctx"] = hashCtx;
+    const response = await call(ossTarget(session.bucket, session.objKey, {
+      partNumber, uploadId: session.uploadId,
+    }), { method: "PUT", headers, body: bytes }, 300_000);
+    const body = await response.text();
+    const etag = etagFrom(response, body);
+    if (!etag) throw httpFailure(`分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`, response.status, `part_upload_http_${response.status}`);
+    return etag;
+  });
 }
 
 async function completeUpload(cookie, session, parts) {
@@ -131,37 +119,37 @@ async function completeUpload(cookie, session, parts) {
   }\n</CompleteMultipartUpload>`;
   const contentMd5 = createHash("md5").update(xml).digest("base64");
   const callback = Buffer.from(JSON.stringify(session.callback)).toString("base64");
-  const date = ossDate();
-  const authMeta = [
-    "POST", contentMd5, "application/xml", date,
-    `x-oss-callback:${callback}`,
-    `x-oss-date:${date}`,
-    `x-oss-user-agent:${COMMIT_OSS_UA}`,
-    `/${session.bucket}/${session.objKey}?uploadId=${session.uploadId}`,
-  ].join("\n");
-  const authKey = await authorize(cookie, session.taskId, session.authInfo, authMeta);
-  const response = await call(ossTarget(session.bucket, session.objKey, { uploadId: session.uploadId }), {
-    method: "POST",
-    headers: {
-      Authorization: authKey,
-      "Content-MD5": contentMd5,
-      "Content-Type": "application/xml",
-      "Content-Length": String(Buffer.byteLength(xml)),
-      Referer: "https://pan.quark.cn/",
-      "x-oss-callback": callback,
-      "x-oss-date": date,
-      "x-oss-user-agent": COMMIT_OSS_UA,
-    },
-    body: xml,
-  }, 60_000);
-  const body = await response.text();
-  if (response.status === 200 || response.status === 203) {
-    if (response.status === 203) console.log("分片完成回调返回 HTTP 203，继续向夸克确认");
-    return responseFid(body);
-  }
-  const failure = new QuarkFailure(`完成分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`);
-  failure.reason = `complete_upload_http_${response.status}`;
-  throw failure;
+  return withRetry({ step: "提交分片" }, async () => {
+    const date = ossDate();
+    const authMeta = [
+      "POST", contentMd5, "application/xml", date,
+      `x-oss-callback:${callback}`,
+      `x-oss-date:${date}`,
+      `x-oss-user-agent:${COMMIT_OSS_UA}`,
+      `/${session.bucket}/${session.objKey}?uploadId=${session.uploadId}`,
+    ].join("\n");
+    const authKey = await authorize(cookie, session.taskId, session.authInfo, authMeta);
+    const response = await call(ossTarget(session.bucket, session.objKey, { uploadId: session.uploadId }), {
+      method: "POST",
+      headers: {
+        Authorization: authKey,
+        "Content-MD5": contentMd5,
+        "Content-Type": "application/xml",
+        "Content-Length": String(Buffer.byteLength(xml)),
+        Referer: "https://pan.quark.cn/",
+        "x-oss-callback": callback,
+        "x-oss-date": date,
+        "x-oss-user-agent": COMMIT_OSS_UA,
+      },
+      body: xml,
+    }, 60_000);
+    const body = await response.text();
+    if (response.status === 200 || response.status === 203) {
+      if (response.status === 203) console.log("分片完成回调返回 HTTP 203，继续向夸克确认");
+      return responseFid(body);
+    }
+    throw httpFailure(`完成分片上传失败（HTTP ${response.status}）：${ossDetail(body)}`, response.status, `complete_upload_http_${response.status}`);
+  });
 }
 
 function responseFid(body) {
@@ -192,7 +180,7 @@ async function confirmFinish(cookie, taskId, objKey, fallbackFid) {
         await delay(attempt * 1000);
       }
     } catch (error) {
-      if (error?.cookie || error?.reason === "cookie_invalid" || error?.reason === "rename_target_missing") throw error;
+      if (error?.cookie || error?.reason === "cookie_invalid" || error?.reason === "rename_target_missing" || error?.final || error?.retryable === false) throw error;
       lastError = error;
       if (attempt < 5) await delay(attempt * 1000);
     }
@@ -206,7 +194,7 @@ async function confirmFinish(cookie, taskId, objKey, fallbackFid) {
   throw failure;
 }
 
-export async function uploadFile(cookie, parentId, file, remoteName = basename(file)) {
+async function startUpload(cookie, parentId, file, remoteName = basename(file)) {
   const name = remoteName;
   const { size } = await stat(file);
   const now = Date.now();
@@ -249,4 +237,8 @@ export async function uploadFile(cookie, parentId, file, remoteName = basename(f
   }
   const callbackFid = await completeUpload(cookie, session, parts);
   return { fid: await confirmFinish(cookie, session.taskId, session.objKey, callbackFid || preparedFid) };
+}
+
+export function uploadFile(cookie, parentId, file, remoteName = basename(file)) {
+  return withUploadFile(remoteName, () => startUpload(cookie, parentId, file, remoteName));
 }
