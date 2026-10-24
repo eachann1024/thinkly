@@ -140,8 +140,8 @@ export function GooseTableHandlesController() {
   const state = useExtensionState(TableHandlesExtension);
   // BlockNote 在指针碰到表外标题时会把 show 关掉。把手还在边框外时继续跟指针，避免方块先消失。
   const sticky = useRef(false);
-  usePointerFollow(Boolean(state?.show) || sticky.current);
   const [only, setOnly] = useState<Chrome>();
+  usePointerFollow(!only && (Boolean(state?.show) || sticky.current));
   const hide = useMemo(
     () =>
       Object.fromEntries(
@@ -182,11 +182,11 @@ export function GooseTableHandlesController() {
   // 移出表格后 BlockNote 仍保留上次的 show，碰到上方标题时又会把 show 关掉。
   // 指针还在表上、缝里或把手上就继续画。
   const owns = pointerOwnsTable(table);
-  if (!state.draggingState && !owns) {
+  if (!only && !state.draggingState && !owns) {
     sticky.current = false;
     return null;
   }
-  if (!state.show && !owns) return null;
+  if (!only && !state.show && !owns) return null;
   sticky.current = true;
   const rowIndex = state.rowIndex;
   const colIndex = state.colIndex;
