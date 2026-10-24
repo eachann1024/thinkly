@@ -56,6 +56,7 @@ import { TitleBarAiToggle } from "./titlebar/TitleBarAiToggle";
 
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
+import { HistoryElectronChrome } from "../history/history-view/HistoryToolbar";
 
 
 
@@ -97,11 +98,8 @@ export function DesktopTitleBar({
   const showTabRail = folderActionsAvailable && !settingsOpen && !inHistoryMode && !aiFullscreenOpen;
   useIncomingWorkspaceTabs(!showTabRail);
 
-  // Win/Linux 均为 frameless：右侧渲染自定义 min/max/close 窗控。
   const isFramelessElectron =
     typeof navigator !== "undefined" && /Win|Linux/i.test(navigator.platform);
-  // Linux 上 CSS 拖拽区不派发鼠标事件（index.css 已整体 no-drag），
-  // 顶栏空白处改走 JS 拖拽，双击切换最大化/还原。
   const isLinuxElectron =
     typeof navigator !== "undefined" && /Linux/i.test(navigator.platform);
 
@@ -135,15 +133,24 @@ export function DesktopTitleBar({
   );
 
   if (inHistoryMode) {
-    // 历史预览：顶栏只留红绿灯拖拽区。返回、版本时间和还原分别在两栏表头。
     return (
       <div
-        className="electron-titlebar flex w-full shrink-0 items-center"
-        data-history-mode
+        className={cn(
+          "electron-titlebar flex w-full shrink-0 items-center",
+          isFramelessElectron ? "pr-0" : "pr-4",
+        )}
         data-sidebar-collapsed={sidebarCollapsed}
         onPointerDown={onTitleBarPointerDown}
         onDoubleClick={onTitleBarDoubleClick}
       >
+        <HistoryElectronChrome
+          page={page}
+          onBeforeActivateTab={onBeforeActivateTab}
+          onToggleSidebar={onToggleSidebar}
+          toggleSidebarCollapsed={toggleSidebarCollapsed}
+          sidebarCollapsed={sidebarCollapsed}
+          toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
+        />
         {isFramelessElectron ? <WinWindowControls /> : null}
       </div>
     );
@@ -262,7 +269,7 @@ export function DesktopTitleBar({
           {aiHeaderActions}
         </div>
       )}
-      {/* 设置页不渲染标题行；占位把最小化/最大化/关闭留在顶栏右侧。 */}
+      { }
       {settingsOpen ? <div className="min-w-0 flex-1" /> : null}
       {isFramelessElectron ? <WinWindowControls /> : null}
     </div>

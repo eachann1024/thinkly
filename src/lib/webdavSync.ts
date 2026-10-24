@@ -247,7 +247,7 @@ export async function triggerAutoWebdavBackup(): Promise<void> {
 
     const date = new Date(now);
     const pad = (n: number) => n.toString().padStart(2, "0");
-    const fileName = `goose-note-export-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.zip`;
+    const fileName = `thinkly-export-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.zip`;
 
     const result = await uploadWebdavBackup(
       webdavUrl,

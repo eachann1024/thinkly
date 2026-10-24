@@ -1,12 +1,4 @@
-/**
- * notebook-ai.css — 笔记本 AI 聊天面板的 markdown 预览样式
- *
- * Streamdown 输出带 data-streamdown="..." 属性，借此精准覆盖默认样式，
- * 让预览与应用排版契合：8px 圆角、紧凑行距、currentColor 链接、
- * 自绘任务勾选框（与编辑器 checkListItem 同风格）。
- */
 
-/* AI 与编辑器共用内容底色，外层主面板统一裁切圆角。 */
 .notebook-ai-shell {
  background: var(--workspace-main-surface);
 }
@@ -63,17 +55,21 @@
 .notebook-ai-empty-state {
  display: flex;
  flex-direction: column;
- align-items: flex-start;
+ align-items: center;
  align-self: stretch;
  justify-content: center;
  max-width: 100%;
  padding: 24px 16px 28px;
+ text-align: center;
+ overflow-wrap: anywhere;
 }
 
 .notebook-ai-empty-state-fullscreen {
+ align-items: flex-start;
  align-self: flex-start;
  max-width: 720px;
  padding: 2rem 0 0;
+ text-align: left;
 }
 
 .notebook-ai-empty-mark {
@@ -95,8 +91,14 @@
 .notebook-ai-empty-suggestions {
  display: flex;
  flex-wrap: wrap;
+ justify-content: center;
+ max-width: 100%;
  gap: 6px;
  margin-top: 14px;
+}
+
+.notebook-ai-empty-state-fullscreen .notebook-ai-empty-suggestions {
+ justify-content: flex-start;
 }
 
 .notebook-ai-empty-suggestion {
@@ -137,7 +139,6 @@
  }
 }
 
-/* 全屏叠层避开网页页头；实际挂载桌面顶栏时，主区已不含顶栏。 */
 .notebook-ai-fullscreen-host {
  top: 3rem;
 }
@@ -165,7 +166,6 @@ html.is-electron:has(.electron-titlebar) .notebook-ai-fullscreen-host {
  min-height: 2.5rem;
 }
 
-/* Electron AI 会话沿用笔记标签的一行顶栏和系统拖动区域。 */
 html.is-electron .electron-titlebar[data-ai-conversation-header] {
  height: var(--electron-titlebar-height, 2.75rem);
 }

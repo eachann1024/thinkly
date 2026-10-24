@@ -95,7 +95,7 @@ export function CodeLatexHints({
   const [showLatexHint, setShowLatexHint] = useState(false);
   return (
     <>
-      {/* LaTeX hint panel */}
+      { }
       {!collapsed && language === "math" && isEditable && (
         <div
           className="absolute bottom-2 right-2 z-20"

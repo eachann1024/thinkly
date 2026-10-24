@@ -30,7 +30,6 @@ export function useLocalFolderWatchLifecycle(
   const { notebook, activePageId, renameDebounceTimers, changeDebounceTimers } =
     input;
 
-  // ── 监听写盘前冲突（pre-save conflict）─────────────────────────────────────
   useEffect(() => {
     const handlePreSaveConflict = (event: Event) => {
       const { pageId, filePath } = (event as CustomEvent).detail as {
@@ -54,7 +53,6 @@ export function useLocalFolderWatchLifecycle(
     };
   }, []);
 
-  // ── 监听本地路径重复：状态异常时拒绝写盘，避免两个页面覆盖同一磁盘文件 ───────
   useEffect(() => {
     const handleDuplicateLocalFile = (event: Event) => {
       const { filePath } = (event as CustomEvent).detail as {
@@ -81,17 +79,12 @@ export function useLocalFolderWatchLifecycle(
     };
   }, []);
 
-  // ── 主动新鲜度检查：切页 / 切笔记本时 ──────────────────────────────────────
-  // watch 只覆盖「当前笔记本目录 + 窗口存活」期间的外部修改；切页时主动 diff
-  // 一次磁盘，把 watch 不在场期间的外部改动无感同步进来。
   useEffect(() => {
-    if (notebook?.source !== "local-folder" || !activePageId) return;
+    if (!activePageId) return;
     void checkLocalPageFreshness(activePageId);
   }, [activePageId, notebook?.id, notebook?.source]);
 
-  // ── 主动新鲜度检查：Electron 窗口重新可见 / 聚焦时 ───────────────────────────
   useEffect(() => {
-    if (notebook?.source !== "local-folder") return;
     const check = () => {
       if (document.visibilityState === "hidden") return;
       const pid = usePages.getState().activePageId;
@@ -105,30 +98,25 @@ export function useLocalFolderWatchLifecycle(
     };
   }, [notebook?.id, notebook?.source]);
 
-  // ── 启动/停止目录 watcher ─────────────────────────────────────────────────
   useEffect(() => {
     const gfs = window.gooseFs;
     const renameTimers = renameDebounceTimers.current;
     const changeTimers = changeDebounceTimers.current;
     if (notebook?.source === "local-folder" && notebook.localPath && gfs) {
-      // 先检查目录是否存在，避免 ENOENT
       const dirExists = gfs.exists(notebook.localPath);
       if (dirExists) {
         try {
           gfs.watch(
             notebook.localPath,
             (_eventType: string, _filename: string) => {
-              // Handled via the goose-note:file-changed event above
             },
           );
         } catch {
-          // 目录不存在或无权访问，忽略
         }
       }
     }
 
     return () => {
-      // 清理去抖计时器
       renameTimers.forEach((timer) => clearTimeout(timer));
       renameTimers.clear();
       changeTimers.forEach((timer) => clearTimeout(timer));
@@ -138,7 +126,6 @@ export function useLocalFolderWatchLifecycle(
         try {
           window.gooseFs.unwatch(notebook.localPath!);
         } catch {
-          // ignore
         }
       }
     };

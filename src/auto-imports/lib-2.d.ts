@@ -46,6 +46,7 @@ declare global {
   const formatSystemModifier: typeof import('../lib/shortcut-platform').formatSystemModifier
   const getDbStorageItem: typeof import('../lib/storage').getDbStorageItem
   const getModifierOnlyShortcut: typeof import('../lib/shortcut-match').getModifierOnlyShortcut
+  const getPinyinMatcherRevision: typeof import('../lib/pinyin-search').getPinyinMatcherRevision
   const getPlatformKind: typeof import('../lib/utils').getPlatformKind
   const getPrimaryModifierKeyDisplay: typeof import('../lib/utils').getPrimaryModifierKeyDisplay
   const getPrimaryModifierKeyLabel: typeof import('../lib/utils').getPrimaryModifierKeyLabel

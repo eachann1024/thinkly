@@ -70,12 +70,11 @@ type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   sideOffset?: number;
   alignOffset?: number;
   collisionPadding?: number;
+  shouldFlip?: boolean;
+  boundaryElement?: Element;
   editorContext?: boolean;
-  /** 高频筛选控件可直接显示菜单，避免入场和退场动画等待。 */
   motion?: "default" | "instant";
-  /** 设置选项保留选择指示；所有菜单共用同一套外观。 */
   variant?: DropdownVariant;
-  /** Keep menus inside a fullscreen element when the browser restricts its top layer. */
   portalContainer?: Element;
 };
 const menuSurfaceClass =
@@ -90,6 +89,8 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       sideOffset = 6,
       alignOffset = 0,
       collisionPadding = 8,
+      shouldFlip,
+      boundaryElement,
       editorContext: _editorContext,
       motion = "default",
       variant = "dropdown",
@@ -111,6 +112,8 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
           offset={sideOffset}
           crossOffset={alignOffset}
           containerPadding={collisionPadding}
+          shouldFlip={shouldFlip}
+          boundaryElement={boundaryElement}
           placement={
             align === "center"
               ? side

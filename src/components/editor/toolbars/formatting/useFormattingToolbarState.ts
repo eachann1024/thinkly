@@ -9,6 +9,7 @@ import {
   useEditorPageContext,
   useEditorSettings,
 } from "@/components/editor/platform/hostContext";
+import { useBlockHandleMenuOpen } from "../../state/blockHandleMenu";
 import { useContextMenu } from "@/components/editor/state/contextMenu";
 import { useGlobalScrollActivity } from "@/components/editor/hooks/useGlobalScrollActivity";
 import { useFormattingToolbarAi } from "@/components/editor/state/formattingToolbarAi";
@@ -30,7 +31,7 @@ import { useFormattingToolbarAiActivate } from "./useFormattingToolbarAiActivate
 
 export function useFormattingToolbarState() {
   const editor = useBlockNoteEditor();
-  // 未启用 AI 的构建跳过 useExtension；编译期分支在同一构建内保持稳定。
+  const blockHandleMenuOpen = useBlockHandleMenuOpen(editor);
 
   const aiExtension = __GOOSE_EDITOR_AI__
     ? useExtension(GooseAIExtension)
@@ -38,7 +39,6 @@ export function useFormattingToolbarState() {
   const { ai: aiSettings } = useEditorSettings();
   const { contentMode, page } = useEditorPageContext();
   const protectsFirstTitle = contentMode === "normalized";
-  // Electron 桌面端与主窗共用构建，COMPACT 恒为 false，必须看运行时草稿页。
   const isQuickNoteSurface =
     __GOOSE_EDITOR_COMPACT__ || isQuickNoteEditorPage(page);
   const markStates = useSelectionMarkStates(editor);
@@ -70,7 +70,6 @@ export function useFormattingToolbarState() {
     },
   });
 
-  // 仅 normalized 文档把物理首块 H1 视为受保护的页面标题。
   const isInTitleOne = useEditorState({
     editor,
     selector: ({ editor }) =>
@@ -160,15 +159,13 @@ export function useFormattingToolbarState() {
     clearSelectionFormatting(editor);
   }, [editor]);
 
-  // 小窗的格式栏是固定底栏，滚动不会遮挡选区，也不应闪烁隐藏；
-  // 常规笔记本的浮动栏仍在滚动时收起，避免与正文一起漂移。
   const shouldHideForScroll =
     (!isQuickNoteSurface && isScrolling) || isContextMenuOpen;
-  // While AI is active we keep the toolbar visible regardless of scroll/menu.
   const shouldHide =
     !aiActive && !colorPickerOpen && !selectionMenuOpen && shouldHideForScroll;
 
   const visible =
+    !blockHandleMenuOpen &&
     editor.isEditable &&
     (aiActive ||
       colorPickerOpen ||

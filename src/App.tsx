@@ -23,7 +23,6 @@ import { shouldPreserveStartupSelection } from "@/lib/workspaceStartup";
 import { PencilIconDefinitions } from "@/components/theme/PencilIconDefinitions";
 import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
 
-// Appearance changes update CSS without re-rendering the whole workspace.
 function AppearanceSync() {
   const {
     uiFontSize, editorFontSize, editorLineHeight,
@@ -54,7 +53,6 @@ function AppearanceSync() {
 function App() {
   useLocale();
   const settingsHydrated = useSettings((state) => state._hasHydrated);
-  // 没选过形象时先弹出选择，然后才是设置引导。欢迎动画已移除。
   const surface = useSettings(firstRunSurface);
   const guideVisible = surface !== "app";
   const [workspaceOpened, setWorkspaceOpened] = useState(false);
@@ -68,34 +66,24 @@ function App() {
   const hydrated = usePages((s) => s.hydrated);
   const activePageId = usePages((s) => s.activePageId);
 
-  // 绑定全局快捷键
   useAppHotkeys();
 
-  // Electron 桌面端：设置水合后注册主窗/速记小窗全局热键（Electron 构建内部 no-op）
   useDesktopHotkeys();
 
-  // 全局兜底：禁止未被 Radix / A1 处理的原生浏览器右键菜单
   useNativeContextMenuGuard();
 
-  // 订阅桌面文件关联和文件夹加载事件
   const { restoreLastNoteIfNeeded, clearActivePageForBlankEntry } = useDesktopFileEvents();
 
-  // 首帧稳定后解除启动过渡禁用（bootstrap 在渲染前已打上标记；
-  // 若未标记则该调用是无副作用的清理）。
   useEffect(() => {
     releaseStartupSettlingAfterPaint();
   }, []);
 
-  // 同步 tab 状态：清理已删除页面的 tab（保留尚未加载的本地文件夹标签）
   useEffect(() => {
     if (!hydrated) return;
     const tabsStore = useTabs.getState();
 
-    // reconcileTabs 会保留属于「尚未加载的本地文件夹笔记本」的标签，
-    // 待该文件夹加载后再由 loadLocalFolderPages 末尾的 reconcile 清理。
     tabsStore.reconcileTabs();
 
-    // 仅在没有标签时，用当前页面初始化第一个标签
     const { activePageId, pages } = usePages.getState();
     if (
       activePageId &&
@@ -106,7 +94,6 @@ function App() {
     }
   }, [hydrated, activePageId]);
 
-  // 根据隐私设置决定是否自动打开上次笔记
   useEffect(() => {
     if (!hydrated) return;
 
@@ -150,7 +137,7 @@ function App() {
       <PencilIconDefinitions />
       {mountWorkspace && (
         <div hidden={guideVisible} inert={guideVisible} className="h-full">
-          {/* Keep an existing editor mounted when reopening the guide. */}
+          { }
           <WorkspacePage />
         </div>
       )}

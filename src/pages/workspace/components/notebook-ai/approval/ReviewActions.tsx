@@ -1,5 +1,5 @@
 import { useLocale } from "@/i18n";
-import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
+import { planRefinementText, planReviewReason } from "./planRefinementText";
 import { useRef, useReducer, useState } from "react";
 import { Loader2, RotateCcw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -148,7 +148,7 @@ export function ReviewActions({
     if (!notebookId) return;
     requestPlanRefinement({
       notebookId,
-      text: `方案「${input?.title ?? "笔记变更计划"}」${review.phase === "conflict" ? "遇到原文或位置冲突" : "未能完成"}。请重新读取目标笔记，检查当前内容和先前操作的结果，基于现状重新生成待确认方案，避免重复执行已完成的变更。\n${review.error ? `原因：${review.error}\n` : ""}\n我的补充要求：`,
+      text: planRefinementText(input?.title ?? t("noteChangePlan")),
     });
   };
   const secondaryClass =
@@ -166,7 +166,7 @@ export function ReviewActions({
           : undoFailed
             ? t("couldNotUndoTheChangesCheckTheTarget")
             : review.detail;
-  const reason = localizeNotebookAiDiagnostic(actionError || undoResult?.error || review.error);
+  const reason = planReviewReason(actionError || undoResult?.error || review.error);
   const canUndo =
     (review.phase === "applied" || undoConflict ||
       (journal?.version === 2 && journal.results.some((item) => item.ok))) &&

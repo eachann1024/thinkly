@@ -11,6 +11,8 @@ import {
 import type { SelectedImageState } from "./ImageToolbar";
 import type { ImageLightboxProps } from "./lightboxTypes";
 import type { useLightboxActions } from "./useLightboxActions";
+import { subscribeBlockHover, useBlockToolbarState } from "../core/blockToolbarSequence";
+import { ownsBlockToolbar } from "../core/blockToolbarOwner";
 
 export function useSelectedImage(
   editor: ImageLightboxProps["editor"],
@@ -24,6 +26,8 @@ export function useSelectedImage(
     null,
   );
   const selectedImageRef = useRef<SelectedImageState | null>(null);
+  const pinnedImage = useRef(false);
+  const toolbarState = useBlockToolbarState(editor, selectedImage?.blockId ?? undefined);
   useEffect(() => {
     selectedImageRef.current = selectedImage;
   }, [selectedImage]);
@@ -67,14 +71,33 @@ export function useSelectedImage(
       );
 
       if (!img || !container.contains(img)) {
-        if (!target?.closest("[data-goose-image-toolbar]")) {
+        if (ownsBlockToolbar(
+          target?.closest<HTMLElement>("[data-goose-image-toolbar]") ?? null,
+          editor.prosemirrorView.dom,
+          selectedImageRef.current?.blockId,
+        )) {
+          pinnedImage.current = true;
+        } else {
+          pinnedImage.current = false;
           setSelectedImage(null);
         }
         return;
       }
 
+      pinnedImage.current = true;
       updateSelectedImageFromElement(img);
     };
+
+    const stopHover = subscribeBlockHover(editor.prosemirrorView.dom, (detail) => {
+      if (pinnedImage.current) return;
+      const image = detail.phase === "toolbar"
+        ? getImageElements(container).find(
+            (img) => getBlockIdFromImage(img, container) === detail.blockId,
+          )
+        : undefined;
+      if (image) updateSelectedImageFromElement(image);
+      else setSelectedImage(null);
+    });
 
     const handleReposition = () => {
       const current = selectedImageRef.current;
@@ -88,15 +111,16 @@ export function useSelectedImage(
       updateSelectedImageFromElement(img);
     };
 
-    container.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("pointerdown", handlePointerDown, true);
     window.addEventListener("scroll", handleReposition, true);
     window.addEventListener("resize", handleReposition);
     return () => {
-      container.removeEventListener("pointerdown", handlePointerDown, true);
+      stopHover();
+      document.removeEventListener("pointerdown", handlePointerDown, true);
       window.removeEventListener("scroll", handleReposition, true);
       window.removeEventListener("resize", handleReposition);
     };
-  }, [editorContainerRef, updateSelectedImageFromElement]);
+  }, [editor, editorContainerRef, updateSelectedImageFromElement]);
   const applyImageAlignment = useCallback(
     (alignment: ImageAlignment) => {
       if (!selectedImage?.blockId) return;
@@ -151,7 +175,7 @@ export function useSelectedImage(
   }, [copyImageToClipboard, selectedImage]);
 
   return {
-    selectedImage,
+    selectedImage: toolbarState.suppressed ? null : selectedImage,
     applyImageAlignment,
     handleSelectedImageZoom,
     handleSelectedImageSystemPreview,

@@ -1,3 +1,4 @@
+import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { useLocale, createTranslator, getFormatLocale, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/page/PageMenu.tsx#localMessages:1">`
 zh-Hans:
@@ -86,12 +87,8 @@ export function PageMenu() {
             <span className="sr-only">{uiText("moreActions")}</span>
           </IconButton>
         </PopoverTrigger>
-        {/*
-          不要在定位外壳上挂 goose-editor-context-ui（CSS zoom）。
-          Electron 旧内核会把 zoom 祖先的 getBoundingClientRect 再次放大，
-          导致导出子菜单相对「导出」触发项下漂，中间出现无法穿越的空隙。
-          页面更多菜单走 viewport 坐标系，尺寸用真实 px。
-        */}
+        {
+}
         <PopoverContent
           variant="menu"
           className="goose-page-menu-surface goose-floating-surface goose-list-layout max-h-[calc(100vh-24px)] w-[272px] max-w-[calc(100vw-16px)] overflow-y-auto p-1.5"
@@ -109,7 +106,7 @@ export function PageMenu() {
           }}
           forceMount
         >
-          {/* Font Selector */}
+          { }
           <div className="pb-1.5">
             <FontSelector
               value={page.fontFamily}
@@ -182,7 +179,7 @@ export function PageMenu() {
             </PopoverAction>
           ) : null}
 
-          {/* Import */}
+          { }
           <div>
             <PopoverAction
               className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
@@ -193,11 +190,11 @@ export function PageMenu() {
             </PopoverAction>
           </div>
 
-          {/* Generate Image — standalone, before Export */}
+          { }
           <PopoverAction
             className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
             onSelect={() => {
-              setThemeSelectorOpen(true);
+              if (page.localReadState !== "error") setThemeSelectorOpen(true);
             }}
           >
             <GooseIcons.Image className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
@@ -206,7 +203,7 @@ export function PageMenu() {
             </span>
           </PopoverAction>
 
-          {/* Export submenu */}
+          { }
           <div className="goose-list-group w-full">
             <PageExportSubmenu
               enabled={pageMenuOpen}
@@ -217,7 +214,6 @@ export function PageMenu() {
               onExportHtml={() => runExport("HTML", () => exportToHTML(page))}
               onExportWord={() =>
                 runExport("Word", async () => {
-                  // docx 与它带的 PDF 视觉链路合计近 1MB，只在真正导出 Word 时加载。
                   const { exportToWord } = await import("@/lib/docxExport");
                   return exportToWord(page);
                 })
@@ -230,11 +226,9 @@ export function PageMenu() {
               disabled={page?.isFolder}
               onSelect={() => {
                 const pid = activePageId;
-                // 进入历史模式前 flush，避免 200ms debounce 内的最新编辑丢失
                 try {
                   flushEditorContent(true);
                 } catch {
-                  /* ignore */
                 }
                 setTimeout(() => {
                   useHistoryView.getState().enter(pid);
@@ -246,6 +240,7 @@ export function PageMenu() {
             </PopoverAction>
           </div>
 
+          {!isStandaloneFile(page) && (
           <PopoverAction
             className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs text-foreground hover:text-[var(--goose-color-danger-focus)] focus:text-[var(--goose-color-danger-focus)]"
             onClick={() => void deletePageWithUndo(activePageId)}
@@ -259,6 +254,7 @@ export function PageMenu() {
               {isLocalItem ? uiText(getPlatformKind() === "windows" ? "moveSystemRecycle" : "moveSystemTrash") : uiText("moveTrash")}
             </span>
           </PopoverAction>
+          )}
 
           <div className="flex items-center justify-between gap-3 px-2 py-1 text-[10px] text-muted-foreground">
             <span>{uiText("wordCount", {count: countWords(page.content)})}</span>

@@ -111,7 +111,6 @@ export function GooseVideoPlayer({
         className="goose-video-player__video"
         playsInline
         preload="metadata"
-        // 不使用原生 controls；避免抢焦点与丑陋默认条
         tabIndex={-1}
         onClick={(e) => {
           e.stopPropagation();
@@ -131,7 +130,7 @@ export function GooseVideoPlayer({
         </div>
       )}
 
-      {/* 中央大播放钮：暂停态常显，播放态随控件淡出 */}
+      { }
       {!loadError && (
         <EditorAction context="media"
           type="button"

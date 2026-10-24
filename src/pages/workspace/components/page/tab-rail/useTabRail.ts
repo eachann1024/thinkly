@@ -1,3 +1,4 @@
+import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -81,12 +82,11 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     isElectron: isElectronRuntime(),
     variant,
   });
-  // 跨窗快照只携带页面 ID；尚未落盘的草稿必须留在源窗口。
   const canTransferTab = (tab: TabItem) =>
     tab.type === "welcome" || tab.type === "notebook-ai" ||
     collectTabPageIds(tab).every((id) => {
       const page = usePages.getState().getPage(id);
-      return Boolean(page && !isUnsavedEditorPage(page));
+      return Boolean(page && !isUnsavedEditorPage(page) && !isStandaloneFile(page));
     });
   const dragEnabled = tabDragEnabled({
     isElectron: isElectronRuntime(),
@@ -101,7 +101,6 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
   useEffect(() => {
-    // DnD delta 包含自动滚动偏移，跨窗判断必须使用真实指针位置。
     const trackPointer = (event: PointerEvent) => {
       nativePointerRef.current = event;
       if (lastCursorRef.current && event.pointerId === activePointerIdRef.current) {

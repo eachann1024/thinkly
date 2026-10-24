@@ -3,10 +3,7 @@
  * 依赖 --editor-code-* / --goose-block-subtle-* / --goose-preview-toolbar-height / --goose-popup-trigger-origin。
  */
 
-/* ===== 自定义代码块增强（DOM 注入方案） ===== */
 
-/* 内置 codeBlock 容器：中性化 BlockNote 默认 chrome（#161616 黑底/白字/圆角），
-   视觉统一交给内层 .goose-code-block-node */
 .workspace-editor-surface .bn-block-content[data-content-type="codeBlock"] {
   background-color: transparent;
   color: inherit;
@@ -14,7 +11,6 @@
   border-radius: 0;
 }
 
-/* 隐藏内置 language select（工具栏替代） */
 .workspace-editor-surface
   .bn-block-content[data-content-type="codeBlock"]
   > div
@@ -22,7 +18,6 @@
   display: none !important;
 }
 
-/* 内置 pre 样式覆盖 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="codeBlock"]
   > pre {
@@ -48,7 +43,6 @@
   position: relative;
 }
 
-/* 注入的工具栏宿主 */
 .goose-code-toolbar-host {
   display: flex;
   align-items: center;
@@ -81,17 +75,14 @@
   backdrop-filter: blur(10px);
 }
 
-/* 自定义 codeBlockSpec 容器 */
 .goose-code-block-node {
   position: relative;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  /* 普通代码块随内容撑高，避免单行内容被固定最小高度撑出额外留白。 */
   min-height: 0;
   background-color: var(--code-bg, hsl(var(--muted) / 0.55));
   color: var(--code-fg, hsl(var(--foreground)));
-  /* 外壳边框与文件块统一，不随代码主题走（--code-border 仅供内部分隔线使用） */
   border: 1px solid var(--goose-block-subtle-border);
   border-radius: var(--editor-code-block-radius, 8px);
   overflow: hidden;

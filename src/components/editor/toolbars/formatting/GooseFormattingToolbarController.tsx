@@ -15,6 +15,7 @@ import {
   getFormattingToolbarReferenceRect,
   rememberFormattingToolbarRect,
 } from "@/components/editor/utils/formattingToolbarReference";
+import { useBlockHandleMenuOpen } from "../../state/blockHandleMenu";
 import { getFormattingSelectionMode } from "./helpers";
 import { OverlayLayerProvider, useOverlayLayer } from "@/components/ui/overlay-layer";
 
@@ -22,18 +23,9 @@ type GooseFormattingToolbarControllerProps = {
   formattingToolbar: FC<FormattingToolbarProps>;
   floatingUIOptions?: FloatingUIOptions;
   portalElement?: HTMLElement | null;
-  /**
-   * Optional external gate. When set and floatingUIOptions does not define
-   * `useFloatingOptions.open`, show = store && open.
-   */
   open?: boolean;
 };
 
-/**
- * BlockNote FormattingToolbarController with a multi-block-aware anchor:
- * toolbars sit above/below the full selected-blocks bbox and stay horizontally
- * centered (prefer top, flip to bottom; never textAlignment-driven start/end).
- */
 export function GooseFormattingToolbarController({
   formattingToolbar: Component,
   floatingUIOptions: propsFloatingUIOptions,
@@ -42,6 +34,7 @@ export function GooseFormattingToolbarController({
 }: GooseFormattingToolbarControllerProps) {
   const editor = useBlockNoteEditor();
   const layer = useOverlayLayer("toolbar");
+  const blockHandleMenuOpen = useBlockHandleMenuOpen(editor);
   const formattingToolbar = useExtension(FormattingToolbarExtension, {
     editor,
   });
@@ -49,15 +42,13 @@ export function GooseFormattingToolbarController({
     editor,
   });
 
-  // Prefer caller's floating open (EditorComposer ANDs store + selection + AI);
-  // else optional open prop gates the store; else store alone.
   const floatingOpen = propsFloatingUIOptions?.useFloatingOptions?.open;
-  const show =
+  const show = !blockHandleMenuOpen && (
     typeof floatingOpen === "boolean"
       ? floatingOpen
       : openProp !== undefined
         ? storeOpen && openProp
-        : storeOpen;
+        : storeOpen);
 
   const lastReferenceRectRef = useRef<DOMRect | null>(null);
   const reference = useMemo<GenericPopoverReference | undefined>(() => {
@@ -81,7 +72,6 @@ export function GooseFormattingToolbarController({
       return {
         element: contextEl,
         getBoundingClientRect,
-        // Multi-block geometry changes every drag frame; never cache a stale box.
         cacheMountedBoundingClientRect: false,
       };
     }
@@ -95,13 +85,11 @@ export function GooseFormattingToolbarController({
   const floatingUIOptions = useMemo<FloatingUIOptions>(() => {
     const callerFloating = propsFloatingUIOptions?.useFloatingOptions;
     const effectiveOpen =
-      typeof callerFloating?.open === "boolean" ? callerFloating.open : show;
+      !blockHandleMenuOpen && (typeof callerFloating?.open === "boolean" ? callerFloating.open : show);
 
     return {
       ...propsFloatingUIOptions,
       useFloatingOptions: {
-        // Prefer above selection; flip below when no room. Do NOT use
-        // textAlignmentToPlacement (top-start) — multi-block must stay centered.
         placement: "top",
         middleware: [
           offset(10),
@@ -110,7 +98,6 @@ export function GooseFormattingToolbarController({
         ],
         ...callerFloating,
         open: effectiveOpen,
-        // Needed as hooks like `useDismiss` call `onOpenChange` to change open.
         onOpenChange: (nextOpen, event, reason) => {
           callerFloating?.onOpenChange?.(nextOpen, event, reason);
           formattingToolbar.store.setState(nextOpen);
@@ -131,7 +118,7 @@ export function GooseFormattingToolbarController({
         },
       },
     };
-  }, [show, propsFloatingUIOptions, formattingToolbar.store, editor, layer]);
+  }, [show, blockHandleMenuOpen, propsFloatingUIOptions, formattingToolbar.store, editor, layer]);
 
   return (
     <OverlayLayerProvider layer={layer}>

@@ -1,12 +1,8 @@
-/* 有子项的页面以图标承载展开操作。
-   箭头仅在行 hover 或键盘聚焦时替换图标。
-   有子项已用 FolderOpen 等不同图标样式区分，不再画图标下横线。 */
 .goose-hidden-expand-icon::after {
   content: none;
   display: none;
 }
 
-/* 拖放与选中共用主题令牌；黑白模式不再漏出独立写死的蓝色。 */
 :root {
   --sidebar-dnd-accent: var(--goose-interactive-hover-fg);
   --sidebar-dnd-accent-soft: var(--goose-interactive-hover);
@@ -28,7 +24,6 @@
   z-index: 21;
 }
 
-/* 在既有虚拟行高内留出背景间隙，保持拖拽定位与点击区域不变。 */
 .sidebar-tree-row {
   box-sizing: border-box;
   border-block: 2px solid transparent;
@@ -50,9 +45,6 @@
   box-shadow: inset 0 0 0 1px var(--goose-interactive-hover-border);
 }
 
-/* 收藏/虚拟树多行共用 .sidebar-tree-row。Electron 旧内核会把
-   `.sidebar-tree-row:hover` 套到所有同类，两项一起亮。
-   悬停由每行 --hovered 类标记，不要写 :hover。 */
 .workspace-shell
   [data-goose-context-trigger][data-context-open="true"]
   > .sidebar-tree-row {
@@ -60,7 +52,6 @@
   background-color: var(--goose-interactive-selected) !important;
 }
 
-/* 选中 / 拖放 / 右键行内图标统一吃强调文字色；语义色图标不动。 */
 .sidebar-tree-row--selected svg:not([class*="text-danger"]),
 .sidebar-drop-parent-target svg:not([class*="text-danger"]),
 .sidebar-tree-source-placeholder svg:not([class*="text-danger"]),
@@ -87,9 +78,6 @@
     box-shadow 120ms ease;
 }
 
-/* 落点线沿用侧栏拖宽把手的静止色（shell.css 的 --workspace-resize-line）：
-   沿长边 22%–78% 为当前强调色的拖拽线，两端淡出。不画左端方头、不加发光，
-   否则文件列表底部会看成一条坏掉的横向滚动条。方向改成横向。 */
 .sidebar-tree-drop-line,
 .sidebar-drop-line,
 .main-tree-drop-between-line {
@@ -209,7 +197,6 @@
   position: relative;
 }
 
-/* 描边不占行尺寸，也不依赖会被全局/RCT 焦点 reset 清掉的 box-shadow。 */
 .main-tree-row--selected::after,
 .main-tree-row--drop-target::after,
 .main-tree-row--drop-target-local::after,

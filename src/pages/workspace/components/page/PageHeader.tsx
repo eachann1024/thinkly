@@ -51,7 +51,6 @@ interface PageHeaderProps {
   onOpenSearch: () => void;
   onRestore?: () => void;
   onDelete?: () => void;
-  /** AI 面板当前是否打开 */
   aiPanelOpen?: boolean;
   aiLayoutMode?: NotebookAiLayoutMode;
 }
@@ -85,7 +84,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "workspace-divider sticky top-0 z-10 shrink-0 bg-[hsl(var(--goose-editor-bg))] px-3",
+        "workspace-page-header workspace-divider sticky top-0 z-10 shrink-0 bg-[hsl(var(--goose-editor-bg))] px-3",
         aiFullscreenOpen
           ? "notebook-ai-page-header-stack rounded-[12px] py-1"
           : "flex h-12 items-center justify-between",
@@ -118,6 +117,8 @@ export function PageHeader({
                   )}
                   onClick={toggleSidebarCollapsed}
                   aria-label={uiText("showSidebar")}
+                  active={sidebarCollapsed}
+                  aria-expanded={!sidebarCollapsed}
                 >
                   <GooseIcons.PanelLeftOpen className="h-4 w-4" />
                 </IconButton>

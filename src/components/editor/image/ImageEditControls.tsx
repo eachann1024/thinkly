@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { FilePanelExtension } from "@blocknote/core/extensions";
+import { useMediaFilePicker } from "../blocks/shared/mediaFilePicker";
 import { EditorAction, Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/editor/ui/popover";
 import { Image, Pencil } from "@/components/ui/icons";
+import { getBlockToolbarOwner } from "../core/blockToolbarOwner";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/image/ImageEditControls.tsx#messages:1">`
 zh-Hans:
@@ -51,6 +52,7 @@ export function ImageEditControls({ editor, blockId }: {
   const [caption, setCaption] = useState("");
   const [alt, setAlt] = useState("");
   const [name, setName] = useState("");
+  const replaceImage = useMediaFilePicker(editor, blockId ?? "");
   if (!blockId || !editor.isEditable) return null;
   const changeOpen = (next: boolean) => {
     if (next) {
@@ -70,7 +72,7 @@ export function ImageEditControls({ editor, blockId }: {
   };
   return <>
     <EditorAction type="button" className="goose-block-toolbar-control" aria-label={t("replaceImage")} title={t("replaceImage")}
-      onClick={() => editor.getExtension(FilePanelExtension)?.showMenu(blockId)}><Image className="h-[15px] w-[15px]" /></EditorAction>
+      onClick={replaceImage}><Image className="h-[15px] w-[15px]" /></EditorAction>
     <Popover open={open} onOpenChange={changeOpen}>
       <PopoverTrigger asChild>
         <EditorAction type="button" className="goose-block-toolbar-control" aria-label={t("captionAndAltText")} title={t("captionAndAltText")}>
@@ -78,6 +80,8 @@ export function ImageEditControls({ editor, blockId }: {
         </EditorAction>
       </PopoverTrigger>
       <PopoverContent editorContext side="bottom" className="w-72 p-3" data-goose-image-toolbar
+        data-goose-block-id={blockId}
+        data-goose-editor-owner={getBlockToolbarOwner(editor.prosemirrorView.dom)}
         onCloseAutoFocus={(event) => { event.preventDefault(); editor.focus(); }}
         onKeyDown={(event) => event.stopPropagation()}>
         <form onSubmit={save} className="flex flex-col gap-3">

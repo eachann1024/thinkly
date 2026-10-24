@@ -1,11 +1,4 @@
-/* ──────────────────────────────────────────────────────────────────────────
- * main-tree.css
- * react-complex-tree 主树视觉覆盖：抹掉默认 outline / focus 边框，
- * 让拖拽快照贴合行轮廓，避免出现"白边"。
- * 该文件被 SidebarMainTree.tsx 直接 import。
- * ────────────────────────────────────────────────────────────────────────── */
 
-/* 1) 容器：只抹掉鼠标焦点的默认边框，保留键盘焦点反馈。 */
 .rct-main-tree:focus:not(:focus-visible),
 .rct-main-tree *:focus:not(:focus-visible) {
   outline: none !important;
@@ -21,7 +14,6 @@
   --tw-ring-offset-shadow: 0 0 #0000 !important;
 }
 
-/* 2) <li> / 行容器：rct 自带类可能带 border/bg，全部去掉，由内部 row 自己管理 */
 .rct-main-tree .rct-tree-item-li,
 .rct-main-tree .rct-tree-item-title-container {
   background: transparent !important;
@@ -29,10 +21,6 @@
   outline: none !important;
 }
 
-/* 3) 拖拽快照：dragstart 时由 MainTreeItem 动态创建本胶囊并 setDragImage。
- *    默认快照是整行大块，跟随鼠标会盖住目标行的拖入高亮；改用紧凑的
- *    "图标+标题"胶囊，落点反馈不再被遮挡。
- *    注意：颜色只用实色变量与 rgba 老语法（Electron 旧内核禁 /alpha）。 */
 .main-tree-drag-ghost {
   position: fixed;
   top: -1000px;
@@ -53,8 +41,6 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.4;
   white-space: nowrap;
-  /* 不加 box-shadow：drag image 截图把阴影算进矩形 bounding box，
-     Electron 旧内核不做透明混合，圆角外会糊出四个灰色直角 */
   pointer-events: none;
 }
 .main-tree-drag-ghost svg {
@@ -70,7 +56,6 @@
   text-overflow: ellipsis;
 }
 
-/* MainTreeRowShell 共享几何：本地主树与大纲使用同一行高和背景间隔。 */
 .main-tree-row {
   height: var(--main-tree-row-height, 32px);
   min-height: var(--main-tree-row-height, 32px);
@@ -78,8 +63,6 @@
   box-sizing: border-box;
 }
 
-/* 原生 button 的 UA 光标是 default，且不继承父级 cursor-pointer。
- * 大纲标题、展开箭头、隐藏箭头图标都是 button，悬停文字区就会变回箭头。 */
 .main-tree-row,
 .main-tree-row :where(button, [role="button"]) {
   cursor: pointer;
@@ -89,13 +72,11 @@
   cursor: text;
 }
 
-/* 高于 rct title-container 的 border 重置，固定行高内保留 2px 背景间隙。 */
 .main-tree-row.main-tree-row {
   border-top: 1px solid transparent !important;
   border-bottom: 1px solid transparent !important;
 }
 
-/* 比各状态的 background 简写优先，避免裁切范围被重置回 border-box。 */
 .main-tree-row.main-tree-row {
   background-clip: padding-box !important;
 }
@@ -116,17 +97,11 @@
   box-shadow: none;
 }
 
-/* 右键菜单是 modal：遮罩一出现行就失去指针悬停。菜单开着时保住与选中一致的行底。
-   已选中 / 拖拽 / 落点仍靠各自 !important。
-   悬停不用 :hover：rct 把 title-container 设成 transparent !important，
-   且 Electron 旧内核会把同类 :hover 套到所有行。 */
 [data-goose-context-trigger][data-context-open="true"] .main-tree-row {
   color: var(--goose-interactive-selected-fg) !important;
   background-color: var(--goose-interactive-selected) !important;
 }
 
-/* 选中 / 拖放行内图标：lucide 均为 currentColor，但默认文件/文件夹图标自带
-   text-muted-foreground 工具类，需显式覆盖；语义色图标（如读取失败红）不动。 */
 .main-tree-row--selected svg:not([class*="text-danger"]),
 .main-tree-row--hovered svg:not([class*="text-danger"]),
 .main-tree-row--drop-target svg:not([class*="text-danger"]),
@@ -144,7 +119,6 @@
   background: var(--goose-interactive-selected);
 }
 
-/* 原行不随拖影消失：以半透明强调色占位，持续展示来源层级和原位置。 */
 .main-tree-row--dragging {
   color: var(--sidebar-dnd-accent) !important;
   background-color: var(--sidebar-dnd-accent-soft) !important;
@@ -158,15 +132,10 @@
   background-color: var(--sidebar-dnd-accent-soft) !important;
 }
 
-/* 笔记行是 relative z-10。线的绝对定位外壳不设层级时，整条线
-   画在行下面。外壳提层后，按住拖动时落点线盖住笔记。
-   线的颜色在 sidebar-dnd.css，与拖宽把手激活态同一套。 */
 .rct-main-tree > div:has(> .main-tree-drop-between-line) {
   z-index: 30;
 }
 
-/* 指针进入可视列表上/下缘吸附带时，行内线不代表真实落点（真实落点是根级首/末），
-   只留 MainTreeEdgeDropWatcher 画在可视边缘的线。 */
 [data-main-tree-edge-drop] .main-tree-drop-between-line {
   display: none;
 }
@@ -184,26 +153,19 @@
   }
 }
 
-/* 4) drop 高亮态由 React 内联类控制；这里只兜底清掉 rct 默认的 dragging-over 颜色 */
 .rct-main-tree .rct-tree-item-li-dragging-over,
 .rct-main-tree .rct-tree-item-title-container-dragging-over,
 .rct-main-tree .rct-tree-item-button-dragging-over {
   background: transparent !important;
 }
 
-/* 上面的库样式重置使用了更靠后的 !important。拖动源与行内落点必须在它
- * 之后重新声明 background-color，否则部分 hover / dragging-over 组合只剩
- * 强调色描边，浅色填充会退回透明或中性灰。 */
 .rct-main-tree .main-tree-row.main-tree-row--dragging,
 .rct-main-tree .main-tree-row.main-tree-row--drop-target,
 .rct-main-tree .main-tree-row.main-tree-row--drop-target-local {
   background-color: var(--sidebar-dnd-accent-soft) !important;
-  /* 原生 dragover 会持续触发树重渲染；保留 transition-colors 会让每次重渲染
-     都从透明色重新起步，实际观感就只剩描边。拖拽反馈应即时出现。 */
   transition: none !important;
 }
 
-/* 拖动源保持选中底，避免半透明占位把当前操作对象“摘出”选中态。 */
 .rct-main-tree .main-tree-row.main-tree-row--selected.main-tree-row--dragging {
   color: var(--goose-interactive-selected-fg) !important;
   background-color: var(--goose-interactive-selected) !important;
@@ -211,7 +173,6 @@
   opacity: 1;
 }
 
-/* 5) rct 的非键盘聚焦态仍不显示额外边框，避免与选中背景叠加。 */
 .rct-main-tree [data-rct-item-interactive]:focus:not(:focus-visible),
 .rct-main-tree [data-rct-item-focus="true"]:focus:not(:focus-visible) {
   outline: none !important;
@@ -222,7 +183,6 @@
   color: var(--goose-interactive-hover-fg);
 }
 
-/* 文件夹数量胶囊：底色取当前文字色的浅透明，悬停与选中行同样可辨。 */
 .main-tree-row-count {
   flex: none;
   min-width: 20px;

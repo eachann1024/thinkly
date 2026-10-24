@@ -1,6 +1,5 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
-/** Notebook AI 输入条：草稿、附件、布局与原生引用动作各自维护。 */
 import { forwardRef, useCallback } from "react";
 import { ArrowUp, Plus } from "@/components/ui/icons";
 import { ComposerPrimitive } from "@assistant-ui/react";
@@ -86,8 +85,6 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       handleDockDrop,
     } = useComposerAttachments(props, surface);
     useComposerSelectionHandle(props, surface, ref);
-    // isEmpty 在 IME 会话里会滞后；发送按钮不因 isEmpty 禁用，避免「有字点不了」
-    // 真正空内容由 handleSubmit 读 DOM 拦截。
     const canClickSend = !isStreaming && !disabled;
     const sendLooksReady = canClickSend && !isEmpty;
 
@@ -132,27 +129,6 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onChange={handleImageInput}
                 disabled={disabled || isStreaming}
               />
-              <span className="flex shrink-0 items-center">
-                <IconButton size="sm" tone="muted"
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={disabled || isStreaming}
-                  className={cn(
-                    "flex shrink-0 items-center justify-center ",
-                    "text-muted-foreground",
-                    "disabled:cursor-not-allowed disabled:text-disabled",
-                    isStreaming && "invisible pointer-events-none",
-                  )}
-                  aria-hidden={isStreaming}
-                  tabIndex={isStreaming ? -1 : undefined}
-                  aria-label={t("uploadImage")}
-                  title={t("uploadImage")}
-                >
-                  <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-                </IconButton>
-              </span>
-
-              {/* 输入区域与工具栏保持同一节点，内容增高只由 CSS 处理。 */}
               <AiComposerInput
                 ref={inputRef}
                 placeholder={placeholder}
@@ -174,10 +150,29 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onSlashCommand={onSlashCommand}
               />
 
-              <span className="flex min-w-0 items-center">
-                <ResourcePicker inputRef={inputRef} disabled={disabled || isStreaming} />
-                <ModelSelectorPopover disabled={disabled} />
-              </span>
+              <div className="notebook-ai-composer-tools flex min-w-0 items-center">
+                {!isStreaming && <span className="flex shrink-0 items-center">
+                  <IconButton size="sm" tone="muted"
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={disabled || isStreaming}
+                    className={cn(
+                      "flex shrink-0 items-center justify-center ",
+                      "text-muted-foreground",
+                      "disabled:cursor-not-allowed disabled:text-disabled",
+                    )}
+                    aria-label={t("uploadImage")}
+                    title={t("uploadImage")}
+                  >
+                    <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </IconButton>
+                </span>}
+
+                <span className="flex min-w-0 items-center">
+                  <ResourcePicker inputRef={inputRef} disabled={disabled || isStreaming} />
+                  <ModelSelectorPopover disabled={disabled} />
+                </span>
+              </div>
 
               <span className="flex shrink-0 items-center justify-self-end">
                 {isStreaming ? (

@@ -82,7 +82,6 @@ export function renderItem({
     hasChildren,
     isLocalNotebook: isLocalFolder,
   });
-  // 空文件夹占位只在扫完之后才显示：读取中/失败时不能冒充空目录。
   const showEmptyFolderPlaceholder = shouldShowEmptyFolderPlaceholder({
     isFolderRow,
     isExpanded: !!context.isExpanded,
@@ -105,10 +104,8 @@ export function renderItem({
     />
   );
 
-  // 文件不显示跟随鼠标的标签，仅由目标区域提示落点；文件夹保留目录拖动快照。
   const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
     if (!e.dataTransfer) return;
-    // startDragging 会同步选中源行；先标记拖拽，避免选中回调打开笔记。
     activeMainTreeDragId = String(item.index);
     onItemDragStart?.(String(item.index));
     (
@@ -124,7 +121,6 @@ export function renderItem({
     }
     if (page.localFilePath && !isPendingCreate && !page.localUnsaved) {
       e.dataTransfer.setData("text/plain", page.localFilePath);
-      // 外部软件复制路径文本；应用内仍允许移动节点。
       e.dataTransfer.effectAllowed = "copyMove";
     }
 
@@ -186,14 +182,12 @@ export function renderItem({
     if (isLocalDirectory) {
       e.preventDefault();
       e.stopPropagation();
-      // 指针已在 pointerdown 翻转；键盘（detail=0）在 click 补一次。
       if (e.detail === 0) toggleLocalDirectory();
       return;
     }
     (
       interactive.onClick as React.MouseEventHandler<HTMLDivElement> | undefined
     )?.(e);
-    // 已选中再点时 tree 可能不触发 onSelectItems；全屏 AI 下仍需回到该页标签
     const pageId = String(item.index);
     if (pageId && pageId !== "root") {
       const permanent = isPlatformPrimaryModifierEvent(e);
@@ -214,9 +208,8 @@ export function renderItem({
       depth={depth}
       itemIndex={String(item.index)}
     >
-      {/* 整行作为 hit area：interactive div 绝对覆盖整个 row。
-          arrow / icon 各自的实际可点击子节点已有自己的 pointer-events 与 stopPropagation，
-          标题文字给 pointer-events-none 透传给底层 interactive；占位 arrow 已 pointer-events-none。 */}
+      {
+}
       <div
         {...interactive}
         data-main-tree-folder={item.isFolder ? "true" : "false"}

@@ -1,15 +1,10 @@
-/* 速记小窗专属样式（仅 quicknote.html 入口加载）。 */
 
-/* 无边框窗口：根容器填满。窗口圆角交给系统（createBrowserWindow roundedCorners）。 */
 html,
 body,
 #root {
   height: 100%;
   width: 100%;
   margin: 0;
-  /* 背景兜底：setSize 放大窗口的瞬间，web 内容若尚未重绘到新尺寸，
-     会露出窗口底层（表现为右侧/底部一条灰边）。让 html/body 与编辑器同色，
-     任何未绘制区域都是同一底色，消除灰色残影。 */
   background: hsl(var(--goose-editor-bg));
 }
 
@@ -22,7 +17,6 @@ body,
   overflow: hidden;
 }
 
-/* 固定标题栏：占布局高度，常驻可见；空白区拖窗，正文不再被把手/覆层误拖。 */
 .quicknote-titlebar-reveal-zone {
   position: relative;
   z-index: 20;
@@ -31,7 +25,6 @@ body,
   height: 30px;
 }
 
-/* 改名入口仅随标题文字撑宽，不继承按钮的默认最小宽度。 */
 .quicknote-slot-name-display {
   display: flex;
   align-items: center;
@@ -65,7 +58,6 @@ body,
 .quicknote-slot-name-input {
   position: absolute;
   z-index: 22;
-  /* 与名称按钮共用起点和 22px 高度。 */
   top: 0;
   bottom: 0;
   left: 10px;
@@ -90,7 +82,6 @@ body,
   background: hsl(var(--goose-editor-bg));
 }
 
-/* 改名时顶部只保留全宽输入框：隐藏标题栏控件。 */
 .quicknote-titlebar-reveal-zone[data-renaming="true"] .quicknote-titlebar {
   visibility: hidden;
   pointer-events: none;
@@ -165,7 +156,6 @@ body,
   color: hsl(var(--muted-foreground));
 }
 
-/* 标题栏已占布局高度；正文从剩余区域顶部开始。 */
 .quicknote-editor-surface {
   box-sizing: border-box;
   height: 100%;
@@ -175,26 +165,17 @@ body,
   padding-bottom: 16px;
 }
 
-/* BlockNote 的 contenteditable 默认只按内容撑高。小窗让编辑面填满
-   滚动容器（标题栏已从视口扣掉）剩余高度。 */
 .quicknote-editor-surface .bn-editor {
   box-sizing: border-box;
   min-height: 100%;
 }
 
-/* 首块去掉 BlockNote 给 heading 的 18px 内置上间距：该间距是用来跟「上文」拉开
-   距离的，但首块前面没有内容，叠加 surface padding 后顶部会显出一大段死空白。
-   仅作用于首块，不影响文中其它 heading 的上间距。 */
 .quicknote-editor-surface
   .bn-block-group
   > .bn-block-outer:first-child
   .bn-block-content[data-content-type="heading"] {
   padding-top: 0;
 }
-/* 无侧边菜单（无把手/加号），收窄左右留白让正文贴近窗口。
-   需压过 editor-base.css 的 `.workspace-editor-surface.max-w-none .bn-editor`
-   (该 56px 是主窗为 side menu 预留的 gutter)——小窗内层仍带 workspace-editor-surface
-   全宽容器，故选择器要叠到同级或更高特异度才生效。 */
 .quicknote-editor-surface .workspace-editor-surface.max-w-none .bn-editor {
   padding-inline: 8px;
 }

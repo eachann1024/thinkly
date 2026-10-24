@@ -32,7 +32,6 @@ def find_installed_pids() -> list[int]:
             ).stdout
             pids.extend(int(line) for line in out.split() if line.isdigit())
         else:
-            # Windows：按镜像名查，tasklist 输出首行为表头。
             out = subprocess.run(
                 ["tasklist", "/FI", f"IMAGENAME eq {INSTALL_BIN_WIN}", "/FO", "CSV", "/NH"],
                 capture_output=True,
@@ -63,10 +62,8 @@ def find_dev_pids() -> list[int]:
                 if not line.isdigit():
                     continue
                 pid = int(line)
-                # 防自杀：跳过本脚本及其父进程（命令行可能带 marker 字符串）。
                 if pid in exclude:
                     continue
-                # /proc 仅在 Linux 可用；无法确认所属仓库时不终止该进程。
                 if IS_LINUX:
                     try:
                         if b"--type=" in Path(f"/proc/{pid}/cmdline").read_bytes():
@@ -120,7 +117,6 @@ def signal_pids(pids: list[int], sig: int) -> None:
             else:
                 os.kill(pid, sig)
         except subprocess.CalledProcessError as error:
-            # /T 可能已随父进程结束了其它目标；仅在 PID 仍存活时判定失败。
             if IS_WIN and not alive_pids([pid]):
                 continue
             die("kill", f"终止 PID {pid} 失败（退出码 {error.returncode}）")
@@ -151,12 +147,12 @@ def alive_pids(pids: list[int]) -> list[int]:
     alive: list[int] = []
     for pid in pids:
         try:
-            os.kill(pid, 0)  # 信号 0 只探测不发送。
+            os.kill(pid, 0)
             alive.append(pid)
         except ProcessLookupError:
             continue
         except PermissionError:
-            alive.append(pid)  # 进程存在但归属他人。
+            alive.append(pid)
     return alive
 
 
@@ -172,7 +168,6 @@ def cmd_kill(_args: argparse.Namespace) -> None:
     merged = sorted({pid for pids in targets.values() for pid in pids})
     signal_pids(merged, signal.SIGTERM)
     if IS_WIN:
-        # taskkill /F 已在 signal_pids 内执行。
         log("kill", f"已强制终止 {len(merged)} 个进程。")
         return
     deadline = time.monotonic() + KILL_GRACE_SECONDS

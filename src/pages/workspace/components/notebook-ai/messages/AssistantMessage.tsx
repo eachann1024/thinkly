@@ -51,7 +51,6 @@ export function AssistantMessage({
     shouldShowToolProgress(progressToolParts, isStreaming);
   const hasText = getTextPartText(msg).trim().length > 0;
   const reasoningText = collectReasoningText(msg);
-  // 发送后立刻走处理进度，不再单独出一张「思考中」卡片；有正文也出纸，纯问答完成后纸保留
   const showWorkCard =
     showToolProgress ||
     hasText ||
@@ -114,7 +113,7 @@ export function AssistantMessage({
         <MessagePrimitive.Error>
           <p className="text-xs text-danger">{t("thisResponseCouldNotBeGenerated")}</p>
         </MessagePrimitive.Error>
-        {/* 流式中不占位：避免底部空出一截操作栏高度 */}
+        { }
         {!isStreaming ? <MessageActionBar /> : null}
       </MessagePrimitive.Root>
     </AssistantToolRenderContext.Provider>

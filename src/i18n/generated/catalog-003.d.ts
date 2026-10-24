@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
     "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
     "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
@@ -51,7 +52,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/ChartCard.tsx#messages:1": { "chart": {  }; "chartDataIsIncomplete": {  }; "chartExportFailed": {  }; "chartExportIsEmpty": {  }; "imageEncodingFailed": {  }; "theChartIsNotReadyYet": {  } };
     "src/pages/workspace/components/notebook-ai/ChatMessages.tsx#messages:1": { "detailSendSuggestion": { "value1": string | number }; "extractKeyPoints": {  }; "howWouldYouLikeToEditThisNote": {  }; "polishThisText": {  }; "scrollToBottom": {  }; "turnIntoAChecklist": {  } };
     "src/pages/workspace/components/notebook-ai/Composer.tsx#messages:1": { "askAiUseForCommandsOrSkillsOr": {  }; "sendMessage": {  }; "stopGenerating": {  }; "uploadImage": {  } };
-    "src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1": { "conversationHistory": {  }; "current": {  }; "deleteConversation": {  }; "noPreviousConversations": {  } };
+    "src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1": { "conversationHistory": {  }; "deleteConversation": {  }; "noPreviousConversations": {  } };
     "src/pages/workspace/components/notebook-ai/ConversationTitle.tsx#messages:1": { "detailConversationTitle": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/DiagramCard.tsx#messages:1": { "diagram": {  }; "diagramGenerationFailed": {  }; "generatingDiagram": {  }; "theDiagramIsNotReadyYet": {  } };
     "src/pages/workspace/components/notebook-ai/ModelSelectorPopover.tsx#messages:1": { "default": {  }; "detailCurrentModel": { "value1": string | number }; "switchModel": {  } };
@@ -61,6 +62,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/ToolProgressCard.tsx#messages:1": { "awaitingApproval": {  }; "canceled": {  }; "complete": {  }; "failed": {  }; "inProgress": {  }; "pending": {  }; "progress": {  }; "thinking": {  }; "undone": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewDiff.tsx#messages:1": { "changeDiff": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewProposal.tsx#messages:1": { "applied": {  }; "deselectAll": {  }; "failed": {  }; "needsReview": {  }; "notApplied": {  }; "pending": {  }; "rolledBack": {  }; "selectAll": {  }; "selectedCount": { "selected": string | number; "total": string | number }; "skipped": {  }; "undone": {  } };
+    "src/pages/workspace/components/notebook-ai/approval/planRefinementText.ts#messages:1": { "invalidPlan": {  }; "refine": { "title": string | number } };
     "src/pages/workspace/components/notebook-ai/approval/planReviewData.ts#messages:1": { "noteChangePlan": {  } };
     "src/pages/workspace/components/notebook-ai/approval/reviewState.ts#messages:1": { "applied": {  }; "appliedCount": { "count": string | number }; "appliedSelection": {  }; "applying": {  }; "applyingSelectedChangesPleaseWait": {  }; "awaitingApproval": {  }; "canceled": {  }; "contentConflict": {  }; "generatingPlan": {  }; "incomplete": {  }; "invalidPlan": {  }; "partialCount": { "count": string | number }; "planGeneratedNoNotesHaveBeenChangedYet": {  }; "preparingChanges": {  }; "theNotesChangedAfterThePlanWasApplied": {  }; "theOriginalContentOrTargetLocationHasChanged": {  }; "thePlanWasNotCompletedAndSomeChanges": {  }; "thePlanWasNotCompletedCheckTheTarget": {  }; "thePlanWasNotCompletedPreviouslyAppliedChanges": {  }; "theseChangesHaveBeenUndone": {  }; "thisPlanCouldNotBeAppliedNoNotes": {  }; "thisPlanWasNotAppliedNoNotesWere": {  }; "undoConflict": {  }; "undone": {  } };
     "src/pages/workspace/components/notebook-ai/approval/usePlanRefinementInput.ts#messages:1": { "theInputIsTemporarilyUnavailableTryRefiningThe": {  } };
@@ -72,6 +74,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/beautifulUiMap.ts#messages:1": { "detailProcessedFor": { "value1": string | number }; "detailThoughtFor": { "value1": string | number }; "detailToolsRun": { "value1": string | number }; "processing": {  }; "runningTools": {  }; "searchComplete": {  }; "searching": {  }; "thinking": {  }; "thisStepWasNotCompletedAndMayHave": {  } };
     "src/pages/workspace/components/notebook-ai/composer/ResourcePicker.tsx#messages:1": { "add": { "count": string | number }; "choose": {  }; "empty": {  }; "indexed": { "count": string | number }; "loading": {  }; "recursive": {  }; "retry": {  }; "root": {  }; "search": {  }; "source": {  }; "target": {  } };
     "src/pages/workspace/components/notebook-ai/composer/useComposerAttachments.ts#messages:1": { "chooseAPngJpegWebpOrGifImage": {  } };
+    "src/pages/workspace/components/notebook-ai/history/conversationTime.ts#messages:1": { "daysAgo": { "count": number }; "today": {  }; "yesterday": {  } };
     "src/pages/workspace/components/notebook-ai/history/historyActions.ts#messages:1": { "confirmDeletion": {  }; "conversationDeleted": {  }; "detailDeleteConversation": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/insertArtifact.ts#messages:1": { "image": {  }; "noPageIsOpen": {  }; "nothingToInsert": {  } };
     "src/pages/workspace/components/notebook-ai/messages/AssistantLetterFold.tsx#messages:1": { "thinking": {  } };
@@ -119,8 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1": { "backToResults": {  }; "continueInAiPanel": {  }; "jumpToLatest": {  }; "sources": {  } };
     "src/pages/workspace/components/search-sheet/SearchSheetFilters.tsx#localMessages:1": { "allNotebooks": {  }; "bestMatch": {  }; "currentNamed": { "name": string | number }; "currentNotebook": {  }; "notebookRemoved": {  }; "recentlyEdited": {  }; "searchScope": { "scope": string | number }; "searchTitlesOnly": {  }; "sortBy": { "sort": string | number } };
     "src/pages/workspace/components/search-sheet/SearchSheetResults.tsx#localMessages:1": { "askAi": {  }; "matchCount": { "count": string | number }; "pinyin": {  }; "removeRecent": { "title": string | number }; "title": {  } };
-    "src/pages/workspace/components/search-sheet/sheetStepText.ts#messages:1": { "compose": {  }; "composeRunning": {  }; "failed": {  }; "found": { "count": string | number }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listPages": {  }; "noResults": {  }; "readPage": {  }; "readWebPage": {  }; "retrieve": {  }; "retrieveFound": { "count": string | number }; "retrieveNone": {  }; "searchNotes": {  }; "searchWeb": {  }; "summary": { "count": string | number }; "summaryFailed": { "count": string | number }; "summaryNotes": { "count": string | number }; "summaryWeb": { "count": string | number }; "thinking": {  }; "tool": {  }; "understand": {  } };
-    "src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1": { "aiCouldnTAnswer": {  } };
-    "src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1": { "textFont": {  } };
   }
 }
