@@ -1,5 +1,26 @@
 # 更新日志
 
+## 1.7.328
+
+- schedule weekly monthly and quarterly reports
+- Name the quick note window after the notebook (#98)
+- Retry macOS DMG builds when hdiutil detach is busy (#97)
+- Center the AI panel selection quote icon, label, and close control (#99)
+- stop repeating an installed macOS update
+- List ai-quote-align in the verification scripts (#100)
+- shrink the AI panel while the sidebar is dragged (#102)
+- Save notes as ordinary Markdown
+- prevent pasted text from opening suggestion menus
+- enable horizontal wheel scrolling in floating formatting toolbar
+- add centered icons to AI review toolbar
+- compact AI processing status without background
+- update table layout live while dragging resize handles
+- reorder table rows and columns while dragging handles
+- keep blank-line clicks on the selected visual line
+- parse inline links inside rich tables (#106)
+- align floating search acceptance with the current raise path (#107)
+- bind AI writes to frozen notebook resource scopes
+
 ## 1.7.327
 
 - accept search-window AI snapshot and continue-ai handoff (#96)
