@@ -25,7 +25,9 @@ export function isClickOnVisualLine(
 }
 
 function wrappedToNextLine(curr: CaretCoords, next: CaretCoords): boolean {
-  return next.top >= curr.bottom - 1 && next.left < curr.left;
+  // 连续硬换行的空行，以及居中/右对齐后的下一行，横坐标未必向左。
+  // 只按垂直行带判断，避免行尾扫描越过空行落到块末尾。
+  return next.top > curr.top && next.top >= curr.bottom - 1;
 }
 
 /** 从 `from` 沿同一视觉行走到最后一个文档位置。 */
