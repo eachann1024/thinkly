@@ -18,6 +18,55 @@ def short(s, n=120):
     s = " ".join(str(s).split())
     return s if len(s) <= n else s[:n - 1] + "…"
 
+def safe_excerpt(text, n=180):
+    text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
+    text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
+    text = re.sub(r"(?i)\b(bearer|token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*\S+", r"\1 [redacted]", text)
+    text = re.sub(r"\b[A-Za-z0-9_\-]{32,}\b", "[redacted]", text)
+    text = " ".join(text.split())
+    return text[:n]
+
+def parse_review(raw):
+    """取最后一个带 merge_recommendation 的完整 JSON 对象。"""
+    raw = raw or ""
+    if not raw.strip():
+        return {}
+    dec = json.JSONDecoder()
+    found = []
+    i = 0
+    while i < len(raw):
+        start = raw.find("{", i)
+        if start < 0:
+            break
+        try:
+            obj, end = dec.raw_decode(raw, start)
+        except json.JSONDecodeError:
+            i = start + 1
+            continue
+        if isinstance(obj, dict) and "merge_recommendation" in obj:
+            found.append(obj)
+        i = end if end > start else start + 1
+    if not found:
+        raise SystemExit("审核结果里没有带 merge_recommendation 的完整 JSON。摘录：" + safe_excerpt(raw))
+    return found[-1]
+
+def read_review_raw():
+    path = env.get("REVIEW_PATH", "").strip()
+    if not path:
+        if env.get("REVIEW_RESULT") == "success":
+            raise SystemExit("审核产物缺失：没有 REVIEW_PATH。审核 JSON 不能通过 job output 传递。")
+        return ""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except FileNotFoundError:
+        if env.get("REVIEW_RESULT") == "success":
+            raise SystemExit(
+                "审核产物缺失：review 任务已成功，但读不到审核 JSON 文件。"
+                "结果不再走 job output；产物丢失时无法判断能否合并。"
+            )
+        return ""
+
 def verdict(review):
     if not review:
         return "无审核结果"
@@ -38,11 +87,7 @@ def block_merge(reasons):
     print("BLOCKED:", reasons)
     sys.exit(0)
 
-review = {}
-try:
-    review = json.loads(env.get("REVIEW_JSON") or "{}") or {}
-except Exception:
-    review = None
+review = parse_review(read_review_raw())
 # 详细结论只写进 Actions 运行摘要，不发评论
 try:
     with open(env["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fh:
@@ -59,6 +104,7 @@ if info["state"] != "open" or info["head"]["sha"] != sha:
     print("PR closed or head moved; a newer run will handle it"); sys.exit(0)
 
 reasons = []
+rec = ""
 allowed = {a.strip() for a in env["ALLOWED_AUTHORS"].split(",") if a.strip()}
 if info["user"]["login"] not in allowed:
     # 不是仓库主人的 PR：只审不合，也不发评论
@@ -67,11 +113,11 @@ if info["user"]["login"] not in allowed:
 # 1) 审核本身必须成功且有结构化结果（超时/报错/无输出 = 不合并）
 if env["REVIEW_RESULT"] != "success":
     reasons.append(f"AI 审核未成功完成（{env['REVIEW_RESULT']}），按规则不自动合并")
-if review is None:
-    review = {}
-    reasons.append("AI 审核输出无法解析")
 elif not review:
-    reasons.append("没有拿到 AI 审核的结构化结果")
+    raise SystemExit(
+        "审核产物缺失：review 任务已成功，但审核 JSON 为空。"
+        "结果不再通过 job output 传递；产物丢失时无法判断能否合并。"
+    )
 else:
     rec = str(review.get("merge_recommendation", "")).strip()
     risk = str(review.get("risk_level", "")).strip().lower()
@@ -116,10 +162,11 @@ else:
 if any("security" in l.lower() for l in labels):
     reasons.append("PR 带有安全疑虑标签")
 
-# 2) 敏感路径转人工
+# 2) 受保护路径默认转人工。主人、本仓库、safe_to_merge 可以放过非密钥路径。
 files = json.loads(gh("api", "--paginate", "--slurp", f"repos/{repo}/pulls/{pr}/files?per_page=100"))
 names = [f["filename"] for page in files for f in page]
 prot = [p.strip() for p in env["PROTECTED_PATHS"].split(",") if p.strip()]
+secret_paths = (".env", "secrets", "credentials", "*.pem", "*.key", "*.p12", "id_rsa")
 def protected(n, p):
     base = n.rsplit("/", 1)[-1]
     if p.endswith("/"):
@@ -127,9 +174,17 @@ def protected(n, p):
     if p.startswith("*"):
         return n.endswith(p[1:])
     return base.startswith(p)
+head_repo = ((info.get("head") or {}).get("repo") or {}).get("full_name") or ""
+owner_bypass = info["user"]["login"] == "eachann1024" and head_repo == repo and rec == "safe_to_merge"
+secret_hit = [n for n in names if any(protected(n, p) for p in secret_paths)]
 hit = [n for n in names if any(protected(n, p) for p in prot)]
-if hit:
-    reasons.append("改动了受保护路径：" + ", ".join(hit[:10]))
+other = [n for n in hit if n not in set(secret_hit)]
+if secret_hit:
+    reasons.append("改动了密钥类路径：" + ", ".join(secret_hit[:10]))
+if other and not owner_bypass:
+    reasons.append("改动了受保护路径：" + ", ".join(other[:10]))
+elif other and owner_bypass:
+    print("owner same-repo safe_to_merge; allow protected paths:", ", ".join(other[:10]))
 
 if reasons:
     block_merge(reasons)
