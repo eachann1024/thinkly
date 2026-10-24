@@ -3,10 +3,17 @@ import { Plugin, type Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { presenceName, runDomPresence } from "@/lib/ui/presence";
 import { shouldAnimateBlockRemoval } from "./tableWindowModel";
+import { MEDIA_KEYBOARD_DELETE_META } from "./mediaBlockDelete";
 
 function removesBlock(tr: Transaction): boolean {
+  // Keyboard deletion must commit its selection before the next key or DOM selection update.
+  if (tr.getMeta(MEDIA_KEYBOARD_DELETE_META)) return false;
   const step = tr.steps[0] as { from?: number; to?: number; slice?: { size: number } } | undefined;
   if (!step || step.from == null || step.to == null || !step.slice) return false;
+  const $from = tr.before.resolve(step.from);
+  const $to = tr.before.resolve(step.to);
+  // Text replacement must commit synchronously, even when it shortens a block.
+  if ($from.sameParent($to) && $from.parent.isTextblock) return false;
   return shouldAnimateBlockRemoval({
     docChanged: tr.docChanged,
     history: tr.getMeta("addToHistory") !== false,

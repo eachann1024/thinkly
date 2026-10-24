@@ -95,7 +95,6 @@ export function CodeBlockToolbar({
         setCopiedKind("image");
         setTimeout(() => setCopiedKind(null), 2000);
       } catch {
-        // 失败 toast 由 onCopyPreview 负责
       } finally {
         setCopyingImage(false);
       }
@@ -146,99 +145,101 @@ export function CodeBlockToolbar({
             chipActiveClass={chipActiveClass}
           />
 
-          {hasVisualPreview && (
-            <CodePreviewToolbar
-              language={language}
-              onLanguageChange={onLanguageChange}
-              getCodeContent={getCodeContent}
-              canPreview={canPreview}
-              onOpenPreview={onOpenPreview}
-              onSystemPreview={onSystemPreview}
-              onDownloadPreview={onDownloadPreview}
-              onCopyPreview={onCopyPreview}
-              previewMode={previewMode}
-              onPreviewModeChange={onPreviewModeChange}
-              chipClass={chipClass}
-              copied={copied}
-              copyingImage={copyingImage}
-              handleCopy={handleCopy}
-            />
-          )}
+          <div className="goose-code-hover-actions inline-flex items-center gap-1">
+            {hasVisualPreview && (
+              <CodePreviewToolbar
+                language={language}
+                onLanguageChange={onLanguageChange}
+                getCodeContent={getCodeContent}
+                canPreview={canPreview}
+                onOpenPreview={onOpenPreview}
+                onSystemPreview={onSystemPreview}
+                onDownloadPreview={onDownloadPreview}
+                onCopyPreview={onCopyPreview}
+                previewMode={previewMode}
+                onPreviewModeChange={onPreviewModeChange}
+                chipClass={chipClass}
+                copied={copied}
+                copyingImage={copyingImage}
+                handleCopy={handleCopy}
+              />
+            )}
 
-          {editable && onWrapChange && !isMathOrMermaid && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={wrap ? t("turnOffLineWrapping") : t("wrapLines")}
-                  aria-pressed={wrap}
-                  onClick={() => onWrapChange(!wrap)}
-                  className={cn(
-                    "h-6 w-6 p-0",
-                    chipClass,
-                    wrap && chipActiveClass,
-                  )}
-                >
-                  {wrap ? (
-                    <GooseIcons.AlignJustify className={iconSize} />
-                  ) : (
-                    <GooseIcons.WrapText className={iconSize} />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{wrap ? t("turnOffLineWrapping") : t("wrapLines")}</TooltipContent>
-            </Tooltip>
-          )}
+            {editable && onWrapChange && !isMathOrMermaid && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={wrap ? t("turnOffLineWrapping") : t("wrapLines")}
+                    aria-pressed={wrap}
+                    onClick={() => onWrapChange(!wrap)}
+                    className={cn(
+                      "h-6 w-6 p-0",
+                      chipClass,
+                      wrap && chipActiveClass,
+                    )}
+                  >
+                    {wrap ? (
+                      <GooseIcons.AlignJustify className={iconSize} />
+                    ) : (
+                      <GooseIcons.WrapText className={iconSize} />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{wrap ? t("turnOffLineWrapping") : t("wrapLines")}</TooltipContent>
+              </Tooltip>
+            )}
 
-          {editable && onFormat && canFormat && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleFormatClick}
-                  disabled={isLoading}
-                  className={cn("h-6 w-6 p-0", chipClass)}
-                >
-                  {isLoading ? (
-                    <GooseIcons.Loader2
-                      className={cn(iconSize, "animate-spin")}
-                    />
-                  ) : (
-                    <GooseIcons.Sparkles className={iconSize} />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t("formatCode")}</TooltipContent>
-            </Tooltip>
-          )}
+            {editable && onFormat && canFormat && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleFormatClick}
+                    disabled={isLoading}
+                    className={cn("h-6 w-6 p-0", chipClass)}
+                  >
+                    {isLoading ? (
+                      <GooseIcons.Loader2
+                        className={cn(iconSize, "animate-spin")}
+                      />
+                    ) : (
+                      <GooseIcons.Sparkles className={iconSize} />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("formatCode")}</TooltipContent>
+              </Tooltip>
+            )}
 
-          {!hasVisualPreview && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void handleCopyCode()}
-                  aria-label={copied ? t("codeCopied") : t("copyCode")}
-                  className={cn("h-6 w-6 p-0", chipClass)}
-                >
-                  {copied ? (
-                    <GooseIcons.Check
-                      className={cn(
-                        iconSize,
-                        "text-[var(--goose-color-success)]",
-                      )}
-                    />
-                  ) : (
-                    <GooseIcons.Copy className={iconSize} />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{copied ? t("copied") : t("copyCode")}</TooltipContent>
-            </Tooltip>
-          )}
+            {!hasVisualPreview && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void handleCopyCode()}
+                    aria-label={copied ? t("codeCopied") : t("copyCode")}
+                    className={cn("h-6 w-6 p-0", chipClass)}
+                  >
+                    {copied ? (
+                      <GooseIcons.Check
+                        className={cn(
+                          iconSize,
+                          "text-[var(--goose-color-success)]",
+                        )}
+                      />
+                    ) : (
+                      <GooseIcons.Copy className={iconSize} />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{copied ? t("copied") : t("copyCode")}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </SelectionToolbarSurface>
     </TooltipProvider>

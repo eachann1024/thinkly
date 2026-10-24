@@ -1,7 +1,6 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import {
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type RefObject,
@@ -17,9 +16,11 @@ import {
   isPointerInTableChromeReach,
   isPointerOverBlockContent,
   isPointerInRects,
-  tableSideMenuWidth,
 } from "./sideMenuHover";
-import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
+import { ownsBlockToolbar } from "./blockToolbarOwner";
+import { isPointerInToolbarCorridor } from "./blockHandleGeometry";
+import { useBlockHandleReference } from "./useBlockHandleReference";
+import { findBlockHandleContent } from "./blockHandleDom";
 
 const SIDEBAR_INTERACTION_SELECTOR = ".workspace-sidebar-pane, .rct-main-tree";
 export function useEditorSideMenuTarget(
@@ -27,85 +28,17 @@ export function useEditorSideMenuTarget(
   isDragging: boolean,
   menuRef: RefObject<HTMLDivElement | null>,
   pressedHandle: RefObject<boolean>,
+  lockedBlockId?: string,
 ) {
   const [hoveredBlockId, setHoveredBlockId] = useState<string>();
   const [sidebarInteracting, setSidebarInteracting] = useState(false);
   const [foldTick, setFoldTick] = useState(0);
   const dragBlockId = useRef(hoveredBlockId);
   if (!isDragging) dragBlockId.current = hoveredBlockId;
-  const blockId = isDragging ? dragBlockId.current : hoveredBlockId;
+  const blockId = lockedBlockId ?? (isDragging ? dragBlockId.current : hoveredBlockId);
   const block = blockId ? editor.getBlock(blockId) : undefined;
-  const [referencePos, setReferencePos] = useState<DOMRect | null>(null);
-  const [tablePlacement, setTablePlacement] = useState<{
-    top: number;
-    gap: number;
-    corridorTop: number;
-    menuReach: number;
-  }>();
-  const tableHold = useRef<{ rect: DOMRect; scale: number } | null>(null);
-  const corridor = useRef<{ rect: DOMRect | null; gap: number }>({
-    rect: null,
-    gap: 0,
-  });
-
-  // Anchor to the content under the pointer, not the editor's blank canvas.
-  useLayoutEffect(() => {
-    const element =
-      blockId &&
-      editor.prosemirrorView.dom.querySelector<HTMLElement>(
-        `[data-node-type="blockContainer"][data-id="${CSS.escape(blockId)}"]`,
-      );
-    if (!element) {
-      tableHold.current = null;
-      setReferencePos(null);
-      setTablePlacement(undefined);
-      return;
-    }
-    const content =
-      element.querySelector<HTMLElement>(":scope > .bn-block-content") ??
-      element;
-    const update = () => {
-      const rect = content.getBoundingClientRect();
-      const column = element.closest('[data-node-type="column"]');
-      const section = element.parentElement?.closest<HTMLElement>('.bn-block:has(> .bn-block-content[data-content-type="columnSection"])');
-      const left =
-        (
-          section ?? column?.firstElementChild ??
-          editor.prosemirrorView.dom.firstElementChild
-        )?.getBoundingClientRect().left ?? rect.left;
-      setReferencePos(new DOMRect(left, rect.top, rect.width, rect.height));
-      const table = content.querySelector<HTMLTableElement>(":scope > .tableWrapper table");
-      if (!table) {
-        tableHold.current = null;
-        setTablePlacement(undefined);
-        return;
-      }
-      const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;
-      const tableRect = table.getBoundingClientRect();
-      tableHold.current = { rect: tableRect, scale };
-      setTablePlacement({
-        // Keep block controls above the row grip, independent of sidebar width.
-        top: tableRect.top - 16 * scale - 4,
-        gap: SIDE_MENU_CONTENT_GAP,
-        corridorTop: tableRect.top - 32 * scale - 6,
-        menuReach: tableSideMenuWidth(scale),
-      });
-    };
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(content);
-    const sheet = content.closest(".workspace-main-sheet");
-    if (sheet) observer.observe(sheet);
-    window.addEventListener("resize", update);
-    window.addEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
-    document.addEventListener("scroll", update, true);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
-      window.removeEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
-      document.removeEventListener("scroll", update, true);
-    };
-  }, [editor, blockId, foldTick]);
+  const { referencePos, firstLineCenter, tablePlacement, tableHold } = useBlockHandleReference(editor, blockId, foldTick);
+  const corridor = useRef<{ rect: DOMRect | null; gap: number }>({ rect: null, gap: 0 });
 
   const firstBlockId = editor.document[0]?.id as string | undefined;
   const showHeadingToggle = isFoldableHeadingBlock(block, firstBlockId) &&
@@ -127,7 +60,6 @@ export function useEditorSideMenuTarget(
     rect: referencePos && corridorTop !== undefined
       ? new DOMRect(referencePos.left, corridorTop, referencePos.width, referencePos.bottom - corridorTop)
       : referencePos,
-    // 块把手用 translate(-100%) 画在间距左侧。走廊要盖住整枚 pill，否则移上去会先卸掉。
     gap: sideMenuGap + (tablePlacement?.menuReach ?? 0),
   };
   useEffect(() => {
@@ -145,7 +77,6 @@ export function useEditorSideMenuTarget(
       setSidebarInteracting(next);
     };
 
-    // 离开块后稍等再卸载，移到相邻块时把手能从旧位置滑过去。
     let leaveTimer: number | undefined;
     const hover = (id: string | undefined) => {
       window.clearTimeout(leaveTimer);
@@ -154,10 +85,13 @@ export function useEditorSideMenuTarget(
     };
     const handlePointerMove = (event: PointerEvent) => {
       updateSidebarInteracting(event.target);
-      if (pressedHandle.current) return;
+      if (pressedHandle.current || lockedBlockId) return;
       const target = event.target instanceof Element ? event.target : null;
       const keep = () => window.clearTimeout(leaveTimer);
       if (menuRef.current?.contains(target)) return keep();
+      const toolbar = target?.closest<HTMLElement>("[data-goose-image-toolbar], [data-goose-video-toolbar]");
+      const menu = target?.closest<HTMLElement>("[data-goose-block-handle-menu]");
+      if (ownsBlockToolbar(toolbar ?? null, editor.prosemirrorView.dom, blockId) || ownsBlockToolbar(menu ?? null, editor.prosemirrorView.dom, blockId)) return keep();
       if (
         isPointerInSideMenuCorridor(
           event.clientX,
@@ -168,9 +102,13 @@ export function useEditorSideMenuTarget(
         )
       )
         return keep();
+      if (blockId) {
+        const current = findBlockHandleContent(editor.prosemirrorView.dom, blockId);
+        const portal = Array.from(document.querySelectorAll<HTMLElement>(`[data-goose-image-toolbar][data-goose-block-id="${CSS.escape(blockId)}"], [data-goose-video-toolbar][data-goose-block-id="${CSS.escape(blockId)}"]`))
+          .find((candidate) => ownsBlockToolbar(candidate, editor.prosemirrorView.dom, blockId));
+        if (current && portal && isPointerInToolbarCorridor(current.getBoundingClientRect(), portal.getBoundingClientRect(), event.clientX, event.clientY)) return keep();
+      }
       const content = target?.closest<HTMLElement>(".bn-block-content");
-      // 表格的行/列把手是 portal，不在块内。指针停在把手上时保持当前块，
-      // 否则菜单先卸掉，行把手跟着一起消失。
       if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return keep();
       const hold = tableHold.current;
       if (
@@ -219,17 +157,20 @@ export function useEditorSideMenuTarget(
       document.removeEventListener("focusin", handleFocusChange, true);
       document.removeEventListener("focusout", handleFocusChange, true);
     };
-  }, [editor, menuRef, pressedHandle]);
+  }, [editor, menuRef, pressedHandle, lockedBlockId, blockId]);
+
+  useEffect(() => editor.onChange(() => setFoldTick((tick) => tick + 1)), [editor]);
 
   const shouldShow =
     Boolean(referencePos && block) &&
     editor.isEditable &&
     (!sidebarInteracting || isDragging) &&
-    (Boolean(hoveredBlockId) || isDragging);
+    (Boolean(hoveredBlockId || lockedBlockId) || isDragging);
 
   return {
     block,
     referencePos,
+    firstLineCenter,
     shouldShow,
     showHeadingToggle,
     headingExpanded,
