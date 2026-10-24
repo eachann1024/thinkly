@@ -1,5 +1,4 @@
 @layer base {
-  /* 窗口外壳不参与滚动；正文、目录和面板各自保留内部滚动。 */
   html, body, #root {
     width: 100%;
     height: 100%;
@@ -28,10 +27,8 @@
     margin-top: var(--goose-top-safe-area);
   }
 
-  /* Electron 桌面端：顶栏在文档流里（overlay 融合条），无额外安全区。 */
   html.is-electron {
     --goose-top-safe-area: 0px;
-    /* 正文区顶边距 pt-1 + 代码块工具栏 top:8px，与 YAML 元数据行对齐。 */
     --goose-toast-offset-top: calc(
       var(--electron-titlebar-height, 2.75rem) + 12px
     );
@@ -53,19 +50,15 @@
     color: inherit;
   }
 
-  /* 编辑器失焦时（如 AI 输入框打开），用装饰保留选区视觉 */
   .goose-fake-selection {
     background-color: rgba(127, 127, 127, 0.24);
   }
 
-  /* 编辑器缩放变量（通过 JS 动态设置，供编辑器内容模块统一跟随缩放） */
   :root {
     --editor-font-size: 17px;
     --editor-line-height: 1.75;
     --sidebar-font-size: 13px;
     --editor-scale: 1;
-    /* 编辑器上下文 UI 的统一缩放契约。浮层通过显式 opt-in 使用，
-       不影响设置、侧栏、Dialog、Toast 等全局界面。 */
     --editor-ui-scale: 1;
     --editor-module-sm-font-size: calc(14px * var(--editor-scale));
     --editor-module-xs-font-size: calc(12px * var(--editor-scale));
@@ -104,9 +97,6 @@
     --editor-file-icon-box-size: calc(40px * var(--editor-scale));
   }
 
-  /* 程序性焦点不绘制外框，键盘 focus-visible 保留独立可见提示。
-     [tabindex] 包含 -1：Radix DialogContent 等容器在打开和窗口重获焦点时
-     会被程序性聚焦，Electron 旧内核会按系统强调色画出贴窗口边缘的 outline。 */
   :where(
       a[href],
       button,
@@ -122,14 +112,12 @@
     --tw-ring-offset-shadow: 0 0 #0000 !important;
   }
 
-  /* Placeholder 也是操作提示，需达到与普通小号文本一致的可读性。 */
   input::placeholder,
   textarea::placeholder {
     color: var(--goose-text-placeholder) !important;
     opacity: 1;
   }
 
-  /* Prevent image dragging globally */
   img {
     -webkit-user-drag: none;
     user-drag: none;
@@ -137,7 +125,6 @@
     -webkit-user-select: none;
   }
 
-  /* 标签与编辑区域保留文本选择能力。 */
   label,
   input,
   textarea,
@@ -150,11 +137,6 @@
     -ms-user-select: text;
   }
 
-  /*
-   * 全局低入侵 overlay 滚动条：8px 槽位里 2px 透明边当空隙，
-   * 方形圆角 thumb 默认全透明，容器 hover 才淡入，thumb 自身 hover 再加深。
-   * 显式 scrollbar-width:none 的区域（标签栏、工具栏等）选择器更具体，不受影响。
-   */
   *::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -201,7 +183,6 @@
     }
   }
 
-  /* 本地文件夹目录列表：滚动条始终可见，提示还有更多子项 */
   .folder-home-list {
     scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
   }

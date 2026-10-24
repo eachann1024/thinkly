@@ -32,8 +32,9 @@ function PageHistoryBinder() {
   useHistoryRecorder({
     pageId: activePageId ?? null,
     workspaceId: page?.workspaceId ?? null,
-    content: page?.content,
+    content: page?.isFolder || page?.localReadState === "error" ? undefined : page?.content,
     signature: historyContentSig,
+    updatedAt: page?.updatedAt,
   });
   return null;
 }
@@ -50,7 +51,6 @@ export function WorkspacePage() {
   const editorRef = paneRegistry.focusedEditorRef;
   const scrollContainerRef = paneRegistry.focusedScrollRef;
   useEffect(() => {
-    // Electron 顶栏在文档流里，安全区为 0。
     const root = document.documentElement;
     root.classList.add("is-electron");
     if (isElectronRuntime() && /Win/i.test(navigator.platform)) {
@@ -65,7 +65,6 @@ export function WorkspacePage() {
     }
   }, []);
 
-  // Hooks
   useWorkspaceEvents({ activePageId, page });
   useWeeklyReflection();
   useLocalFolderWatch({ notebook, activePageId, page });

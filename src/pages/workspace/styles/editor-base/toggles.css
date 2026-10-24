@@ -1,4 +1,3 @@
-/* 标题区块折叠：隐藏 collapsed heading 后续兄弟块（不用 BlockNote toggle children）。 */
 .bn-editor .bn-block-outer[data-goose-section-hidden="true"],
 .bn-editor .bn-block-outer.goose-section-hidden,
 .bn-editor .goose-section-hidden {
@@ -12,9 +11,6 @@
 }
 
 
-/* 折叠箭头换成与侧栏一致的 Lucide ChevronRight（描边 1.75）：
-   BlockNote 内置的是 Material 实心箭头，与整体图标风格不符。
-   用 mask + currentColor 适配深浅模式；只旋转图标，避免矩形按钮旋转后盖住行首。 */
 .bn-editor .bn-toggle-button svg {
   display: none;
 }
@@ -64,7 +60,6 @@
   color: var(--goose-interactive-hover-fg);
 }
 
-/* 侧栏折叠按钮：默认 muted；hover/active/data-fold-hot 用高特异 + !important 压 portal 层叠 */
 .bn-side-menu button.goose-heading-fold-btn {
   color: hsl(var(--muted-foreground));
   background-color: transparent;
@@ -89,18 +84,6 @@ html body .bn-side-menu button.goose-heading-fold-btn[data-fold-hot="true"] span
   color: var(--goose-interactive-hover-fg) !important;
 }
 
-/* 折叠标题整行虚线边框：
-   - 用 outline 不占地；左右 8px 外扩在 block-background.css 对所有标题
-     统一做，折叠只加虚线，文字起点不跳。
-   - outline-offset -1px 让虚线贴在背景条边缘内侧，圆角跟随 4px；
-   - BlockNote 标题默认 padding-top:18px 制造块间距，outline 会把这段空白
-     一起框进去；折叠态把 15px 挪到透明 margin-top，虚线只贴文字行。
-     无背景标题原本没有这条补偿，所以折叠态也要补上。
-   - 不用 color-mix：当前内核解析失败会让整条 outline 简写作废，
-     颜色一律写死 rgba（取值对应 --goose-interactive-selected-fg /
-     --goose-editor-highlight-purple-text 的半透明实色）；
-   - 选择器用后代链不用 > 子代链，容忍 block-outer 与 block-content
-     之间多一层 wrapper。 */
 .bn-editor
   .bn-block-outer[data-goose-heading-collapsed="true"]
   .bn-block-content[data-content-type="heading"] {
@@ -114,7 +97,6 @@ html body .bn-side-menu button.goose-heading-fold-btn[data-fold-hot="true"] span
   border-radius: 4px;
 }
 
-/* 浅紫背景条：虚线跟标题紫同族（--goose-editor-highlight-purple-text 实色半透明），50% 透明度不抢文字。 */
 .bn-editor
   .bn-block-outer[data-goose-heading-collapsed="true"]
   .bn-block-content[data-content-type="heading"][data-background-color="purple"] {
@@ -135,7 +117,6 @@ html body .bn-side-menu button.goose-heading-fold-btn[data-fold-hot="true"] span
   outline-color: rgba(208, 186, 248, 0.5) !important;
 }
 
-/* 折叠态侧栏按钮始终呈选中样式；展开态保持默认、hover 才高亮。 */
 html body .bn-side-menu button.goose-heading-fold-btn[aria-expanded="false"],
 html body .bn-side-menu button.goose-heading-fold-btn[aria-expanded="false"]:hover,
 html body .bn-side-menu button.goose-heading-fold-btn[aria-expanded="false"]:active {
@@ -150,7 +131,6 @@ html body .bn-side-menu button.goose-heading-fold-btn[aria-expanded="false"]:hov
   color: var(--goose-interactive-selected-fg) !important;
 }
 
-/* 普通折叠列表：箭头钉在首行 marker 位；子块跟标题文字对齐，不画竖线。 */
 .bn-block-content[data-content-type="toggleListItem"]
   > div
   > .bn-toggle-wrapper {

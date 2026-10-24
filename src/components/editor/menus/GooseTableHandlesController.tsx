@@ -12,8 +12,8 @@ import { GooseTableExtendButton, GooseTableHandle } from "./GooseTableHandle";
 import { tableRowUnderPointer } from "@/components/editor/extensions/tableCellSelectionDom";
 import { isPointerInTableChromeReach } from "@/components/editor/core/sideMenuHover";
 import { tableHandleRect, releaseTableChrome } from "./tableHandleGeometry";
+import { useBlockToolbarState } from "@/components/editor/core/blockToolbarSequence";
 
-/** 行/列把手要画出内容列。编辑器表面是 overflow:clip，挂在里面会被裁掉。 */
 const TABLE_CHROME_PORTAL =
   typeof document === "undefined" ? null : document.body;
 
@@ -32,7 +32,6 @@ if (typeof document !== "undefined") {
   }, { passive: true });
 }
 
-/** 表格控件显示期间跟随指针。同一帧内多次移动只刷新一次。 */
 function usePointerFollow(active: boolean) {
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -45,7 +44,6 @@ function usePointerFollow(active: boolean) {
   }, [active]);
 }
 
-/** 指针在表内，或正停在已经弹出的行/列把手上。 */
 function pointerOwnsTable(table: HTMLElement): boolean {
   if (pointer.x < 0) return false;
   const bounds = table.getBoundingClientRect();
@@ -76,11 +74,13 @@ function TableChrome({
   stretch?: "width" | "height";
   children: ReactNode;
 }) {
+  const [positionedElement, setPositionedElement] = useState<Element>();
+  const latestElementRef = useRef(element);
+  latestElementRef.current = element;
   const reference = useMemo(
     () => ({ element, ...(getRect ? { getBoundingClientRect: getRect } : {}) }),
     [element, getRect],
   );
-  // GenericPopover already installs autoUpdate (scroll, resize, element resize and layout shift).
   const onMount = useCallback(
     (_reference: unknown, _floating: HTMLElement, update: () => void) => {
       window.addEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, update);
@@ -103,7 +103,6 @@ function TableChrome({
               const span = placement === "top" ? rects.reference.width : rects.reference.height;
               elements.floating.style.setProperty("--goose-table-chrome-span", `${span}px`);
               if (placement !== "left") return;
-              // Floating UI rects are offset-parent relative; gutter space is viewport relative.
               const left = (getRect?.() ?? element.getBoundingClientRect()).left;
               elements.floating.style.setProperty(
                 "--goose-table-handle-max-width",
@@ -115,30 +114,44 @@ function TableChrome({
             ? [
                 size({
                   apply({ rects, elements }) {
-                    // Do not substitute availableWidth/Height: those describe viewport clipping, not the table.
                     elements.floating.style[stretch] =
                       `${rects.reference[stretch]}px`;
                   },
                 }),
               ]
             : []),
+          {
+            name: "gooseTablePositioned",
+            fn({ elements }) {
+              const referenceElement = elements.reference instanceof Element
+                ? elements.reference : elements.reference.contextElement;
+              // This final middleware and Floating UI's coordinate commit finish
+              // in the same microtask chain, before the browser can paint.
+              if (referenceElement === latestElementRef.current) {
+                setPositionedElement(referenceElement);
+              }
+              return {};
+            },
+          },
         ],
       }}
       focusManagerProps={{ disabled: true }}
-      useTransitionStylesProps={{ duration: 0 }}
+      useTransitionStylesProps={{ duration: 0, initial: { opacity: 1 }, open: { opacity: 1 } }}
       portalElement={TABLE_CHROME_PORTAL}
-      elementProps={{ className: `goose-table-chrome-${placement}`, style: { zIndex: 10 } }}
+      elementProps={{ className: `goose-table-chrome-${placement}`, style: {
+        zIndex: 10,
+        visibility: positionedElement === element ? "visible" : "hidden",
+      } }}
     >
       {children}
     </GenericPopover>
   );
 }
 
-/** Project adapter around BlockNote's plugin, not a second table state/coordinate system. */
 export function GooseTableHandlesController() {
   const editor = useBlockNoteEditor<any, any, any>();
   const state = useExtensionState(TableHandlesExtension);
-  // BlockNote 在指针碰到表外标题时会把 show 关掉。把手还在边框外时继续跟指针，避免方块先消失。
+  const toolbarState = useBlockToolbarState(editor, state?.block?.id);
   const sticky = useRef(false);
   const [only, setOnly] = useState<Chrome>();
   usePointerFollow(!only && (Boolean(state?.show) || sticky.current));
@@ -179,9 +192,11 @@ export function GooseTableHandlesController() {
     sticky.current = false;
     return null;
   }
-  // 移出表格后 BlockNote 仍保留上次的 show，碰到上方标题时又会把 show 关掉。
-  // 指针还在表上、缝里或把手上就继续画。
   const owns = pointerOwnsTable(table);
+  if (toolbarState.suppressed || (!toolbarState.ready && !only && !state.draggingState)) {
+    sticky.current = false;
+    return null;
+  }
   if (!only && !state.draggingState && !owns) {
     sticky.current = false;
     return null;
@@ -195,7 +210,6 @@ export function GooseTableHandlesController() {
       ? undefined
       : table.rows[rowIndex]?.cells[colIndex];
   const visible = (key: Chrome) => !only || only === key;
-  // 列把手仍跟指针下的格子。行把手跟整行：行间边框缝归到最近一行。
   const rowRect = () => {
     const tableRect = table.getBoundingClientRect();
     const dragging = state.draggingState?.draggedCellOrientation === "row";

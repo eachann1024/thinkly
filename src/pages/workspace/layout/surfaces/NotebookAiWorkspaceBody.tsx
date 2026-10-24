@@ -20,7 +20,7 @@ import { isElectronChrome } from "./workspaceLayoutConfig";
 import { GuardedNotebookAiPanel } from "./GuardedNotebookAiPanel";
 import { NotebookEditorSplitColumn } from "./NotebookEditorSplitColumn";
 
-export /** 主内容区 + 条件挂载的 AI 面板 UI（运行时在外层 Provider）。 */
+export
 function NotebookAiWorkspaceBody({
   showFullscreenAi,
   aiNotebookId,
@@ -78,10 +78,8 @@ function NotebookAiWorkspaceBody({
 
   return (
     <>
-      {/*
-              全屏 AI 叠在页头下方，不重挂页头。正文 invisible/inert 推迟到下一帧，
-              避免点击帧对 BlockNote 大树做 visibility 强制布局。
-            */}
+      {
+}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {isWelcomeTab ? (
           <>
@@ -119,14 +117,14 @@ function NotebookAiWorkspaceBody({
           </>
         ) : activePageId && page && inHistoryMode ? (
           <>
-            <HistoryToolbar />
+            {!isElectronChrome && <HistoryToolbar />}
             <div className="workspace-editor-surface relative ml-0 mt-0 flex-1 min-h-0 overflow-hidden">
               <div
                 className={cn(
                   "h-full overflow-y-auto page-scroll-container bg-[hsl(var(--goose-editor-bg))]",
                 )}
               >
-                <div className="flex min-h-full flex-col px-14 pt-0">
+                <div className="flex h-full min-h-full flex-col px-14 pt-0">
                   <HistoryReader />
                 </div>
               </div>
@@ -134,7 +132,6 @@ function NotebookAiWorkspaceBody({
           </>
         ) : activePageId && page && !hideFolderHome ? (
           page.isFolder && isLocalFolderPage ? (
-            /* Electron 本地文件夹目录页：主区渲染 FolderHomePage，不挂编辑器 */
             <>
               <div className="workspace-editor-surface workspace-content-columns relative ml-0 mt-0 flex min-h-0 flex-1 flex-row gap-2 overflow-hidden">
                 <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] bg-[hsl(var(--goose-editor-bg))]">

@@ -25,7 +25,6 @@ const t = createTranslator(messages);
 
 type MentionRange = { from: number; to: number };
 
-/** 活动菜单的 query 可能包含 + / @；替换实际触发范围，不能重新猜最后一个符号。 */
 export function getPageMentionTriggerRange(editor: BlockNoteEditor<any, any, any>): MentionRange | null {
   const { selection } = editor.prosemirrorState;
   if (!selection.empty || !selection.$from.parent.isTextblock) return null;
@@ -88,6 +87,7 @@ export function insertPageMentionFromMenu(
 export function getPageMentionMenuItems(
   editor: BlockNoteEditor<any, any, any>,
   items: AiReferenceSuggestionItem[],
+  resolveItem?: (item: AiReferenceSuggestionItem) => AiReferenceSuggestionItem | null,
 ): SlashMenuItem[] {
   if (items.length === 0) {
     return [
@@ -103,7 +103,10 @@ export function getPageMentionMenuItems(
   return items.map((item) => ({
     title: item.title,
     description: item.description,
-    icon: <FileText size={18} />,
-    onItemClick: () => insertPageMentionFromMenu(editor, item),
+    icon: <FileText size={16} />,
+    onItemClick: () => {
+      const live = resolveItem ? resolveItem(item) : item;
+      if (live) insertPageMentionFromMenu(editor, live);
+    },
   }));
 }

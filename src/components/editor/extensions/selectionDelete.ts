@@ -7,17 +7,21 @@ import {
   isOvershootingSingleTextblockSelection, hitSelectionContainsHardBreak,
 } from "./crossBlockSelection";
 import { isBlockNodeSelection, selectedBlockRoots } from "./blockSelectionModel";
+import { isMediaNodeSelection, MEDIA_KEYBOARD_DELETE_META } from "./mediaBlockDelete";
 
 type DeletionRange = { from: number; to: number };
 
-/** 结构删除和文字删除在同一事务内；normalized 首 H1 只清内容，raw 无此限制。 */
 export function safeSelectionDeletion(state: EditorState): Transaction | null {
   const { selection } = state;
   if (selection.empty || selection instanceof CellSelection) return null;
   const title = getProtectedTitle(state);
   const ranges: DeletionRange[] = [];
   if (isBlockNodeSelection(state)) {
-    let roots = selectedBlockRoots(state);
+    let roots = selection instanceof NodeSelection
+      ? selection.node.type.name === "blockContainer"
+        ? [{ pos: selection.from, node: selection.node }]
+        : []
+      : selectedBlockRoots(state);
     if (roots.length === 0 && selection instanceof NodeSelection) {
       const $from = selection.$from;
       for (let depth = $from.depth; depth > 0; depth -= 1) {
@@ -50,7 +54,6 @@ export function safeSelectionDeletion(state: EditorState): Transaction | null {
     for (const hit of hits) {
       const container = containers.get(hit.id);
       const fullySelected = isBlockContentFullySelected(hit);
-      // 父块的 inline 全选不代表其子树全选；保留任何未被覆盖的后代内容。
       let descendantsSelected = true;
       container?.node.descendants((node) => {
         if (node.type.name !== "blockContainer") return;
@@ -75,6 +78,7 @@ export function safeSelectionDeletion(state: EditorState): Transaction | null {
   }
   roots.sort((a, b) => b.from - a.from);
   const tr = state.tr;
+  if (isMediaNodeSelection(selection)) tr.setMeta(MEDIA_KEYBOARD_DELETE_META, true);
   for (const range of roots) tr.delete(range.from, range.to);
   const caret = Math.min(tr.mapping.map(roots[roots.length - 1].from), tr.doc.content.size);
   tr.setSelection(Selection.near(tr.doc.resolve(caret)));

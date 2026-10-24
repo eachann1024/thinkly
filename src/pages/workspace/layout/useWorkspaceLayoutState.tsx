@@ -42,7 +42,6 @@ export function useWorkspaceLayoutState({
         getPage: s.getPage,
         isLocked: Boolean(p?.isLocked),
         isTrashed: Boolean(p?.trashedAt),
-        // 订进 shallow，否则改字体/图标时本组件不重渲染，顶栏拿到的仍是旧 page
         pageFontFamily: p?.fontFamily ?? "default",
         pageIcon: p?.icon ?? "",
       };
@@ -64,6 +63,17 @@ export function useWorkspaceLayoutState({
   const openNewTabHandler = () => {
     openNewTab();
   };
+
+  const { activeNotebookId, notebooks } = useNotebooks(
+    useShallow((s) => ({
+      activeNotebookId: s.activeNotebookId,
+      notebooks: s.notebooks,
+    })),
+  );
+
+  const page = activePageId ? getPage(activePageId) : undefined;
+  const pageNotebook = page ? notebooks[page.workspaceId] : undefined;
+  const aiNotebookId = page ? (pageNotebook?.id ?? null) : activeNotebookId;
 
   const aiEnabled = useSettings((s) => s.ai.enabled);
 
@@ -90,7 +100,7 @@ export function useWorkspaceLayoutState({
   const aiLayoutMode = forceCollapseLeft && rightExpandOverride
     ? "fullscreen" as const : preferredAiLayoutMode;
   const aiFullscreen = isFullscreenAiLayout(aiLayoutMode);
-  const userSideAiPanel = aiEnabled && aiPanelOpen && !aiFullscreen;
+  const userSideAiPanel = aiEnabled && Boolean(aiNotebookId) && aiPanelOpen && !aiFullscreen;
 
   const sideAiRequested = isEffectiveRightSidePanelOpen(
     userSideAiPanel,
@@ -108,14 +118,7 @@ export function useWorkspaceLayoutState({
     resyncSidebarAiSqueeze({ keepSuspend: openedByUser });
   }, [sideAiRequested]);
 
-  const showFullscreenAi = aiEnabled && aiPanelOpen && aiFullscreen;
-
-  const { activeNotebookId, notebooks } = useNotebooks(
-    useShallow((s) => ({
-      activeNotebookId: s.activeNotebookId,
-      notebooks: s.notebooks,
-    })),
-  );
+  const showFullscreenAi = aiEnabled && Boolean(aiNotebookId) && aiPanelOpen && aiFullscreen;
 
   const singleTabModeSetting = useSettings((s) => s.singleTabMode);
 
@@ -136,23 +139,14 @@ export function useWorkspaceLayoutState({
     isLocalFolderRepo &&
     dragIntent === "text-file";
 
-  const page = activePageId ? getPage(activePageId) : undefined;
 
-  const pageNotebook = page ? notebooks[page.workspaceId] : undefined;
-
-  // Electron：订阅 activePage 标题，防抖同步系统窗口 title（Electron 构建内部 no-op）。
   useDesktopWindowTitleSync();
 
-  // 以页面本身是否带本地路径为准（比 notebook.source 更贴合「正文无 H1 标题块」）
   const isLocalFolderPage =
     Boolean(page?.localFilePath) || pageNotebook?.source === "local-folder";
 
-  // Notebook AI 已具备本地文件读取保护、写入失败回滚和本地页面创建通道，
-  // 不应再把本地文件夹笔记本静默排除。设置页开启后，所有笔记本统一显示入口。
-  const aiAvailableForNotebook = aiEnabled;
+  const aiAvailableForNotebook = aiEnabled && Boolean(aiNotebookId);
 
-  // 全屏 AI 优先用当前笔记本；本地文件夹切页竞态下 activeNotebookId 可能短暂为空，回退到页面所属本。
-  const aiNotebookId = activeNotebookId ?? page?.workspaceId ?? null;
 
   const aiPanelVisible = (showSideAiPanel || showFullscreenAi) && Boolean(aiNotebookId);
   useEffect(() => {

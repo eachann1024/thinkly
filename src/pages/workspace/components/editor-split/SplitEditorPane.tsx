@@ -126,7 +126,7 @@ export function SplitEditorPane({
         <SplitPaneHeader tabId={tabId} leafId={leaf.id} title={title} page={page} />
       ) : null}
       <EditorHostBridge page={page} isEditorFullWidth>
-        <div className="page-layout-body flex min-h-0 min-w-0 flex-1">
+        <div data-editor-overlay-host className="page-layout-body relative flex min-h-0 min-w-0 flex-1">
         <div
           ref={setScrollEl}
           tabIndex={-1}

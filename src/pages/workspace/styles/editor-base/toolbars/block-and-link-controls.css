@@ -1,4 +1,3 @@
-/* 图片、视频等块级浮层共用同一密度；外层 goose-editor-context-ui 负责等比缩放。 */
 .goose-block-toolbar-surface {
   display: flex;
   align-items: center;
@@ -40,7 +39,6 @@
   opacity: 0.8;
 }
 
-/* 链接悬浮工具栏：与选区浮动格式工具栏同一套密度，随 --editor-ui-scale 缩放。 */
 [data-goose-link-toolbar] {
   display: flex;
   align-items: center;
@@ -108,26 +106,18 @@
   }
 }
 
-/* 图片按钮原组件只画 focus 背景；补静态轮廓保证键盘焦点清晰，不引入图标动效。 */
 [data-goose-image-toolbar]
   button:not(:disabled):not([aria-disabled="true"]):focus-visible {
   background: var(--goose-interactive-hover);
   color: var(--goose-interactive-hover-fg);
 }
 
-/* 节点选中仍保留编辑器行为与工具栏，但不绘制 BlockNote / ProseMirror
-   默认的蓝色外框。该共享样式同时覆盖主窗与速记小窗。 */
 .bn-editor .ProseMirror-selectednode,
 .bn-editor .bn-block-content.ProseMirror-selectednode > *,
 .bn-editor .ProseMirror-selectednode > .bn-block-content > * {
   outline: none !important;
 }
 
-/* 极简工作区把内部笔记的首个 H1 提到顶栏编辑，正文从标题下方直接开始。
-   本地文件正文没有标题块，不能隐藏它的首段。
-   注意：EditorContextMenu 内还有一层 workspace-editor-surface，没有 data-local-file-page；
-   若按内层 surface 判断，会把本地空页唯一段落也 display:none，主区看起来全黑。
-   因此以 main 上的 data-local-file-page 为准。 */
 .workspace-main-sheet[data-single-tab-mode="true"]:not(
     [data-local-file-page="true"]
   )

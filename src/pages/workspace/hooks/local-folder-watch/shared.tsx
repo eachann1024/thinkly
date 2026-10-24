@@ -63,7 +63,6 @@ export async function readDiskContent(
   try {
     return (await readSharedMarkdown(fs, filePath)).content;
   } catch {
-    // Failed reads cannot establish a disk baseline.
   }
   return null;
 }
@@ -80,10 +79,8 @@ export async function statDisk(
   }
 }
 
-export /**
- * 同一文件冲突 toast 去重：记录当前正在显示的冲突 toast id（key = filePath）。
- * toast 关闭后自动清除，确保同文件不叠弹。
- */
+export
+
 const activeConflictToasts = new Map<string, string | number>();
 
 export function showConflictToast(
@@ -92,7 +89,6 @@ export function showConflictToast(
   onKeepMine: () => void,
   onLoadDisk: () => void,
 ) {
-  // 去重：同文件已有 toast 则不重复弹
   if (activeConflictToasts.has(filePath)) return;
 
   const fileName = filePath.replace(/^.*[\\/]/, "");
@@ -124,13 +120,9 @@ export function showConflictToast(
   activeConflictToasts.set(filePath, toastId);
 }
 
-export /** 冲突 toast 两个按钮的标准行为（watch change / pre-save / 新鲜度检查共用）。 */
+export
 function conflictHandlers(filePath: string, pageId: string) {
   return {
-    // 保留我的编辑：以磁盘当前内容为已知基线（内存编辑仍 dirty），再 force
-    // 落盘覆盖。禁止把快照写成 ""——空快照会让之后任何磁盘内容都判成外部修改。
-    // 读盘失败则 deleteLocalMdSnapshot：无快照时 isLocalMdUnchanged 为 false
-    //（不会跳过写盘），isDiskContentMatchingSnapshot 为 true（不误报冲突）。
     onKeepMine: () => {
       void (async () => {
         try {
@@ -144,7 +136,6 @@ function conflictHandlers(filePath: string, pageId: string) {
               const stat = await statDisk(filePath);
               if (stat) updateSnapshotStat(filePath, stat);
             } catch {
-              // 指纹失败不影响强制落盘
             }
           } else {
             deleteLocalMdSnapshot(filePath);
@@ -165,7 +156,6 @@ function conflictHandlers(filePath: string, pageId: string) {
           });
       })();
     },
-    // 加载磁盘版本：丢弃本地编辑，重读磁盘
     onLoadDisk: () => {
       discardPendingLocalSave(pageId);
       usePages.setState((s) => ({
@@ -176,11 +166,8 @@ function conflictHandlers(filePath: string, pageId: string) {
   };
 }
 
-export /**
- * 主动新鲜度检查：watch 不在场期间（Electron 窗口隐藏、查看其他笔记本、插件退出）
- * 的外部修改收不到 change 事件，在切页 / 窗口恢复可见时主动读盘 diff 兜底。
- * 没变 → 无操作；变了且页面干净且无近期交互 → 静默重载；变了且 dirty / 刚聚焦编辑器 → 冲突提示。
- */
+export
+
 async function checkLocalPageFreshness(pageId: string): Promise<void> {
   const page = usePages.getState().pages[pageId];
   const filePath = page?.localFilePath;

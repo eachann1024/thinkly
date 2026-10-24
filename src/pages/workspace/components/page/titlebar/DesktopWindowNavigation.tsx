@@ -32,12 +32,15 @@ export const actionButtonClass =
 export function DesktopWindowNavigation({
   canGoBack, canGoForward, onBeforeActivateTab, onToggleSidebar,
   toggleSidebarCollapsed, sidebarCollapsed, toggleSidebarShortcutLabel,
+  onBack, backLabel,
 }: {
   canGoBack: boolean; canGoForward: boolean; onBeforeActivateTab?: () => void;
   onToggleSidebar?: () => void; toggleSidebarCollapsed: () => void;
   sidebarCollapsed: boolean; toggleSidebarShortcutLabel: string;
+  onBack?: () => void; backLabel?: string;
 }) {
   useLocale();
+  const backText = backLabel ?? uiText("back");
   return (
     <div
       className="electron-window-controls flex shrink-0 items-center gap-1"
@@ -45,12 +48,12 @@ export function DesktopWindowNavigation({
     >
       <TooltipProvider delayDuration={600}>
         {[
-          { label: uiText("back"), Icon: GooseIcons.ArrowLeft, disabled: !canGoBack, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goBackTabHistory(); } },
-          { label: uiText("forward"), Icon: GooseIcons.ArrowRight, disabled: !canGoForward, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goForwardTabHistory(); } },
-        ].map(({ label, Icon, disabled, onClick }) => (
+          { label: backText, Icon: GooseIcons.ArrowLeft, disabled: !canGoBack, exit: Boolean(onBack), onClick: () => { if (onBack) { onBack(); return; } onBeforeActivateTab?.(); useTabs.getState().goBackTabHistory(); } },
+          { label: uiText("forward"), Icon: GooseIcons.ArrowRight, disabled: !canGoForward, exit: false, onClick: () => { onBeforeActivateTab?.(); useTabs.getState().goForwardTabHistory(); } },
+        ].map(({ label, Icon, disabled, exit, onClick }) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
-              <IconButton size="icon" tone="muted" type="button" className={cn(actionButtonClass, "electron-history-button disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
+              <IconButton size="icon" tone="muted" type="button" className={cn(actionButtonClass, exit ? "electron-history-exit" : "electron-history-button", "disabled:pointer-events-none disabled:text-disabled")} aria-label={label} disabled={disabled} onClick={onClick}>
                 <Icon className="h-4 w-4" />
               </IconButton>
             </TooltipTrigger>

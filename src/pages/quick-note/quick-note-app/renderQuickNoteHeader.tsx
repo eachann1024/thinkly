@@ -90,7 +90,6 @@ export function renderQuickNoteHeader(
           onChange={(event) => editRename(rename.id, event.target.value)}
           onBlur={() => finishRename(true, rename.id)}
           onKeyDown={(event) => {
-            // 中文输入法按 Enter 确认候选词时不能提前提交；keyCode 229 兼容旧 Chromium。
             if (
               isImeKeyboardEvent(event.nativeEvent) ||
               isImeKeyboardEvent(event)
@@ -126,7 +125,7 @@ export function renderQuickNoteHeader(
           </span>
         </div>
 
-        {/* 绝对居中，避免左右内容宽度差导致视觉偏移 */}
+        { }
         <div className="quicknote-slot-switcher-positioner">
           <div className="quicknote-slot-switcher-interactive">
             <QuickNoteSlotSwitcher

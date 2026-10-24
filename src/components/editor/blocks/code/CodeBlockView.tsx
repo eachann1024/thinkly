@@ -44,7 +44,7 @@ export function CodeBlockView(props: CodeBlockViewProps) {
     >
       <CodeBlockHeader {...props} />
 
-      {/* Code content */}
+      { }
       {(!collapsed || isVisualBlock) && (
         <div className="goose-code-content-wrapper">
           {showLineNumbers && shouldShowSource && (

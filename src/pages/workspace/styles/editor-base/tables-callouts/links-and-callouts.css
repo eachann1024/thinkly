@@ -1,4 +1,3 @@
-/* ===== 链接：正文色+下划线；按住 Cmd/Ctrl 再悬停才进可打开态 ===== */
 .workspace-editor-surface a[data-inline-content-type="link"],
 .quicknote-editor-surface a[data-inline-content-type="link"] {
   color: inherit;
@@ -53,9 +52,6 @@
   width: 100%;
 }
 
-/* ===== 标注（callout）图标与首行文字垂直居中 =====
-   与 checklist 同原理：图标槽高度 = 1.5em（一行行高），槽内 flex 居中；
-   多行时槽仍只占首行高度，图标对齐第一行。 */
 .workspace-editor-surface [data-callout="true"],
 .quicknote-editor-surface [data-callout="true"] {
   align-items: flex-start;

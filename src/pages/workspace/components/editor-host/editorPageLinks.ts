@@ -34,7 +34,6 @@ import { flushEditorContent } from "@/stores/pages/actions/flushEditor";
 
 const pendingCreates = new Map<string, Promise<Awaited<ReturnType<NonNullable<EditorPageContext["createPageMentionTarget"]>>>>>();
 
-/** 复用现有本地创建事务：命名冲突由 record API 分配后缀，失败不会留空文件。 */
 async function createMentionTarget(sourceId: string, rawTitle: string) {
   const title = normalizeNewFileName(rawTitle);
   const source = usePages.getState().pages[sourceId];
@@ -63,13 +62,19 @@ export function createEditorPageLinkCapabilities(source: Page): Pick<EditorPageC
   "resolvePageMention" | "subscribePageMetadata" | "createPageMentionTarget"
 > {
   return {
-    resolvePageMention: (props) => {
+    resolvePageMention: (props, options) => {
       const resolved = resolvePageMentionNavigation(props.pageId, usePages.getState().pages,
         props.workspaceId || source.workspaceId, props.wikiTarget);
       if (!resolved.ok) return null;
+      const title = getPageTitle(resolved.page);
+      const notebookName = useNotebooks.getState().notebooks[resolved.page.workspaceId]?.name || "";
+      if (!options?.includeReference) return { title, notebookName };
+      const attrs = buildAiFileReferenceAttrs(resolved.page,
+        useNotebooks.getState().notebooks, usePages.getState().pages);
       return {
-        title: getPageTitle(resolved.page),
-        notebookName: useNotebooks.getState().notebooks[resolved.page.workspaceId]?.name || "",
+        title,
+        notebookName,
+        reference: { ...attrs, title: attrs.titleSnapshot, description: attrs.locationSnapshot || "" },
       };
     },
     subscribePageMetadata: (listener) => {

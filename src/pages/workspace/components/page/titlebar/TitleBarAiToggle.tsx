@@ -21,7 +21,6 @@ import { useAiPanelVisibility } from "@/stores/useAiPanelVisibility";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useSettings } from "@/stores/useSettings";
 
-/** 侧屏 AI 模式下的标题栏 AI 开关；全屏模式入口在左侧图标栏，这里不渲染。 */
 export function TitleBarAiToggle({
   pressed,
   className,
@@ -33,7 +32,6 @@ export function TitleBarAiToggle({
   const aiEnabled = useSettings((s) => s.ai.enabled);
   const shortcut = useSettings((s) => s.appShortcuts.toggleAIPanel);
   const aiPhase = useAiStatus((s) => s.phase);
-  // 只读布局层写入的有效布局模式，不在这里另起 AI 面板实例。
   const aiFullscreen = useAiPanelVisibility((s) => s.fullscreen);
   if (!aiEnabled || aiFullscreen) return null;
   const label = pressed ? uiText("closeAi") : uiText("openAi");
@@ -52,8 +50,9 @@ export function TitleBarAiToggle({
             }}
             aria-label={label}
             aria-pressed={pressed}
+            active={pressed}
           >
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-4 w-4" weight={pressed ? "fill" : "regular"} />
           </IconButton>
         </TooltipTrigger>
         <TooltipContent side="bottom">

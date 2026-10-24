@@ -16,7 +16,6 @@ import "./search-window.css";
 
 const SETTINGS_KEY = "thinkly-settings";
 
-/** 主窗不在时，只改共享设置里的「搜索显示最近」字段，避免用本窗旧快照覆盖整份设置。 */
 function patchPersistedShowRecent(enabled: boolean): void {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
@@ -26,11 +25,9 @@ function patchPersistedShowRecent(enabled: boolean): void {
     parsed.state.showRecentInSearch = enabled;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
   } catch {
-    // 写失败时本窗内存已更新，下次唤出再跟主窗对齐。
   }
 }
 
-/** 只采纳主窗已经恢复完成的快照。拉取本身不在这里等待。 */
 function applyWorkspaceAISnapshot(raw: unknown): void {
   const snapshot = parseSearchAISettings(raw);
   const current = parseSearchAISettings(useSettings.getState().ai);
@@ -38,7 +35,6 @@ function applyWorkspaceAISnapshot(raw: unknown): void {
   useSettings.setState({ ai: normalizeAISettings(snapshot) });
 }
 
-/** 与本地恢复并行发起。恢复结束时若缓存已到就立刻套用，否则等它晚到，不挡住窗口显示。 */
 function pullWorkspaceAISettings(): { settled: boolean; value: unknown; done: Promise<unknown> } {
   const slot: { settled: boolean; value: unknown; done: Promise<unknown> } = {
     settled: false,
@@ -62,17 +58,12 @@ function pullWorkspaceAISettings(): { settled: boolean; value: unknown; done: Pr
   return slot;
 }
 
-/** 每次唤出重开会话：拿最新的当前笔记本作起点，并以新的来源引用触发一次后台重扫。 */
 function reopenSession(): void {
   const session = useSearchSession.getState();
   session.closeSearch();
   session.openSearch(useNotebooks.getState().activeNotebookId, null, 0);
 }
 
-/**
- * 浮动搜索窗根组件：复用应用内搜索面板，会话常开（窗口自身负责显隐）。
- * 打开结果、续聊、设置与分屏交给主窗；Esc / 关闭只收起窗口。
- */
 export function SearchWindowApp() {
   useLocale();
   useCommandSearchIndexWarmup();
@@ -96,7 +87,6 @@ export function SearchWindowApp() {
       reopenSession();
       setFolderSource({ ...readOnlySearchFolderSource });
     };
-    // 首次挂载即打开会话再通知主进程显示；隐藏窗口不跑 rAF，这里不能等下一帧。
     void refresh().then(() => {
       if (!disposed) void api?.searchWindowReady?.();
     });
@@ -104,7 +94,6 @@ export function SearchWindowApp() {
     const unsubscribeAI = api?.onWorkspaceAISettings?.((settings) => {
       if (!disposed) applyWorkspaceAISnapshot(settings);
     });
-    // 焦点不在面板内（如点到空白处）时 Esc 仍收起窗口；面板内的 Esc 由面板自己处理。
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
       if (event.target === document.body || event.target === document.documentElement) void api?.hideSearchWindow?.();
@@ -150,7 +139,7 @@ export function SearchWindowApp() {
         onClose={close}
         folderSource={folderSource}
       />
-      {/* 浮窗尺寸小：与速记小窗一致，居中只显示一条。 */}
+      { }
       <Toaster placement="center" />
     </div>
   );

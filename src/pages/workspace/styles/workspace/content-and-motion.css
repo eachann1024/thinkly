@@ -5,7 +5,6 @@
   box-shadow: none;
 }
 
-/* 页面、文件夹与空白标签由主内容面统一裁切，避免接缝露出第二组内圆角。 */
 .workspace-shell .workspace-content-columns {
   background: var(--workspace-main-surface);
 }
@@ -75,7 +74,6 @@
   will-change: transform, opacity;
 }
 
-/* ── AI Workspace 流式加载动画 ── */
 
 @keyframes ai-workspace-stream-dot {
   0%,
@@ -126,14 +124,11 @@
 
 
 
-/* 外壳与顶栏同色；文件导航和编辑正文各自拥有独立表面。 */
 html.is-electron .workspace-shell,
 html.is-electron body {
   background: var(--goose-shell-surface);
 }
 
-/* Win/Linux frameless：右侧自定义窗控贴齐顶栏高度（Linux 缺这条时按钮
-   固定 h-8 且顶部对齐，与顶栏其他内容不水平）。 */
 html.is-electron.is-win .electron-win-chrome-controls,
 html.is-electron.os-linux .electron-win-chrome-controls {
   height: var(--electron-titlebar-height, 2.75rem);

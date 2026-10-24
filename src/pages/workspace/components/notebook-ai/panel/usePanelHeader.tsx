@@ -7,9 +7,8 @@ import {
   Plus,
   X,
   PanelRight,
-  AppWindow,
+  Maximize2,
   History as HistoryIcon,
-  MoreHorizontal,
   Check,
 } from "@/components/ui/icons";
 import {
@@ -93,7 +92,6 @@ export function usePanelHeader(
     isBusy,
     conversationSummary,
   } = options;
-  // 全屏时工具栏上移到 PageHeader 右上角（顶替 PageMenu）
   const headerToolbar = useMemo(() => {
     const iconBtn =
       "flex items-center justify-center text-muted-foreground disabled:pointer-events-none disabled:text-disabled ";
@@ -153,9 +151,13 @@ export function usePanelHeader(
                     <IconButton size="sm" tone="muted"
                       type="button"
                       className={iconBtn}
-                      aria-label={t("morePanelOptions")}
+                      aria-label={`${t("morePanelOptions")} · ${t(layoutIsFullscreen ? "fullScreen" : "sideBySide")}`}
                     >
-                      <MoreHorizontal className="h-4 w-4" strokeWidth={1.75} />
+                      {layoutIsFullscreen ? (
+                        <Maximize2 className="h-4 w-4" strokeWidth={1.75} />
+                      ) : (
+                        <PanelRight className="h-4 w-4 rotate-180" strokeWidth={1.75} />
+                      )}
                     </IconButton>
                   </PopoverTrigger>
                   <PopoverContent
@@ -170,7 +172,7 @@ export function usePanelHeader(
                       onSelect={() => onLayoutModeChange("side-panel")}
                       className="gap-2"
                     >
-                      <PanelRight className="h-4 w-4" strokeWidth={1.75} />
+                      <PanelRight className="h-4 w-4 rotate-180" strokeWidth={1.75} />
                       <span className="flex-1">{t("sideBySide")}</span>
                       {!layoutIsFullscreen ? (
                         <Check className="h-3.5 w-3.5" />
@@ -181,7 +183,7 @@ export function usePanelHeader(
                       onSelect={() => onLayoutModeChange("fullscreen")}
                       className="gap-2"
                     >
-                      <AppWindow className="h-4 w-4" strokeWidth={1.75} />
+                      <Maximize2 className="h-4 w-4" strokeWidth={1.75} />
                       <span className="flex-1">{t("fullScreen")}</span>
                       {layoutIsFullscreen ? (
                         <Check className="h-3.5 w-3.5" />
@@ -221,7 +223,6 @@ export function usePanelHeader(
   locale,
   ]);
 
-  // 桌面两种布局都把工具栏交给顶栏；网页侧栏仍保留面板内标题。
   useEffect(() => {
     if (!isFullscreen && !isElectronChrome) {
       clearAiHeaderActions();
