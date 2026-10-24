@@ -2,6 +2,24 @@
 # 用仓库 Secret 里的 Codex ChatGPT 登录审核 PR diff。不执行 PR 里的脚本。
 set -euo pipefail
 
+if ! [[ "${PR:-}" =~ ^[1-9][0-9]*$ && "${HEAD_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "PR 或提交参数不合法" >&2
+  exit 1
+fi
+# 确认不是 fork 之后才碰登录态，避免把 CODEX_AUTH_JSON 写到磁盘。
+meta=$(gh api "repos/$REPO/pulls/$PR" --jq '[.head.sha, (.head.repo.full_name // "")] | @tsv')
+actual_sha=${meta%%$'\t'*}
+head_repo=${meta#*$'\t'}
+if [ "$head_repo" != "$REPO" ]; then
+  unset CODEX_AUTH_JSON
+  echo "外部 Fork：拒绝使用登录态审核，不写出 auth.json。" >&2
+  exit 1
+fi
+if [ "$actual_sha" != "$HEAD_SHA" ]; then
+  echo "PR 提交已变化，等待新审核" >&2
+  exit 1
+fi
+
 if [ -z "${CODEX_AUTH_JSON:-}" ]; then
   echo "缺少 CODEX_AUTH_JSON" >&2
   exit 1
@@ -21,16 +39,6 @@ model_reasoning_effort = "medium"
 CFG
 
 npm install -g @openai/codex@0.159.2 >&2
-
-if ! [[ "$PR" =~ ^[1-9][0-9]*$ && "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-  echo "PR 或提交参数不合法" >&2
-  exit 1
-fi
-actual_sha=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)
-if [ "$actual_sha" != "$HEAD_SHA" ]; then
-  echo "PR 提交已变化，等待新审核" >&2
-  exit 1
-fi
 
 diff_file="${RUNNER_TEMP}/pr.diff"
 gh pr diff "$PR" -R "$REPO" > "$diff_file"
@@ -81,8 +89,37 @@ env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_hom
   - < "$prompt_file" >&2
 
 python3 - "$out" <<'PARSE'
-import json, sys
-data = json.load(open(sys.argv[1], encoding="utf-8"))
+import json, re, sys
+try:
+    raw = open(sys.argv[1], encoding="utf-8").read()
+except OSError:
+    raise SystemExit("读不到 Codex 审核输出")
+
+def safe_excerpt(text, n=180):
+    text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
+    text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
+    text = re.sub(r"(?i)\b(bearer|token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*\S+", r"\1 [redacted]", text)
+    text = re.sub(r"\b[A-Za-z0-9_\-]{32,}\b", "[redacted]", text)
+    return " ".join(text.split())[:n]
+
+dec = json.JSONDecoder()
+found = []
+i = 0
+while i < len(raw):
+    start = raw.find("{", i)
+    if start < 0:
+        break
+    try:
+        obj, end = dec.raw_decode(raw, start)
+    except json.JSONDecodeError:
+        i = start + 1
+        continue
+    if isinstance(obj, dict) and "merge_recommendation" in obj:
+        found.append(obj)
+    i = end if end > start else start + 1
+if not found:
+    raise SystemExit("审核结果里没有带 merge_recommendation 的完整 JSON。摘录：" + safe_excerpt(raw))
+data = found[-1]
 needed = {"merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review"}
 if not isinstance(data, dict) or set(data) != needed:
     raise SystemExit("审核结果字段不合法")
