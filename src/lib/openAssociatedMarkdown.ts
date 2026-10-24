@@ -2,14 +2,20 @@ import { createTranslator, i18nYaml } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/openAssociatedMarkdown.ts#localMessages:1">`
 zh-Hans:
+  retry: "重试"
+  permission: "没有文件访问权限，请在系统中允许访问或调整文件权限后重试。"
   couldnTOpenThisMarkdownFile: "无法打开该 Markdown 文件"
   theFileIsnTInsideAFolderThatCan: "文件不在可挂载的文件夹内。"
   theFileIsnTAmongTheVisibleNotesIn: "文件不在当前仓库的可见笔记中。"
 en:
+  retry: "Retry"
+  permission: "File access was denied. Allow access in your system or adjust file permissions, then retry."
   couldnTOpenThisMarkdownFile: "Couldn’t open this Markdown file"
   theFileIsnTInsideAFolderThatCan: "The file isn’t inside a folder that can be opened as a notebook."
   theFileIsnTAmongTheVisibleNotesIn: "The file isn’t among the visible notes in the current repository."
 ja:
+  retry: "再試行"
+  permission: "ファイルへのアクセスが拒否されました。システムのアクセス権を確認してから再試行してください。"
   couldnTOpenThisMarkdownFile: "この Markdown ファイルを開けません"
   theFileIsnTInsideAFolderThatCan: "ファイルがマウント可能なフォルダ内にありません。"
   theFileIsnTAmongTheVisibleNotesIn: "ファイルが現在のリポジトリの表示中のノートに含まれていません。"
@@ -22,10 +28,10 @@ import {
   isCanonicalPathInside,
   localPathsAreCaseInsensitive,
 } from "@/lib/canonicalLocalPath";
-import { pageDirectory } from "@/lib/currentLocalPagePath";
-import { activateNotebook } from "@/lib/notebookNavigation";
+import { openStandaloneMarkdownPage } from "@/lib/openStandaloneMarkdown";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import { getGooseDesktop } from "@/lib/electron/runtime";
+import { rememberAssociatedMarkdownPath } from "@/lib/associated-markdown-paths";
 import { markAssociatedMarkdownOpened } from "@/lib/workspaceStartup";
 import type { Notebook } from "@/stores/useNotebooks";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -81,13 +87,25 @@ async function openPageInNotebook(
 ): Promise<void> {
   activateWorkspace();
   closeNotebookAiIfFullscreen();
-  await activateNotebook(notebookId);
-  useTabs.getState().openTab(pageId);
-  usePages.getState().setActivePage(pageId);
+  if (useNotebooks.getState().notebooks[notebookId]) {
+    useNotebooks.getState().setLastActivePage(notebookId, pageId);
+  }
+  useTabs.getState().openPermanentTab(pageId);
+  await usePages.getState().setActivePage(pageId);
   usePages.getState().setExpandPageId(pageId);
   const sidebar = useSidebarView.getState();
   sidebar.setSelected(notebookId, pageId);
   sidebar.setFocused(notebookId, pageId);
+  const page = usePages.getState().pages[pageId];
+  if (page?.localReadState === "error") {
+    const detail = page.localReadError ?? "";
+    toast.error(uiText("couldnTOpenThisMarkdownFile"), {
+      description: /EPERM|EACCES|permission|access denied/i.test(detail) ? uiText("permission") : detail,
+      action: { label: uiText("retry"), onClick: () => {
+        void usePages.getState().reloadLocalPageFromDisk(pageId).then(() => openPageInNotebook(notebookId, pageId));
+      } },
+    });
+  }
 }
 
 export async function openAssociatedMarkdownFile(
@@ -95,36 +113,21 @@ export async function openAssociatedMarkdownFile(
 ): Promise<boolean> {
   const trimmed = filePath.trim();
   if (!trimmed) return false;
-  // 冷启动时恢复上次笔记的 effect 可能晚于这次打开，先占住选中，避免被盖掉。
   markAssociatedMarkdownOpened();
 
-  let notebook = findContainingLocalFolderNotebook(
+  const notebook = findContainingLocalFolderNotebook(
     trimmed,
     Object.values(useNotebooks.getState().notebooks),
   );
 
   if (!notebook) {
-    const parentDir = pageDirectory(trimmed);
-    if (!parentDir) {
-      toast.error(uiText("couldnTOpenThisMarkdownFile"), {
-        description: uiText("theFileIsnTInsideAFolderThatCan"),
-      });
-      return false;
-    }
-    const folderName = parentDir.split(/[\\/]/).pop() || "Notes";
-    const notebookId = useNotebooks
-      .getState()
-      .createLocalFolderNotebook(folderName, parentDir);
-    await usePages.getState().loadLocalFolderPages(notebookId, parentDir);
-    notebook = useNotebooks.getState().notebooks[notebookId];
-  } else if (notebook.localPath) {
-    await usePages
-      .getState()
-      .loadLocalFolderPages(notebook.id, notebook.localPath);
-    notebook = useNotebooks.getState().notebooks[notebook.id] ?? notebook;
+    const pageId = await openStandaloneMarkdownPage(trimmed);
+    await openPageInNotebook(usePages.getState().pages[pageId].workspaceId, pageId);
+    return true;
   }
 
-  if (!notebook) return false;
+
+  rememberAssociatedMarkdownPath(notebook.id, trimmed);
 
   let pageId = findPageIdByLocalFilePath(trimmed, notebook.id);
   if (!pageId && notebook.localPath) {
@@ -143,11 +146,14 @@ export async function openAssociatedMarkdownFile(
     return false;
   }
 
+  if (usePages.getState().pages[pageId]?.localReadState === "error") {
+    await usePages.getState().reloadLocalPageFromDisk(pageId);
+  }
   await openPageInNotebook(notebook.id, pageId);
   return true;
 }
 
-export async function openAssociatedMarkdownFiles(
+async function openAssociatedMarkdownFilesSequentially(
   filePaths: string[],
 ): Promise<number> {
   const unique = [...new Set(filePaths.filter((value) => value.trim()))];
@@ -159,7 +165,14 @@ export async function openAssociatedMarkdownFiles(
 
   for (const filePath of unique) {
     const beforeActive = usePages.getState().activePageId;
-    const ok = await openAssociatedMarkdownFile(filePath);
+    let ok = false;
+    try {
+      ok = await openAssociatedMarkdownFile(filePath);
+    } catch (error) {
+      toast.error(uiText("couldnTOpenThisMarkdownFile"), {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    }
     if (!ok) continue;
     opened += 1;
     const afterActive = usePages.getState().activePageId;
@@ -178,6 +191,13 @@ export async function openAssociatedMarkdownFiles(
   }
 
   return opened;
+}
+
+let openQueue: Promise<unknown> = Promise.resolve();
+export function openAssociatedMarkdownFiles(filePaths: string[]): Promise<number> {
+  const task = openQueue.catch(() => {}).then(() => openAssociatedMarkdownFilesSequentially(filePaths));
+  openQueue = task;
+  return task;
 }
 
 export async function consumePendingAssociatedMarkdownFiles(): Promise<number> {

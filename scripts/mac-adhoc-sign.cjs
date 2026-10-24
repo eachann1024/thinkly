@@ -33,7 +33,6 @@ function stripChromiumSoundBanks(app) {
   const aliasCount = data.readUInt16LE(10);
   let cursor = 12;
   const entries = [];
-  // 表尾多一条哨兵，fileOffset 是上一条资源的结尾。别把它算进 resourceCount。
   for (let index = 0; index < resourceCount + 1; index += 1) {
     entries.push({
       id: data.readUInt16LE(cursor),
@@ -112,8 +111,19 @@ function installLocalizedDisplayName(app) {
   ]);
 }
 
-// Explicit "-" avoids certificate discovery and never accesses a private key.
-// Developer ID builds retain electron-builder's normal signing/notarization flow.
+function installMarkdownDocumentTypes(app) {
+  const documentTypes = [{
+    CFBundleTypeName: 'Markdown',
+    CFBundleTypeExtensions: ['md', 'markdown'],
+    CFBundleTypeRole: 'Editor',
+    CFBundleTypeIconFile: 'icon',
+    LSItemContentTypes: ['net.daringfireball.markdown'],
+    LSHandlerRank: 'Default',
+  }];
+  run('/usr/bin/plutil', ['-replace', 'CFBundleDocumentTypes', '-json',
+    JSON.stringify(documentTypes), join(app, 'Contents', 'Info.plist')]);
+}
+
 module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
   if (electronPlatformName !== 'darwin') return;
   const app = join(appOutDir, `${packager.appInfo.productFilename}.app`);
@@ -125,10 +135,6 @@ module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
     join(__dirname, 'dmg-assets', '安装指令.command'),
   ]);
   installLocalizedDisplayName(join(appOutDir, `${packager.appInfo.productFilename}.app`));
-  // dmgbuild supports position-only entries, but electron-builder 26's schema
-  // omits that type. Add them after config validation, before DMG construction.
-  // Keep these resources beyond common enlarged Finder windows as well as the
-  // initial 960×640 viewport, including when Show Hidden Files is enabled.
   const contents = packager.config.dmg?.contents;
   if (contents) {
     for (const [index, name] of ['.background.tiff', '.VolumeIcon.icns', '.DS_Store'].entries()) {
@@ -137,6 +143,8 @@ module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
       }
     }
   }
+  // File associations must be finalized before either ad-hoc or Developer ID signing.
+  installMarkdownDocumentTypes(app);
   if (process.env.CSC_LINK) return;
   run('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', '--timestamp=none', app]);
   run('/usr/bin/codesign', ['--verify', '--deep', '--strict', app]);

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
+import { realpathSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { canonicalLocalPath } from "../../src/lib/canonicalLocalPath";
@@ -65,27 +65,12 @@ function resolveOpenMarkdownPath(filesystemPath: string): string {
 
 function markdownFileExists(resolved: string): boolean {
   try {
-    if (existsSync(resolved) && statSync(resolved).isFile()) {
-      return true;
-    }
+    return statSync(resolved).isFile();
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === "ENOENT") return false;
-    try {
-      const info = statSync(resolved);
-      return info.isFile();
-    } catch (statError) {
-      const statCode = (statError as NodeJS.ErrnoException).code;
-      if (statCode === "ENOENT") return false;
-      try {
-        readdirSync(path.dirname(resolved));
-        return true;
-      } catch (readError) {
-        return (readError as NodeJS.ErrnoException).code !== "ENOENT";
-      }
-    }
+    // Deliver permission/missing-file errors to the editor instead of silently dropping OS requests.
+    console.warn("[open-md] 无法检查文件，交由读取流程显示错误", resolved, error);
+    return true;
   }
-  return false;
 }
 
 function acceptMarkdownFile(raw: string): string | null {
@@ -112,7 +97,6 @@ function acceptMarkdownFile(raw: string): string | null {
   return allowAssociatedMarkdownFile(resolved);
 }
 
-/** 默认把 md 投到最近活动的已有 workspace 窗，不另开新窗。 */
 function deliveryWindow(): BrowserWindow | null {
   const win = getMainWindow();
   if (!win || win.isDestroyed()) return null;
@@ -139,7 +123,6 @@ function processQueuedRaw(): void {
   deliverQueuedToRenderer();
 }
 
-/** 保存进笔记本后：抬起主窗口，并把这篇笔记交给它打开。路径无效时不抬窗。 */
 export function revealSavedMarkdownInWorkspace(rawPath: string): boolean {
   const accepted = acceptMarkdownFile(rawPath);
   if (!accepted) return false;
@@ -202,6 +185,7 @@ export function registerOpenMarkdownIpc(): void {
 export function registerOpenFileEvent(): void {
   app.on("open-file", (event, filePath) => {
     event.preventDefault();
+    if (app.isReady()) showOrCreateMainWindow();
     enqueueMarkdownOpenPaths([filePath]);
   });
 }
