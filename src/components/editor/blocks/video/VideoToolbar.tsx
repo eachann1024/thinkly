@@ -1,4 +1,5 @@
 import { EditorAction } from "@/components/editor/ui/button";
+import { getBlockToolbarOwner } from "../../core/blockToolbarOwner";
 import {
   AlignCenter,
   AlignLeft,
@@ -54,6 +55,8 @@ const t = createTranslator(messages);
 
 
 type VideoToolbarProps = {
+  blockId: string;
+  editorRoot: HTMLElement;
   rect: DOMRect;
   alignment: ImageAlignment;
   editable: boolean;
@@ -102,6 +105,8 @@ function VideoToolButton({
 }
 
 export function VideoToolbar({
+  blockId,
+  editorRoot,
   rect,
   alignment,
   editable,
@@ -145,6 +150,8 @@ export function VideoToolbar({
     <TooltipProvider delayDuration={400} skipDelayDuration={100}>
       <div
         data-goose-video-toolbar
+        data-goose-block-id={blockId}
+        data-goose-editor-owner={getBlockToolbarOwner(editorRoot)}
         ref={setFloating}
         className="fixed z-[20000]"
         style={floatingStyles}

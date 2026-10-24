@@ -1,10 +1,9 @@
 import { Input } from "@/components/editor/ui/input";
 import { EditorAction } from "@/components/editor/ui/button";
 import * as GooseIcons from "@/components/ui/icons";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createFileBlockConfig, fileParse } from "@blocknote/core";
 import { createReactBlockSpec, useUploadLoading } from "@blocknote/react";
-import { FilePanelExtension } from "@blocknote/core/extensions";
 import { toast } from "@/components/ui/sonner";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { useEditorPlatform } from "@/components/editor/platform/context";
@@ -18,6 +17,7 @@ import {
 } from "@/components/editor/blocks/shared/MediaPlaceholder";
 import messages from "./customFileBlock.messages.yaml";
 import { createTranslator, useLocale } from "@/i18n";
+import { removeMediaBlock, useMediaFilePicker } from "../shared/mediaFilePicker";
 const t = createTranslator(messages);
 
 
@@ -30,15 +30,6 @@ function describeOpenFailure(error: unknown): string {
         : "";
   if (!message || /failed to fetch/i.test(message)) return t("downloadTheFileBeforeOpeningIt");
   return message;
-}
-
-function triggerDownload(url: string, name: string): void {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 }
 
 async function saveOrFallback(blob: Blob, name: string): Promise<void> {
@@ -64,12 +55,8 @@ function CustomFileBlockContent({
   const { features } = useEditorSettings();
   const [renaming, setRenaming] = useState(false);
   const [draftName, setDraftName] = useState("");
-
-  const handleAddFile = useCallback(() => {
-    if (!editor.isEditable) return;
-    const filePanel = editor.getExtension(FilePanelExtension);
-    filePanel?.showMenu(block.id);
-  }, [editor, block.id]);
+  const renameActive = useRef(false);
+  const handleAddFile = useMediaFilePicker(editor, block.id);
 
   const handleDownload = useCallback(async () => {
     const url = block.props.url;
@@ -88,10 +75,11 @@ function CustomFileBlockContent({
       }
 
       const response = await fetch(url);
+      if (!response.ok) { toast.error(t("saveFailed")); return; }
       await saveOrFallback(await response.blob(), name);
     } catch (error) {
-      console.error("[file-block] 保存失败，回退浏览器下载:", error);
-      triggerDownload(url, name);
+      console.error("[file-block] 保存失败:", error);
+      toast.error(t("saveFailed"));
     }
   }, [block.props.url, block.props.name, platform]);
 
@@ -126,31 +114,35 @@ function CustomFileBlockContent({
   ]);
 
   const handleDelete = useCallback(() => {
-    if (!editor.isEditable) return;
-    editor.removeBlocks([block]);
-  }, [editor, block]);
+    removeMediaBlock(editor, block.id);
+  }, [editor, block.id]);
 
   const handleRenameStart = useCallback(() => {
     if (!editor.isEditable) return;
+    renameActive.current = true;
     setDraftName(block.props.name || "");
     setRenaming(true);
   }, [block.props.name, editor]);
 
   const handleRenameCommit = useCallback(() => {
+    if (!renameActive.current) return;
+    renameActive.current = false;
     const trimmed = draftName.trim();
-    if (trimmed) {
+    if (trimmed && editor.isEditable && editor.getBlock(block.id)?.type === "file") {
       editor.updateBlock(block, { props: { name: trimmed } });
     }
     setRenaming(false);
   }, [editor, block, draftName]);
 
   const handleRenameCancel = useCallback(() => {
+    renameActive.current = false;
     setRenaming(false);
   }, []);
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       e.stopPropagation();
+      if (e.nativeEvent.isComposing || e.keyCode === 229) return;
       if (e.key === "Enter") {
         e.preventDefault();
         handleRenameCommit();
@@ -172,7 +164,7 @@ function CustomFileBlockContent({
         variant="file"
         blockId={block.id}
         editor={editor}
-        title={t("addAttachment")}
+        title={t("addFile")}
         hint={t("clickToChooseOrDragIntoTheEditor")}
         icon={<GooseIcons.FileUp size={18} strokeWidth={1.75} />}
       />
@@ -180,7 +172,7 @@ function CustomFileBlockContent({
   }
 
   return (
-    <div className="goose-file-block-content">
+    <div className="goose-file-block-content" contentEditable={false}>
       <div className="goose-file-block-info">
         {editor.isEditable ? (
           <EditorAction
@@ -188,12 +180,13 @@ function CustomFileBlockContent({
             className="goose-file-block-icon-btn"
             onClick={handleAddFile}
             title={t("replaceFile")}
+            aria-label={t("replaceFile")}
           >
-            <GooseIcons.FileText size={20} strokeWidth={1.75} />
+            <GooseIcons.FileText size={18} strokeWidth={1.75} />
           </EditorAction>
         ) : (
           <span className="goose-file-block-icon-btn">
-            <GooseIcons.FileText size={20} strokeWidth={1.75} />
+            <GooseIcons.FileText size={18} strokeWidth={1.75} />
           </span>
         )}
         {renaming && editor.isEditable ? (
@@ -225,8 +218,9 @@ function CustomFileBlockContent({
             className="goose-file-block-action-btn"
             onClick={handleOpen}
             title={t("openInDefaultApp")}
+            aria-label={t("openInDefaultApp")}
           >
-            <GooseIcons.ExternalLink size={16} strokeWidth={1.75} />
+            <GooseIcons.ExternalLink size={18} strokeWidth={1.75} />
           </EditorAction>
         )}
         {editor.isEditable ? (
@@ -235,8 +229,9 @@ function CustomFileBlockContent({
             className="goose-file-block-action-btn"
             onClick={handleRenameStart}
             title={t("rename")}
+            aria-label={t("rename")}
           >
-            <GooseIcons.Pencil size={16} strokeWidth={1.75} />
+            <GooseIcons.Pencil size={18} strokeWidth={1.75} />
           </EditorAction>
         ) : null}
         <EditorAction
@@ -244,17 +239,19 @@ function CustomFileBlockContent({
           className="goose-file-block-action-btn"
           onClick={handleDownload}
           title={t("download")}
+          aria-label={t("download")}
         >
-          <GooseIcons.Download size={16} strokeWidth={1.75} />
+          <GooseIcons.Download size={18} strokeWidth={1.75} />
         </EditorAction>
         {editor.isEditable ? (
           <EditorAction
             type="button"
-            className="goose-file-block-action-btn"
+            className="goose-file-block-action-btn goose-media-action--danger"
             onClick={handleDelete}
             title={t("delete")}
+            aria-label={t("delete")}
           >
-            <GooseIcons.Trash2 size={16} strokeWidth={1.75} />
+            <GooseIcons.X size={18} strokeWidth={1.75} />
           </EditorAction>
         ) : null}
       </div>

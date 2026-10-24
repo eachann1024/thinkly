@@ -1,0 +1,137 @@
+/* Shared compact attachment source row; the same geometry in every editor host. */
+.goose-media-placeholder,
+.goose-media-loading {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 4px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--goose-control-radius);
+  background: hsl(var(--goose-editor-bg));
+  color: hsl(var(--foreground));
+  font: 400 14px/20px var(--font-ui);
+  transition: border-color var(--goose-control-motion-duration) ease;
+}
+
+.goose-media-placeholder:hover,
+.goose-media-placeholder:focus-within {
+  border-color: var(--goose-interactive-hover-border);
+}
+
+.goose-media-placeholder__choose {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--goose-control-radius);
+  color: inherit;
+  text-align: start;
+  font: inherit;
+}
+
+.goose-media-placeholder__choose:hover:not(:disabled),
+.goose-media-placeholder__choose:focus-visible,
+.goose-media-placeholder__action:hover,
+.goose-media-placeholder__action:focus-visible {
+  background: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
+}
+
+.goose-media-placeholder__choose:disabled {
+  color: var(--goose-text-disabled);
+  cursor: default;
+}
+
+.goose-media-placeholder__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.goose-media-placeholder__icon svg { width: 18px; height: 18px; stroke-width: 1.5; }
+.goose-media-placeholder__copy { min-width: 0; overflow: hidden; white-space: nowrap; }
+.goose-media-placeholder__title { font: inherit; }
+.goose-media-placeholder__actions { display: flex; flex-shrink: 0; }
+
+.goose-media-placeholder__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--goose-control-radius);
+  color: hsl(var(--muted-foreground));
+}
+
+:is(.goose-media-placeholder, .goose-file-block-content, .goose-audio-block) .goose-media-action--danger,
+:is(.goose-media-placeholder, .goose-file-block-content, .goose-audio-block) .goose-media-action--danger:is(:hover, :focus-visible) {
+  color: var(--goose-color-danger);
+}
+
+:is(.goose-media-placeholder, .goose-file-block-content, .goose-audio-block) .goose-media-action--danger:is(:hover, :focus-visible) {
+  background: var(--goose-color-danger-subtle-bg);
+}
+
+.goose-media-loading { gap: 10px; padding-inline: 12px; color: hsl(var(--muted-foreground)); }
+.goose-media-loading__spinner { flex-shrink: 0; }
+.goose-media-loading__label { min-width: 0; overflow: hidden; white-space: nowrap; }
+
+.bn-mantine .bn-panel.goose-media-source-panel {
+  box-sizing: border-box;
+  width: 340px;
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+  padding: 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--goose-menu-radius);
+  background: hsl(var(--goose-menu-surface));
+  box-shadow: var(--goose-menu-shadow);
+  color: hsl(var(--foreground));
+  font: 400 14px/20px var(--font-ui);
+}
+
+.goose-media-source-panel__upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+}
+
+.goose-media-source-panel__url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.goose-media-source-panel__url > svg { flex-shrink: 0; color: hsl(var(--muted-foreground)); }
+.goose-media-source-panel__url input { flex: 1; min-width: 0; width: 0; }
+.goose-media-source-panel__url button { flex-shrink: 0; }
+
+.goose-media-source-panel__error {
+  margin: 8px 0 0;
+  color: var(--goose-color-danger);
+  font: 400 13px/20px var(--font-ui);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+  .bn-mantine .bn-panel.goose-media-source-panel { padding: 6px; }
+  .goose-media-source-panel__url { gap: 6px; }
+  .goose-media-source-panel__url > svg { display: none; }
+}

@@ -6,10 +6,12 @@ import {
   videoParse,
   type BlockNoteEditor,
 } from "@blocknote/core";
-import { FilePanelExtension } from "@blocknote/core/extensions";
+import { useMediaFilePicker } from "../shared/mediaFilePicker";
 import * as GooseIcons from "@/components/ui/icons";
 import { GooseVideoPlayer } from "./GooseVideoPlayer";
 import { VideoToolbar } from "./VideoToolbar";
+import { useBlockToolbarState } from "../../core/blockToolbarSequence";
+import { ownsBlockToolbar } from "../../core/blockToolbarOwner";
 import {
   MediaLoadingPreview,
   MediaPlaceholder,
@@ -63,7 +65,6 @@ function ensureParagraphAfter(
       editor.focus();
     }
   } catch {
-    // ignore
   }
 }
 
@@ -76,11 +77,14 @@ function VideoBlockContent({
 }) {
   useLocale();
   const showLoader = useUploadLoading(block.id);
+  const handleReplace = useMediaFilePicker(editor, block.id);
   const shellRef = useRef<HTMLDivElement>(null);
   const platform = useEditorPlatform();
   const { getActivePageLocalFilePath } = useEditorPageContext();
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   const [selected, setSelected] = useState(false);
+  const toolbarState = useBlockToolbarState(editor, block.id);
+  const showToolbar = !toolbarState.suppressed && (selected || toolbarState.ready);
   const [toolbarRect, setToolbarRect] = useState<DOMRect | null>(null);
 
   const rawSrc = block.props.url as string;
@@ -131,15 +135,18 @@ function VideoBlockContent({
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!showToolbar) return;
     updateToolbarRect();
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null;
+      if (ownsBlockToolbar(target?.closest<HTMLElement>("[data-goose-video-toolbar]") ?? null, editor.prosemirrorView.dom, block.id)) {
+        setSelected(true);
+        return;
+      }
       if (
         target &&
-        (shellRef.current?.contains(target) ||
-          target.closest("[data-goose-video-toolbar]"))
+        shellRef.current?.contains(target)
       ) {
         return;
       }
@@ -159,32 +166,24 @@ function VideoBlockContent({
         updateToolbarRect,
       );
     };
-  }, [selected, updateToolbarRect]);
+  }, [editor, block.id, showToolbar, updateToolbarRect]);
 
   const handleEnterBelow = useCallback(() => {
     if (editor.isEditable) ensureParagraphAfter(editor, block);
   }, [block, editor]);
-
-  const handleReplace = useCallback(() => {
-    editor.getExtension(FilePanelExtension)?.showMenu(block.id);
-  }, [block.id, editor]);
 
   const handleDownload = useCallback(async () => {
     if (!resolvedSrc) return;
     const name = block.props.name || `video-${Date.now()}.mp4`;
     try {
       const response = await fetch(resolvedSrc);
+      if (!response.ok) { toast.error(t("saveFailed")); return; }
       const saved = await saveBlobAndReveal(await response.blob(), name);
       if (saved) toast.success(t("savedToDownloads"));
       else toast.error(t("saveFailed"));
     } catch (error) {
-      console.error("[video] 保存失败，回退浏览器下载:", error);
-      const link = document.createElement("a");
-      link.href = resolvedSrc;
-      link.download = name;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      console.error("[video] 保存失败:", error);
+      toast.error(t("saveFailed"));
     }
   }, [block.props.name, resolvedSrc]);
 
@@ -237,11 +236,13 @@ function VideoBlockContent({
       }}
     >
       <GooseVideoPlayer src={resolvedSrc} onEnterBelow={handleEnterBelow} onDownload={handleDownload} />
-      {selected &&
+      {showToolbar &&
         toolbarRect &&
         editor.isEditable &&
         createPortal(
           <VideoToolbar
+            blockId={block.id}
+            editorRoot={editor.prosemirrorView.dom}
             rect={toolbarRect}
             alignment={alignment}
             editable={editor.isEditable}
