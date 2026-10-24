@@ -1,40 +1,10 @@
-/**
- * Electron 多 workspace 窗身份。
- *
- * 主进程给每个 BrowserWindow 注入 additionalArguments：
- *   --goose-window-id=<uuid>
- *   --goose-window-kind=workspace|quicknote|search
- *
- * 读取顺序：
- * 1. 当前进程 argv（preload / 未沙箱时可直接读 process.argv）
- * 2. gooseDesktop.getWindowContext()（沙箱渲染进程走 IPC）
- * 3. 回退 `main`，避免多窗抢无后缀的 persist key
- *
- * 新窗初始化不走 URL hash，由主进程在 did-finish-load 后发送：
- *   desktop:window-init
- *     - mode currentTab：{ takeTab }
- *     - 从 window-layout.json 恢复且带 tabs 快照：{ restoredTabs }
- *     - mode blank：不发此事件，渲染层自行 openWelcomeTab
- *
- * 请尽早订阅 gooseDesktop.onWindowInit，preload 会缓存最近一次 payload。
- */
+import { isGooseWindowKind, parseGooseWindowArgs, type GooseWindowContext } from "./windowArguments";
+export * from "./windowArguments";
+import { canTransferDocumentTab } from "../standaloneFileCapabilities";
+
 export const FALLBACK_WINDOW_ID = "main";
 
 export const TABS_PERSIST_KEY_PREFIX = "thinkly:open-tabs:v1";
-
-export const GOOSE_WINDOW_ID_PREFIX = "--goose-window-id=";
-export const GOOSE_WINDOW_KIND_PREFIX = "--goose-window-kind=";
-
-export type GooseWindowKind = "workspace" | "quicknote" | "search";
-
-export function isGooseWindowKind(value: unknown): value is GooseWindowKind {
-  return value === "workspace" || value === "quicknote" || value === "search";
-}
-
-export type GooseWindowContext = {
-  windowId: string;
-  kind: GooseWindowKind;
-};
 
 export type GooseWindowTabSnapshot = {
   id: string;
@@ -60,31 +30,6 @@ const listeners = new Set<(ctx: GooseWindowContext) => void>();
 
 export function tabsPersistKey(windowId: string): string {
   return `${TABS_PERSIST_KEY_PREFIX}:${windowId}`;
-}
-
-export function gooseWindowAdditionalArguments(
-  windowId: string,
-  kind: GooseWindowKind,
-): string[] {
-  return [
-    `${GOOSE_WINDOW_ID_PREFIX}${windowId}`,
-    `${GOOSE_WINDOW_KIND_PREFIX}${kind}`,
-  ];
-}
-
-export function parseGooseWindowArgs(argv: string[]): GooseWindowContext | null {
-  let windowId = "";
-  let kind: GooseWindowKind | "" = "";
-  for (const arg of argv) {
-    if (arg.startsWith(GOOSE_WINDOW_ID_PREFIX)) {
-      windowId = arg.slice(GOOSE_WINDOW_ID_PREFIX.length).trim();
-    } else if (arg.startsWith(GOOSE_WINDOW_KIND_PREFIX)) {
-      const value = arg.slice(GOOSE_WINDOW_KIND_PREFIX.length).trim();
-      if (isGooseWindowKind(value)) kind = value;
-    }
-  }
-  if (!windowId || !kind) return null;
-  return { windowId, kind };
 }
 
 function readProcessArgv(): string[] {
@@ -169,7 +114,6 @@ export async function resolveWindowContext(): Promise<GooseWindowContext> {
   return resolvePromise;
 }
 
-/** 契约名 getWindowContext：argv 优先，否则 IPC。 */
 export async function getWindowContext(): Promise<GooseWindowContext> {
   return resolveWindowContext();
 }
@@ -179,6 +123,7 @@ export async function createDesktopWindow(
 ): Promise<{ windowId: string } | null> {
   if (typeof window === "undefined") return null;
   try {
+    if (opts.tab && !(await canTransferDocumentTab(opts.tab))) return null;
     const result = await window.gooseDesktop?.createWindow?.(opts);
     return result ?? null;
   } catch {
@@ -211,6 +156,7 @@ export async function finishTabDrag(opts: {
 }): Promise<FinishTabDragResult> {
   if (typeof window === "undefined") return { action: "none" };
   try {
+    if (!(await canTransferDocumentTab(opts.tab))) return { action: "none" };
     const result = await window.gooseDesktop?.finishTabDrag?.(opts);
     return result ?? { action: "none" };
   } catch {

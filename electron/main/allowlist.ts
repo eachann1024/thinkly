@@ -42,7 +42,6 @@ export function loadVaultRoots(): void {
       }
     }
   } catch {
-    // first run or corrupt file
   }
   mkdirSync(attachmentsRoot(), { recursive: true });
 }
@@ -59,7 +58,6 @@ export function addVaultRoot(p: string): string {
   return resolved;
 }
 
-/** 笔记本根目录改名后，允许列表必须跟着新路径，否则后续读写会被拒绝。 */
 export function replaceVaultRoot(from: string, to: string): void {
   const oldKey = normalizePath(from);
   const nextKey = normalizePath(to);
@@ -112,18 +110,9 @@ export function findVaultRootContaining(p: string): string | null {
   return best;
 }
 
-/** 系统「打开方式」选中的 md：允许读该文件，必要时把父目录登记为仓库根。 */
 export function allowAssociatedMarkdownFile(filePath: string): string {
   const resolved = normalizePath(filePath);
   addSessionAllowed(resolved);
-  const parent = path.dirname(resolved);
-  const root = path.parse(resolved).root;
-  if (parent && parent !== resolved && parent !== root) {
-    addSessionAllowed(parent);
-    if (!findVaultRootContaining(resolved)) {
-      addVaultRoot(parent);
-    }
-  }
   return resolved;
 }
 
@@ -153,17 +142,15 @@ export function assertAllowed(p: string): string {
   return resolved;
 }
 
-/** 规范化本机绝对路径，供打开或探测存在性。不在仓库白名单内也不授予读写。 */
 export function normalizeLocalOpenPath(p: string): string | null {
   if (hasUnsafeSegments(p)) return null;
   const trimmed = p.trim();
-  if (!trimmed.startsWith("/") && !/^[A-Za-z]:[\\/]/.test(trimmed)) {
+  if (!trimmed.startsWith("/") && !trimmed.startsWith("\\\\") && !/^[A-Za-z]:[\\/]/.test(trimmed)) {
     return null;
   }
   return normalizePath(trimmed);
 }
 
-/** 打开已存在的本机文件或文件夹，不要求落在仓库白名单内。不存在或含 .. 的路径拒绝。 */
 export function assertExistingOpenPath(p: string): string {
   const resolved = normalizeLocalOpenPath(p);
   if (!resolved) {
