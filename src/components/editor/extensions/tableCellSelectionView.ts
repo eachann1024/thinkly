@@ -99,7 +99,6 @@ export function createTableCellSelectionView(view: EditorView) {
       const currentTablePos = tablePosFromResolved(
         view.state.doc.resolve(headDocPos),
       );
-      // 指针已经在某一行里时不再扫整段文档。只有跳过表格时才看区间里有没有表。
       let spansTable = false;
       if (currentTablePos == null && !draggingDoc) {
         spansTable = isSpanningTableSelection(

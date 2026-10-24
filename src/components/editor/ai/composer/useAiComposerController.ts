@@ -119,14 +119,12 @@ export function useAiComposerController(
     setPlaceholderVisible,
   });
 
-  // 空闲预热本地 Skill 列表，避免首次输入 `/` 同步读盘卡住
   useEffect(() => {
     if (!readLocalSkills) return;
     const warm = () => {
       try {
         warmLocalSkillsCache();
       } catch {
-        // 预热失败不影响输入
       }
     };
     if (typeof requestIdleCallback === "function") {
@@ -216,7 +214,6 @@ export function useAiComposerController(
       handleMentionBlur,
       clearCommandState,
     );
-  // 始终指向最新 handler，mount 时只绑一次原生监听
   nativeHandlersRef.current = {
     onBeforeInput: handleBeforeInputNative,
     onInput: handleInputNative,

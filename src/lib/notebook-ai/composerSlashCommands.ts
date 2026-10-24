@@ -27,7 +27,6 @@ export type ComposerSlashBuiltinId = "new" | "compact";
 export interface ComposerSlashBuiltin {
   kind: "builtin";
   id: ComposerSlashBuiltinId;
-  /** 菜单展示名（不含 /） */
   name: string;
   aliases: string[];
   description: string;
@@ -96,7 +95,6 @@ export function slashItemDescription(item: ComposerSlashItem): string {
   return item.kind === "builtin" ? item.description : item.skill.description;
 }
 
-/** 整段输入恰好是一条内置指令（允许首尾空白，必须带 /） */
 export function matchExactComposerSlashCommand(
   text: string,
 ): ComposerSlashBuiltinId | null {
@@ -114,7 +112,6 @@ export function matchExactComposerSlashCommand(
   return null;
 }
 
-/** 输入框里只有这条指令、没有引用/图片/Skill chip 时才当作发送拦截 */
 export function matchComposerPayloadSlashCommand(
   payload: Pick<
     AiComposerPayload,

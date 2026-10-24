@@ -11,7 +11,6 @@ import {
 export type { NotebookCardThemeContext } from "./presets/notebook";
 export { buildNotebookCardTheme, NOTEBOOK_THEME } from "./presets/notebook";
 
-// Helper to find a theme by id from category sheets
 const findTheme = (id: string): CardTheme => {
   if (id === "notebook") return NOTEBOOK_THEME;
   const all = [...TECH_THEMES, ...ARTISTIC_THEMES, ...COLORFUL_THEMES];

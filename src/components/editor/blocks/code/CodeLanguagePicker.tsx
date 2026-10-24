@@ -152,7 +152,6 @@ export function CodeLanguagePicker({
 
   useLayoutEffect(() => {
     if (!isOpen) return;
-    // Portal 可能在本轮 layout effect 之后挂载，下一帧再定位当前语言。
     const frame = window.requestAnimationFrame(() => {
       document
         .getElementById(`${languageListId}-opt-${safeHighlightedIndex}`)

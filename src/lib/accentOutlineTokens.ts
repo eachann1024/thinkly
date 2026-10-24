@@ -1,6 +1,5 @@
 import type { AccentColor } from "@/stores/settings/types";
 
-// 实色沿用各主题列表描边；深色仅提高明度，表面仍由原有 token 控制。
 const DARK_ACCENT: Record<AccentColor, string> = {
   ocean: "#779de8",
   iris: "#9484e5",
@@ -14,7 +13,6 @@ const DARK_ACCENT: Record<AccentColor, string> = {
   claude: "#d97757",
 };
 
-// 键盘轮廓独立于选中描边；覆盖画布、纸色渐变及选中/hover 表面。
 const LIGHT_FOCUS: Record<AccentColor, string> = {
   ocean: "#547dd0",
   iris: "#8174cb",
@@ -28,7 +26,6 @@ const LIGHT_FOCUS: Record<AccentColor, string> = {
   claude: "#c6613f",
 };
 
-// 链接保持同一色相，文字明度覆盖选中、hover 和纸色渐变表面。
 const ACCENT_TEXT: Record<AccentColor, [string, string]> = {
   ocean: ["#4668ad", "#779de8"],
   iris: ["#6a5fa6", "#a092e8"],

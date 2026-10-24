@@ -1,6 +1,3 @@
-/**
- * Electron 主窗口「始终置顶」。非桌面构建调用直接返回 false / 忽略。
- */
 import { getGooseDesktop } from "./runtime";
 
 export async function getDesktopAlwaysOnTop(): Promise<boolean> {

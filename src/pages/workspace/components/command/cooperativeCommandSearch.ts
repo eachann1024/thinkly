@@ -14,7 +14,6 @@ export interface CommandMatches {
   recentCandidates: SearchResultPage[];
 }
 
-/** Keep only one scan's data; no persistent query or body cache is introduced. */
 export async function computeCommandMatches(
   pages: Page[],
   rawQuery: string,
@@ -26,7 +25,6 @@ export async function computeCommandMatches(
   if (!query || !prepared.text || signal.aborted) return null;
   await yieldSearchTask(signal);
   if (signal.aborted) return null;
-  // 索引只决定次序。没建好或检索抛错时仍按正文做字面匹配，避免全局搜索空白。
   let indexOrder: string[] = [];
   try {
     indexOrder = searchIndex(query, catalog) ?? [];
@@ -59,9 +57,7 @@ export async function computeCommandMatches(
     const indexed = indexedIds.has(page.id);
     const pinyin = !literal && usePinyin &&
       pinyinMatchIndices(title, rawQuery.trim()) !== null;
-    // Index tokens determine relevance, but cannot admit pages without a real match.
     if (literal || pinyin) {
-      // Only matched pages need snippet extraction and decoration.
       const snippet = bodyHit.count > 0 ? snippetAround(body, bodyHit.start, bodyHit.end) : undefined;
       const titleSnippet = !snippet && titleHit.count > 0
         ? snippetAround(title, titleHit.start, titleHit.end) : undefined;
@@ -84,8 +80,6 @@ export async function computeCommandMatches(
   }
   if (signal.aborted) return null;
 
-  // Preserve MiniSearch relevance, then catalog-order literal and pinyin fallbacks.
-  // Four rank buckets avoid a synchronous O(n log n) sort of all matches.
   const matched: SearchResultPage[] = [];
   const buckets: SearchResultPage[][] = [[], [], [], []];
   const append = async (result: SearchResultPage) => {

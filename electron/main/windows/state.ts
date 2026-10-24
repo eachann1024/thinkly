@@ -8,7 +8,6 @@ export const registry = new WindowRegistry<BrowserWindow>();
 
 export const QUICKNOTE_IDLE_DESTROY_MS = 5 * 60 * 1000;
 
-/** 浮动搜索窗隐藏后保留更久：再次唤出无需重建 renderer 与重扫笔记。 */
 export const SEARCH_IDLE_DESTROY_MS = 15 * 60 * 1000;
 
 export const LAYOUT_PERSIST_DEBOUNCE_MS = 300;
@@ -22,17 +21,13 @@ export type WindowCreatedListener = (
 
 export const windowCreatedListeners = new Set<WindowCreatedListener>();
 
-/** 速记窗 show/close/steal focus 都会补发 activate，期间不要碰 workspace。 */
 export const quicknoteActivateSuppression =
   createQuicknoteActivateSuppression();
 
-/** 唤出浮动窗时已 hide 的 workspace；macOS 随后 unhide 也必须再藏回去。 */
 export const workspacesHeldHidden = new WeakSet<BrowserWindow>();
 
-/** 唤出浮动窗时已最小化的 workspace；macOS 激活应用会 deminiaturize，必须再最小化。 */
 export const workspacesHeldMinimized = new WeakSet<BrowserWindow>();
 
-/** minimize / hide 同步再触发 show 时，避免来回停放。 */
 export const workspaceParkLock = new WeakSet<BrowserWindow>();
 
 export const windowState = {

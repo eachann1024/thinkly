@@ -38,12 +38,10 @@ import { useStickToBottom } from "./useStickToBottom";
 
 const MD_PLUGINS = { cjk };
 const MD_CONTROLS = { table: false, code: true, mermaid: false } as const;
-/** 新到的字以 ease-out-expo 轻微上浮淡入；关键帧见 search-sheet.css 的 sd-thinklyRise。 */
 const MD_ANIMATION = { animation: "thinklyRise", duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)", sep: "word" } as const;
 
 type WebLink = WebResultsCardData["results"][number];
 
-/** 网页来源去重后最多列 6 条，按出现顺序。 */
 function webLinks(cards: InfoCardData[]): WebLink[] {
   const seen = new Set<string>();
   const links: WebLink[] = [];
@@ -59,7 +57,6 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, scrol
   scrollRef: RefObject<HTMLDivElement | null>;
   onBack: () => void;
   onOpenSource: (id: string) => void;
-  /** followUp：卡片点选产生的下一句话，交给 AI 面板继续 */
   onContinue?: (followUp?: string) => void;
 }) {
   useLocale();

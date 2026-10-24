@@ -1,6 +1,5 @@
 import type { Node as ProseMirrorNode } from "prosemirror-model";
 
-/** Keep unselected children and gaps outside the highlighted range. */
 export function groupInlinePreviewRanges<T extends { blockFrom: number }>(
   doc: ProseMirrorNode,
   parts: T[],

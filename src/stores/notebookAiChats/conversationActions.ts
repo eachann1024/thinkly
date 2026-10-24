@@ -120,24 +120,19 @@ export function createConversationChatActions(
         ? notebookChat?.conversations[activeId]
         : undefined;
 
-      // 尚无会话，或当前就是空会话：直接落到可复用的空会话。
       if (!activeConversation || activeConversation.messages.length === 0) {
         return get().createConversation(notebookId);
       }
 
-      // 以笔记本级 last touch 为准（发消息 / 切历史 / 新建 / 打开都会刷新），
-      // 避免「只点开历史」后马上被 30 分钟规则误归档。
       const lastActiveAt = Math.max(
         notebookChat?.updatedAt ?? 0,
         activeConversation.updatedAt,
       );
       if (now - lastActiveAt < maxAgeMs) {
-        // 恢复未过期会话时刷新 touch，把 30 分钟窗口从「最近一次打开」起算。
         get().setActiveConversation(notebookId, activeConversation.id);
         return activeConversation.id;
       }
 
-      // 过期：旧会话保留在 conversations 里供历史列表读取，激活新空白会话。
       return get().createConversation(notebookId);
     },
 
@@ -148,7 +143,6 @@ export function createConversationChatActions(
         if (!notebookChat || !conversation) return state;
 
         const now = Date.now();
-        // 已是当前会话时仍刷新 touch 时间，表示用户再次打开/继续该会话。
         if (notebookChat.activeConversationId === conversationId) {
           return {
             chats: {

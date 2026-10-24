@@ -8,7 +8,6 @@ export type MarkdownRead = Awaited<ReturnType<typeof readMarkdownFile>>;
 const inFlight = new WeakMap<GooseFs, Map<string, Promise<MarkdownRead>>>();
 const handoffs = new Map<string, MarkdownRead>();
 
-/** Only concurrent reads are shared; completed results are never a disk truth cache. */
 export function readSharedMarkdown(
   fs: GooseFs,
   path: string,
@@ -37,7 +36,6 @@ export async function readUnchangedMarkdown(
   return readSharedMarkdown(fs, path);
 }
 
-/** Available only while the caller synchronously invokes reload, never after a toast. */
 export function withMarkdownReadHandoff(
   path: string,
   read: MarkdownRead,

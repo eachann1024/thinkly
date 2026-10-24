@@ -1,6 +1,5 @@
 interface Change { status: string; path: string; previous?: string }
 
-/** Git -z output preserves Chinese names, tabs, spaces and rename pairs. */
 function readChanges(output: string): Change[] {
   const fields = output.split("\0");
   const changes: Change[] = [];
@@ -18,7 +17,6 @@ const hidden = (path: string) => path.split("/").some((part) => part.startsWith(
 const asset = (path: string) => /(?:^|\/)assets\//.test(path);
 const printable = (path: string) => path.replace(/[\r\n\t]/g, " ");
 
-/** Only file names and counts enter the message; never include note contents. */
 export function describeGitSyncChanges(output: string): string {
   const changes = readChanges(output);
   const notes = changes.filter((change) => !hidden(change.path) && !asset(change.path) && /\.(?:md|markdown)$/i.test(change.path));

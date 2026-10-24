@@ -16,7 +16,6 @@ const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
 type MainOp = "minimize" | "hide" | "move-top" | "show" | "restore";
 
-/** 全局唤出浮动窗时，主窗实际会收到的操作。系统可能先把最小化窗口还原。 */
 function replay(state: WorkspaceSurface, broughtForward: boolean): { ops: MainOp[]; minimized: boolean; visible: boolean } {
   const parked = parkedWorkspaceKind(state);
   const ops: MainOp[] = [];
@@ -42,7 +41,6 @@ function sliceFn(source: string, name: string, next: string): string {
   return source.slice(start, end === -1 ? undefined : end);
 }
 
-/** 全局搜索唤出浮动窗时，不 show / restore 已最小化或已隐藏的主窗。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

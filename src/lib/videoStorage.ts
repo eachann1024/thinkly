@@ -46,7 +46,6 @@ export const videoStorage = {
     const video = await transcodeVideo(file, onProgress);
     const localPagePath = await currentLocalPagePath();
 
-    // Electron 仅本地文件夹模式：无仓库时禁止视频写入内置 db
     if (!localPagePath) {
       throw new Error(uiText("openALocalFolderNotebookBeforeInsertingAVideo"));
     }
@@ -60,7 +59,6 @@ export const videoStorage = {
     ) {
       throw new Error(uiText("couldnTCreateTheVideoFolder"));
     }
-    // 转码产物固定 mp4；无 FFmpeg 宿主透传原文件时保留原扩展名，避免 mislabel。
     const passthroughExt =
       video.type && video.type !== VIDEO_OUTPUT_MIME
         ? file.name.split(".").pop()?.toLowerCase() || "mp4"
@@ -92,7 +90,6 @@ export const videoStorage = {
     if (!pageLocalFilePath) return null;
     const path = resolveToAbsolute(pageDirectory(pageLocalFilePath), ref);
     const gfs = typeof window !== "undefined" ? window.gooseFs : undefined;
-    // 原生壳（Electron）无同步 fs，优先异步二进制桥。
     const base64 = gfs?.readFileBase64Async
       ? await gfs.readFileBase64Async(path)
       : (gfs?.readFileBase64?.(path) ?? null);

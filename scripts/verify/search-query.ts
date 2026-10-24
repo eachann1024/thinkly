@@ -1,7 +1,6 @@
 import { createChecker } from "./lib/check";
 import { collapseComposerSearchText, composerDocFromPlainText, searchTextOutsideSlashCommand } from "../../src/pages/workspace/components/search-sheet/searchQueryText";
 
-/** 搜索输入：换行折成检索词，种回输入框时保留分段。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

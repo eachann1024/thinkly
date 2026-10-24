@@ -31,15 +31,6 @@ ja:
   couldnTConvertTheImageToPng: "PNG に変換できませんでした"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * 图片处理工具：压缩、转换、存储
- *
- * 规则：
- * - 非 SVG 统一输出 WebP@80%
- * - 已是 WebP（含 MIME 为空但文件头是 WebP）不再二次压缩
- * - 不做 JPEG / 多档质量 / dataURL 等兜底
- * - 复制与下载时再转 PNG
- */
 
 import type { StorageConfig } from "./imageStorage/types";
 import {
@@ -60,7 +51,6 @@ function canvasToBlob(
   mimeType: string,
   quality?: number,
 ): Promise<Blob | null> {
-  // 项目锁 ES2022，不能用 Promise.withResolvers
   return new Promise((resolve) => {
     if (typeof quality === "number") {
       canvas.toBlob((blob) => resolve(blob), mimeType, quality);
@@ -132,14 +122,10 @@ async function encodeWebp(
   return encoded;
 }
 
-/**
- * 统一压缩入口：只输出 WebP@80%
- */
 export async function compressIfNeeded(
   input: Blob | File,
   cfg: StorageConfig = DEFAULT_STORAGE_CONFIG,
 ): Promise<Blob> {
-  // 调用方可能已 materialize；这里再保证一次字节与 MIME 正确
   const source =
     input.type === SVG_MIME ? input : await materializeImageBlob(input);
 
@@ -147,7 +133,6 @@ export async function compressIfNeeded(
     return source;
   }
 
-  // 已是 WebP：不二次压缩
   if (source.type === WEBP_MIME) {
     if (source.size > MAX_IMAGE_STORE_BYTES) {
       throw new Error(
@@ -171,9 +156,6 @@ export async function compressIfNeeded(
   return encoded;
 }
 
-/**
- * 复制剪贴板 / 下载：统一转 PNG
- */
 export async function convertImageBlobToPng(input: Blob): Promise<Blob> {
   const source =
     input.type === SVG_MIME ? input : await materializeImageBlob(input);
@@ -206,9 +188,6 @@ export async function convertImageBlobToPng(input: Blob): Promise<Blob> {
   return png;
 }
 
-/**
- * 压缩图片（向后兼容薄封装）
- */
 export async function compressImage(
   file: File,
   quality = DEFAULT_STORAGE_CONFIG.compressQuality,
@@ -219,9 +198,6 @@ export async function compressImage(
   });
 }
 
-/**
- * 文件/Blob 转 base64
- */
 export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -233,9 +209,6 @@ export function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-/**
- * 从剪切板事件提取图片文件
- */
 export function getImageFromClipboard(event: ClipboardEvent): File | null {
   const items = event.clipboardData?.items;
   if (!items) return null;
@@ -249,9 +222,6 @@ export function getImageFromClipboard(event: ClipboardEvent): File | null {
   return null;
 }
 
-/**
- * 校验是否为有效的图片 URL
- */
 export function isValidImageUrl(url: string): boolean {
   try {
     const parsed = new URL(url);

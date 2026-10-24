@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-/** 跟随根节点的 .dark 类：主窗口与其他窗口都由 applyTheme 写入。 */
 const listeners = new Set<() => void>();
 let observer: MutationObserver | null = null;
 

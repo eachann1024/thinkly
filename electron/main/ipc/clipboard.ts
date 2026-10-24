@@ -44,7 +44,6 @@ export function registerClipboardIpc(): void {
         const dataUrl = toDataUrl(clipboard.readBuffer(format));
         if (dataUrl) return dataUrl;
       } catch {
-        // 这个格式当前平台不认，继续看下一种。
       }
     }
     const image = clipboard.readImage();

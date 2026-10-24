@@ -125,7 +125,6 @@ function OutlineTreeNode({
   useLocale();
   const isActive = activeId === heading.id;
   const [hovered, setHovered] = useState(false);
-  // 箭头只控制大纲树。正文折叠状态不参与大纲子项的可见性。
   const canToggleOutline = heading.children.length > 0;
   const isEditorCollapsed = heading.isEditorFoldable && heading.isCollapsed;
   const isOutlineCollapsed = locallyCollapsedIds.has(heading.id);
@@ -149,8 +148,6 @@ function OutlineTreeNode({
         onContextMenu={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          // 右键只走编辑器既有的折叠限制；首标题不能折叠时保持无操作，
-          // 绝不回退为收起本地大纲子树。
           onHeadingToggle(heading.id);
         }}
       >

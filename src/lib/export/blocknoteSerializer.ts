@@ -11,10 +11,6 @@ import { jsonContentToMarkdown } from "./markdown/serialize";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { getMermaidInitConfig } from "@/lib/imageExport/mermaidTheme";
 
-/**
- * 把 <pre><code class="language-mermaid">...</code></pre> 转成
- * <pre class="mermaid">...</pre>，便于浏览器侧 mermaid.js 自动渲染。
- */
 function rehypeMermaid() {
   return (tree: any) => {
     const walk = (node: any) => {
@@ -70,12 +66,6 @@ export async function blocksToHTML(
   return String(file);
 }
 
-/**
- * CDN 资源 — 注入到导出 HTML 的 <head> / <body> 末尾。
- * KaTeX：渲染 $$...$$ 数学公式
- * highlight.js：代码高亮（rehype-highlight 输出的是 hljs-* class）
- * mermaid：浏览器侧 auto-init，把 <pre class="mermaid"> 渲染成图
- */
 export const EXPORT_HTML_HEAD_ASSETS = `
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css">

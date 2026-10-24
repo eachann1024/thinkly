@@ -25,7 +25,6 @@ export function renderInline(content: unknown, theme?: CardTheme): string {
 
       if (item.type === "hardBreak") return "<br>";
 
-      // 链接：BlockNote 标准形态 { type, href, content: InlineContent[] }
       if (item.type === "link") {
         const href = item.href || item.attrs?.href || "";
         const inner = renderInline(item.content, theme) || escapeHtml(item.text || href);

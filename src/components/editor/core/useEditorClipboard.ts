@@ -71,7 +71,6 @@ export function useEditorClipboard(runtime: EditorRuntime) {
         }
       })();
     };
-    // 先于 BlockNote 原生 cut handler，防止其在异步位图写入前删除图片。
     container.addEventListener("copy", copyImage, true);
     container.addEventListener("cut", copyImage, true);
     return () => {

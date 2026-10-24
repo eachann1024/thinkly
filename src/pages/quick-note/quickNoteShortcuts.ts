@@ -22,7 +22,6 @@ interface QuickNoteShortcutTarget {
   closest?: (selector: string) => unknown;
 }
 
-/** 原生表单和非正文 contenteditable 保留浏览器自己的编辑快捷键。 */
 export function shouldQuickNoteEditableTargetOwnShortcut(
   target: QuickNoteShortcutTarget | null,
 ) {

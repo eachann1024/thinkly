@@ -18,7 +18,6 @@ import {
   setDesktopAlwaysOnTop,
 } from "@/lib/electron/alwaysOnTop";
 
-/** 读取当前窗口的真实置顶状态；不写入全局设置或影响速记窗口。 */
 export function useWindowAlwaysOnTop(): {
   alwaysOnTop: boolean;
   isPending: boolean;
@@ -54,7 +53,6 @@ export function useWindowAlwaysOnTop(): {
     pendingRef.current = true;
     setIsPending(true);
     try {
-      // 切换前再读一次，避免顶栏重挂载或宿主状态变化时反转旧值。
       const current = await getDesktopAlwaysOnTop();
       if (!mountedRef.current) return;
       setAlwaysOnTop(current);

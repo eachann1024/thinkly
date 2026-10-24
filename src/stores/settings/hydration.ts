@@ -205,6 +205,5 @@ export function hydrateSettings(state?: SettingsState) {
       });
     }
   }
-  // 标记 hydration 完成
   useSettings.setState({ _hasHydrated: true });
 }

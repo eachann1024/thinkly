@@ -29,7 +29,6 @@ async function snapshot(root: string, directories = ["src", "electron"]) {
 const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 export default async function run(): Promise<number> {
-  // Native .mjs loading keeps the verification bundler from compiling the compiler itself.
   const load = (file: string) => import(pathToFileURL(path.resolve(process.cwd(), "scripts/i18n", file)).href);
   const { collectCatalog } = await load("catalog.mjs");
   const { createCatalogSession } = await load("catalogSession.mjs");

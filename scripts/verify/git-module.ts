@@ -11,7 +11,6 @@ import {
 const root = process.cwd();
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
-/** Git 大模块：三端候选路径、macOS 安装框、旧仓库默认开启、读不到就不显示。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

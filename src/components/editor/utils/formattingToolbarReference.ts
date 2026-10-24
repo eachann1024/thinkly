@@ -17,10 +17,6 @@ export type ToolbarReferenceRect = {
   height: number;
 };
 
-/**
- * Union of selected block DOM boxes. Multi-block text selections often report a
- * PM rect glued to the first block's text; block boxes reflect the full span.
- */
 function getSelectedBlocksUnionRect(
   editor: BlockNoteEditor<any, any, any>,
 ): DOMRect | undefined {
@@ -52,11 +48,6 @@ function getSelectedBlocksUnionRect(
   return new DOMRect(minLeft, minTop, maxRight - minLeft, maxBottom - minTop);
 }
 
-/**
- * Floating-toolbar anchor rect for the current formatting selection mode.
- * multiBlock → full selected-blocks bbox (centered above/below the span);
- * other modes → ProseMirror selection bounding box.
- */
 export function getFormattingToolbarReferenceRect(
   editor: BlockNoteEditor<any, any, any>,
   mode?: FormattingSelectionMode,
@@ -80,7 +71,6 @@ export function getFormattingToolbarReferenceRect(
   return editor.getSelectionBoundingBox();
 }
 
-/** The table's reserved top gutter keeps the cell toolbar off column headings. */
 function getSelectedTableRect(
   editor: BlockNoteEditor<any, any, any>,
 ): DOMRect | undefined {
@@ -99,10 +89,6 @@ function isUsableToolbarRect<T extends { width: number; height: number }>(
   return Boolean(rect && (rect.width > 0 || rect.height > 0));
 }
 
-/**
- * 拖选时选区会先塌成空：当前锚点暂时没有，沿用上一帧，避免工具栏跳到 0,0
- * 或被 avoid-overlap 隐掉（从而闪出被挡住的上一行）。
- */
 export function rememberFormattingToolbarRect<
   T extends { width: number; height: number },
 >(rect: T | undefined, last: { current: T | null }, empty: T): T {
@@ -141,11 +127,6 @@ function getSelectedCellsUnionRect(
   return new DOMRect(minLeft, minTop, maxRight - minLeft, maxBottom - minTop);
 }
 
-/**
- * Collapse a tall multi-block reference to a 1px edge so avoid-overlap
- * middleware can place the toolbar above/below without treating the whole
- * selection height as forbidden space.
- */
 export function getMultiBlockToolbarEdgeRect(
   reference: ToolbarReferenceRect,
   preferredSide: ToolbarEdgeSide,

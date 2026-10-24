@@ -91,7 +91,6 @@ function tableNode(block: PartialBlock, schema: Schema, spec: NonNullable<Return
   );
 }
 
-/** 无合并单元格的大表不走 BlockNote 的占位网格。那是按格子重复建网格，上千行要数秒。 */
 export function blockToEditorNode(block: PartialBlock, schema: Schema): Node {
   const spec = simpleTable(block);
   if (spec) return tableNode(block, schema, spec);

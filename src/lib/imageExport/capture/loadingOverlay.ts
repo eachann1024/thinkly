@@ -11,7 +11,6 @@ ja:
 const uiText = createTranslator(localMessages);
 import { UI_LAYERS } from "@/lib/uiLayers";
 
-// ── Loading Overlay ────────────────────────────────────────────
 export function createLoadingOverlay(): HTMLElement {
   document
     .querySelectorAll("#goose-image-export-loading")

@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Same-machine generator benchmark. Never starts Electron or touches the real source/profile.
-// node scripts/perf/vite-generation.mjs --baseline-ref=<before-commit> --rounds=7 --burst=100
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
@@ -129,7 +127,6 @@ try {
   await benchmark("i18n/source-write-echo", async () => {}, collectOld,
     () => session.refresh([path.join(newRoot, translation)]), () => session.metrics);
   const { autoImportEntries } = await import(pathToFileURL(path.join(temporary, "new-auto-import.mjs")).href);
-  // The public entries are intentionally not re-exported by the generator; read the existing TS data via esbuild.
   let publicEntry = autoImportEntries?.[0];
   if (!publicEntry) {
     const entriesCode = await require("esbuild").transform(await readFile(path.join(root, "config/vite/autoImportEntries.ts"), "utf8"), { loader: "ts", format: "cjs" });

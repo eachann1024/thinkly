@@ -8,7 +8,6 @@ function between(html: string, start: string, end: string): string {
   return to < 0 ? "" : html.slice(begin, to);
 }
 
-/** 主题弹层在当前文档里画预览，不等 iframe 和网络字体。 */
 function previewMarkup(html: string): string {
   return `<style>${between(html, "<style>", "</style>")}</style>${between(html, "<body>", "</body>")}`;
 }

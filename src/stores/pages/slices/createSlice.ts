@@ -39,7 +39,6 @@ export function createCreatePageSlice(
       const current = get().pages[pageId];
       const fresh = loadInternalPage(pageId);
       if (!fresh) return false;
-      // 仅当 db 版本更新时才覆盖，避免回退本进程尚未落盘的较新编辑。
       if (current && fresh.updatedAt <= current.updatedAt) return false;
       set((state) => ({
         pages: { ...state.pages, [pageId]: fresh },

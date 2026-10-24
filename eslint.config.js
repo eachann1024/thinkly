@@ -59,10 +59,6 @@ export default defineConfig([
       'react/no-danger': 'warn',
       'jsx-a11y/aria-role': 'warn',
       'jsx-a11y/no-noninteractive-element-to-interactive-role': 'warn',
-      // React Compiler 规则统一降为 warn：以下模式（callback ref 写 ref、
-      // render 阶段同步赋值模块变量、动态依赖的 memo、useMemo 内取当前时间）
-      // 均为编辑器/渲染层的有意设计或编译器过度保守误报，运行正确，
-      // 不作为阻断性 error 处理，与项目其余规则惯例一致。
       'react-hooks/immutability': 'warn',
       'react-hooks/preserve-manual-memoization': 'warn',
       'react-hooks/globals': 'warn',

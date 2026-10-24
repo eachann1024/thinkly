@@ -5,7 +5,6 @@ import type { HistoryDisk } from "./localDisk";
 import { HISTORY_HASH_DIR, originalHistoryPath, parseHistoryLocations, validHistoryRelativePath, type HistoryLocations } from "./localPaths";
 import type { HistoryIndexEntry } from "./types";
 
-/** 旧布局：`.goose/history/<笔记相对路径>/<hash>.index.json` 与 `<hash>.<versionId>.json`。 */
 const LEGACY_FILE = /^[a-f0-9]{8}\.(.+)\.json$/;
 
 interface LegacyFile { path: string; dir: string; kind: string }
@@ -112,7 +111,6 @@ async function migrateGroup(basePath: string, pageId: string, group: Group, loca
   return intact;
 }
 
-/** 幂等、可中断续跑：先写新布局并校验，再删旧文件；全部成功后才删 history-map.json 与空目录。 */
 export async function ensureHistoryLayout(basePath: string, fs: HistoryDisk): Promise<void> {
   const root = historyRoot(basePath);
   const mapFile = `${basePath}/.goose/history-map.json`;
@@ -143,7 +141,6 @@ export async function ensureHistoryLayout(basePath: string, fs: HistoryDisk): Pr
 }
 
 const checked = new Set<string>();
-/** 每次会话对每个笔记本只检查一次；失败时不记录，下次访问重试。 */
 export async function ensureHistoryLayoutOnce(basePath: string, fs: HistoryDisk): Promise<void> {
   if (checked.has(basePath)) return;
   await ensureHistoryLayout(basePath, fs);

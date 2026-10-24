@@ -53,7 +53,6 @@ export async function executeEditOperation(
                 basenameWithoutMarkdownExtension(originalPath),
               );
           } catch {
-            // 保留失败现场，由执行日志提示人工恢复。
           }
         }
         throw new Error("本地文件重命名结果与审批计划不一致");
@@ -137,7 +136,6 @@ export async function executeSearchReplaceOperation(
           (item) => item.operationId === candidate.operationId && item.ok,
         ),
     );
-    // 同页后续项还要写：先不刷新编辑器，避免中间修订把后面的项卡死。
     if (!nextSamePage) reloadEditorIfActive(operation.pageId);
     result = {
       operationId: operation.operationId,

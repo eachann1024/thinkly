@@ -5,7 +5,6 @@ import {
 } from "./catalog.mjs";
 import { createGenerationQueue } from "./catalogQueue.mjs";
 
-/** The first snapshot is complete; later batches read only changed source paths. */
 export function createCatalogSession(root) {
   root = resolve(root);
   let records = new Map(), initialized = false;
@@ -39,8 +38,6 @@ export function createCatalogSession(root) {
       void queue.request(full ? null : files).catch(() => undefined);
       return;
     }
-    // Ordinary edits and translation text changes update only their cached record.
-    // Clone the complete snapshot only when global declaration chunks must change.
     const next = full ? new Map() : changed ? new Map(records) : records;
     for (const [filename, record] of delta) {
       if (record) next.set(filename, record); else next.delete(filename);

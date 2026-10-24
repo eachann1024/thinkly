@@ -6,7 +6,6 @@ import { useSettings } from "@/stores/useSettings";
 import { pickRandomPageIcon } from "@/lib/randomPageIcon";
 import { cloneLocalPageContent } from "./content";
 
-/** 只登记编辑器草稿；不落库、不切页，调用方打开标签或分屏后再激活。 */
 export function createEditorDraftPageAction(
   set: StoreSet,
   get: StoreGet,

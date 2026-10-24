@@ -85,7 +85,6 @@ export function SkillSuggestionsList(props: {
                 data-goose-menu-slot="row"
                 data-keyboard-active={index === props.activeIndex || undefined}
                 className={cn(
-                  // items-start：多行描述时图标与标题首行并排，首行通过等高容器绝对居中
                   "goose-menu-item goose-menu-item-multiline goose-list-row flex w-full flex-nowrap items-start gap-2 rounded-md px-2.5 py-1.5 text-left",
                 )}
                 onMouseDown={(event) => {

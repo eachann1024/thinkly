@@ -26,11 +26,9 @@ function remember(loop: Loop) {
   const time = loop.control.time();
   times.set(loop.name, time);
   loop.control.remove();
-  // Activity may retain the DOM, while display:none cancels its CSSAnimation.
   if (loop.animation.playState !== "idle") loop.animation.currentTime = time;
 }
 
-/** Only discover this registered illustration after a lifecycle or local DOM/style change. */
 function refresh(root: Root) {
   const candidates = root.el.getAnimations({ subtree: true }).flatMap((animation) => {
     if (!(animation instanceof CSSAnimation) || !loopNames.has(animation.animationName)) return [];
@@ -43,8 +41,6 @@ function refresh(root: Root) {
   });
   const live = new Set(candidates.map(({ animation }) => animation));
   clock.batch(() => {
-    // display:none cancels CSSAnimation objects without unmounting the root. Save their
-    // phase before a replacement for the same target/name reads the remembered time.
     for (const [animation, loop] of root.loops) if (!live.has(animation)) {
       remember(loop);
       root.loops.delete(animation);
@@ -60,7 +56,6 @@ function refresh(root: Root) {
         const name = animation.animationName;
         const time = remembered.get(target)?.get(name) ?? (typeof animation.currentTime === "number" ? animation.currentTime : 0);
         animation.pause();
-        // Settles a pending pause synchronously, including the original negative delay phase.
         animation.currentTime = time;
         const control = clock.add({
           time, duration, delay, offsets: loopOffsets(name),

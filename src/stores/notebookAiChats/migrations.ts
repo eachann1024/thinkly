@@ -105,7 +105,6 @@ export function normalizeComposerDrafts(
   return next;
 }
 
-/** Zustand persist v0（单会话）到 v1（多会话）的兼容迁移。 */
 export function migrateNotebookAiChatsState(
   persistedState: unknown,
 ): NotebookAiChatsPersistedState {

@@ -6,7 +6,6 @@ import {
 } from "../../src/components/editor/extensions/trailingBlankClickGeometry";
 import { createChecker } from "./lib/check";
 
-// 给定排版坐标验证行定位；真实 Chromium 的硬换行坐标另用隔离编辑器验收。
 const caret = (top: number, left: number): CaretCoords => ({
   top, bottom: top + 18, left, right: left,
 });

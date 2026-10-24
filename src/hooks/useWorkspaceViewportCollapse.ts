@@ -6,10 +6,6 @@ import {
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 
-/**
- * 按窗口宽度强制收起左右侧栏，不改用户持久化偏好。
- * 拉宽后恢复原偏好；窄窗临时打开不会成为宽窗的展开偏好。
- */
 export function useWorkspaceViewportCollapse(): void {
   const setForceCollapse = useWorkspaceViewport((s) => s.setForceCollapse);
 

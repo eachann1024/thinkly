@@ -1,7 +1,3 @@
-/**
- * 将「仅局部差异」的整页 edit 自动拆成一条或多条 search_replace，
- * 避免误用 edit 导致块 id / props 丢失。纯函数，便于单测。
- */
 import { normalizeAiMarkdownForDiff } from "@/lib/notebook-ai/markdown";
 import type { BatchPlanOperationInput } from "./types";
 
@@ -20,7 +16,6 @@ function splitParagraphs(markdown: string): string[] {
   return trimmed.split(/\n\n+/);
 }
 
-/** LCS 长度表（按段落字符串精确相等）。 */
 function buildLcsTable(a: string[], b: string[]): number[][] {
   const m = a.length;
   const n = b.length;
@@ -42,7 +37,6 @@ interface DiffOp {
   newIndex?: number;
 }
 
-/** 从 LCS 回溯得到对齐序列（从前到后）。 */
 function alignByLcs(oldParas: string[], newParas: string[]): DiffOp[] {
   const dp = buildLcsTable(oldParas, newParas);
   const reverse: DiffOp[] = [];
@@ -71,15 +65,12 @@ function alignByLcs(oldParas: string[], newParas: string[]): DiffOp[] {
 }
 
 interface Hunk {
-  /** 旧段落下标区间 [start, end) */
   oldStart: number;
   oldEnd: number;
-  /** 新段落下标区间 [start, end) */
   newStart: number;
   newEnd: number;
 }
 
-/** 将连续非 equal 操作合并为 hunk；纯插入时 oldStart===oldEnd 为插入点。 */
 function collectHunks(ops: DiffOp[]): Hunk[] {
   const hunks: Hunk[] = [];
   let oldPos = 0;
@@ -128,10 +119,6 @@ function joinParas(paras: string[], start: number, end: number): string {
   return paras.slice(start, end).join("\n\n");
 }
 
-/**
- * 从原文中按段落顺序截取 [start, end) 的精确子串（保留原有 \n\n+ 分隔），
- * 保证 oldString 能在页面 markdown 中 indexOf 命中。
- */
 function extractOldSpan(
   haystack: string,
   paras: string[],
@@ -154,10 +141,6 @@ function extractOldSpan(
   return haystack.slice(spanStart, spanEnd);
 }
 
-/**
- * 尝试把局部 edit 转为 search_replace 列表。
- * 失败（整页重写、过碎、无法唯一定位等）时返回 null，调用方应保留原 edit。
- */
 export function tryConvertEditToSearchReplace(params: {
   pageId: string;
   oldMarkdown: string;
@@ -169,7 +152,6 @@ export function tryConvertEditToSearchReplace(params: {
   const oldNorm = oldMd.trim();
   const newNorm = newMd.trim();
 
-  // 空页 / 仅空白：保留 edit 做整页填充
   if (!oldNorm) return null;
   if (oldNorm === newNorm) return null;
 
@@ -186,14 +168,12 @@ export function tryConvertEditToSearchReplace(params: {
   for (const hunk of hunks) {
     for (let p = hunk.oldStart; p < hunk.oldEnd; p += 1) {
       changedChars += oldParas[p]?.length ?? 0;
-      // 段间分隔
       if (p + 1 < hunk.oldEnd) changedChars += 2;
     }
   }
   const ratio = changedChars / Math.max(oldNorm.length, 1);
   if (ratio > MAX_CHANGED_RATIO) return null;
 
-  // 构建每个 hunk 在「段落序列」上的 equal 邻居，用于纯插入锚定
   const equalOldIndices = new Set<number>();
   for (const op of ops) {
     if (op.kind === "equal" && op.oldIndex != null) {
@@ -216,7 +196,6 @@ export function tryConvertEditToSearchReplace(params: {
     let oldString = extractedOld;
     let newString = joinParas(newParas, hunk.newStart, hunk.newEnd);
 
-    // 纯插入：用相邻未改段落做锚点（优先前一段）
     if (!oldString) {
       let anchorIndex = -1;
       for (let p = hunk.oldStart - 1; p >= 0; p -= 1) {

@@ -153,7 +153,7 @@ export const SETTINGS_OPTION_ROW_CLASS =
 
 export const FIXED_APP_SHORTCUTS = getFixedAppShortcuts();
 
-export /** 单标签模式下 UI 与热键均禁用的自定义动作，不参与冲突占用。 */
+export
 const TAB_ONLY_APP_SHORTCUT_IDS = new Set(["newTab"]);
 
 export const ALWAYS_FIXED_SHORTCUT_VALUES = [
@@ -170,7 +170,6 @@ export const ALWAYS_FIXED_SHORTCUT_VALUES = [
   "Mod+0",
   "F3",
   "Shift+F3",
-  // 浏览器/编辑器固定行为不可被自定义动作覆盖。
   "Mod+S",
   "Mod+1",
   "Mod+2",
@@ -190,7 +189,7 @@ export const ALWAYS_FIXED_SHORTCUT_VALUES = [
   ...(isMacPlatform() ? ["Mod+Shift+W"] : []),
 ];
 
-export /** 仅多标签模式生效的固定快捷键。 */
+export
 const TAB_ONLY_FIXED_SHORTCUT_VALUES = [
   "Mod+W",
   FIXED_APP_SHORTCUTS.reopenTab,

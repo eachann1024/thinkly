@@ -3,7 +3,6 @@ import { createTranslator, getLocale } from "@/i18n";
 
 const t = createTranslator(messages);
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-// Keep matching original persisted/tool text when displayed terminology is revised.
 const legacySources: Readonly<Record<string, string>> = {
   theNewPageSParentIsMissingIn: "新页面的父级不存在、已在垃圾箱中或不属于当前笔记本",
   theDeletionTargetIsMissingInTrashOr: "删除目标不存在、已在垃圾箱中或不属于当前笔记本",
@@ -23,7 +22,6 @@ const diagnostics = Object.entries(messages["zh-Hans"]).map(([key, source]) => {
   return { key, parameters, pattern: new RegExp(`^${pattern}$`) };
 });
 
-/** Keep persisted/tool diagnostics stable; translate only when presenting them. */
 export function localizeNotebookAiDiagnostic(message: string): string {
   if (!message) return message;
   for (const diagnostic of diagnostics) {
@@ -32,7 +30,6 @@ export function localizeNotebookAiDiagnostic(message: string): string {
     const parameters = Object.fromEntries(
       diagnostic.parameters.map((name, index) => [name, match[index + 1]]),
     );
-    // The catalog and placeholder names are compiled together from this module's YAML.
     return (t as (key: string, values: Record<string, string>) => string)(diagnostic.key, parameters);
   }
   if (/^\d+\. /m.test(message)) {
@@ -41,7 +38,6 @@ export function localizeNotebookAiDiagnostic(message: string): string {
       return numbered ? numbered[1] + localizeNotebookAiDiagnostic(numbered[2]) : line;
     }).join("\n");
   }
-  // Aggregated recovery errors retain each original field and its ordering.
   if (message.includes("；")) {
     return message.split("；").map(localizeNotebookAiDiagnostic).join(getLocale() === "zh-Hans" ? "；" : "; ");
   }

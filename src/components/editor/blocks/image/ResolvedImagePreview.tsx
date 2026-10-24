@@ -35,7 +35,6 @@ type ImageResource = {
   phase: "loading" | "loaded" | "error";
 };
 
-/** 内部引用解析后才交给 img；解析、解码与失败分别呈现，避免浏览器破图闪现。 */
 export function ResolvedImagePreview({
   block,
   editor,
@@ -69,7 +68,6 @@ export function ResolvedImagePreview({
     return () => { cancelled = true; };
   }, [editor, source, pagePath, attempt]);
 
-  // URL、页路径或重试变化的首帧也不能展示上一张图或上一轮错误。
   const current = resource?.source === source && resource.pagePath === pagePath &&
     resource.attempt === attempt ? resource : undefined;
   const phase = current?.phase ?? "loading";
@@ -95,7 +93,6 @@ export function ResolvedImagePreview({
       {current?.src && phase !== "error" && (
         <img key={`${source}:${pagePath}:${attempt}`} className="bn-visual-media"
           ref={element => {
-            // 缓存命中或节点复用时 load 可能已发生，仍需确认实际解码结果。
             if (element?.complete) finish(element.naturalWidth > 0 ? "loaded" : "error");
           }}
           src={current.src} alt={typeof block.props.alt === "string" ? block.props.alt : block.props.name || ""}

@@ -92,7 +92,6 @@
  color: var(--goose-color-success);
 }
 
-/* 计划正文跟编辑器走：标题/清单不再压成聊天窄栏字号 */
 .notebook-ai-plan-md {
  font-size: var(--editor-base-font-size, 17px);
  line-height: 1.5;

@@ -46,14 +46,11 @@ function collectHeadings(doc: any[]): HeadingItem[] {
   const visit = (block: any) => {
     if (block.type === "heading" && block.props?.level) {
       const level = block.props.level;
-      // H1 作为文档标题；正文大纲只记录 H2-H4。
       if (level >= 2 && level <= 4) {
         const item: HeadingItem = {
           id: block.id,
           level,
           text: extractTextFromBlock(block) || uiText("untitled"),
-          // 标题折叠的唯一数据来源是 BlockNote heading.props.collapsed。
-          // 兼容旧内容可能留下的字符串值，和编辑器折叠扩展保持一致。
           isCollapsed:
             block.props?.collapsed === true || block.props?.collapsed === "true",
           isEditorFoldable: isFoldableHeadingBlock(block, firstBlockId),
@@ -111,8 +108,6 @@ export function useHeadings(
     }
     const doc = editor.document as any[];
     const nextHeadings = collectHeadings(doc);
-    // 非标题编辑同样会触发 editor.onChange；内容未变时沿用旧引用，
-    // 避免大纲面板的无关重渲染。标题文案、层级或收起状态变化仍会立即更新。
     setHeadings((current) =>
       headingsEqual(current, nextHeadings) ? current : nextHeadings,
     );
@@ -124,10 +119,6 @@ export function useHeadings(
 
   useEffect(() => {
     if (!editor) return;
-    // IME composition 期间每个拼音中间态都会触发 onChange，这里调 editor.document
-    // 全量转换 + collectHeadings 遍历全文 + setHeadings 触发大纲面板重渲染，
-    // 高频叠加会与 PM composition 抢主线程导致输入卡顿。composition 中跳过，
-    // compositionend 后刷新一次即可（大纲对中间态不可见，无功能损失）。
     const isComposing = () =>
       Boolean(
         (editor as { prosemirrorView?: { composing?: boolean } }).prosemirrorView

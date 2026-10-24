@@ -53,8 +53,6 @@ export function useFormattingToolbarAiActivate({
   setActiveTooltip: Dispatch<SetStateAction<string | null>>;
 }) {
   useLocale();
-  // AI 按钮打开自有菜单，冻结当前字符选区。
-  // 保存 selection 作为 AI 浮层锚点，并在菜单生命周期内隐藏格式工具栏。
   const handleAiActivate = useCallback(() => {
     try {
       const { selection } = editor.prosemirrorState;
@@ -63,7 +61,6 @@ export function useFormattingToolbarAiActivate({
         toast.error(t("thisPageCannotBeEdited"));
         return;
       }
-      // Freeze only supported text containers; node selections exclude implicit children.
       captureInlineSelectionParts(editor.prosemirrorState.doc, selection);
 
       if (!aiSettings.enabled) {
@@ -107,7 +104,6 @@ export function useFormattingToolbarAiActivate({
       try {
         setFakeSelection(editor, null);
       } catch {
-        /* ignore */
       }
       resetFormattingToolbarAi(editor);
     }

@@ -104,8 +104,6 @@ function alignsWithCaret(sample) {
   const caret = sample.state.caret;
   const height = sample.box.bottom - sample.box.top;
   const centeredTop = sample.box.top + Math.max(0, (height - (caret.bottom - caret.top)) / 2);
-  // The quote has an intentional inset; compare its actual text start with PM's caret
-  // while allowing the quote's border/padding, rather than comparing to the block edge.
   const quote = sample.state.type === "quote";
   const leftDelta = Math.abs(sample.box.left - caret.left);
   return leftDelta <= (quote ? 6 : 3) && Math.abs(centeredTop - caret.top) <= 3;

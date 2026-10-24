@@ -1,4 +1,3 @@
-/* 侧栏文字、图标和间距随界面根字号同步缩放；100% 保持原有几何。 */
 .workspace-shell .workspace-sidebar-pane .sidebar-design {
   --radius-lg: 0.571429rem;
   --sidebar-body-size: calc(var(--sidebar-font-size, 13px) + 0.071429rem);

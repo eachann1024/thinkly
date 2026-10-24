@@ -24,16 +24,6 @@ ja:
   readFailed: "画像を読み込めませんでした（{{status}}）"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * 将 SVG 标记或预览 DOM 安全栅格化为 PNG。
- *
- * 不走「SVG → <img> → canvas.drawImage」：Mermaid 等含 foreignObject 的 SVG
- * 会污染 canvas（tainted canvas），toBlob 直接失败。
- * 统一用离屏 DOM + html-to-image 截图。
- *
- * 分辨率策略：按内容固有尺寸导出，长边目标 4K（3840）冗余，
- * 小图至少 2×，并受画布边长 / 总像素上限约束。
- */
 
 import { getContentAwarePixelRatios } from "./contentPixelRatio";
 export { EXPORT_TARGET_LONG_EDGE, EXPORT_MIN_PIXEL_RATIO, EXPORT_MAX_PIXEL_RATIO, calculateContentAwarePixelRatio, getContentAwarePixelRatios } from "./contentPixelRatio";
@@ -49,10 +39,6 @@ function parseSvgLength(value: string | null): number | null {
   return Number.isFinite(num) && num > 0 ? num : null;
 }
 
-/**
- * 读取 SVG 内容固有尺寸（属性 → viewBox → bbox → 布局），并写回明确宽高，
- * 避免去掉 width/height 后回落到浏览器默认 300×150 导致糊图。
- */
 export function ensureSvgContentSize(svgEl: SVGSVGElement): {
   width: number;
   height: number;
@@ -79,7 +65,6 @@ export function ensureSvgContentSize(svgEl: SVGSVGElement): {
         height = height ?? bbox.height;
       }
     } catch {
-      // 未挂载或空 SVG 时 getBBox 会抛
     }
   }
 
@@ -153,7 +138,6 @@ async function toPngWithRatioFallback(
   throw lastError instanceof Error ? lastError : new Error(uiText("couldnTGenerateTheImage"));
 }
 
-/** 将 SVG 字符串离屏挂载后截为 PNG Blob */
 export async function svgMarkupToPngBlob(
   svg: string,
   options?: {
@@ -231,7 +215,6 @@ export async function svgMarkupToPngBlob(
   }
 }
 
-/** 截取页面上已有预览节点为 PNG（Math 等） */
 export async function captureElementAsPngBlob(
   element: HTMLElement,
   options?: {
@@ -260,16 +243,13 @@ export async function captureElementAsPngBlob(
   return dataUrlToBlob(dataUrl);
 }
 
-/** data URL / blob URL / 任意可 fetch 的图片地址 → PNG Blob */
 export async function imageUrlToPngBlob(url: string): Promise<Blob> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(uiText("readFailed", {status: response.status}));
   const blob = await response.blob();
   if (!blob.size) throw new Error(uiText("theImageIsEmpty"));
   if (blob.type === "image/png" || blob.type === "") {
-    // getDataURL 可能不带 type，按内容处理
     if (blob.type === "image/png") return blob;
   }
-  // 非 PNG 时尽量原样返回（ECharts 已是 PNG）；需要统一 PNG 的调用方再转
   return blob;
 }

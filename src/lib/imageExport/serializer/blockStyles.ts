@@ -9,7 +9,6 @@ export function bgPalette(theme?: CardTheme) {
   return theme?.mode === "dark" ? BLOCKNOTE_BACKGROUND_COLORS_DARK : BLOCKNOTE_BACKGROUND_COLORS;
 }
 
-/** 块级对齐 + 文字色 + 背景色 → 分号分隔的 CSS 声明（不含 style=） */
 export function collectBlockInlineStyles(block: any, theme: CardTheme): string {
   const styles: string[] = [];
   const align = block?.props?.textAlignment;
@@ -23,7 +22,6 @@ export function collectBlockInlineStyles(block: any, theme: CardTheme): string {
   return styles.join(";");
 }
 
-/** 块级对齐 + 文字色 + 背景色 → style 属性字符串（含前导空格） */
 export function buildBlockStyleAttr(block: any, theme: CardTheme): string {
   const css = collectBlockInlineStyles(block, theme);
   return css ? ` style="${css}"` : "";

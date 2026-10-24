@@ -37,8 +37,6 @@ export async function importMetadataZip(
       throw new Error(uiText("theBackupMetadataFormatIsInvalidImportStopped"));
     }
 
-    // 在产生任何 store 副作用前先把资源完整读入内存。此后若创建回调失败，
-    // 异常必须向外传播给 SettingsDialog 的回滚流程，禁止再回退目录解析造成重复数据。
     const notebookAssetMaps = new Map<string, Map<string, string>>();
     for (const nb of meta.notebooks) {
       const assetMap = await loadAssetsFromFolder(

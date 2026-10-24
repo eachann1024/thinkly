@@ -1,5 +1,3 @@
-/* 错误态：与默认 toast 同结构同布局，只换语义色（浅染底、描边、同色文图）。
- * 布局（图标、关闭按钮位置）全部来自 layout.css 的共享变量，这里禁止再写定位。 */
 .goose-toaster [data-sonner-toast]:is(.goose-toast-error, [data-type="error"]) {
  --normal-bg: var(--goose-interactive-danger);
  --normal-border: var(--goose-interactive-danger-border);
@@ -16,7 +14,6 @@
  opacity: 1 !important;
 }
 
-/* 错误图标：圆角底 + "!"，尺寸跟随共享图标变量。 */
 .goose-toast-error-mark {
  display: grid;
  place-items: center;

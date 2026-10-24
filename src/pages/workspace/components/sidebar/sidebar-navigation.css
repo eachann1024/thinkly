@@ -1,4 +1,3 @@
-/* 方案一：切本与树操作共用标题行，列表底部不再保留整行入口。 */
 .workspace-shell .workspace-sidebar-pane .sidebar-design:has(.sidebar-navigation-heading) {
   padding-inline: 0;
 }
@@ -14,7 +13,6 @@
   margin: 0;
   padding: 0.285714rem 0.714286rem;
 }
-/* 标题下只保留紧凑间距，与正常侧栏共用列表布局。 */
 .workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-page-list {
   margin-top: 0.25rem;
 }
@@ -49,7 +47,6 @@
 .sidebar-navigation-heading .sidebar-notebook-trigger--header > .goose-notebook-chevron {
   flex-shrink: 0;
 }
-/* 菜单仍通过 portal 挂到 body；列表单独滚动，底部操作始终可达。 */
 .goose-notebook-menu-surface.goose-notebook-menu-surface--header {
   display: flex;
   flex-direction: column;

@@ -73,7 +73,6 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
 
   useEffect(() => {
     return () => {
-      // React 卸载仍处于同步阶段；先把最后一帧送入 store/journal，再取消定时器。
       commitEditorContent(pageIdForUpdateRef.current ?? undefined);
     };
   }, [commitEditorContent]);

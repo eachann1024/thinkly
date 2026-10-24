@@ -8,7 +8,6 @@ const H = 72;
 const RINGS = 6;
 const WAVE_BINS = 10;
 const WAVE_PERIOD = DOT_MOTION.period.wave;
-/** 每列相位差：与设计稿一致，整条底线约 1.7 个波长。 */
 const PHASE_PER_COLUMN = 1 / 18;
 
 function build() {
@@ -29,7 +28,6 @@ function build() {
       index: b,
       neutral: list.filter((d) => !d.accent),
       accent: list.filter((d) => d.accent),
-      // 负延迟：入场即处于行波中段，不从同一相位起步
       delay: -((b * per + (per - 1) / 2) * PHASE_PER_COLUMN) * WAVE_PERIOD,
     };
   }).filter((w) => w.neutral.length + w.accent.length > 0);
@@ -39,7 +37,6 @@ function build() {
 const ART = build();
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/** 11 反思无记录：平静的趋势底座，末端品牌蓝。底纹波纹缓慢外扩；底线按列做正弦行波，缓慢上下起伏。 */
 export function FlatlineArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={W} height={H} origin={[50, 100]} className={className}>

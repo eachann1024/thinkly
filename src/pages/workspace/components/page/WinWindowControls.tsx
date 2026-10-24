@@ -22,10 +22,6 @@ ja:
   close: "閉じる"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Frameless 工作区窗的自定义窗控（Win/Linux 均为 frame：false）。
- * 放在 DesktopTitleBar 最右侧：最小化 / 最大化·还原 / 关闭。
- */
 import { useEffect, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { getGooseDesktop } from "@/lib/electron/runtime";

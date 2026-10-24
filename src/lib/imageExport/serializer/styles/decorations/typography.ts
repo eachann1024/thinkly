@@ -26,7 +26,6 @@ function isType(decoration: CardDecoration): decoration is TypeDecoration {
   return TYPE_KINDS.has(decoration.kind);
 }
 
-/** 短装饰随标题对齐方向摆放。 */
 function alignMargin(t: CardTheme, top: string): string {
   if (t.titleAlign === "center") return `margin: ${top} auto 0;`;
   if (t.titleAlign === "right") return `margin: ${top} 0 0 auto;`;

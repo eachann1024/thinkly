@@ -1,4 +1,3 @@
-/** 应用内拖拽只传来源标识和内容快照，落点再读取当前页面状态。 */
 export const GOOSE_PAGE_MIME = "application/x-goose-page";
 export const GOOSE_TEXT_MIME = "application/x-goose-text";
 export const GOOSE_FOLDER_MIME = "application/x-goose-folder";
@@ -17,7 +16,6 @@ function typesOf(data: DataTransfer): string[] {
   return Array.from(data.types ?? []);
 }
 
-/** dragover 处于 protected 模式，只能用 MIME 判断；内容在 drop 时验证。 */
 export function hasWorkspaceDrag(data: DataTransfer): boolean {
   const types = typesOf(data);
   if (types.includes(GOOSE_FOLDER_MIME)) return false;
@@ -69,12 +67,10 @@ export function readWorkspaceDrag(data: DataTransfer): WorkspaceDragPayload | nu
   return { kind: "text", text };
 }
 
-/** 保留树组件写入的数据与外部路径，应用内额外携带稳定的 pageId。 */
 export function writePageDrag(data: DataTransfer, pageId: string): void {
   data.setData(GOOSE_PAGE_MIME, JSON.stringify({ kind: "page", pageId }));
 }
 
-/** 文件夹只参与目录树移动，禁止把树组件的回退文本当成正文。 */
 export function writeFolderDrag(data: DataTransfer, pageId: string): void {
   data.setData(GOOSE_FOLDER_MIME, JSON.stringify({ pageId }));
 }

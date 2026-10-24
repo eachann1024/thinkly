@@ -64,13 +64,13 @@ async function lifecycleFixture() {
     scheduler.resumeDotLoops(root as any);
     now = 500;
     scheduler.pauseDotLoops(root as any);
-    old.playState = "idle"; // CSS display:none cancels the original object without unmounting.
+    old.playState = "idle";
     const fresh = new FixtureAnimation("goose-dm-breathe", new FixtureEffect(target));
     root.animations = [fresh];
     scheduler.resumeDotLoops(root as any);
     const restored = fresh.currentTime === 1734 && fresh.playState === "paused";
     const blink = new FixtureAnimation("goose-cs-blink-open", new FixtureEffect(eye, 7000, -5000), 420);
-    character.animations = [blink]; // A still character may have blinking images and no float.
+    character.animations = [blink];
     scheduler.resumeDotLoops(character as any);
     const blinking = blink.playState === "paused" && blink.currentTime === 420 && character.attributes.get("data-dm-clock") === "boundary";
     scheduler.pauseDotLoops(character as any);

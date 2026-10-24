@@ -19,7 +19,6 @@ import type { OpenFileDialogOptions } from "@/lib/native-dialog-contract";
 
 type FileFilters = NonNullable<OpenFileDialogOptions["filters"]>;
 
-/** 文档导入统一使用主进程选择器，让不同导入入口共享已确认的目录。 */
 export async function pickImportFile(filters: FileFilters): Promise<File | null> {
   const desktop = getGooseDesktop();
   if (desktop) {
@@ -44,7 +43,6 @@ export async function pickImportFile(filters: FileFilters): Promise<File | null>
   });
 }
 
-/** 取消返回 false；写盘失败抛错，禁止将取消或错误降级为自动下载。 */
 export async function saveDocumentBlobAndReveal(
   blob: Blob,
   filename: string,

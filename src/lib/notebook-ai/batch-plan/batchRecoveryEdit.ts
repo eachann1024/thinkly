@@ -82,7 +82,6 @@ export async function recoverEditedOperation(
         executingStartedAt: undefined,
       });
     } catch {
-      // 继续走失败分支，避免覆盖无法证明状态的本地文件。
     }
   }
   return writeBatchPlanJournal({
@@ -145,7 +144,6 @@ export async function recoverSearchReplaceOperation(
       );
     }
   } catch {
-    // fall through to failed
   }
   return writeBatchPlanJournal({
     ...journal,

@@ -1,7 +1,3 @@
-/*
- * 点阵形象：底帧 + 眨眼帧叠放，动画只改 transform / opacity。
- * 播放状态复用 useDotMotion 写入的 data-dm-phase / data-dm-paused。
- */
 .goose-cs {
   position: relative;
   flex-shrink: 0;
@@ -23,14 +19,12 @@
   opacity: 0;
 }
 
-/* 呼吸：整像素阶梯起伏，8s 一轮，位移 ≤ 2px */
 .goose-cs[data-dm-phase="in"]:not([data-cs-still]) .goose-cs-float {
   animation: goose-cs-float-lg 8s steps(1, end) var(--cs-float-delay, 0s) infinite;
 }
 .goose-cs[data-dm-phase="in"][data-cs-size="sm"]:not([data-cs-still]) .goose-cs-float {
   animation-name: goose-cs-float-sm;
 }
-/* 眨眼：每周期末尾闭眼约 2%（≈140ms），部分实例连眨两下 */
 .goose-cs[data-dm-phase="in"] .goose-cs-shut {
   animation: goose-cs-blink var(--cs-blink-period, 7s) step-end var(--cs-blink-delay, 0s) infinite;
 }

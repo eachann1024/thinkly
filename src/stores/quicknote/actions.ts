@@ -27,7 +27,6 @@ import {
 import { useNotebooks, DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 
-/** 会话内每槽最近一次成功记入撤销栈的时间（不持久化，仅用于输入合并窗口）。 */
 export const lastUndoRecordAtBySlot: Partial<Record<QuickNoteSlot, number>> =
   {};
 
@@ -48,7 +47,6 @@ export function createQuickNoteState(
 
     pinned: true,
 
-    // 强制置顶，恒 true
     windowWidth: QUICKNOTE_DEFAULT_WIDTH,
 
     windowHeight: QUICKNOTE_DEFAULT_HEIGHT,
@@ -63,8 +61,6 @@ export function createQuickNoteState(
       const next = normalizeSlot(slot);
       const previous = get().activeSlot;
       if (next === previous) return;
-      // 切槽是明确的编辑边界：回到任一槽后首次输入都应形成新撤销步，
-      // 不能和切换前 800ms 内的输入合并，否则一次撤销会直接退回空稿。
       lastUndoRecordAtBySlot[previous] = 0;
       lastUndoRecordAtBySlot[next] = 0;
       set({ activeSlot: next });
@@ -88,7 +84,6 @@ export function createQuickNoteState(
             drafts: { ...state.drafts, [target]: content },
           };
         }
-        // lastRecordAt 不持久化：用模块级 map 保持合并窗口（会话内有效即可）
         const lastAt = lastUndoRecordAtBySlot[target] ?? 0;
         const hist = recordEditHistory({
           undo: state.undoStacks[target] ?? [],
@@ -118,7 +113,6 @@ export function createQuickNoteState(
       if (!result.applied) {
         return { content: state.drafts[slot] ?? null, applied: false };
       }
-      // 撤销/重做本身不记入历史；并重置合并窗口，避免紧接着的 onChange 误合并
       lastUndoRecordAtBySlot[slot] = 0;
       recordQuickNoteRecovery(slot, state.drafts[slot] ?? null, result.content);
       set({
@@ -194,13 +188,12 @@ export function createQuickNoteState(
         const slot = state.activeSlot;
         const previous = state.drafts[slot] ?? null;
         recordQuickNoteRecovery(slot, previous, null);
-        // 清空也记一步，方便撤销恢复
         const hist = recordEditHistory({
           undo: state.undoStacks[slot] ?? [],
           redo: state.redoStacks[slot] ?? [],
           previous,
           next: null,
-          lastRecordAt: 0, // 强制新步，不与编辑合并
+          lastRecordAt: 0,
         });
         if (hist.recorded) {
           lastUndoRecordAtBySlot[slot] = hist.lastRecordAt;

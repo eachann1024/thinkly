@@ -7,7 +7,6 @@ export const SIDEBAR_MAX_WIDTH = 480;
 
 let sidebarResizeDragActive = false;
 
-/** 侧栏分隔线正在跟随指针。供 AI 让位在同一帧改宽度，而不把每次移动写进 React。 */
 export function isSidebarResizeDrag() {
   return sidebarResizeDragActive;
 }
@@ -78,7 +77,6 @@ export function useSidebarResize({
       return defaultWidth;
     }
   });
-  // 窗口只限制显示宽度，不覆盖用户保存的宽度偏好。
   const minWidth = Math.min(configuredMinWidth, maxWidth);
   const width = clampSidebarResizeWidth(preferredWidth, maxWidth, minWidth);
   const [isResizing, setIsResizing] = useState(false);
@@ -88,7 +86,6 @@ export function useSidebarResize({
 
   useLayoutEffect(() => {
     previewRef.current = onWidthPreview;
-    // 窗口尺寸或侧栏模式在拖动中变化时，结束当前手势。
     activeStopRef.current?.();
   }, [disableResize, minWidth, maxWidth, onWidthPreview]);
 
@@ -106,7 +103,6 @@ export function useSidebarResize({
       try {
         localStorage.setItem(storageKey, String(preferredWidth));
       } catch {
-        // Width is still usable for this session when storage is unavailable.
       }
     }, 300);
     return () => clearTimeout(timer);

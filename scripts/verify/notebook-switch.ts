@@ -1,7 +1,3 @@
-/**
- * 文件夹下拉：选中当帧换色，打开 200ms、关闭 150ms 且关闭快启动。
- * 运行：node scripts/verify/run.mjs notebook-switch
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {

@@ -12,7 +12,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 
-/** 主题色：主题强调色的不同浓度，随浅色/深色主题变化。 */
 const TOPIC_OPACITY = [100, 78, 58, 42, 30, 20];
 const topicColor = (i: number) =>
   `color-mix(in srgb, var(--goose-accent-solid) ${TOPIC_OPACITY[i % TOPIC_OPACITY.length]}%, transparent)`;

@@ -20,11 +20,9 @@ export const FIXED_SPLIT_SHORTCUTS = {
   splitMoveDown: "Mod+Alt+Shift+ArrowDown",
   splitEqualize: "Mod+Alt+E",
   splitMaximize: "Mod+Alt+Enter",
-  // 关闭分屏统一交给 Mod+W 的分层关闭，不注册独立动作。
   closeSplitPane: "",
 } as const;
 
-/** 固定关闭和分屏的占用不能被旧配置或设置 action 覆盖。 */
 export function isReservedCloseOrSplitShortcut(
   shortcut: string,
   platform: PlatformKind = getPlatformKind(),
@@ -43,7 +41,6 @@ export const FIXED_APP_SHORTCUT_IDS = [
 
 export type FixedAppShortcutId = (typeof FIXED_APP_SHORTCUT_IDS)[number];
 
-/** 旧版本提供过配置入口，但现在不再保留的动作。 */
 export const REMOVED_APP_SHORTCUT_IDS = ["saveNote"] as const;
 
 export const NON_CUSTOMIZABLE_APP_SHORTCUT_IDS = new Set<string>([

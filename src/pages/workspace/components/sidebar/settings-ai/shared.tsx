@@ -51,7 +51,7 @@ export const getCustomAiKeyHint = () =>
 
 export const EMPTY_AI_MODEL_OPTIONS: AIModelOption[] = [];
 
-export /** 供应商菜单图标：与预设文案解耦，避免 presets 依赖 React */
+export
 const PROVIDER_ICONS: Record<
   AIProviderId,
   ComponentType<{ className?: string; strokeWidth?: number }>

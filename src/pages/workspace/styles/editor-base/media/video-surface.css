@@ -2,7 +2,6 @@
  * 被 editor-base.css 按序 @import。
  * 依赖 --goose-preview-toolbar-height / --background / --goose-block-subtle-* / --ring。
  */
-/* ===== 自定义视频播放器（替代原生 controls） ===== */
 .goose-video-block-shell {
   position: relative;
   max-width: 100%;
@@ -34,7 +33,6 @@
   -webkit-user-select: none;
 }
 
-/* 播放器整体键盘焦点标在控制栏，保留视频本身与常态投影。 */
 .goose-video-player:focus-visible .goose-video-player__bar {
   background: rgba(255, 255, 255, 0.16);
   border-radius: 8px;

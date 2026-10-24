@@ -47,11 +47,6 @@ function resolveImageBlockType(editor: BlockNoteEditor<any, any, any>): string {
   return "image";
 }
 
-/**
- * 插入空媒体块（及末尾补段）合成一次 undo。
- * 上传完成后的 url 必须走 {@link commitPastedMediaWithoutHistory}，
- * 否则撤回只会撤掉 url，留下「添加图片」空块。
- */
 function insertPastedMediaPlaceholder(
   editor: BlockNoteEditor<any, any, any>,
   referenceBlock: { id: string; content?: unknown },
@@ -64,7 +59,6 @@ function insertPastedMediaPlaceholder(
       fileBlock,
     );
 
-    // 视频/图片 void 块若落在文档末尾，补一行空段落，避免无法在下方继续输入
     try {
       const last = editor.document.at(-1);
       if (last?.id === insertedBlockId) {
@@ -75,7 +69,6 @@ function insertPastedMediaPlaceholder(
         );
       }
     } catch {
-      // ignore
     }
 
     return insertedBlockId;
@@ -93,11 +86,6 @@ function commitPastedMediaWithoutHistory(
   });
 }
 
-/**
- * Mac 剪贴板常无 dataTransfer.types 中的 "Files"（仅有 image/png 等），
- * BlockNote handleFileInsertion 会直接 return；此处遍历 items 插入并 uploadFile。
- */
-/** 粘贴事件没有文件时，从系统剪贴板读取 Shottr / 截图的 PNG。 */
 export async function pasteNativeClipboardImage(
   editor: BlockNoteEditor<any, any, any>,
   readImage: () => Promise<string | null>,
@@ -162,7 +150,6 @@ export async function pasteClipboardMedia(
 
   for (const { file, mime, isVideo, insertedBlockId } of uploads) {
     try {
-      // 固化剪贴板字节；具体资源保存策略由当前编辑器的 uploadFile 决定。
       const materialized = isVideo ? file : await materializeImageBlob(
         file, mime.startsWith("image/") ? mime : resolveImageMimeForUpload(file),
       );

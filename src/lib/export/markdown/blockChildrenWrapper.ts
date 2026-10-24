@@ -1,6 +1,5 @@
 import { noteComment, noteCommentClose } from "./persistedNames";
 
-/** Explicit, readable Markdown envelope for block children that Markdown has no native syntax for. */
 export const BLOCK_CHILDREN_OPEN = noteComment("block-children v1");
 export const BLOCK_CHILDREN_CLOSE = noteCommentClose("block-children");
 const LEGACY_BLOCK_CHILDREN_OPEN = "<!-- goose-note:block-children v1 -->";
@@ -19,7 +18,6 @@ export function wrapBlockChildrenMarkdown(markdown: string): string {
   return `${BLOCK_CHILDREN_OPEN}\n${markdown}\n${BLOCK_CHILDREN_CLOSE}`;
 }
 
-/** Find a balanced wrapper; malformed/incomplete markers are left to the normal parser as visible text. */
 export function findBlockChildrenEnd(lines: string[], start: number): number | null {
   if (!isBlockChildrenOpen(lines[start])) return null;
   let depth = 1;

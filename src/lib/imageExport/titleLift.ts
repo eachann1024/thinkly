@@ -19,10 +19,6 @@ function isMatchingPageH1(
   return Boolean(selectedTitle && selectedTitle === generatedTitle);
 }
 
-/**
- * 选区包含页面 H1 时，“显示标题”已经会在卡片头部渲染同一标题，
- * 因此跳过选区里的重复 H1；普通章节标题仍按原样保留。
- */
 export function getSelectionBlocksToRender(
   selectionBlocks: BlockNoteContent,
   pageTitle: string,
@@ -34,11 +30,6 @@ export function getSelectionBlocksToRender(
     : selectionBlocks;
 }
 
-/**
- * 整页导出：首块是 heading 时提升到卡片标题（任意 level，兼容只有 H2 的页）。
- * 选区导出：仅去掉与页面标题重复的 H1。
- * 调用方用 titleBlock.props 把对齐/背景色写到 `.gooseshot-title`。
- */
 export function splitImageExportTitle(params: {
   blocks: BlockNoteContent;
   pageTitle: string;

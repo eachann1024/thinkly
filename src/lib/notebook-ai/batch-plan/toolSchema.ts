@@ -50,14 +50,12 @@ const canonicalOperationSchema = z.discriminatedUnion("type", [
       ...bindingShape,
       pageId: z.string().min(1),
       oldString: z.string().min(1),
-      /** 可为空字符串，表示删除匹配片段。 */
       newString: z.string(),
       replaceAll: z.boolean().optional(),
     })
     .strict(),
 ]);
 
-/** 模型可见的唯一工具契约；旧格式只在 repair hook 内部兼容。 */
 export const executeBatchPlanInputSchema = z
   .object({
     runId: z.string().min(1).optional(),
@@ -205,9 +203,6 @@ function repairOperation(value: unknown): CanonicalOperation | null {
   };
 }
 
-/**
- * 只修复可证明等价的旧批量计划。不会从 Markdown/XML/空内容推断写入操作。
- */
 export function repairExecuteBatchPlanInput(input: string): string | null {
   let value: unknown;
   try {

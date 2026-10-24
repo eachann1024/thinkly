@@ -76,7 +76,6 @@ export function ResourcePicker({ inputRef, disabled }: { inputRef: RefObject<AiC
       const page = pages[ref.pageId];
       const ancestor = role === "context" && page ? current.find((item) => item.role === role && isPageWithinResource(page, toResourceReference(item, "source"), pages)) : undefined;
       if (ancestor) return current.map((item) => item === ancestor ? { ...item, excludedPageIds: [...(item.excludedPageIds ?? []), ref.pageId] } : item);
-      // A child excluded by its parent can be restored without adding overlapping roots.
       const excludedAncestor = current.find((item) => item.role === role && item.excludedPageIds?.includes(ref.pageId));
       if (excludedAncestor) return current.map((item) => item === excludedAncestor ? { ...item, excludedPageIds: item.excludedPageIds?.filter((id) => id !== ref.pageId) } : item);
       return dedupeResourceSelections([...current, ref], pages);

@@ -33,13 +33,11 @@ export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: 
         const acknowledged = !confirmationRequired && attempt.revision !== null && acknowledgeRecoveryEntry("local-file", pageId, attempt.revision);
         transitionLocalSave(pageId, { type: "write-succeeded", attemptId, acknowledgedRevision: acknowledged ? attempt.revision : null });
       } catch (error) {
-        // Only this attempt may return its snapshot; newer edits and explicit discard win.
         transitionLocalSave(pageId, { type: "write-failed", attemptId });
         throw error;
       }
     }
     const current = getLocalSavePageState(pageId);
-    // A recovered draft introduced while an earlier write was in flight stays unconfirmed.
     if (current.permission.status === "confirmation-required" || current.pending.status !== "empty" || current.recovery.status === "none") return;
     const revision = current.recovery.revision;
     if (!acknowledgeRecoveryEntry("local-file", pageId, revision)) throw new Error(extraText("recoveryIncomplete", { id: pageId }));

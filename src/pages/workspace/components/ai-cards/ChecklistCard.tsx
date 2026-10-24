@@ -24,7 +24,6 @@ function toMarkdown(title: string, items: ChecklistCardData["items"], done: bool
   return [title.trim() ? `### ${title.trim()}` : "", ...lines].filter(Boolean).join("\n");
 }
 
-/** 可勾选清单：本地勾选、进度条随之伸缩，可整份插入笔记为任务列表。 */
 export function ChecklistCard({ card }: { card: ChecklistCardData }) {
   useLocale();
   const { insert } = useCardActions();

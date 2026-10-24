@@ -15,10 +15,8 @@ export interface ReflectionData {
   stats: ReflectionStats;
 }
 
-/** 读取历史（带缓存）并统计；force 时重新读取全部页面的历史。 */
 export async function loadReflectionData(scope: ReflectionScope, force = false): Promise<ReflectionData> {
   const range = scopeRange(scope);
-  // 「可能搁置」需要 60 天回看，事件窗口取 max(所选范围, 60 天)。
   const since = Math.min(range.start, Date.now() - STALLED_LOOKBACK_DAYS * DAY_MS);
   const events = await loadEditEvents(since, force);
   return { range, stats: computeReflectionStats(events, range) };
@@ -28,10 +26,6 @@ export function isReflectionAIReady() {
   return getAIAvailability(useSettings.getState().ai).ok;
 }
 
-/**
- * 为范围生成并缓存反思。force=false 时已有缓存、未授权、无 AI 或无编辑均不调用。
- * 返回是否写入了新报告。
- */
 export async function ensureReflection(
   scope: ReflectionScope,
   options: { force?: boolean; data?: ReflectionData } = {},
@@ -69,7 +63,6 @@ export async function ensureReflection(
   }
 }
 
-/** 检查上一周（周一到周日）是否有编辑，决定入口红点。 */
 export async function refreshLastWeekEdited(): Promise<void> {
   const week = previousWeek();
   const events = await loadEditEvents(week.start);

@@ -17,7 +17,6 @@ import {
 import { senderWindow } from "./common";
 import { registry } from "../windows/state";
 
-/** 主窗发布过的快照。拉取只读这份内存，不在唤出搜索时等待主窗回话。 */
 let cachedWorkspaceAI: SearchAISettingsSnapshot | null = null;
 
 function rememberWorkspaceAI(event: IpcMainEvent, value: unknown): void {
@@ -31,7 +30,6 @@ function rememberWorkspaceAI(event: IpcMainEvent, value: unknown): void {
   search.webContents.send(SEARCH_AI_SETTINGS_PUSH_CHANNEL, snapshot);
 }
 
-/** 浮动搜索窗专用通道：只接受搜索窗自身发起的调用。 */
 export function registerSearchWindowIpc(): void {
   ipcMain.on(SEARCH_AI_SETTINGS_PUBLISH_CHANNEL, rememberWorkspaceAI);
   const fromSearchWindow = (event: Electron.IpcMainInvokeEvent) => {
@@ -51,7 +49,6 @@ export function registerSearchWindowIpc(): void {
     if (!fromSearchWindow(event)) return false;
     const payload = parseOpenSearchResultPayload(value);
     if (!payload) return false;
-    // 先把结果回给搜索窗，再收起它并唤出主窗。
     setImmediate(() => openSearchResultInWorkspace(payload));
     return true;
   });

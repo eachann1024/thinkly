@@ -17,7 +17,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 菜单调用此 helper 即可复用当前编辑器的页面搜索，不依赖全局活动编辑器。 */
 export function openPageMentionSearch(editor: BlockNoteEditor<any, any, any>, trigger: "+" | "[[" = "[[") {
   if (!editor.isEditable || editor.prosemirrorView.composing) return;
   const view = editor.prosemirrorView, { selection } = view.state;

@@ -90,7 +90,6 @@ function useLocale(locale: "zh-Hans" | "en" | "ja", revision: number) {
   });
 }
 
-/** 已知删除失败都有中英日人话，且不会把异常原文交给用户。 */
 export function checkDeleteFailureCopy(): number {
   let revision = 1;
   for (const locale of ["zh-Hans", "en", "ja"] as const) {
@@ -188,7 +187,6 @@ async function waitForPage(titlePart: string) {
   return null;
 }
 
-/** 新建尚未写完的空笔记可以马上删除，真实失败则展示人话而不是「N 项未完成」。 */
 export async function checkDeleteNewNote(): Promise<number> {
   const { usePages } = await import("@/stores/usePages");
   const { useNotebooks } = await import("@/stores/useNotebooks");

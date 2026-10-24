@@ -41,7 +41,6 @@ export function getBlockNoteSlashMenuItems(
 
   const compact = Boolean(options?.compact) || __GOOSE_EDITOR_COMPACT__;
 
-  // 未启用 AI 的构建 / 小窗不添加「生成」斜杠项。
   if (aiEnabled && (__GOOSE_EDITOR_AI__ || false) && !compact) {
     items.push({
       get title() { return t("generate"); },
@@ -49,7 +48,6 @@ export function getBlockNoteSlashMenuItems(
       icon: SLASH_ICONS.sparkles,
       aliases: ["ai", "generate", "shengcheng", "xiezuo", "sparkle"],
       onItemClick: () => {
-        // 删除触发字符 / 或 、
         const pos = editor.getTextCursorPosition();
         const block = pos.block;
         const content = block.content as any[];

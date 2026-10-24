@@ -32,7 +32,6 @@ function copyKey(from: string, to: string): void {
   localStorage.removeItem(from);
 }
 
-/** 把已保存的 goose-note 键抄到 thinkly，避免改名后设置、标签和附件消失。 */
 export function migrateStorageNames(): void {
   if (typeof localStorage === "undefined") return;
   for (const [from, to] of EXACT_KEYS) copyKey(from, to);

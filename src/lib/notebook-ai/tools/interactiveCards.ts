@@ -1,10 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-/**
- * 交互式卡片：execute 原样带上 kind 返回，UI 按 kind 渲染可点、可勾、可拖的卡片。
- * 描述里写清「什么时候主动用」，模型不需要用户说出“交互式”也会选用。
- */
 const echo = <K extends string>(kind: K) => async <T extends object>(input: T) => ({ kind, ...input });
 
 export const showChoices = tool({

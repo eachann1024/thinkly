@@ -17,7 +17,6 @@ export interface ToolProgressPart {
 export interface ProgressStep {
   label: string;
   detail: string;
-  /** searchWeb 完成后的网页来源，展开步骤时紧凑列出 */
   webResults?: WebResultsCardData;
   status:
     | "running"

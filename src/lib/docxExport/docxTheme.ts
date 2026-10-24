@@ -1,15 +1,10 @@
 import { TEXT_COLORS } from "@/lib/textColors";
-/**
- * Word 导出视觉令牌。数值对齐 HTML 预览 / 编辑器浅色导出：
- * 16px 正文、标题 3em/2em/1.3em、行高 1.7、标注与高亮色带。
- */
 
 import {
   BLOCKNOTE_BACKGROUND_COLORS,
   BLOCKNOTE_TEXT_COLORS,
 } from "@/lib/imageExport/serializer/utils";
 
-/** 正文 16px → 12pt；docx size 用半磅。 */
 export const DOCX_BODY_SIZE = 24;
 export const DOCX_CODE_SIZE = 20;
 export const DOCX_CAPTION_SIZE = 20;
@@ -48,7 +43,6 @@ export const DOCX_BACKGROUND_COLORS = BLOCKNOTE_BACKGROUND_COLORS;
 
 export const DOCX_CONTENT_WIDTH_PX = 624;
 export const DOCX_PAGE_MARGIN_TWIP = 1440;
-/** 正文区宽 6.5in，用于块盒子表格。 */
 export const DOCX_CONTENT_WIDTH_DXA = 9360;
 export const DOCX_BLOCK_PAD_Y = 80;
 export const DOCX_HEADING_PAD_Y = 140;

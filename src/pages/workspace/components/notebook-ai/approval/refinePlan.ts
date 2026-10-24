@@ -6,7 +6,6 @@ export function requestPlanRefinement(request: RefinePlanRequest): void {
   );
 }
 
-// 面板尚未挂载时暂存，输入框挂载后再写入。
 let pendingRequest: RefinePlanRequest | null = null;
 export function askNotebookAi(request: RefinePlanRequest): void {
   pendingRequest = request;

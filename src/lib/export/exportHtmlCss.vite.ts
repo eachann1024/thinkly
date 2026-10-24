@@ -25,7 +25,6 @@ function loadEditorBaseCss(): string {
     .join("\n");
 }
 
-/** Vite 打包用：把官方编辑器样式和本仓覆盖收成字符串。 */
 export const EXPORT_VENDOR_CSS = [
   reactCss,
   blockBackgroundCss,

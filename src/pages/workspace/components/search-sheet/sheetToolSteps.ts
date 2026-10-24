@@ -13,7 +13,6 @@ function hostOf(url: string) {
   }
 }
 
-/** 工具开始时从参数里取步骤对象：检索词、网页域名、地点、货币对。 */
 export function toolStartSubject(name: string, args: unknown): string {
   const input = record(args);
   if (!input) return "";
@@ -29,7 +28,6 @@ export function toolStartSubject(name: string, args: unknown): string {
   return "";
 }
 
-/** 工具结束时的数量与修正后的对象（readPage 结束才知道标题）。 */
 export function toolEndInfo(name: string, result: unknown, isError: boolean): { error: boolean; count?: number; subject?: string } {
   const output = record(result);
   const error = isError || Boolean(output && "error" in output && output.error);

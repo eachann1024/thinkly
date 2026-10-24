@@ -1,16 +1,9 @@
-/**
- * Electron 顶栏：按住拖动窗口，单击才进入标题编辑。
- *
- * 控件保持 data-electron-no-drag；位移超过阈值后走 startWindowDrag IPC，
- * 避免 CSS -webkit-app-region: drag 吞掉单击。
- */
 import { getGooseDesktop } from "./runtime";
 
 export const TITLE_WINDOW_DRAG_THRESHOLD_PX = 4;
 export const WINDOW_DRAGGING_CLASS = "window-dragging";
 export const OPTION_WINDOW_DRAG_CLASS = "option-window-drag";
 
-/** ponytail: Option 须在按下鼠标前启用；中途接管拖动需要原生桥接。 */
 export function bindOptionWindowDrag(): () => void {
   const root = document.documentElement;
   const syncKey = (event: KeyboardEvent) => {
@@ -55,7 +48,6 @@ export function shouldStartWindowDrag(
   return dx * dx + dy * dy >= thresholdPx * thresholdPx;
 }
 
-/** 按下时窗口原点 + 按下/当前屏幕坐标 → 新窗口左上角。 */
 export function computeWindowDragOrigin(
   windowOrigin: WindowPoint,
   pressScreen: WindowPoint,
@@ -87,7 +79,6 @@ type IdleDragPointer = {
   };
 };
 
-/** 阈值内当单击；越过阈值后开始拖窗，抬起时结束。 */
 export function bindIdleWindowDrag(
   event: IdleDragPointer,
   startedRef: { current: boolean },

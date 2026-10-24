@@ -1,6 +1,5 @@
 import type { JSONContent } from "@/types";
 
-// FNV-1a 32 位哈希（含长度），用于按内容给图片附件命名以实现去重。
 export function hashBase64(data: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < data.length; i++) {
@@ -71,7 +70,6 @@ export function collectLocalImageWrites(
       );
       if (target && match) {
         const ext = dataUrlImageExtension(match[2]);
-        // 按内容哈希命名以去重：相同图片只落盘一次，避免反复保存产生重复文件。
         const base64Data = match[3];
         const filename = `img_${hashBase64(base64Data)}.${ext}`;
         const imagePath = `${assetsDir}/${filename}`;
@@ -80,7 +78,6 @@ export function collectLocalImageWrites(
         try {
           alreadyExists = window.gooseFs?.exists?.(imagePath) ?? false;
         } catch {
-          // ignore fs check error
         }
 
         if (!alreadyExists) {

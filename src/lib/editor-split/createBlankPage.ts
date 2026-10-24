@@ -16,7 +16,6 @@ const uiText = createTranslator(localMessages);
 import { toast } from "@/components/ui/sonner";
 import { usePages } from "@/stores/usePages";
 
-/** 分屏先打开内存草稿；首次实际编辑保存后才创建源文件的同级文件。 */
 export async function createSplitBlankPage(sourcePageId: string): Promise<string | null> {
   const id = usePages.getState().createEditorDraftPage(sourcePageId);
   if (id) return id;

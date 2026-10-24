@@ -29,7 +29,6 @@ export async function refreshSnapshotFingerprint(
     const stat = await fs.statAsync(filePath);
     if (stat) updateSnapshotStat(filePath, stat);
   } catch {
-    // stat 失败时保留内容快照，下次 watch 退回读全文
   }
 }
 
@@ -45,7 +44,6 @@ export const saveLocalPageContentAction = async (
   const syncPath = get().getLocalFilePath(pageId);
   if (syncPath) await waitForGitSyncWrites(syncPath);
 
-  // 与文件重命名共用页面级串行锁；取得锁后再读取路径。
   const releaseFileOperation = await acquireLocalPageFileOperation(pageId);
   try {
     return await saveLocalPageContentUnlocked(
@@ -71,7 +69,6 @@ export const flushPendingLocalSaveByPageIdAction = async (
   get: StoreGet,
   pageId: string,
 ) => {
-  // saveLocalPageContent 成功时自行清 dirty；失败（含冲突）时不能强清
   await flushPendingLocalSaveByPageIdInternal(pageId, get);
 };
 

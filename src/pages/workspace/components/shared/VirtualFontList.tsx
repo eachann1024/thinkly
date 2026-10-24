@@ -5,7 +5,7 @@ import { Check } from "@/components/ui/icons";
 import { toCssFontFamily } from "@/lib/fontLoader";
 
 export type FontListOption = { family: string | null; label: string };
-const ROW_HEIGHT = 34; // 32px 菜单行 + 2px 背景间隙。
+const ROW_HEIGHT = 34;
 
 export function VirtualFontList({
   label,
@@ -37,7 +37,6 @@ export function VirtualFontList({
     overscan: 3,
     initialRect: { width: 0, height: Math.min(options.length * ROW_HEIGHT, 320) },
     initialOffset: initialIndex.current * ROW_HEIGHT,
-    // Keep the active descendant accessible when the user scrolls it away.
     rangeExtractor: (range) => {
       const visible = defaultRangeExtractor(range);
       return visible.includes(activeIndex)
@@ -87,7 +86,6 @@ export function VirtualFontList({
         }
       }
     }
-    // Enter/Space confirmation is handled on keyup by the preview session.
   };
 
   return (

@@ -45,7 +45,6 @@ def cmd_install(_args: argparse.Namespace) -> None:
             run([*prefix, "apt-get", "install", "-y", str(deb)], tag="install")
             log("install", f"已安装：{deb.name}")
             return
-        # 无 deb（如 --linux-targets AppImage）：放 ~/.local/bin 并加执行位。
         dest_dir = Path.home() / ".local" / "bin"
         dest_dir.mkdir(parents=True, exist_ok=True)
         dest = dest_dir / appimage.name  # type: ignore[union-attr]
@@ -53,7 +52,6 @@ def cmd_install(_args: argparse.Namespace) -> None:
         dest.chmod(0o755)
         log("install", f"已安装 AppImage：{dest}（命令行直接执行文件名即可启动）")
         return
-    # Windows：NSIS 静默安装（/S）。默认每用户安装，无需管理员。
     installer = latest_desktop_artifact("*-setup.exe", "*.exe")
     if not installer:
         die("install", "未找到 NSIS 安装包（dist-desktop/*-setup.exe），请先执行 python3 build.py package")

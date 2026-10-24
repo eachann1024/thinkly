@@ -1,7 +1,6 @@
 import { clamp, type Dot } from "../geometry";
 import { C, OR, POLY, RR, RRS, S, type Shape } from "./shapes";
 
-/** 工作区缺省图的小点阵图标：24 单位坐标，按显示尺寸栅格化（与设计稿 drawIcon 同参）。 */
 
 type Part = [shape: Shape, accent: boolean, opacity: number];
 
@@ -26,7 +25,6 @@ export type WorkspaceDotIconName = keyof typeof ICONS;
 
 const iconPitch = (size: number) => (size <= 20 ? 1.9 : size <= 32 ? 2.2 : size <= 44 ? 2.6 : 3);
 
-/** 栅格化图标；hit 判断画布坐标是否落在图标形状内（供光晕避让）。 */
 export function workspaceDotIcon(name: WorkspaceDotIconName, size: number, x0 = 0, y0 = 0) {
   const parts: Part[] = ICONS[name];
   const pitch = iconPitch(size), k = size / 24, st = pitch / k;

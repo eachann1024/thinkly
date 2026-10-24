@@ -9,10 +9,6 @@ ja:
   timeline: "タイムライン"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Mermaid timeline 自绘：竖轴 + 日期 + 右侧折行卡片。
- * Mermaid 自带时间轴会写死黑线和彩虹盒，且长文本溢出。
- */
 
 import {
   MERMAID_FONT,

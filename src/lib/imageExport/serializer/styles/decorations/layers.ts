@@ -42,7 +42,6 @@ function isBackground(decoration: CardDecoration): decoration is BackgroundDecor
   return BACKGROUND_KINDS.has(decoration.kind);
 }
 
-/** 返回 [目标, 若干背景层]；scale 用于选择器缩略预览。 */
 function toLayers(
   d: BackgroundDecoration,
   t: CardTheme,
@@ -130,7 +129,6 @@ export function buildDecorationLayers(
   return layers;
 }
 
-/** 背景层在上，主题原有底色 / 渐变垫底。 */
 export function composeBackground(layers: string[], base: string): string {
   return layers.length > 0 ? [...layers, base].join(", ") : base;
 }

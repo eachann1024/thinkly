@@ -38,7 +38,6 @@ export type CachedPasteTarget = {
   selection?: EditorSelectionSnapshot;
 };
 
-/** HTML 含非默认 Goose 块级属性或自定义 MIME 时走块级粘贴，行内 strong/span 不算。 */
 export function shouldPasteHtmlAsBlocks(
   htmlText: string,
   hasGooseBlockCopyMime = false,
@@ -51,22 +50,17 @@ export function shouldPasteClipboardAsBlocks(
   clipboard: DataTransfer,
   htmlText: string,
 ): boolean {
-  // `blocknote/html` 是无损内部格式，交回 BlockNote 的默认 paste handler。
-  // 此处不能把它和旧 Goose MIME 一样转为普通 HTML，否则列表 children / 媒体 props
-  // 会经有损解析链路折返。
   if (clipboard.getData("blocknote/html")) return false;
   if (clipboard.getData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME)) return true;
   return shouldPasteHtmlAsBlocks(htmlText);
 }
 
-/** 外部复制的 .md 源码带分栏标记时，必须走本地解析才能还原左右栏。 */
 export function plainHasGooseColumnMarkers(plain: string): boolean {
   if (/<!--\s*(?:thinkly|goose-note):columns\b/i.test(plain)) return true;
   const frontmatter = plain.match(/^---\n([\s\S]*?)\n---/);
   return Boolean(frontmatter && /goose-note:/.test(frontmatter[1]) && /columns/.test(frontmatter[1]));
 }
 
-/** plain 含 Goose 块属性标记或 style 颜色 span 时优先 importMarkdownFragment。 */
 export function plainHasGooseMarkdownMarkers(plain: string): boolean {
   return (
     plainHasGooseColumnMarkers(plain) ||
@@ -136,7 +130,6 @@ function containsClaimedTypes(blocks: unknown[], claimed: Set<string>): boolean 
   return walk(blocks);
 }
 
-/** 内部 HTML 声明了媒体块，但解析结果里没有。这时必须改走无损 paste。 */
 export function clipboardHtmlDroppedMedia(html: string, blocks: unknown[]): boolean {
   const claimed = new Set<string>();
   MEDIA_CLIPBOARD_TYPE.lastIndex = 0;
@@ -145,7 +138,6 @@ export function clipboardHtmlDroppedMedia(html: string, blocks: unknown[]): bool
   return !containsClaimedTypes(blocks, claimed);
 }
 
-/** 剪贴板 HTML 带有源块 ID；粘贴是副本，需由编辑器重新分配块 ID。 */
 export function withoutCopiedBlockIds(blocks: unknown[]): unknown[] {
   return blocks.map((block) => {
     if (!block || typeof block !== "object" || Array.isArray(block))
@@ -164,7 +156,6 @@ export function withoutCopiedBlockIds(blocks: unknown[]): unknown[] {
   });
 }
 
-/** 原生粘贴由我们接管时，与 UniqueID 默认 transformPasted 一样清空容器 ID。 */
 export function withoutBlockNoteClipboardIds(html: string): string {
   if (!html || typeof DOMParser === "undefined") return html;
   const document = new DOMParser().parseFromString(html, "text/html");
@@ -219,13 +210,6 @@ export function tryPasteGooseMarkdownFragment(
   const restored = restoreBlockPropsMarkers(fragment as BlockNoteContent);
   return finishPasteAtAnchor(editor, restored, target);
 }
-/**
- * 是否走「标题一隔离粘贴」：仅当选区完全落在物理首块 H1 内时。
- *
- * 旧逻辑用 `cursorBlock.id === document[0].id`，会把小窗 raw 首段、多 block 选区
- * （选区锚点落在首块）都误判成标题，于是 insertBlocks 在下方追加而不替换选区。
- * 跨块选区 / 非 H1 首块必须返回 false，让默认粘贴替换当前选区。
- */
 export function shouldIsolateTitleStructurePaste(editor: {
   prosemirrorState: Editor["prosemirrorState"];
 }): boolean {
@@ -269,7 +253,6 @@ export function pasteLinesAsBlocks(
   const { firstLine, restBlocks } = planMultilinePaste(lines, currentBlockType);
   const current = editor.getTextCursorPosition().block;
 
-  // 空行粘贴：当前块为空且首行为空时，直接替换/插入后续块，不留空段落。
   if (
     isEmptyInlineBlock(current) &&
     firstLine === "" &&

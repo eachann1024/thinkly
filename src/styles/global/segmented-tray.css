@@ -1,4 +1,3 @@
-/* 分段托盘：凹陷底承载一组同类选项，选中项凸起并带精准轮廓；随 popover 与前景色适配所有主题。 */
 :root {
   --goose-segmented-tray-bg: color-mix(in srgb, hsl(var(--foreground)) 5%, hsl(var(--popover)));
   --goose-segmented-raised-bg: hsl(var(--popover));

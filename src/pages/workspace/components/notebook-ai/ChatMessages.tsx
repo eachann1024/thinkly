@@ -1,7 +1,6 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
-/** 消息列表：线程布局与时间分隔，渲染职责在 messages/。 */
 import { useMemo, useState } from "react";
 import { ArrowDown } from "@/components/ui/icons";
 import { DotDecor, EmptyStateArt } from "@/components/ui/dot-matrix";
@@ -67,7 +66,6 @@ export function ChatMessages({
   const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
     null,
   );
-  // 只在被引用页面的标题变化时重绘历史消息，正文仍按发送时的快照拆分。
   usePages((state) =>
     messages
       .flatMap((message) => message.metadata?.references ?? [])
@@ -82,7 +80,6 @@ export function ChatMessages({
     [messages],
   );
 
-  /** messageId → 格式化时间文案；无则不展示分隔条 */
   const showTimeById = useMemo(() => {
     const map = new Map<string, string>();
     for (let i = 0; i < messages.length; i++) {
@@ -110,7 +107,6 @@ export function ChatMessages({
     <ChatChrome className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden">
       <AssistantUiThreadViewport
         className={cn(
-          // min-w-0：flex 子项可收缩；横向溢出由消息内表格滚动，这里只负责纵向
           "notebook-ai-messages min-w-0 flex-1 overflow-x-hidden overflow-y-scroll [scrollbar-width:thin]",
           messages.length === 0
             ? cn(

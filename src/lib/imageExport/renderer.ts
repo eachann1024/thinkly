@@ -58,7 +58,6 @@ function buildFileName(
   return `${parts.join("_")}.png`;
 }
 
-// ── Public API: Full Page Export ───────────────────────────────
 function notebookThemeContextFromPage(
   page?: Pick<Page, "fontFamily"> | null,
 ): NotebookCardThemeContext {
@@ -130,7 +129,6 @@ export async function exportPageToImage(
   }
 }
 
-// ── Public API: Selection Export ───────────────────────────────
 export async function exportSelectionToImage(
   selectionBlocks: BlockNoteContent,
   pageTitle?: string,
@@ -142,8 +140,6 @@ export async function exportSelectionToImage(
 
   const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
   const wm = normalizeWatermarkConfig(watermarkConfig);
-  // 与预览同一条标题：本地文件用文件名。不能用 extractBlockNoteTitle，
-  // 它会把没有 H1 的正文第一段提升成标题，导出就和预览不一致。
   const title = page
     ? getPageTitle(page as Page)
     : pageTitle || uiText("selectedContent");
@@ -191,7 +187,6 @@ export async function exportSelectionToImage(
   }
 }
 
-// ── Legacy alias ───────────────────────────────────────────────
 export async function exportToImage(
   page: Page,
   themeId: CardThemeId = "notebook",

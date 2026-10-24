@@ -59,7 +59,6 @@ export function SelectionActions({
         restoreSelectionAfterFormat(editor, snapshot);
         copied = document.execCommand("copy");
       } catch {
-        // Native copy may be unavailable; use the same plain-text serializer.
       } finally {
         restoreSelectionAfterFormat(editor, snapshot);
       }

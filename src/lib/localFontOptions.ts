@@ -14,7 +14,6 @@ const probes = new Map<string, { value: boolean; expires: number }>();
 const pendingProbes = new Map<string, Promise<boolean>>();
 const installedFamilies = new Set<string>();
 
-/** Enumerate actual installed families; face styles share one menu entry. */
 export function getAvailableLocalFonts(): Promise<LocalFontOption[]> {
   if (availableFonts && (fontsLoading || Date.now() < fontsExpireAt))
     return availableFonts;
@@ -42,7 +41,6 @@ export function getAvailableLocalFonts(): Promise<LocalFontOption[]> {
         .map((family) => ({ family, label: family }));
     })
     .catch((error: unknown) => {
-      // A denied permission can be granted later; do not cache that failure.
       availableFonts = undefined;
       throw error;
     })

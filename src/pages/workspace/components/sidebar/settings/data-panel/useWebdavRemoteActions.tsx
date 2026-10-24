@@ -103,7 +103,6 @@ export function useWebdavRemoteActions(
     const pending = operationStateRef.current.operation;
     if (pending.status !== "confirming" || !isCurrentActivation(pending.epoch))
       return;
-    // 同步推进后再触发副作用，同一 tick 的第二次确认直接退出。
     sendWebdavEvent({ type: "confirmation.accepted", id: pending.id });
     const { action, file, epoch, id, connection } = pending;
     try {

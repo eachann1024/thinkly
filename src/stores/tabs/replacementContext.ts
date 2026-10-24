@@ -69,7 +69,6 @@ export function createTabReplacementContext(
     }
   };
 
-  /** 当前标签是加号新建的空编辑器时，打开其他页面填入该标签，而不是再开一个。 */
   const adoptActiveEmptyWorkspaceTab = (
     pageId: string,
     preview: boolean,

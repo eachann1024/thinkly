@@ -14,7 +14,6 @@ export function validateInput(input: BatchPlanInput): string | null {
   if (input.operations.length < 1 || input.operations.length > 50)
     return "计划操作数必须在 1 到 50 之间";
   const ids = new Set<string>();
-  /** pageId → 首次占用该页的操作类型；允许多个 search_replace 串联同一页。 */
   const pageMode = new Map<string, "edit" | "search_replace" | "delete">();
   for (const operation of input.operations) {
     if (!operation.operationId.trim() || ids.has(operation.operationId))
@@ -114,10 +113,6 @@ export function expandDeletePageIds(
   return [...expanded];
 }
 
-/**
- * 误用整页 edit 做局部修改时，在 prepare 阶段拆成 search_replace，
- * 以保留未改动块的 id/props。带 title 的 edit 不转换（标题+正文保持原子）。
- */
 export function convertPartialEditsInPlan(
   input: BatchPlanInput,
   notebookId: string,
@@ -132,7 +127,6 @@ export function convertPartialEditsInPlan(
       nextOps.push(operation);
       continue;
     }
-    // 改标题时保持 edit，避免 title 与 body 拆开
     if (operation.title?.trim()) {
       nextOps.push(operation);
       continue;
@@ -157,7 +151,6 @@ export function convertPartialEditsInPlan(
       continue;
     }
 
-    // 保守上限：后续原操作按 1:1 计；任一步超 50 则保留该条 edit
     const remainingAfter = input.operations.length - index - 1;
     const totalIfConvert = nextOps.length + converted.length + remainingAfter;
     if (totalIfConvert > 50) {
@@ -170,13 +163,11 @@ export function convertPartialEditsInPlan(
   }
 
   if (!changed) return input;
-  // 若多次扩展后仍超上限，整体回退
   if (nextOps.length > 50) return input;
   const candidate: BatchPlanInput = {
     ...input,
     operations: nextOps,
   };
-  // 转换后必须仍能通过 pageMode / 唯一 id 校验，否则回退原计划
   if (validateInput(candidate)) return input;
   return candidate;
 }

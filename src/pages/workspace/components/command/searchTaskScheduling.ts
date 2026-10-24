@@ -1,6 +1,5 @@
 import { workspaceMaintenanceDelay } from "@/lib/workspace-navigation-timing";
 
-/** Give input and animation work a turn between bounded search maintenance batches. */
 export function yieldSearchTask(signal: AbortSignal, idle = false): Promise<void> {
   return new Promise((resolve) => {
     let timer = 0;
@@ -41,7 +40,6 @@ export function createSearchTaskBudget(signal: AbortSignal, idle = false) {
   };
 }
 
-/** Stable merge sort also yields during sorting, rather than deferring one large sort. */
 export async function sortSearchCatalog<T>(
   items: T[],
   compare: (a: T, b: T) => number,

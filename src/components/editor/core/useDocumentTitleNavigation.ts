@@ -14,7 +14,6 @@ import {
 } from "./documentTitleNavigation";
 import type { EditorRuntime } from "./useEditorSession";
 
-/** 标题与编辑器只通过各自的文档容器通信，同页双开也不会互相抢焦点。 */
 export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boolean) {
   const { editor, activePageId, pageRef, editorContainerRef, userInteractedRef, contentModeRef } = runtime;
   useEffect(() => {
@@ -37,8 +36,6 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       const pageId = split?.pageId;
       if (event.target !== title || document.activeElement !== title ||
         pageId !== pageRef.current?.id || !canNavigate()) return;
-      // 在插入事务之前标记，确保 raw 文档走正常保存；focus 引发的标题 blur
-      // 发生在插入之后，草稿首次命名的 flush 也能拿到完整正文。
       userInteractedRef.current = true;
       markUserInteraction();
       if (enterFirstBodyParagraph(editor, split)) {
@@ -51,7 +48,6 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       title.focus();
       title.setSelectionRange(offset, offset);
       if (focusFrame !== undefined) cancelAnimationFrame(focusFrame);
-      // React 提交新的 textarea value 后，再固定到拼接点。
       focusFrame = requestAnimationFrame(() => {
         if (document.activeElement === title) title.setSelectionRange(offset, offset);
       });
@@ -83,8 +79,6 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       if (!(target instanceof Node) || !editor.domElement?.contains(target)) return;
       if (target instanceof Element && target.closest("input, textarea, select, [contenteditable='false']")) return;
       if (editor.getExtension(SuggestionMenu)?.shown()) return;
-      // 上方向键沿用首块文字起点。退格只在空正文或首段文字起点回到标题，
-      // 避免吃掉正文中间删除、空段合并，以及列表和标题自己的退格。
       if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : canReturnToDocumentTitle(editor))) return;
       event.preventDefault();
       event.stopPropagation();
@@ -101,7 +95,6 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
         mergePending = true;
         const saved = after === before || await saveDocumentTitle(title, activePageId, after);
         mergePending = false;
-        // 保存期间若切页或继续编辑正文，保留原段，不能移除新的内容。
         if (!saved || !canNavigate() || pageRef.current?.id !== activePageId ||
           !editor.isFocused() || !editor.prosemirrorState.selection.eq(selectionBefore) ||
           !editor.prosemirrorState.doc.eq(documentBefore)) return;

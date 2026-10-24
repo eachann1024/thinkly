@@ -56,7 +56,6 @@ export function normalizeBaseUrl(raw: string): string {
       }
     }
 
-    // 局域网私有地址和本地回环地址放行 HTTP，保障 NAS 局域网内同步的可用性（包含常见的 IPv6 本地及回环地址）
     const isLocal =
       host === "localhost" ||
       host.startsWith("127.") ||

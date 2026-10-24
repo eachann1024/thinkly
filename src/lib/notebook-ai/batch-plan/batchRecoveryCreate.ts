@@ -36,9 +36,6 @@ export async function recoverCreatedOperation(
       executingOperationId: undefined,
       executingStartedAt: undefined,
     });
-  // A path plus matching content cannot prove exclusive-create ownership: another
-  // writer may have won wx. Without the application's committed receipt, preserve
-  // the file and require reconciliation rather than claiming it (and later deleting it).
   if (plannedLocalPath && (journal.createdPageIds[operationId] !== page.id ||
       !journal.after[page.id] || !sameRevision(revisionOf(page), journal.after[page.id]!))) {
     return writeBatchPlanJournal({ ...journal, status: "failed",

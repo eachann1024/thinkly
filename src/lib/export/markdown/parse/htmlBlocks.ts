@@ -18,8 +18,6 @@ export function parseHtmlBlock(lines: string[], startIndex: number, parseMarkdow
   let i = startIndex;
   const line = lines[i];
   const trimmedLine = line.trim();
-    // ── video 块（serialize 写出的 <video src="…" controls ...></video> 单行）
-    // video 在 raw-guard allowlist 中不会被包成 goose-raw-block，这里映射回 video 块
     const videoLineMatch = trimmedLine.match(
       /^<video\s+src="([^"]*)"[^>]*>\s*<\/video>$/i,
     );

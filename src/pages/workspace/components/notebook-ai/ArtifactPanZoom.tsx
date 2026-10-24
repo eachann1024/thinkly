@@ -40,7 +40,6 @@ const t = createTranslator(messages);
 
 interface ArtifactPanZoomProps {
   children: ReactNode;
-  /** 内容变化时重新适配视口（例如 SVG 重新渲染） */
   contentKey?: string;
   className?: string;
   minHeight?: number;

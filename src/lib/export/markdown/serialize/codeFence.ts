@@ -39,7 +39,6 @@ export function serializeCodeFenceInfo(
   return tokens.join(" ");
 }
 
-/** 代码中本来就可以包含 Markdown 围栏，外层必须比内容里的连续标记更长。 */
 export function serializeFencedCode(text: string, language: string, attrs?: Record<string, unknown>): string {
   const info = serializeCodeFenceInfo(language, attrs);
   const char = info.includes("`") ? "~" : "`";

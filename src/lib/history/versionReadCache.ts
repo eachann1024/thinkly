@@ -8,7 +8,6 @@ const entries = new Map<string, { source: string; version: HistoryVersion; signa
 const loadedSignatures = new WeakMap<HistoryVersion, string>();
 let retainedChars = 0;
 
-/** Fresh disk text remains the authority: this cache only avoids repeated parse/normalization/signature work. */
 export function parseHistoryVersion(path: string, text: string | null, pageId: string, versionId: string): HistoryVersion | null {
   const previous = entries.get(path);
   if (previous && previous.source === text) {
@@ -41,7 +40,6 @@ export function parseHistoryVersion(path: string, text: string | null, pageId: s
   return version;
 }
 
-/** DB revisions are validated by the repository on every read; missing revisions bypass caching. */
 export function readRevisionHistoryVersion(
   key: string, revision: string | undefined, value: unknown, pageId: string, versionId: string,
 ): HistoryVersion | null {
@@ -75,7 +73,6 @@ export function readRevisionHistoryVersion(
   return version;
 }
 
-/** Only call on a freshly loaded, unmodified version; restore callers receive a separate editable clone. */
 export function getLoadedHistorySignature(version: HistoryVersion): string {
   return loadedSignatures.get(version) ?? getHistoryVisibleSignature(version.content, version.localFrontmatter);
 }

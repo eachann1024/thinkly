@@ -21,7 +21,6 @@ import { readPageSource, toolEndInfo, toolStartSubject } from "./sheetToolSteps"
 import { sheetAnswerReducer } from "./sheetAnswerState";
 export type { SheetAnswer } from "./sheetAnswerState";
 
-/** 问答范围：notebookId 为工具的绑定笔记本；notebookIds 存在时表示「所有笔记本」下允许检索的全部笔记本。 */
 export type SheetAskScope = { notebookId: string; notebookIds?: string[]; label: string };
 
 export function useSearchAiAvailable() {
@@ -30,7 +29,6 @@ export function useSearchAiAvailable() {
   return { enabled, ready };
 }
 
-/** 搜索面板内的就地问答：先让模型改写检索词，再本地预检索笔记，再用只读 Pi Agent 多步调用工具，流式生成回答。 */
 export function useSheetAnswer() {
   useLocale();
   const [state, dispatch] = useReducer(sheetAnswerReducer, { status: "idle" });

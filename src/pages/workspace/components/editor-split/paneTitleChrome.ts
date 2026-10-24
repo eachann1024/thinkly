@@ -1,4 +1,3 @@
-/** 分栏页签标题：平时只显示名称；指针在名称上，或键盘焦点在把手上时，改显示拖拽把手。 */
 
 export type PaneTitleChrome = "name" | "grip";
 
@@ -32,7 +31,6 @@ export function paneTitlePointerLeave(state: PaneTitlePointer): PaneTitlePointer
   return state.pointerOnTitle ? { ...state, pointerOnTitle: false } : state;
 }
 
-/** 只有键盘焦点（:focus-visible）才把把手留下；鼠标点按离开后名称要回来。 */
 export function paneTitleGripFocus(state: PaneTitlePointer, focusVisible: boolean): PaneTitlePointer {
   return state.gripFocused === focusVisible ? state : { ...state, gripFocused: focusVisible };
 }

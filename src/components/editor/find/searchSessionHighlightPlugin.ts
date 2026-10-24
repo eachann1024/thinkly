@@ -120,5 +120,5 @@ function scrollToCurrent(view: EditorView | null): void {
     const dom = view.domAtPos(value.matches[value.current].from);
     const element = dom.node.nodeType === Node.TEXT_NODE ? dom.node.parentElement : dom.node as HTMLElement;
     element?.scrollIntoView?.({ block: "center", behavior: "smooth" });
-  } catch { /* editor view may be in teardown */ }
+  } catch {   }
 }

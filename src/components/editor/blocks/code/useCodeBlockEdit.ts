@@ -35,7 +35,6 @@ export function useCodeBlockEdit({
     if (Array.isArray(content)) {
       return content.map((c: any) => c?.text ?? "").join("");
     }
-    // Walk inline content via DOM
     const el = contentRef.current;
     if (el) return el.textContent || "";
     return "";
@@ -78,7 +77,6 @@ export function useCodeBlockEdit({
 
   const handleFormat = useCallback(
     (formatted: string) => {
-      // BlockNote: update block content by replacing all text
       const currentContent = block.content;
       if (Array.isArray(currentContent) && currentContent.length > 0) {
         editor.updateBlock(block.id, {

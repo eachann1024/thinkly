@@ -2,7 +2,6 @@ import { NotebookAiSessionProvider } from "../../components/notebook-ai/Notebook
 import type { useWorkspaceScrollSync } from "../useWorkspaceScrollSync";
 import { NotebookAiWorkspaceBody } from "./NotebookAiWorkspaceBody";
 
-/** 设置与笔记互斥挂载；AI 会话运行时留在页面外，切页不中止进行中的请求。 */
 export function WorkspaceNotebookPage({
   context,
 }: {

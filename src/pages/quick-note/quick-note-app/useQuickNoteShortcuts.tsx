@@ -27,11 +27,7 @@ export function useQuickNoteShortcuts(
     persistPlacementThenClose,
   } = input;
 
-  // 强制置顶（无失焦自动隐藏）：小窗常驻最前层，置顶由主窗 preload 在创建时设定，
-  // 失焦不再触发隐藏——点窗外不会收起，只能 Esc / 关闭按钮收起。
 
-  // 键盘：Esc 收起；macOS Cmd / Windows Alt+1~5 切换便签；Cmd/Ctrl+Z 超长期撤销；
-  // Cmd/Ctrl+Shift+Z / Cmd/Ctrl+Y 重做；Cmd/Ctrl +/- 缩放编辑界面（0 复位）。
   useEffect(() => {
     const onShortcutKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || isImeKeyboardEvent(e)) return;
@@ -64,12 +60,10 @@ export function useQuickNoteShortcuts(
         return;
       }
 
-      // macOS 只认 ⌘，Windows / Linux 只认 Ctrl。
       if (!isPlatformPrimaryModifierEvent(e) || e.altKey) return;
 
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 
-      // 超长期撤销/重做：未被浮层消费时拦截默认行为，走持久化栈。
       if (key === "z") {
         e.preventDefault();
         e.stopPropagation();
@@ -114,8 +108,6 @@ export function useQuickNoteShortcuts(
       persistPlacementThenClose();
     };
 
-    // 槽位和撤销快捷键需先于编辑器默认行为处理；Escape 使用冒泡阶段，
-    // 让 Radix/编辑器浮层先关闭自身，未消费时才收起整窗。
     window.addEventListener("keydown", onShortcutKeyDown, true);
     window.addEventListener("keydown", onEscapeKeyDown);
     return () => {

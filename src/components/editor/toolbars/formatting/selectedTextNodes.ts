@@ -1,7 +1,6 @@
 import type { Node } from "prosemirror-model";
 import type { EditorState } from "prosemirror-state";
 
-/** CellSelection has one range per cell; its overall from/to includes other cells. */
 export function forEachSelectedTextNode(
   { selection, doc }: EditorState,
   visit: (node: Node) => void,

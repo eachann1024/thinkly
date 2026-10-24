@@ -1,4 +1,3 @@
-/** A small, static irregularity in the existing icon strokes; no layout changes. */
 export function PencilIconDefinitions() {
   return (
     <svg aria-hidden="true" focusable="false" className="pointer-events-none absolute h-0 w-0 overflow-hidden">

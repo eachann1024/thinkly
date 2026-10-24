@@ -22,7 +22,6 @@ const EXPORTABLE_ASSET_BLOCK_TYPES = new Set([
   "video",
 ]);
 
-/** 把页面块里的本地图/文件/音视频抽进 ZIP assets/，并把 url 改成相对路径。单页 ZIP 复用。 */
 export async function extractImagesFromContent(
   content: any[],
   assetsFolder: JSZipNs,
@@ -49,7 +48,6 @@ export async function extractImagesFromContent(
         continue;
       }
 
-      // 1) 内部存储引用（uuid: / att:）→ 加载为 blob → base64
       if (isImage && (src.startsWith("uuid:") || src.startsWith("att:"))) {
         const { imageStorage } = await getImageStorage();
         const blob = await imageStorage.load(src);
@@ -74,7 +72,6 @@ export async function extractImagesFromContent(
         }
       }
 
-      // 2) 本地文件路径（相对/绝对）→ 从文件系统读取
       if (isLocalAsset) {
         const loadedAsset = resolveAndReadBase64(
           notebookPath,
@@ -91,7 +88,6 @@ export async function extractImagesFromContent(
             continue;
           }
           const ext = guessAssetExtFromPath(src, isImage ? "png" : "bin");
-          // 用原始文件名，避免重名加随机后缀
           const rawName =
             src.split(/[\\/]/).pop() || `img_${Date.now()}.${ext}`;
           const uniqueName = usedAssetNames.has(rawName)
@@ -105,13 +101,11 @@ export async function extractImagesFromContent(
         continue;
       }
 
-      // 3) 去重：同一个 base64 源只存一次
       if (imageMap.has(finalSrc)) {
         block.props.url = getRelativeAssetPath(imageMap.get(finalSrc)!, depth);
         continue;
       }
 
-      // 4) base64 内联图 → 解析并存入 assets
       if (finalSrc.startsWith("data:")) {
         const parsed = parseBase64Asset(finalSrc);
         if (parsed) {

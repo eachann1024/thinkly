@@ -7,7 +7,6 @@ import "./empty-state-art.css";
 
 export type EmptyStateArtKind = keyof typeof EMPTY_ART;
 
-/** Keep the approved nested groups: their opacity also applies to child dots. */
 function ArtGroup({ group }: { group: EmptyArtGroup }) {
   const body = (
     <g className={group.tone.split(" ").filter(Boolean).map(tone => `goose-empty-art-${tone}`).join(" ")}>
@@ -24,7 +23,6 @@ function ArtGroup({ group }: { group: EmptyArtGroup }) {
       : body;
 }
 
-/** Round-dot paths sampled offline; no DOM measurement or per-frame JavaScript. */
 export const EmptyStateArt = memo(function EmptyStateArt({
   kind,
   width = 136,

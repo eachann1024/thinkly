@@ -26,7 +26,6 @@ interface AiPanelResizeEdgeProps {
   onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
 }
 
-/** 命中区居中跨过两栏共用的分隔线，不额外占用布局宽度。 */
 export function AiPanelResizeEdge({
   isResizing,
   width,

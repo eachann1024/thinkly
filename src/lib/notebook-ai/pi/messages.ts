@@ -9,11 +9,6 @@ import type { NotebookAiMessage } from "../types";
 import { isNotebookAiToolPart } from "../messageUtils";
 import { isNotebookSkillId, type NotebookSkillId } from "../skillIds";
 
-/**
- * 每轮 PI transport 都会新建 Agent。历史中已成功 loadSkill 的能力必须同步
- * 恢复到新的 agentContext，否则模型会根据历史直接调用已解锁工具，但当前
- * 工具表仍只有 loadSkill，最终以 unknown tool 结束整轮请求。
- */
 export function collectLoadedSkillIds(
   messages: NotebookAiMessage[],
 ): NotebookSkillId[] {
@@ -89,10 +84,6 @@ function extractImagesFromParts(
   return images;
 }
 
-/**
- * 将持久化/UI 消息历史转为 Pi AgentMessage 列表。
- * 不包含最后一条尚未提交给模型的用户消息时由调用方处理。
- */
 export function uiMessagesToAgentMessages(
   messages: NotebookAiMessage[],
 ): AgentMessage[] {
@@ -215,7 +206,6 @@ export function uiMessagesToAgentMessages(
   return out;
 }
 
-/** 从最后一条用户消息取出可 prompt 的文本与图片。 */
 export function extractLastUserPrompt(messages: NotebookAiMessage[]): {
   text: string;
   images: ImageContent[];

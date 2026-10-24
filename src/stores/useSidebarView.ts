@@ -23,7 +23,6 @@ function writeStored(name: string, value: string) {
   try {
     globalThis.localStorage?.setItem(name, value);
   } catch {
-    // ignore quota / missing storage
   }
 }
 
@@ -48,7 +47,6 @@ function scheduleSidebarViewPersistFlush() {
   }, SIDEBAR_VIEW_PERSIST_DEBOUNCE_MS);
 }
 
-/** 测试或卸载前把尚未落盘的展开态写出去。 */
 export function flushSidebarViewPersist(): void {
   flushSidebarViewPersistWrites();
 }
@@ -64,7 +62,6 @@ const idleLocalStorage: StateStorage = {
     try {
       globalThis.localStorage?.removeItem(name);
     } catch {
-      // ignore
     }
   },
 };

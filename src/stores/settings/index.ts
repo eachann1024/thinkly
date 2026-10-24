@@ -59,7 +59,6 @@ export const useSettings = create<SettingsState>()(
         return {
           ...current,
           ...normalizeFixedShortcutSettings(saved),
-          // Existing installations predate the first-run flag.
           setupGuideSeen: saved.setupGuideSeen ?? (persisted != null),
         } as SettingsState;
       },
@@ -76,7 +75,6 @@ export const useSettings = create<SettingsState>()(
 startSettingsThemeLifecycle();
 
 export type { SettingsState } from "./state";
-// Re-export all types from types.ts for backward compatibility
 export type {
   SearchProvider,
   Theme,

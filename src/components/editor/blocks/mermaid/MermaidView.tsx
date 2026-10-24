@@ -72,7 +72,6 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
     const isDark = resolvedTheme === "dark";
     const cached = readMermaidPreview(identity);
     if (cached) {
-      // A warm return skips IPC, the serial worker queue, source debounce and idle scheduling.
       cancelCommit = schedulePreviewCommit(() => {
         if (active) {
           dispatch({ type: "rendered", identity, html: instantiateMermaidPreview(cached) });
@@ -108,7 +107,6 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
     const delay = sourceRef.current === value ? 0 : 500;
     sourceRef.current = value;
     const debounceTimer = window.setTimeout(() => {
-      // 先让正文和输入响应；屏幕外图表不排进 Mermaid 的全局渲染队列。
       if (typeof requestIdleCallback === "function") {
         idle = requestIdleCallback(() => { void renderMermaid(); }, { timeout: 500 });
       } else {

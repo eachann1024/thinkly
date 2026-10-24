@@ -51,7 +51,7 @@ import { PAGE_DOC_PREFIX } from "@/lib/storage/pageRepository";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import type { Page } from "@/types";
 
-export /** 检测 db 中残留的内置（非本地文件）页面——桌面模式下用于一次性导出。 */
+export
 function listLegacyInternalPages(): Page[] {
   try {
     return HostAdapter.db
@@ -63,7 +63,7 @@ function listLegacyInternalPages(): Page[] {
   }
 }
 
-export /** 桌面端专属：检测到旧内置（web-db）页面时，提供一次性导出为 .md 到当前仓库。 */
+export
 function LegacyInternalPagesExportCard() {
   useLocale();
   const [exporting, setExporting] = useState(false);

@@ -83,7 +83,6 @@ export const GooseAIExtension = createExtension(
               formattingChanged: draft?.edits[index]?.formattingChanged,
             }));
           } catch (error) {
-            // A stale split pane may fail locally; it must never cancel another pane's request.
             visible = { ...visible, status: "error", error };
           }
         }
@@ -112,7 +111,6 @@ export const GooseAIExtension = createExtension(
       if (!owned || owned.state === "closed" || owned.state.status === "thinking" || !prompt.trim()) return;
       try {
         validate(owned);
-        // Capture only provider options, never a page/editor closure, for the in-flight request.
         const settings = options.getSettings();
         const models = settings.customModelOptions ?? [];
         const preferred = settings.workspaceSelectedModelId?.trim();
@@ -136,7 +134,7 @@ export const GooseAIExtension = createExtension(
           const parts = locatePrivateInlineTarget(editor, target);
           selection = view.state.doc.eq(target.document) ? target.bookmark.resolve(view.state.doc) :
             TextSelection.create(view.state.doc, parts[0].from, parts.at(-1)!.to);
-        } catch { /* A conflicting draft can still be dismissed without restoring stale offsets. */ }
+        } catch {   }
       }
       owned.close();
       if (view && !view.isDestroyed && editor.domElement?.isConnected) {
@@ -144,7 +142,6 @@ export const GooseAIExtension = createExtension(
         view.focus();
       }
     };
-    // Non-mounted core editors can use the same API in tests; React explicitly detaches around page replacement.
     if (boundPageId) { session = getPageInlineRewriteSession(boundPageId); unsubscribe = session.subscribe(refresh); }
     return {
       key: "goose-inline-ai" as const,

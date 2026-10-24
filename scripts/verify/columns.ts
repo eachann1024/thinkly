@@ -1,7 +1,3 @@
-/**
- * 分栏块验收：覆盖保存读取、粘贴、AI 插入与摘要、分享图片、Word、PDF 备用通道。
- * 运行：node scripts/verify/run.mjs columns
- */
 import { strFromU8, unzipSync } from "fflate";
 import { Document, Packer } from "docx";
 import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
@@ -61,7 +57,6 @@ export default async function run(): Promise<number> {
   const check = checker.check;
   const expected = layoutShape(SAMPLE[1]);
 
-  // 1. 保存成 .md 再读回
   const markdown = jsonContentToMarkdown(SAMPLE as any);
   check("保存：正文不再写分栏注释", !/<!--\s*(?:thinkly|goose-note):columns\b/i.test(markdown), markdown);
   const reread = importMarkdownFragment(markdown);
@@ -88,29 +83,24 @@ export default async function run(): Promise<number> {
     JSON.stringify(layoutShape(findLayout(legacy as any[]))) === JSON.stringify(expected),
     layoutShape(findLayout(legacy as any[])));
 
-  // 2. 外部复制的分栏 Markdown 源码粘贴（粘贴识别 + 本地解析）
   const pasted = markdown;
   check("粘贴：识别出分栏标记，走本地解析", plainHasGooseColumnMarkers(pasted));
   check("粘贴：解析结果仍是分栏", !!findLayout(importMarkdownFragment(pasted) as any[]));
 
-  // 3. AI 写入：AI 输出里带分栏时不被拆散
   const aiBlocks = parseAiMarkdownToBlocks(pasted) as any[];
   check("AI 插入：分栏外壳和栏内容都保留",
     JSON.stringify(layoutShape(findLayout(aiBlocks))) === JSON.stringify(expected),
     layoutShape(findLayout(aiBlocks)));
 
-  // 4. AI 页面摘要能看到栏内标题和正文
   const summary = extractStructureSummary(SAMPLE as any);
   check("AI 摘要：包含栏内标题", summary.includes("## 左栏标题"), summary);
   check("AI 摘要：包含栏内正文", summary.includes("右栏正文"), summary);
 
-  // 5. 分享长图 / 卡片
   const cardHtml = renderBlocks(SAMPLE, NOTEBOOK_THEME as any);
   check("分享图片：按 60/40 并排", /class="export-columns" style="grid-template-columns:minmax\(0,60fr\) minmax\(0,40fr\)"/.test(cardHtml), cardHtml.slice(0, 300));
   check("分享图片：两栏各自成列", (cardHtml.match(/class="export-column"/g) ?? []).length === 2);
   check("分享图片：栏内不再多缩进一层", !/nested-children/.test(cardHtml));
 
-  // 6. Word：一行无边框表格，栏宽 60/40
   const font = { body: "Arial", eastAsia: "Arial", mono: "Courier New" };
   const children = await processBlockChildren(SAMPLE, 0, { font, numbering: { numbered: 0 } });
   const doc = new Document({ sections: [{ children }] });
@@ -119,11 +109,9 @@ export default async function run(): Promise<number> {
     .map((grid) => [...grid[1].matchAll(/w:w="(\d+)"/g)].map((match) => Number(match[1])));
   const gridCols = grids.find((grid) => grid.length === 2) ?? [];
   check("Word：生成两列表格", gridCols.length === 2, grids);
-  // 左栏宽度含栏间距 360，扣掉后按正文比例算。
   check("Word：列宽约 60/40", gridCols.length === 2 && Math.abs((gridCols[0] - 360) / (gridCols[0] + gridCols[1] - 360) - 0.6) < 0.01, gridCols);
   check("Word：两栏文字都在同一行表格里", /<w:tr>[\s\S]*LEFT[\s\S]*RIGHT[\s\S]*<\/w:tr>/.test(xml));
 
-  // 7. PDF 备用通道：左右并排的 View
   const pdf = await createPdfDocument(SAMPLE, {
     paragraph: (block) => String((block.content as any)?.[0]?.text ?? ""),
     heading: (block) => String((block.content as any)?.[0]?.text ?? ""),

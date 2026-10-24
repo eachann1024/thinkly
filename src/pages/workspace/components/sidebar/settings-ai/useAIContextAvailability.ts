@@ -34,14 +34,12 @@ export function useAIContextAvailability(
       try {
         hasGlobalPrompt = Boolean(readGlobalAgentsPrompt());
       } catch {
-        // An unavailable host reader must not prevent opening settings.
       }
       try {
         hasLocalSkills = getLocalSkills(undefined, true).some((skill) =>
           Boolean(skill.content.trim()),
         );
       } catch {
-        // Only offer controls for content the assistant can actually read.
       }
       setAvailability({ hasGlobalPrompt, hasLocalSkills });
     };

@@ -4,24 +4,12 @@ import {
   type AcceleratorPlatform,
 } from "./accelerator";
 
-/**
- * 全局热键要在 macOS、Windows、Linux 上都交给系统注册。
- * 不能只在 darwin 分支里调用 globalShortcut.register。
- */
 export function platformRegistersGlobalShortcuts(
   platform: AcceleratorPlatform,
 ): boolean {
   return platform === "darwin" || platform === "win32" || platform === "linux";
 }
 
-/**
- * Windows 上交给 globalShortcut.register 的加速键。
- *
- * Electron 44（Chromium 152）的 RegisterHotKey 只带 Control / Alt / Shift，
- * 不带 MOD_WIN。加速键里若含 Command，register() 仍返回 true，但 WM_HOTKEY
- * 回来时对不上回调，热键等于没注册上。CommandOrControl 必须先写成 Control。
- * Win 不是 Electron 的修饰键 token，写进去会把修饰键丢掉还返回 true。
- */
 export function windowsGlobalAccelerator(accelerator: string): string {
   if (!accelerator) return "";
   const parts = accelerator
@@ -55,7 +43,6 @@ export function windowsGlobalAccelerator(accelerator: string): string {
   return parts.join("+");
 }
 
-/** 按顺序交给 globalShortcut.register 的加速键。空快捷键返回空数组。 */
 export function globalShortcutRegisterOrder(
   shortcut: string,
   platform: AcceleratorPlatform,
@@ -84,10 +71,6 @@ export function planGlobalHotkeyBinds(
   };
 }
 
-/**
- * 把计划中的加速键交给 register。Windows 与 macOS 走同一条调用，
- * 只是 Windows 用 Control/Alt/Shift/Super，macOS 仍用 CommandOrControl。
- */
 export function registerPlannedAccelerator(
   accelerator: string,
   platform: AcceleratorPlatform,
@@ -98,7 +81,6 @@ export function registerPlannedAccelerator(
     try {
       if (register(candidate)) return candidate;
     } catch {
-      // 下一条写法
     }
   }
   return "";

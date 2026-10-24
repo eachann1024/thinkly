@@ -19,7 +19,6 @@ export function createChartBaseOption(
     titleOffset,
     isLineLike,
   } = context;
-  /* ── base ──────────────────────────────────────────────────────── */
   const option: EChartsOption = {
     backgroundColor: "transparent",
     color: palette,
@@ -28,7 +27,6 @@ export function createChartBaseOption(
         'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
       color: t.sc,
     },
-    // 尊重系统「减少动态效果」偏好
     animation:
       typeof window === "undefined"
         ? true
@@ -73,7 +71,6 @@ export function createChartBaseOption(
             label: { show: false },
           }
         : undefined,
-      // 饼图更友好的百分比
       ...(cfg.type === "pie"
         ? {
             formatter: "{b}<br/>{c}  ·  {d}%",
@@ -82,7 +79,6 @@ export function createChartBaseOption(
     },
     legend: multiSeries
       ? {
-          // 饼图 legend 放底部更稳；笛卡尔图放标题旁
           ...(cfg.type === "pie"
             ? {
                 bottom: Math.round(4 * scale),

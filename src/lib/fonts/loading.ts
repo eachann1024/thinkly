@@ -47,7 +47,6 @@ const tryInstallLocalFont = async (family: PersistentWoff2Family) => {
       document.fonts.add(face);
       return true;
     } catch {
-      // 本机没有这个名字，试下一个。
     }
   }
   return hasLoadedFont(family);
@@ -75,7 +74,6 @@ const installRemoteFontFromUrls = async (family: PersistentWoff2Family) => {
   return false;
 };
 
-/** 用户选择衬线体时，本机字体优先；网络加载在后台且有超时。 */
 export function ensurePersistentRemoteFont(family: PersistentWoff2Family) {
   if (
     typeof document === "undefined" ||
@@ -102,7 +100,6 @@ export function ensurePersistentRemoteFont(family: PersistentWoff2Family) {
   return load;
 }
 
-/** 切换字体时后台备字，不挡住 UI。本机自定义名也只后台匹配。 */
 export async function ensureEditorFontAvailable(
   fontFamily: "default" | "serif" | "mono" | undefined,
   customFonts: CustomFonts,

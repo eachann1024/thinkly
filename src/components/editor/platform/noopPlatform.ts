@@ -1,13 +1,3 @@
-/**
- * noopPlatform —— 纯浏览器/测试兜底实现。
- *
- * 无 EditorPlatformProvider 时 `useEditorPlatform()` 返回此实现，保证编辑器内核
- * 在无宿主注入时仍能 build 且不崩。能用 Web API 表达的（下载用 a.click、剪贴板用
- * navigator.clipboard）就地实现，其余无对等 Web API 的能力 no-op 或抛"未实现"。
- *
- * 真实平台能力由各宿主注入对应实现。
- *
- */
 import { readNavigatorClipboardImage } from "./navigatorClipboardImage";
 import type {
   EditorPlatform,
@@ -71,7 +61,6 @@ const imageStorage: EditorPlatformImageStorage = {
   save: () => notImplemented("imageStorage.save"),
   load: async () => null,
   delete: async () => {},
-  // 浏览器兜底：仅原样返回可直接渲染的引用（http/data/blob）
   resolveRefToUrl: async (ref) => ref,
 };
 

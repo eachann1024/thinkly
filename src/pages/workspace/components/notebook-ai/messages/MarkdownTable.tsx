@@ -1,12 +1,6 @@
 import type { ComponentProps } from "react";
 export { MdInput } from "../markdown-input";
 
-/**
- * 覆盖 Streamdown 默认 table。
- * 默认 table 带 w-full / 无 nowrap，且 utility 可能未被 Tailwind 扫到；
- * 这里用 plain DOM + notebook-ai.css 锁宽度与横向滚动（兼容 Electron 旧内核）。
- * node 是 hast 节点，不能落到 DOM 上；className 常含 w-full，直接丢弃。
- */
 export function MdTable({
   children,
   node,
@@ -16,7 +10,6 @@ export function MdTable({
 }: ComponentProps<"table"> & { node?: unknown }) {
   void node;
   void className;
-  // 单层 scroll wrapper：外层直接 overflow-x:auto，避免「外 hidden + 内 auto」在旧 Chromium 失效
   return (
     <div
       className="ai-md-table-scroll"
@@ -119,5 +112,3 @@ export function MdTd({
     </td>
   );
 }
-
-/** 工具 / 正文 part 共享的每消息上下文（组件函数本身保持模块级稳定） */

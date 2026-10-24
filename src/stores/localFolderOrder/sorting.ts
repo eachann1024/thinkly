@@ -8,12 +8,6 @@ export function compareNames(a: Page, b: Page): number {
   return byName !== 0 ? byName : a.id.localeCompare(b.id);
 }
 
-/**
- * 本地文件夹子项排序，侧栏树与目录主页共用，保证两处顺序一致。
- * - 无手动顺序：文件夹优先，再按名称（与访达一致）；
- * - 有手动顺序：按手动顺序，不在表内的项（尚未追加进顺序的新条目）排末尾。
- * 两种模式都不看 Page.order，扫描刷新不会打乱顺序。
- */
 export function sortLocalFolderChildren(
   pages: Page[],
   manualOrder: string[] | undefined,

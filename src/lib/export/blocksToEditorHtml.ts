@@ -18,7 +18,6 @@ function setQuotedAttr(attrs: string, name: string, value: string): string {
   return `${attrs} ${name}="${value}"`;
 }
 
-/** 官方 full HTML 有时只写 data-url、不写 src/href。 */
 export function applyExportMediaSrc(html: string): string {
   return html.replace(/<([a-zA-Z][\w:-]*)([^>]*?)>/g, (full, tag, attrs) => {
     const name = String(tag).toLowerCase();
@@ -44,7 +43,6 @@ function asExportBlocks(blocks: BlockNoteContent): BlockNoteContent {
   return [{ type: "paragraph", content: [] }] as BlockNoteContent;
 }
 
-/** 用本仓 editorSchema 建临时 editor，序列化成编辑器所见 HTML。 */
 export function blocksToEditorHtml(blocks: BlockNoteContent): string {
   const content = asExportBlocks(blocks);
   const editor = BlockNoteEditor.create({

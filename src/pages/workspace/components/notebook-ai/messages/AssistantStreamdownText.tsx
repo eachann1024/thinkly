@@ -21,18 +21,12 @@ const MD_COMPONENTS = {
   pre: MdPre,
 };
 
-/**
- * 关掉 Streamdown 表格工具条，避免默认 wrapper/utility 依赖。
- * mermaid 只在流式期间由 Streamdown 渲染，生成完即换成 DiagramCard，
- * 这段过渡态不需要任何控件。
- */
 const STREAMDOWN_CONTROLS = {
   table: false,
   code: true,
   mermaid: false,
 } as const;
 
-/** 模块级稳定引用：禁止 plugins={{ cjk }} 内联，避免 Streamdown 每帧当新插件树 */
 const STREAMDOWN_PLUGINS = { cjk };
 
 const STREAMDOWN_MERMAID_LIGHT = {
@@ -51,10 +45,6 @@ const STREAMDOWN_MERMAID_DARK = {
   }),
 } as const;
 
-/**
- * 助手正文：模块级 memo，禁止在 renderAssistantMessage 内定义 TextPart，
- * 否则每次父渲染新组件 identity → 卸载/重挂 Streamdown → 流式极卡。
- */
 export const AssistantStreamdownText = memo(function AssistantStreamdownText({
   text,
   isStreaming,

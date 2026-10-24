@@ -15,7 +15,6 @@ export const argvWindowContext = readWindowContextFromArgv();
 
 export let splitWindowId = argvWindowContext?.windowId ?? getWindowId();
 
-// 浮动搜索窗没有标签：不读写任何窗口级标签 / 分栏持久化，避免每次重建留下新键。
 export let persistReady =
   (Boolean(argvWindowContext) && argvWindowContext?.kind !== "search") ||
   !isElectronRuntime();
@@ -107,12 +106,10 @@ export function persistSplits(state: EditorSplitStore) {
         JSON.stringify({ byTabId: latest.byTabId }),
       );
     } catch {
-      // 隐私模式 / 配额
     }
   });
 }
 
-/** 把某 tab 的分屏树写入目标窗 persist（同源 localStorage，按 windowId 隔离）。 */
 export function writeTabSplitForWindow(
   windowId: string,
   tabId: string,
@@ -126,13 +123,9 @@ export function writeTabSplitForWindow(
   try {
     window.localStorage.setItem(key, JSON.stringify(existing));
   } catch {
-    // 隐私模式 / 配额
   }
 }
 
-/**
- * 目标窗从 persist 接回该 tab 的树。已有分屏则不覆盖；单叶占位可被完整树替换。
- */
 export function applyPersistedTabSplit(
   tabId: string,
   windowId: string = splitWindowId,
@@ -191,7 +184,6 @@ export function startEditorSplitPersistence() {
         try {
           window.localStorage.removeItem(editorSplitPersistKey(prevId));
         } catch {
-          // 忽略
         }
       }
     });

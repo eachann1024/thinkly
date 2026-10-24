@@ -39,7 +39,6 @@ export interface SearchResultPage extends Page {
 export interface SearchResults {
   recent: SearchResultPage[];
   all: SearchResultPage[];
-  /** 当前应渲染的结果切片，由 useCommandSearch 的 displayLimit 控制 */
   allDisplay: SearchResultPage[];
   hasQuery: boolean;
   hasMore: boolean;
@@ -70,7 +69,6 @@ export function useCommandSearch({
   const scopeChanged = pagination.query !== searchQuery ||
     pagination.searchAllNotebooks !== searchAllNotebooks ||
     pagination.activeNotebookId !== activeNotebookId;
-  // Reset before children commit, so a new query never paints the old page limit.
   if (scopeChanged) {
     setPagination({ query: searchQuery, searchAllNotebooks, activeNotebookId,
       limit: SEARCH_RESULT_PAGE_SIZE });
@@ -99,7 +97,7 @@ export function useCommandSearch({
       try {
         const next = event.newValue ? JSON.parse(event.newValue) : [];
         if (Array.isArray(next) && next.every((id) => typeof id === "string")) setRemovedRecentIds(next);
-      } catch { /* 另一扇窗口写入了坏数据时保留本窗列表。 */ }
+      } catch {   }
     };
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
@@ -178,7 +176,6 @@ export function useCommandSearch({
   const sameSession = retained?.query === searchQuery &&
     retained.all === searchAllNotebooks && retained.activeId === activeNotebookId &&
     retained.notebooks === notebooks;
-  // Retain rows while refreshing the same session, with interaction blocked until ready.
   if (enabled && ready && !prepared.error && (!hasQuery || currentCompletion?.matches) &&
       (!sameSession || retained.matches.all !== liveMatches.all ||
         retained.matches.recentCandidates !== liveMatches.recentCandidates)) {

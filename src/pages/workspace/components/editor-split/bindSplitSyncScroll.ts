@@ -103,10 +103,6 @@ function listen(tabId: string, paneId: string, el: HTMLDivElement, bus: SyncScro
   };
 }
 
-/**
- * 每格的滚动容器是 SplitEditorPane 上的 .page-scroll-container。
- * 滚动恢复和编辑器 scrollIntoView 也会改 scrollTop，不能当成用户源回传。
- */
 export function bindSplitSyncScroll(
   tabId: string,
   paneId: string,

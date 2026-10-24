@@ -19,7 +19,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 超过该长度的说明默认折叠为两行。 */
 const LONG_DETAIL = 90;
 
 const dotVariants: Variants = {

@@ -31,7 +31,6 @@ export function resolveModModifier(
   return platform === "mac" ? "meta" : "ctrl";
 }
 
-/** 系统键：macOS Command、Windows Win、Linux Super（Omarchy / Hyprland）。 */
 export function formatSystemModifier(
   platform: PlatformKind = getPlatformKind(),
 ): string {
@@ -111,7 +110,6 @@ export function normalizeShortcutForConflict(
   return [...modifiers, ...(key ? [key] : [])].join("+");
 }
 
-/** 平台主键事件：macOS 只认 ⌘，Windows / Linux 只认 Ctrl，不把 Super/Win 当成 Mod。 */
 export function isPlatformPrimaryModifierEvent(
   event: Pick<KeyboardEvent, "ctrlKey" | "metaKey">,
   platform: PlatformKind = getPlatformKind(),
@@ -123,10 +121,6 @@ export function isPlatformPrimaryModifierEvent(
   return event.ctrlKey && !event.metaKey;
 }
 
-/**
- * 录制时把「当前平台主键」收成 Mod，Super/Win 保持独立。
- * macOS 的 ⌘ 与 Linux/Windows 的 Ctrl 因此是同一套可移植绑定。
- */
 export function canonicalizeRecordedShortcut(
   shortcut: string,
   platform: PlatformKind = getPlatformKind(),

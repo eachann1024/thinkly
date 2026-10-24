@@ -1,11 +1,3 @@
-/**
- * Electron 桌面端的 window.gooseFs 同构实现。
- *
- * 经 window.gooseDesktop（preload contextBridge）实现 GooseFs 契约，
- * 让 local-folder 扫描、写盘、watch、图片 assets 等既有逻辑不区分宿主直接跑。
- *
- * 仅被 src/lib/host/runtime.electron.ts 动态 import（electron 构建专属）。
- */
 
 import { canonicalRelativePath } from "@/lib/canonicalLocalPath";
 import { getGooseDesktop } from "./runtime";
@@ -21,7 +13,6 @@ export const rememberExists = (path: string, value: boolean) => {
   existsCache.set(path, value);
 };
 
-/** 根目录改名后，存在性缓存和上次打开的目录都改指新路径。 */
 export const relocateExistsCache = (oldRoot: string, newRoot: string) => {
   const nextRoot = newRoot.replace(/\\/g, "/").replace(/\/+$/, "");
   for (const [key, value] of [...existsCache]) {
@@ -38,7 +29,6 @@ export const relocateExistsCache = (oldRoot: string, newRoot: string) => {
     if (relative === null) return;
     window.localStorage.setItem(LAST_DIRECTORY_KEY, relative ? `${nextRoot}/${relative}` : nextRoot);
   } catch {
-    // 目录记忆写失败不影响已经完成的重命名。
   }
 };
 
@@ -120,7 +110,6 @@ const ensureFsChangeBridge = () => {
       try {
         cb(eventType, filename || changed);
       } catch {
-        // ignore
       }
       window.dispatchEvent(
         new CustomEvent("goose-note:file-changed", {
@@ -200,11 +189,9 @@ export const cleanupTempFilesImpl = async (
           await api.fsRemove(entry.path);
         }
       } catch {
-        // ignore
       }
     }
   } catch {
-    // ignore
   }
 };
 
@@ -216,14 +203,12 @@ export const selectDirectoryImpl = async (): Promise<string | null> => {
     try {
       fallbackPath = window.localStorage.getItem(LAST_DIRECTORY_KEY) || undefined;
     } catch {
-      // 主进程保存的目录记忆不依赖浏览器存储可用。
     }
     const dir = await api.selectDirectory({ purpose: "notebook", fallbackPath });
     if (!dir) return null;
     try {
       window.localStorage.setItem(LAST_DIRECTORY_KEY, dir);
     } catch {
-      // ignore
     }
     rememberExists(dir, true);
     return dir;

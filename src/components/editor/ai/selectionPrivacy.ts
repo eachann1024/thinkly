@@ -31,7 +31,6 @@ export interface InlineSelectionPart {
   offsetTo: number;
 }
 
-/** Node selections select their explicit containers, never implicit descendants. */
 export function captureInlineSelectionParts(
   doc: ProseMirrorNode,
   selection: Selection,
@@ -40,9 +39,6 @@ export function captureInlineSelectionParts(
   const textSelection = selection instanceof TextSelection;
   const parts: InlineSelectionPart[] = [];
   const unsupported = () => new Error(t("theSelectionContainsATableOrNonText"));
-  // Body-wide selection (second Cmd+A) can end between containers instead of
-  // inside inline text. Validate those ranges per block below, while still
-  // rejecting positions inside tables and other non-inline content.
   if (textSelection && [selection.$from, selection.$to].some((pos) => {
     if (["doc", "blockGroup", "blockContainer"].includes(pos.parent.type.name)) return false;
     return !pos.parent.isTextblock || pos.depth < 2 || pos.node(-1).type.name !== "blockContainer";
@@ -89,7 +85,6 @@ export interface InlineSelectionSnapshot {
   suffix: Fragment;
 }
 
-/** Freeze character boundaries before the menu takes focus; never expand to words. */
 export function captureInlineSelection(
   doc: ProseMirrorNode,
   from: number,
@@ -151,7 +146,6 @@ export function captureInlineSelection(
   };
 }
 
-/** Build a replacement off-document, retaining untouched text, marks and descendants. */
 export function composeInlineReplacement(
   target: InlineSelectionSnapshot,
   generated: ProseMirrorNode[],
@@ -168,7 +162,6 @@ export function composeInlineReplacement(
     generated.length === 1 && generated[0].childCount === 1
       ? generated[0].firstChild
       : null;
-  // Ordinary rewrites stay inline (including existing heading/list formatting).
   if (
     single?.isTextblock &&
     (single.type.name === "paragraph" || single.type === firstContent.type)
@@ -185,7 +178,6 @@ export function composeInlineReplacement(
     result.push(first.copy(Fragment.from(firstContent.copy(target.prefix))));
   result.push(...generated);
   if (target.suffix.size) {
-    // A split within one source block must not duplicate its id.
     const attrs =
       first === last && target.prefix.size
         ? { ...last.attrs, id: null }
@@ -201,7 +193,6 @@ export function composeInlineReplacement(
     );
   } else if (trailingChildren.length) {
     const tail = result[result.length - 1];
-    // Keep the old descendants as a separate boundary block if generated output has its own children.
     if (tail.childCount > 1) {
       result.push(
         last.type.create({ ...last.attrs, id: null }, [

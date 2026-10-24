@@ -1,7 +1,3 @@
-/**
- * 表格序号默认不改写。右键打开「自动追加编号」后，勾选时补齐，之后只在行数变化时追加。
- * 运行：node scripts/verify/run.mjs table-sequence
- */
 import { readFileSync } from "node:fs";
 import { Schema } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";

@@ -22,8 +22,6 @@ function normalizeMarkdownLineBreaks(markdown: string): string {
   return markdown.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
 
-// 抽出文件顶部的 YAML frontmatter（含起止 --- 行）。返回剩余 markdown body
-// （跳过 frontmatter 之后的多余空行）。frontmatter 不入编辑器，保存时 prepend 回去。
 export function extractFrontmatter(markdown: string): {
   frontmatter: string | null;
   body: string;
@@ -123,7 +121,6 @@ export function encodeUnsupportedMarkdownForEditor(markdown: string): string {
     }
 
     const tagName = getHtmlTagName(trimmed);
-    // 仅放行本应用可无损解析的表格，整段跳过，避免 tbody/tr 被逐行包成 raw。
     if (tagName === "table" && /^<table\s+data-(?:thinkly|goose)-table="v1"(?:\s|>)/i.test(trimmed)) {
       let end = index;
       while (end < lines.length && !/<\/table>\s*$/i.test(lines[end].trim())) end += 1;
@@ -168,7 +165,6 @@ export function decodeUnsupportedMarkdownForDisk(markdown: string): string {
       if (/^\s*<!--\s*(?:thinkly|goose-note):raw-block\s*-->$/.test(body[0] || "")) body.shift();
       output.push(...body);
     } else {
-      // 其他围栏中的 raw 示例仍然是代码，不能递归解包。
       output.push(...lines.slice(index, end + 1));
     }
     index = end;

@@ -36,7 +36,6 @@ export function useSidebarNavigation(
 
   const searchSessionOpen = useSearchSession((state) => state.view.phase !== "closed");
 
-  // 搜索改为主区底部面板，侧栏不再保留搜索视图。
   useEffect(() => {
     if (currentView === "search") setCurrentView("pages");
   }, [currentView, setCurrentView]);
@@ -44,7 +43,6 @@ export function useSidebarNavigation(
   useLayoutEffect(() => {
     const rail = sidebarModeRailRef.current;
     if (!rail?.contains(document.activeElement)) return;
-    // 焦点已在窄栏内时跟随当前视图，保留编辑器或搜索框里的焦点。
     rail
       .querySelector<HTMLButtonElement>('[data-sidebar-view][aria-pressed="true"]')
       ?.focus({ preventScroll: true });
@@ -61,7 +59,6 @@ export function useSidebarNavigation(
   const sidebarViewShortcut = (digit: number) =>
     formatShortcut(`Mod+${digit}`);
 
-  // 历史列表替换内容面板；导航轨道继续提供返回笔记和设置的入口。
   const historyActivePageId = useHistoryView((s) => s.active);
 
   const exitHistoryView = useHistoryView((s) => s.exit);
@@ -168,7 +165,6 @@ export function useSidebarNavigation(
       event.stopPropagation();
       closeSidebarOverlay();
     };
-    // 菜单与输入框仍先处理；仅提示气泡不应吞掉关闭面板的 Esc。
     document.addEventListener("keydown", onEscape, true);
     return () => document.removeEventListener("keydown", onEscape, true);
   }, [sidebarOverlay, settingsOpen, closeSidebarOverlay]);

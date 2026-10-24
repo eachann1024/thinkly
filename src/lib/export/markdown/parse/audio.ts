@@ -1,7 +1,6 @@
 import { readDataAttr } from "../persistedNames";
 import { sanitizeCssColor } from "../blockPropsProperties";
 
-// 与自然媒体 HTML 共用入口，保留旧版只包含 src 的 video 文档。
 export function parseAudioBlock(lines: string[], start: number) {
   const line = lines[start].trim();
   if (!/^<(audio|video)\s+src="[^"]*"[^>]*>\s*<\/\1>$/i.test(line)) return null;

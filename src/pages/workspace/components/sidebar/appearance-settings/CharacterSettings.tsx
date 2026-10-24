@@ -15,7 +15,6 @@ import { CHARACTER_SETTINGS_ANCHOR } from "@/lib/characterGuide";
 import { useSettings } from "@/stores/useSettings";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 
-/** 外观设置中的形象选择：复用首启引导的选择网格。 */
 export function CharacterSettings() {
   useLocale();
   const characterId = useSettings((state) => state.characterId);

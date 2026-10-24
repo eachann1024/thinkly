@@ -7,10 +7,8 @@ import { CHARACTER_GROUPS } from "./registry";
 import "./character-picker.css";
 
 const NEXT_KEYS: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-/** 键盘顺序与视觉顺序一致：先男生组、再女生组。 */
 const ORDER = CHARACTER_GROUPS.flat();
 
-/** 形象选择：引导页与外观设置共用；男生、女生各成一行居中，挥手姿态展示。 */
 export function CharacterPicker({
   value,
   onChange,

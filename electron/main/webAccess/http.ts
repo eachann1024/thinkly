@@ -5,7 +5,6 @@ const BROWSER_UA =
 const TIMEOUT_MS = 15_000;
 const MAX_BYTES = 3 * 1024 * 1024;
 
-/** 主进程发起的外网请求：带浏览器 UA、超时与体积上限，不受渲染进程 CORS 限制。 */
 export async function fetchText(
   url: string,
   init: { accept?: string; headers?: Record<string, string> } = {},

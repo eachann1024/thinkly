@@ -37,7 +37,6 @@ export function plannedContent(
     return buildAiPageContent(operation.title, operation.markdown);
   }
 
-  // full edit：用块级 merge 保留未改动块的 id / props
   const beforePage = journal.before[operation.pageId].page;
   const beforeContent = beforePage.content;
   const isLocal = Boolean(beforePage.localFilePath);

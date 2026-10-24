@@ -19,7 +19,6 @@ export type CharacterCrop = "full" | "head";
 
 const pct = (value: number) => `${(Math.min(1, Math.max(0, value)) * 100).toFixed(2)}%`;
 
-/** 眨眼区域映射到裁切框内；越界时放弃局部眨眼。 */
 function eyeInCrop(eye: CharacterRect, crop: CharacterRect) {
   const pad = 0.012;
   const x = (eye[0] - pad - crop[0]) / crop[2];
@@ -34,7 +33,6 @@ function eyeInCrop(eye: CharacterRect, crop: CharacterRect) {
   };
 }
 
-/** 优先用灰度源按物理像素抖动；缺灰度源时回退 1-bit 素材按格数重抖。 */
 function spriteJob(
   character: CharacterDef,
   pose: CharacterPose,
@@ -57,10 +55,6 @@ function spriteJob(
   };
 }
 
-/**
- * 1-bit 点阵形象：跟随明暗主题，缓慢呼吸并偶尔眨眼。
- * 动效只动 transform / opacity，离开视口或页面隐藏时暂停，减少动效时静帧。
- */
 export function CharacterSprite({
   id,
   pose = "main",
@@ -100,10 +94,8 @@ export function CharacterSprite({
     return () => {
       alive = false;
     };
-    // key 已涵盖 load / source 的全部输入。
   }, [baseKey, shutKey]);
 
-  // 每个实例错开眨眼节奏：6–9s 一次，约四分之一实例连眨两下。
   const [rhythm] = useState(() => ({
     "--cs-blink-period": `${(6 + Math.random() * 3).toFixed(2)}s`,
     "--cs-blink-delay": `${(-Math.random() * 6).toFixed(2)}s`,

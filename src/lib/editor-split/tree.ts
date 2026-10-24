@@ -49,16 +49,11 @@ export { neighborLeaf } from "./treeGeometry";
 export type SplitLeafInput = {
   direction: SplitDirection;
   newPageId: string;
-  /** 默认当前焦点叶。 */
   leafId?: string;
   newLeafId?: string;
   newGroupId?: string;
 };
 
-/**
- * 在指定叶处分屏。新叶落在右侧（horizontal）或下方（vertical）。
- * 原叶 pageId 不变。已有 4 叶时返回错误，不改树。分屏会清掉 zoom。
- */
 export function splitLeaf(
   state: SplitState,
   input: SplitLeafInput,
@@ -171,10 +166,6 @@ function focusAfterClose(state: SplitState, closedId: string): string {
     : neighborLeaves[0].id;
 }
 
-/**
- * 关掉一叶：兄弟吃掉它的空间；只剩一叶的 group 会被提升。
- * 树里只剩这一叶时返回 `{ kind: "last-pane" }`，不改树，由调用方关 Tab。
- */
 export function closeLeaf(
   state: SplitState,
   leafId: string = state.focusedLeafId,
@@ -212,9 +203,6 @@ export function closeLeaf(
   };
 }
 
-/**
- * 写入某个 group 的百分比尺寸。长度会按 children 归一。
- */
 export function replaceSizes(
   state: SplitState,
   groupId: string,
@@ -231,9 +219,6 @@ export function replaceSizes(
   };
 }
 
-/**
- * 当前叶占满 / 退出占满。只改 `zoomedLeafId`，树结构不变。
- */
 export function toggleZoom(
   state: SplitState,
   leafId: string = state.focusedLeafId,
@@ -245,9 +230,6 @@ export function toggleZoom(
   return { ...state, zoomedLeafId: leafId };
 }
 
-/**
- * 把焦点移到指定叶。若正处于 zoom，zoom 跟着移到新叶。
- */
 export function focusLeaf(state: SplitState, paneId: string): SplitState {
   if (!findLeaf(state.root, paneId)) return state;
   return {
@@ -257,9 +239,6 @@ export function focusLeaf(state: SplitState, paneId: string): SplitState {
   };
 }
 
-/**
- * 改某叶绑定的页面。树结构不变。
- */
 export function setLeafPage(
   state: SplitState,
   paneId: string,

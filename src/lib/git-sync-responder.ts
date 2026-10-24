@@ -35,7 +35,6 @@ export function installGitSyncResponder() {
       const pages = Object.values(usePages.getState().pages).filter((page) => ids.has(page.workspaceId));
       if (pages.some((page) => usePages.getState().dirtyLocalPageIds[page.id])) throw new Error(gitText("saveBeforeSync"));
       if (request.finished) return;
-      // All roots share one flush. Acquiring another root never flushes behind a held barrier.
       for (const [index, root] of canonical.entries()) {
         const paths = new Set([root, selected[index]!.localPath!]);
         for (const [alias, value] of [...paths].entries()) {

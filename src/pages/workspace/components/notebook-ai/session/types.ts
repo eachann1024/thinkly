@@ -31,17 +31,12 @@ export interface NotebookAiSessionValue {
   newConversation: (options?: {
     onConsumeCapturedSelection?: () => void;
   }) => void;
-  /**
-   * 打开 AI / 加入对话时解析当前会话：过期则归档并进入空白新会话。
-   * 流式生成中不切换，避免打断正在进行的回复。
-   */
   ensureFreshConversation: () => string;
   compactConversation: () => void;
   selectConversation: (
     nextConversationId: string,
     options?: { onConsumeCapturedSelection?: () => void },
   ) => void;
-  /** 删除历史会话；流式生成中拒绝。返回是否已执行删除 */
   deleteConversation: (targetConversationId: string) => boolean;
   searchPages: (
     query: string,

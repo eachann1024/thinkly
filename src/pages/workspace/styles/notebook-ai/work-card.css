@@ -1,4 +1,3 @@
-/* 审批卡跟 AI 面板同一套 goose token，避免 --bui-surface 回退纯白 */
 .notebook-ai-approval-plan.bui-approval {
  background: hsl(var(--goose-editor-bg));
  color: hsl(var(--foreground));
@@ -21,14 +20,12 @@
  cursor: default;
 }
 
-/* A：工作卡与审批卡同一套纸面；步骤平铺，不套第二张卡 */
 .notebook-ai-work-card {
  min-width: 0;
  max-width: 100%;
  overflow-anchor: none;
 }
 
-/* 左右同为 20px，跟 .bui-approval 纸面一致；折叠箭头走内容流，不再额外左缩 */
 .notebook-ai-work-card.bui-approval {
  padding: 22px 20px 16px;
 }
@@ -39,7 +36,6 @@
   0 8px 22px rgba(0, 0, 0, 0.32);
 }
 
-/* 处理中直接融入对话背景，不再套纸面或预留卡片内边距。 */
 .notebook-ai-work-card.bui-approval.notebook-ai-work-card--running {
  padding: 0 8px;
  border-radius: 0;
@@ -213,7 +209,6 @@
  overflow-anchor: none;
 }
 
-/* 信封正文：一轮回复的 letter，用正文字号而非 aside 的弱提示样式 */
 .notebook-ai-work-letter {
  margin-top: 16px;
  min-width: 0;

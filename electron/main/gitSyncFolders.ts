@@ -8,7 +8,6 @@ import type { GitFolderCheck } from "../../src/lib/git-sync-contract";
 import { addVaultRoot, assertAllowed, findVaultRootContaining, hasUnsafeSegments, normalizePath } from "./allowlist";
 import { validateGitSyncFolder } from "./gitRepositoryEngine";
 
-/** 应用里已经打开的笔记本根目录必须能同步。漏登记是程序问题，不拿来提示用户。 */
 export async function rememberNotebookRoot(localPath: unknown): Promise<boolean> {
   if (typeof localPath !== "string" || hasUnsafeSegments(localPath)) return false;
   let resolved: string;

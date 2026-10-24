@@ -53,7 +53,6 @@ export function useComposerKeyboard(
         }
       }
 
-      // mention/command 仍吃 React 风格事件；用最小 shim 复用现有逻辑
       const reactLike = {
         key: event.key,
         shiftKey: event.shiftKey,
@@ -76,7 +75,6 @@ export function useComposerKeyboard(
         return;
       }
 
-      // 左右方向键：一次跨过一个 chip（原子跳），避免 ZWSP 双档/双锚点连按 3 下。
       if (
         (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
         !event.shiftKey &&

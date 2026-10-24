@@ -9,11 +9,6 @@ type ExportBlock = {
   [key: string]: unknown;
 };
 
-/**
- * 编辑器把 heading 后续内容当同级章节（折叠只藏后续兄弟），
- * 但 BlockNote / 旧 isToggleable 数据会把它们放进 heading.children。
- * 导出前拍平，避免章节标题变成上一节列表里的一项。
- */
 export function flattenHeadingChildrenForExport<T extends ExportBlock>(
   blocks: T[],
 ): T[] {
@@ -67,10 +62,6 @@ function sanitizeExportBlock(block: unknown): Record<string, unknown> {
   return next;
 }
 
-/**
- * 把任意 page.content（BlockNote 数组、旧 doc 对象、本地文件夹占位）收成可导出的块数组。
- * 本地文件夹不强制首块 H1。
- */
 export function cloneExportBlocks(
   content: Page["content"] | unknown,
   options?: { ensureFirstTitle?: boolean },

@@ -16,7 +16,6 @@ type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   container?: HTMLElement | null;
   editorContext?: boolean;
   variant?: "popover" | "menu";
-  /** NodeView controls must not insert focus guards into ProseMirror's DOM. */
   manageFocus?: boolean;
   forceMount?: boolean;
   animation?: "fade" | "reveal";

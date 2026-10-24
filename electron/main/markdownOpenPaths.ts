@@ -1,7 +1,3 @@
-/**
- * 从启动参数里挑出要打开的 Markdown 路径（纯函数，便于单测）。
- * 实际存在性、绝对路径解析在 openMarkdownFiles.ts 里做。
- */
 
 const MARKDOWN_EXT = /\.(md|markdown)$/i;
 
@@ -21,10 +17,6 @@ function looksLikeFlag(arg: string): boolean {
   return arg.startsWith("-");
 }
 
-/**
- * 开发态 argv：`electron dist-electron/main/index.js [files...]`
- * 包装态 argv：`Thinkly.exe [files...]`（macOS 文件走 open-file，不依赖 argv）
- */
 export function collectMarkdownPathsFromArgv(
   argv: string[],
   options: ArgvOpenOptions,

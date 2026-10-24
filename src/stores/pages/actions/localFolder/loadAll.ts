@@ -2,12 +2,6 @@ import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
 import { loadLocalFolderPagesAction } from "./load";
 
-// 把「所有尚未加载」的 local-folder 记事本页面扫进 store。
-// 用途：全局搜索「所有记事本」需要覆盖全量，但 local-folder 记事本是懒加载的
-// （只有打开过才扫盘进内存）。启动后后台静默预热一次，切到「所有记事本」时也兜底调用。
-//
-// 安全性：loadLocalFolderPagesAction 仅在 activeNotebookId === 目标记事本时才会改 activePageId，
-// 这里预加载的都是非激活记事本，因此不会影响当前激活页 / 已打开标签。
 export const loadAllLocalFolderPagesAction = async (
   set: StoreSet,
   get: StoreGet,
@@ -20,13 +14,11 @@ export const loadAllLocalFolderPagesAction = async (
     if (nb.source !== "local-folder") return false;
     if (!nb.localPath || nb.localPathMissing) return false;
     const loadState = localFolderLoadStates[nb.id];
-    // 正在加载中的跳过；为了确保磁盘 Frontmatter 与置顶/收藏状态同步，未在加载中的都执行扫盘校准
     return loadState?.status !== "loading";
   });
 
   if (targets.length === 0) return;
 
-  // 串行扫盘，避免同时大量文件 IO 拖慢交互。
   for (const nb of targets) {
     try {
       await loadLocalFolderPagesAction(set, get, nb.id, nb.localPath!);

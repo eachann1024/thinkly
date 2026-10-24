@@ -43,10 +43,6 @@ export function closestTable(
   return cell?.closest("table") ?? null;
 }
 
-/**
- * 行把手要覆盖指针所在的整行，而不是只覆盖指针下那一格。
- * 行与行的边框缝也归到最近的一行。表外返回 null。
- */
 export function tableRowUnderPointer(
   table: HTMLTableElement,
   clientX: number,
@@ -72,7 +68,6 @@ export function tableRowUnderPointer(
   return nearest;
 }
 
-/** True when two pointer targets sit in different TD/TH cells. */
 export function isCrossCellPointer(
   startEl: EventTarget | null,
   currentEl: EventTarget | null,
@@ -228,7 +223,6 @@ function textPosInCell(
   return lo;
 }
 
-/** 指针下的文档位置。已经在格子里就只用一次 posAtCoords。 */
 export function docPosAtClient(
   view: EditorView,
   clientX: number,

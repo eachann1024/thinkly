@@ -25,7 +25,6 @@ function isCollapsedHeadingContent(
   );
 }
 
-/** PM doc → SectionFoldBlock 树（blockGroup > blockContainer 结构拍平成块树）。 */
 function sectionTreeFromDoc(doc: Node): SectionFoldBlock[] {
   const fromGroup = (group: Node): SectionFoldBlock[] => {
     const blocks: SectionFoldBlock[] = [];
@@ -65,11 +64,6 @@ function firstContainerId(doc: Node): string | undefined {
 
 type FoldSnapshots = Map<string, string[]>;
 
-/**
- * 收集 decorations：
- * - 隐藏区间 = snapshot 里仍存在的 sibling blockContainer + 标题残留 children；
- * - 折叠中的 heading 自身 blockContainer 打 data-goose-heading-collapsed。
- */
 export function collectSectionFoldDecorations(
   doc: Node,
   snapshots: FoldSnapshots,
@@ -108,7 +102,6 @@ export function collectSectionFoldDecorations(
           }),
         );
 
-        // 标题残留 children（旧 isToggleable 数据）属于标题自身，折叠时一直藏。
         let innerOffset = 1;
         container.node.forEach((grand) => {
           if (grand.type.name === "blockGroup") {

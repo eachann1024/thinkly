@@ -1,13 +1,8 @@
 import { animate } from "motion/react";
 
-/** 与 --workspace-sidebar-motion 同一条曲线。 */
 export const SIDEBAR_WIDTH_MOTION_MS = 200;
 const SIDEBAR_WIDTH_EASE = [0.16, 1, 0.3, 1] as const;
 
-/**
- * 只有收起和展开才补间。拖把手、窗口连续变窄时的宽度钳制保持跟手。
- * previous 为 null 表示首次写入，直接落位。
- */
 export function shouldAnimateSidebarWidth(previous: number | null, next: number) {
   if (previous === null) return false;
   return (previous <= 0) !== (next <= 0);

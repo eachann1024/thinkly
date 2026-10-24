@@ -137,7 +137,6 @@ function restoreComposerCaret(snapshot: { node: Node; offset: number } | null) {
       return;
     }
   } catch {
-    // fall through to Range
   }
   try {
     const range = document.createRange();
@@ -146,7 +145,6 @@ function restoreComposerCaret(snapshot: { node: Node; offset: number } | null) {
     selection.removeAllRanges?.();
     selection.addRange?.(range);
   } catch {
-    // linkedom / 失效节点：保持不抢光标
   }
 }
 
@@ -185,7 +183,6 @@ export function appendSelectionQuoteToDom(
   return "appended";
 }
 
-/** Language updates touch only existing chip accessibility attributes. */
 export function refreshSelectionQuoteLabels(container: HTMLElement) {
   container.querySelectorAll<HTMLElement>("[data-ai-selection-quote-attrs]").forEach((chip) => {
     const attrs = parseSelectionQuoteAttrs(chip.dataset.aiSelectionQuoteAttrs);

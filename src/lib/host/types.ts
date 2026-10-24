@@ -17,7 +17,6 @@ export interface HostRemoveResult {
   error?: unknown;
 }
 
-/** 全局热键注册结果；state 供设置页区分 占用/无效/其它错误。 */
 export interface HostHotkeyRegisterResult {
   ok: boolean;
   error?: string;
@@ -31,7 +30,6 @@ export interface HostRuntime {
     get: <T>(id: string) => HostDoc<T> | null;
     remove: (id: string) => HostRemoveResult;
     allDocs: <T>(prefix?: string) => Array<HostDoc<T>>;
-    // 附件存储走磁盘，统一使用异步接口。
     postAttachment: (
       id: string,
       data: Uint8Array,

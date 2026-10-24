@@ -94,7 +94,6 @@ function partId(part: ToolProgressPart, index: number): string {
   return part.toolCallId?.trim() || `${part.type}:${index}`;
 }
 
-/** LoadingState 等宽耗时：<60s 用 `12.3s`，否则 `1m 2.3s` */
 export function formatLoaderElapsed(ms: number): string {
   const total = Math.max(0, ms) / 1000;
   if (total < 60) return `${formatDecimal(total, 1)}s`;
@@ -184,7 +183,6 @@ export function mapStepsToThinkingTrace(
   };
 }
 
-/** 真值立即亮；假值可被 held 粘住。对应 useMinHoldActive 的可见性合成。 */
 export function resolveLoaderHold(active: boolean, held: boolean): boolean {
   return active || held;
 }

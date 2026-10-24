@@ -33,7 +33,6 @@ import { toast } from "@/components/ui/sonner";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
 
-/** 打开本地文件夹：弹出目录选择器，创建本地文件夹笔记本并加载页面。 */
 export function useOpenLocalFolder() {
   const { loadLocalFolderPages } = usePages();
   const createLocalFolderNotebook = useNotebooks((state) => state.createLocalFolderNotebook);
@@ -69,9 +68,7 @@ export function usePageEmptyState() {
   const isLocalFolder = activeNotebook?.source === "local-folder";
 
   const activateOrCreatePage = useCallback(async () => {
-    // Electron 仅本地文件夹模式：无仓库时禁止建页，也绝不自动创建内置笔记本
     if (activeNotebook?.source !== "local-folder") return null;
-    // 如果没有活跃笔记本，创建一个默认笔记本
     let notebookId = activeNotebookId;
     if (!notebookId) {
       const notebookIds = Object.keys(notebooks);
@@ -95,12 +92,10 @@ export function usePageEmptyState() {
 
   const onOpenLocalFolder = useOpenLocalFolder();
 
-  // 全局快捷键监听
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.repeat || isImeKeyboardEvent(e)) return;
       if ((e.target as HTMLElement | null)?.closest?.("[data-shortcut-recorder]")) return;
-      // 当前系统主键 + Alt + P：新建页面
       if (isPlatformPrimaryModifierEvent(e) && e.altKey && e.key === "p") {
         e.preventDefault();
         activateWorkspace();
@@ -121,7 +116,6 @@ export function usePageEmptyState() {
       onClick: () => void | Promise<void>;
     }> = [];
 
-    // Electron 无仓库空态：只有「打开文件夹」，不展示新建页面
     const showCreatePage = isLocalFolder;
     if (showCreatePage) {
       list.push({

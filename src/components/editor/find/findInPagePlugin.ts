@@ -41,7 +41,6 @@ export function collectMatches(
     const positions: number[] = [];
     node.forEach((child, offset) => {
       if (!child.isText || !child.text) {
-        // hardBreaks and inline atoms deliberately split searchable text runs.
         text += "\u0000";
         positions.push(-1);
         return;

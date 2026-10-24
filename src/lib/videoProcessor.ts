@@ -17,7 +17,6 @@ export async function transcodeVideo(
   input: File,
   onProgress?: (progress: VideoTranscodeProgress) => void,
 ): Promise<Blob> {
-  // Electron 版不内置 FFmpeg；保留原始视频，避免不可用宿主 API 的静默失败。
   onProgress?.({ percent: 100 });
   return input;
 }

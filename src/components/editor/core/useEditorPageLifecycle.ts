@@ -41,12 +41,9 @@ export function useEditorPageLifecycle(
   useLayoutEffect(() => {
     if (!__GOOSE_EDITOR_AI__) return;
     const inlineAi = editor.getExtension(GooseAIExtension);
-    // Cleanup runs before any page replacement; a detached session keeps generating in memory.
     return () => inlineAi?.detachPage();
   }, [editor, activePageId]);
 
-  // BlockNoteView 的 editable 会在 prop 变化时重挂 ProseMirror。
-  // 实例上的 isEditable 也要立刻同步，锁定当帧就不能输入。
   useEffect(() => {
     if (editor.isEditable === editable) return;
     editor.isEditable = editable;
@@ -67,8 +64,6 @@ export function useEditorPageLifecycle(
     const syncedSignature = untouched
       ? syncedContentSignatureRef.current
       : mode === "raw" ? signature : getCachedContentSignature(normalizePageContent(blocks));
-    // A watcher may update host content before its editor reload. Never pair that new
-    // source with the old document; only an exact content baseline enables the fast path.
     const cachedSource = source && getCachedContentSignature(source.content) === syncedSignature
       ? { content: source.content, mode, syncedSignature } : undefined;
     pageUndoHistory.save(id, editor.prosemirrorState, signature, cachedSource);
@@ -100,9 +95,6 @@ export function useEditorPageLifecycle(
           view.state,
           signature,
         );
-        // 首次打开、且该页没有历史快照时 restore 原样返回 view.state。重复
-        // updateState 会强制 React NodeView 重建；嵌套 image 正在挂载时其 getPos
-        // 已失效，继而触发 Cannot find node position。
         if (restored !== view.state) {
           markProgrammaticRead(editor);
           view.updateState(restored);
@@ -113,7 +105,6 @@ export function useEditorPageLifecycle(
     saveSnapshotRef.current();
     prevPageIdRef.current = activePageId;
 
-    // 切页起点即重置：侧栏点击等切页前的 pointerdown 不应算进新页面的用户编辑。
     userInteractedRef.current = false;
     pendingEditorChangeRef.current = false;
 
@@ -127,7 +118,6 @@ export function useEditorPageLifecycle(
       p.id, view.state, p.content, contentModeRef.current,
     );
     if (cached) {
-      // Rebuild plugin state once against the cached document, avoiding two NodeView mounts.
       syncedContentSignatureRef.current = cached.syncedSignature;
       markProgrammaticRead(editor);
       view.updateState(cached.state);
@@ -135,9 +125,6 @@ export function useEditorPageLifecycle(
     }
 
 
-    // raw 文档跳过 normalizePageContent（不触发 ensureFirstTitleHeading）。
-    // 须与 EditorComposer.onChange 的 contentMode 判断一致：
-    // raw 文档同样豁免，否则切页/重开时会把首块强转 H1 并刷新签名基线。
     const isLocalPage = contentModeRef.current === "raw";
     const nextContent = isLocalPage
       ? toEditorBlocks(p?.content)
@@ -171,7 +158,6 @@ export function useEditorPageLifecycle(
       replacedSize = 0;
     }
 
-    // 大文档的块树签名放到空闲时再算，切页本身不等整表 JSON。
     const heavy = replacedSize > 20000;
     const pageId = p?.id ?? null;
     if (!heavy) {
@@ -191,7 +177,6 @@ export function useEditorPageLifecycle(
       else window.setTimeout(reconcile, 300);
     }
 
-    // 新笔记独立建栈；最近访问过且正文未在外部变化的笔记恢复自己的历史。
     if (view) {
       const newState = EditorState.create({
         doc: view.state.doc,
@@ -208,9 +193,6 @@ export function useEditorPageLifecycle(
       );
     }
 
-    // normalize 改写了结构才回写（silent 路径：只同步内存，不触发写盘/标脏）。
-    // local 页面不回写：内容未经 normalize，store 保持磁盘解析原样
-    // （空文件的编辑器兜底空段落只是呈现层，不应进 store）。
     const normalizedSig = getCachedContentSignature(nextContent);
     if (
       p &&
@@ -220,12 +202,9 @@ export function useEditorPageLifecycle(
       onContentChangeRef.current(nextContent, { silent: true });
     }
 
-    // 切页完成 = 新一轮程序化同步起点，重置用户交互标记：
-    // 切页后 BlockNote 的异步 props 补全（折叠块/视频等）不应被算作用户编辑。
     userInteractedRef.current = false;
   }, [activePageId, debouncedUpdate, editor]);
 
-  // Bind only after the preceding layout effect has installed this page's document/history.
   useLayoutEffect(() => {
     if (__GOOSE_EDITOR_AI__)
       editor.getExtension(GooseAIExtension)?.attachPage(page.id);

@@ -88,8 +88,6 @@ export function useMainTreeView(
 
   const lastClickModRef = useRef({ meta: false, ctrl: false });
 
-  // react-complex-tree 的方向键默认只移动焦点，不会激活页面。
-  // 仅记录从树内发起的上下导航，避免鼠标点击、自动定位和左右展开/折叠误触发切页。
   const verticalKeyboardNavigationRef = useRef(false);
 
   const viewState = useMemo(() => {
@@ -131,8 +129,6 @@ export function useMainTreeView(
       setPendingTreeSelection(null);
       return;
     }
-    // 页面切换会在标签激活后异步写入 activePageId。树先沿用本次点击的选择；
-    // 目标页落定后撤掉临时态。若期间跳到了第三个页面，则以新导航为准。
     if (
       highlightedPageId === pendingTreeSelection.pageId ||
       (highlightedPageId !== pendingTreeSelection.previousHighlightedPageId &&
@@ -171,10 +167,7 @@ export function useMainTreeView(
   const activateLocalDirectory = useCallback(
     (pageId: string, mode: "preview" | "permanent") => {
       if (!activeNotebookId || !isLocalFolderDirectoryPage(pageId)) return;
-      // Electron：文件夹不进主区，只由行点击负责展开/收起。
       if (isElectronLocalFolderDirectory(pageId)) return;
-      // activePageId 会等标签切换链完成后才更新；先建立本次点击的即时视觉选择，
-      // 避免展开挂载子项时旧 activePageId 让旧子项闪现高亮。
       setPendingTreeSelection({
         notebookId: activeNotebookId,
         pageId,

@@ -24,7 +24,6 @@ function formatAmount(value: number, digits = 2) {
   return new Intl.NumberFormat(getFormatLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
 }
 
-/** 汇率小数位随量级变化：0.0071 这类小汇率需要更多有效位。 */
 function rateDigits(rate: number) {
   if (rate >= 100) return 2;
   if (rate >= 1) return 4;

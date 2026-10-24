@@ -4,7 +4,6 @@ import { ReviewActions } from "./ReviewActions";
 import { ReviewProposal } from "./ReviewProposal";
 import type { ApprovalPlanCardProps } from "./types";
 
-/** 同一回复生成多份方案时，每份预览与它的审批操作保持相邻。 */
 export function PlanReviewCard({
   part,
   onApprovalResponse,

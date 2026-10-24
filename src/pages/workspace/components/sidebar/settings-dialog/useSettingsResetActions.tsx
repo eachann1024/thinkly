@@ -93,7 +93,6 @@ export function useSettingsResetActions(
       if (clearAiChats) useNotebookAiChats.getState().clearAllChats();
       await resetSettingsToDefaults();
       resetAuxiliaryAppState();
-      // Only change next-startup language after the other reset steps succeed.
       if (window.gooseLanguage) {
         try { await resetLanguagePreference(); }
         catch (cause) { throw new Error(uiText("languageResetFailed"), { cause }); }

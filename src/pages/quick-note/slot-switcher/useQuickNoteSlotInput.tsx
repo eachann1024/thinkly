@@ -73,7 +73,6 @@ export function useQuickNoteSlotInput(
     detachWindowScrubListeners();
     const id = ++sequence.current;
     sendScrub({ type: "pressed", id, slot });
-    // 普通点击不闪变拖动指针；持续按住后才显示横向切换提示。
     const holdTimer = window.setTimeout(() => sendScrub({ type: "hold-elapsed", id }), 180);
     const onMove = (ev: PointerEvent) => {
       if (ev.pointerId !== e.pointerId) return;
@@ -108,7 +107,6 @@ export function useQuickNoteSlotInput(
   };
 
   const onRootPointerLeave = () => {
-    // 「移走就生效」：拖动中指针离开切换器时提交当前预览槽
     const transaction = scrubRef.current;
     if (transaction.phase === "idle") return;
     detachWindowScrubListeners();

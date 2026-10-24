@@ -39,7 +39,6 @@ export function localSavePageTransition(state: LocalSavePageState, event: LocalS
     };
     case "restore": return { ...state, pending: { status: "queued", content: event.content }, permission: { status: "confirmation-required" }, recovery: { status: "awaiting-ack", revision: event.revision } };
     case "discard": return { ...state, pending: { status: "empty" }, permission: { status: "automatic" }, write: state.write.status === "writing" ? { status: "discarded", attempt: state.write.attempt } : state.write };
-    // Clearing an AI rollback snapshot must not confirm a recovered draft.
     case "clear-pending": return state.pending.status === "empty" || (event.expected && state.pending.content !== event.expected) ? state : { ...state, pending: { status: "empty" } };
     case "confirm": return state.permission.status === "confirmation-required" ? { ...state, pending: { status: "empty" }, permission: { status: "automatic" } } : state;
     case "write-started": {

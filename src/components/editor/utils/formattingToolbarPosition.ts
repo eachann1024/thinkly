@@ -35,13 +35,6 @@ function sideOrder(preferredSide: ToolbarSide): ToolbarSide[] {
   return ["bottom", "top", "right", "left"];
 }
 
-/**
- * 在可视编辑区内为格式栏寻找一个与完整选区不相交的位置。
- *
- * Floating UI 的常规 flip/shift 负责大多数定位，但 Windows 旧 Chromium
- * 偶尔会返回异常的多行选区几何；最后再过这层确定性约束，避免工具栏被
- * 推进选区。四边都放不下时返回 null，由调用方临时隐藏工具栏，至少不盖住正文。
- */
 export function findNonOverlappingToolbarPosition({
   reference,
   floating,

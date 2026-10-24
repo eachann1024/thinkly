@@ -16,8 +16,6 @@ interface RebindManifest {
   pending?: { commit: string; before: Snapshots; after: Snapshots };
 }
 
-/** Keep the old entries too: a crash before configuration persistence can still
- * recover the original mapping. The new mapping inherits the exact same baseline. */
 export async function preserveReboundHistory(storageRoot: string, repositoryId: string, previous: GitRepositoryFolder, next: GitRepositoryFolder) {
   const file = path.join(storageRoot, repositoryId, "manifest.json");
   let manifest: RebindManifest;
@@ -34,8 +32,6 @@ export async function preserveReboundHistory(storageRoot: string, repositoryId: 
     if (Object.hasOwn(snapshots, newKey) && JSON.stringify(snapshots[newKey]) !== JSON.stringify(snapshots[oldKey])) throw new Error(t("targetRecovery"));
     snapshots[newKey] = snapshots[oldKey]!;
   }
-  // A chosen directory is explicit, but its identity is not proven. Treat it as
-  // first attachment once, so absent local files cannot delete remote content.
   manifest.reboundKeys = [...new Set([...(manifest.reboundKeys ?? []), newKey])];
   await durableAtomicWrite(file, JSON.stringify(manifest));
 }

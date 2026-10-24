@@ -70,10 +70,7 @@ export const createLocalPageRecordAction = async (
   const resolveParentPath = () => {
     if (!parentId) return null;
     const parentPage = get().pages[parentId];
-    // 优先从 page.localFilePath 取路径（稳定 id 后，路径永远在 localFilePath 字段）。
     if (parentPage?.localFilePath) return parentPage.localFilePath;
-    // 兜底：页面不在 store 时，尝试从旧格式 id（local-{nb}-{encoded}）反解。
-    // 注意：稳定 id 后 id 不再必然等于路径编码，此兜底仅供迁移过渡期使用。
     const prefix = `local-${workspaceId}-`;
     if (!parentId.startsWith(prefix)) return null;
     const encoded = parentId.slice(prefix.length);
@@ -136,8 +133,6 @@ export const createLocalPageRecordAction = async (
     }
   }
 
-  // 不要先写空文件再保存：空文件没有快照/自写标记，写盘前冲突检查会把
-  // 「磁盘空文件 ≠ 陈旧快照」误判成外部修改，AI 新建会失败并弹出冲突 toast。
   const id = generateLocalPageId(workspaceId, filePath);
   const newPage: Page = {
     id,
@@ -181,7 +176,6 @@ export const createLocalPageRecordAction = async (
   }
 
   const persisted = get().pages[id];
-  // 写盘期间笔记已被删掉时，不要再写回顺序或激活它。
   if (!persisted) return null;
   persistPageSnapshot(persisted);
   appendLocalFolderOrderEntries(workspaceId, [persisted]);

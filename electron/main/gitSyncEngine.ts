@@ -47,7 +47,6 @@ export async function gitBytes(cwd: string, args: string[], timeout = TIMEOUT_MS
     });
     return stdout;
   } catch (error) {
-    // Do not expose command arguments, local paths, remote output or credentials over IPC.
     throw Object.assign(new Error(gitFailureMessage(error)), { cause: error });
   }
 }
@@ -68,8 +67,7 @@ async function rejectLocalRewrites(root: string, url: string): Promise<void> {
   let output = "";
   try {
     output = await git(root, ["config", "--local", "--null", "--get-regexp", "^url\\..*\\.(insteadof|pushinsteadof)$"]);
-  } catch { /* no rewrite keys */ }
-  // Output is NUL-delimited key/value records. Reject rather than risk transport rewriting.
+  } catch {   }
   const records = output.split("\0").filter(Boolean);
   for (const record of records) {
     const separator = record.indexOf("\n");
@@ -89,7 +87,6 @@ async function isAncestorRepository(path: string): Promise<boolean> {
   } catch { return false; }
 }
 
-/** Synchronize one notebook directory with its dedicated SSH remote. */
 export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
   const config = validateGitSyncConfig(input);
   const root = await realpath(resolve(config.localPath));
@@ -140,7 +137,6 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
     await git(root, ["remote", "add", REMOTE, url]);
   }
 
-  // Stage notebook content while excluding common machine/cache files.
   await git(root, ["add", "-A", "--", ".", ":(exclude,glob)**/.DS_Store", ":(exclude,glob)**/Thumbs.db", ":(exclude,glob)**/desktop.ini"]);
   const staged = Boolean(await git(root, ["diff", "--cached", "--name-only"]));
   if (staged) {
@@ -158,7 +154,6 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
     try {
       const related = localHead && await git(root, ["merge-base", "HEAD", remoteRef]).then(() => true).catch(() => false);
       if (!related) {
-        // Unrelated histories are expected for a notebook initialized independently.
         await git(root, ["merge", "--no-edit", "--allow-unrelated-histories", remoteRef]);
       } else {
         await git(root, ["merge", "--no-edit", remoteRef]);
@@ -168,12 +163,9 @@ export async function syncGitNotebook(input: GitSyncConfig): Promise<void> {
       throw Object.assign(new Error(t("mergeConflict", { reason: error instanceof Error ? error.message : "" })), { cause: error });
     }
   } else if (!localHead) {
-    // Empty local and remote repositories have nothing to merge or push.
     return;
   }
 
-  // Explicit branch refspec: no force and no use of configured pushurl.
-  // Use the checked remote URL directly so a configured pushurl cannot redirect the push.
   try {
     await git(root, ["push", "--no-verify", url, `HEAD:refs/heads/${config.branch}`]);
   } catch (error) {

@@ -1,4 +1,3 @@
-/** summary 保留 Markdown inline；结构标签转义以免用户文字提前关闭 details。 */
 export function serializeToggleDetails(
   block: any,
   text: string,

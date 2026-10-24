@@ -6,7 +6,6 @@ const CLOSE = new RegExp(`^<!--\\s*\\/${NOTE_MARK_PATTERN}:columns\\s*-->$`, "i"
 const COLUMN = new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:column\\s*-->$`, "i");
 const END_COLUMN = new RegExp(`^<!--\\s*\\/${NOTE_MARK_PATTERN}:column\\s*-->$`, "i");
 
-/** 配对布局与每栏边界；围栏中的示例标记是文本，不参与结构扫描。 */
 export function parseColumnsBlock(lines: string[], start: number, parseMarkdown: (markdown: string) => any[]) {
   const opening = lines[start].trim().match(OPEN);
   if (!opening) return null;
@@ -53,6 +52,5 @@ export function parseColumnsBlock(lines: string[], start: number, parseMarkdown:
     if (body) body.push(line);
     else if (trimmed) return null;
   }
-  // 缺失结束标记时原文交还主解析器，绝不把半截数据写成有效分栏。
   return null;
 }

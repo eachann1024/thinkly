@@ -66,7 +66,6 @@ export function useWebdavConfiguration(
     beginWebdavOperation,
   } = input;
 
-  // 列表是独立请求区域；操作内部刷新不再次获取前台操作锁。
   const readRemoteList = async (
     mode: "standalone" | "nested" = "nested",
     config = {

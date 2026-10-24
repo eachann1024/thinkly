@@ -73,7 +73,6 @@ export function createMutationsPageSlice(
       persistPageSnapshots(get().pages, ids);
     },
 
-    // 移动需要同步拿到结果（成功标记与撤回快照），不能放进视图过渡回调里。
     movePageTreeToNotebook: (pageId, targetNotebookId) =>
       movePageTreeToNotebookAction(set, get, pageId, targetNotebookId),
 

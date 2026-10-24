@@ -21,7 +21,6 @@ function cssBody(css: string, selector: string) {
   return blocks.join("\n");
 }
 
-/** 选区引用条：引号、摘要、关闭按钮的中线对齐，不靠逐个偏移。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

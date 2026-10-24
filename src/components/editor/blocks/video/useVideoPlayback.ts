@@ -133,7 +133,6 @@ export function useVideoPlayback(src: string) {
       if (video.paused) await video.play();
       else video.pause();
     } catch {
-      // 自动播放策略等：忽略
     }
   }, [revealControls]);
 
@@ -157,7 +156,6 @@ export function useVideoPlayback(src: string) {
         await root.requestFullscreen();
       }
     } catch {
-      // 宿主环境可能禁用全屏
     }
     revealControls();
   }, [revealControls]);

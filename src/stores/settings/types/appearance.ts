@@ -30,7 +30,6 @@ export interface CustomFonts {
   mono: FontConfig;
 }
 
-// 界面缩放百分比：界面和侧栏同步，正文保持独立字号。
 export type UIFontSize = number;
 
 export const UI_SCALE_MIN = 85;
@@ -49,7 +48,6 @@ export function clampFontSize(
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-// 编辑器字体大小边界
 export const EDITOR_FONT_SIZE_MIN = 12;
 
 export const EDITOR_FONT_SIZE_MAX = 24;
@@ -75,7 +73,6 @@ export function normalizeEditorLineHeight(value: unknown): number {
   );
 }
 
-// 侧栏字体大小边界（与编辑器字号独立持久化）
 export const SIDEBAR_FONT_SIZE_MIN = 12;
 
 export const SIDEBAR_FONT_SIZE_MAX = 18;
@@ -115,7 +112,6 @@ export function resolveCodeTheme(isDark: boolean): CodeTheme {
 }
 
 export function normalizeUIFontSize(value: unknown): UIFontSize {
-  // 兼容旧版三档设置，保留用户原来的界面大小。
   if (value === "small") return 100;
   if (value === "normal") return 114;
   if (value === "large") return 129;

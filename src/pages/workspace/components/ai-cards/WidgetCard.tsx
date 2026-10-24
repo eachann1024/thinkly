@@ -40,7 +40,6 @@ function isDark(color: string) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
 }
 
-/** 从卡片元素读取当前主题的已解析颜色，供沙箱内的 CSS 变量使用。 */
 function readTheme(host: HTMLElement): WidgetTheme {
   const probe = document.createElement("span");
   probe.style.display = "none";
@@ -64,7 +63,6 @@ function readTheme(host: HTMLElement): WidgetTheme {
   return { vars, scheme: isDark(vars.bg) ? "dark" : "light" };
 }
 
-/** 沙箱文档：CSP 置于最前，注入脚本在 head 中，不受模型 HTML 结构影响。 */
 function buildDocument(html: string, id: string, theme: WidgetTheme, run: number) {
   const vars = Object.entries(theme.vars).map(([key, value]) => `--${key}:${value};`).join("");
   const script = `(function(){var ID=${JSON.stringify(id).replace(/</g, "\\u003c")};
@@ -105,7 +103,6 @@ export function WidgetCard({ card }: { card: WidgetCardData }) {
     setThemeReady(true);
   }, []);
 
-  // 主题切换时把新颜色推送给沙箱，不重载组件、保留其内部状态。
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -118,7 +115,7 @@ export function WidgetCard({ card }: { card: WidgetCardData }) {
     const schedule = () => {
       window.clearTimeout(timer);
       requestAnimationFrame(push);
-      timer = window.setTimeout(push, 360); // 卡片底色有 320ms 过渡，落定后再读一次。
+      timer = window.setTimeout(push, 360);
     };
     const observer = new MutationObserver(schedule);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
@@ -148,7 +145,6 @@ export function WidgetCard({ card }: { card: WidgetCardData }) {
     return () => window.clearTimeout(timer);
   }, [ready, run]);
 
-  // run 变化即重建文档；主题只在构建时读取一次，之后经 postMessage 更新。
   const srcDoc = useMemo(() => themeReady && themeRef.current ? buildDocument(card.html, frameId, themeRef.current, run) : "",
     [card.html, frameId, themeReady, run]);
 

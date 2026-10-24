@@ -1,4 +1,3 @@
-// 在真实 Chromium 内读取生产 ProseMirror 选区和浏览器行盒，不模拟文字排版。
 export function installCaretProbe() {
   window.__caretRead = () => {
     const e = window.__gooseNoteEditor,
@@ -9,7 +8,6 @@ export function installCaretProbe() {
     const parent = node?.nodeType === 1 ? node : node?.parentElement;
     const content = parent?.closest("[data-content-type]");
     const tableCell = parent?.closest("td, th");
-    // BlockNote table cells use a native <p> line box instead of .bn-inline-content.
     const inline = parent?.closest(".bn-inline-content") ?? tableCell?.querySelector(":scope > p");
     const block = parent?.closest('[data-node-type="blockContainer"]');
     const box = (r) =>

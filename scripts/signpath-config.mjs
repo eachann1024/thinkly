@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-// Decides whether a Desktop installers job signs Windows binaries through SignPath.
-// Signing runs only for publishing runs (main schedule / workflow_dispatch) on Windows, and only once
-// the SIGNPATH_API_TOKEN secret and the SIGNPATH_ORGANIZATION_ID variable exist. Otherwise the build
-// keeps the unsigned path unchanged. Every SignPath Foundation signing request needs manual approval.
 import { appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";

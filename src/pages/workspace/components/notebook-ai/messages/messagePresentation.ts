@@ -99,7 +99,6 @@ export function shouldShowToolPart(
   );
 }
 
-/** 与 AssistantApprovalPart 的 input 态 guard 保持一致：只有真正会渲染的审批 part 才需要 footer */
 export function hasVisibleApprovalPart(
   parts: ToolDisplayPart[],
   isMessageStreaming: boolean,
@@ -115,7 +114,6 @@ export function hasVisibleApprovalPart(
   );
 }
 
-/** 与 hasVisibleApprovalPart 同一套 guard，取出第一条可见的审批 part 给提案预览用 */
 export function findVisibleApprovalPart(
   parts: ToolDisplayPart[],
   isMessageStreaming: boolean,

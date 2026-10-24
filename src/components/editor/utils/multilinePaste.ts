@@ -15,7 +15,6 @@ export type ListPasteBlockType = (typeof LIST_PASTE_BLOCK_TYPES)[number];
 
 const LIST_PASTE_BLOCK_TYPE_SET = new Set<string>(LIST_PASTE_BLOCK_TYPES);
 
-/** 表格/代码/媒体才走默认 HTML 粘贴。微信表情等 <img> 不能挡住按行拆块。 */
 const NON_TEXT_HTML_BLOCK =
   /<\s*(table|thead|tbody|tr|td|th|pre|video|audio|iframe)\b/i;
 
@@ -28,10 +27,6 @@ export function isListPasteBlockType(
   return typeof type === "string" && LIST_PASTE_BLOCK_TYPE_SET.has(type);
 }
 
-/**
- * 按换行拆成多块。没有换行返回 null（单行保持原块）。
- * 复制时常带末尾 `\n`，丢掉这一行空行，避免多出一个空块。
- */
 export function splitPlainTextPasteLines(text: string): string[] | null {
   const normalized = normalizeClipboardLineEndings(text);
   if (!normalized.includes("\n")) return null;
@@ -46,7 +41,6 @@ export function htmlHasNonTextPasteBlocks(htmlText: string): boolean {
   return NON_TEXT_HTML_BLOCK.test(htmlText || "");
 }
 
-/** 系统剪贴板常丢掉 `blocknote/html`，只剩带 data-content-type 的内部切片。 */
 export function htmlLooksLikeBlockNoteClipboard(html: string): boolean {
   const value = (html || "").trim();
   if (!value) return false;
@@ -56,7 +50,6 @@ export function htmlLooksLikeBlockNoteClipboard(html: string): boolean {
   );
 }
 
-/** 有格式的 HTML 交给编辑器解析；仅带 alt 的表情图片可继续按文本拆行。 */
 export function htmlHasRichPasteContent(html: string): boolean {
   if (htmlLooksLikeBlockNoteClipboard(html)) return true;
   const hasImage = [...html.matchAll(/<img\b[^>]*>/gi)].some(([tag]) => {
@@ -90,7 +83,6 @@ function decodeHtmlEntities(text: string): string {
     });
 }
 
-/** 从 HTML 找回被 <br>/<p>/<div> 表达的换行；表情 img 用 alt。 */
 export function htmlToPlainTextForPaste(htmlText: string): string {
   let s = htmlText || "";
   s = s.replace(/<!--[\s\S]*?-->/g, "");
@@ -116,10 +108,6 @@ function dropLeadingEmptyLines(lines: string[]): string[] {
   return start === 0 ? lines : lines.slice(start);
 }
 
-/**
- * 优先用 text/plain 的换行；没有换行时从 HTML 的 br/块标签找回。
- * 微信/网页常把 CJK 换行写在 HTML 里，纯文本或默认 HTML 粘贴都会挤成一段。
- */
 export function resolvePasteLines(
   plainText: string,
   htmlText: string,
@@ -132,9 +120,7 @@ export function resolvePasteLines(
   return trimmed.length >= 2 ? trimmed : fromPlain;
 }
 
-/** 富文本未编码纯文本中的换行时，优先保住段落，避免默认 HTML 粘贴挤成一行。 */
 export function shouldPreferPlainMultilinePaste(plain: string, html: string): boolean {
-  // ponytail: 仅对缺失换行的 HTML 回退纯文本；需要同时保留行内样式时再补 HTML 分段转换。
   const lines = splitPlainTextPasteLines(plain);
   if (!html || !lines || htmlHasNonTextPasteBlocks(html) ||
       htmlLooksLikeBlockNoteClipboard(html) || htmlHasNonDefaultGooseBlockAttrs(html)) return false;
@@ -152,7 +138,6 @@ export function resolveInheritedPasteBlockType(
   return "paragraph";
 }
 
-/** 粘进列表时去掉行首 markdown / 项目符号，避免「待办里再套一层 - 」。 */
 export function stripInheritedListPrefix(line: string): string {
   return line.replace(LEADING_LIST_MARK, "");
 }

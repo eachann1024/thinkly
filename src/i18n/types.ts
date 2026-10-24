@@ -1,7 +1,6 @@
 export type MessageResource = Readonly<Record<string, string>>;
 export type MessageParameters = Record<string, string | number>;
 export type MessageSchema = Record<string, MessageParameters>;
-/** Populated by `node scripts/i18n/check.mjs --generate`; keys identify a source block. */
 export interface MessageCatalog {}
 export type CompiledMessages<Schema extends MessageSchema = MessageSchema> = {
   readonly "zh-Hans": MessageResource;

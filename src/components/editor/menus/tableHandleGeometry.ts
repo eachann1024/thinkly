@@ -25,7 +25,6 @@ export function tableHandleRect(
       };
 }
 
-/** An unmount/close may only release its own controller slot. */
 export function releaseTableChrome<T extends string>(
   current: T | undefined,
   owner: T,

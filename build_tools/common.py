@@ -89,11 +89,7 @@ def builder_env() -> dict[str, str]:
     env = dict(os.environ)
     bin_dir = str(ROOT / "node_modules" / ".bin")
     env["PATH"] = bin_dir + os.pathsep + env.get("PATH", "")
-    # 本地一律不签名；mac 上避免自动发现证书导致弹钥匙串。
     env["CSC_IDENTITY_AUTO_DISCOVERY"] = "false"
-    # electron / electron-builder 工具链（AppImage runtime、fpm 等）默认从 GitHub
-    # 下载，代理网络下常超时；注入 npmmirror 镜像兜底。已设置的值优先，CI 直连
-    # GitHub 更稳，不覆盖。
     if not env.get("CI"):
         env.setdefault("ELECTRON_MIRROR", "https://npmmirror.com/mirrors/electron/")
         env.setdefault(

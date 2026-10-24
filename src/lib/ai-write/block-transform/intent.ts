@@ -138,7 +138,6 @@ function findTargetIntents(text: string): BlockTypeTransformIntent[] {
   return findTargetMatches(text).map((match) => match.intent);
 }
 
-/** 解析一段以目标类型开头的短语；供“生成某结构”场景做严格主结构判断。 */
 export function resolveExplicitBlockTypeTarget(
   text: string,
 ): BlockTypeTransformIntent | null {
@@ -205,7 +204,6 @@ export function resolveBlockTypeTransformIntent(
   return targets[0];
 }
 
-/** 面板没有可信选区时，只允许用户明确要求转换整页正文。 */
 export function hasWholePageBlockTypeTransformScope(prompt: string) {
   return WHOLE_PAGE_SCOPE_PATTERN.test(prompt.trim());
 }

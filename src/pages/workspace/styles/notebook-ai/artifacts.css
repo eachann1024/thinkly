@@ -1,11 +1,9 @@
-/* ── AI 图表卡片（showChart，外壳与画布卡共用 canvas-card）──────── */
 
 .notebook-ai-chart-card-canvas {
  min-height: 200px;
  padding-bottom: 4px;
 }
 
-/* ── AI 画布卡片（showSvg / xml·svg 围栏）───────────────────────── */
 
 .notebook-ai-canvas-card {
  border: 1px solid hsl(var(--border));
@@ -18,7 +16,6 @@
   box-shadow var(--goose-control-motion-duration) ease;
 }
 
-/* 宽表走单层横向滚动：外层不能 hidden，否则旧内核会裁切而不出滚动条 */
 .notebook-ai-canvas-card--scroll {
  overflow: visible;
 }
@@ -122,7 +119,6 @@
  color: hsl(var(--muted-foreground));
 }
 
-/* ── 可视化 artifact：pan/zoom 视口内按原始尺寸渲染，由容器缩放适配 ── */
 
 .notebook-ai-artifact-panzoom {
  width: 100%;
@@ -131,7 +127,6 @@
  height: min(52vh, 420px);
  min-height: 220px;
  background: transparent;
- /* 必须裁切；适配比例由 JS 用 SVG 固有尺寸计算，避免 scale=1 居中裁边 */
  overflow: hidden;
 }
 
@@ -139,7 +134,6 @@
  position: absolute;
  top: 0;
  left: 0;
- /* 固有宽高由 JS 写成 px，避免 flex 把 SVG 压窄导致测量错误 */
  transform-origin: 0 0;
  will-change: transform;
 }
@@ -149,10 +143,6 @@
  line-height: 0;
 }
 
-/*
- * 不要用 max-content / min-width 强行改 SVG 盒模型。
- * 宽高交给 SVG 自身 width/height 或 viewBox；PanZoom 按固有尺寸缩放。
- */
 .notebook-ai-artifact-svg > svg {
  display: block;
  max-width: none;
@@ -161,10 +151,6 @@
  pointer-events: none;
 }
 
-/*
- * 图节点 hover 底色。SVG 保持 none，避免挡视口拖拽/滚轮；
- * 节点单独 auto，:hover 才能命中。fill 用实色 token，避开 hsl(var)/alpha。
- */
 .notebook-ai-artifact-svg .node,
 .notebook-ai-artifact-svg .actor,
 .notebook-ai-artifact-svg .statediagram-state,

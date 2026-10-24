@@ -7,10 +7,6 @@ export type ComposerBeforeInputDeleteAction =
   | "remove-chip-before"
   | "remove-chip-after";
 
-/**
- * beforeinput 删除决策（纯函数）。
- * IME 会话中必须 ignore，绝不自定义删。
- */
 export function resolveComposerBeforeInputDelete(options: {
   inputType: string | undefined;
   imeActive: boolean;

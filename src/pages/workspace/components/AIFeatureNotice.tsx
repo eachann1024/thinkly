@@ -45,7 +45,6 @@ function openAISettings() {
   );
 }
 
-/** 复用设置表单与保存流程，首次配置在独立对话框内完成。 */
 export function AIFeatureNotice() {
   useLocale();
   const dismissed = useSettings((s) => s.dismissedNotices[NOTICE_ID] === true);

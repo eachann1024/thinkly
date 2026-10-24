@@ -15,7 +15,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 追加到现有草稿，保留引用和附件；由用户补充要求后发送。 */
 export function usePlanRefinementInput(
   notebookId: string,
   inputRef: RefObject<AiComposerInputHandle | null>,
@@ -39,7 +38,6 @@ export function usePlanRefinementInput(
       selection?.removeAllRanges();
       selection?.addRange(range);
       const text = `${el.textContent?.trim() ? "\n\n" : ""}${request.text}`;
-      // 原生插入会触发编辑器的草稿保存与撤销链路。
       if (!document.execCommand("insertText", false, text)) {
         const lines = text.split("\n");
         lines.forEach((line, index) => {
@@ -52,7 +50,6 @@ export function usePlanRefinementInput(
     };
     const handleRefine = (event: Event) => {
       const request = (event as CustomEvent<RefinePlanRequest>).detail;
-      // 面板刚打开、输入框未就绪时保留暂存，由挂载后的下一帧写入。
       if (!disabled && !inputRef.current?.getEditorEl()) return;
       takePendingRefinement(notebookId, request);
       insert(request);

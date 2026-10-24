@@ -1,7 +1,3 @@
-/**
- * mermaid 动态 import 只拉一次。页面里已有 mermaid 块时尽早 preload，
- * 把解析从「预览开始渲」挪到编辑器初始化重叠段。
- */
 
 type MermaidModule = typeof import("mermaid");
 

@@ -76,7 +76,6 @@ function installDragBridge() {
   });
 }
 
-/** 大表 / 大块拖动不再克隆和序列化整份 DOM。返回 false 时走原来的拖拽。 */
 export function startHeavyBlockDrag(view: EditorView, data: DataTransfer, blockId: string): boolean {
   const found = findBlock(view.state.doc, blockId);
   if (!found) return false;

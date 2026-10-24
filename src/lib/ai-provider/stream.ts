@@ -9,7 +9,6 @@ ja:
   couldnTReadTheResponseStream: "レスポンスストリームを読み取れませんでした"
 `;
 const uiText = createTranslator(localMessages);
-// --- Native SSE Parser Utilities ---
 export async function* readSSELines(response: Response, signal: AbortSignal) {
   const reader = response.body?.getReader();
   if (!reader) throw new Error(uiText("couldnTReadTheResponseStream"));

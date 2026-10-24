@@ -7,7 +7,6 @@ import { getBlocksToMove } from "./moveBlockExtension";
 
 const TYPES = ["paragraph", "heading", "heading", "heading", "checkListItem", "bulletListItem", "numberedListItem", null, "codeBlock"] as const;
 
-/** Notion 官方映射：Mac ⌘⌥0–8；Windows/Linux Ctrl+Shift+0–8。 */
 export function changeSelectedBlockType(editor: BlockNoteEditor<any, any, any>, digit: number, defaultCodeWrap: boolean): boolean {
   const type = TYPES[digit];
   if (!editor.isEditable || editor.prosemirrorView.composing || !type) return false;
@@ -45,7 +44,6 @@ export function createGooseBlockTypeKeyboardExtension(getDefaultCodeWrap: () => 
           if (!isPlatformPrimaryModifierEvent(event)) return false;
           const mac = getPlatformKind() === "mac";
           if (mac ? !event.altKey || event.shiftKey : !event.shiftKey || event.altKey) return false;
-          // Option/Shift 会改变 event.key 的字符，物理数字键仍保持稳定。
           const digit = event.code.match(/^Digit([0-8])$/)?.[1] ?? event.key.match(/^[0-8]$/)?.[0];
           return digit !== undefined && changeSelectedBlockType(editor, Number(digit), getDefaultCodeWrap());
         },

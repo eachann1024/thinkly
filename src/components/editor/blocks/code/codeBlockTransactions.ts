@@ -5,7 +5,6 @@ import {
   type Transaction,
 } from "prosemirror-state";
 
-/** Code editing only owns a text selection wholly inside one code block. */
 export function getCodeBlockSelection(selection: Selection) {
   if (!(selection instanceof TextSelection)) return null;
   const { $anchor, $head } = selection;
@@ -54,7 +53,6 @@ export function insertCodeBlockText(tr: Transaction, text: string) {
   const from = Math.min(code.anchor, code.head);
   const to = Math.max(code.anchor, code.head);
   const current = getCodeBlockText(code.node);
-  // Canonical code content uses literal newlines, including legacy hardBreaks.
   return replaceCodeBlockText(
     tr,
     current.slice(0, from) + text + current.slice(to),

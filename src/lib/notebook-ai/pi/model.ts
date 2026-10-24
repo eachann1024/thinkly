@@ -62,10 +62,6 @@ function makeApiKeyAuth(name: string, apiKey: string) {
   };
 }
 
-/**
- * 把用户设置里的协议/密钥/Base URL 映射为 pi-ai Models + 当前 Model。
- * 不默认挂 deepseek 内置 catalog；始终按用户配置的 model id 构造。
- */
 export function buildPiLanguageModel(): PiModelAvailability {
   const ai = useSettings.getState().ai;
 
@@ -143,8 +139,6 @@ export function buildPiLanguageModel(): PiModelAvailability {
       return { ok: true, models, model, providerId };
     }
 
-    // OpenAI 兼容 Chat Completions（含 DeepSeek）。
-    // tool 多轮时关闭 reasoning 回放约束，降低 Duplicate call_id 风险。
     const model: Model<"openai-completions"> = {
       id: modelId,
       name: modelId,

@@ -20,10 +20,6 @@ function isZoomResetKey(event: KeyboardEvent) {
   return event.key === "0" || event.code === "Digit0" || event.code === "Numpad0";
 }
 
-/**
- * 量固有尺寸而非渲染尺寸：SVG 走 viewBox，旧 Chromium 下 offsetWidth 会被容器压失真。
- * 公式没有 viewBox，只能退回布局盒。
- */
 function measureVectorSize(node: HTMLElement): { width: number; height: number } {
   const svg = node.querySelector(".goose-preview-svg > svg");
   const viewBox = (svg as SVGSVGElement | null)?.viewBox?.baseVal;
@@ -120,7 +116,6 @@ export function useFullscreenPreview(open: boolean, content: PreviewContent | nu
         body.clientHeight -
         Number.parseFloat(style.paddingTop) -
         Number.parseFloat(style.paddingBottom);
-      // 公式要等 katex 异步渲染完才有尺寸
       if (size.width < 8 || size.height < 8) {
         if (attempts++ < 20) frame = window.requestAnimationFrame(measure);
         return;
@@ -128,7 +123,6 @@ export function useFullscreenPreview(open: boolean, content: PreviewContent | nu
       setVectorFit({
         width: size.width,
         height: size.height,
-        // 只缩不放：小图保持固有尺寸，放大只会更糊
         scale: Math.min(
           1,
           availableWidth / size.width,

@@ -73,7 +73,6 @@ export function writeClipboardPayload(
   clipboard.setData(GOOSE_BLOCKNOTE_BLOCK_COPY_MIME, "1");
 }
 
-/** 同步事件剪贴板写入失败时接管事件但不剪切，避免原生 handler 继续删除原文。 */
 export function writeSelectionClipboard(view: EditorView, event: ClipboardEvent): boolean {
   if (event.defaultPrevented || !event.clipboardData) return false;
   try {

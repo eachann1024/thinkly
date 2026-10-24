@@ -83,7 +83,6 @@ export function cleanAssetDestination(raw: string): string {
       value = fileUrl.pathname;
       if (/^\/[A-Za-z]:\//.test(value)) value = value.slice(1);
     } catch {
-      // keep original
     }
   }
   const hashIndex = value.indexOf("#");
@@ -93,7 +92,6 @@ export function cleanAssetDestination(raw: string): string {
   try {
     value = decodeURIComponent(value);
   } catch {
-    // keep original
   }
   return value.trim();
 }

@@ -1,4 +1,3 @@
-/** 列表项末尾用硬换行写下的子列表，保存时改成缩进，读旧文件时再拆回子项。 */
 
 const LIST_LINE = /^(?:\d+\.\s+\S|[-*+]\s+\S|-\s+\[[ xX]\](?:\s|$))/;
 
@@ -53,7 +52,6 @@ function parseListLine(line: string, parseInline: (text: string) => any[], expec
   return { type: "bulletListItem", content: parseInline(bullet[1] ?? "") };
 }
 
-/** 旧文件把子列表写成同一行里的 `<br>`。拆成真正的嵌套列表，正文不丢。 */
 export function liftTrailingListBreaks(item: any, parseInline: (text: string) => any[]): any {
   const { head, lists } = splitTrailingListLines(textOf(item?.content));
   if (!lists.length) return item;

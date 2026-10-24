@@ -61,10 +61,6 @@ export type BuildPiAgentResult =
     }
   | { ok: false; reason: string };
 
-/**
- * 构建以 Pi 为 harness 的笔记本 Agent：loop/tool call/state 归 Pi，
- * 领域 execute 仍走鹅现有 notebookAiTools。
- */
 export function buildPiNotebookAgent(
   notebookId: string,
   currentPageId?: string | null,
@@ -104,8 +100,6 @@ export function buildPiNotebookAgent(
     prepareNextTurnWithContext: async (
       turnContext,
     ): Promise<AgentLoopTurnUpdate | undefined> => {
-      // 只刷新 systemPrompt / tools，绝不替换 messages，避免 DeepSeek 等
-      // 出现 Duplicate call_id（重复注入 tool 历史）。
       return {
         context: {
           ...turnContext.context,
@@ -119,7 +113,6 @@ export function buildPiNotebookAgent(
         const skill = (context.args as { skill?: unknown })?.skill;
         if (isKnownSkillId(skill)) {
           agentContext.loadedSkills.add(skill);
-          // 立即刷新 tools，让同批后续工具可见（sequential 模式）
           agent.state.tools = getActivePiTools(allTools, agentContext);
           const skillTools = getSkillToolNames([skill]);
           return {
@@ -141,7 +134,6 @@ export function buildPiNotebookAgent(
     },
   });
 
-  // 用 subscribe 统计 turn，超过上限 abort
   const unsub = agent.subscribe(async (event: AgentEvent) => {
     if (event.type === "turn_start") {
       turnCount += 1;

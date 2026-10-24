@@ -69,16 +69,13 @@ export function migrateSettingsPersistedState(
 
   delete state.codeStyle;
 
-  // v9 removes only the retired system-font selection; preserve every other saved family.
   if (version < 9) migrateLegacyHarmonyFonts(state);
 
-  // 侧栏与界面共用同一字体；界面未指定时沿用旧侧栏字体。
   if (version < 12 && state.uiFontFamily == null && state.sidebarFontFamily != null) {
     state.uiFontFamily = state.sidebarFontFamily;
   }
   delete state.sidebarFontFamily;
 
-  // 旧版只有「界面字号」两档，且侧栏树写死 13px。缺省时从界面档位推断侧栏字号。
   if (
     typeof state.sidebarFontSize !== "number" ||
     !Number.isFinite(state.sidebarFontSize)
@@ -89,38 +86,30 @@ export function migrateSettingsPersistedState(
 
   state.uiFontSize = normalizeUIFontSize(state.uiFontSize);
 
-  // ponytail: 旧设置没有“是否自定义”标记，只迁移旧默认值；以后显式记录用户覆盖。
   if (version < 6) {
     if (state.editorFontSize === 16) state.editorFontSize = EDITOR_FONT_SIZE_DEFAULT;
     if (state.editorLineHeight === 1.5) state.editorLineHeight = EDITOR_LINE_HEIGHT_DEFAULT;
     if (state.defaultPageLayout === "compact") state.defaultPageLayout = "standard";
   }
 
-  // ponytail: 无法区分旧默认与手动选择的 1.95；仅迁移此值，未来用显式覆盖标记区分。
   if (version < 8 && state.editorLineHeight === 1.95) {
     state.editorLineHeight = EDITOR_LINE_HEIGHT_DEFAULT;
   }
 
-  // v14 正文行距默认改为 1.75。只迁移仍停在旧默认 1.5 的用户。
   if (version < 14 && state.editorLineHeight === 1.5) {
     state.editorLineHeight = EDITOR_LINE_HEIGHT_DEFAULT;
   }
 
-  // 极简工作区已成为固定交互，不再保留可切换设置。
   state.singleTabMode = true;
   if (typeof state.randomIconOnCreate !== "boolean") {
     state.randomIconOnCreate = false;
   }
-  // v13 起文件夹数量默认显示。更早写入的 false 是旧默认，不是用户关掉的。
   if (version < 13) state.showSidebarFolderCount = true;
   delete state.showPinnedTitles;
 
-  // 全宽、表格两端对齐已成为常规笔记的固定布局，不再保留可切换的持久化设置。
   delete state.globalEditorFullWidth;
   delete state.tableEvenColumnWidth;
 
-  // v4 拆分应用内与系统全局搜索；只迁移旧全局默认，保留应用内自定义和禁用状态。
-  // v5 速记小窗默认改为 Option/Alt+N；只改还停在旧默认的用户。
   const desktop = state.desktop;
   if (desktop && typeof desktop === "object") {
     const desktopSettings = { ...(desktop as Record<string, unknown>) };

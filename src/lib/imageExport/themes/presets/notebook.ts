@@ -76,12 +76,10 @@ function joinFontStack(families: string[]): string {
   return families.map((family) => toCssFontFamily(family)).join(", ");
 }
 
-/** 笔记本跟编辑器走，默认画布没有点阵，只留书签带。 */
 function notebookDecorations(accent: string): CardDecoration[] {
   return [{ kind: "bookmark-ribbon", color: accent }];
 }
 
-/** 静态浅色 fallback：无 DOM / 无页面上下文时仍可导出。 */
 export const NOTEBOOK_THEME: CardTheme = {
   id: "notebook",
   get name() { return uiText("notebook"); },

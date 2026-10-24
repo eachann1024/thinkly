@@ -1,3 +1,2 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./toolbars/formatting.css";
 @import "./toolbars/block-and-link-controls.css";

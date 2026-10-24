@@ -7,7 +7,6 @@ type SearchContext = {
   startingNotebookId: string | null;
   originPageId: string | null;
   originScrollTop: number;
-  /** 从搜索结果打开的那一篇。底栏和高亮只属于它，其它笔记保持原样。 */
   resultPageId: string | null;
 };
 export type SearchView =

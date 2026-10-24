@@ -1,4 +1,3 @@
-/* 重命名的文字选区独立于正文选区和整行选中底色。 */
 [data-sidebar-rename-field] {
   --goose-rename-selection-bg: var(--goose-accent-text, #1d4ed8);
   --goose-rename-selection-fg: #ffffff;

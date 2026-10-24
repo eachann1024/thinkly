@@ -33,22 +33,14 @@ export interface AppearanceSliceState {
   uiFontSize: UIFontSize;
   editorFontSize: number;
   editorLineHeight: number;
-  /** 旧版侧栏字号，仅保留存储兼容；当前侧栏跟随界面缩放。 */
   sidebarFontSize: number;
-  /** AI 聊天界面字号缩放比。可选值：0.8 / 0.9 / 1.0 / 1.1 / 1.2。副作用：影响 AI 聊天面板所有文字大小。 */
   aiChatScale: number;
-  /** 导出图片的水印/生成选项，跨会话记忆用户选择 */
   imageExportWatermark: WatermarkConfig;
-  /** 导出图片上次选择的卡片主题 */
   imageExportThemeId: CardThemeId;
-  /** 新建笔记时自动分配随机图标；本地文件同样生效，文件夹忽略。 */
   randomIconOnCreate: boolean;
-  /** 编辑器画布背景：无、方格或点阵。 */
   editorGridMode: EditorGridMode;
-  /** 侧栏文件夹显示子项数量；名称放不下时自动隐藏。 */
   showSidebarFolderCount: boolean;
 
-  /** 极简工作区：所有页面在当前标签中切换。产品固定开启，设置里不再提供开关。 */
   singleTabMode: boolean;
 }
 
@@ -140,7 +132,6 @@ export function createAppearanceSlice(
     },
     toggleDarkMode: () => {
       set((state) => {
-        // 侧栏/快捷键按固定顺序轮转：系统 → 浅色 → 深色 → 系统
         const nextTheme: Theme =
           state.theme === "system"
             ? "light"

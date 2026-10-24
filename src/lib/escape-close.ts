@@ -7,9 +7,6 @@ export const OPEN_DIALOG_SELECTOR =
 export const OPEN_ESCAPE_LAYER_SELECTOR = `${OPEN_DIALOG_SELECTOR}, [role="menu"]:not([data-state="closed"]):not([hidden]), [data-goose-floating-content][data-state="open"]`;
 export const OPEN_TOAST_SELECTOR = '[data-sonner-toast]:not([data-removed="true"])';
 
-/** Capture only the notification layer; let editor/IME/dialog handlers consume Escape first.
- * A snapshot prevents a synchronously removed dialog from exposing the note to the same event.
- */
 export function registerEscapeClose(options: {
   document: Document;
   window: Window;
@@ -29,14 +26,12 @@ export function registerEscapeClose(options: {
     }
     if (isImeKeyboardEvent(event)) {
       blocked.add(event);
-      // HeroUI checks isComposing but not Chromium's legacy 229 marker.
-      // Keep native IME cancellation, while preventing dialog dismissal.
       if (root.querySelector(OPEN_ESCAPE_LAYER_SELECTOR)) event.stopImmediatePropagation();
       return;
     }
     if (event.repeat) {
       blocked.add(event);
-      event.stopImmediatePropagation(); // Holding Escape must not peel off more layers.
+      event.stopImmediatePropagation();
       return;
     }
     if (root.querySelector(OPEN_TOAST_SELECTOR)) {
@@ -46,12 +41,10 @@ export function registerEscapeClose(options: {
       options.dismissToasts();
       return;
     }
-    // closeAllOverlays dispatches to document to dismiss UI, never to close a note.
     if (event.target === root || root.querySelector(OPEN_ESCAPE_LAYER_SELECTOR)) blocked.add(event);
   };
   const bubble = (event: KeyboardEvent) => {
     if (!matchShortcut(event, FIXED_ESCAPE_SHORTCUT) || blocked.has(event)) return;
-    // Window listeners (e.g. fullscreen AI) must finish before the fallback runs.
     queueMicrotask(() => {
       if (disposed || event.defaultPrevented || isImeKeyboardEvent(event) || event.repeat || !options.enabled()) return;
       event.preventDefault();

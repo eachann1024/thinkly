@@ -12,7 +12,6 @@ export function KbdShortcut({
   shortcut: string;
   platform?: PlatformKind;
 }) {
-  // 范围键仍需格式化 Mod，避免直接把内部存储值展示给用户。
   if (shortcut.includes("~")) {
     return (
       <Kbd shortcut={shortcut} platform={platform} variant="chip" />

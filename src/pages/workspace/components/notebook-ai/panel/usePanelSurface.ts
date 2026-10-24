@@ -37,13 +37,11 @@ export function usePanelSurface(
   const widthCap = dragWidth ?? squeezeWidth;
   const [maxWidth, setMaxWidth] = useState(width);
   const composerDockRef = useRef<HTMLDivElement | null>(null);
-  // 展示宽度：随父级 flex 行可用空间收缩，避免 minWidth=stored 把面板裁出视口
   const [fittedWidth, setEffectiveWidth] = useState(width);
   const effectiveWidth = widthCap == null ? fittedWidth : Math.min(fittedWidth, widthCap);
   const composerRef = useRef<ComposerHandle | null>(null);
   const [bodyReady, setBodyReady] = useState(false);
 
-  // 面板挂载=AI 任务面；卸载/切走时清 body 标记并收起残留浮层
   useEffect(() => {
     const root = panelRootRef.current;
     setAiPanelSurface({ active: true, fullscreen: isFullscreen });
@@ -66,7 +64,6 @@ export function usePanelSurface(
     };
   }, []);
 
-  // 侧栏：观察父级（.workspace-editor-surface）宽度，计算不挤爆编辑区的 effectiveWidth
   useLayoutEffect(() => {
     if (isFullscreen) return;
     const root = panelRootRef.current;
@@ -79,8 +76,6 @@ export function usePanelSurface(
       const sidebarVisible = stage && !stage.hasAttribute("data-sidebar-collapsed") &&
         !stage.hasAttribute("data-sidebar-overlay") && !stage.closest("[data-settings]");
       const room = parentW - (sidebarVisible ? SIDEBAR_EDITOR_RESERVE : 200);
-      // 与侧栏让位共用正文预留，拖动和松手使用同一个宽度上限。
-      // 极窄时使用父级可用宽度，避免右侧裁切。
       const availableRoom = room > 0 ? room : Math.max(0, parentW);
       availableWidthRef.current = availableRoom;
       if (isSidebarResizeDrag() || isPointerDragActive("ai-panel")) return;
@@ -96,7 +91,6 @@ export function usePanelSurface(
     return () => ro.disconnect();
   }, [isFullscreen, width, squeezeWidth]);
 
-  // 顶栏 AI 列与正文使用同一展示宽度，拖宽和窗口缩放时不各算一遍。
   useLayoutEffect(() => {
     if (isFullscreen || !isElectronChrome) return;
     const shell =
@@ -107,7 +101,6 @@ export function usePanelSurface(
     };
   }, [effectiveWidth, isElectronChrome, isFullscreen]);
 
-  // 输入条浮动叠在消息上：把 dock 高度换算进 zoom 坐标系，给消息区垫底。
   useLayoutEffect(() => {
     const dock = composerDockRef.current;
     const panel = panelRootRef.current;

@@ -1,6 +1,5 @@
 import { clamp, type Dot } from "../geometry";
 
-/** 设置页小点阵图标：24 单位坐标的形状谓词，按显示尺寸栅格化（与设计稿 drawIcon 同参）。 */
 
 type Shape = (x: number, y: number) => boolean;
 type Part = [shape: Shape, accent: boolean, opacity: number];
@@ -55,7 +54,6 @@ const ICONS = {
 
 export type SettingsDotIconName = keyof typeof ICONS;
 
-/** 点距随显示尺寸取档；中性点径 .34、强调点径 .40，统一左上受光。 */
 const iconPitch = (size: number) => (size <= 20 ? 1.9 : size <= 32 ? 2.2 : size <= 44 ? 2.6 : 3);
 
 export function dotIcon(name: SettingsDotIconName, size: number, x0 = 0, y0 = 0): Dot[] {
@@ -81,7 +79,6 @@ export function dotIcon(name: SettingsDotIconName, size: number, x0 = 0, y0 = 0)
   return dots;
 }
 
-/** 中性点按列分箱：用于自左向右缓慢扫过的光带（flow 循环按列错峰）。 */
 export function columnBins(dots: Dot[], bins: number) {
   const xs = dots.map((d) => d.x);
   const x0 = Math.min(...xs), bw = (Math.max(...xs) - x0) / bins || 1;

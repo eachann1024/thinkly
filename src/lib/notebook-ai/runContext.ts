@@ -18,7 +18,6 @@ export function resolveRunCurrentPageId(value: string | null | undefined, fallba
   return value === undefined ? fallback() : value;
 }
 
-/** Only the user's own request and explicit target chips can authorize locations. */
 export function selectRunWriteTargets(params: {
   prompt: string;
   references: ResourceRef[];
@@ -81,7 +80,6 @@ export function freezeNotebookAiRun(params: {
   });
 }
 
-/** Chip labels, attachment names and skill names are data, never write authorization. */
 export function freezeNotebookAiComposerRun(params: {
   notebookId: string;
   currentPageId?: string | null;
@@ -91,7 +89,6 @@ export function freezeNotebookAiComposerRun(params: {
   return freezeNotebookAiRun({ ...params, prompt: params.payload.freeformText });
 }
 
-/** Never recover authority from assistant text, skill instructions, or note contents. */
 export function getNotebookAiRunContext(messages: NotebookAiMessage[]): NotebookAiRunContext {
   const user = [...messages].reverse().find((message) => message.role === "user");
   const writeScope = user?.metadata?.writeScope;

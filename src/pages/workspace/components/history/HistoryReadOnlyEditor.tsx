@@ -41,22 +41,10 @@ const ignoreReadOnlyContentChange = () => {};
 
 interface HistoryReadOnlyEditorProps {
   content: BlockNoteContent;
-  /** 当前版本标识；变化时用 replaceBlocks 换内容，而非重建实例 */
   versionKey: string;
   sourcePage?: Page;
 }
 
-/**
- * 只读 BlockNote 渲染器，专供历史模式右侧主区使用。
- *
- * 设计取舍：
- *  - 不复用 Editor.tsx：那是写态编辑器，绑死 usePages.activePageId、有 debouncedUpdate / file drop / shortcuts，
- *    在历史模式下这些副作用全是噪音。这里只要一个干净的只读渲染。
- *  - 切版本时用 editor.replaceBlocks 原地换内容，而非靠外层 key 重建实例。
- *    重建 BlockNote/ProseMirror 实例开销极大，Electron 旧内核下连续回看多个版本会卡死主线程；
- *    复用同一实例只换 blocks 把开销降到一次解析。
- *  - 不挂 SideMenu / FormattingToolbar / SlashMenu：只读不需要任何编辑控件。
- */
 export function HistoryReadOnlyEditor({
   content,
   versionKey,
@@ -90,7 +78,6 @@ export function HistoryReadOnlyEditor({
         spellcheck: "false",
       },
     },
-    // 与 Editor.tsx 共享同一解析实现和 ObjectURL 缓存，避免历史视图重复泄漏
     resolveFileUrl: async (url) => {
       const { resolveImageRefToUrl } = await import("@/lib/imageStorage/resolveUrl");
       const { usePages } = await import("@/stores/usePages");
@@ -102,20 +89,14 @@ export function HistoryReadOnlyEditor({
 
   useEditorLocale(editor, "history");
 
-  // 同步 isEditable（BlockNote 的 editable 在 view 上是 prop，editor 实例上也维护一份）
   useEffect(() => {
     editor.isEditable = false;
   }, [editor]);
 
-  // 切版本时原地换内容：initialContent 只在创建时生效一次，后续版本靠 replaceBlocks
-  // 把整篇文档换掉，复用同一编辑器实例（不重建，避免卡死）。
-  // 以 normalized 引用为准（content 真正到达才换），而非 versionKey——后者会先于
-  // 异步内容变化，导致用旧内容多刷一次。
   const renderedContentRef = useRef(normalized);
   useEffect(() => {
-    if (renderedContentRef.current === normalized) return; // 首次渲染由 initialContent 承担
+    if (renderedContentRef.current === normalized) return;
     let cancelled = false;
-    // BlockNote 的 React 节点会同步刷新；移出 React effect，避免 flushSync 重入。
     queueMicrotask(() => {
       if (cancelled) return;
       renderedContentRef.current = normalized;
@@ -150,8 +131,6 @@ export function HistoryReadOnlyEditor({
     return <p className="px-6 py-12 text-center text-sm text-muted-foreground">{t("thisNoteCouldNotBeFoundSoIts")}</p>;
   }
 
-  // 注入原页面路径与所选版本正文；只读回调不进入页面写入链。
-  // 与主 Editor 在 WorkspaceLayout 内的全宽包裹一致。
   return (
     <EditorHostBridge
       page={previewPage}

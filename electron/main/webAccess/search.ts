@@ -3,7 +3,6 @@ import { decodeEntities, stripTags } from "./html";
 
 export type WebSearchHit = { title: string; url: string; snippet: string };
 
-/** Bing 结果链接可能被包成 bing.com/ck/a?...&u=a1<base64url>，这里还原真实地址。 */
 function unwrapBingUrl(href: string) {
   try {
     const url = new URL(decodeEntities(href));
@@ -61,7 +60,6 @@ const ENGINES = [
   { name: "DuckDuckGo", url: (q: string) => `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`, parse: parseDuckDuckGoResults },
 ];
 
-/** 自带联网搜索：无需密钥，依次尝试 Bing 中国、Bing 国际、DuckDuckGo，拿到结果即返回。 */
 export async function builtinWebSearch(query: string, limit = 6): Promise<{ engine: string; results: WebSearchHit[] }> {
   const trimmed = query.trim();
   if (!trimmed) throw new Error("搜索词为空");

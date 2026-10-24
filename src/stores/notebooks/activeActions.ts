@@ -25,17 +25,12 @@ export function createActiveNotebookActions(
       const lastActivePage = lastActivePageId
         ? pagesStore.pages[lastActivePageId]
         : undefined;
-      // 已经打开过的本地库可立即回到其缓存的上次页面，再在后台重扫。
-      // 这条普通的侧栏切库路径没有 pending target，不能因此回退到空白页。
       const cachedLocalLandingPageId =
         notebook?.source === "local-folder" &&
         lastActivePage?.workspaceId === id &&
         !lastActivePage.trashedAt
           ? lastActivePage.id
           : null;
-      // 分屏/搜索的跨本导航已明确目标页时，目标页本来就在内存树中。
-      // 不能先清 activePage 再在同一链路写回，否则主区会短暂卸载为
-      // 空白页；真实重扫若发现目标不存在，loader 仍会在完成时清理它。
       const keepsPendingTarget = pendingPage?.workspaceId === id;
       set({ activeNotebookId: id });
       if (notebook?.source === "local-folder" && !keepsPendingTarget) {
@@ -76,8 +71,6 @@ export function createActiveNotebookActions(
           pagesStore.setActivePage(pendingId);
           pagesStore.setExpandPageId(pendingId);
 
-          // 如果是本地文件夹笔记本，且正在重新加载页面，暂不清除 pendingNavigatePageId
-          // 让 loadLocalFolderPages 在加载完成后处理（能够确保页面存在且触发展开）
           const isLoadingLocal =
             notebook?.source === "local-folder" &&
             notebook.localPath &&

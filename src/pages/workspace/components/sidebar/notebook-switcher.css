@@ -151,7 +151,6 @@
   height: 16px;
 }
 .goose-notebook-row .goose-notebook-monogram svg { width: 100%; height: 100%; }
-/* 选中和悬停当帧换色。拖拽换位的 transition 写在行内，这里不加 !important。 */
 .goose-notebook-menu-surface :is(.goose-notebook-row, .goose-notebook-add-action) {
   transition: none;
 }

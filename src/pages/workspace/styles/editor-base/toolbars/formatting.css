@@ -1,4 +1,3 @@
-/* Formatting uses the shared selection surface; dock and portal menus keep the same controls. */
 [data-formatting-toolbar] {
   --formatting-control-size: var(--selection-control-size, 32px);
   min-width: 0;
@@ -95,7 +94,6 @@
   box-shadow: none;
 }
 
-/* 语义分组呈现为分段托盘；宽度不足时按组换行。 */
 .goose-formatting-toolbar-group {
   display: flex;
   min-width: 0;
@@ -119,12 +117,10 @@
   box-shadow: var(--goose-segmented-raised-shadow), inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* Floating controls use layout sizes, avoiding CSS zoom on their measured anchors. */
 [data-formatting-toolbar][data-goose-floating-toolbar="true"]
   .goose-formatting-toolbar-row {
   gap: calc(6px * var(--editor-ui-scale, 1));
   padding: calc(4px * var(--editor-ui-scale, 1));
-  /* 浮动条按内容取宽；缩放后的小数宽度会让 wrap 误判换行，改为单行、极窄时横向滚动。 */
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;

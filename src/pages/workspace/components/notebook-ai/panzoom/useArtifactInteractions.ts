@@ -12,7 +12,6 @@ export function useArtifactInteractions({
   const [dragging, setDragging] = useState(false);
   useEffect(() => () => gestureRef.current?.dispose(), []);
   useEffect(() => { if (!isZoomedIn) gestureRef.current?.cancel(); }, [isZoomedIn]);
-  // 仅在已放大时拦截滚轮：平移查看细节，不缩放，也不抢走页面滚动
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport || !isZoomedIn) return;

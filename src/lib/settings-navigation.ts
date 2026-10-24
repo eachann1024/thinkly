@@ -5,7 +5,6 @@ export function isWorkspaceSettingsOpen(root: Pick<Document, "body"> = document)
   return root.body.hasAttribute("data-goose-settings-open");
 }
 
-/** Only explicit user navigation emits this event; hydration and focus do not. */
 export function activateWorkspace(host: Window = window): void {
   deferWorkspaceMaintenance();
   host.dispatchEvent(new CustomEvent("goose-note:workspace-activate"));

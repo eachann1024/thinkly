@@ -15,8 +15,6 @@ await collectCatalog(root, true);
 mkdirSync(resolve(root, "dist-electron/main"), { recursive: true });
 mkdirSync(resolve(root, "dist-electron/preload"), { recursive: true });
 
-// 正式构建不写 sourcemap；之前调试构建留下的 .map 会一直躺在产物里，
-// 除了占体积，还会让人以为正式包带了源码。
 if (!sourcemap) {
   for (const dir of ["main", "preload"]) {
     for (const name of ["index.js", "previewWorker.js"]) {

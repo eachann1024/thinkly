@@ -34,7 +34,6 @@ export function duplicateTableDimension(
   axis: Axis,
   index: number,
 ): Content {
-  // ponytail: merged tables are disabled in the menu; upgrade with span-aware duplication.
   if (hasMergedTableCells(content))
     throw new Error(t("rowsAndColumnsWithMergedCellsCannotBe"));
   const count =
@@ -72,7 +71,6 @@ function tableDimension(
     index >= (axis === "row" ? map.height : map.width)
   )
     return;
-  // Include cells spanning into the target and deduplicate merged cells.
   const offsets = new Set<number>();
   for (let i = 0; i < (axis === "row" ? map.width : map.height); i++) {
     offsets.add(
@@ -82,7 +80,6 @@ function tableDimension(
   return { table, map, start: block.posBeforeNode + 2, offsets: [...offsets] };
 }
 
-/** Only a uniform dimension has a checked swatch; mixed colors leave all unchecked. */
 export function tableDimensionColor(
   state: EditorState,
   blockId: string,
@@ -102,7 +99,6 @@ export function tableDimensionColor(
     : undefined;
 }
 
-/** Plugin colIndex is a DOM cell index, not a grid column when earlier cells span. */
 export function tableHandleColumnIndex(
   state: EditorState,
   blockId: string,

@@ -27,7 +27,6 @@ function getGoogleFontsUrl(): string {
     "Courier+Prime:wght@400;700",
     "ZCOOL+XiaoWei",
     "Ma+Shan+Zheng",
-    // Space Grotesk 最高到 700；更大字重由浏览器合成
     "Space+Grotesk:wght@400;500;600;700",
     "Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700",
     "IBM+Plex+Sans:wght@400;500;600",
@@ -41,9 +40,7 @@ export function buildStyledHTML(params: {
   blocksHtml: string;
   theme: CardTheme;
   watermarkConfig?: WatermarkConfig;
-  /** 弹层预览用：文档底透明，避免卡片变矮后露出白底。不影响真实导出。 */
   preview?: boolean;
-  /** 被提升为首标题的 heading 的 inline CSS（对齐 / 颜色 / 背景） */
   titleInlineStyle?: string;
 }): string {
   const { title, blocksHtml, theme } = params;

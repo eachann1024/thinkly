@@ -49,7 +49,6 @@ function appearanceSignature(): string {
 export function getAppearanceSnapshot(): AppearanceSnapshot {
   const state = useSettings.getState();
   const fields = Object.fromEntries(APPEARANCE_KEYS.map((key) => [key, state[key]])) as AssetAppearance;
-  // 读取真实 document 语义色；十六进制输出保证 Electron 背景颜色格式稳定。
   const background = readThemeSurfaceSnapshot().background;
   const rgb = background.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
   const backgroundColor = rgb
@@ -57,7 +56,6 @@ export function getAppearanceSnapshot(): AppearanceSnapshot {
     : background;
   return { ...fields, resolvedTheme: resolveTheme(state.theme), backgroundColor };
 }
-/** 接收时不重水合、不回写持久状态，避免覆盖其他窗口的业务设置。 */
 export function applyAppearanceSnapshot(snapshot: AssetAppearance): void {
   const previous = useSettings.getState();
   if (!APPEARANCE_KEYS.some((key) => key in snapshot && appearanceChanged(snapshot, previous, key))) return;
@@ -73,7 +71,6 @@ export function publishAppearanceSnapshot(): void {
   if (receiving || publishPending || !useSettings.getState()._hasHydrated ||
     !window.gooseDesktop?.appearance) return;
   publishPending = true;
-  // 等本轮设置与 DOM 写入结束后再采样，避免在每次 setState 中强制重算样式。
   queueMicrotask(() => {
     publishPending = false;
     const signature = appearanceSignature();
@@ -106,6 +103,6 @@ export function startAppearanceSync(): void {
     try {
       const state = JSON.parse(event.newValue).state;
       if (state?.theme && state?.customFonts) applyAppearanceSnapshot(state);
-    } catch { /* 损坏的持久状态留给启动恢复处理。 */ }
+    } catch {   }
   });
 }

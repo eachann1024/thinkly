@@ -64,7 +64,6 @@ function fallbackReplace(a: string[], b: string[]): PlanDiffLine[] {
   return lines.length > 0 ? lines : [{ kind: "eq", text: "" }];
 }
 
-/** 行级 LCS diff；过大时退回整段删+整段增，避免卡主线程。 */
 export function diffTextLines(oldText: string, newText: string): PlanDiffLine[] {
   if (oldText === newText) {
     return splitLines(oldText).map((text) => ({ kind: "eq" as const, text }));

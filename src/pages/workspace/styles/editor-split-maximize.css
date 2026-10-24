@@ -1,4 +1,3 @@
-/* 其它格保持挂载和原占位，只是看不见；分隔条也不接收点击。 */
 .editor-split-surface[data-maximized-pane] .editor-split-pane:not([data-maximized="true"]) {
   visibility: hidden;
 }

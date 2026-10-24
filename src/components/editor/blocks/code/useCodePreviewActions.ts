@@ -97,7 +97,6 @@ export function useCodePreviewActions({
           const captured = await captureElementAsPngBlob(previewRef.current);
           return convertImageBlobToPng(captured);
         } catch {
-          // 预览节点截图失败时走离屏渲染
         }
       }
 

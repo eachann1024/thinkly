@@ -20,22 +20,12 @@ export {
 } from "./inlineCodeCaretModel";
 export { handleArrow } from "./inlineCodeCaretKeyboard";
 
-/**
- * 行内代码的光标进出。
- *
- * 「盒内 / 盒外」不是插件自己的状态，而是直接读 ProseMirror 的
- * storedMarks（缺省时读 `$pos.marks()`）：含 code 即盒内。code mark
- * inclusive: false，右边界缺省在盒外、左边界缺省在盒外；盒内两端由
- * storedMarks 带上 code。盒外不写 storedMarks，避免 compositionstart
- * 把 truthy storedMarks 当成 markCursor 重启、打断拼音。
- */
 
 function inlineCodeCaretPlugin() {
   return new Plugin({
     props: {
       handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
         if (event.isComposing || view.composing) return false;
-        // Cmd+Backspace 等整行删除保持浏览器 / PM 默认，可连同行内代码一起删。
         if (event.metaKey) return false;
 
         if (event.altKey && !event.ctrlKey) {
@@ -85,7 +75,6 @@ function inlineCodeCaretPlugin() {
           return false;
         },
       },
-      /** 点在盒子矩形内落盒内、点在左右留白里落盒外。 */
       handleClick(view: EditorView, pos: number, event: MouseEvent): boolean {
         if (event.button !== 0) return false;
 

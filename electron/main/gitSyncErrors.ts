@@ -1,6 +1,4 @@
 import { t } from "./i18n/gitErrors";
-/** Classify known transport failures without sending stderr or command args to
- * the renderer: those can contain private paths, remote output or credentials. */
 export function gitFailureMessage(error: unknown): string {
   const failure = error as { code?: string; killed?: boolean; stderr?: Buffer | string; message?: string };
   if (failure?.code === "ENOENT") return t("gitMissing");

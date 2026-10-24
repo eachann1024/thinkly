@@ -11,19 +11,16 @@ import {
   inferProviderIdFromSettings,
 } from "@/lib/ai-provider";
 
-/** Agent 运行时：pi = Pi harness；legacy = 自研 ToolLoopAgent。 */
 export type AIAgentRuntime = "legacy" | "pi";
 
 export interface AISettings {
   enabled: boolean;
   readGlobalPrompt: boolean;
   readLocalSkills: boolean;
-  /** Agent 运行时；默认 pi。可用 localStorage goose-ai-runtime 覆盖。 */
   runtime: AIAgentRuntime;
   selectedModelId: string | null;
   workspaceSelectedModelId: string | null;
   workspaceReasoningLevel: AIReasoningLevel;
-  /** 供应商预设（DeepSeek / GLM / MiniMax / 自定义…） */
   customProviderId: AIProviderId;
   customProtocol: CustomAIProtocol;
   customOpenAIResponsesBaseURL: string;
@@ -33,7 +30,6 @@ export interface AISettings {
   customOpenAIApiKey: string;
   customClaudeApiKey: string;
   customModelOptions: AIModelOption[];
-  /** TinyFish 联网搜索 / 读网页密钥；与供应商槽位独立。 */
   tinyfishApiKey: string;
 }
 
@@ -79,7 +75,6 @@ export function normalizeAIReasoningLevel(value: unknown): AIReasoningLevel {
   return "default";
 }
 
-/** 跨窗快照和旧持久化里，推理档、供应商 id 可能是任意字符串，函数内再收成合法值。 */
 type NormalizableAISettings = Partial<
   Omit<AISettings, "workspaceReasoningLevel" | "customProviderId">
 > & {

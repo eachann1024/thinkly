@@ -1,6 +1,3 @@
-/**
- * 分屏方向键与布局预设。运行：node scripts/verify/run.mjs split-keys
- */
 import { walkLeaves } from "@/lib/editor-split/tree";
 import { neighborLeaf } from "@/lib/editor-split/treeGeometry";
 import { applyLayoutPreset, equalizeSplitSizes } from "@/lib/editor-split/layoutPreset";

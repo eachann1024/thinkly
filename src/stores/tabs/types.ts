@@ -8,7 +8,6 @@ export interface TabItem {
   id: string;
   pageId: string;
   type?: TabType;
-  /** 预览/临时标签：侧栏单击打开，可被下一个预览替换；编辑后晋升永久 */
   preview?: boolean;
   workspaceId?: string;
   lastAccessedAt?: number;
@@ -52,7 +51,6 @@ export interface TabsState {
   ) => void;
   promotePreviewTab: (tabId?: string) => void;
   openInCurrentTab: (pageId: string) => void;
-  /** 分屏聚焦叶变化时只改 pageId，不拆 split、不开新 Tab。 */
   syncTabPageId: (tabId: string, pageId: string) => void;
   closeTab: (tabId: string) => void;
   closeOtherTabs: (tabId: string) => void;

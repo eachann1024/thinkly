@@ -27,7 +27,6 @@ function treeSignature(page: Page): string {
   return signature;
 }
 
-/** 侧栏树只关心标题和结构。正文编辑会换 pages 引用，不能因此重绘整棵树。 */
 export function areSidebarPagesEqual(
   left: Record<string, Page>,
   right: Record<string, Page>,

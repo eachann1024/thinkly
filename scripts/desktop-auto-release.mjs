@@ -63,14 +63,12 @@ export function prependChangelogSection(changelog, version, bullets) {
   return `${section}\n${text}`;
 }
 
-/** Insert the release section on tip CHANGELOG; keep tip content if the heading already exists. */
 export function ensureChangelogSection(changelog, version, bullets) {
   const text = changelog.replace(/\r\n?/g, "\n");
   if (hasChangelogSection(text, version)) return text;
   return prependChangelogSection(text, version, bullets);
 }
 
-/** Change only the top-level "version" field; keep tip formatting and other keys. */
 export function setPackageJsonVersion(text, version) {
   assert.match(version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
   assert.ok(/^[ \t]*"version"[ \t]*:/m.test(text), "package.json is missing a version field");

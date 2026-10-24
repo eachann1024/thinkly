@@ -81,7 +81,6 @@ export async function relocateLocalPageTree(
     path === oldPath || path.startsWith(oldPath + "/");
   const nextFile = (path: string) =>
     inside(path) ? nextPath + path.slice(oldPath.length) : path;
-  // Include notes outside the directory: they may reference assets being moved with it.
   const related = Object.values(get().pages)
     .filter((p) => p.workspaceId === page.workspaceId && p.localFilePath)
     .sort((a, b) => a.id.localeCompare(b.id));
@@ -133,7 +132,6 @@ export async function relocateLocalPageTree(
     };
     try {
       for (const entry of rewrites) {
-        // Register before attempting a write so a thrown error also restores the original.
         written.push(entry);
         await write(entry.path, entry.after);
       }

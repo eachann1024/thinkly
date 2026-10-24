@@ -2,7 +2,6 @@ import { isGeneratedDataImageName } from "@/components/editor/blocks/image/image
 import { sanitizeCssColor } from "../blockPropsProperties";
 
 export function parseFileBlock(lines: string[], startIndex: number) {
-  // 保留旧附件语法；新格式另外记录文件说明与背景，兼容带括号的 URL。
   const match = lines[startIndex].trim().match(
     /^\[📎\s+((?:\\.|[^\]])*)\]\((?:<([^>]+)>|([^)]*))\)(?:\{goose-file=([^}]+)\})?$/,
   );
@@ -19,7 +18,7 @@ export function parseFileBlock(lines: string[], startIndex: number) {
       const backgroundColor = sanitizeCssColor(metadata.backgroundColor);
       if (backgroundColor) props.backgroundColor = backgroundColor;
     }
-  } catch { /* 旧格式没有元数据；仍保留链接与文件名。 */ }
+  } catch {   }
   return { block: { type: "file", props }, nextIndex: startIndex + 1 };
 }
 
@@ -28,7 +27,6 @@ export function parseImageBlock(lines: string[], startIndex: number) {
   let i = startIndex;
   const line = lines[i];
   const trimmedLine = line.trim();
-    // 图片：![alt](url){width=N align=X}（width → previewWidth，align → textAlignment）
     const imgMatch = trimmedLine.match(
       /^!\[((?:\\.|[^\]])*)\]\((?:<([^>]+)>|([^)]*))\)(?:\{([^}]+)\})?$/,
     );
@@ -53,12 +51,11 @@ export function parseImageBlock(lines: string[], startIndex: number) {
       try {
         const parsed = JSON.parse(decodeURIComponent(metaMap.get("goose-image") || ""));
         if (parsed?.v === 1) imageMetadata = parsed;
-      } catch { /* 兼容没有语义元数据的旧 Markdown 图片。 */ }
+      } catch {   }
       content.push({
         type: "image",
         props: {
           url,
-          // 旧版把 caption 放在 Markdown alt 中；自动生成的文件名不当成说明。
           ...(alt ? { name: alt } : {}),
           ...(alt && !isGeneratedDataImageName(alt) ? { caption: alt } : {}),
           ...(imageMetadata ? {

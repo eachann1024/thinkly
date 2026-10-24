@@ -1,5 +1,3 @@
-/* 成功态：与默认 toast 同结构同布局，只换语义色（浅染底、描边、同色文图）；
- * 勾号保持 success 语义，附带操作按钮使用产品强调色（actions.css）。 */
 .goose-toaster [data-sonner-toast]:is(.goose-toast-success, [data-type="success"]) {
  --normal-bg: var(--goose-interactive-success);
  --normal-border: var(--goose-interactive-success-border);
@@ -14,7 +12,6 @@
  color: var(--goose-interactive-success-fg) !important;
 }
 
-/* 成功勾号不随强调色变化。 */
 .goose-toaster [data-sonner-toast]:is(.goose-toast-success, [data-type="success"]) [data-icon] svg {
  color: var(--goose-color-success) !important;
  stroke: var(--goose-color-success) !important;

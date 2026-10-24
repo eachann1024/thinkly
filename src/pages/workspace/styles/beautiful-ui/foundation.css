@@ -1,7 +1,3 @@
-/**
- * Beautiful UI 作用域样式（MIT, Shane Levine）。
- * 仅 hex/rgb + 仓库已验证 token；禁止 oklch / color-mix / hsl(var(--x)/alpha)。
- */
 
 .bui-root,
 .notebook-ai-messages {

@@ -1,9 +1,5 @@
 import type { JSONContent } from "@/types";
 
-/**
- * 持久化输入草稿时去掉图片 token：File/blob 无法跨进程恢复，
- * 保留残缺 chip 会导致发送时丢图却看似还在。
- */
 export function stripComposerDraftImages(
   content: JSONContent | null | undefined,
 ): JSONContent | null {
@@ -26,7 +22,6 @@ export function stripComposerDraftImages(
         return (node as { type?: string }).type !== "aiImageAttachment";
       });
       if (nextNodes.length === 0) {
-        // 保留纯空段落没有意义
         return null;
       }
       return { ...blockRecord, content: nextNodes };
@@ -37,7 +32,6 @@ export function stripComposerDraftImages(
   return { type: "doc", content: nextBlocks };
 }
 
-/** 草稿是否包含用户可见内容（文本、引用或 Skill chip） */
 export function composerDraftHasContent(
   content: JSONContent | null | undefined,
 ): boolean {

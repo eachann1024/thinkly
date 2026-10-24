@@ -4,7 +4,6 @@ import { createSearchTaskBudget, yieldSearchTask } from "./searchTaskScheduling"
 
 const EMPTY_RECENT: SearchResultPage[] = [];
 
-/** Keep the five-entry selection out of render, including an empty-query full catalog. */
 export function useCommandSearchRecent(
   candidates: SearchResultPage[], excludedIds: string[], enabled: boolean, sessionKey: string,
 ): { recent: SearchResultPage[]; pending: boolean } {

@@ -116,7 +116,6 @@ export function useSkillCommands(options: {
             ensureComposerCaretAnchors(editor);
             editor.focus({ preventScroll: true });
           } catch {
-            // 清掉 /query 失败也不阻断指令执行
           }
           onContentMutation();
         }
@@ -128,7 +127,6 @@ export function useSkillCommands(options: {
 
       try {
         detected.range.deleteContents();
-        // 间距靠 CSS；插入后用 ZWSP 锚点保证旧 Chromium 光标可见。
         const chip = createSkillChipElement(toSkillAttrs(item.skill));
         detected.range.insertNode(chip);
         pruneEmptyComposerTextNodes(editor);

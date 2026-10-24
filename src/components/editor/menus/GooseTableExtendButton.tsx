@@ -83,7 +83,6 @@ export function GooseTableExtendButton({
       const unit = (isColumnHandle ? EMPTY_CELL_WIDTH : 44) * scale;
       const win = event.currentTarget.ownerDocument.defaultView!;
       const abort = new AbortController();
-      // Register immediately; React renders must not create gaps in drag listeners.
       const move = (mouse: MouseEvent) => {
         const diff = (isColumnHandle ? mouse.clientX : mouse.clientY) - startPos;
         if (!movedMouse.current && isTableExtendPointerClick(diff)) return;

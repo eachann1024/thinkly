@@ -1,5 +1,4 @@
 export async function restoreImportedHistory(history: Record<string, any>, importedPageIdMap: Map<string, string>) {
-    // 还原并合并历史记录数据到本地数据库
     if (history) {
       const { resolveHistoryBackend } = await import("@/lib/history/backend");
       const { selectEvictedVersionIds } = await import(
@@ -18,7 +17,6 @@ export async function restoreImportedHistory(history: Record<string, any>, impor
 
           if (!importedIndex) continue;
 
-          // 1. 合并 versions 列表并去重
           const versionMap = new Map<string, any>();
 
           if (localIndex && Array.isArray(localIndex.versions)) {
@@ -32,12 +30,10 @@ export async function restoreImportedHistory(history: Record<string, any>, impor
             }
           }
 
-          // 按时间戳从小到大排序
           let mergedVersions = Array.from(versionMap.values()).sort(
             (a, b) => a.createdAt - b.createdAt,
           );
 
-          // 2. 超出数量限制裁剪（淘汰最旧的非 Milestone）
           const evictedVersionIds = selectEvictedVersionIds(mergedVersions);
           if (evictedVersionIds.length > 0) {
             const evictedSet = new Set(evictedVersionIds);
@@ -46,20 +42,17 @@ export async function restoreImportedHistory(history: Record<string, any>, impor
             );
           }
 
-          // 3. 计算最新的字符数
           const lastVersionCharCount =
             mergedVersions.length > 0
               ? mergedVersions[mergedVersions.length - 1].charCount
               : 0;
 
-          // 4. 保存合并后的索引
           await backend.saveIndex({
             pageId,
             versions: mergedVersions,
             lastVersionCharCount,
           });
 
-          // 5. 写入导入的历史版本
           if (Array.isArray(importedVersions)) {
             const activeVersionIds = new Set(
               mergedVersions.map((v) => v.versionId),
@@ -71,7 +64,6 @@ export async function restoreImportedHistory(history: Record<string, any>, impor
             }
           }
 
-          // 6. 清理淘汰裁剪掉的本地历史版本
           for (const evictedId of evictedVersionIds) {
             await backend.removeVersion(pageId, evictedId);
           }

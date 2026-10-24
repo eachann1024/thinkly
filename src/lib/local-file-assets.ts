@@ -75,7 +75,6 @@ export async function saveLocalAsset(file: File, target: LocalAssetTarget): Prom
   return { ...saved, name: file.name, mimeType: file.type || guessMime(file.name), size: file.size, kind: getLocalAssetKindForFile(file) };
 }
 
-/** Roll back only a newly created resource when its note/insertion did not commit. */
 export async function discardSavedLocalAsset(asset: SavedLocalAssetPath): Promise<void> {
   await getGooseDesktop()?.fsRemove(asset.absolutePath);
 }

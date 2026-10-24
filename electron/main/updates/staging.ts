@@ -43,7 +43,6 @@ export function isFilesystemError(error: unknown): boolean {
   return fsErrorCode(error) !== "";
 }
 
-/** Node's own message already includes the errno and path; keep both if a caller wrapped it. */
 export function describeFsError(error: unknown): string {
   if (!(error instanceof Error)) return "unknown update error";
   const code = fsErrorCode(error);
@@ -71,7 +70,6 @@ function realDirectoryFs(): DirectoryFs {
       return nodeDirectoryFs(loaded);
     }
   } catch {
-    // original-fs exists only inside Electron and is the fs module without the asar patch.
   }
   return nodeDirectoryFs(nodeFs);
 }
@@ -121,9 +119,6 @@ function logRemoveFailure(error: unknown): void {
   console.error(`[update] could not remove update files: ${describeFsError(error)}`);
 }
 
-// Electron patches fs so a path ending in `.asar` is a virtual directory. A recursive
-// rm then descends into app.asar instead of unlinking it, and rmdir of the parent
-// fails with ENOTEMPTY. Unlink those archives as ordinary files first.
 function unlinkAsarFiles(root: string, fsImpl: DirectoryFs): void {
   if (!exists(root, fsImpl)) return;
   runWithoutAsar(() => {

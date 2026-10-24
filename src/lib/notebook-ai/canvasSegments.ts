@@ -1,7 +1,3 @@
-/**
- * 把 AI 正文里的 SVG / xml 画布从 markdown 里拆出来。
- * 流式未闭合围栏不进入可见文本，避免用户看到源码。
- */
 
 export type CanvasChatSegment =
   | { type: "markdown"; content: string }
@@ -106,7 +102,6 @@ function mergePending(segments: CanvasChatSegment[]): CanvasChatSegment[] {
   ];
 }
 
-/** 无围栏的裸 <svg>：完整则渲染，流式未闭合则藏源码。 */
 function splitBareSvg(
   segments: CanvasChatSegment[],
   streaming: boolean,

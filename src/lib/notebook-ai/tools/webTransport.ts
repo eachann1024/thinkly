@@ -89,7 +89,6 @@ function uniqueNonEmptyKeys(keys: Array<string | undefined | null>): string[] {
 
 function readViteTinyfishKey(slot: "A" | "B"): string {
   try {
-    // 完整成员访问，供 Vite 构建期替换为打包内置 key。
     const raw =
       slot === "A"
         ? import.meta.env.VITE_TINYFISH_API_KEY_A

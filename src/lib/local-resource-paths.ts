@@ -65,7 +65,6 @@ export function rebaseLocalResource(
   );
 }
 
-/** Change only resource destinations; preserve prose, frontmatter and formatting. */
 export function rebaseMarkdownResources(
   markdown: string,
   fromFile: string,

@@ -61,7 +61,6 @@ async function firstWorking(files: string[]): Promise<string | null> {
   return null;
 }
 
-// 未安装命令行工具时，直接执行 /usr/bin/git 会弹出系统安装框。只读 xcode-select -p。
 async function readDeveloperDir(): Promise<string | null> {
   if (process.platform !== "darwin") return null;
   const result = await run("/usr/bin/xcode-select", ["-p"]);

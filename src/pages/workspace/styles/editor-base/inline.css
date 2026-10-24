@@ -1,3 +1,2 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./inline/code.css";
 @import "./inline/content.css";

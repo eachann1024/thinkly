@@ -1,4 +1,3 @@
-/** 根目录改名期间，推迟对旧路径的全量重扫，避免把还没改完映射的页面清掉。 */
 let suppressed: { notebookId: string; token: number } | null = null;
 let token = 0;
 

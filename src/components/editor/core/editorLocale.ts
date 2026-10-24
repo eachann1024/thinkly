@@ -27,7 +27,6 @@ export function getEditorPlaceholders(profile: EditorPlaceholderProfile) {
   };
 }
 
-/** BlockNote retains this object for its lifetime; translate leaf reads on demand. */
 export function createLiveEditorDictionary(profile: EditorPlaceholderProfile) {
   const at = (path: string[]) => {
     let value: any = blockNoteDictionary();

@@ -30,7 +30,6 @@ def refresh_app_registration() -> None:
         [str(LSREGISTER), "-dump"], check=True, capture_output=True, text=True
     ).stdout
     paths = set()
-    # Each LaunchServices bundle record starts with its own bundle id.
     for record in re.split(r"(?m)^bundle id:", dump):
         if not re.search(rf"(?m)^identifier:\s+{re.escape(BUNDLE_ID)}\s*$", record):
             continue
@@ -107,7 +106,6 @@ def archive_build() -> Path:
 
 
 def remove_build_copies() -> None:
-    # Only generated bundles owned by this project, never arbitrary registered apps.
     candidates = [
         BUILT_APP,
         ROOT / "dist-electron/packaged/mac-arm64" / f"{APP_NAME}.app",
@@ -122,7 +120,6 @@ def remove_build_copies() -> None:
             info = plistlib.load(source)
         if info.get("CFBundleIdentifier") != BUNDLE_ID:
             raise RuntimeError(f"构建产物标识不匹配，保留：{candidate}")
-        # A never-registered intermediate bundle returns -10814; removal is still valid.
         subprocess.run(
             [str(LSREGISTER), "-u", str(candidate)], check=False,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,

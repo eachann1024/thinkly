@@ -40,7 +40,6 @@ function containerMarks(doc: Node): ContainerMark[] {
   return marks;
 }
 
-/** A container's visible boundary includes its children; no document attributes. */
 export const gooseContainedBlockSurface = createExtension({
   key: "goose-contained-block-surface",
   prosemirrorPlugins: [new Plugin({

@@ -38,10 +38,6 @@ ja:
 const uiText = createTranslator(localMessages);
 import type { AIModelOption, CustomAIProtocol } from "./types";
 
-/**
- * AI 供应商预设。
- * 用户只选供应商并填 Key；协议 / Base URL / 模型分支内部处理。
- */
 export type AIProviderId =
   | "deepseek"
   | "glm"
@@ -54,26 +50,16 @@ export interface AIProviderPreset {
   id: AIProviderId;
   label: string;
   description: string;
-  /** 固定 Base URL；自定义项为 null，需用户填写 */
   baseURL: string | null;
-  /** 默认协议（DeepSeek 会按模型再分支） */
   protocol: CustomAIProtocol;
-  /** 是否允许编辑 Base URL */
   allowCustomBaseURL: boolean;
-  /** 拉取模型失败时的兜底列表 */
   fallbackModels?: AIModelOption[];
 }
 
-/** 官方文档：https://api-docs.deepseek.com/ */
 export const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
 
-/** 官方文档：https://docs.bigmodel.cn/cn/guide/develop/openai/introduction */
 export const GLM_BASE_URL = "https://open.bigmodel.cn/api/paas/v4";
 
-/**
- * 大陆用户优先国内域名。
- * 官方：https://platform.minimax.io / https://api.minimaxi.com
- */
 export const MINIMAX_BASE_URL = "https://api.minimaxi.com/v1";
 
 export const AI_PROVIDER_PRESETS: AIProviderPreset[] = [
@@ -158,16 +144,11 @@ export function isAIProviderId(value: unknown): value is AIProviderId {
   );
 }
 
-/** DeepSeek V4 Pro 尚不支持 Responses，走兼容 Chat Completions。 */
 export function isDeepSeekProModel(modelId: string | null | undefined): boolean {
   if (!modelId) return false;
   return /deepseek-v4-pro|v4-pro/i.test(modelId.trim());
 }
 
-/**
- * 按供应商 + 模型解析实际协议。
- * DeepSeek：4flash → openai-responses；4 pro → openai。
- */
 export function resolveProtocolForProvider(
   providerId: AIProviderId,
   modelId: string | null | undefined,
@@ -185,9 +166,6 @@ export function resolveProtocolForProvider(
     : preset.protocol;
 }
 
-/**
- * 从已有 base URL / 协议推断供应商（迁移旧配置用）。
- */
 export function inferProviderIdFromSettings(input: {
   customProtocol?: CustomAIProtocol | string | null;
   customOpenAIResponsesBaseURL?: string | null;
@@ -222,12 +200,10 @@ export function inferProviderIdFromSettings(input: {
   return "custom-openai-responses";
 }
 
-/** 预设供应商写入凭证时，需要同步的协议槽位。 */
 export function getProviderCredentialSlots(
   providerId: AIProviderId,
 ): CustomAIProtocol[] {
   if (providerId === "deepseek") {
-    // Flash 用 Responses、Pro 用兼容，保存时两端都写入同一 Key/URL
     return ["openai-responses", "openai"];
   }
   return [getAIProviderPreset(providerId).protocol];

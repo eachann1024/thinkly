@@ -46,7 +46,6 @@ import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
 export const TECH_APPLICATION: CardTheme[] = [
-  // ── 12. Vercel Geist ─────────────────────────────────────────
   {
     id: "vercel-dark",
     get name() { return uiText("vercelBlack"); },
@@ -92,7 +91,6 @@ export const TECH_APPLICATION: CardTheme[] = [
     ],
   },
 
-  // ── 13. Tokyo Night ──────────────────────────────────────────
   {
     id: "tokyo-night",
     get name() { return uiText("tokyoNight"); },
@@ -138,7 +136,6 @@ export const TECH_APPLICATION: CardTheme[] = [
     ],
   },
 
-  // ── 14. Catppuccin Macchiato ─────────────────────────────────
   {
     id: "catppuccin",
     name: "Catppuccin",
@@ -184,7 +181,6 @@ export const TECH_APPLICATION: CardTheme[] = [
     ],
   },
 
-  // ── 16. Linear ───────────────────────────────────────────────
   {
     id: "linear",
     name: "Linear",

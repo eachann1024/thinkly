@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { EASE_OUT_EXPO } from "./cardMotion";
 
-/** 内容高度变化时外壳以 ease-out-expo 平滑伸缩；减少动态效果时直接跳到新高度。 */
 export function AutoHeight({ children, className }: { children: ReactNode; className?: string }) {
   const reduce = useReducedMotion();
   const innerRef = useRef<HTMLDivElement>(null);

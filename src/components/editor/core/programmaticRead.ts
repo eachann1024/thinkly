@@ -1,7 +1,6 @@
 const readers = new WeakSet<object>();
 let paintingTable = false;
 
-/** 切页的同步 onChange 不再把整篇文档转成块对象。 */
 export function markProgrammaticRead(editor: object): void {
   readers.add(editor);
   setTimeout(() => readers.delete(editor), 0);

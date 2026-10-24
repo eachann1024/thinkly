@@ -58,7 +58,6 @@ import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
 export const ARTISTIC_READING: CardTheme[] = [
-  // ── 3. Medium ────────────────────────────────────────────────
   {
     id: "medium",
     get name() { return uiText("mediumMagazine"); },
@@ -105,7 +104,6 @@ export const ARTISTIC_READING: CardTheme[] = [
     ],
   },
 
-  // ── 4. Kenya Hara ────────────────────────────────────────────
   {
     id: "kenya-hara",
     get name() { return uiText("haraWhite"); },
@@ -152,7 +150,6 @@ export const ARTISTIC_READING: CardTheme[] = [
     ],
   },
 
-  // ── 5. Typewriter ────────────────────────────────────────────
   {
     id: "typewriter",
     get name() { return uiText("vintageTypewriter"); },
@@ -200,7 +197,6 @@ export const ARTISTIC_READING: CardTheme[] = [
     ],
   },
 
-  // ── 7. Academic ──────────────────────────────────────────────
   {
     id: "academic",
     get name() { return uiText("academicLatex"); },

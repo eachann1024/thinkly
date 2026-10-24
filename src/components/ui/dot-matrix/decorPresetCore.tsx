@@ -12,7 +12,6 @@ const bl = "bottom-left";
 const br = "bottom-right";
 
 export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = {
-  // 01 书本：右上大弧 + 左下栅格碎片 + 左上散点星
   page: [
     {
       at: tr,
@@ -48,7 +47,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       ),
     },
   ],
-  // 02 空文件夹：左上渐隐三角 + 右下横向刻度
   folder: [
     {
       at: tl,
@@ -59,7 +57,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       node: <DecorTicks position={br} axis="x" length={144} inset={[20, 14]} />,
     },
   ],
-  // 10 大纲：右上十字准星 + 左下纵向刻度 + 右下散点星
   outline: [
     {
       at: tr,
@@ -100,7 +97,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       ),
     },
   ],
-  // 08 搜索：左下渐隐三角 + 右上散点星
   search: [
     {
       at: bl,
@@ -120,7 +116,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       ),
     },
   ],
-  // 09 历史：右上十字准星 + 左下纵向刻度 + 右下四分之一弧
   history: [
     {
       at: tr,
@@ -145,7 +140,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       ),
     },
   ],
-  // 17 分栏不存在：左上栅格碎片 + 右下十字准星
   splitMissing: [
     {
       at: tl,
@@ -163,7 +157,6 @@ export const CORE_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = 
       ),
     },
   ],
-  // 16 渲染失败：右上横向刻度 + 左下四分之一弧 + 右下散点
   splitError: [
     {
       at: tr,

@@ -12,7 +12,6 @@ import type { NotebookAiAgentContext } from "./types";
 export function toResourceReference(reference: AiFileReferenceAttrs, role: "source" | "target"): ResourceRef {
   const pages = usePages.getState().pages;
   const page = pages[reference.pageId];
-  // Ownership comes from an actual index record, never from an id prefix.
   const matches = page && page.workspaceId === reference.workspaceId && !page.trashedAt;
   const kind = reference.kind === "notebook" ? "notebook" : matches ? page.isFolder ? "folder" : "page" : reference.kind ?? "page";
   return {
@@ -29,7 +28,6 @@ export function toResourceReference(reference: AiFileReferenceAttrs, role: "sour
   };
 }
 
-/** Identity has no content budget: every explicitly selected resource remains addressable. */
 export function formatResourceManifest(references: ResourceRef[]) {
   if (!references.length) return "";
   return [
@@ -48,14 +46,13 @@ export async function ensureNotebookReferenceIndex(notebookId: string): Promise<
   }
   if (!notebook.localPath || notebook.localPathMissing) throw new Error(`笔记本 ${notebook.name} 的目录不可用`);
   if (typeof window === "undefined" || !window.gooseFs) throw new Error("本地文件读取不可用");
-  // The legacy scanner catches readDir errors; probe the selected root so failure cannot look empty.
   await readDirectory(window.gooseFs, notebook.localPath);
   const state = useNotebooks.getState().getLocalFolderLoadState(notebookId);
   if (state.status === "ready") {
     try {
       const prior = JSON.parse(state.fingerprint);
       if (prior.basePath === notebook.localPath && JSON.stringify(prior.hiddenFolders) === JSON.stringify(useSettings.getState().localFolderHiddenFolders)) return;
-    } catch { /* A legacy or stale fingerprint requires a real reload. */ }
+    } catch {   }
   }
   await usePages.getState().loadLocalFolderPages(notebookId, notebook.localPath);
   const loaded = useNotebooks.getState().getLocalFolderLoadState(notebookId);
@@ -121,7 +118,6 @@ export function readableNotebookIds(context: NotebookAiAgentContext): string[] {
 
 const keyOfSelection = (reference: AiFileReferenceAttrs) => `${reference.workspaceId}:${reference.pageId}`;
 
-/** Parent selections supersede child selections only when their recursion includes them. */
 export function dedupeResourceSelections(references: AiFileReferenceAttrs[], pages: Record<string, Page>): AiFileReferenceAttrs[] {
   const unique = references.filter((ref, index) => references.findIndex((other) => other.workspaceId === ref.workspaceId && other.pageId === ref.pageId && other.role === ref.role) === index);
   return unique.filter((ref) => !unique.some((parent) => {
@@ -132,7 +128,6 @@ export function dedupeResourceSelections(references: AiFileReferenceAttrs[], pag
   }));
 }
 
-/** Check the actual child boundary without consulting titles or expanding the selected root. */
 export function canReadFolderChildren(context: NotebookAiAgentContext, notebookId: string, folderId?: string): boolean {
   if (!context.resourceReferences) return readableNotebookIds(context).includes(notebookId);
   const probe = { id: "__ai_scope_child__", workspaceId: notebookId, parentId: folderId } as Page;

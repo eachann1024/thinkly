@@ -5,7 +5,6 @@ import {
 import { useEditorSplit, writeTabSplitForWindow } from "@/stores/useEditorSplit";
 import { useTabs } from "@/stores/useTabs";
 
-/** 把标签挪到别的窗口后，源窗若已空则关掉（不再补欢迎页）。 */
 export function detachTabFromThisWindow(
   tabId: string,
   destWindowId?: string,
@@ -20,7 +19,6 @@ export function detachTabFromThisWindow(
   try {
     window.localStorage.removeItem(tabsPersistKey(getWindowId()));
   } catch {
-    // 忽略存储异常
   }
   void window.gooseDesktop?.closeWindow?.();
 }

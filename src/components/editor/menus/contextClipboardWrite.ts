@@ -15,7 +15,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 系统不支持富文本写入时显式失败，不把格式化剪切降级成纯文本后删原文。 */
 export async function writeContextClipboard(view: EditorView): Promise<void> {
   const payload = getSelectionClipboardPayload(view);
   if (!payload) throw new Error(t("nothingToCopy"));

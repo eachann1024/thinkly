@@ -1,7 +1,3 @@
-/**
- * 订阅 activePage + getPageTitle，防抖 300ms 同步 Electron 系统窗口标题。
- * 仅 Electron 构建有效（Electron 构建 effect 内部直接 return）。
- */
 import { useEffect } from "react";
 import { useLocale } from "@/i18n";
 import { usePages } from "@/stores/usePages";
@@ -17,7 +13,6 @@ import {
 export function useDesktopWindowTitleSync(): void {
   const locale = useLocale();
   const activePageId = usePages((s) => s.activePageId);
-  // 选择器只取标题字符串：内容保存产生的新 page 对象不会触发重渲染。
   const pageTitle = usePages((s) => {
     const page = activePageId ? s.pages[activePageId] : undefined;
     return page ? getPageTitle(page) : null;

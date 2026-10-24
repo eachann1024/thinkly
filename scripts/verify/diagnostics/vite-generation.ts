@@ -1,4 +1,3 @@
-// THINKLY_VITE_I18N_REPORT=/tmp/i18n.json THINKLY_VITE_AUTOIMPORT_REPORT=/tmp/auto.json bun run verify diagnostics/vite-generation
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";

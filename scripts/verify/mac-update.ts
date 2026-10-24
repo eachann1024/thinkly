@@ -45,7 +45,6 @@ function asarParent(target: string): string {
   return target;
 }
 
-/** Electron's patched fs: `.asar` is a directory, so a recursive rm reports ENOTEMPTY. */
 function electronAsarFs(options: { blockRemove?: boolean } = {}): DirectoryFs {
   return {
     lstatSync(target) {

@@ -15,7 +15,6 @@ export const createPageAction = (
   workspaceId = DEFAULT_NOTEBOOK,
   id?: string,
 ): string => {
-  // Electron 仅本地文件夹模式：非 local-folder 工作区禁止建页（内置数据层关闭）
   const target = useNotebooks.getState().notebooks[workspaceId];
   if (target?.source !== "local-folder") return "";
   flushEditorContent();
@@ -48,7 +47,6 @@ export const createPageRecordAction = (
   } & Partial<Page>,
 ): string => {
   const { workspaceId, parentId, id, content, ...extra } = options;
-  // Electron 仅本地文件夹模式：拒绝写入内置工作区（含 AI / MCP 通路）
   const notebook = useNotebooks.getState().notebooks[workspaceId];
   if (notebook?.source !== "local-folder") return "";
   const finalId = id || uuidv4();

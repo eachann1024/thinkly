@@ -1,16 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { pauseDotLoops, releaseDotLoops, resumeDotLoops } from "./dotLoopController";
 
-/**
- * 点阵动效的播放控制：直接改宿主元素的 data 属性，不触发 React 重渲染。
- * - data-dm-phase="pre"：尚未进入视口，入场组隐藏，循环不启动
- * - data-dm-phase="in"：入场完成后持续循环
- * - data-dm-phase="static"：系统减少动效，仅静态画面
- * - data-dm-paused：不可见时冻结循环时钟，入场与反馈由 CSS 暂停
- *
- * 离开视口或文档隐藏时保留 phase=in，冻结逻辑时钟；恢复后从原进度继续。
- * React <Activity> 隐藏时会清理并在显示时重跑 effect，重新注册会保留已播放状态。
- */
 
 type Entry = {
   el: Element;
@@ -32,7 +22,6 @@ const reducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
-/** 一帧内批量切到 in：保证 pre 至少被样式计算过一次，动画才会重新开始。 */
 function flush() {
   frame = 0;
   pending.forEach((el) => {
@@ -152,7 +141,6 @@ function register(el: Element) {
   entry.onAnimationEnd = (event) => onEntryAnimationEnd(entry, event);
   el.addEventListener("animationend", entry.onAnimationEnd as EventListener);
   entries.set(el, entry);
-  // Reduced motion remains observed so a live preference change takes effect immediately.
   el.setAttribute(
     "data-dm-phase",
     staticMotion ? "static" : phaseWasIn || wasPlayed ? "in" : "pre",
@@ -167,8 +155,6 @@ function register(el: Element) {
     motionBound = true;
   }
   if (io) io.observe(el);
-  // Start paused until IntersectionObserver confirms visibility. This also
-  // preserves an existing `in` phase without replaying its entrance on reattach.
   apply(entry);
   return () => {
     releaseDotLoops(el);
@@ -196,7 +182,6 @@ function register(el: Element) {
   };
 }
 
-/** 返回挂到点阵 <svg> 上的 ref；首帧渲染属性请使用 DOT_MOTION_INITIAL。 */
 export function useDotMotion<T extends Element = SVGSVGElement>() {
   const ref = useRef<T>(null);
   useLayoutEffect(() => {
@@ -206,5 +191,4 @@ export function useDotMotion<T extends Element = SVGSVGElement>() {
   return ref;
 }
 
-/** 首帧属性：React 只在值变化时写 DOM，因此不会覆盖 hook 后续写入的 phase。 */
 export const DOT_MOTION_INITIAL = { "data-dm-phase": "pre" } as const;

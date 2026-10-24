@@ -13,7 +13,6 @@ import { renderToolVisual } from "./toolVisual";
 function AssistantTextPart({ text, status }: TextMessagePartProps) {
   useLocale();
   const ctx = useContext(AssistantToolRenderContext);
-  // 多轮工具调用会留下多段正文；只有当前仍在输出的 part 才是 running
   const isPartStreaming =
     Boolean(ctx?.isStreaming) && status.type === "running";
   return (
@@ -25,7 +24,6 @@ function AssistantTextPart({ text, status }: TextMessagePartProps) {
   );
 }
 
-/** 工作卡 footer：只渲染 executeBatchPlan 的 embedded 审批，其余 part 一律 null */
 function AssistantApprovalPart({ artifact }: ToolCallMessagePartProps) {
   useLocale();
   const ctx = useContext(AssistantToolRenderContext);
@@ -52,7 +50,6 @@ function AssistantApprovalPart({ artifact }: ToolCallMessagePartProps) {
   );
 }
 
-/** 纸外 artifact：只渲染 Table/Chart/Diagram/Svg，text 与审批一律 null */
 function AssistantArtifactPart({ artifact }: ToolCallMessagePartProps) {
   useLocale();
   const ctx = useContext(AssistantToolRenderContext);
@@ -73,10 +70,6 @@ function NullMessagePart() {
   return null;
 }
 
-/**
- * MessagePrimitive.Parts 的 components 必须模块级常量，避免 identity 抖动。
- * 同一条消息拆三份 map 各渲一类 part、其余 null，防止正文/审批/artifact 双渲染。
- */
 export const ASSISTANT_TEXT_PARTS = {
   Text: AssistantTextPart,
   Reasoning: NullMessagePart,

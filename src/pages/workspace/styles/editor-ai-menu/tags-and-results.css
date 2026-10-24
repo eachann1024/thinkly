@@ -1,4 +1,3 @@
-/* ---------- Tag 行（可换行 chip + ➕） ---------- */
 .goose-ai-tags {
   display: flex;
   flex-wrap: wrap;
@@ -32,7 +31,6 @@
   border-color: var(--goose-interactive-hover-border);
 }
 
-/* ➕：圆角方形虚线，与普通 tag 区分 */
 .goose-ai-tag--plus {
   display: inline-flex;
   align-items: center;
@@ -51,13 +49,11 @@
   background: var(--goose-interactive-hover);
 }
 
-/* ---------- AI 结果回显区（thinking / error / 流式文本） ---------- */
 .bn-ai-menu,
 .bn-ai-prompt-suggestion {
   border-radius: 14px;
 }
 
-/* 修改高亮：与项目 selection 高亮风格保持一致（弱化默认色） */
 ins,
 [data-type="modification"] {
   color: inherit;

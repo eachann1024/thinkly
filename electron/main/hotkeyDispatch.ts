@@ -15,7 +15,6 @@ import {
   toggleWindow,
 } from "./windows";
 
-/** 三条全局热键的分发：系统 globalShortcut 不带来源窗口，before-input-event 带上聚焦窗的种类。 */
 export type HotkeySlot = "wake" | "quicknote" | "search";
 export type HotkeySourceKind = SearchHotkeySource;
 
@@ -43,7 +42,6 @@ function focusedWindowKind(): HotkeySourceKind {
   return "workspace";
 }
 
-/** 聚焦的 workspace 内用应用内搜索面板；其余情况（应用不在前台、速记前台）切换浮动搜索窗。 */
 function dispatchSearchHotkey(
   sourceKind: HotkeySourceKind,
   fromWindowInput: boolean,

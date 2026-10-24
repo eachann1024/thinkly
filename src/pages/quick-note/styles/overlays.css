@@ -1,4 +1,3 @@
-/* 速记滚动区：只保留纵向滚动；横向始终裁切，避免 Cmd+/- 缩放残留底栏滚动条。 */
 .quicknote-root .page-scroll-container {
   scrollbar-color: transparent transparent;
   scrollbar-width: thin;
@@ -24,7 +23,6 @@
   background: rgba(82, 82, 82, 0.45);
 }
 
-/* 设置面板在小窗内保持可访问，字号拖杆不随编辑区缩放。 */
 .quicknote-help-popover {
   display: flex;
   max-height: var(--goose-popover-available-height);
@@ -95,7 +93,6 @@
   padding: 0 8px 4px;
 }
 
-/* 选中文字后的格式栏属于速记小窗：横向铺满并吸附窗口底边，不做悬浮胶囊。 */
 .goose-formatting-toolbar-dock [data-formatting-toolbar] {
   width: 100%;
   max-width: none;
@@ -131,7 +128,6 @@
   }
 }
 
-/* 速记只调整菜单滚动布局，条目状态由公共菜单配方维护。 */
 .quicknote-root [data-goose-slash-lite="true"] [data-notion-slash-scroll] {
   scroll-padding-bottom: 12px;
 }

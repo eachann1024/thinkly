@@ -23,7 +23,6 @@ export function barGradient(
   hex: string,
   isDark: boolean,
 ): echarts.graphic.LinearGradient {
-  // 顶部略亮、底部略深，增加体积感但不抢戏
   if (isDark) {
     return verticalGradient(hexToRgba(hex, 1), hexToRgba(hex, 0.72));
   }

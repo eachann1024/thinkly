@@ -57,7 +57,6 @@ export function useFormatCode() {
       }
 
       const formatted = await prettier.format(code, options)
-      // 代码块不需要文件末尾换行，否则编辑器会多显示一行。
       return formatted.replace(/\r?\n$/, '')
     } catch (error) {
       console.error('Formatting failed:', error)

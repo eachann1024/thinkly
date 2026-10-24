@@ -94,8 +94,6 @@ export async function renderPngBlobWithFallback(element: HTMLElement): Promise<B
       const hasFallback = index < pixelRatios.length - 1;
       const timedOut =
         error instanceof Error && /timeout|超时/i.test(error.message);
-      // html-to-image 没有取消接口；超时任务可能仍在后台运行，此时再起一次
-      // 捕获只会进一步增加内存压力，因此仅对已经明确失败的尝试降级重试。
       if (!hasFallback || timedOut) break;
       console.warn(
         `[imageExport] ${pixelRatio}x capture failed, retrying at ${pixelRatios[index + 1]}x:`,
@@ -103,8 +101,6 @@ export async function renderPngBlobWithFallback(element: HTMLElement): Promise<B
       );
       await yieldForCanvasCleanup();
     } finally {
-      // PNG Blob 已经独立于画布；每次尝试结束就立即释放大画布，避免在
-      // Base64 转换、写盘或下一次降级重试期间继续占用位图内存。
       releaseCanvas(canvas);
     }
   }

@@ -6,8 +6,6 @@ import {
   useNotebookAiChats,
   composerDraftHasContent,
 } from "@/stores/useNotebookAiChats";
-// transport → agent → ai / @earendil-works 的工具链约 350KB，只有真正发消息时才需要；
-// 静态引用它会把整个 SDK 链拉进首帧。
 import { buildLanguageModel } from "@/lib/notebook-ai/model";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import { getSessionChat } from "./sessionChat";
@@ -36,9 +34,6 @@ export function useSessionState(notebookId: string) {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [composerRevision, setComposerRevision] = useState(0);
 
-  // WorkspaceLayout 不再用 key 重挂整个 Provider。这里在 render 期间把新笔记本
-  // 的会话状态一次性换好，React 会立即重渲染，子节点不会拿到旧 notebook 的消息。
-  // 原 Chat 继续归属原会话；压缩任务由 layout effect 清理。
   if (session.notebookId !== notebookId) {
     const nextConversationId = useNotebookAiChats
       .getState()
@@ -87,8 +82,6 @@ export function useSessionState(notebookId: string) {
     clearError,
   } = useChat<NotebookAiMessage>({
     chat,
-    // 流式 token 不节流会每字触发 messages → 全树 commit + Streamdown 重解析，整面板卡顿。
-    // ~50ms ≈ 20fps UI 更新，观感仍流畅，React commit 次数大幅下降。
     experimental_throttle: 50,
   });
 
@@ -103,7 +96,6 @@ export function useSessionState(notebookId: string) {
   useEffect(() => {
     if (previousAiRef.current === ai) return;
     previousAiRef.current = ai;
-    // 配置更新后允许重新连接；不重发上一轮，避免重复执行笔记工具。
     if (getAiAvailabilityError(error)) clearError();
   }, [ai, error, clearError]);
   const aiStatusActiveRef = useRef(false);

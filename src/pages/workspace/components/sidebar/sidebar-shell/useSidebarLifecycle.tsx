@@ -137,7 +137,6 @@ export function useSidebarLifecycle(
     let lastHeight = -1;
     const updateHeight = () => {
       const height = scrollAreaNode.clientHeight;
-      // 隐藏列表会报告 0；保留有效高度，避免切换视图时重绘整棵树。
       if (height <= 0 || height === lastHeight) return;
       lastHeight = height;
       setScrollAreaHeight(height);
@@ -152,7 +151,6 @@ export function useSidebarLifecycle(
     if (!activeNotebookId) return;
     activateWorkspace();
     closeNotebookAiIfFullscreen();
-    // 在当前所处页面的同级创建：取当前页的 parentId 作为新页的父级
     const basePageId = selectedPageId ?? activePageId;
     const basePage = basePageId ? getPage(basePageId) : undefined;
     const siblingParentId =
@@ -163,7 +161,6 @@ export function useSidebarLifecycle(
     if (!newPageId) return;
     openInCurrentTab(newPageId);
     window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete", { detail: { pageId: newPageId } }));
-    // 新页若落在折叠的父级下，展开祖先并聚焦使其可见
     if (siblingParentId) setExpandPageId(newPageId);
   };
 
@@ -190,7 +187,6 @@ export function useSidebarLifecycle(
   const switchSidebarView = (view: SidebarView) => {
     activateWorkspace();
     if (inHistoryMode) exitHistoryView();
-    // 大纲和文件列表同一条规则：全屏 AI 下一次点击就回到笔记。
     if (viewClickLeavesFullscreenAi(view)) closeNotebookAiIfFullscreen();
     setCurrentView(view);
   };

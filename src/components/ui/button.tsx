@@ -6,7 +6,6 @@ import { buttonVariants } from "./control-recipes";
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   busy?: boolean;
 }
-// The shared recipe keeps preserve controls free of implicit layout, border and size.
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, contentStyle = "default", context = "shell", busy, ...props }, ref) => (
     <button ref={ref} data-slot="button" data-goose-control="button" data-goose-context={context} data-goose-content-style={contentStyle}

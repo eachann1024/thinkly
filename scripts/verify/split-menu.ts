@@ -1,7 +1,3 @@
-/**
- * 分屏更多菜单：放大不改布局树、关闭后自动还原、关闭其他、移到新标签、空草稿仍被引用时不丢弃。
- * 运行：node scripts/verify/run.mjs split-menu
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {

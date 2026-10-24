@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/** 无可见窗口的真实 Electron 行为验收；不载入业务 main/preload 或用户数据。 */
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { createHash } from "node:crypto";

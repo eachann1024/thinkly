@@ -54,8 +54,6 @@ export function classifyAiLineText(text: string): AiLineClass | null {
     };
   }
 
-  // `1. foo` 要有空格；`1.5` / `2024.8.28` 不能当成有序列表。
-  // `1)` / `1、` / `1。` 允许无空格，对齐中文输入习惯。
   const numbered = body.match(/^(\d+)(?:\.\s+|[)、）。]\s*)/);
   if (numbered) {
     return {
@@ -78,7 +76,6 @@ export function classifyAiLineText(text: string): AiLineClass | null {
   return null;
 }
 
-/** 把伪列表/待办行改写成解析器能认的 Markdown。围栏外逐行调用。 */
 export function rewriteAiStructureLine(line: string): string {
   const classified = classifyAiLineText(line);
   const indent = line.match(/^\s*/)?.[0] ?? "";

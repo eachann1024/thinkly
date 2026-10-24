@@ -26,7 +26,6 @@ def package_with_builder(linux_targets: str | None) -> None:
     elif IS_WIN:
         cmd = ["electron-builder", "--win", "nsis", "--x64"]
     else:
-        # 多目标作为 --linux 后的独立参数传入（electron-builder 不认逗号串）。
         cmd = ["electron-builder", "--linux"]
         if linux_targets:
             cmd.extend(t.strip() for t in linux_targets.split(",") if t.strip())
@@ -47,7 +46,6 @@ def package_with_builder(linux_targets: str | None) -> None:
 
 
 def cmd_package(args: argparse.Namespace) -> None:
-    # 打包前强杀：旧实例持有 SingletonLock 与挂载的 AppImage，会阻塞覆盖安装。
     cmd_kill(args)
     package_with_builder(args.linux_targets)
     artifacts = sorted(

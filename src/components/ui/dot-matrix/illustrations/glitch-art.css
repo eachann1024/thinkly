@@ -1,4 +1,3 @@
-/* 16 渲染失败插画的悬停预备态：只动 transform，位移 ≤ 2px */
 .goose-glitch-fix,
 .goose-glitch-gap {
   transform-box: fill-box;

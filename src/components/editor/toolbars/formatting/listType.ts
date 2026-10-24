@@ -79,8 +79,6 @@ function listTypeUpdate(
 ): { type: ListBlockType; props: Record<string, unknown> } {
   return {
     type: target,
-    // checked 只在 checkListItem 之间保留；start 只留给原本有序的块。
-    // 其余情况显式覆盖为默认值，避免换类型后残留在 PM attrs 里。
     props: {
       checked:
         target === "checkListItem" && block.type === "checkListItem"
@@ -94,7 +92,6 @@ function listTypeUpdate(
   };
 }
 
-/** 方案 A：已全是目标类型时再点一次取消回 paragraph。 */
 export function applySelectedListType(
   editor: BlockNoteEditor<any, any, any>,
   target: ListBlockType,
@@ -112,7 +109,6 @@ export function applySelectedListType(
           resetToParagraph ? { type: "paragraph" } : listTypeUpdate(block, target),
         );
       } catch {
-        /* 选区块可能已不在文档里 */
       }
     }
   });

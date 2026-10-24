@@ -1,7 +1,6 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
-// 需要已启动的 dev server 和同一 ego TaskSpace；不截图，不接触桌面或真实笔记。
 export default function run() {
   const space = Number(process.env.CARET_SPACE);
   if (!space) throw new Error("请设置 CARET_SPACE 为本次验收的 ego TaskSpace ID");

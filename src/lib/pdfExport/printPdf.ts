@@ -15,10 +15,6 @@ ja:
   theDesktopPdfPrintingServiceIsUnavailable: "Electron の PDF 印刷サービスを利用できません"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Electron 主路径：把笔记 HTML 丢进隐藏窗，webContents.printToPDF。
- * 浏览器没有这套 API 时由 exportToPDF 降级 react-pdf。
- */
 
 import type { Page } from "@/types";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
@@ -87,7 +83,6 @@ function placeholderParagraph(
   };
 }
 
-/** 视频/文件/音频改成图标+文件名，避免 att-file: / data:video 进打印引擎。 */
 export function toPrintMediaPlaceholders(blocks: BlockNoteContent): BlockNoteContent {
   return blocks.map((block) => {
     if (!block || typeof block !== "object") return block;

@@ -38,7 +38,6 @@ export function createBundledAssetRestorer(rootAssetMap: Map<string, string>): B
         const src = block.props.url as string;
         const filename = getBundledAssetName(src);
         if (filename) {
-          // 优先从笔记本内 assets 查找，再从根级 assets 查找
           const dataUrl =
             notebookAssetMap.get(filename) || rootAssetMap.get(filename);
           if (dataUrl) {

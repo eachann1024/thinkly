@@ -75,13 +75,7 @@ import { useTabs } from "@/stores/useTabs";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 
-/**
- * 页面删除/恢复的唯一入口。
- * 所有调用点（侧栏右键菜单、页面菜单、快捷键、垃圾箱视图）共用这三个函数，
- * toast 统一走全局 Toaster 的 top-right 位置。
- */
 
-/** 恢复页面并弹统一的成功 toast；reopenTab 用于撤回删除后重新打开标签页 */
 export function restorePageWithToast(
   pageId: string,
   opts: { reopenTab?: boolean } = {},
@@ -120,7 +114,6 @@ export function restorePageWithToast(
 
 const permanentDeleteInFlight = new Set<string>();
 
-/** 永久删除（垃圾箱条目/本地文件）：先给出可读确认，再统一反馈执行结果。 */
 export function permanentlyDeletePageWithCleanup(pageId: string) {
   const page = usePages.getState().pages[pageId];
   if (!page || permanentDeleteInFlight.has(pageId)) return;
@@ -166,7 +159,6 @@ export function permanentlyDeletePageWithCleanup(pageId: string) {
   });
 }
 
-/** 删除页面：本地文件夹直接移入系统废纸篓（不弹确认），应用内页面进垃圾箱并支持撤回 */
 export async function deletePageWithUndo(pageId: string) {
   const page = usePages.getState().pages[pageId];
   if (!page) return;
@@ -219,7 +211,6 @@ export async function deletePageWithUndo(pageId: string) {
   );
 }
 
-/** Restore only the exact item backed up for this deletion; never guess by filename. */
 export async function undoLocalTrash(token: string, notebookId: string) {
   if (!(await window.gooseFs?.undoTrash?.(token))) throw new Error(uiText("couldnTRestoreTheFileFromTheSystemTrash"));
   const notebook = useNotebooks.getState().notebooks[notebookId];

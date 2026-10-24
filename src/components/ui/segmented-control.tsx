@@ -8,7 +8,6 @@ interface SegmentedControlProps extends Omit<React.HTMLAttributes<HTMLDivElement
   onValueChange: (value: string) => void;
   disabled?: boolean;
 }
-/** 表单选择使用radiogroup，不能与文档导航Tabs混用。 */
 export function SegmentedControl({ options, value, onValueChange, disabled, className, ...props }: SegmentedControlProps) {
   const enabled = options.filter(option => !disabled && !option.disabled);
   const tabStop = enabled.some(option => option.value === value) ? value : enabled[0]?.value;

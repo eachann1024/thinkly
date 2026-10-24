@@ -40,10 +40,6 @@ function stripFrontmatterDelimiters(blob: string): string {
   return blob;
 }
 
-/**
- * 解析 frontmatter 原文 blob（可含 --- 定界符）。
- * 失败时 settings 回退默认，调用方应保留原 blob 不覆盖。
- */
 export function parseLocalFrontmatterBlob(blob: string | null | undefined): {
   ok: boolean;
   data: Record<string, unknown>;
@@ -100,9 +96,6 @@ export function parseLocalFrontmatterBlob(blob: string | null | undefined): {
   }
 }
 
-/**
- * 从完整 markdown 文本恢复页面设置（扫描/reload 用）。
- */
 export function pageSettingsFromMarkdown(
   markdown: string | null | undefined,
 ): LocalPageFrontmatterSettings {

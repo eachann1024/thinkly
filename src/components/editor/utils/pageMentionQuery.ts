@@ -1,7 +1,6 @@
 export const PAGE_MENTION_TRIGGERS = ["@", "[[", "+"] as const;
 export type PageMentionTrigger = (typeof PAGE_MENTION_TRIGGERS)[number];
 
-/** 排除邮箱/标识符内部；中文、空白和标点可作为页面引用边界。 */
 export function isPageMentionBoundaryChar(charBefore: string): boolean {
   return !charBefore || !/[A-Za-z0-9._@+-]/.test(charBefore);
 }

@@ -48,7 +48,6 @@ export function getPrimaryModifierKeyDisplay(
     return style === "symbol" ? "⌘" : "Command";
   }
 
-  // Win/Linux/other: 当前快捷键主键都是 Ctrl
   return "Ctrl";
 }
 

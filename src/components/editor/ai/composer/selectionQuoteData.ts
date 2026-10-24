@@ -12,7 +12,6 @@ ja:
   selectionReferenceAdded: "選択範囲の引用を追加しました"
 `;
 const t = createTranslator(messages);
-/** 可序列化选区引用及去重、标签和展示策略。 */
 export const APPEND_COMPOSER_SELECTION_EVENT =
   "goose-note:append-composer-selection";
 export const OPEN_AI_PANEL_EVENT = "goose-note:open-ai-panel";
@@ -35,7 +34,6 @@ export interface AppendComposerSelectionDetail {
   pageId: string;
   pageTitle: string;
   text: string;
-  /** 点击路径可入场淡入；快捷键必须 false */
   animate?: boolean;
 }
 
@@ -77,7 +75,6 @@ export function canDispatchAppendComposerSelection(params: {
   return canShowAddToChatButton(params);
 }
 
-/** 会话正在切换时，当前 Composer 实例先别消费队列，留给随后挂载的输入框。 */
 export function shouldDeferPendingSelectionQuote(params: {
   composerConversationId: string | null | undefined;
   activeConversationId: string | null | undefined;
@@ -87,7 +84,6 @@ export function shouldDeferPendingSelectionQuote(params: {
   return Boolean(composerId && activeId && composerId !== activeId);
 }
 
-/** FNV-1a 32-bit，去重键用，不求加密强度 */
 export function hashSelectionQuoteText(text: string): string {
   let hash = 2166136261;
   for (let i = 0; i < text.length; i++) {

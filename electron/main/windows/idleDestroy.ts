@@ -2,7 +2,6 @@ import { BrowserWindow } from "electron";
 import { appQuitting } from "./registry";
 import { windowState } from "./state";
 
-/** 隐藏后才回收的浮动小窗（速记、搜索）共用的空闲销毁计时器。 */
 export type IdleDestroyTimerKey = "quicknoteDestroyTimer" | "searchDestroyTimer";
 
 export function clearIdleDestroyTimer(key: IdleDestroyTimerKey): void {

@@ -9,7 +9,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 相邻消息间隔达到该值才再显示时间分隔条（微信风格） */
 export const CHAT_TIME_GAP_MS = 5 * 60 * 1000;
 
 type MessageWithCreatedAt = {
@@ -37,14 +36,6 @@ export function getMessageCreatedAt(
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-/**
- * 微信风格时间文案；无效时间返回 ""。
- * - 今天：HH:mm
- * - 昨天：昨天 HH:mm
- * - 昨天之前且 7 天内：星期X HH:mm
- * - 同年更早：M月D日 HH:mm
- * - 跨年：YYYY年M月D日 HH:mm
- */
 export function formatChatMessageTime(
   timestamp: number,
   now?: number | Date,
@@ -71,12 +62,6 @@ export function formatChatMessageTime(
   return `${new Intl.DateTimeFormat(getFormatLocale(), options).format(date)} ${hm}`;
 }
 
-/**
- * 是否在本条消息上方展示时间分隔。
- * - current 无 createdAt → false
- * - 无 previous 或 previous 无 createdAt → true
- * - gap >= 5min → true
- */
 export function shouldShowChatTimeDivider(
   current: MessageWithCreatedAt,
   previous: MessageWithCreatedAt | null | undefined,
@@ -91,7 +76,6 @@ export function shouldShowChatTimeDivider(
   return currentAt - previousAt >= CHAT_TIME_GAP_MS;
 }
 
-/** 为缺少 createdAt 的消息补上时间戳（不覆盖已有值） */
 export function ensureNotebookAiMessageCreatedAt<T extends MessageWithCreatedAt>(
   messages: T[],
   now = Date.now(),

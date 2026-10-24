@@ -31,7 +31,6 @@ const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "bmp", "a
 const AUDIO_EXTENSIONS = new Set(["mp3", "m4a", "wav", "ogg", "oga", "flac", "aac", "opus", "weba"]);
 const VIDEO_EXTENSIONS = new Set(["mp4", "m4v", "webm", "mov", "ogv"]);
 
-/** MIME alone must never turn an HTML/executable attachment into a preview. */
 export function getLocalAssetKindForFile(file: Pick<File, "name" | "type">): LocalAssetKind {
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
   const mime = file.type.toLowerCase().split(";", 1)[0];

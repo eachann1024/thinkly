@@ -21,7 +21,6 @@ ja:
   theAiServiceIsTemporarilyUnavailablePleaseTry: "AI サービスは一時的に利用できません。しばらくしてからもう一度お試しください。"
 `;
 const t = createTranslator(messages);
-/** 仅把明确的连接/鉴权/额度故障视为服务不可用，普通生成错误仍留在对话中。 */
 export function getAiAvailabilityError(error: unknown): string | undefined {
   if (!error || typeof error !== "object") return undefined;
   const value = error as {
@@ -59,7 +58,6 @@ export function getAiAvailabilityError(error: unknown): string | undefined {
   if (value.statusCode && value.statusCode >= 500 && value.statusCode <= 599) {
     return t("theAiServiceIsTemporarilyUnavailablePleaseTry");
   }
-  // SDK 的重试错误可能将原始 HTTP 故障放在 cause 中。
   if (value.cause && value.cause !== error) {
     const cause = value.cause as { statusCode?: number; message?: string };
     return getAiAvailabilityError({

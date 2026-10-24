@@ -3,7 +3,6 @@ import {
   getSelectedPlainTextContext,
 } from "@/components/editor/utils/selection";
 
-/** 只读取正文的当前选区，避免把搜索框或其他控件的选中文字带回搜索。 */
 export function readSearchSelection(): string {
   if (document.activeElement?.closest("input, textarea, select, button"))
     return "";

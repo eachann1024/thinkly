@@ -15,7 +15,6 @@ import { usePages } from "@/stores/usePages";
 import type { AssetWorkspaceSnapshot } from "./asset-maintenance-contract";
 
 let installed = false;
-/** 只读当前 store + 所有已挂载编辑器，不强制保存或修改用户草稿。 */
 export function installAssetMaintenanceSnapshotResponder() {
   const bridge = window.gooseDesktop?.assetMaintenance;
   if (installed || !bridge) return;

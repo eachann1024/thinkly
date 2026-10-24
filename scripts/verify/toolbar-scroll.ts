@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { createChecker } from "./lib/check";
 
-/** 浮动格式栏和速记底栏共用滚轮映射，窄窗始终保留单行操作。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

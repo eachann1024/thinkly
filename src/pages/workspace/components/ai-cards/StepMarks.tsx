@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { EASE_OUT_EXPO } from "./cardMotion";
 import "./ai-cards.css";
 
-/** 完成勾：路径长度从 0 画到 1，ease-out-expo 收尾。 */
 export function StepCheck({ className }: { className?: string }) {
   const reduce = useReducedMotion();
   return <svg className={cn("ai-step-check", className)} width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
@@ -12,7 +11,6 @@ export function StepCheck({ className }: { className?: string }) {
   </svg>;
 }
 
-/** 进行中：两段弧以线性匀速旋转，减少动态效果时静止。 */
 export function StepSpinner() {
   return <svg className="ai-step-spinner" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
     <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeOpacity=".22" strokeWidth="1.5"/>
@@ -20,7 +18,6 @@ export function StepSpinner() {
   </svg>;
 }
 
-/** 失败：叉号同样以路径绘入。 */
 export function StepCross() {
   const reduce = useReducedMotion();
   return <svg className="ai-step-cross" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">

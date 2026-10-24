@@ -2,7 +2,6 @@ export const COLUMN_LAYOUT = "columnLayout";
 export const COLUMN_SECTION = "columnSection";
 export type ColumnBlock = { id?: string; type: string; props?: Record<string, any>; children?: ColumnBlock[]; [key: string]: any };
 
-/** 宽度只保存正数比例；损坏或旧属性回退等分，不影响任何内容。 */
 export function readColumnWidths(value: unknown, count: number): number[] {
   if (count < 1) return [];
   const raw = typeof value === "string" ? value.split(",").map(Number) : [];
@@ -30,7 +29,6 @@ export function createColumnsBlock(count: 2 | 3, blocks: ColumnBlock[] = []): Co
   };
 }
 
-/** 只修复结构壳，不拍平真实块，不丢弃非标准布局中已有的内容。 */
 export function normalizeColumnLayout(block: ColumnBlock, children: ColumnBlock[]): ColumnBlock {
   const sections: ColumnBlock[] = [];
   for (const child of children) {
@@ -48,7 +46,6 @@ export function normalizeColumnLayout(block: ColumnBlock, children: ColumnBlock[
   };
 }
 
-/** 无行内内容的图片、附件和表格同样是栏内可到达的实际块。 */
 export function firstColumnBlock(block: any, end = false): any {
   if (!block) return undefined;
   const children = block.children ?? [];

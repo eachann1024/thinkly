@@ -1,4 +1,3 @@
-/* 形象选择：男生、女生各一组，组内卡片等宽居中；组间留白大于卡片间距。 */
 .goose-character-picker {
   --character-card-gap: 10px;
   --character-group-gap: 18px;

@@ -1,7 +1,3 @@
-/**
- * 多选上下移动只看相邻块。两千块走一遍必须低于 10 毫秒。
- * 运行：node scripts/verify/run.mjs block-move
- */
 import { Schema, type Node } from "prosemirror-model";
 import { adjacentBlock, findBlockPositions } from "@/components/editor/extensions/blockSelectionModel";
 import { createChecker } from "./lib/check";

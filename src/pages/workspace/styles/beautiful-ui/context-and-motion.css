@@ -74,7 +74,6 @@
 
 .goose-ai-prompt-menu.bui-selection-actions,
 .goose-ai-prompt-menu {
-  /* 行内 AI 浮层沿用现有 editor-ai-menu；此处只加 shimmer 忙碌态 */
 }
 
 .goose-ai-menu-busy-actions .bui-loader-label {

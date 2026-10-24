@@ -1,4 +1,3 @@
-/** 点阵循环：低频取样但持续循环，保留入场、错误反馈、暂停、减弱动效与坐标。 */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import postcss, { type AtRule, type Root, type Rule } from "postcss";
@@ -26,7 +25,6 @@ function value(selector: string, property: string, parent: Root | AtRule = css) 
 
 type Frames = Record<string, Record<string, string>>;
 
-/** 固定原关键帧的时点与幅度；只允许循环取样曲线发生变化。 */
 const frames: Record<string, Frames> = {
   "goose-dm-main-drift": {
     "0%,100%": { transform: "translateY(0) scale(1)" },

@@ -7,9 +7,6 @@ import { getCachedContentSignature } from "./editorContentPolicy";
 
 const historyKey = history().spec.key!;
 
-// prosemirror-history 没有序列化 API。这里只适配其 Branch / Item，保留原型和
-// 不可变 RopeSequence；Step 必须在新编辑器的 schema 中重建，否则跨 mount
-// 撤销图片、列表等结构时会混入旧 schema 的节点。用真实 history 的回归测试约束。
 function migrateHistory(value: any, schema: Schema): any {
   const clone = (source: any, fields: object) =>
     Object.assign(Object.create(Object.getPrototypeOf(source)), source, fields);
@@ -31,7 +28,6 @@ type Snapshot = {
   source?: Source & { signature: string };
 };
 
-/** 每个窗口本次运行内共享，最多 10 篇（含当前篇）；不保留编辑器、DOM 或宿主闭包。 */
 export class PageUndoHistory {
   private entries = new Map<string, Snapshot | null>();
 
@@ -49,7 +45,6 @@ export class PageUndoHistory {
   }
 
   save(pageId: string, state: EditorState, signature: string, source?: Source) {
-    // 非聚焦分屏的卸载不应把已淘汰的笔记重新挤进最近访问列表。
     if (!this.entries.has(pageId)) return;
     const plugin = historyKey.get(state);
     if (!plugin) return;
@@ -60,7 +55,6 @@ export class PageUndoHistory {
     });
   }
 
-  /** Restore the immutable document directly only when the host's source is unchanged. */
   restoreCached(pageId: string, current: EditorState, content: unknown, mode: Source["mode"]) {
     const snapshot = this.entries.get(pageId);
     const source = snapshot?.source;
@@ -94,11 +88,9 @@ export class PageUndoHistory {
       });
       const state = EditorState.create({
         doc,
-        // Bookmarks resolve against the destination schema without invoking custom JSON decoders.
         selection: snapshot.state.selection.getBookmark().resolve(doc),
         plugins: current.plugins.map((entry) => entry === plugin ? restoredPlugin : entry),
       }).reconfigure({ plugins: current.plugins });
-      // 返回后继续输入，应形成新的撤销组。
       return state.apply(closeHistory(state.tr));
     } catch (error) {
       console.error("[goose-note] Could not restore page undo history", error);

@@ -25,7 +25,6 @@ import {
   type WorkspaceSurface,
 } from "../../src/lib/electron/floatingRaise";
 
-/** 浮动搜索窗：热键去向、居中位置、窗口种类参数与打开结果载荷。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

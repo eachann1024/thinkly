@@ -38,10 +38,6 @@ export function parseConfig(
   return raw as unknown as SimplifiedConfig;
 }
 
-/**
- * 检测 AI 是否输出了原生 ECharts option（而非我们的简化格式）。
- * 原生格式：没有 root type，series 数组的每项有 type 字段。
- */
 export function isRawEChartsOption(raw: Record<string, unknown>): boolean {
   if (!raw || typeof raw !== "object") return false;
   const series = raw.series;

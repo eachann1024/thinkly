@@ -57,7 +57,6 @@ import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
 import "./search-editor-bridge.css";
 
-/** 命中顶到可视区首行；表格内容滚整行。滚不动（文首或已到底）时保持原位。 */
 function placeSearchMatch(scroller: HTMLElement, target: HTMLElement) {
   const row = target.closest("tr, li, [data-id]") as HTMLElement | null;
   const anchor = row && scroller.contains(row) ? row : target;
@@ -149,7 +148,6 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       if (cancelled) return;
       const editor = editorRef.current?.editor;
       if (!editor || editor._tiptapEditor.isDestroyed) return;
-      // Editor stamps this only after replacing the document for this page.
       if (editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
       const latest = useSearchSession.getState();
       const latestAttached = latest.view.phase !== "closed" && latest.view.context.resultPageId === pageId;
@@ -165,7 +163,6 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       const request = latest.navigation;
       if (latest.view.phase === "closed" || request.phase !== "target" || request.pageId !== pageId || request.id === handled.current) return;
       handled.current = request.id;
-      // Explicit search navigation takes priority over the page's saved scroll position.
       const titleMatch = attached && query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
       if (request.restoreTop !== null || (attached && (state?.matches.length || titleMatch))) cancelPendingRestoration();
       if (request.restoreTop !== null && scrollRef.current) scrollRef.current.scrollTop = request.restoreTop;
@@ -193,7 +190,6 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       if (remaining <= 0) apply();
       else timer = window.setTimeout(apply, remaining);
     };
-    // Editor readiness may arrive during navigation; it must retain the same deadline.
     ready();
     window.addEventListener("goose-note:search-editor-ready", ready);
     return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };

@@ -1,23 +1,16 @@
-# 当前 AI 审核已改用 .github/codex-review（Codex ChatGPT 登录）。本文件不再被 workflow 读取。
-# PR-Agent 仓库配置：放仓库根目录。workflow 用 pull_request_target，从默认分支读取本文件，PR 改不了自己的审核规则。
-# 文档：https://docs.pr-agent.ai/usage-guide/additional_configurations/ 、https://docs.pr-agent.ai/tools/review/
-# 已核对 The-PR-Agent/pr-agent 源码 35553cb（2026-10-08）里的键名。
 
 [config]
 response_language = "zh-CN"
 model = "gemini/gemini-3.8-flash"
-# fallback 必须是本 key 实测能调通的模型。gemini-3.1-flash 在 2026-10-09 返回 404。
 fallback_models = ["gemini/gemini-2.5-flash"]
 ai_timeout = 180
 
 [pr_reviewer]
-# 评论由 workflow 里 config.publish_output=false 关掉；这里只保留闸门要的字段，其余都关
 enable_help_text = false
 require_score_review = false
 require_todo_scan = false
 require_priority_files = false
 require_estimate_contribution_time_cost = false
-# 闸门读取这三个结构化字段：merge_recommendation / risk_level / security_concerns
 require_merge_recommendation = true      # safe_to_merge / merge_with_caution / changes_required
 require_risk_assessment = true           # low / medium / high
 require_security_review = true

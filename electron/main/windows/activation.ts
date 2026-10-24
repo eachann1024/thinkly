@@ -44,10 +44,6 @@ export function waitReadyToShow(
   });
 }
 
-/**
- * Windows 前台锁会丢掉 globalShortcut 回调里的 show/focus，窗口停在后面。
- * 先置顶再聚焦，SetForegroundWindow 才会生效；主窗随后取消置顶。
- */
 function claimWindowsForeground(win: BrowserWindow): void {
   const keepOnTop = win.isAlwaysOnTop();
   win.setAlwaysOnTop(true);
@@ -58,7 +54,6 @@ function claimWindowsForeground(win: BrowserWindow): void {
   if (!keepOnTop && !win.isDestroyed()) win.setAlwaysOnTop(false);
 }
 
-/** 全局热键唤出时必须抢前台；macOS 不 steal 时 frameless 小窗常常不出现。 */
 export function raiseWindow(win: BrowserWindow): void {
   if (win.isDestroyed()) return;
   releaseWorkspacePark(win);
@@ -92,10 +87,6 @@ export function focusedWorkspaceWindow(): BrowserWindow | null {
   return null;
 }
 
-/**
- * 只抬浮动小窗（速记、搜索），不激活整个应用，也不 show / restore 主窗。
- * macOS 上 moveTop（orderWindow）和普通 show / focus 会把已最小化或藏在后面的 workspace 一起带出来。
- */
 export function raiseFloatingWindow(
   win: BrowserWindow,
   parked: ParkedSets = captureParkedWorkspaces(),
@@ -106,7 +97,6 @@ export function raiseFloatingWindow(
     forgetParkedWorkspaces(parked);
     return;
   }
-  // 只还原浮动窗自己。workspace 的最小化交给停放逻辑。
   if (win.isMinimized()) win.restore();
   setHiddenThrottle(win, false);
   if (process.platform === "darwin") {
@@ -120,7 +110,6 @@ export function raiseFloatingWindow(
     win.focus();
   }
   settleParkedWorkspaces(parked);
-  // 主窗本来就在前台时，浮动窗获焦可能把它压到别的应用后面；排回普通层，再让浮动窗叠在上面。
   if (
     focused &&
     !focused.isDestroyed() &&
@@ -134,7 +123,6 @@ export function raiseFloatingWindow(
     markQuicknoteActivateSuppressed();
     settleParkedWorkspaces(parked);
   });
-  // deminiaturize 可能晚于这次调用才落地。
   setTimeout(() => settleParkedWorkspaces(parked), 50);
   setTimeout(() => settleParkedWorkspaces(parked), 300);
   setTimeout(() => forgetParkedWorkspaces(parked), 1_500);
@@ -153,20 +141,12 @@ export async function toggleWindow(win: BrowserWindow | null): Promise<void> {
   raiseWindow(win);
 }
 
-/**
- * 首次唤起才创建速记窗，避免启动就多一个 renderer。
- *
- * 速记快捷键是严格二态切换：只要窗口可见，再次按键就关闭，不因全局
- * 快捷键触发时焦点短暂转移而重新聚焦。这里不调用 toggleWindow，避免改变
- * workspace 窗口原有的「可见但未聚焦时先聚焦」行为。
- */
 export async function toggleQuicknoteWindow(): Promise<void> {
   let win = getQuicknoteWindow();
   if (win && !win.isDestroyed() && win.isVisible()) {
     closeQuicknote();
     return;
   }
-  // 创建 BrowserWindow 可能激活应用。先记下主窗，再用这份快照抬速记。
   const parked = captureParkedWorkspaces();
   if (!win || win.isDestroyed()) {
     win = createQuicknoteWindow();
@@ -186,15 +166,10 @@ export function closeQuicknote(): void {
   win.close();
 }
 
-/** 全局搜索热键：显示并聚焦最近活动 workspace 窗，不 toggle 隐藏。已在前台则跳过 raise，避免 steal focus 卡顿。 */
 export function showAndFocusMainWindow(): void {
   showOrCreateMainWindow();
 }
 
-/**
- * 只显示主窗，不走三态隐藏。小窗前台、功能转发、搜索热键都走这里。
- * 没有 workspace 时补开一扇空白窗。
- */
 export function showOrCreateMainWindow(): BrowserWindow {
   let win = getMainWindow();
   if (!win || win.isDestroyed()) {

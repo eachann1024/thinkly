@@ -11,7 +11,6 @@ export const saveDirtyLocalPageAction = async (
   if (!page) return false;
   if (page.localReadState === "error") return false;
 
-  // 先让编辑器把最新内容刷进 store。
   window.dispatchEvent(
     new CustomEvent("goose-note:flush-editor", {
       detail: { immediate: true, pageId },

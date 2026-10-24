@@ -34,12 +34,10 @@ export function isExternalFileDrag(dataTransfer: DataTransfer | null): boolean {
   return Array.from(dataTransfer.types || []).includes("Files");
 }
 
-/** 侧栏选中页的父目录 */
 export function getPageParentDirectoryId(page: Page): string | undefined {
   return page.parentId;
 }
 
-/** 页面所在目录（文件→父文件夹；文件夹→自身） */
 export function getPageContainingFolderId(page: Page): string | undefined {
   return page.isFolder ? page.id : page.parentId;
 }
@@ -221,6 +219,5 @@ export function rememberLocalFolderTarget(
     parsed[workspaceId] = next;
     window.localStorage.setItem(RECENT_TARGETS_KEY, JSON.stringify(parsed));
   } catch {
-    // ignore quota / parse errors
   }
 }

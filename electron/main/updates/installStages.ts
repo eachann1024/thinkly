@@ -5,7 +5,6 @@ import { promisify } from "node:util";
 import { discardDirectory } from "./staging";
 
 const exec = promisify(execFile);
-/** Sibling of the installed .app. Node's mkdtemp suffix is [A-Za-z0-9]. */
 const STAGE_NAME = /^\.goose-update-[A-Za-z0-9]+$/;
 const LSREGISTER = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
 
@@ -28,15 +27,10 @@ async function unregisterStagedApps(stage: string): Promise<void> {
       const info = await lstat(bundle);
       if (info.isSymbolicLink() || !info.isDirectory()) continue;
       await exec(LSREGISTER, ["-u", bundle]);
-    } catch { /* Launch Services is absent outside macOS, and a missing bundle is already gone. */ }
+    } catch {   }
   }
 }
 
-/**
- * Remove install swap directories sitting next to the real app.
- * Only a direct child named `.goose-update-[A-Za-z0-9]+` is removed.
- * The app bundle itself, other apps, symlinks, and stages we are running from stay.
- */
 export async function removeSiblingUpdateStages(appBundle: string): Promise<string[]> {
   const removed: string[] = [];
   if (!appBundle.endsWith(".app") || livesInUpdateStage(appBundle)) return removed;

@@ -1,7 +1,6 @@
 import type { Node as PMNode, Slice } from "prosemirror-model";
 import type { EditorState } from "prosemirror-state";
 import { normalizeClipboardLineEndings } from "./clipboardMarkdown";
-/** 连续列表项（含嵌套子列表）之间用单个换行。 */
 const COMPACT_LIST_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
@@ -51,7 +50,6 @@ function shouldEmitPlainTextBlock(node: PMNode): boolean {
 }
 
 export type SerializePlainTextOptions = {
-  /** 多块格式复制时带上 1. / - / # ，方便系统剪贴板丢掉内部 MIME 后仍能还原。 */
   includeBlockMarkers?: boolean;
   preserveWhitespace?: boolean;
 };
@@ -105,10 +103,6 @@ function serializeTablePlainText(table: PMNode): string {
   return normalizeClipboardLineEndings(rows.join("\n"));
 }
 
-/**
- * 按 BlockNote 块结构序列化选区 plain text，避免 PM 默认 `\n\n` 在
- * blockContainer / blockGroup 上产生空行，也避免 checkbox 等结构节点带出空格。
- */
 export function serializeDocRangePlainText(
   doc: PMNode,
   from: number,

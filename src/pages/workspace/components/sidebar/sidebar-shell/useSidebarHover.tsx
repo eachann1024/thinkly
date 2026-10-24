@@ -31,7 +31,7 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
   }, [cancelTimers]);
   const focusSidebar = (view: SidebarView) => {
     requestAnimationFrame(() => {
-      if (view === "search") return; // 搜索会话负责聚焦输入框。
+      if (view === "search") return;
       sidebarRef.current?.querySelector<HTMLElement>(
         view === "pages"
           ? '.sidebar-notebook-trigger, [role="tree"] [tabindex="0"], button'
@@ -48,7 +48,6 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
       settingsOpen,
       inHistoryMode,
       preview: forceCollapseLeft && mode === "preview",
-      // 全屏盖住正文时，再点当前的大纲/文件列表也要切回笔记，而不是只收起侧栏。
       aiFullscreenOpen: isNotebookAiFullscreenOpen(),
     });
     if (action === "search") {
@@ -116,7 +115,6 @@ export function useSidebarHover(input: ReturnType<typeof useSidebarLifecycle>) {
       if (sidebarRef.current?.contains(event.target)) {
         engage();
       } else if (event.target.closest(".workspace-main-sheet")) {
-        // 不取消正文的第一次点击，浮层和菜单在同一次手势内收起。
         dismissAfterNavigation();
       }
     };

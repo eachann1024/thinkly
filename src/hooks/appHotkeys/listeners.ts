@@ -66,8 +66,6 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
       return;
     }
 
-    // 快捷键录制输入框内的按键一律放行，否则已配置的快捷键会在
-    // capture 阶段被吞掉，导致用户无法重新录制同名/相近的快捷键
     const target = event.target as HTMLElement | null;
     if (target?.closest?.("[data-shortcut-recorder]")) {
       pendingModifierOnlyEntry = null;
@@ -147,7 +145,6 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
       return;
     }
 
-    // 未将侧键分配给其他动作时，保持浏览器式的后退 / 前进体验。
     event.preventDefault();
     event.stopPropagation();
     activateWorkspace();

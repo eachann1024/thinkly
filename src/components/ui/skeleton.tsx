@@ -2,22 +2,18 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { useDelayedFlag } from "@/hooks/useDelayedFlag";
 import { cn } from "@/lib/utils";
 
-// 固定宽度序列：每行长短错落，又不会在重渲染时跳动。
 const TITLE_WIDTHS = [72, 48, 84, 60, 40, 78, 54, 66];
 const SUBTITLE_WIDTHS = [36, 22, 42, 28, 18, 45, 30, 24];
 const LINE_WIDTHS = [100, 96, 88, 100, 92, 64];
 
 const widthAt = (widths: number[], index: number) => `${widths[index % widths.length]}%`;
 
-/** 单个占位块：中性底色 + 横扫高光，形状由调用方 className 决定。 */
 export function Skeleton({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return <span aria-hidden="true" {...props} className={cn("goose-skeleton", className)} />;
 }
 
 type DelayedProps = {
-  /** 读屏播报的加载说明；不渲染为可见文字。 */
   label?: string;
-  /** 挂载后多久才显示；快速加载在此之前结束就不会闪出骨架。 */
   delay?: number;
   className?: string;
 };
@@ -31,7 +27,6 @@ function DelayedStatus({ label, delay = 180, children, ...props }: DelayedProps 
   );
 }
 
-/** 列表加载骨架：图标 + 标题条 + 可选副标题条，对应搜索结果、文件树等行。 */
 export function SkeletonList({
   rows = 8,
   lines = 2,
@@ -59,7 +54,6 @@ export function SkeletonList({
   );
 }
 
-/** 正文加载骨架：标题条 + 若干段落行，对应笔记／历史版本正文。 */
 export function SkeletonDocument({ lines = 6, ...rest }: DelayedProps & { lines?: number }) {
   return (
     <DelayedStatus {...rest} className={cn("goose-skeleton-document", rest.className)}>

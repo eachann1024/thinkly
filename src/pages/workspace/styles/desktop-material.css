@@ -1,5 +1,3 @@
-/* macOS 主窗口保持实心壳色。顶栏和左侧导航轨道透出这层背景，
- * 不再叠系统材质，避免变成发灰的半透明条。 */
 html.is-electron.os-mac .workspace-shell[data-electron-chrome] {
   background: var(--goose-shell-surface);
 }

@@ -41,12 +41,10 @@ export function compareSemver(a: string, b: string): number {
   return 0;
 }
 
-/** Pending download is still an update only when it is strictly newer than the running app. */
 export function readyVersionIsNewer(pendingVersion: string, runningVersion: string): boolean {
   return compareSemver(pendingVersion, runningVersion) > 0;
 }
 
-/** Swap directories may be removed once this build is the staged version or newer. */
 export function canClearInstallStage(runningVersion: string, stageVersion: string | null | undefined): boolean {
   if (!stageVersion) return true;
   return compareSemver(runningVersion, stageVersion) >= 0;
@@ -71,7 +69,6 @@ export function pickUpdateAsset(
   if (platform === "win32") {
     const exes = names.filter((asset) => asset.name.toLowerCase().endsWith(".exe"));
     const native = exes.find((asset) => asset.name.toLowerCase().includes("arm64") === isArm);
-    // Windows on ARM can run the x64 installer under emulation if a release has no arm64 build.
     return native ?? (isArm ? exes[0] : null) ?? null;
   }
 

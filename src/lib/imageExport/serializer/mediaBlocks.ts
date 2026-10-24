@@ -34,8 +34,6 @@ function getImageTextForExport(props: Record<string, unknown>, src: string) {
   const rawCaption = imageTextProp(props.caption);
   const name = imageTextProp(props.name);
   const caption = props.captionSource === "generated" && isGeneratedDataImageName(rawCaption, src) ? "" : rawCaption;
-  // BlockNote 的 name 才是图片替代文本来源。即使是剪贴板默认文件名也继续
-  // 留在 alt 上；只是不把它升级为用户可见的 figcaption。
   const alt = typeof props.alt === "string" ? props.alt : name || caption;
   return { caption, alt };
 }

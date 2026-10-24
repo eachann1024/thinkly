@@ -1,6 +1,5 @@
 import { readThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 
-/** 图表组件色来自应用语义，数据 palette 仍由 chartPalette 独立维护。 */
 export function readChartTheme(_isDark: boolean) {
   const theme = readThemeSurfaceSnapshot();
   return {

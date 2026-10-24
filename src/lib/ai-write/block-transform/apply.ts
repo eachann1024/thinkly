@@ -57,10 +57,6 @@ function isCoercibleGeneratedBlock(
   return classifyAiLineText(inlineContentText(block.content)) != null;
 }
 
-/**
- * 只把「已经像目标结构」的新块收成目标类型，不把夹杂的普通句子整批改成待办。
- * 若完全没有可识别项，再退化为只转换普通段落。
- */
 export function coerceGeneratedBlocksToExpectedType(
   editor: BlockTypeTransformEditor,
   blockIds: string[],

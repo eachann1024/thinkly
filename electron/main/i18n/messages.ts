@@ -1,7 +1,5 @@
 import { createTranslator, type CompiledMessages, type MessageSchema, type Translator } from "../../../src/i18n/core";
 
-// Keep the existing boundary that hides raw Git/SSH output, while recognizing
-// translated application messages without relying on their writing system.
 const displayedMessages = new Set<string>();
 export function isDesktopMessage(message: string): boolean {
   return displayedMessages.has(message);

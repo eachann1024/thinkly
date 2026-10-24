@@ -4,7 +4,6 @@ const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|heic|heif|tiff?)$/i;
 const VIDEO_EXT = /\.(mp4|m4v|mov|webm|avi|mkv|flv|wmv)$/i;
 const clipboardFileCache = new WeakMap<object, { file: File; mime: string }[]>();
 
-/** 剪贴板 file item 是否应按图片块粘贴（含 Mac 空 file.type、靠 item.type/扩展名判断） */
 export function isPasteableClipboardImageFile(
   file: File,
   itemType: string,
@@ -14,7 +13,6 @@ export function isPasteableClipboardImageFile(
   return IMAGE_EXT.test(file.name);
 }
 
-/** 剪贴板是否含可粘贴的图片文件（Mac 截图/复制图常同时带 text/html，需优先走 Files 上传路径） */
 export function clipboardHasPasteableImage(
   data: DataTransfer | null | undefined,
 ): boolean {
@@ -23,10 +21,6 @@ export function clipboardHasPasteableImage(
   );
 }
 
-/**
- * 可测的剪贴板/拖放数据形状（避免单测 mock 完整 DataTransfer）。
- * 与 DataTransfer 兼容：优先 items（Mac 截图常 files 为空），再扫 files。
- */
 export type ClipboardImageSource = {
   items?: ArrayLike<{
     kind: string;
@@ -36,7 +30,6 @@ export type ClipboardImageSource = {
   files?: ArrayLike<File> | null;
 };
 
-/** 在粘贴事件仍有效时取得文件；items/files 是同一批内容的两种表示。同一事件只读一次。 */
 export function extractClipboardFiles(
   data: ClipboardImageSource | null | undefined,
 ): { file: File; mime: string }[] {
@@ -49,7 +42,6 @@ export function extractClipboardFiles(
   const resolved = files.length
     ? files
     : Array.from(data?.files ?? []).map((file) => ({ file, mime: file.type }));
-  // 空结果不缓存。捕获阶段读不到文件时，不能把后面的粘贴处理也锁死。
   if (data && resolved.length) clipboardFileCache.set(data, resolved);
   return resolved;
 }
@@ -58,7 +50,6 @@ export function isClipboardImageType(type: string): boolean {
   return type.startsWith("image/") || type === "public.png" || type === "public.tiff" || type === "image/tiff";
 }
 
-/** 捕获阶段只看类型，不调用 getAsFile，避免把文件读丢。 */
 export function shouldDeferPasteToMediaHandler(
   data: { types?: ArrayLike<string> } | null | undefined,
   allowVideo: boolean,
@@ -75,7 +66,6 @@ export function shouldDeferPasteToMediaHandler(
 
 export type ClipboardPasteRoute = "blocks" | "media-files" | "default";
 
-/** 笔记内块优先无损还原；只有外部图片/视频文件才走上传。文件只读取一次。 */
 export function resolveClipboardPasteRoute(
   data: (ClipboardImageSource & { getData?: (type: string) => string }) | null | undefined,
   allowVideo: boolean,
@@ -109,10 +99,6 @@ export function resolveClipboardPasteRoute(
   return hasImage || hasVideo ? "media-files" : "default";
 }
 
-/**
- * 粘贴事件里没有文件，但系统剪贴板有图片。Shottr / 截图在 Electron 里经常是这种形态。
- * 有正文时不读，避免把一段文字粘贴换成旧图片。
- */
 export function shouldReadNativeClipboardImage(
   data: (ClipboardImageSource & { types?: ArrayLike<string>; getData?: (type: string) => string }) | null | undefined,
 ): boolean {
@@ -137,11 +123,6 @@ export function shouldReadNativeClipboardImage(
   return !plain.trim() && !html.trim();
 }
 
-/**
- * 从剪贴板/拖放数据提取图片 File。
- * Mac 截图/复制图常只有 items（files 为空）；item.type 有 image/* 而 file.type 可能为空。
- * 空 type 会按 item.type / 扩展名归一，便于下游 isImageUploadFile 通过。
- */
 export function extractClipboardImageFiles(
   data: ClipboardImageSource | null | undefined,
 ): File[] {
@@ -203,7 +184,6 @@ export function clipboardHasPasteableMedia(
   );
 }
 
-/** 上传路径是否应按图片走 imageStorage（含剪贴板 type 为空的 Mac 截图，需有图片扩展名） */
 export function isImageUploadFile(file: File): boolean {
   if (file.type.startsWith("image/")) return true;
   return IMAGE_EXT.test(file.name);
@@ -220,7 +200,6 @@ export function shouldUploadViaImageStorage(
   return block?.type === "image" || block?.type === "imageResize";
 }
 
-/** 为 imageStorage.save 解析 MIME；仅应在 shouldUploadViaImageStorage 为 true 时调用 */
 export function resolveImageMimeForUpload(file: File): string {
   if (file.type.startsWith("image/")) return file.type;
   const ext = file.name.split(".").pop()?.toLowerCase();
@@ -238,6 +217,5 @@ export function resolveImageMimeForUpload(file: File): string {
     tiff: "image/tiff",
   };
   if (ext && map[ext]) return map[ext];
-  // Mac 截图粘贴：空 type + 无扩展名，但目标块已是 image
   return "image/png";
 }

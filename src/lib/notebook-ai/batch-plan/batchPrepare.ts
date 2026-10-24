@@ -79,7 +79,6 @@ async function prepareBatchPlanOnce(params: PrepareParams): Promise<BatchPlanPre
     return { ok: false, error: journal.error!, journal };
   }
 
-  // 局部 edit → search_replace；后续冻结/路径规划均使用转换后的计划
   let bound: ReturnType<typeof bindOperationTargets>;
   try {
     const converted = convertPartialEditsInPlan(params.input, params.notebookId);
@@ -206,7 +205,6 @@ async function prepareBatchPlanOnce(params: PrepareParams): Promise<BatchPlanPre
         `ai-batch-${params.runId}-${uuidv4()}`;
     for (const pageId of pageIds) {
       const owner = operationOwnerByPageId.get(pageId);
-      // 允许多个 search_replace 串联同一页；edit/delete 仍互斥。
       const allowSharedSearchReplace =
         operation.type === "search_replace" &&
         owner?.startsWith("search_replace:");

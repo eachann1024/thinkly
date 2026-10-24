@@ -1,4 +1,3 @@
-/** Exact visual boundaries of the existing CSS steps curves, including blink wraparound. */
 export function loopOffsets(name: string): readonly number[] {
   if (name === "goose-dm-glint") return [0, 0.14, 0.28, 0.34, 0.48, 0.68, 0.84, 1];
   if (name === "goose-cs-float-sm") return [0, 0.5, 1];
@@ -25,9 +24,8 @@ type Environment = {
 type Input = { time: number; duration: number; delay: number; offsets: readonly number[]; write(time: number): void };
 type Track = Input & { anchor: number; active: boolean; due: number };
 
-/** One timeout for every registered loop; inactive time never enters its logical clock. */
 export function createLoopClock(environment: Environment) {
-  const tracks = new Set<Track>(); // Only active loops enter the shared timer's work set.
+  const tracks = new Set<Track>();
   let timer: unknown = null, batching = 0;
   const timeAt = (track: Track, now: number) => track.time + (track.active ? now - track.anchor : 0);
   function schedule() {

@@ -7,12 +7,6 @@ import {
 import { MIXED } from "./colorPalette";
 import { forEachSelectedTextNode } from "./selectedTextNodes";
 
-/**
- * Walks the current selection and returns the textColor / backgroundColor
- * marks across it. Returns `MIXED` if the selection spans more than one value.
- * BlockNote's useActiveStyles() only reads marks at selection.$to, so it
- * can't detect heterogeneous color selections — we scan the range ourselves.
- */
 export function useSelectionColorState(editor: BlockNoteEditor<any, any, any>) {
   return useEditorState({
     editor,

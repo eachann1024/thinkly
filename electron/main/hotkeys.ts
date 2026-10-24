@@ -74,7 +74,6 @@ function unregisterSlot(slot: HotkeySlot): void {
   try {
     globalShortcut.unregister(existing);
   } catch {
-    // ignore
   }
   registered[slot] = "";
 }
@@ -120,7 +119,6 @@ function applyRegistration(keys: HotkeyRequest): {
   const searchAcc = keys.search.trim() ? toElectronAccelerator(keys.search) : "";
   const next = { wake: wakeAcc, quicknote: quickAcc, search: searchAcc };
 
-  // 键没变就别卸：macOS 对同一 accelerator 立刻 unregister+register 经常返回 false。
   for (const slot of ["wake", "quicknote", "search"] as const) {
     if (
       registered[slot] &&
@@ -172,15 +170,12 @@ export function registerHotkeys(keys: HotkeyRequest): {
   paused?: boolean;
 } {
   Object.assign(lastRequested, copyHotkeyRequest(keys));
-  // 录制框仍聚焦时系统热键已卸载。这里只缓存配置，
-  // 不能把“已接收”伪装成“已注册”，否则设置页会误报生效。
   if (paused) {
     return { wakeOk: false, quicknoteOk: false, searchOk: false, paused: true };
   }
   return applyRegistration(lastRequested);
 }
 
-/** 录制快捷键时先卸掉全局热键，否则系统会先吃掉按键，输入框收不到。 */
 export function pauseGlobalHotkeys(): void {
   paused = true;
   unregisterSlot("wake");
@@ -202,7 +197,6 @@ export function unregisterAllHotkeys(): void {
   try {
     globalShortcut.unregisterAll();
   } catch {
-    // ignore
   }
   registered.wake = "";
   registered.quicknote = "";

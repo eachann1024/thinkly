@@ -2,8 +2,6 @@ import type { ReactNode } from "react";
 
 export type SidebarRailIconName = "folder" | "ai" | "outline" | "search" | "calendar" | "settings" | "feedback" | "update";
 
-// Geometry follows concept 04's 246px preview crops, normalized to 24px.
-// The back sheet is open so no hidden edges show through the front page.
 const backSheetPath =
   "M14.1 3.9Q14.1 2.1 12.3 2.1H4.5Q2.8 2.1 2.8 3.9V16.4Q2.8 18.2 4.5 18.2H6.2";
 const frontPagePath =
@@ -20,7 +18,6 @@ const aiSparklePath =
   "M10.2 4.3Q11 11.3 17.9 13.1Q11 14.9 10.2 21.9Q9.4 14.9 2.5 13.1Q9.4 11.3 10.2 4.3Z M18.2 2.1Q18.6 5 21.5 5.4Q18.6 5.8 18.2 8.7Q17.8 5.8 14.9 5.4Q17.8 5 18.2 2.1Z";
 const feedbackPath =
   "M5 6.2H19Q20.8 6.2 20.8 8V15.2Q20.8 17 19 17H10.2L6.2 20.2V17H5Q3.2 17 3.2 15.2V8Q3.2 6.2 5 6.2Z";
-// Clockwise ring at the search mark's size. The head sits on the stroke so the gap doesn't read as a C.
 const updateArcPath = "M18.99 10.86A7.15 7.15 0 1 1 15.13 5.92";
 const updateArrowPath = "M14.54 7.36L17.25 6.95L15.9 4.57";
 const settingsPath = [

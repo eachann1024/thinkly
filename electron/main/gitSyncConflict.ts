@@ -9,8 +9,6 @@ interface CachedConflict {
   remote: string | undefined;
   choice?: GitConflictResolution["choice"];
 }
-// Only choices and previews are ephemeral. No original file is changed until the
-// normal validated sync transaction pushes and applies its durable journal.
 const repositories = new Map<string, Map<string, CachedConflict>>();
 export class GitConflictError extends Error {
   readonly conflicts: readonly GitSyncConflict[];
@@ -44,8 +42,6 @@ const limit = 256 * 1024;
 function preview(value: string | undefined) {
   if (value === undefined) return { text: null, binary: false, truncated: false };
   const bytes = Buffer.from(value, "base64");
-  // Inspect UTF-8 validity across the complete content; a cut through a multi-byte
-  // character must not misclassify an otherwise valid text file as binary.
   const text = bytes.toString("utf8");
   const binary = bytes.includes(0) || !Buffer.from(text, "utf8").equals(bytes);
   return { text: binary ? null : bytes.subarray(0, limit).toString("utf8"), binary, truncated: bytes.length > limit };

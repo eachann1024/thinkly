@@ -5,7 +5,6 @@ export function imageAltText(props: any): string {
   return "";
 }
 
-/** 标准 Markdown 图片。宽高、说明等应用设置不写在这一行上。 */
 export function serializeImage(block: any): string {
   const props = block.props ?? block.attrs ?? {};
   const alt = imageAltText(props).replace(/[\r\n]+/g, " ").replace(/\\/g, "\\\\").replace(/\]/g, "\\]");

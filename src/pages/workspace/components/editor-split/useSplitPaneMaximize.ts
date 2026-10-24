@@ -23,10 +23,6 @@ export function isSplitHeaderBlankTarget(target: EventTarget | null): boolean {
   return Boolean(target.closest(".editor-split-header"));
 }
 
-/**
- * 斜杠菜单等弹层打开时焦点常常仍在编辑器里。
- * 这时 Esc 先留给弹层，不还原放大。
- */
 function escapeBlocked(event: KeyboardEvent): boolean {
   if (event.defaultPrevented || isImeKeyboardEvent(event)) return true;
   const active = document.activeElement;
@@ -39,10 +35,6 @@ function escapeBlocked(event: KeyboardEvent): boolean {
   return false;
 }
 
-/**
- * 放大格用绝对定位盖住分屏表面。祖先的 overflow 会裁切，临时放开后再恢复。
- * 面板自身的 flex 尺寸不动，其它格只隐藏、不卸载。
- */
 export function useSplitPaneMaximize(tabId: string, leafId: string) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const maximized = useEditorSplit(

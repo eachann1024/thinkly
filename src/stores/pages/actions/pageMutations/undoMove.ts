@@ -10,12 +10,6 @@ type MoveUndoSnapshot = {
   order?: number;
 };
 
-/**
- * 撤回 movePageTree：用移动前捕获的 {workspaceId, parentId, order} 精确写回。
- * 不复用正向 move（正向会把 root 页 parentId 置 undefined 并重排 order）。
- * 撤回前校验各页源笔记本仍存在，被删则跳过；全部源笔记本都不存在则放弃撤回返回 false，
- * 避免把页面写回到已不存在的笔记本而变成孤儿。
- */
 export const undoMovePageTreeAction = (
   set: StoreSet,
   get: StoreGet,

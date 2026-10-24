@@ -69,7 +69,6 @@ const ICONS: Partial<Record<Kind, GooseIcon>> = {
 
 type Header = { title: string; source?: string };
 
-/** 表头只在带来信息时出现：选项与释义卡的正文自带主题，不再加装饰标题。 */
 function cardHeader(card: InfoCardData): Header | null {
   switch (card.kind) {
     case "weather": case "exchange": return { title: t(card.kind), source: card.source };
@@ -109,7 +108,6 @@ function CardBody({ card }: { card: InfoCardData }): ReactNode {
   }
 }
 
-/** 搜索回答与 AI 面板共用的信息卡：弹簧入场，内部行依次落定。 */
 export const InfoCard = memo(function InfoCard({ card, className }: { card: InfoCardData; className?: string }) {
   useLocale();
   const reduce = useReducedMotion();

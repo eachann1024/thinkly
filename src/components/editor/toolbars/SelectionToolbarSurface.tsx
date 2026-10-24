@@ -23,7 +23,6 @@ function navigateToolbar(event: KeyboardEvent<HTMLDivElement>) {
   buttons[next].focus({ preventScroll: true });
 }
 
-/** Shared selection chrome; each context supplies only its supported commands. */
 export const SelectionToolbarSurface = forwardRef<HTMLDivElement, Props>(
   function SelectionToolbarSurface({ context, variant = "floating", className, onKeyDown, ...props }, ref) {
     return <div {...props} ref={ref} role={props.role ?? "toolbar"}

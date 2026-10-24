@@ -38,5 +38,4 @@ export function blockTextStyle(props: Record<string, unknown> = {}): Style {
   };
 }
 
-// Break long tokens in narrow cells while retaining the original saved text.
 export const splitPdfWord = (word: string): string[] => Array.from(word);

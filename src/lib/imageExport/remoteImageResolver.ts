@@ -1,8 +1,3 @@
-// ── Remote Image Resolver ──────────────────────────────────────
-// Resolves internal, local, remote and blob image URLs to base64 data URLs
-// for safe use during html-to-image SVG serialization.
-// Object URLs (blob:) cannot be resolved inside SVG foreignObject context,
-// so we must use inline data URLs.
 
 import type { PartialBlock } from "@blocknote/core";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
@@ -21,7 +16,6 @@ type GooseFsBridge = {
   fetchRemoteImage?: (url: string, timeoutMs?: number) => Promise<string | null>;
 };
 
-// ponytail: withResolvers 需 ES2024 lib，项目锁 ES2022
 function loadImageViaCanvas(url: string, timeoutMs = 8000): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     const img = new Image();
@@ -77,7 +71,6 @@ async function resolveSingleUrl(
         if (response.ok) return blobToBase64(await response.blob());
       }
     } catch {
-      // Missing/denied local files and revoked blob URLs retain the original ref.
     }
     return null;
   }
@@ -87,7 +80,6 @@ async function resolveSingleUrl(
       const blob = await imageStorage.load(url);
       if (blob) return blobToBase64(blob);
     } catch {
-      /* fallthrough */
     }
     return null;
   }
@@ -100,7 +92,6 @@ async function resolveSingleUrl(
           return dataUrl;
         }
       } catch {
-        /* fallthrough to renderer fetch */
       }
     }
     try {
@@ -121,13 +112,11 @@ async function resolveSingleUrl(
         return blobToBase64(blob);
       }
     } catch {
-      /* fallthrough to canvas */
     }
     try {
       const dataUrl = await loadImageViaCanvas(url);
       if (dataUrl) return dataUrl;
     } catch {
-      /* give up */
     }
     return null;
   }

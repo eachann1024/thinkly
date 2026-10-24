@@ -6,7 +6,6 @@ import type { Page } from "@/types";
 export interface EditEvent {
   pageId: string;
   at: number;
-  /** 该次编辑新增的字数（charDelta 的正值）。 */
   added: number;
 }
 
@@ -17,7 +16,6 @@ interface CacheEntry {
   events: EditEvent[];
 }
 
-/** 内存缓存：pageId -> 历史事件。页面 updatedAt 变化时才重读该页。 */
 const cache = new Map<string, CacheEntry>();
 
 export function isEditablePage(page: Page): boolean {
@@ -31,7 +29,6 @@ async function readPageEvents(page: Page): Promise<EditEvent[]> {
     at: v.createdAt,
     added: Math.max(0, v.charDelta),
   }));
-  // 没有历史记录：用 updatedAt 补成一次事件。
   if (events.length > 0) return events;
   const added = Math.max(0, countWords(page.content));
   return [{ pageId: page.id, at: page.updatedAt || page.createdAt, added }];
@@ -48,7 +45,6 @@ async function runPool<T>(items: T[], limit: number, worker: (item: T) => Promis
 const inflightPages = new Map<string, Promise<void>>();
 const inflightBatches = new Map<string, Promise<EditEvent[]>>();
 
-/** 按 pageId 共享进行中的读取；失败时不缓存，下次重试。 */
 function refreshPage(page: Page): Promise<void> {
   const running = inflightPages.get(page.id);
   if (running) return running;
@@ -75,10 +71,6 @@ async function loadBatch(since: number, force: boolean): Promise<EditEvent[]> {
   return pages.flatMap((p) => cache.get(p.id)?.events ?? []);
 }
 
-/**
- * 读取 since 之后有过动静的页面的历史事件（本地文件夹与数据库笔记都经 resolveHistoryBackend 路由）。
- * 并发受控；进行中的整批与单页读取均去重；已缓存且页面未再变化的不重读，force 时全部重读。
- */
 export function loadEditEvents(since: number, force = false): Promise<EditEvent[]> {
   const key = `${since}:${force}`;
   const running = inflightBatches.get(key);

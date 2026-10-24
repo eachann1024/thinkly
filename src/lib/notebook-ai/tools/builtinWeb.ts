@@ -6,7 +6,6 @@ function desktopWeb(): DesktopWeb | null {
   return typeof window !== "undefined" ? window.gooseDesktop?.web ?? null : null;
 }
 
-/** 应用自带联网（主进程抓取 Bing / DuckDuckGo），无需任何密钥。 */
 export async function builtinSearch(query: string, maxResults: number) {
   const web = desktopWeb();
   if (!web) return { error: "联网服务暂不可用" };
@@ -29,7 +28,6 @@ export async function builtinRead(url: string) {
   }
 }
 
-/** 公开数据接口（天气、汇率）走主进程取 JSON；非桌面环境退回 fetch。 */
 export async function fetchPublicJson(url: string, signal?: AbortSignal): Promise<unknown> {
   const web = desktopWeb();
   if (web) return web.json(url);
