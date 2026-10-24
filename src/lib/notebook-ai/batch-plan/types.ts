@@ -1,12 +1,19 @@
 import type { Page } from "@/types";
+import type { OperationTarget, RunWriteScope } from "../resourceScope";
 
-export type BatchPlanOperationInput =
+interface BatchOperationBinding {
+  target?: OperationTarget;
+  sourceRefIds?: string[];
+  dependsOn?: string[];
+}
+
+export type BatchPlanOperationInput = BatchOperationBinding & (
   | {
       type: "create";
       operationId: string;
       title: string;
       markdown: string;
-      parentId?: string;
+      parentId?: string | null;
     }
   | {
       type: "edit";
@@ -31,7 +38,7 @@ export type BatchPlanOperationInput =
       newString: string;
       /** 是否替换全部匹配；默认 false。 */
       replaceAll?: boolean;
-    };
+    });
 
 export interface BatchPlanInput {
   title: string;
@@ -65,10 +72,23 @@ export interface BatchOperationResult {
   ok: boolean;
   pageIds: string[];
   error?: string;
+  notebookId?: string;
+  target?: OperationTarget;
+  skipped?: boolean;
+}
+
+export interface FrozenOperationTarget extends OperationTarget {
+  notebookRoot?: string;
+  locationSignature: string;
 }
 
 export interface BatchPlanJournal {
-  version: 1;
+  version: 1 | 2;
+  writeScope?: RunWriteScope;
+  operationTargets?: Record<string, FrozenOperationTarget>;
+  requestedInputSignature?: string;
+  recoveryConflicts?: Record<string, string>;
+  operationBefore?: Record<string, FrozenPageSnapshot>;
   toolCallId: string;
   runId: string;
   notebookId: string;

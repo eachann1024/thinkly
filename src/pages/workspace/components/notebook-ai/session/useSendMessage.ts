@@ -1,5 +1,10 @@
 import { useLocale } from "@/i18n";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { toast } from "@/components/ui/sonner";
+import { normalizeAiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
+import { prepareNotebookAiReferences } from "@/lib/notebook-ai/readResourceScope";
+import { freezeNotebookAiComposerRun } from "@/lib/notebook-ai/runContext";
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 import {
   buildNotebookAiUserMessage,
   getCurrentNotebookAiPageId,
@@ -25,22 +30,19 @@ ja:
 `;
 const t = createTranslator(messages);
 
-
 export function useSendMessage(state: SessionState) {
   useLocale();
+  const preparing = useRef(false);
   const {
     isBusy,
     unavailableReason,
     notebookId,
     conversationId,
-    messages,
+    chat,
     requestCurrentPageIdRef,
-    setMessages,
-    clearError,
-    sendMessage,
   } = state;
   const send = useCallback(
-    (
+    async (
       payload: AiComposerPayload,
       imageAttachments: NotebookAiImageAttachment[],
       options?: {
@@ -48,7 +50,7 @@ export function useSendMessage(state: SessionState) {
         onConsumeCapturedSelection?: () => void;
       },
     ) => {
-      if (isBusy || unavailableReason) return false;
+      if (isBusy || unavailableReason || preparing.current) return false;
 
       const displayText = payload.promptText.trim();
       const hasQuotes =
@@ -68,42 +70,73 @@ export function useSendMessage(state: SessionState) {
           };
 
       const currentPageId = getCurrentNotebookAiPageId(notebookId);
-      const { modelText, metadata } = buildNotebookAiUserMessage({
-        payload: requestPayload,
-        notebookId,
-        currentPageId,
-        useImplicitPage: false,
-      });
-      metadata.displayText = displayText || (hasQuotes ? t("summarizeSelection") : t("imagesUploaded"));
-      metadata.createdAt = Date.now();
-      metadata.imageAttachments = imageAttachments.map(({ file }) => ({
-        filename: file.name,
-        mediaType: file.type || "image/*",
-      }));
-      if (metadata.diagnostics) {
-        metadata.diagnostics.imageCount = imageAttachments.length;
-      }
-      const cleanedMessages = sanitizeNotebookAiMessages(messages);
-      const onConsumeCapturedSelection = options?.onConsumeCapturedSelection;
+      preparing.current = true;
+      try {
+        await prepareNotebookAiReferences(
+          normalizeAiComposerPayload(requestPayload).resources,
+        );
+        const { modelText, metadata } = buildNotebookAiUserMessage({
+          payload: requestPayload,
+          notebookId,
+          currentPageId,
+          useImplicitPage: false,
+        });
+        metadata.displayText =
+          displayText ||
+          (hasQuotes ? t("summarizeSelection") : t("imagesUploaded"));
+        metadata.createdAt = Date.now();
+        metadata.currentPageId = currentPageId;
+        metadata.writeScope = freezeNotebookAiComposerRun({
+          notebookId,
+          currentPageId,
+          payload: requestPayload,
+          references: metadata.resourceReferences,
+        });
+        metadata.imageAttachments = imageAttachments.map(({ file }) => ({
+          filename: file.name,
+          mediaType: file.type || "image/*",
+        }));
+        if (metadata.diagnostics) {
+          metadata.diagnostics.imageCount = imageAttachments.length;
+        }
+        const cleanedMessages = sanitizeNotebookAiMessages(chat.messages);
+        const onConsumeCapturedSelection = options?.onConsumeCapturedSelection;
 
-      requestCurrentPageIdRef.current = currentPageId;
-      if (cleanedMessages !== messages) {
-        setMessages(cleanedMessages);
-        useNotebookAiChats
-          .getState()
-          .setMessages(notebookId, conversationId, cleanedMessages);
-      }
+        requestCurrentPageIdRef.current = currentPageId;
+        if (cleanedMessages !== chat.messages) {
+          chat.messages = cleanedMessages;
+          useNotebookAiChats
+            .getState()
+            .setMessages(notebookId, conversationId, cleanedMessages);
+        }
 
-      clearError();
-      void sendMessage({
-        text: modelText,
-        files: createImageFileList(imageAttachments),
-        metadata,
-      });
-      onConsumeCapturedSelection?.();
-      return true;
+        chat.clearError();
+        void chat.sendMessage({
+          text: modelText,
+          files: createImageFileList(imageAttachments),
+          metadata,
+        });
+        onConsumeCapturedSelection?.();
+        return true;
+      } catch (error) {
+        toast.error(
+          localizeNotebookAiDiagnostic(
+            error instanceof Error ? error.message : "引用加载失败，请重试",
+          ),
+        );
+        return false;
+      } finally {
+        preparing.current = false;
+      }
     },
-    [isBusy, unavailableReason, notebookId, messages, requestCurrentPageIdRef, clearError, sendMessage, setMessages, conversationId],
+    [
+      isBusy,
+      unavailableReason,
+      notebookId,
+      chat,
+      requestCurrentPageIdRef,
+      conversationId,
+    ],
   );
 
   return send;

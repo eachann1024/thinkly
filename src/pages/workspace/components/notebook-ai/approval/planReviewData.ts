@@ -101,3 +101,22 @@ export function reviewPagePath(page: Page): string {
   if (notebook?.name) titles.unshift(notebook.name);
   return titles.join(" / ");
 }
+
+/** Use the frozen destination for uncreated notes; never use the visible notebook. */
+export function reviewOperationPath(operation: BatchPlanOperationInput, journal: BatchPlanJournal | null): string {
+  const page = operationTargetPage(operation, journal);
+  if (page) return reviewPagePath(page);
+  if (operation.type !== "create") return "";
+  const target = journal?.operationTargets?.[operation.operationId] ?? operation.target;
+  const notebookId = target?.notebookId ?? journal?.notebookId;
+  const notebook = notebookId ? useNotebooks.getState().notebooks[notebookId] : undefined;
+  const localPath = journal?.plannedLocalPaths[operation.operationId];
+  if (localPath) {
+    const root = notebook?.localPath?.replace(/\/$/, "");
+    return `${notebook?.name ?? notebookId ?? ""} / ${root && localPath.startsWith(`${root}/`) ? localPath.slice(root.length + 1) : localPath}`;
+  }
+  const parentId = target?.parentId ?? operation.parentId;
+  const parent = parentId ? usePages.getState().pages[parentId] : undefined;
+  const prefix = parent && parent.workspaceId === notebookId ? reviewPagePath(parent) : notebook?.name ?? notebookId ?? "";
+  return [prefix, operation.title].filter(Boolean).join(" / ");
+}

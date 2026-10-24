@@ -2,6 +2,8 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/shared/FontSelector.tsx#localMessages:1": { "default": {  }; "monospace": {  }; "serif": {  } };
+    "src/pages/workspace/components/shared/LocalFontSelect.tsx#localMessages:1": { "checkingInstalledFonts": {  }; "couldnTReadInstalledFontsReopenThe": {  }; "fontMissing": { "name": string | number }; "fontNotInstalledUsingAFallback": {  }; "loadingInstalledFonts": {  }; "noInstalledFontsFound": {  }; "selected": { "label": string | number; "name": string | number }; "selectedFallback": { "label": string | number; "name": string | number }; "systemFont": {  } };
     "src/pages/workspace/components/sidebar/AppearanceEditorPreview.tsx#localMessages:1": { "aFewPlansForTheWeekend_b122": {  }; "afterDinnerIWateredTheMint_0f53": {  }; "buyCoffeeBeans_bc59": {  }; "callMomAndAskHowShe_eca4": {  }; "currentFolder_9db0": {  }; "iWouldAlsoLikeAnUnhurried_1117": {  }; "ifTheWeatherIsNiceI_cd40": {  }; "liveEditorPreview_d9e9": {  }; "local_8e7e": {  }; "projectPlan_271c": {  }; "reminders_1062": {  }; "serifPreviewALittleRoomTo_3bc8": {  }; "sortThePhotosFromMyWalk_a34c": {  }; "theCroissantWarmedItsPaperBag_bea6": {  }; "theRainHadJustStoppedAs_7743": {  }; "theTreesCastLongShadowsUnder_e9d6": {  }; "thereIsNoNeedToFill_a850": {  }; "visitTheFlowerMarket_1874": {  }; "wednesdayAfterTheRain_a77a": {  }; "wednesdayAfterTheRain_db18": {  } };
     "src/pages/workspace/components/sidebar/LocalFolderLoadingSkeleton.tsx#localMessages:1": { "loadingFolder_c7a5": {  } };
     "src/pages/workspace/components/sidebar/LocalFolderTargetPicker.tsx#localMessages:1": { "filesImported": { "count": string | number }; "filesSkipped": { "count": string | number }; "importFailed_fddc": {  }; "importTo_5a85": {  }; "moveTo_86ed": {  }; "noMatchingFolders_6b46": {  }; "noOtherNotebooksAvailable_35ba": {  }; "searchFoldersOrPaths_40c6": {  }; "searchOtherNotebooks_c47c": {  }; "textFileImported_376b": {  }; "theFileCouldNotBeParsed_8954": {  } };
@@ -120,7 +122,5 @@ declare module "../types" {
     "src/stores/pages/actions/hydrate.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/hydrate.ts#block2:2": { "newerStored": {  }; "recoveredEditor": {  }; "recoveryKept": {  } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
-    "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
-    "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };
   }
 }

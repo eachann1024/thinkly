@@ -6,6 +6,7 @@ import type {
 import type { AiSelectionQuoteAttrs } from "@/components/editor/ai/composer/selectionQuote";
 import type { NotebookAiTools } from "./tools";
 import type { NotebookSkillId } from "./skills";
+import type { ResourceRef, RunWriteScope } from "./resourceScope";
 
 export type NotebookAiContextMode = "structure-summary" | "full-text";
 
@@ -29,6 +30,11 @@ export interface NotebookAiContextDiagnostics {
 
 export interface NotebookAiMessageMetadata {
   displayText?: string;
+  /** 本轮完整稳定身份，与正文预算分离。 */
+  resourceReferences?: ResourceRef[];
+  /** 发送时冻结的授权快照，历史恢复本身不会发起执行。 */
+  writeScope?: RunWriteScope;
+  currentPageId?: string | null;
   references?: AiFileReferenceAttrs[];
   /** 本轮用户消息中显式调用的本地 Skill（chip 顺序）。 */
   skills?: AiSkillCommandAttrs[];
@@ -59,6 +65,8 @@ export interface NotebookAiAgentContext {
   notebookIds?: string[];
   currentPageId?: string | null;
   loadedSkills: Set<NotebookSkillId>;
+  resourceReferences?: ResourceRef[];
+  writeScope?: RunWriteScope;
 }
 
 /** 单条 AI 会话状态 */

@@ -5,6 +5,7 @@ import type { NotebookAiMessage } from "./types";
 import type { UIMessage } from "ai";
 import { resolveNotebookAiRuntime } from "./pi/runtime";
 import { buildPiTransport } from "./pi/transport";
+import type { NotebookAiRunContext } from "./runContext";
 
 export type NotebookChatUIMessage = UIMessage<
   unknown,
@@ -35,18 +36,19 @@ export type BuildTransportResult =
 export function buildTransport(
   notebookId: string,
   currentPageId?: string | null,
+  runContext: NotebookAiRunContext = {},
 ): BuildTransportResult {
   const runtime = resolveNotebookAiRuntime();
 
   if (runtime === "pi") {
-    const piResult = buildPiTransport(notebookId, currentPageId);
+    const piResult = buildPiTransport(notebookId, currentPageId, runContext);
     if (!piResult.ok) {
       return { ok: false, reason: piResult.reason };
     }
     return { ok: true, transport: piResult.transport, runtime: "pi" };
   }
 
-  const agentResult = buildNotebookAgent(notebookId, currentPageId);
+  const agentResult = buildNotebookAgent(notebookId, currentPageId, runContext);
   if (!agentResult.ok) {
     return { ok: false, reason: agentResult.reason };
   }

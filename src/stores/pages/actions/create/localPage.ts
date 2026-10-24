@@ -166,7 +166,7 @@ export const createLocalPageRecordAction = async (
     saved = await get().saveLocalPageContent(
       id,
       cloneLocalPageContent(newPage.content),
-      { force: true },
+      { force: true, createOnly: Boolean(requestedFilePath) },
     );
   } catch {
     saved = false;

@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { useCallback } from "react";
 import { batchExecutionSummary } from "@/lib/notebook-ai/batch-plan/executionSummary";
 import { toast } from "@/components/ui/sonner";
-import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
+import { persistSessionMessages } from "./sessionMessages";
 import {
   executePreparedBatchPlan,
   undoBatchPlan,
@@ -16,6 +16,8 @@ import type {
   BatchUndoResult,
 } from "../ApprovalPlanCard";
 import type { SessionState } from "./useSessionState";
+import { readBatchPlanJournal } from "@/lib/notebook-ai/batch-plan";
+import { revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useBatchApprovalActions.ts#messages:1">`
 zh-Hans:
@@ -45,19 +47,17 @@ ja:
 `;
 const t = createTranslator(messages);
 
-
 export function useBatchApprovalActions(state: SessionState) {
   useLocale();
   const {
     currentSessionScope,
     isCurrentSession,
-    setMessages,
+    chat,
     notebookId,
     conversationId,
   } = state;
   const onBatchApproval = useCallback(
     async (response: BatchApprovalResponse) => {
-      const scope = currentSessionScope;
       const replaceToolPart = (
         state:
           | "approval-responded"
@@ -66,35 +66,33 @@ export function useBatchApprovalActions(state: SessionState) {
           | "output-error",
         payload: { output?: unknown; errorText?: string } = {},
       ) => {
-        if (!isCurrentSession(scope)) return;
-        setMessages((current) => {
-          const cleanedMessages = updatePlanMessages(
-            current,
-            response.toolCallId,
-            (part) => ({
-              ...part,
-              state,
-              ...(payload.output !== undefined
-                ? { output: payload.output }
-                : {}),
-              ...(payload.errorText ? { errorText: payload.errorText } : {}),
-              approval: {
-                id: response.approvalId,
-                approved: response.approved,
-                reason: response.approved
-                  ? `用户批准执行 ${response.selectedOperationIds.length} 项操作`
-                  : "用户取消了整批计划",
-              },
-            }),
-          );
-          useNotebookAiChats
-            .getState()
-            .setMessages(notebookId, conversationId, cleanedMessages);
-          return cleanedMessages;
-        });
+        const cleanedMessages = updatePlanMessages(
+          chat.messages,
+          response.toolCallId,
+          (part) => ({
+            ...part,
+            state,
+            ...(payload.output !== undefined ? { output: payload.output } : {}),
+            ...(payload.errorText ? { errorText: payload.errorText } : {}),
+            approval: {
+              id: response.approvalId,
+              approved: response.approved,
+              reason: response.approved
+                ? `用户批准执行 ${response.selectedOperationIds.length} 项操作`
+                : "用户取消了整批计划",
+            },
+          }),
+        );
+        persistSessionMessages(notebookId, conversationId, cleanedMessages);
+        chat.messages = cleanedMessages;
       };
 
       if (!response.approved) {
+        const pending = readBatchPlanJournal(
+          response.toolCallId,
+          response.runId,
+        );
+        if (pending?.writeScope) revokeRunWriteScope(pending.writeScope.runId);
         replaceToolPart("output-denied");
         return;
       }
@@ -123,7 +121,10 @@ export function useBatchApprovalActions(state: SessionState) {
             status: result.journal.status,
             ...batchExecutionSummary(result),
             selectedCount: result.journal.selectedOperationIds.length,
-            canUndo: result.ok && result.journal.status === "completed",
+            canUndo:
+              result.results.some((item) => item.ok) &&
+              (result.journal.status === "completed" ||
+                result.journal.version === 2),
             ...(result.ok ? {} : { error: result.error }),
             results: result.results,
           },
@@ -137,17 +138,16 @@ export function useBatchApprovalActions(state: SessionState) {
         });
       }
     },
-    [conversationId, currentSessionScope, isCurrentSession, notebookId, setMessages],
+    [conversationId, currentSessionScope, isCurrentSession, notebookId, chat],
   );
 
   const onBatchUndo = useCallback(
     async (toolCallId: string, runId: string): Promise<BatchUndoResult> => {
       const scope = currentSessionScope;
       try {
+        const pending = readBatchPlanJournal(toolCallId, runId);
+        if (pending?.writeScope) revokeRunWriteScope(pending.writeScope.runId);
         const result = await undoBatchPlan(toolCallId, runId);
-        if (!isCurrentSession(scope)) {
-          return { ok: false, error: t("conversationChangedOutdatedResultsWereIgnored") };
-        }
         if (!result.ok) {
           toast.error(t("couldNotUndoAllChangesInThisBatch"), {
             description: formatNotebookAiError(result.error, { phase: "undo" }),
@@ -164,27 +164,24 @@ export function useBatchApprovalActions(state: SessionState) {
           result.results.flatMap((operation) => operation.pageIds),
         );
         pageIds.forEach(reloadEditorIfActive);
-        setMessages((current) => {
-          const cleanedMessages = updatePlanMessages(
-            current,
-            toolCallId,
-            (part) => ({
-              ...part,
-              output: {
-                ...(part.output && typeof part.output === "object"
-                  ? (part.output as Record<string, unknown>)
-                  : {}),
-                status: "undone",
-                canUndo: false,
-              },
-            }),
-          );
-          useNotebookAiChats
-            .getState()
-            .setMessages(notebookId, conversationId, cleanedMessages);
-          return cleanedMessages;
-        });
-        toast.success(t("changesInThisBatchUndone"));
+        const cleanedMessages = updatePlanMessages(
+          chat.messages,
+          toolCallId,
+          (part) => ({
+            ...part,
+            output: {
+              ...(part.output && typeof part.output === "object"
+                ? (part.output as Record<string, unknown>)
+                : {}),
+              status: "undone",
+              canUndo: false,
+            },
+          }),
+        );
+        persistSessionMessages(notebookId, conversationId, cleanedMessages);
+        chat.messages = cleanedMessages;
+        if (isCurrentSession(scope))
+          toast.success(t("changesInThisBatchUndone"));
         return {
           ok: true,
           status: "reverted",
@@ -192,15 +189,12 @@ export function useBatchApprovalActions(state: SessionState) {
             .length,
         };
       } catch (undoError) {
-        if (!isCurrentSession(scope)) {
-          return { ok: false, error: t("conversationChangedOutdatedResultsWereIgnored") };
-        }
         const description = formatNotebookAiError(undoError, { phase: "undo" });
         toast.error(t("undoFailed"), { description });
         return { ok: false, error: description };
       }
     },
-    [conversationId, currentSessionScope, isCurrentSession, notebookId, setMessages],
+    [conversationId, currentSessionScope, isCurrentSession, notebookId, chat],
   );
 
   return { onBatchApproval, onBatchUndo };

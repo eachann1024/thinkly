@@ -12,6 +12,7 @@ import { ModelSelectorPopover } from "./ModelSelectorPopover";
 import { usePlanRefinementInput } from "./approval/usePlanRefinementInput";
 import { useComposerSurface } from "./composer/useComposerSurface";
 import { useComposerDraft } from "./composer/useComposerDraft";
+import { ResourcePicker } from "./composer/ResourcePicker";
 import { useComposerSubmission } from "./composer/useComposerSubmission";
 import { useComposerAttachments } from "./composer/useComposerAttachments";
 import { useComposerSelectionHandle } from "./composer/useComposerSelectionHandle";
@@ -174,6 +175,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
               />
 
               <span className="flex min-w-0 items-center">
+                <ResourcePicker inputRef={inputRef} disabled={disabled || isStreaming} />
                 <ModelSelectorPopover disabled={disabled} />
               </span>
 

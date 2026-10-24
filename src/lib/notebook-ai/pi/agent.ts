@@ -15,6 +15,7 @@ import {
   type NotebookSkillId,
 } from "../skills";
 import type { NotebookAiAgentContext } from "../types";
+import { formatRunWriteScope, resolveRunCurrentPageId, type NotebookAiRunContext } from "../runContext";
 import { buildPiLanguageModel } from "./model";
 import { buildPiDomainTools, getActivePiTools, isKnownSkillId } from "./tools";
 
@@ -26,7 +27,7 @@ function buildSystemPrompt(
   const notebookName = notebook?.name ?? "未知笔记本";
 
   const pages = usePages.getState().pages;
-  const activePageId = currentPageId ?? getCurrentNotebookAiPageId(notebookId);
+  const activePageId = resolveRunCurrentPageId(currentPageId, () => getCurrentNotebookAiPageId(notebookId));
   const activePage =
     activePageId && pages[activePageId]?.workspaceId === notebookId
       ? pages[activePageId]
@@ -67,11 +68,13 @@ export type BuildPiAgentResult =
 export function buildPiNotebookAgent(
   notebookId: string,
   currentPageId?: string | null,
+  runContext: NotebookAiRunContext = {},
 ): BuildPiAgentResult {
   const agentContext: NotebookAiAgentContext = {
     notebookId,
-    currentPageId: currentPageId ?? getCurrentNotebookAiPageId(notebookId),
-    loadedSkills: new Set(),
+    currentPageId: resolveRunCurrentPageId(currentPageId, () => getCurrentNotebookAiPageId(notebookId)),
+    ...runContext,
+    loadedSkills: new Set(runContext.loadedSkills),
   };
 
   const modelResult = buildPiLanguageModel();
@@ -79,13 +82,15 @@ export function buildPiNotebookAgent(
     return { ok: false, reason: modelResult.reason };
   }
 
+  const systemPrompt = () => [buildSystemPrompt(notebookId, agentContext.currentPageId),
+    agentContext.writeScope ? formatRunWriteScope(agentContext.writeScope) : ""].filter(Boolean).join("\n\n");
   const allTools = buildPiDomainTools(agentContext);
   let turnCount = 0;
   const MAX_TURNS = 16;
 
   const agent: Agent = new Agent({
     initialState: {
-      systemPrompt: buildSystemPrompt(notebookId, agentContext.currentPageId),
+      systemPrompt: systemPrompt(),
       model: modelResult.model,
       thinkingLevel: "off",
       tools: getActivePiTools(allTools, agentContext),
@@ -104,10 +109,7 @@ export function buildPiNotebookAgent(
       return {
         context: {
           ...turnContext.context,
-          systemPrompt: buildSystemPrompt(
-            notebookId,
-            agentContext.currentPageId,
-          ),
+          systemPrompt: systemPrompt(),
           tools: getActivePiTools(allTools, agentContext),
         },
       };

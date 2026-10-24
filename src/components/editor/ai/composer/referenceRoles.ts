@@ -71,20 +71,22 @@ export function normalizeAiComposerPayload(
   const resources: AiFileReferenceAttrs[] = [];
   const resourceMap = new Map<string, AiFileReferenceAttrs>();
   const occurrences: AiReferenceOccurrence[] = [];
+  const keyOf = (ref: AiFileReferenceAttrs) => `${ref.workspaceId}:${ref.pageId}`;
 
   input.tokens.forEach((token, tokenIndex) => {
     if (token.type !== "reference" || !token.reference.pageId) return;
     const { role, roleSource } = inferAiReferenceRole(input.tokens, tokenIndex);
-    if (!resourceMap.has(token.reference.pageId)) {
+    if (!resourceMap.has(keyOf(token.reference))) {
       const resource = { ...token.reference };
       delete resource.role;
-      resourceMap.set(token.reference.pageId, resource);
+      resourceMap.set(keyOf(token.reference), resource);
       resources.push(resource);
     }
     occurrences.push({
       occurrenceId: `${token.reference.pageId}:${tokenIndex}`,
       tokenIndex,
       pageId: token.reference.pageId,
+      workspaceId: token.reference.workspaceId,
       role,
       roleSource,
     });
@@ -92,15 +94,16 @@ export function normalizeAiComposerPayload(
 
   // 兼容旧 payload：tokens 为空或缺失引用 token 时仍消费 references。
   input.references.forEach((reference) => {
-    if (!reference.pageId || resourceMap.has(reference.pageId)) return;
+    if (!reference.pageId || resourceMap.has(keyOf(reference))) return;
     const resource = { ...reference };
     delete resource.role;
-    resourceMap.set(reference.pageId, resource);
+    resourceMap.set(keyOf(reference), resource);
     resources.push(resource);
     occurrences.push({
       occurrenceId: `${reference.pageId}:legacy-${occurrences.length}`,
       tokenIndex: -1,
       pageId: reference.pageId,
+      workspaceId: reference.workspaceId,
       role: reference.role ?? "context",
       roleSource: reference.role ? "explicit" : "default",
     });
@@ -109,24 +112,20 @@ export function normalizeAiComposerPayload(
   const rolesByPage = new Map<string, Set<AiReferenceRole>>();
   occurrences.forEach((occurrence) => {
     const roles =
-      rolesByPage.get(occurrence.pageId) ?? new Set<AiReferenceRole>();
+      rolesByPage.get(`${occurrence.workspaceId}:${occurrence.pageId}`) ?? new Set<AiReferenceRole>();
     roles.add(occurrence.role);
-    rolesByPage.set(occurrence.pageId, roles);
+    rolesByPage.set(`${occurrence.workspaceId}:${occurrence.pageId}`, roles);
   });
-  const contextReferences = resources.filter((reference) => {
-    const pageOccurrences = occurrences.filter(
-      (occurrence) => occurrence.pageId === reference.pageId,
-    );
-    // 同一资源同时作为参考和目标时只解析一次，但仍作为读取上下文。
-    // 纯目标资源不读取正文，避免无意义的 token 消耗。
-    return pageOccurrences.some((occurrence) => occurrence.role === "context");
+  const referencesForRole = (role: AiReferenceRole) => resources.flatMap((reference) => {
+    const occurrence = occurrences.find((item) => item.pageId === reference.pageId && item.workspaceId === reference.workspaceId && item.role === role);
+    if (!occurrence) return [];
+    const token = input.tokens[occurrence.tokenIndex];
+    const attrs = token?.type === "reference" ? token.reference : input.references.find((item) => keyOf(item) === keyOf(reference)) ?? reference;
+    return [{ ...attrs, role }];
   });
-  const targetReferences = resources.filter((reference) =>
-    occurrences.some(
-      (occurrence) =>
-        occurrence.pageId === reference.pageId && occurrence.role === "target",
-    ),
-  );
+  // Each role retains its own recursion and exclusions, even for a shared identity.
+  const contextReferences = referencesForRole("context");
+  const targetReferences = referencesForRole("target");
 
   return {
     payload: { ...input, references: resources },

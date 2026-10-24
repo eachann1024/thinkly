@@ -2,10 +2,9 @@ import { Agent, type AgentEvent } from "@earendil-works/pi-agent-core";
 import type { NotebookAiAgentContext } from "../types";
 import { buildPiLanguageModel } from "./model";
 import { buildPiDomainTools } from "./tools";
-import { ALWAYS_ON_CARD_TOOLS } from "../tools";
+import { READ_ONLY_TOOL_NAMES } from "../toolAccess";
+export { READ_ONLY_TOOL_NAMES } from "../toolAccess";
 
-/** 只读工具白名单：不含 executeBatchPlan 等写入类工具，也不需要 loadSkill 渐进开放。 */
-export const READ_ONLY_TOOL_NAMES = ["searchNotes", "readPage", "listPages", "searchWeb", "readWebPage", ...ALWAYS_ON_CARD_TOOLS] as const;
 export type ReadOnlyToolName = (typeof READ_ONLY_TOOL_NAMES)[number];
 
 const MAX_TURNS = 8;

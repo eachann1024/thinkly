@@ -27,6 +27,7 @@ zh-Hans:
   preparingChanges: "正在整理变更内容。"
   appliedSelection: "已应用所选操作。"
   appliedCount: "已应用 {{count}} 项操作。"
+  partialCount: "已应用 {{count}} 项，其余操作未完成。"
 en:
   generatingPlan: "Generating plan"
   awaitingApproval: "Awaiting approval"
@@ -51,6 +52,7 @@ en:
   preparingChanges: "Preparing changes."
   appliedSelection: "Selected changes applied."
   appliedCount: "Changes applied: {{count}}."
+  partialCount: "{{count}} applied; remaining operations are incomplete."
 ja:
   generatingPlan: "プランを生成中"
   awaitingApproval: "確認待ち"
@@ -75,6 +77,7 @@ ja:
   preparingChanges: "変更内容を整理しています。"
   appliedSelection: "選択した操作を適用しました。"
   appliedCount: "{{count}} 件の操作を適用しました。"
+  partialCount: "{{count}} 件を適用しました。残りの操作は未完了です。"
 `;
 const t = createTranslator(messages);
 
@@ -148,7 +151,7 @@ export function planReviewState(
       ? output.selectedCount
       : undefined);
   const appliedCount =
-    phase === "applied"
+    phase === "applied" || journal?.version === 2
       ? (journal?.results.filter((result) => result.ok).length ??
         (typeof output.appliedCount === "number"
           ? output.appliedCount
@@ -166,7 +169,8 @@ export function planReviewState(
     get failed() { return t("incomplete"); },
   };
   const rollback = journal?.rollbackStatus ?? output.rollbackStatus;
-  const detail =
+  const partial = journal?.version === 2 && journal.status === "failed" && Boolean(appliedCount);
+  const detail = partial ? t("partialCount", { count: appliedCount ?? 0 }) :
     phase === "approval"
       ? t("planGeneratedNoNotesHaveBeenChangedYet")
       : phase === "executing"

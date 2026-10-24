@@ -4,7 +4,7 @@ import type {
   FrozenPageSnapshot,
   BatchPlanJournal,
 } from "./types";
-import { readBatchPlanJournal, writeBatchPlanJournal } from "./journal";
+import { readBatchPlanJournal, writeBatchPlanJournal, readBatchPlanForScopeRun, linkBatchPlanJournal } from "./journal";
 import {
   guardNotebookForAiWrite,
   guardPageForAiWrite,
@@ -20,18 +20,47 @@ import {
 } from "./batchValidation";
 import { makeLocalPlanPaths } from "./batchLocalPlanPaths";
 import { clone } from "./batchShared";
+import { checkOperationScope, type RunWriteScope } from "../resourceScope";
+import { bindOperationTargets } from "./batchTargets";
+import { withBatchPreparationLock } from "./batchPreparationLock";
 
-export async function prepareBatchPlan(params: {
+interface PrepareParams {
   toolCallId: string;
   runId: string;
   notebookId: string;
   input: BatchPlanInput;
-}): Promise<BatchPlanPrepareResult> {
-  const existing = readBatchPlanJournal(params.toolCallId, params.runId);
-  if (existing)
+  writeScope?: RunWriteScope;
+}
+
+export function prepareBatchPlan(params: PrepareParams): Promise<BatchPlanPrepareResult> {
+  const prepare = async () => {
+    const result = await prepareBatchPlanOnce(params);
+    if (!result.journal || result.journal.status !== "invalid" || result.journal.requestedInputSignature) return result;
+    const journal = writeBatchPlanJournal({ ...result.journal, version: 2,
+      writeScope: params.writeScope ? clone(params.writeScope) : undefined,
+      requestedInputSignature: JSON.stringify(params.input) });
+    return { ...result, journal };
+  };
+  const toolKey = JSON.stringify(["tool", params.toolCallId, params.runId]);
+  return withBatchPreparationLock(toolKey, () => params.writeScope
+    ? withBatchPreparationLock(JSON.stringify(["scope", params.writeScope.runId, params.runId]), prepare)
+    : prepare());
+}
+
+async function prepareBatchPlanOnce(params: PrepareParams): Promise<BatchPlanPrepareResult> {
+  const existing = readBatchPlanJournal(params.toolCallId, params.runId) ??
+    (params.writeScope ? readBatchPlanForScopeRun(params.writeScope.runId, params.runId) : null);
+  const requestedInputSignature = JSON.stringify(params.input);
+  if (existing) {
+    if (existing.writeScope?.runId !== params.writeScope?.runId)
+      return { ok: false, error: "工具调用已绑定其他会话写入范围，请使用新的调用标识", journal: existing };
+    if (existing.requestedInputSignature && existing.requestedInputSignature !== requestedInputSignature)
+      return { ok: false, error: "runId 已绑定其他冻结计划，请使用新的 runId", journal: existing };
+    linkBatchPlanJournal(params.toolCallId, existing);
     return existing.status === "invalid"
       ? { ok: false, error: existing.error || "计划无效", journal: existing }
       : { ok: true, journal: existing };
+  }
   const inputError = validateInput(params.input);
   const notebookGuard = guardNotebookForAiWrite(params.notebookId);
   if (inputError || !notebookGuard.ok) {
@@ -51,7 +80,17 @@ export async function prepareBatchPlan(params: {
   }
 
   // 局部 edit → search_replace；后续冻结/路径规划均使用转换后的计划
-  const planInput = convertPartialEditsInPlan(params.input, params.notebookId);
+  let bound: ReturnType<typeof bindOperationTargets>;
+  try {
+    const converted = convertPartialEditsInPlan(params.input, params.notebookId);
+    bound = bindOperationTargets(converted, params.notebookId, params.writeScope);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "操作目的地无效";
+    const journal = writeBatchPlanJournal(invalidJournal(params.toolCallId, params.runId,
+      params.notebookId, params.input, message));
+    return { ok: false, error: message, journal };
+  }
+  const planInput = bound.input;
 
   const before: Record<string, FrozenPageSnapshot> = {};
   const affectedPageIdsByOperationId: Record<string, string[]> = {};
@@ -78,9 +117,10 @@ export async function prepareBatchPlan(params: {
   const plannedPageIds: Record<string, string> = {};
   const operationOwnerByPageId = new Map<string, string>();
   for (const operation of planInput.operations) {
+    const notebookId = bound.targets[operation.operationId]!.notebookId;
     if (
       operation.type === "create" &&
-      useNotebooks.getState().notebooks[params.notebookId]?.source !==
+      useNotebooks.getState().notebooks[notebookId]?.source !==
         "local-folder"
     )
       plannedPageIds[operation.operationId] = uuidv4();
@@ -88,7 +128,7 @@ export async function prepareBatchPlan(params: {
       const parent = usePages.getState().pages[operation.parentId];
       if (
         !parent ||
-        parent.workspaceId !== params.notebookId ||
+        parent.workspaceId !== notebookId ||
         Boolean(parent.trashedAt)
       ) {
         const message = "新页面的父级不存在、已在垃圾箱中或不属于当前笔记本";
@@ -110,7 +150,7 @@ export async function prepareBatchPlan(params: {
         const page = usePages.getState().pages[pageId];
         if (
           !page ||
-          page.workspaceId !== params.notebookId ||
+          page.workspaceId !== notebookId ||
           Boolean(page.trashedAt)
         ) {
           const message = "删除目标不存在、已在垃圾箱中或不属于当前笔记本";
@@ -148,8 +188,14 @@ export async function prepareBatchPlan(params: {
       operation.type === "edit" || operation.type === "search_replace"
         ? [operation.pageId]
         : operation.type === "delete"
-          ? expandDeletePageIds(params.notebookId, operation.pageIds)
+          ? expandDeletePageIds(notebookId, operation.pageIds)
           : [];
+    if (operation.type === "delete" && params.writeScope) {
+      const error = checkOperationScope({ ...operation, pageIds },
+        bound.targets[operation.operationId]!, params.writeScope, params.notebookId);
+      if (error) return { ok: false, error, journal: writeBatchPlanJournal(invalidJournal(
+        params.toolCallId, params.runId, params.notebookId, planInput, error)) };
+    }
     if (operation.type === "delete")
       affectedPageIdsByOperationId[operation.operationId] = pageIds;
     if (
@@ -188,7 +234,7 @@ export async function prepareBatchPlan(params: {
           : operation.operationId,
       );
       const guard = guardPageForAiWrite(pageId, {
-        expectedNotebookId: params.notebookId,
+        expectedNotebookId: notebookId,
       });
       if (!guard.ok) {
         const journal = writeBatchPlanJournal(
@@ -214,7 +260,10 @@ export async function prepareBatchPlan(params: {
   }
   const now = Date.now();
   const journal: BatchPlanJournal = {
-    version: 1,
+    version: 2,
+    writeScope: params.writeScope ? clone(params.writeScope) : undefined,
+    operationTargets: bound.targets,
+    requestedInputSignature,
     toolCallId: params.toolCallId,
     runId: params.runId,
     notebookId: params.notebookId,

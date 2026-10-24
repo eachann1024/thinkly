@@ -38,6 +38,7 @@ function buildDescription(
   page: Page,
   notebooks: Record<string, Notebook>,
   activeNotebookId: string | null,
+  pages: Record<string, Page>,
 ) {
   const wsId = page.workspaceId ?? (page as { notebookId?: string }).notebookId;
   const notebook = getNotebookSnapshot(wsId, notebooks);
@@ -46,7 +47,7 @@ function buildDescription(
     activeNotebookId != null && wsId === activeNotebookId;
 
   if (page.isFolder || page.localFilePath) {
-    const location = getLocationSnapshot(page, notebooks);
+    const location = getLocationSnapshot(page, notebooks, pages);
     if (isActiveNotebook) return location;
     return `${notebookName} · ${location}`;
   }
@@ -221,11 +222,11 @@ export function getAiReferenceSuggestionItems(
     })
     .slice(0, 30)
     .map((page) => {
-      const attrs = buildAiFileReferenceAttrs(page, notebooks);
+      const attrs = buildAiFileReferenceAttrs(page, notebooks, pages);
       return {
         ...attrs,
         title: attrs.titleSnapshot,
-        description: buildDescription(page, notebooks, activeNotebookId),
+        description: buildDescription(page, notebooks, activeNotebookId, pages),
         isFolder: page.isFolder,
       } satisfies AiReferenceSuggestionItem;
     });

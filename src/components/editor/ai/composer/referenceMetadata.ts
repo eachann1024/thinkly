@@ -20,15 +20,28 @@ export function getNotebookSnapshot(
 export function getLocationSnapshot(
   page: Page,
   notebooks: Record<string, Notebook>,
+  pages: Record<string, Page> = {},
 ) {
   const notebook = getNotebookSnapshot(page.workspaceId, notebooks);
-  if (!page.localFilePath) return notebook?.name ?? "未知笔记本";
+  if (!page.localFilePath) {
+    const parts = [getPageTitle(page)];
+    const visited = new Set([page.id]);
+    let parentId = page.parentId;
+    while (parentId && !visited.has(parentId)) {
+      visited.add(parentId);
+      const parent = pages[parentId];
+      if (!parent || parent.workspaceId !== page.workspaceId) break;
+      parts.unshift(getPageTitle(parent));
+      parentId = parent.parentId;
+    }
+    return parts.join("/");
+  }
 
   const basePath = notebook?.localPath?.replace(/[\\/]+$/, "") ?? "";
   const normalizedPath = page.localFilePath.replace(/[\\/]+/g, "/");
   const normalizedBase = basePath.replace(/[\\/]+/g, "/");
 
-  if (normalizedBase && normalizedPath.startsWith(normalizedBase)) {
+  if (normalizedBase && (normalizedPath === normalizedBase || normalizedPath.startsWith(`${normalizedBase}/`))) {
     const relativePath = normalizedPath
       .slice(normalizedBase.length)
       .replace(/^\/+/, "");
@@ -41,16 +54,20 @@ export function getLocationSnapshot(
 export function buildAiFileReferenceAttrs(
   page: Page,
   notebooks: Record<string, Notebook>,
+  pages: Record<string, Page> = {},
 ): AiFileReferenceAttrs {
   const wsId = page.workspaceId ?? (page as { notebookId?: string }).notebookId;
   const notebook = getNotebookSnapshot(wsId, notebooks);
   return {
     pageId: page.id,
+    refId: `${wsId}:${page.isFolder ? "folder" : "page"}:${page.id}`,
+    kind: page.isFolder ? "folder" : "page",
+    parentId: page.parentId,
     workspaceId: wsId ?? "",
     titleSnapshot: getPageTitle(page),
     sourceType: getSourceType(page),
     localFilePath: page.localFilePath,
     notebookNameSnapshot: notebook?.name ?? "未知笔记本",
-    locationSnapshot: getLocationSnapshot(page, notebooks),
+    locationSnapshot: getLocationSnapshot(page, notebooks, pages),
   };
 }

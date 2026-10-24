@@ -8,6 +8,7 @@ import { ensureNotebookAiMessageCreatedAt } from "@/lib/notebook-ai/messageTime"
 import { getNotebookAiPlaceholderHints } from "./helpers";
 import type { NotebookAiSessionScope } from "./types";
 import type { SessionState } from "./useSessionState";
+import { revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useStreamLifecycle.ts#messages:1">`
 zh-Hans:
@@ -31,6 +32,7 @@ export function useStreamLifecycle(state: SessionState) {
     currentSessionScope,
     committedStopRef,
     stop,
+    chat,
     messagesRef,
     messages,
     requestCurrentPageIdRef,
@@ -68,7 +70,7 @@ export function useStreamLifecycle(state: SessionState) {
     requestCurrentPageIdRef.current = null;
     return () => {
       compactAbortRef.current?.abort();
-      void committedStopRef.current();
+      // 切换草稿不终止旧 Chat；独立实例把完成记录写回原会话。
       // 切换不是一次成功完成，不能在新笔记本上误触发 celebrate。
       if (aiStatusActiveRef.current) {
         aiStatusActiveRef.current = false;
@@ -88,9 +90,7 @@ export function useStreamLifecycle(state: SessionState) {
     wasStreaming: boolean;
   } | null>(null);
 
-  // @ai-sdk/react 会把旧 Chat 的 onFinish 转发给最新 render 的 callback；笔记本
-  // 切换时该 callback 无法辨认消息来自哪个 Chat。改为只观察当前 Chat 的状态转变，
-  // 并按捕获的会话 scope 落盘，旧流即使迟到也不会触碰新会话。
+  // 完成回执由独立 Chat 绑定原会话同步落盘；这里只整理当前可见消息。
   useEffect(() => {
     const scope = currentSessionScope;
     const previous = streamStateRef.current;
@@ -113,24 +113,7 @@ export function useStreamLifecycle(state: SessionState) {
     if (isCurrentSession(scope)) {
       setMessages(cleanedMessages);
     }
-    const persist = () => {
-      useNotebookAiChats
-        .getState()
-        .setMessages(scope.notebookId, scope.conversationId, cleanedMessages);
-    };
-    const ric = (
-      globalThis as typeof globalThis & {
-        requestIdleCallback?: (
-          cb: () => void,
-          opts?: { timeout: number },
-        ) => number;
-      }
-    ).requestIdleCallback;
-    if (typeof ric === "function") {
-      ric(persist, { timeout: 700 });
-    } else {
-      setTimeout(persist, 48);
-    }
+
   }, [
     conversationId,
     currentSessionScope,
@@ -145,8 +128,10 @@ export function useStreamLifecycle(state: SessionState) {
 
   const stopAll = useCallback(() => {
     compactAbortRef.current?.abort();
+    const user = [...chat.messages].reverse().find((message) => message.role === "user");
+    if (user?.metadata?.writeScope) revokeRunWriteScope(user.metadata.writeScope.runId);
     void stop();
-  }, [compactAbortRef, stop]);
+  }, [chat, compactAbortRef, stop]);
 
   useEffect(() => {
     if (!isStreaming) return;
@@ -178,6 +163,7 @@ export function useStreamLifecycle(state: SessionState) {
   }, [aiStatusActiveRef, error, isCompacting, isStreaming, status]);
 
   useEffect(() => {
+    if (chat.status === "streaming" || chat.status === "submitted") return;
     setMessages(
       useNotebookAiChats
         .getState()
@@ -188,6 +174,7 @@ export function useStreamLifecycle(state: SessionState) {
   }, [
     notebookId,
     conversationId,
+    chat,
     setMessages,
     clearError,
     requestCurrentPageIdRef,

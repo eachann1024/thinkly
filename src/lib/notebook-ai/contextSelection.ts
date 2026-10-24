@@ -41,6 +41,7 @@ function formatResolvedContext(
   const header = [
     `[引用 ${index + 1}]`,
     `标题：${context.title}`,
+    `notebookId：${context.reference.workspaceId}；${context.reference.kind === "folder" ? "folderId" : "pageId"}：${context.reference.pageId}`,
     `来源：${sourceLabel} · ${context.notebookName}`,
     `位置：${context.location}`,
   ];
@@ -53,7 +54,7 @@ function formatResolvedContext(
   }
   const content =
     mode === "full-text" ? context.contentText : context.structureSummary;
-  return [...header, content || "（空白内容）"].join("\n");
+  return [...header, context.coverage ? `索引项 ${context.coverage.enumerated}；${mode === "full-text" ? "正文已提供" : "摘要已提供"} ${context.coverage.loaded}；未读 ${context.coverage.omitted}` : "", content || "（空白内容）"].filter(Boolean).join("\n");
 }
 
 export interface NotebookAiContextSelection {
@@ -80,11 +81,11 @@ export function buildNotebookAiContextSelection(params: {
   const unboundedBlock = params.contexts
     .map((context, index) => formatResolvedContext(context, index, mode))
     .join("\n\n");
-  const contextBlock = unboundedBlock.slice(0, characterBudget);
+  const contextBlock = unboundedBlock.slice(0, characterBudget) + (unboundedBlock.length > characterBudget ? "\n[正文预算已用完，后续内容未包含。资源身份仍保留在独立清单中；请按需 readPage，不得声称全部读完。]" : "");
   const readyCount = params.contexts.filter(
-    (context) => context.readStatus === "ready",
+    (context) => context.readStatus === "ready" && context.reference.kind !== "folder" && context.reference.kind !== "notebook",
   ).length;
-  const failedCount = params.contexts.length - readyCount;
+  const failedCount = params.contexts.filter((context) => context.readStatus === "error").length;
 
   return {
     mode,

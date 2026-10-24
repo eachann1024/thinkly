@@ -62,6 +62,7 @@ const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = 
     ),
   }),
   readPage: Type.Object({
+    notebookId: Type.Optional(Type.String()),
     pageId: Type.Optional(
       Type.String({ description: "页面 id；省略则读取当前打开页面" }),
     ),
@@ -82,7 +83,14 @@ const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = 
           operationId: Type.Optional(Type.String()),
           title: Type.Optional(Type.String()),
           markdown: Type.Optional(Type.String()),
-          parentId: Type.Optional(Type.String()),
+          parentId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+          target: Type.Optional(Type.Object({
+            notebookId: Type.String(),
+            parentId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+            pageId: Type.Optional(Type.String()),
+          })),
+          sourceRefIds: Type.Optional(Type.Array(Type.String())),
+          dependsOn: Type.Optional(Type.Array(Type.String())),
           pageId: Type.Optional(Type.String()),
           pageIds: Type.Optional(Type.Array(Type.String())),
           oldString: Type.Optional(Type.String()),
@@ -167,8 +175,9 @@ async function runSdkTool(
     }
   }
 
+  const parsed = (tool.inputSchema as z.ZodType).parse(input);
   const output = await execute(
-    input as never,
+    parsed as never,
     {
       toolCallId,
       messages: [],
