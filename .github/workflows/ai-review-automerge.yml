@@ -28,7 +28,8 @@ env:
   # 受保护路径默认转人工（needs-human）。fork，以及不是 eachann1024 的 PR，都不绕过。
   # 作者是 eachann1024、head 仓库就是本仓库（不是 fork）、且结论为 safe_to_merge 时，
   # 即使改了这些路径也自动 squash 合并，不要求 bot-automerge 标签。
-  # 密钥类路径（.env、secrets、credentials、*.pem、*.key、*.p12、id_rsa）任何情况下都不自动合并。
+  # 密钥类路径任何情况下都不自动合并：路径中任意一段名为 secrets 或 credentials，
+  # 以及文件名 .env*、*.pem、*.key、*.p12、id_rsa*。
   PROTECTED_PATHS: ".github/,.pr_agent.toml,.gemini/,.coderabbit.yaml,.greptile/,.env,secrets,credentials,*.pem,*.key,*.p12,id_rsa,deploy/,vercel.json,netlify.toml,fly.toml,wrangler.toml,render.yaml,Dockerfile,docker-compose,compose.yaml,compose.yml,Procfile,publish-release.mjs,publish.mjs,updates/,Casks/"
 
 jobs:

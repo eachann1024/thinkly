@@ -19,10 +19,24 @@ def short(s, n=120):
     return s if len(s) <= n else s[:n - 1] + "…"
 
 def safe_excerpt(text, n=180):
+    text = text or ""
+    value = r"(?:\"[^\"\n]+\"|'[^'\n]+'|`[^`\n]+`|\S+)"
+    keys = r"access_token|refresh_token|id_token|api_key|token|password|secret"
     text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
+    # 引号里的 JSON 凭据字段整段换成占位，避免值里有空格或转义引号时只盖住一半。
+    text = re.sub(
+        rf'(?i)(["\'])({keys})\1\s*:\s*(["\'])((?:\\.|(?!\3).)*)\3',
+        lambda m: f"{m.group(1)}{m.group(2)}{m.group(1)}: {m.group(3)}[redacted]{m.group(3)}",
+        text,
+    )
+    # Authorization: Bearer <token> 里原先只吃掉 Bearer 这个词，后面的凭据会留在摘录里。
+    text = re.sub(r"(?i)\bauthorization\b\s*[:=]?\s*(?:bearer|basic|token|digest)\s+" + value, "[redacted]", text)
+    text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
     text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
-    text = re.sub(r"(?i)\b(bearer|token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*\S+", r"\1 [redacted]", text)
-    text = re.sub(r"\b[A-Za-z0-9_\-]{32,}\b", "[redacted]", text)
+    text = re.sub(r"eyJ[A-Za-z0-9_\-=]{8,}(?:\.[A-Za-z0-9_\-=]+)*", "[redacted]", text)
+    # 分隔符保持可选：password hunter2、token abcdef 这类空格分隔的短凭据也要盖住。
+    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*" + value, r"\1 [redacted]", text)
+    text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
     text = " ".join(text.split())
     return text[:n]
 
@@ -166,7 +180,6 @@ if any("security" in l.lower() for l in labels):
 files = json.loads(gh("api", "--paginate", "--slurp", f"repos/{repo}/pulls/{pr}/files?per_page=100"))
 names = [f["filename"] for page in files for f in page]
 prot = [p.strip() for p in env["PROTECTED_PATHS"].split(",") if p.strip()]
-secret_paths = (".env", "secrets", "credentials", "*.pem", "*.key", "*.p12", "id_rsa")
 def protected(n, p):
     base = n.rsplit("/", 1)[-1]
     if p.endswith("/"):
@@ -174,9 +187,18 @@ def protected(n, p):
     if p.startswith("*"):
         return n.endswith(p[1:])
     return base.startswith(p)
+def secret_material(path):
+    # 目录段 secrets / credentials，而不只看文件名。文件名仍匹配 .env*、*.pem、*.key、*.p12、id_rsa*。
+    parts = [part.casefold() for part in path.split("/") if part]
+    if any(part in {"secrets", "credentials"} for part in parts):
+        return True
+    base = parts[-1] if parts else ""
+    if base.startswith(".env") or base.startswith("id_rsa") or base.startswith("secrets") or base.startswith("credentials"):
+        return True
+    return base.endswith((".pem", ".key", ".p12"))
 head_repo = ((info.get("head") or {}).get("repo") or {}).get("full_name") or ""
 owner_bypass = info["user"]["login"] == "eachann1024" and head_repo == repo and rec == "safe_to_merge"
-secret_hit = [n for n in names if any(protected(n, p) for p in secret_paths)]
+secret_hit = [n for n in names if secret_material(n)]
 hit = [n for n in names if any(protected(n, p) for p in prot)]
 other = [n for n in hit if n not in set(secret_hit)]
 if secret_hit:
