@@ -1,4 +1,8 @@
 .settings-shell[hidden], .settings-sidebar-navigation[hidden] { display: none !important; }
+.settings-page-view { flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+/* 页面只淡入，不让 transform 改变页面内浮层的定位参照。 */
+.workspace-shell .settings-page-view:not([hidden]) { animation-name: workspace-navigation-fade; }
+.settings-tab-page { height: 100%; min-height: 0; min-width: 0; background: hsl(var(--goose-settings-bg)); }
 .settings-shell { container-type: inline-size; container-name: settings; background: hsl(var(--goose-settings-bg)); }
 .settings-scroll { padding: 4rem 2.5rem 2.5rem; }
 .settings-panel { position: relative; max-width: 1120px; margin: 0 auto; }
@@ -6,10 +10,10 @@
 /* 分类名称由正文页头统一显示，设置项中的分组标题仍保持原样。 */
 .settings-groups > div > h3,
 .settings-shortcuts > div:first-child > h3,
-.settings-shell[data-settings-tab="git-sync"] .settings-panel > div > div:first-child > h3 { display: none; }
+.settings-tab-page[data-settings-tab="git-sync"] .settings-panel > div > div:first-child > h3 { display: none; }
 .settings-groups > div > h3 + * { margin-top: 0; }
 .settings-shortcuts > div:first-child { position: absolute; top: 0; right: 0; }
-.settings-shell[data-settings-tab="shortcuts"] .settings-page-header { padding-right: 12rem; }
+.settings-tab-page[data-settings-tab="shortcuts"] .settings-page-header { padding-right: 12rem; }
 .settings-groups > div {
   max-width: 1120px;
   margin: 0 auto;
@@ -31,7 +35,7 @@
   gap: 20px;
 }
 .settings-shortcuts-columns { margin-top: 8px; }
-.settings-shell .settings-shortcuts-columns { margin-top: 0; }
+.settings-tab-page .settings-shortcuts-columns { margin-top: 0; }
 .settings-card-columns > div,
 .settings-shortcuts-columns > div { min-width: 0; }
 .settings-card-columns section,
@@ -44,13 +48,9 @@
 }
 .settings-data-grid > div { min-width: 0; }
 .settings-data-grid > div > section { border: 1px solid hsl(var(--border) / .55); }
-.settings-shell[data-settings-tab="appearance"] {
-  container-type: inline-size;
-  container-name: settings;
-}
-.settings-shell[data-settings-tab="appearance"] .settings-scroll { overflow: hidden; padding: 4rem 0 0; }
-.settings-shell[data-settings-tab="appearance"] .settings-panel { display: flex; flex-direction: column; height: 100%; max-width: none; }
-.settings-shell[data-settings-tab="appearance"] .settings-page-header { width: min(1120px, calc(100% - 5rem)); margin-inline: auto; }
+.settings-tab-page[data-settings-tab="appearance"] .settings-scroll { overflow: hidden; padding: 4rem 0 0; }
+.settings-tab-page[data-settings-tab="appearance"] .settings-panel { display: flex; flex-direction: column; height: 100%; max-width: none; }
+.settings-tab-page[data-settings-tab="appearance"] .settings-page-header { width: min(1120px, calc(100% - 5rem)); margin-inline: auto; }
 .settings-appearance-layout {
   display: grid;
   flex: 1;
@@ -87,8 +87,8 @@
 .settings-appearance-layout[data-scale-drag-layout="options"] .settings-appearance-options { grid-column: 1; }
 @container settings (max-width: 76rem) {
   .settings-scroll { padding: 3rem 1.5rem 1.5rem; }
-  .settings-shell[data-settings-tab="appearance"] .settings-scroll { padding-top: 3rem; }
-  .settings-shell[data-settings-tab="appearance"] .settings-page-header { width: calc(100% - 3rem); }
+  .settings-tab-page[data-settings-tab="appearance"] .settings-scroll { padding-top: 3rem; }
+  .settings-tab-page[data-settings-tab="appearance"] .settings-page-header { width: calc(100% - 3rem); }
   .settings-card-columns { grid-template-columns: minmax(0, 1fr); }
   .settings-shortcuts-columns { grid-template-columns: minmax(0, 1fr); }
   .settings-data-grid { grid-template-columns: minmax(0, 1fr); }
@@ -96,7 +96,7 @@
 @container settings (max-width: 40rem) {
   .settings-scroll { padding: 3rem 1rem 1rem; }
   .settings-page-header { margin-bottom: 2rem; }
-  .settings-shell[data-settings-tab="appearance"] .settings-page-header { width: calc(100% - 2rem); }
+  .settings-tab-page[data-settings-tab="appearance"] .settings-page-header { width: calc(100% - 2rem); }
   .settings-appearance-options { padding-inline: 1rem; }
   .settings-ai-pick-row { flex-wrap: wrap; }
   .settings-ai-pick-row > :last-child,
