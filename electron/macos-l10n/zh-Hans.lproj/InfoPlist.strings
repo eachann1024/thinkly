@@ -1,4 +1,4 @@
-CFBundleDisplayName = "思绪 · Thinkly";
-CFBundleName = "思绪 · Thinkly";
-NSAppleEventsUsageDescription = "思绪 · Thinkly 需要发送系统事件，以便用快捷键唤出主窗口和速记小窗。";
-NSAccessibilityUsageDescription = "思绪 · Thinkly 需要辅助功能权限，以便在其他应用处于前台时用快捷键唤出主窗口和速记小窗。";
+CFBundleDisplayName = "thinkly";
+CFBundleName = "thinkly";
+NSAppleEventsUsageDescription = "thinkly 需要发送系统事件，以便用快捷键唤出主窗口和速记小窗。";
+NSAccessibilityUsageDescription = "thinkly 需要辅助功能权限，以便在其他应用处于前台时用快捷键唤出主窗口和速记小窗。";

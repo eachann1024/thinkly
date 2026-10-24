@@ -9,7 +9,7 @@ export type ReleaseDetails = AppReleaseDetails & { releaseUrl?: string };
 export type VerifiedUpdate = ReleaseDetails & { version: string; path: string; asset: GithubReleaseAsset };
 async function requestRelease(url: string): Promise<ReleaseDetails & { version: string; assets: GithubReleaseAsset[] }> {
   const response = await net.fetch(`${url}?t=${Date.now()}`, {
-    headers: { "User-Agent": `Goose-Note/${app.getVersion()}`, "Cache-Control": "no-cache" },
+    headers: { "User-Agent": `Thinkly/${app.getVersion()}`, "Cache-Control": "no-cache" },
     signal: AbortSignal.timeout(15_000), credentials: "omit",
   });
   if (!response.ok) throw new Error(t("releaseHttp", { status: response.status }));
