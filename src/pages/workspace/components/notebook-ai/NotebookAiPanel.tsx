@@ -97,7 +97,7 @@ function NotebookAiPanelReady(props: NotebookAiPanelProps) {
         isFullscreen ? "min-w-0 w-full flex-1" : "z-[50] shrink-0",
       )}
       style={
-        isFullscreen ? undefined : { width: effectiveWidth, maxWidth: "100%" }
+        isFullscreen ? undefined : { width: effectiveWidth, maxWidth: "100%", minWidth: 0 }
       }
     >
       {!isFullscreen ? (

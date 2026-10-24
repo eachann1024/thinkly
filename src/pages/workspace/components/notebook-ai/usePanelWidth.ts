@@ -9,7 +9,7 @@ function clamp(value: number) {
   return Number.isFinite(value) ? Math.max(PANEL_WIDTH_MIN, value) : DEFAULT_WIDTH;
 }
 
-function readStoredWidth(): number {
+export function readPreferredPanelWidth(): number {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw?.trim()) return clamp(Number(raw));
@@ -18,7 +18,7 @@ function readStoredWidth(): number {
 }
 
 export function usePanelWidth(onWidthPreview: (width: number) => number, disabled = false) {
-  const [width, setWidth] = useState(readStoredWidth);
+  const [width, setWidth] = useState(readPreferredPanelWidth);
   const [isResizing, setIsResizing] = useState(false);
   const gestureRef = useRef<ReturnType<typeof startPointerDrag> | null>(null);
   const previewRef = useRef(onWidthPreview);

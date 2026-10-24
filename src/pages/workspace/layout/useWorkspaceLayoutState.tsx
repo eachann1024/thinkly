@@ -15,7 +15,13 @@ import { isEffectiveRightSidePanelOpen } from "@/lib/workspaceViewport";
 import { useWorkspaceViewportCollapse } from "@/hooks/useWorkspaceViewportCollapse";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import { useAiPanelVisibility } from "@/stores/useAiPanelVisibility";
-import { useEffect } from "react";
+import {
+  noteSidebarAiOpenedByUser,
+  resyncSidebarAiSqueeze,
+  setSidebarAiRequested,
+  useSidebarAiSqueeze,
+} from "../components/sidebar/sidebar-shell/sidebarAiSqueeze";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { type WorkspaceLayoutProps } from "./shared";
 
 export function useWorkspaceLayoutState({
@@ -86,11 +92,21 @@ export function useWorkspaceLayoutState({
   const aiFullscreen = isFullscreenAiLayout(aiLayoutMode);
   const userSideAiPanel = aiEnabled && aiPanelOpen && !aiFullscreen;
 
-  const showSideAiPanel = isEffectiveRightSidePanelOpen(
+  const sideAiRequested = isEffectiveRightSidePanelOpen(
     userSideAiPanel,
     forceCollapseRight,
     rightExpandOverride,
   );
+  const aiSqueezedHidden = useSidebarAiSqueeze((s) => s.hidden);
+  const showSideAiPanel = sideAiRequested && !aiSqueezedHidden;
+  const wasSideAiRequested = useRef<boolean | null>(null);
+  useLayoutEffect(() => {
+    const openedByUser = wasSideAiRequested.current === false && sideAiRequested;
+    wasSideAiRequested.current = sideAiRequested;
+    if (openedByUser) noteSidebarAiOpenedByUser();
+    setSidebarAiRequested(sideAiRequested);
+    resyncSidebarAiSqueeze({ keepSuspend: openedByUser });
+  }, [sideAiRequested]);
 
   const showFullscreenAi = aiEnabled && aiPanelOpen && aiFullscreen;
 
