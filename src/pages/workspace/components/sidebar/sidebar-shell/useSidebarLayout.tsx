@@ -11,6 +11,7 @@ import {
 } from "../hooks/useSidebarResize";
 import { useSidebarItemHeight } from "../hooks/useSidebarItemHeight";
 import { useSidebarAvailableWidth } from "./useSidebarAvailableWidth";
+import { syncSidebarAiSqueeze } from "./sidebarAiSqueeze";
 import { type SidebarView, type SidebarProps } from "./shared";
 
 export function useSidebarLayout({
@@ -116,6 +117,12 @@ export function useSidebarLayout({
         shell.style.setProperty(
           "--workspace-sidebar-width",
           `${sidebarCollapsed || sidebarOverlay ? 0 : nextWidth}px`,
+        );
+      }
+      if (sidebar) {
+        syncSidebarAiSqueeze(
+          sidebar,
+          sidebarCollapsed || sidebarOverlay ? 0 : nextWidth,
         );
       }
     },

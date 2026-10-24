@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePanelWidth } from "../usePanelWidth";
+import { isSidebarResizeDrag } from "../../sidebar/hooks/useSidebarResize";
+import {
+  readSidebarAiLiveWidth,
+  useSidebarAiSqueeze,
+} from "../../sidebar/sidebar-shell/sidebarAiSqueeze";
 import type { ComposerHandle } from "../Composer";
 import { readEditorScale } from "../artifactPanZoomScale";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
@@ -26,10 +31,14 @@ export function usePanelSurface(
   }, []);
   const { width, isResizing, onDragHandlePointerDown, onDragHandleKeyDown } =
     usePanelWidth(previewWidth, isFullscreen);
+  const squeezeWidth = useSidebarAiSqueeze((s) => s.width);
+  const dragWidth = isSidebarResizeDrag() ? readSidebarAiLiveWidth() : null;
+  const widthCap = dragWidth ?? squeezeWidth;
   const [maxWidth, setMaxWidth] = useState(width);
   const composerDockRef = useRef<HTMLDivElement | null>(null);
   // 展示宽度：随父级 flex 行可用空间收缩，避免 minWidth=stored 把面板裁出视口
-  const [effectiveWidth, setEffectiveWidth] = useState(width);
+  const [fittedWidth, setEffectiveWidth] = useState(width);
+  const effectiveWidth = widthCap == null ? fittedWidth : Math.min(fittedWidth, widthCap);
   const composerRef = useRef<ComposerHandle | null>(null);
   const [bodyReady, setBodyReady] = useState(false);
 
@@ -65,13 +74,15 @@ export function usePanelSurface(
 
     const EDITOR_MIN = 200;
     const recompute = () => {
+      if (isSidebarResizeDrag()) return;
       const parentW = parent.clientWidth;
       const room = parentW - EDITOR_MIN;
       // room 足够时：不超过 stored，且留给编辑区至少 EDITOR_MIN
       // 极窄时使用父级可用宽度，避免右侧裁切。
       const availableRoom = room > 0 ? room : Math.max(0, parentW);
       setMaxWidth(availableRoom);
-      const next = Math.min(width, availableRoom);
+      const cap = useSidebarAiSqueeze.getState().width;
+      const next = Math.min(width, availableRoom, cap ?? Number.POSITIVE_INFINITY);
       setEffectiveWidth(next);
     };
 
@@ -79,7 +90,7 @@ export function usePanelSurface(
     const ro = new ResizeObserver(recompute);
     ro.observe(parent);
     return () => ro.disconnect();
-  }, [isFullscreen, width]);
+  }, [isFullscreen, width, squeezeWidth]);
 
   // 顶栏 AI 列与正文使用同一展示宽度，拖宽和窗口缩放时不各算一遍。
   useLayoutEffect(() => {
@@ -90,7 +101,7 @@ export function usePanelSurface(
     return () => {
       shell?.style.removeProperty("--workspace-ai-width");
     };
-  }, [effectiveWidth, isFullscreen, isElectronChrome]);
+  }, [effectiveWidth, isElectronChrome, isFullscreen]);
 
   // 输入条浮动叠在消息上：把 dock 高度换算进 zoom 坐标系，给消息区垫底。
   useLayoutEffect(() => {
