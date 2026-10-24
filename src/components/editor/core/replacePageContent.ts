@@ -3,7 +3,6 @@ import { Fragment } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import { blockToEditorNode } from "./fastBlockToNode";
 
-/** 整篇导航只需一次替换，不走逐块删除和位置映射。 */
 export function replacePageContent(tr: Transaction, blocks: PartialBlock<any, any, any>[]): Transaction {
   const schema = tr.doc.type.schema;
   const group = schema.nodes.blockGroup.createChecked(

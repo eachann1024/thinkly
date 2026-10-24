@@ -14,7 +14,6 @@ const FALLBACK_SNAPSHOT = {
 
 type ThemeSurfaceSnapshot = typeof FALLBACK_SNAPSHOT;
 
-/** Canvas/iframe 边界只读取已经解析的语义颜色，不另建明暗色表。 */
 export function readThemeSurfaceSnapshot(root?: HTMLElement): ThemeSurfaceSnapshot {
   const element = root ?? (typeof document === "undefined" ? undefined : document.documentElement);
   if (!element) return FALLBACK_SNAPSHOT;

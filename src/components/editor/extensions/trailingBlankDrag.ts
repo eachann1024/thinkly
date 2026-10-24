@@ -8,9 +8,6 @@ const DRAG_THRESHOLD_PX = 4;
 
 type DragFlagEvent = MouseEvent & { gooseBlankDragArmed?: boolean };
 
-/**
- * 点在文字行带之下。行尾右侧仍走浏览器拖选，这里不接管。
- */
 export function isClickBelowTextPosition(
   view: EditorView,
   clientY: number,
@@ -51,7 +48,6 @@ function extendDrag(view: EditorView, anchor: number, event: MouseEvent) {
   view.dispatch(tr);
 }
 
-/** 从锚点跟鼠标扩展选区。同一按下只挂一次。 */
 export function armBottomBlankSelectionDrag(
   view: EditorView,
   event: MouseEvent,
@@ -107,7 +103,6 @@ export function armBottomBlankSelectionDrag(
   window.addEventListener("blur", onUp);
 }
 
-/** 块内底部空白：自己放下光标并开始拖选。 */
 export function startBlankDragFromPos(
   view: EditorView,
   event: MouseEvent,

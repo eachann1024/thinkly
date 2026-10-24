@@ -57,7 +57,6 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     );
   };
 
-  // ----- font zoom: keep event.code fallback (small keypad / non-US layouts) -----
   const isZoomInKey = (event: KeyboardEvent) =>
     event.key === "+" ||
     event.key === "=" ||
@@ -72,7 +71,6 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
   const isZoomResetKey = (event: KeyboardEvent) =>
     event.key === "0" || event.code === "Digit0" || event.code === "Numpad0";
 
-  // ----- shared modifier gate for meta/ctrl-based shortcuts -----
   const hasPrimaryModifier = (event: KeyboardEvent) =>
     isPlatformPrimaryModifierEvent(event) && !event.altKey && !event.repeat;
 
@@ -108,7 +106,6 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     ).at(-1);
     if (dialogEl) {
       if (fromEscape) return;
-      // HeroUI listens on the dialog subtree, not document.
       const target = dialogEl.contains(document.activeElement)
         ? document.activeElement!
         : dialogEl;
@@ -126,11 +123,8 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
       window.dispatchEvent(new CustomEvent("goose-note:close-settings"));
       return;
     }
-    // AI 侧栏或独立全屏面板已打开：Cmd+W 只收起面板，不关 Tab / 分屏格 / 窗口，也不 stop 会话。
     if (closeNotebookAiPanel()) return;
-    // Esc 只退出临时界面；关闭分屏、标签或窗口必须使用 Cmd/Ctrl+W。
     if (fromEscape) return;
-    // 已分屏时先关当前格；最后一格才走原来的关 Tab。
     if (closePaneOrTab() === "closed-pane") return;
     if (!isElectronRuntime() && effectiveSingleTabMode()) return;
     const activeId = activeTabIdRef.current;
@@ -140,7 +134,6 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
       useNotebooks.getState().activeNotebookId,
     );
     if (isElectronRuntime() && loneVisibleTab?.id === activeId) {
-      // Escape stops at the last visible tab; only Cmd/Ctrl+W may close the window.
       if (!fromEscape) void getGooseDesktop()?.closeWindow?.();
       return;
     }

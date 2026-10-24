@@ -74,7 +74,7 @@ export const pageMentionSpec = createReactInlineContentSpec(
         try {
           const props = sanitizePageMentionProps(JSON.parse(decodeURIComponent(encoded)));
           if (props) return props;
-        } catch { /* 无效标记继续按 href 或可见文字导入。 */ }
+        } catch {   }
       }
       const href = element.tagName === "A" ? element.getAttribute("href") : null;
       return href ? pageMentionFromMarkdownLink(element.textContent || "", href) ?? undefined : undefined;

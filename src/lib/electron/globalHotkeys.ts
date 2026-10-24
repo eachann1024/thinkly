@@ -21,7 +21,6 @@ ja:
   couldnTDisableTheShortcutTryAgain: "ショートカットを無効にできませんでした。もう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
-/** Electron 全局热键 IPC；注册、暂停、恢复共用队列，结果只对应提交时的快照。 */
 import type { HostHotkeyRegisterResult } from "@/lib/host/types";
 import { toElectronAccelerator } from "./accelerator";
 import { getGooseDesktop } from "./runtime";
@@ -95,7 +94,6 @@ async function submitSnapshot(
     try {
       result = await api.registerHotkeys(request);
     } catch (error) {
-      // 即使新配置提交失败，离开录制框也要尝试恢复之前的热键。
       if (resume && needsResume) {
         await api.resumeHotkeys();
         needsResume = false;
@@ -106,7 +104,6 @@ async function submitSnapshot(
       result = await api.resumeHotkeys();
       needsResume = false;
     }
-    // 兼容旧主进程：暂停时返回的 true 只是接收配置，不能视为注册成功。
     return needsResume ? { ...result, paused: true } : result;
   });
 }
@@ -120,7 +117,6 @@ export async function pauseDesktopGlobalHotkeys(): Promise<void> {
   });
 }
 
-/** 三条热键一起提交，避免用空槽覆盖其它热键；resume 仅在离开录制时使用。 */
 export async function syncAllDesktopGlobalHotkeys(
   input: DesktopGlobalHotkeyInput,
   options: { resume?: boolean } = {},
@@ -149,7 +145,6 @@ export async function registerDesktopGlobalHotkey(
   current[id] = slot.value;
   const result = await submitSnapshot({ ...current });
   const ok = id === "wake" ? result?.wakeOk : id === "quicknote" ? result?.quicknoteOk : result?.searchOk;
-  // 单槽注册仍把空字符串视为无效；清空停用走 unregister 或批量同步。
   return resultForSlot(
     { ...slot, invalid: slot.invalid || !shortcut.trim() },
     ok === true,

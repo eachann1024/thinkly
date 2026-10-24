@@ -9,7 +9,6 @@ type CachedQuery = {
 
 const MAX_QUERIES_PER_DOCUMENT = 2;
 const MAX_SELECTIONS_PER_QUERY = 2;
-// Immutable document identities invalidate edited content without retaining old documents.
 const documents = new WeakMap<ProseMirrorNode, Map<string, CachedQuery>>();
 
 function remember<K, V>(cache: Map<K, V>, key: K, value: V, limit: number): void {

@@ -19,7 +19,6 @@ export interface DesktopSettings {
   wakeHotkeyEnabled: boolean;
   searchHotkey: string;
   searchHotkeyEnabled: boolean;
-  /** 速记小窗唤出/隐藏（仅 Electron 桌面端展示与注册）。 */
   quicknoteHotkey: string;
   quicknoteHotkeyEnabled: boolean;
   wakeHotkeyStatus: DesktopHotkeyStatus;
@@ -83,7 +82,6 @@ export function normalizeDesktopHotkeyStatus(
   };
 }
 
-/** 水合合并：持久化里缺省的 desktop 字段（含后加的 quicknote 三字段）回退默认值。 */
 export function mergeDesktopSettings(
   stored: Partial<DesktopSettings> | undefined,
 ): DesktopSettings {

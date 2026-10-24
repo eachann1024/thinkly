@@ -48,7 +48,6 @@ function serializeTextWithBreaks(text: string, styles: Record<string, unknown>, 
 export function blockNoteInlineToText(content: any, preserveHardBreaks = false): string {
   if (content == null) return "";
   if (typeof content === "string") return preserveHardBreaks ? content.replace(/\n/g, "<br>") : content;
-  // BlockNote 0.50 TableCell 对象形态: { type: "tableCell", content: InlineContent[] | [Paragraph] }
   if (
     typeof content === "object" &&
     !Array.isArray(content) &&
@@ -62,7 +61,6 @@ export function blockNoteInlineToText(content: any, preserveHardBreaks = false):
       if (typeof item === "string") return preserveHardBreaks ? item.replace(/\n/g, "<br>") : item;
       if (item == null) return "";
       if (item.type === "hardBreak") return preserveHardBreaks ? "<br>" : "\n";
-      // 嵌套 paragraph（markdown 导入时表格 cell 会包一层 paragraph）
       if (item.type === "paragraph" && Array.isArray(item.content)) {
         return blockNoteInlineToText(item.content, preserveHardBreaks);
       }
@@ -80,7 +78,6 @@ export function blockNoteInlineToText(content: any, preserveHardBreaks = false):
 }
 
 export function escapePipeInCell(value: string): string {
-  // GFM 表格 cell 里的 | 必须转义，否则会被解析成列分隔符
   return value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 

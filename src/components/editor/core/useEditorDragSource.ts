@@ -8,7 +8,6 @@ type EditorDragApi = {
   getBlock: (id: string) => { type: string; props?: { language?: unknown } } | undefined;
 };
 
-/** 在 ProseMirror 完成原生序列化后补来源，保留正文内拖动的既有移动语义。 */
 export function useEditorDragSource(
   editor: EditorDragApi,
   page: Page,

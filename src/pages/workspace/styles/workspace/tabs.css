@@ -1,4 +1,3 @@
-/* TabRail：1/2/3 等分，4+ 横向滚动；选中只靠浅底胶囊+字色，不要底条。 */
 .tab-rail {
   padding: 4px;
   gap: 8px;
@@ -32,7 +31,6 @@
   min-width: 0;
   line-height: normal;
 }
-/* 原生 input 内部单行编辑器使用 normal，展示文字同用 normal 避免子像素基线偏移。 */
 .tab-rail-item .page-title-edit-shell {
   height: 2rem;
 }

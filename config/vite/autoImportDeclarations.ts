@@ -45,7 +45,6 @@ function generateLeaf(imports: Import[], directory: string): string {
   return `${LEAF_HEADER}${toTypeDeclarationFile(values, options)}${types.length ? `\n${toTypeReExports(types, options)}` : ""}\n`;
 }
 
-/** Declaration line counts only grow as imports are appended (including grouped type exports). */
 export function splitDeclarationImports(imports: Import[], directory: string, rendered?: () => void): string[] {
   const leaves: string[] = [];
   for (let start = 0; start < imports.length;) {
@@ -58,7 +57,6 @@ export function splitDeclarationImports(imports: Import[], directory: string, re
         size = middle; content = candidate; low = middle + 1;
       } else high = middle - 1;
     }
-    // Preserve the linear splitter's behavior for one item already over the limit.
     if (!size) { size = 1; rendered?.(); content = generateLeaf(imports.slice(start, start + 1), directory); }
     leaves.push(content); start += size;
   }
@@ -104,7 +102,6 @@ function assertUniquePublicImports(imports: Import[]) {
   }
 }
 
-/** 无缓存调用始终完整扫描；开发会话只重扫 dirty 命中的公开入口。 */
 export async function generateAutoImportDeclarations(root: string, cache?: DeclarationCache, metrics?: GenerationMetrics,
   paths: string[] | null = null, scanner?: ReturnType<typeof createPublicImportScanner>) {
   const missing = autoImportEntries.filter(
@@ -119,7 +116,6 @@ export async function generateAutoImportDeclarations(root: string, cache?: Decla
     ([from, names]) => names.map((name) => ({ from, name, as: name })),
   );
   if (metrics) metrics.scans++;
-  // Keep unimport's export-star resolution and type scan as the authority.
   const scanned = scanner ? await scanner.scan(paths) : await scanPublicImports(autoImportEntries, root);
   assertUniquePublicImports([...packageImports, ...scanned]);
   const fingerprint = JSON.stringify([packageImports, scanned]);
@@ -128,7 +124,6 @@ export async function generateAutoImportDeclarations(root: string, cache?: Decla
     return;
   }
   if (metrics) metrics.generations++;
-  // Publish the fingerprint only after every output has been written successfully.
   const nextCache: DeclarationCache | undefined = cache && { fingerprint, outputs: new Map() };
   const unimport = createUnimport({ imports: packageImports });
   await unimport.modifyDynamicImports(() => scanned);
@@ -180,7 +175,6 @@ export async function generateAutoImportDeclarations(root: string, cache?: Decla
   if (cache && nextCache) Object.assign(cache, nextCache);
 }
 
-/** Build/add/unlink request a full refresh; changes reuse each entry's resolved export-star dependencies. */
 export function createAutoImportDeclarationGenerator(root: string) {
   const cache: DeclarationCache = { fingerprint: "", outputs: new Map() };
   const metrics: GenerationMetrics = { scans: 0, generations: 0, cacheHits: 0, writes: 0, leafRenders: 0,

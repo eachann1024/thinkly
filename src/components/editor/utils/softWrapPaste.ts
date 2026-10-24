@@ -87,7 +87,6 @@ function appendInlineContent(
   }
 }
 
-/** 把解析出的块压成同一 textblock 的 inline + hardBreak，避免拆出 callout/quote。 */
 export function flattenParsedBlocksToSoftWrapInline(
   blocks: unknown[],
 ): SoftWrapInlineItem[] {
@@ -109,7 +108,6 @@ export function flattenParsedBlocksToSoftWrapInline(
   return result;
 }
 
-/** 按行解析 inline markdown，保留 `**粗体**` 与换行，不把 `2.` 变成有序列表。 */
 export function buildSoftWrapInlineFromMarkdown(
   text: string,
 ): SoftWrapInlineItem[] {
@@ -163,7 +161,6 @@ function marksFromStyles(
         marks.push(markType.create());
       }
     } catch {
-      /* 跳过无法创建的 mark */
     }
   }
   return marks;
@@ -217,7 +214,6 @@ function dispatchInlineSlice(editor: SoftWrapEditor, nodes: unknown[]) {
   );
 }
 
-/** BlockNote 把文本里的 `\n` 转成 hardBreak，不能传 `{ type: "hardBreak" }`。 */
 export function toInsertableInlineContent(
   items: SoftWrapInlineItem[],
 ): unknown[] {

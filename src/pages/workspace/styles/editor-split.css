@@ -1,4 +1,3 @@
-/* Tab 内并排卡片分屏。变量挂在 .workspace-shell。 */
 
 .workspace-shell {
   --split-sash-visual: 8px;
@@ -41,7 +40,6 @@
 
 .editor-split-surface[data-editor-split="true"]
   .editor-split-pane[data-focused="true"]::after {
-  /* 盖在正文之上的内描边，不占布局，也不拦截点击或光标。 */
   content: "";
   position: absolute;
   inset: 0;

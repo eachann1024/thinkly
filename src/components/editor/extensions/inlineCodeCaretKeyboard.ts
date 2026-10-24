@@ -68,10 +68,8 @@ export function handleArrow(
   const edge = inlineCodeEdgeAt($pos, codeType);
 
   if (!edge) {
-    // 不在边界：代码内部逐字移动，以及从正文进入代码左边界。
     const target = stepTarget($pos, selection.from, direction);
     if (target === null) return false;
-    // 边界 span 会让 Chromium 的原生方向键从代码内跳回盒外；盒内逐字移动也由 PM 接管。
     if (
       !isInsideCode(state, $pos, codeType) &&
       inlineCodeEdgeAt(state.doc.resolve(target), codeType) !== "start"
@@ -102,10 +100,6 @@ export function handleArrow(
   return true;
 }
 
-/**
- * 边界上的删除必须自己做：浏览器会把紧邻的零宽 boundary span 当成要删的东西，
- * 删完文档没变化，ProseMirror 也就不会重绘补回那个 span。
- */
 export function handleDelete(
   view: EditorView,
   direction: "backward" | "forward",

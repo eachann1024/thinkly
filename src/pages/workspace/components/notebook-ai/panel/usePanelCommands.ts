@@ -51,8 +51,6 @@ export function usePanelCommands(
     [onClose],
   );
 
-  // 全屏覆盖主区：Esc 在输入框失焦（点消息、侧栏、空白）后仍须退出。
-  // ChatChrome onKeyDown 只在焦点位于面板子树时冒泡；Composer onEscape 只在输入框内。
   useEffect(() => {
     if (!isFullscreen) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {

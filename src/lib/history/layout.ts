@@ -4,7 +4,6 @@ import { HISTORY_HASH_DIR, historyHash, validHistoryRelativePath } from "./local
 import { writeHistoryJson, type HistoryDisk } from "./localDisk";
 import type { HistoryIndexEntry } from "./types";
 
-/** 布局 2：`.goose/history/<hash(pageId)>/meta.json` + `<versionId>.json` 快照。 */
 export interface HistoryMeta {
   version: 2;
   pageId: string;
@@ -38,7 +37,6 @@ export function emptyHistoryMeta(pageId: string, relativePath: string | null): H
   return { version: 2, pageId, relativePath: validHistoryRelativePath(relativePath) ? relativePath : null, previousPaths: [], versions: [], lastVersionCharCount: 0 };
 }
 
-/** 同笔记本内改名/移动只改路径，不搬历史目录。 */
 export function withHistoryPath(meta: HistoryMeta, relativePath: string): HistoryMeta {
   if (meta.relativePath === relativePath) return meta;
   const previous = [...meta.previousPaths, ...(meta.relativePath ? [meta.relativePath] : [])].filter((path) => path !== relativePath);
@@ -53,7 +51,6 @@ export async function readHistoryMetaAt(dir: string, fs: HistoryDisk): Promise<H
   return parseHistoryMeta(text);
 }
 
-/** 找到该 pageId 的目录；8 位哈希冲突时依次探测 `-1`、`-2`…，未占用则返回首个空位。 */
 export async function findHistoryEntry(basePath: string, pageId: string, fs: HistoryDisk): Promise<{ dir: string; meta: HistoryMeta | null }> {
   const hash = historyHash(pageId);
   for (let i = 0; i < 32; i++) {
@@ -77,7 +74,6 @@ export async function writeHistoryMeta(basePath: string, dir: string, meta: Hist
 
 export const yieldToMain = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-/** 只读 meta.json 的轻量枚举；分批并让出主线程，损坏的条目跳过不影响其余。 */
 export async function listHistoryEntries(basePath: string, fs: HistoryDisk): Promise<{ dir: string; meta: HistoryMeta }[]> {
   const root = historyRoot(basePath);
   if (!await fs.exists(root)) return [];

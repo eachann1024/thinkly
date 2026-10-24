@@ -23,7 +23,6 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** 取出 CSS 中选择器包含关键字的规则体。 */
 function cssRules(css: string, selectorIncludes: string): string[] {
   const rules: string[] = [];
   const re = /([^{}]+)\{([^{}]*)\}/g;
@@ -33,7 +32,6 @@ function cssRules(css: string, selectorIncludes: string): string[] {
   return rules;
 }
 
-/** 全局通知：统一入口、三个窗口挂载 Toaster、图标 / 文字 / 关闭按钮对齐第一行中线。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

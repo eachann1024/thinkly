@@ -22,7 +22,6 @@ export function useLightboxSlides(
     requestRef.current += 1;
     dispatch({ type: "closed" });
   }, []);
-  // The editor is reused across pages; invalidate work before new-page events.
   useLayoutEffect(() => {
     closeLightbox();
     return () => { requestRef.current += 1; };
@@ -35,7 +34,6 @@ export function useLightboxSlides(
       try {
         URL.revokeObjectURL(url);
       } catch {
-        /* ignore */
       }
     });
     objectUrlsRef.current.clear();
@@ -66,7 +64,6 @@ export function useLightboxSlides(
             platform,
             pagePath,
           );
-          // A blob already used by the editor is borrowed, not ours to revoke.
           if (requestRef.current !== request) {
             if (resolved.startsWith("blob:") && resolved !== src) URL.revokeObjectURL(resolved);
             return [];

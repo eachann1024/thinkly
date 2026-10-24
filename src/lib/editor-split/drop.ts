@@ -46,7 +46,6 @@ function droppedTextContent(payload: Extract<WorkspaceDragPayload, { kind: "text
   }));
 }
 
-/** Drop only copies content; it never moves or deletes the source document. */
 export async function dropWorkspaceContent(
   tabId: string,
   paneId: string,
@@ -75,7 +74,6 @@ export async function dropWorkspaceContent(
     ? payload.pageId
     : await createSplitBlankPage(target.pageId);
   if (!newPageId) return false;
-  // A navigation or another split during asynchronous creation invalidates this drop.
   if (useTabs.getState().activeTabId !== tabId ||
       useEditorSplit.getState().getStateForTab(tabId) !== current) {
     if (payload.kind === "text") usePages.getState().discardEditorDraftPage(newPageId);

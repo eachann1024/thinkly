@@ -34,7 +34,6 @@ function appendMixed(imports: Import[], mixed: Import[][]): Import[] {
   return result;
 }
 
-/** unimport 会忽略混合 export 列表中的 type 项；补回公开入口原有类型。 */
 export async function scanPublicImports(
   entries: string[],
   root: string,
@@ -43,7 +42,6 @@ export async function scanPublicImports(
     await Promise.all(entries.map((entry) => mixedTypes(absolute(root, entry)))));
 }
 
-/** Keep unimport's scanner authoritative; its seen set records every resolved export-star dependency. */
 export function createPublicImportScanner(entries: string[], root: string, metrics: PublicImportScanMetrics) {
   let order: string[] | undefined, records = new Map<string, EntryScan>(), previous: Import[] = [];
   return {
@@ -56,7 +54,6 @@ export function createPublicImportScanner(entries: string[], root: string, metri
       const settled = await Promise.allSettled(affected.map(async (file): Promise<[string, EntryScan]> => {
         metrics.entryScans++;
         const seen = new Set<string>();
-        // scanDirExports defaults to types:true; false would lose pure type exports.
         const imports = await scanExports(file, true, seen);
         metrics.dependencyReads += seen.size; metrics.typeParses++;
         return [file, { imports, mixed: await mixedTypes(file), dependencies: await dependencyPaths(root, [...seen]) }];

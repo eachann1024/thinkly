@@ -12,10 +12,6 @@ export const BOOLEAN_MARK_NAMES = [
 export type BooleanMarkName = (typeof BOOLEAN_MARK_NAMES)[number];
 export type BooleanMarkState = boolean | "mixed";
 
-/**
- * Walk each selected range so partial coverage remains visible as mixed.
- * BlockNote's useActiveStyles() only inspects selection.$to which misses ranges.
- */
 export function useSelectionMarkStates(editor: BlockNoteEditor<any, any, any>) {
   return useEditorState({
     editor,

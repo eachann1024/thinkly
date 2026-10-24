@@ -26,12 +26,10 @@ function buildTableCellTagAttr(cell: any, theme: CardTheme): string {
 function renderTableCellContent(cell: any, theme: CardTheme): string {
   if (cell == null) return "";
   if (typeof cell === "string") return escapeHtml(cell).replace(/\n/g, "<br>");
-  // BlockNote tableCell: { type, content: InlineContent[] | paragraph[] }
   if (typeof cell === "object" && !Array.isArray(cell) && Array.isArray(cell.content)) {
     return renderTableCellContent(cell.content, theme);
   }
   if (Array.isArray(cell)) {
-    // 可能是 inline 数组，或内嵌 paragraph 块
     const hasParagraph = cell.some(
       (c: any) => c && typeof c === "object" && c.type === "paragraph",
     );

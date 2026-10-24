@@ -147,7 +147,6 @@ export function useGooseTableHandle(
   }, [editor, index, orientation, state]);
 
   const handleDelete = useCallback(() => {
-    // Reuse the displayed target even if menu dismissal changes live selection.
     const snapshot = deletionSnapshot;
     if (!snapshot || !tableHandles) return;
     const block = editor.getBlock(snapshot.blockId);
@@ -241,7 +240,6 @@ export function useGooseTableHandle(
     setOpen(open);
     ownsInteraction.current = open;
     if (open) {
-      // Capture before focus moves into the menu; label and action share it.
       setDeletionSnapshot(captureDeletionSnapshot());
       tableHandles?.freezeHandles();
       hideOtherElements(true);

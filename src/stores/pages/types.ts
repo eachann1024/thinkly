@@ -45,10 +45,6 @@ export interface PagesState {
   dirtyLocalPageIds: Record<string, boolean>;
   hydrateFromStorage: () => Promise<void>;
 
-  /**
-   * 从 db 重读单页覆盖内存（跨窗同步用）。仅当 db 版本的 updatedAt 比内存新才覆盖，
-   * 避免回退本进程未落盘的较新编辑。返回是否实际更新。
-   */
   reloadPageFromStorage: (pageId: string) => boolean;
 
   createPage: (parentId?: string, workspaceId?: string, id?: string) => string;
@@ -143,7 +139,6 @@ export interface PagesState {
     filePath: string,
     options?: { force?: boolean },
   ) => Promise<void>;
-  // 预加载所有尚未加载的 local-folder 记事本页面（供「所有记事本」全局搜索覆盖全量）。
   loadAllLocalFolderPages: () => Promise<void>;
   saveLocalPageContent: (
     pageId: string,
@@ -154,21 +149,11 @@ export interface PagesState {
   flushPendingLocalSaveByPageId: (pageId: string) => Promise<void>;
   isLocalPageDirty: (pageId: string) => boolean;
   saveDirtyLocalPage: (pageId: string) => Promise<boolean>;
-  /**
-   * 显式重命名 local-folder 页面文件（由虚拟标题编辑入口触发）。
-   * @param newBaseName 新文件名（不含扩展名）
-   * @returns 新 pageId（文件名不变则返回原 pageId）
-   */
   renameLocalPageFile: (pageId: string, newBaseName: string) => Promise<string>;
-  /**
-   * 移动 local-folder 页面（文件或目录）到目标父目录。
-   * targetFolderId 为 undefined 表示移到根目录。
-   */
   moveLocalPage: (
     pageId: string,
     targetFolderId: string | undefined,
   ) => Promise<void>;
-  /** 跨记事本移动到目标根目录，保留页面 ID 与子目录结构。 */
   moveLocalPageToNotebook: (
     pageId: string,
     targetNotebookId: string,
@@ -183,7 +168,6 @@ export interface PagesState {
     parentId?: string;
     title?: string;
     content?: JSONContent;
-    /** 审批计划预分配的绝对路径；传入后不再按标题另行撞名改后缀。 */
     filePath?: string;
   }) => Promise<string | null>;
   createLocalFolderRecord: (options: {
@@ -191,9 +175,7 @@ export interface PagesState {
     parentId?: string;
     title?: string;
   }) => Promise<string | null>;
-  /** Electron 新标签：内存页，输入内容后再写盘。 */
   createUnsavedLocalPage: (workspaceId: string, parentId?: string) => string;
-  /** 标签和分屏共用草稿；没有来源文件时在指定笔记本根目录创建。 */
   createEditorDraftPage: (sourcePageId: string | null, workspaceId?: string) => string;
   discardEditorDraftPage: (pageId: string) => void;
   discardUnsavedLocalPage: (pageId: string) => void;

@@ -1,6 +1,5 @@
 import palette from "@/styles/text-colors.json" with { type: "json" };
 
-/** Shared by DOM text, canvas labels, generated widgets and document exports. */
 export const TEXT_COLORS = palette;
 export type TextColorTheme = keyof typeof TEXT_COLORS;
 type TextColorRole = Exclude<
@@ -21,7 +20,6 @@ function luminance(hex: string): number {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 }
 
-/** Colored diagram surfaces still use the common ink roles at readable contrast. */
 export function textColorsOnSurface(background: string) {
   const surface = luminance(background);
   const contrast = (color: string) => {

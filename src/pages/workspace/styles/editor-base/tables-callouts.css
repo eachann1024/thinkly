@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./tables-callouts/table-surface.css";
 @import "./tables-callouts/links-and-callouts.css";
 @import "./tables-callouts/table-controls.css";

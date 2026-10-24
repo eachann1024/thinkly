@@ -1,4 +1,3 @@
-/** Electron 本地文档、磁盘附件和 gooseFs 初始化。 */
 import type {
   HostDoc,
   HostRuntime,

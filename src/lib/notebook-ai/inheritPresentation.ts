@@ -1,7 +1,3 @@
-/**
- * AI 经 Markdown 往返会丢掉块级对齐/颜色/背景，以及整段统一的行内颜色。
- * 落盘前把源块上的这些表现属性补回替换块，已有非默认样式优先保留。
- */
 import { pickPersistedBlockProps } from "@/lib/export/markdown/blockPropsMarker";
 
 const PRESENTATION_BLOCK_TYPES = new Set([
@@ -73,7 +69,6 @@ function walkInlineText(
   }
 }
 
-/** 源块全部文字节点共享同一非默认颜色时才继承，避免把局部高亮抹到整段。 */
 export function collectUniformInlineColorStyles(
   content: unknown,
 ): InlineColorStyles | null {
@@ -207,10 +202,6 @@ function pickSource(
   return sameType ?? sources[0]!;
 }
 
-/**
- * 把源块的对齐、块级颜色/背景，以及整段统一的行内颜色补到替换块上。
- * 替换块上已有的非默认样式不覆盖。
- */
 export function inheritPresentationFromSource(
   sourceBlocks: unknown[] | null | undefined,
   replacementBlocks: unknown[] | null | undefined,

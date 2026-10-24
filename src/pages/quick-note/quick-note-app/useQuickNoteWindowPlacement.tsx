@@ -22,8 +22,6 @@ export function useQuickNoteWindowPlacement(
     resizeSettleTimerRef,
   } = input;
 
-  // 窗口位置记忆：用户拖动窗口移动 → 停下后记住最终位置，下次开窗沿用。
-  // 仅在前台且有焦点时轮询；空闲 500ms，拖动中升到 120ms（须短于 settle，避免反复 IPC）。
   useEffect(() => {
     let lastX = window.screenX;
     let lastY = window.screenY;
@@ -51,7 +49,6 @@ export function useQuickNoteWindowPlacement(
           settleTimer = null;
           const sx = window.screenX;
           const sy = window.screenY;
-          // preload 权威写 db；store 同步一份，避免后续草稿 persist 用旧坐标盖掉位置。
           quickNoteWindow.persistPosition(sx, sy);
           setWindowPosition(sx, sy);
           if (pollMs !== POSITION_POLL_IDLE_MS)
@@ -84,7 +81,6 @@ export function useQuickNoteWindowPlacement(
     };
   }, [setWindowPosition]);
 
-  // 窗口尺寸记忆：用户拖动窗口边框改宽高 → 停下后记住最终尺寸，下次开窗沿用。
   useEffect(() => {
     const onResize = () => {
       isResizingRef.current = true;
@@ -94,11 +90,7 @@ export function useQuickNoteWindowPlacement(
       resizeSettleTimerRef.current = window.setTimeout(() => {
         resizeSettleTimerRef.current = null;
         isResizingRef.current = false;
-        // 持久化由主窗用 win.getSize() 权威读取后写回 dbStorage：子窗渲染进程的
-        // outerWidth 在 Electron frameless 窗口里 resize 后并不更新，直接存会记错值，
-        // 导致下次开窗仍回默认宽度（用户每次都要重新拉宽）。
         quickNoteWindow.persistSize();
-        // 同步进程内 store（best-effort），用视口宽高兜底，开窗尺寸以 dbStorage 为准。
         const w = window.innerWidth;
         const h = window.innerHeight;
         if (w >= QUICKNOTE_MIN_WIDTH && h >= QUICKNOTE_MIN_HEIGHT) {

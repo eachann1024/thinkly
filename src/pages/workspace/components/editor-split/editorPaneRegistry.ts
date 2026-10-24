@@ -58,7 +58,6 @@ export function createEditorPaneRegistry(): EditorPaneRegistry {
       return focusedEntry()?.editorRef.current ?? null;
     },
     set current(_value) {
-      // 聚焦代理只读；各叶自己的 Editor ref 才写入。
     },
   };
 
@@ -67,7 +66,6 @@ export function createEditorPaneRegistry(): EditorPaneRegistry {
       return focusedEntry()?.scrollEl ?? null;
     },
     set current(_value) {
-      // 聚焦代理只读；各叶用 callback ref 登记滚动容器。
     },
   };
 

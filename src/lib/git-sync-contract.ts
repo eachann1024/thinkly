@@ -88,7 +88,6 @@ export interface GitSyncState {
   configs: GitRepositoryConfig[];
   statuses: GitSyncStatus[];
   mappingHistory?: Record<string, GitRepositoryFolder[]>;
-  /** 大模块开关。旧配置缺省时由主进程按是否已有仓库补上。 */
   moduleEnabled: boolean;
 }
 

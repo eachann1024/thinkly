@@ -34,7 +34,6 @@ export function useArtifactTransform(contentKey?: string) {
       if (contentRef.current) {
         contentRef.current.style.transform = `translate(${normalized.x}px, ${normalized.y}px) scale(${normalized.scale})`;
       }
-      // 平移不触发 React 重渲染，缩放时才更新工具栏百分比。
       if (normalized.scale !== previous.scale) setScale(normalized.scale);
     },
     [],
@@ -85,12 +84,9 @@ export function useArtifactTransform(contentKey?: string) {
 
     contentSizeRef.current = measured;
 
-    // 把内容盒钉成固有尺寸，避免 flex 子项把 SVG 压窄后 scrollWidth 失真
     content.style.width = `${measured.width}px`;
     content.style.height = `${measured.height}px`;
 
-    // 优先按宽度适应视口，保障横向完整展示与居中；
-    // 当高度巨大时设置下限阈值（0.55），防止长图/复杂架构图被过度微缩成不可读的细线条
     const safeFit = computeArtifactFitScale({
       viewportWidth,
       viewportHeight,
@@ -118,7 +114,6 @@ export function useArtifactTransform(contentKey?: string) {
         frame = window.requestAnimationFrame(tryFit);
         return;
       }
-      // 最后一搏：用当前盒子尺寸，避免一直透明
       const content = contentRef.current;
       if (content) {
         contentSizeRef.current = {
@@ -183,7 +178,6 @@ export function useArtifactTransform(contentKey?: string) {
       const clamped = Math.min(maxScale, Math.max(minScale, nextScale));
       if (Math.abs(clamped - prev.scale) < 0.0001) return;
 
-      // 适配比例及以下重新居中，避免缩小后偏移残留
       if (clamped <= fitScale + 0.0001) {
         centerAtScale(clamped);
         return;

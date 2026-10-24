@@ -5,10 +5,6 @@ import { DOT_MOTION, rippleDelay } from "../motion";
 import { columnBins } from "./settingsDotIcons";
 import { workspaceDotIcon, type WorkspaceDotIconName } from "./workspaceDotIcons";
 
-/**
- * sweep：一束光自左向右缓慢扫过（10 大纲为空）
- * ripple：自左向右按列波纹，小尺寸收敛为 3 环（19 树内空文件夹）
- */
 export type WorkspaceDotIconMotion = "sweep" | "ripple";
 
 const SWEEP_PERIOD = 12;

@@ -1,7 +1,3 @@
-/**
- * 计算器卡片的安全表达式求值：分词 + 递归下降，只认数字、变量、运算符与白名单函数，不经 eval / Function。
- * 优先级：+ - < * / % < 一元负号 < ^（右结合）< 函数调用与括号。
- */
 
 type Token =
   | { type: "num"; value: number }
@@ -155,13 +151,11 @@ function evaluate(node: Node, vars: Record<string, number>): number {
 
 export type CompiledFormula = (vars: Record<string, number>) => number;
 
-/** 预编译公式；语法错误在编译时抛出 CalcError，未知变量在求值时抛出。 */
 export function compileFormula(formula: string): CompiledFormula {
   const ast = new Parser(tokenize(formula)).parse();
   return vars => evaluate(ast, vars);
 }
 
-/** 求值不抛错：成功给数值，失败（含非有限结果）给 null。 */
 export function safeEvaluate(compiled: CompiledFormula | null, vars: Record<string, number>): number | null {
   if (!compiled) return null;
   try {

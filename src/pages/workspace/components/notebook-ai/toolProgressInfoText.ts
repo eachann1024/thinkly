@@ -87,7 +87,6 @@ const t = createTranslator(messages);
 
 type StepText = Pick<ProgressStep, "label" | "detail">;
 
-/** 「动作 · 对象」形式的步骤名；对象缺失时只留动作。 */
 export function withSubject(action: string, subject: string) {
   return subject ? `${action} · ${truncate(subject)}` : action;
 }
@@ -105,7 +104,6 @@ const CARD_LABEL_KEYS = {
   "tool-showStats": "showStats", "tool-showRecipe": "showRecipe", "tool-showDefinition": "showDefinition", "tool-showWidget": "showWidget",
 } as const;
 
-/** 其余卡片工具：「动作 · 标题」，完成后只说已显示。 */
 function cardStepText(part: ToolProgressPart, input: Record<string, unknown> | null, error: string): StepText | null {
   const key = CARD_LABEL_KEYS[part.type as keyof typeof CARD_LABEL_KEYS];
   if (!key) return null;
@@ -119,7 +117,6 @@ function cardStepText(part: ToolProgressPart, input: Record<string, unknown> | n
   };
 }
 
-/** 天气 / 汇率 / 时间与其余卡片工具的步骤文案；非卡片工具返回 null。 */
 export function getInfoToolStepText(part: ToolProgressPart): StepText | null {
   const input = readObject(part.input);
   const output = readObject(part.output);

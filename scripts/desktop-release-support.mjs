@@ -65,7 +65,6 @@ export function verifyReleaseSource(release, tag, sha) {
     try {
       gh(["api", `repos/${REPO}/git/ref/tags/${tag}`]);
     } catch (error) {
-      // A draft may have no tag yet. The refs API reports this specifically as 404.
       if (String(error.stderr).includes("HTTP 404")) return;
       throw error;
     }
@@ -81,8 +80,6 @@ export function readRepoFile(ref, path) {
   return Buffer.from(String(data.content).replaceAll("\n", ""), "base64").toString("utf8");
 }
 
-// Commit download manifests together. Concurrent main pushes retry up to 3 times.
-// options.resolveFiles(head) may re-read tip files each attempt (auto-bump version writeback).
 export function publishMetadata(files, tag, options = {}) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     assertPublishVersion(versionFromTag(tag), tag, getReleases().filter((release) => !release.draft));

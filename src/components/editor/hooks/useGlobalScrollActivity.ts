@@ -1,7 +1,3 @@
-/**
- * 纯 Web API 的滚动活跃状态 hook，无任何平台依赖，可随编辑器包跨端使用。
- * 从 src/hooks/useGlobalScrollActivity.ts 搬入编辑器包，消除对宿主 hooks 目录的跨包引用。
- */
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
 type ScrollActivitySnapshot = {

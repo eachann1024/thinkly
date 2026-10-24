@@ -1,4 +1,3 @@
-/** Data URLs have no external lifetime: eviction cannot revoke a mounted consumer. */
 const MAX_ENTRIES = 128;
 const MAX_BYTES = 32 * 1024 * 1024;
 const entries = new Map<string, { version: string; url: string }>();

@@ -61,7 +61,6 @@ function RenameInput({ context }: { context: NonNullable<React.ContextType<typeo
     const input = inputRef.current;
     if (!input) return;
     input.focus({ preventScroll: true });
-    // 进入重命名后选中完整名称，直接输入即可替换；长名称仍从首部显示。
     input.select();
     input.scrollLeft = 0;
   }, []);

@@ -1,4 +1,3 @@
-/** Cmd/Ctrl+W 关标签：主进程菜单与 before-input-event 共用的判定。 */
 
 export const CLOSE_ACTIVE_TAB_CHANNEL = "desktop:close-active-tab";
 export const CLOSE_TAB_ACCELERATOR = "CommandOrControl+W";
@@ -14,10 +13,6 @@ export type CloseTabKeyInput = {
   shift?: boolean;
 };
 
-/**
- * 平台主键 + W，不含 Shift/Alt。
- * macOS 只认 ⌘W；Windows/Linux 只认 Ctrl+W。
- */
 export function isPrimaryModW(
   input: CloseTabKeyInput,
   platform: NodeJS.Platform = process.platform,

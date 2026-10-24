@@ -12,7 +12,6 @@ export function sameGitFolderTargets(a: GitRepositoryFolder[], b: GitRepositoryF
     folder.remotePath === other.remotePath && pathKey(folder.localPath) === pathKey(other.localPath)));
 }
 
-/** Reopening a path creates a notebook ID, but must retain its remote directory. */
 export async function prepareGitFolderMappings(
   input: GitRepositoryConfig,
   previous: GitRepositoryConfig | undefined,
@@ -41,8 +40,6 @@ export async function prepareGitFolderMappings(
   }
   const validated = validateGitRepository(input);
   for (const { old, next } of rebound) {
-    // A replacement at the same path is not proof of disk identity. Reattach
-    // conservatively so missing local files cannot delete remote notes.
     await preserveReboundHistory(storageRoot, input.id, old, next);
   }
   return validated;

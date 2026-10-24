@@ -1,14 +1,3 @@
-/**
- * 行内代码相对路径 tag。
- *
- * 本地文件夹笔记本里，行内代码内容是 ./ 或 ../ 开头的相对路径、解析后落在
- * 笔记本根目录内且磁盘上真实存在时，用 Decoration.inline 加
- * `goose-inline-code-path` class；按住当前系统主键时 hover 出下划线扫动动效，
- * 点击交给宿主：笔记内 .md 在应用内打开，绝对路径的文件或文件夹交给系统打开。
- *
- * 热路径保护：不在 apply 里同步全文档扫描；doc 变化或探测回填后统一走
- * 200ms 去抖重扫，结果经自定义 meta 事务写回（addToHistory: false）。
- */
 import { createExtension } from "@blocknote/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
@@ -44,7 +33,6 @@ type PathState = PathTagState;
 const ARMED_CLASS = "goose-inline-code-path-armed";
 const RESCAN_DEBOUNCE_MS = 200;
 
-/** 收集带 code mark 的连续文本区间（相邻同 mark 的 text 节点合并成一段）。 */
 function collectCodeRanges(doc: PMNode): Array<{ from: number; to: number; text: string }> {
   const codeType = doc.type.schema.marks.code;
   if (!codeType) return [];
@@ -73,14 +61,12 @@ function buildDecorations(
   if (!deps.isFsAvailable()) return DecorationSet.empty;
   const decorations: Decoration[] = [];
   for (const range of collectCodeRanges(doc)) {
-    // 绝对路径与文件夹按原文探测；相对笔记路径无扩展名时补 .md。
     const target = toOpenTarget(range.text);
     if (!target) continue;
     const absolute = isAbsoluteLocalPath(range.text);
     if (!absolute && (!pagePath || !root)) continue;
     const absPath = resolveCandidatePath(target, pagePath ?? "/");
     if (!absPath) continue;
-    // 相对路径仍限制在笔记本内；绝对路径只要磁盘上存在即可点击。
     if (!absolute && (!root || !isInsideRoot(absPath, root))) continue;
     const state = peekProbe(absPath);
     if (state === "hit") {
@@ -133,7 +119,6 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
     view(view: EditorView) {
       let timer: ReturnType<typeof setTimeout> | null = null;
       let destroyed = false;
-      // 基路径/根目录走 ref 运行时变化，笔记重命名或移动时 doc 不变也要重扫。
       let lastPagePath = deps.getPageLocalFilePath();
       let lastFolderRoot = deps.getLocalFolderRoot();
 
@@ -156,14 +141,12 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
         }, RESCAN_DEBOUNCE_MS);
       };
 
-      // 首次挂载异步扫一次（init 不同步遍历文档）。
       scheduleRescan();
 
       const unsubscribeModifierClass = subscribeModifierClass(view.dom, ARMED_CLASS);
 
       return {
         update(view: EditorView, prevState: EditorState) {
-          // 文档或基路径/根目录变化时安排去抖重扫；meta 事务本身不重复触发。
           const nextPagePath = deps.getPageLocalFilePath();
           const nextFolderRoot = deps.getLocalFolderRoot();
           if (
@@ -189,7 +172,6 @@ function createPathTagPlugin(deps: InlineCodePathTagDeps) {
 export function createInlineCodePathTagExtension(deps: InlineCodePathTagDeps) {
   return createExtension({
     key: "goose-inline-code-path-tag",
-    // handleClick 按插件顺序短路：必须抢在 inlineCodeCaret 之前处理 Cmd/Ctrl 点击。
     runsBefore: ["goose-inline-code-caret"],
     prosemirrorPlugins: [createPathTagPlugin(deps)],
   });

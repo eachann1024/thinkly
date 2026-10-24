@@ -38,7 +38,6 @@ function readHistory() {
   return loaded;
 }
 
-/** Invalid hints never create directories or grant access to their contents. */
 async function nearestDirectory(candidate: unknown): Promise<string | undefined> {
   if (!absolutePath(candidate)) return;
   let current = path.normalize(candidate);
@@ -49,10 +48,8 @@ async function nearestDirectory(candidate: unknown): Promise<string | undefined>
         return current;
       }
     } catch {
-      // A missing/offline/unreadable location can still have a usable parent.
     }
     const parent = path.dirname(current);
-    // Do not drop the user at a drive/filesystem root after losing a location.
     if (parent === current || parent === path.parse(parent).root) return;
     current = parent;
   }
@@ -86,7 +83,6 @@ export async function saveDialogPath(defaultPath?: string) {
   );
 }
 
-/** Serialize different windows' confirmations, and persist before the picker is released. */
 export async function rememberDialogDirectory(purpose: DialogPurpose, directory: string) {
   if (!absolutePath(directory)) return;
   const operation = writes.then(async () => {
@@ -96,7 +92,6 @@ export async function rememberDialogDirectory(purpose: DialogPurpose, directory:
     await durableAtomicWrite(historyFile(), JSON.stringify({ version: 1, directories: history }, null, 2));
   });
   writes = operation.catch((error) => {
-    // A preferences write must not turn a confirmed file operation into a failure.
     console.warn("[dialogs] 无法保存目录记忆", error);
   });
   await writes;

@@ -3,7 +3,6 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { getLocationSnapshot } from "@/components/editor/ai/composer/referenceMetadata";
 import { readObject } from "./toolProgressValues";
 
-/** Summaries show concrete notebook/directory identities, including same-name folders. */
 export function batchPlanDestinations(input: Record<string, unknown> | null, output: Record<string, unknown> | null): string {
   const results = Array.isArray(output?.results) ? output.results : [];
   const operations = results.length ? results : Array.isArray(input?.operations) ? input.operations : [];

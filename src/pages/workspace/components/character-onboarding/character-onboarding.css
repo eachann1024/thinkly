@@ -1,4 +1,3 @@
-/* 首启形象引导：标题、选择器与主按钮组成一个居中整体，点阵装饰铺在四角与边缘。 */
 .setup-guide.character-onboarding {
   position: fixed;
   inset: 0;
@@ -47,7 +46,6 @@
   margin-top: 32px;
 }
 
-/* 装饰随窗口收缩：先整体缩小并隐藏次要项，再完全隐藏，始终不压到中间内容。 */
 @media (max-width: 860px), (max-height: 640px) {
   .character-onboarding-decor .goose-dm-decor-item > .goose-dm {
     scale: 0.72;

@@ -1,5 +1,4 @@
 export function installRuntimePolyfills() {
-  // Polyfill for older Chromium (Electron built-in)
   if (typeof globalThis.structuredClone !== "function") {
     Object.defineProperty(globalThis, "structuredClone", {
       value: function structuredClonePolyfill<T>(value: T): T {

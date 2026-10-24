@@ -26,7 +26,6 @@ export function equalLayout(group: SplitGroup): Layout {
   return layout;
 }
 
-/** 存储里的尺寸变了以后，让已经挂上的分隔组跟上。拖动结束写入的值与当前布局一致时不会再设一次。 */
 export function useApplyStoredGroupLayout(
   groupRef: RefObject<GroupImperativeHandle | null>,
   group: SplitGroup,

@@ -45,7 +45,6 @@ export const historyRepository = {
     assertStorageOperation(HostAdapter.db.remove(versionKey(pageId, versionId)));
   },
 
-  /** 级联删除某个 page 的所有历史 */
   dropAll(pageId: string): void {
     const versions = HostAdapter.db.allDocs<HistoryVersion>(
       `${VERSION_PREFIX}${pageId}:`,
@@ -57,7 +56,6 @@ export const historyRepository = {
     assertStorageOperation(HostAdapter.db.remove(indexKey(pageId)));
   },
 
-  /** 清理内部页面历史；本地文件夹的 .goose/history 不在该数据库中，不受影响。 */
   clearAll(): void {
     HostAdapter.db
       .allDocs<HistoryVersion>(VERSION_PREFIX)

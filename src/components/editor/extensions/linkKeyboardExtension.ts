@@ -11,7 +11,6 @@ import { getPlatformKind, type PlatformKind } from "@/lib/utils";
 import { useSettings } from "@/stores/useSettings";
 import { subscribeModifierClass } from "./modifierClassSubscription";
 
-/** 按住当前系统主键时编辑器进入可打开链接的提示态，与 links.onClick 判定一致。 */
 export const LINK_ARMED_CLASS = "goose-link-armed";
 
 export function shouldArmLinkOpenHint(
@@ -35,7 +34,6 @@ type LinkShortcutEvent = Pick<
     nativeEvent?: Pick<KeyboardEvent, "isComposing" | "keyCode" | "which">;
   };
 
-/** 仅匹配当前平台的 Mod+K（macOS ⌘K / Windows·Linux Ctrl+K），不把 Super/Win 当成链接键。 */
 export function isPrimaryLinkShortcutEvent(
   event: LinkShortcutEvent,
   platform: PlatformKind = getPlatformKind(),
@@ -117,7 +115,6 @@ export const createGooseLinkKeyboardExtension = () =>
         if (url) {
           const target = normalizeExternalUrl(url);
           if (target) {
-            // 动态读取 React Ref 里的最新设置，避免闭包捕获陈旧状态
             void getEditorPlatform().shell.openUrl(
               target,
             );

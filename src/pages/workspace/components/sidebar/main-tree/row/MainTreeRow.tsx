@@ -50,8 +50,6 @@ export function TreeRowIcon({
     const live = s.pages[page.id];
     return live ? live.icon : page?.icon;
   });
-  // 文件夹占一个折叠槽和一个图标槽；子文件从自己的行起点放图标，
-  // 因而正好与父文件夹的图标槽对齐，不额外缩进一列。
   const isFolderRow = isSidebarFolderRow({
     isFolder: !!page.isFolder,
     hasChildren,
@@ -161,8 +159,6 @@ export function MainTreeRow({
       }
       className={cn(
         withoutChildren.className,
-        // 行高用 --main-tree-row-height 锁成整数，避免 margin/子像素让 rct
-        // computeItemHeight 与真实行距不一致（Electron 越往下越拖不准）。
         isPendingCreate
           ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
           : "text-foreground",

@@ -24,8 +24,6 @@ function collectReferenceNeighborText(
   const parts: string[] = [];
   while (cursor >= 0 && cursor < tokens.length && remaining > 0) {
     const token = tokens[cursor];
-    // 只看与当前引用直接相邻的文本，不能越过另一个引用或图片，
-    // 否则“@A @B 汇总到 @C”会把 A/B 误判成目标。
     if (token.type !== "text") break;
     const text = token.text;
     const slice =
@@ -61,10 +59,6 @@ export function inferAiReferenceRole(
   return { role: "context", roleSource: "default" };
 }
 
-/**
- * 规范化 composer payload：资源按 pageId 唯一，出现记录仍完整保序。
- * 不修改传入对象，避免调用方之间共享可变 references 数组。
- */
 export function normalizeAiComposerPayload(
   input: AiComposerPayload,
 ): NormalizedAiComposerPayload {
@@ -92,7 +86,6 @@ export function normalizeAiComposerPayload(
     });
   });
 
-  // 兼容旧 payload：tokens 为空或缺失引用 token 时仍消费 references。
   input.references.forEach((reference) => {
     if (!reference.pageId || resourceMap.has(keyOf(reference))) return;
     const resource = { ...reference };
@@ -123,7 +116,6 @@ export function normalizeAiComposerPayload(
     const attrs = token?.type === "reference" ? token.reference : input.references.find((item) => keyOf(item) === keyOf(reference)) ?? reference;
     return [{ ...attrs, role }];
   });
-  // Each role retains its own recursion and exclusions, even for a shared identity.
   const contextReferences = referencesForRole("context");
   const targetReferences = referencesForRole("target");
 

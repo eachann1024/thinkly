@@ -1,10 +1,4 @@
 #!/usr/bin/env node
-/**
- * 隔离诊断：只创建 show:false 的 Electron 窗口，不启动业务主进程或读取用户笔记。
- * node scripts/perf/hidden-lifecycle.mjs [--baseline-renderer /tmp/old/renderer] [--json report.json]
- * 真实 old/new renderer 或源码 CSS 交错各测两轮、每轮至少32秒；不作为真实前后台验收。
- * --causes / --promote / --scheduler-probe 仅为6秒反事实粗测，不生成最终达标结论。
- */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -143,7 +137,6 @@ async function runElectronDiagnostic() {
       .map(([variant, css]) => [variant, createHash("sha256").update(css).digest("hex")]));
     const loadRenderer = async (entry) => {
       if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
-      // The isolated A/B documents share the same original random rhythm inputs.
       const seeded = await bounded("seed random before document", () => win.webContents.debugger.sendCommand("Page.addScriptToEvaluateOnNewDocument", {
         source: "{ let seed = 0x54686e6b; window.__thinklyDiagRandom = 'LCG32:0x54686e6b'; Math.random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }; }",
       }));
@@ -189,7 +182,6 @@ async function runElectronDiagnostic() {
       const promotion = promote && phaseCase === "promote" ? "\n.goose-dm,.goose-dm :is(.goose-dm-breathe,.goose-dm-ripple,.goose-dm-glint,.goose-dm-flow,.goose-dm-wave,.goose-dm-progress,.goose-dm-alert){will-change:transform,opacity}" : "";
       const selector = pauseGroup === "dot" ? ".goose-dm,.goose-dm *" : pauseGroup === "character" ? ".goose-cs,.goose-cs *" : ".goose-dm,.goose-dm *,.goose-cs,.goose-cs *";
       const css = (variant === "before" ? beforeCSS : afterCSS) + promotion + (pauseGroup === "none" ? "" : `\n${selector}{animation-play-state:paused!important}`);
-      // 真实源码 CSS 最后追加，保留原 specificity 与 important 关系。
       await win.webContents.executeJavaScript(`{
         document.getElementById('thinkly-cpu-diagnostic-style')?.remove();
         const style = document.createElement('style');
@@ -209,7 +201,6 @@ async function runElectronDiagnostic() {
         console.log(`隔离诊断：第${phases.length + 1}轮 ${variant} 开始CPU采样`);
         const durationMs = causes || promote || schedulerProbe ? 6000 : 32000;
         const samples = [];
-        // Unequal intervals avoid aliasing both equal-looking midsteps of a 13s ripple.
         const sampleOffsetsMs = durationMs >= 32000 ? [5000, 12500, 20500, 28000] : [];
         for (const targetMs of sampleOffsetsMs) {
           await sleep(Math.max(0, targetMs - (performance.now() - started)));
@@ -228,7 +219,6 @@ async function runElectronDiagnostic() {
         if (phases.length && JSON.stringify(phases[0].before.renderer.geometry) !== JSON.stringify(before.renderer.geometry)) throw new Error("交错各轮fixture几何不一致");
         const perfAfter = await performanceMetrics();
         const visualSamples = [];
-        // Outside the measured CPU window: cover the longest held quarter (16s/4).
         if (durationMs >= 32000) for (let index = 0; index < 4; index++) {
           await sleep(1100);
           const visual = await snapshot();

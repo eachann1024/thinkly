@@ -10,15 +10,10 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { TEXT_COLORS, textColorVariables } from "@/lib/textColors";
-/**
- * 独立 HTML / printToPDF 共用的编辑器样式。
- * Node 单测走磁盘；浏览器走 Vite `?raw` 异步块，避免 markdown 导出把 CSS 打进主包。
- */
 
 import { existsSync, readFileSync } from "node:fs";
 import { SYSTEM_FONT_STACK } from "@/lib/fontLoader";
 
-/** 磁盘读入口时展开相对 @import，避免只拿到声明、丢掉拆分后的规则。 */
 function readCssResolvingLocalImports(file: string): string {
   const dir = file.replace(/[/\\][^/\\]+$/, "");
   return readFileSync(file, "utf8").replace(
@@ -210,7 +205,6 @@ function assembleExportCss(vendorCss: string): string {
 }
 
 async function loadViteVendorCss(): Promise<string> {
-  // Vite 编译期展开；Playwright 单测不会走到这里（先读磁盘）。
   const loaders = import.meta.glob("./exportHtmlCss.vite.ts");
   const load = loaders["./exportHtmlCss.vite.ts"];
   if (!load) throw new Error(uiText("exportStylesAreMissingFromThisBuild"));
@@ -224,7 +218,6 @@ export async function getExportHtmlCss(): Promise<string> {
   return assembleExportCss(await loadViteVendorCss());
 }
 
-/** Electron 旧内核 printToPDF：去掉 hsl(var)/alpha，避免整块实色。 */
 export function sanitizePrintCss(css: string): string {
   return css
     .replace(/[^{};]+:[^;{}]*hsl\(\s*var\([^;{}]*;/g, "")

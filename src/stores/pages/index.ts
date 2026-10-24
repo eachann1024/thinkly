@@ -8,7 +8,6 @@ import { createSelectorsPageSlice } from "./slices/selectorsSlice";
 import { createLocalFolderPageSlice } from "./slices/localFolderSlice";
 import { useNotebooks } from "../useNotebooks";
 
-// Re-export flushEditorContent for external consumers
 export { flushEditorContent } from "./actions/flushEditor";
 export { clearLocalPageMetadataCache } from "./clearCache";
 

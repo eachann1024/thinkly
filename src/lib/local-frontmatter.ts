@@ -20,16 +20,6 @@ export {
   parseLocalFrontmatterBlob,
   pageSettingsFromMarkdown,
 } from "./local-frontmatter/parser";
-/**
- * 本地文件夹页面设置 ↔ YAML frontmatter（方案 A）
- *
- * 白名单键（命名空间 goose-*，默认值省略写盘）：
- * - goose-layout: full | standard（旧 compact 按 standard 读取，未设置时跟随全局）
- * - goose-font: serif | mono（default 不写）
- * - goose-locked: true（false 不写）
- *
- * 未知键原样保留；解析失败时不改写原文 blob。
- */
 import { stringify as stringifyYaml } from "yaml";
 import type { PageContent } from "@/components/editor/utils/blocknote-content";
 import { extractFrontmatter } from "./markdown-raw-guard";
@@ -62,23 +52,16 @@ function wrapFrontmatter(yamlBody: string): string {
 }
 
 export type MergeFrontmatterResult = {
-  /** undefined = 文件无需 frontmatter 块 */
   blob: string | undefined;
-  /** true 时 blob 为原样（或 undefined），未安全 merge */
   parseFailed: boolean;
   error?: string;
   settings: LocalPageFrontmatterSettings;
 };
 
-/** goose 命名空间键：只服务应用设置，单独存在时不在编辑器展示 YAML 块。 */
 export function isGooseFrontmatterKey(key: string): boolean {
   return key.startsWith("goose-");
 }
 
-/**
- * YAML 里是否有用户可见属性（非 goose-*）。
- * 解析失败时视为可见，避免把坏 YAML 从编辑器藏起来。
- */
 export function frontmatterBodyHasUserVisibleKeys(
   yamlBody: string | null | undefined,
 ): boolean {
@@ -87,7 +70,6 @@ export function frontmatterBodyHasUserVisibleKeys(
   return Object.keys(parsed.data).some((key) => !isGooseFrontmatterKey(key));
 }
 
-/** 取内容首块 yaml-frontmatter 的 YAML 正文（不含 --- 定界符），无则 null。 */
 export function getContentFrontmatterBody(
   content: PageContent | null | undefined,
 ): string | null {
@@ -105,10 +87,6 @@ export function getContentFrontmatterBody(
   return null;
 }
 
-/**
- * 用某一段 YAML 正文替换内容首块 yaml-frontmatter。
- * 仅 goose 设置（收藏/置顶/字体/锁定）或空 YAML 时不插入、并去掉已有首块。
- */
 export function applyFrontmatterBodyToContent(
   content: PageContent | null | undefined,
   yamlBody: string | null | undefined,
@@ -145,12 +123,6 @@ export function applyFrontmatterBodyToContent(
     : (blocks as PageContent);
 }
 
-/**
- * 把 goose 设置 merge 进「已以 --- 开头的 markdown」的头部 YAML 块。
- * 编辑器首块已是 yaml-frontmatter 时走这里：合并结果写回首块并返回，
- * 调用方不要再 prepend 一段独立 frontmatter，否则同文件会写出两个 --- 头。
- * markdown 不以 --- 开头时返回 null（调用方回退旧 prepend 路径）。
- */
 export function mergeSettingsIntoFrontmatterHeader(
   markdown: string,
   settings: LocalPageFrontmatterSettings,
@@ -167,12 +139,6 @@ export function mergeSettingsIntoFrontmatterHeader(
   };
 }
 
-/**
- * 把白名单设置 merge 进 frontmatter。
- * - 默认值省略 goose 键
- * - 其它键保留
- * - 解析失败：不改写原文
- */
 export function mergeLocalPageSettingsIntoFrontmatter(
   existingBlob: string | null | undefined,
   settings: LocalPageFrontmatterSettings,

@@ -4,7 +4,6 @@ import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 type RawContentRef = { current: boolean };
 const titlePolicyKey = new PluginKey<RawContentRef>("goose-document-title-policy");
 
-/** 读取当前页面模式的同一 ref，切页时无需重建编辑器或缓存模式。 */
 export function createDocumentTitlePolicyPlugin(rawContent: RawContentRef) {
   return new Plugin({
     key: titlePolicyKey,
@@ -45,7 +44,6 @@ export function getProtectedTitleBlockId(editor: {
   return getProtectedTitle(editor.prosemirrorState)?.id;
 }
 
-/** 字符样式只保护 normalized 页面标题；正文 heading 与 raw 首标题均可格式化。 */
 export function selectionTouchesProtectedTitle(state: EditorState): boolean {
   const title = getProtectedTitle(state);
   if (!title) return false;

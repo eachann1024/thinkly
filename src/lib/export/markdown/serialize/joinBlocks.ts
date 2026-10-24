@@ -1,9 +1,5 @@
 export type MarkdownPart = { kind: "empty" | "list" | "flow"; md: string };
 
-/**
- * 空段是额外的空行：段与段之间本来就有一行空白，再多的空行才是空段。
- * 文件末尾的空段多留一个换行，这样补上 POSIX 结尾换行后仍数得回来。
- */
 export function joinBlocks(parts: MarkdownPart[]): string {
   let text = "";
   let pending = 0;

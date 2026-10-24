@@ -38,7 +38,6 @@ export function useShortcutSettings({
   useLocale();
   const [confirmReset, setConfirmReset] = useState(false);
 
-  // zustand v5 忽略第二个 equalityFn 参数，对象选择器会导致重复渲染，故拆成原始值。
   const wakeHotkey = useSettings((s) => s.desktop.wakeHotkey);
 
   const quicknoteHotkey = useSettings((s) => s.desktop.quicknoteHotkey);
@@ -55,7 +54,6 @@ export function useShortcutSettings({
     resetAppShortcuts();
     setCloseTabShortcut(DEFAULT_CLOSE_TAB_SHORTCUT);
     setSearchPanelCloseShortcut(DEFAULT_SEARCH_PANEL_CLOSE_SHORTCUT);
-    // 桌面全局快捷键一并恢复默认并重新启用
     const settings = useSettings.getState();
     settings.setWakeHotkey(DEFAULT_WAKE_HOTKEY);
     settings.setWakeHotkeyEnabled(true);

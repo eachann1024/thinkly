@@ -1,6 +1,5 @@
 import { blockNoteInlineToText } from "./inline";
 
-// ── legacy jsonContent 格式兼容（极旧存量数据：TipTap 容器节点）────────────────
 
 export function legacyItemInline(item: any): string {
   return blockNoteInlineToText(
@@ -36,5 +35,3 @@ export function serializeLegacyListItem(item: any, indent: string): string {
 
   return children.length ? line + "\n" + children.join("\n") : line;
 }
-
-// ── 单块序列化（非列表项）──────────────────────────────────────────────────────

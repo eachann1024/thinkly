@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# 用仓库 Secret 里的 Codex ChatGPT 登录审核 PR diff。不执行 PR 里的脚本。
 set -euo pipefail
 
 if [ -z "${CODEX_AUTH_JSON:-}" ]; then

@@ -14,14 +14,12 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 
-/** 槽位切换。Mod 交给 formatShortcut：macOS 为 ⌘，其余平台为 Ctrl。 */
 export const QUICK_NOTE_SLOT_SWITCH_SHORTCUT = "Mod+1～5";
 
 export function formatQuickNoteSlotSwitchShortcut(platform: PlatformKind): string {
   return formatShortcut(QUICK_NOTE_SLOT_SWITCH_SHORTCUT, platform);
 }
 
-/** 说明弹层的两行正文：槽位说明，以及随平台变化的切换快捷键。 */
 export function quickNoteHelpLines(platform: PlatformKind): readonly [string, string] {
   return [
     uiText("helpSlots"),

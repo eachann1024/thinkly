@@ -1,7 +1,6 @@
 import type { ParsedLocalMarkdown } from "./markdown";
 import { getLocalMdSnapshot } from "@/lib/local-md-snapshot";
 
-// Bump when parser/title interpretation changes. No Page objects are retained.
 const PARSER_VERSION = 1;
 const MAX_ENTRIES = 128;
 const MAX_CHARACTERS = 8 * 1024 * 1024;
@@ -65,7 +64,6 @@ export function cacheParsedMarkdown(
     remove(cache.keys().next().value!);
 }
 
-/** Enumeration still decides existence; removed/hidden paths lose their parsed data. */
 export function pruneParsedMarkdown(
   scope: string,
   livePaths: ReadonlySet<string>,

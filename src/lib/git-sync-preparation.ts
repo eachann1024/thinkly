@@ -30,7 +30,6 @@ for (const catalog of [gitMessages, historyMessages]) {
 
 export const isGitPreparationMessage = (message: string) => safeFailures.has(message);
 
-/** Only known application messages cross IPC; native paths and causes stay local. */
 export function gitSyncPreparationFailure(error: unknown): string {
   if (error instanceof HistoryWriteError) {
     return gitText(error.kind === "directory" ? "createHistoryFailed" : "saveHistoryFailed");
@@ -40,7 +39,6 @@ export function gitSyncPreparationFailure(error: unknown): string {
   return known ? known[getLocale()] : gitText("preparationFailed");
 }
 
-/** Tracks all roots in one window request; late acquisitions are released immediately. */
 export class GitSyncPreparation {
   private requests = new Map<string, { request: GitSyncPreparationRequest; release: () => void }>();
   private finished = new Set<string>();
@@ -49,7 +47,6 @@ export class GitSyncPreparation {
     this.finished.add(id);
     this.requests.get(id)?.release();
     this.requests.delete(id);
-    // Request IDs are UUIDs; retain a bounded set to ignore delayed duplicate messages.
     if (this.finished.size > 1000) this.finished.delete(this.finished.values().next().value!);
   }
 

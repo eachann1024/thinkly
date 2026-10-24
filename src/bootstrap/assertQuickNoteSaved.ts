@@ -26,7 +26,6 @@ export async function assertQuickNoteSaved(): Promise<void> {
     const raw = storage.getDbStorageItem("thinkly:quicknote");
     if (raw) persisted = JSON.parse(raw)?.state?.drafts ?? {};
   } catch {
-    // 下方只对真正非空或有删除变更的草稿阻止重启。
   }
   const slots = new Set([
     ...quickNote.QUICKNOTE_SLOTS,

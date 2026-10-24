@@ -15,7 +15,6 @@ export type PendingEditorCommitResult =
   | "not-pending"
   | "unchanged";
 
-/** 同步提交编辑器最后一帧；页面 id 闸门防止旧编辑器把内容串到新页面。 */
 export const commitPendingEditorChange = <T>(
   input: PendingEditorCommitInput<T>,
 ): PendingEditorCommitResult => {

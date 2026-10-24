@@ -1,4 +1,3 @@
-/** 验收脚本共用的断言：只打印结果，不抛错，最后返回失败数。 */
 export function createChecker() {
   let failed = 0;
   return {

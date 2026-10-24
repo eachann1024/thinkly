@@ -1,4 +1,3 @@
-/** 侧栏根目录手动顺序用的目录键。这里不引 store，避免验收脚本带上持久化。 */
 export const SPLIT_SWITCHER_ROOT_ORDER_KEY = "root";
 
 export type SplitSwitcherPage = {
@@ -26,7 +25,6 @@ export type SplitSwitcherScope = "siblings" | "notebook-root";
 
 export type SplitSwitcherOptions = {
   localFolder?: boolean;
-  /** 目录键 → pageId。根目录键是 "root"。 */
   manualOrders?: Record<string, string[]>;
 };
 
@@ -34,7 +32,6 @@ function parentKey(parentId: string | null | undefined): string {
   return parentId ? parentId : "";
 }
 
-/** 与侧栏树一致：回收站、未落盘草稿和未保存本地页不进列表。 */
 function isListed(page: SplitSwitcherPage): boolean {
   return !page.trashedAt && !page.editorDraft && !page.localUnsaved;
 }
@@ -63,11 +60,6 @@ function comparePages(
   return byTitle !== 0 ? byTitle : a.id.localeCompare(b.id);
 }
 
-/**
- * 同级：当前页的 parentId（根级则是笔记本根）。
- * 笔记本根：忽略当前父级，只列该笔记本根上的笔记和文件夹。
- * 文件夹带上子项，供菜单继续展开；文件夹本身不是可选页面。
- */
 export function splitSwitcherEntries(
   pages: readonly SplitSwitcherPage[],
   current: { workspaceId: string; parentId?: string | null },

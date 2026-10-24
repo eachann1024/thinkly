@@ -60,14 +60,10 @@ interface ShortcutInputEvent {
   stopPropagation: () => void
 }
 
-/** Extract the canonical main key from an event, using event.code as fallback
- *  when a modifier (especially Alt on Mac) causes event.key to be a non-ASCII
- *  composed character (e.g. ⌥C → "ç"). */
 function resolveMainKey(event: ShortcutInputEvent): string {
   const hasModifier = event.ctrlKey || event.metaKey || event.altKey
   const isAsciiPrintable = event.key.length === 1 && event.key.codePointAt(0)! < 128
   if (hasModifier && !isAsciiPrintable && event.code) {
-    // KeyX → X, Digit5 → 5, BracketLeft → [, etc.
     const code = event.code
     if (code.startsWith("Key")) return code.slice(3)
     if (code.startsWith("Digit")) return code.slice(5)

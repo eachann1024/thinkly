@@ -34,7 +34,6 @@ const activeListMarkerPlugin = new Plugin({
   },
 });
 
-/** 给 ProseMirror 光标所在列表块添加纯呈现类，不写入 BlockNote 文档。 */
 export const gooseActiveListMarkerExtension = createExtension({
   key: "goose-active-list-marker",
   prosemirrorPlugins: [activeListMarkerPlugin],
@@ -57,7 +56,7 @@ export const gooseActiveListMarkerExtension = createExtension({
       if (event.pointerType === "mouse" && event.button === 0 &&
           event.target instanceof HTMLInputElement &&
           event.target.closest('.bn-block-content[data-content-type="checkListItem"]')) {
-        event.preventDefault(); // Keep the editor's active-line background steady on mouse check.
+        event.preventDefault();
       }
     }, { capture: true, signal });
     dom.addEventListener("change", (event) => {
@@ -68,7 +67,6 @@ export const gooseActiveListMarkerExtension = createExtension({
       if (!event.target.checked || dom.ownerDocument.defaultView?.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const id = item.closest("[data-id]")?.getAttribute("data-id");
       if (!id) return;
-      // BlockNote replaces the paragraph on check; animate its replacement, not the removed node.
       requestAnimationFrame(() => {
         const text = dom.querySelector<HTMLElement>(
           `[data-id="${CSS.escape(id)}"] .bn-block-content[data-content-type="checkListItem"][data-checked="true"] .bn-inline-content`,
@@ -77,7 +75,6 @@ export const gooseActiveListMarkerExtension = createExtension({
         const range = dom.ownerDocument.createRange();
         range.selectNodeContents(text);
         const left = text.getBoundingClientRect().left;
-        // ponytail: 多行同步扫过最长一行；需要逐行接力时再按 rect 分段。
         let width = 0;
         for (const rect of range.getClientRects()) width = Math.max(width, rect.right - left);
         if (!width) return;

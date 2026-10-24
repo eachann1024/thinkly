@@ -22,11 +22,6 @@ import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { portableHistoryIds } from "@/lib/history/notebookHistory";
 import { clearHistoryTombstones, recordHistoryTombstones } from "@/lib/history/tombstones";
 
-// ── 增量 watch 辅助：单页从 store 移除 ────────────────────────────────────────
-/**
- * 文件被外部删除/移走时，从 store 中移除该页面并处理 activePage / tab 善后。
- * 不触发全量重扫。
- */
 export const removeSingleLocalPageAction = (
   set: StoreSet,
   get: StoreGet,
@@ -42,10 +37,8 @@ export const removeSingleLocalPageAction = (
 
   const pageId = target.id;
 
-  // 清除快照
   deleteLocalMdSnapshot(filePath);
 
-  // 外部删除或移走仅移除当前页面；历史只记本机墓碑，14 天后才由空闲清理删除。
   if (!target.isFolder) recordHistoryTombstones(target.workspaceId, [pageId]);
 
   set((state) => {
@@ -65,16 +58,9 @@ export const removeSingleLocalPageAction = (
     };
   });
 
-  // 关闭指向该页面的标签
   useTabs.getState().removeDeletedPage(pageId);
 };
 
-// ── 增量 watch 辅助：单个新文件扫入 store ────────────────────────────────────
-/**
- * 文件被外部新建/移入时，读取文件内容、构造 Page 对象并合并进 store。
- * 若该 pageId 已存在（例如 rename 后先 add 再 remove）则更新内容。
- * 不触发全量重扫，不触发 activePage 跳转。
- */
 export const addSingleLocalPageAction = async (
   set: StoreSet,
   _get: StoreGet,
@@ -87,7 +73,6 @@ export const addSingleLocalPageAction = async (
 
   const fs = window.gooseFs;
 
-  // 只处理 markdown 文件（非目录）
   if (!/\.(md|markdown)$/i.test(filePath)) return;
 
   const fallbackTitle = localFileTitleFromPath(filePath);
@@ -143,12 +128,10 @@ export const addSingleLocalPageAction = async (
     readError,
   );
 
-  // 记录快照
   if (typeof markdown === "string") {
     setLocalMdSnapshot(filePath, markdown);
   }
 
-  // 恢复元数据缓存（如果有）
   const cachedMeta = localPageMetadataCache.get(pageId);
 
   const now = Date.now();
@@ -181,6 +164,5 @@ export const addSingleLocalPageAction = async (
     },
   }));
 
-  // watch 增量新增（外部新建/移入）：进手动顺序目录末尾
   appendLocalFolderOrderEntries(notebookId, [newPage]);
 };

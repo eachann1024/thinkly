@@ -105,7 +105,6 @@ function openWithExplorer(targetPath: string): boolean {
     const info = statSync(targetPath);
     if (info.isDirectory()) return spawnDetached("explorer", [targetPath]);
   } catch {
-    // fall through to select
   }
   return spawnDetached("explorer", [`/select,${targetPath}`]);
 }

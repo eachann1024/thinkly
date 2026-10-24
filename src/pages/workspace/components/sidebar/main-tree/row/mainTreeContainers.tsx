@@ -55,7 +55,6 @@ export function MainTreeDragBetweenLine({
 
   const depth = draggingPosition.depth ?? 0;
   const style = (lineProps.style ?? {}) as CSSProperties;
-  // 紧凑布局：文件夹本体承载展开控件，不额外保留箭头列。
   const lineStart = depth * INDENT + ROW_PADDING_LEFT;
   return (
     <div

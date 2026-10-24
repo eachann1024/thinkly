@@ -20,7 +20,6 @@ function hostWindow(): HostWindow | null {
 
 
 
-/** 下载目录已有同名文件时，按系统习惯加 ` (1)`、` (2)`，避免覆盖失败看起来像没导出。 */
 export function nextAvailableFilename(
   filename: string,
   exists: (candidate: string) => boolean,

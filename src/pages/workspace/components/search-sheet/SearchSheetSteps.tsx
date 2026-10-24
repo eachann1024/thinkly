@@ -8,7 +8,6 @@ import { StepCheck, StepCross, StepSpinner } from "../ai-cards/StepMarks";
 import type { SheetAnswer, SheetStep } from "./sheetAnswerState";
 import { stepLabel, stepResult, stepsSummary } from "./sheetStepText";
 
-/** 高度展开：ease-out-expo；收起更快，用 ease-in 曲线让内容先离开。 */
 const OPEN: Transition = { height: { duration: 0.36, ease: EASE_OUT_EXPO }, opacity: { duration: 0.2, ease: "easeOut" } };
 const CLOSE: Transition = { height: { duration: 0.24, ease: [0.4, 0, 1, 1] }, opacity: { duration: 0.14, ease: "easeIn" } };
 const collapse: Variants = {
@@ -22,7 +21,6 @@ const row: Variants = {
 };
 const list: Variants = { hidden: {}, shown: { transition: { staggerChildren: 0.04 } } };
 
-/** Agent 刚接手、还没有任何事件时，用一条进行中的「思考」占位，避免时间线停顿。 */
 const PENDING_STEP: SheetStep = { id: -1, name: "thinking", subject: "", status: "running" };
 
 function StepMark({ status }: { status: SheetStep["status"] }) {
@@ -31,7 +29,6 @@ function StepMark({ status }: { status: SheetStep["status"] }) {
   </span>;
 }
 
-/** 思考原文：默认在回答开始后收起；展开时贴底跟随新内容。 */
 function ThinkingText({ text, open }: { text: string; open: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -66,7 +63,6 @@ function StepRow({ step, thinking, thinkingOpen, onToggleThinking }: {
   </motion.li>;
 }
 
-/** 回答上方的步骤时间线：进行中逐步展开，完成后收成一行摘要，可点开回看。 */
 export const SearchSheetSteps = memo(function SearchSheetSteps({ answer }: { answer: SheetAnswer }) {
   useLocale();
   const reduce = useReducedMotion();

@@ -45,19 +45,16 @@ export const useQuickNote = create<QuickNoteState>()(
       activeSlot: state.activeSlot,
       drafts: state.drafts,
       slotNames: state.slotNames,
-      pinned: true, // 强制置顶，写回恒 true
+      pinned: true,
       editorZoom: state.editorZoom,
       windowWidth: state.windowWidth,
       windowHeight: state.windowHeight,
-      // 位置：preload 与 setWindowPosition 双写；这里必须始终带上 store 内最新
-      // windowX/Y，否则草稿 onChange 触发的 persist 会用缺省/旧值把 preload 刚写的位置抹掉。
       windowX: state.windowX,
       windowY: state.windowY,
     }),
     migrate: (persisted, version) => {
       const raw = (persisted ?? {}) as Record<string, unknown>;
       if (version < 1) {
-        // v0：单字段 draftContent → 槽位 1，其余空
         return {
           ...raw,
           activeSlot: 1,
@@ -96,7 +93,6 @@ export const useQuickNote = create<QuickNoteState>()(
       };
       return normalized;
     },
-    // 兜底：缺 drafts / 脏 activeSlot 时仍能归一，避免 rehydrate 后崩溃
     merge: (persisted, current) => {
       const p = (persisted ?? {}) as Record<string, unknown>;
       const recovery = recoverQuickNoteDrafts(

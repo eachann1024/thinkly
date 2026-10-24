@@ -10,7 +10,6 @@ const SYSTEM = [
   "只输出关键词，用英文逗号分隔，不要编号、解释或其他文字。",
 ].join("\n");
 
-/** 正式回答前的轻量请求：让模型给出检索关键词；失败、超时或被取消都静默返回空数组。 */
 export async function expandQueryTerms(question: string, signal: AbortSignal): Promise<string[]> {
   const modelCheck = buildLanguageModel();
   if (!modelCheck.ok) return [];

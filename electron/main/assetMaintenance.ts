@@ -81,7 +81,6 @@ export function registerAssetMaintenanceIpc(): void {
     const win = createAssetMaintenanceWindow();
     if (existing) return;
     lifecycle = assetMaintenanceTransition(lifecycle, { type: "close" });
-    // 专用 session + 不透明扫描令牌：预览协议没有任意路径读取入口。
     const previewSession = win.webContents.session;
     previewSession.protocol.handle("goose-asset", async (request) => {
       const url = new URL(request.url);
@@ -146,7 +145,6 @@ export function registerAssetMaintenanceIpc(): void {
         lifecycle = assetMaintenanceTransition(lifecycle, { type: "cancel", operationId });
         return { deleted: 0, canceled: true };
       }
-      // 一次性令牌；任何失败、部分完成或再次点击均须重新扫描。
       lifecycle = assetMaintenanceTransition(lifecycle, { type: "consume", operationId });
       if (event.sender.isDestroyed()) throw new Error(t("windowClosed"));
       if (Date.now() - record.created > 10 * 60_000) throw new Error(t("expired"));

@@ -8,7 +8,6 @@ import "./ai-cards-info.css";
 type Stat = StatsCardData["stats"][number];
 type ParsedValue = { prefix: string; number: number; decimals: number; grouped: boolean; suffix: string };
 
-/** 拆出数值前缀（如 ¥、$）、数字本体与后缀（单位、%、万等），无法解析时不做计数动画。 */
 function parseValue(raw: string): ParsedValue | null {
   const match = /^(\D*?)([-+−]?\d[\d,]*(?:\.\d+)?)(.*)$/u.exec(raw.trim());
   if (!match) return null;

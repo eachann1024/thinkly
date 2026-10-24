@@ -42,7 +42,6 @@ export function transitionTabsStartup(
       if (state.phase === "awaiting-window") return {
         state: { phase: "awaiting-window", pending: { source: "restored", tabs: event.tabs } }, commands: [],
       };
-      // 与原初始化事件一致：已存在非空目标档案时才阻止 restored payload。
       if (event.destinationHasTabs) return { state, commands: [] };
       return { state: { phase: "ready-restored", windowId: state.windowId }, commands: [
         { type: "apply-snapshots", tabs: event.tabs }, { type: "persist" },
@@ -50,7 +49,6 @@ export function transitionTabsStartup(
     case "context-resolved": {
       if (taken) return { state: { phase: "ready-take", windowId: event.windowId },
         commands: [{ type: "persist" }, { type: "restore-taken-split", tabId: null }] };
-      // 真实 windowId 的档案即使为空也具有恢复优先级。
       if (event.destination) return { state: { phase: "ready-destination", windowId: event.windowId },
         commands: [{ type: "apply-destination", tabs: event.destination }] };
       if (state.phase === "awaiting-window" && state.pending.source === "restored") return {

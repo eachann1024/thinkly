@@ -1,4 +1,3 @@
-/** 大表只挂视口内的行。选区锚点单独钉住，避免把中间几千行一起实体化。 */
 export const TABLE_WINDOW_THRESHOLD = 64;
 export const TABLE_VIEWPORT_ROWS = 28;
 export const TABLE_OVERSCAN_ROWS = 24;
@@ -46,7 +45,6 @@ export function liveRowCount(rowCount: number, window: RowWindow | null, spans: 
   return count;
 }
 
-/** 单块删除才做视图过渡。整页替换、大表删除、长文档都不截图。 */
 export function shouldAnimateBlockRemoval(input: {
   docChanged: boolean;
   history: boolean;

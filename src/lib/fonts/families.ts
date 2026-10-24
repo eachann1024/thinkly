@@ -7,7 +7,6 @@ export const DEFAULT_FONT_NAMES = {
   mono: "JetBrains Mono",
 } as const;
 
-/** 本机安装时的常见 family / 文件名，先于远端。 */
 export const CANGER_JINKAI_LOCAL_NAMES = [
   "仓耳今楷",
   "仓耳今楷03W04",
@@ -24,14 +23,12 @@ export const SERIF_LOCAL_FALLBACKS = [
   "Times",
 ];
 
-/** 钉 commit 的仓耳今楷 woff2：国内镜像优先，再 jsDelivr / GitHub raw。不要拷进项目。 */
 const CANGER_JINKAI_WOFF2_URLS = [
   "https://cdn.jsdmirror.com/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
   "https://cdn.jsdelivr.net/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
   "https://raw.githubusercontent.com/eachann1024/Resources/d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
 ] as const;
 
-/** 兼容用户显式选择的旧字体；默认衬线只使用本机字体。 */
 export const REMOTE_FONT_SOURCES = {
   仓耳今楷: CANGER_JINKAI_WOFF2_URLS,
 } as const;
@@ -84,7 +81,6 @@ const formatFontFamily = (family: string) => {
   return `"${trimmed.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 };
 
-/** 生成可写入 CSS font-family 的单项（泛型族不加引号）。 */
 export const toCssFontFamily = (family: string) =>
   family.trim() === SYSTEM_FONT_STACK
     ? SYSTEM_FONT_STACK
@@ -98,7 +94,6 @@ export function normalizeLocalFontName(value: unknown): string | null {
     : null;
 }
 
-/** Probe a locally installed face without mistaking the CSS fallback for a match. */
 export async function isLocalFontAvailable(value: string): Promise<boolean> {
   const name = normalizeLocalFontName(value);
   if (!name) return false;

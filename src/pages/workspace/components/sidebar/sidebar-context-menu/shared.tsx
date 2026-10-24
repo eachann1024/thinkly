@@ -98,7 +98,6 @@ export function scheduleAfterMenuClose(action: () => void) {
 export interface SidebarContextMenuProps {
   page: Page;
   children: React.ReactNode;
-  /** 该行在侧栏里是不是文件夹行 */
   isFolderRow?: boolean;
   onCreateLocalFile?: (parentId?: string) => void;
   onCreateLocalFolder?: (parentId?: string) => void;

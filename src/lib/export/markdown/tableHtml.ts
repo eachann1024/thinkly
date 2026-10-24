@@ -12,10 +12,6 @@ export const tableHtmlEscape = (text: string) => escapeHtmlAttribute(text);
 
 const MENTION_SCHEME = PAGE_MENTION_HREF_SCHEME.replace(/:$/, "").toLowerCase();
 
-/**
- * 单元格链接只保留 http(s)、mailto、无协议相对地址，以及本应用的页面引用。
- * 先去掉控制字符，避免协议名里夹换行或空字符后绕过判断。
- */
 export function sanitizeTableHref(value: string): string | null {
   const href = value.replace(/[\u0000-\u001F\u007F]/g, "").trim();
   if (!href) return "";
@@ -36,7 +32,6 @@ export function tableColorStyle(props: Record<string, unknown>): string {
   return styles.join(";");
 }
 
-/** HTML 内容本身是唯一文本来源；data 属性仅保留命名色和页面引用等语义。 */
 export function tableInlineHtml(content: any): string {
   if (typeof content === "string") return tableHtmlEscape(content).replace(/\n/g, "<br>");
   if (!content) return "";
@@ -72,7 +67,6 @@ export function tableInlineHtml(content: any): string {
 
 export function parseTableInlineHtml(node: Node, styles: Record<string, unknown> = {}): any[] {
   if (node.nodeType === 3) return node.textContent ? [{ type: "text", text: node.textContent, styles }] : [];
-  // 用 nodeType 而不是 instanceof Element，跨 realm 的节点（以及验收脚本里的 HTML 解析）同样能走进来。
   if (node.nodeType !== 1) return [];
   const element = node as Element;
   const tag = element.tagName.toLowerCase();
@@ -90,7 +84,7 @@ export function parseTableInlineHtml(node: Node, styles: Record<string, unknown>
     try {
       const props = sanitizePageMentionProps(JSON.parse(decodeURIComponent(mention)));
       if (props) return [{ type: "pageMention", props: { ...props, title: (element.textContent || "").trim().replace(/^@/, "") || props.title } }];
-    } catch { /* 无效引用继续保留可见文本。 */ }
+    } catch {   }
   }
   const children = Array.from(element.childNodes).flatMap((child) => parseTableInlineHtml(child, extra));
   if (tag === "a") {

@@ -27,7 +27,6 @@ export function useWorkspaceScrollSync(
         !input.page.isFolder && input.activePageId),
   );
 
-  // 全屏打开后再给编辑区打 inert，避开点击帧对 BlockNote 大树做无障碍更新
   useEffect(() => {
     const fromPanes = paneRegistry?.getScrollElements() ?? [];
     const fallback = scrollContainerRef.current;

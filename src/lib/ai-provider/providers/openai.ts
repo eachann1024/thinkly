@@ -82,7 +82,6 @@ export async function handleOpenAIStream(
           }
         }
       } catch {
-        // ignore parse error on single line
       }
     }
   }

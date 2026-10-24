@@ -9,7 +9,6 @@ import type { FloatingUIOptions } from "@blocknote/react";
 
 const COMPACT_SLASH_VIEWPORT_PADDING = 18;
 
-/** 紧凑编辑器让斜杠菜单避开视口边缘，并按可用高度裁切。 */
 export function getCompactSlashMenuFloatingOptions(): FloatingUIOptions {
   const middleware: Middleware[] = [
     offset(6),

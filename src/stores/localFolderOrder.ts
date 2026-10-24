@@ -22,10 +22,8 @@ import { sortLocalFolderChildren } from "./localFolderOrder/sorting";
 
 const ORDER_KEY_PREFIX = "gn:local-order:";
 
-/** 笔记本根目录没有父页面，用固定 dirKey。 */
 export const LOCAL_FOLDER_ROOT_DIR_KEY = "root";
 
-/** 目录键 → 该目录子项 pageId 有序数组；存在即表示该目录处于手动顺序。 */
 export type LocalFolderOrderMap = Record<string, string[]>;
 
 interface LocalFolderOrderState {
@@ -50,7 +48,6 @@ function putInState(notebookId: string, orders: LocalFolderOrderMap): void {
   }));
 }
 
-/** 落盘成功才更新内存：写失败就报错，不能让界面假装已保存。 */
 function persist(notebookId: string, orders: LocalFolderOrderMap): boolean {
   if (!writeDbStorageJSON(storageKey(notebookId), orders)) {
     toast.error(storeText("saveOrderFailed"), {
@@ -62,7 +59,6 @@ function persist(notebookId: string, orders: LocalFolderOrderMap): boolean {
   return true;
 }
 
-/** 存储可能被旧版本或外部写入破坏：只收下「目录键 → 去重后的非空字符串 id 数组」。 */
 function sanitizeOrders(raw: unknown): LocalFolderOrderMap {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const orders: LocalFolderOrderMap = {};
@@ -79,7 +75,6 @@ function sanitizeOrders(raw: unknown): LocalFolderOrderMap {
   return orders;
 }
 
-/** 某记事本当前已知的手动顺序（未加载 / 无手动顺序时为 {}）。 */
 export function getLocalFolderOrders(
   notebookId: string | null | undefined,
 ): LocalFolderOrderMap {
@@ -87,10 +82,6 @@ export function getLocalFolderOrders(
   return useLocalFolderOrders.getState().ordersByNotebook[notebookId] ?? {};
 }
 
-/**
- * 把手动顺序从存储读进内存（含边界消毒）。在本地文件夹加载流程里调用一次即可；
- * 未加载时排序按名称处理，加载完成后订阅方会自动重渲染。
- */
 export function ensureLocalFolderOrdersLoaded(notebookId: string): void {
   if (useLocalFolderOrders.getState().ordersByNotebook[notebookId]) return;
   putInState(
@@ -99,7 +90,6 @@ export function ensureLocalFolderOrdersLoaded(notebookId: string): void {
   );
 }
 
-/** 目录内拖动排序后写入手动顺序：该目录从此进入手动模式。 */
 export function setLocalFolderOrder(
   notebookId: string,
   dirKey: string,
@@ -111,7 +101,6 @@ export function setLocalFolderOrder(
   });
 }
 
-/** 恢复名称排序：清掉该目录的手动顺序，其他目录不受影响。 */
 export function clearLocalFolderOrder(
   notebookId: string,
   dirKey: string,
@@ -123,9 +112,7 @@ export function clearLocalFolderOrder(
   return persist(notebookId, next);
 }
 
-/** 删除本地记事本 / 清空本地数据时一并清理。 */
 export function removeLocalFolderOrders(notebookId: string): void {
-  // 清理属尽力而为：内存必须跟着删除动作清空，避免残留顺序污染重建后的库
   removeDbStorageItem(storageKey(notebookId));
   useLocalFolderOrders.setState((state) => {
     const next = { ...state.ordersByNotebook };
@@ -134,11 +121,6 @@ export function removeLocalFolderOrders(notebookId: string): void {
   });
 }
 
-/**
- * 新条目（扫描发现 / 新建 / 物化 / watch 增量）追加到所属目录手动序末尾并落盘，
- * 位置从此稳定：后续再新增不会挤到它前面。只动处于手动顺序的目录；
- * 草稿与待创建占位跳过（它们还不是最终 id）。
- */
 export function appendLocalFolderOrderEntries(
   notebookId: string,
   pages: Iterable<Page>,
@@ -167,10 +149,6 @@ export function appendLocalFolderOrderEntries(
   if (changed) persist(notebookId, next);
 }
 
-/**
- * 移动成功后调整顺序：清源目录旧槽位，追加到目标目录末尾（仅手动顺序的目录）。
- * 移动失败不要调用，否则顺序会和磁盘不一致。
- */
 export function reassignLocalFolderOrder(
   notebookId: string,
   pageId: string,
@@ -196,7 +174,6 @@ export function reassignLocalFolderOrder(
   if (changed) persist(notebookId, next);
 }
 
-/** 订阅某目录是否处于手动顺序（决定「恢复名称排序」入口是否出现）。 */
 export function useLocalFolderManualOrder(
   notebookId: string | null | undefined,
   dirKey: string | undefined,
@@ -207,11 +184,6 @@ export function useLocalFolderManualOrder(
   });
 }
 
-/**
- * 同目录拖动落点 → 新的手动顺序并落盘。
- * @param insertIndex react-complex-tree 给的子项下标（基于含被拖项的列表）；负数表示末尾
- * @returns 是否真的写入了新顺序；落回原位（或写盘失败）返回 false，不切手动模式
- */
 export function applyLocalFolderReorder(
   notebookId: string,
   dirKey: string,
@@ -224,7 +196,6 @@ export function applyLocalFolderReorder(
     (page) => page.id,
   );
 
-  // 落点下标基于含被拖项的列表，过滤后 splice 前要补偿前面被移除的项数
   let index = insertIndex < 0 ? current.length : insertIndex;
   if (index > 0) {
     index -= movedIds.filter((id) => {
@@ -236,7 +207,6 @@ export function applyLocalFolderReorder(
   return writeLocalFolderOrder(notebookId, dirKey, current, movedIds, index);
 }
 
-/** 把 movedIds 插到 current 的 index 处并落盘；index 由调用方归一为非负。 */
 function writeLocalFolderOrder(
   notebookId: string,
   dirKey: string,
@@ -251,13 +221,6 @@ function writeLocalFolderOrder(
   return setLocalFolderOrder(notebookId, dirKey, next);
 }
 
-/**
- * 跨目录移动成功后的落点：把移入的 id 放到目标目录的 insertIndex 处并落盘。
- * rct 的 childIndex 基于目标目录当时的子项列表，跨目录移动时该列表不含被拖项，
- * 所以不做 applyLocalFolderReorder 那种「前面被移除项」补偿；否则按名称排序的
- * 目标目录会把落点前移。目标目录没有手动顺序时以当前显示顺序为基准建立，
- * 与同目录落点一致。移动失败不应调用（顺序会和磁盘不一致）。
- */
 export function insertLocalFolderOrder(
   notebookId: string,
   dirKey: string,

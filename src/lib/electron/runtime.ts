@@ -9,7 +9,6 @@ ja:
   desktopIntegrationIsUnavailable: "デスクトップ連携を利用できません"
 `;
 const uiText = createTranslator(localMessages);
-/** 检测 Electron preload 提供的原生桥接。 */
 export function isElectronRuntime(): boolean {
   return typeof window !== "undefined" && Boolean(window.gooseDesktop);
 }

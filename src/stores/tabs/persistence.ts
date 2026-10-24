@@ -25,8 +25,6 @@ export const argvWindowContext = readWindowContextFromArgv();
 
 export let tabsWindowId = argvWindowContext?.windowId ?? getWindowId();
 
-/** Electron 在 IPC 给出真实 windowId 前不要读写无后缀 / `:main` 键，避免多窗抢同一份 persist。 */
-// 浮动搜索窗没有标签：不读写任何窗口级标签 / 分栏持久化，避免每次重建留下新键。
 export let persistReady =
   (Boolean(argvWindowContext) && argvWindowContext?.kind !== "search") ||
   !isElectronRuntime();
@@ -50,7 +48,6 @@ export const readPersistedTabsRaw = (key: string): PersistedTabs | null => {
         .filter(
           (t) => t && typeof t.id === "string" && typeof t.pageId === "string",
         )
-        // 兼容旧固定标签：只丢弃固定标记，保留标签、顺序和其他状态。
         .map(({ pinned: _legacyPinned, ...t }: TabItem & { pinned?: unknown }) => ({
           ...t,
           lastAccessedAt:
@@ -84,7 +81,6 @@ export const loadPersistedTabs = (): PersistedTabs | null => {
     );
     window.localStorage.removeItem(LEGACY_TABS_PERSIST_KEY);
   } catch {
-    // 忽略存储异常（隐私模式 / 配额）
   }
   return legacy;
 };
@@ -123,7 +119,6 @@ export const persistTabs = (state: TabsState) => {
         JSON.stringify(payload),
       );
     } catch {
-      // 忽略存储异常（隐私模式 / 配额）
     }
   });
 };
@@ -131,7 +126,6 @@ export const persistTabs = (state: TabsState) => {
 export function startTabsPersistence(
   useTabs: import("zustand").StoreApi<TabsState>,
 ) {
-  // 标签状态变化时持久化（跨会话恢复上次打开的标签）。
   if (typeof window !== "undefined") {
     const applyTabSnapshots = (
       tabs: GooseWindowTabSnapshot[],
@@ -184,7 +178,7 @@ export function startTabsPersistence(
           case "clean-fallback":
             if (previousWindowId === FALLBACK_WINDOW_ID && tabsWindowId !== FALLBACK_WINDOW_ID) {
               try { window.localStorage.removeItem(tabsPersistKey(previousWindowId)); }
-              catch { /* 忽略存储异常 */ }
+              catch {   }
             }
             break;
         }

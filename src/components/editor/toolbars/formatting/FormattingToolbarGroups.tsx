@@ -7,7 +7,6 @@ import { ListTypeGroup } from "./groups/ListTypeGroup";
 import { ClearFormatButton } from "./groups/ClearFormatButton";
 import type { useFormattingToolbarState } from "./useFormattingToolbarState";
 
-/** 功能与顺序只由选区能力决定；宽度不足时按组换行，不隐藏操作。 */
 export function FormattingToolbarGroups({
   state,
 }: {

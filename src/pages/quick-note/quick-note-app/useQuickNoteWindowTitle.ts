@@ -23,7 +23,6 @@ function activeNotebookName(): string {
   return typeof name === "string" ? name.trim() : "";
 }
 
-/** 速记小窗的显示名和系统窗口标题：当前笔记本名，重名时加现有的 ` (1)` 后缀。 */
 export function useQuickNoteWindowTitle(): string {
   const locale = useLocale();
   const notebookName = useNotebooks((state) => {
@@ -41,7 +40,6 @@ export function useQuickNoteWindowTitle(): string {
       try {
         await useNotebooks.persist.rehydrate();
       } catch {
-        // 笔记本清单读不到时，继续用内存里已经水合的名称。
       }
       if (cancelled) return;
       const base = activeNotebookName();
@@ -52,7 +50,6 @@ export function useQuickNoteWindowTitle(): string {
       try {
         await getGooseDesktop()?.setTitle(next);
       } catch {
-        // 浏览器预览没有系统窗口标题。
       }
     };
     void apply();

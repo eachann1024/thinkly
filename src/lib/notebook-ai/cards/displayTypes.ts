@@ -1,4 +1,3 @@
-/** 交互式与信息展示卡片的数据契约，字段与 tools/interactiveCards.ts、infoCards.ts 的入参一致，外加 kind。 */
 
 export type ChoicesCardData = { kind: "choices"; question?: string; options: Array<{ label: string; message?: string; description?: string }> };
 export type ChecklistCardData = { kind: "checklist"; title: string; items: Array<{ text: string; done?: boolean }> };

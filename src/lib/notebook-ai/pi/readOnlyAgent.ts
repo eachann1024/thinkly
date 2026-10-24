@@ -11,19 +11,13 @@ const MAX_TURNS = 8;
 
 export type ReadOnlyAgentHandlers = {
   onText: (text: string) => void;
-  /** 推理文本（累计值）；模型不输出推理时不会触发 */
   onThinking?: (text: string) => void;
   onToolStart: (name: string, args: unknown) => void;
   onToolEnd: (name: string, result: unknown, isError: boolean) => void;
 };
 
-/**
- * 复用侧栏 Pi 运行时与领域工具，跑一次只读的多步问答；返回最终文本。
- * 每次调用新建 Agent，不保留历史。
- */
 export async function runPiReadOnlyAgent(options: {
   notebookId: string;
-  /** 跨笔记本检索的允许范围，见 NotebookAiAgentContext.notebookIds */
   notebookIds?: string[];
   systemPrompt: string;
   prompt: string;

@@ -1,4 +1,3 @@
-/* 操作按钮：浅染底、无描边，与文案同排的紧凑文字按钮。 */
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action] {
   --goose-toast-action-bg: var(--goose-interactive-hover);
   --goose-toast-action-active: var(--goose-interactive-selected);

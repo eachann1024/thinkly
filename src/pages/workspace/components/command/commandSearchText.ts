@@ -10,7 +10,6 @@ function isWs(code: number): boolean {
   return code === 9 || code === 10 || code === 13 || code === 32 || code === 0xa0 || code === 0x3000 || code === 0x200b || code === 0xfeff;
 }
 
-/** 汉字、扩展汉字、兼容汉字、平假名与片假名。这些字符之间的空白不参与匹配。 */
 function isCjk(code: number): boolean {
   return (code >= 0x4e00 && code <= 0x9fff)
     || (code >= 0x3400 && code <= 0x4dbf)
@@ -23,11 +22,6 @@ function escapeChar(code: number): string {
   return REGEXP_META.test(ch) ? `\\${ch}` : ch;
 }
 
-/**
- * 把查询收成一条可复用的匹配。
- * 汉字之间的换行和空格可有可无；英文空白折成一段空白，避免 hello world 命中 helloworld。
- * 整次搜索只编译一次，逐页扫描不再分配等长副本。
- */
 export function prepareSearchQuery(query: string): PreparedSearch {
   const raw = query.trim();
   let text = "";
@@ -58,7 +52,6 @@ export function prepareSearchQuery(query: string): PreparedSearch {
   return { text, source: new RegExp(pattern, letters ? "gi" : "g") };
 }
 
-/** 一次扫完命中次数和第一处原文范围，供计数与摘要共用。 */
 export function scanLiteral(content: string, prepared: PreparedSearch): LiteralHit {
   const source = prepared.source;
   if (!source || !content) return MISS;

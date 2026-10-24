@@ -1,6 +1,5 @@
 export type CustomAIProtocol = "openai-responses" | "openai" | "claude";
 
-/** 与 presets.ts 中 AIProviderId 对齐；此处用 string 避免循环依赖，运行时校验。 */
 export type AIProviderIdLike =
   | "deepseek"
   | "glm"
@@ -21,7 +20,6 @@ export interface AISettingsLike {
   enabled: boolean;
   selectedModelId: string | null;
   workspaceReasoningLevel: AIReasoningLevel;
-  /** 供应商预设；缺省时由 base URL / 协议推断 */
   customProviderId?: AIProviderIdLike | string | null;
   customProtocol: CustomAIProtocol;
   customOpenAIResponsesBaseURL: string;

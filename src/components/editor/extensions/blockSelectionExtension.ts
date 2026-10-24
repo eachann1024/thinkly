@@ -52,7 +52,6 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
           )).scrollIntoView());
           return true;
         }
-        // 块选择时按字符不会把整块替换；按 Enter 返回文字编辑。
         return event.key.length === 1;
       },
       handleTextInput(view) {

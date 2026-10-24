@@ -1,4 +1,3 @@
-/** 隔离诊断的全量动画与稳定几何快照，不读取应用状态或用户数据。 */
 export const snapshotSource = `(() => {
     window.__thinklyDiagIds ||= new WeakMap(); window.__thinklyDiagNextId ||= 0;
     const id = object => { if (!window.__thinklyDiagIds.has(object)) window.__thinklyDiagIds.set(object, ++window.__thinklyDiagNextId); return window.__thinklyDiagIds.get(object); };

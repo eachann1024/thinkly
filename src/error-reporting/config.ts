@@ -18,13 +18,6 @@ function readProjectEntry(value: unknown): { enabled?: boolean; dsn: string | nu
   return { dsn: null };
 }
 
-/**
- * 解析 ~/.config/goose/error-reporting.json。
- * 兼容两种形状：
- * - 顶层 enabled + projects[id] = string DSN
- * - projects[id] = { enabled, dsn }
- * 缺字段 / enabled 非 true / 无 DSN → 不上报。不在仓库里写死公网地址。
- */
 export function resolveErrorReportingConfig(
   raw: unknown,
   project: string = GOOSE_NOTE_PROJECT,

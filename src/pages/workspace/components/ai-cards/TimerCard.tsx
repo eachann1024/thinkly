@@ -35,7 +35,6 @@ const t = createTranslator(messages);
 
 type TimerState = { total: number; remaining: number; endAt: number | null };
 
-/** 计时状态按卡片内容存在模块里：消息重渲染或卡片重新挂载都不会中断计时。 */
 const timers = new Map<string, TimerState>();
 
 function formatClock(ms: number) {
@@ -52,7 +51,6 @@ function remainingOf(state: TimerState, now: number) {
   return state.endAt === null ? state.remaining : Math.max(0, state.endAt - now);
 }
 
-/** 计时器：圆环随剩余时间收拢，开始 / 暂停 / 重置；到点轻轻脉动并发系统通知。 */
 export function TimerCard({ card }: { card: TimerCardData }) {
   useLocale();
   const reduce = useReducedMotion();

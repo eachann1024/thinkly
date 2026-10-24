@@ -19,7 +19,6 @@ export function makeLocalFolderHistoryBackend(
       return run(fs);
     });
   }
-  /** 定位页面的历史目录；笔记在笔记本内改名后，只刷新 meta.json 里的路径。 */
   async function locate(pageId: string, fs: HistoryDisk) {
     const found = await findHistoryEntry(basePath, pageId, fs);
     const current = relativePath(pageId);

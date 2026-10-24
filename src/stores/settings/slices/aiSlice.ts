@@ -104,7 +104,6 @@ export function createAISlice(set: SetFn): AISlice {
           : "deepseek";
         const preset = getAIProviderPreset(providerId);
         const normalizedModelOptions = normalizeAIModelOptions(modelOptions);
-        // 保留用户当前默认模型（仍在新列表中时）；否则回落到列表首项
         const preservedSelectedModelId =
           state.ai.selectedModelId &&
           normalizedModelOptions.some(

@@ -6,7 +6,6 @@ const cache = new Map<string, string>();
 let bytes = 0;
 const pending = new Map<string, Promise<string>>();
 
-/** Keep repeated formulas cheap across previews without retaining an entire notebook. */
 async function getMathPreview(value: string, displayMode: boolean) {
   const key = JSON.stringify([value, displayMode]);
   const cached = cache.get(key);
@@ -37,7 +36,6 @@ async function getMathPreview(value: string, displayMode: boolean) {
 
 export async function renderMathPreview(value: string, displayMode: boolean) {
   const html = await getMathPreview(value, displayMode);
-  // A shared cached result can wake many blocks together; spread their DOM updates across frames.
   if (!displayMode) return html;
   return new Promise<string>(resolve => schedulePreviewCommit(() => resolve(html)));
 }

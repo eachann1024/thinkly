@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./editor-ai-menu/input-surface.css";
 @import "./editor-ai-menu/busy-motion.css";
 @import "./editor-ai-menu/input-controls.css";

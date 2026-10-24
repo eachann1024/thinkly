@@ -47,12 +47,10 @@ def resolve_alias(data):
 
 def write_layout(mount, alias_type, store_type):
     alias = alias_type.for_file(str(mount / '.background.tiff')).to_bytes()
-    # Long/non-ASCII volume names can be truncated in the legacy alias header.
     alias_type.from_bytes(alias)
     if resolve_alias(alias).resolve() != (mount / '.background.tiff').resolve():
         raise RuntimeError('Background alias resolved outside this image')
     with store_type.open(str(mount / '.DS_Store'), 'w+') as store:
-        # Match dmgbuild's complete Finder view schema, including its version.
         store['.']['vSrn'] = ('long', 1)
         store['.']['bwsp'] = dict(ShowStatusBar=False, WindowBounds='{{400, 200}, {960, 640}}',
                                  ContainerShowSidebar=False, PreviewPaneVisibility=False,
@@ -73,7 +71,6 @@ def write_layout(mount, alias_type, store_type):
 
 @contextmanager
 def attach(image, readonly=False):
-    # A dedicated mount path lets us detach even if plist parsing fails.
     mount = Path(tempfile.mkdtemp(prefix='goose-dmg-mount-'))
     device = None
     try:
@@ -163,7 +160,6 @@ def main():
             for chunk in iter(lambda: image_file.read(1024 * 1024), b''):
                 hasher.update(chunk)
         digest = hasher.hexdigest()
-        # Exclusive creation preserves an existing sidecar, including a late arrival.
         with checksum.open('x') as sidecar:
             sidecar.write(f'{digest}  {args.output.name}\n')
         try:

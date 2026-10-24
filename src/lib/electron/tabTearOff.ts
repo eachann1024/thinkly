@@ -1,9 +1,3 @@
-/**
- * Electron 标签撕离 / 拼回：纯几何与决策，主进程和渲染层共用。
- *
- * 拖到另一工作区顶栏 → dock；拖出源窗足够远且源窗有 ≥2 个标签 → tearOff；
- * 其余（含单标签拖到空白处）→ none，交给窗内排序或取消。
- */
 
 export type ScreenPoint = { x: number; y: number };
 
@@ -30,10 +24,8 @@ export type TabRailRect = {
   width: number;
 };
 
-/** 必须超出源窗外框这么多才撕成新窗，避免擦边误开。 */
 export const TEAR_OFF_MARGIN_PX = 24;
 
-/** 顶栏命中区向下多留一点，方便拖到标签轨下沿。 */
 export const TAB_DOCK_SLOP_PX = 12;
 
 export const DEFAULT_TEAR_OFF_GRAB_OFFSET_X = 80;
@@ -56,7 +48,6 @@ export function expandRect(rect: ScreenRect, margin: number): ScreenRect {
   };
 }
 
-/** 原生标题栏（若有）+ 自定义顶栏 + slop。 */
 export function dockHitRect(
   outer: ScreenRect,
   content: ScreenRect,
@@ -111,7 +102,6 @@ export function resolveTabDrag(opts: {
   return { action: "none" };
 }
 
-/** 按指针落在标签中线左/右决定插入下标。 */
 export function insertIndexFromTabRects(
   rects: TabRailRect[],
   pointerX: number,
@@ -124,7 +114,6 @@ export function insertIndexFromTabRects(
   return rects.length;
 }
 
-/** 插入线 X，与 `tab.left` 同一坐标系（通常是 viewport）。 */
 export function insertLineLeft(
   rects: TabRailRect[],
   insertIndex: number,

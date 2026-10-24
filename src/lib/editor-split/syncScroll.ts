@@ -14,7 +14,6 @@ export function scrollRange(box: ScrollMetrics): number {
   return Number.isFinite(range) && range > 0 ? range : 0;
 }
 
-/** 不可滚动（range ≤ 0）时比例为 0，避免除以 0。 */
 export function scrollRatio(box: ScrollMetrics): number {
   const range = scrollRange(box);
   if (range <= 0) return 0;
@@ -100,10 +99,6 @@ export function parseSyncScrollFlags(raw: string | null): Record<string, true> {
   }
 }
 
-/**
- * 程序写入的滚动（含本总线刚设的 scrollTop）不能再当作用户源。
- * echoing 为本次赋值的回声；userDriven 为滚轮、拖滚动条或滚动键。
- */
 export function shouldRelayScroll(input: {
   echoing: boolean;
   enabled: boolean;

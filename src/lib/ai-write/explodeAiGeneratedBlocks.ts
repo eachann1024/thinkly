@@ -1,7 +1,3 @@
-/**
- * AI 落盘后的确定性块结构：不依赖模型有没有输出标准 Markdown。
- * 每行独立成块；勾选外观一律变成可点击的 checkListItem。
- */
 import type { PartialBlock } from "@blocknote/core";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 
@@ -15,7 +11,6 @@ const ATOMIC_BLOCK_TYPES = new Set([
   "divider",
 ]);
 
-/** 容器块：只拆 children，不把自身正文打成多张卡片。 */
 const CONTAINER_BLOCK_TYPES = new Set(["callout", "toggleListItem"]);
 
 const LIST_BLOCK_TYPES = new Set([

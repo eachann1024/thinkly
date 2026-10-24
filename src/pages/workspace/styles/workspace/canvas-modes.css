@@ -1,9 +1,7 @@
-/* 编辑器网格：线条叠在当前纸面之上，随正文滚动，格距对齐正文行高。 */
 :root[data-goose-editor-grid] {
   --goose-editor-grid-size: calc(var(--editor-font-size, 17px) * var(--editor-line-height, 1.75));
   --goose-editor-grid-line: hsl(var(--foreground) / 0.07);
   --goose-editor-grid-dot: hsl(var(--foreground) / 0.16);
-  /* 网格只画在内缩半格的整格区域里，四边首层线与点都不贴边。 */
   --goose-editor-grid-area: calc(round(down, calc(100% - var(--goose-editor-grid-size)), var(--goose-editor-grid-size)) + 1px);
   --goose-editor-grid-layers:
     repeating-linear-gradient(to bottom, var(--goose-editor-grid-line) 0 1px, transparent 1px var(--goose-editor-grid-size)) center / var(--goose-editor-grid-area) var(--goose-editor-grid-area) no-repeat local,

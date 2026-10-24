@@ -39,7 +39,6 @@ export function FormattingToolbarLayout({
   } = state;
   const rowRef = useToolbarHorizontalScroll(true);
   const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
-  // 选区 AI 润色入口暂时停用；加入对话继续使用独立入口。
   const sections: ReactNode[] = [];
 
   if (isTableSelection && hasTableMergeAction(state.editor)) {
@@ -99,7 +98,6 @@ export function FormattingToolbarLayout({
         data-selection-mode={caps.mode}
         data-goose-floating-toolbar={!isQuickNoteSurface ? "true" : undefined}
         onMouseDown={(e) => {
-          // Allow native focus on the AI textarea; everything else uses onClick.
           const target = e.target as HTMLElement | null;
           if (!target) return;
           if (target.tagName === "TEXTAREA" || target.tagName === "INPUT")
@@ -114,9 +112,6 @@ export function FormattingToolbarLayout({
         role="toolbar"
         aria-label={t("textFormatting")}
         className={cn(
-          // 小窗底栏已用固定 px 尺寸，禁止再套 CSS zoom：
-          // Electron 旧内核会放大 zoom 祖先的 getBoundingClientRect，
-          // 导致 Portal 色板 / tooltip 错位（只露出「文本颜色」标题）。
           !isQuickNoteSurface && "goose-formatting-toolbar-scaled",
           selectionModeClass,
           "transition-[opacity,transform,width] duration-150 ease-out",

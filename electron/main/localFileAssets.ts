@@ -11,7 +11,6 @@ import {
   type SavedLocalAssetPath,
 } from "../../src/lib/local-file-asset-contract";
 
-/** Only creates a fresh file in a registered notebook; never follows assets symlinks. */
 export async function saveNotebookAsset(input: SaveLocalAssetRequest): Promise<SavedLocalAssetPath> {
   if (!input || typeof input.name !== "string" || typeof input.notebookRoot !== "string" ||
       typeof input.pageLocalFilePath !== "string" || !(input.data instanceof Uint8Array)) {

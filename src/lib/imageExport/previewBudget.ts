@@ -1,4 +1,3 @@
-/** 主题弹层只排版开头一屏。份量固定，和全文长度无关。 */
 
 const PREVIEW_BLOCK_LIMIT = 16;
 const PREVIEW_CHAR_LIMIT = 1800;

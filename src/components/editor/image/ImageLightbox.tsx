@@ -135,7 +135,6 @@ export function ImageLightbox({
               <div key="title" className="goose-image-lightbox-title">
                 {currentSlide?.alt || t("imagePreview")}
               </div>,
-              // Zoom 插件默认把按钮前置插入工具条；用占位符锁定它在右侧操作组的位置
               "zoom",
               <EditorAction
                 key="download"

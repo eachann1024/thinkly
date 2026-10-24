@@ -69,7 +69,6 @@ function notifyStatus(
   toast.error(uiText("shortcutFailed", { label }), { description: detail });
 }
 
-/** 只在用户改键后的真实注册结果变化时通知，打开设置或初次水合不提示。 */
 export function useDesktopHotkeyToasts(enabled: boolean) {
   useLocale();
   const wake = useSettings((s) => s.desktop.wakeHotkeyStatus);

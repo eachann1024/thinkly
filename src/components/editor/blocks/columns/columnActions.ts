@@ -16,7 +16,6 @@ export function findColumnsContext(editor: Editor, id: string) {
   return undefined;
 }
 
-/** 仅接收同一父级的连续根块，避免跨层选择重复搬移子树。 */
 export function canConvertBlocksToColumns(editor: Editor, blocks = getBlocksToMove(editor) as any[]): boolean {
   if (!editor.isEditable || !blocks.length) return false;
   const title = getProtectedTitleBlockId(editor);
@@ -53,7 +52,6 @@ export function convertBlocksToColumns(editor: Editor, count: 2 | 3, blocks = ge
 
 export function insertColumnsFromSlash(editor: Editor, count: 2 | 3): void {
   const block = editor.getTextCursorPosition().block;
-  // clearQuery 已移除斜杠文本；真实内容或子树通过同一原子替换完整移入第一栏。
   if (block.id === getProtectedTitleBlockId(editor)) {
     const [layout] = editor.insertBlocks([createColumnsBlock(count) as any], block, "after");
     const target = firstColumnBlock(layout);

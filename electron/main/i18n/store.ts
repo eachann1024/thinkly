@@ -40,7 +40,7 @@ export async function initializeLanguage(): Promise<void> {
     error = "language.readFailed";
   }
   let region = "en-US";
-  try { region = normalizeSystemLocale(app.getSystemLocale()) ?? region; } catch { /* Keep a valid Intl locale. */ }
+  try { region = normalizeSystemLocale(app.getSystemLocale()) ?? region; } catch {   }
   snapshot = { preference, effectiveLocale: resolveLocale(preference, systemLanguages()), formatLocale: region, revision: 0, ...(error ? { error } : {}) };
 }
 
@@ -54,7 +54,6 @@ export function saveLanguagePreference(preference: unknown): Promise<LanguageSna
     return Promise.reject(new Error("language.invalidPreference"));
   }
   const operation = writes.then(async () => {
-    // A damaged or unreadable source is never replaced with defaults.
     if (readError) throw new Error("language.readFailed");
     if (await readSource() !== source) throw new Error("language.conflict");
     const effectiveLocale = resolveLocale(preference, systemLanguages());

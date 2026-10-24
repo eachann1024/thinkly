@@ -105,7 +105,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     }
   }
   const validate = (input: GitRepositoryInput) => validateRepositoryInput(input, state.configs);
-  // Snapshot identity prevents an older save from discarding a newer selection.
   useEffect(() => {
     clearTimeout(saveTimers.current.get(id));
     if (!state.moduleEnabled || !bridge || !config || (!drafts[id] && !folderDrafts[id] && !reconciledFolders) || locks.current.has(id) || syncing || errors[id])
@@ -135,7 +134,6 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       );
     }, 600);
     saveTimers.current.set(id, timer);
-    // Derived snapshots update together; per-repository timers survive switching repositories.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bridge, config, id, drafts, folderDrafts, folders, reconciledFolders, busy, syncing, errors, state.moduleEnabled]);
 

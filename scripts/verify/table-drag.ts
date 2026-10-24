@@ -1,7 +1,3 @@
-/**
- * 从表下方向上拖：选区停在指针那一行的文字位置，不把整张表选中。
- * 运行：node scripts/verify/run.mjs table-drag
- */
 import { Schema } from "prosemirror-model";
 import { TextSelection } from "prosemirror-state";
 import { CellSelection } from "prosemirror-tables";

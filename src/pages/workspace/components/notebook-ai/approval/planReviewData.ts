@@ -60,7 +60,6 @@ export function proposedMarkdown(
   try {
     return jsonContentToMarkdown(plannedContent(operation, journal));
   } catch {
-    // 尚未通过正文解析的方案仍展示模型原稿，执行器会进行最终校验。
     return operation.markdown;
   }
 }
@@ -102,7 +101,6 @@ export function reviewPagePath(page: Page): string {
   return titles.join(" / ");
 }
 
-/** Use the frozen destination for uncreated notes; never use the visible notebook. */
 export function reviewOperationPath(operation: BatchPlanOperationInput, journal: BatchPlanJournal | null): string {
   const page = operationTargetPage(operation, journal);
   if (page) return reviewPagePath(page);

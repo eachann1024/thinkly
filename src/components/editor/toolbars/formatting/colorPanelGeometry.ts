@@ -48,8 +48,6 @@ export function getColorPanelPosition({
   const spaceAbove = trigger.top - padding;
   const spaceBelow = viewportHeight - padding - trigger.bottom;
   const needed = panelHeight + gap;
-  // 底栏 / 小窗场景：触发器靠近视口下半区时优先向上展开，
-  // 避免色板开到窗口外只露出「文本颜色」标题，看起来像坏掉的 tooltip。
   const nearBottom = trigger.bottom > viewportHeight * 0.55;
   const showAbove =
     forceShowAbove ??

@@ -10,7 +10,6 @@ import { persistSessionMessages } from "./sessionMessages";
 
 const chats = new Map<string, Chat<NotebookAiMessage>>();
 
-/** A running chat belongs to its original notebook and conversation, not the visible draft. */
 export function getSessionChat(notebookId: string, conversationId: string) {
   const key = `${notebookId}:${conversationId}`;
   const existing = chats.get(key);
@@ -29,7 +28,6 @@ export function getSessionChat(notebookId: string, conversationId: string) {
       });
     },
     async reconnectToStream() {
-      // Local tools must never replay automatically after re-opening a panel.
       return null;
     },
   };
@@ -42,7 +40,6 @@ export function getSessionChat(notebookId: string, conversationId: string) {
     },
   });
   chats.set(key, chat);
-  // Bound inactive memory without interrupting active runs.
   if (chats.size > 24) {
     for (const [oldKey, oldChat] of chats) {
       if (chats.size <= 24) break;

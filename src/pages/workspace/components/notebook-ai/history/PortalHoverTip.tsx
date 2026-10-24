@@ -8,10 +8,6 @@ import {
 import { createPortal } from "react-dom";
 import { TOOLTIP_DELAY_MS } from "@/components/ui/tooltip-delay";
 import { useOverlayLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
-/**
- * Dropdown / 溢出容器内 Radix Tooltip 常被 pointer 捕获拦掉。
- * 用 body portal + 固定定位，延迟与全局 Tooltip 一致。
- */
 export function PortalHoverTip({
   content,
   children,

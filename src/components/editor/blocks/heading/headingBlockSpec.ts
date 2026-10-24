@@ -33,7 +33,6 @@ const createHeadingKeyboardShortcut =
     return true;
   };
 
-/** 普通 heading 折叠后续 section，显式 toggle heading 仅折叠自己的 children。 */
 export const gooseHeadingBlockConfig = createBlockConfig(() => ({
   type: "heading" as const,
   propSchema: {
@@ -133,5 +132,4 @@ export const createGooseHeadingBlockSpec = createBlockSpec(
   ],
 );
 
-/** createBlockSpec 返回工厂，必须调用后才是可用的 BlockSpec。 */
 export const gooseHeadingBlockSpec = createGooseHeadingBlockSpec();

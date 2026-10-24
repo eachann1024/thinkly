@@ -1,10 +1,8 @@
-/* AI 交互卡：选项、清单、步骤、测验、记忆卡、计算器、单位换算、计时与倒计时。只消费主题语义变量。 */
 .ai-card-actions { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
 .ai-card-actions-center { justify-content: center; }
 .ai-card .ai-card-btn { height: var(--goose-control-height-small, 28px); padding: 0 10px; font-size: 13px; }
 .ai-card-steps-index { flex: none; margin-right: 8px; font-size: 12px; font-weight: 400; color: var(--goose-text-secondary); }
 
-/* 进度条与圆环 */
 .ai-card-progress { position: relative; flex: 1 1 auto; min-width: 3rem; height: 4px; border-radius: 2px; overflow: hidden;
   background: color-mix(in srgb, var(--goose-text-secondary) 16%, transparent); }
 .ai-card-progress-fill { position: absolute; inset: 0; border-radius: inherit; background: var(--goose-accent-solid); }
@@ -15,7 +13,6 @@
 .ai-card-ring-arc { transition: stroke-dashoffset 260ms linear, color 320ms cubic-bezier(.16,1,.3,1); }
 .ai-card-ring-label { position: relative; color: var(--goose-text-primary); }
 
-/* 选项按钮（测验选项共用） */
 .ai-card-choices-question { margin: 0 0 6px; font-weight: var(--font-weight-medium); }
 .ai-card-choices-list, .ai-card-quiz-options { display: flex; flex-direction: column; gap: 4px; }
 .ai-card .ai-card-choice { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 34px; padding: 6px 10px; border: 1px solid hsl(var(--border));
@@ -30,13 +27,11 @@
 .ai-card-choice-label { overflow-wrap: anywhere; }
 .ai-card-choice-desc { font-size: 12px; line-height: 16px; color: var(--goose-text-secondary); }
 
-/* 清单 */
 .ai-card-checklist-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .ai-card-check-row { display: flex; align-items: flex-start; gap: 8px; width: 100%; min-height: 28px; padding: 4px 0; cursor: pointer; }
 .ai-card-check-text { overflow-wrap: anywhere; transition: color 200ms ease; }
 .ai-card-check-row[data-done] .ai-card-check-text { color: var(--goose-text-secondary); text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
 
-/* 步骤 */
 .ai-card-steps-dots { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; padding: 0; list-style: none; }
 .ai-card .ai-card-steps-dot { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid hsl(var(--border));
   border-radius: 50%; font-size: 11px; color: var(--goose-text-secondary); transition: border-color 200ms ease, background-color 200ms ease, color 200ms ease; }
@@ -47,7 +42,6 @@
 .ai-card-steps-title { display: flex; align-items: baseline; margin: 0; font-weight: var(--font-weight-medium); }
 .ai-card-steps-detail { margin: 4px 0 0; color: var(--goose-text-secondary); white-space: pre-wrap; }
 
-/* 测验 */
 .ai-card-quiz-question { display: flex; align-items: baseline; margin: 0 0 8px; font-weight: var(--font-weight-medium); }
 .ai-card-quiz-letter { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 4px;
   font-size: 11px; color: var(--goose-text-secondary); background: color-mix(in srgb, var(--goose-text-secondary) 10%, transparent); }
@@ -63,7 +57,6 @@
 .ai-card-quiz-score .ai-card-progress { width: 100%; }
 .ai-card-quiz-score-value { font-size: 28px; line-height: 34px; font-weight: 300; }
 
-/* 记忆卡：两面叠在同一格，高度取较高的一面。 */
 .ai-card-flash-stage { perspective: 900px; }
 .ai-card .ai-card-flash-card { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: center; cursor: pointer; }
 .ai-card-flash-inner { display: grid; transform-style: preserve-3d; }
@@ -73,7 +66,6 @@
 .ai-card-flash-face[data-back] { transform: rotateY(180deg); color: var(--goose-text-secondary); background: color-mix(in srgb, var(--goose-accent-solid) 5%, hsl(var(--background))); }
 .ai-card-flash-count { margin: 0 auto 0 4px; font-size: 12px; color: var(--goose-text-secondary); }
 
-/* 计算器 */
 .ai-card-calc-outputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 8px 16px; margin-bottom: 8px; }
 .ai-card-calc-out { display: flex; flex-direction: column; min-width: 0; }
 .ai-card-calc-out-label { font-size: 12px; color: var(--goose-text-secondary); }
@@ -87,19 +79,16 @@
 .ai-card-calc-var-input { display: inline-flex; flex: none; align-items: center; gap: 4px; }
 .ai-card-calc-var-input input { width: 6.5rem; text-align: right; }
 
-/* 单位换算 */
 .ai-card-unit-result { display: flex; align-items: baseline; gap: 6px; min-width: 0; margin-bottom: 8px; }
 .ai-card-unit-value { font-size: 26px; line-height: 34px; font-weight: 400; letter-spacing: -0.01em; overflow-wrap: anywhere; }
 .ai-card-unit-symbol { font-size: 14px; color: var(--goose-text-secondary); }
 .ai-card-unit-form { display: grid; grid-template-columns: minmax(4.5rem, 1fr) minmax(0, 1.4fr) auto minmax(0, 1.4fr); align-items: center; gap: 6px; }
 
-/* 计时器 */
 .ai-card-timer { display: flex; flex-direction: column; align-items: center; }
 .ai-card-timer-clock { font-size: 24px; line-height: 30px; font-weight: 400; }
 .ai-card-timer[data-done] .ai-card-ring { color: var(--goose-text-success); }
 .ai-card-timer[data-done] .ai-card-timer-clock { font-size: 15px; color: var(--goose-text-success); }
 
-/* 倒计时 */
 .ai-card-countdown { display: flex; flex-direction: column; gap: 6px; }
 .ai-card-countdown-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .ai-card-countdown-tile { display: flex; flex-direction: column; align-items: center; padding: 6px 4px; border: 1px solid hsl(var(--border)); border-radius: 8px; }

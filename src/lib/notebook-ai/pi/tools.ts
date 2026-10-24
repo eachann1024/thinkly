@@ -10,7 +10,6 @@ import { isNotebookSkillId } from "../skillIds";
 
 type SdkTool = (typeof notebookAiTools)[keyof typeof notebookAiTools];
 
-/** 与 AI SDK 工具描述对齐的 TypeBox 参数（给模型看）。 */
 const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = {
   loadSkill: Type.Object({
     skill: Type.Union(
@@ -129,7 +128,6 @@ const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = 
   }),
 };
 
-/** 没有手写 TypeBox 的工具（卡片类）直接由 zod 生成 JSON Schema，pi-ai 同样能校验。 */
 function toolParameters(name: keyof typeof notebookAiTools): TSchema {
   const manual = TOOL_PARAMETERS[name];
   if (manual) return manual;
@@ -188,7 +186,6 @@ async function runSdkTool(
 
   const result = resultToAgentToolResult(output);
   if (tool === notebookAiTools.executeBatchPlan) {
-    // 审批卡已生成：终止后续自动 LLM 轮次（对齐 legacy hasToolCall stopWhen）
     result.terminate = true;
   }
   return result;
@@ -221,7 +218,6 @@ export function buildPiDomainTools(
   });
 }
 
-/** 按已加载 Skill 裁剪 active tools（始终保留 loadSkill）。 */
 export function getActivePiTools(
   allTools: AgentTool[],
   agentContext: NotebookAiAgentContext,

@@ -1,7 +1,3 @@
-/**
- * 侧栏拖拽落点线与拖宽把手静止色同一套淡出，颜色跟随强调色，不再画左端方头。
- * 运行：node scripts/verify/run.mjs sidebar-drag-trigger
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createChecker } from "./lib/check";

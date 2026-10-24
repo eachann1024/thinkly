@@ -20,7 +20,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
     runUnifiedClose,
   } = actions;
   return [
-    // new-tab (Mod+T)
     {
       id: "new-tab",
       shortcutId: "newTab",
@@ -41,7 +40,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         useTabs.getState().openNewTab();
       },
     },
-    // Cmd+Shift+N：新桌面窗口（主进程 API 用可选链兜底）
     {
       id: "new-window",
       match: (event) =>
@@ -57,7 +55,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         void createDesktopWindow({ mode: "blank" });
       },
     },
-    // Escape only dismisses transient UI; desktop Mod+W retains ordered close.
     {
       id: "unified-close",
       match: (event) =>
@@ -70,7 +67,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         runUnifiedClose();
       },
     },
-    // Cmd/Ctrl+1~4 按图标栏顺序切换入口；AI 项开关 AI 面板。不绑定 Cmd+0（字体缩放重置）。
     {
       id: "switch-sidebar-view-by-number",
       match: (event) => {
@@ -88,7 +84,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         event.preventDefault();
         const order = normalizeSidebarRailOrder(useSettings.getState().sidebarRailOrder);
         const item = order[Number(event.code.slice(-1)) - 1];
-        // 与按钮一致只派发事件；AI 未启用或不可用时由工作区监听方忽略。
         if (item === "ai") {
           window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
           return;
@@ -101,7 +96,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         );
       },
     },
-    // Cmd/Ctrl+5~8 跳到对应序号标签，Cmd/Ctrl+9 跳到最后一个。1~4 已用于图标栏入口。
     {
       id: "switch-tab-by-number",
       match: (event) => {
@@ -125,7 +119,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         useTabs.getState().setActiveTab(targetTab.id);
       },
     },
-    // Ctrl+Tab / Ctrl+Shift+Tab cycle tabs
     {
       id: "cycle-tab",
       match: (event) =>
@@ -147,7 +140,6 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         useTabs.getState().setActiveTab(tabs[nextIndex].id);
       },
     },
-    // 与 Chrome 一致，固定使用 Mod+Shift+T，并按关闭顺序逐个恢复。
     {
       id: "reopen-tab",
       match: (event) =>

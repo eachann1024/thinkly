@@ -26,13 +26,11 @@ export type PdfFontPlan = {
   monoUrls: readonly string[];
 };
 
-/** 仅作 file:// 相对解析的文档/测例，不再作为加载来源。 */
 export const PDF_FONT_RELATIVE_PATHS = [
   "fonts/NotoSansSC-Regular.ttf",
   "fonts/NotoSansSC-Regular.otf",
 ] as const;
 
-/** Noto Sans SC static TTF（fontsource 分包，钉版本）。不要 WOFF2 / OTF。 */
 export const PDF_CJK_FONT_URLS = [
   "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-sc@5.2.8/chinese-simplified-400-normal.ttf",
   "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-sc@5.1.0/chinese-simplified-400-normal.ttf",

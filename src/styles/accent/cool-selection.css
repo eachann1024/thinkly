@@ -1,8 +1,3 @@
-/*
- * 编辑器文字选区（::selection / ShowSelection / fake-selection）。
- * 旧 Chromium 上 ::selection 对继承来的 CSS 变量不稳定，会掉回 .dark 的 iris 默认紫，
- * 与交互配色不一致。浅色按 data-goose-accent 写实色，深色统一中性灰。
- */
 :root[data-goose-accent="iris"] {
   --goose-editor-selection-bg: #e0e7ff;
 }
@@ -46,9 +41,6 @@
   --goose-editor-selection-bg: rgba(168, 85, 247, 0.35);
 }
 
-/* 属性选择器实色兜底：即使 ::selection 解析 var 失败，仍跟强调色。
- * 文字高亮写在元素自身的 ::selection 上（WebKit 不吃带空格的后代选择器）；
- * 块壳透明规则在 shell.css，避免跨块选区把底间距画成空白条。 */
 :root[data-goose-accent="iris"] .goose-blocknote-editor .bn-inline-content::selection,
 :root[data-goose-accent="iris"] .bn-editor .bn-inline-content::selection,
 :root[data-goose-accent="iris"] .goose-blocknote-editor .bn-inline-content *::selection,

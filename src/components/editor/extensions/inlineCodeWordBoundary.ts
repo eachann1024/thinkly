@@ -56,11 +56,6 @@ function takeGrapheme(
   };
 }
 
-/**
- * Option/Ctrl 按词删除的区间。行内 code 与两侧正文是硬边界：
- * 盒外不会吃进代码，盒内不会删到代码外。
- * 没有可删内容时返回 null（调用方在盒外硬边界上应吞掉按键，避免浏览器把整段 code 当一个词删掉）。
- */
 export function wordDeleteRange(
   $pos: ResolvedPos,
   direction: WordAxis,
@@ -117,10 +112,6 @@ export function wordMoveTarget(
 
 export type WordDeletePlan = { from: number; to: number } | "swallow";
 
-/**
- * 只在会碰到行内代码边界时接管；普通正文仍交给浏览器，以免改掉系统分词。
- * 盒外朝代码按词删且没有「自己这一侧」的词 → swallow，防止整段 code 被当一个词删掉。
- */
 export function resolveWordDelete(
   $pos: ResolvedPos,
   direction: WordAxis,
@@ -140,7 +131,6 @@ export function resolveWordDelete(
   return clamped;
 }
 
-/** 空数组在 PM 里仍是 truthy storedMarks，组字会走 markCursor 并打断 IME。 */
 export function storedMarksForCodeEdge(
   $pos: ResolvedPos,
   codeType: MarkType,

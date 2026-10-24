@@ -26,7 +26,6 @@ function retentionTimer(token: string, backup: string) {
 }
 const RETAIN_MS = 10 * 60_000;
 
-/** Keep an exact, short-lived copy because Electron's trashItem does not return a restore URL. */
 export async function trashWithUndo(
   original: string,
   backupRoot: string,
@@ -43,7 +42,6 @@ export async function trashWithUndo(
     await rm(backupDir, { recursive: true, force: true }).catch(() => {});
     throw error;
   }
-  // ponytail: an undo copy is retained for 10 minutes; a native trash URL would avoid duplicate disk use.
   const timer = retentionTimer(token, backup);
   transition(token, { type: "retain", original, backup, timer });
   return token;
@@ -57,7 +55,6 @@ export async function undoTrash(token: string): Promise<string> {
   assertGitSyncWritable(original);
   transition(token, { type: "restore" });
   clearTimeout(timer);
-  // Keep the backup if restoration fails, so a conflict can be resolved and retried.
   try {
     try {
       await lstat(original);
@@ -67,14 +64,13 @@ export async function undoTrash(token: string): Promise<string> {
     }
     const backupInfo = await lstat(backup);
     if (backupInfo.isDirectory()) {
-      await mkdir(original); // exclusive: never merge into an existing folder
+      await mkdir(original);
       for (const child of await readdir(backup)) {
         await cp(path.join(backup, child), path.join(original, child), {
           recursive: true, force: false, errorOnExist: true, preserveTimestamps: true,
         });
       }
     } else {
-      // Exclusive creation prevents overwriting a file written after deletion.
       if (backupInfo.isSymbolicLink()) {
         await cp(backup, original, { force: false, errorOnExist: true });
       } else {
@@ -97,7 +93,6 @@ function rebaseUndoPath(filePath: string, oldRoot: string, newRoot: string): str
   return relative ? `${next}/${relative}` : next;
 }
 
-/** 笔记本根目录改名后，撤回仍应回到新路径，而不是已经不存在的旧路径。 */
 export function retargetTrashUndoPaths(oldRoot: string, newRoot: string): void {
   for (const [token, item] of pending) {
     if (item.status !== "retained" && item.status !== "restoring") continue;

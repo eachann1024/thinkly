@@ -44,7 +44,6 @@ export function createSpecialTabActions(
         return;
       }
       const { openTabs } = get();
-      // 复用已有的欢迎 tab（同时只存在一个）
       const existingWelcome = openTabs.find((tab) => tab.type === "welcome");
       if (existingWelcome) {
         get().setActiveTab(existingWelcome.id);
@@ -70,7 +69,6 @@ export function createSpecialTabActions(
         activeTabId: newTab.id,
       });
       pushTabHistory(newTab.id);
-      // 欢迎 tab 不关联真实页面，不调用 syncNotebookForPage / scheduleSetActivePage
     },
 
     openNewTab: () => {
@@ -130,7 +128,6 @@ export function createSpecialTabActions(
         workspaceId: notebookId,
         lastAccessedAt: now,
       };
-      // 独立 AI 标签放在最前，贴近「标签栏最左入口」。
       const nextOpenTabs = [
         newTab,
         ...openTabs.map((tab) =>

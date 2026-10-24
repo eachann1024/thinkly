@@ -22,7 +22,6 @@ export const useNotebookAiChats = create<NotebookAiChatsState>()(
       skipHydration: true,
       migrate: (persistedState: unknown) =>
         migrateNotebookAiChatsState(persistedState),
-      // 只持久化数据字段，不持久化函数
       partialize: (state) => ({
         chats: state.chats,
         composerDrafts: state.composerDrafts,

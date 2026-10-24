@@ -1,4 +1,3 @@
-/* 分屏标题栏：左侧笔记本，名称在正中；悬停时把手顶替名称，仍在正中。右侧是更多和关闭。 */
 .editor-split-header {
   position: relative;
   display: grid;

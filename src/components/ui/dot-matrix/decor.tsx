@@ -20,7 +20,6 @@ const AT = {
   "bottom-right": "br",
 } as const;
 
-/** 缺省图边角装饰层；compact 用于设置卡片等较矮的容器。 */
 export function DotDecor({
   preset,
   compact = false,

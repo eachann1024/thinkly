@@ -44,14 +44,12 @@ function decodeMarker(encoded: string, isCurrent: boolean): PersistedBlockProps 
     const parsed = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>;
     if (isCurrent && parsed.v !== 1) return null;
     const metadata = restorePersistedBlockProps(parsed);
-    // 只有实际恢复出白名单字段才消费标记，避免未知/未来版本内容被静默删除。
     return Object.keys(metadata).length > 0 ? metadata : null;
   } catch {
     return null;
   }
 }
 
-/** editor 的 lossless 比较将可恢复的旧命名空间归一为 v1 标记。 */
 export function canonicalizeBlockPropsMarkers(markdown: string): string {
   return markdown.replace(
     new RegExp(`<!--[ \\t]*${NOTE_MARK_PATTERN}:(native-)?block-props=([^\\s]+)[ \\t]*-->`, "gi"),
@@ -87,7 +85,6 @@ export function encodeBlockPropsMarkers(blocks: BlockNoteContent): BlockNoteCont
   }) as BlockNoteContent;
 }
 
-/** 恢复当前标记及 editor 旧标记；损坏内容保持原样，保证正文仍可打开。 */
 export function restoreBlockPropsMarkers(blocks: BlockNoteContent): BlockNoteContent {
   return (blocks as MarkdownBlock[]).map((block) => {
     const children = Array.isArray(block.children)
@@ -107,7 +104,6 @@ export function restoreBlockPropsMarkers(blocks: BlockNoteContent): BlockNoteCon
   }) as BlockNoteContent;
 }
 
-/** 保存前把行内旧标记收进 props，避免注释再写进正文。 */
 export function detachBlockPropsMarker<T extends MarkdownBlock>(block: T): T {
   const stripped = stripInlineMarker(block.content);
   if (!stripped) return block;

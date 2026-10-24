@@ -3,7 +3,6 @@ import { useBlockNoteEditor, useExtension, useExtensionState } from "@blocknote/
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { tableReorderPreview } from "./tableReorderPreview";
 
-/** Pointer capture works while held, without native HTML drag/menu press conflicts. */
 export function useTableHandleDrag(
   orientation: "row" | "column",
   hideOtherElements: (hide: boolean) => void,
@@ -21,7 +20,6 @@ export function useTableHandleDrag(
     draggable: false,
     isDragging,
     onClickCapture(event: MouseEvent<HTMLButtonElement>) {
-      // Pointer taps are handled on pointerup; retain the keyboard menu trigger.
       if (event.detail === 0) return;
       event.preventDefault();
       event.stopPropagation();
@@ -88,7 +86,6 @@ export function useTableHandleDrag(
       }, options);
       grip.addEventListener("lostpointercapture", () => finish(false), { signal: abort.signal });
       win.addEventListener("blur", () => finish(false), options);
-      // Captured geometry becomes stale when the note or its table scroller moves.
       win.addEventListener("scroll", () => finish(false), options);
       win.addEventListener("resize", () => finish(false), options);
       win.addEventListener("keydown", (key) => {

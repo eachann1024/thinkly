@@ -1,4 +1,3 @@
-// 装饰用内联 SVG：全部生成 data URI，不依赖外部资源，可被 html-to-image 栅格化。
 
 const XMLNS = "http://www.w3.org/2000/svg";
 
@@ -14,7 +13,6 @@ function round(value: number): string {
   return String(Math.round(value * 100) / 100);
 }
 
-/** 确定性伪随机，保证每次导出图案一致。 */
 function seeded(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -32,7 +30,6 @@ function hexToUnitRgb(hex: string): [number, number, number] {
 
 export const GRAIN_TILE = 180;
 
-/** 纸张颗粒：以噪声红通道驱动透明度，只留稀疏斑点。 */
 export function grainSvg(tone: string, opacity: number, fibers = false): string {
   const [r, g, b] = hexToUnitRgb(tone).map(round);
   const k = round(opacity * 4);
@@ -46,7 +43,6 @@ export function grainSvg(tone: string, opacity: number, fibers = false): string 
   );
 }
 
-/** 右上角网点：越靠角越大。 */
 export function halftoneSvg(color: string, size: number): string {
   const step = 11;
   const maxRadius = 4.4;
@@ -117,7 +113,6 @@ export function coffeeRingSvg(color: string): string {
 
 export const HORIZON_HEIGHT = 170;
 
-/** 透视网格地平线，横向随容器拉伸，线宽保持不变。 */
 export function horizonSvg(color: string): string {
   const width = 680;
   const height = HORIZON_HEIGHT;
@@ -137,7 +132,6 @@ export function horizonSvg(color: string): string {
   );
 }
 
-/** 条纹落日：自上而下按间距递增镂空，露出卡片上沿的部分也能看到条纹。 */
 export function sunSvg(color: string): string {
   const cuts = [
     [50, 2],

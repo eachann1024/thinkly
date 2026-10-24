@@ -7,7 +7,6 @@ import { rebaseResourceContent } from "../local-resource-paths";
 
 type HistoryMove = { id: string; from: string; to: string };
 
-/** 跨笔记本移动：整个 `<hash>/` 目录先复制并核对，正文移动成功后再清理源目录。 */
 export async function withNotebookHistoryTransfer<T>(
   sourceBase: string,
   targetBase: string,
@@ -71,13 +70,11 @@ export async function withNotebookHistoryTransfer<T>(
           if (!(await fs!.writeFile(destination, content))) throw new Error(uiText("couldnTWriteTheMigratedHistory"));
           if ((await fs!.readFile(destination)) !== content) throw new Error(uiText("migratedHistoryFailedVerification"));
         }
-        // meta.json 最后写入：它出现即代表该目录完整可用。
         const meta = JSON.stringify({ ...entry.meta, relativePath: entry.to, previousPaths: [] }, null, 2) + "\n";
         const metaFile = `${target.dir}/${META_FILE}`;
         if (!(await fs!.writeFile(metaFile, meta)) || (await fs!.readFile(metaFile)) !== meta) throw new Error(uiText("migratedHistoryFailedVerification"));
       }
       const result = await move();
-      // 正文已移动，清理失败只保留额外历史副本，不能撤回目标的有效历史。
       for (const entry of planned) {
         if (!(await fs!.deleteDir(entry.sourceDir))) console.warn("[notebook-move] 原历史副本尚未清理", entry.sourceDir);
       }

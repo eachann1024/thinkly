@@ -19,7 +19,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
     matchesConfiguredShortcut,
   } = actions;
   return [
-    // F3 → editor find navigation
     {
       id: "find-nav-f3",
       allowRepeat: true,
@@ -34,7 +33,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         );
       },
     },
-    // 设置快捷键固定：全平台 Mod+,（mac ⌘, / win·linux Ctrl+,）。中文逗号与 Comma 归一后再匹配。
     {
       id: "open-settings",
       match: (event) => {
@@ -58,7 +56,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         window.dispatchEvent(new CustomEvent("goose-note:open-settings"));
       },
     },
-    // Mod+K search
     {
       id: "open-search",
       shortcutId: "openSearch",
@@ -75,8 +72,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         }));
       },
     },
-    // Mod+J 开关 AI 面板 —— 对齐 Notion（mac ⌘J / win ctrl J），跨平台用 Mod 自动转
-    // 是否真正切换由 WorkspaceLayout 侧监听判断（需 ai.enabled），这里只负责派发
     {
       id: "toggle-ai-panel",
       shortcutId: "toggleAIPanel",
@@ -89,7 +84,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
       },
     },
-    // toggle sidebar — configurable, default Alt+B; allow triggering even from editor
     {
       id: "toggle-sidebar",
       shortcutId: "toggleSidebar",
@@ -107,7 +101,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         else useSidebarView.getState().toggleSidebarCollapsed();
       },
     },
-    // 页内查找固定为 Chrome/系统通用的 Mod+F。
     {
       id: "editor-find-open",
       match: (event) =>
@@ -118,7 +111,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         window.dispatchEvent(new CustomEvent("goose-note:editor-find-open"));
       },
     },
-    // 页内替换：macOS 不用 Mod+H（会隐藏应用），与 VS Code 一样走 Mod+Alt+F。
     {
       id: "editor-find-replace-open",
       match: (event) => matchShortcut(event, "Mod+Alt+F"),
@@ -132,8 +124,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         );
       },
     },
-    // cmd+g forward / cmd+shift+g backward — direction driven by shiftKey,
-    // so we cannot use matchShortcut('Mod+G') (it would reject cmd+shift+g).
     {
       id: "editor-find-nav-g",
       allowRepeat: true,
@@ -151,7 +141,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         );
       },
     },
-    // font zoom in (cmd +/=) — custom matcher keeps event.code fallback
     {
       id: "zoom-in",
       match: (event) => hasPrimaryModifier(event) && isZoomInKey(event),
@@ -160,7 +149,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         useSettings.getState().increaseEditorFontSize();
       },
     },
-    // font zoom out (cmd -)
     {
       id: "zoom-out",
       match: (event) => hasPrimaryModifier(event) && isZoomOutKey(event),
@@ -169,7 +157,6 @@ export function createEditorHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         useSettings.getState().decreaseEditorFontSize();
       },
     },
-    // font zoom reset (cmd 0)
     {
       id: "zoom-reset",
       match: (event) => hasPrimaryModifier(event) && isZoomResetKey(event),

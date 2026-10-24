@@ -49,9 +49,6 @@ ja:
 const t = createTranslator(messages);
 
 
-// 展示型块不显示右键菜单，文字选区继续使用剪贴板菜单。
-// math/mermaid 是 codeBlock 的 language 变体，其 data-content-type 为 "codeBlock"，
-// 但需通过父块的 data-language 属性区分；image/file/audio/video/divider/imageResize 直接匹配
 const CONTEXT_MENU_EXCLUDED_BLOCK_TYPES = new Set([
   "image",
   "imageResize",
@@ -67,7 +64,6 @@ function isExcludedBlockTarget(target: HTMLElement): boolean {
   if (!blockContent) return false;
   const contentType = (blockContent as HTMLElement).dataset.contentType ?? "";
   if (CONTEXT_MENU_EXCLUDED_BLOCK_TYPES.has(contentType)) return true;
-  // codeBlock 且 language 为 math 或 mermaid 也属于展示型
   if (contentType === "codeBlock") {
     const lang = (blockContent as HTMLElement).dataset.language ?? "";
     if (lang === "math" || lang === "mermaid") return true;
@@ -87,7 +83,6 @@ interface EditorContextMenuProps {
   handleEditorKeyDownCapture?: (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => void;
-  // EditorComposer 的属性暂由其他实施范围维护；本菜单不再消费这两项。
   searchProviders: any[];
   customActions: any[];
   effectiveTheme: "light" | "dark";
@@ -116,7 +111,6 @@ export function EditorContextMenu({
   const selectedTextRef = useRef("");
   const { handleContextPaste, handleCopySelection, handleCutSelection, rememberContextSelection } =
     useEditorContextClipboard(editor, editable, selectedTextRef);
-  // 速记小窗根据草稿页隐藏「生成选中图片」。
   const showSelectionImageExport =
     page?.id !== "__quicknote_draft__";
 
@@ -126,7 +120,6 @@ export function EditorContextMenu({
     try {
       text = getEditorSelectionPlainText(editor.prosemirrorState);
     } catch {
-      /* ignore */
     }
     const trimmedText = text.trim();
     selectedTextRef.current = trimmedText;
@@ -135,7 +128,6 @@ export function EditorContextMenu({
       copyable =
         copyable || Boolean(resolveCopyBlockSelection(editor.prosemirrorState));
     } catch {
-      /* ignore */
     }
     setCanCopy(copyable);
 

@@ -11,7 +11,6 @@ export function createCreateNotebookActions(
   get: import("zustand").StoreApi<NotebooksState>["getState"],
 ): Pick<NotebooksState, "createNotebook" | "createLocalFolderNotebook"> {
   return {
-    // 内置笔记本只保留恢复数据格式，不再提供新建入口。
     createNotebook: () => "",
 
     createLocalFolderNotebook: (name, localPath) => {
@@ -69,8 +68,6 @@ export function createCreateNotebookActions(
         notebooks: nextNotebooks,
         activeNotebookId: id,
       });
-      // 新本尚没有可复用的页面缓存，必须立即离开旧本编辑器；不能等异步
-      // scan 的 showWelcome 收尾才清空，否则新库加载期间会短暂显示旧库正文。
       void pagesStore.setActivePage(null);
       return id;
     },

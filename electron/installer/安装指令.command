@@ -1,5 +1,4 @@
 #!/bin/zsh
-# Only the explicitly installed Thinkly bundle is eligible for this operation.
 set -eu
 APP='/Applications/Thinkly.app'
 finish() {

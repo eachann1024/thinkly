@@ -1,10 +1,5 @@
 import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
-/**
- * 侧边 AI 模型选择器 — 默认跟随设置里配置的模型，
- * 切换后写入 workspaceSelectedModelId 作为工作区级覆盖，
- * 重新选回默认模型时清除覆盖。
- */
 import { useMemo, useState } from "react";
 import { Check, ChevronDown } from "@/components/ui/icons";
 import {
@@ -49,7 +44,6 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
     (state) => state.setAIWorkspaceSelectedModelId,
   );
 
-  // 默认选中设置配置的模型；工作区覆盖失效（模型已不在列表中）时回退默认。
   const effectiveModelId = useMemo(() => {
     if (
       workspaceSelectedModelId &&

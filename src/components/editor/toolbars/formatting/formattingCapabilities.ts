@@ -20,24 +20,23 @@ import {
 
 export type FormattingSelectionMode =
   | "none"
-  | "cellText" // text selection touching table (single continuous text range inside table)
-  | "cellGrid" // prosemirror-tables CellSelection (multi-cell grid)
-  | "singleBlock" // one non-table block
-  | "multiBlock"; // ≥2 blocks
+  | "cellText"
+  | "cellGrid"
+  | "singleBlock"
+  | "multiBlock";
 
 export type FormattingTextAlignment = "left" | "center" | "right";
 
 export interface FormattingToolbarCapabilities {
   mode: FormattingSelectionMode;
-  showMarks: boolean; // bold/italic/strike/underline/code
+  showMarks: boolean;
   showColors: boolean;
   showLink: boolean;
   showAlign: boolean;
-  showAi: boolean; // presence of extractable text; AI enabled is UI concern
+  showAi: boolean;
   showClear: boolean;
   textAlignment: FormattingTextAlignment;
 }
-/** 选区是否触及表格（tableRole 或 type.name === "table"）。 */
 function selectionTouchesTable(selection: { $from: any; $to: any }): boolean {
   if (findAncestorOfRole(selection.$from, "table")) return true;
   if (findAncestorOfRole(selection.$to, "table")) return true;
@@ -69,11 +68,6 @@ function normalizeTextAlignment(value: unknown): FormattingTextAlignment {
   return "left";
 }
 
-/**
- * 是否应显示对齐控件：
- * - 无任何选中块支持 textAlignment，且无表格单元格选区 → false
- * - 表格无 getCellSelection() 且无块级 textAlignment → false
- */
 export function canShowAlign(editor: BlockNoteEditor<any, any, any>): boolean {
   const blocks = getSelectedBlocksSafe(editor);
   const cellSelection = getCellSelectionSafe(editor);
@@ -128,7 +122,6 @@ export function getFormattingSelectionMode(
     blockCount = 0;
   }
   if (blockCount <= 1) {
-    // getSelection 在 AllSelection / 部分 PM 选区可能为空；回退 safe + 容器计数
     const safeCount = getSelectedBlocksSafe(editor).length;
     blockCount = Math.max(blockCount, safeCount);
   }
@@ -143,10 +136,6 @@ export function getFormattingSelectionMode(
   return "singleBlock";
 }
 
-/**
- * 读取当前选区文字对齐（块级 props 或表格选中单元格）。
- * 对齐算法对齐 BlockNote TextAlignButton；表格优先首个选中单元格。
- */
 export function getSelectionTextAlignment(
   editor: BlockNoteEditor<any, any, any>,
 ): FormattingTextAlignment {
@@ -236,7 +225,6 @@ export function getFormattingToolbarCapabilities(
     };
   }
 
-  // multiBlock
   return {
     mode,
     showMarks: !protectsTitle,

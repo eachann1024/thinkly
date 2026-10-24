@@ -13,15 +13,10 @@ import {
 } from "./geometry";
 import { DOT_MOTION, rippleDelay } from "./motion";
 
-/**
- * 缺省图容器的边角点阵装饰（与 corners.tsx 互补）：虚线刻度、散点星、栅格碎片。
- * 透明度 ≈ 0.12–0.25，循环周期 11–14s；由 DotDecor 统一放进容器查询层。
- */
 
 const isLeft = (p: CornerPosition) => p.endsWith("left");
 const isTop = (p: CornerPosition) => p.startsWith("top");
 
-/** 以角为锚点、向内缩进 inset 的绝对定位。 */
 function place(
   p: CornerPosition,
   inset: number | [number, number],
@@ -35,7 +30,6 @@ function place(
 
 const SHAPE_CLASS = "pointer-events-none absolute text-foreground";
 
-/** 虚线刻度：沿边缘的点阵标尺，每 5 格一根长刻度；自锚角向外渐隐，亮度沿刻度缓慢流过。 */
 export function DecorTicks({
   position,
   axis = "x",
@@ -58,7 +52,6 @@ export function DecorTicks({
     `ticks:${position}:${axis}:${length}:${gap}:${max}`,
     () => {
       const dots: Dot[] = [];
-      // 刻度贴着容器边：x 轴刻度向内（远离边）伸出，y 轴同理
       const fromStart = axis === "x" ? isLeft(position) : isTop(position);
       const edgeNear = axis === "x" ? isTop(position) : isLeft(position);
       const count = Math.floor(length / gap);
@@ -105,7 +98,6 @@ export function DecorTicks({
   );
 }
 
-/** 散点星：少量十字小星与单点随机散布（种子固定），分三组错峰缓慢微亮。 */
 export function DecorScatter({
   position,
   width = 132,
@@ -188,7 +180,6 @@ export function DecorScatter({
   );
 }
 
-/** 栅格碎片：一块按有序抖动向外剥落的方格点阵，按对角带缓慢波纹。 */
 export function DecorShard({
   position,
   cols = 7,
@@ -214,7 +205,6 @@ export function DecorShard({
       const dots: Dot[] = [];
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
-          // 局部坐标 (u, v)：锚角处最密
           const u = isLeft(position) ? i : cols - 1 - i;
           const v = isTop(position) ? j : rows - 1 - j;
           const t = clamp(1 - (u / cols + v / rows) * 0.62);

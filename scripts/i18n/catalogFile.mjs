@@ -8,7 +8,6 @@ function schemaType(schema) {
   return `{ ${Object.entries(schema).map(([key, params]) => `${quote(key)}: { ${Object.entries(params).map(([name, type]) => `${quote(name)}: ${type}`).join("; ")} }`).join("; ")} }`;
 }
 
-/** Keep the full CLI and the incremental dev session on exactly the same parser. */
 export function analyzeCatalogFile(root, filename, code, metrics) {
   const source = relative(root, filename).replaceAll("\\", "/");
   const record = { source, code, normalizedCode: code, entries: [], declarations: [], sidecar: null };

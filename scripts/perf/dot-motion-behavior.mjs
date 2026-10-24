@@ -1,4 +1,3 @@
-/** 对真实 renderer DOM 执行行为验收；page 由浏览器或隔离 Electron 提供。 */
 export async function verifyDotMotion(page, dotInput) {
 const checks = [];
 const check = (label, ok, detail) => checks.push({ label, ok: Boolean(ok), detail });
@@ -172,7 +171,6 @@ try {
         picture: `${style.transform}:${style.opacity}` };
     })));
   const started = await state();
-  // Infrequent blinks may hold their first frame for almost an entire cycle.
   const duration = Math.max(4500, ...started.map((item) => item.duration
     * (item.name.startsWith("goose-cs-blink") ? 0.98 : 0.5) + 250));
   const pictures = [];

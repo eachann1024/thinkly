@@ -1,10 +1,9 @@
 @layer base {
   :root {
-    --goose-shell-bg: 0 0% 94.51%; /* #F1F1F1 主界面壳层/侧栏/舞台留白共用 */
+    --goose-shell-bg: 0 0% 94.51%;
     --goose-search-overlay: rgba(0, 0, 0, 0.34);
     --goose-search-overlay-fallback: rgba(0, 0, 0, 0.55);
     --goose-selected-bg: 60 6.67% 94.12%;
-    /* 鸢尾靛蓝：激活导航/选中项浅底（实色 hex，Electron 旧内核安全） */
     --goose-interactive-selected: #e0e7ff;
     --goose-interactive-selected-fg: var(--goose-text-primary);
     --goose-interactive-selected-border: transparent;
@@ -13,45 +12,38 @@
     --goose-interactive-hover-fg: var(--goose-interactive-selected-fg);
     --goose-interactive-hover-border: transparent;
     --goose-editor-selection-bg: #e0e7ff;
-    /* 紧凑按钮状态：实色，避免 Electron 旧内核解析 hsl(var(...)/alpha) 失败 */
     --goose-control-hover-bg: var(--goose-interactive-hover);
     --goose-primary-hover-bg: var(--goose-interactive-hover);
     --goose-primary-active-bg: var(--goose-interactive-selected);
     --goose-icon-chip-on-selected: var(--goose-interactive-selected);
-    /* 置顶/Pin 激活红：必须是 hex 实色，Electron 旧内核解析不了 Tailwind 的 oklch 红 */
     --goose-pin-accent: #ef4444;
-    /* 语义实色变量——替代 Tailwind 裸调色板色，Electron 旧内核 oklch 解析失败兜底 */
-    --goose-color-danger: var(--goose-text-danger); /* Pin/删除强调红 */
-    --goose-color-danger-hover: #dc2626; /* 删除按钮 hover 背景红 */
-    --goose-color-danger-subtle-bg: #fee2e2; /* 链接移除按钮 hover 淡红背景 */
-    --goose-color-danger-focus: var(--goose-text-danger); /* 危险菜单项 focus/highlighted 文字色 */
+    --goose-color-danger: var(--goose-text-danger);
+    --goose-color-danger-hover: #dc2626;
+    --goose-color-danger-subtle-bg: #fee2e2;
+    --goose-color-danger-focus: var(--goose-text-danger);
     --goose-interactive-danger: #fff1f2;
     --goose-interactive-danger-border: #d92d20;
     --goose-interactive-success: #ecfdf3;
     --goose-interactive-success-border: #32a467;
     --goose-interactive-warning: #fffaeb;
     --goose-interactive-warning-border: #dcae38;
-    --goose-color-favorite: #facc15; /* 收藏星星黄 */
-    --goose-color-unsaved: #f59e0b; /* 未保存状态点琥珀 */
-    --goose-color-success: var(--goose-text-success); /* 成功确认勾绿 */
-    --goose-color-lock-bg: #fef08a; /* 已锁定/已删除徽章背景 */
-    --goose-color-lock-text: var(--goose-text-warning); /* 已锁定/已删除徽章文字 */
-    --goose-color-restore-hover: #d97706; /* 恢复按钮 hover 背景琥珀 */
-    --goose-color-capture-hint: var(--goose-text-danger); /* 快捷键捕获提示占位符红 */
+    --goose-color-favorite: #facc15;
+    --goose-color-unsaved: #f59e0b;
+    --goose-color-success: var(--goose-text-success);
+    --goose-color-lock-bg: #fef08a;
+    --goose-color-lock-text: var(--goose-text-warning);
+    --goose-color-restore-hover: #d97706;
+    --goose-color-capture-hint: var(--goose-text-danger);
     --goose-ai-approval-check-bg: #6366f1;
     --goose-ai-approval-check-fg: var(--goose-text-on-dark);
-    /* 编辑器内浅色容器（callout / 代码工具栏等）：禁 /alpha，Electron 旧内核会回退成刺眼实色 */
     --goose-block-subtle-bg: #f3f2f1;
     --goose-block-subtle-border: #e8e7e5;
     --goose-block-subtle-hover: #ebeae8;
     --goose-table-control-hover: var(--goose-block-subtle-hover);
     --goose-block-subtle-inset: #f7f6f5;
-    /* 加载骨架：占位底色跟随区块浅底，高光只做轻微提亮 */
     --goose-skeleton-bg: var(--goose-block-subtle-hover);
     --goose-skeleton-shine: rgba(255, 255, 255, 0.6);
-    /* 当前行底：实色，避免 Electron 旧内核解析 hsl(var(...)/alpha) 失败 */
     --goose-active-line-bg: #f4f5f7;
-    /* 与标题色条左右外扩对齐；文字/光标仍落在原基线 */
     --goose-active-line-outset: 8px;
     --goose-callout-accent: #6366f1;
     --goose-callout-bg: #f7f6f3;
@@ -86,7 +78,6 @@
     --workspace-drag-line-color: hsl(var(--primary));
     --workspace-drag-line-glow: 0 0 8px hsl(var(--primary) / 0.4);
 
-    /* Font Variables mapped to Tailwind theme */
     --font-ui:
       "Inter Variable", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Segoe UI", sans-serif;
     --font-default: var(--font-ui);
@@ -102,12 +93,10 @@
   }
 
   .dark {
-    /* 更深壳层 + 抬升编辑面，拉开层次 */
     --goose-shell-bg: 222 14% 8.5%;
     --goose-search-overlay: rgba(0, 0, 0, 0.72);
     --goose-search-overlay-fallback: var(--goose-search-overlay);
     --goose-selected-bg: 220 12% 15.5%;
-    /* 默认强调色 fallback：ocean 蓝（无 data-goose-accent 时也不掉 iris 紫） */
     --goose-interactive-selected: rgba(59, 130, 246, 0.28);
     --goose-interactive-selected-fg: var(--goose-text-primary);
     --goose-interactive-selected-border: #60a5fa;

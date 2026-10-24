@@ -3,7 +3,6 @@ import type { EditorView } from "prosemirror-view";
 import type { InlinePreviewPart } from "./inlinePreview";
 import { groupInlinePreviewRanges } from "./inlinePreviewRange";
 
-/** Keep both vertical edges inside the editor and any horizontal clipping ancestor. */
 function horizontalBounds(host: HTMLElement) {
   const bounds = host.getBoundingClientRect();
   let left = bounds.left;
@@ -18,7 +17,6 @@ function horizontalBounds(host: HTMLElement) {
   return { left, right };
 }
 
-/** A sibling layer keeps the outline out of ProseMirror's editable document. */
 export function createInlinePreviewOutline(view: EditorView, key: PluginKey<InlinePreviewPart[]>) {
   const host = view.dom.parentElement;
   if (!host) return { update() {}, destroy() {} };
@@ -42,7 +40,6 @@ export function createInlinePreviewOutline(view: EditorView, key: PluginKey<Inli
         return element instanceof HTMLElement ? [element.getBoundingClientRect()] : [];
       }).filter((rect) => rect.width > 0 && rect.height > 0);
       if (!rects.length) continue;
-      // Preserve the outset where there is room, but never draw an edge outside the clip.
       const left = Math.max(Math.min(...rects.map((rect) => rect.left)) - 5 * scaleX, bounds.left + scaleX);
       const top = Math.min(...rects.map((rect) => rect.top));
       const right = Math.min(Math.max(...rects.map((rect) => rect.right)) + 5 * scaleX, bounds.right - scaleX);

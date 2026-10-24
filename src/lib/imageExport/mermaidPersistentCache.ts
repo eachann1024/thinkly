@@ -60,7 +60,6 @@ export async function persistPreview(key: string | null, svg: string) {
       const metadata = transaction.objectStore(METADATA);
       store.put({ key, svg, size, updated: Date.now() });
       metadata.put({ key, size, updated: Date.now() });
-      // Eviction only reads small metadata records, never clones all cached SVG strings.
       const all = metadata.getAll();
       all.onsuccess = () => {
         const entries = all.result.sort((a, b) => a.updated - b.updated);
@@ -73,5 +72,5 @@ export async function persistPreview(key: string | null, svg: string) {
       };
       transaction.oncomplete = transaction.onerror = transaction.onabort = () => resolve();
     });
-  } catch { /* The preview remains usable if storage is unavailable or full. */ }
+  } catch {   }
 }

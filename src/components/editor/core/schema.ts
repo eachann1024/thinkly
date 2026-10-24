@@ -16,7 +16,6 @@ import { columnLayoutBlockSpec, columnSectionBlockSpec } from "../blocks/columns
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    // 普通 heading 保留 section 折叠；显式 toggle heading/list 使用真实 children。
     heading: gooseHeadingBlockSpec,
     table: gooseTableBlockSpec,
     toggleListItem: gooseToggleListItemBlockSpec,

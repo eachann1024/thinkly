@@ -39,7 +39,6 @@ function languageOf(node: { attrs: Record<string, unknown> }) {
   return typeof raw === "string" ? raw.trim().toLowerCase() : "";
 }
 
-/** 光标所在代码行（1-based）打到 codeBlock 节点上，供 CSS 画当前行底。 */
 export function resolveCodeBlockActiveLine(
   state: EditorState,
 ): DecorationSet | null {
@@ -51,8 +50,6 @@ export function resolveCodeBlockActiveLine(
     if (isWrapped(node)) return null;
     if (SKIP_LANGUAGES.has(languageOf(node))) return null;
 
-    // React node view 会丢掉打在 codeBlock 上的 decoration attrs，
-    // 改挂外层 blockContainer（和列表当前行同一层）。
     const containerDepth = depth - 1;
     const container = $head.node(containerDepth);
     if (container.type.name !== "blockContainer") return null;

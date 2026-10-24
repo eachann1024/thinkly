@@ -1,7 +1,3 @@
-/**
- * 重名后缀与本地文件共用：空闲用原名，否则 `名称 (1)`、`名称 (2)`… 直到 99。
- * allocateUniqueLocalBaseName、新建页和窗口标题都走 duplicateSuffixName，避免另起一套后缀。
- */
 export const DUPLICATE_NAME_LIMIT = 99;
 
 export function duplicateSuffixName(baseName: string, suffix: number): string {
@@ -9,7 +5,6 @@ export function duplicateSuffixName(baseName: string, suffix: number): string {
   return `${baseName} (${suffix})`;
 }
 
-/** 原名未被占用则原样返回；否则取第一个空闲的现有后缀。全部占满时返回 null。 */
 export function withExistingDuplicateSuffix(
   baseName: string,
   taken: Iterable<string>,
@@ -22,7 +17,6 @@ export function withExistingDuplicateSuffix(
   return null;
 }
 
-/** 窗口标题：有笔记本名就用它，并避开其它窗口已经占用的标题。 */
 export function resolveNotebookWindowTitle(
   notebookName: string,
   takenTitles: Iterable<string>,

@@ -23,11 +23,6 @@ import { countLeaves, MAX_SPLIT_LEAVES } from "./tree";
 
 export type OpenBesidePlacement = "left" | "right" | "top" | "bottom";
 
-/**
- * 把已有笔记开到当前格的左、右、上或下方，并聚焦新格。
- * 单格编辑区同样适用：ensureTab 先补出当前页这一格。
- * 文件夹、回收站、满 4 格和不可分屏的视图都拒绝，不改现有布局。
- */
 export function openPageBeside(
   pageId: string,
   placement: OpenBesidePlacement,

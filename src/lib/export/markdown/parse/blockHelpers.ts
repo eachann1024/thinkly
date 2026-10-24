@@ -1,9 +1,5 @@
 const CODE_BLOCK_META_PREFIXES = ["thinkly=", "goose-note="];
 
-/**
- * CommonMark thematic break：至少三个相同的 `-` / `*` / `_`，中间可夹空格。
- * 行首最多 3 个空格；与 setext 标题下划线（`---` 紧跟在文本行后）互斥，由调用方保证。
- */
 export function isThematicBreakLine(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed) return false;
@@ -70,13 +66,6 @@ export function parseCodeFenceInfo(infoLine: string): {
   };
 }
 
-/**
- * 解析 GFM 表格 → BlockNote table 块格式：
- * { type: "table", content: { type: "tableContent", rows: [{ cells: [InlineContent[]] }] } }
- *
- * 直接输出 BlockNote 运行时格式（而非 TipTap tableRow 节点），使 normalizeBlocks
- * 直通后编辑器可直接加载，序列化侧统一走 rows/cells 读取。首行为表头（GFM 约定）。
- */
 export function parseTableBlock(
   lines: string[],
   i: number,

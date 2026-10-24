@@ -16,10 +16,6 @@ function readHeadingLevel(block: unknown): number | null {
   return typeof block.props.level === "number" ? block.props.level : null;
 }
 
-/**
- * 内部笔记本空态红线：标题一之下必须有一行普通正文块可点可写。
- * 仅当文档顶层只剩标题一（H1）时补一个空段落；有任何其它正文块则原样返回。
- */
 export function ensureBodyParagraphAfterTitle(
   content: BlockNoteContent,
 ): BlockNoteContent {
@@ -36,9 +32,6 @@ export function ensureBodyParagraphAfterTitle(
   return next;
 }
 
-/**
- * 运行时判断：当前编辑器文档是否「只剩标题一」、需要补空正文。
- */
 export function needsBodyParagraphAfterTitle(
   blocks: ReadonlyArray<unknown>,
 ): boolean {

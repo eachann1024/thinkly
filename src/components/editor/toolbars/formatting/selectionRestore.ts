@@ -17,7 +17,6 @@ export function restoreSelectionAfterFormat(
   editor: BlockNoteEditor<any, any, any>,
   snapshot: { json: any; bookmark?: SelectionBookmark },
 ) {
-  // BlockNote's multiple-node class inherits Selection.fromJSON recursively.
   const resolve = (doc: ProseMirrorNode) =>
     snapshot.json.type === "multiple-node"
       ? (snapshot.bookmark?.resolve(doc) ??
@@ -39,7 +38,6 @@ export function restoreSelectionAfterFormat(
       tr.setSelection(resolve(tr.doc));
     });
   } catch {
-    /* 文档结构变了就保持当前选区 */
   }
 }
 
@@ -74,7 +72,6 @@ export function withPreservedSelection(
   try {
     editor.focus();
   } catch {
-    /* ignore */
   }
   apply();
   restoreSelectionAfterFormat(editor, snapshot);

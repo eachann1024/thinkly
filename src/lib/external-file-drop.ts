@@ -1,4 +1,3 @@
-/** Native files only: editor blocks and app page drags keep their own handlers. */
 export function isExternalFileTransfer(data: Pick<DataTransfer, "types">): boolean {
   const types = Array.from(data.types);
   return types.includes("Files") && !types.some(type =>
@@ -12,7 +11,6 @@ export function getExternalFileDropTarget(target: EventTarget | null): "editor" 
   return null;
 }
 
-/** Read synchronously: the browser clears DataTransfer after the drop callback. */
 export function readExternalDroppedFiles(data: DataTransfer): { files: File[]; skippedCount: number } {
   const items = Array.from(data.items || []).filter(item => item.kind === "file");
   if (!items.length) return { files: Array.from(data.files || []), skippedCount: 0 };
@@ -27,7 +25,6 @@ export function readExternalDroppedFiles(data: DataTransfer): { files: File[]; s
   return { files, skippedCount };
 }
 
-/** Protected drag data can hide filenames; do not claim those files are accepted. */
 export function getSidebarFileDragState(data: DataTransfer): "accepted" | "rejected" | "pending" {
   const files = Array.from(data.files || []);
   if (files.length) return files.some(file => /\.(md|markdown)$/i.test(file.name)) ? "accepted" : "rejected";

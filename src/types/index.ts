@@ -32,7 +32,7 @@ export interface Workspace {
   createdAt: number;
   updatedAt: number;
   source?: "default" | "local-folder";
-  localPath?: string; // 本地文件夹路径
+  localPath?: string;
 }
 
 export interface Page {
@@ -43,7 +43,6 @@ export interface Page {
   cover?: string;
   content: JSONContent;
 
-  // Feature flags
   isFolder?: boolean;
   isFavorite?: boolean;
   isLocked: boolean;
@@ -51,29 +50,23 @@ export interface Page {
   fontFamily: FontFamily;
   pageLayout?: PageLayout;
 
-  // Metadata
   createdAt: number;
   updatedAt: number;
-  order?: number; // Custom sort order
-  favoriteOrder?: number; // Favorites-only sort order
+  order?: number;
+  favoriteOrder?: number;
   isPinned?: boolean;
   pinnedAt?: number;
-  trashedAt?: number; // Soft delete
-  trashBatchId?: string; // Soft delete 批次标识，restore 精确匹配同批
-  /** 分屏先编辑的内存草稿；首次内容保存成功后才进入文件列表。 */
+  trashedAt?: number;
+  trashBatchId?: string;
   editorDraft?: boolean;
 
-  // Local file system (for local-folder mode)
   localFilePath?: string;
-  /** Electron 新标签：先在内存编辑，输入内容后再写盘。 */
   localUnsaved?: boolean;
   localPendingCreate?: "folder" | "file";
   localReadState?: LocalFileReadState;
   localReadError?: string;
-  // 文件顶部 YAML frontmatter 原文（含起止 --- 行，不入编辑器，保存时 prepend 回去）。
   localFrontmatter?: string;
 
-  // Linking (for future bidirectional links)
   outgoingLinks?: string[];
   incomingLinks?: string[];
 }

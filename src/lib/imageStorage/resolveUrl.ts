@@ -1,17 +1,13 @@
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { clearResolvedUrlCache, resolveCachedUrl } from "./resolvedUrlCache";
 
-/** Kept for compatibility; cached data URLs do not require explicit revocation. */
 export const clearResolvedImageObjectUrlCache = clearResolvedUrlCache;
 
-/** Resolve a resource, merging reads while preserving mounted consumers on eviction. */
 export async function resolveImageRefToUrl(
   url: string,
   pageLocalFilePath?: string | null,
 ): Promise<string> {
   if (/^(https?:|data:|blob:)/.test(url)) return url;
-  // Normal video playback uses owned blob leases. Keep this legacy callback
-  // playable without leaking ownerless object URLs; its data URLs are not retained.
   const { videoStorage } = await import("@/lib/videoStorage");
   if (videoStorage.canHandle(url)) {
     return resolveCachedUrl(`legacy-video:${pageLocalFilePath ?? ""}:${url}`, url,
@@ -37,7 +33,6 @@ export async function resolveImageRefToUrl(
     }, () => readLocalFileAsBlobAsync(fullPath));
   }
   return resolveCachedUrl(url, url,
-    // Content-addressed attachments are immutable. Legacy UUID resources are not.
     async () => /^att:goose-img\/[a-f0-9]{64}\./.test(url) ? url : null,
     async () => {
       return (await import("./index")).imageStorage.load(url);

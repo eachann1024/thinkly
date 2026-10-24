@@ -61,7 +61,6 @@ export function ReviewProposal({
   };
 }) {
   useLocale();
-  // 页面标题、路径与可导航状态跟随目标笔记的变化。
   usePages((state) => state.pages);
   const { input, journal } = readReviewPlan(part);
   const operations = input?.operations ?? [];

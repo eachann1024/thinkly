@@ -11,7 +11,6 @@ export interface CodeBlockToolbarProps {
   onOpenPreview?: () => void;
   onSystemPreview?: () => void;
   onDownloadPreview?: () => void;
-  /** 复制渲染后的预览图（Mermaid / Math），未提供时退回复制源码 */
   onCopyPreview?: () => void | Promise<void>;
   canPreview?: boolean;
 }

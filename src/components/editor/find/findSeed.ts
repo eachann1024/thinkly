@@ -25,10 +25,6 @@ function readDomSelection(container: HTMLElement | null | undefined): string {
   return getSelectedPlainTextContext(container)?.selectedText ?? "";
 }
 
-/**
- * Cmd+F 打开页内查找时，把当前选区写进查找框。
- * 优先 BlockNote 选区，表格单元格和代码块再走专用/DOM 回退。
- */
 export function readEditorFindSeed(
   editor: FindSeedEditor | null | undefined,
   container?: HTMLElement | null,

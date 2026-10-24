@@ -9,11 +9,8 @@ ja:
   theContentIsTooLargeToExportAsOne: "内容が大きすぎて 1 枚の画像として書き出せません。範囲を狭めてからやり直してください"
 `;
 const uiText = createTranslator(localMessages);
-/** 导出长边目标像素（4K 冗余） */
 export const EXPORT_TARGET_LONG_EDGE = 3840;
-/** 内容清晰度下限倍率（视网膜） */
 export const EXPORT_MIN_PIXEL_RATIO = 2;
-/** SVG/矢量栅格允许的更高倍率（页面长截图仍走 renderer 的 3×） */
 export const EXPORT_MAX_PIXEL_RATIO = 8;
 
 const MAX_CAPTURE_EDGE = 16_384;
@@ -21,11 +18,8 @@ const MAX_CAPTURE_PIXELS = 16_000_000;
 const MIN_CAPTURE_PIXEL_RATIO = 0.1;
 
 export type ContentAwarePixelRatioOptions = {
-  /** 长边目标像素，默认 3840（4K） */
   targetLongEdge?: number;
-  /** 最低倍率，默认 2 */
   minRatio?: number;
-  /** 最高倍率，默认 8 */
   maxRatio?: number;
 };
 
@@ -44,12 +38,6 @@ function isCaptureRatioWithinLimits(
   );
 }
 
-/**
- * 按内容宽高计算导出 pixelRatio：
- * - 优先把长边推到 4K（3840）冗余
- * - 小内容至少 2×，避免糊
- * - 大内容受画布边长 / 16M 像素上限约束
- */
 export function calculateContentAwarePixelRatio(
   width: number,
   height: number,
@@ -67,11 +55,9 @@ export function calculateContentAwarePixelRatio(
     MAX_CAPTURE_EDGE / safeHeight,
   );
   const areaRatio = Math.sqrt(MAX_CAPTURE_PIXELS / (safeWidth * safeHeight));
-  // 内容越大倍率可降，但仍尽量贴 4K 长边
   const contentRatio = targetLongEdge / longEdge;
   let ratio = Math.min(maxRatio, edgeRatio, areaRatio, Math.max(minRatio, contentRatio));
 
-  // 若内容本身已超过 4K，仍尽量保留 minRatio（在安全范围内）
   if (longEdge >= targetLongEdge) {
     ratio = Math.min(maxRatio, edgeRatio, areaRatio, Math.max(1, minRatio));
   }
@@ -91,7 +77,6 @@ export function calculateContentAwarePixelRatio(
   return ratio;
 }
 
-/** 失败时按更低倍率降级重试（内存/画布偶发失败） */
 export function getContentAwarePixelRatios(
   width: number,
   height: number,

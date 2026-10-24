@@ -70,8 +70,6 @@ export function useStreamLifecycle(state: SessionState) {
     requestCurrentPageIdRef.current = null;
     return () => {
       compactAbortRef.current?.abort();
-      // 切换草稿不终止旧 Chat；独立实例把完成记录写回原会话。
-      // 切换不是一次成功完成，不能在新笔记本上误触发 celebrate。
       if (aiStatusActiveRef.current) {
         aiStatusActiveRef.current = false;
         useAiStatus.getState().reset();
@@ -90,7 +88,6 @@ export function useStreamLifecycle(state: SessionState) {
     wasStreaming: boolean;
   } | null>(null);
 
-  // 完成回执由独立 Chat 绑定原会话同步落盘；这里只整理当前可见消息。
   useEffect(() => {
     const scope = currentSessionScope;
     const previous = streamStateRef.current;
@@ -145,7 +142,6 @@ export function useStreamLifecycle(state: SessionState) {
     return () => window.clearTimeout(timer);
   }, [committedStopRef, isStreaming, messages]);
 
-  // 请求生命周期 → 页头图标：关面板/切页不打断；仅真实结束才 celebrate。
   useEffect(() => {
     if (isStreaming || isCompacting) {
       if (!aiStatusActiveRef.current) {

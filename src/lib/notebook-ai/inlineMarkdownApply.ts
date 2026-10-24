@@ -1,7 +1,3 @@
-/**
- * 行内 AI：将选区/光标块序列化为 markdown，并把模型返回的 markdown 写回对应块。
- * 与面板 agent 的 markdown 局部改写对齐，避免单块 update 无法扩列表的限制。
- */
 import { normalizeAiMarkdown } from "./markdown";
 import { inheritPresentationFromSource } from "./inheritPresentation";
 import {
@@ -25,7 +21,6 @@ export interface InlineEditTarget {
   mode: InlineEditMode;
 }
 
-/** 最小编辑器表面；用宽松类型避免与 BlockNote 泛型参数打架。 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InlineMarkdownEditor = {
   document?: unknown[];
@@ -47,7 +42,6 @@ export type InlineMarkdownEditor = {
 };
 
 export interface InlineBlockSnapshot {
-  /** 被替换前、按 sourceBlockIds 顺序克隆的完整块 */
   blocks: unknown[];
   sourceBlockIds: string[];
 }
@@ -69,7 +63,6 @@ function cloneValue<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-/** 去掉解析结果上的 id，交给 replaceBlocks 生成新块，避免与源 id 冲突。 */
 function toReplacementBlocks(blocks: unknown[]): unknown[] {
   return blocks.map((block) => {
     if (!block || typeof block !== "object") return block;
@@ -81,9 +74,6 @@ function toReplacementBlocks(blocks: unknown[]): unknown[] {
   });
 }
 
-/**
- * 在 replace 前快照源块，结构校验失败或用户拒绝时可 restore。
- */
 export function snapshotBlocks(
   editor: InlineMarkdownEditor,
   sourceBlockIds: string[],
@@ -103,9 +93,6 @@ export function snapshotBlocks(
   return { blocks, sourceBlockIds: foundIds };
 }
 
-/**
- * 用快照还原：先移除改写产生的新块 id，再写回原块。
- */
 export function restoreBlocks(
   editor: InlineMarkdownEditor,
   snapshot: InlineBlockSnapshot,
@@ -119,15 +106,11 @@ export function restoreBlocks(
   });
 }
 
-/**
- * 序列化当前行内编辑目标：有选区用选中整块；无选区用光标所在块。
- */
 export function serializeInlineEditTarget(
   editor: InlineMarkdownEditor,
 ): InlineEditTarget {
   const selected = asBlocksWithIds(editor.getSelection?.()?.blocks);
   if (selected.length > 0) {
-    // 取文档中的完整块，保证 children / props 与页面一致
     const fullBlocks = selected.map((block) => {
       const live =
         typeof editor.getBlock === "function"
@@ -166,13 +149,9 @@ export interface ApplyMarkdownToInlineTargetOptions {
 export interface ApplyMarkdownToInlineTargetResult {
   replacedCount: number;
   blockCount: number;
-  /** replace 后新块 id（按文档顺序收集），用于 restore */
   newBlockIds: string[];
 }
 
-/**
- * 用新 markdown 替换 sourceBlockIds 对应的块（可 1→N，支持列表扩写）。
- */
 export function applyMarkdownToInlineTarget(
   editor: InlineMarkdownEditor,
   newMarkdown: string,
@@ -211,7 +190,6 @@ export function applyMarkdownToInlineTarget(
     throw new Error(t("theAiResponseCouldNotBeParsedInto"));
   }
 
-  // 记录源块在文档中的锚点，便于事后收集新块 id
   const firstSourceId = sourceBlockIds[0];
   const docBefore = Array.isArray(editor.document)
     ? (editor.document as Array<{ id?: string }>)
@@ -234,11 +212,9 @@ export function applyMarkdownToInlineTarget(
       }
     }
   } else {
-    // 兜底：文档末尾可能插入；按类型扫描最近变更不够稳，尽量从非源 id 中取
     const sourceSet = new Set(sourceBlockIds);
     for (const block of docAfter) {
       if (block?.id && !sourceSet.has(block.id)) {
-        // 不盲取全文，仅当长度匹配时在后段收集
       }
     }
   }
@@ -249,8 +225,7 @@ export function applyMarkdownToInlineTarget(
     newBlockIds:
       newBlockIds.length === replacementBlocks.length
         ? newBlockIds
-        : // 若定位失败，用 replace 后文档中紧跟原位置的块数量仍可能不足；
-          // 再试一次：去掉仍存在的旧 id 后，按 diff 取新增
+        :
           collectNewBlockIds(
             docBefore,
             docAfter,
@@ -269,7 +244,6 @@ function collectNewBlockIds(
   const beforeIds = new Set(
     before.map((b) => b?.id).filter((id): id is string => !!id),
   );
-  // 源块应已消失；新增的即 new
   const sourceSet = new Set(sourceBlockIds);
   const added = after
     .map((b) => b?.id)
@@ -278,7 +252,6 @@ function collectNewBlockIds(
     );
   if (added.length === expectedCount) return added;
 
-  // 若 id 复用（部分实现会保留首块 id），按文档位置推断
   const firstIdx = after.findIndex((b) => b?.id === sourceBlockIds[0]);
   if (firstIdx >= 0) {
     return after

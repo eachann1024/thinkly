@@ -9,7 +9,6 @@
 @import "./editor-split-maximize.css";
 @import "./page-layout.css";
 
-/* Preserve the original cascade through ordered domain imports. */
 @import "./workspace/shell.css";
 @import "./workspace/native-titlebar.css";
 @import "./workspace/tabs.css";

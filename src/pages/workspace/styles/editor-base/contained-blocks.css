@@ -1,4 +1,3 @@
-/* Children remain within the same visual boundary in both shared editor hosts. */
 .bn-editor .goose-content-container > .bn-block {
   background: var(--goose-container-bg, transparent);
   border-radius: 4px;
@@ -26,7 +25,6 @@
   padding-bottom: 3px;
 }
 
-/* 引用首行保留透明边框占位；子块与首行正文使用同一输入起点。 */
 .bn-editor .goose-content-container[data-container-type="quote"] > .bn-block {
   --goose-quote-content-inset: calc(1em + 2px);
 }

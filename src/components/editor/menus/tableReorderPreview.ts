@@ -5,7 +5,6 @@ import { CellSelection, moveTableColumn, moveTableRow, TableMap } from "prosemir
 import { closeHistory } from "prosemirror-history";
 import type { EditorView } from "prosemirror-view";
 
-/** Capture geometry once; pointer frames only translate the visible preview. */
 export function tableReorderPreview(
   view: EditorView,
   blockId: string,
@@ -49,7 +48,6 @@ export function tableReorderPreview(
       });
     }));
   }
-  // Crossing a merged dimension cannot split it. Keep the existing merge intact.
   let firstTarget = 0;
   let lastTarget = lows.length - 1;
   for (const cell of cells) {
@@ -87,7 +85,6 @@ export function tableReorderPreview(
       if (rules) (rules[0] as CSSStyleRule).style.transform = `${transform}(${delta / scale}px)`;
       grip.style.translate = rowAxis ? `0 ${delta}px` : `${delta}px 0`;
       const center = (lows[from] + highs[from]) / 2 + delta;
-      // Binary search keeps pointer work independent of table row count.
       let low = 0;
       let high = lows.length;
       while (low < high) {
@@ -120,7 +117,6 @@ export function tableReorderPreview(
         moveUnmergedTableDimension(view, node, start, rowAxis, from, target);
         return;
       }
-      // Anchor the command to this table even when the text caret is elsewhere.
       const state = view.state.apply(view.state.tr.setSelection(
         CellSelection.create(view.state.doc, start + map.map[0]),
       ));

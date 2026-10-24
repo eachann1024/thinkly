@@ -1,7 +1,3 @@
-/**
- * 应用内快捷键格式 → Electron accelerator。
- * 主进程与渲染进程共用；无法识别时返回空串。
- */
 export type AcceleratorPlatform = "darwin" | "win32" | "linux" | string;
 
 function resolveAcceleratorPlatform(
@@ -14,11 +10,6 @@ function resolveAcceleratorPlatform(
   return "darwin";
 }
 
-/**
- * 应用内快捷键 → Electron accelerator。
- * Windows/Linux 上 Meta/Cmd 必须映射为 Super（Win 键）；Electron 文档写明
- * Command 在 Win/Linux 上无效，否则 globalShortcut 注册失败或根本不触发。
- */
 export function toElectronAccelerator(
   shortcut: string,
   platform?: AcceleratorPlatform,
@@ -43,7 +34,6 @@ export function toElectronAccelerator(
       continue;
     }
     if (["meta", "command", "cmd"].includes(lower)) {
-      // macOS → Command；Windows/Linux → Super（物理 Win/Super 键）
       const token = resolvedPlatform === "darwin" ? "Command" : "Super";
       if (!modifiers.includes(token)) modifiers.push(token);
       continue;
@@ -96,7 +86,6 @@ export function toElectronAccelerator(
   return [...modifiers, key].join("+");
 }
 
-/** 同一组合的 Electron 写法（unregister 必须用当时真正 register 的那条）。 */
 export function electronAcceleratorAliases(
   accelerator: string,
   platform: AcceleratorPlatform = "darwin",
@@ -112,7 +101,6 @@ export function electronAcceleratorAliases(
       ),
     );
   }
-  // Win/Linux：Super / Meta / Win 互通（录制存 Super，旧数据可能是 Meta）
   if (platform !== "darwin") {
     if (accelerator.includes("Super")) {
       aliases.push(accelerator.replaceAll("Super", "Meta"));
@@ -207,7 +195,6 @@ function inputMatchesExactAccelerator(
   const wantCommand =
     modifiers.has("command") || modifiers.has("cmd") || modifiers.has("meta");
 
-  // Chromium：macOS Command 与 Windows Win / Linux Super 都体现在 meta 位上。
   const wantMetaKey =
     platform === "darwin"
       ? wantCommand || wantSuper || (commandOrControl && true)
@@ -224,7 +211,6 @@ function inputMatchesExactAccelerator(
   return acceleratorKeyMatches(input, key);
 }
 
-/** 主进程 before-input-event 与已注册 accelerator 对齐，供前台窗补全局热键。 */
 export function inputMatchesAccelerator(
   input: AcceleratorKeyInput,
   accelerator: string,

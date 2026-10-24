@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-/** Keep mounted previews, and optionally track near-viewport changes to cancel queued work. */
 export function usePreviewVisibility<T extends HTMLElement = HTMLDivElement>(eager = false, trackVisibility = false) {
   const previewRef = useRef<T>(null);
   const [seen, setSeen] = useState(() => eager || typeof IntersectionObserver === "undefined");

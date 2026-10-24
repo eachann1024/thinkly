@@ -10,7 +10,6 @@ function moved<T>(items: readonly T[], from: number, to: number): T[] {
   return next;
 }
 
-/** Reuse immutable cells; the generic merged-table command recreates every cell. */
 export function moveUnmergedTableDimension(
   view: EditorView, table: Node, start: number, rowAxis: boolean, from: number, to: number,
 ) {
@@ -20,7 +19,6 @@ export function moveUnmergedTableDimension(
     const destination = originalRows[rowIndex];
     if (rowAxis && sourceRow === destination) return destination;
     const orderedCells = rowAxis ? sourceRow.content.content : moved(sourceRow.content.content, from, to);
-    // Header roles stay at their existing table positions, matching the generic command.
     const cells = orderedCells.map((cell, column) => {
       const type = destination.child(column).type;
       return cell.type === type ? cell : type.create(cell.attrs, cell.content, cell.marks);
@@ -31,7 +29,6 @@ export function moveUnmergedTableDimension(
   const tr = view.state.tr.replaceWith(start - 1, start - 1 + table.nodeSize, next);
   const map = TableMap.get(next);
   const cell = map.map[rowAxis ? to * map.width : to];
-  // Keep the caret in the moved content without painting a whole-table selection.
   tr.setSelection(TextSelection.near(tr.doc.resolve(start + cell + 1)));
   view.dispatch(closeHistory(tr).scrollIntoView());
   view.focus();

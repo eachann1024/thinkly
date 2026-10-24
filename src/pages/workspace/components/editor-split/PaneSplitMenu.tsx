@@ -26,7 +26,6 @@ import type { SplitLeaf } from "@/lib/editor-split/types";
 import { useEditorSplit } from "@/stores/useEditorSplit";
 import { usePages } from "@/stores/usePages";
 
-/** 正文、输入和标题栏自己处理右键，格子菜单只接空白处。 */
 export function paneKeepsOwnContextMenu(target: EventTarget | null): boolean {
   return typeof Element !== "undefined" && target instanceof Element && !!target.closest(
     ".bn-editor, input, textarea, [contenteditable='true'], [data-split-chrome]",

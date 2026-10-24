@@ -3,10 +3,6 @@ import { cn } from "@/lib/utils";
 import { DOT_MOTION_INITIAL, useDotMotion } from "./useDotMotion";
 import "./dot-matrix.css";
 
-/**
- * 点阵插画容器：负责视口暂停、减少动效与首次入场。
- * origin 为入场缩放原点（相对 viewBox 的百分比），默认居中。
- */
 export function DotMatrixMotion({
   width,
   height,

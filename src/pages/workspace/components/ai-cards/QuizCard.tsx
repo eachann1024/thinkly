@@ -45,7 +45,6 @@ function Score({ correct, total, onRetry }: { correct: number; total: number; on
   </div>;
 }
 
-/** 小测验：点选后立刻判对错并给解析，最后汇总得分，可重做。 */
 export function QuizCard({ card }: { card: QuizCardData }) {
   useLocale();
   const reduce = useReducedMotion();

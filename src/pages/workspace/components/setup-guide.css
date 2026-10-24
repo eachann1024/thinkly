@@ -1,3 +1,2 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./setup-guide-styles/layout.css";
 @import "./setup-guide-styles/responsive.css";

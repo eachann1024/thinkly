@@ -90,7 +90,6 @@ function appendTab(page: Page, tabId: string) {
   useTabs.getState().setActiveTab(tab.id);
 }
 
-/** 移出分屏后再开标签。空草稿不能走关标签的丢弃，否则新标签会指向已删页面。 */
 export function moveSplitPaneToNewTab(tabId: string, leafId: string): boolean {
   if (effectiveSingleTabMode()) return false;
   const split = useEditorSplit.getState();

@@ -1,5 +1,3 @@
-/* 行布局、背景和箭头均复用本地主树；大纲增加标题级别与收起标记。
- * 绝对定位包含块已排除共享行的透明边框，虚线贴合整条背景。 */
 .outline-panel {
   display: flex;
   width: 100%;
@@ -52,7 +50,6 @@
   opacity: 0;
 }
 
-/* 父标题复用同一栏位显示箭头，避免再增加一列留白；键盘聚焦同样可见。 */
 .outline-heading-row:is(:hover, :focus-within)
   .outline-heading-marker[data-expandable="true"] .outline-heading-level {
   opacity: 0;
@@ -72,7 +69,6 @@
   pointer-events: none;
 }
 
-/* 空态占满标题下方区域，插画与文案上下左右居中。 */
 .outline-empty {
   position: relative;
   box-sizing: border-box;

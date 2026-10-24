@@ -23,11 +23,6 @@ import { usePages } from "@/stores/usePages";
 import { useHistoryView } from "@/stores/useHistoryView";
 import { isSpecialTab, useTabs } from "@/stores/useTabs";
 
-/**
- * 指针点进另一格时，浏览器与编辑器负责把 caret 落在实际点击处；此时只同步
- * 分屏/标签/侧栏状态，不能随后再把 selection 移到正文开头。键盘与命令导航仍
- * 使用默认值，把焦点显式交给目标编辑器。
- */
 export interface FocusSplitPaneOptions {
   focusEditor?: boolean;
 }
@@ -38,10 +33,6 @@ export function activeWorkspaceTab() {
   return openTabs.find((tab) => tab.id === activeTabId) ?? null;
 }
 
-/**
- * 分屏切换由键盘或命令面板发起时，状态已更新但新叶的 Editor 还会在本帧后重挂载。
- * 等一帧再派发，确保只由新的活动编辑器接收，避免焦点留在已切走的格或命令面板里。
- */
 export function focusActiveSplitEditor() {
   if (typeof window === "undefined") return;
   const dispatch = () => {
@@ -54,10 +45,6 @@ export function focusActiveSplitEditor() {
   }
 }
 
-/**
- * 本地文件夹切换会同步置空 activePage 并异步重扫。先登记目标，重扫完成后才不会
- * 把刚替换到分屏叶的目标又清回空白。常规记事本同样通过这一路径更新侧栏。
- */
 export function syncNotebookForSplitPage(pageId: string) {
   const page = usePages.getState().getPage(pageId);
   if (!page?.workspaceId) return;
@@ -71,8 +58,6 @@ export function syncNotebookForSplitPage(pageId: string) {
     isLocalFolder &&
     notebooks.getLocalFolderLoadState(page.workspaceId).status === "loading";
 
-  // 只为跨本地库切换或正在扫描的本地库保留 pending；同本已 ready 的普通
-  // 导航必须清掉旧值，否则 watcher/后续扫描会把活动页反向抢回。
   if (!isCurrentNotebook && isLocalFolder) {
     pages.setPendingNavigatePageId(page.id);
   } else if (isLoadingCurrentLocal) {

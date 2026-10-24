@@ -1,4 +1,3 @@
-/** 从各类流式事件里抽出思考增量，避免只认 OpenAI 摘要字段。 */
 
 function nestedText(value: unknown): string {
   if (!value || typeof value !== "object") return "";

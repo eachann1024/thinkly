@@ -25,8 +25,6 @@ export function resolveNotebookLandingPageId(
     return lastPageId;
   }
 
-  // 本地文件夹首次打开保留空白入口；但已载入且曾打开过页面的本地库
-  // 应即时复用内存缓存，后台扫描完成前不让主区回退为空白。
   if (notebook.source === "local-folder") return null;
 
   const firstValidPage = Object.values(pages)

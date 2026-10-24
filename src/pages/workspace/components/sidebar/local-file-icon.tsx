@@ -24,10 +24,6 @@ interface LocalFileIconProps {
   isExpanded?: boolean;
 }
 
-/**
- * 侧栏行是不是文件夹：本地仓库看 isFolder，内置笔记本看是否已有子页面。
- * 只有文件夹行画图标、才有展开箭头。
- */
 export function isSidebarFolderRow({
   isFolder,
   hasChildren,
@@ -40,7 +36,6 @@ export function isSidebarFolderRow({
   return isLocalNotebook ? isFolder : hasChildren;
 }
 
-/** 本地仓库：每一级文件夹都显示展开箭头，不论当前有没有子项。 */
 export function shouldShowFolderExpandArrow(args: {
   isFolder: boolean;
   hasChildren: boolean;
@@ -49,10 +44,6 @@ export function shouldShowFolderExpandArrow(args: {
   return isSidebarFolderRow(args);
 }
 
-/**
- * 空文件夹占位：文件夹行展开后确实一个子项都没有才显示。
- * 本地仓库读取中/读取失败时不能冒充空目录——那只是还没扫到。
- */
 export function shouldShowEmptyFolderPlaceholder({
   isFolderRow,
   isExpanded,
@@ -136,7 +127,6 @@ export function LocalFileIcon({
     );
   }
 
-  // 本地仓库：目录默认用文件夹图标（开合状态跟箭头走），右键菜单换过的图标优先。
   if (isLocalFolder && page.isFolder) {
     const Icon =
       SelectedIcon ?? (isExpanded ? GooseIcons.FolderOpen : GooseIcons.Folder);
@@ -179,7 +169,6 @@ export function LocalFileIcon({
     );
   }
 
-  // 内置笔记本：有子页面且未自定义图标时，用"有内容的文件夹"标识可展开
   if (hasChildren) {
     const FolderStateIcon = isExpanded ? GooseIcons.FolderOpen : GooseIcons.Folder;
     return (
@@ -193,8 +182,6 @@ export function LocalFileIcon({
     );
   }
 
-  // 已设置 iconName 但 lucide 中不存在该 key（升级/改名导致）：
-  // fallback 到默认图标，避免把英文字符串直接渲染到侧栏。
   if (page.isFolder) {
     const FolderIcon = isExpanded ? GooseIcons.FolderOpen : GooseIcons.Folder;
     return (

@@ -11,7 +11,6 @@ import { clipboardHtmlDroppedMedia, withoutCopiedBlockIds } from "@/components/e
 import { writeSelectionClipboard } from "@/components/editor/extensions/copyBlockClipboard";
 import { resolveClipboardPasteRoute } from "@/components/editor/utils/pasteClipboardImage";
 
-// 真实 BlockNote 事务与项目 schema；无 DOM，不模拟系统剪贴板、解码或宿主文件系统。
 Object.defineProperty(navigator, "languages", { configurable: true, value: ["zh-CN"] });
 const { editorSchema } = await import("@/components/editor/core/schema");
 const { jsonContentToMarkdown } = await import("@/lib/export/markdown/serialize");
@@ -135,8 +134,6 @@ export default async function run() {
       const pasted = editor.document[0];
       if (editor.document.length !== 1 || pasted.type !== sample.type || pasted.id === "source") return false;
       const markdown = jsonContentToMarkdown(encodeLocalBlockPropsWrappers(editor.document as any, { preserveEmptyParagraphs: true }));
-      // 这三类写为 HTML，读回依赖真实 DOMParser；Node 只验真实序列化
-      // 输出及 BlockNote JSON 重建，不用伪造 DOM 解析器冒充宿主验收。
       const htmlType = ["table", "audio", "video"].includes(sample.type);
       const restored = htmlType
         ? create(JSON.parse(JSON.stringify(editor.document))).editor.document

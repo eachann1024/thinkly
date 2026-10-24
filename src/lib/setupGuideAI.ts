@@ -89,7 +89,6 @@ export function redactSetupGuideAIError(
   try {
     variants.add(encodeURIComponent(key));
   } catch {
-    // Keep raw-key scrubbing available even for malformed Unicode input.
   }
   for (const variant of variants) {
     if (variant) safeMessage = safeMessage.split(variant).join(t("redacted"));

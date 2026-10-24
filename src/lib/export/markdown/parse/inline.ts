@@ -4,10 +4,6 @@ import {
   pageMentionFromWikiLink,
 } from "@/components/editor/inline/pageMention";
 
-/**
- * 给一组 inline 节点统一附加样式（用于 <u>…</u> / <span style> 内部嵌套解析后合并样式）。
- * 纯字符串节点会被提升为 styled text 节点。
- */
 function applyStyles(nodes: any[], extra: Record<string, any>): any[] {
   return nodes.map((node) => {
     if (typeof node === "string") {
@@ -36,10 +32,6 @@ function toLinkContent(nodes: any[]): any[] {
   });
 }
 
-/**
- * 只读取行内颜色相关声明；忽略其他 CSS，避免把块级 text-align 等属性
- * 误当成行内样式写回编辑器。
- */
 function parseSpanColorStyles(style: string): Record<string, string> {
   const styles: Record<string, string> = {};
   const colorMatch = style.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i);
@@ -61,8 +53,6 @@ function parseInlineMarkdownChunk(text: string): any[] {
   const result: any[] = [];
   if (!text) return result;
 
-  // 优先级：$math$ > <u>underline</u> > <span style>…</span> > ==highlight== >
-  //         **bold** > *italic* > ~~strike~~ > `code` > [[wiki]] > [link](url)
   const regex =
     /(\$((?:\\\$|[^\$])+?)\$|<u>(.+?)<\/u>|<span\b([^>]*)>(.+?)<\/span>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[((?:\\.|[^\]\\\n])+?)\]\]|\[((?:\\.|[^\]\\])+)\]\(([^)]+)\))/gi;
   let lastIndex = 0;
@@ -93,13 +83,10 @@ function parseInlineMarkdownChunk(text: string): any[] {
     }
 
     if (match[2] !== undefined) {
-      // $math$
       pushPlain(`$${match[2]}$`);
     } else if (match[3] !== undefined) {
-      // <u>underline</u>：内部递归，整体附加 underline
       result.push(...applyStyles(parseInlineMarkdown(match[3]), { underline: true }));
     } else if (match[4] !== undefined && match[5] !== undefined) {
-      // Obsidian 等常见写法允许 style 在任意属性位置，且单双引号皆可。
       const styleAttribute = match[4].match(
         /\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/i,
       );
@@ -109,11 +96,9 @@ function parseInlineMarkdownChunk(text: string): any[] {
         );
         result.push(...applyStyles(parseInlineMarkdown(match[5]), styles));
       } else {
-        // 非样式 span 仍保留其中的 Markdown 行内格式，避免吞掉内容。
         result.push(...parseInlineMarkdown(match[5]));
       }
     } else if (match[6] !== undefined) {
-      // ==highlight== → yellow
       result.push(...applyStyles(parseInlineMarkdown(match[6]), { backgroundColor: "yellow" }));
     } else if (match[7] !== undefined) {
       result.push(...applyStyles(parseInlineMarkdown(match[7]), { bold: true }));

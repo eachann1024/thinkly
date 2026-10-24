@@ -53,7 +53,6 @@ export function useReferenceMentions({
     [mention.phase, mentionQuery, searchPages, searchPagesOverride, locale],
   );
 
-  // Keep a ref so keyboard handler always sees current items without stale closure
   const mentionItemsRef = useRef(mentionItems);
   useEffect(() => {
     mentionItemsRef.current = mentionItems;
@@ -91,10 +90,6 @@ export function useReferenceMentions({
 
       dispatch({ type: "cleared" });
 
-      // Prefer the range captured at detection time — by the time we get here,
-      // React may have re-rendered (popover mounting) and Chromium can reset the
-      // live selection's anchor to the contenteditable container, which would
-      // make a fresh detectMentionAtCaret() return null.
       const detected = lastDetectedRef.current ?? detectMentionAtCaret(el);
       lastDetectedRef.current = null;
       if (!detected) return;
@@ -102,18 +97,13 @@ export function useReferenceMentions({
       try {
         detected.range.deleteContents();
         if (referencePlacement === "inline") {
-          // 间距靠 CSS；ZWSP 锚点保证旧 Chromium 光标可见。
           const chip = createChipElement(item);
           detected.range.insertNode(chip);
           pruneEmptyComposerTextNodes(el);
           ensureComposerCaretAnchors(el);
-          // Focus BEFORE placing the cursor — calling focus() after addRange()
-          // resets the selection in some browsers.
           el.focus({ preventScroll: true });
           placeCaretAfterNode(chip);
         } else {
-          // Notebook AI keeps page context outside the editable prompt, so the
-          // typed @query is removed and the caret stays at that position.
           const caretRange = document.createRange();
           caretRange.setStart(
             detected.range.startContainer,
@@ -154,7 +144,6 @@ export function useReferenceMentions({
         dispatch({ type: "navigated", delta: -1, count });
         return true;
       }
-      // Shift+Enter 留给 composer 做换行；Enter / Tab 确认 @ 引用
       if (isSuggestionMenuAcceptKey(event)) {
         event.preventDefault();
         const item = items[mention.activeIndex];

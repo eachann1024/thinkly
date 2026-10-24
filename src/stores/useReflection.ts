@@ -11,21 +11,14 @@ export interface ReflectionReport extends ReflectionNarrative {
 const MAX_REPORTS = 12;
 
 interface ReflectionState {
-  /** 周期缓存键 -> 报告 */
   reports: Record<string, ReflectionReport>;
-  /** 各周期已检查的报告键，空周期也只检查一次。 */
   scheduledKeys: Partial<Record<ReflectionScope, string>>;
   markScheduled: (scope: ReflectionScope, key: string) => void;
-  /** 已读红点的上周 weekKey。 */
   lastSeenWeekKey: string | null;
-  /** 用户已同意把笔记标题和摘要发给当前 AI。 */
   aiConsent: boolean;
-  /** 用户手动开关过反思授权。未手动时，AI 启用即视为打开。 */
   aiConsentChosen: boolean;
-  /** 上周有编辑时为上周 weekKey（仅内存，由历史记录计算）。 */
   lastWeekEditedKey: string | null;
   generatingKey: string | null;
-  /** 最近一次失败，按报告键记录，避免误伤其它范围。 */
   failure: { key: string; message: string } | null;
   saveReport: (key: string, report: ReflectionReport) => void;
   markSeen: (weekKey: string) => void;
@@ -78,7 +71,6 @@ export const useReflection = create<ReflectionState>()(
         aiConsent: s.aiConsent,
         aiConsentChosen: s.aiConsentChosen,
       }),
-      // v1 的 activity 分桶已废弃（改读版本历史），旧周报缺少范围键与主题，一并丢弃；授权与已读保留。
       migrate: (persisted, version) => {
         const p = (persisted ?? {}) as Partial<ReflectionState>;
         return {
@@ -86,7 +78,6 @@ export const useReflection = create<ReflectionState>()(
           scheduledKeys: p.scheduledKeys ?? {},
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
-          // v3 前的 false 是默认未授权。只有当时已打开，才算用户选过。
           aiConsentChosen: version >= 3 ? p.aiConsentChosen === true : p.aiConsent === true,
         };
       },
@@ -105,7 +96,6 @@ export const useReflection = create<ReflectionState>()(
   ),
 );
 
-/** 未手动选择时，AI 已启用则反思默认打开。 */
 export function isReflectionAiConsented(
   state: Pick<ReflectionState, "aiConsent" | "aiConsentChosen">,
   aiEnabled: boolean,
@@ -113,6 +103,5 @@ export function isReflectionAiConsented(
   return state.aiConsentChosen ? state.aiConsent : aiEnabled;
 }
 
-/** 红点：上周有编辑，且还没打开过弹窗。 */
 export const selectHasUnseenReflection = (weekKey: string) => (s: ReflectionState) =>
   s.lastWeekEditedKey === weekKey && s.lastSeenWeekKey !== weekKey;

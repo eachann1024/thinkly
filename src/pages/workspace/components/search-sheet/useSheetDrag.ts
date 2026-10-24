@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
 import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 
-/** 拖动位置直接写 DOM，搜索结果列表只在手势开始和结束时更新。 */
 export function useSheetDrag(sheetRef: RefObject<HTMLElement | null>, onDismiss: () => void, enabled = true) {
   const gestureRef = useRef<ReturnType<typeof startPointerDrag> | null>(null);
   const [dragging, setDragging] = useState(false);

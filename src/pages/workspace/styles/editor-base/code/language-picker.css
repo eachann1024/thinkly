@@ -1,4 +1,3 @@
-/* 语言选择与其他菜单共用实际像素尺寸，不随正文字号缩放。 */
 .goose-code-language-picker {
   display: flex;
   flex-direction: column;

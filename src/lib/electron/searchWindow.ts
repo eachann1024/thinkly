@@ -1,11 +1,3 @@
-/**
- * 浮动搜索窗（类似 Notion 快速搜索）的纯逻辑：主进程与验收脚本共用，不依赖 Electron。
- *
- * - resolveSearchHotkeySurface：全局搜索热键该打开应用内搜索面板，还是切换浮动搜索窗；
- * - centeredSearchWindowBounds：在光标所在屏的工作区内水平居中、偏上三分之一放置；
- * - parseOpenSearchResultPayload：校验浮动窗发往主进程的「打开结果」载荷；
- * - parseSearchWindowCommand：校验续聊、打开设置、隐藏最近与分屏等主窗动作。
- */
 
 export const SEARCH_WINDOW_WIDTH = 680;
 export const SEARCH_WINDOW_HEIGHT = 460;
@@ -18,10 +10,8 @@ export type SearchHotkeySource = "workspace" | "quicknote" | "search";
 export type SearchHotkeySurface = "in-app" | "show-floating" | "hide-floating";
 
 export type SearchHotkeyState = {
-  /** true：来自某扇已聚焦窗口的 before-input-event；false：来自系统 globalShortcut。 */
   fromWindowInput: boolean;
   sourceKind: SearchHotkeySource;
-  /** 当前是否有可见、未最小化且已聚焦的 workspace 窗。 */
   workspaceFocused: boolean;
   searchVisible: boolean;
 };
@@ -37,7 +27,6 @@ export function resolveSearchHotkeySurface(
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
-/** 窗口比工作区大时先收缩到工作区；顶部留白取剩余高度的三分之一。 */
 export function centeredSearchWindowBounds(
   workArea: Rect,
   size: { width: number; height: number } = {
@@ -85,10 +74,6 @@ export function parseOpenSearchResultPayload(
 
 type ResolvablePage = { id: string; localFilePath?: string; isFolder?: boolean };
 
-/**
- * 主窗按 id 找结果页；浮动窗只读扫描时新文件的 id 可能尚未写入映射，
- * 与主窗分配的不同，此时按本地文件路径回退匹配。
- */
 export function resolveSearchResultPageId(
   pages: Record<string, ResolvablePage | undefined>,
   payload: OpenSearchResultPayload,
@@ -116,7 +101,6 @@ type SearchAiBody = {
   sources: SearchAiSourcePayload[];
 };
 
-/** 浮动搜索窗不能自己写聊天记录、设置或分屏，这些动作交给主窗。 */
 export type SearchWindowCommand =
   | ({ type: "archive-ai" } & SearchAiBody)
   | ({ type: "continue-ai"; followUp?: string } & SearchAiBody)
@@ -127,7 +111,6 @@ export type SearchWindowCommand =
   | { type: "split"; action: SearchSplitAction }
   | { type: "open-beside"; pageId: string; placement: OpenBesidePlacement; query: string; localFilePath?: string };
 
-/** 隐藏最近和归档问答只通知已有主窗；其余动作才把它带到前台。与唤出小窗无关。 */
 export function searchCommandRaisesMainWindow(type: SearchWindowCommand["type"]): boolean {
   return type !== "hide-recent" && type !== "archive-ai";
 }

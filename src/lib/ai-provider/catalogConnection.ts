@@ -51,10 +51,6 @@ export function getSettingsProviderId(
   return inferProviderIdFromSettings(settings);
 }
 
-/**
- * 按供应商 + 当前模型解析实际协议。
- * DeepSeek：Flash → Responses；Pro → 兼容 Chat Completions。
- */
 export function resolveActiveProtocol(
   settings: AISettingsLike,
   requestOverrides?: AIRequestOverrides,
@@ -164,7 +160,6 @@ export function getCustomAIApiKey(
         : settings.customClaudeApiKey
   ).trim();
 
-  // DeepSeek 双协议共用同一 Key：某一槽位为空时回退另一槽位。
   if (!key && getSettingsProviderId(settings) === "deepseek") {
     return (
       settings.customOpenAIResponsesApiKey?.trim() ||

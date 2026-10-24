@@ -17,7 +17,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { SidebarRailItem } from "@/stores/settings/slices/sidebarRailSlice";
 
-// 只沿轨道竖向移动，且不拖出图标区。
 const lockToRail: Modifier = ({ transform, draggingNodeRect, containerNodeRect }) => {
   let y = transform.y;
   if (draggingNodeRect && containerNodeRect) {
@@ -39,13 +38,11 @@ export function SidebarRailSortableList({
   onOrderChange: (order: SidebarRailItem[]) => void;
   children: ReactNode;
 }) {
-  // 移动超过阈值才进入拖拽；拖拽激活后 dnd-kit 会吞掉松手时的 click。
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
   );
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
-    // 在完整顺序上移动，隐藏中的入口保持原位。
     const from = order.indexOf(active.id as SidebarRailItem);
     const to = order.indexOf(over.id as SidebarRailItem);
     if (from < 0 || to < 0) return;

@@ -1,4 +1,3 @@
-/* 设置入口头像：28px 圆框，比 16px 图标略大以容纳五官，仍在按钮内居中。 */
 .sidebar-character-avatar {
   display: inline-flex;
   width: 28px;

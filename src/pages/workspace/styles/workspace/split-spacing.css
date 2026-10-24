@@ -1,4 +1,3 @@
-/* 多分屏共用外侧留白，单页、设置和全屏 AI 沿用原布局。 */
 .workspace-shell:not([data-settings]) > .workspace-stage[data-split-spacing] {
   --workspace-stage-pad-top: 8px;
   --workspace-stage-pad-right: 8px;

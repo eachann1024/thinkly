@@ -55,8 +55,6 @@ export function UserMessage({
   );
 
   return (
-    // 整行 w-full + justify-end：百分比/可用宽度有确定参照，避免 w-fit+max-w% 在旧内核上失效。
-    // 左侧 pl 留呼吸缝；气泡 min-w-0 可在剩余宽度内换行，不再横向撑破后被左侧裁切。
     <MessagePrimitive.Root className="notebook-ai-message notebook-ai-message-user flex w-full min-w-0 justify-end pl-5">
       <div className="flex min-w-0 max-w-full flex-col items-end gap-1">
         <div className="notebook-ai-message-text notebook-ai-user-bubble min-w-0 max-w-full space-y-2 rounded-[14px] rounded-tr-[4px] px-3 py-2 text-sm text-foreground leading-relaxed">

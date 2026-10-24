@@ -1,4 +1,3 @@
-/** Shared immutable search snapshots, maintained outside React render. */
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { clearContentDerivationsCache } from "@/components/editor/utils/content-page-derivations-cache";
@@ -126,7 +125,6 @@ async function buildCatalog(
   return catalog;
 }
 
-/** Share identical work; a newer pages/notebooks snapshot cancels the previous build. */
 export function syncSearchCatalog(
   pages: Record<string, Page>, notebooks: SearchNotebooks,
 ): Promise<SearchCatalog | null> {

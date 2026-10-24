@@ -1,9 +1,5 @@
 import { useEffect, useRef, type RefObject } from "react";
 
-/**
- * 键盘菜单滚动策略：激活项中心到达可视区域中线时开始滚动，
- * 随后尽量保持居中；列表首尾由 scrollTop 边界自然截断。
- */
 export function useCenteredActiveItemScroll<T extends HTMLElement>(options: {
   activeIndex: number;
   itemCount: number;

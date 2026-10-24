@@ -34,8 +34,6 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
   const paint = () => {
     if (disposed || !owner || !dom.isConnected) return;
     const width = frozenWidth ?? owner.clientWidth;
-    // 仅修改本 NodeView 的 chrome。外层 blockContainer 属于 PM，写它的
-    // style/data-* 会被 DOMObserver 当作内容修改并不断重建 NodeView。
     if (!layoutRule && layoutStyle.sheet) {
       layoutStyle.sheet.insertRule(`${ownerSelector} > .bn-block-group {}`, 0);
       layoutRule = layoutStyle.sheet.cssRules[0] as CSSStyleRule;
@@ -96,7 +94,6 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
       const startX = event.clientX;
       const base = [...widths];
       frozenWidth = owner.clientWidth;
-      // CSS zoom affects pointer coordinates but not grid tracks or handle offsets.
       const scale = owner.getBoundingClientRect().width / Math.max(1, owner.offsetWidth);
       const available = Math.max(1, frozenWidth - GAP * (count - 1)) * scale;
       dom.dataset.columnsResizing = "true";
@@ -136,9 +133,7 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
     paint();
     return true;
   };
-  // BlockNote 可在离线 DOM 中构造 NodeView；首个帧不保证已插入文档。
   const connection = new MutationObserver((records) => {
-    // 只关注包含本 NodeView 的插入，接入后立即销毁连接观察器。
     if (records.some((record) => Array.from(record.addedNodes).some((node) => node.contains(dom)))) attach();
   });
   if (!attach()) connection.observe(document, { childList: true, subtree: true });

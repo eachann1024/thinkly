@@ -1,4 +1,3 @@
-/* The positioning shell owns width; the existing context zoom scales this surface once. */
 .goose-ai-menu-selection.bui-select-actions.goose-inline-ai-surface {
   --inline-ai-control-height: 2.5rem;
   display: flex;

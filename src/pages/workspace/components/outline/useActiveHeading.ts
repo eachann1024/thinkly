@@ -64,22 +64,18 @@ export function useActiveHeading(
         lastVisibleId = id;
       }
 
-      // 优先选“已经到达顶部锚点”的最近标题（支持一级/二级/三级大纲）
       if (relativeY <= OUTLINE_ACTIVE_ANCHOR_OFFSET && relativeY > nearestPassedY) {
         nearestPassedY = relativeY;
         nearestPassedId = id;
         continue;
       }
 
-      // 如果还没到任何标题，则取离锚点最近的下一个标题
       if (relativeY > OUTLINE_ACTIVE_ANCHOR_OFFSET && relativeY < nearestUpcomingY) {
         nearestUpcomingY = relativeY;
         nearestUpcomingId = id;
       }
     }
 
-    // 点击接近文档底部的标题时，滚动条可能已经到底，标题无法贴到顶部锚点。
-    // 此时优先跟随视口内最后一个标题；普通滚动则在下个标题进入识别带后切换。
     const shouldUseVisibleUpcoming =
       nearestPassedY < 0 && nearestUpcomingY <= recognitionOffset;
     let nextActiveId = nearestPassedId ?? nearestUpcomingId;
@@ -124,7 +120,6 @@ export function useActiveHeading(
       if (el) observerRef.current.observe(el);
     }
 
-    // 初始计算
     findTopMost();
 
     return () => {

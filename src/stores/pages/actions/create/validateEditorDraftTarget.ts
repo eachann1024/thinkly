@@ -56,7 +56,6 @@ function resolveDraftDirectory(
   return target;
 }
 
-/** 首次写盘失败后仍是草稿，重试时也不能重建已删除的原目录。 */
 export async function validateEditorDraftTarget(
   get: StoreGet,
   pageId: string,
@@ -72,7 +71,6 @@ export async function validateEditorDraftTarget(
       ? (await desktop.fsStat(directory)).isDirectory
       : Boolean(fs?.existsAsync ? await fs.existsAsync(directory) : fs?.exists(directory));
   } catch {
-    // 目录不可读取时保留草稿，交给现有保存失败提示处理。
   }
   if (!available || resolveDraftDirectory(get, pageId, filePath) !== directory) {
     throw new Error(storeText("draftFolderUnavailable"));

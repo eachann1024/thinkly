@@ -1,4 +1,3 @@
-/** Body-level layers. Small z-indices inside a surface remain local to it. */
 export const UI_LAYERS = {
   toolbar: 1000,
   menu: 20000,
@@ -19,7 +18,6 @@ export function overlayLayer(kind: OverlayKind, owner = 0): number {
   return Math.max(UI_LAYERS[kind], owner + offset);
 }
 
-/** A body portal competes with the outermost stacking context, not an inner z-index. */
 export function elementRootLayer(element: HTMLElement): number {
   let layer = 0;
   for (let node: HTMLElement | null = element; node && node !== document.documentElement; node = node.parentElement) {

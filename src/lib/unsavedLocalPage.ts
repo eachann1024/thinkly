@@ -22,7 +22,6 @@ function blockHasPersistableContent(block: unknown): boolean {
   return (node.children ?? []).some(blockHasPersistableContent);
 }
 
-/** 空白未落盘页：只有空段落/空标题，关闭时丢弃、不写磁盘。 */
 export function localPageHasPersistableContent(
   content: JSONContent | null | undefined,
 ): boolean {

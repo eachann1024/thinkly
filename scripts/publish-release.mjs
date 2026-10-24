@@ -19,7 +19,6 @@ import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./d
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
-// 1.7.317 及更早版本无法应用内升级，这些用户手动下载时拿到的是当时最新版，所以之后的版本都要带上。
 const MANUAL_UPGRADE_VERSION = "1.7.318";
 
 function manualUpgradeNotes(version) {
@@ -68,7 +67,6 @@ export function formatReleaseBody({ version, releaseNotes, repo, tag, signed, ma
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REPO = process.env.GH_REPO || process.env.GITHUB_REPOSITORY || "eachann1024/thinkly";
 
-// The get-release-by-tag endpoint never returns drafts, so look releases up in the full list.
 export function pickRelease(lines, tag) {
   const found = lines.split("\n").filter(Boolean).map((line) => JSON.parse(line)).filter((release) => release.tag_name === tag);
   assert.ok(found.length <= 1, `Multiple releases use tag ${tag}`);
@@ -144,14 +142,11 @@ async function main() {
         hashes.set(name, asset.digest.slice("sha256:".length));
       }
     }
-    // Recheck immediately before marking latest so an older in-flight run cannot downgrade it.
     assertPublishVersion(version, tag, getReleases());
     if (uploaded.draft) gh(["release", "edit", tag, "--repo", REPO, "--draft=false", "--latest"]);
     const published = findRelease(tag);
     verifyReleaseSource(published, tag, sha);
     const files = publishedDownloadMetadata(published);
-    // Auto-bump: each writeback attempt reads tip package.json / CHANGELOG from main and only
-    // sets version / prepends the new section, so mid-build main edits are kept.
     let resolveFiles;
     if (process.env.AUTO_BUMP === "true") {
       const plan = JSON.parse(readFileSync(join(ROOT, "release-plan.json"), "utf8"));

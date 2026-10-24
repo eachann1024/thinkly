@@ -36,7 +36,6 @@ export function inlineDiffEdges(before: string, after: string) {
   while (start < before.length && start < after.length && before[start] === after[start]) start++;
   while (end < before.length - start && end < after.length - start &&
     before[before.length - 1 - end] === after[after.length - 1 - end]) end++;
-  // Do not split a UTF-16 surrogate pair at a shared boundary.
   if (start > 0 && /[\uD800-\uDBFF]/.test(before[start - 1])) start--;
   if (end > 0 && /[\uDC00-\uDFFF]/.test(before[before.length - end])) end--;
   return { start, end };
@@ -48,7 +47,6 @@ export function createInlinePreviewPlugin() {
     key,
     view: (view) => {
       const outline = createInlinePreviewOutline(view, key);
-      // Refresh decorations against the same state: no transaction or undo step.
       const unsubscribe = subscribeLanguage(() => {
         if (!view.isDestroyed) view.updateState(view.state);
       });

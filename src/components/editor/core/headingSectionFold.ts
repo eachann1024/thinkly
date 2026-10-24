@@ -32,7 +32,6 @@ function collectDescendantIds(
   }
 }
 
-/** 可折叠 heading：非文档物理首块（page title / document[0]）。 */
 export function isFoldableHeadingBlock(
   block: { id?: string; type?: string } | null | undefined,
   firstBlockId: string | undefined,
@@ -42,7 +41,6 @@ export function isFoldableHeadingBlock(
   return block.id !== firstBlockId;
 }
 
-/** 显式 toggle heading 只折叠 children，不参与后续兄弟 section 的隐藏。 */
 export function isSectionFoldHeadingBlock(
   block: SectionFoldBlock,
   firstBlockId: string | undefined,
@@ -50,7 +48,6 @@ export function isSectionFoldHeadingBlock(
   return isFoldableHeadingBlock(block, firstBlockId) && !isToggleBlock(block);
 }
 
-/** 从 heading 后扫同级兄弟，遇 level <= 当前 heading 则停。 */
 export function collectSectionBlockIds(
   blocks: SectionFoldBlock[],
   headingId: string,
@@ -75,7 +72,6 @@ export function collectSectionBlockIds(
   return hiddenIds;
 }
 
-/** section 插入锚点：最后一个被扫描到的 sibling id；没有则返回 headingId。 */
 export function getSectionInsertAnchorId(
   blocks: SectionFoldBlock[],
   headingId: string,
@@ -84,7 +80,6 @@ export function getSectionInsertAnchorId(
   return ids.length > 0 ? ids[ids.length - 1] : headingId;
 }
 
-/** 捕获折叠快照：collapse 那一刻 section 扫描到的 sibling id 列表。 */
 export function captureFoldSnapshot(
   blocks: SectionFoldBlock[],
   headingId: string,
@@ -92,11 +87,6 @@ export function captureFoldSnapshot(
   return collectSectionBlockIds(blocks, headingId);
 }
 
-/**
- * 推进折叠快照：展开→折叠重新 capture；仍折叠保留旧快照（剔除已不在文档的 id，
- * 不吸收新 sibling）；展开或 heading 被删则丢弃。prevDocument 为 null 表示初始化，
- * 对所有 collapsed heading 直接 capture。
- */
 export function updateFoldSnapshots(
   snapshots: Map<string, string[]>,
   prevDocument: SectionFoldBlock[] | null,
@@ -170,7 +160,6 @@ export function collectAllHiddenSectionBlockIds(
   return hidden;
 }
 
-/** 返回应展开以露出 targetBlockId 的 collapsed heading id（自顶向下）。 */
 export function findCollapsedHeadingsHidingBlock(
   document: SectionFoldBlock[],
   targetBlockId: string,
@@ -235,8 +224,6 @@ export function toggleHeadingCollapsed(
   }
 
   editor.transact((tr) => {
-    // 大纲右键不会移动正文选区。收起前先将即将隐藏的选区移到父标题，
-    // 避免 DOM selection 留在 display:none 的子标题/正文内。
     let selectionWillHide = false;
     if (hiddenIds.size > 0) {
       tr.doc.nodesBetween(tr.selection.from, tr.selection.to, (node) => {

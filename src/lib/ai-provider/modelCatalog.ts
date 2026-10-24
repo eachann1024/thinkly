@@ -76,7 +76,6 @@ export async function readErrorMessage(response: Response) {
       return payload.message.trim();
     }
   } catch {
-    // ignore non-json responses
   }
 
   try {
@@ -240,7 +239,6 @@ export async function fetchCustomAIModels(config: {
   });
 
   if (!response.ok) {
-    // 预设供应商鉴权失败时，若有兜底模型且明确是列表接口问题，仍抛错让用户知悉 Key 问题。
     const errorMsg = await readErrorMessage(response);
     throw new Error(errorMsg || getAuthFailedMessage(providerLabel));
   }

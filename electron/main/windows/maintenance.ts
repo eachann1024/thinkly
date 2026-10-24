@@ -10,7 +10,6 @@ import {
 } from "./configuration";
 import { bindCloseTabAccelerator } from "./close";
 
-// 工具窗口不加入 workspace registry：不恢复标签、不同步工作区状态，关闭即销毁。
 export let assetMaintenanceWindow: BrowserWindow | null = null;
 
 export function getAssetMaintenanceWindow(): BrowserWindow | null {

@@ -8,12 +8,10 @@ const ATTRIBUTES: Record<string, string[]> = {
   colgroup: [], col: ["style"], tbody: [], tr: [],
   td: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
   th: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
-  // target/rel 只影响打开方式，链接模型存的是 href 和行内标记；不放行会把整张表打成 raw-block。
   a: ["href", "target", "rel", "data-thinkly-page-mention", "data-goose-page-mention"], span: [...COLOR_ATTRS, "style"],
   strong: [], b: [], em: [], i: [], u: [], del: [], s: [], code: [], br: [],
 };
 
-/** 只恢复能完整表达的结构。手改/损坏 HTML 回退原文，避免 DOM 修复时悄悄丢内容。 */
 export function isLosslessTableDocument(document: Document, table: HTMLTableElement): boolean {
   if (document.head.childNodes.length || Array.from(document.body.childNodes)
     .some((node) => node !== table && (node.nodeType !== 3 || node.textContent?.trim()))) return false;
@@ -25,7 +23,6 @@ export function isLosslessTableDocument(document: Document, table: HTMLTableElem
     if (!allowed || Array.from(element.attributes).some((attribute) => !allowed.includes(attribute.name))) return false;
     if (tag === "a") {
       const href = element.getAttribute("href");
-      // 危险协议不能变成可点链接，也不悄悄删掉；整表回退原文。
       if (href && sanitizeTableHref(href) == null) return false;
     }
     if (Array.from(element.childNodes).some((node) => node.nodeType !== 1 && node.nodeType !== 3)) return false;

@@ -27,10 +27,8 @@ import type { WatermarkConfig } from "./watermark";
 import { normalizeWatermarkConfig } from "./watermark";
 import { splitImageExportTitle } from "./titleLift";
 
-/** 宽于该值才显示生成图片弹层的真实内容预览。Electron 默认约 800 不显示；桌面端默认 1250 显示。 */
 export const IMAGE_EXPORT_LIVE_PREVIEW_MIN_WIDTH = 1000;
 
-/** 窗口达到该宽度时，生成选项收成标题行工具条（Electron 默认 1250），避免与标题并排撑高页头。 */
 export const IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH = 1200;
 
 export function shouldShowImageExportLivePreview(width: number): boolean {
@@ -55,7 +53,6 @@ function firstInlineText(content: unknown): string {
   return out.trim().slice(0, 80);
 }
 
-/** 长文只读文件名或开头标题，避免为了标题把全文规范化。 */
 function previewTitle(
   page: Pick<Page, "content" | "localFilePath"> | null | undefined,
   fallback: string,

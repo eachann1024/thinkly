@@ -1,6 +1,5 @@
 import { useNotebooks } from "@/stores/useNotebooks";
 
-/** Desktop actions need a linked folder, but remain available during notebook switches. */
 export function useFolderToolbarActions() {
   return useNotebooks((state) => {
     const active = state.activeNotebookId

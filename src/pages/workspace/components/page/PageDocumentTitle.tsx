@@ -36,7 +36,6 @@ const displayTitle = (page: Page) => {
   return title === UNTITLED_PAGE_TITLE ? "" : title;
 };
 
-/** 本地文件与草稿的正文大标题：显示文件名，提交时重命名或落盘。 */
 export function PageDocumentTitle({ page, focused, editable }: {
   page: Page;
   focused: boolean;
@@ -92,7 +91,6 @@ export function PageDocumentTitle({ page, focused, editable }: {
       updateValue(committed);
       return Promise.resolve(false);
     }
-    // 连续回车、撤销/重做必须按顺序改名，不能并发使用同一个旧文件路径。
     pendingSavesRef.current += 1;
     const save = saveQueueRef.current.then(async () => {
       let succeeded = true;
@@ -115,7 +113,6 @@ export function PageDocumentTitle({ page, focused, editable }: {
       } finally {
         pendingSavesRef.current -= 1;
         const latest = usePages.getState().pages[page.id];
-        // 失败时保留输入，尤其不能抹掉撤销刚从正文恢复的原标题。
         if (succeeded && !pendingSavesRef.current && !editingRef.current && latest) updateValue(displayTitle(latest));
       }
       return succeeded;
@@ -134,7 +131,6 @@ export function PageDocumentTitle({ page, focused, editable }: {
       if (detail.pageId !== page.id) return;
       updateValue(detail.title);
       allowEmptyRef.current = true;
-      // 首次拆分由随后的 blur 提交；正文内撤销/重做则立即同步文件名。
       if (document.activeElement !== field) commitRef.current();
     };
     const saveFromEditor = (event: Event) => {

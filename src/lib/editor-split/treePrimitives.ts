@@ -17,9 +17,6 @@ export function orientationForDirection(
   return direction === "right" ? "horizontal" : "vertical";
 }
 
-/**
- * 把一组百分比归一成 `count` 项且合计 100。长度不对或全 0 时均分。
- */
 export function normalizeSizes(sizes: number[], count: number): number[] {
   if (count <= 0) return [];
   const usable = sizes
@@ -36,17 +33,11 @@ export function normalizeSizes(sizes: number[], count: number): number[] {
   return rounded;
 }
 
-/**
- * 深度优先、与视觉顺序一致地列出全部叶子。
- */
 export function walkLeaves(node: SplitNode): SplitLeaf[] {
   if (node.kind === "leaf") return [node];
   return node.children.flatMap(walkLeaves);
 }
 
-/**
- * 在树里找指定叶子。找不到返回 `null`。
- */
 export function findLeaf(node: SplitNode, leafId: string): SplitLeaf | null {
   if (node.kind === "leaf") return node.id === leafId ? node : null;
   for (const child of node.children) {
@@ -56,9 +47,6 @@ export function findLeaf(node: SplitNode, leafId: string): SplitLeaf | null {
   return null;
 }
 
-/**
- * 在树里找指定 group。找不到返回 `null`。
- */
 export function findGroup(node: SplitNode, groupId: string): SplitGroup | null {
   if (node.kind === "leaf") return null;
   if (node.id === groupId) return node;
@@ -73,9 +61,6 @@ export function countLeaves(node: SplitNode): number {
   return walkLeaves(node).length;
 }
 
-/**
- * 单叶状态：一个 Tab 尚未分屏时的根。
- */
 export function createSingleLeafState(
   pageId: string,
   leafId: string = createSplitNodeId("leaf"),

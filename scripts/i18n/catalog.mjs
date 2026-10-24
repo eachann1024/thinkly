@@ -101,7 +101,6 @@ export async function publishCatalog(root, records, generate, stale, metrics, ou
     codeFiles: ordered.filter((record) => !record.sidecar).map(({ source, code }) => ({ source, code })) };
 }
 
-/** CLI always performs a full scan; only the Vite session keeps incremental state. */
 export async function collectCatalog(root, generate) {
   const records = new Map(), stale = [];
   for (const filename of await collectFiles(root)) {

@@ -1,4 +1,3 @@
-/** 与现有 unplugin-auto-import React preset 相同的公开 API。 */
 export const autoImportPackages = {
   react: [
     "useState",

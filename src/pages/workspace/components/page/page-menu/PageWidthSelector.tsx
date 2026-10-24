@@ -22,7 +22,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 页面示意：外框代表窗口，内条代表正文占用宽度。 */
 function WidthGlyph({ layout }: { layout: "standard" | "full" }) {
   return (
     <span className="relative flex h-[18px] w-7 items-center justify-center rounded-[4px] border border-current opacity-80">
@@ -68,7 +67,6 @@ export function PageWidthSelector({
           key={choice.value}
           type="button"
           aria-pressed={current === choice.value}
-          // 选回默认项时清除单篇覆盖，继续跟随全局默认宽度。
           onClick={() => onChange(choice.value === fallback ? undefined : choice.value)}
           className="goose-segmented-option flex h-14 min-w-0 flex-col items-center justify-center gap-1.5"
         >

@@ -32,7 +32,6 @@ type GooseAIMenuControllerProps = {
 
 type BnColorScheme = "light" | "dark";
 
-/** 浮层 bn-root 需带 data-color-scheme，BlockNote 才会切到深色菜单变量。 */
 function resolveBnColorScheme(
   editorDom: HTMLElement | null | undefined,
 ): BnColorScheme {
@@ -48,10 +47,6 @@ function resolveBnColorScheme(
   return "light";
 }
 
-/**
- * 格式栏入口锚到原文字选区，
- * 其它入口（空段落、斜杠菜单）则继续沿用块锚点。
- */
 export function GooseAIMenuController({
   aiMenu: Component = GooseAIMenu,
   isActiveEditor = true,
@@ -71,12 +66,10 @@ export function GooseAIMenuController({
     resolveBnColorScheme(editor.domElement),
   );
 
-  // 同页分屏共享生成会话，只让活动编辑器提供输入浮层，避免争抢焦点。
   const open = isActiveEditor && aiMenuState !== "closed";
   const blockId = open ? aiMenuState.blockId : undefined;
   const selection = open ? ai.getSelectionAnchor() : undefined;
 
-  // 空行没有可保留的文字选区；输入框获得焦点后仍标明 AI 作用的行。
   useEffect(() => {
     if (!open || selection || !blockId || !isEmptyParagraphBlock(editor.getBlock(blockId))) return;
     const block = Array.from(editor.domElement?.querySelectorAll(".bn-block[data-id]") ?? [])
@@ -86,7 +79,6 @@ export function GooseAIMenuController({
     return () => outer?.classList.remove("goose-ai-empty-target");
   }, [blockId, editor, open, selection]);
 
-  // 打开时读取 + 监听 html class / 编辑器 bn-root 的 color-scheme，主题切换能跟上
   useEffect(() => {
     const read = () => {
       setColorScheme(resolveBnColorScheme(editor.domElement));
@@ -111,14 +103,14 @@ export function GooseAIMenuController({
 
   useEffect(() => {
     if (wasOpenRef.current && !open) {
-      try { setFakeSelection(editor, null); } catch { /* Editor may be detached. */ }
+      try { setFakeSelection(editor, null); } catch {   }
       resetFormattingToolbarAi(editor);
     }
     wasOpenRef.current = open;
   }, [editor, open, resetFormattingToolbarAi]);
 
   useEffect(() => () => {
-    try { setFakeSelection(editor, null); } catch { /* Editor may be detached. */ }
+    try { setFakeSelection(editor, null); } catch {   }
     resetFormattingToolbarAi(editor);
   }, [editor, page.id, resetFormattingToolbarAi]);
 
@@ -160,7 +152,6 @@ export function GooseAIMenuController({
             maxHeight: `${Math.max(100, availableHeight)}px`,
             overflowY: "auto",
           });
-          // 内层 zoom 的布局宽度需反算，避免 flex 固有宽度随输入内容变化。
           elements.floating.style.setProperty(
             "--goose-inline-ai-layout-width",
             `${maxW / scale}px`,
@@ -174,7 +165,6 @@ export function GooseAIMenuController({
     return {
       useFloatingOptions: {
         open,
-        // 选区与块锚点都用 start 对齐，避免 bottom 居中导致菜单跑到标题下方中间
         placement: "bottom-start",
         middleware: sharedMiddleware,
         onOpenChange: (nextOpen) => {
@@ -211,8 +201,6 @@ export function GooseAIMenuController({
     };
   }, [ai, aiMenuState, colorScheme, editor.domElement, open]);
 
-  // GenericPopover 的外层负责 viewport 定位；缩放只放在内层 surface，
-  // 避免 CSS zoom 同时放大 Floating UI 计算出的 fixed 坐标。
   const content = open ? (
     <div
       className="goose-editor-context-ui bn-root bn-mantine"

@@ -11,7 +11,6 @@ const INSET = 1;
 const RINGS = 8;
 const PERIOD = 12;
 
-/** 圆角矩形周长等距取点，按周长序号分段：明暗沿边框缓慢绕行。 */
 function buildFrame(w: number, h: number) {
   const L = INSET, T = INSET, R = w - INSET, B = h - INSET, r = RADIUS, k = 0.5523 * r;
   const segs: Segment[] = [
@@ -29,7 +28,6 @@ function buildFrame(w: number, h: number) {
   return ringBuckets(dots, { cx: 0, cy: 0, n: RINGS, dist: (d) => order.get(d) ?? 0 });
 }
 
-/** 点阵圆角虚框容器：按实际尺寸生成边框点，内容叠在上方。 */
 export function DotFrameBox({ className, children }: { className?: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<[number, number]>([0, 0]);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-/** 当前 devicePixelRatio（≥1，四舍五入到 0.25），跨屏或缩放时更新。 */
 function read(): number {
   const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
   return Math.max(1, Math.round(dpr * 4) / 4);

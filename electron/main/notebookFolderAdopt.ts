@@ -31,7 +31,6 @@ async function matchingSibling(notebookId: string, previous: string): Promise<st
   return matches.length === 1 ? matches[0]! : null;
 }
 
-/** 访达已经把文件夹改名时，按 .goose/notebook.json 找回唯一的新位置并改写映射。 */
 export async function adoptRenamedNotebookFolder(request: GitNotebookFolderAdopt, context: NotebookRetargetContext): Promise<{ localPath: string; name: string } | null> {
   if (!request || typeof request.notebookId !== "string" || typeof request.previousLocalPath !== "string" || !Array.isArray(request.occupiedPaths)) return null;
   const previous = assertAllowed(request.previousLocalPath);

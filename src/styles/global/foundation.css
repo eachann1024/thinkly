@@ -1,13 +1,5 @@
-/* 让 Tailwind v4 扫描 streamdown 发出的 class，避免被摇树掉 */
 @source "../../../node_modules/streamdown/dist/index.js";
 
-/* ── Electron 旧内核 @property 降级 ───────────────────────────────
- * Tailwind v4 的 shadow-* / ring-* / 渐变 / transform 等工具类全部依赖
- * @property 注册初值的 --tw-* 变量链（如 box-shadow: var(--tw-inset-shadow), ..., var(--tw-shadow)）。
- * Electron 旧内核不支持 @property，且 Tailwind 自带降级块包在旧内核同样匹配不上的
- * @supports 门里 → 变量未定义 → 整条 box-shadow 等声明作废（菜单/弹层投影消失）。
- * 这里把官方降级块原样无条件声明一份（@layer properties 优先级低于 utilities，
- * 工具类自身的变量赋值仍正常覆盖，新内核/浏览器零影响）。 */
 @layer properties {
   *,
   :before,
@@ -105,13 +97,6 @@
   }
 }
 
-/* ── HeroUI ↔ shadcn 令牌冲突兜底 ───────────────────────────────
- * @heroui/styles 会在 `:root,.light,.default,[data-theme=light|default]`
- * 里把 --accent / --border 设成「已解析颜色」(oklch)，而本项目这两个 token
- * 是「HSL 通道」形态、经 hsl(var(--xxx)) 消费。若 HeroUI 的值胜出，
- * hsl(oklch(...)) 非法 → 全局边框 / bg-accent 视觉崩坏。
- * 这里用「无 layer」规则重新声明本项目的通道值（无 layer 永远压过任何 @layer），
- * 锁定 shadcn 视觉零改动；HeroUI 自身强调色面已由各替换组件 className 覆盖，不依赖此 token。 */
 :root,
 .light,
 .default,
@@ -136,9 +121,6 @@
     0 14px 34px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
-/* HeroUI 的 text-muted 表示弱化文字；本项目 --muted / --color-muted 是底色。
- * 深色模式下 text-muted 会变成「深色底当字色」，关闭钮、菜单箭头等图标消失。
- * Tabs 未选中态把 text-muted @apply 进 .tabs__tab，.class 覆盖不到。 */
 .text-muted {
   color: hsl(var(--muted-foreground));
 }
@@ -169,5 +151,4 @@
   position: static;
 }
 
-/* class 模式暗色：等价 v3 darkMode: ["class"] */
 @custom-variant dark (&:is(.dark *));

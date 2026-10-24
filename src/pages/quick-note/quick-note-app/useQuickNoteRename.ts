@@ -6,7 +6,6 @@ import { transitionQuickNoteRename, type QuickNoteRenameEvent, type QuickNoteRen
 type Input = Pick<ReturnType<typeof useQuickNoteDraftState>, "editorRef" | "slotNamesRef" | "setSlotNames" | "setHelpOpen">;
 export function useQuickNoteRename({ editorRef, slotNamesRef, setSlotNames, setHelpOpen }: Input, flushEditor: () => void) {
   const [rename, dispatch] = useReducer(transitionQuickNoteRename, { phase: "idle" });
-  // 同步事务镜像使 Enter 后紧随的 blur 读取 finishing，而非上次 render 的 editing。
   const renameRef = useRef<QuickNoteRenameState>(rename);
   const sequence = useRef(0);
   const frame = useRef(0);

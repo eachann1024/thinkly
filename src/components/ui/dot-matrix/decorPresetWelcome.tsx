@@ -13,7 +13,6 @@ const bl = "bottom-left";
 const br = "bottom-right";
 
 export const WELCOME_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = {
-  // 12 启动首屏：左上大弧 + 右下栅格碎片 + 右上散点星 + 左下横向刻度
   bootstrap: [
     {
       at: tl,
@@ -63,7 +62,6 @@ export const WELCOME_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>>
       ),
     },
   ],
-  // 侧栏无文件夹：左下渐隐点阵 + 右上散点与品牌蓝四角星
   noFolder: [
     {
       at: bl,
@@ -84,7 +82,6 @@ export const WELCOME_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>>
       ),
     },
   ],
-  // 首启形象引导：左上大弧 + 右上散点星 + 左下栅格碎片 + 右下十字准星，左侧与底边各一条刻度
   character: [
     {
       at: tl,

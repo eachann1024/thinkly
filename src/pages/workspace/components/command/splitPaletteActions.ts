@@ -40,9 +40,6 @@ export type SplitPaletteAction = {
   run: () => void;
 };
 
-/**
- * 命令面板分屏动作。空查询不出现，避免盖住「输入关键词开始搜索」空态。
- */
 export const SPLIT_PALETTE_ACTIONS: SplitPaletteAction[] = [
   {
     id: "split-right",

@@ -37,9 +37,6 @@ export async function prepareMacUpdate(update: VerifiedUpdate): Promise<void> {
   });
 }
 
-// Arguments stay separate from shell source, including app paths containing spaces.
-// The old bundle stays in the stage until the new process is up, then the whole stage is removed
-// so previous.app / failed.app are not left beside the real app for Launch Services to index.
 const installer = `#!/bin/sh
 set -eu
 target="$1"
@@ -86,9 +83,7 @@ async function installMac(update: VerifiedUpdate): Promise<void> {
     throw new Error(t("moveToApplications"));
   }
   await access(path.dirname(target), constants.W_OK);
-  // Drop swap directories left beside the app by an earlier attempt before creating another one.
   await removeSiblingUpdateStages(target);
-  // Re-extract from the verified archive so an interrupted/modified staging folder is never reused.
   await prepareMacUpdate(update);
   const stage = await mkdtemp(path.join(path.dirname(target), ".goose-update-"));
   try {
@@ -130,7 +125,6 @@ export async function installUpdate(update: VerifiedUpdate): Promise<void> {
 
 type StageRecord = { path: string; version: string };
 
-/** null: no usable record. undefined: unreadable, so leave the stage alone. */
 async function readStageRecord(): Promise<StageRecord | null | undefined> {
   try {
     const record = JSON.parse(await readFile(stageRecord(), "utf8")) as { path?: string; version?: string };
@@ -163,7 +157,6 @@ async function finishMacInstallStage(runningVersion: string): Promise<void> {
   await rm(stageRecord(), { force: true });
 }
 
-/** Tell a live installer the new app is up, then delete swap directories next to that app. */
 export async function acknowledgeMacInstall(): Promise<void> {
   if (process.platform !== "darwin" || !app.isPackaged) return;
   try {

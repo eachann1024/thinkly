@@ -1,4 +1,3 @@
-/* 忙态：星星旋转缩放 + 碎星飞溅 + 扫光（仅 opacity/transform） */
 .goose-ai-prompt-field--busy
   .goose-ai-prompt-field__icon
   .bn-combobox-icon::before {

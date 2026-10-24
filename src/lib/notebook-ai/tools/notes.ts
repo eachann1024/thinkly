@@ -16,9 +16,6 @@ function canAccessNotebook(context: NotebookAiAgentContext, notebookId: string) 
   return readableNotebookIds(context).includes(notebookId);
 }
 
-// ----------------------------------------------------------------
-// listNotebooks
-// ----------------------------------------------------------------
 export const listNotebooks = tool({
   description: "返回本轮允许读取的笔记本及稳定身份。",
   inputSchema: z.object({}),
@@ -29,9 +26,6 @@ export const listNotebooks = tool({
   },
 });
 
-// ----------------------------------------------------------------
-// listPages
-// ----------------------------------------------------------------
 export const listPages = tool({
   description:
     "列出指定笔记本（默认为当前绑定笔记本）中所有未删除的页面，返回页面 id、标题和最近更新时间。",
@@ -43,7 +37,6 @@ export const listPages = tool({
   }),
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
-    // 多笔记本范围下省略 notebookId 表示列出全部允许的笔记本
     const targetId = input.notebookId ?? (context.resourceReferences || context.notebookIds ? null : context.notebookId);
     if (targetId !== null && !canAccessNotebook(context, targetId)) {
       return { error: "AI 只能访问当前绑定笔记本" };
@@ -66,9 +59,6 @@ export const listPages = tool({
   },
 });
 
-// ----------------------------------------------------------------
-// searchNotes
-// ----------------------------------------------------------------
 export const searchNotes = tool({
   description:
     "在当前绑定笔记本中全文搜索。仅用于跨页面查找或目标页面不明确的任务；当前页编辑、润色、总结、删除区块时不要调用。返回匹配页面和命中片段。",
@@ -86,18 +76,15 @@ export const searchNotes = tool({
     const notebooks = useNotebooks.getState().notebooks;
     const queryLower = query.toLowerCase();
 
-    // 把 query 按分隔符切成 ≥2 字的词项（用于降级分词匹配）
     const queryTerms = queryLower
       .split(/[\s,，。、？！?!]+/)
       .filter((t) => t.length >= 2);
 
-    /** 对原始文本打分并返回命中位置 */
     function scoreText(rawText: string): { score: number; matchIdx: number } {
       const lower = rawText.toLowerCase();
       let score = 0;
       let matchIdx = -1;
 
-      // 整短语匹配，每次命中 10 分
       let searchFrom = 0;
       while (true) {
         const idx = lower.indexOf(queryLower, searchFrom);
@@ -107,7 +94,6 @@ export const searchNotes = tool({
         searchFrom = idx + queryLower.length;
       }
 
-      // 分词命中（仅当整短语 0 分时启用作为降级）
       if (score === 0 && queryTerms.length >= 1) {
         for (const term of queryTerms) {
           let sf = 0;
@@ -140,7 +126,6 @@ export const searchNotes = tool({
 
       const title = getPageTitle(page);
       const bodyText = getContentDerivationsForPage(page).text;
-      // 用原始大小写文本，保留正文真实字符，分词匹配在内部 toLowerCase
       const rawCombined = `${title}\n${bodyText}`;
 
       const { score, matchIdx } = scoreText(rawCombined);
@@ -158,13 +143,11 @@ export const searchNotes = tool({
       });
     }
 
-    // 按分数降序，最多 20 条
     candidates.sort((a, b) => b.score - a.score);
     const top = candidates.slice(0, 20);
 
     return top.map(
       ({ pageId, notebookId, notebookName, title, rawCombined, matchIdx }) => {
-        // 从原始文本（保留大小写）截取 snippet
         const safeIdx = Math.max(0, matchIdx);
         const start = Math.max(0, safeIdx - 60);
         const end = Math.min(rawCombined.length, safeIdx + query.length + 60);
@@ -178,9 +161,6 @@ export const searchNotes = tool({
   },
 });
 
-// ----------------------------------------------------------------
-// readPage
-// ----------------------------------------------------------------
 export const readPage = tool({
   description:
     "读取页面完整内容，返回标题和 Markdown 格式正文。当前页任务可省略 pageId，默认读取当前打开页面。",

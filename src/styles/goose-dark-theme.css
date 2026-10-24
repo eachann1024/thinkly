@@ -1,25 +1,21 @@
-/* 设置画布与抬升表面在浅色下沿用原有角色。 */
 :root {
   --goose-settings-bg: var(--goose-shell-bg);
   --goose-raised-bg: var(--goose-editor-bg);
 }
 
-/* 普通浅色配色用近白画布；纸色主题继续沿用自己的暖色背景。 */
 :root:not(.dark):not(:is([data-goose-accent="mono"], [data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"])) {
-  --goose-settings-bg: 0 0% 97.255%; /* #f8f8f8 */
+  --goose-settings-bg: 0 0% 97.255%;
 }
 
-/* 深色统一使用参考图的中性灰。覆盖完整主题的染色表面，
- * 强调色仍负责链接、光标、焦点和语义状态；不改变浅色主题。 */
 :root.dark,
 :root.dark[data-goose-accent],
 :root[data-theme="dark"],
 .dark:not(:root),
 [data-theme="dark"]:not(:root) {
   color-scheme: dark;
-  --goose-shell-bg: 0 0% 20.392%; /* #343434 外壳 */
-  --goose-editor-bg: 0 0% 9.412%; /* #181818 正文 */
-  --goose-raised-bg: 0 0% 13.333%; /* #222222 卡片 / 菜单 */
+  --goose-shell-bg: 0 0% 20.392%;
+  --goose-editor-bg: 0 0% 9.412%;
+  --goose-raised-bg: 0 0% 13.333%;
   --goose-selected-bg: 0 0% 20.392%;
   --background: var(--goose-shell-bg);
   --card: var(--goose-editor-bg);
@@ -40,7 +36,6 @@
   --goose-input-surface: #363636;
   --goose-settings-bg: var(--goose-editor-bg);
 
-  /* 深色交互表面保持灰阶，选中描边沿用当前强调色。 */
   --goose-dark-selected-bg: #343434;
   --goose-dark-hover-bg: #2c2c2c;
   --goose-dark-interactive-border: #4a4a4a;
@@ -73,7 +68,6 @@
   --goose-callout-border: #3c3c3c;
 }
 
-/* BlockNote 正文与 portal 会再挂 .dark；强调色沿用外层选择。 */
 :root.dark .bn-root.dark {
   --primary: inherit;
   --ring: inherit;

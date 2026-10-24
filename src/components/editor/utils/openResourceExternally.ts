@@ -133,12 +133,10 @@ function readBlobViaXhr(source: string): Promise<Blob> {
 }
 
 async function readUrlAsBlob(source: string): Promise<Blob> {
-  // Electron 以 file:// 加载插件时，fetch(blob:) / fetch(data:) 常变成 Failed to fetch。
   if (/^(?:blob|data):/i.test(source)) {
     try {
       return await readBlobViaXhr(source);
     } catch {
-      // 再试 fetch；都失败则抛给上层。
     }
   }
   const response = await fetch(source);
@@ -263,7 +261,6 @@ async function openResourceOnce(
       for (const prefix of [LEGACY_TEMP_RESOURCE_PREFIX, TEMP_RESOURCE_PREFIX])
         await platform.fs.cleanupTempFiles(prefix, TEMP_RESOURCE_MAX_AGE_MS);
     } catch {
-      // 清理失败不阻断本次打开；下次启动仍会重试。
     }
   }
 

@@ -130,8 +130,6 @@ export const movePageTreeToNotebookAction = (
     nextActivePageId = remainingPages[0]?.id ?? null;
   }
 
-  // 移动前捕获每页原始 {workspaceId, parentId, order}，供撤回精确还原
-  // （正向会把 root 页 parentId 置 undefined + 重排 order，反向必须精确写回）。
   const undoSnapshots = movedIds.map((mid) => {
     const c = snapshotPages[mid];
     return {

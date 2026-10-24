@@ -46,7 +46,6 @@ function UnitSelect({ units, value, label, onChange }: { units: UnitDef[]; value
   </Select>;
 }
 
-/** 单位换算：改数值或单位即时换算，互换按钮带半圈旋转。 */
 export function UnitConverterCard({ card }: { card: UnitConverterCardData }) {
   useLocale();
   const reduce = useReducedMotion();

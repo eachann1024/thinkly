@@ -2,9 +2,6 @@ import type { EChartsOption } from "echarts";
 import { getPalette } from "./chartPalette";
 import { readChartTheme } from "./chartThemeTokens";
 
-/**
- * 给原生 ECharts option 注入统一主题色与基础 tooltip（不破坏用户自定义 series）。
- */
 export function polishRawOption(
   raw: EChartsOption,
   isDark: boolean,

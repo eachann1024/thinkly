@@ -69,11 +69,6 @@ import {
 import { reassignLocalFolderOrder } from "@/stores/localFolderOrder";
 import type { StoreSet, StoreGet } from "../hydrate";
 
-/**
- * 最近自移路径集合——用于在 watcher rename 事件中抑制自写回声。
- * key: 绝对路径，value: 登记时间戳（ms）。
- * 窗口 ~5s，精确路径或目录前缀匹配均视为自移。
- */
 const recentSelfMoved = new Map<string, number>();
 const SELF_MOVE_WINDOW_MS = 5000;
 
@@ -93,14 +88,6 @@ export function wasRecentlySelfMoved(absPath: string): boolean {
   return false;
 }
 
-/**
- * 移动 local-folder 页面（文件或目录）到目标父目录。
- * - targetFolderId 为 undefined → 移到笔记本根目录
- * - targetFolderId 非 undefined → 必须是 isFolder=true 的页面
- *
- * 移动语义：文件系统 mv；page.localFilePath / parentId 同步更新；id 不变。
- * 目录移动：递归更新同笔记本中所有以旧目录路径为前缀的子页面。
- */
 export async function moveLocalPageAction(
   set: StoreSet,
   get: StoreGet,
@@ -121,7 +108,6 @@ export async function moveLocalPageAction(
     throw new Error(storeText("notebookMissing"));
   }
 
-  // 解析目标目录路径
   let targetDirPath: string;
   if (targetFolderId === undefined) {
     targetDirPath = notebook.localPath;
@@ -135,17 +121,13 @@ export async function moveLocalPageAction(
 
   const oldPath = page.localFilePath;
 
-  // 提取文件名
   const fileName = oldPath.replace(/\\/g, "/").split("/").pop()!;
 
-  // 解析当前所在目录
   const oldDir = oldPath.replace(/\\/g, "/").split("/").slice(0, -1).join("/");
   const normalizedTargetDir = targetDirPath.replace(/\\/g, "/");
 
-  // 同目录 no-op
   if (oldDir === normalizedTargetDir) return;
 
-  // 防止目录移进自己的子孙
   if (page.isFolder) {
     const normalizedOld = oldPath.replace(/\\/g, "/");
     if (
@@ -160,7 +142,6 @@ export async function moveLocalPageAction(
 
   const fs = window.gooseFs;
 
-  // 目标路径已存在冲突检测
   const exists = (() => {
     try {
       return fs.exists?.(newPath) ?? false;
@@ -186,11 +167,9 @@ export async function moveLocalPageAction(
     return;
   }
 
-  // 登记自移路径（旧 + 新），抑制 watcher 回声
   markSelfMoved(oldPath.replace(/\\/g, "/"));
   markSelfMoved(newPath);
 
-  // flush 待写防抖内容，避免 mv 后计时器把内容写回旧路径重建文件
   await flushPendingLocalSaveByPageIdInternal(pageId, get);
 
   const release = page.isFolder
@@ -209,7 +188,6 @@ export async function moveLocalPageAction(
         ? null
         : rebaseMarkdownResources(markdown, oldPath, newPath);
 
-    // 执行文件系统移动
     let renamed: boolean;
     try {
       renamed = Boolean(await Promise.resolve(fs.rename(oldPath, newPath)));
@@ -242,20 +220,16 @@ export async function moveLocalPageAction(
     const basePath = notebook.localPath;
 
     if (!page.isFolder) {
-      // ── 文件页面移动 ──────────────────────────────────────────────────────────
-      // 迁移 md 快照
       const snapshot = getLocalMdSnapshot(oldPath);
       if (snapshot !== undefined) {
         setLocalMdSnapshot(newPath, relocatedMarkdown ?? snapshot);
         deleteLocalMdSnapshot(oldPath);
       }
 
-      // 迁移 idMap
       const oldRel = toRelativePath(basePath, oldPath);
       const newRel = toRelativePath(basePath, newPath);
       migrateLocalPageIdMapEntry(page.workspaceId, oldRel, newRel, pageId);
 
-      // 更新 store
       runWithPresence(() => set((state) => {
         const current = state.pages[pageId];
         if (!current) return state;
@@ -286,8 +260,6 @@ export async function moveLocalPageAction(
     );
     await migrateNotebookHistory(basePath, historyPaths);
 
-    // 移动成功后才更新手动顺序：清源目录旧槽位、追加目标目录末尾。
-    // 目录自身移动时，其孩子的手动顺序以目录 pageId 为键，不受影响。
     reassignLocalFolderOrder(
       page.workspaceId,
       pageId,

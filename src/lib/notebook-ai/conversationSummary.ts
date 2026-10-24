@@ -32,7 +32,6 @@ function getUserDisplayText(message: NotebookAiMessage) {
     : rawText;
 }
 
-/** 会话列表与面板顶栏共用：首条用户消息，否则「新会话」。 */
 export function getConversationSummary(messages: NotebookAiMessage[]) {
   const firstUserMessage = messages.find((message) => message.role === "user");
   return firstUserMessage

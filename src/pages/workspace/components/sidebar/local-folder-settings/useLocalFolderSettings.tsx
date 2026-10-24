@@ -38,7 +38,6 @@ import {
   getSystemDefaultLabels,
 } from "./shared";
 
-// IPC results contain copied strings; keep availability data and read labels from current resources.
 function localizeOptions(items: LocalFolderOpenAppCandidate[], candidates: LocalFolderOpenAppCandidate[]) {
   return items.map((item) => ({ ...item, label: candidates.find((candidate) => candidate.id === item.id)?.label ?? item.label }));
 }
@@ -90,8 +89,6 @@ export function useLocalFolderSettings({
 
     void (async () => {
       try {
-        // 重扫会替换 workspace 页面集合；先把编辑器最新内容推进保存队列并等待本地写盘，
-        // 避免用户刚编辑完就修改隐藏目录时丢失未落盘内容。
         window.dispatchEvent(
           new CustomEvent("goose-note:flush-editor", {
             detail: { immediate: true },

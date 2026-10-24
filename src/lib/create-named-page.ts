@@ -17,7 +17,6 @@ import { useSettings } from "@/stores/useSettings";
 import { pickRandomPageIcon } from "./randomPageIcon";
 import { toast } from "@/components/ui/sonner";
 
-/** 手动新建入口：直接以「新页面」创建，标题在正文顶部修改。 */
 export async function createNamedPage(parentId: string | undefined, workspaceId: string) {
   const notebooks = useNotebooks.getState();
   if (notebooks.notebooks[workspaceId]?.source === "local-folder") {

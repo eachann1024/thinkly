@@ -32,10 +32,6 @@ function build() {
 const ART = build();
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/**
- * 16 正文渲染失败：错位的一行文字。文字行波纹缓慢外扩；错位段与品牌蓝缺口一次轻抖后缓慢呼吸。
- * 宿主带 goose-glitch-host、按钮带 data-dm-arm 时，悬停按钮让错位段回正一点、缺口微放大（预备态）。
- */
 export function GlitchArt({ className, scale = 1 }: { className?: string; scale?: number }) {
   return (
     <DotMatrixMotion width={Math.round(W * scale)} height={Math.round(H * scale)} viewBox={`0 0 ${W} ${H}`} origin={[42, 57]} className={cn("shrink-0 text-foreground", className)}>

@@ -3,12 +3,10 @@ import { create } from "zustand";
 import { PANEL_WIDTH_MIN, readPreferredPanelWidth } from "../../notebook-ai/usePanelWidth";
 import { isSidebarResizeDrag, SIDEBAR_MAX_WIDTH } from "../hooks/useSidebarResize";
 
-/** 侧栏拖宽时留给正文的宽度，与原先侧栏上限里的 360 预留相同。 */
 export const SIDEBAR_EDITOR_RESERVE = 360;
 
 export type SidebarAiFit = {
   hidden: boolean;
-  /** 展示宽度上限。null 表示沿用用户保存的面板宽度。 */
   width: number | null;
 };
 
@@ -41,7 +39,6 @@ export function readSidebarAiLiveWidth(): number | null {
   return live.width;
 }
 
-/** 用户刚打开 AI 时，先显示到最小宽度，等下一次拖侧栏再允许藏起。 */
 export function noteSidebarAiOpenedByUser() {
   hideSuspended = true;
 }
@@ -64,10 +61,6 @@ export function setSidebarAiRequested(requested: boolean) {
   useSidebarAiSqueeze.setState({ requested: true });
 }
 
-/**
- * 侧栏变宽时，多出来的宽度从 AI 面板扣。
- * 扣到 PANEL_WIDTH_MIN 仍放不下正文预留，就藏起面板。AI 本来关着则不改。
- */
 export function resolveSidebarAiSqueeze(input: {
   aiOpen: boolean;
   preferredAiWidth: number;
@@ -88,7 +81,6 @@ export function resolveSidebarAiSqueeze(input: {
   return { hidden: false, width: room };
 }
 
-/** 设置页仍按 AI 当前宽度占位；工作区里 AI 打开时让出这段宽度。 */
 export function resolveSidebarMaxWidth(input: {
   stageWidth: number;
   padding: number;

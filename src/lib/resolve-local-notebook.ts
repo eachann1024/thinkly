@@ -9,7 +9,6 @@ async function pathExists(target: string): Promise<boolean> {
   return window.gooseFs?.exists(target) ?? false;
 }
 
-/** 路径还在就盖上身份标记；被访达改名时按标记找回新目录并改写映射。找不到则返回 null。 */
 export async function resolveLocalNotebookRoot(notebook: Notebook): Promise<string | null> {
   if (notebook.source !== "local-folder" || !notebook.localPath) return null;
   if (await pathExists(notebook.localPath)) {

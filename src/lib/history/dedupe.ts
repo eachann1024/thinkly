@@ -2,10 +2,6 @@ import type { HistoryBackend } from "./backend";
 import { getLoadedHistorySignature } from "./versionReadCache";
 import type { HistoryIndexEntry } from "./types";
 
-/**
- * 防御性折叠旧数据中的相邻重复版本。
- * 有名称的版本和多个里程碑都保留；普通重复项优先保留更新或已标记的那条。
- */
 export async function filterAdjacentDuplicateHistoryEntries(
   pageId: string,
   entries: HistoryIndexEntry[],

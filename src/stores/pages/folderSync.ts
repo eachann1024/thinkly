@@ -25,13 +25,11 @@ function acknowledgePendingRevision(pageId: string) {
     transitionLocalSave(pageId, { type: "acknowledged", revision: recovery.revision });
   }
 }
-/** Explicit disk acceptance invalidates any old in-flight failure snapshot. */
 export const discardPendingLocalSave = (pageId: string) => {
   clearLocalSaveTimers(pageId);
   transitionLocalSave(pageId, { type: "discard" });
   acknowledgePendingRevision(pageId);
 };
-/** Recovered content remains in memory until the user confirms or edits it. */
 export const restorePendingLocalSave = (pageId: string, content: JSONContent, recoveryRevision: number): void => {
   transitionLocalSave(pageId, { type: "restore", content: cloneJSONContent(content), revision: recoveryRevision });
 };
@@ -57,12 +55,10 @@ export const queueLocalPageSave = (pageId: string, content: JSONContent, getStat
   scheduleLocalSave(pageId, getState);
 };
 
-/** Move the journal before moving the single in-memory page state. */
 export const migratePendingLocalSave = (
   oldPageId: string, newPageId: string, getState: () => PagesState,
 ): { ok: true } | { ok: false; error: string } => {
   if (oldPageId === newPageId) return { ok: true };
-  // A running write has captured its page ID. Its owner must flush before moving identity.
   if (hasLocalSaveWriteChain(oldPageId) || hasLocalSaveWriteChain(newPageId)) return { ok: false, error: storeText("savingBeforeMove") };
   const previous = getLocalSavePageState(oldPageId);
   if (previous.pending.status === "empty" && previous.permission.status === "automatic" && previous.recovery.status === "none") return { ok: true };

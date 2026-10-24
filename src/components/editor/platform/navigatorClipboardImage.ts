@@ -1,4 +1,3 @@
-/** 页面剪贴板里的图片。系统位图读不到时的后备，失败就当没有图片。 */
 export async function readNavigatorClipboardImage(): Promise<string | null> {
   const clipboard = typeof navigator === "undefined" ? undefined : navigator.clipboard;
   if (!clipboard?.read) return null;

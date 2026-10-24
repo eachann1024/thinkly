@@ -26,7 +26,6 @@ function remoteCopy(name: string, reserved: Set<string>) {
   throw new Error(t("uniqueName"));
 }
 
-/** A missing baseline means first attach: absence locally must not delete remote files. */
 export function reconcileFiles(base: Files | undefined, local: Files, remote: Files, context?: ConflictContext): Files {
   const merged: Files = Object.create(null);
   const names = new Set([...Object.keys(base ?? {}), ...Object.keys(local), ...Object.keys(remote)]);
@@ -44,7 +43,6 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
       context.active.add(conflict.info.id);
       if (!conflict.choice) {
         context.unresolved.push(conflict.info);
-        // Placeholder never reaches the write transaction while conflicts remain.
         value = l;
       } else if (conflict.choice === "remote") value = r;
       else {

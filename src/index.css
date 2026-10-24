@@ -23,7 +23,6 @@
 @import "./styles/goose-text-colors.css";
 @import "./styles/goose-dark-theme.css";
 
-/* Preserve the original cascade through ordered domain imports. */
 @import "./styles/global/foundation.css";
 @import "./styles/global/floating-surfaces.css";
 @import "./styles/global/menu-items.css";

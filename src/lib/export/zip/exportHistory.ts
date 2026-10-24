@@ -1,7 +1,6 @@
 import type { Page } from "@/types";
 
 export async function loadExportHistory(exportPagesList: Page[]) {
-  // 读取并打包历史记录数据
   const { resolveHistoryBackend } = await import("@/lib/history/backend");
   const exportHistory: Record<string, { index: any; versions: any[] }> = {};
 

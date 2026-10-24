@@ -86,8 +86,6 @@ export function useCodePreview(
 
   const textContent = getCodeContent();
   const lineCount = textContent.split("\n").length;
-  // yaml-frontmatter 是可编辑的普通代码块，不做表格预览；
-  // math/mermaid 才走视觉预览（紧凑编辑器构建退化为可编辑源码）。
   const isMathOrMermaid =
     !__GOOSE_EDITOR_COMPACT__ &&
     (language === "math" || language === "mermaid");
@@ -100,7 +98,6 @@ export function useCodePreview(
   const visualTitle = language === "math" ? "Math" : "Mermaid";
 
   useEffect(() => {
-    // 首次输入形成可预览内容时保留源码焦点；预览切换由用户决定。
     if (!isVisualBlock || !canPreview) {
       setPreviewMode("code");
       setPreviewContent(null);

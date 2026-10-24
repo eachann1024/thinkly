@@ -10,7 +10,6 @@ function flush() {
   finally { if (queue.length) frame = requestAnimationFrame(flush); }
 }
 
-/** Separate preview DOM commits across frames instead of draining all async results at once. */
 export function schedulePreviewCommit(run: () => void) {
   const item = { run, cancelled: false };
   queue.push(item);

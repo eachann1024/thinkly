@@ -34,7 +34,6 @@ guard FileManager.default.fileExists(atPath: targetPath) else {
     throw FileIconError.missingTarget(targetPath)
 }
 
-// Write Finder's custom icon metadata; no application or window is opened.
 guard NSWorkspace.shared.setIcon(icon, forFile: targetPath, options: []) else {
     throw FileIconError.failedToSetIcon(targetPath)
 }

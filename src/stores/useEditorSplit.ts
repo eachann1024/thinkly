@@ -201,9 +201,6 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
       });
       return;
     }
-    // 未分屏：侧栏切页会改 tab.pageId 但复用同一 tabId。叶子必须跟着换，
-    // 否则 WorkspaceLayout 会把 focusedPageId 写回活动页，多窗单标签切页被吃掉。
-    // 已分屏不改树，由 tryShowPageInFocusedSplit 换格。
     if (isSplitState(current)) return;
     if (focusedPageIdOf(current) === pageId) return;
     const next = setLeafPage(current, current.focusedLeafId, pageId);
@@ -240,9 +237,6 @@ export const useEditorSplit = create<EditorSplitStore>()((set, get) => ({
   },
 }));
 
-/**
- * zustand v5 会静默丢掉 hook 第二个 equalityFn。要比较引用请走这里。
- */
 export function useEditorSplitSelector<T>(
   selector: (state: EditorSplitStore) => T,
   equalityFn: (a: T, b: T) => boolean,

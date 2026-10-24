@@ -1,7 +1,3 @@
-/**
- * 全屏 AI 时，点大纲或文件列表一次就切回笔记；再点 AI 图标也一次关闭。
- * 运行：node scripts/verify/run.mjs fullscreen-ai-rail
- */
 import {
   aiToggleSteps,
   sidebarViewClickAction,

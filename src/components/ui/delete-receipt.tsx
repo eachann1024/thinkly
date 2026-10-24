@@ -42,7 +42,6 @@ import { toast } from "./sonner";
 
 type ReceiptItem = { title: string; deleted: boolean; reason?: string };
 
-/** One receipt for one or many deletions; undo appears only when a real restore is available. */
 export function showDeleteReceipt(
   items: ReceiptItem[],
   isLocalFolder: boolean,
@@ -54,7 +53,6 @@ export function showDeleteReceipt(
   const failureReason = items.find((item) => !item.deleted && item.reason)?.reason;
   const destination = isLocalFolder ? uiText(getPlatformKind() === "windows" ? "systemRecycle" : "systemTrash") : uiText("trash");
   let undoing = false;
-  // 全部失败时直接展示具体原因；不要只说「N 项未完成」。
   const label = failed
     ? !done && failureReason
       ? failureReason
@@ -63,7 +61,6 @@ export function showDeleteReceipt(
       ? uiText("deletedItem", {destination, title: items[0].title})
       : uiText("deletedMany", {done, destination});
 
-  // 标准 toast：图标、关闭按钮与其它通知共用同一套对齐；撤回成功才关闭，失败保留回执。
   let id: string | number = "";
   const action = done > 0 && onUndo ? {
     label: <><RotateCcw className="size-3.5" aria-hidden="true" />{uiText("undo")}</>,

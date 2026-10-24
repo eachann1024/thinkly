@@ -62,7 +62,6 @@ function sameTarget(a: SplitDropTarget | null, b: SplitDropTarget | null): boole
     a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height;
 }
 
-/** 侧栏笔记拖到格子上。落点框与分屏间拖拽共用 editor-split-drop-preview。 */
 export function SidebarPageDrop({
   tabId,
   surfaceRef,

@@ -18,7 +18,6 @@ export function gitVersionAcceptable(text: string): boolean {
   return /^git version \d+\.\d+/m.test(text);
 }
 
-/** 没有显式选择时，已经连过仓库的安装保持开启。 */
 export function inferGitModuleEnabled(saved: unknown, configCount: number): boolean {
   if (saved && typeof saved === "object" && !Array.isArray(saved)) {
     const value = (saved as { moduleEnabled?: unknown }).moduleEnabled;
@@ -27,7 +26,6 @@ export function inferGitModuleEnabled(saved: unknown, configCount: number): bool
   return configCount > 0;
 }
 
-/** xcode-select -p 的结果。绝不返回会弹出「安装命令行工具」的 /usr/bin/git。 */
 export function developerGitPath(dir: string | null | undefined): string | null {
   if (!dir) return null;
   const trimmed = dir.trim();
@@ -110,7 +108,6 @@ function knownPaths(input: GitLookupInput, platform: GitLookupPlatform): string[
   return files;
 }
 
-/** 按 PATH、常见安装位置给出候选。macOS 排除 /usr/bin/git。 */
 export function gitLookupCandidates(input: GitLookupInput): string[] {
   const platform = platformOf(input.platform);
   const name = platform === "win32" ? "git.exe" : "git";

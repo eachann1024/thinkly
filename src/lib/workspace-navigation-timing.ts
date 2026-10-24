@@ -1,4 +1,3 @@
-// Keep background search maintenance out of the 170 ms workspace entrance animation.
 let resumeAt = 0;
 
 export function deferWorkspaceMaintenance(): void {

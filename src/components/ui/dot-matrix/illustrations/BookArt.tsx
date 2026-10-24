@@ -23,7 +23,6 @@ const topL = (x: number) => 58 + ((x - 24) * 12) / 82;
 const topR = (x: number) => 70 - ((x - 114) * 12) / 82;
 const LINE_ROWS = [16, 28, 40, 52, 64];
 
-/** 品牌蓝四角星：网格原点对齐星心（与设计稿一致）。 */
 function star(sx: number, sy: number, sR: number, pitch = 4) {
   return grid(
     W,
@@ -77,7 +76,6 @@ function buildBook() {
 const ART = buildBook();
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/** 01 无打开页面：展开书本 + 品牌蓝书签。光晕波纹外扩；书页一束光自左向右扫过；书签与小星偶尔微亮。 */
 export function BookArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={W} height={H} origin={[(CX / W) * 100, (CY / H) * 100]} className={className}>

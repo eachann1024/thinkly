@@ -17,7 +17,6 @@ export function readToggleCollapsed(block: ToggleBlock): boolean {
   return value === true || value === "true";
 }
 
-/** 顶层块返回 null，找不到返回 undefined。 */
 export function findParentBlock(
   blocks: ToggleBlock[],
   id: string,

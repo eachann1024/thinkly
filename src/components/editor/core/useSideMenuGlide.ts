@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-// 只在换块时过渡位置；滚动和尺寸变化要立即跟手。
 export function useSideMenuGlide(blockId: string | undefined) {
   const [shownBlockId, setShownBlockId] = useState(blockId);
   const [gliding, setGliding] = useState(false);

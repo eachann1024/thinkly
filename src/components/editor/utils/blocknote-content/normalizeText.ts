@@ -1,7 +1,5 @@
-/** 写在 props 里、用户能看见也会拿来搜的字段。url / language / title 不进索引。 */
 const SEARCHABLE_PROP_KEYS = ["caption", "name", "summary", "alt"] as const;
 
-/** 粘贴/空块占位文件名，搜 image、webp、mp4 会误伤一堆笔记 */
 const GENERIC_MEDIA_NAMES = new Set([
   "image.webp",
   "image.png",
@@ -54,7 +52,6 @@ function getBlockLanguage(block: any): string {
   return typeof language === "string" ? language.trim().toLowerCase() : "";
 }
 
-/** 去掉 goose-* 页面设置和 --- 定界，保留用户自己写的 YAML（如 name / description） */
 function stripGooseFrontmatterNoise(text: string): string {
   return text
     .split(/\r?\n/)

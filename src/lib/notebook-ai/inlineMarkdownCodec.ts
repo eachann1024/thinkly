@@ -27,13 +27,11 @@ export function serializeBlocksToMarkdown(
       encodeBlockPropsMarkers(blocks as BlockNoteContent),
     );
   } catch {
-    // fall through
   }
   if (typeof editor.blocksToMarkdownLossy === "function") {
     try {
       return editor.blocksToMarkdownLossy(blocks as never);
     } catch {
-      // fall through
     }
   }
   return jsonContentToMarkdown(blocks as BlockNoteContent);
@@ -54,7 +52,6 @@ export function parseMarkdownToBlocks(
         return exploded.length > 0 ? exploded : parsed;
       }
     } catch {
-      // fall through
     }
   }
   const fragment = importMarkdownFragment(markdown);

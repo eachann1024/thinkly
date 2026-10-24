@@ -28,7 +28,6 @@ import { getNativePlatform } from "../SetupGuide";
 import "../setup-guide.css";
 import "./character-onboarding.css";
 
-/** 首启形象引导：确认后写入设置，之后不再出现；随后接现有设置引导。 */
 export function CharacterOnboarding() {
   useLocale();
   const visible = useSettings(isCharacterGuideVisible);
@@ -41,7 +40,6 @@ const subscribeResize = (notify: () => void) => {
   return () => window.removeEventListener("resize", notify);
 };
 
-/** 形象像素尺寸随窗口分档：点阵按物理像素抖动，只取整档避免缩放发虚。 */
 function spriteSizeForWindow() {
   const { innerWidth: w, innerHeight: h } = window;
   if (w < 680 || h < 600) return 80;

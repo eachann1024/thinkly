@@ -11,7 +11,6 @@ const FADE_W = 248;
 const FADE_H = 120;
 const FADE_RINGS = 5;
 
-/** 从空态文字末尾向上方 ＋ 弯折的点阵轨迹；右端距右边 24px，对齐侧栏头部的新建按钮。 */
 function buildTrail() {
   const pts = sample([[[196, 22], [222, 22], [224, 12], [224, 5]]], 5);
   const dots: Dot[] = pts.map(([x, y], i) => {
@@ -24,7 +23,6 @@ function buildTrail() {
   };
 }
 
-/** 侧栏底部渐隐点阵，自左下角显现。 */
 function buildFade() {
   const dots = grid(FADE_W, FADE_H, 10, (x, y, i, j) => {
     const t = clamp((y - 20) / 100) * clamp(1 - x / 300);
@@ -37,7 +35,6 @@ function buildFade() {
 const TRAIL = buildTrail();
 const FADE = buildFade();
 
-/** 03 已关联：轨迹由文字向 ＋ 缓慢流动（波纹），末端品牌蓝点偶尔微亮。 */
 export function TreeTrailArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={TRAIL_W} height={TRAIL_H} origin={[79, 85]} className={className}>
@@ -56,7 +53,6 @@ export function TreeTrailArt({ className }: { className?: string }) {
   );
 }
 
-/** 03 侧栏底部渐隐点阵：由左下角向外缓慢波纹。 */
 export function TreeFadeArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={FADE_W} height={FADE_H} origin={[0, 100]} className={className}>

@@ -23,12 +23,9 @@ let renderQueue: Promise<unknown> = Promise.resolve();
 let nextInstance = 0;
 const rendererIdentity = crypto.randomUUID();
 
-/** Give every mounted/exported SVG its own IDs, including markers and CSS selectors. */
 function instantiate(svg: string): string {
   const parser = new DOMParser();
   const document = parser.parseFromString(svg, "image/svg+xml");
-  // Mermaid's HTML labels may contain <br> or named HTML entities that are not XML.
-  // Never insert Chromium's XML error document (including its page-wide CSS) into the editor.
   const root = document.documentElement.localName === "svg"
     ? document.documentElement
     : parser.parseFromString(svg, "text/html").querySelector("svg");
@@ -42,7 +39,6 @@ function instantiate(svg: string): string {
     if (!id) continue;
     ids.set(id, `${prefix}${ids.size}`);
   }
-  // SVG 的每个属性都要处理引用；匹配器只构建一次，避免属性数 × ID 数重复排序和编译。
   const alternatives = [...ids.keys()].sort((a, b) => b.length - a.length).map(id =>
     [...id].map(char =>
       "^$.*+?()[]{}|".includes(char) || char.charCodeAt(0) === 92
@@ -70,7 +66,6 @@ function instantiate(svg: string): string {
   return new XMLSerializer().serializeToString(root);
 }
 
-/** One global queue protects Mermaid's mutable initialize/render configuration. */
 export async function renderCachedMermaid(
   source: string,
   options: MermaidInitOptions,

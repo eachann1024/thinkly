@@ -76,7 +76,6 @@ export function createHighlightPlugin({
       },
       apply: (tr, data) => {
         const refresh = !!tr.getMeta("prosemirror-highlight-refresh");
-        // 光标和选区移动没有改正文，不必比较所有代码块或重建装饰缓存。
         if (!tr.docChanged && !refresh) return data;
         const cache = tr.docChanged ? data.cache.invalidate(tr) : data.cache;
         const [decorations, promises] = calculateDecoration(
@@ -149,7 +148,6 @@ function calculateDecoration(
         const [_, decorations] = cached;
         if (decorations.length > 0) allDecorations.push(decorations);
       } else {
-        // FIX: Use textBetween with \n to preserve hard_break nodes!
         const parsed = parser({
           content: node.textBetween(0, node.content.size, "\n", "\n"),
           language: language || undefined,

@@ -1,8 +1,3 @@
-/**
- * AI 并排打开时，侧栏拖宽要同步收窄 AI 面板；窄于已有最小宽度就藏起。
- * AI 关着时侧栏上限与原来一致。
- * 运行：node scripts/verify/run.mjs sidebar-ai-squeeze
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { PANEL_WIDTH_MIN } from "../../src/pages/workspace/components/notebook-ai/usePanelWidth";

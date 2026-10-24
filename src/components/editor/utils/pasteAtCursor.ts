@@ -91,7 +91,6 @@ export function focusPastedBlock(
     try {
       editor.setTextCursorPosition(block, "end");
     } catch {
-      // Image and other non-text blocks cannot receive a text cursor.
     }
     editor.focus();
   }, 0);

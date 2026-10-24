@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { loadReflectionData, type ReflectionData } from "@/lib/reflection/reflectionRunner";
 import { scopeRange, type ReflectionScope } from "@/lib/reflection/scopeRange";
 
-/** 打开弹窗或切换范围时读取版本历史并统计；reload(true) 强制重读全部历史。 */
 export function useReflectionData(open: boolean, scope: ReflectionScope) {
   const [data, setData] = useState<ReflectionData | null>(null);
   const [loading, setLoading] = useState(false);

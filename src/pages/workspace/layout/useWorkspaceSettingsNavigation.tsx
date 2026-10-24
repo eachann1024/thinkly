@@ -48,7 +48,6 @@ export function useWorkspaceSettingsNavigation(
             ? document.activeElement
             : null;
       }
-      // Mark the active surface before synthetic Escape dismisses floating layers.
       document.body.setAttribute("data-goose-settings-open", "");
       closeAllOverlays();
       setSettingsSidebarExpanded(true);
@@ -91,10 +90,6 @@ export function useWorkspaceSettingsNavigation(
     focusAiAfterSettingsCloseRef.current = false;
     if (!previousOpen || settingsOpen) return;
     const restore = window.requestAnimationFrame(() => {
-      // Settings close normally returns focus to the note. Opening AI from
-      // settings must wait until the settings attribute and editor inert flag
-      // are cleared, otherwise the composer ignores the focus request and the
-      // note steals it back.
       if (focusAi) {
         window.dispatchEvent(new CustomEvent("goose-note:focus-ai-composer"));
         return;

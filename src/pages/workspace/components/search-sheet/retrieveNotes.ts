@@ -15,7 +15,6 @@ const WEAK_COVERAGE = 0.6;
 const STOP = new Set("的了是在和与及或我你他她它们这那哪些什么怎么如何为什么吗呢吧啊请帮把给对从到有没一个".split(""));
 const EN_STOP = new Set("what which how why who the and for are is was do does did our we you have has any about with from that this there".split(" "));
 
-/** 拆检索词：强词＝模型改写词、英文词、去虚词后的中文整段；弱词＝中文二字切片，只在覆盖率够高时计分。 */
 export function questionTerms(question: string, extraTerms: string[] = []): Terms {
   const strong = new Set(extraTerms.map(term => term.trim().toLowerCase()).filter(term => term.length >= 2));
   const weak = new Set<string>();
@@ -35,7 +34,6 @@ function countOf(haystack: string, needle: string, cap = 50) {
   return count;
 }
 
-/** 整词命中（标题加重）为主；二字碎片只有覆盖大部分时才给少量分，避免「视频」「提示」各自命中就算相关。 */
 function scorePage(title: string, body: string, terms: Terms) {
   let score = 0, matched = 0;
   for (const term of terms.strong) {
@@ -53,7 +51,6 @@ function scorePage(title: string, body: string, terms: Terms) {
   return score;
 }
 
-/** 取命中最密集的几个窗口拼成摘录；只在命中附近取片段，没有命中就取开头一小段。 */
 function excerptOf(text: string, terms: string[], limit: number) {
   const lower = text.toLowerCase();
   const hits: number[] = [];
@@ -72,10 +69,6 @@ function excerptOf(text: string, terms: string[], limit: number) {
   return parts.join(" … ");
 }
 
-/**
- * 参照 Notion Q&A 的检索增强做法：先检索、再只把相关片段交给模型，而不是塞入全部笔记。
- * 关键词搜索结果与候选页统一打分，排名靠前的只加少量权重，仍需过相对阈值，宁缺勿滥。
- */
 export function retrieveNotes(question: string, candidates: Page[], ranked: Page[], extraTerms: string[] = []): NoteSource[] {
   const terms = questionTerms(question, extraTerms);
   if (!terms.strong.length && !terms.weak.length) return [];
@@ -102,7 +95,6 @@ export function retrieveNotes(question: string, candidates: Page[], ranked: Page
 
 import { CARD_GUIDE } from "@/lib/notebook-ai/cardGuide";
 
-/** 预检索的笔记摘录作为起点，其余信息交给只读工具按需获取；范围由调用方给出，不默认「当前笔记本」。 */
 export function buildAgentPrompt(question: string, sources: NoteSource[], scopeLabel: string, allNotebooks: boolean) {
   const context = sources.length
     ? sources.map((s, i) => `[${i + 1}] 《${s.title}》（pageId: ${s.id}）\n${s.excerpt}`).join("\n\n")

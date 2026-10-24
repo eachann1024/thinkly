@@ -1,7 +1,6 @@
 import type { CardTheme } from "../themes";
 import { normalizeColumnLayout, readColumnWidths } from "@/components/editor/blocks/columns/columnModel";
 
-/** 分享图里保持编辑器的左右栏比例；每栏内容仍走通用块渲染。 */
 export function renderColumnsBlock(
   block: any,
   theme: CardTheme,

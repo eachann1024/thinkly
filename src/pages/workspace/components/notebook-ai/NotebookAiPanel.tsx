@@ -1,5 +1,4 @@
 import { useLocale } from "@/i18n";
-/** 面板 UI 仅消费常驻会话，关闭面板不会停止生成。 */
 import { useContext, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { isElectronRuntime } from "@/lib/electron/runtime";
@@ -42,7 +41,6 @@ function NotebookAiPanelReady(props: NotebookAiPanelProps) {
     layoutMode = "side-panel",
     variant = "side-panel",
   } = props;
-  // editorRef 由 SessionProvider 持有，面板侧仅保留 prop 兼容调用方签名
   void _editorRef;
   const isFullscreen = variant === "fullscreen";
   const isElectronChrome = isElectronRuntime();

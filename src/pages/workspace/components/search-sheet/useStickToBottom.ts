@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "motion/react";
 
-/** 距底部多少像素内视为「在底部」，用户回到这里就恢复跟随。 */
 const NEAR_BOTTOM = 32;
-/** 指数趋近的时间常数：每帧走剩余距离的 1 - e^(-dt/τ)，等价于临界阻尼的无回弹追随。 */
 const TAU_MS = 110;
 const UP_KEYS = new Set(["PageUp", "ArrowUp", "Home"]);
 
@@ -11,10 +9,6 @@ function distanceToBottom(el: HTMLElement) {
   return el.scrollHeight - el.clientHeight - el.scrollTop;
 }
 
-/**
- * 流式回答的贴底跟随：内容增高时平滑追到底部；用户向上滚（滚轮、触摸、键盘或拖动滚动条）立即停止跟随，
- * 向下滚回距底 32px 内恢复。新问题由调用方按 requestId 重新挂载，从跟随状态开始。
- */
 export function useStickToBottom(scrollRef: RefObject<HTMLElement | null>) {
   const reduce = useReducedMotion();
   const [following, setFollowingState] = useState(true);
@@ -62,7 +56,6 @@ export function useStickToBottom(scrollRef: RefObject<HTMLElement | null>) {
       const top = el.scrollTop;
       const movedUp = top < lastTop.current - 1;
       lastTop.current = top;
-      // 内容收起导致的回弹也会让 scrollTop 变小，但那时仍贴着底部，不算用户上滚。
       if (movedUp && distanceToBottom(el) > NEAR_BOTTOM) { stop(); return; }
       if (!movedUp && !followingRef.current && distanceToBottom(el) <= NEAR_BOTTOM) setFollowing(true);
     };

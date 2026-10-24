@@ -38,7 +38,6 @@ export function emitVisibilityChange(): void {
     try {
       listener();
     } catch {
-      // ignore
     }
   }
 }

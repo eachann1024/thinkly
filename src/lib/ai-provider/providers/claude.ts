@@ -91,7 +91,6 @@ export async function handleClaudeStream(
           }
         }
       } catch {
-        // parse error
       }
     }
   }

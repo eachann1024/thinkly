@@ -1,9 +1,6 @@
 import { TableHandlesExtension } from "@blocknote/core/extensions";
 import type { BlockNoteEditor } from "@blocknote/core";
 
-/**
- * 选区是否完全落在同一个表格单元格内。
- */
 export function isSelectionInsideSingleCell(selection: any): boolean {
   const $from = selection.$from;
   const $to = selection.$to;
@@ -36,10 +33,6 @@ export type CellSelectionInfo = {
   to: RelativeCell;
   cells: RelativeCell[];
 };
-/**
- * Resolve table cell indices for the current selection.
- * Prefers TableHandlesExtension; falls back to ProseMirror tableRole walk.
- */
 export function getCellSelectionSafe(
   editor: BlockNoteEditor<any, any, any>,
 ): CellSelectionInfo | undefined {
@@ -49,16 +42,11 @@ export function getCellSelectionSafe(
       ?.getCellSelection();
     if (cellSelection?.cells?.length) return cellSelection;
   } catch {
-    /* extension unavailable */
   }
 
   return resolveCellSelectionFromPm(editor);
 }
 
-/**
- * PM fallback when TableHandlesExtension.getCellSelection is unavailable.
- * Uses tableRole ancestors + $pos.index for row/col indices.
- */
 function resolveCellSelectionFromPm(
   editor: BlockNoteEditor<any, any, any>,
 ): CellSelectionInfo | undefined {

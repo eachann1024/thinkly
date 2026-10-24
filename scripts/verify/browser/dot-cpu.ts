@@ -23,7 +23,6 @@ const maxGap = (item: any) => {
   return Math.max(...offsets.slice(1).map((value, index) => value - offsets[index])) * item.duration;
 };
 
-/** Stable target IDs distinguish duplicate names across every snapshot and bundle load. */
 function inventory(state: any) {
   return JSON.stringify(list(state?.renderer?.animationTimes).map((item) => ({
     id: item.id, targetId: item.targetId, name: item.name,
@@ -93,7 +92,6 @@ function clocksAdvance(phase: any) {
       && inventory(snapshot) === inventory(prior)
       && list(prior?.renderer?.animationTimes).every((item) => {
         const next = after.get(item.id);
-        // The longest held step differs for SVG, small float and infrequent blinks.
         const tolerance = phase.variant === "after" && isLoop(item) ? maxGap(item) + 150 : Math.max(100, delta * 0.01);
         return next && next.time >= item.time && Math.abs((next.time - item.time) - delta) <= tolerance;
       });
@@ -116,7 +114,6 @@ function visualsChange(phase: any) {
   });
 }
 
-/** Visual reads happen after both CPU counters and CDP performance metrics have closed. */
 function visualSamplesContinue(phase: any) {
   const samples = list(phase.visualSamples);
   const animated = loops(phase.after).filter((item) => !item.name.startsWith("goose-cs-blink"));
@@ -139,7 +136,6 @@ function visualSamplesContinue(phase: any) {
   });
 }
 
-/** 隔离 Electron 诊断的机器验收；先运行 scripts/perf/hidden-lifecycle.mjs。 */
 export default async function run() {
   const checker = createChecker();
   const filename = process.env.THINKLY_DOT_CPU_REPORT ?? path.join(tmpdir(), "thinkly-dot-cpu.json");

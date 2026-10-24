@@ -42,7 +42,6 @@ export function useQuickNoteSlotPreview({
     const root = rootRef.current;
     if (!root) return null;
 
-    // 仍在胶囊水平范围内时，按 X 投影到最近按钮（快速横滑不必严格命中圆心）
     const rootRect = root.getBoundingClientRect();
     const insideY =
       clientY >= rootRect.top - 8 && clientY <= rootRect.bottom + 8;

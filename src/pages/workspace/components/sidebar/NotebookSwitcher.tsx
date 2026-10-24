@@ -62,7 +62,6 @@ export function NotebookSwitcher(
     : "FolderOpen";
   const NotebookChevron = isHeader ? GooseIcons.ChevronDown : GooseIcons.ChevronUp;
 
-  // 隐藏或移动入口时关闭旧菜单；编辑对话框仍由同一个组件持有。
   useLayoutEffect(() => {
     const trigger = triggerRef.current;
     isDraggingRef.current = false;

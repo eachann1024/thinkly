@@ -16,7 +16,6 @@ export function readBatchPlanJournal(
   if (!journal || (journal.version !== 1 && journal.version !== 2)) return null;
   return {
     ...journal,
-    // v1 deliberately ignores any later target fields; replay keeps its original single notebook.
     input: journal.version === 1 ? { ...journal.input, operations: journal.input.operations.map(
       ({ target: _target, ...operation }) => operation) } : journal.input,
     operationTargets: journal.version === 2 ? journal.operationTargets ?? {} : undefined,
@@ -58,7 +57,6 @@ export function updateBatchPlanSelection(
   return writeBatchPlanJournal({ ...journal, selectedOperationIds: unique });
 }
 
-/** Same host run + model run id reuses one journal even after a new tool-call id. */
 export function readBatchPlanForScopeRun(scopeRunId: string, runId: string) {
   const ref = readDbStorageJSON<{ toolCallId: string; runId: string } | null>(
     `${KEY_PREFIX}run:${scopeRunId}:${runId}`, null);

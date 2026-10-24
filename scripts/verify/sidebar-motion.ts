@@ -1,7 +1,3 @@
-/**
- * 侧栏展开、收起和窗口拖窄自动收起补间占位宽度；拖把手只改宽度时不补间。
- * 运行：node scripts/verify/run.mjs sidebar-motion
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { shouldAnimateSidebarWidth } from "@/pages/workspace/components/sidebar/sidebarWidthMotion";

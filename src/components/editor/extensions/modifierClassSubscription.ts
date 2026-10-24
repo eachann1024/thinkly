@@ -10,7 +10,6 @@ type ModifierSubscription = {
 const subscriptions = new WeakMap<Document, ModifierSubscription>();
 const NO_MODIFIERS: ModifierState = { metaKey: false, ctrlKey: false };
 
-/** 一个窗口只监听一次修饰键；普通光标移动、按键和鼠标移动不重复写编辑器 DOM。 */
 function createModifierSubscription(doc: Document): ModifierSubscription | null {
   const eventWindow = doc.defaultView;
   if (!eventWindow) return null;

@@ -123,7 +123,6 @@ export const saveInternalPage = (page: Page): boolean => {
   return putDocWithRetry(getPageDocId(page.id), clonePage(page));
 };
 
-/** 从 db 读取单条内部页快照（跨窗同步用：另一窗写盘后重读最新）。 */
 export const loadInternalPage = (pageId: string): Page | null => {
   const doc = HostAdapter.db.get<PersistedPageDoc>(getPageDocId(pageId));
   if (!doc?.data) return null;

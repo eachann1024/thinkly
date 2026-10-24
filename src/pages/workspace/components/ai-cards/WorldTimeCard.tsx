@@ -33,7 +33,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 每秒对齐到整秒刷新一次，所有时钟共用同一个 now。 */
 function useNow() {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {

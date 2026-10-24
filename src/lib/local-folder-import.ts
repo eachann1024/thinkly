@@ -68,7 +68,6 @@ export function resolveImportParentForDrop(workspaceId: string): string | undefi
   );
 }
 
-/** Sidebar imports only Markdown copies; all other files belong to the editor drop target. */
 export async function importFilesToLocalFolder(options: {
   workspaceId: string;
   files: File[];

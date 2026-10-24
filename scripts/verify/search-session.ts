@@ -8,7 +8,6 @@ function context(state: SearchSessionState) {
   return state.view.phase === "closed" ? null : state.view.context;
 }
 
-/** 搜索弹窗、结果底栏、普通笔记三条关系。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

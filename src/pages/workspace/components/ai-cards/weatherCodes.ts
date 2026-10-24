@@ -71,7 +71,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 色调分组：卡片按它取一层极淡的语义底色。 */
 export type WeatherTone = "clear" | "cloudy" | "fog" | "rain" | "snow" | "storm";
 type LabelKey = Parameters<typeof t>[0];
 type CodeInfo = { label: LabelKey; tone: WeatherTone };
@@ -107,7 +106,6 @@ const CODES: Record<number, CodeInfo> = {
   99: { label: "hail", tone: "storm" },
 };
 
-/** WMO weather_code → 文案、图标与色调；isDay 只影响晴与少云的日夜图标。 */
 export function describeWeather(code: number, isDay = true): { label: string; tone: WeatherTone; Icon: GooseIcon } {
   const info = CODES[code];
   if (!info) return { label: t("unknown"), tone: "cloudy", Icon: Cloud };

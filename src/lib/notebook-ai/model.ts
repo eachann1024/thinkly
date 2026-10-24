@@ -30,11 +30,6 @@ export type ModelAvailability =
   | { ok: true; model: LanguageModel }
   | { ok: false; reason: string };
 
-/**
- * 从 settings 构造 LanguageModel。
- * 支持 OpenAI Responses、OpenAI 兼容和 Anthropic 三种自定义协议；
- * DeepSeek 等预设按模型分支协议。
- */
 export function buildLanguageModel(): ModelAvailability {
   const ai = useSettings.getState().ai;
 
@@ -42,7 +37,6 @@ export function buildLanguageModel(): ModelAvailability {
     return { ok: false, get reason() { return t("enableTheAiAssistantInSettingsToUse"); } };
   }
 
-  // 工作区覆盖只在模型仍存在于列表时生效，否则回退到设置里配置的默认模型。
   const workspaceOverride = ai.workspaceSelectedModelId?.trim();
   const workspaceOverrideValid =
     !!workspaceOverride &&

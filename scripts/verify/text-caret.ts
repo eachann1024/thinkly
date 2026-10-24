@@ -3,8 +3,6 @@ import path from "node:path";
 import postcss from "postcss";
 import { createChecker } from "./lib/check";
 
-// 光标只由浏览器排版引擎绘制。结构检查防止全局镜像/隐藏规则再次进入入口；
-// 不用 DOM 模拟器推断原生光标几何，真实输入交互另在浏览器验收。
 const root = process.cwd();
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 function files(dir: string): string[] {
@@ -24,9 +22,7 @@ export default function run() {
   for (const file of sources.filter((file) => file.endsWith(".css"))) {
     postcss.parse(read(file)).walkDecls("caret-color", (decl) => {
       const selector = decl.parent?.type === "rule" ? decl.parent.selector : "";
-      // 唯一有意隐藏输入的地方：AI 忙态由 ticker 占据原输入槽。
       if (file.endsWith("editor-ai-menu/input-controls.css") && selector === ".goose-ai-prompt-field--busy .goose-ai-prompt-field__textarea") return;
-      // 只接受已核对的主题色，避免漏掉 slash-alpha、透明 hex 等等价写法。
       if (!/^var\(--goose-(?:text-caret|accent-focus|text-link)\)$/.test(decl.value)) hidden.push(`${file}: ${selector} → ${decl.value}`);
     });
   }

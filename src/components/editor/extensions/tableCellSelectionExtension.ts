@@ -27,7 +27,6 @@ type CellRect = { top: number; right: number; bottom: number; left: number };
 const ANCHOR_FRAME = "goose-table-selection-anchor";
 const tableRects = new WeakMap<Node, Map<number, CellRect>>();
 
-/** 多格选区只描外轮廓。锚点内框会在选区左上角再叠一层，只留给单独一格。 */
 export function tableCellPaintsAnchorFrame(anchorPos: number, headPos: number): boolean {
   return anchorPos === headPos;
 }
@@ -101,7 +100,6 @@ function windowedCellDecorations(state: EditorState, selection: CellSelection): 
   return DecorationSet.create(state.doc, decorations);
 }
 
-/** Immutable table nodes let pointer selection reuse a single grid scan. */
 function tableCellSelectionDecorations(state: EditorState) {
   if (!(state.selection instanceof CellSelection)) return spanningCellDecorations(state);
   return windowedCellDecorations(state, state.selection) ?? fullCellDecorations(state);
@@ -130,8 +128,6 @@ function fullCellDecorations(state: EditorState) {
       !selected.has(map.map[row * map.width + col]);
     const columns = Array.from({ length: right - left }, (_, i) => left + i);
     const rows = Array.from({ length: bottom - top }, (_, i) => top + i);
-    // ponytail: partial merged-cell edges keep fill only; segment strokes need
-    // measured DOM geometry, not grid fractions (columns/rows can be unequal).
     const edges = [
       columns.every((col) => outside(top - 1, col)) && "top",
       rows.every((row) => outside(row, right)) && "right",

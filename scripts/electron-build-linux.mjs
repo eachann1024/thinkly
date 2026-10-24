@@ -5,8 +5,6 @@ import { delimiter, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:process";
 
-// Linux 桌面端打包：产出 AppImage / deb / pacman（目标在 prepare-electron-pack.mjs 生成的
-// electron-builder.yml 中定义）。AppImage 可在 Omarchy / Arch 等发行版直接双击运行。
 if (platform !== "linux") {
   console.error("[linux] bun run linux 面向 Linux 打包；当前平台不是 Linux。");
   console.error("       请在目标 Linux 系统（如 Omarchy / Arch）上执行。");
@@ -16,16 +14,11 @@ if (platform !== "linux") {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const pack = resolve(root, "dist-electron/app-pack");
 
-// 打包前强制停止正在运行的思绪 · Thinkly（AppImage / deb / pacman 安装版通用）。
-// 否则旧实例仍持有数据目录单实例锁（SingletonLock）与挂载的 AppImage，
-// 新打包的 AppImage 无法覆盖，双击启动也会被聚焦到已卡死的旧窗口。
-// 停止是尽力而为：杀进程失败不应中断打包，故整个函数用 try/catch 兜底。
 function stopRunningApp() {
   const shell = (cmd) => {
     try {
       return execSync(cmd, { encoding: "utf8", shell: true }).trim();
     } catch {
-      // 命令均带 `|| true`，仅真实 spawn 失败才会到这；视为无输出继续。
       return "";
     }
   };
@@ -34,7 +27,6 @@ function stopRunningApp() {
     if (!proc) return;
     shell("pkill -x thinkly || true");
     shell("pkill -x goose-note-app || true");
-    // 等待进程退出，最多 15 秒（SIGTERM 后仍未退则 SIGKILL）。
     const deadline = Date.now() + 15000;
     while (Date.now() < deadline) {
       if (!shell("pgrep -x thinkly || pgrep -x goose-note-app || true")) return;

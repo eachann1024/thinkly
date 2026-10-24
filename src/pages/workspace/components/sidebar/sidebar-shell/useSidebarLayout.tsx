@@ -100,7 +100,6 @@ export function useSidebarLayout({
 
   const isLocalFolder = activeNotebook?.source === "local-folder";
 
-  // Electron 仅本地模式：没有仓库时不露出「新建页面」入口与内置本语义
   const electronNoVault = !activeNotebookId;
 
   const itemHeight = useSidebarItemHeight() + 4;

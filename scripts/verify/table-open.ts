@@ -1,9 +1,3 @@
-/**
- * 富表格重新打开：本应用写出的 HTML 表格（新旧标记名）打开时不被 raw guard 包成 raw-block，
- * 原样写回磁盘；手写的普通 HTML 表格仍受保护。
- * 单元格里的 http(s) 链接和常见行内标记要解析成表格并往返；危险协议和不认识的标签仍回退原文。
- * 运行：node scripts/verify/run.mjs table-open
- */
 import { markdownToJsonContent } from "@/lib/export/markdown/parse/block";
 import { parseTableHtmlBlock } from "@/lib/export/markdown/parse/table";
 import { serializeTable } from "@/lib/export/markdown/serialize/table";
@@ -18,7 +12,6 @@ const RAW = /thinkly-raw-block|thinkly:raw-block/;
 
 export default function run() {
   const checker = createChecker();
-  // 单元格里有 `_` 和链接，序列化器会写成 HTML 表格
   const table = serializeTable({
     type: "table",
     content: {

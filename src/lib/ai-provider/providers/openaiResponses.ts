@@ -102,7 +102,6 @@ export async function handleOpenAIResponsesStream(
         }
       }
     } catch {
-      // 忽略无法解析的单条 SSE 事件，继续读取后续内容。
     }
   }
 

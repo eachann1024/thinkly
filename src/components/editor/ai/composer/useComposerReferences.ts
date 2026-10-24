@@ -20,7 +20,6 @@ import type { ComposerContentState } from "./useComposerContentState";
 export function useComposerReferences(state: ComposerContentState) {
   const { editorRef, liveRegionRef, emitCurrentContent } =
     state;
-  // 引用以稳定 pageId 为准；更名后同步更新 chip、草稿和发送内容，不重建编辑器选区。
   const syncReferenceTitles = useCallback(() => {
     const el = editorRef.current;
     if (!el) return;
@@ -47,7 +46,6 @@ export function useComposerReferences(state: ComposerContentState) {
         chip.textContent = `@${next.titleSnapshot}`;
         changed = true;
       } catch {
-        // 破损的旧 chip 交由原有解析逻辑处理。
       }
     }
     if (changed) emitCurrentContent();
@@ -80,7 +78,6 @@ export function useComposerReferences(state: ComposerContentState) {
       const range = window.getSelection()!.getRangeAt(0);
       range.deleteContents();
 
-      // 间距靠 CSS；ZWSP 锚点保证旧 Chromium 光标可见。
       const chip = createChipElement(reference);
       range.insertNode(chip);
       pruneEmptyComposerTextNodes(el);

@@ -2,20 +2,11 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { createChecker } from "./lib/check";
 
-/**
- * 首屏与包体预算。
- *
- * 口径：`dist-electron/renderer/index.html` 里出现的模块（entry + modulepreload）
- * 就是冷启动必须解析执行的 JS；`chunks/` 里其余文件是按需加载的懒加载块。
- * 预算取当前达成值向上取整，用来拦住后续提交把重代码重新拖回首屏。
- */
 const EAGER_BUDGET_KB = 5600;
 const PRELOAD_LINK_BUDGET = 62;
 const LARGEST_EAGER_CHUNK_BUDGET_KB = 830;
 const RENDERER_BUDGET_KB = 26 * 1024;
-/** 首屏里同一特征块的合计体积上限（避开空壳 chunk 误报）。 */
 const FORBIDDEN_KB = 24;
-/** 首屏永远不该出现的重型库（各自的 chunk 名特征）。 */
 const FORBIDDEN_IN_EAGER = [
   { name: "react-pdf", marker: "react-pdf" },
   { name: "echarts", marker: "vendor-echarts" },
@@ -23,7 +14,6 @@ const FORBIDDEN_IN_EAGER = [
   { name: "prettier", marker: "vendor-prettier" },
 ];
 
-// 验收运行器从仓库根启动（bun run verify），构建产物路径相对 cwd 解析。
 const root = process.cwd();
 const rendererDir = path.join(root, "dist-electron/renderer");
 
@@ -68,7 +58,6 @@ export default async function run(): Promise<number> {
   check(`modulepreload 条数 ≤ ${PRELOAD_LINK_BUDGET}`, preloadLinks <= PRELOAD_LINK_BUDGET, `当前 ${preloadLinks}`);
   check(`最大首屏块 ≤ ${LARGEST_EAGER_CHUNK_BUDGET_KB}KB`, (biggest?.kb ?? 0) <= LARGEST_EAGER_CHUNK_BUDGET_KB, biggest);
 
-  // 只按体积判定：rolldown 会生成几百字节的空壳 chunk，块名带上重库名字但内容几乎为空。
   for (const rule of FORBIDDEN_IN_EAGER) {
     const hits = eager.filter((rel) => rel.includes(rule.marker));
     const kb = hits.reduce((sum, rel) => sum + fileKB(path.join(rendererDir, rel)), 0);

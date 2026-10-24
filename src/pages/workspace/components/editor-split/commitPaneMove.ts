@@ -7,7 +7,6 @@ import { snapshotCurrentSelection, restoreSelectionAfterFormat } from "@/compone
 import type { EditorPaneRegistry } from "./editorPaneRegistry";
 import type { SplitDropTarget } from "./splitDropGeometry";
 
-/** 布局变化可能重挂编辑器；先提交正文，再按 pane ID 恢复选区与滚动。 */
 export function commitPaneMove(
   tabId: string,
   sourceId: string,

@@ -14,7 +14,6 @@ import * as GooseIcons from "@/components/ui/icons";
 interface SidebarSectionHeaderProps {
   title?: string;
   eyebrow?: string;
-  /** 不传则不渲染「新建」按钮（如 Electron 无仓库时） */
   onCreate?: () => void;
   createTitle?: string;
   onCollapseAll?: () => void;

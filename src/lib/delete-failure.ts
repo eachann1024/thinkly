@@ -81,7 +81,6 @@ function errorCode(error: unknown): string {
   return match?.[1]?.toUpperCase() ?? "";
 }
 
-/** 文件已经不在磁盘上。删除这类笔记应直接清掉记录，而不是报失败。 */
 export function isMissingFileError(error: unknown): boolean {
   const code = errorCode(error);
   const text = errorText(error);
@@ -116,7 +115,6 @@ export function classifyDeleteFailure(error: unknown): DeleteFailureKind {
   return "unknown";
 }
 
-/** 给用户看的删除失败说明。不回传异常原文或堆栈。 */
 export function describeDeleteFailure(error: unknown): string {
   return uiText(classifyDeleteFailure(error));
 }

@@ -15,7 +15,6 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  /* font 简写会带回芯片行高；压回 1 后，字框高度等于字号，flex 才能把墨迹中线对齐。 */
   line-height: 1;
   cursor: pointer;
 }

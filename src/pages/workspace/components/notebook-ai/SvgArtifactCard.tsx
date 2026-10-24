@@ -117,7 +117,6 @@ export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps)
             role="img"
             aria-label={title?.trim() || t("image")}
             className="notebook-ai-artifact-svg"
-            // Model SVG is allowlisted by sanitizeSvgMarkup before rendering.
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
           />

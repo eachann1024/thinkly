@@ -8,11 +8,6 @@ export function normalizePageTitle(title: string | null | undefined): string {
   return !trimmed || trimmed === "无标题" ? UNTITLED_PAGE_TITLE : trimmed;
 }
 
-/**
- * 极简工作区的内部页面仍把标题持久化在首个 H1 中，但标题只由顶栏编辑。
- * 正文编辑器可能持有改名前的文档快照；保存正文前用此函数合并最新标题，
- * 避免旧快照把刚改好的名称覆盖回去。
- */
 export function withInternalPageTitle(
   content: JSONContent,
   title: string,
@@ -65,8 +60,6 @@ export function getPageTitle(page: Page): string {
   try {
     if (!page || typeof page !== "object") return UNTITLED_PAGE_TITLE;
     if (page.localFilePath) {
-      // 本地文件：tab/侧栏用文件名（去 .md/.markdown 后缀），不取编辑器内的 H1——
-      // 文件名与文档标题是两件独立的事。
       const name = page.localFilePath.split(/[\\/]/).pop() || "";
       const stripped = page.isFolder ? name : name.replace(/\.(md|markdown)$/i, "").trim();
       return normalizePageTitle(stripped);

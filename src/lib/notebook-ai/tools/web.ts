@@ -28,7 +28,6 @@ export {
   type TinyfishSearchHit,
 } from "./webResults";
 
-/** TinyFish 只在配了密钥时作为加速通道；没有密钥或调用失败一律回落到应用自带联网，不再提示用户去配置。 */
 async function tinyfishSearch(query: string, maxResults: number, signal?: AbortSignal) {
   if (readTinyfishKeyPool().length === 0) return null;
   const outcome = await withTinyfishKeyRotation((apiKey) =>

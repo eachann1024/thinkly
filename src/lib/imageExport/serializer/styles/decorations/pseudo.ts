@@ -21,7 +21,6 @@ function isPseudo(decoration: CardDecoration): decoration is PseudoDecoration {
   return decoration.kind in SLOT_BY_KIND;
 }
 
-/** 解析主题 border 简写里的线宽，用于把装饰贴齐卡片外沿。 */
 function borderWidth(border: string): number {
   if (border.trim() === "none") return 0;
   const match = /(\d+(?:\.\d+)?)px/.exec(border);

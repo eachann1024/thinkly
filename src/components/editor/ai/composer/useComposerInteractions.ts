@@ -52,7 +52,6 @@ export function useComposerInteractions(
       const removeBtn = target.closest<HTMLElement>("[data-ai-image-remove]");
       if (removeBtn) {
         event.preventDefault();
-        // 移除前先关预览，避免悬空浮层
         hideImagePreview();
         removeImageChip(removeBtn.dataset.aiImageRemove!);
         return;
@@ -65,7 +64,6 @@ export function useComposerInteractions(
           ? imageRegistryRef.current.get(attrs.imageId)
           : null;
         if (attrs && entry) {
-          // 悬停浮层与全屏同时在场会互相遮挡
           hideImagePreview();
           setImagePreviewContent({
             kind: "image",
@@ -89,14 +87,9 @@ export function useComposerInteractions(
     endImeSession();
     handleMentionBlur();
     clearCommandState();
-    // 失焦时关掉图片预览，避免浮层悬空
     hideImagePreview();
   }, [endImeSession, handleMentionBlur, clearCommandState, hideImagePreview]);
 
-  /**
-   * 焦点在 contenteditable 内时粘贴：命令式节点不走 React 冒泡时 dock onPaste 可能丢。
-   * Mac 截图常只有 clipboardData.items，此处与 dock 共用 extractClipboardImageFiles。
-   */
   const handlePasteNative = useCallback(
     (event: ClipboardEvent) => {
       if (disabled) return;

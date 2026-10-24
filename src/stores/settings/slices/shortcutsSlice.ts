@@ -36,7 +36,6 @@ export const DEFAULT_APP_SHORTCUTS: Record<string, string> = {
     ...FIXED_SPLIT_SHORTCUTS,
 }
 
-/** 同版本恢复/导入也执行：固定值覆盖旧值，迁走占用固定键的自定义动作。 */
 export function normalizeAppShortcuts(stored: unknown): Record<string, string> {
     const result = { ...DEFAULT_APP_SHORTCUTS }
     if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return result

@@ -1,4 +1,3 @@
-/* 屏外块不排版。大表用行数撑开滚动高度，避免滑到表格时整页跳动。 */
 .bn-editor .bn-block-outer {
   content-visibility: auto;
   contain-intrinsic-size: auto 48px;

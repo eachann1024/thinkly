@@ -14,8 +14,6 @@ export function registerLanguageIpc(): void {
   const save = async (preference: unknown) => {
     const snapshot = await saveLanguagePreference(preference);
     setLanguageSnapshot(snapshot);
-    // Persistence has succeeded: a closed window or a native menu failure must
-    // not report a failed save or prevent other windows receiving the snapshot.
     try { app.setName(localizedAppName()); installMenu(); }
     catch (error) { console.error("[i18n] Could not refresh application menu", error); }
     for (const win of BrowserWindow.getAllWindows()) {

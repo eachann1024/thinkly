@@ -1,5 +1,4 @@
 #!/usr/bin/env swift
-// Typeset installer copy separately from the illustration for sharp Retina text.
 import AppKit
 
 let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
@@ -42,7 +41,6 @@ for scale in [1, 2] {
     arrow.move(to: NSPoint(x: 536, y: 382)); arrow.line(to: NSPoint(x: 550, y: 370)); arrow.line(to: NSPoint(x: 536, y: 358))
     ink.setStroke(); arrow.lineWidth = 2.5; arrow.lineCapStyle = .round; arrow.stroke()
     NSGraphicsContext.restoreGraphicsState()
-    // 2x pixels at 144 DPI retains the same 960×640 logical size in Finder.
     bitmap.size = NSSize(width: 960, height: 640)
     guard let data = bitmap.representation(using: .png, properties: [:]) else { fatalError("Cannot encode PNG") }
     try data.write(to: assets.appendingPathComponent(scale == 1 ? "background.png" : "background-2x.png"))

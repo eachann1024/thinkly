@@ -2,11 +2,6 @@ import type { EditorView } from "@tiptap/pm/view";
 
 export type BlockHitRect = { top: number; bottom: number };
 
-/**
- * 点在块盒子里用最内层块；点在首块之上或末块之下时归最近的那一块。
- * `blocks` 按 DOM 顺序（父先于子），含住时取最后一个即最内层。
- * 两块之间的空隙由 `isClickInInterBlockGap` 单独吞掉，不走这里。
- */
 export function pickOwningBlockIndex(
   blocks: BlockHitRect[],
   clientY: number,
@@ -33,7 +28,6 @@ export function pickOwningBlockIndex(
   return 0;
 }
 
-/** 点在两块内容盒子之间的垂直空隙：不改光标。首块之上、末块之下不算。 */
 export function isClickInInterBlockGap(
   blocks: BlockHitRect[],
   clientY: number,
@@ -69,10 +63,6 @@ function textblockRangeAt(
   return null;
 }
 
-/**
- * 表格/媒体外壳不是可编辑文本块。
- * 点在这些块上时不能按 Y 把光标判给上方标题；单元格走自己的 inline 容器。
- */
 const NON_TEXT_BLOCK_CONTENT_TYPES = new Set([
   "table",
   "image",
@@ -83,11 +73,6 @@ const NON_TEXT_BLOCK_CONTENT_TYPES = new Set([
   "divider",
 ]);
 
-/**
- * 标准块的 `.bn-inline-content` 是 `.bn-block-content` 的直接子级；
- * 标题/引用隔了一层 `h1`/`blockquote`；callout 等 React 自定义块则嵌在
- * `.react-renderer` 里。漏掉后者时，点击会被判给上方块（常见为标题 H1）。
- */
 export function isTextBlockContent(el: HTMLElement): boolean {
   const type = el.getAttribute("data-content-type");
   if (type && NON_TEXT_BLOCK_CONTENT_TYPES.has(type)) return false;
@@ -126,10 +111,6 @@ export function closestBlockContentEl(
   return el as HTMLElement;
 }
 
-/**
- * 表格单元格的可编辑面是 td/th 里的 `.bn-inline-content`，
- * 不是外层 `data-content-type="table"`。点格内文字或格内空白时用这一层。
- */
 export function tableCellInlineFromEventTarget(
   target: EventTarget | null,
 ): HTMLElement | null {
@@ -191,7 +172,6 @@ export function textblockRangeFromContentEl(
   }
 }
 
-/** 点在某个块内部时，用该块，不要按 Y 把点击判给上方标题。 */
 export function contentBlockFromEventTarget(
   target: EventTarget | null,
 ): HTMLElement | null {
@@ -199,10 +179,6 @@ export function contentBlockFromEventTarget(
   return htmlEl && isTextBlockContent(htmlEl) ? htmlEl : null;
 }
 
-/**
- * 点在表格/图片等结构化块内部时，不要按 Y 把点击判给上方标题。
- * 表格单元格返回该格 inline；图片/视频/文件/分割线返回 null（交给默认点击）。
- */
 export function pickTrailingBlankContentEl(
   target: EventTarget | null,
   contents: HTMLElement[],

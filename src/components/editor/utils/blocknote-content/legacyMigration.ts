@@ -23,8 +23,6 @@ function textFromLegacy(
   node: LegacyPageContent | string | undefined,
 ): string {
   if (node == null) return "";
-  // parseInlineMarkdown 对未匹配 mark 的纯文本直接 push 字符串，所以 content
-  // 数组里可能混入裸字符串。如果不在这里处理，纯文本标题（# 中文）会被当成空内容。
   if (typeof node === "string") return node;
   if (typeof node.text === "string") return node.text;
   if (!Array.isArray(node.content)) return "";
@@ -155,13 +153,6 @@ function inlineTextLength(value: unknown): number {
   }, 0);
 }
 
-/**
- * BlockNote 的 zh locale 把空 heading 块渲染为 「标题」 灰字占位。首块作为页面
- * 标题槽必须保留（用户可以在这里点击输入标题），但**后续**的空 heading
- * 没有任何意义，只会让编辑器看起来像有一个个空标题，所以这里统一剥掉。
- *
- * 只在顶层应用——避免误伤 quote / details 等嵌套内容中的子 heading。
- */
 function stripRedundantEmptyHeadings(blocks: BlockNoteContent): BlockNoteContent {
   return blocks.filter((block, index) => {
     if (index === 0) return true;
@@ -178,11 +169,6 @@ function stripRedundantEmptyHeadings(blocks: BlockNoteContent): BlockNoteContent
 export function normalizePageContent(
   content: PageContent | null | undefined,
   options?: {
-    /**
-     * 是否强制首块为 H1 标题（ensureFirstTitleHeading + 剥冗余空标题）。
-     * 默认 true（内部笔记本行为）。local-folder 导入传 false：
-     * 磁盘 markdown 没有 H1 时首块保持段落原样，不做标题提升。
-     */
     ensureFirstTitle?: boolean;
   },
 ): BlockNoteContent {

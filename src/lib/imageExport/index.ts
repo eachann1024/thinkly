@@ -1,4 +1,3 @@
-// Public API — re-export everything consumers need
 export type { CardTheme, CardThemeId, NotebookCardThemeContext } from "./themes";
 export {
   CARD_THEMES,

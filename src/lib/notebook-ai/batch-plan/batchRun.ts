@@ -54,7 +54,6 @@ export async function run(journal: BatchPlanJournal): Promise<BatchPlanExecuteRe
       if (dependencyFailed) throw new Error("前置操作未成功，本项未执行");
       if (conflict) throw new Error(conflict);
       if (working.writeScope && isRunWriteScopeRevoked(working.writeScope)) throw new Error("本轮写入范围已撤销");
-      // Persist intent before each mutation; scope and location were checked at this boundary.
       const livePage = operation.type === "edit" || operation.type === "search_replace"
         ? usePages.getState().pages[operation.pageId] : undefined;
       working = writeBatchPlanJournal({ ...working, executingOperationId: operation.operationId,
@@ -72,8 +71,6 @@ export async function run(journal: BatchPlanJournal): Promise<BatchPlanExecuteRe
       }
     } catch (error) {
       working = executionState.working;
-      // A throwing adapter may already have committed. Reconcile its persisted intent
-      // before classifying failure; recovery compensates only provable partial writes.
       if (working.executingOperationId) {
         const reconciled = await recoverInterruptedOperation(working);
         working = reconciled;

@@ -118,7 +118,6 @@ export async function restoreMissingReferencedLocalAssets({
           break;
         }
       } catch {
-        // try next candidate path
       }
     }
     if (!recovered) {

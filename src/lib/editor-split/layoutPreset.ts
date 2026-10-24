@@ -10,7 +10,6 @@ export type SplitNodeIds = {
 
 export type LayoutPresetResult = {
   state: SplitState;
-  /** 多出来的格子按视觉顺序关掉后留下的笔记；笔记本身不删。 */
   droppedPageIds: string[];
 };
 
@@ -47,10 +46,6 @@ function group(
   };
 }
 
-/**
- * 四宫格按阅读顺序排：上左、上右、下左、下右。
- * 先走上面那条横向组，walkLeaves 的顺序才和原来的格子顺序一致。
- */
 function buildRoot(preset: LayoutPresetName, slots: SplitLeaf[], ids: SplitNodeIds): SplitNode {
   if (preset === "columns") return group(ids, "horizontal", slots.map(leafFrom));
   if (preset === "rows") return group(ids, "vertical", slots.map(leafFrom));
@@ -66,11 +61,6 @@ function layoutShapeKey(node: SplitNode): string {
   return `g:${node.orientation}:${sizes}:${node.children.map(layoutShapeKey).join("|")}`;
 }
 
-/**
- * 把树收成预设。格子按视觉顺序保留笔记；不够的位置用 extraPageIds 补，
- * 多余的从末尾关掉并记在 droppedPageIds。调用方负责补空笔记、且不删除被关掉的笔记。
- * 补不满时返回 null，不改原树。
- */
 export function applyLayoutPreset(
   state: SplitState,
   preset: LayoutPresetName,
@@ -119,7 +109,6 @@ function equalizeNode(node: SplitNode): SplitNode {
   return { ...node, children, sizes };
 }
 
-/** 只把每一组的尺寸改成均分，叶子、焦点和放大都不动。 */
 export function equalizeSplitSizes(state: SplitState): SplitState {
   const root = equalizeNode(state.root);
   if (root === state.root) return state;

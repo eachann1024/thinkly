@@ -1,7 +1,3 @@
-/**
- * 侧栏笔记拖入编辑区：落区、边缘新开格并聚焦、中央替换、满员禁止边缘、文件夹拒绝、单格可分屏。
- * 运行：node scripts/verify/run.mjs split-drop
- */
 import { applySidebarPageDrop, resolveSidebarPageDrop } from "@/lib/editor-split/sidebarPageDrop";
 import { walkLeaves } from "@/lib/editor-split/tree";
 import type { SplitNode, SplitState } from "@/lib/editor-split/types";

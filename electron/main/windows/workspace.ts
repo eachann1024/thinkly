@@ -153,8 +153,6 @@ export function createWorkspaceWindow(
     backgroundColor: material.backgroundColor === "#00000000" ? material.backgroundColor : appearanceBackgroundColor(),
     transparent: false,
     autoHideMenuBar: true,
-    // Win/Linux：去掉原生顶栏，由 DesktopTitleBar 右侧自定义 min/max/close。
-    // Mac：保留 frame + hidden titleBar，红绿灯仍走系统。
     frame: isMac,
     ...(icon ? { icon } : {}),
     ...(material.backgroundMaterial
@@ -162,7 +160,6 @@ export function createWorkspaceWindow(
       : {}),
     ...(isMac
       ? {
-          // hidden：自定义 y 就是按钮顶部偏移。inset 样式会额外下移，对不齐 web 顶栏。
           titleBarStyle: "hidden" as const,
           trafficLightPosition: trafficLightPosition(),
           ...(material.vibrancy ? { vibrancy: material.vibrancy } : {}),

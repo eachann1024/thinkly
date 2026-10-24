@@ -1,6 +1,5 @@
 import ts from "typescript";
 
-/** Candidates require source review: content, stable identifiers and logs are not UI copy. */
 export function inventoryHan(code, file) {
   const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const candidates = [];

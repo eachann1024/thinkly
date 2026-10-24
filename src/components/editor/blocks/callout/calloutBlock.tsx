@@ -25,7 +25,6 @@ const t = createTranslator(messages);
 
 export { DEFAULT_CALLOUT_ICON, LUCIDE_ICON_TO_EMOJI, normalizeCalloutIcon };
 
-/** 将 Lucide 名（新存）或 emoji（存量）统一渲染为 React 元素 */
 function renderCalloutIcon(iconStr: string, className?: string) {
   const resolved = normalizeCalloutIcon(iconStr);
   const IconComp = resolvePageIcon(resolved);

@@ -7,10 +7,6 @@ import { renderColumnsBlock } from "./columnsBlock";
 export { collectBlockInlineStyles } from "./blockStyles";
 export { renderInline, extractInlineText, extractCellTextForHtml } from "./inline";
 
-/**
- * 将连续顶层 bullet/numbered 列表项合并为 ul/ol，避免裸 li。
- * checkListItem 保持独立 task-item，不并入 ul。
- */
 export function renderBlocks(blocks: any[], theme: CardTheme): string {
   if (!Array.isArray(blocks) || blocks.length === 0) return "";
   const parts: string[] = [];

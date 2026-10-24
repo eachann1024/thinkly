@@ -88,7 +88,6 @@ export function useAIModelRefresh(
     }
     sendRequestEvent({ type: "models.started", requestId, action });
     try {
-      // 先持久化供应商 / Key / Base URL，避免拉模型失败时配置丢失。
       const sameSavedConnection = areSetupGuideAIConnectionsEqual(
         { ...connection, apiKey },
         savedConnection,
@@ -103,7 +102,6 @@ export function useAIModelRefresh(
       });
 
       sendRequestEvent({ type: "models.configSaved", requestId });
-      // DeepSeek 模型列表走兼容 /models；协议按模型在请求时分支。
       const listProtocol: CustomAIProtocol =
         connection.providerId === "deepseek" ? "openai" : connection.protocol;
       const modelOptions = await fetchCustomAIModels({
@@ -207,8 +205,6 @@ export function useAIModelRefresh(
           ? DEFAULT_CLAUDE_BASE_URL
           : DEFAULT_OPENAI_BASE_URL);
       setCustomBaseURL(nextBaseURL);
-      // Credential slots are shared by protocol, not by provider. Never carry
-      // a draft key over to a different host before the user saves explicitly.
       setApiKeyDraft("");
       return;
     }
@@ -223,7 +219,6 @@ export function useAIModelRefresh(
         : DEFAULT_OPENAI_BASE_URL);
     setCustomBaseURL(nextBaseURL);
 
-    // 仅当切回当前已保存供应商时复用草稿 Key；否则只读该供应商在 store 中的 Key，避免串用。
     const finalKey =
       value === ai.customProviderId
         ? apiKeyDraft
@@ -248,7 +243,6 @@ export function useAIModelRefresh(
     if (isOnboarding) cancelConnectionTest();
     dismissModelError();
     setSelectedModelId(modelId);
-    // DeepSeek 选 Pro/Flash 时协议会变；若已有 Key，同步持久化协议槽位。
     if (providerId !== "deepseek" || !apiKeyDraft.trim()) return;
     const connection = getConnectionForProvider(providerId);
     const protocol = resolveProtocolForProvider(

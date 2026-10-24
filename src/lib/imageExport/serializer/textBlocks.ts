@@ -31,7 +31,6 @@ export function renderTextBlock(
   function renderChildren(block: any, theme: CardTheme, className = "nested-children"): string {
     const children = block?.children;
     if (!Array.isArray(children) || children.length === 0) return "";
-    // 子块也可能是连续列表，走 renderBlocks 合并
     const inner = renderBlocks(children, theme);
     if (!inner) return "";
     return `<div class="${className}">${inner}</div>`;
@@ -51,11 +50,9 @@ export function renderTextBlock(
     }
 
     case "bulletListItem": {
-      // 嵌套子列表：若 children 是列表项，由 renderBlocks 处理
       const children = block.children?.length
         ? renderBlocks(block.children, theme)
         : "";
-      // 若 children 已是 ul/ol（renderBlocks 输出），直接挂；否则包一层
       const childHtml = children
         ? children.trimStart().startsWith("<ul") || children.trimStart().startsWith("<ol")
           ? children
@@ -95,7 +92,6 @@ export function renderTextBlock(
       const summary =
         typeof block.props?.summary === "string" ? block.props.summary.trim() : "";
 
-      // mermaid/math 由上游管线转 image；若仍落到这里则当普通代码
       const showLang = lang && lang !== "text" && lang !== "plain";
       const preClass = wrap ? ' class="code-wrap"' : "";
       const dataAttrs = [

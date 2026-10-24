@@ -64,10 +64,6 @@ export type GeneratedBlockStructureValidationResult =
       pseudoMarkers: PseudoStructureMarkerIssue[];
     };
 
-/**
- * 只识别“动作 + 紧邻的明确目标类型”。例如“生成一份无序列表”会命中，
- * “生成一篇包含无序列表的文章”不会把文章内部结构误当作主结构目标。
- */
 export function resolveGeneratedBlockStructureExpectation(
   prompt: string,
 ): GeneratedBlockStructureExpectation | null {
@@ -84,10 +80,6 @@ export function resolveGeneratedBlockStructureExpectation(
   return resolveExplicitBlockTypeTarget(targetPhrase);
 }
 
-/**
- * 规范化模型常见但不会被 Markdown 解析器识别的伪结构标记。
- * fenced code 内完全保持原样，避免篡改示例代码。
- */
 export function normalizeGeneratedStructureMarkdown(markdown: string) {
   const lines = markdown.split("\n");
   let fence: { char: "`" | "~"; length: number } | null = null;
@@ -169,7 +161,6 @@ function blockMatchesExpectation(
   );
 }
 
-/** 验证 AI 建议实际形成了目标块，而不是只在 paragraph 中画出外观。 */
 export function validateGeneratedBlockStructure({
   beforeBlocks,
   afterBlocks,

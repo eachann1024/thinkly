@@ -124,7 +124,6 @@ export function isSlashMenuDivider(item: SlashMenuItem): boolean {
   );
 }
 
-/** 速记小窗 / 紧凑构建只保留常用输入块。 */
 export const COMPACT_SLASH_MENU_TITLES = new Set([
   ...Object.values(messages["zh-Hans"]),
   ...Object.values(messages.en),
@@ -145,10 +144,8 @@ export function filterSlashMenuItems(
 ): SlashMenuItem[] {
   const q = query.trim().toLowerCase();
 
-  // No query: return all items (dividers included for grouping)
   if (!q.length) return items;
 
-  // With query: only return matching non-divider items
   const matched = items.filter((item) => {
     if ((item as any).type === "divider") return false;
     const haystacks = [

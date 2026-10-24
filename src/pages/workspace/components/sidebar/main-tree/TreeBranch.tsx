@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/
 const easeOut = [0.23, 1, 0.32, 1] as const;
 type FocusGuardProps = { present: boolean; onReturnFocus: () => void; children: ReactNode };
 
-/** Capture focus before inert is committed, then return it through RCT's focus action. */
 class CollapseFocusGuard extends Component<FocusGuardProps> {
   private root = createRef<HTMLDivElement>();
   getSnapshotBeforeUpdate(previous: FocusGuardProps) {

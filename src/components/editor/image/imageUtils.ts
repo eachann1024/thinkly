@@ -24,10 +24,6 @@ export async function resolveImageSrc(
   return platform.imageStorage.resolveRefToUrl(src, pageLocalFilePath);
 }
 
-/**
- * 将编辑器图片引用复制为真正的位图数据。
- * 剪贴板统一写入 PNG，避免内部 att:/uuid: 引用或 WebP 被外部应用误当成文本。
- */
 export async function copyImageSrcToClipboard(
   src: string,
   platform: EditorPlatform,

@@ -19,7 +19,6 @@ export function applyChartAxes(
     legendOffset,
     isLineLike,
   } = context;
-  /* ── cartesian axes ────────────────────────────────────────────── */
   if (isCartesian && cfg.type !== "heatmap") {
     option.grid = {
       containLabel: true,
@@ -72,7 +71,6 @@ export function applyChartAxes(
     };
   }
 
-  /* ── heatmap axes & visualMap ──────────────────────────────────── */
   if (cfg.type === "heatmap") {
     option.grid = {
       containLabel: true,

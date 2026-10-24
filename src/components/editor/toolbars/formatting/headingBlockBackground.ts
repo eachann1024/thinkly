@@ -60,10 +60,6 @@ function removeInlineBackgroundFromBlocks(
   if (tr.docChanged) view.dispatch(tr);
 }
 
-/**
- * 标题背景属于块级语义：只要当前工具栏目标全部是标题，就给完整标题块上色。
- * 返回 false 表示应由调用方继续走普通的行内文字背景逻辑。
- */
 export function applyHeadingBlockBackground(
   editor: AnyEditor,
   backgroundColor: string,
@@ -72,7 +68,6 @@ export function applyHeadingBlockBackground(
   const state = getHeadingBackgroundSelectionState(blocks);
   if (!state.isHeadingSelection) return false;
 
-  // 清掉旧版本可能留在标题文字上的局部背景，避免“无背景”后仍残留色块。
   removeInlineBackgroundFromBlocks(editor, blocks);
   editor.transact(() => {
     for (const block of blocks) {

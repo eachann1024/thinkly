@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { open, rename, rm } from "node:fs/promises";
 import path from "node:path";
 
-/** Flush file bytes and the rename so a recovery journal survives process/OS interruption. */
 export async function durableAtomicWrite(file: string, bytes: string | Buffer) {
   const temporary = path.join(path.dirname(file), `.goose-sync-${randomUUID()}.tmp`);
   try {

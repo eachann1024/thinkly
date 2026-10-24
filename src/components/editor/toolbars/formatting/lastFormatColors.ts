@@ -1,14 +1,5 @@
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from "./colorPalette";
 
-/**
- * 记忆策略：完整记住最近一次通过颜色面板「应用」的文本色 / 背景色。
- * - 点文本色：只更新 lastTextColor（含 default）
- * - 点背景色：只更新 lastBackgroundColor（含 default / 无背景）
- * - 右键色对：同时更新两者
- * - 点击 / 右键工具栏 Palette：当前不是上次颜色时复现记忆；再次操作清除颜色
- * - 两者都没有记录时 no-op
- * 使用 localStorage，跨笔记 / 重启可复用；读写对 SSR / 无 window 安全。
- */
 const LAST_FORMAT_COLORS_KEY = "thinkly:last-format-colors";
 
 const KNOWN_TEXT_COLORS = new Set(TEXT_COLORS.map((item) => item.color));
@@ -65,12 +56,10 @@ export function writeLastFormatColors(patch: LastFormatColors) {
     if (isKnownColor(patch.backgroundColor, KNOWN_BG_COLORS)) {
       next.backgroundColor = patch.backgroundColor;
     }
-    // 仅在至少有一个有效字段时写入，避免清掉已有记忆
     if (next.textColor === undefined && next.backgroundColor === undefined) {
       return;
     }
     window.localStorage.setItem(LAST_FORMAT_COLORS_KEY, JSON.stringify(next));
   } catch {
-    // localStorage 不可用时静默失败，不影响颜色应用
   }
 }

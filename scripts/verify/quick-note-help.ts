@@ -10,7 +10,6 @@ const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 const SLOTS = "顶部 1–5 是五张各自独立的速记。";
 const REMOVED = ["保存后会打开主窗口", "侧栏选中会切过去", "这张速记会清空", "This Quick Note is cleared", "このクイックノートは空になります"];
 
-/** 速记说明弹层：两行有序列表，切换快捷键随平台变化，不再写保存与清空。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

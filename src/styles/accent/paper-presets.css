@@ -1,4 +1,3 @@
-/* 浅秋 / 麦笺：完整配色主题。仅覆盖颜色与图标笔触，保持布局、字体和图标尺寸。 */
 :root[data-goose-accent="amber"] {
   --primary: 41.379 33.333% 34.118%;
   --primary-foreground: var(--goose-text-on-dark-channels);

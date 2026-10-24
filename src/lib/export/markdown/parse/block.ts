@@ -19,20 +19,7 @@ import {
 import { applyNoteMeta, splitGeneratedMarkdown } from "../noteMeta";
 import { parseQuoteBlock } from "./quoteBlock";
 
-/**
- * markdownToJsonContent 输出 **BlockNote PartialBlock[]**（数组，非 {type:"doc"}）。
- *
- * 为什么是 BlockNote 格式而不是 TipTap doc：
- * normalizePageContent 对数组输入走 normalizeBlocks（children 递归、attrs→props、
- * VALID_BLOCK_TYPES 直通），而对 {type:"doc"} 输入走 legacyNodeToBlocks——后者会
- * 丢弃 listItem.children（嵌套拍平）、orderedList start、imageResize 宽高对齐，
- * 并把 details/video/file 压成纯文本或直接丢掉。直接输出 BlockNote 格式可彻底
- * 绕开这条有损路径，保证 scanner 读入的 page.content 与磁盘 md 零损对应。
- */
 
-// 返回类型标 any（运行时恒为 PartialBlock[] 数组）：调用方 entry.ts 仍有
-// `Array.isArray(parsed) ? parsed : parsed?.content` 的双形状兼容分支，
-// 标 any[] 会让 else 分支被 narrow 成 never 报 TS2339。
 export function markdownToJsonContent(markdown: string): any {
   const split = splitGeneratedMarkdown(markdown);
   return applyNoteMeta(parseMarkdownBody(split.body), split.meta);
@@ -67,7 +54,6 @@ function parseMarkdownBody(markdown: string): any {
     }
     if (i < lines.length && lines[i].trim() === "---") {
       const yamlBody = frontmatterLines.join("\n");
-      // 只有用户属性才展示 YAML 块；仅 goose-favorite 等应用设置不进编辑器。
       if (frontmatterBodyHasUserVisibleKeys(yamlBody)) {
         content.push({
           type: "codeBlock",
@@ -141,7 +127,6 @@ function parseMarkdownBody(markdown: string): any {
       continue;
     }
 
-    // setext 标题：当前行是普通文本，下一行是 ===+（H1）或 ---+（H2）
     if (
       trimmedLine &&
       !trimmedLine.startsWith(">") &&
@@ -185,7 +170,6 @@ function parseMarkdownBody(markdown: string): any {
       continue;
     }
 
-    // Try parsing table
     const tableResult = parseTableBlock(lines, i, parseInlineMarkdown);
     if (tableResult) {
       content.push(tableResult.block);
@@ -200,7 +184,6 @@ function parseMarkdownBody(markdown: string): any {
       continue;
     }
 
-    // 嵌套列表（task / bullet / ordered）
     const baseIndent = indentLevel(line);
     const stripped = line.slice(baseIndent);
     if (
@@ -259,7 +242,6 @@ function parseMarkdownBody(markdown: string): any {
           ) {
             break;
           }
-          // 下一行是 setext 下划线 → 当前行是 setext 标题文本，停止收集
           const nextTrimmed = lines[i + 1]?.trim() ?? "";
           if (/^={2,}$/.test(nextTrimmed) || /^-{2,}$/.test(nextTrimmed)) {
             break;
@@ -271,7 +253,6 @@ function parseMarkdownBody(markdown: string): any {
       }
 
       if (paragraphLines.length > 0) {
-        // 软换行保真：段内换行用 \n 保留（BlockNote 文本内 \n = hardBreak）
         const combinedText = paragraphLines.join("\n");
         const inline = parseInlineMarkdown(combinedText);
         content.push(

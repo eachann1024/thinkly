@@ -121,7 +121,6 @@ export const fileStorage = {
     const mimeType = file.type || DEFAULT_MIME_TYPE;
     const localPagePath = await currentLocalPagePath();
 
-    // Electron 仅本地文件夹模式：无仓库（当前页非本地文件）时禁止附件写入内置 db
     if (!localPagePath) {
       throw new Error(uiText("openALocalFolderNotebookBeforeInsertingAttachments"));
     }

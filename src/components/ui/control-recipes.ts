@@ -3,7 +3,6 @@ import { cva } from "class-variance-authority";
 export type ControlContext = "shell" | "editor" | "media";
 export const controlState = "goose-control transition-colors duration-[var(--goose-control-motion-duration,150ms)] disabled:pointer-events-none disabled:text-disabled motion-reduce:transition-none";
 export const controlFrame = `${controlState} inline-flex items-center justify-center`;
-// Button/Toggle already owned icon sizing; IconButton must retain its child's explicit size.
 export const buttonContent = "gap-2 whitespace-nowrap rounded-[var(--goose-control-radius,8px)] text-[length:var(--goose-control-font-size,14px)] font-medium [&_svg]:pointer-events-none [&_svg]:size-[var(--goose-control-icon-size,16px)] [&_svg]:shrink-0";
 export const controlSizes = {
   default: "h-[var(--goose-control-height,40px)] px-4 py-2",
@@ -34,12 +33,10 @@ const buttonRecipe = cva(`${controlState} rounded-[var(--goose-control-radius,8p
   compoundVariants: [{ variant: "ghost", size: "icon", className: "goose-toolbar-action" }],
   defaultVariants: { variant: "default", size: "default", context: "shell", contentStyle: "default" },
 });
-// Raw controls retain their geometry; an explicitly requested size still applies.
 export function buttonVariants(props?: Parameters<typeof buttonRecipe>[0]) {
   const size = props?.size === undefined && props?.contentStyle === "preserve" ? null : props?.size;
   return buttonRecipe({ ...props, size });
 }
-// 表单与行内编辑分别拥有几何，inline 不再继承表单的边框、留白或固定高度。
 const formField = "rounded-[var(--goose-field-radius,8px)] border border-input bg-background px-3 py-2 text-base md:text-sm";
 export const fieldVariants = cva("goose-field w-full placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-disabled", {
   variants: {

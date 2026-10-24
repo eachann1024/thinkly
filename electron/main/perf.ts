@@ -1,19 +1,8 @@
-/**
- * 启动与内存计时（仅当 `GOOSE_PERF_LOG` 指向文件时启用）。
- *
- * 不设环境变量时全部函数立即返回，不注册监听、不开定时器、不写盘，
- * 对正式运行的启动时间和内存没有可测量的影响。
- *
- * 输出是逐行 JSON（JSONL），由 `scripts/perf/startup.mjs` 汇总成 p50/p95。
- * 时间基准统一用 `process.getCreationTime()`（操作系统记录的进程创建时刻），
- * 这样主进程模块求值之前的那段 Chromium 引导也能算进去。
- */
 import { app } from "electron";
 import { appendFileSync } from "node:fs";
 
 const logPath = process.env.GOOSE_PERF_LOG ?? "";
 const exitAfterReport = process.env.GOOSE_PERF_EXIT === "1";
-/** 首帧稳定后再等一会，让 GPU/渲染进程的内存读数稳定下来。 */
 const SETTLE_MS = Number(process.env.GOOSE_PERF_SETTLE_MS ?? 1200);
 const POLL_MS = 20;
 
@@ -28,7 +17,6 @@ function write(record: Record<string, unknown>): void {
       `${JSON.stringify({ ...record, at: Date.now() - creationTime })}\n`,
     );
   } catch {
-    // 性能日志不能影响应用本身。
   }
 }
 
@@ -48,14 +36,8 @@ const PROBE = `(() => ({
   rendered: (document.getElementById('root')?.childElementCount ?? 0) > 0,
 }))()`;
 
-/** 首帧探针的硬上限：超时就停，不让测量脚本挂死。 */
 const FRAME_TIMEOUT_MS = 15000;
 
-/**
- * 等渲染进程把界面真正画出来：
- * `#root` 有子节点 ≈ React 已提交，`data-startup-settling` 被移除 ≈ 双 rAF 后的首帧已稳定。
- * 两个信号分开记——它们的间隔就是"窗口已经出现但界面还没画完"的那段空白。
- */
 function watchFirstFrame(kind: string, contents: Pollable): void {
   const startedAt = Date.now();
   let rendered = false;
@@ -121,8 +103,6 @@ export function installPerfInstrumentation(): void {
   if (!perfEnabled) return;
   markStartup("main-module");
   app.once("ready", () => markStartup("app-ready"));
-  // 用户真正看到窗口的时刻：窗口在 ready-to-show 之后才 show，之前是隐藏的。
-  // 必须在 browser-window-created 上挂，web-contents-created 时 BrowserWindow 还没构造完。
   app.on("browser-window-created", (_event, win) => {
     win.once("ready-to-show", () => markStartup("ready-to-show:workspace"));
     win.once("show", () => markStartup("window-shown:workspace"));
@@ -139,7 +119,6 @@ export function installPerfInstrumentation(): void {
   });
 }
 
-/** 主要窗口创建前的准备耗时（语言包、菜单、窗口恢复）由调用方打点。 */
 export function timeStartupPhase<T>(phase: string, run: () => T): T {
   if (!perfEnabled) return run();
   const began = Date.now() - creationTime;

@@ -1,7 +1,3 @@
-/**
- * 分屏验收：替换只改目标格并聚焦、文件夹不能进分屏、同级切换列表、选中描边。
- * 运行：node scripts/verify/run.mjs split
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { replaceSplitLeafPage, splitPaneAcceptsPage } from "@/lib/editor-split/panePage";

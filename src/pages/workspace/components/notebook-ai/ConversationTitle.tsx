@@ -19,11 +19,9 @@ const t = createTranslator(messages);
 interface ConversationTitleProps {
   summary: string;
   className?: string;
-  /** 未传时按 summary 是否为空态「新会话」判断 */
   muted?: boolean;
 }
 
-/** 只读会话标题：单行省略，完整文案走 title + aria-label。 */
 export function ConversationTitle({
   summary,
   className,

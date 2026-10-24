@@ -45,7 +45,6 @@ export function pruneNotebookChats(
     return updatedAtDifference || left.localeCompare(right);
   };
 
-  // 空会话只是面板的临时占位，不能为了它淘汰已有真实历史。
   const emptyCandidates = notebookIds
     .filter((notebookId) => notebookId !== protectedNotebookId)
     .filter((notebookId) => !hasRealHistory(notebookId))

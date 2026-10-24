@@ -1,7 +1,3 @@
-/* ── 双 Shift「采集」预览 ───────────────────────────────────────
- * 仅 collectVariant 查询参数存在时渲染。原型只在会话内计数，不写真实笔记。
- * 新样式使用静态 rgba / hex，兼容 Electron 的旧 Chromium 内核。
- */
 .quicknote-collect-chip {
   position: absolute;
   z-index: 24;

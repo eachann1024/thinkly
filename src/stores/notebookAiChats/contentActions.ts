@@ -43,7 +43,6 @@ export function createContentChatActions(
           composerDraftHasContent(state.composerDrafts[notebookId]),
         );
         if (remainingList.length === 0 && !hasDraft) {
-          // 无会话且无草稿：连同笔记本记录一起移除，保持 LRU 语义干净
           const { [notebookId]: _removedChat, ...restChats } = state.chats;
           return { chats: restChats };
         }

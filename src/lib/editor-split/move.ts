@@ -23,10 +23,6 @@ function swapLeaves(
   return { ...node, children };
 }
 
-/**
- * 中心互换完整叶子；边缘先移走源叶，再平分目标槽位。
- * 不创建页面、不经过关闭格子的 UI 路径；无效或原位拖放返回原状态。
- */
 export function moveLeaf(
   state: SplitState,
   sourceId: string,
@@ -51,7 +47,6 @@ export function moveLeaf(
   const orientation: SplitGroupOrientation =
     placement === "left" || placement === "right" ? "horizontal" : "vertical";
   const before = placement === "left" || placement === "top";
-  // 已在目标同轴的这一侧相邻：保留用户尺寸，避免原位拖放触发重排。
   if (
     source.parent &&
     source.parent === target.parent &&
@@ -63,7 +58,6 @@ export function moveLeaf(
 
   const removed = closeLeaf(state, sourceId);
   if (removed.kind !== "updated" || removed.state === state) return state;
-  // 移走源叶可能提升单子节点的 group，因此重新查找目标的父级和索引。
   const remainingRoot = removed.state.root;
   const destination = findLeafPath(remainingRoot, targetId);
   if (!destination) return state;
@@ -90,6 +84,5 @@ export function moveLeaf(
     });
   }
 
-  // 只取关闭操作得到的树，焦点仍跟随原来的叶子 ID。
   return { ...state, root };
 }

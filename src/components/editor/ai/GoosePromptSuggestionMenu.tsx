@@ -40,23 +40,15 @@ export type GoosePromptSuggestionMenuProps = {
   placeholder?: string;
   disabled?: boolean;
   busy?: boolean;
-  /** 忙态时在输入槽里展示思考/生成文本，不撑开高度。 */
   busyTickerText?: string;
-  /** 可换行 tag 行；为空则不渲染。 */
   tags?: GooseAiMenuTag[];
   actionMenus?: { label: string; actions: GooseAiMenuTag[] }[];
   showSubmit?: boolean;
-  /** 打开 AI 设置，仅 idle 传入。 */
   showPlus?: boolean;
   onOpenAiPanel?: () => void;
-  /** 自动增高上限（px），超出后内部滚动。默认约 6 行。 */
   maxAutoHeightPx?: number;
 };
 
-/**
- * 行内 AI 提示菜单：多行 textarea + 高度随内容增长 + 可换行 tag 行。
- * 键盘：Enter 提交自由提示；Shift+Enter 换行。tag 是原生 button，Enter 由浏览器处理。
- */
 export function GoosePromptSuggestionMenu(
   props: GoosePromptSuggestionMenuProps,
 ) {
@@ -93,7 +85,6 @@ export function GoosePromptSuggestionMenu(
         event.nativeEvent.isComposing ||
         event.nativeEvent.keyCode === 229
       ) {
-        // 确认候选词的 Enter / Escape 不得发送或关闭浮层。
         event.stopPropagation();
         return;
       }
@@ -117,7 +108,6 @@ export function GoosePromptSuggestionMenu(
     wasDisabledRef.current = disabled;
     if (!input || disabled) return;
     const active = document.activeElement;
-    // 首次打开立即输入；生成结束时不抢走用户已移到其他区域的焦点。
     if (
       wasDisabled &&
       active !== document.body &&
@@ -128,7 +118,6 @@ export function GoosePromptSuggestionMenu(
     input.setSelectionRange(input.value.length, input.value.length);
   }, [disabled]);
 
-  // 从实际排版读取高度，跟随界面字号；窄窗换行后重新量高。
   useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;

@@ -9,7 +9,6 @@ import {
   type SplitState,
 } from "./types";
 
-/** 与分屏拖拽 findPointerTarget 同一阈值；满 4 格时边缘返回 null，不退回中央。 */
 export const SIDEBAR_PAGE_DROP_EDGE_RATIO = 0.28;
 
 export type SidebarDropRect = {
@@ -31,15 +30,10 @@ export type SidebarPageDropResult =
     }
   | { ok: false; reason: "folder" | "rejected" | "full" | "missing" };
 
-/** 侧栏笔记拖拽。文件夹 MIME 留给目录树，不在这里认。 */
 export function isSidebarPageDrag(types: readonly string[]): boolean {
   return types.includes(GOOSE_PAGE_MIME) && !types.includes(GOOSE_FOLDER_MIME);
 }
 
-/**
- * 指针在格子内：最近边小于 28% 为该边缘，否则中央。
- * 文件夹没有落点。已满 4 格时边缘没有落点，中央仍可替换。
- */
 export function resolveSidebarPageDrop(input: {
   rect: SidebarDropRect;
   x: number;
@@ -72,10 +66,6 @@ function swapLeaves(node: SplitNode, source: SplitLeaf, added: SplitLeaf): Split
   return { ...node, children: node.children.map((child) => swapLeaves(child, source, added)) };
 }
 
-/**
- * 边缘在该方向新开一格并聚焦新格；中央只替换目标格并聚焦。
- * splitLeaf 只把新格插在目标之后，左/上再对调，新笔记才落在该侧。
- */
 export function applySidebarPageDrop(
   state: SplitState,
   paneId: string,

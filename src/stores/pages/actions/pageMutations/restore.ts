@@ -83,8 +83,6 @@ export const restorePageAction = (
       if (visited.has(currentId)) continue;
       visited.add(currentId);
       const current = restoredPages[currentId];
-      // 节点自身有 batchId 时按 batchId 精确匹配同批；
-      // 存量垃圾箱数据无 batchId，回退到 trashedAt 时间窗匹配（兼容旧行为）。
       const matched =
         current?.trashBatchId !== undefined
           ? current.trashBatchId === batchId

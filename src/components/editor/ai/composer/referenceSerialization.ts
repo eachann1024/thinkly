@@ -131,12 +131,10 @@ function collectInlineContent(
     if (node.type === "aiSkillCommand") {
       const attrs = normalizeSkillCommandAttrs(node.attrs);
       if (!attrs) return;
-      // payload.skills：按 name 第一次出现顺序去重；tokens 仍保留每次出现。
       if (!skillNames.has(attrs.name)) {
         skillNames.add(attrs.name);
         skills.push(attrs);
       }
-      // 与 @ 引用对称：chip 文本进 promptText，不进 freeformText
       promptText += `/${attrs.name}`;
       tokens.push({
         type: "skill",

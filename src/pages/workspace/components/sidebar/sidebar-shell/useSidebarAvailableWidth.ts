@@ -3,7 +3,6 @@ import { useLayoutEffect, useState, type RefObject } from "react";
 import { SIDEBAR_MAX_WIDTH, isSidebarResizeDrag } from "../hooks/useSidebarResize";
 import { resyncSidebarAiSqueeze, sidebarMaxFromStage } from "./sidebarAiSqueeze";
 
-/** 为轨道、留白和正文预留实际空间，不回写用户拖出的宽度。 */
 export function useSidebarAvailableWidth(sidebarRef: RefObject<HTMLDivElement | null>) {
   const [maxWidth, setMaxWidth] = useState(SIDEBAR_MAX_WIDTH);
   useLayoutEffect(() => {
@@ -26,7 +25,6 @@ export function useSidebarAvailableWidth(sidebarRef: RefObject<HTMLDivElement | 
       if (isPointerDragActive("ai-panel")) return;
       const next = sidebarMaxFromStage(stage);
       setMaxWidth((previous) => Math.abs(previous - next) < 0.5 ? previous : next);
-      // 拖动中由指针预览同一帧改 AI 宽度；松手和窗口变化再按落定宽度对齐。
       if (!isSidebarResizeDrag()) resyncSidebarAiSqueeze({ keepSuspend: true });
     }
     const panelSelector = '[data-ai-panel-layout="side-panel"]';

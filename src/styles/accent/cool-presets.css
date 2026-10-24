@@ -1,8 +1,3 @@
-/*
- * 产品强调色 preset。所有关键交互色均为静态 HSL 通道、hex 或 rgba，
- * 不依赖 oklch / color-mix / hsl(var(...)/alpha)，兼容 Electron 旧 Chromium。
- * 无 data-goose-accent 时继续使用 index.css 的现有鸢尾 fallback。
- */
 
 :root[data-goose-accent="iris"] {
   --primary: 239 84% 67%;

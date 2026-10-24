@@ -32,12 +32,10 @@ function startsWithBytes(bytes: Uint8Array, signature: number[]): boolean {
   return true;
 }
 
-/** 用文件头识别真实图片类型；剪贴板 File.type 经常为空或错误 */
 function detectRasterMime(
   bytes: Uint8Array,
   declaredType: string,
 ): RasterMime | null {
-  // WEBP: RIFF....WEBP
   if (
     bytes.length >= 12 &&
     startsWithBytes(bytes, [0x52, 0x49, 0x46, 0x46]) &&
@@ -49,19 +47,16 @@ function detectRasterMime(
     return WEBP_MIME;
   }
 
-  // PNG
   if (
     startsWithBytes(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
   ) {
     return PNG_MIME;
   }
 
-  // JPEG
   if (startsWithBytes(bytes, [0xff, 0xd8, 0xff])) {
     return "image/jpeg";
   }
 
-  // GIF
   if (
     startsWithBytes(bytes, [0x47, 0x49, 0x46, 0x38, 0x37, 0x61]) ||
     startsWithBytes(bytes, [0x47, 0x49, 0x46, 0x38, 0x39, 0x61])
@@ -69,7 +64,6 @@ function detectRasterMime(
     return "image/gif";
   }
 
-  // BMP
   if (startsWithBytes(bytes, [0x42, 0x4d])) {
     return "image/bmp";
   }
@@ -90,10 +84,6 @@ function detectRasterMime(
   return null;
 }
 
-/**
- * 将剪贴板/上传文件固化为带正确 MIME 的 Blob。
- * Electron/Electron 大图粘贴时，延迟读取的 File 可能失效；先读完字节再处理。
- */
 export async function materializeImageBlob(
   input: Blob | File,
   preferredMime?: string,

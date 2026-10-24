@@ -1,7 +1,3 @@
-/**
- * 灰度 → 1-bit 点阵的纯计算：拉伸对比度、反锐化保边、伽马映射，再按尺寸选抖动方式。
- * 小尺寸用 Atkinson 误差扩散（只扩散 3/4 误差，五官边缘更硬）；大尺寸用 Bayer 有序抖动保留网点质感。
- */
 
 export const BAYER = (() => {
   const m = [[0, 2], [3, 1]];
@@ -17,10 +13,8 @@ export const BAYER = (() => {
   return Float32Array.from(b.flat(), (v) => (v + 0.5) / 64);
 })();
 
-/** 以下尺寸（物理像素边长）走误差扩散。 */
 const DIFFUSE_BELOW = 120;
 
-/** 前景亮度 1%／99% 分位。 */
 function range(L: Float32Array, A: Float32Array): [number, number] {
   const hist = new Uint32Array(256);
   let n = 0;
@@ -36,7 +30,6 @@ function range(L: Float32Array, A: Float32Array): [number, number] {
   return hi - lo < 16 ? [0, 1] : [lo / 255, hi / 255];
 }
 
-/** 3×3 盒式模糊，只在前景内取样。 */
 function blur(L: Float32Array, A: Float32Array, w: number, h: number): Float32Array {
   const out = new Float32Array(L.length);
   for (let y = 0; y < h; y++) {
@@ -65,10 +58,6 @@ function isEdge(A: Float32Array, w: number, h: number, x: number, y: number): bo
   return A[y * w + x - 1] < 0.5 || A[y * w + x + 1] < 0.5 || A[(y - 1) * w + x] < 0.5 || A[(y + 1) * w + x] < 0.5;
 }
 
-/**
- * L：亮度 0..1；A：不透明度 0..1；返回每像素是否落墨。
- * 浅色主题暗处落墨；深色主题亮处落墨，暗部（头发）留稀疏底纹，外轮廓描一圈实点保住发型剪影。
- */
 export function ditherGray(L: Float32Array, A: Float32Array, w: number, h: number, dark: boolean): Uint8Array {
   const n = w * h;
   const small = Math.min(w, h) < DIFFUSE_BELOW;

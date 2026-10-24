@@ -1,7 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import type { EditorRuntime } from "./useEditorSession";
 
-/** Deferred editor work belongs to one mounted page, never its successor. */
 export function useEditorPageTasks(
   { editor, activePageId, pageRef }: EditorRuntime,
   enabled = true,

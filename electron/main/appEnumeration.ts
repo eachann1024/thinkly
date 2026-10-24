@@ -65,7 +65,6 @@ async function enumerateOpenApps(): Promise<OpenApp[]> {
 let snapshot: { apps: OpenApp[]; expires: number } | undefined;
 let pending: Promise<OpenApp[]> | undefined;
 
-/** New installations become visible on the next request after the short snapshot expires. */
 export function listOpenApps(): Promise<OpenApp[]> {
   if (snapshot && Date.now() < snapshot.expires)
     return Promise.resolve(snapshot.apps);

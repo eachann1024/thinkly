@@ -5,7 +5,6 @@ import { history } from "@tiptap/pm/history";
 import { enterFirstBodyParagraph, canReturnToDocumentTitle } from "../../src/components/editor/core/documentTitleNavigation";
 import { isPlainDocumentNavigation } from "../../src/lib/document-title-keyboard";
 
-// Bun 提供 navigator，但未提供 languages；只补运行时语言信息，不模拟编辑器 DOM。
 Object.defineProperty(navigator, "languages", { configurable: true, value: ["zh-CN"] });
 const { jsonContentToMarkdown } = await import("../../src/lib/export/markdown/serialize");
 const { markdownToJsonContent } = await import("../../src/lib/export/markdown/parse/block");
@@ -21,7 +20,6 @@ function verify(name: string, check: () => void) {
 }
 const create = (initialContent: any[]) => {
   const editor = BlockNoteEditor.create({ initialContent });
-  // 无 DOM 的 BlockNote 默认不挂载插件，显式装入真实 history 以检查事务撤销。
   editor.prosemirrorView.updateState(editor.prosemirrorState.reconfigure({ plugins: [history()] }));
   return editor;
 };

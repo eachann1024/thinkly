@@ -1,8 +1,3 @@
-/**
- * 侧栏右键菜单：Windows 长快捷键不把标签截成省略号，宽度随内容增长；
- * macOS 短快捷键停在最小宽度。
- * 运行：node scripts/verify/run.mjs context-menu-width
- */
 import { execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -44,7 +39,6 @@ function chromeBin() {
       execFileSync("which", [name], { stdio: "ignore" });
       return name;
     } catch {
-      /* 继续找下一个可执行文件 */
     }
   }
   return null;

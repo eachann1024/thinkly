@@ -1,4 +1,3 @@
-/** 轻量 HTML 处理：不引第三方解析库，够搜索结果抽取和正文提取用。 */
 
 const ENTITIES: Record<string, string> = {
   amp: "&", lt: "<", gt: ">", quot: "\"", apos: "'", nbsp: " ", ensp: " ", emsp: " ",
@@ -31,7 +30,6 @@ export function extractTitle(html: string) {
   return stripTags(title);
 }
 
-/** 正文提取：优先 article/main，去掉导航、脚本等噪声，块级标签换行，输出近似 Markdown 的纯文本。 */
 export function htmlToReadableText(html: string) {
   let body = html.replace(/<!--[\s\S]*?-->/g, " ");
   body = dropBlocks(body, ["script", "style", "noscript", "svg", "template", "iframe", "nav", "footer", "header", "aside", "form", "button", "select"]);

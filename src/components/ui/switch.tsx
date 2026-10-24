@@ -6,7 +6,6 @@ export type SwitchProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "typ
   controlSize?: "default" | "small";
   onCheckedChange?: (checked: boolean) => void;
 };
-// 原生 checkbox 保留 label/htmlFor、表单提交、Space 和受控 checked 契约。
 const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
   ({ className, onCheckedChange, onChange, controlSize = "default", ...props }, ref) => {
     const association = useFieldControl(props);
@@ -35,7 +34,6 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
 Switch.displayName = "Switch";
 export { Switch };
 
-/** Wrap one Switch and non-interactive content to make its entire row clickable. */
 export const SwitchRow = React.forwardRef<
   HTMLLabelElement,
   React.ComponentPropsWithoutRef<"label">

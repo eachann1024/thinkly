@@ -17,7 +17,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 
-/** 缩略卡约为导出尺寸的 0.3 倍，装饰按同比例缩放。 */
 const MINI_DECORATION_SCALE = 0.3;
 import * as GooseIcons from "@/components/ui/icons";
 import { useMemo } from "react";

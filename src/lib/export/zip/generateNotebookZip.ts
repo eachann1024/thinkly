@@ -55,11 +55,9 @@ export async function generateExportZip(
     const notebookFolder = zip.folder(notebookFolderName);
     if (!notebookFolder) continue;
 
-    // assets 放在每个笔记本文件夹内部，而非 zip 根目录
     const assetsFolder = notebookFolder.folder("assets");
     if (!assetsFolder) continue;
 
-    // 每个笔记本独立的 imageMap，避免跨笔记本冲突
     const imageMap = new Map<string, string>();
     const usedAssetNames = new Set<string>();
 

@@ -27,7 +27,6 @@ export class ErrorBoundary extends Component<
         componentStack: info.componentStack,
       });
     } catch {
-      // 上报失败不能再炸业务
     }
   }
 

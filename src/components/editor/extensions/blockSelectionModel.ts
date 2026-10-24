@@ -58,7 +58,6 @@ function lastBlockInside(node: PMNode, pos: number): SelectedBlockNode | null {
   return last;
 }
 
-/** 下一块 / 上一块。只看相邻容器，不扫整篇文档。 */
 export function adjacentBlock(
   doc: PMNode,
   pos: number,
@@ -141,7 +140,6 @@ function blockBookmark(anchor: number, head: number): SelectionBookmark {
   };
 }
 
-/** 块选区与文字选区分离，首尾均覆盖完整容器，包含被选父块的子树。 */
 class GooseBlockSelectionImpl extends Selection {
   readonly anchorBlockPos: number;
   readonly headBlockPos: number;
@@ -194,7 +192,6 @@ class GooseBlockSelectionImpl extends Selection {
   }
 }
 GooseBlockSelectionImpl.prototype.visible = false;
-// PM 的 JSON 注册表跨 Vite 热更新存活；复用已注册构造器，避免重复 ID 或 instanceof 分裂。
 const previousClass = import.meta.hot?.data.gooseBlockSelectionClass as typeof GooseBlockSelectionImpl | undefined;
 export const GooseBlockSelection = previousClass ?? GooseBlockSelectionImpl;
 if (!previousClass) Selection.jsonID("goose-block", GooseBlockSelection);

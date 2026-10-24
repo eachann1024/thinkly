@@ -39,7 +39,6 @@ function writeFlags(flags: Record<string, true>) {
   try {
     window.localStorage.setItem(syncScrollPersistKey(windowId), JSON.stringify(flags));
   } catch {
-    // 隐私模式 / 配额
   }
 }
 
@@ -62,7 +61,6 @@ export function startSyncScrollPersistence() {
       try {
         window.localStorage.removeItem(syncScrollPersistKey(previousId));
       } catch {
-        // 忽略
       }
     }
   });
