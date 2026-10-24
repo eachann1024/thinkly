@@ -1,10 +1,14 @@
+# 所有作者的非草稿、非 fork PR 都审核；只有 eachann1024 的 PR 可自动合并。
+# 审核与合并脚本来自可信默认分支，PR 仅通过 API 读取，不检出、不执行 PR 或 fork 代码。
+# 不把 CODEX_AUTH_JSON 交给 fork PR。workflow_dispatch 只读审核本仓库 PR，不触发合并、评论或标签。
+# 需要仓库 Secret CODEX_AUTH_JSON。结构化结论只进产物；摘要和评论只写枚举，不写模型原文。
 name: AI review & auto-merge
 
 on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR 编号（只读审核，支持外部 Fork 和已关闭 PR）'
+        description: 'PR 编号（只读审核本仓库 PR，含已关闭；不审核外部 Fork）'
         required: true
         type: string
   pull_request_target:
@@ -21,6 +25,11 @@ env:
   ALLOWED_AUTHORS: eachann1024
   ALLOW_CAUTION: "true"
   CHECKS_TIMEOUT_MIN: "20"
+  # 受保护路径默认转人工（needs-human）。fork，以及不是 eachann1024 的 PR，都不绕过。
+  # 作者是 eachann1024、head 仓库就是本仓库（不是 fork）、且结论为 safe_to_merge 时，
+  # 即使改了这些路径也自动 squash 合并，不要求 bot-automerge 标签。
+  # 密钥类路径任何情况下都不自动合并：路径中任意一段名为 secrets 或 credentials，
+  # 以及文件名 .env*、*.pem、*.key、*.p12、id_rsa*。重命名看新旧两个路径，删除也算。
   PROTECTED_PATHS: ".github/,.pr_agent.toml,.gemini/,.coderabbit.yaml,.greptile/,.env,secrets,credentials,*.pem,*.key,*.p12,id_rsa,deploy/,vercel.json,netlify.toml,fly.toml,wrangler.toml,render.yaml,Dockerfile,docker-compose,compose.yaml,compose.yml,Procfile,publish-release.mjs,publish.mjs,updates/,Casks/"
 
 jobs:
@@ -40,6 +49,8 @@ jobs:
           persist-credentials: false
       - name: Codex review (ChatGPT login)
         id: pragent
+        # fork 的 if 为假时本步不运行，CODEX_AUTH_JSON 不会注入到 runner。
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,14 +59,27 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/review.json"
-          {
-            echo '## AI 审核结论'
-            echo
-            echo '```json'
-            cat "$RUNNER_TEMP/review.json"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$RUNNER_TEMP/review.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          print("## AI 审核结论")
+          print()
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          recs = {"safe_to_merge", "merge_with_caution", "changes_required"}
+          risks = {"low", "medium", "high"}
+          rec = data.get("merge_recommendation")
+          risk = data.get("risk_level")
+          issues = data.get("key_issues_to_review")
+          print("merge_recommendation=" + (rec if rec in recs else "invalid"))
+          print("risk_level=" + (risk if risk in risks else "invalid"))
+          print("issue_count=" + str(len(issues) if isinstance(issues, list) else 0))
+          PY
+      - name: Reject fork review
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "外部 Fork：不读取 CODEX_AUTH_JSON，不检出、不执行 PR 代码。" >&2
+          exit 1
       - name: Upload review result
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/upload-artifact@v4
         with:
           name: codex-review
@@ -93,6 +117,9 @@ jobs:
           sha = info['head']['sha']
           if not re.fullmatch(r'[0-9a-f]{40}', sha):
               raise SystemExit('PR 提交不合法')
+          head_repo = ((info.get('head') or {}).get('repo') or {}).get('full_name') or ''
+          if head_repo != repo:
+              raise SystemExit('外部 Fork：不读取 CODEX_AUTH_JSON，不检出、不执行 PR 代码')
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
               output.write(f'sha={sha}\n')
           PY
@@ -105,13 +132,20 @@ jobs:
           HEAD_SHA: ${{ steps.target.outputs.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/validated-review.json"
-          {
-            echo '## Codex 审核验收'
-            echo
-            echo '```json'
-            cat "$RUNNER_TEMP/validated-review.json"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$RUNNER_TEMP/validated-review.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          print("## Codex 审核验收")
+          print()
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          recs = {"safe_to_merge", "merge_with_caution", "changes_required"}
+          risks = {"low", "medium", "high"}
+          rec = data.get("merge_recommendation")
+          risk = data.get("risk_level")
+          issues = data.get("key_issues_to_review")
+          print("merge_recommendation=" + (rec if rec in recs else "invalid"))
+          print("risk_level=" + (risk if risk in risks else "invalid"))
+          print("issue_count=" + str(len(issues) if isinstance(issues, list) else 0))
+          PY
       - name: Upload review result
         uses: actions/upload-artifact@v4
         with:
@@ -123,6 +157,7 @@ jobs:
   gate:
     name: ai-merge-gate
     needs: review
+    # 作者限制与脚本内实时检查双重保护；手动审核与外部作者绝不进入合并任务。
     if: >-
       !cancelled() &&
       github.event_name == 'pull_request_target' &&
@@ -143,6 +178,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      # 审核 JSON 只走产物。job output 会被按行掩码成 Skip output，整段结果会丢。
       - name: Download review result
         if: needs.review.result == 'success'
         continue-on-error: true
@@ -157,7 +193,10 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REVIEW_RESULT: ${{ needs.review.result }}
+          REVIEW_PATH: ${{ runner.temp }}/codex-review/review.json
         run: |
-          REVIEW_JSON="$(cat "$RUNNER_TEMP/codex-review/review.json" 2>/dev/null || true)"
-          export REVIEW_JSON
+          if [ "$REVIEW_RESULT" = "success" ] && [ ! -s "$REVIEW_PATH" ]; then
+            echo "审核产物缺失：review 任务已成功，但没有可读的 codex-review/review.json。审核 JSON 不通过 job output 传递；产物丢失时无法判断能否合并。" >&2
+            exit 1
+          fi
           python3 .github/codex-review/merge.py

@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! [[ "${PR:-}" =~ ^[1-9][0-9]*$ && "${HEAD_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "PR 或提交参数不合法" >&2
+  exit 1
+fi
+# 确认不是 fork 之后才碰登录态，避免把 CODEX_AUTH_JSON 写到磁盘。
+meta=$(gh api "repos/$REPO/pulls/$PR" --jq '[.head.sha, (.head.repo.full_name // "")] | @tsv')
+actual_sha=${meta%%$'\t'*}
+head_repo=${meta#*$'\t'}
+if [ "$head_repo" != "$REPO" ]; then
+  unset CODEX_AUTH_JSON
+  echo "外部 Fork：拒绝使用登录态审核，不写出 auth.json。" >&2
+  exit 1
+fi
+if [ "$actual_sha" != "$HEAD_SHA" ]; then
+  echo "PR 提交已变化，等待新审核" >&2
+  exit 1
+fi
+
 if [ -z "${CODEX_AUTH_JSON:-}" ]; then
   echo "缺少 CODEX_AUTH_JSON" >&2
   exit 1
@@ -20,16 +38,6 @@ model_reasoning_effort = "medium"
 CFG
 
 npm install -g @openai/codex@0.159.2 >&2
-
-if ! [[ "$PR" =~ ^[1-9][0-9]*$ && "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-  echo "PR 或提交参数不合法" >&2
-  exit 1
-fi
-actual_sha=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)
-if [ "$actual_sha" != "$HEAD_SHA" ]; then
-  echo "PR 提交已变化，等待新审核" >&2
-  exit 1
-fi
 
 diff_file="${RUNNER_TEMP}/pr.diff"
 gh pr diff "$PR" -R "$REPO" > "$diff_file"
@@ -70,32 +78,76 @@ PROMPT
 } >> "$prompt_file"
 
 out="${RUNNER_TEMP}/codex-last-message.json"
-env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_home" codex exec \
+# 模型输出不进 Actions 日志。失败只报进程退出，不打印原文。
+codex_log="${RUNNER_TEMP}/codex-exec.log"
+if ! env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_home" codex exec \
   --ephemeral \
   --disable shell_tool \
   --skip-git-repo-check \
   -s read-only \
   --output-schema .github/codex-review/schema.json \
   -o "$out" \
-  - < "$prompt_file" >&2
+  - < "$prompt_file" >"$codex_log" 2>&1; then
+  echo "Codex 审核进程失败，输出未写入日志。" >&2
+  exit 1
+fi
 
 python3 - "$out" <<'PARSE'
 import json, sys
-data = json.load(open(sys.argv[1], encoding="utf-8"))
-needed = {"merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review"}
-if not isinstance(data, dict) or set(data) != needed:
-    raise SystemExit("审核结果字段不合法")
+try:
+    raw = open(sys.argv[1], encoding="utf-8").read()
+except OSError:
+    raise SystemExit("读不到 Codex 审核输出")
+
+needed = ("merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review")
+
+def objects_in(text):
+    dec = json.JSONDecoder()
+    found = []
+    i = 0
+    while i < len(text):
+        start = text.find("{", i)
+        if start < 0:
+            break
+        try:
+            obj, end = dec.raw_decode(text, start)
+        except json.JSONDecodeError:
+            i = start + 1
+            continue
+        if isinstance(obj, dict):
+            found.append(obj)
+        i = end if end > start else start + 1
+    return found
+
+def fail(text, found, missing):
+    lines = len(text.splitlines())
+    miss = ",".join(missing) if missing else "无"
+    raise SystemExit(
+        f"审核结果无法解析：字节 {len(text.encode('utf-8'))}，行数 {lines}，"
+        f"JSON 对象 {len(found)}，缺少字段 {miss}"
+    )
+
+found = objects_in(raw)
+chosen = [obj for obj in found if "merge_recommendation" in obj]
+if not chosen:
+    last = found[-1] if found else {}
+    missing = [field for field in needed if field not in last]
+    fail(raw, found, missing or ["merge_recommendation"])
+data = chosen[-1]
+missing = [field for field in needed if field not in data]
+if missing or set(data) != set(needed):
+    fail(raw, found, missing)
 if data["merge_recommendation"] not in {"safe_to_merge", "merge_with_caution", "changes_required"}:
-    raise SystemExit("审核建议不合法")
+    fail(raw, found, [])
 if data["risk_level"] not in {"low", "medium", "high"} or not isinstance(data["security_concerns"], str):
-    raise SystemExit("审核风险或安全字段不合法")
+    fail(raw, found, [])
 issues = data["key_issues_to_review"]
 keys = {"relevant_file", "issue_header", "issue_content"}
 if not isinstance(issues, list) or len(issues) > 3 or any(
     not isinstance(issue, dict) or set(issue) != keys or any(not isinstance(value, str) for value in issue.values())
     for issue in issues
 ):
-    raise SystemExit("审核问题字段不合法")
+    fail(raw, found, [] if "key_issues_to_review" in data else ["key_issues_to_review"])
 json.dump(data, sys.stdout, ensure_ascii=False)
 print()
 PARSE
