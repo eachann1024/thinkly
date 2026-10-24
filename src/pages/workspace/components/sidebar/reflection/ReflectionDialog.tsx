@@ -9,7 +9,7 @@ import { useSettings } from "@/stores/useSettings";
 import { isReflectionAiConsented, useReflection } from "@/stores/useReflection";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import { ensureReflection, isReflectionAIReady } from "@/lib/reflection/reflectionRunner";
-import { DEFAULT_SCOPE, type ReflectionScope } from "@/lib/reflection/scopeRange";
+import { DEFAULT_SCOPE, scopeRange, type ReflectionScope } from "@/lib/reflection/scopeRange";
 import { previousWeek } from "@/lib/reflection/weekRange";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
 import { ReflectionScheduleTag } from "./ReflectionScheduleTag";
@@ -98,7 +98,7 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
       description={(
         <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <span>{uiText("basis")}</span>
-          <ReflectionScheduleTag scope={scope} enabled={aiConsent && aiReady} />
+          <ReflectionScheduleTag range={data?.range ?? scopeRange(scope)} enabled={aiConsent && aiReady} />
         </span>
       )}
       actions={(

@@ -4,13 +4,11 @@ import type { ScopeRange } from "./scopeRange";
 
 export const STALLED_DAYS = 14;
 export const MAX_STALLED = 3;
-/** 搁置判定的回看窗口与最少编辑次数（与所选范围无关）。 */
 export const STALLED_LOOKBACK_DAYS = 60;
 export const STALLED_MIN_EDITS = 2;
 export const MAX_TOP_NOTES = 5;
 
 export interface TrendPoint {
-  /** 该点（天或周）的起始时间。 */
   start: number;
   edits: number;
   added: number;
@@ -28,12 +26,9 @@ export interface ReflectionStats {
   added: number;
   notes: number;
   trend: TrendPoint[];
-  /** 最活跃的一天（起始时间），无数据为 null。 */
   busiestDay: number | null;
   peakHour: number | null;
-  /** 范围内按编辑次数降序的全部笔记。 */
   perNote: NoteActivity[];
-  /** 过去 STALLED_LOOKBACK_DAYS 天编辑不少于 STALLED_MIN_EDITS 次、最后一次在 STALLED_DAYS 天前。 */
   stalled: NoteActivity[];
 }
 
@@ -49,15 +44,14 @@ function argMax(values: number[]): number | null {
   return index;
 }
 
-/** 90 天按周聚合，其余按天。 */
 function buildTrend(events: EditEvent[], range: ScopeRange): TrendPoint[] {
-  const step = range.days > 31 ? 7 : 1;
   const points: TrendPoint[] = [];
-  for (let day = 0; day < range.days; day += step) {
+  for (let day = 0; day < range.days; day += 1) {
     points.push({ start: addDays(range.start, day), edits: 0, added: 0 });
   }
+  const byDay = new Map(points.map((point) => [dayKey(point.start), point]));
   for (const e of events) {
-    const point = points[Math.min(points.length - 1, Math.floor(Math.round((startOfDay(e.at) - range.start) / DAY_MS) / step))];
+    const point = byDay.get(dayKey(e.at));
     if (!point) continue;
     point.edits += 1;
     point.added += e.added;

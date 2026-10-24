@@ -7,15 +7,12 @@ export const DEFAULT_SCOPE: ReflectionScope = "7d";
 
 export interface ScopeRange {
   scope: ReflectionScope;
-  /** 已完成周期的独立缓存键，与旧版滚动范围隔离。 */
   key: string;
   start: number;
-  /** 当前周期开始时刻，开区间。 */
   end: number;
   days: number;
 }
 
-/** 本地日历周期边界；日期构造器负责跨年、闰月和夏令时。 */
 export function reflectionSchedule(scope: ReflectionScope, now = Date.now()) {
   const date = new Date(now);
   if (scope === "7d") {
@@ -28,11 +25,14 @@ export function reflectionSchedule(scope: ReflectionScope, now = Date.now()) {
   return { start: at(-months), dueAt: at(0), nextAt: at(months) };
 }
 
+export function scheduledReflectionKey(scope: ReflectionScope, now = Date.now()): string {
+  return `scheduled:${scope}:${dayKey(reflectionSchedule(scope, now).dueAt)}`;
+}
+
 export function scopeRange(scope: ReflectionScope, now = Date.now()): ScopeRange {
-  const { start, dueAt: end } = reflectionSchedule(scope, now);
-  const a = new Date(start);
-  const b = new Date(end);
-  const days = Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())
-    - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 86_400_000);
-  return { scope, key: `scheduled:${scope}:${dayKey(end)}`, start, end, days };
+  const days = scope === "7d" ? 7 : scope === "30d" ? 30 : 90;
+  // Include today and use local calendar boundaries, including across DST changes.
+  const end = addDays(now, 1);
+  const start = addDays(end, -days);
+  return { scope, key: `rolling-v2:${scope}:${dayKey(now)}`, start, end, days };
 }

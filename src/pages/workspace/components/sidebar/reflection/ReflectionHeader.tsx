@@ -10,21 +10,21 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/reflectio
 zh-Hans:
   range: "时间范围"
   refresh: "重新读取并生成"
-  scope7d: "周"
-  scope30d: "月"
-  scope90d: "三个月"
+  scope7d: "最近 7 天"
+  scope30d: "最近 30 天"
+  scope90d: "最近 90 天"
 en:
   range: "Time range"
   refresh: "Reload and regenerate"
-  scope7d: "Week"
-  scope30d: "Month"
-  scope90d: "Three months"
+  scope7d: "Last 7 days"
+  scope30d: "Last 30 days"
+  scope90d: "Last 90 days"
 ja:
   range: "期間"
   refresh: "再読み込みして再生成"
-  scope7d: "週"
-  scope30d: "月"
-  scope90d: "3 か月"
+  scope7d: "直近7日間"
+  scope30d: "直近30日間"
+  scope90d: "直近90日間"
 `;
 const uiText = createTranslator(localMessages);
 
