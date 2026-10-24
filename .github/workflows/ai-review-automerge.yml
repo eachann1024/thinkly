@@ -1,7 +1,7 @@
 # 所有作者的非草稿、非 fork PR 都审核；只有 eachann1024 的 PR 可自动合并。
 # 审核与合并脚本来自可信默认分支，PR 仅通过 API 读取，不检出、不执行 PR 或 fork 代码。
 # 不把 CODEX_AUTH_JSON 交给 fork PR。workflow_dispatch 只读审核本仓库 PR，不触发合并、评论或标签。
-# 需要仓库 Secret CODEX_AUTH_JSON；审核详情保存在 Actions 摘要与产物中，不走 job output。
+# 需要仓库 Secret CODEX_AUTH_JSON。结构化结论只进产物；摘要和评论只写枚举，不写模型原文。
 name: AI review & auto-merge
 
 on:
@@ -59,13 +59,20 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/review.json"
-          {
-            echo '## AI 审核结论'
-            echo
-            echo '```json'
-            cat "$RUNNER_TEMP/review.json"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$RUNNER_TEMP/review.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          print("## AI 审核结论")
+          print()
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          recs = {"safe_to_merge", "merge_with_caution", "changes_required"}
+          risks = {"low", "medium", "high"}
+          rec = data.get("merge_recommendation")
+          risk = data.get("risk_level")
+          issues = data.get("key_issues_to_review")
+          print("merge_recommendation=" + (rec if rec in recs else "invalid"))
+          print("risk_level=" + (risk if risk in risks else "invalid"))
+          print("issue_count=" + str(len(issues) if isinstance(issues, list) else 0))
+          PY
       - name: Reject fork review
         if: github.event.pull_request.head.repo.full_name != github.repository
         run: |
@@ -125,13 +132,20 @@ jobs:
           HEAD_SHA: ${{ steps.target.outputs.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/validated-review.json"
-          {
-            echo '## Codex 审核验收'
-            echo
-            echo '```json'
-            cat "$RUNNER_TEMP/validated-review.json"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - "$RUNNER_TEMP/validated-review.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          print("## Codex 审核验收")
+          print()
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          recs = {"safe_to_merge", "merge_with_caution", "changes_required"}
+          risks = {"low", "medium", "high"}
+          rec = data.get("merge_recommendation")
+          risk = data.get("risk_level")
+          issues = data.get("key_issues_to_review")
+          print("merge_recommendation=" + (rec if rec in recs else "invalid"))
+          print("risk_level=" + (risk if risk in risks else "invalid"))
+          print("issue_count=" + str(len(issues) if isinstance(issues, list) else 0))
+          PY
       - name: Upload review result
         uses: actions/upload-artifact@v4
         with:

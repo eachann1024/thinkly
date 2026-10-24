@@ -79,75 +79,76 @@ PROMPT
 } >> "$prompt_file"
 
 out="${RUNNER_TEMP}/codex-last-message.json"
-env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_home" codex exec \
+# 模型输出不进 Actions 日志。失败只报进程退出，不打印原文。
+codex_log="${RUNNER_TEMP}/codex-exec.log"
+if ! env -u GH_TOKEN -u GITHUB_TOKEN -u CODEX_AUTH_JSON CODEX_HOME="$review_codex_home" codex exec \
   --ephemeral \
   --disable shell_tool \
   --skip-git-repo-check \
   -s read-only \
   --output-schema .github/codex-review/schema.json \
   -o "$out" \
-  - < "$prompt_file" >&2
+  - < "$prompt_file" >"$codex_log" 2>&1; then
+  echo "Codex 审核进程失败，输出未写入日志。" >&2
+  exit 1
+fi
 
 python3 - "$out" <<'PARSE'
-import json, re, sys
+import json, sys
 try:
     raw = open(sys.argv[1], encoding="utf-8").read()
 except OSError:
     raise SystemExit("读不到 Codex 审核输出")
 
-def safe_excerpt(text, n=180):
-    text = text or ""
-    value = r"(?:\"[^\"\n]+\"|'[^'\n]+'|`[^`\n]+`|\S+)"
-    keys = r"access_token|refresh_token|id_token|api_key|token|password|secret"
-    text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
-    # 引号里的 JSON 凭据字段整段换成占位，避免值里有空格或转义引号时只盖住一半。
-    text = re.sub(
-        rf'(?i)(["\'])({keys})\1\s*:\s*(["\'])((?:\\.|(?!\3).)*)\3',
-        lambda m: f"{m.group(1)}{m.group(2)}{m.group(1)}: {m.group(3)}[redacted]{m.group(3)}",
-        text,
-    )
-    # Authorization: Bearer <token> 里原先只吃掉 Bearer 这个词，后面的凭据会留在摘录里。
-    text = re.sub(r"(?i)\bauthorization\b\s*[:=]?\s*(?:bearer|basic|token|digest)\s+" + value, "[redacted]", text)
-    text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
-    text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
-    text = re.sub(r"eyJ[A-Za-z0-9_\-=]{8,}(?:\.[A-Za-z0-9_\-=]+)*", "[redacted]", text)
-    # 分隔符保持可选：password hunter2、token abcdef 这类空格分隔的短凭据也要盖住。
-    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*" + value, r"\1 [redacted]", text)
-    text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
-    return " ".join(text.split())[:n]
+needed = ("merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review")
 
-dec = json.JSONDecoder()
-found = []
-i = 0
-while i < len(raw):
-    start = raw.find("{", i)
-    if start < 0:
-        break
-    try:
-        obj, end = dec.raw_decode(raw, start)
-    except json.JSONDecodeError:
-        i = start + 1
-        continue
-    if isinstance(obj, dict) and "merge_recommendation" in obj:
-        found.append(obj)
-    i = end if end > start else start + 1
-if not found:
-    raise SystemExit("审核结果里没有带 merge_recommendation 的完整 JSON。摘录：" + safe_excerpt(raw))
-data = found[-1]
-needed = {"merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review"}
-if not isinstance(data, dict) or set(data) != needed:
-    raise SystemExit("审核结果字段不合法")
+def objects_in(text):
+    dec = json.JSONDecoder()
+    found = []
+    i = 0
+    while i < len(text):
+        start = text.find("{", i)
+        if start < 0:
+            break
+        try:
+            obj, end = dec.raw_decode(text, start)
+        except json.JSONDecodeError:
+            i = start + 1
+            continue
+        if isinstance(obj, dict):
+            found.append(obj)
+        i = end if end > start else start + 1
+    return found
+
+def fail(text, found, missing):
+    lines = len(text.splitlines())
+    miss = ",".join(missing) if missing else "无"
+    raise SystemExit(
+        f"审核结果无法解析：字节 {len(text.encode('utf-8'))}，行数 {lines}，"
+        f"JSON 对象 {len(found)}，缺少字段 {miss}"
+    )
+
+found = objects_in(raw)
+chosen = [obj for obj in found if "merge_recommendation" in obj]
+if not chosen:
+    last = found[-1] if found else {}
+    missing = [field for field in needed if field not in last]
+    fail(raw, found, missing or ["merge_recommendation"])
+data = chosen[-1]
+missing = [field for field in needed if field not in data]
+if missing or set(data) != set(needed):
+    fail(raw, found, missing)
 if data["merge_recommendation"] not in {"safe_to_merge", "merge_with_caution", "changes_required"}:
-    raise SystemExit("审核建议不合法")
+    fail(raw, found, [])
 if data["risk_level"] not in {"low", "medium", "high"} or not isinstance(data["security_concerns"], str):
-    raise SystemExit("审核风险或安全字段不合法")
+    fail(raw, found, [])
 issues = data["key_issues_to_review"]
 keys = {"relevant_file", "issue_header", "issue_content"}
 if not isinstance(issues, list) or len(issues) > 3 or any(
     not isinstance(issue, dict) or set(issue) != keys or any(not isinstance(value, str) for value in issue.values())
     for issue in issues
 ):
-    raise SystemExit("审核问题字段不合法")
+    fail(raw, found, [] if "key_issues_to_review" in data else ["key_issues_to_review"])
 json.dump(data, sys.stdout, ensure_ascii=False)
 print()
 PARSE
