@@ -1,3 +1,4 @@
+import { withSuggestionReconcileSuppressed } from "../utils/suggestionInputPolicy";
 import { pasteInsideCurrentBlock } from "../utils/containedPaste";
 import { useCallback, type MutableRefObject } from "react";
 import {
@@ -47,36 +48,38 @@ export function useEditorPaste({
       )
         return;
 
-      const clipboard = event.clipboardData;
-      const plainText = normalizeMarkdownPasteText(
-        clipboard.getData("text/plain"),
-      );
-      const htmlText = clipboard.getData("text/html");
-      if (pasteInsideCurrentBlock(editor, plainText, htmlText, clipboard.getData("blocknote/html"), shiftPressedRef.current)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-      if (shiftPressedRef.current) return;
-      if (looksLikeMermaidDiagram(plainText)) {
-        event.preventDefault();
-        event.stopPropagation();
-        editor.pasteMarkdown(`\`\`\`mermaid\n${plainText.trim()}\n\`\`\``);
-        return;
-      }
-
-      if (handleEditorStructurePaste(editor, event, plainText, htmlText))
-        return;
-      if (!plainText) return;
-      if (plainHasGooseColumnMarkers(plainText)) {
-        const target = cachePasteTarget(editor);
-        if (target && tryPasteGooseMarkdownFragment(editor, plainText, target)) {
+      withSuggestionReconcileSuppressed(editor, () => {
+        const clipboard = event.clipboardData;
+        const plainText = normalizeMarkdownPasteText(
+          clipboard.getData("text/plain"),
+        );
+        const htmlText = clipboard.getData("text/html");
+        if (pasteInsideCurrentBlock(editor, plainText, htmlText, clipboard.getData("blocknote/html"), shiftPressedRef.current)) {
           event.preventDefault();
           event.stopPropagation();
           return;
         }
-      }
-      handleEditorTextPaste(editor, event, plainText, htmlText);
+        if (shiftPressedRef.current) return;
+        if (looksLikeMermaidDiagram(plainText)) {
+          event.preventDefault();
+          event.stopPropagation();
+          editor.pasteMarkdown(`\`\`\`mermaid\n${plainText.trim()}\n\`\`\``);
+          return;
+        }
+
+        if (handleEditorStructurePaste(editor, event, plainText, htmlText))
+          return;
+        if (!plainText) return;
+        if (plainHasGooseColumnMarkers(plainText)) {
+          const target = cachePasteTarget(editor);
+          if (target && tryPasteGooseMarkdownFragment(editor, plainText, target)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+        }
+        handleEditorTextPaste(editor, event, plainText, htmlText);
+      });
     },
     [editable, editor],
   );
