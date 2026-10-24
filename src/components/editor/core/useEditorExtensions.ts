@@ -42,6 +42,7 @@ import { gooseInlineCodeBacktickWrapExtension } from "@/components/editor/extens
 import { gooseActiveListMarkerExtension } from "@/components/editor/extensions/activeListMarkerExtension";
 import { gooseActiveHeadingCaretExtension } from "@/components/editor/extensions/activeHeadingCaretExtension";
 import { gooseActiveLineExtension } from "@/components/editor/extensions/activeLineExtension";
+import { gooseBlockHandleUiExtension } from "../extensions/blockHandleUiExtension";
 import { gooseFakeSelectionExtension } from "@/components/editor/extensions/fakeSelectionExtension";
 import { ArrowInputRuleExtension } from "@/components/editor/inputrules/arrowInputRule";
 import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlugin";
@@ -75,8 +76,6 @@ export function useEditorExtensions(session: EditorSession) {
     aiSettingsRef,
     inlineAiScopeRef,
   } = session;
-  // 行内代码相对路径 tag：扩展实例只建一次（extensions 数组变化会重建编辑器），
-  // 依赖全部走 ref 读取。放在 inlineCodeCaret 之前，Cmd/Ctrl 点击先被它短路。
   const inlineCodePathTagExtension = useMemo(
     () =>
       createInlineCodePathTagExtension({
@@ -121,6 +120,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseActiveListMarkerExtension,
     gooseActiveHeadingCaretExtension,
     gooseActiveLineExtension,
+    gooseBlockHandleUiExtension,
     gooseContainedBlockSurface,
     gooseColumnLayoutExtension(),
     createGooseBlockTypeKeyboardExtension(() => settingsRef.current.defaultCodeBlockWrap)(),
@@ -157,7 +157,6 @@ export function useEditorExtensions(session: EditorSession) {
     gooseFindInPageExtension,
     gooseSearchSessionHighlightExtension,
     gooseDividerInputRuleExtension(),
-    // 紧凑编辑器构建不挂 AI 扩展，避免加载不需要的模型依赖。
     ...(!__GOOSE_EDITOR_AI__
       ? []
       : [
