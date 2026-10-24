@@ -16,6 +16,11 @@ ja:
 const t = createTranslator(messages);
 import { ensureComposerCaretAnchors } from "./composerCaret";
 import {
+  SELECTION_QUOTE_CLOSE,
+  SELECTION_QUOTE_MARK,
+  selectionQuoteMarkViewBoxAttr,
+} from "./selectionQuoteAlign";
+import {
   parseSelectionQuoteAttrs,
   formatSelectionQuotePromptLabel,
   hasDuplicateSelectionQuote,
@@ -23,6 +28,42 @@ import {
   type AiSelectionQuoteAttrs,
   type AppendSelectionQuoteResult,
 } from "./selectionQuoteData";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function appendQuoteMark(parent: HTMLElement) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", selectionQuoteMarkViewBoxAttr());
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  svg.classList.add("ai-selection-quote-mark");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", SELECTION_QUOTE_MARK.path);
+  path.setAttribute("fill", "currentColor");
+  svg.appendChild(path);
+  parent.appendChild(svg);
+}
+
+function appendQuoteClose(parent: HTMLElement) {
+  const { viewBox, size, arms } = SELECTION_QUOTE_CLOSE;
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${viewBox} ${viewBox}`);
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  svg.classList.add("ai-selection-quote-close");
+  for (const [x1, y1, x2, y2] of arms) {
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", `M${x1} ${y1} ${x2} ${y2}`);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "2.4");
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+  }
+  parent.appendChild(svg);
+}
 
 export function listSelectionQuotesFromDom(
   editor: HTMLElement,
@@ -51,18 +92,21 @@ export function createSelectionQuoteChipElement(
     "ai-composer-chip inline-flex items-center justify-center rounded text-[11px] font-medium" +
     " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +
     " select-none";
-  const label = formatSelectionQuotePromptLabel(attrs);
+  const label = document.createElement("span");
+  label.className = "ai-selection-quote-label";
+  label.textContent = formatSelectionQuotePromptLabel(attrs);
   const preview = document.createElement("button");
   preview.type = "button";
   preview.dataset.aiQuotePreview = "";
   preview.className = "ai-selection-quote-preview";
-  preview.textContent = label;
+  appendQuoteMark(preview);
+  preview.appendChild(label);
   preview.setAttribute("aria-label", t("previewSourceSelection", { title: attrs.pageTitle }));
   const remove = document.createElement("button");
   remove.type = "button";
   remove.dataset.aiQuoteRemove = "";
   remove.className = "ai-selection-quote-remove";
-  remove.textContent = "×";
+  appendQuoteClose(remove);
   remove.setAttribute("aria-label", t("removeSelectionReference"));
   span.append(preview, remove);
   span.title = attrs.text;
