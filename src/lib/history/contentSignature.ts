@@ -1,36 +1,48 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 
-/**
- * 历史只比较用户可见的编辑器内容。
- * BlockNote 的块 id、空 children 占位，以及偶尔混入的选择/更新时间都不应制造版本。
- * 标题、正文、块类型、可见样式和非空子块仍完整参与比较。
- */
+const defaultProps: Record<string, unknown> = {
+  backgroundColor: "default",
+  textColor: "default",
+  textAlignment: "left",
+};
+const blockDefaults: Record<string, Record<string, unknown>> = {
+  heading: { level: 1, collapsed: false, isToggleable: false },
+  toggleListItem: { collapsed: false },
+  codeBlock: { wrap: false, collapsed: false, summary: "" },
+  table: { sequenceColumn: false },
+};
+
+function normalizeContent(value: unknown, parentKey = "", defaults = defaultProps): unknown {
+  if (Array.isArray(value)) return value.map((item) => normalizeContent(item));
+  if (!value || typeof value !== "object") return value;
+  const source = value as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(source).sort()) {
+    if (key === "id" || key === "updatedAt" || key === "selection") continue;
+    if (parentKey === "props" && Object.hasOwn(defaults, key) && source[key] === defaults[key]) continue;
+    const normalized = normalizeContent(source[key], key,
+      key === "props" ? { ...defaultProps, ...blockDefaults[String(source.type)] } : defaultProps);
+    if (key === "children" && Array.isArray(normalized) && normalized.length === 0) continue;
+    if ((key === "props" || key === "styles") && normalized && typeof normalized === "object" && Object.keys(normalized).length === 0) continue;
+    result[key] = normalized;
+  }
+  return result;
+}
+
 export function getHistoryContentSignature(content: BlockNoteContent): string {
   try {
-    return JSON.stringify(content ?? null, (key, value) => {
-      if (key === "id" || key === "updatedAt" || key === "selection") {
-        return undefined;
-      }
-      if (key === "children" && Array.isArray(value) && value.length === 0) {
-        return undefined;
-      }
-      return value;
-    });
+    return JSON.stringify(normalizeContent(content ?? null));
   } catch {
     return "__goose-note-unserializable-history-content__";
   }
 }
 
-/** 本地文件历史额外比较会影响界面的 goose 设置，忽略任意业务 YAML 元数据。 */
 export function getHistoryVisibleSignature(
   content: BlockNoteContent,
   localFrontmatter?: string,
 ): string {
-  const settings =
-    localFrontmatter === undefined
-      ? null
-      : parseLocalFrontmatterBlob(localFrontmatter).settings;
+  const settings = parseLocalFrontmatterBlob(localFrontmatter).settings;
   return JSON.stringify({
     content: getHistoryContentSignature(content),
     settings,

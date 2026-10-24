@@ -45,7 +45,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 09 无版本／未选中：时钟点阵 + 光晕，静态缺省循环。 */
 const HISTORY_ART = <DotIconArt icon="history" size={64} width={168} height={116} halo className="-my-2" />;
 
 export function HistoryReaderState({
@@ -62,17 +61,15 @@ export function HistoryReaderState({
   illustration?: ReactNode;
 }) {
   return (
-    <div className="relative flex h-full min-h-[280px] items-center justify-center overflow-hidden px-6">
+    <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-6">
       {illustration ? <DotDecor preset="history" /> : null}
       <EmptyState icon={Icon} illustration={illustration} title={title} details={description} action={action} className="relative" />
     </div>
   );
 }
 
-export /**
- * 主区只读编辑器。挂在 workspace-editor-surface > page-scroll-container 内，
- * 复用与主 Editor 完全一致的滚动容器和 max-w-4xl 包裹。
- */
+export
+
 function HistoryReader() {
   useLocale();
   const {

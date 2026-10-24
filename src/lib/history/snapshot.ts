@@ -11,7 +11,6 @@ import type {
   HistoryVersion,
 } from "./types";
 
-/** 自动历史之间至少相隔 5 分钟；期间编辑由记录器合并为最新 pending。 */
 export const AUTOMATIC_SNAPSHOT_MIN_INTERVAL_MS = 5 * 60_000;
 
 const indexWriteChains = new Map<string, Promise<unknown>>();
@@ -20,9 +19,10 @@ function withIndexLock<T>(pageId: string, fn: () => Promise<T>): Promise<T> {
   const prev = indexWriteChains.get(pageId) ?? Promise.resolve();
   const next = prev.catch(() => undefined).then(fn);
   indexWriteChains.set(pageId, next);
-  next.finally(() => {
+  const release = () => {
     if (indexWriteChains.get(pageId) === next) indexWriteChains.delete(pageId);
-  });
+  };
+  void next.then(release, release);
   return next;
 }
 
@@ -68,11 +68,9 @@ export type RecordHistorySnapshotResult =
   | { status: "created"; entry: HistoryIndexEntry }
   | { status: "updated"; entry: HistoryIndexEntry }
   | { status: "duplicate" }
+  | { status: "unavailable" }
   | { status: "rate-limited"; retryAt: number };
 
-/**
- * 落一个完整快照版本。重复或被自动限频时返回 null；同内容里程碑会升级最新条目。
- */
 export async function recordHistorySnapshot(
   params: RecordSnapshotParams,
 ): Promise<HistoryIndexEntry | null> {
@@ -95,13 +93,14 @@ async function recordHistorySnapshotUnlocked(
 ): Promise<RecordHistorySnapshotResult> {
   const { pageId, workspaceId, content, trigger, isMilestone, label } = params;
 
+  const page = usePages.getState().pages[pageId];
+  if (page?.localReadState === "error") return { status: "unavailable" };
   const backend = resolveHistoryBackend(pageId);
   const index = await backend.loadIndex(pageId);
   const now = Date.now();
   const charCount = countWords(content);
   const charDelta = charCount - index.lastVersionCharCount;
   const latestEntry = index.versions[index.versions.length - 1];
-  const page = usePages.getState().pages[pageId];
   const localFrontmatter = page?.localFrontmatter;
 
   if (
@@ -149,7 +148,6 @@ async function recordHistorySnapshotUnlocked(
   const versionId = genVersionId(now);
   const size = estimateSize(content);
 
-  // 本地文件夹页面额外保存 frontmatter
   const version: HistoryVersion = {
     versionId,
     pageId,
@@ -191,7 +189,6 @@ async function recordHistorySnapshotUnlocked(
     lastVersionCharCount: charCount,
   });
 
-  // 索引发布成功后再清理旧版本；索引读写失败时保留全部旧快照。
   for (const versionId of evictedVersionIds) {
     await backend.removeVersion(pageId, versionId);
   }

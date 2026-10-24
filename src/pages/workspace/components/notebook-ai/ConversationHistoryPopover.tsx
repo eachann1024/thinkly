@@ -1,10 +1,11 @@
 import { useLocale } from "@/i18n";
+import { FadeText } from "@/components/ui/fade-text";
+import { formatConversationTime } from "./history/conversationTime";
 import { IconButton } from "@/components/ui/icon-button";
 import { PortalHoverTip } from "./history/PortalHoverTip";
 import { requestDeleteConversation } from "./history/historyActions";
 import { useMemo, useState, type MouseEvent } from "react";
 import {
-  Check,
   Clock3,
   History as HistoryIcon,
   Trash2,
@@ -19,21 +20,18 @@ import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { cn } from "@/lib/utils";
 import { DotIconArt } from "@/components/ui/dot-matrix";
 import { presenceName, runWithPresence } from "@/lib/ui/presence";
-import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
+import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1">`
 zh-Hans:
   noPreviousConversations: "暂无历史会话"
-  current: "当前"
   deleteConversation: "删除会话"
   conversationHistory: "历史会话"
 en:
   noPreviousConversations: "No previous conversations"
-  current: "Current"
   deleteConversation: "Delete conversation"
   conversationHistory: "Conversation history"
 ja:
   noPreviousConversations: "過去の会話はありません"
-  current: "現在"
   deleteConversation: "会話を削除"
   conversationHistory: "会話履歴"
 `;
@@ -43,9 +41,7 @@ const t = createTranslator(messages);
 export interface ConversationHistoryListProps {
   notebookId: string;
   onSelectConversation: (conversationId: string) => void;
-  /** 选中后回调（用于关闭外层菜单） */
   onDidSelect?: () => void;
-  /** 删除会话回调；未提供时不显示删除按钮 */
   onDeleteConversation?: (conversationId: string) => void;
   className?: string;
   compact?: boolean;
@@ -55,34 +51,6 @@ export interface ConversationHistoryPopoverProps {
   notebookId: string;
   onSelectConversation: (conversationId: string) => void;
   disabled?: boolean;
-}
-
-/** 显示到时分秒；非今日附带月日（跨年再带年份） */
-function formatConversationTime(timestamp: number) {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const now = new Date();
-  const time = date.toLocaleTimeString(getFormatLocale(), {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const isToday =
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate();
-
-  if (isToday) return time;
-
-  const datePart = date.toLocaleDateString(getFormatLocale(), {
-    year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
-    month: "short",
-    day: "numeric",
-  });
-
-  return `${datePart} ${time}`;
 }
 
 export function ConversationHistoryList({
@@ -162,38 +130,32 @@ export function ConversationHistoryList({
                 }}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
-                className="goose-menu-item goose-menu-item-multiline goose-list-row goose-accent-selection group flex w-full min-w-0 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
+                className="goose-menu-item goose-menu-item-multiline goose-list-row goose-accent-selection group flex w-full min-w-0 max-w-full cursor-pointer flex-col items-stretch gap-1 overflow-hidden rounded-[var(--goose-control-radius)] px-2.5 py-2 text-left text-foreground transition-colors "
                 data-selected={isActive || undefined}
                 aria-current={isActive ? "true" : undefined}
               >
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <div className="block w-full truncate goose-menu-title">{summary}</div>
-                  <div className="flex items-center gap-1 goose-menu-description">
+                <FadeText className="w-full goose-menu-title">{summary}</FadeText>
+                <div className="flex min-w-0 w-full items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-1 goose-menu-description">
                     <Clock3 className="h-3 w-3 shrink-0" strokeWidth={1.75} />
-                    <span className="truncate">
+                    <span className="goose-tabular min-w-0 [overflow-wrap:anywhere]">
                       {formatConversationTime(conversation.updatedAt)}
                     </span>
                   </div>
+                  {onDeleteConversation ? (
+                    <IconButton size="xs" tone="danger"
+                      type="button"
+                      aria-label={t("deleteConversation")}
+                      title={t("deleteConversation")}
+                      onClick={(event) =>
+                        confirmDeleteConversation(event, conversation.id, summary)
+                      }
+                      className="flex shrink-0 items-center justify-center"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    </IconButton>
+                  ) : null}
                 </div>
-                {isActive ? (
-                  <span className="flex shrink-0 items-center gap-0.5 text-[11px] text-foreground">
-                    <Check className="h-3 w-3" strokeWidth={2} />
-                    {t("current")}
-                  </span>
-                ) : null}
-                {onDeleteConversation ? (
-                  <IconButton size="xs" tone="danger"
-                    type="button"
-                    aria-label={t("deleteConversation")}
-                    title={t("deleteConversation")}
-                    onClick={(event) =>
-                      confirmDeleteConversation(event, conversation.id, summary)
-                    }
-                    className="flex shrink-0 items-center justify-center text-muted-foreground opacity-0 transition-[opacity,color,background-color] focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  </IconButton>
-                ) : null}
               </div>
             )}
           </PortalHoverTip>
@@ -212,7 +174,7 @@ export function ConversationHistoryList({
         "min-w-0 max-w-full overflow-x-hidden overflow-y-auto",
         className,
       )}
-      style={{ maxHeight: Math.min(conversations.length * 58 + 12, 300) }}
+      style={{ maxHeight: 300 }}
     >
       {list}
     </div>
@@ -249,7 +211,7 @@ export function ConversationHistoryPopover({
         variant="menu"
         align="end"
         sideOffset={6}
-        className="w-72 max-w-72 overflow-hidden p-0"
+        className="w-[22rem] max-w-[calc(100vw-24px)] overflow-hidden p-[var(--goose-menu-surface-inset)]"
       >
         <ConversationHistoryList
           notebookId={notebookId}
