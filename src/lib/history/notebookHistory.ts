@@ -5,7 +5,6 @@ import { validHistoryRelativePath } from "./localPaths";
 
 const PORTABLE_TTL_MS = 20_000;
 
-/** 应用内改名/移动后，把新路径写进各页面的 meta.json；历史目录本身不搬动。同时顺带迁移旧布局。 */
 export async function migrateNotebookHistory(basePath: string, knownPaths: Record<string, string> = {}, provided?: HistoryDisk) {
   const fs = provided ?? rendererHistoryDisk();
   if (!fs) return;
@@ -20,7 +19,6 @@ export async function migrateNotebookHistory(basePath: string, knownPaths: Recor
   });
 }
 
-/** 磁盘上仍存在的笔记路径 → 其历史所属 pageId，用于重开笔记本时沿用原 ID。 */
 export async function portableHistoryIds(basePath: string): Promise<Record<string, string>> {
   const fs = rendererHistoryDisk();
   if (!fs) return {};
@@ -39,5 +37,9 @@ export async function portableHistoryIds(basePath: string): Promise<Record<strin
     for (const [path, { id }] of Object.entries(best)) value[path] = id;
     rememberPortableIds(basePath, value);
     return value;
+  }).catch((error) => {
+    // History is optional metadata: a protected .goose directory must not block notes.
+    console.warn("[history] 无法读取历史索引，继续读取笔记", basePath, error);
+    return {};
   });
 }
