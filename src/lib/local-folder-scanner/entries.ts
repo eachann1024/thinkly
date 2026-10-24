@@ -37,8 +37,8 @@ export interface LocalFolderScannerOptions {
   gooseFs: GooseFs;
   hiddenFolders?: string[];
   forceRead?: boolean;
-  /** 只读扫描（浮动搜索窗）：不写 id 映射、不触碰历史目录布局。 */
   readOnly?: boolean;
+  includedFilePaths?: string[];
 }
 
 export interface LocalFolderEntry {
@@ -50,10 +50,6 @@ export interface LocalFolderEntry {
 
 export const SCAN_CPU_SLICE_MS = 8;
 
-/**
- * Markdown 解析发生在渲染线程。批量扫描时定期让出一帧，避免旧版 Electron
- * Chromium 因连续长任务把窗口判定为无响应。Node 单测环境回落到 setTimeout。
- */
 export function yieldToRenderer(): Promise<void> {
   return new Promise((resolve) => {
     if (
@@ -94,7 +90,6 @@ export function shouldIgnoreEntry(name: string, hiddenFoldersSet: Set<string>) {
   );
 }
 
-/** 增量 watch 使用：只要相对路径任一目录段命中扫描器规则，就忽略整条路径。 */
 export function shouldIgnoreLocalRelativePath(
   relativePath: string,
   hiddenFolders: readonly string[] = [],
@@ -171,7 +166,6 @@ export async function readMarkdownFile(
     };
   };
 
-  // A fingerprint belongs to these bytes only when stat brackets the read.
   const before = await statMarkdownFile(gooseFs, filePath);
   const fileResult = await readContent();
   const after = await statMarkdownFile(gooseFs, filePath);

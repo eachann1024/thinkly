@@ -22,6 +22,7 @@ import {
 } from "./local-folder-scanner/entries";
 import { readUnchangedMarkdown } from "./local-folder-scanner/read-cache";
 import { buildMarkdownPage } from "./local-folder-scanner/markdown";
+import { canonicalRelativePath, comparisonLocalPath, localPathsAreCaseInsensitive } from "./canonicalLocalPath";
 export {
   buildLocalPageId,
   shouldIgnoreEntry,
@@ -40,15 +41,14 @@ export async function scanLocalFolderPages({
   hiddenFolders = [],
   forceRead = false,
   readOnly = false,
+  includedFilePaths = [],
 }: LocalFolderScannerOptions): Promise<Page[]> {
-  // 读取一次映射表，整个扫描过程共享（避免逐文件 IO）。
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
   let idMapDirty = false;
   const portable = readOnly ? {} : await portableHistoryIds(basePath);
   for (const [path, id] of Object.entries(portable)) {
     if (!idMap[path] && !Object.values(idMap).includes(id)) { idMap[path] = id; idMapDirty = true; }
   }
-  // 记录本次扫描实际存在的相对路径，用于扫描结束后剪枝。
   const liveRelativePaths = new Set<string>();
   const hiddenFoldersSet = new Set(hiddenFolders);
   const cacheScope = JSON.stringify([basePath, [...hiddenFolders].sort()]);
@@ -63,12 +63,12 @@ export async function scanLocalFolderPages({
       entries = await readDirectory(gooseFs, dirPath);
     } catch (error) {
       console.error("readDir failed", error);
+      if (dirPath === basePath) throw error;
       return [];
     }
 
     const pages: Page[] = [];
 
-    // 收集待并发处理的文件项（目录仍串行，子树递归需有序）
     interface PendingFileEntry {
       entry: LocalFolderEntry;
       fileId: string;
@@ -117,8 +117,6 @@ export async function scanLocalFolderPages({
       pendingFiles.push({ entry, fileId });
     }
 
-    // 文件 IO 并发、Markdown 解析串行分片：既避免 EMFILE，也避免多个大文件
-    // 在同一个渲染帧里连续解析形成长任务。
     const BATCH_SIZE = 8;
     const now = Date.now();
     for (let i = 0; i < pendingFiles.length; i += BATCH_SIZE) {
@@ -175,6 +173,37 @@ export async function scanLocalFolderPages({
   };
 
   const pages = await scanDirectory(basePath);
+  const caseInsensitive = localPathsAreCaseInsensitive();
+  const pathKey = (filePath: string) => comparisonLocalPath(filePath, caseInsensitive);
+  const scannedPaths = new Set(pages.flatMap((page) =>
+    page.localFilePath ? [pathKey(page.localFilePath)] : []));
+  for (const filePath of includedFilePaths) {
+    const relativePath = canonicalRelativePath(basePath, filePath);
+    if (!relativePath || scannedPaths.has(pathKey(filePath))) continue;
+    try {
+      const exists = gooseFs.existsAsync
+        ? await gooseFs.existsAsync(filePath) : gooseFs.exists(filePath);
+      if (!exists) continue;
+      const { id, dirty } = resolveOrCreateStableId(notebookId, relativePath, idMap);
+      const entry = {
+        name: relativePath.split("/").pop()!,
+        path: filePath,
+        isFile: true,
+        isDirectory: false,
+      };
+      const page = await buildMarkdownPage(notebookId, basePath, entry,
+        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope);
+      const parentPath = filePath.replace(/[\\/][^\\/]+$/, "");
+      page.parentId = pages.find((candidate) =>
+        candidate.isFolder && candidate.localFilePath &&
+        pathKey(candidate.localFilePath) === pathKey(parentPath))?.id;
+      pages.push(page);
+      liveRelativePaths.add(relativePath);
+      if (dirty) idMapDirty = true;
+    } catch (error) {
+      console.error("[local-folder-scanner] 显式打开文件读取失败", filePath, error);
+    }
+  }
   pruneParsedMarkdown(
     cacheScope,
     new Set(
@@ -184,7 +213,6 @@ export async function scanLocalFolderPages({
     ),
   );
 
-  // 扫描结束后统一处理映射表持久化与剪枝。
   if (readOnly) return pages;
   if (idMapDirty) {
     writeLocalPageIdMap(notebookId, idMap);

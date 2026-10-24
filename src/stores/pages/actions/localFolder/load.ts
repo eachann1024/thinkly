@@ -1,6 +1,7 @@
 import type { StoreSet, StoreGet } from "../hydrate";
 import { ensureLocalFolderOrdersLoaded } from "@/stores/localFolderOrder";
 import { useSettings } from "@/stores/useSettings";
+import { associatedMarkdownPaths } from "@/lib/associated-markdown-paths";
 import {
   localFolderLoadTasks,
   latestLocalFolderLoadRequest,
@@ -20,13 +21,13 @@ export const loadLocalFolderPagesAction = (
     return Promise.resolve();
   }
 
-  // 手动排序只存在内存 store 里，进该本地文件夹时读进来，树才能直接按手动顺序渲染
   ensureLocalFolderOrdersLoaded(notebookId);
 
   const hiddenFolders = [...useSettings.getState().localFolderHiddenFolders];
   const fingerprint = JSON.stringify({
     basePath,
     hiddenFolders,
+    includedFilePaths: associatedMarkdownPaths(notebookId),
     showWelcome: Boolean(options?.showWelcome),
     forceRead: Boolean(options?.forceRead),
   });

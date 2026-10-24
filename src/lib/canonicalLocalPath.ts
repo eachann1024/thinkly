@@ -1,12 +1,12 @@
-/** 纯路径工具：无 Node/Electron/DOM 依赖，主进程与渲染进程共用。 */
 
 const SYSTEM_VOLUMES_DATA = "/system/volumes/data";
 
 export function normalizeLocalPathSlashes(path: string): string {
-  return path.replace(/\\/g, "/").replace(/\/+/g, "/");
+  const slashes = path.replace(/\\/g, "/");
+  const prefix = slashes.startsWith("//") ? "/" : "";
+  return prefix + slashes.replace(/\/+/g, "/");
 }
 
-/** 剥掉 macOS firmlink 前缀 `/System/Volumes/Data`（大小写不敏感）。 */
 export function stripSystemVolumesDataPrefix(path: string): string {
   const normalized = normalizeLocalPathSlashes(path);
   const lower = normalized.toLowerCase();
@@ -52,7 +52,6 @@ export function isCanonicalPathInside(
   return file === root || file.startsWith(`${root}/`);
 }
 
-/** 在 canonical 语义下计算 file 相对 base 的路径（不含前导斜杠）。 */
 export function canonicalRelativePath(
   basePath: string,
   filePath: string,
