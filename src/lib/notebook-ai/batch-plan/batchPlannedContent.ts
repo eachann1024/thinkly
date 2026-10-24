@@ -1,3 +1,4 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchPlanJournal } from "./types";
 import { useNotebooks } from "@/stores/useNotebooks";
 import {
@@ -25,7 +26,7 @@ export function plannedContent(
 ) {
   if (operation.type === "create") {
     const isLocal =
-      useNotebooks.getState().notebooks[journal.notebookId]?.source ===
+      useNotebooks.getState().notebooks[operationNotebookId(journal, operation)]?.source ===
       "local-folder";
     if (isLocal) {
       const content = parseAiMarkdownToBlocks(operation.markdown);
@@ -73,7 +74,7 @@ export function plannedSearchReplaceContent(
   >,
   journal: BatchPlanJournal,
 ): JSONContent {
-  const before = journal.before[operation.pageId];
+  const before = journal.operationBefore?.[operation.operationId] ?? journal.before[operation.pageId];
   const applied = applySearchReplacePreservingBlocks(
     before.page.content,
     operation.oldString,

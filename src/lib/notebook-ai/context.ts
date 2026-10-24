@@ -18,12 +18,14 @@ import {
 import { formatSelectionQuoteModelBlock } from "@/components/editor/ai/composer/selectionQuote";
 import { useSettings } from "@/stores/useSettings";
 import type { NotebookAiMessageMetadata } from "./types";
+import { toResourceReference, formatResourceManifest } from "./readResourceScope";
 
 function dedupeReferences(references: AiFileReferenceAttrs[]) {
   const seen = new Set<string>();
   return references.filter((reference) => {
-    if (!reference.pageId || seen.has(reference.pageId)) return false;
-    seen.add(reference.pageId);
+    const key = `${reference.workspaceId}:${reference.pageId}`;
+    if (!reference.pageId || seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }
@@ -58,10 +60,8 @@ export function getNotebookAiReferenceSuggestions(
 ): AiReferenceSuggestionItem[] {
   const { pages } = usePages.getState();
   const { notebooks } = useNotebooks.getState();
-  const includeFolders = notebooks[notebookId]?.source === "local-folder";
   return getAiReferenceSuggestionItems(query, pages, notebooks, notebookId, {
-    notebookId,
-    includeFolders,
+    includeFolders: true,
     priorityPageId: getCurrentNotebookAiPageId(notebookId),
   });
 }
@@ -101,7 +101,7 @@ function getImplicitPage(notebookId: string, currentPageId?: string | null) {
   ) {
     return undefined;
   }
-  return buildAiFileReferenceAttrs(page, useNotebooks.getState().notebooks);
+  return buildAiFileReferenceAttrs(page, useNotebooks.getState().notebooks, usePages.getState().pages);
 }
 
 export function buildNotebookAiUserMessage(params: {
@@ -121,18 +121,10 @@ export function buildNotebookAiUserMessage(params: {
   const currentPageId =
     params.currentPageId ?? getCurrentNotebookAiPageId(params.notebookId);
   const normalized = normalizeAiComposerPayload(params.payload);
-  const isAvailableReference = (reference: AiFileReferenceAttrs) => {
-    const page = usePages.getState().pages[reference.pageId];
-    return Boolean(
-      page && page.workspaceId === params.notebookId && !page.trashedAt,
-    );
-  };
-  const references = dedupeReferences(normalized.resources).filter(
-    isAvailableReference,
-  );
+  const references = dedupeReferences(normalized.resources);
   const explicitContextReferences = dedupeReferences(
     normalized.contextReferences,
-  ).filter(isAvailableReference);
+  );
   const implicitPage =
     params.useImplicitPage !== false && references.length === 0
       ? getImplicitPage(params.notebookId, currentPageId)
@@ -157,9 +149,13 @@ export function buildNotebookAiUserMessage(params: {
     imageCount: params.payload.images?.length,
   });
   const contextBlock = contextSelection.contextBlock;
+  const resourceReferences = [
+    ...contextReferences.map((reference) => toResourceReference(reference, "source")),
+    ...normalized.targetReferences.map((reference) => toResourceReference(reference, "target")),
+  ];
   const contextIntro =
     explicitContextReferences.length > 0
-      ? `用户为本轮选择了以下笔记作为上下文。已按${contextSelection.mode === "full-text" ? "全文" : "结构摘要"}模式读取；请优先基于这些内容回答。`
+      ? `用户为本轮选择了以下笔记作为上下文。单页按${contextSelection.mode === "full-text" ? "全文" : "结构摘要"}模式提供，目录仅提供索引；先按需读取子页，再基于实际已读内容回答。`
       : implicitPage
         ? `用户没有 @ 其它笔记。默认把当前活动页签对应的笔记作为本轮关联页面，并按${contextSelection.mode === "full-text" ? "全文" : "结构摘要"}模式读取；“当前页 / 本文 / 这篇”都指向该页面。`
         : "";
@@ -179,6 +175,7 @@ export function buildNotebookAiUserMessage(params: {
   const modelText = [
     "用户输入：",
     displayText,
+    formatResourceManifest(resourceReferences),
     quoteBlock
       ? ["用户加入的选区引用（含完整原文，请阅读）：", quoteBlock].join("\n")
       : "",
@@ -191,7 +188,7 @@ export function buildNotebookAiUserMessage(params: {
           contextIntro,
           contextBlock,
           implicitPage
-            ? `默认变更目标 pageId：${implicitPage.pageId}。修改前先 readPage，再通过 executeBatchPlan 提交审批计划。`
+            ? `当前关联页 notebookId：${implicitPage.workspaceId}，pageId：${implicitPage.pageId}；只有用户明确要求修改时才生成写入范围。修改前先 readPage，再通过 executeBatchPlan 提交审批计划。`
             : "",
         ]
           .filter(Boolean)
@@ -209,6 +206,7 @@ export function buildNotebookAiUserMessage(params: {
     currentPageId,
     metadata: {
       displayText,
+      resourceReferences,
       references: references.length > 0 ? references : undefined,
       skills,
       selectionQuotes: selectionQuotes.length > 0 ? selectionQuotes : undefined,

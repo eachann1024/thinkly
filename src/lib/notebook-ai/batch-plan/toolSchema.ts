@@ -6,20 +6,30 @@ const optionalOperationId = z
   .optional()
   .describe("可选的操作唯一标识；省略时由应用自动生成");
 
+const bindingShape = {
+  target: z.object({ notebookId: z.string().min(1), parentId: z.string().min(1).nullable().optional(),
+    pageId: z.string().min(1).optional() }).strict().optional(),
+  sourceRefIds: z.array(z.string().min(1)).optional(),
+  dependsOn: z.array(z.string().min(1)).optional(),
+};
+const createTargetSchema = z.object({ notebookId: z.string().min(1), parentId: z.string().min(1).nullable() }).strict().optional();
 const canonicalOperationSchema = z.discriminatedUnion("type", [
   z
     .object({
       type: z.literal("create"),
       operationId: optionalOperationId,
+      ...bindingShape,
+      target: createTargetSchema,
       title: z.string().min(1),
       markdown: z.string().min(1),
-      parentId: z.string().min(1).optional(),
+      parentId: z.string().min(1).nullable().optional(),
     })
     .strict(),
   z
     .object({
       type: z.literal("edit"),
       operationId: optionalOperationId,
+      ...bindingShape,
       pageId: z.string().min(1),
       markdown: z.string().min(1),
       title: z.string().min(1).optional(),
@@ -29,6 +39,7 @@ const canonicalOperationSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("delete"),
       operationId: optionalOperationId,
+      ...bindingShape,
       pageIds: z.array(z.string().min(1)).min(1),
     })
     .strict(),
@@ -36,6 +47,7 @@ const canonicalOperationSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("search_replace"),
       operationId: optionalOperationId,
+      ...bindingShape,
       pageId: z.string().min(1),
       oldString: z.string().min(1),
       /** 可为空字符串，表示删除匹配片段。 */
@@ -114,15 +126,22 @@ function repairOperation(value: unknown): CanonicalOperation | null {
   const type = fromType ?? fromAction;
   if (!type) return null;
 
+  const binding = { ...(value.target !== undefined ? { target: value.target as CanonicalOperation["target"] } : {}),
+    ...(Array.isArray(value.dependsOn) ? { dependsOn: value.dependsOn as string[] } : {}),
+    ...(Array.isArray(value.sourceRefIds) ? { sourceRefIds: value.sourceRefIds as string[] } : {}) };
   const operationId =
     typeof value.operationId === "string" ? value.operationId : undefined;
   if (type === "create") {
+    const target = createTargetSchema.safeParse(value.target);
+    if (!target.success) return null;
     return {
       type,
+      ...binding,
+      target: target.data,
       ...(operationId ? { operationId } : {}),
       title: value.title as string,
       markdown: value.markdown as string,
-      ...(typeof value.parentId === "string"
+      ...(value.parentId === null || typeof value.parentId === "string"
         ? { parentId: value.parentId }
         : {}),
     };
@@ -130,6 +149,7 @@ function repairOperation(value: unknown): CanonicalOperation | null {
   if (type === "edit") {
     return {
       type,
+      ...binding,
       ...(operationId ? { operationId } : {}),
       pageId: value.pageId as string,
       markdown: value.markdown as string,
@@ -163,6 +183,7 @@ function repairOperation(value: unknown): CanonicalOperation | null {
     if (oldString === undefined || newString === undefined) return null;
     return {
       type,
+      ...binding,
       ...(operationId ? { operationId } : {}),
       pageId: value.pageId as string,
       oldString,
@@ -178,6 +199,7 @@ function repairOperation(value: unknown): CanonicalOperation | null {
       : value.pageIds;
   return {
     type,
+    ...binding,
     ...(operationId ? { operationId } : {}),
     pageIds: pageIds as string[],
   };

@@ -1,3 +1,5 @@
+import { useNotebooks } from "@/stores/useNotebooks";
+import { isRunWriteScopeRevoked } from "../resourceScope";
 import type { BatchPlanJournal } from "./types";
 import { writeBatchPlanJournal } from "./journal";
 import { resultForOperation } from "./batchShared";
@@ -25,6 +27,14 @@ export async function recoverInterruptedOperation(
       executingOperationId: undefined,
       executingStartedAt: undefined,
     });
+  }
+  const target = journal.operationTargets?.[operationId];
+  if (journal.version === 2 && (!target ||
+      !useNotebooks.getState().notebooks[target.notebookId] ||
+      useNotebooks.getState().notebooks[target.notebookId]?.localPath !== target.notebookRoot ||
+      (journal.writeScope && isRunWriteScopeRevoked(journal.writeScope)))) {
+    return writeBatchPlanJournal({ ...journal, status: "failed",
+      error: "中断任务的写入范围已撤销或笔记本位置变化，未继续恢复" });
   }
   if (resultForOperation(journal, operationId)) {
     return writeBatchPlanJournal({

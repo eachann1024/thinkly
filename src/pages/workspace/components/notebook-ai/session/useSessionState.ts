@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, useReducer } from "r
 import { useSettings } from "@/stores/useSettings";
 import { getAiAvailabilityError } from "@/lib/notebook-ai/availabilityError";
 import { useChat } from "@ai-sdk/react";
-import type { ChatTransport } from "ai";
 import {
   useNotebookAiChats,
   composerDraftHasContent,
@@ -10,9 +9,8 @@ import {
 // transport → agent → ai / @earendil-works 的工具链约 350KB，只有真正发消息时才需要；
 // 静态引用它会把整个 SDK 链拉进首帧。
 import { buildLanguageModel } from "@/lib/notebook-ai/model";
-import { getCurrentNotebookAiPageId } from "@/lib/notebook-ai/context";
-import { prepareNotebookAiMessagesForModel } from "@/lib/notebook-ai/messageUtils";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
+import { getSessionChat } from "./sessionChat";
 import type { NotebookAiSessionScope } from "./types";
 
 import { sessionScopeReducer, type SessionScopeState } from "./sessionScopeState";
@@ -40,7 +38,7 @@ export function useSessionState(notebookId: string) {
 
   // WorkspaceLayout 不再用 key 重挂整个 Provider。这里在 render 期间把新笔记本
   // 的会话状态一次性换好，React 会立即重渲染，子节点不会拿到旧 notebook 的消息。
-  // 真正停止旧 Chat/压缩任务留给 layout effect，避免在 render 中执行副作用。
+  // 原 Chat 继续归属原会话；压缩任务由 layout effect 清理。
   if (session.notebookId !== notebookId) {
     const nextConversationId = useNotebookAiChats
       .getState()
@@ -78,52 +76,7 @@ export function useSessionState(notebookId: string) {
   const ai = useSettings((state) => state.ai);
   const modelCheck = buildLanguageModel();
 
-  const persistedMessages = useMemo(
-    () =>
-      useNotebookAiChats
-        .getState()
-        .getConversationMessages(notebookId, conversationId),
-    [notebookId, conversationId],
-  );
-
-  // useChat 只在 chat id 改变时重建 Chat；transport 必须保持稳定，
-  // 并在真正发送时再绑定本轮最新的页签上下文。
-  const transport = useMemo<ChatTransport<NotebookAiMessage>>(
-    () => ({
-      async sendMessages(options) {
-        const currentPageId =
-          requestCurrentPageIdRef.current ??
-          getCurrentNotebookAiPageId(notebookId);
-        const result = (await import("@/lib/notebook-ai/transport")).buildTransport(
-          notebookId,
-          currentPageId,
-        );
-        if (!result.ok) {
-          throw new Error(result.reason);
-        }
-
-        return result.transport.sendMessages({
-          ...options,
-          messages: prepareNotebookAiMessagesForModel(options.messages),
-        });
-      },
-      async reconnectToStream(options) {
-        const currentPageId =
-          requestCurrentPageIdRef.current ??
-          getCurrentNotebookAiPageId(notebookId);
-        const result = (await import("@/lib/notebook-ai/transport")).buildTransport(
-          notebookId,
-          currentPageId,
-        );
-        if (!result.ok) {
-          throw new Error(result.reason);
-        }
-        return result.transport.reconnectToStream(options);
-      },
-    }),
-    [notebookId],
-  );
-
+  const chat = getSessionChat(session.notebookId, conversationId);
   const {
     messages,
     sendMessage,
@@ -133,9 +86,7 @@ export function useSessionState(notebookId: string) {
     error,
     clearError,
   } = useChat<NotebookAiMessage>({
-    transport,
-    id: `notebook-ai-${notebookId}-${conversationId}`,
-    messages: persistedMessages,
+    chat,
     // 流式 token 不节流会每字触发 messages → 全树 commit + Streamdown 重解析，整面板卡顿。
     // ~50ms ≈ 20fps UI 更新，观感仍流畅，React commit 次数大幅下降。
     experimental_throttle: 50,
@@ -162,6 +113,7 @@ export function useSessionState(notebookId: string) {
   return {
     notebookId,
     conversationId,
+    chat,
     sessionGeneration,
     currentSessionScope,
     activeSessionScopeRef,

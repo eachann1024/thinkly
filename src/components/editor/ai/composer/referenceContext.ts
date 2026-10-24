@@ -10,7 +10,6 @@ import type {
   ResolvedAiReferenceContext,
 } from "./referenceTypes";
 import {
-  getNotebookSnapshot,
   getLocationSnapshot,
   getSourceType,
 } from "./referenceMetadata";
@@ -18,21 +17,22 @@ import {
 function resolveReferenceLocation(
   page: Page,
   notebooks: Record<string, Notebook>,
+  pages: Record<string, Page>,
 ) {
-  const notebook = getNotebookSnapshot(page.workspaceId, notebooks);
   if (!page.localFilePath) {
-    return notebook?.name ?? "未知笔记本";
+    return getLocationSnapshot(page, notebooks, pages);
   }
 
-  return getLocationSnapshot(page, notebooks);
+  return getLocationSnapshot(page, notebooks, pages);
 }
 
 function listFolderChildLines(
   page: Page,
   pages: Record<string, Page>,
+  reference: AiFileReferenceAttrs,
 ): string[] {
   return Object.values(pages)
-    .filter((child) => child.parentId === page.id && !child.trashedAt)
+    .filter((child) => child.workspaceId === page.workspaceId && child.parentId === page.id && !child.trashedAt && !reference.excludedPageIds?.includes(child.id))
     .sort((a, b) => {
       if (Boolean(a.isFolder) !== Boolean(b.isFolder))
         return a.isFolder ? -1 : 1;
@@ -56,7 +56,7 @@ export function buildFolderReferenceContext(
     notebooks[page.workspaceId]?.name ??
     reference.notebookNameSnapshot ??
     "未知笔记本";
-  const childLines = listFolderChildLines(page, pages);
+  const childLines = listFolderChildLines(page, pages, reference);
   const listing = childLines.length
     ? `目录子项：\n${childLines.map((line) => `- ${line}`).join("\n")}`
     : "（空目录）";
@@ -65,12 +65,13 @@ export function buildFolderReferenceContext(
     title: getPageTitle(page),
     sourceType: getSourceType(page),
     notebookName,
-    location: resolveReferenceLocation(page, notebooks),
-    contentText: listing,
+    location: resolveReferenceLocation(page, notebooks, pages),
+    contentText: `${listing}\n状态：仅有目录索引，子页正文尚未读取。请调用 listFolder 分页枚举，再 readPage。`,
     structureSummary: childLines.length
       ? `目录，${childLines.length} 个子项：\n${childLines.map((line) => `- ${line}`).join("\n")}`
-      : "空目录",
+      : "索引中暂无子项；这不证明磁盘完整目录为空",
     readStatus: "ready",
+    coverage: { enumerated: childLines.length, loaded: 0, omitted: childLines.length, recursive: reference.recursive !== false },
   };
 }
 
@@ -97,11 +98,34 @@ export function resolveAiReferenceContexts(
   notebooks: Record<string, Notebook>,
 ) {
   return references.map((reference) => {
+    if (reference.kind === "notebook") {
+      const notebook = notebooks[reference.workspaceId];
+      if (!notebook) return buildFallbackReferenceContext(reference, "笔记本已失效，请重新选择");
+      const excluded = new Set(reference.excludedPageIds ?? []);
+      const entries = Object.values(pages).filter((page) => {
+        if (page.workspaceId !== reference.workspaceId || page.trashedAt || (reference.recursive === false && page.parentId)) return false;
+        const visited = new Set<string>();
+        let candidate: Page | undefined = page;
+        while (candidate && !visited.has(candidate.id)) {
+          if (excluded.has(candidate.id)) return false;
+          visited.add(candidate.id);
+          candidate = candidate.parentId ? pages[candidate.parentId] : undefined;
+        }
+        return true;
+      });
+      const summary = `笔记本根目录，仅有 ${entries.length} 条所选范围索引，正文尚未读取。请 listFolder 分页枚举，再 readPage；索引数量不证明磁盘枚举完整。`;
+      return {
+        reference, title: notebook.name, sourceType: reference.sourceType,
+        notebookName: notebook.name, location: "/", contentText: summary,
+        structureSummary: summary,
+        readStatus: "ready", coverage: { enumerated: entries.length, loaded: 0, omitted: entries.length, recursive: reference.recursive !== false },
+      } satisfies ResolvedAiReferenceContext;
+    }
     const page = pages[reference.pageId];
-    if (!page) {
+    if (!page || page.trashedAt || page.workspaceId !== reference.workspaceId) {
       return buildFallbackReferenceContext(
         reference,
-        "引用目标不存在或尚未加载",
+        "引用目标不存在、归属变化或尚未加载，请重新选择",
       );
     }
 
@@ -126,8 +150,9 @@ export function resolveAiReferenceContexts(
       title: getPageTitle(page),
       sourceType: getSourceType(page),
       notebookName,
-      location: resolveReferenceLocation(page, notebooks),
+      location: resolveReferenceLocation(page, notebooks, pages),
       contentText: getContentDerivationsForPage(page).text.trim(),
+      coverage: { enumerated: 1, loaded: 1, omitted: 0, recursive: false },
       structureSummary: getContentStructureSummaryForPage(page),
       readStatus: "ready",
     } satisfies ResolvedAiReferenceContext;

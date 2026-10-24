@@ -1,3 +1,4 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchOperationResult } from "./types";
 import { usePages } from "@/stores/usePages";
 import { writePageContentSafely } from "@/lib/notebook-ai/pageWriteGuard";
@@ -63,7 +64,7 @@ export async function executeEditOperation(
       operation.pageId,
       plannedContent(operation, working),
       {
-        expectedNotebookId: working.notebookId,
+        expectedNotebookId: operationNotebookId(working, operation),
         expectedRevision: before.revision,
       },
     );

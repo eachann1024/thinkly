@@ -80,6 +80,11 @@ function collectInlineContent(
     if (node.type === "aiFileReference") {
       const attrs = {
         pageId: String(node.attrs?.pageId ?? ""),
+        refId: typeof node.attrs?.refId === "string" ? node.attrs.refId : undefined,
+        kind: node.attrs?.kind === "notebook" || node.attrs?.kind === "folder" ? node.attrs.kind : "page",
+        parentId: typeof node.attrs?.parentId === "string" ? node.attrs.parentId : undefined,
+        recursive: node.attrs?.recursive !== false,
+        excludedPageIds: Array.isArray(node.attrs?.excludedPageIds) ? node.attrs.excludedPageIds.filter((id: unknown): id is string => typeof id === "string") : undefined,
         workspaceId: String(node.attrs?.workspaceId ?? ""),
         titleSnapshot: String(node.attrs?.titleSnapshot ?? "未命名文件"),
         sourceType:

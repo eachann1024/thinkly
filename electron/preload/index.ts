@@ -33,8 +33,8 @@ const gooseDesktop = {
   showOpenDialog: (opts?: OpenFileDialogOptions) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,
   showSaveDialog: (opts?: SaveFileDialogOptions) => invoke("desktop:showSaveDialog", opts) as Promise<string | null>,
   fsReadText: (p: string) => invoke("desktop:fsReadText", p) as Promise<string>,
-  fsWriteText: (p: string, data: string) =>
-    invoke("desktop:fsWriteText", p, data) as Promise<void>,
+  fsWriteText: (p: string, data: string, exclusive?: boolean) =>
+    invoke("desktop:fsWriteText", p, data, exclusive) as Promise<void>,
   fsRead: (p: string) => invoke("desktop:fsRead", p) as Promise<Uint8Array>,
   fsSaveAsset: (input: import("../../src/lib/local-file-asset-contract").SaveLocalAssetRequest) =>
     invoke("desktop:fsSaveAsset", input) as Promise<import("../../src/lib/local-file-asset-contract").SavedLocalAssetPath>,

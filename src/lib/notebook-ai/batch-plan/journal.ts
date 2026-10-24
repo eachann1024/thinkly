@@ -11,13 +11,16 @@ export function readBatchPlanJournal(
   toolCallId: string,
   runId: string,
 ): BatchPlanJournal | null {
-  const journal = readDbStorageJSON<BatchPlanJournal | null>(
-    batchPlanJournalKey(toolCallId, runId),
-    null,
-  );
-  if (!journal) return null;
+  const stored = readDbStorageJSON<BatchPlanJournal | string | null>(batchPlanJournalKey(toolCallId, runId), null);
+  const journal = typeof stored === "string" ? readDbStorageJSON<BatchPlanJournal | null>(stored, null) : stored;
+  if (!journal || (journal.version !== 1 && journal.version !== 2)) return null;
   return {
     ...journal,
+    // v1 deliberately ignores any later target fields; replay keeps its original single notebook.
+    input: journal.version === 1 ? { ...journal.input, operations: journal.input.operations.map(
+      ({ target: _target, ...operation }) => operation) } : journal.input,
+    operationTargets: journal.version === 2 ? journal.operationTargets ?? {} : undefined,
+    writeScope: journal.version === 2 ? journal.writeScope : undefined,
     affectedPageIdsByOperationId: journal.affectedPageIdsByOperationId ?? {},
     deleteBatchIdsByOperationId: journal.deleteBatchIdsByOperationId ?? {},
     plannedPageIds: journal.plannedPageIds ?? {},
@@ -32,6 +35,10 @@ export function writeBatchPlanJournal(
 ): BatchPlanJournal {
   const next = { ...journal, updatedAt: Date.now() };
   writeDbStorageJSON(batchPlanJournalKey(next.toolCallId, next.runId), next);
+  if (next.version === 2 && next.writeScope) {
+    writeDbStorageJSON(`${KEY_PREFIX}run:${next.writeScope.runId}:${next.runId}`,
+      { toolCallId: next.toolCallId, runId: next.runId });
+  }
   return next;
 }
 
@@ -49,4 +56,15 @@ export function updateBatchPlanSelection(
     allowed.has(id),
   );
   return writeBatchPlanJournal({ ...journal, selectedOperationIds: unique });
+}
+
+/** Same host run + model run id reuses one journal even after a new tool-call id. */
+export function readBatchPlanForScopeRun(scopeRunId: string, runId: string) {
+  const ref = readDbStorageJSON<{ toolCallId: string; runId: string } | null>(
+    `${KEY_PREFIX}run:${scopeRunId}:${runId}`, null);
+  return ref ? readBatchPlanJournal(ref.toolCallId, ref.runId) : null;
+}
+export function linkBatchPlanJournal(toolCallId: string, journal: BatchPlanJournal) {
+  if (toolCallId !== journal.toolCallId) writeDbStorageJSON(batchPlanJournalKey(toolCallId, journal.runId),
+    batchPlanJournalKey(journal.toolCallId, journal.runId));
 }

@@ -1,3 +1,4 @@
+import { operationNotebookId, validateFrozenOperationTarget } from "./batchTargets";
 import type { BatchPlanJournal } from "./types";
 import {
   guardNotebookForAiWrite,
@@ -7,14 +8,19 @@ import { usePages } from "@/stores/usePages";
 import { pendingOperations } from "./batchShared";
 import { pageAtLocalPath, pathExists, comparisonPath } from "./batchPaths";
 import { expandDeletePageIds } from "./batchValidation";
+import { checkOperationScope } from "../resourceScope";
 
 export async function preflight(
   journal: BatchPlanJournal,
 ): Promise<string | null> {
-  const notebook = guardNotebookForAiWrite(journal.notebookId);
-  if (!notebook.ok) return notebook.error;
+
   const pageIds = new Set<string>();
   for (const operation of pendingOperations(journal)) {
+    const notebookId = operationNotebookId(journal, operation);
+    const notebook = guardNotebookForAiWrite(notebookId);
+    if (!notebook.ok) return notebook.error;
+    const targetError = await validateFrozenOperationTarget(journal, operation);
+    if (targetError) return targetError;
     const plannedLocalPath = journal.plannedLocalPaths[operation.operationId];
     if (operation.type === "create" && plannedLocalPath) {
       if (
@@ -28,7 +34,7 @@ export async function preflight(
       const parent = usePages.getState().pages[operation.parentId];
       if (
         !parent ||
-        parent.workspaceId !== journal.notebookId ||
+        parent.workspaceId !== notebookId ||
         Boolean(parent.trashedAt)
       ) {
         return "新页面的父级在审批后发生变化";
@@ -42,9 +48,14 @@ export async function preflight(
         journal.affectedPageIdsByOperationId[operation.operationId] ??
         operation.pageIds;
       const currentPageIds = expandDeletePageIds(
-        journal.notebookId,
+        notebookId,
         operation.pageIds,
       );
+      if (journal.writeScope) {
+        const error = checkOperationScope({ ...operation, pageIds: currentPageIds },
+          journal.operationTargets?.[operation.operationId] ?? { notebookId }, journal.writeScope, journal.notebookId);
+        if (error) return error;
+      }
       if (
         frozenPageIds.length !== currentPageIds.length ||
         frozenPageIds.some((pageId) => !currentPageIds.includes(pageId))
@@ -58,8 +69,8 @@ export async function preflight(
     const snapshot = journal.before[pageId];
     if (!snapshot) return "冻结计划缺少目标页面快照";
     const guard = guardPageForAiWrite(pageId, {
-      expectedNotebookId: journal.notebookId,
-      expectedRevision: snapshot.revision,
+      expectedNotebookId: snapshot.page.workspaceId,
+      expectedRevision: journal.after[pageId] ?? snapshot.revision,
     });
     if (!guard.ok) return guard.error;
     const beforePath = snapshot.page.localFilePath;

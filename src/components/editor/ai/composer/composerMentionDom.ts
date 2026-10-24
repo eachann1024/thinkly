@@ -1,5 +1,19 @@
 import type { AiFileReferenceAttrs } from "./referenceLookup";
 import { getComposerCaretTextContext } from "./composerCommandDetection";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const messages = i18nYaml<"src/components/editor/ai/composer/composerMentionDom.ts#messages:1">`
+zh-Hans:
+  source: "参考"
+  target: "写入位置"
+en:
+  source: "Reference"
+  target: "Write destination"
+ja:
+  source: "参照"
+  target: "書き込み先"
+`;
+const t = createTranslator(messages);
 
 export interface DetectedMention { query: string; range: Range }
 
@@ -70,5 +84,6 @@ export function createChipElement(
     " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +
     " cursor-pointer hover:bg-[var(--goose-interactive-hover)] select-none";
   span.textContent = `@${attrs.titleSnapshot}`;
+  span.title = [attrs.notebookNameSnapshot, attrs.locationSnapshot, t(attrs.role === "target" ? "target" : "source")].filter(Boolean).join(" / ");
   return span;
 }

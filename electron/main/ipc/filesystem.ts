@@ -1,3 +1,4 @@
+import { writeNotebookText } from "../writeNotebookText";
 import { t } from "../i18n/nativeServices";
 import { assertGitSyncWritable, waitForGitSyncRead } from "../gitSyncLock";
 import { ipcMain, shell } from "electron";
@@ -36,10 +37,10 @@ export function registerFilesystemIpc(undoRoot: string): void {
 
   ipcMain.handle(
     "desktop:fsWriteText",
-    async (_event, p: string, data: string) => {
+    async (_event, p: string, data: string, exclusive?: boolean) => {
       const target = assertAllowed(p);
       ensureParentDir(target);
-      await withSelfWriteMark([target], () => writeFile(target, data, "utf8"));
+      await withSelfWriteMark([target], () => writeNotebookText(target, data, exclusive));
     },
   );
 

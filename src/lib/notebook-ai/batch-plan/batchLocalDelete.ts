@@ -1,9 +1,10 @@
+import { useNotebooks } from "@/stores/useNotebooks";
 import type { BatchPlanJournal, FrozenPageSnapshot } from "./types";
 import { recordHistorySnapshot } from "@/lib/history/snapshot";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { clone } from "./batchShared";
-import { dirname, pathExists } from "./batchPaths";
+import { dirname, pathExists, assertLocalPathInsideRoot } from "./batchPaths";
 
 export async function rememberBefore(
   pageId: string,
@@ -13,7 +14,7 @@ export async function rememberBefore(
   if (!snapshot) return;
   await recordHistorySnapshot({
     pageId,
-    workspaceId: journal.notebookId,
+    workspaceId: snapshot.page.workspaceId,
     content: clone(snapshot.page.content),
     trigger: "pre-op",
     isMilestone: true,
@@ -129,6 +130,10 @@ export async function restoreLocalDelete(
       continue;
     }
     try {
+      const notebook = useNotebooks.getState().notebooks[snapshot.page.workspaceId];
+      if (!notebook?.localPath) throw new Error("恢复目标笔记本已卸载");
+      await assertLocalPathInsideRoot(originalPath, notebook.localPath, { targetMayNotExist: true });
+      await assertLocalPathInsideRoot(trashPath, notebook.localPath);
       await renameLocalPath(trashPath, originalPath);
       restored.push(snapshot);
     } catch (error) {

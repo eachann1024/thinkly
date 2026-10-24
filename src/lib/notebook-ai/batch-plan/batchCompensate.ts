@@ -16,7 +16,10 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
       const pageId = journal.createdPageIds[result.operationId];
       const page = pageId ? usePages.getState().pages[pageId] : undefined;
       const after = pageId ? journal.after[pageId] : undefined;
-      if (pageId && page && after && sameRevision(revisionOf(page), after)) {
+      const operation = journal.input.operations.find((item) => item.operationId === result.operationId);
+      const expectedNotebookId = journal.version === 1 ? journal.notebookId
+        : journal.operationTargets?.[result.operationId]?.notebookId ?? operation?.target?.notebookId;
+      if (pageId && page && page.workspaceId === expectedNotebookId && after && sameRevision(revisionOf(page), after)) {
         const deleted = await usePages.getState().deletePage(pageId);
         if (deleted) useTabs.getState().removeDeletedPage(pageId);
         else errors.push(`无法撤回新建页面 ${pageId}`);
@@ -37,7 +40,7 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
       for (const pageId of result.pageIds) {
         const page = usePages.getState().pages[pageId];
         const after = journal.after[pageId];
-        if (page?.trashedAt && after && sameRevision(revisionOf(page), after)) {
+        if (page?.trashedAt && page.workspaceId === journal.before[pageId]?.page.workspaceId && after && sameRevision(revisionOf(page), after)) {
           const restored = usePages.getState().restorePage(pageId);
           if (!restored.ok) errors.push(`无法恢复页面 ${pageId}`);
         } else if (page?.trashedAt) {
@@ -56,7 +59,7 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
           pageId,
           clone(snapshot.page.content),
           {
-            expectedNotebookId: journal.notebookId,
+            expectedNotebookId: snapshot.page.workspaceId,
             expectedRevision: after,
           },
         );

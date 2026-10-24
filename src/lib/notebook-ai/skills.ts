@@ -16,9 +16,9 @@ export const NOTEBOOK_AGENT_INSTRUCTIONS = agentInstructions.replace("{{CARD_GUI
 
 export const NOTEBOOK_SKILLS = {
   createNoote: {
-    description: "在当前笔记本新建页面",
+    description: "在本轮确定的笔记本和目录新建页面",
     content: createNooteSkill.trim(),
-    tools: ["executeBatchPlan"],
+    tools: ["listFolder", "readPage", "executeBatchPlan"],
   },
   updateNote: {
     description: "改写、追加、补充或重命名当前页",
@@ -26,19 +26,20 @@ export const NOTEBOOK_SKILLS = {
     tools: ["readPage", "executeBatchPlan"],
   },
   deleteNote: {
-    description: "把当前笔记本中的页面移入垃圾箱",
+    description: "把本轮授权的页面移入垃圾箱",
     content: deleteNoteSkill.trim(),
     tools: [
       "listPages",
+      "listFolder",
       "searchNotes",
       "readPage",
       "executeBatchPlan",
     ],
   },
   searchNotes: {
-    description: "在当前笔记本搜索并读取页面",
+    description: "在本轮来源范围搜索并读取页面",
     content: searchNotesSkill.trim(),
-    tools: ["listPages", "searchNotes", "readPage"],
+    tools: ["listPages", "listFolder", "searchNotes", "readPage"],
   },
   chat: {
     description: "仅解释或建议，不改笔记",

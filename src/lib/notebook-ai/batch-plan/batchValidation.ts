@@ -19,6 +19,9 @@ export function validateInput(input: BatchPlanInput): string | null {
   for (const operation of input.operations) {
     if (!operation.operationId.trim() || ids.has(operation.operationId))
       return "operationId 必须唯一且不能为空";
+    for (const dependency of operation.dependsOn ?? []) {
+      if (!ids.has(dependency)) return "依赖必须指向计划中先前的操作";
+    }
     ids.add(operation.operationId);
     if (
       operation.type === "create" &&
@@ -136,7 +139,7 @@ export function convertPartialEditsInPlan(
     }
 
     const page = pages[operation.pageId];
-    if (!page || page.workspaceId !== notebookId || Boolean(page.trashedAt)) {
+    if (!page || page.workspaceId !== (operation.target?.notebookId ?? notebookId) || Boolean(page.trashedAt)) {
       nextOps.push(operation);
       continue;
     }
@@ -162,7 +165,7 @@ export function convertPartialEditsInPlan(
       continue;
     }
 
-    nextOps.push(...converted);
+    nextOps.push(...converted.map((item) => ({ ...item, target: operation.target, sourceRefIds: operation.sourceRefIds, dependsOn: operation.dependsOn })));
     changed = true;
   }
 

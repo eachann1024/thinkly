@@ -1,3 +1,4 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchPlanJournal } from "./types";
 import { usePages } from "@/stores/usePages";
 import { writeBatchPlanJournal } from "./journal";
@@ -20,8 +21,8 @@ export async function recoverEditedOperation(
   const operationId = operation.operationId;
 
   const page = usePages.getState().pages[operation.pageId];
-  const before = journal.before[operation.pageId];
-  if (!page || !before)
+  const before = journal.operationBefore?.[operation.operationId] ?? journal.before[operation.pageId];
+  if (!page || !before || page.workspaceId !== operationNotebookId(journal, operation))
     return writeBatchPlanJournal({
       ...journal,
       status: "failed",
@@ -103,8 +104,8 @@ export async function recoverSearchReplaceOperation(
   const operationId = operation.operationId;
 
   const page = usePages.getState().pages[operation.pageId];
-  const before = journal.before[operation.pageId];
-  if (!page || !before)
+  const before = journal.operationBefore?.[operation.operationId] ?? journal.before[operation.pageId];
+  if (!page || !before || page.workspaceId !== operationNotebookId(journal, operation))
     return writeBatchPlanJournal({
       ...journal,
       status: "failed",

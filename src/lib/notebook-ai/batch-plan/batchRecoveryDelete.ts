@@ -1,3 +1,4 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchPlanJournal } from "./types";
 import { writeBatchPlanJournal } from "./journal";
 import { usePages } from "@/stores/usePages";
@@ -88,7 +89,7 @@ export async function recoverDeletedOperation(
   }
   const allDeleted = affected.every((pageId) => {
     const page = pages[pageId];
-    return !!page?.trashedAt && page.trashBatchId === deleteBatchId;
+    return !!page?.trashedAt && page.workspaceId === operationNotebookId(journal, operation) && page.trashBatchId === deleteBatchId;
   });
   if (allDeleted) {
     return appendRecoveredSuccess(
@@ -103,7 +104,7 @@ export async function recoverDeletedOperation(
     const page = pages[pageId];
     const before = journal.before[pageId];
     return (
-      !!page && !!before && sameRevision(revisionOf(page), before.revision)
+      !!page && !!before && page.workspaceId === operationNotebookId(journal, operation) && sameRevision(revisionOf(page), before.revision)
     );
   });
   if (allBefore)
@@ -114,7 +115,7 @@ export async function recoverDeletedOperation(
     });
   for (const rootId of operation.pageIds) {
     const page = usePages.getState().pages[rootId];
-    if (page?.trashedAt && page.trashBatchId === deleteBatchId) {
+    if (page?.trashedAt && page.workspaceId === operationNotebookId(journal, operation) && page.trashBatchId === deleteBatchId) {
       usePages.getState().restorePage(rootId);
     }
   }

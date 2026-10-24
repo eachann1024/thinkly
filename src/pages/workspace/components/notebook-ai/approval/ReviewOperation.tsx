@@ -20,6 +20,7 @@ import {
   proposedMarkdown,
   operationTargetPage,
   reviewPagePath,
+  reviewOperationPath,
 } from "./planReviewData";
 import { requestPlanRefinement } from "./refinePlan";
 import { ReviewDiff } from "./ReviewDiff";
@@ -101,14 +102,7 @@ export function ReviewOperation({
         : operation.type === "delete"
           ? t("detailMoveNotesToTrashIncludingChildNotes", { value1: affectedCount ?? operation.pageIds.length })
           : t("createNote");
-  const path = page
-    ? reviewPagePath(page)
-    : operation.type === "create"
-      ? (journal?.plannedLocalPaths[operation.operationId] ??
-        (operation.parentId
-          ? `${usePages.getState().pages[operation.parentId] ? reviewPagePath(usePages.getState().pages[operation.parentId]!) : t("targetParent")} / ${title}`
-          : `${journal ? (useNotebooks.getState().notebooks[journal.notebookId]?.name ?? "") : ""} / ${title}`))
-      : "";
+  const path = reviewOperationPath(operation, journal);
   const Icon =
     operation.type === "create"
       ? FilePlus2

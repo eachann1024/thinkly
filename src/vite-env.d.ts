@@ -35,6 +35,7 @@ declare global {
     ) => Promise<{ ok: boolean; error?: string | null; content?: string | null }>;
     writeFile: (path: string, content: string, encoding?: string) => boolean;
     writeFileAsync?: (path: string, content: string, encoding?: string) => Promise<boolean>;
+    createFileAsync?: (path: string, content: string) => Promise<boolean>;
     exists: (path: string) => boolean;
     existsAsync?: (path: string) => Promise<boolean>;
     /** 仅 mtimeMs + size，不含 atime。供本地文件夹 watch 指纹快路径使用。 */
@@ -79,7 +80,7 @@ declare global {
     showOpenDialog: (opts?: import("./lib/native-dialog-contract").OpenFileDialogOptions) => Promise<string[] | null>
     showSaveDialog: (opts?: import("./lib/native-dialog-contract").SaveFileDialogOptions) => Promise<string | null>
     fsReadText: (p: string) => Promise<string>
-    fsWriteText: (p: string, data: string) => Promise<void>
+    fsWriteText: (p: string, data: string, exclusive?: boolean) => Promise<void>
     fsRead: (p: string) => Promise<Uint8Array>
     fsSaveAsset: (input: import("./lib/local-file-asset-contract").SaveLocalAssetRequest) => Promise<import("./lib/local-file-asset-contract").SavedLocalAssetPath>
     fsWrite: (p: string, data: Uint8Array) => Promise<void>

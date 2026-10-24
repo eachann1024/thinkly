@@ -14,6 +14,7 @@ import { useSettings } from "@/stores/useSettings";
 import { repairExecuteBatchPlanInput } from "./batch-plan/tool";
 import type { ModelAvailability } from "./model";
 import type { NotebookAiAgentContext } from "./types";
+import { formatRunWriteScope, resolveRunCurrentPageId, type NotebookAiRunContext } from "./runContext";
 
 /** 只注入当前任务所需的稳定上下文，具体能力由 loadSkill 渐进加载。 */
 function buildSystemPrompt(
@@ -24,7 +25,7 @@ function buildSystemPrompt(
   const notebookName = notebook?.name ?? "未知笔记本";
 
   const pages = usePages.getState().pages;
-  const activePageId = currentPageId ?? getCurrentNotebookAiPageId(notebookId);
+  const activePageId = resolveRunCurrentPageId(currentPageId, () => getCurrentNotebookAiPageId(notebookId));
   const activePage =
     activePageId && pages[activePageId]?.workspaceId === notebookId
       ? pages[activePageId]
@@ -59,11 +60,13 @@ export type BuildAgentResult =
 export function buildNotebookAgent(
   notebookId: string,
   currentPageId?: string | null,
+  runContext: NotebookAiRunContext = {},
 ): BuildAgentResult {
   const agentContext: NotebookAiAgentContext = {
     notebookId,
-    currentPageId: currentPageId ?? getCurrentNotebookAiPageId(notebookId),
-    loadedSkills: new Set(),
+    currentPageId: resolveRunCurrentPageId(currentPageId, () => getCurrentNotebookAiPageId(notebookId)),
+    ...runContext,
+    loadedSkills: new Set(runContext.loadedSkills),
   };
   const modelResult: ModelAvailability = buildLanguageModel();
   if (!modelResult.ok) {
@@ -73,7 +76,8 @@ export function buildNotebookAgent(
   const agent = new ToolLoopAgent({
     model: modelResult.model,
     tools: notebookAiTools,
-    instructions: buildSystemPrompt(notebookId, agentContext.currentPageId),
+    instructions: [buildSystemPrompt(notebookId, agentContext.currentPageId),
+      agentContext.writeScope ? formatRunWriteScope(agentContext.writeScope) : ""].filter(Boolean).join("\n\n"),
     // executeBatchPlan 已经返回本地审批卡；不要再让模型看到该结果后继续一轮。
     // hasToolCall 在本步工具执行完成后才检查，因此不会阻止冻结计划的生成。
     stopWhen: [hasToolCall("executeBatchPlan"), stepCountIs(16)],
