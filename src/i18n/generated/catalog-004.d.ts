@@ -50,6 +50,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/reflection/ReflectionMetrics.tsx#localMessages:1": { "busiestDay": {  }; "charsAdded": {  }; "notesEdited": {  }; "peakHour": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": {  }; "generating": {  }; "nextStep": {  }; "notConfigured": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNoteList.tsx#localMessages:1": { "lastEdit": { "date": string | number }; "meta": { "added": string | number; "edits": string | number }; "stalled": {  }; "topNotes": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionScheduleTag.tsx#localMessages:1": { "next": { "time": string | number }; "paused": {  }; "schedule30d": {  }; "schedule7d": {  }; "schedule90d": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionTopics.tsx#localMessages:1": { "topics": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionTrend.tsx#localMessages:1": { "added": {  }; "edits": {  }; "trend": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIConnectionTestSection.tsx#localMessages:1": { "cancelCheck_ca80": {  }; "checkConnection_69e7": {  }; "checkingConnection_3d70": {  }; "checking_2ff3": {  }; "connectionCheck_58bb": {  }; "enableTheAiAssistantSaveA_9011": {  }; "readyToCheckTheConnection_542d": {  }; "saveTheConfigurationAndFetchAvailable_11da": {  }; "saveTheCurrentProviderConfigurationFirst_3c68": {  }; "thisCheckDoesNotReadNotes_a76b": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
     "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };
-    "src/stores/pages/actions/localFolder/move.ts#block1:1": { "moveFailed": { "reason": string | number }; "nameExists": { "name": string | number } };
   }
 }
