@@ -4,9 +4,11 @@
 
 <h1 align="center">思绪 · Thinkly</h1>
 
-<p align="center">思绪 Thinkly：安放每一瞬念头，随时向过去提问</p>
+<p align="center">思绪 · Thinkly：安放每一瞬念头，随时向过去提问</p>
 
 <p align="center">Thinkly: Keep every passing thought. Ask your past anytime.</p>
+
+<p align="center">官网 / Website: <a href="https://note.cooool.top/">https://note.cooool.top/</a></p>
 
 <p align="center">
   本地 Markdown、随手速记与 AI，放在同一个写作空间。
