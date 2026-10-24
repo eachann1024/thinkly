@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { createAudioBlockConfig, audioParse } from "@blocknote/core";
 import { createReactBlockSpec, useUploadLoading } from "@blocknote/react";
 import { EditorAction } from "@/components/editor/ui/button";
-import { Download, Music } from "@/components/ui/icons";
+import { Download, Music, Upload, X } from "@/components/ui/icons";
 import { useEditorPlatform } from "@/components/editor/platform/context";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { MediaLoadingPreview, MediaPlaceholder } from "./shared/MediaPlaceholder";
+import { removeMediaBlock, useMediaFilePicker } from "./shared/mediaFilePicker";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { toast } from "@/components/ui/sonner";
 import { createTranslator, i18nYaml, useLocale } from "@/i18n";
@@ -16,21 +17,28 @@ zh-Hans:
   failed: "无法预览此音频，可下载原文件"
   download: "下载原文件"
   saveFailed: "保存失败"
+  replace: "替换音频"
+  delete: "删除"
 en:
   add: "Add audio"
   failed: "This audio cannot be previewed. Download the original file."
   download: "Download original"
   saveFailed: "Save failed"
+  replace: "Replace audio"
+  delete: "Delete"
 ja:
   add: "音声を追加"
   failed: "この音声は再生できません。元のファイルをダウンロードしてください"
   download: "元のファイルをダウンロード"
   saveFailed: "保存に失敗しました"
+  replace: "音声を置き換える"
+  delete: "削除"
 `);
 
 function AudioContent({ block, editor }: { block: any; editor: any }) {
   useLocale();
   const loading = useUploadLoading(block.id);
+  const chooseFile = useMediaFilePicker(editor, block.id);
   const platform = useEditorPlatform();
   const { getActivePageLocalFilePath } = useEditorPageContext();
   const raw = block.props.url as string;
@@ -43,6 +51,7 @@ function AudioContent({ block, editor }: { block: any; editor: any }) {
     setSrc("");
     setFailed(false);
     if (!raw) return;
+    if (/^(https?:|data:|blob:)/i.test(raw)) { setSrc(raw); return; }
     const storage = platform.imageStorage;
     const request = storage.acquireVideoRefToUrl
       ? storage.acquireVideoRefToUrl(raw, pagePath)
@@ -63,18 +72,31 @@ function AudioContent({ block, editor }: { block: any; editor: any }) {
     } catch { toast.error(t("saveFailed")); }
   };
   if (loading) return <MediaLoadingPreview />;
-  if (!raw) return <MediaPlaceholder variant="file" blockId={block.id} editor={editor} title={t("add")} icon={<Music size={20} />} />;
+  if (!raw) return <MediaPlaceholder variant="file" blockId={block.id} editor={editor} title={t("add")} icon={<Music size={18} />} />;
   return (
-    <div className="goose-audio-block flex w-full flex-col gap-2" contentEditable={false}>
-      {block.props.showPreview !== false && !failed && src && <audio key={src} src={src} controls preload="metadata" aria-label={block.props.name || t("add")} className="w-full" onError={() => setFailed(true)} />}
-      {failed && <span role="status" className="text-sm text-muted-foreground">{t("failed")}</span>}
-      <div className="flex items-center gap-2">
-        <span className="min-w-0 truncate text-sm">{block.props.name}</span>
-        <EditorAction type="button" disabled={!src} onClick={() => void download()} title={t("download")} aria-label={t("download")}>
-          <Download size={16} />
-        </EditorAction>
+    <div className="goose-audio-block" contentEditable={false}>
+      <div className="goose-audio-block__header">
+        <Music size={18} className="goose-audio-block__icon" aria-hidden="true" />
+        <span className="goose-audio-block__name" title={block.props.name}>{block.props.name || t("add")}</span>
+        <div className="goose-audio-block__actions">
+          {editor.isEditable && <EditorAction type="button" className="goose-file-block-action-btn"
+            onClick={chooseFile} title={t("replace")} aria-label={t("replace")}>
+            <Upload size={18} aria-hidden="true" />
+          </EditorAction>}
+          <EditorAction type="button" className="goose-file-block-action-btn" disabled={!src}
+            onClick={() => void download()} title={t("download")} aria-label={t("download")}>
+            <Download size={18} aria-hidden="true" />
+          </EditorAction>
+          {editor.isEditable && <EditorAction type="button" className="goose-file-block-action-btn goose-media-action--danger"
+            onClick={() => removeMediaBlock(editor, block.id)} title={t("delete")} aria-label={t("delete")}>
+            <X size={18} aria-hidden="true" />
+          </EditorAction>}
+        </div>
       </div>
-      {block.props.caption && <span className="text-sm text-muted-foreground">{block.props.caption}</span>}
+      {block.props.showPreview !== false && !failed && src && <audio key={src} src={src} controls preload="none"
+        aria-label={block.props.name || t("add")} className="goose-audio-block__player" onError={() => setFailed(true)} />}
+      {failed && <span role="status" className="goose-audio-block__caption">{t("failed")}</span>}
+      {block.props.caption && <span className="goose-audio-block__caption">{block.props.caption}</span>}
     </div>
   );
 }
