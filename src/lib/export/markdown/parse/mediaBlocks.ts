@@ -1,3 +1,4 @@
+import { isGeneratedDataImageName } from "@/components/editor/blocks/image/imageCaption";
 import { sanitizeCssColor } from "../blockPropsProperties";
 
 export function parseFileBlock(lines: string[], startIndex: number) {
@@ -57,9 +58,9 @@ export function parseImageBlock(lines: string[], startIndex: number) {
         type: "image",
         props: {
           url,
-          // 旧版把 caption 放在 Markdown alt 中；没有来源信息时保留原说明。
+          // 旧版把 caption 放在 Markdown alt 中；自动生成的文件名不当成说明。
           ...(alt ? { name: alt } : {}),
-          ...(alt ? { caption: alt } : {}),
+          ...(alt && !isGeneratedDataImageName(alt) ? { caption: alt } : {}),
           ...(imageMetadata ? {
             alt: typeof imageMetadata.alt === "string" ? imageMetadata.alt : alt,
             name: typeof imageMetadata.name === "string" ? imageMetadata.name : "",
