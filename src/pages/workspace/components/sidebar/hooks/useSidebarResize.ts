@@ -5,6 +5,13 @@ export const SIDEBAR_MIN_WIDTH = 160;
 const SIDEBAR_DEFAULT_WIDTH = SIDEBAR_MIN_WIDTH;
 export const SIDEBAR_MAX_WIDTH = 480;
 
+let sidebarResizeDragActive = false;
+
+/** 侧栏分隔线正在跟随指针。供 AI 让位在同一帧改宽度，而不把每次移动写进 React。 */
+export function isSidebarResizeDrag() {
+  return sidebarResizeDragActive;
+}
+
 export function resolveSidebarWidth(
   saved: string | null,
   defaultWidth = SIDEBAR_DEFAULT_WIDTH,
@@ -87,6 +94,7 @@ export function useSidebarResize({
 
   useEffect(
     () => () => {
+      sidebarResizeDragActive = false;
       activeCleanupRef.current?.();
       activeCleanupRef.current = null;
     },
@@ -101,6 +109,7 @@ export function useSidebarResize({
       event.stopImmediatePropagation();
       activeCleanupRef.current();
       activeCleanupRef.current = activeStopRef.current = null;
+      sidebarResizeDragActive = false;
       previewRef.current(width);
       setIsResizing(false);
     };
@@ -123,6 +132,7 @@ export function useSidebarResize({
     if (disableResize || event.button !== 0 || !event.isPrimary || activeCleanupRef.current) return;
     event.preventDefault();
     event.stopPropagation();
+    sidebarResizeDragActive = true;
     setIsResizing(true);
     const startX = event.clientX;
     const startWidth = width;
@@ -139,6 +149,7 @@ export function useSidebarResize({
       onEnd: () => {
         activeCleanupRef.current = null;
         activeStopRef.current = null;
+        sidebarResizeDragActive = false;
         setWidth(pendingWidth);
         setIsResizing(false);
       },

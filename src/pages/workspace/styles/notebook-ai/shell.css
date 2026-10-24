@@ -16,6 +16,10 @@
  box-shadow: inset 1px 0 var(--workspace-divider);
 }
 
+[data-ai-panel-layout="side-panel"][data-ai-squeezed-hidden] {
+ display: none;
+}
+
 .notebook-ai-panel-header {
  min-width: 0;
  height: 3.75rem;
