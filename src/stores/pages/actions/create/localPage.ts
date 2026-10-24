@@ -14,6 +14,7 @@ import {
 } from "../../persistence";
 import { markSelfWrite } from "@/lib/local-md-snapshot";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
+import { duplicateSuffixName } from "@/lib/duplicateName";
 
 export const createLocalPageAction = async (
   set: StoreSet,
@@ -126,12 +127,12 @@ export const createLocalPageRecordAction = async (
       let suffix = 1;
       while (
         await checkExists(
-          `${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`,
+          `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`,
         )
       ) {
         suffix++;
       }
-      filePath = `${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`;
+      filePath = `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`;
     }
   }
 

@@ -8,6 +8,7 @@ ja:
   nameUnavailable: "使用可能な名前を生成できません。手動で変更してください"
 `);
 import type { Page } from "@/types";
+import { duplicateSuffixName } from "@/lib/duplicateName";
 
 /** 统一本地路径比较口径，避免斜杠差异导致重复路径漏判。 */
 export function normalizeLocalFilePathKey(filePath: string): string {
@@ -102,7 +103,7 @@ export async function allocateUniqueLocalBaseName(
   }
 
   for (let suffix = 1; suffix <= 99; suffix += 1) {
-    const candidate = `${baseName} (${suffix})`;
+    const candidate = duplicateSuffixName(baseName, suffix);
     const candidatePath = `${dir}/${candidate}${ext}`;
     if (
       !(await isLocalFilePathTaken(
