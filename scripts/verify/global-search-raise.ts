@@ -125,7 +125,15 @@ export default async function run(): Promise<number> {
   const restraints = workspace.match(/restrainParkedWorkspace/g)?.length ?? 0;
   check("主窗 show 与 restore 会按住误抬起的窗口", workspace.includes('win.on("show"') && workspace.includes('win.on("restore"') && restraints >= 3, restraints);
   const quicknote = read("electron/main/windows/quicknote.ts");
-  check("速记仍走同一套浮动唤出", activation.includes("raiseFloatingWindow(win)") && quicknote.includes('type: "panel"'));
+  const quickStart = activation.indexOf("export async function toggleQuicknoteWindow");
+  const quickToggle = activation.slice(quickStart, activation.indexOf("export function closeQuicknote", quickStart));
+  check(
+    "速记仍走同一套浮动唤出",
+    quickToggle.includes("raiseFloatingWindow(win") &&
+      !quickToggle.includes("raiseWindow(") &&
+      !/type:\s*["']panel["']/.test(quicknote) &&
+      /setVisibleOnAllWorkspaces\(\s*true,\s*\{[^}]*skipTransformProcessType:\s*true/s.test(quicknote),
+  );
 
   return checker.failed;
 }

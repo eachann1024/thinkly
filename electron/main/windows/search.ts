@@ -8,6 +8,7 @@ import {
   SEARCH_WINDOW_HEIGHT,
   SEARCH_WINDOW_SHOWN_CHANNEL,
   SEARCH_WINDOW_WIDTH,
+  searchCommandRaisesMainWindow,
   type OpenSearchResultPayload,
   type SearchWindowCommand,
 } from "../../../src/lib/electron/searchWindow";
@@ -33,6 +34,7 @@ import {
   showOrCreateMainWindow,
   waitReadyToShow,
 } from "./activation";
+import { captureParkedWorkspaces, forgetParkedWorkspaces } from "./park";
 import { registry, SEARCH_IDLE_DESTROY_MS } from "./state";
 
 /** 渲染层首帧挂载完成后才显示，避免空白 root 闪一下。 */
@@ -97,10 +99,9 @@ export function createSearchWindow(): BrowserWindow {
     backgroundColor: appearanceBackgroundColor(),
     transparent: false,
     ...(icon ? { icon } : {}),
-    // 与速记相同：panel 浮在当前空间，show 时不激活整个应用、不放出已 hide 的 workspace。
+    // 不用 panel。macOS 的 panel 一显示就会把同应用的普通窗口收起。
     ...(isMac
       ? {
-          type: "panel" as const,
           titleBarStyle: "hidden" as const,
           roundedCorners: true,
           hiddenInMissionControl: true,
@@ -184,6 +185,8 @@ let creating: Promise<void> | null = null;
 export async function showSearchWindow(): Promise<void> {
   // 首次创建期间再按热键：等同一次创建完成，不在 renderer 就绪前提前显示。
   if (creating) return creating;
+  // 创建 BrowserWindow 可能激活应用。先记下主窗，再用这份快照抬搜索窗。
+  const parked = captureParkedWorkspaces();
   let win = getSearchWindow();
   if (!win) {
     const created = createSearchWindow();
@@ -191,12 +194,15 @@ export async function showSearchWindow(): Promise<void> {
       .then(() => rendererReady.get(created)?.promise)
       .finally(() => { creating = null; });
     await creating;
-    if (created.isDestroyed()) return;
+    if (created.isDestroyed()) {
+      forgetParkedWorkspaces(parked);
+      return;
+    }
     win = created;
   }
   placeOnCursorDisplay(win);
   armSearchShowGuard();
-  raiseFloatingWindow(win);
+  raiseFloatingWindow(win, parked);
   if (!win.webContents.isDestroyed()) win.webContents.send(SEARCH_WINDOW_SHOWN_CHANNEL);
 }
 
@@ -239,7 +245,7 @@ export function openSearchResultInWorkspace(payload: OpenSearchResultPayload): v
 
 /** 隐藏最近、归档问答只通知已存在的主窗，不把主窗带到前台。其余动作先收起搜索窗再唤出主窗。 */
 export function dispatchSearchWindowCommand(command: SearchWindowCommand): boolean {
-  if (command.type === "hide-recent" || command.type === "archive-ai") {
+  if (!searchCommandRaisesMainWindow(command.type)) {
     const win = getMainWindow();
     if (!win || win.isDestroyed()) return false;
     sendWhenLoaded(win, SEARCH_WINDOW_COMMAND_CHANNEL, command);
