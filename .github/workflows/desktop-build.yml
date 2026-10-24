@@ -2,8 +2,6 @@ name: Desktop installers
 
 on:
   schedule:
-    # 每小时整点检查；同版本且无面向用户的新提交则只跑判断。
-    # 同版本但有面向用户提交时自动 patch+1，构建期写入生效版本，发版时与 updates/Casks 一并写回 main。
     - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
@@ -23,7 +21,6 @@ on:
 permissions:
   contents: read
 
-# schedule 与 workflow_dispatch 共用，避免并行跑出发两个版本。
 concurrency:
   group: desktop-installers-${{ github.ref }}
   cancel-in-progress: false
@@ -45,7 +42,7 @@ jobs:
       version: ${{ steps.check.outputs.version }}
       auto_bump: ${{ steps.check.outputs.auto_bump }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
@@ -58,7 +55,7 @@ jobs:
           FORCE: ${{ inputs.force == true }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: node scripts/select-desktop-release.mjs
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: steps.check.outputs.should_build == 'true'
         with:
           name: release-plan-${{ env.SOURCE_SHA }}
@@ -73,7 +70,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
@@ -86,7 +83,7 @@ jobs:
           cp BUILD-ARTIFACTS.md LICENSE SOURCE-CODE.md THIRD-PARTY-NOTICES.txt source-artifact/
           cd source-artifact
           sha256sum *.tar.gz > source-${SOURCE_SHA}-SHA256SUMS.txt
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: source-${{ env.SOURCE_SHA }}
           path: source-artifact/
@@ -104,7 +101,6 @@ jobs:
           - platform: win
             arch: x64
             runner: windows-2022
-          # Cross-packaged on x64: the app ships no native modules, electron-builder fetches arm64 Electron.
           - platform: win
             arch: arm64
             runner: windows-2022
@@ -118,27 +114,26 @@ jobs:
             arch: x64
             runner: ubuntu-24.04
     runs-on: ${{ matrix.runner }}
-    # Signed Windows publishing waits for manual SignPath approvals (two requests per architecture).
     timeout-minutes: ${{ matrix.platform == 'win' && needs.prepare.outputs.publish == 'true' && 180 || 45 }}
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
       NODE_OPTIONS: --max-old-space-size=6144
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: '1.3.14'
       - name: Verify selected source commit
         shell: bash
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: release-plan-${{ env.SOURCE_SHA }}
           path: .
@@ -177,8 +172,6 @@ jobs:
         run: |
           node scripts/prepare-electron-pack.mjs
           node scripts/build-ci-installers.mjs ${{ matrix.platform }} ${{ matrix.arch }}
-      # SignPath (only when configured): sign the app exe, build the NSIS installer from the signed
-      # app, sign the installer, then collect. Hashes are computed after signing.
       - name: Build unpacked Windows app for signing
         if: steps.signing.outputs.enabled == 'true'
         run: |
@@ -187,7 +180,7 @@ jobs:
       - name: Upload unsigned Windows app exe
         id: upload-unsigned-app
         if: steps.signing.outputs.enabled == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: signpath-app-win-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
           path: dist-signpath/app/
@@ -195,7 +188,7 @@ jobs:
           retention-days: 1
       - name: Sign Windows app exe with SignPath
         if: steps.signing.outputs.enabled == 'true'
-        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ steps.signing.outputs.organizationId }}
@@ -212,7 +205,7 @@ jobs:
       - name: Upload unsigned Windows installer
         id: upload-unsigned-installer
         if: steps.signing.outputs.enabled == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: signpath-installer-win-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
           path: dist-signpath/installer/
@@ -220,7 +213,7 @@ jobs:
           retention-days: 1
       - name: Sign Windows installer with SignPath
         if: steps.signing.outputs.enabled == 'true'
-        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ steps.signing.outputs.organizationId }}
@@ -246,7 +239,7 @@ jobs:
             # Every shared library the binary needs must come from the declared pacman depends.
             ! ldd "/opt/Thinkly/thinkly" | grep "not found"
           '
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: thinkly-${{ matrix.platform }}-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
           path: dist-desktop/ci/
@@ -265,14 +258,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           path: downloaded-artifacts/
       - name: Apply effective release version and changelog
@@ -300,11 +293,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
       - name: Restore manifests from verified published asset digests
