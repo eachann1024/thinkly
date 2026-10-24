@@ -17,7 +17,13 @@ import {
   type SearchWindowCommand,
 } from "../../src/lib/electron/searchWindow";
 import { gooseWindowAdditionalArguments, parseGooseWindowArgs } from "../../src/lib/electron/windowContext";
-import { correctWorkspaceAfterFloatingRaise, fillWorkspaceFloatingPlans, planWorkspaceAfterFloatingRaise } from "../../src/lib/electron/windowToggle";
+import {
+  comingForwardOp,
+  correctionForParked,
+  parkedWorkspaceKind,
+  shouldOrderFloatingWithFocusedWorkspace,
+  type WorkspaceSurface,
+} from "../../src/lib/electron/floatingRaise";
 
 /** 浮动搜索窗：热键去向、居中位置、窗口种类参数与打开结果载荷。 */
 export default async function run(): Promise<number> {
@@ -167,64 +173,41 @@ export default async function run(): Promise<number> {
   check("配置齐了只显示询问行", !chromeReady.showEnable && chromeReady.showAsk);
 
   console.log("· 小窗不改主窗可见性");
-  const plans = [
-    [{ visible: true, minimized: false }, "keep-visible"],
-    [{ visible: false, minimized: false }, "keep-hidden"],
-    [{ visible: false, minimized: true }, "leave"],
-    [{ visible: true, minimized: true }, "leave"],
-  ] as const;
-  for (const [state, expected] of plans) {
-    check(`规划 ${expected}`, planWorkspaceAfterFloatingRaise(state) === expected, state);
+  const surfaces: Array<[WorkspaceSurface, "minimized" | "hidden" | null]> = [
+    [{ visible: true, minimized: false, focused: false }, null],
+    [{ visible: false, minimized: false, focused: false }, "hidden"],
+    [{ visible: false, minimized: true, focused: false }, "minimized"],
+    [{ visible: true, minimized: true, focused: true }, "minimized"],
+  ];
+  for (const [state, expected] of surfaces) {
+    check(`停放 ${expected ?? "不打扰"}`, parkedWorkspaceKind(state) === expected, state);
   }
-  const visibleBits = new Uint8Array([1, 0, 0, 1]);
-  const minimizedBits = new Uint8Array([0, 0, 1, 1]);
-  const planBits = new Uint8Array(4);
-  fillWorkspaceFloatingPlans(visibleBits, minimizedBits, planBits);
-  check("批量规划与单窗一致", planBits[0] === 1 && planBits[1] === 2 && planBits[2] === 0 && planBits[3] === 0);
-  check("可见窗被收起后拉回", correctWorkspaceAfterFloatingRaise("keep-visible", false) === "show");
-  check("可见窗仍可见则不动", correctWorkspaceAfterFloatingRaise("keep-visible", true) === "leave");
-  check("隐藏窗被带出后重新隐藏", correctWorkspaceAfterFloatingRaise("keep-hidden", true) === "hide");
-  check("隐藏窗保持隐藏则不动", correctWorkspaceAfterFloatingRaise("keep-hidden", false) === "leave");
-  check("最小化窗口不纠正", correctWorkspaceAfterFloatingRaise("leave", true) === "leave" && correctWorkspaceAfterFloatingRaise("leave", false) === "leave");
+  check("可见窗不在停放里", parkedWorkspaceKind({ visible: true, minimized: false, focused: true }) === null);
+  check("隐藏被抬起后只隐藏回去", comingForwardOp("hidden") === "hide" && correctionForParked("hidden", { visible: true, minimized: false }) === "hide");
+  check("隐藏窗保持隐藏则不动", correctionForParked("hidden", { visible: false, minimized: false }) === null);
+  check("最小化被抬起后只最小化回去", comingForwardOp("minimized") === "minimize" && correctionForParked("minimized", { visible: true, minimized: false }) === "minimize");
+  check("仍最小化则不动", correctionForParked("minimized", { visible: false, minimized: true }) === null);
+  const corrections = [comingForwardOp("hidden"), comingForwardOp("minimized"), correctionForParked("hidden", { visible: true, minimized: false }), correctionForParked("minimized", { visible: true, minimized: false })];
+  check("纠正不会 show 或 restore", corrections.every((op) => op === "hide" || op === "minimize"));
+  check("未聚焦的主窗不和浮动窗一起置顶", !shouldOrderFloatingWithFocusedWorkspace(false));
+  check("已聚焦的主窗才一起置顶", shouldOrderFloatingWithFocusedWorkspace(true));
 
   const windowCount = 1_000_000;
-  const visibleWindows = new Uint8Array(windowCount);
-  const minimizedWindows = new Uint8Array(windowCount);
-  const plannedWindows = new Uint8Array(windowCount);
-  const legacyWindows = new Uint8Array(windowCount);
-  for (let i = 0; i < windowCount; i++) {
-    visibleWindows[i] = i & 1;
-    minimizedWindows[i] = (i & 3) === 0 ? 1 : 0;
-  }
-  const legacyPlans = (visible: Uint8Array, plans: Uint8Array): number => {
-    let checksum = 0;
-    for (let i = 0; i < visible.length; i++) {
-      const plan = visible[i] ? 1 : 2;
-      plans[i] = plan;
-      checksum += plan;
-    }
-    return checksum;
-  };
-  for (let warm = 0; warm < 2; warm++) {
-    fillWorkspaceFloatingPlans(visibleWindows, minimizedWindows, plannedWindows);
-    legacyPlans(visibleWindows, legacyWindows);
-  }
+  let planChecksum = 0;
+  const warmKind = parkedWorkspaceKind({ visible: true, minimized: false, focused: false });
+  for (let warm = 0; warm < 2; warm++) planChecksum += warmKind === null ? 1 : 0;
   const planStarted = performance.now();
-  const planChecksum = fillWorkspaceFloatingPlans(visibleWindows, minimizedWindows, plannedWindows);
+  for (let i = 0; i < windowCount; i++) {
+    const kind = parkedWorkspaceKind({
+      visible: (i & 1) === 1,
+      minimized: (i & 3) === 0,
+      focused: false,
+    });
+    if (!kind) planChecksum += 3;
+    else planChecksum += correctionForParked(kind, { visible: true, minimized: false }) === "hide" ? 2 : 1;
+  }
   const planMs = performance.now() - planStarted;
-  const legacyStarted = performance.now();
-  const legacyChecksum = legacyPlans(visibleWindows, legacyWindows);
-  const legacyMs = performance.now() - legacyStarted;
-  check(
-    "百万扇窗口显隐规划不超过 50ms",
-    planMs <= 50 && plannedWindows[0] === 0 && plannedWindows[1] === 1 && planChecksum > 0,
-    planMs,
-  );
-  check(
-    "百万扇规划不超过改前判断的 10%",
-    planMs <= legacyMs * 1.1 + 0.25 && legacyChecksum > 0,
-    { planMs, legacyMs },
-  );
+  check("百万扇窗口显隐规划不超过 50ms", planMs <= 50 && planChecksum > windowCount, planMs);
 
   const raisesMain: Array<[SearchWindowCommand["type"], boolean]> = [
     ["hide-recent", false],
@@ -246,10 +229,12 @@ export default async function run(): Promise<number> {
   const raiseEnd = activation.indexOf("export async function toggleWindow");
   const raise = activation.slice(raiseStart, raiseEnd);
   const searchMain = readFileSync(join(process.cwd(), "electron/main/windows/search.ts"), "utf8");
-  check("先快照再显示小窗", raise.indexOf("snapshotWorkspacePlans") < raise.indexOf("presentFloatingWindow") && raise.indexOf("presentFloatingWindow") < raise.indexOf("applyWorkspacePlans"));
-  check("下一拍仍按快照双向纠正", raise.indexOf("applyWorkspacePlans") !== raise.lastIndexOf("applyWorkspacePlans"));
+  check("先快照再显示小窗", raise.indexOf("captureParkedWorkspaces") < raise.indexOf("showInactive") && raise.indexOf("showInactive") < raise.indexOf("settleParkedWorkspaces"));
+  check("下一拍仍按快照双向纠正", raise.indexOf("settleParkedWorkspaces") !== raise.lastIndexOf("settleParkedWorkspaces"));
   check("不再把可见窗口当成已隐藏", !activation.includes("shouldKeepWorkspaceHiddenAfterQuicknote") && !activation.includes("restoreHiddenWorkspaces"));
-  check("纠正期间失焦不收起搜索窗", searchMain.includes("isFloatingRaiseActive"));
+  const blurAt = searchMain.indexOf('win.on("blur"');
+  const blur = searchMain.slice(blurAt, searchMain.indexOf('win.on("focus"', blurAt));
+  check("纠正期间失焦不收起搜索窗", blur.includes("suppressSearchBlurUntil") && blur.indexOf("suppressSearchBlurUntil") < blur.indexOf("hideSearchWindow"));
   check("分发命令走同一套是否抬主窗", searchMain.includes("searchCommandRaisesMainWindow"));
   const mainIndex = readFileSync(join(process.cwd(), "electron/main/index.ts"), "utf8");
   const focusStart = mainIndex.indexOf("function focusExistingWorkspace");
@@ -262,9 +247,17 @@ export default async function run(): Promise<number> {
   check("速记小窗不是 panel", !quicknoteMain.includes("type: \"panel\"") && !quicknoteMain.includes("type: 'panel'"));
   check("唤出小窗不切换激活策略", !activation.includes("setActivationPolicy"));
   const showSearch = searchMain.slice(searchMain.indexOf("export async function showSearchWindow"), searchMain.indexOf("export function hideSearchWindow"));
-  check("创建搜索窗之前先记下主窗", showSearch.indexOf("captureWorkspacePlans") < showSearch.indexOf("createSearchWindow"));
+  check(
+    "创建搜索窗之前先记下主窗",
+    showSearch.indexOf("captureParkedWorkspaces") < showSearch.indexOf("createSearchWindow") &&
+      showSearch.indexOf("armSearchShowGuard") < showSearch.indexOf("raiseFloatingWindow"),
+  );
   const showQuick = activation.slice(activation.indexOf("export async function toggleQuicknoteWindow"), activation.indexOf("export function closeQuicknote"));
-  check("创建速记之前先记下主窗", showQuick.indexOf("captureWorkspacePlans") < showQuick.indexOf("createQuicknoteWindow"));
+  check(
+    "创建速记之前先记下主窗",
+    showQuick.indexOf("captureParkedWorkspaces") < showQuick.indexOf("createQuicknoteWindow") &&
+      showQuick.indexOf("createQuicknoteWindow") < showQuick.indexOf("raiseFloatingWindow"),
+  );
 
   return checker.failed;
 }
