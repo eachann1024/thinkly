@@ -7,6 +7,8 @@ import {
   reconcileSlashSuggestionMenu,
 } from "@/components/editor/utils/slashMenuPolicy";
 
+import { isSuggestionReconcileSuppressed, shouldReconcileSuggestionInput } from "../utils/suggestionInputPolicy";
+
 const PLUGIN_KEY = new PluginKey("goose-slash-menu-reconcile");
 
 export function createGooseSlashMenuReconcileExtension(
@@ -19,7 +21,8 @@ export function createGooseSlashMenuReconcileExtension(
       new Plugin({
         key: PLUGIN_KEY,
         appendTransaction(transactions, oldState, newState) {
-          if (!transactions.some((t) => t.docChanged)) return null;
+          if (editorRef.current && isSuggestionReconcileSuppressed(editorRef.current)) return null;
+          if (!shouldReconcileSuggestionInput(transactions, oldState, newState)) return null;
           // 移动块只改变位置，不是输入引用查询；正文里的 + / @ 不应因此弹菜单。
           if (oldState.selection.$from.parent.eq(newState.selection.$from.parent)) return null;
           queueMicrotask(() => {
