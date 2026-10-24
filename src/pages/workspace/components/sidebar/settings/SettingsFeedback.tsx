@@ -58,7 +58,9 @@ import { toast } from "@/components/ui/sonner";
 import { celebrate } from "@/lib/celebrate";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { GripTextarea, gripPaint } from "@/components/ui/grip-textarea";
+import { fieldVariants } from "@/components/ui/control-recipes";
+import { cn } from "@/lib/utils";
 
 const endpoint = "https://feedback-api.cooool.top/api/feedback";
 const imageLimit = 20 * 1024 * 1024;
@@ -124,10 +126,13 @@ export function SettingsFeedback() {
   return (
     <form className="grid max-w-xl gap-4" onSubmit={submit}>
       <Field label={uiText("body_2c1e")} required>
-        <Textarea
+        <GripTextarea
+          className={cn(fieldVariants(), "h-auto min-h-20")}
+          paint={gripPaint.goose}
+          gripLabel={uiText("body_2c1e")}
+          minHeight={120}
           name="message"
           required
-          rows={6}
           maxLength={4000}
           value={body}
           placeholder={uiText("bodyPlaceholder_4f2a")}
