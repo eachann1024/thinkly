@@ -4,6 +4,10 @@ import { aiToggleSteps } from "../components/sidebar/sidebar-shell/railClick";
 import { isFullscreenAiLayout } from "../components/notebook-ai/useNotebookAiPanel";
 import { subscribePageTitleFocus } from "@/lib/page-title-focus";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
+import {
+  revealSqueezedAiPanel,
+  useSidebarAiSqueeze,
+} from "../components/sidebar/sidebar-shell/sidebarAiSqueeze";
 import type { useWorkspaceSettingsNavigation } from "./useWorkspaceSettingsNavigation";
 
 export function useWorkspaceAiNavigation(
@@ -28,6 +32,11 @@ export function useWorkspaceAiNavigation(
     // can both run in one turn; the layout effect consumes the flag after
     // settings are actually gone.
     if (settingsOpen) focusAiAfterSettingsCloseRef.current = true;
+    if (!settingsOpen && !aiFullscreen && aiPanelOpen && useSidebarAiSqueeze.getState().hidden) {
+      revealSqueezedAiPanel();
+      window.dispatchEvent(new CustomEvent("goose-note:focus-ai-composer"));
+      return;
+    }
     const vp = useWorkspaceViewport.getState();
     const steps = aiToggleSteps({
       available: aiAvailableForNotebook,
