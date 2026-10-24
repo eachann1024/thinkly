@@ -1,5 +1,5 @@
-/* 所有状态共用紧凑标签；处理中跟随主题，结果使用产品语义色。 */
-.notebook-ai-work-card.bui-approval,
+/* 处理中用无底色行内状态；结果和审批保留原有语义标签。 */
+.notebook-ai-work-card.bui-approval:not(.notebook-ai-work-card--running),
 .notebook-ai-approval-plan.bui-approval {
   padding-top: 20px;
   padding-bottom: 14px;
@@ -24,7 +24,7 @@
   letter-spacing: 0;
 }
 
-/* 结果状态保留原有分层透明度；处理中使用统一的弱底与实色轮廓。 */
+/* 结果状态保留原有分层透明度。 */
 .notebook-ai-work-status::before,
 .notebook-ai-work-status::after {
   position: absolute;
@@ -75,6 +75,29 @@
   height: 20px;
   flex: 0 0 auto;
   stroke-width: 2.4;
+}
+
+.notebook-ai-work-status--running {
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--goose-text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.notebook-ai-work-status--running::before,
+.notebook-ai-work-status--running::after {
+  content: none;
+}
+
+.notebook-ai-work-status--running .notebook-ai-work-status-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--goose-accent-solid);
+  stroke-width: 2;
 }
 
 .notebook-ai-work-status-spinner {

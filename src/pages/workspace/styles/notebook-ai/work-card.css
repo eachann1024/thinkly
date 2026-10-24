@@ -39,6 +39,22 @@
   0 8px 22px rgba(0, 0, 0, 0.32);
 }
 
+/* 处理中直接融入对话背景，不再套纸面或预留卡片内边距。 */
+.notebook-ai-work-card.bui-approval.notebook-ai-work-card--running {
+ padding: 0 8px;
+ border-radius: 0;
+ background: transparent;
+ box-shadow: none;
+}
+
+.notebook-ai-work-card--running .notebook-ai-work-toggle {
+ margin: 4px 0 0;
+ padding-top: 6px;
+ padding-bottom: 6px;
+ font-size: 12px;
+ line-height: 20px;
+}
+
 .notebook-ai-work-title {
  min-width: 0;
  overflow-wrap: anywhere;

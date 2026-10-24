@@ -27,6 +27,7 @@ export function WorkCardStatus({ status }: { status: WorkCardStatusData }) {
       className={cn(
         "notebook-ai-work-status",
         `notebook-ai-work-status--${status.tone}`,
+        status.icon === "running" && "notebook-ai-work-status--running",
       )}
     >
       <Icon
