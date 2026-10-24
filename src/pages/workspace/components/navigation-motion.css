@@ -1,4 +1,4 @@
-/* 布局只切换一次，避免编辑器在过渡期间逐帧重新排版。 */
+/* 拖宽不过渡 width。展开收起改由 --workspace-sidebar-width 补间。 */
 html .workspace-shell > .workspace-stage,
 html .workspace-shell[data-electron-chrome] > .electron-titlebar {
   transition-property: none;

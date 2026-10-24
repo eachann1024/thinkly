@@ -12,6 +12,7 @@ import {
 import { useSidebarItemHeight } from "../hooks/useSidebarItemHeight";
 import { useSidebarAvailableWidth } from "./useSidebarAvailableWidth";
 import { syncSidebarAiSqueeze } from "./sidebarAiSqueeze";
+import { setWorkspaceSidebarWidth, shouldAnimateSidebarWidth } from "../sidebarWidthMotion";
 import { type SidebarView, type SidebarProps } from "./shared";
 
 export function useSidebarLayout({
@@ -91,6 +92,7 @@ export function useSidebarLayout({
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const sidebarOccupancyRef = useRef<number | null>(null);
 
   const sidebarModeRailRef = useRef<HTMLElement>(null);
 
@@ -120,12 +122,12 @@ export function useSidebarLayout({
         `${nextWidth}px`,
       );
       const shell = sidebar?.closest(".workspace-shell");
+      const occupancy = sidebarCollapsed || sidebarOverlay ? 0 : nextWidth;
       if (shell instanceof HTMLElement) {
-        shell.style.setProperty(
-          "--workspace-sidebar-width",
-          `${sidebarCollapsed || sidebarOverlay ? 0 : nextWidth}px`,
-        );
+        const motion = shouldAnimateSidebarWidth(sidebarOccupancyRef.current, occupancy);
+        setWorkspaceSidebarWidth(shell, occupancy, motion);
       }
+      sidebarOccupancyRef.current = occupancy;
     },
     [sidebarCollapsed, sidebarOverlay],
   );
