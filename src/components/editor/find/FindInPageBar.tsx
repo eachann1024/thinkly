@@ -1,13 +1,13 @@
 import { Input } from "@/components/editor/ui/input";
 import { EditorAction } from "@/components/editor/ui/button";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
 import { formatShortcut } from "@/lib/utils";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { useEditorUiScale } from "@/components/editor/hooks/useEditorUiScale";
-import { getScaledEditorUiPx } from "@/components/editor/utils/editorContextUi";
+import { useFindInPageLayout } from "./useFindInPageLayout";
 import {
   clearFind,
   getFindState,
@@ -22,6 +22,7 @@ const t = createTranslator(messages);
 
 type FindInPageBarProps = {
   editor: BlockNoteEditor<any, any, any> | null;
+  editorContainerRef: RefObject<HTMLDivElement | null>;
   open: boolean;
   seedQuery?: string;
   openNonce?: number;
@@ -35,10 +36,11 @@ const iconBtnClass =
   "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--goose-control-radius)] disabled:text-disabled";
 const iconClass = "block size-[14px] shrink-0";
 const inputClass =
-  "h-6 min-w-0 w-44 flex-1 text-sm leading-6";
+  "h-6 min-w-[min(5rem,100%)] w-44 flex-1 text-sm leading-6";
 
 export function FindInPageBar({
   editor,
+  editorContainerRef,
   open,
   seedQuery = "",
   openNonce = 0,
@@ -48,7 +50,7 @@ export function FindInPageBar({
   onClose,
 }: FindInPageBarProps) {
   useLocale();
-  const editorUiScale = useEditorUiScale();
+  const { host, style } = useFindInPageLayout(open, editorContainerRef);
   const inputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -84,7 +86,7 @@ export function FindInPageBar({
       return;
     }
     focus();
-  }, [open, openNonce, openReplace]);
+  }, [open, openNonce, openReplace, host]);
 
   useEffect(() => {
     if (!open || !editor) return;
@@ -114,7 +116,6 @@ export function FindInPageBar({
   const total = state?.matches.length ?? 0;
   const currentDisplay = total === 0 ? 0 : (state?.current ?? -1) + 1;
   const canReplace = Boolean(editable && editor && total > 0);
-  const offset = getScaledEditorUiPx(8, editorUiScale);
 
   const handleStep = (delta: number) => {
     if (!editor || total === 0) return;
@@ -148,18 +149,17 @@ export function FindInPageBar({
     });
   };
 
-  return (
+  const bar = (
     <div
       data-goose-find-in-page
-      className="fixed z-[20500]"
-      style={{
-        right: offset,
-        top: `calc(var(--electron-titlebar-height, 2.75rem) + ${offset}px)`,
-        maxWidth: `calc(100vw - ${offset * 2}px)`,
-      }}
+      className="rounded-md shadow-md"
+      style={style}
       onMouseDown={(event) => event.stopPropagation()}
     >
-      <div className="goose-editor-inline-context-ui flex max-w-full items-start gap-1 rounded-md border bg-background/95 px-1 py-1.5 shadow-md backdrop-blur">
+      <div
+        className="goose-editor-inline-context-ui flex items-start gap-1 rounded-md border bg-popover px-1 py-1.5"
+        style={{ width: "100%" }}
+      >
         <EditorAction
           type="button"
           aria-expanded={replaceOpen}
@@ -176,7 +176,7 @@ export function FindInPageBar({
           )}
         </EditorAction>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex h-6 min-w-0 items-center gap-1">
+          <div className="flex min-h-6 min-w-0 flex-wrap items-center gap-1">
             <GooseIcons.Search className={cn(iconClass, "text-muted-foreground")} />
             <Input variant="inline"
               ref={inputRef}
@@ -245,7 +245,7 @@ export function FindInPageBar({
           {replaceOpen ? (
             <div
               id="goose-find-replace-row"
-              className="flex h-6 min-w-0 items-center gap-1"
+              className="flex min-h-6 min-w-0 flex-wrap items-center gap-1"
             >
               <GooseIcons.Replace className={cn(iconClass, "text-muted-foreground")} />
               <Input variant="inline"
@@ -295,4 +295,5 @@ export function FindInPageBar({
       </div>
     </div>
   );
+  return host ? createPortal(bar, host) : bar;
 }
