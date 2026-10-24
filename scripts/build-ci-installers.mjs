@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -39,9 +40,160 @@ function macNameArgs() {
 }
 
 function builder(...args) {
-  execFileSync(process.execPath, [
+  const command = [
     resolve(root, 'node_modules/electron-builder/out/cli/cli.js'), ...args, ...macNameArgs(), `--${arch}`, '--publish', 'never',
-  ], { cwd: pack, stdio: 'inherit', env: { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' } });
+  ];
+  const env = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' };
+  // dmgbuild 在 hdiutil “Resource busy” 时会先 detach -force，然后仍然失败，压缩 DMG 不会生成。
+  // 只重试 macOS；Windows / Linux 仍是一次执行。
+  if (platform !== 'mac') {
+    execFileSync(process.execPath, command, { cwd: pack, stdio: 'inherit', env });
+    return;
+  }
+  buildMacInstallers(command, env);
+}
+
+const MAC_DMG_ATTEMPTS = 3;
+
+function isBusyDetach(output) {
+  return output.includes('Unable to detach device cleanly')
+    && /couldn't eject "?(disk\d+)"?[^\n]*Resource busy/.test(output);
+}
+
+function busyDetachReason(output) {
+  const lines = output.split('\n').map(line => line.trim()).filter(Boolean);
+  return lines.findLast(line => line.includes('Unable to detach device cleanly'))
+    || lines.findLast(line => line.includes('Resource busy'))
+    || 'hdiutil could not eject the DMG (Resource busy)';
+}
+
+function diskId(devEntry) {
+  return /^\/dev\/(disk\d+)/.exec(devEntry || '')?.[1] || '';
+}
+
+function ownDmgBasename() {
+  const version = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).version;
+  const archSuffix = arch === 'arm64' ? '-arm64' : '';
+  return `Thinkly-${version}${archSuffix}.dmg`;
+}
+
+function busyImageDevices(images, output) {
+  // 只卸载本次 dmgbuild 报错的那块盘。镜像必须是这次产物的临时 DMG，或挂载点正好是 /Volumes/Thinkly。
+  const named = new Set([...output.matchAll(/couldn't eject "?(disk\d+)"?[^\n]*Resource busy/g)].map(match => match[1]));
+  const dmgName = ownDmgBasename();
+  const devices = [];
+  for (const image of images) {
+    if (image['system-image'] === true) continue;
+    const entities = Array.isArray(image['system-entities']) ? image['system-entities'] : [];
+    const entries = entities
+      .map(entity => entity?.['dev-entry'])
+      .filter(entry => typeof entry === 'string' && named.has(diskId(entry)));
+    if (entries.length === 0) continue;
+    const mounts = entities.map(entity => entity?.['mount-point']).filter(mount => typeof mount === 'string' && mount !== '');
+    const imagePath = typeof image['image-path'] === 'string' ? image['image-path'] : '';
+    const ownPath = imagePath.endsWith(dmgName);
+    const ownMount = mounts.length > 0 && mounts.every(mount => mount === '/Volumes/Thinkly');
+    if (!ownPath && !ownMount) continue;
+    devices.push(...entries);
+  }
+  return [...new Set(devices)].sort((a, b) => a.length - b.length);
+}
+
+function mountedDiskImages() {
+  let plist = '';
+  try {
+    plist = execFileSync('hdiutil', ['info', '-plist'], { encoding: 'utf8' });
+  } catch (error) {
+    console.error(`hdiutil info failed: ${error.message}`);
+    return [];
+  }
+  try {
+    const json = execFileSync('plutil', ['-convert', 'json', '-o', '-', '-'], { encoding: 'utf8', input: plist });
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed.images) ? parsed.images : [];
+  } catch (error) {
+    console.error(`Could not parse hdiutil info: ${error.message}`);
+    return [];
+  }
+}
+
+function detachBusyVolumes(output) {
+  const devices = busyImageDevices(mountedDiskImages(), output);
+  if (devices.length === 0) {
+    console.error('No disk image from this build was still mounted');
+    return;
+  }
+  for (const device of devices) {
+    try {
+      execFileSync('hdiutil', ['detach', '-force', device], { stdio: 'inherit' });
+      console.error(`Force-detached ${device}`);
+    } catch (error) {
+      console.error(`hdiutil detach -force ${device} failed: ${error.message}`);
+    }
+  }
+}
+
+function removePartialDmg() {
+  if (!existsSync(packaged)) return;
+  for (const name of readdirSync(packaged)) {
+    if (!/\.dmg(?:\.blockmap)?$/.test(name)) continue;
+    const file = resolve(packaged, name);
+    try {
+      if (!statSync(file).isFile()) continue;
+      rmSync(file, { force: true });
+      console.error(`Removed partial DMG output ${name}`);
+    } catch (error) {
+      console.error(`Could not remove partial DMG output ${name}: ${error.message}`);
+    }
+  }
+}
+
+function runMacBuilder(command, env) {
+  const logDir = mkdtempSync(resolve(tmpdir(), 'thinkly-dmg-'));
+  const logFile = resolve(logDir, 'electron-builder.log');
+  try {
+    const result = spawnSync('bash', [
+      '-c', 'set -o pipefail; "$@" 2>&1 | tee "$LOG_FILE"', 'bash', process.execPath, ...command,
+    ], { cwd: pack, env: { ...env, LOG_FILE: logFile }, stdio: 'inherit' });
+    const output = existsSync(logFile) ? readFileSync(logFile, 'utf8') : '';
+    if (result.error) {
+      result.error.builderOutput = output;
+      throw result.error;
+    }
+    if (result.status !== 0) {
+      const error = new Error(`Command failed: electron-builder --mac (exit ${result.status ?? result.signal})`);
+      error.builderOutput = output;
+      throw error;
+    }
+  } finally {
+    rmSync(logDir, { recursive: true, force: true });
+  }
+}
+
+function buildMacInstallers(command, env) {
+  let lastOutput = '';
+  for (let attempt = 1; attempt <= MAC_DMG_ATTEMPTS; attempt++) {
+    try {
+      runMacBuilder(command, env);
+      return;
+    } catch (error) {
+      lastOutput = error.builderOutput || '';
+      if (!isBusyDetach(lastOutput) || attempt === MAC_DMG_ATTEMPTS) {
+        if (!isBusyDetach(lastOutput)) throw error;
+        const reason = busyDetachReason(lastOutput);
+        throw new Error(`macOS DMG build failed after ${MAC_DMG_ATTEMPTS} attempts: ${reason}`);
+      }
+      console.error(`macOS DMG detach was Resource busy (attempt ${attempt}/${MAC_DMG_ATTEMPTS}): ${busyDetachReason(lastOutput)}`);
+      console.error('Force-detaching this build\'s busy disk image and removing partial DMG output before retry');
+      detachBusyVolumes(lastOutput);
+      removePartialDmg();
+      try {
+        execFileSync('sleep', ['2']);
+      } catch (sleepError) {
+        console.error(`Wait before DMG retry failed: ${sleepError.message}`);
+      }
+    }
+  }
 }
 
 function installerFiles() {
