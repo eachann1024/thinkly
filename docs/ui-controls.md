@@ -7,7 +7,7 @@
 | 家族 | 公共入口/适配 | 当前状态与边界 |
 |---|---|---|
 | Button / IconButton / Toolbar | `components/ui/button`、`icon-button`、`control-recipes` | 公共视觉来源已建立；editor/ui 出口做薄适配；逐消费者核查 |
-| Input / Textarea / Field | `components/ui/input`、`textarea`、`field` | 公共关联 label/help/error；行内输入通过 variant 表达，保留 IME/blur 事件 |
+| Input / Textarea / Field | `components/ui/input`、`textarea`、`field`、`grip-textarea` | 公共关联 label/help/error；行内输入通过 variant 表达，保留 IME/blur 事件。用户拉高的多行输入用底边把手，规则在用户级前端说明 |
 | NativeSelect / Combobox | `components/ui/select`、公共 Popover/Menu | 原生 Select 已建立；字体/模型虚拟候选保留测量，尚需入口验收 |
 | Checkbox / Radio / Switch | `components/ui/checkbox`、`radio`、`switch` | 真实 checked/indeterminate/disabled；HeroUI 仅由 Checkbox 适配器直接依赖 |
 | Range / Number | `components/ui/range`、数值 Input | 保留原生拖动和值域；业务即时预览属于消费者 |
