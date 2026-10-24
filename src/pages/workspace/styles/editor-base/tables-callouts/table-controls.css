@@ -65,6 +65,8 @@
   background: transparent;
   color: hsl(var(--muted-foreground));
   cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 .goose-table-handle-btn:hover,
 .goose-table-handle-btn[aria-expanded="true"] {
@@ -152,7 +154,4 @@
 
 .goose-table-handle-btn[data-dragging="true"] {
   cursor: grabbing;
-}
-.goose-table-handle-btn[draggable="false"] {
-  cursor: pointer;
 }
