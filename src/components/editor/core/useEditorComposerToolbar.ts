@@ -18,6 +18,7 @@ import {
   getFormattingSelectionMode,
   isFormattingToolbarOpen,
 } from "@/components/editor/toolbars/formatting/helpers";
+import { useBlockHandleMenuOpen } from "../state/blockHandleMenu";
 import { useFormattingToolbarAi } from "@/components/editor/state/formattingToolbarAi";
 import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
 import { findNonOverlappingToolbarPosition } from "@/components/editor/utils/formattingToolbarPosition";
@@ -44,6 +45,7 @@ export function useEditorComposerToolbar(
   >,
   closeLinkPopover: () => void,
 ) {
+  const blockHandleMenuOpen = useBlockHandleMenuOpen(editor);
   const formattingToolbarStoreOpen = useExtensionState(
     FormattingToolbarExtension,
     { editor },
@@ -69,7 +71,7 @@ export function useEditorComposerToolbar(
 
   const formattingToolbarOpen = isFormattingToolbarOpen({
     editable,
-    suppress: suppressFormattingToolbar,
+    suppress: suppressFormattingToolbar || blockHandleMenuOpen,
     aiActive: formattingToolbarAiActive,
     storeOpen: formattingToolbarStoreOpen,
     selectionAllowed: formattingToolbarSelectionAllowed,
@@ -77,8 +79,6 @@ export function useEditorComposerToolbar(
   });
   toolbarOpenForHoldRef.current = formattingToolbarOpen;
 
-  // BlockNote 在 editor pointerdown 时关掉格式栏，pointerup 才按选区恢复。
-  // 已有选区再拖选另一行时按住工具栏，避免挡住的上一行闪一下。
   useEffect(() => {
     const dom = editor.domElement;
     if (!dom) return;
@@ -144,9 +144,6 @@ export function useEditorComposerToolbar(
           width: rects.reference.width,
           height: rects.reference.height,
         };
-        // Multi-block spans are tall: collapse to a thin top/bottom edge so the
-        // toolbar can sit above/below the full selection instead of being forced
-        // sideways or hidden by avoid-overlap treating the whole bbox as forbidden.
         if (getFormattingSelectionMode(editor) === "multiBlock") {
           reference = getMultiBlockToolbarEdgeRect(reference, preferredSide);
         }
@@ -162,7 +159,6 @@ export function useEditorComposerToolbar(
             height: Math.max(0, bottom - top),
           },
           preferredSide,
-          // 工具栏没有外投影，只保留紧凑的视觉分隔；偏移随编辑器 UI 等比缩放。
           gap: getFormattingToolbarGap(),
         });
 
@@ -181,8 +177,6 @@ export function useEditorComposerToolbar(
       useFloatingOptions: {
         open: formattingToolbarOpen,
         strategy: "fixed" as const,
-        // 优先完整选区上方、水平居中；上方空间不足再翻到下方。
-        // 边界取编辑器与视口的交集，避免靠边选区溢出。
         placement: "top" as const,
         middleware: [
           floatingOffset(() => getFormattingToolbarGap()),
@@ -194,10 +188,6 @@ export function useEditorComposerToolbar(
           floatingSize({
             ...overflowOptions,
             apply({ availableWidth, elements }) {
-              // 极窄窗口或高缩放下允许工具栏横向滚动，所有操作仍可访问。
-              // 工具栏直接使用缩放后的布局尺寸，Floating UI 与
-              // 按钮 DOMRect 共用同一套 viewport 坐标，无需再换算 CSS zoom。
-              // 旧 Electron 内核会把带 overflow 的浮层与圆角子元素合成出直角灰块。
               const safeAvailableWidth = Math.max(0, availableWidth);
               elements.floating.style.maxWidth = `${safeAvailableWidth}px`;
               elements.floating.style.overflowX = "visible";
@@ -209,13 +199,8 @@ export function useEditorComposerToolbar(
               }
             },
           }),
-          // 最后一层硬约束：工具栏必须完整留在编辑区/视口交集内，且不与
-          // 完整选区相交；覆盖 Windows 旧内核的多行选区坐标差异。
           avoidSelectionOverlap,
         ],
-        // 选区是虚拟锚点。段落对齐等事务会改变其 DOM 几何，却不会改变
-        // ProseMirror 的 from/to；逐帧检测可在同一帧布局完成后立即刷新位置。
-        // 同时覆盖滚动、缩放、窗口变化和工具栏自身尺寸变化。
         whileElementsMounted(reference, floating, update) {
           const cleanup = floatingAutoUpdate(reference, floating, update, {
             animationFrame: true,
