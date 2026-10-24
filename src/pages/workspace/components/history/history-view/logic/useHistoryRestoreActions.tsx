@@ -23,7 +23,6 @@ zh-Hans:
   couldNotMarkMilestone: "标记失败"
   couldNotRemoveMilestone: "取消标记失败"
   confirmRestore: "确定还原到此历史版本？\\n当前正文会自动保留为「还原前快照」，可随时恢复。"
-  confirmRemoveMilestone: "确定取消里程碑标记？\\n取消后该版本将恢复为普通快照，超出数量上限时可能被自动清理。"
 en:
   thisVersionCouldNotBeRead: "This version could not be read"
   theVersionFileIsEmptyOrUnreadableIf: "The version file is empty or unreadable. If your notebook is in cloud storage, sign in to it first."
@@ -35,7 +34,6 @@ en:
   couldNotMarkMilestone: "Could not mark milestone"
   couldNotRemoveMilestone: "Could not remove milestone"
   confirmRestore: "Restore this version?\\nThe current content will be saved as a snapshot that you can restore at any time."
-  confirmRemoveMilestone: "Remove this milestone?\\nThis version will become a regular snapshot and may be deleted automatically when the snapshot limit is exceeded."
 ja:
   thisVersionCouldNotBeRead: "このバージョンを読み込めません"
   theVersionFileIsEmptyOrUnreadableIf: "バージョンファイルが空か、読み込めません。リポジトリがクラウドストレージ上にある場合は、先にクラウドストレージへのサインインを復旧してください。"
@@ -47,7 +45,6 @@ ja:
   couldNotMarkMilestone: "マークに失敗しました"
   couldNotRemoveMilestone: "マークの解除に失敗しました"
   confirmRestore: "この履歴バージョンに復元しますか？\\n現在の本文は「復元前のスナップショット」として自動的に保持されるため、いつでも元に戻せます。"
-  confirmRemoveMilestone: "マイルストーンのマークを解除しますか？\\n解除すると、このバージョンは通常のスナップショットに戻り、上限を超えた場合は自動的に削除されることがあります。"
 `;
 const t = createTranslator(messages);
 
@@ -146,12 +143,6 @@ export function useHistoryRestoreActions(
 
   const handleToggleMilestone = (versionId: string, willBe: boolean) => {
     if (!pageId || pendingMilestoneVersionId) return;
-    if (!willBe) {
-      const ok = window.confirm(
-        t("confirmRemoveMilestone"),
-      );
-      if (!ok) return;
-    }
     setPendingMilestoneVersionId(versionId);
     applyMilestoneLocally(versionId, willBe);
     const op = willBe
