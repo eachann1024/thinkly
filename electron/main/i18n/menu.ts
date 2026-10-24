@@ -7,12 +7,12 @@ import { splitLayoutViewItems } from "./splitLayoutMenu";
 
 const t = createTranslator(i18nYaml<"electron/main/i18n/menu.ts#block1:1">`
 zh-Hans:
-  about: 关于思绪 · Thinkly
+  about: 关于thinkly
   services: 服务
-  hide: 隐藏思绪 · Thinkly
+  hide: 隐藏thinkly
   hideOthers: 隐藏其他
   showAll: 显示全部
-  quit: 退出思绪 · Thinkly
+  quit: 退出thinkly
   file: 文件
   newWindow: 新建窗口
   closeTab: 关闭标签
@@ -43,12 +43,12 @@ zh-Hans:
   zoom: 缩放
   front: 前置全部窗口
 en:
-  about: About Thinkly
+  about: About thinkly
   services: Services
-  hide: Hide Thinkly
+  hide: Hide thinkly
   hideOthers: Hide Others
   showAll: Show All
-  quit: Quit Thinkly
+  quit: Quit thinkly
   file: File
   newWindow: New Window
   closeTab: Close Tab
@@ -79,12 +79,12 @@ en:
   zoom: Zoom
   front: Bring All to Front
 ja:
-  about: "Thinkly について"
+  about: "thinkly について"
   services: "サービス"
-  hide: "Thinkly を非表示"
+  hide: "thinkly を非表示"
   hideOthers: "ほかを非表示"
   showAll: "すべてを表示"
-  quit: "Thinkly を終了"
+  quit: "thinkly を終了"
   file: "ファイル"
   newWindow: "新規ウィンドウ"
   closeTab: "タブを閉じる"
@@ -117,7 +117,6 @@ ja:
 `);
 
 export function installMenu(): void {
-  // Preserve the Windows/Linux behavior: Alt does not open a native menu.
   if (process.platform !== "darwin") { Menu.setApplicationMenu(null); return; }
   const template: Electron.MenuItemConstructorOptions[] = [
     { label: localizedAppName(), submenu: [

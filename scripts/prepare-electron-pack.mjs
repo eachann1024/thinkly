@@ -21,12 +21,10 @@ try {
   throw new Error(`Failed to parse root package.json: ${err.message}`);
 }
 
-// Use the exact installed version, including lockfile resolutions, for release packaging.
 const electronVersion = JSON.parse(
   readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8"),
 ).version;
 
-// Linux 包要求邮箱格式；默认使用非联系地址占位，不向公开作者字段补入私人邮箱。
 const linuxMaintainer =
   process.env.LINUX_MAINTAINER ||
   (typeof pkg.author === "string" && pkg.author.includes("@") ? pkg.author : undefined) ||
@@ -79,7 +77,6 @@ function stripPackJunk(dir) {
 
 stripPackJunk(pack);
 
-// Legal notices and source instructions must survive release-file filtering.
 for (const file of ["LICENSE", "THIRD-PARTY-NOTICES.txt"]) {
   cpSync(resolve(root, file), resolve(pack, file));
 }
@@ -164,9 +161,11 @@ mac:
   extendInfo:
     LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
-    CFBundleDisplayName: Thinkly
+    CFBundleDisplayName: thinkly
+    # Spotlight 搜索别名独立于显示名；英文系统也能搜「思绪」。
+    MDItemKeywords: "thinkly, 思绪"
     # 不要写 CFBundleName。Electron 用它找 Helper.app，必须等于 productName（磁盘上的 Thinkly）。
-    # 用户看到的名字是 CFBundleDisplayName、macos-l10n 和 app.setName，已经是思绪 · Thinkly。
+    # 用户显示名由 CFBundleDisplayName、macos-l10n 和 app.setName 统一为 thinkly。
     NSAppleEventsUsageDescription: Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.
     NSAccessibilityUsageDescription: Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.
   target:
@@ -213,8 +212,8 @@ nsis:
   uninstallerIcon: icon.ico
   installerHeaderIcon: icon.ico
   # 安装包文件名用 productName（Thinkly）。
-  shortcutName: Thinkly
-  uninstallDisplayName: Thinkly
+  shortcutName: thinkly
+  uninstallDisplayName: thinkly
   artifactName: Thinkly-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
@@ -229,8 +228,9 @@ linux:
     - pacman
   desktop:
     entry:
-      Name: Thinkly
-      "Name[zh_CN]": "思绪 · Thinkly"
+      Name: thinkly
+      "Name[zh_CN]": "thinkly"
+      Keywords: "thinkly;思绪;"
       Comment: "Thinkly: Keep every passing thought. Ask your past anytime."
       "Comment[zh_CN]": "思绪 Thinkly：安放每一瞬念头，随时向过去提问"
       Categories: Office;Note;
