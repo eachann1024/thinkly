@@ -1,3 +1,4 @@
+import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 import { i18nYaml, createTranslator, subscribeLanguage } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/columns/columnResize.ts#messages:1">`
 zh-Hans:
@@ -27,14 +28,23 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
   let disposed = false;
   let frozenWidth: number | null = null;
   let cancelDrag: (() => void) | undefined;
+  let layoutRule: CSSStyleRule | null = null;
+  let paintedTracks = "";
   const handles: HTMLButtonElement[] = [];
   const paint = () => {
     if (disposed || !owner || !dom.isConnected) return;
-    const width = frozenWidth ?? owner.getBoundingClientRect().width;
+    const width = frozenWidth ?? owner.clientWidth;
     // 仅修改本 NodeView 的 chrome。外层 blockContainer 属于 PM，写它的
     // style/data-* 会被 DOMObserver 当作内容修改并不断重建 NodeView。
-    const css = `${ownerSelector} > .bn-block-group { grid-template-columns: ${widths.map((part) => `minmax(0, ${part}fr)`).join(" ")}; }`;
-    if (layoutStyle.textContent !== css) layoutStyle.textContent = css;
+    if (!layoutRule && layoutStyle.sheet) {
+      layoutStyle.sheet.insertRule(`${ownerSelector} > .bn-block-group {}`, 0);
+      layoutRule = layoutStyle.sheet.cssRules[0] as CSSStyleRule;
+    }
+    const tracks = widths.map((part) => `minmax(0, ${part}fr)`).join(" ");
+    if (layoutRule && paintedTracks !== tracks) {
+      layoutRule.style.gridTemplateColumns = tracks;
+      paintedTracks = tracks;
+    }
     const stacked = String(width < 520);
     if (dom.dataset.columnsStacked !== stacked) dom.dataset.columnsStacked = stacked;
     let sum = 0;
@@ -79,31 +89,34 @@ export function renderColumnResize(block: any, editor: BlockNoteEditor<any, any,
       commit();
     });
     handle.addEventListener("pointerdown", (event) => {
-      if (!editor.isEditable || event.button !== 0 || !owner) return;
+      if (!editor.isEditable || event.button !== 0 || !event.isPrimary || !owner) return;
       event.preventDefault();
       event.stopPropagation();
       cancelDrag?.();
       const startX = event.clientX;
       const base = [...widths];
-      frozenWidth = owner.getBoundingClientRect().width;
-      const available = Math.max(1, frozenWidth - GAP * (count - 1));
-      const controller = new AbortController();
+      frozenWidth = owner.clientWidth;
+      // CSS zoom affects pointer coordinates but not grid tracks or handle offsets.
+      const scale = owner.getBoundingClientRect().width / Math.max(1, owner.offsetWidth);
+      const available = Math.max(1, frozenWidth - GAP * (count - 1)) * scale;
       dom.dataset.columnsResizing = "true";
       const finish = (save: boolean) => {
-        controller.abort();
         frozenWidth = null;
         delete dom.dataset.columnsResizing;
         cancelDrag = undefined;
         if (save) commit();
         else { widths = base; paint(); }
       };
-      cancelDrag = () => finish(false);
-      window.addEventListener("pointermove", (move) => {
-        resizePair(index, base[index] + (move.clientX - startX) / available * 100, base);
-      }, { signal: controller.signal });
-      window.addEventListener("pointerup", () => finish(true), { once: true, signal: controller.signal });
-      window.addEventListener("pointercancel", () => finish(false), { once: true, signal: controller.signal });
-      window.addEventListener("blur", () => finish(false), { once: true, signal: controller.signal });
+      const gesture = startPointerDrag({
+        target: handle,
+        pointerId: event.pointerId,
+        startX,
+        cursor: "col-resize",
+        onMove: (x) => resizePair(index, base[index] + (x - startX) / available * 100, base),
+        onEnd: () => finish(true),
+        onCancel: () => finish(false),
+      });
+      cancelDrag = gesture.cancel;
     });
     handles.push(handle);
     dom.appendChild(handle);

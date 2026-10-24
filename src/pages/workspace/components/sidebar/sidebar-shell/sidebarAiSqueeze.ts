@@ -1,3 +1,4 @@
+import { isPointerDragActive } from "@/lib/interaction/pointerDrag";
 import { create } from "zustand";
 import { PANEL_WIDTH_MIN, readPreferredPanelWidth } from "../../notebook-ai/usePanelWidth";
 import { isSidebarResizeDrag, SIDEBAR_MAX_WIDTH } from "../hooks/useSidebarResize";
@@ -190,6 +191,7 @@ export function syncSidebarAiSqueeze(
   sidebarWidth: number,
   options?: { keepSuspend?: boolean },
 ) {
+  if (isPointerDragActive("ai-panel")) return;
   if (!options?.keepSuspend) hideSuspended = false;
   const stage = sidebar.closest<HTMLElement>(".workspace-stage");
   if (!stage) return;

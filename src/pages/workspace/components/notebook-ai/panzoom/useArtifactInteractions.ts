@@ -1,9 +1,5 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 import { editorScaleNow } from "./artifactMeasure";
 import type { ArtifactTransformState } from "./useArtifactTransform";
 export function useArtifactInteractions({
@@ -12,20 +8,14 @@ export function useArtifactInteractions({
   isZoomedIn,
   applyTransform,
 }: ArtifactTransformState) {
-  const dragRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
-  } | null>(null);
-
+  const gestureRef = useRef<ReturnType<typeof startPointerDrag> | null>(null);
   const [dragging, setDragging] = useState(false);
+  useEffect(() => () => gestureRef.current?.dispose(), []);
+  useEffect(() => { if (!isZoomedIn) gestureRef.current?.cancel(); }, [isZoomedIn]);
   // 仅在已放大时拦截滚轮：平移查看细节，不缩放，也不抢走页面滚动
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport || !isZoomedIn) return;
-
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       event.stopPropagation();
@@ -37,52 +27,36 @@ export function useArtifactInteractions({
         y: prev.y - event.deltaY / zoom,
       });
     };
-
     viewport.addEventListener("wheel", onWheel, { passive: false });
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [applyTransform, isZoomedIn, transformRef, viewportRef]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isZoomedIn) return;
-    if (event.button !== 0) return;
-    // 控件按钮不进入拖拽
+    if (!isZoomedIn || event.button !== 0 || !event.isPrimary || gestureRef.current) return;
     if ((event.target as HTMLElement | null)?.closest("button")) return;
-
     const viewport = viewportRef.current;
     if (!viewport) return;
-
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: transformRef.current.x,
-      originY: transformRef.current.y,
-    };
-    setDragging(true);
-    viewport.setPointerCapture(event.pointerId);
-  };
-
-  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-
+    event.preventDefault();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const origin = transformRef.current;
     const zoom = editorScaleNow();
-    applyTransform({
-      scale: transformRef.current.scale,
-      x: drag.originX + (event.clientX - drag.startX) / zoom,
-      y: drag.originY + (event.clientY - drag.startY) / zoom,
+    const end = () => { gestureRef.current = null; setDragging(false); };
+    setDragging(true);
+    gestureRef.current = startPointerDrag({
+      target: viewport,
+      pointerId: event.pointerId,
+      startX,
+      startY,
+      cursor: "grabbing",
+      onMove: (x, y) => applyTransform({
+        scale: origin.scale,
+        x: origin.x + (x - startX) / zoom,
+        y: origin.y + (y - startY) / zoom,
+      }),
+      onEnd: end,
+      onCancel: end,
     });
   };
-
-  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    dragRef.current = null;
-    setDragging(false);
-    if (viewportRef.current?.hasPointerCapture(event.pointerId)) {
-      viewportRef.current.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  return { dragging, onPointerDown, onPointerMove, endDrag };
+  return { dragging, onPointerDown };
 }

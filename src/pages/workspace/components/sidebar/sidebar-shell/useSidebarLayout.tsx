@@ -108,6 +108,13 @@ export function useSidebarLayout({
   const previewSidebarWidth = useCallback(
     (nextWidth: number) => {
       const sidebar = sidebarRef.current;
+      if (sidebar) {
+        syncSidebarAiSqueeze(
+          sidebar,
+          sidebarCollapsed || sidebarOverlay ? 0 : nextWidth,
+        );
+      }
+
       sidebar?.style.setProperty(
         "--sidebar-configured-width",
         `${nextWidth}px`,
@@ -117,12 +124,6 @@ export function useSidebarLayout({
         shell.style.setProperty(
           "--workspace-sidebar-width",
           `${sidebarCollapsed || sidebarOverlay ? 0 : nextWidth}px`,
-        );
-      }
-      if (sidebar) {
-        syncSidebarAiSqueeze(
-          sidebar,
-          sidebarCollapsed || sidebarOverlay ? 0 : nextWidth,
         );
       }
     },

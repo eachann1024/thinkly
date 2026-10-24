@@ -46,9 +46,15 @@ export function usePanelWidth(onWidthPreview: (width: number) => number, disable
       target: event.currentTarget,
       pointerId: event.pointerId,
       startX,
+      scope: "ai-panel",
       cursor: "col-resize",
       onMove: (clientX) => {
         pendingWidth = previewRef.current(clamp(displayedWidth + startX - clientX));
+      },
+      onCancel: () => {
+        gestureRef.current = null;
+        previewRef.current(displayedWidth);
+        setIsResizing(false);
       },
       onEnd: () => {
         gestureRef.current = null;
