@@ -2,14 +2,14 @@ import { t } from "./i18n/updates";
 import { app, BrowserWindow, shell } from "electron";
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { compareSemver, pickUpdateAsset, PUBLIC_RELEASES_LATEST_URL, type GithubReleaseAsset } from "../../src/lib/appUpdateRelease";
+import { compareSemver, pickUpdateAsset, PUBLIC_RELEASES_LATEST_URL, readyVersionIsNewer, type GithubReleaseAsset } from "../../src/lib/appUpdateRelease";
 import type { AppUpdateCheckResult, AppUpdateRetryMetadata } from "../../src/lib/appUpdateTypes";
 import { getUpdateState, sendUpdateEvent } from "./updates/state";
 import { updateRetryMetadata } from "../../src/lib/appUpdateState";
 import { updateLifecycleTransition, automaticUpdatesTransition, type UpdateLifecycle, type UpdateLifecycleEvent, type AutomaticUpdates } from "./updates/lifecycle";
 import { fetchRelease, type ReleaseDetails, type VerifiedUpdate } from "./updates/release";
 import { downloadVerifiedUpdate, verifyUpdateFile } from "./updates/download";
-import { installUpdate, prepareMacUpdate, cleanInstalledUpdate } from "./updates/install";
+import { installUpdate, prepareMacUpdate, acknowledgeMacInstall, cleanInstalledUpdate } from "./updates/install";
 import { cleanVersionDirectories, describeFsError, discardDirectory, isFilesystemError, isMissingFile } from "./updates/staging";
 
 export { getUpdateState } from "./updates/state";
@@ -199,7 +199,8 @@ async function restoreReady(): Promise<void> {
     if (!isMissingFile(error)) console.error(`[update] could not read the downloaded update: ${describeFsError(error)}`);
   }
   if (sawRecord && !pending) await clearReadyRecord();
-  const keep = pending && compareSemver(pending.version, getAppVersion()) > 0 ? pending.version : null;
+  await acknowledgeMacInstall();
+  const keep = pending && readyVersionIsNewer(pending.version, getAppVersion()) ? pending.version : null;
   await cleanVersionDirectories(root, keep);
   if (!pending) return;
   if (!keep) {
