@@ -100,7 +100,6 @@ export function GooseTableHandle({
   useLocale();
   const { features } = useEditorSettings();
   const mergeNoteId = useId();
-  const { isDragging, ...dragProps } = useTableHandleDrag(orientation, hideOtherElements);
   const {
     editor,
     state,
@@ -117,6 +116,9 @@ export function GooseTableHandle({
     runMenuAction,
     handleOpenChange,
   } = useGooseTableHandle(orientation, hideOtherElements);
+  const { isDragging, ...dragProps } = useTableHandleDrag(
+    orientation, hideOtherElements, index, () => handleOpenChange(!open),
+  );
 
   if (!editor.isEditable) return null;
   if (!state || index === undefined) return null;
