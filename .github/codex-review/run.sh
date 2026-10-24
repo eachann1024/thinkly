@@ -96,10 +96,24 @@ except OSError:
     raise SystemExit("读不到 Codex 审核输出")
 
 def safe_excerpt(text, n=180):
+    text = text or ""
+    value = r"(?:\"[^\"\n]+\"|'[^'\n]+'|`[^`\n]+`|\S+)"
+    keys = r"access_token|refresh_token|id_token|api_key|token|password|secret"
     text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
+    # 引号里的 JSON 凭据字段整段换成占位，避免值里有空格或转义引号时只盖住一半。
+    text = re.sub(
+        rf'(?i)(["\'])({keys})\1\s*:\s*(["\'])((?:\\.|(?!\3).)*)\3',
+        lambda m: f"{m.group(1)}{m.group(2)}{m.group(1)}: {m.group(3)}[redacted]{m.group(3)}",
+        text,
+    )
+    # Authorization: Bearer <token> 里原先只吃掉 Bearer 这个词，后面的凭据会留在摘录里。
+    text = re.sub(r"(?i)\bauthorization\b\s*[:=]?\s*(?:bearer|basic|token|digest)\s+" + value, "[redacted]", text)
+    text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
     text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
-    text = re.sub(r"(?i)\b(bearer|token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*\S+", r"\1 [redacted]", text)
-    text = re.sub(r"\b[A-Za-z0-9_\-]{32,}\b", "[redacted]", text)
+    text = re.sub(r"eyJ[A-Za-z0-9_\-=]{8,}(?:\.[A-Za-z0-9_\-=]+)*", "[redacted]", text)
+    # 分隔符保持可选：password hunter2、token abcdef 这类空格分隔的短凭据也要盖住。
+    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*" + value, r"\1 [redacted]", text)
+    text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
     return " ".join(text.split())[:n]
 
 dec = json.JSONDecoder()
