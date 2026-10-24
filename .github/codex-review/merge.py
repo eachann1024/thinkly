@@ -18,33 +18,10 @@ def short(s, n=120):
     s = " ".join(str(s).split())
     return s if len(s) <= n else s[:n - 1] + "…"
 
-def safe_excerpt(text, n=180):
-    text = text or ""
-    value = r"(?:\"[^\"\n]+\"|'[^'\n]+'|`[^`\n]+`|\S+)"
-    keys = r"access_token|refresh_token|id_token|api_key|token|password|secret"
-    text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
-    # 引号里的 JSON 凭据字段整段换成占位，避免值里有空格或转义引号时只盖住一半。
-    text = re.sub(
-        rf'(?i)(["\'])({keys})\1\s*:\s*(["\'])((?:\\.|(?!\3).)*)\3',
-        lambda m: f"{m.group(1)}{m.group(2)}{m.group(1)}: {m.group(3)}[redacted]{m.group(3)}",
-        text,
-    )
-    # Authorization: Bearer <token> 里原先只吃掉 Bearer 这个词，后面的凭据会留在摘录里。
-    text = re.sub(r"(?i)\bauthorization\b\s*[:=]?\s*(?:bearer|basic|token|digest)\s+" + value, "[redacted]", text)
-    text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
-    text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
-    text = re.sub(r"eyJ[A-Za-z0-9_\-=]{8,}(?:\.[A-Za-z0-9_\-=]+)*", "[redacted]", text)
-    # 分隔符保持可选：password hunter2、token abcdef 这类空格分隔的短凭据也要盖住。
-    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*" + value, r"\1 [redacted]", text)
-    text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
-    text = " ".join(text.split())
-    return text[:n]
+EXPECTED_FIELDS = ("merge_recommendation", "risk_level", "security_concerns", "key_issues_to_review")
 
-def parse_review(raw):
-    """取最后一个带 merge_recommendation 的完整 JSON 对象。"""
+def json_objects(raw):
     raw = raw or ""
-    if not raw.strip():
-        return {}
     dec = json.JSONDecoder()
     found = []
     i = 0
@@ -57,12 +34,32 @@ def parse_review(raw):
         except json.JSONDecodeError:
             i = start + 1
             continue
-        if isinstance(obj, dict) and "merge_recommendation" in obj:
+        if isinstance(obj, dict):
             found.append(obj)
         i = end if end > start else start + 1
-    if not found:
-        raise SystemExit("审核结果里没有带 merge_recommendation 的完整 JSON。摘录：" + safe_excerpt(raw))
-    return found[-1]
+    return found
+
+def parse_failure(raw, objects, missing):
+    raw = raw or ""
+    lines = len(raw.splitlines())
+    miss = ",".join(missing) if missing else "无"
+    raise SystemExit(
+        f"审核结果无法解析：字节 {len(raw.encode('utf-8'))}，行数 {lines}，"
+        f"JSON 对象 {len(objects)}，缺少字段 {miss}"
+    )
+
+def parse_review(raw):
+    """取最后一个带 merge_recommendation 的完整 JSON 对象。失败时只报元数据。"""
+    raw = raw or ""
+    if not raw.strip():
+        return {}
+    found = json_objects(raw)
+    chosen = [obj for obj in found if "merge_recommendation" in obj]
+    if not chosen:
+        last = found[-1] if found else {}
+        missing = [field for field in EXPECTED_FIELDS if field not in last]
+        parse_failure(raw, found, missing or ["merge_recommendation"])
+    return chosen[-1]
 
 def read_review_raw():
     path = env.get("REVIEW_PATH", "").strip()
@@ -84,7 +81,13 @@ def read_review_raw():
 def verdict(review):
     if not review:
         return "无审核结果"
-    return f"{review.get('merge_recommendation', '?')} / 风险 {review.get('risk_level', '?')}"
+    rec = str(review.get("merge_recommendation", ""))
+    risk = str(review.get("risk_level", "")).lower()
+    if rec not in {"safe_to_merge", "merge_with_caution", "changes_required"}:
+        rec = "invalid"
+    if risk not in {"low", "medium", "high"}:
+        risk = "invalid"
+    return f"{rec} / 风险 {risk}"
 
 def block_merge(reasons):
     gh("label", "create", block, "-R", repo, "--color", "B60205",
@@ -102,11 +105,21 @@ def block_merge(reasons):
     sys.exit(0)
 
 review = parse_review(read_review_raw())
-# 详细结论只写进 Actions 运行摘要，不发评论
+# 摘要只写枚举，不写模型原文
 try:
+    rec_name = str(review.get("merge_recommendation", "")) if review else ""
+    risk_name = str(review.get("risk_level", "")).lower() if review else ""
+    if rec_name not in {"safe_to_merge", "merge_with_caution", "changes_required"}:
+        rec_name = "invalid" if review else "none"
+    if risk_name not in {"low", "medium", "high"}:
+        risk_name = "invalid" if review else "none"
+    issues = review.get("key_issues_to_review") if review else []
+    issue_count = len(issues) if isinstance(issues, list) else 0
     with open(env["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fh:
-        fh.write("## AI 审核结论\n\n```json\n" +
-                 json.dumps(review, ensure_ascii=False, indent=2)[:60000] + "\n```\n")
+        fh.write("## AI 审核结论\n\n"
+                 f"merge_recommendation={rec_name}\n\n"
+                 f"risk_level={risk_name}\n\n"
+                 f"issue_count={issue_count}\n")
 except Exception:
     pass
 
@@ -144,15 +157,16 @@ else:
         sec_text = str(sec_raw or "").strip()
         low = sec_text.lower()
         sec_clear = low.startswith("no") or low in {"false", "none", "null"}
+    known_recs = {"safe_to_merge", "merge_with_caution", "changes_required"}
     ok_recs = {"safe_to_merge"} | ({"merge_with_caution"} if env["ALLOW_CAUTION"] == "true" else set())
     if rec not in ok_recs:
-        reasons.append(f"合并建议为 `{rec or '缺失'}`")
+        reasons.append(f"合并建议为 `{rec}`" if rec in known_recs else "合并建议缺失或不在允许集合")
     if risk not in {"low", "medium"}:
-        reasons.append(f"风险等级为 `{risk or '缺失'}`")
+        reasons.append(f"风险等级为 `{risk}`" if risk in {"low", "medium", "high"} else "风险等级缺失或不在允许集合")
     if sec_raw is None or (not isinstance(sec_raw, bool) and not sec_text):
         reasons.append("安全审查字段缺失")
     elif not sec_clear:
-        reasons.append(f"存在安全疑虑：{sec_text[:300]}")
+        reasons.append("存在安全疑虑")
     # 安全/鉴权/计费/数据/迁移类意见一律转人工
     issues = review.get("key_issues_to_review") or []
     if not isinstance(issues, list):
@@ -167,12 +181,9 @@ else:
         if isinstance(it, dict):
             text = f"{it.get('issue_header', '')} {it.get('issue_content', '')}"
             if fatal_kw.search(text):
-                reasons.append("审核意见涉及安全/鉴权/计费/数据/迁移：" + str(it.get("issue_header", ""))[:120])
+                reasons.append("审核意见涉及安全/鉴权/计费/数据/迁移")
     if rec == "changes_required":
-        for it in issues:
-            if isinstance(it, dict):
-                reasons.append("要改：" + short(f"{str(it.get('relevant_file', '')).strip()} "
-                                             f"{str(it.get('issue_header', '')).strip()}：{it.get('issue_content', '')}"))
+        reasons.append(f"有 {sum(isinstance(it, dict) for it in issues)} 条必须修改的意见")
 if any("security" in l.lower() for l in labels):
     reasons.append("PR 带有安全疑虑标签")
 
