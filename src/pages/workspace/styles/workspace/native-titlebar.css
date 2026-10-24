@@ -189,7 +189,45 @@ html.is-electron .electron-titlebar [data-page-title-field] {
   box-sizing: border-box;
 }
 
-/* 历史预览顶栏：无导航按钮，左侧只为 macOS 红绿灯 / Windows 边距留位，工具条占满整行。 */
+/* 历史预览：顶栏退出文档流，只盖住红绿灯那一行。两栏表头升到同一高度。 */
+.workspace-shell[data-electron-chrome]:has(.electron-titlebar[data-history-mode]) {
+  position: relative;
+}
 .workspace-shell[data-electron-chrome] .electron-titlebar[data-history-mode] {
-  padding-left: var(--electron-traffic-inset, 12px);
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  width: auto;
+  padding-left: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+.workspace-shell[data-electron-chrome] .electron-titlebar[data-history-mode] .electron-win-chrome-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  pointer-events: auto;
+}
+.workspace-shell[data-electron-chrome]:has(.electron-titlebar[data-history-mode]) .sidebar-rail-shell {
+  padding-top: calc(var(--electron-titlebar-height, 2.75rem) + 0.571429rem);
+}
+.workspace-shell[data-electron-chrome]:has(.electron-titlebar[data-history-mode]) .sidebar-rail-shell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--electron-titlebar-height, 2.75rem);
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+.workspace-shell[data-electron-chrome]:has(.electron-titlebar[data-history-mode]) .workspace-sidebar-pane .sidebar-content-surface {
+  border-top-left-radius: 0;
+}
+.workspace-shell[data-electron-chrome]:has(.electron-titlebar[data-history-mode]) .workspace-main-sheet {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }

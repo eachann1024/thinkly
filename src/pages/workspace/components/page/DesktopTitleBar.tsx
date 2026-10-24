@@ -48,7 +48,6 @@ import { useSettings } from "@/stores/useSettings";
 import { isFullscreenAiLayout } from "../notebook-ai/useNotebookAiPanel";
 import { useAiHeaderActions, useAiHeaderTitle } from "../notebook-ai/aiHeaderSlot";
 import { ConversationTitle } from "../notebook-ai/ConversationTitle";
-import { HistoryToolbar } from "../history/HistoryView";
 import { PageMenu } from "./PageMenu";
 import { TabRail } from "./TabRail";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
@@ -136,7 +135,7 @@ export function DesktopTitleBar({
   );
 
   if (inHistoryMode) {
-    // 历史预览：不渲染导航/侧栏/置顶按钮和标签栏，仅保留 返回 + 标题 + 还原。
+    // 历史预览：顶栏只留红绿灯拖拽区。返回、版本时间和还原分别在两栏表头。
     return (
       <div
         className="electron-titlebar flex w-full shrink-0 items-center"
@@ -145,7 +144,6 @@ export function DesktopTitleBar({
         onPointerDown={onTitleBarPointerDown}
         onDoubleClick={onTitleBarDoubleClick}
       >
-        <HistoryToolbar />
         {isFramelessElectron ? <WinWindowControls /> : null}
       </div>
     );

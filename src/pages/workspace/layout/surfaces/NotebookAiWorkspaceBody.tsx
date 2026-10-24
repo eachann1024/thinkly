@@ -119,7 +119,7 @@ function NotebookAiWorkspaceBody({
           </>
         ) : activePageId && page && inHistoryMode ? (
           <>
-            {!isElectronChrome && <HistoryToolbar />}
+            <HistoryToolbar />
             <div className="workspace-editor-surface relative ml-0 mt-0 flex-1 min-h-0 overflow-hidden">
               <div
                 className={cn(
