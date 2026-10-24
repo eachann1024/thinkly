@@ -1,3 +1,4 @@
+import { splitTrailingListLines } from "../listLines";
 import { blockNoteInlineToText } from "./inline";
 import { wrapLocalBlockPropsMarkdown } from "../localBlockPropsWrappers";
 
@@ -29,7 +30,8 @@ export function serializeListItemBlock(
   num: number | null,
   serializeBlocks: (blocks: any[], indent: string) => string,
 ): string {
-  const text = blockNoteInlineToText(item.content, true);
+  const broken = splitTrailingListLines(blockNoteInlineToText(item.content, false));
+  const text = broken.head.split("\n").join("<br>");
   let marker: string;
   let childIndentWidth: number;
   if (item.type === "checkListItem") {
@@ -43,6 +45,10 @@ export function serializeListItemBlock(
     childIndentWidth = 2;
   }
   let line = wrapLocalBlockPropsMarkdown(item, `${indent}${marker}${text}`);
+  if (broken.lists.length) {
+    const nestedIndent = indent + " ".repeat(childIndentWidth);
+    line += "\n" + broken.lists.map((entry) => `${nestedIndent}${entry}`).join("\n");
+  }
   if (Array.isArray(item.children) && item.children.length > 0) {
     const allListChildren = item.children.every((child: any) =>
       LIST_ITEM_TYPES.has(child?.type),

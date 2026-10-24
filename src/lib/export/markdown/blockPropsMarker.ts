@@ -106,3 +106,16 @@ export function restoreBlockPropsMarkers(blocks: BlockNoteContent): BlockNoteCon
     };
   }) as BlockNoteContent;
 }
+
+/** 保存前把行内旧标记收进 props，避免注释再写进正文。 */
+export function detachBlockPropsMarker<T extends MarkdownBlock>(block: T): T {
+  const stripped = stripInlineMarker(block.content);
+  if (!stripped) return block;
+  const metadata = decodeMarker(stripped.encoded, stripped.isCurrent);
+  if (!metadata) return block;
+  return {
+    ...block,
+    props: { ...(block.props ?? {}), ...metadata },
+    content: stripped.content as T["content"],
+  };
+}

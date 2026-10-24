@@ -1,12 +1,25 @@
 import { normalizeColumnLayout } from "@/components/editor/blocks/columns/columnModel";
-import { noteComment, noteCommentClose } from "../persistedNames";
+import type { MarkdownScope } from "../noteMeta";
 
-export function serializeColumns(block: any, serializeBlocks: (blocks: any[], indent: string) => string, indent = ""): string {
+export function serializeColumns(
+  block: any,
+  indent: string,
+  scope: MarkdownScope,
+  serializeBlocks: (blocks: any[], indent: string, scope: MarkdownScope) => string,
+): string {
   const layout = normalizeColumnLayout(block, block.children ?? []);
-  const sections = layout.children!.map((section) => [
-    noteComment("column"),
-    serializeBlocks(section.children ?? [], ""),
-    noteCommentClose("column"),
-  ].join("\n\n"));
-  return [noteComment(`columns widths="${layout.props!.widths}"`), ...sections, noteCommentClose("columns")].join("\n\n").split("\n").map((line) => indent + line).join("\n");
+  const at = scope.index;
+  const counts: number[] = [];
+  const parts: string[] = [];
+  for (const section of layout.children ?? []) {
+    const before = scope.index;
+    const markdown = serializeBlocks(section.children ?? [], "", scope);
+    counts.push(scope.index - before);
+    if (markdown) parts.push(markdown);
+  }
+  if (counts.some((count) => count > 0)) {
+    scope.sink.column({ path: scope.path, at, widths: String(layout.props?.widths ?? ""), counts });
+  }
+  const body = parts.join("\n\n");
+  return indent ? body.split("\n").map((line) => (line ? indent + line : line)).join("\n") : body;
 }
