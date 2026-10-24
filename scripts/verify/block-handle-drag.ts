@@ -1,8 +1,3 @@
-/**
- * 块把手拖动只搬正文，不在格子边缘开分屏。
- * 大文档的轻量拖动只带 text/plain，以前会被当成外部文本。
- * 运行：node scripts/verify/run.mjs block-handle-drag
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
@@ -66,7 +61,7 @@ export default function run(): number {
   check("轻量拖动的纯文本不开分屏", isInEditorMoveDrag(Array.from(heavy.types)));
   check("轻量拖动仍被其它落点当成工作区内容拒绝", hasWorkspaceDrag(heavy));
 
-  const menu = read("src/components/editor/core/EditorSideMenu.tsx");
+  const menu = read("src/components/editor/core/useBlockHandleDrag.ts");
   const heavyDrag = read("src/components/editor/core/lightweightBlockDrag.ts");
   const surface = read("src/pages/workspace/components/editor-split/SplitContentDropSurface.tsx");
   const start = menu.slice(menu.indexOf("const handleDragStart"));

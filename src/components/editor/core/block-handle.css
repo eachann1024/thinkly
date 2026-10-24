@@ -1,0 +1,50 @@
+.goose-block-handle { transition: opacity 120ms ease; }
+@media (prefers-reduced-motion: reduce) { .goose-block-handle { transition: none; } }
+body[data-scroll-locked] .goose-block-handle { opacity: 0; pointer-events: none !important; }
+.goose-block-handle-button {
+  display: flex;
+  width: 44px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 6px;
+  box-sizing: border-box;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 6px;
+  background: hsl(var(--background));
+  color: hsl(var(--muted-foreground));
+}
+.goose-block-handle-button svg { width: 14px; height: 14px; flex: none; }
+.goose-block-handle-button[draggable="true"] { cursor: grab; }
+.goose-block-handle-button[draggable="true"]:active { cursor: grabbing; }
+.goose-block-handle-button:hover, .goose-block-handle-button[aria-expanded="true"] {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+.goose-empty-block-add { width: 24px; padding: 5px; }
+[data-node-type="blockOuter"][data-goose-empty-handle-hover="true"] > [data-node-type="blockContainer"] > .bn-block-content,
+[data-node-type="blockOuter"][data-goose-empty-handle-hover="true"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content {
+  border-radius: 4px;
+  background: hsl(var(--muted) / 0.65);
+}
+.goose-block-handle-menu {
+  min-width: min(224px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+}
+.goose-block-handle-danger { color: hsl(var(--destructive)); }
+.goose-block-color-swatch { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 16px; height: 16px; border-radius: 3px; font-size: 13px; }
+
+.goose-block-handle-controls { display: flex; align-items: center; }
+.goose-block-fold { width: 20px; padding: 3px; }
+
+.goose-block-menu-anchor { position: relative; }
+.goose-block-menu-positioner { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+
+.bn-side-menu.goose-block-handle > .goose-editor-inline-context-ui { gap: 0; padding: 0; border-radius: 0; }
+.bn-side-menu.goose-block-handle .goose-block-handle-button { width: calc(44px * var(--editor-scale, 1)); height: calc(24px * var(--editor-scale, 1)); gap: calc(4px * var(--editor-scale, 1)); padding: 0; border-radius: 6px; }
+.bn-side-menu.goose-block-handle .goose-empty-block-add { width: calc(24px * var(--editor-scale, 1)); }
+.bn-side-menu.goose-block-handle .goose-block-fold { width: calc(20px * var(--editor-scale, 1)); }
+.bn-side-menu.goose-block-handle .goose-block-fold:not(:hover) { border: 0; background: transparent; }
+.bn-side-menu.goose-block-handle .goose-block-fold { border: 0; }
+.bn-side-menu.goose-block-handle { height: calc(24px * var(--editor-scale, 1)); }
