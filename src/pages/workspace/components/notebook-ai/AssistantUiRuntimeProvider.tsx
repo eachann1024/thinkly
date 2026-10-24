@@ -13,12 +13,6 @@ ja:
   compactedSummary: "会話を圧縮しました。以降の質問は、この要約をもとに続行されます。"
 `;
 const t = createTranslator(messages);
-/**
- * assistant-ui 外部运行时适配。
- *
- * useChat/messages 仍是唯一业务真源；assistant-ui 只读取同一份消息并负责
- * Thread / Message / Composer primitives 的语义、可访问性和视口状态。
- */
 import { useMemo, type ReactNode } from "react";
 import {
   AssistantRuntimeProvider,
@@ -174,7 +168,6 @@ export function NotebookAiAssistantRuntimeProvider({
     isRunning,
     isSendDisabled: isDisabled || isRunning,
     onNew: async () => {
-      // Composer 正文由 AiComposerInput 管理；不会从 assistant-ui 发起提交。
     },
     onCancel: async () => onCancel(),
     unstable_capabilities: { copy: true },

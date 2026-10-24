@@ -13,8 +13,6 @@ import {
   updateSnapshotStat,
 } from "@/lib/local-md-snapshot";
 
-// 外部进程修改了文件后，把磁盘内容重新读入 store（不触发脏标记 / 自动保存）。
-// 若该文件有未保存的本地编辑（dirty）则跳过，避免覆盖用户输入。
 export const reloadLocalPageFromDiskAction = async (
   set: StoreSet,
   get: StoreGet,
@@ -52,7 +50,6 @@ export const reloadLocalPageFromDiskAction = async (
   if (read.stat && !(await validateMarkdownRead(fs, filePath, read, false)))
     return;
 
-  // Reading/parsing yields: don't overwrite edits, a move, or another reload.
   const current = get().pages[pageId];
   if (
     !current ||
@@ -98,7 +95,6 @@ export const reloadLocalPageFromDiskAction = async (
     };
   });
 
-  // 当前正在编辑的文件被外部修改 → 通知编辑器重载内容。
   if (get().activePageId === pageId) {
     window.dispatchEvent(
       new CustomEvent("goose-note:reload-active-editor", {

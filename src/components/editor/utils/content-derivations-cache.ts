@@ -13,7 +13,6 @@ const MAX_CHARS = 2_000_000;
 const cache = new Map<string, { value: ContentDerivations; size: number }>();
 let retainedChars = 0;
 
-/** revision must change with visible content; callers already owning a signature avoid reserializing. */
 export function getContentDerivations(content: JSONContent, revision: string): ContentDerivations {
   const cached = cache.get(revision);
   if (cached) {

@@ -43,7 +43,6 @@ export async function scan(root: string, readContents = true): Promise<Files> {
   return files;
 }
 
-/** Read-only preflight using the same path and access checks as actual sync. */
 export async function validateGitSyncFolder(root: string): Promise<void> {
   await scan(root, false);
 }

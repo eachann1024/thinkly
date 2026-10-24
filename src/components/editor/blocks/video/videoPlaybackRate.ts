@@ -2,7 +2,6 @@ export const VIDEO_PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const;
 export const VIDEO_HOLD_DELAY_MS = 200;
 export type VideoPlaybackRateState = { selectedRate: number; boosting: boolean };
 
-/** Playback preferences are session state, never document content. */
 export function createVideoPlaybackRateController(
   media: Pick<HTMLVideoElement, "playbackRate">,
   notify: (state: VideoPlaybackRateState) => void,

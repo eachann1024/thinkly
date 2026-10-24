@@ -3,7 +3,6 @@ import { renderColumnResize } from "./columnResize";
 import { readColumnWidths } from "./columnModel";
 import "./columns.css";
 
-/** 外部 HTML 也保留 BlockNote 可读的标准容器/子树，避免 void parse rule 吞掉 children。 */
 function externalColumnContainer(type: "columnLayout" | "columnSection", widths = "50,50", count = 2) {
   const dom = document.createElement("div");
   dom.dataset.nodeType = "blockContainer";

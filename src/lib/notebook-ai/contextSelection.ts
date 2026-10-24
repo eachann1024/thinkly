@@ -16,7 +16,6 @@ export const NOTEBOOK_AI_CONTEXT_CHARACTER_BUDGETS: Record<
 const FULL_TEXT_INTENT_PATTERN =
   /(全文|原文|逐段|逐句|逐字|完整内容|完整阅读|通读|精确汇总|精确总结|准确汇总|准确总结|逐条提取|全文翻译|全文改写|verbatim|full[ -]?text|paragraph[ -]?by[ -]?paragraph|exact (?:summary|wording)|quote (?:the )?original)/i;
 
-/** 仅根据用户指令决定上下文级别，不读取 store，便于调用方预览。 */
 export function selectNotebookAiContextMode(
   promptText: string,
 ): NotebookAiContextMode {
@@ -65,9 +64,6 @@ export interface NotebookAiContextSelection {
   diagnostics: NotebookAiContextDiagnostics;
 }
 
-/**
- * 将已解析引用按意图分级并应用总字符预算。纯函数不记录或返回 diagnostics 中的正文。
- */
 export function buildNotebookAiContextSelection(params: {
   promptText: string;
   contexts: ResolvedAiReferenceContext[];

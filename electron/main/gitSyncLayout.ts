@@ -23,7 +23,6 @@ export function planGitLayout(input: GitRepositoryInput) {
   return { config, moves };
 }
 
-/** Keep old aliases until persistence succeeds, including an interrupted journal. */
 export function aliasGitLayout(snapshots: Snapshots | undefined, moves: GitLayoutMove[]) {
   if (!snapshots) return;
   for (const move of moves) {
@@ -33,13 +32,11 @@ export function aliasGitLayout(snapshots: Snapshots | undefined, moves: GitLayou
   }
 }
 
-/** Portable association record: no machine paths, secrets or note contents. */
 export function gitLayoutMetadata(previous: string | null, config: GitRepositoryInput, moves: GitLayoutMove[]): string {
   const saved = previous ? JSON.parse(previous) : { version: 1, folders: [] };
   if (saved.version !== 1 || !Array.isArray(saved.folders)) throw new Error(t("mappingUnreadable"));
   const matches = (entry: { notebookId: string; path: string }, folder: GitRepositoryInput["folders"][number]) =>
     entry.notebookId === folder.notebookId || entry.path?.normalize("NFC").toLowerCase() === folder.remotePath.normalize("NFC").toLowerCase();
-  // Explicitly associating an existing backup on another device changes its local notebook ID.
   const folders = saved.folders.filter((entry: { notebookId: string; path: string }) => !config.folders.some((folder) => matches(entry, folder)));
   for (const folder of config.folders) {
     const old = saved.folders.find((entry: { notebookId: string; path: string }) => matches(entry, folder));

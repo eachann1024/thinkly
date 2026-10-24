@@ -61,8 +61,6 @@ export function mimeTypeFromAssetPath(filePath: string): string {
 }
 
 export function getRelativeAssetPath(filename: string, depth: number): string {
-  // depth 0 = 笔记本根目录，assets 在同级 → ./assets/
-  // depth 1 = 子文件夹内页面 → ../assets/
   const prefix = depth > 0 ? "../".repeat(depth) : "./";
   return `${prefix}assets/${filename}`;
 }
@@ -83,22 +81,16 @@ export function guessAssetExtFromPath(filePath: string, fallback = "bin"): strin
   return fallback;
 }
 
-/**
- * 将图片路径解析为绝对路径后，通过 Node.js fs 读取为 base64
- * 优先基于页面文件目录解析（相对路径语义正确），兜底用笔记本根目录
- */
 export function resolveAndReadBase64(
   notebookPath: string | undefined,
   src: string,
   pageFilePath?: string,
 ): { data: string; resolvedPath: string } | null {
-  // 绝对路径直接读取
   if (src.startsWith("/") || /^[A-Za-z]:[\\/]/.test(src)) {
     const data = readLocalFileAsBase64(src);
     return data ? { data, resolvedPath: src } : null;
   }
 
-  // 优先相对于页面文件目录解析
   if (pageFilePath) {
     const pageDir = pageFilePath.replace(/[\\/][^\\/]+$/, "");
     const fullPath = resolveToAbsolute(pageDir, src);
@@ -106,7 +98,6 @@ export function resolveAndReadBase64(
     if (result) return { data: result, resolvedPath: fullPath };
   }
 
-  // 兜底：相对于笔记本根目录
   if (notebookPath) {
     const fullPath = resolveToAbsolute(notebookPath, src);
     const data = readLocalFileAsBase64(fullPath);

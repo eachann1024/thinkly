@@ -3,7 +3,6 @@ import { builtinWebSearch } from "../webAccess/search";
 import { builtinReadPage } from "../webAccess/read";
 import { fetchJson } from "../webAccess/http";
 
-/** 只有这些公开数据接口可经主进程取 JSON，供 AI 信息卡片使用，避免成为任意代理。 */
 const JSON_HOSTS = new Set([
   "geocoding-api.open-meteo.com",
   "api.open-meteo.com",

@@ -16,7 +16,6 @@ import type { ModelAvailability } from "./model";
 import type { NotebookAiAgentContext } from "./types";
 import { formatRunWriteScope, resolveRunCurrentPageId, type NotebookAiRunContext } from "./runContext";
 
-/** 只注入当前任务所需的稳定上下文，具体能力由 loadSkill 渐进加载。 */
 function buildSystemPrompt(
   notebookId: string,
   currentPageId?: string | null,
@@ -53,10 +52,6 @@ export type BuildAgentResult =
   | { ok: true; agent: ToolLoopAgent<never, typeof notebookAiTools> }
   | { ok: false; reason: string };
 
-/**
- * 构建绑定指定笔记本的 ToolLoopAgent。
- * 每次调用都会重新构建以获取最新的笔记本上下文。
- */
 export function buildNotebookAgent(
   notebookId: string,
   currentPageId?: string | null,
@@ -78,8 +73,6 @@ export function buildNotebookAgent(
     tools: notebookAiTools,
     instructions: [buildSystemPrompt(notebookId, agentContext.currentPageId),
       agentContext.writeScope ? formatRunWriteScope(agentContext.writeScope) : ""].filter(Boolean).join("\n\n"),
-    // executeBatchPlan 已经返回本地审批卡；不要再让模型看到该结果后继续一轮。
-    // hasToolCall 在本步工具执行完成后才检查，因此不会阻止冻结计划的生成。
     stopWhen: [hasToolCall("executeBatchPlan"), stepCountIs(16)],
     experimental_context: agentContext,
     prepareStep: () => {

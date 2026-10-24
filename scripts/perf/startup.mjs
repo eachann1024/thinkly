@@ -1,26 +1,4 @@
 #!/usr/bin/env node
-/**
- * 启动与内存实测：反复启动真实 Electron 进程，按阶段汇总 p50/p95。
- *
- * 用法：
- *   node scripts/perf/startup.mjs                    # 测 dist-electron/app-pack
- *   node scripts/perf/startup.mjs --app dist-desktop/Thinkly.app --runs 7
- *   node scripts/perf/startup.mjs --json /tmp/after.json
- *   node scripts/perf/startup.mjs --compare /tmp/before.json
- *
- * 指标口径（全部以操作系统记录的进程创建时刻为零点）：
- *   main-module        主进程模块求值
- *   app-ready          Chromium 引导完成，可以建窗
- *   language-init-end  语言包读完（当前代码在建窗之前）
- *   restore-windows-end 窗口已创建、开始加载 HTML
- *   window-shown       窗口真正显示（用户感知的"打开"）
- *   did-finish-load    HTML 与首屏脚本执行完
- *   renderer-rendered   React 已提交首帧
- *   first-stable-frame 首帧稳定（双 rAF 之后）
- *
- * 注意：连续启动之间操作系统页缓存是热的，这里量的是"进程未运行时的启动"，
- * 不是清空页缓存的极端冷启动；后者需要 root 跑 purge，不作为日常口径。
- */
 import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
@@ -55,7 +33,6 @@ function electronBinary() {
   return path.join(dist, "electron");
 }
 
-/** macOS .app 用自身的可执行文件；其他情况用 Electron 二进制 + 应用目录。 */
 function launchCommand() {
   if (appTarget.endsWith(".app")) {
     const info = path.join(appTarget, "Contents/Info.plist");
@@ -189,7 +166,6 @@ function printTable(summary, baseline) {
 
 const workDir = mkdtempSync(path.join(tmpdir(), "thinkly-perf-"));
 
-/** 复制一份真实配置目录：保留设置与窗口布局，不碰正在运行的正式实例。 */
 function prepareProfile() {
   if (profile === "real") return null;
   const dir = path.join(workDir, "profile");

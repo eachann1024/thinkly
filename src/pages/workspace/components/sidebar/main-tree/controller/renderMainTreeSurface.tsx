@@ -150,7 +150,6 @@ export function renderMainTreeSurface(
                 : String((target as any).targetItem);
             if (targetId === "root") return true;
             const parentPage = pages[targetId];
-            // 本地文件夹：落点父级必须是目录（或根）
             if (isLocalFolder && parentPage && !parentPage.isFolder)
               return false;
             return !dragItems.some((it) => {
@@ -171,8 +170,6 @@ export function renderMainTreeSurface(
             const pageId = String(item.index);
             setFocusedView(activeNotebookId, pageId);
 
-            // 上下键沿 react-complex-tree 计算出的“当前可见节点”移动：
-            // 展开时会进入子页面，折叠时会跳过整棵子树。
             if (!verticalKeyboardNavigationRef.current) return;
             verticalKeyboardNavigationRef.current = false;
             if (pageId === "root" || !pages[pageId]) return;

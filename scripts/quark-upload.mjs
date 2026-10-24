@@ -7,7 +7,6 @@ import { uploadFile } from "./quark-oss.mjs";
 import { INSTALL_FOLDER as FOLDER_NAME, LEGACY_INSTALL_FOLDER as LEGACY_FOLDER_NAME, expectedInstallers } from "./quark-preflight.mjs";
 
 const NOTE_NAME = "说明.txt";
-// 新文件名用于上传；旧文件名只用于识别上一版，全部上传成功后由 retainLatest 删除。
 const INSTALLERS = [
   /^Thinkly-(\d+\.\d+\.\d+)-arm64\.dmg$/,
   /^Thinkly-(\d+\.\d+\.\d+)\.dmg$/,

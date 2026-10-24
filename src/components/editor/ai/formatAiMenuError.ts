@@ -25,9 +25,6 @@ ja:
   theModelReturnedAnInvalidResponseTryAnother: "モデルが返した形式が正しくありません。別のモデルを使うか、しばらくしてからもう一度お試しください"
 `;
 const t = createTranslator(messages);
-/**
- * 行内 AI 菜单错误文案。目标失效时保留原文并提示重新选择。
- */
 export function isMissingTargetBlockError(error: unknown): boolean {
   const message = toErrorText(error).toLowerCase();
   if (!message) return false;

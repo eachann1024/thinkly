@@ -27,7 +27,6 @@ interface TrackedImage {
   contentHash?: string;
 }
 
-/** Tracks insertion order so async hashes always reject the later image. */
 export class ImageDedupTracker {
   private nextSequence = 0;
   private readonly images = new Map<string, TrackedImage>();
@@ -63,7 +62,6 @@ export class ImageDedupTracker {
     this.images.delete(imageId);
   }
 
-  /** Returns the later imageId when a content duplicate is found. */
   resolveContentHash(imageId: string, contentHash: string): string | null {
     const image = this.images.get(imageId);
     if (!image) return null;

@@ -66,7 +66,6 @@ export function useMainTreeState({
 
   const setExpandPageId = usePages((s) => s.setExpandPageId);
 
-  // 本地文件夹手动顺序：拖动排序 / 恢复名称排序后靠它触发树重建
   const localFolderOrders = useLocalFolderOrders((s) =>
     activeNotebookId ? s.ordersByNotebook[activeNotebookId] : undefined,
   );
@@ -76,7 +75,6 @@ export function useMainTreeState({
     LOCAL_FOLDER_ROOT_DIR_KEY,
   );
 
-  // 根目录进入手动排序后给个恢复入口（树容器与空状态两个右键菜单共用）
   const rootOrderMenuGroup = rootHasManualOrder ? (
     <ContextMenuGroup>
 
@@ -84,7 +82,6 @@ export function useMainTreeState({
         onSelect={() =>
           scheduleAfterMenuClose(() => {
             if (!activeNotebookId) return;
-            // 写盘失败时 clearLocalFolderOrder 自己会报错，不要谎报成功
             if (
               clearLocalFolderOrder(activeNotebookId, LOCAL_FOLDER_ROOT_DIR_KEY)
             ) {
@@ -125,9 +122,6 @@ export function useMainTreeState({
 
   const localLoadStatus = localLoadState?.status ?? "idle";
 
-  // 已经加载过的本地库会在激活时后台重扫。保留这份树，既避免侧栏
-  // 从完整内容闪成骨架屏，也让用户仍可在扫描期间看到上一次成功结果。
-  // 首次载入没有缓存页面时仍完整展示 loading；真正失败则走下方错误态。
   const hasCachedLocalTree = useMemo(() => Boolean(
     activeNotebookId &&
     Object.values(pages).some(

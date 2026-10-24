@@ -99,7 +99,6 @@ export function registerFilesystemIpc(undoRoot: string): void {
     try {
       target = assertAllowed(p);
     } catch {
-      // 行内绝对路径点击只读存在性，不授予仓库外的读写权限。
       const openTarget = normalizeLocalOpenPath(p);
       return openTarget ? pathExists(openTarget) : false;
     }
@@ -108,10 +107,6 @@ export function registerFilesystemIpc(undoRoot: string): void {
       await stat(target);
       return true;
     } catch (statError) {
-      // 只有真正的「不存在」(ENOENT) 才该被当作路径失效。
-      // iCloud Drive 等云盘目录可能尚未完全物化，stat 会瞬时抛
-      // EPERM/EACCES/EBUSY，此时目录其实仍存在 —— 不应把真实存在的
-      // 仓库误报成「路径失效」。用 readdir 复核一次再下结论。
       if ((statError as NodeJS.ErrnoException).code === "ENOENT") {
         return false;
       }
@@ -164,7 +159,6 @@ export function registerFilesystemIpc(undoRoot: string): void {
   ipcMain.handle("desktop:fsUndoTrash", async (_event, token: string) => {
     if (typeof token !== "string") throw new Error(t("invalidUndo"));
     const original = await undoTrash(token);
-    // The destination is the original, pre-validated path; no arbitrary restore path is accepted.
     markRecentWrite(original);
     return original;
   });

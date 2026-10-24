@@ -5,7 +5,6 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
 export const HEADING_CARET_ATTR = "data-goose-heading-caret";
 
-/** 光标落在 heading 块内容内时，给该 PM 节点打呈现用属性（不写 BlockNote 文档）。 */
 export function resolveHeadingCaretDecoration(
   state: EditorState,
 ): DecorationSet | null {

@@ -230,7 +230,6 @@ export function closeAllWatchers(): void {
     try {
       watcher.close();
     } catch {
-      // ignore
     }
   }
   watchers.clear();

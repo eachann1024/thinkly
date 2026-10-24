@@ -39,7 +39,6 @@ function placeName(location: WeatherCardData["location"]) {
 
 function weekday(day: WeatherDay, index: number) {
   if (index === 0) return t("today");
-  // 日期按地点当地日历解析，取正午避免跨时区回退到前一天。
   const date = new Date(`${day.date}T12:00:00Z`);
   return Number.isNaN(date.getTime()) ? day.date : new Intl.DateTimeFormat(getFormatLocale(), { weekday: "short", timeZone: "UTC" }).format(date);
 }

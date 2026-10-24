@@ -1,8 +1,3 @@
-/**
- * AI 输入框的对外 handle、props 与原生事件表。
- * 被 AiComposerInput、useComposerEditor 使用。
- * 依赖 referenceLookup 类型与 JSONContent。
- */
 import type { JSONContent } from "@/types";
 import type {
  AiComposerPayload,
@@ -14,23 +9,14 @@ import type { ComposerSlashBuiltinId } from "@/lib/notebook-ai/composerSlashComm
 
 export interface AiComposerInputHandle {
  focus: () => void;
- /** 暴露命令式 contenteditable 节点，供外层量内容宽度（只读，勿改样式） */
  getEditorEl: () => HTMLDivElement | null;
  clear: () => void;
  getPayload: () => AiComposerPayload;
- /** 解析 payload 中的内联图片 token → 真实 File 附件，按出现顺序 */
  resolveImages: (
   payload: AiComposerPayload,
  ) => { file: File; previewUrl: string }[];
- /** 在光标处插入图片 chip（无光标时追加到末尾） */
  insertImages: (files: File[]) => void;
- /** 在光标处插入页面引用 chip（无光标时追加到末尾） */
  insertReference: (reference: AiFileReferenceAttrs) => void;
- /**
-  * 把选区引用 chip 追加到输入框末尾。
-  * 本身不 focus；restoreCaret 为 true 时恢复插入前的 caret。
-  * 加入对话由 Composer 在插入后 focus。
-  */
  appendSelectionQuote: (
   quote: AiSelectionQuoteAttrs,
   options?: { restoreCaret?: boolean; animate?: boolean },
@@ -46,7 +32,6 @@ export interface AiComposerInputProps {
  initialContent?: JSONContent | null;
  onContentChange?: (content: JSONContent | null) => void;
  onIsEmptyChange?: (isEmpty: boolean) => void;
- /** 外层布局类：默认 flex-1；两行展开时传 order-first w-full basis-full */
  className?: string;
  onReferenceAdded?: (reference: AiFileReferenceAttrs) => void;
  searchPages?: (query: string) => AiReferenceSuggestionItem[];
@@ -54,15 +39,11 @@ export interface AiComposerInputProps {
  variant?: "compact" | "panel";
  compactWidthClass?: string;
  disabled?: boolean;
- /** 单张图片最大字节数，超出触发 onImageRejected */
  maxImageBytes?: number;
- /** 输入框内最多同时存在的图片数量，超出触发 onImageRejected */
  maxImageCount?: number;
  onImageRejected?: (message: string) => void;
  notebookId?: string;
- /** 选择或发送 /新会话、/压缩 等内置指令 */
  onSlashCommand?: (id: ComposerSlashBuiltinId) => void;
- /** @ 或 / 建议菜单打开、切换或关闭 */
  onSuggestionsChange?: (kind: "mention" | "command" | null) => void;
 }
 

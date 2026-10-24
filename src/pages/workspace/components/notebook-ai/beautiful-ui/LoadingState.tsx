@@ -14,7 +14,6 @@ ja:
 const t = createTranslator(messages);
 
 
-// 兼容调用方的名称，所有进度统一使用一个轻量符号。
 export type LoaderVariant = "Drive" | "Dots" | "Orbit";
 
 export function LoadingState({

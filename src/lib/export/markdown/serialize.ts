@@ -23,11 +23,6 @@ function holdsOwnChildren(block: any): boolean {
   return CHILDREN_CONSUMED_TYPES.has(block?.type) || (block?.type === "heading" && Boolean(block?.props?.isToggleable));
 }
 
-/**
- * 序列化块数组（顶层或任意嵌套层）。
- * 连续列表项用单换行接成一个列表；其余块之间空一行。
- * 标了保留的空段写成额外空行，不写 HTML 注释。
- */
 function serializeBlocks(blocks: any[], indent: string, scope: MarkdownScope): string {
   const parts: MarkdownPart[] = [];
   let index = 0;

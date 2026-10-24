@@ -1,4 +1,3 @@
-/* 字号 / 行高令牌与渲染设置；字体栈见 theme-tokens.css。 */
 :root {
   --goose-type-caption: 11px;
   --goose-type-footnote: 12px;
@@ -23,13 +22,10 @@ body {
   font-feature-settings: "calt" 1;
 }
 
-/* 数字对齐场景（计数、时间、快捷键）。 */
 .goose-tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* 衬线模式走次像素渲染：宋体类字体横画极细，灰度抗锯齿会再掉一档权重。
- * 属性挂在编辑面/页面壳上，平滑属性可继承给正文与标题。 */
 [data-font-family="serif"] {
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;

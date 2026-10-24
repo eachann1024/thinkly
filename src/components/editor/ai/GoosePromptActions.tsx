@@ -46,7 +46,6 @@ export function GoosePromptActions({
             type="button"
             className={`goose-ai-tag${tag.key === "accept" ? " goose-inline-ai-primary" : ""}`}
             onMouseDown={(event) => {
-              // 避免 mousedown 抢走 textarea 焦点导致浮层抖动
               event.preventDefault();
             }}
             onClick={(event) => {

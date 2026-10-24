@@ -1,4 +1,3 @@
-/* 原生光标与文字共用排版、选区和合成输入；不再另画坐标镜像。 */
 :root { --goose-text-caret: hsl(var(--primary)); }
 :is(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]),
 .bn-editor .bn-inline-content { caret-color: var(--goose-text-caret); }

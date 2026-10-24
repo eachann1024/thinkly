@@ -1,7 +1,3 @@
-/**
- * 清除格式：行内 mark、文字色、背景色一次去掉，对齐回到左，链接保留，撤销一步还原。
- * 运行：node scripts/verify/run.mjs clear-format
- */
 import { BlockNoteEditor } from "@blocknote/core";
 import { TextSelection } from "@tiptap/pm/state";
 import { clearSelectionFormatting } from "@/components/editor/toolbars/formatting/formattingActions";

@@ -22,7 +22,6 @@ const patterns = catalogs.flatMap((catalog) => (["zh-Hans", "en", "ja"] as const
   }),
 ));
 
-/** Translate the current status view without rewriting stored diagnostics. */
 export function localizeSavedGitError(message: string, depth = 0): string {
   for (const entry of patterns) {
     const match = entry.pattern?.exec(message);

@@ -42,8 +42,6 @@ type FullscreenPreviewProps = {
 
 export function FullscreenPreview(props: FullscreenPreviewProps) {
   useLocale();
-  // Closed previews exist in every code block. Keep their layout reads and
-  // theme observers out of note navigation until a preview is actually opened.
   if (!props.open || !props.content || typeof document === "undefined") return null;
   return <ActiveFullscreenPreview {...props} />;
 }
@@ -162,7 +160,6 @@ function ActiveFullscreenPreview({
                         ? { background: content.background }
                         : undefined
                     }
-                    // SVG comes from local mermaid/export sanitizers, not raw model HTML.
                     // eslint-disable-next-line react/no-danger
                     dangerouslySetInnerHTML={{
                       __html: normalizeSvgIntrinsicSize(content.markup),

@@ -11,7 +11,6 @@ export type ToolDisplayPart = {
 
 const CARD_TOOL_PARTS = new Set<string>(CARD_TOOL_NAMES.map((name) => `tool-${name}`));
 
-/** 卡片类工具（天气、选项、清单等）与图表一样是纸外 artifact，只出卡片时不再空出一张工作卡。 */
 function isVisualArtifactPart(part: ToolDisplayPart) {
   return (
     CARD_TOOL_PARTS.has(part.type) ||
@@ -32,7 +31,6 @@ function readSkillId(part: ToolDisplayPart) {
   return typeof skill === "string" ? skill : "";
 }
 
-/** 对话是默认能力，成功加载时不出现在处理进度里。 */
 export function isDefaultChatSkillPart(part: ToolDisplayPart) {
   if (part.type !== "tool-loadSkill") return false;
   if (part.state === "output-error" || part.errorText) return false;

@@ -46,7 +46,6 @@ export function useConversationActions(state: SessionState) {
       clearError();
       requestCurrentPageIdRef.current = null;
       options?.onConsumeCapturedSelection?.();
-      // 新会话清空输入草稿，避免把旧会话未发送内容带过去
       useNotebookAiChats.getState().clearComposerDraft(notebookId);
       const nextConversationId = useNotebookAiChats
         .getState()
@@ -125,7 +124,6 @@ export function useConversationActions(state: SessionState) {
 
   const deleteConversation = useCallback(
     (targetConversationId: string) => {
-      // 流式中只拒绝删除当前激活会话，删除其他历史会话不受影响
       if (isBusy && targetConversationId === conversationId) {
         toast.warning(t("waitForTheResponseToFinishBeforeDeleting"));
         return false;
@@ -133,12 +131,10 @@ export function useConversationActions(state: SessionState) {
 
       const chats = useNotebookAiChats.getState();
       if (targetConversationId !== conversationId) {
-        // 非激活会话：只删记录，不影响当前会话内容
         chats.deleteConversation(notebookId, targetConversationId);
         return true;
       }
 
-      // 删除激活会话：不要 persistCurrentConversation（会把内存消息写回刚要删的会话）
       chats.deleteConversation(notebookId, targetConversationId);
       clearError();
       requestCurrentPageIdRef.current = null;
@@ -151,7 +147,6 @@ export function useConversationActions(state: SessionState) {
         return true;
       }
 
-      // 无剩余会话：与新建会话一致，落到空白新会话
       useNotebookAiChats.getState().clearComposerDraft(notebookId);
       const freshConversationId = useNotebookAiChats
         .getState()

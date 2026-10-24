@@ -28,11 +28,6 @@ export type BuildTransportResult =
     }
   | { ok: false; reason: string };
 
-/**
- * 构建绑定指定笔记本的 ChatTransport。
- * 默认 Pi harness；settings.ai.runtime / localStorage goose-ai-runtime 可切 legacy。
- * 每次调用都会重新构建以保证 agent 中的 system prompt 和当前页签上下文是最新的。
- */
 export function buildTransport(
   notebookId: string,
   currentPageId?: string | null,

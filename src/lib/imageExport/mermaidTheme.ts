@@ -1,7 +1,4 @@
 import { TEXT_COLORS } from "@/lib/textColors";
-/**
- * Mermaid 渲染主题：Neo 外形 + 产品色，去掉默认黄底紫盒。
- */
 
 import type { MermaidConfig } from "mermaid";
 

@@ -5,11 +5,6 @@ import { halo as haloField, memoDots, ringBuckets, type Dot } from "../geometry"
 import { DOT_MOTION, rippleDelay } from "../motion";
 import { iconDots, type DotIconName } from "./iconShapes";
 
-/**
- * idle 静态缺省：光晕波纹 + 图标缓慢浮动，品牌蓝点微亮（无光晕的小图标自身做波纹）
- * progress 进行中：图标按行明暗扫过；progress-reverse 自下而上
- * alert 错误：图标一次短促横抖后转入缓慢呼吸
- */
 export type DotIconMotion = "idle" | "progress" | "progress-reverse" | "alert";
 
 const ERROR_COLOR = { color: "hsl(var(--destructive))" };
@@ -24,9 +19,7 @@ type IconArt = {
   neutral: Dot[];
   accent: Dot[];
   error: Dot[];
-  /** 无光晕时图标自身按环波纹 */
   rings: Rings;
-  /** 进行中：按行分带（由上到下） */
   rows: Dot[][];
 };
 
@@ -36,7 +29,6 @@ export type DotIconArtSpec = {
   height: number;
   size: number;
   halo?: boolean;
-  /** 额外避让区域（例如为角落装饰留白）；需配合 clearKey 区分缓存 */
   clear?: (x: number, y: number) => boolean;
   clearKey?: string;
 };
@@ -78,7 +70,6 @@ function HaloRings({ rings }: { rings: Rings }) {
   ));
 }
 
-/** 图标主体（不含 svg 容器），供组合插画复用。 */
 export function DotIconBody({ art, motion = "idle", hasHalo }: { art: IconArt; motion?: DotIconMotion; hasHalo: boolean }) {
   if (motion === "progress" || motion === "progress-reverse") {
     const last = art.rows.length - 1;
@@ -112,7 +103,6 @@ export function DotIconBody({ art, motion = "idle", hasHalo }: { art: IconArt; m
     <DotGroup dots={art.accent} enter={false} loop="glint" period={DOT_MOTION.period.glint} delay={2} />
   ) : null;
   if (!hasHalo) {
-    // 小图标无光晕：自身按环波纹，品牌蓝点微亮
     return (
       <>
         {art.rings.map(({ index, dots }) => (
@@ -130,7 +120,6 @@ export function DotIconBody({ art, motion = "idle", hasHalo }: { art: IconArt; m
   );
 }
 
-/** 点阵图标缺省图：可选光晕；进行中／错误态由 motion 指定。 */
 export function DotIconArt({
   motion = "idle",
   className,

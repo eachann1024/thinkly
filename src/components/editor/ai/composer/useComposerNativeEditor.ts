@@ -1,8 +1,3 @@
-/**
- * 命令式挂载 contenteditable：生命周期内不销毁，避免 React 改属性。
- * 被 AiComposerInput 在原生 handler 赋值之后调用。
- * 依赖 composerTokens、图片 preview portal、宿主空壳 ref。
- */
 import {
   useEffect,
   useLayoutEffect,
@@ -84,7 +79,6 @@ export function useComposerEditor(options: {
     el.dataset.aiComposerEditor = "true";
     el.dataset.aiComposerVariant = variant;
     el.spellcheck = false;
-    // 类名只写一次；之后禁用态用 classList 改，不整段替换
     el.className = [
       "block w-full bg-transparent p-0 text-foreground outline-none",
       "overflow-y-auto break-words whitespace-pre-wrap",
@@ -93,7 +87,6 @@ export function useComposerEditor(options: {
         : "min-h-[20px] max-h-[88px] text-[12px] leading-[20px]",
     ].join(" ");
     el.contentEditable = "true";
-    // 编辑宿主默认可聚焦但不在 Tab 序（tabIndex=-1）；显式 0 才能从工具栏 Tab 进来。
     el.tabIndex = 0;
 
     const onBeforeInput = (event: Event) =>
@@ -116,7 +109,6 @@ export function useComposerEditor(options: {
     const onCompositionEnd = () =>
       nativeHandlersRef.current?.onCompositionEnd();
 
-    // 预览浮层：进入时取消关闭，离开时延迟关闭（每实例独立 portal）
     const previewEl = createImagePreviewPortal();
     imagePreviewElRef.current = previewEl;
     const onPreviewEnter = () => {
@@ -157,7 +149,6 @@ export function useComposerEditor(options: {
     host.appendChild(el);
     editorRef.current = el;
 
-    // 首次种子（若有）：同步空态给发送按钮，避免切回面板时草稿已在但按钮仍灰
     const seed = lastEmittedContentRef.current;
     if (seed) {
       setDomFromJsonContent(el, seed, imageRegistryRef.current);
@@ -187,7 +178,6 @@ export function useComposerEditor(options: {
         clearTimeout(imagePreviewHideTimerRef.current);
         imagePreviewHideTimerRef.current = null;
       }
-      // 仅当本实例持有该 portal 时移除，避免多 composer 互相拆掉
       if (imagePreviewElRef.current === previewEl) {
         previewEl.remove();
         imagePreviewElRef.current = null;
@@ -197,7 +187,6 @@ export function useComposerEditor(options: {
       el.remove();
       editorRef.current = null;
     };
-    // variant 固定按实例；禁止依赖变化重建节点
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -209,7 +198,6 @@ export function useComposerEditor(options: {
     refreshSelectionQuoteLabels(el);
   }, [editorRef, locale]);
 
-  // disabled 只改属性，不重建节点、不碰 className 整串
   useEffect(() => {
     const el = editorRef.current;
     if (!el) return;

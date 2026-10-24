@@ -21,29 +21,19 @@ import type {
 
 export function useComposerContentState(props: AiComposerInputProps) {
   const { initialContent, onContentChange, onIsEmptyChange } = props;
-  /**
-   * contenteditable 必须命令式挂载：一旦由 React 调和 className/aria，
-   * 微信输入法在字一多时必卡。host 只是空壳，真正编辑器永不走 reconcile。
-   */
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const placeholderRef = useRef<HTMLDivElement | null>(null);
   const liveRegionRef = useRef<HTMLSpanElement | null>(null);
   const nativeHandlersRef = useRef<ComposerNativeHandlers | null>(null);
-  /** 标准 composition 标记 */
   const isComposingRef = useRef(false);
   const isEmptyRef = useRef(!composerDraftHasContent(initialContent));
-  // Track the most recent content we emitted upward so we can ignore the echo
-  // back via `initialContent` — otherwise the sync useEffect rebuilds the DOM
-  // on every keystroke, invalidating the live selection and any cached ranges.
   const lastEmittedContentRef = useRef<JSONContent | null | undefined>(
     initialContent,
   );
   const lastReceivedContentRef = useRef(initialContent);
-  // imageId → { file, previewUrl }；chip 只携带可序列化 attrs
   const imageRegistryRef = useRef<ComposerImageRegistry>(new Map());
   const imageDedupRef = useRef(new ImageDedupTracker());
-  /** body 级图片 hover 预览浮层（命令式，非 React） */
   const imagePreviewElRef = useRef<HTMLDivElement | null>(null);
   const imagePreviewHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -53,7 +43,6 @@ export function useComposerContentState(props: AiComposerInputProps) {
 
   const [isEmpty, setIsEmpty] = useState(() => isEmptyRef.current);
 
-  /** 占位符只用 DOM 显隐，避免 IME 中途 setState 触发 React 重渲染 */
   const setPlaceholderVisible = useCallback((visible: boolean) => {
     const node = placeholderRef.current;
     if (!node) return;
@@ -88,14 +77,12 @@ export function useComposerContentState(props: AiComposerInputProps) {
     const el = editorRef.current;
     if (!el) return;
 
-    // 整行删光：轻量路径，避免全量 walk + 同帧 setState 堆在 delete 后面
     if (isEditorDomEmpty(el)) {
       syncEmptyState(true);
       if (lastEmittedContentRef.current != null) {
         lastEmittedContentRef.current = null;
         onContentChange?.(null);
       }
-      // 图片 GC 放到空闲时段，别堵删除
       const registry = imageRegistryRef.current;
       if (registry.size > 0) {
         const runGc = () => {
@@ -123,7 +110,6 @@ export function useComposerContentState(props: AiComposerInputProps) {
         .filter((token) => token.type === "image")
         .map((token) => token.image.imageId),
     );
-    // 删除后的 GC 异步做，减少主线程尖峰
     if (liveIds.size < imageRegistryRef.current.size) {
       const snapshot = new Set(liveIds);
       const runGc = () => gcStaleImages(snapshot);

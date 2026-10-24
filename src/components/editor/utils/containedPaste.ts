@@ -26,7 +26,6 @@ const t = createTranslator(messages);
 type Editor = BlockNoteEditor<any, any, any>;
 const CONTAINERS = new Set(["callout", "quote"]);
 
-/** Only a text selection within one inline block can imply continuing that block. */
 export function containedPasteTarget(state: Pick<EditorState, "selection">) {
   const { selection } = state;
   if (!(selection instanceof TextSelection)) return null;
@@ -38,7 +37,6 @@ export function containedPasteTarget(state: Pick<EditorState, "selection">) {
   const depth = $from.depth - 1;
   const block = $from.node(depth);
   if (block.type.name !== "blockContainer") return null;
-  // First H1 keeps the existing title isolation policy.
   if ($from.before(depth) === 1 && $from.parent.type.name === "heading" && $from.parent.attrs.level === 1) return null;
   let continuation = false;
   $from.parent.forEach((node, offset) => {
@@ -56,10 +54,7 @@ function freshBlocks(blocks: any[]): any[] {
   }));
 }
 
-/** Insert real child blocks at the caret, retaining the suffix and existing children. */
 export function insertContainedBlocks(editor: Editor, blocks: any[]): string[] | null {
-  // 媒体占位块会在外层 transact 中调用；必须复用当前事务，不能读取
-  // prosemirrorState 或自行 dispatch，否则 BlockNote 会在上传前抛错。
   return editor.transact((tr) => {
     const target = containedPasteTarget(tr);
     if (!target || !blocks.length) return null;
@@ -85,7 +80,6 @@ export function insertContainedBlocks(editor: Editor, blocks: any[]): string[] |
   });
 }
 
-/** Shared by native keyboard paste and the context menu; parsing is synchronous. */
 export function pasteInsideCurrentBlock(
   editor: Editor,
   plain: string,
@@ -94,7 +88,6 @@ export function pasteInsideCurrentBlock(
   plainOnly = false,
 ): boolean {
   if (!containedPasteTarget(editor.prosemirrorState) || (!plain && !html && !nativeHtml)) return false;
-  // Preserve the existing URL-over-selection link behavior.
   if (!plainOnly && !/\s/.test(plain.trim()) && isValidUrl(plain.trim())) return false;
   try {
     const internal = normalizeBlockNoteClipboardHtml(nativeHtml || (htmlLooksLikeBlockNoteClipboard(html) ? html : ""));
@@ -110,8 +103,6 @@ export function pasteInsideCurrentBlock(
       blocks = [{ type: "paragraph", content: plain }];
     }
     if (!blocks.length) throw new Error(t("theClipboardContentCouldNotBeRead"));
-    // Paragraph-only content is text within the current block. Structured content
-    // keeps its types and children instead of being flattened into plain text.
     const openSlice = internal.match(/data-pm-slice=["'](\d+)\s+(\d+)/);
     const partialInline = blocks.length === 1 && !blocks[0].children?.length &&
       Array.isArray(blocks[0].content) && openSlice && Number(openSlice[1]) >= 2 && Number(openSlice[2]) >= 2;

@@ -18,7 +18,6 @@ import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import { openSheetConversation, saveSearchAiTranscript } from "../search-sheet/saveSheetConversation";
 import { useSearchSession } from "./useSearchSession";
 
-/** 新开的主窗只先加载当前笔记本，其余本地文件夹在后台陆续加载；等这么久仍找不到就停在搜索结果。 */
 const TARGET_WAIT_MS = 20_000;
 const SETTINGS_KEY = "thinkly-settings";
 
@@ -82,7 +81,6 @@ function notebookForAi(fallbackId: string): string | null {
   return notebooks.notebooks[notebookId] ? notebookId : null;
 }
 
-/** 同一轮问答只落一次。续聊写到主窗当前笔记本，和软件内搜索落在正在编辑的笔记本上一致。 */
 async function rememberSearchAi(command: SearchAiCommand): Promise<{ notebookId: string; conversationId: string } | null> {
   const existing = archivedSearchAi.get(command.token);
   if (existing) return existing;
@@ -130,12 +128,6 @@ function applySearchWindowCommand(command: Exclude<SearchWindowCommand, { type: 
   });
 }
 
-/**
- * 浮动搜索窗选中结果后由主进程转交到这里：先按同样的入口打开应用内搜索（带上查询词），
- * 再走 targetPage → SearchSessionController 在标签中打开，与应用内搜索一致。
- * 续聊、设置、隐藏最近和分屏同样由主窗执行。
- * 须挂在 useSidebarNavigation 之后，保证 goose-note:open-search 已有监听。
- */
 export function useSearchWindowHandoff(): void {
   useEffect(() => {
     const api = getGooseDesktop();

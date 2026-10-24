@@ -17,12 +17,10 @@ export type LastNoteRestoreResult =
 
 let preserveStartupSelection = false;
 
-/** 系统关联打开了 md 时，不要被「不自动打开上次笔记」清成空白首页。 */
 export function shouldPreserveStartupSelection(): boolean {
   return preserveStartupSelection;
 }
 
-/** 关联 Markdown 已打开时调用，避免 restore 盖掉用户刚打开的文件。 */
 export function markAssociatedMarkdownOpened(): void {
   preserveStartupSelection = true;
 }
@@ -33,10 +31,6 @@ type WorkspaceStartupGateOptions = {
   renderError: (error: unknown) => void;
 };
 
-/**
- * 主工作区的首帧提交门。prepare 未完成前绝不调用 render；失败则提交可恢复的错误页。
- * 独立成纯函数是为了能直接验证“恢复先于 React render”这一时序约束。
- */
 export async function renderWorkspaceAfterStartup({
   prepare,
   render,
@@ -70,7 +64,6 @@ const resolveWorkspaceStartupPageId = (
     return lastPageId;
   }
 
-  // 内部记事本沿用统一的落点规则；本地文件夹只有在启动扫描完成后才会走到这里。
   const regularLandingPageId = resolveNotebookLandingPageId(notebookId);
   if (regularLandingPageId) return regularLandingPageId;
 
@@ -92,18 +85,11 @@ export const clearWorkspaceStartupSelection = () => {
   }
 };
 
-/**
- * 在工作区首帧前恢复上次笔记。
- *
- * 页面数据和设置已由 bootstrap 水合完成；这里同步落定 page + tab，避免工作区
- * 先以 activePageId=null 绘制首页，再由 React effect 切回历史内容。
- */
 export function restoreLastNoteIfNeeded(): LastNoteRestoreResult {
   const pagesStore = usePages.getState();
   if (!pagesStore.hydrated) return "not-ready";
   if (pagesStore.activePageId) {
     const current = pagesStore.pages[pagesStore.activePageId];
-    // 桌面端文件夹不是可打开页面：清掉水合残留后再走普通恢复。
     if (!current?.isFolder) return "already-active";
     pagesStore.setActivePage(null);
   }
@@ -114,19 +100,11 @@ export function restoreLastNoteIfNeeded(): LastNoteRestoreResult {
   );
   if (!targetPageId) return "no-history";
 
-  // openTab 先同步选中/创建标签；setActivePage 再同步落定页面。openTab 内部排队的
-  // setActivePage 随后会因 id 相同直接返回，不会造成二次切页。
   useTabs.getState().openTab(targetPageId);
   pagesStore.setActivePage(targetPageId);
   return "restored";
 }
 
-/**
- * 完成主工作区首帧所需的全部异步恢复。
- *
- * 内部页面在 pages hydrate 后已就绪；本地文件夹页面必须先扫描磁盘，否则同步 restore
- * 只能得到空结果，React 就会先绘制首页，再由挂载后的 effect 补上历史页面。
- */
 export async function prepareWorkspaceStartup(): Promise<LastNoteRestoreResult> {
   const pagesStore = usePages.getState();
   if (!pagesStore.hydrated) return "not-ready";
@@ -184,7 +162,6 @@ export async function prepareWorkspaceStartup(): Promise<LastNoteRestoreResult> 
         root,
       );
     } catch (error) {
-      // 单个本地目录不可读不应阻止整个应用出现；loadLocalFolderPages 已记录 error 状态。
       console.error("[bootstrap] 恢复本地文件夹失败", error);
       clearWorkspaceStartupSelection();
       return "local-folder-unavailable";

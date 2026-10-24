@@ -1,7 +1,3 @@
-/**
- * 分屏同步滚动：比例换算、只联动同笔记、关闭与程序滚动不回传、可用性。
- * 运行：node scripts/verify/run.mjs split-scroll
- */
 import {
   createSyncScrollBus,
   scrollRatio,

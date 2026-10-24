@@ -18,10 +18,6 @@ export function useEditorFocus(
     setSuppressFormattingToolbar,
   } = runtime;
   const tasks = useEditorPageTasks(runtime, isActiveEditor);
-  // 冷加载时 BlockNoteView 尚未完全挂定，editor.focus() 会落到 view.dom，
-  // 但此时 contentEditable 还未稳定，焦点会「漏」到侧栏页面重命名输入框等
-  // 下一个可聚焦元素。guard：view 存在、dom 已连入文档且 doc 非空才聚焦；
-  // 否则用 rAF 延后到下一帧（挂载完成）再试，避免冷加载点编辑器丢焦点。
   const focusEditorSafely = useCallback(() => {
     const tryFocus = () => {
       if (editor._tiptapEditor.isDestroyed) return false;
@@ -41,8 +37,6 @@ export function useEditorFocus(
   }, [editor, tasks]);
 
   const focusEditorEnd = useCallback(() => {
-    // 标题一独占文档时（删光正文后）：补空正文并聚焦它，而不是把光标钉回标题末尾。
-    // 守卫 extension 也会补，这里主动插入保证点击当帧光标就落到正文。
     if (
       !usesRawEditorContentRef.current &&
       needsBodyParagraphAfterTitle(editor.document)
@@ -64,8 +58,6 @@ export function useEditorFocus(
 
     const lastBlock = editor.document.at(-1);
     if (lastBlock) {
-      // 表格、代码及无光标块之后补正文，让下方空白点击退出这些块。
-      // 已有末尾正文时直接复用，连续点击不会再追加空行。
       const blockSpecs = editor.schema.blockSpecs as
         | Record<string, { config?: { content?: string } }>
         | undefined;
@@ -98,7 +90,6 @@ export function useEditorFocus(
       focusEditorEnd();
       const view = editor.prosemirrorView;
       if (!view || view.isDestroyed) return;
-      // 光标已经在文末。从这里跟鼠标向上拖，才能跨行选中。
       armBottomBlankSelectionDrag(view, event, view.state.selection.head);
     },
     [editor, focusEditorEnd, setSuppressFormattingToolbar, suppressFormattingToolbarRef],
@@ -114,9 +105,6 @@ export function useEditorFocus(
     [beginBottomBlankSelection, editable, editorContainerRef],
   );
 
-  // 补丁：EditorContextMenu 容器高度 = 内容高度（flex-1 min-h-0），
-  // 点击编辑器内容下方的空白时，event.target 落在外层 page-scroll-container 的背景上，
-  // onMouseDown 不会冒泡到 workspace-editor-surface，所以需要在更上层监听。
   useEffect(() => {
     if (!editable) return;
 
@@ -125,16 +113,13 @@ export function useEditorFocus(
       const container = editorContainerRef.current;
       if (!container) return;
 
-      // 只处理点击落在 page-scroll-container 内但不在 workspace-editor-surface 内的情况
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      if (container.contains(target)) return; // 已由 onMouseDown 处理
+      if (container.contains(target)) return;
       const scrollContainer = target.closest(".page-scroll-container");
       if (!scrollContainer) return;
-      // 分屏时多个编辑器都在听 document：只处理落在本实例滚动容器内的点击。
       if (!scrollContainer.contains(container)) return;
 
-      // 检查 Y 坐标是否在末尾块之下（与 isBottomEditorBlankClick 逻辑一致）
       const blocks = container.querySelectorAll<HTMLElement>(".bn-block-outer");
       const lastBlock = blocks[blocks.length - 1];
       if (!lastBlock) return;
@@ -149,8 +134,6 @@ export function useEditorFocus(
     };
   }, [beginBottomBlankSelection, editable, editorContainerRef]);
 
-  // 消闪 mouseup 清理：空白区域 mousedown 后抑制格式化工具栏，mouseup 时恢复。
-  // 兜底 blur：鼠标拖出窗口松开时 document mouseup 不触发，window blur 覆盖此场景。
   useEffect(() => {
     const clearSuppress = () => {
       if (!suppressFormattingToolbarRef.current) return;

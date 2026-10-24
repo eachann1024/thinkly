@@ -48,8 +48,6 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
       ? [{ type: "paragraph", content: "" }] as ReturnType<typeof createEditorSafeContent>
       : createEditorSafeContent(normalizeContent(page?.content), editorSchema),
   );
-  // 初次 mount 时给 syncedContentSignatureRef 设置基线，
-  // 否则切走时 flush 会把"只读打开"误判成编辑、刷新 updatedAt。
   if (syncedContentSignatureRef.current === null) {
     syncedContentSignatureRef.current = getCachedContentSignature(
       initialContent,

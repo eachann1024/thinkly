@@ -1,4 +1,3 @@
-/** Obsidian / Logseq 风格双链：`[[target]]`、`[[target|alias]]`、`[[target#heading]]`。 */
 
 const WIKI_MEDIA_EXTENSIONS = new Set([
   "png",

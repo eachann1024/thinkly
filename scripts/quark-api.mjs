@@ -2,7 +2,6 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 const API = "https://drive-pc.quark.cn/1/clouddrive";
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
-// 网络错误、超时、HTTP 429 和 5xx 最多再试 4 次，间隔 2s/4s/8s/16s，并加最多 20% 抖动。
 const RETRIES = 4;
 const fileContext = new AsyncLocalStorage();
 const STEPS = {

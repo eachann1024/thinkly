@@ -31,17 +31,14 @@ export function useLocalFileChangeEvents({
   page,
 }: UseLocalFolderWatchOptions) {
   useLocale();
-  // 增量 rename/delete 事件去抖：同一目录连发事件合并，300ms 内只触发一次
   const renameDebounceTimers = useRef<
     Map<string, ReturnType<typeof setTimeout>>
   >(new Map());
 
-  // change 事件 200ms trailing 去抖，避免同一文件连发读盘
   const changeDebounceTimers = useRef<
     Map<string, ReturnType<typeof setTimeout>>
   >(new Map());
 
-  // 监听文件变更事件
   useEffect(() => {
     const processChangeEvent = async (filePath: string) => {
       if (!notebook || isNotebookRescanSuppressed(notebook.id)) return;
@@ -73,7 +70,6 @@ export function useLocalFileChangeEvents({
         }
       };
 
-      // 自写回声：时间窗内直接忽略（主判据仍是内容/指纹 diff）。
       if (selfWrite) {
         debugWatch();
         return;
@@ -138,7 +134,6 @@ export function useLocalFileChangeEvents({
         return;
       }
 
-      // 与全量扫描共用忽略规则：dot / 内置忽略目录 / 用户隐藏目录都不进入增量链路。
       if (
         typeof filename === "string" &&
         shouldIgnoreLocalRelativePath(
@@ -153,7 +148,6 @@ export function useLocalFileChangeEvents({
       if (!gooseFs) return;
       const filePath = `${dirPath}/${filename}`;
 
-      // ── change 事件：单文件 reload ────────────────────────────────────────
       if (eventType === "change") {
         const existing = changeDebounceTimers.current.get(filePath);
         if (existing) clearTimeout(existing);
@@ -165,7 +159,6 @@ export function useLocalFileChangeEvents({
         return;
       }
 
-      // ── rename/delete 事件：增量处理，300ms 去抖合并连发 ─────────────────
       if (eventType === "rename") {
         const debounceKey = filePath;
         const existing = renameDebounceTimers.current.get(debounceKey);
@@ -175,9 +168,6 @@ export function useLocalFileChangeEvents({
           renameDebounceTimers.current.delete(debounceKey);
           if (notebook?.id && isNotebookRescanSuppressed(notebook.id)) return;
 
-          // macOS 的 fs.watch 可能把普通 writeFile 报成 rename。应用自身保存产生的
-          // 这类回声不能按“文件重新出现”处理，否则 addSingleLocalPage 会替换当前页，
-          // 让编辑器选区和滚动视角一起回到文首。
           if (
             wasRecentlySelfMoved(filePath) ||
             wasRecentlySelfWritten(filePath)
@@ -190,13 +180,10 @@ export function useLocalFileChangeEvents({
             : gooseFs.exists(filePath);
 
           if (!exists) {
-            // 文件/目录消失 → 单页移除（md 文件）或全量重扫（目录变化兜底）
             const isMdFile = /\.(md|markdown)$/i.test(filePath);
             if (isMdFile) {
-              // 单文件 md 消失：增量移除
               usePages.getState().removeSingleLocalPage(filePath);
             } else {
-              // 目录变化或非 md 文件：全量重扫兜底
               if (notebook.id && notebook.localPath) {
                 void usePages
                   .getState()
@@ -207,11 +194,8 @@ export function useLocalFileChangeEvents({
               }
             }
           } else {
-            // 文件出现（新建 / rename 到此名）
             const isMdFile = /\.(md|markdown)$/i.test(filePath);
             if (isMdFile && notebook.id && notebook.localPath) {
-              // 延迟到达的自写 rename 事件可能已经超过时间窗。若该路径本来就在
-              // store 中，且磁盘内容仍与写后快照一致，则它只是保存回声，不应重载。
               const existingPage = Object.values(
                 usePages.getState().pages,
               ).find(
@@ -234,7 +218,6 @@ export function useLocalFileChangeEvents({
                 .getState()
                 .addSingleLocalPage(notebook.id, notebook.localPath, filePath);
             } else if (!isMdFile) {
-              // 非 md 文件（可能是目录）：全量重扫兜底
               if (notebook.id && notebook.localPath) {
                 void usePages
                   .getState()

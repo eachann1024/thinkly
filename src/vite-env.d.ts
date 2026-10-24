@@ -13,11 +13,6 @@ interface ImportMetaEnv {
 declare global {
   const __GOOSE_EDITOR_COMPACT__: boolean;
 
-  /**
-   * 编辑器 AI 能力编译开关。主笔记本为 true；速记和原生 macOS 编辑器产物为 false。
-   * 原生编辑器保留数学、Mermaid、视频和代码格式化，
-   * 同时不会把 AI SDK 或 AI 菜单带入生产包。
-   */
   const __GOOSE_EDITOR_AI__: boolean;
 
   interface GooseFs {
@@ -38,7 +33,6 @@ declare global {
     createFileAsync?: (path: string, content: string) => Promise<boolean>;
     exists: (path: string) => boolean;
     existsAsync?: (path: string) => Promise<boolean>;
-    /** 仅 mtimeMs + size，不含 atime。供本地文件夹 watch 指纹快路径使用。 */
     statAsync?: (path: string) => Promise<{ mtimeMs: number; size: number } | null>;
     realpathAsync?: (path: string) => Promise<string | null>;
     watch: (dir: string, cb: any) => any;
@@ -46,14 +40,12 @@ declare global {
     mkdir: (dir: string) => boolean | Promise<boolean>;
     deleteFile: (path: string) => boolean | Promise<boolean>;
     deleteDir: (path: string) => boolean | Promise<boolean>;
-    /** 永久删除 .goose/history 下的内部文件或目录（不进回收站）。 */
     purgeGoose?: (path: string) => Promise<boolean>;
     trashWithUndo?: (path: string) => Promise<string | null>;
     undoTrash?: (token: string) => Promise<boolean>;
     rename: (oldPath: string, newPath: string) => boolean | Promise<boolean>;
     writeTempFile?: (relativePath: string, contentBase64: string) => Promise<string | null>;
     cleanupTempFiles?: (prefix: string, maxAgeMs: number) => Promise<void>;
-    /** 隐藏窗 printToPDF，返回 PDF base64；不可用或失败时为 null。 */
     printHtmlToPdf?: (html: string) => Promise<string | null>;
     selectDirectory?: () => Promise<string | null>;
     restoreLastDirectory?: () => Promise<string | null>;

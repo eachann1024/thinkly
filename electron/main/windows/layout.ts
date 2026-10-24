@@ -84,7 +84,6 @@ export function persistWindowLayout(opts?: { evenIfQuitting?: boolean }): void {
     mkdirSync(app.getPath("userData"), { recursive: true });
     writeFileSync(layoutPath(), serializeWindowLayout(layout));
   } catch {
-    // ignore corrupt disk / first-run races
   }
 }
 

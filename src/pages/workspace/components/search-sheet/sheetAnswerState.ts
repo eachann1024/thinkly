@@ -1,10 +1,8 @@
 import type { InfoCardData } from "@/lib/notebook-ai/cards/types";
 import type { NoteSource } from "./retrieveNotes";
 
-/** 时间线上的一步：name 为阶段（understand/retrieve/thinking/compose）或工具名，subject 为检索词、网址、地点等对象。 */
 export type SheetStep = { id: number; name: string; subject: string; status: "running" | "done" | "error"; count?: number };
 
-/** sources 为预检索摘录（编号与正文 [n] 对应），readPages 为 readPage 实际读过的页面。 */
 type AnswerContent = {
   requestId: number; question: string; sources: NoteSource[]; readPages: NoteSource[]; text: string;
   steps: SheetStep[]; thinking: string; cards: InfoCardData[];
@@ -34,7 +32,6 @@ function settle(steps: SheetStep[], match: (step: SheetStep) => boolean, status:
     : steps;
 }
 
-/** 新的一步开始：先收起仍在运行的思考，再把同名步骤之外的阶段排到末尾。 */
 function startStep(steps: SheetStep[], name: string, subject = ""): SheetStep[] {
   const base = settle(steps, step => step.name === "thinking").filter(step => !(step.name === "compose" && step.status === "running"));
   return [...base, { id: ++stepSeq, name, subject, status: "running" }];
@@ -80,14 +77,12 @@ export function sheetAnswerReducer(state: SheetAnswerState, event: Event): Sheet
   return { ...content, status: "streaming", text: event.text || text, steps: event.text ? withText(steps) : steps };
 }
 
-/** 正文里引用过的摘录编号，兼容 [1]、[1, 2]、[1][2]。 */
 function citedNumbers(text: string) {
   const cited = new Set<number>();
   for (const match of text.matchAll(/\[(\d+(?:\s*[,，、]\s*\d+)*)\]/g)) for (const n of match[1].split(/[,，、]/)) cited.add(Number(n));
   return cited;
 }
 
-/** 来源区只列被 [n] 引用过的摘录（保留原编号）；完成后再补上 readPage 读过、未被引用的页面（无编号）。 */
 export function visibleSources(answer: SheetAnswer): Array<{ index: number | null; source: NoteSource }> {
   const cited = citedNumbers(answer.text);
   const list: Array<{ index: number | null; source: NoteSource }> = answer.sources.flatMap((source, i) => cited.has(i + 1) ? [{ index: i + 1, source }] : []);

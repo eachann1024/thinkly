@@ -26,10 +26,6 @@ export function listVisibleWorkspaceTabs(
   );
 }
 
-/**
- * 仅用于判断窗口内是否只剩一个真实可见标签（例如关闭快捷键）。
- * 不得用它复用或替换已有笔记标签。
- */
 export function findLoneVisibleWorkspaceTab(
   openTabs: TabItem[],
   getPage: (id: string) => Page | undefined,
@@ -39,7 +35,6 @@ export function findLoneVisibleWorkspaceTab(
   return visible.length === 1 ? visible[0] : null;
 }
 
-/** 加号新建的欢迎页或空白未落盘页，打开其他文档时应填入该标签。 */
 export function isReusableEmptyWorkspaceTab(
   tab: TabItem | null | undefined,
   getPage: (id: string) => Page | undefined,

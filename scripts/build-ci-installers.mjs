@@ -7,13 +7,9 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-// Usage: build-ci-installers.mjs <platform> <arch> [--stage=all|unpacked|installer|collect]
-// "all" (default) builds and collects in one go. Windows signing (SignPath) splits the build so the
-// workflow can sign between stages: unpacked → sign app exe → installer (prepackaged) → sign → collect.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const [platform, arch] = process.argv.slice(2);
 const stage = process.argv.find(arg => arg.startsWith('--stage='))?.slice('--stage='.length) ?? 'all';
-// mac ZIPs feed the app's verified download-and-install flow, including unsigned builds.
 const targets = { win: ['nsis'], mac: ['dmg', 'zip'], linux: ['AppImage', 'deb', 'pacman'] };
 const host = { win: 'win32', mac: 'darwin', linux: 'linux' };
 if (process.platform !== host[platform] || !['x64', 'arm64'].includes(arch) || (platform === 'linux' && arch !== 'x64')) {
@@ -31,7 +27,6 @@ const appExe = 'Thinkly.exe';
 
 function macNameArgs() {
   if (platform !== 'mac') return [];
-  // 用户指定 artifactName 后，electron-builder 不再为默认架构 x64 去掉 ${arch}。
   const archSuffix = arch === 'arm64' ? '-arm64' : '';
   return [
     `--config.dmg.artifactName=Thinkly-\${version}${archSuffix}.\${ext}`,
@@ -44,8 +39,6 @@ function builder(...args) {
     resolve(root, 'node_modules/electron-builder/out/cli/cli.js'), ...args, ...macNameArgs(), `--${arch}`, '--publish', 'never',
   ];
   const env = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' };
-  // dmgbuild 在 hdiutil “Resource busy” 时会先 detach -force，然后仍然失败，压缩 DMG 不会生成。
-  // 只重试 macOS；Windows / Linux 仍是一次执行。
   if (platform !== 'mac') {
     execFileSync(process.execPath, command, { cwd: pack, stdio: 'inherit', env });
     return;
@@ -78,7 +71,6 @@ function ownDmgBasename() {
 }
 
 function busyImageDevices(images, output) {
-  // 只卸载本次 dmgbuild 报错的那块盘。镜像必须是这次产物的临时 DMG，或挂载点正好是 /Volumes/Thinkly。
   const named = new Set([...output.matchAll(/couldn't eject "?(disk\d+)"?[^\n]*Resource busy/g)].map(match => match[1]));
   const dmgName = ownDmgBasename();
   const devices = [];
@@ -251,7 +243,6 @@ if (signed) {
   assertAuthenticode(resolve(unpacked, appExe));
 }
 
-// Verify the runtime icon inside the actual packaged app, not only the input directory.
 const builderRequire = createRequire(resolve(root, 'node_modules/electron-builder/package.json'));
 const appBuilderRequire = createRequire(builderRequire.resolve('app-builder-lib/package.json'));
 const { extractFile } = appBuilderRequire('@electron/asar');
@@ -275,7 +266,6 @@ for (const file of files) {
   cpSync(from, resolve(output, file));
 }
 const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
-// Hashes are computed here, after signing, so SHA256SUMS and the update feed describe the signed files.
 writeFileSync(resolve(output, 'BUILD.json'), JSON.stringify({
   commit, version: pkg.version, platform, arch,
   signed: platform === 'mac' ? Boolean(process.env.CSC_LINK) : signed,

@@ -21,7 +21,6 @@ const DEFAULTS = {
   search: "CmdOrCtrl+Shift+K",
 };
 
-/** Windows 全局热键：加速键写成 Control/Alt/Shift，三条都会交给 register，且不限于 macOS。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

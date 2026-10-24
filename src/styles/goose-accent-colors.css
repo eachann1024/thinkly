@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./accent/cool-presets.css";
 @import "./accent/warm-presets.css";
 @import "./accent/cool-selection.css";

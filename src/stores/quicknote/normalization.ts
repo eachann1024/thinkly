@@ -36,7 +36,6 @@ export function normalizeDrafts(
     }
     return empty;
   }
-  // 旧版单草稿：迁移到槽位 1
   if (legacyDraft !== undefined) {
     empty[1] = legacyDraft ?? null;
   }

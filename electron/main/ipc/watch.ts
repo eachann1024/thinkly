@@ -49,7 +49,6 @@ export function registerWatchIpc(): void {
     try {
       watcher?.close();
     } catch {
-      // ignore
     }
   });
 }

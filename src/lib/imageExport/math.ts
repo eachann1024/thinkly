@@ -31,11 +31,6 @@ function getCodeBlockText(block: any): string {
   return content == null ? "" : String(content);
 }
 
-/**
- * 将 KaTeX HTML 栅格化为 PNG data URL。
- * 不用 SVG foreignObject 作 img src（浏览器兼容差）；
- * 离屏 DOM + html-to-image 截图更稳。
- */
 async function mathHtmlToPngDataUrl(html: string, theme: CardTheme): Promise<string> {
   const { captureElementAsPngBlob } = await import("./svgToPng");
 
@@ -78,10 +73,8 @@ async function renderMathBlockAsImage(block: any, theme: CardTheme): Promise<voi
 
   try {
     const { default: katex } = await import("katex");
-    // 确保 katex CSS 已注入（MathView 运行时会带；导出时可能未加载）
     if (typeof document !== "undefined" && !document.getElementById("goose-katex-css")) {
       try {
-        // 动态 import 副作用 CSS 可能不可用；忽略失败，依赖内联样式
         const link = document.createElement("link");
         link.id = "goose-katex-css";
         link.rel = "stylesheet";
@@ -93,7 +86,6 @@ async function renderMathBlockAsImage(block: any, theme: CardTheme): Promise<voi
           setTimeout(() => resolve(), 1500);
         });
       } catch {
-        // ignore
       }
     }
 

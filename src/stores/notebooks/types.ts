@@ -1,19 +1,16 @@
 export interface Notebook {
   id: string;
   name: string;
-  icon?: string; // emoji 或 Lucide 图标名
+  icon?: string;
   createdAt: number;
   updatedAt: number;
-  /** 用户自定义排序；缺省时回退 createdAt */
   order?: number;
   source?: "default" | "local-folder";
-  localPath?: string; // 本地文件夹路径
+  localPath?: string;
   localPathMissing?: boolean;
-  /** 开启后不出现在「所有记事本」全局搜索；当前本搜索仍可见 */
   excludeFromGlobalSearch?: boolean;
 }
 
-/** 按 order（缺省 createdAt）升序；同值再用 createdAt 稳定排序 */
 export function sortNotebooksByOrder(
   notebooks: Record<string, Notebook>,
 ): Notebook[] {
@@ -65,12 +62,10 @@ export interface NotebooksState {
   getLocalFolderLoadState: (notebookId: string) => LocalFolderLoadState;
 }
 
-// 生成唯一ID
 export function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
-// 默认记事本
 export const DEFAULT_NOTEBOOK_ID = "default-notebook";
 
 export const DEFAULT_NOTEBOOK = DEFAULT_NOTEBOOK_ID;

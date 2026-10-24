@@ -21,10 +21,6 @@ function parseSvgLength(value: string | null | undefined): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-/**
- * 量 SVG 固有尺寸。scrollWidth 在旧 Chromium / flex 窄列里常被压成容器宽，
- * 导致 fit 比例=1、再居中 → 左右被 overflow 裁切（用户看到的「遮挡」）。
- */
 export function measureArtifactContentSize(content: HTMLElement): {
   width: number;
   height: number;
@@ -41,7 +37,6 @@ export function measureArtifactContentSize(content: HTMLElement): {
         }
       }
     } catch {
-      // 未插入布局时 getBBox 会抛错
     }
 
     const vb = svg.viewBox?.baseVal;
@@ -56,7 +51,6 @@ export function measureArtifactContentSize(content: HTMLElement): {
     }
   }
 
-  // 临时去掉 transform 再量，避免已缩放时 scrollWidth 失真
   const prevTransform = content.style.transform;
   content.style.transform = "none";
   const width = Math.max(content.scrollWidth, content.offsetWidth, 1);

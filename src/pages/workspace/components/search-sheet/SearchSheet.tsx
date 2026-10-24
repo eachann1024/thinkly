@@ -112,7 +112,6 @@ import { handleSearchSheetKeyDown, handleSearchSheetKeyDownCapture } from "./sea
 import { useSheetActions } from "./useSheetActions";
 import "./search-sheet.css";
 
-/** variant="window"：浮动搜索窗铺满窗口；打开结果、续聊、设置与分屏交给主窗。 */
 type SearchSheetProps = {
   aiNotebookId: string | null;
   variant?: "sheet" | "window";
@@ -225,7 +224,6 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const busy = hasQuery && (loading || pending);
   const scopeAll = session.scope.kind === "all";
   const tabScopeName = scopeAll ? notebooks[session.startingNotebookId ?? ""]?.name || uiText("currentNotebook") : uiText("allNotebooks");
-  // 尚无可展示的行时用骨架占位；保留旧结果刷新时不替换。
   const awaitingRows = !searchError && !results.length && (busy || (!hasQuery && showRecent && isSearching));
   const statusKind = searchError ? "error" : awaitingRows || results.length ? null : hasQuery ? "none" : "empty";
   const count = searchError || !hasQuery ? "" : busy ? uiText("searching") : uiText("noteCount", {count: total});

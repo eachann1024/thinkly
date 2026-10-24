@@ -40,7 +40,6 @@ function isLocalSidecarUrl(src: unknown): boolean {
   return !isRemoteOrEmbeddedUrl(src);
 }
 
-/** 页面是否含需要随单页导出打包的本地 file / video / audio（不含纯 http 与已内联 data）。 */
 export function pageHasLocalSidecarAttachments(content: unknown): boolean {
   if (!Array.isArray(content)) return false;
   for (const block of content) {
@@ -127,10 +126,6 @@ async function buildMainFile(
   };
 }
 
-/**
- * 单页导出：有本地 file/video/audio 时打 ZIP（主文件 + assets/），否则仍是单文件。
- * PDF 渲染由调用方传入 blob，这里只负责是否打包附件。
- */
 export async function buildSinglePageExport(
   page: Page,
   format: SinglePageExportFormat,

@@ -2,9 +2,6 @@ import { createExtension } from "@blocknote/core";
 // @ts-ignore
 import { InputRule, inputRules } from "@handlewithcare/prosemirror-inputrules";
 
-/**
- * Tiptap plugin key for the arrow input rule.
- */
 function arrowInputRulePlugin() {
   return inputRules({
     rules: [

@@ -24,7 +24,6 @@ export function createWorkspaceHotkeys(
     createNewNoteFromHotkey,
   } = actions;
   return [
-    // 新建笔记固定为 Mod+N，不跟随同步配置变化。
     {
       id: "new-note",
       match: (event) =>
@@ -92,7 +91,6 @@ export function createWorkspaceHotkeys(
         if (page) void copyLocalFolderPagePath(page);
       },
     },
-    // toggle theme (Mod+Shift+L)
     {
       id: "toggle-theme",
       shortcutId: "toggleTheme",
@@ -105,7 +103,6 @@ export function createWorkspaceHotkeys(
         useSettings.getState().toggleDarkMode();
       },
     },
-    // nav-back / nav-forward (Mod+[ / Mod+])
     {
       id: "nav-back",
       shortcutId: "navBack",

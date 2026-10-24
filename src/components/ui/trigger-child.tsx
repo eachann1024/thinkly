@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 type ChildProps = React.HTMLAttributes<HTMLElement> & {
   ref?: React.Ref<HTMLElement>;
 };
-/** HeroUI render 的单子节点桥：保留已有 DOM/ref，先执行业务事件，再执行未取消的触发事件。 */
 export function TriggerChild({
   child,
   injected,

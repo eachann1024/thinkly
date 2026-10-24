@@ -15,10 +15,8 @@ export function useWorkspaceEvents({
   const { ai } = useSettings();
   const lastViewedPageIdRef = useRef<string | null>(null);
 
-  // Suppress unused-variable lint: ai.enabled used in future NotebookAiPanel hookup
   void ai;
 
-  // Close AI page when switching pages (kept for future NotebookAiPanel hookup)
   useEffect(() => {
     if (!activePageId || !page) {
       lastViewedPageIdRef.current = null;

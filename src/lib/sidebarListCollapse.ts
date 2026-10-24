@@ -2,7 +2,6 @@ import { OPEN_ESCAPE_LAYER_SELECTOR, OPEN_TOAST_SELECTOR } from "@/lib/escape-cl
 import { usePages } from "@/stores/usePages";
 import { useSidebarView } from "@/stores/useSidebarView";
 
-/** 侧栏页面树 / 收藏树：点过这里之后 Esc 收起全部展开项。 */
 export const SIDEBAR_PAGE_LIST_SELECTOR = [
   ".rct-main-tree",
   "[data-sidebar-page-list]",
@@ -78,7 +77,6 @@ export function shouldCollapseSidebarListOnEscape(event: {
     return false;
   }
   if (hasSidebarListEscapeOverlay()) return false;
-  // A remembered sidebar click must not steal Escape after keyboard focus enters the editor.
   const target = asClosestNode(event.target);
   if (target?.closest(SIDEBAR_LIST_EDITABLE_SELECTOR + ", .bn-editor")) return false;
   return sidebarListArmed || isSidebarPageListTarget(event.target);
@@ -105,7 +103,6 @@ function isUsableSidebarPage(
   return true;
 }
 
-/** 侧栏 Esc 收起时要露出的目标：选中行 > 焦点行 > 当前打开页。 */
 export function resolveSidebarCollapseTargetId(
   notebookId: string,
   options: {
@@ -127,10 +124,6 @@ export function resolveSidebarCollapseTargetId(
   return null;
 }
 
-/**
- * 当前笔记要可见时必须展开的祖先（不含自身）。
- * 中途遇到已删、跨笔记本或环则停，避免把无效父级展开。
- */
 export function collectSidebarRevealAncestorIds(
   pages: Record<string, SidebarCollapsePage>,
   pageId: string | null | undefined,

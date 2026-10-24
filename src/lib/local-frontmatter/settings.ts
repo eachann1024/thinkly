@@ -6,7 +6,6 @@ export const GOOSE_LOCKED_KEY = "goose-locked";
 export const GOOSE_PINNED_KEY = "goose-pinned";
 export const GOOSE_FAVORITE_KEY = "goose-favorite";
 
-/** 会写入 / 从 frontmatter 恢复的 Page 字段 */
 export const LOCAL_PAGE_FRONTMATTER_SETTINGS_KEYS = [
   "fontFamily",
   "pageLayout",
@@ -51,7 +50,6 @@ export function normalizePageLayout(value: unknown): PageLayout {
 function normalizeFont(value: unknown): FontFamily {
   if (typeof value !== "string") return "default";
   const trimmed = value.trim().toLowerCase();
-  // 兼容早期/手写 default、sans
   if (trimmed === "sans" || trimmed === "default") return "default";
   if (trimmed === "serif" || trimmed === "mono") return trimmed;
   return "default";

@@ -1,14 +1,4 @@
 import { TEXT_COLORS } from "@/lib/textColors";
-/**
- * PDF 导出 block mapping。
- *
- * 在项目手写默认映射之上提供自定义 / 视觉块：
- *   - callout      —— 浅色导出：左侧强调色 + 笔记页同色背景 + emoji icon
- *   - file/video/audio —— 可读占位（文件名），不把本地/data URL 丢给 react-pdf 去 fetch
- *   - codeBlock    —— mermaid/math/latex 渲成 PNG；失败才回退源码
- *   - image        —— 任意本地/插件/远程 URL 先转栅格 data URL 再嵌入
- *   - heading      —— 折叠标题加 ▾，子块由 renderer 缩进输出
- */
 
 
 import type { ReactElement } from "react";
@@ -47,7 +37,6 @@ function isHttpUrl(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
 
-/** 延迟加载 PDF primitive，不加载编辑器或第三方默认映射。 */
 export async function createPdfBlockMappings(options?: PdfBlockMappingOptions) {
   const { View, Text, Link, Image } = await import("@react-pdf/renderer");
   const { createDefaultPdfBlockMappings } = await import("./renderer");
@@ -133,7 +122,6 @@ export async function createPdfBlockMappings(options?: PdfBlockMappingOptions) {
     ) as unknown as ReactElement<typeof Text>;
   };
 
-  // ----- callout -----
   const calloutMapping = (block: any, exporter: any): ReactElement<typeof Text> => {
     const icon = resolveCalloutIcon(block.props?.icon as string | undefined);
     return (

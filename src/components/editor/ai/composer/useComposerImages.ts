@@ -1,8 +1,3 @@
-/**
- * 输入框内联图片：注册表、hover 预览、插入/移除、卸载释放。
- * 被 AiComposerInput 在 Skill 预热 effect 之后调用。
- * 依赖 composerImageChip、imageDedup、composerTokens、skill 光标锚点。
- */
 import { useCallback, useEffect, useState } from "react";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import type { AiImageAttachmentAttrs } from "./referenceLookup";
@@ -169,7 +164,6 @@ export function useComposerImages(options: ComposerImagesOptions) {
         onImageRejected?.(t("imagesAdded", { count: accepted.length }));
       }
 
-      // 确保 selection 落在编辑器内（否则追加到末尾）
       const selection = window.getSelection();
       const inside =
         selection &&
@@ -187,7 +181,6 @@ export function useComposerImages(options: ComposerImagesOptions) {
       const range = window.getSelection()!.getRangeAt(0);
       range.deleteContents();
 
-      // Spacing via CSS margin on .ai-composer-chip; no spacer text nodes.
       const frag = document.createDocumentFragment();
       let lastChip: HTMLSpanElement | null = null;
       for (const { file, attrs } of accepted) {
@@ -203,7 +196,6 @@ export function useComposerImages(options: ComposerImagesOptions) {
       ensureComposerCaretAnchors(el);
 
       if (lastChip) {
-        // 落在 ZWSP/文本节点上，旧 Chromium 才能画出 caret
         placeCaretAfterNode(lastChip);
       }
 

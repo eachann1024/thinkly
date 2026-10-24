@@ -20,9 +20,6 @@ function getDocumentTitleId(editor: AnyEditor): string | undefined {
   return getProtectedTitleBlockId(editor);
 }
 
-/**
- * 当前需要移动的 blocks：有多选时用选区，否则用光标所在块。
- */
 export function getBlocksToMove(editor: AnyEditor): AnyBlock[] {
   if (isBlockNodeSelection(editor.prosemirrorState)) {
     const roots = selectedBlockRoots(editor.prosemirrorState);
@@ -38,9 +35,6 @@ export function getBlocksToMove(editor: AnyEditor): AnyBlock[] {
   );
 }
 
-/**
- * 复刻 BlockNote getMoveUpPlacement 的最小逻辑（不处理 columnList 递归）。
- */
 function getMoveUpPlacement(
   editor: AnyEditor,
   prevBlock?: AnyBlock,
@@ -69,9 +63,6 @@ function getMoveUpPlacement(
   return { referenceBlock, placement };
 }
 
-/**
- * 若上移最终会把 blocks 插到文档标题一之前，返回 true。
- */
 export function wouldMoveBeforeDocumentTitle(
   editor: AnyEditor,
   blocks: AnyBlock[],
@@ -101,10 +92,6 @@ export function wouldMoveBeforeDocumentTitle(
   return placement.placement === "before" && referenceId === titleId;
 }
 
-/**
- * Option/Alt+↑/↓ 移动当前选中/光标块。
- * 始终返回 true（吞键），即使 no-op（含标题保护）。
- */
 export function moveSelectedBlocksByShortcut(
   editor: AnyEditor,
   direction: MoveDirection,
@@ -149,7 +136,6 @@ export function moveSelectedBlocksByShortcut(
     } else if (direction === "up") editor.moveBlocksUp();
     else editor.moveBlocksDown();
   } catch {
-    // 吞掉异常，保证快捷键始终被消费
   }
 
   return true;

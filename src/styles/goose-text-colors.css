@@ -1,6 +1,5 @@
 @import "./goose-text-palette.css";
 
-/* Text roles use opaque colors. Disabled state must never fade explanatory text. */
 @layer base {
   :where(input, textarea)::placeholder {
     color: var(--goose-text-placeholder);
@@ -34,7 +33,6 @@
   cursor: not-allowed;
 }
 
-/* HeroUI owns disabled opacity on the label, native controls own it on the input. */
 :is(.checkbox, .radio):is([data-disabled="true"], [aria-disabled="true"]),
 .checkbox--disabled,
 .radio--disabled {
@@ -50,7 +48,6 @@
   color: var(--goose-text-disabled);
 }
 
-/* Explicit status roles survive hover, selection and disabled parent inheritance. */
 .text-danger,
 [data-text-role="danger"] {
   color: var(--goose-text-danger);

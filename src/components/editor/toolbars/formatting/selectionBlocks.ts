@@ -1,9 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 
-/**
- * AI 菜单需要 block id 锚点。表格 / CellSelection 下 getTextCursorPosition 可能抛错，
- * 依次回退：光标块 → 选区首块 → 选区起点最近 blockContainer。
- */
 export function resolveFormattingToolbarAiBlockId(
   editor: BlockNoteEditor<any, any, any>,
 ): string | null {
@@ -11,7 +7,6 @@ export function resolveFormattingToolbarAiBlockId(
     const cursorBlock = editor.getTextCursorPosition()?.block;
     if (cursorBlock?.id) return cursorBlock.id;
   } catch {
-    /* table cell selection */
   }
 
   try {
@@ -19,7 +14,6 @@ export function resolveFormattingToolbarAiBlockId(
     const first = selected?.[0];
     if (first?.id) return first.id;
   } catch {
-    /* ignore */
   }
 
   try {
@@ -34,7 +28,6 @@ export function resolveFormattingToolbarAiBlockId(
         return node.attrs.id;
       }
     }
-    // 少数 schema 把 id 挂在内容节点上
     for (let d = $pos.depth; d > 0; d -= 1) {
       const node = $pos.node(d);
       if (typeof node.attrs?.id === "string" && node.attrs.id) {
@@ -43,15 +36,10 @@ export function resolveFormattingToolbarAiBlockId(
     }
     void doc;
   } catch {
-    /* ignore */
   }
 
   return null;
 }
-/**
- * 选区真正落在内容上的 blockContainer id。
- * 有内联内容的块要求与选区有非空交集；空段落 / 媒体块要求被选区完整覆盖。
- */
 export function collectSelectedContentBlockIds(
   editor: BlockNoteEditor<any, any, any>,
 ): Set<string> {
@@ -77,10 +65,6 @@ export function collectSelectedContentBlockIds(
   return ids;
 }
 
-/**
- * 剔除选区端点恰好停在块边界、实际一个字都没选中的块。
- * BlockNote getSelection() 按位置区间取块，从上一段末尾起拖选会把上一段一起带上。
- */
 export function dropBlocksWithoutSelectedContent(
   editor: BlockNoteEditor<any, any, any>,
   blocks: any[],
@@ -99,9 +83,6 @@ export function dropBlocksWithoutSelectedContent(
   return filtered.length > 0 ? filtered : blocks;
 }
 
-/**
- * Safe selected-blocks lookup. Table / CellSelection 下 getSelection 可能抛错。
- */
 export function getSelectedBlocksSafe(
   editor: BlockNoteEditor<any, any, any>,
 ): any[] {
@@ -111,17 +92,14 @@ export function getSelectedBlocksSafe(
       return dropBlocksWithoutSelectedContent(editor, selected);
     }
   } catch {
-    /* table cell selection */
   }
 
   try {
     const cursorBlock = editor.getTextCursorPosition()?.block;
     if (cursorBlock) return [cursorBlock];
   } catch {
-    /* ignore */
   }
 
-  // PM 回退：收集选区覆盖的 blockContainer id 对应块
   try {
     const { selection, doc } = editor.prosemirrorState;
     const ids = new Set<string>();

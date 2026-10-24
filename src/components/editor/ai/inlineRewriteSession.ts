@@ -15,7 +15,6 @@ export type InlineMenuState =
       error?: unknown;
     };
 
-/** Request ownership is independent of fetch cancellation (providers can finish late). */
 export function createInlineRewriteSession<Target, Draft>(deps: {
   getState: () => InlineMenuState;
   setState: (state: InlineMenuState) => void;

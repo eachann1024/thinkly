@@ -5,7 +5,6 @@ const solidWindows = new Set<BrowserWindow>();
 const publishers = new Set<BrowserWindow>();
 export function appearanceBackgroundColor(): string {
   if (snapshot) return snapshot.backgroundColor;
-  // renderer 发布权威语义色之前的安全首帧兜底。
   return nativeTheme.shouldUseDarkColors ? "#191919" : "#ffffff";
 }
 export function bindWindowAppearance(win: BrowserWindow, material = false, publishes = true): void {
@@ -26,7 +25,6 @@ export function registerAppearanceIpc(): void {
   ipcMain.handle("desktop:appearance-get", () => snapshot);
   ipcMain.on("desktop:appearance-publish", (event, payload: AppearanceSnapshot) => {
     const sender = BrowserWindow.fromWebContents(event.sender);
-    // 独立工具窗口仅订阅，不能把本 partition 的默认设置广播到工作区。
     if (!sender || !publishers.has(sender) || !payload ||
       !["light", "dark", "system"].includes(payload.theme) ||
       !["light", "dark"].includes(payload.resolvedTheme) ||
@@ -43,8 +41,6 @@ export function registerAppearanceIpc(): void {
     }
   });
   nativeTheme.on("updated", () => {
-    // 有权威快照时，由共享 renderer 系统主题监听发布新的解析色。
-    // 不把上一模式颜色与新的 resolvedTheme 拼成不一致的快照。
     if (!snapshot) updateBackgrounds();
   });
 }

@@ -1,4 +1,3 @@
-/* 只接真实选择控件；普通操作菜单、单文档标题和颜色样本保持原本语义。 */
 .goose-accent-selection,
 [data-goose-control="theme-preview-card"],
 [data-goose-setting-choice="true"] {
@@ -24,7 +23,6 @@
   box-shadow: inset 0 0 0 1px var(--goose-selection-border);
 }
 
-/* 设置选择器的勾号使用可读强调文字；操作菜单和禁用项仍继承正文。 */
 .goose-floating-surface [data-goose-menu-slot="row"]:is([data-selected="true"], [data-goose-selected="true"]):where(
   :not([data-disabled="true"]):not([aria-disabled="true"]):not(.goose-accent-option)
 ) [data-goose-selection-indicator="true"] {

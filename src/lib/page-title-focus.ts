@@ -26,10 +26,6 @@ export function isPageTitleFocusRequested(pageId: string): boolean {
   return pendingPageId === pageId;
 }
 
-/**
- * 新建标题聚焦期间，侧栏只同步选中/展开，不应通过 focusItem 抢走 DOM 焦点。
- * 请求完成后保留一个短保护期，覆盖侧栏 activePageId effect 的 80ms 延迟任务。
- */
 export function isPageTitleAutoFocusProtected(pageId: string): boolean {
   return pendingPageId === pageId || protectedPageId === pageId;
 }
@@ -56,7 +52,6 @@ export function subscribePageTitleFocus(
   return () => window.removeEventListener(FOCUS_PAGE_TITLE_EVENT, handle);
 }
 
-/** 本地文件与未落盘草稿使用正文大标题；文件夹与速记草稿除外。 */
 export function hasDocumentTitle(page: Page | null | undefined): boolean {
   if (!page || page.isFolder || page.id === "__quicknote_draft__") return false;
   return Boolean(page.localFilePath || page.localUnsaved);

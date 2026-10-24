@@ -25,8 +25,6 @@ export function useQuickNoteEditorActions(
     displaySlot,
   } = input;
 
-  // 草稿内容变更：写入「当前显示的槽位」（正式 active 或 scrub 预览）。
-  // 用 displaySlot 闭包锁定槽号，避免切换后旧实例尾随 onChange 串写。
   const onDraftChange = useMemo(() => {
     const boundSlot = displaySlot;
     return (content: BlockNoteContent) => {

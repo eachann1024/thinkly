@@ -33,7 +33,6 @@ function belongsToSearchNotebook(
   );
 }
 
-/** 搜索面板只收录可打开的笔记；local-folder 目录节点仅用于侧栏导航。 */
 export function isCommandSearchablePage(
   page: Page,
   notebooks: Record<string, SearchNotebook | undefined>,
@@ -49,11 +48,6 @@ export function isCommandSearchablePage(
   );
 }
 
-/**
- * 「所有记事本」搜索时，排除设置了 excludeFromGlobalSearch 的笔记本页面。
- * 当前正在看的记事本始终纳入，避免「当前本能搜到、切到所有反而没有」。
- * 当前本搜索不在这里拦截（由 activeNotebook 范围过滤负责）。
- */
 export function shouldIncludePageInCommandScope(
   page: Page,
   notebooks: Record<string, SearchNotebook | undefined>,

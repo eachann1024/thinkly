@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, useReducedMotion, type Transition, type Variants } from "motion/react";
 
-/** ease-out-expo：快速离开、长尾落定，用于计数与高度展开。 */
 export const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
-/** 卡片入场：临界阻尼附近的弹簧（ζ≈0.93），无回弹但落点柔和。 */
 export const CARD_SPRING: Transition = { type: "spring", stiffness: 420, damping: 38, mass: 1 };
-/** 行内条目：更轻的弹簧，配合 stagger 依次落定。 */
 export const ROW_SPRING: Transition = { type: "spring", stiffness: 520, damping: 40, mass: 0.8 };
 
 export const cardVariants: Variants = {
@@ -19,7 +16,6 @@ export const rowVariants: Variants = {
   shown: { opacity: 1, y: 0, transition: ROW_SPRING },
 };
 
-/** 数字从 0 附近滚到目标值，时长 0.7s ease-out-expo；减少动态效果时直接显示终值。 */
 export function useCountUp(target: number, { from, duration = 0.7 }: { from?: number; duration?: number } = {}) {
   const reduce = useReducedMotion();
   const still = Boolean(reduce) || !Number.isFinite(target);
@@ -32,7 +28,6 @@ export function useCountUp(target: number, { from, duration = 0.7 }: { from?: nu
   return still ? target : value;
 }
 
-/** 结果变化时从当前显示值补间到新值（0.35s ease-out-expo），拖动滑块时数字连续滚动。 */
 export function useTween(target: number | null) {
   const reduce = useReducedMotion();
   const [shown, setShown] = useState(target ?? 0);

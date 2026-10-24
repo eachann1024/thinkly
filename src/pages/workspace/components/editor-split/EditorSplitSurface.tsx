@@ -113,9 +113,6 @@ function SplitPane({
       data-zoomed={zoomed ? "true" : "false"}
       data-pane-id={leaf.id}
       onPointerDownCapture={() => {
-        // 只同步当前分屏与全局页面状态。不可在本次 pointer 的默认选区之后
-        // 再 rAF 聚焦编辑器，否则表格 cell、正文、嵌入输入框中的落点会被
-        // `focus-editor-body` 重置到页面开头。
         if (!focused) focusSplitPane(tabId, leaf.id, { focusEditor: false });
       }}
       onContextMenu={

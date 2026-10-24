@@ -6,9 +6,6 @@ const LIST_ITEM_TYPES = new Set([
   "checkListItem",
 ]);
 
-/**
- * 与 serializeBlocks 对齐：连续列表项合并为一段，其余一块一段。
- */
 export function buildSegments(blocks: any[]): Array<{
   start: number;
   end: number;
@@ -59,10 +56,6 @@ export function findAllOccurrences(haystack: string, needle: string): number[] {
   return positions;
 }
 
-/**
- * 折叠水平空白（空格/Tab）后的定位，并映射回原文区间。
- * 换行保留，避免跨段误匹配。
- */
 export function findWhitespaceFlexible(
   haystack: string,
   needle: string,

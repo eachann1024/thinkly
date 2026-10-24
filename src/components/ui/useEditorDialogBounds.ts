@@ -1,7 +1,6 @@
 import { useLayoutEffect, useState, type CSSProperties } from "react";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 
-/** 窄窗弹窗跟随主编辑面板；独立速记窗口没有该面板时保留默认布局。 */
 export function useEditorDialogBounds(open: boolean): CSSProperties | undefined {
   const compact = useWorkspaceViewport((state) => state.forceCollapseLeft);
   const [bounds, setBounds] = useState<CSSProperties>();

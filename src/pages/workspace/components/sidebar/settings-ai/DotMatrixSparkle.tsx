@@ -21,7 +21,6 @@ const RINGS = 8;
 
 function buildSparkleDots() {
   const rand = createRandom(7);
-  // 效果图里星芒点各消耗两次随机数，这里保留以复现同一光晕分布
   const skip = () => {
     rand();
     rand();
@@ -60,7 +59,6 @@ const NEUTRAL_RINGS = ringBuckets(
 const ACCENT_DOTS: Dot[] = ALL_DOTS.filter((d) => d.accent);
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/** 05 AI 星芒：主星按环由中心聚合，波纹缓慢外扩；品牌蓝小星偶尔微亮。 */
 export function DotMatrixSparkle({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={ART_W} height={ART_H} origin={[(CX / ART_W) * 100, (CY / ART_H) * 100]} className={className}>

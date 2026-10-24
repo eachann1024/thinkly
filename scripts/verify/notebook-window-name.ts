@@ -11,7 +11,6 @@ import { createChecker } from "./lib/check";
 const root = process.cwd();
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 
-/** 速记窗口名用笔记本名；重名走本地文件已经在用的 `名称 (1)`。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

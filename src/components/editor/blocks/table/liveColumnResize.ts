@@ -2,7 +2,6 @@ import { Plugin } from "prosemirror-state";
 import { columnResizingPluginKey, TableMap } from "prosemirror-tables";
 import type { EditorView } from "prosemirror-view";
 
-/** Keep the native hover handles, but preview DOM widths without editor transactions. */
 export function withLiveColumnResize(plugin: Plugin): Plugin {
   if (plugin.spec.key !== columnResizingPluginKey) return plugin;
   return new Plugin({
@@ -32,7 +31,6 @@ function startResize(view: EditorView, event: MouseEvent): boolean {
   const win = view.dom.ownerDocument.defaultView;
   if (!table || !cols || cols.length !== map.width || !win) return false;
 
-  // Read geometry once, including auto-sized columns and editor zoom.
   const scale = table.getBoundingClientRect().width / table.offsetWidth || 1;
   const widths = Array.from(cols, (col) => col.getBoundingClientRect().width / scale);
   const originalWidth = widths[colIndex];
@@ -47,7 +45,6 @@ function startResize(view: EditorView, event: MouseEvent): boolean {
     setDragging: { startX, startWidth: originalWidth },
   }));
   for (let i = 0; i < cols.length; i++) cols[i].style.width = `${widths[i]}px`;
-  // BlockNote's width:auto!important otherwise overrides TableView's inline width.
   table.style.setProperty("width", `${baseTotal + width}px`, "important");
   table.style.minWidth = "";
 
@@ -76,7 +73,6 @@ function startResize(view: EditorView, event: MouseEvent): boolean {
     const current = view.state.doc.nodeAt(tablePos);
     restore();
     const tr = view.state.tr.setMeta(columnResizingPluginKey, { setHandle: -1 });
-    // A concurrent edit/deletion invalidates the captured positions; never overwrite it.
     if (commit && width !== originalWidth && current === node) {
       widths[colIndex] = width;
       const seen = new Set<number>();

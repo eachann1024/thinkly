@@ -63,7 +63,6 @@ function OutputRow({ output, compiled, vars }: { output: CalculatorCardData["out
   </motion.div>;
 }
 
-/** 实时计算器：滑块或数字输入改参数，结果按安全解析的公式即时重算。 */
 export function CalculatorCard({ card }: { card: CalculatorCardData }) {
   useLocale();
   const [vars, setVars] = useState<Record<string, number>>(() => Object.fromEntries(card.variables.map(v => [v.name, v.value])));

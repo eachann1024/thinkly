@@ -11,12 +11,10 @@ type Editor = BlockNoteEditor<any, any, any>;
 function bodyStart(editor: Editor) {
   const blocks = editor.document;
   const first = blocks[0];
-  // YAML 属性必须留在文件头，否则下一次保存会变成正文或重复生成 frontmatter。
   const header = first?.type === "codeBlock" && first.props.language === "yaml-frontmatter" ? first : undefined;
   return { header, first: blocks[header ? 1 : 0] };
 }
 
-/** 只接受首个顶层块本身的文字起点，不穿过表格、子块或块选区。 */
 export function isFirstBodyTextStart(selection: Selection, firstBlockId: string): boolean {
   if (!(selection instanceof TextSelection) || !selection.empty) return false;
   const { $from } = selection;
@@ -28,7 +26,6 @@ export function isFirstBodyTextStart(selection: Selection, firstBlockId: string)
   return false;
 }
 
-/** 标题按光标拆分；原正文与属性头保留，拆分和标题变化共用一次撤销。 */
 export function enterFirstBodyParagraph(editor: Editor, split?: DocumentTitleSplit): boolean {
   const { first, header } = bodyStart(editor);
   if (!first && !header) return false;
@@ -46,7 +43,6 @@ export function enterFirstBodyParagraph(editor: Editor, split?: DocumentTitleSpl
     if (split && split.before !== split.title) tr.step(new DocumentTitleStep(split.pageId, split.before, split.title));
     editor.setTextCursorPosition(target, "start");
   });
-  // 随后输入正文另起一次历史记录，避免撤销打字时连同拆分一起撤销。
   editor.transact((tr) => { closeHistory(tr); });
   return true;
 }
@@ -62,11 +58,6 @@ function paragraphHasInlineContent(block: { content?: unknown }): boolean {
   return Array.isArray(block.content) && block.content.length > 0;
 }
 
-/**
- * 正文退格回到标题末尾：正文为空，或光标已在首段文字起点。
- * 起点前面没有字符，退格不会改掉已有文字。
- * 带子块的空段，以及列表／标题，仍走原来的退格。
- */
 export function shouldBackspaceToDocumentTitle(editor: Editor): boolean {
   if (!canReturnToDocumentTitle(editor)) return false;
   const { first } = bodyStart(editor);
@@ -75,10 +66,6 @@ export function shouldBackspaceToDocumentTitle(editor: Editor): boolean {
   return !first.children?.length;
 }
 
-/**
- * 首段是空段落且正文还有别的块时，退格把这行空段直接删掉，
- * 光标交给标题末尾；正文只剩这一个空段时保留它，标题回车还能继续用。
- */
 export function removeEmptyFirstBodyParagraph(editor: Editor): boolean {
   const { first, header } = bodyStart(editor);
   if (!first || first.type !== "paragraph") return false;
@@ -88,7 +75,6 @@ export function removeEmptyFirstBodyParagraph(editor: Editor): boolean {
   return true;
 }
 
-/** 方向键只移动光标，不复用回车的插入/拆分行为。 */
 export function focusFirstBodyBlock(editor: Editor): boolean {
   const { first } = bodyStart(editor);
   if (!first) return false;
@@ -97,11 +83,9 @@ export function focusFirstBodyBlock(editor: Editor): boolean {
   return true;
 }
 
-/** 先验证合并后的文件名，不能截断或清洗搬入的正文。 */
 export function mergedFirstBodyTitle(editor: Editor, title: string): string | null {
   const { first } = bodyStart(editor);
   if (!first || first.type !== "paragraph") return null;
-  // 标题只能承载文字；自定义行内节点不能在转换时静默丢失。
   const inlineText = (content: any[]): string | null => {
     let text = "";
     for (const item of content) {
@@ -118,7 +102,6 @@ export function mergedFirstBodyTitle(editor: Editor, title: string): string | nu
   if (text === null) return null;
   const after = title + text;
   if (text) {
-    // 文件名绑定的标题不能截断或清洗搬入的正文。
     try {
       if (normalizeNewFileName(after) !== after || sanitizeFilenameSegment(after, " (99).markdown") !== after) return null;
     } catch { return null; }
@@ -126,7 +109,6 @@ export function mergedFirstBodyTitle(editor: Editor, title: string): string | nu
   return after;
 }
 
-/** 调用方先保存标题成功，再把正文移除；二者共享撤销事务。 */
 export function mergeFirstBodyParagraph(editor: Editor, pageId: string, title: string): boolean {
   const { first, header } = bodyStart(editor);
   const after = mergedFirstBodyTitle(editor, title);

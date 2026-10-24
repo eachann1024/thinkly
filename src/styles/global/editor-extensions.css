@@ -1,6 +1,4 @@
-/* --- Editor Extensions Styles --- */
 
-/* Inline Math */
 .inline-math-node {
   @apply mx-0.5 px-1 rounded border border-transparent hover:border-border transition-colors;
   background-color: var(--goose-block-subtle-bg);
@@ -9,7 +7,6 @@
   vertical-align: middle;
 }
 
-/* Details / Toggle List */
 .details-wrapper {
   @apply my-2 border rounded-lg overflow-hidden;
   border-color: var(--goose-block-subtle-border);
@@ -53,7 +50,6 @@
   background-color: var(--goose-block-subtle-inset);
 }
 
-/* Callout Node */
 .callout-node {
   @apply transition-all duration-200;
 }
@@ -62,8 +58,6 @@
   @apply m-0;
 }
 
-/* --- CMDK Overlay：搜索框外全屏磨砂 ---
- * 中等 blur + 半透明底，独立合成层；只淡入淡出 opacity，不动画 filter（Electron 旧内核更稳、更省） */
 [cmdk-overlay] {
   position: fixed;
   inset: 0;
@@ -88,13 +82,11 @@
   animation: none;
 }
 
-/* Electron 全屏 backdrop-filter 会强制把编辑器栅成纹理，⌘K 打开明显卡一帧 */
 .is-electron [cmdk-overlay] {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-/* 径向渐变工具类 */
 @layer utilities {
   .bg-gradient-radial {
     background: radial-gradient(

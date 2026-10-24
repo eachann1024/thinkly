@@ -30,11 +30,9 @@ import { useOpenLocalFolder } from "@/pages/workspace/components/page/empty-stat
 
 interface TreeEmptyStateProps {
   isLocalNotebook: boolean;
-  /** 侧栏树可视区高度；有值时用它做垂直居中，避免 flex 高度链断裂 */
   height?: number;
 }
 
-/** 尚未关联本地文件夹：待生成的文件树 + 指向按钮的点阵路径，整组在内容区居中。 */
 function NoFolderState({ height }: { height: number }) {
   const openLocalFolder = useOpenLocalFolder();
   const hasMeasuredHeight = height > 0;

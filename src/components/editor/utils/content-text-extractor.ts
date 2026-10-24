@@ -1,17 +1,14 @@
 import type { JSONContent } from "@/types";
 import { extractBlockNoteTitle, extractPlainText } from "./blocknote-content";
 
-/** 提取页面纯文本，用于搜索 */
 export function extractTextFromContent(content: JSONContent): string {
   return extractPlainText(content);
 }
 
-/** 提取页面标题 */
 export function extractTitleFromContent(content: JSONContent): string {
   return extractBlockNoteTitle(content);
 }
 
-/** 分栏只是排版外壳，栏内块对摘要来说等同顶层块。 */
 function flattenColumnBlocks(blocks: any[]): any[] {
   return blocks.flatMap((block) =>
     block?.type === "columnLayout" || block?.type === "columnSection"
@@ -29,18 +26,6 @@ function getBlockLevel(block: any): number | undefined {
   return block?.props?.level ?? block?.attrs?.level;
 }
 
-/**
- * 提取页面结构摘要，用于 AI 上下文（替代全文注入以节省 token）
- *
- * 输出格式：
- * - 标题（h1）
- * - 段落标题列表（h2/h3）
- * - 前几段的开头摘要（各截取 summaryMaxChars 字）
- * - 总字数
- *
- * 当 includeBlockIds 为 true 时，每一行前会带上块 id 前缀，例如
- * `[blk_xxx] ## 二级标题`，供 AI 在结构化定位时引用。
- */
 export function extractStructureSummary(
   content: JSONContent,
   options?: {
@@ -113,17 +98,10 @@ export function extractStructureSummary(
   return parts.join("\n\n");
 }
 
-/**
- * 统计字数
- * - 中文字符：每个算 1 字
- * - 英文单词：每个算 1 字
- * - 连续数字：算 1 字
- */
 export function countWords(content: JSONContent): number {
   return countWordsInText(extractTextFromContent(content));
 }
 
-/** Count an already extracted text, retaining the existing Chinese/English/number semantics. */
 export function countWordsInText(text: string): number {
   if (!text) return 0;
 

@@ -133,10 +133,8 @@ export function matchShortcut(event: KeyboardEvent, shortcut: string) {
 
   const keyToken = parts.find((part) => !isModifierToken(part));
   const eventKey = normalizeShortcutToken(event.key);
-  // 单独修饰键需等到 keyup 才能确认它没有组成组合键，由上层分发器处理。
   if (!keyToken) return false;
   if (!isModifierToken(eventKey) && eventKey === keyToken) return true;
-  // macOS 上 Option 组合键的 event.key 是变音字符（如 ⌥W → "∑"），用 event.code 兜底
   const code = event.code || "";
   let codeKey = "";
   if (/^Key[A-Z]$/.test(code)) codeKey = code.slice(3).toLowerCase();

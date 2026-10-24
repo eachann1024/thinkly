@@ -1,4 +1,3 @@
-/* 强调色 radio 的状态使用扁平选择器，避免旧 Electron 内核忽略嵌套 hover。 */
 .goose-accent-option:hover {
   background: var(--goose-accent-option-light-surface) !important;
 }
@@ -16,7 +15,6 @@
   outline: none !important;
   background: var(--goose-accent-option-light-surface) !important;
   color: var(--goose-accent-option-light-fg) !important;
-  /* checked 已使用同一底色，文字下划线单独标明键盘焦点。 */
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -37,7 +35,6 @@
   color: var(--goose-accent-option-dark-fg) !important;
 }
 
-/* Only UI glyphs receive the pencil treatment; user images and diagrams stay intact. */
 :root:is([data-goose-accent="amber"], [data-goose-accent="wheat"]) .lucide {
   stroke-width: 1.6;
 }
@@ -45,8 +42,6 @@
   filter: url("#goose-pencil-stroke");
 }
 
-/* BlockNote adds its own .dark class. Inherit the selected ink instead of
- * letting that nested class restore the application's blue fallback tokens. */
 :root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) .bn-root {
   --foreground: inherit;
   --muted-foreground: inherit;
@@ -65,7 +60,6 @@
   --bn-colors-editor-text: hsl(var(--foreground));
 }
 
-/* Explicit document colors take precedence over the default active-title ink. */
 :root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"])
   .workspace-editor-surface
   .bn-block-content[data-content-type="heading"][data-text-color]:not([data-text-color="default"])
@@ -85,8 +79,6 @@
   color: inherit;
 }
 
-/* Shared surfaces fall back to the existing palette. Only the two selected light
- * presets override them; changing an accent or appearance leaves no inline tint. */
 :root {
   --goose-shell-surface: hsl(var(--goose-shell-bg));
   --goose-sidebar-surface: #fafafa;
@@ -100,7 +92,6 @@
   --foreground: var(--goose-text-primary-channels);
   --card-foreground: var(--foreground);
   --popover-foreground: var(--foreground);
-  /* All accent presets share the global small-text roles. */
   --muted-foreground: var(--goose-text-secondary-channels);
   --goose-nav-title: var(--muted-foreground);
   --popover: 0 0% 100%;

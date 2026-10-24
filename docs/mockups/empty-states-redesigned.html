@@ -15,7 +15,6 @@ const ns='http://www.w3.org/2000/svg';
 function el(tag,attrs={},parent){const n=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);parent?.append(n);return n}
 function group(parent,cls){return el('g',{class:cls},parent)}
 function dot(g,x,y,r=1.45){el('circle',{cx:x,cy:y,r},g)}
-// Paths are sampled once into round dots; only whole groups animate.
 function path(g,d,pitch=5.2){const p=el('path',{d,fill:'none',stroke:'none'},g);const length=p.getTotalLength();const count=Math.max(1,Math.round(length/pitch));for(let i=0;i<=count;i++){const q=p.getPointAtLength(length*i/count);dot(g,q.x,q.y)}p.remove()}
 function line(g,x,y,x2,y2){path(g,`M${x} ${y}L${x2} ${y2}`)}
 function ring(g,x,y,r){const count=Math.round(2*Math.PI*r/5.2);for(let i=0;i<count;i++){const a=i/count*Math.PI*2;dot(g,x+Math.cos(a)*r,y+Math.sin(a)*r)}}
@@ -47,7 +46,6 @@ const scenes=[
  const frame=group(svg,'ink body');path(frame,'M53 35H167V104H53Z');line(frame,105,37,105,102);
  const left=group(svg,'ink secondary');line(left,65,51,90,51);line(left,65,61,86,61);line(left,65,71,92,71);
  const ghost=group(svg,'accent motion');
- // Four separated corners read as a vacant document slot.
  path(ghost,'M119 58V49H129');path(ghost,'M143 49H153V58');path(ghost,'M119 82V91H129');path(ghost,'M143 91H153V82');
  const mark=group(ghost,'accent signal');line(mark,132,70,140,70);baseline(svg);
 }],

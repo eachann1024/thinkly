@@ -1,4 +1,3 @@
-/** 公共自动导入入口；拆出的内部模块只能通过原入口显式导出。 */
 export const autoImportEntries = [
   "src/components/editor/hooks/useCenteredActiveItemScroll.ts",
   "src/components/editor/hooks/useEditorPaste.ts",

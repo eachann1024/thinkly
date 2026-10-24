@@ -3,7 +3,6 @@ import { sanitizeCssColor } from "../blockPropsProperties";
 import { parseTableInlineHtml } from "../tableHtml";
 import { isLosslessTableDocument } from "./tableSafety";
 
-/** 只认本应用写出的标记表格；普通不支持的 HTML 仍由 raw guard 原样保护。 */
 export function parseTableHtmlBlock(lines: string[], start: number) {
   if (!/^<table\s+data-(?:thinkly|goose)-table="v1"(?:\s|>)/i.test(lines[start].trim())) return null;
   let end = start;

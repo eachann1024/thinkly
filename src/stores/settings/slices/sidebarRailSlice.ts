@@ -9,7 +9,6 @@ export const DEFAULT_SIDEBAR_RAIL_ORDER: readonly SidebarRailItem[] = [
 
 const KNOWN_ITEMS = new Set<string>(DEFAULT_SIDEBAR_RAIL_ORDER);
 
-/** 去掉未知与重复项；缺失项按默认位置补回，旧数据和新增入口都能得到完整顺序。 */
 export function normalizeSidebarRailOrder(value: unknown): SidebarRailItem[] {
   const order: SidebarRailItem[] = [];
   if (Array.isArray(value)) {

@@ -17,7 +17,6 @@ export function createI18nPlugin(): Plugin {
     async buildStart() { await refresh(); },
     async closeBundle() { if (!watching) await session?.close(); },
     async closeWatcher() { await session?.close(); },
-    // Vite awaits this hook for add/update/delete before its HMR transform.
     async watchChange(file) { await refresh([file]); },
     transform(code, id) {
       const filename = id.split("?")[0];

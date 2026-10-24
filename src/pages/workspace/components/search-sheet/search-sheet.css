@@ -1,4 +1,3 @@
-/* 底部拉起的全局搜索：窗口级模态，常驻挂载以保留退场动画。 */
 .search-sheet-layer { position:fixed; inset:0; pointer-events:none; }
 .search-sheet-scrim { position:absolute; inset:0; background:var(--goose-search-overlay); opacity:0; transition:opacity 150ms ease-in; }
 .search-sheet-layer[data-open="true"] { pointer-events:auto; }
@@ -66,9 +65,7 @@
 .search-sheet-source-index { flex:none; font-size:.75rem; color:var(--goose-text-secondary); }
 .search-sheet-source-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:600px) { .search-sheet-footer { display:none; } .search-sheet { width:100%; height:calc(100vh - 2.5rem); } }
-/* 质感：极淡纸纹颗粒，只铺在表面底色之上、内容之下。 */
 .search-sheet-layer { --search-sheet-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-/* 空、无结果与错误状态：图形与标题一同浮起，居于列表剩余空间中心。 */
 .search-sheet-list:has(> .search-sheet-status[data-state]) { display:flex; flex-direction:column; }
 .search-sheet-status[data-state] { position:relative; flex:1; justify-content:center; padding:1.5rem .75rem 3rem; gap:.875rem; }
 .search-sheet-status[data-state] > :not(.goose-dm-decor) { position:relative; }
@@ -82,9 +79,7 @@
 .search-sheet .search-sheet-action[data-quiet="true"] { border-color:transparent; background:transparent; color:var(--goose-text-secondary); }
 .search-sheet .search-sheet-action[data-quiet="true"]:hover > svg:first-child { transform:none; }
 .search-sheet .search-sheet-action[data-quiet="true"]:hover { color:var(--goose-text-primary); }
-/* 结果：每次查询整体淡入，不做逐行级联。 */
 .search-sheet-results { display:flex; flex-direction:column; gap:var(--goose-menu-row-gap); animation:search-sheet-rise 240ms cubic-bezier(.22,1,.36,1) both; }
-/* AI 回答：问题→正文→来源依次落定，操作栏常驻底部。 */
 .search-sheet-list[data-answer] { display:flex; flex-direction:column; padding-bottom:0; }
 .search-sheet-list[data-answer] .search-sheet-answer { flex:1; padding-bottom:0; }
 .search-sheet-answer > * { animation:search-sheet-settle 380ms cubic-bezier(.22,1,.36,1) both; }
@@ -104,7 +99,6 @@
 @keyframes search-sheet-rise { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
 @keyframes search-sheet-settle { from { opacity:0; transform:translateY(10px); filter:blur(3px); } to { opacity:1; transform:none; filter:none; } }
 @keyframes search-sheet-pop { from { opacity:0; transform:translateY(8px) scale(.9); } 60% { opacity:1; } to { opacity:1; transform:none; } }
-/* 步骤时间线：进行中逐条落定，完成后收成一行摘要；高度动画由 motion 驱动。 */
 .search-sheet-steps { display:flex; flex-direction:column; padding-left:1.625rem; margin-top:-.25rem; font-size:.8125rem; line-height:1.25rem; color:var(--goose-text-secondary); }
 .search-sheet-steps-collapse { overflow:hidden; }
 .search-sheet-step-list { display:flex; flex-direction:column; margin:0; padding:0; list-style:none; }
@@ -128,16 +122,13 @@
 .search-sheet-answer-cards .ai-card { margin:0 0 .5rem; }
 .search-sheet-answer > .search-sheet-answer-cards, .search-sheet-answer > .search-sheet-steps, .search-sheet-answer > .search-sheet-follow { animation:none; }
 .search-sheet .search-sheet-source[data-web] .search-sheet-source-index { max-width:7rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-/* 回到最新：零高度的粘性层，浮在操作栏上方，不占正文空间。 */
 .search-sheet-follow { position:sticky; bottom:3.75rem; z-index:1; display:flex; justify-content:center; height:0; margin:-.75rem 0 0; overflow:visible; pointer-events:none; }
 .search-sheet-follow > * { transform-origin:50% 100%; translate:0 -100%; pointer-events:auto; }
 .search-sheet .search-sheet-follow-pill { display:inline-flex; align-items:center; gap:.375rem; height:1.75rem; min-height:0; padding:0 .75rem; border:1px solid hsl(var(--border)); border-radius:999px; background:hsl(var(--goose-menu-surface)); box-shadow:var(--goose-menu-shadow); font-size:.75rem; color:var(--goose-text-primary); }
 .search-sheet .search-sheet-follow-pill:hover { background:var(--goose-interactive-hover); }
-/* 流式正文：streamdown 给新字包 [data-sd-animate]，这里提供关键帧。 */
 .search-sheet-answer-md [data-sd-animate] { animation:var(--sd-animation, sd-thinklyRise) var(--sd-duration, 320ms) var(--sd-easing, cubic-bezier(.16,1,.3,1)) var(--sd-delay, 0ms) both; }
 @keyframes sd-thinklyRise { from { opacity:0; filter:blur(2px); } to { opacity:1; filter:none; } }
 @media (prefers-reduced-motion:reduce) { .search-sheet,.search-sheet-scrim { transition-duration:0s !important; } .search-sheet *,.search-sheet *::before { animation:none !important; transition-duration:0s !important; } }
-/* 浮动搜索窗：面板铺满独立窗口，窗口自身负责显隐、圆角与阴影。 */
 .search-sheet-layer[data-variant="window"] { pointer-events:auto; }
 .search-sheet-layer[data-variant="window"] .search-sheet { position:absolute; inset:0; width:auto; height:auto; min-height:0; padding-top:.75rem; border:0; border-radius:0; box-shadow:none; transform:none; visibility:visible; transition:none; }
 .search-sheet-layer[data-variant="window"] .search-sheet-footer { display:grid; }

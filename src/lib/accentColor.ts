@@ -6,7 +6,6 @@ type AccentRuntimeTokens = {
   dark: Record<string, string>;
 };
 
-// 深色交互表面保持中性灰，选中描边在输出时跟随所选强调色。
 const NEUTRAL_DARK_RUNTIME_TOKENS: Record<string, string> = {
   "--goose-interactive-selected": "var(--goose-dark-selected-bg, #343434)",
   "--goose-interactive-selected-fg": "var(--goose-text-primary)",
@@ -20,11 +19,6 @@ const NEUTRAL_DARK_RUNTIME_TOKENS: Record<string, string> = {
   "--goose-editor-selection-bg": "var(--goose-dark-selection-bg, #444444)",
 };
 
-/**
- * 运行时直接写入的交互 token。
- * 浅色表面跟随强调色，深色表面共用中性灰；直接写入可避免
- * 旧内核 / 缓存 CSS 只命中部分变量。文字消费全局可读性色表。
- */
 const ACCENT_RUNTIME_TOKENS: Record<AccentColor, AccentRuntimeTokens> = {
   iris: {
     light: {
@@ -237,20 +231,13 @@ function writeAccentRuntimeTokens(
   if (!root?.style?.setProperty) return;
   const tokens = resolveAccentRuntimeTokens(accentColor, isDarkDocument(root));
   for (const [name, value] of Object.entries(tokens)) {
-    // 保留旧变量名，静态适配层负责具体控件颜色。
     if (root.style.getPropertyValue(name) !== value) {
       root.style.setProperty(name, value);
     }
   }
 
-  // 清除旧版本热更新遗留的页面选择器；运行时只输出变量。
   document.getElementById(RUNTIME_STYLE_ID)?.remove();
 }
-/**
- * 应用强调色：
- * 1. 写 data-goose-accent，供静态 CSS preset 覆盖 primary 等其余 token
- * 2. 直接 setProperty 关键表面 token，避免仅靠选择器时行内代码掉回 iris fallback
- */
 export function applyAccentColor(accentColor: AccentColor): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
@@ -260,10 +247,6 @@ export function applyAccentColor(accentColor: AccentColor): void {
   writeAccentRuntimeTokens(root, accentColor);
 }
 
-/**
- * 按当前 data-goose-accent + 明暗 class 重刷 runtime token。
- * 主题切换后应调用，避免仍停在上一模式的 inline-code vars。
- */
 export function syncAccentColorCssVars(): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;

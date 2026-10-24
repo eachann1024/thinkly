@@ -1,4 +1,3 @@
-/* root 与 group 分别布局，保证选中行和相邻 hover 行始终有间隙。 */
 :is(.goose-list-layout, .goose-list-group, [data-goose-menu-slot="root"], [data-goose-menu-slot="group"]):not([data-goose-layout="grid"]) {
   display: flex;
   flex-direction: column;
@@ -15,13 +14,11 @@
 .goose-list-row:not(.goose-menu-item) {
   border-radius: var(--goose-control-radius);
 }
-/* 虚拟列表与时间线保留行高、坐标；透明边框只给背景留空隙。 */
 .goose-list-row[data-goose-row-inset] {
   box-sizing: border-box;
   border-block: calc(var(--goose-list-row-gap) / 2) solid transparent;
   background-clip: padding-box;
 }
-/* 单行设置项与控件同高。说明、滑杆、表单用 --stack，不要再用 p-4 把一行撑高。 */
 .goose-settings-option-row {
   box-sizing: border-box;
   min-height: var(--goose-control-height);
@@ -36,7 +33,6 @@
 }
 .goose-settings-option-row--joined { border-radius: 0; }
 
-/* Checkbox keeps its own square geometry; HeroUI still owns form/keyboard state. */
 [data-goose-control="checkbox"] [data-goose-slot="check-control"] {
   box-sizing: border-box;
   display: inline-flex;
@@ -50,7 +46,6 @@
   border-radius: var(--goose-checkbox-radius);
   box-shadow: none;
 }
-/* The supplier's accent pseudo-layer uses a different color-token format. */
 [data-goose-control="checkbox"] [data-goose-slot="check-control"]::before { display: none; }
 [data-goose-control="checkbox"] [data-goose-slot="check-indicator"] {
   display: flex;
@@ -62,7 +57,6 @@
 [data-goose-control="checkbox"] [data-goose-slot="check-content"],
 [data-goose-control="checkbox"] [data-slot="label"] { font: inherit; }
 
-/* 标签单独一行、控件在下一行时，两者之间留出空隙。 */
 .goose-field-group,
 label.flex-col {
   gap: var(--goose-field-label-gap);

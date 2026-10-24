@@ -1,14 +1,3 @@
-/**
- * PDF 字体注册（中文支持）。
- *
- * @react-pdf 的 Font.register({ src }) 若给普通 URL，渲染阶段会 fetch。
- * Electron / Electron 以 file:// 打开 index.html，根路径 `/fonts/xxx`
- * 会变成 file:///fonts/xxx（磁盘根目录）→ ERR_FILE_NOT_FOUND → Failed to fetch。
- * 因此不能把 src 设成站点根 `/fonts/...`，必须先读成 data: URL 再注册。
- *
- * react-pdf 只稳吃 static TTF；WOFF2 / OTF 会 Offset、空白字形。
- * 默认嵌入 Noto Sans SC static TTF。失败则 ready=false，不假装 Helvetica/Inter 成功。
- */
 
 import {
   PDF_FONT_FAMILY,
@@ -133,7 +122,6 @@ export async function loadFirstPdfFontDataUrl(
   return null;
 }
 
-/** Noto CJK static TTF（测例与主路径）。 */
 export async function loadPdfFontDataUrl(): Promise<string | null> {
   return loadFirstPdfFontDataUrl(PDF_CJK_FONT_URLS);
 }

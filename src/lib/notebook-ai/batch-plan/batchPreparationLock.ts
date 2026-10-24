@@ -1,4 +1,3 @@
-/** Serialize preparation before any async path planning can allocate a second journal. */
 const preparations = new Map<string, Promise<unknown>>();
 
 export async function withBatchPreparationLock<T>(key: string, prepare: () => Promise<T>): Promise<T> {

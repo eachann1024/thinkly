@@ -29,7 +29,6 @@ function pathToFileUrl(filePath: string): string {
   return `file://${encodeURI(normalized)}`;
 }
 
-/** 只改写整段就是旧根目录内部的绝对路径或 file URL。相对链接保持原样。 */
 export function rebaseAbsolutePathString(value: string, oldRoot: string, newRoot: string): string {
   const fromFileUrl = fileUrlToPath(value);
   const target = fromFileUrl ?? value;
@@ -89,7 +88,6 @@ export function rebaseBatchPlanJournals(notebookId: string, oldRoot: string, new
       const serialized = JSON.stringify(next);
       if (serialized !== raw) window.localStorage.setItem(key, serialized);
     } catch {
-      // 损坏的日志留在原地，避免改名把别的记录写坏。
     }
   }
 }
@@ -124,7 +122,7 @@ export async function stampNotebookMarker(notebookId: string, root: string): Pro
   const file = `${directory}/notebook.json`;
   const current = fs.readFileAsync ? await fs.readFileAsync(file) : fs.readFile(file);
   let historyLayout: unknown;
-  try { historyLayout = current ? JSON.parse(current).historyLayout : undefined; } catch { /* 损坏的标记由下面重写 */ }
+  try { historyLayout = current ? JSON.parse(current).historyLayout : undefined; } catch {   }
   const next = `${JSON.stringify({ id: notebookId, ...(historyLayout === undefined ? {} : { historyLayout }) })}\n`;
   if (current === next) return;
   await fs.mkdir(directory);

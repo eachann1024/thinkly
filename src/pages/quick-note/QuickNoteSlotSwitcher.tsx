@@ -76,7 +76,6 @@ export function QuickNoteSlotSwitcher(props: QuickNoteSlotSwitcherProps) {
             data-occupied={occupied ? "true" : "false"}
             className="quicknote-slot-btn"
             onPointerDown={(e) => onPointerDown(e, slot)}
-            // 选择由 pointer 提交；避免 click 与拖动松手重复触发
             onClick={(e) => e.preventDefault()}
           >
             <span className="quicknote-slot-btn-label">{slot}</span>

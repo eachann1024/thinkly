@@ -2,7 +2,6 @@ import type { CardDecoration } from "./decorations";
 
 export type { CardDecoration } from "./decorations";
 
-// ── Card Theme Interface ───────────────────────────────────────
 export interface CardTheme {
   id: string;
   name: string;
@@ -11,7 +10,6 @@ export interface CardTheme {
   tags: string[];
   mode: "light" | "dark";
 
-  // Typography
   titleFont: string;
   bodyFont: string;
   codeFont: string;
@@ -24,7 +22,6 @@ export interface CardTheme {
   bodyLineHeight: number;
   bodyLetterSpacing: string;
 
-  // Colors
   background: string;
   cardBg: string;
   textColor: string;
@@ -38,7 +35,6 @@ export interface CardTheme {
   divider: string;
   watermark: string;
 
-  // Layout & Decorations
   containerPaddingX: number;
   containerPaddingY: number;
   cardPaddingX: number;
@@ -49,6 +45,5 @@ export interface CardTheme {
   showDecorations: boolean;
   decorationColor: string;
   watermarkVisible: boolean;
-  /** 主题专属装饰（胶带、网点、印章等），见 decorations.ts */
   decorations?: CardDecoration[];
 }

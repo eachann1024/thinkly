@@ -15,7 +15,6 @@ export function isLocalFolderDirectoryPage(pageId: string): boolean {
   return notebook?.source === "local-folder";
 }
 
-/** 桌面本地模式：文件夹只用于侧栏展开/收起，不作为可打开的页面。 */
 export function isElectronLocalFolderDirectory(pageId: string): boolean {
   return isLocalFolderDirectoryPage(pageId);
 }
@@ -25,11 +24,8 @@ export function openPageFromSidebar(
   mode: "preview" | "permanent",
   options?: { newTab?: boolean },
 ) {
-  // 文件夹只在侧栏展开，不打开内容页。
   if (isElectronLocalFolderDirectory(pageId)) return;
 
-  // AI 全屏时主区域被会话盖住：侧栏点页面应退出 AI 并切到该标签
-  // （与标签栏 onBeforeActivateTab 行为对齐）
   closeNotebookAiIfFullscreen();
 
   const tabs = useTabs.getState();

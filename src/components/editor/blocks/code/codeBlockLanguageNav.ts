@@ -1,4 +1,3 @@
-/** 语言搜索列表的高亮下标：有关键词时落在第一项，否则尽量对准当前语言。 */
 export function defaultLanguageHighlightIndex(
   languages: readonly string[],
   search: string,

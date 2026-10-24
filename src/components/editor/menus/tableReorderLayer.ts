@@ -1,4 +1,3 @@
-/** A viewport copy keeps pointer frames away from the document and offscreen cells. */
 export function tableReorderLayer(table: HTMLTableElement, rowAxis: boolean, from: number) {
   const doc = table.ownerDocument;
   const win = doc.defaultView!;
@@ -16,7 +15,6 @@ export function tableReorderLayer(table: HTMLTableElement, rowAxis: boolean, fro
     position: "fixed", left: `${bounds.left}px`, top: `${visible[0].rect.top - (table.rows[0].getBoundingClientRect().top - bounds.top)}px`,
     width: `${bounds.width}px`, pointerEvents: "none", zIndex: "9999",
   });
-  // Retain theme, editor scale and descendant selectors without copying layout boxes.
   const contextRoot = table.closest("[data-page-layout]") ?? table.closest(".workspace-editor-surface");
   const ancestors: HTMLElement[] = [];
   for (let parent = table.parentElement; parent; parent = parent.parentElement) {

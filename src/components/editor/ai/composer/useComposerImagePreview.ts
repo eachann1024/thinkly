@@ -77,7 +77,6 @@ export function useComposerImagePreview(options: ComposerImagesOptions) {
       activePreviewChipRef.current = chip;
 
       const preview = imagePreviewElRef.current;
-      // portal 在 editor mount 时创建；卸载后不再展示
       if (!preview?.isConnected) return;
 
       let img = preview.querySelector("img");
@@ -110,7 +109,6 @@ export function useComposerImagePreview(options: ComposerImagesOptions) {
         place();
       } else {
         img.onload = () => place();
-        // 即便 onload 失败也先按当前尺寸放一次
         place();
       }
     },
@@ -127,7 +125,6 @@ export function useComposerImagePreview(options: ComposerImagesOptions) {
     (event: MouseEvent) => {
       const chip = getPreviewableImageChip(event.target);
       if (!chip || chip.dataset.aiImagePreviewable !== "true") {
-        // 移入 remove 按钮：若当前在同 chip 上预览则关闭
         if (
           event.target instanceof Element &&
           event.target.closest("[data-ai-image-remove]")
@@ -158,7 +155,6 @@ export function useComposerImagePreview(options: ComposerImagesOptions) {
   const handleImagePreviewOut = useCallback(
     (event: MouseEvent) => {
       const related = event.relatedTarget;
-      // 仍在同一 chip 内（除 remove 外）或进入预览浮层：保持
       if (related instanceof Node) {
         const preview = imagePreviewElRef.current;
         if (preview?.contains(related)) {

@@ -1,13 +1,3 @@
-/**
- * liveWriter.ts — 流式写入页面内容
- *
- * 处理 createPage / updatePage 工具的 input-streaming 阶段：
- *  - 首次拿到 title 即建页并跳转打开
- *  - 每 ~200ms 节流把"已收到的部分 markdown"转 blocks 写入该页
- *  - state === 'output-available' 时用完整 markdown 做最终落盘
- *
- * 暴露给 UI 层的接口：handleStreamingWritePart(part, ctx)
- */
 
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
@@ -22,9 +12,6 @@ import {
 } from "@/lib/notebook-ai/pageWriteGuard";
 import type { JSONContent } from "@/types";
 
-// ----------------------------------------------------------------
-// 内部状态：按 toolCallId 追踪流式写入会话
-// ----------------------------------------------------------------
 export interface WriterSession {
   pageId: string;
   notebookId: string;
@@ -41,11 +28,7 @@ export const stoppedToolCalls = new Set<string>();
 
 export const THROTTLE_MS = 200;
 
-// ----------------------------------------------------------------
-// 内部工具函数
-// ----------------------------------------------------------------
 
-/** 从部分 JSON 字符串中尽力提取 title 和 markdown 字段 */
 export function tryExtractFromPartialJson(partialInput: unknown): {
   title?: string;
   markdown?: string;
@@ -58,7 +41,6 @@ export function tryExtractFromPartialJson(partialInput: unknown): {
   };
 }
 
-/** 获取当前活动页的 pageId */
 function getActivePageId(): string | null {
   const { openTabs, activeTabId } = useTabs.getState();
   if (!activeTabId) return null;
@@ -66,7 +48,6 @@ function getActivePageId(): string | null {
   return tab?.pageId ?? null;
 }
 
-/** 跟随滚动到底部（仅当该页面是当前活动页且 follow=true） */
 function followScroll(session: WriterSession) {
   if (!session.follow) return;
   if (getActivePageId() !== session.pageId) return;
@@ -83,15 +64,12 @@ function followScroll(session: WriterSession) {
     container.scrollTop = container.scrollHeight;
   };
 
-  // reload 事件里 replaceBlocks 是同步的，DOM 已更新，立即滚一次；
-  // rAF 在后台标签页不触发，不能只依赖它，再用两次 setTimeout 兜异步渲染
   scroll();
   requestAnimationFrame(scroll);
   setTimeout(scroll, 80);
   setTimeout(scroll, 400);
 }
 
-/** 触发编辑器重载当前页面内容（replaceInPage 等非流式写入工具也复用此通路） */
 export function reloadEditorIfActive(pageId: string) {
   if (typeof window !== "undefined") {
     window.dispatchEvent(
@@ -102,7 +80,6 @@ export function reloadEditorIfActive(pageId: string) {
   }
 }
 
-/** 写入中间帧（silent=true，不刷新 updatedAt，不触发落盘队列） */
 export function writeIntermediateFrame(session: WriterSession): boolean {
   const guard = guardPageForAiWrite(session.pageId, {
     expectedNotebookId: session.notebookId,
@@ -122,12 +99,10 @@ export function writeIntermediateFrame(session: WriterSession): boolean {
     followScroll(session);
     return true;
   } catch {
-    // 部分 markdown 解析失败，跳过此帧
     return true;
   }
 }
 
-/** 最终落盘（完整 markdown，走正常持久化路径） */
 export async function writeFinalFrame(
   markdown: string,
   title: string,
@@ -153,9 +128,6 @@ export async function writeFinalFrame(
   }
 }
 
-// ----------------------------------------------------------------
-// 创建/打开页面
-// ----------------------------------------------------------------
 export async function ensurePageCreated(
   title: string,
   notebookId: string,
@@ -203,7 +175,6 @@ export async function ensurePageCreated(
   };
   sessions.set(toolCallId, session);
 
-  // 绑定滚轮监听：向上滚→停止跟随，滚回底部→恢复跟随
   if (typeof window !== "undefined" && typeof document !== "undefined") {
     const container = document.querySelector(".page-scroll-container");
     if (container) {
@@ -226,10 +197,6 @@ export async function ensurePageCreated(
   return creation;
 }
 
-/**
- * createPage 工具的唯一最终提交入口。它与流式预建共享同一个单飞创建操作，
- * 因此 execute 与 React effect 无论谁先到达都只能得到同一页。
- */
 export async function createAndFinalizePage(params: {
   toolCallId: string;
   notebookId: string;
@@ -264,13 +231,7 @@ export async function createAndFinalizePage(params: {
   }
 }
 
-// ----------------------------------------------------------------
-// 公开接口
-// ----------------------------------------------------------------
 
-/**
- * 清理指定 toolCallId 的写入会话（例如错误发生时）。
- */
 export function cleanupWriterSession(toolCallId: string): void {
   stoppedToolCalls.add(toolCallId);
   if (stoppedToolCalls.size > 200) {

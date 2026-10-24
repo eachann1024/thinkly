@@ -3,15 +3,6 @@ import { Plugin } from "@tiptap/pm/state";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { Node as PMNode } from "@tiptap/pm/model";
 
-/**
- * normalized 文档空态：标题一之下始终保留一行普通空段落。
- *
- * 用户把标题下唯一空行 Backspace 删掉后，文档会只剩 H1；
- * 此时点击下方空白只能聚焦标题末尾，无法再点进正文。
- * 本守卫在每次文档变更后，若顶层只剩 H1，立刻在其后插入空 paragraph。
- *
- * raw 文档不施加（与 firstTitleGuard 同一策略）。
- */
 
 const TITLE_LEVEL = 1;
 
@@ -35,7 +26,6 @@ function getFirstTopLevelContainer(
   if (container.type.name !== "blockContainer") return null;
   const content = container.firstChild;
   if (!content) return null;
-  // doc > blockGroup(pos 0) > first blockContainer(pos 1)
   return { containerPos: 1, content };
 }
 

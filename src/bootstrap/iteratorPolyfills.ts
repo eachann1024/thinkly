@@ -1,7 +1,4 @@
 export function installIteratorPolyfills() {
-  // Iterator Helpers (ES2025) polyfill — Electron 旧内核 (< Chrome 122) 缺 Iterator.prototype.*。
-  // 旧浏览器可能缺少 Map.prototype.values().filter()，缺失时会抛
-  // `s.values(...).filter is not a function`，导致 AI 调用在错误处理路径二次崩溃。
   {
     const IterProto = Object.getPrototypeOf(
       Object.getPrototypeOf([][Symbol.iterator]()),
@@ -21,7 +18,6 @@ export function installIteratorPolyfills() {
           this: Iterator<unknown>,
           fn: (v: unknown, i: number) => boolean,
         ) {
-          // generator 内捕获 this（Iterator 实例），generator 函数不可用箭头函数替代
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const it = this;
           let i = 0;
@@ -38,7 +34,6 @@ export function installIteratorPolyfills() {
           this: Iterator<unknown>,
           fn: (v: unknown, i: number) => unknown,
         ) {
-          // generator 内捕获 this（Iterator 实例），generator 函数不可用箭头函数替代
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const it = this;
           let i = 0;
@@ -49,7 +44,6 @@ export function installIteratorPolyfills() {
         },
       );
       define("take", function (this: Iterator<unknown>, limit: number) {
-        // generator 内捕获 this（Iterator 实例），generator 函数不可用箭头函数替代
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const it = this;
         return (function* () {
@@ -62,7 +56,6 @@ export function installIteratorPolyfills() {
         })();
       });
       define("drop", function (this: Iterator<unknown>, limit: number) {
-        // generator 内捕获 this（Iterator 实例），generator 函数不可用箭头函数替代
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const it = this;
         return (function* () {
@@ -79,7 +72,6 @@ export function installIteratorPolyfills() {
           this: Iterator<unknown>,
           fn: (v: unknown, i: number) => unknown,
         ) {
-          // generator 内捕获 this（Iterator 实例），generator 函数不可用箭头函数替代
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const it = this;
           let i = 0;

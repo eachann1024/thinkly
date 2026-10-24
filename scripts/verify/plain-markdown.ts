@@ -1,7 +1,3 @@
-/**
- * 新保存的笔记用普通 Markdown：空段是空行，嵌套列表是缩进，图片是 ![]()。
- * 旧注释和自定义属性仍能打开。运行：node scripts/verify/run.mjs plain-markdown
- */
 import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
 import { markdownToJsonContent } from "@/lib/export/markdown/parse/block";
 import { encodeLocalBlockPropsWrappers } from "@/lib/export/markdown/localBlockPropsWrappers";

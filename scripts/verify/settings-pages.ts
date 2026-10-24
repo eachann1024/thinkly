@@ -1,4 +1,3 @@
-/** 设置页隔离、页面状态保留与笔记 AI 会话生命周期。 */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createChecker } from "./lib/check";

@@ -70,7 +70,6 @@ export function useFileDrop() {
     clearLocalFolderFileDropTarget();
   };
   useEffect(() => {
-    // Capture also sees editor drops stopped before React's workspace handler.
     const onDrop = () => queueMicrotask(reset);
     window.addEventListener("drop", onDrop, true);
     window.addEventListener("dragend", reset);
@@ -133,7 +132,6 @@ export function useFileDrop() {
       });
       return;
     }
-    // Opening an import must not pull the user back after a notebook switch.
     if (useNotebooks.getState().activeNotebookId === workspaceId) {
       closeNotebookAiIfFullscreen();
       await activateNotebook(workspaceId);

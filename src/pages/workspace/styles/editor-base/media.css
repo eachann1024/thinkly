@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./media/video-surface.css";
 @import "./media/video-controls.css";
 @import "./media/image-lightbox.css";

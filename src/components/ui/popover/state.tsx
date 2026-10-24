@@ -26,7 +26,6 @@ function usePopoverState({
     padding: 8,
   });
   const open = controlled ?? local;
-  // Programmatic/keyboard opens are immediate; a pointer explicitly opts into motion.
   const keyboard = React.useRef(true);
   const [reducedMotion, setReducedMotion] = React.useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,

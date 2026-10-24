@@ -17,7 +17,6 @@ export type ParkedSets = {
   hidden: BrowserWindow[];
 };
 
-/** 记下唤出浮动窗之前已经最小化或隐藏的 workspace，供随后按回去。 */
 export function captureParkedWorkspaces(): ParkedSets {
   const minimized: BrowserWindow[] = [];
   const hidden: BrowserWindow[] = [];
@@ -40,7 +39,6 @@ export function captureParkedWorkspaces(): ParkedSets {
   return { minimized, hidden };
 }
 
-/** 用户主动唤出主窗时放开停放，否则 show / restore 会被立刻按回去。 */
 export function releaseWorkspacePark(win: BrowserWindow): void {
   workspacesHeldHidden.delete(win);
   workspacesHeldMinimized.delete(win);
@@ -76,11 +74,6 @@ function applyCorrection(win: BrowserWindow, parked: ParkedWorkspace): void {
   }
 }
 
-/**
- * 主窗 show / restore 时调用。事件到达时 isMinimized / isVisible 可能还没翻过来，
- * 所以按停放种类直接按回去，不看当前标志。
- * 返回 true 表示这次显示不是用户要看主窗。
- */
 export function restrainParkedWorkspace(win: BrowserWindow): boolean {
   if (workspacesHeldMinimized.has(win)) {
     putBack(win, "minimized");

@@ -34,7 +34,6 @@ export async function restoreFileFromTrash(destPath: string): Promise<boolean> {
         const info = await stat(full);
         matches.push({ path: full, mtimeMs: info.mtimeMs });
       } catch {
-        // skip unreadable trash entries
       }
     }
   }
@@ -46,7 +45,6 @@ export async function restoreFileFromTrash(destPath: string): Promise<boolean> {
   try {
     await rm(source, { force: true });
   } catch {
-    // restored copy is enough
   }
   return existsSync(destPath);
 }

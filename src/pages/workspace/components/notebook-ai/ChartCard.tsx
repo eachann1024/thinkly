@@ -1,9 +1,5 @@
 import { useLocale } from "@/i18n";
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
-/**
- * showChart 工具的输出渲染卡片
- * 与编辑器 EChartsBlock 共用 chartTheme / chartPalette，保证视觉一致
- */
 import { useCallback, useEffect, useMemo, useRef, useId, type RefObject } from "react";
 import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
@@ -123,13 +119,11 @@ export function ChartCard(props: ChartCardProps) {
 
   const option = useMemo(() => {
     if (!hasRenderableChartSeries(props.series)) return null;
-    // 标题由卡片外层 DOM 展示，option 内不再重复画 title
     const cfg: SimplifiedConfig = {
       type: props.type as ChartType,
       categories: props.categories,
       series: props.series,
     };
-    // AI 面板内固定 scale=1，避免跟编辑器字号耦合
     return {
       color: getPalette(isDark),
       ...buildOption(cfg, isDark, 1),
@@ -139,7 +133,6 @@ export function ChartCard(props: ChartCardProps) {
   const latestOption = useRef(option);
   latestOption.current = option;
 
-  // 初始化实例
   useEffect(() => {
     let disposed = false;
     let chart: typeof chartRef.current = null;
@@ -162,7 +155,6 @@ export function ChartCard(props: ChartCardProps) {
     };
     window.addEventListener("resize", handleResize);
 
-    // 容器尺寸变化（侧栏拖拽）也要 resize
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && containerRef.current) {
       ro = new ResizeObserver(handleResize);
@@ -179,7 +171,6 @@ export function ChartCard(props: ChartCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, hasSeries]);
 
-  // 配置 / 主题变化时重绘
   useEffect(() => {
     if (!option) return;
     const previous = lastData.current;
@@ -196,7 +187,6 @@ export function ChartCard(props: ChartCardProps) {
       1,
       chart.getHeight?.() || containerRef.current?.clientHeight || 1,
     );
-    // 面板里图表显示宽度往往只有几百 px，固定 2× 会糊；按内容抬到 4K 冗余
     const pixelRatio = calculateContentAwarePixelRatio(width, height);
     return chart.getDataURL({
       type: "png",

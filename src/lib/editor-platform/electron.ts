@@ -11,12 +11,6 @@ ja:
   copyingImagesIsnTSupportedOnThisSystem: "このシステムでは画像のコピーに対応していません。"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Electron 桌面端（仅本地模式）的 EditorPlatform 实现。
- *
- * fs / dialog 通过 Electron preload 注入的 window.gooseFs 提供。
- * shell / clipboard / ai.customFetch 走 window.gooseDesktop。
- */
 import type {
   DirEntry,
   EditorPlatform,
@@ -111,13 +105,11 @@ const shell: EditorPlatformShell = {
         await api.openUrl(url);
         return;
       } catch {
-        // fall through
       }
     }
     try {
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
-      // noop
     }
   },
   showNotification: (body) => {
@@ -138,7 +130,6 @@ const shell: EditorPlatformShell = {
         });
       }
     } catch {
-      // noop
     }
   },
   getDownloadsPath: async () => {
@@ -199,7 +190,6 @@ const clipboard: EditorPlatformClipboard = {
         await api.writeText(text);
         return;
       } catch {
-        // fall through
       }
     }
     await navigator.clipboard?.writeText(text);
@@ -211,7 +201,6 @@ const clipboard: EditorPlatformClipboard = {
         await api.writeImage(dataUrl, extras);
         return;
       } catch {
-        // fall through
       }
     }
     if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
@@ -230,7 +219,6 @@ const clipboard: EditorPlatformClipboard = {
       try {
         return (await api.readText()) ?? "";
       } catch {
-        // fall through
       }
     }
     return (await navigator.clipboard?.readText()) ?? "";
@@ -241,7 +229,6 @@ const clipboard: EditorPlatformClipboard = {
       try {
         return await api.readImage();
       } catch {
-        // 主进程读不到时再试页面剪贴板。
       }
     }
     return readNavigatorClipboardImage();

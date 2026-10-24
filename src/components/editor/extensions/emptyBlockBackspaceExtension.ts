@@ -7,7 +7,6 @@ type NestedBlock = { id: string; type: string; content?: unknown; children?: Nes
 const isInlineBlockEmpty = (block: { content?: unknown }) =>
   Array.isArray(block.content) && block.content.length === 0;
 
-/** 只移除空叶子项，后续兄弟仍留在原 parent.children。 */
 export function deleteEmptyNestedListItem(editor: any, block: NestedBlock): boolean {
   if (!LIST_ITEM_TYPES.has(block.type) || !isInlineBlockEmpty(block) || block.children?.length) return false;
   const parent = findParentBlock(editor.document as ToggleBlock[], block.id) as NestedBlock | null | undefined;
@@ -21,7 +20,6 @@ export function deleteEmptyNestedListItem(editor: any, block: NestedBlock): bool
   return true;
 }
 
-/** 移除 toggle 外壳时把完整 children 提升为后续兄弟，绝不 removeBlocks 整棵树。 */
 function unwrapToggle(editor: any, block: any, keepHeading = false): boolean {
   const children = block.children as any[];
   editor.transact(() => {
@@ -36,7 +34,6 @@ function unwrapToggle(editor: any, block: any, keepHeading = false): boolean {
   return true;
 }
 
-/** 空控件退格原地降级；只有明确选区删除才能删除带内容的子树。 */
 export const gooseEmptyBlockBackspaceExtension = createExtension({
   key: "goose-empty-block-backspace",
   keyboardShortcuts: {

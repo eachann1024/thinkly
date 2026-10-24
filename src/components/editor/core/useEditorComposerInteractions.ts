@@ -62,9 +62,6 @@ export function useEditorComposerInteractions({
       ]) &&
       !!target?.closest(".bn-editor");
 
-    // 不依赖 ProseMirror keymap 在模块加载时缓存的 navigator.platform。
-    // Electron 的 Windows WebView 偶尔会让 Mod-k 错配，capture 兜底直接按实际
-    // Ctrl/Meta 状态处理；已有链接仍保持“再次按下即移除”的既有行为。
     if (isPrimaryLinkShortcut) {
       const url = editor.getSelectedLinkUrl();
       const selectedText = editor.getSelectedText();

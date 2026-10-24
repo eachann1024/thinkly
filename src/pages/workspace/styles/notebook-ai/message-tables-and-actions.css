@@ -1,10 +1,3 @@
-/*
- * AI 消息内宽表格：旧 Chromium（Electron）上更稳的写法
- * - 单层滚动：wrapper 直接 overflow-x:auto（避免「外 hidden + 内 auto」在旧内核失效）
- * - 不用 grid/minmax/max-content（旧内核组合易把滚动容器撑破后被祖先裁切）
- * - table 用 width:auto + 单元格 nowrap 按内容撑开，触发横向滚动
- * - 不依赖 Tailwind 是否扫到 streamdown 源码里的 utility class
- */
 .notebook-ai-messages .ai-md [data-streamdown="table-wrapper"],
 .notebook-ai-messages .ai-md-table-scroll {
  display: block;
@@ -13,25 +6,21 @@
  max-width: 100%;
  min-width: 0;
  box-sizing: border-box;
- /* 实色，避免 var(...)/alpha 在 Electron 旧内核退化 */
  margin: 10px 0;
  padding: 0;
  border: 1px solid var(--goose-block-subtle-border, hsl(var(--border)));
  border-radius: 8px;
  background: hsl(var(--goose-editor-bg));
- /* 单层横向滚动 */
  overflow-x: auto;
  overflow-y: hidden;
  -webkit-overflow-scrolling: touch;
  scrollbar-width: thin;
 }
 
-/* 单层结构下不再给 > div 设 width:max-content（会把 scroll 容器撑开导致裁切） */
 
 .notebook-ai-messages .ai-md [data-streamdown="table"],
 .notebook-ai-messages .ai-md-table,
 .notebook-ai-messages .ai-md table {
- /* auto + nowrap 比 max-content 更兼容；min-width:100% 保证窄表仍铺满 */
  width: auto !important;
  min-width: 100% !important;
  max-width: none !important;
@@ -72,7 +61,6 @@
  border-bottom: 0;
 }
 
-/* 代码块同样允许横向滚动 */
 .notebook-ai-messages .ai-md [data-streamdown="code-block"],
 .notebook-ai-messages .ai-md [data-streamdown="code-block-body"] {
  max-width: 100%;
@@ -108,7 +96,6 @@
  user-select: text;
 }
 
-/* 图形 SVG 文字可选中复制；放大平移时由 .is-zoomed 关回 none */
 .notebook-ai-messages .notebook-ai-artifact-svg,
 .notebook-ai-messages .notebook-ai-artifact-svg * {
  cursor: text;
@@ -116,7 +103,6 @@
  user-select: text;
 }
 
-/* 工具栏 / 可点控件：覆盖消息区默认 text 光标 */
 .notebook-ai-messages button,
 .notebook-ai-messages [role="button"],
 .notebook-ai-messages .notebook-ai-artifact-actions,
@@ -135,7 +121,6 @@
  cursor: not-allowed;
 }
 
-/* 图形视口：默认不拦截页面滚动、文字可选中；仅放大后进入拖拽/平移并禁止选中 */
 .notebook-ai-messages .notebook-ai-artifact-panzoom.is-zoomed {
  cursor: grab;
  touch-action: none;
@@ -148,7 +133,6 @@
  cursor: grabbing;
 }
 
-/* 放大拖拽时控件仍保持 pointer */
 .notebook-ai-messages .notebook-ai-artifact-panzoom.is-dragging button,
 .notebook-ai-messages .notebook-ai-artifact-panzoom.is-dragging [role="button"],
 .notebook-ai-messages .notebook-ai-artifact-panzoom.is-zoomed button,

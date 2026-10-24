@@ -1,8 +1,3 @@
-/**
- * 末尾块下方的加号：在文末补空行并打开块菜单，复用已有空行，标题不复用；
- * 菜单没选就关掉时只撤掉本次补的、仍为空且光标已离开的空行。
- * 运行：node scripts/verify/run.mjs trailing-add
- */
 import { BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import {

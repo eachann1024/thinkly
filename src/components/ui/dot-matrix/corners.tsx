@@ -27,7 +27,6 @@ const POSITION_CLASS: Record<CornerPosition, string> = {
 
 const isLeft = (p: CornerPosition) => p.endsWith("left");
 const isTop = (p: CornerPosition) => p.startsWith("top");
-/** 点到角点的局部坐标 (u, v)：0 处于角上。 */
 const local = (p: CornerPosition, size: number, x: number, y: number) =>
   [isLeft(p) ? x : size - x, isTop(p) ? y : size - y] as const;
 const cornerOrigin = (p: CornerPosition): [number, number] => [
@@ -77,7 +76,6 @@ function CornerSvg({
   );
 }
 
-/** 渐隐三角：由角向外按斜带显现，斜带波纹缓慢外扩。 */
 export function CornerTriangle({
   position,
   size = 132,
@@ -92,7 +90,6 @@ export function CornerTriangle({
   className?: string;
 }) {
   const rings = memoDots(`triangle:${position}:${size}:${pitch}:${max}`, () => {
-    // 在角点局部坐标里生成再镜像，等价于旧实现的整体旋转
     const dots = grid(size, size, pitch, (u, v) => {
       const k = (u + v) / size;
       if (k > 1) return null;
@@ -121,7 +118,6 @@ export function CornerTriangle({
   );
 }
 
-/** 十字准星：角内偏移处的点阵十字，四臂渐隐，缓慢呼吸。 */
 export function CornerCrosshair({
   position,
   size = 56,
@@ -180,7 +176,6 @@ export function CornerCrosshair({
   );
 }
 
-/** 弧线：以角为圆心的四分之一点阵弧，沿弧长渐隐，波纹沿弧缓慢流过。 */
 export function CornerArc({
   position,
   size = 120,
@@ -200,7 +195,6 @@ export function CornerArc({
     `arc:${position}:${size}:${radius}:${gap}:${max}`,
     () => {
       const k = 0.5523 * radius;
-      // 局部坐标中从 (radius, 0) 到 (0, radius) 的四分之一圆
       const seg: Segment = [
         [radius, 0],
         [radius, k],
@@ -239,7 +233,6 @@ export function CornerArc({
   );
 }
 
-/** 设置页模块激活等场景的默认角落：左上 + 右下渐隐三角。 */
 export function DotMatrixCorners({
   positions = ["top-left", "bottom-right"],
   size,

@@ -17,22 +17,12 @@ type ToasterProps = React.ComponentProps<typeof Sonner> & {
 type ToastMessage = Parameters<typeof sonnerToast>[0];
 
 const defaultToastClassNames = {
-  // 注意：
-  // 1. 不要加 `toast` 标记类 —— @heroui/styles 定义了同名 .toast 组件类
-  //    （position:absolute/left:0/right:0/pointer-events 等），会劫持 sonner 的布局
-  //    并让关闭按钮点击失效。
-  // 2. 不要加 !opacity-100 —— sonner 靠 opacity:0 隐藏过期/超出堆叠数的
-  //    toast（data-visible=false），强制不透明会让"幽灵 toast"留在屏幕上且点不动。
-  // 3. 宽度与布局由 styles/toast/layout.css 控制；数值以 ./toast-layout.ts 为准。
   toast:
-    // Electron 旧内核不支持 hsl(var(--x)/alpha)，避免 bg-*/95、border-*/70 退化成实色
     "group goose-toast goose-toast-surface !text-sm !overflow-visible",
   title: "!text-foreground !opacity-100 !font-medium !text-[14px]",
   description: "!text-[13px] !text-muted-foreground",
   actionButton: cn(buttonVariants({ size: "sm" }), "!text-xs !font-medium"),
   cancelButton: cn(buttonVariants({ variant: "ghost", size: "sm" }), "!text-xs"),
-  // Sonner owns the close button and dismissal; share the IconButton recipe.
-  // 尺寸与位置只由 toast/layout.css 的 --goose-toast-* 变量决定，这里和业务侧都不得再覆盖。
   closeButton: cn(iconButtonVariants({ tone: "muted", size: "xs" }), "goose-toast-close [&_svg]:size-4"),
   error:
     "goose-toast-error",
@@ -105,7 +95,6 @@ const Toaster = ({
       swipeDirections={["left", "right", "top"]}
       className={cn("toaster group goose-toaster", placement === "center" && "goose-toaster-center", className)}
       style={{ ...(toastLayoutCssVars() as CSSProperties), ...style, zIndex: UI_LAYERS.toast }}
-      // 关闭 sonner 默认 richColors，错误视觉完全由全局 goose-toast-error 接管
       richColors={false}
       icons={{
         ...icons,
@@ -161,11 +150,6 @@ const Toaster = ({
   );
 };
 
-/**
- * 全局唯一 toast 入口。
- * 错误态强制走 goose-toast-error（红字 + 圆底!，干净无装饰纹理），
- * 业务侧不得绕过这套视觉；不提供 custom，自绘内容无法共享图标 / 关闭按钮对齐。
- */
 const toast = Object.assign(
   (message: ToastMessage, data?: ExternalToast) => sonnerToast(message, data),
   {
@@ -178,7 +162,6 @@ const toast = Object.assign(
       const { icon: _ignoredIcon, ...rest } = data ?? {};
       return sonnerToast.error(message, {
         ...rest,
-        // 业务侧不得覆盖错误图标 / 错误样式类
         icon: <ErrorToastIcon />,
         className: cn("goose-toast-error", rest.className),
         classNames: {

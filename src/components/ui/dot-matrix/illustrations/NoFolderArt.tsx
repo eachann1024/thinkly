@@ -16,7 +16,6 @@ import {
 } from "../geometry";
 import { rippleDelay } from "../motion";
 
-/** 无本地文件夹缺省态（V3）：待生成的文件树骨架、指向按钮的点阵路径、底部渐隐与右上散点星。 */
 
 const TREE_W = 216;
 const TREE_H = 150;
@@ -146,7 +145,6 @@ const TRAIL = memoDots("noFolder:trail", buildTrail);
 const FADE = memoDots("noFolder:fade", buildFade);
 const SCATTER = memoDots("noFolder:scatter", buildScatter);
 
-/** 虚线框里的渐隐文件树骨架；首行图标为品牌蓝，其余行缓慢流过。 */
 export function NoFolderTreeArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion
@@ -187,7 +185,6 @@ export function NoFolderTreeArt({ className }: { className?: string }) {
   );
 }
 
-/** 文案下方向下的点阵路径，末端品牌蓝箭头，指向「打开本地文件夹」按钮。 */
 export function NoFolderTrailArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion
@@ -217,7 +214,6 @@ export function NoFolderTrailArt({ className }: { className?: string }) {
   );
 }
 
-/** 底部自左下角铺开的渐隐点阵。 */
 export function NoFolderFadeArt({
   className,
   motion,
@@ -247,7 +243,6 @@ export function NoFolderFadeArt({
   );
 }
 
-/** 右上散点与品牌蓝四角星。 */
 export function NoFolderScatterArt({
   className,
   motion,

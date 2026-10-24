@@ -1,4 +1,3 @@
-/** 外壳始终包住编辑器。AI 运行时等第一次打开面板再加载，避免启动时解析 SDK。 */
 import { lazy, Suspense, useCallback, useState, type ReactNode, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { NotebookAiSessionContext } from "./session/context";
@@ -20,7 +19,6 @@ export type { NotebookAiSessionValue } from "./session/types";
 interface NotebookAiSessionProviderProps {
   notebookId: string;
   editorRef?: RefObject<EditorRef | null>;
-  /** 面板当前可见。一旦为真就保持运行时，关闭面板不中止请求。 */
   panelOpen?: boolean;
   children: ReactNode;
 }

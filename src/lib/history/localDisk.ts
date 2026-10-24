@@ -22,7 +22,6 @@ export function historyDiskOperation<T>(basePath: string, operation: () => Promi
 export function rendererHistoryDisk(): HistoryDisk | null {
   if (typeof window === "undefined" || !window.gooseFs) return null;
   const fs = window.gooseFs;
-  // 内部历史文件永久删除，不进系统回收站；旧宿主无此接口时回退到普通删除。
   const purge = (path: string) => fs.purgeGoose ? fs.purgeGoose(path) : fs.deleteFile(path);
   return {
     readFile: (path) => fs.readFileAsync ? fs.readFileAsync(path) : fs.readFile(path),

@@ -1,9 +1,5 @@
 import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
-/**
- * 处理进度：所有阶段共用紧凑状态标签，步骤与具体原因保留在正文。
- * 工具调用与思考汇总成一行；思考只在行内截成一句，不另开折叠。
- */
 import { useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PlanReviewProvider } from "./approval/PlanReviewContext";
@@ -102,7 +98,6 @@ function FoldChevron() {
 interface ToolProgressCardProps {
   parts: ToolProgressPart[];
   isMessageStreaming?: boolean;
-  /** 多段思考拼成一段后压成行内一句，与工具摘要同一行。 */
   thinkingText?: string;
   children?: ReactNode;
   footer?: ReactNode;
@@ -203,12 +198,10 @@ export function ToolProgressCard({
     useState<WorkCardStatusData | null>(null);
   const status = approvalStatus ?? heading.status;
   const showProcessing = status.icon === "running";
-  // 步骤默认收起，不随 running/error 自动展开
   const [open, setOpen] = useState(false);
   const foldable = steps.length > 0;
   const traceLabel = foldable ? heading.toggle : hasThinking ? t("thinking") : "";
   const showTraceRow = foldable || hasThinking;
-  // 纯问答纸：无步骤且非 running 时不出抬头，避免伪造「处理完成」
   const hasHeading = foldable || showRunning;
 
   if (!hasHeading && !showTraceRow && !children && !footer) return null;

@@ -1,4 +1,3 @@
-/* 右键、下拉和自定义菜单共用外壳；表单浮层共用表面颜色。 */
 .goose-floating-surface,
 .goose-menu-surface {
   border: 1px solid hsl(var(--goose-menu-border));
@@ -7,7 +6,6 @@
   box-shadow: var(--goose-menu-shadow);
 }
 
-/* 菜单统一外沿；表单浮层保留自己的尺寸和内容布局。 */
 .goose-menu-surface,
 .goose-floating-surface:has([data-goose-menu-slot="row"]) {
   --goose-floating-radius: var(--goose-menu-radius);
@@ -19,13 +17,11 @@
   padding: var(--goose-menu-surface-inset);
 }
 
-/* 外壳已承担内边距，避免供应商菜单根节点再叠一层。 */
 :is(.goose-menu-surface, .goose-floating-surface)
   [data-goose-menu-slot="root"]:not(.goose-menu-surface) {
   padding: 0;
 }
 
-/* 行间距止于最后一行，菜单底部只保留与顶部相同的外壳内边距。 */
 :is(.goose-menu-surface, .goose-floating-surface)
   > :is(.goose-list-row, [data-goose-menu-slot="row"]):last-child,
 :is(.goose-menu-surface, .goose-floating-surface)
@@ -34,17 +30,12 @@
   margin-block-end: 0;
 }
 
-/* HeroUI 的 .dropdown__popover 在 @layer 里用 bg-overlay。
- * 深色只挂 .dark，:root 的 --overlay 仍是白色，layer 规则会盖掉上面的背景。
- * 无 layer 才能压过它，把下拉底色锁回菜单表面。 */
 .dropdown__popover.goose-floating-surface,
 .dropdown__popover.goose-menu-surface {
   background-color: hsl(var(--goose-menu-surface));
   color: hsl(var(--popover-foreground));
 }
 
-/* 菜单从浮层外壳转移焦点到高亮项时，始终保留外壳真实投影。
- * 控件焦点策略只清理 ring 变量，不清除浮层的 box-shadow。 */
 @layer properties {
   .goose-floating-surface,
   .goose-floating-surface:focus,
@@ -56,8 +47,6 @@
   }
 }
 
-/* HeroUI 下拉默认 zoom-in-90 过猛，且从中心放大。
- * 改成和 Floating UI 菜单同一套：从触发边移入 6px + scale(0.96)。 */
 [data-goose-floating-content].dropdown__popover {
   transform-origin: var(--trigger-anchor-point, top center);
 }
@@ -201,7 +190,6 @@
   }
 }
 
-/* 删除或移动时，只淡出真正消失的项，只淡入新出现的项。未变化的项不闪。 */
 ::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -237,7 +225,6 @@
   }
 }
 
-/* 高频操作可跳过浮层和菜单项的过渡，其他菜单仍使用共享动效。 */
 [data-goose-floating-content].dropdown__popover.goose-menu-surface[data-goose-motion="instant"] {
   --goose-control-motion-duration: 0ms;
   animation: none !important;

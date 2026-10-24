@@ -15,7 +15,7 @@ export const INDENT = MAIN_TREE_INDENT;
 
 export const ROW_PADDING_LEFT = MAIN_TREE_ROW_PADDING_LEFT;
 
-export /** 子行标题相对行起点：行内补偿 4px + 图标槽 18px + sidebar-design 行距 10px。 */
+export
 const CHILD_TITLE_OFFSET = 4 + INDENT + 10;
 
 export interface RenderItemArgs {

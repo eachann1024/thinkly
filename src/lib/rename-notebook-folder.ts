@@ -89,7 +89,6 @@ function readableError(error: unknown): Error {
   return new Error(error.message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, ""));
 }
 
-/** 修改本地笔记本名称时重命名真实文件夹，并改写仍指向旧路径的映射。 */
 export async function renameLocalNotebookFolder(
   notebookId: string,
   name: string,

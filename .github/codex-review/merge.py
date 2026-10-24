@@ -27,7 +27,6 @@ def block_merge(reasons):
     gh("label", "create", block, "-R", repo, "--color", "B60205",
        "--description", "AI 闸门判定需要人工处理", check=False)
     gh("api", "-X", "POST", f"repos/{repo}/issues/{pr}/labels", "-f", f"labels[]={block}", check=False)
-    # 结论行已写了建议和风险，要点里优先放具体原因
     reasons = sorted(reasons, key=lambda r: r.startswith(("合并建议为", "风险等级为")))
     lines = [f"- {short(r)}" for r in reasons[:3]]
     if len(reasons) > 3:
@@ -43,7 +42,6 @@ try:
     review = json.loads(env.get("REVIEW_JSON") or "{}") or {}
 except Exception:
     review = None
-# 详细结论只写进 Actions 运行摘要，不发评论
 try:
     with open(env["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as fh:
         fh.write("## AI 审核结论\n\n```json\n" +
@@ -61,10 +59,8 @@ if info["state"] != "open" or info["head"]["sha"] != sha:
 reasons = []
 allowed = {a.strip() for a in env["ALLOWED_AUTHORS"].split(",") if a.strip()}
 if info["user"]["login"] not in allowed:
-    # 不是仓库主人的 PR：只审不合，也不发评论
     print("author not allowed; review only"); sys.exit(0)
 
-# 1) 审核本身必须成功且有结构化结果（超时/报错/无输出 = 不合并）
 if env["REVIEW_RESULT"] != "success":
     reasons.append(f"AI 审核未成功完成（{env['REVIEW_RESULT']}），按规则不自动合并")
 if review is None:
@@ -75,7 +71,6 @@ elif not review:
 else:
     rec = str(review.get("merge_recommendation", "")).strip()
     risk = str(review.get("risk_level", "")).strip().lower()
-    # Actions 把 PR-Agent YAML 里的 No 编进 output JSON 时会变成布尔 false，不能当安全疑虑
     sec_raw = review.get("security_concerns", None)
     if isinstance(sec_raw, bool):
         sec_text = "true" if sec_raw else "false"
@@ -93,11 +88,9 @@ else:
         reasons.append("安全审查字段缺失")
     elif not sec_clear:
         reasons.append(f"存在安全疑虑：{sec_text[:300]}")
-    # 安全/鉴权/计费/数据/迁移类意见一律转人工
     issues = review.get("key_issues_to_review") or []
     if not isinstance(issues, list):
         issues = []
-    # 不用裸「安全」：建议里的「并发安全/线程安全」不是安全漏洞
     fatal_kw = re.compile(
         r"安全漏洞|安全隐患|安全问题|安全风险|不安全|安全性|漏洞|注入|泄露|密钥|令牌|凭据|鉴权|认证|授权|越权|权限|计费|扣费|支付|账单|"
         r"数据(丢失|损坏|泄露|删除|清空|覆盖)|丢数据|迁移|schema|"
@@ -116,7 +109,6 @@ else:
 if any("security" in l.lower() for l in labels):
     reasons.append("PR 带有安全疑虑标签")
 
-# 2) 敏感路径转人工
 files = json.loads(gh("api", "--paginate", "--slurp", f"repos/{repo}/pulls/{pr}/files?per_page=100"))
 names = [f["filename"] for page in files for f in page]
 prot = [p.strip() for p in env["PROTECTED_PATHS"].split(",") if p.strip()]
@@ -134,7 +126,6 @@ if hit:
 if reasons:
     block_merge(reasons)
 
-# 3) 等同一提交上的其他检查全部结束且全绿（排除本 workflow 自己的 job）
 own = {"ai-review", "ai-merge-gate"}
 deadline = time.time() + int(env["CHECKS_TIMEOUT_MIN"]) * 60
 while True:
@@ -154,7 +145,6 @@ while True:
         block_merge([f"等待检查超过 {env['CHECKS_TIMEOUT_MIN']} 分钟（{', '.join(pending[:10])}），超时不合并"])
     time.sleep(30)
 
-# 4) 可合并状态
 for _ in range(10):
     info = api(f"repos/{repo}/pulls/{pr}")
     if info["mergeable"] is not None:
@@ -165,7 +155,6 @@ if info["head"]["sha"] != sha:
 if info["mergeable"] is not True:
     block_merge([f"PR 当前不可合并（mergeable={info['mergeable']}, state={info.get('mergeable_state')}），可能有冲突"])
 
-# 5) 合并：--match-head-commit 保证合并的就是审核过的那个提交
 r = subprocess.run(["gh", "pr", "merge", pr, "-R", repo, "--squash", "--delete-branch",
                     "--match-head-commit", sha], capture_output=True, text=True)
 if r.returncode != 0:

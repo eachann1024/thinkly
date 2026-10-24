@@ -82,8 +82,6 @@ export function looksLikeMermaidDiagram(text: string): boolean {
     return false;
   }
 
-  // 避免用户只粘了一个 Mermaid 声明词时误转。真实图表通常还有一行内容，
-  // 或同一行已经包含标题/数据/关系语法。
   return (
     lines.length > 1 ||
     /(-->|---|==>|-.->|:\s|title\s+|accTitle\s*:|accDescr\s*:)/i.test(

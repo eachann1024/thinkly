@@ -8,7 +8,6 @@ type AnyEditor = BlockNoteEditor<any, any, any>;
 
 export type TrailingAddAnchor = { top: number; left: number };
 
-/** 指针可从正文左侧这么远处开始算作末尾空白，盖住加号所在的槽位。 */
 const GUTTER_REACH = 72;
 
 function isEmptyParagraph(block: any): boolean {
@@ -20,7 +19,6 @@ function isEmptyParagraph(block: any): boolean {
   );
 }
 
-/** 文末可复用的空段落；标题块不复用。 */
 function reusableLastBlock(editor: AnyEditor) {
   const last = editor.document.at(-1);
   if (!last || last.id === getProtectedTitleBlockId(editor)) return undefined;
@@ -43,7 +41,6 @@ function lineHeightOf(element: HTMLElement): number {
   return Number.isFinite(value) ? value : (Number.parseFloat(style.fontSize) || 16) * 1.5;
 }
 
-/** 指针在最后一个可见块下方的空白里时，返回加号要画的位置。 */
 export function readTrailingAddAnchor(
   editor: AnyEditor,
   clientX: number,
@@ -78,7 +75,6 @@ export function readTrailingAddAnchor(
   return { top, left: left - SIDE_MENU_CONTENT_GAP - HEADING_SIDE_MENU_EXTRA_GAP };
 }
 
-/** 在文末放好空段落并打开块菜单；返回本次新建的块 id（复用已有空段落时为 undefined）。 */
 export function openTrailingBlockMenu(editor: AnyEditor): string | undefined {
   const suggestionMenu = editor.getExtension(SuggestionMenu);
   const last = editor.document.at(-1);
@@ -87,7 +83,6 @@ export function openTrailingBlockMenu(editor: AnyEditor): string | undefined {
   const reusable = reusableLastBlock(editor);
   let createdId: string | undefined;
   editor.transact((tr) => {
-    // 只为打开菜单而补的空行不进撤销栈，没选就删掉时也不留痕迹。
     tr.setMeta("addToHistory", false);
     const target = reusable ?? editor.insertBlocks([{ type: "paragraph" }], last, "after")[0];
     if (!reusable) createdId = target?.id;
@@ -97,7 +92,6 @@ export function openTrailingBlockMenu(editor: AnyEditor): string | undefined {
   return createdId;
 }
 
-/** 菜单关闭后，新建的空行若仍为空且光标已离开，就撤掉。 */
 export function discardUntouchedTrailingBlock(editor: AnyEditor, blockId: string): void {
   const view = editor.prosemirrorView;
   if (!view || view.isDestroyed) return;

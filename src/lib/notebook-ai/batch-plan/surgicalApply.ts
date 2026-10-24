@@ -23,7 +23,6 @@ export interface SurgicalSearchReplaceSuccess {
   ok: true;
   content: JSONContent;
   replacedCount: number;
-  /** 被替换的顶层块数量（替换前累计） */
   touchedBlockCount: number;
 }
 
@@ -80,9 +79,6 @@ function applyOneMatch(
   return { touched: beforeCount };
 }
 
-/**
- * 在页面内容上应用 search/replace，仅重解析被命中的块范围。
- */
 export function applySearchReplacePreservingBlocks(
   content: JSONContent,
   oldString: string,
@@ -106,7 +102,6 @@ export function applySearchReplacePreservingBlocks(
   const previewOf = (md: string) =>
     md.length > 400 ? `${md.slice(0, 400)}…` : md;
 
-  // 多轮：每轮基于当前 blocks 重建 markdown，从后往前应用本轮全部匹配，避免下标错乱。
   let guard = 0;
   while (guard < 64) {
     guard += 1;
@@ -140,13 +135,9 @@ export function applySearchReplacePreservingBlocks(
       matches = [matches[0]!];
     }
 
-    // 从后往前，同一全文布局下下标稳定
     matches.sort((a, b) => b.start - a.start);
     let appliedThisRound = 0;
     for (const match of matches) {
-      // 注意：同轮多次 splice 后，后续 match 的 char 下标仍对「本轮开始」有效，
-      // 但 blocks 已变。因此同轮只安全处理「从后往前」且每次重新 buildSegments 会漂移。
-      // 正确做法：同轮只 apply 一处（最后一处），然后 while 重建。
       const result = applyOneMatch(
         blocks,
         find,
@@ -158,7 +149,6 @@ export function applySearchReplacePreservingBlocks(
       replacedCount += 1;
       touchedBlockCount += result.touched;
       appliedThisRound += 1;
-      // 每成功一处就重建全文，防止同轮多处错位
       break;
     }
 
@@ -203,10 +193,6 @@ export function applySearchReplacePreservingBlocks(
   };
 }
 
-/**
- * 全量 edit 兜底：按块 markdown 指纹 LCS 对齐，保留未改动原块（id/props/nesting），
- * 仅对未匹配区间使用重解析结果。前缀/后缀对齐是 LCS 退化情形。
- */
 export function mergeFullEditPreservingUnchangedBlocks(
   originalContent: JSONContent,
   newMarkdown: string,

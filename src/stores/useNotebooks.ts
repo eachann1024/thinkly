@@ -31,8 +31,6 @@ export const useNotebooks = create<NotebooksState>()(
       }),
       skipHydration: true,
       onRehydrateStorage: () => (state) => {
-        // Electron 仅本地文件夹模式：水合后立刻丢掉内置本（含历史 default-notebook），
-        // 绝不回种；activeNotebookId 失效时回空态。
         if (!state) return;
         const localOnly = Object.fromEntries(
           Object.entries(state.notebooks).filter(
@@ -80,7 +78,6 @@ export const useNotebooks = create<NotebooksState>()(
           ]),
         );
 
-        // v4：缺 order 的本按 createdAt 升序补 0..n-1
         const sortedForOrder = Object.values(migratedNotebooks).sort(
           (a, b) => a.createdAt - b.createdAt,
         );

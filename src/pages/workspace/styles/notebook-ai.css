@@ -1,6 +1,5 @@
 @import "./beautiful-ui.css";
 
-/* Preserve the original cascade through ordered domain imports. */
 @import "./notebook-ai/shell.css";
 @import "./notebook-ai/composer.css";
 @import "./notebook-ai/messages.css";

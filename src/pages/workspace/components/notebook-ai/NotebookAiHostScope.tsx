@@ -1,7 +1,3 @@
-/**
- * 为不在页面编辑器树内的 AI 面板（独立标签 / 欢迎页侧栏）注入 EditorHost 上下文。
- * Composer / AiComposerInput 依赖 useEditorPageContext（onOpenPage、@ 引用搜索）。
- */
 import { useMemo, type ReactNode } from "react";
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
@@ -47,7 +43,6 @@ export function NotebookAiHostScope({
     <EditorHostBridge
       page={hostPage}
       isEditorFullWidth
-      // AI shell 不经由 host 写页内容（写入走 liveWriter / editorRef）
       onContentChangeOverride={() => {}}
     >
       {children}

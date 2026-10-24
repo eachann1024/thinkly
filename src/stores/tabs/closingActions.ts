@@ -38,7 +38,6 @@ export function createClosingTabActions(
 
       const closedTab = openTabs[index];
       const special = isSpecialTab(closedTab);
-      // 关闭前确保该页的编辑已落盘（本地文件夹页面采用自动保存队列）。
       if (tabId === activeTabId) commitActiveEditor();
       if (!special) {
         const closedPageIds = collectTabPageIds(closedTab);
@@ -66,7 +65,6 @@ export function createClosingTabActions(
 
       const nextTabs = openTabs.filter((tab) => tab.id !== tabId);
 
-      // 关闭最后一个标签后，自动补一个 welcome 占位标签，保持标签栏不消失（对齐浏览器/VSCode）。
       if (nextTabs.length === 0) {
         set({ openTabs: [], activeTabId: null });
         get().openWelcomeTab();
@@ -118,7 +116,6 @@ export function createClosingTabActions(
 
       const nextTabs = [currentTab];
 
-      // 计算被关闭的 tab 集合，flush 落盘并在失败时 toast 警告。
       const nextTabIds = new Set(nextTabs.map((t) => t.id));
       const closedTabs = openTabs.filter((t) => !nextTabIds.has(t.id));
       if (closedTabs.some((t) => t.id === activeTabId)) commitActiveEditor();
@@ -145,7 +142,6 @@ export function createClosingTabActions(
         ? activeTabId
         : tabId;
 
-      // 计算被关闭的 tab 集合，flush 落盘并在失败时 toast 警告。
       const nextTabIds = new Set(nextTabs.map((t) => t.id));
       const closedTabs = openTabs.filter((t) => !nextTabIds.has(t.id));
       if (closedTabs.some((t) => t.id === activeTabId)) commitActiveEditor();
@@ -179,7 +175,6 @@ export function createClosingTabActions(
         ? activeTabId
         : tabId;
 
-      // 计算被关闭的 tab 集合，flush 落盘并在失败时 toast 警告。
       const nextTabIds = new Set(nextTabs.map((t) => t.id));
       const closedTabs = openTabs.filter((t) => !nextTabIds.has(t.id));
       if (closedTabs.some((t) => t.id === activeTabId)) commitActiveEditor();

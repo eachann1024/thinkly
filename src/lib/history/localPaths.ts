@@ -3,7 +3,6 @@ import { historyText as uiText } from "./messages";
 export interface HistoryLocation { relativePath: string; previousPaths: string[] }
 export interface HistoryLocations { version: 1; pages: Record<string, HistoryLocation> }
 
-/** 按 pageId 存放的历史目录名：8 位哈希，冲突时追加 -N。 */
 export const HISTORY_HASH_DIR = /^[a-f0-9]{8}(?:-\d+)?$/;
 
 export function historyHash(pageId: string): string {

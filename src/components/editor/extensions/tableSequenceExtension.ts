@@ -18,7 +18,6 @@ function isSequenceText(text: string): boolean {
   return value === "" || /^\d+$/.test(value);
 }
 
-/** 正文第一列里的空格和纯数字改成 1、2、3…。文字和合并单元格保持原样。 */
 export function sequenceCellUpdates(
   table: PMNode,
   tablePos: number,
@@ -83,7 +82,6 @@ function replaceSequenceCells(
   return tr.steps.length > 0 ? tr : null;
 }
 
-/** oldState 缺省时给已开启的表编号；传入旧文档时，只在行数变化后追加。 */
 export function sequenceColumnTransaction(
   state: EditorState,
   oldState?: EditorState,

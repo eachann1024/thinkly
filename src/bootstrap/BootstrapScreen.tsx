@@ -22,7 +22,6 @@ const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileText } from "@/components/ui/icons";
-// 首屏直接引入单个插画，避免经由索引带入其他插画
 import { DotIconArt } from "@/components/ui/dot-matrix/illustrations/DotIconArt";
 import { DotDecor } from "@/components/ui/dot-matrix/decor";
 

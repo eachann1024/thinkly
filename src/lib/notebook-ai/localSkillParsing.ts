@@ -18,7 +18,6 @@ export interface LocalSkill {
   content: string;
 }
 
-/** 工作区 Skill：在 SKILL/ 或 skills/ 下的 SKILL.md，或直接挂在该目录的 md */
 const WORKSPACE_SKILL_DIR = /(?:^|\/)(?:SKILL|skills)\//i;
 const WORKSPACE_SKILL_FILE = /\/SKILL\.md$/i;
 const WORKSPACE_FLAT_SKILL_FILE = /(?:^|\/)(?:SKILL|skills)\/[^/]+\.md$/i;

@@ -10,7 +10,6 @@ export function isInsideNotebook(root: string, target: string): boolean {
   return relative !== "" && !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative);
 }
 
-/** 不跟随目录或文件符号链接；遇到链接即停止，不能把无法检查的 Markdown 当成无引用。 */
 export async function assertNotebookPath(root: string, target: string): Promise<string> {
   const resolved = path.resolve(target);
   if (resolved !== root && !isInsideNotebook(root, resolved)) throw new Error(t("outsideNotebook"));
@@ -49,7 +48,6 @@ export async function assetFingerprint(root: string, filePath: string): Promise<
   await assertNotebookPath(root, filePath);
   const info = await lstat(filePath);
   if (!info.isFile()) throw new Error(t("notRegularFile"));
-  // stat 加内容摘要：即使同大小替换/保留 mtime，也不能删除过期扫描指向的新文件。
   const digest = createHash("sha256");
   for await (const chunk of createReadStream(filePath)) digest.update(chunk);
   const hash = digest.digest("hex");

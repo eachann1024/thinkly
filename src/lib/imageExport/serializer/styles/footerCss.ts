@@ -1,7 +1,6 @@
 import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../../themes";
 
-/** 在深浅两种墨色中选择与背景对比度更高的一种。 */
 function getContrastingInk(color: string): "#0a0a0a" | "#ffffff" {
   const hex = color.trim();
   const short = /^#([0-9a-f]{3})$/i.exec(hex);

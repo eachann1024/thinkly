@@ -1,4 +1,3 @@
-// Shared by Release notes and the generated download page.
 export const MAC_SIGNED = "macOS 安装包已完成代码签名与公证。";
 export const MAC_HELPER_MARKER = "<!-- goose-mac-install-helper:v1 -->";
 export const MAC_INSTALL_REASON = "为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。";

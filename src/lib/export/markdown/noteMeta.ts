@@ -6,7 +6,6 @@ import { detachBlockPropsMarker } from "./blockPropsMarker";
 import { pickPersistedBlockProps } from "./blockPropsProperties";
 import { imageAltText } from "./serialize/image";
 
-/** 写在正文外的应用设置。goose- 键不进编辑器。 */
 export const NOTE_META_KEY = "goose-note";
 
 export type NoteColumn = { path: string; at: number; widths: string; counts: number[] };
@@ -133,7 +132,6 @@ function renderFrontmatter(data: Record<string, unknown>): string {
   return yaml ? `---\n${yaml}\n---` : "---\n---";
 }
 
-/** 只剥掉文件头后的一个分隔空行，正文自己的空行留下来。 */
 function peelFrontmatter(markdown: string): { frontmatter: string | null; body: string } {
   const normalized = markdown.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const lines = normalized.split("\n");
@@ -193,7 +191,6 @@ export function splitGeneratedMarkdown(markdown: string): { body: string; meta: 
   return { body: joinFrontmatter(renderFrontmatter(rest), extracted.body), meta };
 }
 
-/** 这次保存没有新的应用设置时，去掉 frontmatter 里残留的旧 goose-note。 */
 export function stripNoteMetaBlob(blob: string | null | undefined): string | undefined {
   if (!blob) return undefined;
   const parsed = parseLocalFrontmatterBlob(blob);

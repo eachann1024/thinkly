@@ -68,7 +68,6 @@ export function listWorkspaceDockSurfaces(): WorkspaceDockSurface[] {
         },
       });
     } catch {
-      // ignore transient native bounds errors
     }
   }
   return surfaces;
@@ -83,7 +82,6 @@ export function sendToWorkspace(
   if (!record || record.kind !== "workspace") return false;
   const win = record.win;
   if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return false;
-  // 拖标签时目标窗处于 blur，默认 backgroundThrottling 会推迟 accept/preview。
   win.webContents.backgroundThrottling = false;
   win.webContents.send(channel, payload);
   return true;
@@ -121,7 +119,6 @@ export function closeWorkspaceWindow(
   record.win.close();
 }
 
-/** 最近活动的 workspace 窗；兼容旧的单主窗调用点。 */
 export function getMainWindow(): BrowserWindow | null {
   const record = registry.lastFocusedWorkspace();
   if (!record) return null;

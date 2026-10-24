@@ -1,14 +1,6 @@
 import type { PartialBlock } from "@blocknote/core";
 import { MAX_FILENAME_BYTES, filenameByteLength, truncateToBytes } from "./filenameLimits";
 
-/**
- * 本地文件夹模式下，文件名 ↔ 编辑器首块 H1 双向绑定。
- *
- * 读：scanner 用 `ensureFilenameAsTitle` 把首块 H1 的文字强制覆盖为文件名
- * （没有 H1 就前置一个）。
- * 写：保存时用 `extractFirstHeadingText` 拿到首块 H1 文字，若与当前 basename
- * 不一致则触发 rename。
- */
 
 function extractInlineText(content: unknown): string {
   if (typeof content === "string") return content;
@@ -67,11 +59,6 @@ export function ensureFilenameAsTitle(
 
 const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g;
 
-/**
- * Windows/Mac/Linux 文件名兼容清洗。空白塞回为空格、保留中文/Emoji，
- * 控制字符与跨平台禁用符替换为 `-`。
- * `reservedSuffix` 是调用方还要拼上的扩展名（以及重名序号），字节数从 255 里扣掉。
- */
 export function sanitizeFilenameSegment(value: string, reservedSuffix = ""): string {
   const trimmed = (value || "").trim();
   if (!trimmed) return "";

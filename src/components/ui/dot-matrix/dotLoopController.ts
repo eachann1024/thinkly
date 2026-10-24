@@ -4,7 +4,6 @@ type Driver = {
   releaseDotLoops(el: Element): void;
 };
 
-/** Load the shared clock only for a visible illustration; preserve the latest lifecycle intent. */
 export function createLoopController(load: () => Promise<Driver>) {
   let driver: Driver | undefined, loading: Promise<void> | undefined;
   const pending = new Map<Element, boolean>();

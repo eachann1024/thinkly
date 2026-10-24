@@ -1,4 +1,3 @@
-/* 加载骨架：中性占位块 + 缓慢横扫高光（transform 驱动）；减少动态效果时保持静态。 */
 .goose-skeleton {
   position: relative;
   display: block;
@@ -72,7 +71,6 @@
   height: 0.75rem;
 }
 
-/* 紧凑行：与侧栏文件树行高一致，行间不留空隙。 */
 .goose-skeleton-list[data-density="compact"] {
   gap: 0;
 }

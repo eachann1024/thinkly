@@ -76,14 +76,12 @@ export function createQuicknoteWindow(): BrowserWindow {
     minWidth: MIN_QUICKNOTE_WIDTH,
     minHeight: MIN_QUICKNOTE_HEIGHT,
     show: false,
-    // 与主窗口共用 macOS 原生窗口框架，避免无框 panel 的圆角差异。
     frame: isMac,
     alwaysOnTop: true,
     skipTaskbar: true,
     backgroundColor: appearanceBackgroundColor(),
     transparent: false,
     ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
-    // 不用 panel。macOS 的 panel 一显示就会把同应用的普通窗口收起。
     ...(isMac
       ? {
           titleBarStyle: "hidden" as const,
@@ -100,7 +98,6 @@ export function createQuicknoteWindow(): BrowserWindow {
   bindWindowAppearance(win);
   if (isMac) {
     win.setWindowButtonVisibility(false);
-    // 默认会把进程切成 UIElement，主窗口和 Dock 会一起被藏起来。
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
     win.setAlwaysOnTop(true, "floating");
   }

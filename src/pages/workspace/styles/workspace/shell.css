@@ -76,7 +76,6 @@
   --workspace-drag-line-glow: var(--goose-accent-drag-glow);
 }
 
-/* 完整主题：正文使用暖纸色，次级页面略暖，布局不变。 */
 :root:is([data-goose-accent="amber"], [data-goose-accent="wheat"], [data-goose-accent="claude"]) :is(
   .workspace-page-empty,
   .workspace-folder-home,

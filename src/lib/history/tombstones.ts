@@ -1,9 +1,5 @@
 import { readDbStorageJSON, writeDbStorageJSON } from "../storage/localDbStorage";
 
-/**
- * 本机墓碑：笔记文件消失后只记 `{notebookId, pageId, deletedAt}`，历史延迟清理。
- * 存在本机 localStorage（与 gn:local-idmap 同一存储），不写入笔记本目录，因此不会被同步。
- */
 const KEY = "gn:history-tombstones";
 export const HISTORY_TOMBSTONE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 

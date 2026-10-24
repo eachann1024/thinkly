@@ -18,7 +18,6 @@ interface SuggestionPosition {
   maxHeight: number;
 }
 
-/** 只读当前 token 的位置；输入换行、滚动或缩放后不沿用旧的 viewport rect。 */
 function readAnchorLeft(composer: HTMLElement, trigger: "@" | "/", fallback: DOMRect) {
   const caret = getComposerCaretTextContext(composer);
   const index = caret?.beforeCaret.lastIndexOf(trigger) ?? -1;
@@ -34,7 +33,6 @@ function readAnchorLeft(composer: HTMLElement, trigger: "@" | "/", fallback: DOM
     : composer.getBoundingClientRect().left;
 }
 
-/** 建议菜单与其他菜单都使用 viewport 像素，锚点仍跟随输入框。 */
 export function useComposerSuggestionsPosition(
   composerRef: RefObject<HTMLDivElement | null>,
   anchorRect: DOMRect,
@@ -48,7 +46,6 @@ export function useComposerSuggestionsPosition(
     const composer = composerRef.current;
     const floating = floatingRef.current;
     if (!composer || !floating) return;
-    // PromptBar 包含 shell 外侧的边框；compact 入口没有 shell 时使用自身输入区域。
     const shell = composer.closest<HTMLElement>(".bui-prompt-bar")
       ?? composer.closest<HTMLElement>(".notebook-ai-composer-shell")
       ?? composer;
@@ -66,7 +63,6 @@ export function useComposerSuggestionsPosition(
       const belowEdge = Math.max(rect.bottom + GAP, viewportTop);
       const spaceAbove = Math.max(0, aboveEdge - viewportTop);
       const spaceBelow = Math.max(0, viewportBottom - belowEdge);
-      // 底部面板优先上方并缩短滚动区；上方连一行都放不下才使用更宽裕的下方。
       const above = spaceAbove >= MIN_USEFUL_HEIGHT || spaceAbove >= spaceBelow;
       const maxWidth = Math.max(0, Math.min(MAX_WIDTH, viewportRight - viewportLeft));
       const maxHeight = Math.min(MAX_HEIGHT, Math.floor(above ? spaceAbove : spaceBelow));

@@ -6,7 +6,6 @@ import type { ChoicesCardData } from "@/lib/notebook-ai/cards/types";
 import { useCardActions } from "./cardActions";
 import { rowVariants } from "./cardMotion";
 
-/** 选项按钮：点一下作为用户下一句话发出，随后锁定为已选。 */
 export function ChoicesCard({ card }: { card: ChoicesCardData }) {
   const { send, busy } = useCardActions();
   const [chosen, setChosen] = useState<number | null>(null);

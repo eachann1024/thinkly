@@ -1,4 +1,3 @@
-/** 行内 AI 舒展浮卡；所有宽度都是定位外壳的 viewport 像素。 */
 export const AI_MENU_MIN_WIDTH_PX = 280;
 export const AI_MENU_MAX_WIDTH_PX = 576;
 export const AI_MENU_VIEWPORT_RATIO = 1;
@@ -11,10 +10,6 @@ export type AiMenuFloatingWidthInput = {
   preferredWidth?: number;
 };
 
-/**
- * 基准约 36rem；小窗按视口和当前编辑区收缩。
- * 内层 zoom 已负责 UI 缩放，可用宽度不能再除以 scale。
- */
 export function computeAiMenuFloatingWidth({
   viewportWidth,
   availableWidth,

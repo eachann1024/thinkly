@@ -1,10 +1,6 @@
 import { documentTextColors } from "@/lib/textColors";
 const OBJECT_REPLACEMENT_CHARACTER = /\uFFFC/g;
 
-/**
- * U+FFFC 是编辑器内部用于表示内联原子节点的占位符。它不属于用户文本，
- * 某些字体会把它绘制成虚线框中的 “OBJ”，因此导出前统一移除。
- */
 export function stripEditorObjectReplacementCharacters(value: string): string {
   return value.replace(OBJECT_REPLACEMENT_CHARACTER, "");
 }
@@ -31,10 +27,6 @@ export const BLOCKNOTE_BACKGROUND_COLORS: Record<string, string> = {
   pink: "#f4dfeb",
 };
 
-/**
- * 深色导出卡片与常规编辑器共用的语义色阶：
- * 高明度文字 + 低明度同色表面，保证同色叠加仍清晰可读。
- */
 export const BLOCKNOTE_TEXT_COLORS_DARK: Record<string, string> = documentTextColors("dark");
 
 export const BLOCKNOTE_BACKGROUND_COLORS_DARK: Record<string, string> = {

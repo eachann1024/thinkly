@@ -1,11 +1,3 @@
-/**
- * HistoryBackend 抽象 —— 统一历史版本的读写接口。
- *
- * dbBackend：包装现有同步 historyRepository，行为与改造前完全等价。
- * localFolderBackend：写入 {basePath}/.goose/history/ 目录。
- *
- * resolveHistoryBackend：根据 pageId 对应的页面类型自动路由。
- */
 
 import { historyRepository } from "./repository";
 import { usePages } from "@/stores/usePages";
@@ -14,7 +6,6 @@ import type { HistoryIndex, HistoryVersion } from "./types";
 import { makeLocalFolderHistoryBackend } from "./localBackend";
 import { canonicalRelativePath } from "../canonicalLocalPath";
 
-// ── 接口定义 ──────────────────────────────────────────────────────────────────
 
 export interface HistoryBackend {
   loadIndex(pageId: string): Promise<HistoryIndex>;
@@ -25,7 +16,6 @@ export interface HistoryBackend {
   dropAll(pageId: string): Promise<void>;
 }
 
-// ── dbBackend：包装现有同步实现 ───────────────────────────────────────────────
 
 export const dbBackend: HistoryBackend = {
   async loadIndex(pageId) {

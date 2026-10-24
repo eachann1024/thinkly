@@ -18,7 +18,6 @@ const ART_W = 240;
 const ART_H = 190;
 const MAIN_Y = 124;
 const BRANCH_Y = 64;
-/** 流速：每像素 12ms，整条主干约 2.6s 流完。 */
 const FLOW_S_PER_PX = 0.012;
 const FLOW_BIN_S = 0.24;
 const HALO_RINGS = 6;
@@ -82,7 +81,6 @@ function buildCommitGraph() {
     return { r: 0.55 + t * 0.5, o: 0.05 + t * 0.17 };
   });
 
-  // 到达时间：主干从左向右；分支自 88 节点分出，经上方两个提交回到汇合点
   const branchPath: Segment[] = [
     [[88, my], [88, 88], [100, by], [126, by]],
     line([126, by], [162, by]),
@@ -136,7 +134,6 @@ function buildCommitGraph() {
 const GRAPH = buildCommitGraph();
 const P = DOT_MOTION.period;
 
-/** 14 Git 提交图：光晕缓慢呼吸，亮度沿主干与分支慢慢流过节点，品牌蓝小星偶尔微亮。 */
 export function DotMatrixCommitGraph({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={ART_W} height={ART_H} origin={[50, (98 / ART_H) * 100]} className={className}>

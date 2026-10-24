@@ -14,7 +14,6 @@ function section(children: PMNode[], schema: Schema, original?: PMNode): PMNode 
   ], original?.marks);
 }
 
-/** 修复删除/拖动后的结构壳；每个现存实际块原样留在树中。 */
 function repairLayout(node: PMNode, schema: Schema): PMNode {
   const sections: PMNode[] = [];
   const group = node.childCount > 1 ? node.lastChild : undefined;

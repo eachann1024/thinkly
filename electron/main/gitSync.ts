@@ -80,11 +80,9 @@ async function load() {
         configs.clear(); statuses.clear(); nextRun.clear(); mappingHistory = Object.create(null); moduleEnabled = false;
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw Object.assign(new Error(t("configUnreadable")), { cause: error });
       }
-      // Retired privacy credentials are no longer read or used. Cleanup must not block SSH sync.
       await rm(path.join(app.getPath("userData"), "git-sync-tokens.json"), { force: true }).catch(() => undefined);
       loading = gitLoadTransition(loading, "load.succeeded");
     })().catch((error) => {
-      // Cache successful loads only; the retry button must read the disk again.
       loadPromise = undefined;
       loading = gitLoadTransition(loading, "load.failed");
       throw error;
@@ -107,7 +105,6 @@ function assertWorkspace(event: Electron.IpcMainInvokeEvent) {
 
 function prepareWindow(win: BrowserWindow, roots: string[], requestId: string) {
   return new Promise<void>((resolve, reject) => {
-    // Cold iCloud histories may need hundreds of verified file copies before locking roots.
     const timeout = setTimeout(() => finish(t("saveTimeout")), 120_000);
     const finish = (error: string | null) => {
       clearTimeout(timeout); pendingReplies.delete(requestId);
@@ -222,8 +219,6 @@ async function save(raw: GitRepositoryInput) {
     throw error;
   }
   nextRun.set(input.id, Date.now() + input.intervalMinutes * 60_000); publish();
-  // This runs inside the same serialized operation: saving a newly selected folder always
-  // gets its own sync attempt, including while automatic sync is disabled.
   return added && moduleEnabled ? sync(input.id) : state();
 }
 
@@ -249,7 +244,6 @@ export function registerGitSyncIpc() {
   const handle = (channel: string, operation: (value: never) => Promise<unknown>) => {
     ipcMain.handle(channel, async (event, value) => {
       assertWorkspace(event);
-      // Deliberately drop the cause at IPC: native errors can contain paths or credentials.
       // eslint-disable-next-line preserve-caught-error
       return queue.run(async () => { try { await load(); return await operation(value as never); } catch (error) { throw new Error(messageOf(error)); } });
     });
@@ -286,7 +280,6 @@ export function registerGitSyncIpc() {
     configs.delete(id); statuses.delete(id);
     try { await persist(); }
     catch (error) { if (previous) configs.set(id, previous); if (previousStatus) statuses.set(id, previousStatus); throw error; }
-    // Retain notebook files, remote files, mapping identity and recovery data.
     nextRun.delete(id); notifications.delete(id); retainGitConflicts(id, new Set()); publish(); return state();
   });
 }

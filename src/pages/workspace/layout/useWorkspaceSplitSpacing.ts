@@ -22,9 +22,7 @@ export function useWorkspaceSplitSpacing(enabled: boolean) {
     if (stage.hasAttribute("data-split-spacing") === enabled) return;
 
     animations.current.forEach((animation) => animation.cancel());
-    // 留白一次落定，只过渡透明度，避免尺寸观察器逐帧更新和正文缩放。
     stage.toggleAttribute("data-split-spacing", enabled);
-    // 同步刷新挂在 body 上的光标与浮层；每次布局切换只通知一次。
     const frame = window.requestAnimationFrame(() => {
       window.dispatchEvent(new Event("resize"));
     });

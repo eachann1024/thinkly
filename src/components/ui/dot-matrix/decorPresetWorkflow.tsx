@@ -12,7 +12,6 @@ const bl = "bottom-left";
 const br = "bottom-right";
 
 export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>> = {
-  // 04 AI 新会话：左上渐隐三角 + 右上纵向刻度
   aiChat: [
     {
       at: tl,
@@ -32,7 +31,6 @@ export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>
       ),
     },
   ],
-  // 06 AI 不可用：右上栅格碎片 + 左下四分之一弧
   aiOff: [
     {
       at: tr,
@@ -45,7 +43,6 @@ export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>
       ),
     },
   ],
-  // 05 AI 启用：左上渐隐三角 + 右下双弧 + 右上散点星
   aiGate: [
     { at: tl, node: <CornerTriangle position={tl} size={120} max={0.2} /> },
     {
@@ -74,7 +71,6 @@ export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>
       ),
     },
   ],
-  // 14 Git 启用：右上十字准星 + 左下渐隐三角 + 右下横向刻度
   gitGate: [
     {
       at: tr,
@@ -98,7 +94,6 @@ export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>
       node: <DecorTicks position={br} axis="x" length={132} inset={[22, 16]} />,
     },
   ],
-  // 13 WebDAV：左上十字准星 + 右下横向刻度
   webdav: [
     {
       at: tl,
@@ -125,7 +120,6 @@ export const WORKFLOW_DECOR_PRESETS: Partial<Record<DotDecorPreset, DecorItem[]>
       ),
     },
   ],
-  // 15 Git 仓库空：右上渐隐三角 + 左下散点星
   gitRepos: [
     {
       at: tr,

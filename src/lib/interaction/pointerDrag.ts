@@ -1,11 +1,9 @@
 const activeScopes = new Map<string, number>();
 
-/** Layout observers must not overwrite the dimensions owned by a live gesture. */
 export function isPointerDragActive(scope: string) {
   return (activeScopes.get(scope) ?? 0) > 0;
 }
 
-/** One captured pointer, one preview per frame, and a final flush before commit. */
 export function startPointerDrag(options: {
   target: HTMLElement;
   pointerId: number;
@@ -56,7 +54,6 @@ export function startPointerDrag(options: {
   };
   const finish = () => {
     if (!active) return;
-    // Keep ownership while writing the last preview, then publish the durable value.
     if (frame !== null) host.cancelAnimationFrame(frame);
     flush();
     cleanup();

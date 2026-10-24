@@ -17,15 +17,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { clearResolvedUrlCache } from "@/lib/imageStorage/resolvedUrlCache";
-/**
- * Electron 桌面端的附件磁盘存储。
- *
- * 布局：userData/attachments/{id} 为二进制本体，{id}.meta 为 JSON { type }。
- * 上限 50MB。首次使用时把 localStorage 里 goose-note:web-att:* 的 base64 附件
- * 搬到磁盘后删除旧 key。
- *
- * 仅被 src/lib/host/runtime.electron.ts 使用（electron 构建专属）。
- */
 
 import type { HostPutResult } from "@/lib/host/types";
 import { getGooseDesktop } from "./runtime";
@@ -62,7 +53,6 @@ const attachmentPaths = async (
 
 let migratePromise: Promise<void> | null = null;
 
-/** 把 localStorage 旧附件迁到磁盘（幂等，只跑一次）。 */
 export const migrateLegacyAttachments = (): Promise<void> => {
   if (migratePromise) return migratePromise;
   migratePromise = (async () => {
@@ -169,11 +159,9 @@ export const removeAttachment = async (id: string): Promise<void> => {
         const rest = await api.fsReadDir(parentDir);
         if (rest.length === 0) await api.fsRemove(parentDir);
       } catch {
-        // ignore
       }
     }
   } catch {
-    // ignore
   } finally {
     clearResolvedUrlCache();
   }

@@ -1,4 +1,3 @@
-/** Artifact 图形缩放范围：相对适配比例，允许缩到 25%。 */
 
 export const ARTIFACT_MAX_ZOOM_FACTOR = 5;
 export const ARTIFACT_MIN_ZOOM_FACTOR = 0.25;
@@ -34,10 +33,6 @@ export function computeArtifactFitScale(args: {
   return Number.isFinite(nextFit) && nextFit > 0 ? nextFit : 1;
 }
 
-/**
- * 消息区用 CSS zoom，Cmd+= 后视口 clientWidth 仍按 --editor-scale 反比变小（视觉尺寸不变）。
- * 此时若强制重新适配，图会被缩回去，放大等于没发生，所以只在视口变大时才重新铺满。
- */
 export function shouldSnapToFitOnResize(args: {
   currentScale: number;
   previousFit: number;

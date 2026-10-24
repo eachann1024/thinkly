@@ -7,11 +7,9 @@ import type { ReflectionStats } from "./reflectionStats";
 export interface ReflectionTopic {
   name: string;
   description: string;
-  /** 百分比，所有主题合计 100。 */
   share: number;
 }
 
-/** 结构化要点：简短主题名 + 一两句话。 */
 export interface ReflectionTheme {
   name: string;
   point: string;
@@ -19,7 +17,6 @@ export interface ReflectionTheme {
 
 export interface ReflectionNarrative {
   title: string;
-  /** 旧格式的整段正文；新格式为空串。 */
   body: string;
   topics: ReflectionTopic[];
   themes?: ReflectionTheme[];
@@ -30,7 +27,6 @@ const MAX_TOPICS = 6;
 const MAX_THEMES = 4;
 const clean = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
-/** 把 share 缩放到合计 100（最大余数法）；无有效数据返回空。 */
 export function normalizeTopics(raw: unknown): ReflectionTopic[] {
   if (!Array.isArray(raw)) return [];
   const items = raw
@@ -65,7 +61,6 @@ function normalizeThemes(raw: unknown): ReflectionTheme[] {
     .slice(0, MAX_THEMES);
 }
 
-/** 容错解析：代码围栏、前后多余文字，或完全不是 JSON 时按「首行标题 + 其余正文」。 */
 export function parseReflectionText(raw: string): ReflectionNarrative | null {
   const text = raw.replace(/```(?:json)?/gi, "").trim();
   const start = text.indexOf("{");
@@ -87,7 +82,6 @@ export function parseReflectionText(raw: string): ReflectionNarrative | null {
         };
       }
     } catch {
-      /* 继续走纯文本兜底 */
     }
   }
   const [first, ...rest] = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);

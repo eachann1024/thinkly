@@ -20,10 +20,6 @@ function createMessageId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-/**
- * Pi Agent → AI SDK UIMessageStream 桥。
- * 保留 useChat / 审批卡 / 工具卡片 UI，不自研第二套对话循环。
- */
 export function buildPiTransport(
   notebookId: string,
   currentPageId?: string | null,
@@ -45,7 +41,6 @@ export function buildPiTransport(
         throw new Error("没有可发送的用户消息");
       }
 
-      // 历史不含最后一条 user（由 agent.prompt 注入）
       const history = messages.slice(0, -1);
       restoreLoadedSkills(collectLoadedSkillIds(history));
       agent.state.messages = uiMessagesToAgentMessages(history);
@@ -214,7 +209,6 @@ export function buildPiTransport(
                   break;
               }
             } catch {
-              // 流已关闭时忽略
             }
           });
 

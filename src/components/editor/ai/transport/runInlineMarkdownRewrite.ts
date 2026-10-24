@@ -1,7 +1,3 @@
-/**
- * 行内 AI：对精确选区/光标块做 Markdown 改写，返回草稿供用户确认。
- * 走与面板相同的 runAITextStream（SSE），边思考边把最新一句盖进输入槽。
- */
 import type { AISettingsLike, AIStreamUpdate } from "@/lib/ai-provider/types";
 import { runAITextStream } from "@/lib/ai-provider";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -41,9 +37,6 @@ function stripOuterFence(text: string): string {
   return trimmed;
 }
 
-/**
- * 调用模型，将 oldMarkdown 按 userPrompt 改写为新 markdown 字符串。
- */
 export async function runInlineMarkdownRewrite(
   options: RunInlineMarkdownRewriteOptions,
 ): Promise<string> {

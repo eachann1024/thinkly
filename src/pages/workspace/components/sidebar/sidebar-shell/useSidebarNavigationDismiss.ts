@@ -6,7 +6,6 @@ import { hasSidebarFloatingInteraction, hasSidebarInteraction } from "./sidebarI
 
 type PointerOrigin = { x: number; y: number; at: number; pageId: string };
 
-/** 导航真正到达目标后收起，并保留首击后的双击意图。 */
 export function useSidebarNavigationDismiss(
   input: ReturnType<typeof useSidebarLifecycle>,
   dismiss: () => void,
@@ -27,7 +26,7 @@ export function useSidebarNavigationDismiss(
     if (pageId && pointer?.pageId === pageId && performance.now() - pointer.at < 450)
       guard.current = pointer;
     latest.current.dismiss();
-    if (!pageId) return; // 搜索取消和正文就绪入口各自管理焦点。
+    if (!pageId) return;
     requestAnimationFrame(() => {
       const surface = document.querySelector('[data-focused="true"][data-pane-id]') ??
         document.querySelector(".workspace-main-sheet");
@@ -51,7 +50,6 @@ export function useSidebarNavigationDismiss(
         target.closest(".workspace-main-sheet") &&
         performance.now() - previous.at < 450 &&
         Math.hypot(event.clientX - previous.x, event.clientY - previous.y) < 6) {
-        // 浮层已收起，第二击仍属于原文件，不能落到下层正文。
         event.preventDefault();
         event.stopImmediatePropagation();
         consumeClick.current = true;

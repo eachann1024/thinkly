@@ -8,7 +8,6 @@ import {
 } from "./mainTreeEdgeDrop";
 
 interface EdgeDropIndicator {
-  /** 当前拖动轮次；拖动结束后旧指示线不再渲染 */
   dragId: string;
   zone: MainTreeEdgeZone;
   top: number;
@@ -17,20 +16,12 @@ interface EdgeDropIndicator {
 }
 
 interface MainTreeEdgeDropWatcherProps {
-  /** 可视列表（滚动容器）；上/下缘与最后一行都以它的矩形为准 */
   containerRef: RefObject<HTMLElement | null>;
-  /** 树内拖动中的条目 id；null 表示当前没有内部拖动 */
   draggingItemId: string | null;
   draggedItem: TreeItem<Page> | undefined;
   onEdgeDrop: (zone: MainTreeEdgeZone, item: TreeItem<Page>) => void;
 }
 
-/**
- * rct 用 isOutsideOfContainer 判定落点：指针贴到树容器边线或越出时落点无效
- * （松手什么都不发生），行内又只有文件夹顶部 20% 才算“插到最前”。
- * 这里在应用层接管树内拖动：指针到可视列表上/下缘（含垂直越界、底部空白）时，
- * 明确按根级首/末位置落点，并把可视边缘线画出来；中部仍交给 rct 处理。
- */
 export function MainTreeEdgeDropWatcher({
   containerRef,
   draggingItemId,
@@ -39,7 +30,6 @@ export function MainTreeEdgeDropWatcher({
 }: MainTreeEdgeDropWatcherProps) {
   const [indicator, setIndicator] = useState<EdgeDropIndicator | null>(null);
   const indicatorRef = useRef<EdgeDropIndicator | null>(null);
-  // window 监听在整段拖动里只注册一次，回调与条目用 ref 取最新值
   const latestRef = useRef({ onEdgeDrop, draggedItem });
 
   useEffect(() => {
@@ -68,7 +58,6 @@ export function MainTreeEdgeDropWatcher({
 
     const readEdge = (event: DragEvent) => {
       const viewportRect = container.getBoundingClientRect();
-      // 切本入口、标题操作及菜单不能被树的越界首/末落点接管。
       const overNotebookControl =
         event.target instanceof Element &&
         event.target.closest(".sidebar-navigation-heading, .sidebar-notebook-footer, .goose-notebook-menu-surface");
@@ -123,7 +112,6 @@ export function MainTreeEdgeDropWatcher({
     const handleWindowDragOver = (event: DragEvent) => {
       const { zone, viewportRect } = readEdge(event);
       if (zone) {
-        // 越界时 rct 与树容器都不会 preventDefault，浏览器就不会派发 drop
         event.preventDefault();
         event.stopPropagation();
       }
@@ -136,7 +124,6 @@ export function MainTreeEdgeDropWatcher({
       indicatorRef.current = null;
       setIndicator(null);
       if (!zone || !item) return;
-      // 接管这一次落点：阻止 rct 的 window drop 监听重复处理同一个 drop
       event.preventDefault();
       event.stopPropagation();
       latestRef.current.onEdgeDrop(zone, item);
@@ -152,7 +139,6 @@ export function MainTreeEdgeDropWatcher({
 
   if (!visible) return null;
 
-  // 侧栏祖先带 transform（成为 fixed 的包含块），所以挂到 body 才是真正的视口坐标
   return createPortal(
     <div
       aria-hidden

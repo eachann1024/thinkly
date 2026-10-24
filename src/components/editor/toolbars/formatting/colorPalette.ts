@@ -68,7 +68,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** BlockNote 命名颜色 —— 必须与 BlockNote CSS 中定义的颜色名一致 */
 export const TEXT_COLORS = [
   { get name() { return t("default"); }, color: "default" },
   { get name() { return t("gray"); }, color: "gray" },
@@ -95,10 +94,6 @@ export const HIGHLIGHT_COLORS = [
   { get name() { return t("pinkBackground"); }, color: "pink" },
 ];
 
-/**
- * 颜色名 → CSS 颜色值。
- * 文字预览在笔记本和速记中共用全局色表；背景预览保留各入口现有色带。
- */
 const previewColor = (token: string, fallback: string) =>
   `var(${token}, ${fallback})`;
 

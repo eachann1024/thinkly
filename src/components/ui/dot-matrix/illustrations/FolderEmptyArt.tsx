@@ -24,7 +24,6 @@ function build() {
 const ART = build();
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/** 02 空文件夹主页：打开的文件夹 + 光晕。光晕波纹外扩；文件夹一束光自左向右缓慢扫过。 */
 export function FolderEmptyArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={W} height={H} className={className}>

@@ -1,4 +1,3 @@
-/* 处理中用无底色行内状态；结果和审批保留原有语义标签。 */
 .notebook-ai-work-card.bui-approval:not(.notebook-ai-work-card--running),
 .notebook-ai-approval-plan.bui-approval {
   padding-top: 20px;
@@ -24,7 +23,6 @@
   letter-spacing: 0;
 }
 
-/* 结果状态保留原有分层透明度。 */
 .notebook-ai-work-status::before,
 .notebook-ai-work-status::after {
   position: absolute;

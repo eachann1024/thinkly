@@ -10,7 +10,6 @@ import {
 } from "./batchRecoveryEdit";
 import { recoverDeletedOperation } from "./batchRecoveryDelete";
 
-/** 将崩溃时已写 intent、但还来不及记录 result 的操作安全归类。 */
 export async function recoverInterruptedOperation(
   journal: BatchPlanJournal,
 ): Promise<BatchPlanJournal> {

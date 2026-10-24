@@ -1,6 +1,5 @@
 import { liftTrailingListBreaks } from "../listLines";
 
-/** 计算行的缩进空格数（tab 记 2） */
 export function indentLevel(line: string): number {
   let count = 0;
   for (const ch of line) {
@@ -12,16 +11,6 @@ export function indentLevel(line: string): number {
 }
 
 
-/**
- * 解析嵌套列表（bullet / ordered / checkbox 混嵌），输出 BlockNote 块格式：
- * { type: "bulletListItem"|"numberedListItem"|"checkListItem", props?, content, children? }
- *
- * 有序编号约定（与 BlockNote 一致）：仅每段连续 numbered run 的首项在编号 ≠ 1 时
- * 写 props.start；后续项编号由序列化时递增推得。
- *
- * 空行结束当前列表（loose list 的空行由外层主循环补 spacer 段落，
- * 序列化时 spacer 会把两段列表隔开，保住原文的空行）。
- */
 export function parseNestedList(
   lines: string[],
   startI: number,
@@ -34,11 +23,10 @@ export function parseNestedList(
 
   while (i < lines.length) {
     const line = lines[i];
-    if (!line.trim()) break; // 空行结束本层列表
+    if (!line.trim()) break;
     const lvl = indentLevel(line);
     if (lvl < baseIndent) break;
     if (lvl > baseIndent) {
-      // 理论上子层已被 collectChildren 消耗；防御性交还外层处理，不丢行
       break;
     }
 
@@ -85,7 +73,6 @@ export function parseNestedList(
   return { items, nextIndex: i };
 }
 
-/** 收集缩进比 minIndent 更深的行作为子列表 */
 function collectChildren(
   lines: string[],
   startI: number,
@@ -99,7 +86,6 @@ function collectChildren(
   const childIndent = indentLevel(lines[i]);
   if (childIndent < minIndent) return { items: [], nextIndex: startI };
   if (!parseMarkdown) return parseNestedList(lines, i, childIndent, parseInline);
-  // 子树可包含段落、分栏、toggle、媒体和表格；统一交回完整块解析器。
   const body: string[] = [];
   let end = i;
   while (end < lines.length) {

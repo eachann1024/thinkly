@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
-/** 按 page 记住滚动位置，跨 pane 实例共享，避免切格时用错容器。 */
 const pageScrollPositions: Record<string, number> = {};
 
 export function useScrollRestoration(
@@ -15,7 +14,6 @@ export function useScrollRestoration(
     pendingRestoration.current = null;
   }, []);
 
-  // 每个容器自己上报：滚动中、卸监听（blur / 换页 / unmount）时写入对应 pageId。
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || !pageId) return;
@@ -31,7 +29,6 @@ export function useScrollRestoration(
     };
   }, [pageId, scrollContainerRef]);
 
-  // Register before search's passive effect so explicit navigation can cancel both restores.
   useLayoutEffect(() => {
     const container = scrollContainerRef.current;
     if (!pageId || !container) return;

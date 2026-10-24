@@ -71,7 +71,6 @@ async function loadIcons(found: OpenApp[]): Promise<OpenApp[]> {
   );
 }
 
-/** Only extracted display assets are cached; launch and permission checks stay live. */
 export async function withAppIcons(found: OpenApp[]): Promise<OpenApp[]> {
   const keys = await Promise.all(found.map((item) => identity(item.path)));
   const output = new Map<number, Promise<OpenApp>>();

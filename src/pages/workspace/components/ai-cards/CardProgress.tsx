@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { CARD_SPRING } from "./cardMotion";
 
-/** 细进度条：填充以弹簧缩放，0–1。 */
 export function CardProgress({ value, tone }: { value: number; tone?: "success" | "accent" }) {
   const reduce = useReducedMotion();
   const clamped = Math.max(0, Math.min(1, value));
@@ -13,7 +12,6 @@ export function CardProgress({ value, tone }: { value: number; tone?: "success" 
   </span>;
 }
 
-/** 圆环进度：stroke-dashoffset 随值收拢，用于计时器。 */
 export function CardRing({ value, size = 96, stroke = 5, children }: { value: number; size?: number; stroke?: number; children?: ReactNode }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;

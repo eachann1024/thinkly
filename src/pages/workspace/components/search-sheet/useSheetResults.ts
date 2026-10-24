@@ -15,7 +15,6 @@ const EMPTY_PAGES: Record<string, Page> = {};
 const isTitleMatch = (page: SearchResultPage) =>
   page.matchKind === "title" || page.matchKind === "pinyin" || (page.titleMatchCount ?? 0) > 0;
 
-/** 复用全局搜索引擎，在其结果上叠加「仅标题」与「最近编辑」排序。 */
 export function useSheetResults(folderSource?: SearchFolderSource) {
   useLocale();
   const s = useSearchSession(useShallow(state => ({

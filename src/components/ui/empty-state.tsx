@@ -14,7 +14,6 @@ import type { ReactNode } from "react";
 import type { GooseIcon } from "./icons";
 import { cn } from "@/lib/utils";
 
-/** 缺省态统一为轻量行；详细原因按需展开。传入 illustration 时点阵插画置于上方并替代图标。 */
 export function EmptyState({
   icon: Icon,
   illustration,

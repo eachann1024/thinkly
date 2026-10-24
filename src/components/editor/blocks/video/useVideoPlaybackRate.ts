@@ -62,7 +62,7 @@ export function useVideoPlaybackRate(
       event.preventDefault();
       event.stopPropagation();
       heldPointerRef.current = event.pointerId;
-      try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Window listeners still restore the rate. */ }
+      try { event.currentTarget.setPointerCapture(event.pointerId); } catch {   }
       controllerRef.current?.beginHold();
     },
   };

@@ -34,7 +34,6 @@ function sanitizeTableContent(
     const cells = (row as { cells?: unknown } | undefined)?.cells;
     if (!Array.isArray(cells)) continue;
     const sanitizedCells = cells.map(sanitizeTableCell);
-    // rowspan 可能覆盖整行，不能删除没有起始单元格的合法覆盖行。
     sanitizedRows.push({ cells: sanitizedCells });
   }
 

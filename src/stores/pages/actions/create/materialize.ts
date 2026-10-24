@@ -120,7 +120,6 @@ export const materializeUnsavedLocalPageAction = async (
   }
 
   persistPageSnapshot(get().pages[pageId]);
-  // 草稿物化成文件后进手动顺序末尾
   appendLocalFolderOrderEntries(latest.workspaceId, [get().pages[pageId]]);
   return true;
 };

@@ -15,14 +15,12 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** 取出组件最后一次 return 之后的界面标记，用来判断实际画出的节点。 */
 function renderedMarkup(source: string): string {
   const marker = "if (!showChrome || !page) return null;";
   const at = source.lastIndexOf(marker);
   return at >= 0 ? source.slice(at) : source;
 }
 
-/** 搜索结果笔记右上角的「笔记本或文件夹 / 页名」路径标签不再渲染，命中底栏仍在。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

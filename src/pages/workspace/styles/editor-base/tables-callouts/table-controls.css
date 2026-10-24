@@ -1,4 +1,3 @@
-/* ===== 表格控件：尺寸来自实际 table border box，不裁成 viewport 尺寸 ===== */
 .goose-table-extend-button,
 .goose-table-handle-btn {
   --radius-sm: var(--goose-control-radius);
@@ -50,7 +49,6 @@
   background-color: var(--goose-accent-drag-line);
   border-radius: var(--radius-sm);
 }
-/* Real scaled layout boxes preserve Floating UI's 4px gap without CSS zoom. */
 .goose-table-handle-btn.goose-editor-position-safe-trigger {
   display: flex;
   align-items: center;
@@ -83,7 +81,6 @@
   width: calc(28px * var(--editor-scale, 1));
   height: calc(20px * var(--editor-scale, 1));
 }
-/* 把手和表格之间有 4px 空隙。补一条透明桥，移向方块时命中把手，而不是上方标题。 */
 .goose-table-chrome-left::after,
 .goose-table-chrome-top::after {
   content: "";

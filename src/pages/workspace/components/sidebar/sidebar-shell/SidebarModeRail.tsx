@@ -51,9 +51,7 @@ export function SidebarModeRail({
   const searchSheetOpen = useSearchSession((s) => s.view.phase === "sheet");
   const aiEnabled = useSettings((s) => s.ai.enabled);
   const folderActionsAvailable = useFolderToolbarActions();
-  // 只读布局层算出的真实可见状态，不在这里另起一份 AI 面板状态。
   const aiPanelVisible = useAiPanelVisibility((s) => s.visible);
-  // 侧屏模式下 AI 入口在标题栏，图标栏只在全屏模式显示。
   const aiFullscreen = useAiPanelVisibility((s) => s.fullscreen);
   const activePageId = usePages((s) => s.activePageId);
   const pageTrashed = usePages((s) =>
@@ -62,7 +60,6 @@ export function SidebarModeRail({
   const storedOrder = useSettings((s) => s.sidebarRailOrder);
   const setRailOrder = useSettings((s) => s.setSidebarRailOrder);
   const showAi = aiEnabled && aiFullscreen && folderActionsAvailable && Boolean(activePageId) && !pageTrashed;
-  // Mod+1~4 按完整顺序编号，AI 入口不在图标栏时也保留它的序号。
   const order = normalizeSidebarRailOrder(storedOrder);
   const toggleAiLabel = aiPanelVisible ? uiText("closeAi") : uiText("openAi");
   const {
@@ -103,7 +100,6 @@ export function SidebarModeRail({
       },
       onClick: (event) => {
         if (view === "search") {
-          // 鼠标点击先保存正文选区，按钮拿到焦点后再消费。
           const query = event.detail
             ? searchSelectionRef.current
             : readSearchSelection();
@@ -119,7 +115,6 @@ export function SidebarModeRail({
     ai: {
       label: toggleAiLabel,
       icon: "ai",
-      // 与其他入口一致：设置页打开时只高亮设置。
       selected: !settingsOpen && aiPanelVisible,
       tooltip: `${toggleAiLabel} · ${sidebarViewShortcut(order.indexOf("ai") + 1)}`,
       onClick: () => {

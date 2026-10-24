@@ -13,7 +13,6 @@ interface Entry {
 }
 const active = new Map<string, Entry>();
 
-/** Only mounted consumers own these URLs; zero consumers releases immediately. */
 export async function acquireVideoRefToUrl(
   ref: string,
   pageLocalFilePath?: string | null,

@@ -14,7 +14,7 @@ import { retainDeletedGitFiles } from "./gitSyncRecovery";
 export { validateGitSyncFolder } from "./gitSyncFiles";
 export { GitConflictError, getGitConflict, resolveGitConflict } from "./gitSyncConflict";
 
-type Files = Record<string, string>; // base64 bytes; snapshots are also recovery backups.
+type Files = Record<string, string>;
 type Snapshots = Record<string, Files>;
 interface Journal { commit: string; before: Snapshots; after: Snapshots }
 interface Manifest { version: 1; identity: string; baseline: Snapshots; pending?: Journal; reboundKeys?: string[] }
@@ -40,8 +40,6 @@ export function reconcileGitFiles(base: Files | undefined, local: Files, remote:
 }
 
 async function applyJournal(config: GitRepositoryInput, journal: Journal, verifyRoot?: (root: string) => Promise<void>) {
-  // Preflight every selected folder before changing any of them. A partially applied journal
-  // accepts either the original or target bytes, so retries cannot turn remote edits into deletes.
   for (const folder of config.folders) {
     await verifyRoot?.(folder.localPath);
     const key = mappingKey(folder), before = journal.before[key] ?? empty(), after = journal.after[key] ?? empty();
@@ -78,11 +76,9 @@ async function applyJournal(config: GitRepositoryInput, journal: Journal, verify
 export interface GitRepositorySyncOptions {
   storageRoot: string;
   verifyRoot?: (root: string) => Promise<void>;
-  /** Fault injection for isolated recovery tests; production does not set this. */
   afterPush?: () => Promise<void>;
 }
 
-/** Isolated Git objects/index: remote trees are never checked out into notebook roots. */
 export async function syncGitRepository(input: GitRepositoryInput, options: GitRepositorySyncOptions): Promise<GitRepositoryInput> {
   const { config, moves } = planGitLayout(validateGitRepository(input));
   if (!config.folders.length) return config;
@@ -96,7 +92,6 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   const gitStat = await lstat(gitDir).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return null; throw error; });
   if (gitStat && (!gitStat.isDirectory() || gitStat.isSymbolicLink())) throw new Error(t("invalidIsolatedRepo"));
   if (!gitStat) await git(work, ["init", "--initial-branch", config.branch]);
-  // All transport uses an explicit validated URL; never honor local rewrite rules.
   const rewrites = await git(work, ["config", "--local", "--includes", "--get-regexp", "^(url\\.|include\\.|includeif\\.)"]).catch(() => "");
   if (rewrites) throw new Error(t("rewrites"));
   const identity = createHash("sha256").update(`${config.provider}\0${config.remoteUrl}\0${config.branch}\0${config.layout}`).digest("hex");
@@ -108,7 +103,6 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   aliasGitLayout(manifest.baseline, moves);
   aliasGitLayout(manifest.pending?.before, moves);
   aliasGitLayout(manifest.pending?.after, moves);
-  // Keep conservative reattachment semantics when the same operation renames its remote directory.
   manifest.reboundKeys = manifest.reboundKeys?.map((key) => {
     const move = moves.find((entry) => key === `${entry.notebookId}:${entry.from}`);
     return move ? `${move.notebookId}:${move.to}` : key;
@@ -145,8 +139,6 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
       await atomicJson(manifestFile, manifest);
       for (const folder of config.folders) local[mappingKey(folder)] = await scan(folder.localPath);
     } else {
-      // A rejected push never applied files. Preserve its backup, then recompute against
-      // the current remote and last successful baseline instead of replaying stale output.
       await atomicJson(path.join(root, `recovery-${manifest.pending.commit}.json`), manifest.pending);
       delete manifest.pending;
       await atomicJson(manifestFile, manifest);
@@ -200,7 +192,6 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   for (const folder of config.folders) {
     const key = mappingKey(folder);
     assertTree(after[key]!);
-    // Catch file/directory collisions and unsafe ancestors before creating/pushing a commit.
     for (const name of new Set([...Object.keys(local[key]!), ...Object.keys(after[key]!)])) await safeTarget(folder.localPath, name);
   }
   await git(work, remoteHead ? ["read-tree", remoteHead] : ["read-tree", "--empty"]);

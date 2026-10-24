@@ -62,7 +62,6 @@ function releaseUnused(pageIds: string[], stillShown: Set<string>) {
   }
 }
 
-/** 没有相邻格时不交换。zoom 占满时 movePane 不改树。 */
 export function swapFocusedSplitPane(dir: SplitNeighborDirection): boolean {
   if (!isNormalEditorSurface()) return false;
   const tab = activeWorkspaceTab();

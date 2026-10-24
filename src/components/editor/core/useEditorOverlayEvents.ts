@@ -13,7 +13,6 @@ type OverlayEvents = {
   dispatch: Dispatch<EditorOverlayEvent>;
 };
 
-/** Global commands belong to the focused pane; pending opens belong to its page. */
 export function useEditorOverlayEvents({
   editor, editorContainerRef, isActiveEditor, pageId,
   dispatch,
@@ -39,7 +38,6 @@ export function useEditorOverlayEvents({
       dispatch({ type: "find-requested", request: {
         seed, replace: (event as CustomEvent<{ replace?: unknown }>).detail?.replace === true, nonce,
       } });
-      // Let overlay dismissal finish before opening the find bar.
       window.clearTimeout(pendingOpen);
       pendingOpen = window.setTimeout(() => dispatch({ type: "find-opened", nonce }), 0);
     };

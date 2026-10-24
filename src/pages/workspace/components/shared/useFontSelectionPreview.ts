@@ -8,7 +8,6 @@ import {
 
 import { fontSelectionReducer, type FontSelectionEvent } from "./fontSelectionState";
 
-/** Menu session only: preview uses the owning settings value and setter. */
 export function useFontSelectionPreview(
   value: string | null,
   onChange: (value: string | null) => void,
@@ -30,7 +29,6 @@ export function useFontSelectionPreview(
   const confirmFont = useCallback((font: string | null) => {
     if (session.current.status === "closed") return;
     send({ type: "confirm", font });
-    // An action must confirm even if selection already equals the preview.
     current.current.onChange(font);
     keyboardNavigation.current = false;
     removeConfirmationKeyUp.current?.();
@@ -41,8 +39,6 @@ export function useFontSelectionPreview(
     current.current.onChange(font);
   }, [send]);
 
-  // React Aria filters capture props on Popover. Attach to its real DOM node,
-  // so navigation is observed before the menu moves focus to the next item.
   const contentRef = useCallback(
     (node: HTMLElement | null) => {
       removeListeners.current?.();
@@ -61,8 +57,6 @@ export function useFontSelectionPreview(
             item.getAttribute("aria-disabled") === "true"
           )
             return;
-          // Own this key pair: closing before keyup can send that release to the
-          // restored trigger and reopen it through React Aria's press handling.
           event.preventDefault();
           event.stopImmediatePropagation();
           if (event.repeat) return;

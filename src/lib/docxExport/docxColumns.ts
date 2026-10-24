@@ -8,7 +8,6 @@ const COLUMN_GAP_DXA = 360;
 
 type RenderChildren = (blocks: unknown[], ctx: DocxExportContext) => Promise<DocxBlockChild[]>;
 
-/** Word 没有原生分栏块：用一行无边框表格按原栏宽并排。 */
 export async function columnsToTable(
   block: Record<string, unknown>,
   ctx: DocxExportContext,

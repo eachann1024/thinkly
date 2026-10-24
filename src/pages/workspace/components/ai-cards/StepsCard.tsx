@@ -33,7 +33,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 逐步翻看：上一步 / 下一步横向滑入，外壳高度随内容平滑伸缩；走过的步骤在圆点里打勾。 */
 export function StepsCard({ card }: { card: StepsCardData }) {
   useLocale();
   const reduce = useReducedMotion();

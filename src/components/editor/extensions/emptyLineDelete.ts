@@ -1,11 +1,6 @@
 import { TextSelection } from "@tiptap/pm/state";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 
-/**
- * 空段落（或文本末尾）紧挨表格、图片、分割线等结构块时，前向 Delete
- * 不能把焦点直接交给默认 joinForward：ProseMirror 会把那个结构块作为
- * 删除目标，用户本意只是删当前行的文字。结构块仅应在明确选中后删除。
- */
 type ForwardDeleteEditor = {
   prosemirrorState: EditorState;
   getTextCursorPosition?: () => {
@@ -22,7 +17,6 @@ export function preventForwardDeleteIntoStructureBlock(
   }
 
   const { $from } = state.selection;
-  // 只处理文本块末尾；块内普通 Delete 和非文本块自身的行为维持默认。
   if (
     !$from.parent.isTextblock ||
     $from.parentOffset !== $from.parent.content.size
@@ -31,8 +25,6 @@ export function preventForwardDeleteIntoStructureBlock(
   }
 
   const nextBlock = editor.getTextCursorPosition?.().nextBlock;
-  // BlockNote 的文字块 content 为 InlineContent[]，表格/媒体/分割线等
-  // 结构块不是数组。下一块仍是文字块时，保留默认的段落合并手感。
   return Boolean(nextBlock && !Array.isArray(nextBlock.content));
 }
 
@@ -41,7 +33,6 @@ type LineDeleteEditor = {
   transact: (callback: (tr: Transaction) => void) => unknown;
 };
 
-/** 删除块内由换行符或 hardBreak 分隔的空行，保留整个块及其格式。 */
 export function deleteEmptyInlineLineBackward(
   editor: LineDeleteEditor,
 ): boolean {
@@ -50,7 +41,6 @@ export function deleteEmptyInlineLineBackward(
   const { $from } = selection;
   if (!$from.parent.isTextblock) return false;
 
-  // 保持字符串下标与 PM inline offset 一致；不可把图片、mention 等当成空白。
   let text = "";
   $from.parent.forEach((node) => {
     text += node.isText
@@ -76,7 +66,6 @@ export function deleteEmptyInlineLineBackward(
   return true;
 }
 
-/** 空文本行按 Delete：删除本行，光标回到前面的可编辑位置。 */
 export function deleteEmptyLineBackward(editor: {
   prosemirrorState: EditorState;
   transact: (callback: (tr: Transaction) => void) => unknown;
@@ -87,7 +76,6 @@ export function deleteEmptyLineBackward(editor: {
   if (!$from.parent.isTextblock || $from.parent.content.size !== 0)
     return false;
 
-  // 只删除 blockContainer 的直接文本内容，不能把空表格单元格当作空行。
   const depth = $from.depth - 1;
   if (depth < 1) return false;
   const container = $from.node(depth);
@@ -96,8 +84,6 @@ export function deleteEmptyLineBackward(editor: {
   }
   const from = $from.before(depth);
   const previous = TextSelection.findFrom($from.doc.resolve(from), -1, true);
-  // 本地 Markdown 没有强制标题；首个空段落也可删除，光标落入下一块。
-  // 真正的首块标题以及文档唯一一行仍保留。
   const next =
     !previous && ["paragraph", "codeBlock"].includes($from.parent.type.name)
       ? TextSelection.findFrom(
@@ -108,7 +94,6 @@ export function deleteEmptyLineBackward(editor: {
       : null;
   const target = previous ?? next;
   if (!target) {
-    // 文档只剩空代码块时，退出代码框并保留一个可输入的普通段落。
     if ($from.parent.type.name === "codeBlock") {
       editor.transact((tr) => {
         tr.setNodeMarkup($from.before(), tr.doc.type.schema.nodes.paragraph);

@@ -18,12 +18,6 @@ export function computeSidebarFontSize(uiFontSize: UIFontSize): number {
 
 export const EDITOR_UI_SCALE_CHANGE_EVENT = "goose-editor-ui-scale-change";
 
-/**
- * 计算编辑器周边 UI（工具条、图片操作等）的有效缩放。
- *
- * 编辑字号决定全局基准，速记小窗可再叠加自己的局部 zoom。返回固定四位
- * 小数字符串，既可直接写入 CSS 变量，也能避免浮点误差造成无意义的重复事件。
- */
 export function computeEditorUiScale(
   editorFontSize: number,
   localZoom = 1,
@@ -53,17 +47,9 @@ function applyEditorUiScale(root: HTMLElement, scale: string): void {
 }
 
 export function computeSidebarRowHeight(sidebarFontSize: number): number {
-  // 默认 32px 行高；文字与上下间距使用同一缩放比例。
   return Math.round(sidebarFontSize / SIDEBAR_FONT_SIZE_DEFAULT * 32);
 }
 
-/**
- * 同步写入界面字号、侧栏字号与编辑器缩放变量。
- *
- * 启动恢复与用户主动调整共用同一入口：bootstrap 在首个可绘制帧前调用，
- * App 的 effect 在设置变化时重复调用（幂等）。这样冷启动时窗口一出现
- * 就已经处于上次缩放状态，不会先按 100% 布局再跳变。
- */
 export function applyAppearanceScaleVariables(options: {
   uiFontSize: UIFontSize;
   editorFontSize: number;
@@ -90,7 +76,6 @@ export function applyAppearanceScaleVariables(options: {
   }
 }
 
-/** 首帧稳定前的标记：存在期间禁用全局过渡，避免内部动画从默认值追赶到恢复值。 */
 const STARTUP_SETTLING_ATTR = "data-startup-settling";
 
 export function markStartupSettling(): void {
@@ -103,10 +88,6 @@ export function clearStartupSettling(): void {
   document.documentElement.removeAttribute(STARTUP_SETTLING_ATTR);
 }
 
-/**
- * 挂载稳定后解除过渡禁用。双 rAF 确保 React 已提交且浏览器完成一次
- * 带恢复状态的绘制，再恢复过渡，用户不会看到追赶动画。
- */
 export function releaseStartupSettlingAfterPaint(): void {
   if (typeof requestAnimationFrame === "undefined") {
     clearStartupSettling();

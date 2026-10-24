@@ -30,10 +30,6 @@ const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";
 import type { NotebookImportInspection } from "./types";
 
-/**
- * 在覆盖本地数据前只读校验导入包，确保它至少包含一份可恢复的记事本数据。
- * 该函数不会创建记事本、页面或历史记录。
- */
 export async function inspectNotebookImportZip(
   zipBlob: Blob,
 ): Promise<NotebookImportInspection> {

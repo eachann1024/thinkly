@@ -29,7 +29,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 对齐整秒刷新。 */
 function useSecondClock() {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -41,7 +40,6 @@ function useSecondClock() {
   return now;
 }
 
-/** 数字变化时旧值上滑淡出、新值自下方滑入。 */
 function Tile({ value, label }: { value: string; label: string }) {
   const reduce = useReducedMotion();
   const offset = reduce ? 0 : 10;
@@ -60,7 +58,6 @@ function formatTarget(date: Date) {
   return new Intl.DateTimeFormat(getFormatLocale(), { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-/** 实时倒计时：天 / 时 / 分 / 秒四格逐秒滑动，到点后显示已到。 */
 export function CountdownCard({ card }: { card: CountdownCardData }) {
   useLocale();
   const now = useSecondClock();

@@ -1,7 +1,6 @@
 import { NOTE_MARK_PATTERN } from "../persistedNames";
 import { parseInlineMarkdown } from "./inline";
 
-/** 引用和标注。旧文件里的图标注释仍读回，新文件不再写这行注释。 */
 export function parseQuoteBlock(
   lines: string[],
   index: number,
@@ -19,7 +18,7 @@ export function parseQuoteBlock(
       try {
         icon = decodeURIComponent(iconMarker[1]);
         firstContent = firstContent.slice(iconMarker[0].length);
-      } catch { /* 保留原文。 */ }
+      } catch {   }
     }
     const calloutLines: string[] = [firstContent];
     let cursor = index + 1;

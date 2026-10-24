@@ -12,7 +12,6 @@ import {
   type SearchWindowCommand,
 } from "../../src/lib/electron/searchWindow";
 
-// 主窗可能刚由浮动搜索窗唤起、渲染层尚未订阅；先缓存，订阅时补发一次。
 let pendingSearchResult: OpenSearchResultPayload | null = null;
 const subscribers = new Set<(payload: OpenSearchResultPayload) => void>();
 
@@ -59,7 +58,6 @@ export const searchWindow = {
       ipcRenderer.removeListener(SEARCH_WINDOW_SHOWN_CHANNEL, listener);
     };
   },
-  /** 每条结果只交付一次，避免订阅方重挂载时重复打开。 */
   onOpenSearchResult: (cb: (payload: OpenSearchResultPayload) => void) => {
     subscribers.add(cb);
     queueMicrotask(deliverPending);

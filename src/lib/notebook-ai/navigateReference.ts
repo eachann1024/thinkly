@@ -1,7 +1,3 @@
-/**
- * 聊天行内 @ 引用导航。复用宿主 onOpenPage
- * （EditorHostBridge 内会 closeNotebookAiIfFullscreen + openTab）。
- */
 export function navigateNotebookAiReference(
   pageId: string | undefined | null,
   openPage: (pageId: string) => void,

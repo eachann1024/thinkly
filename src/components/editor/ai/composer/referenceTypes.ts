@@ -11,7 +11,6 @@ export interface AiFileReferenceAttrs {
   refId?: string;
   kind?: "notebook" | "folder" | "page";
   parentId?: string;
-  /** 默认递归；当前层来源仅允许读取直接子页。 */
   recursive?: boolean;
   excludedPageIds?: string[];
   titleSnapshot: string;
@@ -19,7 +18,6 @@ export interface AiFileReferenceAttrs {
   localFilePath?: string;
   notebookNameSnapshot?: string;
   locationSnapshot?: string;
-  /** 可选显式角色；未设置时由邻近文本推断。 */
   role?: AiReferenceRole;
 }
 
@@ -29,10 +27,6 @@ export interface AiReferenceSuggestionItem extends AiFileReferenceAttrs {
   isFolder?: boolean;
 }
 
-/**
- * 内联图片附件的可序列化属性。
- * 真实 File / previewUrl 由 composer 注册表按 imageId 维护，不进 JSONContent。
- */
 export interface AiImageAttachmentAttrs {
   imageId: string;
   fileName: string;
@@ -40,7 +34,6 @@ export interface AiImageAttachmentAttrs {
   size: number;
 }
 
-/** Skill 命令 chip 的可序列化属性（JSON node type: aiSkillCommand） */
 export interface AiSkillCommandAttrs {
   name: string;
   path?: string;
@@ -73,15 +66,10 @@ export type AiComposerToken =
 export interface AiComposerPayload {
   promptText: string;
   freeformText: string;
-  /** 唯一资源列表，按第一次出现顺序排列。 */
   references: AiFileReferenceAttrs[];
-  /** 内联图片 token，按在输入框中出现的顺序排列 */
   images: AiImageAttachmentAttrs[];
-  /** 本地 Skill 调用，按 name 第一次出现顺序去重 */
   skills: AiSkillCommandAttrs[];
-  /** 选区引用 chip，按出现顺序；含完整选区文本 */
   selectionQuotes?: AiSelectionQuoteAttrs[];
-  /** 完整有序 token；同一资源可出现多次并保留每处角色。 */
   tokens: AiComposerToken[];
 }
 

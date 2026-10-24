@@ -100,7 +100,6 @@ export function publishedDownloadMetadata(release) {
     assert.match(asset?.digest ?? "", /^sha256:[a-f0-9]{64}$/, `Missing published checksum: ${name}`);
     hashes.set(name, asset.digest.slice("sha256:".length));
   }
-  // This sentence is emitted only after both macOS build records report signing and notarization.
   const signed = (release.body ?? "").includes("macOS 安装包已完成代码签名与公证。");
   return downloadMetadata(version, release.tag_name, hashes, signed, release.published_at,
     publishedReleaseNotes(release.body));

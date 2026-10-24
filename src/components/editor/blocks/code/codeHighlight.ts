@@ -8,16 +8,10 @@ import { Decoration } from "prosemirror-view";
 import { common, createLowlight } from "lowlight";
 import { LANGUAGE_ALIASES } from "./codeLanguageAliases";
 
-// 所有宿主均以 highlight.js common（~37 种常用语言）作为代码高亮基线，
-// 把语法包从 ~1MB（all 全量）降到 ~300KB（vendor-markdown 1257KB→530KB）。
-// 注意：不做小众语言运行时按需加载——vite/rolldown 对 node_modules 既无法 code-split
-// 裸包模板字符串，import.meta.glob 又会把全部 192 种语言 eager 内联进首屏（体积反弹到
-// 1.4MB，是负优化）。故 common 外语言一律同步降级为无高亮纯文本（不报错），由 failedSet 记录。
 const lowlight = createLowlight(common);
 const lowlightParser = createLowlightParser(lowlight);
 const loadedLanguagesSet = new Set(lowlight.listLanguages());
 
-// 不支持的语言直接显示纯文本，避免误触发所有已加载语言的自动识别。
 const failedLangsSet = new Set<string>();
 
 const PLAIN_TEXT_LANGUAGES = new Set(["none", "plain", "plaintext", "text", "txt"]);

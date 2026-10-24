@@ -71,7 +71,6 @@ function toText(error: unknown): string {
   return "";
 }
 
-/** 同一原因被分号叠多遍时只保留一条；多种原因按条列出。 */
 export function collapseRepeatedErrorSegments(message: string): string {
   const text = message.trim();
   if (!text) return "";

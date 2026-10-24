@@ -5,10 +5,6 @@ import { usePages } from "@/stores/usePages";
 import { syncSearchCatalog } from "./pageSearchCatalog";
 import { syncIndex } from "./pageSearchIndex";
 
-/**
- * 搜索打开后才在空闲时建目录和倒排索引。关掉两分钟且没有再次打开，会由调用方拆掉。
- * 只订 pages / notebooks 引用变化，不驱动 CommandPalette 重渲染。
- */
 export function useCommandSearchIndexWarmup(enabled = true): void {
   useLocale();
   useEffect(() => {

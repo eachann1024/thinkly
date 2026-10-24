@@ -31,7 +31,6 @@ export const quote = (value: string): PartialBlock => ({
   content: value,
 });
 
-// SAFETY: BlockNote 内置类型未导出项目自定义 callout 的 icon prop，运行时 propSchema 接受它。
 export const callout = (icon: string, value: string): PartialBlock =>
   ({
     type: "callout",

@@ -9,8 +9,6 @@ export const gooseCodeTextDropExtension = createExtension(({ editor }) => ({
       from: number; to: number; text: string;
       doc: typeof view.state.doc; x: number; y: number;
     } | null = null;
-    // ponytail: Chromium doesn't start native cross-block text drags here;
-    // remove this mouse fallback when the editor starts them reliably.
     dom.addEventListener("mousedown", (event) => {
       pressed = null;
       const selection = view.state.selection;
@@ -60,7 +58,6 @@ export const gooseCodeTextDropExtension = createExtension(({ editor }) => ({
       return true;
     }
 
-    // React's code-block NodeView swallows ProseMirror's bubble-phase drop handler.
     dom.addEventListener(
       "drop",
       (event) => {
@@ -73,7 +70,6 @@ export const gooseCodeTextDropExtension = createExtension(({ editor }) => ({
           '[data-node-type="blockContainer"]',
         )?.dataset.id;
         const { selection } = view.state;
-        // Leave block-handle drags and external files/HTML to BlockNote.
         if (
           !id ||
           !view.dragging?.move ||

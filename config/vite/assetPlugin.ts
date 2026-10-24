@@ -43,11 +43,9 @@ export function createAssetPlugin(root: string): Plugin {
         recursive: true,
         force: true,
       });
-      // 禁止 NotoSansSC 打进产物；其它 public/fonts（如 UI 字体）不动
       for (const name of ["NotoSansSC-Regular.ttf", "NotoSansSC-Regular.otf"]) {
         rmSync(path.resolve(root, outDir, "fonts", name), { force: true });
       }
-      // KaTeX CSS 相对 url(fonts/KaTeX_*)，对齐到 assets/fonts/*.woff2
       const katexFontSrc = path.resolve(root, "node_modules/katex/dist/fonts");
       const katexFontDest = path.resolve(root, outDir, "assets/fonts");
       if (existsSync(katexFontSrc)) {

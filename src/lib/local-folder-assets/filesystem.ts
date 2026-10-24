@@ -73,7 +73,6 @@ function isWithin(basePath: string, target: string): boolean {
   );
 }
 
-// 包含隐藏目录以及 assets 中的 Markdown；不读取 JS/CSS 等其它文件内容。
 export async function collectNotebookFiles(
   gooseFs: AssetMaintenanceFs,
   basePath: string,
@@ -188,13 +187,11 @@ export async function collectReferenceIndex(
     await ingestMarkdown(filePath);
   }
 
-  // Historical snapshots also keep resources alive, including deleted notes.
   for (const file of (await collectNotebookFiles(gooseFs, normalizedBasePath)).history) {
     const text = await readTextFile(gooseFs, file);
     const version = JSON.parse(text!);
     if (!version.content) continue;
     const mirror = relativePath(basePath, file).slice(".goose/history/".length).split("/").slice(0, -1).join("/");
-    // 新布局目录名是 pageId 哈希，不是笔记路径；只有旧布局的镜像目录才可当作路径。
     const legacyMirror = /^[a-f0-9]{8}(?:-\d+)?$/.test(mirror) ? "" : mirror;
     const relative = version.relativePath || legacyMirror || originalHistoryPath(version.pageId, version.workspaceId);
     const notePath = relative ? `${normalizedBasePath}/${relative}` : `${normalizedBasePath}/history.md`;

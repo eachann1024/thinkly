@@ -44,7 +44,6 @@ export function detectMentionAtCaret(container: HTMLElement): DetectedMention | 
   return { query, range };
 }
 
-/** 解析 @ 菜单锚点；range 为空时退到 caret / 编辑器矩形，避免菜单飞到左上角。 */
 export function resolveMentionAnchorRect(range: Range, editor: HTMLElement): DOMRect {
   const rect = range.getBoundingClientRect();
   if (rect.width > 0 || rect.height > 0) {
@@ -77,8 +76,6 @@ export function createChipElement(
   span.contentEditable = "false";
   span.dataset.aiMentionId = attrs.pageId;
   span.dataset.aiMentionAttrs = JSON.stringify(attrs);
-  // 垂直对齐：chip 用 inline-flex + items-center；高度与行高由 notebook-ai.css 统一。
-  // 高度/行高/垂直对齐由 notebook-ai.css 与编辑器行高对齐；勿加 leading-none/h-*
   span.className =
     "ai-composer-chip inline-flex items-center justify-center rounded text-[11px] font-medium" +
     " bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)] border border-[var(--goose-inline-code-border-hover)]" +

@@ -60,7 +60,6 @@ const readLegacyRawFromDb = (key: string): string | null => {
 
 const readLegacyRawFromLocalStorage = (key: string): string | null => {
   if (typeof window === "undefined") throw new Error("legacy-storage-unavailable");
-  // 只有 key 确实不存在才可按空处理；读取失败必须中止，避免覆盖旧本或设置。
   return window.localStorage.getItem(key);
 };
 
@@ -106,7 +105,6 @@ const readLegacyMigrationMark = (): LegacyMigrationMark | null => {
     const parsed = JSON.parse(getDbStorageItem(LEGACY_MIGRATION_CLEANUP_KEY) ?? "{}") as Partial<LegacyMigrationMark>;
     return parsed.version === 3 && parsed.cleanupPending
       ? { version: 3, cleanupPending: parsed.cleanupPending }
-      // v2 markers predate source tracking, so preserve their cleanup retry.
       : { version: 3, cleanupPending: { db: true, localStorage: true } };
   } catch {
     return { version: 3, cleanupPending: { db: true, localStorage: true } };
@@ -146,8 +144,6 @@ const samePage = (left: Page, right: Page): boolean =>
 export const migrateLegacyStorage = async (): Promise<void> => {
   const mark = readLegacyMigrationMark();
   if (mark) {
-    // Only sources whose deletion previously failed are retried. Do not infer
-    // that any other same-named source is safe to remove.
     (["db", "localStorage"] as const).forEach((source) => {
       if (mark.cleanupPending[source] && removeLegacyPagesSource(source)) {
         delete mark.cleanupPending[source];
@@ -171,8 +167,6 @@ export const migrateLegacyStorage = async (): Promise<void> => {
   const legacyNotebooksRaw = readLegacyRaw(LEGACY_NOTEBOOKS_KEY);
   const legacySettingsRaw = readLegacyRaw(LEGACY_SETTINGS_KEY);
 
-  // A malformed source is never removed. A valid companion source can still be
-  // migrated independently, leaving the damaged source available for repair.
   if (validSources.length === 0) return;
 
   const legacyNotebooksEnvelope = parseLegacyEnvelope<LegacyNotebooksState>(legacyNotebooksRaw);
@@ -184,8 +178,6 @@ export const migrateLegacyStorage = async (): Promise<void> => {
       if (!existing) {
         migratedPages[id] = page;
       } else if (!samePage(existing, page)) {
-        // DB is deterministic first. Keep the other complete envelope as the
-        // recoverable conflict copy rather than silently discarding it.
         unsafeSources.add(source.name);
       }
     });
@@ -219,9 +211,6 @@ export const migrateLegacyStorage = async (): Promise<void> => {
   if (!migrationSucceeded) return;
 
   const nextMark: LegacyMigrationMark = { version: 3, cleanupPending: {} };
-  // A dual-source conflict keeps both complete envelopes recoverable. Otherwise
-  // each valid source is eligible for independent cleanup after this durable
-  // commit; a failed commit leaves every source untouched for a full retry.
   if (unsafeSources.size === 0) {
     validSources.forEach((source) => { nextMark.cleanupPending[source.name] = true; });
   }

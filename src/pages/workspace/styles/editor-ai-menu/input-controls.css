@@ -3,12 +3,10 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box !important;
-  /* border-box：height 含 padding，与图标槽 --goose-ai-row 同一套度量 */
   min-height: var(--goose-ai-row) !important;
-  max-height: 148px; /* 6 行内容 + 上下 padding */
+  max-height: 148px;
   height: var(--goose-ai-row);
   margin: 0 !important;
-  /* 必须 !important：否则会被 .bn-mantine .bn-combobox-input 的 padding 清零 */
   padding: var(--goose-ai-pad-y) 12px var(--goose-ai-pad-y) 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -31,7 +29,6 @@
 .goose-ai-prompt-field__textarea::placeholder {
   color: hsl(var(--muted-foreground));
   opacity: 1;
-  /* placeholder 单行省略，避免撑开高度错觉 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -44,7 +41,6 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* 忙态：输入槽改成单行 ticker，原文/placeholder 让位 */
 .goose-ai-prompt-field--busy .goose-ai-prompt-field__textarea {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
@@ -106,7 +102,6 @@
   box-sizing: border-box;
 }
 
-/* 兼容仍走 Mantine TextInput 的路径（若有） */
 .bn-combobox .bn-combobox-input {
   margin: 0;
 }
@@ -162,7 +157,7 @@
   width: 22px;
   height: 22px;
   border-radius: var(--goose-control-radius);
-  color: var(--goose-interactive-selected-fg); /* 与 AiButton 共用项目主题强调色 */
+  color: var(--goose-interactive-selected-fg);
 }
 
 .bn-combobox .bn-combobox-icon svg {

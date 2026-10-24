@@ -1,4 +1,3 @@
-/* 控件共用几何；菜单独立于普通控件，主题只改变语义颜色。 */
 :root {
   --goose-control-radius: 8px;
   --goose-menu-radius: 8px;

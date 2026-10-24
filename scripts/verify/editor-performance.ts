@@ -1,7 +1,3 @@
-/**
- * 大表只挂视口内的行，长文档删除不做整页截图，表格节点不再按格子重复建网格。
- * 运行：node scripts/verify/run.mjs editor-performance
- */
 import { BlockNoteEditor, blockToNode } from "@blocknote/core";
 import { blockToEditorNode } from "@/components/editor/core/fastBlockToNode";
 import {

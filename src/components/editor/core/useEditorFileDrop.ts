@@ -36,10 +36,8 @@ export function useEditorFileDrop(runtime: EditorRuntime, editable: boolean) {
     if (!container) return;
     const onDrop = (event: DragEvent) => {
       const transfer = event.dataTransfer;
-      // Other editor hosts keep their existing storage and drag behavior.
       if (!runtime.pageRef.current?.localFilePath) return;
       if (!transfer || !isExternalFileTransfer(transfer)) return;
-      // Native capture prevents BlockNote uploading and the sidebar importing the same files.
       event.preventDefault();
       event.stopPropagation();
       const pageId = pageIdForUpdateRef.current;

@@ -5,7 +5,6 @@ import type { Notebook } from "@/stores/notebooks/types";
 export const folderPathKey = (path: string) =>
   comparisonLocalPath(path, localPathsAreCaseInsensitive()).replace(/\/+$/, "");
 
-/** Keep selections live while retaining the stable remote mapping from history. */
 export function reconcileFolderSelection(folders: GitRepositoryFolder[], notebooks: Notebook[]) {
   let changed = false;
   const seen = new Set<string>();

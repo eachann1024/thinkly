@@ -18,7 +18,6 @@ const t = createTranslator(messages);
 export type PageInlineState = InlineMenuState;
 export type RewritePart = (markdown: string, prompt: string, signal: AbortSignal, update: (text: string) => void) => Promise<string>;
 
-/** Only in-memory text and snapshots. A session never owns an editor or its lifecycle. */
 export function createPageInlineRewriteSession(pageId: string) {
   let state: PageInlineState = "closed";
   let target: PrivateInlineTarget | undefined;
@@ -78,7 +77,6 @@ export function createPageInlineRewriteSession(pageId: string) {
       cancel();
       const request = generation;
       const captured = target;
-      // 追加要求基于上一版完整建议；重试复用同一次请求的输入，避免重复缩短等操作。
       const source = requestSource(retry);
       lastRequestSource = source;
       const abort = new AbortController();

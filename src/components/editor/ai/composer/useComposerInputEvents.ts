@@ -35,10 +35,6 @@ export function useComposerInputEvents(
     scheduleDetectOnly,
     touchImeSession,
   } = flush;
-  /**
-   * 有 chip 时拦截原生删除：旧 Chromium 对 contenteditable=false 节点
-   * 走 deleteByCut / 跨边界删除极易卡死。IME 会话绝不拦截。
-   */
   const handleBeforeInputNative = useCallback(
     (event: Event) => {
       const native = event as InputEvent;
@@ -52,7 +48,6 @@ export function useComposerInputEvents(
         inputType === "deleteCompositionText" ||
         inputType === "deleteByComposition";
 
-      // 普通文本删除交给浏览器；IME 和无 chip 场景无需逐键扫描选区边界。
       if (imeActive) return;
       const el = editorRef.current;
       if (!el || !editorHasComposerChips(el)) return;
@@ -64,7 +59,6 @@ export function useComposerInputEvents(
         !el.contains(range.commonAncestorContainer) &&
         el !== range.commonAncestorContainer
       ) {
-        // 选区不在编辑器内
         if (!el.contains(range.startContainer)) return;
       }
 
@@ -101,10 +95,8 @@ export function useComposerInputEvents(
       if (action === "delete-selection-chips") {
         removeComposerChipsIntersectingRange(el, range);
         try {
-          // chip 摘掉后再删文本；包 try 防 range 失效
           if (!range.collapsed) range.deleteContents();
         } catch {
-          // ignore
         }
         cleanupOrphanComposerZwspNodes(el);
         syncEmptyState(isEditorDomEmpty(el));
@@ -134,7 +126,6 @@ export function useComposerInputEvents(
     (event: Event) => {
       const native = event as InputEvent;
       const inputType = native.inputType ?? "";
-      // 组合态删除仍属 IME，不能当普通 delete 去 flush
       const looksLikeImeInput =
         native.isComposing === true ||
         inputType === "insertCompositionText" ||
@@ -158,7 +149,6 @@ export function useComposerInputEvents(
         return;
       }
 
-      // 空态只在首字/末字边界变化；立即同步按钮，完整草稿仍防抖，IME 已在前面排除。
       const el = editorRef.current;
       if (el && isEditorDomEmpty(el)) {
         syncEmptyState(true);
@@ -173,7 +163,6 @@ export function useComposerInputEvents(
         !isDelete ? COMPOSER_INPUT_FLUSH_MS :
           el && editorHasComposerChips(el) ? COMPOSER_CHIP_DELETE_FLUSH_MS : COMPOSER_DELETE_FLUSH_MS,
       );
-      // 非删除：立刻探测 @ /，菜单不跟 200ms 内容防抖绑死
       if (!isDelete) {
         scheduleDetectOnly(0);
       }

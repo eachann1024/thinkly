@@ -70,7 +70,6 @@ export const duplicatePageAction = async (
     const baseName = dotIdx > 0 ? fileName.slice(0, dotIdx) : fileName;
     const ext = dotIdx > 0 ? fileName.slice(dotIdx) : ".md";
 
-    // 碰撞检测必须等 async exists（Electron 同步 exists 只读冷缓存，未命中会误判不存在）。
     const checkExists = async (path: string): Promise<boolean> => {
       if (fs.existsAsync) {
         return await fs.existsAsync(path);
@@ -113,10 +112,6 @@ export const duplicatePageAction = async (
     }
     let copyFrontmatterBlob = copyFmMerge.blob;
 
-    // 异步读取源文件真实内容；读不到（如 Electron 无同步 IPC）则从内存页序列化正文，
-    // 避免只写 frontmatter 丢正文。
-    // 若是副份，编辑器首块已是 yaml-frontmatter，把副份设置 merge 进该头，
-    // 不要「抽 body + prepend」，否则同文件会写出两个 --- 头。
     let fileContent = "";
     let rawMd: string | null = null;
     try {
@@ -126,7 +121,6 @@ export const duplicatePageAction = async (
         rawMd = fs.readFile(sourcePath);
       }
     } catch {
-      // 仅读取失败可回退内存，YAML 合并失败不能绕过保护。
     }
     try {
       if (rawMd != null) {

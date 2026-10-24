@@ -23,13 +23,10 @@ function assertRenameRequest(request: GitNotebookFolderRename): { name: string; 
   const previous = assertAllowed(request.previousLocalPath);
   const slash = previous.lastIndexOf("/");
   if (slash <= 0) throw new Error(t("cannotRename"));
-  // 新路径只能是原仓库根的同级新名字。渲染进程给出的路径只用来核对名称，
-  // 真正落盘的位置以已允许的旧路径为准，避免 /tmp 与 /private/tmp 这种前缀差把改名拒绝掉。
   if (bare(request.localPath).split("/").pop() !== name) throw new Error(t("renameInPlace"));
   return { name, previous, next: `${previous.slice(0, slash)}/${name}` };
 }
 
-/** 远端子目录仍按文件夹名对齐；改名前先挡住会撞车的名称，避免下次同步把映射改乱。 */
 export function assertGitRemoteNameAvailable(state: Pick<GitSyncState, "configs" | "mappingHistory">, notebookId: string, name: string) {
   const next = name.normalize("NFC").toLowerCase();
   for (const config of state.configs) {
@@ -136,7 +133,6 @@ export async function renameGitTrackedNotebookFolder(request: GitNotebookFolderR
       await moveDirectory(next, previous);
       await clearNotebookRenameIntent(context.userData);
     } catch {
-      // 目录没能移回去时保留意图，下次启动继续把映射补到实际位置。
     }
     throw error;
   }

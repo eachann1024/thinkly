@@ -37,13 +37,10 @@ export function setLanguageSnapshot(next: LanguageSnapshot) {
 if (typeof document !== "undefined") document.documentElement.lang = snapshot.effectiveLocale;
 const desktopBridge = bridge();
 desktopBridge?.onSnapshot(setLanguageSnapshot);
-// A different window may save while this renderer is loading its modules.
-// Subscribe first, then reconcile; revision ordering prevents a stale reply.
 if (desktopBridge) void desktopBridge.getSnapshot().then(setLanguageSnapshot).catch((error) => {
   console.warn("[i18n] Could not refresh language snapshot", error);
 });
 
-/** A compile-time macro. Executing this function means a build entry omitted the plugin. */
 export function i18nYaml<Id extends string = string>(
   _source: TemplateStringsArray,
 ): CompiledMessages<Id extends keyof MessageCatalog ? MessageCatalog[Id] : MessageSchema> {
@@ -87,7 +84,6 @@ export function createTranslator<Schema extends MessageSchema>(messages: Compile
   return ((key: string, parameters?: Record<string, string | number>) => {
     const options = {
       lng: getLocale(), ns: namespace,
-      // Display numbers use the system region; plural selection keeps its numeric count.
       replace: parameters && Object.fromEntries(
         Object.entries(parameters).map(([name, value]) => [name, formatInterpolation(value)]),
       ),

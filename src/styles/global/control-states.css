@@ -1,4 +1,3 @@
-/* 原生、HeroUI、编辑器均把真实状态映射到同一套语义颜色。 */
 :is(.goose-interactive, .goose-list-row) {
   box-sizing: border-box;
   transition: background-color var(--goose-control-motion-duration) ease,
@@ -90,7 +89,6 @@
   :is(.goose-interactive, .goose-list-row, .goose-control) { transition: none; }
 }
 
-/* Checkbox states consume application colors, without changing vendor state semantics. */
 [data-goose-control="checkbox"] {
   --goose-check-bg: var(--goose-input-surface, hsl(var(--background)));
   --goose-check-border: hsl(var(--input));

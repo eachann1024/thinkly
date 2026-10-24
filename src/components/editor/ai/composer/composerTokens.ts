@@ -1,8 +1,3 @@
-/**
- * contenteditable DOM ↔ token / payload / JSONContent 互转。
- * 被 AiComposerInput 读写草稿、水合初始内容时使用。
- * 依赖 mention/skill/图片 chip 工厂与 ZWSP 锚点。
- */
 import type { JSONContent } from "@/types";
 import type {
   AiComposerPayload,
@@ -29,7 +24,6 @@ export function readTokensFromDom(container: HTMLElement): AiComposerToken[] {
 
   function walk(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      // 剥掉光标锚点 ZWSP，避免进 prompt / 气泡
       const text = stripComposerCaretZwsp(node.textContent ?? "");
       if (text) tokens.push({ type: "text", text });
     } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -43,7 +37,6 @@ export function readTokensFromDom(container: HTMLElement): AiComposerToken[] {
           ) as AiFileReferenceAttrs;
           tokens.push({ type: "reference", reference: attrs });
         } catch {
-          // ignore malformed chip
         }
       } else if (el.dataset.aiImageAttrs) {
         try {
@@ -52,7 +45,6 @@ export function readTokensFromDom(container: HTMLElement): AiComposerToken[] {
           ) as AiImageAttachmentAttrs;
           tokens.push({ type: "image", image: attrs });
         } catch {
-          // ignore malformed chip
         }
       } else if (el.dataset.aiSkillAttrs) {
         try {
@@ -61,7 +53,6 @@ export function readTokensFromDom(container: HTMLElement): AiComposerToken[] {
           ) as AiSkillCommandAttrs;
           tokens.push({ type: "skill", skill: attrs });
         } catch {
-          // ignore malformed chip
         }
       } else if (el.dataset.aiSelectionQuoteAttrs) {
         try {
@@ -72,7 +63,6 @@ export function readTokensFromDom(container: HTMLElement): AiComposerToken[] {
             tokens.push({ type: "selectionQuote", quote: attrs });
           }
         } catch {
-          // ignore malformed chip
         }
       } else {
         el.childNodes.forEach(walk);
@@ -104,7 +94,6 @@ export function buildPayloadFromTokens(tokens: AiComposerToken[]): AiComposerPay
       promptText += `[图片 ${token.image.fileName}]`;
     } else if (token.type === "skill") {
       skills.push(token.skill);
-      // 与 @ 对称：chip 标签进 promptText，不进 freeformText
       promptText += `/${token.skill.name}`;
     } else if (token.type === "selectionQuote") {
       selectionQuotes.push(token.quote);
@@ -123,7 +112,6 @@ export function buildPayloadFromTokens(tokens: AiComposerToken[]): AiComposerPay
   };
 }
 
-/** 发送按钮 / 占位符：无文本、引用、图片、Skill、选区引用才视为空 */
 export function isComposerPayloadEmpty(
   payload: Pick<
     AiComposerPayload,
@@ -224,6 +212,5 @@ export function setDomFromJsonContent(
       }
     });
   });
-  // 水合后补 ZWSP 锚点，避免只有 chip 时光标不可见
   ensureComposerCaretAnchors(container);
 }

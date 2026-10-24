@@ -41,7 +41,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 极简空态：不暴露服务端错误与凭证，仅给出原因和下一步。 */
 export function AiUnavailableState({
   reason,
   error,
@@ -64,9 +63,7 @@ export function AiUnavailableState({
       ? t("aiAssistantIsOff")
       : needsModel ? t("noModelSelected") : t("aiIsTemporarilyUnavailable");
   const canRetry = retryable && enabled;
-  // 读取中为进行中；助手开启但不可用（且非缺模型）为错误态
   const motion: DotIconMotion = !hydrated ? "progress" : enabled && !needsModel ? "alert" : "idle";
-  // 紧凑条（已有消息时）保持单行图标，不放插画
   const art = compact ? undefined
     : hydrated && !enabled ? <EmptyStateArt kind="assistantOff" className="-my-2" />
     : <DotIconArt icon="sparkleOff" size={52} width={136} height={96} halo motion={motion} className="-my-2" />;

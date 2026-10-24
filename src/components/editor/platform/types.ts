@@ -1,14 +1,4 @@
-/**
- * EditorPlatform —— 编辑器内核的平台适配契约（承重墙）。
- *
- * 编辑器内核**只 import 此接口类型**，不直接触碰任一宿主 API。
- * 运行时实现由宿主注入，纯浏览器和测试使用 `noopPlatform.ts` 兜底。
- *
- * 设计取舍：宿主能力统一为 async，这是跨端的最低公分母。
- *
- */
 
-// ── 通用结构 ───────────────────────────────
 export interface FileStat {
   size?: number;
   mtime?: number;
@@ -43,12 +33,10 @@ export interface SaveDialogOptions {
   filters?: Array<{ name: string; extensions: string[] }>;
 }
 
-// ── fs ────────────────────────────────────
 export interface EditorPlatformFs {
   isAvailable(): boolean;
   readFileAsync(path: string): Promise<string | null>;
   readFileStatAsync(path: string): Promise<FileStat | null>;
-  /** 图片读取，统一 async（WKWebView/Electron 无同步桥） */
   readFileBase64(path: string): Promise<string | null>;
   writeFileAsync(
     path: string,
@@ -66,40 +54,32 @@ export interface EditorPlatformFs {
   deleteFile(path: string): Promise<boolean>;
   deleteDir(path: string): Promise<boolean>;
   rename(oldPath: string, newPath: string): Promise<boolean>;
-  /** 返回 unlisten 函数 */
   watch(path: string, cb: (e: FsWatchEvent) => void): () => void;
   revealItemInFolder(path: string): Promise<boolean>;
 }
 
-// ── shell ─────────────────────────────────
 export interface EditorPlatformShell {
   openPath(targetPath: string): Promise<boolean>;
   showItemInFolder(targetPath: string): Promise<boolean>;
-  /** 使用系统默认浏览器打开链接。 */
   openUrl(url: string): Promise<void>;
   showNotification(body: string): void;
   getDownloadsPath(): Promise<string | null>;
 }
 
-// ── imageStorage ──────────────────────────
 export interface EditorPlatformImageStorage {
-  /** 返回 att:/uuid:/本地相对/data: 引用 */
   save(blob: Blob, mimeType: string): Promise<string>;
   load(ref: string): Promise<Blob | null>;
   delete(ref: string): Promise<void>;
-  /** Video consumers release their object URL when unmounted or replaced. */
   acquireVideoRefToUrl?(
     ref: string,
     pageLocalFilePath?: string | null,
   ): Promise<{ url: string; release: () => void }>;
-  /** Shared image resolution */
   resolveRefToUrl(
     ref: string,
     pageLocalFilePath?: string | null,
   ): Promise<string>;
 }
 
-// ── dialog ────────────────────────────────
 export interface EditorPlatformDialog {
   showSaveDialog(options?: SaveDialogOptions): Promise<string | null>;
   showOpenDialog(options?: OpenDialogOptions): Promise<string[] | null>;
@@ -107,7 +87,6 @@ export interface EditorPlatformDialog {
   restoreLastDirectory(): Promise<string | null>;
 }
 
-// ── clipboard ─────────────────────────────
 export interface EditorPlatformClipboard {
   copyText(text: string): Promise<void>;
   copyImage(dataUrl: string, extras?: { html?: string; text?: string }): Promise<void>;
@@ -115,15 +94,10 @@ export interface EditorPlatformClipboard {
   readImage(): Promise<string | null>;
 }
 
-// ── ai（仅保留自定义协议所需的平台 fetch）──
 export interface EditorPlatformAi {
-  /**
-   * 宿主可注入受控 fetch；未提供时 transport 回退到 globalThis.fetch。
-   */
   customFetch?: typeof fetch;
 }
 
-// ── 顶层聚合 ──────────────────────────────
 export interface EditorPlatform {
   fs: EditorPlatformFs;
   shell: EditorPlatformShell;

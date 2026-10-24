@@ -17,7 +17,6 @@ function isDefaultBackground(value: unknown) {
   return value == null || value === "default" || value === "";
 }
 
-/** 光标所在文本块加呈现类，不写入 BlockNote 文档。 */
 export function resolveActiveLineDecoration(
   state: EditorState,
 ): DecorationSet | null {

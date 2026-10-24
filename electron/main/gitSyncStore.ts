@@ -7,7 +7,6 @@ import { normalizedGitRemote, validateGitRepository, validateGitSyncConfig, type
 export interface GitMappingHistory { [repositoryId: string]: GitRepositoryConfig["folders"] }
 export interface GitSyncSavedState extends GitSyncState { version: 2; mappingHistory: GitMappingHistory }
 
-/** v1 mappings keep their remote-root layout; duplicate remotes are disabled, never merged. */
 export function migrateGitSyncState(saved: unknown): GitSyncSavedState {
   if (!saved || typeof saved !== "object" || !Array.isArray((saved as GitSyncState).configs)) throw new Error(t("invalidConfig"));
   const raw = saved as GitSyncSavedState;

@@ -12,7 +12,6 @@ export type WorkCardStatusData = {
   icon: "running" | "done" | "error" | "waiting" | "cancelled" | "undone";
 };
 
-// 内嵌审批卡将提交、撤回等局部状态同步给唯一的外层抬头。
 export const WorkCardStatusContext = createContext<Dispatch<
   SetStateAction<WorkCardStatusData | null>
 > | null>(null);

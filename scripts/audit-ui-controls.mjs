@@ -1,4 +1,3 @@
-/** 源码清单工具：报告候选与新增旁路，不运行测试、不判断视觉或退出失败。 */
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -85,7 +84,6 @@ for (const file of all.sort()) {
   for (const [category, pattern] of Object.entries(categories)) for (const match of source.matchAll(pattern)) add(category, file, source, match.index, match[0]);
 }
 if (refresh) {
-  // 只清理已不存在的人工审核条目，绝不自动接纳当前所有旁路。
   const present = new Set(findings.map(item => item.id));
   policy.baseline = policy.baseline.filter(item => present.has(item.id) &&
     ["content", "native", "layout"].includes(item.classification) && item.reason?.trim());

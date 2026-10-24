@@ -19,7 +19,6 @@ function segmentGraphemes(text: string): string[] {
   ).Segmenter;
 
   if (!Segmenter) {
-    // 旧版 Electron Chromium 没有 Intl.Segmenter 时，至少正确处理代理对。
     return Array.from(text);
   }
   const values: string[] = [];
@@ -31,7 +30,6 @@ function segmentGraphemes(text: string): string[] {
   return values;
 }
 
-/** 文本靠 edge 一侧的首个字素占多少个 UTF-16 码元。 */
 export function edgeGraphemeLength(text: string, edge: InlineCodeEdge): number {
   if (!text) return 0;
   const graphemes = segmentGraphemes(text);
@@ -40,7 +38,6 @@ export function edgeGraphemeLength(text: string, edge: InlineCodeEdge): number {
   return grapheme?.length ?? 0;
 }
 
-/** 该文档位置是否正好压在某段行内代码的左右边界上。 */
 export function inlineCodeEdgeAt(
   $pos: ResolvedPos,
   codeType: MarkType,
@@ -54,10 +51,6 @@ export function inlineCodeEdgeAt(
   return null;
 }
 
-/**
- * 光标停在边界上时方向键的语义：
- * 朝代码内部按 → 盒外先进盒内、盒内再走一个字素；朝外按 → 盒内先出盒、盒外交给浏览器。
- */
 export function inlineCodeEdgeArrowAction(
   edge: InlineCodeEdge,
   inside: boolean,
@@ -68,10 +61,6 @@ export function inlineCodeEdgeArrowAction(
   return inside ? "leave" : null;
 }
 
-/**
- * 边界上的 DOM 选区是否已经落在「看得见光标」的那一侧。
- * 落在零宽 boundary 节点里、或盒内/盒外和 storedMarks 不一致时，必须重钉。
- */
 export function shouldKeepInlineCodeDomCaret(options: {
   wantInside: boolean;
   contentContainsAnchor: boolean;

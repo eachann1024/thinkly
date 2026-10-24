@@ -14,7 +14,6 @@ type SplitKeyEvent = Pick<
   "key" | "altKey" | "shiftKey" | "metaKey" | "ctrlKey" | "repeat"
 >;
 
-/** 搜索结果上的分屏：macOS 用 ⌘，Windows / Linux 用 Ctrl，加上方向键。 */
 export function searchSplitPlacement(
   event: SplitKeyEvent,
   platform: PlatformKind = getPlatformKind(),

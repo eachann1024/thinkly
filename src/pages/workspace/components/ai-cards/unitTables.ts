@@ -2,7 +2,6 @@ import type { UnitConverterCardData } from "@/lib/notebook-ai/cards/types";
 
 export type UnitCategory = UnitConverterCardData["category"];
 
-/** 线性单位：value × factor = 基准单位；温度单独走仿射换算。 */
 export type UnitDef = { id: string; symbol: string; zh: string; en: string; factor: number; aliases?: string[] };
 
 const L = (id: string, symbol: string, zh: string, en: string, factor: number, aliases: string[] = []): UnitDef =>
@@ -75,7 +74,6 @@ export const UNIT_TABLES: Record<UnitCategory, UnitDef[]> = {
   ],
 };
 
-/** 大小写不敏感地匹配代号、符号或中英别名；找不到时回退到该类第一个单位。 */
 export function resolveUnit(category: UnitCategory, raw: string): UnitDef {
   const units = UNIT_TABLES[category] ?? UNIT_TABLES.length;
   const key = raw.trim().toLowerCase();

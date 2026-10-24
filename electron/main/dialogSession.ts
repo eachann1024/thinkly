@@ -3,8 +3,6 @@ import { BrowserWindow } from "electron";
 const activeWindows = new Set<number>();
 let appDialogOpen = false;
 
-/** Duplicate requests are cancelled, not joined: two consumers must not import
- * the same selection twice or mistake another dialog's result for their own. */
 export async function withWindowDialog<T>(
   win: BrowserWindow | null,
   cancelled: T,

@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./toast/layout.css";
 @import "./toast/error.css";
 @import "./toast/success.css";

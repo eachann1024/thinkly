@@ -35,7 +35,6 @@ import type { useQuickNoteEditorActions } from "./useQuickNoteEditorActions";
 async function revealSavedNoteWhenReady(filePath: string): Promise<boolean> {
   try {
     if (await quickNoteWindow.revealSavedNote(filePath)) return true;
-    // 刚写完的文件，主进程偶发还看不到，短等一次再试。
     await new Promise((resolve) => setTimeout(resolve, 250));
     return await quickNoteWindow.revealSavedNote(filePath);
   } catch (error) {
@@ -86,7 +85,6 @@ export function useQuickNoteSaveActions(
     }
   }, [applyHistoryContentToEditor, flushEditor, savingToNote]);
 
-  /** 拖动预览：只改显示槽，不写 activeSlot。 */
   const handlePreviewSlot = useCallback(
     (slot: QuickNoteSlot | null) => {
       flushEditor();
@@ -95,7 +93,6 @@ export function useQuickNoteSaveActions(
     [flushEditor],
   );
 
-  /** 关窗 / 收起前把当前位置写进 store + preload，保证下次 Electron 唤起仍在原处。 */
   const persistPlacementThenClose = useCallback(() => {
     flushEditor();
     const x = window.screenX;
@@ -107,13 +104,10 @@ export function useQuickNoteSaveActions(
     quickNoteWindow.close();
   }, [flushEditor, setWindowPosition]);
 
-  // 首帧：聚焦光标到编辑器。
   useEffect(() => {
     requestAnimationFrame(() => editorRef.current?.editor?.focus?.());
   }, []);
 
-  // 复用窗口：父窗以「速记」再次唤起已存在的小窗时（preload 发 quicknote:enter），
-  // 重新聚焦即可（草稿延续，不重解析笔记）。
   useEffect(() => {
     const handler = () => {
       requestAnimationFrame(() => editorRef.current?.editor?.focus?.());

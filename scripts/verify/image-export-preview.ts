@@ -1,7 +1,3 @@
-/**
- * 生成图片的主题弹层：万行内容也只排版开头，预览不请求网络字体，笔记本不带点阵。
- * 运行：node scripts/verify/run.mjs image-export-preview
- */
 import { buildImageExportPreviewHtml } from "@/lib/imageExport/livePreview";
 import { buildStyledHTML } from "@/lib/imageExport/serializer/builder";
 import { NOTEBOOK_THEME } from "@/lib/imageExport/themes";

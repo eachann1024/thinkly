@@ -23,7 +23,6 @@ function surface(input: {
   }, known);
 }
 
-/** 新用户先弹出形象选择；已选过的不再弹，欢迎动画不再播放。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

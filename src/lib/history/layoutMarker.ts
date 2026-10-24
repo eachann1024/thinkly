@@ -2,7 +2,6 @@ import type { HistoryDisk } from "./localDisk";
 
 export const HISTORY_LAYOUT = 2;
 
-/** 迁移完成后在 notebook.json 记下 historyLayout；id 与其他字段原样保留。 */
 export async function markHistoryLayout(basePath: string, fs: HistoryDisk): Promise<void> {
   const file = `${basePath}/.goose/notebook.json`;
   if (!await fs.exists(file)) return;

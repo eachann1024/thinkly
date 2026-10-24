@@ -1,5 +1,4 @@
 #!/bin/sh
-# 去掉 AI 署名行；作者或提交者是 Claude 时拒绝提交
 for ident in "$(git var GIT_AUTHOR_IDENT)" "$(git var GIT_COMMITTER_IDENT)"; do
   case "$ident" in
     *[Cc]laude*|*anthropic.com*)

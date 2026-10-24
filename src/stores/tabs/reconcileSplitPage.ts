@@ -5,7 +5,6 @@ import { usePages } from "../usePages";
 import { useNotebooks } from "../useNotebooks";
 import { walkLeaves } from "@/lib/editor-split/tree";
 
-/** 空草稿不落库；重开窗口时保留同标签里仍存在的源文件。 */
 export function reconcileSplitTabPage(tab: TabItem): TabItem {
   if (isSpecialTab(tab)) return tab;
   const notebook = tab.workspaceId

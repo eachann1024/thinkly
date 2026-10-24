@@ -29,11 +29,6 @@ function isCaptureRatioWithinLimits(
   );
 }
 
-/**
- * 按画布边长 / 总像素上限计算可用的 pixelRatio。
- * 理论比值经 floor 到 4 位后，两端 Math.ceil 仍可能略超上限，
- * 因此会继续下调直到落在安全范围内，而不是直接抛「尺寸超出」。
- */
 export function calculateSafePixelRatio(width: number, height: number): number {
   const safeWidth = Math.max(1, Math.ceil(width));
   const safeHeight = Math.max(1, Math.ceil(height));
@@ -44,10 +39,8 @@ export function calculateSafePixelRatio(width: number, height: number): number {
   const areaRatio = Math.sqrt(MAX_CAPTURE_PIXELS / (safeWidth * safeHeight));
   let ratio = Math.min(MAX_CAPTURE_PIXEL_RATIO, edgeRatio, areaRatio);
 
-  // 向下保留四位，避免浮点取整后重新越过安全像素上限。
   ratio = Math.floor(ratio * 10_000) / 10_000;
 
-  // floor 后两端 ceil 仍可能把总像素顶破上限，逐级下调 0.0001。
   while (
     ratio >= MIN_CAPTURE_PIXEL_RATIO &&
     !isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio)
@@ -61,11 +54,6 @@ export function calculateSafePixelRatio(width: number, height: number): number {
   return ratio;
 }
 
-/**
- * Electron 的 Chromium 运行时连续创建大画布时可能暂时无法分配足够内存。
- * 首次使用安全上限倍率；失败后逐级降到 2x、1x，避免一次偶发的画布失败
- * 直接中断整个导出流程。
- */
 export function getCapturePixelRatios(width: number, height: number): number[] {
   const primaryRatio = calculateSafePixelRatio(width, height);
   const roundDown = (ratio: number) => Math.floor(ratio * 10_000) / 10_000;

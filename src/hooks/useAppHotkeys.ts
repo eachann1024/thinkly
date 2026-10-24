@@ -11,9 +11,6 @@ export function useAppHotkeys() {
 
   const { openTabs, activeTabId } = useTabs();
 
-  // Dynamic values consumed inside the single keydown listener must be read
-  // through refs, otherwise the once-registered listener would capture stale
-  // values (breaks tab switching / close after the list changes).
   const appShortcutsRef = useRef(normalizeAppShortcuts(appShortcuts));
 
   const openTabsRef = useRef(openTabs);

@@ -3,7 +3,6 @@ import { useId, useLayoutEffect } from "react";
 import { useLocale } from "@/i18n";
 import { getEditorPlaceholders, type EditorPlaceholderProfile } from "./editorLocale";
 
-/** Update only presentation: no remount, selection update, or document/history transaction. */
 export function useEditorLocale(
   editor: BlockNoteEditor<any, any, any>,
   profile: EditorPlaceholderProfile,
@@ -22,9 +21,6 @@ export function useEditorLocale(
     const rule = (suffix: string, content: string | undefined) =>
       `${selector}${suffix}:has(.ProseMirror-trailingBreak:only-child):after { content: ${JSON.stringify(content ?? "")}; }`;
     const { default: defaultText, emptyDocument, ...blocks } = getEditorPlaceholders(profile);
-    // BlockNote's built-in extension snapshots CSS at mount. Scope overrides to
-    // this instance, retaining its original focus/empty-block decoration contract.
-    // 折叠标题的正文在箭头 wrapper 内；占位必须跟随真正的标题行，不能作为外层 flex 项。
     const toggleHeading = `[${attribute}="${id}"].bn-editor:focus .bn-block-content[data-content-type="heading"][data-is-toggleable="true"][data-is-empty-and-focused] .bn-inline-content:has(> .ProseMirror-trailingBreak:only-child)::before`;
     style.textContent = [
       `${toggleHeading} { content: ${JSON.stringify(blocks.heading ?? defaultText ?? "")}; }`,

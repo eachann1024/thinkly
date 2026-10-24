@@ -19,7 +19,6 @@ export async function importFolderZip(zip: JSZipNs, callbacks: NotebookImportCal
     const notebookPathPrefix = `${notebookName}/`;
     const pathIdMap = new Map<string, string>();
 
-    // 加载笔记本内的 assets（新格式）
     const notebookAssetMap = await loadAssetsFromFolder(
       zip.folder(`${notebookName}/assets`),
     );
@@ -28,7 +27,6 @@ export async function importFolderZip(zip: JSZipNs, callbacks: NotebookImportCal
     zip.forEach((path, entry) => {
       if (!entry.dir && path.startsWith(notebookPathPrefix)) {
         const relativePath = path.slice(notebookPathPrefix.length);
-        // 跳过 assets 目录下的文件（图片，不是页面）
         if (relativePath.startsWith("assets/")) return;
         files.push({
           path: relativePath,

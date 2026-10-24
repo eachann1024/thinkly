@@ -69,7 +69,6 @@ export function useEditorContextClipboard(
           }
         }
       } catch {
-        // 系统未提供多格式读取时继续尝试文本，不更改原选区或原内容。
       }
       if (!nativeHtml && htmlLooksLikeBlockNoteClipboard(html)) nativeHtml = html;
       if (!media.length && !plain && !html && !nativeHtml) plain = await platform.clipboard.readText();
@@ -91,7 +90,6 @@ export function useEditorContextClipboard(
         if (inserted.length) focusPastedBlock(editor, inserted[inserted.length - 1]);
         return;
       }
-      // 原生 paste 使用缓存的精确选区和 data-pm-slice 开放边界，部分文字不会变整块追加。
       const columnTarget = !internal && plainHasGooseColumnMarkers(plain) ? cachePasteTarget(editor) : null;
       if (columnTarget && tryPasteGooseMarkdownFragment(editor, plain, columnTarget)) {
         editor.focus();
@@ -113,7 +111,6 @@ export function useEditorContextClipboard(
     const snapshot = snapshotRef.current ?? snapshotEditorSelection(editor.prosemirrorState);
     if (!restore(snapshot)) return;
     editor.focus();
-    // 优先同步事件链；其失败分支会阻止原生剪切并显示错误。
     if (document.execCommand(cut ? "cut" : "copy")) return;
     try {
       const image = getSelectedImageUrl(editor.prosemirrorState);

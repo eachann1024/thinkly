@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type R
 import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 import { UI_SCALE_MIN, UI_SCALE_MAX } from "@/stores/settings/types";
 
-/** Root font changes move the range itself; keep the gesture in its starting coordinates. */
 export function useInterfaceScaleDrag(
   layoutRef: RefObject<HTMLDivElement | null>,
   setScale: (scale: number) => void,
@@ -24,7 +23,6 @@ export function useInterfaceScaleDrag(
     const slider = event.currentTarget;
     slider.focus({ preventScroll: true });
     const rect = slider.getBoundingClientRect();
-    // Chromium's native range thumb is 16px; its centre stays within the track.
     const thumbInset = 8;
     const trackStart = rect.left + thumbInset;
     const trackWidth = Math.max(1, rect.width - thumbInset * 2);

@@ -39,7 +39,6 @@ async function postEnvelope(url: string, body: string | Uint8Array) {
     const result = await send(url, body);
     return { statusCode: result?.statusCode ?? 0 };
   }
-  // file:// 的 fetch 是 null origin，会被 CORS 挡；没有 preload 就放弃。
   if (typeof location !== "undefined" && location.protocol === "file:") {
     throw new Error("file:// cannot POST Sentry envelope without preload");
   }
@@ -101,7 +100,6 @@ export function reportGooseNoteError(
   try {
     captureException(error, extra ? { extra } : undefined);
   } catch {
-    // 上报失败不能再炸业务
   }
 }
 

@@ -22,7 +22,6 @@ import { useEditorSplit } from "@/stores/useEditorSplit";
 import { flushEditorContent, usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 
-/** 中央走替换；边缘按纯函数开格。拖入只复制引用，不移动侧栏节点。 */
 export function commitSidebarPageDrop(
   tabId: string,
   paneId: string,

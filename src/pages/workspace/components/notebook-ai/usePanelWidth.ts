@@ -13,7 +13,7 @@ export function readPreferredPanelWidth(): number {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw?.trim()) return clamp(Number(raw));
-  } catch { /* Keep the session usable when storage is unavailable. */ }
+  } catch {   }
   return DEFAULT_WIDTH;
 }
 
@@ -32,7 +32,7 @@ export function usePanelWidth(onWidthPreview: (width: number) => number, disable
   const setAndPersist = useCallback((next: number) => {
     const value = clamp(next);
     setWidth(value);
-    try { localStorage.setItem(STORAGE_KEY, String(value)); } catch { /* Session only. */ }
+    try { localStorage.setItem(STORAGE_KEY, String(value)); } catch {   }
   }, []);
 
   const onDragHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>, displayedWidth: number) => {

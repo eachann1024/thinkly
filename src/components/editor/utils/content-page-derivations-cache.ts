@@ -13,7 +13,6 @@ interface Entry {
 
 const MAX_ENTRIES = 64;
 const MAX_CHARS = 2_000_000;
-// The WeakMap stores only a token, so evicting an entry also releases every derived string.
 const tokens = new WeakMap<object, { updatedAt: number; token: number }>();
 const entries = new Map<number, Entry>();
 let nextToken = 0;
@@ -43,7 +42,6 @@ function trim(): void {
   }
 }
 
-/** Store pages replace content on edits; updatedAt additionally guards same-reference version changes. */
 function getEntry(page: PageContentVersion): { entry: Entry; token?: number } {
   const content = page.content;
   if (!content || typeof content !== "object") {
@@ -80,7 +78,6 @@ export function getContentDerivationsForPage(page: PageContentVersion): ContentD
   return getEntry(page).entry.value;
 }
 
-/** A replaced content object invalidates summaries, including block ID-only changes. */
 export function getContentStructureSummaryForPage(page: PageContentVersion, options?: SummaryOptions): string {
   const { entry, token } = getEntry(page);
   const key = JSON.stringify([

@@ -26,7 +26,6 @@ export function useSidebarContextMenu({
 
   const isTrashed = !!page.trashedAt;
 
-  // 只有进入手动顺序的目录才需要「恢复名称排序」（非目录页面恒为 false）
   const folderHasManualOrder = useLocalFolderManualOrder(
     page.workspaceId,
     page.isFolder ? page.id : undefined,

@@ -40,7 +40,6 @@ export function useEditorPresentation(
         const isDivider = (it: (typeof items)[number]) =>
           (it as { type?: string }).type === "divider";
         const kept = items.filter((item) => !hidden.has(item.title));
-        // 砍项后清理冗余分隔线：折叠连续/首部 divider，再去尾部 divider。
         const collapsed: typeof items = [];
         for (const it of kept) {
           if (
@@ -83,7 +82,6 @@ export function useEditorPresentation(
     );
     const rememberLiveSelection = () => {
       const dom = editor.domElement;
-      // 输入框有自己的选区；不要在每次输入时重新克隆失焦正文留下的旧选区。
       if (!dom?.contains(document.activeElement)) return;
       const selection = document.getSelection();
       if (!selection?.anchorNode || !dom.contains(selection.anchorNode)) return;

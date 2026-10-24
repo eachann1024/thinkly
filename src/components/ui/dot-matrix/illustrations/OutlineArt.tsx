@@ -10,7 +10,6 @@ const P = 4;
 const RINGS = 6;
 const SCAN_PERIOD = 12;
 
-/** 大纲行：层级 1–3，起点按层级缩进，current 为当前项（品牌蓝高亮）。 */
 type Row = { y: number; level: 1 | 2 | 3; len: number; current?: boolean };
 const ROWS: Row[] = [
   { y: 22, level: 1, len: 128 },
@@ -36,7 +35,6 @@ function rowDots({ y, level, len, current }: Row) {
   const x0 = INDENT[level];
   const { r, o } = STYLE[level];
   const dots: Dot[] = [];
-  // 层级标记：一级为 2×2 实心块，其余为单个圆点
   if (level === 1) for (const [dx, dy] of [[0, -2], [P, -2], [0, 2], [P, 2]]) dots.push({ x: x0 + dx, y: y + dy, r: r * 1.05, o: o + 0.1 });
   else dots.push({ x: x0, y, r: r * 1.25, o: Math.min(1, o + 0.2), accent: current });
   const start = x0 + (level === 1 ? 14 : 10);
@@ -44,7 +42,6 @@ function rowDots({ y, level, len, current }: Row) {
     const tail = clamp((start + len - x) / 24);
     const base = { x, y, r: r * (0.8 + tail * 0.2), o: (current ? 0.92 : o) * (0.45 + tail * 0.55), accent: current };
     dots.push(base);
-    // 一级标题加粗为两行
     if (level === 1) dots.push({ ...base, y: y + 4, o: base.o * 0.7 }, { ...base, y: y - 4, o: base.o * 0.7 });
   }
   return dots;
@@ -62,7 +59,6 @@ function build() {
       band.push({ x, y, r: 0.7, o: 0.08 + edge * 0.14, accent: true });
     }
   }
-  // 当前项左侧的竖向标记
   const bar: Dot[] = [-4, 0, 4].map((dy) => ({ x: x0 - 6, y: current.y + dy, r: 1.2, o: 0.95, accent: true }));
   const guides: Dot[] = GUIDES.flatMap(({ x, y0, y1 }) => {
     const out: Dot[] = [];
@@ -89,10 +85,6 @@ function build() {
 const ART = build();
 const RIPPLE = DOT_MOTION.period.ripple;
 
-/**
- * 10 大纲为空：分层大纲（标题、子项、缩进参考线），当前项品牌蓝高亮。
- * 光晕波纹外扩；各行自上而下依次微亮如同浏览；当前项与高亮底带缓慢呼吸、偶尔微亮。
- */
 export function OutlineArt({ className }: { className?: string }) {
   return (
     <DotMatrixMotion width={W} height={H} origin={[18, 50]} className={cn("shrink-0 text-foreground", className)}>

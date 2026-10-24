@@ -48,7 +48,6 @@ export function useNotebookSwitcherState({
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      // 整行按住再拖：短点选切换仓库，按住后才进入排序，避免再做拖拽把手
       activationConstraint: { delay: 200, tolerance: 8 },
     }),
   );
@@ -84,7 +83,6 @@ export function useNotebookSwitcherState({
     activeNotebook?.name || uiText("openFolder");
 
   const notebookList = sortNotebooksByOrder(notebooks);
-  // Electron 仅本地文件夹模式：最后一个文件夹也允许移除（回到空态）
   const canDeleteNotebook = notebookList.length > 0;
   return {
     onOpenSettings,

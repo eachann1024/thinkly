@@ -18,7 +18,6 @@ export function usePanelComposerSeed(
     ensureFreshOnOpenRef.current();
   }, []);
 
-  // 只恢复用户的未发送草稿；打开面板和切换笔记都不添加或替换引用。
   const composerSeedContent = useNotebookAiChats.getState().getComposerDraft(notebookId);
 
   useEffect(() => {

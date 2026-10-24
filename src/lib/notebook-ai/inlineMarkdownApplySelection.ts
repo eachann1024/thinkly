@@ -149,7 +149,6 @@ function describeInlineDraft(nodes: ProseMirrorNode[], sourceType: string): stri
   return rows.join("\n");
 }
 
-/** Re-locate by stable ID: unrelated edits may move offsets without invalidating a draft. */
 export function locatePrivateInlineTarget(editor: Editor, target: PrivateInlineTarget) {
   const locations = new Map<string, { node: ProseMirrorNode; pos: number }>();
   const doc = editor.prosemirrorState.doc;
@@ -167,7 +166,6 @@ export function locatePrivateInlineTarget(editor: Editor, target: PrivateInlineT
       for (let depth = 0; depth <= resolved.depth; depth++)
         if (resolved.node(depth).type.name === "blockContainer") ancestors.push(String(resolved.node(depth).attrs.id));
     }
-    // Each remounted editor owns a distinct schema; node.eq would compare type identities.
     if (!found || JSON.stringify(found.node.firstChild?.toJSON()) !== JSON.stringify(part.node.firstChild!.toJSON()) ||
       JSON.stringify(ancestors) !== JSON.stringify(part.ancestors)) {
       throw new Error(t("theTextChangedOrTheBlocksMovedSelect"));
@@ -187,7 +185,6 @@ export function applyPrivateInlineDraft(editor: Editor, target: PrivateInlineTar
   if (draft.edits.length !== parts.length) throw new Error(t("theAiSuggestionIsIncompletePleaseRetry"));
   editor.transact((tr) => {
     closeHistory(tr);
-    // Descendants are applied first. Parents are re-read from this transaction so their children survive.
     for (const part of [...parts].sort((a, b) => b.from - a.from)) {
       const edit = draft.edits.find((item) => item.blockId === part.blockId);
       if (!edit) throw new Error(t("theAiSuggestionIsIncompletePleaseRetry"));
@@ -200,7 +197,6 @@ export function applyPrivateInlineDraft(editor: Editor, target: PrivateInlineTar
       tr.replaceWith(snapshot.replaceFrom, snapshot.replaceTo, composeInlineReplacement(snapshot, edit.nodes));
     }
   });
-  // Prevent a subsequent keystroke from joining this batch's undo event.
   editor.transact((tr) => closeHistory(tr));
 }
 

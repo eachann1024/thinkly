@@ -31,7 +31,6 @@ const uiText = createTranslator(localMessages);
 export const CHARACTER_POSES = ["main", "blink", "open", "fail", "wave"] as const;
 export type CharacterPose = (typeof CHARACTER_POSES)[number];
 export type CharacterTone = "light" | "dark";
-/** 相对整图的 x, y, w, h（0..1）。 */
 export type CharacterRect = readonly [number, number, number, number];
 type AssetLoader = () => Promise<string>;
 export type CharacterAssets = Record<CharacterPose, Record<CharacterTone, AssetLoader>>;
@@ -39,20 +38,16 @@ export type CharacterAssets = Record<CharacterPose, Record<CharacterTone, AssetL
 export interface CharacterDef {
   id: string;
   readonly name: string;
-  /** 眨眼区域：睁眼／闭眼图差分得出；缺省时整帧切换。 */
   eye?: CharacterRect;
   assets: CharacterAssets;
-  /** 高清灰度源（已裁好），按物理像素现场抖动；缺省时回退 1-bit 素材。 */
   gray: Partial<Record<`${CharacterPose}-${"full" | "head"}`, AssetLoader>>;
 }
 
-/** 文件名规则：{id}-{pose}-{light|dark}.png；?inline 保证画布可读取像素。 */
 const FILES = import.meta.glob<string>("/src/assets/characters/*.png", {
   query: "?inline",
   import: "default",
 });
 
-/** 灰度源：{id}-{pose}.webp 为整图，{id}-{pose}-head.webp 为 CHARACTER_HEAD_CROP 裁切。 */
 const GRAY = import.meta.glob<string>("/src/assets/characters/gray/*.webp", {
   query: "?inline",
   import: "default",
@@ -84,7 +79,6 @@ function resolveAssets(id: string): CharacterAssets | undefined {
   return assets;
 }
 
-/** 新形象：复制 PNG 到 src/assets/characters/，在此追加一行并在上方补名称。 */
 const ENTRIES: { id: string; eye?: CharacterRect }[] = [
   { id: "a", eye: [0.363, 0.316, 0.293, 0.145] },
   { id: "b", eye: [0.344, 0.293, 0.336, 0.141] },
@@ -95,7 +89,6 @@ const ENTRIES: { id: string; eye?: CharacterRect }[] = [
   { id: "g", eye: [0.369, 0.246, 0.277, 0.215] },
 ];
 
-/** 文件未到位的条目自动跳过，避免注册表先于素材合入时报错。 */
 export const CHARACTERS: readonly CharacterDef[] = ENTRIES.flatMap(({ id, eye }) => {
   const assets = resolveAssets(id);
   if (!assets) return [];
@@ -113,7 +106,6 @@ export const CHARACTERS: readonly CharacterDef[] = ENTRIES.flatMap(({ id, eye })
 
 export type CharacterGender = "male" | "female";
 
-/** 形象性别分组：选择器按此把男生、女生分别排在一起；未列出的归入男生组。 */
 const CHARACTER_GENDER: Record<string, CharacterGender> = {
   a: "male",
   b: "male",
@@ -124,7 +116,6 @@ const CHARACTER_GENDER: Record<string, CharacterGender> = {
   g: "female",
 };
 
-/** 按性别分组后的形象，组内保持注册顺序；空组自动省略。 */
 export const CHARACTER_GROUPS: readonly (readonly CharacterDef[])[] = (["male", "female"] as const)
   .map((gender) => CHARACTERS.filter((item) => (CHARACTER_GENDER[item.id] ?? "male") === gender))
   .filter((group) => group.length > 0);
@@ -135,6 +126,5 @@ export function findCharacter(id: string | null | undefined): CharacterDef | und
   return id ? CHARACTERS.find((item) => item.id === id) : undefined;
 }
 
-/** 头像裁切：头部与发型方框，相对整图；须与 gray/*-head.webp 的预裁切一致。 */
 export const CHARACTER_HEAD_CROP: CharacterRect = [0.16, 0, 0.68, 0.68];
 export const CHARACTER_FULL_CROP: CharacterRect = [0, 0, 1, 1];

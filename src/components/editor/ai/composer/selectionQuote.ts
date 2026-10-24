@@ -1,4 +1,3 @@
-/** 选区引用入口与待挂载输入框的追加队列。 */
 import {
   APPEND_COMPOSER_SELECTION_EVENT,
   OPEN_AI_PANEL_EVENT,
@@ -18,7 +17,6 @@ export function takePendingAppendComposerSelections(): AppendComposerSelectionDe
   );
 }
 
-/** 消费成功（true）才出队；失败留在队列里等输入框挂载后再试。 */
 export function consumePendingAppendComposerSelections(
   consume: (detail: AppendComposerSelectionDetail) => boolean,
 ): number {

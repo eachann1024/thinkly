@@ -52,7 +52,6 @@ import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
 export const TECH_DOCUMENT: CardTheme[] = [
-  // ── 1. Notion ────────────────────────────────────────────────
   {
     id: "notion",
     get name() { return uiText("minimalWhite"); },
@@ -94,7 +93,6 @@ export const TECH_DOCUMENT: CardTheme[] = [
     watermarkVisible: true,
   },
 
-  // ── 2. Obsidian ──────────────────────────────────────────────
   {
     id: "obsidian",
     get name() { return uiText("deepNight"); },
@@ -136,7 +134,6 @@ export const TECH_DOCUMENT: CardTheme[] = [
     watermarkVisible: true,
   },
 
-  // ── 10. GitHub Light ─────────────────────────────────────────
   {
     id: "github-light",
     get name() { return uiText("githubLight"); },
@@ -182,7 +179,6 @@ export const TECH_DOCUMENT: CardTheme[] = [
     ],
   },
 
-  // ── 11. GitHub Dark ──────────────────────────────────────────
   {
     id: "github-dark",
     get name() { return uiText("githubDark"); },

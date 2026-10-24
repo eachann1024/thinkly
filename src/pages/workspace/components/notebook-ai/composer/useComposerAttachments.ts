@@ -79,7 +79,6 @@ export function useComposerAttachments(
     [addImageFiles],
   );
 
-  /** 粘贴图片 → 插入到光标处（Mac 截图常只有 items，files 为空） */
   const handleDockPaste = useCallback(
     (event: React.ClipboardEvent) => {
       if (disabled || isStreaming) return;
@@ -92,7 +91,6 @@ export function useComposerAttachments(
     [addImageFiles, disabled, isStreaming],
   );
 
-  /** 图片提供落点反馈，工作区内容拒绝拖入。 */
   const handleDockDragOver = useCallback(
     (event: React.DragEvent) => {
       const types = Array.from(event.dataTransfer?.types ?? []);

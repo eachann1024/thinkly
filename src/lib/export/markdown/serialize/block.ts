@@ -24,7 +24,6 @@ export function blockNoteBlockToMarkdown(
       break;
 
     case "quote": {
-      // 多行引用：文本内 \n（hardBreak）逐行加 > 前缀
       result = text
         .split("\n")
         .map((l) => `> ${l}`)
@@ -33,7 +32,6 @@ export function blockNoteBlockToMarkdown(
     }
 
     case "codeBlock": {
-      // 编辑器/新 parse 用 props，极旧存量数据用 attrs
       const codeProps = block.props ?? block.attrs ?? {};
       const lang = (codeProps.language || "").trim();
       if (lang === "yaml-frontmatter") {
@@ -94,7 +92,6 @@ export function blockNoteBlockToMarkdown(
     }
 
     case "details": {
-      // 极旧 parse 三件套格式：content = [detailsSummary, detailsContent]
       const contentArr: any[] = Array.isArray(block.content)
         ? block.content
         : [];
@@ -120,7 +117,6 @@ export function blockNoteBlockToMarkdown(
       result = text;
       break;
 
-    // ── 极旧 jsonContent 容器格式（TipTap 风格存量数据）────────────────────────
     case "bulletList":
     case "taskList": {
       const items: any[] = Array.isArray(block.content) ? block.content : [];

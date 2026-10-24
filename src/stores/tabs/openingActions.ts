@@ -119,7 +119,6 @@ export function createOpeningTabActions(
       }
       const existing = findTabByPageId(openTabs, pageId);
       if (existing) {
-        // ponytail: 已打开的目标只切回既有标签，不复制页面；若必须留在当前槽位，再实现标签内容交换。
         focusTabLeafForPage(existing.id, pageId);
         get().setActiveTab(existing.id);
         return;

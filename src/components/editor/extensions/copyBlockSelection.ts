@@ -4,7 +4,6 @@ import { CellSelection } from "prosemirror-tables";
 import { isWholeTableCellSelection } from "../utils/selection";
 import { currentBlockNode } from "./blockSelectionModel";
 
-/** 折叠光标复制完整当前块；文字选区始终保留精确 slice 和原有开放边界。 */
 export function getCurrentBlockNodeSelection(state: EditorState): NodeSelection | null {
   if (!state.selection.empty) return null;
   const block = currentBlockNode(state);

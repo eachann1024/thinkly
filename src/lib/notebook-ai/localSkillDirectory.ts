@@ -66,7 +66,6 @@ function loadGlobalSkills(forceRefresh: boolean): LocalSkill[] {
   ) {
     return globalCache.skills;
   }
-  // Missing optional host bridges are not treated as a successful disk read.
   if (!bridge?.listLocalSkills) return EMPTY;
   try {
     const skills = bridge
@@ -76,7 +75,6 @@ function loadGlobalSkills(forceRefresh: boolean): LocalSkill[] {
     globalCache = { skills, loadedAt: Date.now(), bridge };
     return skills;
   } catch {
-    // Preserve the last usable result, without advancing its TTL; next call retries.
     return globalCache?.bridge === bridge ? globalCache.skills : EMPTY;
   }
 }

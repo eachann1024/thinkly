@@ -35,13 +35,6 @@ function guessMimeFromPath(filePath: string): string {
   return `image/${ext}`;
 }
 
-/**
- * 将单文件导出中的图片、视频资源就地替换为 data:base64。
- * 整库 ZIP 导出会把媒体写入 assets 目录，不走此处。
- * - uuid:/att:/att-video: → 内部附件存储
- * - 本地文件路径 → 文件系统
- * - http(s) / 已是 base64 → 保留
- */
 export async function inlineExportMediaAsBase64(
   content: BlockNoteContent,
   pageLocalFilePath?: string | null,

@@ -10,11 +10,9 @@ export interface SearchProvidersSliceState {
     searchProviders: SearchProvider[]
     searchAllNotebooks: boolean
     showRecentInSearch: boolean
-    /** 鼠标悬停时自动展开笔记本切换下拉菜单。默认关闭，需点击触发。 */
     notebookDropdownHoverExpand: boolean
     privacy: PrivacySettings
     customActions: CustomAction[]
-    // 已关闭的通知 ID 集合，持久化存储
     dismissedNotices: Record<string, boolean>
 }
 export interface SearchProvidersSliceActions {
@@ -153,7 +151,6 @@ export function createSearchProvidersSlice(set: SetFn): SearchProvidersSlice {
                 customActions: state.customActions.map((a) => {
                     if (a.id !== id) return a
                     const newAction = { ...a, ...updates }
-                    // 名称为空时自动关闭
                     if (!newAction.name.trim()) newAction.isEnabled = false
                     return newAction
                 }),

@@ -6,10 +6,6 @@ export type ReplaceSplitLeafResult = {
   previousPageId: string;
 };
 
-/**
- * 只改目标叶的 pageId，并把焦点移到这一叶。其它叶保持原页面。
- * 树不认识文件夹；调用方必须先用 splitPaneAcceptsPage 拒绝。
- */
 export function replaceSplitLeafPage(
   state: SplitState,
   leafId: string,
@@ -23,7 +19,6 @@ export function replaceSplitLeafPage(
   };
 }
 
-/** 与 isLiveEditorPage 同一约束：文件夹和回收站页不能成为分屏内容。 */
 export function splitPaneAcceptsPage<
   T extends { isFolder?: boolean; trashedAt?: number },
 >(page: T | null | undefined): page is T {

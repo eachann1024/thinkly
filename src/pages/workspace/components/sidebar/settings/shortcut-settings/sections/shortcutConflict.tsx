@@ -52,7 +52,7 @@ import {
   FIXED_SHORTCUT_VALUES,
 } from "./shortcutConfig";
 
-export // Collect all currently configured shortcuts to detect conflicts
+export
 // eslint-disable-next-line react-refresh/only-export-components
 function getAllConfiguredShortcuts(
   appShortcuts: Record<string, string>,
@@ -76,11 +76,9 @@ function getAllConfiguredShortcuts(
   for (const [id, s] of Object.entries(appShortcuts)) {
     if (id === excludeId || !s || NON_CUSTOMIZABLE_APP_SHORTCUT_IDS.has(id))
       continue;
-    // 单标签模式下这些动作不注册热键，也不应占用可配置位。
     if (singleTabMode && TAB_ONLY_APP_SHORTCUT_IDS.has(id)) continue;
     shortcuts.push(normalizeShortcutForConflict(s, isMac));
   }
-  // 桌面全局快捷键（Electron）也参与冲突占用。
   if (excludeId !== "wake-hotkey" && desktopHotkeys?.wakeHotkey) {
     shortcuts.push(
       normalizeShortcutForConflict(desktopHotkeys.wakeHotkey, isMac),

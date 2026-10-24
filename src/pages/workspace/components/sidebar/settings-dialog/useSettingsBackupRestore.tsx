@@ -69,7 +69,6 @@ export function useSettingsBackupRestore(
         )
       : {};
 
-    // 本地文件夹内容属于用户磁盘数据，先落盘但绝不删除磁盘文件或 .goose/history。
     await usePages.getState().flushPendingLocalSaves();
     dataStorage.removeItem("thinkly-notebooks");
     historyRepository.clearAll();

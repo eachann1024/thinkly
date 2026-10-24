@@ -1,4 +1,3 @@
-/* 常驻导航轨道与左侧留白共用外壳背景，内侧不再出现竖条。 */
 .workspace-shell:has(> .workspace-stage .sidebar-mode-rail) {
   --workspace-stage-pad-left: 4px;
   --workspace-rail-width: 48px;
@@ -28,7 +27,6 @@
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane {
-  /* 占位宽度由变量补间。这里只淡入淡出。 */
   transition: opacity var(--workspace-sidebar-motion), transform var(--workspace-sidebar-motion);
 }
 .workspace-shell .workspace-sidebar-pane[data-sidebar-width-motion] {
@@ -46,7 +44,6 @@
   background: var(--workspace-sidebar-surface);
   box-shadow: 0 12px 32px hsl(var(--foreground) / 0.12);
 }
-/* 浮层边缘的拖动热区放在内部，避免被圆角容器裁掉。 */
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] > [role="separator"] {
   right: 0 !important;
   width: 8px !important;

@@ -4,7 +4,6 @@ import { entryIndex, loopVars, type DotLoop } from "./motion";
 
 const ACCENT_FILL = "var(--goose-accent-solid)";
 
-/** 纯静态点：传入模块级常量数组，memo 后父级重渲染不会重建 circle。 */
 export const Dots = memo(function Dots({ dots }: { dots: Dot[] }) {
   return dots.map((dot, index) => (
     <circle
@@ -18,10 +17,6 @@ export const Dots = memo(function Dots({ dots }: { dots: Dot[] }) {
   ));
 });
 
-/**
- * 一组点：外层 <g> 负责入场（--dm-i 环序号），内层 <g> 负责循环。
- * enter={false} 时不包入场层（用于已在其他入场组内的子组）。
- */
 export const DotGroup = memo(function DotGroup({
   dots,
   children,

@@ -6,10 +6,6 @@ import type { SearchFolderSource } from "./useSearchFolderRefresh";
 
 const loaded = new Set<string>();
 
-/**
- * 浮动搜索窗与主窗并行运行，只读取本地文件夹：不写 id 映射、不做恢复、
- * 不记历史墓碑、不改标签与手动排序。扫描结果只替换本窗口内存里的页面。
- */
 async function loadReadOnly(notebookId: string, basePath: string): Promise<void> {
   const gooseFs = typeof window === "undefined" ? undefined : window.gooseFs;
   if (!gooseFs) return;

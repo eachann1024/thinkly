@@ -1,11 +1,3 @@
-/**
- * Rolldown (Vite 8) tree-shaking bug workaround.
- *
- * Transform.prototype.changedRange is called by BlockNote through Transaction
- * (which extends Transform), but Rolldown's tree-shaking fails to trace the
- * inheritance chain and removes the method. This polyfill restores it at runtime
- * by detecting the missing method and patching it onto the Transaction prototype.
- */
 import { Transaction } from "prosemirror-state";
 
 type ChangedRangeResult = { from: number; to: number } | null;

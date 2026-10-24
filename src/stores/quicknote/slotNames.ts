@@ -17,10 +17,6 @@ import {
 } from "./normalization";
 import { getDbStorageItem, setDbStorageItem } from "@/lib/storage";
 
-/**
- * 便签名称单独落库，避免改名时同步重写包含正文与 200 步撤销快照的速记主文档。
- * Electron 的数据库调用是同步的；主文档较大时，这种无关的整包写入会直接堵住旧渲染进程。
- */
 export const QUICKNOTE_SLOT_NAMES_STORAGE_KEY =
   "thinkly:quicknote-slot-names";
 
@@ -62,7 +58,6 @@ export function serializeQuickNoteSlotNames(
   } satisfies PersistedQuickNoteSlotNames);
 }
 
-/** 新存储不存在时以主文档里的旧字段兜底，实现无感迁移。 */
 export function loadQuickNoteSlotNames(
   legacyNames: QuickNoteSlotNames,
 ): QuickNoteSlotNames {

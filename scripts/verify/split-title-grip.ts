@@ -1,7 +1,3 @@
-/**
- * 分栏页签标题与拖拽把手：平时只显示名称，悬停名称才显示把手并藏起名称，离开后名称回来。
- * 运行：node scripts/verify/run.mjs split-title-grip
- */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {

@@ -147,7 +147,6 @@ export async function resolvePdfImageDataUrl(
           return await resolvePdfImageDataUrl(absUrl, pageLocalFilePath);
         }
       } catch {
-        // ignore invalid relative URL
       }
     }
   } catch (error) {

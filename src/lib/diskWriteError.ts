@@ -33,7 +33,6 @@ ja:
   couldnTSaveTheNoteToDiskTryAgain: "ノートをディスクに保存できませんでした。もう一度お試しください。"
 `;
 const uiText = createTranslator(localMessages);
-/** 磁盘写入失败。把 EACCES 等底层错误收成可展示的中文说明。 */
 
 export class DiskWriteError extends Error {
   readonly code?: string;

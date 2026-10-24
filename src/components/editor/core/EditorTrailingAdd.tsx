@@ -25,7 +25,6 @@ const t = createTranslator(messages);
 
 const HOVER_OPEN_DELAY_MS = 180;
 
-/** 末尾块下方空白里的加号：悬停或点击在文末打开块菜单。 */
 export function EditorTrailingAdd() {
   useLocale();
   const editor = useBlockNoteEditor<any, any, any>();
@@ -90,7 +89,6 @@ export function EditorTrailingAdd() {
     const id = createdId.current;
     if (!id) return;
     createdId.current = undefined;
-    // 等选项落地或点击把光标移走后再判断，选了「文本」的空行要保留。
     const timer = window.setTimeout(() => discardUntouchedTrailingBlock(editor, id), 0);
     return () => window.clearTimeout(timer);
   }, [editor, menuShown]);

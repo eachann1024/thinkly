@@ -61,14 +61,12 @@ export function useColorActions(
     if (!textColor || !backgroundColor) return;
     applyWithHeldSelection(
       () => {
-        // 先应用样式再一次写入，避免两次 localStorage 读写
         if (textColor === "default") {
           editor.removeStyles({ textColor: true } as any);
         } else {
           editor.addStyles({ textColor: textColor });
         }
         if (applyHeadingBlockBackground(editor, backgroundColor)) {
-          // 标题背景已按完整块应用。
         } else if (backgroundColor === "default") {
           editor.removeStyles({ backgroundColor: true } as any);
         } else {
@@ -111,7 +109,6 @@ export function useColorActions(
           return;
         }
         if (last.textColor !== undefined) {
-          // 直接应用，不经 applyTextColor，避免把「未记忆的那一侧」误写成当前值
           if (last.textColor === "default") {
             editor.removeStyles({ textColor: true } as any);
           } else {
@@ -120,7 +117,6 @@ export function useColorActions(
         }
         if (last.backgroundColor !== undefined) {
           if (applyHeadingBlockBackground(editor, last.backgroundColor)) {
-            // 标题背景已按完整块应用。
           } else if (last.backgroundColor === "default") {
             editor.removeStyles({ backgroundColor: true } as any);
           } else {

@@ -80,7 +80,6 @@ export function useHistoryRestoreActions(
     try {
       flushEditorContent(true);
     } catch {
-      /* ignore */
     }
 
     const latest = getPage(pageId);
@@ -113,7 +112,6 @@ export function useHistoryRestoreActions(
         };
         if (latest.localFilePath || result.localFrontmatter !== undefined) {
           updates.localFrontmatter = result.localFrontmatter;
-          // 还原 frontmatter 时同步 goose 设置，避免随后写盘用当前内存设置覆盖
           const fm = parseLocalFrontmatterBlob(result.localFrontmatter);
           if (!fm.ok) {
             toast.error(t("thisVersionHasDamagedMetadataAndCannotBe"));

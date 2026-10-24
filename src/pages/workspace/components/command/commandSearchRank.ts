@@ -1,6 +1,3 @@
-/**
- * 有查询时的结果排序：标题匹配优先于正文命中，同档内保持传入顺序（MiniSearch 相关度）。
- */
 export function titleMatchRank(title: string, query: string): number {
   const t = title.trim().toLowerCase();
   const q = query.trim().toLowerCase();

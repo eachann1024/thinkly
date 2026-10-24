@@ -32,7 +32,6 @@ function reactNodeToText(node: ReactNode): string {
   return "";
 }
 
-/** 只包一层 catalog CodeBlock，不替换 Streamdown 高亮。可视化源码走画布卡片。 */
 export function MdPre({
   children,
 }: ComponentProps<"pre"> & { node?: unknown }) {
@@ -48,7 +47,6 @@ export function MdPre({
     if (ctx?.isStreaming) return <CanvasLoadingCard />;
     return null;
   }
-  // 流式期间沿用 Streamdown：每个 token 都重画 Mermaid 会疯狂闪烁
   if (!ctx?.isStreaming && language?.toLowerCase() === "mermaid") {
     return <DiagramCard source={source} editorRef={ctx?.editorRef} />;
   }

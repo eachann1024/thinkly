@@ -102,7 +102,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 工具在处理进度里显示的名称。 */
 export function toolLabel(name: string) {
   return t(name as Parameters<typeof t>[0]);
 }

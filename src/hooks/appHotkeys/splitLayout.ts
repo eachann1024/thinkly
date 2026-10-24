@@ -11,10 +11,6 @@ const MOVE_SHORTCUTS: Array<[SplitNeighborDirection, keyof typeof FIXED_SPLIT_SH
   ["down", "splitMoveDown", "split-move-down"],
 ];
 
-/**
- * 与焦点快捷键一样在 document capture 里 preventDefault。
- * 编辑器的方向键处理发生在更里面的目标阶段，这样带修饰键的方向键不会去移动光标或块。
- */
 export function createSplitLayoutHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
   const { matchesConfiguredShortcut } = actions;
   const moves: HotkeyEntry[] = MOVE_SHORTCUTS.map(([dir, shortcutId, id]) => ({

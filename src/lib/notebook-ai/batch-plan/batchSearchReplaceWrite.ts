@@ -18,7 +18,6 @@ export async function writeSearchReplaceFromLatest(
     const livePage = usePages.getState().pages[operation.pageId];
     if (!livePage) throw new Error("目标页不存在");
     const alreadyWrote = Boolean(working.after[operation.pageId]);
-    // 同页后续项必须基于当前正文和当前修订，不能再用批准瞬间的旧快照。
     const baseContent = alreadyWrote ? livePage.content : before.page.content;
     const expectedRevision = alreadyWrote
       ? working.after[operation.pageId]!

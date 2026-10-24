@@ -16,7 +16,6 @@ type InlineItem = {
   [key: string]: unknown;
 };
 
-/** 按 PM inline 字符偏移拆分，保留 link、样式与原子节点。 */
 function splitInlineContent(items: InlineItem[], offset: number) {
   const before: InlineItem[] = [];
   const after: InlineItem[] = [];
@@ -50,7 +49,6 @@ function splitInlineContent(items: InlineItem[], offset: number) {
   return { before, after };
 }
 
-/** 空 child 退出父 toggle 时显式搬移，避免默认 lift 将后续兄弟挂错父块。 */
 function handleEmptyToggleChild(editor: any, block: any): boolean {
   if (block.type !== "paragraph" || block.content.length || block.children.length) return false;
   const parent = findParentBlock(editor.document, block.id) as any;
@@ -105,7 +103,6 @@ export const gooseCollapsedToggleEnterExtension = createExtension({
       if (handleEmptyToggleChild(editor, block)) return true;
       if (!isToggleBlock(block)) return false;
 
-      // 空 summary 有子树时进入子树，不删除 wrapper 或其中内容。
       if (block.content.length === 0) {
         if (block.children.length) {
           editor.transact(() => {
@@ -122,7 +119,6 @@ export const gooseCollapsedToggleEnterExtension = createExtension({
       const { before, after } = splitInlineContent(block.content as InlineItem[], selection.$from.parentOffset);
       editor.transact(() => {
         if (selection.$from.parentOffset === 0) {
-          // 行首仅在前面加空行，子树始终留在原块。
           editor.insertBlocks([{ type: "paragraph" }], block, "before");
           editor.setTextCursorPosition(block, "start");
           return;

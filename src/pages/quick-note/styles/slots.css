@@ -1,6 +1,3 @@
-/* ── 1–5 便签切换器 ─────────────────────────────────────────────
- * 顶栏绝对居中；悬停时整栏显示底色，当前槽位使用强调色。
- */
 .quicknote-slot-switcher {
   position: relative;
   display: inline-flex;
@@ -78,7 +75,6 @@
 }
 
 
-/* 选中底色留在数字按钮，悬停底色留在整条切换栏。 */
 .quicknote-slot-switcher .quicknote-slot-btn[aria-checked] {
   background: transparent;
   color: hsl(var(--muted-foreground));

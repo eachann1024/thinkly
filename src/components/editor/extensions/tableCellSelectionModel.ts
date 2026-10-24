@@ -39,7 +39,6 @@ export function textSelectionAt(
   }
 }
 
-/** 一端在表格内、另一端在表外（或另一张表）时，选区已经跨出表格。 */
 export function selectionCrossesTableBoundary(
   $a: ResolvedPos,
   $b: ResolvedPos,
@@ -59,8 +58,6 @@ export function isSpanningTableSelection(sel: {
   if (selectionCrossesTableBoundary(sel.$anchor, sel.$head)) return true;
   if (!(sel instanceof TextSelection)) return false;
 
-  // 两端都在表格外时，选区仍可能完整跨过中间的表格块。
-  // 两端位于同一张表格时则保留原有单元格选区行为。
   if (
     tablePosFromResolved(sel.$anchor) != null ||
     tablePosFromResolved(sel.$head) != null
@@ -79,7 +76,6 @@ export function isSpanningTableSelection(sel: {
   return containsTable;
 }
 
-/** 表外一端停在原处，表内一端停在指针所在格子的文字位置，不扩成整表。 */
 export function createSelectionLeavingTable(
   $inTable: ResolvedPos,
   $outside: ResolvedPos,
@@ -200,7 +196,6 @@ function textblockSpan(node: Node, pos: number): { from: number; to: number } | 
   return to < 0 ? null : { from, to };
 }
 
-/** 选区完整盖住的格子。指针所在、只盖住一部分文字的格子不在这里。 */
 export function fullyCoveredCells(
   doc: ResolvedPos["doc"],
   from: number,
@@ -229,7 +224,6 @@ export function fullyCoveredCells(
   return cells;
 }
 
-/** 表外拖选命中或跨过表格后接管，普通文本拖选继续使用原生行为。 */
 export function shouldTakeOverOutsideTableDrag(
   draggingDoc: boolean,
   currentTablePos: number | null,

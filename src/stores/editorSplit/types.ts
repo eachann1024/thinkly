@@ -19,7 +19,6 @@ export type PersistedSplits = {
 
 export type EditorSplitStore = {
   byTabId: Record<string, SplitState>;
-  /** 临时放大，按 tabId 记格子。不写入布局树，也不进持久化。 */
   maximizedPaneIdByTab: Record<string, string>;
   getStateForTab: (tabId: string) => SplitState | null;
   splitFocused: (input: SplitFocusedInput) => SplitFocusedResult;
@@ -41,7 +40,6 @@ export type EditorSplitStore = {
   clearTab: (tabId: string) => void;
   focusedPageId: (tabId: string) => string | null;
   isSplit: (tabId: string) => boolean;
-  /** 缺省为关。只存打开的标签。 */
   syncScrollByTabId: Record<string, true>;
   toggleSyncScroll: (tabId: string) => void;
 };

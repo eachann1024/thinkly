@@ -3,14 +3,12 @@ import { NOTE_MARK_PATTERN, noteComment } from "./persistedNames";
 import { documentTextColors } from "@/lib/textColors";
 import { INLINE_BLOCK_TYPES, pickPersistedBlockProps, sanitizeCssColor, type MarkdownBlock, type PersistedBlockProps } from "./blockPropsProperties";
 
-// toggleListItem 会序列化到 <summary> 内，不是一个可安全包裹的完整 Markdown 行。
 const LOCAL_WRAPPABLE_BLOCK_TYPES = new Set(
   [...INLINE_BLOCK_TYPES].filter((type) => type !== "toggleListItem"),
 );
 export const LOCAL_BLOCK_PROPS_WRAPPER_STYLE = "__gooseLocalBlockPropsWrapperStyle";
 export const LOCAL_PRESERVE_EMPTY_PARAGRAPH = "__gooseLocalPreserveEmptyParagraph";
 const LOCAL_TEXT_COLOR_CSS = documentTextColors("light");
-// 仅用于识别旧文档的 canonical wrapper，生成新文档始终使用全局文字色表。
 const LEGACY_LOCAL_TEXT_COLOR_CSS: Record<string, string> = {
   gray: "#9b9a97", brown: "#64473a", red: "#e03e3e", orange: "#d9730d",
   yellow: "#dfab01", green: "#4d6461", blue: "#0b6e99", purple: "#6940a5", pink: "#ad1a72",
@@ -45,10 +43,6 @@ function localWrapperStyle(metadata: PersistedBlockProps, textPalette = LOCAL_TE
 }
 
 
-/**
- * 本地文件夹专用：让 Obsidian 等 Markdown 预览器真实应用块级样式。
- * 只包文本型块，媒体、代码和表格仍走各自已有的 Markdown 表示。
- */
 export function encodeLocalBlockPropsWrappers(
   blocks: BlockNoteContent,
   { preserveEmptyParagraphs = false } = {},
@@ -75,7 +69,6 @@ export function encodeLocalBlockPropsWrappers(
   }) as BlockNoteContent;
 }
 
-/** 新保存不再把块样式或空段写进正文。旧 span / 注释仍由 unwrap 读回。 */
 export function wrapLocalBlockPropsMarkdown(_block: MarkdownBlock, markdown: string): string {
   return markdown;
 }
@@ -101,10 +94,6 @@ function parseLocalWrapperStyle(style: string): PersistedBlockProps | null {
     : null;
 }
 
-/**
- * 在调用通用 Markdown inline parser 前剥离我们自己输出的完整行 wrapper。
- * data 属性、属性顺序和 canonical style 都必须匹配，用户普通 span 不会被误认。
- */
 export function unwrapLocalBlockPropsWrappers(markdown: string): string {
   const lines = markdown.split("\n");
   const output: string[] = [];
@@ -158,13 +147,11 @@ export function unwrapLocalBlockPropsWrappers(markdown: string): string {
     const closeOnLine = initialInner.lastIndexOf("</span>");
     if (closeOnLine >= 0 && initialInner.slice(closeOnLine + 7) === "") {
       const inner = initialInner.slice(0, closeOnLine);
-      // 连续 quote 行在 parser 中会合并成同一块，只有首行放 marker。
       output.push(`${linePrefix}${isQuote && previousQuoteStyle === style ? "" : marker(metadata)}${inner}`);
       previousQuoteStyle = isQuote ? style : null;
       continue;
     }
 
-    // 只允许段落或 heading 走跨行 wrapper；列表/引用必须每行完整闭合。
     if (isQuote || /^\s*(?:[-*+]\s+|\d+\.\s+)/.test(linePrefix)) {
       output.push(line);
       previousQuoteStyle = null;

@@ -1,12 +1,6 @@
 import { createTranslator } from "@/i18n/core";
 import localMessages from "./commands.messages.yaml";
 const uiText = createTranslator(localMessages);
-/**
- * 常规笔记本分屏命令。快捷键代理只应调用这里。
- * - splitRight() / splitDown()
- * - closePaneOrTab() → "closed-pane" | "close-tab"
- * - focusNeighbor(...) / toggleZoom()（与临时放大同一状态）
- */
 import { toast } from "@/components/ui/sonner";
 import {
   isUnsavedEditorPage,
@@ -174,12 +168,10 @@ function focusSplitByVisualOrder(step: -1 | 1): string | null {
   return next ? focusSplitPane(tab.id, next.id) : null;
 }
 
-/** 按视觉顺序循环到前一个分屏格。 */
 export function focusPreviousSplitPane(): string | null {
   return focusSplitByVisualOrder(-1);
 }
 
-/** 按视觉顺序循环到下一个分屏格。 */
 export function focusNextSplitPane(): string | null {
   return focusSplitByVisualOrder(1);
 }
@@ -195,7 +187,6 @@ export function closeFocusedSplitPane(): boolean {
   return closePaneOrTab() === "closed-pane";
 }
 
-/** 分屏格标题栏 / 空态关闭：最后一格则关标签。 */
 export function closeSplitPaneFromUi(tabId: string, leafId: string): void {
   if (closeSplitPaneById(tabId, leafId) === "close-tab") {
     useTabs.getState().closeTab(tabId);
@@ -218,13 +209,6 @@ export function toggleSplitZoom(): void {
   toggleZoom();
 }
 
-/**
- * 将分屏焦点、活动页和当前标签标题一起切到同一篇笔记。
- *
- * 分屏焦点本身会触发 React 的后续 effect；若只写 split store，标签标题和
- * 侧栏高亮会短暂仍指向旧页。这里把三份状态在同一轮同步，编辑器仍由
- * SplitEditorPane 的 page key 安静地重新初始化，不额外创建标签或显示加载状态。
- */
 export function focusSplitPane(
   tabId: string,
   paneId: string,
@@ -244,11 +228,8 @@ export function focusSplitPane(
   if (!tab || isSpecialTab(tab)) return leaf.pageId || null;
 
   const page = usePages.getState().getPage(leaf.pageId);
-  // 笔记已不在 store 时仍允许聚焦该格，才能关掉它；不能把活动页切到失踪 id，
-  // 否则 WorkspaceLayout 会卸掉整列分屏。
   if (!isLiveEditorPage(page)) return leaf.pageId;
 
-  // 先更新 tab 的 pageId，再激活 tab；setActiveTab 会据此同步笔记本与历史。
   tabs.syncTabPageId(tabId, page.id);
   if (tabs.activeTabId !== tabId) {
     useTabs.getState().setActiveTab(tabId);
@@ -261,10 +242,6 @@ export function focusSplitPane(
   return page.id;
 }
 
-/**
- * 当前 tab 已分屏时，把页面放到聚焦格（或聚焦已展示该页的格）。
- * 返回 true 表示已处理，调用方不要再开/切 tab。
- */
 export function tryShowPageInFocusedSplit(pageId: string): boolean {
   if (isHistoryPreviewSurface()) return false;
 
@@ -279,8 +256,6 @@ export function tryShowPageInFocusedSplit(pageId: string): boolean {
   const state = split.getStateForTab(tab.id);
   if (!state) return false;
 
-  // 只替换“发起时当前 tab 的聚焦叶”。不能因目标已在另一标签页出现就切走，
-  // 否则 Cmd+K 看起来会随机新增/跳转顶层标签，也会失去用户刚刚选中的分栏。
   flushEditorContent(true);
   const previousPageId = findLeaf(state.root, state.focusedLeafId)?.pageId;
   split.setPanePage(tab.id, state.focusedLeafId, pageId);

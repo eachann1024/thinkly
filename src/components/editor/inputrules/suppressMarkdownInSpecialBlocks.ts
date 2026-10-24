@@ -18,11 +18,6 @@ function isSpecialSelection(state: EditorState): boolean {
   return SPECIAL_TYPES.has(state.selection.$from.parent.type.name);
 }
 
-/**
- * 只拒绝默认 input rule 对特殊块的转换，包括 compositionend 旁路。
- * 输入规则先独立提交键入文字，再提交带 isInputRules 元数据的转换事务：拒绝后者
- * 可以原样保留文字、块属性与选区，同时允许菜单转换、撤销和首标题规范正常工作。
- */
 export const gooseSuppressMarkdownInSpecialBlocksExtension = createExtension({
   key: "goose-suppress-markdown-in-special-blocks",
   prosemirrorPlugins: [new Plugin({

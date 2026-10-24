@@ -1,7 +1,3 @@
-/**
- * Node 验收没有浏览器 DOMParser。这里只覆盖富表格解析会碰到的 HTML 子集，
- * 生产环境仍走宿主的 DOMParser。
- */
 const VOID = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"]);
 const NAMED: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: "\"", apos: "'", nbsp: "\u00a0" };
 

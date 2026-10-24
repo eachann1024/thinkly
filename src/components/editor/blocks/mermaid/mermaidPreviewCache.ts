@@ -5,7 +5,6 @@ let bytes = 0;
 let instance = 0;
 const identity = crypto.randomUUID();
 
-/** Window-local display cache; backend templates and export caches remain independent. */
 export function readMermaidPreview(key: string) {
   const preview = previews.get(key);
   if (preview) { previews.delete(key); previews.set(key, preview); }
@@ -13,7 +12,6 @@ export function readMermaidPreview(key: string) {
 }
 
 export function rememberMermaidPreview(key: string, svg: string) {
-  // Renderer stamps its unique namespace; changing it is a string operation, not an SVG reparse.
   const prefix = svg.match(/data-goose-diagram-prefix="(goose-diagram-[a-f0-9-]+-\d+-)"/)?.[1];
   if (!prefix) return;
   const size = (key.length + svg.length) * 2;

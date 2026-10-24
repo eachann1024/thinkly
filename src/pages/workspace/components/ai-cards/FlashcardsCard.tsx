@@ -26,7 +26,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 翻转弹簧：略欠阻尼，翻到位时有一点点落定感。 */
 const FLIP_SPRING = { type: "spring", stiffness: 260, damping: 26, mass: 0.9 } as const;
 
 function shuffled(length: number, current: number) {
@@ -35,12 +34,10 @@ function shuffled(length: number, current: number) {
     const j = Math.floor(Math.random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }
-  // 打乱后不停在刚看的那张
   if (length > 1 && order[0] === current) [order[0], order[1]] = [order[1], order[0]];
   return order;
 }
 
-/** 记忆卡：点按翻面（rotateY 弹簧），前后切换与打乱顺序。 */
 export function FlashcardsCard({ card }: { card: FlashcardsCardData }) {
   useLocale();
   const reduce = useReducedMotion();

@@ -3,7 +3,6 @@ import { extractTitle, htmlToReadableText } from "./html";
 
 const MAX_CONTENT = 48_000;
 
-/** 自带网页读取：主进程抓取并提取正文。地址校验在渲染进程 validateExternalHttpUrl 已做，这里再兜底只放行 http(s)。 */
 export async function builtinReadPage(url: string): Promise<{ url: string; title: string; content: string }> {
   const parsed = new URL(url);
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error("只允许读取 HTTP 或 HTTPS 网页");

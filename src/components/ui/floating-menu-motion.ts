@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 
-/** 与菜单基线一致。关闭用快启动，点选后马上退场。 */
 export const NOTEBOOK_MENU_OPEN_MS = 200;
 export const NOTEBOOK_MENU_CLOSE_MS = 150;
 export const NOTEBOOK_MENU_EASE = "cubic-bezier(.22,1,.36,1)";

@@ -20,7 +20,6 @@ function focusExistingWorkspace(source: string): string {
   return source.slice(start, next);
 }
 
-/** 聚焦已有工作区：放开隐藏停放，且不调用未定义的名字。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

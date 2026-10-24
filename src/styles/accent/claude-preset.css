@@ -1,4 +1,3 @@
-/* Claude：平涂暖纸面 + 陶土强调，只覆盖颜色。 */
 :root[data-goose-accent="claude"] {
   --goose-callout-accent: #c6613f;
   --goose-ai-approval-check-bg: #c6613f;
@@ -121,7 +120,6 @@ html:root.dark[data-goose-accent="claude"] .dark:not(:root) {
   --goose-callout-border: #3d332c;
 }
 
-/* 搜索命中：浅色底 + 强调描边，与文字选区区分。 */
 :root[data-goose-accent="claude"] .goose-search-session-match,
 :root[data-goose-accent="claude"] .goose-find-match {
   background-color: var(--goose-search-hit-bg);

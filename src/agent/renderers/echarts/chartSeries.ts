@@ -15,7 +15,6 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
     actualType,
     labelSmallFontSize,
   } = context;
-  /* ── series ────────────────────────────────────────────────────── */
   return series.map((s, i) => {
     const color = getSeriesColor(i, isDark);
     const base: Record<string, unknown> = {
@@ -50,7 +49,6 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
       base.smooth = 0.35;
       base.symbol = "circle";
       base.symbolSize = Math.max(5, Math.round(6 * scale));
-      // 多系列默认隐藏点，悬停再显示；单系列同样
       base.showSymbol = false;
       base.lineStyle = {
         width: Math.max(2, Math.round((multiSeries ? 2 : 2.5) * scale)),
@@ -74,7 +72,6 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
         },
       };
       if (cfg.type === "area") {
-        // 多系列面积降低不透明度，避免叠成泥
         base.areaStyle = {
           color: multiSeries
             ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -85,7 +82,6 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
           origin: "start",
         };
       } else if (!multiSeries) {
-        // 单系列折线也给极轻面积，避免「光秃线」
         base.areaStyle = {
           color: areaGradient(color),
           opacity: 0.85,
@@ -133,7 +129,6 @@ export function createChartSeries(context: ChartOptionContext): SeriesOption[] {
       };
       base.animationType = "scale";
       base.animationEasing = "cubicOut";
-      // 中心留白更干净的环形；单环时不塞文字，避免拥挤
       if (!isMultiRing && i === 0) {
         base.avoidLabelOverlap = true;
       }

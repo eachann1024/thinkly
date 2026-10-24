@@ -27,16 +27,10 @@ function stripBlockIds(blocks: any[]): any[] {
   });
 }
 
-/** 块级 markdown 指纹（与序列化一致，不含不可见 marker 特殊处理） */
 function blockMarkdownFingerprint(block: any): string {
   return jsonContentToMarkdown([block] as any);
 }
 
-/**
- * 按 markdown 指纹做 LCS 对齐：匹配对保留 original 块对象，
- * 未匹配的 candidate 区间保留 candidate 块。
- * 公共前缀/后缀是 LCS 的退化情形。
- */
 export function alignBlocksByMarkdownFingerprint(
   original: any[],
   candidate: any[],
@@ -57,7 +51,6 @@ export function alignBlocksByMarkdownFingerprint(
   const a = original.map(blockMarkdownFingerprint);
   const b = candidate.map(blockMarkdownFingerprint);
 
-  // dp[i][j] = LCS 长度（a[0..i), b[0..j)）
   const dp: number[][] = Array.from({ length: n + 1 }, () =>
     new Array<number>(m + 1).fill(0),
   );
@@ -71,7 +64,6 @@ export function alignBlocksByMarkdownFingerprint(
     }
   }
 
-  // 回溯匹配对（0-based 下标），按 candidate 顺序
   const matches: Array<{ oi: number; ci: number }> = [];
   let i = n;
   let j = m;
@@ -95,7 +87,6 @@ export function alignBlocksByMarkdownFingerprint(
     const origGap = original.slice(prevOi + 1, match.oi);
     const candGap = candidate.slice(prevCi + 1, match.ci);
     merged.push(...inheritPresentationFromSource(origGap, candGap));
-    // 保留原块对象（id / props / nesting）
     merged.push(original[match.oi]);
     prevOi = match.oi;
     prevCi = match.ci;
@@ -122,15 +113,10 @@ export function parseFragment(markdown: string): any[] {
   if (!fragment || !Array.isArray(fragment) || fragment.length === 0) {
     return [];
   }
-  // 顺序：import → 恢复 props 标记 → 去掉 id（避免与原页冲突）→ 拆行成独立块
   const restored = restoreBlockPropsMarkers(fragment as any);
   return stripBlockIds(explodeAiGeneratedBlocks(restored as any[]) as any[]);
 }
 
-/**
- * normalizePageContent / normalizeBlock 会丢掉 id。
- * 按块 markdown 指纹 LCS 对齐，把原块 id 写回未改动块。
- */
 export function reattachPreservedBlockIds(
   source: any[],
   normalized: any[],

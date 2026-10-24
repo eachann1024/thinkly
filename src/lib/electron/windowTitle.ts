@@ -10,13 +10,6 @@ ja:
   start: "開始"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Electron 桌面端窗口标题同步（纯函数部分，保持轻量可被 unit 测试直接 import）。
- *
- * 顶栏标题 = 当前文件名（getPageTitle）；系统窗口 title 与 document.title 同步。
- * 欢迎页用「开始」，无页面时回落当前语言的产品名。
- * store 订阅与防抖在 @/hooks/useDesktopWindowTitle。
- */
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getGooseDesktop } from "./runtime";
@@ -35,7 +28,6 @@ export function resolveWindowTitle(
   return title || getDefaultWindowTitle();
 }
 
-/** 同步 document.title 与系统窗口标题；非 Electron 构建/调用失败时静默。 */
 export async function syncDesktopWindowTitle(title: string): Promise<void> {
 
   try {

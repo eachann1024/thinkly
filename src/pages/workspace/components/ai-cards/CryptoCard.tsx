@@ -7,12 +7,10 @@ import "./ai-cards-info.css";
 
 type Coin = CryptoCardData["coins"][number];
 
-/** CoinGecko id 形如 shiba-inu，展示为 Shiba Inu。 */
 function coinName(id: string) {
   return id.split(/[-_\s]+/).filter(Boolean).map(word => word[0].toUpperCase() + word.slice(1)).join(" ");
 }
 
-/** 价格小数位随量级变化：低价币保留四位有效数字。 */
 function formatPrice(value: number, currency: string) {
   const digits = value >= 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : { maximumSignificantDigits: 4 };
   try {

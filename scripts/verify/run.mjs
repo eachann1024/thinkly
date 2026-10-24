@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// 验收脚本运行器：用项目同款 i18n 编译把 scripts/verify/<name>.ts 打包后直接执行。
-// 用法：node scripts/verify/run.mjs columns   （不带参数则依次运行全部验收）
 import { build } from "esbuild";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

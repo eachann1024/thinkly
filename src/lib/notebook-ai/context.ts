@@ -108,10 +108,6 @@ export function buildNotebookAiUserMessage(params: {
   payload: AiComposerPayload;
   notebookId: string;
   currentPageId?: string | null;
-  /**
-   * AI 面板会把当前笔记作为显式、可移除的上下文项传入；移除后不能再
-   * 回退为隐式当前页，否则用户无法发起完全脱离笔记的提问。
-   */
   useImplicitPage?: boolean;
 }): {
   modelText: string;
@@ -129,7 +125,6 @@ export function buildNotebookAiUserMessage(params: {
     params.useImplicitPage !== false && references.length === 0
       ? getImplicitPage(params.notebookId, currentPageId)
       : undefined;
-  // target 只用于后续工具写入定位，不把其正文作为本轮读取上下文。
   const contextReferences =
     explicitContextReferences.length > 0
       ? explicitContextReferences
@@ -198,7 +193,6 @@ export function buildNotebookAiUserMessage(params: {
     .filter(Boolean)
     .join("\n\n");
 
-  // skills 合并去重：payload.skills → tokens 中 skill → 仍空则用 invokedSkill
   const skills = collectNotebookAiMessageSkills(params.payload, invokedSkill);
 
   return {
@@ -216,12 +210,6 @@ export function buildNotebookAiUserMessage(params: {
   };
 }
 
-/**
- * 组装消息 metadata.skills：按 name 去重（首次优先）。
- * 1. payload.skills
- * 2. payload.tokens 中 type==="skill"
- * 3. 仍空且 invokedSkill 非空 → 补一条
- */
 export function collectNotebookAiMessageSkills(
   payload: {
     skills?: AiSkillCommandAttrs[];

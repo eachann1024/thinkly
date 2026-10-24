@@ -58,7 +58,6 @@ const reportFlushFailure = (error: unknown) => {
 };
 
 const retryPendingWrites = () => {
-  // 所有入口都复用 runFlushOnce：连续点击或生命周期事件只共享一个在途任务。
   void runFlushOnce()
     .then(() => {
       toast.dismiss("goose-pending-writes-failed");
@@ -108,7 +107,6 @@ export const setupSaveGuards = () => {
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    // 本地文件夹来源：显式调 saveDirtyLocalPage 写盘；其它来源沿用自动保存 flush。
     const pagesState = usePages.getState();
     const activePageId = pagesState.activePageId;
     const activePage = activePageId ? pagesState.pages[activePageId] : null;
@@ -122,7 +120,6 @@ export const setupSaveGuards = () => {
         toast.error(uiText("parseFailed"), { duration: 1800 });
         return;
       }
-      // 内容已自动保存；显式保存会再确保落盘并应用「标题→文件名」重命名。
       void pagesState
         .saveDirtyLocalPage(activePageId)
         .then((ok) => {

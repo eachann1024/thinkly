@@ -46,12 +46,6 @@ function rangeOverlap(a0: number, a1: number, b0: number, b1: number): number {
   return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
 }
 
-/**
- * 按几何邻接找相邻叶子，不按创建顺序。
- *
- * 判定：共享那条边（左右看 x，上下看 y），且沿另一轴有正长度重叠。
- * 多候选时取重叠更大者；再平手则取更靠上 / 更靠左的一格。
- */
 export function neighborLeaf(
   state: SplitState,
   leafId: string,

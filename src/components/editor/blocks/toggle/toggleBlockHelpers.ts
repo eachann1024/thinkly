@@ -14,7 +14,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 使用 BlockNote 原生结构/CSS，但展开状态随笔记保存，且所有 DOM 操作局限于此 wrapper。 */
 export function createPersistentToggleWrapper(
   block: any,
   editor: BlockNoteEditor<any, any, any>,
@@ -54,7 +53,6 @@ export function createPersistentToggleWrapper(
   };
 }
 
-/** details 的 summary 作为 inline，剩余节点作为真实 children，避免 HTML 导入拍平。 */
 export function parseToggleDetailsContent(
   details: HTMLElement,
   schema: Schema,

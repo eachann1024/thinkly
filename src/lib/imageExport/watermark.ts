@@ -11,7 +11,6 @@ ja:
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "./themes";
 
-// ── Watermark ──────────────────────────────────────────────────
 
 export interface WatermarkConfig {
   showWatermark: boolean;
@@ -29,7 +28,6 @@ export const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
   showTitle: true,
 };
 
-/** 与持久化设置合并，避免旧数据缺少 showTitle 等字段导致开关与导出不一致 */
 export function normalizeWatermarkConfig(
   config?: Partial<WatermarkConfig> | null,
 ): WatermarkConfig {

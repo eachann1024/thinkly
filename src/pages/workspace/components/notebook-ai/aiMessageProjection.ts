@@ -5,7 +5,6 @@ export interface AssistantUiMessageProjection {
   isRunning: boolean;
 }
 
-/** Instance-local weak keys follow AI SDK's immutable message snapshots. */
 export function createAiMessageProjector() {
   const projections = new WeakMap<
     NotebookAiMessage,

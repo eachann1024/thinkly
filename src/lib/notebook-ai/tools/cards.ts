@@ -15,7 +15,6 @@ async function geocode(location: string, signal?: AbortSignal): Promise<GeoHit |
   return null;
 }
 
-/** 城市名转坐标再取实况与 7 天预报，数据来自 Open-Meteo（免密钥）。 */
 export const getWeather = tool({
   description: "查询某地的实时天气和未来 7 天预报，结果会以天气卡片展示给用户。用户问天气、气温、要不要带伞时调用。",
   inputSchema: z.object({
@@ -97,7 +96,6 @@ async function erApiRate(base: string, quote: string, signal?: AbortSignal) {
   return { rate, date, history: [], source: "ExchangeRate-API" };
 }
 
-/** 汇率换算：先用欧洲央行数据（带 30 天走势），不支持的币种退回 open.er-api。 */
 export const getExchangeRate = tool({
   description: "查询两种货币的最新汇率并换算金额，结果会以汇率卡片展示。用户问汇率、外币换算时调用。币种用 ISO 代码，如 USD、CNY、JPY、EUR、HKD。",
   inputSchema: z.object({
@@ -130,7 +128,6 @@ function isValidTimeZone(timeZone: string) {
   }
 }
 
-/** 世界时间：本地计算，不联网；卡片会按时区实时走秒。 */
 export const getWorldTime = tool({
   description: "显示一个或多个城市的当前时间和时差，结果会以时钟卡片展示。用户问几点了、时差、跨时区约时间时调用。",
   inputSchema: z.object({
@@ -149,7 +146,6 @@ export const getWorldTime = tool({
   },
 });
 
-/** 加密货币行情：CoinGecko 公共接口，免密钥。 */
 export const getCryptoPrice = tool({
   description: "查询加密货币的实时价格和 24 小时涨跌，结果以行情卡片展示。用户问比特币、以太坊等币价时使用。",
   inputSchema: z.object({

@@ -1,4 +1,3 @@
-/* Preserve the original cascade through ordered domain imports. */
 @import "./beautiful-ui/foundation.css";
 @import "./beautiful-ui/feedback.css";
 @import "./beautiful-ui/prompt-and-tasks.css";

@@ -96,7 +96,6 @@ export function useLightboxActions(
         }
         const response = await fetch(resolvedSrc);
         const sourceBlob = await response.blob();
-        // 存储多为 WebP；下载统一转 PNG，兼容更多工具
         const blob = await convertImageBlobToPng(sourceBlob);
         const filename = `image-${Date.now()}.png`;
         const saved = await saveBlobAndReveal(blob, filename);
@@ -114,7 +113,6 @@ export function useLightboxActions(
           try {
             URL.revokeObjectURL(resolvedObjectUrl);
           } catch {
-            /* ignore */
           }
         }
       }
@@ -141,7 +139,6 @@ export function useLightboxActions(
         }
         const response = await fetch(resolvedSrc);
         const sourceBlob = await response.blob();
-        // 剪贴板统一 PNG，避免 WebP 在部分 App 粘贴失败
         const blob = await convertImageBlobToPng(sourceBlob);
         const base64 = await blobToBase64(blob);
         await platform.clipboard.copyImage(base64);
@@ -155,7 +152,6 @@ export function useLightboxActions(
           try {
             URL.revokeObjectURL(resolvedObjectUrl);
           } catch {
-            /* ignore */
           }
         }
       }

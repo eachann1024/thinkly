@@ -1,8 +1,3 @@
-/**
- * mention / 图片 / Skill chip 的边界探测与 beforeinput 删除决策。
- * 被 AiComposerInput 原生删除/方向键处理使用。
- * 依赖 useSkillCommands 的 ZWSP 工具。
- */
 import {
   isComposerZwspOnlyText,
   stripComposerCaretZwsp,
@@ -30,7 +25,6 @@ export function editorHasComposerChips(editor: HTMLElement): boolean {
   return Boolean(editor.querySelector(COMPOSER_CHIP_SELECTOR));
 }
 
-/** selection 是否覆盖编辑器全部内容（全选删除） */
 export function selectionCoversEntireEditor(
   editor: HTMLElement,
   range: Range,
@@ -47,7 +41,6 @@ export function selectionCoversEntireEditor(
   }
 }
 
-/** 选区是否与任一 mention/image chip 相交 */
 export function rangeContainsComposerChip(
   range: Range,
   editor?: HTMLElement | null,
@@ -66,7 +59,6 @@ export function rangeContainsComposerChip(
     try {
       if (range.intersectsNode(chip)) return true;
     } catch {
-      // detached / invalid boundary
     }
   }
   return false;
@@ -79,7 +71,6 @@ function skipEmptyTextSiblings(
   let current = node;
   while (current && current.nodeType === Node.TEXT_NODE) {
     const text = current.textContent ?? "";
-    // 空节点或纯 ZWSP 锚点：对 chip 边界探测视为“无内容”
     if (text.length > 0 && !isComposerZwspOnlyText(text)) break;
     current =
       direction === "previous" ? current.previousSibling : current.nextSibling;
@@ -87,7 +78,6 @@ function skipEmptyTextSiblings(
   return current;
 }
 
-/** 折叠光标紧贴 chip 左侧边界时，返回该 chip（Backspace / ← 目标） */
 export function getComposerChipBeforeCaret(
   editor: HTMLElement,
   range?: Range | null,
@@ -105,9 +95,7 @@ export function getComposerChipBeforeCaret(
   if (startContainer.nodeType === Node.TEXT_NODE) {
     const text = startContainer.textContent ?? "";
     const onlyZwsp = isComposerZwspOnlyText(text);
-    // 普通文本中间：不算紧贴 chip
     if (startOffset > 0 && !onlyZwsp) return null;
-    // 纯 ZWSP 内任意 offset，或 offset===0：向左跳过空/ZWSP 找 chip
     let node: Node | null = startContainer;
     while (node && node !== editor) {
       const prev = skipEmptyTextSiblings(node.previousSibling, "previous");
@@ -137,7 +125,6 @@ export function getComposerChipBeforeCaret(
   return null;
 }
 
-/** 折叠光标紧贴 chip 右侧边界时，返回该 chip（Delete / → 目标） */
 export function getComposerChipAfterCaret(
   editor: HTMLElement,
   range?: Range | null,
@@ -156,7 +143,6 @@ export function getComposerChipAfterCaret(
     const text = startContainer.textContent ?? "";
     const len = text.length;
     const onlyZwsp = isComposerZwspOnlyText(text);
-    // 普通文本中间：不算紧贴 chip
     if (startOffset < len && !onlyZwsp) return null;
     let node: Node | null = startContainer;
     while (node && node !== editor) {
@@ -200,24 +186,20 @@ export function removeComposerChipsIntersectingRange(
         chip.remove();
       }
     } catch {
-      // ignore
     }
   }
 }
 
-/** 清理 chip 移除后残留的孤儿 ZWSP / 空文本节点 */
 export function cleanupOrphanComposerZwspNodes(editor: HTMLElement) {
   const hasChips = editorHasComposerChips(editor);
   const rawText = editor.textContent ?? "";
   const visible = stripComposerCaretZwsp(rawText).trim();
 
-  // 如果已经没有任何 chip 且没有可视文本，彻底置空以重置 DOM 状态
   if (!hasChips && visible.length === 0) {
     editor.innerHTML = "";
     return;
   }
 
-  // 清理未与 chip 相邻的纯 ZWSP 节点
   const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
   const toRemove: Text[] = [];
   let node = walker.nextNode() as Text | null;
@@ -249,7 +231,6 @@ export function placeCaretInEditor(editor: HTMLElement, atStart: boolean) {
   selection.addRange(caret);
 }
 
-/** 是否已无文本且无 chip（只读 DOM，不建 token；ZWSP 锚点不算内容） */
 export function isEditorDomEmpty(el: HTMLElement) {
   if (el.querySelector(COMPOSER_CHIP_SELECTOR)) {
     return false;

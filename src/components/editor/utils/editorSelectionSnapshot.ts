@@ -11,7 +11,6 @@ export function snapshotEditorSelection(state: EditorState): EditorSelectionSnap
   return { doc: state.doc, bookmark: state.selection.getBookmark() };
 }
 
-/** 异步剪贴板返回前发生了文档变更时停止操作，绝不把旧坐标用于新内容。 */
 export function restoreEditorSelection(
   view: EditorView,
   snapshot: EditorSelectionSnapshot,

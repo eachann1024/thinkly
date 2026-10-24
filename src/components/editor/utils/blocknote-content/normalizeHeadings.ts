@@ -7,9 +7,6 @@ import {
 import { normalizeBlocks } from "./normalizeBlocks";
 
 function canUseAsHeadingContent(block: PartialBlock): boolean {
-  // 只把 paragraph 提升为标题。codeBlock / table / image / list 等结构化块保持原样，
-  // 否则会被撕掉外壳变成 heading 丢数据（例如：本地文件首块若是 codeBlock 包住的
-  // frontmatter，原实现会把它强转成 H1 露出 raw-block marker 文本）。
   if (block.type !== "paragraph") return false;
   return typeof block.content === "string" || Array.isArray(block.content);
 }
@@ -69,7 +66,6 @@ export function ensureFirstTitleHeading(
     ];
   }
 
-  // 首块是结构化块：保持原样，不前置空标题，避免在编辑器顶部塞无关 H1。
   return content;
 }
 
@@ -137,9 +133,6 @@ function normalizeSectionFoldBlock(block: PartialBlock): PartialBlock[] {
   return [working];
 }
 
-/**
- * 普通 heading 延续旧 section 数据规范；显式 toggle heading/list 保留真实子树。
- */
 export function normalizeHeadingSectionFold(
   blocks: PartialBlock[],
 ): PartialBlock[] {

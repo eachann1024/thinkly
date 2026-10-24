@@ -46,7 +46,6 @@ import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
 export const COLORFUL_THEMES: CardTheme[] = [
-  // ── 9. Poster ────────────────────────────────────────────────
   {
     id: "poster",
     get name() { return uiText("boldPoster"); },
@@ -93,7 +92,6 @@ export const COLORFUL_THEMES: CardTheme[] = [
     ],
   },
 
-  // ── 15. Synthwave ────────────────────────────────────────────
   {
     id: "synthwave",
     get name() { return uiText("synthwave"); },
@@ -140,7 +138,6 @@ export const COLORFUL_THEMES: CardTheme[] = [
     ],
   },
 
-  // ── 18. Solarized Light ──────────────────────────────────────
   {
     id: "solarized-light",
     get name() { return uiText("solarizedLight"); },

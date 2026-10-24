@@ -81,7 +81,6 @@ const TOOL_LABELS = ["searchNotes", "readPage", "listPages", "searchWeb", "readW
 type ToolLabel = (typeof TOOL_LABELS)[number];
 const isToolLabel = (name: string): name is ToolLabel => (TOOL_LABELS as readonly string[]).includes(name);
 
-/** 步骤名：「动作 · 对象」；笔记标题加书名号，检索词加引号。 */
 export function stepLabel(step: SheetStep) {
   if (step.name === "understand") return t("understand");
   if (step.name === "retrieve") return t("retrieve");
@@ -95,7 +94,6 @@ export function stepLabel(step: SheetStep) {
   return `${action} · ${subject}`;
 }
 
-/** 步骤右侧的结果：数量、失败。 */
 export function stepResult(step: SheetStep) {
   if (step.status === "error") return t("failed");
   if (step.status !== "done" || step.count === undefined) return "";
@@ -103,7 +101,6 @@ export function stepResult(step: SheetStep) {
   return step.count ? t("found", { count: step.count }) : t("noResults");
 }
 
-/** 完成后折叠成一行：已完成 N 步 · 阅读 X 篇笔记 · 联网 Y 次。 */
 export function stepsSummary(steps: SheetStep[]) {
   const visible = steps.filter(step => step.name !== "compose");
   const notes = steps.filter(step => step.name === "readPage" && step.status === "done").length;

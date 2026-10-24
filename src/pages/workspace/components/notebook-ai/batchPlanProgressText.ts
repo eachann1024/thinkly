@@ -43,7 +43,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 计划的准备、批准、执行与撤回使用同一状态文案。 */
 export function getBatchPlanProgressText(
   part: ToolProgressPart,
   input: Record<string, unknown> | null,

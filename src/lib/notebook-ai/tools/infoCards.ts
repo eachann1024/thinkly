@@ -1,7 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-/** 信息展示卡片：把结构化内容排成卡片，比长段 Markdown 更好读。 */
 const echo = <K extends string>(kind: K) => async <T extends object>(input: T) => ({ kind, ...input });
 
 export const showTimeline = tool({

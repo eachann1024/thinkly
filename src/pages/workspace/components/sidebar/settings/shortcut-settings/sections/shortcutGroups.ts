@@ -136,7 +136,6 @@ export function splitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
   ]);
 }
 
-/** 焦点移动、交换和循环是进阶用法，默认折叠在分屏列表下面。 */
 export function advancedSplitShortcutsForCurrentPlatform(): ShortcutGroupItem[] {
   return shortcutItems([
     [uiText("focusLeft_4e1e"), FIXED_SPLIT_SHORTCUTS.splitFocusLeft],

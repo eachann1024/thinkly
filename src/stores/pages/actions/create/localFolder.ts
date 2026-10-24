@@ -79,7 +79,6 @@ export const createLocalFolderRecordAction = async (
   }));
 
   syncLocalPageMetadataCache(id, newPage);
-  // 手动顺序目录：新建文件夹追加到末尾
   appendLocalFolderOrderEntries(workspaceId, [newPage]);
   return id;
 };

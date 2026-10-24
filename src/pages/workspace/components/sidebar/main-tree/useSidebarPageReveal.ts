@@ -16,7 +16,6 @@ interface SidebarPageRevealOptions {
   consumeRequest: (pageId: string) => void;
 }
 
-/** Reveal is a pending navigation, not tree focus. Only a rendered, visible row completes it. */
 export function useSidebarPageReveal({
   activeNotebookId,
   highlightedPageId,
@@ -57,12 +56,9 @@ export function useSidebarPageReveal({
       restoringNotebook.current = false;
     } else if (restoringNotebook.current) {
       pending.current = null;
-      // 切本的首个有效选中页只恢复高亮，不覆盖该本已记住的列表位置。
       if (treeReady && highlightedPageId && pages[highlightedPageId]?.workspaceId === activeNotebookId)
         restoringNotebook.current = false;
     } else if (pageChanged || notebookChanged) {
-      // A notebook can switch before its page is hydrated. Keep an explicit request
-      // across that intermediate render, but a newer displayed page supersedes it.
       if ((pageChanged && highlightedPageId) || !pending.current?.explicit) {
         pending.current = highlightedPageId
           ? { pageId: highlightedPageId, explicit: false }
@@ -80,7 +76,6 @@ export function useSidebarPageReveal({
     let parentId = page.parentId;
     while (parentId) {
       const parent = pages[parentId];
-      // Incomplete hydration must not count as a successful reveal.
       if (!parent || parent.workspaceId !== activeNotebookId || parent.trashedAt || parent.localUnsaved || seen.has(parentId)) return;
       seen.add(parentId);
       ancestors.push(parentId);
@@ -89,7 +84,7 @@ export function useSidebarPageReveal({
     const missing = ancestors.filter((id) => !expandedIds.includes(id));
     if (missing.length) {
       setExpanded(activeNotebookId, [...expandedIds, ...missing]);
-      return; // The next committed render still owns the uncompleted intent.
+      return;
     }
 
     const container = scrollContainerRef.current;
@@ -113,21 +108,17 @@ export function useSidebarPageReveal({
       if (!container.clientHeight || !rect.height) return;
       const top = bounds.top + container.clientTop;
       const bottom = top + container.clientHeight;
-      // Do not use focusItem/scrollIntoView: both can affect focus or outer scrollers.
       const delta = rect.top < top || rect.height > container.clientHeight
         ? rect.top - top
         : rect.bottom > bottom ? rect.bottom - bottom : 0;
       if (delta) container.scrollTop += delta;
       pending.current = null;
       stop();
-      // Also retire an older explicit request superseded by this displayed page.
       if (expandPageId) consumeRequest(expandPageId);
     };
     const schedule = () => {
       if (!cancelled && frame === null) frame = window.requestAnimationFrame(reveal);
     };
-    // RCT may commit its rows after the ancestor expansion. Observe rather than
-    // polling; cancellation never consumes the intent or marks it completed.
     const mutations = new MutationObserver(schedule);
     mutations.observe(container, { childList: true, subtree: true });
     const resize = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);

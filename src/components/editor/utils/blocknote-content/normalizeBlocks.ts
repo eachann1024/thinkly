@@ -60,11 +60,7 @@ function hasInlineText(content: unknown): boolean {
 }
 
 function isEmptyWrapperBlock(type: string, block: any): boolean {
-  // 空折叠标题仍是子树的可编辑 summary，不能把 wrapper 当作冗余空行剥掉。
   if (type === "heading" && block.props?.isToggleable === true) return false;
-  // Modern BlockNote inline containers can have an intentionally empty head
-  // followed by child blocks (for example a paste at the start of a paragraph).
-  // Keep that parent; legacy wrappers that embed blocks in `content` still flatten.
   if (
     type !== "heading" &&
     Array.isArray(block.children) &&
@@ -139,14 +135,6 @@ export function normalizeBlocks(blocks: any[] | undefined): PartialBlock[] {
   );
 }
 
-/**
- * BlockNote 只在一段连续有序列表的首项读取 `props.start`。后续项上的 start
- * 平时虽然不影响显示，但当前面的列表项被删除、它变成首项后就会突然生效，造成
- * 「删掉 1. 后仍显示 2.」的错觉。
- *
- * 因此只移除同一 sibling run 内后续项的冗余 start；被非列表块隔开的新 run、
- * 以及每个嵌套 blockGroup 的首项仍保留显式起始序号。
- */
 function normalizeRedundantNumberedListStarts(
   blocks: PartialBlock[],
 ): PartialBlock[] {
@@ -171,8 +159,6 @@ function normalizeRedundantNumberedListStarts(
 }
 
 function normalizeQuoteBlock(block: any): PartialBlock[] {
-  // Modern BlockNote quote blocks can own a real child blockGroup. Preserve that
-  // tree; the legacy `blockquote` migration below still flattens its old shape.
   if (
     block.type === "quote" &&
     block.children?.length > 0 &&
@@ -228,7 +214,6 @@ function normalizeBlock(block: any): PartialBlock[] {
   if (!block || typeof block !== "object") return [];
 
   const type = block.type;
-  // 折叠列表已下线，旧数据转普通段落，子块保留为缩进。
   if (type === "toggleListItem") {
     const { props: _props, ...rest } = block;
     return normalizeBlock({ ...rest, type: "paragraph" });
@@ -238,7 +223,6 @@ function normalizeBlock(block: any): PartialBlock[] {
   }
   if (type === "quote" || type === "blockquote") {
     const flattened = normalizeQuoteBlock(block);
-    // Legacy blockquote/content trees retain their historical flattening behavior.
     if (
       type === "quote" &&
       block.children?.length > 0 &&
@@ -273,7 +257,6 @@ function normalizeBlock(block: any): PartialBlock[] {
     return [{ type, children: children.length ? children : [{ type: "paragraph" }] } as PartialBlock];
   }
 
-  // 所有 heading 都保留 children；物理首块拍平由 ensureFirstTitleHeading 负责。
   if (children.length > 0 && isEmptyWrapperBlock(type, block)) {
     return children;
   }

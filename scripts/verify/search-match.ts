@@ -16,7 +16,6 @@ const key = (
   ...overrides,
 });
 
-/** 正文跨行匹配，以及搜索结果上按系统主键加方向键分屏。 */
 export default async function run(): Promise<number> {
   const checker = createChecker();
   const { check } = checker;

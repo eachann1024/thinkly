@@ -1,5 +1,4 @@
 import { useLocale } from "@/i18n";
-/** 第一次打开面板后才挂上。面板关掉且没有进行中的请求时，稍后再卸掉运行时。 */
 import { useEffect, useLayoutEffect, useMemo } from "react";
 import { useSessionState } from "./session/useSessionState";
 import { useStreamLifecycle } from "./session/useStreamLifecycle";

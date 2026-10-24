@@ -1,11 +1,6 @@
-/*
- * 点阵缺省图动效：只动 transform / opacity；按组 <g> 驱动，错峰用 CSS 变量。
- * 数值与 motion.ts 的 DOT_MOTION 一一对应。
- */
 .goose-dm {
   --dm-ease: cubic-bezier(0.45, 0, 0.55, 1);
   --dm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  /* 每段关键帧分两步取样，保留微幅循环，避免持续逐帧更新。 */
   --dm-loop-ease: steps(2, end);
   overflow: visible;
   transform-box: view-box;
@@ -15,7 +10,6 @@
   --dm-loop-low: 0.92;
 }
 
-/* The whole picture keeps a barely visible drift while it is in the viewport. */
 .goose-dm[data-dm-phase="in"].goose-dm-main {
   animation: goose-dm-main-drift 12s var(--dm-loop-ease) -6s infinite both;
 }
@@ -53,7 +47,6 @@
   }
 }
 
-/* 入场：由内向外按环聚合，360ms + 8 × 28ms ≤ 600ms */
 .goose-dm .goose-dm-rg {
   transform-box: view-box;
   transform-origin: var(--dm-ox, 50%) var(--dm-oy, 50%);
@@ -72,7 +65,6 @@
   }
 }
 
-/* 循环：仅在 phase=in 时启动 */
 .goose-dm .goose-dm-glint,
 .goose-dm .goose-dm-wave,
 .goose-dm .goose-dm-alert {
@@ -111,7 +103,6 @@
       infinite both;
 }
 
-/* 光晕缓慢呼吸 */
 @keyframes goose-dm-breathe {
   0%,
   100% {
@@ -121,7 +112,6 @@
     opacity: var(--dm-loop-low, 0.9);
   }
 }
-/* 波纹：按环错峰起伏，维持低反差循环 */
 @keyframes goose-dm-ripple {
   0%,
   100% {
@@ -131,7 +121,6 @@
     opacity: var(--dm-loop-low, 0.9);
   }
 }
-/* 品牌蓝偶尔微亮 */
 @keyframes goose-dm-glint {
   0%,
   100% {
@@ -146,7 +135,6 @@
     transform: scale(1.006);
   }
 }
-/* 沿路径流过：亮度峰按到达时间错峰 */
 @keyframes goose-dm-flow {
   0%,
   100% {
@@ -156,7 +144,6 @@
     opacity: 0.94;
   }
 }
-/* 波浪起伏 */
 @keyframes goose-dm-wave {
   0%,
   100% {
@@ -166,7 +153,6 @@
     transform: translateY(0.35px);
   }
 }
-/* 进行中：稍快但平滑 */
 @keyframes goose-dm-progress {
   0%,
   100% {
@@ -176,7 +162,6 @@
     opacity: 0.9;
   }
 }
-/* 错误：一次短促横向反馈 */
 @keyframes goose-dm-shake {
   25% {
     transform: translateX(-0.8px);
@@ -189,7 +174,6 @@
   }
 }
 
-/* 离开视口 / 页面隐藏时暂停 */
 .goose-dm[data-dm-paused] * {
   animation-play-state: paused !important;
 }
@@ -209,7 +193,6 @@
   }
 }
 
-/* 缺省图边角装饰：尺寸容器，窄／矮时先缩小、再隐藏次要项、最后整体隐藏 */
 .goose-dm-decor {
   position: absolute;
   inset: 0;

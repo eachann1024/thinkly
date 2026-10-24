@@ -1,8 +1,3 @@
-/**
- * 多行单元格选中只留外轮廓，不再在锚点格上叠一层内框。
- * 单格选中仍画锚点框；格内编辑仍是文字选区，不画单元格框。
- * 运行：node scripts/verify/run.mjs table-selection-frame
- */
 import { readFileSync } from "node:fs";
 import { Schema } from "prosemirror-model";
 import { EditorState, TextSelection } from "prosemirror-state";

@@ -41,9 +41,6 @@ type MarkdownParser = typeof import("./markdown/parse");
 type ZipBundle = typeof import("./zipBundle");
 type PageExport = typeof import("./pageWithAttachments");
 
-// 下面这些不再静态重导出：docx / react-pdf / rehype-katex / jszip 加起来约 2MB，
-// 以前经本文件被 stores、设置面板和页面菜单静态引用，整条链都被塞进冷启动首屏。
-// 改成调用时才 import，行为不变，只有真正导出/导入的那一刻才下载解析这些模块。
 export { jsonContentToMarkdown } from "./markdown/serialize";
 export { saveBlobAndReveal } from "./fileSave";
 export type { ImportResult } from "./markdown/parse";
@@ -63,7 +60,6 @@ export const blocksToHTML = (
 type ImportedMarkdown = Awaited<ReturnType<MarkdownParser["importFromMarkdown"]>>;
 type ImportedFragment = Awaited<ReturnType<MarkdownParser["importMarkdownFragment"]>>;
 
-/** 原本是同步函数，这里改成 Promise；调用方都在 async 流程里，已一并加 await。 */
 export const importFromMarkdown = async (
   ...args: Parameters<MarkdownParser["importFromMarkdown"]>
 ): Promise<ImportedMarkdown> => {
@@ -103,7 +99,6 @@ export const buildSinglePageExport = (
 ): ReturnType<PageExport["buildSinglePageExport"]> =>
   import("./pageWithAttachments").then((mod) => mod.buildSinglePageExport(...args));
 
-/** 同步方法的懒加载包装：调用方全部在 async 流程里，改成 Promise 不影响时序。 */
 export const pageHasLocalSidecarAttachments = (
   ...args: Parameters<PageExport["pageHasLocalSidecarAttachments"]>
 ): Promise<boolean> =>

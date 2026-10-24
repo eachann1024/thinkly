@@ -1,4 +1,3 @@
-/** One active generation and one merged dirty batch; failed work is retried on the next request. */
 export function createGenerationQueue(run) {
   const dirty = new Set();
   let full = false, active = null, closed = false;

@@ -63,7 +63,6 @@ export function findBlockDocumentRange(
   return range;
 }
 
-/** Checks CellSelection positions without calling BlockNote cursor APIs. */
 export function isCellSelectionInsideBlock(
   doc: ProseMirrorNode,
   blockId: string,
@@ -81,14 +80,6 @@ export function isCellSelectionInsideBlock(
   );
 }
 
-/**
- * Freezes the row/column range that a table-menu delete action targets.
- *
- * A multi-row or multi-column CellSelection wins over the hovered handle. A
- * one-cell selection keeps the handle semantics. Removing the final dimension
- * deletes the table block because prosemirror-tables intentionally rejects
- * deleting every row or every column.
- */
 export function createTableDeletionSnapshot({
   blockId,
   orientation,

@@ -55,7 +55,6 @@ function isEmptyInline(value: unknown): boolean {
   );
 }
 
-/** 只认可编辑器实际清空后的段落，未知块或异常 shape 不能借 normalize 的空兜底写盘。 */
 export function isEmptyParagraphDocument(value: unknown): value is JSONContent & unknown[] {
   return Array.isArray(value) && Array.from(value).every((block) =>
     isRecord(block) && Object.keys(block).every((key) => EMPTY_BLOCK_KEYS.has(key)) &&
@@ -79,7 +78,6 @@ export function assertLocalPageReadable(page: Page | undefined, filePath: string
   }
 }
 
-/** 先读盘，返回同步校验；调用方在最后一次 await 后、write 前执行。 */
 export async function prepareEmptyLocalWrite(
   get: StoreGet, gooseFs: GooseFs, page: Page, filePath: string,
   content: JSONContent, markdown: string, force = false,
@@ -89,7 +87,6 @@ export async function prepareEmptyLocalWrite(
   try {
     const exists = gooseFs.existsAsync
       ? await gooseFs.existsAsync(filePath) : gooseFs.exists(filePath);
-    // 文件已经不在磁盘上时没有原文可保护。残留快照不能拦住同名空笔记重新写盘。
     if (exists) {
       const read = gooseFs.readFileAsync
         ? await gooseFs.readFileAsync(filePath) : gooseFs.readFile(filePath);

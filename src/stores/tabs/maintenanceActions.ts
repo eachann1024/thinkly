@@ -43,15 +43,12 @@ export function createMaintenanceTabActions(
       }
 
       let nextTabs = openTabs.map(reconcileSplitTabPage).filter((tab) => {
-        // 欢迎 tab 不关联真实页面，始终保留。
         if (tab.type === "welcome") return true;
-        // AI 标签按笔记本存活：笔记本还在就保留。
         if (tab.type === "notebook-ai") {
           const notebookId = tab.workspaceId;
           return Boolean(notebookId && notebooks[notebookId]);
         }
         if (pagesState.getPage(tab.pageId)) return true;
-        // 页面不在内存：若它属于尚未加载的本地文件夹笔记本，保留（稍后会加载）。
         const ws = tab.workspaceId;
         if (
           ws &&

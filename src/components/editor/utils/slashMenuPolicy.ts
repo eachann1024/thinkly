@@ -8,11 +8,9 @@ export { findActivePageMentionQuery, isPageMentionBoundaryChar, mentionTriggerDe
 const SLASH_TRIGGERS = ["/", "、"] as const;
 
 export type SlashMenuPagePolicy = {
-  /** local-folder 或速记草稿：首块可弹 slash（标题不在首块内） */
   allowSlashMenuOnFirstBlock: boolean;
 };
 
-/** Enter（无 Shift）或无修饰键的 Tab：确认当前 @ / 建议项。 */
 export function isSuggestionMenuAcceptKey(event: {
   key: string;
   shiftKey?: boolean;
@@ -52,7 +50,6 @@ function hasCodeMark($from: Transaction["selection"]["$from"]): boolean {
   return $from.marks().some((mark) => mark.type.name === "code");
 }
 
-/** 与 EditorComposer SuggestionMenuController.shouldOpen 共用 */
 export function shouldOpenSlashSuggestionMenu(
   tr: Transaction,
   editor: BlockNoteEditor<any, any, any>,
@@ -64,18 +61,12 @@ export function shouldOpenSlashSuggestionMenu(
     const cursorBlock = editor.getTextCursorPosition().block;
     if (cursorBlock && cursorBlock.id === editor.document[0]?.id) return false;
   }
-  // Only the first character of a text block can start a slash command.
-  // Offsets also count hard breaks and inline atoms, unlike textContent.
   if (!tr.selection.empty || !$from.parent.isTextblock || $from.parentOffset !== 0) return false;
   if (hasCodeMark($from)) return false;
   if (isCodeTextblockParent($from.parent) || isInsideCodeBlock($from) || isCodeLikeEditorBlock(editor)) return false;
   return !$from.parent.type.isInGroup("tableContent");
 }
 
-/**
- * `@` 在任意 inline 块中、词边界处触发：段落、标题、列表、待办、引用、高亮块、表格单元格。
- * 代码块与行内代码不弹。
- */
 export function shouldOpenPageMentionSuggestionMenu(
   tr: Transaction,
   editor: BlockNoteEditor<any, any, any>,
@@ -101,10 +92,6 @@ export function shouldOpenPageMentionSuggestionMenu(
   return isPageMentionBoundaryChar(charBefore);
 }
 
-/**
- * BlockNote 仅在 handleTextInput 插入触发符时开菜单；删光 query 后块首仍留 `/` 时不会再开。
- * 文档稳定后检测并程序化 reopen + 恢复 query。
- */
 export function reconcileSlashSuggestionMenu(
   editor: BlockNoteEditor<any, any, any>,
   policy: SlashMenuPagePolicy,
@@ -132,14 +119,10 @@ export function reconcileSlashSuggestionMenu(
     if (cursorBlock && cursorBlock.id === editor.document[0]?.id) return;
   }
 
-  // Preserve hard breaks and inline atoms so a later line cannot look like block start.
   const textBefore = parent.textBetween(0, $from.parentOffset, "\n", "\ufffc");
   const trigger = SLASH_TRIGGERS.find((t) => textBefore.startsWith(t));
   if (!trigger) return;
   const query = textBefore.slice(trigger.length);
-  // Local paths such as `/Users/name/project` also start with `/`, but they
-  // are content, not slash-command queries. Touching selection while IME is
-  // settling can make those long path lines visually flicker.
   if (/[\/\\\n\ufffc、]/u.test(query)) return;
 
   const blockStart = $from.start();
@@ -157,7 +140,6 @@ export function reconcileSlashSuggestionMenu(
   );
 }
 
-/** 删光 query 后行内仍留边界 `@` 时重新打开提及菜单。 */
 export function reconcilePageMentionSuggestionMenu(
   editor: BlockNoteEditor<any, any, any>,
 ): void {

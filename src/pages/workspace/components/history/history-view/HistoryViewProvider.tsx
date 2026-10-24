@@ -4,7 +4,6 @@ import { useHistoryViewState } from "./logic/useHistoryViewState";
 import { useHistoryRestoreActions } from "./logic/useHistoryRestoreActions";
 import { HistoryViewContext } from "./useHistoryViewLogic";
 
-/** 侧栏、顶栏和正文共用一次历史读取及操作状态。 */
 export function HistoryViewProvider({ children }: { children: ReactNode }) {
   useLocale();
   const history = useHistoryViewState();

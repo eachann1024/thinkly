@@ -14,10 +14,6 @@ import {
 } from "./tableCellSelection";
 import { withPreservedSelection } from "./selectionRestore";
 
-/**
- * Apply text alignment to the current selection.
- * Follows BlockNote TextAlignButton: block props for paragraphs, cell props for tables.
- */
 function applyAlignmentToSelection(
   editor: BlockNoteEditor<any, any, any>,
   alignment: FormattingTextAlignment,
@@ -71,7 +67,6 @@ export function applySelectionTextAlignment(
   editor: BlockNoteEditor<any, any, any>,
   alignment: FormattingTextAlignment,
 ): void {
-  // transact 回调内读 prosemirrorState 会抛错，选区解析必须先于事务完成
   const blocks = getSelectedBlocksSafe(editor);
   const cellSelection = getCellSelectionSafe(editor);
   withPreservedSelection(editor, () => {
@@ -91,10 +86,6 @@ const CLEARABLE_MARKS = [
   "backgroundColor",
 ] as const;
 
-/**
- * 清格式必须改当前事务。removeStyles 会另开一条 TipTap 事务，
- * 包在 editor.transact 里时修改到不了文档。
- */
 function clearMarksInTransaction(editor: BlockNoteEditor<any, any, any>): void {
   editor.transact((tr) => {
     const types = CLEARABLE_MARKS.map((name) => editor.pmSchema.marks[name]).filter(Boolean);
@@ -109,9 +100,6 @@ function clearMarksInTransaction(editor: BlockNoteEditor<any, any, any>): void {
   });
 }
 
-/**
- * Clear inline marks / colors and reset text alignment on the selection.
- */
 export function clearSelectionFormatting(
   editor: BlockNoteEditor<any, any, any>,
 ): void {

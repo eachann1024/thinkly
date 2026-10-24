@@ -28,10 +28,8 @@ export interface RecoveryJournalEntry {
   content: JSONContent | null;
   revision: number;
   updatedAt: number;
-  /** 首次未 ACK 编辑时的持久化基线；连续编辑期间保持不变。 */
   baseSignature?: string;
   baseUpdatedAt?: number;
-  /** 尚未创建文件的编辑器草稿身份；恢复时无需依赖磁盘已存在该页。 */
   draftPage?: Page;
 }
 
@@ -43,7 +41,6 @@ interface LegacyRecoveryJournalState {
 interface RecoveryJournalDoc {
   version: 2;
   entry?: RecoveryJournalEntry;
-  /** ACK 使用同一文档 CAS 写墓碑，避免无 revision 删除误删并发新稿。 */
   acknowledgedRevision?: number;
 }
 
@@ -152,7 +149,6 @@ export const recordRecoveryEntry = (input: {
       ...(input.draftPage || previous?.draftPage
         ? { draftPage: input.draftPage ?? previous?.draftPage }
         : {}),
-      // WAL 未 ACK 前始终沿用首次持久化基线，不能随内存连续编辑漂移。
       ...(previous?.baseSignature || baseSignature
         ? { baseSignature: previous?.baseSignature ?? baseSignature }
         : {}),
@@ -165,7 +161,6 @@ export const recordRecoveryEntry = (input: {
   return result ? written : null;
 };
 
-/** 旧 ACK 通过文档 CAS 写墓碑；与新 record 冲突时会重读并拒绝，不能清掉新稿。 */
 export const acknowledgeRecoveryEntry = (
   source: RecoverySource,
   id: string,
@@ -221,7 +216,6 @@ export const clearRecoveryJournalForTests = (): void => {
   removeDbStorageItem(RECOVERY_JOURNAL_STORAGE_KEY);
 };
 
-/** 仅当目标仍是首次未 ACK 编辑时的持久化版本，才允许恢复到内存。 */
 export const canApplyRecoveryEntry = (
   entry: RecoveryJournalEntry,
   currentContent: JSONContent | null | undefined,

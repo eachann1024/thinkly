@@ -3,21 +3,15 @@ export interface DetectedCommand {
   range: Range;
 }
 
-/**
- * 当前 text node 内 `/query` 探测（与 @ 一致：任意位置，前一字符须为空白、零宽字符或行首）。
- * query 中不能有空白。
- */
 export function parseSlashCommandBeforeCaret(beforeCaret: string): {
   query: string;
   slashIndex: number;
 } | null {
   const slashIndex = beforeCaret.lastIndexOf("/");
   if (slashIndex === -1) return null;
-  // 前置字符若不是空白、换行、零宽字符且不是行首，则不算合法命令
   if (slashIndex > 0) {
     const prevChar = beforeCaret[slashIndex - 1];
     if (!/[\s\n\u200B\uFEFF]/.test(prevChar)) {
-      // 进一步检查 slashIndex 之前是否全部是零宽字符（等效于行首）
       const textBefore = beforeCaret.slice(0, slashIndex);
       if (textBefore.replace(/[\u200B\uFEFF]/g, "").length > 0) {
         return null;
@@ -30,10 +24,6 @@ export function parseSlashCommandBeforeCaret(beforeCaret: string): {
   return { query, slashIndex };
 }
 
-/**
- * 空输入框在旧 Chromium 里 caret 常落在 contenteditable 元素上，不是 TEXT_NODE。
- * 只认文本节点时，本地文件夹空会话（没有默认 @chip）输入 @ / 会探测失败。
- */
 export function getComposerCaretTextContext(container: HTMLElement): {
   textNode: Text;
   beforeCaret: string;

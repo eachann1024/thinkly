@@ -33,7 +33,6 @@ const t = createTranslator(messages);
 const MAX_SERVINGS = 99;
 const FRACTIONS: Array<[number, string]> = [[0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"]];
 
-/** 用量取整：大数取整（≥200 取 5 的倍数），小数优先贴近常用分数，否则保留一位小数。 */
 function formatAmount(value: number) {
   if (!(value > 0)) return "0";
   if (value >= 200) return String(Math.round(value / 5) * 5);

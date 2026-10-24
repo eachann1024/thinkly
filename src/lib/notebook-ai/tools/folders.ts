@@ -25,7 +25,6 @@ function fingerprint(value: string) {
   return (hash >>> 0).toString(36);
 }
 
-/** Reuse scanner filtering and host directory APIs; surface failures the legacy scanner skips. */
 async function diskCoverage(context: NotebookAiAgentContext, notebookId: string, folderId: string | undefined, recursive: boolean) {
   const notebook = useNotebooks.getState().notebooks[notebookId];
   if (notebook?.source !== "local-folder") return { complete: true, missingPaths: [] as string[], errors: [] as string[] };

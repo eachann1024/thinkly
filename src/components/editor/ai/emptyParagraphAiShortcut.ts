@@ -1,8 +1,3 @@
-/**
- * 空白段落唤起行内 AI。
- * 仅空格唤起；回车始终交给编辑器创建新行。
- * 表格单元格、非空段落、修饰键、IME 合成中都不抢。
- */
 
 export function isInlineAiEmptyParagraphTriggerKey(key: string): boolean {
   return key === " ";

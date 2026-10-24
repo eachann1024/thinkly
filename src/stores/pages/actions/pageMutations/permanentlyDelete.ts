@@ -28,8 +28,6 @@ export const permanentlyDeletePageAction = async (
     const snapshotPages = get().pages;
 
     const resolvePathFromId = (pageId: string) => {
-      // 兜底：从旧格式 id（local-{nb}-{encoded}）反解路径。
-      // 稳定 id 后路径应始终来自 page.localFilePath，此分支仅用于极端兜底。
       const prefix = `local-${page.workspaceId}-`;
       if (!pageId.startsWith(prefix)) return null;
       const encoded = pageId.slice(prefix.length);
@@ -41,7 +39,6 @@ export const permanentlyDeletePageAction = async (
       }
     };
 
-    // 路径优先从 page.localFilePath 取（稳定 id 后是主路径来源）。
     const targetPath = page.localFilePath || resolvePathFromId(id);
     if (!targetPath) return;
 
@@ -60,14 +57,10 @@ export const permanentlyDeletePageAction = async (
       : await window.gooseFs.deleteFile(targetPath);
     if (!deleted) return;
 
-    // 清理历史快照：必须在 store 记录删除前解析 backend（删后解析不到
-    // notebook.localPath）。文件夹删除时连同所有被递归移除的子页一并清理。
     removedIds.forEach((pid) => {
       void resolveHistoryBackend(pid).dropAll(pid);
     });
 
-    // 清理自动保存计时器与待写队列，防止删除后重建同名文件时被 dirty 守卫（load.ts:26）
-    // 拒绝加载磁盘内容，也避免计时器到期后对已不存在的页面执行写盘。
     removedIds.forEach((pid) => {
       clearLocalSaveTimers(pid);
       clearPendingLocalSaveContent(pid);
@@ -77,7 +70,6 @@ export const permanentlyDeletePageAction = async (
       const newPages = { ...state.pages };
       removedIds.forEach((pid) => delete newPages[pid]);
 
-      // 同步清理 dirtyLocalPageIds，避免删除后重建同名文件被 dirty 守卫拒绝加载。
       const newDirtyLocalPageIds = { ...state.dirtyLocalPageIds };
       removedIds.forEach((pid) => delete newDirtyLocalPageIds[pid]);
 
@@ -98,12 +90,9 @@ export const permanentlyDeletePageAction = async (
   }
 
   const targetPage = get().pages[id];
-  // 清理历史快照：内部页存于 Electron dbStorage（gn:hist: 前缀），永久删除后
-  // 若不清理会成为孤儿数据。在 store 记录删除前调用。
   if (targetPage) {
     void resolveHistoryBackend(id).dropAll(id);
   }
-  // 清理自动保存计时器与待写队列（对非本地页面无害，统一处理）。
   clearLocalSaveTimers(id);
   clearPendingLocalSaveContent(id);
   runWithPresence(() => set((state) => {
@@ -114,7 +103,6 @@ export const permanentlyDeletePageAction = async (
     const newPages = { ...state.pages };
     delete newPages[id];
 
-    // 清理 dirtyLocalPageIds，避免删除后重建同名文件被 dirty 守卫拒绝加载。
     const newDirtyLocalPageIds = { ...state.dirtyLocalPageIds };
     delete newDirtyLocalPageIds[id];
 

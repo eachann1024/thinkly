@@ -59,9 +59,6 @@ interface QuickNoteCollectPreviewProps {
   variant: QuickNoteCollectVariant;
 }
 
-/**
- * 采集交互的会话内原型。只维护 React state，不读取剪贴板、不写草稿或笔记。
- */
 export function QuickNoteCollectPreview({
   variant,
 }: QuickNoteCollectPreviewProps) {
@@ -109,7 +106,6 @@ export function QuickNoteCollectPreview({
       detectorRef.current = result.state;
       if (!result.triggered) return;
 
-      // 只观察按键，不改变浏览器或编辑器的默认键盘行为。
       if (variant === "copper") {
         simulateCollect();
         return;

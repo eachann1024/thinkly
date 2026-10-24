@@ -20,7 +20,6 @@ export function useEditorHostFocus(
     if (!isActiveEditor) return;
     const handleFocusStart = () => {
       const pageId = pageRef.current?.id;
-      // Local-file titles belong to the host tab; keep its pending focus request.
       if (pageId && isPageTitleFocusRequested(pageId) && usesRawEditorContentRef.current) return;
       const focusTitleEnd = () => {
         const blocks = editor.document;
@@ -74,7 +73,6 @@ export function useEditorHostFocus(
     const focusCreatedPage = () => {
       const pageId = pageRef.current?.id;
       if (!pageId || !isPageTitleFocusRequested(pageId)) return;
-      // 本地文件与草稿由正文顶部的大标题接管新建聚焦。
       if (hasDocumentTitle(pageRef.current)) return;
       cancelCreatedPageFocus?.();
       cancelCreatedPageFocus = tasks.frame(() => {

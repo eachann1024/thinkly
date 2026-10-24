@@ -143,14 +143,12 @@ export async function runAITextStream(
     contentUpdate: string,
     isReasoning: boolean,
   ) => {
-    // Phase flow logic: connecting -> thinking -> generating
     if (
       currentPhase === "connecting" ||
       (isReasoning && currentPhase !== "thinking")
     ) {
       currentPhase = isReasoning ? "thinking" : "generating";
     }
-    // Automatically jump to generating if payload has content and it's not reasoning
     if (!isReasoning && contentUpdate) {
       currentPhase = "generating";
     }

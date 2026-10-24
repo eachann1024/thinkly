@@ -50,7 +50,6 @@ export function useAppearanceSettings({
     scaleDragCleanupRef.current?.();
     let observer: MutationObserver | null = null;
     if (scrollContainer) {
-      // 上方内容随字号重排时，让正在拖动的滑条保持在原来的屏幕位置。
       observer = new MutationObserver(() => {
         scrollContainer.scrollTop +=
           slider.getBoundingClientRect().top - sliderTop;
@@ -60,7 +59,6 @@ export function useAppearanceSettings({
         attributeFilter: ["style"],
       });
     }
-    // 原生 range 可能接管指针；在控件外松手或窗口失焦也要解除布局锁。
     window.addEventListener("pointerup", unlockScaleDragLayout);
     window.addEventListener("pointercancel", unlockScaleDragLayout);
     window.addEventListener("blur", unlockScaleDragLayout);

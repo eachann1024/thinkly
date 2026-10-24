@@ -20,16 +20,6 @@ ja:
   searchDisabled: "グローバル検索のショートカットをオフにしました"
   shortcutUnavailable: "ショートカットが他のアプリで使用されているか、無効です"
 `);
-/**
- * Electron 桌面端全局热键注册（仅主应用 App 调用；速记小窗 lean 入口不注册）。
- *
- * 设置水合完成后按 desktop settings 注册三条热键：
- * - wake：主窗口唤出/隐藏
- * - quicknote：速记小窗唤出/隐藏
- * - search：聚焦主窗并打开搜索面板
- * 改键/开关通过依赖变化热更新（先卸旧键再注册新键，见 lib/electron/globalHotkeys）。
- * 注册结果写回 desktop.*HotkeyStatus，供设置页展示 占用/无效/已关闭/错误。
- */
 import { useEffect } from "react";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { getGooseDesktop } from "@/lib/electron/runtime";

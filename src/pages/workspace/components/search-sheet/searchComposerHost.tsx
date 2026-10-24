@@ -20,7 +20,6 @@ function hostPage(notebookId: string): Page {
   };
 }
 
-/** 搜索不在编辑器树里，AI 输入仍要读页面上下文；点 @ 走搜索打开结果。 */
 export function SearchComposerHost({ notebookId, onOpenResult, children }: {
   notebookId: string | null;
   onOpenResult?: (page: { id: string; localFilePath?: string }) => void;

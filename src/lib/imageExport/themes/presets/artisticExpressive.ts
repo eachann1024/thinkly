@@ -49,7 +49,6 @@ import { TEXT_COLORS } from "@/lib/textColors";
 import type { CardTheme } from "../types";
 
 export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
-  // ── 8. Stationery ────────────────────────────────────────────
   {
     id: "stationery",
     get name() { return uiText("journalNotes"); },
@@ -96,7 +95,6 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     ],
   },
 
-  // ── 17. Mocha Mousse (Pantone-inspired) ──────────────────────
   {
     id: "mocha-mousse",
     get name() { return uiText("mochaMousse"); },
@@ -143,7 +141,6 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     ],
   },
 
-  // ── 19. Brutalist ────────────────────────────────────────────
   {
     id: "brutalist",
     get name() { return uiText("boldPrint"); },
@@ -191,7 +188,6 @@ export const ARTISTIC_EXPRESSIVE: CardTheme[] = [
     ],
   },
 
-  // ── 20. Risograph ────────────────────────────────────────────
   {
     id: "risograph",
     name: "Risograph",

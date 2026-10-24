@@ -25,12 +25,9 @@ export function isClickOnVisualLine(
 }
 
 function wrappedToNextLine(curr: CaretCoords, next: CaretCoords): boolean {
-  // 连续硬换行的空行，以及居中/右对齐后的下一行，横坐标未必向左。
-  // 只按垂直行带判断，避免行尾扫描越过空行落到块末尾。
   return next.top > curr.top && next.top >= curr.bottom - 1;
 }
 
-/** 从 `from` 沿同一视觉行走到最后一个文档位置。 */
 export function extendToVisualLineEnd(
   coordsAtPos: (pos: number) => CaretCoords,
   from: number,
@@ -52,7 +49,6 @@ export function extendToVisualLineEnd(
   return pos;
 }
 
-/** 从 `from` 沿同一视觉行走到第一个文档位置。 */
 export function extendToVisualLineStart(
   coordsAtPos: (pos: number) => CaretCoords,
   from: number,
@@ -74,7 +70,6 @@ export function extendToVisualLineStart(
   return pos;
 }
 
-/** 二分找到 `clientY` 所在视觉行上的一个文档位置。 */
 export function findPosOnVisualLine(
   coordsAtPos: (pos: number) => CaretCoords,
   start: number,
@@ -102,7 +97,6 @@ export function findPosOnVisualLine(
   return null;
 }
 
-/** 行高留白 / 折行缝里取离 `clientY` 最近的视觉行。 */
 function findNearestPosOnVisualLine(
   coordsAtPos: (pos: number) => CaretCoords,
   start: number,
@@ -175,7 +169,6 @@ export function resolveLineEndIfClickPastText(args: {
   return lineEnd;
 }
 
-/** 点在字上不改；点行尾空白或块间/块内 padding 空隙则落到最近一行行尾。 */
 export function resolveBlockEmptyClickPos(args: {
   clientX: number;
   clientY: number;
@@ -202,8 +195,6 @@ export function resolveBlockEmptyClickPos(args: {
     return null;
   }
 
-  // 文字垂直范围内但没贴到 caret 带：行高留白 / 折行缝。
-  // 按最近视觉行处理，不要当成块间空隙拽到段尾。
   const nearest = findNearestPosOnVisualLine(coordsAtPos, start, end, clientY);
   if (nearest == null) return null;
   try {

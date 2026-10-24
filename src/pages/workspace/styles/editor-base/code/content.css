@@ -1,6 +1,5 @@
 .goose-code-content-wrapper {
   --goose-code-font-size: 0.85em;
-  /* 高亮与 pre 共用已计算的字号/行高，避免 em 在不同层级重复缩放。 */
   font-size: var(--goose-code-font-size);
   line-height: 1.7;
   --goose-code-line-box: 1lh;
@@ -53,8 +52,6 @@
   line-height: inherit;
 }
 
-/* 当前代码行：铺满内容区（含行号列），对齐 pre 的行盒。
- * 限定到当前代码块的直接内容层；wrapper 自身负责裁切，避免高亮条越出代码块。 */
 .bn-block-outer[data-goose-code-active-line]
   > .bn-block
   > .bn-block-content
@@ -75,7 +72,6 @@
   background: var(--code-active-line-bg, var(--goose-active-line-bg));
 }
 
-/* 行号 */
 .goose-code-line-numbers {
   position: absolute;
   left: 0;

@@ -5,7 +5,6 @@ import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
 import type { SettingsTab } from "./types";
 import { SETTINGS_TABS } from "../settings-dialog/shared";
 
-/** 每个分类拥有自己的页头、滚动容器与草稿；隐藏时暂停页面副作用。 */
 export function SettingsPage({
   tab, visible, keepAlive, children,
 }: {

@@ -64,7 +64,6 @@ export function createRunWriteScope(params: {
   };
 }
 
-/** Resolve only stable identities. Never infer ownership from names or the active tab. */
 export function resolveOperationTarget(
   operation: ScopedOperation,
   fallbackNotebookId: string,

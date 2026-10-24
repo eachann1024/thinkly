@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** 包一层现有 Streamdown 输出，只加 caret/tail，不拆 Markdown。 */
 export function StreamingText({
   streaming,
   children,

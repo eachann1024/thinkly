@@ -19,17 +19,12 @@ ja:
 `;
 const t = createTranslator(messages);
 
-/** 纯文本消息的 composer 载荷，与空状态建议共用同一形状。 */
 export function textPayload(text: string): AiComposerPayload {
   return { promptText: text, freeformText: text, references: [], images: [], skills: [], tokens: [{ type: "text", text }] };
 }
 
 type SendText = (payload: AiComposerPayload, images: []) => boolean | Promise<boolean> | unknown;
 
-/**
- * AI 面板给卡片的宿主动作：send 作为用户消息发出并开始回复，insert 把 Markdown 插入当前笔记。
- * 同时接手搜索回答里排队的卡片点选：会话切到目标且空闲时自动发出。
- */
 export function usePanelCardActions({ notebookId, conversationId, isBusy, ready, editorRef, sendPayload }: {
   notebookId: string;
   conversationId: string;

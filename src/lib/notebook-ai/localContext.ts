@@ -70,10 +70,6 @@ export function searchLocalSkills(query: string, notebookId?: string) {
     .slice(0, 30);
 }
 
-/**
- * 扫描 prompt 任意位置的 `/name`，返回第一个在 getLocalSkills() 中存在的 skill。
- * 不再限定行首，便于「请用 /grill-me 帮我…」这类写法。
- */
 export function resolveInvokedLocalSkill(
   promptText: string,
 ): LocalSkill | null {
@@ -90,9 +86,6 @@ export function resolveInvokedLocalSkill(
   return null;
 }
 
-/**
- * 优先取 tokens 中第一个 skill chip；若无 chip 则拼文本再走 resolveInvokedLocalSkill。
- */
 export function resolveInvokedLocalSkillFromTokens(
   tokens: Array<{ type: string; skill?: { name: string }; text?: string }>,
 ): LocalSkill | null {

@@ -1,8 +1,3 @@
-/* ── Tailwind v4 CSS-first 主题映射 ──────────────────────────────
- * 用 @theme inline：颜色值保持 hsl(var(--xxx)) 引用，
- * 真正的色值仍由下方 :root/.dark 里的 CSS 变量驱动（与 shadcn v4 一致）。
- * 这样 bg-background / text-foreground / border-border / rounded-lg /
- * font-sans 等工具类按 v3 同名规则重新生成，视觉 token 完整保留。 */
 @theme inline {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -39,34 +34,24 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  /* borderRadius：v3 lg/md/sm 映射 */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  /* 普通控件不跟随菜单项圆角变化。 */
   --radius-control: var(--goose-control-radius);
   --radius-thumb: 4px;
   --radius-marker: 1px;
 
-  /* fontFamily：v3 sans/serif/mono 映射 */
   --font-sans: var(--font-ui), sans-serif;
   --font-serif: var(--goose-font-serif), serif;
   --font-mono: var(--goose-font-mono), monospace;
 }
 
-/* v4 默认 ring 宽度为 1px、ring 颜色为 currentColor；
- * 保留 v3 的 3px 默认，避免任何残留 ring 工具类视觉突变
- * （本项目全局已用 --tw-ring-shadow:0 0 #0000 清掉 focus ring）。 */
 @theme {
   --default-ring-width: 3px;
-  /* 字重对齐 Claude：regular 400 / medium 460 / semibold 560。 */
   --font-weight-medium: 460;
   --font-weight-semibold: 560;
 }
 
-/* v4 起 border/divide 默认色为 currentColor。本项目已用
- * `* { @apply border-border }` 显式指定，下面再兜底一层保险，
- * 防止任何未被 @apply 覆盖到的元素出现 currentColor 描边突变。 */
 @layer base {
   *,
   ::after,

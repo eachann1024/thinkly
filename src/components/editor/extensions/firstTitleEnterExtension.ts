@@ -42,14 +42,6 @@ function insertEmptyParagraphAfter(
   return true;
 }
 
-/**
- * 文档首块由 firstTitleGuard 保持为 H1。
- *
- * 行首 Enter 在当前 heading 前插入空段落，光标留在原 heading，原内容下移。
- * 对首块，守卫将新插入的空段落设为 H1；原 heading 的内容和属性保持不变。
- * 首块行中 / 行尾 Enter 继续在下方拆出正文段落。
- * 折叠正文标题的行首也优先处理，避免把空行插到章节末尾。
- */
 function applyHeadingEnter(
   editor: BlockNoteEditor<any, any, any>,
 ): boolean {
@@ -77,14 +69,12 @@ function applyHeadingEnter(
   const firstBlockId = getProtectedTitleBlockId(editor);
   const isFirstTitle = headingBlock.id === firstBlockId;
 
-  // 空标题回车原地降级成段落；否则会留下一个空标题加一行空段。
   if (contentSize === 0 && !isFirstTitle) {
     editor.updateBlock(headingBlock, { type: "paragraph", props: {} });
     editor.setTextCursorPosition(headingBlock, "start");
     return true;
   }
 
-  // 非空标题行首：在前面插空段落，原内容下移；空标题仍走下方插入。
   if (atStart && (!isFirstTitle || contentSize > 0)) {
     return insertEmptyParagraphBeforeHeading(editor, headingBlock);
   }
@@ -132,8 +122,6 @@ function applyHeadingEnter(
 
 export const gooseFirstTitleEnterExtension = createExtension({
   key: "goose-first-title-enter",
-  // 不要 runsBefore: ["default"]：那会把 TipTap priority 压到默认 keymap 之下，
-  // 标题行首 Enter 被 splitBlock 先吃掉，扩展永远不跑。
   keyboardShortcuts: {
     Enter: ({ editor }) => applyHeadingEnter(editor),
   },

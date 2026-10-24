@@ -42,9 +42,6 @@ function writeCachedSelectedBlocks(
   editor[SELECTED_BLOCKS_CACHE_KEY] = cloneSelectedBlocks(blocks);
 }
 
-/**
- * 只读当前 ProseMirror 选区覆盖的块。光标塌缩、NodeSelection 或读失败时返回空数组。
- */
 export function readLiveEditorSelectedBlocks(
   editor: EditorSelectedBlocksSource | null | undefined,
 ): BlockNoteContent {
@@ -61,10 +58,6 @@ export function readLiveEditorSelectedBlocks(
   }
 }
 
-/**
- * 有非空选区时写入快照。WKWebView / Electron 点到顶栏后常把选区收成光标，
- * 菜单打开时要靠这份快照，而不是再去现场读。
- */
 export function rememberEditorSelectedBlocks(
   editor: EditorSelectedBlocksSource | null | undefined,
 ): BlockNoteContent {
@@ -84,16 +77,12 @@ export function clearEditorSelectedBlocksCache(
   editor[SELECTED_BLOCKS_CACHE_KEY] = [];
 }
 
-/**
- * 导出选区图片用：优先现场选区，失焦塌缩后回落到打开菜单前的快照。
- */
 export function getEditorSelectedBlocksForExport(
   editor: EditorSelectedBlocksSource | null | undefined,
 ): BlockNoteContent {
   return rememberEditorSelectedBlocks(editor);
 }
 
-/** 当前是否选中了单个图片块；是则返回图片原始引用。 */
 export function getSelectedImageUrl(state: EditorState): string | null {
   const selection = state.selection;
   if (!(selection instanceof NodeSelection)) return null;
@@ -115,27 +104,15 @@ export function getSelectedImageUrl(state: EditorState): string | null {
     return selectedNodeUrl;
   }
 
-  // 父块携带图片子树时仍是整块复制，不能误当成单张图片。
   return selection.node.type.name === "blockContainer" && selection.node.childCount === 1 && selection.node.firstChild
     ? readImageUrl(selection.node.firstChild)
     : null;
 }
 
-/**
- * 表格单元格选区（CellSelection）的纯文本提取。
- * 选中一个或多个表格单元格时，原生 window.getSelection() 往往是塌缩的——
- * 单元格高亮由 ProseMirror decoration 绘制，DOM 选区并未真正覆盖文字。
- * 复制时需直接从 CellSelection 读单元格文本，绕过 DOM 选区。
- *
- * @returns 选中单元格的纯文本（多格按行连接、同行各格用 Tab 连接）；
- *          当前选区不是 CellSelection 时返回 null（交回常规复制流程）。
- */
 export function getSelectedCellPlainText(state: EditorState): string | null {
   const selection = state.selection;
   if (!(selection instanceof CellSelection)) return null;
 
-  // forEachCell 按文档顺序遍历选中单元格；按所在表格行分组，
-  // 同行各格用 Tab 连接、行间用换行连接，单格场景即纯单格文本。
   const rows: string[][] = [];
   let lastRowTop = Number.NaN;
   selection.forEachCell((cellNode, cellPos) => {
@@ -152,7 +129,6 @@ export function getSelectedCellPlainText(state: EditorState): string | null {
   return normalizeClipboardLineEndings(text);
 }
 
-/** 当前 CellSelection 是否覆盖整张表（相对只选部分单元格）。 */
 export function isWholeTableCellSelection(state: EditorState): boolean {
   const selection = state.selection;
   if (!(selection instanceof CellSelection)) return false;

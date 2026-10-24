@@ -27,8 +27,6 @@ function allowCoveredRows(extension: Extension): Extension {
 
 const tableSpec = defaultBlockSpecs.table;
 
-// rowspan 覆盖整行时没有起始单元格；默认 + 会补出多余单元格或在重开时 createChecked 失败。
-// sequenceColumn 记在表格节点上，右键勾选后才按行追加编号。
 export const gooseTableBlockSpec = {
   ...tableSpec,
   config: {
@@ -85,5 +83,4 @@ export type GooseTableBlock = BlockFromConfigNoChildren<
   StyleSchema
 >;
 
-// BlockNote 的 TableHandlesState 把 block 固定为默认表格 schema，看不到这里新增的 props。
 export type GooseTableHandlesState = Omit<TableHandlesState, "block"> & { block: GooseTableBlock };

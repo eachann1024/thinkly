@@ -15,10 +15,6 @@ function optionalText(value: unknown) {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
 
-/**
- * 兼容模型常见的批量计划省略：operationId 可由应用按顺序生成；删除单页时
- * pageId 可代替 pageIds。最终仍统一成执行器需要的严格、确定性结构。
- */
 export function normalizeBatchPlanOperations(
   value: unknown,
 ): BatchPlanOperationInput[] {

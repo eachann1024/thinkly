@@ -9,10 +9,6 @@ ja:
   untitled: "無題"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * Shared incremental MiniSearch index. Every complete index is tied to one
- * immutable catalog; partially maintained versions are never queried.
- */
 import MiniSearch from "minisearch";
 import type { Page } from "@/types";
 import { getPageTitle, UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
@@ -30,7 +26,6 @@ function bodyForSearchIndex(page: Page, title: string): string {
   return body.replace(/^(?:新页面|未命名|无标题)\s*/, "").trim();
 }
 
-/** CJK characters remain individual tokens; other runs preserve existing matching. */
 function tokenize(text: string): string[] {
   const tokens: string[] = [];
   const re = /[一-鿿㐀-䶿豈-﫿぀-ヿ]|[^\s一-鿿㐀-䶿豈-﫿぀-ヿ]+/g;
@@ -100,7 +95,6 @@ async function maintainIndex(catalog: SearchCatalog, signal: AbortSignal): Promi
         id: page.id, title: isPlaceholderTitle(title) ? "" : title,
         body: bodyForSearchIndex(page, title),
       };
-      // Publish the version only after MiniSearch accepted the complete page.
       if (ms.has(page.id)) ms.replace(doc);
       else ms.add(doc);
       indexedVersions.set(page.id, { updatedAt: page.updatedAt, content: page.content, title });
@@ -119,7 +113,6 @@ export function cancelIndexSync(): void {
   indexedCatalog = null;
 }
 
-/** Cancel superseded work, but retain successfully indexed pages for the next pass. */
 export function syncIndex(catalog: SearchCatalog): Promise<boolean> {
   if (indexedCatalog === catalog) return Promise.resolve(true);
   if (pending?.catalog === catalog) return pending.promise;
@@ -132,7 +125,6 @@ export function syncIndex(catalog: SearchCatalog): Promise<boolean> {
   return promise;
 }
 
-/** A caller cannot accidentally search a partially updated or older index. */
 export function searchIndex(query: string, catalog: SearchCatalog): string[] | null {
   if (!miniSearch || indexedCatalog !== catalog) return null;
   return miniSearch.search(query).map(result => result.id as string);

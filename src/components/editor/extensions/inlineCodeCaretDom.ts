@@ -7,7 +7,6 @@ import {
   type InlineCodeEdge,
 } from "./inlineCodeCaretModel";
 
-/** prosemirror-view 未导出 domObserver 类型，但版本已在 package.json 里锁死。 */
 type EditorViewInternals = EditorView & {
   domObserver: { setCurSelection: () => void };
 };
@@ -77,7 +76,6 @@ export function queueCaretSync(view: EditorView): void {
   });
 }
 
-/** 把浏览器光标钉到 boundary span 的正确一侧；两侧映射回的文档位置相同。 */
 export function syncCaretSide(view: EditorView): void {
   const { state } = view;
   const codeType = state.schema.marks.code;
@@ -104,7 +102,6 @@ export function syncCaretSide(view: EditorView): void {
   const innerPoint = collapsedRangeAt(doc, (range) => {
     if (edge === "start") range.setStartBefore(content);
     else {
-      // ponytail: 普通行内代码钉在末尾文本节点；复杂嵌套内容仍回退到内容盒边界。
       const last = content.lastChild;
       if (last?.nodeType === Node.TEXT_NODE)
         range.setStart(last, last.textContent?.length ?? 0);
@@ -144,7 +141,5 @@ export function syncCaretSide(view: EditorView): void {
   range.collapse(true);
   domSelection.removeAllRanges();
   domSelection.addRange(range);
-  // 不同步 DOMObserver 的话，它会把这次改动当成用户选区变化，
-  // 在 flush 里用 selectionToDOM 把光标画回 ProseMirror 的缺省一侧。
   (view as EditorViewInternals).domObserver.setCurSelection();
 }

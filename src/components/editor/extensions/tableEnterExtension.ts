@@ -8,14 +8,6 @@ import {
   TableMap,
 } from "prosemirror-tables";
 
-/**
- * Notion 简易表格：
- * - Enter：跳到同列下一行；已在末行则先加一行再跳过去
- * - Shift+Enter：单元格内换行（hardBreak），不加行
- *
- * BlockNote / ProseMirror 默认 Enter 会尝试 splitBlock，单元格又只收
- * inline，所以回车经常被吞掉、看起来完全没反应。
- */
 
 function caretInCell(tr: Transaction, cellPos: number): Transaction {
   return tr
@@ -106,7 +98,6 @@ export function applyTableShiftEnter(
 
 export const gooseTableEnterExtension = createExtension({
   key: "goose-table-enter",
-  // 抢在默认 splitBlock 之前，否则单元格里 Enter 会被吞掉却什么都不做。
   runsBefore: ["default"],
   keyboardShortcuts: {
     Enter: ({ editor }) => {

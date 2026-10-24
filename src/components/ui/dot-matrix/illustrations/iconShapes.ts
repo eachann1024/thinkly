@@ -1,8 +1,6 @@
-/** 小点阵图标：24 单位坐标，[形状, 色类, 透明度] 取第一个命中；与设计稿 ICONS 同参。 */
 import { clamp, type Dot } from "../geometry";
 import { ARC, AST, C, OR, POLY, RING, RRS, S, type Shape } from "./shapes";
 
-/** d 中性（currentColor）／a 品牌蓝／e 错误色 */
 export type IconTone = "d" | "a" | "e";
 type IconPart = [Shape, IconTone, number];
 
@@ -48,10 +46,8 @@ export const DOT_ICONS = {
 export type DotIconName = keyof typeof DOT_ICONS;
 export type IconDot = Dot & { tone: IconTone };
 
-/** 统一点距：按显示尺寸取档，点径两档（中性 .34／强调 .40），统一左上受光。 */
 export const iconPitch = (size: number) => (size <= 20 ? 1.9 : size <= 32 ? 2.2 : size <= 44 ? 2.6 : 3);
 
-/** 在 (x0, y0) 处画 size 尺寸的图标；返回点与命中函数（光晕避让用）。 */
 export function iconDots(name: DotIconName, x0: number, y0: number, size: number) {
   const parts: IconPart[] = DOT_ICONS[name];
   const pitch = iconPitch(size), k = size / 24, st = pitch / k;

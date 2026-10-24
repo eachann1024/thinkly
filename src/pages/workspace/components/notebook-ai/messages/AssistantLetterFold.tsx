@@ -31,7 +31,6 @@ function LetterFoldChevron() {
   );
 }
 
-/** 有变更计划时，把说明收进折叠，默认收起，把版面让给整页改动。 */
 export function AssistantLetterFold({ children }: { children: ReactNode }) {
   useLocale();
   const [open, setOpen] = useState(false);
@@ -52,5 +51,3 @@ export function AssistantLetterFold({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-/** 从 context 读 isStreaming，避免 stream 结束时换 Text 组件类型导致整段 remount */

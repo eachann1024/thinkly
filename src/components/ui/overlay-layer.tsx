@@ -41,7 +41,6 @@ function registerModal(id: string, owner: number) {
   if (index < 0) {
     publishModalStack([...modalStack, { id, owner, base: nextModalBase(modalStack) }]);
   } else if (modalStack[index].owner !== owner) {
-    // Owner updates must not make an already-open modal the newest modal.
     publishModalStack(modalStack.map((entry) => entry.id === id ? { ...entry, owner } : entry));
   }
 }
@@ -60,7 +59,6 @@ function nextModalBase(stack: readonly ModalEntry[]) {
   return stack.reduce<number>((base, entry) => Math.max(base, resolvedModalLayer(entry) + MODAL_LAYER_STEP), UI_LAYERS.modal);
 }
 
-/** React context survives portals, so a menu stays above the surface that owns it. */
 export function OverlayLayerProvider({ layer, children }: PropsWithChildren<{ layer: number }>) {
   return <OverlayLayerContext.Provider value={layer}>{children}</OverlayLayerContext.Provider>;
 }
@@ -69,7 +67,6 @@ export function useOverlayLayer(kind: OverlayKind): number {
   return overlayLayer(kind, useContext(OverlayLayerContext));
 }
 
-/** Each open modal reserves a band above earlier siblings and its owning surface. */
 export function useModalLayer(open: boolean): number {
   const id = useId();
   const owner = useContext(OverlayLayerContext);
@@ -88,7 +85,6 @@ export function useModalLayer(open: boolean): number {
   return Math.max(base, owner + MODAL_LAYER_STEP);
 }
 
-/** Only portals owned by the foremost modal may escape its focus/inert boundary. */
 export function useOverlayTopLayer(layer: number): boolean {
   const stack = useSyncExternalStore(subscribeToModals, getModalStack, getServerModalStack);
   const top = stack.reduce((highest, entry) => Math.max(highest, resolvedModalLayer(entry)), 0);

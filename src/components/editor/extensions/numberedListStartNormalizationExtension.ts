@@ -9,10 +9,6 @@ import {
 
 const PLUGIN_KEY = new PluginKey("goose-numbered-list-start-normalization");
 
-/**
- * 找出同一 blockGroup 内非首项有序列表节点上冗余的 start 属性。
- * 嵌套 blockGroup 会独立扫描，显式起始序号不会跨层级或跨非列表块传播。
- */
 function findRedundantStartPositions(doc: PMNode): number[] {
   const positions: number[] = [];
 
@@ -26,7 +22,6 @@ function findRedundantStartPositions(doc: PMNode): number[] {
       const isNumbered = content?.type.name === "numberedListItem";
 
       if (isNumbered && previousWasNumbered && content?.attrs.start != null) {
-        // blockGroup 内容起点 + child offset + blockContainer 内容起点。
         positions.push(pos + 1 + offset + 1);
       }
       previousWasNumbered = isNumbered;

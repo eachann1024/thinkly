@@ -4,7 +4,6 @@ const positions = new Map<string, number>();
 export const hasNotebookTreeScroll = (notebookId: string | null) =>
   notebookId !== null && positions.has(notebookId);
 
-/** 树保持挂载；切本单独记住列表位置，不触碰正文滚动。 */
 export function useNotebookTreeScroll(
   notebookId: string | null,
   containerRef: RefObject<HTMLDivElement | null>,

@@ -56,7 +56,6 @@ export function useMainTreeDragActions(
 
     let newParentId: string | undefined;
     let insertIndex: number;
-    // 父级与插入索引必须来自同一落点，不能再用悬停行的目录覆盖父级。
     if (target.targetType === "between-items") {
       const pid = String(target.parentItem);
       newParentId = pid === "root" ? undefined : pid;
@@ -88,7 +87,6 @@ export function useMainTreeDragActions(
       });
     };
 
-    // ── 本地文件夹：同目录内落点 = 该目录手动排序；其余落点 = 文件系统移动 ──────
     if (isLocalFolder) {
       const sameDirDrop = dragIds.every(
         (id) => usePages.getState().pages[id]?.parentId === newParentId,
@@ -106,7 +104,6 @@ export function useMainTreeDragActions(
             target.childIndex,
           )
         ) {
-          // 首次有效同目录拖动：该目录切为手动顺序，落点即新位置
           keepDragSelection();
           return;
         }
@@ -122,9 +119,6 @@ export function useMainTreeDragActions(
             toast.error(uiText("moveFailed", { error: (err as Error).message ?? String(err) }));
           }
         }
-        // 跨目录移动成功后补落点：文件系统移动本身不表达位置，同目录那种
-        // applyLocalFolderReorder 又只在同目录才走。edge 顶部 childIndex 为 0、
-        // 底部为根子项数，都按目标目录落点插入，否则一律被追加到末尾。
         if (!sameDirDrop && insertIndex >= 0 && movedIds.length > 0) {
           insertLocalFolderOrder(
             activeNotebookId,
@@ -144,12 +138,9 @@ export function useMainTreeDragActions(
       return;
     }
 
-    // ── Electron 内置模式：原有内存排序逻辑 ────────────────────────────────────
     const allChildren = getChildren(newParentId, activeNotebookId).map(
       (p) => p.id,
     );
-    // rct 的 childIndex 基于含被拖项的原列表；过滤后 splice 前要补偿
-    // 插入点之前被移除的项数，否则从上往下拖会偏后一位
     if (insertIndex > 0) {
       const removedBefore = dragIds.filter((id) => {
         const idx = allChildren.indexOf(id);
@@ -170,7 +161,6 @@ export function useMainTreeDragActions(
 
     reorderPages(finalIds, newParentId);
 
-    // 拖入成为子页面后自动展开新父级，让落点立即可见
     if (newParentId && !expandedIds.includes(newParentId)) {
       expandView(activeNotebookId, newParentId);
     }

@@ -15,13 +15,6 @@ ja:
   pdfExportFailed: "PDF の書き出しに失敗しました"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * PDF 渲染入口（只出 blob）。保存/有附件打 ZIP 由 export/index.exportToPDF 负责。
- *
- * - Electron：隐藏窗 printToPDF（系统中文字体，官方 HTML）
- * - 失败或非 Electron：手写 react-pdf renderer，嵌入 Noto Sans SC static TTF
- * - 两路都失败则 throw，让 PageMenu toast 报失败
- */
 
 import type { Page } from "@/types";
 import type { CustomFonts } from "@/stores/useSettings";
@@ -31,7 +24,6 @@ import { registerPdfFonts } from "./fontConfig";
 import { createPdfBlockMappings } from "./blockMappings";
 import { canPrintToPdf, exportPageViaPrintToPdf } from "./printPdf";
 
-/** 薄 getter：避免 fontConfig 静态绑 zustand。 */
 async function readExportCustomFonts(): Promise<CustomFonts> {
   const { useSettings } = await import("@/stores/useSettings");
   return useSettings.getState().customFonts;
@@ -66,7 +58,6 @@ async function exportViaReactPdf(
   return blob;
 }
 
-/** 只渲染 PDF blob，保存/打包由 export/index 负责。 */
 export async function renderPageToPdfBlob(
   page: Page,
   customFonts?: CustomFonts,

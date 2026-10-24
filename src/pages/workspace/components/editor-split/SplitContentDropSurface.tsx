@@ -63,7 +63,6 @@ function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDro
       ["left", x - rect.left, horizontalZone], ["right", rect.right - x, horizontalZone],
       ["top", y - rect.top, verticalZone], ["bottom", rect.bottom - y, verticalZone],
     ];
-    // 左右各覆盖 30%，分别判断热区后再选择最近边缘。
     const candidates = edges.filter((edge) => edge[1] <= edge[2]);
     if (!candidates.length) return null;
     const nearest = candidates.reduce((best, edge) => edge[1] < best[1] ? edge : best);
@@ -81,7 +80,6 @@ function contentDropTarget(surface: HTMLElement, x: number, y: number): SplitDro
   return null;
 }
 
-/** 文件只允许落在分屏边缘；正文选区仍保留原有的文内拖动行为。 */
 export function SplitContentDropSurface({ tabId, children }: { tabId: string; children: ReactNode }) {
   useLocale();
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -94,7 +92,6 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
     const over = (event: DragEvent) => {
       const data = event.dataTransfer;
       if (!data || !(event.target instanceof Node) || !surface.contains(event.target)) return;
-      // 侧栏笔记交给 SidebarPageDrop。块把手和正文拖动留在编辑器里，不开分屏。
       if (isSidebarPageDrag(Array.from(data.types))) return;
       if (isEditorDrag(data)) { reset(); return; }
       const canSplit = hasWorkspaceDrag(data);
@@ -103,7 +100,6 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       if (!target && !isFileDrag(data)) { reset(); return; }
       event.preventDefault();
       event.stopPropagation();
-      // 只拒绝当前位置的落下，保留原生拖拽，继续移到边缘即可分屏。
       data.dropEffect = target ? "copy" : "none";
       if (!target) { reset(); return; }
       const state = useEditorSplit.getState().getStateForTab(tabId);
@@ -121,8 +117,6 @@ export function SplitContentDropSurface({ tabId, children }: { tabId: string; ch
       if (!canSplit && !isFileDrag(data)) return;
       const target = canSplit ? contentDropTarget(surface, event.clientX, event.clientY) : null;
       if (!target && !isFileDrag(data)) return;
-      // BlockNote also moves/deletes selections from document capture, so consume
-      // edge drops at window capture before either editor can handle this copy.
       event.preventDefault();
       event.stopPropagation();
       data.dropEffect = target ? "copy" : "none";

@@ -8,7 +8,6 @@ import { Composer, type ComposerHandle } from "@/pages/workspace/components/note
 import { buildQuickNoteDraftPage, useQuickNote } from "@/stores/useQuickNote";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 
-/** Live production controls; input stays in local drafts and never invokes an AI request. */
 export function GalleryComposer() {
   const composerRef = useRef<ComposerHandle>(null);
   const page = useMemo(() => buildQuickNoteDraftPage(null), []);

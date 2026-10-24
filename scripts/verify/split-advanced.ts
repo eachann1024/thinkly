@@ -1,7 +1,3 @@
-/**
- * 分屏进阶用法折叠，以及不用键盘把已有笔记开到右侧或下方。
- * 运行：node scripts/verify/run.mjs split-advanced
- */
 import { readFileSync } from "node:fs";
 import {
   advancedSplitShortcutsForCurrentPlatform,

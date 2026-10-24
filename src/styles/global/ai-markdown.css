@@ -1,6 +1,4 @@
-/* ── AI 对话气泡内的 Markdown 渲染样式 ── */
 .ai-markdown {
-  /* 段落 */
   & p {
     @apply my-1.5 leading-7;
   }
@@ -11,7 +9,6 @@
     @apply mb-0;
   }
 
-  /* 标题 */
   & h1 {
     @apply mt-4 mb-2 text-base font-semibold tracking-[-0.02em];
   }
@@ -22,7 +19,6 @@
     @apply mt-2 mb-1 text-sm  font-semibold;
   }
 
-  /* 列表 */
   & ul {
     @apply my-1.5 list-disc pl-5 space-y-0.5;
   }
@@ -33,7 +29,6 @@
     @apply leading-7;
   }
 
-  /* 行内代码：跟随当前强调色 token，避免明暗模式硬编码灰 */
   & code:not(pre > code) {
     background-color: var(--goose-inline-code-bg);
     color: var(--goose-inline-code-fg);
@@ -44,7 +39,6 @@
     border: none;
   }
 
-  /* 代码块 */
   & pre {
     @apply my-2 overflow-x-auto rounded-lg bg-muted/60 px-4 py-3;
   }
@@ -52,12 +46,10 @@
     @apply font-mono text-[0.82em] leading-6;
   }
 
-  /* 引用块 */
   & blockquote {
     @apply my-2 border-l-2 border-border/60 pl-3 text-muted-foreground;
   }
 
-  /* 表格 */
   & table {
     @apply my-2 w-full border-collapse text-sm;
   }
@@ -68,12 +60,10 @@
     @apply border border-border/50 px-3 py-1.5;
   }
 
-  /* 分割线 */
   & hr {
     @apply my-3 border-border/40;
   }
 
-  /* 链接 */
   & a {
     color: var(--goose-accent-link);
     text-decoration-line: underline;
@@ -83,7 +73,6 @@
     color: var(--goose-accent-link-hover);
   }
 
-  /* 粗体 / 斜体 */
   & strong {
     @apply font-semibold;
   }

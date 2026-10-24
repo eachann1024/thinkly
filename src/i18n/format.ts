@@ -1,6 +1,5 @@
 import { getFormatLocale, getLocale } from "./runtime";
 
-/** Regional formatting is deliberately independent of the interface language. */
 export function formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
   return new Intl.NumberFormat(getFormatLocale(), options).format(value);
 }
