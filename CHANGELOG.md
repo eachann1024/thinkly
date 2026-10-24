@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.7.329
+
+- 隔离设置分类页面与笔记编辑器浮层
+- keep workspace drag previews live and lightweight
+- animate sidebar width only when expanding or collapsing
+- toggle history milestones without confirmation
+- split history headers across the sidebar and document
+
 ## 1.7.328
 
 - schedule weekly monthly and quarterly reports

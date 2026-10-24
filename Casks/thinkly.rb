@@ -1,8 +1,8 @@
 cask "thinkly" do
   arch arm: "-arm64", intel: ""
-  version "1.7.328,3dcd639"
-  sha256 arm: "661b0a369aa6aa233859004bbb4bf5ebe3fe53e8081b6e96ea85f862d00dafc7",
-         intel: "24ec015edc0aad613d7b95a972438796b9f983ecfd85bc7e60896343b4d5643b"
+  version "1.7.329,07e4e00"
+  sha256 arm: "5773f4a814e934558c86c9e9963fec3d3cc0ca91d460ae217d4888c7d7702320",
+         intel: "05f8df86abaace9921d3150f8642c6ee552a62eba66aa87315bd22d93b396d18"
   url "https://github.com/eachann1024/thinkly/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}#{arch}.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
