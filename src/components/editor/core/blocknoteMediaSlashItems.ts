@@ -1,5 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
-import { FilePanelExtension } from "@blocknote/core/extensions";
+import { openMediaFilePicker } from "../blocks/shared/mediaFilePicker";
 import { SLASH_ICONS, type SlashMenuItem } from "./blocknoteSlashModel";
 import { Volume2 } from "@/components/ui/icons";
 import { createElement } from "react";
@@ -38,10 +38,10 @@ export function getMediaSlashMenuItems(
     onItemClick: () => {
       const block = insert({ type });
       if (!block?.id) return;
-      if (["audio", "video"].includes(type) && editor.document.at(-1)?.id === block.id) {
+      if (["audio", "video"].includes(type) && editor.transact((tr) => tr.doc.firstChild?.lastChild?.attrs.id === block.id)) {
         editor.insertBlocks([{ type: "paragraph", content: "" }], block, "after");
       }
-      editor.getExtension(FilePanelExtension)?.showMenu(block.id);
+      openMediaFilePicker(editor, block.id);
     },
   }));
 }

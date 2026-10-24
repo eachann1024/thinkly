@@ -2,6 +2,7 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from "../toolbars/formatting/colorPalette";
 import type { SlashMenuItem } from "./blocknoteSlashModel";
+import { canConvertBlock } from "./blockConversionPolicy";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/blocknoteCommandSlashItems.ts#messages:1">`
 zh-Hans:
@@ -53,7 +54,7 @@ ja:
 const t = createTranslator(messages);
 
 
-const BLOCK_CONVERSIONS = [
+export const BLOCK_CONVERSIONS = [
   { get label() { return t("text"); }, type: "paragraph" },
   { get label() { return t("heading1"); }, type: "heading", props: { level: 1, isToggleable: false, collapsed: false } },
   { get label() { return t("heading2"); }, type: "heading", props: { level: 2, isToggleable: false, collapsed: false } },
@@ -76,19 +77,19 @@ const aliases: Record<string, string> = {
   codeBlock: "code 代码块",
 };
 
-/** Commands change the current block after the suggestion controller removes its query. */
 export function getCommandSlashItems(
   editor: BlockNoteEditor<any, any, any>, query: string, defaultCodeBlockWrap: boolean,
 ): SlashMenuItem[] | null {
   const turn = /^(?:turn(?:\s+into)?|转换)(?:\s+(.*))?$/i.exec(query.trim());
   if (turn) {
+    if (!canConvertBlock(editor, editor.getTextCursorPosition().block)) return [];
     const q = (turn[1] ?? "").trim().toLowerCase();
     return BLOCK_CONVERSIONS.filter((target) => `${target.label} ${aliases[target.type]}`.toLowerCase().includes(q))
       .map((target) => ({
         title: t("turnIntoBlock", { label: target.label }),
         onItemClick: () => {
           const block = editor.getTextCursorPosition().block;
-          if (block.id === getProtectedTitleBlockId(editor) || editor.schema.blockSchema[block.type]?.content !== "inline") return;
+          if (!canConvertBlock(editor, block)) return;
           editor.updateBlock(block, {
             type: target.type,
             props: { ...("props" in target ? target.props : {}), ...(target.type === "codeBlock" ? { wrap: defaultCodeBlockWrap } : {}) },
