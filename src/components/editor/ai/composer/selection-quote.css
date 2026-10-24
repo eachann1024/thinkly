@@ -15,23 +15,43 @@
   background: transparent;
   color: inherit;
   font: inherit;
+  /* font 简写会带回芯片行高；压回 1 后，字框高度等于字号，flex 才能把墨迹中线对齐。 */
+  line-height: 1;
   cursor: pointer;
 }
 .ai-selection-quote-preview {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  gap: 5px;
+  overflow: hidden;
+  text-align: left;
+}
+.ai-selection-quote-mark {
+  display: block;
+  flex: 0 0 auto;
+  height: 0.5em;
+  aspect-ratio: 14.25 / 8.75;
+  overflow: hidden;
+}
+.ai-selection-quote-label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: left;
-}
-.ai-selection-quote-preview::before {
-  content: "❞";
-  margin-right: 5px;
+  line-height: 1;
 }
 .ai-selection-quote-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 18px;
   margin-left: auto;
   border-radius: 3px;
-  font-size: 15px;
+}
+.ai-selection-quote-close {
+  display: block;
+  flex: 0 0 auto;
 }
 .ai-selection-quote-remove:hover {
   background: var(--goose-interactive-hover);
