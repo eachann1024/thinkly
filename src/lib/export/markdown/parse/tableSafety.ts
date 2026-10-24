@@ -1,5 +1,5 @@
 import { readDataAttr } from "../persistedNames";
-import { tableColorStyle } from "../tableHtml";
+import { sanitizeTableHref, tableColorStyle } from "../tableHtml";
 
 const COLOR_ATTRS = ["data-thinkly-text-color", "data-goose-text-color", "data-thinkly-background-color", "data-goose-background-color"];
 const ALIGN_ATTRS = ["data-thinkly-text-alignment", "data-goose-text-alignment"];
@@ -8,7 +8,8 @@ const ATTRIBUTES: Record<string, string[]> = {
   colgroup: [], col: ["style"], tbody: [], tr: [],
   td: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
   th: ["colspan", "rowspan", ...COLOR_ATTRS, ...ALIGN_ATTRS, "style"],
-  a: ["href", "data-thinkly-page-mention", "data-goose-page-mention"], span: [...COLOR_ATTRS, "style"],
+  // target/rel 只影响打开方式，链接模型存的是 href 和行内标记；不放行会把整张表打成 raw-block。
+  a: ["href", "target", "rel", "data-thinkly-page-mention", "data-goose-page-mention"], span: [...COLOR_ATTRS, "style"],
   strong: [], b: [], em: [], i: [], u: [], del: [], s: [], code: [], br: [],
 };
 
@@ -22,6 +23,11 @@ export function isLosslessTableDocument(document: Document, table: HTMLTableElem
     const tag = element.tagName.toLowerCase();
     const allowed = ATTRIBUTES[tag];
     if (!allowed || Array.from(element.attributes).some((attribute) => !allowed.includes(attribute.name))) return false;
+    if (tag === "a") {
+      const href = element.getAttribute("href");
+      // 危险协议不能变成可点链接，也不悄悄删掉；整表回退原文。
+      if (href && sanitizeTableHref(href) == null) return false;
+    }
     if (Array.from(element.childNodes).some((node) => node.nodeType !== 1 && node.nodeType !== 3)) return false;
     if (element.hasAttribute("style")) {
       if (tag === "col") {

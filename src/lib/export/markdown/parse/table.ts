@@ -10,7 +10,7 @@ export function parseTableHtmlBlock(lines: string[], start: number) {
   while (end < lines.length && !/<\/table>\s*$/i.test(lines[end].trim())) end += 1;
   if (end >= lines.length) return null;
   const source = lines.slice(start, end + 1).join("\n");
-  const document = new DOMParser().parseFromString(source, "text/html");
+  const document = new globalThis.DOMParser().parseFromString(source, "text/html");
   const table = document.querySelector("table");
   if (!table || !isLosslessTableDocument(document, table)) return { block: { type: "codeBlock", props: { language: "thinkly-raw-block" }, content: source }, nextIndex: end + 1 };
   const count = (value: string | null, max: number) => Math.min(max, Math.max(0, Math.floor(Number(value) || 0)));
