@@ -10,6 +10,7 @@ import { loadVaultRoots } from "./allowlist";
 import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
 import { closeAllWatchers, registerIpcHandlers } from "./ipc";
 import { startAutomaticUpdates } from "./appUpdate";
+import { acknowledgeMacInstall } from "./updates/install";
 import {
   enqueueMarkdownPathsFromArgv,
   flushQueuedMarkdownOpenPaths,
@@ -104,6 +105,9 @@ function startApp(): void {
   registerGitSyncIpc();
 
   app.whenReady().then(async () => {
+    // Before the installer gives up: mark the new app started and remove swap directories
+    // so previous.app / failed.app are not left in the Applications folder.
+    await acknowledgeMacInstall();
     markStartup("language-init-start");
     await initializeLanguage();
     setLanguageSnapshot(getLanguageSnapshot());
