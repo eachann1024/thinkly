@@ -127,6 +127,7 @@
   /* 浮动条按内容取宽；缩放后的小数宽度会让 wrap 误判换行，改为单行、极窄时横向滚动。 */
   flex-wrap: nowrap;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 

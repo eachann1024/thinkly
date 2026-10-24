@@ -37,7 +37,7 @@ export function FormattingToolbarLayout({
     menuRef,
     shouldHide,
   } = state;
-  const rowRef = useToolbarHorizontalScroll(isQuickNoteSurface);
+  const rowRef = useToolbarHorizontalScroll(true);
   const isTableSelection = caps.mode === "cellText" || caps.mode === "cellGrid";
   // 选区 AI 润色入口暂时停用；加入对话继续使用独立入口。
   const sections: ReactNode[] = [];
