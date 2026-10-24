@@ -21,6 +21,7 @@ import {
   textSelectionAt,
   shouldTakeOverOutsideTableDrag,
 } from "./tableCellSelectionModel";
+import { columnResizingPluginKey } from "prosemirror-tables";
 import { isBlankDragActive } from "./trailingBlankDrag";
 
 export function createTableCellSelectionView(view: EditorView) {
@@ -78,7 +79,8 @@ export function createTableCellSelectionView(view: EditorView) {
   };
 
   const handlePointerMove = (event: Event) => {
-    if (!mouseDown || startDocPos == null || isBlankDragActive(view)) return;
+    if (!mouseDown || startDocPos == null || isBlankDragActive(view)
+      || columnResizingPluginKey.getState(view.state)?.dragging) return;
     const mouse = event as MouseEvent;
     const targetCell = tableCellFromTarget(mouse.target, view.dom);
     if (
@@ -163,7 +165,8 @@ export function createTableCellSelectionView(view: EditorView) {
 
   const onMouseDown = (event: Event) => {
     const mouse = event as MouseEvent;
-    if (mouse.button !== 0 || mouse.ctrlKey || mouse.metaKey) return;
+    if (mouse.button !== 0 || mouse.ctrlKey || mouse.metaKey
+      || view.dom.classList.contains("resize-cursor")) return;
     const cell = tableCellFromTarget(mouse.target, view.dom);
     if (!eventInsideEditor(view, event)) {
       startCell = null;

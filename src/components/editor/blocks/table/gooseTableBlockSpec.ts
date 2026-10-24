@@ -1,3 +1,4 @@
+import { withLiveColumnResize } from "./liveColumnResize";
 import { defaultBlockSpecs } from "@blocknote/core/blocks";
 import type {
   BlockFromConfigNoChildren,
@@ -14,7 +15,13 @@ function allowCoveredRows(extension: Extension): Extension {
     ...extension,
     tiptapExtensions: extension.tiptapExtensions?.map((node) => node.name === "tableRow"
       ? (node as Node).extend({ content: "(tableCell | tableHeader)*" })
-      : node),
+      : node.name === "BlockNoteTableExtension"
+        ? node.extend({
+            addProseMirrorPlugins() {
+              return (this.parent?.() ?? []).map(withLiveColumnResize);
+            },
+          })
+        : node),
   };
 }
 
@@ -34,6 +41,25 @@ export const gooseTableBlockSpec = {
   implementation: {
     ...tableSpec.implementation,
     node: (tableSpec.implementation as { node: Node }).node.extend({
+      addNodeView() {
+        const render = this.parent?.();
+        if (!render) return null;
+        return (props) => {
+          const view = render(props);
+          const syncWidth = () => {
+            const table = (view.dom as HTMLElement).querySelector("table");
+            if (table?.style.width) table.style.setProperty("width", table.style.width, "important");
+          };
+          const update = view.update?.bind(view);
+          if (update) view.update = (...args) => {
+            const accepted = update(...args);
+            if (accepted) syncWidth();
+            return accepted;
+          };
+          syncWidth();
+          return view;
+        };
+      },
       addAttributes() {
         return {
           ...(this.parent?.() ?? {}),
