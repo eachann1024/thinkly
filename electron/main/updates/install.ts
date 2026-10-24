@@ -8,6 +8,8 @@ import { promisify } from "node:util";
 import { markQuitting } from "../windows";
 import { flushBeforeUpdate } from "./save";
 import type { VerifiedUpdate } from "./release";
+import { canClearInstallStage, compareSemver } from "../../../src/lib/appUpdateRelease";
+import { isUpdateStageName, livesInUpdateStage, removeSiblingUpdateStages } from "./installStages";
 import { describeFsError, discardDirectory, isMissingFile, replaceUpdateDirectory } from "./staging";
 
 const exec = promisify(execFile);
@@ -36,7 +38,8 @@ export async function prepareMacUpdate(update: VerifiedUpdate): Promise<void> {
 }
 
 // Arguments stay separate from shell source, including app paths containing spaces.
-// The old bundle remains available until the new process finishes starting.
+// The old bundle stays in the stage until the new process is up, then the whole stage is removed
+// so previous.app / failed.app are not left beside the real app for Launch Services to index.
 const installer = `#!/bin/sh
 set -eu
 target="$1"
@@ -49,27 +52,32 @@ while kill -0 "$parent_pid" 2>/dev/null; do
   if [ "$count" -gt 120 ]; then exit 1; fi
   sleep 1
 done
+remove_stage() {
+  rm -rf "$stage"
+}
 rollback() {
   if [ -d "$stage/previous.app" ]; then
     if [ -e "$target" ]; then mv "$target" "$stage/failed.app"; fi
     mv "$stage/previous.app" "$target"
   fi
   /usr/bin/open "$target" || true
+  remove_stage
 }
 trap rollback HUP INT TERM
-if ! mv "$target" "$stage/previous.app"; then /usr/bin/open "$target"; exit 1; fi
+if ! mv "$target" "$stage/previous.app"; then /usr/bin/open "$target"; remove_stage; exit 1; fi
 if ! mv "$stage/next.app" "$target"; then rollback; exit 1; fi
 if ! /usr/bin/open "$target"; then rollback; exit 1; fi
 count=0
 while [ ! -f "$stage/started" ]; do
   count=$((count + 1))
   if [ "$count" -gt 60 ]; then
-    if ! /usr/bin/pgrep -f "$process_pattern" >/dev/null; then rollback; fi
-    exit 1
+    if ! /usr/bin/pgrep -f "$process_pattern" >/dev/null; then rollback; exit 1; fi
+    remove_stage
+    exit 0
   fi
   sleep 1
 done
-rm -rf "$stage"
+remove_stage
 `;
 
 async function installMac(update: VerifiedUpdate): Promise<void> {
@@ -78,6 +86,8 @@ async function installMac(update: VerifiedUpdate): Promise<void> {
     throw new Error(t("moveToApplications"));
   }
   await access(path.dirname(target), constants.W_OK);
+  // Drop swap directories left beside the app by an earlier attempt before creating another one.
+  await removeSiblingUpdateStages(target);
   // Re-extract from the verified archive so an interrupted/modified staging folder is never reused.
   await prepareMacUpdate(update);
   const stage = await mkdtemp(path.join(path.dirname(target), ".goose-update-"));
@@ -118,17 +128,54 @@ export async function installUpdate(update: VerifiedUpdate): Promise<void> {
   app.quit();
 }
 
-export async function cleanInstalledUpdate(update: VerifiedUpdate): Promise<void> {
-  if (process.platform !== "darwin") return;
+type StageRecord = { path: string; version: string };
+
+/** null: no usable record. undefined: unreadable, so leave the stage alone. */
+async function readStageRecord(): Promise<StageRecord | null | undefined> {
   try {
-    const record = JSON.parse(await readFile(stageRecord(), "utf8")) as { path: string; version: string };
-    const parent = path.dirname(installedApp());
-    if (record.version === update.version && path.dirname(record.path) === parent &&
-        /^\.goose-update-[a-zA-Z0-9]+$/.test(path.basename(record.path))) {
-      await writeFile(path.join(record.path, "started"), String(process.pid), { mode: 0o600 });
-      await rm(stageRecord(), { force: true });
-    }
+    const record = JSON.parse(await readFile(stageRecord(), "utf8")) as { path?: string; version?: string };
+    if (!record.path || !record.version || !isUpdateStageName(path.basename(record.path))) return null;
+    return { path: record.path, version: record.version };
   } catch (error) {
-    if (!isMissingFile(error)) console.error(`[update] could not finish the install stage: ${describeFsError(error)}`);
+    if (isMissingFile(error)) return null;
+    console.error(`[update] could not read the install stage: ${describeFsError(error)}`);
+    return undefined;
   }
+}
+
+async function signalInstallStage(bundle: string, runningVersion: string, record: StageRecord | null): Promise<void> {
+  if (!record || !canClearInstallStage(runningVersion, record.version)) return;
+  try {
+    if (await realpath(path.dirname(record.path)) !== await realpath(path.dirname(bundle))) return;
+    await writeFile(path.join(record.path, "started"), String(process.pid), { mode: 0o600 });
+  } catch (error) {
+    if (!isMissingFile(error)) console.error(`[update] could not mark the install started: ${describeFsError(error)}`);
+  }
+}
+
+async function finishMacInstallStage(runningVersion: string): Promise<void> {
+  const bundle = installedApp();
+  if (!bundle.endsWith(".app") || livesInUpdateStage(bundle)) return;
+  const record = await readStageRecord();
+  if (record === undefined || !canClearInstallStage(runningVersion, record?.version)) return;
+  await signalInstallStage(bundle, runningVersion, record);
+  await removeSiblingUpdateStages(bundle);
+  await rm(stageRecord(), { force: true });
+}
+
+/** Tell a live installer the new app is up, then delete swap directories next to that app. */
+export async function acknowledgeMacInstall(): Promise<void> {
+  if (process.platform !== "darwin" || !app.isPackaged) return;
+  try {
+    await finishMacInstallStage(app.getVersion());
+  } catch (error) {
+    if (!isMissingFile(error)) console.error(`[update] could not remove install leftovers: ${describeFsError(error)}`);
+  }
+}
+
+export async function cleanInstalledUpdate(update: VerifiedUpdate): Promise<void> {
+  if (process.platform !== "darwin" || compareSemver(app.getVersion(), update.version) < 0) return;
+  await finishMacInstallStage(app.getVersion()).catch((error: unknown) => {
+    if (!isMissingFile(error)) console.error(`[update] could not finish the install stage: ${describeFsError(error)}`);
+  });
 }
