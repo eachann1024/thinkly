@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
-import { FilePlus2, FileText, Pencil, Trash2 } from "@/components/ui/icons";
+import { ArrowLeftRight, ClipboardCopy, Copy, FilePlus2, FileText, Pencil, Trash2 } from "@/components/ui/icons";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { usePages } from "@/stores/usePages";
@@ -202,6 +202,7 @@ export function ReviewOperation({
                 className="goose-accent-selection"
                 onClick={() => setView("diff")}
               >
+                <ArrowLeftRight aria-hidden />
                 {t("diff")}
               </Button>
               <Button contentStyle="preserve" variant="ghost" size={null}
@@ -210,16 +211,19 @@ export function ReviewOperation({
                 className="goose-accent-selection"
                 onClick={() => setView("new")}
               >
+                <FileText aria-hidden />
                 {operation.type === "search_replace" ? t("newText") : t("resultingContent")}
               </Button>
             </div>
           ) : null}
           {oldText !== undefined && operation.type !== "create" ? (
             <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(oldText, t("original"))}>
+              <Copy aria-hidden />
               {t("copyOriginal")}
             </Button>
           ) : null}
           <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(newText, t("newContent"))}>
+            <ClipboardCopy aria-hidden />
             {t("copyNewContent")}
           </Button>
           <Button contentStyle="preserve" variant="ghost" size={null}
@@ -228,6 +232,7 @@ export function ReviewOperation({
             onMouseDown={(event) => event.preventDefault()}
             onClick={refine}
           >
+            <Pencil aria-hidden />
             {t("refineSelectedText")}
           </Button>
         </div>
