@@ -189,7 +189,8 @@ if any("security" in l.lower() for l in labels):
 
 # 2) 受保护路径默认转人工。主人、本仓库、safe_to_merge 可以放过非密钥路径。
 files = json.loads(gh("api", "--paginate", "--slurp", f"repos/{repo}/pulls/{pr}/files?per_page=100"))
-names = [f["filename"] for page in files for f in page]
+entries = [entry for page in files for entry in page]
+names = [entry.get("filename") or "" for entry in entries if entry.get("filename")]
 prot = [p.strip() for p in env["PROTECTED_PATHS"].split(",") if p.strip()]
 def protected(n, p):
     base = n.rsplit("/", 1)[-1]
@@ -207,9 +208,21 @@ def secret_material(path):
     if base.startswith(".env") or base.startswith("id_rsa") or base.startswith("secrets") or base.startswith("credentials"):
         return True
     return base.endswith((".pem", ".key", ".p12"))
+def entry_paths(entry):
+    # 删除的文件只有 filename。重命名必须同时看 previous_filename，移入或移出都算。
+    paths = []
+    for key in ("filename", "previous_filename"):
+        path = entry.get(key) or ""
+        if path and path not in paths:
+            paths.append(path)
+    return paths
 head_repo = ((info.get("head") or {}).get("repo") or {}).get("full_name") or ""
 owner_bypass = info["user"]["login"] == "eachann1024" and head_repo == repo and rec == "safe_to_merge"
-secret_hit = [n for n in names if secret_material(n)]
+secret_hit = []
+for entry in entries:
+    for path in entry_paths(entry):
+        if secret_material(path) and path not in secret_hit:
+            secret_hit.append(path)
 hit = [n for n in names if any(protected(n, p) for p in prot)]
 other = [n for n in hit if n not in set(secret_hit)]
 if secret_hit:
