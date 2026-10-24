@@ -72,3 +72,20 @@
 .goose-column-resizer:disabled {
   display: none;
 }
+
+.goose-column-drop-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 1px;
+  background: var(--goose-accent-solid);
+  transform-origin: top left;
+  pointer-events: none;
+  z-index: 70;
+}
+
+body:has(.bn-editor[data-column-drop="true"]) .prosemirror-dropcursor-block,
+body:has(.bn-editor[data-column-drop="true"]) .prosemirror-dropcursor-inline {
+  display: none;
+}

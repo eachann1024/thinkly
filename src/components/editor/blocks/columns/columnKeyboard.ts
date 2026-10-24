@@ -30,7 +30,6 @@ function focusNextColumn(editor: Editor, context: ReturnType<typeof findColumnsC
   focusBlock(editor, target, direction < 0);
 }
 
-/** 只拦截栏的物理边界，栏内文本、代码缩进和普通层级命令继续走原扩展。 */
 export function handleColumnKey(editor: Editor, event: KeyboardEvent): boolean {
   if (!editor.isEditable || editor.prosemirrorView.composing || event.isComposing || event.keyCode === 229) return false;
   if (event.metaKey || event.ctrlKey || event.altKey) return false;
@@ -62,7 +61,6 @@ export function handleColumnKey(editor: Editor, event: KeyboardEvent): boolean {
     const parent = editor.getParentBlock(block);
     const selected = editor.getSelection()?.blocks ?? [block];
     if (selected.some((item: any) => [COLUMN_LAYOUT, COLUMN_SECTION].includes(item.type))) return true;
-    // Shift-Tab 不得将顶层实际块提升成 layout 的直接子节点。
     if (event.shiftKey && parent?.type === COLUMN_SECTION) return true;
     const previous = editor.getPrevBlock(block);
     return !event.shiftKey && (!previous || previous.type === COLUMN_LAYOUT || previous.type === COLUMN_SECTION);
@@ -85,6 +83,7 @@ export function handleColumnKey(editor: Editor, event: KeyboardEvent): boolean {
     ? editor.prosemirrorView.endOfTextblock(backwards ? "up" : "down")
     : $from.parentOffset === (backwards ? 0 : $from.parent.content.size);
   if (!boundary) return false;
+  if (event.key === "Backspace" || event.key === "Delete") return true;
   focusNextColumn(editor, context, backwards ? -1 : 1, event.key === "ArrowDown" || event.key === "ArrowRight");
   return true;
 }
