@@ -2,11 +2,17 @@ import { useLocale } from "@/i18n";
 import { useRef } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import * as GooseIcons from "@/components/ui/icons";
+import { IconButton } from "@/components/ui/icon-button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { Button } from "@/components/ui/button";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { bindIdleWindowDrag } from "@/lib/electron/windowDrag";
+import { cn } from "@/lib/utils";
+import type { Page } from "@/types";
+import { actionButtonClass, DesktopWindowNavigation } from "../../page/titlebar/DesktopWindowNavigation";
+import { PageFileTitle } from "../../page/titlebar/PageFileTitle";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
 import { formatGroupLabel, formatTime } from "./historyViewPresentation";
 import "./history-controls.css";
@@ -49,7 +55,6 @@ function isChromeControlTarget(target: EventTarget | null) {
   return target instanceof Element && Boolean(target.closest("button, a, input, textarea, [data-electron-no-drag]"));
 }
 
-/** Linux 的 CSS 拖拽区不派发单击；历史表头改走与顶栏相同的 JS 拖拽。 */
 export function useHistoryHeaderChrome() {
   const dragRef = useRef(false);
   const linux = typeof navigator !== "undefined" && /Linux/i.test(navigator.platform);
@@ -63,6 +68,80 @@ export function useHistoryHeaderChrome() {
       void getGooseDesktop()?.toggleMaximizeWindow?.();
     },
   };
+}
+
+
+function versionLabelOf(createdAt: number | undefined, fallback: string) {
+  return createdAt == null ? fallback : `${formatGroupLabel(createdAt, Date.now())} ${formatTime(createdAt)}`;
+}
+
+export function HistoryElectronChrome({
+  page, onBeforeActivateTab, onToggleSidebar, toggleSidebarCollapsed, sidebarCollapsed, toggleSidebarShortcutLabel,
+}: {
+  page?: Page;
+  onBeforeActivateTab?: () => void;
+  onToggleSidebar?: () => void;
+  toggleSidebarCollapsed: () => void;
+  sidebarCollapsed: boolean;
+  toggleSidebarShortcutLabel: string;
+}) {
+  useLocale();
+  const { exit, isEmpty, selectedEntry, selectedVersionId, selectedStatus, isRestoring, handleRestore } = useHistoryViewLogic();
+  const versionLabel = versionLabelOf(selectedEntry?.createdAt, "");
+  const busy = isRestoring || selectedStatus === "loading";
+  const restoreLabel = isRestoring ? t("restoringVersion") : selectedStatus === "loading" ? t("loadingVersion") : t("restoreThisVersion");
+  return (
+    <>
+      <DesktopWindowNavigation
+        canGoBack
+        canGoForward={false}
+        onBack={exit}
+        backLabel={t("backToEditor")}
+        onBeforeActivateTab={onBeforeActivateTab}
+        onToggleSidebar={onToggleSidebar}
+        toggleSidebarCollapsed={toggleSidebarCollapsed}
+        sidebarCollapsed={sidebarCollapsed}
+        toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
+      />
+      <div className="electron-document-header relative flex min-w-0 w-full flex-1 items-center justify-between">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+          {page ? (
+            <div className="min-w-0">
+              <PageFileTitle page={page} />
+            </div>
+          ) : (
+            <span className="page-file-title inline-flex min-w-0 items-center gap-1 px-1 text-sm font-medium text-muted-foreground">
+              {t("selectAVersion")}
+            </span>
+          )}
+          {versionLabel && <span className="shrink-0 text-sm text-muted-foreground">{versionLabel}</span>}
+        </div>
+        {!isEmpty && (
+          <div className="flex shrink-0 items-center gap-2">
+            <TooltipProvider delayDuration={600}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <IconButton
+                    size="icon"
+                    tone="muted"
+                    type="button"
+                    className={cn(actionButtonClass, "disabled:pointer-events-none disabled:text-disabled")}
+                    aria-label={restoreLabel}
+                    aria-busy={busy || undefined}
+                    disabled={!selectedVersionId || selectedStatus !== "ready" || isRestoring}
+                    onClick={handleRestore}
+                  >
+                    {busy ? <GooseIcons.LoaderCircle className="h-4 w-4 animate-spin" /> : <GooseIcons.RotateCcw className="h-4 w-4" />}
+                  </IconButton>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{busy ? (isRestoring ? t("restoring") : t("loading")) : t("restoreThisVersion")}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export function HistoryBackButton() {
@@ -83,7 +162,6 @@ export function HistoryBackButton() {
   );
 }
 
-/** 正文栏表头：版本时间在左，还原在右。侧栏收起时才把返回放回这里。 */
 export function HistoryToolbar() {
   useLocale();
   const headerChrome = useHistoryHeaderChrome();

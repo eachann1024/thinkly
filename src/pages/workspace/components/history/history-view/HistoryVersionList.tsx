@@ -5,6 +5,7 @@ import * as GooseIcons from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkeletonList } from "@/components/ui/skeleton";
+import { isElectronRuntime } from "@/lib/electron/runtime";
 import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPanel";
 import { triggerLabel, formatTime } from "./historyViewPresentation";
 import "./history-controls.css";
@@ -53,11 +54,8 @@ ja:
 const t = createTranslator(messages);
 
 
-export /**
- * 页面历史模块（历史模式下占据整块侧栏主体，替换笔记本头 + 页面树/大纲）。
- * 不自带宽度/背景/边框——靠 Sidebar 父容器提供。
- * 表头与正文栏 HistoryToolbar 同高，共用一条底线。
- */
+export
+
 function HistoryVersionList() {
   useLocale();
   const headerChrome = useHistoryHeaderChrome();
@@ -74,14 +72,20 @@ function HistoryVersionList() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col" aria-label={t("versionHistory")}>
-      <header className="history-column-header" {...headerChrome}>
-        <HistoryBackButton />
-        <span className="min-w-0 truncate text-sm font-medium text-foreground">
+      {isElectronRuntime() ? (
+        <div className="shrink-0 truncate px-3 pb-1 pt-3 text-sm font-medium text-foreground">
           {t("versionHistory")}
-        </span>
-      </header>
+        </div>
+      ) : (
+        <header className="history-column-header" {...headerChrome}>
+          <HistoryBackButton />
+          <span className="min-w-0 truncate text-sm font-medium text-foreground">
+            {t("versionHistory")}
+          </span>
+        </header>
+      )}
       {!isEmpty && (
-        <p className="shrink-0 truncate whitespace-nowrap px-3 pb-2 pt-3 text-[11px] leading-none text-muted-foreground">
+        <p className={cn("shrink-0 truncate whitespace-nowrap px-3 pb-2 text-[11px] leading-none text-muted-foreground", isElectronRuntime() ? "pt-1" : "pt-3")}>
           {t("selectAVersionToPreviewAndRestore")}
         </p>
       )}
@@ -126,7 +130,7 @@ function HistoryVersionList() {
                         data-selected={isSelected ? "true" : "false"}
                         className="history-version-item group relative flex items-center"
                       >
-                        {/* 绝对定位轨道：覆盖整行高度（含 padding），相邻项首尾相接不断线 */}
+                        { }
                         <span
                           aria-hidden
                           className="pointer-events-none absolute bottom-0 left-1.5 top-0 z-[1] flex w-4 items-center justify-center"
