@@ -1,3 +1,5 @@
+import { collectTabPageIds } from "@/stores/tabs/helpers";
+import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -78,8 +80,9 @@ export function usePageMenu() {
     createLocalPageRecord,
     setActivePage,
   } = usePages();
-  const { activeNotebookId, notebooks } = useNotebooks();
+  const { activeNotebookId: sidebarNotebookId, notebooks } = useNotebooks();
   const page = activePageId ? getPage(activePageId) : undefined;
+  const activeNotebookId = page ? (notebooks[page.workspaceId]?.id ?? null) : sidebarNotebookId;
   const activeNotebook = activeNotebookId
     ? notebooks[activeNotebookId]
     : undefined;
@@ -93,7 +96,8 @@ export function usePageMenu() {
   const isLocalItem = Boolean(page?.localFilePath);
   const { openTabs, activeTabId } = useTabs();
   const activeTab = openTabs.find((tab) => tab.id === activeTabId);
-  const canOpenInNewWindow = isElectronRuntime();
+  const canOpenInNewWindow = isElectronRuntime() && !isStandaloneFile(page) &&
+    Boolean(activeTab && collectTabPageIds(activeTab).every((id) => !isStandaloneFile(getPage(id))));
 
   const captureSelectedBlocks = () => {
     const blocks = captureEditorSelectedBlocks();
@@ -111,6 +115,10 @@ export function usePageMenu() {
 
   const handleImport = async () => {
     if (importPending.current) return;
+    if (!activeNotebookId) {
+      toast.error(uiText("needFolder"), { description: uiText("chooseImportFolder") });
+      return;
+    }
     importPending.current = true;
     try {
       const result = await importFile({
@@ -174,7 +182,7 @@ export function usePageMenu() {
   };
 
   const runExport = (label: string, task: () => Promise<boolean>) => {
-    if (exportPending.current) return;
+    if (exportPending.current || page?.localReadState === "error") return;
     if (page?.isFolder) {
       toast.error(uiText("exportSingleNote"));
       return;

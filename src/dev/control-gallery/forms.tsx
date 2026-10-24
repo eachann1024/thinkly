@@ -2,7 +2,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { GripTextarea, gripPaint } from "@/components/ui/grip-textarea";
+import { fieldVariants } from "@/components/ui/control-recipes";
+import { cn } from "@/lib/utils";
 import { Field } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Radio } from "@/components/ui/radio";
@@ -34,7 +36,7 @@ export function GalleryForms() {
       <Field label="错误输入" error="请填写有效地址"><Input defaultValue="无效地址" /></Field>
       <Field label="只读输入"><Input readOnly value="可选择复制的内容" /></Field>
       <Field label="禁用输入"><Input disabled value="当前不可操作" /></Field>
-      <Field label="多行文本"><Textarea placeholder="输入多行内容" /></Field>
+      <Field label="多行文本"><GripTextarea paint={gripPaint.goose} gripLabel="多行文本" className={cn(fieldVariants(), "h-auto min-h-20")} placeholder="输入多行内容" /></Field>
       <Field label="原生选择"><NativeSelect defaultValue="normal"><option value="normal">默认</option><option value="long">较长的选项文字</option><option disabled>禁用选项</option></NativeSelect></Field>
       <Field label={`范围：${range}`}><Range min={0} max={100} value={range} onChange={e => setRange(Number(e.target.value))} /></Field>
       <Field label="禁用范围"><Range disabled defaultValue={40} /></Field>

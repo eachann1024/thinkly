@@ -13,17 +13,6 @@ ja:
   noteNotFound: "このノートが見つかりません"
 `;
 const uiText = createTranslator(localMessages);
-/**
- * EditorHostBridge —— 宿主（Electron app）把应用 store 桥接成编辑器内核所需的注入对象。
- *
- * 编辑器内核（@/components/editor）不直接读 usePages/useNotebooks/useSettings/useTabs，
- * 也不直接碰平台 API；本桥读取这些 store 与 Electron 平台实现，组装成 EditorSettings /
- * EditorPageContext，经 <EditorPlatformProvider> + <EditorHostProvider> 注入，再渲染
- * 传入的 <Editor>（children）。
- *
- * 行为保持不变：注入对象的各字段/回调一一对应抽取前 Editor.tsx 内的 store 直读逻辑。
- *
- */
 import { useMemo, type ReactNode } from "react";
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
@@ -64,19 +53,12 @@ import { toast } from "@/components/ui/sonner";
 import { createEditorPageLinkCapabilities } from "./editorPageLinks";
 
 interface EditorHostBridgeProps {
-  /** 当前被编辑的页（替换编辑器内核对 usePages.activePageId/getPage 的直读）。 */
   page: Page;
-  /** 宿主决定编辑器是否使用全宽；常规笔记固定为 true。 */
   isEditorFullWidth: boolean;
-  /**
-   * 内容变更落库回调的覆盖。默认走 usePages.updatePage 落库；速记小窗草稿模式传入此项，
-   * 把内容写到草稿存储而非真实 page（草稿不入 pages map、不进笔记列表）。
-   */
   onContentChangeOverride?: (
     content: BlockNoteContent,
     options?: { silent?: boolean },
   ) => void;
-  /** 宿主显式选择正文处理方式；本地文件默认 raw，应用页面默认 normalized。 */
   contentMode?: "raw" | "normalized";
   children: ReactNode;
 }
@@ -114,7 +96,6 @@ export function EditorHostBridge({
       features: {
         tablePresentationControls: true,
         mermaidUnsafeHTML: true,
-        // Electron 无 FFmpeg：视频原文件保存，slash 文案走「保存为相对资源」。
         transcodeVideoUploads: false,
         openAttachmentsExternally: true,
         localFolderNotebook: notebook?.source === "local-folder",
@@ -235,7 +216,7 @@ export function EditorHostBridge({
           },
         });
       },
-      searchPages: (query: string) => {
+      searchPages: (query: string, options?: { includeFolders?: boolean }) => {
         const { pages } = usePages.getState();
         const { notebooks, activeNotebookId } = useNotebooks.getState();
         const includeFolders =
@@ -248,7 +229,7 @@ export function EditorHostBridge({
           pages,
           notebooks,
           activeNotebookId,
-          { includeFolders },
+          { includeFolders: options?.includeFolders ?? includeFolders },
         );
       },
       resolvePageContexts: (refs) => {

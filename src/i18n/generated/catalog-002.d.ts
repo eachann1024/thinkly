@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/components/ui/image-export/theme-model.ts#localMessages:1": { "sampleEdition": {  }; "sampleFile": {  }; "sampleHeading": {  } };
     "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
     "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
     "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
@@ -95,7 +96,7 @@ declare module "../types" {
     "src/lib/notebook-ai/model.ts#messages:1": { "chooseAModelInSettingsBeforeUsingThe": {  }; "detailCouldNotCreateAiModel": { "value1": string | number }; "enableTheAiAssistantInSettingsToUse": {  } };
     "src/lib/notebook-ai/pi/model.ts#messages:1": { "chooseAModelInSettingsBeforeUsingThe": {  }; "detailCouldNotCreatePiModel": { "value1": string | number }; "enableTheAiAssistantInSettingsToUse": {  } };
     "src/lib/notebook-ai/pi/toolLabels.ts#messages:1": { "executeBatchPlan": {  }; "getCryptoPrice": {  }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listFolder": {  }; "listNotebooks": {  }; "listPages": {  }; "loadSkill": {  }; "readPage": {  }; "readWebPage": {  }; "searchNotes": {  }; "searchWeb": {  }; "showCalculator": {  }; "showChart": {  }; "showChecklist": {  }; "showChoices": {  }; "showComparison": {  }; "showCountdown": {  }; "showDefinition": {  }; "showDiagram": {  }; "showFlashcards": {  }; "showQuiz": {  }; "showRecipe": {  }; "showStats": {  }; "showSteps": {  }; "showSvg": {  }; "showTable": {  }; "showTimeline": {  }; "showTimer": {  }; "showUnitConverter": {  }; "showWidget": {  } };
-    "src/lib/openAssociatedMarkdown.ts#localMessages:1": { "couldnTOpenThisMarkdownFile": {  }; "theFileIsnTAmongTheVisibleNotesIn": {  }; "theFileIsnTInsideAFolderThatCan": {  } };
+    "src/lib/openAssociatedMarkdown.ts#localMessages:1": { "couldnTOpenThisMarkdownFile": {  }; "permission": {  }; "retry": {  }; "theFileIsnTAmongTheVisibleNotesIn": {  }; "theFileIsnTInsideAFolderThatCan": {  } };
     "src/lib/page-delete-actions.ts#localMessages:1": { "confirmDelete": { "title": string | number }; "couldnTRestoreTheFileFromTheSystemTrash": {  }; "deleteFailed": { "title": string | number }; "deletePermanently": {  }; "deleted": { "title": string | number }; "deleting": { "title": string | number }; "fileRestoredRefreshTheFolderToSeeIt": {  }; "note": {  }; "restored": { "title": string | number }; "restoredChildren": { "count": string | number }; "restoredItem": { "kind": string | number; "title": string | number }; "restoredLocation": { "children": string | number; "notebook": string | number; "path": string | number }; "root": {  }; "theNoteStillExists": {  }; "theSystemTrashStillContainsACopyOfThe": {  }; "thisCanTBeUndone": {  }; "thisWillPermanentlyDeleteTheItemAndAllIts": {  }; "tryAgainLater": {  }; "untitled": {  }; "untitledNotebook": {  } };
     "src/lib/pdfExport/index.ts#localMessages:1": { "couldnTLoadTheChineseFontRequiredToGenerate": {  }; "pdfExportFailed": {  }; "theGeneratedPdfIsEmpty": {  } };
     "src/lib/pdfExport/pdfCodeVisual.ts#localMessages:1": { "exportingEquationsAsImagesIsnTSupportedInThis": {  }; "theEquationImageIsnTAPngDataUrl": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ReadingPreferences.tsx#localMessages:1": { "aLittleSpaceBetweenTheLinesMakes": {  }; "giveYourWordsRoomToBreathe": {  }; "lineSpacing": {  }; "lineSpacingPresets": {  }; "livePreview": {  }; "readingPreview": {  }; "relaxed": {  }; "standard": {  }; "textSize": {  }; "times": {  }; "writeDownSomethingWorthRememberingTodayThere": {  } };
     "src/pages/workspace/components/SetupGuide.tsx#localMessages:1": { "adjustReadingPreferences": {  }; "appearance": {  }; "appearancePreview": {  }; "back": {  }; "customizeAppearance": {  }; "exitSetup": {  }; "finishSetup": {  }; "next": {  }; "progress": { "step": string | number; "total": string | number }; "reading": {  }; "setupGuide": {  }; "setupSteps": {  } };
     "src/pages/workspace/components/ai-cards/CalculatorCard.tsx#messages:1": { "invalidFormula": {  } };
-    "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
   }
 }

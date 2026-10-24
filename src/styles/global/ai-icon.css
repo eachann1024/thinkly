@@ -21,7 +21,6 @@
   }
 }
 
-/* 空闲态：极轻的漂浮 + 微旋，让入口始终有“活着”的感觉 */
 @keyframes ai-icon-idle-float {
   0%,
   100% {
@@ -84,7 +83,6 @@
   animation: ai-icon-breathe 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-/* SVG 默认会把滤镜和缩放裁在 viewBox 内，视觉上会形成 24×24 方框。 */
 .ai-icon {
   overflow: visible;
 }
@@ -128,7 +126,6 @@
   border-color: var(--goose-interactive-selected-border);
 }
 
-/* 默认透明底；hover 与顶栏其它图标一致起底；选中用强调色底 + 强调色图标 */
 button.ai-icon-button {
   position: relative;
   isolation: isolate;
@@ -164,8 +161,6 @@ button.ai-icon-button {
   transition: transform 180ms ease;
 }
 
-/* 空闲：默认静止，避免无限动画常驻合成器；hover / 键盘焦点时再漂浮。
-   streaming / done 走各自关键帧，不叠 idle。 */
 .ai-icon-button .ai-icon[data-ai-state="idle"] .ai-icon-glyph {
   transform-origin: 12px 12px;
   transform-box: fill-box;
@@ -185,7 +180,6 @@ button.ai-icon-button {
   transform: scale(1.06);
 }
 
-/* 打开面板：空闲星标跟强调色走，不要青绿发光 */
 .ai-icon-button[aria-pressed="true"] .ai-icon[data-ai-state="idle"] {
   filter: none;
   transform: none;
@@ -224,7 +218,6 @@ button.ai-icon-button {
   filter: none;
 }
 
-/* 深色选中态必须写在 .dark .ai-icon-button .ai-icon 之后，否则同优先级会被 idle 滤镜盖掉 */
 .dark .ai-icon-button[aria-pressed="true"] .ai-icon[data-ai-state="idle"] {
   filter: none;
   transform: none;
@@ -254,7 +247,6 @@ button.ai-icon-button {
   transform: none;
 }
 
-/* AI 运行态沿用产品强调色，不保留独立星云渐变。 */
 .ai-header-nebula-streaming {
   position: relative;
   background: var(--goose-interactive-hover);

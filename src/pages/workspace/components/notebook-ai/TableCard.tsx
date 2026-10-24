@@ -1,7 +1,4 @@
 import { useLocale } from "@/i18n";
-/**
- * showTable 工具的输出渲染卡片
- */
 import type { RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { ArtifactActions } from "./ArtifactActions";
@@ -87,7 +84,7 @@ export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
           />
         ) : null}
       </div>
-      {/* 单层横向滚动：wrapper 直接 overflow-x:auto（无外 hidden + 内 auto） */}
+      { }
       <div className="notebook-ai-canvas-card-scroll">
         <table>
           <thead>

@@ -37,17 +37,6 @@ ja:
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { DotDecor, FolderEmptyArt } from "@/components/ui/dot-matrix";
-/**
- * FolderHomePage —— 本地文件夹「目录主页」（方案 B：Finder 式）。
- *
- * 点击侧栏本地文件夹时在主区打开：头部显示文件夹名与路径面包屑，
- * 内容区列出直接子项（文件/子文件夹），右上角提供「新建子文件夹 / 新建文件」。
- *
- * 边界态：
- * - 空文件夹：居中空态 + 前置创建入口，不渲染空列表框；
- * - 子项很多：列表撑满主区剩余高度，超出后内部滚动，标题旁显示总数徽章；
- * - 超长文件名：truncate 截断，与侧栏树行一致。
- */
 import { useMemo, useState } from "react";
 import type { Page } from "@/types";
 import {
@@ -95,7 +84,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
   );
   const [creating, setCreating] = useState<"file" | "folder" | null>(null);
 
-  // 与侧栏树共用一份排序：默认名称序，进入手动顺序的目录按手动顺序。
   const manualOrders = useLocalFolderOrders(
     (s) => s.ordersByNotebook[page.workspaceId],
   );
@@ -118,7 +106,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
     try {
       const newId = await createLocalPage(page.id, page.workspaceId);
       if (!newId) return;
-      // createLocalPage 内部已激活新页；确保父文件夹在侧栏展开可见
       expandView(page.workspaceId, page.id);
     } finally {
       setCreating(null);
@@ -137,7 +124,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
         toast.error(uiText("folderFailed"));
         return;
       }
-      // 侧栏展开父级并定位新文件夹，保持「双向可见」
       expandView(page.workspaceId, page.id);
       setExpandPageId(newId);
       toast.success(uiText("folderCreated"));
@@ -147,7 +133,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
   };
 
   const handleOpenChild = (child: Page) => {
-    // 子文件夹打开自己的主页；文件以预览标签打开（与侧栏单击一致）
     openPreviewTab(child.id);
   };
 
@@ -156,7 +141,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
   return (
     <div className="workspace-folder-home flex min-h-0 flex-1 flex-col overflow-hidden bg-[hsl(var(--goose-editor-bg))]">
       <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-8 py-8 md:px-12 md:py-10">
-        {/* 头部 */}
+        { }
         <div className="mb-6 flex shrink-0 items-center gap-3.5">
           <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[13px] bg-[hsl(var(--goose-selected-bg))] text-muted-foreground">
             <FolderOpen className="h-6 w-6" />
@@ -171,7 +156,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
           </div>
         </div>
 
-        {/* 内容标题行 + 创建入口 */}
+        { }
         <div className="mb-2.5 flex shrink-0 items-center gap-2.5">
           <h2 className="text-[13px] font-semibold text-muted-foreground">
             {uiText("contents")}<span className="ml-1.5 rounded-control bg-[hsl(var(--goose-selected-bg))] px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
@@ -206,7 +191,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
         </div>
 
         {count === 0 ? (
-          /* 空文件夹：居中空态，创建入口前置 */
           <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-1 overflow-hidden rounded-[11px] border border-dashed border-border bg-background px-5 pb-10 pt-11 text-center [&>:not(.goose-dm-decor)]:relative">
             <DotDecor preset="folder" />
             <FolderEmptyArt className="mb-2 text-foreground" />
@@ -235,7 +219,6 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
             </div>
           </div>
         ) : (
-          /* 子项列表：撑满主区剩余高度，超出后内部滚动，头部与创建按钮始终可见 */
           <div className="goose-list-layout folder-home-list page-scroll-container min-h-0 flex-1 overflow-y-auto rounded-[11px] border border-border bg-background">
             {children.map((child) => (
               <Button contentStyle="preserve" variant="ghost" size={null}

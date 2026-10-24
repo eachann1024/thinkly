@@ -2,6 +2,7 @@ import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { type FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { OverlayLayerProvider, useOverlayLayer } from "@/components/ui/overlay-layer";
+import { useBlockHandleMenuOpen } from "../../state/blockHandleMenu";
 import { useFormattingToolbarAi } from "@/components/editor/state/formattingToolbarAi";
 import { FormattingToolbarExtension } from "@blocknote/core/extensions";
 import {
@@ -15,16 +16,13 @@ type FixedFormattingToolbarControllerProps = {
   open: boolean;
 };
 
-/**
- * 紧凑布局格式工具栏：固定在视口底部并横向铺满，不跟随选区浮动。
- * open 由选区 / AI 状态驱动；鼠标仍在工具栏上时短暂保持，便于点按按钮。
- */
 export function FixedFormattingToolbarController({
   formattingToolbar: Component,
   open,
 }: FixedFormattingToolbarControllerProps) {
   const editor = useBlockNoteEditor();
   const layer = useOverlayLayer("toolbar");
+  const blockHandleMenuOpen = useBlockHandleMenuOpen(editor);
   const inlineAiActive = useFormattingToolbarAi((state) => state.active && state.owner === editor);
   const formattingToolbar = useExtension(FormattingToolbarExtension, {
     editor,
@@ -35,7 +33,7 @@ export function FixedFormattingToolbarController({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isWorkspaceSettingsOpen()) return;
-      if (inlineAiActive) return;
+      if (inlineAiActive || blockHandleMenuOpen) return;
       if (event.key !== "Escape" || event.defaultPrevented || event.isComposing || event.repeat) return;
       if (!open && !hovered) return;
       event.preventDefault();
@@ -45,7 +43,7 @@ export function FixedFormattingToolbarController({
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [editor, formattingToolbar.store, open, hovered, inlineAiActive]);
+  }, [editor, formattingToolbar.store, open, hovered, inlineAiActive, blockHandleMenuOpen]);
 
   useEffect(() => {
     const vk = (
@@ -87,7 +85,11 @@ export function FixedFormattingToolbarController({
     };
   }, []);
 
-  const visible = !inlineAiActive && (open || hovered);
+  useEffect(() => {
+    if (blockHandleMenuOpen) setHovered(false);
+  }, [blockHandleMenuOpen]);
+
+  const visible = !blockHandleMenuOpen && !inlineAiActive && (open || hovered);
   if (!visible || typeof document === "undefined") return null;
 
   return createPortal(

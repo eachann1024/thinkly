@@ -2,6 +2,9 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/search-sheet/sheetStepText.ts#messages:1": { "compose": {  }; "composeRunning": {  }; "failed": {  }; "found": { "count": string | number }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listPages": {  }; "noResults": {  }; "readPage": {  }; "readWebPage": {  }; "retrieve": {  }; "retrieveFound": { "count": string | number }; "retrieveNone": {  }; "searchNotes": {  }; "searchWeb": {  }; "summary": { "count": string | number }; "summaryFailed": { "count": string | number }; "summaryNotes": { "count": string | number }; "summaryWeb": { "count": string | number }; "thinking": {  }; "tool": {  }; "understand": {  } };
+    "src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1": { "aiCouldnTAnswer": {  } };
+    "src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1": { "textFont": {  } };
     "src/pages/workspace/components/shared/FontSelector.tsx#localMessages:1": { "default": {  }; "monospace": {  }; "serif": {  } };
     "src/pages/workspace/components/shared/LocalFontSelect.tsx#localMessages:1": { "checkingInstalledFonts": {  }; "couldnTReadInstalledFontsReopenThe": {  }; "fontMissing": { "name": string | number }; "fontNotInstalledUsingAFallback": {  }; "loadingInstalledFonts": {  }; "noInstalledFontsFound": {  }; "selected": { "label": string | number; "name": string | number }; "selectedFallback": { "label": string | number; "name": string | number }; "systemFont": {  } };
     "src/pages/workspace/components/sidebar/AppearanceEditorPreview.tsx#localMessages:1": { "aFewPlansForTheWeekend_b122": {  }; "afterDinnerIWateredTheMint_0f53": {  }; "buyCoffeeBeans_bc59": {  }; "callMomAndAskHowShe_eca4": {  }; "currentFolder_9db0": {  }; "iWouldAlsoLikeAnUnhurried_1117": {  }; "ifTheWeatherIsNiceI_cd40": {  }; "liveEditorPreview_d9e9": {  }; "local_8e7e": {  }; "projectPlan_271c": {  }; "reminders_1062": {  }; "serifPreviewALittleRoomTo_3bc8": {  }; "sortThePhotosFromMyWalk_a34c": {  }; "theCroissantWarmedItsPaperBag_bea6": {  }; "theRainHadJustStoppedAs_7743": {  }; "theTreesCastLongShadowsUnder_e9d6": {  }; "thereIsNoNeedToFill_a850": {  }; "visitTheFlowerMarket_1874": {  }; "wednesdayAfterTheRain_a77a": {  }; "wednesdayAfterTheRain_db18": {  } };
@@ -119,8 +122,5 @@ declare module "../types" {
     "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
     "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
     "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };
-    "src/stores/pages/actions/hydrate.ts#block1:1": { "recovered": { "count": number } };
-    "src/stores/pages/actions/hydrate.ts#block2:2": { "newerStored": {  }; "recoveredEditor": {  }; "recoveryKept": {  } };
-    "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
   }
 }

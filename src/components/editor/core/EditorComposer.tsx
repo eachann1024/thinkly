@@ -120,9 +120,6 @@ export function EditorComposer({
         : undefined,
     [],
   );
-  // 选区工具栏一出现就可见。链接工具栏 hover 等 150ms 再出现，减少划过误开；
-  // 移出立即收起。挂到 document（portalElement=null），用 --editor-ui-scale
-  // 写真实尺寸，避免 CSS zoom 在放大缩小后和图标对不齐。
   const linkToolbarFloatingOptions = useMemo<FloatingUIOptions>(
     () => ({
       useHoverProps: {
@@ -159,14 +156,7 @@ export function EditorComposer({
           if (programmaticRead(editor) || tableWindowPaint()) return;
           const safePageId = pageIdForUpdateRef.current;
           if (!safePageId) return;
-          // raw 文档跳过 normalizePageContent（含 ensureFirstTitleHeading），
-          // 与 Editor.tsx 切页/commit 路径保持一致，避免程序化规范化误触保存。
-          // 用户真实输入仍会让文档签名偏离基线，照常走 debouncedUpdate 保存。
-          // 须与 Editor.tsx 的 contentMode 保持一致；raw 文档不执行页面级规范化。
           const usesRawContent = usesRawEditorContent;
-          // 用户意图门控（仅 raw 文档）：打开后无任何用户交互时的 onChange 来自
-          // BlockNote 异步 props 补全（折叠块/视频/带属性图片等），静默同步 store 与
-          // 基线、不入保存队列。一旦用户交互过（打字/IME/点击/拖拽…），照常入队保存。
           if (usesRawContent && !userInteractedRef.current) {
             const nextContent = clonePageContent(
               editor.document as BlockNoteContent,
@@ -250,7 +240,7 @@ export function EditorComposer({
             )}
           </>
         ) : null}
-        {/* 紧凑编辑器构建不挂 AI 菜单。 */}
+        { }
         {__GOOSE_EDITOR_AI__ &&
           aiSettings.enabled &&
           editable &&
@@ -266,6 +256,7 @@ export function EditorComposer({
       />
       <FindInPageBar
         editor={editor}
+        editorContainerRef={editorContainerRef}
         open={find.phase === "open" || find.phase === "reopening"}
         seedQuery={find.phase === "closed" ? "" : find.request.seed}
         openNonce={find.phase === "closed" ? 0 : find.request.nonce}

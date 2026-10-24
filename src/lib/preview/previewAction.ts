@@ -30,10 +30,8 @@ import { blobToBase64, getExtensionFromMimeType } from "@/lib/imageStorage/utils
 import { fs } from "@/lib/electron-platform/fs";
 import { shell } from "@/lib/electron-platform/shell";
 
-/** 所有「打开来看」预览按钮的统一文案 */
 export const getPreviewActionTooltip = () => uiText("previewClickForFullScreenRightClickForSystem");
 
-/** 预览缩放按百分比步进，不用 1.2 倍这种非整比例 */
 export const PREVIEW_ZOOM_STEP_PERCENT = 25;
 export const PREVIEW_ZOOM_MIN_PERCENT = 25;
 export const PREVIEW_ZOOM_MAX_PERCENT = 400;
@@ -97,7 +95,7 @@ export function buildPreviewTempFile(
   const hasExt = /\.[a-z0-9]{1,8}$/i.test(fileName);
   const safeName = hasExt ? fileName : `${fileName}.${fallbackExt || "png"}`;
   return {
-    relativePath: `goose-note/previews/${token}/${safeName}`,
+    relativePath: `thinkly/previews/${token}/${safeName}`,
     base64,
   };
 }
@@ -106,10 +104,6 @@ export function svgNeedsHtmlShell(markup: string): boolean {
   return /<foreignObject[\s>]/i.test(markup);
 }
 
-/**
- * 预览按固有尺寸展示，缩放交给外层 transform。
- * 这里只补齐缺失的一侧：没有 viewBox 就按像素宽高推，没有像素宽高就按 viewBox 推。
- */
 export function normalizeSvgIntrinsicSize(markup: string): string {
   return markup.replace(/<svg\b([^>]*)>/i, (full, attrs: string) => {
     const width = attrs.match(/\swidth="([\d.]+)"/i)?.[1];
@@ -249,7 +243,7 @@ async function openTextFileInSystem(
   fileName: string,
 ): Promise<void> {
   await writeAndOpenTempFile({
-    relativePath: `goose-note/previews/${previewToken()}/${fileName}`,
+    relativePath: `thinkly/previews/${previewToken()}/${fileName}`,
     base64: textToBase64(text),
   });
 }

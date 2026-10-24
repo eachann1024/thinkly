@@ -61,7 +61,6 @@ function moveAcrossCodeBoundary(
     (direction === "up" || direction === "down") &&
     target instanceof TextSelection
   ) {
-    // Keep the visual column when entering the adjacent text block.
     const from = view.coordsAtPos(selection.head);
     const edge = view.coordsAtPos(target.head);
     const hit = view.posAtCoords({
@@ -84,6 +83,22 @@ export const gooseCodeBlockKeyboardExtension = createExtension(
     prosemirrorPlugins: [
       new Plugin({
         props: {
+          handleDOMEvents: {
+            beforeinput(view, event) {
+              const input = event as InputEvent;
+              if (
+                !view.editable || !input.cancelable || view.composing ||
+                input.isComposing || input.defaultPrevented ||
+                input.inputType !== "insertText" || !input.data ||
+                !getCodeBlockSelection(view.state.selection)
+              ) return false;
+              // Use the editor selection for plain code input. Chromium's
+              // editable ranges can escape or miss a React node-view selection.
+              event.preventDefault();
+              view.dispatch(view.state.tr.insertText(input.data).scrollIntoView());
+              return true;
+            },
+          },
           handleKeyDown(view, event) {
             if (
               !view.editable ||

@@ -1,6 +1,7 @@
 import { EditorAction } from "@/components/editor/ui/button";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { ImageEditControls } from "./ImageEditControls";
+import { getBlockToolbarOwner } from "../core/blockToolbarOwner";
 import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import {
   AlignCenter,
@@ -186,6 +187,8 @@ export function ImageToolbar({
       <div
         ref={usesFloatingPosition ? refs.setFloating : undefined}
         data-goose-image-toolbar
+        data-goose-block-id={selectedImage.blockId ?? undefined}
+        data-goose-editor-owner={getBlockToolbarOwner(editor.prosemirrorView.dom)}
         className="fixed z-[20000]"
         style={
           usesFloatingPosition

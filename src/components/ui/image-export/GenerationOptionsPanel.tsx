@@ -82,7 +82,7 @@ export function GenerationOptionsPanel({
 
   return (
     <div ref={setContainer} role="group" aria-label={uiText("exportOptions")} className="ml-auto shrink-0">
-      {/* Keep the portal host outside the button row so mounting it cannot add a flex gap. */}
+      { }
       <div className="flex items-center gap-2">
         <Toggle
           variant="outline"

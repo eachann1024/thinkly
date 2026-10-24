@@ -4,13 +4,32 @@ import { containedPasteTarget } from "../utils/containedPaste";
 
 type Editor = BlockNoteEditor<any, any, any>;
 
-export function insertParagraphAfterBlock(editor: Editor, blockId: string) {
+const CONTINUING_LISTS = new Set(["bulletListItem", "numberedListItem", "checkListItem"]);
+
+function insertFollowingBlock(editor: Editor, blockId: string, type: string) {
   if (!editor.isEditable || !editor.getBlock(blockId)) return;
   editor.transact(() => {
-    const [paragraph] = editor.insertBlocks([{ type: "paragraph" }], blockId, "after");
-    editor.setTextCursorPosition(paragraph, "start");
+    const [created] = editor.insertBlocks([{ type }], blockId, "after");
+    if (created) editor.setTextCursorPosition(created, "start");
   });
   editor.focus();
+}
+
+export function insertParagraphAfterBlock(editor: Editor, blockId: string) {
+  insertFollowingBlock(editor, blockId, "paragraph");
+}
+
+function continueList(editor: Editor, block: { id: string; type: string }): boolean {
+  const state = editor.prosemirrorState;
+  const { $from } = state.selection;
+  const atEnd = state.selection.empty && $from.parentOffset === $from.parent.content.size;
+  const last = $from.parent.lastChild;
+  if (!(atEnd && last?.type.name === "hardBreak")) return false;
+  editor.transact((tr) => {
+    tr.delete(state.selection.from - 1, state.selection.from);
+    insertFollowingBlock(editor, block.id, block.type);
+  });
+  return true;
 }
 
 function enterInContainer(editor: Editor): boolean {
@@ -19,7 +38,6 @@ function enterInContainer(editor: Editor): boolean {
   const { $from, $to } = state.selection;
   if (!$from.sameParent($to)) return false;
   const { block } = editor.getTextCursorPosition();
-  // The final empty child paragraph exits exactly one containing block.
   if (state.selection.empty && block.type === "paragraph" && !$from.parent.content.size && !block.children.length) {
     const parent = editor.getParentBlock(block);
     if (parent && parent.children.at(-1)?.id === block.id &&
@@ -32,6 +50,8 @@ function enterInContainer(editor: Editor): boolean {
     }
   }
   if (!containedPasteTarget(state)) return false;
+  if (CONTINUING_LISTS.has(block.type)) return continueList(editor, block);
+  if (block.type === "toggleListItem") return false;
   const atEnd = state.selection.empty && $from.parentOffset === $from.parent.content.size;
   const last = $from.parent.lastChild;
   if (atEnd && (!last || last.type.name === "hardBreak")) {

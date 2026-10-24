@@ -1,29 +1,15 @@
-/** 侧栏 pill 右缘与内容列左缘的间距（px） */
 export const SIDE_MENU_CONTENT_GAP = 6;
 
-/** 标题盒子左右外扩 8px。普通块当前行底也外扩同样距离，
- *  把手统一再左移这么多，和标题把手对齐、避免压住色条。 */
 export const HEADING_SIDE_MENU_EXTRA_GAP = 8;
 
-/**
- * 表格 tableWrapper 左侧为行把手留的 padding（BlockNote `--bn-table-handle-size`）。
- * 视觉上表格边框比内容列左缘更靠右，从格子移向侧栏会先经过这段空白。
- */
 export const TABLE_SIDE_MENU_INSET = 9;
 
-/** 行/列把手伸出表格的距离：24px 按钮 + 4px 间距，再留 2px，避免缝里卸掉。 */
 const TABLE_CHROME_REACH = 30;
 
-/** 表格块把手没有折叠钮：两枚 22px 按钮、2px 间距、左右各 4px 内边距，再留 4px。 */
 export function tableSideMenuWidth(scale: number): number {
   return (22 * 2 + 2 + 8 + 4) * scale;
 }
 
-/**
- * 行/列把手和块把手都画在表格边框外。标题和表格之间往往只有一行间距，
- * 指针移向左上角方块时会先落到标题上，于是把手先消失。
- * 边框外这一圈，以及左上角块把手所占的位置，仍算这张表。
- */
 export function isPointerInTableChromeReach(
   table: Pick<DOMRect, "left" | "right" | "top" | "bottom">,
   x: number,
@@ -59,7 +45,6 @@ export function isPointerInRects(
 
 type LineBox = { left: number; right: number; top: number; bottom: number };
 
-/** 同一行的文字碎片并成一条；行与行之间的半行距留到后面补。 */
 function wrappedLineBoxes(
   rects: Iterable<Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "height">>,
 ): LineBox[] {
@@ -87,10 +72,6 @@ function wrappedLineBoxes(
   return lines;
 }
 
-/**
- * 行高大于字面时，Range 矩形之间有空隙。指针在段落里移动会反复离开这些空隙，把手跟着闪。
- * 空隙按中线分给相邻行；左右仍只用该行文字宽度，短行右侧空白不显示把手。
- */
 function hitsWrappedText(
   rects: Iterable<Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "height">>,
   bounds: Pick<DOMRect, "top" | "bottom">,
@@ -145,11 +126,13 @@ function relativeLines(
   return lines;
 }
 
-/** 整行空白不算内容：只有文字、控件或媒体才显示把手。大块只量一次外框。 */
 export function isPointerOverBlockContent(content: HTMLElement, x: number, y: number): boolean {
   const inline = content.querySelector<HTMLElement>(".bn-inline-content");
   if (!inline) return isPointerInRects([content.getBoundingClientRect()], x, y);
   const bounds = inline.getBoundingClientRect();
+  if (content.dataset.contentType === "paragraph" && !inline.textContent) {
+    return isPointerInRects([bounds], x, y);
+  }
   if (heavyInline(inline)) {
     if (x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom) return true;
   } else {
@@ -189,10 +172,6 @@ const EDITOR_SIDE_MENU_HOVER_SELECTOR = [
   ".goose-table-extend-button",
 ].join(", ");
 
-/**
- * BlockNote SideMenu 会在编辑器左右约 250px 内夹住 X 并弹出把手。
- * 左右 gutter 不属于编辑器，只有指针落在内容列或已出现的把手上才显示。
- */
 function asClosestHost(
   target: EventTarget | null,
 ): Pick<Element, "closest"> | null {
@@ -224,7 +203,6 @@ const TABLE_SIDE_MENU_UI_SELECTOR = [
   ".goose-table-extend-button",
 ].join(", ");
 
-/** 表格行/列把手是 portal，BlockNote 会把它们当成编辑器外并关掉 SideMenu.show */
 export function isTableSideMenuUiTarget(target: EventTarget | null): boolean {
   return Boolean(
     asClosestHost(target)?.closest(TABLE_SIDE_MENU_UI_SELECTOR),
@@ -237,11 +215,6 @@ type SideMenuCorridorRect = {
   height: number;
 };
 
-/**
- * 内容列与侧栏之间的 gutter 不属于 `.bn-editor`。表格又比 pill 高，
- * 现有 `::after` 桥只跟 pill 同高，从某一行横移会先掉 hover。
- * 用块的完整高度做几何走廊，避免侧栏先卸掉。
- */
 export function isPointerInSideMenuCorridor(
   clientX: number,
   clientY: number,

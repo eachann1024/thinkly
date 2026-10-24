@@ -1,5 +1,3 @@
-/* 控件焦点不额外绘制外圈；清除 outline 与 ring，保留单层边框和真实投影。
-   properties 的首个子层统一压住后续焦点描边，包括同层的旧样式。 */
 @layer properties.goose-focus-policy {
   :is(:focus, :focus-visible, [data-focus-visible="true"], [data-keyboard-active="true"]),
   :is(.checkbox, .radio, .switch, [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"]):is(:focus-visible, [data-focus-visible="true"])
@@ -11,9 +9,6 @@
   }
 }
 
-/* 键盘焦点用底色/文字表达。label 的反馈不改子 control 的 checked 图形；
-   range 使用 range.css 的实心 thumb，disabled 不套用交互色。
-   :where 保持低优先级，让业务的选中、危险色等状态仍可覆盖。 */
 :where(
   a[href], button, input:not([type="range"]):not([type="hidden"]), textarea, select, summary,
   [role="button"], [role="tab"], [role="menuitem"], [role="option"],
@@ -28,14 +23,10 @@
   color: var(--goose-interactive-hover-fg);
 }
 
-/* 行内编辑的焦点由光标和外层行/输入外壳表达，不叠加局部色块。
-   同时压住通用 Input 的 hover 填色，普通表单输入仍沿用上面的反馈。 */
 :is(input, textarea)[data-goose-inline-input] {
   background-color: transparent !important;
 }
 
-/* Chromium may classify a programmatically focused container as focus-visible
-   after a pointer click. Retain the existing pointer-only container reset. */
 html[data-goose-pointer-focus="true"] :is(
     a,
     button,
@@ -58,7 +49,6 @@ html[data-goose-pointer-focus="true"] :is(
   padding: 0 !important;
 }
 
-/* Text entry stays ring-free after a click and typing; Tab restores keyboard focus. */
 html[data-goose-pointer-focus="true"] :is(input, textarea, select, [contenteditable="true"]):focus {
   outline: none !important;
   --tw-ring-shadow: 0 0 #0000 !important;

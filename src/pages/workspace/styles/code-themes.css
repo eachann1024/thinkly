@@ -1,6 +1,3 @@
-/* ===== Code Theme CSS Variables ===== */
-/* Shiki handles syntax highlighting via inline styles (ProseMirror decorations).
-   These CSS variables control background/border/line-number colors for the code block shell. */
 
 :root {
   --code-bg: hsl(var(--background));
@@ -43,7 +40,6 @@
   --code-token-variable: var(--goose-text-primary);
 }
 
-/* GitHub light/dark are selected with the application appearance. */
 :root[data-code-theme="github-light"] {
   --code-bg: #ffffff;
   --code-fg: var(--goose-text-primary);

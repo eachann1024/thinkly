@@ -44,7 +44,6 @@ import {
 } from "@/lib/storage/recoveryJournal";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { toast } from "@/components/ui/sonner";
-import { useNotebooks } from "../../useNotebooks";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
 import { queueLocalPageSave } from "../folderSync";
 import { clonePageContent } from "../actions/create/content";
@@ -98,7 +97,6 @@ export function createUpdatePageSlice(
       }
       const shouldMergeFrontmatterSettings =
         isLocal && !silent && isLocalPageFrontmatterSettingsUpdate(updates);
-      // 仅改字体/锁定也要落盘；读失败页不写，避免覆盖坏文件
       const shouldQueueLocalSettingsSave =
         shouldMergeFrontmatterSettings && page?.localReadState !== "error" && !page?.editorDraft;
 
@@ -135,8 +133,6 @@ export function createUpdatePageSlice(
           pinnedAt = undefined;
         }
 
-        // 只有真正的内容编辑才刷新 updatedAt：必须显式传入 content 字段，
-        // 且没有标记为 silent（silent 用于切页/normalize 这类被动同步）。
         const isContentEdit = "content" in updates && !silent;
         let updatedPage = {
           ...page,
@@ -146,10 +142,7 @@ export function createUpdatePageSlice(
           updatedAt: isContentEdit ? now : page.updatedAt,
         };
 
-        // 本地页：字体/锁定/置顶/收藏 merge 进 frontmatter blob（解析失败保留原文，避免破坏手写 YAML）
         if (shouldMergeFrontmatterSettings) {
-          // 以编辑器当前首块 YAML 为基准（用户可能在编辑器里改过 name/description），
-          // 而不是用过期的 localFrontmatter 覆盖手写内容。
           const contentYamlBody = getContentFrontmatterBody(
             updatedPage.content,
           );
@@ -173,7 +166,6 @@ export function createUpdatePageSlice(
             updatedPage = {
               ...updatedPage,
               localFrontmatter: mergeResult.blob,
-              // 仅用户属性同步进编辑器首块；只有收藏/置顶等 goose 键时去掉该块。
               content: applyFrontmatterBodyToContent(
                 updatedPage.content,
                 yamlBody,
@@ -188,8 +180,7 @@ export function createUpdatePageSlice(
         const shouldQueueContentSave =
           Boolean(updates.content) &&
           !silent &&
-          useNotebooks.getState().notebooks[page.workspaceId]?.source ===
-            "local-folder" &&
+          isLocal &&
           page.localReadState !== "error" &&
           (!page.editorDraft || localPageHasPersistableContent(updates.content) ||
             state.dirtyLocalPageIds[id]) &&
@@ -198,13 +189,7 @@ export function createUpdatePageSlice(
             !localPageHasPersistableContent(updates.content) && !state.dirtyLocalPageIds[id]
           );
 
-        // 内容编辑 或 仅改 frontmatter 设置：标脏并入防抖写盘队列
         if (shouldQueueContentSave || shouldQueueLocalSettingsSave) {
-          // 本地文件夹与普通笔记本一致：编辑即自动保存。先标脏（短暂显示"保存中"），
-          // 再入防抖队列落盘；写盘成功后由 saveLocalPageContent 清除脏标记。
-          // 标题→文件名的 rename 仍由显式 Cmd/Ctrl+S（saveDirtyLocalPage）处理，
-          // 避免输入标题过程中频繁重命名文件。
-          // silent=true（切页/normalize 被动同步）时跳过标脏与队列，不触发写盘。
           const contentForSave = shouldQueueContentSave
             ? updates.content!
             : updatedPage.content;

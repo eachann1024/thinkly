@@ -46,12 +46,8 @@ export function QuickNoteApp() {
           contentMode="raw"
           onContentChangeOverride={onDraftChange}
         >
-          {/*
-            用 CSS zoom（Chromium/Electron 支持）而不是 transform:scale + 反向宽高。
-            transform 不改变布局盒：缩小后 width=100/zoom% 会 > 100%，父级
-            overflow-y-auto 会连带出现底部横向滚动条，放大时也会出现可视高度与
-            scrollHeight 不一致。zoom 同步缩放布局与绘制，滚动条只随真实内容出现。
-          */}
+          {
+}
           <div
             className="quicknote-editor-surface flex min-h-full flex-col"
             style={{ zoom } as CSSProperties}

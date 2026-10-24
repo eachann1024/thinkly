@@ -1,4 +1,3 @@
-/** AI 输入框 React 空壳；命令式编辑器与输入流程由 controller 组装。 */
 import { forwardRef, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ComposerSuggestionsList } from "./ComposerSuggestionsList";
@@ -90,7 +89,7 @@ export const AiComposerInput = forwardRef<
         </div>
       ) : null}
 
-      {/* 空壳：真正 contenteditable 在 useLayoutEffect 里 append，React 永不 reconcile 它 */}
+      { }
       <div ref={editorHostRef} className="relative min-w-0" />
       <span
         ref={liveRegionRef}

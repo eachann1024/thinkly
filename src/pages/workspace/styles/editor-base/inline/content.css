@@ -1,4 +1,3 @@
-/* ===== 笔记 @ 提及 tag：垂直居中，左右留白避免贴在一起 ===== */
 .workspace-editor-surface
   .bn-inline-content
   [data-inline-content-type="pageMention"],
@@ -7,7 +6,7 @@
   [data-inline-content-type="pageMention"] {
   display: inline-flex;
   align-items: center;
-  vertical-align: bottom;
+  vertical-align: middle;
   box-sizing: border-box;
   height: 1.5em;
   margin-left: 0.25em;
@@ -48,7 +47,6 @@
   cursor: pointer;
 }
 
-/* ===== CheckListItem：勾选后用灰色文字代替中划线 ===== */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"][data-checked="true"]
   .bn-inline-content {
@@ -57,7 +55,6 @@
   background-position: 0 0;
 }
 
-/* BlockNote 覆写了 --foreground 为完整的 oklch()，不能再包 hsl()。 */
 .workspace-editor-surface {
   --goose-check-glint: color-mix(in srgb, hsl(var(--card-foreground)) 35%, hsl(var(--card)));
 }
@@ -84,7 +81,6 @@
   caret-color: var(--goose-accent-focus);
 }
 
-/* 选中背景会盖掉裁剪到文字的渐变；选中文字必须有实体前景色。 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"]
   .bn-inline-content::selection,
@@ -94,7 +90,6 @@
   -webkit-text-fill-color: currentColor;
 }
 
-/* 原生选择高亮不绘制 text-clip 背景，选中文字时暂用实体字色。 */
 .workspace-editor-surface
   .bn-editor.goose-checklist-selection
   .bn-block-content[data-content-type="checkListItem"]
@@ -102,18 +97,12 @@
   -webkit-text-fill-color: currentColor;
 }
 
-/* 链接、代码和显式文字色不继承渐变。 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"]
   .bn-inline-content :is(a, code, [data-inline-content-type], [style*="color"]) {
   -webkit-text-fill-color: currentColor;
 }
 
-/* ===== CheckListItem 对齐：单行时复选框与文字垂直居中，多行时对齐第一行 =====
-   原理：复选框包裹盒高度 = 一行行高（--editor-line-height），盒内 input 垂直居中。
-   单行 → 盒高等于唯一一行 → 视觉居中；
-   多行 → 盒高仍只占第一行高度 → 复选框对齐第一行（顶部对齐效果）。
-   覆盖 BlockNote 内置的固定 height:24px，避免换字体后行高变化导致错位。 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"]
   > div:has(> input) {
@@ -124,9 +113,6 @@
   align-items: center;
 }
 
-/* 方框随字号同步缩放：1em ≈ 一个汉字高（与文字一样大），cmd+= 放大字体时同步放大。
-   左右 margin 也用 em，使「间距+框+间距」总槽宽恒为 1.5em（默认 16px 字号时 24px，
-   与无序/有序列表 marker 槽一致），框中心落在 0.65em ≈ 10.4px，贴近连接线轴 10.5px。 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"]
   > div
@@ -160,7 +146,6 @@
   border-color: var(--goose-accent-solid);
 }
 
-/* 旧 Electron 的 input 不生成伪元素，由原有容器承载可读勾号。 */
 .workspace-editor-surface
   .bn-block-content[data-content-type="checkListItem"]
   > div:has(> input:checked)::after {
@@ -186,8 +171,6 @@
   }
 }
 
-/* ===== BlockNote children 缩进优化 ===== */
-/* 普通标题下 children 轻微收进；折叠标题按原型 C 顶格，见 toggles.css。 */
 .workspace-editor-surface
   .bn-block:has(
     > .bn-block-content[data-content-type="heading"]:not(
@@ -198,7 +181,6 @@
   padding-left: 0.5em;
 }
 
-/* 页面级字体切换：表面自身 + 编辑器，避免 BlockNote 类名变动后选不中 */
 .workspace-editor-surface[data-font-family="default"],
 .workspace-editor-surface[data-font-family="default"] .bn-editor,
 .workspace-editor-surface[data-font-family="default"] .bn-default-styles {

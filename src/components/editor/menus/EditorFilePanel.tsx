@@ -1,10 +1,11 @@
-import { useRef, useState, useReducer, useLayoutEffect } from "react";
+import { useRef, useState, useReducer, useLayoutEffect, useId } from "react";
 import { useBlockNoteEditor } from "@blocknote/react";
 import { FilePanelExtension } from "@blocknote/core/extensions";
 import { Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
 import { Link, Upload } from "@/components/ui/icons";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mediaFileAccept, uploadMediaFile } from "../blocks/shared/mediaFilePicker";
+import { useEditorPageContext } from "../platform/hostContext";
 
 import { filePanelReducer } from "./filePanelState";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
@@ -43,7 +44,6 @@ ja:
 const t = createTranslator(messages);
 
 
-/** 远程媒体只保存地址，沿用浏览器正常加载。 */
 function remoteMediaUrl(value: string): URL | null {
   try {
     const url = new URL(value.trim());
@@ -55,27 +55,28 @@ function remoteMediaUrl(value: string): URL | null {
 export function EditorFilePanel({ blockId }: { blockId: string }) {
   useLocale();
   const editor = useBlockNoteEditor<any, any, any>();
+  const { page } = useEditorPageContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [tab, setTab] = useState<"upload" | "url">("upload");
   const [urlInput, setUrlInput] = useState("");
+  const errorId = useId();
   const [state, dispatch] = useReducer(filePanelReducer, { phase: "idle" });
   const requestRef = useRef(0);
   const loading = state.phase === "uploading";
   const error = state.phase === "error" ? state.message : "";
   useLayoutEffect(() => {
     dispatch({ type: "owner-changed" });
+    setUrlInput("");
     return () => { requestRef.current += 1; };
-  }, [blockId, editor]);
+  }, [blockId, editor, page.id]);
   const block = editor.getBlock(blockId);
-  const accept = block?.type === "image" ? "image/*"
-    : block?.type === "video" ? "video/*" : block?.type === "audio" ? "audio/*" : undefined;
+  const accept = mediaFileAccept(block?.type);
   const close = () => {
     requestRef.current += 1;
     editor.getExtension(FilePanelExtension)?.closeMenu();
     editor.focus();
   };
   const update = (url: string, name: string) => {
-    if (!editor.isEditable || editor.getBlock(blockId)?.type !== block?.type) return;
+    if (!editor.isEditable || editor.getBlock(blockId) !== block) return;
     editor.updateBlock(blockId, { props: { url, name } });
     close();
   };
@@ -86,10 +87,12 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
     const request = ++requestRef.current;
     dispatch({ type: "upload-started", request });
     try {
-      const url = await editor.uploadFile(file, blockId);
+      const updated = await uploadMediaFile(editor, blockId, file, {
+        isCurrent: () => requestRef.current === request,
+      });
       if (requestRef.current !== request) return;
-      update(typeof url === "string" ? url : url.url, file.name);
       dispatch({ type: "upload-completed", request });
+      if (updated) close();
     } catch (failure) {
       if (requestRef.current === request) dispatch({ type: "upload-failed", request,
         message: failure instanceof Error ? failure.message : t("attachmentUploadFailed") });
@@ -97,43 +100,38 @@ export function EditorFilePanel({ blockId }: { blockId: string }) {
   };
   const embed = (event: React.FormEvent) => {
     event.preventDefault();
+    if (loading) return;
     const url = remoteMediaUrl(urlInput);
     if (!url) { dispatch({ type: "url-invalid", get message() { return t("enterAValidHttpOrHttpsUrl"); } }); return; }
     let name = "";
-    try { name = decodeURIComponent(url.pathname.split("/").pop() || ""); } catch { /* 地址仍可用。 */ }
+    try { name = decodeURIComponent(url.pathname.split("/").pop() || ""); } catch {   }
     update(url.href, name || url.hostname);
   };
   if (!block || !editor.isEditable) return null;
   return (
-    <div className="goose-editor-context-ui bn-panel w-80 max-w-[calc(100vw-24px)] rounded-lg border bg-popover p-3 text-popover-foreground shadow-md"
+    <div className="goose-editor-context-ui bn-panel goose-media-source-panel"
       onKeyDown={(event) => {
         event.stopPropagation();
         if (event.key === "Escape") { event.preventDefault(); close(); }
       }}>
-      <Tabs value={tab} onValueChange={(value) => { setTab(value as "upload" | "url"); dispatch({ type: "form-edited" }); }}>
-      <TabsList className="mb-3" aria-label={t("mediaSource")}>
-        <TabsTrigger value="upload" disabled={loading}>
-          <Upload className="h-4 w-4" /> {t("upload")}
-        </TabsTrigger>
-        <TabsTrigger value="url" disabled={loading}>
-          <Link className="h-4 w-4" /> {t("embedLink")}
-        </TabsTrigger>
-      </TabsList>
-      {tab === "upload" ? (
-        <TabsContent value="upload">
+      <div className="goose-media-source-panel__upload">
           <input ref={inputRef} type="file" className="hidden" accept={accept} onChange={upload} />
-          <Button type="button" variant="outline" className="w-full" disabled={loading}
-            onClick={() => inputRef.current?.click()}>{loading ? t("uploading") : t("chooseFile")}</Button>
-        </TabsContent>
-      ) : (
-        <TabsContent value="url"><form onSubmit={embed} className="flex flex-col gap-2">
+          <Button type="button" variant="ghost" size="sm" className="goose-media-source-panel__upload-button"
+            disabled={loading || !editor.uploadFile} onClick={() => inputRef.current?.click()}>
+            <Upload size={18} aria-hidden="true" />{loading ? t("uploading") : t("chooseFile")}
+          </Button>
+      </div>
+      <form noValidate onSubmit={embed} className="goose-media-source-panel__url" aria-label={t("embedLink")}>
+          <Link size={18} aria-hidden="true" />
           <Input autoFocus type="url" value={urlInput} placeholder="https://…" aria-label={t("mediaUrl")}
+            controlSize="compact" disabled={loading} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && (event.nativeEvent.isComposing || event.keyCode === 229)) event.preventDefault();
+            }}
             onChange={(event) => { setUrlInput(event.target.value); dispatch({ type: "form-edited" }); }} />
-          <Button type="submit" disabled={!urlInput.trim()}>{t("embed")}</Button>
-        </form></TabsContent>
-      )}
-      </Tabs>
-      {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
+          <Button type="submit" size="sm" disabled={loading || !urlInput.trim()}>{t("embed")}</Button>
+      </form>
+      {error && <p id={errorId} role="alert" className="goose-media-source-panel__error">{error}</p>}
     </div>
   );
 }

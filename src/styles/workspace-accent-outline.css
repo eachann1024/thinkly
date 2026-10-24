@@ -1,9 +1,11 @@
-/* 精准轮廓只消费真实选中状态，不改变标签、轨道或列表的几何与事件。 */
-/* 链接从信息色独立出来，嵌套编辑器/浮层沿用当前主题的可读强调文字。 */
 :root, .light, .default, .dark, [data-theme], [data-sonner-theme] {
   --goose-text-link: var(--goose-accent-text, var(--goose-text-info));
 }
 
+:root .workspace-shell :is(.electron-titlebar, .workspace-page-header, .notebook-ai-header-toolbar)
+  [data-goose-control="icon-button"]:is([aria-pressed="true"], [data-state="open"]):where(
+    :not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"])
+  ),
 :root .workspace-shell .tab-rail-item[data-tab-active="true"]:not([data-tab-count="1"]):where(:not([aria-disabled="true"])),
 :root .workspace-shell .sidebar-rail-shell > :is(.sidebar-mode-rail, .sidebar-rail-footer) :is(
   .sidebar-mode-rail-button,
@@ -17,7 +19,6 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* 单标签只展示名称，悬停和按下均不出现选择底色；键盘焦点仍可辨认。 */
 :root .workspace-shell .tab-rail-item[data-tab-count="1"] {
   background: transparent;
   color: var(--goose-text-primary);
@@ -29,14 +30,12 @@
   box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
 }
 
-/* RCT 的 focus 背景不能覆盖已选中的行；行距、圆角、原有描边保持不变。 */
 :root .workspace-shell :is(.main-tree-row--selected, .sidebar-tree-row--selected):focus-visible,
 :root .workspace-shell .main-tree-row--selected > [data-rct-item-interactive]:focus-visible {
   background-color: var(--goose-interactive-selected) !important;
   color: var(--goose-interactive-selected-fg) !important;
 }
 
-/* 开关的 checked 保持优先于 enabled:hover，焦点边框另用可读色。 */
 [data-goose-control="switch"]:checked:not(:disabled):where(
   :not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"])
 ) {

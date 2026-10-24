@@ -1,8 +1,3 @@
-/**
- * 表格左上角的块把手和行/列把手画在边框外。
- * 指针在缝里或块把手上时仍算这张表；标题中线以上、离开左上角后则不算。
- * 运行：node scripts/verify/run.mjs table-chrome
- */
 import {
   SIDE_MENU_CONTENT_GAP,
   isPointerInSideMenuCorridor,
@@ -10,6 +5,7 @@ import {
   tableSideMenuWidth,
 } from "@/components/editor/core/sideMenuHover";
 import { createChecker } from "./lib/check";
+import { readFileSync } from "node:fs";
 
 export default function run() {
   const checker = createChecker();
@@ -57,6 +53,26 @@ export default function run() {
       SIDE_MENU_CONTENT_GAP,
       32,
     ),
+  );
+
+  const controller = readFileSync("src/components/editor/menus/GooseTableHandlesController.tsx", "utf8");
+  checker.check(
+    "表格共用 200ms 门控后直接可见，不再等待透明度动画帧",
+    controller.includes("!toolbarState.ready && !only && !state.draggingState") &&
+      controller.includes("useTransitionStylesProps={{ duration: 0, initial: { opacity: 1 }, open: { opacity: 1 } }}"),
+  );
+  checker.check(
+    "定位前保持隐藏，末尾定位中间件才释放当前表格",
+    controller.includes('visibility: positionedElement === element ? "visible" : "hidden"') &&
+      controller.indexOf('name: "gooseTablePositioned"') > controller.indexOf("...(stretch") &&
+      controller.includes("setPositionedElement(referenceElement)") &&
+      controller.includes("elements.reference : elements.reference.contextElement"),
+  );
+  checker.check(
+    "旧表格迟到的定位结果不能覆盖当前表格状态",
+    controller.includes("const latestElementRef = useRef(element)") &&
+      controller.includes("latestElementRef.current = element") &&
+      /if \(referenceElement === latestElementRef\.current\)\s*\{\s*setPositionedElement\(referenceElement\);\s*\}/.test(controller),
   );
 
   return checker.failed;

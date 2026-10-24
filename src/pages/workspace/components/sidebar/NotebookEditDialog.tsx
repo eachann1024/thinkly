@@ -121,9 +121,9 @@ export function NotebookEditDialog({
       contentClassName="bg-[hsl(var(--goose-shell-bg))]"
       bodyClassName="relative h-full overflow-y-auto p-6 animate-in fade-in duration-200"
     >
-      {/* 内容卡片 */}
+      { }
       <div ref={setIconContainer} className="relative mx-auto w-full max-w-md py-6">
-        {/* 标题 */}
+        { }
         <div className="text-center mb-8">
           {showDeleteConfirm && (
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-[14px] mb-4 bg-[var(--goose-color-danger-subtle-bg)]">
@@ -142,7 +142,7 @@ export function NotebookEditDialog({
           </p>
         </div>
 
-        {/* 表单卡片 */}
+        { }
         {showDeleteConfirm ? (
           <div className="bg-[var(--goose-color-danger-subtle-bg)] backdrop-blur-[1px] rounded-[14px] p-6 shadow-[0_12px_26px_rgba(15,23,42,0.1)] space-y-4">
             <div className="space-y-3">
@@ -168,10 +168,8 @@ export function NotebookEditDialog({
                 size="lg"
                 onClick={() => {
                   if (openDeleteConfirm) {
-                    // 直接删除入口：关闭整个对话框
                     onOpenChange(false);
                   } else {
-                    // 编辑进入删除：返回编辑界面
                     setShowDeleteConfirm(false);
                   }
                 }}
@@ -239,10 +237,10 @@ export function NotebookEditDialog({
           </div>
         )}
 
-        {/* 操作按钮 - 编辑模式 */}
+        { }
         {!showDeleteConfirm && (
           <div className="flex flex-col gap-4 mt-6">
-            {/* 允许移除最后一个文件夹并回到空态。 */}
+            { }
             {notebookId && (
                 <Button
                   variant="ghost"
