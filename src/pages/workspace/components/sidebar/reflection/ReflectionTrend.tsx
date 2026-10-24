@@ -32,7 +32,6 @@ const BOTTOM = 26;
 const GRID_LINES = 4;
 const X_TICKS = 5;
 
-/** 向上取整到 1/2/5 × 10^k，使 4 等分刻度为整数。 */
 function niceMax(max: number): number {
   const raw = Math.max(max, GRID_LINES) / GRID_LINES;
   const pow = 10 ** Math.floor(Math.log10(raw));
@@ -53,9 +52,10 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
   const y = (v: number) => TOP + plotH - (v / top) * plotH;
   const number = new Intl.NumberFormat(locale, { notation: "compact" });
   const date = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  const tickCount = points.length <= 7 ? points.length : X_TICKS;
   const tickIndexes = Array.from(
-    new Set(Array.from({ length: Math.min(X_TICKS, points.length) }, (_, k) =>
-      Math.round((k * (points.length - 1)) / Math.max(1, Math.min(X_TICKS, points.length) - 1)))),
+    new Set(Array.from({ length: Math.min(tickCount, points.length) }, (_, k) =>
+      Math.round((k * (points.length - 1)) / Math.max(1, Math.min(tickCount, points.length) - 1)))),
   );
   const full = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" });
   const onMove = (event: React.MouseEvent<SVGSVGElement>) => {
@@ -66,7 +66,6 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
     setHover(Math.min(points.length - 1, Math.max(0, index)));
   };
   const active = hover !== null && hover < points.length ? hover : null;
-  // 浮层定位用百分比，靠边收拢，顶部节点改为向下展开，避免被 SVG 外沿裁切。
   const tip =
     active === null
       ? null
@@ -128,7 +127,7 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
         {active !== null && (
           <line x1={x(active)} x2={x(active)} y1={TOP} y2={TOP + plotH} className="stroke-border" strokeWidth={1} />
         )}
-        {values.map((v, i) => (
+        {values.map((v, i) => points.length <= 7 || i === active ? (
           <circle
             key={i}
             cx={x(i)}
@@ -137,7 +136,7 @@ export function ReflectionTrend({ points }: { points: TrendPoint[] }) {
             className="fill-[var(--goose-accent-solid)] stroke-[var(--goose-menu-surface)]"
             strokeWidth={i === active ? 2 : 0}
           />
-        ))}
+        ) : null)}
       </svg>
         {tip ? (
           <div
