@@ -15,6 +15,7 @@ import {
   forgetParkedWorkspaces,
   releaseWorkspacePark,
   settleParkedWorkspaces,
+  type ParkedSets,
 } from "./park";
 
 export function waitReadyToShow(
@@ -95,10 +96,12 @@ export function focusedWorkspaceWindow(): BrowserWindow | null {
  * 只抬浮动小窗（速记、搜索），不激活整个应用，也不 show / restore 主窗。
  * macOS 上 moveTop（orderWindow）和普通 show / focus 会把已最小化或藏在后面的 workspace 一起带出来。
  */
-export function raiseFloatingWindow(win: BrowserWindow): void {
+export function raiseFloatingWindow(
+  win: BrowserWindow,
+  parked: ParkedSets = captureParkedWorkspaces(),
+): void {
   markQuicknoteActivateSuppressed();
   const focused = focusedWorkspaceWindow();
-  const parked = captureParkedWorkspaces();
   if (win.isDestroyed()) {
     forgetParkedWorkspaces(parked);
     return;
@@ -117,7 +120,7 @@ export function raiseFloatingWindow(win: BrowserWindow): void {
     win.focus();
   }
   settleParkedWorkspaces(parked);
-  // 主窗本来就在前台时，panel 获焦可能把它压到别的应用后面；排回普通层，再让浮动窗叠在上面。
+  // 主窗本来就在前台时，浮动窗获焦可能把它压到别的应用后面；排回普通层，再让浮动窗叠在上面。
   if (
     focused &&
     !focused.isDestroyed() &&
@@ -159,18 +162,21 @@ export async function toggleWindow(win: BrowserWindow | null): Promise<void> {
  */
 export async function toggleQuicknoteWindow(): Promise<void> {
   let win = getQuicknoteWindow();
-  if (!win) {
-    win = createQuicknoteWindow();
-    await waitReadyToShow(win);
-    if (win.isDestroyed()) return;
-    raiseFloatingWindow(win);
-    return;
-  }
-  if (win.isVisible()) {
+  if (win && !win.isDestroyed() && win.isVisible()) {
     closeQuicknote();
     return;
   }
-  raiseFloatingWindow(win);
+  // 创建 BrowserWindow 可能激活应用。先记下主窗，再用这份快照抬速记。
+  const parked = captureParkedWorkspaces();
+  if (!win || win.isDestroyed()) {
+    win = createQuicknoteWindow();
+    await waitReadyToShow(win);
+    if (win.isDestroyed()) {
+      forgetParkedWorkspaces(parked);
+      return;
+    }
+  }
+  raiseFloatingWindow(win, parked);
 }
 
 export function closeQuicknote(): void {
