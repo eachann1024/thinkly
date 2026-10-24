@@ -1,0 +1,61 @@
+.goose-block-handle-menu.goose-block-color-menu {
+  width: 272px;
+  min-width: min(224px, calc(100vw - 16px));
+}
+.goose-block-color-group {
+  display: grid;
+  grid-template-columns: repeat(var(--goose-color-columns), minmax(0, 1fr));
+  gap: 6px;
+}
+.goose-block-color-group .goose-block-color-heading {
+  grid-column: 1 / -1;
+  padding: 2px 0;
+}
+.goose-menu-surface .goose-menu-item.goose-block-color-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--goose-menu-item-radius);
+  box-sizing: border-box;
+  background: var(--goose-color-swatch-bg);
+  color: var(--goose-color-swatch-fg);
+}
+.goose-block-color-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--goose-color-swatch-fg);
+}
+.goose-block-color-menu.goose-menu-surface .goose-block-color-choice:is(:hover, [data-hovered="true"], [data-focused="true"], :focus-visible) {
+  background: color-mix(in srgb, var(--goose-interactive-hover) 40%, var(--goose-color-swatch-bg));
+  color: var(--goose-color-swatch-fg);
+}
+.goose-block-color-menu.goose-menu-surface .goose-menu-item.goose-block-color-choice[data-selected="true"] {
+  border-color: var(--goose-accent-solid);
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
+  background: var(--goose-color-swatch-bg);
+  color: var(--goose-color-swatch-fg);
+}
+.goose-menu-surface .goose-menu-item > svg.goose-block-color-check {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  padding: 1px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: hsl(var(--goose-menu-surface));
+  color: var(--goose-accent-solid);
+  pointer-events: none;
+}
