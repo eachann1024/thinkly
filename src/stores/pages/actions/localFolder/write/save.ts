@@ -26,6 +26,7 @@ import {
 import { findDuplicateLocalFileOwner } from "../pathGuards";
 import { collectLocalImageWrites } from "./images";
 import { encodeLocalBlockPropsWrappers } from "@/lib/export/markdown/blockPropsMarker";
+import { stripNoteMetaBlob } from "@/lib/export/markdown/noteMeta";
 import {
   mergeSettingsIntoFrontmatterHeader,
   mergeLocalPageSettingsIntoFrontmatter,
@@ -149,7 +150,7 @@ export const saveLocalPageContentUnlocked = async (
     if (frontmatterMerge.parseFailed) {
       throw new Error(storeText("invalidFrontmatterSave"));
     }
-    frontmatterBlob = frontmatterMerge.blob;
+    frontmatterBlob = stripNoteMetaBlob(frontmatterMerge.blob);
     finalContent = frontmatterBlob
       ? `${frontmatterBlob}\n\n${markdownContent}`
       : markdownContent;
@@ -253,7 +254,9 @@ export const saveLocalPageContentUnlocked = async (
     markSelfWrite(filePath);
     // 落盘成功即清除脏标记（自动保存与显式保存共用此路径）。
     // 若合并成功，以落盘的头为磁盘一致的 localFrontmatter；merge 失败回退原 blob。
-    const nextFrontmatter = frontmatterBlob ?? page.localFrontmatter;
+    const nextFrontmatter = frontmatterHeaderMerge
+      ? frontmatterBlob ?? page.localFrontmatter
+      : frontmatterBlob;
     set((s) => {
       const current = s.pages[pageId];
       if (!current) {

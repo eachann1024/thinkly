@@ -1,5 +1,5 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { NOTE_MARK_PATTERN, dataAttr, noteComment } from "./persistedNames";
+import { NOTE_MARK_PATTERN, noteComment } from "./persistedNames";
 import { documentTextColors } from "@/lib/textColors";
 import { INLINE_BLOCK_TYPES, pickPersistedBlockProps, sanitizeCssColor, type MarkdownBlock, type PersistedBlockProps } from "./blockPropsProperties";
 
@@ -8,7 +8,7 @@ const LOCAL_WRAPPABLE_BLOCK_TYPES = new Set(
   [...INLINE_BLOCK_TYPES].filter((type) => type !== "toggleListItem"),
 );
 export const LOCAL_BLOCK_PROPS_WRAPPER_STYLE = "__gooseLocalBlockPropsWrapperStyle";
-const LOCAL_PRESERVE_EMPTY_PARAGRAPH = "__gooseLocalPreserveEmptyParagraph";
+export const LOCAL_PRESERVE_EMPTY_PARAGRAPH = "__gooseLocalPreserveEmptyParagraph";
 const LOCAL_TEXT_COLOR_CSS = documentTextColors("light");
 // 仅用于识别旧文档的 canonical wrapper，生成新文档始终使用全局文字色表。
 const LEGACY_LOCAL_TEXT_COLOR_CSS: Record<string, string> = {
@@ -75,38 +75,9 @@ export function encodeLocalBlockPropsWrappers(
   }) as BlockNoteContent;
 }
 
-/** 仅由本地 writer 调用：在最终 Markdown 行形成后包上完整可见 wrapper。 */
-export function wrapLocalBlockPropsMarkdown(block: MarkdownBlock, markdown: string): string {
-  const style = block.props?.[LOCAL_BLOCK_PROPS_WRAPPER_STYLE];
-  if (typeof style !== "string" || !parseLocalWrapperStyle(style)) {
-    // Markdown 空白没有块身份，复用既有空段标记，保证本地文件重开不丢首段。
-    return markdown === "" && block.type === "paragraph" && block.props?.[LOCAL_PRESERVE_EMPTY_PARAGRAPH]
-      ? noteComment("empty-block=paragraph") : markdown;
-  }
-  const open = `<span ${dataAttr("note-block-props")}="v1" style="${style}">`;
-  if (block.type === "toggleListItem" || (block.type === "heading" && block.props?.isToggleable)) {
-    return markdown.replace(
-      /^(<summary>(?:<h[1-3]>)?)([^\n]*?)((?:<\/h[1-3]>)?<\/summary>)$/m,
-      (_source, start: string, inner: string, end: string) => `${start}${open}${inner}</span>${end}`,
-    );
-  }
-  // 段落/标题保留一个跨行外层 wrapper，读入时由跨行 scanner 先完整剥离。
-  // 引用序列化会给每行补 `> `，因此必须每行独立包裹才是有效 Markdown/HTML。
-  const wrapLine = (line: string) => {
-    const prefix = line.match(/^(\s*(?:(?:#{1,6}\s+)|(?:[-*+]\s+(?:\[[ xX]\]\s+)?|\d+\.\s+)|(?:>\s+(?:\[![A-Z]+\]\s+\S+\s+)?))?)/)?.[1] ?? "";
-    return `${prefix}${open}${line.slice(prefix.length)}</span>`;
-  };
-  if (block.type === "quote") return markdown.split("\n").map(wrapLine).join("\n");
-  if (block.type === "callout") {
-    return markdown.split("\n").map((line, index) => (
-      index === 0 ? wrapLine(line) : `> ${open}${line.replace(/^>\s?/, "")}</span>`
-    )).join("\n");
-  }
-  const firstLineEnd = markdown.indexOf("\n");
-  if (firstLineEnd < 0) return wrapLine(markdown);
-  const firstLine = markdown.slice(0, firstLineEnd);
-  const prefix = firstLine.match(/^(\s*(?:#{1,6}\s+)?)/)?.[1] ?? "";
-  return `${prefix}${open}${markdown.slice(prefix.length)}</span>`;
+/** 新保存不再把块样式或空段写进正文。旧 span / 注释仍由 unwrap 读回。 */
+export function wrapLocalBlockPropsMarkdown(_block: MarkdownBlock, markdown: string): string {
+  return markdown;
 }
 
 function parseLocalWrapperStyle(style: string): PersistedBlockProps | null {
