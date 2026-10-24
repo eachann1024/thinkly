@@ -6,6 +6,7 @@ import {
 import type { AgentEvent } from "@earendil-works/pi-agent-core";
 import type { NotebookAiMessage } from "../types";
 import { buildPiNotebookAgent } from "./agent";
+import type { NotebookAiRunContext } from "../runContext";
 import {
   collectLoadedSkillIds,
   extractLastUserPrompt,
@@ -26,10 +27,11 @@ function createMessageId(prefix: string) {
 export function buildPiTransport(
   notebookId: string,
   currentPageId?: string | null,
+  runContext: NotebookAiRunContext = {},
 ):
   | { ok: true; transport: ChatTransport<NotebookAiMessage> }
   | { ok: false; reason: string } {
-  const agentBuild = buildPiNotebookAgent(notebookId, currentPageId);
+  const agentBuild = buildPiNotebookAgent(notebookId, currentPageId, runContext);
   if (!agentBuild.ok) {
     return { ok: false, reason: agentBuild.reason };
   }

@@ -27,7 +27,7 @@ export interface NotebookAiSessionValue {
       capturedSelection?: NotebookAiPanelSelectionCapture | null;
       onConsumeCapturedSelection?: () => void;
     },
-  ) => boolean;
+  ) => Promise<boolean>;
   newConversation: (options?: {
     onConsumeCapturedSelection?: () => void;
   }) => void;

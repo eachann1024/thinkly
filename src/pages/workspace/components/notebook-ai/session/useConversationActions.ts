@@ -17,7 +17,6 @@ ja:
 `;
 const t = createTranslator(messages);
 
-
 export function useConversationActions(state: SessionState) {
   useLocale();
   const {
@@ -29,7 +28,6 @@ export function useConversationActions(state: SessionState) {
     requestCurrentPageIdRef,
     setComposerRevision,
     setConversationId,
-    setMessages,
   } = state;
   const persistCurrentConversation = useCallback(() => {
     useNotebookAiChats
@@ -55,7 +53,6 @@ export function useConversationActions(state: SessionState) {
         .createConversation(notebookId);
       setComposerRevision((revision) => revision + 1);
       setConversationId(nextConversationId);
-      setMessages([]);
     },
     [
       isBusy,
@@ -65,7 +62,6 @@ export function useConversationActions(state: SessionState) {
       notebookId,
       setComposerRevision,
       setConversationId,
-      setMessages,
     ],
   );
 
@@ -82,8 +78,6 @@ export function useConversationActions(state: SessionState) {
     useNotebookAiChats.getState().clearComposerDraft(notebookId);
     setComposerRevision((revision) => revision + 1);
     setConversationId(nextConversationId);
-    // 外部（如搜索面板）可能预先激活了带消息的会话，按存储内容恢复。
-    setMessages(useNotebookAiChats.getState().getConversationMessages(notebookId, nextConversationId));
     return nextConversationId;
   }, [
     isBusy,
@@ -94,7 +88,6 @@ export function useConversationActions(state: SessionState) {
     requestCurrentPageIdRef,
     setComposerRevision,
     setConversationId,
-    setMessages,
   ]);
 
   useEffect(() => {
@@ -114,15 +107,10 @@ export function useConversationActions(state: SessionState) {
       persistCurrentConversation();
       const chats = useNotebookAiChats.getState();
       chats.setActiveConversation(notebookId, nextConversationId);
-      const nextMessages = chats.getConversationMessages(
-        notebookId,
-        nextConversationId,
-      );
       clearError();
       requestCurrentPageIdRef.current = null;
       options?.onConsumeCapturedSelection?.();
       setConversationId(nextConversationId);
-      setMessages(nextMessages);
     },
     [
       isBusy,
@@ -132,7 +120,6 @@ export function useConversationActions(state: SessionState) {
       clearError,
       requestCurrentPageIdRef,
       setConversationId,
-      setMessages,
     ],
   );
 
@@ -160,11 +147,7 @@ export function useConversationActions(state: SessionState) {
         .getState()
         .getActiveConversationId(notebookId);
       if (nextActiveConversationId) {
-        const nextMessages = useNotebookAiChats
-          .getState()
-          .getConversationMessages(notebookId, nextActiveConversationId);
         setConversationId(nextActiveConversationId);
-        setMessages(nextMessages);
         return true;
       }
 
@@ -175,10 +158,17 @@ export function useConversationActions(state: SessionState) {
         .createConversation(notebookId);
       setComposerRevision((revision) => revision + 1);
       setConversationId(freshConversationId);
-      setMessages([]);
       return true;
     },
-    [isBusy, conversationId, notebookId, clearError, requestCurrentPageIdRef, setComposerRevision, setConversationId, setMessages],
+    [
+      isBusy,
+      conversationId,
+      notebookId,
+      clearError,
+      requestCurrentPageIdRef,
+      setComposerRevision,
+      setConversationId,
+    ],
   );
 
   const searchPages = useCallback(

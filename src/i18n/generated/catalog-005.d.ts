@@ -2,6 +2,8 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
+    "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };
     "src/stores/pages/actions/localFolder/move.ts#block1:1": { "moveFailed": { "reason": string | number }; "nameExists": { "name": string | number } };
     "src/stores/pages/actions/localFolder/move.ts#block2:2": { "fsUnavailable": {  }; "moveFailed": {  }; "moveIntoSelf": {  }; "notebookMissing": {  }; "pageUnavailable": {  }; "readStoppedMove": {  }; "resourceMoved": {  }; "resourceRolledBack": {  }; "targetFolderMissing": {  }; "writeResourceFailed": {  } };
     "src/stores/pages/actions/localFolder/moveToNotebook.ts#block1:1": { "nameExists": { "name": string | number } };

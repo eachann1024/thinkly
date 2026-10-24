@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { isComposerPayloadEmpty } from "@/components/editor/ai/composer/composerTokens";
 import { normalizeAiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
@@ -12,7 +12,9 @@ export function useComposerSubmission(
 ) {
   const { disabled, isStreaming, onSend, onSlashCommand, notebookId } = props;
   const { inputRef, setIsEmpty, setAutoFocusToken } = surface;
-  const handleSubmit = useCallback(() => {
+  const visibleNotebook = useRef(notebookId);
+  visibleNotebook.current = notebookId;
+  const handleSubmit = useCallback(async () => {
     if (disabled || isStreaming) return;
     const input = inputRef.current;
     const payload = input?.getPayload();
@@ -32,9 +34,12 @@ export function useComposerSubmission(
 
     if (isComposerPayloadEmpty(payload) && images.length === 0) return;
 
+    const submittedPayload = JSON.stringify(payload);
     const normalized = normalizeAiComposerPayload(payload);
-    const accepted = onSend(normalized.payload, images);
+    const accepted = await onSend(normalized.payload, images);
     if (accepted === false) return;
+    if (visibleNotebook.current !== notebookId || inputRef.current !== input ||
+      JSON.stringify(input?.getPayload()) !== submittedPayload) return;
 
     input?.clear();
     cancelPendingDraftPersist();

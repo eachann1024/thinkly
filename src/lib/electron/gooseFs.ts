@@ -118,6 +118,18 @@ export const electronGooseFs = {
     return true;
   },
   writeFileAsync: writeFileImpl,
+  createFileAsync: async (path: string, content: string) => {
+    const api = getGooseDesktop();
+    if (!api) return false;
+    try {
+      await api.fsWriteText(path, content, true);
+      rememberExists(path, true);
+      return true;
+    } catch (error) {
+      rememberDiskWriteFailure(toDiskWriteError(error, path));
+      return false;
+    }
+  },
 
   exists: (path: string) => existsCache.get(path) ?? false,
   existsAsync: async (path: string) => {

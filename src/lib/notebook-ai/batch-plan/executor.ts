@@ -8,30 +8,45 @@ import { comparisonPath, pathExists } from "./batchPaths";
 import { compensate } from "./batchCompensate";
 
 const inFlight = new Map<string, Promise<BatchPlanExecuteResult>>();
+const undoInFlight = new Map<string, Promise<BatchPlanExecuteResult>>();
 
 export function executePreparedBatchPlan(
   toolCallId: string,
   runId: string,
 ): Promise<BatchPlanExecuteResult> {
-  const key = `${toolCallId}:${runId}`;
-  const current = inFlight.get(key);
-  if (current) return current;
   const journal = readBatchPlanJournal(toolCallId, runId);
   if (!journal) return Promise.reject(new Error("未找到批量计划"));
+  const key = `${journal.toolCallId}:${journal.runId}`;
+  if (undoInFlight.has(key)) return Promise.resolve({ ok: false, journal,
+    error: "计划正在撤回，请等待完成", results: journal.results });
+  const current = inFlight.get(key);
+  if (current) return current;
   const promise = run(journal).finally(() => inFlight.delete(key));
   inFlight.set(key, promise);
   return promise;
 }
 
-export async function undoBatchPlan(
+export function undoBatchPlan(
   toolCallId: string,
   runId: string,
 ): Promise<BatchPlanExecuteResult> {
   const journal = readBatchPlanJournal(toolCallId, runId);
-  if (!journal) throw new Error("未找到批量计划");
+  if (!journal) return Promise.reject(new Error("未找到批量计划"));
+  const key = `${journal.toolCallId}:${journal.runId}`;
+  if (inFlight.has(key)) return Promise.resolve({ ok: false, journal,
+    error: "计划仍在执行，请先停止并等待当前操作结束", results: journal.results });
+  const current = undoInFlight.get(key);
+  if (current) return current;
+  const promise = Promise.resolve().then(() => undoPreparedBatchPlan(journal))
+    .finally(() => undoInFlight.delete(key));
+  undoInFlight.set(key, promise);
+  return promise;
+}
+
+async function undoPreparedBatchPlan(journal: NonNullable<ReturnType<typeof readBatchPlanJournal>>): Promise<BatchPlanExecuteResult> {
   if (journal.status === "undone")
     return { ok: true, journal, results: journal.results };
-  if (journal.status !== "completed")
+  if (journal.status !== "completed" && !(journal.version === 2 && journal.status === "failed" && journal.results.some((item) => item.ok)))
     return {
       ok: false,
       journal,
@@ -40,7 +55,10 @@ export async function undoBatchPlan(
     };
   for (const [pageId, after] of Object.entries(journal.after)) {
     const page = usePages.getState().pages[pageId];
-    if (!page || !sameRevision(revisionOf(page), after)) {
+    const ownerResult = journal.results.find((item) => item.ok && item.pageIds.includes(pageId));
+    const expectedNotebookId = journal.before[pageId]?.page.workspaceId ??
+      (ownerResult ? journal.operationTargets?.[ownerResult.operationId]?.notebookId : undefined) ?? journal.notebookId;
+    if (!page || page.workspaceId !== expectedNotebookId || !sameRevision(revisionOf(page), after)) {
       const conflicted = writeBatchPlanJournal({
         ...journal,
         status: "undo-conflicted",

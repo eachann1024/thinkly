@@ -8,6 +8,12 @@ export type AiReferenceRole = "context" | "target";
 export interface AiFileReferenceAttrs {
   pageId: string;
   workspaceId: string;
+  refId?: string;
+  kind?: "notebook" | "folder" | "page";
+  parentId?: string;
+  /** 默认递归；当前层来源仅允许读取直接子页。 */
+  recursive?: boolean;
+  excludedPageIds?: string[];
   titleSnapshot: string;
   sourceType: AiFileReferenceSourceType;
   localFilePath?: string;
@@ -83,6 +89,7 @@ export interface AiReferenceOccurrence {
   occurrenceId: string;
   tokenIndex: number;
   pageId: string;
+  workspaceId: string;
   role: AiReferenceRole;
   roleSource: "explicit" | "inferred" | "default";
 }
@@ -105,5 +112,6 @@ export interface ResolvedAiReferenceContext {
   contentText: string;
   structureSummary: string;
   readStatus: "ready" | "error";
+  coverage?: { enumerated: number; loaded: number; omitted: number; recursive: boolean };
   errorMessage?: string;
 }

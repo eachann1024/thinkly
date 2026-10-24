@@ -1,8 +1,8 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchPlanJournal } from "./types";
 import { usePages } from "@/stores/usePages";
 import { applySearchReplacePreservingBlocks } from "./surgicalApply";
 import { writePageContentSafely } from "@/lib/notebook-ai/pageWriteGuard";
-import { revisionOf } from "./batchShared";
 
 export async function writeSearchReplaceFromLatest(
   operation: Extract<
@@ -21,7 +21,7 @@ export async function writeSearchReplaceFromLatest(
     // 同页后续项必须基于当前正文和当前修订，不能再用批准瞬间的旧快照。
     const baseContent = alreadyWrote ? livePage.content : before.page.content;
     const expectedRevision = alreadyWrote
-      ? revisionOf(livePage)
+      ? working.after[operation.pageId]!
       : before.revision;
     const applied = applySearchReplacePreservingBlocks(
       baseContent,
@@ -34,20 +34,13 @@ export async function writeSearchReplaceFromLatest(
       operation.pageId,
       applied.content,
       {
-        expectedNotebookId: working.notebookId,
+        expectedNotebookId: operationNotebookId(working, operation),
         expectedRevision,
       },
     );
     return saved;
   };
 
-  let saved = await attempt();
-  if (
-    !saved.ok &&
-    saved.code === "page-changed" &&
-    working.after[operation.pageId]
-  ) {
-    saved = await attempt();
-  }
+  const saved = await attempt();
   if (!saved.ok) throw new Error(saved.error);
 }

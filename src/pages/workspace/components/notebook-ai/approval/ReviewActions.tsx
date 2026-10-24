@@ -1,8 +1,9 @@
 import { useLocale } from "@/i18n";
 import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
-import { useRef, useReducer } from "react";
+import { useRef, useReducer, useState } from "react";
 import { Loader2, RotateCcw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { isRunWriteScopeRevoked, revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { formatNotebookAiError } from "@/lib/notebook-ai/errors";
 import { ApprovalCard } from "../beautiful-ui/ApprovalCard";
@@ -46,11 +47,14 @@ export function ReviewActions({
   const actionError = action.status === "response-failed" ? action.error :
     action.status === "undoing" || action.status === "undo-finished" ? action.responseError ?? "" : "";
   const busyRef = useRef(false);
+  const [cancelRequested, setCancelRequested] = useState(false);
   const review = planReviewState(part, journal);
   const canApprove =
     review.phase === "approval" &&
     Boolean(journal && input && part.toolCallId && selectedIds.length) &&
     !submitting;
+  const canRetry = review.phase === "failed" && journal?.version === 2 &&
+    Boolean(journal.writeScope && !isRunWriteScopeRevoked(journal.writeScope)) && !submitting;
   const hasError =
     ["failed", "invalid", "conflict"].includes(review.phase) ||
     Boolean(actionError);
@@ -90,12 +94,12 @@ export function ReviewActions({
                     ? { label: review.label, icon: "done", tone: "success" }
                     : { label: review.label, icon: "running", tone: "accent" };
   useEmbeddedWorkCardStatus(status, embedded);
-  const respond = async (approved: boolean) => {
+  const respond = async (approved: boolean, retry = false) => {
     if (
       !part.toolCallId ||
       !input?.runId ||
       busyRef.current ||
-      (approved && !canApprove)
+      (approved && !(retry ? canRetry : canApprove))
     )
       return;
     busyRef.current = true;
@@ -107,7 +111,7 @@ export function ReviewActions({
         toolCallId: part.toolCallId,
         runId: input.runId,
         approved,
-        selectedOperationIds: approved ? selectedIds : [],
+        selectedOperationIds: approved ? retry ? journal!.selectedOperationIds : selectedIds : [],
       });
       dispatch({ type: "responded" });
     } catch (error) {
@@ -164,9 +168,10 @@ export function ReviewActions({
             : review.detail;
   const reason = localizeNotebookAiDiagnostic(actionError || undoResult?.error || review.error);
   const canUndo =
-    (review.phase === "applied" || undoConflict) &&
+    (review.phase === "applied" || undoConflict ||
+      (journal?.version === 2 && journal.results.some((item) => item.ok))) &&
     output.canUndo !== false &&
-    !undone;
+    !undone && !submitting && review.phase !== "executing";
   const footer = (
     <div className="notebook-ai-review-footer">
       <p aria-live="polite">{detail}</p>
@@ -220,6 +225,21 @@ export function ReviewActions({
             </Button>
           ) : null}
         </>
+      ) : null}
+      {(review.phase === "executing" || approving) && journal?.writeScope ? (
+        <Button type="button" variant="secondary" className={secondaryClass}
+          disabled={cancelRequested} onClick={() => {
+            revokeRunWriteScope(journal.writeScope!.runId);
+            setCancelRequested(true);
+          }}>
+          {cancelRequested ? t("stoppingAfterCurrentItem") : t("stopRemainingItems")}
+        </Button>
+      ) : null}
+      {canRetry ? (
+        <Button type="button" variant="secondary" className={secondaryClass}
+          disabled={undoing} onClick={() => void respond(true, true)}>
+          {t("retryFailedItems")}
+        </Button>
       ) : null}
       {canUndo ? (
         <Button

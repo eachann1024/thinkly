@@ -76,7 +76,7 @@ export function ReviewProposal({
   const results =
     journal?.results ??
     (Array.isArray(output.results)
-      ? (output.results as { operationId: string; ok: boolean }[])
+      ? (output.results as { operationId: string; ok: boolean; skipped?: boolean }[])
       : []);
   const canSelect = review.phase === "approval" && !locked;
   if (!input) return null;
@@ -90,9 +90,10 @@ export function ReviewProposal({
     if (!included && results.length) return t("skipped");
     const result = results.find((item) => item.operationId === id);
     if (!result) return review.phase === "executing" ? t("pending") : t("notApplied");
+    if (result.skipped) return t("skipped");
     if (!result.ok) return t("failed");
     if (review.phase === "undone") return t("undone");
-    if (review.phase === "failed" || review.phase === "conflict")
+    if (journal?.version !== 2 && (review.phase === "failed" || review.phase === "conflict"))
       return review.rollback === "complete" ? t("rolledBack") : t("needsReview");
     return t("applied");
   };

@@ -11,7 +11,7 @@ import {
 } from "./batchPaths";
 import { expandDeletePageIds } from "./batchValidation";
 
-export async function makeLocalPlanPaths(
+async function makeNotebookPlanPaths(
   notebookId: string,
   input: BatchPlanInput,
 ): Promise<{
@@ -121,4 +121,20 @@ export async function makeLocalPlanPaths(
     localTrashPathsByPageId,
     deleteBatchIdsByOperationId,
   };
+}
+
+export async function makeLocalPlanPaths(notebookId: string, input: BatchPlanInput) {
+  const grouped = new Map<string, BatchPlanInput["operations"]>();
+  for (const op of input.operations) {
+    const id = op.target?.notebookId ?? notebookId;
+    grouped.set(id, [...(grouped.get(id) ?? []), op]);
+  }
+  const result = { plannedLocalPaths: {}, localTrashPathsByPageId: {}, deleteBatchIdsByOperationId: {} };
+  for (const [id, operations] of grouped) {
+    const paths = await makeNotebookPlanPaths(id, { ...input, operations });
+    Object.assign(result.plannedLocalPaths, paths.plannedLocalPaths);
+    Object.assign(result.localTrashPathsByPageId, paths.localTrashPathsByPageId);
+    Object.assign(result.deleteBatchIdsByOperationId, paths.deleteBatchIdsByOperationId);
+  }
+  return result;
 }

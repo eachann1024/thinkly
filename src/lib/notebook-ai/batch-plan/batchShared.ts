@@ -69,7 +69,9 @@ export function appendRecoveredSuccess(
     ...journal,
     results: resultForOperation(journal, result.operationId)
       ? journal.results
-      : [...journal.results, result],
+      : [...journal.results, { ...result,
+          notebookId: journal.operationTargets?.[result.operationId]?.notebookId ?? journal.notebookId,
+          target: journal.operationTargets?.[result.operationId] }],
     after: { ...journal.after, ...after },
     createdPageIds: createdPageId
       ? { ...journal.createdPageIds, [result.operationId]: createdPageId }

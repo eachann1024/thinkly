@@ -1,3 +1,4 @@
+import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchOperationResult } from "./types";
 import { usePages } from "@/stores/usePages";
 import {
@@ -21,8 +22,8 @@ export async function executeCreateOperation(
     let pageId: string;
     if (plannedLocalPath) {
       const created = await usePages.getState().createLocalPageRecord({
-        workspaceId: working.notebookId,
-        parentId: operation.parentId,
+        workspaceId: operationNotebookId(working, operation),
+        parentId: operation.parentId ?? undefined,
         title: operation.title,
         content,
         filePath: plannedLocalPath,
@@ -45,8 +46,8 @@ export async function executeCreateOperation(
       }
       const created = usePages.getState().createPageRecord({
         id: pageId,
-        workspaceId: working.notebookId,
-        parentId: operation.parentId,
+        workspaceId: operationNotebookId(working, operation),
+        parentId: operation.parentId ?? undefined,
         content,
       });
       if (created !== pageId) throw new Error("创建页面返回了非预分配 ID");

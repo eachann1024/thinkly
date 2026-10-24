@@ -148,7 +148,7 @@ export interface PagesState {
   saveLocalPageContent: (
     pageId: string,
     content: JSONContent,
-    options?: { force?: boolean },
+    options?: { force?: boolean; createOnly?: boolean },
   ) => Promise<boolean>;
   flushPendingLocalSaves: () => Promise<void>;
   flushPendingLocalSaveByPageId: (pageId: string) => Promise<void>;

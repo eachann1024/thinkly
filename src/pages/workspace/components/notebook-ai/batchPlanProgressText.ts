@@ -1,5 +1,6 @@
 import { formatNotebookAiError } from "@/lib/notebook-ai/errors";
 import { readObject, truncate } from "./toolProgressValues";
+import { batchPlanDestinations } from "./batchPlanDestinations";
 import type { ToolProgressPart, ProgressStep } from "./toolProgressModel";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/batchPlanProgressText.ts#messages:1">`
@@ -54,6 +55,8 @@ export function getBatchPlanProgressText(
     : Array.isArray(readObject(input?.plan)?.changes)
       ? (readObject(input?.plan)?.changes as unknown[]).length
       : 0;
+  const destinations = batchPlanDestinations(input, output);
+  const atDestinations = (text: string) => destinations ? `${text} · ${destinations}` : text;
   const executionFailed =
     part.state === "output-error" ||
     Boolean(part.errorText) ||
@@ -61,9 +64,9 @@ export function getBatchPlanProgressText(
   if (executionFailed) {
     return {
       get label() { return t("generateBatchPlan"); },
-      detail: formatNotebookAiError(part.errorText || output?.error, {
+      detail: atDestinations(formatNotebookAiError(part.errorText || output?.error, {
         phase: part.approval?.approved === true ? "execute" : "prepare",
-      }),
+      })),
     };
   }
   if (
@@ -89,7 +92,7 @@ export function getBatchPlanProgressText(
         : operationCount;
     return {
       get label() { return t("applyBatchPlan"); },
-      detail: appliedCount ? t("detailChangesCompleted", { value1: appliedCount }) : t("thisBatchOfChangesIsComplete"),
+      detail: atDestinations(appliedCount ? t("detailChangesCompleted", { value1: appliedCount }) : t("thisBatchOfChangesIsComplete")),
     };
   }
   if (
@@ -100,9 +103,9 @@ export function getBatchPlanProgressText(
   ) {
     return {
       get label() { return t("generateBatchPlan"); },
-      detail: operationCount
+      detail: atDestinations(operationCount
         ? t("detailOperationsPreparedAwaitingApproval", { value1: operationCount })
-        : t("planGeneratedAwaitingApproval"),
+        : t("planGeneratedAwaitingApproval")),
     };
   }
   return {

@@ -19,6 +19,7 @@ declare module "../types" {
     "src/components/editor/ai/composer/SelectionQuotePreview.tsx#messages:1": { "openSourceNote": {  }; "selectionReference": {  }; "sourceNoteUnavailable": {  } };
     "src/components/editor/ai/composer/SkillSuggestionsList.tsx#messages:1": { "noMatchingCommandsOrSkills": {  } };
     "src/components/editor/ai/composer/composerImageChip.ts#messages:1": { "removeNamedFile": { "name": string | number }; "removeNamedImage": { "name": string | number } };
+    "src/components/editor/ai/composer/composerMentionDom.ts#messages:1": { "source": {  }; "target": {  } };
     "src/components/editor/ai/composer/referenceSuggestions.ts#messages:1": { "appPage": {  }; "appPageNotebook": { "notebookName": string | number }; "unknownNotebook": {  } };
     "src/components/editor/ai/composer/selectionQuoteData.ts#messages:1": { "selectionReferenceAdded": {  }; "thisSelectionIsAlreadyInTheInput": {  } };
     "src/components/editor/ai/composer/selectionQuoteDom.ts#messages:1": { "previewSourceSelection": { "title": string | number }; "removeSelectionReference": {  }; "selectionFromSource": { "title": string | number } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/components/ui/image-export/LivePreviewPane.tsx#localMessages:1": { "exportPreview": {  } };
     "src/components/ui/image-export/ThemePreviewCard.tsx#localMessages:1": { "sampleBody": {  }; "sampleFile": {  }; "sampleTitle": {  } };
     "src/components/ui/image-export/theme-model.ts#localMessages:1": { "sampleEdition": {  }; "sampleFile": {  }; "sampleHeading": {  } };
-    "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
   }
 }

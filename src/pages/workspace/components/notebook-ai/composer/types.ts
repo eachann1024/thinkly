@@ -33,7 +33,7 @@ export interface ComposerProps {
   onSend: (
     payload: AiComposerPayload,
     images: NotebookAiImageAttachment[],
-  ) => boolean | void;
+  ) => boolean | void | Promise<boolean | void>;
   onSlashCommand?: (id: ComposerSlashBuiltinId) => void;
   isStreaming: boolean;
   disabled?: boolean;

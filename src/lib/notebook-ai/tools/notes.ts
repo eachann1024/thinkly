@@ -8,25 +8,24 @@ import { blocksToMarkdown } from "@/lib/export/blocknoteSerializer";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type { NotebookAiAgentContext } from "../types";
 
-/** 有 notebookIds 时按允许列表放行（搜索面板「所有笔记本」），否则只放行绑定笔记本。 */
+import { canReadNotebookResource, readableNotebookIds, ensureNotebookReferenceIndex } from "../readResourceScope";
+import { getLocationSnapshot } from "@/components/editor/ai/composer/referenceMetadata";
+export { listFolder } from "./folders";
+
 function canAccessNotebook(context: NotebookAiAgentContext, notebookId: string) {
-  return context.notebookIds ? context.notebookIds.includes(notebookId) : notebookId === context.notebookId;
+  return readableNotebookIds(context).includes(notebookId);
 }
 
 // ----------------------------------------------------------------
 // listNotebooks
 // ----------------------------------------------------------------
 export const listNotebooks = tool({
-  description: "返回当前绑定笔记本。AI 不可访问其他笔记本。",
+  description: "返回本轮允许读取的笔记本及稳定身份。",
   inputSchema: z.object({}),
   execute: async (_input, { experimental_context }) => {
-    const { notebookId: currentNotebookId } =
-      experimental_context as NotebookAiAgentContext;
+    const context = experimental_context as NotebookAiAgentContext;
     const notebooks = useNotebooks.getState().notebooks;
-    const notebook = notebooks[currentNotebookId];
-    return notebook
-      ? [{ id: notebook.id, name: notebook.name, isCurrent: true }]
-      : [];
+    return readableNotebookIds(context).map((id) => notebooks[id]).filter(Boolean).map((notebook) => ({ id: notebook.id, name: notebook.name, isCurrent: notebook.id === context.notebookId }));
   },
 });
 
@@ -45,18 +44,21 @@ export const listPages = tool({
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
     // 多笔记本范围下省略 notebookId 表示列出全部允许的笔记本
-    const targetId = input.notebookId ?? (context.notebookIds ? null : context.notebookId);
+    const targetId = input.notebookId ?? (context.resourceReferences || context.notebookIds ? null : context.notebookId);
     if (targetId !== null && !canAccessNotebook(context, targetId)) {
       return { error: "AI 只能访问当前绑定笔记本" };
     }
+    try { for (const id of targetId === null ? readableNotebookIds(context) : [targetId]) await ensureNotebookReferenceIndex(id); }
+    catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
     const pages = usePages.getState().pages;
     return Object.values(pages)
-      .filter((p) => !p.trashedAt && (targetId === null ? canAccessNotebook(context, p.workspaceId) : p.workspaceId === targetId))
+      .filter((p) => canReadNotebookResource(context, p) && (targetId === null ? canAccessNotebook(context, p.workspaceId) : p.workspaceId === targetId))
       .sort((a, b) => b.updatedAt - a.updatedAt)
       .map((p) => ({
         pageId: p.id,
         title: getPageTitle(p),
-        ...(context.notebookIds ? { notebookId: p.workspaceId } : {}),
+        notebookId: p.workspaceId,
+        relativePath: getLocationSnapshot(p, useNotebooks.getState().notebooks, pages),
         parentId: p.parentId,
         isFolder: !!p.isFolder,
         updatedAt: p.updatedAt,
@@ -78,6 +80,8 @@ export const searchNotes = tool({
     const query = input.query.trim();
     if (!query) return [];
 
+    try { for (const id of readableNotebookIds(context)) await ensureNotebookReferenceIndex(id); }
+    catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
     const pages = usePages.getState().pages;
     const notebooks = useNotebooks.getState().notebooks;
     const queryLower = query.toLowerCase();
@@ -132,7 +136,7 @@ export const searchNotes = tool({
 
     for (const page of Object.values(pages)) {
       if (page.trashedAt) continue;
-      if (!canAccessNotebook(context, page.workspaceId)) continue;
+      if (!canReadNotebookResource(context, page)) continue;
 
       const title = getPageTitle(page);
       const bodyText = getContentDerivationsForPage(page).text;
@@ -181,22 +185,23 @@ export const readPage = tool({
   description:
     "读取页面完整内容，返回标题和 Markdown 格式正文。当前页任务可省略 pageId，默认读取当前打开页面。",
   inputSchema: z.object({
-    pageId: z.string().optional().describe("页面 id；省略则读取当前打开页面"),
+    pageId: z.string().optional().describe("页面 id；省略则读取本轮绑定页面"),
+    notebookId: z.string().optional().describe("跨笔记本读取时提供真实 notebookId"),
   }),
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
-    const { currentPageId } = context;
-    const pageId =
-      input.pageId ?? currentPageId ?? usePages.getState().activePageId ?? "";
+    const pageId = input.pageId ?? context.currentPageId ?? "";
+    try {
+      const ids = input.notebookId ? [input.notebookId] : readableNotebookIds(context);
+      if (ids.some((id) => !canAccessNotebook(context, id))) throw new Error("笔记本不在本轮读取范围内");
+      for (const id of ids) await ensureNotebookReferenceIndex(id);
+    } catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
     const page = usePages.getState().pages[pageId];
-    if (!page) {
-      return { error: pageId ? `页面 ${pageId} 不存在` : "当前没有打开页面" };
-    }
-    if (!canAccessNotebook(context, page.workspaceId)) {
-      return { error: "AI 只能读取当前绑定笔记本中的页面" };
-    }
+    if (!page || (input.notebookId && input.notebookId !== page.workspaceId)) return { error: "页面不存在或归属变化，请重新选择" };
+    if (page.isFolder || !canReadNotebookResource(context, page)) return { error: "页面不在本轮读取范围内；目录请先 listFolder" };
+    if (page.localReadState === "error") return { error: page.localReadError || "页面读取失败" };
     const title = getPageTitle(page);
     const markdown = await blocksToMarkdown(page.content as BlockNoteContent);
-    return { pageId, title, markdown };
+    return { pageId, notebookId: page.workspaceId, parentId: page.parentId ?? null, relativePath: getLocationSnapshot(page, useNotebooks.getState().notebooks, usePages.getState().pages), title, markdown, readStatus: "ready" };
   },
 });

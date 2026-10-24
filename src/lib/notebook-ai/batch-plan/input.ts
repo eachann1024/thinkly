@@ -61,19 +61,32 @@ export function normalizeBatchPlanOperations(
       }
     }
     usedOperationIds.add(operationId);
+    const binding = {
+      ...(isRecord(operation.target) ? { target: {
+        notebookId: typeof operation.target.notebookId === "string" ? operation.target.notebookId : "",
+        ...(operation.target.parentId === null || typeof operation.target.parentId === "string"
+          ? { parentId: operation.target.parentId as string | null } : {}),
+        ...(typeof operation.target.pageId === "string" ? { pageId: operation.target.pageId } : {}),
+      } } : {}),
+      ...(Array.isArray(operation.dependsOn) ? { dependsOn: operation.dependsOn.filter(
+        (id): id is string => typeof id === "string") } : {}),
+      ...(Array.isArray(operation.sourceRefIds) ? { sourceRefIds: operation.sourceRefIds.filter(
+        (id): id is string => typeof id === "string") } : {}),
+    };
 
     if (type === "create") {
       const title = requiredText(operation.title);
       const markdown = requiredText(operation.markdown);
-      const parentId = optionalText(operation.parentId);
+      const parentId = operation.parentId === null ? null : optionalText(operation.parentId);
       if (!title || !markdown) return [];
       return [
         {
           type,
           operationId,
+          ...binding,
           title,
           markdown,
-          ...(parentId ? { parentId } : {}),
+          ...(parentId !== undefined ? { parentId } : {}),
         },
       ];
     }
@@ -87,6 +100,7 @@ export function normalizeBatchPlanOperations(
         {
           type,
           operationId,
+          ...binding,
           pageId,
           markdown,
           ...(title ? { title } : {}),
@@ -130,6 +144,7 @@ export function normalizeBatchPlanOperations(
         {
           type,
           operationId,
+          ...binding,
           pageId,
           oldString,
           newString,
@@ -146,7 +161,7 @@ export function normalizeBatchPlanOperations(
       return normalized ? [normalized] : [];
     });
     const uniquePageIds = [...new Set(pageIds)];
-    return [{ type, operationId, pageIds: uniquePageIds }];
+    return [{ type, operationId, ...binding, pageIds: uniquePageIds }];
   });
 }
 

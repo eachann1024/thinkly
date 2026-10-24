@@ -57,7 +57,7 @@ export const saveLocalPageContentUnlocked = async (
   gooseFs: NonNullable<Window["gooseFs"]>,
   pageId: string,
   content: JSONContent,
-  options?: { force?: boolean },
+  options?: { force?: boolean; createOnly?: boolean },
 ): Promise<boolean> => {
   const page = get().pages[pageId];
   if (!page) return false;
@@ -187,7 +187,6 @@ export const saveLocalPageContentUnlocked = async (
   if (!options?.force) {
     if (await hasExternalDiskChange(filePath, pageId, "pre-save")) return false;
   }
-  // ────────────────────────────────────────────────────────────────────────────
 
   if (pendingImageWrites.length > 0) {
     if (page.editorDraft) await validateEditorDraftTarget(get, pageId, filePath);
@@ -227,7 +226,10 @@ export const saveLocalPageContentUnlocked = async (
   markSelfWrite(filePath);
   let result: boolean;
   try {
-    if (window.gooseFs?.writeFileAsync) {
+    if (options?.createOnly) {
+      if (!window.gooseFs?.createFileAsync) throw new Error("当前宿主不支持安全新建文件");
+      result = await window.gooseFs.createFileAsync(filePath, diskContent);
+    } else if (window.gooseFs?.writeFileAsync) {
       result = await window.gooseFs.writeFileAsync(filePath, diskContent);
     } else {
       result = window.gooseFs?.writeFile(filePath, diskContent) ?? false;

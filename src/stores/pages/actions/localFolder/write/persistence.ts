@@ -38,7 +38,7 @@ export const saveLocalPageContentAction = async (
   get: StoreGet,
   pageId: string,
   content: JSONContent,
-  options?: { force?: boolean },
+  options?: { force?: boolean; createOnly?: boolean },
 ): Promise<boolean> => {
   if (typeof window === "undefined" || !window.gooseFs) return false;
   const gooseFs = window.gooseFs;
