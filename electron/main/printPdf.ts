@@ -27,7 +27,6 @@ async function waitPrintDocumentReady(
       );
       if (ready) return;
     } catch {
-      // 导航中
     }
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
@@ -37,7 +36,7 @@ export async function printHtmlToPdf(html: string): Promise<string | null> {
   if (typeof html !== "string" || !html.trim()) return null;
 
   return enqueuePrint(async () => {
-    const tempDir = path.join(app.getPath("temp"), "goose-note-print");
+    const tempDir = path.join(app.getPath("temp"), "thinkly-print");
     const htmlPath = path.join(tempDir, `print-${Date.now()}.html`);
     await mkdir(tempDir, { recursive: true });
     await writeFile(htmlPath, html, "utf8");
@@ -54,7 +53,6 @@ export async function printHtmlToPdf(html: string): Promise<string | null> {
           try {
             win?.close();
           } catch {
-            // ignore
           }
           win = null;
           if (error) reject(error);
@@ -107,7 +105,6 @@ export async function printHtmlToPdf(html: string): Promise<string | null> {
       try {
         await unlink(htmlPath);
       } catch {
-        // ignore
       }
     }
   });
