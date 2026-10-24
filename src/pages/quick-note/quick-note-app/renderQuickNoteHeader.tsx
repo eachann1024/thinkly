@@ -3,8 +3,6 @@ import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1">`
 zh-Hans:
   renameSlot: "重命名速记 {{slot}}"
-  renameLabel: "重命名速记"
-  renameNamedLabel: "{{name}} · 重命名速记"
   saveToNotes: "保存到笔记"
   emptyNote: "速记内容为空，无法保存"
   fontSize: "字号"
@@ -14,8 +12,6 @@ zh-Hans:
   helpTitle: "速记"
 en:
   renameSlot: "Rename Quick Note {{slot}}"
-  renameLabel: "Rename Quick Note"
-  renameNamedLabel: "{{name}} · Rename Quick Note"
   saveToNotes: "Save to notes"
   emptyNote: "This Quick Note is empty"
   fontSize: "Font size"
@@ -25,8 +21,6 @@ en:
   helpTitle: "Quick Note"
 ja:
   renameSlot: "クイックノート {{slot}} の名前を変更"
-  renameLabel: "クイックノートの名前を変更"
-  renameNamedLabel: "{{name}} · クイックノートの名前を変更"
   saveToNotes: "ノートに保存"
   emptyNote: "クイックノートが空のため、保存できません"
   fontSize: "文字サイズ"
@@ -69,8 +63,7 @@ export function renderQuickNoteHeader(
     zoom,
     setEditorZoom,
     editorFontSize,
-    displaySlot,
-    displaySlotName,
+    windowTitle,
     occupiedSlots,
     startRename,
     finishRename,
@@ -121,21 +114,16 @@ export function renderQuickNoteHeader(
         style={{ WebkitAppRegion: "drag" } as CSSProperties}
       >
         <div className="quicknote-titlebar-left">
-          <Button contentStyle="preserve" variant="ghost"
-            type="button"
-            aria-label={uiText("renameLabel")}
-            title={uiText("renameNamedLabel", {name: displaySlotName})}
-            className="quicknote-slot-name-display quicknote-titlebar-btn"
-            style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-            onClick={() => startRename(activeSlot)}
+          <span
+            className="quicknote-slot-name-display"
+            title={windowTitle}
+            aria-label={windowTitle}
+            data-notebook-window-title={windowTitle}
           >
-            <span
-              key={`${displaySlot}-${displaySlotName}`}
-              className="quicknote-slot-name-text"
-            >
-              {displaySlotName}
+            <span key={windowTitle} className="quicknote-slot-name-text">
+              {windowTitle}
             </span>
-          </Button>
+          </span>
         </div>
 
         {/* 绝对居中，避免左右内容宽度差导致视觉偏移 */}

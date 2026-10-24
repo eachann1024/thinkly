@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
     "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
     "src/pages/workspace/components/ai-cards/FlashcardsCard.tsx#messages:1": { "flip": {  }; "next": {  }; "previous": {  }; "shuffle": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1": { "textFont": {  } };
     "src/pages/workspace/components/shared/FontSelector.tsx#localMessages:1": { "default": {  }; "monospace": {  }; "serif": {  } };
     "src/pages/workspace/components/shared/LocalFontSelect.tsx#localMessages:1": { "checkingInstalledFonts": {  }; "couldnTReadInstalledFontsReopenThe": {  }; "fontMissing": { "name": string | number }; "fontNotInstalledUsingAFallback": {  }; "loadingInstalledFonts": {  }; "noInstalledFontsFound": {  }; "selected": { "label": string | number; "name": string | number }; "selectedFallback": { "label": string | number; "name": string | number }; "systemFont": {  } };
-    "src/pages/workspace/components/sidebar/AppearanceEditorPreview.tsx#localMessages:1": { "aFewPlansForTheWeekend_b122": {  }; "afterDinnerIWateredTheMint_0f53": {  }; "buyCoffeeBeans_bc59": {  }; "callMomAndAskHowShe_eca4": {  }; "currentFolder_9db0": {  }; "iWouldAlsoLikeAnUnhurried_1117": {  }; "ifTheWeatherIsNiceI_cd40": {  }; "liveEditorPreview_d9e9": {  }; "local_8e7e": {  }; "projectPlan_271c": {  }; "reminders_1062": {  }; "serifPreviewALittleRoomTo_3bc8": {  }; "sortThePhotosFromMyWalk_a34c": {  }; "theCroissantWarmedItsPaperBag_bea6": {  }; "theRainHadJustStoppedAs_7743": {  }; "theTreesCastLongShadowsUnder_e9d6": {  }; "thereIsNoNeedToFill_a850": {  }; "visitTheFlowerMarket_1874": {  }; "wednesdayAfterTheRain_a77a": {  }; "wednesdayAfterTheRain_db18": {  } };
   }
 }

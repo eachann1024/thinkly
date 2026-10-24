@@ -124,6 +124,7 @@ declare global {
     printHtmlToPdf: (html: string) => Promise<string | null>
     netFetch: (url: string, init?: { method?: string; headers?: Record<string,string>; body?: string }) => Promise<{ status: number; headers: Record<string,string>; body: string }>
     setTitle: (t: string) => Promise<void>
+    otherWindowTitles: () => Promise<string[]>
     getAlwaysOnTop: () => Promise<boolean>
     setAlwaysOnTop: (on: boolean) => Promise<boolean>
     syncTitleBarHeight: (height: number) => Promise<void>

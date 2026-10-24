@@ -135,6 +135,7 @@ const gooseDesktop = {
       body: string;
     }>,
   setTitle: (t: string) => invoke("desktop:setTitle", t) as Promise<void>,
+  otherWindowTitles: () => invoke("desktop:otherWindowTitles") as Promise<string[]>,
   getAlwaysOnTop: () => invoke("desktop:getAlwaysOnTop") as Promise<boolean>,
   setAlwaysOnTop: (on: boolean) =>
     invoke("desktop:setAlwaysOnTop", on) as Promise<boolean>,

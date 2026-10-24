@@ -10,6 +10,7 @@ import {
   POSITION_SETTLE_MS,
 } from "./shared";
 import type { useQuickNoteShortcuts } from "./useQuickNoteShortcuts";
+import { useQuickNoteWindowTitle } from "./useQuickNoteWindowTitle";
 
 export function useQuickNoteWindowPlacement(
   input: ReturnType<typeof useQuickNoteShortcuts>,
@@ -114,5 +115,6 @@ export function useQuickNoteWindowPlacement(
       window.removeEventListener("resize", onResize);
     };
   }, [setWindowSize]);
-  return { ...input };
+  const windowTitle = useQuickNoteWindowTitle();
+  return { ...input, windowTitle };
 }

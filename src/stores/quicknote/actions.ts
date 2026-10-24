@@ -23,7 +23,6 @@ import { recordQuickNoteRecovery } from "./recovery";
 import {
   getActiveDraftContent,
   isQuickNoteDraftEmpty,
-  extractQuickNoteDraftTitle,
 } from "./content";
 import { useNotebooks, DEFAULT_NOTEBOOK } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
@@ -160,7 +159,7 @@ export function createQuickNoteState(
       const notebook = notebooksState.notebooks[nbId];
       if (!notebook) return null;
 
-      const title = extractQuickNoteDraftTitle(content);
+      const title = notebook.name.trim();
       let id: string | null;
       if (notebook.source === "local-folder") {
         id =
