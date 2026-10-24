@@ -1,8 +1,10 @@
+import { isPointerDragActive } from "@/lib/interaction/pointerDrag";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePanelWidth } from "../usePanelWidth";
 import { isSidebarResizeDrag } from "../../sidebar/hooks/useSidebarResize";
 import {
   readSidebarAiLiveWidth,
+  SIDEBAR_EDITOR_RESERVE,
   useSidebarAiSqueeze,
 } from "../../sidebar/sidebar-shell/sidebarAiSqueeze";
 import type { ComposerHandle } from "../Composer";
@@ -18,11 +20,10 @@ export function usePanelSurface(
   isElectronChrome: boolean,
 ) {
   const panelRootRef = useRef<HTMLDivElement | null>(null);
+  const availableWidthRef = useRef(Number.POSITIVE_INFINITY);
   const previewWidth = useCallback((nextWidth: number) => {
     const root = panelRootRef.current;
-    const parentWidth = root?.parentElement?.clientWidth ?? nextWidth;
-    const availableRoom = parentWidth > 200 ? parentWidth - 200 : Math.max(0, parentWidth);
-    const next = Math.min(nextWidth, availableRoom);
+    const next = Math.min(nextWidth, availableWidthRef.current);
     if (root) {
       root.style.width = `${next}px`;
       root.closest<HTMLElement>(".workspace-shell")?.style.setProperty("--workspace-ai-width", `${next}px`);
@@ -72,14 +73,17 @@ export function usePanelSurface(
     const parent = root?.parentElement;
     if (!parent) return;
 
-    const EDITOR_MIN = 200;
     const recompute = () => {
-      if (isSidebarResizeDrag()) return;
       const parentW = parent.clientWidth;
-      const room = parentW - EDITOR_MIN;
-      // room 足够时：不超过 stored，且留给编辑区至少 EDITOR_MIN
+      const stage = root.closest(".workspace-stage");
+      const sidebarVisible = stage && !stage.hasAttribute("data-sidebar-collapsed") &&
+        !stage.hasAttribute("data-sidebar-overlay") && !stage.closest("[data-settings]");
+      const room = parentW - (sidebarVisible ? SIDEBAR_EDITOR_RESERVE : 200);
+      // 与侧栏让位共用正文预留，拖动和松手使用同一个宽度上限。
       // 极窄时使用父级可用宽度，避免右侧裁切。
       const availableRoom = room > 0 ? room : Math.max(0, parentW);
+      availableWidthRef.current = availableRoom;
+      if (isSidebarResizeDrag() || isPointerDragActive("ai-panel")) return;
       setMaxWidth(availableRoom);
       const cap = useSidebarAiSqueeze.getState().width;
       const next = Math.min(width, availableRoom, cap ?? Number.POSITIVE_INFINITY);

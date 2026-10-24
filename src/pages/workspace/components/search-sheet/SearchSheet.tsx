@@ -82,7 +82,7 @@ ja:
   currentNotebook: "現在のノートブック"
 `;
 const uiText = createTranslator(localMessages);
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -157,7 +157,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const layer = useModalLayer(visible);
   const endSearch = useCallback(() => onClose ? onClose() : useSearchSession.getState().closeSearch(), [onClose]);
   const dismissSheet = useCallback(() => onClose ? onClose() : useSearchSession.getState().dismissSheet(), [onClose]);
-  const drag = useSheetDrag(sheetRef, dismissSheet);
+  const drag = useSheetDrag(sheetRef, dismissSheet, visible && !windowed);
 
   const onSearchText = useCallback((text: string) => { if (useSearchSession.getState().query !== text) useSearchSession.getState().setQuery(text); }, []);
   const onPromptChange = useCallback((next: string) => setPrompt(current => current === next ? current : next), []);
@@ -232,8 +232,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   const mentionNotebookId = session.scope.kind === "all" ? session.startingNotebookId ?? aiNotebookId : session.scope.notebookId ?? aiNotebookId;
   return <OverlayLayerProvider layer={layer}><div className="search-sheet-layer" data-open={visible} data-variant={variant} style={{ zIndex: layer }} onKeyDownCapture={keydownCapture} onKeyDown={keydown}>
     {!windowed && <div className="search-sheet-scrim" aria-hidden="true" onClick={dismissSheet}/>}
-    <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label={uiText("searchNotes")} inert={!visible} data-dragging={drag.dragging}
-      style={drag.offset ? { "--search-sheet-drag": `${drag.offset}px` } as CSSProperties : undefined}>
+    <div ref={sheetRef} className="search-sheet" role={visible ? "dialog" : undefined} aria-modal={visible || undefined} aria-label={uiText("searchNotes")} inert={!visible} data-dragging={drag.dragging}>
       {!windowed && <div className="search-sheet-grab" aria-hidden="true" {...drag.handlers}/>}
       <div className="search-sheet-query">
         <Search size={20} aria-hidden="true"/>
