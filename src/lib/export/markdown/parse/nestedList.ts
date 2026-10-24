@@ -1,3 +1,5 @@
+import { liftTrailingListBreaks } from "../listLines";
+
 /** 计算行的缩进空格数（tab 记 2） */
 export function indentLevel(line: string): number {
   let count = 0;
@@ -69,10 +71,11 @@ export function parseNestedList(
       };
     }
     i++;
+    item = liftTrailingListBreaks(item, parseInline);
 
     const sub = collectChildren(lines, i, lvl + 1, parseInline, parseMarkdown);
     if (sub.items.length) {
-      item.children = sub.items;
+      item.children = [...(item.children ?? []), ...sub.items];
       i = sub.nextIndex;
     }
 

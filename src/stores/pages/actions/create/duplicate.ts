@@ -20,6 +20,7 @@ import {
   decodeUnsupportedMarkdownForDisk,
 } from "@/lib/markdown-raw-guard";
 import { encodeLocalBlockPropsWrappers } from "@/lib/export/markdown/blockPropsMarker";
+import { stripNoteMetaBlob } from "@/lib/export/markdown/noteMeta";
 import { cloneLocalPageContent } from "./content";
 import {
   applyTrailingNewlineStyle,
@@ -169,6 +170,7 @@ export const duplicatePageAction = async (
         fileContent = headerMerge.markdown;
         copyFrontmatterBlob = headerMerge.frontmatter;
       } else {
+        copyFrontmatterBlob = stripNoteMetaBlob(copyFrontmatterBlob);
         fileContent = copyFrontmatterBlob
           ? `${copyFrontmatterBlob}\n\n${markdownContent}`
           : markdownContent;

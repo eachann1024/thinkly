@@ -167,21 +167,17 @@ export function isDiskContentMatchingSnapshot(
 }
 
 /**
- * 按快照原文的「尾换行风格」修正待写内容（最小 diff 原则）：
- * - 原文以 N 个 \n 结尾 → 待写内容也以恰好 N 个 \n 结尾（保真还原 POSIX 尾换行）
- * - 原文不以 \n 结尾 → 不补
- * - 无快照 → 默认补一个 \n（POSIX 惯例）
- * blocksToMarkdown 输出不带尾 \n，不经此修正每次编辑都会丢掉原文件的尾换行，
- * 给 git diff 制造 "\ No newline at end of file" 噪音。
- * 写后快照更新存的是修正后的实际写盘内容，尾换行风格随之延续，后续 diff 仍命中。
+ * 按快照原文的尾换行修正待写内容。
+ * 正文已经以换行结尾时原样保留，空段留下的额外空行不会被抹掉。
+ * 正文没有结尾换行时，按快照补回原来的尾换行；没有快照则补一个。
  */
 export function applyTrailingNewlineStyle(
   absPath: string,
   content: string,
 ): string {
-  const body = content.replace(/\n+$/, "");
+  if (/\n$/.test(content)) return content;
   const snapshot = snapshotMap.get(absPath)?.content;
-  if (snapshot === undefined) return `${body}\n`;
+  if (snapshot === undefined) return `${content}\n`;
   const trailing = snapshot.match(/\n*$/)?.[0] ?? "";
-  return body + trailing;
+  return content + trailing;
 }
