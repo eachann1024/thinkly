@@ -1,0 +1,57 @@
+[data-goose-page-reference-menu] {
+  display: flex;
+  max-height: inherit;
+  min-height: 0;
+}
+
+[data-goose-page-reference-menu] > .goose-menu-surface {
+  display: flex;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: inherit;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.goose-page-reference-scroll {
+  min-height: 0;
+  max-height: inherit;
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.goose-page-reference-scroll[data-hover-suppressed] { pointer-events: none; }
+
+[data-goose-page-reference-menu] .goose-page-reference-row {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  line-height: 20px;
+  text-align: left;
+}
+
+.goose-page-reference-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 20px;
+}
+
+.goose-page-reference-title {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
