@@ -1,0 +1,16 @@
+.goose-fade-text {
+  display: block;
+  min-width: 0;
+  max-height: 2lh;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.goose-fade-text[data-overflowing="true"] {
+  mask-image: linear-gradient(#fff, #fff),
+    linear-gradient(to right, #fff calc(100% - 3em), transparent);
+  mask-size: 100% calc(100% - 1lh), 100% 1lh;
+  mask-position: top, bottom;
+  mask-repeat: no-repeat;
+}
