@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRad
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { X, ChevronDown, MessageSquare } from "@/components/ui/icons";
+import { X, ChevronDown } from "@/components/ui/icons";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import type { SettingsTab, SettingsTabConfig } from "./types";
 import { cn } from "@/lib/utils";
@@ -37,7 +37,6 @@ interface SettingsScaffoldProps {
   mainContainer: HTMLElement | null;
   visible: boolean;
   children: ReactNode;
-  feedbackBanner?: ReactNode;
 }
 
 export function SettingsScaffold({
@@ -49,7 +48,6 @@ export function SettingsScaffold({
   mainContainer,
   visible,
   children,
-  feedbackBanner,
 }: SettingsScaffoldProps) {
   useLocale();
   const compact = useWorkspaceViewport((s) => s.forceCollapseLeft);
@@ -66,45 +64,21 @@ export function SettingsScaffold({
     }
     wasVisibleRef.current = visible;
   }, [visible, sidebarContainer, compact]);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const scrollPositionsRef = useRef<Partial<Record<SettingsTab, number>>>({});
-  const previousActiveTabRef = useRef<SettingsTab>(activeTab);
   const [navSheen, setNavSheen] = useState(false);
-  const [titleSheen, setTitleSheen] = useState(false);
   useEffect(() => {
     setNavSheen(false);
-    setTitleSheen(false);
     if (!visible) return;
     const start = window.setTimeout(() => {
       setNavSheen(true);
-      setTitleSheen(activeTab === "feedback");
     }, 500);
     const end = window.setTimeout(() => {
       setNavSheen(false);
-      setTitleSheen(false);
     }, 3500);
     return () => {
       window.clearTimeout(start);
       window.clearTimeout(end);
     };
   }, [visible, activeTab === "feedback"]);
-
-  useLayoutEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const previousActiveTab = previousActiveTabRef.current;
-    if (!scrollContainer || previousActiveTab === activeTab) return;
-    scrollPositionsRef.current[previousActiveTab] = scrollContainer.scrollTop;
-    scrollContainer.scrollTop = scrollPositionsRef.current[activeTab] ?? 0;
-    previousActiveTabRef.current = activeTab;
-  }, [activeTab]);
-
-  const handleTabChange = (tab: SettingsTab) => {
-    if (scrollContainerRef.current) {
-      scrollPositionsRef.current[activeTab] =
-        scrollContainerRef.current.scrollTop;
-    }
-    onTabChange(tab);
-  };
 
   return (
     <>
@@ -134,7 +108,7 @@ export function SettingsScaffold({
                     aria-current={activeTab === tab.id ? "page" : undefined}
                     data-selected={activeTab === tab.id || undefined}
                     data-settings-tab={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
+                    onClick={() => onTabChange(tab.id)}
                     className={cn(
                       "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm",
                       activeTab !== tab.id && "text-muted-foreground",
@@ -159,7 +133,6 @@ export function SettingsScaffold({
             inert={!visible}
             aria-hidden={!visible}
             data-settings=""
-            data-settings-tab={activeTab}
           >
             <nav className="settings-compact-navigation" aria-label={uiText("settingsCategories_2590")}>
               <span className="text-sm font-medium">{uiText("settings_e366")}</span>
@@ -171,7 +144,7 @@ export function SettingsScaffold({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuRadioGroup value={activeTab} onValueChange={(value) => handleTabChange(value as SettingsTab)}>
+                  <DropdownMenuRadioGroup value={activeTab} onValueChange={(value) => onTabChange(value as SettingsTab)}>
                     {tabs.map((tab) => <DropdownMenuRadioItem key={tab.id} value={tab.id}>{tab.label}</DropdownMenuRadioItem>)}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
@@ -185,35 +158,7 @@ export function SettingsScaffold({
             >
               <X className="h-4 w-4" />
             </IconButton>
-            <div className="min-h-0 flex-1 bg-[hsl(var(--goose-settings-bg))]">
-              <div
-                ref={scrollContainerRef}
-                onScroll={(event) => {
-                  scrollPositionsRef.current[activeTab] =
-                    event.currentTarget.scrollTop;
-                }}
-                className="settings-scroll h-full overflow-y-auto"
-              >
-                <div className="settings-panel min-h-0">
-                  <header className="settings-page-header">
-                    <h2 className={cn(
-                      "text-3xl font-semibold tracking-tight",
-                      activeTab === "feedback" && "feedback-sheen-title",
-                      activeTab === "feedback" && titleSheen && "is-on",
-                    )}>
-                      {activeTab === "feedback" ? <MessageSquare className="h-7 w-7 shrink-0" aria-hidden="true" /> : null}
-                      {tabs.find((tab) => tab.id === activeTab)?.label}
-                    </h2>
-                    {feedbackBanner ? (
-                      <div className="mt-6">
-                        {feedbackBanner}
-                      </div>
-                    ) : null}
-                  </header>
-                  {children}
-                </div>
-              </div>
-            </div>
+            {children}
           </div>,
           mainContainer,
         )}

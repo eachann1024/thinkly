@@ -24,7 +24,6 @@ ja:
   supportsMdMarkdownAndTxt: ".md、.markdown に対応"
 `;
 const uiText = createTranslator(localMessages);
-import { cn } from "@/lib/utils";
 import { SearchSessionController } from "../components/sidebar/SearchSessionController";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { LazySearchSheet } from "../components/search-sheet/LazySearchSheet";
@@ -35,9 +34,9 @@ import {
   permanentlyDeletePageWithCleanup,
   restorePageWithToast,
 } from "@/lib/page-delete-actions";
-import { NotebookAiSessionProvider } from "../components/notebook-ai/NotebookAiSession";
 import type { useWorkspaceScrollSync } from "./useWorkspaceScrollSync";
-import { isElectronChrome, NotebookAiWorkspaceBody } from "./shared";
+import { isElectronChrome } from "./shared";
+import { WorkspaceNotebookPage } from "./surfaces/WorkspaceNotebookPage";
 
 export function renderWorkspaceShell(
   context: ReturnType<typeof useWorkspaceScrollSync>,
@@ -49,20 +48,12 @@ export function renderWorkspaceShell(
     onDragOver,
     onDragLeave,
     onDrop,
-    editorRef,
     scrollContainerRef,
     activePageId,
-    isLocked,
-    isTrashed,
     openNewTab,
     isWelcomeTab,
-    openNewTabHandler,
-    aiPanelOpen,
     aiLayoutMode,
-    setAiLayoutMode,
     closeAiPanel,
-    aiPanelCapturedSelection,
-    consumeAiPanelCapturedSelection,
     showSideAiPanel,
     showFullscreenAi,
     singleTabMode,
@@ -79,7 +70,6 @@ export function renderWorkspaceShell(
     setSettingsTab,
     settingsHost,
     setSettingsHost,
-    editorHostRef,
     closeSettings,
     handleSettingsOpenChange,
   } = context;
@@ -159,75 +149,7 @@ export function renderWorkspaceShell(
             data-single-tab-mode={singleTabMode ? "true" : undefined}
             data-local-file-page={isLocalFolderPage ? "true" : undefined}
           >
-            <div
-              ref={editorHostRef}
-              className={cn(
-                "workspace-editor-host relative flex min-h-0 flex-1 flex-col overflow-hidden",
-                settingsOpen && "invisible",
-              )}
-            >
-              {/*
-                第一次打开面板才加载会话运行时。之后 Provider 常驻，
-                关面板 / 切页不卸载 useChat，顶栏动画可跟到请求真正结束。
-              */}
-              {aiAvailableForNotebook && aiNotebookId ? (
-                <NotebookAiSessionProvider
-                  notebookId={aiNotebookId}
-                  editorRef={editorRef}
-                  panelOpen={showFullscreenAi || showSideAiPanel}
-                >
-                  <NotebookAiWorkspaceBody
-                    showFullscreenAi={showFullscreenAi}
-                    aiNotebookId={aiNotebookId}
-                    aiAvailableForNotebook={aiAvailableForNotebook}
-                    isWelcomeTab={isWelcomeTab}
-                    openNewTabHandler={openNewTabHandler}
-                    aiPanelOpen={showFullscreenAi || showSideAiPanel}
-                    aiLayoutMode={aiLayoutMode}
-                    showSideAiPanel={showSideAiPanel}
-                    closeAiPanel={closeAiPanel}
-                    editorRef={editorRef}
-                    aiPanelCapturedSelection={aiPanelCapturedSelection}
-                    consumeAiPanelCapturedSelection={
-                      consumeAiPanelCapturedSelection
-                    }
-                    setAiLayoutMode={setAiLayoutMode}
-                    activePageId={activePageId}
-                    page={page}
-                    inHistoryMode={inHistoryMode}
-                    isLocalFolderPage={isLocalFolderPage}
-                    isLocked={isLocked}
-                    isTrashed={isTrashed}
-                    scrollContainerRef={scrollContainerRef}
-                  />
-                </NotebookAiSessionProvider>
-              ) : (
-                <NotebookAiWorkspaceBody
-                  showFullscreenAi={false}
-                  aiNotebookId={null}
-                  aiAvailableForNotebook={false}
-                  isWelcomeTab={isWelcomeTab}
-                  openNewTabHandler={openNewTabHandler}
-                  aiPanelOpen={false}
-                  aiLayoutMode={aiLayoutMode}
-                  showSideAiPanel={false}
-                  closeAiPanel={closeAiPanel}
-                  editorRef={editorRef}
-                  aiPanelCapturedSelection={null}
-                  consumeAiPanelCapturedSelection={
-                    consumeAiPanelCapturedSelection
-                  }
-                  setAiLayoutMode={setAiLayoutMode}
-                  activePageId={activePageId}
-                  page={page}
-                  inHistoryMode={inHistoryMode}
-                  isLocalFolderPage={isLocalFolderPage}
-                  isLocked={isLocked}
-                  isTrashed={isTrashed}
-                  scrollContainerRef={scrollContainerRef}
-                />
-              )}
-            </div>
+            <WorkspaceNotebookPage context={context} />
           </main>
         </div>
       </div>

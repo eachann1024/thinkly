@@ -11,7 +11,7 @@ import { useSettings } from "@/stores/useSettings";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import type { useSettingsResetActions } from "./useSettingsResetActions";
 import { SETTINGS_TABS } from "./shared";
-import { WorkspaceViewActivity } from "../../WorkspaceViewActivity";
+import { SettingsPage } from "../settings/SettingsPage";
 import type { GitAvailability } from "../settings/useGitAvailability";
 
 export function renderSettingsScaffold(
@@ -86,10 +86,8 @@ export function renderSettingsScaffold(
       sidebarContainer={sidebarContainer}
       mainContainer={mainContainer}
       visible={open}
-      feedbackBanner={null}
-
     >
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "general"}>
+      <SettingsPage tab="general" keepAlive={open} visible={open && activeTab === "general"}>
         <div className="settings-groups">
           <SettingsGeneral
             autoOpenLastNote={privacy.autoOpenLastNote}
@@ -100,9 +98,9 @@ export function renderSettingsScaffold(
             setNotebookDropdownHoverExpand={setNotebookDropdownHoverExpand}
           />
         </div>
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "shortcuts"}>
+      <SettingsPage tab="shortcuts" keepAlive={open} visible={open && activeTab === "shortcuts"}>
         <div className="settings-groups">
           <SettingsShortcuts
             closeTabShortcut={closeTabShortcut}
@@ -115,9 +113,9 @@ export function renderSettingsScaffold(
             singleTabMode={effectiveSingleTabMode(singleTabMode)}
           />
         </div>
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "local-folder"}>
+      <SettingsPage tab="local-folder" keepAlive={open} visible={open && activeTab === "local-folder"}>
         <div className="settings-groups">
           <SettingsLocalFolder
             visible={open && activeTab === "local-folder"}
@@ -131,9 +129,9 @@ export function renderSettingsScaffold(
             setLocalFolderHiddenFolders={setLocalFolderHiddenFolders}
           />
         </div>
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "appearance"}>
+      <SettingsPage tab="appearance" keepAlive={open} visible={open && activeTab === "appearance"}>
         <SettingsAppearance
           theme={theme}
           setTheme={setTheme}
@@ -147,9 +145,9 @@ export function renderSettingsScaffold(
           increaseEditorFontSize={increaseEditorFontSize}
           decreaseEditorFontSize={decreaseEditorFontSize}
         />
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "ai"}>
+      <SettingsPage tab="ai" keepAlive={open} visible={open && activeTab === "ai"}>
         <div className="settings-groups">
           <SettingsAI
             visible={open && activeTab === "ai"}
@@ -163,13 +161,13 @@ export function renderSettingsScaffold(
             saveCustomConfig={saveAICustomConfig}
           />
         </div>
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "git-sync" && gitAvailability === "ready"}>
+      <SettingsPage tab="git-sync" keepAlive={open} visible={open && activeTab === "git-sync" && gitAvailability === "ready"}>
         <SettingsGitSync visible={open && activeTab === "git-sync"} />
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "data"}>
+      <SettingsPage tab="data" keepAlive={open} visible={open && activeTab === "data"}>
         <div className="settings-groups">
           <SettingsDataPanel
             active={open && activeTab === "data"}
@@ -191,11 +189,11 @@ export function renderSettingsScaffold(
             onResetAndImport={handleReset}
           />
         </div>
-      </WorkspaceViewActivity>
+      </SettingsPage>
 
-      <WorkspaceViewActivity keepAlive={open} visible={open && activeTab === "feedback"}>
+      <SettingsPage tab="feedback" keepAlive={open} visible={open && activeTab === "feedback"}>
         <SettingsFeedback />
-      </WorkspaceViewActivity>
+      </SettingsPage>
     </SettingsScaffold>
   );
 }
