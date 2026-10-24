@@ -12,6 +12,7 @@ import { useSidebarLayout } from "./sidebar-shell/useSidebarLayout";
 import { useSidebarNavigation } from "./sidebar-shell/useSidebarNavigation";
 import { useSearchWindowHandoff } from "./useSearchWindowHandoff";
 import { useSidebarLifecycle } from "./sidebar-shell/useSidebarLifecycle";
+import { useSidebarFloating } from "./sidebar-shell/useSidebarFloating";
 
 export function Sidebar(props: SidebarProps) {
   useLocale();
@@ -39,8 +40,7 @@ export function Sidebar(props: SidebarProps) {
     handleResizeKeyDown,
     settingsSidebarHost,
   } = context;
-  // 临时面板收起后仍留在覆盖层，避免退出文档流时宽度动画挤动正文。
-  const sidebarFloating = context.forceCollapseLeft && (sidebarOverlay || sidebarCollapsed);
+  const sidebarFloating = useSidebarFloating(context.forceCollapseLeft, sidebarOverlay);
 
   return (
     <>
@@ -59,7 +59,7 @@ export function Sidebar(props: SidebarProps) {
         )}
         data-sidebar-resizing={isResizing || undefined}
         style={{
-          width: sidebarCollapsed ? 0 : "var(--sidebar-configured-width)",
+          width: "var(--workspace-sidebar-width)",
           minWidth: 0,
           opacity: sidebarCollapsed ? 0 : 1,
           transform: sidebarCollapsed ? "translateX(-8px)" : "translateX(0)",

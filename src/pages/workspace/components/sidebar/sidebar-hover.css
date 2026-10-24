@@ -28,8 +28,11 @@
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane {
-  /* 布局转换一次完成；覆盖面板仅淡入/淡出，不动画宽度。 */
+  /* 占位宽度由变量补间。这里只淡入淡出。 */
   transition: opacity var(--workspace-sidebar-motion), transform var(--workspace-sidebar-motion);
+}
+.workspace-shell .workspace-sidebar-pane[data-sidebar-width-motion] {
+  overflow: hidden !important;
 }
 .workspace-shell .workspace-stage > .workspace-sidebar-pane[data-sidebar-floating] {
   position: absolute;
@@ -67,10 +70,8 @@
 .workspace-shell .sidebar-toggle-button:is(:hover, :focus-visible, [data-state="open"]) {
   opacity: 1;
 }
-.workspace-shell[data-electron-chrome] .electron-titlebar:not([data-sidebar-collapsed="true"]) {
-  padding-left: max(calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px), calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width) + var(--workspace-sidebar-width)));
-}
 .workspace-shell[data-electron-chrome] .electron-titlebar {
+  padding-left: max(calc(var(--electron-traffic-inset, 78px) + var(--electron-navigation-width) + 8px), calc(var(--workspace-stage-pad-left) + var(--workspace-rail-width) + var(--workspace-sidebar-width)));
   transition: none;
 }
 @media (max-width: 719px) {

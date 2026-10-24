@@ -17,6 +17,7 @@ declare global {
   const WORKSPACE_MIN_MAIN_WIDTH: typeof import('../lib/workspaceViewport').WORKSPACE_MIN_MAIN_WIDTH
   const WORKSPACE_MIN_WINDOW_HEIGHT: typeof import('../lib/workspaceViewport').WORKSPACE_MIN_WINDOW_HEIGHT
   const WORKSPACE_MIN_WINDOW_WIDTH: typeof import('../lib/workspaceViewport').WORKSPACE_MIN_WINDOW_WIDTH
+  const activateNotebook: typeof import('../lib/notebookNavigation').activateNotebook
   const activateWorkspace: typeof import('../lib/settings-navigation').activateWorkspace
   const applyRolldownPolyfills: typeof import('../lib/rolldown-polyfill').applyRolldownPolyfills
   const areSetupGuideAIConnectionsEqual: typeof import('../lib/setupGuideAI').areSetupGuideAIConnectionsEqual
@@ -36,6 +37,7 @@ declare global {
   const documentTextColors: typeof import('../lib/textColors').documentTextColors
   const downloadWebdavBackup: typeof import('../lib/webdavSync').downloadWebdavBackup
   const effectiveSingleTabMode: typeof import('../lib/tabMode').effectiveSingleTabMode
+  const extractFrontmatter: typeof import('../lib/markdown-raw-guard').extractFrontmatter
   const findContainingLocalFolderNotebook: typeof import('../lib/openAssociatedMarkdown').findContainingLocalFolderNotebook
   const formatDualShortcut: typeof import('../lib/onboardingContent').formatDualShortcut
   const formatDualShortcutGroup: typeof import('../lib/onboardingContent').formatDualShortcutGroup
