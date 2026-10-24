@@ -63,18 +63,33 @@ export default async function run(): Promise<number> {
 
   // 1. 保存成 .md 再读回
   const markdown = jsonContentToMarkdown(SAMPLE as any);
-  check("保存：写出分栏注释标记", /<!-- thinkly:columns widths="60,40" -->/.test(markdown), markdown);
+  check("保存：正文不再写分栏注释", !/<!--\s*(?:thinkly|goose-note):columns\b/i.test(markdown), markdown);
   const reread = importMarkdownFragment(markdown);
   check("读取：栏宽与每栏内容原样还原",
     JSON.stringify(layoutShape(findLayout(reread as any[]))) === JSON.stringify(expected),
     layoutShape(findLayout(reread as any[])));
-  const legacy = importMarkdownFragment(markdown.replaceAll("thinkly:", "goose-note:"));
+  const legacy = importMarkdownFragment([
+    "# 分栏验收",
+    "",
+    "<!-- goose-note:columns widths=\"60,40\" -->",
+    "<!-- goose-note:column -->",
+    "## 左栏标题",
+    "",
+    "左栏正文 LEFT",
+    "<!-- /goose-note:column -->",
+    "<!-- goose-note:column -->",
+    "右栏正文 RIGHT",
+    "<!-- /goose-note:column -->",
+    "<!-- /goose-note:columns -->",
+    "",
+    "分栏之后",
+  ].join("\n"));
   check("读取：旧 goose-note 分栏标记仍能还原",
     JSON.stringify(layoutShape(findLayout(legacy as any[]))) === JSON.stringify(expected),
     layoutShape(findLayout(legacy as any[])));
 
   // 2. 外部复制的分栏 Markdown 源码粘贴（粘贴识别 + 本地解析）
-  const pasted = markdown.split("\n").slice(2).join("\n");
+  const pasted = markdown;
   check("粘贴：识别出分栏标记，走本地解析", plainHasGooseColumnMarkers(pasted));
   check("粘贴：解析结果仍是分栏", !!findLayout(importMarkdownFragment(pasted) as any[]));
 

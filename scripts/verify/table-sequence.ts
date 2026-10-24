@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { Schema } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";
 import { markdownToJsonContent } from "@/lib/export/markdown/parse/block";
+import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
 import { serializeTable } from "@/lib/export/markdown/serialize/table";
 import {
   sequenceColumnTransaction,
@@ -148,7 +149,7 @@ export default function run() {
       disabled.doc.firstChild!.firstChild!.attrs.sequenceColumn === false,
   );
 
-  const markdown = serializeTable({
+  const markdown = jsonContentToMarkdown([{
     type: "table",
     props: { sequenceColumn: true },
     content: {
@@ -160,13 +161,14 @@ export default function run() {
         { cells: ["2", "B"] },
       ],
     },
-  });
+  }] as any);
   const parsed = markdownToJsonContent(markdown);
   checker.check(
     "勾选结果会写进笔记并在重新打开时保留",
-    markdown.startsWith("<!-- thinkly:table-sequence -->") &&
+    !markdown.includes("table-sequence") &&
       markdown.includes("| 2 |") &&
       parsed[0]?.props?.sequenceColumn === true,
+    markdown,
   );
   const plain = serializeTable({
     type: "table",
