@@ -10,7 +10,7 @@ import {
   DEFAULT_TITLE_BAR_HEIGHT_PX,
   trafficLightPositionForTitleBar,
 } from "../../../src/lib/electron/titlebarLayout";
-import { gooseWindowAdditionalArguments } from "../../../src/lib/electron/windowContext";
+import { gooseWindowAdditionalArguments } from "../../../src/lib/electron/windowArguments";
 import {
   DEFAULT_WORKSPACE_HEIGHT,
   DEFAULT_WORKSPACE_WIDTH,
@@ -30,7 +30,6 @@ export const QUICKNOTE_WIDTH = 480;
 
 export const QUICKNOTE_HEIGHT = 350;
 
-/** DesktopTitleBar 为 Tailwind h-11 = 2.75rem，随界面字号（标准 14 / 放大 16）变化。 */
 export const TITLE_BAR_HEIGHT = DEFAULT_TITLE_BAR_HEIGHT_PX;
 
 export type CreateWorkspaceWindowOpts = {
@@ -59,11 +58,6 @@ export function rendererFile(
   return path.join(__dirname, "../renderer", name);
 }
 
-/**
- * Linux/Windows 任务栏图标。打包后 main 位于 <pack>/main/，icon.png 由
- * prepare-electron-pack 复制在 pack 根；开发态 main 位于 dist-electron/main/，
- * 图标在源码 electron/icons/。macOS 走 app/dock 原生图标，不读这里。
- */
 export function framelessWindowIcon(): string | undefined {
   if (process.platform === "darwin") return undefined;
   const packaged = path.join(__dirname, "../icon.png");
@@ -83,7 +77,6 @@ export const sharedWebPrefs =
     sandbox: true,
     spellcheck: false,
     zoomFactor: 1,
-    // 正式包启用 V8 代码缓存；开发热更新不要 code cache。
     ...(isDevRenderer() ? {} : { v8CacheOptions: "code" as const }),
   });
 
@@ -106,7 +99,6 @@ export function applyTrafficLightPosition(win: BrowserWindow): void {
   win.setWindowButtonPosition(trafficLightPosition());
 }
 
-/** 渲染进程在界面字号变化后同步顶栏高度，红绿灯按新高度垂直居中。 */
 export function setMainWindowTitleBarHeight(
   win: BrowserWindow,
   height: number,
@@ -118,7 +110,6 @@ export function setMainWindowTitleBarHeight(
 
 export function setHiddenThrottle(win: BrowserWindow, hidden: boolean): void {
   if (win.isDestroyed()) return;
-  // 隐藏窗节流；可见编辑器保持 Chromium 默认（前台不节流）。
   win.webContents.backgroundThrottling = hidden;
 }
 

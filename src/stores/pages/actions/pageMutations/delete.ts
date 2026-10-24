@@ -1,3 +1,4 @@
+import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { useNotebooks } from "../../../useNotebooks";
 import { useSidebarView } from "../../../useSidebarView";
 import type { StoreSet, StoreGet } from "../hydrate";
@@ -18,11 +19,6 @@ import {
   discardPendingLocalSave,
 } from "../../folderSync";
 
-/**
- * 删除后把侧栏的键盘焦点/选中同步到新的合理行。
- * 否则 focusedItem 仍指向已删除项，react-complex-tree 焦点丢失，
- * 连续删除与方向键导航的起点会错乱。
- */
 function syncSidebarSelectionAfterDelete(
   workspaceId: string,
   removedIds: Set<string>,
@@ -37,7 +33,6 @@ function syncSidebarSelectionAfterDelete(
   }
   const nextActive =
     fallbackPageId !== undefined ? fallbackPageId : get().activePageId;
-  // nextActive 可能为 null（整本删空），此时清掉焦点/选中。
   if (removedIds.has(focused || "")) {
     view.setFocused(workspaceId, nextActive);
   }
@@ -56,13 +51,15 @@ export const deletePageAction = async (
   clearDeleteFailure();
   const page = get().pages[id];
   if (!page) return false;
+  if (isStandaloneFile(page)) {
+    rememberDeleteFailure(new Error("outside the allowed folders"));
+    return false;
+  }
 
   const notebook = useNotebooks.getState().notebooks[page.workspaceId];
   const isLocalFolder = notebook?.source === "local-folder";
   if (isLocalFolder && notebook?.localPath) {
     const resolvePathFromId = (pageId: string) => {
-      // 兜底：从旧格式 id（local-{nb}-{encoded}）反解路径。
-      // 稳定 id 后路径应始终来自 page.localFilePath，此分支仅用于极端兜底。
       const prefix = `local-${page.workspaceId}-`;
       if (!pageId.startsWith(prefix)) return null;
       const encoded = pageId.slice(prefix.length);
@@ -74,7 +71,6 @@ export const deletePageAction = async (
       }
     };
 
-    // 新建会先把笔记放进侧栏，文件可能还在写。先丢掉未发出的保存，再等当前写盘结束。
     discardPendingLocalSave(id);
     const releaseFileOperation = await acquireLocalPageFileOperation(id);
     try {
@@ -84,7 +80,6 @@ export const deletePageAction = async (
         rememberDeleteFailure(new Error("desktop-unavailable"));
         return false;
       }
-      // 路径优先从 page.localFilePath 取（稳定 id 后是主路径来源）。
       const targetPath = current.localFilePath || resolvePathFromId(id);
 
       const removedIds = new Set<string>();

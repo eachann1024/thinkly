@@ -32,7 +32,7 @@ export function createActivationTabActions(
       const page = usePages.getState().getPage(pageId);
       if (!page) return;
       const notebookStore = useNotebooks.getState();
-      if (notebookStore.activeNotebookId !== page.workspaceId) {
+      if (notebookStore.notebooks[page.workspaceId] && notebookStore.activeNotebookId !== page.workspaceId) {
         notebookStore.setActiveNotebook(page.workspaceId);
       }
     },
@@ -95,7 +95,6 @@ export function createActivationTabActions(
       });
       ensureSplitForWorkspaceTab(tab);
       pushTabHistory(tab.id);
-      // 欢迎 / AI 标签不关联真实页面，不同步活动页。
       if (tab.type === "welcome") return;
       if (tab.type === "notebook-ai") {
         const notebookId = tab.workspaceId;
