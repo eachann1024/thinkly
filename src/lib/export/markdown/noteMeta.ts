@@ -42,7 +42,12 @@ export function createNoteSink(): NoteSink {
 
 export class MarkdownScope {
   index = 0;
-  constructor(readonly path: string, readonly sink: NoteSink) {}
+  readonly path: string;
+  readonly sink: NoteSink;
+  constructor(path: string, sink: NoteSink) {
+    this.path = path;
+    this.sink = sink;
+  }
   take(block: any): { path: string; block: any } {
     const at = this.index++;
     const path = this.path ? `${this.path}.${at}` : String(at);
