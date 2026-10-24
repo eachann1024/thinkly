@@ -49,7 +49,6 @@ declare global {
   const REMOTE_FONT_SOURCES: typeof import('../lib/fontLoader').REMOTE_FONT_SOURCES
   const REMOVED_APP_SHORTCUT_IDS: typeof import('../lib/fixed-app-shortcuts').REMOVED_APP_SHORTCUT_IDS
   const SYSTEM_FONT_STACK: typeof import('../lib/fontLoader').SYSTEM_FONT_STACK
-  const activateNotebook: typeof import('../lib/notebookNavigation').activateNotebook
   const applyAccentColor: typeof import('../lib/accentColor').applyAccentColor
   const applyAppearanceScaleVariables: typeof import('../lib/appearance').applyAppearanceScaleVariables
   const applyFontVariables: typeof import('../lib/fontLoader').applyFontVariables
@@ -63,6 +62,7 @@ declare global {
   const buildLocalPageId: typeof import('../lib/local-folder-scanner').buildLocalPageId
   const buildNotebookCardTheme: typeof import('../lib/imageExport/index').buildNotebookCardTheme
   const buildSinglePageExport: typeof import('../lib/export/index').buildSinglePageExport
+  const canClearInstallStage: typeof import('../lib/appUpdateRelease').canClearInstallStage
   const canonicalLocalPath: typeof import('../lib/canonicalLocalPath').canonicalLocalPath
   const canonicalRelativePath: typeof import('../lib/canonicalLocalPath').canonicalRelativePath
   const cleanAssetDestination: typeof import('../lib/local-folder-asset-maintenance').cleanAssetDestination
@@ -101,7 +101,6 @@ declare global {
   const exportToWord: typeof import('../lib/docxExport/index').exportToWord
   const extractAssetReferencesFromMarkdown: typeof import('../lib/local-folder-asset-maintenance').extractAssetReferencesFromMarkdown
   const extractFirstHeadingText: typeof import('../lib/local-title-binding').extractFirstHeadingText
-  const extractFrontmatter: typeof import('../lib/markdown-raw-guard').extractFrontmatter
   const fetchCustomAIModels: typeof import('../lib/ai-provider/index').fetchCustomAIModels
   const fileStorage: typeof import('../lib/fileStorage').fileStorage
   const formatAttachmentSize: typeof import('../lib/fileStorage').formatAttachmentSize
@@ -195,6 +194,7 @@ declare global {
   const readLocalPageIdMap: typeof import('../lib/local-page-idmap').readLocalPageIdMap
   const readPersistentDismissState: typeof import('../lib/dismiss-state').readPersistentDismissState
   const readRecentLocalFolderTargets: typeof import('../lib/local-folder-target').readRecentLocalFolderTargets
+  const readyVersionIsNewer: typeof import('../lib/appUpdateRelease').readyVersionIsNewer
   const registerEscapeClose: typeof import('../lib/escape-close').registerEscapeClose
   const releaseGitSyncWrites: typeof import('../lib/git-sync-write-barrier').releaseGitSyncWrites
   const releaseStartupSettlingAfterPaint: typeof import('../lib/appearance').releaseStartupSettlingAfterPaint
