@@ -3,14 +3,21 @@ import * as GooseIcons from "@/components/ui/icons";
 import { useCallback, type ReactNode } from "react";
 import { FilePanelExtension } from "@blocknote/core/extensions";
 import { cn } from "@/components/editor/utils/cn";
+import { removeMediaBlock, useMediaFilePicker, type MediaFileEditor } from "./mediaFilePicker";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/shared/MediaPlaceholder.tsx#messages:1">`
 zh-Hans:
   uploading: "上传中…"
+  embed: "嵌入链接"
+  delete: "删除"
 en:
   uploading: "Uploading…"
+  embed: "Embed link"
+  delete: "Delete"
 ja:
   uploading: "アップロード中…"
+  embed: "リンクを埋め込む"
+  delete: "削除"
 `;
 const t = createTranslator(messages);
 
@@ -20,12 +27,7 @@ export type MediaPlaceholderVariant = "image" | "file";
 type MediaPlaceholderProps = {
   variant: MediaPlaceholderVariant;
   blockId: string;
-  editor: {
-    isEditable: boolean;
-    getExtension: (ext: typeof FilePanelExtension) =>
-      | { showMenu: (id: string) => void }
-      | undefined;
-  };
+  editor: MediaFileEditor;
   title: string;
   hint?: string;
   icon: ReactNode;
@@ -42,11 +44,12 @@ export function MediaPlaceholder({
   className,
 }: MediaPlaceholderProps) {
   useLocale();
+  const chooseFile = useMediaFilePicker(editor, blockId);
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
   }, []);
 
-  const handleClick = useCallback(() => {
+  const embedLink = useCallback(() => {
     if (!editor.isEditable) return;
     editor.getExtension(FilePanelExtension)?.showMenu(blockId);
   }, [blockId, editor]);
@@ -54,8 +57,7 @@ export function MediaPlaceholder({
   const isImage = variant === "image";
 
   return (
-    <EditorAction
-      type="button"
+    <div contentEditable={false}
       className={cn(
         "goose-media-placeholder",
         isImage
@@ -63,19 +65,27 @@ export function MediaPlaceholder({
           : "goose-media-placeholder--file",
         className,
       )}
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
-      disabled={!editor.isEditable}
-      aria-label={title}
-      title={hint || title}
     >
-      <span className="goose-media-placeholder__icon" aria-hidden="true">
-        {icon}
-      </span>
-      <span className="goose-media-placeholder__copy">
-        <span className="goose-media-placeholder__title">{title}</span>
-      </span>
-    </EditorAction>
+      <EditorAction type="button" className="goose-media-placeholder__choose"
+        onMouseDown={handleMouseDown} onClick={chooseFile} disabled={!editor.isEditable}
+        aria-label={title} title={hint || title}>
+        <span className="goose-media-placeholder__icon" aria-hidden="true">{icon}</span>
+        <span className="goose-media-placeholder__copy">
+          <span className="goose-media-placeholder__title">{title}</span>
+        </span>
+      </EditorAction>
+      {editor.isEditable && <div className="goose-media-placeholder__actions">
+        <EditorAction type="button" className="goose-media-placeholder__action"
+          onMouseDown={handleMouseDown} onClick={embedLink} aria-label={t("embed")} title={t("embed")}>
+          <GooseIcons.Link size={18} aria-hidden="true" />
+        </EditorAction>
+        <EditorAction type="button" className="goose-media-placeholder__action goose-media-action--danger"
+          onMouseDown={handleMouseDown} onClick={() => removeMediaBlock(editor, blockId)}
+          aria-label={t("delete")} title={t("delete")}>
+          <GooseIcons.X size={18} aria-hidden="true" />
+        </EditorAction>
+      </div>}
+    </div>
   );
 }
 

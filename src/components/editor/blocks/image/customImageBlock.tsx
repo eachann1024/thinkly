@@ -3,7 +3,6 @@ import { createImageBlockConfig, imageParse } from "@blocknote/core";
 import {
   createReactBlockSpec,
   useUploadLoading,
-  ResizableFileBlockWrapper,
 } from "@blocknote/react";
 import {
   MediaLoadingPreview,
@@ -14,6 +13,7 @@ import {
   normalizeParsedImageProps,
 } from "./imageCaption";
 import { ResolvedImagePreview } from "./ResolvedImagePreview";
+import { ResizableImageWrapper } from "./ResizableImageWrapper";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/image/customImageBlock.tsx#messages:1">`
 zh-Hans:
@@ -59,9 +59,9 @@ function CustomImageBlockContent({
   const displayBlock = imageBlockWithoutGeneratedCaption(block);
 
   return (
-    <ResizableFileBlockWrapper block={displayBlock} editor={editor}>
+    <ResizableImageWrapper block={displayBlock} editor={editor}>
       <ResolvedImagePreview block={displayBlock} editor={editor} />
-    </ResizableFileBlockWrapper>
+    </ResizableImageWrapper>
   );
 }
 
