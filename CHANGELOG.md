@@ -1,5 +1,27 @@
 # 更新日志
 
+## 1.7.330
+
+- Refactor → strip explanatory comments
+- Fix → use lowercase thinkly app name
+- Fix → open associated markdown files
+- Fix → keep standalone files out of notebooks
+- Add → block handle menu and drag
+- Improve → wire block handle toolbars
+- Add → column drop while dragging blocks
+- Improve → replace and delete media blocks
+- Improve → restyle media block shells
+- Fix → slash insert and block conversion
+- Fix → verify block type conversion
+- Fix → count reflection over recent days
+- Add → resizable textarea grip handle
+- Improve → search page references faster
+- Fix → record and list note history
+- Fix → keep find bar inside the editor
+- Add → fade overflowing assistant text
+- Docs → keep design notes and menu evals
+- Improve → remaining editor and workspace behavior
+
 ## 1.7.329
 
 - 隔离设置分类页面与笔记编辑器浮层
