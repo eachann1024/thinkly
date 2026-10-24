@@ -10,14 +10,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { electronGooseFsShell } from "./gooseFsShell";
-/**
- * Electron 桌面端的 window.gooseFs 同构实现。
- *
- * 经 window.gooseDesktop（preload contextBridge）实现 GooseFs 契约，
- * 让 local-folder 扫描、写盘、watch、图片 assets 等既有逻辑不区分宿主直接跑。
- *
- * 仅被 src/lib/host/runtime.electron.ts 动态 import（electron 构建专属）。
- */
 
 import { getGooseDesktop } from "./runtime";
 import {
@@ -43,7 +35,7 @@ export const electronGooseFs = {
   readDir: () => [] as unknown[],
   readDirAsync: async (dir: string) => {
     const api = getGooseDesktop();
-    if (!api) return [];
+    if (!api) throw new Error(uiText("desktopIntegrationIsUnavailable"));
     try {
       const entries = await api.fsReadDir(dir);
       rememberExists(dir, true);
@@ -56,8 +48,9 @@ export const electronGooseFs = {
           path: entry.path,
         };
       });
-    } catch {
-      return [];
+    } catch (error) {
+      console.error("[electron-gooseFs] readDir failed", dir, error);
+      throw error;
     }
   },
 
@@ -100,7 +93,6 @@ export const electronGooseFs = {
     }
   },
 
-  // 仅 mtimeMs + size，不含 atime。供本地文件夹 watch 指纹快路径使用。
   statAsync: async (path: string) => {
     const api = getGooseDesktop();
     if (!api) return null;

@@ -12,6 +12,7 @@ import { getContentSignature } from "@/components/editor/utils/blocknote-content
 import { useNotebooks } from "../../../../useNotebooks";
 import { localPageMetadataCache } from "../../../persistence";
 import { scanLocalFolderPages } from "@/lib/local-folder-scanner";
+import { associatedMarkdownPaths } from "@/lib/associated-markdown-paths";
 import { latestLocalFolderLoadRequest } from "./tasks";
 import { isNotebookRescanSuppressed } from "@/lib/local-folder-rescan-guard";
 import type { Page } from "@/types";
@@ -88,13 +89,11 @@ export const loadLocalFolderPagesOnce = async (
       gooseFs: window.gooseFs,
       hiddenFolders,
       forceRead: options?.forceRead,
+      includedFilePaths: associatedMarkdownPaths(notebookId),
     });
 
-    // 同一记事本可能在启动恢复、点击切换和 watch 兜底中同时发起刷新。
-    // 只允许最新请求提交，避免较慢的旧扫描反向覆盖新目录状态。
     if (isNotebookRescanSuppressed(notebookId) || !isCurrentRequest()) return;
 
-    // 重扫发现缺失的笔记只记墓碑（历史延迟清理）；重新出现的清除墓碑。
     const scannedIds = new Set(localPages.map((page) => page.id));
     recordHistoryTombstones(notebookId, Object.values(currentPages)
       .filter((page) => page.workspaceId === notebookId && page.localFilePath && !page.isFolder && !scannedIds.has(page.id))
@@ -121,11 +120,9 @@ export const loadLocalFolderPagesOnce = async (
             const existing = localPageMetadataCache.get(page.id);
             const current = state.pages[page.id];
             if (existing) {
-              // icon 等非 frontmatter 属性保留
               if (existing.icon) {
                 page.icon = existing.icon;
               }
-              // isPinned / isFavorite 以 frontmatter 为准；若 frontmatter 标为 pinned/favorite，可沿用现有时间戳或排序
               if (page.isPinned && existing.pinnedAt !== undefined) {
                 page.pinnedAt = existing.pinnedAt;
               }
@@ -140,9 +137,6 @@ export const loadLocalFolderPagesOnce = async (
               }
             }
 
-            // 重扫不能覆盖仍在内存/写盘队列中的本地编辑。既保护扫描开始时
-            // 已 dirty 的页，也保护扫描期间内容发生过变化、但写盘刚成功清掉
-            // dirty 标记的页；同时采纳扫描得到的路径与父级元数据。
             const contentChangedDuringScan =
               current &&
               contentSignaturesAtLoadStart.get(page.id) !==
@@ -189,7 +183,6 @@ export const loadLocalFolderPagesOnce = async (
           const isLocalFolder = notebook?.source === "local-folder";
 
           if (isLocalFolder) {
-            // 隐藏目录设置变化后，当前页可能已不在重扫结果里；不能保留悬空 activePageId。
             if (nextActivePageId && !updated[nextActivePageId]) {
               result.activePageId = null;
               result.expandPageId = null;
@@ -226,9 +219,6 @@ export const loadLocalFolderPagesOnce = async (
       }
 
       if (options?.showWelcome && !hasExistingPages) {
-        // 打开/切换到本地文件夹时保持空白入口，不自动打开首篇。
-        // 已缓存的文件夹复用上次活动页并后台刷新，不能在扫描完成后再把它
-        // 清回空白，否则会重现一次完整界面闪烁。
         result.activePageId = null;
         result.expandPageId = null;
         result.pendingNavigatePageId = null;
@@ -248,9 +238,6 @@ export const loadLocalFolderPagesOnce = async (
       return result;
     });
 
-    // 扫描发现的条目（外部新增 / 移入）追加到所属手动顺序目录末尾。
-    // 只追加不清理：隐藏目录 / 暂时读不到的文件不在 localPages 里，
-    // 按扫描结果清扫会误删合法槽位（应用内移动的旧槽位由 move 路径清）。
     appendLocalFolderOrderEntries(notebookId, localPages);
 
     recoverScannedLocalPages(set, get, notebookId);
@@ -258,12 +245,10 @@ export const loadLocalFolderPagesOnce = async (
       type: "succeeded", requestId, fingerprint,
       finishedAt: Date.now(),
     });
-    // 该笔记本页面已就绪：清理指向已不存在文件的持久化标签。
     try {
       const { useTabs } = await import("../../../../useTabs");
       useTabs.getState().reconcileTabs();
     } catch {
-      // ignore tabs reconcile error
     }
   } catch (error) {
     if (!isCurrentRequest()) return;
