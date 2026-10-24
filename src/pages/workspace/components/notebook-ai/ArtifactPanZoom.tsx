@@ -59,13 +59,12 @@ export function ArtifactPanZoom({
     contentRef,
     scale,
     fitScale,
-    offset,
     ready,
     isZoomedIn,
     fitToViewport,
     zoomByStep,
   } = transform;
-  const { dragging, onPointerDown, onPointerMove, endDrag } =
+  const { dragging, onPointerDown } =
     useArtifactInteractions(transform);
   const percent = Math.round((scale / Math.max(fitScale, 0.0001)) * 100);
   const { minScale, maxScale } = getArtifactScaleRange(fitScale);
@@ -84,9 +83,6 @@ export function ArtifactPanZoom({
       )}
       style={{ minHeight }}
       onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
       role="img"
       aria-label={isZoomedIn ? t("zoomedDiagramDragOrScrollToPan") : t("diagramPreview")}
     >
@@ -94,7 +90,6 @@ export function ArtifactPanZoom({
         ref={contentRef}
         className="notebook-ai-artifact-panzoom-content"
         style={{
-          transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
           opacity: ready ? 1 : 0,
         }}
       >

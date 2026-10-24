@@ -17,7 +17,6 @@ export function useArtifactTransform(contentKey?: string) {
   const contentSizeRef = useRef({ width: 1, height: 1 });
   const [scale, setScale] = useState(1);
   const [fitScale, setFitScale] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [ready, setReady] = useState(false);
 
   const isZoomedIn = scale > fitScale + 0.001;
@@ -30,9 +29,13 @@ export function useArtifactTransform(contentKey?: string) {
         x: roundTransform(next.x),
         y: roundTransform(next.y),
       };
+      const previous = transformRef.current;
       transformRef.current = normalized;
-      setScale(normalized.scale);
-      setOffset({ x: normalized.x, y: normalized.y });
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translate(${normalized.x}px, ${normalized.y}px) scale(${normalized.scale})`;
+      }
+      // 平移不触发 React 重渲染，缩放时才更新工具栏百分比。
+      if (normalized.scale !== previous.scale) setScale(normalized.scale);
     },
     [],
   );
@@ -227,7 +230,6 @@ export function useArtifactTransform(contentKey?: string) {
     contentSizeRef,
     scale,
     fitScale,
-    offset,
     ready,
     isZoomedIn,
     applyTransform,
