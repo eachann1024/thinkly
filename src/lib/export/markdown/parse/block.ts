@@ -16,6 +16,8 @@ import {
   shouldSkipListSpacer,
   tryAttachBlockChildren,
 } from "./blockChildren";
+import { applyNoteMeta, splitGeneratedMarkdown } from "../noteMeta";
+import { parseQuoteBlock } from "./quoteBlock";
 
 /**
  * markdownToJsonContent 输出 **BlockNote PartialBlock[]**（数组，非 {type:"doc"}）。
@@ -32,10 +34,27 @@ import {
 // `Array.isArray(parsed) ? parsed : parsed?.content` 的双形状兼容分支，
 // 标 any[] 会让 else 分支被 narrow 成 never 报 TS2339。
 export function markdownToJsonContent(markdown: string): any {
-  const lines = markdown
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .split("\n");
+  const split = splitGeneratedMarkdown(markdown);
+  return applyNoteMeta(parseMarkdownBody(split.body), split.meta);
+}
+
+function pushBlankParagraphs(lines: string[], index: number, content: any[]): number {
+  let blanks = 0;
+  let cursor = index;
+  while (cursor < lines.length && !lines[cursor].trim()) {
+    if (!shouldSkipListSpacer(lines, cursor)) blanks += 1;
+    cursor += 1;
+  }
+  const empties = content.length === 0 || cursor >= lines.length ? blanks : Math.max(0, blanks - 1);
+  for (let count = 0; count < empties; count += 1) content.push({ type: "paragraph" });
+  return cursor;
+}
+
+function parseMarkdownBody(markdown: string): any {
+  let source = markdown.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  if (source.endsWith("\n")) source = source.slice(0, -1);
+  if (!source.trim()) return [];
+  const lines = source.split("\n");
   const content: any[] = [];
   let i = 0;
 
@@ -63,6 +82,10 @@ export function markdownToJsonContent(markdown: string): any {
   }
 
   while (i < lines.length) {
+    if (!lines[i].trim()) {
+      i = pushBlankParagraphs(lines, i, content);
+      continue;
+    }
     const line = lines[i];
     const trimmedLine = line.trim();
 
@@ -82,7 +105,7 @@ export function markdownToJsonContent(markdown: string): any {
       }
     }
 
-    const childWrapper = tryAttachBlockChildren(lines, i, content, markdownToJsonContent);
+    const childWrapper = tryAttachBlockChildren(lines, i, content, parseMarkdownBody);
     if (childWrapper) {
       i = childWrapper.nextIndex;
       continue;
@@ -93,7 +116,7 @@ export function markdownToJsonContent(markdown: string): any {
       continue;
     }
 
-    const parseHtmlBlockResult = parseTableHtmlBlock(lines, i) ?? parseHtmlBlock(lines, i, markdownToJsonContent);
+    const parseHtmlBlockResult = parseTableHtmlBlock(lines, i) ?? parseHtmlBlock(lines, i, parseMarkdownBody);
     if (parseHtmlBlockResult) {
       content.push(parseHtmlBlockResult.block);
       i = parseHtmlBlockResult.nextIndex;
@@ -155,47 +178,10 @@ export function markdownToJsonContent(markdown: string): any {
       continue;
     }
 
-    if (trimmedLine.startsWith(">")) {
-      const firstLine = trimmedLine.slice(1).trim();
-
-      const calloutMatch = firstLine.match(
-        /^\[!INFO\]\s+(\S+)\s+(.*)$/i,
-      );
-
-      if (calloutMatch) {
-        let icon = calloutMatch[1];
-        let firstContent = calloutMatch[2];
-        const iconMarker = firstContent.match(new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:callout-icon=([^\\s]+)\\s*-->`));
-        if (iconMarker) {
-          try { icon = decodeURIComponent(iconMarker[1]); firstContent = firstContent.slice(iconMarker[0].length); } catch { /* 保留原文。 */ }
-        }
-        const calloutLines: string[] = [firstContent];
-        i++;
-        // 本地文件夹的块级 wrapper 会让多行 callout 的后续行保持 `> ` 前缀；
-        // 与普通多行引用一致地合并，避免第二行被拆成独立 quote 块。
-        while (i < lines.length && lines[i].trim().startsWith(">")) {
-          calloutLines.push(lines[i].trim().slice(1).trim());
-          i++;
-        }
-        content.push({
-          type: "callout",
-          props: { icon },
-          content: parseInlineMarkdown(calloutLines.join("\n")),
-        });
-        continue;
-      }
-
-      // 多行引用：连续 > 行用 \n 连接（BlockNote 文本内 \n = hardBreak，编辑器可保真）
-      const quoteLines: string[] = [firstLine];
-      i++;
-      while (i < lines.length && lines[i].trim().startsWith(">")) {
-        quoteLines.push(lines[i].trim().slice(1).trim());
-        i++;
-      }
-      content.push({
-        type: "quote",
-        content: parseInlineMarkdown(quoteLines.join("\n")),
-      });
+    const quote = parseQuoteBlock(lines, i);
+    if (quote) {
+      content.push(quote.block);
+      i = quote.nextIndex;
       continue;
     }
 
@@ -227,7 +213,7 @@ export function markdownToJsonContent(markdown: string): any {
         i,
         baseIndent,
         parseInlineMarkdown,
-        markdownToJsonContent,
+        parseMarkdownBody,
       );
       if (items.length) {
         content.push(...items);
@@ -295,14 +281,6 @@ export function markdownToJsonContent(markdown: string): any {
         );
         continue;
       }
-    } else if (
-      !shouldSkipListSpacer(lines, i) &&
-      content.length > 0 &&
-      ["bulletListItem", "numberedListItem", "checkListItem"].includes(
-        content[content.length - 1].type,
-      )
-    ) {
-      content.push({ type: "paragraph" });
     }
     i++;
   }

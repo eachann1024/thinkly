@@ -39,7 +39,7 @@ export function parseDetailsBlock(
       const summary = inner.match(/^\s*<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
       if (!summary) return null;
       const heading = summary[1].trim().match(/^<h([1-3])\b[^>]*>([\s\S]*)<\/h\1>$/i);
-      const children = parseMarkdown(inner.slice(summary[0].length));
+      const children = parseMarkdown(inner.slice(summary[0].length).trim());
       return {
         block: {
           type: heading ? "heading" : "toggleListItem",
