@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { localStorageAdapter } from "@/lib/storage";
+import type { ReflectionScope } from "@/lib/reflection/scopeRange";
 import type { ReflectionNarrative } from "@/lib/reflection/generateReflection";
 
 export interface ReflectionReport extends ReflectionNarrative {
@@ -10,8 +11,11 @@ export interface ReflectionReport extends ReflectionNarrative {
 const MAX_REPORTS = 12;
 
 interface ReflectionState {
-  /** 「范围:结束日期」-> 报告 */
+  /** 周期缓存键 -> 报告 */
   reports: Record<string, ReflectionReport>;
+  /** 各周期已检查的报告键，空周期也只检查一次。 */
+  scheduledKeys: Partial<Record<ReflectionScope, string>>;
+  markScheduled: (scope: ReflectionScope, key: string) => void;
   /** 已读红点的上周 weekKey。 */
   lastSeenWeekKey: string | null;
   /** 用户已同意把笔记标题和摘要发给当前 AI。 */
@@ -35,6 +39,8 @@ export const useReflection = create<ReflectionState>()(
   persist(
     (set) => ({
       reports: {},
+      scheduledKeys: {},
+      markScheduled: (scope, key) => set((s) => ({ scheduledKeys: { ...s.scheduledKeys, [scope]: key } })),
       lastSeenWeekKey: null,
       aiConsent: false,
       aiConsentChosen: false,
@@ -67,6 +73,7 @@ export const useReflection = create<ReflectionState>()(
       skipHydration: true,
       partialize: (s) => ({
         reports: s.reports,
+        scheduledKeys: s.scheduledKeys,
         lastSeenWeekKey: s.lastSeenWeekKey,
         aiConsent: s.aiConsent,
         aiConsentChosen: s.aiConsentChosen,
@@ -76,6 +83,7 @@ export const useReflection = create<ReflectionState>()(
         const p = (persisted ?? {}) as Partial<ReflectionState>;
         return {
           reports: version < 2 ? {} : (p.reports ?? {}),
+          scheduledKeys: p.scheduledKeys ?? {},
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
           // v3 前的 false 是默认未授权。只有当时已打开，才算用户选过。
@@ -87,6 +95,7 @@ export const useReflection = create<ReflectionState>()(
         return {
           ...current,
           reports: p.reports ?? current.reports,
+          scheduledKeys: p.scheduledKeys ?? {},
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
           aiConsentChosen: p.aiConsentChosen === true,
