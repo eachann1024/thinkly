@@ -16,6 +16,17 @@
 .notebook-ai-review-toolbar {
   gap: 6px;
 }
+.notebook-ai-review-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.notebook-ai-review-toolbar button > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 .notebook-ai-review-toolbar [role="group"] {
   display: flex;
   gap: var(--goose-list-row-gap);
