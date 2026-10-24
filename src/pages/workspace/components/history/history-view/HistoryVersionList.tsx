@@ -9,6 +9,7 @@ import { closeNotebookAiIfFullscreen } from "../../notebook-ai/useNotebookAiPane
 import { triggerLabel, formatTime } from "./historyViewPresentation";
 import "./history-controls.css";
 import { useHistoryViewLogic } from "./useHistoryViewLogic";
+import { HistoryBackButton, useHistoryHeaderChrome } from "./HistoryToolbar";
 import { i18nYaml, createTranslator, getFormatLocale } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/history/history-view/HistoryVersionList.tsx#messages:1">`
 zh-Hans:
@@ -54,11 +55,12 @@ const t = createTranslator(messages);
 
 export /**
  * 页面历史模块（历史模式下占据整块侧栏主体，替换笔记本头 + 页面树/大纲）。
- * 不自带宽度/背景/边框——靠 Sidebar 父容器提供（Sidebar 已是 shell-bg）。
- * 退出按钮在主区 HistoryToolbar 上，这里不重复放。
+ * 不自带宽度/背景/边框——靠 Sidebar 父容器提供。
+ * 表头与正文栏 HistoryToolbar 同高，共用一条底线。
  */
 function HistoryVersionList() {
   useLocale();
+  const headerChrome = useHistoryHeaderChrome();
   const {
     groups,
     isEmpty,
@@ -72,19 +74,17 @@ function HistoryVersionList() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col" aria-label={t("versionHistory")}>
-      <div className="shrink-0 px-3 pt-3 pb-2">
-        <div className="flex items-center gap-1.5">
-          <GooseIcons.History className="h-3.5 w-3.5 text-[var(--goose-interactive-selected-fg)]" />
-          <span className="text-[12px] font-medium text-foreground">
-            {t("versionHistory")}
-          </span>
-        </div>
-        {!isEmpty && (
-          <p className="mt-1 truncate whitespace-nowrap text-[11px] leading-none text-muted-foreground">
-            {t("selectAVersionToPreviewAndRestore")}
-          </p>
-        )}
-      </div>
+      <header className="history-column-header" {...headerChrome}>
+        <HistoryBackButton />
+        <span className="min-w-0 truncate text-sm font-medium text-foreground">
+          {t("versionHistory")}
+        </span>
+      </header>
+      {!isEmpty && (
+        <p className="shrink-0 truncate whitespace-nowrap px-3 pb-2 pt-3 text-[11px] leading-none text-muted-foreground">
+          {t("selectAVersionToPreviewAndRestore")}
+        </p>
+      )}
       {isEmpty && indexLoading ? (
         <SkeletonList rows={6} icon={false} label={t("versionHistory")} className="px-2 py-1" />
       ) : isEmpty ? (
