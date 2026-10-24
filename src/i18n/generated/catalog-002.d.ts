@@ -112,8 +112,9 @@ declare module "../types" {
     "src/lib/webdavValidation.ts#localMessages:1": { "enterARemoteWebdavFolder": {  }; "enterAWebdavUrl": {  }; "invalidWebdavUrl": {  }; "publicWebdavServicesMustUseASecureHttpsConnection": {  }; "theParentFolderDoesnTExistMakeSureThe": {  }; "theRemoteWebdavFolderCanTContainBackslashes": {  }; "theRemoteWebdavFolderCanTContainEmptyPath": {  }; "theRemoteWebdavFolderCanTContainParentDirectory": {  }; "theRemoteWebdavFolderHasInvalidEncoding": {  }; "theWebdavUrlMustStartWithHttpOrHttps": {  } };
     "src/pages/quick-note/QuickNoteCollectPreview.tsx#localMessages:1": { "collected": {  }; "collecting": {  }; "collectingCount": { "count": string | number }; "collectionStatus": { "recent": string | number; "count": string | number }; "emptyCollection": {  }; "itemCount": { "count": string | number }; "sampleClip": { "number": string | number }; "simulate": {  }; "simulateOne": {  }; "stop": {  }; "stopAutoCollect": {  }; "stopCollect": {  } };
     "src/pages/quick-note/QuickNoteSlotSwitcher.tsx#localMessages:1": { "empty": { "name": string | number }; "occupied": { "name": string | number }; "renameHint": { "name": string | number }; "switchNote": {  } };
-    "src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1": { "close": {  }; "emptyNote": {  }; "fontSize": {  }; "helpLabel": {  }; "helpTitle": {  }; "pixels": { "size": string | number }; "renameLabel": {  }; "renameNamedLabel": { "name": string | number }; "renameSlot": { "slot": string | number }; "saveToNotes": {  } };
+    "src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1": { "close": {  }; "emptyNote": {  }; "fontSize": {  }; "helpLabel": {  }; "helpTitle": {  }; "pixels": { "size": string | number }; "renameSlot": { "slot": string | number }; "saveToNotes": {  } };
     "src/pages/quick-note/quick-note-app/useQuickNoteSaveActions.tsx#localMessages:1": { "openNotebook": {  }; "saveFailed": {  }; "saved": {  }; "savedButNotOpened": {  } };
+    "src/pages/quick-note/quick-note-app/useQuickNoteWindowTitle.ts#localMessages:1": { "fallback": {  } };
     "src/pages/quick-note/quickNoteHelpCopy.ts#localMessages:1": { "helpSlots": {  }; "helpSwitch": { "shortcut": string | number } };
     "src/pages/workspace/components/AIFeatureNotice.tsx#localMessages:1": { "chooseAProviderSaveYourSettingsAnd": {  }; "openSettings": {  }; "setUpLater": {  }; "setUpTheAiWritingAssistant": {  } };
     "src/pages/workspace/components/ReadingPreferences.tsx#localMessages:1": { "aLittleSpaceBetweenTheLinesMakes": {  }; "giveYourWordsRoomToBreathe": {  }; "lineSpacing": {  }; "lineSpacingPresets": {  }; "livePreview": {  }; "readingPreview": {  }; "relaxed": {  }; "standard": {  }; "textSize": {  }; "times": {  }; "writeDownSomethingWorthRememberingTodayThere": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ai-cards/CalculatorCard.tsx#messages:1": { "invalidFormula": {  } };
     "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
     "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
-    "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
   }
 }

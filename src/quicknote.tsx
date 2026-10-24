@@ -1,17 +1,6 @@
-import { createTranslator, i18nYaml, subscribeLanguage } from "@/i18n/core";
-const entryText = createTranslator(i18nYaml<"src/quicknote.tsx#block1:1">`
-zh-Hans:
-  title: 速记
-en:
-  title: Quick Note
-ja:
-  title: "クイックノート"
-`);
-const updateTitle = () => { document.title = entryText("title"); };
-updateTitle();
-subscribeLanguage(updateTitle);
 /**
  * 速记小窗入口（独立 browser 窗口加载 quicknote.html → 本文件）。
+ * 窗口标题由 useQuickNoteWindowTitle 写成当前笔记本名，这里不再覆盖成「速记」。
  *
  * 复用主窗的 bootstrap，但以 lean 模式启动（host fs + 设置/字体 + 保存守卫），
  * 跳过主应用专属的重活（加载全部笔记/迁移/恢复/AI 记录），加速小窗冷启动。

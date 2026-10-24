@@ -1,4 +1,4 @@
-import { getAssetMaintenanceWindow, getQuicknoteWindow, getSearchWindow, lookupWindowContext } from "../windows";
+import { getAssetMaintenanceWindow, getSearchWindow, lookupWindowContext } from "../windows";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { getLanguageSnapshot, saveLanguagePreference } from "./store";
 import { setLanguageSnapshot } from "../../../src/i18n/core";
@@ -21,7 +21,6 @@ export function registerLanguageIpc(): void {
     for (const win of BrowserWindow.getAllWindows()) {
       if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
         try {
-          if (win === getQuicknoteWindow()) win.setTitle(attachmentText("quicknoteTitle"));
           if (win === getSearchWindow()) win.setTitle(attachmentText("searchTitle"));
           if (win === getAssetMaintenanceWindow()) win.setTitle(attachmentText("cleanupTitle"));
         } catch (error) { console.error("[i18n] Could not refresh window title", error); }

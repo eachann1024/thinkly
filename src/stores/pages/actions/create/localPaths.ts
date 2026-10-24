@@ -8,6 +8,7 @@ import {
 } from "@/lib/local-page-idmap";
 import type { StoreGet } from "../hydrate";
 import { UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
+import { duplicateSuffixName } from "@/lib/duplicateName";
 
 export function generateLocalPageId(
   notebookId: string,
@@ -93,12 +94,12 @@ export async function allocateLocalMarkdownFilePath(
     let suffix = 1;
     while (
       await checkExists(
-        `${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`,
+        `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`,
       )
     ) {
       suffix++;
     }
-    filePath = `${normalizedBaseDir}/${normalizedTitle} (${suffix}).md`;
+    filePath = `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`;
   }
   return filePath;
 }

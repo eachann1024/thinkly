@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import { cancelTabDrag, finishTabDrag, previewTabDrag } from "../tabDock";
 import { endWindowMove, startWindowMove } from "../windowMove";
 import {
@@ -20,6 +20,14 @@ export function registerWindowsIpc(): void {
   ipcMain.handle("desktop:setTitle", async (event, t: string) => {
     const win = senderWindow(event);
     if (win && !win.isDestroyed()) win.setTitle(t ?? "");
+  });
+
+  ipcMain.handle("desktop:otherWindowTitles", (event) => {
+    const self = senderWindow(event);
+    return BrowserWindow.getAllWindows()
+      .filter((win) => win !== self && !win.isDestroyed())
+      .map((win) => win.getTitle().trim())
+      .filter((title) => title.length > 0);
   });
 
   ipcMain.handle("desktop:getAlwaysOnTop", async (event) => {
