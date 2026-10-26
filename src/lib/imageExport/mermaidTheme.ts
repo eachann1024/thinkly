@@ -12,6 +12,7 @@ export interface MermaidInitOptions {
   securityLevel?: "strict" | "loose" | "antiscript";
   fontFamily?: string;
   useMaxWidth?: boolean;
+  exportTypography?: boolean;
 }
 
 const LIGHT = {
@@ -144,7 +145,21 @@ export function getMermaidInitConfig(options: MermaidInitOptions) {
       ...getMermaidThemeVariables(options.mode),
       fontFamily,
     },
-    themeCSS: timelineCss(options.mode),
+    themeCSS: timelineCss(options.mode) + (options.exportTypography ? `
+foreignObject, foreignObject div, foreignObject span, foreignObject p, .label, .nodeLabel, .edgeLabel {
+  font-family: ${fontFamily} !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+.label p, .nodeLabel p, .edgeLabel p {
+  margin: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  max-width: 280px;
+}
+` : ""),
     timeline: {
       useMaxWidth,
       disableMulticolor: true,

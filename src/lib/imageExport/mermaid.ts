@@ -88,6 +88,7 @@ export async function renderMermaidSvgForExport(
     securityLevel: "loose",
     fontFamily: MERMAID_FONT,
     useMaxWidth: false,
+    exportTypography: true,
   }, "export");
   return isMermaidTimeline(source) ? svg : hardenMermaidSvg(svg);
 }
