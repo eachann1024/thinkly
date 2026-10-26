@@ -29,7 +29,13 @@
   flex-direction: column;
   gap: 8px;
   overflow: hidden;
-  line-height: 1.6;
+  font-size: var(--goose-type-footnote);
+  line-height: var(--goose-leading-footnote);
+}
+
+.quicknote-help-title {
+  font-size: var(--goose-type-body);
+  line-height: var(--goose-leading-body);
 }
 
 .quicknote-help-heading {

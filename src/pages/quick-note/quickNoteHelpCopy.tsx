@@ -29,7 +29,7 @@ function withShortcutKeys(text: string, shortcuts: Record<string, string>, platf
   return text.split(/(\{\w+\})/g).map((part, index) => {
     const shortcut = shortcuts[part];
     return shortcut
-      ? <Kbd key={index} shortcut={shortcut} platform={platform} variant="default" />
+      ? <Kbd key={index} shortcut={shortcut} platform={platform} variant="inline" className="font-sans text-[length:inherit]" />
       : part;
   });
 }
