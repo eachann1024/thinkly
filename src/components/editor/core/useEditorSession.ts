@@ -1,3 +1,4 @@
+import { openEditorLink } from "../utils/openEditorLink";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { useCreateBlockNote } from "@blocknote/react";
 import {
@@ -29,6 +30,7 @@ export function useEditorSession(editable: boolean) {
     onOpenPage,
     getActivePageLocalFilePath,
     getActivePageLocalFolderRoot,
+    onOpenLocalLink,
     onOpenMarkdownPath,
     onOpenAttachment,
     getLatestPage,
@@ -57,6 +59,8 @@ export function useEditorSession(editable: boolean) {
   getActivePageLocalFilePathRef.current = getActivePageLocalFilePath;
   const getActivePageLocalFolderRootRef = useRef(getActivePageLocalFolderRoot);
   getActivePageLocalFolderRootRef.current = getActivePageLocalFolderRoot;
+  const onOpenLocalLinkRef = useRef(onOpenLocalLink);
+  onOpenLocalLinkRef.current = onOpenLocalLink;
   const onOpenMarkdownPathRef = useRef(onOpenMarkdownPath);
   onOpenMarkdownPathRef.current = onOpenMarkdownPath;
   const onOpenAttachmentRef = useRef(onOpenAttachment);
@@ -91,6 +95,13 @@ export function useEditorSession(editable: boolean) {
   const editorInstanceRef = useRef<ReturnType<
     typeof useCreateBlockNote
   > | null>(null);
+
+  const openLink = useCallback((url: string) => openEditorLink(
+    url, editorInstanceRef.current, platformRef.current, {
+      getActivePageLocalFilePath: () => getActivePageLocalFilePathRef.current(),
+      onOpenLocalLink: (path, fragment) => onOpenLocalLinkRef.current?.(path, fragment) ?? Promise.resolve(false),
+    },
+  ), []);
 
   const usesRawEditorContent = contentMode === "raw";
   const usesRawEditorContentRef = useRef(usesRawEditorContent);
@@ -129,6 +140,7 @@ export function useEditorSession(editable: boolean) {
   }, []);
 
   return {
+    openLink,
     settings,
     theme,
     searchProviders,

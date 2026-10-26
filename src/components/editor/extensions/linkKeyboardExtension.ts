@@ -1,7 +1,6 @@
 import { createExtension } from "@blocknote/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import { getEditorPlatform } from "@/components/editor/platform/context";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import {
   isPlatformPrimaryModifierEvent,
@@ -62,13 +61,6 @@ export function isLinkShortcutClaimedByApp(
   return false;
 }
 
-function normalizeExternalUrl(url: string): string {
-  const trimmed = url.trim();
-  if (!trimmed) return "";
-  if (/^www\./i.test(trimmed)) return `https://${trimmed}`;
-  return trimmed;
-}
-
 const linkArmedPluginKey = new PluginKey("goose-link-armed");
 
 function createLinkArmedPlugin() {
@@ -82,7 +74,7 @@ function createLinkArmedPlugin() {
   });
 }
 
-export const createGooseLinkKeyboardExtension = () =>
+export const createGooseLinkKeyboardExtension = (openLink: (url: string) => Promise<void>) =>
   createExtension({
     key: "goose-link-keyboard",
     prosemirrorPlugins: [createLinkArmedPlugin()],
@@ -113,12 +105,7 @@ export const createGooseLinkKeyboardExtension = () =>
       "Alt-Enter": ({ editor }) => {
         const url = editor.getSelectedLinkUrl();
         if (url) {
-          const target = normalizeExternalUrl(url);
-          if (target) {
-            void getEditorPlatform().shell.openUrl(
-              target,
-            );
-          }
+          void openLink(url);
           return true;
         }
         return false;
