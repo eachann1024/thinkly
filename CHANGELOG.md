@@ -1,5 +1,11 @@
 # 更新日志
 
+## 1.7.333
+
+- Fix code language picker current selection and remove grouping
+- Remove page and callout entries from slash menus
+- keep slash menus anchored when flipping above
+
 ## 1.7.332
 
 ### 2026-10-27 · 编辑与回顾
