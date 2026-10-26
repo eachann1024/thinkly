@@ -1,4 +1,4 @@
-export const PAGE_MENTION_TRIGGERS = ["@", "[[", "+"] as const;
+export const PAGE_MENTION_TRIGGERS = ["@"] as const;
 export type PageMentionTrigger = (typeof PAGE_MENTION_TRIGGERS)[number];
 
 export function isPageMentionBoundaryChar(charBefore: string): boolean {
@@ -10,17 +10,12 @@ export function findActivePageMentionQuery(textBefore: string): {
   trigger: PageMentionTrigger;
   query: string;
 } | null {
-  const candidates = PAGE_MENTION_TRIGGERS.map((trigger) => ({
-    trigger, atIndex: textBefore.lastIndexOf(trigger),
-  })).sort((a, b) => b.atIndex - a.atIndex);
-  for (const { trigger, atIndex } of candidates) {
-    if (atIndex < 0 || (trigger !== "[[" && !isPageMentionBoundaryChar(textBefore.charAt(atIndex - 1)))) continue;
-    const query = textBefore.slice(atIndex + trigger.length);
-    if (/[\r\n\ufffc\u200b]/.test(query) || query.includes("]]")) continue;
-    if (trigger === "[[" && /[\[\]]/.test(query)) continue;
-    return { atIndex, trigger, query };
-  }
-  return null;
+  const trigger = PAGE_MENTION_TRIGGERS[0];
+  const atIndex = textBefore.lastIndexOf(trigger);
+  if (atIndex < 0 || !isPageMentionBoundaryChar(textBefore.charAt(atIndex - 1))) return null;
+  const query = textBefore.slice(atIndex + trigger.length);
+  if (/[\r\n\ufffc\u200b]/.test(query)) return null;
+  return { atIndex, trigger, query };
 }
 
 export function mentionTriggerDeleteRange(
