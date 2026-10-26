@@ -3,15 +3,15 @@ import type JSZipNs from "jszip";
 import { importFromMarkdown, type ImportResult } from "../markdown/parse";
 import { loadAssetsFromFolder } from "./importAssets";
 import type { NotebookImportCallbacks, BundledAssetRestorer } from "./types";
+import { isImportableNotebookPagePath } from "./importPagePath";
 
 export async function importFolderZip(zip: JSZipNs, callbacks: NotebookImportCallbacks, restoreBundledAssets: BundledAssetRestorer) {
   const { onCreateNotebook, onCreatePage } = callbacks;
   const topLevelEntries = new Set<string>();
-  zip.forEach((path) => {
+  zip.forEach((path, entry) => {
+    if (entry.dir || !isImportableNotebookPagePath(path)) return;
     const parts = path.split("/");
-    if (parts.length > 1 && parts[0] !== "assets") {
-      topLevelEntries.add(parts[0]);
-    }
+    topLevelEntries.add(parts[0]);
   });
 
   for (const notebookName of topLevelEntries) {
@@ -25,7 +25,7 @@ export async function importFolderZip(zip: JSZipNs, callbacks: NotebookImportCal
 
     const files: { path: string; depth: number }[] = [];
     zip.forEach((path, entry) => {
-      if (!entry.dir && path.startsWith(notebookPathPrefix)) {
+      if (!entry.dir && path.startsWith(notebookPathPrefix) && isImportableNotebookPagePath(path)) {
         const relativePath = path.slice(notebookPathPrefix.length);
         if (relativePath.startsWith("assets/")) return;
         files.push({
