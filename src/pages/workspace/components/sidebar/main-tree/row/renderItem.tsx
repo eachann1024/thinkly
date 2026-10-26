@@ -38,6 +38,10 @@ import { PendingCreateNameInput } from "./PendingCreateNameInput";
 import { MainTreeRowTitle } from "./MainTreeRowTitle";
 import { writeFolderDrag, writePageDrag } from "@/lib/workspace-drag";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import {
+  consumeMainTreeDragPress,
+  mainTreeDragPressProps,
+} from "./mainTreeDragActivation";
 
 export let activeMainTreeDragId: string | null = null;
 
@@ -105,6 +109,11 @@ export function renderItem({
   );
 
   const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
+    if (!consumeMainTreeDragPress(e.currentTarget)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     if (!e.dataTransfer) return;
     activeMainTreeDragId = String(item.index);
     onItemDragStart?.(String(item.index));
@@ -212,6 +221,7 @@ export function renderItem({
 }
       <div
         {...interactive}
+        {...mainTreeDragPressProps}
         data-main-tree-folder={item.isFolder ? "true" : "false"}
         onClick={handleRowClick}
         onPointerDown={handleRowPointerDown}
