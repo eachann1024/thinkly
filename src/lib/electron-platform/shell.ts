@@ -30,7 +30,7 @@ export const shell = {
     void getGooseDesktop()?.writeImage?.(dataUrl);
   },
   showNotification: (body: string) => {
-    void getGooseDesktop()?.notify({ title: common("productName"), body });
+    void getGooseDesktop()?.notify({ title: common("productName"), body }).catch((error: unknown) => console.error("[notifications] delivery failed", error));
   },
   openUrl: (url: string) => {
     void getGooseDesktop()?.openUrl(url);
