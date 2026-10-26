@@ -184,7 +184,7 @@
   gap: 6px;
   height: 32px;
   min-height: 32px;
-  margin-top: 8px;
+  margin-top: 0;
   padding-inline: var(--goose-menu-content-gap);
   border-radius: var(--goose-control-radius, 8px);
   background-color: color-mix(in srgb, var(--goose-accent-solid, hsl(var(--primary))) 10%, transparent);
