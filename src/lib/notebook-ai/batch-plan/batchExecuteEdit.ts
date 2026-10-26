@@ -64,6 +64,7 @@ export async function executeEditOperation(
       plannedContent(operation, working),
       {
         expectedNotebookId: operationNotebookId(working, operation),
+        animate: true,
         expectedRevision: before.revision,
       },
     );
