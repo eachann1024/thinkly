@@ -1,9 +1,10 @@
-import { getToolProgressStepText } from "./toolProgressText";
+import { ToolProgressStep } from "./ToolProgressStep";
 import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
 import { readObject } from "./toolProgressValues";
+import { finalizeToolProgressSteps, type ToolProgressFacts } from "./toolProgressFacts";
 export { getToolProgressStepText } from "./toolProgressText";
 import { isHiddenSkillPart } from "./toolProgressVisibility";
-import { toInfoCard, type WebResultsCardData } from "@/lib/notebook-ai/cards/types";
+import { type WebResultsCardData } from "@/lib/notebook-ai/cards/types";
 
 export interface ToolProgressPart {
   type: string;
@@ -16,6 +17,7 @@ export interface ToolProgressPart {
 }
 
 export interface ProgressStep {
+  id?: string;
   label: string;
   detail: string;
   webResults?: WebResultsCardData;
@@ -80,20 +82,23 @@ export function buildToolProgressSteps(
   isMessageStreaming?: boolean,
   completion?: NotebookAiCompletion,
 ): ProgressStep[] {
-  return parts
-    .filter((part) => !isHiddenSkillPart(part))
-    .map((part) => {
-      const status = getToolProgressStepStatus(part, isMessageStreaming);
-      const interrupted = completion && completion !== "complete";
-      const step: ProgressStep = {
-        ...getToolProgressStepText(part),
-        status: interrupted && (status === "running" || status === "waiting")
-          ? "cancelled" : status,
-      };
-      if (part.type !== "tool-searchWeb" || part.state !== "output-available") return step;
-      const card = toInfoCard("searchWeb", part.output);
-      return card?.kind === "webResults" ? { ...step, webResults: card } : step;
-    });
+  const steps: ProgressStep[] = new Array(parts.length);
+  const facts: ToolProgressFacts = { total: 0, hasWaiting: false, hasRunning: false };
+  const interrupted = Boolean(completion && completion !== "complete");
+  for (const part of parts) {
+    if (isHiddenSkillPart(part)) continue;
+    const rawStatus = getToolProgressStepStatus(part, isMessageStreaming);
+    const status = interrupted && (rawStatus === "running" || rawStatus === "waiting") ? "cancelled" : rawStatus;
+    const step = new ToolProgressStep(part, status);
+    steps[facts.total++] = step;
+    if (status === "done") facts.lastDone = step;
+    else if (status === "running") { facts.lastRunning = step; facts.hasRunning = true; }
+    else if (status === "waiting") facts.hasWaiting = true;
+    else if (status === "error" && !facts.firstError) facts.firstError = step;
+  }
+  steps.length = facts.total;
+  facts.lastStep = steps.at(-1);
+  return finalizeToolProgressSteps(steps, facts);
 }
 
 function buildSummary(steps: ProgressStep[]) {

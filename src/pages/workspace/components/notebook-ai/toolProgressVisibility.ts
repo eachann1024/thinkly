@@ -12,7 +12,7 @@ export type ToolDisplayPart = {
 
 const CARD_TOOL_PARTS = new Set<string>(CARD_TOOL_NAMES.map((name) => `tool-${name}`));
 
-function isVisualArtifactPart(part: ToolDisplayPart) {
+export function isVisualArtifactPart(part: ToolDisplayPart) {
   return (
     CARD_TOOL_PARTS.has(part.type) ||
     part.type === "tool-showChart" ||
@@ -41,14 +41,13 @@ export function shouldShowToolProgress(
   parts: ToolDisplayPart[],
   isMessageStreaming: boolean,
 ) {
-  const visibleParts = parts.filter((part) => !isHiddenSkillPart(part));
-  if (visibleParts.length === 0) return false;
-  if (isMessageStreaming) {
-    if (visibleParts.every(isCanvasArtifactPart)) return false;
-    return true;
+  for (const part of parts) {
+    if (isHiddenSkillPart(part)) continue;
+    if (isMessageStreaming) {
+      if (!isCanvasArtifactPart(part)) return true;
+    } else if (part.state === "output-error" || part.errorText || !isVisualArtifactPart(part)) {
+      return true;
+    }
   }
-  return visibleParts.some((part) => {
-    if (part.state === "output-error" || part.errorText) return true;
-    return !isVisualArtifactPart(part);
-  });
+  return false;
 }

@@ -22,6 +22,10 @@ import {
 import { isNotebookAiToolPart } from "@/lib/notebook-ai/messageUtils";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import {
+  isVisualArtifactPart,
+  type ToolDisplayPart,
+} from "./toolProgressVisibility";
+import {
   createAiMessageProjector,
   type AssistantUiMessageProjection,
 } from "./aiMessageProjection";
@@ -85,6 +89,14 @@ function convertNotebookAiMessage(
     }
 
     if (!isNotebookAiToolPart(part)) continue;
+    const displayPart = part as ToolDisplayPart;
+    if (
+      displayPart.type !== "tool-executeBatchPlan" &&
+      displayPart.type !== "tool-showTable" &&
+      !isVisualArtifactPart(displayPart)
+    ) {
+      continue;
+    }
     const args = toJsonObject(part.input);
     content.push({
       type: "tool-call",
