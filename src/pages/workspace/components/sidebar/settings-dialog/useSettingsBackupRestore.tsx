@@ -41,7 +41,7 @@ export function useSettingsBackupRestore(
   input: ReturnType<typeof useSettingsImportExport>,
 ) {
   useLocale();
-  const { notebooks, pages, format, createNotebook } = input;
+  const { format, createNotebook } = input;
 
   const clearCurrentContent = async (options?: {
     preserveLocalFolders?: boolean;
