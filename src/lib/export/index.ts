@@ -31,10 +31,6 @@ import type { Page } from "@/types";
 import type { CustomFonts } from "@/stores/useSettings";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
-import {
-  pickImportFile,
-  saveDocumentBlobAndReveal,
-} from "./documentFileDialogs";
 
 type BlockNoteSerializer = typeof import("./blocknoteSerializer");
 type MarkdownParser = typeof import("./markdown/parse");
@@ -115,6 +111,7 @@ async function exportPage(
   pdfBlob?: Blob,
 ) {
   const { blob, filename } = await buildSinglePageExport(page, format, pdfBlob);
+  const { saveDocumentBlobAndReveal } = await import("./documentFileDialogs");
   return saveDocumentBlobAndReveal(blob, filename);
 }
 
@@ -196,6 +193,7 @@ export async function importFile(options?: {
     error,
   });
   try {
+    const { pickImportFile } = await import("./documentFileDialogs");
     const file = await pickImportFile([
       { name: uiText("noteFiles"), extensions: ["json", "md", "markdown", "txt"] },
     ]);
