@@ -22,7 +22,7 @@ export function useEditorPresentation(
   hiddenSlashItemTitles?: string[],
 ) {
   const locale = useLocale();
-  const { editor, aiSettingsRef, settingsRef, page, onOpenPageRef, theme } =
+  const { editor, settingsRef, page, onOpenPageRef, theme } =
     runtime;
   const getSlashItems = useCallback(
     async (query: string) => {
@@ -30,7 +30,6 @@ export function useEditorPresentation(
       if (commands) return commands;
       let items = getBlockNoteSlashMenuItems(
         editor,
-        aiSettingsRef.current.enabled,
         settingsRef.current.features,
         { compact: isQuickNoteEditorPage(page), defaultCodeBlockWrap: settingsRef.current.defaultCodeBlockWrap },
       );
