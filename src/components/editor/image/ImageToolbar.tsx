@@ -1,6 +1,5 @@
 import { EditorAction } from "@/components/editor/ui/button";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { ImageEditControls } from "./ImageEditControls";
 import { getBlockToolbarOwner } from "../core/blockToolbarOwner";
 import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import {
@@ -228,7 +227,6 @@ export function ImageToolbar({
           ))}
 
           <div className="goose-block-toolbar-separator" />
-          <ImageEditControls editor={editor} blockId={selectedImage.blockId} />
 
           <ImageToolButton
             label={openImageLabel}
