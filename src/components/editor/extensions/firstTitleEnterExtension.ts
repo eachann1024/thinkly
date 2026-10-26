@@ -1,11 +1,5 @@
 import { createExtension } from "@blocknote/core";
 import type { BlockNoteEditor } from "@blocknote/core";
-import {
-  getSectionInsertAnchorId,
-  isFoldableHeadingBlock,
-  readHeadingCollapsed,
-} from "@/components/editor/core/headingSectionFold";
-import { isToggleBlock } from "../core/toggleBlocks";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 
 const EMPTY_PARAGRAPH = { type: "paragraph" as const, content: [] };
@@ -60,7 +54,6 @@ function applyHeadingEnter(
     }
   }
   if (!headingBlock || headingBlock.type !== "heading") return false;
-  if (isToggleBlock(headingBlock)) return false;
 
   const offset = $from.parentOffset;
   const contentSize = $from.parent.content.size;
@@ -77,20 +70,6 @@ function applyHeadingEnter(
 
   if (atStart && (!isFirstTitle || contentSize > 0)) {
     return insertEmptyParagraphBeforeHeading(editor, headingBlock);
-  }
-
-  if (
-    readHeadingCollapsed(headingBlock) &&
-    isFoldableHeadingBlock(headingBlock, firstBlockId)
-  ) {
-    const anchorId = getSectionInsertAnchorId(
-      editor.document as any,
-      headingBlock.id,
-    );
-    const anchor = editor.getBlock(anchorId) ?? headingBlock;
-    const handled = insertEmptyParagraphAfter(editor, anchor);
-    editor.focus();
-    return handled;
   }
 
   if (!isFirstTitle) return false;

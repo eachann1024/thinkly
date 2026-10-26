@@ -74,7 +74,7 @@ function getBlockTrigger(
   if (headingLevel) {
     return {
       type: "heading",
-      props: { level: headingLevel, isToggleable: false, collapsed: false },
+      props: { level: headingLevel },
       triggerText: textBefore,
     };
   }

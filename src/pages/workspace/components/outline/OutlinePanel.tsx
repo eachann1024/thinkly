@@ -3,17 +3,14 @@ import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/outline/OutlinePanel.tsx#localMessages:1">`
 zh-Hans:
-  collapsedHeading: "H{{level}} {{text}}，已收起"
   heading: "H{{level}} {{text}}"
   noHeadingsInThisNote: "正文暂无标题"
   documentOutline: "文档大纲"
 en:
-  collapsedHeading: "H{{level}} {{text}}, collapsed"
   heading: "H{{level}} {{text}}"
   noHeadingsInThisNote: "No headings in this note"
   documentOutline: "Document outline"
 ja:
-  collapsedHeading: "H{{level}} {{text}}、折りたたみ済み"
   heading: "H{{level}} {{text}}"
   noHeadingsInThisNote: "本文に見出しがありません"
   documentOutline: "ドキュメントのアウトライン"
@@ -37,7 +34,6 @@ interface OutlinePanelProps {
   headings: HeadingItem[];
   activeId: string | null;
   onHeadingClick: (blockId: string) => void;
-  onHeadingToggle: (blockId: string) => void;
   emptyMessage?: string;
   emptyHint?: string | null;
 }
@@ -46,7 +42,6 @@ export function OutlinePanel({
   headings,
   activeId,
   onHeadingClick,
-  onHeadingToggle,
   emptyMessage = uiText("noHeadingsInThisNote"),
   emptyHint = null,
 }: OutlinePanelProps) {
@@ -93,7 +88,6 @@ export function OutlinePanel({
               itemHeight={itemHeight}
               locallyCollapsedIds={locallyCollapsedIds}
               onHeadingClick={onHeadingClick}
-              onHeadingToggle={onHeadingToggle}
               onToggleLocalOutline={toggleLocalOutline}
             />
           ))}
@@ -110,7 +104,6 @@ function OutlineTreeNode({
   itemHeight,
   locallyCollapsedIds,
   onHeadingClick,
-  onHeadingToggle,
   onToggleLocalOutline,
 }: {
   heading: HeadingItem;
@@ -119,14 +112,12 @@ function OutlineTreeNode({
   itemHeight: number;
   locallyCollapsedIds: Set<string>;
   onHeadingClick: (blockId: string) => void;
-  onHeadingToggle: (blockId: string) => void;
   onToggleLocalOutline: (blockId: string) => void;
 }) {
   useLocale();
   const isActive = activeId === heading.id;
   const [hovered, setHovered] = useState(false);
   const canToggleOutline = heading.children.length > 0;
-  const isEditorCollapsed = heading.isEditorFoldable && heading.isCollapsed;
   const isOutlineCollapsed = locallyCollapsedIds.has(heading.id);
   const toggleOutline = () => onToggleLocalOutline(heading.id);
 
@@ -136,7 +127,6 @@ function OutlineTreeNode({
         active={isActive}
         hovered={!isActive && hovered}
         className="outline-heading-row text-foreground"
-        data-collapsed={isEditorCollapsed ? "true" : undefined}
         style={
           {
             paddingLeft: depth * MAIN_TREE_INDENT + MAIN_TREE_ROW_PADDING_LEFT,
@@ -145,11 +135,6 @@ function OutlineTreeNode({
         }
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        onContextMenu={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onHeadingToggle(heading.id);
-        }}
       >
         <OutlineHeadingMarker
           level={heading.level}
@@ -163,7 +148,7 @@ function OutlineTreeNode({
           onClick={() => onHeadingClick(heading.id)}
           aria-current={isActive ? "location" : undefined}
           aria-label={
-            uiText(isEditorCollapsed ? "collapsedHeading" : "heading", {level: heading.level, text: heading.text})
+            uiText("heading", {level: heading.level, text: heading.text})
           }
           className={cn(
             "outline-heading relative z-10 min-w-0 flex-1 truncate text-left leading-snug",
@@ -183,7 +168,6 @@ function OutlineTreeNode({
               itemHeight={itemHeight}
               locallyCollapsedIds={locallyCollapsedIds}
               onHeadingClick={onHeadingClick}
-              onHeadingToggle={onHeadingToggle}
               onToggleLocalOutline={onToggleLocalOutline}
             />
           ))}

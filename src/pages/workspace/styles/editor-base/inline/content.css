@@ -173,9 +173,7 @@
 
 .workspace-editor-surface
   .bn-block:has(
-    > .bn-block-content[data-content-type="heading"]:not(
-        [data-is-toggleable="true"]
-      )
+    > .bn-block-content[data-content-type="heading"]
   )
   > .bn-block-children {
   padding-left: 0.5em;

@@ -21,9 +21,7 @@ export function useEditorLocale(
     const rule = (suffix: string, content: string | undefined) =>
       `${selector}${suffix}:has(.ProseMirror-trailingBreak:only-child):after { content: ${JSON.stringify(content ?? "")}; }`;
     const { default: defaultText, emptyDocument, ...blocks } = getEditorPlaceholders(profile);
-    const toggleHeading = `[${attribute}="${id}"].bn-editor:focus .bn-block-content[data-content-type="heading"][data-is-toggleable="true"][data-is-empty-and-focused] .bn-inline-content:has(> .ProseMirror-trailingBreak:only-child)::before`;
     style.textContent = [
-      `${toggleHeading} { content: ${JSON.stringify(blocks.heading ?? defaultText ?? "")}; }`,
       rule("[data-is-empty-and-focused]", defaultText),
       ...(emptyDocument === undefined ? [] : [rule("[data-is-only-empty-block]", emptyDocument)]),
       ...Object.entries(blocks).filter(([, text]) => text !== undefined)
