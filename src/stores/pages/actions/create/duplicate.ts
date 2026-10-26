@@ -10,33 +10,17 @@ ja:
 import type { StoreSet, StoreGet } from "../hydrate";
 import { flushEditorContent } from "../flushEditor";
 import { useNotebooks } from "../../../useNotebooks";
-import {
-  mergeLocalPageSettingsIntoFrontmatter,
-  mergeSettingsIntoFrontmatterHeader,
-} from "@/lib/local-frontmatter";
+import { mergeLocalPageSettingsIntoFrontmatter } from "@/lib/local-frontmatter";
 import { toast } from "@/components/ui/sonner";
-import {
-  extractFrontmatter,
-  decodeUnsupportedMarkdownForDisk,
-} from "@/lib/markdown-raw-guard";
-import { encodeLocalBlockPropsWrappers } from "@/lib/export/markdown/blockPropsMarker";
-import { stripNoteMetaBlob } from "@/lib/export/markdown/noteMeta";
 import { cloneLocalPageContent } from "./content";
-import {
-  applyTrailingNewlineStyle,
-  markSelfWrite,
-  setLocalMdSnapshot,
-} from "@/lib/local-md-snapshot";
-import {
-  readLocalPageIdMap,
-  toRelativePath,
-  resolveOrCreateStableId,
-  writeLocalPageIdMap,
-} from "@/lib/local-page-idmap";
+import { readLocalPageIdMap, toRelativePath, writeLocalPageIdMap } from "@/lib/local-page-idmap";
 import type { Page } from "@/types";
 import { persistPageSnapshot } from "../../persistence";
 import { v4 as uuidv4 } from "uuid";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
+import { preserveLocalEditorDraft } from "./recovery";
+import { queueLocalPageCreation } from "./localCreationQueue";
+import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 
 export const duplicatePageAction = async (
   set: StoreSet,
@@ -56,179 +40,81 @@ export const duplicatePageAction = async (
     const fs = window.gooseFs;
     if (!fs) return id;
 
-    const sourcePath = sourcePage.localFilePath;
-    const isWindows = sourcePath.includes("\\") && !sourcePath.includes("/");
-    const slash = isWindows ? "\\" : "/";
-    const lastSlash = Math.max(
-      sourcePath.lastIndexOf("/"),
-      sourcePath.lastIndexOf("\\"),
-    );
-    const dir = lastSlash >= 0 ? sourcePath.slice(0, lastSlash) : "";
-    const fileName =
-      lastSlash >= 0 ? sourcePath.slice(lastSlash + 1) : sourcePath;
-    const dotIdx = fileName.lastIndexOf(".");
-    const baseName = dotIdx > 0 ? fileName.slice(0, dotIdx) : fileName;
-    const ext = dotIdx > 0 ? fileName.slice(dotIdx) : ".md";
-
-    const checkExists = async (path: string): Promise<boolean> => {
-      if (fs.existsAsync) {
-        return await fs.existsAsync(path);
-      }
-      return fs.exists?.(path) ?? false;
-    };
-
-    let copyIndex = 1;
-    let candidateName = `${baseName}_副本${ext}`;
-    let candidatePath = dir ? `${dir}${slash}${candidateName}` : candidateName;
-
-    while (
-      (await checkExists(candidatePath)) ||
-      Object.values(get().pages).some(
-        (p) =>
-          p.localFilePath === candidatePath ||
-          p.localFilePath?.replace(/\\/g, "/") ===
-            candidatePath.replace(/\\/g, "/"),
-      )
-    ) {
-      copyIndex += 1;
-      candidateName = `${baseName}_副本 ${copyIndex}${ext}`;
-      candidatePath = dir ? `${dir}${slash}${candidateName}` : candidateName;
-    }
-
-    const copySettings = {
-      fontFamily: sourcePage.fontFamily ?? "default",
-      pageLayout: sourcePage.pageLayout,
-      isLocked: Boolean(sourcePage.isLocked),
-      isPinned: false,
-      isFavorite: false,
-    };
-    const copyFmMerge = mergeLocalPageSettingsIntoFrontmatter(
-      sourcePage.localFrontmatter,
-      copySettings,
-    );
-    if (copyFmMerge.parseFailed) {
-      toast.error(storeText("invalidFrontmatterCopy"));
-      return id;
-    }
-    let copyFrontmatterBlob = copyFmMerge.blob;
-
-    let fileContent = "";
-    let rawMd: string | null = null;
-    try {
-      if (fs.readFileAsync) {
-        rawMd = await fs.readFileAsync(sourcePath);
-      } else if (fs.readFile) {
-        rawMd = fs.readFile(sourcePath);
-      }
-    } catch {
-    }
-    try {
-      if (rawMd != null) {
-        const headerMerge = mergeSettingsIntoFrontmatterHeader(
-          rawMd,
-          copySettings,
-        );
-        if (headerMerge) {
-          fileContent = headerMerge.markdown;
-          copyFrontmatterBlob = headerMerge.frontmatter;
-        } else {
-          const { body } = extractFrontmatter(rawMd);
-          fileContent = copyFrontmatterBlob
-            ? `${copyFrontmatterBlob}\n\n${body}`
-            : body;
-        }
-      }
-    } catch {
-      toast.error(storeText("invalidFrontmatterCopy"));
-      return id;
-    }
-
-    if (!fileContent) {
-      const { blocksToMarkdown } = await import("@/lib/export");
-      const markdownContent = await blocksToMarkdown(
-        encodeLocalBlockPropsWrappers(
-          cloneLocalPageContent(sourcePage.content) as any,
-        ),
-      );
-      let headerMerge;
-      try {
-        headerMerge = mergeSettingsIntoFrontmatterHeader(
-          markdownContent,
-          copySettings,
-        );
-      } catch {
+    return queueLocalPageCreation(notebook.id, async () => {
+      const source = get().pages[id];
+      if (!source || source.localReadState === "error" || !source.localFilePath) return id;
+      const sourcePath = source.localFilePath.replace(/\\/g, "/");
+      const slash = sourcePath.lastIndexOf("/");
+      const directory = sourcePath.slice(0, slash);
+      const fileName = sourcePath.slice(slash + 1);
+      const dot = fileName.lastIndexOf(".");
+      const baseName = dot > 0 ? fileName.slice(0, dot) : fileName;
+      const extension = dot > 0 ? fileName.slice(dot) : ".md";
+      let suffix = 1;
+      let candidatePath: string;
+      do {
+        candidatePath = `${directory}/${baseName}_副本${suffix === 1 ? "" : ` ${suffix}`}${extension}`;
+        const occupied = Object.values(get().pages).some((page) =>
+          page.localFilePath?.replace(/\\/g, "/") === candidatePath);
+        const exists = occupied || await (fs.existsAsync ? fs.existsAsync(candidatePath) : fs.exists(candidatePath));
+        if (!exists) break;
+        suffix++;
+      } while (true);
+      const copySettings = {
+        fontFamily: source.fontFamily ?? "default",
+        pageLayout: source.pageLayout,
+        isLocked: Boolean(source.isLocked),
+        isPinned: false,
+        isFavorite: false,
+      };
+      const frontmatter = mergeLocalPageSettingsIntoFrontmatter(source.localFrontmatter, copySettings);
+      if (frontmatter.parseFailed) {
         toast.error(storeText("invalidFrontmatterCopy"));
         return id;
       }
-      if (headerMerge) {
-        fileContent = headerMerge.markdown;
-        copyFrontmatterBlob = headerMerge.frontmatter;
-      } else {
-        copyFrontmatterBlob = stripNoteMetaBlob(copyFrontmatterBlob);
-        fileContent = copyFrontmatterBlob
-          ? `${copyFrontmatterBlob}\n\n${markdownContent}`
-          : markdownContent;
+      const newId = uuidv4();
+      const now = Date.now();
+      const copied: Page = {
+        ...source,
+        ...copySettings,
+        id: newId,
+        localFilePath: candidatePath,
+        localFrontmatter: frontmatter.blob,
+        localMetadataId: undefined,
+        localMetadataRevision: undefined,
+        editorDraft: undefined,
+        localUnsaved: undefined,
+        localPendingCreate: undefined,
+        content: cloneLocalPageContent(source.content),
+        pinnedAt: undefined,
+        favoriteOrder: undefined,
+        createdAt: now,
+        updatedAt: now,
+        order: (source.order ?? 0) + 1,
+        localReadState: "ready",
+        localReadError: undefined,
+      };
+      set((state) => ({ pages: { ...state.pages, [newId]: copied } }));
+      let saved = false;
+      try {
+        saved = await get().saveLocalPageContent(newId, copied.content, { force: true, createOnly: true });
+      } catch {
       }
-    }
-
-    const diskContent = applyTrailingNewlineStyle(
-      candidatePath,
-      decodeUnsupportedMarkdownForDisk(fileContent),
-    );
-
-    markSelfWrite(candidatePath);
-    const writeOk = fs.writeFileAsync
-      ? await fs.writeFileAsync(candidatePath, diskContent)
-      : fs.writeFile
-        ? fs.writeFile(candidatePath, diskContent)
-        : false;
-    if (!writeOk) return id;
-
-    setLocalMdSnapshot(candidatePath, diskContent);
-
-    const basePath = notebook.localPath || "";
-    const idMap = readLocalPageIdMap(notebook.id);
-    const relativePath = toRelativePath(basePath, candidatePath);
-    const { id: newId, dirty } = resolveOrCreateStableId(
-      notebook.id,
-      relativePath,
-      idMap,
-    );
-    if (dirty) {
+      if (!saved) {
+        preserveLocalEditorDraft(set, get, newId, candidatePath);
+        return id;
+      }
+      const idMap = readLocalPageIdMap(notebook.id);
+      const relative = toRelativePath(notebook.localPath!, candidatePath);
+      idMap[relative] = newId;
       writeLocalPageIdMap(notebook.id, idMap);
-    }
-
-    const now = Date.now();
-    const clonedContent = cloneLocalPageContent(sourcePage.content);
-
-    const newPage: Page = {
-      ...sourcePage,
-      id: newId,
-      workspaceId: notebook.id,
-      parentId: sourcePage.parentId,
-      localFilePath: candidatePath,
-      localFrontmatter: copyFrontmatterBlob,
-      content: clonedContent,
-      isPinned: false,
-      pinnedAt: undefined,
-      isFavorite: false,
-      favoriteOrder: undefined,
-      createdAt: now,
-      updatedAt: now,
-      order: (sourcePage.order ?? 0) + 1,
-      localReadState: "ready",
-      localReadError: undefined,
-    };
-
-    set((state) => ({
-      pages: {
-        ...state.pages,
-        [newId]: newPage,
-      },
-    }));
-
-    persistPageSnapshot(get().pages[newId]);
-    return newId;
+      const persisted = get().pages[newId];
+      if (persisted) {
+        persistPageSnapshot(persisted);
+        appendLocalFolderOrderEntries(notebook.id, [persisted]);
+      }
+      return newId;
+    });
   }
 
   let newId = "";
