@@ -72,7 +72,7 @@ export function getCommandSlashItems(
   if (turn) {
     if (!canConvertBlock(editor, editor.getTextCursorPosition().block)) return [];
     const q = (turn[1] ?? "").trim().toLowerCase();
-    return BLOCK_CONVERSIONS.filter((target) => `${target.label} ${aliases[target.type]}`.toLowerCase().includes(q))
+    return BLOCK_CONVERSIONS.filter((target) => target.type !== "callout" && `${target.label} ${aliases[target.type]}`.toLowerCase().includes(q))
       .map((target) => ({
         title: t("turnIntoBlock", { label: target.label }),
         onItemClick: () => {
