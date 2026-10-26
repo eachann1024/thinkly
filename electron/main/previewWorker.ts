@@ -85,6 +85,7 @@ function validate(request: MermaidPreviewRequest) {
       (o.securityLevel !== undefined && !["strict", "loose", "antiscript"].includes(o.securityLevel)) ||
       (o.fontFamily !== undefined && (typeof o.fontFamily !== "string" || o.fontFamily.length > 4096)) ||
       (o.useMaxWidth !== undefined && typeof o.useMaxWidth !== "boolean") ||
+      (o.exportTypography !== undefined && typeof o.exportTypography !== "boolean") ||
       (request.fontIdentity !== undefined && (typeof request.fontIdentity !== "string" || request.fontIdentity.length > 65536))) {
     throw new Error(t("invalidRequest"));
   }
