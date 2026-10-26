@@ -1,4 +1,5 @@
 import { gooseContainedBlockSurface } from "../extensions/containedBlockSurface";
+import { goosePlaceholderExtension } from "../extensions/placeholderExtension";
 import { gooseContainedBlockKeyboard } from "../extensions/containedBlockKeyboard";
 import { useMemo } from "react";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
@@ -104,6 +105,7 @@ export function useEditorExtensions(session: EditorSession) {
   // Editor transactions must commit synchronously, including selection updates.
   // View-transition callbacks defer dispatch and leave stale DOM under rapid input.
   return [
+    goosePlaceholderExtension(),
     createGooseFirstTitleGuardExtension(usesRawEditorContentRef),
     createGooseBodyParagraphGuardExtension(usesRawEditorContentRef),
     gooseSuppressMarkdownInSpecialBlocksExtension,

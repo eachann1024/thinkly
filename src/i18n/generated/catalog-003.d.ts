@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
     "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
     "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1": { "pinWindow": {  }; "unpinWindow": {  } };
     "src/pages/workspace/components/search-sheet/SearchSheet.tsx#localMessages:1": { "allNotebooks": {  }; "askAi": {  }; "clearSearch": {  }; "currentNotebook": {  }; "enableAiAnswers": {  }; "hide": {  }; "loadMoreResults": {  }; "newLine": {  }; "noMatchingNotes": {  }; "noteCount": { "count": string | number }; "notes": {  }; "open": {  }; "recentlyOpened": {  }; "searchAllNotebooks": {  }; "searchCurrentNotebook": {  }; "searchNotes": {  }; "searchNotesOrAskAi": {  }; "searchResults": {  }; "searching": {  }; "select": {  }; "someNotebooksCouldnTBeRead": {  }; "splitOpen": {  }; "switchScope": {  }; "switchScopeHint": { "name": string | number }; "tryAgain": {  } };
     "src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1": { "backToResults": {  }; "continueInAiPanel": {  }; "jumpToLatest": {  }; "sources": {  } };
-    "src/pages/workspace/components/search-sheet/SearchSheetFilters.tsx#localMessages:1": { "allNotebooks": {  }; "bestMatch": {  }; "currentNamed": { "name": string | number }; "currentNotebook": {  }; "notebookRemoved": {  }; "recentlyEdited": {  }; "searchScope": { "scope": string | number }; "searchTitlesOnly": {  }; "sortBy": { "sort": string | number } };
   }
 }

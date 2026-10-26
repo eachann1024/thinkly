@@ -8,6 +8,7 @@ import { parseAiMarkdownToBlocks } from "@/lib/notebook-ai/markdown";
 import type { CardActions } from "../../ai-cards/cardActions";
 import { CARD_SEND_EVENT, hasCardSend, takeCardSend } from "../cardSendQueue";
 import { insertArtifactBlocks } from "../insertArtifact";
+import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
 
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/usePanelCardActions.ts#messages:1">`
 zh-Hans:
@@ -40,7 +41,7 @@ export function usePanelCardActions({ notebookId, conversationId, isBusy, ready,
     const blocks = parseAiMarkdownToBlocks(markdown) as PartialBlock[];
     void insertArtifactBlocks(editorRef, blocks).then(result => {
       if (result.ok) toast.success(t("inserted"));
-      else toast.error(result.error);
+      else toast.error(localizeNotebookAiDiagnostic(result.error));
     });
   }, [editorRef]);
 

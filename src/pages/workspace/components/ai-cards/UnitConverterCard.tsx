@@ -29,7 +29,7 @@ ja:
 const t = createTranslator(messages);
 
 function unitName(unit: UnitDef) {
-  const name = getLocale() === "zh-Hans" ? unit.zh : unit.en;
+  const name = ({ "zh-Hans": unit.zh, en: unit.en, ja: unit.ja })[getLocale()];
   return name === unit.symbol ? name : `${name} (${unit.symbol})`;
 }
 
