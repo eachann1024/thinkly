@@ -229,20 +229,22 @@ export function ToolProgressCard({
             </p>
           ) : null}
           {showTraceRow ? (
-            <WorkCardTraceRow
-              foldable={foldable}
-              open={open}
-              label={traceLabel}
-              thinkingLine={thinkingLine}
-              running={showProcessing}
-              onToggle={() => setOpen((value) => !value)}
-            />
+            <div className={cn("notebook-ai-work-trace", foldable && "notebook-ai-work-trace--foldable")}>
+              <WorkCardTraceRow
+                foldable={foldable}
+                open={open}
+                label={traceLabel}
+                thinkingLine={thinkingLine}
+                running={showProcessing}
+                onToggle={() => setOpen((value) => !value)}
+              />
+              <AnimatePresence initial={false}>
+                {foldable && open ? (
+                  <ToolProgressSteps key="steps" steps={steps} statusLabel={stepStatusLabel} />
+                ) : null}
+              </AnimatePresence>
+            </div>
           ) : null}
-          <AnimatePresence initial={false}>
-            {foldable && open ? (
-              <ToolProgressSteps key="steps" steps={steps} statusLabel={stepStatusLabel} />
-            ) : null}
-          </AnimatePresence>
           {children ? (
             <div
               className={cn(

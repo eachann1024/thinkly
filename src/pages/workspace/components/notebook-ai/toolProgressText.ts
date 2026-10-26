@@ -35,7 +35,7 @@ export function getToolProgressStepText(
   if (part.type === "tool-loadSkill") {
     const skillLabel = getSkillProgressLabel(part);
     return {
-      get label() { return withSubject(t("loadCapability"), skillLabel); },
+      get label() { return skillLabel || t("loadCapability"); },
       detail: outputError ? formatNotebookAiError(outputError) : output ? t("detailLoadedCapability", { value1: skillLabel }) : t("detailLoadingCapability", { value1: skillLabel }),
     };
   }
