@@ -1,5 +1,5 @@
 import { LEGACY_SETTING_KEYS, NOTE_ID_KEY, splitFrontmatter, readIdentity } from "@/lib/note-metadata/identity";
-import { settingsOnlySaveToken } from "@/lib/note-metadata/settingsSave";
+import { settingsOnlySaveToken, isBlockMetadataOnlySave } from "@/lib/note-metadata/settingsSave";
 import { findNoteMetadata } from "@/lib/note-metadata/lookup";
 import { reanchorNoteMeta } from "@/lib/note-metadata/reanchor";
 import { prepareNoteMetadata as prepareDiskMetadata } from "@/lib/note-metadata/codec";
@@ -15,6 +15,7 @@ import { canonicalRelativePath } from "@/lib/canonicalLocalPath";
 
 export async function serializeLocalSave(page: Page, filePath: string, markdownContent: string) {
   const settingsSaveToken = settingsOnlySaveToken(page.id);
+  const blockMetadataOnly = isBlockMetadataOnlySave(page.id, settingsSaveToken);
   const settings = {
     fontFamily: page.fontFamily ?? "default",
     pageLayout: page.pageLayout,
@@ -45,7 +46,10 @@ export async function serializeLocalSave(page: Page, filePath: string, markdownC
       if (raw === null) throw new Error("Cannot read settings baseline");
       const existing = await findNoteMetadata(window.gooseFs, root, raw, filePath);
       metadata = await prepareDiskMetadata(raw, identity, settings);
-      if (existing) metadata.payload.meta = reanchorNoteMeta(existing.current.markdown, raw, existing.current.meta);
+      if (blockMetadataOnly) {
+        const changed = await prepareNoteMetadata(decodeUnsupportedMarkdownForDisk(legacyMarkdown), identity, settings);
+        metadata.payload.meta = reanchorNoteMeta(changed.cleanMarkdown, metadata.cleanMarkdown, changed.payload.meta);
+      } else if (existing) metadata.payload.meta = reanchorNoteMeta(existing.current.markdown, raw, existing.current.meta);
       const { document } = splitFrontmatter(raw);
       if (![NOTE_ID_KEY, "goose-note", ...LEGACY_SETTING_KEYS].some(key => document.has(key))) {
         metadata.cleanMarkdown = raw;

@@ -1,4 +1,4 @@
-import { markSettingsOnlySave, settingsOnlySaveToken } from "@/lib/note-metadata/settingsSave";
+import { markSettingsOnlySave, settingsOnlySaveToken, isSidecarOnlyBlockChange } from "@/lib/note-metadata/settingsSave";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/slices/updateSlice.ts#block1:1">`
 zh-Hans:
@@ -104,7 +104,9 @@ export function createUpdatePageSlice(
         showRecoveryJournalFailure(id, baseSignature, baseUpdatedAt, get, isLocal ? recoverySettings(page) : undefined);
       }
       if (!silent && (isSettingsEdit || "content" in updates)) {
-        markSettingsOnlySave(id, isSettingsEdit && !("content" in updates) && (!get().dirtyLocalPageIds[id] || settingsOnlySaveToken(id) !== undefined));
+        const blockMetadataOnly = hasSidecarRoot && "content" in updates && isSidecarOnlyBlockChange(page.content, updates.content);
+        const onlyMetadata = blockMetadataOnly || isSettingsEdit && !("content" in updates);
+        markSettingsOnlySave(id, onlyMetadata && (!get().dirtyLocalPageIds[id] || settingsOnlySaveToken(id) !== undefined), blockMetadataOnly ? true : undefined);
       }
       const shouldMergeFrontmatterSettings =
         isSettingsEdit && !hasSidecarRoot;

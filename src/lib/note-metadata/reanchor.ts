@@ -1,3 +1,4 @@
+import { parseDocument } from "yaml";
 import { markdownToJsonContent } from "@/lib/export/markdown/parse/block";
 import { splitGeneratedMarkdown, type NoteMeta, type NoteNest } from "@/lib/export/markdown/noteMeta";
 
@@ -9,7 +10,16 @@ type ParsedBlock = {
 };
 
 function fingerprint(block: ParsedBlock): string {
-  return JSON.stringify([block.type, block.props ?? {}, block.content ?? null]);
+  let content: unknown = block.content ?? null;
+  if (block.type === "codeBlock" && block.props?.language === "yaml-frontmatter" && typeof content === "string") {
+    const document = parseDocument(content);
+    if (!document.errors.length) {
+      const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical)
+        : value && typeof value === "object" ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, canonical(item)])) : value;
+      content = canonical(document.toJS());
+    }
+  }
+  return JSON.stringify([block.type, block.props ?? {}, content]);
 }
 
 function buckets(values: string[]): Map<string, number[]> {
@@ -41,6 +51,14 @@ function mapLevel(
 ): void {
   const oldKeys = previous.map(fingerprint);
   const newKeys = current.map(fingerprint);
+  if (oldKeys.length === newKeys.length && oldKeys.every((key, index) => key === newKeys[index])) {
+    previous.forEach((block, index) => {
+      const oldPath = pathAt(previousParent, index), newPath = pathAt(currentParent, index);
+      paths.set(oldPath, newPath);
+      mapLevel(block.children ?? [], current[index].children ?? [], oldPath, newPath, paths);
+    });
+    return;
+  }
   const oldBuckets = buckets(oldKeys);
   const newBuckets = buckets(newKeys);
   const oldContexts = buckets(oldKeys.map((_, at) => context(oldKeys, at)));
