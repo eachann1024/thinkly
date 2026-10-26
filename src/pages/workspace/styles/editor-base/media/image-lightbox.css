@@ -16,6 +16,13 @@
   background: hsl(var(--background));
 }
 
+.goose-image-lightbox-mac .yarl__toolbar {
+  padding-left: var(--electron-traffic-inset, 96px);
+}
+
+.goose-image-lightbox-frameless .yarl__toolbar {
+  padding-right: 0;
+}
 
 .goose-image-lightbox .yarl__slide {
   padding-top: calc(var(--goose-preview-toolbar-height) + 24px);
