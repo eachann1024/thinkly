@@ -43,7 +43,6 @@ export function useAISettingsDraft({
     dispatchRequests(event);
   }, []);
   const savingCustomConfig = isModelRequestBusy(requests.models);
-  const customSaveError = requests.models.status === "failed" ? requests.models.message : null;
   const testingConnection = requests.test.status === "testing";
   const connectionTestResult = requests.test.status === "testing" ? "idle" : requests.test.status;
   const connectionTestMessage = "message" in requests.test ? requests.test.message : "";
@@ -170,7 +169,6 @@ export function useAISettingsDraft({
     sendRequestEvent,
     dismissModelError,
     savingCustomConfig,
-    customSaveError,
     apiKeyVisible,
     setApiKeyVisible,
     testingConnection,
