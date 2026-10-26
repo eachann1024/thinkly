@@ -1,5 +1,6 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
+import type { NoteSettings } from "@/lib/note-metadata/contract";
+import { getHistorySettings } from "./settings";
 
 const defaultProps: Record<string, unknown> = {
   backgroundColor: "default",
@@ -41,8 +42,9 @@ export function getHistoryContentSignature(content: BlockNoteContent): string {
 export function getHistoryVisibleSignature(
   content: BlockNoteContent,
   localFrontmatter?: string,
+  explicitSettings?: NoteSettings,
 ): string {
-  const settings = parseLocalFrontmatterBlob(localFrontmatter).settings;
+  const settings = getHistorySettings(explicitSettings, localFrontmatter);
   return JSON.stringify({
     content: getHistoryContentSignature(content),
     settings,
