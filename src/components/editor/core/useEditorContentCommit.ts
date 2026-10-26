@@ -7,6 +7,7 @@ import {
 } from "@/components/editor/utils/blocknote-content";
 import { commitPendingEditorChange } from "./editorPendingCommit";
 import { getCachedContentSignature } from "./editorContentPolicy";
+import { flushSettingsContentChange } from "./settingsContentFlush";
 import type { EditorRuntime } from "./useEditorSession";
 
 export function useEditorContentCommit(runtime: EditorRuntime) {
@@ -44,7 +45,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
   }, [readCurrentEditorContent]);
 
   const commitEditorContent = useCallback(
-    (targetPageId?: string) => {
+    (targetPageId?: string, options?: { afterPaint?: boolean }) => {
       const safePageId = targetPageId ?? pageIdForUpdateRef.current;
       if (!safePageId) return;
       debouncedUpdate.cancel();
@@ -54,6 +55,21 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
       )
         return;
       const { content, signature } = readCurrentEditorContent();
+      if (options?.afterPaint) {
+        pendingEditorChangeRef.current = false;
+        const persisted = syncedContentSignatureRef.current;
+        const commit = onContentChangeRef.current;
+        flushSettingsContentChange({
+          pending: true,
+          signature,
+          persistedSignature: persisted,
+          persist: () => {
+            commit(content);
+            syncedContentSignatureRef.current = signature;
+          },
+        });
+        return;
+      }
       const result = commitPendingEditorChange({
         targetPageId: safePageId,
         currentPageId: pageIdForUpdateRef.current,
@@ -73,7 +89,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
 
   useEffect(() => {
     return () => {
-      commitEditorContent(pageIdForUpdateRef.current ?? undefined);
+      commitEditorContent(pageIdForUpdateRef.current ?? undefined, { afterPaint: true });
     };
   }, [commitEditorContent]);
 
