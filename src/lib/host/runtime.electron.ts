@@ -74,6 +74,11 @@ const watchStorage = (): void => {
   });
 };
 
+const revNum = (rev?: string): number => {
+  const value = Number(String(rev || "0").split("-")[0]);
+  return Number.isFinite(value) ? value : 0;
+};
+
 const loadDocuments = (): Record<string, HostDoc<unknown>> => {
   watchStorage();
   if (documents) return documents;
@@ -89,33 +94,43 @@ const loadDocuments = (): Record<string, HostDoc<unknown>> => {
     if (raw === null) continue;
     const parsed: unknown = JSON.parse(raw);
     if (!isDoc(id, parsed)) throw new Error("local-storage-invalid-document");
+    const current = docs[id];
+    if (current && revNum(parsed._rev) <= revNum(current._rev)) continue;
     docs[id] = parsed;
   }
   documents = docs;
   return docs;
 };
 
-const foldLibrary = (): void => {
-  if (!documents) return;
-  const store = storage();
-  const ids = [...touched];
-  const body = JSON.stringify(documents);
-  for (const id of ids) store.removeItem(DOC_PREFIX + id);
-  store.removeItem(OVERLAY_KEY);
-  store.setItem(MONOLITH_KEY, body);
-  touched.clear();
-  if (foldTimer) clearTimeout(foldTimer);
-  foldTimer = null;
-};
-
 const scheduleFold = (): void => {
   if (foldTimer) clearTimeout(foldTimer);
   foldTimer = setTimeout(() => {
     foldTimer = null;
-    try { foldLibrary(); } catch { /* 副本还在，下次保存再折回 */ }
+    try {
+      foldLibrary();
+    } catch (err) {
+      console.warn("[runtime.electron] 折回整库失败", err);
+      scheduleFold();
+    }
   }, 30_000);
   const timer = foldTimer as { unref?: () => void };
   timer.unref?.();
+};
+
+const foldLibrary = (): void => {
+  if (!documents) return;
+  const store = storage();
+  store.setItem(MONOLITH_KEY, JSON.stringify(documents));
+  try {
+    for (const id of [...touched]) store.removeItem(DOC_PREFIX + id);
+    store.removeItem(OVERLAY_KEY);
+    touched.clear();
+    if (foldTimer) clearTimeout(foldTimer);
+    foldTimer = null;
+  } catch (err) {
+    console.warn("[runtime.electron] 折回后清理副本失败", err);
+    scheduleFold();
+  }
 };
 
 const writeDoc = (id: string, doc: HostDoc<unknown> | null, state: "put" | "del"): boolean => {
@@ -131,21 +146,6 @@ const writeDoc = (id: string, doc: HostDoc<unknown> | null, state: "put" | "del"
   return true;
 };
 
-const rewriteTouched = (ids: string[]): void => {
-  if (!documents) return;
-  const store = storage();
-  const overlay: Overlay = {};
-  for (const id of ids) {
-    const doc = documents[id];
-    if (doc) {
-      store.setItem(DOC_PREFIX + id, JSON.stringify(doc));
-      overlay[id] = "put";
-    } else overlay[id] = "del";
-  }
-  if (Object.keys(overlay).length) store.setItem(OVERLAY_KEY, JSON.stringify(overlay));
-  for (const id of ids) touched.add(id);
-};
-
 const saveDoc = (
   id: string,
   doc: HostDoc<unknown> | null,
@@ -157,16 +157,19 @@ const saveDoc = (
     scheduleFold();
     return true;
   } catch (err) {
-    const ids = [...touched];
-    if (isQuota(err)) {
-      try {
-        foldLibrary();
-        return true;
-      } catch { /* 整库没写上，回到保存前的副本 */ }
+    if (!isQuota(err)) {
+      revert();
+      return false;
     }
-    revert();
-    try { rewriteTouched(ids); } catch { /* 内存已回到保存前 */ }
-    return false;
+    try {
+      foldLibrary();
+      return true;
+    } catch (foldErr) {
+      console.warn("[runtime.electron] 折回整库失败", foldErr);
+      scheduleFold();
+      revert();
+      return false;
+    }
   }
 };
 

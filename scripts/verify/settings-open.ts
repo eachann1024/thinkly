@@ -20,7 +20,8 @@ function memoryStorage() {
       return value ?? null;
     },
     setItem(key: string, value: string) {
-      if (api.blockCopies && key !== MONOLITH) {
+      const blocked = (api.blockCopies && key !== MONOLITH) || (api.blockMonolith && key === MONOLITH);
+      if (blocked) {
         const quota = new Error("quota");
         quota.name = "QuotaExceededError";
         throw quota;
@@ -33,6 +34,7 @@ function memoryStorage() {
       values.delete(key);
     },
     blockCopies: false,
+    blockMonolith: false,
     reset() {
       reads = 0;
       readBytes = 0;
@@ -69,8 +71,17 @@ export default function run(): number {
   );
 
   const storage = memoryStorage();
-  const windowRef = globalThis as { window?: { localStorage: typeof storage } };
-  windowRef.window = { localStorage: storage };
+  const listeners = new Set<(event: { key: string | null }) => void>();
+  const view = {
+    localStorage: storage,
+    addEventListener(type: string, fn: (event: { key: string | null }) => void) {
+      if (type === "storage") listeners.add(fn);
+    },
+    dropCache() {
+      for (const fn of listeners) fn({ key: MONOLITH });
+    },
+  };
+  (globalThis as { window?: typeof view }).window = view;
   const db: Record<string, { _id: string; _rev: string; data: { id: string; content: string } }> = {};
   const body = "x".repeat(4000);
   for (let i = 0; i < 240; i += 1) {
@@ -114,23 +125,58 @@ export default function run(): number {
     "删除一篇文档也不重写整库",
     removed.ok === true && storage.values.get(MONOLITH) === monolith && storage.writeBytes < 64_000 && hostRuntime.db.get("gn:hist:p:1") === null,
   );
+  const copyBefore = storage.values.get("thinkly:web-doc:gn:page:3");
+  const overlayBefore = storage.values.get("thinkly:web-db:overlay");
+  const monolithBefore = storage.values.get(MONOLITH);
   storage.blockCopies = true;
-  const currentFold = hostRuntime.db.get<{ content: string }>("gn:page:3");
-  const folded = hostRuntime.db.put("gn:page:3", {
-    ...currentFold?.data,
-    content: `${body}#`,
-  }, currentFold?._rev);
-  const foldedMap = JSON.parse(storage.values.get(MONOLITH) ?? "{}") as Record<string, { data?: { content?: string } }>;
+  storage.blockMonolith = true;
+  const warnings: unknown[][] = [];
+  const warn = console.warn;
+  console.warn = (...args: unknown[]) => { warnings.push(args); };
+  const failed = hostRuntime.db.put("gn:page:5", { id: "5", content: `${body}?` });
+  console.warn = warn;
+  storage.blockCopies = false;
+  storage.blockMonolith = false;
+  view.dropCache();
+  checker.check(
+    "整库写失败时保留副本，重新打开后删掉的文档仍然不在",
+    failed.ok === false && warnings.length > 0 &&
+      storage.values.get("thinkly:web-doc:gn:page:3") === copyBefore &&
+      storage.values.get("thinkly:web-db:overlay") === overlayBefore &&
+      storage.values.get(MONOLITH) === monolithBefore &&
+      hostRuntime.db.get<{ content: string }>("gn:page:3")?.data.content.endsWith("!") &&
+      hostRuntime.db.get("gn:hist:p:1") === null,
+  );
+  const copy = JSON.parse(storage.values.get("thinkly:web-doc:gn:page:3") ?? "null") as {
+    _id: string; _rev: string; data: { id: string; content: string };
+  };
+  const library = JSON.parse(storage.values.get(MONOLITH) ?? "{}") as Record<string, unknown>;
+  library["gn:page:3"] = { ...copy, data: { ...copy.data, content: `${body}=` } };
+  delete library["gn:hist:p:1"];
+  storage.values.set(MONOLITH, JSON.stringify(library));
+  storage.values.set("thinkly:web-doc:gn:hist:p:1", JSON.stringify({
+    _id: "gn:hist:p:1", _rev: "9-back", data: { id: "1", content: "back" },
+  }));
+  storage.values.set("thinkly:web-db:overlay", JSON.stringify({
+    "gn:page:3": "put",
+    "gn:hist:p:1": "del",
+  }));
+  view.dropCache();
+  checker.check(
+    "整库已写上但副本还没清时，重新打开与整库一致且删除仍然有效",
+    hostRuntime.db.get<{ content: string }>("gn:page:3")?.data.content.endsWith("=") &&
+      hostRuntime.db.get("gn:hist:p:1") === null,
+  );
+  const beforeBytes = [...storage.values.values()].reduce((sum, value) => sum + value.length, 0);
+  storage.blockCopies = true;
+  const dropped = hostRuntime.db.remove("gn:page:9");
+  const afterBytes = [...storage.values.values()].reduce((sum, value) => sum + value.length, 0);
+  const folded = storage.values.get(MONOLITH) ?? "";
   const copyLeft = [...storage.values.keys()].some((key) => key.startsWith("thinkly:web-doc:") || key === "thinkly:web-db:overlay");
   checker.check(
-    "配额不够时把这篇折回整库并清掉副本",
-    folded.ok === true && foldedMap["gn:page:3"]?.data?.content?.endsWith("#") && !copyLeft,
-  );
-  const dropped = hostRuntime.db.remove("gn:page:4");
-  const droppedMap = JSON.parse(storage.values.get(MONOLITH) ?? "{}") as Record<string, unknown>;
-  checker.check(
-    "配额不够时删除会从整库去掉这篇",
-    dropped.ok === true && !Object.hasOwn(droppedMap, "gn:page:4") && hostRuntime.db.get("gn:page:4") === null,
+    "成功折回后删除会释放整库空间",
+    dropped.ok === true && afterBytes < beforeBytes && !folded.includes("\"gn:page:9\"") &&
+      !copyLeft && hostRuntime.db.get("gn:page:9") === null,
   );
   return checker.failed;
 }
