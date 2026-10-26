@@ -199,8 +199,8 @@ export function EditorLayoutSettings() {
       >
         {(
           [
-            ["full", uiText("fullWidth_dc39")],
             ["standard", uiText("standard_544f")],
+            ["full", uiText("fullWidth_dc39")],
           ] as const
         ).map(([value, label]) => (
           <SelectableCard
