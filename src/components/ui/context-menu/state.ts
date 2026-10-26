@@ -1,7 +1,8 @@
 import * as React from "react";
-import { autoUpdate, flip, offset, safePolygon, shift, useDismiss, useFloating, useFloatingNodeId, useFloatingTree, useHover, useInteractions, useListNavigation, useRole, useTransitionStatus, useTypeahead } from "@floating-ui/react";
+import { autoUpdate, flip, offset, safePolygon, shift, useDismiss, useFloating, useFloatingNodeId, useFloatingParentNodeId, useFloatingTree, useHover, useInteractions, useListNavigation, useRole, useTransitionStatus, useTypeahead } from "@floating-ui/react";
 import { useReducedMotion } from "motion/react";
 import { FLOATING_MENU_CLOSE_MS, FLOATING_MENU_OPEN_MS, type FloatingMotionMode } from "../floating-menu-motion";
+import { subscribeToSiblingMenus } from "./menu-tree-events";
 
 function isDescendantNode(
   tree: ReturnType<typeof useFloatingTree>,
@@ -42,6 +43,7 @@ export function useMenuState(
   nested: boolean,
 ) {
   const nodeId = useFloatingNodeId();
+  const parentId = useFloatingParentNodeId();
   const tree = useFloatingTree();
   const keyboard = React.useRef(true);
   const reducedMotion = useReducedMotion();
@@ -111,6 +113,13 @@ export function useMenuState(
     tree?.events.on("context-menu-select", close);
     return () => tree?.events.off("context-menu-select", close);
   }, [tree, onOpenChange]);
+  React.useEffect(() => {
+    if (!nested || !tree) return;
+    return subscribeToSiblingMenus(tree.events, { nodeId, parentId }, () => onOpenChange(false));
+  }, [tree, nodeId, parentId, nested, onOpenChange]);
+  React.useEffect(() => {
+    if (open && nested) tree?.events.emit("menuopen", { nodeId, parentId });
+  }, [tree, nodeId, parentId, nested, open]);
   React.useEffect(() => {
     if (!open) return;
     const closeOnOutside = (event: Event) => {

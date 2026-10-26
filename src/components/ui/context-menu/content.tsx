@@ -5,6 +5,7 @@ import { floatingMenuMotionStyle } from "../floating-menu-motion";
 
 import { useMenu } from "./state";
 import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "../overlay-layer";
+import { MenuRootContent } from "../menu-root";
 
 type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   editorContext?: boolean;
@@ -51,6 +52,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
       "goose-menu-surface max-h-[calc(100dvh-16px)] overflow-y-auto overscroll-contain text-popover-foreground";
     return (
       <OverlayLayerProvider layer={layer}>
+      <MenuRootContent>
       <FloatingPortal>
         <FloatingFocusManager
           context={state.context}
@@ -102,6 +104,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
           </div>
         </FloatingFocusManager>
       </FloatingPortal>
+      </MenuRootContent>
       </OverlayLayerProvider>
     );
   },

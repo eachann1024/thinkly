@@ -15,6 +15,7 @@ import { Dropdown, Popover as HeroPopover, Separator } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
+import { MenuRootContent, MenuRootScopeContext, useMenuRoot } from "./menu-root";
 
 type DropdownVariant = "dropdown" | "menu";
 const DropdownVariantContext = React.createContext<DropdownVariant>("dropdown");
@@ -29,14 +30,16 @@ function DropdownMenu({
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }>) {
+  const [localOpen, setLocalOpen] = React.useState(defaultOpen ?? false);
+  const change = (next: boolean) => {
+    if (open === undefined) setLocalOpen(next);
+    onOpenChange?.(next);
+  };
+  const root = useMenuRoot(open ?? localOpen, change);
   return (
-    <Dropdown
-      isOpen={open}
-      defaultOpen={defaultOpen}
-      onOpenChange={onOpenChange}
-    >
-      {children}
-    </Dropdown>
+    <MenuRootScopeContext.Provider value={root}>
+      <Dropdown isOpen={root.open} onOpenChange={change}>{children}</Dropdown>
+    </MenuRootScopeContext.Provider>
   );
 }
 const DropdownMenuTrigger = React.forwardRef<
@@ -76,6 +79,7 @@ type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
   motion?: "default" | "instant";
   variant?: DropdownVariant;
   portalContainer?: Element;
+  isNonModal?: boolean;
 };
 const menuSurfaceClass =
   "goose-menu-surface text-popover-foreground";
@@ -95,6 +99,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
       motion = "default",
       variant = "dropdown",
       portalContainer,
+      isNonModal,
       ...props
     },
     ref,
@@ -105,9 +110,11 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
     return (
       <OverlayLayerProvider layer={layer}>
       <DropdownVariantContext.Provider value={variant}>
+      <MenuRootContent>
         <Dropdown.Popover
           {...props}
           UNSTABLE_portalContainer={portalContainer}
+          isNonModal={isNonModal}
           ref={ref}
           offset={sideOffset}
           crossOffset={alignOffset}
@@ -140,6 +147,7 @@ const DropdownMenuContent = React.forwardRef<HTMLElement, ContentProps>(
             {children}
           </Dropdown.Menu>
         </Dropdown.Popover>
+      </MenuRootContent>
       </DropdownVariantContext.Provider>
       </OverlayLayerProvider>
     );
