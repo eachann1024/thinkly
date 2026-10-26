@@ -4,6 +4,10 @@ import { NoteMetadataError } from "./contract";
 export async function replaceNoteMarkdown(
   fs: NoteMetadataFs, filePath: string, markdown: string, expected: string,
 ): Promise<boolean> {
+  if (markdown === expected && fs.readFileAsync) {
+    if (await fs.readFileAsync(filePath) !== expected) throw new NoteMetadataError("conflict", "Markdown changed during saving");
+    return true;
+  }
   if (fs.compareAndSwapFileAsync) {
     if (!await fs.compareAndSwapFileAsync(filePath, expected, markdown)) {
       throw new NoteMetadataError("conflict", "Markdown changed during saving");

@@ -68,6 +68,7 @@ export interface Page {
   localFrontmatter?: string;
   localMetadataRevision?: string | null;
   localMetadataId?: string;
+  localMetadataRoot?: string;
 
   outgoingLinks?: string[];
   incomingLinks?: string[];
