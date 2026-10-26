@@ -42,7 +42,6 @@ export function createDefaultPdfBlockMappings(): Record<
     bulletListItem: list,
     numberedListItem: list,
     checkListItem: list,
-    toggleListItem: list,
     heading: (block, context) => (
       <Text
         minPresenceAhead={24}
@@ -57,7 +56,6 @@ export function createDefaultPdfBlockMappings(): Record<
           marginTop: 8,
         }}
       >
-        {block.props?.isToggleable ? "▾ " : ""}
         {context.transformInlineContent(block.content)}
       </Text>
     ),
