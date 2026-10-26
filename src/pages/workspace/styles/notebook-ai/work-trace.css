@@ -1,0 +1,113 @@
+.notebook-ai-work-trace {
+ min-width: 0;
+ margin: 10px 0 2px;
+}
+
+.notebook-ai-work-trace--foldable {
+ padding: 0 10px;
+ overflow: hidden;
+ border-radius: var(--goose-control-radius);
+ background: var(--goose-interactive-hover);
+}
+
+.notebook-ai-work-trace--foldable .notebook-ai-work-toggle:is(:hover, :focus-visible) {
+ background: transparent;
+}
+
+.notebook-ai-work-card--running .notebook-ai-work-trace {
+ margin: 4px 0 0;
+}
+
+.notebook-ai-work-card--running .notebook-ai-work-toggle {
+ padding-top: 6px;
+ padding-bottom: 6px;
+ font-size: 12px;
+ line-height: 20px;
+}
+
+.notebook-ai-work-toggle {
+ display: flex;
+ width: 100%;
+ max-width: none;
+ min-height: 32px;
+ align-items: center;
+ gap: 8px;
+ margin: 0;
+ padding: 8px 0;
+ border: 0;
+ border-radius: var(--goose-control-radius);
+ background: transparent;
+ color: hsl(var(--muted-foreground));
+ font-size: 12.5px;
+ line-height: 1.4;
+ text-align: left;
+ cursor: pointer;
+}
+
+.notebook-ai-work-toggle-label {
+ min-width: 0;
+ flex: 1 1 auto;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+.notebook-ai-work-toggle:has(.notebook-ai-work-think) .notebook-ai-work-toggle-label {
+ flex: 0 1 auto;
+}
+
+.notebook-ai-work-think {
+ min-width: 0;
+ flex: 1 1 0;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+.notebook-ai-work-toggle--static {
+ cursor: default;
+}
+
+.notebook-ai-work-toggle--static:hover,
+.notebook-ai-work-toggle--static:focus-visible {
+ background: transparent;
+ color: hsl(var(--muted-foreground));
+}
+
+.notebook-ai-work-live {
+ margin: 12px 0 0;
+ font-size: 12.5px;
+ line-height: 1.4;
+ color: hsl(var(--muted-foreground));
+}
+
+.notebook-ai-work-chev {
+ display: block;
+ width: 14px;
+ height: 14px;
+ flex: 0 0 auto;
+ transform-origin: center;
+ transform-box: border-box;
+ transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.notebook-ai-work-toggle[aria-expanded="true"] .notebook-ai-work-chev {
+ transform: rotate(90deg);
+}
+
+.notebook-ai-work-steps {
+ margin: 0;
+ padding: 0;
+ width: 100%;
+ list-style: none;
+}
+
+.notebook-ai-work-steps > :last-child .notebook-ai-work-step {
+ padding-bottom: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .notebook-ai-work-chev {
+  transition: none;
+ }
+}
