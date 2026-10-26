@@ -64,8 +64,6 @@ export interface RecordSnapshotParams {
   trigger: HistoryTrigger;
   isMilestone?: boolean;
   label?: string;
-  /** Content count observed before editing, used when no prior version exists. */
-  initialCharCount?: number;
 }
 
 export type RecordHistorySnapshotResult =
@@ -105,9 +103,6 @@ async function recordHistorySnapshotUnlocked(
   const charCount = countWords(content);
   const charDelta = charCount - index.lastVersionCharCount;
   const latestEntry = index.versions[index.versions.length - 1];
-  const editCharDelta = latestEntry
-    ? charDelta
-    : params.initialCharCount === undefined ? undefined : charCount - params.initialCharCount;
   const localFrontmatter = page?.localFrontmatter;
   const settings = page ? getPageHistorySettings(page) : undefined;
 
@@ -167,7 +162,6 @@ async function recordHistorySnapshotUnlocked(
     label,
     charCount,
     charDelta,
-    ...(editCharDelta !== undefined ? { editCharDelta } : {}),
     size,
     content,
     ...(localFrontmatter !== undefined ? { localFrontmatter } : {}),
@@ -184,7 +178,6 @@ async function recordHistorySnapshotUnlocked(
     label,
     charCount,
     charDelta,
-    ...(editCharDelta !== undefined ? { editCharDelta } : {}),
     size,
   };
 
