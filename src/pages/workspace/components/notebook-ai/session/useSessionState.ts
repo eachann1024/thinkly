@@ -69,7 +69,7 @@ export function useSessionState(notebookId: string) {
   );
 
   const ai = useSettings((state) => state.ai);
-  const modelCheck = buildLanguageModel();
+  const modelCheck = useMemo(() => buildLanguageModel(), [ai]);
 
   const chat = getSessionChat(session.notebookId, conversationId);
   const {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchSession } from "../sidebar/useSearchSession";
-import { getLoadedSearchSheet, loadSearchSheet, preloadSearchSheet } from "./searchSheetLoader";
+import { getLoadedSearchSheet, loadSearchSheet } from "./searchSheetLoader";
 
 export function LazySearchSheet(props: { aiNotebookId: string | null }) {
   const open = useSearchSession((state) => state.view.phase !== "closed");
@@ -8,14 +8,6 @@ export function LazySearchSheet(props: { aiNotebookId: string | null }) {
   const [resolved, setResolved] = useState(getLoadedSearchSheet);
   const [loadError, setLoadError] = useState<unknown>(null);
   const ready = resolved ?? getLoadedSearchSheet();
-  useEffect(() => {
-    if (typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(preloadSearchSheet, { timeout: 1500 });
-      return () => cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(preloadSearchSheet, 1500);
-    return () => window.clearTimeout(id);
-  }, []);
   useEffect(() => {
     if (!open || ready) return;
     let cancelled = false;

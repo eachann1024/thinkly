@@ -1,13 +1,11 @@
-import { lazy, Suspense, useCallback, useState, type ReactNode, type RefObject } from "react";
+import { Suspense, useCallback, useState, type ReactNode, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { NotebookAiSessionContext } from "./session/context";
 import type { NotebookAiSessionValue } from "./session/types";
 
-const NotebookAiSessionBinder = lazy(() =>
-  import("./NotebookAiSessionBinder").then((mod) => ({
-    default: mod.NotebookAiSessionBinder,
-  })),
-);
+import { notebookAiSession } from "./notebookAiLoader";
+
+const NotebookAiSessionBinder = notebookAiSession.Component;
 
 export { useNotebookAiSession } from "./session/context";
 export {
