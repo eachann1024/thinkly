@@ -8,6 +8,8 @@ import { ImageToolbar } from "./ImageToolbar";
 import { useLightboxSlides } from "./useLightboxSlides";
 import { useLightboxActions } from "./useLightboxActions";
 import { useSelectedImage } from "./useSelectedImage";
+import { getLightboxWindowChrome } from "./lightboxWindowChrome";
+import { WinWindowControls } from "@/pages/workspace/components/page/WinWindowControls";
 import type { ImageLightboxProps } from "./lightboxTypes";
 import { OverlayLayerProvider, useModalLayer, useOverlayTopLayer } from "@/components/ui/overlay-layer";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
@@ -15,7 +17,7 @@ const messages = i18nYaml<"src/components/editor/image/ImageLightbox.tsx#message
 zh-Hans:
   zoomIn: "放大"
   zoomOut: "缩小"
-  close: "关闭"
+  close: "关闭图片预览"
   nextImage: "下一张"
   previousImage: "上一张"
   imagePreview: "图片预览"
@@ -24,7 +26,7 @@ zh-Hans:
 en:
   zoomIn: "Zoom in"
   zoomOut: "Zoom out"
-  close: "Close"
+  close: "Close image preview"
   nextImage: "Next image"
   previousImage: "Previous image"
   imagePreview: "Image preview"
@@ -33,7 +35,7 @@ en:
 ja:
   zoomIn: "拡大"
   zoomOut: "縮小"
-  close: "閉じる"
+  close: "画像プレビューを閉じる"
   nextImage: "次の画像"
   previousImage: "前の画像"
   imagePreview: "画像プレビュー"
@@ -60,6 +62,7 @@ export function ImageLightbox({
   } = useLightboxSlides(editorContainerRef);
   const layer = useModalLayer(open);
   const topLayer = useOverlayTopLayer(layer);
+  const windowChrome = getLightboxWindowChrome(editorContainerRef.current);
   const portalContainer = {
     style: { zIndex: layer },
     "data-react-aria-top-layer": topLayer || undefined,
@@ -127,7 +130,7 @@ export function ImageLightbox({
           carousel={{ finite: slides.length <= 1, padding: "48px" }}
           controller={{ closeOnBackdropClick: true, closeOnPullDown: true }}
           animation={{ fade: 220, swipe: 280 }}
-          className="goose-image-lightbox"
+          className={`goose-image-lightbox${windowChrome ? ` goose-image-lightbox-${windowChrome}` : ""}`}
           portal={{ container: portalContainer }}
           toolbar={{
             buttons: [
@@ -153,6 +156,7 @@ export function ImageLightbox({
                 <Copy size={18} strokeWidth={1.75} />
               </EditorAction>,
               "close",
+              ...(windowChrome === "frameless" ? [<WinWindowControls key="window-controls" />] : []),
             ],
           }}
           render={{
