@@ -13,6 +13,8 @@ export interface CodeBlockToolbarProps {
   onDownloadPreview?: () => void;
   onCopyPreview?: () => void | Promise<void>;
   canPreview?: boolean;
+  collapsed?: boolean;
+  onCollapsedChange?: () => void;
 }
 
 export interface CodeCopyState {

@@ -12,11 +12,22 @@ export function findBlockHandleContent(root: HTMLElement, blockId: string): HTML
 /** Measure one text fragment, never every wrapped line of a potentially large block. */
 export function blockHandleFirstLineCenter(content: HTMLElement): number | undefined {
   if (content.dataset.contentType === "codeBlock") {
-    // The caption remains the handle's anchor even when the code wraps or collapses.
-    const caption = content.querySelector<HTMLElement>(".goose-code-toolbar-left");
-    if (!caption || caption.closest(".bn-block-content") !== content) return undefined;
-    const bounds = caption.getBoundingClientRect();
-    return bounds.height > 0 ? bounds.top + bounds.height / 2 : undefined;
+    // The handle follows the first code line (the legend chip now straddles the top border).
+    const node = content.querySelector<HTMLElement>(".goose-code-block-node");
+    if (!node || node.closest(".bn-block-content") !== content) return undefined;
+    const nodeBounds = node.getBoundingClientRect();
+    if (nodeBounds.height <= 0) return undefined;
+    if (node.dataset.collapsed === "true") {
+      const legends = node.querySelector<HTMLElement>(".goose-code-toolbar-left")?.getBoundingClientRect();
+      return legends && legends.height > 0 ? legends.top + legends.height / 2 : nodeBounds.top + nodeBounds.height / 2;
+    }
+    const pre = node.querySelector<HTMLElement>(".goose-code-pre:not(.goose-code-pre-hidden)");
+    if (pre) {
+      const style = getComputedStyle(pre);
+      const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.7;
+      return pre.getBoundingClientRect().top + (parseFloat(style.paddingTop) || 0) + lineHeight / 2;
+    }
+    return nodeBounds.top + 24;
   }
   if (["image", "video", "audio", "file", "table"].includes(content.dataset.contentType ?? "")) return undefined;
   const inline = content.querySelector<HTMLElement>(".bn-inline-content");

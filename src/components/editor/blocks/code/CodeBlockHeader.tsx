@@ -1,22 +1,15 @@
-import * as GooseIcons from "@/components/ui/icons";
-import { Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
-import { cn } from "@/lib/utils";
 import { CodeBlockToolbar } from "./CodeBlockToolbar";
+import { CodeLanguagePicker } from "./CodeLanguagePicker";
+import { LANGUAGE_DISPLAY_NAMES } from "./codeBlockLanguages";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1">`
 zh-Hans:
-  expandCodeBlock: "展开代码块"
-  collapseCodeBlock: "折叠代码块"
   addCodeCaption: "添加代码说明"
 en:
-  expandCodeBlock: "Expand code block"
-  collapseCodeBlock: "Collapse code block"
   addCodeCaption: "Add code caption"
 ja:
-  expandCodeBlock: "コードブロックを展開"
-  collapseCodeBlock: "コードブロックを折りたたむ"
   addCodeCaption: "コードの説明を追加"
 `;
 const t = createTranslator(messages);
@@ -56,32 +49,34 @@ export function CodeBlockHeader({
     handleDownloadPreview,
     handleCopyPreview,
   } = preview;
+  const displayLanguage = isVisualBlock
+    ? visualTitle
+    : language
+      ? LANGUAGE_DISPLAY_NAMES[language.toLowerCase()] || language
+      : "Plain Text";
   return (
     <div className="goose-code-toolbar-row" contentEditable={false}>
-      <div className="goose-code-toolbar-left flex items-center gap-0.5 min-w-0 flex-1">
-        {isVisualBlock ? (
-          <div className="goose-code-visual-title">{visualTitle}</div>
-        ) : (
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              aria-label={collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
-              onClick={handleCollapsedChange}
-              className={cn(
-                "h-6 w-6 p-0 shrink-0 rounded-md transition-transform",
-                collapsed && "-rotate-90",
-              )}
-            >
-              <GooseIcons.ChevronDown className="h-3.5 w-3.5" />
-            </Button>
+      <div className="goose-code-toolbar-left">
+        <CodeLanguagePicker
+          language={language}
+          onLanguageChange={handleLanguageChange}
+          editable={isEditable}
+          isMathOrMermaid={isVisualBlock}
+          sourceMode={previewMode === "code"}
+          displayLanguage={displayLanguage}
+        />
+        {!isVisualBlock && (isEditable || summary) && (
+          <div
+            className="goose-code-caption"
+            data-filled={summary || isEditingSummary ? "true" : undefined}
+          >
             <Input
               ref={summaryInputRef}
               variant="inline"
               value={isEditingSummary ? summaryDraft : summary}
               readOnly={!isEditable || !isEditingSummary}
               placeholder={t("addCodeCaption")}
+              aria-label={t("addCodeCaption")}
               onMouseDown={(e) => {
                 e.stopPropagation();
                 if (!isEditable) return;
@@ -119,13 +114,9 @@ export function CodeBlockHeader({
                 }
                 e.stopPropagation();
               }}
-              className={cn(
-                "h-6 w-full min-w-0 px-1.5 text-xs",
-                !isEditingSummary && !summary && "text-muted-foreground",
-                !isEditingSummary && summary && "text-muted-foreground",
-              )}
+              className="goose-code-caption-input h-8 w-full min-w-0 px-3 text-xs"
             />
-          </>
+          </div>
         )}
       </div>
       <CodeBlockToolbar
@@ -147,6 +138,8 @@ export function CodeBlockHeader({
         onDownloadPreview={handleDownloadPreview}
         onCopyPreview={handleCopyPreview}
         canPreview={canPreview}
+        collapsed={collapsed}
+        onCollapsedChange={handleCollapsedChange}
       />
     </div>
   );
