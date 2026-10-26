@@ -4,6 +4,5 @@ export { hasStructuredBlocks, normalizeBlocks } from "./normalizeBlocks";
 export {
   ensureFirstTitleHeading,
   normalizeBlockContent,
-  normalizeHeadingSectionFold,
-  normalizeHeadingToggleableFlags,
+  normalizeHeadingChildren,
 } from "./normalizeHeadings";
