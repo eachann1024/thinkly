@@ -39,14 +39,7 @@ export function renderTextBlock(
   switch (block.type) {
     case "heading": {
       const level = Math.min(Math.max(Number(block.props?.level) || 1, 1), 3);
-      const isToggle = !!block.props?.isToggleable;
-      const inner = isToggle
-        ? `<span class="toggle-marker">▾</span><span>${inlineHtml}</span>`
-        : inlineHtml;
-      const heading = isToggle
-        ? `<h${level}${styleAttr}><div class="toggle-summary">${inner}</div></h${level}>`
-        : `<h${level}${styleAttr}>${inner}</h${level}>`;
-      return `${heading}${renderChildren(block, theme)}`;
+      return `<h${level}${styleAttr}>${inlineHtml}</h${level}>${renderChildren(block, theme)}`;
     }
 
     case "bulletListItem": {
@@ -121,12 +114,6 @@ export function renderTextBlock(
 
     case "divider": {
       return `<hr />`;
-    }
-
-    case "toggleListItem": {
-      const summary = `<div class="toggle-summary"><span class="toggle-marker">▾</span><span>${inlineHtml}</span></div>`;
-      const childrenHtml = renderChildren(block, theme, "toggle-children");
-      return `<div class="toggle-block"${styleAttr}>${summary}${childrenHtml}</div>`;
     }
 
     case "callout": {
