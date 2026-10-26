@@ -15,6 +15,10 @@
 }
 .workspace-shell .workspace-sidebar-pane .sidebar-design .sidebar-page-list {
   margin-top: 0.25rem;
+  margin-inline: 0;
+}
+.sidebar-page-list > .sidebar-tree-scroll {
+  padding-inline: 1rem;
 }
 .sidebar-design .sidebar-navigation-heading[hidden] {
   display: none !important;
