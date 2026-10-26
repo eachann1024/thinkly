@@ -1,26 +1,23 @@
 import { stringify as stringifyYaml } from "yaml";
 import { normalizeCalloutIcon, resolveCalloutIcon } from "@/components/editor/blocks/callout/calloutIcons";
-import { splitFrontmatter, renderFrontmatter as renderPreservedFrontmatter } from "@/lib/note-metadata/identity";
-import { validateNoteMeta } from "@/lib/note-metadata/validate";
 import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 import { detachBlockPropsMarker } from "./blockPropsMarker";
 import { pickPersistedBlockProps } from "./blockPropsProperties";
 import { imageAltText } from "./serialize/image";
+import { splitFrontmatter, renderFrontmatter as renderPreservedFrontmatter } from "@/lib/note-metadata/identity";
+import { validateNoteMeta } from "@/lib/note-metadata/validate";
 
 export const NOTE_META_KEY = "goose-note";
 
-export type NoteColumn = { path: string; at: number; widths: string; counts: number[] };
 export type NoteNest = { path: string; at: number; count: number };
 export type NoteMeta = {
   v: 1;
   blocks?: Record<string, Record<string, unknown>>;
-  columns?: NoteColumn[];
   nests?: NoteNest[];
 };
 
 export type NoteSink = {
   patch: (path: string, value: Record<string, unknown>) => void;
-  column: (entry: NoteColumn) => void;
   nest: (entry: NoteNest) => void;
   finish: () => NoteMeta | null;
 };
@@ -32,10 +29,9 @@ export function createNoteSink(): NoteSink {
       meta.blocks ??= {};
       meta.blocks[path] = { ...(meta.blocks[path] ?? {}), ...value };
     },
-    column(entry) { (meta.columns ??= []).push(entry); },
     nest(entry) { (meta.nests ??= []).push(entry); },
     finish() {
-      return meta.blocks || meta.columns || meta.nests ? meta : null;
+      return meta.blocks || meta.nests ? meta : null;
     },
   };
 }
@@ -106,6 +102,7 @@ function filePatch(block: any): Record<string, unknown> | null {
   if (block?.type !== "file") return null;
   const props = block.props ?? {};
   const extra: Record<string, unknown> = {};
+  if (props.caption) extra.caption = props.caption;
   if (props.backgroundColor && props.backgroundColor !== "default") extra.backgroundColor = props.backgroundColor;
   return Object.keys(extra).length ? extra : null;
 }
@@ -115,6 +112,7 @@ function mediaPatch(block: any): Record<string, unknown> | null {
   const props = block.props ?? {};
   const extra: Record<string, unknown> = {};
   if (props.name) extra.name = props.name;
+  if (props.caption) extra.caption = props.caption;
   if (props.backgroundColor && props.backgroundColor !== "default") extra.backgroundColor = props.backgroundColor;
   if (props.showPreview === false) extra.showPreview = false;
   if (block.type === "video" && props.textAlignment && props.textAlignment !== "left") extra.textAlignment = props.textAlignment;
@@ -209,14 +207,14 @@ function applyPatch(props: Record<string, unknown>, patch: Record<string, unknow
   return next;
 }
 
-function foldLevel(blocks: any[], parentPath: string, meta: NoteMeta): any[] {
+function foldLevel(blocks: any[], nests: NoteNest[]): any[] {
   const next = blocks.map((block) => ({ ...block }));
   const consumed = new Set<number>();
-  for (const nest of (meta.nests ?? []).filter((entry) => entry.path === parentPath).sort((a, b) => b.at - a.at)) {
+  for (const nest of nests) {
     const parent = next[nest.at];
     if (!parent) continue;
     const kids = [];
-    for (let offset = 1; offset <= nest.count; offset += 1) {
+    for (let offset = 1; offset <= Math.min(nest.count, next.length - nest.at - 1); offset += 1) {
       const index = nest.at + offset;
       if (!next[index]) continue;
       kids.push(next[index]);
@@ -224,27 +222,17 @@ function foldLevel(blocks: any[], parentPath: string, meta: NoteMeta): any[] {
     }
     next[nest.at] = { ...parent, children: [...(parent.children ?? []), ...kids] };
   }
-  for (const column of (meta.columns ?? []).filter((entry) => entry.path === parentPath)) {
-    if (!next[column.at]) continue;
-    let cursor = column.at;
-    const sections = column.counts.map((count) => {
-      const children = [];
-      for (let offset = 0; offset < count; offset += 1) {
-        const index = cursor + offset;
-        if (!consumed.has(index) && next[index]) children.push(next[index]);
-        consumed.add(index);
-      }
-      cursor += count;
-      return { type: "columnSection", children };
-    });
-    consumed.delete(column.at);
-    next[column.at] = { type: "columnLayout", props: { widths: column.widths }, children: sections };
-  }
   return next.filter((_, index) => !consumed.has(index));
 }
 
 export function applyNoteMeta(blocks: any[], meta: NoteMeta | null): any[] {
   if (!meta) return blocks;
+  const nests = new Map<string, NoteNest[]>();
+  for (const nest of meta.nests ?? []) {
+    if (!nests.has(nest.path)) nests.set(nest.path, []);
+    nests.get(nest.path)!.push(nest);
+  }
+  for (const bucket of nests.values()) bucket.sort((a, b) => b.at - a.at);
   const visit = (list: any[], parentPath: string): any[] => {
     const patched = list.map((block, index) => {
       const path = parentPath ? `${parentPath}.${index}` : String(index);
@@ -256,7 +244,7 @@ export function applyNoteMeta(blocks: any[], meta: NoteMeta | null): any[] {
         ...(patch ? { props: applyPatch(block?.props ?? {}, patch) } : {}),
       };
     });
-    return foldLevel(patched, parentPath, meta);
+    return foldLevel(patched, nests.get(parentPath) ?? []);
   };
   return visit(blocks, "");
 }
