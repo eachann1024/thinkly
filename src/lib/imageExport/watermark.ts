@@ -2,7 +2,7 @@ import { createTranslator, getFormatLocale, i18nYaml } from "@/i18n/core";
 
 const localMessages = i18nYaml<"src/lib/imageExport/watermark.ts#localMessages:1">`
 zh-Hans:
-  gooseNotes: "思绪 · Thinkly"
+  gooseNotes: "Thinkly"
 en:
   gooseNotes: "Thinkly"
 ja:

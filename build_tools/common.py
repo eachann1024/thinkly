@@ -1,4 +1,4 @@
-"""思绪 · Thinkly 构建：common。"""
+"""Thinkly 构建：common。"""
 
 from __future__ import annotations
 
