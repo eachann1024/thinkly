@@ -27,6 +27,8 @@ ja:
 const uiText = createTranslator(localMessages);
 import { generateExportZip } from "@/lib/export";
 import { uploadWebdavBackup } from "@/lib/webdavSync";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { usePages } from "@/stores/usePages";
 import { toast } from "@/components/ui/sonner";
 import type { useWebdavConfiguration } from "./useWebdavConfiguration";
 
@@ -36,8 +38,6 @@ export function useWebdavSyncActions(
   useLocale();
   const {
     notebookList,
-    notebooks,
-    pages,
     webdavUrl,
     webdavUsername,
     webdavPassword,
@@ -68,8 +68,8 @@ export function useWebdavSyncActions(
       }
       const zipBlob = await generateExportZip(
         { format: "md", notebookIds },
-        notebooks,
-        Object.values(pages),
+        useNotebooks.getState().notebooks,
+        Object.values(usePages.getState().pages),
       );
       if (!isCurrentActivation(epoch)) return;
       const now = new Date();
