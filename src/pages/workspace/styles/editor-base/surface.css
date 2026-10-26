@@ -1,4 +1,5 @@
 @import "./contained-blocks.css";
+@import "./placeholder.css";
 .goose-search-session-match {
   background-color: color-mix(in srgb, var(--goose-accent-solid) 16%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--goose-accent-solid) 65%, transparent);

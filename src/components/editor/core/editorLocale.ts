@@ -3,13 +3,13 @@ import { getLocale, i18nYaml, createTranslator } from "@/i18n";
 
 const messages = i18nYaml<"src/components/editor/core/editorLocale.ts#messages:1">`
 zh-Hans:
-  typeToInsertABlock: "输入 / 选择内容"
+  typeToInsertABlock: "输入／选择内容，支持直接粘贴图片、视频等文件"
   quote: "引用"
 en:
-  typeToInsertABlock: "Type / to insert a block"
+  typeToInsertABlock: "Type / to choose content, or paste images, videos, and other files directly"
   quote: "Quote"
 ja:
-  typeToInsertABlock: "/ を入力してブロックを挿入"
+  typeToInsertABlock: "/ を入力して内容を選択。画像・動画などのファイルを直接貼り付けできます"
   quote: "引用"
 `;
 const t = createTranslator(messages);

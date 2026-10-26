@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
     "src/lib/ai-provider/catalogConnection.ts#localMessages:1": { "checkYourConfigurationInSettingsAiAssistantAiService": {  } };
     "src/lib/ai-provider/modelCatalog.ts#localMessages:1": { "authenticationFailed": { "hint": string | number; "provider": string | number }; "customAnthropicProvider": {  }; "customOpenaiCompatibleProvider": {  }; "customOpenaiResponsesProvider": {  }; "enableTheAiAssistantInSettingsFirst": {  }; "missingApiKey": { "hint": string | number }; "saveYourCustomAiConfigurationAndLoadTheModel": {  } };
     "src/lib/ai-provider/presets.ts#localMessages:1": { "chatCompletionsCompatible": {  }; "claudeMessagesCompatible": {  }; "customAnthropic": {  }; "customOpenaiCompatible": {  }; "customOpenaiResponses": {  }; "glmZhipu": {  }; "officialApiEnterYourApiKey": {  }; "officialApiPlatform": {  }; "openaiResponsesCompatible": {  }; "zhipuBigmodelPlatform": {  } };
@@ -79,7 +80,7 @@ declare module "../types" {
     "src/lib/local-frontmatter/parser.ts#localMessages:1": { "couldnTParseYaml": {  }; "theFrontmatterRootMustBeAnObject": {  }; "theYamlFrontmatterIsNotClosed": {  } };
     "src/lib/move-page-to-notebook.ts#localMessages:1": { "couldnTMoveTheNoteToTheDestinationNotebook": {  }; "couldnTUndoTheMoveTheOriginalNotebookNo": {  }; "destinationNotebook": {  }; "moveFailedTryAgain": {  }; "movedToNotebook": { "name": string | number }; "undo": {  } };
     "src/lib/new-page-name.ts#localMessages:1": { "enterAFileName": {  }; "theFileNameContainsUnsupportedCharacters": {  } };
-    "src/lib/note-metadata/messages.ts#block1:1": { "conflict": {  }; "corrupt": {  }; "identity": {  }; "io": {  }; "mismatch": {  }; "missing": {  }; "tooLarge": {  }; "unsafe": {  }; "unsupported": {  } };
+    "src/lib/note-metadata/messages.ts#block1:1": { "changedId": {  }; "changedIdConflict": {  }; "changedIdRescan": {  }; "conflict": {  }; "corrupt": {  }; "diskRead": {  }; "duplicateId": {  }; "identity": {  }; "io": {  }; "mismatch": {  }; "missing": {  }; "tooLarge": {  }; "unsafe": {  }; "unsupported": {  } };
     "src/lib/notebook-ai/availabilityError.ts#messages:1": { "authenticationFailedCheckTheCredentialsAndServiceUrl": {  }; "couldNotConnectToTheAiServiceCheck": {  }; "theAiServiceHasInsufficientCreditSwitchServices": {  }; "theAiServiceIsTemporarilyUnavailablePleaseTry": {  }; "tooManyRequestsToTheAiServicePlease": {  } };
     "src/lib/notebook-ai/compactConversation.ts#messages:1": { "compactionFailedNoSummaryWasReturned": {  }; "thereIsNoContentToCompactInThis": {  } };
     "src/lib/notebook-ai/composerSlashCommands.ts#messages:1": { "compact": {  }; "newConversation": {  }; "startABlankConversationAndKeepThisOne": {  }; "summarizeThisConversationToFreeUpContextSpace": {  } };
@@ -112,15 +113,14 @@ declare module "../types" {
     "src/lib/webdavValidation.ts#localMessages:1": { "enterARemoteWebdavFolder": {  }; "enterAWebdavUrl": {  }; "invalidWebdavUrl": {  }; "publicWebdavServicesMustUseASecureHttpsConnection": {  }; "theParentFolderDoesnTExistMakeSureThe": {  }; "theRemoteWebdavFolderCanTContainBackslashes": {  }; "theRemoteWebdavFolderCanTContainEmptyPath": {  }; "theRemoteWebdavFolderCanTContainParentDirectory": {  }; "theRemoteWebdavFolderHasInvalidEncoding": {  }; "theWebdavUrlMustStartWithHttpOrHttps": {  } };
     "src/pages/quick-note/QuickNoteCollectPreview.tsx#localMessages:1": { "collected": {  }; "collecting": {  }; "collectingCount": { "count": string | number }; "collectionStatus": { "recent": string | number; "count": string | number }; "emptyCollection": {  }; "itemCount": { "count": string | number }; "sampleClip": { "number": string | number }; "simulate": {  }; "simulateOne": {  }; "stop": {  }; "stopAutoCollect": {  }; "stopCollect": {  } };
     "src/pages/quick-note/QuickNoteSlotSwitcher.tsx#localMessages:1": { "empty": { "name": string | number }; "occupied": { "name": string | number }; "renameHint": { "name": string | number }; "switchNote": {  } };
-    "src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1": { "close": {  }; "emptyNote": {  }; "fontSize": {  }; "helpLabel": {  }; "helpTitle": {  }; "pixels": { "size": string | number }; "renameSlot": { "slot": string | number }; "saveToNotes": {  } };
+    "src/pages/quick-note/quick-note-app/renderQuickNoteHeader.tsx#localMessages:1": { "close": {  }; "emptyNote": {  }; "helpLabel": {  }; "helpTitle": {  }; "renameSlot": { "slot": string | number }; "saveToNotes": {  } };
     "src/pages/quick-note/quick-note-app/useQuickNoteSaveActions.tsx#localMessages:1": { "openMainWindow": {  }; "openNotebook": {  }; "openSavedNote": {  }; "saveFailed": {  }; "saved": {  }; "savedButNotOpened": {  } };
     "src/pages/quick-note/quick-note-app/useQuickNoteWindowTitle.ts#localMessages:1": { "fallback": {  } };
-    "src/pages/quick-note/quickNoteHelpCopy.ts#localMessages:1": { "helpSlots": {  }; "helpSwitch": { "shortcut": string | number } };
+    "src/pages/quick-note/quickNoteHelpCopy.tsx#localMessages:1": { "helpFontSize": { "decrease": string | number; "increase": string | number; "reset": string | number }; "helpSlots": {  }; "helpSwitch": { "shortcut": string | number } };
     "src/pages/workspace/components/AIFeatureNotice.tsx#localMessages:1": { "chooseAProviderSaveYourSettingsAnd": {  }; "openSettings": {  }; "setUpLater": {  }; "setUpTheAiWritingAssistant": {  } };
     "src/pages/workspace/components/ReadingPreferences.tsx#localMessages:1": { "aLittleSpaceBetweenTheLinesMakes": {  }; "giveYourWordsRoomToBreathe": {  }; "lineSpacing": {  }; "lineSpacingPresets": {  }; "livePreview": {  }; "readingPreview": {  }; "relaxed": {  }; "standard": {  }; "textSize": {  }; "times": {  }; "writeDownSomethingWorthRememberingTodayThere": {  } };
     "src/pages/workspace/components/SetupGuide.tsx#localMessages:1": { "adjustReadingPreferences": {  }; "appearance": {  }; "appearancePreview": {  }; "back": {  }; "customizeAppearance": {  }; "exitSetup": {  }; "finishSetup": {  }; "next": {  }; "progress": { "step": string | number; "total": string | number }; "reading": {  }; "setupGuide": {  }; "setupSteps": {  } };
     "src/pages/workspace/components/ai-cards/CalculatorCard.tsx#messages:1": { "invalidFormula": {  } };
     "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
-    "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
   }
 }
