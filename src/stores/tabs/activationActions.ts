@@ -107,7 +107,10 @@ export function createActivationTabActions(
       });
       ensureSplitForWorkspaceTab(tab);
       pushTabHistory(tab.id);
-      if (tab.type === "welcome") return;
+      if (tab.type === "welcome") {
+        void scheduleSetActivePage(null);
+        return;
+      }
       if (tab.type === "notebook-ai") {
         const notebookId = tab.workspaceId;
         if (notebookId) {

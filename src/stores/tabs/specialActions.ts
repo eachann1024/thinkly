@@ -12,6 +12,7 @@ import type { TabsActionContext } from "./context";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import {
   commitActiveEditor,
+  scheduleSetActivePage,
   createTabId,
   stampTabAccess,
   findNotebookAiTabInList,
@@ -69,6 +70,7 @@ export function createSpecialTabActions(
         activeTabId: newTab.id,
       });
       pushTabHistory(newTab.id);
+      void scheduleSetActivePage(null);
     },
 
     openNewTab: () => {
