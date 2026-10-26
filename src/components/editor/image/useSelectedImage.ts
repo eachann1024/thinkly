@@ -26,7 +26,6 @@ export function useSelectedImage(
     null,
   );
   const selectedImageRef = useRef<SelectedImageState | null>(null);
-  const pinnedImage = useRef(false);
   const toolbarState = useBlockToolbarState(editor, selectedImage?.blockId ?? undefined);
   useEffect(() => {
     selectedImageRef.current = selectedImage;
@@ -71,25 +70,20 @@ export function useSelectedImage(
       );
 
       if (!img || !container.contains(img)) {
-        if (ownsBlockToolbar(
+        if (!ownsBlockToolbar(
           target?.closest<HTMLElement>("[data-goose-image-toolbar]") ?? null,
           editor.prosemirrorView.dom,
           selectedImageRef.current?.blockId,
         )) {
-          pinnedImage.current = true;
-        } else {
-          pinnedImage.current = false;
           setSelectedImage(null);
         }
         return;
       }
 
-      pinnedImage.current = true;
       updateSelectedImageFromElement(img);
     };
 
     const stopHover = subscribeBlockHover(editor.prosemirrorView.dom, (detail) => {
-      if (pinnedImage.current) return;
       const image = detail.phase === "toolbar"
         ? getImageElements(container).find(
             (img) => getBlockIdFromImage(img, container) === detail.blockId,
@@ -175,7 +169,7 @@ export function useSelectedImage(
   }, [copyImageToClipboard, selectedImage]);
 
   return {
-    selectedImage: toolbarState.suppressed ? null : selectedImage,
+    selectedImage: toolbarState.ready && !toolbarState.suppressed ? selectedImage : null,
     applyImageAlignment,
     handleSelectedImageZoom,
     handleSelectedImageSystemPreview,
