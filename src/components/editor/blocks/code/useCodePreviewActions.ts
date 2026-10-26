@@ -1,10 +1,5 @@
 import { useCallback } from "react";
 import { TEXT_COLORS } from "@/lib/textColors";
-import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
-import {
-  captureElementAsPngBlob,
-  svgMarkupToPngBlob,
-} from "@/lib/imageExport/svgToPng";
 import { blobToBase64, convertImageBlobToPng } from "@/lib/imageProcessor";
 import { toast } from "@/components/ui/sonner";
 import { openPreviewInSystem } from "@/lib/preview/previewAction";
@@ -84,6 +79,8 @@ export function useCodePreviewActions({
     }
 
     if (language === "mermaid") {
+      const { renderMermaidSvgForExport } = await import("@/lib/imageExport/mermaid");
+      const { svgMarkupToPngBlob } = await import("@/lib/imageExport/svgToPng");
       const svg = await renderMermaidSvgForExport(
         text,
         isDarkTheme(theme) ? "dark" : "light",
@@ -92,6 +89,7 @@ export function useCodePreviewActions({
     }
 
     if (language === "math") {
+      const { captureElementAsPngBlob } = await import("@/lib/imageExport/svgToPng");
       if (previewRef.current) {
         try {
           const captured = await captureElementAsPngBlob(previewRef.current);
@@ -180,6 +178,7 @@ export function useCodePreviewActions({
       if (!text) throw new Error(t("nothingToPreview"));
 
       if (language === "mermaid") {
+        const { renderMermaidSvgForExport } = await import("@/lib/imageExport/mermaid");
         const svg = await renderMermaidSvgForExport(
           text,
           isDarkTheme(theme) ? "dark" : "light",
