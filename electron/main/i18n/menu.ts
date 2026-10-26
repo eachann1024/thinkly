@@ -7,12 +7,12 @@ import { splitLayoutViewItems } from "./splitLayoutMenu";
 
 const t = createTranslator(i18nYaml<"electron/main/i18n/menu.ts#block1:1">`
 zh-Hans:
-  about: 关于thinkly
+  about: 关于 Thinkly
   services: 服务
-  hide: 隐藏thinkly
+  hide: 隐藏 Thinkly
   hideOthers: 隐藏其他
   showAll: 显示全部
-  quit: 退出thinkly
+  quit: 退出 Thinkly
   file: 文件
   newWindow: 新建窗口
   closeTab: 关闭标签
@@ -43,12 +43,12 @@ zh-Hans:
   zoom: 缩放
   front: 前置全部窗口
 en:
-  about: About thinkly
+  about: About Thinkly
   services: Services
-  hide: Hide thinkly
+  hide: Hide Thinkly
   hideOthers: Hide Others
   showAll: Show All
-  quit: Quit thinkly
+  quit: Quit Thinkly
   file: File
   newWindow: New Window
   closeTab: Close Tab
@@ -79,12 +79,12 @@ en:
   zoom: Zoom
   front: Bring All to Front
 ja:
-  about: "thinkly について"
+  about: "Thinkly について"
   services: "サービス"
-  hide: "thinkly を非表示"
+  hide: "Thinkly を非表示"
   hideOthers: "ほかを非表示"
   showAll: "すべてを表示"
-  quit: "thinkly を終了"
+  quit: "Thinkly を終了"
   file: "ファイル"
   newWindow: "新規ウィンドウ"
   closeTab: "タブを閉じる"
