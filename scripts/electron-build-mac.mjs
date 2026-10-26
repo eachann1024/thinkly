@@ -18,7 +18,14 @@ const env = {
   CSC_IDENTITY_AUTO_DISCOVERY: "false",
 };
 const cli = resolve(root, "node_modules/electron-builder/out/cli/cli.js");
-const result = spawnQuiet(process.execPath, [cli, "--mac", "--arm64", "--config.mac.target=dir"], {
+const electronDist = resolve(root, "node_modules/electron/dist");
+const result = spawnQuiet(process.execPath, [
+  cli,
+  "--mac",
+  "--arm64",
+  "--config.mac.target=dir",
+  `--config.electronDist=${electronDist}`,
+], {
   env,
   cwd: pack,
 });
