@@ -110,6 +110,7 @@ function sanitizeBlock(
 
   const contentKind = spec.config?.content;
   const next = { type: rawType } as PartialBlock;
+  if (typeof block.id === "string" && block.id) next.id = block.id;
   const props = sanitizeProps(rawType, block.props ?? block.attrs, spec);
   if (props) next.props = props;
 

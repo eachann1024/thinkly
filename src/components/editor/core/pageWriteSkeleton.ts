@@ -1,17 +1,18 @@
 import type { Node } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import "./pageWriteSkeleton.css";
+import { samePageMarkup } from "./pageNodeComparison";
 
 function changedRanges(before: Node, after: Node, offset = 0): [number, number][] {
   if (before.eq(after)) return [];
-  if (before.sameMarkup(after) && before.childCount === after.childCount && !before.isText) {
+  if (samePageMarkup(before, after) && before.childCount === after.childCount && !before.isText) {
     const ranges: [number, number][] = [];
     before.forEach((child, pos, index) => {
       ranges.push(...changedRanges(child, after.child(index), offset + pos + (before.type.name === "doc" ? 0 : 1)));
     });
     return ranges;
   }
-  if (before.isText && after.isText && before.sameMarkup(after)) {
+  if (before.isText && after.isText && samePageMarkup(before, after)) {
     const oldText = before.text ?? "";
     const newText = after.text ?? "";
     let start = 0;
