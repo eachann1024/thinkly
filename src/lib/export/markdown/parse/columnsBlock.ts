@@ -1,4 +1,4 @@
-import { normalizeColumnLayout } from "@/components/editor/blocks/columns/columnModel";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
 import { NOTE_MARK_PATTERN } from "../persistedNames";
 
 const OPEN = new RegExp(`^<!--\\s*${NOTE_MARK_PATTERN}:columns(?:\\s+widths="([\\d.,\\s]+)")?\\s*-->$`, "i");
@@ -34,7 +34,7 @@ export function parseColumnsBlock(lines: string[], start: number, parseMarkdown:
       if (depth > 0) { body?.push(line); continue; }
       if (body || !sections.length) return null;
       return {
-        block: normalizeColumnLayout({ type: "columnLayout", props: { widths: opening[1] } }, sections),
+        blocks: flattenLegacyColumns(sections),
         nextIndex: index + 1,
       };
     }
