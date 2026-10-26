@@ -2,6 +2,7 @@ import type { Chat } from "@ai-sdk/react";
 import type { ChatOnFinishCallback } from "ai";
 import type { NotebookAiCompletion, NotebookAiMessage } from "@/lib/notebook-ai/types";
 import { revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
+import { finishExecutionDetails } from "@/lib/notebook-ai/executionTransport";
 
 type SessionChat = Chat<NotebookAiMessage>;
 type Finish = Parameters<ChatOnFinishCallback<NotebookAiMessage>>[0];
@@ -31,7 +32,12 @@ export function finishSessionChat(chat: SessionChat, finish: Finish) {
   const response = chat.messages.find((message) => message.id === finish.message.id) ?? finish.message;
   const completed: NotebookAiMessage = {
     ...response,
-    metadata: { ...response.metadata, completion },
+    metadata: {
+      ...response.metadata, completion,
+      ...(response.metadata?.execution ? {
+        execution: finishExecutionDetails(response.metadata.execution),
+      } : {}),
+    },
   };
   const exists = chat.messages.some((message) => message.id === completed.id);
   chat.messages = exists

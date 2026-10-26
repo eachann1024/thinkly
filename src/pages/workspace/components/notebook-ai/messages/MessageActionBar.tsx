@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { ActionBarPrimitive, BranchPickerPrimitive } from "@assistant-ui/react";
-import { Copy, ChevronLeft, ChevronRight } from "@/components/ui/icons";
+import { Copy, Check, ChevronLeft, ChevronRight } from "@/components/ui/icons";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/MessageActionBar.tsx#messages:1">`
 zh-Hans:
@@ -36,7 +36,7 @@ export const MessageActionBar = () => { useLocale(); return ((
         aria-label={t("copyMessage")}
         title={t("copy")}
       >
-        <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
+        <Copy className="notebook-ai-copy-default h-4 w-4" /><Check className="notebook-ai-copy-complete h-4 w-4" />
       </ActionBarPrimitive.Copy>
     </ActionBarPrimitive.Root>
     <BranchPickerPrimitive.Root

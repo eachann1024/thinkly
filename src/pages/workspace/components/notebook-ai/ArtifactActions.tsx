@@ -1,34 +1,21 @@
-import { useLocale } from "@/i18n";
-import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnostic";
-import { IconButton } from "@/components/ui/icon-button";
-import { copyText, downloadText, copyImagePayload } from "./artifactClipboard";
-import { useState } from "react";
-import {
-  Copy,
-  Download,
-  FilePlus2,
-  Image as ImageIcon,
-  Loader2,
-  Maximize2,
-} from "@/components/ui/icons";
-import { toast } from "@/components/ui/sonner";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useLocale, i18nYaml, createTranslator } from "@/i18n";
+import { Copy, Download, FilePlus2, Image, Maximize2 } from "@/components/ui/icons";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
-import {
-  getPreviewActionTooltip,
-} from "@/lib/preview/previewAction";
+import { getPreviewActionTooltip } from "@/lib/preview/previewAction";
+import { toast } from "@/components/ui/sonner";
+import { copyText, downloadText, copyImagePayload } from "./artifactClipboard";
 import { useArtifactPreview } from "./useArtifactPreview";
+import { useArtifactAction } from "./useArtifactAction";
+import { ArtifactActionButton } from "./ArtifactActionButton";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
-import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ArtifactActions.tsx#messages:1">`
 zh-Hans:
+  working: "处理中"
+  succeeded: "已完成"
+  failed: "失败，点击重试"
+  saveFailed: "保存失败"
   copyImage: "复制图片"
   unknownError: "未知错误"
   copySource: "复制源码"
@@ -40,6 +27,10 @@ zh-Hans:
   detailCopyFailed: "复制失败：{{value1}}"
   detailDownloadFailed: "下载失败：{{value1}}"
 en:
+  working: "Working"
+  succeeded: "Done"
+  failed: "Failed, click to retry"
+  saveFailed: "Save failed"
   copyImage: "Copy image"
   unknownError: "Unknown error"
   copySource: "Copy source"
@@ -51,6 +42,10 @@ en:
   detailCopyFailed: "Copy failed: {{value1}}"
   detailDownloadFailed: "Download failed: {{value1}}"
 ja:
+  working: "処理中"
+  succeeded: "完了"
+  failed: "失敗、クリックして再試行"
+  saveFailed: "保存に失敗しました"
   copyImage: "画像をコピー"
   unknownError: "不明なエラー"
   copySource: "ソースをコピー"
@@ -64,204 +59,51 @@ ja:
 `;
 const t = createTranslator(messages);
 
-
-const iconBtnClass = "cursor-pointer";
-
 export function ArtifactActions({
-  copySource,
-  downloadSource,
-  filename = "artifact.txt",
-  mimeType = "text/plain;charset=utf-8",
-  onCopyImage,
-  onDownloadImage,
-  downloadImageFilename = "artifact.png",
-  onPreview,
-  onPreviewImage,
-  previewFilename = "preview.png",
-  previewIdentity,
-  onInsert,
+  copySource, downloadSource, filename = "artifact.txt", mimeType = "text/plain;charset=utf-8",
+  onCopyImage, onDownloadImage, downloadImageFilename = "artifact.png", onPreview, onPreviewImage,
+  previewFilename = "preview.png", previewIdentity, onInsert, imageReady = true, insertReady = true,
 }: ArtifactActionsProps) {
   useLocale();
-  const [copyingImage, setCopyingImage] = useState(false);
-  const [downloadingImage, setDownloadingImage] = useState(false);
-  const { previewing, previewContent, closePreview, previewHandlers } = useArtifactPreview({
-    onPreview, onPreviewImage, previewFilename,
-    identity: previewIdentity ?? JSON.stringify([copySource, downloadSource, filename, previewFilename]),
+  const identity = previewIdentity ?? JSON.stringify([copySource, downloadSource, filename, previewFilename]);
+  const { states, run } = useArtifactAction(identity);
+  const { previewing, previewFailed, previewContent, closePreview, previewHandlers } = useArtifactPreview({
+    onPreview, onPreviewImage, previewFilename, identity,
   });
-
+  const feedback = (id: string) => states[id] === "busy" ? t("working") :
+    states[id] === "success" ? t("succeeded") : states[id] === "error" ? t("failed") : undefined;
+  const action = (id: string, label: string, fn: () => Promise<unknown>) => ({
+    state: states[id], feedback: feedback(id), onClick: () => run(id, label, fn),
+  });
   const hasSourceCopy = Boolean(copySource?.trim());
-  const hasImageCopy = Boolean(onCopyImage);
-  const hasImageDownload = Boolean(onDownloadImage);
-  const hasSourceDownload =
-    Boolean(downloadSource?.trim()) && !hasImageDownload;
+  const hasSourceDownload = Boolean(downloadSource?.trim()) && !onDownloadImage;
   const hasPreview = Boolean(onPreview || onPreviewImage);
-
-  if (
-    !hasSourceCopy &&
-    !hasImageCopy &&
-    !hasImageDownload &&
-    !hasSourceDownload &&
-    !hasPreview &&
-    !onInsert
-  ) {
-    return null;
-  }
-
-  return (
-    <TooltipProvider delayDuration={300}>
-      <div className="notebook-ai-artifact-actions flex shrink-0 items-center gap-0.5">
-        {hasImageCopy ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <IconButton type="button" size="sm" tone="muted"
-                className={iconBtnClass}
-                aria-label={t("copyImage")}
-                disabled={copyingImage}
-                onClick={() => {
-                  if (!onCopyImage || copyingImage) return;
-                  setCopyingImage(true);
-                  void (async () => {
-                    try {
-                      const payload = await onCopyImage();
-                      await copyImagePayload(payload);
-                    } catch (err) {
-                      toast.error(
-                        t("detailCopyFailed", { value1: err instanceof Error ? localizeNotebookAiDiagnostic(err.message) : t("unknownError") }),
-                      );
-                    } finally {
-                      setCopyingImage(false);
-                    }
-                  })();
-                }}
-              >
-                {copyingImage ? (
-                  <Loader2
-                    className="h-3.5 w-3.5 animate-spin"
-                    strokeWidth={1.75}
-                  />
-                ) : (
-                  <ImageIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
-                )}
-              </IconButton>
-            </TooltipTrigger>
-            <TooltipContent>{t("copyImage")}</TooltipContent>
-          </Tooltip>
-        ) : null}
-
-        {hasSourceCopy ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <IconButton type="button" size="sm" tone="muted"
-                className={iconBtnClass}
-                aria-label={t("copySource")}
-                onClick={() => void copyText(copySource!)}
-              >
-                <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </IconButton>
-            </TooltipTrigger>
-            <TooltipContent>{t("copySource")}</TooltipContent>
-          </Tooltip>
-        ) : null}
-
-        {onInsert ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <IconButton type="button" size="sm" tone="muted"
-                className={iconBtnClass}
-                aria-label={t("insertIntoCurrentNote")}
-                onClick={async () => {
-                  const result = await onInsert();
-                  toast[result.ok ? "success" : "error"](
-                    result.ok ? t("insertedIntoCurrentNote") : result.error,
-                  );
-                }}
-              >
-                <FilePlus2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              </IconButton>
-            </TooltipTrigger>
-            <TooltipContent>{t("insertIntoCurrentNote")}</TooltipContent>
-          </Tooltip>
-        ) : null}
-
-        {hasPreview ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <IconButton type="button" size="sm" tone="muted"
-                className={iconBtnClass}
-                disabled={previewing}
-                {...previewHandlers}
-              >
-                {previewing ? (
-                  <Loader2
-                    className="h-3.5 w-3.5 animate-spin"
-                    strokeWidth={1.75}
-                  />
-                ) : (
-                  <Maximize2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                )}
-              </IconButton>
-            </TooltipTrigger>
-            <TooltipContent>{getPreviewActionTooltip()}</TooltipContent>
-          </Tooltip>
-        ) : null}
-
-        {hasImageDownload ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
-            aria-label={t("downloadImage")}
-            disabled={downloadingImage}
-            onClick={() => {
-              if (!onDownloadImage || downloadingImage) return;
-              setDownloadingImage(true);
-              void (async () => {
-                try {
-                  const blob = await onDownloadImage();
-                  await saveBlobAndReveal(blob, downloadImageFilename);
-                  toast.success(t("saved"));
-                } catch (err) {
-                  toast.error(
-                    t("detailDownloadFailed", { value1: err instanceof Error ? localizeNotebookAiDiagnostic(err.message) : t("unknownError") }),
-                  );
-                } finally {
-                  setDownloadingImage(false);
-                }
-              })();
-            }}
-          >
-            {downloadingImage ? (
-              <Loader2
-                className="h-3.5 w-3.5 animate-spin"
-                strokeWidth={1.75}
-              />
-            ) : (
-              <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
-            )}
-            {t("download")}
-          </Button>
-        ) : hasSourceDownload ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="notebook-ai-canvas-card-download h-7 gap-1 px-2 text-xs text-muted-foreground"
-            aria-label={t("download")}
-            onClick={() =>
-              void downloadText(downloadSource!, filename, mimeType)
-            }
-          >
-            <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
-            {t("download")}
-          </Button>
-        ) : null}
-      </div>
-      <FullscreenPreview
-        open={Boolean(previewContent)}
-        content={previewContent}
-        onClose={closePreview}
-      />
-    </TooltipProvider>
-  );
+  if (!hasSourceCopy && !onCopyImage && !onDownloadImage && !hasSourceDownload && !hasPreview && !onInsert) return null;
+  return <TooltipProvider delayDuration={300}>
+    <div className="notebook-ai-artifact-actions flex shrink-0 items-center gap-0.5" role="group">
+      {onCopyImage ? <ArtifactActionButton icon={Image} label={t("copyImage")} disabled={!imageReady}
+        {...action("image", t("copyImage"), async () => copyImagePayload(await onCopyImage()))} /> : null}
+      {hasSourceCopy ? <ArtifactActionButton icon={Copy} label={t("copySource")}
+        {...action("source", t("copySource"), async () => copyText(copySource!))} /> : null}
+      {onInsert ? <ArtifactActionButton icon={FilePlus2} label={t("insertIntoCurrentNote")} disabled={!insertReady}
+        {...action("insert", t("insertIntoCurrentNote"), async () => {
+          const result = await onInsert();
+          if (!result.ok) throw new Error(result.error);
+          toast.success(t("insertedIntoCurrentNote"));
+        })} /> : null}
+      {hasPreview ? <ArtifactActionButton icon={Maximize2} label={getPreviewActionTooltip()}
+        {...previewHandlers} active={Boolean(previewContent)} disabled={!imageReady || previewing}
+        state={previewing ? "busy" : previewFailed ? "error" : "idle"}
+        feedback={previewing ? t("working") : previewFailed ? t("failed") : undefined} /> : null}
+      {onDownloadImage || hasSourceDownload ? <ArtifactActionButton icon={Download} label={onDownloadImage ? t("downloadImage") : t("download")}
+        disabled={Boolean(onDownloadImage) && !imageReady}
+        {...action("download", t("download"), async () => {
+          if (onDownloadImage) {
+            if (!await saveBlobAndReveal(await onDownloadImage(), downloadImageFilename)) throw new Error(t("saveFailed"));
+            toast.success(t("saved"));
+          } else await downloadText(downloadSource!, filename, mimeType);
+        })} /> : null}
+    </div>
+    <FullscreenPreview open={Boolean(previewContent)} content={previewContent} onClose={closePreview} />
+  </TooltipProvider>;
 }
