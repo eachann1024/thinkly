@@ -1,4 +1,5 @@
 import { CARD_TOOL_NAMES } from "@/lib/notebook-ai/cards/types";
+import { getSkillProgressId } from "./toolProgressValues";
 
 export type ToolDisplayPart = {
   type: string;
@@ -24,24 +25,23 @@ function isCanvasArtifactPart(part: ToolDisplayPart) {
   return part.type === "tool-showSvg";
 }
 
-function readSkillId(part: ToolDisplayPart) {
-  const input = part.input;
-  if (!input || typeof input !== "object" || Array.isArray(input)) return "";
-  const skill = (input as { skill?: unknown }).skill;
-  return typeof skill === "string" ? skill : "";
-}
-
 export function isDefaultChatSkillPart(part: ToolDisplayPart) {
   if (part.type !== "tool-loadSkill") return false;
   if (part.state === "output-error" || part.errorText) return false;
-  return readSkillId(part) === "chat";
+  return getSkillProgressId(part) === "chat";
+}
+
+export function isHiddenSkillPart(part: ToolDisplayPart) {
+  if (part.type !== "tool-loadSkill") return false;
+  if (part.state === "output-error" || part.errorText) return false;
+  return isDefaultChatSkillPart(part) || !getSkillProgressId(part);
 }
 
 export function shouldShowToolProgress(
   parts: ToolDisplayPart[],
   isMessageStreaming: boolean,
 ) {
-  const visibleParts = parts.filter((part) => !isDefaultChatSkillPart(part));
+  const visibleParts = parts.filter((part) => !isHiddenSkillPart(part));
   if (visibleParts.length === 0) return false;
   if (isMessageStreaming) {
     if (visibleParts.every(isCanvasArtifactPart)) return false;

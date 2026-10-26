@@ -54,3 +54,16 @@ export const SKILL_LABELS: Record<string, string> = {
   get webResearch() { return t("webResearch"); },
   get liveInfo() { return t("liveInfo"); },
 };
+
+export function getSkillProgressId(part: { input?: unknown; output?: unknown }) {
+  for (const value of [part.input, part.output]) {
+    const skill = asString(readObject(value)?.skill);
+    if (Object.hasOwn(SKILL_LABELS, skill)) return skill;
+  }
+  return "";
+}
+
+export function getSkillProgressLabel(part: { input?: unknown; output?: unknown }) {
+  const skill = getSkillProgressId(part);
+  return skill ? SKILL_LABELS[skill] : "";
+}

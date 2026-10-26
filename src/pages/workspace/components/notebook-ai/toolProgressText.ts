@@ -5,7 +5,7 @@ import {
   readObject,
   asString,
   truncate,
-  SKILL_LABELS,
+  getSkillProgressLabel,
 } from "./toolProgressValues";
 import { getInfoToolStepText, withSubject } from "./toolProgressInfoText";
 import messages from "./toolProgressText.messages.yaml";
@@ -33,11 +33,10 @@ export function getToolProgressStepText(
   if (infoText) return infoText;
 
   if (part.type === "tool-loadSkill") {
-    const skill = asString(input?.skill);
-    const skillLabel = SKILL_LABELS[skill] || t("required");
+    const skillLabel = getSkillProgressLabel(part);
     return {
-      get label() { return t("loadCapability"); },
-      detail: output ? t("detailLoadedCapability", { value1: skillLabel }) : t("detailLoadingCapability", { value1: skillLabel }),
+      get label() { return withSubject(t("loadCapability"), skillLabel); },
+      detail: outputError ? formatNotebookAiError(outputError) : output ? t("detailLoadedCapability", { value1: skillLabel }) : t("detailLoadingCapability", { value1: skillLabel }),
     };
   }
 
