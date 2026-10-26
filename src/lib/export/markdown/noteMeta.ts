@@ -1,5 +1,4 @@
 import { stringify as stringifyYaml } from "yaml";
-import { isGeneratedDataImageName } from "@/components/editor/blocks/image/imageCaption";
 import { normalizeCalloutIcon, resolveCalloutIcon } from "@/components/editor/blocks/callout/calloutIcons";
 import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 import { detachBlockPropsMarker } from "./blockPropsMarker";
@@ -89,17 +88,14 @@ function imagePatch(block: any): Record<string, unknown> | null {
   if (block?.type !== "image" && block?.type !== "imageResize") return null;
   const props = block.props ?? block.attrs ?? {};
   const alt = imageAltText(props);
-  const plainCaption = alt && !isGeneratedDataImageName(alt) ? alt : "";
   const extra: Record<string, unknown> = {};
   if (String(props.name ?? "") !== alt) extra.name = String(props.name ?? "");
-  if (String(props.caption ?? "") !== plainCaption) extra.caption = String(props.caption ?? "");
   if (typeof props.alt === "string" && props.alt !== alt) extra.alt = props.alt;
   const width = Number(props.previewWidth ?? props.width);
   if (Number.isFinite(width) && width > 0) extra.previewWidth = width;
   if (props.textAlignment && props.textAlignment !== "left") extra.textAlignment = props.textAlignment;
   if (props.backgroundColor && props.backgroundColor !== "default") extra.backgroundColor = props.backgroundColor;
   if (props.showPreview === false) extra.showPreview = false;
-  if (props.captionSource === "user" || props.captionSource === "generated") extra.captionSource = props.captionSource;
   if (block.type === "imageResize") extra.legacyResize = true;
   return Object.keys(extra).length ? extra : null;
 }
@@ -108,7 +104,6 @@ function filePatch(block: any): Record<string, unknown> | null {
   if (block?.type !== "file") return null;
   const props = block.props ?? {};
   const extra: Record<string, unknown> = {};
-  if (props.caption) extra.caption = props.caption;
   if (props.backgroundColor && props.backgroundColor !== "default") extra.backgroundColor = props.backgroundColor;
   return Object.keys(extra).length ? extra : null;
 }
@@ -118,7 +113,6 @@ function mediaPatch(block: any): Record<string, unknown> | null {
   const props = block.props ?? {};
   const extra: Record<string, unknown> = {};
   if (props.name) extra.name = props.name;
-  if (props.caption) extra.caption = props.caption;
   if (props.backgroundColor && props.backgroundColor !== "default") extra.backgroundColor = props.backgroundColor;
   if (props.showPreview === false) extra.showPreview = false;
   if (block.type === "video" && props.textAlignment && props.textAlignment !== "left") extra.textAlignment = props.textAlignment;

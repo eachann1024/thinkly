@@ -9,7 +9,7 @@ import {
   MediaPlaceholder,
 } from "@/components/editor/blocks/shared/MediaPlaceholder";
 import {
-  imageBlockWithoutGeneratedCaption,
+  imageBlockWithoutCaption,
   normalizeParsedImageProps,
 } from "./imageCaption";
 import { ResolvedImagePreview } from "./ResolvedImagePreview";
@@ -56,7 +56,7 @@ function CustomImageBlockContent({
     );
   }
 
-  const displayBlock = imageBlockWithoutGeneratedCaption(block);
+  const displayBlock = imageBlockWithoutCaption(block);
 
   return (
     <ResizableImageWrapper block={displayBlock} editor={editor}>
@@ -90,14 +90,13 @@ export const customImageBlock = createReactBlockSpec(
       });
     },
     toExternalHTML: ({ block }) => {
-      const props = imageBlockWithoutGeneratedCaption(block).props;
+      const props = imageBlockWithoutCaption(block).props;
       if (props.showPreview === false) {
-        const link = <a href={props.url}>{props.name || props.url}</a>;
-        return props.caption ? <div data-caption-source={props.captionSource}>{link}<p>{props.caption}</p></div> : link;
+        return <a href={props.url}>{props.name || props.url}</a>;
       }
       const image = <img src={props.url} alt={typeof props.alt === "string" ? props.alt : props.name}
         data-goose-image-name={props.name} width={props.previewWidth} />;
-      return props.caption ? <figure data-caption-source={props.captionSource}>{image}<figcaption>{props.caption}</figcaption></figure> : image;
+      return image;
     },
     runsBefore: ["file"],
   },
