@@ -7,14 +7,15 @@ import { focusNewPage, cloneLocalPageContent } from "./content";
 import type { JSONContent, Page } from "@/types";
 import { useSettings } from "@/stores/useSettings";
 import { pickRandomPageIcon } from "@/lib/randomPageIcon";
-import { generateLocalPageId } from "./localPaths";
+import { allocateLocalMarkdownFilePath, generateLocalPageId } from "./localPaths";
+import { queueLocalPageCreation } from "./localCreationQueue";
 import {
   syncLocalPageMetadataCache,
   persistPageSnapshot,
 } from "../../persistence";
 import { markSelfWrite } from "@/lib/local-md-snapshot";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
-import { duplicateSuffixName } from "@/lib/duplicateName";
+import { preserveLocalEditorDraft } from "./recovery";
 
 export const createLocalPageAction = async (
   set: StoreSet,
@@ -53,7 +54,7 @@ export const createLocalPageRecordAction = async (
     content?: JSONContent;
     filePath?: string;
   },
-): Promise<string | null> => {
+): Promise<string | null> => queueLocalPageCreation(workspaceId, async () => {
   const notebook = useNotebooks.getState().notebooks[workspaceId];
   if (
     !notebook?.localPath ||
@@ -67,73 +68,19 @@ export const createLocalPageRecordAction = async (
     ? pickRandomPageIcon()
     : undefined;
 
-  const resolveParentPath = () => {
-    if (!parentId) return null;
-    const parentPage = get().pages[parentId];
-    if (parentPage?.localFilePath) return parentPage.localFilePath;
-    const prefix = `local-${workspaceId}-`;
-    if (!parentId.startsWith(prefix)) return null;
-    const encoded = parentId.slice(prefix.length);
-    try {
-      const relativePath = decodeURIComponent(encoded);
-      return `${notebook.localPath}/${relativePath}`;
-    } catch {
-      return null;
-    }
-  };
-
   const now = Date.now();
-  const localPath = notebook.localPath;
-  const normalizedTitle = (
-    (title || UNTITLED_PAGE_TITLE).trim() || UNTITLED_PAGE_TITLE
-  ).replace(/[\\/:*?"<>|]/g, "_");
-  const parentPath = resolveParentPath();
   const parentPage = parentId ? get().pages[parentId] : undefined;
+  if (parentId && (!parentPage || parentPage.workspaceId !== workspaceId || parentPage.trashedAt)) return null;
   const storedParentId =
     parentPage?.localFilePath && !parentPage.isFolder
       ? parentPage.parentId
       : parentId;
-  const baseDir = parentPath
-    ? parentPage?.isFolder
-      ? parentPath
-      : parentPath.replace(/[^\/\\]+$/, "")
-    : localPath;
-  const normalizedBaseDir = baseDir.replace(/[\/\\]$/, "");
+  const filePath = await allocateLocalMarkdownFilePath(
+    get, workspaceId, parentId, title, requestedFilePath,
+  );
+  if (!filePath) return null;
 
-  const checkExists = async (path: string) => {
-    if (window.gooseFs?.existsAsync) {
-      return await window.gooseFs.existsAsync(path);
-    }
-    return window.gooseFs?.exists(path) ?? false;
-  };
-
-  const isPathInsideNotebookRoot = (candidate: string) => {
-    const root = localPath.replace(/\\/g, "/").replace(/\/$/, "");
-    const normalized = candidate.replace(/\\/g, "/");
-    return normalized === root || normalized.startsWith(`${root}/`);
-  };
-
-  let filePath: string;
-  if (requestedFilePath) {
-    if (!isPathInsideNotebookRoot(requestedFilePath)) return null;
-    if (await checkExists(requestedFilePath)) return null;
-    filePath = requestedFilePath;
-  } else {
-    filePath = `${normalizedBaseDir}/${normalizedTitle}.md`;
-    if (await checkExists(filePath)) {
-      let suffix = 1;
-      while (
-        await checkExists(
-          `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`,
-        )
-      ) {
-        suffix++;
-      }
-      filePath = `${normalizedBaseDir}/${duplicateSuffixName(normalizedTitle, suffix)}.md`;
-    }
-  }
-
-  const id = generateLocalPageId(workspaceId, filePath);
+  const id = generateLocalPageId(workspaceId, filePath, true);
   const newPage: Page = {
     id,
     workspaceId,
@@ -161,17 +108,13 @@ export const createLocalPageRecordAction = async (
     saved = await get().saveLocalPageContent(
       id,
       cloneLocalPageContent(newPage.content),
-      { force: true, createOnly: Boolean(requestedFilePath) },
+      { force: true, createOnly: true },
     );
   } catch {
     saved = false;
   }
   if (!saved) {
-    set((state) => {
-      const nextPages = { ...state.pages };
-      delete nextPages[id];
-      return { pages: nextPages };
-    });
+    preserveLocalEditorDraft(set, get, id, filePath);
     return null;
   }
 
@@ -180,4 +123,4 @@ export const createLocalPageRecordAction = async (
   persistPageSnapshot(persisted);
   appendLocalFolderOrderEntries(workspaceId, [persisted]);
   return id;
-};
+});
