@@ -93,6 +93,17 @@ export function useSettingsImportExport(
       if (!file) return;
       sendDataEvent({ type: "import.fileChosen", id });
 
+      const { inspectNotebookImportZip } = await import("@/lib/export");
+      const inspection = await inspectNotebookImportZip(file);
+      if (inspection.source === "local-backup") {
+        const { importLocalNotebooks } = await import("@/lib/export/localNotebookBackup/host");
+        const restored = await importLocalNotebooks(file);
+        if (restored) toast.success(uiText("importComplete_b6d1"), {
+          description: uiText("notebooksRestored", { notebooks: restored.notebooks, pages: restored.pages }),
+        });
+        return;
+      }
+
       let firstWorkspaceId: string | null = null;
       let firstPageId: string | null = null;
       let notebookCount = 0;

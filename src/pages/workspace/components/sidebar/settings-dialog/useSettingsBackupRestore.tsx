@@ -170,38 +170,13 @@ export function useSettingsBackupRestore(
 
   const restoreBackupWithRollback = async (zipBlob: Blob) => {
     const { inspectNotebookImportZip } = await import("@/lib/export");
-    await inspectNotebookImportZip(zipBlob);
-    const rollbackBlob = await createRollbackBackup();
-
-    await clearCurrentContent({
-      preserveLocalFolders: true,
-      preserveWorkspaceState: true,
-    });
-    try {
-      await importBackupIntoEmptyState(zipBlob);
-      useTabs.getState().reconcileTabs();
-    } catch (error) {
-      console.error("[restore] 导入失败，开始回滚", error);
-      try {
-        await clearCurrentContent({
-          preserveLocalFolders: true,
-          preserveWorkspaceState: true,
-        });
-        if (rollbackBlob) {
-          await importBackupIntoEmptyState(rollbackBlob);
-        } else {
-          createDefaultNotebook();
-        }
-        useTabs.getState().reconcileTabs();
-      } catch (rollbackError) {
-        console.error("[restore] 回滚失败", rollbackError);
-        throw new Error(uiText("restoreFailedAndAutomaticRollbackDid_84d4"), {
-          cause: rollbackError,
-        });
-      }
-      throw new Error(uiText("restoreFailedYourPreviousDataWas_dcd9"), { cause: error });
-    }
+    const inspection = await inspectNotebookImportZip(zipBlob);
+    if (inspection.source !== "local-backup") throw new Error("Legacy internal backups cannot replace local notebooks. The original backup has been preserved.");
+    const { importLocalNotebooks } = await import("@/lib/export/localNotebookBackup/host");
+    if (!await importLocalNotebooks(zipBlob)) return false;
+    useTabs.getState().reconcileTabs();
     toast.success(uiText("restoredAndSynced_ea35"));
+    return true;
   };
   return {
     ...input,

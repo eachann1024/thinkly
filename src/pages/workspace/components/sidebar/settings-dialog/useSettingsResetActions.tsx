@@ -115,7 +115,7 @@ export function useSettingsResetActions(
     const id = beginDataOperation("restore");
     if (id === null) throw new Error(uiText("dataIsBeingResetOrRestored_eec4"));
     try {
-      await restoreBackupWithRollback(zipBlob);
+      return await restoreBackupWithRollback(zipBlob);
     } finally {
       sendDataEvent({ type: "restore.finished", id });
     }

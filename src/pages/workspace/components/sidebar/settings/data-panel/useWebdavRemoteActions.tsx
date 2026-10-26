@@ -11,8 +11,8 @@ zh-Hans:
   restoreFromCloud_6e37: "从云端恢复"
   restoreCloudBackup_bfc3: "恢复云端备份"
   confirmDeleteBackup: "确定删除云端备份「{{name}}」？删除后无法从云端找回。"
-  confirmRestoreLatest: "确定从云端恢复最新备份「{{name}}」？此操作将覆盖本地当前数据。恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。"
-  confirmRestoreBackup: "确定使用云端备份「{{name}}」恢复数据？恢复前将先校验完整性；若恢复中断，将自动还原当前本地数据。"
+  confirmRestoreLatest: "确定从云端恢复最新备份「{{name}}」？校验后请选择一个空文件夹存放恢复的笔记本。"
+  confirmRestoreBackup: "确定恢复云端备份「{{name}}」？校验后请选择一个空文件夹存放恢复的笔记本。"
 en:
   cloudBackupDeleted_5e7b: "Cloud backup deleted"
   couldNotDeleteBackup_31a4: "Could not delete backup"
@@ -22,8 +22,8 @@ en:
   restoreFromCloud_6e37: "Restore from cloud"
   restoreCloudBackup_bfc3: "Restore cloud backup"
   confirmDeleteBackup: "Delete cloud backup “{{name}}”? It cannot be recovered from the cloud."
-  confirmRestoreLatest: "Restore the latest cloud backup “{{name}}”? This replaces current local data. The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
-  confirmRestoreBackup: "Restore cloud backup “{{name}}”? The backup will be checked first; if restoration is interrupted, your current local data will be restored automatically."
+  confirmRestoreLatest: "Restore the latest cloud backup “{{name}}”? After validation, choose an empty folder for the restored notebooks."
+  confirmRestoreBackup: "Restore cloud backup “{{name}}”? After validation, choose an empty folder for the restored notebooks."
 ja:
   cloudBackupDeleted_5e7b: "クラウドバックアップを削除しました"
   couldNotDeleteBackup_31a4: "バックアップを削除できませんでした"
@@ -33,8 +33,8 @@ ja:
   restoreFromCloud_6e37: "クラウドから復元"
   restoreCloudBackup_bfc3: "クラウドバックアップを復元"
   confirmDeleteBackup: "クラウドバックアップ「{{name}}」を削除しますか？削除後はクラウドから復元できません。"
-  confirmRestoreLatest: "クラウドの最新バックアップ「{{name}}」から復元しますか？現在のローカルデータは上書きされます。復元前に整合性を確認し、復元が中断された場合は現在のローカルデータを自動的に元に戻します。"
-  confirmRestoreBackup: "クラウドバックアップ「{{name}}」でデータを復元しますか？復元前に整合性を確認し、復元が中断された場合は現在のローカルデータを自動的に元に戻します。"
+  confirmRestoreLatest: "クラウドの最新バックアップ「{{name}}」を復元しますか？検証後、復元先の空のフォルダを選択してください。"
+  confirmRestoreBackup: "クラウドバックアップ「{{name}}」を復元しますか？検証後、復元先の空のフォルダを選択してください。"
 `;
 const uiText = createTranslator(localMessages);
 import {
@@ -127,7 +127,7 @@ export function useWebdavRemoteActions(
         );
         if (!isCurrentActivation(epoch)) return;
         if (onResetAndImport) {
-          await onResetAndImport(blob);
+          if (await onResetAndImport(blob) === false) return;
           updateWebdavSettings({
             webdavLastDownloadAt: new Date().toISOString(),
             webdavLastDownloadFilename: file.basename,
