@@ -16,6 +16,7 @@ zh-Hans:
   connectAndSync_9751: "连接并同步"
   cancel_625f: "取消"
   readFailed: "读取配置失败：{{error}}"
+  notificationTargetMissing: "通知中的仓库已不存在，请从列表选择仓库。"
 en:
   removeConfiguration_9285: "Remove configuration"
   gitSyncIsAvailableInThe_bf2b: "Git sync is available in the desktop app only."
@@ -34,6 +35,7 @@ en:
   connectAndSync_9751: "Connect and sync"
   cancel_625f: "Cancel"
   readFailed: "Could not read configuration: {{error}}"
+  notificationTargetMissing: "The repository from the notification no longer exists. Choose a repository from the list."
 ja:
   removeConfiguration_9285: "設定を削除"
   gitSyncIsAvailableInThe_bf2b: "Git 同期はデスクトップ版アプリでのみ利用できます。"
@@ -52,3 +54,4 @@ ja:
   connectAndSync_9751: "接続して同期"
   cancel_625f: "キャンセル"
   readFailed: "設定を読み込めませんでした：{{error}}"
+  notificationTargetMissing: "通知のリポジトリは存在しません。リストからリポジトリを選択してください。"

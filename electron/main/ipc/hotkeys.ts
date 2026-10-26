@@ -1,4 +1,6 @@
-import { ipcMain, Notification } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
+import { registerNotificationIpc, showActionableNotification } from "../notifications";
+import { lookupWindowContext } from "../windows";
 import {
   registerHotkeys,
   pauseGlobalHotkeys,
@@ -10,6 +12,7 @@ import {
 } from "../accessibility";
 
 export function registerHotkeysIpc(): void {
+  registerNotificationIpc();
   ipcMain.handle(
     "desktop:registerHotkeys",
     async (
@@ -38,9 +41,11 @@ export function registerHotkeysIpc(): void {
 
   ipcMain.handle(
     "desktop:notify",
-    async (_event, n: { title: string; body: string }) => {
-      if (!Notification.isSupported()) return;
-      new Notification({ title: n.title, body: n.body }).show();
+    async (event, n: unknown) => {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (event.senderFrame !== event.sender.mainFrame || !lookupWindowContext(win)) return;
+      if (!n || typeof n !== "object" || !("title" in n) || !("body" in n) || typeof n.title !== "string" || typeof n.body !== "string") return;
+      showActionableNotification({ title: n.title, body: n.body }, { type: "workspace" }, win);
     },
   );
 }
