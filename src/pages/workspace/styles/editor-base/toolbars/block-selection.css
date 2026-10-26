@@ -1,0 +1,34 @@
+.bn-editor .bn-block-outer[data-goose-block-selected="true"] {
+  --goose-block-selection-outset: 8px;
+  --goose-block-selection-fill: color-mix(in srgb, var(--goose-accent-solid) 9%, hsl(var(--goose-editor-bg)));
+  position: relative;
+  border-radius: 4px;
+  background-color: var(--goose-block-selection-fill);
+  outline: none;
+  box-shadow: 7px 0 0 var(--goose-block-selection-fill),
+    -7px 0 0 var(--goose-block-selection-fill);
+}
+
+.bn-editor .bn-block-outer[data-goose-block-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0 calc(-1 * var(--goose-block-selection-outset));
+  border: 1px solid var(--goose-accent-solid);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.bn-editor .bn-block-outer[data-goose-block-selected="true"] .bn-block-outer[data-goose-block-selected="true"] {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.bn-editor .bn-block-outer[data-goose-block-selected="true"] .bn-block-outer[data-goose-block-selected="true"]::after {
+  display: none;
+}
+
+.bn-editor .bn-block-outer,
+.workspace-editor-surface:has(> .bn-container, > .bn-root) {
+  overflow-clip-margin: 9px;
+}
