@@ -50,6 +50,18 @@ export function useEditorPageLifecycle(
   }, [editor, editable]);
   const prevPageIdRef = useRef<string | null>(activePageId);
   const sourceRef = useRef({ page, mode: contentModeRef.current });
+  const loadedDocumentRef = useRef<{
+    doc: EditorState["doc"];
+    content: unknown;
+    mode: "raw" | "normalized";
+  } | null>(null);
+  const rememberLoadedDocument = () => {
+    loadedDocumentRef.current = {
+      doc: editor.prosemirrorState.doc,
+      content: pageRef.current?.content,
+      mode: contentModeRef.current,
+    };
+  };
   if (activePageId === prevPageIdRef.current) {
     sourceRef.current = { page, mode: contentModeRef.current };
   }
@@ -58,13 +70,17 @@ export function useEditorPageLifecycle(
     if (!id) return;
     const source = getLatestPage?.(id) ?? sourceRef.current.page;
     const mode = sourceRef.current.mode;
-    const untouched = !userInteractedRef.current && syncedContentSignatureRef.current;
+    const loaded = loadedDocumentRef.current;
+    const untouched = loaded?.doc === editor.prosemirrorState.doc && syncedContentSignatureRef.current;
     const blocks = untouched ? null : editor.document as BlockNoteContent;
     const signature = untouched ? syncedContentSignatureRef.current! : getContentSignature(blocks);
     const syncedSignature = untouched
       ? syncedContentSignatureRef.current
       : mode === "raw" ? signature : getCachedContentSignature(normalizePageContent(blocks));
-    const cachedSource = source && getCachedContentSignature(source.content) === syncedSignature
+    const cachedSource = source && (
+      (untouched && source.content === loaded?.content && mode === loaded?.mode) ||
+      getCachedContentSignature(source.content) === syncedSignature
+    )
       ? { content: source.content, mode, syncedSignature } : undefined;
     pageUndoHistory.save(id, editor.prosemirrorState, signature, cachedSource);
   };
@@ -87,19 +103,25 @@ export function useEditorPageLifecycle(
       }
       if (activePageId) {
         const view = editor.prosemirrorView;
+        const source = pageRef.current;
+        const cached = source && pageUndoHistory.restoreCached(
+          activePageId, view.state, source.content, contentModeRef.current,
+        );
         const signature = !userInteractedRef.current && syncedContentSignatureRef.current
           ? syncedContentSignatureRef.current
           : getContentSignature(editor.document);
-        const restored = pageUndoHistory.restore(
+        const restored = cached?.state ?? pageUndoHistory.restore(
           activePageId,
           view.state,
           signature,
         );
+        if (cached) syncedContentSignatureRef.current = cached.syncedSignature;
         if (restored !== view.state) {
           markProgrammaticRead(editor);
           view.updateState(restored);
         }
       }
+      rememberLoadedDocument();
       return;
     }
     saveSnapshotRef.current();
@@ -121,6 +143,7 @@ export function useEditorPageLifecycle(
       syncedContentSignatureRef.current = cached.syncedSignature;
       markProgrammaticRead(editor);
       view.updateState(cached.state);
+      rememberLoadedDocument();
       return;
     }
 
@@ -203,6 +226,7 @@ export function useEditorPageLifecycle(
     }
 
     userInteractedRef.current = false;
+    rememberLoadedDocument();
   }, [activePageId, debouncedUpdate, editor]);
 
   useLayoutEffect(() => {
