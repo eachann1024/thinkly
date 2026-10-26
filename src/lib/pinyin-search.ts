@@ -1,25 +1,25 @@
 type PinyinMatch = typeof import("pinyin-pro").match;
 
 let pinyinMatch: PinyinMatch | null = null;
-let preloading = false;
+let preloading: Promise<void> | null = null;
 let matcherRevision = 0;
 
 export function getPinyinMatcherRevision(): number {
   return matcherRevision;
 }
 
-export function warmPinyinMatcher(): void {
-  if (pinyinMatch || preloading) return;
-  preloading = true;
-  void import("pinyin-pro")
+export function warmPinyinMatcher(): Promise<void> {
+  if (pinyinMatch) return Promise.resolve();
+  preloading ??= import("pinyin-pro")
     .then((mod) => {
       pinyinMatch = mod.match;
       matchCache.clear();
       matcherRevision++;
     })
     .catch(() => {
-      preloading = false;
+      preloading = null;
     });
+  return preloading;
 }
 
 const matchCache = new Map<string, readonly number[] | null>();
