@@ -1,4 +1,3 @@
-import { runWithPresence } from "@/lib/ui/presence";
 import type { NotebooksState } from "./types";
 import { usePages } from "../usePages";
 import { useTabs } from "../useTabs";
@@ -83,22 +82,20 @@ export function createDeleteNotebookActions(
         }
       }
 
-      runWithPresence(() => {
-        pagesStore.removePagesByWorkspaceId(id, { purgePersistence: true });
-        if (deletedNotebook?.source === "local-folder") {
-          removeLocalPageMetaByWorkspaceId(id);
-          removeLocalFolderOrders(id);
-        }
-        useTabs.setState({
-          openTabs: remainingTabs,
-          activeTabId: nextActiveTabId,
-        });
-        set({
-          notebooks: remainingNotebooks,
-          lastActivePageByNotebook: remainingLastActive,
-          localFolderLoadStates: remainingLoadStates,
-          activeNotebookId: nextActiveNotebookId,
-        });
+      pagesStore.removePagesByWorkspaceId(id, { purgePersistence: true });
+      if (deletedNotebook?.source === "local-folder") {
+        removeLocalPageMetaByWorkspaceId(id);
+        removeLocalFolderOrders(id);
+      }
+      useTabs.setState({
+        openTabs: remainingTabs,
+        activeTabId: nextActiveTabId,
+      });
+      set({
+        notebooks: remainingNotebooks,
+        lastActivePageByNotebook: remainingLastActive,
+        localFolderLoadStates: remainingLoadStates,
+        activeNotebookId: nextActiveNotebookId,
       });
 
       if (
