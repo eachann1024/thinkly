@@ -1,7 +1,7 @@
 import { getToolProgressStepText } from "./toolProgressText";
 import { readObject } from "./toolProgressValues";
 export { getToolProgressStepText } from "./toolProgressText";
-import { isDefaultChatSkillPart } from "./toolProgressVisibility";
+import { isHiddenSkillPart } from "./toolProgressVisibility";
 import { toInfoCard, type WebResultsCardData } from "@/lib/notebook-ai/cards/types";
 
 export interface ToolProgressPart {
@@ -79,7 +79,7 @@ export function buildToolProgressSteps(
   isMessageStreaming?: boolean,
 ): ProgressStep[] {
   return parts
-    .filter((part) => !isDefaultChatSkillPart(part))
+    .filter((part) => !isHiddenSkillPart(part))
     .map((part) => {
       const step: ProgressStep = {
         ...getToolProgressStepText(part),
