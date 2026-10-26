@@ -13,6 +13,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import type { JSONContent, Page } from "@/types";
+import type { NoteSettings } from "@/lib/note-metadata/contract";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { HostAdapter } from "@/lib/host/adapter";
 import {
@@ -31,6 +32,8 @@ export interface RecoveryJournalEntry {
   baseSignature?: string;
   baseUpdatedAt?: number;
   draftPage?: Page;
+  settings?: NoteSettings;
+  baseSettings?: NoteSettings;
 }
 
 interface LegacyRecoveryJournalState {
@@ -128,6 +131,8 @@ export const recordRecoveryEntry = (input: {
   baseSignature?: string | (() => string);
   baseUpdatedAt?: number;
   draftPage?: Page;
+  settings?: NoteSettings;
+  baseSettings?: NoteSettings;
   now?: number;
 }): RecoveryJournalEntry | null => {
   migrateLegacyEntries();
@@ -146,6 +151,8 @@ export const recordRecoveryEntry = (input: {
       content: input.content,
       revision: lastRevision + 1,
       updatedAt: input.now ?? Date.now(),
+      ...(input.settings || previous?.settings ? { settings: input.settings ?? previous?.settings } : {}),
+      ...(input.baseSettings || previous?.baseSettings ? { baseSettings: previous?.baseSettings ?? input.baseSettings } : {}),
       ...(input.draftPage || previous?.draftPage
         ? { draftPage: input.draftPage ?? previous?.draftPage }
         : {}),
