@@ -1,5 +1,6 @@
 import type { ProgressStep } from "./toolProgressModel";
 import type { WorkCardStatusData } from "./workCardStatusContext";
+import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/workCardHeading.ts#messages:1">`
 zh-Hans:
@@ -12,6 +13,12 @@ zh-Hans:
   undone: "已撤回"
   pending: "待处理"
   complete: "处理完成"
+  stopped: "已手动停止"
+  timeout: "响应超时"
+  disconnected: "连接已中断"
+  interrupted: "生成已中断"
+  limited: "已达输出上限"
+  blocked: "内容受限"
   detailSteps: "{{value1}} 步{{value2}}"
 en:
   thePageContentHasChanged: "The page content has changed"
@@ -23,6 +30,12 @@ en:
   undone: "Undone"
   pending: "Pending"
   complete: "Complete"
+  stopped: "Stopped manually"
+  timeout: "Response timed out"
+  disconnected: "Connection interrupted"
+  interrupted: "Generation interrupted"
+  limited: "Output limit reached"
+  blocked: "Content restricted"
   detailSteps: "{{value1}} steps{{value2}}"
 ja:
   thePageContentHasChanged: "ページの内容が変更されました"
@@ -34,12 +47,18 @@ ja:
   undone: "取り消し済み"
   pending: "保留中"
   complete: "処理完了"
+  stopped: "手動で停止しました"
+  timeout: "応答がタイムアウトしました"
+  disconnected: "接続が切断されました"
+  interrupted: "生成が中断されました"
+  limited: "出力上限に達しました"
+  blocked: "コンテンツが制限されました"
   detailSteps: "{{value1}} ステップ{{value2}}"
 `;
 const t = createTranslator(messages);
 
 
-export type WorkCardPhase = ProgressStep["status"];
+export type WorkCardPhase = ProgressStep["status"] | Exclude<NotebookAiCompletion, "complete">;
 
 export type WorkCardHeading = {
   status: WorkCardStatusData;
@@ -62,7 +81,9 @@ function lastOf(
 export function getWorkCardPhase(
   steps: readonly ProgressStep[],
   isRunning: boolean,
+  completion?: NotebookAiCompletion,
 ): WorkCardPhase {
+  if (completion && completion !== "complete") return completion;
   if (steps.some((step) => step.status === "error")) return "error";
   const latestStatus = steps.at(-1)?.status;
   if (
@@ -72,7 +93,7 @@ export function getWorkCardPhase(
   )
     return latestStatus;
   if (isRunning) return "running";
-  if (steps.some((step) => step.status === "waiting")) return "waiting";
+  if (steps.some((step) => step.status === "waiting" || step.status === "running")) return "waiting";
   return "done";
 }
 
@@ -106,6 +127,18 @@ export function getWorkCardHeading(
   if (phase === "running") {
     return {
       status: { get label() { return t("processing"); }, tone: "accent", icon: "running" },
+      toggle,
+    };
+  }
+
+  if (phase === "stopped" || phase === "timeout" || phase === "disconnected" ||
+      phase === "interrupted" || phase === "limited" || phase === "blocked") {
+    return {
+      status: {
+        label: t(phase),
+        tone: phase === "stopped" ? "neutral" : "warning",
+        icon: phase === "stopped" ? "cancelled" : "error",
+      },
       toggle,
     };
   }

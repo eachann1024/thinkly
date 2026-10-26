@@ -100,7 +100,6 @@ export function useSessionState(notebookId: string) {
   }, [ai, error, clearError]);
   const aiStatusActiveRef = useRef(false);
   const messagesRef = useRef(messages);
-  const committedStopRef = useRef(stop);
 
   return {
     notebookId,
@@ -133,7 +132,6 @@ export function useSessionState(notebookId: string) {
     unavailableReason,
     aiStatusActiveRef,
     messagesRef,
-    committedStopRef,
   };
 }
 
