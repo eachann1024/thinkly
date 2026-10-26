@@ -3,13 +3,13 @@ import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/codeBlockLanguages.ts#messages:1">`
 zh-Hans:
   mathFormula: "数学公式 ($$)"
-  documentMetadataYaml: "文档元数据 (YAML)"
+  documentMetadataYaml: "YAML"
 en:
   mathFormula: "Math formula ($$)"
-  documentMetadataYaml: "Document metadata (YAML)"
+  documentMetadataYaml: "YAML"
 ja:
   mathFormula: "数式 ($$)"
-  documentMetadataYaml: "ドキュメントのメタデータ (YAML)"
+  documentMetadataYaml: "YAML"
 `;
 const t = createTranslator(messages);
 export const POPULAR_LANGUAGES = [
