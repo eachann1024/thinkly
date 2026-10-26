@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { planRefinementText, planReviewReason } from "./planRefinementText";
 import { useRef, useReducer, useState } from "react";
-import { Loader2, RotateCcw } from "@/components/ui/icons";
+import { RotateCcw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { isRunWriteScopeRevoked, revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -17,6 +17,7 @@ import { usePlanReviewSelection } from "./PlanReviewContext";
 import { planReviewState, reviewOutput } from "./reviewState";
 import { requestPlanRefinement } from "./refinePlan";
 import "./plan-review.css";
+import { ReviewActionStatus } from "./ReviewActionStatus";
 import { reviewActionReducer } from "./reviewActionState";
 import messages from "./ReviewActions.messages.yaml";
 import { createTranslator } from "@/i18n";
@@ -174,7 +175,10 @@ export function ReviewActions({
     !undone && !submitting && review.phase !== "executing";
   const footer = (
     <div className="notebook-ai-review-footer">
-      <p aria-live="polite">{detail}</p>
+      {hasError || undoConflict || undoFailed ? <p>{detail}</p> : null}
+      {submitting || undoing || review.phase !== "approval" ? (
+        <ReviewActionStatus status={status} />
+      ) : null}
       {review.phase === "applied" &&
       review.selectedCount !== undefined &&
       operationIds.length > review.selectedCount ? (
@@ -187,31 +191,25 @@ export function ReviewActions({
           {reason}
         </p>
       ) : null}
-      {review.phase === "approval" ? (
+      {review.phase === "approval" && !submitting ? (
         <>
           {!journal ? (
             <p className="text-[var(--goose-color-danger-focus)]" role="alert">
               {t("theOriginalPlanIsNoLongerAvailableGenerate")}
             </p>
           ) : null}
-          <div className="grid grid-cols-[1fr_1.2fr] gap-2.5">
+          <div className="notebook-ai-review-approval-actions">
             <Button
               type="button"
-              variant="secondary"
-              className={secondaryClass}
-              disabled={submitting}
-              onClick={() => void respond(false)}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="button"
-              className="goose-interactive-primary h-[40px] text-[14px] font-semibold shadow-none"
+              className="goose-interactive-primary h-[40px] w-full text-[14px] font-semibold shadow-none"
               disabled={!canApprove}
               onClick={() => void respond(true)}
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {t("applyCount", { count: selectedIds.length })}
+            </Button>
+            <Button type="button" variant="secondary" className={secondaryClass}
+              onClick={() => void respond(false)}>
+              {t("cancel")}
             </Button>
           </div>
           {!journal ? (
@@ -241,7 +239,7 @@ export function ReviewActions({
           {t("retryFailedItems")}
         </Button>
       ) : null}
-      {canUndo ? (
+      {canUndo && !undoing ? (
         <Button
           type="button"
           variant="secondary"
@@ -249,11 +247,7 @@ export function ReviewActions({
           disabled={undoing}
           onClick={() => void undo()}
         >
-          {undoing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <RotateCcw className="h-4 w-4" />
-          )}
+          <RotateCcw className="h-4 w-4" />
           {undoFailed || undoConflict ? t("retryUndo") : t("undoTheseChanges")}
         </Button>
       ) : null}
@@ -275,6 +269,7 @@ export function ReviewActions({
     <ApprovalCard
       title={input?.title ?? t("noteChangePlan")}
       status={status}
+      showStatus={false}
       footer={footer}
     />
   );
