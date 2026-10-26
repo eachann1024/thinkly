@@ -60,6 +60,7 @@ function convertNotebookAiMessage(
   projection: AssistantUiMessageProjection,
 ): ThreadMessageLike {
   const { message, isRunning } = projection;
+  const completion = message.metadata?.completion;
   const content: Array<Exclude<ThreadMessageLike["content"], string>[number]> =
     [];
 
@@ -142,7 +143,15 @@ function convertNotebookAiMessage(
       ? {
           status: isRunning
             ? ({ type: "running" } as const)
-            : ({ type: "complete", reason: "stop" } as const),
+            : completion && completion !== "complete"
+              ? ({
+                  type: "incomplete",
+                  reason: completion === "stopped" ? "cancelled"
+                    : completion === "limited" ? "length"
+                    : completion === "blocked" ? "content-filter"
+                    : completion === "error" ? "error" : "other",
+                } as const)
+              : ({ type: "complete", reason: "stop" } as const),
         }
       : {}),
   };

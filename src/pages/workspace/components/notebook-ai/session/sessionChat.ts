@@ -7,6 +7,7 @@ import { prepareNotebookAiMessagesForModel } from "@/lib/notebook-ai/messageUtil
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 
 import { persistSessionMessages } from "./sessionMessages";
+import { finishSessionChat } from "./sessionCompletion";
 
 const chats = new Map<string, Chat<NotebookAiMessage>>();
 
@@ -19,7 +20,9 @@ export function getSessionChat(notebookId: string, conversationId: string) {
       const user = [...options.messages].reverse().find((message) => message.role === "user");
       const currentPageId = user?.metadata && "currentPageId" in user.metadata
         ? user.metadata.currentPageId ?? null : getCurrentNotebookAiPageId(notebookId);
-      const result = (await import("@/lib/notebook-ai/transport")).buildTransport(
+      const { buildTransport } = await import("@/lib/notebook-ai/transport");
+      options.abortSignal?.throwIfAborted();
+      const result = buildTransport(
         notebookId, currentPageId, getNotebookAiRunContext(options.messages),
       );
       if (!result.ok) throw new Error(result.reason);
@@ -31,12 +34,12 @@ export function getSessionChat(notebookId: string, conversationId: string) {
       return null;
     },
   };
-  const chat = new Chat<NotebookAiMessage>({
+  const chat: Chat<NotebookAiMessage> = new Chat<NotebookAiMessage>({
     id: `notebook-ai-${notebookId}-${conversationId}`,
     messages: useNotebookAiChats.getState().getConversationMessages(notebookId, conversationId),
     transport,
-    onFinish: ({ messages }) => {
-      persistSessionMessages(notebookId, conversationId, messages);
+    onFinish: (finish) => {
+      persistSessionMessages(notebookId, conversationId, finishSessionChat(chat, finish));
     },
   });
   chats.set(key, chat);

@@ -93,11 +93,39 @@ export function buildPiTransport(
               reasoningId = null;
             }
           };
+          const finishResponse = () => {
+            if (finished) return;
+            finished = true;
+            endReasoning();
+            endText();
+            closeStep();
+            const response = [...agent.state.messages].reverse()
+              .find((message) => message.role === "assistant");
+            const reason = response?.stopReason;
+            const err = agent.state.errorMessage || response?.errorMessage;
+            if (err && !abortSignal?.aborted) {
+              writer.write({ type: "error", errorText: err });
+            }
+            writer.write({
+              type: "finish",
+              finishReason: abortSignal?.aborted || reason === "aborted" ? "other"
+                : err || reason === "error" ? "error"
+                : reason === "length" ? "length"
+                : reason === "stop" ? "stop"
+                : reason === "toolUse" ? "tool-calls" : "other",
+            });
+          };
 
           writer.write({
             type: "start",
             messageId: assistantMessageId,
           });
+
+          if (abortSignal?.aborted) {
+            abort();
+            finishResponse();
+            return;
+          }
 
           const onAbort = () => {
             abort();
@@ -189,20 +217,7 @@ export function buildPiTransport(
                   break;
                 }
                 case "agent_end": {
-                  endReasoning();
-                  endText();
-                  closeStep();
-                  if (!finished) {
-                    finished = true;
-                    const err = agent.state.errorMessage;
-                    if (err) {
-                      writer.write({ type: "error", errorText: err });
-                    }
-                    writer.write({
-                      type: "finish",
-                      finishReason: err ? "error" : "stop",
-                    });
-                  }
+                  finishResponse();
                   break;
                 }
                 default:
@@ -220,20 +235,7 @@ export function buildPiTransport(
             }
             await agent.waitForIdle();
 
-            if (!finished) {
-              finished = true;
-              const err = agent.state.errorMessage;
-              if (err) {
-                writer.write({ type: "error", errorText: err });
-              }
-              endReasoning();
-              endText();
-              closeStep();
-              writer.write({
-                type: "finish",
-                finishReason: err ? "error" : "stop",
-              });
-            }
+            finishResponse();
           } catch (error) {
             if (!finished) {
               finished = true;

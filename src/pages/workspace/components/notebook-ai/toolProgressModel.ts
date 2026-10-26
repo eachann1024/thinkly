@@ -1,4 +1,5 @@
 import { getToolProgressStepText } from "./toolProgressText";
+import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
 import { readObject } from "./toolProgressValues";
 export { getToolProgressStepText } from "./toolProgressText";
 import { isHiddenSkillPart } from "./toolProgressVisibility";
@@ -77,13 +78,17 @@ export function getToolProgressStepStatus(
 export function buildToolProgressSteps(
   parts: ToolProgressPart[],
   isMessageStreaming?: boolean,
+  completion?: NotebookAiCompletion,
 ): ProgressStep[] {
   return parts
     .filter((part) => !isHiddenSkillPart(part))
     .map((part) => {
+      const status = getToolProgressStepStatus(part, isMessageStreaming);
+      const interrupted = completion && completion !== "complete";
       const step: ProgressStep = {
         ...getToolProgressStepText(part),
-        status: getToolProgressStepStatus(part, isMessageStreaming),
+        status: interrupted && (status === "running" || status === "waiting")
+          ? "cancelled" : status,
       };
       if (part.type !== "tool-searchWeb" || part.state !== "output-available") return step;
       const card = toInfoCard("searchWeb", part.output);
