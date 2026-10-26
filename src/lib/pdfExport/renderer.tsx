@@ -3,7 +3,8 @@ import { Document, Page, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { PdfBlock, PdfContext, PdfBlockMapping } from "./blockTypes";
 import { renderPdfInline } from "./pdfInline";
-import { normalizeColumnLayout, readColumnWidths } from "@/components/editor/blocks/columns/columnModel";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 export type { PdfBlock, PdfContext, PdfBlockMapping } from "./blockTypes";
 export { pdfColor, blockTextStyle, splitPdfWord } from "./pdfTextStyle";
 export { renderPdfInline } from "./pdfInline";
@@ -30,10 +31,6 @@ export async function createPdfDocument(
             ? start
             : ordinal + 1;
       } else ordinal = 0;
-      if (block.type === "columnLayout") {
-        result.push(await renderColumns(block, index, depth));
-        continue;
-      }
       const mapping = mappings[block.type ?? "paragraph"] ?? mappings.paragraph;
       result.push(
         <View key={block.id ?? index} style={{ marginBottom: 6 }}>
@@ -48,24 +45,6 @@ export async function createPdfDocument(
     }
     return result;
   }
-  async function renderColumns(block: PdfBlock, index: number, depth: number): Promise<ReactNode> {
-    const layout = normalizeColumnLayout(block as any, (block.children ?? []) as any[]);
-    const sections = (layout.children ?? []) as PdfBlock[];
-    const widths = readColumnWidths(layout.props?.widths, sections.length);
-    const columns: ReactNode[] = [];
-    for (const [column, section] of sections.entries()) {
-      columns.push(
-        <View key={column} style={{ width: `${widths[column]}%`, paddingRight: column < sections.length - 1 ? 18 : 0 }}>
-          {await renderBlocks(section.children ?? [], depth)}
-        </View>,
-      );
-    }
-    return (
-      <View key={block.id ?? index} style={{ flexDirection: "row", marginBottom: 6 }}>
-        {columns}
-      </View>
-    );
-  }
   return (
     <Document>
       <Page
@@ -78,7 +57,7 @@ export async function createPdfDocument(
           color: TEXT_COLORS.light.primary,
         }}
       >
-        {await renderBlocks(blocks, 0)}
+        {await renderBlocks(unfoldLegacyBlocks(flattenLegacyColumns([...blocks])), 0)}
       </Page>
     </Document>
   );
