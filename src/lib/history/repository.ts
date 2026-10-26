@@ -2,6 +2,7 @@ import { readRevisionHistoryVersion, invalidateHistoryVersion } from "./versionR
 import { HostAdapter } from "@/lib/host/adapter";
 import type { HistoryIndex, HistoryVersion } from "./types";
 import { normalizeHistoryIndex } from "./guards";
+import { bumpHistoryIndexRevision } from "./indexRevision";
 
 const VERSION_PREFIX = "gn:hist:";
 const INDEX_PREFIX = "gn:hist-idx:";
@@ -26,6 +27,7 @@ export const historyRepository = {
     const key = indexKey(index.pageId);
     const existing = HostAdapter.db.get<HistoryIndex>(key);
     assertStorageOperation(HostAdapter.db.put(key, index, existing?._rev));
+    bumpHistoryIndexRevision(index.pageId);
   },
 
   loadVersion(pageId: string, versionId: string): HistoryVersion | null {
@@ -54,6 +56,7 @@ export const historyRepository = {
       assertStorageOperation(HostAdapter.db.remove(doc._id));
     });
     assertStorageOperation(HostAdapter.db.remove(indexKey(pageId)));
+    bumpHistoryIndexRevision(pageId);
   },
 
   clearAll(): void {
@@ -68,6 +71,7 @@ export const historyRepository = {
       .forEach((doc) => {
         invalidateHistoryVersion(doc._id);
         assertStorageOperation(HostAdapter.db.remove(doc._id));
+        bumpHistoryIndexRevision(doc._id.slice(INDEX_PREFIX.length));
       });
   },
 };
