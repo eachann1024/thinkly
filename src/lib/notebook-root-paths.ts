@@ -109,9 +109,17 @@ export async function rebaseNotebookFileReferences(notebookId: string, oldRoot: 
     if (disk == null) continue;
     const rewritten = rebaseMarkdownAbsolutePaths(disk, oldRoot, newRoot);
     if (rewritten === disk) continue;
+    const { prepareMetadataRelocation } = await import("@/lib/note-metadata/relocate");
+    await prepareMetadataRelocation(fs, newRoot, newRoot, [{
+      id: page.id, path: filePath, nextPath: filePath, before: disk, after: rewritten,
+      revision: usePages.getState().pages[page.id]?.localMetadataRevision,
+    }], (id, localMetadataRevision) => usePages.setState((state) => ({
+      pages: { ...state.pages, [id]: { ...state.pages[id], localMetadataRevision } },
+    })));
     markSelfWrite(filePath);
-    const wrote = fs.writeFileAsync ? await fs.writeFileAsync(filePath, rewritten) : fs.writeFile(filePath, rewritten);
-    if (wrote) setLocalMdSnapshot(filePath, rewritten);
+    const { replaceNoteMarkdown } = await import("@/lib/note-metadata/writeMarkdown");
+    await replaceNoteMarkdown(fs, filePath, rewritten, disk);
+    setLocalMdSnapshot(filePath, rewritten);
   }
 }
 
