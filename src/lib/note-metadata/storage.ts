@@ -69,7 +69,7 @@ export async function readMetadataEnvelope(fs: NoteMetadataFs, root: string, not
   if (raw === null) throw new NoteMetadataError("io-error", "Metadata read returned no content");
   const envelope = parseEnvelope(raw, noteId);
   rawEnvelopes.set(envelope, raw);
-  for (const snapshot of [envelope.current, envelope.previous]) {
+  for (const snapshot of [envelope.current, envelope.previous, envelope.recovery]) {
     if (snapshot && await markdownDigest(snapshot.markdown) !== snapshot.digest) {
       throw new NoteMetadataError("corrupt", "Metadata baseline checksum differs");
     }
@@ -104,9 +104,9 @@ export async function stageMetadata(
         if (compatible) previous = { ...compatible, markdown: currentDiskMarkdown, digest };
       }
       if (!previous && existing.legacyBaseline === currentDiskMarkdown) legacyBaseline = currentDiskMarkdown;
-      if (!previous && legacyBaseline === undefined) throw new NoteMetadataError("mismatch", "Current Markdown has no matching metadata revision");
-    } else if (!existing && currentDiskMarkdown !== null && readIdentity(currentDiskMarkdown)) {
-      throw new NoteMetadataError("missing", "Cannot replace missing note metadata");
+      if (!previous && legacyBaseline === undefined) legacyBaseline = currentDiskMarkdown;
+    } else if (!existing && currentDiskMarkdown !== null && readIdentity(currentDiskMarkdown) && readIdentity(currentDiskMarkdown) !== next.noteId) {
+      throw new NoteMetadataError("identity", "Legacy note identity differs");
     } else if (!existing && currentDiskMarkdown !== null) legacyBaseline = currentDiskMarkdown;
     else if (existing && currentDiskMarkdown === null && expectedRevision !== existingRevision) {
       throw new NoteMetadataError("conflict", "Existing metadata cannot be adopted by a new note");
@@ -114,7 +114,7 @@ export async function stageMetadata(
     const samePayload = existing && existing.current.digest === next.payload.digest &&
       JSON.stringify(existing.current.meta) === JSON.stringify(next.payload.meta) &&
       JSON.stringify(existing.current.settings) === JSON.stringify(next.payload.settings);
-    if (samePayload) {
+    if (samePayload && !existing.deleted && existing.relativePath === next.relativePath) {
       const raw = metadataEnvelopeText(existing);
       const unchanged = fs.compareAndSwapFileAsync
         ? await fs.compareAndSwapFileAsync(file, raw, raw)
@@ -126,6 +126,9 @@ export async function stageMetadata(
     const revision = crypto.randomUUID();
     const envelope: NoteMetadataEnvelope = {
       version: 1, noteId: next.noteId, revision, current: next.payload,
+      ...(next.relativePath ? { relativePath: next.relativePath } : {}),
+      ...(existing?.relativePath && existing.relativePath !== next.relativePath ? { previousRelativePath: existing.relativePath } : existing?.previousRelativePath ? { previousRelativePath: existing.previousRelativePath } : {}),
+      ...(existing && (existing.recovery || (!previous && legacyBaseline !== undefined)) ? { recovery: existing.recovery ?? existing.current } : {}),
       ...(previous && previous.digest !== next.payload.digest ? { previous } : {}),
       ...(legacyBaseline !== undefined ? { legacyBaseline } : {}),
     };

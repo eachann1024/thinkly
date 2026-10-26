@@ -43,12 +43,13 @@ export const reloadLocalPageFromDiskAction = async (
   const markdown = read.content;
   const readError = read.error;
 
+  const metadataRoot = page.localMetadataRoot ?? useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
   const parsed = await parseLocalMarkdownContent(
     markdown,
     localFileTitleFromPath(filePath),
     readError,
-    useNotebooks.getState().notebooks[page.workspaceId]?.localPath
-      ? { root: useNotebooks.getState().notebooks[page.workspaceId].localPath!, fs }
+    metadataRoot
+      ? { root: metadataRoot, fs, filePath }
       : undefined,
   );
 

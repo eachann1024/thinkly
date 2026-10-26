@@ -4,7 +4,6 @@ import { createLocalNotebookBackup } from "./create";
 import { readBackupArchive } from "./archive";
 import { readValidatedNotebookBackup } from "./restore";
 import { assertSnapshotUnchanged } from "./snapshot";
-import { readIdentity } from "@/lib/note-metadata/identity";
 
 export const BUNDLE_PATH = "thinkly-local-backups.json";
 export type BackupNotebook = { name: string; notebookId: string; files: BackupFiles };
@@ -18,14 +17,12 @@ export async function createLocalNotebookBundle(notebooks: { name: string; root:
   let fileCount = 0;
   const ids = new Set<string>();
   const snapshots: BackupFiles[] = [];
-  const noteIds = new Set<string>();
   for (let number = 0; number < notebooks.length; number++) {
     const notebook = notebooks[number];
     if (!notebook.name.trim() || notebook.name.length > 200 || /[\u0000-\u001f]/.test(notebook.name)) fail("Invalid notebook name");
     const blob = await createLocalNotebookBackup(notebook.root, fs);
     if (blob.size > BACKUP_LIMITS.fileBytes) fail("Bundled notebook archive is too large");
     const validated = await readValidatedNotebookBackup(blob);
-    assertUniqueNoteIds(validated.files, noteIds);
     snapshots.push(validated.files);
     fileCount += validated.files.size;
     if (fileCount > BACKUP_LIMITS.entries) fail("Too many bundled files");
@@ -58,7 +55,6 @@ export async function readLocalNotebookBundle(blob: Blob): Promise<BackupNoteboo
   const notebooks: BackupNotebook[] = [];
   const paths = new Set<string>();
   const ids = new Set<string>();
-  const noteIds = new Set<string>();
   let total = 0;
   let fileCount = 0;
   for (const entry of index.notebooks) {
@@ -67,7 +63,6 @@ export async function readLocalNotebookBundle(blob: Blob): Promise<BackupNoteboo
       || paths.has(entry.path) || !outer.has(entry.path)) fail("Invalid bundled notebook");
     paths.add(entry.path);
     const notebook = await readValidatedNotebookBackup(new Blob([new Uint8Array(outer.get(entry.path)!)]));
-    assertUniqueNoteIds(notebook.files, noteIds);
     if (ids.has(notebook.notebookId)) fail("Notebook identities are duplicated");
     ids.add(notebook.notebookId);
     fileCount += notebook.files.size;
@@ -77,14 +72,4 @@ export async function readLocalNotebookBundle(blob: Blob): Promise<BackupNoteboo
     notebooks.push({ name: entry.name, ...notebook });
   }
   return notebooks;
-}
-
-function assertUniqueNoteIds(files: BackupFiles, ids: Set<string>): void {
-  for (const [name, bytes] of files) {
-    if (!/\.(?:md|markdown)$/i.test(name)) continue;
-    const id = readIdentity(decodeText(bytes));
-    if (!id) continue;
-    if (ids.has(id)) fail("Note identities overlap between notebooks");
-    ids.add(id);
-  }
 }

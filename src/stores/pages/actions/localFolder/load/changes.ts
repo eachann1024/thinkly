@@ -130,7 +130,7 @@ export const addSingleLocalPageAction = async (
     markdown,
     fallbackTitle,
     readError,
-    { root: basePath, fs },
+    { root: basePath, fs, filePath },
   );
 
   if (typeof markdown === "string") {

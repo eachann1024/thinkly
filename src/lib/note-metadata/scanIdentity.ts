@@ -45,6 +45,12 @@ export function createNoteIdentityResolver(
     const previousStillExists = previous && previous !== relative
       ? fs.existsAsync ? await fs.existsAsync(`${root}/${previous}`) : fs.exists(`${root}/${previous}`)
       : false;
+    if (reservedIds.has(identity) && page.localMetadataId) {
+      page.id = `local-view:${notebookId}:${encodeURIComponent(relative)}`;
+      claimed.set(page.id, relative);
+      idMap[relative] = page.id;
+      return true;
+    }
     if (reservedIds.has(identity) || owner && owner !== relative || previousStillExists) {
       isolateNoteIdentity(page, new Set([...reservedIds, ...claimed.keys(), ...allocated.keys()]));
       claimed.set(page.id, relative);
