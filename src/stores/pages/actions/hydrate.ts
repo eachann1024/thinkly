@@ -33,7 +33,7 @@ import type { PagesState } from "../types";
 import {
   LEGACY_TITLE_CHILDREN_REPAIR_MARK_KEY,
   NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY,
-  HEADING_SECTION_FOLD_MIGRATION_MARK_KEY,
+  LEGACY_FOLDING_REPAIR_MARK_KEY,
 } from "../types";
 import { isLocalFolderPage, seedLocalPageMetadataCache } from "../persistence";
 import {
@@ -47,7 +47,7 @@ import { recoverEditorDraft } from "./recoverEditorDraft";
 import {
   repairLegacyTitleChildrenInPages,
   repairNormalizedContentInPages,
-  repairHeadingSectionFoldInPages,
+  repairLegacyFoldingInPages,
 } from "../migrations";
 
 export type StoreSet = (
@@ -72,13 +72,13 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
     ? { pages: repairedPages, repairedPageIds: [] as string[] }
     : repairNormalizedContentInPages(repairedPages);
   const hasMigratedHeadingSectionFold =
-    getDbStorageItem(HEADING_SECTION_FOLD_MIGRATION_MARK_KEY) === "1";
+    getDbStorageItem(LEGACY_FOLDING_REPAIR_MARK_KEY) === "1";
   const {
-    pages: sectionFoldPages,
-    repairedPageIds: sectionFoldPageIds,
+    pages: unfoldedPages,
+    repairedPageIds: unfoldedPageIds,
   } = hasMigratedHeadingSectionFold
     ? { pages: contentRepairedPages, repairedPageIds: [] as string[] }
-    : repairHeadingSectionFoldInPages(contentRepairedPages);
+    : repairLegacyFoldingInPages(contentRepairedPages);
 
   if (!hasRepairedLegacyTitleChildren) {
     if (repairedPageIds.length > 0) {
@@ -109,20 +109,20 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
   }
 
   if (!hasMigratedHeadingSectionFold) {
-    if (sectionFoldPageIds.length > 0) {
-      sectionFoldPageIds.forEach((pageId) => {
-        const repairedPage = sectionFoldPages[pageId];
+    if (unfoldedPageIds.length > 0) {
+      unfoldedPageIds.forEach((pageId) => {
+        const repairedPage = unfoldedPages[pageId];
         if (!repairedPage || repairedPage.localFilePath) return;
         saveInternalPage(repairedPage);
       });
       console.info(
-        `[usePages] migrated heading section fold in ${sectionFoldPageIds.length} page(s).`,
+        `[usePages] migrated heading section fold in ${unfoldedPageIds.length} page(s).`,
       );
     }
-    setDbStorageItem(HEADING_SECTION_FOLD_MIGRATION_MARK_KEY, "1");
+    setDbStorageItem(LEGACY_FOLDING_REPAIR_MARK_KEY, "1");
   }
 
-  const recoveredPages = { ...sectionFoldPages };
+  const recoveredPages = { ...unfoldedPages };
   let recoveredCount = 0;
   let conflictCount = 0;
   for (const entry of listRecoveryEntries("internal-page")) {
