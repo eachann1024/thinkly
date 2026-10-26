@@ -34,9 +34,14 @@ const fs: EditorPlatformFs = {
   isAvailable: () => hostFs.isAvailable(),
   readFileAsync: (path) => hostFs.readFileAsync(path),
   readFileStatAsync: async (path): Promise<FileStat | null> => {
-    const raw = await hostFs.readFileStatAsync(path);
-    if (!raw) return null;
-    return raw as unknown as FileStat;
+    const api = getGooseDesktop();
+    if (!api) return null;
+    try {
+      const stat = await api.fsStat(path);
+      return { size: stat.size, mtime: stat.mtimeMs, isDirectory: stat.isDirectory, isFile: !stat.isDirectory };
+    } catch {
+      return null;
+    }
   },
   readFileBase64: async (path) => {
     const gfs =
