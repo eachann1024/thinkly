@@ -45,7 +45,7 @@ export function createNoteIdentityResolver(
     const previousStillExists = previous && previous !== relative
       ? fs.existsAsync ? await fs.existsAsync(`${root}/${previous}`) : fs.exists(`${root}/${previous}`)
       : false;
-    if (reservedIds.has(identity) && page.localMetadataId) {
+    if ((reservedIds.has(identity) || reservedIds.has(page.id)) && page.localMetadataId) {
       page.id = `local-view:${notebookId}:${encodeURIComponent(relative)}`;
       claimed.set(page.id, relative);
       idMap[relative] = page.id;
@@ -57,10 +57,10 @@ export function createNoteIdentityResolver(
       return false;
     }
     claimed.set(identity, relative);
-    page.id = identity;
-    if (!page.localMetadataId || idMap[relative] === identity) return false;
+    page.id = previous && previous !== relative ? identity : idMap[relative] ?? page.id;
+    if (!page.localMetadataId || idMap[relative] === page.id) return false;
     if (previous && previous !== relative) delete idMap[previous];
-    idMap[relative] = identity;
+    idMap[relative] = page.id;
     return true;
   };
   return Object.assign(resolve, {
