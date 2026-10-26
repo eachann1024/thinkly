@@ -1,4 +1,10 @@
 import { useState } from "react";
+import {
+  Popover,
+  PopoverAction,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SelectionToolbarSurface } from "@/components/editor/toolbars/SelectionToolbarSurface";
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
@@ -11,11 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useFormatCode } from "@/components/editor/hooks/useFormatCode";
 import { useEditorPlatform } from "@/components/editor/platform/context";
-import {
-  FORMAT_SUPPORTED_LANGUAGES,
-  LANGUAGE_DISPLAY_NAMES,
-} from "./codeBlockLanguages";
-import { CodeLanguagePicker } from "./CodeLanguagePicker";
+import { FORMAT_SUPPORTED_LANGUAGES } from "./codeBlockLanguages";
+import { CodeLatexHints } from "./CodeLatexHints";
 import { CodePreviewToolbar } from "./CodePreviewToolbar";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
@@ -28,6 +31,10 @@ zh-Hans:
   codeCopied: "已复制代码"
   copyCode: "复制代码"
   copied: "已复制"
+  expandCodeBlock: "展开代码块"
+  collapseCodeBlock: "折叠代码块"
+  moreActions: "更多操作"
+  downloadImage: "下载图片"
 en:
   codeActions: "Code actions"
   turnOffLineWrapping: "Turn off line wrapping"
@@ -36,6 +43,10 @@ en:
   codeCopied: "Code copied"
   copyCode: "Copy code"
   copied: "Copied"
+  expandCodeBlock: "Expand code block"
+  collapseCodeBlock: "Collapse code block"
+  moreActions: "More actions"
+  downloadImage: "Download image"
 ja:
   codeActions: "コード操作"
   turnOffLineWrapping: "折り返しを解除"
@@ -44,6 +55,10 @@ ja:
   codeCopied: "コードをコピーしました"
   copyCode: "コードをコピー"
   copied: "コピーしました"
+  expandCodeBlock: "コードブロックを展開"
+  collapseCodeBlock: "コードブロックを折りたたむ"
+  moreActions: "その他の操作"
+  downloadImage: "画像をダウンロード"
 `;
 const t = createTranslator(messages);
 
@@ -63,6 +78,8 @@ export function CodeBlockToolbar({
   onDownloadPreview,
   onCopyPreview,
   canPreview = false,
+  collapsed = false,
+  onCollapsedChange,
 }: CodeBlockToolbarProps) {
   useLocale();
   const [copiedKind, setCopiedKind] = useState<"code" | "image" | null>(null);
@@ -72,9 +89,6 @@ export function CodeBlockToolbar({
   const { format, isLoading } = useFormatCode();
   const platform = useEditorPlatform();
 
-  const displayLanguage = language
-    ? LANGUAGE_DISPLAY_NAMES[language.toLowerCase()] || language
-    : "Plain Text";
 
   const handleCopyCode = async () => {
     const content = getCodeContent();
@@ -116,9 +130,15 @@ export function CodeBlockToolbar({
   );
   const isMathOrMermaid = language === "math" || language === "mermaid";
   const hasVisualPreview = isMathOrMermaid && Boolean(onPreviewModeChange);
-  const chipClass = "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)] text-muted-foreground cursor-pointer";
-  const chipActiveClass = "";
-  const iconSize = "size-[var(--goose-control-icon-size)]";
+  const showWrap = editable && Boolean(onWrapChange) && !isMathOrMermaid && !collapsed;
+  const showFormat = editable && Boolean(onFormat) && canFormat && !collapsed;
+  const showCollapse = !isMathOrMermaid && Boolean(onCollapsedChange);
+  const showHelp = language === "math" && editable && !collapsed;
+  const showDownloadInMore = hasVisualPreview;
+  const hasMore = showDownloadInMore || showWrap || showFormat;
+  const btn = "goose-code-island-btn goose-accent-selection";
+  const icon = "goose-code-island-icon";
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <TooltipProvider delayDuration={600}>
@@ -132,114 +152,191 @@ export function CodeBlockToolbar({
           hasVisualPreview && "goose-code-toolbar-actions-visual",
         )}
       >
-        <div className="flex shrink-0 items-center gap-1">
-          <div className="goose-code-hover-actions inline-flex items-center gap-1">
-            {hasVisualPreview && (
-              <CodePreviewToolbar
-                language={language}
-                onLanguageChange={onLanguageChange}
-                getCodeContent={getCodeContent}
-                canPreview={canPreview}
-                onOpenPreview={onOpenPreview}
-                onSystemPreview={onSystemPreview}
-                onDownloadPreview={onDownloadPreview}
-                onCopyPreview={onCopyPreview}
-                previewMode={previewMode}
-                onPreviewModeChange={onPreviewModeChange}
-                chipClass={chipClass}
-                copied={copied}
-                copyingImage={copyingImage}
-                handleCopy={handleCopy}
-              />
-            )}
+        <div className="goose-code-hover-actions flex shrink-0 items-center">
+          {showCollapse && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
+                  aria-expanded={!collapsed}
+                  data-goose-selected="false"
+                  onClick={onCollapsedChange}
+                  className={btn}
+                >
+                  <GooseIcons.ChevronDown
+                    className={cn(icon, "goose-code-collapse-icon", collapsed && "-rotate-90")}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
-            {editable && onWrapChange && !isMathOrMermaid && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={wrap ? t("turnOffLineWrapping") : t("wrapLines")}
+          {hasVisualPreview && (
+            <CodePreviewToolbar
+              language={language}
+              onLanguageChange={onLanguageChange}
+              getCodeContent={getCodeContent}
+              canPreview={canPreview}
+              onOpenPreview={onOpenPreview}
+              onSystemPreview={onSystemPreview}
+              onDownloadPreview={onDownloadPreview}
+              onCopyPreview={onCopyPreview}
+              previewMode={previewMode}
+              onPreviewModeChange={onPreviewModeChange}
+              copied={copied}
+              copyingImage={copyingImage}
+              handleCopy={handleCopy}
+            />
+          )}
+
+          {showWrap && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={wrap ? t("turnOffLineWrapping") : t("wrapLines")}
+                  aria-pressed={wrap}
+                  data-goose-secondary="true"
+                  onClick={() => onWrapChange?.(!wrap)}
+                  className={btn}
+                >
+                  {wrap ? (
+                    <GooseIcons.AlignJustify className={icon} />
+                  ) : (
+                    <GooseIcons.WrapText className={icon} />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {wrap ? t("turnOffLineWrapping") : t("wrapLines")}
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {showFormat && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t("formatCode")}
+                  data-goose-secondary="true"
+                  onClick={handleFormatClick}
+                  disabled={isLoading}
+                  className={btn}
+                >
+                  {isLoading ? (
+                    <GooseIcons.Loader2 className={cn(icon, "animate-spin")} />
+                  ) : (
+                    <GooseIcons.Sparkles className={icon} />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{t("formatCode")}</TooltipContent>
+            </Tooltip>
+          )}
+
+          {!hasVisualPreview && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void handleCopyCode()}
+                  aria-label={copied ? t("codeCopied") : t("copyCode")}
+                  className={btn}
+                >
+                  {copied ? (
+                    <GooseIcons.Check className={cn(icon, "text-[var(--goose-color-success)]")} />
+                  ) : (
+                    <GooseIcons.Copy className={icon} />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{copied ? t("copied") : t("copyCode")}</TooltipContent>
+            </Tooltip>
+          )}
+
+          {showHelp && <CodeLatexHints />}
+
+          {hasMore && (
+            <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t("moreActions")}
+                  className={cn(btn, "goose-code-more")}
+                >
+                  <GooseIcons.MoreHorizontal className={icon} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent variant="menu" align="end" className="goose-code-more-menu">
+                <div className="goose-list-layout" data-goose-menu-slot="root" role="menu">
+                {showDownloadInMore && (
+                  <PopoverAction
+                    disabled={!canPreview}
+                    onSelect={() => {
+                      setMoreOpen(false);
+                      onDownloadPreview?.();
+                    }}
+                    role="menuitem"
+                    data-goose-menu-slot="row"
+                    className="goose-menu-item"
+                  >
+                    <GooseIcons.Download className={icon} />
+                    <span>{t("downloadImage")}</span>
+                  </PopoverAction>
+                )}
+                {showWrap && (
+                  <PopoverAction
                     aria-pressed={wrap}
-                    onClick={() => onWrapChange(!wrap)}
-                    className={cn(
-                      "h-6 w-6 p-0",
-                      chipClass,
-                      wrap && chipActiveClass,
-                    )}
+                    onSelect={() => {
+                      setMoreOpen(false);
+                      onWrapChange?.(!wrap);
+                    }}
+                    role="menuitem"
+                    data-goose-menu-slot="row"
+                    className="goose-menu-item"
                   >
                     {wrap ? (
-                      <GooseIcons.AlignJustify className={iconSize} />
+                      <GooseIcons.AlignJustify className={icon} />
                     ) : (
-                      <GooseIcons.WrapText className={iconSize} />
+                      <GooseIcons.WrapText className={icon} />
                     )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{wrap ? t("turnOffLineWrapping") : t("wrapLines")}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {editable && onFormat && canFormat && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleFormatClick}
+                    <span>{wrap ? t("turnOffLineWrapping") : t("wrapLines")}</span>
+                  </PopoverAction>
+                )}
+                {showFormat && (
+                  <PopoverAction
                     disabled={isLoading}
-                    className={cn("h-6 w-6 p-0", chipClass)}
+                    onSelect={() => {
+                      setMoreOpen(false);
+                      void handleFormatClick();
+                    }}
+                    role="menuitem"
+                    data-goose-menu-slot="row"
+                    className="goose-menu-item"
                   >
-                    {isLoading ? (
-                      <GooseIcons.Loader2
-                        className={cn(iconSize, "animate-spin")}
-                      />
-                    ) : (
-                      <GooseIcons.Sparkles className={iconSize} />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t("formatCode")}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {!hasVisualPreview && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void handleCopyCode()}
-                    aria-label={copied ? t("codeCopied") : t("copyCode")}
-                    className={cn("h-6 w-6 p-0", chipClass)}
-                  >
-                    {copied ? (
-                      <GooseIcons.Check
-                        className={cn(
-                          iconSize,
-                          "text-[var(--goose-color-success)]",
-                        )}
-                      />
-                    ) : (
-                      <GooseIcons.Copy className={iconSize} />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{copied ? t("copied") : t("copyCode")}</TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-
-          <CodeLanguagePicker
-            language={language}
-            onLanguageChange={onLanguageChange}
-            editable={editable}
-            isMathOrMermaid={isMathOrMermaid}
-            sourceMode={previewMode === "code"}
-            hasVisualPreview={hasVisualPreview}
-            displayLanguage={displayLanguage}
-            chipClass={chipClass}
-            chipActiveClass={chipActiveClass}
-          />
+                    <GooseIcons.Sparkles className={icon} />
+                    <span>{t("formatCode")}</span>
+                  </PopoverAction>
+                )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       </SelectionToolbarSurface>
     </TooltipProvider>

@@ -1,26 +1,61 @@
-.goose-code-toolbar-row {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  z-index: 10;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  pointer-events: none;
-  color: var(--code-fg, hsl(var(--foreground)));
+/* 代码块悬浮岛：左上角图例标签 + 说明胶囊，右上角操作岛，均骑在块上边框上。
+ * 显隐只看 --goose-code-reveal / -pe / -vis 三个变量：块 hover（toolbar 阶段）、
+ * 焦点落在工具行内、弹层打开、折叠态、触屏时置为显示。
+ * 颜色一律来自强调色体系（--primary、--goose-interactive-*、--goose-block-subtle-*）。
+ */
+
+.workspace-editor-surface .bn-block-content[data-content-type="codeBlock"] {
+  --goose-code-reveal: 1;
+  --goose-code-pe: auto;
+  --goose-code-vis: visible;
+  --goose-code-delay: 0ms;
+  --goose-code-ease: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.goose-code-block-node[data-visual-preview="true"] .goose-code-toolbar-row {
-  position: relative;
-  inset: auto;
-  min-height: 46px;
-  align-items: center;
-  padding: 0 12px 0 16px;
-  border-bottom: 1px solid var(--code-border, var(--goose-block-subtle-border));
-  background: var(--goose-block-subtle-bg);
-  pointer-events: auto;
+[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] {
+  --goose-code-reveal: 0;
+  --goose-code-pe: none;
+  --goose-code-vis: hidden;
+  --goose-code-delay: 260ms;
+}
+
+[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-hover="toolbar"] > [data-node-type="blockContainer"] > .bn-block-content[data-content-type="codeBlock"],
+[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-hover="toolbar"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content[data-content-type="codeBlock"],
+[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] .goose-code-toolbar-row:is(:focus-within, :has([data-state="open"])),
+[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] .goose-code-block-node[data-collapsed="true"] .goose-code-toolbar-row {
+  --goose-code-reveal: 1;
+  --goose-code-pe: auto;
+  --goose-code-vis: visible;
+  --goose-code-delay: 40ms;
+}
+
+[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-tools-suppressed="true"] > [data-node-type="blockContainer"] > .bn-block-content[data-content-type="codeBlock"],
+[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-tools-suppressed="true"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content[data-content-type="codeBlock"] {
+  --goose-code-reveal: 0;
+  --goose-code-pe: none;
+  --goose-code-vis: hidden;
+  --goose-code-delay: 0ms;
+}
+
+@media (pointer: coarse) {
+  .workspace-editor-surface .bn-block-content[data-content-type="codeBlock"] {
+    --goose-code-reveal: 1;
+    --goose-code-pe: auto;
+    --goose-code-vis: visible;
+  }
+}
+
+/* 工具行：高度为 0 的定位层，不占文档流。 */
+.goose-code-toolbar-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 10;
+  pointer-events: none;
+  container-type: inline-size;
+  color: var(--code-fg, hsl(var(--foreground)));
 }
 
 .goose-code-toolbar-left,
@@ -28,92 +63,300 @@
   pointer-events: auto;
 }
 
+/* ---- 左侧：图例标签 + 说明胶囊 ---- */
 .goose-code-toolbar-left {
-  flex: 1;
+  position: absolute;
+  top: calc(-16px * var(--editor-scale, 1));
+  left: calc(16px * var(--editor-scale, 1));
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
+  max-width: calc(100% - 32px * var(--editor-scale, 1));
 }
 
-.goose-code-visual-title {
+.goose-code-toolbar-left .goose-code-legend-chip {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: calc(32px * var(--editor-scale, 1));
+  min-width: 0;
+  max-width: calc((34px + var(--goose-code-reveal) * 206px) * var(--editor-scale, 1));
+  gap: calc(var(--goose-code-reveal) * 7px);
+  padding: 0 calc((8px + var(--goose-code-reveal) * 3px) * var(--editor-scale, 1)) 0
+    calc((8px + var(--goose-code-reveal)) * var(--editor-scale, 1));
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid var(--goose-block-subtle-border);
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--goose-code-surface), var(--goose-code-surface)),
+    hsl(var(--background));
+  color: var(--goose-accent-text, hsl(var(--primary)));
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    max-width 320ms var(--goose-code-ease),
+    padding 320ms var(--goose-code-ease),
+    gap 320ms var(--goose-code-ease),
+    background-color var(--goose-control-motion-duration) ease,
+    border-color var(--goose-control-motion-duration) ease,
+    color var(--goose-control-motion-duration) ease;
+}
+
+.goose-code-toolbar-left .goose-code-legend-chip[data-static="true"] {
+  cursor: default;
+}
+
+.goose-code-legend-glyph {
+  flex: 0 0 auto;
+  width: calc(16px * var(--editor-scale, 1));
+  height: calc(16px * var(--editor-scale, 1));
+}
+
+.goose-code-legend-label,
+.goose-code-legend-caret,
+.goose-code-legend-lock {
+  opacity: var(--goose-code-reveal);
+  transition: opacity 200ms ease;
+}
+
+.goose-code-legend-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--goose-interactive-hover-fg);
-  font-size: 16px;
-  font-weight: 650;
-  line-height: 1.2;
 }
 
+.goose-code-legend-caret,
+.goose-code-legend-lock {
+  flex: 0 0 auto;
+  width: calc(14px * var(--editor-scale, 1));
+  height: calc(14px * var(--editor-scale, 1));
+  margin-left: 4px;
+}
+
+.goose-code-legend-lock {
+  color: hsl(var(--muted-foreground));
+}
+
+.goose-code-toolbar-left .goose-code-legend-chip:is(:hover, :focus-visible, [data-state="open"]),
+.goose-code-block-node[data-collapsed="true"] .goose-code-legend-chip {
+  --goose-code-reveal: 1;
+}
+
+@media (pointer: coarse) {
+  .goose-code-toolbar-left .goose-code-legend-chip {
+    --goose-code-reveal: 1;
+  }
+}
+
+.goose-code-toolbar-left .goose-code-legend-chip[data-state="open"] {
+  border-color: var(--goose-accent-focus);
+}
+
+.goose-code-toolbar-left .goose-code-legend-chip:focus-visible {
+  outline: 2px solid var(--goose-accent-focus);
+  outline-offset: 1px;
+}
+
+/* 说明胶囊：有内容时常驻，没内容时随显隐展开。 */
+.goose-code-caption {
+  flex: 0 1 auto;
+  box-sizing: border-box;
+  min-width: 0;
+  width: calc(var(--goose-code-reveal) * 220px * var(--editor-scale, 1));
+  opacity: var(--goose-code-reveal);
+  visibility: var(--goose-code-vis);
+  overflow: hidden;
+  border-radius: 999px;
+  transition:
+    width 320ms var(--goose-code-ease) var(--goose-code-delay),
+    opacity 200ms ease var(--goose-code-delay),
+    visibility 0s linear var(--goose-code-delay);
+}
+
+.goose-code-caption[data-filled="true"] {
+  width: calc(220px * var(--editor-scale, 1));
+  opacity: 1;
+  visibility: visible;
+}
+
+.goose-code-caption .goose-code-caption-input {
+  box-sizing: border-box;
+  border: 1px solid var(--goose-block-subtle-border);
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--goose-code-surface), var(--goose-code-surface)),
+    hsl(var(--background)) !important;
+  color: var(--code-fg, hsl(var(--foreground))) !important;
+  text-overflow: ellipsis;
+}
+
+.goose-code-caption .goose-code-caption-input:focus,
+.goose-code-caption .goose-code-caption-input:focus-visible {
+  border-color: var(--goose-accent-focus);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--goose-accent-focus);
+}
+
+.goose-code-caption .goose-code-caption-input:not(:focus) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* ---- 右侧：操作岛 ---- */
 .goose-code-toolbar-actions {
   --goose-popup-trigger-origin: top right;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  padding: 0;
-  box-shadow: none;
-  backdrop-filter: none;
+  position: absolute;
+  top: calc(-20px * var(--editor-scale, 1));
+  right: calc(14px * var(--editor-scale, 1));
+  box-sizing: border-box;
+  padding: calc(4px * var(--editor-scale, 1));
+  border: 1px solid var(--goose-block-subtle-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--goose-code-surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--goose-menu-shadow);
+  opacity: var(--goose-code-reveal);
+  visibility: var(--goose-code-vis);
+  pointer-events: var(--goose-code-pe);
+  transform: translateY(calc((1 - var(--goose-code-reveal)) * 8px))
+    scale(calc(0.96 + var(--goose-code-reveal) * 0.04));
+  transform-origin: top right;
+  transition:
+    opacity 180ms ease var(--goose-code-delay),
+    transform 300ms var(--goose-code-ease) var(--goose-code-delay),
+    visibility 0s linear var(--goose-code-delay);
   flex-shrink: 0;
 }
 
-[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--goose-control-motion-duration) ease;
+.goose-code-toolbar-actions .goose-code-hover-actions {
+  flex-wrap: nowrap;
+  gap: 2px;
 }
 
-[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-hover="toolbar"] > [data-node-type="blockContainer"] > .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions,
-[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-hover="toolbar"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions,
-[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions:focus-within,
-[data-goose-block-toolbar-sequence="true"] .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions:has([data-state="open"]) {
+.goose-code-toolbar-actions .goose-code-island-btn {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: calc(32px * var(--editor-scale, 1));
+  min-width: 0;
+  height: calc(32px * var(--editor-scale, 1));
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: hsl(var(--muted-foreground));
+}
+
+.goose-code-toolbar-actions .goose-code-island-btn:where(:hover, :focus-visible) {
+  color: var(--goose-interactive-hover-fg);
+}
+
+.goose-code-toolbar-actions .goose-code-island-btn:where([aria-pressed="true"], [data-state="open"]) {
+  color: var(--goose-interactive-selected-fg);
+}
+
+.goose-code-island-icon {
+  width: var(--goose-control-icon-size);
+  height: var(--goose-control-icon-size);
+}
+
+.goose-code-collapse-icon {
+  transition: transform var(--goose-control-motion-duration) ease;
+}
+
+.goose-code-toolbar-actions button:disabled {
   opacity: 1;
-  pointer-events: auto;
+  color: var(--goose-text-disabled);
 }
 
-[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-tools-suppressed="true"] > [data-node-type="blockContainer"] > .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions,
-[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-tools-suppressed="true"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content[data-content-type="codeBlock"] .goose-code-hover-actions {
-  opacity: 0;
-  pointer-events: none;
+.goose-code-island-sep {
+  flex: 0 0 1px;
+  width: 1px;
+  height: calc(18px * var(--editor-scale, 1));
+  margin: 0 4px;
+  background: var(--goose-block-subtle-border);
 }
 
-.goose-code-toolbar-actions-visual {
-  gap: 6px;
-}
-
-.goose-code-toolbar-actions-visual button {
-  min-width: 28px;
-  border-radius: var(--goose-control-radius);
-}
-
-
-
-.goose-code-toolbar-actions-visual .goose-code-display-toggle {
-  margin-left: 6px;
-  border: 1px solid var(--goose-block-subtle-border);
+/* 代码 / 预览 分段控件 */
+.goose-code-display-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
   background: var(--goose-block-subtle-hover);
 }
 
-.goose-code-toolbar-actions-visual .goose-code-display-toggle-button {
-  min-width: 42px;
-  border-radius: var(--goose-control-radius);
+.goose-code-toolbar-actions .goose-code-display-toggle-button {
+  box-sizing: border-box;
+  min-width: calc(44px * var(--editor-scale, 1));
+  height: calc(28px * var(--editor-scale, 1));
+  min-height: 0;
+  padding: 0 calc(12px * var(--editor-scale, 1));
+  border: 0;
+  border-radius: 999px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
   font-weight: var(--font-weight-semibold);
   line-height: 1;
 }
 
-
-
-.goose-code-toolbar-actions button:disabled {
-  opacity: 1; color: var(--goose-text-disabled);
+.goose-code-toolbar-actions .goose-code-display-toggle-button[aria-selected="true"] {
+  color: var(--goose-interactive-selected-fg);
 }
 
-.goose-code-toolbar-left input {
-  background: transparent !important;
-  color: var(--code-fg, hsl(var(--foreground))) !important;
-  width: 100%;
+/* 更多菜单：窄宽度下收纳次要操作，宽度够时隐藏。 */
+.goose-code-toolbar-actions .goose-code-more {
+  display: none;
 }
 
-.goose-code-toolbar-left input::placeholder {
+.goose-code-more-menu .goose-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.goose-code-toolbar-left input:focus {
-  background: hsl(var(--muted) / 0.28) !important;
+@container (max-width: 479px) {
+  .goose-code-toolbar-actions [data-goose-secondary="true"] {
+    display: none;
+  }
+  .goose-code-toolbar-actions .goose-code-more {
+    display: inline-flex;
+  }
+  .goose-code-toolbar-left {
+    max-width: calc(100% - 150px);
+  }
+}
+
+/* 折叠态：只剩一条 42px 的条，图例与操作岛都收进条内且常驻。 */
+.goose-code-block-node[data-collapsed="true"] .goose-code-toolbar-left {
+  top: 4px;
+  left: 8px;
+}
+
+.goose-code-block-node[data-collapsed="true"] .goose-code-toolbar-actions {
+  top: 0;
+  right: 8px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-code-toolbar-left .goose-code-legend-chip,
+  .goose-code-legend-label,
+  .goose-code-legend-caret,
+  .goose-code-legend-lock,
+  .goose-code-caption,
+  .goose-code-toolbar-actions,
+  .goose-code-collapse-icon {
+    transition: none;
+  }
 }

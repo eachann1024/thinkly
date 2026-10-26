@@ -5,11 +5,8 @@
   --goose-code-line-box: 1lh;
   position: relative;
   overflow: hidden;
-  padding-top: var(--editor-code-toolbar-row-height, 36px);
-}
-
-.goose-code-block-node[data-visual-preview="true"] .goose-code-content-wrapper {
-  padding-top: 0;
+  border-radius: inherit;
+  padding-top: var(--editor-code-toolbar-row-height, 6px);
 }
 
 .goose-code-pre {
@@ -65,7 +62,7 @@
   pointer-events: none;
   height: var(--goose-code-line-box);
   top: calc(
-    var(--editor-code-toolbar-row-height, 36px) +
+    var(--editor-code-toolbar-row-height, 6px) +
       var(--editor-code-block-padding-y, 12px) +
       (var(--goose-code-active-line, 1) - 1) * var(--goose-code-line-box)
   );

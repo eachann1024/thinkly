@@ -2,7 +2,6 @@ import { EditorAction } from "@/components/editor/ui/button";
 import { useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Button } from "@/components/editor/ui/button";
-import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeLatexHints.tsx#messages:1">`
@@ -82,23 +81,14 @@ const LATEX_SNIPPETS = [
   { get label() { return t("nthRoot"); }, code: "\\sqrt[n]{x}" },
 ];
 
-export function CodeLatexHints({
-  collapsed,
-  language,
-  isEditable,
-}: {
-  collapsed: boolean;
-  language: string;
-  isEditable: boolean;
-}) {
+export function CodeLatexHints() {
   useLocale();
   const [showLatexHint, setShowLatexHint] = useState(false);
   return (
     <>
-      { }
-      {!collapsed && language === "math" && isEditable && (
+      {(
         <div
-          className="absolute bottom-2 right-2 z-20"
+          className="goose-code-latex-hints inline-flex"
           contentEditable={false}
           onMouseDown={(event) => event.stopPropagation()}
         >
@@ -111,17 +101,14 @@ export function CodeLatexHints({
                 data-state={showLatexHint ? "open" : "closed"}
                 variant="ghost"
                 size="sm"
-                className={cn(
-                  "h-6 w-6 p-0 rounded-md",
-                  "border border-[var(--goose-block-subtle-border)] bg-[var(--goose-block-subtle-bg)]",
-                )}
+                className="goose-code-island-btn goose-accent-selection"
               >
-                <GooseIcons.HelpCircle className="h-3.5 w-3.5" />
+                <GooseIcons.HelpCircle className="goose-code-island-icon" />
               </Button>
             </PopoverTrigger>
             <PopoverContent
               editorContext
-              side="top"
+              side="bottom"
               align="end"
               className="w-[420px] max-w-[calc(100vw-2rem)] rounded-lg border bg-background p-3 shadow-lg"
               aria-label={t("latexSyntaxReference")}
