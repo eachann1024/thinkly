@@ -1,8 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
-import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import { createSlashBlockInsertion } from "./blocknoteSlashActions";
-import { getToggleSlashMenuItems } from "./blocknoteToggleSlashItems";
-import { getMediaSlashMenuItems } from "./blocknoteMediaSlashItems";
 import {
   SLASH_ICONS,
   filterCompactSlashMenuItems,
@@ -27,7 +24,6 @@ export type {
 
 export function getBlockNoteSlashMenuItems(
   editor: BlockNoteEditor<any, any, any>,
-  aiEnabled: boolean,
   features: SlashMenuFeaturePolicy = {
     transcodeVideoUploads: true,
     openAttachmentsExternally: true,
@@ -40,44 +36,6 @@ export function getBlockNoteSlashMenuItems(
 
   const compact = Boolean(options?.compact) || __GOOSE_EDITOR_COMPACT__;
 
-  if (aiEnabled && (__GOOSE_EDITOR_AI__ || false) && !compact) {
-    items.push({
-      get title() { return t("generate"); },
-      get description() { return t("continueWriting"); },
-      icon: SLASH_ICONS.sparkles,
-      aliases: ["ai", "generate", "shengcheng", "xiezuo", "sparkle"],
-      onItemClick: () => {
-        const pos = editor.getTextCursorPosition();
-        const block = pos.block;
-        const content = block.content as any[];
-        if (
-          Array.isArray(content) &&
-          content.length === 1 &&
-          content[0]?.type === "text" &&
-          (content[0].text === "/" || content[0].text === "、")
-        ) {
-          editor.updateBlock(block, { content: [] });
-        } else if (
-          Array.isArray(content) &&
-          content.length >= 1 &&
-          content[0]?.type === "text" &&
-          (content[0].text.startsWith("/") || content[0].text.startsWith("、"))
-        ) {
-          const newText = content[0].text.slice(1);
-          editor.updateBlock(block, {
-            content: newText ? [{ ...content[0], text: newText }] : [],
-          });
-        }
-
-        const ai = editor.getExtension(GooseAIExtension);
-        const blockId = editor.getTextCursorPosition().block.id;
-        if (ai && blockId) {
-          ai.openAIMenuAtBlock(blockId);
-        }
-      },
-    });
-  }
-
   items.push(
     { get title() { return t("text"); }, aliases: ["text", "paragraph", "wenben"], onItemClick: () => insertOrUpdate({ type: "paragraph" }) },
     {
@@ -89,7 +47,7 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 1, isToggleable: false, collapsed: false },
+          props: { level: 1 },
         }),
     },
     {
@@ -101,7 +59,7 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 2, isToggleable: false, collapsed: false },
+          props: { level: 2 },
         }),
     },
     {
@@ -113,10 +71,9 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({
           type: "heading",
-          props: { level: 3, isToggleable: false, collapsed: false },
+          props: { level: 3 },
         }),
     },
-    ...getToggleSlashMenuItems(insertOrUpdate),
     { type: "divider" } as any,
     {
       get title() { return t("checklist"); },
@@ -214,7 +171,6 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({ type: "codeBlock", props: { language: "mermaid" } }),
     },
-    ...getMediaSlashMenuItems(editor, insertOrUpdate),
   );
 
   let menuItems = items;

@@ -14,7 +14,6 @@ import {
   Minus,
   Quote,
   Sigma,
-  Sparkles,
   Table,
   Video,
 } from "@/components/ui/icons";
@@ -27,8 +26,6 @@ zh-Hans:
   checklist: "待办事项"
   bulletedList: "无序列表"
   numberedList: "有序列表"
-  toggleHeading1: "折叠一级标题"
-  toggleHeading2: "折叠二级标题"
   quote: "引用"
   callout: "标注"
   divider: "分隔线"
@@ -41,8 +38,6 @@ en:
   checklist: "Checklist"
   bulletedList: "Bulleted list"
   numberedList: "Numbered list"
-  toggleHeading1: "Toggle heading 1"
-  toggleHeading2: "Toggle heading 2"
   quote: "Quote"
   callout: "Callout"
   divider: "Divider"
@@ -55,8 +50,6 @@ ja:
   checklist: "ToDo リスト"
   bulletedList: "箇条書きリスト"
   numberedList: "番号付きリスト"
-  toggleHeading1: "トグル見出し 1"
-  toggleHeading2: "トグル見出し 2"
   quote: "引用"
   callout: "コールアウト"
   divider: "区切り線"
@@ -65,7 +58,6 @@ ja:
 `;
 
 export const SLASH_ICONS = {
-  sparkles: <Sparkles size={18} />,
   heading1: <Heading1 size={18} />,
   heading2: <Heading2 size={18} />,
   heading3: <Heading3 size={18} />,
