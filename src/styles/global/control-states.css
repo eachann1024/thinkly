@@ -37,6 +37,7 @@
   color: var(--goose-interactive-selected-fg);
 }
 .goose-interactive-danger,
+.goose-interactive-danger-ghost,
 .goose-menu-item-danger {
   --goose-interactive-hover: var(--goose-interactive-danger);
   --goose-interactive-hover-fg: var(--goose-interactive-danger-fg);
