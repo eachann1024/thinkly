@@ -46,7 +46,8 @@ export function ExecutionTrace({ parts, steps, execution, running, label, thinki
     return () => window.clearInterval(timer);
   }, [running, execution?.startedAt, execution?.endedAt]);
   const measuredEnd = execution?.endedAt ?? (running ? now : execution?.startedAt ?? now);
-  const duration = execution ? Math.max(0, measuredEnd - execution.startedAt) : undefined;
+  const duration = execution && (running || execution.endedAt !== undefined)
+    ? Math.max(0, measuredEnd - execution.startedAt) : undefined;
   const timeline = useMemo(() => open && execution ? prepareExecutionStages(execution, parts) : null, [open, execution, parts]);
   const stages = timeline?.(measuredEnd) ?? [];
   const id = useId();

@@ -27,7 +27,7 @@ export function ChoicesCard({ card }: { card: ChoicesCardData }) {
               <span className="ai-card-choice-label">{option.label}</span>
               {option.description && <span className="ai-card-choice-desc">{option.description}</span>}
             </span>
-            {selected ? <Check size={14} aria-hidden="true"/> : <ChevronRight size={14} aria-hidden="true"/>}
+            {selected ? <Check size={16} aria-hidden="true"/> : <ChevronRight size={16} aria-hidden="true"/>}
           </Button>
         </motion.div>;
       })}

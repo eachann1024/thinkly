@@ -20,8 +20,10 @@ export function ArtifactRenderStatus({ failed, onRetry }: { failed?: boolean; on
   useLocale();
   const Icon = failed ? CircleAlert : LoaderCircle;
   return <div className="notebook-ai-artifact-render-status" role="status">
-    <Icon size={16} className={failed ? undefined : "animate-spin motion-reduce:animate-none"} />
-    <span>{t(failed ? "failed" : "loading")}</span>
+    <div className="notebook-ai-artifact-render-label" data-failed={failed || undefined}>
+      <Icon size={16} className={failed ? undefined : "animate-spin motion-reduce:animate-none"} />
+      <span>{t(failed ? "failed" : "loading")}</span>
+    </div>
     {failed ? <Button variant="ghost" size="sm" onClick={onRetry}><RotateCcw size={16} />{t("retry")}</Button> : null}
   </div>;
 }

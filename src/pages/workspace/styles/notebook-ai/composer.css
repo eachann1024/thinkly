@@ -34,17 +34,17 @@
 }
 
 .notebook-ai-composer-shell {
- --ai-composer-font-size: max(1rem, calc(var(--editor-font-size, 17px) * 0.92));
+ --ai-composer-font-size: var(--editor-base-font-size, 17px);
  --ai-composer-line-height: calc(var(--ai-composer-font-size) * 1.5);
- --ai-composer-action-size: 2.5rem;
+ --ai-composer-action-size: 30px;
  display: grid;
  grid-template-columns: minmax(0, 1fr) var(--ai-composer-action-size);
  align-items: center;
  gap: 0.5rem;
  min-width: 0;
  overflow: hidden;
- padding: 0.75rem;
- border-radius: 0.875rem;
+ padding: 10px;
+ border-radius: 9px;
  background: var(--goose-ai-composer-surface);
  transition:
   color var(--goose-control-motion-duration) ease,
@@ -58,13 +58,14 @@
 .bui-prompt-bar {
  --goose-ai-composer-surface: var(--goose-input-surface);
  overflow: hidden;
- border: 1px solid hsl(var(--input));
- border-radius: 0.875rem;
+ border: 1px solid color-mix(in srgb, var(--goose-text-secondary) 35%, var(--goose-input-surface));
+ border-radius: 9px;
  background: var(--goose-ai-composer-surface);
  transition: border-color var(--goose-control-motion-duration) ease;
 }
+.bui-prompt-bar[data-streaming="true"],
 .bui-prompt-bar:focus-within {
- border-color: color-mix(in srgb, hsl(var(--input)) 72%, var(--goose-text-primary));
+ border-color: color-mix(in srgb, var(--goose-text-secondary) 65%, var(--goose-input-surface));
 }
 .bui-prompt-bar > .notebook-ai-composer-shell {
  background: transparent;
@@ -90,7 +91,9 @@
  width: var(--ai-composer-action-size);
  height: var(--ai-composer-action-size);
  padding: 0;
- border-radius: 50%;
+ border-radius: 7px;
+ border: 1px solid color-mix(in srgb, var(--goose-text-secondary) 65%, var(--goose-ai-composer-surface));
+ opacity: 1;
 }
 
 .notebook-ai-composer-shell [data-goose-control="icon-button"] {
@@ -99,8 +102,8 @@
 }
 
 .notebook-ai-composer-shell [data-goose-control="icon-button"] > svg {
- width: 1.125rem;
- height: 1.125rem;
+ width: 16px;
+ height: 16px;
 }
 
 .notebook-ai-stop-square {
@@ -112,6 +115,7 @@
 
 .notebook-ai-model-menu {
  width: min(16rem, calc(100vw - 24px));
+ padding: var(--goose-menu-surface-inset);
  max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
  overscroll-behavior: contain;
  scrollbar-width: thin;
@@ -123,7 +127,7 @@
  max-width: 100%;
  gap: 0.375rem;
  padding-inline: 0.5rem;
- font-size: 1rem;
+ font-size: 13px;
  line-height: 1.5;
 }
 

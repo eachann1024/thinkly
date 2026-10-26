@@ -1,10 +1,10 @@
 import { useLocale } from "@/i18n";
 import { FadeText } from "@/components/ui/fade-text";
-import { formatConversationTime } from "./history/conversationTime";
+import { conversationTimeGroup, formatConversationTime } from "./history/conversationTime";
 import { IconButton } from "@/components/ui/icon-button";
 import { PortalHoverTip } from "./history/PortalHoverTip";
 import { requestDeleteConversation } from "./history/historyActions";
-import { useMemo, useState, type MouseEvent } from "react";
+import { Fragment, useMemo, useState, type MouseEvent } from "react";
 import {
   Clock3,
   History as HistoryIcon,
@@ -110,12 +110,16 @@ export function ConversationHistoryList({
 
   const list = (
     <div className="goose-list-layout min-w-0 max-w-full overflow-x-hidden">
-      {conversations.map((conversation) => {
+      {conversations.map((conversation, index) => {
         const isActive = conversation.id === activeConversationId;
         const summary = getConversationSummary(conversation.messages);
+        const group = conversationTimeGroup(conversation.updatedAt);
+        const showGroup = index === 0 || conversationTimeGroup(conversations[index - 1].updatedAt).key !== group.key;
 
         return (
-          <PortalHoverTip key={conversation.id} content={summary}>
+          <Fragment key={conversation.id}>
+          {showGroup ? <div className="notebook-ai-history-group">{group.label}</div> : null}
+          <PortalHoverTip content={summary}>
             {({ onMouseEnter, onMouseLeave }) => (
               <div
                 role="button"
@@ -150,7 +154,7 @@ export function ConversationHistoryList({
                       onClick={(event) =>
                         confirmDeleteConversation(event, conversation.id, summary)
                       }
-                      className="flex shrink-0 items-center justify-center"
+                      className="notebook-ai-history-delete flex shrink-0 items-center justify-center"
                     >
                       <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </IconButton>
@@ -159,6 +163,7 @@ export function ConversationHistoryList({
               </div>
             )}
           </PortalHoverTip>
+          </Fragment>
         );
       })}
     </div>
@@ -211,7 +216,7 @@ export function ConversationHistoryPopover({
         variant="menu"
         align="end"
         sideOffset={6}
-        className="w-[22rem] max-w-[calc(100vw-24px)] overflow-hidden p-[var(--goose-menu-surface-inset)]"
+        className="notebook-ai-history-menu w-[22rem] max-w-[calc(100vw-24px)] overflow-hidden p-[var(--goose-menu-surface-inset)]"
       >
         <ConversationHistoryList
           notebookId={notebookId}

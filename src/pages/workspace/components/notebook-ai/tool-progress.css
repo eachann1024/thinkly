@@ -13,43 +13,14 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 4px 8px;
-  margin-left: -8px;
-  border: 1px solid transparent;
+  padding: 0;
+  border: 0;
   border-radius: var(--goose-control-radius);
   color: var(--goose-accent-text);
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
   line-height: 20px;
   letter-spacing: 0;
-}
-
-.notebook-ai-work-status::before,
-.notebook-ai-work-status::after {
-  position: absolute;
-  z-index: -1;
-  inset: -1px;
-  border-radius: inherit;
-  content: "";
-  pointer-events: none;
-}
-
-.notebook-ai-work-status::before {
-  background: var(--notebook-ai-status-color);
-  opacity: 0.12;
-}
-
-.notebook-ai-work-status::after {
-  border: 1px solid var(--notebook-ai-status-color);
-  opacity: 0.36;
-}
-
-.notebook-ai-work-status--accent::before {
-  background: var(--goose-interactive-selected);
-  opacity: 1;
-}
-.notebook-ai-work-status--accent::after {
-  opacity: 1;
 }
 
 .notebook-ai-work-status.notebook-ai-work-status--success {

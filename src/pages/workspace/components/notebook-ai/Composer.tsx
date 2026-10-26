@@ -150,7 +150,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
               />
 
               <div className="notebook-ai-composer-tools flex min-w-0 items-center">
-                {!isStreaming && <span className="flex shrink-0 items-center">
+                <span className="flex shrink-0 items-center">
                   <IconButton size="sm" tone="muted"
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -165,7 +165,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   >
                     <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </IconButton>
-                </span>}
+                </span>
 
                 <span className="flex min-w-0 items-center">
                   <ModelSelectorPopover disabled={disabled} />
@@ -185,7 +185,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                   <IconButton size="sm" tone="muted"
                     type="button"
                     onClick={handleSubmit}
-                    disabled={!canClickSend}
+                    disabled={!sendLooksReady}
                     className={cn("bui-composer-send notebook-ai-send-button", sendLooksReady && "goose-interactive-primary")}
                     data-ready={sendLooksReady ? "true" : "false"}
                     aria-label={t("sendMessage")}

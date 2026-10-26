@@ -97,6 +97,7 @@ export const AssistantStreamdownText = memo(function AssistantStreamdownText({
                   components={MD_COMPONENTS}
                   plugins={STREAMDOWN_PLUGINS}
                   controls={STREAMDOWN_CONTROLS}
+                  lineNumbers={false}
                   mermaid={mermaid}
                   parseIncompleteMarkdown={
                     isStreaming && index === segments.length - 1
@@ -114,6 +115,7 @@ export const AssistantStreamdownText = memo(function AssistantStreamdownText({
             components={MD_COMPONENTS}
             plugins={STREAMDOWN_PLUGINS}
             controls={STREAMDOWN_CONTROLS}
+            lineNumbers={false}
             mermaid={mermaid}
             parseIncompleteMarkdown={isStreaming}
           >
