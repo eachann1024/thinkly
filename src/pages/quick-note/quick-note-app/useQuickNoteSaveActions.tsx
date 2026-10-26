@@ -7,16 +7,22 @@ zh-Hans:
   openNotebook: "请确认已打开笔记本后再试。"
   saved: "已保存到笔记"
   savedButNotOpened: "笔记已写入，主窗口暂时没能打开它。"
+  openMainWindow: "打开主窗口"
+  openSavedNote: "打开笔记"
 en:
   saveFailed: "Couldn’t save to notes"
   openNotebook: "Make sure a notebook is open, then try again."
   saved: "Saved to notes"
   savedButNotOpened: "The note was saved, but the main window could not open it."
+  openMainWindow: "Open main window"
+  openSavedNote: "Open note"
 ja:
   saveFailed: "ノートに保存できませんでした"
   openNotebook: "ノートブックが開いていることを確認してから、もう一度お試しください。"
   saved: "ノートに保存しました"
   savedButNotOpened: "ノートは書き込まれましたが、メインウィンドウで開けませんでした。"
+  openMainWindow: "メインウィンドウを開く"
+  openSavedNote: "ノートを開く"
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useEffect } from "react";
@@ -27,10 +33,12 @@ import {
   type QuickNoteSlot,
 } from "@/stores/useQuickNote";
 import { toast } from "@/components/ui/sonner";
-import { useNotebooks } from "@/stores/useNotebooks";
+import { showSaveRecoveryNotice } from "@/lib/save-recovery-notice";
+import { DEFAULT_NOTEBOOK, useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { quickNoteWindow } from "@/lib/electron/quickNoteWindow";
 import type { useQuickNoteEditorActions } from "./useQuickNoteEditorActions";
+import { routeQuickNoteSaveFailure } from "./quickNoteSaveFailure";
 
 async function revealSavedNoteWhenReady(filePath: string): Promise<boolean> {
   try {
@@ -41,6 +49,36 @@ async function revealSavedNoteWhenReady(filePath: string): Promise<boolean> {
     console.warn("[quicknote] 打开主窗口失败", error);
     return false;
   }
+}
+
+function showOpenMainWindowFailure(description: string): void {
+  showSaveRecoveryNotice({
+    id: "quicknote-open-main-window-failed",
+    title: uiText("saveFailed"),
+    description,
+    retryLabel: uiText("openMainWindow"),
+    onRetry: async () => {
+      if (!(await quickNoteWindow.showMainWindow())) {
+        throw new Error(uiText("openNotebook"));
+      }
+    },
+    onRetryFailure: (error) => error instanceof Error ? error.message : String(error),
+  });
+}
+
+function showSavedNoteOpenFailure(noteId: string, filePath: string): void {
+  showSaveRecoveryNotice({
+    id: `quicknote-saved-but-not-opened:${noteId}`,
+    title: uiText("saved"),
+    description: uiText("savedButNotOpened"),
+    retryLabel: uiText("openSavedNote"),
+    onRetry: async () => {
+      if (!(await revealSavedNoteWhenReady(filePath))) {
+        throw new Error(uiText("savedButNotOpened"));
+      }
+    },
+    onRetryFailure: (error) => error instanceof Error ? error.message : String(error),
+  });
 }
 
 export function useQuickNoteSaveActions(
@@ -68,20 +106,39 @@ export function useQuickNoteSaveActions(
       await useNotebooks.persist.rehydrate();
       const saved = await useQuickNote.getState().saveDraftToNotebook();
       if (!saved) {
-        toast.error(uiText("saveFailed"), {
-          description: uiText("openNotebook"),
+        const notebookState = useNotebooks.getState();
+        const notebookId = notebookState.activeNotebookId ?? DEFAULT_NOTEBOOK;
+        const notebook = notebookState.notebooks[notebookId];
+        routeQuickNoteSaveFailure({
+          notebookAvailable: Boolean(notebook),
+          localRecoveryAvailable: Boolean(
+            notebook?.source === "local-folder" && notebook.localPath && window.gooseFs,
+          ),
+          openNotebook: () => showOpenMainWindowFailure(uiText("openNotebook")),
+          showSaveError: () => toast.error(uiText("saveFailed")),
         });
         return;
       }
       const current = useQuickNote.getState();
-      if (saved.clearedSlot !== null && current.activeSlot === saved.clearedSlot && current.drafts[saved.clearedSlot] === null) {
+      if (
+        saved.clearedSlot !== null &&
+        current.activeSlot === saved.clearedSlot &&
+        current.drafts[saved.clearedSlot] === null
+      ) {
         applyHistoryContentToEditor(null);
       }
       const filePath = usePages.getState().pages[saved.id]?.localFilePath;
       if (filePath && (await revealSavedNoteWhenReady(filePath))) return;
-      toast.success(
-        uiText("saved"),
-        filePath ? { description: uiText("savedButNotOpened") } : undefined,
+      if (filePath) {
+        showSavedNoteOpenFailure(saved.id, filePath);
+      } else {
+        toast.success(uiText("saved"));
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : uiText("saveFailed"),
       );
     } finally {
       setSavingToNote(false);
