@@ -4,6 +4,8 @@ import type { EditorView } from "@tiptap/pm/view";
 import { GooseBlockSelection, selectedBlockRoots } from "@/components/editor/extensions/blockSelectionModel";
 import { editorViewForTarget } from "@/components/editor/extensions/tableWindowExtension";
 import { markBlockHandleDrag } from "@/lib/editor-split/blockHandleDrag";
+import { preserveImageDragPreviewWidths } from "./imageDragPreview";
+import { preserveImageDragWidths } from "./imageDragWidths";
 
 type PendingDrag = {
   view: EditorView;
@@ -89,7 +91,8 @@ export function startHeavyBlockDrag(view: EditorView, data: DataTransfer, blockI
   if (!heavy && !editorIsHeavy(view.state.doc)) return false;
 
   installDragBridge();
-  const slice = multi ? selection.content() : new Slice(Fragment.from(found.node), 0, 0);
+  const slice = preserveImageDragWidths(view.dom,
+    multi ? selection.content() : new Slice(Fragment.from(found.node), 0, 0));
   const node = multi ? undefined : NodeSelection.create(view.state.doc, found.pos);
   if (node) view.dispatch(view.state.tr.setSelection(node).setMeta("addToHistory", false));
   const ids = multi
@@ -110,6 +113,11 @@ export function startHeavyBlockDrag(view: EditorView, data: DataTransfer, blockI
     ghost.style.maxHeight = "72px";
     ghost.style.overflow = "hidden";
     ghost.style.pointerEvents = "none";
+    if (preserveImageDragPreviewWidths(view.dom, ghost)) {
+      ghost.style.width = `${preview.getBoundingClientRect().width}px`;
+      ghost.style.maxWidth = "none";
+      ghost.style.maxHeight = "none";
+    }
   } else {
     ghost = document.createElement("div");
     ghost.className = "goose-drag-ghost";
