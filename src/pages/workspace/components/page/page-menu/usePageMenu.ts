@@ -174,7 +174,7 @@ export function usePageMenu() {
         ...content,
       ] as any[];
 
-      updatePage(newId, { content: blocks });
+      updatePage(newId, { content: blocks }, { recordActivity: false });
 
       setActivePage(null);
       requestAnimationFrame(() => {

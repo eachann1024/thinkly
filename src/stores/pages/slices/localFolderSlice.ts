@@ -87,11 +87,11 @@ export function createLocalFolderPageSlice(
     moveLocalPageToNotebook: (pageId, targetNotebookId) =>
       moveLocalPageToNotebookAction(set, get, pageId, targetNotebookId),
 
-    writePageContent: (pageId, content, mode) =>
-      writePageContentAction(set, get, pageId, content, mode),
+    writePageContent: (pageId, content, mode, options) =>
+      writePageContentAction(set, get, pageId, content, mode, options),
 
-    appendPageContent: (pageId, content) =>
-      appendPageContentAction(set, get, pageId, content),
+    appendPageContent: (pageId, content, options) =>
+      appendPageContentAction(set, get, pageId, content, options),
 
     replaceBlockRange: (pageId, startBlockId, endBlockId, newBlocks) =>
       replaceBlockRangeAction(
