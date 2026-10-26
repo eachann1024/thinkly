@@ -116,6 +116,15 @@ export async function renameLocalPageFileAction(
     if (get().pages[pageId]?.localFilePath !== page.localFilePath) {
       throw new Error(storeText("renamePathChanged"));
     }
+    const metadataRoot = page.localMetadataRoot ?? useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
+    if (metadataRoot && fs.readFileAsync) {
+      const markdown = await fs.readFileAsync(page.localFilePath);
+      if (markdown === null) throw new Error(storeText("renameFailed"));
+      const { prepareMetadataRelocation } = await import("@/lib/note-metadata/relocate");
+      await prepareMetadataRelocation(fs, metadataRoot, metadataRoot, [{ id: pageId, path: page.localFilePath, nextPath: nextFilePath, before: markdown, after: markdown, revision: get().pages[pageId]?.localMetadataRevision }], (id, localMetadataRevision) => {
+        set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], localMetadataRevision } } }));
+      });
+    }
     const renamed = Boolean(
       await Promise.resolve(fs.rename(page.localFilePath, nextFilePath)),
     );

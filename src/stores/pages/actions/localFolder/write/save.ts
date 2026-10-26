@@ -181,7 +181,7 @@ export const saveLocalPageContentUnlocked = async (
     set((state) => {
       const current = state.pages[pageId];
       if (!current || current.localFilePath !== filePath) return state;
-      return { pages: { ...state.pages, [pageId]: { ...current, localMetadataRevision: receipt.revision } } };
+      return { pages: { ...state.pages, [pageId]: { ...current, localMetadataId: metadata.noteId, localMetadataRevision: receipt.revision } } };
     });
   }
   markSelfWrite(filePath);

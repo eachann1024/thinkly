@@ -18,7 +18,7 @@ export async function notebookMetadata(fs: NoteMetadataFs, root: string): Promis
       if (typeof id !== "string" || `${await markdownDigest(id)}.json` !== entry.name) continue;
       const envelope = await readMetadataEnvelope(fs, root, id);
       if (envelope) result.push(envelope);
-    } catch { /* Preserve unreadable sidecars without blocking the Markdown body. */ }
+    } catch {}
   }
   return result;
 }
