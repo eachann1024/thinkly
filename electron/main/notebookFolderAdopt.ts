@@ -14,7 +14,7 @@ function overlaps(left: string, right: string): boolean {
   return x === y || x.startsWith(`${y}/`) || y.startsWith(`${x}/`);
 }
 
-async function matchingSibling(notebookId: string, previous: string): Promise<string | null> {
+async function matchingSibling(portableNotebookId: string, previous: string): Promise<string | null> {
   const parent = path.dirname(previous);
   const matches: string[] = [];
   for (const entry of await readdir(parent, { withFileTypes: true })) {
@@ -26,15 +26,18 @@ async function matchingSibling(notebookId: string, previous: string): Promise<st
     if (!info.isDirectory() || info.isSymbolicLink()) continue;
     let id = "";
     try { id = JSON.parse(await readFile(path.join(candidate, ".goose", "notebook.json"), "utf8")).id; } catch { continue; }
-    if (id === notebookId) matches.push(candidate);
+    if (id === portableNotebookId) matches.push(candidate);
   }
-  return matches.length === 1 ? matches[0]! : null;
+  if (matches.length > 1) throw new Error("Multiple notebook folders have the same identity; open the intended folder explicitly.");
+  return matches[0] ?? null;
 }
 
 export async function adoptRenamedNotebookFolder(request: GitNotebookFolderAdopt, context: NotebookRetargetContext): Promise<{ localPath: string; name: string } | null> {
   if (!request || typeof request.notebookId !== "string" || typeof request.previousLocalPath !== "string" || !Array.isArray(request.occupiedPaths)) return null;
   const previous = assertAllowed(request.previousLocalPath);
-  const next = await matchingSibling(request.notebookId, previous).catch(() => null);
+  const portableNotebookId = request.portableNotebookId ?? request.notebookId;
+  if (typeof portableNotebookId !== "string" || !portableNotebookId || portableNotebookId.length > 200) throw new Error("Invalid notebook identity");
+  const next = await matchingSibling(portableNotebookId, previous);
   if (!next || request.occupiedPaths.some((occupied) => typeof occupied === "string" && overlaps(occupied, next))) return null;
   const name = path.basename(next);
   const intent = { notebookId: request.notebookId, previous, next, name };

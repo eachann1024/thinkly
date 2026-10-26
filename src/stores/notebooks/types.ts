@@ -7,6 +7,7 @@ export interface Notebook {
   order?: number;
   source?: "default" | "local-folder";
   localPath?: string;
+  portableNotebookId?: string;
   localPathMissing?: boolean;
   excludeFromGlobalSearch?: boolean;
 }

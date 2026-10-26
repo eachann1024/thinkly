@@ -12,7 +12,7 @@ async function pathExists(target: string): Promise<boolean> {
 export async function resolveLocalNotebookRoot(notebook: Notebook): Promise<string | null> {
   if (notebook.source !== "local-folder" || !notebook.localPath) return null;
   if (await pathExists(notebook.localPath)) {
-    await stampNotebookMarker(notebook.id, notebook.localPath).catch(() => undefined);
+    await stampNotebookMarker(notebook.id, notebook.localPath);
     return notebook.localPath;
   }
   const occupiedPaths = Object.values(useNotebooks.getState().notebooks)
@@ -20,9 +20,10 @@ export async function resolveLocalNotebookRoot(notebook: Notebook): Promise<stri
     .map((item) => item.localPath!);
   const adopted = await getGooseDesktop()?.gitSync?.adoptRenamedNotebookFolder?.({
     notebookId: notebook.id,
+    portableNotebookId: notebook.portableNotebookId ?? notebook.id,
     previousLocalPath: notebook.localPath,
     occupiedPaths,
-  }).catch(() => null);
+  });
   if (!adopted?.localPath) return null;
   await commitRenamedNotebookRoot(notebook.id, notebook.localPath, adopted.localPath, { name: adopted.name });
   return adopted.localPath;
