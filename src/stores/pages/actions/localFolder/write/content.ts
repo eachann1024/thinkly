@@ -3,6 +3,8 @@ import { normalizePageContent } from "@/components/editor/utils/blocknote-conten
 import type { StoreSet, StoreGet } from "../../hydrate";
 import { isLocalFolderPage } from "../../../persistence";
 import { cloneLocalPageContent, clonePageContent } from "../../pageCreate";
+import { getPendingLocalSaveContent } from "../../../folderSync";
+import { localSaveSnapshotIsCurrent, shouldClearDirtyAfterLocalSave } from "./saveSnapshot";
 
 export function mergePageContent(
   base: JSONContent,
@@ -49,18 +51,32 @@ export const writePageContentAction = async (
   });
 
   if (isLocal) {
+    const savedPage = get().pages[pageId];
+    const savedContent = cloneLocalPageContent(content);
     let saved: boolean;
     try {
       saved = await get().saveLocalPageContent(
         pageId,
-        cloneLocalPageContent(content),
+        savedContent,
       );
     } catch {
       return false;
     }
     if (saved) {
+      const current = get().pages[pageId];
+      const snapshotIsCurrent = savedPage
+        ? localSaveSnapshotIsCurrent(
+            savedPage,
+            current,
+            savedContent,
+            get().getLocalFilePath(pageId) ?? undefined,
+          )
+        : false;
+      const hasQueuedSave = getPendingLocalSaveContent(pageId) !== undefined;
       set((s) => ({
-        dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
+        dirtyLocalPageIds: shouldClearDirtyAfterLocalSave(snapshotIsCurrent, hasQueuedSave)
+          ? { ...s.dirtyLocalPageIds, [pageId]: false }
+          : s.dirtyLocalPageIds,
       }));
     }
     return saved;

@@ -33,6 +33,19 @@ export const discardPendingLocalSave = (pageId: string) => {
 export const restorePendingLocalSave = (pageId: string, content: JSONContent, recoveryRevision: number): void => {
   transitionLocalSave(pageId, { type: "restore", content: cloneJSONContent(content), revision: recoveryRevision });
 };
+export const beginRecoveredLocalSave = (pageId: string): (() => void) => {
+  const previous = getLocalSavePageState(pageId);
+  if (previous.permission.status !== "confirmation-required" || previous.pending.status !== "queued" || previous.recovery.status !== "awaiting-ack") return () => {};
+  const { content } = previous.pending;
+  const { revision } = previous.recovery;
+  transitionLocalSave(pageId, { type: "clear-pending", expected: content });
+  return () => {
+    const current = getLocalSavePageState(pageId);
+    if (current.permission.status === "confirmation-required" && current.pending.status === "empty" && current.recovery.status === "awaiting-ack" && current.recovery.revision === revision) {
+      transitionLocalSave(pageId, { type: "restore", content, revision });
+    }
+  };
+};
 export const confirmRecoveredLocalSave = (pageId: string): void => {
   if (getLocalSavePageState(pageId).permission.status !== "confirmation-required") return;
   transitionLocalSave(pageId, { type: "confirm" });

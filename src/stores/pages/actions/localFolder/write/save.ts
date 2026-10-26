@@ -39,6 +39,8 @@ import {
   prepareEmptyLocalWrite, assertEmptySerializationIsExpected,
   assertLocalPageReadable, isEmptyParagraphDocument,
 } from "./emptySaveGuard";
+import { localSaveSnapshotIsCurrent, resolveLocalSaveCompletion, shouldClearDirtyAfterLocalSave } from "./saveSnapshot";
+import { getLocalSavePageState } from "../../../folderSyncRegistry";
 
 export const saveLocalPageContentUnlocked = async (
   set: StoreSet,
@@ -113,9 +115,14 @@ export const saveLocalPageContentUnlocked = async (
       ? await gooseFs.existsAsync(filePath)
       : gooseFs.exists(filePath);
     if (alreadyOnDisk) {
-      set((s) => ({
-        dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
-      }));
+      set((s) => {
+        const current = s.pages[pageId];
+        const snapshotIsCurrent = localSaveSnapshotIsCurrent(page, current, content, filePath);
+        const hasQueuedSave = getLocalSavePageState(pageId).pending.status !== "empty";
+        return shouldClearDirtyAfterLocalSave(snapshotIsCurrent, hasQueuedSave)
+          ? { dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false } }
+          : s;
+      });
       return true;
     }
   }
@@ -214,24 +221,37 @@ export const saveLocalPageContentUnlocked = async (
       if (!current) {
         return {
           lastSavedAt: Date.now(),
-          dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
         };
       }
+      const hasQueuedSave = getLocalSavePageState(pageId).pending.status !== "empty";
+      const completion = resolveLocalSaveCompletion(
+        page,
+        current,
+        content,
+        filePath,
+        Boolean(options?.createOnly || page.editorDraft),
+        hasQueuedSave,
+      );
+      const { snapshotIsCurrent, clearDraftFlags: createdTargetStillBelongsToPage } = completion;
       const frontmatterChanged =
         (current.localFrontmatter ?? undefined) !==
         (nextFrontmatter ?? undefined);
       return {
         lastSavedAt: Date.now(),
-        dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
-        ...(frontmatterChanged || current.editorDraft
+        dirtyLocalPageIds: completion.clearDirty
+          ? { ...s.dirtyLocalPageIds, [pageId]: false }
+          : s.dirtyLocalPageIds,
+        ...(createdTargetStillBelongsToPage || snapshotIsCurrent && (frontmatterChanged || current.editorDraft || current.localUnsaved)
           ? {
               pages: {
                 ...s.pages,
                 [pageId]: {
                   ...current,
-                  editorDraft: undefined,
-                  localFrontmatter: nextFrontmatter || undefined,
-                  ...(metadata ? { localMetadataId: page.id, localMetadataRevision: metadataRevision } : {}),
+                  ...(createdTargetStillBelongsToPage ? { editorDraft: undefined, localUnsaved: undefined } : {}),
+                  ...(snapshotIsCurrent ? {
+                    localFrontmatter: nextFrontmatter || undefined,
+                    ...(metadata ? { localMetadataId: page.id, localMetadataRevision: metadataRevision } : {}),
+                  } : {}),
                 },
               },
             }
@@ -240,8 +260,15 @@ export const saveLocalPageContentUnlocked = async (
     });
     if (page.editorDraft) {
       const materialized = get().pages[pageId];
-      persistPageSnapshot(materialized);
-      if (materialized) appendLocalFolderOrderEntries(materialized.workspaceId, [materialized]);
+      if (
+        materialized &&
+        materialized.workspaceId === page.workspaceId &&
+        materialized.localFilePath === filePath &&
+        !materialized.editorDraft
+      ) {
+        persistPageSnapshot(materialized);
+        appendLocalFolderOrderEntries(materialized.workspaceId, [materialized]);
+      }
     }
     updateSnapshotAfterWrite(filePath, diskContent);
     await refreshSnapshotFingerprint(filePath);
