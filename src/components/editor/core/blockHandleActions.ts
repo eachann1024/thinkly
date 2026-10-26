@@ -2,7 +2,6 @@ import { getNodeById, type BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { NodeSelection } from "prosemirror-state";
 import { blockHandleCapabilities, isEmptyHandleParagraph } from "./blockHandleModel";
-import { getSectionInsertAnchorId, readHeadingCollapsed } from "./headingSectionFold";
 import { BLOCK_CONVERSIONS } from "./blocknoteCommandSlashItems";
 import { sparseBlockHandleTargets } from "../extensions/sparseBlockHandleDecorations";
 import { withoutBlockHandleScroll } from "../extensions/blockHandleUiExtension";
@@ -35,10 +34,7 @@ export function insertFromHandle(editor: Editor, blockId: string, placement: "be
   if (!block) return undefined;
   const caps = blockHandleCapabilities(editor, block);
   if (!(placement === "before" ? caps.insertBefore : caps.insertAfter)) return undefined;
-  const anchorId = placement === "after" && block.type === "heading" &&
-    !block.props.isToggleable && readHeadingCollapsed(block)
-    ? getSectionInsertAnchorId(editor.document as any, blockId) : blockId;
-  const [created] = editor.insertBlocks([{ type: "paragraph" }], anchorId, placement);
+  const [created] = editor.insertBlocks([{ type: "paragraph" }], blockId, placement);
   if (created) {
     editor.setTextCursorPosition(created, "start");
     editor.focus();
