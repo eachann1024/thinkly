@@ -8,12 +8,22 @@ import { asRecord, blockProps, paragraphShading, isCheckedProp, type DocxExportC
 import { imageParagraph, placeholderParagraph, mediaLabel } from "./docxMedia";
 import { blockToTable } from "./docxTable";
 import { codeBlockToChildren } from "./docxCodeBlock";
-import { columnsToTable } from "./docxColumns";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 export { blockToTable } from "./docxTable";
 export type { DocxBlockChild } from "./docxLayout";
 export type { DocxNumberingState, DocxExportContext } from "./docxBlockContext";
 
 export async function processBlockChildren(
+  blocks: unknown[],
+  depth: number,
+  ctx: DocxExportContext,
+  extras?: { callout?: boolean },
+): Promise<DocxBlockChild[]> {
+  return processFlattenedBlockChildren(unfoldLegacyBlocks(flattenLegacyColumns(blocks)), depth, ctx, extras);
+}
+
+async function processFlattenedBlockChildren(
   blocks: unknown[],
   depth: number,
   ctx: DocxExportContext,
@@ -37,7 +47,7 @@ export async function processBlockChildren(
 
     const pushChildren = async (nextDepth = depth + 1) => {
       if (!children.length) return;
-      result.push(...(await processBlockChildren(children, nextDepth, ctx, extras)));
+      result.push(...(await processFlattenedBlockChildren(children, nextDepth, ctx, extras)));
     };
 
     switch (type) {
@@ -48,8 +58,7 @@ export async function processBlockChildren(
           props, inline, alignment, shading, result, pushChildren, depth,
         });
         break;
-      case "bulletListItem":
-      case "toggleListItem": {
+      case "bulletListItem": {
         result.push(
           ...markerBox({
             marker: tightParagraph({
@@ -206,17 +215,11 @@ export async function processBlockChildren(
         );
         if (children.length) {
           result.push(
-            ...(await processBlockChildren(children, depth, ctx, { callout: true })),
+            ...(await processFlattenedBlockChildren(children, depth, ctx, { callout: true })),
           );
         }
         break;
       }
-      case "columnLayout":
-        result.push(...(await columnsToTable(block, ctx, (items, inner) => processBlockChildren(items, depth, inner))));
-        break;
-      case "columnSection":
-        result.push(...(await processBlockChildren(children, depth, ctx, extras)));
-        break;
       case "file":
       case "audio":
       case "video": {

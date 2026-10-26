@@ -3,11 +3,16 @@ import { buildBlockStyleAttr } from "./blockStyles";
 import { renderMediaBlock } from "./mediaBlocks";
 import { renderTableBlock } from "./tableBlock";
 import { renderTextBlock } from "./textBlocks";
-import { renderColumnsBlock } from "./columnsBlock";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 export { collectBlockInlineStyles } from "./blockStyles";
 export { renderInline, extractInlineText, extractCellTextForHtml } from "./inline";
 
 export function renderBlocks(blocks: any[], theme: CardTheme): string {
+  return renderFlattenedBlocks(unfoldLegacyBlocks(flattenLegacyColumns(blocks)), theme);
+}
+
+function renderFlattenedBlocks(blocks: any[], theme: CardTheme): string {
   if (!Array.isArray(blocks) || blocks.length === 0) return "";
   const parts: string[] = [];
   let i = 0;
@@ -20,7 +25,7 @@ export function renderBlocks(blocks: any[], theme: CardTheme): string {
         i += 1;
       }
       parts.push(
-        `<ul class="bn-list">${items.map((item) => renderBlock(item, theme)).join("")}</ul>`,
+        `<ul class="bn-list">${items.map((item) => renderFlattenedBlock(item, theme)).join("")}</ul>`,
       );
       continue;
     }
@@ -34,25 +39,27 @@ export function renderBlocks(blocks: any[], theme: CardTheme): string {
       const startAttr =
         Number.isInteger(start) && start > 1 ? ` start="${start}"` : "";
       parts.push(
-        `<ol class="bn-list"${startAttr}>${items.map((item) => renderBlock(item, theme)).join("")}</ol>`,
+        `<ol class="bn-list"${startAttr}>${items.map((item) => renderFlattenedBlock(item, theme)).join("")}</ol>`,
       );
       continue;
     }
-    parts.push(renderBlock(block, theme));
+    parts.push(renderFlattenedBlock(block, theme));
     i += 1;
   }
   return parts.join("\n");
 }
 
 export function renderBlock(block: any, theme: CardTheme): string {
+  return renderBlocks([block], theme);
+}
+
+function renderFlattenedBlock(block: any, theme: CardTheme): string {
   if (!block || typeof block !== "object") return "";
   if (["image", "imageResize", "file", "video", "audio"].includes(block.type)) {
     return renderMediaBlock(block, theme, buildBlockStyleAttr(block, theme));
   }
-  if (block.type === "columnLayout") return renderColumnsBlock(block, theme, renderBlocks);
-  if (block.type === "columnSection") return renderBlocks(block.children ?? [], theme);
   if (block.type === "table") {
     return renderTableBlock(block, theme, buildBlockStyleAttr(block, theme));
   }
-  return renderTextBlock(block, theme, renderBlock, renderBlocks);
+  return renderTextBlock(block, theme, renderFlattenedBlock, renderFlattenedBlocks);
 }
