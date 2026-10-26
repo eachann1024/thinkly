@@ -15,6 +15,7 @@ import { editorSchema } from "./schema";
 import type { EditorSession } from "./useEditorSession";
 import type { useEditorExtensions } from "./useEditorExtensions";
 import { createLiveEditorDictionary } from "./editorLocale";
+import { isExternalFileTransfer } from "@/lib/external-file-drop";
 
 export function createEditorOptions(
   session: EditorSession,
@@ -33,6 +34,14 @@ export function createEditorOptions(
     initialContent: initialContent as any,
     schema: editorSchema,
     tables: { splitCells: true, cellBackgroundColor: true, cellTextColor: true },
+    dropCursor: {
+      hooks: {
+        computeDropPosition: ({ event, defaultPosition }) =>
+          event.dataTransfer && isExternalFileTransfer(event.dataTransfer)
+            ? null
+            : defaultPosition,
+      },
+    },
     disableExtensions: [
       "quote-block-shortcuts",
       "toggle-list-item-shortcuts",
