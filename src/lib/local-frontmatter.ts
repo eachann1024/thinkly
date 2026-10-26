@@ -20,9 +20,10 @@ export {
   parseLocalFrontmatterBlob,
   pageSettingsFromMarkdown,
 } from "./local-frontmatter/parser";
-import { stringify as stringifyYaml } from "yaml";
+import { parseDocument } from "yaml";
 import type { PageContent } from "@/components/editor/utils/blocknote-content";
 import { extractFrontmatter } from "./markdown-raw-guard";
+import { splitFrontmatter } from "./note-metadata/identity";
 import {
   GOOSE_LAYOUT_KEY,
   GOOSE_FONT_KEY,
@@ -59,7 +60,8 @@ export type MergeFrontmatterResult = {
 };
 
 export function isGooseFrontmatterKey(key: string): boolean {
-  return key.startsWith("goose-");
+  return ["goose-note", "goose-id", GOOSE_LAYOUT_KEY, GOOSE_FONT_KEY,
+    GOOSE_LOCKED_KEY, GOOSE_PINNED_KEY, GOOSE_FAVORITE_KEY].includes(key);
 }
 
 export function frontmatterBodyHasUserVisibleKeys(
@@ -128,13 +130,14 @@ export function mergeSettingsIntoFrontmatterHeader(
   settings: LocalPageFrontmatterSettings,
 ): { markdown: string; frontmatter: string | undefined } | null {
   if (!/^---\s*\n/.test(markdown)) return null;
-  const { frontmatter, body } = extractFrontmatter(markdown);
+  const { frontmatter } = extractFrontmatter(markdown);
   if (!frontmatter) throw new Error(uiText("theYamlFrontmatterIsNotClosedSavingHasBeen"));
   const merged = mergeLocalPageSettingsIntoFrontmatter(frontmatter, settings);
   if (merged.parseFailed) throw new Error(uiText("theYamlFrontmatterIsInvalidSavingHasBeenBlocked"));
   const mergedBlob = merged.blob;
+  const { tail } = splitFrontmatter(markdown);
   return {
-    markdown: mergedBlob ? `${mergedBlob}\n\n${body}` : body,
+    markdown: mergedBlob ? `${mergedBlob}${tail}` : tail.replace(/^\r?\n(?:\r?\n)?/, ""),
     frontmatter: mergedBlob,
   };
 }
@@ -171,39 +174,41 @@ export function mergeLocalPageSettingsIntoFrontmatter(
     };
   }
 
-  const data: Record<string, unknown> = { ...parsed.data };
+  const yamlBody = (existingBlob ?? "").replace(/^---[^\S\r\n]*\r?\n/, "").replace(/\r?\n---[^\S\r\n]*$/, "");
+  const document = parseDocument(yamlBody || "{}");
+  const data = document;
 
   if (pageLayout === undefined) {
-    delete data[GOOSE_LAYOUT_KEY];
+    data.delete(GOOSE_LAYOUT_KEY);
   } else {
-    data[GOOSE_LAYOUT_KEY] = pageLayout;
+    data.set(GOOSE_LAYOUT_KEY, pageLayout);
   }
 
   if (fontFamily === "default") {
-    delete data[GOOSE_FONT_KEY];
+    data.delete(GOOSE_FONT_KEY);
   } else {
-    data[GOOSE_FONT_KEY] = fontFamily;
+    data.set(GOOSE_FONT_KEY, fontFamily);
   }
 
   if (!isLocked) {
-    delete data[GOOSE_LOCKED_KEY];
+    data.delete(GOOSE_LOCKED_KEY);
   } else {
-    data[GOOSE_LOCKED_KEY] = true;
+    data.set(GOOSE_LOCKED_KEY, true);
   }
 
   if (!isPinned) {
-    delete data[GOOSE_PINNED_KEY];
+    data.delete(GOOSE_PINNED_KEY);
   } else {
-    data[GOOSE_PINNED_KEY] = true;
+    data.set(GOOSE_PINNED_KEY, true);
   }
 
   if (!isFavorite) {
-    delete data[GOOSE_FAVORITE_KEY];
+    data.delete(GOOSE_FAVORITE_KEY);
   } else {
-    data[GOOSE_FAVORITE_KEY] = true;
+    data.set(GOOSE_FAVORITE_KEY, true);
   }
 
-  if (Object.keys(data).length === 0) {
+  if (!document.contents || (document.contents as { items?: unknown[] }).items?.length === 0) {
     return {
       blob: undefined,
       parseFailed: false,
@@ -212,9 +217,7 @@ export function mergeLocalPageSettingsIntoFrontmatter(
   }
 
   try {
-    const yamlBody = stringifyYaml(data, {
-      lineWidth: 0,
-    }).replace(/\s+$/, "");
+    const yamlBody = document.toString({ lineWidth: 0 }).replace(/\s+$/, "");
     return {
       blob: wrapFrontmatter(yamlBody),
       parseFailed: false,
