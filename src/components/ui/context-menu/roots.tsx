@@ -2,6 +2,7 @@ import * as React from "react";
 import { FloatingNode, FloatingTree, useFloatingParentNodeId, useMergeRefs } from "@floating-ui/react";
 import { useContextMenu } from "@/components/editor/state/contextMenu";
 import { TriggerChild } from "../trigger-child";
+import { MenuRootScopeContext, useMenuRoot } from "../menu-root";
 
 import { useMenuState, MenuContext, ParentMenuContext, useMenu } from "./state";
 
@@ -40,10 +41,13 @@ function ContextMenuRoot({ children, onOpenChange }: ContextMenuProps) {
     },
     [id],
   );
-  const state = useMenuState(open, change, false);
+  const root = useMenuRoot(open, change);
+  const state = useMenuState(root.open, change, false);
   return (
     <FloatingNode id={state.nodeId}>
-      <MenuContext.Provider value={state}>{children}</MenuContext.Provider>
+      <MenuRootScopeContext.Provider value={root}>
+        <MenuContext.Provider value={state}>{children}</MenuContext.Provider>
+      </MenuRootScopeContext.Provider>
     </FloatingNode>
   );
 }
