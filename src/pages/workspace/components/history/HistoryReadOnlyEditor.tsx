@@ -140,7 +140,7 @@ export function HistoryReadOnlyEditor({
     <div
       data-font-family={activePage?.fontFamily ?? "default"}
       className={cn(
-        "workspace-editor-surface mt-1 flex min-h-0 w-full flex-1 flex-col pt-1 pb-12",
+        "workspace-editor-surface mt-1 flex w-full flex-auto flex-col pt-1 pb-12",
         "max-w-full",
       )}
     >

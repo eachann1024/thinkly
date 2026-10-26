@@ -124,7 +124,7 @@ function NotebookAiWorkspaceBody({
                   "h-full overflow-y-auto page-scroll-container bg-[hsl(var(--goose-editor-bg))]",
                 )}
               >
-                <div className="flex h-full min-h-full flex-col px-14 pt-0">
+                <div className="flex min-h-full flex-col px-14 pt-0">
                   <HistoryReader />
                 </div>
               </div>
