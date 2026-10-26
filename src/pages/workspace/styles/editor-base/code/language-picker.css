@@ -12,8 +12,7 @@
   line-height: var(--goose-menu-item-line-height);
 }
 
-.goose-code-language-search,
-.goose-code-language-label {
+.goose-code-language-search {
   flex-shrink: 0;
 }
 
@@ -27,6 +26,7 @@
 }
 
 .goose-code-language-list {
+  position: relative;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
