@@ -1,4 +1,5 @@
 import { portableHistoryIds } from "./history/notebookHistory";
+import { createNoteIdentityResolver } from "./note-metadata/scanIdentity";
 import { pruneParsedMarkdown } from "./local-folder-scanner/parsed-cache";
 import {
   type LocalPageIdMap,
@@ -42,6 +43,7 @@ export async function scanLocalFolderPages({
   forceRead = false,
   readOnly = false,
   includedFilePaths = [],
+  reservedPageIds,
 }: LocalFolderScannerOptions): Promise<Page[]> {
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
   let idMapDirty = false;
@@ -52,6 +54,7 @@ export async function scanLocalFolderPages({
   const liveRelativePaths = new Set<string>();
   const hiddenFoldersSet = new Set(hiddenFolders);
   const cacheScope = JSON.stringify([basePath, [...hiddenFolders].sort()]);
+  const resolveIdentity = createNoteIdentityResolver(basePath, notebookId, gooseFs, idMap, reservedPageIds);
 
   const scanDirectory = async (
     dirPath: string,
@@ -87,6 +90,7 @@ export async function scanLocalFolderPages({
           idMap,
         );
         if (dirty) idMapDirty = true;
+        resolveIdentity.reserve(relativePath, folderId);
 
         const folderPage = buildFolderPage(
           notebookId,
@@ -95,6 +99,7 @@ export async function scanLocalFolderPages({
           parentId,
           folderId,
         );
+        if (await resolveIdentity(folderPage)) idMapDirty = true;
         pages.push(folderPage);
         const subPages = await scanDirectory(entry.path, folderPage.id);
         pages.push(...subPages);
@@ -113,6 +118,7 @@ export async function scanLocalFolderPages({
         idMap,
       );
       if (dirty) idMapDirty = true;
+      resolveIdentity.reserve(relativePath, fileId);
 
       pendingFiles.push({ entry, fileId });
     }
@@ -150,8 +156,10 @@ export async function scanLocalFolderPages({
             now,
             pending.fileId,
             cacheScope,
+            gooseFs,
           );
           page.parentId = parentId;
+          if (await resolveIdentity(page)) idMapDirty = true;
           pages.push(page);
         } catch (error) {
           console.error("[local-folder-scanner] 跳过文件解析失败:", error);
@@ -185,6 +193,7 @@ export async function scanLocalFolderPages({
         ? await gooseFs.existsAsync(filePath) : gooseFs.exists(filePath);
       if (!exists) continue;
       const { id, dirty } = resolveOrCreateStableId(notebookId, relativePath, idMap);
+      resolveIdentity.reserve(relativePath, id);
       const entry = {
         name: relativePath.split("/").pop()!,
         path: filePath,
@@ -192,7 +201,8 @@ export async function scanLocalFolderPages({
         isDirectory: false,
       };
       const page = await buildMarkdownPage(notebookId, basePath, entry,
-        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope);
+        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope, gooseFs);
+      if (await resolveIdentity(page)) idMapDirty = true;
       const parentPath = filePath.replace(/[\\/][^\\/]+$/, "");
       page.parentId = pages.find((candidate) =>
         candidate.isFolder && candidate.localFilePath &&

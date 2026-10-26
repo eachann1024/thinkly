@@ -21,6 +21,7 @@ import type { Page } from "@/types";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { portableHistoryIds } from "@/lib/history/notebookHistory";
 import { clearHistoryTombstones, recordHistoryTombstones } from "@/lib/history/tombstones";
+import { createNoteIdentityResolver, protectCommittedNoteIdentities } from "@/lib/note-metadata/scanIdentity";
 
 export const removeSingleLocalPageAction = (
   set: StoreSet,
@@ -63,7 +64,7 @@ export const removeSingleLocalPageAction = (
 
 export const addSingleLocalPageAction = async (
   set: StoreSet,
-  _get: StoreGet,
+  get: StoreGet,
   notebookId: string,
   basePath: string,
   filePath: string,
@@ -74,6 +75,12 @@ export const addSingleLocalPageAction = async (
   const fs = window.gooseFs;
 
   if (!/\.(md|markdown)$/i.test(filePath)) return;
+  const existing = Object.values(get().pages).find(page => page.workspaceId === notebookId &&
+    page.localFilePath?.replace(/\\/g, "/") === filePath.replace(/\\/g, "/"));
+  if (existing) {
+    if (!get().dirtyLocalPageIds[existing.id]) await get().reloadLocalPageFromDisk(existing.id);
+    return;
+  }
 
   const fallbackTitle = localFileTitleFromPath(filePath);
   const relativePath = canonicalRelativePath(basePath, filePath);
@@ -96,9 +103,6 @@ export const addSingleLocalPageAction = async (
     relativePath,
     idMap,
   );
-  if (dirty || adopted) {
-    writeLocalPageIdMap(notebookId, idMap);
-  }
   clearHistoryTombstones(notebookId, [pageId]);
 
   let markdown: string | null;
@@ -126,6 +130,7 @@ export const addSingleLocalPageAction = async (
     markdown,
     fallbackTitle,
     readError,
+    { root: basePath, fs },
   );
 
   if (typeof markdown === "string") {
@@ -150,6 +155,8 @@ export const addSingleLocalPageAction = async (
     pageLayout: parsed.pageLayout,
     localFilePath: filePath,
     localFrontmatter: parsed.frontmatter,
+    localMetadataId: parsed.metadataId,
+    localMetadataRevision: parsed.metadataRevision,
     localReadState: parsed.readState,
     localReadError: parsed.readError,
     createdAt: now,
@@ -157,12 +164,17 @@ export const addSingleLocalPageAction = async (
     ...(cachedMeta?.icon && { icon: cachedMeta.icon }),
   };
 
-  set((state) => ({
-    pages: {
-      ...state.pages,
-      [pageId]: newPage,
-    },
-  }));
+  const resolveIdentity = createNoteIdentityResolver(basePath, notebookId, fs, idMap,
+    new Set(Object.values(get().pages).filter((page) => page.localFilePath !== filePath).map((page) => page.id)));
+  const identityChanged = await resolveIdentity(newPage);
+  if (dirty || adopted || identityChanged) writeLocalPageIdMap(notebookId, idMap);
+
+  set((state) => {
+    if (Object.values(state.pages).some(page => page.localFilePath?.replace(/\\/g, "/") === filePath.replace(/\\/g, "/"))) return state;
+    const [safePage] = protectCommittedNoteIdentities([newPage], new Set(Object.keys(state.pages)));
+    Object.assign(newPage, safePage);
+    return { pages: { ...state.pages, [newPage.id]: newPage } };
+  });
 
   appendLocalFolderOrderEntries(notebookId, [newPage]);
 };

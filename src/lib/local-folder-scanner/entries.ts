@@ -39,6 +39,7 @@ export interface LocalFolderScannerOptions {
   forceRead?: boolean;
   readOnly?: boolean;
   includedFilePaths?: string[];
+  reservedPageIds?: ReadonlySet<string>;
 }
 
 export interface LocalFolderEntry {

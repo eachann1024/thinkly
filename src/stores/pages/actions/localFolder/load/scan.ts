@@ -20,6 +20,7 @@ import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { recoverScannedLocalPages } from "./recovery";
 import { clearHistoryTombstones, recordHistoryTombstones } from "@/lib/history/tombstones";
 import "../../../../useTabs";
+import { protectCommittedNoteIdentities } from "@/lib/note-metadata/scanIdentity";
 
 export const loadLocalFolderPagesOnce = async (
   set: StoreSet,
@@ -83,13 +84,15 @@ export const loadLocalFolderPagesOnce = async (
   }
 
   try {
-    const localPages = await scanLocalFolderPages({
+    let localPages = await scanLocalFolderPages({
       notebookId,
       basePath,
       gooseFs: window.gooseFs,
       hiddenFolders,
       forceRead: options?.forceRead,
       includedFilePaths: associatedMarkdownPaths(notebookId),
+      reservedPageIds: new Set(Object.values(get().pages)
+        .filter((page) => page.workspaceId !== notebookId).map((page) => page.id)),
     });
 
     if (isNotebookRescanSuppressed(notebookId) || !isCurrentRequest()) return;
@@ -101,6 +104,11 @@ export const loadLocalFolderPagesOnce = async (
     clearHistoryTombstones(notebookId, localPages.filter((page) => !page.isFolder).map((page) => page.id));
 
     set((state) => {
+      localPages = protectCommittedNoteIdentities(localPages, new Set(Object.values(state.pages)
+        .filter(page => page.workspaceId !== notebookId || page.editorDraft || page.localUnsaved && !page.localFilePath)
+        .map(page => page.id)));
+      const currentByPath = new Map(Object.values(state.pages).filter(page => page.workspaceId === notebookId && page.localFilePath)
+        .map(page => [page.localFilePath!.replace(/\\/g, "/"), page]));
       const pagesOutsideNotebook = Object.fromEntries(
         Object.entries(state.pages).filter(
           ([, page]) => page.workspaceId !== notebookId,
@@ -117,6 +125,13 @@ export const loadLocalFolderPagesOnce = async (
         ...pagesOutsideNotebook,
         ...localPages.reduce(
           (acc, page) => {
+            const previous = page.localFilePath && currentByPath.get(page.localFilePath.replace(/\\/g, "/"));
+            if (previous && previous.id !== page.id && (state.dirtyLocalPageIds[previous.id] ||
+              dirtyPageIdsAtLoadStart.has(previous.id) || previous !== currentPages[previous.id])) {
+              acc[previous.id] = { ...previous, localReadState: "error",
+                localReadError: "磁盘笔记 ID 已改变，已保留未保存的编辑；请先处理冲突" };
+              return acc;
+            }
             const existing = localPageMetadataCache.get(page.id);
             const current = state.pages[page.id];
             if (existing) {
@@ -143,8 +158,10 @@ export const loadLocalFolderPagesOnce = async (
                 getContentSignature(current.content);
             const preserveCurrent =
               current &&
-              (dirtyPageIdsAtLoadStart.has(page.id) ||
-                contentChangedDuringScan);
+              (state.dirtyLocalPageIds[page.id] ||
+                current !== currentPages[page.id] ||
+                dirtyPageIdsAtLoadStart.has(page.id) ||
+                contentChangedDuringScan || page.localReadState === "error");
             acc[page.id] = preserveCurrent
               ? {
                   ...page,
@@ -152,8 +169,8 @@ export const loadLocalFolderPagesOnce = async (
                   workspaceId: page.workspaceId,
                   parentId: page.parentId,
                   localFilePath: page.localFilePath,
-                  localReadState: page.localReadState,
-                  localReadError: page.localReadError,
+                  ...(current === currentPages[page.id] && page.localReadState === "error"
+                    ? { localReadState: page.localReadState, localReadError: page.localReadError } : {}),
                 }
               : page;
             return acc;
