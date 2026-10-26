@@ -1,6 +1,7 @@
 import type { NotebooksState, Notebook } from "./types";
 import { generateId, nextNotebookOrder } from "./types";
 import { usePages } from "../usePages";
+import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearchSession";
 import {
   localPathsAreCaseInsensitive,
   comparisonLocalPath,
@@ -14,6 +15,7 @@ export function createCreateNotebookActions(
     createNotebook: () => { throw new Error("Legacy internal notebooks are read-only. Choose a local notebook folder to restore a complete backup."); },
 
     createLocalFolderNotebook: (name, localPath) => {
+      useSearchSession.getState().closeSearch();
       const pagesStore = usePages.getState();
       const caseInsensitive = localPathsAreCaseInsensitive();
       const targetPath = comparisonLocalPath(localPath, caseInsensitive);
