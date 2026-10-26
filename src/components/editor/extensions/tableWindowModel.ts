@@ -44,17 +44,3 @@ export function liveRowCount(rowCount: number, window: RowWindow | null, spans: 
   }
   return count;
 }
-
-export function shouldAnimateBlockRemoval(input: {
-  docChanged: boolean;
-  history: boolean;
-  stepCount: number;
-  removed: number;
-  inserted: number;
-  rootBlocks: number;
-}): boolean {
-  if (!input.docChanged || !input.history) return false;
-  if (input.stepCount !== 1 || input.rootBlocks > 48) return false;
-  const shrunk = input.removed - input.inserted;
-  return shrunk >= 2 && input.removed <= 300 && input.inserted < 40;
-}

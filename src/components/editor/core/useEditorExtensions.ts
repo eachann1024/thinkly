@@ -21,7 +21,6 @@ import { gooseMediaBlockEnterExtension } from "@/components/editor/extensions/me
 import { gooseEmptyNestedListEnterExtension } from "@/components/editor/extensions/emptyNestedListEnterExtension";
 import { gooseCrossBlockDeleteExtension } from "@/components/editor/extensions/crossBlockDeleteExtension";
 import { gooseEmptyBlockBackspaceExtension } from "@/components/editor/extensions/emptyBlockBackspaceExtension";
-import { gooseBlockPresenceExtension } from "@/components/editor/extensions/blockPresenceExtension";
 import { createGooseNumberedListStartNormalizationExtension } from "@/components/editor/extensions/numberedListStartNormalizationExtension";
 import { createGooseTableSequenceExtension } from "@/components/editor/extensions/tableSequenceExtension";
 import { createGooseBodyParagraphGuardExtension } from "@/components/editor/extensions/bodyParagraphGuardExtension";
@@ -102,6 +101,8 @@ export function useEditorExtensions(session: EditorSession) {
     [],
   );
 
+  // Editor transactions must commit synchronously, including selection updates.
+  // View-transition callbacks defer dispatch and leave stale DOM under rapid input.
   return [
     createGooseFirstTitleGuardExtension(usesRawEditorContentRef),
     createGooseBodyParagraphGuardExtension(usesRawEditorContentRef),
@@ -138,7 +139,6 @@ export function useEditorExtensions(session: EditorSession) {
     gooseEmptyNestedListEnterExtension,
     gooseCrossBlockDeleteExtension,
     gooseEmptyBlockBackspaceExtension,
-    gooseBlockPresenceExtension,
     createGooseNumberedListStartNormalizationExtension(usesRawEditorContentRef),
     createGooseTableSequenceExtension(usesRawEditorContentRef),
     createGooseSlashMenuReconcileExtension(
