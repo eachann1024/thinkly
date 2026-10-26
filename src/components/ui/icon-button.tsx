@@ -14,6 +14,8 @@ const iconButtonVariants = cva(
           "text-muted-foreground",
         danger:
           "goose-interactive-danger",
+        "danger-ghost":
+          "goose-interactive-danger-ghost",
         handle:
           "bg-muted/80 text-muted-foreground border-border/50 backdrop-blur-[1px] cursor-grab",
       },

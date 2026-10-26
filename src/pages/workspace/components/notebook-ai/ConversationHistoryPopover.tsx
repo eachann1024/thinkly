@@ -143,7 +143,7 @@ export function ConversationHistoryList({
                     </span>
                   </div>
                   {onDeleteConversation ? (
-                    <IconButton size="xs" tone="danger"
+                    <IconButton size="xs" tone="danger-ghost"
                       type="button"
                       aria-label={t("deleteConversation")}
                       title={t("deleteConversation")}
