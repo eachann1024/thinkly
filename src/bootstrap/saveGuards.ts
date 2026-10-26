@@ -20,6 +20,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import { dismissSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import { isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import { showSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 import { getGooseDesktop } from "@/lib/electron/runtime";
@@ -108,6 +109,12 @@ export const setupSaveGuards = () => {
     if (!isPlatformPrimaryModifierEvent(event)) return;
     if (event.altKey || event.shiftKey || event.repeat) return;
     if (event.key.toLowerCase() !== "s") return;
+
+    if (isWorkspaceSettingsOpen()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
 
     const target = document.activeElement;
     const isEditableInput =
