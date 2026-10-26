@@ -31,6 +31,7 @@ export interface GitSyncContentProps {
   loading: boolean;
   loadError: string;
   adding: boolean;
+  notificationTargetMissing: boolean;
   disabled: boolean;
   selectionDisabled: boolean;
   status: GitSyncStatus | undefined;
@@ -68,6 +69,7 @@ export function GitSyncContent({
   loading,
   loadError,
   adding,
+  notificationTargetMissing,
   disabled,
   selectionDisabled,
   status,
@@ -125,6 +127,11 @@ export function GitSyncContent({
         </SettingsSectionCard>
       ) : (
         <>
+          {notificationTargetMissing && (
+            <p role="alert" className="text-sm text-danger">
+              {uiText("notificationTargetMissing")}
+            </p>
+          )}
           {loading && (
             <p role="status" className="text-sm text-muted-foreground">
               {uiText("loadingSyncConfiguration_41ae")}</p>
