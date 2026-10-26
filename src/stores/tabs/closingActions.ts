@@ -16,6 +16,7 @@ import {
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
 import { useNotebooks } from "../useNotebooks";
+import { listVisibleWorkspaceTabs } from "@/pages/workspace/components/page/visibleTabs";
 import { runWithPresence } from "@/lib/ui/presence";
 
 export function createClosingTabActions(
@@ -64,6 +65,9 @@ export function createClosingTabActions(
       }
 
       const nextTabs = openTabs.filter((tab) => tab.id !== tabId);
+      const notebookId = useNotebooks.getState().activeNotebookId;
+      const visibleTabs = listVisibleWorkspaceTabs(openTabs, usePages.getState().getPage, notebookId);
+      const nextVisibleTabs = listVisibleWorkspaceTabs(nextTabs, usePages.getState().getPage, notebookId);
 
       if (nextTabs.length === 0) {
         set({ openTabs: [], activeTabId: null });
@@ -72,19 +76,15 @@ export function createClosingTabActions(
       }
 
       let nextActiveId: string | null = null;
-      if (activeTabId === tabId && nextTabs.length > 0) {
-        nextActiveId =
-          nextTabs[Math.min(index, nextTabs.length - 1)]?.id ?? null;
+      if (activeTabId === tabId) {
+        const visibleIndex = visibleTabs.findIndex((tab) => tab.id === tabId);
+        nextActiveId = nextVisibleTabs[Math.min(Math.max(visibleIndex, 0), nextVisibleTabs.length - 1)]?.id ?? null;
       } else if (activeTabId !== tabId) {
         nextActiveId = resolveTabIdInHistory(activeTabId, nextTabs);
       }
 
       const historyState = syncHistoryWithOpenTabs(nextTabs);
-      const fallbackActiveId =
-        resolveTabIdInHistory(nextActiveId, nextTabs) ??
-        (historyState.tabHistoryIndex >= 0
-          ? historyState.tabHistory[historyState.tabHistoryIndex]
-          : null);
+      const fallbackActiveId = resolveTabIdInHistory(nextActiveId, nextVisibleTabs);
 
       set({
         openTabs: nextTabs,
@@ -92,6 +92,9 @@ export function createClosingTabActions(
         ...historyState,
       });
       const nextActiveTab = nextTabs.find((tab) => tab.id === fallbackActiveId);
+      if (!nextActiveTab || nextActiveTab.type === "welcome") {
+        void scheduleSetActivePage(null);
+      }
       if (nextActiveTab && !isSpecialTab(nextActiveTab)) {
         const pageId = workspaceTabPageId(nextActiveTab);
         get().syncNotebookForPage(pageId);
@@ -114,7 +117,8 @@ export function createClosingTabActions(
       const currentTab = openTabs.find((tab) => tab.id === tabId);
       if (!currentTab) return;
 
-      const nextTabs = [currentTab];
+      const visibleIds = new Set(listVisibleWorkspaceTabs(openTabs, usePages.getState().getPage, useNotebooks.getState().activeNotebookId).map(tab => tab.id));
+      const nextTabs = openTabs.filter(tab => tab.id === tabId || !visibleIds.has(tab.id));
 
       const nextTabIds = new Set(nextTabs.map((t) => t.id));
       const closedTabs = openTabs.filter((t) => !nextTabIds.has(t.id));
@@ -137,7 +141,8 @@ export function createClosingTabActions(
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
       if (currentIndex <= 0) return;
 
-      const nextTabs = openTabs.slice(currentIndex);
+      const visibleIds = new Set(listVisibleWorkspaceTabs(openTabs, usePages.getState().getPage, useNotebooks.getState().activeNotebookId).map(tab => tab.id));
+      const nextTabs = openTabs.filter((tab, index) => index >= currentIndex || !visibleIds.has(tab.id));
       const nextActiveId = nextTabs.some((tab) => tab.id === activeTabId)
         ? activeTabId
         : tabId;
@@ -170,7 +175,8 @@ export function createClosingTabActions(
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
       if (currentIndex === -1 || currentIndex >= openTabs.length - 1) return;
 
-      const nextTabs = openTabs.slice(0, currentIndex + 1);
+      const visibleIds = new Set(listVisibleWorkspaceTabs(openTabs, usePages.getState().getPage, useNotebooks.getState().activeNotebookId).map(tab => tab.id));
+      const nextTabs = openTabs.filter((tab, index) => index <= currentIndex || !visibleIds.has(tab.id));
       const nextActiveId = nextTabs.some((tab) => tab.id === activeTabId)
         ? activeTabId
         : tabId;
