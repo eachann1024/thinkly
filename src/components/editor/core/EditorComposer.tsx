@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import {
   FilePanelController,
   LinkToolbarController,
-  SuggestionMenuController,
   type FloatingUIOptions,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -20,6 +19,7 @@ import { GooseAIMenu } from "@/components/editor/ai/GooseAIMenu";
 import { GooseAIMenuController } from "@/components/editor/ai/GooseAIMenuController";
 import { FormattingToolbarHoldContext } from "@/components/editor/state/formattingToolbarHold";
 import { EditorSideMenu } from "./EditorSideMenu";
+import { EditorSuggestionMenuController } from "./EditorSuggestionMenuController";
 import { EditorTrailingAdd } from "./EditorTrailingAdd";
 import { ImageLightbox } from "@/components/editor/image/ImageLightbox";
 import { EditorLinkToolbar } from "@/components/editor/toolbars/link/EditorLinkToolbar";
@@ -199,7 +199,7 @@ export function EditorComposer({
         {editable ? <FilePanelController filePanel={EditorFilePanel} /> : null}
         {editable ? (
           <>
-            <SuggestionMenuController
+            <EditorSuggestionMenuController
               triggerCharacter="/"
               getItems={getSlashItems}
               floatingUIOptions={slashMenuFloatingOptions}
@@ -215,7 +215,7 @@ export function EditorComposer({
                 }
               }}
             />
-            <SuggestionMenuController
+            <EditorSuggestionMenuController
               triggerCharacter="、"
               getItems={getSlashItems}
               floatingUIOptions={slashMenuFloatingOptions}
