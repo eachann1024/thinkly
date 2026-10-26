@@ -203,18 +203,15 @@ export function GooseTableHandlesController() {
   }
   if (!only && !state.show && !owns) return null;
   sticky.current = true;
-  const rowIndex = state.rowIndex;
-  const colIndex = state.colIndex;
-  const cell =
-    rowIndex === undefined || colIndex === undefined
-      ? undefined
-      : table.rows[rowIndex]?.cells[colIndex];
+  const rowIndex = state.rowIndex ?? 0;
+  const colIndex = state.colIndex ?? 0;
+  const cell = table.rows[rowIndex]?.cells[colIndex];
   const visible = (key: Chrome) => !only || only === key;
   const rowRect = () => {
     const tableRect = table.getBoundingClientRect();
     const dragging = state.draggingState?.draggedCellOrientation === "row";
-    const row = dragging
-      ? table.rows[rowIndex ?? -1]
+    const row = dragging || state.rowIndex === undefined
+      ? table.rows[rowIndex]
       : tableRowUnderPointer(table, tableRect.left + 1, pointer.y);
     const rect = (row ?? cell)?.getBoundingClientRect();
     if (!rect) return new DOMRect();
