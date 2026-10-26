@@ -60,6 +60,7 @@ export interface GitNotebookFolderRename {
 
 export interface GitNotebookFolderAdopt {
   notebookId: string;
+  portableNotebookId?: string;
   previousLocalPath: string;
   occupiedPaths: string[];
 }
