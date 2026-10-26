@@ -26,9 +26,9 @@ const args = [
   "--arm64",
   "--config.mac.target=dir",
 ];
-// 本机安装会留下 node_modules/electron/dist，继续用它打包。
-// CI 的 ELECTRON_SKIP_BINARY_DOWNLOAD 不会下载该目录；此时不要传入 electronDist，
-// 让 electron-builder 自行下载 zip。default_app.asar 仍由 afterPack 删除。
+// Electron 44 安装时不下载二进制，CI 上 node_modules/electron/dist 不存在。
+// 本机已有该目录时继续用它；否则不要传入 electronDist，让 electron-builder 下载 zip。
+// default_app.asar 仍由 afterPack 删除。
 if (existsSync(electronDist) && statSync(electronDist).isDirectory()) {
   args.push(`--config.electronDist=${electronDist}`);
 }
