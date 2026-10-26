@@ -31,6 +31,9 @@ await esbuild.build({
   platform: "node",
   target: "node22",
   format: "esm",
+  banner: {
+    js: 'import { createRequire as __electronCreateRequire } from "node:module"; const require = __electronCreateRequire(import.meta.url);',
+  },
   outfile: resolve(root, "dist-electron/main/index.js"),
   external: ["electron"],
   sourcemap,
