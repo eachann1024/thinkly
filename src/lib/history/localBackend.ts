@@ -1,7 +1,7 @@
 import { historyText as uiText } from "./messages";
 
 import type { HistoryBackend } from "./backend";
-import { emptyHistoryMeta, findHistoryEntry, invalidatePortableIds, isSafeVersionId, withHistoryPath, writeHistoryMeta, type HistoryMeta } from "./layout";
+import { emptyHistoryMeta, findLocalViewHistoryEntry, invalidatePortableIds, isSafeVersionId, withHistoryPath, writeHistoryMeta, type HistoryMeta } from "./layout";
 import { ensureHistoryLayoutOnce } from "./legacyMigration";
 import { historyDiskOperation, rendererHistoryDisk, writeHistoryJson, type HistoryDisk } from "./localDisk";
 import { originalHistoryPath, validHistoryRelativePath } from "./localPaths";
@@ -20,11 +20,13 @@ export function makeLocalFolderHistoryBackend(
     });
   }
   async function locate(pageId: string, fs: HistoryDisk) {
-    const found = await findHistoryEntry(basePath, pageId, fs);
     const current = relativePath(pageId);
+    const found = await findLocalViewHistoryEntry(basePath, pageId, current, fs);
     let meta = found.meta;
-    if (meta && validHistoryRelativePath(current) && meta.relativePath !== current) {
-      meta = withHistoryPath(meta, current);
+    const addView = meta && pageId.startsWith("local-view:") && meta.pageId !== pageId && !meta.viewIds?.includes(pageId);
+    if (meta && (addView || validHistoryRelativePath(current) && meta.relativePath !== current)) {
+      if (validHistoryRelativePath(current)) meta = withHistoryPath(meta, current);
+      if (addView) meta = { ...meta, viewIds: [...(meta.viewIds ?? []), pageId] };
       await writeHistoryMeta(basePath, found.dir, meta, fs);
     }
     return { dir: found.dir, meta, current: validHistoryRelativePath(current) ? current : (meta?.relativePath ?? originalHistoryPath(pageId)) };
@@ -53,18 +55,19 @@ export function makeLocalFolderHistoryBackend(
     },
     loadVersion(pageId, versionId) {
       return operation(async (fs) => {
-        const { dir } = await locate(pageId, fs);
+        const { dir, meta } = await locate(pageId, fs);
         const path = file(dir, versionId);
-        return parseHistoryVersion(path, (await fs.exists(path)) ? await fs.readFile(path) : null, pageId, versionId);
+        const version = parseHistoryVersion(path, (await fs.exists(path)) ? await fs.readFile(path) : null, meta?.pageId ?? pageId, versionId);
+        return version ? { ...version, pageId } : null;
       }, null);
     },
     saveVersion(version) {
       return operation(async (fs) => {
-        const { dir, current } = await locate(version.pageId, fs);
+        const { dir, current, meta } = await locate(version.pageId, fs);
         const path = file(dir, version.versionId);
         invalidateHistoryVersion(path);
         if (!await fs.exists(dir) && !await fs.mkdir(dir)) throw new Error(uiText("couldnTCreateTheDestinationHistoryFolder"));
-        await writeHistoryJson(path, { ...version, relativePath: current ?? undefined }, fs);
+        await writeHistoryJson(path, { ...version, pageId: meta?.pageId ?? version.pageId, relativePath: current ?? undefined }, fs);
       }, undefined);
     },
     removeVersion(pageId, versionId) {

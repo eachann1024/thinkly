@@ -3,12 +3,14 @@ import { normalizeHistoryIndex } from "./guards";
 import { HISTORY_HASH_DIR, historyHash, validHistoryRelativePath } from "./localPaths";
 import { writeHistoryJson, type HistoryDisk } from "./localDisk";
 import type { HistoryIndexEntry } from "./types";
+import { canonicalRelativePath } from "../canonicalLocalPath";
 
 export interface HistoryMeta {
   version: 2;
   pageId: string;
   relativePath: string | null;
   previousPaths: string[];
+  viewIds?: string[];
   versions: HistoryIndexEntry[];
   lastVersionCharCount: number;
 }
@@ -28,6 +30,7 @@ export function parseHistoryMeta(text: string): HistoryMeta {
     pageId: raw.pageId,
     relativePath: validHistoryRelativePath(raw.relativePath) ? raw.relativePath : null,
     previousPaths: Array.isArray(raw.previousPaths) ? raw.previousPaths.filter(validHistoryRelativePath) : [],
+    ...(Array.isArray(raw.viewIds) ? { viewIds: raw.viewIds.filter((id: unknown): id is string => typeof id === "string" && id.startsWith("local-view:")) } : {}),
     versions: index.versions,
     lastVersionCharCount: index.lastVersionCharCount,
   };
@@ -59,6 +62,27 @@ export async function findHistoryEntry(basePath: string, pageId: string, fs: His
     if (!meta || meta.pageId === pageId) return { dir, meta };
   }
   throw new Error(uiText("historyFileIdentifiersDonTMatchTheOriginalHas"));
+}
+
+export async function findLocalViewHistoryEntry(
+  basePath: string, pageId: string, relativePath: string | null, fs: HistoryDisk,
+): Promise<{ dir: string; meta: HistoryMeta | null }> {
+  const found = await findHistoryEntry(basePath, pageId, fs);
+  if (found.meta || !pageId.startsWith("local-view:") || !validHistoryRelativePath(relativePath)) return found;
+  const entries = await listHistoryEntries(basePath, fs);
+  const aliases = entries.filter(entry => entry.meta.viewIds?.includes(pageId));
+  if (aliases.length) return aliases.length === 1 ? aliases[0] : found;
+  const matches = entries.filter(entry => entry.meta.relativePath === relativePath);
+  if (matches.length) return matches.length === 1 ? matches[0] : found;
+  try {
+    const encoded = pageId.match(/^local-view:[^:]+:([^:]+)(?::\d+)?$/)?.[1];
+    if (!encoded) return found;
+    const original = decodeURIComponent(encoded);
+    const path = canonicalRelativePath(basePath, original) ?? original;
+    if (!validHistoryRelativePath(path)) return found;
+    const previous = entries.filter(entry => entry.meta.relativePath === path || entry.meta.previousPaths.includes(path));
+    return previous.length === 1 ? previous[0] : found;
+  } catch { return found; }
 }
 
 const portableCache = new Map<string, { at: number; value: Record<string, string> }>();
