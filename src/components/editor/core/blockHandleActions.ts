@@ -4,6 +4,10 @@ import { NodeSelection } from "prosemirror-state";
 import { blockHandleCapabilities, isEmptyHandleParagraph } from "./blockHandleModel";
 import { getSectionInsertAnchorId, readHeadingCollapsed } from "./headingSectionFold";
 import { BLOCK_CONVERSIONS } from "./blocknoteCommandSlashItems";
+import { sparseBlockHandleTargets } from "../extensions/sparseBlockHandleDecorations";
+import { withoutBlockHandleScroll } from "../extensions/blockHandleUiExtension";
+import { setBlockColor } from "../toolbars/formatting/blockColorActions";
+import { getHandleConversionBlockIds } from "./blockConversionSelection";
 
 type Editor = BlockNoteEditor<any, any, any>;
 
@@ -68,7 +72,8 @@ export function setHandleBlockProperty(editor: Editor, blockId: string, prop: "t
   if (!block) return false;
   const caps = blockHandleCapabilities(editor, block);
   if (prop === "textAlignment" ? !caps.align : !caps.color) return false;
-  editor.updateBlock(block, { props: { [prop]: value } });
+  if (prop === "textAlignment") editor.updateBlock(block, { props: { [prop]: value } });
+  else setBlockColor(editor, blockId, prop, value);
   if (focusEditor) editor.focus();
   return true;
 }
