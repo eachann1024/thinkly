@@ -1,3 +1,4 @@
+import type { NoteSettings } from "@/lib/note-metadata/contract";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 
 export type HistoryTrigger = "idle" | "manual" | "pre-op";
@@ -32,5 +33,6 @@ export interface HistoryVersion {
   size: number;
   content: BlockNoteContent;
   localFrontmatter?: string;
+  settings?: NoteSettings;
   relativePath?: string;
 }
