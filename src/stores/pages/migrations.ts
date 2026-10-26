@@ -1,3 +1,4 @@
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 import type { Page } from "@/types";
 import { normalizePageContent } from "@/components/editor/utils/blocknote-content";
 
@@ -91,14 +92,14 @@ export function repairNormalizedContentInPages(
   return { pages: nextPages, repairedPageIds };
 }
 
-export function repairHeadingSectionFoldInPages(
+export function repairLegacyFoldingInPages(
   pages: Record<string, Page>,
 ): { pages: Record<string, Page>; repairedPageIds: string[] } {
   let nextPages = pages;
   const repairedPageIds: string[] = [];
 
   Object.entries(pages).forEach(([pageId, page]) => {
-    const normalizedContent = normalizePageContent(page.content);
+    const normalizedContent = Array.isArray(page.content) ? unfoldLegacyBlocks(page.content) : page.content;
     if (JSON.stringify(page.content) === JSON.stringify(normalizedContent)) {
       return;
     }
@@ -115,11 +116,4 @@ export function repairHeadingSectionFoldInPages(
   });
 
   return { pages: nextPages, repairedPageIds };
-}
-
-/** @deprecated 由 repairHeadingSectionFoldInPages 取代 */
-export function repairHeadingToggleableInPages(
-  pages: Record<string, Page>,
-): { pages: Record<string, Page>; repairedPageIds: string[] } {
-  return repairHeadingSectionFoldInPages(pages);
 }

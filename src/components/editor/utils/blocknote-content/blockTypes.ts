@@ -15,13 +15,13 @@ export const VALID_BLOCK_TYPES = new Set([
   "alert",
   "link",
   "embed",
-  "toggleListItem",
-  "columnLayout",
-  "columnSection",
   "divider",
 ]);
 
 export const LEGACY_BLOCK_TYPES = new Set([
+  "toggleListItem",
+  "columnLayout",
+  "columnSection",
   "blockquote",
   "paragraph",
   "heading",

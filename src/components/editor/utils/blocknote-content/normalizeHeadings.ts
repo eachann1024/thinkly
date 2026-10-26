@@ -32,8 +32,6 @@ export function ensureFirstTitleHeading(
       props: {
         ...firstBlock.props,
         level: TITLE_HEADING_LEVEL,
-        collapsed: false,
-        isToggleable: false,
       },
     } as PartialBlock;
 
@@ -56,8 +54,6 @@ export function ensureFirstTitleHeading(
         props: {
           ...firstBlock.props,
           level: TITLE_HEADING_LEVEL,
-          collapsed: false,
-          isToggleable: false,
         },
         content,
       } as unknown as PartialBlock,
@@ -74,74 +70,12 @@ export function normalizeBlockContent(content: unknown): BlockNoteContent {
   return normalizeBlocks(content);
 }
 
-function normalizeHeadingProps(props: unknown): Record<string, unknown> {
-  const next = {
-    ...(typeof props === "object" && props
-      ? (props as Record<string, unknown>)
-      : {}),
-  };
-  next.isToggleable = next.isToggleable === true;
-  if (next.collapsed == null) next.collapsed = false;
-  return next;
-}
-
-function normalizeSectionFoldBlock(block: PartialBlock): PartialBlock[] {
-  const working = block;
-
-  if (working.type === "heading") {
-    const nestedChildren = Array.isArray(
-      (working as { children?: PartialBlock[] }).children,
-    )
-      ? ((working as { children?: PartialBlock[] }).children as PartialBlock[])
-      : [];
-    const props = normalizeHeadingProps(working.props);
-    if (props.isToggleable) {
-      return [{
-        ...working,
-        props,
-        ...(nestedChildren.length
-          ? { children: normalizeHeadingSectionFold(nestedChildren) }
-          : {}),
-      } as PartialBlock];
-    }
-    const { children: _ignored, ...headingOnly } = working as PartialBlock & {
-      children?: PartialBlock[];
-    };
-    const flat: PartialBlock[] = [
-      {
-        ...headingOnly,
-        props,
-      } as PartialBlock,
-    ];
-    if (nestedChildren.length > 0) {
-      flat.push(
-        ...normalizeHeadingSectionFold(normalizeBlocks(nestedChildren)),
-      );
-    }
-    return flat;
-  }
-
-  const children = (working as { children?: PartialBlock[] }).children;
-  if (Array.isArray(children) && children.length > 0) {
-    return [
-      {
-        ...working,
-        children: normalizeHeadingSectionFold(children),
-      } as PartialBlock,
-    ];
-  }
-  return [working];
-}
-
-export function normalizeHeadingSectionFold(
-  blocks: PartialBlock[],
-): PartialBlock[] {
-  return blocks.flatMap((block) => normalizeSectionFoldBlock(block));
-}
-
-/** @deprecated 使用 normalizeHeadingSectionFold */
-export function normalizeHeadingToggleableFlags(
-  blocks: PartialBlock[],
-): PartialBlock[] {
-  return normalizeHeadingSectionFold(blocks);
+export function normalizeHeadingChildren(blocks: PartialBlock[]): PartialBlock[] {
+  return blocks.flatMap((block) => {
+    const { children, ...rest } = block;
+    const nested = Array.isArray(children) ? normalizeHeadingChildren(children) : [];
+    return block.type === "heading"
+      ? [rest as PartialBlock, ...nested]
+      : [{ ...rest, ...(nested.length ? { children: nested } : {}) } as PartialBlock];
+  });
 }

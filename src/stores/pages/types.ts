@@ -7,10 +7,8 @@ export const LEGACY_TITLE_CHILDREN_REPAIR_MARK_KEY =
   "goose-note:content-repair:title-children:v1";
 export const NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY =
   "goose-note:content-repair:nested-empty-wrapper:v1";
-export const HEADING_TOGGLEABLE_MIGRATION_MARK_KEY =
-  "goose-note:content-repair:heading-toggleable:v1";
-export const HEADING_SECTION_FOLD_MIGRATION_MARK_KEY =
-  "goose-note:content-repair:heading-section-fold:v1";
+export const LEGACY_FOLDING_REPAIR_MARK_KEY =
+  "goose-note:content-repair:legacy-folding:v1";
 
 export const LOCAL_PAGE_META_UPDATE_KEYS: Array<keyof Page> = [
   "isFavorite",

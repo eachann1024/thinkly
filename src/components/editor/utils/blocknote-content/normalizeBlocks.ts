@@ -1,4 +1,4 @@
-import { normalizeColumnLayout } from "../../blocks/columns/columnModel";
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 import type { PartialBlock } from "@blocknote/core";
 import { normalizeParsedImageProps } from "@/components/editor/blocks/image/imageCaption";
 import {
@@ -60,7 +60,6 @@ function hasInlineText(content: unknown): boolean {
 }
 
 function isEmptyWrapperBlock(type: string, block: any): boolean {
-  if (type === "heading" && block.props?.isToggleable === true) return false;
   if (
     type !== "heading" &&
     Array.isArray(block.children) &&
@@ -130,7 +129,7 @@ function repairDetachedListMarkers(blocks: PartialBlock[]): PartialBlock[] {
 export function normalizeBlocks(blocks: any[] | undefined): PartialBlock[] {
   return normalizeRedundantNumberedListStarts(
     repairDetachedListMarkers(
-      (blocks ?? []).flatMap((block) => normalizeBlock(block)),
+      unfoldLegacyBlocks(blocks ?? []).flatMap((block) => normalizeBlock(block)),
     ),
   );
 }
@@ -214,10 +213,6 @@ function normalizeBlock(block: any): PartialBlock[] {
   if (!block || typeof block !== "object") return [];
 
   const type = block.type;
-  if (type === "toggleListItem") {
-    const { props: _props, ...rest } = block;
-    return normalizeBlock({ ...rest, type: "paragraph" });
-  }
   if (type === "horizontalRule") {
     return [{ type: "divider" } as PartialBlock];
   }
@@ -250,13 +245,6 @@ function normalizeBlock(block: any): PartialBlock[] {
   }
 
   const children = normalizeBlocks(block.children);
-  if (type === "columnLayout") {
-    return [normalizeColumnLayout({ type, props: block.props ?? block.attrs }, children as any[]) as PartialBlock];
-  }
-  if (type === "columnSection") {
-    return [{ type, children: children.length ? children : [{ type: "paragraph" }] } as PartialBlock];
-  }
-
   if (children.length > 0 && isEmptyWrapperBlock(type, block)) {
     return children;
   }
