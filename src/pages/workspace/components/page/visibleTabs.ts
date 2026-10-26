@@ -8,12 +8,13 @@ import type { TabItem } from "@/stores/useTabs";
 export function isWorkspaceTabVisible(
   tab: TabItem,
   getPage: (id: string) => Page | undefined,
-  _activeNotebookId: string | null | undefined,
+  activeNotebookId: string | null | undefined,
 ): boolean {
   if (tab.type === "notebook-ai") return false;
   if (tab.type === "welcome") return true;
   const tabPage = getPage(tab.pageId);
-  return !tabPage || !tabPage.trashedAt;
+  const notebookId = tabPage?.workspaceId ?? tab.workspaceId;
+  return Boolean(activeNotebookId && notebookId === activeNotebookId && !tabPage?.trashedAt);
 }
 
 export function listVisibleWorkspaceTabs(
