@@ -1,20 +1,30 @@
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action] {
-  --goose-toast-action-bg: var(--goose-interactive-hover);
-  --goose-toast-action-active: var(--goose-interactive-selected);
-  --goose-toast-action-fg: var(--goose-interactive-selected-fg);
-  --goose-toast-action-border: transparent;
-  background: var(--goose-toast-action-bg);
+  --goose-toast-action-bg: var(--goose-button-slate-bottom);
+  --goose-toast-action-active: var(--goose-button-slate-focus-bottom);
+  --goose-toast-action-fg: var(--goose-button-primary-fg);
+  --goose-toast-action-border: var(--goose-button-primary-edge);
+  --button-top: color-mix(in srgb, var(--goose-toast-action-bg) 88%, var(--goose-button-face-top));
+  --button-bottom: var(--goose-toast-action-bg);
+  --button-edge: var(--goose-toast-action-border);
+  --button-fg: var(--goose-toast-action-fg);
+  --button-inset-edge: 1px;
+  background-color: var(--goose-toast-action-bg);
+  background-image: linear-gradient(180deg, var(--button-top), var(--button-bottom));
   color: var(--goose-toast-action-fg);
   border-color: var(--goose-toast-action-border);
-  box-shadow: inset 0 0 0 1px var(--goose-toast-action-border);
 }
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:where(:not(:disabled)):is(:hover, :active, :focus-visible) {
-  background: var(--goose-toast-action-active);
+  --button-bottom: var(--goose-toast-action-active);
+  background-color: var(--goose-toast-action-active);
+}
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:where(:not(:disabled)):active {
+  background-image: linear-gradient(180deg, var(--button-bottom), var(--button-top));
 }
 .goose-toaster [data-sonner-toast][data-styled="true"]:is(.goose-toast-success, [data-type="success"]) [data-button][data-action]:not(.goose-toast-action-danger) {
   --goose-toast-action-bg: color-mix(in srgb, var(--goose-interactive-success) 88%, var(--goose-interactive-success-fg));
   --goose-toast-action-active: color-mix(in srgb, var(--goose-interactive-success) 80%, var(--goose-interactive-success-fg));
   --goose-toast-action-fg: var(--goose-interactive-success-fg);
+  --goose-toast-action-border: var(--goose-interactive-success-border);
 }
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action].goose-toast-action-danger {
   --goose-toast-action-bg: var(--goose-interactive-danger);

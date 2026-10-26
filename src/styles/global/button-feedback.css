@@ -1,0 +1,49 @@
+:is(.goose-button, .goose-button-icon, [data-goose-control="toggle"], .goose-segmented-option) {
+  transition: transform 120ms ease, box-shadow 140ms ease,
+    background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.goose-button.goose-button-link {
+  text-decoration-line: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+.goose-button.goose-button-link:where(:hover, :focus-visible) {
+  color: var(--goose-text-primary);
+  text-decoration-color: currentColor;
+}
+:is(.goose-button-ghost, .goose-button-icon, [data-goose-control="toggle"],
+  .goose-segmented-option, .goose-menu-item, button.goose-interactive, button.goose-list-row):where(:active, [data-pressed="true"]):where(
+  :not(:disabled):not([aria-disabled="true"]):not([data-disabled="true"]):not([aria-busy="true"])
+) {
+  background-color: var(--goose-interactive-hover);
+  color: var(--goose-interactive-hover-fg);
+  box-shadow: inset 0 var(--goose-button-step) calc(var(--goose-button-step) * 2) var(--goose-button-press);
+}
+/* Selection is still owned by the accent/semantic system, including grouped controls. */
+.goose-button.goose-button-surface:is([aria-pressed="true"], [aria-selected="true"],
+  [aria-checked="true"], [data-selected="true"], [data-goose-selected="true"],
+  [aria-expanded="true"], [aria-current="page"], [data-state="on"], [data-state="open"]) {
+  background-image: none;
+  background-color: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+  box-shadow: inset 0 0 0 1px var(--goose-selection-border, var(--goose-interactive-selected-border));
+  transform: none;
+}
+.goose-button.goose-button-surface:is(:disabled, [aria-disabled="true"], [data-disabled="true"]):where(:not([aria-busy="true"])) {
+  background: hsl(var(--muted));
+  color: var(--goose-text-disabled);
+  border-color: hsl(var(--border));
+  box-shadow: none;
+  transform: none;
+}
+.goose-button.goose-button-surface[aria-busy="true"] {
+  background-color: var(--button-bottom);
+  color: var(--button-fg);
+  cursor: progress;
+  transform: none;
+}
+:is(.goose-button, .goose-button-icon, [data-goose-control="toggle"])[aria-busy="true"] { cursor: progress; }
+@media (prefers-reduced-motion: reduce) {
+  :is(.goose-button, .goose-button-icon, [data-goose-control="toggle"], .goose-segmented-option) { transition: none; }
+  .goose-button.goose-button-surface:active { transform: none; }
+}

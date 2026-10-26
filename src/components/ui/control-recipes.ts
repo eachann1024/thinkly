@@ -16,15 +16,15 @@ export const toggleSizes = {
   lg: "h-11 px-5 min-w-11",
   icon: controlSizes.icon,
 };
-const buttonRecipe = cva(`${controlState} rounded-[var(--goose-control-radius,8px)]`, {
+const buttonRecipe = cva(`${controlState} goose-button rounded-[var(--goose-control-radius,8px)]`, {
   variants: {
     variant: {
-      default: "goose-interactive goose-interactive-primary shadow-none",
-      destructive: "goose-interactive goose-interactive-danger",
-      outline: "goose-interactive border-border bg-background",
-      secondary: "goose-interactive bg-secondary text-secondary-foreground shadow-none",
-      ghost: "goose-interactive border-transparent bg-transparent",
-      link: "border-transparent text-link underline-offset-4 hover:underline",
+      default: "goose-interactive goose-interactive-primary goose-button-surface goose-button-primary",
+      destructive: "goose-interactive goose-interactive-danger goose-button-surface goose-button-danger",
+      outline: "goose-interactive goose-button-surface goose-button-secondary border-border bg-background",
+      secondary: "goose-interactive goose-button-surface goose-button-tertiary bg-secondary text-secondary-foreground",
+      ghost: "goose-interactive goose-button-ghost border-transparent bg-transparent",
+      link: "goose-button-link border-transparent text-link underline-offset-4",
     },
     size: controlSizes,
     contentStyle: { default: `${buttonContent} inline-flex items-center justify-center border`, preserve: "" },
