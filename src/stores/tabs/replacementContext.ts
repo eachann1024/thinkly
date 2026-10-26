@@ -54,6 +54,16 @@ export function createTabReplacementContext(
   const invalidateSingleTabSwitch = () => {
     ++singleTabSwitchToken;
   };
+  let switchSave: { pageId: string; promise: Promise<void> } | null = null;
+  const flushSwitchPage = (pageId: string) => {
+    if (switchSave?.pageId === pageId) return switchSave.promise;
+    const promise = usePages.getState().flushPendingLocalSaveByPageId(pageId)
+      .finally(() => {
+        if (switchSave?.promise === promise) switchSave = null;
+      });
+    switchSave = { pageId, promise };
+    return promise;
+  };
 
   const discardReplacedEmptyPage = (
     previousPageId: string,
@@ -117,6 +127,10 @@ export function createTabReplacementContext(
     const targetPage = usePages.getState().getPage(pageId);
     if (!targetPage || targetPage.trashedAt) return;
 
+    const token = ++singleTabSwitchToken;
+    await Promise.resolve();
+    if (token !== singleTabSwitchToken) return;
+
     const { openTabs, activeTabId } = get();
     const activeTab = openTabs.find((tab) => tab.id === activeTabId);
     if (activeTab?.pageId === pageId) {
@@ -135,7 +149,6 @@ export function createTabReplacementContext(
       return;
     }
 
-    const token = ++singleTabSwitchToken;
     commitActiveEditor();
 
     const currentPageId =
@@ -144,8 +157,9 @@ export function createTabReplacementContext(
         : null;
     if (currentPageId) {
       try {
-        await usePages.getState().flushPendingLocalSaveByPageId(currentPageId);
+        await flushSwitchPage(currentPageId);
       } catch (error) {
+        if (token !== singleTabSwitchToken) return;
         toast.error(storeText("currentSaveFailed"), {
           description: describeDiskWriteError(error),
         });
@@ -230,8 +244,9 @@ export function createTabReplacementContext(
       activeTab && !isSpecialTab(activeTab) ? activeTab.pageId : null;
     if (currentPageId) {
       try {
-        await usePages.getState().flushPendingLocalSaveByPageId(currentPageId);
+        await flushSwitchPage(currentPageId);
       } catch (error) {
+        if (token !== singleTabSwitchToken) return;
         toast.error(storeText("currentSaveFailed"), {
           description: describeDiskWriteError(error),
         });
