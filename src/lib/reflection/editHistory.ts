@@ -1,6 +1,6 @@
 import { resolveHistoryBackend } from "@/lib/history/backend";
+import { getHistoryIndexRevision } from "@/lib/history/indexRevision";
 import { usePages } from "@/stores/usePages";
-import { countWords } from "@/components/editor/utils/content-text-extractor";
 import type { Page } from "@/types";
 
 export interface EditEvent {
@@ -13,6 +13,7 @@ const READ_CONCURRENCY = 4;
 
 interface CacheEntry {
   pageUpdatedAt: number;
+  historyRevision: number;
   events: EditEvent[];
 }
 
@@ -24,14 +25,16 @@ export function isEditablePage(page: Page): boolean {
 
 async function readPageEvents(page: Page): Promise<EditEvent[]> {
   const index = await resolveHistoryBackend(page.id).loadIndex(page.id);
-  const events = index.versions.map((v) => ({
-    pageId: page.id,
-    at: v.createdAt,
-    added: Math.max(0, v.charDelta),
-  }));
-  if (events.length > 0) return events;
-  const added = Math.max(0, countWords(page.content));
-  return [{ pageId: page.id, at: page.updatedAt || page.createdAt, added }];
+  return index.versions.flatMap((v, position) => {
+    // Legacy first snapshots counted the entire existing note from zero.
+    // Without an observed editing baseline, that content is not proven activity.
+    if (v.editCharDelta === undefined && position === 0 && v.charDelta === v.charCount) return [];
+    return [{
+      pageId: page.id,
+      at: v.createdAt,
+      added: Math.max(0, v.editCharDelta ?? v.charDelta),
+    }];
+  });
 }
 
 async function runPool<T>(items: T[], limit: number, worker: (item: T) => Promise<void>) {
@@ -48,9 +51,14 @@ const inflightBatches = new Map<string, Promise<EditEvent[]>>();
 function refreshPage(page: Page): Promise<void> {
   const running = inflightPages.get(page.id);
   if (running) return running;
+  let historyRevision = getHistoryIndexRevision(page.id);
   const task = readPageEvents(page)
-    .then((events) => {
-      cache.set(page.id, { pageUpdatedAt: page.updatedAt, events });
+    .then(async (events) => {
+      if (historyRevision !== getHistoryIndexRevision(page.id)) {
+        historyRevision = getHistoryIndexRevision(page.id);
+        events = await readPageEvents(page);
+      }
+      cache.set(page.id, { pageUpdatedAt: page.updatedAt, historyRevision, events });
     })
     .catch(() => {
       cache.delete(page.id);
@@ -66,7 +74,8 @@ async function loadBatch(since: number, force: boolean): Promise<EditEvent[]> {
   const pages = Object.values(usePages.getState().pages).filter(
     (p) => isEditablePage(p) && Math.max(p.updatedAt, p.createdAt) >= since,
   );
-  const stale = pages.filter((p) => force || cache.get(p.id)?.pageUpdatedAt !== p.updatedAt);
+  const stale = pages.filter((p) => force || cache.get(p.id)?.pageUpdatedAt !== p.updatedAt ||
+    cache.get(p.id)?.historyRevision !== getHistoryIndexRevision(p.id));
   await runPool(stale, READ_CONCURRENCY, (page) => refreshPage(page));
   return pages.flatMap((p) => cache.get(p.id)?.events ?? []);
 }

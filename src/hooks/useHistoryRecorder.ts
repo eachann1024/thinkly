@@ -80,6 +80,7 @@ export function useHistoryRecorder(params: {
         workspaceId,
         content: p.content,
         trigger: "idle",
+        initialCharCount: lastRecordedCharRef.current,
       })
         .then((result) => {
           if (cancelled) return;
