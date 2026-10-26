@@ -11,7 +11,6 @@ import { gooseEditorStyleSpecs } from "@/components/editor/inline-code/InlineCod
 import { pageMentionSpec } from "@/components/editor/inline/pageMentionSpec";
 import { gooseToggleListItemBlockSpec } from "../blocks/toggle/toggleListItemBlockSpec";
 
-import { columnLayoutBlockSpec, columnSectionBlockSpec } from "../blocks/columns/columnBlockSpecs";
 
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
@@ -19,8 +18,6 @@ export const editorSchema = BlockNoteSchema.create({
     heading: gooseHeadingBlockSpec,
     table: gooseTableBlockSpec,
     toggleListItem: gooseToggleListItemBlockSpec,
-    columnLayout: columnLayoutBlockSpec,
-    columnSection: columnSectionBlockSpec,
     callout: calloutBlock,
     image: customImageBlock,
     video: customVideoBlock,
