@@ -53,7 +53,7 @@ export function PaneSplitMenu({
       <ContextMenuTrigger asChild>
         <div
           className="flex h-full min-h-0 min-w-0 flex-col"
-          onContextMenuCapture={(event) => {
+          onContextMenu={(event) => {
             if (!paneKeepsOwnContextMenu(event.target)) return;
             event.preventDefault();
           }}
