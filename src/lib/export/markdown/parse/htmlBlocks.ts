@@ -11,7 +11,11 @@ function decodeHtmlAttribute(value: string): string {
 }
 
 
-export function parseHtmlBlock(lines: string[], startIndex: number, parseMarkdown: (markdown: string) => any[]) {
+export function parseHtmlBlock(
+  lines: string[],
+  startIndex: number,
+  parseMarkdown: (markdown: string) => any[],
+): { block?: any; blocks?: any[]; nextIndex: number } | null {
   const structured = parseColumnsBlock(lines, startIndex, parseMarkdown) ?? parseAudioBlock(lines, startIndex);
   if (structured) return structured;
   const content: any[] = [];

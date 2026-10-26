@@ -104,7 +104,11 @@ function parseMarkdownBody(markdown: string): any {
 
     const parseHtmlBlockResult = parseTableHtmlBlock(lines, i) ?? parseHtmlBlock(lines, i, parseMarkdownBody);
     if (parseHtmlBlockResult) {
-      content.push(parseHtmlBlockResult.block);
+      if ("blocks" in parseHtmlBlockResult && Array.isArray(parseHtmlBlockResult.blocks)) {
+        for (const block of parseHtmlBlockResult.blocks) content.push(block);
+      } else if ("block" in parseHtmlBlockResult && parseHtmlBlockResult.block) {
+        content.push(parseHtmlBlockResult.block);
+      }
       i = parseHtmlBlockResult.nextIndex;
       continue;
     }
