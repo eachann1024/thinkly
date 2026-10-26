@@ -14,7 +14,7 @@ function allowCoveredRows(extension: Extension): Extension {
   return {
     ...extension,
     tiptapExtensions: extension.tiptapExtensions?.map((node) => node.name === "tableRow"
-      ? (node as Node).extend({ content: "(tableCell | tableHeader)*" })
+      ? (node as { extend: (config: { content: string }) => typeof node }).extend({ content: "(tableCell | tableHeader)*" })
       : node.name === "BlockNoteTableExtension"
         ? node.extend({
             addProseMirrorPlugins() {

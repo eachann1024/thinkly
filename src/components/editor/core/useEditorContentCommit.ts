@@ -5,7 +5,7 @@ import {
   normalizePageContent,
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
-import { commitPendingEditorChange } from "./editorPendingCommit";
+import { commitPendingEditorChange, pendingContentAlreadyPersisted } from "./editorPendingCommit";
 import { getCachedContentSignature } from "./editorContentPolicy";
 import type { EditorRuntime } from "./useEditorSession";
 
@@ -34,7 +34,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
         if (targetPageId !== pageIdForUpdateRef.current) return;
         const { content, signature } = readCurrentEditorContent();
         pendingEditorChangeRef.current = false;
-        if (signature === syncedContentSignatureRef.current) return;
+        if (pendingContentAlreadyPersisted(signature, syncedContentSignatureRef.current)) return;
         syncedContentSignatureRef.current = signature;
         onContentChangeRef.current(content);
       },

@@ -11,9 +11,8 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useSettings } from "@/stores/settings";
-import { useNotebooks } from "@/stores/useNotebooks";
-import { usePages } from "@/stores/usePages";
 import { useWebdavOperationState } from "./useWebdavOperationState";
 import { type SettingsDataPanelProps, formatRemoteTime } from "./shared";
 
@@ -38,10 +37,6 @@ export function useDataPanelState({
 
   const totalCount = notebookList.length;
 
-  const { notebooks } = useNotebooks();
-
-  const { pages } = usePages();
-
   const {
     webdavUrl,
     webdavUsername,
@@ -54,7 +49,19 @@ export function useDataPanelState({
     webdavLastDownloadAt,
     webdavLastDownloadFilename,
     updateWebdavSettings,
-  } = useSettings();
+  } = useSettings(useShallow((state) => ({
+    webdavUrl: state.webdavUrl,
+    webdavUsername: state.webdavUsername,
+    webdavPassword: state.webdavPassword,
+    webdavRemoteDir: state.webdavRemoteDir,
+    webdavRetentionDays: state.webdavRetentionDays,
+    webdavAutoBackupEnabled: state.webdavAutoBackupEnabled,
+    webdavLastUploadAt: state.webdavLastUploadAt,
+    webdavLastUploadFilename: state.webdavLastUploadFilename,
+    webdavLastDownloadAt: state.webdavLastDownloadAt,
+    webdavLastDownloadFilename: state.webdavLastDownloadFilename,
+    updateWebdavSettings: state.updateWebdavSettings,
+  })));
 
   const [tempUrl, setTempUrl] = useState(webdavUrl);
 
@@ -140,8 +147,6 @@ export function useDataPanelState({
     onResetAndImport,
     selectedCount,
     totalCount,
-    notebooks,
-    pages,
     webdavUrl,
     webdavUsername,
     webdavPassword,
