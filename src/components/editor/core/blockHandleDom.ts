@@ -18,7 +18,7 @@ export function blockHandleFirstLineCenter(content: HTMLElement): number | undef
     const bounds = caption.getBoundingClientRect();
     return bounds.height > 0 ? bounds.top + bounds.height / 2 : undefined;
   }
-  if (["image", "video", "audio", "file", "table", "column", "columnList", "columnSection"].includes(content.dataset.contentType ?? "")) return undefined;
+  if (["image", "video", "audio", "file", "table"].includes(content.dataset.contentType ?? "")) return undefined;
   const inline = content.querySelector<HTMLElement>(".bn-inline-content");
   if (!inline || inline.closest(".bn-block-content") !== content) return undefined;
   const bounds = inline.getBoundingClientRect();

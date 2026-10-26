@@ -2,7 +2,7 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import {
   Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
   ChevronRight, Quote, Info, Minus, Table, Code, Sigma, GitGraph, Image,
-  Video, Music, FileText, Columns2,
+  Video, Music, FileText,
 } from "@/components/ui/icons";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 import { canConvertBlock } from "./blockConversionPolicy";
@@ -12,7 +12,7 @@ export const BLOCK_HANDLE_ICONS = {
   numberedListItem: ListOrdered, checkListItem: CheckSquare,
   toggleListItem: ChevronRight, quote: Quote, callout: Info, divider: Minus,
   table: Table, codeBlock: Code, image: Image, video: Video, audio: Music,
-  file: FileText, columnLayout: Columns2, columnSection: Columns2,
+  file: FileText,
 };
 
 export function BlockHandleIcon({ block }: { block: any }) {
@@ -31,7 +31,6 @@ export function isEmptyHandleParagraph(block: any): boolean {
 
 export function blockHandleCapabilities(editor: BlockNoteEditor<any, any, any>, block: any) {
   const title = block?.id === getProtectedTitleBlockId(editor);
-  const section = block?.type === "columnSection";
   const editable = Boolean(editor.isEditable && block);
   const props = block ? editor.schema.blockSchema[block.type]?.propSchema : undefined;
   const inline = editable && !title && editor.schema.blockSchema[block.type]?.content === "inline";
@@ -39,10 +38,10 @@ export function blockHandleCapabilities(editor: BlockNoteEditor<any, any, any>, 
     color: Boolean(inline && props?.textColor && props?.backgroundColor),
     align: Boolean(inline && props?.textAlignment),
     copy: Boolean(block),
-    mutate: editable && !title && !section,
-    insertBefore: editable && !title && !section,
-    insertAfter: editable && !section,
+    mutate: editable && !title,
+    insertBefore: editable && !title,
+    insertAfter: editable,
     convert: canConvertBlock(editor, block),
-    draggable: editable && !title && !section,
+    draggable: editable && !title,
   };
 }
