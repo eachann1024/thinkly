@@ -1,13 +1,14 @@
-import { sanitizeCssColor } from "../blockPropsProperties";
+import { persistedStyleColor } from "../blockPropsProperties";
 import { sanitizePageMentionProps, serializePageMentionMarkdown } from "@/components/editor/inline/pageMention";
 
 function serializeInlineText(
   text: string,
   styles: Record<string, unknown>,
 ): string {
+  if (!text) return "";
   const hasUnderline = styles.underline === true;
-  const textColor = sanitizeCssColor(styles.textColor);
-  const backgroundColor = sanitizeCssColor(styles.backgroundColor);
+  const textColor = persistedStyleColor(styles.textColor, "textColor");
+  const backgroundColor = persistedStyleColor(styles.backgroundColor, "backgroundColor");
   const hasColor = textColor && textColor !== "default";
   const hasBg = backgroundColor && backgroundColor !== "default";
   const isYellowHighlight = hasBg && backgroundColor === "yellow" && !hasColor;
@@ -27,10 +28,32 @@ function serializeInlineText(
   return hasUnderline ? `<u>${text}</u>` : text;
 }
 
+function mergeTextRuns(content: any[]): any[] {
+  const merged: any[] = [];
+  for (const item of content) {
+    if (item?.type !== "text" && typeof item !== "string") { merged.push(item); continue; }
+    const text = typeof item === "string" ? item : item.text || "";
+    if (!text) continue;
+    const source = item.styles || {};
+    const styles: Record<string, unknown> = {};
+    for (const name of ["bold", "italic", "strike", "code", "underline"]) {
+      if (source[name]) styles[name] = true;
+    }
+    for (const name of ["textColor", "backgroundColor"] as const) {
+      const color = persistedStyleColor(source[name], name);
+      if (color) styles[name] = color;
+    }
+    const previous = merged[merged.length - 1];
+    if (previous?.type === "text" && JSON.stringify(previous.styles) === JSON.stringify(styles)) previous.text += text;
+    else merged.push({ type: "text", text, styles });
+  }
+  return merged;
+}
+
 function extractLinkText(linkContent: any, preserveHardBreaks = false): string {
   if (typeof linkContent === "string") return preserveHardBreaks ? linkContent.replace(/\n/g, "<br>") : linkContent;
   if (!Array.isArray(linkContent)) return "";
-  return linkContent
+  return mergeTextRuns(linkContent)
     .map((child: any) => {
       if (typeof child === "string") return preserveHardBreaks ? child.replace(/\n/g, "<br>") : child;
       if (child?.type === "hardBreak") return preserveHardBreaks ? "<br>" : "\n";
@@ -56,7 +79,7 @@ export function blockNoteInlineToText(content: any, preserveHardBreaks = false):
     return blockNoteInlineToText(content.content, preserveHardBreaks);
   }
   if (!Array.isArray(content)) return "";
-  return content
+  return mergeTextRuns(content)
     .map((item: any) => {
       if (typeof item === "string") return preserveHardBreaks ? item.replace(/\n/g, "<br>") : item;
       if (item == null) return "";

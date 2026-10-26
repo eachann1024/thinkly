@@ -47,7 +47,7 @@ export function serializeTable(block: any): string {
       column += colspan;
       const attrs = [`colspan="${colspan}"`, `rowspan="${rowspan}"`];
       for (const [key, attribute] of [["textColor", dataAttr("text-color")], ["backgroundColor", dataAttr("background-color")], ["textAlignment", dataAttr("text-alignment")]]) {
-        if (props[key] && props[key] !== "default") attrs.push(`${attribute}="${tableHtmlEscape(props[key])}"`);
+        if (props[key] && props[key] !== "default" && !(key === "textAlignment" && props[key] === "left")) attrs.push(`${attribute}="${tableHtmlEscape(props[key])}"`);
       }
       const style = tableColorStyle(props);
       if (style) attrs.push(`style="${tableHtmlEscape(style)}"`);
