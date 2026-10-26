@@ -8,15 +8,7 @@ en:
 ja:
   writeFailed: "ファイルに書き込めません：{{path}}"
 `);
-import { createTranslator, i18nYaml } from "@/i18n/core";
-const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/save.ts#block2:2">`
-zh-Hans:
-  invalidFrontmatterSave: "YAML 前置区格式异常，已阻止保存"
-en:
-  invalidFrontmatterSave: "The YAML frontmatter is invalid. Saving was blocked."
-ja:
-  invalidFrontmatterSave: "YAML フロントマターの形式が正しくないため、保存を中止しました"
-`);
+import { i18nYaml } from "@/i18n/core";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import type { JSONContent } from "@/types";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
@@ -27,17 +19,13 @@ import {
 import { findDuplicateLocalFileOwner } from "../pathGuards";
 import { collectLocalImageWrites } from "./images";
 import { encodeLocalBlockPropsWrappers } from "@/lib/export/markdown/blockPropsMarker";
-import { stripNoteMetaBlob } from "@/lib/export/markdown/noteMeta";
+import { pickPersistedBlockProps } from "@/lib/export/markdown/blockPropsProperties";
+import { serializeLocalSave } from "./serialization";
+import { stageMetadata } from "@/lib/note-metadata/storage";
+import { replaceNoteMarkdown } from "@/lib/note-metadata/writeMarkdown";
 import {
-  mergeSettingsIntoFrontmatterHeader,
-  mergeLocalPageSettingsIntoFrontmatter,
-} from "@/lib/local-frontmatter";
-import {
-  decodeUnsupportedMarkdownForDisk,
-} from "@/lib/markdown-raw-guard";
-import {
-  applyTrailingNewlineStyle,
   isLocalMdUnchanged,
+  getLocalMdSnapshot,
   markSelfWrite,
   updateSnapshotAfterWrite,
 } from "@/lib/local-md-snapshot";
@@ -110,52 +98,17 @@ export const saveLocalPageContentUnlocked = async (
   );
 
   const { blocksToMarkdown } = await import("@/lib/export");
-  const markdownContent = sourceIsEmpty ? "" : await blocksToMarkdown(
-    encodeLocalBlockPropsWrappers(processedContent as any, { preserveEmptyParagraphs: !sourceIsEmpty }),
+  const collapseEmpty = sourceIsEmpty && content.length <= 1 &&
+    content.every((block: { props?: Record<string, unknown> }) => Object.keys(pickPersistedBlockProps(block.props)).length === 0);
+  const markdownContent = collapseEmpty ? "" : await blocksToMarkdown(
+    encodeLocalBlockPropsWrappers(processedContent as any, { preserveEmptyParagraphs: !collapseEmpty }),
   );
   assertEmptySerializationIsExpected(sourceIsEmpty, processedContent, markdownContent, filePath);
 
-  const frontmatterHeaderMerge = mergeSettingsIntoFrontmatterHeader(
-    markdownContent,
-    {
-      fontFamily: page.fontFamily ?? "default",
-      pageLayout: page.pageLayout,
-      isLocked: Boolean(page.isLocked),
-      isPinned: Boolean(page.isPinned),
-      isFavorite: Boolean(page.isFavorite),
-    },
-  );
-  let frontmatterBlob: string | undefined;
-  let finalContent: string;
-  if (frontmatterHeaderMerge) {
-    finalContent = frontmatterHeaderMerge.markdown;
-    frontmatterBlob = frontmatterHeaderMerge.frontmatter;
-  } else {
-    const frontmatterMerge = mergeLocalPageSettingsIntoFrontmatter(
-      page.localFrontmatter,
-      {
-        fontFamily: page.fontFamily ?? "default",
-        pageLayout: page.pageLayout,
-        isLocked: Boolean(page.isLocked),
-        isPinned: Boolean(page.isPinned),
-        isFavorite: Boolean(page.isFavorite),
-      },
-    );
-    if (frontmatterMerge.parseFailed) {
-      throw new Error(storeText("invalidFrontmatterSave"));
-    }
-    frontmatterBlob = stripNoteMetaBlob(frontmatterMerge.blob);
-    finalContent = frontmatterBlob
-      ? `${frontmatterBlob}\n\n${markdownContent}`
-      : markdownContent;
-  }
+  const serialized = await serializeLocalSave(page, filePath, markdownContent);
+  const { diskContent, frontmatter: frontmatterBlob, metadata, root } = serialized;
 
-  const diskContent = applyTrailingNewlineStyle(
-    filePath,
-    decodeUnsupportedMarkdownForDisk(finalContent),
-  );
-
-  if (isLocalMdUnchanged(filePath, diskContent)) {
+  if (!metadata && !options?.createOnly && !page.editorDraft && isLocalMdUnchanged(filePath, diskContent)) {
     const alreadyOnDisk = gooseFs.existsAsync
       ? await gooseFs.existsAsync(filePath)
       : gooseFs.exists(filePath);
@@ -202,12 +155,35 @@ export const saveLocalPageContentUnlocked = async (
   );
   validateEmptyWrite();
   assertLocalPageReadable(get().pages[pageId], filePath);
+  let previousMarkdown: string | null = null;
+  let metadataRevision = page.localMetadataRevision;
+  if (metadata && root) {
+    if (!options?.createOnly && !page.editorDraft) {
+      if (!gooseFs.readFileAsync) throw new Error("当前宿主不支持读取元数据保存基线");
+      previousMarkdown = await gooseFs.readFileAsync(filePath);
+      if (previousMarkdown === null) throw new Error("无法读取笔记，已停止保存");
+      if (!options?.force && previousMarkdown !== getLocalMdSnapshot(filePath)) {
+        throw new Error("笔记已被外部修改，已停止保存");
+      }
+    }
+    const receipt = await stageMetadata(gooseFs, root, previousMarkdown, metadata,
+      page.localMetadataRevision ?? null);
+    metadataRevision = receipt.revision;
+    markSelfWrite(receipt.path);
+    set((state) => {
+      const current = state.pages[pageId];
+      if (!current || current.localFilePath !== filePath) return state;
+      return { pages: { ...state.pages, [pageId]: { ...current, localMetadataRevision: receipt.revision } } };
+    });
+  }
   markSelfWrite(filePath);
   let result: boolean;
   try {
-    if (options?.createOnly) {
+    if (options?.createOnly || page.editorDraft) {
       if (!window.gooseFs?.createFileAsync) throw new Error("当前宿主不支持安全新建文件");
       result = await window.gooseFs.createFileAsync(filePath, diskContent);
+    } else if (metadata && previousMarkdown !== null) {
+      result = await replaceNoteMarkdown(gooseFs, filePath, diskContent, previousMarkdown);
     } else if (window.gooseFs?.writeFileAsync) {
       result = await window.gooseFs.writeFileAsync(filePath, diskContent);
     } else {
@@ -232,9 +208,7 @@ export const saveLocalPageContentUnlocked = async (
 
   if (result) {
     markSelfWrite(filePath);
-    const nextFrontmatter = frontmatterHeaderMerge
-      ? frontmatterBlob ?? page.localFrontmatter
-      : frontmatterBlob;
+    const nextFrontmatter = frontmatterBlob;
     set((s) => {
       const current = s.pages[pageId];
       if (!current) {
@@ -257,6 +231,7 @@ export const saveLocalPageContentUnlocked = async (
                   ...current,
                   editorDraft: undefined,
                   localFrontmatter: nextFrontmatter || undefined,
+                  ...(metadata ? { localMetadataId: page.id, localMetadataRevision: metadataRevision } : {}),
                 },
               },
             }
