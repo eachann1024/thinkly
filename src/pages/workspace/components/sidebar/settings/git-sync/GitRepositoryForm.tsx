@@ -93,7 +93,8 @@ function AutomaticSync({
         <div className="flex shrink-0 items-center gap-2">
           <Input
             id="git-sync-interval"
-            className="h-10 w-[88px] text-sm"
+            variant="inline"
+            className="w-[88px] text-right text-sm leading-5 goose-tabular"
             type="number"
             min={1}
             max={1440}
