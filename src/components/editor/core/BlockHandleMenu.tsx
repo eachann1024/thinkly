@@ -9,7 +9,6 @@ import { blockHandleCapabilities, BlockHandleIcon } from "./blockHandleModel";
 import { blockHandleText as t } from "./blockHandleMessages";
 import { BLOCK_CONVERSIONS } from "./blocknoteCommandSlashItems";
 import { convertHandleBlock, deleteHandleBlock, insertFromHandle, selectHandleBlock } from "./blockHandleActions";
-import { toggleHeadingCollapsed } from "./headingSectionFold";
 import { BlockHandleStyleMenus } from "./BlockHandleStyleMenus";
 import { useBlockHandleMenuLayout } from "./useBlockHandleMenuLayout";
 import { setBlockHandleMenuOpen } from "../state/blockHandleMenu";
@@ -20,12 +19,11 @@ type Props = {
   block: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  headingFold?: { expanded: boolean; onToggle: () => void };
   anchor: DOMRect;
   children: ReactElement<{ onClick?: (event: MouseEvent) => void; "aria-expanded"?: boolean; "aria-haspopup"?: "menu" }>;
 };
 
-export function BlockHandleMenu({ editor, block, open, onOpenChange, headingFold, anchor, children }: Props) {
+export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, children }: Props) {
   const selectedText = useRef("");
   const menuOwner = useRef({}).current;
   useLayoutEffect(() => {
@@ -79,10 +77,6 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, headingFold
           </DropdownMenuContent>
         </EditorSubmenuTrigger>}
         <BlockHandleStyleMenus editor={editor} block={block} run={run} layout={layout} />
-        {headingFold && <DropdownMenuItem onSelect={() => run(() => {
-          toggleHeadingCollapsed(editor, block.id);
-          headingFold.onToggle();
-        })}><ChevronRight className={headingFold.expanded ? "rotate-90" : undefined} />{headingFold.expanded ? t("collapse") : t("expand")}</DropdownMenuItem>}
         {capabilities.copy && <DropdownMenuItem onSelect={() => run(clipboard.handleCopySelection)}><Copy />{t("copy")}</DropdownMenuItem>}
         {capabilities.mutate && <DropdownMenuItem onSelect={() => run(clipboard.handleCutSelection)}><Scissors />{t("cut")}</DropdownMenuItem>}
         {capabilities.mutate && <DropdownMenuItem onSelect={() => run(clipboard.handleContextPaste)}><Clipboard />{t("paste")}</DropdownMenuItem>}
