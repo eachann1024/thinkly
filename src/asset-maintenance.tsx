@@ -31,7 +31,7 @@ zh-Hans:
   summary_other: "{{count}} 个 · {{size}}"
   selected_other: "已选择 {{count}} 个。删除前再次检查引用；扫描结果 10 分钟内有效。"
   initFailed: "资源清理窗口初始化失败：{{reason}}"
-  windowTitle: "资源清理 · 思绪 · Thinkly"
+  windowTitle: "资源清理 · Thinkly"
 en:
   previewUnavailable: "This format can’t be previewed. The file is still available."
   title: "Clean up unreferenced images and videos"

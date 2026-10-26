@@ -1,4 +1,4 @@
-# 思绪 · Thinkly 开发说明
+# Thinkly 开发说明
 
 本地优先的 Electron Markdown 笔记应用，主窗口与独立速记小窗共享 React、TypeScript、Vite 和 BlockNote 编辑器。
 
@@ -26,7 +26,7 @@ bun run linux        # Linux 包
 
 各平台命令自动编译 renderer、Electron main/preload，准备 `dist-electron/app-pack` 后打包。CI 和 Python 构建脚本通过 `node scripts/run-task.mjs build` 调用公共编译流程；需要调试信息时设置环境变量 `GOOSE_DEBUG=1`。
 
-GitHub 仓库是 `eachann1024/thinkly`。中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。应用 ID 是 `com.thinkly.desktop`，磁盘上的应用是 `Thinkly.app`，数据目录是 Thinkly，安装包以 `Thinkly` / `thinkly` 命名，Homebrew cask 名是 `thinkly`，新的 WebDAV 默认目录是 `Thinkly`，SignPath 项目 slug 是 `thinkly`。已发布的 1.7.317 仍是 `Goose Note.app`，下一次发布需要手动安装一次；首次启动会把「Goose Note」数据目录改名为 Thinkly。旧笔记里的 `goose-note:` 标记仍能打开，已经保存的 WebDAV 目录不会改写。更新清单同时接受 `thinkly`、`goose-note` 和 `goose-notes` 的下载地址。不要再占用这些旧仓库名。
+GitHub 仓库是 `eachann1024/thinkly`。所有语言统一显示 Thinkly。应用 ID 是 `com.thinkly.desktop`，磁盘上的应用是 `Thinkly.app`，数据目录是 Thinkly，安装包以 `Thinkly` / `thinkly` 命名，Homebrew cask 名是 `thinkly`，新的 WebDAV 默认目录是 `Thinkly`，SignPath 项目 slug 是 `thinkly`。已发布的 1.7.317 仍是 `Goose Note.app`，从该版本升级需要手动安装一次；首次启动会把「Goose Note」数据目录改名为 Thinkly。旧笔记里的 `goose-note:` 标记仍能打开，已经保存的 WebDAV 目录不会改写。更新清单同时接受 `thinkly`、`goose-note` 和 `goose-notes` 的下载地址。不要再占用这些旧仓库名。
 
 跨平台单入口脚本（参考 1Panel build.py 思路，三平台通用）：
 

@@ -25,6 +25,8 @@ const args = [
   "--mac",
   "--arm64",
   "--config.mac.target=dir",
+  "--publish",
+  "never",
 ];
 // Electron 44 安装时不下载二进制，CI 上 node_modules/electron/dist 不存在。
 // 本机已有该目录时继续用它；否则不要传入 electronDist，让 electron-builder 下载 zip。
