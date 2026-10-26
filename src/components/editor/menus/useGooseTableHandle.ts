@@ -63,15 +63,13 @@ export function useGooseTableHandle(
 
   const index = state
     ? orientation === "column"
-      ? state.colIndex === undefined
-        ? undefined
-        : tableHandleColumnIndex(
-            editor.prosemirrorState,
-            state.block.id,
-            state.rowIndex ?? 0,
-            state.colIndex,
-          )
-      : state.rowIndex
+      ? tableHandleColumnIndex(
+          editor.prosemirrorState,
+          state.block.id,
+          state.rowIndex ?? 0,
+          state.colIndex ?? 0,
+        )
+      : state.rowIndex ?? 0
     : undefined;
   const isRow = orientation === "row";
   const ownsInteraction = useRef(false);
