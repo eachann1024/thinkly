@@ -33,7 +33,7 @@ import {
   normalizeSlotNames,
 } from "./quicknote/normalization";
 import type { JSONContent } from "@/types";
-import { toast } from "@/components/ui/sonner";
+import { notifyRecoveryDrafts } from "@/lib/recoveryDraftNotice";
 
 export const useQuickNote = create<QuickNoteState>()(
   persist(createQuickNoteState, {
@@ -107,18 +107,12 @@ export const useQuickNote = create<QuickNoteState>()(
       );
       if (recovery.recoveredSlots.length > 0) {
         queueMicrotask(() =>
-          toast.warning(storeText("quicknoteRecovered"), {
-            id: "goose-quicknote-recovered",
-            description: storeText("quicknoteRecoveredDetail"),
-          }),
+          notifyRecoveryDrafts(storeText("quicknoteRecovered"), storeText("quicknoteRecoveredDetail"), "goose-quicknote-recovered"),
         );
       }
       if (recovery.conflictSlots.length > 0) {
         queueMicrotask(() =>
-          toast.warning(storeText("quicknoteDraftSeparate"), {
-            id: "goose-quicknote-recovery-conflict",
-            description: storeText("quicknoteNewer"),
-          }),
+          notifyRecoveryDrafts(storeText("quicknoteDraftSeparate"), storeText("quicknoteNewer"), "goose-quicknote-recovery-conflict"),
         );
       }
       return {
