@@ -1,3 +1,4 @@
+import { retireNoteMetadata } from "@/lib/note-metadata/deletion";
 import { runWithPresence } from "@/lib/ui/presence";
 import { useNotebooks } from "../../../useNotebooks";
 import type { StoreSet, StoreGet } from "../hydrate";
@@ -56,6 +57,7 @@ export const permanentlyDeletePageAction = async (
       ? await window.gooseFs.deleteDir(targetPath)
       : await window.gooseFs.deleteFile(targetPath);
     if (!deleted) return;
+    await retireNoteMetadata(window.gooseFs, notebook.localPath, [...removedIds].map(pid => snapshotPages[pid]).filter(Boolean));
 
     removedIds.forEach((pid) => {
       void resolveHistoryBackend(pid).dropAll(pid);

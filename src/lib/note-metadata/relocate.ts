@@ -1,5 +1,7 @@
+import { reanchorNoteMeta } from "./reanchor";
 import { markdownDigest, NoteMetadataError, type NoteMetadataEnvelope, type NoteMetadataFs } from "./contract";
-import { readIdentity } from "./identity";
+import { canonicalRelativePath } from "../canonicalLocalPath";
+import { findNoteMetadata } from "./lookup";
 import { readMetadataEnvelope, metadataPath, stageMetadata, metadataRevision, metadataEnvelopeText } from "./storage";
 import { hydrateNoteMetadata } from "./restore";
 
@@ -13,15 +15,13 @@ export async function prepareMetadataRelocation(
 ): Promise<void> {
   const plans: { entry: MetadataRelocation; source: NoteMetadataEnvelope; sourceRevision: string; moved: boolean; changes: boolean; digest: string }[] = [];
   for (const entry of entries) {
-    const identity = readIdentity(entry.before);
-    if (!identity) continue;
-    if (identity !== entry.id) throw new NoteMetadataError("identity", "Moved note identity differs");
-    const source = await readMetadataEnvelope(fs, sourceRoot, identity);
-    if (!source) throw new NoteMetadataError("missing", "Moved note metadata is missing");
+    const source = await findNoteMetadata(fs, sourceRoot, entry.before, entry.path);
+    if (!source) continue;
+    const identity = source.noteId;
     const sourceRevision = await metadataRevision(source);
     if (entry.revision !== undefined && entry.revision !== sourceRevision) throw new NoteMetadataError("conflict", "Moved note metadata changed");
-    await hydrateNoteMetadata(fs, sourceRoot, entry.before);
-    const matched = [source.current, source.previous].find(snapshot => snapshot?.markdown.replace(/\r\n/g, "\n") === entry.before.replace(/\r\n/g, "\n"))!;
+    await hydrateNoteMetadata(fs, sourceRoot, entry.before, entry.path);
+    const matched = [source.current, source.previous].find(snapshot => snapshot?.markdown.replace(/\r\n/g, "\n") === entry.before.replace(/\r\n/g, "\n")) ?? source.current;
     const digest = await markdownDigest(entry.after);
     const moved = sourceRoot !== targetRoot && entry.path !== entry.nextPath;
     const changes = source.current.digest !== digest || JSON.stringify(source.current.meta) !== JSON.stringify(matched.meta) ||
@@ -44,23 +44,25 @@ export async function prepareMetadataRelocation(
   await assertJournalBoundary(fs, sourceRoot, journalDir);
   await createOrVerify(fs, `${journalDir}/${await markdownDigest(manifest)}.json`, manifest);
   for (const { entry, source, sourceRevision, moved } of plans) {
-    const matched = [source.current, source.previous].find(snapshot => snapshot?.markdown.replace(/\r\n/g, "\n") === entry.before.replace(/\r\n/g, "\n"))!;
-    const next = { noteId: entry.id, cleanMarkdown: entry.after, payload: {
-      ...matched, markdown: entry.after, digest: await markdownDigest(entry.after),
+    const matched = [source.current, source.previous].find(snapshot => snapshot?.markdown.replace(/\r\n/g, "\n") === entry.before.replace(/\r\n/g, "\n")) ?? source.current;
+    const next = { noteId: source.noteId, relativePath: canonicalRelativePath(moved ? sourceRoot : targetRoot, moved ? entry.path : entry.nextPath)!, cleanMarkdown: entry.after, payload: {
+      ...matched, meta: reanchorNoteMeta(matched.markdown, entry.after, matched.meta), markdown: entry.after, digest: await markdownDigest(entry.after),
     } };
     const staged = await stageMetadata(fs, sourceRoot, entry.before, next, sourceRevision);
     onRevision(entry.id, staged.revision);
     if (moved) {
-      const envelope = await readMetadataEnvelope(fs, sourceRoot, entry.id);
+      const envelope = await readMetadataEnvelope(fs, sourceRoot, source.noteId);
       if (!envelope || await metadataRevision(envelope) !== staged.revision) throw new NoteMetadataError("conflict", "Source metadata changed during moving");
-      const file = await metadataPath(targetRoot, entry.id);
+      const file = await metadataPath(targetRoot, source.noteId);
       if (!fs.mkdir || !await fs.mkdir(file.slice(0, file.lastIndexOf("/")))) throw new NoteMetadataError("io-error", "Cannot create destination metadata directory");
-      const target = await readMetadataEnvelope(fs, targetRoot, entry.id);
-      if (!target) await createOrVerify(fs, file, metadataEnvelopeText(envelope));
-      const written = await readMetadataEnvelope(fs, targetRoot, entry.id);
-      if (!written || await metadataRevision(written) !== staged.revision) {
+      const target = await readMetadataEnvelope(fs, targetRoot, source.noteId);
+      const targetRaw = JSON.stringify({ ...envelope, relativePath: canonicalRelativePath(targetRoot, entry.nextPath)!, previousRelativePath: undefined, deleted: true });
+      if (!target) await createOrVerify(fs, file, targetRaw);
+      const written = await readMetadataEnvelope(fs, targetRoot, source.noteId);
+      if (!written || metadataEnvelopeText(written) !== targetRaw) {
         throw new NoteMetadataError("conflict", "Moved metadata failed verification");
       }
+      onRevision(entry.id, await metadataRevision(written));
     }
   }
 }
@@ -81,5 +83,27 @@ async function assertJournalBoundary(fs: NoteMetadataFs, root: string, dir: stri
   const actual = await fs.realpathAsync(dir);
   if (actual && actual !== dir && !actual.replace(/\\/g, "/").startsWith(`${base}/`)) {
     throw new NoteMetadataError("unsafe-path", "Move journal resolves outside the notebook");
+  }
+}
+
+export async function finalizeMetadataRelocation(
+  fs: NoteMetadataFs, sourceRoot: string, targetRoot: string, entries: MetadataRelocation[],
+  onRevision: (id: string, revision: string) => void,
+): Promise<void> {
+  if (sourceRoot === targetRoot) return;
+  if (!fs.compareAndSwapFileAsync) throw new NoteMetadataError("io-error", "Atomic metadata move API unavailable");
+  for (const entry of entries) {
+    const source = await findNoteMetadata(fs, sourceRoot, entry.before, entry.path);
+    if (!source) continue;
+    const target = await readMetadataEnvelope(fs, targetRoot, source.noteId);
+    if (!target) throw new NoteMetadataError("missing", "Moved metadata is missing");
+    for (const [root, envelope, deleted] of [[targetRoot, target, false], [sourceRoot, source, true]] as const) {
+      const raw = JSON.stringify({ ...envelope, deleted, revision: crypto.randomUUID() });
+      if (!await fs.compareAndSwapFileAsync(await metadataPath(root, envelope.noteId), metadataEnvelopeText(envelope), raw)) {
+        throw new NoteMetadataError("conflict", "Moved metadata changed during finalizing");
+      }
+    }
+    const committed = await readMetadataEnvelope(fs, targetRoot, source.noteId);
+    if (committed) onRevision(entry.id, await metadataRevision(committed));
   }
 }

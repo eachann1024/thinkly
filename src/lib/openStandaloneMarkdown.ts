@@ -4,6 +4,7 @@ import { localFileTitleFromPath, parseLocalMarkdownContent } from "./local-folde
 import { setLocalMdSnapshot, updateSnapshotStat } from "./local-md-snapshot";
 import { usePages } from "@/stores/usePages";
 import { recoverScannedLocalPages } from "@/stores/pages/actions/localFolder/load/recovery";
+import { resolveStandaloneMetadataRoot } from "./note-metadata/root";
 
 // Session-only documents have no mounted root and never scan their parent folder.
 import { STANDALONE_FILES_WORKSPACE } from "./standaloneFileCapabilities";
@@ -24,7 +25,10 @@ export async function openStandaloneMarkdownPage(filePath: string): Promise<stri
     return existing.id;
   }
   const read = await readMarkdownFile(fs, filePath);
-  const parsed = await parseLocalMarkdownContent(read.content, localFileTitleFromPath(filePath), read.error);
+  const metadataRoot = await resolveStandaloneMetadataRoot(fs, filePath);
+  const parsed = await parseLocalMarkdownContent(read.content, localFileTitleFromPath(filePath), read.error, {
+    root: metadataRoot, fs, filePath,
+  });
   const id = `external:${key}`;
   const now = Date.now();
   if (typeof read.content === "string") {
@@ -37,6 +41,8 @@ export async function openStandaloneMarkdownPage(filePath: string): Promise<stri
     fontSize: "default", fontFamily: parsed.fontFamily, pageLayout: parsed.pageLayout,
     localFilePath: filePath, localFrontmatter: parsed.frontmatter,
     localReadState: parsed.readState, localReadError: parsed.readError,
+    localMetadataId: parsed.metadataId, localMetadataRevision: parsed.metadataRevision,
+    localMetadataRoot: metadataRoot,
     createdAt: now, updatedAt: now,
   } } }));
   recoverScannedLocalPages(usePages.setState, usePages.getState, STANDALONE_FILES_WORKSPACE);

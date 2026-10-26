@@ -1,3 +1,4 @@
+import { retireNoteMetadata } from "@/lib/note-metadata/deletion";
 import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { useNotebooks } from "../../../useNotebooks";
 import { useSidebarView } from "../../../useSidebarView";
@@ -136,6 +137,7 @@ export const deletePageAction = async (
         }
       }
 
+      await retireNoteMetadata(window.gooseFs, notebook.localPath!, [...removedIds].map(pid => snapshotPages[pid]).filter(Boolean));
       runWithPresence(() => set((state) => {
         const newPages = { ...state.pages };
         removedIds.forEach((pid) => delete newPages[pid]);

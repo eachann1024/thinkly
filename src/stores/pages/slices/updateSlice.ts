@@ -1,3 +1,4 @@
+import { markSettingsOnlySave, settingsOnlySaveToken } from "@/lib/note-metadata/settingsSave";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/slices/updateSlice.ts#block1:1">`
 zh-Hans:
@@ -72,7 +73,7 @@ export function createUpdatePageSlice(
         toast.error(storeText("readSettingsUnchanged"));
         return;
       }
-      const hasSidecarRoot = Boolean(page && useNotebooks.getState().notebooks[page.workspaceId]?.localPath);
+      const hasSidecarRoot = Boolean(page && (page.localMetadataRoot || useNotebooks.getState().notebooks[page.workspaceId]?.localPath));
       const isDurableContentEdit =
         Boolean(page) && "content" in updates && !silent &&
         (!page?.editorDraft || localPageHasPersistableContent(updates.content) ||
@@ -101,6 +102,9 @@ export function createUpdatePageSlice(
         clearRecoveryJournalNotice(id);
       } else if (isDurableContentEdit || isSettingsEdit) {
         showRecoveryJournalFailure(id, baseSignature, baseUpdatedAt, get, isLocal ? recoverySettings(page) : undefined);
+      }
+      if (!silent && (isSettingsEdit || "content" in updates)) {
+        markSettingsOnlySave(id, isSettingsEdit && !("content" in updates) && (!get().dirtyLocalPageIds[id] || settingsOnlySaveToken(id) !== undefined));
       }
       const shouldMergeFrontmatterSettings =
         isSettingsEdit && !hasSidecarRoot;
