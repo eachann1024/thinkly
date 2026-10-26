@@ -73,25 +73,30 @@ export function SearchWindowApp() {
   useEffect(() => {
     const api = getGooseDesktop();
     let disposed = false;
-    const refresh = async () => {
+    let refreshRevision = 0;
+    const refresh = async (openSession = true) => {
+      const revision = ++refreshRevision;
       const pulled = pullWorkspaceAISettings();
       try {
         await refreshReadOnlyPersistence();
       } catch (error) {
         console.error("[search-window] 读取设置或笔记本失败", error);
       }
-      if (disposed) return;
+      if (disposed || revision !== refreshRevision) return;
       if (pulled.settled) applyWorkspaceAISnapshot(pulled.value);
       else void pulled.done.then((value) => {
-        if (!disposed) applyWorkspaceAISnapshot(value);
+        if (!disposed && revision === refreshRevision) applyWorkspaceAISnapshot(value);
       });
-      reopenSession();
+      if (openSession) reopenSession();
       setFolderSource({ ...readOnlySearchFolderSource });
     };
     void refresh().then(() => {
       if (!disposed) void api?.searchWindowReady?.();
     });
-    const unsubscribe = api?.onSearchWindowShown?.(() => void refresh());
+    const unsubscribe = api?.onSearchWindowShown?.(() => {
+      reopenSession();
+      void refresh(false);
+    });
     const unsubscribeAI = api?.onWorkspaceAISettings?.((settings) => {
       if (!disposed) applyWorkspaceAISnapshot(settings);
     });

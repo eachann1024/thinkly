@@ -190,8 +190,11 @@ export async function showSearchWindow(): Promise<void> {
   }
   placeOnCursorDisplay(win);
   armSearchShowGuard();
-  raiseFloatingWindow(win, parked);
-  if (!win.webContents.isDestroyed()) win.webContents.send(SEARCH_WINDOW_SHOWN_CHANNEL);
+  raiseFloatingWindow(win, parked, { activateApp: true });
+  if (!win.webContents.isDestroyed()) {
+    win.webContents.focus();
+    win.webContents.send(SEARCH_WINDOW_SHOWN_CHANNEL);
+  }
 }
 
 export function hideSearchWindow(opts: { suppressActivate?: boolean } = {}): void {
