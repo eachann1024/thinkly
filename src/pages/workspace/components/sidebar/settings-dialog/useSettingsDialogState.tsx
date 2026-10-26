@@ -129,9 +129,7 @@ export function useSettingsDialogState({
   const [clearHistory, setClearHistory] = useState(false);
   const [clearAiChats, setClearAiChats] = useState(false);
 
-  const notebookList = sortNotebooksByOrder(notebooks).filter(
-    (n) => n.source !== "local-folder",
-  );
+  const notebookList = sortNotebooksByOrder(notebooks);
 
   const { createNotebook } = useNotebooks(
     useShallow((s) => ({ createNotebook: s.createNotebook })),
