@@ -36,13 +36,6 @@
   0 8px 22px rgba(0, 0, 0, 0.32);
 }
 
-.notebook-ai-work-card.bui-approval.notebook-ai-work-card--running {
- padding: 0 8px;
- border-radius: 0;
- background: transparent;
- box-shadow: none;
-}
-
 .notebook-ai-work-card--running .notebook-ai-work-toggle {
  margin: 4px 0 0;
  padding-top: 6px;
