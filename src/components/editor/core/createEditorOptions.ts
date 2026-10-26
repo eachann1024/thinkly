@@ -1,6 +1,6 @@
 import { captureLocalAssetTarget, isLocalAssetTargetCurrent } from "@/lib/local-file-assets";
 import type { BlockNoteEditorOptions } from "@blocknote/core";
-import { normalizeExternalUrl } from "@/lib/openExternalUrl";
+import { isValidEditorLink } from "../utils/editorLinkTarget";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { shouldArmLinkOpenHint } from "@/components/editor/extensions/linkKeyboardExtension";
 import { pasteClipboardFilesFromClipboard, pasteNativeClipboardImage } from "@/components/editor/utils/pasteClipboardFilesFromClipboard";
@@ -10,7 +10,6 @@ import { uploadEditorFile } from "@/components/editor/utils/uploadEditorFile";
 import { fileStorage } from "@/lib/fileStorage";
 import { getFileUploadAvailability } from "@/lib/fileUploadAvailability";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
-import { isLinkworthyText } from "@/components/editor/utils/clipboard";
 import { editorSchema } from "./schema";
 import type { EditorSession } from "./useEditorSession";
 import type { useEditorExtensions } from "./useEditorExtensions";
@@ -128,17 +127,12 @@ export function createEditorOptions(
         if (link) {
           const href = link.getAttribute("href");
           if (href) {
-            const normalizedHref = normalizeExternalUrl(href);
-            if (normalizedHref) {
-              platformRef.current.shell.openUrl(
-                normalizedHref,
-              );
-            }
+            void session.openLink(href);
           }
         }
         return true;
       },
-      isValidLink: isLinkworthyText,
+      isValidLink: isValidEditorLink,
     },
 
     extensions,

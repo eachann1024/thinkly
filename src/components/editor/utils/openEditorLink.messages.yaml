@@ -1,0 +1,6 @@
+zh-Hans:
+  couldNotOpenLink: "无法打开链接，请检查文件路径或标题是否存在"
+en:
+  couldNotOpenLink: "Could not open the link. Check that the file path or heading exists."
+ja:
+  couldNotOpenLink: "リンクを開けません。ファイルパスまたは見出しを確認してください"
