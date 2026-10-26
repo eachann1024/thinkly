@@ -28,14 +28,12 @@ export function blockHandleFirstLineCenter(content: HTMLElement): number | undef
   let node = walker.nextNode();
   while (node) {
     const isBreak = node instanceof Element && node.tagName === "BR";
-    if (isBreak || (node.nodeType === Node.TEXT_NODE && node.textContent?.length)) {
+    if (isBreak) break;
+    if (node.nodeType === Node.TEXT_NODE && node.textContent?.length) {
       const range = doc.createRange();
-      if (isBreak) range.selectNode(node);
-      else {
-        range.setStart(node, 0);
-        // A full Unicode character also handles a leading surrogate pair.
-        range.setEnd(node, (node.textContent?.codePointAt(0) ?? 0) > 0xffff ? 2 : 1);
-      }
+      range.setStart(node, 0);
+      // A full Unicode character also handles a leading surrogate pair.
+      range.setEnd(node, (node.textContent?.codePointAt(0) ?? 0) > 0xffff ? 2 : 1);
       const first = range.getClientRects()[0];
       if (first?.height > 0) return first.top + first.height / 2;
       break;
