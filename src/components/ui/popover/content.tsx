@@ -54,6 +54,13 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
       ? "goose-menu-surface w-auto text-popover-foreground"
       : "goose-floating-surface goose-popover-surface w-64 text-popover-foreground";
     const state = usePopoverContext();
+    const insideElements = React.useCallback(() => {
+      const reference = state.refs.domReference.current;
+      const editor = !state.modal && reference instanceof Element
+        ? reference.closest(".bn-editor")
+        : null;
+      return editor ? [editor] : [];
+    }, [state.modal, state.refs]);
     const layer = useOverlayLayer("menu");
     const topLayer = useOverlayTopLayer(layer);
     const [scope, animate] = useAnimate<HTMLDivElement>();
@@ -164,6 +171,7 @@ export const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentPro
           context={state.context}
           disabled={!state.open || !manageFocus}
           modal={state.modal}
+          getInsideElements={insideElements}
           initialFocus={notebookMenu && !state.keyboard.current ? -1 : focus.initial}
           returnFocus={focus.restore}
         >
