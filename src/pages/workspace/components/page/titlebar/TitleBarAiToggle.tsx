@@ -20,6 +20,7 @@ import { cn, formatShortcut } from "@/lib/utils";
 import { useAiPanelVisibility } from "@/stores/useAiPanelVisibility";
 import { useAiStatus } from "@/stores/useAiStatus";
 import { useSettings } from "@/stores/useSettings";
+import { preloadNotebookAi } from "../../notebook-ai/notebookAiLoader";
 
 export function TitleBarAiToggle({
   pressed,
@@ -45,6 +46,8 @@ export function TitleBarAiToggle({
             type="button"
             className={cn("ai-icon-button shrink-0", className, "text-foreground")}
             data-ai-state={aiPhase}
+            onPointerEnter={preloadNotebookAi}
+            onFocus={preloadNotebookAi}
             onClick={() => {
               window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
             }}
