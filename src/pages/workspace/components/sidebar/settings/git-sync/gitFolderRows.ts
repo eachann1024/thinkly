@@ -5,6 +5,10 @@ import type { Notebook } from "@/stores/notebooks/types";
 export const folderPathKey = (path: string) =>
   comparisonLocalPath(path, localPathsAreCaseInsensitive()).replace(/\/+$/, "");
 
+export function isGitFolderRecoveryRequired(available: boolean, error: string | null | undefined) {
+  return !available || /不存在|无法匹配|身份|路径已变化|路径不在允许|no longer exists|does not exist|not found|missing|not.*match|identity|path.*changed|outside the allowed|not within (the )?allowed|許可された.*ディレクトリ内にありません/i.test(error ?? "");
+}
+
 export function reconcileFolderSelection(folders: GitRepositoryFolder[], notebooks: Notebook[]) {
   let changed = false;
   const seen = new Set<string>();
