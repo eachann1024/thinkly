@@ -1,3 +1,4 @@
+import { recordPageActivity } from "@/lib/reflection/activityJournal";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
@@ -48,6 +49,9 @@ async function createPage(
     if (!pageId) {
       return { ok: false, error: "创建页面失败，内容未保存" };
     }
+
+    const createdPage = usePages.getState().pages[pageId];
+    if (createdPage) recordPageActivity({ ...createdPage, content: [] }, createdPage);
 
     try {
       useTabs.getState().openTab(pageId);

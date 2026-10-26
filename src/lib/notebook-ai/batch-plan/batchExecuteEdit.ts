@@ -1,3 +1,4 @@
+import { batchActivityId } from "./batchActivity";
 import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchOperationResult } from "./types";
 import { usePages } from "@/stores/usePages";
@@ -65,6 +66,7 @@ export async function executeEditOperation(
       {
         expectedNotebookId: operationNotebookId(working, operation),
         animate: true,
+        activityId: batchActivityId(working, operation.operationId),
         expectedRevision: before.revision,
       },
     );

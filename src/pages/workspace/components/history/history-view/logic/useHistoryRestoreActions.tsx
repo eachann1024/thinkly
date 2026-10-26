@@ -120,7 +120,7 @@ export function useHistoryRestoreActions(
           updates.localFrontmatter = result.localFrontmatter;
         }
         Object.assign(updates, result.settings);
-        updatePage(pageId, updates);
+        updatePage(pageId, updates, { recordActivity: false });
         toast.success(t("versionRestoredThePreviousContentWasSavedAs"));
         setIsRestoring(false);
         exit();
