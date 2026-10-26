@@ -15,10 +15,7 @@ export function readLiveBlockHandleReference(editor: BlockNoteEditor<any, any, a
   if (!element || !content?.isConnected || !root.contains(content)) return null;
   const rect = content.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return null;
-  const column = element.closest('[data-node-type="column"]');
-  const section = element.parentElement?.closest<HTMLElement>('.bn-block:has(> .bn-block-content[data-content-type="columnSection"])');
-  const left = (section ?? column?.firstElementChild ?? root.firstElementChild)?.getBoundingClientRect().left ?? rect.left;
-  const position = new DOMRect(left, rect.top, rect.width, rect.height);
+  const position = new DOMRect(rect.left, rect.top, rect.width, rect.height);
   const table = content.querySelector<HTMLTableElement>(":scope > .tableWrapper table");
   if (!table) return { content, position, firstLineCenter: blockHandleFirstLineCenter(content), tableHold: null };
   const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;

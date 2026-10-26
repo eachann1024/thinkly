@@ -48,7 +48,6 @@ import { ArrowInputRuleExtension } from "@/components/editor/inputrules/arrowInp
 import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlugin";
 import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
-import { gooseColumnLayoutExtension } from "../extensions/columnLayoutExtension";
 import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorExtensions.ts#messages:1">`
@@ -122,7 +121,6 @@ export function useEditorExtensions(session: EditorSession) {
     gooseActiveLineExtension,
     gooseBlockHandleUiExtension,
     gooseContainedBlockSurface,
-    gooseColumnLayoutExtension(),
     createGooseBlockTypeKeyboardExtension(() => settingsRef.current.defaultCodeBlockWrap)(),
     gooseTabBehaviorExtension,
     gooseTableEnterExtension,

@@ -1,7 +1,6 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { GooseAIExtension } from "@/components/editor/ai/GooseAIExtension";
 import { createSlashBlockInsertion } from "./blocknoteSlashActions";
-import { getColumnSlashMenuItems } from "./blocknoteColumnSlashItems";
 import { getToggleSlashMenuItems } from "./blocknoteToggleSlashItems";
 import { getMediaSlashMenuItems } from "./blocknoteMediaSlashItems";
 import {
@@ -215,7 +214,6 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () =>
         insertOrUpdate({ type: "codeBlock", props: { language: "mermaid" } }),
     },
-    ...getColumnSlashMenuItems(editor),
     ...getMediaSlashMenuItems(editor, insertOrUpdate),
   );
 
