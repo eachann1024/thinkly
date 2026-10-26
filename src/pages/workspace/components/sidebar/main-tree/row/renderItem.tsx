@@ -136,22 +136,17 @@ export function renderItem({
     const rowEl = (e.currentTarget as HTMLElement)
       .closest("li")
       ?.querySelector(".main-tree-row");
-    const ghost = document.createElement("canvas");
-    ghost.width = ghost.height = 1;
-    const folderGhost = page.isFolder ? document.createElement("div") : null;
-    if (folderGhost) {
-      folderGhost.className = "main-tree-drag-ghost";
-      const iconSvg = rowEl?.querySelector(".main-tree-row-icon-slot svg");
-      if (iconSvg) folderGhost.appendChild(iconSvg.cloneNode(true));
-      const label = document.createElement("span");
-      label.textContent = title || uiText("untitled_44a7");
-      folderGhost.appendChild(label);
-    }
-    const dragImage = folderGhost ?? ghost;
+    const dragImage = document.createElement("div");
+    dragImage.className = "main-tree-drag-ghost";
+    const icon = rowEl?.querySelector(".main-tree-row-icon-slot svg");
+    if (icon) dragImage.appendChild(icon.cloneNode(true));
+    const label = document.createElement("span");
+    label.textContent = title || uiText("untitled_44a7");
+    dragImage.appendChild(label);
     dragImage.style.position = "fixed";
     dragImage.style.top = "-1000px";
     document.body.appendChild(dragImage);
-    e.dataTransfer.setDragImage(dragImage, folderGhost ? 18 : 0, folderGhost ? 17 : 0);
+    e.dataTransfer.setDragImage(dragImage, 18, 17);
     window.setTimeout(() => dragImage.remove(), 0);
 
     if (rowEl instanceof HTMLElement) {
