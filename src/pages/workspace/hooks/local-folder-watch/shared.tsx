@@ -21,6 +21,7 @@ const uiText = createTranslator(localMessages);
 import { readMarkdownFile } from "@/lib/local-folder-scanner/entries";
 import {
   readSharedMarkdown,
+  validateMarkdownRead,
   withMarkdownReadHandoff,
 } from "@/lib/local-folder-scanner/read-cache";
 import { toast } from "@/components/ui/sonner";
@@ -30,7 +31,6 @@ import {
   isStatMatchingSnapshot,
   updateSnapshotAfterWrite,
   updateSnapshotStat,
-  deleteLocalMdSnapshot,
   type LocalMdFileStat,
 } from "@/lib/local-md-snapshot";
 import {
@@ -38,6 +38,12 @@ import {
   discardPendingLocalSave,
 } from "@/stores/pages/folderSync";
 import { wasRecentlyInteracting } from "@/lib/editor-interaction-signal";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { noteMetadataNeedsRefresh } from "@/lib/note-metadata/watch";
+import { parseLocalMarkdownContent } from "@/lib/local-folder-scanner/markdown";
+import { pageWithParsedMarkdown } from "@/lib/local-folder-scanner/applyParsed";
+import { hydrateNoteMetadata } from "@/lib/note-metadata/restore";
+import { noteMetadataErrorMessage } from "@/lib/note-metadata/messages";
 
 export interface Notebook {
   id: string;
@@ -126,42 +132,59 @@ function conflictHandlers(filePath: string, pageId: string) {
     onKeepMine: () => {
       void (async () => {
         try {
+          const pg = usePages.getState().pages[pageId];
           const fs = window.gooseFs;
-          const diskContent = fs
-            ? (await readMarkdownFile(fs, filePath)).content
-            : null;
-          if (diskContent !== null) {
-            updateSnapshotAfterWrite(filePath, diskContent);
-            try {
-              const stat = await statDisk(filePath);
-              if (stat) updateSnapshotStat(filePath, stat);
-            } catch {
-            }
-          } else {
-            deleteLocalMdSnapshot(filePath);
-          }
-        } catch {
-          deleteLocalMdSnapshot(filePath);
+          if (!pg || !fs || pg.localFilePath !== filePath) return;
+          const root = useNotebooks.getState().notebooks[pg.workspaceId]?.localPath;
+          const read = await readMarkdownFile(fs, filePath);
+          if (read.content === null) throw Error(read.error || "无法读取磁盘笔记，已保留当前编辑");
+          const restored = root ? await hydrateNoteMetadata(fs, root, read.content) : undefined;
+          if (restored && restored.noteId !== pg.localMetadataId) throw Error("磁盘笔记 ID 已改变，已保留当前编辑");
+          if (usePages.getState().pages[pageId] !== pg) return;
+          if (restored?.noteId) usePages.setState(state => ({ pages: { ...state.pages,
+            [pageId]: { ...pg, localMetadataRevision: restored.revision },
+          } }));
+          updateSnapshotAfterWrite(filePath, read.content);
+          if (read.stat) updateSnapshotStat(filePath, read.stat);
+          const saved = await usePages.getState().saveLocalPageContent(pageId, pg.content as any, { force: true });
+          if (saved) confirmRecoveredLocalSave(pageId);
+        } catch (error) {
+          toast.error(noteMetadataErrorMessage(error));
+          console.error("[local-folder] conflict force-save failed", error);
         }
-        const pg = usePages.getState().pages[pageId];
-        if (!pg) return;
-        void usePages
-          .getState()
-          .saveLocalPageContent(pageId, pg.content as any, { force: true })
-          .then((saved) => {
-            if (saved) confirmRecoveredLocalSave(pageId);
-          })
-          .catch((error) => {
-            console.error("[local-folder] conflict force-save failed", error);
-          });
       })();
     },
     onLoadDisk: () => {
-      discardPendingLocalSave(pageId);
-      usePages.setState((s) => ({
-        dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [pageId]: false },
-      }));
-      void usePages.getState().reloadLocalPageFromDisk(pageId);
+      void (async () => {
+        const page = usePages.getState().pages[pageId];
+        const fs = window.gooseFs;
+        const root = page && useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
+        if (!page || !fs || page.localFilePath !== filePath) return;
+        const read = await readMarkdownFile(fs, filePath);
+        const parsed = await parseLocalMarkdownContent(read.content, "", read.error, root ? { root, fs } : undefined);
+        if (usePages.getState().pages[pageId] !== page) return;
+        if (parsed.readState !== "ready" || parsed.metadataId !== page.localMetadataId) {
+          toast.error(parsed.readError || uiText("chooseHowToResolveTheConflict"));
+          return;
+        }
+        if (read.stat && !await validateMarkdownRead(fs, filePath, read, false)) return;
+        let applied = false;
+        usePages.setState((state) => {
+          if (state.pages[pageId] !== page) return state;
+          applied = true;
+          return {
+            pages: { ...state.pages, [pageId]: pageWithParsedMarkdown(page, parsed) },
+            dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [pageId]: false },
+          };
+        });
+        if (!applied) return;
+        discardPendingLocalSave(pageId);
+        updateSnapshotAfterWrite(filePath, read.content!);
+        if (read.stat) updateSnapshotStat(filePath, read.stat);
+        if (usePages.getState().activePageId === pageId) window.dispatchEvent(
+          new CustomEvent("goose-note:reload-active-editor", { detail: { pageId } }),
+        );
+      })().catch(error => console.error("[local-folder] conflict reload failed", error));
     },
   };
 }
@@ -175,6 +198,14 @@ async function checkLocalPageFreshness(pageId: string): Promise<void> {
 
   const fs = window.gooseFs;
   if (!fs) return;
+  const root = useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
+  if (root && await noteMetadataNeedsRefresh(fs, root, page)) {
+    if (usePages.getState().dirtyLocalPageIds[pageId] || wasRecentlyInteracting(2000)) {
+      const { onKeepMine, onLoadDisk } = conflictHandlers(filePath, pageId);
+      showConflictToast(filePath, pageId, onKeepMine, onLoadDisk);
+    } else await usePages.getState().reloadLocalPageFromDisk(pageId);
+    return;
+  }
   const stat = await statDisk(filePath);
   if (stat && isStatMatchingSnapshot(filePath, stat)) return;
   const read = await readSharedMarkdown(fs, filePath).catch(() => null);
