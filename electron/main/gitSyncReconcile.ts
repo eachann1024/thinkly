@@ -40,9 +40,12 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
   const names = new Set([...Object.keys(base ?? {}), ...Object.keys(local), ...Object.keys(remote)]);
   const reserved: ReservedPaths = { files: new Set(), directories: new Set() };
   for (const name of names) reservePath(reserved, name);
-  const grouped = new Set<string>();
+  const remainingBase = base ? { ...base } : undefined;
+  const remainingLocal = { ...local }, remainingRemote = { ...remote };
   for (const group of groupNoteFiles(base, local, remote)) {
-    group.names.forEach(name => grouped.add(name));
+    for (const name of Object.keys(group.base ?? {})) delete remainingBase?.[name];
+    for (const name of Object.keys(group.local)) delete remainingLocal[name];
+    for (const name of Object.keys(group.remote)) delete remainingRemote[name];
     const b = noteGroupSignature(group.base), l = noteGroupSignature(group.local), r = noteGroupSignature(group.remote);
     let selected: Files;
     if (l === r) selected = group.local;
@@ -67,13 +70,13 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
     }
   }
   for (const name of names) {
-    if (grouped.has(name)) continue;
-    const b = base?.[name], l = local[name], r = remote[name];
+    if (!own(remainingBase ?? {}, name) && !own(remainingLocal, name) && !own(remainingRemote, name)) continue;
+    const b = remainingBase?.[name], l = remainingLocal[name], r = remainingRemote[name];
     let value: string | undefined;
     if (l === r) value = l;
-    else if ((!base || !own(base, name)) && (l === undefined || r === undefined)) value = l ?? r;
-    else if (base && own(base, name) && l === b) value = r;
-    else if (base && own(base, name) && r === b) value = l;
+    else if ((!remainingBase || !own(remainingBase, name)) && (l === undefined || r === undefined)) value = l ?? r;
+    else if (remainingBase && own(remainingBase, name) && l === b) value = r;
+    else if (remainingBase && own(remainingBase, name) && r === b) value = l;
     else {
       if (!context) throw new Error(t("resolveFirst"));
       const conflict = recordGitConflict(context.repositoryId, context.identity, context.folder, name, l, r);
@@ -90,7 +93,14 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
         }
       }
     }
-    if (value !== undefined) merged[name] = value;
+    if (value !== undefined && merged[name] !== undefined && merged[name] !== value) {
+      if (!context) throw new Error(t("resolveFirst"));
+      const conflict = recordGitConflict(context.repositoryId, `${context.identity}:overlap:${name}`, context.folder, name, merged[name], value);
+      context.active.add(conflict.info.id);
+      if (!conflict.choice) context.unresolved.push(conflict.info);
+      else if (conflict.choice === "remote") merged[name] = value;
+      else if (conflict.choice === "both") merged[remoteCopy(name, reserved)] = value;
+    } else if (value !== undefined) merged[name] = value;
   }
   return merged;
 }
