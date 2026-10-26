@@ -1,3 +1,5 @@
+import { recordPageActivity } from "@/lib/reflection/activityJournal";
+import { batchActivityId } from "./batchActivity";
 import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchOperationResult } from "./types";
 import { usePages } from "@/stores/usePages";
@@ -54,6 +56,7 @@ export async function executeCreateOperation(
     }
     const page = usePages.getState().pages[pageId];
     if (!page) throw new Error("创建页面后未找到页面");
+    recordPageActivity({ ...page, content: [] }, page, batchActivityId(working, operation.operationId));
     working = {
       ...working,
       createdPageIds: {

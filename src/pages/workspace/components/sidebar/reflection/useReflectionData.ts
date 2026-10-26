@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadReflectionData, type ReflectionData } from "@/lib/reflection/reflectionRunner";
-import { scopeRange, type ReflectionScope } from "@/lib/reflection/scopeRange";
+import type { ReflectionScope } from "@/lib/reflection/scopeRange";
 
 export function useReflectionData(open: boolean, scope: ReflectionScope) {
   const [data, setData] = useState<ReflectionData | null>(null);
@@ -27,12 +27,8 @@ export function useReflectionData(open: boolean, scope: ReflectionScope) {
 
   useEffect(() => {
     if (!open) return;
-    let key = scopeRange(scope).key;
     void Promise.resolve().then(() => reload(false));
     const timer = window.setInterval(() => {
-      const nextKey = scopeRange(scope).key;
-      if (nextKey === key) return;
-      key = nextKey;
       void reload(false);
     }, 60_000);
     return () => {

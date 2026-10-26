@@ -6,7 +6,6 @@ import { ensureHistoryLayoutOnce } from "./legacyMigration";
 import { historyDiskOperation, rendererHistoryDisk, writeHistoryJson, type HistoryDisk } from "./localDisk";
 import { originalHistoryPath, validHistoryRelativePath } from "./localPaths";
 import { invalidateHistoryVersion, parseHistoryVersion } from "./versionReadCache";
-import { bumpHistoryIndexRevision } from "./indexRevision";
 
 export function makeLocalFolderHistoryBackend(
   basePath: string,
@@ -52,7 +51,6 @@ export function makeLocalFolderHistoryBackend(
         const { dir, meta, current } = await locate(index.pageId, fs);
         const next: HistoryMeta = { ...(meta ?? emptyHistoryMeta(index.pageId, current)), versions: index.versions, lastVersionCharCount: index.lastVersionCharCount };
         await writeHistoryMeta(basePath, dir, next, fs);
-        bumpHistoryIndexRevision(index.pageId);
       }, undefined);
     },
     loadVersion(pageId, versionId) {
@@ -86,7 +84,6 @@ export function makeLocalFolderHistoryBackend(
         if (!meta) return;
         for (const entry of meta.versions) invalidateHistoryVersion(file(dir, entry.versionId));
         if (!await fs.deleteDir(dir)) throw new Error(uiText("couldnTPermanentlyClearVersionHistory"));
-        bumpHistoryIndexRevision(pageId);
         invalidatePortableIds(basePath);
       }, undefined);
     },

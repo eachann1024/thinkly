@@ -1,3 +1,4 @@
+import { batchActivityId } from "./batchActivity";
 import { operationNotebookId } from "./batchTargets";
 import type { BatchPlanInput, BatchPlanJournal } from "./types";
 import { usePages } from "@/stores/usePages";
@@ -35,6 +36,7 @@ export async function writeSearchReplaceFromLatest(
       {
         expectedNotebookId: operationNotebookId(working, operation),
         animate: true,
+        activityId: batchActivityId(working, operation.operationId),
         expectedRevision,
       },
     );

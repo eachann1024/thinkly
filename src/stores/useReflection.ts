@@ -61,7 +61,7 @@ export const useReflection = create<ReflectionState>()(
     }),
     {
       name: "thinkly-reflection",
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => localStorageAdapter),
       skipHydration: true,
       partialize: (s) => ({
@@ -74,8 +74,8 @@ export const useReflection = create<ReflectionState>()(
       migrate: (persisted, version) => {
         const p = (persisted ?? {}) as Partial<ReflectionState>;
         return {
-          reports: version < 4 ? {} : (p.reports ?? {}),
-          scheduledKeys: version < 4 ? {} : (p.scheduledKeys ?? {}),
+          reports: version < 5 ? {} : (p.reports ?? {}),
+          scheduledKeys: version < 5 ? {} : (p.scheduledKeys ?? {}),
           lastSeenWeekKey: p.lastSeenWeekKey ?? null,
           aiConsent: p.aiConsent === true,
           aiConsentChosen: version >= 3 ? p.aiConsentChosen === true : p.aiConsent === true,

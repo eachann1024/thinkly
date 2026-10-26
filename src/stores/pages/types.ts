@@ -56,7 +56,7 @@ export interface PagesState {
   updatePage: (
     id: string,
     updates: Partial<Page>,
-    options?: { silent?: boolean },
+    options?: { silent?: boolean; recordActivity?: boolean },
   ) => void;
   deletePage: (
     id: string,
@@ -185,8 +185,9 @@ export interface PagesState {
     pageId: string,
     content: JSONContent,
     mode?: "replace",
+    options?: { recordActivity?: boolean },
   ) => Promise<boolean>;
-  appendPageContent: (pageId: string, content: JSONContent) => Promise<boolean>;
+  appendPageContent: (pageId: string, content: JSONContent, options?: { recordActivity?: boolean }) => Promise<boolean>;
   replaceBlockRange: (
     pageId: string,
     startBlockId: string,

@@ -19,6 +19,7 @@ export interface WriterSession {
   lastScheduled: number;
   throttleTimer: ReturnType<typeof setTimeout> | null;
   lastMarkdown: string;
+  activityBaseContent: JSONContent;
   follow: boolean;
   wheelCleanup: (() => void) | null;
 }
@@ -113,12 +114,13 @@ export async function writeFinalFrame(
     const result = await writePageContentSafely(
       session.pageId,
       content as JSONContent,
-      { expectedNotebookId: session.notebookId },
+      { expectedNotebookId: session.notebookId, activityBaseContent: session.activityBaseContent },
     );
     if (!result.ok) {
       console.error("[liveWriter] writeFinalFrame refused", result.error);
       return false;
     }
+    session.activityBaseContent = content as JSONContent;
     reloadEditorIfActive(session.pageId);
     followScroll(session);
     return true;
@@ -170,6 +172,7 @@ export async function ensurePageCreated(
     lastScheduled: 0,
     throttleTimer: null,
     lastMarkdown: initialMarkdown,
+    activityBaseContent: pageGuard.page.content,
     follow: true,
     wheelCleanup: null,
   };

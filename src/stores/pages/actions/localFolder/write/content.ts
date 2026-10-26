@@ -39,6 +39,7 @@ export const writePageContentAction = async (
   pageId: string,
   content: JSONContent,
   _mode: "replace" = "replace",
+  options?: { recordActivity?: boolean },
 ): Promise<boolean> => {
   const page = get().pages[pageId];
   if (!page || page.isFolder) return false;
@@ -48,7 +49,7 @@ export const writePageContentAction = async (
     content: isLocal
       ? cloneLocalPageContent(content)
       : clonePageContent(content),
-  });
+  }, options);
 
   if (isLocal) {
     const savedPage = get().pages[pageId];
@@ -90,6 +91,7 @@ export const appendPageContentAction = async (
   get: StoreGet,
   pageId: string,
   content: JSONContent,
+  options?: { recordActivity?: boolean },
 ): Promise<boolean> => {
   const page = get().pages[pageId];
   if (!page || page.isFolder) return false;
@@ -104,7 +106,7 @@ export const appendPageContentAction = async (
     mergeOpts,
   );
 
-  return await get().writePageContent(pageId, mergedContent);
+  return await get().writePageContent(pageId, mergedContent, "replace", options);
 };
 
 export const replaceBlockRangeAction = async (

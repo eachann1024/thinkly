@@ -1,3 +1,4 @@
+import { removeCompensatedActivity } from "./batchActivity";
 import type { BatchPlanJournal } from "./types";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
@@ -21,8 +22,10 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
         : journal.operationTargets?.[result.operationId]?.notebookId ?? operation?.target?.notebookId;
       if (pageId && page && page.workspaceId === expectedNotebookId && after && sameRevision(revisionOf(page), after)) {
         const deleted = await usePages.getState().deletePage(pageId);
-        if (deleted) useTabs.getState().removeDeletedPage(pageId);
-        else errors.push(`无法撤回新建页面 ${pageId}`);
+        if (deleted) {
+          useTabs.getState().removeDeletedPage(pageId);
+          removeCompensatedActivity(journal, pageId, true);
+        } else errors.push(`无法撤回新建页面 ${pageId}`);
       } else if (pageId) {
         errors.push(`新建页面 ${pageId} 已变化，未撤回`);
       }
@@ -62,10 +65,13 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
             expectedNotebookId: snapshot.page.workspaceId,
             animate: true,
             expectedRevision: after,
+            recordActivity: false,
           },
         );
-        if (restored.ok) reloadEditorIfActive(pageId);
-        else errors.push(restored.error);
+        if (restored.ok) {
+          reloadEditorIfActive(pageId);
+          removeCompensatedActivity(journal, pageId);
+        } else errors.push(restored.error);
         const originalPath = snapshot.page.localFilePath;
         const currentPath = usePages.getState().pages[pageId]?.localFilePath;
         if (

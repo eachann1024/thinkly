@@ -1,3 +1,4 @@
+import { recordPageActivity } from "@/lib/reflection/activityJournal";
 import { markSettingsOnlySave, settingsOnlySaveToken, isSidecarOnlyBlockChange } from "@/lib/note-metadata/settingsSave";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/slices/updateSlice.ts#block1:1">`
@@ -228,6 +229,9 @@ export function createUpdatePageSlice(
       }
       const updatedPage = get().pages[id];
       if (!updatedPage) return;
+      if (updates.content && !silent && options?.recordActivity !== false) {
+        recordPageActivity(page, updatedPage);
+      }
 
       if (isLocalFolderPage(updatedPage)) {
         if (shouldPersistLocalMeta && !updatedPage.localUnsaved) {

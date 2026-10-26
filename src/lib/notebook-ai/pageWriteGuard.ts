@@ -1,3 +1,4 @@
+import { recordPageActivity } from "@/lib/reflection/activityJournal";
 import { beginPageWriteTransition } from "./pageWriteTransition";
 import type { JSONContent, Page } from "@/types";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -151,6 +152,9 @@ async function runSafePageWrite(
   options: {
     expectedNotebookId?: string | null;
     expectedRevision?: ExpectedPageRevision;
+    recordActivity?: boolean;
+    activityId?: string;
+    activityBaseContent?: JSONContent;
   },
 ): Promise<SafePageWriteResult> {
   const guard = guardPageForAiWrite(pageId, options);
@@ -167,7 +171,8 @@ async function runSafePageWrite(
       error: "页面写入失败，未保存本次修改",
     };
   }
-  const attemptedContent = usePages.getState().pages[pageId]?.content;
+  const attemptedPage = usePages.getState().pages[pageId];
+  const attemptedContent = attemptedPage?.content;
   const attemptedSignature = getPageContentSignature(attemptedContent);
 
   let saved: boolean;
@@ -176,7 +181,12 @@ async function runSafePageWrite(
   } catch {
     saved = false;
   }
-  if (saved) return { ok: true, pageId };
+  if (saved) {
+    if (attemptedPage && options.recordActivity !== false) {
+      recordPageActivity({ ...guard.page, content: options.activityBaseContent ?? beforeContent }, attemptedPage, options.activityId);
+    }
+    return { ok: true, pageId };
+  }
 
   const current = usePages.getState().pages[pageId];
   if (
@@ -210,6 +220,9 @@ export async function writePageContentSafely(
   options: {
     expectedNotebookId?: string | null;
     expectedRevision?: ExpectedPageRevision;
+    recordActivity?: boolean;
+    activityId?: string;
+    activityBaseContent?: JSONContent;
     animate?: boolean;
   } = {},
 ): Promise<SafePageWriteResult> {
@@ -219,7 +232,7 @@ export async function writePageContentSafely(
   try {
     return await runSafePageWrite(
       pageId,
-      () => usePages.getState().writePageContent(pageId, content, "replace"),
+      () => usePages.getState().writePageContent(pageId, content, "replace", { recordActivity: false }),
       { ...options, expectedRevision: options.expectedRevision ?? guard },
     );
   } finally {
@@ -233,11 +246,11 @@ export async function writePageContentSafely(
 export async function appendPageContentSafely(
   pageId: string,
   content: JSONContent,
-  options: { expectedNotebookId?: string | null } = {},
+  options: { expectedNotebookId?: string | null; recordActivity?: boolean } = {},
 ): Promise<SafePageWriteResult> {
   return runSafePageWrite(
     pageId,
-    () => usePages.getState().appendPageContent(pageId, content),
+    () => usePages.getState().appendPageContent(pageId, content, { recordActivity: false }),
     options,
   );
 }
