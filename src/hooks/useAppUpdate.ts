@@ -16,12 +16,17 @@ ja:
 `);
 import { useEffect } from "react";
 import type { AppUpdateState } from "@/lib/appUpdateTypes";
-import { downloadAppUpdate, readAppVersion } from "@/lib/electron/appUpdate";
+import {
+  checkAppUpdate,
+  downloadAppUpdate,
+  readAppVersion,
+} from "@/lib/electron/appUpdate";
 import {
   getAppUpdateTarget,
   appUpdateTransition,
   updateRetryMetadata,
 } from "@/lib/appUpdateState";
+import { createAppUpdateCheckAction } from "@/lib/appUpdateCheckAction";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useAppUpdateUi } from "@/stores/useAppUpdateUi";
 
@@ -132,6 +137,29 @@ function download(): Promise<void> {
   return downloadTask;
 }
 
+const checkForUpdates = createAppUpdateCheckAction<AppUpdateState>({
+  getState: () => useAppUpdateUi.getState().state,
+  getRevision: () => eventRevision,
+  canStart: (state) => state.status !== "ready" && state.status !== "downloading",
+  setChecking: (previous) =>
+    setUpdateState(appUpdateTransition(previous, { type: "check.started" })),
+  check: async () => {
+    if (!getGooseDesktop()?.checkForUpdate) return;
+    await checkAppUpdate();
+  },
+  readLatest: async (fallback) => {
+    const state = await getGooseDesktop()?.getUpdateState().catch(() => fallback);
+    return state ?? fallback;
+  },
+  failure: (previous, error) =>
+    appUpdateTransition(previous, {
+      type: "check.failed",
+      metadata: updateRetryMetadata(previous),
+      message: error === undefined ? storeText("updateFailed") : errorMessage(error),
+    }),
+  setState: setUpdateState,
+});
+
 function install(): Promise<void> {
   if (installTask) return installTask;
   const desktop = getGooseDesktop();
@@ -178,6 +206,8 @@ export function useAppUpdate() {
     ...ui,
     installing: ui.operation.status === "installing",
     installError: ui.operation.status === "failed" ? ui.operation.message : "",
+    checking: ui.state.status === "checking",
+    checkForUpdates,
     download,
     install,
     revealDownload,

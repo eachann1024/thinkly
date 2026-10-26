@@ -7,3 +7,11 @@ export function hasNewAppUpdate(currentVersion: string, state: AppUpdateState): 
   return Boolean(current && target && readyVersionIsNewer(target.version, current.version)
     && state.status !== "idle" && state.status !== "checking" && state.status !== "up-to-date");
 }
+
+export function shouldShowAppUpdateSettings(
+  currentVersion: string,
+  state: AppUpdateState,
+  canCheckManually: boolean,
+): boolean {
+  return canCheckManually || hasNewAppUpdate(currentVersion, state);
+}
