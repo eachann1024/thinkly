@@ -1,5 +1,5 @@
 import { ensureHistoryLayout, ensureHistoryLayoutOnce } from "./legacyMigration";
-import { cachedPortableIds, findHistoryEntry, invalidatePortableIds, listHistoryEntries, rememberPortableIds, withHistoryPath, writeHistoryMeta } from "./layout";
+import { cachedPortableIds, findLocalViewHistoryEntry, invalidatePortableIds, listHistoryEntries, rememberPortableIds, withHistoryPath, writeHistoryMeta } from "./layout";
 import { historyDiskOperation, rendererHistoryDisk, type HistoryDisk } from "./localDisk";
 import { validHistoryRelativePath } from "./localPaths";
 
@@ -13,8 +13,12 @@ export async function migrateNotebookHistory(basePath: string, knownPaths: Recor
     await ensureHistoryLayout(basePath, fs);
     for (const [pageId, path] of Object.entries(knownPaths)) {
       if (!validHistoryRelativePath(path)) continue;
-      const { dir, meta } = await findHistoryEntry(basePath, pageId, fs);
-      if (meta && meta.relativePath !== path) await writeHistoryMeta(basePath, dir, withHistoryPath(meta, path), fs);
+      const { dir, meta } = await findLocalViewHistoryEntry(basePath, pageId, path, fs);
+      if (meta && meta.relativePath !== path) {
+        const next = withHistoryPath(meta, path);
+        if (pageId.startsWith("local-view:") && meta.pageId !== pageId) next.viewIds = [...new Set([...(meta.viewIds ?? []), pageId])];
+        await writeHistoryMeta(basePath, dir, next, fs);
+      }
     }
   });
 }
