@@ -41,7 +41,9 @@ export function WinWindowControls() {
       if (!cancelled) setMaximized(Boolean(v));
     });
     const onResize = () => {
-      void desktop?.isWindowMaximized?.().then((v) => setMaximized(Boolean(v)));
+      void desktop?.isWindowMaximized?.().then((v) => {
+        if (!cancelled) setMaximized(Boolean(v));
+      });
     };
     window.addEventListener("resize", onResize);
     return () => {
