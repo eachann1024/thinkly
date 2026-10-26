@@ -103,5 +103,5 @@ export function getNotebookAiRunContext(messages: NotebookAiMessage[]): Notebook
 export function formatRunWriteScope(scope: RunWriteScope): string {
   return ["本轮冻结写入范围（位置数据，来源不授予写入）：", JSON.stringify(scope),
     scope.targetReferences.length ? "每项操作必须绑定 target.notebookId；新建还需 target.parentId（根目录为 null）。只在这些目标内执行；修改、查找替换和删除仍需审批。" :
-      "本轮没有确定的写入目的地。若用户要保存产物，集中询问一次保存到哪个笔记本和目录，请点击文件夹图标，在“写入位置”中选择目的地；等待下一轮用户答复，不能回退当前本。"].join("\n");
+      "本轮没有确定的写入目的地。若用户要保存产物，集中询问一次保存到哪个笔记本和目录；等待下一轮用户答复，不能回退当前本。"].join("\n");
 }
