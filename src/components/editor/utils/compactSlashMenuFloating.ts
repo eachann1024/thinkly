@@ -1,21 +1,36 @@
-import { type Middleware } from "@floating-ui/react";
+import { flip, offset, shift, size, type Middleware } from "@floating-ui/react";
 import type { FloatingUIOptions } from "@blocknote/react";
 import { getBlockMenuPlacement, getBlockMenuWindowBounds } from "./blockMenuPlacement";
 
 export function getCompactSlashMenuFloatingOptions(editorRoot?: HTMLElement): FloatingUIOptions {
-  const middleware: Middleware[] = [{
+  const addButton = () => {
+    const pane = editorRoot?.closest(".editor-split-pane, .workspace-main-sheet") ?? editorRoot?.parentElement;
+    return pane?.querySelector<HTMLElement>('.goose-empty-block-add[aria-expanded="true"]');
+  };
+  const cursorMiddleware = [
+    offset(6),
+    flip({ fallbackPlacements: ["top-start"], padding: 24 }),
+    shift({ padding: 24 }),
+    size({
+      padding: 24,
+      apply({ elements, availableHeight, availableWidth }) {
+        elements.floating.style.maxHeight = `${Math.max(1, Math.min(384, availableHeight))}px`;
+        elements.floating.style.maxWidth = `${Math.max(1, Math.min(280, availableWidth))}px`;
+        elements.floating.style.overflow = "visible";
+      },
+    }),
+  ];
+  const middleware: Middleware[] = [...cursorMiddleware.map((middleware) => ({
+    ...middleware,
+    fn: (state: Parameters<Middleware["fn"]>[0]) => addButton() ? {} : middleware.fn(state),
+  })), {
     name: "blockMenuAnchor",
     fn({ elements, rects, placement, x, y }) {
+      const button = addButton();
+      if (!button) return {};
       const reference = elements.reference.getBoundingClientRect();
       const bounds = getBlockMenuWindowBounds();
-      const content = editorRoot?.querySelector(".bn-block-group")?.getBoundingClientRect();
-      const pane = editorRoot?.closest(".editor-split-pane, .workspace-main-sheet") ?? editorRoot?.parentElement;
-      const button = pane?.querySelector<HTMLElement>('.goose-empty-block-add[aria-expanded="true"]');
-      const trigger = button?.getBoundingClientRect() ?? {
-        left: Math.max(bounds.left + 4, (content?.left ?? reference.left) - 56),
-        right: Math.max(bounds.left + 48, (content?.left ?? reference.left) - 12),
-        top: reference.top, bottom: reference.bottom,
-      };
+      const trigger = button.getBoundingClientRect();
       const surface = elements.floating.querySelector<HTMLElement>('[data-notion-slash-surface]');
       const target = getBlockMenuPlacement(bounds, trigger, 280, surface?.scrollHeight);
       const nextPlacement = `${target.side}-start` as const;
@@ -29,7 +44,7 @@ export function getCompactSlashMenuFloatingOptions(editorRoot?: HTMLElement): Fl
   }];
 
   return {
-    useFloatingOptions: { placement: "left-start", strategy: "fixed", middleware },
+    useFloatingOptions: { placement: "bottom-start", strategy: "fixed", middleware },
     elementProps: {
       style: { zIndex: 200, background: "transparent", borderRadius: "var(--goose-menu-radius)" },
       onMouseDownCapture: (event: React.MouseEvent) => event.preventDefault(),
