@@ -8,6 +8,9 @@
   --goose-table-header: var(--goose-block-subtle-bg);
   --goose-table-selection: var(--goose-table-selection-border, var(--goose-accent-focus));
 }
+.workspace-editor-surface .bn-editor [data-content-type="table"] {
+  padding-block: 0;
+}
 .workspace-editor-surface .bn-editor [data-content-type="table"] .tableWrapper {
   padding: 0
     calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1)) 0;
