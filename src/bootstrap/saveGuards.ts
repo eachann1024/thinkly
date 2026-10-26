@@ -18,13 +18,15 @@ ja:
   parseFailed: "このファイルは解析できないため、保存が無効になっています"
 `;
 const uiText = createTranslator(localMessages);
-import { toast } from "@/components/ui/sonner";
+import { dismissSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
+import { showSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { assertQuickNoteSaved } from "./assertQuickNoteSaved";
+import { runManualSaveFlush } from "./manualSaveFlush";
 
 let flushInFlight: Promise<void> | null = null;
 
@@ -47,26 +49,34 @@ const runFlushOnce = () => {
 
 const reportFlushFailure = (error: unknown) => {
   console.error("[save-guard] pending writes flush failed", error);
-  toast.error(uiText("saveFailed"), {
+  showSaveRecoveryNotice({
     id: "goose-pending-writes-failed",
+    title: uiText("saveFailed"),
     description: describeDiskWriteError(error),
-    action: {
-      label: uiText("retry"),
-      onClick: () => retryPendingWrites(),
-    },
+    retryLabel: uiText("retry"),
+    onRetry: retryPendingWrites,
+    onRetryFailure: describeDiskWriteError,
   });
 };
 
-const retryPendingWrites = () => {
-  void runFlushOnce()
-    .then(() => {
-      toast.dismiss("goose-pending-writes-failed");
-    })
-    .catch(reportFlushFailure);
+const retryPendingWrites = async () => {
+  await runFlushOnce();
+  if (Object.values(usePages.getState().dirtyLocalPageIds).some(Boolean)) {
+    throw new Error(uiText("unsavedNotes"));
+  }
+  await assertQuickNoteSaved();
+};
+
+const dismissPendingWriteNoticeIfSaved = async () => {
+  if (Object.values(usePages.getState().dirtyLocalPageIds).some(Boolean)) return;
+  await assertQuickNoteSaved();
+  dismissSaveRecoveryNotice("goose-pending-writes-failed");
 };
 
 const flushFromLifecycle = () => {
-  void runFlushOnce().catch(reportFlushFailure);
+  void runFlushOnce()
+    .then(dismissPendingWriteNoticeIfSaved)
+    .catch(reportFlushFailure);
 };
 export const setupSaveGuards = () => {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -84,6 +94,7 @@ export const setupSaveGuards = () => {
         throw new Error(uiText("unsavedNotes"));
       }
       await assertQuickNoteSaved();
+      dismissSaveRecoveryNotice("goose-pending-writes-failed");
       desktop.replyBeforeUpdate(requestId, null);
     } catch (error) {
       reportFlushFailure(error);
@@ -127,13 +138,21 @@ export const setupSaveGuards = () => {
             reportFlushFailure(
               new Error(`manual save failed: ${activePageId}`),
             );
+          } else {
+            void runFlushOnce()
+              .then(dismissPendingWriteNoticeIfSaved)
+              .catch(reportFlushFailure);
           }
         })
         .catch(reportFlushFailure);
       return;
     }
 
-    void runFlushOnce().catch(reportFlushFailure);
+    runManualSaveFlush(
+      runFlushOnce,
+      dismissPendingWriteNoticeIfSaved,
+      reportFlushFailure,
+    );
   };
 
   const handleVisibilityChange = () => {
