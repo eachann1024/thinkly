@@ -39,11 +39,16 @@ export const pendingQuickNoteRecoveryRevisions = new Map<
   number
 >();
 
+const quickNoteDraftRevisions = new Map<QuickNoteSlot, number>();
+export const getQuickNoteDraftRevision = (slot: QuickNoteSlot): number =>
+  quickNoteDraftRevisions.get(slot) ?? 0;
+
 export const recordQuickNoteRecovery = (
   slot: QuickNoteSlot,
   previous: JSONContent | null,
   content: JSONContent | null,
 ): void => {
+  quickNoteDraftRevisions.set(slot, getQuickNoteDraftRevision(slot) + 1);
   const entry = recordRecoveryEntry({
     source: "quicknote",
     id: String(slot),
@@ -70,6 +75,7 @@ export function recoverQuickNoteDrafts(draftsRaw: unknown): {
   const conflictSlots: QuickNoteSlot[] = [];
   for (const entry of listRecoveryEntries("quicknote")) {
     const slot = normalizeSlot(entry.id);
+    quickNoteDraftRevisions.set(slot, getQuickNoteDraftRevision(slot) + 1);
     const current = drafts[slot];
     const alreadyCurrent =
       getContentSignature(current) === getContentSignature(entry.content);
