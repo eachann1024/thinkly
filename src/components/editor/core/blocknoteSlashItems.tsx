@@ -116,13 +116,6 @@ export function getBlockNoteSlashMenuItems(
       onItemClick: () => insertOrUpdate({ type: "quote" }),
     },
     {
-      get title() { return t("callout"); },
-      get description() { return t("insertACalloutWithAnIcon"); },
-      icon: SLASH_ICONS.info,
-      aliases: ["callout", "annotation", "info", "biaozhu", "tishi"],
-      onItemClick: () => insertOrUpdate({ type: "callout" }),
-    },
-    {
       get title() { return t("divider"); },
       get description() { return t("insertAHorizontalDivider"); },
       icon: SLASH_ICONS.minus,
