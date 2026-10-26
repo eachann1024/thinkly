@@ -5,7 +5,7 @@ import { isBlockNoteContent, createEmptyBlockNoteContent } from "./emptyContent"
 import {
   normalizeBlockContent,
   ensureFirstTitleHeading,
-  normalizeHeadingSectionFold,
+  normalizeHeadingChildren,
 } from "./normalize";
 import { ensureBodyParagraphAfterTitle } from "./ensureBodyParagraph";
 
@@ -178,11 +178,11 @@ export function normalizePageContent(
     const sanitized = isBlockNoteContent(content)
       ? normalizeBlockContent(content)
       : normalizeBlockContent(childrenFromLegacy(content.content));
-    const withSectionFold = (blocks: BlockNoteContent) =>
-      normalizeHeadingSectionFold(blocks);
-    if (!ensureTitle) return withSectionFold(sanitized);
+    const withHeadingChildren = (blocks: BlockNoteContent) =>
+      normalizeHeadingChildren(blocks);
+    if (!ensureTitle) return withHeadingChildren(sanitized);
     if (!sanitized.length) return createEmptyBlockNoteContent();
-    return withSectionFold(
+    return withHeadingChildren(
       ensureBodyParagraphAfterTitle(
         stripRedundantEmptyHeadings(ensureFirstTitleHeading(sanitized)),
       ),

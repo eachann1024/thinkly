@@ -1,4 +1,6 @@
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
 import type { PartialBlock } from "@blocknote/core";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
 import type { BlockNoteContent } from "./emptyContent";
 import { createEmptyLocalPageContent } from "./emptyContent";
 import { hasStructuredBlocks, simpleExtractText } from "./normalize";
@@ -140,7 +142,7 @@ export function createEditorSafeContent(
   content: unknown,
   schema: unknown,
 ): BlockNoteContent {
-  const sanitized = sanitizeBlocks(content, getBlockSpecs(schema));
+  const sanitized = sanitizeBlocks(Array.isArray(content) ? unfoldLegacyBlocks(flattenLegacyColumns(content)) : content, getBlockSpecs(schema));
   return sanitized.length > 0
     ? (sanitized as BlockNoteContent)
     : createEmptyLocalPageContent();
