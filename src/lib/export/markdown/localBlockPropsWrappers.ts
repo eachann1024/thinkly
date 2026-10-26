@@ -4,7 +4,7 @@ import { documentTextColors } from "@/lib/textColors";
 import { INLINE_BLOCK_TYPES, pickPersistedBlockProps, sanitizeCssColor, type MarkdownBlock, type PersistedBlockProps } from "./blockPropsProperties";
 
 const LOCAL_WRAPPABLE_BLOCK_TYPES = new Set(
-  [...INLINE_BLOCK_TYPES].filter((type) => type !== "toggleListItem"),
+  [...INLINE_BLOCK_TYPES],
 );
 export const LOCAL_BLOCK_PROPS_WRAPPER_STYLE = "__gooseLocalBlockPropsWrapperStyle";
 export const LOCAL_PRESERVE_EMPTY_PARAGRAPH = "__gooseLocalPreserveEmptyParagraph";
@@ -51,7 +51,7 @@ export function encodeLocalBlockPropsWrappers(
     const children = Array.isArray(block.children)
       ? encodeLocalBlockPropsWrappers(block.children as BlockNoteContent, { preserveEmptyParagraphs })
       : undefined;
-    const metadata = block.type && (LOCAL_WRAPPABLE_BLOCK_TYPES.has(block.type) || block.type === "toggleListItem")
+    const metadata = block.type && LOCAL_WRAPPABLE_BLOCK_TYPES.has(block.type)
       ? pickPersistedBlockProps(block.props)
       : {};
     const hasStyle = Object.keys(metadata).length > 0;

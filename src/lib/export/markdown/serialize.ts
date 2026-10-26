@@ -1,8 +1,9 @@
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { isBlockNoteContent } from "@/components/editor/utils/blocknote-content";
+import { unfoldLegacyBlocks } from "@/lib/legacyFolding";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
 import { LOCAL_PRESERVE_EMPTY_PARAGRAPH } from "./localBlockPropsWrappers";
 import { attachNoteMeta, createNoteSink, MarkdownScope } from "./noteMeta";
-import { serializeColumns } from "./serialize/columns";
 import { joinBlocks, type MarkdownPart } from "./serialize/joinBlocks";
 import { CHILDREN_CONSUMED_TYPES, LIST_ITEM_TYPES, serializeListItemBlock } from "./serialize/lists";
 import { blockNoteBlockToMarkdown } from "./serialize/block";
@@ -20,27 +21,15 @@ function keepEmpty(block: any): boolean {
 }
 
 function holdsOwnChildren(block: any): boolean {
-  return CHILDREN_CONSUMED_TYPES.has(block?.type) || (block?.type === "heading" && Boolean(block?.props?.isToggleable));
+  return CHILDREN_CONSUMED_TYPES.has(block?.type);
 }
 
-function serializeBlocks(blocks: any[], indent: string, scope: MarkdownScope): string {
+function serializeBlockParts(blocks: any[], indent: string, scope: MarkdownScope): MarkdownPart[] {
   const parts: MarkdownPart[] = [];
   let index = 0;
   while (index < blocks.length) {
     const block = blocks[index];
     if (!block || typeof block !== "object") {
-      index += 1;
-      continue;
-    }
-    if (block.type === "columnLayout") {
-      const markdown = serializeColumns(block, indent, scope, serializeBlocks);
-      if (markdown) parts.push({ kind: "flow", md: markdown });
-      index += 1;
-      continue;
-    }
-    if (block.type === "columnSection") {
-      const markdown = serializeBlocks(block.children ?? [], indent, scope);
-      if (markdown) parts.push({ kind: "flow", md: markdown });
       index += 1;
       continue;
     }
@@ -82,14 +71,20 @@ function serializeBlocks(blocks: any[], indent: string, scope: MarkdownScope): s
     }
     index += 1;
   }
-  return joinBlocks(parts);
+  return parts;
+}
+
+function serializeBlocks(blocks: any[], indent: string, scope: MarkdownScope): string {
+  return joinBlocks(serializeBlockParts(blocks, indent, scope));
 }
 
 export function jsonContentToMarkdown(content: BlockNoteContent, skipFirstH1 = false): string {
   if (!isBlockNoteContent(content)) return "";
-  let blocks = content as any[];
+  let blocks = unfoldLegacyBlocks(flattenLegacyColumns(content as any[]));
   if (skipFirstH1 && blocks[0]?.type === "heading") blocks = blocks.slice(1);
   const sink = createNoteSink();
-  const body = serializeBlocks(blocks, "", new MarkdownScope("", sink));
+  const parts = serializeBlockParts(blocks, "", new MarkdownScope("", sink));
+  if (parts[0]?.md === "---") parts[0].md = "***";
+  const body = joinBlocks(parts);
   return attachNoteMeta(body, sink.finish());
 }

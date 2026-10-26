@@ -6,7 +6,6 @@ import { serializeTable } from "./table";
 import { serializeImage } from "./image";
 import { serializeFile } from "./file";
 import { serializeFencedCode } from "./codeFence";
-import { serializeToggleDetails } from "./toggleDetails";
 import { legacyItemInline, serializeLegacyListItem } from "./legacyLists";
 
 export function blockNoteBlockToMarkdown(
@@ -18,9 +17,7 @@ export function blockNoteBlockToMarkdown(
 
   switch (block.type) {
     case "heading":
-      result = block.props?.isToggleable
-        ? serializeToggleDetails(block, text, serializeBlocks)
-        : `${"#".repeat(block.props?.level || block.attrs?.level || 1)} ${text}`;
+      result = `${"#".repeat(block.props?.level || block.attrs?.level || 1)} ${text}`;
       break;
 
     case "quote": {
@@ -82,15 +79,6 @@ export function blockNoteBlockToMarkdown(
       result = serializeAudio(block);
       break;
 
-    case "columnLayout":
-    case "columnSection":
-      return "";
-
-    case "toggleListItem": {
-      result = serializeToggleDetails(block, text, serializeBlocks);
-      break;
-    }
-
     case "details": {
       const contentArr: any[] = Array.isArray(block.content)
         ? block.content
@@ -108,7 +96,7 @@ export function blockNoteBlockToMarkdown(
         ? contentBlock.content
         : [];
       const innerMd = serializeBlocks(innerBlocks, "");
-      result = `<details>\n<summary>${summaryText}</summary>\n\n${innerMd}\n\n</details>`;
+      result = `${summaryText}\n\n${innerMd}`;
       break;
     }
 
