@@ -11,10 +11,36 @@ import { isMediaNodeSelection, MEDIA_KEYBOARD_DELETE_META } from "./mediaBlockDe
 
 type DeletionRange = { from: number; to: number };
 
+function fullySelectedHeadingRemoval(state: EditorState, titleId: string | undefined): Transaction | null {
+  if (isOvershootingSingleTextblockSelection(state)) return null;
+  const hits = collectSelectedBlocks(state);
+  const hit = hits.length === 1 ? hits[0] : undefined;
+  if (!hit?.isTextblock || hit.id === titleId || !isBlockContentFullySelected(hit)) return null;
+  let pos = -1;
+  let node = state.doc;
+  state.doc.descendants((candidate, candidatePos) => {
+    if (pos >= 0) return false;
+    if (candidate.type.name === "blockContainer" && String(candidate.attrs.id) === hit.id) {
+      pos = candidatePos;
+      node = candidate;
+      return false;
+    }
+    return true;
+  });
+  if (pos < 0 || node.firstChild?.type.name !== "heading" || node.childCount !== 1) return null;
+  const tr = state.tr.delete(pos, pos + node.nodeSize);
+  tr.setSelection(Selection.near(tr.doc.resolve(Math.min(pos, tr.doc.content.size))));
+  return tr;
+}
+
 export function safeSelectionDeletion(state: EditorState): Transaction | null {
   const { selection } = state;
   if (selection.empty || selection instanceof CellSelection) return null;
   const title = getProtectedTitle(state);
+  if (!isBlockNodeSelection(state) && !(selection instanceof AllSelection)) {
+    const onlyHeading = fullySelectedHeadingRemoval(state, title?.id);
+    if (onlyHeading) return onlyHeading;
+  }
   const ranges: DeletionRange[] = [];
   if (isBlockNodeSelection(state)) {
     let roots = selection instanceof NodeSelection

@@ -17,6 +17,12 @@ import {
 
 const HEADING_LEVELS = [1, 2, 3] as const;
 
+export function headingLevelForHashPrefix(text: string): number | null {
+  const match = /^(#+)$/u.exec(text);
+  if (!match || !HEADING_LEVELS.includes(match[1].length as (typeof HEADING_LEVELS)[number])) return null;
+  return match[1].length;
+}
+
 const createHeadingKeyboardShortcut =
   (level: number) =>
   ({ editor }: { editor: BlockNoteEditor<any, any, any> }) => {
