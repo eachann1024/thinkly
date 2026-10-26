@@ -5,23 +5,19 @@ export function createSlashBlockInsertion(
   editor: BlockNoteEditor<any, any, any>,
   defaultCodeBlockWrap = false,
 ) {
-  const focusAndScrollTo = (block: { id: string }, positioned = false) => {
-    if (!positioned) {
-      try {
-        editor.setTextCursorPosition(block, "end");
-      } catch {
-      }
+  const focusAndScrollTo = (block: { id: string }) => {
+    try {
+      editor.setTextCursorPosition(block, "end");
+    } catch {
     }
     editor.focus();
     const state = editor.prosemirrorState;
     window.setTimeout(() => {
       // Do not move a cursor that the user has already moved or typed with.
       if (editor.prosemirrorState.doc !== state.doc || !editor.prosemirrorState.selection.eq(state.selection)) return;
-      if (!positioned) {
-        try {
-          editor.setTextCursorPosition(block, "end");
-        } catch {
-        }
+      try {
+        editor.setTextCursorPosition(block, "end");
+      } catch {
       }
       editor.focus();
     }, 0);
@@ -100,7 +96,7 @@ export function createSlashBlockInsertion(
         target = inserted;
       }
     }
-    if (target?.id) focusAndScrollTo(target, target?.id === currentBlock.id);
+    if (target?.id) focusAndScrollTo(target);
     return target;
   };
 }
