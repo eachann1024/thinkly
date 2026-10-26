@@ -57,12 +57,12 @@ export async function readLocalFileAsBlobAsync(
 
     if (typeof gfs.readFileBase64Async === "function") {
       const base64 = (await gfs.readFileBase64Async(fullPath)) as string | null;
-      if (base64) return base64ToUint8Blob(base64, mime);
+      return base64 ? base64ToUint8Blob(base64, mime) : null;
     }
 
     if (typeof gfs.readFileBase64 === "function") {
       const base64 = gfs.readFileBase64(fullPath) as string | null;
-      if (base64) return base64ToUint8Blob(base64, mime);
+      return base64 ? base64ToUint8Blob(base64, mime) : null;
     }
 
     if (
