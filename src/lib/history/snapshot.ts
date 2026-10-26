@@ -1,9 +1,10 @@
+import { getPageHistorySettings } from "./settings";
+import type { NoteSettings } from "@/lib/note-metadata/contract";
 import { getLoadedHistorySignature } from "./versionReadCache";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { countWords } from "@/components/editor/utils/content-text-extractor";
 import { resolveHistoryBackend, type HistoryBackend } from "./backend";
 import { getHistoryVisibleSignature } from "./contentSignature";
-import { selectEvictedVersionIds } from "./retention";
 import { usePages } from "@/stores/usePages";
 import type {
   HistoryIndexEntry,
@@ -43,6 +44,7 @@ async function isSameAsLatestVersion(
   index: { versions: Array<{ versionId: string }> },
   content: BlockNoteContent,
   localFrontmatter: string | undefined,
+  settings: NoteSettings | undefined,
   backend: HistoryBackend,
 ): Promise<boolean> {
   const latestEntry = index.versions[index.versions.length - 1];
@@ -51,7 +53,7 @@ async function isSameAsLatestVersion(
   if (!latest) return false;
   return (
     getLoadedHistorySignature(latest) ===
-    getHistoryVisibleSignature(content, localFrontmatter)
+    getHistoryVisibleSignature(content, localFrontmatter, settings)
   );
 }
 
@@ -102,6 +104,7 @@ async function recordHistorySnapshotUnlocked(
   const charDelta = charCount - index.lastVersionCharCount;
   const latestEntry = index.versions[index.versions.length - 1];
   const localFrontmatter = page?.localFrontmatter;
+  const settings = page ? getPageHistorySettings(page) : undefined;
 
   if (
     await isSameAsLatestVersion(
@@ -109,6 +112,7 @@ async function recordHistorySnapshotUnlocked(
       index,
       content,
       localFrontmatter,
+      settings,
       backend,
     )
   ) {
@@ -161,6 +165,7 @@ async function recordHistorySnapshotUnlocked(
     size,
     content,
     ...(localFrontmatter !== undefined ? { localFrontmatter } : {}),
+    ...(settings ? { settings } : {}),
   };
 
   await backend.saveVersion(version);
@@ -177,6 +182,7 @@ async function recordHistorySnapshotUnlocked(
   };
 
   let nextVersions = [...index.versions, entry];
+  const { selectEvictedVersionIds } = await import("./retention");
   const evictedVersionIds = selectEvictedVersionIds(nextVersions);
   if (evictedVersionIds.length > 0) {
     const evictedSet = new Set(evictedVersionIds);

@@ -9,6 +9,7 @@ import { useWorkspaceEvents } from "./hooks/useWorkspaceEvents";
 import { useWeeklyReflection } from "./hooks/useWeeklyReflection";
 import { useLocalFolderWatch } from "./hooks/useLocalFolderWatch";
 import { useFileDrop } from "./hooks/useFileDrop";
+import { getPageHistorySettings } from "@/lib/history/settings";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { WorkspaceLayout } from "./WorkspaceLayout";
@@ -35,6 +36,7 @@ function PageHistoryBinder() {
     content: page?.isFolder || page?.localReadState === "error" ? undefined : page?.content,
     signature: historyContentSig,
     updatedAt: page?.updatedAt,
+    settingsSignature: page ? JSON.stringify(getPageHistorySettings(page)) : undefined,
   });
   return null;
 }

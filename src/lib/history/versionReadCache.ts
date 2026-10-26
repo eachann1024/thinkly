@@ -24,7 +24,7 @@ export function parseHistoryVersion(path: string, text: string | null, pageId: s
   if (!text) return null;
   const version = normalizeHistoryVersion(JSON.parse(text), pageId, versionId);
   if (!version) return null;
-  const signature = getHistoryVisibleSignature(version.content, version.localFrontmatter);
+  const signature = getHistoryVisibleSignature(version.content, version.localFrontmatter, version.settings);
   const size = text.length * 2 + signature.length;
   if (size <= MAX_CHARS / 4) {
     entries.set(path, { source: text, version: structuredClone(version), signature, size });
@@ -58,7 +58,7 @@ export function readRevisionHistoryVersion(
   invalidateHistoryVersion(key);
   const version = normalizeHistoryVersion(value, pageId, versionId);
   if (!version) return null;
-  const signature = getHistoryVisibleSignature(version.content, version.localFrontmatter);
+  const signature = getHistoryVisibleSignature(version.content, version.localFrontmatter, version.settings);
   const size = JSON.stringify(version).length + signature.length;
   if (size <= MAX_CHARS / 4) {
     entries.set(key, { source: revision, version: structuredClone(version), signature, size });
@@ -74,7 +74,7 @@ export function readRevisionHistoryVersion(
 }
 
 export function getLoadedHistorySignature(version: HistoryVersion): string {
-  return loadedSignatures.get(version) ?? getHistoryVisibleSignature(version.content, version.localFrontmatter);
+  return loadedSignatures.get(version) ?? getHistoryVisibleSignature(version.content, version.localFrontmatter, version.settings);
 }
 
 export function invalidateHistoryVersion(path: string): void {
