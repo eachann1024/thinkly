@@ -24,7 +24,7 @@ export function shouldReconcileSuggestionInput(
   if (end.b <= start) return true;
   const inserted = newState.doc.textBetween(start, end.b, "\n", "\ufffc");
   if (transactions.some((tr) => tr.getMeta("composition") !== undefined)) {
-    return /[@+\[\/、]/u.test(inserted);
+    return /[@\/、]/u.test(inserted);
   }
-  return end.b - start === 1 && /^[@+\[\/、]$/u.test(inserted);
+  return end.b - start === 1 && /^[@\/、]$/u.test(inserted);
 }
