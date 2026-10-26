@@ -44,7 +44,6 @@ export function createEditorOptions(
     },
     disableExtensions: [
       "quote-block-shortcuts",
-      "toggle-list-item-shortcuts",
       "divider-block-shortcuts",
     ],
     dictionary: createLiveEditorDictionary(isQuickNoteEditorPage(page) ? "quicknote" : "note"),
