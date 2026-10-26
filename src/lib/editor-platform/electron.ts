@@ -120,13 +120,17 @@ const shell: EditorPlatformShell = {
     }
     try {
       if (typeof Notification === "undefined") return;
+      const show = () => {
+        const notification = new Notification(body);
+        notification.onclick = () => { window.focus(); notification.close(); };
+      };
       if (Notification.permission === "granted") {
-        new Notification(body);
+        show();
         return;
       }
       if (Notification.permission !== "denied") {
         void Notification.requestPermission().then((permission) => {
-          if (permission === "granted") new Notification(body);
+          if (permission === "granted") show();
         });
       }
     } catch {
