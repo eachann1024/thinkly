@@ -69,7 +69,7 @@ export async function readMetadataEnvelope(fs: NoteMetadataFs, root: string, not
   if (raw === null) throw new NoteMetadataError("io-error", "Metadata read returned no content");
   const envelope = parseEnvelope(raw, noteId);
   rawEnvelopes.set(envelope, raw);
-  for (const snapshot of [envelope.current, envelope.previous, envelope.recovery]) {
+  for (const snapshot of [envelope.current, envelope.previous, envelope.recovery, ...(envelope.recoveries ?? [])]) {
     if (snapshot && await markdownDigest(snapshot.markdown) !== snapshot.digest) {
       throw new NoteMetadataError("corrupt", "Metadata baseline checksum differs");
     }
@@ -123,11 +123,17 @@ export async function stageMetadata(
       if (!unchanged) throw new NoteMetadataError("conflict", "Note metadata changed during saving");
       return { revision: existingRevision!, path: file };
     }
+    const recoveries = [...(existing?.recoveries ?? [])];
+    if (existing && existing.current.meta !== null && JSON.stringify(existing.current.meta) !== JSON.stringify(next.payload.meta)) {
+      const candidate = JSON.stringify(existing.current);
+      if (!recoveries.some(snapshot => JSON.stringify(snapshot) === candidate)) recoveries.push(existing.current);
+    }
     const revision = crypto.randomUUID();
     const envelope: NoteMetadataEnvelope = {
       version: 1, noteId: next.noteId, revision, current: next.payload,
       ...(next.relativePath ? { relativePath: next.relativePath } : {}),
       ...(existing?.relativePath && existing.relativePath !== next.relativePath ? { previousRelativePath: existing.relativePath } : existing?.previousRelativePath ? { previousRelativePath: existing.previousRelativePath } : {}),
+      ...(recoveries.length ? { recoveries } : {}),
       ...(existing && (existing.recovery || (!previous && legacyBaseline !== undefined)) ? { recovery: existing.recovery ?? existing.current } : {}),
       ...(previous && previous.digest !== next.payload.digest ? { previous } : {}),
       ...(legacyBaseline !== undefined ? { legacyBaseline } : {}),

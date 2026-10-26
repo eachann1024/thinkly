@@ -45,15 +45,16 @@ export async function findNoteMetadata(
   if (!relative) return null;
   const envelopes = await (catalog ?? notebookMetadata(fs, root));
   const exact = envelopes.filter(value => value.relativePath === relative);
-  if (!exact.length) {
+  if (!exact.some(envelope => !envelope.deleted)) {
     for (const envelope of envelopes) {
       if (envelope.previousRelativePath !== relative || !envelope.relativePath || !fs.existsAsync) continue;
       if (!await fs.existsAsync(`${root}/${envelope.relativePath}`)) exact.push(envelope);
     }
   }
-  if (exact.length === 1 && [exact[0].current, exact[0].previous].some(snapshot => snapshot &&
-    (snapshot.markdown === markdown || !exact[0].deleted))) return exact[0];
-  if (exact.length > 1) return null;
+  const active = exact.filter(envelope => !envelope.deleted);
+  if (active.length) return active.length === 1 ? active[0] : null;
+  const retired = exact.filter(envelope => [envelope.current, envelope.previous].some(snapshot => snapshot?.markdown === markdown));
+  if (retired.length) return retired.length === 1 ? retired[0] : null;
   const digest = await markdownDigest(markdown);
   const candidates: NoteMetadataEnvelope[] = [];
   const contextual: NoteMetadataEnvelope[] = [];

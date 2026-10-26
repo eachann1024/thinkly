@@ -93,13 +93,17 @@ export function parseEnvelope(raw: string, expectedId: string): NoteMetadataEnve
   try { value = JSON.parse(raw); } catch { return fail("Invalid metadata JSON"); }
   if (!object(value)) return fail("Invalid metadata envelope");
   if (value.version !== 1) throw new NoteMetadataError("unsupported", "Unsupported note metadata version");
-  safeKeys(value, ["version", "noteId", "revision", "current", "previous", "legacyBaseline", "relativePath", "recovery", "deleted", "previousRelativePath"]);
+  safeKeys(value, ["version", "noteId", "revision", "current", "previous", "legacyBaseline", "relativePath", "recovery", "deleted", "previousRelativePath", "recoveries"]);
   validateNoteId(value.noteId);
   if (value.noteId !== expectedId || typeof value.revision !== "string" || !/^[a-f0-9-]{36}$/.test(value.revision)) fail("Invalid metadata identity or revision");
   if (value.deleted !== undefined && typeof value.deleted !== "boolean") fail("Invalid deletion state");
   for (const key of ["relativePath", "previousRelativePath"]) {
     const relative = value[key];
     if (relative !== undefined && (typeof relative !== "string" || !relative || relative.startsWith("/") || relative.includes("\\") || relative.split("/").some(part => part === ".." || part === ".") || /[\u0000-\u001f]/.test(relative))) fail("Invalid relative path");
+  }
+  if (value.recoveries !== undefined) {
+    if (!Array.isArray(value.recoveries) || value.recoveries.length > MAX_META_ENTRIES) fail("Invalid recovery archive");
+    for (const snapshot of value.recoveries) validateSnapshot(snapshot, expectedId);
   }
   if (value.recovery !== undefined) validateSnapshot(value.recovery, expectedId);
   validateSnapshot(value.current, expectedId);
