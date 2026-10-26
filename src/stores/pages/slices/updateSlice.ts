@@ -1,29 +1,17 @@
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/slices/updateSlice.ts#block1:1">`
 zh-Hans:
-  recoveryWriteFailed: "无法写入恢复备份"
-  keepWindowOpen: "请先不要关闭窗口，并复制重要内容后重试。"
   readSettingsUnchanged: "页面读取失败，未更改设置"
   yamlSettingsUnchanged: "YAML 前置区格式异常，未更改设置"
   fixYaml: "原文已保留，请先修复 YAML 后重试。"
-  notSaved: "内容暂未保存"
-  recoverySaved: "最新内容已放入恢复备份，下次打开仍可找回。"
 en:
-  recoveryWriteFailed: "Couldn’t write the recovery backup"
-  keepWindowOpen: "Keep this window open. Copy any important content, then try again."
   readSettingsUnchanged: "The page couldn’t be read. Settings were not changed."
   yamlSettingsUnchanged: "The YAML frontmatter is invalid. Settings were not changed."
   fixYaml: "The original content was preserved. Fix the YAML and try again."
-  notSaved: "Content has not been saved"
-  recoverySaved: "The latest content was saved to a recovery backup and can be recovered the next time you open the app."
 ja:
-  recoveryWriteFailed: "復元用バックアップを書き込めませんでした"
-  keepWindowOpen: "ウインドウを閉じずに、重要な内容をコピーしてからもう一度お試しください。"
   readSettingsUnchanged: "ページを読み込めなかったため、設定は変更されていません"
   yamlSettingsUnchanged: "YAML フロントマターの形式が正しくないため、設定は変更されていません"
   fixYaml: "元の内容は保持されています。YAML を修正してからもう一度お試しください。"
-  notSaved: "内容は未保存です"
-  recoverySaved: "最新の内容を復元用バックアップに保存しました。次回起動時に復元できます。"
 `);
 import type { PagesState } from "../types";
 import {
@@ -47,6 +35,14 @@ import { toast } from "@/components/ui/sonner";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
 import { queueLocalPageSave } from "../folderSync";
 import { clonePageContent } from "../actions/create/content";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { recoverySettings } from "@/lib/storage/localRecoverySettings";
+import {
+  clearPagePersistenceNotice,
+  clearRecoveryJournalNotice,
+  showPagePersistenceFailure,
+  showRecoveryJournalFailure,
+} from "../saveFailureNotices";
 
 export function createUpdatePageSlice(
   set: import("zustand").StoreApi<PagesState>["setState"],
@@ -71,17 +67,29 @@ export function createUpdatePageSlice(
         isLocalFolderPage(page) && shouldPersistLocalPageMetaUpdate(updates);
       const silent = options?.silent === true;
       const isLocal = isLocalFolderPage(page);
+      const isSettingsEdit = isLocal && !silent && isLocalPageFrontmatterSettingsUpdate(updates);
+      if (isSettingsEdit && page?.localReadState === "error") {
+        toast.error(storeText("readSettingsUnchanged"));
+        return;
+      }
+      const hasSidecarRoot = Boolean(page && useNotebooks.getState().notebooks[page.workspaceId]?.localPath);
       const isDurableContentEdit =
         Boolean(page) && "content" in updates && !silent &&
         (!page?.editorDraft || localPageHasPersistableContent(updates.content) ||
           localPageHasPersistableContent(page.content));
-      const recoveryEntry = isDurableContentEdit
+      const baseSignature = getContentSignature(page?.content ?? null);
+      const baseUpdatedAt = page?.updatedAt;
+      const recoveryEntry = isDurableContentEdit || isSettingsEdit
         ? recordRecoveryEntry({
             source: isLocal ? "local-file" : "internal-page",
             id,
-            content: updates.content ?? null,
-            baseSignature: () => getContentSignature(page?.content ?? null),
-            baseUpdatedAt: page?.updatedAt,
+            content: "content" in updates ? updates.content ?? null : page.content,
+            ...(isLocal ? {
+              settings: recoverySettings({ ...page, ...updates }),
+              baseSettings: recoverySettings(page),
+            } : {}),
+            baseSignature,
+            baseUpdatedAt,
             ...(page?.editorDraft ? { draftPage: {
               ...page,
               content: updates.content ?? page.content,
@@ -89,16 +97,15 @@ export function createUpdatePageSlice(
             } } : {}),
           })
         : null;
-      if (isDurableContentEdit && !recoveryEntry) {
-        toast.error(storeText("recoveryWriteFailed"), {
-          id: "goose-recovery-journal-failed",
-          description: storeText("keepWindowOpen"),
-        });
+      if (recoveryEntry) {
+        clearRecoveryJournalNotice(id);
+      } else if (isDurableContentEdit || isSettingsEdit) {
+        showRecoveryJournalFailure(id, baseSignature, baseUpdatedAt, get, isLocal ? recoverySettings(page) : undefined);
       }
       const shouldMergeFrontmatterSettings =
-        isLocal && !silent && isLocalPageFrontmatterSettingsUpdate(updates);
+        isSettingsEdit && !hasSidecarRoot;
       const shouldQueueLocalSettingsSave =
-        shouldMergeFrontmatterSettings && page?.localReadState !== "error" && !page?.editorDraft;
+        isSettingsEdit && page?.localReadState !== "error" && !page?.editorDraft;
 
       if (shouldMergeFrontmatterSettings && page?.localReadState === "error") {
         toast.error(storeText("readSettingsUnchanged"));
@@ -235,11 +242,13 @@ export function createUpdatePageSlice(
       }
       if (persisted && recoveryEntry) {
         acknowledgeRecoveryEntry("internal-page", id, recoveryEntry.revision);
+        clearRecoveryJournalNotice(id);
+        clearPagePersistenceNotice(id);
       } else if (!persisted) {
-        toast.error(storeText("notSaved"), {
-          id: `goose-page-save-failed:${id}`,
-          description: storeText("recoverySaved"),
-        });
+        showPagePersistenceFailure(id, Boolean(recoveryEntry), get, set);
+      } else {
+        clearPagePersistenceNotice(id);
+        clearRecoveryJournalNotice(id);
       }
     },
   };
