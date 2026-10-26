@@ -1,4 +1,6 @@
 import { createTranslator, i18nYaml } from "@/i18n/core";
+import { NoteMetadataError } from "@/lib/note-metadata/contract";
+import { noteMetadataErrorMessage } from "@/lib/note-metadata/messages";
 
 const localMessages = i18nYaml<"src/lib/diskWriteError.ts#localMessages:1">`
 zh-Hans:
@@ -101,6 +103,11 @@ export function toDiskWriteError(
 }
 
 export function describeDiskWriteError(error: unknown, path?: string): string {
+  let nested = error;
+  for (let depth = 0; depth < 5 && nested instanceof Error; depth++) {
+    if (nested instanceof NoteMetadataError) return noteMetadataErrorMessage(nested);
+    nested = nested.cause;
+  }
   if (error instanceof DiskWriteError && error.message) return error.message;
 
   const text = toText(error);
