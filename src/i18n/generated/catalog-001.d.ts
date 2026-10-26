@@ -33,8 +33,8 @@ declare module "../types" {
     "src/components/editor/ai/transport/runInlineMarkdownRewrite.ts#messages:1": { "aiDidNotReturnAnyContentThatCould": {  } };
     "src/components/editor/blocks/audioBlock.tsx#block1:1": { "add": {  }; "delete": {  }; "download": {  }; "failed": {  }; "replace": {  }; "saveFailed": {  } };
     "src/components/editor/blocks/callout/calloutBlock.tsx#messages:1": { "calloutIcon": {  } };
-    "src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1": { "addCodeCaption": {  }; "collapseCodeBlock": {  }; "expandCodeBlock": {  } };
-    "src/components/editor/blocks/code/CodeBlockToolbar.tsx#messages:1": { "codeActions": {  }; "codeCopied": {  }; "copied": {  }; "copyCode": {  }; "formatCode": {  }; "turnOffLineWrapping": {  }; "wrapLines": {  } };
+    "src/components/editor/blocks/code/CodeBlockHeader.tsx#messages:1": { "addCodeCaption": {  } };
+    "src/components/editor/blocks/code/CodeBlockToolbar.tsx#messages:1": { "codeActions": {  }; "codeCopied": {  }; "collapseCodeBlock": {  }; "copied": {  }; "copyCode": {  }; "downloadImage": {  }; "expandCodeBlock": {  }; "formatCode": {  }; "moreActions": {  }; "turnOffLineWrapping": {  }; "wrapLines": {  } };
     "src/components/editor/blocks/code/CodeBlockView.tsx#messages:1": { "formulaPreview": {  } };
     "src/components/editor/blocks/code/CodeLatexHints.tsx#messages:1": { "arrow": {  }; "fraction": {  }; "greaterThanOrEqualTo": {  }; "infinity": {  }; "integral": {  }; "latexSyntaxReference": {  }; "lessThanOrEqualTo": {  }; "limit": {  }; "matrix": {  }; "notEqual": {  }; "nthRoot": {  }; "squareRoot": {  }; "subscript": {  }; "sum": {  }; "superscript": {  }; "vector": {  } };
     "src/components/editor/blocks/code/CodePreviewToolbar.tsx#messages:1": { "code": {  }; "codeBlockDisplayMode": {  }; "codeCopied": {  }; "copyCode": {  }; "copyImage": {  }; "downloadImage": {  }; "imageCopied": {  }; "preview": {  }; "showCode": {  }; "showPreview": {  } };

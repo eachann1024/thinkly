@@ -3,7 +3,6 @@ import { MathView } from "@/components/editor/blocks/math/MathView";
 import { MermaidView } from "@/components/editor/blocks/mermaid/MermaidView";
 import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { CodeBlockHeader } from "./CodeBlockHeader";
-import { CodeLatexHints } from "./CodeLatexHints";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockView.tsx#messages:1">`
@@ -19,8 +18,7 @@ const t = createTranslator(messages);
 
 export function CodeBlockView(props: CodeBlockViewProps) {
   useLocale();
-  const { language, wrap, collapsed, contentRef, isEditable, edit, preview } =
-    props;
+  const { language, wrap, collapsed, contentRef, edit, preview } = props;
   const { rootRef } = edit;
   const {
     previewRef,
@@ -102,11 +100,6 @@ export function CodeBlockView(props: CodeBlockViewProps) {
         content={previewContent}
         title={language === "math" ? t("formulaPreview") : "Mermaid"}
         onClose={() => setPreviewContent(null)}
-      />
-      <CodeLatexHints
-        collapsed={collapsed}
-        language={language}
-        isEditable={isEditable}
       />
     </div>
   );
