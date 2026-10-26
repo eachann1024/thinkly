@@ -11,7 +11,7 @@ const t = createTranslator(messages);
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import type { ApprovalPlanPart } from "../ApprovalPlanCard";
 import {
-  isDefaultChatSkillPart,
+  isHiddenSkillPart,
   type ToolDisplayPart,
 } from "../toolProgressVisibility";
 const INPUT_ONLY_STATES = new Set([
@@ -79,7 +79,7 @@ export function shouldShowToolPart(
   part: ToolDisplayPart,
   isMessageStreaming: boolean,
 ) {
-  if (isDefaultChatSkillPart(part)) return false;
+  if (isHiddenSkillPart(part)) return false;
   const state = part.state ?? "";
   if (
     part.type === "tool-executeBatchPlan" &&
