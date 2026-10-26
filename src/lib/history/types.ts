@@ -11,6 +11,8 @@ export interface HistoryIndexEntry {
   label?: string;
   charCount: number;
   charDelta: number;
+  /** Character change from a known editing baseline, excluding imported content. */
+  editCharDelta?: number;
   size: number;
 }
 
@@ -30,6 +32,7 @@ export interface HistoryVersion {
   label?: string;
   charCount: number;
   charDelta: number;
+  editCharDelta?: number;
   size: number;
   content: BlockNoteContent;
   localFrontmatter?: string;

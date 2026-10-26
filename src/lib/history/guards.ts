@@ -39,6 +39,8 @@ function normalizeIndexEntry(value: unknown): HistoryIndexEntry | null {
     ...(label ? { label } : {}),
     charCount: finiteNumber(raw.charCount),
     charDelta: finiteNumber(raw.charDelta),
+    ...(typeof raw.editCharDelta === "number" && Number.isFinite(raw.editCharDelta)
+      ? { editCharDelta: raw.editCharDelta } : {}),
     size: finiteNumber(raw.size),
   };
 }
@@ -92,6 +94,8 @@ export function normalizeHistoryVersion(
     ...(label ? { label } : {}),
     charCount: finiteNumber(raw.charCount),
     charDelta: finiteNumber(raw.charDelta),
+    ...(typeof raw.editCharDelta === "number" && Number.isFinite(raw.editCharDelta)
+      ? { editCharDelta: raw.editCharDelta } : {}),
     size: finiteNumber(raw.size),
     content: raw.content as HistoryVersion["content"],
     ...(settings ? { settings } : {}),
