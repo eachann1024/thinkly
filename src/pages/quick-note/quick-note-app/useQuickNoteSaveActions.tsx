@@ -66,15 +66,18 @@ export function useQuickNoteSaveActions(
     setSavingToNote(true);
     try {
       await useNotebooks.persist.rehydrate();
-      const id = await useQuickNote.getState().saveDraftToNotebook();
-      if (!id) {
+      const saved = await useQuickNote.getState().saveDraftToNotebook();
+      if (!saved) {
         toast.error(uiText("saveFailed"), {
           description: uiText("openNotebook"),
         });
         return;
       }
-      applyHistoryContentToEditor(null);
-      const filePath = usePages.getState().pages[id]?.localFilePath;
+      const current = useQuickNote.getState();
+      if (saved.clearedSlot !== null && current.activeSlot === saved.clearedSlot && current.drafts[saved.clearedSlot] === null) {
+        applyHistoryContentToEditor(null);
+      }
+      const filePath = usePages.getState().pages[saved.id]?.localFilePath;
       if (filePath && (await revealSavedNoteWhenReady(filePath))) return;
       toast.success(
         uiText("saved"),
