@@ -10,7 +10,7 @@ const hash = (value: string) => createHash("sha256").update(value).digest("hex")
 const metadataName = (id: string) => `.goose/metadata/${hash(id)}.json`;
 const visibleMarkdown = (name: string) => /\.(md|markdown)$/i.test(name) && !name.split("/").some(part => part.startsWith("."));
 const sameText = (a: string, b: string) => a.replace(/\r\n/g, "\n") === b.replace(/\r\n/g, "\n");
-const snapshots = (envelope: NoteMetadataEnvelope) => [envelope.current, envelope.previous, envelope.recovery];
+const snapshots = (envelope: NoteMetadataEnvelope) => [envelope.current, envelope.previous, envelope.recovery, ...(envelope.recoveries ?? [])];
 
 export type NoteFileGroup = { id: string; names: Set<string>; base?: Files; local: Files; remote: Files };
 
@@ -33,9 +33,11 @@ function identify(files: Files): Identities {
     const envelope = envelopeFor(files, raw.noteId)!;
     envelopes.push(envelope);
     ids.set(envelope.noteId, undefined);
+  }
+  for (const envelope of [...envelopes].sort((a, b) => Number(Boolean(a.deleted)) - Number(Boolean(b.deleted)))) {
     const path = envelope.relativePath && files[envelope.relativePath] !== undefined ? envelope.relativePath
       : envelope.previousRelativePath && !files[envelope.relativePath ?? ""] ? envelope.previousRelativePath : undefined;
-    if (path && visibleMarkdown(path) && files[path] !== undefined && (!envelope.deleted ||
+    if (path && visibleMarkdown(path) && files[path] !== undefined && (!envelope.deleted || !owners.has(path) &&
       snapshots(envelope).some(snapshot => snapshot && sameText(snapshot.markdown, decode(files[path]))))) claim(envelope.noteId, path);
   }
   for (const [name, bytes] of Object.entries(files)) {
@@ -119,6 +121,7 @@ export function forkNoteGroup(files: Files, id: string, targetName: string): Fil
       markdown: next, digest: hash(next), meta: null,
       settings: { fontFamily: "default", isLocked: false, isPinned: false, isFavorite: false },
     },
+    ...(envelope.recoveries?.length ? { recoveries: envelope.recoveries.map(cleanSnapshot) } : {}),
     ...(!selected ? { previous: cleanSnapshot(envelope.current), recovery: cleanSnapshot(envelope.recovery ?? envelope.previous ?? envelope.current) } : {}),
   };
   return { [targetName]: encode(next), [metadataName(newId)]: encode(JSON.stringify(nextEnvelope) + "\n") };
