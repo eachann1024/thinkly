@@ -32,6 +32,7 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
   const { appShortcutsRef, openTabsRef, activeTabIdRef } = refs;
   const actions = createHotkeyActions(refs);
   const { runUnifiedClose, createNewNoteFromHotkey } = actions;
+  const uninstallCloseTargetTracking = actions.installCloseTargetTracking();
   const entries: HotkeyEntry[] = [
     ...createEditorHotkeys(actions),
     ...createWorkspaceHotkeys(actions),
@@ -197,6 +198,7 @@ export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
   );
 
   return () => {
+    uninstallCloseTargetTracking();
     unsubscribeCloseActiveTab?.();
     unregisterEscapeClose();
     document.removeEventListener("keydown", dispatcher, true);
