@@ -6,6 +6,8 @@ import { Switch, SwitchRow } from "@/components/ui/switch";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "./settings/SettingsSectionCard";
 import { SettingsAppUpdate } from "./settings/SettingsAppUpdate";
+import { Button } from "@/components/ui/button";
+import { openRecoveryDrafts } from "@/lib/recoveryDrafts";
 
 const messages = i18nYaml<"src/pages/workspace/components/sidebar/SettingsGeneral.tsx#messages:1">`
 zh-Hans:
@@ -15,6 +17,7 @@ zh-Hans:
   hover: 悬停展开笔记本菜单
   search: 搜索
   recent: 搜索时显示最近访问的笔记
+  recovery: 恢复稿
 en:
   general: General
   common: General settings
@@ -22,6 +25,7 @@ en:
   hover: Open the notebook menu on hover
   search: Search
   recent: Show recent notes in search
+  recovery: Recovery drafts
 ja:
   general: "一般"
   common: "よく使う設定"
@@ -29,6 +33,7 @@ ja:
   hover: "ホバーでノートブックメニューを開く"
   search: "検索"
   recent: "検索時に最近開いたノートを表示"
+  recovery: "復元用下書き"
 `;
 
 interface SettingsGeneralProps {
@@ -80,6 +85,9 @@ export function SettingsGeneral({
             </span>
             <Switch id="show-recent-in-search" checked={showRecentInSearch} onCheckedChange={setShowRecentInSearch} className={SWITCH_CLASS} />
           </SwitchRow>
+        </SettingsSectionCard>
+        <SettingsSectionCard title={t("recovery")}>
+          <Button variant="outline" size="sm" onClick={openRecoveryDrafts}>{t("recovery")}</Button>
         </SettingsSectionCard>
         <SettingsAppUpdate />
       </div>
