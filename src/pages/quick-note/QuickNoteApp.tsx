@@ -10,6 +10,7 @@ import { useQuickNoteSaveActions } from "./quick-note-app/useQuickNoteSaveAction
 import { useQuickNoteShortcuts } from "./quick-note-app/useQuickNoteShortcuts";
 import { useQuickNoteWindowPlacement } from "./quick-note-app/useQuickNoteWindowPlacement";
 import { renderQuickNoteHeader } from "./quick-note-app/renderQuickNoteHeader";
+import { RecoveryDraftsHost } from "@/components/recovery/RecoveryDraftsHost";
 
 export function QuickNoteApp() {
   useLocale();
@@ -34,6 +35,7 @@ export function QuickNoteApp() {
 
   return (
     <div
+      data-quicknote-root
       className="quicknote-root relative flex h-screen w-screen flex-col bg-[hsl(var(--goose-editor-bg))]"
       data-collect-variant={collectVariant ?? undefined}
     >
@@ -63,6 +65,7 @@ export function QuickNoteApp() {
         offset={{ bottom: 30, left: 24, right: 24 }}
         mobileOffset={{ bottom: 30, left: 24, right: 24 }}
       />
+      <RecoveryDraftsHost />
     </div>
   );
 }

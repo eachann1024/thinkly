@@ -22,6 +22,7 @@ import {
 import { shouldPreserveStartupSelection } from "@/lib/workspaceStartup";
 import { PencilIconDefinitions } from "@/components/theme/PencilIconDefinitions";
 import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
+import { RecoveryDraftsHost } from "@/components/recovery/RecoveryDraftsHost";
 
 function AppearanceSync() {
   const {
@@ -136,7 +137,7 @@ function App() {
       <AppearanceSync />
       <PencilIconDefinitions />
       {mountWorkspace && (
-        <div hidden={guideVisible} inert={guideVisible} className="h-full">
+        <div data-workspace-root hidden={guideVisible} inert={guideVisible} className="h-full">
           { }
           <WorkspacePage />
         </div>
@@ -145,6 +146,7 @@ function App() {
       {surface === "setup" && <SetupGuide />}
       <AppUpdateDialog />
       <Toaster />
+      <RecoveryDraftsHost />
     </>
   );
 }
