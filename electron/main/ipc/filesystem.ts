@@ -1,4 +1,5 @@
 import { writeNotebookText } from "../writeNotebookText";
+import { compareAndSwapText } from "../compareAndSwapText";
 import { t } from "../i18n/nativeServices";
 import { assertGitSyncWritable, waitForGitSyncRead } from "../gitSyncLock";
 import { ipcMain, shell } from "electron";
@@ -28,6 +29,16 @@ import type { SaveLocalAssetRequest } from "../../../src/lib/local-file-asset-co
 
 export function registerFilesystemIpc(undoRoot: string): void {
   registerGooseInternalIpc();
+  ipcMain.handle("desktop:fsCompareAndSwapText", async (_event, p: string, expected: string | null, next: string) => {
+    if ((expected !== null && typeof expected !== "string") || typeof next !== "string") throw new Error("Invalid note text");
+    const target = assertAllowed(p);
+    ensureParentDir(target);
+    let committed = false;
+    await withSelfWriteMark([target], async () => {
+      committed = await compareAndSwapText(target, expected, next, () => { assertAllowed(target); assertGitSyncWritable(target); });
+    });
+    return committed;
+  });
   ipcMain.handle("desktop:fsSaveAsset", (_event, input: SaveLocalAssetRequest) => saveNotebookAsset(input));
   ipcMain.handle("desktop:fsReadText", async (_event, p: string) => {
     const target = assertAllowed(p);
@@ -53,11 +64,11 @@ export function registerFilesystemIpc(undoRoot: string): void {
 
   ipcMain.handle(
     "desktop:fsWrite",
-    async (_event, p: string, data: Uint8Array) => {
+    async (_event, p: string, data: Uint8Array, exclusive?: boolean) => {
       const target = assertAllowed(p);
       ensureParentDir(target);
       await withSelfWriteMark([target], () =>
-        writeFile(target, Buffer.from(data)),
+        writeFile(target, Buffer.from(data), { flag: exclusive ? "wx" : "w" }),
       );
     },
   );

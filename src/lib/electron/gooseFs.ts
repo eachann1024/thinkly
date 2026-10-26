@@ -21,6 +21,7 @@ import {
   existsCache,
   rememberExists,
   bytesToBase64,
+  base64ToBytes,
   toErrorMessage,
   writeFileImpl,
   watchImpl,
@@ -110,11 +111,19 @@ export const electronGooseFs = {
     return true;
   },
   writeFileAsync: writeFileImpl,
-  createFileAsync: async (path: string, content: string) => {
+  compareAndSwapFileAsync: async (path: string, expected: string | null, next: string) => {
+    const api = getGooseDesktop();
+    if (!api) throw new Error("Desktop filesystem unavailable");
+    const committed = await api.fsCompareAndSwapText(path, expected, next);
+    if (committed) rememberExists(path, true);
+    return committed;
+  },
+  createFileAsync: async (path: string, content: string, encoding?: string) => {
     const api = getGooseDesktop();
     if (!api) return false;
     try {
-      await api.fsWriteText(path, content, true);
+      if (encoding === "base64") await api.fsWrite(path, base64ToBytes(content), true);
+      else await api.fsWriteText(path, content, true);
       rememberExists(path, true);
       return true;
     } catch (error) {
