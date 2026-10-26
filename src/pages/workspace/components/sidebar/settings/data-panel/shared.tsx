@@ -32,7 +32,7 @@ export interface SettingsDataPanelProps {
   onExport: () => void;
   onOpenResetDialog: () => void;
   onRestartGuide: () => void;
-  onResetAndImport?: (blob: Blob) => Promise<void>;
+  onResetAndImport?: (blob: Blob) => Promise<boolean | void>;
 }
 
 export const DATA_BADGE_CLASS =
