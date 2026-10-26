@@ -35,11 +35,13 @@ const gooseDesktop = {
   fsReadText: (p: string) => invoke("desktop:fsReadText", p) as Promise<string>,
   fsWriteText: (p: string, data: string, exclusive?: boolean) =>
     invoke("desktop:fsWriteText", p, data, exclusive) as Promise<void>,
+  fsCompareAndSwapText: (p: string, expected: string | null, next: string) =>
+    invoke("desktop:fsCompareAndSwapText", p, expected, next) as Promise<boolean>,
   fsRead: (p: string) => invoke("desktop:fsRead", p) as Promise<Uint8Array>,
   fsSaveAsset: (input: import("../../src/lib/local-file-asset-contract").SaveLocalAssetRequest) =>
     invoke("desktop:fsSaveAsset", input) as Promise<import("../../src/lib/local-file-asset-contract").SavedLocalAssetPath>,
-  fsWrite: (p: string, data: Uint8Array) =>
-    invoke("desktop:fsWrite", p, data) as Promise<void>,
+  fsWrite: (p: string, data: Uint8Array, exclusive?: boolean) =>
+    invoke("desktop:fsWrite", p, data, exclusive) as Promise<void>,
   fsReadDir: (p: string) =>
     invoke("desktop:fsReadDir", p) as Promise<
       { name: string; isDirectory: boolean; path: string }[]
