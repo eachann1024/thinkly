@@ -118,6 +118,7 @@ export function TabRail({
       <div
         ref={tabsScrollerRef}
         role="tablist"
+        data-workspace-tab-rail=""
         aria-label={uiText("openTabs")}
         className={cn(
           "relative @container min-w-0 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
