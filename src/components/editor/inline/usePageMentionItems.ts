@@ -12,14 +12,20 @@ import { getPageTitle } from "../utils/page-title";
 const messages = i18nYaml<"src/components/editor/inline/usePageMentionItems.ts#messages:1">`
 zh-Hans:
   pageCreatedTheOriginalNoteHasChangedOpen: "新页面已创建；原笔记内容已变化，请从侧栏打开"
+  pageCreatedButCouldNotOpen: "新页面已创建，但暂时无法打开。请重试，或从侧栏打开。"
+  openCreatedPage: "打开新页面"
   couldNotCreateThePageYourOriginalContent: "创建页面失败，原内容已保留"
   createPageHere: "新建“{{title}}”"
 en:
   pageCreatedTheOriginalNoteHasChangedOpen: "Page created. The original note has changed; open the new page from the sidebar."
+  pageCreatedButCouldNotOpen: "The page was created, but could not be opened. Retry or open it from the sidebar."
+  openCreatedPage: "Open new page"
   couldNotCreateThePageYourOriginalContent: "Could not create the page. Your original content was preserved."
   createPageHere: "Create “{{title}}”"
 ja:
   pageCreatedTheOriginalNoteHasChangedOpen: "新しいページを作成しました。元のノートの内容が変更されたため、サイドバーから開いてください"
+  pageCreatedButCouldNotOpen: "ページは作成されましたが開けませんでした。再試行するか、サイドバーから開いてください。"
+  openCreatedPage: "新しいページを開く"
   couldNotCreateThePageYourOriginalContent: "ページを作成できませんでした。元の内容は残されています"
   createPageHere: "「{{title}}」を新規作成"
 `;
@@ -28,7 +34,7 @@ const t = createTranslator(messages);
 
 export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
   const locale = useLocale();
-  const { page, searchPages, getLatestPage, resolvePageMention, createPageMentionTarget } = useEditorPageContext();
+  const { page, searchPages, getLatestPage, resolvePageMention, createPageMentionTarget, onOpenPage } = useEditorPageContext();
   const pageVisit = useRef({ id: page.id });
   if (pageVisit.current.id !== page.id) pageVisit.current = { id: page.id };
   const origin = pageVisit.current;
@@ -67,7 +73,32 @@ export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
             if (!created) return;
             if (pageVisit.current !== origin || !editor.isEditable ||
               !restoreEditorSelection(editor.prosemirrorView, snapshot)) {
-              toast.info(t("pageCreatedTheOriginalNoteHasChangedOpen"));
+              const noticeId = `created-page-open:${created.pageId}`;
+              const openCreatedPage = (event: { preventDefault: () => void }) => {
+                event.preventDefault();
+                let opened: boolean | void = false;
+                try {
+                  opened = onOpenPage(created.pageId);
+                } catch {
+                }
+                if (opened === false) {
+                  toast.info(t("pageCreatedButCouldNotOpen"), {
+                    id: noticeId,
+                    duration: Infinity,
+                    action: { label: t("openCreatedPage"), onClick: openCreatedPage },
+                  });
+                  return;
+                }
+                toast.dismiss(noticeId);
+              };
+              toast.info(t("pageCreatedTheOriginalNoteHasChangedOpen"), {
+                id: noticeId,
+                duration: Infinity,
+                action: {
+                  label: t("openCreatedPage"),
+                  onClick: openCreatedPage,
+                },
+              });
               return;
             }
             const live = resolveItem(created);
@@ -81,5 +112,5 @@ export function usePageMentionItems(editor: BlockNoteEditor<any, any, any>) {
       });
     }
     return result;
-  }, [editor, origin, searchPages, getLatestPage, resolvePageMention, createPageMentionTarget, locale]);
+  }, [editor, origin, searchPages, getLatestPage, resolvePageMention, createPageMentionTarget, onOpenPage, locale]);
 }
