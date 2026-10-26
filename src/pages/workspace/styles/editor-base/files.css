@@ -51,6 +51,12 @@
   pointer-events: none;
 }
 
+.bn-editor .bn-block-outer[data-goose-block-selected="true"]
+  :is(.goose-media-placeholder, .goose-media-loading, .goose-image-preview,
+    .goose-video-block-shell, .goose-audio-block, .goose-file-block-content)::after {
+  content: none;
+}
+
 .goose-file-block-info {
   display: flex;
   align-items: center;
