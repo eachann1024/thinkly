@@ -149,7 +149,6 @@ export function SortableNotebookItem({
           </Tooltip>
         </TooltipProvider>
         </div>
-        <GooseIcons.Check className={isActive ? "h-4 w-4 shrink-0" : "invisible h-4 w-4 shrink-0"} />
       </div>
     </div>
   );
