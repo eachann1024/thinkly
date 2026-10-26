@@ -8,7 +8,7 @@ import { ensureNotebookAiMessageCreatedAt } from "@/lib/notebook-ai/messageTime"
 import { getNotebookAiPlaceholderHints } from "./helpers";
 import type { NotebookAiSessionScope } from "./types";
 import type { SessionState } from "./useSessionState";
-import { revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
+import { stopSessionChat } from "./sessionCompletion";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/session/useStreamLifecycle.ts#messages:1">`
 zh-Hans:
@@ -30,8 +30,6 @@ export function useStreamLifecycle(state: SessionState) {
   const {
     activeSessionScopeRef,
     currentSessionScope,
-    committedStopRef,
-    stop,
     chat,
     messagesRef,
     messages,
@@ -55,15 +53,12 @@ export function useStreamLifecycle(state: SessionState) {
   } = state;
   useLayoutEffect(() => {
     activeSessionScopeRef.current = currentSessionScope;
-    committedStopRef.current = stop;
     messagesRef.current = messages;
   }, [
     activeSessionScopeRef,
-    committedStopRef,
     currentSessionScope,
     messages,
     messagesRef,
-    stop,
   ]);
 
   useLayoutEffect(() => {
@@ -77,7 +72,6 @@ export function useStreamLifecycle(state: SessionState) {
     };
   }, [
     aiStatusActiveRef,
-    committedStopRef,
     compactAbortRef,
     notebookId,
     requestCurrentPageIdRef,
@@ -125,22 +119,20 @@ export function useStreamLifecycle(state: SessionState) {
 
   const stopAll = useCallback(() => {
     compactAbortRef.current?.abort();
-    const user = [...chat.messages].reverse().find((message) => message.role === "user");
-    if (user?.metadata?.writeScope) revokeRunWriteScope(user.metadata.writeScope.runId);
-    void stop();
-  }, [chat, compactAbortRef, stop]);
+    stopSessionChat(chat, "stopped");
+  }, [chat, compactAbortRef]);
 
   useEffect(() => {
     if (!isStreaming) return;
     const timer = window.setTimeout(() => {
-      void committedStopRef.current();
+      stopSessionChat(chat, "timeout");
       toast.error(t("aiResponseTimedOutThisTaskWasPaused"), {
         id: "notebook-ai-stream-timeout",
         description: t("completedContentWasPreservedYouCanRetryAt"),
       });
     }, NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
-  }, [committedStopRef, isStreaming, messages]);
+  }, [chat, isStreaming, messages]);
 
   useEffect(() => {
     if (isStreaming || isCompacting) {
@@ -155,8 +147,11 @@ export function useStreamLifecycle(state: SessionState) {
     aiStatusActiveRef.current = false;
     useAiStatus
       .getState()
-      .finishStreaming({ celebrate: status === "ready" && !error });
-  }, [aiStatusActiveRef, error, isCompacting, isStreaming, status]);
+      .finishStreaming({
+        celebrate: status === "ready" && !error &&
+          chat.messages.at(-1)?.metadata?.completion === "complete",
+      });
+  }, [aiStatusActiveRef, chat, error, isCompacting, isStreaming, status]);
 
   useEffect(() => {
     if (chat.status === "streaming" || chat.status === "submitted") return;

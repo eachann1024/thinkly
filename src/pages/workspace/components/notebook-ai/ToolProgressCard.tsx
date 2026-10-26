@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n";
+import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -98,6 +99,7 @@ function FoldChevron() {
 interface ToolProgressCardProps {
   parts: ToolProgressPart[];
   isMessageStreaming?: boolean;
+  completion?: NotebookAiCompletion;
   thinkingText?: string;
   children?: ReactNode;
   footer?: ReactNode;
@@ -173,14 +175,15 @@ function WorkCardTraceRow({
 export function ToolProgressCard({
   parts,
   isMessageStreaming,
+  completion,
   thinkingText,
   children,
   footer,
 }: ToolProgressCardProps) {
   const locale = useLocale();
   const steps = useMemo(
-    () => buildToolProgressSteps(parts, isMessageStreaming),
-    [parts, isMessageStreaming, locale],
+    () => buildToolProgressSteps(parts, isMessageStreaming, completion),
+    [parts, isMessageStreaming, completion, locale],
   );
   const thinkingLine = visibleBusyTickerLine(thinkingText ?? "");
   const hasThinking = thinkingLine.length > 0;
@@ -188,21 +191,23 @@ export function ToolProgressCard({
   const hasError = steps.some((step) => step.status === "error");
   const isRunning =
     !hasError &&
+    !completion &&
     (Boolean(isMessageStreaming) ||
       steps.some((step) => step.status === "running"));
   const heldRunning = useMinHoldActive(isRunning, ORB_VISIBLE_MIN_MS);
-  const showRunning = resolveLoaderHold(isRunning, heldRunning);
-  const phase = getWorkCardPhase(steps, showRunning);
+  const showRunning = !completion && resolveLoaderHold(isRunning, heldRunning);
+  const phase = getWorkCardPhase(steps, showRunning, completion);
   const heading = getWorkCardHeading(steps, phase);
   const [approvalStatus, setApprovalStatus] =
     useState<WorkCardStatusData | null>(null);
-  const status = approvalStatus ?? heading.status;
+  const interrupted = Boolean(completion && completion !== "complete");
+  const status = interrupted ? heading.status : approvalStatus ?? heading.status;
   const showProcessing = status.icon === "running";
   const [open, setOpen] = useState(false);
   const foldable = steps.length > 0;
   const traceLabel = foldable ? heading.toggle : hasThinking ? t("thinking") : "";
   const showTraceRow = foldable || hasThinking;
-  const hasHeading = foldable || showRunning;
+  const hasHeading = foldable || showRunning || interrupted;
 
   if (!hasHeading && !showTraceRow && !children && !footer) return null;
 
