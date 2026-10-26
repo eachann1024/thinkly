@@ -1,3 +1,3 @@
 export function localizedAppName(): string {
-  return "thinkly";
+  return "Thinkly";
 }

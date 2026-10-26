@@ -7,7 +7,7 @@ finish() {
   read -r reply
 }
 if [[ ! -d "$APP" || -L "$APP" || -L "$APP/Contents" || -L "$APP/Contents/Info.plist" ]]; then
-  finish '请先将「思绪 · Thinkly」拖入「应用程序」，等待复制完成，再打开安装指令。'
+  finish '请先将「Thinkly」拖入「应用程序」，等待复制完成，再打开安装指令。'
   exit 1
 fi
 bundle_id=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist" 2>/dev/null || true)
@@ -15,13 +15,13 @@ if [[ "$bundle_id" != 'com.thinkly.desktop' || ! -d "$APP/Contents/MacOS" ]]; th
   finish '应用信息不匹配，未进行修改。请重新下载官方安装包。'
   exit 1
 fi
-printf '此指令仅移除「思绪 · Thinkly」的下载隔离标记，不修改笔记，不关闭系统安全保护。\n请在系统授权窗口确认；密码由 macOS 处理。\n'
+printf '此指令仅移除「Thinkly」的下载隔离标记，不修改笔记，不关闭系统安全保护。\n请在系统授权窗口确认；密码由 macOS 处理。\n'
 if /usr/bin/osascript <<'APPLESCRIPT'
 do shell script "/usr/bin/xattr -r -s -d com.apple.quarantine '/Applications/Thinkly.app'" with administrator privileges
 APPLESCRIPT
 then
   if /usr/bin/open "$APP"; then
-    finish '已完成，正在打开思绪 · Thinkly。'
+    finish '已完成，正在打开 Thinkly。'
   else
     finish '隔离标记已处理，但应用未能打开。请从「应用程序」重试；如仍失败，请重新下载官方安装包。'
     exit 1

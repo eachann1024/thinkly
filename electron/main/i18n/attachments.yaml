@@ -15,7 +15,7 @@ zh-Hans:
   notebookChanged: "笔记本已变更，请重新扫描"
   changed: "资源引用或文件已变化，未删除，请重新扫描"
   fileChanged: "资源文件已变化"
-  cleanupTitle: "资源清理 · 思绪 · Thinkly"
+  cleanupTitle: "资源清理 · Thinkly"
   quicknoteTitle: "速记"
   searchTitle: "搜索"
   moveTrash: "移入废纸篓"

@@ -1,4 +1,4 @@
-"""思绪 · Thinkly 构建：installation。"""
+"""Thinkly 构建：installation。"""
 
 from __future__ import annotations
 

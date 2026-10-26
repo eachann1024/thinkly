@@ -10,8 +10,8 @@ zh-Hans:
   copied: "已复制"
   loading: "正在加载…"
   settings: "设置"
-  productName: "thinkly"
-  slogan: "思绪 Thinkly：安放每一瞬念头，随时向过去提问"
+  productName: "Thinkly"
+  slogan: "Thinkly：安放每一瞬念头，随时向过去提问"
 en:
   cancel: "Cancel"
   confirm: "Confirm"
@@ -24,7 +24,7 @@ en:
   copied: "Copied"
   loading: "Loading…"
   settings: "Settings"
-  productName: "thinkly"
+  productName: "Thinkly"
   slogan: "Thinkly: Keep every passing thought. Ask your past anytime."
 ja:
   cancel: "キャンセル"
@@ -38,5 +38,5 @@ ja:
   copied: "コピーしました"
   loading: "読み込み中…"
   settings: "設定"
-  productName: "thinkly"
+  productName: "Thinkly"
   slogan: "Thinkly：ふとした思いつきをすべて受け止め、いつでも過去に問いかけられる"

@@ -8,7 +8,7 @@ zh-Hans:
   theBackupMetadataIsMissingItsNotebookOrPage: "备份元数据缺少笔记本或页面列表"
   theBackupContainsInvalidNotebookData: "备份中包含无效的笔记本信息"
   theBackupContainsInvalidPageData: "备份中包含无效的页面信息"
-  thisZipFileContainsNoRecoverableGooseNotesData: "ZIP 中没有可恢复的思绪 · Thinkly 数据"
+  thisZipFileContainsNoRecoverableGooseNotesData: "ZIP 中没有可恢复的Thinkly 数据"
 en:
   theBackupIsnTAValidZipFile: "The backup isn’t a valid ZIP file"
   theBackupMetadataIsDamaged: "The backup metadata is damaged"

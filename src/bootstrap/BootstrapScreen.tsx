@@ -3,9 +3,9 @@ import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/bootstrap/BootstrapScreen.tsx#localMessages:1">`
 zh-Hans:
-  openFailed: "思绪 · Thinkly 暂时无法打开"
+  openFailed: "Thinkly 暂时无法打开"
   restoring: "正在恢复速记"
-  opening: "正在打开思绪 · Thinkly"
+  opening: "正在打开Thinkly"
   reload: "重新加载"
 en:
   openFailed: "Thinkly couldn’t open"
