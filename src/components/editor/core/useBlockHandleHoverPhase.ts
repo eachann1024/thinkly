@@ -4,29 +4,47 @@ import { setBlockHandleUi, type BlockHandleUiEditor, type BlockHandleUiPhase } f
 
 export const BLOCK_HANDLE_TOOLBAR_DELAY = 200;
 export type BlockHandleHoverPhase = BlockHandleUiPhase;
-type HoverEditor = BlockHandleUiEditor & { prosemirrorView: { dom: HTMLElement } };
+type HoverView = BlockHandleUiEditor["prosemirrorView"] & { dom: HTMLElement };
+type HoverEditor = { prosemirrorView: HoverView };
+
+function publishForView(view: HoverView, dom: HTMLElement, blockId: string | undefined, phase: BlockHandleHoverPhase, locked = false) {
+  if (view.isDestroyed) return;
+  setBlockHandleUi({ prosemirrorView: view }, { blockId, phase, locked });
+  if (view.isDestroyed) return;
+  dom.dispatchEvent(new CustomEvent("goose:block-hover", { detail: { blockId, phase, locked } }));
+}
 
 export function publishBlockHandlePhase(editor: HoverEditor, blockId: string | undefined, phase: BlockHandleHoverPhase, locked = false) {
-  setBlockHandleUi(editor, { blockId, phase, locked });
-  editor.prosemirrorView.dom.dispatchEvent(new CustomEvent("goose:block-hover", { detail: { blockId, phase, locked } }));
+  const view = editor.prosemirrorView;
+  publishForView(view, view.dom, blockId, phase, locked);
+}
+
+export function startBlockHandleUiLifecycle(editor: HoverEditor): () => void {
+  const view = editor.prosemirrorView;
+  const capturedEditor = { prosemirrorView: view };
+  setBlockHandleUi(capturedEditor, { enabled: true });
+  return () => setBlockHandleUi(capturedEditor, { enabled: false, blockId: undefined, phase: "none", locked: false, emptyBlockId: undefined });
 }
 
 export function startBlockHandleHoverPhase(editor: HoverEditor, blockId: string | undefined, locked: boolean, dragging: boolean): () => void {
   if (!blockId) return () => {};
-  publishBlockHandlePhase(editor, blockId, dragging ? "none" : "handle", locked || dragging);
+  const view = editor.prosemirrorView;
+  const dom = view.dom;
+  const publish = (nextBlockId: string | undefined, phase: BlockHandleHoverPhase, nextLocked = false) =>
+    publishForView(view, dom, nextBlockId, phase, nextLocked);
+  publish(blockId, dragging ? "none" : "handle", locked || dragging);
   const timer = !locked && !dragging ? window.setTimeout(() => {
-    publishBlockHandlePhase(editor, blockId, "toolbar");
+    publish(blockId, "toolbar");
   }, BLOCK_HANDLE_TOOLBAR_DELAY) : undefined;
   return () => {
     window.clearTimeout(timer);
-    publishBlockHandlePhase(editor, undefined, "none");
+    publish(undefined, "none");
   };
 }
 
 export function useBlockHandleHoverPhase(editor: BlockNoteEditor<any, any, any>, blockId: string | undefined, locked: boolean, dragging: boolean) {
   useEffect(() => {
-    setBlockHandleUi(editor, { enabled: true });
-    return () => { setBlockHandleUi(editor, { enabled: false, blockId: undefined, phase: "none", locked: false, emptyBlockId: undefined }); };
+    return startBlockHandleUiLifecycle(editor as HoverEditor);
   }, [editor]);
-  useEffect(() => startBlockHandleHoverPhase(editor, blockId, locked, dragging), [editor, blockId, locked, dragging]);
+  useEffect(() => startBlockHandleHoverPhase(editor as HoverEditor, blockId, locked, dragging), [editor, blockId, locked, dragging]);
 }
