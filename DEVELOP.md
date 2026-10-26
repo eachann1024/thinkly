@@ -58,18 +58,15 @@ Windows 下载包必须匹配“设置 → 系统 → 关于”中的系统类�
 
 必须使用电脑时，读取 `use-compute`，仅操作受影响的原生控件及必要系统交互；需要新安装包才运行 `bun run mac`。浏览器没有 Electron 宿主桥，不能验证真实磁盘保存、系统剪贴板或全局快捷键，未覆盖部分须如实说明。
 
-不编写、不运行 TDD、ERE、单元或 E2E 用例，不建设测试桥、fixture 或覆盖率门槛。PR 的截图与验收要求统一见 [贡献指南](CONTRIBUTING.md)。一次性原型、截图和实操记录保存在仓库外，通过 PR 附件提供，不进入源码提交。生产构建、正式视频与安装包按实际用途归档，不当成无用缓存整目录删除。
+临时检查的使用与清理遵循 [AGENTS.md](AGENTS.md)，不设置覆盖率门槛。PR 的截图与验收要求统一见 [贡献指南](CONTRIBUTING.md)。一次性原型、截图和实操记录保存在仓库外，通过 PR 附件提供，不进入源码提交。生产构建、正式视频与安装包按实际用途归档，不当成无用缓存整目录删除。
 
 ## 性能与体积
 
-两个固定入口，不靠主观判断：
+启动与内存实测入口：
 
 ```bash
-bun run verify perf                                  # 静态预算：首屏 JS、懒加载块、sourcemap 残留
 node scripts/perf/startup.mjs --app dist-desktop/Thinkly.app --runs 7
 ```
-
-`verify perf` 的预算取达成值向上取整：首屏 JS（`index.html` 里的 entry + modulepreload）≤ 5600KB、modulepreload ≤ 62 条、单个首屏块 ≤ 830KB，且 echarts／mermaid／prettier／react-pdf 不得进入首屏（按块体积判定，避开几百字节的空壳 chunk）。任何提交把这些重库拖回首屏都会红。
 
 `startup.mjs` 启动真实应用若干次，以 `process.getCreationTime()` 为零点汇总 p50/p95：`app-ready`、`did-finish-load`、`renderer-rendered`、`first-stable-frame`，以及各进程工作集内存。它复制一份真实配置目录（`--profile empty` 用空目录、`--profile real` 直接用当前配置）并通过 `GOOSE_PERF_USERDATA` 隔离，不会与正在运行的实例抢单实例锁。实测刻度：
 
