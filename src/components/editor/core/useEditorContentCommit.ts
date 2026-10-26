@@ -5,9 +5,8 @@ import {
   normalizePageContent,
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
-import { commitPendingEditorChange } from "./editorPendingCommit";
+import { commitPendingEditorChange, pendingContentAlreadyPersisted } from "./editorPendingCommit";
 import { getCachedContentSignature } from "./editorContentPolicy";
-import { flushSettingsContentChange } from "./settingsContentFlush";
 import type { EditorRuntime } from "./useEditorSession";
 
 export function useEditorContentCommit(runtime: EditorRuntime) {
@@ -35,7 +34,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
         if (targetPageId !== pageIdForUpdateRef.current) return;
         const { content, signature } = readCurrentEditorContent();
         pendingEditorChangeRef.current = false;
-        if (signature === syncedContentSignatureRef.current) return;
+        if (pendingContentAlreadyPersisted(signature, syncedContentSignatureRef.current)) return;
         syncedContentSignatureRef.current = signature;
         onContentChangeRef.current(content);
       },
@@ -45,7 +44,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
   }, [readCurrentEditorContent]);
 
   const commitEditorContent = useCallback(
-    (targetPageId?: string, options?: { afterPaint?: boolean }) => {
+    (targetPageId?: string) => {
       const safePageId = targetPageId ?? pageIdForUpdateRef.current;
       if (!safePageId) return;
       debouncedUpdate.cancel();
@@ -55,21 +54,6 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
       )
         return;
       const { content, signature } = readCurrentEditorContent();
-      if (options?.afterPaint) {
-        pendingEditorChangeRef.current = false;
-        const persisted = syncedContentSignatureRef.current;
-        const commit = onContentChangeRef.current;
-        flushSettingsContentChange({
-          pending: true,
-          signature,
-          persistedSignature: persisted,
-          persist: () => {
-            commit(content);
-            syncedContentSignatureRef.current = signature;
-          },
-        });
-        return;
-      }
       const result = commitPendingEditorChange({
         targetPageId: safePageId,
         currentPageId: pageIdForUpdateRef.current,
@@ -89,7 +73,7 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
 
   useEffect(() => {
     return () => {
-      commitEditorContent(pageIdForUpdateRef.current ?? undefined, { afterPaint: true });
+      commitEditorContent(pageIdForUpdateRef.current ?? undefined);
     };
   }, [commitEditorContent]);
 

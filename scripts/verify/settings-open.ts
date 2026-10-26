@@ -1,10 +1,14 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { hostRuntime } from "@/lib/host/runtime.electron";
-import { flushSettingsContentChange } from "@/components/editor/core/settingsContentFlush";
+import {
+  commitPendingEditorChange,
+  pendingContentAlreadyPersisted,
+} from "@/components/editor/core/editorPendingCommit";
 import { createChecker } from "./lib/check";
 
 const MONOLITH = "thinkly:web-db";
+const UNRELIABLE = "__goose-note-unserializable-content__";
 const read = (file: string) => readFileSync(path.join(process.cwd(), file), "utf8");
 
 function memoryStorage() {
@@ -61,8 +65,12 @@ export default function run(): number {
       fontEffect.includes("return () => {\n      active = false;\n    };"),
   );
   checker.check(
-    "设置卸载走绘制后的刷新",
-    /afterPaint: true/.test(commit) && commit.includes("flushSettingsContentChange"),
+    "卸载时同步提交，不延后到绘制之后",
+    /commitEditorContent\(pageIdForUpdateRef\.current \?\? undefined\);/.test(commit) &&
+      !commit.includes("afterPaint") &&
+      !commit.includes("requestIdleCallback") &&
+      !commit.includes("setTimeout") &&
+      !existsSync("src/components/editor/core/settingsContentFlush.ts"),
   );
 
   const storage = memoryStorage();
@@ -76,43 +84,41 @@ export default function run(): number {
   const monolith = JSON.stringify(db);
   storage.values.set(MONOLITH, monolith);
   storage.reset();
-  const unchanged = flushSettingsContentChange({
+
+  const rewrite = () => {
+    const current = hostRuntime.db.get<{ content: string }>("gn:page:3");
+    hostRuntime.db.put("gn:page:3", { content: `${current?.data.content ?? body}!` }, current?._rev);
+  };
+  const unchanged = commitPendingEditorChange({
+    targetPageId: "page",
+    currentPageId: "page",
     pending: true,
-    signature: "same",
-    persistedSignature: "same",
-    persist: () => {
-      const current = hostRuntime.db.get<{ content: string }>("gn:page:3");
-      hostRuntime.db.put("gn:page:3", current?.data ?? { content: body }, current?._rev);
-    },
+    content: body,
+    signature: "same-body",
+    syncedSignature: "same-body",
+    commit: rewrite,
   });
   checker.check(
-    "内容没变时打开设置不写库",
-    unchanged === "skipped" && storage.writes === 0 && storage.writeBytes === 0 && storage.reads === 0,
-    `reads ${storage.reads} writes ${storage.writes} writeBytes ${storage.writeBytes}`,
+    "正文签名与上次写入一致时不写库",
+    unchanged === "unchanged" && pendingContentAlreadyPersisted("same-body", "same-body") &&
+      storage.writes === 0 && storage.writeBytes === 0 && storage.reads === 0,
+    `reads ${storage.reads} writes ${storage.writes}`,
   );
 
-  storage.reset();
-  let queued: (() => void) | null = null;
-  const changed = flushSettingsContentChange({
+  const unsure = commitPendingEditorChange({
+    targetPageId: "page",
+    currentPageId: "page",
     pending: true,
-    signature: "edited",
-    persistedSignature: "same",
-    schedule: (task) => { queued = task; },
-    persist: () => {
-      const current = hostRuntime.db.get<{ content: string }>("gn:page:3");
-      hostRuntime.db.put("gn:page:3", {
-        ...current?.data,
-        content: `${body}!`,
-      }, current?._rev);
-    },
+    content: body,
+    signature: UNRELIABLE,
+    syncedSignature: UNRELIABLE,
+    commit: rewrite,
   });
-  const syncWrites = storage.writes;
-  queued?.();
   checker.check(
-    "内容变了仍整库重写，但不是在点击当时",
-    changed === "scheduled" && syncWrites === 0 && queued !== null &&
+    "无法确认正文没变时仍同步整库重写",
+    unsure === "committed" && !pendingContentAlreadyPersisted(UNRELIABLE, UNRELIABLE) &&
       storage.writes >= 1 && storage.writeBytes > monolith.length / 2,
-    `syncWrites ${syncWrites} laterWrites ${storage.writes} writeBytes ${storage.writeBytes}`,
+    `writes ${storage.writes} writeBytes ${storage.writeBytes}`,
   );
   return checker.failed;
 }
