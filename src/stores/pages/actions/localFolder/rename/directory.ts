@@ -1,3 +1,4 @@
+import type { MetadataRelocation } from "@/lib/note-metadata/relocate";
 import { runWithPresence } from "@/lib/ui/presence";
 import { createTranslator, i18nYaml } from "@/i18n/core";
 const storeText = createTranslator(i18nYaml<"src/stores/pages/actions/localFolder/rename/directory.ts#block1:1">`
@@ -100,6 +101,7 @@ export async function relocateLocalPageTree(
     if (await (fs.existsAsync ? fs.existsAsync(nextPath) : fs.exists(nextPath)))
       throw new Error(storeText("nameExists"));
     const moved = { from: oldPath, to: nextPath };
+    const metadataEntries: MetadataRelocation[] = [];
     const rewrites: Array<{
       id: string;
       before: string;
@@ -119,21 +121,19 @@ export async function relocateLocalPageTree(
         nextFile(path),
         moved,
       );
+      metadataEntries.push({ id: p.id, path, nextPath: nextFile(path), before, after, revision: get().pages[p.id]?.localMetadataRevision });
       if (before !== after) rewrites.push({ id: p.id, before, after, path });
     }
     const written: typeof rewrites = [];
-    const write = async (path: string, text: string) => {
-      if (
-        !(await (fs.writeFileAsync
-          ? fs.writeFileAsync(path, text)
-          : fs.writeFile(path, text)))
-      )
-        throw new Error(storeText("resourceRefsFailed"));
-    };
+    const { replaceNoteMarkdown } = await import("@/lib/note-metadata/writeMarkdown");
     try {
+      const { prepareMetadataRelocation } = await import("@/lib/note-metadata/relocate");
+      await prepareMetadataRelocation(fs, basePath, targetBasePath, metadataEntries, (id, localMetadataRevision) => {
+        set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], localMetadataRevision } } }));
+      });
       for (const entry of rewrites) {
+        await replaceNoteMarkdown(fs, entry.path, entry.after, entry.before);
         written.push(entry);
-        await write(entry.path, entry.after);
       }
       markSelfMoved(oldPath);
       markSelfMoved(nextPath);
@@ -165,7 +165,7 @@ export async function relocateLocalPageTree(
       } else await rename();
     } catch (error) {
       const restored = await Promise.allSettled(
-        written.map((entry) => write(entry.path, entry.before)),
+        written.map((entry) => replaceNoteMarkdown(fs, entry.path, entry.before, entry.after)),
       );
       if (restored.some((result) => result.status === "rejected"))
         throw new Error(

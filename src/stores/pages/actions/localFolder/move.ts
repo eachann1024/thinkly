@@ -188,6 +188,16 @@ export async function moveLocalPageAction(
         ? null
         : rebaseMarkdownResources(markdown, oldPath, newPath);
 
+    if (markdown !== null && relocatedMarkdown !== null) {
+      const { prepareMetadataRelocation } = await import("@/lib/note-metadata/relocate");
+      await prepareMetadataRelocation(fs, notebook.localPath, notebook.localPath, [{
+        id: pageId, path: oldPath, nextPath: newPath, before: markdown, after: relocatedMarkdown,
+        revision: get().pages[pageId]?.localMetadataRevision,
+      }], (id, localMetadataRevision) => set((state) => ({
+        pages: { ...state.pages, [id]: { ...state.pages[id], localMetadataRevision } },
+      })));
+    }
+
     let renamed: boolean;
     try {
       renamed = Boolean(await Promise.resolve(fs.rename(oldPath, newPath)));
@@ -201,16 +211,13 @@ export async function moveLocalPageAction(
     }
 
     if (relocatedMarkdown !== null && relocatedMarkdown !== markdown) {
+      const { replaceNoteMarkdown } = await import("@/lib/note-metadata/writeMarkdown");
       try {
-        const written = fs.writeFileAsync
-          ? await fs.writeFileAsync(newPath, relocatedMarkdown)
-          : await fs.writeFile(newPath, relocatedMarkdown);
-        if (!written) throw new Error(storeText("writeResourceFailed"));
+        await replaceNoteMarkdown(fs, newPath, relocatedMarkdown, markdown!);
       } catch (error) {
-        const restored = await (fs.writeFileAsync
-          ? fs.writeFileAsync(newPath, markdown!)
-          : fs.writeFile(newPath, markdown!));
-        if (!restored || !(await fs.rename(newPath, oldPath)))
+        try { await replaceNoteMarkdown(fs, newPath, markdown!, relocatedMarkdown); } catch {}
+        const occupied = fs.existsAsync ? await fs.existsAsync(oldPath) : fs.exists(oldPath);
+        if (occupied || !(await fs.rename(newPath, oldPath)))
           throw new Error(storeText("resourceMoved"), {
             cause: error,
           });
