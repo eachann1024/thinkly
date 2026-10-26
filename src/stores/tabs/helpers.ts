@@ -1,24 +1,32 @@
-import { createTranslator as extraTranslator, i18nYaml } from "@/i18n/core";
+import { common } from "@/i18n/common";
+import { createTranslator as extraTranslator, getLocale, i18nYaml } from "@/i18n/core";
 const extraText = extraTranslator(i18nYaml<"src/stores/tabs/helpers.ts#block1:1">`
 zh-Hans:
   saveFailed: "「{{title}}」未能保存到磁盘"
   saveIncomplete: "本地页面保存未完成：{{id}}"
+  confirmationRequired: "恢复内容需要确认，请重新打开笔记并解决冲突后再保存。"
+  pageUnavailable: "笔记已删除或不可用，请先恢复笔记后重试。"
 en:
   saveFailed: "“{{title}}” couldn’t be saved to disk"
   saveIncomplete: "The local page has not finished saving: {{id}}"
+  confirmationRequired: "Recovered content needs confirmation. Reopen the note and resolve the conflict before saving."
+  pageUnavailable: "This note was deleted or is unavailable. Restore it before retrying."
 ja:
   saveFailed: "「{{title}}」をディスクに保存できませんでした"
   saveIncomplete: "ローカルページの保存が完了していません：{{id}}"
+  confirmationRequired: "復元した内容の確認が必要です。ノートを再度開き、競合を解決してから保存してください。"
+  pageUnavailable: "ノートが削除されたか利用できません。復元してから再試行してください。"
 `);
 import { usePages } from "../usePages";
 import type { TabItem } from "./types";
 import { useEditorSplit } from "../useEditorSplit";
 import { walkLeaves } from "@/lib/editor-split/tree";
 import { isSpecialTab, getNotebookAiTabPageId } from "./types";
-import { isRecoveredLocalSaveConfirmationRequired } from "../pages/folderSync";
+import { getPendingLocalSaveContent, isRecoveredLocalSaveConfirmationRequired } from "../pages/folderSync";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { toast } from "@/components/ui/sonner";
+import { dismissSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
+import { showSaveRecoveryNotice } from "@/lib/save-recovery-notice";
 
 export const createTabId = (pageId: string) =>
   `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}-${pageId.slice(0, 6)}`;
@@ -146,13 +154,65 @@ export const flushClosedPageSaves = (pageIds: string[]): void => {
         console.error("[tabs] closed page flush failed", pageId, error);
       }
       const stillDirty = usePages.getState().dirtyLocalPageIds[pageId];
-      if (stillDirty && !isRecoveredLocalSaveConfirmationRequired(pageId)) {
+      const hasPendingSave = getPendingLocalSaveContent(pageId) !== undefined;
+      const confirmationRequired = isRecoveredLocalSaveConfirmationRequired(pageId);
+      const flushFailed = Boolean(flushError);
+      const noticeId = `goose-closed-page-save-failed:${pageId}`;
+      if (!stillDirty && !hasPendingSave && !confirmationRequired && !flushFailed) {
+        dismissSaveRecoveryNotice(noticeId);
+      } else {
         const page = usePages.getState().getPage(pageId);
         const title = page ? getPageTitle(page) : pageId;
-        toast.warning(extraText("saveFailed", { title }), {
-          description: describeDiskWriteError(
-            flushError ?? new Error(extraText("saveIncomplete", { id: pageId })),
-          ),
+        showSaveRecoveryNotice({
+          id: noticeId,
+          title: extraText("saveFailed", { title }),
+          description: confirmationRequired
+            ? extraText("confirmationRequired")
+            : describeDiskWriteError(
+                flushError ?? new Error(extraText("saveIncomplete", { id: pageId })),
+              ),
+          retryLabel: common("retry"),
+          onRetry: async () => {
+            if (isRecoveredLocalSaveConfirmationRequired(pageId)) {
+              throw new Error(extraText("confirmationRequired"));
+            }
+            const page = usePages.getState().getPage(pageId);
+            if (!page || page.trashedAt) {
+              throw new Error(extraText("pageUnavailable"));
+            }
+            if (isRecoveredLocalSaveConfirmationRequired(pageId)) {
+              throw new Error(extraText("saveIncomplete", { id: pageId }));
+            }
+            await usePages.getState().flushPendingLocalSaveByPageId(pageId);
+            if (
+              isRecoveredLocalSaveConfirmationRequired(pageId) ||
+              usePages.getState().dirtyLocalPageIds[pageId] ||
+              getPendingLocalSaveContent(pageId) !== undefined
+            ) {
+              throw new Error(extraText("saveIncomplete", { id: pageId }));
+            }
+          },
+          onRetryFailure: describeDiskWriteError,
+          onReopenFailure: describeDiskWriteError,
+          reopenLabel:
+            getLocale() === "en"
+              ? "Reopen"
+              : getLocale() === "ja"
+                ? "再度開く"
+                : "重新打开",
+          onReopen: async () => {
+            const page = usePages.getState().getPage(pageId);
+            if (!page || page.trashedAt) {
+              throw new Error(extraText("pageUnavailable"));
+            }
+            const { useTabs } = await import("@/stores/useTabs");
+            useTabs.setState((state) => ({
+              recentlyClosedPageIds: state.recentlyClosedPageIds.filter(
+                (id) => id !== pageId,
+              ),
+            }));
+            useTabs.getState().openPermanentTab(pageId);
+          },
         });
       }
     }),
@@ -162,8 +222,14 @@ export const flushClosedPageSaves = (pageIds: string[]): void => {
 };
 
 export let setActivePageChain: Promise<void> = Promise.resolve();
+let activePageRequest = 0;
+
+export const cancelScheduledActivePage = () => {
+  ++activePageRequest;
+};
 
 export const scheduleSetActivePage = (pageId: string | null) => {
+  const request = ++activePageRequest;
   setActivePageChain = setActivePageChain
     .catch(() => {})
     .then(() => {
@@ -180,9 +246,3 @@ export const clampHistoryIndex = (
   if (currentIndex < 0) return 0;
   return Math.min(currentIndex, historyLength - 1);
 };
-let activePageRequest = 0;
-
-export const cancelScheduledActivePage = () => {
-  ++activePageRequest;
-};
-  const request = ++activePageRequest;
