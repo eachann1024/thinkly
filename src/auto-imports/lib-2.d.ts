@@ -121,6 +121,7 @@ declare global {
   const sameSidebarExpandedIds: typeof import('../lib/sidebarListCollapse').sameSidebarExpandedIds
   const serializeWikiLinkMarkdown: typeof import('../lib/wikiLink').serializeWikiLinkMarkdown
   const setDbStorageItem: typeof import('../lib/storage').setDbStorageItem
+  const settingsToastAction: typeof import('../lib/settings-navigation').settingsToastAction
   const shortcutHasModifier: typeof import('../lib/shortcut-match').shortcutHasModifier
   const shouldCollapseSidebarListOnEscape: typeof import('../lib/sidebarListCollapse').shouldCollapseSidebarListOnEscape
   const shouldPreserveStartupSelection: typeof import('../lib/workspaceStartup').shouldPreserveStartupSelection
