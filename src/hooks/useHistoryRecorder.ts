@@ -16,8 +16,10 @@ export function useHistoryRecorder(params: {
   content: BlockNoteContent | undefined;
   signature: string;
   updatedAt: number | undefined;
+  settingsSignature?: string;
 }) {
-  const { pageId, workspaceId, content, signature, updatedAt } = params;
+  const { pageId, workspaceId, content, updatedAt } = params;
+  const signature = `${params.signature}:${params.settingsSignature ?? ""}`;
 
   const observedUpdatedAtRef = useRef<number | undefined>(undefined);
   const lastRecordedSigRef = useRef<string | null>(null);
@@ -26,6 +28,7 @@ export function useHistoryRecorder(params: {
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingRef = useRef(false);
+  const observedSettingsRef = useRef<string | undefined>(undefined);
   const pendingRef = useRef<{
     content: BlockNoteContent;
     charCount: number;
@@ -131,10 +134,11 @@ export function useHistoryRecorder(params: {
   useEffect(() => {
     if (!pageId || !workspaceId || !content) return;
     const { wordCount: charCount } = getContentDerivations(content, signature);
-    const fingerprint = getHistoryContentSignature(content);
+    const fingerprint = getHistoryContentSignature(content) + ":" + (params.settingsSignature ?? "");
 
     // 首次读入和编辑器静默规范化只建立基线，不视为用户编辑。
-    const silentUpdate = observedUpdatedAtRef.current === updatedAt;
+    const silentUpdate = observedUpdatedAtRef.current === updatedAt && observedSettingsRef.current === params.settingsSignature;
+    observedSettingsRef.current = params.settingsSignature;
     observedUpdatedAtRef.current = updatedAt;
     if (lastRecordedFingerprintRef.current === null ||
       (silentUpdate && !pendingRef.current && !recordingRef.current)) {

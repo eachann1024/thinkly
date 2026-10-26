@@ -1,3 +1,6 @@
+import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
+import { getHistorySettings } from "./settings";
+import type { NoteSettings } from "@/lib/note-metadata/contract";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { findHistoryEntry } from "./layout";
@@ -10,10 +13,11 @@ import { resolveHistoryBackend } from "./backend";
 export async function materializeVersion(
   pageId: string,
   versionId: string,
-): Promise<{ content: BlockNoteContent; localFrontmatter?: string } | null> {
+): Promise<{ content: BlockNoteContent; localFrontmatter?: string; settings?: NoteSettings } | null> {
   const backend = resolveHistoryBackend(pageId);
   const version = await backend.loadVersion(pageId, versionId);
   if (!version) return null;
+  if (!parseLocalFrontmatterBlob(version.localFrontmatter).ok) throw new Error("Historical frontmatter is damaged");
   let content = version.content;
   const page = usePages.getState().pages[pageId];
   const basePath = page ? useNotebooks.getState().notebooks[page.workspaceId]?.localPath : null;
@@ -25,6 +29,8 @@ export async function materializeVersion(
   }
   return {
     content,
+    ...(version.settings !== undefined || page?.localFilePath || version.localFrontmatter !== undefined
+      ? { settings: getHistorySettings(version.settings, version.localFrontmatter) } : {}),
     ...(version.localFrontmatter !== undefined
       ? { localFrontmatter: version.localFrontmatter }
       : {}),

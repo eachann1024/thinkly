@@ -1,3 +1,4 @@
+import { getHistorySettings } from "./settings";
 import type {
   HistoryIndex,
   HistoryIndexEntry,
@@ -78,6 +79,9 @@ export function normalizeHistoryVersion(
 
   const label = stringValue(raw.label);
   const createdAt = finiteNumber(raw.createdAt, Date.now());
+  let settings;
+  try { if (raw.settings !== undefined) settings = getHistorySettings(raw.settings); }
+  catch { return null; }
   return {
     versionId,
     pageId,
@@ -90,6 +94,7 @@ export function normalizeHistoryVersion(
     charDelta: finiteNumber(raw.charDelta),
     size: finiteNumber(raw.size),
     content: raw.content as HistoryVersion["content"],
+    ...(settings ? { settings } : {}),
     ...(typeof raw.relativePath === "string" ? { relativePath: raw.relativePath } : {}),
     ...(typeof raw.localFrontmatter === "string"
       ? { localFrontmatter: raw.localFrontmatter }
