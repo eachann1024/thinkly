@@ -18,6 +18,7 @@ import { useEditorPageLifecycle } from "./useEditorPageLifecycle";
 import { useEditorFocus } from "./useEditorFocus";
 import { useEditorClipboard } from "./useEditorClipboard";
 import { useEditorFileDrop } from "./useEditorFileDrop";
+import { useEditorLinkAnchor } from "./useEditorLinkAnchor";
 import { useEditorHostEvents } from "./useEditorHostEvents";
 import { useDocumentTitleNavigation } from "./useDocumentTitleNavigation";
 import { useEditorPresentation } from "./useEditorPresentation";
@@ -73,6 +74,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
   useDocumentTitleNavigation(runtime, editable);
   const contentCommit = useEditorContentCommit(runtime);
   useEditorPageLifecycle(runtime, contentCommit, editable, isActiveEditor);
+  useEditorLinkAnchor(runtime, isActiveEditor);
   const { handleEditorBlankMouseDown, focusEditorSafely } = useEditorFocus(
     runtime,
     editable,
