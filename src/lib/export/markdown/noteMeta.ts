@@ -1,5 +1,7 @@
 import { stringify as stringifyYaml } from "yaml";
 import { normalizeCalloutIcon, resolveCalloutIcon } from "@/components/editor/blocks/callout/calloutIcons";
+import { splitFrontmatter, renderFrontmatter as renderPreservedFrontmatter } from "@/lib/note-metadata/identity";
+import { validateNoteMeta } from "@/lib/note-metadata/validate";
 import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 import { detachBlockPropsMarker } from "./blockPropsMarker";
 import { pickPersistedBlockProps } from "./blockPropsProperties";
@@ -150,7 +152,8 @@ function joinFrontmatter(frontmatter: string, body: string): string {
 function parseMeta(value: unknown): NoteMeta | null {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
-    if (!parsed || typeof parsed !== "object" || (parsed as { v?: unknown }).v !== 1) return null;
+    if (parsed === null) return null;
+    validateNoteMeta(parsed);
     return parsed as NoteMeta;
   } catch {
     return null;
@@ -162,10 +165,9 @@ export function attachNoteMeta(body: string, meta: NoteMeta | null): string {
   const payload = JSON.stringify(meta);
   const existing = peelFrontmatter(body);
   if (existing.frontmatter) {
-    const parsed = parseLocalFrontmatterBlob(existing.frontmatter);
-    if (parsed.ok) {
-      return joinFrontmatter(renderFrontmatter({ ...parsed.data, [NOTE_META_KEY]: payload }), existing.body);
-    }
+    const { document, tail, present } = splitFrontmatter(body);
+    document.set(NOTE_META_KEY, payload);
+    return renderPreservedFrontmatter(document, tail, present);
   }
   return joinFrontmatter(renderFrontmatter({ [NOTE_META_KEY]: payload }), body);
 }
@@ -179,19 +181,20 @@ export function splitGeneratedMarkdown(markdown: string): { body: string; meta: 
   }
   const meta = parseMeta(parsed.data[NOTE_META_KEY]);
   if (!meta) return { body: markdown, meta: null };
-  const rest = { ...parsed.data };
-  delete rest[NOTE_META_KEY];
-  if (Object.keys(rest).length === 0) return { body: extracted.body, meta };
-  return { body: joinFrontmatter(renderFrontmatter(rest), extracted.body), meta };
+  const { document, tail, present } = splitFrontmatter(markdown);
+  document.delete(NOTE_META_KEY);
+  if ((document.contents as { items: unknown[] }).items.length === 0) return { body: extracted.body, meta };
+  return { body: renderPreservedFrontmatter(document, tail, present), meta };
 }
 
 export function stripNoteMetaBlob(blob: string | null | undefined): string | undefined {
   if (!blob) return undefined;
   const parsed = parseLocalFrontmatterBlob(blob);
   if (!parsed.ok || !Object.prototype.hasOwnProperty.call(parsed.data, NOTE_META_KEY)) return blob;
-  const rest = { ...parsed.data };
-  delete rest[NOTE_META_KEY];
-  return Object.keys(rest).length ? renderFrontmatter(rest) : undefined;
+  const { document } = splitFrontmatter(blob);
+  document.delete(NOTE_META_KEY);
+  return (document.contents as { items: unknown[] }).items.length
+    ? renderPreservedFrontmatter(document, "", true) : undefined;
 }
 
 function applyPatch(props: Record<string, unknown>, patch: Record<string, unknown>) {
