@@ -99,13 +99,13 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
 
     return (
       <div
-        className="inline-flex max-h-[inherit] min-h-0 flex-col overflow-visible bg-transparent"
+        className="inline-flex max-w-[inherit] max-h-[inherit] min-h-0 flex-col overflow-visible bg-transparent"
         data-notion-slash-root="true"
         {...(lite ? { "data-goose-slash-lite": "true" } : {})}
       >
         <div
           data-notion-slash-surface="true"
-          className="goose-menu-surface z-50 flex h-auto max-h-[inherit] min-h-0 w-[280px] flex-col overflow-hidden text-popover-foreground"
+          className="goose-menu-surface z-50 flex h-auto max-h-[inherit] min-h-0 w-[280px] max-w-[inherit] flex-col overflow-hidden text-popover-foreground"
         >
           <div
             ref={containerRef}
