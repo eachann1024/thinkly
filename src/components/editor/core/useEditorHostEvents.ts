@@ -1,3 +1,5 @@
+import { showPageWriteSkeleton } from "./pageWriteSkeleton";
+import type { PageWriteTransition } from "@/lib/notebook-ai/pageWriteTransition";
 import { useEffect } from "react";
 import {
   clonePageContent,
@@ -11,7 +13,6 @@ import { replacePageContent } from "./replacePageContent";
 import { markProgrammaticRead } from "./programmaticRead";
 import type { Transaction } from "@tiptap/pm/state";
 import { useEditorHostFocus } from "./useEditorHostFocus";
-import { useEditorPageTasks } from "./useEditorPageTasks";
 import type { EditorRuntime } from "./useEditorSession";
 import type { EditorContentCommit } from "./useEditorContentCommit";
 
@@ -33,8 +34,9 @@ export function useEditorHostEvents(
     userInteractedRef,
   } = runtime;
   useEditorHostFocus(runtime, focusEditorSafely, isActiveEditor);
-  const tasks = useEditorPageTasks(runtime);
+
   useEffect(() => {
+    const transitionController = new AbortController();
     const handleFlush = (event: Event) => {
       const customEvent = event as CustomEvent<{ immediate?: boolean }>;
       if (customEvent.detail?.immediate) {
@@ -100,11 +102,20 @@ export function useEditorHostEvents(
       );
       userInteractedRef.current = false;
       if (scrollContainer && typeof scrollTop === "number") {
-        tasks.frame(() => {
-          scrollContainer.scrollTop = scrollTop;
-        });
+        scrollContainer.scrollTop = scrollTop;
       }
     };
+
+    const handlePrepareWrite = (event: Event) => {
+      const detail = (event as CustomEvent<PageWriteTransition>).detail;
+      if (detail.pageId !== pageIdForUpdateRef.current) return;
+      const content = contentModeRef.current === "raw"
+        ? toEditorBlocks(detail.content) : normalizePageContent(detail.content);
+      const blocks = createEditorSafeContent(content, editor.schema);
+      const next = replacePageContent(editor.prosemirrorState.tr, blocks as any).doc;
+      detail.pending.push(showPageWriteSkeleton(editor.prosemirrorView, next, transitionController.signal));
+    };
+    window.addEventListener("goose-note:prepare-page-write", handlePrepareWrite);
 
     const handleAssetReferences = (event: Event) => {
       const detail = (
@@ -135,6 +146,8 @@ export function useEditorHostEvents(
     );
 
     return () => {
+      transitionController.abort();
+      window.removeEventListener("goose-note:prepare-page-write", handlePrepareWrite);
       window.removeEventListener(
         "goose-note:asset-references",
         handleAssetReferences,
@@ -146,6 +159,7 @@ export function useEditorHostEvents(
       );
     };
   }, [
+    runtime.activePageId,
     commitEditorContent,
     debouncedUpdate,
     editor,
@@ -157,6 +171,5 @@ export function useEditorHostEvents(
     pendingEditorChangeRef,
     syncedContentSignatureRef,
     userInteractedRef,
-    tasks,
   ]);
 }

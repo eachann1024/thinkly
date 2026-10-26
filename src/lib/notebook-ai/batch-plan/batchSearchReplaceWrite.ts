@@ -34,6 +34,7 @@ export async function writeSearchReplaceFromLatest(
       applied.content,
       {
         expectedNotebookId: operationNotebookId(working, operation),
+        animate: true,
         expectedRevision,
       },
     );

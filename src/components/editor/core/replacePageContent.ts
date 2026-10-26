@@ -10,6 +10,11 @@ export function replacePageContent(tr: Transaction, blocks: PartialBlock<any, an
     blocks.map((block) => blockToEditorNode(block as Parameters<typeof blockToEditorNode>[0], schema)),
   );
   group.check();
-  return tr.replaceWith(0, tr.doc.content.size, Fragment.from(group))
+  const next = tr.doc.type.create(tr.doc.attrs, Fragment.from(group));
+  const start = tr.doc.content.findDiffStart(next.content);
+  if (start === null) return tr;
+  const end = tr.doc.content.findDiffEnd(next.content)!;
+  const overlap = start - Math.min(end.a, end.b);
+  return tr.replace(start, end.a + Math.max(0, overlap), next.slice(start, end.b + Math.max(0, overlap)))
     .setMeta("addToHistory", false);
 }

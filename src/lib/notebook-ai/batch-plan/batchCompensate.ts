@@ -60,6 +60,7 @@ export async function compensate(journal: BatchPlanJournal): Promise<string[]> {
           clone(snapshot.page.content),
           {
             expectedNotebookId: snapshot.page.workspaceId,
+            animate: true,
             expectedRevision: after,
           },
         );

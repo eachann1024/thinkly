@@ -1,3 +1,4 @@
+import { beginPageWriteTransition } from "./pageWriteTransition";
 import type { JSONContent, Page } from "@/types";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
@@ -209,13 +210,24 @@ export async function writePageContentSafely(
   options: {
     expectedNotebookId?: string | null;
     expectedRevision?: ExpectedPageRevision;
+    animate?: boolean;
   } = {},
 ): Promise<SafePageWriteResult> {
-  return runSafePageWrite(
-    pageId,
-    () => usePages.getState().writePageContent(pageId, content, "replace"),
-    options,
-  );
+  const guard = guardPageForAiWrite(pageId, options);
+  if (!guard.ok) return guard;
+  const cleanup = options.animate ? await beginPageWriteTransition(pageId, content) : () => {};
+  try {
+    return await runSafePageWrite(
+      pageId,
+      () => usePages.getState().writePageContent(pageId, content, "replace"),
+      { ...options, expectedRevision: options.expectedRevision ?? guard },
+    );
+  } finally {
+    if (options.animate && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("goose-note:reload-active-editor", { detail: { pageId } }));
+    }
+    cleanup();
+  }
 }
 
 export async function appendPageContentSafely(
