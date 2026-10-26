@@ -1,6 +1,6 @@
 import { showPageWriteSkeleton } from "./pageWriteSkeleton";
 import type { PageWriteTransition } from "@/lib/notebook-ai/pageWriteTransition";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import {
   clonePageContent,
   createEditorSafeContent,
@@ -9,7 +9,7 @@ import {
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { toEditorBlocks } from "./editorContentPolicy";
-import { replacePageContent } from "./replacePageContent";
+import { pageContentGroup, replacePageContent } from "./replacePageContent";
 import { markProgrammaticRead } from "./programmaticRead";
 import type { Transaction } from "@tiptap/pm/state";
 import { useEditorHostFocus } from "./useEditorHostFocus";
@@ -35,8 +35,14 @@ export function useEditorHostEvents(
   } = runtime;
   useEditorHostFocus(runtime, focusEditorSafely, isActiveEditor);
 
+  const transitionController = useRef<AbortController | null>(null);
+  useLayoutEffect(() => {
+    const controller = new AbortController();
+    transitionController.current = controller;
+    return () => controller.abort();
+  }, [editor, runtime.activePageId]);
+
   useEffect(() => {
-    const transitionController = new AbortController();
     const handleFlush = (event: Event) => {
       const customEvent = event as CustomEvent<{ immediate?: boolean }>;
       if (customEvent.detail?.immediate) {
@@ -90,11 +96,7 @@ export function useEditorHostEvents(
             error,
           },
         );
-        const fallbackContent = createEditorSafeContent(
-          undefined,
-          editor.schema,
-        );
-        editor.transact((tr: Transaction) => replacePageContent(tr, fallbackContent as any));
+        return;
       }
       const reloadedRaw = clonePageContent(editor.document as BlockNoteContent);
       syncedContentSignatureRef.current = getContentSignature(
@@ -112,8 +114,9 @@ export function useEditorHostEvents(
       const content = contentModeRef.current === "raw"
         ? toEditorBlocks(detail.content) : normalizePageContent(detail.content);
       const blocks = createEditorSafeContent(content, editor.schema);
-      const next = replacePageContent(editor.prosemirrorState.tr, blocks as any).doc;
-      detail.pending.push(showPageWriteSkeleton(editor.prosemirrorView, next, transitionController.signal));
+      const current = editor.prosemirrorState.doc;
+      const next = current.type.createChecked(current.attrs, pageContentGroup(current.type.schema, blocks as any));
+      detail.pending.push(showPageWriteSkeleton(editor.prosemirrorView, next, transitionController.current!.signal));
     };
     window.addEventListener("goose-note:prepare-page-write", handlePrepareWrite);
 
@@ -146,7 +149,6 @@ export function useEditorHostEvents(
     );
 
     return () => {
-      transitionController.abort();
       window.removeEventListener("goose-note:prepare-page-write", handlePrepareWrite);
       window.removeEventListener(
         "goose-note:asset-references",
@@ -159,6 +161,7 @@ export function useEditorHostEvents(
       );
     };
   }, [
+    transitionController,
     runtime.activePageId,
     commitEditorContent,
     debouncedUpdate,
