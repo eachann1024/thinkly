@@ -166,7 +166,9 @@ export let setActivePageChain: Promise<void> = Promise.resolve();
 export const scheduleSetActivePage = (pageId: string | null) => {
   setActivePageChain = setActivePageChain
     .catch(() => {})
-    .then(() => usePages.getState().setActivePage(pageId));
+    .then(() => {
+      if (request === activePageRequest) usePages.getState().setActivePage(pageId);
+    });
   return setActivePageChain;
 };
 
@@ -178,3 +180,9 @@ export const clampHistoryIndex = (
   if (currentIndex < 0) return 0;
   return Math.min(currentIndex, historyLength - 1);
 };
+let activePageRequest = 0;
+
+export const cancelScheduledActivePage = () => {
+  ++activePageRequest;
+};
+  const request = ++activePageRequest;

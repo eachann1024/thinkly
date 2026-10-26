@@ -37,6 +37,7 @@ export interface TabsState {
   isHistoryNavigating: boolean;
   recentlyClosedPageIds: string[];
   syncNotebookForPage: (pageId: string | null) => void;
+  cancelPendingActivation: () => void;
   syncActiveTabForPage: (pageId: string | null) => void;
   openTab: (pageId: string) => void;
   openWelcomeTab: () => void;

@@ -23,7 +23,7 @@ export const setActivePageAction = (
 
   set({ activePageId: id });
 
-  const notebookId = useNotebooks.getState().activeNotebookId;
+  const notebookId = get().pages[id]?.workspaceId;
   if (notebookId) {
     useNotebooks.getState().setLastActivePage(notebookId, id);
   }

@@ -2,6 +2,7 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import type { Page } from "@/types";
+import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearchSession";
 
 const compareBySidebarOrder = (a: Page, b: Page) =>
   (a.order ?? a.createdAt) - (b.order ?? b.createdAt);
@@ -40,12 +41,9 @@ export async function activateNotebook(
   const notebooksStore = useNotebooks.getState();
   if (!notebooksStore.notebooks[notebookId]) return null;
 
+  useSearchSession.getState().closeSearch();
   notebooksStore.setActiveNotebook(notebookId);
   const landingPageId = resolveNotebookLandingPageId(notebookId);
-  if (landingPageId) {
-    useTabs.getState().syncActiveTabForPage(landingPageId);
-  } else {
-    await usePages.getState().setActivePage(null);
-  }
+  useTabs.getState().syncActiveTabForPage(landingPageId);
   return landingPageId;
 }
