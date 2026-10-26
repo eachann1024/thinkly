@@ -1,4 +1,5 @@
 import { createTranslator, i18nYaml } from "@/i18n/core";
+import { localizeNoteReadError } from "@/lib/note-metadata/messages";
 
 const localMessages = i18nYaml<"src/lib/openAssociatedMarkdown.ts#localMessages:1">`
 zh-Hans:
@@ -98,7 +99,7 @@ async function openPageInNotebook(
   sidebar.setFocused(notebookId, pageId);
   const page = usePages.getState().pages[pageId];
   if (page?.localReadState === "error") {
-    const detail = page.localReadError ?? "";
+    const detail = localizeNoteReadError(page.localReadError ?? "");
     toast.error(uiText("couldnTOpenThisMarkdownFile"), {
       description: /EPERM|EACCES|permission|access denied/i.test(detail) ? uiText("permission") : detail,
       action: { label: uiText("retry"), onClick: () => {

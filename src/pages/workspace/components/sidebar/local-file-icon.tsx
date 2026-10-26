@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n";
+import { localizeNoteReadError } from "@/lib/note-metadata/messages";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/local-file-icon.tsx#localMessages:1">`
@@ -122,7 +123,7 @@ export function LocalFileIcon({
       <GooseIcons.CircleX
         size={16}
         className={cn("h-4 w-4 text-danger", className)}
-        aria-label={page.localReadError || uiText("couldNotReadMarkdownFile_6724")}
+        aria-label={page.localReadError ? localizeNoteReadError(page.localReadError) : uiText("couldNotReadMarkdownFile_6724")}
       />
     );
   }

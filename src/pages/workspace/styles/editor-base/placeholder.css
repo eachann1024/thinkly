@@ -1,0 +1,26 @@
+.goose-blocknote-editor .goose-placeholder-host > .bn-inline-content {
+  position: relative;
+  flex-grow: 1;
+}
+
+.goose-blocknote-editor .goose-placeholder-host::after {
+  display: none;
+}
+
+.goose-blocknote-editor .goose-editor-placeholder[contenteditable="false"] {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--goose-text-placeholder);
+  font: inherit;
+}
+
+.goose-blocknote-editor:focus .goose-editor-placeholder {
+  display: block;
+}

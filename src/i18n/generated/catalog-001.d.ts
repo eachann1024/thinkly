@@ -70,8 +70,8 @@ declare module "../types" {
     "src/components/editor/image/imageUtils.ts#messages:1": { "imageReadFailed": { "status": string | number } };
     "src/components/editor/image/useLightboxActions.ts#messages:1": { "copiedToClipboard": {  }; "copyFailed": { "error": string | number }; "couldNotOpenInTheSystemImageViewer": {  }; "downloadFailed": { "error": string | number }; "imageSavedToDownloads": {  }; "saveFailed": {  }; "unknownError": {  } };
     "src/components/editor/inline/pageLinkSlashItems.tsx#messages:1": { "page": {  } };
+    "src/components/editor/inline/pageMention.ts#messages:1": { "untitled": {  } };
     "src/components/editor/inline/pageMentionMenuItems.tsx#messages:1": { "noMatchingNotes": {  }; "tryAnotherKeyword": {  } };
-    "src/components/editor/inline/pageMentionSpec.tsx#messages:1": { "untitled": {  } };
     "src/components/editor/inline/usePageMentionItems.ts#messages:1": { "couldNotCreateThePageYourOriginalContent": {  }; "createPageHere": { "title": string | number }; "openCreatedPage": {  }; "pageCreatedButCouldNotOpen": {  }; "pageCreatedTheOriginalNoteHasChangedOpen": {  } };
     "src/components/editor/menus/EditorContextMenu.tsx#messages:1": { "copy": {  }; "cut": {  }; "exportSelectionAsImage": {  }; "insertParagraphBelow": {  }; "orderedNumbers": {  }; "paste": {  }; "selectedContent": {  } };
     "src/components/editor/menus/EditorFilePanel.tsx#messages:1": { "attachmentUploadFailed": {  }; "chooseFile": {  }; "embed": {  }; "embedLink": {  }; "enterAValidHttpOrHttpsUrl": {  }; "mediaSource": {  }; "mediaUrl": {  }; "upload": {  }; "uploading": {  } };
@@ -113,6 +113,7 @@ declare module "../types" {
     "src/components/ui/dot-matrix/character/registry.ts#localMessages:1": { "a": {  }; "b": {  }; "c": {  }; "d": {  }; "e": {  }; "f": {  }; "g": {  } };
     "src/components/ui/dropdown-menu.tsx#localMessages:1": { "actions": {  } };
     "src/components/ui/empty-state.tsx#localMessages:1": { "details": {  } };
+    "src/components/ui/grip-textarea.tsx#messages:1": { "resizeHeight": { "label": string | number } };
     "src/components/ui/image-export-theme-selector.tsx#localMessages:1": { "chooseTheme": {  }; "current": {  }; "dark": {  }; "description": { "mode": string | number; "count": string | number }; "generateImage": {  }; "light": {  }; "selection": {  }; "wholePage": {  } };
     "src/components/ui/image-export/GenerationOptionsPanel.tsx#localMessages:1": { "branding": {  }; "date": {  }; "exportOptions": {  }; "footer": {  }; "footerOptions": {  }; "time": {  }; "title": {  } };
     "src/components/ui/image-export/LivePreviewPane.tsx#localMessages:1": { "exportPreview": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
     "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
     "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
-    "src/hooks/useWindowAlwaysOnTop.ts#block1:1": { "readPinFailed": {  }; "togglePinFailed": {  } };
   }
 }
