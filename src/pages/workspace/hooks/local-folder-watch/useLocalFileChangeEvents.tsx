@@ -17,6 +17,7 @@ import { useSettings } from "@/stores/useSettings";
 import { shouldIgnoreLocalRelativePath } from "@/lib/local-folder-scanner";
 import { wasRecentlyInteracting } from "@/lib/editor-interaction-signal";
 import { isNotebookRescanSuppressed } from "@/lib/local-folder-rescan-guard";
+import { isNoteMetadataEvent, metadataEventPages, noteMetadataNeedsRefresh } from "@/lib/note-metadata/watch";
 import {
   type UseLocalFolderWatchOptions,
   readDiskContent,
@@ -131,6 +132,27 @@ export function useLocalFileChangeEvents({
         notebook?.source !== "local-folder" ||
         notebook.localPath !== dirPath
       ) {
+        return;
+      }
+
+      if (isNoteMetadataEvent(filename)) {
+        const filePath = `${dirPath}/${filename}`;
+        const existing = changeDebounceTimers.current.get(filePath);
+        if (existing) clearTimeout(existing);
+        changeDebounceTimers.current.set(filePath, setTimeout(async () => {
+          changeDebounceTimers.current.delete(filePath);
+          const fs = window.gooseFs;
+          if (!fs || wasRecentlySelfWritten(filePath) || isNotebookRescanSuppressed(notebook.id)) return;
+          const targets = await metadataEventPages(filename, Object.values(usePages.getState().pages)
+            .filter(page => page.workspaceId === notebook.id));
+          for (const target of targets) {
+            if (!target.localFilePath || !await noteMetadataNeedsRefresh(fs, dirPath, target)) continue;
+            if (usePages.getState().dirtyLocalPageIds[target.id] || wasRecentlyInteracting(2000)) {
+              const { onKeepMine, onLoadDisk } = conflictHandlers(target.localFilePath, target.id);
+              showConflictToast(target.localFilePath, target.id, onKeepMine, onLoadDisk);
+            } else await usePages.getState().reloadLocalPageFromDisk(target.id);
+          }
+        }, 200));
         return;
       }
 

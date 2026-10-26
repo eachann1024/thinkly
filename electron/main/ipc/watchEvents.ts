@@ -86,6 +86,7 @@ export function shouldIgnoreWatchFilename(
   if (filename == null) return false;
   const relative = filename.toString();
   if (!relative) return false;
+  if (/^\.goose[/\\]metadata[/\\][a-f0-9]{64}\.json$/.test(relative)) return false;
   const segments = relative.split(/[/\\]/).filter(Boolean);
   for (const segment of segments) {
     if (segment.startsWith(".")) return true;
