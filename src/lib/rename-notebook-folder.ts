@@ -78,10 +78,10 @@ function applyRenamedPaths(notebookId: string, oldRoot: string, newRoot: string,
 }
 
 export async function commitRenamedNotebookRoot(notebookId: string, oldRoot: string, newRoot: string, updates: Partial<Notebook>) {
+  await stampNotebookMarker(notebookId, newRoot);
   applyRenamedPaths(notebookId, oldRoot, newRoot, updates);
   rebaseBatchPlanJournals(notebookId, oldRoot, newRoot);
   await rebaseNotebookFileReferences(notebookId, oldRoot, newRoot);
-  await stampNotebookMarker(notebookId, newRoot);
 }
 
 function readableError(error: unknown): Error {
@@ -110,6 +110,7 @@ export async function renameLocalNotebookFolder(
   assertGitRemoteNameAvailable(await desktop.gitSync.getState(), notebookId, trimmed);
   if (pathKey(previous) !== pathKey(next) && await desktopPathExists(next)) throw new Error(gitText("nameExists"));
 
+  await stampNotebookMarker(notebookId, notebook.localPath);
   const pages = Object.values(usePages.getState().pages).filter((page) => page.workspaceId === notebookId && page.localFilePath);
   window.dispatchEvent(new CustomEvent("goose-note:flush-editor", { detail: { immediate: true } }));
   for (const page of pages) if (!page.isFolder) await flushPendingLocalSaveByPageIdInternal(page.id, usePages.getState);
