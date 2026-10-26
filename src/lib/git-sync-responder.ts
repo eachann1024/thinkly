@@ -30,9 +30,9 @@ export function installGitSyncResponder() {
         return notebook;
       });
       window.dispatchEvent(new CustomEvent("goose-note:flush-editor", { detail: { immediate: true } }));
-      await usePages.getState().flushPendingLocalSaves();
       const ids = new Set(selected.map((notebook) => notebook.id));
       const pages = Object.values(usePages.getState().pages).filter((page) => ids.has(page.workspaceId));
+      await Promise.all(pages.map(page => usePages.getState().flushPendingLocalSaveByPageId(page.id)));
       if (pages.some((page) => usePages.getState().dirtyLocalPageIds[page.id])) throw new Error(gitText("saveBeforeSync"));
       if (request.finished) return;
       for (const [index, root] of canonical.entries()) {
