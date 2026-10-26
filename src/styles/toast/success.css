@@ -4,6 +4,7 @@
  --normal-text: var(--goose-interactive-success-fg);
  --goose-toast-close-fg: var(--goose-interactive-success-fg);
  --goose-toast-close-hover-fg: var(--goose-interactive-success-fg);
+ --goose-toast-close-hover-bg: color-mix(in srgb, var(--goose-interactive-success) 80%, var(--goose-interactive-success-fg));
 }
 
 .goose-toaster
