@@ -1,9 +1,8 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, useState } from "react";
 import type { SettingsDialogProps } from "./settings-dialog/shared";
+import { settingsDialog } from "./settingsDialogLoader";
 
-const SettingsDialog = lazy(() =>
-  import("./SettingsDialog").then((mod) => ({ default: mod.SettingsDialog })),
-);
+const SettingsDialog = settingsDialog.Component;
 
 export function LazySettingsDialog(props: SettingsDialogProps) {
   const [everOpened, setEverOpened] = useState(props.open);

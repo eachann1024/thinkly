@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { ReflectionButton } from "./reflection/ReflectionButton";
 import { SidebarRailIcon } from "./SidebarRailIcon";
 import { CharacterAvatar, useHasCharacter } from "./CharacterAvatar";
+import { preloadSettingsDialog } from "./settingsDialogLoader";
 import "./sidebar-footer-labels.css";
 import "./settings/settings-layout.css";
 
@@ -54,6 +55,8 @@ export function SidebarFooter({
               aria-label={uiText("feedback_4c2a")}
               title={uiText("feedback_4c2a")}
               aria-pressed={feedbackActive}
+              onPointerEnter={preloadSettingsDialog}
+              onFocus={preloadSettingsDialog}
               onClick={onOpenFeedback}
             >
               <SidebarRailIcon name="feedback" selected={feedbackActive} />
@@ -71,6 +74,8 @@ export function SidebarFooter({
               aria-label={uiText("settings_e366")}
               title={uiText("settings_e366")}
               aria-pressed={isSettingsOpen && !feedbackActive}
+              onPointerEnter={preloadSettingsDialog}
+              onFocus={preloadSettingsDialog}
               onClick={onOpenSettings}
             >
               {hasCharacter ? <CharacterAvatar /> : <SidebarRailIcon name="settings" selected={isSettingsOpen && !feedbackActive} />}

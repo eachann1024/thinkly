@@ -36,6 +36,7 @@ import { SidebarFooter } from "../SidebarFooter";
 import { readSearchSelection } from "../readSearchSelection";
 import { useSearchSession } from "../useSearchSession";
 import { preloadSearchSheet } from "../../search-sheet/searchSheetLoader";
+import { preloadNotebookAi } from "../../notebook-ai/notebookAiLoader";
 import { SidebarRailButton } from "./SidebarRailButton";
 import { SidebarRailSortableList } from "./SidebarRailSortable";
 import type { useSidebarHover } from "./useSidebarHover";
@@ -120,6 +121,8 @@ export function SidebarModeRail({
       icon: "ai",
       selected: !settingsOpen && aiPanelVisible,
       tooltip: `${toggleAiLabel} · ${sidebarViewShortcut(order.indexOf("ai") + 1)}`,
+      onPointerEnter: preloadNotebookAi,
+      onFocus: preloadNotebookAi,
       onClick: () => {
         window.dispatchEvent(new CustomEvent("goose-note:toggle-ai-panel"));
       },
