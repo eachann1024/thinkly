@@ -1,8 +1,10 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
+import { blockHandleFirstLineCenter } from "./blockHandleDom";
 import { isInteractiveEditorTarget } from "../utils/selection";
 import { HEADING_SIDE_MENU_EXTRA_GAP, SIDE_MENU_CONTENT_GAP } from "./sideMenuHover";
+import { withoutBlockHandleScroll } from "../extensions/blockHandleUiExtension";
 
 type AnyEditor = BlockNoteEditor<any, any, any>;
 
@@ -14,7 +16,7 @@ function isEmptyParagraph(block: any): boolean {
   return (
     block?.type === "paragraph" &&
     Array.isArray(block.content) &&
-    block.content.length === 0 &&
+    block.content.every((part: any) => part.type === "text" && !part.text) &&
     !(block.children?.length > 0)
   );
 }
@@ -52,8 +54,10 @@ export function readTrailingAddAnchor(
   const dom = view.dom as HTMLElement;
   const scroller = dom.closest<HTMLElement>(".page-scroll-container") ?? dom.parentElement;
   if (!scroller || !target || !scroller.contains(target)) return null;
-  if (target instanceof HTMLElement && isInteractiveEditorTarget(target)) return null;
-  if (target.closest(".bn-block-outer")) return null;
+  // BlockNote's non-editable trailing widget is blank insertion space.
+  // It must not be rejected as an interactive embedded control.
+  if (target instanceof HTMLElement && isInteractiveEditorTarget(target) &&
+    !target.closest(".bn-trailing-block")) return null;
   if (editor.getExtension(SuggestionMenu)?.shown()) return null;
 
   const last = lastVisibleTopBlock(dom);
@@ -61,15 +65,20 @@ export function readTrailingAddAnchor(
   const lastRect = last.getBoundingClientRect();
   const domRect = dom.getBoundingClientRect();
   const scrollRect = scroller.getBoundingClientRect();
-  if (clientY < lastRect.bottom || clientY > scrollRect.bottom) return null;
+  const reusable = reusableLastBlock(editor);
+  const lastIsReusable = Boolean(reusable &&
+    (last.dataset.id === reusable.id || last.querySelector(`[data-node-type="blockContainer"][data-id="${CSS.escape(reusable.id)}"]`)));
+  // The final empty paragraph and the whitespace below it share one add control.
+  const hitBlock = target.closest(".bn-block-outer");
+  if (hitBlock && (!lastIsReusable || hitBlock !== last)) return null;
+  if (clientY < (lastIsReusable ? lastRect.top : lastRect.bottom) || clientY > scrollRect.bottom) return null;
   const left =
     (dom.querySelector(":scope > .bn-block-group") ?? dom).getBoundingClientRect().left;
   if (clientX < left - GUTTER_REACH || clientX > domRect.right) return null;
 
-  const lastIsReusable = reusableLastBlock(editor)?.id === last.dataset.id;
   const content = last.querySelector<HTMLElement>(".bn-block-content") ?? last;
   const top = lastIsReusable
-    ? content.getBoundingClientRect().top + content.getBoundingClientRect().height / 2
+    ? (blockHandleFirstLineCenter(content) ?? content.getBoundingClientRect().top + content.getBoundingClientRect().height / 2)
     : lastRect.bottom + lineHeightOf(dom) / 2;
   if (top > scrollRect.bottom) return null;
   return { top, left: left - SIDE_MENU_CONTENT_GAP - HEADING_SIDE_MENU_EXTRA_GAP };
@@ -79,16 +88,17 @@ export function openTrailingBlockMenu(editor: AnyEditor): string | undefined {
   const suggestionMenu = editor.getExtension(SuggestionMenu);
   const last = editor.document.at(-1);
   if (!suggestionMenu || !last || suggestionMenu.shown()) return undefined;
-  editor.focus();
   const reusable = reusableLastBlock(editor);
   let createdId: string | undefined;
-  editor.transact((tr) => {
-    tr.setMeta("addToHistory", false);
-    const target = reusable ?? editor.insertBlocks([{ type: "paragraph" }], last, "after")[0];
-    if (!reusable) createdId = target?.id;
-    if (target) editor.setTextCursorPosition(target, "start");
+  withoutBlockHandleScroll(editor, () => {
+    editor.transact((tr) => {
+      tr.setMeta("addToHistory", false);
+      const target = reusable ?? editor.insertBlocks([{ type: "paragraph" }], last, "after")[0];
+      if (!reusable) createdId = target?.id;
+      if (target) editor.setTextCursorPosition(target, "start");
+    });
+    suggestionMenu.openSuggestionMenu("/");
   });
-  suggestionMenu.openSuggestionMenu("/");
   return createdId;
 }
 
