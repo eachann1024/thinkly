@@ -13,7 +13,6 @@ const uiText = createTranslator(localMessages);
 import { useSettingsDataOperation } from "./useSettingsDataOperation";
 import { useShallow } from "zustand/react/shallow";
 import { useNotebooks, sortNotebooksByOrder } from "@/stores/useNotebooks";
-import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import type { ExportOptions } from "@/lib/export";
 import type { SettingsDialogProps } from "./shared";
@@ -121,8 +120,6 @@ export function useSettingsDialogState({
     useShallow((s) => ({ notebooks: s.notebooks })),
   );
 
-  const { pages } = usePages(useShallow((s) => ({ pages: s.pages })));
-
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [format, setFormat] = useState<ExportOptions["format"]>("md");
@@ -206,7 +203,6 @@ export function useSettingsDialogState({
     localFolderHiddenFolders,
     setLocalFolderHiddenFolders,
     notebooks,
-    pages,
     selectedIds,
     setSelectedIds,
     format,

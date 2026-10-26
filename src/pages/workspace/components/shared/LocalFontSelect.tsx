@@ -78,7 +78,7 @@ export function LocalFontSelect({
   const [fontProbe, dispatchProbe] = useReducer(fontProbeReducer, { status: "idle" });
   const savedFont = fontProbe.status === "ready" ? fontProbe : null;
   useEffect(() => {
-    if (!open && fonts !== null) return;
+    if (!open) return;
     let active = true;
     dispatchFonts({ type: "load" });
     void getAvailableLocalFonts().then((available) => {
@@ -91,7 +91,7 @@ export function LocalFontSelect({
     return () => {
       active = false;
     };
-  }, [open, fonts]);
+  }, [open]);
   useEffect(() => {
     if (!value || value === baseFont || fonts?.some((font) => font.family === value)) {
       dispatchProbe({ type: "reset" });
