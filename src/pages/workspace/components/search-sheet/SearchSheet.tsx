@@ -82,7 +82,7 @@ ja:
   currentNotebook: "現在のノートブック"
 `;
 const uiText = createTranslator(localMessages);
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -93,6 +93,7 @@ import { OverlayLayerProvider, useModalLayer } from "@/components/ui/overlay-lay
 import { SkeletonList } from "@/components/ui/skeleton";
 import type { SearchWindowCommand } from "@/lib/electron/searchWindow";
 import { formatShortcut } from "@/lib/utils";
+import { deferWorkspaceMaintenance } from "@/lib/workspace-navigation-timing";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { useSettings } from "@/stores/useSettings";
 import { matchingSplitPaletteActions } from "../command/splitPaletteActions";
@@ -164,12 +165,21 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId, variant = "
   useEffect(() => { if (!visible) resetAnswer(); }, [visible, resetAnswer]);
   useEffect(() => { if (answer && answer.question !== prompt.trim()) resetAnswer(); }, [answer, prompt, resetAnswer]);
   useEffect(() => { setActiveId(null); listRef.current?.scrollTo({ top: 0 }); }, [deferredQuery, session.scope, session.titleOnly, session.sort]);
+  useLayoutEffect(() => {
+    if (visible && !windowed && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) deferWorkspaceMaintenance();
+  }, [visible, windowed, session.focusNonce]);
   useEffect(() => {
     if (!visible) return;
     const active = document.activeElement;
     if (active instanceof HTMLElement && !sheetRef.current?.contains(active)) returnFocus.current = active;
     queryRef.current?.focus(true);
-  }, [visible, session.focusNonce]);
+    if (!windowed) return;
+    const refocus = () => {
+      if (!sheetRef.current?.contains(document.activeElement)) queryRef.current?.focus();
+    };
+    window.addEventListener("focus", refocus);
+    return () => window.removeEventListener("focus", refocus);
+  }, [visible, windowed, session.focusNonce]);
   useEffect(() => {
     if (visible || session.open) return;
     const target = returnFocus.current;
