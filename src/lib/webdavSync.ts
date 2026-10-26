@@ -234,9 +234,7 @@ export async function triggerAutoWebdavBackup(): Promise<void> {
   try {
     const notebooksStore = useNotebooks.getState();
     const pagesStore = usePages.getState();
-    const notebookIds = Object.values(notebooksStore.notebooks)
-      .filter((notebook) => notebook.source !== "local-folder")
-      .map((n) => n.id);
+    const notebookIds = Object.values(notebooksStore.notebooks).map((n) => n.id);
     if (notebookIds.length === 0) return;
 
     const zipBlob = await generateExportZip(
