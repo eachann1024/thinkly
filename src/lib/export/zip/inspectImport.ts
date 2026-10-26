@@ -42,6 +42,14 @@ export async function inspectNotebookImportZip(
     throw new Error(uiText("theBackupIsnTAValidZipFile"), { cause: error });
   }
 
+  if (zip.file("thinkly-local-backups.json") || zip.file("thinkly-local-backup.json")) {
+    const { readLocalNotebookBundle } = await import("../localNotebookBackup/bundle");
+    const notebooks = await readLocalNotebookBundle(zipBlob);
+    return { source: "local-backup", notebookCount: notebooks.length,
+      pageCount: notebooks.reduce((sum, notebook) => sum + [...notebook.files.keys()]
+        .filter((name) => /\.(md|markdown)$/i.test(name)).length, 0) };
+  }
+
   const metaFile = zip.file("backup-metadata.json");
   if (metaFile) {
     let meta: unknown;

@@ -6,7 +6,7 @@ export interface ExportOptions {
 }
 
 export interface NotebookImportInspection {
-  source: "metadata" | "folders";
+  source: "metadata" | "folders" | "local-backup";
   notebookCount: number;
   pageCount: number;
 }
