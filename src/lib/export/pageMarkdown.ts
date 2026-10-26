@@ -2,6 +2,7 @@ import type { BlockNoteContent } from "@/components/editor/utils/blocknote-conte
 import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { blocksToEditorHtml } from "./blocksToEditorHtml";
+import { addExportTitle, stripExportMetadata } from "./plainMarkdown";
 
 
 function isFirstBlockH1(block: unknown): boolean {
@@ -32,15 +33,15 @@ export async function buildExportMarkdown(
 ): Promise<string> {
   const { blocksToMarkdown } = await import("./blocknoteSerializer");
   if (page.localFilePath) {
-    return blocksToMarkdown(blocks);
+    return stripExportMetadata(await blocksToMarkdown(blocks));
   }
   const includeTitleHeading = options.includeTitleHeading ?? true;
   if (!includeTitleHeading) {
-    return blocksToMarkdown(stripFirstH1(blocks));
+    return stripExportMetadata(await blocksToMarkdown(stripFirstH1(blocks)));
   }
   const title = getPageTitle(page);
-  const body = await blocksToMarkdown(stripFirstH1(blocks));
-  return `# ${title}\n\n${body}`;
+  const body = stripExportMetadata(await blocksToMarkdown(stripFirstH1(blocks)));
+  return addExportTitle(body, title);
 }
 
 export async function buildExportHtmlBody(
