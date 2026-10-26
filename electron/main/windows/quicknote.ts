@@ -84,8 +84,6 @@ export function createQuicknoteWindow(): BrowserWindow {
     ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
     ...(isMac
       ? {
-          // Key focus stays in the panel without activating the app in Stage Manager.
-          type: "panel" as const,
           titleBarStyle: "hidden" as const,
           roundedCorners: true,
           hiddenInMissionControl: true,

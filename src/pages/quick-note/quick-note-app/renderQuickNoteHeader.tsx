@@ -5,6 +5,8 @@ zh-Hans:
   renameSlot: "重命名速记 {{slot}}"
   saveToNotes: "保存到笔记"
   emptyNote: "速记内容为空，无法保存"
+  fontSize: "字号"
+  pixels: "{{size}} 像素"
   close: "关闭"
   helpLabel: "使用说明"
   helpTitle: "速记"
@@ -12,6 +14,8 @@ en:
   renameSlot: "Rename Quick Note {{slot}}"
   saveToNotes: "Save to notes"
   emptyNote: "This Quick Note is empty"
+  fontSize: "Font size"
+  pixels: "{{size}} pixels"
   close: "Close"
   helpLabel: "How to use"
   helpTitle: "Quick Note"
@@ -19,6 +23,8 @@ ja:
   renameSlot: "クイックノート {{slot}} の名前を変更"
   saveToNotes: "ノートに保存"
   emptyNote: "クイックノートが空のため、保存できません"
+  fontSize: "文字サイズ"
+  pixels: "{{size}} ピクセル"
   close: "閉じる"
   helpLabel: "使い方"
   helpTitle: "クイックノート"
@@ -28,6 +34,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { type CSSProperties } from "react";
 import { CircleAlert, FilePlus2, X } from "@/components/ui/icons";
+import {
+  QUICKNOTE_ZOOM_MIN,
+  QUICKNOTE_ZOOM_MAX,
+} from "@/stores/useQuickNote";
 import {
   Popover,
   PopoverContent,
@@ -50,6 +60,9 @@ export function renderQuickNoteHeader(
     editRename,
     renameInputRef,
     slotNames,
+    zoom,
+    setEditorZoom,
+    editorFontSize,
     windowTitle,
     occupiedSlots,
     startRename,
@@ -60,7 +73,7 @@ export function renderQuickNoteHeader(
     handlePreviewSlot,
     persistPlacementThenClose,
   } = context;
-  const helpLines = quickNoteHelpLines(getPlatformKind());
+  const [helpSlots, helpSwitch] = quickNoteHelpLines(getPlatformKind());
   return (
     <div
       className="quicknote-titlebar-reveal-zone"
@@ -100,19 +113,16 @@ export function renderQuickNoteHeader(
         style={{ WebkitAppRegion: "drag" } as CSSProperties}
       >
         <div className="quicknote-titlebar-left">
-          <button
-            type="button"
+          <span
             className="quicknote-slot-name-display"
             title={windowTitle}
-            aria-label={uiText("renameSlot", { slot: activeSlot })}
+            aria-label={windowTitle}
             data-notebook-window-title={windowTitle}
-            style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-            onClick={() => startRename(activeSlot)}
           >
             <span key={windowTitle} className="quicknote-slot-name-text">
               {windowTitle}
             </span>
-          </button>
+          </span>
         </div>
 
         { }
@@ -171,8 +181,28 @@ export function renderQuickNoteHeader(
               <div className="quicknote-help-heading">
                 <div className="text-sm font-medium">{uiText("helpTitle")}</div>
                 <ol className="quicknote-help-list goose-tabular">
-                  {helpLines.map((line, index) => <li key={index}>{line}</li>)}
+                  <li>{helpSlots}</li>
+                  <li>{helpSwitch}</li>
                 </ol>
+              </div>
+              <div className="quicknote-font-control">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="quicknote-font-size">{uiText("fontSize")}</label>
+                  <span className="tabular-nums text-muted-foreground">
+                    {Math.round(editorFontSize * zoom * 10) / 10} px
+                  </span>
+                </div>
+                <input
+                  id="quicknote-font-size"
+                  type="range"
+                  aria-label={uiText("fontSize")}
+                  aria-valuetext={uiText("pixels", {size: Math.round(editorFontSize * zoom * 10) / 10})}
+                  min={QUICKNOTE_ZOOM_MIN}
+                  max={QUICKNOTE_ZOOM_MAX}
+                  step={0.01}
+                  value={zoom}
+                  onChange={(event) => setEditorZoom(Number(event.target.value))}
+                />
               </div>
             </PopoverContent>
           </Popover>
