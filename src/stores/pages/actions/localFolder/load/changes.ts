@@ -165,13 +165,20 @@ export const addSingleLocalPageAction = async (
   };
 
   const resolveIdentity = createNoteIdentityResolver(basePath, notebookId, fs, idMap,
-    new Set(Object.values(get().pages).filter((page) => page.localFilePath !== filePath).map((page) => page.id)));
+    new Set(Object.values(get().pages).filter((page) => page.workspaceId !== notebookId).map((page) => page.id)));
+  for (const page of Object.values(get().pages)) {
+    if (page.workspaceId !== notebookId || !page.localFilePath) continue;
+    const relative = canonicalRelativePath(basePath, page.localFilePath);
+    if (!relative) continue;
+    resolveIdentity.reserve(relative, page.id);
+    if (page.localMetadataId) resolveIdentity.reserve(relative, page.localMetadataId);
+  }
   const identityChanged = await resolveIdentity(newPage);
   if (dirty || adopted || identityChanged) writeLocalPageIdMap(notebookId, idMap);
 
   set((state) => {
     if (Object.values(state.pages).some(page => page.localFilePath?.replace(/\\/g, "/") === filePath.replace(/\\/g, "/"))) return state;
-    const [safePage] = protectCommittedNoteIdentities([newPage], new Set(Object.keys(state.pages)));
+    const [safePage] = protectCommittedNoteIdentities([newPage], new Map(Object.values(state.pages).map(page => [page.id, page])));
     Object.assign(newPage, safePage);
     return { pages: { ...state.pages, [newPage.id]: newPage } };
   });
