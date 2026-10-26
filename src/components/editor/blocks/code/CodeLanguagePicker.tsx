@@ -23,6 +23,7 @@ import {
 } from "./codeBlockLanguages";
 import {
   defaultLanguageHighlightIndex,
+  findLanguageOptionIndex,
   moveLanguageHighlightIndex,
 } from "./codeBlockLanguageNav";
 import type { CodeBlockToolbarProps } from "./codeToolbarTypes";
@@ -55,8 +56,11 @@ export function CodeLanguagePicker({
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [languageList, setLanguageList] = useState<HTMLDivElement | null>(null);
   const languageListId = useId();
   const menuFocus = useCodeLanguageFocus();
+  const selectedLanguage =
+    POPULAR_LANGUAGES[findLanguageOptionIndex(POPULAR_LANGUAGES, language)];
 
   const filteredLanguages = useMemo(() => {
     if (!search) return POPULAR_LANGUAGES;
@@ -151,14 +155,17 @@ export function CodeLanguagePicker({
   }, [isOpen, search, language, filteredLanguages]);
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
-    const frame = window.requestAnimationFrame(() => {
-      document
-        .getElementById(`${languageListId}-opt-${safeHighlightedIndex}`)
-        ?.scrollIntoView({ block: "nearest" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [isOpen, languageListId, safeHighlightedIndex]);
+    if (!isOpen || !languageList) return;
+    const option = languageList.children[safeHighlightedIndex];
+    if (!(option instanceof HTMLElement) || !filteredLanguages.length) return;
+    const top = option.offsetTop;
+    const bottom = top + option.offsetHeight;
+    if (top < languageList.scrollTop) {
+      languageList.scrollTop = top;
+    } else if (bottom > languageList.scrollTop + languageList.clientHeight) {
+      languageList.scrollTop = bottom - languageList.clientHeight;
+    }
+  }, [isOpen, languageList, safeHighlightedIndex, filteredLanguages]);
 
   return (
     <>
@@ -225,10 +232,8 @@ export function CodeLanguagePicker({
                 className="goose-code-language-input"
               />
             </div>
-            {!search && (
-              <div className="goose-code-language-label goose-menu-label">{t("commonLanguages")}</div>
-            )}
             <div
+              ref={setLanguageList}
               id={languageListId}
               className="goose-code-language-list goose-list-layout"
               data-goose-menu-slot="root"
@@ -249,7 +254,7 @@ export function CodeLanguagePicker({
                   }
                   aria-selected={index === safeHighlightedIndex}
                   data-goose-selected={
-                    lang.toLowerCase() === language.toLowerCase()
+                    lang === selectedLanguage
                   }
                   data-goose-lang-highlighted={
                     index === safeHighlightedIndex ? "true" : undefined
@@ -267,7 +272,7 @@ export function CodeLanguagePicker({
                   <span className="goose-code-language-name">
                     {LANGUAGE_DISPLAY_NAMES[lang] || lang}
                   </span>
-                  {lang.toLowerCase() === language.toLowerCase() && (
+                  {lang === selectedLanguage && (
                     <Check
                       className="goose-code-language-check"
                       aria-hidden="true"
