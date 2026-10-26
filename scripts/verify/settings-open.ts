@@ -20,6 +20,11 @@ function memoryStorage() {
       return value ?? null;
     },
     setItem(key: string, value: string) {
+      if (api.blockCopies && key !== MONOLITH) {
+        const quota = new Error("quota");
+        quota.name = "QuotaExceededError";
+        throw quota;
+      }
       writes += 1;
       writeBytes += value.length;
       values.set(key, value);
@@ -27,6 +32,7 @@ function memoryStorage() {
     removeItem(key: string) {
       values.delete(key);
     },
+    blockCopies: false,
     reset() {
       reads = 0;
       readBytes = 0;
@@ -107,6 +113,24 @@ export default function run(): number {
   checker.check(
     "删除一篇文档也不重写整库",
     removed.ok === true && storage.values.get(MONOLITH) === monolith && storage.writeBytes < 64_000 && hostRuntime.db.get("gn:hist:p:1") === null,
+  );
+  storage.blockCopies = true;
+  const currentFold = hostRuntime.db.get<{ content: string }>("gn:page:3");
+  const folded = hostRuntime.db.put("gn:page:3", {
+    ...currentFold?.data,
+    content: `${body}#`,
+  }, currentFold?._rev);
+  const foldedMap = JSON.parse(storage.values.get(MONOLITH) ?? "{}") as Record<string, { data?: { content?: string } }>;
+  const copyLeft = [...storage.values.keys()].some((key) => key.startsWith("thinkly:web-doc:") || key === "thinkly:web-db:overlay");
+  checker.check(
+    "配额不够时把这篇折回整库并清掉副本",
+    folded.ok === true && foldedMap["gn:page:3"]?.data?.content?.endsWith("#") && !copyLeft,
+  );
+  const dropped = hostRuntime.db.remove("gn:page:4");
+  const droppedMap = JSON.parse(storage.values.get(MONOLITH) ?? "{}") as Record<string, unknown>;
+  checker.check(
+    "配额不够时删除会从整库去掉这篇",
+    dropped.ok === true && !Object.hasOwn(droppedMap, "gn:page:4") && hostRuntime.db.get("gn:page:4") === null,
   );
   return checker.failed;
 }

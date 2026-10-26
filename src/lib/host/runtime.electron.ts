@@ -12,7 +12,16 @@ const DOC_PREFIX = "thinkly:web-doc:";
 type Overlay = Record<string, "put" | "del">;
 
 let documents: Record<string, HostDoc<unknown>> | null = null;
+let touched = new Set<string>();
+let foldTimer: ReturnType<typeof setTimeout> | null = null;
 let watching = false;
+
+const isQuota = (err: unknown): boolean => {
+  if (!err || typeof err !== "object") return false;
+  const name = "name" in err ? err.name : "";
+  const code = "code" in err ? err.code : 0;
+  return name === "QuotaExceededError" || code === 22 || code === 1014;
+};
 
 const storage = (): Storage => {
   if (typeof window === "undefined") throw new Error("local-storage-unavailable");
@@ -59,6 +68,8 @@ const watchStorage = (): void => {
     const key = event.key;
     if (key === null || key === MONOLITH_KEY || key === OVERLAY_KEY || key.startsWith(DOC_PREFIX)) {
       documents = null;
+      if (foldTimer) clearTimeout(foldTimer);
+      foldTimer = null;
     }
   });
 };
@@ -67,7 +78,9 @@ const loadDocuments = (): Record<string, HostDoc<unknown>> => {
   watchStorage();
   if (documents) return documents;
   const docs = readMonolith();
-  for (const [id, state] of Object.entries(readOverlay())) {
+  const overlay = readOverlay();
+  touched = new Set(Object.keys(overlay));
+  for (const [id, state] of Object.entries(overlay)) {
     if (state === "del") {
       delete docs[id];
       continue;
@@ -82,7 +95,31 @@ const loadDocuments = (): Record<string, HostDoc<unknown>> => {
   return docs;
 };
 
+const foldLibrary = (): void => {
+  if (!documents) return;
+  const store = storage();
+  const ids = [...touched];
+  const body = JSON.stringify(documents);
+  for (const id of ids) store.removeItem(DOC_PREFIX + id);
+  store.removeItem(OVERLAY_KEY);
+  store.setItem(MONOLITH_KEY, body);
+  touched.clear();
+  if (foldTimer) clearTimeout(foldTimer);
+  foldTimer = null;
+};
+
+const scheduleFold = (): void => {
+  if (foldTimer) clearTimeout(foldTimer);
+  foldTimer = setTimeout(() => {
+    foldTimer = null;
+    try { foldLibrary(); } catch { /* 副本还在，下次保存再折回 */ }
+  }, 30_000);
+  const timer = foldTimer as { unref?: () => void };
+  timer.unref?.();
+};
+
 const writeDoc = (id: string, doc: HostDoc<unknown> | null, state: "put" | "del"): boolean => {
+  touched.add(id);
   const store = storage();
   const key = DOC_PREFIX + id;
   if (doc) store.setItem(key, JSON.stringify(doc));
@@ -92,6 +129,45 @@ const writeDoc = (id: string, doc: HostDoc<unknown> | null, state: "put" | "del"
   overlay[id] = state;
   store.setItem(OVERLAY_KEY, JSON.stringify(overlay));
   return true;
+};
+
+const rewriteTouched = (ids: string[]): void => {
+  if (!documents) return;
+  const store = storage();
+  const overlay: Overlay = {};
+  for (const id of ids) {
+    const doc = documents[id];
+    if (doc) {
+      store.setItem(DOC_PREFIX + id, JSON.stringify(doc));
+      overlay[id] = "put";
+    } else overlay[id] = "del";
+  }
+  if (Object.keys(overlay).length) store.setItem(OVERLAY_KEY, JSON.stringify(overlay));
+  for (const id of ids) touched.add(id);
+};
+
+const saveDoc = (
+  id: string,
+  doc: HostDoc<unknown> | null,
+  state: "put" | "del",
+  revert: () => void,
+): boolean => {
+  try {
+    writeDoc(id, doc, state);
+    scheduleFold();
+    return true;
+  } catch (err) {
+    const ids = [...touched];
+    if (isQuota(err)) {
+      try {
+        foldLibrary();
+        return true;
+      } catch { /* 整库没写上，回到保存前的副本 */ }
+    }
+    revert();
+    try { rewriteTouched(ids); } catch { /* 内存已回到保存前 */ }
+    return false;
+  }
 };
 
 const nextWebRev = (current?: string): string => {
@@ -122,12 +198,11 @@ export const hostRuntime: HostRuntime = {
       const nextRev = nextWebRev(rev || previous?._rev);
       const next: HostDoc<T> = { _id: id, _rev: nextRev, data };
       docs[id] = next;
-      try { writeDoc(id, next, "put"); }
-      catch {
+      const kept = saveDoc(id, next, "put", () => {
         if (previous) docs[id] = previous;
         else delete docs[id];
-        return { id, ok: false, error: "local-storage-write-failed" };
-      }
+      });
+      if (!kept) return { id, ok: false, error: "local-storage-write-failed" };
       return { id, ok: true, rev: nextRev };
     },
     get: <T>(id: string): HostDoc<T> | null => {
@@ -140,11 +215,10 @@ export const hostRuntime: HostRuntime = {
       catch { return { id, ok: false, error: "local-storage-read-failed" }; }
       const previous = docs[id];
       delete docs[id];
-      try { writeDoc(id, null, "del"); }
-      catch {
+      const dropped = saveDoc(id, null, "del", () => {
         if (previous) docs[id] = previous;
-        return { id, ok: false, error: "local-storage-write-failed" };
-      }
+      });
+      if (!dropped) return { id, ok: false, error: "local-storage-write-failed" };
       void electronAttachments()
         .then((mod) => mod.removeAttachment(id))
         .catch(() => {});
