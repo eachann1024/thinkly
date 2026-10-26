@@ -139,6 +139,10 @@ declare global {
     takePendingOpenMarkdownFiles: () => Promise<string[]>
     onOpenMarkdownFiles: (cb: (files: string[]) => void) => () => void
     notify: (n: { title: string; body: string }) => Promise<void>
+    openSettings: (tab: import("./pages/workspace/components/sidebar/settings/types").SettingsTab) => Promise<boolean>
+    onNotificationAction: (cb: (delivery: import("./lib/notification-action").NotificationDelivery) => void) => () => void
+    notificationReady: () => Promise<import("./lib/notification-action").NotificationDelivery | null>
+    notificationHandled: (sequence: number) => Promise<boolean>
     getWindowContext: () => Promise<{ windowId: string; kind: "workspace" | "quicknote" | "search" }>
     hideSearchWindow: () => Promise<void>
     searchWindowReady: () => Promise<void>
