@@ -58,6 +58,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/SvgArtifactCard.tsx#messages:1": { "couldNotDisplayImage": {  }; "generatingImage": {  }; "generatingImage2": {  }; "image": {  } };
     "src/pages/workspace/components/notebook-ai/TableCard.tsx#messages:1": { "table": {  } };
     "src/pages/workspace/components/notebook-ai/ToolProgressCard.tsx#messages:1": { "awaitingApproval": {  }; "canceled": {  }; "complete": {  }; "failed": {  }; "inProgress": {  }; "pending": {  }; "progress": {  }; "thinking": {  }; "undone": {  } };
+    "src/pages/workspace/components/notebook-ai/ToolProgressPages.tsx#messages:1": { "first": {  }; "last": {  }; "next": {  }; "page": {  }; "previous": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewDiff.tsx#messages:1": { "changeDiff": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewProposal.tsx#messages:1": { "applied": {  }; "deselectAll": {  }; "failed": {  }; "needsReview": {  }; "notApplied": {  }; "pending": {  }; "rolledBack": {  }; "selectAll": {  }; "selectedCount": { "selected": string | number; "total": string | number }; "skipped": {  }; "undone": {  } };
     "src/pages/workspace/components/notebook-ai/approval/planRefinementText.ts#messages:1": { "invalidPlan": {  }; "refine": { "title": string | number } };

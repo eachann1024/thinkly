@@ -10,6 +10,7 @@ ja:
 const t = createTranslator(messages);
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import type { ApprovalPlanPart } from "../ApprovalPlanCard";
+import { isNotebookAiToolPart } from "@/lib/notebook-ai/messageUtils";
 import {
   isHiddenSkillPart,
   type ToolDisplayPart,
@@ -38,6 +39,63 @@ export function collectReasoningText(message: NotebookAiMessage): string {
     if (text) chunks.push(text);
   }
   return chunks.join("\n");
+}
+
+export interface AssistantMessagePresentation {
+  hasText: boolean;
+  reasoningText: string;
+  progressToolParts: ToolDisplayPart[];
+  visibleApprovalPart?: ApprovalPlanPart;
+  otherApprovalParts: ApprovalPlanPart[];
+}
+
+function isVisibleApprovalCandidate(part: ToolDisplayPart) {
+  return (
+    part.type === "tool-executeBatchPlan" &&
+    part.state !== "input-streaming" &&
+    part.state !== "input-available" &&
+    part.state !== "call" &&
+    part.state !== "partial-call"
+  );
+}
+
+export function deriveAssistantMessagePresentation(
+  message: NotebookAiMessage,
+  isMessageStreaming: boolean,
+): AssistantMessagePresentation {
+  let hasTextPart = false;
+  let hasText = false;
+  let reasoningText = "";
+  const progressToolParts: ToolDisplayPart[] = [];
+  let visibleApprovalPart: ApprovalPlanPart | undefined;
+  const otherApprovalParts: ApprovalPlanPart[] = [];
+
+  for (const part of message.parts ?? []) {
+    if (part.type === "text" && !hasTextPart) {
+      hasTextPart = true;
+      hasText = "text" in part && String(part.text ?? "").trim().length > 0;
+    }
+    if (part.type === "reasoning" && "text" in part) {
+      const chunk = String(part.text ?? "").trim();
+      if (chunk) reasoningText = chunk;
+    }
+    if (!isNotebookAiToolPart(part)) continue;
+    if (!shouldShowToolPart(part, isMessageStreaming)) continue;
+
+    const toolPart = part as ToolDisplayPart;
+    progressToolParts.push(toolPart);
+    if (!isVisibleApprovalCandidate(toolPart)) continue;
+    if (visibleApprovalPart) otherApprovalParts.push(toolPart);
+    else visibleApprovalPart = toolPart;
+  }
+
+  return {
+    hasText,
+    reasoningText,
+    progressToolParts,
+    visibleApprovalPart,
+    otherApprovalParts,
+  };
 }
 
 export function getUserDisplayText(message: NotebookAiMessage) {
