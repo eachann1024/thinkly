@@ -74,7 +74,7 @@ export function renderMainTreeSurface(
     <ContextMenuTrigger asChild>
       <div
         ref={scrollContainerRef}
-        className="flex-1 min-h-0 min-w-0 w-full overflow-auto"
+        className="sidebar-tree-scroll flex-1 min-h-0 min-w-0 w-full overflow-auto"
         style={
           {
             height: viewportHeight || undefined,
