@@ -104,9 +104,9 @@ export const loadLocalFolderPagesOnce = async (
     clearHistoryTombstones(notebookId, localPages.filter((page) => !page.isFolder).map((page) => page.id));
 
     set((state) => {
-      localPages = protectCommittedNoteIdentities(localPages, new Set(Object.values(state.pages)
+      localPages = protectCommittedNoteIdentities(localPages, new Map(Object.values(state.pages)
         .filter(page => page.workspaceId !== notebookId || page.editorDraft || page.localUnsaved && !page.localFilePath)
-        .map(page => page.id)));
+        .map(page => [page.id, page])));
       const currentByPath = new Map(Object.values(state.pages).filter(page => page.workspaceId === notebookId && page.localFilePath)
         .map(page => [page.localFilePath!.replace(/\\/g, "/"), page]));
       const pagesOutsideNotebook = Object.fromEntries(
