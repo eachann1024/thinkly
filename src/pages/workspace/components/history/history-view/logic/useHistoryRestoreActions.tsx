@@ -3,17 +3,18 @@ import { toast } from "@/components/ui/sonner";
 import { describeDiskWriteError } from "@/lib/diskWriteError";
 import {
   markMilestone,
-  recordHistorySnapshot,
+  recordHistorySnapshotDetailed,
   unmarkMilestone,
 } from "@/lib/history/snapshot";
+import { historyRestoreTargetSignature, canApplyHistoryRestore } from "@/lib/history/restoreGuard";
 import { materializeVersion } from "@/lib/history/restore";
-import { parseLocalFrontmatterBlob } from "@/lib/local-frontmatter";
 import { createSafeHistoryContent } from "../historyViewPresentation";
 import type { useHistoryViewState } from "./useHistoryViewState";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/history/history-view/logic/useHistoryRestoreActions.tsx#messages:1">`
 zh-Hans:
   thisVersionCouldNotBeRead: "无法读取该版本"
+  noteChangedDuringRestore: "笔记在读取历史期间已变化，请重新还原。"
   theVersionFileIsEmptyOrUnreadableIf: "版本文件为空或无法读取。若仓库在云盘上，请先恢复云盘登录。"
   thisVersionHasAnInvalidFormatAndCannot: "该历史版本格式异常，无法还原"
   thisVersionHasDamagedMetadataAndCannotBe: "该历史版本头部属性损坏，无法还原"
@@ -25,6 +26,7 @@ zh-Hans:
   confirmRestore: "确定还原到此历史版本？\\n当前正文会自动保留为「还原前快照」，可随时恢复。"
 en:
   thisVersionCouldNotBeRead: "This version could not be read"
+  noteChangedDuringRestore: "The note changed while loading history. Please restore again."
   theVersionFileIsEmptyOrUnreadableIf: "The version file is empty or unreadable. If your notebook is in cloud storage, sign in to it first."
   thisVersionHasAnInvalidFormatAndCannot: "This version has an invalid format and cannot be restored"
   thisVersionHasDamagedMetadataAndCannotBe: "This version has damaged metadata and cannot be restored"
@@ -36,6 +38,7 @@ en:
   confirmRestore: "Restore this version?\\nThe current content will be saved as a snapshot that you can restore at any time."
 ja:
   thisVersionCouldNotBeRead: "このバージョンを読み込めません"
+  noteChangedDuringRestore: "履歴の読み込み中にノートが変更されました。もう一度復元してください。"
   theVersionFileIsEmptyOrUnreadableIf: "バージョンファイルが空か、読み込めません。リポジトリがクラウドストレージ上にある場合は、先にクラウドストレージへのサインインを復旧してください。"
   thisVersionHasAnInvalidFormatAndCannot: "この履歴バージョンの形式が正しくないため、復元できません"
   thisVersionHasDamagedMetadataAndCannotBe: "この履歴バージョンのヘッダー情報が破損しているため、復元できません"
@@ -83,17 +86,20 @@ export function useHistoryRestoreActions(
     }
 
     const latest = getPage(pageId);
-    if (!latest) return;
+    if (!latest) { setIsRestoring(false); return; }
+    const targetSignature = historyRestoreTargetSignature(latest);
 
-    recordHistorySnapshot({
+    recordHistorySnapshotDetailed({
       pageId,
       workspaceId: latest.workspaceId,
       content: latest.content,
       trigger: "pre-op",
-    }).catch((err) => console.error("[history] pre-op snapshot failed:", err));
-
-    materializeVersion(pageId, selectedVersionId)
+    }).then((snapshot) => {
+      if (snapshot.status === "unavailable") throw new Error(t("thisVersionCouldNotBeRead"));
+      return materializeVersion(pageId, selectedVersionId);
+    })
       .then((result) => {
+        if (!canApplyHistoryRestore(targetSignature, getPage(pageId))) throw new Error(t("noteChangedDuringRestore"));
         if (!result || result.content == null) {
           toast.error(t("thisVersionCouldNotBeRead"), {
             description: t("theVersionFileIsEmptyOrUnreadableIf"),
@@ -112,16 +118,8 @@ export function useHistoryRestoreActions(
         };
         if (latest.localFilePath || result.localFrontmatter !== undefined) {
           updates.localFrontmatter = result.localFrontmatter;
-          const fm = parseLocalFrontmatterBlob(result.localFrontmatter);
-          if (!fm.ok) {
-            toast.error(t("thisVersionHasDamagedMetadataAndCannotBe"));
-            setIsRestoring(false);
-            return;
-          }
-          updates.fontFamily = fm.settings.fontFamily;
-          updates.pageLayout = fm.settings.pageLayout;
-          updates.isLocked = fm.settings.isLocked;
         }
+        Object.assign(updates, result.settings);
         updatePage(pageId, updates);
         toast.success(t("versionRestoredThePreviousContentWasSavedAs"));
         setIsRestoring(false);
