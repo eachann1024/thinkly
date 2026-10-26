@@ -74,7 +74,7 @@ export async function writeHistoryMeta(basePath: string, dir: string, meta: Hist
 
 export const yieldToMain = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-export async function listHistoryEntries(basePath: string, fs: HistoryDisk): Promise<{ dir: string; meta: HistoryMeta }[]> {
+export async function listHistoryEntries(basePath: string, fs: HistoryDisk, strict = false): Promise<{ dir: string; meta: HistoryMeta }[]> {
   const root = historyRoot(basePath);
   if (!await fs.exists(root)) return [];
   const dirs = (await fs.readDir(root)).filter((entry) => entry.isDirectory && HISTORY_HASH_DIR.test(entry.name));
@@ -85,6 +85,7 @@ export async function listHistoryEntries(basePath: string, fs: HistoryDisk): Pro
         const meta = await readHistoryMetaAt(entry.path, fs);
         return meta ? { dir: entry.path, meta } : null;
       } catch (error) {
+        if (strict) throw error;
         console.warn("[history] 跳过无法读取的历史条目", entry.path, error);
         return null;
       }
