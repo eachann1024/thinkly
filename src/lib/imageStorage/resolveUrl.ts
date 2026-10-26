@@ -22,8 +22,8 @@ export async function resolveImageRefToUrl(
       : pageLocalFilePath
         ? resolveToAbsolute(pageLocalFilePath.replace(/[\\/][^\\/]+$/, ""), url)
         : null;
-    if (!fullPath) return url;
-    return resolveCachedUrl(`local:${fullPath}`, url, async () => {
+    if (!fullPath) return "";
+    return resolveCachedUrl(`local:${fullPath}`, "", async () => {
       try {
         const stat = await getGooseDesktop()?.fsStat(fullPath);
         return stat ? `${stat.size}:${stat.mtimeMs}` : null;
