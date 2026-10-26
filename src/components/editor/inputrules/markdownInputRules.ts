@@ -1,7 +1,8 @@
 import { createExtension } from "@blocknote/core";
-import { Plugin } from "@tiptap/pm/state";
+import { Plugin, type Transaction } from "@tiptap/pm/state";
 import { jsonContentToMarkdown } from "@/lib/export/markdown/serialize";
 import type { RefObject } from "react";
+import { headingLevelForHashPrefix } from "../blocks/heading/headingBlockSpec";
 import type { EditorSettings } from "../platform/hostContext";
 
 type BlockTrigger = {
@@ -69,12 +70,12 @@ function getBlockTrigger(
     };
   }
 
-  const heading = /^(#{1,3})$/u.exec(textBefore);
-  if (heading) {
+  const headingLevel = headingLevelForHashPrefix(textBefore);
+  if (headingLevel) {
     return {
       type: "heading",
-      props: { level: heading[1].length, isToggleable: false, collapsed: false },
-      triggerText: heading[0],
+      props: { level: headingLevel, isToggleable: false, collapsed: false },
+      triggerText: textBefore,
     };
   }
 
@@ -86,79 +87,58 @@ function getBlockTrigger(
   return null;
 }
 
+export function applyMarkdownBlockSpace(editor: any, settingsRef: RefObject<EditorSettings>): boolean {
+  const state = editor.prosemirrorState;
+  if (!state.selection.empty) return false;
+  const from = state.selection.from;
+  const $from = state.doc.resolve(from);
+  const parent = $from.parent;
+  if (parent.type.name !== "paragraph" && parent.type.name !== "heading") return false;
+  const textBefore = parent.textBetween(0, $from.parentOffset, null, "￼");
+  const currentBlock = editor.getTextCursorPosition().block;
+  const trigger = getBlockTrigger(textBefore, editor, currentBlock);
+  if (!trigger) return false;
+  if (trigger.type === "codeBlock") trigger.props.wrap = settingsRef.current.defaultCodeBlockWrap;
+  if (parent.type.name !== "paragraph") return false;
+  const blockPos = $from.before($from.depth);
+  const targetType = state.schema.nodes[trigger.type];
+  if (!targetType) return false;
+  if (trigger.type === "codeBlock" && $from.parentOffset === parent.content.size && !currentBlock.children.length) {
+    const body: any[] = [];
+    let next = editor.getNextBlock(currentBlock);
+    while (next) {
+      const isClosingFence = next.type === "paragraph" && !next.children.length && Array.isArray(next.content) &&
+        next.content.every((item: any) => item.type === "text") &&
+        /^```[ \t]*$/u.test(next.content.map((item: any) => item.text).join(""));
+      if (isClosingFence) {
+        const content = jsonContentToMarkdown(body);
+        editor.transact(() => {
+          editor.updateBlock(currentBlock, { type: "codeBlock", props: trigger.props, content });
+          editor.removeBlocks([...body, next]);
+          editor.setTextCursorPosition(currentBlock.id, "start");
+        });
+        return true;
+      }
+      body.push(next);
+      next = editor.getNextBlock(next);
+    }
+  }
+  editor.transact((tr: Transaction) => {
+    tr.setNodeMarkup(blockPos, targetType, { ...parent.attrs, ...trigger.props });
+    tr.delete(from - trigger.triggerText.length, from);
+  });
+  trigger.afterTransform?.();
+  return true;
+}
+
 function createMarkdownBlockTrigger(editor: any, settingsRef: RefObject<EditorSettings>) {
   return new Plugin({
     props: {
-      handleTextInput(view, from, to, text) {
+      handleTextInput(_view, from, to, text) {
         if (text !== " " || from !== to) return false;
-
-        const { state } = view;
-        const $from = state.doc.resolve(from);
-        const parent = $from.parent;
-        if (parent.type.name !== "paragraph" && parent.type.name !== "heading") {
-          return false;
-        }
-
-        const textBefore = parent.textBetween(
-          0,
-          $from.parentOffset,
-          null,
-          "￼",
-        );
-        const currentBlock = editor.getTextCursorPosition().block;
-        const trigger = getBlockTrigger(textBefore, editor, currentBlock);
-        if (!trigger) return false;
-        if (trigger.type === "codeBlock") trigger.props.wrap = settingsRef.current.defaultCodeBlockWrap;
-
-        if (parent.type.name !== "paragraph") {
-          return false;
-        }
-
-        const blockPos = $from.before($from.depth);
-        const targetType = state.schema.nodes[trigger.type];
-        if (!targetType) return false;
-
-        if (
-          trigger.type === "codeBlock" &&
-          $from.parentOffset === parent.content.size &&
-          !currentBlock.children.length
-        ) {
-          const body: any[] = [];
-          let next = editor.getNextBlock(currentBlock);
-          while (next) {
-            const isClosingFence =
-              next.type === "paragraph" &&
-              !next.children.length &&
-              Array.isArray(next.content) &&
-              next.content.every((item: any) => item.type === "text") &&
-              /^```[ \t]*$/u.test(next.content.map((item: any) => item.text).join(""));
-            if (isClosingFence) {
-              const content = jsonContentToMarkdown(body);
-              editor.transact(() => {
-                editor.updateBlock(currentBlock, {
-                  type: "codeBlock",
-                  props: trigger.props,
-                  content,
-                });
-                editor.removeBlocks([...body, next]);
-                editor.setTextCursorPosition(currentBlock.id, "start");
-              });
-              return true;
-            }
-            body.push(next);
-            next = editor.getNextBlock(next);
-          }
-        }
-
-        const tr = state.tr;
-        tr.setNodeMarkup(blockPos, targetType, {
-          ...parent.attrs,
-          ...trigger.props,
-        });
-        tr.delete(from - trigger.triggerText.length, from);
-        view.dispatch(tr);
-        trigger.afterTransform?.();
-        return true;
+        const selection = editor.prosemirrorState.selection;
+        if (!selection.empty || selection.from !== from) return false;
+        return applyMarkdownBlockSpace(editor, settingsRef);
       },
     },
   });
