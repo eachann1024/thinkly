@@ -24,7 +24,7 @@ export function changeSelectedBlockType(editor: BlockNoteEditor<any, any, any>, 
     return true;
   });
   editor.transact(() => roots.forEach((block) => {
-    const props = type === "heading" ? { level: digit, isToggleable: false, collapsed: false }
+    const props = type === "heading" ? { level: digit }
       : type === "codeBlock" && block.type !== "codeBlock" ? { language: "text", wrap: defaultCodeWrap }
         : {};
     editor.updateBlock(block, { type, props });

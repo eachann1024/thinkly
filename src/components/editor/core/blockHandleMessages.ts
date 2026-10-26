@@ -17,8 +17,6 @@ zh-Hans:
   paste: "粘贴"
   remove: "删除"
   convert: "转换为"
-  collapse: "收起章节"
-  expand: "展开章节"
 en:
   color: "Color"
   textColor: "Text color"
@@ -36,8 +34,6 @@ en:
   paste: "Paste"
   remove: "Delete"
   convert: "Turn into"
-  collapse: "Collapse section"
-  expand: "Expand section"
 ja:
   color: "色"
   textColor: "文字色"
@@ -55,6 +51,4 @@ ja:
   paste: "貼り付け"
   remove: "削除"
   convert: "変換"
-  collapse: "セクションを折りたたむ"
-  expand: "セクションを展開"
 `);

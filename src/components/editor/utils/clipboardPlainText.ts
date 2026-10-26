@@ -5,7 +5,6 @@ const COMPACT_LIST_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
 ]);
 
 const PARAGRAPH_LIKE_BLOCK_TYPES = new Set([
@@ -63,7 +62,6 @@ function blockClipboardMarker(
       numbered.value += 1;
       return `${numbered.value}. `;
     case "bulletListItem":
-    case "toggleListItem":
       numbered.value = 0;
       return "- ";
     case "checkListItem":

@@ -8,7 +8,6 @@ export const LIST_PASTE_BLOCK_TYPES = [
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
 ] as const;
 
 export type ListPasteBlockType = (typeof LIST_PASTE_BLOCK_TYPES)[number];

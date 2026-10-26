@@ -23,10 +23,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { useCallback, useMemo, useSyncExternalStore } from "react";
-import {
-  isFoldableHeadingBlock,
-  toggleHeadingCollapsed,
-} from "@/components/editor/core/headingSectionFold";
 import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { OutlinePanel } from "../outline/OutlinePanel";
 import { useHeadings } from "../outline/useHeadings";
@@ -135,16 +131,6 @@ export function SidebarOutline({
     [focusedScrollRef],
   );
 
-  const handleHeadingToggle = useCallback(
-    (blockId: string) => {
-      if (!editor) return;
-      const block = editor.getBlock(blockId);
-      if (!isFoldableHeadingBlock(block, editor.document[0]?.id)) return;
-      toggleHeadingCollapsed(editor, blockId);
-    },
-    [editor],
-  );
-
   const emptyMessage = !pageId
     ? uiText("selectANoteToViewIts_13a8")
     : !page || page.trashedAt
@@ -165,7 +151,6 @@ export function SidebarOutline({
       headings={headings}
       activeId={activeId}
       onHeadingClick={handleHeadingClick}
-      onHeadingToggle={handleHeadingToggle}
       emptyMessage={emptyMessage}
       emptyHint={emptyMessage ? null : undefined}
     />

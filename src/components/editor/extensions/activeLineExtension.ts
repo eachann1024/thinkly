@@ -10,7 +10,6 @@ const ACTIVE_LINE_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
 ]);
 
 function isDefaultBackground(value: unknown) {

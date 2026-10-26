@@ -37,7 +37,6 @@ const SKIP_COERCE_TYPES = new Set([
   "file",
   "audio",
   "callout",
-  "toggleListItem",
 ]);
 
 function isCoercibleGeneratedBlock(

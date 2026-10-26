@@ -1,7 +1,7 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import {
   Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
-  ChevronRight, Quote, Info, Minus, Table, Code, Sigma, GitGraph, Image,
+  Quote, Info, Minus, Table, Code, Sigma, GitGraph, Image,
   Video, Music, FileText,
 } from "@/components/ui/icons";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
@@ -10,7 +10,7 @@ import { canConvertBlock } from "./blockConversionPolicy";
 export const BLOCK_HANDLE_ICONS = {
   paragraph: Type, heading: Heading1, bulletListItem: List,
   numberedListItem: ListOrdered, checkListItem: CheckSquare,
-  toggleListItem: ChevronRight, quote: Quote, callout: Info, divider: Minus,
+  quote: Quote, callout: Info, divider: Minus,
   table: Table, codeBlock: Code, image: Image, video: Video, audio: Music,
   file: FileText,
 };

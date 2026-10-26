@@ -40,7 +40,6 @@ const SUPPORTED_SOURCE_BLOCK_TYPES = new Set([
   "checkListItem",
   "quote",
   "codeBlock",
-  "toggleListItem",
 ]);
 
 export function inlineContentText(content: unknown): string {
