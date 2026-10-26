@@ -41,7 +41,7 @@ import {
   canApplyRecoveryEntry,
   listRecoveryEntries,
 } from "@/lib/storage/recoveryJournal";
-import { toast } from "@/components/ui/sonner";
+import { notifyRecoveryDrafts } from "@/lib/recoveryDraftNotice";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { recoverEditorDraft } from "./recoverEditorDraft";
 import {
@@ -71,12 +71,12 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
   } = hasRepairedNestedEmptyWrappers
     ? { pages: repairedPages, repairedPageIds: [] as string[] }
     : repairNormalizedContentInPages(repairedPages);
-  const hasMigratedHeadingSectionFold =
+  const hasRepairedLegacyFolding =
     getDbStorageItem(LEGACY_FOLDING_REPAIR_MARK_KEY) === "1";
   const {
     pages: unfoldedPages,
     repairedPageIds: unfoldedPageIds,
-  } = hasMigratedHeadingSectionFold
+  } = hasRepairedLegacyFolding
     ? { pages: contentRepairedPages, repairedPageIds: [] as string[] }
     : repairLegacyFoldingInPages(contentRepairedPages);
 
@@ -108,7 +108,7 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
     setDbStorageItem(NESTED_EMPTY_WRAPPER_REPAIR_MARK_KEY, "1");
   }
 
-  if (!hasMigratedHeadingSectionFold) {
+  if (!hasRepairedLegacyFolding) {
     if (unfoldedPageIds.length > 0) {
       unfoldedPageIds.forEach((pageId) => {
         const repairedPage = unfoldedPages[pageId];
@@ -116,7 +116,7 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
         saveInternalPage(repairedPage);
       });
       console.info(
-        `[usePages] migrated heading section fold in ${unfoldedPageIds.length} page(s).`,
+        `[usePages] unfolded legacy content in ${unfoldedPageIds.length} page(s).`,
       );
     }
     setDbStorageItem(LEGACY_FOLDING_REPAIR_MARK_KEY, "1");
@@ -169,15 +169,9 @@ export const hydrateFromStorageAction = async (set: StoreSet) => {
     onboardingCompleted,
   });
   if (recoveredCount > 0) {
-    toast.warning(extraText("recovered", { count: recoveredCount }), {
-      id: "goose-recovered-internal-pages",
-      description: storeText("recoveredEditor"),
-    });
+    notifyRecoveryDrafts(extraText("recovered", { count: recoveredCount }), storeText("recoveredEditor"), "goose-recovered-internal-pages");
   }
   if (conflictCount > 0) {
-    toast.warning(storeText("recoveryKept"), {
-      id: "goose-recovery-conflicts",
-      description: storeText("newerStored"),
-    });
+    notifyRecoveryDrafts(storeText("recoveryKept"), storeText("newerStored"), "goose-recovery-conflicts");
   }
 };
