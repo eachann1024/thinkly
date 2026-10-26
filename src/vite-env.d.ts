@@ -30,7 +30,8 @@ declare global {
     ) => Promise<{ ok: boolean; error?: string | null; content?: string | null }>;
     writeFile: (path: string, content: string, encoding?: string) => boolean;
     writeFileAsync?: (path: string, content: string, encoding?: string) => Promise<boolean>;
-    createFileAsync?: (path: string, content: string) => Promise<boolean>;
+    createFileAsync?: (path: string, content: string, encoding?: string) => Promise<boolean>;
+    compareAndSwapFileAsync?: (path: string, expected: string | null, next: string) => Promise<boolean>;
     exists: (path: string) => boolean;
     existsAsync?: (path: string) => Promise<boolean>;
     statAsync?: (path: string) => Promise<{ mtimeMs: number; size: number } | null>;
@@ -72,10 +73,11 @@ declare global {
     showOpenDialog: (opts?: import("./lib/native-dialog-contract").OpenFileDialogOptions) => Promise<string[] | null>
     showSaveDialog: (opts?: import("./lib/native-dialog-contract").SaveFileDialogOptions) => Promise<string | null>
     fsReadText: (p: string) => Promise<string>
+    fsCompareAndSwapText: (p: string, expected: string | null, next: string) => Promise<boolean>
     fsWriteText: (p: string, data: string, exclusive?: boolean) => Promise<void>
     fsRead: (p: string) => Promise<Uint8Array>
     fsSaveAsset: (input: import("./lib/local-file-asset-contract").SaveLocalAssetRequest) => Promise<import("./lib/local-file-asset-contract").SavedLocalAssetPath>
-    fsWrite: (p: string, data: Uint8Array) => Promise<void>
+    fsWrite: (p: string, data: Uint8Array, exclusive?: boolean) => Promise<void>
     fsReadDir: (p: string) => Promise<{ name: string; isDirectory: boolean; path: string }[]>
     fsMkdir: (p: string) => Promise<void>
     fsExists: (p: string) => Promise<boolean>
