@@ -66,6 +66,8 @@ export interface Page {
   localReadState?: LocalFileReadState;
   localReadError?: string;
   localFrontmatter?: string;
+  localMetadataRevision?: string | null;
+  localMetadataId?: string;
 
   outgoingLinks?: string[];
   incomingLinks?: string[];
