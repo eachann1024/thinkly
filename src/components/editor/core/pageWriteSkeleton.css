@@ -1,0 +1,10 @@
+.goose-page-write-skeleton { pointer-events: none; }
+.goose-page-write-mask {
+  position: fixed;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  background: var(--goose-editor-bg);
+  pointer-events: none;
+}
+.goose-page-write-mask > .goose-skeleton { width: 100%; height: 75%; }
