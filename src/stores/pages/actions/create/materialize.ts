@@ -16,6 +16,7 @@ import { markSelfWrite } from "@/lib/local-md-snapshot";
 import { cloneLocalPageContent } from "./content";
 import { appendLocalFolderOrderEntries } from "@/stores/localFolderOrder";
 import { validateEditorDraftTarget } from "./validateEditorDraftTarget";
+import { preserveLocalEditorDraft } from "./recovery";
 
 export const assignUnsavedLocalFilePathAction = async (
   set: StoreSet,
@@ -96,26 +97,13 @@ export const materializeUnsavedLocalPageAction = async (
     saved = await get().saveLocalPageContent(
       pageId,
       cloneLocalPageContent(latest.content),
-      { force: true },
+      { force: true, createOnly: true },
     );
   } catch {
     saved = false;
   }
   if (!saved) {
-    set((state) => {
-      const current = state.pages[pageId];
-      if (!current) return state;
-      return {
-        pages: {
-          ...state.pages,
-          [pageId]: {
-            ...current,
-            localFilePath: undefined,
-            localUnsaved: true,
-          },
-        },
-      };
-    });
+    preserveLocalEditorDraft(set, get, pageId, filePath);
     return false;
   }
 
