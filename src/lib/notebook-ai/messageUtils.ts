@@ -57,7 +57,11 @@ export function sanitizeNotebookAiMessages(
 
     if (nextParts.length !== parts.length) changed = true;
 
-    if (message.role === "assistant" && !nextParts.some(hasModelRelevantPart)) {
+    if (
+      message.role === "assistant" &&
+      !nextParts.some(hasModelRelevantPart) &&
+      !message.metadata?.completion
+    ) {
       changed = true;
       continue;
     }

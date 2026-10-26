@@ -26,7 +26,18 @@ export interface NotebookAiContextDiagnostics {
   imageCount?: number;
 }
 
+export type NotebookAiCompletion =
+  | "complete"
+  | "stopped"
+  | "timeout"
+  | "disconnected"
+  | "interrupted"
+  | "error"
+  | "limited"
+  | "blocked";
+
 export interface NotebookAiMessageMetadata {
+  completion?: NotebookAiCompletion;
   displayText?: string;
   resourceReferences?: ResourceRef[];
   writeScope?: RunWriteScope;

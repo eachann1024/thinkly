@@ -43,6 +43,7 @@ export function AssistantMessage({
   toolRenderBase: Omit<AssistantToolRenderContextValue, "isStreaming">;
 }) {
   useLocale();
+  const completion = isStreaming ? undefined : msg.metadata?.completion;
   const progressToolParts = (msg.parts ?? [])
     .filter(isNotebookAiToolPart)
     .filter((part) => shouldShowToolPart(part, isStreaming));
@@ -52,6 +53,7 @@ export function AssistantMessage({
   const hasText = getTextPartText(msg).trim().length > 0;
   const reasoningText = collectReasoningText(msg);
   const showWorkCard =
+    Boolean(completion && completion !== "complete") ||
     showToolProgress ||
     hasText ||
     (isStreaming && (!hasText || reasoningText.length > 0));
@@ -77,6 +79,7 @@ export function AssistantMessage({
           <ToolProgressCard
             parts={progressToolParts}
             isMessageStreaming={isStreaming}
+            completion={completion}
             thinkingText={reasoningText}
             footer={
               visibleApprovalPart ? (
