@@ -1,6 +1,6 @@
 import { useLocale } from "@/i18n";
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
-import { useCallback, useEffect, useMemo, useRef, useId, type RefObject } from "react";
+import { useCallback, useMemo, useRef, type RefObject } from "react";
 import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import type { EditorRef } from "@/components/editor/core/Editor";
@@ -11,7 +11,9 @@ import {
   type ChartType,
 } from "@/agent/renderers/echarts/chartTheme";
 import { getPalette } from "@/agent/renderers/echarts/chartPalette";
-import { calculateContentAwarePixelRatio } from "@/lib/imageExport/svgToPng";
+import { calculateContentAwarePixelRatio, svgMarkupToPngBlob } from "@/lib/imageExport/svgToPng";
+import { useChartRenderer } from "./useChartRenderer";
+import { ArtifactRenderStatus } from "./ArtifactRenderStatus";
 import { ArtifactActions } from "./ArtifactActions";
 import {
   createImageArtifactBlocks,
@@ -100,21 +102,6 @@ export function ChartCard(props: ChartCardProps) {
   const resolvedTheme = useResolvedTheme(theme);
   const isDark = resolvedTheme === "dark";
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<{
-    setOption: (o: unknown, opts?: { notMerge?: boolean }) => void;
-    resize: () => void;
-    dispose: () => void;
-    getWidth: () => number;
-    getHeight: () => number;
-    getDataURL: (opts?: {
-      type?: string;
-      pixelRatio?: number;
-      backgroundColor?: string;
-    }) => string;
-  } | null>(null);
-  const uid = useId();
-  const lastData = useRef({ type: props.type, categories: props.categories, series: props.series });
-
   const hasSeries = hasRenderableChartSeries(props.series);
 
   const option = useMemo(() => {
@@ -130,56 +117,9 @@ export function ChartCard(props: ChartCardProps) {
     };
   }, [props.type, props.categories, props.series, isDark, themeSurface]);
 
-  const latestOption = useRef(option);
-  latestOption.current = option;
+  const { chart: chartRef, status, retry } = useChartRenderer(containerRef, option);
 
-  useEffect(() => {
-    let disposed = false;
-    let chart: typeof chartRef.current = null;
-
-    const init = async () => {
-      if (!hasSeries || !containerRef.current) return;
-      const { echarts } = await import("@/agent/renderers/echarts/registerEcharts");
-      if (disposed || !containerRef.current) return;
-      chart = echarts.init(containerRef.current, undefined, {
-        renderer: "svg",
-      }) as typeof chartRef.current;
-      chartRef.current = chart;
-      if (latestOption.current) chart?.setOption(latestOption.current, { notMerge: true });
-    };
-
-    void init();
-
-    const handleResize = () => {
-      chartRef.current?.resize();
-    };
-    window.addEventListener("resize", handleResize);
-
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && containerRef.current) {
-      ro = new ResizeObserver(handleResize);
-      ro.observe(containerRef.current);
-    }
-
-    return () => {
-      disposed = true;
-      window.removeEventListener("resize", handleResize);
-      ro?.disconnect();
-      chart?.dispose();
-      chartRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, hasSeries]);
-
-  useEffect(() => {
-    if (!option) return;
-    const previous = lastData.current;
-    const dataChanged = previous.type !== props.type || previous.categories !== props.categories || previous.series !== props.series;
-    chartRef.current?.setOption(option, { notMerge: dataChanged });
-    lastData.current = { type: props.type, categories: props.categories, series: props.series };
-  }, [option]);
-
-  const capturePngDataUrl = useCallback(async () => {
+  const capturePngBlob = useCallback(async () => {
     const chart = chartRef.current;
     if (!chart) throw new Error(t("theChartIsNotReadyYet"));
     const width = Math.max(1, chart.getWidth?.() || containerRef.current?.clientWidth || 1);
@@ -188,26 +128,33 @@ export function ChartCard(props: ChartCardProps) {
       chart.getHeight?.() || containerRef.current?.clientHeight || 1,
     );
     const pixelRatio = calculateContentAwarePixelRatio(width, height);
-    return chart.getDataURL({
+    const dataUrl = chart.getDataURL({
       type: "png",
       pixelRatio,
       backgroundColor: "transparent",
     });
+    // ECharts' SVG renderer returns SVG even when getDataURL requests PNG.
+    // Serialize the rendered DOM so quoted font names stay valid XML.
+    chart.getZr().flush();
+    const svg = containerRef.current?.querySelector("svg");
+    return svg
+      ? svgMarkupToPngBlob(new XMLSerializer().serializeToString(svg), { pixelRatio, padding: 0 })
+      : dataUrlToBlob(dataUrl);
   }, []);
 
-  const capturePngBlob = useCallback(async () => {
-    return dataUrlToBlob(await capturePngDataUrl());
-  }, [capturePngDataUrl]);
+  const capturePngDataUrl = useCallback(async () => blobToDataUrl(await capturePngBlob()), [capturePngBlob]);
 
   if (!hasSeries) {
     return <ChartIncompleteNotice title={props.title} />;
   }
 
   return (
-    <div className="notebook-ai-canvas-card my-2 overflow-hidden">
+    <div className="notebook-ai-canvas-card notebook-ai-chart-card my-2 overflow-hidden" aria-busy={status === "loading"}>
       <div className="notebook-ai-canvas-card-header">
         <div className="notebook-ai-canvas-card-title">{props.title?.trim() || t("chart")}</div>
         <ArtifactActions
+          imageReady={status === "ready"}
+          insertReady={status === "ready"}
           previewIdentity={JSON.stringify([props.type, props.categories, props.series, resolvedTheme, themeSurface])}
           onCopyImage={capturePngDataUrl}
           onDownloadImage={capturePngBlob}
@@ -223,10 +170,11 @@ export function ChartCard(props: ChartCardProps) {
           }}
         />
       </div>
+      {status !== "ready" ? <ArtifactRenderStatus failed={status === "failed"} onRetry={retry} /> : null}
       <div
         ref={containerRef}
         className="notebook-ai-chart-card-canvas"
-        style={{ width: "100%", height: props.type === "pie" ? 260 : 240 }}
+        style={{ width: "100%", height: props.type === "pie" ? 260 : 240, opacity: status === "ready" ? 1 : 0 }}
         role="img"
         aria-label={props.title ?? t("chart")}
       />

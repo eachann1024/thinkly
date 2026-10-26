@@ -1,6 +1,8 @@
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import type { ArtifactInsertResult } from "./insertArtifact";
 export interface ArtifactActionsProps {
+  imageReady?: boolean;
+  insertReady?: boolean;
   copySource?: string;
   downloadSource?: string;
   filename?: string;

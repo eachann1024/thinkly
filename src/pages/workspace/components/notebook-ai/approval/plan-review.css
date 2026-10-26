@@ -103,8 +103,7 @@
   font-weight: 500;
   line-height: 24px;
 }
-.notebook-ai-review-action-status[data-tone="accent"],
-.notebook-ai-review-action-status[data-tone="success"] {
+.notebook-ai-review-action-status[data-tone="accent"] {
   background: color-mix(in srgb, var(--goose-accent-solid) 10%, transparent);
   color: var(--goose-accent-text);
 }
@@ -116,3 +115,9 @@
   height: 16px;
   flex-shrink: 0;
 }
+
+.notebook-ai-review-action-status[data-tone="success"] {
+  color: var(--goose-text-success);
+  background: var(--goose-interactive-success);
+}
+.notebook-ai-review-action-status[data-tone="warning"] { color: var(--goose-text-warning); }

@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { planRefinementText, planReviewReason } from "./planRefinementText";
 import { useRef, useReducer, useState } from "react";
-import { RotateCcw } from "@/components/ui/icons";
+import { RotateCcw, Check, X, Square, RefreshCw } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { isRunWriteScopeRevoked, revokeRunWriteScope } from "@/lib/notebook-ai/resourceScope";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -104,6 +104,7 @@ export function ReviewActions({
     )
       return;
     busyRef.current = true;
+    setCancelRequested(false);
     dispatch({ type: "respond", approved });
     setLocked(true);
     try {
@@ -174,7 +175,7 @@ export function ReviewActions({
     output.canUndo !== false &&
     !undone && !submitting && review.phase !== "executing";
   const footer = (
-    <div className="notebook-ai-review-footer">
+    <div className="notebook-ai-review-footer" aria-busy={submitting || undoing || review.phase === "executing" || undefined}>
       {hasError || undoConflict || undoFailed ? <p>{detail}</p> : null}
       {submitting || undoing || review.phase !== "approval" ? (
         <ReviewActionStatus status={status} />
@@ -205,11 +206,12 @@ export function ReviewActions({
               disabled={!canApprove}
               onClick={() => void respond(true)}
             >
+              <Check size={16} />
               {t("applyCount", { count: selectedIds.length })}
             </Button>
             <Button type="button" variant="secondary" className={secondaryClass}
               onClick={() => void respond(false)}>
-              {t("cancel")}
+              <X size={16} />{t("cancel")}
             </Button>
           </div>
           {!journal ? (
@@ -217,9 +219,10 @@ export function ReviewActions({
               type="button"
               variant="secondary"
               className={secondaryClass}
+              disabled={undoing || submitting}
               onClick={regenerate}
             >
-              {t("regeneratePlan")}
+              <RefreshCw size={16} />{t("regeneratePlan")}
             </Button>
           ) : null}
         </>
@@ -230,13 +233,13 @@ export function ReviewActions({
             revokeRunWriteScope(journal.writeScope!.runId);
             setCancelRequested(true);
           }}>
-          {cancelRequested ? t("stoppingAfterCurrentItem") : t("stopRemainingItems")}
+          <Square size={16} />{cancelRequested ? t("stoppingAfterCurrentItem") : t("stopRemainingItems")}
         </Button>
       ) : null}
       {canRetry ? (
         <Button type="button" variant="secondary" className={secondaryClass}
           disabled={undoing} onClick={() => void respond(true, true)}>
-          {t("retryFailedItems")}
+          <RefreshCw size={16} />{t("retryFailedItems")}
         </Button>
       ) : null}
       {canUndo && !undoing ? (
@@ -256,9 +259,10 @@ export function ReviewActions({
           type="button"
           variant="secondary"
           className={secondaryClass}
+          disabled={undoing || submitting}
           onClick={regenerate}
         >
-          {t("reviseAndRegeneratePlan")}
+          <RefreshCw size={16} />{t("reviseAndRegeneratePlan")}
         </Button>
       ) : null}
     </div>

@@ -77,6 +77,7 @@ export function useArtifactPreview({ identity, onPreview, onPreviewImage, previe
   const snapshot = artifactPreviewSnapshot(preview);
   return {
     previewing: preview.phase === "resolving",
+    previewFailed: preview.phase === "failed",
     previewContent: snapshot.phase === "open" ? snapshot.content : null,
     closePreview: () => send({ type: "closed" }),
     previewHandlers: previewPointerHandlers({ disabled: preview.phase === "resolving",

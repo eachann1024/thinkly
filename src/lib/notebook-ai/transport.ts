@@ -6,6 +6,8 @@ import type { UIMessage } from "ai";
 import { resolveNotebookAiRuntime } from "./pi/runtime";
 import { buildPiTransport } from "./pi/transport";
 import type { NotebookAiRunContext } from "./runContext";
+import { withExecutionDetails } from "./executionTransport";
+import { getNotebookAiModelId } from "./model";
 
 export type NotebookChatUIMessage = UIMessage<
   unknown,
@@ -40,7 +42,7 @@ export function buildTransport(
     if (!piResult.ok) {
       return { ok: false, reason: piResult.reason };
     }
-    return { ok: true, transport: piResult.transport, runtime: "pi" };
+    return { ok: true, transport: withExecutionDetails(piResult.transport, getNotebookAiModelId()), runtime: "pi" };
   }
 
   const agentResult = buildNotebookAgent(notebookId, currentPageId, runContext);
@@ -52,5 +54,5 @@ export function buildTransport(
     agent: agentResult.agent,
   });
 
-  return { ok: true, transport, runtime: "legacy" };
+  return { ok: true, transport: withExecutionDetails(transport, getNotebookAiModelId()), runtime: "legacy" };
 }

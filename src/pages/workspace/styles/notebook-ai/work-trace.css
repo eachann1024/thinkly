@@ -4,7 +4,8 @@
 }
 
 .notebook-ai-work-trace--foldable {
- padding: 0 10px;
+ padding: 0 8px;
+ margin-inline: -8px;
  overflow: hidden;
  border-radius: var(--goose-control-radius);
  background: var(--goose-interactive-hover);
@@ -14,22 +15,11 @@
  background: transparent;
 }
 
-.notebook-ai-work-card--running .notebook-ai-work-trace {
- margin: 4px 0 0;
-}
-
-.notebook-ai-work-card--running .notebook-ai-work-toggle {
- padding-top: 6px;
- padding-bottom: 6px;
- font-size: 12px;
- line-height: 20px;
-}
-
 .notebook-ai-work-toggle {
  display: flex;
  width: 100%;
  max-width: none;
- min-height: 32px;
+ min-height: 36px;
  align-items: center;
  gap: 8px;
  margin: 0;
@@ -38,8 +28,8 @@
  border-radius: var(--goose-control-radius);
  background: transparent;
  color: hsl(var(--muted-foreground));
- font-size: 12.5px;
- line-height: 1.4;
+ font-size: 13px;
+ line-height: 20px;
  text-align: left;
  cursor: pointer;
 }
@@ -76,15 +66,15 @@
 
 .notebook-ai-work-live {
  margin: 12px 0 0;
- font-size: 12.5px;
+ font-size: 13px;
  line-height: 1.4;
  color: hsl(var(--muted-foreground));
 }
 
 .notebook-ai-work-chev {
  display: block;
- width: 14px;
- height: 14px;
+ width: 16px;
+ height: 16px;
  flex: 0 0 auto;
  transform-origin: center;
  transform-box: border-box;

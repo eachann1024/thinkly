@@ -30,22 +30,25 @@ export type ModelAvailability =
   | { ok: true; model: LanguageModel }
   | { ok: false; reason: string };
 
-export function buildLanguageModel(): ModelAvailability {
+export function getNotebookAiModelId(): string {
   const ai = useSettings.getState().ai;
-
-  if (!ai.enabled) {
-    return { ok: false, get reason() { return t("enableTheAiAssistantInSettingsToUse"); } };
-  }
-
   const workspaceOverride = ai.workspaceSelectedModelId?.trim();
   const workspaceOverrideValid =
     !!workspaceOverride &&
     ai.customModelOptions.some((option) => option.id === workspaceOverride);
-  const modelId = (
+  return (
     (workspaceOverrideValid ? workspaceOverride : null) ??
     ai.selectedModelId ??
     ""
   ).trim();
+}
+
+export function buildLanguageModel(): ModelAvailability {
+  const ai = useSettings.getState().ai;
+  if (!ai.enabled) {
+    return { ok: false, get reason() { return t("enableTheAiAssistantInSettingsToUse"); } };
+  }
+  const modelId = getNotebookAiModelId();
   if (!modelId) {
     return {
       ok: false,
