@@ -8,6 +8,7 @@ import { blockHandleCapabilities, BlockHandleIcon } from "./blockHandleModel";
 import { blockHandleText as t } from "./blockHandleMessages";
 import { BLOCK_CONVERSIONS } from "./blocknoteCommandSlashItems";
 import { convertHandleBlock, deleteHandleBlock, insertFromHandle, selectHandleBlock } from "./blockHandleActions";
+import { getHandleConversionBlockIds, syncHandleTextSelection } from "./blockConversionSelection";
 import { BlockHandleStyleMenus } from "./BlockHandleStyleMenus";
 import { useBlockHandleMenuLayout } from "./useBlockHandleMenuLayout";
 import { setBlockHandleMenuOpen } from "../state/blockHandleMenu";
@@ -23,6 +24,8 @@ type Props = {
 };
 
 export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, children }: Props) {
+  const selectedBlockIds = useRef<string[]>([]);
+  useLayoutEffect(() => { if (open) selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id); }, [editor, block.id, open]);
   const menuOwner = useRef({}).current;
   useLayoutEffect(() => {
     setBlockHandleMenuOpen(editor, menuOwner, open);
@@ -47,7 +50,7 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
         {cloneElement(children, {
           "aria-expanded": open,
           "aria-haspopup": "menu",
-          onClick: (event) => { children.props.onClick?.(event); if (!event.defaultPrevented) changeOpen(!open); },
+          onClick: (event) => { children.props.onClick?.(event); selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id); selectHandleBlock(editor, block.id); if (!event.defaultPrevented) changeOpen(!open); },
         })}
       </div>
       <DropdownMenuContent ref={layout.menuRef} variant="menu" side={layout.side} shouldFlip={layout.side === "bottom"}
@@ -67,7 +70,7 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
             data-goose-block-handle-menu={block.id} data-goose-block-id={block.id} data-goose-editor-owner={owner}
             className="goose-block-handle-menu" motion="instant">
             {BLOCK_CONVERSIONS.map((target, index) => <DropdownMenuItem key={index} textValue={target.label}
-              onSelect={() => run(() => { convertHandleBlock(editor, block.id, target, defaultCodeBlockWrap); })}>
+              onSelect={() => run(() => { convertHandleBlock(editor, block.id, target, defaultCodeBlockWrap, selectedBlockIds.current); })}>
               <BlockHandleIcon block={{ type: target.type, props: "props" in target ? target.props : {} }} />{target.label}
             </DropdownMenuItem>)}
           </DropdownMenuContent>
