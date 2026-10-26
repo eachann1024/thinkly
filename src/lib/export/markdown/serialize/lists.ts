@@ -9,7 +9,6 @@ export const LIST_ITEM_TYPES = new Set([
 ]);
 
 export const CHILDREN_CONSUMED_TYPES = new Set([
-  "toggleListItem",
   "details",
   "bulletList",
   "orderedList",
