@@ -13,7 +13,9 @@ import { duplicateSuffixName } from "@/lib/duplicateName";
 export function generateLocalPageId(
   notebookId: string,
   filePath: string,
+  freshNote = false,
 ): string {
+  if (freshNote) return uuidv4();
   const notebook = useNotebooks.getState().notebooks[notebookId];
   if (!notebook?.localPath) return uuidv4();
   const basePath = notebook.localPath;
@@ -70,11 +72,16 @@ export async function allocateLocalMarkdownFilePath(
     : localPath;
   const normalizedBaseDir = baseDir.replace(/[\/\\]$/, "");
 
+  const normalizePath = (path: string) => path.replace(/\\/g, "/").replace(/\/+$/, "");
+  const isReserved = (path: string) => Object.values(get().pages).some((page) =>
+    !page.trashedAt && page.localFilePath && normalizePath(page.localFilePath) === normalizePath(path),
+  );
   const checkExists = async (path: string) => {
-    if (window.gooseFs?.existsAsync) {
-      return await window.gooseFs.existsAsync(path);
-    }
-    return window.gooseFs?.exists(path) ?? false;
+    if (isReserved(path)) return true;
+    const exists = window.gooseFs?.existsAsync
+      ? await window.gooseFs.existsAsync(path)
+      : window.gooseFs?.exists(path) ?? false;
+    return exists || isReserved(path);
   };
 
   const isPathInsideNotebookRoot = (candidate: string) => {
