@@ -1,6 +1,5 @@
 import type { Page } from "@/types";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { createEmptyBlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import type JSZipNs from "jszip";
 import { cloneExportBlocks } from "../prepareExportBlocks";
 import { getPageTitle } from "@/components/editor/utils/page-title";
@@ -15,12 +14,7 @@ function normalizeExportContent(
   content: Page["content"],
   isLocalFolderPage = false,
 ): BlockNoteContent {
-  try {
-    return cloneExportBlocks(content, { ensureFirstTitle: !isLocalFolderPage });
-  } catch (error) {
-    console.warn("[export] normalize page content failed:", error);
-    return createEmptyBlockNoteContent();
-  }
+  return cloneExportBlocks(content, { ensureFirstTitle: !isLocalFolderPage });
 }
 
 function getPageDepth(page: Page, pageMap: Map<string, Page>): number {
@@ -42,6 +36,12 @@ export async function generateExportZip(
   notebooksMap: Record<string, { name: string; localPath?: string }>,
   allPages: Page[],
 ): Promise<Blob> {
+  const selected = options.notebookIds.map((id) => notebooksMap[id]);
+  if (options.format === "md" && selected.some((notebook) => notebook?.localPath)) {
+    if (selected.some((notebook) => !notebook)) throw new Error("Notebook selection changed before export");
+    const { exportLocalNotebooks } = await import("../localNotebookBackup/host");
+    return exportLocalNotebooks(selected);
+  }
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const { format, notebookIds } = options;

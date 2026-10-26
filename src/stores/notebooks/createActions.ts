@@ -11,7 +11,7 @@ export function createCreateNotebookActions(
   get: import("zustand").StoreApi<NotebooksState>["getState"],
 ): Pick<NotebooksState, "createNotebook" | "createLocalFolderNotebook"> {
   return {
-    createNotebook: () => "",
+    createNotebook: () => { throw new Error("Legacy internal notebooks are read-only. Choose a local notebook folder to restore a complete backup."); },
 
     createLocalFolderNotebook: (name, localPath) => {
       const pagesStore = usePages.getState();
