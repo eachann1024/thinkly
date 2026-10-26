@@ -79,7 +79,7 @@
     --editor-code-block-padding-x: calc(16px * var(--editor-scale));
     --editor-code-block-radius: calc(8px * var(--editor-scale));
     --editor-code-block-node-radius: calc(12px * var(--editor-scale));
-    --editor-code-toolbar-row-height: calc(36px * var(--editor-scale));
+    --editor-code-toolbar-row-height: calc(6px * var(--editor-scale));
     --editor-code-toolbar-padding-inline: calc(8px * var(--editor-scale));
     --editor-code-toolbar-gap: calc(8px * var(--editor-scale));
     --editor-code-toolbar-gap-sm: calc(6px * var(--editor-scale));

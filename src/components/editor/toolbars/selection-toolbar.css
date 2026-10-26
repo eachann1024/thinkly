@@ -18,20 +18,6 @@
   height: var(--selection-control-size);
   flex-basis: var(--selection-control-size);
 }
-.goose-selection-toolbar[data-selection-toolbar="code"] {
-  border-radius: var(--goose-control-radius);
-}
-.goose-selection-toolbar[data-selection-toolbar="code"] > div {
-  flex-wrap: wrap;
-  min-width: 0;
-  gap: 4px;
-}
-.goose-selection-toolbar[data-selection-toolbar="code"] button:not([role="tab"]) {
-  min-height: 28px;
-}
-.goose-selection-toolbar[data-selection-toolbar="code"] button:not([role="combobox"]):has(> svg:only-child) {
-  width: 28px;
-}
 @media (prefers-reduced-motion: reduce) {
   .goose-selection-toolbar, .goose-selection-toolbar button { transition: none; }
 }

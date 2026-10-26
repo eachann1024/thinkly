@@ -5,7 +5,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import {
   getPreviewActionTooltip,
   previewPointerHandlers,
@@ -58,11 +57,10 @@ export function CodePreviewToolbar({
   onCopyPreview,
   previewMode,
   onPreviewModeChange,
-  chipClass,
   copied,
   copyingImage,
   handleCopy,
-}: CodeBlockToolbarProps & CodeCopyState & { chipClass: string }) {
+}: CodeBlockToolbarProps & CodeCopyState) {
   useLocale();
   const copiesImage = previewMode === "preview" && Boolean(onCopyPreview);
   const isCopyingImage = copiesImage && copyingImage;
@@ -82,17 +80,17 @@ export function CodePreviewToolbar({
             variant="ghost"
             size="sm"
             disabled={!canPreview}
-            className={cn("h-7 w-7 p-0", chipClass)}
+            className="goose-code-island-btn goose-accent-selection"
             {...previewPointerHandlers({
               disabled: !canPreview,
               onInternal: () => onOpenPreview?.(),
               onSystem: () => onSystemPreview?.(),
             })}
           >
-            <GooseIcons.Maximize2 className="h-3.5 w-3.5" />
+            <GooseIcons.Maximize2 className="goose-code-island-icon" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{getPreviewActionTooltip()}</TooltipContent>
+        <TooltipContent side="bottom">{getPreviewActionTooltip()}</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -104,12 +102,13 @@ export function CodePreviewToolbar({
             aria-label={t("downloadImage")}
             onClick={onDownloadPreview}
             disabled={!canPreview}
-            className={cn("h-7 w-7 p-0", chipClass)}
+            data-goose-secondary="true"
+            className="goose-code-island-btn goose-accent-selection"
           >
-            <GooseIcons.Download className="h-3.5 w-3.5" />
+            <GooseIcons.Download className="goose-code-island-icon" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{t("downloadImage")}</TooltipContent>
+        <TooltipContent side="bottom">{t("downloadImage")}</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -120,28 +119,27 @@ export function CodePreviewToolbar({
             size="sm"
             onClick={() => void handleCopy()}
             disabled={isCopyingImage || (copiesImage && !canPreview)}
-            className={cn("h-7 w-7 p-0", chipClass)}
+            className="goose-code-island-btn goose-accent-selection"
             aria-label={copyLabel}
           >
             {isCopyingImage ? (
-              <GooseIcons.Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <GooseIcons.Loader2 className="goose-code-island-icon animate-spin" />
             ) : copied ? (
               <GooseIcons.Check
-                className={cn(
-                  "h-3.5 w-3.5",
-                  "text-[var(--goose-color-success)]",
-                )}
+                className="goose-code-island-icon text-[var(--goose-color-success)]"
               />
             ) : (
-              <GooseIcons.Copy className="h-3.5 w-3.5" />
+              <GooseIcons.Copy className="goose-code-island-icon" />
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{copyLabel}</TooltipContent>
+        <TooltipContent side="bottom">{copyLabel}</TooltipContent>
       </Tooltip>
 
+      <span className="goose-code-island-sep" aria-hidden="true" />
+
       <div
-        className="goose-code-display-toggle inline-flex h-7 items-center gap-0.5 rounded-[12px] p-0.5"
+        className="goose-code-display-toggle"
         role="tablist"
         aria-label={t("codeBlockDisplayMode")}
       >
@@ -153,11 +151,7 @@ export function CodePreviewToolbar({
           aria-selected={previewMode === "code"}
           aria-label={t("showCode")}
           onClick={() => onPreviewModeChange?.("code")}
-          className={cn(
-            "goose-code-display-toggle-button h-6 px-2.5 text-xs",
-            chipClass,
-            previewMode === "code" && "goose-code-action-active",
-          )}
+          className="goose-code-display-toggle-button goose-accent-selection"
         >
           {t("code")}
         </Button>
@@ -170,11 +164,7 @@ export function CodePreviewToolbar({
           aria-label={t("showPreview")}
           onClick={() => onPreviewModeChange?.("preview")}
           disabled={!canPreview}
-          className={cn(
-            "goose-code-display-toggle-button h-6 px-2.5 text-xs",
-            chipClass,
-            previewMode === "preview" && "goose-code-action-active",
-          )}
+          className="goose-code-display-toggle-button goose-accent-selection"
         >
           {t("preview")}
         </Button>

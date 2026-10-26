@@ -9,6 +9,8 @@
   color: inherit;
   border: 0;
   border-radius: 0;
+  /* 给骑在上边框的图例标签和操作岛留出位置，避免压到上一个块。 */
+  padding-top: calc(20px * var(--editor-scale, 1));
 }
 
 .workspace-editor-surface
@@ -81,11 +83,23 @@
   max-width: 100%;
   box-sizing: border-box;
   min-height: 0;
-  background-color: var(--code-bg, hsl(var(--muted) / 0.55));
+  --goose-code-surface: var(--code-bg, hsl(var(--muted) / 0.55));
+  background-color: var(--goose-code-surface);
   color: var(--code-fg, hsl(var(--foreground)));
   border: 1px solid var(--goose-block-subtle-border);
   border-radius: var(--editor-code-block-radius, 8px);
-  overflow: hidden;
+  /* 悬浮岛骑在上边框上，节点本身不裁切；裁切与圆角交给 .goose-code-content-wrapper。 */
+  overflow: visible;
+  transition:
+    border-color var(--goose-control-motion-duration) ease,
+    box-shadow var(--goose-control-motion-duration) ease;
+}
+
+/* 块处于工具显示阶段或焦点在块内时，边框与外发光换成强调色。 */
+[data-goose-block-toolbar-sequence="true"] [data-node-type="blockOuter"][data-goose-block-hover="toolbar"] > [data-node-type="blockContainer"] .goose-code-block-node:not([data-collapsed="true"]),
+.goose-code-block-node:not([data-collapsed="true"]):has(.goose-code-toolbar-row:is(:focus-within, :has([data-state="open"]))) {
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
 }
 
 .goose-code-block-node[data-collapsed="true"] {
@@ -93,6 +107,7 @@
 }
 
 .goose-code-block-node[data-visual-preview="true"] {
-  min-height: 178px;
-  background-color: hsl(var(--background));
+  min-height: 140px;
+  --goose-code-surface: hsl(var(--background));
+  background-color: var(--goose-code-surface);
 }
