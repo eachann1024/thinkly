@@ -1,4 +1,3 @@
-import { isGeneratedDataImageName } from "@/components/editor/blocks/image/imageCaption";
 import { sanitizeCssColor } from "../blockPropsProperties";
 
 export function parseFileBlock(lines: string[], startIndex: number) {
@@ -57,12 +56,9 @@ export function parseImageBlock(lines: string[], startIndex: number) {
         props: {
           url,
           ...(alt ? { name: alt } : {}),
-          ...(alt && !isGeneratedDataImageName(alt) ? { caption: alt } : {}),
           ...(imageMetadata ? {
             alt: typeof imageMetadata.alt === "string" ? imageMetadata.alt : alt,
             name: typeof imageMetadata.name === "string" ? imageMetadata.name : "",
-            caption: typeof imageMetadata.caption === "string" ? imageMetadata.caption : "",
-            captionSource: imageMetadata.captionSource === "generated" ? "generated" : imageMetadata.captionSource === "user" ? "user" : "",
             ...(sanitizeCssColor(imageMetadata.backgroundColor) ? { backgroundColor: sanitizeCssColor(imageMetadata.backgroundColor) } : {}),
             showPreview: imageMetadata.showPreview !== false,
           } : {}),

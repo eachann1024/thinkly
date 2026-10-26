@@ -16,7 +16,6 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "../themes";
-import { isGeneratedDataImageName } from "@/components/editor/blocks/image/imageCaption";
 import { escapeHtml } from "./utils";
 
 function looksLikeImageUrl(src: string): boolean {
@@ -30,12 +29,9 @@ function imageTextProp(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function getImageTextForExport(props: Record<string, unknown>, src: string) {
-  const rawCaption = imageTextProp(props.caption);
+function getImageAltForExport(props: Record<string, unknown>) {
   const name = imageTextProp(props.name);
-  const caption = props.captionSource === "generated" && isGeneratedDataImageName(rawCaption, src) ? "" : rawCaption;
-  const alt = typeof props.alt === "string" ? props.alt : name || caption;
-  return { caption, alt };
+  return typeof props.alt === "string" ? props.alt : name;
 }
 
 
@@ -44,12 +40,8 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
     case "image":
     case "imageResize": {
       const src = block.props?.url || block.props?.src || "";
-      const { caption, alt } = getImageTextForExport(block.props ?? {}, src);
-      if (!src) {
-        return caption
-          ? `<p class="media-fallback"${styleAttr}>${escapeHtml(caption)}</p>`
-          : "";
-      }
+      const alt = getImageAltForExport(block.props ?? {});
+      if (!src) return "";
       const alignment = block.props?.textAlignment || block.props?.alignment;
       const imgAlignStyle =
         alignment === "center"
@@ -63,9 +55,6 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
           ? `max-width:${previewWidth}px;`
           : "";
       const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="${imgAlignStyle}${widthStyle}" />`;
-      if (caption) {
-        return `<figure class="export-figure"${styleAttr}>${img}<figcaption>${escapeHtml(caption)}</figcaption></figure>`;
-      }
       return img;
     }
 

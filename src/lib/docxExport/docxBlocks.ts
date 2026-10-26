@@ -134,12 +134,11 @@ export async function processBlockChildren(
       case "image":
       case "imageResize": {
         const src = String(props.url || props.src || "");
-        const caption = String(props.caption || props.alt || "");
         const previewWidth = Number(props.previewWidth ?? props.width);
         if (src) {
           result.push(
             ...(await imageParagraph(src, ctx, {
-              caption,
+              alt: String(props.alt || props.name || ""),
               alignment: props.textAlignment,
               previewWidth: Number.isFinite(previewWidth) ? previewWidth : undefined,
             })),

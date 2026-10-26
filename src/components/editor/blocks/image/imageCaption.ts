@@ -15,13 +15,11 @@ export function isGeneratedDataImageName(
 export function normalizeParsedImageProps(
   parsed: Record<string, unknown>,
 ): Record<string, unknown> {
-  if (parsed.captionSource !== "generated" || !isGeneratedDataImageName(parsed.caption, parsed.url)) return parsed;
-  const caption = String(parsed.caption).trim();
-  const name = typeof parsed.name === "string" ? parsed.name.trim() : "";
-  return { ...parsed, name: name || caption, caption: "" };
+  if (!parsed.caption && !parsed.captionSource) return parsed;
+  return { ...parsed, caption: "", captionSource: "" };
 }
 
-export function imageBlockWithoutGeneratedCaption<T extends { props?: unknown }>(
+export function imageBlockWithoutCaption<T extends { props?: unknown }>(
   block: T,
 ): T {
   const props = block.props;

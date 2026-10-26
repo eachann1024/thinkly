@@ -8,6 +8,7 @@
   left: 0;
   right: 0;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
   min-height: var(--goose-preview-toolbar-height);
   padding: 6px 12px 6px 18px;
@@ -15,16 +16,6 @@
   background: hsl(var(--background));
 }
 
-.goose-image-lightbox .goose-image-lightbox-title {
-  min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--goose-interactive-hover-fg);
-}
 
 .goose-image-lightbox .yarl__slide {
   padding-top: calc(var(--goose-preview-toolbar-height) + 24px);

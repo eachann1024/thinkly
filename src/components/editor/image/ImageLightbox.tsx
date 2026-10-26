@@ -110,7 +110,6 @@ export function ImageLightbox({
           slides={slides.map((s) => ({
             src: s.src,
             alt: s.alt,
-            title: s.alt || undefined,
           }))}
           plugins={[Zoom]}
           zoom={{
@@ -132,9 +131,6 @@ export function ImageLightbox({
           portal={{ container: portalContainer }}
           toolbar={{
             buttons: [
-              <div key="title" className="goose-image-lightbox-title">
-                {currentSlide?.alt || t("imagePreview")}
-              </div>,
               "zoom",
               <EditorAction
                 key="download"
