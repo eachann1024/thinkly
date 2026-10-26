@@ -20,6 +20,21 @@ export function createGooseSlashMenuReconcileExtension(
     prosemirrorPlugins: [
       new Plugin({
         key: PLUGIN_KEY,
+        props: {
+          handleDOMEvents: {
+            compositionend: () => {
+              queueMicrotask(() => {
+                const ed = editorRef.current;
+                if (!ed || isSuggestionReconcileSuppressed(ed)) return;
+                reconcileSlashSuggestionMenu(ed, {
+                  allowSlashMenuOnFirstBlock: allowSlashMenuOnFirstBlockRef.current,
+                });
+                reconcilePageMentionSuggestionMenu(ed);
+              });
+              return false;
+            },
+          },
+        },
         appendTransaction(transactions, oldState, newState) {
           if (editorRef.current && isSuggestionReconcileSuppressed(editorRef.current)) return null;
           if (!shouldReconcileSuggestionInput(transactions, oldState, newState)) return null;

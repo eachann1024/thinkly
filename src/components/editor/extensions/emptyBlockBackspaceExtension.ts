@@ -1,6 +1,7 @@
 import { createExtension } from "@blocknote/core";
 import { findParentBlock, isToggleBlock, type ToggleBlock } from "../core/toggleBlocks";
 import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
+import { deleteEmptyLineBackward } from "./emptyLineDelete";
 
 const LIST_ITEM_TYPES = new Set(["bulletListItem", "numberedListItem", "checkListItem"]);
 type NestedBlock = { id: string; type: string; content?: unknown; children?: NestedBlock[] };
@@ -34,46 +35,59 @@ function unwrapToggle(editor: any, block: any, keepHeading = false): boolean {
   return true;
 }
 
+export function backspaceAtBlockStart(editor: any): boolean {
+  const state = editor.prosemirrorState;
+  if (!state.selection.empty || state.selection.$from.parentOffset !== 0) return false;
+  const block = editor.getTextCursorPosition().block;
+  if (block.id === getProtectedTitleBlockId(editor)) return false;
+  if (deleteEmptyNestedListItem(editor, block)) return true;
+
+  if (block.type === "paragraph" && isInlineBlockEmpty(block) && !block.children.length) {
+    const parent = findParentBlock(editor.document as ToggleBlock[], block.id);
+    if (parent && isToggleBlock(parent)) {
+      const siblings = parent.children as { id: string }[];
+      const index = siblings.findIndex((sibling) => sibling.id === block.id);
+      if (index < 0) return false;
+      editor.transact(() => {
+        editor.removeBlocks([block]);
+        editor.setTextCursorPosition(index > 0 ? siblings[index - 1] : parent, "end");
+      });
+      return true;
+    }
+  }
+  if (block.type === "paragraph") return false;
+
+  const pendingInputRuleUndo = state.plugins.some(
+    (plugin: { spec?: { isInputRules?: boolean }; getState: (value: typeof state) => unknown }) =>
+      plugin.spec?.isInputRules && plugin.getState(state),
+  );
+  if (!Array.isArray(block.content)) return false;
+  if (isToggleBlock(block)) {
+    if (!pendingInputRuleUndo && !isInlineBlockEmpty(block)) return false;
+    return unwrapToggle(editor, block, pendingInputRuleUndo && block.type === "heading");
+  }
+  if (!pendingInputRuleUndo && block.type === "heading" && isInlineBlockEmpty(block) && !block.children.length) {
+    const id = block.id;
+    deleteEmptyLineBackward(editor);
+    if (!editor.getBlock(id)) return true;
+  }
+  if (!pendingInputRuleUndo && block.type === "heading" && !isInlineBlockEmpty(block) && !block.children.length) {
+    editor.updateBlock(block, { type: "paragraph", props: {} });
+    editor.setTextCursorPosition(block, "start");
+    return true;
+  }
+  if (!pendingInputRuleUndo) {
+    if (LIST_ITEM_TYPES.has(block.type) || !isInlineBlockEmpty(block)) return false;
+  }
+  if (block.children.length) return false;
+  editor.updateBlock(block, { type: "paragraph", props: {} });
+  editor.setTextCursorPosition(block, "start");
+  return true;
+}
+
 export const gooseEmptyBlockBackspaceExtension = createExtension({
   key: "goose-empty-block-backspace",
   keyboardShortcuts: {
-    Backspace: ({ editor }) => {
-      const state = editor.prosemirrorState;
-      if (!state.selection.empty || state.selection.$from.parentOffset !== 0) return false;
-      const block = editor.getTextCursorPosition().block;
-      if (block.id === getProtectedTitleBlockId(editor)) return false;
-      if (deleteEmptyNestedListItem(editor, block)) return true;
-
-      if (block.type === "paragraph" && isInlineBlockEmpty(block) && !block.children.length) {
-        const parent = findParentBlock(editor.document as ToggleBlock[], block.id);
-        if (parent && isToggleBlock(parent)) {
-          const siblings = parent.children as { id: string }[];
-          const index = siblings.findIndex((sibling) => sibling.id === block.id);
-          if (index < 0) return false;
-          editor.transact(() => {
-            editor.removeBlocks([block]);
-            editor.setTextCursorPosition(index > 0 ? siblings[index - 1] : parent, "end");
-          });
-          return true;
-        }
-      }
-      if (block.type === "paragraph") return false;
-
-      const pendingInputRuleUndo = state.plugins.some(
-        (plugin) => (plugin.spec as { isInputRules?: boolean }).isInputRules && plugin.getState(state),
-      );
-      if (!Array.isArray(block.content)) return false;
-      if (isToggleBlock(block)) {
-        if (!pendingInputRuleUndo && !isInlineBlockEmpty(block)) return false;
-        return unwrapToggle(editor, block, pendingInputRuleUndo && block.type === "heading");
-      }
-      if (!pendingInputRuleUndo) {
-        if (LIST_ITEM_TYPES.has(block.type) || !isInlineBlockEmpty(block)) return false;
-      }
-      if (block.children.length) return false;
-      editor.updateBlock(block, { type: "paragraph", props: {} });
-      editor.setTextCursorPosition(block, "start");
-      return true;
-    },
+    Backspace: ({ editor }) => backspaceAtBlockStart(editor),
   },
 });

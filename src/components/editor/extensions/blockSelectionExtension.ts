@@ -1,10 +1,34 @@
-import { createExtension } from "@blocknote/core";
+import { createExtension, type BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
 import { Plugin, PluginKey, TextSelection } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
+import { shouldOpenSlashSuggestionMenu } from "../utils/slashMenuPolicy";
 import { GooseBlockSelection, adjacentBlock, currentBlockNode, selectedBlockRoots, isBlockNodeSelection } from "./blockSelectionModel";
 import { deleteSelectionSafely } from "./selectionDelete";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+
+const SLASH_TRIGGERS = new Set(["/", "、"]);
+
+export function typeSlashAtSelectedBlockStart(
+  editor: BlockNoteEditor<any, any, any>,
+  text: string,
+): boolean {
+  if (!editor.isEditable || !SLASH_TRIGGERS.has(text)) return false;
+  const state = editor.prosemirrorState;
+  if (!isBlockNodeSelection(state)) return false;
+  const block = currentBlockNode(state);
+  const content = block?.node.firstChild;
+  if (!block || !content?.isTextblock) return false;
+  const start = block.pos + 2;
+  const probe = state.tr.setSelection(TextSelection.create(state.doc, start));
+  if (!shouldOpenSlashSuggestionMenu(probe, editor, { allowSlashMenuOnFirstBlock: false })) return false;
+  editor.transact((tr) => {
+    tr.setSelection(TextSelection.create(tr.doc, start));
+    tr.insertText(text, start);
+  });
+  editor.getExtension(SuggestionMenu)?.openSuggestionMenu(text);
+  return true;
+}
 
 export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
   key: "goose-block-selection",
@@ -33,6 +57,9 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
         if (event.key === "Backspace" || event.key === "Delete") {
           return editor.isEditable && deleteSelectionSafely(view);
         }
+        if (event.key === "/" || event.key === "、") {
+          return typeSlashAtSelectedBlockStart(editor, event.key) || true;
+        }
         if (event.key === "Enter") {
           const content = block.node.firstChild;
           if (content?.isTextblock) {
@@ -54,8 +81,10 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
         }
         return event.key.length === 1;
       },
-      handleTextInput(view) {
-        return isBlockNodeSelection(view.state);
+      handleTextInput(view, _from, _to, text) {
+        if (!isBlockNodeSelection(view.state)) return false;
+        if (text === "/" || text === "、") return typeSlashAtSelectedBlockStart(editor, text);
+        return true;
       },
     },
   })],
