@@ -202,10 +202,10 @@
   color: var(--sidebar-foreground);
 }
 .sidebar-design .main-tree-row.main-tree-row {
-  height: calc(var(--main-tree-row-height) - 0.142857rem);
-  min-height: calc(var(--main-tree-row-height) - 0.142857rem);
-  margin: 0 0 0.142857rem;
-  border-block: 0 !important;
+  height: var(--main-tree-row-height);
+  min-height: var(--main-tree-row-height);
+  margin: 0;
+  border-block: calc(var(--goose-list-row-gap) / 2) solid transparent !important;
   gap: 0.714286rem;
 }
 .sidebar-design .sidebar-tree-row.sidebar-tree-row { border-block: 0; }
