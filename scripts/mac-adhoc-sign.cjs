@@ -127,6 +127,7 @@ function installMarkdownDocumentTypes(app) {
 module.exports = async ({ electronPlatformName, appOutDir, packager }) => {
   if (electronPlatformName !== 'darwin') return;
   const app = join(appOutDir, `${packager.appInfo.productFilename}.app`);
+  rmSync(join(app, 'Contents/Resources/default_app.asar'), { force: true });
   removeSoftwareVulkan(app);
   stripChromiumSoundBanks(app);
   run('/usr/bin/swift', [
