@@ -1,5 +1,16 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type TextareaHTMLAttributes } from "react";
 import { useFieldControl } from "./field";
+import { createTranslator, i18nYaml, useLocale } from "@/i18n";
+
+const messages = i18nYaml<"src/components/ui/grip-textarea.tsx#messages:1">`
+zh-Hans:
+  resizeHeight: "调整{{label}}高度"
+en:
+  resizeHeight: "Resize {{label}} height"
+ja:
+  resizeHeight: "{{label}}の高さを調整"
+`;
+const t = createTranslator(messages);
 
 const EDGE = 16;
 
@@ -48,6 +59,7 @@ function maxHeight(field: HTMLElement, min: number, top = field.getBoundingClien
 }
 
 export function GripTextarea({ gripLabel, minHeight = 64, paint, fitContent = true, className, style, onChange, ...props }: GripProps) {
+  useLocale();
   const association = useFieldControl(props);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -178,7 +190,7 @@ export function GripTextarea({ gripLabel, minHeight = 64, paint, fitContent = tr
         type="button"
         role="slider"
         aria-orientation="vertical"
-        aria-label={`调整${gripLabel}高度`}
+        aria-label={t("resizeHeight", { label: gripLabel })}
         aria-valuemin={minHeight}
         aria-valuemax={ceiling}
         aria-valuenow={Math.round(height ?? minHeight)}

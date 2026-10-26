@@ -103,6 +103,7 @@ declare global {
   const floatingMenuMotionStyle: typeof import('../components/ui/floating-menu-motion').floatingMenuMotionStyle
   const floatingMenuOrigin: typeof import('../components/ui/floating-menu-motion').floatingMenuOrigin
   const iconButtonVariants: typeof import('../components/ui/icon-button').iconButtonVariants
+  const kbdRecipes: typeof import('../components/ui/kbd').kbdRecipes
   const resolveTooltipDelayDuration: typeof import('../components/ui/tooltip-delay').resolveTooltipDelayDuration
   const showDeleteReceipt: typeof import('../components/ui/delete-receipt').showDeleteReceipt
   const toast: typeof import('../components/ui/sonner').toast

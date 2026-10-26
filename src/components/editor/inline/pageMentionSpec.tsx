@@ -11,23 +11,13 @@ import {
   serializePageMentionHref,
   type PageMentionProps,
 } from "./pageMention";
-import { i18nYaml, createTranslator, useLocale } from "@/i18n";
-const messages = i18nYaml<"src/components/editor/inline/pageMentionSpec.tsx#messages:1">`
-zh-Hans:
-  untitled: "未命名"
-en:
-  untitled: "Untitled"
-ja:
-  untitled: "無題"
-`;
-const t = createTranslator(messages);
-
+import { useLocale } from "@/i18n";
 
 function PageMentionTag({ props }: { props: PageMentionProps }) {
   useLocale();
   const { onOpenPage } = useEditorPageContext();
   const live = usePageMentionTitle(props);
-  const label = live.title.trim() ? pageMentionLabel(live) : `@${t("untitled")}`;
+  const label = pageMentionLabel(live);
   const open = mentionOpenPayload(props);
   return (
     <span
@@ -61,7 +51,7 @@ export const pageMentionSpec = createReactInlineContentSpec(
     propSchema: {
       pageId: { default: "" },
       workspaceId: { default: "" },
-      title: { default: "未命名" },
+      title: { default: "" },
       notebookName: { default: "" },
       wikiTarget: { default: "" },
     },

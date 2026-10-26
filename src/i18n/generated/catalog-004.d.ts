@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/search-sheet/SearchSheetFilters.tsx#localMessages:1": { "allNotebooks": {  }; "bestMatch": {  }; "currentNamed": { "name": string | number }; "currentNotebook": {  }; "notebookRemoved": {  }; "recentlyEdited": {  }; "searchScope": { "scope": string | number }; "searchTitlesOnly": {  }; "sortBy": { "sort": string | number } };
     "src/pages/workspace/components/search-sheet/SearchSheetResults.tsx#localMessages:1": { "askAi": {  }; "matchCount": { "count": string | number }; "pinyin": {  }; "removeRecent": { "title": string | number }; "title": {  } };
     "src/pages/workspace/components/search-sheet/sheetStepText.ts#messages:1": { "compose": {  }; "composeRunning": {  }; "failed": {  }; "found": { "count": string | number }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listPages": {  }; "noResults": {  }; "readPage": {  }; "readWebPage": {  }; "retrieve": {  }; "retrieveFound": { "count": string | number }; "retrieveNone": {  }; "searchNotes": {  }; "searchWeb": {  }; "summary": { "count": string | number }; "summaryFailed": { "count": string | number }; "summaryNotes": { "count": string | number }; "summaryWeb": { "count": string | number }; "thinking": {  }; "tool": {  }; "understand": {  } };
     "src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1": { "aiCouldnTAnswer": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
     "src/search.tsx#block1:1": { "title": {  } };
     "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
-    "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
   }
 }

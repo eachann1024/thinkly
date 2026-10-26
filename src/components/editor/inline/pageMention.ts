@@ -4,6 +4,17 @@ import {
   stripWikiMarkdownExtension,
   wikiLinkDisplayTitle,
 } from "@/lib/wikiLink";
+import { createTranslator, i18nYaml } from "@/i18n";
+
+const messages = i18nYaml<"src/components/editor/inline/pageMention.ts#messages:1">`
+zh-Hans:
+  untitled: "未命名"
+en:
+  untitled: "Untitled"
+ja:
+  untitled: "無題"
+`;
+const t = createTranslator(messages);
 
 export const PAGE_MENTION_TYPE = "pageMention";
 export const PAGE_MENTION_HREF_SCHEME = "goose-page:";
@@ -19,7 +30,7 @@ export type PageMentionProps = {
 const EMPTY_MENTION: PageMentionProps = {
   pageId: "",
   workspaceId: "",
-  title: "未命名",
+  title: "",
   notebookName: "",
   wikiTarget: "",
 };
@@ -49,7 +60,7 @@ export function sanitizePageMentionProps(value: unknown): PageMentionProps | nul
 }
 
 export function pageMentionLabel(props: Pick<PageMentionProps, "title">): string {
-  const title = props.title.trim() || EMPTY_MENTION.title;
+  const title = props.title.trim() || t("untitled");
   return title.startsWith("@") ? title : `@${title}`;
 }
 
@@ -91,7 +102,7 @@ export function parsePageMentionHref(href: string): Pick<
 }
 
 export function serializePageMentionMarkdown(props: PageMentionProps): string {
-  const title = props.title.trim() || EMPTY_MENTION.title;
+  const title = props.title.trim() || t("untitled");
   const wikiTarget = (props.wikiTarget ?? "").trim();
   if (!props.pageId.trim() && wikiTarget) {
     return serializeWikiLinkMarkdown(wikiTarget, title);

@@ -2,6 +2,7 @@ import type { BlockNoteEditor } from "@blocknote/core";
 import { useId, useLayoutEffect } from "react";
 import { useLocale } from "@/i18n";
 import { getEditorPlaceholders, type EditorPlaceholderProfile } from "./editorLocale";
+import { goosePlaceholderKey } from "../extensions/placeholderExtension";
 
 export function useEditorLocale(
   editor: BlockNoteEditor<any, any, any>,
@@ -30,6 +31,10 @@ export function useEditorLocale(
     const root = dom.getRootNode();
     if (root instanceof ShadowRoot) root.appendChild(style);
     else dom.ownerDocument.head.appendChild(style);
+    const view = editor.prosemirrorView;
+    if (goosePlaceholderKey.getState(view.state) !== undefined) {
+      view.dispatch(view.state.tr.setMeta(goosePlaceholderKey, profile));
+    }
     return () => {
       style.remove();
       if (dom.getAttribute(attribute) === id) dom.removeAttribute(attribute);
