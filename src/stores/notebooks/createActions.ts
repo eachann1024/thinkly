@@ -35,8 +35,8 @@ export function createCreateNotebookActions(
               updatedAt: Date.now(),
             },
           },
-          activeNotebookId: existing.id,
         }));
+        get().setActiveNotebook(existing.id);
         const lastActivePageId = get().lastActivePageByNotebook[existing.id];
         const lastActivePage = lastActivePageId
           ? pagesStore.pages[lastActivePageId]
@@ -66,9 +66,8 @@ export function createCreateNotebookActions(
       const nextNotebooks = { ...currentNotebooks, [id]: notebook };
       set({
         notebooks: nextNotebooks,
-        activeNotebookId: id,
       });
-      void pagesStore.setActivePage(null);
+      get().setActiveNotebook(id);
       return id;
     },
   };
