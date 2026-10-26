@@ -90,6 +90,7 @@ export function focusedWorkspaceWindow(): BrowserWindow | null {
 export function raiseFloatingWindow(
   win: BrowserWindow,
   parked: ParkedSets = captureParkedWorkspaces(),
+  options: { activateApp?: boolean } = {},
 ): void {
   markQuicknoteActivateSuppressed();
   const focused = focusedWorkspaceWindow();
@@ -100,6 +101,7 @@ export function raiseFloatingWindow(
   if (win.isMinimized()) win.restore();
   setHiddenThrottle(win, false);
   if (process.platform === "darwin") {
+    if (options.activateApp) app.focus({ steal: true });
     win.showInactive();
     if (!win.isDestroyed()) win.focus();
   } else if (process.platform === "win32") {

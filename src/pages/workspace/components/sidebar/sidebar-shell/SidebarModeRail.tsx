@@ -35,6 +35,7 @@ import { useFolderToolbarActions } from "../../page/useFolderToolbarActions";
 import { SidebarFooter } from "../SidebarFooter";
 import { readSearchSelection } from "../readSearchSelection";
 import { useSearchSession } from "../useSearchSession";
+import { preloadSearchSheet } from "../../search-sheet/searchSheetLoader";
 import { SidebarRailButton } from "./SidebarRailButton";
 import { SidebarRailSortableList } from "./SidebarRailSortable";
 import type { useSidebarHover } from "./useSidebarHover";
@@ -92,8 +93,10 @@ export function SidebarModeRail({
         view === "search" ? undefined : !settingsOpen && !sidebarCollapsed && currentView === view,
       "aria-controls": view === "search" ? undefined : "workspace-sidebar-content",
       onPointerEnter: (event) => {
+        if (view === "search") preloadSearchSheet();
         if (event.pointerType === "mouse") hoverSidebarView(view);
       },
+      onFocus: view === "search" ? preloadSearchSheet : undefined,
       onPointerDownCapture: (event) => {
         if (view === "search" && event.button === 0)
           searchSelectionRef.current = readSearchSelection();
