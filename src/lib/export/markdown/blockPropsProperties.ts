@@ -22,7 +22,6 @@ export const INLINE_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
   "quote",
   "callout",
 ]);
@@ -31,6 +30,14 @@ export function sanitizeCssColor(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const color = value.trim();
   return KNOWN_COLORS.has(color) || SAFE_CSS_COLOR.test(color) ? color : undefined;
+}
+
+export function persistedStyleColor(value: unknown, property: "textColor" | "backgroundColor"): string | undefined {
+  const color = sanitizeCssColor(value);
+  if (!color || /^(?:default|inherit|initial|unset|revert|revert-layer)$/i.test(color)) return undefined;
+  if (property === "textColor" && /^currentcolor$/i.test(color)) return undefined;
+  if (property === "backgroundColor" && /^transparent$/i.test(color)) return undefined;
+  return color;
 }
 
 export function restorePersistedBlockProps(props: Record<string, unknown>): PersistedBlockProps {
@@ -52,9 +59,9 @@ export function pickPersistedBlockProps(
   if (props?.textAlignment === "center" || props?.textAlignment === "right") {
     metadata.textAlignment = props.textAlignment;
   }
-  const textColor = sanitizeCssColor(props?.textColor);
+  const textColor = persistedStyleColor(props?.textColor, "textColor");
   if (textColor && textColor !== "default") metadata.textColor = textColor;
-  const backgroundColor = sanitizeCssColor(props?.backgroundColor);
+  const backgroundColor = persistedStyleColor(props?.backgroundColor, "backgroundColor");
   if (backgroundColor && backgroundColor !== "default") {
     metadata.backgroundColor = backgroundColor;
   }

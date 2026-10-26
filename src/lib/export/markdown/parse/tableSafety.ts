@@ -35,7 +35,9 @@ export function isLosslessTableDocument(document: Document, table: HTMLTableElem
           backgroundColor: readDataAttr(element, "background-color"),
           textAlignment: readDataAttr(element, "text-alignment"),
         });
-        if (element.getAttribute("style") !== expected) return false;
+        const legacyLeft = readDataAttr(element, "text-alignment") === "left"
+          ? `${expected ? expected + ";" : ""}text-align:left` : expected;
+        if (element.getAttribute("style") !== expected && element.getAttribute("style") !== legacyLeft) return false;
       }
     }
   }

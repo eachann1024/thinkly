@@ -1,5 +1,5 @@
 import { documentTextColors } from "@/lib/textColors";
-import { sanitizeCssColor } from "./blockPropsProperties";
+import { persistedStyleColor, sanitizeCssColor } from "./blockPropsProperties";
 import { sanitizePageMentionProps, pageMentionLabel, serializePageMentionHref, pageMentionFromMarkdownLink, PAGE_MENTION_HREF_SCHEME } from "@/components/editor/inline/pageMention";
 import { dataAttr, readDataAttr } from "./persistedNames";
 import { escapeHtmlAttribute } from "./serialize/inline";
@@ -24,11 +24,11 @@ export function sanitizeTableHref(value: string): string | null {
 
 export function tableColorStyle(props: Record<string, unknown>): string {
   const styles: string[] = [];
-  const text = sanitizeCssColor(props.textColor);
-  const background = sanitizeCssColor(props.backgroundColor);
+  const text = persistedStyleColor(props.textColor, "textColor");
+  const background = persistedStyleColor(props.backgroundColor, "backgroundColor");
   if (text && text !== "default") styles.push(`color:${documentTextColors("light")[text] ?? text}`);
   if (background && background !== "default") styles.push(`background-color:${backgrounds[background] ?? background}`);
-  if (["left", "center", "right"].includes(String(props.textAlignment))) styles.push(`text-align:${props.textAlignment}`);
+  if (["center", "right"].includes(String(props.textAlignment))) styles.push(`text-align:${props.textAlignment}`);
   return styles.join(";");
 }
 
@@ -52,12 +52,13 @@ export function tableInlineHtml(content: any): string {
       return props ? `<a href="${tableHtmlEscape(serializePageMentionHref(props))}" ${dataAttr("page-mention")}="${encodeURIComponent(JSON.stringify(props))}">${tableHtmlEscape(pageMentionLabel(props))}</a>` : "";
     }
     let text = tableInlineHtml(item.text || "");
+    if (!text) return "";
     const styles = item.styles || {};
     for (const [name, tag] of [["bold", "strong"], ["italic", "em"], ["underline", "u"], ["strike", "del"], ["code", "code"]]) {
       if (styles[name]) text = `<${tag}>${text}</${tag}>`;
     }
-    const color = sanitizeCssColor(styles.textColor);
-    const background = sanitizeCssColor(styles.backgroundColor);
+    const color = persistedStyleColor(styles.textColor, "textColor");
+    const background = persistedStyleColor(styles.backgroundColor, "backgroundColor");
     if (color || background) {
       text = `<span${color ? ` ${dataAttr("text-color")}="${tableHtmlEscape(color)}"` : ""}${background ? ` ${dataAttr("background-color")}="${tableHtmlEscape(background)}"` : ""} style="${tableHtmlEscape(tableColorStyle(styles))}">${text}</span>`;
     }

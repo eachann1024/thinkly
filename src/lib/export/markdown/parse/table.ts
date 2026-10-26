@@ -21,7 +21,7 @@ export function parseTableHtmlBlock(lines: string[], start: number) {
       const textAlignment = readDataAttr(cell, "text-alignment");
       if (textColor) props.textColor = textColor;
       if (backgroundColor) props.backgroundColor = backgroundColor;
-      if (["left", "center", "right"].includes(textAlignment || "")) props.textAlignment = textAlignment;
+      if (["center", "right"].includes(textAlignment || "")) props.textAlignment = textAlignment;
       return { type: "tableCell", props, content: parseTableInlineHtml(cell) };
     }),
   }));
