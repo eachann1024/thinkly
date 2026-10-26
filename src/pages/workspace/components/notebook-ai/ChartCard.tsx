@@ -170,14 +170,16 @@ export function ChartCard(props: ChartCardProps) {
           }}
         />
       </div>
-      {status !== "ready" ? <ArtifactRenderStatus failed={status === "failed"} onRetry={retry} /> : null}
-      <div
-        ref={containerRef}
-        className="notebook-ai-chart-card-canvas"
-        style={{ width: "100%", height: props.type === "pie" ? 260 : 240, opacity: status === "ready" ? 1 : 0 }}
-        role="img"
-        aria-label={props.title ?? t("chart")}
-      />
+      <div className="notebook-ai-artifact-render-region">
+        {status !== "ready" ? <ArtifactRenderStatus failed={status === "failed"} onRetry={retry} /> : null}
+        <div
+          ref={containerRef}
+          className="notebook-ai-chart-card-canvas"
+          style={{ width: "100%", height: props.type === "pie" ? 260 : 240, opacity: status === "ready" ? 1 : 0 }}
+          role="img"
+          aria-label={props.title ?? t("chart")}
+        />
+      </div>
     </div>
   );
 }

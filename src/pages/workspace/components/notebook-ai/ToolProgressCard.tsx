@@ -33,6 +33,7 @@ zh-Hans:
   pending: "待处理"
   thinking: "思考"
   progress: "处理进度"
+  choicesProvided: "已提供选项"
 en:
   inProgress: "In progress"
   failed: "Failed"
@@ -43,6 +44,7 @@ en:
   pending: "Pending"
   thinking: "Thinking"
   progress: "Progress"
+  choicesProvided: "Options provided"
 ja:
   inProgress: "進行中"
   failed: "失敗"
@@ -53,6 +55,7 @@ ja:
   pending: "保留中"
   thinking: "思考"
   progress: "処理状況"
+  choicesProvided: "選択肢を提示しました"
 `;
 const t = createTranslator(messages);
 
@@ -113,7 +116,12 @@ export function ToolProgressCard({
   const [approvalStatus, setApprovalStatus] =
     useState<WorkCardStatusData | null>(null);
   const interrupted = Boolean(completion && completion !== "complete");
-  const status = interrupted ? heading.status : approvalStatus ?? heading.status;
+  const hasChoices = parts.some(part => part.type === "tool-showChoices" && getToolProgressStepStatus(part, isMessageStreaming) === "done");
+  const status = interrupted ? heading.status : approvalStatus ?? (
+    phase === "done" && hasChoices
+      ? { label: t("choicesProvided"), tone: "neutral" as const, icon: "waiting" as const }
+      : heading.status
+  );
   const showProcessing = status.icon === "running";
   const foldable = steps.length > 0;
   const traceLabel = foldable ? heading.toggle : hasThinking ? t("thinking") : "";

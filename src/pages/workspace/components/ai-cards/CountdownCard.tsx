@@ -1,8 +1,8 @@
 import { useLocale, getFormatLocale, createTranslator, i18nYaml } from "@/i18n";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { CountdownCardData } from "@/lib/notebook-ai/cards/types";
-import { ROW_SPRING, rowVariants } from "./cardMotion";
+import { rowVariants } from "./cardMotion";
 
 const messages = i18nYaml<"src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1">`
 zh-Hans:
@@ -41,14 +41,9 @@ function useSecondClock() {
 }
 
 function Tile({ value, label }: { value: string; label: string }) {
-  const reduce = useReducedMotion();
-  const offset = reduce ? 0 : 10;
   return <motion.span className="ai-card-countdown-tile" variants={rowVariants}>
     <span className="ai-card-countdown-digits goose-tabular" aria-label={`${value} ${label}`}>
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span key={value} initial={{ y: offset, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -offset, opacity: 0 }}
-          transition={ROW_SPRING} aria-hidden="true">{value}</motion.span>
-      </AnimatePresence>
+      <span aria-hidden="true">{value}</span>
     </span>
     <span className="ai-card-countdown-unit">{label}</span>
   </motion.span>;

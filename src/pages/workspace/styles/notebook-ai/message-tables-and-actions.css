@@ -61,7 +61,6 @@
  border-bottom: 0;
 }
 
-.notebook-ai-messages .ai-md [data-streamdown="code-block"],
 .notebook-ai-messages .ai-md [data-streamdown="code-block-body"] {
  max-width: 100%;
  min-width: 0;
