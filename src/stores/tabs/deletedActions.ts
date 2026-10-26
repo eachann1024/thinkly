@@ -1,6 +1,8 @@
 import type { TabSet, TabGet, TabsState } from "./types";
 import type { TabsActionContext } from "./context";
 import { usePages } from "../usePages";
+import { useNotebooks } from "../useNotebooks";
+import { listVisibleWorkspaceTabs } from "@/pages/workspace/components/page/visibleTabs";
 import { isSpecialTab } from "./types";
 import {
   closeSplitLeavesForDeletedPage,
@@ -60,7 +62,6 @@ export function createDeletedTabActions(
 
       if (tabsToClose.size === 0) return;
 
-      const deletedIndex = openTabs.findIndex((tab) => tabsToClose.has(tab.id));
       const nextTabs = openTabs.filter((tab) => !tabsToClose.has(tab.id));
       if (nextTabs.length === 0) {
         set({ openTabs: [], activeTabId: null });
@@ -68,6 +69,9 @@ export function createDeletedTabActions(
         return;
       }
 
+      const notebookId = useNotebooks.getState().activeNotebookId;
+      const visibleTabs = listVisibleWorkspaceTabs(openTabs, usePages.getState().getPage, notebookId);
+      const nextVisibleTabs = listVisibleWorkspaceTabs(nextTabs, usePages.getState().getPage, notebookId);
       let finalTabs = nextTabs;
       let nextActiveId = activeTabId;
 
@@ -78,15 +82,14 @@ export function createDeletedTabActions(
             : undefined;
         const preferredStillOpen =
           preferredPage && !preferredPage.trashedAt
-            ? nextTabs.find((tab) => tabShowsPageId(tab, preferredPage.id))
+            ? nextVisibleTabs.find((tab) => tabShowsPageId(tab, preferredPage.id))
             : undefined;
 
         if (preferredStillOpen) {
           nextActiveId = preferredStillOpen.id;
         } else {
-          nextActiveId =
-            nextTabs[Math.min(Math.max(deletedIndex, 0), nextTabs.length - 1)]
-              ?.id ?? null;
+          const visibleIndex = visibleTabs.findIndex((tab) => tabsToClose.has(tab.id));
+          nextActiveId = nextVisibleTabs[Math.min(Math.max(visibleIndex, 0), nextVisibleTabs.length - 1)]?.id ?? null;
         }
       }
 
@@ -98,11 +101,7 @@ export function createDeletedTabActions(
       }
 
       const historyState = syncHistoryWithOpenTabs(finalTabs);
-      const fallbackActiveId =
-        resolveTabIdInHistory(nextActiveId, finalTabs) ??
-        (historyState.tabHistoryIndex >= 0
-          ? historyState.tabHistory[historyState.tabHistoryIndex]
-          : null);
+      const fallbackActiveId = resolveTabIdInHistory(nextActiveId, nextVisibleTabs);
 
       set({
         openTabs: finalTabs,
