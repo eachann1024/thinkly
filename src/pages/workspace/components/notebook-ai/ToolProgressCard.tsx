@@ -1,16 +1,12 @@
 import { useLocale } from "@/i18n";
-import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
-import { Button } from "@/components/ui/button";
+import type { NotebookAiCompletion, NotebookAiExecution } from "@/lib/notebook-ai/types";
 import { useMemo, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ExecutionTrace } from "./ExecutionTrace";
+import { ExecutionSources } from "./ExecutionSources";
 import { PlanReviewProvider } from "./approval/PlanReviewContext";
 import { visibleBusyTickerLine } from "@/components/editor/ai/inlineBusyTicker";
-import {
-  ORB_VISIBLE_MIN_MS,
-  useMinHoldActive,
-} from "@/components/ui/ai-motion";
+
 import { cn } from "@/lib/utils";
-import { resolveLoaderHold } from "./beautifulUiMap";
 import {
   buildToolProgressSteps,
   getToolProgressStepStatus,
@@ -18,9 +14,9 @@ import {
   type ProgressStep,
   type ToolProgressPart,
 } from "./toolProgressModel";
+import { getToolProgressFacts } from "./toolProgressFacts";
 import { getWorkCardHeading, getWorkCardPhase } from "./workCardHeading";
 import { WorkCardStatus } from "./WorkCardStatus";
-import { ToolProgressSteps } from "./ToolProgressSteps";
 import {
   WorkCardStatusContext,
   type WorkCardStatusData,
@@ -77,27 +73,9 @@ function stepStatusLabel(status: ProgressStep["status"]) {
   return t("pending");
 }
 
-function FoldChevron() {
-  return (
-    <svg
-      className="notebook-ai-work-chev"
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
 interface ToolProgressCardProps {
   parts: ToolProgressPart[];
+  execution?: NotebookAiExecution;
   isMessageStreaming?: boolean;
   completion?: NotebookAiCompletion;
   thinkingText?: string;
@@ -105,75 +83,9 @@ interface ToolProgressCardProps {
   footer?: ReactNode;
 }
 
-function WorkCardTraceRow({
-  foldable,
-  open,
-  label,
-  thinkingLine,
-  running,
-  onToggle,
-}: {
-  foldable: boolean;
-  open: boolean;
-  label: string;
-  thinkingLine: string;
-  running: boolean;
-  onToggle: () => void;
-}) {
-  const reduce = useReducedMotion();
-  const body = (
-    <>
-      {foldable ? <FoldChevron /> : null}
-      {label ? (
-        <span className="notebook-ai-work-toggle-label">
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.span
-              key={label}
-              className={cn("notebook-ai-work-toggle-text", running && "ai-shimmer-text")}
-              initial={reduce ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ type: "spring", stiffness: 480, damping: 38 }}
-            >
-              {label}
-            </motion.span>
-          </AnimatePresence>
-        </span>
-      ) : null}
-      {thinkingLine ? (
-        <span
-          className="notebook-ai-work-think"
-          title={thinkingLine}
-          aria-live="polite"
-        >
-          {thinkingLine}
-        </span>
-      ) : null}
-    </>
-  );
-
-  if (foldable) {
-    return (
-      <Button contentStyle="preserve" variant="ghost" size={null}
-        type="button"
-        className="notebook-ai-work-toggle"
-        aria-expanded={open}
-        onClick={onToggle}
-      >
-        {body}
-      </Button>
-    );
-  }
-
-  return (
-    <p className="notebook-ai-work-toggle notebook-ai-work-toggle--static">
-      {body}
-    </p>
-  );
-}
-
 export function ToolProgressCard({
   parts,
+  execution,
   isMessageStreaming,
   completion,
   thinkingText,
@@ -185,28 +97,27 @@ export function ToolProgressCard({
     () => buildToolProgressSteps(parts, isMessageStreaming, completion),
     [parts, isMessageStreaming, completion, locale],
   );
-  const thinkingLine = visibleBusyTickerLine(thinkingText ?? "");
+  const thinkingLine = useMemo(() => visibleBusyTickerLine(thinkingText ?? ""), [thinkingText]);
   const hasThinking = thinkingLine.length > 0;
 
-  const hasError = steps.some((step) => step.status === "error");
+  const activity = useMemo(() => getToolProgressFacts(steps), [steps]);
+  const hasError = Boolean(activity.firstError);
   const isRunning =
     !hasError &&
     !completion &&
     (Boolean(isMessageStreaming) ||
-      steps.some((step) => step.status === "running"));
-  const heldRunning = useMinHoldActive(isRunning, ORB_VISIBLE_MIN_MS);
-  const showRunning = !completion && resolveLoaderHold(isRunning, heldRunning);
-  const phase = getWorkCardPhase(steps, showRunning, completion);
-  const heading = getWorkCardHeading(steps, phase);
+      activity.hasRunning);
+  const showRunning = isRunning;
+  const phase = useMemo(() => getWorkCardPhase(steps, showRunning, completion), [steps, showRunning, completion]);
+  const heading = useMemo(() => getWorkCardHeading(steps, phase), [steps, phase, locale]);
   const [approvalStatus, setApprovalStatus] =
     useState<WorkCardStatusData | null>(null);
   const interrupted = Boolean(completion && completion !== "complete");
   const status = interrupted ? heading.status : approvalStatus ?? heading.status;
   const showProcessing = status.icon === "running";
-  const [open, setOpen] = useState(false);
   const foldable = steps.length > 0;
   const traceLabel = foldable ? heading.toggle : hasThinking ? t("thinking") : "";
-  const showTraceRow = foldable || hasThinking;
+  const showTraceRow = foldable || hasThinking || Boolean(execution);
   const hasHeading = foldable || showRunning || interrupted;
 
   if (!hasHeading && !showTraceRow && !children && !footer) return null;
@@ -229,22 +140,10 @@ export function ToolProgressCard({
             </p>
           ) : null}
           {showTraceRow ? (
-            <div className={cn("notebook-ai-work-trace", foldable && "notebook-ai-work-trace--foldable")}>
-              <WorkCardTraceRow
-                foldable={foldable}
-                open={open}
-                label={traceLabel}
-                thinkingLine={thinkingLine}
-                running={showProcessing}
-                onToggle={() => setOpen((value) => !value)}
-              />
-              <AnimatePresence initial={false}>
-                {foldable && open ? (
-                  <ToolProgressSteps key="steps" steps={steps} statusLabel={stepStatusLabel} />
-                ) : null}
-              </AnimatePresence>
-            </div>
+            <ExecutionTrace parts={parts} steps={steps} execution={execution}
+              running={isRunning} label={traceLabel} thinkingLine={thinkingLine} statusLabel={stepStatusLabel} />
           ) : null}
+          <ExecutionSources parts={parts} execution={execution} />
           {children ? (
             <div
               className={cn(
@@ -264,8 +163,7 @@ export function ToolProgressCard({
             <span
               className="sr-only"
               role="status"
-              aria-live="polite"
-              aria-atomic="true"
+                  aria-atomic="true"
             >
               {hasHeading ? status.label : ""}
               {thinkingLine}
