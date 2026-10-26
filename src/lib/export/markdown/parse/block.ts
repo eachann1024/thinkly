@@ -18,11 +18,12 @@ import {
 } from "./blockChildren";
 import { applyNoteMeta, splitGeneratedMarkdown } from "../noteMeta";
 import { parseQuoteBlock } from "./quoteBlock";
+import { normalizeMultilineSpans } from "./spanRanges";
 
 
 export function markdownToJsonContent(markdown: string): any {
   const split = splitGeneratedMarkdown(markdown);
-  return applyNoteMeta(parseMarkdownBody(split.body), split.meta);
+  return applyNoteMeta(parseMarkdownBody(normalizeMultilineSpans(split.body)), split.meta);
 }
 
 function pushBlankParagraphs(lines: string[], index: number, content: any[]): number {
@@ -40,7 +41,8 @@ function pushBlankParagraphs(lines: string[], index: number, content: any[]): nu
 function parseMarkdownBody(markdown: string): any {
   let source = markdown.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   if (source.endsWith("\n")) source = source.slice(0, -1);
-  if (!source.trim()) return [];
+  if (!source.trim()) return source.length || markdown.length
+    ? source.split("\n").map(() => ({ type: "paragraph" })) : [];
   const lines = source.split("\n");
   const content: any[] = [];
   let i = 0;
@@ -54,7 +56,8 @@ function parseMarkdownBody(markdown: string): any {
     }
     if (i < lines.length && lines[i].trim() === "---") {
       const yamlBody = frontmatterLines.join("\n");
-      if (frontmatterBodyHasUserVisibleKeys(yamlBody)) {
+      const visible = frontmatterBodyHasUserVisibleKeys(yamlBody);
+      if (visible) {
         content.push({
           type: "codeBlock",
           props: { language: "yaml-frontmatter" },
@@ -62,6 +65,7 @@ function parseMarkdownBody(markdown: string): any {
         });
       }
       i++;
+      if (!visible && lines[i] === "") i++;
     } else {
       i = 0;
     }
