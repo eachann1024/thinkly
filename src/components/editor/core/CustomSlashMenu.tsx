@@ -105,6 +105,7 @@ const CustomSlashMenu = forwardRef<HTMLDivElement, CustomSlashMenuProps>(
       >
         <div
           data-notion-slash-surface="true"
+          style={{ minWidth: 0, maxWidth: "inherit" }}
           className="goose-menu-surface z-50 flex h-auto max-h-[inherit] min-h-0 w-[280px] max-w-[inherit] flex-col overflow-hidden text-popover-foreground"
         >
           <div
