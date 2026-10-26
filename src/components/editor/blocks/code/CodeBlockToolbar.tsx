@@ -133,18 +133,6 @@ export function CodeBlockToolbar({
         )}
       >
         <div className="flex shrink-0 items-center gap-1">
-          <CodeLanguagePicker
-            language={language}
-            onLanguageChange={onLanguageChange}
-            editable={editable}
-            isMathOrMermaid={isMathOrMermaid}
-            sourceMode={previewMode === "code"}
-            hasVisualPreview={hasVisualPreview}
-            displayLanguage={displayLanguage}
-            chipClass={chipClass}
-            chipActiveClass={chipActiveClass}
-          />
-
           <div className="goose-code-hover-actions inline-flex items-center gap-1">
             {hasVisualPreview && (
               <CodePreviewToolbar
@@ -240,6 +228,18 @@ export function CodeBlockToolbar({
               </Tooltip>
             )}
           </div>
+
+          <CodeLanguagePicker
+            language={language}
+            onLanguageChange={onLanguageChange}
+            editable={editable}
+            isMathOrMermaid={isMathOrMermaid}
+            sourceMode={previewMode === "code"}
+            hasVisualPreview={hasVisualPreview}
+            displayLanguage={displayLanguage}
+            chipClass={chipClass}
+            chipActiveClass={chipActiveClass}
+          />
         </div>
       </SelectionToolbarSurface>
     </TooltipProvider>
