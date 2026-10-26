@@ -232,7 +232,8 @@ export function GitSyncContent({
                   conflicts={conflicts}
                   bridge={bridge}
                   disabled={disabled}
-                  onResolve={(request) => void run(id, "resolve", () => bridge.resolveConflict(request))}
+                  syncing={status?.phase === "syncing"}
+                  onResolve={(request) => void run(id, "resolve", () => bridge.resolveConflicts(request))}
                 />
               )}
             </SettingsSectionCard>

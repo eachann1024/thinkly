@@ -8,13 +8,13 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { clearAllGitSyncNotifications, clearGitSyncNotification, notifyGitSyncFailure } from "./gitSyncNotifications";
-import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
+import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictBatchResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
 import { idleGitSyncStatus as idle, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
 import { gitSchedulerTransition, gitLoadTransition, type GitSchedulerState, type GitLoadState } from "./gitSyncLifecycle";
 import { gitSyncPreparationFailure, isGitPreparationMessage } from "../../src/lib/git-sync-preparation";
 import { broadcast, lookupWindowContext } from "./windows";
-import { syncGitRepository, GitConflictError, getGitConflict, resolveGitConflict } from "./gitRepositoryEngine";
-import { retainGitConflicts } from "./gitSyncConflict";
+import { syncGitRepository, GitConflictError, getGitConflict } from "./gitRepositoryEngine";
+import { retainGitConflicts, resolveGitConflicts } from "./gitSyncConflict";
 import { checkedGitRoot as checkedRoot, checkGitFolder, rememberNotebookRoot } from "./gitSyncFolders";
 import { rebindGitFolder } from "./gitSyncRebind";
 import { lockGitSyncPath } from "./gitSyncLock";
@@ -264,10 +264,10 @@ export function registerGitSyncIpc() {
     if (!configs.has(id) || typeof request.conflictId !== "string" || !/^[a-f0-9]{64}$/.test(request.conflictId)) throw new Error(t("invalidConflict"));
     return getGitConflict(id, request.conflictId);
   });
-  handle("git-sync:resolve-conflict", async (request: GitConflictResolution) => {
+  handle("git-sync:resolve-conflict", async (request: GitConflictBatchResolution) => {
     const id = validateRepositoryId(request?.repositoryId);
     if (!configs.has(id)) throw new Error(t("configRemoved"));
-    await resolveGitConflict(request);
+    resolveGitConflicts(request, statuses.get(id)?.conflicts ?? []);
     return sync(id);
   });
   handle("git-sync:remove", async (value) => {

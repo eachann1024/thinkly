@@ -41,7 +41,7 @@ export const gitSync: GitSyncBridge = {
   renameNotebookFolder: (request) => invoke("git-sync:rename-folder", request),
   adoptRenamedNotebookFolder: (request) => invoke("git-sync:adopt-folder", request),
   getConflict: (repositoryId, conflictId) => invoke("git-sync:conflict", { repositoryId, conflictId }),
-  resolveConflict: (request) => invoke("git-sync:resolve-conflict", request),
+  resolveConflicts: (request) => invoke("git-sync:resolve-conflict", request),
   onState: (callback) => {
     const listener = (_event: unknown, state: Parameters<typeof callback>[0]) =>
       callback(state);

@@ -1,6 +1,6 @@
 import { t } from "./i18n/gitErrors";
 import { createHash } from "node:crypto";
-import type { GitRepositoryFolder, GitSyncConflict, GitSyncConflictDetail, GitConflictResolution } from "../../src/lib/git-sync-contract";
+import type { GitRepositoryFolder, GitSyncConflict, GitSyncConflictDetail, GitConflictResolution, GitConflictBatchResolution } from "../../src/lib/git-sync-contract";
 export type { GitSyncConflict, GitSyncConflictDetail, GitConflictResolution } from "../../src/lib/git-sync-contract";
 
 interface CachedConflict {
@@ -54,10 +54,22 @@ export async function getGitConflict(repositoryId: string, conflictId: string): 
   return { ...conflict.info, localText: local.text, remoteText: remote.text, binary: local.binary || remote.binary, truncated: local.truncated || remote.truncated };
 }
 
-export async function resolveGitConflict(request: GitConflictResolution): Promise<void> {
+function checkedResolution(request: GitConflictResolution) {
   if (!["local", "remote", "both"].includes(request.choice)) throw new Error(t("invalidResolution"));
   const conflict = repositories.get(request.repositoryId)?.get(request.conflictId);
   if (!conflict) throw new Error(t("conflictChanged"));
   if (request.choice === "both" && (conflict.local === undefined || conflict.remote === undefined)) throw new Error(t("cannotKeepBoth"));
-  conflict.choice = request.choice;
+  return conflict;
+}
+
+export async function resolveGitConflict(request: GitConflictResolution): Promise<void> {
+  checkedResolution(request).choice = request.choice;
+}
+
+export function resolveGitConflicts(request: GitConflictBatchResolution, expected: GitSyncConflict[]) {
+  if (!Array.isArray(request.resolutions) || !expected.length || request.resolutions.length !== expected.length
+    || new Set(request.resolutions.map(item => item?.conflictId)).size !== expected.length
+    || expected.some(conflict => !request.resolutions.some(item => item?.conflictId === conflict.id))) throw new Error(t("conflictChanged"));
+  const choices = request.resolutions.map(item => ({ conflict: checkedResolution({ ...item, repositoryId: request.repositoryId }), choice: item.choice }));
+  for (const { conflict, choice } of choices) conflict.choice = choice;
 }
