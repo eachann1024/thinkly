@@ -20,8 +20,8 @@ export function BlockHandleStyleMenus({ editor, block, run, layout }: Props) {
   return <>
     {caps.color && <EditorSubmenuTrigger>
       <DropdownMenuItem textValue={t("color")}><Palette />{t("color")}<ChevronRight className="ml-auto" /></DropdownMenuItem>
-      <DropdownMenuContent variant="menu" side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
-        boundaryElement={layout.boundaryElement} style={layout.submenuStyle} collisionPadding={8} motion="instant"
+      <DropdownMenuContent variant="menu" isNonModal data-goose-submenu-direction={layout.submenuSide} side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
+        boundaryElement={layout.boundaryElement} style={layout.submenuStyle} collisionPadding={8}
         data-goose-block-handle-menu={block.id} data-goose-block-id={block.id} data-goose-editor-owner={owner}
         className="goose-block-handle-menu goose-block-color-menu">
         <BlockHandleColorPalette key={block.id} editor={editor} block={block} />
@@ -29,8 +29,8 @@ export function BlockHandleStyleMenus({ editor, block, run, layout }: Props) {
     </EditorSubmenuTrigger>}
     {caps.align && <EditorSubmenuTrigger>
       <DropdownMenuItem textValue={t("align")}><AlignLeft />{t("align")}<ChevronRight className="ml-auto" /></DropdownMenuItem>
-      <DropdownMenuContent variant="menu" side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
-        boundaryElement={layout.boundaryElement} style={layout.submenuStyle} collisionPadding={8} motion="instant"
+      <DropdownMenuContent variant="menu" isNonModal data-goose-submenu-direction={layout.submenuSide} side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
+        boundaryElement={layout.boundaryElement} style={layout.submenuStyle} collisionPadding={8}
         data-goose-block-handle-menu={block.id} data-goose-block-id={block.id} data-goose-editor-owner={owner}
         className="goose-block-handle-menu">
         {alignment.map((value) => {

@@ -6,10 +6,6 @@ import {
   type RefObject,
 } from "react";
 import {
-  isFoldableHeadingBlock,
-  readHeadingCollapsed,
-} from "./toggleHeadingGutter";
-import {
   HEADING_SIDE_MENU_EXTRA_GAP,
   SIDE_MENU_CONTENT_GAP,
   isPointerInSideMenuCorridor,
@@ -21,6 +17,7 @@ import { ownsBlockToolbar } from "./blockToolbarOwner";
 import { isPointerInToolbarCorridor } from "./blockHandleGeometry";
 import { useBlockHandleReference } from "./useBlockHandleReference";
 import { findBlockHandleContent } from "./blockHandleDom";
+import { documentEdgeBlockIds } from "./documentEdgeBlockIds";
 
 const SIDEBAR_INTERACTION_SELECTOR = ".workspace-sidebar-pane, .rct-main-tree";
 export function useEditorSideMenuTarget(
@@ -29,25 +26,17 @@ export function useEditorSideMenuTarget(
   menuRef: RefObject<HTMLDivElement | null>,
   pressedHandle: RefObject<boolean>,
   lockedBlockId?: string,
+  onReferenceHidden?: (blockId: string) => void,
 ) {
   const [hoveredBlockId, setHoveredBlockId] = useState<string>();
   const [sidebarInteracting, setSidebarInteracting] = useState(false);
-  const [foldTick, setFoldTick] = useState(0);
+  const [documentTick, setDocumentTick] = useState(0);
   const dragBlockId = useRef(hoveredBlockId);
   if (!isDragging) dragBlockId.current = hoveredBlockId;
   const blockId = lockedBlockId ?? (isDragging ? dragBlockId.current : hoveredBlockId);
   const block = blockId ? editor.getBlock(blockId) : undefined;
-  const { referencePos, firstLineCenter, tablePlacement, tableHold } = useBlockHandleReference(editor, blockId, foldTick);
+  const { referencePos, firstLineCenter, tablePlacement, tableHold } = useBlockHandleReference(editor, blockId, documentTick, onReferenceHidden);
   const corridor = useRef<{ rect: DOMRect | null; gap: number }>({ rect: null, gap: 0 });
-
-  const firstBlockId = editor.document[0]?.id as string | undefined;
-  const showHeadingToggle = isFoldableHeadingBlock(block, firstBlockId) &&
-    !(block?.props as { isToggleable?: boolean } | undefined)?.isToggleable;
-  const liveHeading = block ? (editor.getBlock(block.id) ?? block) : undefined;
-  const headingExpanded = liveHeading
-    ? !readHeadingCollapsed(liveHeading)
-    : false;
-  void foldTick;
 
   const sideMenuGap =
     block?.type === "table"
@@ -67,13 +56,7 @@ export function useEditorSideMenuTarget(
       target: EventTarget | null = document.activeElement,
     ) => {
       const element = target instanceof Element ? target : null;
-      const activeElement = document.activeElement;
-      const next =
-        Boolean(element?.closest(SIDEBAR_INTERACTION_SELECTOR)) ||
-        Boolean(
-          activeElement instanceof Element &&
-            activeElement.closest(SIDEBAR_INTERACTION_SELECTOR),
-        );
+      const next = Boolean(element?.closest(SIDEBAR_INTERACTION_SELECTOR));
       setSidebarInteracting(next);
     };
 
@@ -89,6 +72,12 @@ export function useEditorSideMenuTarget(
       const target = event.target instanceof Element ? event.target : null;
       const keep = () => window.clearTimeout(leaveTimer);
       if (menuRef.current?.contains(target)) return keep();
+      const handleRect = menuRef.current?.getBoundingClientRect();
+      const contentLeft = corridor.current.rect?.left;
+      // Include the handle's animated position, not only its final target row.
+      if (handleRect && contentLeft !== undefined &&
+        event.clientX >= handleRect.left && event.clientX <= Math.max(handleRect.right, contentLeft + 32) &&
+        event.clientY >= handleRect.top - 4 && event.clientY <= handleRect.bottom + 4) return keep();
       const toolbar = target?.closest<HTMLElement>("[data-goose-image-toolbar], [data-goose-video-toolbar]");
       const menu = target?.closest<HTMLElement>("[data-goose-block-handle-menu]");
       if (ownsBlockToolbar(toolbar ?? null, editor.prosemirrorView.dom, blockId) || ownsBlockToolbar(menu ?? null, editor.prosemirrorView.dom, blockId)) return keep();
@@ -109,6 +98,7 @@ export function useEditorSideMenuTarget(
         if (current && portal && isPointerInToolbarCorridor(current.getBoundingClientRect(), portal.getBoundingClientRect(), event.clientX, event.clientY)) return keep();
       }
       const content = target?.closest<HTMLElement>(".bn-block-content");
+      const isLastContent = content?.closest<HTMLElement>('[data-node-type="blockContainer"]')?.dataset.id === documentEdgeBlockIds(editor.prosemirrorState.doc).last;
       if (target?.closest(".goose-table-chrome-left, .goose-table-chrome-top, .bn-table-handle")) return keep();
       const hold = tableHold.current;
       if (
@@ -120,7 +110,7 @@ export function useEditorSideMenuTarget(
       if (
         content &&
         editor.prosemirrorView.dom.contains(content) &&
-        (content.dataset.contentType === "table"
+        ((content.dataset.contentType === "table" || isLastContent)
           ? isPointerInRects([content.getBoundingClientRect()], event.clientX, event.clientY)
           : isPointerOverBlockContent(content, event.clientX, event.clientY))
       ) {
@@ -133,7 +123,7 @@ export function useEditorSideMenuTarget(
       }
     };
     const handleFocusChange = (event: FocusEvent) => {
-      updateSidebarInteracting(event.target);
+      updateSidebarInteracting(event.type === "focusout" ? event.relatedTarget : event.target);
     };
     const handleWindowBlur = () => {
       pressedHandle.current = false;
@@ -159,7 +149,7 @@ export function useEditorSideMenuTarget(
     };
   }, [editor, menuRef, pressedHandle, lockedBlockId, blockId]);
 
-  useEffect(() => editor.onChange(() => setFoldTick((tick) => tick + 1)), [editor]);
+  useEffect(() => editor.onChange(() => setDocumentTick((tick) => tick + 1)), [editor]);
 
   const shouldShow =
     Boolean(referencePos && block) &&
@@ -172,10 +162,7 @@ export function useEditorSideMenuTarget(
     referencePos,
     firstLineCenter,
     shouldShow,
-    showHeadingToggle,
-    headingExpanded,
     sideMenuGap,
     tableMenuTop: block?.type === "table" ? tablePlacement?.top : undefined,
-    setFoldTick,
   };
 }

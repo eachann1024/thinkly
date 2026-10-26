@@ -20,25 +20,34 @@ export function readLiveBlockHandleReference(editor: BlockNoteEditor<any, any, a
   if (!table) return { content, position, firstLineCenter: blockHandleFirstLineCenter(content), tableHold: null };
   const scale = Number.parseFloat(getComputedStyle(content).getPropertyValue("--editor-scale")) || 1;
   const tableRect = table.getBoundingClientRect();
+  const firstRow = table.rows[0]?.getBoundingClientRect();
   return {
     content, position, tableHold: { rect: tableRect, scale },
     tablePlacement: {
-      top: tableRect.top - 16 * scale - 4,
-      gap: SIDE_MENU_CONTENT_GAP,
-      corridorTop: tableRect.top - 32 * scale - 6,
+      top: firstRow ? firstRow.top + firstRow.height / 2 : tableRect.top,
+      gap: SIDE_MENU_CONTENT_GAP + 28 * scale,
+      corridorTop: tableRect.top - 24 * scale - 6,
       menuReach: tableSideMenuWidth(scale),
     },
   };
 }
 
-export function observeBlockHandleReference(editor: BlockNoteEditor<any, any, any>, blockId: string, onMeasure: (reference: Reference) => void): () => void {
+export function observeBlockHandleReference(editor: BlockNoteEditor<any, any, any>, blockId: string, onMeasure: (reference: Reference | null) => void): () => void {
   const root = editor.prosemirrorView.dom;
   let observedContent: HTMLElement | undefined;
   let previousMeasurement = "";
   const update = () => {
     // NodeViews can replace their content without changing the block ID.
     const reference = readLiveBlockHandleReference(editor, blockId);
-    if (!reference) return;
+    if (!reference) {
+      if (previousMeasurement !== "hidden") {
+        previousMeasurement = "hidden";
+        if (observedContent) observer.unobserve(observedContent);
+        observedContent = undefined;
+        onMeasure(null);
+      }
+      return;
+    }
     if (reference.content !== observedContent) {
       if (observedContent) observer.unobserve(observedContent);
       observedContent = reference.content;
@@ -70,12 +79,14 @@ export function observeBlockHandleReference(editor: BlockNoteEditor<any, any, an
   };
 }
 
-export function useBlockHandleReference(editor: BlockNoteEditor<any, any, any>, blockId: string | undefined, foldTick: number) {
+export function useBlockHandleReference(editor: BlockNoteEditor<any, any, any>, blockId: string | undefined, documentTick: number, onHidden?: (blockId: string) => void) {
   const [referencePos, setReferencePos] = useState<DOMRect | null>(null);
   const [tablePlacement, setTablePlacement] = useState<TablePlacement>();
   const [firstLineCenter, setFirstLineCenter] = useState<number>();
   const tableHold = useRef<TableHold | null>(null);
   const measuredBlockId = useRef<string | undefined>(undefined);
+  const hiddenCallback = useRef(onHidden);
+  hiddenCallback.current = onHidden;
   useLayoutEffect(() => {
     if (measuredBlockId.current !== blockId) {
       measuredBlockId.current = blockId;
@@ -86,11 +97,19 @@ export function useBlockHandleReference(editor: BlockNoteEditor<any, any, any>, 
     }
     if (!blockId) return;
     return observeBlockHandleReference(editor, blockId, (reference) => {
+      if (!reference) {
+        setReferencePos(null);
+        setFirstLineCenter(undefined);
+        setTablePlacement(undefined);
+        tableHold.current = null;
+        hiddenCallback.current?.(blockId);
+        return;
+      }
       setReferencePos(reference.position);
       setFirstLineCenter(reference.firstLineCenter);
       setTablePlacement(reference.tablePlacement);
       tableHold.current = reference.tableHold;
     });
-  }, [editor, blockId, foldTick]);
+  }, [editor, blockId, documentTick]);
   return { referencePos, firstLineCenter, tablePlacement, tableHold };
 }

@@ -1,4 +1,4 @@
-import { cloneElement, useLayoutEffect, useRef, type ReactElement, type MouseEvent } from "react";
+import { cloneElement, useCallback, useLayoutEffect, useRef, type ReactElement, type MouseEvent, type PointerEvent } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { ArrowUp, ArrowDown, Trash2, Replace, ChevronRight } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -8,24 +8,28 @@ import { blockHandleCapabilities, BlockHandleIcon } from "./blockHandleModel";
 import { blockHandleText as t } from "./blockHandleMessages";
 import { BLOCK_CONVERSIONS } from "./blocknoteCommandSlashItems";
 import { convertHandleBlock, deleteHandleBlock, insertFromHandle, selectHandleBlock } from "./blockHandleActions";
-import { getHandleConversionBlockIds, syncHandleTextSelection } from "./blockConversionSelection";
 import { BlockHandleStyleMenus } from "./BlockHandleStyleMenus";
 import { useBlockHandleMenuLayout } from "./useBlockHandleMenuLayout";
 import { setBlockHandleMenuOpen } from "../state/blockHandleMenu";
 import { getBlockToolbarOwner } from "./blockToolbarOwner";
+import { getHandleConversionBlockIds, syncHandleTextSelection } from "./blockConversionSelection";
 
 type Props = {
   editor: BlockNoteEditor<any, any, any>;
   block: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCloseComplete: (blockId: string) => void;
   anchor: DOMRect;
-  children: ReactElement<{ onClick?: (event: MouseEvent) => void; "aria-expanded"?: boolean; "aria-haspopup"?: "menu" }>;
+  children: ReactElement<{ onClick?: (event: MouseEvent) => void; onPointerDown?: (event: PointerEvent) => void; "aria-expanded"?: boolean; "aria-haspopup"?: "menu" }>;
 };
 
-export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, children }: Props) {
+export function BlockHandleMenu({ editor, block, open, onOpenChange, onCloseComplete, anchor, children }: Props) {
   const selectedBlockIds = useRef<string[]>([]);
-  useLayoutEffect(() => { if (open) selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id); }, [editor, block.id, open]);
+  useLayoutEffect(() => {
+    if (open) selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id);
+  }, [editor, block.id, open]);
+  const menuFocusRequested = useRef(false);
   const menuOwner = useRef({}).current;
   useLayoutEffect(() => {
     setBlockHandleMenuOpen(editor, menuOwner, open);
@@ -39,6 +43,28 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
     changeOpen(false);
   };
   const layout = useBlockHandleMenuLayout(editor.prosemirrorView.dom, open, anchor);
+  const presence = useRef({ open, blockId: block.id, onCloseComplete });
+  presence.current = { open, blockId: block.id, onCloseComplete };
+  const contentRef = layout.menuRef;
+  const setContentRef = useCallback((node: HTMLElement | null) => {
+    contentRef.current = node;
+    if (!node && !presence.current.open) presence.current.onCloseComplete(presence.current.blockId);
+  }, [contentRef]);
+  useLayoutEffect(() => {
+    if (!open && !contentRef.current) onCloseComplete(block.id);
+  }, [open, block.id, contentRef, onCloseComplete]);
+  const focusMenu = () => {
+    const menu = layout.menuRef.current;
+    const item = menu?.querySelector<HTMLElement>('[role="menuitem"][data-focused]:not([aria-disabled="true"])') ??
+      menu?.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])');
+    if (!item) return;
+    menuFocusRequested.current = false;
+    item.focus({ preventScroll: true });
+  };
+  useLayoutEffect(() => {
+    if (open && menuFocusRequested.current) focusMenu();
+    if (!open) menuFocusRequested.current = false;
+  }, [open, block.id]);
   const changeOpen = (next: boolean) => {
     setBlockHandleMenuOpen(editor, menuOwner, next);
     onOpenChange(next);
@@ -50,13 +76,26 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
         {cloneElement(children, {
           "aria-expanded": open,
           "aria-haspopup": "menu",
-          onClick: (event) => { children.props.onClick?.(event); selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id); selectHandleBlock(editor, block.id); if (!event.defaultPrevented) changeOpen(!open); },
+          onPointerDown: (event) => {
+            syncHandleTextSelection(editor);
+            children.props.onPointerDown?.(event);
+          },
+          onClick: (event) => {
+            children.props.onClick?.(event);
+            selectedBlockIds.current = getHandleConversionBlockIds(editor, block.id);
+            selectHandleBlock(editor, block.id);
+            if (!event.defaultPrevented) changeOpen(!open);
+            if (event.defaultPrevented || !open) {
+              menuFocusRequested.current = true;
+              focusMenu();
+            }
+          },
         })}
       </div>
-      <DropdownMenuContent ref={layout.menuRef} variant="menu" side={layout.side} shouldFlip={layout.side === "bottom"}
-        boundaryElement={layout.boundaryElement} sideOffset={layout.sideOffset} style={layout.rootStyle} align="start" collisionPadding={8}
+      <DropdownMenuContent data-goose-root-menu="" ref={setContentRef} variant="menu" isNonModal side={layout.side} shouldFlip={false}
+        portalContainer={layout.portalContainer} boundaryElement={layout.boundaryElement} sideOffset={layout.sideOffset} style={layout.rootStyle} align="start" collisionPadding={8}
         data-goose-block-handle-menu={block.id} data-goose-block-id={block.id} data-goose-editor-owner={owner}
-        className="goose-block-handle-menu" motion="instant">
+        className="goose-block-handle-menu">
         {capabilities.insertBefore && <DropdownMenuItem onSelect={() => run(() => { insertFromHandle(editor, block.id, "before"); })}>
           <ArrowUp />{t("before")}
         </DropdownMenuItem>}
@@ -65,10 +104,10 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
         </DropdownMenuItem>}
         {capabilities.convert && <EditorSubmenuTrigger>
           <DropdownMenuItem textValue={t("convert")}><Replace />{t("convert")}<ChevronRight className="ml-auto" /></DropdownMenuItem>
-          <DropdownMenuContent variant="menu" side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
+          <DropdownMenuContent variant="menu" isNonModal data-goose-submenu-direction={layout.submenuSide} side={layout.submenuSide} shouldFlip={layout.submenuSide === "bottom"}
             boundaryElement={layout.boundaryElement} style={layout.submenuStyle} sideOffset={2} collisionPadding={8}
             data-goose-block-handle-menu={block.id} data-goose-block-id={block.id} data-goose-editor-owner={owner}
-            className="goose-block-handle-menu" motion="instant">
+            className="goose-block-handle-menu">
             {BLOCK_CONVERSIONS.map((target, index) => <DropdownMenuItem key={index} textValue={target.label}
               onSelect={() => run(() => { convertHandleBlock(editor, block.id, target, defaultCodeBlockWrap, selectedBlockIds.current); })}>
               <BlockHandleIcon block={{ type: target.type, props: "props" in target ? target.props : {} }} />{target.label}
