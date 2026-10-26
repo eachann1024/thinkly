@@ -105,6 +105,7 @@ async function toPngWithRatioFallback(
     pixelRatio?: number;
     backgroundColor?: string;
     ratios?: number[];
+    style?: Partial<CSSStyleDeclaration>;
   },
 ): Promise<string> {
   const { toPng } = await import("html-to-image");
@@ -123,6 +124,7 @@ async function toPngWithRatioFallback(
         cacheBust: true,
         backgroundColor: options?.backgroundColor ?? "transparent",
         skipFonts: true,
+        style: options?.style,
         width,
         height,
       });
@@ -201,6 +203,7 @@ export async function svgMarkupToPngBlob(
       {
         pixelRatio: options?.pixelRatio,
         backgroundColor,
+        style: { position: "static" },
         ratios:
           options?.pixelRatio != null
             ? undefined
