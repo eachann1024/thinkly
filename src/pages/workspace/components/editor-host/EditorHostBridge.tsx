@@ -50,6 +50,7 @@ import { openAssociatedMarkdownFile } from "@/lib/openAssociatedMarkdown";
 import { tryShowPageInFocusedSplit } from "@/lib/editor-split/commands";
 import { resolvePageMentionNavigation } from "@/lib/pageMentionNavigation";
 import { toast } from "@/components/ui/sonner";
+import { openEditorLocalLink } from "./openEditorLocalLink";
 import { createEditorPageLinkCapabilities } from "./editorPageLinks";
 
 interface EditorHostBridgeProps {
@@ -182,6 +183,7 @@ export function EditorHostBridge({
           ? (notebook.localPath ?? null)
           : null;
       },
+      onOpenLocalLink: openEditorLocalLink,
       onOpenMarkdownPath: async (source) => {
         const livePage = usePages.getState().pages[page.id] ?? page;
         const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];

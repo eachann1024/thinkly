@@ -101,6 +101,7 @@ export interface EditorPageContext {
   ) => boolean | void;
   getActivePageLocalFilePath: () => string | null;
   getActivePageLocalFolderRoot: () => string | null;
+  onOpenLocalLink?: (path: string, fragment: string) => Promise<boolean>;
   onOpenMarkdownPath?: (source: string) => Promise<boolean>;
   onOpenAttachment?: (
     source: string,

@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as GooseIcons from "@/components/ui/icons";
 import { Input } from "@/components/editor/ui/input";
 import { Button } from "@/components/editor/ui/button";
+import { useEditorPageContext } from "@/components/editor/platform/hostContext";
+import { openEditorLink } from "@/components/editor/utils/openEditorLink";
 import { useEditorPlatform } from "@/components/editor/platform/context";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/link/EditorLinkToolbar.tsx#messages:1">`
@@ -33,13 +35,6 @@ ja:
 const t = createTranslator(messages);
 
 
-function normalizeExternalUrl(url: string): string {
-  const trimmed = url.trim();
-  if (!trimmed) return "";
-  if (/^www\./i.test(trimmed)) return `https://${trimmed}`;
-  return trimmed;
-}
-
 export function EditorLinkToolbar({
   url,
   text,
@@ -50,6 +45,7 @@ export function EditorLinkToolbar({
   useLocale();
   const editor = useBlockNoteEditor();
   const platform = useEditorPlatform();
+  const pageContext = useEditorPageContext();
   const [editing, setEditing] = useState(false);
   const [editUrl, setEditUrl] = useState(url);
   const [editText, setEditText] = useState(text);
@@ -81,11 +77,8 @@ export function EditorLinkToolbar({
   }, [editor, range, setToolbarOpen]);
 
   const handleOpen = useCallback(() => {
-    const target = normalizeExternalUrl(url);
-    if (target) {
-      void platform.shell.openUrl(target);
-    }
-  }, [url, platform]);
+    void openEditorLink(url, editor, platform, pageContext);
+  }, [url, editor, platform, pageContext]);
 
   const startEditing = useCallback(() => {
     if (!editor.isEditable) return;

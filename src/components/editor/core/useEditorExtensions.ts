@@ -128,7 +128,7 @@ export function useEditorExtensions(session: EditorSession) {
     gooseTableCellSelectionExtension,
     gooseCopyCurrentBlockExtension,
     gooseMoveBlockExtension,
-    createGooseLinkKeyboardExtension(),
+    createGooseLinkKeyboardExtension(session.openLink),
     gooseCodeBlockKeyboardExtension,
     gooseCodeTextDropExtension(),
     gooseCodeBlockLinkStripExtension,
