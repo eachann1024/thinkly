@@ -4,9 +4,7 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-
 zh-Hans:
   aiModels_a342: "AI 模型"
   fetchingModels_e925: "正在获取模型…"
-  fetchError: "获取失败：{{error}}"
   availableModels: "{{count}} 个可用模型"
-  saveTheServiceConfigurationToFetch_d515: "请先保存服务配置以获取模型"
   fetching_43c6: "获取中…"
   refreshModels_3d7d: "重新获取模型"
   defaultModel_b11d: "默认模型"
@@ -14,9 +12,7 @@ zh-Hans:
 en:
   aiModels_a342: "AI models"
   fetchingModels_e925: "Fetching models…"
-  fetchError: "Fetch failed: {{error}}"
   availableModels: "Available models: {{count}}"
-  saveTheServiceConfigurationToFetch_d515: "Save the service configuration to fetch models"
   fetching_43c6: "Fetching…"
   refreshModels_3d7d: "Refresh models"
   defaultModel_b11d: "Default model"
@@ -24,9 +20,7 @@ en:
 ja:
   aiModels_a342: "AI モデル"
   fetchingModels_e925: "モデルを取得しています…"
-  fetchError: "取得に失敗しました: {{error}}"
   availableModels: "利用可能なモデル: {{count}} 件"
-  saveTheServiceConfigurationToFetch_d515: "モデルを取得するには、先にサービス設定を保存してください"
   fetching_43c6: "取得中…"
   refreshModels_3d7d: "モデルを再取得"
   defaultModel_b11d: "デフォルトモデル"
@@ -43,12 +37,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { SettingsSectionCard } from "../settings/SettingsSectionCard";
 import { cn } from "@/lib/utils";
 import type { useAIModelRefresh } from "./useAIModelRefresh";
@@ -62,7 +50,6 @@ export function renderAIModelSection(
     isOnboarding,
     providerId,
     savingCustomConfig,
-    customSaveError,
     testingConnection,
     modelSectionRef,
     customModels,
@@ -70,7 +57,6 @@ export function renderAIModelSection(
     getConnectionForProvider,
     saveButtonReason,
     modelButtonDisabled,
-    modelButtonReason,
     refreshCustomModels,
     handleModelChange,
   } = context;
@@ -92,15 +78,13 @@ export function renderAIModelSection(
             {uiText("aiModels_a342")}</span>
         }
         description={
-          <span role="status" aria-live="polite">
-            {savingCustomConfig
-              ? uiText("fetchingModels_e925")
-              : customSaveError
-                ? uiText("fetchError", { error: customSaveError })
-                : customModels.length > 0
-                  ? uiText("availableModels", { count: customModels.length })
-                  : uiText("saveTheServiceConfigurationToFetch_d515")}
-          </span>
+          savingCustomConfig || customModels.length > 0 ? (
+            <span role="status" aria-live="polite">
+              {savingCustomConfig
+                ? uiText("fetchingModels_e925")
+                : uiText("availableModels", { count: customModels.length })}
+            </span>
+          ) : undefined
         }
         actions={
           <Button
@@ -140,68 +124,53 @@ export function renderAIModelSection(
                   {uiText("defaultModel_b11d")}</Label>
               </div>
             </div>
-            <TooltipProvider delayDuration={600}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={modelButtonDisabled}
-                          className={cn(
-                            "min-w-[220px] justify-between rounded-[var(--goose-control-radius)]",
-                            modelButtonDisabled && "cursor-not-allowed",
-                          )}
-                        >
-                          <span className="truncate">
-                            {currentModel?.label ??
-                              modelButtonReason ??
-                              uiText("selectAModel_0e34")}
-                          </span>
-                          <GooseIcons.ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="w-[280px]"
-                        style={{
-                          maxHeight: "min(360px, var(--available-height))",
-                        }}
-                      >
-                        <DropdownMenuRadioGroup
-                          value={selectedModelId ?? ""}
-                          onValueChange={handleModelChange}
-                        >
-                          {customModels.map((model) => (
-                            <DropdownMenuRadioItem
-                              key={model.id}
-                              value={model.id}
-                              className="goose-menu-item-multiline items-start"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="truncate goose-menu-title">
-                                  {model.label}
-                                </div>
-                                <div className="line-clamp-2 goose-menu-description">
-                                  {model.description || model.id}
-                                </div>
-                              </div>
-                            </DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TooltipTrigger>
-                {modelButtonReason ? (
-                  <TooltipContent side="left">
-                    {modelButtonReason}
-                  </TooltipContent>
-                ) : null}
-              </Tooltip>
-            </TooltipProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={modelButtonDisabled}
+                  className={cn(
+                    "min-w-[220px] justify-between rounded-[var(--goose-control-radius)]",
+                    modelButtonDisabled && "cursor-not-allowed",
+                  )}
+                >
+                  <span className="truncate">
+                    {currentModel?.label ?? uiText("selectAModel_0e34")}
+                  </span>
+                  <GooseIcons.ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-[280px]"
+                style={{
+                  maxHeight: "min(360px, var(--available-height))",
+                }}
+              >
+                <DropdownMenuRadioGroup
+                  value={selectedModelId ?? ""}
+                  onValueChange={handleModelChange}
+                >
+                  {customModels.map((model) => (
+                    <DropdownMenuRadioItem
+                      key={model.id}
+                      value={model.id}
+                      className="goose-menu-item-multiline items-start"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate goose-menu-title">
+                          {model.label}
+                        </div>
+                        <div className="line-clamp-2 goose-menu-description">
+                          {model.description || model.id}
+                        </div>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </SettingsSectionCard>
