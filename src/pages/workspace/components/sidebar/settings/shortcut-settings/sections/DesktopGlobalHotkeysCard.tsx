@@ -6,7 +6,7 @@ zh-Hans:
   shortcutConflict_3ff0: "快捷键冲突"
   shortcutInUse: "{{shortcut}} 已被其他操作使用。"
   globalShortcuts_2205: "全局快捷键"
-  allowGooseNoteInAccessibilitySettings_4a8a: "允许思绪 · Thinkly 使用辅助功能后，才能在其他应用中唤出窗口。"
+  allowGooseNoteInAccessibilitySettings_4a8a: "允许Thinkly 使用辅助功能后，才能在其他应用中唤出窗口。"
   openAccessibilitySettings_1769: "打开辅助功能"
   showMainWindow_61e7: "唤出主窗口"
   showQuickNote_cd4c: "唤出速记"

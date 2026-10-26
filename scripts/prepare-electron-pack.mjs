@@ -161,11 +161,10 @@ mac:
   extendInfo:
     LSHasLocalizedDisplayName: true
     LSMultipleInstancesProhibited: true
-    CFBundleDisplayName: thinkly
-    # Spotlight 搜索别名独立于显示名；英文系统也能搜「思绪」。
-    MDItemKeywords: "thinkly, 思绪"
+    CFBundleDisplayName: Thinkly
+    MDItemKeywords: "Thinkly"
     # 不要写 CFBundleName。Electron 用它找 Helper.app，必须等于 productName（磁盘上的 Thinkly）。
-    # 用户显示名由 CFBundleDisplayName、macos-l10n 和 app.setName 统一为 thinkly。
+    # 用户显示名由 CFBundleDisplayName、macos-l10n 和 app.setName 统一为 Thinkly。
     NSAppleEventsUsageDescription: Thinkly needs to send system events so keyboard shortcuts can open the main window and the quick note.
     NSAccessibilityUsageDescription: Thinkly needs Accessibility permission so keyboard shortcuts can open the main window and the quick note while another app is in front.
   target:
@@ -212,8 +211,8 @@ nsis:
   uninstallerIcon: icon.ico
   installerHeaderIcon: icon.ico
   # 安装包文件名用 productName（Thinkly）。
-  shortcutName: thinkly
-  uninstallDisplayName: thinkly
+  shortcutName: Thinkly
+  uninstallDisplayName: Thinkly
   artifactName: Thinkly-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
@@ -228,11 +227,11 @@ linux:
     - pacman
   desktop:
     entry:
-      Name: thinkly
-      "Name[zh_CN]": "thinkly"
-      Keywords: "thinkly;思绪;"
+      Name: Thinkly
+      "Name[zh_CN]": "Thinkly"
+      Keywords: "Thinkly;"
       Comment: "Thinkly: Keep every passing thought. Ask your past anytime."
-      "Comment[zh_CN]": "思绪 Thinkly：安放每一瞬念头，随时向过去提问"
+      "Comment[zh_CN]": "Thinkly：安放每一瞬念头，随时向过去提问"
       Categories: Office;Note;
       MimeType: text/markdown;text/x-markdown;
       StartupWMClass: thinkly
