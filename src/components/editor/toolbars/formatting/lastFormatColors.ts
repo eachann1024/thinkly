@@ -39,6 +39,11 @@ export function readLastFormatColors(): LastFormatColors {
     if (isKnownColor(parsed.backgroundColor, KNOWN_BG_COLORS)) {
       next.backgroundColor = parsed.backgroundColor;
     }
+    if (next.textColor && next.textColor !== "default") {
+      next.backgroundColor = "default";
+    } else if (next.backgroundColor) {
+      next.textColor = "default";
+    }
     return next;
   } catch {
     return {};
@@ -48,8 +53,7 @@ export function readLastFormatColors(): LastFormatColors {
 export function writeLastFormatColors(patch: LastFormatColors) {
   if (typeof window === "undefined") return;
   try {
-    const current = readLastFormatColors();
-    const next: LastFormatColors = { ...current };
+    const next: LastFormatColors = {};
     if (isKnownColor(patch.textColor, KNOWN_TEXT_COLORS)) {
       next.textColor = patch.textColor;
     }

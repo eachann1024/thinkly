@@ -13,6 +13,7 @@ import {
   type CellSelectionInfo,
 } from "./tableCellSelection";
 import { withPreservedSelection } from "./selectionRestore";
+import { clearSelectedBlockColors, materializeSelectedBlockColors } from "./blockColorActions";
 
 function applyAlignmentToSelection(
   editor: BlockNoteEditor<any, any, any>,
@@ -20,7 +21,9 @@ function applyAlignmentToSelection(
   blocks: any[],
   cellSelection: CellSelectionInfo | undefined,
 ): void {
-  for (const block of blocks) {
+  for (const selectedBlock of blocks) {
+    const block = editor.getBlock(selectedBlock.id);
+    if (!block) continue;
     if (
       blockHasType(block, editor, block.type, {
         textAlignment: defaultProps.textAlignment,
@@ -106,8 +109,10 @@ export function clearSelectionFormatting(
   const blocks = getSelectedBlocksSafe(editor);
   const cellSelection = getCellSelectionSafe(editor);
   withPreservedSelection(editor, () => {
-    clearMarksInTransaction(editor);
     editor.transact(() => {
+      materializeSelectedBlockColors(editor);
+      clearMarksInTransaction(editor);
+      clearSelectedBlockColors(editor, blocks);
       applyAlignmentToSelection(editor, "left", blocks, cellSelection);
     });
   });

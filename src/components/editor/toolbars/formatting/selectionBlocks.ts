@@ -1,4 +1,5 @@
 import type { BlockNoteEditor } from "@blocknote/core";
+import type { EditorState } from "prosemirror-state";
 
 export function resolveFormattingToolbarAiBlockId(
   editor: BlockNoteEditor<any, any, any>,
@@ -42,9 +43,10 @@ export function resolveFormattingToolbarAiBlockId(
 }
 export function collectSelectedContentBlockIds(
   editor: BlockNoteEditor<any, any, any>,
+  state: Pick<EditorState, "selection" | "doc"> = editor.prosemirrorState,
 ): Set<string> {
   const ids = new Set<string>();
-  const { selection, doc } = editor.prosemirrorState;
+  const { selection, doc } = state;
   doc.nodesBetween(selection.from, selection.to, (node: any, pos: number) => {
     if (node.type?.name !== "blockContainer") return true;
     const id = node.attrs?.id;

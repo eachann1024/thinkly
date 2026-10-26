@@ -44,7 +44,7 @@ export function ColorPickerPanel({
     currentTextColor,
     currentBgColor,
   } = panel;
-  const { applyTextColor, applyBackgroundColor, applyColorPair } = actions;
+  const { applyTextColor, applyBackgroundColor } = actions;
   return isMounted && position ? (
     <div
       ref={panelRef}
@@ -65,9 +65,11 @@ export function ColorPickerPanel({
           {t("textColor")}
         </div>
         <div className="goose-color-picker-grid goose-list-group grid" data-goose-layout="grid">
-          {TEXT_COLORS.map((item, index) => (
+          {TEXT_COLORS.map((item) => (
             <Button
               key={item.color}
+              aria-label={item.name}
+              title={item.name}
               aria-pressed={isColorSwatchSelected(currentTextColor, item.color)}
               type="button"
               variant="ghost"
@@ -79,7 +81,7 @@ export function ColorPickerPanel({
               onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                applyColorPair(index);
+                applyTextColor(item.color);
               }}
             >
               <div
@@ -101,9 +103,11 @@ export function ColorPickerPanel({
           {t("backgroundColor")}
         </div>
         <div className="goose-color-picker-grid goose-color-picker-grid-last goose-list-group grid" data-goose-layout="grid">
-          {HIGHLIGHT_COLORS.map((item, index) => (
+          {HIGHLIGHT_COLORS.map((item) => (
             <Button
               key={item.color}
+              aria-label={item.name}
+              title={item.name}
               aria-pressed={isColorSwatchSelected(currentBgColor, item.color)}
               type="button"
               variant="ghost"
@@ -115,7 +119,7 @@ export function ColorPickerPanel({
               onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                applyColorPair(index);
+                applyBackgroundColor(item.color);
               }}
             >
               <div

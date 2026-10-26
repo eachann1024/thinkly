@@ -1,9 +1,7 @@
 import { useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { applyHeadingBlockBackground } from "./headingBlockBackground";
+import { applySelectionFormatColors } from "./selectionColorActions";
 import {
-  TEXT_COLORS,
-  HIGHLIGHT_COLORS,
   COLOR_PREVIEW,
   BG_PREVIEW,
 } from "./colorPalette";
@@ -23,59 +21,25 @@ export function useColorActions(
   const [lastColors, setLastColors] =
     useState<LastFormatColors>(readLastFormatColors);
 
-  const applyTextColor = (color: string) => {
+  const applyColors = (colors: LastFormatColors) => {
+    const textColor = colors.textColor ?? "default";
+    const backgroundColor = colors.backgroundColor ?? "default";
     applyWithHeldSelection(
-      () => {
-        if (color === "default") {
-          editor.removeStyles({ textColor: true } as any);
-        } else {
-          editor.addStyles({ textColor: color });
-        }
-        rememberLastFormatColors({ textColor: color });
-      },
-      { textColor: color },
+      () => applySelectionFormatColors(editor, { textColor, backgroundColor }),
+      { textColor, backgroundColor },
     );
+  };
+
+  const applyTextColor = (color: string) => {
+    const colors = { textColor: color, backgroundColor: "default" };
+    applyColors(colors);
+    rememberLastFormatColors(colors);
   };
 
   const applyBackgroundColor = (color: string) => {
-    applyWithHeldSelection(
-      () => {
-        if (applyHeadingBlockBackground(editor, color)) {
-          rememberLastFormatColors({ backgroundColor: color });
-          return;
-        }
-        if (color === "default") {
-          editor.removeStyles({ backgroundColor: true } as any);
-        } else {
-          editor.addStyles({ backgroundColor: color });
-        }
-        rememberLastFormatColors({ backgroundColor: color });
-      },
-      { backgroundColor: color },
-    );
-  };
-
-  const applyColorPair = (index: number) => {
-    const textColor = TEXT_COLORS[index]?.color;
-    const backgroundColor = HIGHLIGHT_COLORS[index]?.color;
-    if (!textColor || !backgroundColor) return;
-    applyWithHeldSelection(
-      () => {
-        if (textColor === "default") {
-          editor.removeStyles({ textColor: true } as any);
-        } else {
-          editor.addStyles({ textColor: textColor });
-        }
-        if (applyHeadingBlockBackground(editor, backgroundColor)) {
-        } else if (backgroundColor === "default") {
-          editor.removeStyles({ backgroundColor: true } as any);
-        } else {
-          editor.addStyles({ backgroundColor: backgroundColor });
-        }
-        rememberLastFormatColors({ textColor, backgroundColor });
-      },
-      { textColor, backgroundColor },
-    );
+    const colors = { textColor: "default", backgroundColor: color };
+    applyColors(colors);
+    rememberLastFormatColors(colors);
   };
 
   const rememberLastFormatColors = (patch: LastFormatColors) => {
@@ -99,57 +63,14 @@ export function useColorActions(
       return;
     }
     const clearing = selectionUsesLastFormatColors(displayColors, last);
-    applyWithHeldSelection(
-      () => {
-        if (clearing) {
-          editor.removeStyles({ textColor: true } as any);
-          if (!applyHeadingBlockBackground(editor, "default")) {
-            editor.removeStyles({ backgroundColor: true } as any);
-          }
-          return;
-        }
-        if (last.textColor !== undefined) {
-          if (last.textColor === "default") {
-            editor.removeStyles({ textColor: true } as any);
-          } else {
-            editor.addStyles({ textColor: last.textColor });
-          }
-        }
-        if (last.backgroundColor !== undefined) {
-          if (applyHeadingBlockBackground(editor, last.backgroundColor)) {
-          } else if (last.backgroundColor === "default") {
-            editor.removeStyles({ backgroundColor: true } as any);
-          } else {
-            editor.addStyles({ backgroundColor: last.backgroundColor });
-          }
-        }
-      },
-      clearing
-        ? {
-            textColor:
-              last.textColor !== undefined
-                ? "default"
-                : displayColors.textColor,
-            backgroundColor:
-              last.backgroundColor !== undefined
-                ? "default"
-                : displayColors.backgroundColor,
-          }
-        : {
-            ...(last.textColor !== undefined
-              ? { textColor: last.textColor }
-              : {}),
-            ...(last.backgroundColor !== undefined
-              ? { backgroundColor: last.backgroundColor }
-              : {}),
-          },
-    );
+    applyColors(clearing
+      ? { textColor: "default", backgroundColor: "default" }
+      : last);
   };
 
   return {
     applyTextColor,
     applyBackgroundColor,
-    applyColorPair,
     applyLastFormatColors,
     lastTextPreview,
     lastColorBar,
