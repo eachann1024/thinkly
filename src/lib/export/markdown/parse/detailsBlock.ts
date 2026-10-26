@@ -39,15 +39,11 @@ export function parseDetailsBlock(
       const heading = summary[1].trim().match(/^<h([1-3])\b[^>]*>([\s\S]*)<\/h\1>$/i);
       const children = parseMarkdown(inner.slice(summary[0].length).trim());
       return {
-        block: {
-          type: heading ? "heading" : "toggleListItem",
-          props: {
-            collapsed: !/(?:^|\s)open(?:\s|=|$)/i.test(opening[1]),
-            ...(heading ? { level: Number(heading[1]), isToggleable: true } : {}),
-          },
+        blocks: [{
+          type: heading ? "heading" : "paragraph",
+          ...(heading ? { props: { level: Number(heading[1]) } } : {}),
           content: parseInlineMarkdown(decodeSummary(heading ? heading[2] : summary[1])),
-          ...(children.length ? { children } : {}),
-        },
+        }, ...children],
         nextIndex: index + 1,
       };
     }
