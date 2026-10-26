@@ -1,6 +1,5 @@
 import type { StoreSet, StoreGet } from "../../hydrate";
-import { cloneLocalPageContent } from "../../pageCreate";
-import { confirmRecoveredLocalSave } from "../../../folderSync";
+import { beginRecoveredLocalSave, cloneJSONContent, confirmRecoveredLocalSave, getPendingLocalSaveContent } from "../../../folderSync";
 
 export const saveDirtyLocalPageAction = async (
   set: StoreSet,
@@ -21,16 +20,19 @@ export const saveDirtyLocalPageAction = async (
 
   const latest = get().pages[effectivePageId];
   if (!latest) return false;
+  const content = cloneJSONContent(latest.content);
 
-  const ok = await get().saveLocalPageContent(
-    effectivePageId,
-    cloneLocalPageContent(latest.content),
-  );
-  if (ok) {
-    confirmRecoveredLocalSave(effectivePageId);
-    set((s) => ({
-      dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [effectivePageId]: false },
-    }));
+  const restorePending = beginRecoveredLocalSave(effectivePageId);
+  try {
+    const ok = await get().saveLocalPageContent(effectivePageId, content);
+    if (ok) {
+      const hasQueuedSave = getPendingLocalSaveContent(effectivePageId) !== undefined;
+      if (!get().dirtyLocalPageIds[effectivePageId] && !hasQueuedSave) {
+        confirmRecoveredLocalSave(effectivePageId);
+      }
+    }
+    return ok;
+  } finally {
+    restorePending();
   }
-  return ok;
 };
