@@ -47,7 +47,6 @@ export function useSettingsImportExport(
   const {
     open,
     notebooks,
-    pages,
     selectedIds,
     format,
     sendDataEvent,
@@ -71,7 +70,7 @@ export function useSettingsImportExport(
           notebookIds: selectedIds,
         },
         notebooks,
-        Object.values(pages),
+        Object.values(usePages.getState().pages),
       );
       if (saved) toast.success(uiText("exportComplete_105c"));
     } catch (err) {
