@@ -1,4 +1,5 @@
 import type { ProgressStep } from "./toolProgressModel";
+import { getToolProgressFacts } from "./toolProgressFacts";
 import type { WorkCardStatusData } from "./workCardStatusContext";
 import type { NotebookAiCompletion } from "@/lib/notebook-ai/types";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -68,24 +69,15 @@ export type WorkCardHeading = {
 
 const CONFLICT = "页面内容已发生变化";
 
-function lastOf(
-  steps: readonly ProgressStep[],
-  status: ProgressStep["status"],
-): ProgressStep | undefined {
-  for (let i = steps.length - 1; i >= 0; i -= 1) {
-    if (steps[i]?.status === status) return steps[i];
-  }
-  return undefined;
-}
-
 export function getWorkCardPhase(
   steps: readonly ProgressStep[],
   isRunning: boolean,
   completion?: NotebookAiCompletion,
 ): WorkCardPhase {
   if (completion && completion !== "complete") return completion;
-  if (steps.some((step) => step.status === "error")) return "error";
-  const latestStatus = steps.at(-1)?.status;
+  const facts = getToolProgressFacts(steps);
+  if (facts.firstError) return "error";
+  const latestStatus = facts.lastStep?.status;
   if (
     latestStatus === "approval" ||
     latestStatus === "cancelled" ||
@@ -93,7 +85,7 @@ export function getWorkCardPhase(
   )
     return latestStatus;
   if (isRunning) return "running";
-  if (steps.some((step) => step.status === "waiting" || step.status === "running")) return "waiting";
+  if (facts.hasWaiting || facts.hasRunning) return "waiting";
   return "done";
 }
 
@@ -101,12 +93,11 @@ export function getWorkCardHeading(
   steps: readonly ProgressStep[],
   phase: WorkCardPhase,
 ): WorkCardHeading {
-  const n = steps.length;
-  const errorStep = steps.find((step) => step.status === "error");
-  const runningStep = lastOf(steps, "running");
-  const doneStep = lastOf(steps, "done");
+  const facts = getToolProgressFacts(steps);
+  const n = facts.total;
+  const errorStep = facts.firstError;
   const latest =
-    errorStep ?? (phase === "running" ? runningStep : steps[n - 1]) ?? doneStep;
+    errorStep ?? (phase === "running" ? facts.lastRunning : facts.lastStep) ?? facts.lastDone;
   const toggle =
     n === 0 ? "" : t("detailSteps", { value1: n, value2: latest?.label ? ` · ${latest.label}` : "" });
 
