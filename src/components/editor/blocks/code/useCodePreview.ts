@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/sonner";
-import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import { isDarkTheme, useCodePreviewActions } from "./useCodePreviewActions";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
@@ -54,6 +53,7 @@ export function useCodePreview(
       if (!text) throw new Error(t("nothingToPreview"));
 
       if (language === "mermaid") {
+        const { renderMermaidSvgForExport } = await import("@/lib/imageExport/mermaid");
         const svg = await renderMermaidSvgForExport(
           text,
           isDarkTheme(theme) ? "dark" : "light",
