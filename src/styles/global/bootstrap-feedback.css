@@ -34,11 +34,6 @@ svg.lucide {
   stroke-width: 1.75;
 }
 
-body:has([role="dialog"]:not([hidden]), [role="menu"]:not([hidden]))
-  [role="tooltip"] {
-  display: none !important;
-}
-
 .bootstrap-screen {
   display: flex;
   min-height: 100dvh;
