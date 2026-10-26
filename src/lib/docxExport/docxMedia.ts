@@ -40,6 +40,7 @@ export async function imageParagraph(
   ctx: DocxExportContext,
   options?: {
     caption?: string;
+    alt?: string;
     alignment?: unknown;
     previewWidth?: number;
   },
@@ -65,6 +66,7 @@ export async function imageParagraph(
     });
   }
   const size = scaleImage(image.width, image.height, options?.previewWidth, ctx.contentWidthPx);
+  const alt = options?.alt ?? options?.caption;
   const paragraphs: Paragraph[] = [
     tightParagraph({
       alignment: alignmentFromBlock(options?.alignment) ?? AlignmentType.CENTER,
@@ -73,8 +75,8 @@ export async function imageParagraph(
           type: image.type,
           data: image.buffer,
           transformation: { width: size.width, height: size.height },
-          altText: options?.caption
-            ? { name: options.caption, title: options.caption, description: options.caption }
+          altText: alt
+            ? { name: alt, title: alt, description: alt }
             : undefined,
         }),
       ],

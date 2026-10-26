@@ -216,7 +216,6 @@ export async function createPdfBlockMappings(options?: PdfBlockMappingOptions) {
     children?: any,
   ) => {
     const url = String(block?.props?.url || block?.props?.src || "");
-    const caption = (block.props?.caption as string) || "";
     let src: string | null = null;
     if (url) {
       try {
@@ -228,12 +227,12 @@ export async function createPdfBlockMappings(options?: PdfBlockMappingOptions) {
     }
 
     if (src && isRasterPdfImageSrc(src)) {
-      return pngView(block, src, "image", caption || undefined);
+      return pngView(block, src, "image");
     }
 
     return (
       <View wrap={false} key={"image" + block.id} style={{ padding: 6 * PIXELS_PER_POINT }}>
-        <Text>{caption || "[图片]"}</Text>
+        <Text>{"[图片]"}</Text>
       </View>
     ) as unknown as ReactElement<typeof Text>;
   };

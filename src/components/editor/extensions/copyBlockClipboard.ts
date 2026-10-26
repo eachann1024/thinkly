@@ -3,11 +3,11 @@ import { NodeSelection, TextSelection, type EditorState } from "prosemirror-stat
 import type { EditorView } from "@tiptap/pm/view";
 import { CellSelection } from "prosemirror-tables";
 import { toast } from "@/components/ui/sonner";
-import { isGeneratedDataImageName } from "../blocks/image/imageCaption";
 import { serializeDocRangePlainText, serializeSlicePlainText } from "../utils/clipboard";
 import { getSelectedCellPlainText, isWholeTableCellSelection } from "../utils/selection";
 import { resolveCopyBlockSelection, getTableBlockContainerSelection } from "./copyBlockSelection";
 import { deleteSelectionSafely } from "./selectionDelete";
+import { flattenLegacyColumnClipboard } from "../utils/legacyColumnClipboard";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/extensions/copyBlockClipboard.ts#messages:1">`
 zh-Hans:
@@ -24,12 +24,9 @@ export const GOOSE_BLOCKNOTE_BLOCK_COPY_MIME = "application/x-goose-blocknote-bl
 
 function normalizeDataImageCaptionInClipboardDom(dom: HTMLElement): void {
   for (const image of dom.querySelectorAll<HTMLElement>('[data-content-type="image"]')) {
-    if (image.getAttribute("data-caption-source") !== "generated") continue;
-    const url = image.getAttribute("data-url");
-    const caption = image.getAttribute("data-caption");
-    if (!isGeneratedDataImageName(caption, url)) continue;
-    if (!image.getAttribute("data-name")) image.setAttribute("data-name", caption!.trim());
     image.removeAttribute("data-caption");
+    image.removeAttribute("data-caption-source");
+    image.querySelectorAll("figcaption, .bn-file-caption").forEach(caption => caption.remove());
   }
 }
 
@@ -37,6 +34,7 @@ export function normalizeBlockNoteClipboardHtml(html: string): string {
   if (!html || typeof DOMParser === "undefined") return html;
   const document = new DOMParser().parseFromString(html, "text/html");
   const before = document.body.innerHTML;
+  flattenLegacyColumnClipboard(document.body);
   normalizeDataImageCaptionInClipboardDom(document.body);
   return document.body.innerHTML === before ? html : document.body.innerHTML;
 }
