@@ -3,6 +3,7 @@ import { app } from "electron";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { canonicalLocalPath } from "../../src/lib/canonicalLocalPath";
+import { physicalLocalPath } from "./physicalLocalPath";
 
 const ROOTS_FILE = "vault-roots.json";
 
@@ -86,12 +87,12 @@ export function hasUnsafeSegments(p: string): boolean {
   return p.split(/[/\\]/).includes("..") || p.includes("\0");
 }
 
-function isUnder(root: string, target: string): boolean {
+function isUnder(root: string, target: string, caseInsensitive = process.platform === "win32" || process.platform === "darwin"): boolean {
   const from = normalizePath(root);
   const to = normalizePath(target);
   let relFrom = from;
   let relTo = to;
-  if (process.platform === "win32" || process.platform === "darwin") {
+  if (caseInsensitive) {
     relFrom = from.toLowerCase();
     relTo = to.toLowerCase();
   }
@@ -99,12 +100,28 @@ function isUnder(root: string, target: string): boolean {
   return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
+function allowedRoots(): string[] {
+  return [userDataRoot(), downloadsRoot(), ...vaultRoots, ...sessionAllowed];
+}
+
+function physicalAllowedRoots(roots: string[]): string[] {
+  return roots.map(physicalLocalPath).filter((root): root is string => root !== null);
+}
+
+function isWithinAllowedRoot(root: string, target: string, physicalRoots: string[]): boolean {
+  const physicalRoot = physicalLocalPath(root);
+  if (!physicalRoot || (!isUnder(root, target) && !isUnder(physicalRoot, target))) return false;
+  const physicalTarget = physicalLocalPath(target);
+  return physicalTarget !== null && physicalRoots.some((allowed) => isUnder(allowed, physicalTarget, false));
+}
+
 export function findVaultRootContaining(p: string): string | null {
   if (hasUnsafeSegments(p)) return null;
   const resolved = normalizePath(p);
   let best: string | null = null;
+  const physicalRoots = physicalAllowedRoots(allowedRoots());
   for (const root of vaultRoots) {
-    if (!isUnder(root, resolved)) continue;
+    if (!isWithinAllowedRoot(root, resolved, physicalRoots)) continue;
     if (!best || root.length > best.length) best = root;
   }
   return best;
@@ -119,16 +136,9 @@ export function allowAssociatedMarkdownFile(filePath: string): string {
 export function isAllowedPath(p: string): boolean {
   if (hasUnsafeSegments(p)) return false;
   const resolved = normalizePath(p);
-  if (isUnder(attachmentsRoot(), resolved)) return true;
-  if (isUnder(userDataRoot(), resolved)) return true;
-  if (isUnder(downloadsRoot(), resolved)) return true;
-  for (const root of vaultRoots) {
-    if (isUnder(root, resolved)) return true;
-  }
-  for (const allowed of sessionAllowed) {
-    if (resolved === allowed || isUnder(allowed, resolved)) return true;
-  }
-  return false;
+  const roots = allowedRoots();
+  const physicalRoots = physicalAllowedRoots(roots);
+  return roots.some((root) => isWithinAllowedRoot(root, resolved, physicalRoots));
 }
 
 export function assertAllowed(p: string): string {
