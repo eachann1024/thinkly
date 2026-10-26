@@ -62,7 +62,7 @@ export function useAIModelRefresh(
     if (isModelRequestBusy(requestStateRef.current.models) || requestStateRef.current.test.status === "testing") return;
     const apiKey = connection.apiKey.trim();
     if (!apiKey) {
-      toast.error(getCustomAiKeyHint());
+      if (action !== "switch") toast.error(getCustomAiKeyHint());
       return;
     }
     const provider = getAIProviderPreset(connection.providerId);
@@ -81,9 +81,11 @@ export function useAIModelRefresh(
         modelAbortControllerRef.current = null;
         modelTimeoutRef.current = null;
         controller.abort();
-        toast.error(message, {
-          description: action === "refresh" ? uiText("theModelListWasNotUpdated_9f40") : uiText("theApiKeyWasSavedBut_935a"),
-        });
+        if (action !== "switch") {
+          toast.error(message, {
+            description: action === "refresh" ? uiText("theModelListWasNotUpdated_9f40") : uiText("theApiKeyWasSavedBut_935a"),
+          });
+        }
       }, 30_000);
     }
     sendRequestEvent({ type: "models.started", requestId, action });
@@ -142,9 +144,11 @@ export function useAIModelRefresh(
       scrollToModelSection();
 
       if (modelOptions.length === 0) {
-        toast.warning(uiText("providerSaved", { provider: provider.label }), {
-          description: uiText("noModelsReturnedCheckWhetherThis_5cfd"),
-        });
+        if (action !== "switch") {
+          toast.warning(uiText("providerSaved", { provider: provider.label }), {
+            description: uiText("noModelsReturnedCheckWhetherThis_5cfd"),
+          });
+        }
       } else {
         const actionLabel =
           action === "switch"
@@ -166,12 +170,14 @@ export function useAIModelRefresh(
       const message = redactSetupGuideAIError(rawMessage, apiKey) || uiText("couldNotFetchTheModelList_7e6f");
       const configSaved = requestStateRef.current.models.status === "loading";
       sendRequestEvent({ type: "models.failed", requestId, message });
-      toast.error(message, {
-        description: !configSaved ? uiText("theServiceConfigurationCouldNotBe_4f24") :
-          action === "refresh"
-            ? uiText("theModelListWasNotUpdated_9f40")
-            : uiText("theApiKeyWasSavedBut_935a"),
-      });
+      if (action !== "switch") {
+        toast.error(message, {
+          description: !configSaved ? uiText("theServiceConfigurationCouldNotBe_4f24") :
+            action === "refresh"
+              ? uiText("theModelListWasNotUpdated_9f40")
+              : uiText("theApiKeyWasSavedBut_935a"),
+        });
+      }
     } finally {
       if (requestId === modelRequestIdRef.current) {
         if (modelTimeoutRef.current) clearTimeout(modelTimeoutRef.current);
@@ -225,12 +231,7 @@ export function useAIModelRefresh(
         : readStoredApiKey(ai, value, nextPreset.protocol);
     setApiKeyDraft(finalKey);
 
-    if (!finalKey.trim()) {
-      toast.info(uiText("providerSwitched", { provider: nextPreset.label }), {
-        description: uiText("enterAnApiKeyAndSave_67e0"),
-      });
-      return;
-    }
+    if (!finalKey.trim()) return;
 
     void refreshCustomModels(
       getConnectionForProvider(value, finalKey, nextBaseURL),

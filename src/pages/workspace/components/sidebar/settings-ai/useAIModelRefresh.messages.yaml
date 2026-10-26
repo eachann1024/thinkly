@@ -9,7 +9,6 @@ zh-Hans:
   modelsFetched: "已获取 {{count}} 个模型，默认选择 {{model}}。"
   couldNotFetchTheModelList_7e6f: "获取模型列表失败"
   theServiceConfigurationCouldNotBe_4f24: "服务配置未能保存。"
-  enterAnApiKeyAndSave_67e0: "填写 API Key 并保存后，将自动获取模型列表。"
 en:
   fetchingModelsTimedOutAfter30_6d78: "Fetching models timed out after 30 seconds. Your configuration was saved; you can try again."
   theModelListWasNotUpdated_9f40: "The model list was not updated. Your current configuration was kept."
@@ -21,7 +20,6 @@ en:
   modelsFetched: "Models fetched: {{count}}. Default: {{model}}."
   couldNotFetchTheModelList_7e6f: "Could not fetch the model list"
   theServiceConfigurationCouldNotBe_4f24: "The service configuration could not be saved."
-  enterAnApiKeyAndSave_67e0: "Enter an API key and save to fetch the model list automatically."
 ja:
   fetchingModelsTimedOutAfter30_6d78: "モデル一覧の取得がタイムアウトしました (30 秒)。設定は保存済みです。もう一度お試しください。"
   theModelListWasNotUpdated_9f40: "モデル一覧は更新されず、現在の設定が保持されました。"
@@ -33,4 +31,3 @@ ja:
   modelsFetched: "{{count}} 件のモデルを取得しました。デフォルトは {{model}} です。"
   couldNotFetchTheModelList_7e6f: "モデル一覧を取得できませんでした"
   theServiceConfigurationCouldNotBe_4f24: "サービス設定を保存できませんでした。"
-  enterAnApiKeyAndSave_67e0: "API Key を入力して保存すると、モデル一覧が自動的に取得されます。"
