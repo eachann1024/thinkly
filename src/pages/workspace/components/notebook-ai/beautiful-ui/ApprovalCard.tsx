@@ -21,12 +21,14 @@ export function ApprovalCard({
   children,
   footer,
   className,
+  showStatus = true,
 }: {
   title: string;
   status: WorkCardStatusData;
   children?: ReactNode;
   footer?: ReactNode;
   className?: string;
+  showStatus?: boolean;
 }) {
   useLocale();
   return (
@@ -38,18 +40,18 @@ export function ApprovalCard({
       aria-label={t("aiNoteChangePlan")}
       aria-busy={status.icon === "running" || undefined}
     >
-      <WorkCardStatus status={status} />
+      {showStatus ? <WorkCardStatus status={status} /> : null}
       <p className="mt-3 min-w-0 text-[14px] font-semibold leading-normal text-foreground">
         {title}
       </p>
-      <span
+      {showStatus ? <span
         className="sr-only"
         role="status"
         aria-live="polite"
         aria-atomic="true"
       >
         {status.label}
-      </span>
+      </span> : null}
       {children}
       {footer ? <div className="mt-[22px]">{footer}</div> : null}
     </section>
