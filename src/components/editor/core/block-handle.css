@@ -1,3 +1,22 @@
+.workspace-editor-surface:has(> .goose-editor-overlay-layer) { position: relative; }
+/* Handles remain clipped to their pane; menus use the window portal. */
+.goose-editor-overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  contain: layout paint;
+  isolation: isolate;
+  pointer-events: none;
+}
+.goose-editor-overlay-layer > * { pointer-events: auto; }
+.goose-block-handle, .goose-trailing-add {
+  animation: goose-block-handle-enter 160ms ease-out 60ms both;
+}
+.goose-block-handle[data-gliding] { transition: transform 180ms cubic-bezier(.2,.8,.2,1), opacity 120ms ease; }
+@keyframes goose-block-handle-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .goose-block-handle, .goose-trailing-add { animation: none; transition: none !important; }
+}
 .goose-block-handle { transition: opacity 120ms ease; }
 @media (prefers-reduced-motion: reduce) { .goose-block-handle { transition: none; } }
 body[data-scroll-locked] .goose-block-handle { opacity: 0; pointer-events: none !important; }
@@ -12,31 +31,29 @@ body[data-scroll-locked] .goose-block-handle { opacity: 0; pointer-events: none 
   box-sizing: border-box;
   border: 1px solid hsl(var(--border) / 0.7);
   border-radius: 6px;
-  background: hsl(var(--background));
-  color: hsl(var(--muted-foreground));
+  background: hsl(var(--goose-menu-surface));
+  color: hsl(var(--popover-foreground));
 }
 .goose-block-handle-button svg { width: 14px; height: 14px; flex: none; }
 .goose-block-handle-button[draggable="true"] { cursor: grab; }
 .goose-block-handle-button[draggable="true"]:active { cursor: grabbing; }
 .goose-block-handle-button:hover, .goose-block-handle-button[aria-expanded="true"] {
-  background: hsl(var(--muted));
-  color: hsl(var(--foreground));
+  background: hsl(var(--goose-menu-surface));
+  color: var(--goose-accent-solid);
 }
 .goose-empty-block-add { width: 24px; padding: 5px; }
-[data-node-type="blockOuter"][data-goose-empty-handle-hover="true"] > [data-node-type="blockContainer"] > .bn-block-content,
-[data-node-type="blockOuter"][data-goose-empty-handle-hover="true"] > [data-node-type="blockContainer"] > .react-renderer > .bn-block-content {
-  border-radius: 4px;
-  background: hsl(var(--muted) / 0.65);
-}
 .goose-block-handle-menu {
   min-width: min(224px, calc(100vw - 16px));
   max-width: calc(100vw - 16px);
+  overscroll-behavior: contain;
 }
-.goose-block-handle-danger { color: hsl(var(--destructive)); }
+.goose-block-handle-danger {
+  --goose-interactive-hover-fg: var(--goose-text-danger);
+  --goose-interactive-selected-fg: var(--goose-text-danger);
+}
 .goose-block-color-swatch { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 16px; height: 16px; border-radius: 3px; font-size: 13px; }
 
 .goose-block-handle-controls { display: flex; align-items: center; }
-.goose-block-fold { width: 20px; padding: 3px; }
 
 .goose-block-menu-anchor { position: relative; }
 .goose-block-menu-positioner { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
@@ -44,7 +61,52 @@ body[data-scroll-locked] .goose-block-handle { opacity: 0; pointer-events: none 
 .bn-side-menu.goose-block-handle > .goose-editor-inline-context-ui { gap: 0; padding: 0; border-radius: 0; }
 .bn-side-menu.goose-block-handle .goose-block-handle-button { width: calc(44px * var(--editor-scale, 1)); height: calc(24px * var(--editor-scale, 1)); gap: calc(4px * var(--editor-scale, 1)); padding: 0; border-radius: 6px; }
 .bn-side-menu.goose-block-handle .goose-empty-block-add { width: calc(24px * var(--editor-scale, 1)); }
-.bn-side-menu.goose-block-handle .goose-block-fold { width: calc(20px * var(--editor-scale, 1)); }
-.bn-side-menu.goose-block-handle .goose-block-fold:not(:hover) { border: 0; background: transparent; }
-.bn-side-menu.goose-block-handle .goose-block-fold { border: 0; }
 .bn-side-menu.goose-block-handle { height: calc(24px * var(--editor-scale, 1)); }
+
+.goose-block-handle-menu[data-goose-submenu-direction] {
+  position: fixed !important;
+  left: var(--goose-submenu-left) !important;
+  right: auto !important;
+  top: var(--goose-submenu-top) !important;
+  bottom: auto !important;
+  max-height: var(--goose-submenu-height) !important;
+  overflow-y: auto;
+}
+
+/* Floating controls share the menu surface, text and border theme tokens. */
+.bn-side-menu:is(.goose-block-handle, .goose-trailing-add) .goose-block-handle-button {
+  background: hsl(var(--goose-menu-surface));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--goose-menu-border));
+  border-radius: 7px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 4px 12px rgb(0 0 0 / 6%);
+}
+.bn-side-menu:is(.goose-block-handle, .goose-trailing-add) .goose-block-handle-button:is(:hover, :active, :focus-visible, [aria-expanded="true"]),
+.bn-side-menu.goose-block-handle[data-dragging] .goose-block-handle-button {
+  background: hsl(var(--goose-menu-surface));
+  color: var(--goose-accent-solid);
+  border-color: var(--goose-accent-solid);
+}
+.bn-side-menu:is(.goose-block-handle, .goose-trailing-add) .goose-block-handle-button:active {
+  box-shadow: inset 0 0 0 1px var(--goose-accent-solid);
+}
+.bn-side-menu.goose-trailing-add > .goose-trailing-add-controls { display: flex; align-items: center; padding: 0; }
+.bn-side-menu.goose-trailing-add .goose-empty-block-add {
+  width: calc(24px * var(--editor-scale, 1));
+  height: calc(24px * var(--editor-scale, 1));
+}
+
+.goose-block-handle-menu[data-goose-root-menu] {
+  position: fixed !important;
+  left: var(--goose-root-menu-left) !important;
+  right: auto !important;
+  top: var(--goose-root-menu-top) !important;
+  bottom: auto !important;
+  max-height: var(--goose-root-menu-height) !important;
+  overflow-y: auto;
+}
+.bn-side-menu.goose-trailing-add {
+  display: flex;
+  align-items: center;
+  height: calc(24px * var(--editor-scale, 1));
+}
