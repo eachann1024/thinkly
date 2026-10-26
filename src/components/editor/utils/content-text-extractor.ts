@@ -1,4 +1,5 @@
 import type { JSONContent } from "@/types";
+import { flattenLegacyColumns } from "@/lib/legacyColumns";
 import { extractBlockNoteTitle, extractPlainText } from "./blocknote-content";
 
 export function extractTextFromContent(content: JSONContent): string {
@@ -9,17 +10,9 @@ export function extractTitleFromContent(content: JSONContent): string {
   return extractBlockNoteTitle(content);
 }
 
-function flattenColumnBlocks(blocks: any[]): any[] {
-  return blocks.flatMap((block) =>
-    block?.type === "columnLayout" || block?.type === "columnSection"
-      ? flattenColumnBlocks(Array.isArray(block.children) ? block.children : [])
-      : [block],
-  );
-}
-
 function getTopLevelBlocks(content: JSONContent): any[] {
-  if (Array.isArray(content)) return flattenColumnBlocks(content);
-  return Array.isArray(content?.content) ? flattenColumnBlocks(content.content) : [];
+  if (Array.isArray(content)) return flattenLegacyColumns(content);
+  return Array.isArray(content?.content) ? flattenLegacyColumns(content.content) : [];
 }
 
 function getBlockLevel(block: any): number | undefined {
