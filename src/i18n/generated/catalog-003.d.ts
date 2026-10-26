@@ -70,7 +70,6 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/beautiful-ui/ApprovalCard.tsx#messages:1": { "aiNoteChangePlan": {  } };
     "src/pages/workspace/components/notebook-ai/beautiful-ui/LoadingState.tsx#messages:1": { "processing": {  } };
     "src/pages/workspace/components/notebook-ai/beautifulUiMap.ts#messages:1": { "detailProcessedFor": { "value1": string | number }; "detailThoughtFor": { "value1": string | number }; "detailToolsRun": { "value1": string | number }; "processing": {  }; "runningTools": {  }; "searchComplete": {  }; "searching": {  }; "thinking": {  }; "thisStepWasNotCompletedAndMayHave": {  } };
-    "src/pages/workspace/components/notebook-ai/composer/ResourcePicker.tsx#messages:1": { "add": { "count": string | number }; "choose": {  }; "empty": {  }; "indexed": { "count": string | number }; "loading": {  }; "recursive": {  }; "retry": {  }; "root": {  }; "search": {  }; "source": {  }; "target": {  } };
     "src/pages/workspace/components/notebook-ai/composer/useComposerAttachments.ts#messages:1": { "chooseAPngJpegWebpOrGifImage": {  } };
     "src/pages/workspace/components/notebook-ai/history/conversationTime.ts#messages:1": { "daysAgo": { "count": number }; "today": {  }; "yesterday": {  } };
     "src/pages/workspace/components/notebook-ai/history/historyActions.ts#messages:1": { "confirmDeletion": {  }; "conversationDeleted": {  }; "detailDeleteConversation": { "value1": string | number }; "newConversation": {  } };
@@ -122,5 +121,6 @@ declare module "../types" {
     "src/pages/workspace/components/search-sheet/SearchSheetResults.tsx#localMessages:1": { "askAi": {  }; "matchCount": { "count": string | number }; "pinyin": {  }; "removeRecent": { "title": string | number }; "title": {  } };
     "src/pages/workspace/components/search-sheet/sheetStepText.ts#messages:1": { "compose": {  }; "composeRunning": {  }; "failed": {  }; "found": { "count": string | number }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listPages": {  }; "noResults": {  }; "readPage": {  }; "readWebPage": {  }; "retrieve": {  }; "retrieveFound": { "count": string | number }; "retrieveNone": {  }; "searchNotes": {  }; "searchWeb": {  }; "summary": { "count": string | number }; "summaryFailed": { "count": string | number }; "summaryNotes": { "count": string | number }; "summaryWeb": { "count": string | number }; "thinking": {  }; "tool": {  }; "understand": {  } };
     "src/pages/workspace/components/search-sheet/useSheetAnswer.ts#localMessages:1": { "aiCouldnTAnswer": {  } };
+    "src/pages/workspace/components/shared/DefaultFontSelect.tsx#localMessages:1": { "textFont": {  } };
   }
 }
