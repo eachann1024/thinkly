@@ -31,7 +31,3 @@ function startPresence(update: () => void, flush: boolean): void {
 export function runWithPresence(update: () => void): void {
   startPresence(update, true);
 }
-
-export function runDomPresence(update: () => void): void {
-  startPresence(update, false);
-}
