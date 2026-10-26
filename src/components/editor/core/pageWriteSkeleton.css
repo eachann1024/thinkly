@@ -1,7 +1,12 @@
-.goose-page-write-skeleton { pointer-events: none; }
-.goose-page-write-mask {
-  position: fixed;
+.goose-page-write-skeleton {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
   z-index: 5;
+}
+.goose-page-write-mask {
+  position: absolute;
   display: flex;
   align-items: center;
   background: var(--goose-editor-bg);

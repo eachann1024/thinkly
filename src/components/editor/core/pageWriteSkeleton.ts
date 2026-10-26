@@ -34,7 +34,10 @@ function changedRanges(before: Node, after: Node, offset = 0): [number, number][
 export async function showPageWriteSkeleton(view: EditorView, next: Node, signal: AbortSignal): Promise<() => void> {
   const ranges = changedRanges(view.state.doc, next);
   if (!ranges.length || !view.dom.isConnected) return () => {};
-  const host = view.dom.closest<HTMLElement>(".page-scroll-container") ?? view.dom.parentElement!;
+  const host = view.dom.parentElement!;
+  const oldPosition = host.style.position;
+  const positionHost = getComputedStyle(host).position === "static";
+  if (positionHost) host.style.position = "relative";
   const overlay = document.createElement("div");
   overlay.className = "goose-page-write-skeleton";
   overlay.setAttribute("aria-hidden", "true");
@@ -46,7 +49,9 @@ export async function showPageWriteSkeleton(view: EditorView, next: Node, signal
   let disposed = false;
   const draw = () => {
     if (disposed || !view.dom.isConnected) return;
-    const bounds = host.getBoundingClientRect();
+    const bounds = overlay.getBoundingClientRect();
+    const scaleX = bounds.width / overlay.clientWidth || 1;
+    const scaleY = bounds.height / overlay.clientHeight || 1;
     const pieces: HTMLElement[] = [];
     for (const [from, to] of ranges) {
       const a = view.domAtPos(Math.min(from, view.state.doc.content.size));
@@ -73,10 +78,10 @@ export async function showPageWriteSkeleton(view: EditorView, next: Node, signal
         rects.push(new DOMRect(caret.left, caret.top, 2, caret.bottom - caret.top));
       }
       for (const rect of rects) {
-        const left = Math.max(bounds.left, rect.left);
-        const top = Math.max(bounds.top, rect.top);
-        const width = Math.min(bounds.right, rect.right) - left;
-        const height = Math.min(bounds.bottom, rect.bottom) - top;
+        const left = (rect.left - bounds.left) / scaleX;
+        const top = (rect.top - bounds.top) / scaleY;
+        const width = rect.width / scaleX;
+        const height = rect.height / scaleY;
         if (width <= 0 || height <= 0) continue;
         const piece = document.createElement("span");
         piece.className = "goose-page-write-mask";
@@ -93,10 +98,10 @@ export async function showPageWriteSkeleton(view: EditorView, next: Node, signal
     if (disposed) return;
     disposed = true;
     overlay.remove();
+    if (positionHost && host.style.position === "relative") host.style.position = oldPosition;
     if (oldBusy === null) view.dom.removeAttribute("aria-busy");
     else view.dom.setAttribute("aria-busy", oldBusy);
     for (const event of ["beforeinput", "paste", "cut", "drop", "keydown"]) view.dom.removeEventListener(event, preventEdit, true);
-    window.removeEventListener("scroll", draw, true);
     window.removeEventListener("resize", draw);
     observer.disconnect();
     signal.removeEventListener("abort", cleanup);
@@ -105,7 +110,7 @@ export async function showPageWriteSkeleton(view: EditorView, next: Node, signal
     try { draw(); } catch { cleanup(); }
   });
   observer.observe(host);
-  window.addEventListener("scroll", draw, true);
+  observer.observe(view.dom);
   window.addEventListener("resize", draw);
   signal.addEventListener("abort", cleanup, { once: true });
   try {
