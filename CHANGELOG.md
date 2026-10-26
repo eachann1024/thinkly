@@ -1,5 +1,14 @@
 # 更新日志
 
+## 1.7.334
+
+- Improve editor placeholder shortcut hint and align translations
+- Keep concurrent quick note changes outside placeholder update
+- Fix quick note activation and improve shortcut help
+- move code block chrome into a floating island (#117)
+- center the collapsed code legend glyph and give the expanded chip room (#118)
+- Fix inline shortcut spacing and quick note help styling
+
 ## 1.7.333
 
 - Fix code language picker current selection and remove grouping
