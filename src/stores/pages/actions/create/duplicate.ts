@@ -80,7 +80,7 @@ export const duplicatePageAction = async (
         id: newId,
         localFilePath: candidatePath,
         localFrontmatter: frontmatter.blob,
-        localMetadataId: undefined,
+        localMetadataId: newId,
         localMetadataRevision: undefined,
         editorDraft: undefined,
         localUnsaved: undefined,
