@@ -2,7 +2,6 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
-    "src/stores/pages/actions/hydrate.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/hydrate.ts#block2:2": { "newerStored": {  }; "recoveredEditor": {  }; "recoveryKept": {  } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
@@ -16,18 +15,18 @@ declare module "../types" {
     "src/stores/pages/actions/localFolder/rename/file.ts#block1:1": { "renameFailed": { "reason": string | number } };
     "src/stores/pages/actions/localFolder/rename/file.ts#block2:2": { "emptyName": {  }; "fsUnavailable": {  }; "invalidName": {  }; "pageUnavailable": {  }; "renameFailed": {  }; "renamePathChanged": {  } };
     "src/stores/pages/actions/localFolder/write/emptySaveGuard.ts#block1:1": { "emptyExternalConflict": {  }; "emptyNewerContent": {  }; "emptyPathChanged": {  }; "emptyReadBlocked": {  }; "emptyRecoveryFailed": {  }; "emptyUnconfirmed": {  }; "readBlocked": {  }; "serializeBlocked": {  } };
-    "src/stores/pages/actions/localFolder/write/persistence.ts#block1:1": { "notSavedDisk": {  } };
+    "src/stores/pages/actions/localFolder/write/persistence.ts#block1:1": { "pageUnavailable": {  }; "retry": {  }; "saveFailed": { "title": string | number }; "saveIncomplete": { "id": string | number } };
     "src/stores/pages/actions/localFolder/write/save.ts#block1:1": { "writeFailed": { "path": string | number } };
-    "src/stores/pages/actions/localFolder/write/save.ts#block2:2": { "invalidFrontmatterSave": {  } };
     "src/stores/pages/actions/pageMutations/restore.ts#block1:1": { "file": {  }; "folder": {  }; "page": {  }; "unnamedNotebook": {  }; "untitled": {  } };
     "src/stores/pages/folderSync.ts#block1:1": { "savingBeforeMove": {  } };
     "src/stores/pages/folderSyncFlush.ts#block1:1": { "recoveryIncomplete": { "id": string | number }; "saveIncomplete": { "id": string | number } };
-    "src/stores/pages/slices/updateSlice.ts#block1:1": { "fixYaml": {  }; "keepWindowOpen": {  }; "notSaved": {  }; "readSettingsUnchanged": {  }; "recoverySaved": {  }; "recoveryWriteFailed": {  }; "yamlSettingsUnchanged": {  } };
-    "src/stores/quicknote/recovery.ts#block1:1": { "keepQuicknoteOpen": {  }; "quicknoteNotSaved": {  }; "quicknoteRecoveryFailed": {  }; "quicknoteRetry": {  }; "retry": {  } };
+    "src/stores/pages/saveFailureNotices.ts#block1:1": { "keepWindowOpen": {  }; "notSaved": {  }; "pageUnavailable": {  }; "recoverySaved": {  }; "recoveryWriteFailed": {  }; "retry": {  }; "saveIncomplete": { "id": string | number } };
+    "src/stores/pages/slices/updateSlice.ts#block1:1": { "fixYaml": {  }; "readSettingsUnchanged": {  }; "yamlSettingsUnchanged": {  } };
+    "src/stores/quicknote/recovery.ts#block1:1": { "keepQuicknoteOpen": {  }; "quicknoteNotSaved": {  }; "quicknoteRecoveryFailed": {  }; "quicknoteRetry": {  }; "retry": {  }; "retryQuicknoteRecovery": {  } };
     "src/stores/quicknote/slotNames.ts#localMessages:1": { "defaultName": { "slot": string | number } };
     "src/stores/settings/slices/shortcutsSlice.ts#block1:1": { "quicknoteDisabled": {  }; "searchDisabled": {  }; "wakeDisabled": {  } };
     "src/stores/settings/types/search.ts#block1:1": { "enterSearchUrl": {  }; "invalidUrl": {  }; "searchPlaceholder": {  }; "searchProtocol": {  } };
-    "src/stores/tabs/helpers.ts#block1:1": { "saveFailed": { "title": string | number }; "saveIncomplete": { "id": string | number } };
+    "src/stores/tabs/helpers.ts#block1:1": { "confirmationRequired": {  }; "pageUnavailable": {  }; "saveFailed": { "title": string | number }; "saveIncomplete": { "id": string | number } };
     "src/stores/tabs/replacementContext.ts#block1:1": { "saveIncomplete": { "id": string | number } };
     "src/stores/tabs/replacementContext.ts#block2:2": { "currentSaveFailed": {  }; "resolveSaveFirst": {  } };
     "src/stores/tabs/specialActions.ts#block1:1": { "blankTabFailed": {  } };

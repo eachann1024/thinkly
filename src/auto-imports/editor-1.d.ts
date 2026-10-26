@@ -90,8 +90,7 @@ declare global {
   const normalizeClipboardLineEndings: typeof import('../components/editor/utils/clipboardMarkdown').normalizeClipboardLineEndings
   const normalizeClipboardListMarkers: typeof import('../components/editor/utils/clipboardMarkdown').normalizeClipboardListMarkers
   const normalizeEditorUiScale: typeof import('../components/editor/utils/editorContextUi').normalizeEditorUiScale
-  const normalizeHeadingSectionFold: typeof import('../components/editor/utils/blocknote-content/index').normalizeHeadingSectionFold
-  const normalizeHeadingToggleableFlags: typeof import('../components/editor/utils/blocknote-content/index').normalizeHeadingToggleableFlags
+  const normalizeHeadingChildren: typeof import('../components/editor/utils/blocknote-content/index').normalizeHeadingChildren
   const normalizeMarkdownPasteText: typeof import('../components/editor/utils/clipboardMarkdown').normalizeMarkdownPasteText
   const normalizePageContent: typeof import('../components/editor/utils/blocknote-content/index').normalizePageContent
   const normalizePageTitle: typeof import('../components/editor/utils/page-title').normalizePageTitle
