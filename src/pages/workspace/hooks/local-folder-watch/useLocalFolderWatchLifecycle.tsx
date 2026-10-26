@@ -4,17 +4,21 @@ import { createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/hooks/local-folder-watch/useLocalFolderWatchLifecycle.tsx#localMessages:1">`
 zh-Hans:
   saveFailed: "「{{name}}」保存失败"
+  openLocalFolderSettings: "打开本地文件设置"
   anotherPagePointsToTheSameLocal: "检测到另一个页面已指向同一个本地文件，请重新加载本地文件夹后再试。"
 en:
   saveFailed: "Couldn’t save {{name}}"
+  openLocalFolderSettings: "Open local folder settings"
   anotherPagePointsToTheSameLocal: "Another page points to the same local file. Reload the local folder and try again."
 ja:
   saveFailed: "「{{name}}」を保存できませんでした"
+  openLocalFolderSettings: "ローカルファイル設定を開く"
   anotherPagePointsToTheSameLocal: "別のページが同じローカルファイルを参照しています。ローカルフォルダを再読み込みしてから、もう一度お試しください。"
 `;
 const uiText = createTranslator(localMessages);
 import { useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
+import { settingsToastAction } from "@/lib/settings-navigation";
 import { usePages } from "@/stores/usePages";
 import {
   showConflictToast,
@@ -64,6 +68,7 @@ export function useLocalFolderWatchLifecycle(
       toast.error(uiText("saveFailed", {name: fileName}), {
         description:
           uiText("anotherPagePointsToTheSameLocal"),
+        action: settingsToastAction("local-folder", uiText("openLocalFolderSettings")),
       });
     };
 

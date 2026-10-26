@@ -6,6 +6,7 @@ import { setFakeSelection } from "@/components/editor/extensions/fakeSelectionEx
 import { resolveFormattingToolbarAiBlockId } from "./selectionBlocks";
 import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { toast } from "@/components/ui/sonner";
+import { settingsToastAction } from "@/lib/settings-navigation";
 import { getCustomAIApiKey } from "@/lib/ai-provider";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/toolbars/formatting/useFormattingToolbarAiActivate.ts#messages:1">`
@@ -14,6 +15,7 @@ zh-Hans:
   enableTheAiAssistantInSettingsFirst: "AI 助手尚未开启，请先到设置中打开"
   noApiKeyIsConfiguredCheckSettingsAi: "未填写 API Key。请前往「设置 › AI 助手 › AI 服务」检查配置。"
   saveTheAiServiceSettingsAndLoadThe: "请先保存 AI 服务配置并获取模型列表"
+  openSettings: "打开设置"
   theSelectionCouldNotBeLocatedSelectThe: "无法定位当前选区，请重新选中正文文字后再试"
   thisSelectionDoesNotSupportInlineRewritingSelect: "当前选区暂不支持行内改写，请重新选择正文文字。"
 en:
@@ -21,6 +23,7 @@ en:
   enableTheAiAssistantInSettingsFirst: "Enable the AI assistant in Settings first"
   noApiKeyIsConfiguredCheckSettingsAi: "No API key is configured. Check Settings › AI assistant › AI service."
   saveTheAiServiceSettingsAndLoadThe: "Save the AI service settings and load the model list first"
+  openSettings: "Open settings"
   theSelectionCouldNotBeLocatedSelectThe: "The selection could not be located. Select the body text again and retry."
   thisSelectionDoesNotSupportInlineRewritingSelect: "This selection does not support inline rewriting. Select body text and try again."
 ja:
@@ -28,6 +31,7 @@ ja:
   enableTheAiAssistantInSettingsFirst: "AI アシスタントがオフです。先に設定でオンにしてください"
   noApiKeyIsConfiguredCheckSettingsAi: "API キーが入力されていません。「設定 › AI アシスタント › AI サービス」で設定を確認してください。"
   saveTheAiServiceSettingsAndLoadThe: "先に AI サービスの設定を保存し、モデル一覧を取得してください"
+  openSettings: "設定を開く"
   theSelectionCouldNotBeLocatedSelectThe: "現在の選択範囲を特定できません。本文のテキストを選択し直してからお試しください"
   thisSelectionDoesNotSupportInlineRewritingSelect: "この選択範囲はインラインでの書き換えに対応していません。本文のテキストを選択し直してください。"
 `;
@@ -64,21 +68,25 @@ export function useFormattingToolbarAiActivate({
       captureInlineSelectionParts(editor.prosemirrorState.doc, selection);
 
       if (!aiSettings.enabled) {
-        toast.error(t("enableTheAiAssistantInSettingsFirst"));
+        toast.error(t("enableTheAiAssistantInSettingsFirst"), {
+          action: settingsToastAction("ai", t("openSettings")),
+        });
         return;
       }
       const apiKey = getCustomAIApiKey(aiSettings);
       if (!apiKey) {
-        toast.error(
-          t("noApiKeyIsConfiguredCheckSettingsAi"),
-        );
+        toast.error(t("noApiKeyIsConfiguredCheckSettingsAi"), {
+          action: settingsToastAction("ai", t("openSettings")),
+        });
         return;
       }
       const hasModel =
         aiSettings.selectedModelId?.trim() ||
         aiSettings.customModelOptions[0]?.id;
       if (!hasModel) {
-        toast.error(t("saveTheAiServiceSettingsAndLoadThe"));
+        toast.error(t("saveTheAiServiceSettingsAndLoadThe"), {
+          action: settingsToastAction("ai", t("openSettings")),
+        });
         return;
       }
 

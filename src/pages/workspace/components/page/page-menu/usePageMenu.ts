@@ -1,5 +1,6 @@
 import { collectTabPageIds } from "@/stores/tabs/helpers";
 import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
+import { settingsToastAction } from "@/lib/settings-navigation";
 import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
 
@@ -8,6 +9,7 @@ zh-Hans:
   noFile: "未选择文件"
   importFailed: "导入失败"
   needFolder: "请先关联本地文件夹"
+  openLocalFolderSettings: "打开本地文件设置"
   chooseImportFolder: "导入前请先在左侧栏打开或新建一个本地文件夹作为存储位置。"
   retryImport: "导入失败，请重试"
   imported: "已导入为新笔记"
@@ -21,6 +23,7 @@ en:
   noFile: "No file selected"
   importFailed: "Import failed"
   needFolder: "Connect a local folder first"
+  openLocalFolderSettings: "Open local folder settings"
   chooseImportFolder: "Open or create a local folder in the sidebar before importing."
   retryImport: "Import failed. Try again."
   imported: "Imported as a new note"
@@ -34,6 +37,7 @@ ja:
   noFile: "ファイルが選択されていません"
   importFailed: "インポートに失敗しました"
   needFolder: "先にローカルフォルダを関連付けてください"
+  openLocalFolderSettings: "ローカルファイル設定を開く"
   chooseImportFolder: "インポートする前に、サイドバーで保存先となるローカルフォルダを開くか新規作成してください。"
   retryImport: "インポートに失敗しました。もう一度お試しください"
   imported: "新しいノートとしてインポートしました"
@@ -116,7 +120,10 @@ export function usePageMenu() {
   const handleImport = async () => {
     if (importPending.current) return;
     if (!activeNotebookId) {
-      toast.error(uiText("needFolder"), { description: uiText("chooseImportFolder") });
+      toast.error(uiText("needFolder"), {
+        description: uiText("chooseImportFolder"),
+        action: settingsToastAction("local-folder", uiText("openLocalFolderSettings")),
+      });
       return;
     }
     importPending.current = true;
@@ -135,6 +142,7 @@ export function usePageMenu() {
       if (!activeNotebookId) {
         toast.error(uiText("needFolder"), {
           description: uiText("chooseImportFolder"),
+          action: settingsToastAction("local-folder", uiText("openLocalFolderSettings")),
         });
         return;
       }
