@@ -1,4 +1,5 @@
 import { sanitizeCssColor } from "../blockPropsMarker";
+import { findClosingSpan } from "./spanRanges";
 import {
   pageMentionFromMarkdownLink,
   pageMentionFromWikiLink,
@@ -10,8 +11,9 @@ function applyStyles(nodes: any[], extra: Record<string, any>): any[] {
       return { type: "text", text: node, styles: { ...extra } };
     }
     if (node?.type === "text") {
-      return { ...node, styles: { ...(node.styles || {}), ...extra } };
+      return { ...node, styles: { ...extra, ...(node.styles || {}) } };
     }
+    if (node?.type === "link") return { ...node, content: applyStyles(node.content, extra) };
     return node;
   });
 }
@@ -54,7 +56,7 @@ function parseInlineMarkdownChunk(text: string): any[] {
   if (!text) return result;
 
   const regex =
-    /(\$((?:\\\$|[^\$])+?)\$|<u>(.+?)<\/u>|<span\b([^>]*)>(.+?)<\/span>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[((?:\\.|[^\]\\\n])+?)\]\]|\[((?:\\.|[^\]\\])+)\]\(([^)]+)\))/gi;
+    /(\$((?:\\\$|[^\$])+?)\$|<u>([\s\S]+?)<\/u>|<span\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/span\s*>|==(.+?)==|\*\*(.+?)\*\*|\*(.+?)\*|~~(.+?)~~|`(.+?)`|\[\[((?:\\.|[^\]\\\n])+?)\]\]|\[((?:\\.|[^\]\\])+)\]\(([^)]+)\))/gi;
   let lastIndex = 0;
   let match;
   const breakRegex = /<br\s*\/?>/gi;
@@ -78,6 +80,15 @@ function parseInlineMarkdownChunk(text: string): any[] {
       continue;
     }
     if (!match) break;
+    if (match[4] !== undefined) {
+      const opening = match[4].length + 6;
+      const closing = findClosingSpan(text, match.index + opening);
+      if (closing) {
+        match[5] = text.slice(match.index + opening, closing.start);
+        match[0] = text.slice(match.index, closing.end);
+        regex.lastIndex = closing.end;
+      }
+    }
     if (match.index > lastIndex) {
       pushPlain(text.slice(lastIndex, match.index));
     }
@@ -142,7 +153,7 @@ function parseInlineMarkdownChunk(text: string): any[] {
     pushPlain(text.slice(lastIndex));
   }
 
-  return result.length > 0 ? result : [text];
+  return result;
 }
 
 export function parseInlineMarkdown(text: string): any[] {
