@@ -156,7 +156,8 @@ export function renderQuickNoteHeader(
                 type="button"
                 aria-label={uiText("helpLabel")}
                 title={uiText("helpLabel")}
-                className={`quicknote-titlebar-btn quicknote-help-trigger ${helpOpen ? "goose-interactive--selected" : ""}`}
+                className="quicknote-titlebar-btn quicknote-help-trigger"
+                data-goose-selected="false"
                 style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
               >
                 <CircleAlert className="h-3.5 w-3.5" />
@@ -167,11 +168,11 @@ export function renderQuickNoteHeader(
               align="end"
               side="bottom"
               collisionPadding={8}
-              className="quicknote-help-popover w-72 text-xs"
+              className="quicknote-help-popover w-72"
               onCloseAutoFocus={(event) => event.preventDefault()}
             >
               <div className="quicknote-help-heading">
-                <div className="text-sm font-medium">{uiText("helpTitle")}</div>
+                <div className="quicknote-help-title font-medium">{uiText("helpTitle")}</div>
                 <ol className="quicknote-help-list goose-tabular">
                   {helpLines.map((line, index) => <li key={index}>{line}</li>)}
                 </ol>

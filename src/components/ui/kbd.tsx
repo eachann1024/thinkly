@@ -14,7 +14,7 @@ export interface KbdProps {
 export const kbdRecipes = {
   default: "pointer-events-none inline-flex h-6 select-none items-center gap-[3px] whitespace-nowrap rounded-[var(--goose-kbd-radius,var(--radius-md))] border border-border/85 bg-muted/80 px-1.5 font-sans text-[13px] font-medium text-muted-foreground shadow-[inset_0_0_0_1px_hsl(var(--border)/0.35)]",
   chip: "inline-flex items-center gap-[3px] whitespace-nowrap rounded-[var(--goose-kbd-chip-radius,6px)] bg-[var(--goose-interactive-hover)] px-2 py-0.5 font-sans text-[13px] text-muted-foreground",
-  inline: "goose-tabular pointer-events-none inline-flex select-none items-center justify-center whitespace-nowrap rounded-[var(--goose-kbd-chip-radius,6px)] border border-border bg-muted px-[0.35em] font-mono text-[0.85em] leading-[1.25] text-muted-foreground shadow-[0_1px_0_hsl(var(--border))]",
+  inline: "goose-tabular pointer-events-none mx-[0.2em] inline-flex select-none items-center justify-center whitespace-nowrap rounded-[var(--goose-kbd-chip-radius,6px)] border border-border bg-muted px-[0.35em] font-mono text-[0.85em] leading-[1.25] text-muted-foreground shadow-[0_1px_0_hsl(var(--border))]",
 };
 
 export function Kbd({ shortcut, className, platform = getPlatformKind(), variant = "default", context = "shell" }: KbdProps) {
