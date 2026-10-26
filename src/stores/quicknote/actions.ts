@@ -19,7 +19,9 @@ import {
   clampQuickNoteZoom,
 } from "./types";
 import { updateQuickNoteSlotName } from "./slotNames";
-import { recordQuickNoteRecovery } from "./recovery";
+import { getQuickNoteDraftRevision, recordQuickNoteRecovery } from "./recovery";
+import { quickNoteSaveSnapshotMatches } from "./saveSnapshot";
+import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import {
   getActiveDraftContent,
   isQuickNoteDraftEmpty,
@@ -145,8 +147,16 @@ export function createQuickNoteState(
     },
 
     saveDraftToNotebook: async () => {
-      const content = getActiveDraftContent(get());
+      const initial = get();
+      const slot = initial.activeSlot;
+      const content = getActiveDraftContent(initial);
       if (isQuickNoteDraftEmpty(content)) return null;
+      const snapshot = {
+        slot,
+        content,
+        revision: getQuickNoteDraftRevision(slot),
+        signature: getContentSignature(content),
+      };
 
       const notebooksState = useNotebooks.getState();
       const nbId = notebooksState.activeNotebookId ?? DEFAULT_NOTEBOOK;
@@ -172,15 +182,33 @@ export function createQuickNoteState(
       if (!id) return null;
 
       const latest = get();
-      const slot = latest.activeSlot;
-      recordQuickNoteRecovery(slot, latest.drafts[slot] ?? null, null);
-      lastUndoRecordAtBySlot[slot] = 0;
-      set({
-        drafts: { ...latest.drafts, [slot]: null },
-        undoStacks: { ...latest.undoStacks, [slot]: [] },
-        redoStacks: { ...latest.redoStacks, [slot]: [] },
-      });
-      return id;
+      const savedSlot = snapshot.slot;
+      const currentContent = latest.drafts[savedSlot] ?? null;
+      const unchanged = snapshot.signature === getContentSignature(currentContent) &&
+        quickNoteSaveSnapshotMatches(
+          snapshot,
+          savedSlot,
+          currentContent,
+          getQuickNoteDraftRevision(savedSlot),
+        );
+      if (unchanged) {
+        recordQuickNoteRecovery(savedSlot, currentContent, null);
+        lastUndoRecordAtBySlot[savedSlot] = 0;
+        set((state) => {
+          const stateContent = state.drafts[savedSlot] ?? null;
+          if (
+            stateContent === null ||
+            getContentSignature(stateContent) !== snapshot.signature ||
+            getQuickNoteDraftRevision(savedSlot) !== snapshot.revision + 1
+          ) return state;
+          return {
+            drafts: { ...state.drafts, [savedSlot]: null },
+            undoStacks: { ...state.undoStacks, [savedSlot]: [] },
+            redoStacks: { ...state.redoStacks, [savedSlot]: [] },
+          };
+        });
+      }
+      return { id, clearedSlot: unchanged && get().drafts[savedSlot] === null ? savedSlot : null };
     },
 
     clearDraft: () =>

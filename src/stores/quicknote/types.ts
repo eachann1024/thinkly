@@ -32,7 +32,7 @@ export interface QuickNoteState {
   ) => void;
   undoDraft: () => { content: JSONContent | null; applied: boolean };
   redoDraft: () => { content: JSONContent | null; applied: boolean };
-  saveDraftToNotebook: () => Promise<string | null>;
+  saveDraftToNotebook: () => Promise<{ id: string; clearedSlot: QuickNoteSlot | null } | null>;
   clearDraft: () => void;
   setWindowWidth: (width: number) => void;
   setWindowHeight: (height: number) => void;
