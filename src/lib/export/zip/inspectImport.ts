@@ -29,6 +29,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import type JSZipNs from "jszip";
 import type { NotebookImportInspection } from "./types";
+import { isImportableNotebookPagePath } from "./importPagePath";
 
 export async function inspectNotebookImportZip(
   zipBlob: Blob,
@@ -102,12 +103,8 @@ export async function inspectNotebookImportZip(
   const notebookNames = new Set<string>();
   let pageCount = 0;
   zip.forEach((path, entry) => {
-    if (entry.dir) return;
+    if (entry.dir || !isImportableNotebookPagePath(path)) return;
     const parts = path.split("/");
-    if (parts.length < 2 || parts[0] === "assets" || parts[1] === "assets")
-      return;
-    const extension = path.split(".").pop()?.toLowerCase();
-    if (extension !== "md" && extension !== "json") return;
     notebookNames.add(parts[0]);
     pageCount += 1;
   });
