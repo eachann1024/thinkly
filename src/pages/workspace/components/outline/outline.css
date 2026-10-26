@@ -59,15 +59,7 @@
   opacity: 1;
 }
 
-.outline-heading-row[data-collapsed="true"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  border: 1px dashed var(--goose-interactive-selected-fg);
-  border-radius: var(--radius-lg) / calc(var(--radius-lg) - 2px);
-  pointer-events: none;
-}
+
 
 .outline-empty {
   position: relative;

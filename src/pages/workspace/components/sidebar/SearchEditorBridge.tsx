@@ -51,7 +51,6 @@ import { ArrowLeft, ChevronDown, ChevronUp, X } from "@/components/ui/icons";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { usePages } from "@/stores/usePages";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import { findCollapsedHeadingsHidingBlock, type SectionFoldBlock } from "@/components/editor/core/headingSectionFold";
 import { clearSearchSessionHighlight, getSearchSessionHighlightState, selectSearchSessionHighlight, setSearchSessionHighlightQuery, subscribeSearchSessionHighlight } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { closeNotebookAiIfFullscreen } from "../notebook-ai/useNotebookAiPanel";
 import { searchMemoryKey, useSearchSession } from "./useSearchSession";
@@ -102,18 +101,6 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     const state = getSearchSessionHighlightState(editor);
     const match = state?.matches[state.current];
     if (!match) { if (page && session.query && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase()) && scrollRef.current) scrollRef.current.scrollTop = 0; return; }
-    const dom = editor.prosemirrorView.domAtPos(match.from);
-    const element = dom.node.nodeType === Node.TEXT_NODE ? dom.node.parentElement : dom.node as HTMLElement;
-    const blockId = element?.closest("[data-id]")?.getAttribute("data-id");
-    if (blockId) {
-      const ids = findCollapsedHeadingsHidingBlock(editor.document as SectionFoldBlock[], blockId, editor.document[0]?.id);
-      for (const id of ids) { const block = editor.getBlock(id); if (block?.type === "heading" || block?.type === "toggleListItem") editor.updateBlock(block, { props: { collapsed: false } }); }
-      let ancestor = element?.parentElement;
-      while (ancestor && ancestor !== editor.prosemirrorView.dom) {
-        if (ancestor instanceof HTMLDetailsElement) ancestor.open = true;
-        ancestor = ancestor.parentElement;
-      }
-    }
     cancelAnimationFrame(frame.current);
     const paint = () => {
       if (useSearchSession.getState().view.phase !== "reader" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;

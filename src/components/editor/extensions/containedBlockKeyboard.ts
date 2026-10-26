@@ -40,8 +40,7 @@ function enterInContainer(editor: Editor): boolean {
   const { block } = editor.getTextCursorPosition();
   if (state.selection.empty && block.type === "paragraph" && !$from.parent.content.size && !block.children.length) {
     const parent = editor.getParentBlock(block);
-    if (parent && parent.children.at(-1)?.id === block.id &&
-      !["columnSection", "columnLayout"].includes(parent.type)) {
+    if (parent && parent.children.at(-1)?.id === block.id) {
       editor.transact(() => {
         editor.removeBlocks([block]);
         insertParagraphAfterBlock(editor, parent.id);
@@ -51,7 +50,6 @@ function enterInContainer(editor: Editor): boolean {
   }
   if (!containedPasteTarget(state)) return false;
   if (CONTINUING_LISTS.has(block.type)) return continueList(editor, block);
-  if (block.type === "toggleListItem") return false;
   const atEnd = state.selection.empty && $from.parentOffset === $from.parent.content.size;
   const last = $from.parent.lastChild;
   if (atEnd && (!last || last.type.name === "hardBreak")) {

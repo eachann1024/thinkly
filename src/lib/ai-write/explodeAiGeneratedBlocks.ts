@@ -11,7 +11,7 @@ const ATOMIC_BLOCK_TYPES = new Set([
   "divider",
 ]);
 
-const CONTAINER_BLOCK_TYPES = new Set(["callout", "toggleListItem"]);
+const CONTAINER_BLOCK_TYPES = new Set(["callout"]);
 
 const LIST_BLOCK_TYPES = new Set([
   "checkListItem",

@@ -6,7 +6,6 @@ const PRESENTATION_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
   "quote",
   "quoteListItem",
   "callout",

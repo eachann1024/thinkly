@@ -9,15 +9,13 @@ import { customVideoBlock } from "../blocks/video/videoBlock";
 import { codeBlockSpec } from "@/components/editor/blocks/code/codeBlockSpec";
 import { gooseEditorStyleSpecs } from "@/components/editor/inline-code/InlineCodeComponent";
 import { pageMentionSpec } from "@/components/editor/inline/pageMentionSpec";
-import { gooseToggleListItemBlockSpec } from "../blocks/toggle/toggleListItemBlockSpec";
-
+const { toggleListItem: _toggleListItem, ...textBlockSpecs } = defaultBlockSpecs;
 
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
-    ...defaultBlockSpecs,
+    ...textBlockSpecs,
     heading: gooseHeadingBlockSpec,
     table: gooseTableBlockSpec,
-    toggleListItem: gooseToggleListItemBlockSpec,
     callout: calloutBlock,
     image: customImageBlock,
     video: customVideoBlock,

@@ -13,7 +13,6 @@ const CONVERTIBLE_BLOCK_TYPES = new Set<string>([
   "paragraph",
   "heading",
   "quote",
-  "toggleListItem",
   ...LIST_BLOCK_TYPES,
 ]);
 

@@ -13,9 +13,6 @@ zh-Hans:
   checklist: "待办事项"
   bulletedList: "无序列表"
   numberedList: "有序列表"
-  toggleHeading1: "折叠一级标题"
-  toggleHeading2: "折叠二级标题"
-  toggleHeading3: "折叠三级标题"
   quote: "引用"
   callout: "标注"
   codeBlock: "代码块"
@@ -28,9 +25,6 @@ en:
   checklist: "Checklist"
   bulletedList: "Bulleted list"
   numberedList: "Numbered list"
-  toggleHeading1: "Toggle heading 1"
-  toggleHeading2: "Toggle heading 2"
-  toggleHeading3: "Toggle heading 3"
   quote: "Quote"
   callout: "Callout"
   codeBlock: "Code block"
@@ -43,9 +37,6 @@ ja:
   checklist: "ToDo リスト"
   bulletedList: "箇条書きリスト"
   numberedList: "番号付きリスト"
-  toggleHeading1: "トグル見出し 1"
-  toggleHeading2: "トグル見出し 2"
-  toggleHeading3: "トグル見出し 3"
   quote: "引用"
   callout: "コールアウト"
   codeBlock: "コードブロック"
@@ -56,15 +47,12 @@ const t = createTranslator(messages);
 
 export const BLOCK_CONVERSIONS = [
   { get label() { return t("text"); }, type: "paragraph" },
-  { get label() { return t("heading1"); }, type: "heading", props: { level: 1, isToggleable: false, collapsed: false } },
-  { get label() { return t("heading2"); }, type: "heading", props: { level: 2, isToggleable: false, collapsed: false } },
-  { get label() { return t("heading3"); }, type: "heading", props: { level: 3, isToggleable: false, collapsed: false } },
+  { get label() { return t("heading1"); }, type: "heading", props: { level: 1 } },
+  { get label() { return t("heading2"); }, type: "heading", props: { level: 2 } },
+  { get label() { return t("heading3"); }, type: "heading", props: { level: 3 } },
   { get label() { return t("checklist"); }, type: "checkListItem" },
   { get label() { return t("bulletedList"); }, type: "bulletListItem" },
   { get label() { return t("numberedList"); }, type: "numberedListItem" },
-  { get label() { return t("toggleHeading1"); }, type: "heading", props: { level: 1, isToggleable: true, collapsed: false } },
-  { get label() { return t("toggleHeading2"); }, type: "heading", props: { level: 2, isToggleable: true, collapsed: false } },
-  { get label() { return t("toggleHeading3"); }, type: "heading", props: { level: 3, isToggleable: true, collapsed: false } },
   { get label() { return t("quote"); }, type: "quote" },
   { get label() { return t("callout"); }, type: "callout" },
   { get label() { return t("codeBlock"); }, type: "codeBlock", props: { language: "text" } },
