@@ -1,6 +1,12 @@
 import { getGooseDesktop } from "./runtime";
 
 export const quickNoteWindow = {
+  showMainWindow: async () => {
+    const show = getGooseDesktop()?.showMainWindow;
+    if (!show) return false;
+    await show("none");
+    return true;
+  },
   close: () => {
     void getGooseDesktop()?.closeQuicknote();
   },
