@@ -1,7 +1,7 @@
 import { NodeSelection, TextSelection, type EditorState, type Selection, type Transaction } from "prosemirror-state";
 import { getProtectedTitle } from "../utils/documentTitlePolicy";
 
-const MEDIA_TYPES = new Set(["image", "imageResize", "video", "audio", "file"]);
+const MEDIA_TYPES = new Set(["image", "imageResize", "video", "audio", "file", "divider"]);
 export const MEDIA_KEYBOARD_DELETE_META = "goose-media-keyboard-delete";
 
 export function isMediaNodeSelection(selection: Selection): boolean {
