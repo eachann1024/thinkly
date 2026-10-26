@@ -2,6 +2,10 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/stores/pages/actions/create/recovery.ts#block1:1": { "draftDescription": {  }; "draftPreserved": {  } };
+    "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };
+    "src/stores/pages/actions/hydrate.ts#block1:1": { "recovered": { "count": number } };
+    "src/stores/pages/actions/hydrate.ts#block2:2": { "newerStored": {  }; "recoveredEditor": {  }; "recoveryKept": {  } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
     "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };

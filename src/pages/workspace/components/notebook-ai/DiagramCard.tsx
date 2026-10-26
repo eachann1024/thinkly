@@ -1,8 +1,9 @@
 import { useLocale } from "@/i18n";
-import { useCallback, useEffect, useReducer, type RefObject } from "react";
+import { useCallback, useEffect, useReducer, useState, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
 import { svgMarkupToPngBlob } from "@/lib/imageExport/svgToPng";
+import { ArtifactRenderStatus } from "./ArtifactRenderStatus";
 import { ArtifactActions } from "./ArtifactActions";
 import { ArtifactPanZoom } from "./ArtifactPanZoom";
 import { createMermaidArtifactBlocks, insertArtifactBlocks } from "./insertArtifact";
@@ -42,6 +43,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
   const theme = useSettings((state) => state.theme);
   const resolvedTheme = useResolvedTheme(theme);
   const [renderState, dispatch] = useReducer(diagramRenderReducer, { status: "empty" });
+  const [revision, setRevision] = useState(0);
   const key = `${resolvedTheme}:${source}`;
   const svg = renderState.status === "ready" && renderState.key === key ? renderState.svg : "";
   const failed = renderState.status === "failed" && renderState.key === key;
@@ -66,7 +68,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
     return () => {
       active = false;
     };
-  }, [resolvedTheme, source, key]);
+  }, [resolvedTheme, source, key, revision]);
 
   const capturePng = useCallback(async () => {
     const markup =
@@ -81,6 +83,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
       <div className="notebook-ai-canvas-card-header">
         <div className="notebook-ai-canvas-card-title">{title?.trim() || t("diagram")}</div>
         <ArtifactActions
+          imageReady={Boolean(svg)}
           previewIdentity={key}
           copySource={source}
           onCopyImage={async () => capturePng()}
@@ -115,14 +118,8 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
             dangerouslySetInnerHTML={{ __html: svg }}
           />
         </ArtifactPanZoom>
-      ) : failed ? (
-        <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          {t("diagramGenerationFailed")}
-        </div>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          {t("generatingDiagram")}
-        </div>
+        <ArtifactRenderStatus failed={failed} onRetry={() => setRevision(value => value + 1)} />
       )}
     </div>
   );

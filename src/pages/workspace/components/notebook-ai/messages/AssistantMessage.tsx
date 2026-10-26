@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { MessagePrimitive } from "@assistant-ui/react";
+import { useMemo, useRef } from "react";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
-import { isNotebookAiToolPart } from "@/lib/notebook-ai/messageUtils";
 import { ToolProgressCard } from "../ToolProgressCard";
 import { ApprovalPlanCard, BatchPlanProposal } from "../ApprovalPlanCard";
 import { PlanReviewCard } from "../approval/PlanReviewCard";
@@ -11,10 +11,7 @@ import {
   type AssistantToolRenderContextValue,
 } from "./toolRenderContext";
 import {
-  collectReasoningText,
-  getTextPartText,
-  shouldShowToolPart,
-  findVisibleApprovalPart,
+  deriveAssistantMessagePresentation,
 } from "./messagePresentation";
 import { AssistantLetterFold } from "./AssistantLetterFold";
 import {
@@ -44,14 +41,39 @@ export function AssistantMessage({
 }) {
   useLocale();
   const completion = isStreaming ? undefined : msg.metadata?.completion;
-  const progressToolParts = (msg.parts ?? [])
-    .filter(isNotebookAiToolPart)
-    .filter((part) => shouldShowToolPart(part, isStreaming));
+  const presentationCache = useRef<{
+    isStreaming: boolean;
+    presentation: ReturnType<typeof deriveAssistantMessagePresentation>;
+  } | null>(null);
+  const presentation = useMemo(() => {
+    const next = deriveAssistantMessagePresentation(msg, isStreaming);
+    const previous = presentationCache.current;
+    if (
+      previous &&
+      previous.isStreaming === isStreaming &&
+      previous.presentation.progressToolParts.length === next.progressToolParts.length
+    ) {
+      let sameToolParts = true;
+      for (let index = 0; index < next.progressToolParts.length; index += 1) {
+        if (
+          previous.presentation.progressToolParts[index] !==
+          next.progressToolParts[index]
+        ) {
+          sameToolParts = false;
+          break;
+        }
+      }
+      if (sameToolParts) {
+        next.progressToolParts = previous.presentation.progressToolParts;
+      }
+    }
+    presentationCache.current = { isStreaming, presentation: next };
+    return next;
+  }, [msg.parts, isStreaming]);
+  const { progressToolParts, hasText, reasoningText, visibleApprovalPart, otherApprovalParts } = presentation;
   const showToolProgress =
     progressToolParts.length > 0 &&
     shouldShowToolProgress(progressToolParts, isStreaming);
-  const hasText = getTextPartText(msg).trim().length > 0;
-  const reasoningText = collectReasoningText(msg);
   const showWorkCard =
     Boolean(completion && completion !== "complete") ||
     showToolProgress ||
@@ -62,15 +84,6 @@ export function AssistantMessage({
     ...toolRenderBase,
     isStreaming,
   };
-  const visibleApprovalPart = findVisibleApprovalPart(
-    progressToolParts,
-    isStreaming,
-  );
-  const otherApprovalParts = progressToolParts
-    .map((part) => findVisibleApprovalPart([part], isStreaming))
-    .filter((part): part is NonNullable<typeof part> =>
-      Boolean(part && part !== visibleApprovalPart),
-    );
 
   return (
     <AssistantToolRenderContext.Provider value={toolRenderValue}>
@@ -78,6 +91,7 @@ export function AssistantMessage({
         {showWorkCard ? (
           <ToolProgressCard
             parts={progressToolParts}
+            execution={msg.metadata?.execution}
             isMessageStreaming={isStreaming}
             completion={completion}
             thinkingText={reasoningText}

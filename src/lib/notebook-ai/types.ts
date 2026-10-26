@@ -37,6 +37,7 @@ export type NotebookAiCompletion =
   | "blocked";
 
 export interface NotebookAiMessageMetadata {
+  execution?: NotebookAiExecution;
   completion?: NotebookAiCompletion;
   displayText?: string;
   resourceReferences?: ResourceRef[];
@@ -53,6 +54,22 @@ export interface NotebookAiMessageMetadata {
   }>;
   createdAt?: number;
   compacted?: boolean;
+}
+
+export interface NotebookAiExecution {
+  startedAt: number;
+  endedAt?: number;
+  modelId: string;
+  tools: Record<string, { startedAt: number; endedAt?: number; type?: string }>;
+  sources?: NotebookAiExecutionSource[];
+}
+
+export interface NotebookAiExecutionSource {
+  id: string;
+  title: string;
+  kind: "note" | "web";
+  url?: string;
+  toolCallId?: string;
 }
 
 export type NotebookAiMessage = UIMessage<
