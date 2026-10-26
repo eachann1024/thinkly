@@ -3,29 +3,27 @@
   --goose-toast-action-active: var(--goose-interactive-selected);
   --goose-toast-action-fg: var(--goose-interactive-selected-fg);
   --goose-toast-action-border: transparent;
-  --goose-toast-action-focus: var(--goose-accent-outline-focus);
   background: var(--goose-toast-action-bg);
   color: var(--goose-toast-action-fg);
+  border-color: var(--goose-toast-action-border);
   box-shadow: inset 0 0 0 1px var(--goose-toast-action-border);
 }
-.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:where(:not(:disabled)):is(:hover, :active) {
+.goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:where(:not(:disabled)):is(:hover, :active, :focus-visible) {
   background: var(--goose-toast-action-active);
+}
+.goose-toaster [data-sonner-toast][data-styled="true"]:is(.goose-toast-success, [data-type="success"]) [data-button][data-action]:not(.goose-toast-action-danger) {
+  --goose-toast-action-bg: color-mix(in srgb, var(--goose-interactive-success) 88%, var(--goose-interactive-success-fg));
+  --goose-toast-action-active: color-mix(in srgb, var(--goose-interactive-success) 80%, var(--goose-interactive-success-fg));
+  --goose-toast-action-fg: var(--goose-interactive-success-fg);
 }
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action].goose-toast-action-danger {
   --goose-toast-action-bg: var(--goose-interactive-danger);
   --goose-toast-action-active: var(--goose-color-danger-subtle-bg);
   --goose-toast-action-fg: var(--goose-interactive-danger-fg);
   --goose-toast-action-border: var(--goose-interactive-danger-border);
-  --goose-toast-action-focus: var(--goose-text-danger);
 }
 .goose-toaster [data-sonner-toast][data-styled="true"] [data-button][data-action]:disabled {
   background: hsl(var(--muted));
   color: var(--goose-text-disabled);
   box-shadow: none;
-}
-@layer properties {
-  :root:not([data-goose-pointer-focus="true"]) .goose-toaster [data-sonner-toast] [data-button][data-action]:focus-visible:not(:disabled) {
-    outline: 2px solid var(--goose-toast-action-focus) !important;
-    outline-offset: -4px;
-  }
 }
