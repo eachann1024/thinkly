@@ -145,10 +145,14 @@
  max-width: 100%;
 }
 
-.ai-md {
+.notebook-ai-messages .ai-md {
+ margin-inline: calc(-1 * var(--notebook-ai-content-gutter, 12px));
+ padding-inline: var(--notebook-ai-content-gutter, 12px);
+ max-width: none;
+ color: var(--goose-text-primary);
  line-height: 1.7;
  word-break: break-word;
- overflow-x: hidden;
+ overflow-x: clip;
  position: relative;
 }
 
@@ -181,15 +185,8 @@
 
 .notebook-ai-user-bubble {
  background: hsl(var(--goose-editor-bg));
- box-shadow:
-  inset 0 0 0 1px var(--goose-block-subtle-bg),
-  0 8px 22px rgba(15, 23, 42, 0.08);
-}
-
-.dark .notebook-ai-user-bubble {
- box-shadow:
-  inset 0 0 0 1px var(--goose-block-subtle-bg),
-  0 8px 22px rgba(0, 0, 0, 0.32);
+ box-shadow: none;
+ border-radius: var(--notebook-ai-card-radius, 12px);
 }
 
 .notebook-ai-message-text {

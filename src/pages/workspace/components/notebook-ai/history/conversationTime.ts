@@ -5,15 +5,21 @@ zh-Hans:
   today: "今天"
   yesterday: "昨天"
   daysAgo: "{{count}}天前"
+  recent: "最近 7 天"
+  earlier: "更早"
 en:
   today: "Today"
   yesterday: "Yesterday"
+  recent: "Previous 7 days"
+  earlier: "Earlier"
   daysAgo_one: "{{count}} day ago"
   daysAgo_other: "{{count}} days ago"
 ja:
   today: "今日"
   yesterday: "昨日"
   daysAgo: "{{count}}日前"
+  recent: "過去7日間"
+  earlier: "それ以前"
 `;
 const t = createTranslator(messages);
 
@@ -32,4 +38,13 @@ export function formatConversationTime(timestamp: number, now = Date.now()) {
     hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
   });
   return `${datePart} ${time}`;
+}
+
+export function conversationTimeGroup(timestamp: number, now = Date.now()) {
+  const date = new Date(timestamp);
+  const today = new Date(now);
+  const calendarDay = (value: Date) => Date.UTC(value.getFullYear(), value.getMonth(), value.getDate());
+  const days = (calendarDay(today) - calendarDay(date)) / 86_400_000;
+  const key = days <= 0 ? "today" : days === 1 ? "yesterday" : days < 7 ? "recent" : "earlier";
+  return { key, label: t(key) };
 }

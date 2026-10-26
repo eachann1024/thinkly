@@ -56,7 +56,7 @@ function AssistantArtifactPart({ artifact }: ToolCallMessagePartProps) {
   if (!ctx) return null;
   const { isStreaming, editorRef } = ctx;
   const part = artifact as ToolDisplayPart | undefined;
-  if (!part || part.type === "tool-executeBatchPlan") return null;
+  if (!part || part.type === "tool-executeBatchPlan" || part.type === "tool-showChoices") return null;
   if (!shouldShowToolPart(part, isStreaming)) return null;
   return renderToolVisual(
     part,
@@ -86,4 +86,18 @@ export const ASSISTANT_ARTIFACT_PARTS = {
   Text: NullMessagePart,
   Reasoning: NullMessagePart,
   tools: { Override: AssistantArtifactPart },
+};
+
+function AssistantChoicePart({ artifact }: ToolCallMessagePartProps) {
+  useLocale();
+  const ctx = useContext(AssistantToolRenderContext);
+  const part = artifact as ToolDisplayPart | undefined;
+  if (!ctx || !part || part.type !== "tool-showChoices" || !shouldShowToolPart(part, ctx.isStreaming)) return null;
+  return renderToolVisual(part, part.toolCallId ?? part.type, ctx.editorRef, ctx.isStreaming);
+}
+
+export const ASSISTANT_CHOICE_PARTS = {
+  Text: NullMessagePart,
+  Reasoning: NullMessagePart,
+  tools: { Override: AssistantChoicePart },
 };
