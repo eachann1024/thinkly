@@ -38,6 +38,7 @@ import type {
   GitRepositoryFolder,
 } from "@/lib/git-sync-contract";
 import { SettingsSectionCard } from "../SettingsSectionCard";
+import { isGitFolderRecoveryRequired } from "./gitFolderRows";
 
 function distinguishingPath(
   folder: GitRepositoryFolder,
@@ -113,8 +114,7 @@ export function GitFolderList({
             /[，。； ]*已停止本次同步[。]?/g,
             "",
           );
-          const needsRecovery =
-            !available || /不存在|无法匹配|身份|路径已变化|no longer exists|does not exist|not found|missing|not.*match|identity|path.*changed/i.test(error ?? "");
+          const needsRecovery = isGitFolderRecoveryRequired(available, error);
           const shortPath = distinguishingPath(folder, rows);
           const blocked =
             disabled ||

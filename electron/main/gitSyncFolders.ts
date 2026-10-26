@@ -5,7 +5,7 @@ import { t } from "./i18n/gitErrors";
 import { lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import type { GitFolderCheck } from "../../src/lib/git-sync-contract";
-import { addVaultRoot, assertAllowed, findVaultRootContaining, hasUnsafeSegments, normalizePath } from "./allowlist";
+import { addVaultRoot, assertAllowed, findVaultRootContaining, hasUnsafeSegments, isAllowedPath, normalizePath } from "./allowlist";
 import { validateGitSyncFolder } from "./gitRepositoryEngine";
 
 export async function rememberNotebookRoot(localPath: unknown): Promise<boolean> {
@@ -22,10 +22,46 @@ export async function rememberNotebookRoot(localPath: unknown): Promise<boolean>
 }
 
 export async function checkedGitRoot(localPath: string) {
-  const allowed = assertAllowed(localPath);
-  const stat = await lstat(allowed);
-  const root = await realpath(allowed);
-  if (!stat.isDirectory() || stat.isSymbolicLink() || normalizePath(root) !== normalizePath(allowed)) throw new Error(t("noSymlink"));
+  // `..` and NUL must be rejected before the path is normalized. For paths
+  // outside the allowlist, inspect only whether the configured root is gone;
+  // this lets stale sync entries reach recovery without granting access to
+  // existing unapproved paths.
+  if (hasUnsafeSegments(localPath)) return assertAllowed(localPath);
+  const normalized = normalizePath(localPath);
+  const allowed = isAllowedPath(normalized) ? normalized : null;
+  if (!allowed) {
+    try {
+      await lstat(normalized);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new Error(t("missingFolder"));
+      assertAllowed(normalized);
+      throw error;
+    }
+    return assertAllowed(normalized);
+  }
+
+  let stat;
+  try {
+    stat = await lstat(allowed);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") throw new Error(t("missingFolder"));
+    if (code === "EACCES" || code === "EPERM") throw new Error(t("readPermission"));
+    throw error;
+  }
+  if (stat.isSymbolicLink()) throw new Error(t("noSymlink"));
+  if (!stat.isDirectory()) throw new Error(t("syncFolderInvalid"));
+
+  let root: string;
+  try {
+    root = await realpath(allowed);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") throw new Error(t("missingFolder"));
+    if (code === "EACCES" || code === "EPERM") throw new Error(t("readPermission"));
+    throw error;
+  }
+  if (normalizePath(root) !== normalizePath(allowed)) throw new Error(t("noSymlink"));
   assertAllowed(root);
   const vault = findVaultRootContaining(root);
   if (!vault || normalizePath(await realpath(vault)) !== normalizePath(root)) throw new Error(t("reopenRoot"));
