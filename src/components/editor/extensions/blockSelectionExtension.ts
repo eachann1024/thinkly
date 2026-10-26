@@ -1,11 +1,54 @@
 import { createExtension, type BlockNoteEditor } from "@blocknote/core";
 import { SuggestionMenu } from "@blocknote/core/extensions";
-import { Plugin, PluginKey, TextSelection } from "prosemirror-state";
-import { Decoration, DecorationSet } from "prosemirror-view";
+import { Plugin, PluginKey, TextSelection, NodeSelection, type EditorState } from "prosemirror-state";
+import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
 import { shouldOpenSlashSuggestionMenu } from "../utils/slashMenuPolicy";
 import { GooseBlockSelection, adjacentBlock, currentBlockNode, selectedBlockRoots, isBlockNodeSelection } from "./blockSelectionModel";
 import { deleteSelectionSafely } from "./selectionDelete";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import { createSparseBlockHandleDecorations, sparseBlockDecorationTargetsAtPositions } from "./sparseBlockHandleDecorations";
+
+const decorationsByDocument = new WeakMap<EditorState["doc"], {
+  selection: EditorState["selection"];
+  decorations: DecorationSet;
+}>();
+
+export function resolveBlockSelectionDecorations(state: EditorState): DecorationSet | null {
+  const selection = state.selection;
+  const cached = decorationsByDocument.get(state.doc);
+  if (cached?.selection === selection) return cached.decorations;
+  const blocks = selection instanceof GooseBlockSelection ? selectedBlockRoots(state) :
+    selection instanceof NodeSelection && selection.node.type.name === "blockContainer"
+      ? [{ node: selection.node, pos: selection.from }] : [];
+  if (!blocks.length) return null;
+  const decorations = selection instanceof NodeSelection
+    ? createSparseBlockHandleDecorations(state.doc, sparseBlockDecorationTargetsAtPositions(state.doc, blocks), () => ({
+      class: "ProseMirror-selectednode", "data-goose-block-selected": "true",
+    }))
+    : DecorationSet.create(state.doc, blocks.map(({ node, pos }) =>
+    Decoration.node(pos, pos + node.nodeSize, {
+      class: "ProseMirror-selectednode", "data-goose-block-selected": "true",
+    }),
+  ));
+  decorationsByDocument.set(state.doc, { selection, decorations });
+  return decorations;
+}
+
+export function restoreTextSelectionOnBlockClick(view: EditorView, _pos: number, event: MouseEvent): boolean {
+  if (event.button !== 0 || event.shiftKey || event.altKey || event.metaKey || event.ctrlKey || view.composing || !view.editable) return false;
+  const { state } = view;
+  if (!(state.selection instanceof NodeSelection) || state.selection.node.type.name !== "blockContainer") return false;
+  const target = event.target instanceof Element ? event.target : null;
+  const inline = target?.closest(".bn-inline-content");
+  if (!inline || !view.dom.contains(inline) || target?.closest(
+    'a, button, input, textarea, select, td, th, [role="button"], [contenteditable="false"], [data-inline-content-type="pageMention"]',
+  )) return false;
+  const hit = view.posAtCoords({ left: event.clientX, top: event.clientY });
+  if (!hit || !state.doc.resolve(hit.pos).parent.inlineContent) return false;
+  view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, hit.pos)).setMeta("addToHistory", false).setMeta("pointer", true));
+  view.focus();
+  return true;
+}
 
 const SLASH_TRIGGERS = new Set(["/", "、"]);
 
@@ -35,12 +78,8 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
   prosemirrorPlugins: [new Plugin({
     key: new PluginKey("goose-block-selection"),
     props: {
-      decorations(state) {
-        if (!(state.selection instanceof GooseBlockSelection)) return null;
-        return DecorationSet.create(state.doc, selectedBlockRoots(state).map(({ node, pos }) =>
-          Decoration.node(pos, pos + node.nodeSize, { class: "ProseMirror-selectednode", "data-goose-block-selected": "true" }),
-        ));
-      },
+      decorations: resolveBlockSelectionDecorations,
+      handleClick: restoreTextSelectionOnBlockClick,
       handleKeyDown(view, event) {
         if (view.composing || event.isComposing || event.keyCode === 229) return false;
         const primary = isPlatformPrimaryModifierEvent(event);
