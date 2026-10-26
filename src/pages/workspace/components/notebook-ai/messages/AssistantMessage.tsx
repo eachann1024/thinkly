@@ -17,6 +17,7 @@ import { AssistantLetterFold } from "./AssistantLetterFold";
 import {
   ASSISTANT_TEXT_PARTS,
   ASSISTANT_ARTIFACT_PARTS,
+  ASSISTANT_CHOICE_PARTS,
 } from "./assistantParts";
 import { MessageActionBar } from "./MessageActionBar";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -77,6 +78,7 @@ export function AssistantMessage({
   const showWorkCard =
     Boolean(completion && completion !== "complete") ||
     showToolProgress ||
+    progressToolParts.some(part => part.type === "tool-showChoices") ||
     hasText ||
     (isStreaming && (!hasText || reasoningText.length > 0));
 
@@ -116,6 +118,7 @@ export function AssistantMessage({
             {visibleApprovalPart ? (
               <BatchPlanProposal part={visibleApprovalPart} />
             ) : null}
+            <MessagePrimitive.Parts components={ASSISTANT_CHOICE_PARTS} />
           </ToolProgressCard>
         ) : null}
         {otherApprovalParts.map((part) => (

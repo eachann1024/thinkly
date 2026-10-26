@@ -15,8 +15,8 @@
 
 .ai-card-choices-question { margin: 0 0 6px; font-weight: var(--font-weight-medium); }
 .ai-card-choices-list, .ai-card-quiz-options { display: flex; flex-direction: column; gap: 4px; }
-.ai-card .ai-card-choice { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 34px; padding: 6px 10px; border: 1px solid hsl(var(--border));
-  border-radius: 8px; background: hsl(var(--background)); color: var(--goose-text-primary); text-align: left; font-size: 13px; line-height: 18px;
+.ai-card .ai-card-choice { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 34px; padding: 6px 10px; border: 1px solid transparent;
+  border-radius: var(--goose-control-radius, 6px); background: transparent; color: var(--goose-text-primary); text-align: left; font-size: 13px; line-height: 18px;
   transition: background-color var(--goose-control-motion-duration) ease, border-color var(--goose-control-motion-duration) ease, opacity 200ms ease; }
 .ai-card .ai-card-choice:hover:not(:disabled) { background: var(--goose-interactive-hover); }
 .ai-card .ai-card-choice:disabled { opacity: .55; }
@@ -57,13 +57,13 @@
 .ai-card-quiz-score .ai-card-progress { width: 100%; }
 .ai-card-quiz-score-value { font-size: 28px; line-height: 34px; font-weight: 300; }
 
-.ai-card-flash-stage { perspective: 900px; }
+.ai-card-flash-stage { min-width: 0; }
 .ai-card .ai-card-flash-card { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: center; cursor: pointer; }
-.ai-card-flash-inner { display: grid; transform-style: preserve-3d; }
+.ai-card-flash-inner { display: grid; }
 .ai-card-flash-face { grid-area: 1 / 1; display: flex; align-items: center; justify-content: center; min-height: 104px; padding: 14px 16px;
   border: 1px solid hsl(var(--border)); border-radius: 10px; background: hsl(var(--background)); font-size: 15px; line-height: 22px;
   backface-visibility: hidden; -webkit-backface-visibility: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
-.ai-card-flash-face[data-back] { transform: rotateY(180deg); color: var(--goose-text-secondary); background: color-mix(in srgb, var(--goose-accent-solid) 5%, hsl(var(--background))); }
+.ai-card-flash-face[data-back] { color: var(--goose-text-secondary); background: color-mix(in srgb, var(--goose-accent-solid) 5%, hsl(var(--background))); }
 .ai-card-flash-count { margin: 0 auto 0 4px; font-size: 12px; color: var(--goose-text-secondary); }
 
 .ai-card-calc-outputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 8px 16px; margin-bottom: 8px; }
@@ -99,3 +99,13 @@
 @media (prefers-reduced-motion: reduce) {
   .ai-card .ai-card-choice, .ai-card-check-text, .ai-card .ai-card-steps-dot, .ai-card-ring-arc { transition: none; }
 }
+
+.ai-card-flash-face[hidden] { display: none; }
+.notebook-ai-work-letter .ai-card[data-kind="choices"] .ai-card-choice {
+ width: calc(100% + 18px);
+ margin-inline: -9px;
+ padding: 8px;
+ font-size: inherit;
+ line-height: 1.5;
+}
+.notebook-ai-work-letter .ai-card-choice-desc { font-size: 13px; line-height: 20px; }

@@ -122,8 +122,10 @@ export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps)
           />
         </ArtifactPanZoom>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center px-3 py-4 text-xs text-muted-foreground">
-          <EmptyState icon={Image} title={t("couldNotDisplayImage")} />
+        <div className="notebook-ai-artifact-render-region--diagram">
+          <div className="notebook-ai-artifact-render-status">
+            <EmptyState icon={Image} title={t("couldNotDisplayImage")} />
+          </div>
         </div>
       )}
     </div>

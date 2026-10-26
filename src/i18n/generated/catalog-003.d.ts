@@ -60,7 +60,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/NotebookAiPanel.tsx#messages:1": { "aiAssistant": {  } };
     "src/pages/workspace/components/notebook-ai/SvgArtifactCard.tsx#messages:1": { "couldNotDisplayImage": {  }; "generatingImage": {  }; "generatingImage2": {  }; "image": {  } };
     "src/pages/workspace/components/notebook-ai/TableCard.tsx#messages:1": { "table": {  } };
-    "src/pages/workspace/components/notebook-ai/ToolProgressCard.tsx#messages:1": { "awaitingApproval": {  }; "canceled": {  }; "complete": {  }; "failed": {  }; "inProgress": {  }; "pending": {  }; "progress": {  }; "thinking": {  }; "undone": {  } };
+    "src/pages/workspace/components/notebook-ai/ToolProgressCard.tsx#messages:1": { "awaitingApproval": {  }; "canceled": {  }; "choicesProvided": {  }; "complete": {  }; "failed": {  }; "inProgress": {  }; "pending": {  }; "progress": {  }; "thinking": {  }; "undone": {  } };
     "src/pages/workspace/components/notebook-ai/ToolProgressPages.tsx#messages:1": { "first": {  }; "last": {  }; "next": {  }; "page": {  }; "previous": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewDiff.tsx#messages:1": { "changeDiff": {  } };
     "src/pages/workspace/components/notebook-ai/approval/ReviewProposal.tsx#messages:1": { "applied": {  }; "deselectAll": {  }; "failed": {  }; "needsReview": {  }; "notApplied": {  }; "pending": {  }; "rolledBack": {  }; "selectAll": {  }; "selectedCount": { "selected": string | number; "total": string | number }; "skipped": {  }; "undone": {  } };
@@ -75,7 +75,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/beautiful-ui/LoadingState.tsx#messages:1": { "processing": {  } };
     "src/pages/workspace/components/notebook-ai/beautifulUiMap.ts#messages:1": { "detailProcessedFor": { "value1": string | number }; "detailThoughtFor": { "value1": string | number }; "detailToolsRun": { "value1": string | number }; "processing": {  }; "runningTools": {  }; "searchComplete": {  }; "searching": {  }; "thinking": {  }; "thisStepWasNotCompletedAndMayHave": {  } };
     "src/pages/workspace/components/notebook-ai/composer/useComposerAttachments.ts#messages:1": { "chooseAPngJpegWebpOrGifImage": {  } };
-    "src/pages/workspace/components/notebook-ai/history/conversationTime.ts#messages:1": { "daysAgo": { "count": number }; "today": {  }; "yesterday": {  } };
+    "src/pages/workspace/components/notebook-ai/history/conversationTime.ts#messages:1": { "daysAgo": { "count": number }; "earlier": {  }; "recent": {  }; "today": {  }; "yesterday": {  } };
     "src/pages/workspace/components/notebook-ai/history/historyActions.ts#messages:1": { "confirmDeletion": {  }; "conversationDeleted": {  }; "detailDeleteConversation": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/insertArtifact.ts#messages:1": { "image": {  }; "noPageIsOpen": {  }; "nothingToInsert": {  } };
     "src/pages/workspace/components/notebook-ai/messages/AssistantLetterFold.tsx#messages:1": { "thinking": {  } };

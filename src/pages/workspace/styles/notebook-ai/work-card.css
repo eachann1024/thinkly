@@ -1,15 +1,8 @@
 .notebook-ai-approval-plan.bui-approval {
  background: hsl(var(--goose-editor-bg));
- color: hsl(var(--foreground));
- box-shadow:
-  inset 0 0 0 1px var(--goose-block-subtle-bg),
-  0 8px 22px rgba(15, 23, 42, 0.08);
-}
-
-.dark .notebook-ai-approval-plan.bui-approval {
- box-shadow:
-  inset 0 0 0 1px var(--goose-block-subtle-bg),
-  0 8px 22px rgba(0, 0, 0, 0.32);
+ color: var(--goose-text-primary);
+ box-shadow: none;
+ border-radius: var(--notebook-ai-card-radius, 12px);
 }
 
 .notebook-ai-messages .notebook-ai-approval-plan button {
@@ -27,7 +20,8 @@
 }
 
 .notebook-ai-work-card.bui-approval {
- padding: 16px 20px;
+ padding: 16px 24px;
+ border-radius: var(--notebook-ai-card-radius, 12px);
  box-shadow: inset 0 0 0 1px var(--goose-block-subtle-bg);
 }
 
@@ -47,15 +41,15 @@
 
 .notebook-ai-work-mark {
  display: block;
- width: 14px;
- height: 14px;
+ width: 16px;
+ height: 16px;
  flex: 0 0 auto;
  color: hsl(var(--muted-foreground));
 }
 
 .bui-think-spinner.notebook-ai-work-mark {
- width: 14px;
- height: 14px;
+ width: 16px;
+ height: 16px;
 }
 
 .notebook-ai-work-step {
@@ -176,7 +170,7 @@
 }
 
 .notebook-ai-letter-chev {
- flex: 0 0 14px;
+ flex: 0 0 16px;
  transition: transform 180ms ease-out;
 }
 

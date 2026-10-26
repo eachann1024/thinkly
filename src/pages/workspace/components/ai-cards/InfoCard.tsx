@@ -116,7 +116,7 @@ export const InfoCard = memo(function InfoCard({ card, className }: { card: Info
   return <motion.section className={["ai-card", className].filter(Boolean).join(" ")} data-kind={card.kind} aria-label={header?.title}
     variants={cardVariants} initial={reduce ? false : "hidden"} animate="shown">
     {header && <header className="ai-card-head">
-      {Icon && <Icon size={14} aria-hidden="true"/>}
+      {Icon && <Icon size={16} aria-hidden="true"/>}
       <span className="ai-card-title">{header.title}</span>
       {header.source && <span className="ai-card-source">{header.source}</span>}
     </header>}

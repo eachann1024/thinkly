@@ -26,7 +26,7 @@ ja:
 `;
 const t = createTranslator(messages);
 
-const FLIP_SPRING = { type: "spring", stiffness: 260, damping: 26, mass: 0.9 } as const;
+const FLIP_TRANSITION = { duration: 0.15 } as const;
 
 function shuffled(length: number, current: number) {
   const order = Array.from({ length }, (_, i) => i);
@@ -51,10 +51,10 @@ export function FlashcardsCard({ card }: { card: FlashcardsCardData }) {
     <motion.div variants={rowVariants} className="ai-card-flash-stage">
       <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="ai-card-flash-card"
         title={t("flip")} aria-label={flipped ? current.back : current.front} aria-pressed={flipped} onClick={() => setFlipped(f => !f)}>
-        <motion.span key={position} className="ai-card-flash-inner" initial={false}
-          animate={{ rotateY: flipped ? 180 : 0 }} transition={reduce ? { duration: 0 } : FLIP_SPRING}>
-          <span className="ai-card-flash-face" aria-hidden={flipped}>{current.front}</span>
-          <span className="ai-card-flash-face" data-back="true" aria-hidden={!flipped}>{current.back}</span>
+        <motion.span key={`${position}-${flipped}`} className="ai-card-flash-inner" initial={{ opacity: reduce ? 1 : 0 }}
+          animate={{ opacity: 1 }} transition={reduce ? { duration: 0 } : FLIP_TRANSITION}>
+          <span className="ai-card-flash-face" hidden={flipped} aria-hidden={flipped}>{current.front}</span>
+          <span className="ai-card-flash-face" data-back="true" hidden={!flipped} aria-hidden={!flipped}>{current.back}</span>
         </motion.span>
       </Button>
     </motion.div>

@@ -88,7 +88,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
         align="center"
         sideOffset={6}
         collisionPadding={12}
-        className="notebook-ai-model-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto p-2"
+        className="notebook-ai-model-menu max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto"
       >
         <div className="goose-list-layout">
           {customModelOptions.map((option) => {
@@ -114,7 +114,7 @@ export function ModelSelectorPopover({ disabled }: ModelSelectorPopoverProps) {
                 ) : null}
                 {isActive ? (
                   <Check
-                    className="h-3.5 w-3.5 shrink-0 text-[var(--goose-interactive-selected-fg)]"
+                    className="h-4 w-4 shrink-0 text-[var(--goose-interactive-selected-fg)]"
                     strokeWidth={2}
                   />
                 ) : null}

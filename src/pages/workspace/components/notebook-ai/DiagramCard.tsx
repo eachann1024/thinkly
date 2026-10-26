@@ -109,6 +109,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
           }
         />
       </div>
+      <div className="notebook-ai-artifact-render-region notebook-ai-artifact-render-region--diagram">
       {svg ? (
         <ArtifactPanZoom contentKey={`${resolvedTheme}:${source}`} minHeight={280}>
           <div
@@ -121,6 +122,7 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
       ) : (
         <ArtifactRenderStatus failed={failed} onRetry={() => setRevision(value => value + 1)} />
       )}
+      </div>
     </div>
   );
 }
