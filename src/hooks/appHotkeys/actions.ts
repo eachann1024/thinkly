@@ -37,10 +37,12 @@ import {
 } from "@/lib/settings-navigation";
 import { findLoneVisibleWorkspaceTab } from "@/pages/workspace/components/page/visibleTabs";
 import type { AppHotkeyRefs } from "./types";
+import { createCloseTargetTracker } from "./closeTarget";
 
 export function createHotkeyActions(refs: AppHotkeyRefs) {
   const { appShortcutsRef, openTabsRef, activeTabIdRef } = refs;
   const fixedShortcuts = getFixedAppShortcuts();
+  const closeTarget = createCloseTargetTracker(document);
 
   const isEditableEventTarget = (event: KeyboardEvent) => {
     const target =
@@ -123,7 +125,7 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
       window.dispatchEvent(new CustomEvent("goose-note:close-settings"));
       return;
     }
-    if (closeNotebookAiPanel()) return;
+    if ((fromEscape || closeTarget.isAiPanelTarget()) && closeNotebookAiPanel()) return;
     if (fromEscape) return;
     if (closePaneOrTab() === "closed-pane") return;
     if (!isElectronRuntime() && effectiveSingleTabMode()) return;
@@ -172,6 +174,7 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     isZoomResetKey,
     hasPrimaryModifier,
     matchesConfiguredShortcut,
+    installCloseTargetTracking: closeTarget.install,
     runUnifiedClose,
     createNewNoteFromHotkey,
   };
