@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
 import { MenuRootContent, MenuRootScopeContext, useMenuRoot } from "./menu-root";
-
 type DropdownVariant = "dropdown" | "menu";
 const DropdownVariantContext = React.createContext<DropdownVariant>("dropdown");
 
@@ -45,10 +44,11 @@ function DropdownMenu({
 const DropdownMenuTrigger = React.forwardRef<
   HTMLElement,
   React.HTMLAttributes<HTMLElement> & { asChild?: boolean }
->(({ asChild, children, ...props }, ref) => (
+>(({ asChild, children, className, ...props }, ref) => (
   <HeroPopover.Trigger
     {...props}
     ref={ref as React.Ref<HTMLDivElement>}
+    className={cn("goose-popup-trigger", className)}
     render={
       asChild && React.isValidElement(children)
         ? (injected) => (

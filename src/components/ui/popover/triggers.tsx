@@ -8,7 +8,7 @@ import { usePopoverContext } from "./state";
 export const PopoverTrigger = React.forwardRef<
   HTMLElement,
   React.HTMLAttributes<HTMLElement> & { asChild?: boolean }
->(({ asChild, children, ...props }, forwardedRef) => {
+>(({ asChild, children, className, ...props }, forwardedRef) => {
   const state = usePopoverContext();
   const ref = useMergeRefs([forwardedRef, state.refs.setReference]);
   const injected = {
@@ -28,6 +28,7 @@ export const PopoverTrigger = React.forwardRef<
       },
     }),
     ref,
+    className: cn("goose-popup-trigger", className),
     "data-state": state.open ? "open" : "closed",
     "data-present": state.isMounted ? "true" : "false",
     "data-motion": state.motionMode,

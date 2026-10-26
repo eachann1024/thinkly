@@ -1,4 +1,5 @@
 .goose-accent-selection,
+.goose-popup-trigger,
 [data-goose-control="theme-preview-card"],
 [data-goose-setting-choice="true"] {
   --goose-selection-border: var(--goose-accent-solid);
@@ -10,14 +11,15 @@
 .dark .goose-accent-option {
   --goose-selection-focus: var(--goose-accent-option-dark-focus, var(--goose-accent-outline-focus));
 }
-.goose-accent-selection:is(.goose-interactive-danger, .goose-menu-item-danger) {
+:is(.goose-accent-selection, .goose-popup-trigger):is(.goose-interactive-danger, .goose-menu-item-danger) {
   --goose-selection-border: var(--goose-interactive-danger-border);
   --goose-selection-focus: var(--goose-text-danger);
 }
-:root .goose-accent-selection:where(
+:root :is(.goose-accent-selection, .goose-popup-trigger):where(
   :not([data-goose-selected="false"]):not(:disabled):not([data-disabled="true"]):not([aria-disabled="true"]):not([data-invalid="true"]):not([aria-invalid="true"]):not([data-goose-context="media"])
 ):is([data-goose-selected="true"], [data-selected="true"], [aria-selected="true"], [aria-pressed="true"],
-  [aria-checked="true"], [data-state="checked"], [data-state="on"], [aria-current="true"], [aria-current="page"]) {
+  [aria-checked="true"], [data-state="checked"], [data-state="on"], [data-state="open"],
+  [aria-expanded="true"], [aria-current="true"], [aria-current="page"]) {
   background-color: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
   box-shadow: inset 0 0 0 1px var(--goose-selection-border);

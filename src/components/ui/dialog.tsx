@@ -49,11 +49,15 @@ function Dialog({ open, defaultOpen, onOpenChange, children }: DialogProps) {
 const DialogTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
->(({ asChild, children, onClick, ...props }, ref) => {
-  const { setOpen } = useDialogState();
+>(({ asChild, children, className, onClick, ...props }, ref) => {
+  const { open, setOpen } = useDialogState();
   const injected = {
     ...props,
     ref,
+    className: cn("goose-popup-trigger", className),
+    "data-state": open ? "open" : "closed",
+    "aria-haspopup": "dialog" as const,
+    "aria-expanded": open,
     onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(event);
       if (!event.defaultPrevented) setOpen(true);
