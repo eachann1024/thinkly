@@ -4,6 +4,8 @@ import {
   validateMarkdownRead,
 } from "@/lib/local-folder-scanner/read-cache";
 import type { StoreSet, StoreGet } from "../../hydrate";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { pageWithParsedMarkdown } from "@/lib/local-folder-scanner/applyParsed";
 import {
   parseLocalMarkdownContent,
   localFileTitleFromPath,
@@ -45,6 +47,9 @@ export const reloadLocalPageFromDiskAction = async (
     markdown,
     localFileTitleFromPath(filePath),
     readError,
+    useNotebooks.getState().notebooks[page.workspaceId]?.localPath
+      ? { root: useNotebooks.getState().notebooks[page.workspaceId].localPath!, fs }
+      : undefined,
   );
 
   if (read.stat && !(await validateMarkdownRead(fs, filePath, read, false)))
@@ -56,16 +61,12 @@ export const reloadLocalPageFromDiskAction = async (
     current.trashedAt ||
     current.workspaceId !== page.workspaceId ||
     current.localFilePath !== filePath ||
-    current.content !== page.content ||
+    current !== page ||
     get().dirtyLocalPageIds[pageId]
   )
     return;
 
-  if (typeof markdown === "string") {
-    setLocalMdSnapshot(filePath, markdown);
-    if (read.stat) updateSnapshotStat(filePath, read.stat);
-  }
-
+  let applied = false;
   set((state) => {
     const current = state.pages[pageId];
     if (
@@ -73,27 +74,35 @@ export const reloadLocalPageFromDiskAction = async (
       current.trashedAt ||
       current.workspaceId !== page.workspaceId ||
       current.localFilePath !== filePath ||
-      current.content !== page.content ||
+      current !== page ||
       state.dirtyLocalPageIds[pageId]
     )
       return state;
+    if (parsed.metadataId !== page.localMetadataId && (parsed.metadataId || page.localMetadataId)) {
+      return { pages: { ...state.pages, [pageId]: {
+        ...current, localReadState: "error",
+        localReadError: "磁盘笔记 ID 已改变，已保留当前内容；请重新扫描笔记本以确认身份",
+      } } };
+    }
+    if (parsed.readState === "error") {
+      return { pages: { ...state.pages, [pageId]: { ...current,
+        localReadState: "error", localReadError: parsed.readError,
+      } } };
+    }
+    applied = true;
     return {
       pages: {
         ...state.pages,
-        [pageId]: {
-          ...current,
-          content: parsed.content,
-          localFrontmatter: parsed.frontmatter,
-          fontFamily: parsed.fontFamily,
-          pageLayout: parsed.pageLayout,
-          isLocked: parsed.isLocked,
-          localReadState: parsed.readState,
-          localReadError: parsed.readError,
-          updatedAt: Date.now(),
-        },
+        [pageId]: pageWithParsedMarkdown(current, parsed),
       },
     };
   });
+
+  if (!applied) return;
+  if (typeof markdown === "string") {
+    setLocalMdSnapshot(filePath, markdown);
+    if (read.stat) updateSnapshotStat(filePath, read.stat);
+  }
 
   if (get().activePageId === pageId) {
     window.dispatchEvent(
