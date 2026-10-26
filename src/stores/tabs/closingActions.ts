@@ -131,8 +131,9 @@ export function createClosingTabActions(
         activeTabId: currentTab.id,
         ...historyState,
       });
-      get().syncNotebookForPage(workspaceTabPageId(currentTab));
-      void scheduleSetActivePage(workspaceTabPageId(currentTab));
+      const pageId = isSpecialTab(currentTab) ? null : workspaceTabPageId(currentTab);
+      get().syncNotebookForPage(pageId);
+      void scheduleSetActivePage(pageId);
     }),
 
     closeTabsToLeft: (tabId: string) => runWithPresence(() => {
