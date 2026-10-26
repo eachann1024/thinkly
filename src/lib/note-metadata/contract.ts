@@ -23,6 +23,7 @@ export type NoteMetadataEnvelope = {
   deleted?: boolean;
   previousRelativePath?: string;
   recovery?: NoteMetadataSnapshot;
+  recoveries?: NoteMetadataSnapshot[];
   current: NoteMetadataSnapshot;
   previous?: NoteMetadataSnapshot;
   legacyBaseline?: string;
