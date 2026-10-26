@@ -1,9 +1,8 @@
 import { cloneElement, useLayoutEffect, useRef, type ReactElement, type MouseEvent } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { ArrowUp, ArrowDown, Copy, Scissors, Clipboard, Trash2, Replace, ChevronRight } from "@/components/ui/icons";
+import { ArrowUp, ArrowDown, Trash2, Replace, ChevronRight } from "@/components/ui/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { EditorSubmenuTrigger } from "../ui/vendor-menu";
-import { useEditorContextClipboard } from "../menus/useEditorContextClipboard";
 import { useEditorSettings } from "../platform/hostContext";
 import { blockHandleCapabilities, BlockHandleIcon } from "./blockHandleModel";
 import { blockHandleText as t } from "./blockHandleMessages";
@@ -24,14 +23,12 @@ type Props = {
 };
 
 export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, children }: Props) {
-  const selectedText = useRef("");
   const menuOwner = useRef({}).current;
   useLayoutEffect(() => {
     setBlockHandleMenuOpen(editor, menuOwner, open);
     return () => setBlockHandleMenuOpen(editor, menuOwner, false);
   }, [editor, menuOwner, open]);
   const { defaultCodeBlockWrap } = useEditorSettings();
-  const clipboard = useEditorContextClipboard(editor, editor.isEditable, selectedText);
   const capabilities = blockHandleCapabilities(editor, block);
   const owner = getBlockToolbarOwner(editor.prosemirrorView.dom);
   const run = (action: () => void) => {
@@ -41,7 +38,6 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
   const layout = useBlockHandleMenuLayout(editor.prosemirrorView.dom, open, anchor);
   const changeOpen = (next: boolean) => {
     setBlockHandleMenuOpen(editor, menuOwner, next);
-    if (next && selectHandleBlock(editor, block.id)) clipboard.rememberContextSelection();
     onOpenChange(next);
   };
   return (
@@ -77,9 +73,6 @@ export function BlockHandleMenu({ editor, block, open, onOpenChange, anchor, chi
           </DropdownMenuContent>
         </EditorSubmenuTrigger>}
         <BlockHandleStyleMenus editor={editor} block={block} run={run} layout={layout} />
-        {capabilities.copy && <DropdownMenuItem onSelect={() => run(clipboard.handleCopySelection)}><Copy />{t("copy")}</DropdownMenuItem>}
-        {capabilities.mutate && <DropdownMenuItem onSelect={() => run(clipboard.handleCutSelection)}><Scissors />{t("cut")}</DropdownMenuItem>}
-        {capabilities.mutate && <DropdownMenuItem onSelect={() => run(clipboard.handleContextPaste)}><Clipboard />{t("paste")}</DropdownMenuItem>}
         {capabilities.mutate && <DropdownMenuItem className="goose-block-handle-danger" onSelect={() => run(() => { deleteHandleBlock(editor, block.id); })}>
           <Trash2 />{t("remove")}
         </DropdownMenuItem>}
