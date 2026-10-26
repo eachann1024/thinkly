@@ -29,10 +29,11 @@ import {
   acknowledgeRecoveryEntry,
   canApplyRecoveryEntry,
 } from "@/lib/storage/recoveryJournal";
-import { getContentSignature } from "@/components/editor/utils/blocknote-content";
-import { restorePendingLocalSave } from "../../../folderSync";
-import { toast } from "@/components/ui/sonner";
+import { getLocalRecoveryContentSignature, normalizeLocalRecoveryBaseSignature } from "@/lib/storage/localRecoverySignature";
+import { getPendingLocalSaveContent, isRecoveredLocalSaveConfirmationRequired, restorePendingLocalSave } from "../../../folderSync";
+import { notifyRecoveryDrafts } from "@/lib/recoveryDraftNotice";
 import { recoverEditorDraft } from "../../recoverEditorDraft";
+import { recoverySettingsMatch, validRecoverySettings } from "@/lib/storage/localRecoverySettings";
 
 export function recoverScannedLocalPages(
   set: StoreSet,
@@ -42,6 +43,10 @@ export function recoverScannedLocalPages(
   let recoveredCount = 0;
   let conflictCount = 0;
   for (const entry of listRecoveryEntries("local-file")) {
+    if (!validRecoverySettings(entry.settings) || !validRecoverySettings(entry.baseSettings)) {
+      conflictCount += 1;
+      continue;
+    }
     const current = get().pages[entry.id];
     if (!current) {
       const draft = recoverEditorDraft(entry);
@@ -57,14 +62,24 @@ export function recoverScannedLocalPages(
     }
     if (!current || current.workspaceId !== notebookId || current.isFolder)
       continue;
-    const currentSignature = getContentSignature(current.content);
-    if (currentSignature === getContentSignature(entry.content)) {
-      if (!current.editorDraft) acknowledgeRecoveryEntry("local-file", entry.id, entry.revision);
+    if (current.localReadState === "error") {
+      conflictCount += 1;
       continue;
     }
+    const currentSignature = getLocalRecoveryContentSignature(current.content);
+    if (currentSignature !== null && currentSignature === getLocalRecoveryContentSignature(entry.content) && recoverySettingsMatch(current, entry.settings)) {
+      if (!current.editorDraft && !get().dirtyLocalPageIds[entry.id] && getPendingLocalSaveContent(entry.id) === undefined && !isRecoveredLocalSaveConfirmationRequired(entry.id)) {
+        acknowledgeRecoveryEntry("local-file", entry.id, entry.revision);
+      }
+      continue;
+    }
+    const baseSignature = entry.baseSignature
+      ? normalizeLocalRecoveryBaseSignature(entry.baseSignature)
+      : undefined;
     if (
-      !canApplyRecoveryEntry(
-        entry,
+      !recoverySettingsMatch(current, entry.baseSettings) ||
+      currentSignature === null || baseSignature === null || !canApplyRecoveryEntry(
+        { ...entry, baseSignature },
         current.content,
         undefined,
         currentSignature,
@@ -78,7 +93,7 @@ export function recoverScannedLocalPages(
       set((state) => ({
         pages: {
           ...state.pages,
-          [entry.id]: { ...state.pages[entry.id], content: entry.content! },
+          [entry.id]: { ...state.pages[entry.id], ...entry.settings, content: entry.content! },
         },
         dirtyLocalPageIds: {
           ...state.dirtyLocalPageIds,
@@ -89,15 +104,9 @@ export function recoverScannedLocalPages(
     }
   }
   if (recoveredCount > 0) {
-    toast.warning(extraText("recovered", { count: recoveredCount }), {
-      id: `goose-recovered-local-pages:${notebookId}`,
-      description: storeText("recoveredLocal"),
-    });
+    notifyRecoveryDrafts(extraText("recovered", { count: recoveredCount }), storeText("recoveredLocal"), `goose-recovered-local-pages:${notebookId}`);
   }
   if (conflictCount > 0) {
-    toast.warning(storeText("externalConflict"), {
-      id: `goose-local-recovery-conflicts:${notebookId}`,
-      description: storeText("recoverySeparate"),
-    });
+    notifyRecoveryDrafts(storeText("externalConflict"), storeText("recoverySeparate"), `goose-local-recovery-conflicts:${notebookId}`);
   }
 }
