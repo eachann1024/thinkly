@@ -1,0 +1,86 @@
+.goose-button.goose-button-surface {
+  --button-top: var(--goose-button-face-top);
+  --button-bottom: var(--goose-button-face-bottom);
+  --button-edge: var(--goose-button-edge);
+  --button-fg: var(--goose-text-primary);
+  --button-shine: var(--goose-button-shine);
+  --button-shade: var(--goose-button-shade);
+  --button-drop: var(--goose-button-drop);
+  --button-press: var(--goose-button-press);
+  background-color: var(--button-bottom);
+  background-image: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  border-color: var(--button-edge);
+  color: var(--button-fg);
+  box-shadow: inset 0 var(--goose-button-step) 0 var(--button-shine),
+    inset 0 calc(var(--goose-button-step) * -1) 0 var(--button-shade),
+    inset 0 0 0 var(--button-inset-edge, 0px) var(--button-edge),
+    0 var(--goose-button-step) calc(var(--goose-button-step) * 2) var(--button-drop),
+    0 calc(var(--goose-button-step) * 4) calc(var(--goose-button-step) * 8)
+      calc(var(--goose-button-step) * -4) var(--button-drop);
+}
+.goose-button.goose-button-primary {
+  --button-top: var(--goose-button-slate-top);
+  --button-bottom: var(--goose-button-slate-bottom);
+  --button-edge: var(--goose-button-primary-edge);
+  --button-fg: var(--goose-button-primary-fg);
+  --button-shine: var(--goose-button-primary-shine);
+  --button-shade: var(--goose-button-primary-shade);
+  --button-drop: var(--goose-button-primary-drop);
+  --button-press: var(--goose-button-primary-press);
+}
+.goose-button.goose-button-tertiary {
+  --button-top: var(--goose-button-soft-top);
+  --button-bottom: var(--goose-button-soft-bottom);
+  --button-drop: color-mix(in srgb, var(--goose-button-drop) 65%, transparent);
+}
+.goose-button.goose-button-danger {
+  --button-top: color-mix(in srgb, var(--goose-interactive-danger) 90%, var(--goose-button-face-top));
+  --button-bottom: var(--goose-interactive-danger);
+  --button-edge: var(--goose-interactive-danger-border);
+  --button-fg: var(--goose-interactive-danger-fg);
+}
+.goose-button.goose-button-surface:where(:hover):where(
+  :not(:disabled):not([aria-disabled="true"]):not([data-disabled="true"]):not([aria-busy="true"])
+) {
+  --button-top: color-mix(in srgb, var(--goose-button-face-top) 85%, white);
+  box-shadow: inset 0 var(--goose-button-step) 0 var(--button-shine),
+    inset 0 calc(var(--goose-button-step) * -1) 0 var(--button-shade),
+    inset 0 0 0 var(--button-inset-edge, 0px) var(--button-edge),
+    0 var(--goose-button-step) calc(var(--goose-button-step) * 2) var(--button-drop),
+    0 calc(var(--goose-button-step) * 8) calc(var(--goose-button-step) * 16)
+      calc(var(--goose-button-step) * -5) var(--button-drop);
+}
+.goose-button.goose-button-primary:where(:hover):where(:not(:disabled):not([aria-busy="true"])) {
+  --button-top: color-mix(in srgb, var(--goose-button-slate-top) 90%, white);
+}
+.goose-button.goose-button-tertiary:where(:hover):where(:not(:disabled):not([aria-busy="true"])) {
+  --button-top: var(--goose-button-face-top);
+}
+.goose-button.goose-button-surface:where(:focus-visible) {
+  --button-top: color-mix(in srgb, var(--goose-button-face-top) 85%, var(--goose-interactive-hover));
+  --button-bottom: var(--goose-interactive-hover);
+}
+.goose-button.goose-button-primary:where(:focus-visible) {
+  --button-top: var(--goose-button-slate-focus-top);
+  --button-bottom: var(--goose-button-slate-focus-bottom);
+}
+.goose-button.goose-button-danger:where(:hover, :focus-visible) {
+  --button-top: color-mix(in srgb, var(--goose-interactive-danger) 70%, var(--goose-button-face-top));
+  --button-bottom: var(--goose-interactive-danger);
+}
+.goose-button.goose-button-surface:where(:active, [data-pressed="true"]):where(
+  :not(:disabled):not([aria-disabled="true"]):not([data-disabled="true"]):not([aria-busy="true"])
+) {
+  background-image: linear-gradient(180deg, var(--button-bottom), var(--button-top));
+  box-shadow: inset 0 0 0 var(--button-inset-edge, 0px) var(--button-edge),
+    inset 0 calc(var(--goose-button-step) * -1) 0 var(--button-shade),
+    inset 0 var(--goose-button-step) calc(var(--goose-button-step) * 2) var(--button-press),
+    0 var(--goose-button-step) 0 var(--button-shine),
+    0 var(--goose-button-step) var(--goose-button-step) var(--button-drop);
+}
+/* Preserve custom transforms, full-row geometry, and editor/media control anchoring. */
+.goose-button.goose-button-surface[data-goose-content-style="default"]:where(
+  :not([role="tab"]):not([role="radio"]):not(.goose-list-row)
+):where(:active):where(:not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"])) {
+  transform: translateY(var(--goose-button-step));
+}

@@ -2,6 +2,7 @@ import * as React from "react";
 import { useMergeRefs } from "@floating-ui/react";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "../trigger-child";
+import { buttonVariants } from "../control-recipes";
 
 import { usePopoverContext } from "./state";
 
@@ -41,6 +42,7 @@ export const PopoverTrigger = React.forwardRef<
   ) : (
     <button
       {...injected}
+      className={cn(buttonVariants({ variant: "ghost", contentStyle: "preserve" }), injected.className)}
       ref={ref as React.Ref<HTMLButtonElement>}
       type="button"
     >

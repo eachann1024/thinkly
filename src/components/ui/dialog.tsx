@@ -71,9 +71,9 @@ const DialogTrigger = React.forwardRef<
       injected={injected}
     />
   ) : (
-    <button type="button" {...injected}>
+    <Button variant="ghost" contentStyle="preserve" type="button" {...injected}>
       {children}
-    </button>
+    </Button>
   );
 });
 const DialogClose = React.forwardRef<
