@@ -115,17 +115,15 @@ export async function rebaseNotebookFileReferences(notebookId: string, oldRoot: 
   }
 }
 
-export async function stampNotebookMarker(notebookId: string, root: string): Promise<void> {
+export async function stampNotebookMarker(notebookId: string, root: string): Promise<string> {
   const fs = window.gooseFs;
-  if (!fs) return;
-  const directory = `${root.replace(/[\\/]+$/, "")}/.goose`;
-  const file = `${directory}/notebook.json`;
-  const current = fs.readFileAsync ? await fs.readFileAsync(file) : fs.readFile(file);
-  let historyLayout: unknown;
-  try { historyLayout = current ? JSON.parse(current).historyLayout : undefined; } catch {   }
-  const next = `${JSON.stringify({ id: notebookId, ...(historyLayout === undefined ? {} : { historyLayout }) })}\n`;
-  if (current === next) return;
-  await fs.mkdir(directory);
-  if (fs.writeFileAsync) await fs.writeFileAsync(file, next);
-  else fs.writeFile(file, next);
+  if (!fs) throw new Error("Filesystem unavailable");
+  const { ensureNotebookMarker } = await import("@/lib/notebook-marker");
+  const { useNotebooks } = await import("@/stores/useNotebooks");
+  const notebook = useNotebooks.getState().notebooks[notebookId];
+  const portableNotebookId = await ensureNotebookMarker(fs, root, notebookId, notebook?.portableNotebookId);
+  if (notebook && notebook.portableNotebookId !== portableNotebookId) {
+    useNotebooks.getState().updateNotebook(notebookId, { portableNotebookId });
+  }
+  return portableNotebookId;
 }
