@@ -40,6 +40,11 @@ export interface GitConflictResolution {
   choice: "local" | "remote" | "both";
 }
 
+export interface GitConflictBatchResolution {
+  repositoryId: string;
+  resolutions: Omit<GitConflictResolution, "repositoryId">[];
+}
+
 export interface GitFolderRebind {
   repositoryId: string;
   notebookId: string;
@@ -104,7 +109,7 @@ export interface GitSyncBridge {
   renameNotebookFolder: (request: GitNotebookFolderRename) => Promise<{ localPath: string }>;
   adoptRenamedNotebookFolder: (request: GitNotebookFolderAdopt) => Promise<{ localPath: string; name: string } | null>;
   getConflict: (repositoryId: string, conflictId: string) => Promise<GitSyncConflictDetail>;
-  resolveConflict: (request: GitConflictResolution) => Promise<GitSyncState>;
+  resolveConflicts: (request: GitConflictBatchResolution) => Promise<GitSyncState>;
   onState: (callback: (state: GitSyncState) => void) => () => void;
   onPrepare: (callback: (requestId: string, localPaths: string[]) => void) => () => void;
   replyPrepare: (requestId: string, error: string | null) => void;
