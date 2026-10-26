@@ -1,7 +1,6 @@
 import { useEffect, useRef, useReducer } from "react";
 import { useEditorPageContext, useEditorSettings } from "@/components/editor/platform/hostContext";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
-import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
 import { usePreviewVisibility } from "../shared/usePreviewVisibility";
 import { schedulePreviewCommit } from "../shared/previewCommitQueue";
 import {
@@ -87,6 +86,8 @@ export const MermaidView: React.FC<MermaidViewProps> = ({ value }) => {
         return;
       }
       try {
+        const { renderCachedMermaid } = await import("@/lib/imageExport/mermaidCache");
+        if (!active) return;
         const svg = await renderCachedMermaid(value, {
           mode: isDark ? "dark" : "light",
           securityLevel: features.mermaidUnsafeHTML ? "loose" : "strict",
