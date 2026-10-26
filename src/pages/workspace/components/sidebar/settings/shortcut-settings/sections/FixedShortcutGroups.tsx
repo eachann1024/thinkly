@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ChevronDown } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -36,11 +37,11 @@ export function CollapsibleShortcutGroups({
         const open = openId === group.id;
         return (
           <section key={group.id} className="overflow-hidden rounded-xl">
-            <button
+            <Button variant="ghost" contentStyle="preserve"
               type="button"
               aria-expanded={open}
               onClick={() => setOpenId(open ? "" : group.id)}
-              className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-left hover:bg-[var(--goose-interactive-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--goose-focus)]"
+              className="goose-list-row flex h-10 w-full items-center gap-3 rounded-xl px-4 text-left"
             >
               <span className="min-w-0 flex-1 text-sm font-medium text-foreground">
                 {group.title}
@@ -55,7 +56,7 @@ export function CollapsibleShortcutGroups({
                 )}
                 aria-hidden="true"
               />
-            </button>
+            </Button>
             {open ? (
               <div className="px-1 pb-2 pt-1">
                 <ShortcutRows items={group.items} />
@@ -83,11 +84,11 @@ export function CollapsibleShortcutSection({
   if (!items.length) return null;
   return (
     <section className="overflow-hidden rounded-xl">
-      <button
+      <Button variant="ghost" contentStyle="preserve"
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-left hover:bg-[var(--goose-interactive-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--goose-focus)]"
+        className="goose-list-row flex h-10 w-full items-center gap-3 rounded-xl px-4 text-left"
       >
         <span className="min-w-0 flex-1 text-sm font-medium text-foreground">{title}</span>
         <span className="text-sm tabular-nums text-muted-foreground">{items.length}</span>
@@ -98,7 +99,7 @@ export function CollapsibleShortcutSection({
           )}
           aria-hidden="true"
         />
-      </button>
+      </Button>
       {open ? (
         <div className="px-1 pb-2 pt-1">
           <ShortcutRows items={items} />

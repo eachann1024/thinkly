@@ -164,7 +164,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
             </span>
           </h2>
           <span className="flex-1" />
-          <Button contentStyle="preserve" variant="ghost" size={null}
+          <Button contentStyle="preserve" variant="outline" size={null}
             type="button"
             onClick={() => void handleCreateFolder()}
             disabled={creating !== null}
@@ -176,7 +176,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               <FolderPlus className="h-3.5 w-3.5" />
             )}
             {uiText("newSubfolder")}</Button>
-          <Button contentStyle="preserve" variant="ghost" size={null}
+          <Button contentStyle="preserve" variant="outline" size={null}
             type="button"
             onClick={() => void handleCreateFile()}
             disabled={creating !== null}
@@ -200,7 +200,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               {uiText("createFirst", {folder: folderName})}
             </p>
             <div className="flex gap-2">
-              <Button contentStyle="preserve" variant="ghost" size={null}
+              <Button contentStyle="preserve" variant="outline" size={null}
                 type="button"
                 onClick={() => void handleCreateFile()}
                 disabled={creating !== null}
@@ -208,7 +208,7 @@ export function FolderHomePage({ page }: FolderHomePageProps) {
               >
                 <FilePlus2 className="h-3.5 w-3.5" />
                 {uiText("newFile")}</Button>
-              <Button contentStyle="preserve" variant="ghost" size={null}
+              <Button contentStyle="preserve" variant="outline" size={null}
                 type="button"
                 onClick={() => void handleCreateFolder()}
                 disabled={creating !== null}

@@ -189,11 +189,11 @@ export function RecoveryDraftsDialog({ open, onOpenChange }: Props) {
                 ? useQuickNote.getState().slotNames[normalizeSlot(entry.id)] || t("sourceQuicknote", { value1: normalizeSlot(entry.id) })
                 : (() => { const page = entry.draftPage ?? usePages.getState().pages[entry.id]; return page ? getPageTitle(page) : entry.id; })();
               const key = entryKey(entry);
-              return <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={key === selectedKey}
-                className="w-full rounded-md px-2 py-2 text-left text-sm hover:bg-[hsl(var(--goose-interactive-hover))] aria-pressed:bg-[hsl(var(--goose-interactive-selected))]">
+              return <Button variant="ghost" contentStyle="preserve" key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={key === selectedKey}
+                className="goose-list-row goose-accent-selection w-full rounded-md px-2 py-2 text-left text-sm">
                 <span className="block truncate font-medium">{itemTitle}</span>
                 <span className="mt-1 block truncate text-xs text-muted-foreground">{entry.source === "quicknote" ? t("sourceQuicknote", { value1: normalizeSlot(entry.id) }) : t(sourceKey(entry.source))} · {formatDate(entry.updatedAt)}</span>
-              </button>;
+              </Button>;
             })}
             {entries.length > RECOVERY_LIST_PAGE_SIZE && <div className="flex justify-between gap-2 pt-2">
               <Button size="sm" variant="ghost" disabled={listPage === 0} onClick={() => changeListPage(listPage - 1)}>{t("previous")}</Button>
