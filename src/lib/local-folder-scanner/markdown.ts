@@ -16,6 +16,10 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { getParsedMarkdown, cacheParsedMarkdown } from "./parsed-cache";
+import { hydrateNoteMetadata } from "@/lib/note-metadata/restore";
+import { readIdentity } from "@/lib/note-metadata/identity";
+import { validateLegacyNoteMetadata } from "@/lib/note-metadata/codec";
+import { noteMetadataErrorMessage } from "@/lib/note-metadata/messages";
 import {
   encodeUnsupportedMarkdownForEditor,
   extractFrontmatter,
@@ -47,12 +51,15 @@ export interface ParsedLocalMarkdown {
   isFavorite: boolean;
   readState: "ready" | "error";
   readError?: string;
+  metadataRevision?: string | null;
+  metadataId?: string;
 }
 
 export async function parseLocalMarkdownContent(
   markdown: string | null,
   fallbackTitle: string,
   readError?: string,
+  context?: { root: string; fs: GooseFs },
 ): Promise<ParsedLocalMarkdown> {
   if (markdown === null) {
     return {
@@ -67,13 +74,30 @@ export async function parseLocalMarkdownContent(
   }
 
   const { frontmatter } = extractFrontmatter(markdown);
+  let hydratedMarkdown = markdown;
+  let metadataRevision: string | null | undefined;
+  let metadataId: string | undefined;
+  let metadataError: string | undefined;
+  let metadataSettings: import("@/lib/note-metadata/contract").NoteSettings | undefined;
+  try {
+    metadataId = readIdentity(markdown);
+    if (metadataId) {
+      if (!context) throw new Error("无法定位此笔记的隐藏元数据，请从所属笔记本打开");
+      const restored = await hydrateNoteMetadata(context.fs, context.root, markdown);
+      hydratedMarkdown = restored.legacyMarkdown;
+      metadataRevision = restored.revision;
+      metadataSettings = restored.settings;
+    } else validateLegacyNoteMetadata(markdown);
+  } catch (error) {
+    metadataError = noteMetadataErrorMessage(error);
+  }
   const unclosedFrontmatter =
     /^---[^\S\r\n]*(?:\r?\n|$)/.test(markdown) && !frontmatter;
-  const fmSettings = parseLocalFrontmatterBlob(frontmatter).settings;
+  const fmSettings = metadataSettings ?? parseLocalFrontmatterBlob(frontmatter).settings;
   const encodedMd = encodeUnsupportedMarkdownForEditor(
-    unwrapLocalBlockPropsWrappers(markdown),
+    unwrapLocalBlockPropsWrappers(hydratedMarkdown),
   );
-  const { importFromMarkdown } = await import("@/lib/export");
+  const { importFromMarkdown } = await import("@/lib/export/markdown/parse");
   const imported = await importFromMarkdown(encodedMd, fallbackTitle, {
     preserveStructure: true,
   });
@@ -91,12 +115,14 @@ export async function parseLocalMarkdownContent(
     isLocked: fmSettings.isLocked,
     isPinned: fmSettings.isPinned,
     isFavorite: fmSettings.isFavorite,
-    readState: imported.success && !unclosedFrontmatter ? "ready" : "error",
+    metadataId,
+    metadataRevision,
+    readState: imported.success && !unclosedFrontmatter && !metadataError ? "ready" : "error",
     readError: unclosedFrontmatter
       ? uiText("theYamlFrontmatterIsNotClosedTheOriginalFile")
       : imported.success
-        ? undefined
-        : imported.error || uiText("couldnTParseMarkdown"),
+        ? metadataError
+        : imported.error || metadataError || uiText("couldnTParseMarkdown"),
   };
 }
 
@@ -112,12 +138,13 @@ export async function buildMarkdownPage(
   now: number,
   resolvedId?: string,
   cacheScope = basePath,
+  fs?: GooseFs,
 ): Promise<Page> {
   const fallbackTitle = normalizeLocalFileTitle(entry.name);
   const fileId =
     resolvedId ?? buildLocalPageId(notebookId, basePath, entry.path);
   const cached =
-    typeof readResult.content === "string"
+    typeof readResult.content === "string" && !readResult.content.includes("goose-id")
       ? getParsedMarkdown(
           entry.path,
           readResult.content,
@@ -131,11 +158,12 @@ export async function buildMarkdownPage(
       readResult.content,
       fallbackTitle,
       readResult.error,
+      fs ? { root: basePath, fs } : undefined,
     ));
 
   if (typeof readResult.content === "string") {
     setLocalMdSnapshot(entry.path, readResult.content);
-    if (!cached)
+    if (!cached && !parsed.metadataId)
       cacheParsedMarkdown(
         entry.path,
         readResult.content,
@@ -162,6 +190,8 @@ export async function buildMarkdownPage(
     pageLayout: parsed.pageLayout,
     localFilePath: entry.path,
     localFrontmatter: parsed.frontmatter,
+    localMetadataId: parsed.metadataId,
+    localMetadataRevision: parsed.metadataRevision,
     localReadState: parsed.readState,
     localReadError: parsed.readError,
     createdAt: now,
