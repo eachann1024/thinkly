@@ -1,0 +1,38 @@
+/* Approved button-system.html palette; geometry remains in control-tokens.css. */
+:root {
+  --goose-button-face-top: #fff;
+  --goose-button-face-bottom: #f1f3f6;
+  --goose-button-soft-top: #f1f3f5;
+  --goose-button-soft-bottom: #e4e7eb;
+  --goose-button-slate-top: #454e60;
+  --goose-button-slate-bottom: #2b3446;
+  --goose-button-slate-focus-top: #626f86;
+  --goose-button-slate-focus-bottom: #45536b;
+  --goose-button-edge: rgb(24 35 52 / .18);
+  --goose-button-shine: rgb(255 255 255 / .94);
+  --goose-button-shade: rgb(15 23 42 / .08);
+  --goose-button-drop: rgb(15 23 42 / .07);
+  --goose-button-press: rgb(15 23 42 / .15);
+  --goose-button-primary-edge: #1b2332;
+  --goose-button-primary-shine: rgb(255 255 255 / .18);
+  --goose-button-primary-shade: rgb(0 0 0 / .22);
+  --goose-button-primary-drop: rgb(25 34 48 / .19);
+  --goose-button-primary-press: rgb(0 0 0 / .4);
+  --goose-button-primary-fg: #fff;
+  --goose-button-step: calc(var(--goose-control-font-size, .875rem) / 14);
+}
+.dark {
+  --goose-button-face-top: #3b3f47;
+  --goose-button-face-bottom: #31353d;
+  --goose-button-soft-top: #30343b;
+  --goose-button-soft-bottom: #2a2d33;
+  --goose-button-slate-top: #737f96;
+  --goose-button-slate-bottom: #58647b;
+  --goose-button-slate-focus-top: #8995ac;
+  --goose-button-slate-focus-bottom: #68768f;
+  --goose-button-edge: rgb(10 14 22 / .55);
+  --goose-button-shine: rgb(255 255 255 / .2);
+  --goose-button-shade: rgb(0 0 0 / .3);
+  --goose-button-drop: rgb(0 0 0 / .25);
+  --goose-button-press: rgb(0 0 0 / .5);
+}

@@ -1,6 +1,7 @@
 import { useLocale, createTranslator, i18nYaml } from "@/i18n";
 import { useState } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
+import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icons";
 import type { TimelineCardData } from "@/lib/notebook-ai/cards/displayTypes";
 import { EASE_OUT_EXPO, rowVariants } from "./cardMotion";
@@ -34,10 +35,10 @@ function Detail({ text }: { text: string }) {
   return <>
     <motion.p className="ai-tl-detail" data-clamped={!open || undefined} layout={reduce ? false : "size"}
       transition={{ duration: 0.32, ease: EASE_OUT_EXPO }}>{text}</motion.p>
-    <button type="button" className="ai-tl-toggle" aria-expanded={open} onClick={() => setOpen(value => !value)}>
+    <Button variant="link" contentStyle="preserve" type="button" className="ai-tl-toggle" aria-expanded={open} onClick={() => setOpen(value => !value)}>
       {open ? t("less") : t("more")}
       <ChevronDown size={12} aria-hidden="true" data-open={open || undefined}/>
-    </button>
+    </Button>
   </>;
 }
 

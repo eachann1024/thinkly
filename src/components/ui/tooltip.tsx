@@ -19,6 +19,7 @@ import {
 } from "@floating-ui/react";
 import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
+import { buttonVariants } from "./control-recipes";
 import { TOOLTIP_DELAY_MS, resolveTooltipDelayDuration } from "./tooltip-delay";
 import { useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
 
@@ -128,6 +129,7 @@ const TooltipTrigger = React.forwardRef<
   ) : (
     <button
       {...injected}
+      className={cn(buttonVariants({ variant: "ghost", contentStyle: "preserve" }), props.className)}
       ref={ref as React.Ref<HTMLButtonElement>}
       type="button"
     >

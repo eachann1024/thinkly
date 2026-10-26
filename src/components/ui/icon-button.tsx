@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { controlFrame, type ControlContext } from "./control-recipes";
 
 const iconButtonVariants = cva(
-  `${controlFrame} goose-interactive shrink-0 rounded-[var(--goose-icon-button-radius,6px)] border border-transparent`,
+  `${controlFrame} goose-button-icon goose-interactive shrink-0 rounded-[var(--goose-icon-button-radius,6px)] border border-transparent`,
   {
     variants: {
       tone: {

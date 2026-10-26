@@ -129,7 +129,7 @@ export function UserMessage({
                 }
                 if (segment.type === "selectionQuote") {
                   return (
-                    <button
+                    <Button variant="ghost" contentStyle="preserve"
                       type="button"
                       key={segment.key}
                       data-ai-selection-quote-chip=""
@@ -139,7 +139,7 @@ export function UserMessage({
                       onClick={() => setQuotePreview(segment.quote)}
                     >
                       {formatSelectionQuotePromptLabel(segment.quote)}
-                    </button>
+                    </Button>
                   );
                 }
                 const page =
