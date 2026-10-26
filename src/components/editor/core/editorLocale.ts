@@ -23,7 +23,6 @@ export function getEditorPlaceholders(profile: EditorPlaceholderProfile) {
     ...dictionary.placeholders,
     default: profile === "quicknote" ? "" : t("typeToInsertABlock"),
     quote: t("quote"),
-    toggleListItem: "",
   };
 }
 

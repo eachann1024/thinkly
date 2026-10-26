@@ -10,7 +10,6 @@ export const TEXTUAL_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
   "quote",
   "callout",
 ]);

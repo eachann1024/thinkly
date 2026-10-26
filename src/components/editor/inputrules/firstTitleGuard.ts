@@ -11,7 +11,6 @@ const INLINE_CONTENT_BLOCK_TYPES = new Set([
   "bulletListItem",
   "numberedListItem",
   "checkListItem",
-  "toggleListItem",
   "quote",
   "callout",
 ]);
@@ -55,8 +54,7 @@ function firstTitleGuardPlugin(
       const level = (content.attrs?.level as number | undefined) ?? null;
 
       if (
-        contentTypeName === "heading" && level === TITLE_LEVEL &&
-        content.attrs.isToggleable !== true && content.attrs.collapsed !== true
+        contentTypeName === "heading" && level === TITLE_LEVEL
       ) return null;
 
       const headingType = newState.schema.nodes.heading;
@@ -69,8 +67,6 @@ function firstTitleGuardPlugin(
         tr.setNodeMarkup(contentPos, headingType, {
           ...content.attrs,
           level: TITLE_LEVEL,
-          isToggleable: false,
-          collapsed: false,
         });
         return tr.steps.length > 0 ? tr : null;
       }

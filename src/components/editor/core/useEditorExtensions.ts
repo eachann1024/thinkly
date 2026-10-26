@@ -19,8 +19,6 @@ import { gooseCodeBlockLinkStripExtension } from "@/components/editor/extensions
 import { gooseFirstTitleEnterExtension } from "@/components/editor/extensions/firstTitleEnterExtension";
 import { gooseMediaBlockEnterExtension } from "@/components/editor/extensions/mediaBlockEnterExtension";
 import { gooseEmptyNestedListEnterExtension } from "@/components/editor/extensions/emptyNestedListEnterExtension";
-import { gooseCollapsedToggleEnterExtension } from "@/components/editor/extensions/collapsedToggleEnterExtension";
-import { gooseHeadingSectionFoldExtension } from "@/components/editor/extensions/headingSectionFoldExtension";
 import { gooseCrossBlockDeleteExtension } from "@/components/editor/extensions/crossBlockDeleteExtension";
 import { gooseEmptyBlockBackspaceExtension } from "@/components/editor/extensions/emptyBlockBackspaceExtension";
 import { gooseBlockPresenceExtension } from "@/components/editor/extensions/blockPresenceExtension";
@@ -138,8 +136,6 @@ export function useEditorExtensions(session: EditorSession) {
     gooseMediaBlockEnterExtension,
     gooseContainedBlockKeyboard,
     gooseEmptyNestedListEnterExtension,
-    gooseCollapsedToggleEnterExtension,
-    gooseHeadingSectionFoldExtension,
     gooseCrossBlockDeleteExtension,
     gooseEmptyBlockBackspaceExtension,
     gooseBlockPresenceExtension,

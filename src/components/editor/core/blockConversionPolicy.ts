@@ -5,7 +5,7 @@ import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 // also use it). Only ordinary rich-text blocks share conversion semantics.
 const CONVERTIBLE_TEXT_BLOCKS = new Set([
   "paragraph", "heading", "bulletListItem", "numberedListItem",
-  "checkListItem", "toggleListItem", "quote", "callout",
+  "checkListItem", "quote", "callout",
 ]);
 
 export function canConvertBlock(editor: BlockNoteEditor<any, any, any>, block: { id: string; type: string } | undefined | null): boolean {
