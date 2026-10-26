@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Button } from "@/components/editor/ui/button";
 import { Input } from "@/components/editor/ui/input";
-import { Check } from "@/components/ui/icons";
+import { Check, ChevronDown, Code, GitBranch, Lock, Sigma } from "@/components/ui/icons";
 import {
   Popover,
   PopoverContent,
@@ -39,17 +39,11 @@ export function CodeLanguagePicker({
   editable,
   isMathOrMermaid,
   sourceMode = false,
-  hasVisualPreview,
   displayLanguage,
-  chipClass,
-  chipActiveClass,
 }: Pick<CodeBlockToolbarProps, "language" | "onLanguageChange" | "editable"> & {
   isMathOrMermaid: boolean;
   sourceMode?: boolean;
-  hasVisualPreview: boolean;
   displayLanguage: string;
-  chipClass: string;
-  chipActiveClass: string;
 }) {
   const locale = useLocale();
   const [search, setSearch] = useState("");
@@ -167,6 +161,15 @@ export function CodeLanguagePicker({
     }
   }, [isOpen, languageList, safeHighlightedIndex, filteredLanguages]);
 
+  const Glyph = language === "mermaid" ? GitBranch : language === "math" ? Sigma : Code;
+  const legend = (caret: boolean) => (
+    <>
+      <Glyph className="goose-code-legend-glyph" aria-hidden="true" />
+      <span className="goose-code-legend-label">{displayLanguage}</span>
+      {caret ? <ChevronDown className="goose-code-legend-caret" aria-hidden="true" /> : null}
+    </>
+  );
+
   return (
     <>
       {editable && (!isMathOrMermaid || sourceMode) ? (
@@ -193,18 +196,15 @@ export function CodeLanguagePicker({
               data-state={isOpen ? "open" : "closed"}
               variant="ghost"
               size="sm"
-              className={cn(
-                "goose-code-lang-trigger h-6 min-w-6 px-1.5 font-mono text-xs",
-                chipClass,
-                isOpen && chipActiveClass,
-              )}
+              aria-label={`${t("codeLanguage")}: ${displayLanguage}`}
+              className="goose-code-legend-chip goose-code-lang-trigger goose-accent-selection"
             >
-              {displayLanguage}
+              {legend(true)}
             </Button>
           </PopoverTrigger>
           <PopoverContent
             variant="menu"
-            align="end"
+            align="start"
             className="goose-code-language-picker"
             onCloseAutoFocus={(event) => {
               event.preventDefault();
@@ -284,11 +284,14 @@ export function CodeLanguagePicker({
           </PopoverContent>
         </Popover>
       ) : (
-        !hasVisualPreview && (
-          <div className="inline-flex h-6 cursor-default items-center rounded-md bg-[var(--goose-block-subtle-bg)] px-1.5 font-mono text-[11px] text-muted-foreground">
-            {displayLanguage}
-          </div>
-        )
+        <div
+          className="goose-code-legend-chip"
+          data-static="true"
+          data-readonly={editable ? undefined : "true"}
+        >
+          {legend(false)}
+          {editable ? null : <Lock className="goose-code-legend-lock" aria-hidden="true" />}
+        </div>
       )}
     </>
   );
