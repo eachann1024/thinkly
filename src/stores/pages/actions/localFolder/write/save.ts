@@ -1,3 +1,4 @@
+import { finishSettingsOnlySave } from "@/lib/note-metadata/settingsSave";
 import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { createTranslator as extraTranslator } from "@/i18n/core";
 const extraText = extraTranslator(i18nYaml<"src/stores/pages/actions/localFolder/write/save.ts#block1:1">`
@@ -108,7 +109,7 @@ export const saveLocalPageContentUnlocked = async (
   assertEmptySerializationIsExpected(sourceIsEmpty, processedContent, markdownContent, filePath);
 
   const serialized = await serializeLocalSave(page, filePath, markdownContent);
-  const { diskContent, frontmatter: frontmatterBlob, metadata, root } = serialized;
+  const { diskContent, frontmatter: frontmatterBlob, metadata, root, settingsSaveToken } = serialized;
 
   if (!metadata && !options?.createOnly && !page.editorDraft && isLocalMdUnchanged(filePath, diskContent)) {
     const alreadyOnDisk = gooseFs.existsAsync
@@ -241,7 +242,7 @@ export const saveLocalPageContentUnlocked = async (
         dirtyLocalPageIds: completion.clearDirty
           ? { ...s.dirtyLocalPageIds, [pageId]: false }
           : s.dirtyLocalPageIds,
-        ...(createdTargetStillBelongsToPage || snapshotIsCurrent && (frontmatterChanged || current.editorDraft || current.localUnsaved)
+        ...(createdTargetStillBelongsToPage || snapshotIsCurrent && (frontmatterChanged || current.editorDraft || current.localUnsaved || metadata && (current.localMetadataId !== metadata.noteId || current.localMetadataRevision !== metadataRevision))
           ? {
               pages: {
                 ...s.pages,
@@ -250,7 +251,7 @@ export const saveLocalPageContentUnlocked = async (
                   ...(createdTargetStillBelongsToPage ? { editorDraft: undefined, localUnsaved: undefined } : {}),
                   ...(snapshotIsCurrent ? {
                     localFrontmatter: nextFrontmatter || undefined,
-                    ...(metadata ? { localMetadataId: page.id, localMetadataRevision: metadataRevision } : {}),
+                    ...(metadata ? { localMetadataId: metadata.noteId, localMetadataRevision: metadataRevision } : {}),
                   } : {}),
                 },
               },
@@ -258,6 +259,7 @@ export const saveLocalPageContentUnlocked = async (
           : {}),
       };
     });
+    finishSettingsOnlySave(pageId, settingsSaveToken);
     if (page.editorDraft) {
       const materialized = get().pages[pageId];
       if (

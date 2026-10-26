@@ -35,9 +35,11 @@ export async function prepareNoteMetadata(
   }
   validateNoteMeta(meta);
   for (const key of LEGACY_SETTING_KEYS) document.delete(key);
-  document.set(NOTE_ID_KEY, noteId);
-  const cleanMarkdown = renderFrontmatter(document, tail, present);
-  const header = cleanMarkdown.slice(0, cleanMarkdown.length - (present ? tail.length : tail.length + 2));
+  document.delete(NOTE_ID_KEY);
+  const cleanMarkdown = isMap(document.contents) && document.contents.items.length
+    ? renderFrontmatter(document, tail, present)
+    : present ? tail.replace(/^\r?\n(?:\r?\n)?/, "") : tail;
+  const header = cleanMarkdown.startsWith("---\n") ? cleanMarkdown.slice(0, cleanMarkdown.indexOf("\n---", 4) + 4) : undefined;
   return {
     noteId, cleanMarkdown, frontmatter: header,
     payload: { digest: await markdownDigest(cleanMarkdown), markdown: cleanMarkdown, meta, settings: structuredClone(settings) },
@@ -49,7 +51,7 @@ export async function finalizePreparedMarkdown(
 ): Promise<PreparedNoteMetadata> {
   if (diskMarkdown.length > MAX_MARKDOWN_CHARS) throw new NoteMetadataError("too-large", "Note is too large");
   const { document } = splitFrontmatter(diskMarkdown);
-  if (document.get(NOTE_ID_KEY) !== prepared.noteId) throw new NoteMetadataError("identity", "Final Markdown identity differs");
+  if (document.has(NOTE_ID_KEY)) throw new NoteMetadataError("identity", "Final Markdown contains an application identity");
   return {
     ...prepared, cleanMarkdown: diskMarkdown,
     payload: { ...prepared.payload, markdown: diskMarkdown, digest: await markdownDigest(diskMarkdown) },

@@ -138,7 +138,7 @@ function conflictHandlers(filePath: string, pageId: string) {
           const root = useNotebooks.getState().notebooks[pg.workspaceId]?.localPath;
           const read = await readMarkdownFile(fs, filePath);
           if (read.content === null) throw Error(read.error || "无法读取磁盘笔记，已保留当前编辑");
-          const restored = root ? await hydrateNoteMetadata(fs, root, read.content) : undefined;
+          const restored = root ? await hydrateNoteMetadata(fs, root, read.content, filePath) : undefined;
           if (restored && restored.noteId !== pg.localMetadataId) throw Error("磁盘笔记 ID 已改变，已保留当前编辑");
           if (usePages.getState().pages[pageId] !== pg) return;
           if (restored?.noteId) usePages.setState(state => ({ pages: { ...state.pages,
@@ -158,10 +158,10 @@ function conflictHandlers(filePath: string, pageId: string) {
       void (async () => {
         const page = usePages.getState().pages[pageId];
         const fs = window.gooseFs;
-        const root = page && useNotebooks.getState().notebooks[page.workspaceId]?.localPath;
+        const root = page && (page.localMetadataRoot ?? useNotebooks.getState().notebooks[page.workspaceId]?.localPath);
         if (!page || !fs || page.localFilePath !== filePath) return;
         const read = await readMarkdownFile(fs, filePath);
-        const parsed = await parseLocalMarkdownContent(read.content, "", read.error, root ? { root, fs } : undefined);
+        const parsed = await parseLocalMarkdownContent(read.content, "", read.error, root ? { root, fs, filePath } : undefined);
         if (usePages.getState().pages[pageId] !== page) return;
         if (parsed.readState !== "ready" || parsed.metadataId !== page.localMetadataId) {
           toast.error(parsed.readError || uiText("chooseHowToResolveTheConflict"));

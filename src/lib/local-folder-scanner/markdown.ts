@@ -59,7 +59,7 @@ export async function parseLocalMarkdownContent(
   markdown: string | null,
   fallbackTitle: string,
   readError?: string,
-  context?: { root: string; fs: GooseFs },
+  context?: { root: string; fs: GooseFs; filePath?: string; metadataCatalog?: Promise<import("@/lib/note-metadata/contract").NoteMetadataEnvelope[]> },
 ): Promise<ParsedLocalMarkdown> {
   if (markdown === null) {
     return {
@@ -81,9 +81,10 @@ export async function parseLocalMarkdownContent(
   let metadataSettings: import("@/lib/note-metadata/contract").NoteSettings | undefined;
   try {
     metadataId = readIdentity(markdown);
-    if (metadataId) {
+    if (context) {
       if (!context) throw new Error("无法定位此笔记的隐藏元数据，请从所属笔记本打开");
-      const restored = await hydrateNoteMetadata(context.fs, context.root, markdown);
+      const restored = await hydrateNoteMetadata(context.fs, context.root, markdown, context.filePath, context.metadataCatalog);
+      metadataId = restored.noteId;
       hydratedMarkdown = restored.legacyMarkdown;
       metadataRevision = restored.revision;
       metadataSettings = restored.settings;
@@ -139,12 +140,13 @@ export async function buildMarkdownPage(
   resolvedId?: string,
   cacheScope = basePath,
   fs?: GooseFs,
+  metadataCatalog?: Promise<import("@/lib/note-metadata/contract").NoteMetadataEnvelope[]>,
 ): Promise<Page> {
   const fallbackTitle = normalizeLocalFileTitle(entry.name);
   const fileId =
     resolvedId ?? buildLocalPageId(notebookId, basePath, entry.path);
   const cached =
-    typeof readResult.content === "string" && !readResult.content.includes("goose-id")
+    !fs && typeof readResult.content === "string" && !readResult.content.includes("goose-id")
       ? getParsedMarkdown(
           entry.path,
           readResult.content,
@@ -158,7 +160,7 @@ export async function buildMarkdownPage(
       readResult.content,
       fallbackTitle,
       readResult.error,
-      fs ? { root: basePath, fs } : undefined,
+      fs ? { root: basePath, fs, filePath: entry.path, metadataCatalog } : undefined,
     ));
 
   if (typeof readResult.content === "string") {

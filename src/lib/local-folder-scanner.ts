@@ -1,3 +1,4 @@
+import { notebookMetadata } from "./note-metadata/lookup";
 import { portableHistoryIds } from "./history/notebookHistory";
 import { createNoteIdentityResolver } from "./note-metadata/scanIdentity";
 import { pruneParsedMarkdown } from "./local-folder-scanner/parsed-cache";
@@ -45,6 +46,7 @@ export async function scanLocalFolderPages({
   includedFilePaths = [],
   reservedPageIds,
 }: LocalFolderScannerOptions): Promise<Page[]> {
+  const metadataCatalog = notebookMetadata(gooseFs, basePath);
   const idMap: LocalPageIdMap = readLocalPageIdMap(notebookId);
   let idMapDirty = false;
   const portable = readOnly ? {} : await portableHistoryIds(basePath);
@@ -157,6 +159,7 @@ export async function scanLocalFolderPages({
             pending.fileId,
             cacheScope,
             gooseFs,
+            metadataCatalog,
           );
           page.parentId = parentId;
           if (await resolveIdentity(page)) idMapDirty = true;
@@ -201,7 +204,7 @@ export async function scanLocalFolderPages({
         isDirectory: false,
       };
       const page = await buildMarkdownPage(notebookId, basePath, entry,
-        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope, gooseFs);
+        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope, gooseFs, metadataCatalog);
       if (await resolveIdentity(page)) idMapDirty = true;
       const parentPath = filePath.replace(/[\\/][^\\/]+$/, "");
       page.parentId = pages.find((candidate) =>

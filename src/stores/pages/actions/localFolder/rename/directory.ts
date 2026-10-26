@@ -163,6 +163,12 @@ export async function relocateLocalPageTree(
           rename,
         );
       } else await rename();
+      if (acrossNotebooks) {
+        const { finalizeMetadataRelocation } = await import("@/lib/note-metadata/relocate");
+        await finalizeMetadataRelocation(fs, basePath, targetBasePath, metadataEntries, (id, localMetadataRevision) => {
+          set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], localMetadataRevision } } }));
+        });
+      }
     } catch (error) {
       const restored = await Promise.allSettled(
         written.map((entry) => replaceNoteMarkdown(fs, entry.path, entry.before, entry.after)),

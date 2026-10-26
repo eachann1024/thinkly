@@ -19,6 +19,10 @@ export type NoteMetadataEnvelope = {
   version: 1;
   noteId: string;
   revision: string;
+  relativePath?: string;
+  deleted?: boolean;
+  previousRelativePath?: string;
+  recovery?: NoteMetadataSnapshot;
   current: NoteMetadataSnapshot;
   previous?: NoteMetadataSnapshot;
   legacyBaseline?: string;
@@ -28,6 +32,7 @@ export type PreparedNoteMetadata = {
   noteId: string;
   cleanMarkdown: string;
   frontmatter?: string;
+  relativePath?: string;
   payload: NoteMetadataSnapshot;
 };
 
@@ -41,7 +46,7 @@ export type HydratedNoteMetadata = {
 
 export type NoteMetadataFs = Partial<Pick<GooseFs,
   "readFileAsync" | "readFileStatAsync" | "existsAsync" | "createFileAsync" |
-  "writeFileAsync" | "mkdir" | "rename" | "deleteFile" | "realpathAsync" | "compareAndSwapFileAsync"
+  "writeFileAsync" | "readDir" | "readDirAsync" | "mkdir" | "rename" | "deleteFile" | "realpathAsync" | "compareAndSwapFileAsync"
 >>;
 
 export type NoteMetadataErrorCode = "identity" | "missing" | "corrupt" | "unsupported" |

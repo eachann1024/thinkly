@@ -81,7 +81,8 @@ export function validateSnapshot(value: unknown, noteId: string): asserts value 
   safeKeys(value, ["digest", "markdown", "meta", "settings"]);
   if (typeof value.digest !== "string" || !/^[a-f0-9]{64}$/.test(value.digest) || typeof value.markdown !== "string") fail("Invalid metadata digest");
   if (value.markdown.length > MAX_MARKDOWN_CHARS) throw new NoteMetadataError("too-large", "Note is too large");
-  if (readIdentity(value.markdown) !== noteId) fail("Metadata baseline identity differs");
+  const embeddedId = readIdentity(value.markdown);
+  if (embeddedId && embeddedId !== noteId) fail("Metadata baseline identity differs");
   validateSettings(value.settings);
   validateNoteMeta(value.meta);
 }
@@ -92,12 +93,18 @@ export function parseEnvelope(raw: string, expectedId: string): NoteMetadataEnve
   try { value = JSON.parse(raw); } catch { return fail("Invalid metadata JSON"); }
   if (!object(value)) return fail("Invalid metadata envelope");
   if (value.version !== 1) throw new NoteMetadataError("unsupported", "Unsupported note metadata version");
-  safeKeys(value, ["version", "noteId", "revision", "current", "previous", "legacyBaseline"]);
+  safeKeys(value, ["version", "noteId", "revision", "current", "previous", "legacyBaseline", "relativePath", "recovery", "deleted", "previousRelativePath"]);
   validateNoteId(value.noteId);
   if (value.noteId !== expectedId || typeof value.revision !== "string" || !/^[a-f0-9-]{36}$/.test(value.revision)) fail("Invalid metadata identity or revision");
+  if (value.deleted !== undefined && typeof value.deleted !== "boolean") fail("Invalid deletion state");
+  for (const key of ["relativePath", "previousRelativePath"]) {
+    const relative = value[key];
+    if (relative !== undefined && (typeof relative !== "string" || !relative || relative.startsWith("/") || relative.includes("\\") || relative.split("/").some(part => part === ".." || part === ".") || /[\u0000-\u001f]/.test(relative))) fail("Invalid relative path");
+  }
+  if (value.recovery !== undefined) validateSnapshot(value.recovery, expectedId);
   validateSnapshot(value.current, expectedId);
   if (value.previous !== undefined) validateSnapshot(value.previous, expectedId);
   if (value.legacyBaseline !== undefined && (typeof value.legacyBaseline !== "string" ||
-    value.legacyBaseline.length > MAX_MARKDOWN_CHARS || readIdentity(value.legacyBaseline) !== undefined)) fail("Invalid legacy baseline");
+    value.legacyBaseline.length > MAX_MARKDOWN_CHARS || (readIdentity(value.legacyBaseline) !== undefined && readIdentity(value.legacyBaseline) !== expectedId))) fail("Invalid legacy baseline");
   return value as NoteMetadataEnvelope;
 }

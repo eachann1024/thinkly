@@ -14,7 +14,14 @@ export async function validateBackupFiles(files: BackupFiles): Promise<string> {
   if (!marker) fail("Notebook identity marker is missing");
   const notebookId = parseNotebookMarker(decodeText(marker)).id;
   const root = "/backup";
-  const fs = { readFileAsync: async (file: string) => {
+  const fs = {
+    existsAsync: async (file: string) => files.has(file.slice(root.length + 1)),
+    readDirAsync: async (directory: string) => {
+      const prefix = `${directory.slice(root.length + 1)}/`;
+      return [...files.keys()].filter(name => name.startsWith(prefix) && !name.slice(prefix.length).includes("/"))
+        .map(name => ({ name: name.slice(prefix.length) }));
+    },
+    readFileAsync: async (file: string) => {
     const bytes = files.get(file.slice(root.length + 1));
     if (!bytes) throw new Error("ENOENT");
     return decodeText(bytes);
@@ -30,7 +37,11 @@ export async function validateBackupFiles(files: BackupFiles): Promise<string> {
       const id = readIdentity(markdown);
       if (id && noteIds.has(id)) fail("Duplicate note identities");
       if (id) noteIds.add(id);
-      await hydrateNoteMetadata(fs, root, markdown);
+      const hydrated = await hydrateNoteMetadata(fs, root, markdown, `${root}/${name}`);
+      if (hydrated.noteId && hydrated.noteId !== id) {
+        if (noteIds.has(hydrated.noteId)) fail("Duplicate note identities");
+        noteIds.add(hydrated.noteId);
+      }
     }
   }
   validateHistory(files);
