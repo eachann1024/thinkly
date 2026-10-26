@@ -1,5 +1,8 @@
 import type { NotebooksState } from "./types";
 import { usePages } from "../usePages";
+import { useTabs } from "../useTabs";
+import { useHistoryView } from "../useHistoryView";
+import { workspaceTabPageId } from "../tabs/helpers";
 import { fs } from "@/lib/electron-platform/fs";
 import { IDLE_LOCAL_FOLDER_LOAD_STATE, transitionLocalFolderLoad } from "./localFolderLoadState";
 
@@ -21,6 +24,8 @@ export function createActiveNotebookActions(
       const pendingId = pagesStore.pendingNavigatePageId;
       const pendingPage = pendingId ? pagesStore.pages[pendingId] : undefined;
       const notebook = get().notebooks[id];
+      if (!notebook) return;
+      const notebookChanged = get().activeNotebookId !== id;
       const lastActivePageId = get().lastActivePageByNotebook[id];
       const lastActivePage = lastActivePageId
         ? pagesStore.pages[lastActivePageId]
@@ -32,8 +37,28 @@ export function createActiveNotebookActions(
           ? lastActivePage.id
           : null;
       const keepsPendingTarget = pendingPage?.workspaceId === id;
+      if (notebookChanged) {
+        useTabs.getState().cancelPendingActivation();
+        useHistoryView.getState().exit();
+        usePages.setState({
+          expandPageId: null,
+          pendingNavigatePageId: keepsPendingTarget ? pendingId : null,
+          searchHighlightQuery: "",
+          searchHighlightPageId: null,
+          searchHighlightNonce: 0,
+          handledSearchHighlightNonce: 0,
+        });
+        const tabs = useTabs.getState();
+        const activeTab = tabs.openTabs.find((tab) => tab.id === tabs.activeTabId);
+        const tabNotebookId = activeTab && !activeTab.type
+          ? pagesStore.pages[workspaceTabPageId(activeTab)]?.workspaceId ?? activeTab.workspaceId
+          : activeTab?.workspaceId;
+        if (activeTab?.type !== "welcome" && tabNotebookId !== id) {
+          useTabs.setState({ activeTabId: null });
+        }
+      }
       set({ activeNotebookId: id });
-      if (notebook?.source === "local-folder" && !keepsPendingTarget) {
+      if ((notebookChanged || notebook.source === "local-folder") && !keepsPendingTarget) {
         void pagesStore.setActivePage(cachedLocalLandingPageId);
       }
       if (
@@ -66,7 +91,7 @@ export function createActiveNotebookActions(
         });
       }
 
-      if (pendingId) {
+      if (keepsPendingTarget && pendingId) {
         if (pendingPage && pendingPage.workspaceId === id) {
           pagesStore.setActivePage(pendingId);
           pagesStore.setExpandPageId(pendingId);

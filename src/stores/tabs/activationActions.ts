@@ -5,11 +5,13 @@ import { useNotebooks } from "../useNotebooks";
 import { effectiveSingleTabMode } from "@/lib/tabMode";
 import {
   findTabByPageId,
+  focusTabLeafForPage,
   commitActiveEditor,
   stampTabAccess,
   ensureSplitForWorkspaceTab,
   workspaceTabPageId,
   scheduleSetActivePage,
+  cancelScheduledActivePage,
 } from "./helpers";
 import { isSpecialTab } from "./types";
 
@@ -19,6 +21,7 @@ export function createActivationTabActions(
   context: TabsActionContext,
 ): Pick<
   TabsState,
+  | "cancelPendingActivation"
   | "syncNotebookForPage"
   | "syncActiveTabForPage"
   | "syncTabPageId"
@@ -27,6 +30,11 @@ export function createActivationTabActions(
   const { pushTabHistory, replaceWithSinglePage, replaceWithSingleWelcome } =
     context;
   return {
+    cancelPendingActivation: () => {
+      context.invalidateSingleTabSwitch();
+      cancelScheduledActivePage();
+    },
+
     syncNotebookForPage: (pageId: string | null) => {
       if (!pageId) return;
       const page = usePages.getState().getPage(pageId);
@@ -38,17 +46,21 @@ export function createActivationTabActions(
     },
 
     syncActiveTabForPage: (pageId: string | null) => {
-      if (!pageId) return;
+      if (!pageId) {
+        get().cancelPendingActivation();
+        set({ activeTabId: null });
+        usePages.getState().setActivePage(null);
+        return;
+      }
       if (effectiveSingleTabMode()) {
         void replaceWithSinglePage(pageId);
         return;
       }
-      const { openTabs, activeTabId } = get();
+      const { openTabs } = get();
       const existingTab = findTabByPageId(openTabs, pageId);
       if (existingTab) {
-        if (existingTab.id !== activeTabId) {
-          get().setActiveTab(existingTab.id);
-        }
+        focusTabLeafForPage(existingTab.id, pageId);
+        get().setActiveTab(existingTab.id);
         return;
       }
 
