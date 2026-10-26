@@ -9,6 +9,7 @@ import { useSidebarView } from "@/stores/useSidebarView";
 import type { SettingsTab } from "../settings/types";
 import { isSettingsTab, isWorkspaceSettingsOpen } from "@/lib/settings-navigation";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import { useNotificationActions } from "@/lib/useNotificationActions";
 
 interface UseSidebarEffectsOptions {
   activePageId?: string | null | undefined;
@@ -24,6 +25,7 @@ export function useSidebarEffects({
   onOpenSettings,
   onSettingsTabChange,
 }: UseSidebarEffectsOptions) {
+  useNotificationActions(onOpenSettings);
   const resolveDeleteTargetPageId = useCallback(
     (target: Element | null) => {
       const activePageId = usePages.getState().activePageId;
@@ -105,6 +107,7 @@ export function useSidebarEffects({
     const handleOpenSettings = (event: Event) => {
       const tab = (event as CustomEvent<{ tab?: unknown }>).detail?.tab;
       onOpenSettings(isSettingsTab(tab) ? tab : undefined);
+      event.preventDefault();
     };
     const handleTabChange = (event: Event) => {
       const tab = (event as CustomEvent<{ tab?: unknown }>).detail?.tab;

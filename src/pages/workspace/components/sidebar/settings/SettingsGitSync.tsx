@@ -24,6 +24,7 @@ import { useGitFolderChecks } from "./git-sync/useGitFolderChecks";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { type GitDraft } from "./git-sync/GitRepositoryForm";
 import { folderPathKey, gitFolderRows, reconcileFolderSelection } from "./git-sync/gitFolderRows";
+import { useGitNotificationDestination } from "./git-sync/useGitNotificationDestination";
 
 export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   useLocale();
@@ -39,6 +40,9 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
   const [selectedId, setSelectedId] = useState("");
   const [newId, setNewId] = useState(() => crypto.randomUUID());
   const [adding, setAdding] = useState(false);
+  const { missingTarget, preferredRepositoryId, clearMissingTarget } = useGitNotificationDestination(
+    visible, loading, loadError, state, setSelectedId, setAdding,
+  );
   const [drafts, setDrafts] = useState<Record<string, GitDraft>>({});
   const [folderDrafts, setFolderDrafts] = useState<Record<string, GitRepositoryFolder[]>>({});
   const [errors, setErrors] = useState<Record<string, GitSyncUiFailure | undefined>>({});
@@ -52,7 +56,11 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
     return () => timers.forEach(clearTimeout);
   }, []);
   const [removeConfirmation, setRemoveConfirmation] = useState("");
-  const config = adding ? undefined : (state.configs.find((item) => item.id === selectedId) ?? state.configs[0]);
+  const config = adding || missingTarget
+    ? undefined
+    : (state.configs.find((item) => item.id === preferredRepositoryId)
+      ?? state.configs.find((item) => item.id === selectedId)
+      ?? state.configs[0]);
   const moduleReady = Boolean(bridge) && !loading && !loadError && state.moduleEnabled;
   const { checks: folderChecks, recheck } = useGitFolderChecks(bridge, visible && moduleReady && Boolean(config || adding), [
     ...localNotebooks.map((notebook) => notebook.localPath!),
@@ -254,6 +262,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
       folderChecks={folderChecks}
       draft={draft}
       error={formatGitUiFailure(errors[id])}
+      notificationTargetMissing={missingTarget}
       unsavedFolders={Boolean(folderDrafts[id]) || reconciledFolders}
       unsavedSettings={Boolean(drafts[id])}
       removeConfirmation={removeConfirmation}
@@ -269,6 +278,7 @@ export function SettingsGitSync({ visible = true }: { visible?: boolean }) {
         setRemoveConfirmation("");
       }}
       onSelect={(value) => {
+        clearMissingTarget();
         setSelectedId(value);
         setAdding(false);
         setRemoveConfirmation("");

@@ -2,6 +2,7 @@ import "./language";
 import { appearance } from "./appearance";
 import { invoke, assetMaintenance, gitSync, web } from "./services";
 import { searchWindow } from "./search";
+import { notifications } from "./notifications";
 import type { DirectoryDialogOptions, OpenFileDialogOptions, SaveFileDialogOptions } from "../../src/lib/native-dialog-contract";
 import type { AppUpdateCheckResult, AppUpdateState } from "../../src/lib/appUpdateTypes";
 import type {
@@ -25,6 +26,7 @@ const gooseDesktop = {
     invoke("desktop:renderMermaidPreview", request) as Promise<string>,
   appearance,
   ...searchWindow,
+  ...notifications,
   gitSync,
   assetMaintenance,
   web,
@@ -33,10 +35,10 @@ const gooseDesktop = {
   showOpenDialog: (opts?: OpenFileDialogOptions) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,
   showSaveDialog: (opts?: SaveFileDialogOptions) => invoke("desktop:showSaveDialog", opts) as Promise<string | null>,
   fsReadText: (p: string) => invoke("desktop:fsReadText", p) as Promise<string>,
-  fsWriteText: (p: string, data: string, exclusive?: boolean) =>
-    invoke("desktop:fsWriteText", p, data, exclusive) as Promise<void>,
   fsCompareAndSwapText: (p: string, expected: string | null, next: string) =>
     invoke("desktop:fsCompareAndSwapText", p, expected, next) as Promise<boolean>,
+  fsWriteText: (p: string, data: string, exclusive?: boolean) =>
+    invoke("desktop:fsWriteText", p, data, exclusive) as Promise<void>,
   fsRead: (p: string) => invoke("desktop:fsRead", p) as Promise<Uint8Array>,
   fsSaveAsset: (input: import("../../src/lib/local-file-asset-contract").SaveLocalAssetRequest) =>
     invoke("desktop:fsSaveAsset", input) as Promise<import("../../src/lib/local-file-asset-contract").SavedLocalAssetPath>,

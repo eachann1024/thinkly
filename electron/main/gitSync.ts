@@ -3,10 +3,11 @@ import { isGitMessage } from "../../src/lib/git-messages";
 import { t } from "./i18n/gitSyncMessages";
 import { isDesktopMessage } from "./i18n/messages";
 import { getLocale } from "../../src/i18n/core";
-import { app, BrowserWindow, ipcMain, Notification } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
+import { clearAllGitSyncNotifications, clearGitSyncNotification, notifyGitSyncFailure } from "./gitSyncNotifications";
 import { normalizedGitRemote, validateGitRepository, validateRepositoryId, type GitConflictResolution, type GitRepositoryConfig, type GitRepositoryInput, type GitSyncState, type GitSyncStatus } from "../../src/lib/git-sync-contract";
 import { idleGitSyncStatus as idle, gitSyncStatusTransition } from "../../src/lib/git-sync-status";
 import { gitSchedulerTransition, gitLoadTransition, type GitSchedulerState, type GitLoadState } from "./gitSyncLifecycle";
@@ -29,7 +30,6 @@ import { adoptRenamedNotebookFolder } from "./notebookFolderAdopt";
 const configs = new Map<string, GitRepositoryConfig>();
 const statuses = new Map<string, GitSyncStatus>();
 const nextRun = new Map<string, number>();
-const notifications = new Map<string, string>();
 const queue = new GitSyncSerialQueue();
 let mappingHistory: GitMappingHistory = Object.create(null);
 let moduleEnabled = false;
@@ -47,12 +47,6 @@ const state = (): GitSyncState => {
 };
 const publish = () => broadcast("git-sync:state", state());
 const messageOf = (error: unknown) => error instanceof Error && (isDesktopMessage(error.message) || isGitMessage(error.message) || isGitPreparationMessage(error.message) || (getLocale() === "zh-Hans" && /^[\u3400-\u9fff]/.test(error.message))) ? error.message.slice(0, 500) : t("failed");
-
-function notifyFailure(id: string, message: string) {
-  if (notifications.get(id) === message) return;
-  notifications.set(id, message);
-  if (Notification.isSupported()) new Notification({ title: t("notification"), body: message.slice(0, 400) }).show();
-}
 
 async function atomic(file: string, value: unknown) {
   await mkdir(app.getPath("userData"), { recursive: true });
@@ -150,11 +144,11 @@ async function sync(repositoryId: string): Promise<GitSyncState> {
     const selected = new Set(synchronized.folders.map((folder) => folder.notebookId));
     mappingHistory[repositoryId] = [...(mappingHistory[repositoryId] ?? []).filter((folder) => !selected.has(folder.notebookId)), ...synchronized.folders];
     statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.succeeded", at: new Date().toISOString() }));
-    await persist(); notifications.delete(repositoryId);
+    await persist(); clearGitSyncNotification({ type: "repository", repositoryId });
   } catch (error) {
     const message = messageOf(error);
     statuses.set(repositoryId, gitSyncStatusTransition(statuses.get(repositoryId) ?? idle(repositoryId), { type: "sync.failed", message, conflicts: error instanceof GitConflictError ? [...error.conflicts] : undefined }));
-    notifyFailure(repositoryId, message);
+    notifyGitSyncFailure({ type: "repository", repositoryId }, message);
   } finally {
     unlocks.reverse().forEach((unlock) => unlock());
     for (const { win, requestId } of prepared) if (!win.isDestroyed()) win.webContents.send("git-sync:finish", requestId);
@@ -175,7 +169,7 @@ async function tick() {
       const due = [...configs.values()].find((config) => config.enabled && config.folders.length && (nextRun.get(config.id) ?? 0) <= Date.now());
       if (due) await sync(due.id);
     });
-  } catch (error) { notifyFailure("scheduler", messageOf(error)); }
+  } catch (error) { notifyGitSyncFailure({ type: "scheduler" }, messageOf(error)); }
   finally { scheduler = gitSchedulerTransition(scheduler, "tick.finished"); }
 }
 
@@ -184,7 +178,7 @@ export function startGitSync() {
   scheduler = gitSchedulerTransition(scheduler, "scheduler.started");
   if (timer) return;
   timer = setInterval(() => { void tick(); }, 5000); timer.unref();
-  void queue.run(load).catch((error) => notifyFailure("scheduler", messageOf(error)));
+  void queue.run(load).catch((error) => notifyGitSyncFailure({ type: "scheduler" }, messageOf(error)));
 }
 export function stopGitSync() {
   scheduler = gitSchedulerTransition(scheduler, "scheduler.stopped");
@@ -254,6 +248,7 @@ export function registerGitSyncIpc() {
     if (typeof enabled !== "boolean") throw new Error(t("failed"));
     const previous = moduleEnabled;
     moduleEnabled = enabled;
+    if (!enabled) clearAllGitSyncNotifications(configs.keys());
     try { await persist(); }
     catch (error) { moduleEnabled = previous; throw error; }
     publish();
@@ -280,6 +275,6 @@ export function registerGitSyncIpc() {
     configs.delete(id); statuses.delete(id);
     try { await persist(); }
     catch (error) { if (previous) configs.set(id, previous); if (previousStatus) statuses.set(id, previousStatus); throw error; }
-    nextRun.delete(id); notifications.delete(id); retainGitConflicts(id, new Set()); publish(); return state();
+    nextRun.delete(id); clearGitSyncNotification({ type: "repository", repositoryId: id }); retainGitConflicts(id, new Set()); publish(); return state();
   });
 }
