@@ -1,5 +1,10 @@
 # 更新日志
 
+## 1.7.336
+
+- select the document title when creating a file
+- update 5 files in src/
+
 ## 1.7.335
 
 - Fix heading text colors and reduce heading bottom spacing
