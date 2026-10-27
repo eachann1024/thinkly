@@ -82,7 +82,7 @@
       "Inter Variable", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Segoe UI", sans-serif;
     --font-default: var(--font-ui);
     --goose-font-serif:
-      Georgia, "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC",
+      "仓耳今楷", Georgia, "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC",
       "SimSun", Cambria, "Times New Roman", Times, serif;
     --goose-font-mono:
       "JetBrains Mono", ui-monospace, Menlo, Consolas,
