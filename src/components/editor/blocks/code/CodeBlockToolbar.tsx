@@ -31,8 +31,6 @@ zh-Hans:
   codeCopied: "已复制代码"
   copyCode: "复制代码"
   copied: "已复制"
-  expandCodeBlock: "展开代码块"
-  collapseCodeBlock: "折叠代码块"
   moreActions: "更多操作"
   downloadImage: "下载图片"
 en:
@@ -43,8 +41,6 @@ en:
   codeCopied: "Code copied"
   copyCode: "Copy code"
   copied: "Copied"
-  expandCodeBlock: "Expand code block"
-  collapseCodeBlock: "Collapse code block"
   moreActions: "More actions"
   downloadImage: "Download image"
 ja:
@@ -55,14 +51,10 @@ ja:
   codeCopied: "コードをコピーしました"
   copyCode: "コードをコピー"
   copied: "コピーしました"
-  expandCodeBlock: "コードブロックを展開"
-  collapseCodeBlock: "コードブロックを折りたたむ"
   moreActions: "その他の操作"
   downloadImage: "画像をダウンロード"
 `;
 const t = createTranslator(messages);
-
-
 export function CodeBlockToolbar({
   language,
   onLanguageChange,
@@ -78,8 +70,6 @@ export function CodeBlockToolbar({
   onDownloadPreview,
   onCopyPreview,
   canPreview = false,
-  collapsed = false,
-  onCollapsedChange,
 }: CodeBlockToolbarProps) {
   useLocale();
   const [copiedKind, setCopiedKind] = useState<"code" | "image" | null>(null);
@@ -88,8 +78,6 @@ export function CodeBlockToolbar({
   const [copyingImage, setCopyingImage] = useState(false);
   const { format, isLoading } = useFormatCode();
   const platform = useEditorPlatform();
-
-
   const handleCopyCode = async () => {
     const content = getCodeContent();
     await platform.clipboard.copyText(content);
@@ -99,7 +87,6 @@ export function CodeBlockToolbar({
     setCopiedKind("code");
     setTimeout(() => setCopiedKind(null), 2000);
   };
-
   const handleCopy = async () => {
     if (previewMode === "preview" && onCopyPreview) {
       if (copyingImage) return;
@@ -116,7 +103,6 @@ export function CodeBlockToolbar({
     }
     await handleCopyCode();
   };
-
   const handleFormatClick = async () => {
     if (!onFormat) return;
     const content = getCodeContent();
@@ -124,22 +110,19 @@ export function CodeBlockToolbar({
     const formatted = await format(content, language || "text");
     if (formatted) onFormat(formatted);
   };
-
   const canFormat = FORMAT_SUPPORTED_LANGUAGES.includes(
     (language || "").toLowerCase(),
   );
   const isMathOrMermaid = language === "math" || language === "mermaid";
   const hasVisualPreview = isMathOrMermaid && Boolean(onPreviewModeChange);
-  const showWrap = editable && Boolean(onWrapChange) && !isMathOrMermaid && !collapsed;
-  const showFormat = editable && Boolean(onFormat) && canFormat && !collapsed;
-  const showCollapse = !isMathOrMermaid && Boolean(onCollapsedChange);
-  const showHelp = language === "math" && editable && !collapsed;
+  const showWrap = editable && Boolean(onWrapChange) && !isMathOrMermaid;
+  const showFormat = editable && Boolean(onFormat) && canFormat;
+  const showHelp = language === "math" && editable;
   const showDownloadInMore = hasVisualPreview;
   const hasMore = showDownloadInMore || showWrap || showFormat;
   const btn = "goose-code-island-btn goose-accent-selection";
   const icon = "goose-code-island-icon";
   const [moreOpen, setMoreOpen] = useState(false);
-
   return (
     <TooltipProvider delayDuration={600}>
       <SelectionToolbarSurface
@@ -153,30 +136,6 @@ export function CodeBlockToolbar({
         )}
       >
         <div className="goose-code-hover-actions flex shrink-0 items-center">
-          {showCollapse && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  aria-label={collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
-                  aria-expanded={!collapsed}
-                  data-goose-selected="false"
-                  onClick={onCollapsedChange}
-                  className={btn}
-                >
-                  <GooseIcons.ChevronDown
-                    className={cn(icon, "goose-code-collapse-icon", collapsed && "-rotate-90")}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {collapsed ? t("expandCodeBlock") : t("collapseCodeBlock")}
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {hasVisualPreview && (
             <CodePreviewToolbar
               language={language}
@@ -194,7 +153,6 @@ export function CodeBlockToolbar({
               handleCopy={handleCopy}
             />
           )}
-
           {showWrap && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -220,7 +178,6 @@ export function CodeBlockToolbar({
               </TooltipContent>
             </Tooltip>
           )}
-
           {showFormat && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -244,7 +201,6 @@ export function CodeBlockToolbar({
               <TooltipContent side="bottom">{t("formatCode")}</TooltipContent>
             </Tooltip>
           )}
-
           {!hasVisualPreview && (
             <Tooltip>
               <TooltipTrigger asChild>

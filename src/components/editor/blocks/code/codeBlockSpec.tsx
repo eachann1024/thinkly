@@ -13,7 +13,6 @@ export const codeBlockSpec = createReactBlockSpec(
       ...defaultProps,
       language: { default: "text" },
       wrap: { default: false },
-      collapsed: { default: false },
       summary: { default: "" },
     },
     content: "inline",

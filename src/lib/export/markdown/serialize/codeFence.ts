@@ -17,14 +17,10 @@ export function serializeCodeFenceInfo(
   }
 
   const summary = normalizeCodeBlockSummary(attrs?.summary);
-  const collapsed = attrs?.collapsed === true;
   const metadata: Record<string, unknown> = {};
 
   if (summary) {
     metadata.summary = summary;
-  }
-  if (collapsed) {
-    metadata.collapsed = true;
   }
   if (attrs?.wrap === true) {
     metadata.wrap = true;

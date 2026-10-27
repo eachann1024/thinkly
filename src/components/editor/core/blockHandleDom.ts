@@ -17,10 +17,6 @@ export function blockHandleFirstLineCenter(content: HTMLElement): number | undef
     if (!node || node.closest(".bn-block-content") !== content) return undefined;
     const nodeBounds = node.getBoundingClientRect();
     if (nodeBounds.height <= 0) return undefined;
-    if (node.dataset.collapsed === "true") {
-      const legends = node.querySelector<HTMLElement>(".goose-code-toolbar-left")?.getBoundingClientRect();
-      return legends && legends.height > 0 ? legends.top + legends.height / 2 : nodeBounds.top + nodeBounds.height / 2;
-    }
     const pre = node.querySelector<HTMLElement>(".goose-code-pre:not(.goose-code-pre-hidden)");
     if (pre) {
       const style = getComputedStyle(pre);

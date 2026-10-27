@@ -68,7 +68,6 @@ function rememberBlock(block: any, path: string, sink: NoteSink): any {
   if (prepared.type === "codeBlock") {
     const code: Record<string, unknown> = {};
     if (typeof prepared.props?.summary === "string" && prepared.props.summary.trim()) code.summary = prepared.props.summary;
-    if (prepared.props?.collapsed === true) code.collapsed = true;
     if (prepared.props?.wrap === true) code.wrap = true;
     if (Object.keys(code).length) patch.code = code;
   }

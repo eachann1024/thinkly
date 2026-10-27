@@ -18,7 +18,6 @@ const t = createTranslator(messages);
 export function CodeBlockHeader({
   language,
   wrap,
-  collapsed,
   summary,
   isEditable,
   edit,
@@ -35,7 +34,6 @@ export function CodeBlockHeader({
     handleLanguageChange,
     handleWrapChange,
     handleSummaryCommit,
-    handleCollapsedChange,
     handleFormat,
   } = edit;
   const {
@@ -138,8 +136,6 @@ export function CodeBlockHeader({
         onDownloadPreview={handleDownloadPreview}
         onCopyPreview={handleCopyPreview}
         canPreview={canPreview}
-        collapsed={collapsed}
-        onCollapsedChange={handleCollapsedChange}
       />
     </div>
   );

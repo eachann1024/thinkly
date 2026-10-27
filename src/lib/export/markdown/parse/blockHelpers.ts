@@ -20,13 +20,11 @@ function normalizeCodeBlockSummary(value: unknown): string {
 export function parseCodeFenceInfo(infoLine: string): {
   language: string;
   summary: string;
-  collapsed: boolean;
   wrap: boolean;
 } {
   const tokens = infoLine.trim().split(/\s+/).filter(Boolean);
   let language = "";
   let summary = "";
-  let collapsed = false;
   let wrap = false;
 
   for (const token of tokens) {
@@ -44,9 +42,6 @@ export function parseCodeFenceInfo(infoLine: string): {
           if (candidateSummary) {
             summary = candidateSummary;
           }
-          if ((parsed as Record<string, unknown>).collapsed === true) {
-            collapsed = true;
-          }
           wrap = (parsed as Record<string, unknown>).wrap === true;
         }
       } catch {}
@@ -61,7 +56,6 @@ export function parseCodeFenceInfo(infoLine: string): {
   return {
     language,
     summary,
-    collapsed,
     wrap,
   };
 }
