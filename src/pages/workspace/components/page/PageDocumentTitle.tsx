@@ -70,6 +70,7 @@ export function PageDocumentTitle({ page, focused, editable }: {
       frame = requestAnimationFrame(() => {
         if (!isPageTitleFocusRequested(pageId)) return;
         fieldRef.current?.focus();
+        fieldRef.current?.select();
         completePageTitleFocus(pageId);
       });
     };
