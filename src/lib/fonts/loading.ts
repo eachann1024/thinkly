@@ -34,26 +34,8 @@ const hasLoadedFont = async (family: string) => {
   }
 };
 
-const tryInstallLocalFont = async (family: PersistentWoff2Family) => {
+const installBundledFont = async (family: PersistentWoff2Family) => {
   if (await hasLoadedFont(family)) return true;
-
-  for (const localName of CANGER_JINKAI_LOCAL_NAMES) {
-    try {
-      const face = new FontFace(family, `local("${localName}")`, {
-        style: "normal",
-        weight: "400",
-      });
-      await withTimeout(face.load());
-      document.fonts.add(face);
-      return true;
-    } catch {
-    }
-  }
-  return hasLoadedFont(family);
-};
-
-const installRemoteFontFromUrls = async (family: PersistentWoff2Family) => {
-  if (await tryInstallLocalFont(family)) return true;
 
   await waitForFonts([family]);
   if (await hasLoadedFont(family)) return true;
@@ -86,13 +68,13 @@ export function ensurePersistentRemoteFont(family: PersistentWoff2Family) {
   const existing = persistentFontLoads.get(family);
   if (existing) return existing;
 
-  const load = installRemoteFontFromUrls(family)
+  const load = installBundledFont(family)
     .then((loaded) => {
       if (!loaded) persistentFontLoads.delete(family);
       return loaded;
     })
     .catch((error) => {
-      console.warn(`[fontLoader] ${family} 远端加载失败`, error);
+      console.warn(`[fontLoader] ${family} 内置字体加载失败`, error);
       persistentFontLoads.delete(family);
       return false;
     });
@@ -111,7 +93,7 @@ export async function ensureEditorFontAvailable(
       (localName) => localName.toLowerCase() === family.toLowerCase(),
     ),
   );
-  if (selectsJinKai) {
+  if (selectsJinKai || (category === "serif" && selectedFamilies.length === 0)) {
     void ensurePersistentRemoteFont("仓耳今楷");
     return;
   }

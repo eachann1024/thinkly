@@ -40,15 +40,5 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src:
-    local("仓耳今楷"),
-    local("仓耳今楷03W04"),
-    local("仓耳今楷03简繁 W04"),
-    local("TsangerJinKai03-W04"),
-    url("https://cdn.jsdmirror.com/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2")
-      format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2")
-      format("woff2"),
-    url("https://raw.githubusercontent.com/eachann1024/Resources/d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2")
-      format("woff2");
+  src: url("./assets/fonts/TsangerJinKai03-W04.woff2") format("woff2");
 }
