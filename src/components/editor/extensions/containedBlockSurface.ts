@@ -4,6 +4,7 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node } from "@tiptap/pm/model";
 import { BG_PREVIEW } from "../toolbars/formatting/colorPalette";
 import { sanitizeCssColor } from "@/lib/export/markdown/blockPropsProperties";
+import { isContainedBlockContent } from "../utils/containedBlockPolicy";
 
 type ContainerMark = {
   pos: number;
@@ -23,12 +24,8 @@ function containerMarks(doc: Node): ContainerMark[] {
     if (node.type.name !== "blockContainer" || node.childCount < 2) return;
     const content = node.firstChild!;
     const type = content.type.name;
-    let continuation = false;
-    content.forEach((child) => {
-      if (child.type.name === "hardBreak") continuation = true;
-    });
+    if (!isContainedBlockContent(content)) return;
     const background = sanitizeCssColor(content.attrs.backgroundColor);
-    if (!continuation && type !== "callout" && type !== "quote" && (!background || background === "default")) return;
     marks.push({
       pos,
       size: node.nodeSize,
