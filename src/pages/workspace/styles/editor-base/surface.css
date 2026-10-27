@@ -66,7 +66,6 @@
 .workspace-editor-surface
   .bn-block-content[data-content-type="heading"][data-goose-heading-caret="true"]
   .bn-inline-content {
-  color: var(--goose-interactive-selected-fg);
   caret-color: var(--goose-accent-focus);
 }
 
