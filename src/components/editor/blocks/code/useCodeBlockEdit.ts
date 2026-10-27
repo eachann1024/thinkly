@@ -6,7 +6,6 @@ export function useCodeBlockEdit({
   editor,
   isEditable,
   summary,
-  collapsed,
   onDefaultCodeBlockWrapChange,
 }: {
   block: any;
@@ -14,19 +13,10 @@ export function useCodeBlockEdit({
   editor: any;
   isEditable: boolean;
   summary: string;
-  collapsed: boolean;
   onDefaultCodeBlockWrapChange: (wrap: boolean) => void;
 }) {
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [summaryDraft, setSummaryDraft] = useState("");
-  const [readOnlyCollapsed, setReadOnlyCollapsed] = useState<{
-    id: string;
-    value: boolean;
-  } | null>(null);
-  const displayedCollapsed =
-    !isEditable && readOnlyCollapsed !== null && readOnlyCollapsed.id === block.id
-      ? readOnlyCollapsed.value
-      : collapsed;
   const summaryInputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const getCodeContent = useCallback(() => {
@@ -67,14 +57,6 @@ export function useCodeBlockEdit({
     setIsEditingSummary(false);
   }, [summaryDraft, summary, editor, block.id]);
 
-  const handleCollapsedChange = useCallback(() => {
-    if (!isEditable) {
-      setReadOnlyCollapsed({ id: block.id, value: !displayedCollapsed });
-      return;
-    }
-    editor.updateBlock(block.id, { props: { collapsed: !collapsed } });
-  }, [editor, block.id, collapsed, displayedCollapsed, isEditable]);
-
   const handleFormat = useCallback(
     (formatted: string) => {
       const currentContent = block.content;
@@ -107,8 +89,6 @@ export function useCodeBlockEdit({
     handleLanguageChange,
     handleWrapChange,
     handleSummaryCommit,
-    handleCollapsedChange,
-    collapsed: displayedCollapsed,
     handleFormat,
   };
 }

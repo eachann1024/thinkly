@@ -81,24 +81,13 @@ export function renderTextBlock(
       const lang = (block.props?.language || "").trim();
       const codeStr = escapeHtml(extractCodeText(block.content));
       const wrap = block.props?.wrap === true;
-      const collapsed = block.props?.collapsed === true;
-      const summary =
-        typeof block.props?.summary === "string" ? block.props.summary.trim() : "";
-
       const showLang = lang && lang !== "text" && lang !== "plain";
       const preClass = wrap ? ' class="code-wrap"' : "";
-      const dataAttrs = [
-        lang ? ` data-lang="${escapeHtml(lang)}"` : "",
-        collapsed ? ' data-collapsed="true"' : "",
-      ].join("");
-      const summaryHtml =
-        collapsed && summary
-          ? `<div class="code-summary">${escapeHtml(summary)}</div>`
-          : "";
+      const dataAttrs = lang ? ` data-lang="${escapeHtml(lang)}"` : "";
       const langHtml = showLang
         ? `<div class="code-lang">${escapeHtml(lang)}</div>`
         : "";
-      return `<div class="code-block"${dataAttrs}>${langHtml}${summaryHtml}<pre${preClass}><code${lang ? ` class="language-${escapeHtml(lang)}"` : ""}>${codeStr}</code></pre></div>`;
+      return `<div class="code-block"${dataAttrs}>${langHtml}<pre${preClass}><code${lang ? ` class="language-${escapeHtml(lang)}"` : ""}>${codeStr}</code></pre></div>`;
     }
 
     case "quote": {

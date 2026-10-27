@@ -9,7 +9,6 @@ export interface CodeBlockViewProps {
   editor: any;
   language: string;
   wrap: boolean;
-  collapsed: boolean;
   summary: string;
   isEditable: boolean;
   edit: CodeBlockEditState;

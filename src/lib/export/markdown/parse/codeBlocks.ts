@@ -32,7 +32,6 @@ export function parseCodeBlock(lines: string[], startIndex: number) {
       props: {
         language: info.language,
         ...(info.summary ? { summary: info.summary } : {}),
-        ...(info.collapsed ? { collapsed: true } : {}),
         ...(info.wrap ? { wrap: true } : {}),
       },
       content: codeLines.join("\n"),
