@@ -3,7 +3,7 @@ export const SYSTEM_FONT_STACK =
 
 export const DEFAULT_FONT_NAMES = {
   default: SYSTEM_FONT_STACK,
-  serif: "Georgia",
+  serif: "仓耳今楷",
   mono: "JetBrains Mono",
 } as const;
 
@@ -24,9 +24,7 @@ export const SERIF_LOCAL_FALLBACKS = [
 ];
 
 const CANGER_JINKAI_WOFF2_URLS = [
-  "https://cdn.jsdmirror.com/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
-  "https://cdn.jsdelivr.net/gh/eachann1024/Resources@d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
-  "https://raw.githubusercontent.com/eachann1024/Resources/d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2",
+  new URL("../../assets/fonts/TsangerJinKai03-W04.woff2", import.meta.url).href,
 ] as const;
 
 export const REMOTE_FONT_SOURCES = {
