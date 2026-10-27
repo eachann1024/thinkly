@@ -257,6 +257,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -280,6 +281,15 @@ jobs:
           GH_REPO: ${{ github.repository }}
           AUTO_BUMP: ${{ needs.prepare.outputs.auto_bump }}
         run: node scripts/publish-release.mjs
+      - name: Start the Quark upload for the new release
+        # Only reached after a release was published. The daily schedule in quark-upload.yml stays as a fallback,
+        # and the upload skips files that already exist, so a repeated trigger is harmless.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh workflow run quark-upload.yml --ref main -f release_tag=latest \
+            || echo "::warning::Could not start quark-upload.yml; the daily schedule will upload this release."
 
   repair:
     name: Repair published download metadata
