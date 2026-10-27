@@ -15,7 +15,6 @@ export function CodeBlockComponent({
   const { onDefaultCodeBlockWrapChange, theme } = useEditorSettings();
   const language = (block.props.language as string) || "text";
   const wrap = block.props.wrap === true;
-  const collapsed = block.props.collapsed === true;
   const summary =
     typeof block.props.summary === "string" ? block.props.summary : "";
   const isEditable = editor.isEditable;
@@ -25,7 +24,6 @@ export function CodeBlockComponent({
     editor,
     isEditable,
     summary,
-    collapsed,
     onDefaultCodeBlockWrapChange,
   });
   const preview = useCodePreview(edit.getCodeContent, language, wrap, theme);
@@ -36,7 +34,6 @@ export function CodeBlockComponent({
       editor={editor}
       language={language}
       wrap={wrap}
-      collapsed={edit.collapsed}
       summary={summary}
       isEditable={isEditable}
       edit={edit}

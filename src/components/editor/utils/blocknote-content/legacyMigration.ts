@@ -101,7 +101,6 @@ function legacyNodeToBlocks(node: LegacyPageContent): PartialBlock[] {
           props: {
             language: node.attrs?.language || "",
             ...(node.attrs?.summary ? { summary: node.attrs.summary } : {}),
-            ...(node.attrs?.collapsed ? { collapsed: node.attrs.collapsed } : {}),
             ...(node.attrs?.wrap != null ? { wrap: node.attrs.wrap } : {}),
           },
           content: textFromLegacy(node),
