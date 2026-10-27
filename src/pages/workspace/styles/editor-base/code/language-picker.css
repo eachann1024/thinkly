@@ -1,7 +1,7 @@
 .goose-code-language-picker {
   display: flex;
   flex-direction: column;
-  gap: var(--goose-menu-row-gap);
+  gap: 8px;
   box-sizing: border-box;
   width: var(--goose-menu-min-width);
   max-width: calc(100vw - 16px);
@@ -14,6 +14,8 @@
 
 .goose-code-language-search {
   flex-shrink: 0;
+  /* 搜索框的焦点环要有呼吸空间，不能贴着第一个选项。 */
+  padding: 2px 2px 0;
 }
 
 .goose-code-language-picker .goose-code-language-input {

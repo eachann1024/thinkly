@@ -33,6 +33,8 @@
   font-size: inherit;
   line-height: inherit;
   overflow-x: auto;
+  /* 空块或换语言后内容变短时，至少留 4 行高度。 */
+  min-height: calc(4lh + 2 * var(--editor-code-block-padding-y, 12px));
 }
 
 .goose-code-pre-hidden {
