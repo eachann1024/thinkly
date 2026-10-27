@@ -7,6 +7,7 @@ import { isValidUrl, looksLikeMarkdownFragment } from "./clipboard";
 import { importMarkdownFragment } from "@/lib/export/markdown/parse";
 import { restoreBlockPropsMarkers } from "@/lib/export/markdown/blockPropsMarker";
 import { htmlLooksLikeBlockNoteClipboard } from "./multilinePaste";
+import { isContainedBlockContent } from "./containedBlockPolicy";
 import { toast } from "@/components/ui/sonner";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/utils/containedPaste.ts#messages:1">`
@@ -24,7 +25,6 @@ const t = createTranslator(messages);
 
 
 type Editor = BlockNoteEditor<any, any, any>;
-const CONTAINERS = new Set(["callout", "quote"]);
 
 export function containedPasteTarget(state: Pick<EditorState, "selection">) {
   const { selection } = state;
@@ -37,13 +37,7 @@ export function containedPasteTarget(state: Pick<EditorState, "selection">) {
   const depth = $from.depth - 1;
   const block = $from.node(depth);
   if (block.type.name !== "blockContainer") return null;
-  if ($from.before(depth) === 1 && $from.parent.type.name === "heading" && $from.parent.attrs.level === 1) return null;
-  let continuation = false;
-  $from.parent.forEach((node, offset) => {
-    if (offset < $from.parentOffset && node.type.name === "hardBreak") continuation = true;
-  });
-  const background = $from.parent.attrs.backgroundColor;
-  if (!CONTAINERS.has($from.parent.type.name) && !continuation && (!background || background === "default")) return null;
+  if (!isContainedBlockContent($from.parent, $from.parentOffset)) return null;
   return { depth, block, pos: $from.before(depth) };
 }
 
