@@ -1,4 +1,4 @@
 import { Dropdown, Header } from "@heroui/react";
 export const EditorMenuSection = Dropdown.Section;
-export const EditorSubmenuTrigger = Dropdown.SubmenuTrigger;
+export { DropdownMenuSub as EditorSubmenuTrigger } from "@/components/ui/dropdown-submenu";
 export const EditorMenuHeader = Header;

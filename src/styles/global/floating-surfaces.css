@@ -183,6 +183,12 @@
   }
 }
 
+[data-goose-floating-content].dropdown__popover[data-goose-submenu][data-exiting="true"] {
+  opacity: 0;
+  pointer-events: none;
+  animation: none !important;
+}
+
 [data-goose-floating-content].dropdown__popover.goose-menu-surface[data-goose-motion="instant"] {
   --goose-control-motion-duration: 0ms;
   animation: none !important;
