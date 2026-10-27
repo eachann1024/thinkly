@@ -14,7 +14,7 @@ export function EditorSuggestionMenuController(props: ComponentProps<typeof Sugg
   const owner = useMenuRoot(visible, (open) => {
     if (!open && menu.store.state?.triggerCharacter === props.triggerCharacter) menu.closeMenu();
   });
-  const floatingUIOptions = useMemo(() => getCompactSlashMenuFloatingOptions(root ?? undefined), [root]);
+  const floatingUIOptions = useMemo(() => getCompactSlashMenuFloatingOptions(), []);
   if (!layer) return null;
   return <MenuRootContext.Provider value={owner}>
     <SuggestionMenuController {...props} portalElement={layer} floatingUIOptions={floatingUIOptions} />
