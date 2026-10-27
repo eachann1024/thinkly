@@ -1,5 +1,16 @@
 # 更新日志
 
+## 1.7.335
+
+- Fix heading text colors and reduce heading bottom spacing
+- align add-button menus with slash menu placement
+- Fix Enter and paste behavior for headings and list items
+- reuse split pane menu selection and available name width
+- switch submenus without exit animation delay
+- Unify vertical spacing across heading levels and backgrounds
+- restore and bundle Tsanger JinKai serif font
+- remove code block folding and always show code
+
 ## 1.7.334
 
 - Improve editor placeholder shortcut hint and align translations
