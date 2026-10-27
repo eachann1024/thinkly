@@ -85,14 +85,3 @@
   padding-left: 8px;
   padding-right: 8px;
 }
-
-.bn-block-content[data-content-type="heading"][data-background-color] {
-  margin-top: 15px;
-  padding-top: 3px;
-}
-
-.workspace-editor-surface
-  .bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type="heading"][data-background-color])
-  + .bn-block-outer {
-  margin-top: 0.6em;
-}
