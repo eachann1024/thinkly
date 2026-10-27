@@ -120,9 +120,9 @@ export function SplitPaneHeader({
       <div className="editor-split-header-crumb">
         {page && notebook ? (
           <>
-            <NotebookMark notebook={notebook} />
             <SplitPanePageMenu tabId={tabId} leafId={leafId} page={page} scope="notebook-root">
               <Button contentStyle="preserve" variant="ghost" size={null} type="button" className="editor-split-header-notebook">
+                <NotebookMark notebook={notebook} />
                 <NotebookName name={notebook.name} />
               </Button>
             </SplitPanePageMenu>
