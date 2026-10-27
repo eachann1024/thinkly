@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { TriggerChild } from "./trigger-child";
 import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "./overlay-layer";
 import { MenuRootContent, MenuRootScopeContext, useMenuRoot } from "./menu-root";
+import { DropdownMenuSub } from "./dropdown-submenu";
 type DropdownVariant = "dropdown" | "menu";
 const DropdownVariantContext = React.createContext<DropdownVariant>("dropdown");
 
@@ -270,18 +271,6 @@ function DropdownMenuRadioItem({
       <span className="goose-menu-item-content flex min-w-0 flex-1 items-center"><DropdownMenuIconSlot icon={icon} loading={iconLoading} />{children}</span>
       {!hideIndicator && <Dropdown.ItemIndicator data-goose-selection-indicator={variant === "dropdown" || undefined} className="ms-auto shrink-0" style={{ position: "static", transform: "none", translate: "none" }} />}
     </DropdownMenuItem>
-  );
-}
-function DropdownMenuSub({
-  children,
-}: {
-  children: [React.ReactElement, React.ReactElement];
-}) {
-  return (
-    <Dropdown.SubmenuTrigger>
-      {children[0]}
-      {children[1]}
-    </Dropdown.SubmenuTrigger>
   );
 }
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
