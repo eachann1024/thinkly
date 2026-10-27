@@ -71,7 +71,7 @@
   align-items: center;
   border: 1px solid hsl(var(--border) / 0.55);
   border-radius: 8px;
-  background: hsl(var(--background) / 0.92);
+  background: hsl(var(--goose-editor-bg) / 0.92);
   padding: 2px;
   box-shadow: 0 6px 18px hsl(var(--foreground) / 0.08);
   backdrop-filter: blur(10px);
@@ -108,6 +108,6 @@
 
 .goose-code-block-node[data-visual-preview="true"] {
   min-height: 140px;
-  --goose-code-surface: hsl(var(--background));
+  --goose-code-surface: hsl(var(--goose-editor-bg));
   background-color: var(--goose-code-surface);
 }
