@@ -14,7 +14,7 @@
 .editor-split-header-crumb {
   display: flex;
   align-items: center;
-  justify-self: start;
+  justify-self: stretch;
   gap: 6px;
   min-width: 0;
   overflow: hidden;
@@ -64,7 +64,10 @@
 
 .editor-split-header-notebook {
   flex: 0 1 auto;
-  max-width: 42%;
+  gap: 6px;
+  height: 24px;
+  padding-inline: 4px;
+  max-width: 100%;
   color: var(--goose-text-secondary);
   font-weight: 400;
 }
@@ -100,7 +103,8 @@
   white-space: nowrap;
 }
 
-.editor-split-header-title-slot .goose-notebook-name {
+.editor-split-header-title-slot .goose-notebook-name,
+.editor-split-header-notebook .goose-notebook-name {
   flex: 0 1 auto;
 }
 

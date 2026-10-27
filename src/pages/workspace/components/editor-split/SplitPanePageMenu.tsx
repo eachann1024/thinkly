@@ -19,6 +19,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSub,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -66,29 +68,33 @@ function SwitcherNodes({
   currentId: string;
   onPick: (pageId: string) => void;
 }) {
-  return entries.map((entry) =>
-    entry.isFolder ? (
-      <DropdownMenuSub key={entry.id}>
-        <DropdownMenuItem textValue={entry.title}>
-          <GooseIcons.Folder className="h-4 w-4 shrink-0" />
-          <span className="min-w-0 flex-1 truncate">{entry.title}</span>
-          <GooseIcons.ChevronRight className="ml-auto h-4 w-4 shrink-0" />
-        </DropdownMenuItem>
-        <DropdownMenuContent side="right" align="start" sideOffset={2}>
-          <SwitcherNodes entries={entry.children} currentId={currentId} onPick={onPick} />
-        </DropdownMenuContent>
-      </DropdownMenuSub>
-    ) : (
-      <DropdownMenuItem
-        key={entry.id}
-        textValue={entry.title}
-        aria-current={entry.id === currentId ? "page" : undefined}
-        onSelect={() => onPick(entry.id)}
-      >
-        <span className="min-w-0 flex-1 truncate">{entry.title}</span>
-        {entry.id === currentId ? <GooseIcons.Check className="ml-auto h-4 w-4 shrink-0" /> : null}
-      </DropdownMenuItem>
-    ),
+  return (
+    <DropdownMenuRadioGroup value={currentId}>
+      {entries.map((entry) =>
+        entry.isFolder ? (
+          <DropdownMenuSub key={entry.id}>
+            <DropdownMenuItem textValue={entry.title}>
+              <GooseIcons.Folder className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">{entry.title}</span>
+              <GooseIcons.ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+            </DropdownMenuItem>
+            <DropdownMenuContent side="right" align="start" sideOffset={2}>
+              <SwitcherNodes entries={entry.children} currentId={currentId} onPick={onPick} />
+            </DropdownMenuContent>
+          </DropdownMenuSub>
+        ) : (
+          <DropdownMenuRadioItem
+            key={entry.id}
+            value={entry.id}
+            textValue={entry.title}
+            aria-current={entry.id === currentId ? "page" : undefined}
+            onSelect={() => onPick(entry.id)}
+          >
+            <span className="min-w-0 flex-1 truncate">{entry.title}</span>
+          </DropdownMenuRadioItem>
+        ),
+      )}
+    </DropdownMenuRadioGroup>
   );
 }
 
