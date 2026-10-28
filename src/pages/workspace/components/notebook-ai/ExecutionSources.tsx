@@ -38,10 +38,10 @@ export function ExecutionSources({ parts, execution }: { parts: ToolProgressPart
   const page = Math.min(requestedPage, pages - 1);
   const id = useId();
   if (!sources.length) return null;
-  return <div className="notebook-ai-execution-sources">
-    <Button variant="ghost" size={null} contentStyle="preserve" className="notebook-ai-execution-source-toggle"
+  return <div className="notebook-ai-execution-sources notebook-ai-work-trace notebook-ai-work-trace--foldable">
+    <Button variant="ghost" size={null} contentStyle="preserve" className="notebook-ai-work-toggle"
       aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)}>
-      <FileText size={16} /><span>{t("sources", { count: sources.length })}</span><ChevronRight className="notebook-ai-work-chev" size={16} />
+      <ChevronRight className="notebook-ai-work-chev" size={16} /><span className="notebook-ai-work-toggle-label">{t("sources", { count: sources.length })}</span>
     </Button>
     <ExecutionDisclosure open={open} id={id}>
       <ul className="notebook-ai-execution-source-list">
