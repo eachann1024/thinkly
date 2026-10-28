@@ -1,4 +1,5 @@
 zh-Hans:
+  reapply: "重新应用"
   stopRemainingItems: "停止后续操作"
   stoppingAfterCurrentItem: "当前项结束后停止"
   canceling: "正在取消"
@@ -27,6 +28,7 @@ zh-Hans:
   skippedCount: "已跳过 {{count}} 项未选操作。"
   applyCount_other: "应用 {{count}} 项"
 en:
+  reapply: "Reapply"
   stopRemainingItems: "Stop remaining operations"
   stoppingAfterCurrentItem: "Stopping after current item"
   canceling: "Canceling"
@@ -56,6 +58,7 @@ en:
   applyCount_one: "Apply {{count}} change"
   applyCount_other: "Apply {{count}} changes"
 ja:
+  reapply: "再適用"
   stopRemainingItems: "残りの操作を停止"
   stoppingAfterCurrentItem: "現在の項目が終わったら停止"
   canceling: "キャンセル中"

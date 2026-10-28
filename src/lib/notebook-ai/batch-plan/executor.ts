@@ -3,6 +3,7 @@ import { readBatchPlanJournal, writeBatchPlanJournal } from "./journal";
 import { usePages } from "@/stores/usePages";
 import { formatBatchPlanErrors } from "@/lib/notebook-ai/errors";
 import { run } from "./batchRun";
+import { prepareReapplication } from "./batchReapply";
 import { sameRevision, revisionOf } from "./batchShared";
 import { comparisonPath, pathExists } from "./batchPaths";
 import { compensate } from "./batchCompensate";
@@ -13,6 +14,7 @@ const undoInFlight = new Map<string, Promise<BatchPlanExecuteResult>>();
 export function executePreparedBatchPlan(
   toolCallId: string,
   runId: string,
+  options: { reapply?: boolean } = {},
 ): Promise<BatchPlanExecuteResult> {
   const journal = readBatchPlanJournal(toolCallId, runId);
   if (!journal) return Promise.reject(new Error("未找到批量计划"));
@@ -21,7 +23,9 @@ export function executePreparedBatchPlan(
     error: "计划正在撤回，请等待完成", results: journal.results });
   const current = inFlight.get(key);
   if (current) return current;
-  const promise = run(journal).finally(() => inFlight.delete(key));
+  const promise = Promise.resolve().then(async () =>
+    run(options.reapply ? await prepareReapplication(journal) : journal),
+  ).finally(() => inFlight.delete(key));
   inFlight.set(key, promise);
   return promise;
 }
