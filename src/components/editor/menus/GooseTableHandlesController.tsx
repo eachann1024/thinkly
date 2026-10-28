@@ -180,14 +180,16 @@ export function GooseTableHandlesController() {
     return null;
   }
   const node = getNodeById(state.block.id, editor.prosemirrorState.doc);
-  if (!node) {
+  if (!node || node.node.firstChild?.type.name !== "table") {
     sticky.current = false;
     return null;
   }
-  const dom = editor.prosemirrorView.domAtPos(node.posBeforeNode + 3).node;
-  const table = (dom instanceof Element ? dom : dom.parentElement)?.closest(
-    "table",
-  );
+  // Resolve the table node itself, not a fixed offset into its first cell.
+  // Imported tables can start with different cell/column DOM structures.
+  const dom = editor.prosemirrorView.nodeDOM(node.posBeforeNode + 1);
+  const table = dom instanceof Element
+    ? dom.matches("table") ? dom as HTMLTableElement : dom.querySelector("table")
+    : null;
   if (!table) {
     sticky.current = false;
     return null;

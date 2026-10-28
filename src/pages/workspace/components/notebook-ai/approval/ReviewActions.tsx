@@ -54,6 +54,7 @@ export function ReviewActions({
     review.phase === "approval" &&
     Boolean(journal && input && part.toolCallId && selectedIds.length) &&
     !submitting;
+  const canReapply = review.phase === "undone" && Boolean(journal && onApprovalResponse) && !submitting && !undoing;
   const canRetry = review.phase === "failed" && journal?.version === 2 &&
     Boolean(journal.writeScope && !isRunWriteScopeRevoked(journal.writeScope)) && !submitting;
   const hasError =
@@ -95,12 +96,12 @@ export function ReviewActions({
                     ? { label: review.label, icon: "done", tone: "success" }
                     : { label: review.label, icon: "running", tone: "accent" };
   useEmbeddedWorkCardStatus(status, embedded);
-  const respond = async (approved: boolean, retry = false) => {
+  const respond = async (approved: boolean, retry = false, reapply = false) => {
     if (
       !part.toolCallId ||
       !input?.runId ||
       busyRef.current ||
-      (approved && !(retry ? canRetry : canApprove))
+      (approved && !(reapply ? canReapply : retry ? canRetry : canApprove))
     )
       return;
     busyRef.current = true;
@@ -112,8 +113,8 @@ export function ReviewActions({
         approvalId: part.approval?.id ?? `batch-approval-${part.toolCallId}`,
         toolCallId: part.toolCallId,
         runId: input.runId,
-        approved,
-        selectedOperationIds: approved ? retry ? journal!.selectedOperationIds : selectedIds : [],
+        approved, reapply,
+        selectedOperationIds: approved ? (retry || reapply) ? journal!.selectedOperationIds : selectedIds : [],
       });
       dispatch({ type: "responded" });
     } catch (error) {
@@ -234,6 +235,12 @@ export function ReviewActions({
             setCancelRequested(true);
           }}>
           <Square size={16} />{cancelRequested ? t("stoppingAfterCurrentItem") : t("stopRemainingItems")}
+        </Button>
+      ) : null}
+      {canReapply ? (
+        <Button type="button" variant="secondary" className={`${secondaryClass} w-full`}
+          onClick={() => void respond(true, false, true)}>
+          <RefreshCw size={16} />{t("reapply")}
         </Button>
       ) : null}
       {canRetry ? (

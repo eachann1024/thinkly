@@ -47,6 +47,7 @@ export type BatchPlanOutput = {
 };
 
 export interface BatchApprovalResponse {
+  reapply?: boolean;
   approvalId: string;
   toolCallId: string;
   runId: string;
