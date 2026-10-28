@@ -52,6 +52,8 @@ export function buildPiTransport(
           let reasoningId: string | null = null;
           let stepOpen = false;
           let finished = false;
+          let settle: () => void = () => {};
+          const terminal = new Promise<void>((resolve) => { settle = resolve; });
 
           const openStep = () => {
             if (!stepOpen) {
@@ -96,6 +98,7 @@ export function buildPiTransport(
           const finishResponse = () => {
             if (finished) return;
             finished = true;
+            settle();
             endReasoning();
             endText();
             closeStep();
@@ -129,10 +132,12 @@ export function buildPiTransport(
 
           const onAbort = () => {
             abort();
+            finishResponse();
           };
           abortSignal?.addEventListener("abort", onAbort);
 
           const unsub = agent.subscribe(async (event: AgentEvent) => {
+            if (finished) return;
             try {
               switch (event.type) {
                 case "turn_start": {
@@ -228,13 +233,12 @@ export function buildPiTransport(
           });
 
           try {
-            if (prompt.images.length > 0) {
-              await agent.prompt(prompt.text, prompt.images);
-            } else {
-              await agent.prompt(prompt.text);
-            }
-            await agent.waitForIdle();
-
+            // A terminal event or cancellation must release the UI even when a
+            // provider/tool promise fails to settle after aborting.
+            await Promise.race([
+              agent.prompt(prompt.text, prompt.images.length ? prompt.images : undefined),
+              terminal,
+            ]);
             finishResponse();
           } catch (error) {
             if (!finished) {

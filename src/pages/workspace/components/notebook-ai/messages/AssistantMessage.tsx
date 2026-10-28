@@ -118,7 +118,6 @@ export function AssistantMessage({
             {visibleApprovalPart ? (
               <BatchPlanProposal part={visibleApprovalPart} />
             ) : null}
-            <MessagePrimitive.Parts components={ASSISTANT_CHOICE_PARTS} />
           </ToolProgressCard>
         ) : null}
         {otherApprovalParts.map((part) => (
@@ -130,6 +129,9 @@ export function AssistantMessage({
           />
         ))}
         <MessagePrimitive.Parts components={ASSISTANT_ARTIFACT_PARTS} />
+        {!isStreaming ? (
+          <MessagePrimitive.Parts components={ASSISTANT_CHOICE_PARTS} />
+        ) : null}
         <MessagePrimitive.Error>
           <p className="text-xs text-danger">{t("thisResponseCouldNotBeGenerated")}</p>
         </MessagePrimitive.Error>

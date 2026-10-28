@@ -14,14 +14,9 @@
 .notebook-ai-execution-model { display: flex; gap: 12px; align-items: baseline; margin: 0 0 10px; color: hsl(var(--muted-foreground)); font-size: 12px; }
 .notebook-ai-execution-model > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notebook-ai-execution-sources { margin: 10px 0 0; }
-.notebook-ai-execution-source-toggle,
 .notebook-ai-execution-source { display: flex; width: calc(100% + 16px); min-width: 0; align-items: center; gap: 8px; margin-inline: -8px; padding: 8px; border-radius: var(--goose-control-radius); font-size: 13px; line-height: 20px; text-align: left; }
-.notebook-ai-execution-source-toggle { background: var(--goose-interactive-hover); }
-.notebook-ai-execution-source-toggle > span,
 .notebook-ai-execution-source > span { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.notebook-ai-execution-source-toggle > svg,
 .notebook-ai-execution-source > svg { flex: 0 0 16px; color: hsl(var(--muted-foreground)); }
-.notebook-ai-execution-source-toggle[aria-expanded="true"] .notebook-ai-work-chev { transform: rotate(90deg); }
 .notebook-ai-execution-source-list { max-height: 280px; overflow: auto; overscroll-behavior: contain; margin: 4px 0 0; padding: 0 8px; list-style: none; }
 .notebook-ai-execution-source time { color: hsl(var(--muted-foreground)); font-size: 12px; }
 .notebook-ai-artifact-action { display: inline-flex; }
