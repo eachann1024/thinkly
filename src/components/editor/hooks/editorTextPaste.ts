@@ -127,6 +127,18 @@ export function handleEditorTextPaste(
     return;
   }
 
+  // Preserve our serialized table structure before the generic HTML/Markdown
+  // parser discards table metadata (widths, spans and header dimensions).
+  if (!container.inTable && plainHasGooseMarkdownMarkers(plainText) && !htmlHasRichPasteContent(htmlText)) {
+    const target = cachePasteTarget(editor);
+    if (target) {
+      event.preventDefault();
+      event.stopPropagation();
+      tryPasteGooseMarkdownFragment(editor, plainText, target);
+      return;
+    }
+  }
+
   const hasMarkdownCodeFence = /(^|\n)\s*```/.test(plainText);
   if (hasMarkdownCodeFence) {
     event.preventDefault();

@@ -73,7 +73,7 @@ export function useBatchApprovalActions(state: SessionState) {
             ...part,
             state,
             ...(payload.output !== undefined ? { output: payload.output } : {}),
-            ...(payload.errorText ? { errorText: payload.errorText } : {}),
+            errorText: payload.errorText,
             approval: {
               id: response.approvalId,
               approved: response.approved,
@@ -97,11 +97,9 @@ export function useBatchApprovalActions(state: SessionState) {
         return;
       }
 
-      const journal = updateBatchPlanSelection(
-        response.toolCallId,
-        response.runId,
-        response.selectedOperationIds,
-      );
+      const journal = response.reapply
+        ? readBatchPlanJournal(response.toolCallId, response.runId)
+        : updateBatchPlanSelection(response.toolCallId, response.runId, response.selectedOperationIds);
       if (!journal) {
         toast.error(t("thisPlanHasExpiredAskAiToGenerate"));
         return;
@@ -112,6 +110,7 @@ export function useBatchApprovalActions(state: SessionState) {
         const result = await executePreparedBatchPlan(
           response.toolCallId,
           response.runId,
+          { reapply: response.reapply },
         );
         replaceToolPart("output-available", {
           output: {

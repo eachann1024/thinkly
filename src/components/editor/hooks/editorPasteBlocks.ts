@@ -64,6 +64,7 @@ export function plainHasGooseColumnMarkers(plain: string): boolean {
 export function plainHasGooseMarkdownMarkers(plain: string): boolean {
   return (
     plainHasGooseColumnMarkers(plain) ||
+    /<table\s+data-(?:thinkly|goose)-table=/i.test(plain) ||
     /goose-note:/i.test(plain) ||
     /(?:thinkly|goose-note):block-props|data-(?:thinkly|goose)-note-block-props/i.test(plain) ||
     /<span[^>]*style\s*=/i.test(plain)
