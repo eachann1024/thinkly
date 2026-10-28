@@ -1,6 +1,5 @@
 .notebook-ai-review-selection,
-.notebook-ai-review-toolbar,
-.notebook-ai-review-meta {
+.notebook-ai-review-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -46,17 +45,6 @@
 .notebook-ai-review-target:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-.notebook-ai-review-meta {
-  align-items: flex-start;
-  flex-direction: column;
-  gap: var(--goose-list-row-gap);
-  overflow-wrap: anywhere;
-}
-.notebook-ai-review-result {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-size: 11px;
 }
 .notebook-ai-review-copy-status {
   margin: 0;

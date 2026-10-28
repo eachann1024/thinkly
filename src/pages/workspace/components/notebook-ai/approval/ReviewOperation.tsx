@@ -1,8 +1,14 @@
 import { useLocale } from "@/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { useMemo, useRef, useState } from "react";
-import { ArrowLeftRight, ClipboardCopy, Copy, FilePlus2, FileText, Pencil, Trash2 } from "@/components/ui/icons";
+import { useRef, useState } from "react";
+import {
+  ArrowLeftRight,
+  ClipboardCopy,
+  Copy,
+  FileText,
+  Pencil,
+} from "@/components/ui/icons";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { usePages } from "@/stores/usePages";
@@ -12,15 +18,13 @@ import type {
   BatchPlanOperationInput,
   BatchPlanJournal,
 } from "@/lib/notebook-ai/batch-plan/types";
-import { applySearchReplacePreservingBlocks } from "@/lib/notebook-ai/batch-plan/surgicalApply";
-import { diffTextLines, planOperationKindLabel } from "../batchPlanDiff";
+import { planOperationKindLabel } from "../batchPlanDiff";
 import { PlanMarkdown } from "../PlanMarkdown";
 import {
   originalMarkdown,
   proposedMarkdown,
   operationTargetPage,
   reviewPagePath,
-  reviewOperationPath,
 } from "./planReviewData";
 import { requestPlanRefinement } from "./refinePlan";
 import { ReviewDiff } from "./ReviewDiff";
@@ -28,21 +32,18 @@ import messages from "./ReviewOperation.messages.yaml";
 import { createTranslator } from "@/i18n";
 const t = createTranslator(messages);
 
-
 export function ReviewOperation({
   operation,
   journal,
   canSelect,
   selected,
   onSelect,
-  resultLabel,
 }: {
   operation: BatchPlanOperationInput;
   journal: BatchPlanJournal | null;
   canSelect: boolean;
   selected: boolean;
   onSelect: () => void;
-  resultLabel?: string;
 }) {
   useLocale();
   const { onOpenPage } = useEditorPageContext();
@@ -61,56 +62,8 @@ export function ReviewOperation({
           : page
             ? getPageTitle(page)
             : t("theTargetNoteIsNoLongerAvailable");
-  const livePage = page ? usePages.getState().pages[page.id] : undefined;
-  const navigable = Boolean(
-    livePage && !livePage.trashedAt && !livePage.isFolder,
-  );
   const oldText = originalMarkdown(operation, journal);
   const newText = proposedMarkdown(operation, journal);
-  const lines =
-    oldText !== undefined && newText !== undefined
-      ? diffTextLines(oldText, newText)
-      : [];
-  const added = lines.filter((line) => line.kind === "add").length;
-  const deleted = lines.filter((line) => line.kind === "del").length;
-  const affectedCount =
-    operation.type === "delete"
-      ? (journal?.affectedPageIdsByOperationId[operation.operationId]?.length ??
-        operation.pageIds.length)
-      : undefined;
-  const snapshotContent =
-    operation.type === "search_replace"
-      ? journal?.before[operation.pageId]?.page.content
-      : undefined;
-  const replacementPreview = useMemo(
-    () =>
-      operation.type === "search_replace" && snapshotContent
-        ? applySearchReplacePreservingBlocks(
-            snapshotContent,
-            operation.oldString,
-            operation.newString,
-            { replaceAll: operation.replaceAll },
-          )
-        : undefined,
-    [operation, snapshotContent],
-  );
-  const scope =
-    operation.type === "search_replace"
-      ? `${operation.replaceAll ? t("replaceAllMatches") : t("replaceFirstMatch")}${replacementPreview?.ok ? t("matchCount", { count: replacementPreview.replacedCount }) : ""}`
-      : operation.type === "edit"
-        ? t("replaceEntireNoteBody")
-        : operation.type === "delete"
-          ? t("detailMoveNotesToTrashIncludingChildNotes", { value1: affectedCount ?? operation.pageIds.length })
-          : t("createNote");
-  const path = reviewOperationPath(operation, journal);
-  const Icon =
-    operation.type === "create"
-      ? FilePlus2
-      : operation.type === "delete"
-        ? Trash2
-        : operation.type === "search_replace"
-          ? Pencil
-          : FileText;
   const captureSelection = () => {
     const selection = window.getSelection();
     setSelectionText(
@@ -148,87 +101,93 @@ export function ReviewOperation({
       className="notebook-ai-plan-file"
       aria-label={`${planOperationKindLabel(operation.type)} ${title}`}
     >
-      <div className="notebook-ai-plan-file-bar">
-        {canSelect ? (
-          <Checkbox
-            isSelected={selected}
-            onChange={onSelect}
-            aria-label={t("detailApply", { value1: planOperationKindLabel(operation.type), value2: title })}
-          >
-            <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
-          </Checkbox>
-        ) : (
-          <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        )}
-        <span className="notebook-ai-plan-file-kind">
-          {planOperationKindLabel(operation.type)}
-        </span>
-        {navigable ? (
-          <Button contentStyle="preserve" variant="ghost" size={null}
-            type="button"
-            className="notebook-ai-plan-file-title notebook-ai-review-target"
-            title={t("detailOpenTargetNote", { value1: path })}
-            onClick={() => onOpenPage(livePage!.id)}
-          >
-            {title}
-          </Button>
-        ) : (
-          <span className="notebook-ai-plan-file-title">{title}</span>
-        )}
-        {resultLabel ? (
-          <span className="notebook-ai-review-result">{resultLabel}</span>
-        ) : null}
-      </div>
-      <div className="notebook-ai-review-meta">
-        <span title={path}>{path}</span>
-        <span>
-          {scope}
-          {lines.length ? t("detailLines", { value1: added, value2: deleted }) : ""}
-        </span>
-      </div>
-      {newText !== undefined ? (
+      {canSelect || newText !== undefined ? (
         <div className="notebook-ai-review-toolbar">
-          {oldText !== undefined && operation.type !== "create" ? (
-            <div role="group" aria-label={t("detailPreviewModeFor", { value1: title })}>
-              <Button contentStyle="preserve" variant="ghost" size={null}
-                type="button"
-                aria-pressed={view === "diff"}
-                className="goose-accent-selection"
-                onClick={() => setView("diff")}
-              >
-                <ArrowLeftRight aria-hidden />
-                {t("diff")}
-              </Button>
-              <Button contentStyle="preserve" variant="ghost" size={null}
-                type="button"
-                aria-pressed={view === "new"}
-                className="goose-accent-selection"
-                onClick={() => setView("new")}
-              >
-                <FileText aria-hidden />
-                {operation.type === "search_replace" ? t("newText") : t("resultingContent")}
-              </Button>
-            </div>
+          {canSelect ? (
+            <Checkbox
+              isSelected={selected}
+              onChange={onSelect}
+              aria-label={t("detailApply", {
+                value1: planOperationKindLabel(operation.type),
+                value2: title,
+              })}
+            >
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox>
           ) : null}
-          {oldText !== undefined && operation.type !== "create" ? (
-            <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(oldText, t("original"))}>
-              <Copy aria-hidden />
-              {t("copyOriginal")}
-            </Button>
+          {newText !== undefined ? (
+            <>
+              {oldText !== undefined && operation.type !== "create" ? (
+                <div
+                  role="group"
+                  aria-label={t("detailPreviewModeFor", { value1: title })}
+                >
+                  <Button
+                    contentStyle="preserve"
+                    variant="ghost"
+                    size={null}
+                    type="button"
+                    aria-pressed={view === "diff"}
+                    className="goose-accent-selection"
+                    onClick={() => setView("diff")}
+                  >
+                    <ArrowLeftRight aria-hidden />
+                    {t("diff")}
+                  </Button>
+                  <Button
+                    contentStyle="preserve"
+                    variant="ghost"
+                    size={null}
+                    type="button"
+                    aria-pressed={view === "new"}
+                    className="goose-accent-selection"
+                    onClick={() => setView("new")}
+                  >
+                    <FileText aria-hidden />
+                    {operation.type === "search_replace"
+                      ? t("newText")
+                      : t("resultingContent")}
+                  </Button>
+                </div>
+              ) : null}
+              {oldText !== undefined && operation.type !== "create" ? (
+                <Button
+                  contentStyle="preserve"
+                  variant="ghost"
+                  size={null}
+                  type="button"
+                  onClick={() => void copy(oldText, t("original"))}
+                >
+                  <Copy aria-hidden />
+                  {t("copyOriginal")}
+                </Button>
+              ) : null}
+              <Button
+                contentStyle="preserve"
+                variant="ghost"
+                size={null}
+                type="button"
+                onClick={() => void copy(newText, t("newContent"))}
+              >
+                <ClipboardCopy aria-hidden />
+                {t("copyNewContent")}
+              </Button>
+              <Button
+                contentStyle="preserve"
+                variant="ghost"
+                size={null}
+                type="button"
+                disabled={!selectionText}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={refine}
+              >
+                <Pencil aria-hidden />
+                {t("refineSelectedText")}
+              </Button>
+            </>
           ) : null}
-          <Button contentStyle="preserve" variant="ghost" size={null} type="button" onClick={() => void copy(newText, t("newContent"))}>
-            <ClipboardCopy aria-hidden />
-            {t("copyNewContent")}
-          </Button>
-          <Button contentStyle="preserve" variant="ghost" size={null}
-            type="button"
-            disabled={!selectionText}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={refine}
-          >
-            <Pencil aria-hidden />
-            {t("refineSelectedText")}
-          </Button>
         </div>
       ) : null}
       <p
@@ -252,7 +211,10 @@ export function ReviewOperation({
               return (
                 <li key={id}>
                   {target && !target.trashedAt && !target.isFolder ? (
-                    <Button contentStyle="preserve" variant="ghost" size={null}
+                    <Button
+                      contentStyle="preserve"
+                      variant="ghost"
+                      size={null}
                       type="button"
                       className="notebook-ai-review-target"
                       title={reviewPagePath(target)}
@@ -276,7 +238,9 @@ export function ReviewOperation({
         ) : newText ? (
           <PlanMarkdown markdown={newText} />
         ) : (
-          <p className="notebook-ai-review-empty">{t("thisTextWillBeDeleted")}</p>
+          <p className="notebook-ai-review-empty">
+            {t("thisTextWillBeDeleted")}
+          </p>
         )}
       </div>
     </section>

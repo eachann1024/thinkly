@@ -19,31 +19,6 @@
  border-top: 1px solid var(--goose-block-subtle-border);
 }
 
-.notebook-ai-plan-file-bar {
- display: flex;
- min-width: 0;
- align-items: center;
- gap: 8px;
- padding: 8px 0;
- color: hsl(var(--muted-foreground));
- font-size: 12px;
- line-height: 16px;
-}
-
-.notebook-ai-plan-file-kind {
- flex: 0 0 auto;
- font-weight: var(--font-weight-semibold);
-}
-
-.notebook-ai-plan-file-title {
- min-width: 0;
- overflow: hidden;
- text-overflow: ellipsis;
- white-space: nowrap;
- color: hsl(var(--foreground));
- font-weight: var(--font-weight-semibold);
-}
-
 .notebook-ai-plan-file-body {
  padding: 4px 0 16px;
  min-width: 0;

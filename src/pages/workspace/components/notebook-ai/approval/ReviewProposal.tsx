@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { usePages } from "@/stores/usePages";
 import { usePlanReviewSelection } from "./PlanReviewContext";
-import { planReviewState, reviewOutput } from "./reviewState";
+import { planReviewState } from "./reviewState";
 import { readReviewPlan } from "./planReviewData";
 import { ReviewOperation } from "./ReviewOperation";
 import "./plan-review.css";
@@ -71,31 +71,8 @@ export function ReviewProposal({
     journal?.selectedOperationIds,
   );
   const review = planReviewState(part, journal);
-  const output = reviewOutput(part.output);
-  const results =
-    journal?.results ??
-    (Array.isArray(output.results)
-      ? (output.results as { operationId: string; ok: boolean; skipped?: boolean }[])
-      : []);
   const canSelect = review.phase === "approval" && !locked;
   if (!input) return null;
-  const resultLabel = (id: string) => {
-    if (review.phase === "approval" || review.phase === "preparing")
-      return undefined;
-    if (review.phase === "cancelled") return t("notApplied");
-    const included =
-      journal?.selectedOperationIds.includes(id) ??
-      results.some((result) => result.operationId === id);
-    if (!included && results.length) return t("skipped");
-    const result = results.find((item) => item.operationId === id);
-    if (!result) return review.phase === "executing" ? t("pending") : t("notApplied");
-    if (result.skipped) return t("skipped");
-    if (!result.ok) return t("failed");
-    if (review.phase === "undone") return t("undone");
-    if (journal?.version !== 2 && (review.phase === "failed" || review.phase === "conflict"))
-      return review.rollback === "complete" ? t("rolledBack") : t("needsReview");
-    return t("applied");
-  };
   return (
     <div className="notebook-ai-work-proposal">
       <h4>{input.summary.trim() || input.title}</h4>
@@ -132,7 +109,6 @@ export function ReviewProposal({
                 : [...selectedIds, operation.operationId],
             )
           }
-          resultLabel={resultLabel(operation.operationId)}
         />
       ))}
     </div>
