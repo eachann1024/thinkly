@@ -1,5 +1,12 @@
 # 更新日志
 
+## 1.7.337
+
+- Fix quick note save names to match slot titles
+- settle cancelled streams and present follow-up choices after responses
+- Remove redundant AI change preview metadata
+- Fix copied table handling and allow reapplying undone AI changes
+
 ## 1.7.336
 
 - select the document title when creating a file
