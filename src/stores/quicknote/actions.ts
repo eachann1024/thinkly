@@ -18,7 +18,11 @@ import {
   QUICKNOTE_MIN_HEIGHT,
   clampQuickNoteZoom,
 } from "./types";
-import { updateQuickNoteSlotName } from "./slotNames";
+import {
+  getQuickNoteSlotName,
+  loadQuickNoteSlotNames,
+  updateQuickNoteSlotName,
+} from "./slotNames";
 import { getQuickNoteDraftRevision, recordQuickNoteRecovery } from "./recovery";
 import { quickNoteSaveSnapshotMatches } from "./saveSnapshot";
 import { getContentSignature } from "@/components/editor/utils/blocknote-content";
@@ -151,6 +155,7 @@ export function createQuickNoteState(
       const slot = initial.activeSlot;
       const content = getActiveDraftContent(initial);
       if (isQuickNoteDraftEmpty(content)) return null;
+      const title = getQuickNoteSlotName(slot, loadQuickNoteSlotNames(initial.slotNames));
       const snapshot = {
         slot,
         content,
@@ -163,7 +168,6 @@ export function createQuickNoteState(
       const notebook = notebooksState.notebooks[nbId];
       if (!notebook) return null;
 
-      const title = notebook.name.trim();
       let id: string | null;
       if (notebook.source === "local-folder") {
         id =

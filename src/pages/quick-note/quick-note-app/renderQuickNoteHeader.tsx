@@ -50,7 +50,7 @@ export function renderQuickNoteHeader(
     editRename,
     renameInputRef,
     slotNames,
-    displaySlot,
+    displaySlotName,
     windowTitle,
     occupiedSlots,
     startRename,
@@ -61,7 +61,7 @@ export function renderQuickNoteHeader(
     handlePreviewSlot,
     persistPlacementThenClose,
   } = context;
-  const displayTitle = slotNames[displaySlot]?.trim() || windowTitle;
+  const displayTitle = displaySlotName;
   const helpLines = quickNoteHelpLines(getPlatformKind());
   return (
     <div
