@@ -65,7 +65,7 @@ export function withExecutionDetails(
             if (changed) controller.enqueue({ type: "message-metadata", messageMetadata: { execution: snapshot() } });
           }
         },
-      }));
+      }), { signal: options.abortSignal });
     },
   };
 }
