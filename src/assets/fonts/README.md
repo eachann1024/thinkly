@@ -6,3 +6,5 @@ JetBrains Mono Regular 2.304，来源 [JetBrains/JetBrainsMono](https://github.c
 
 - 文件：`LXGWWenKai-Regular.woff2`（8,098,756 字节）
 - SHA-256：`791d93cae9ab125fec4fb965794691f2411c96c51aee793a2b24c21e1bff3b9c`
+
+仓耳今楷 03 W04 仅为既有自定义字体设置保留，不再作为默认衬线字体。文件 `TsangerJinKai03-W04.woff2` 沿用此前的[固定版本资源](https://github.com/eachann1024/Resources/blob/d6dc229cd882dc0983dc5ce7cf28fb85047a4a76/%E4%BB%93%E8%80%B3%E4%BB%8A%E6%A5%B703W04.woff2)，SHA-256：`e5a2d3b47f48c8ba9c3871dcd669d41be6e0e638e86902287b5c74e0d6df1cb8`。
