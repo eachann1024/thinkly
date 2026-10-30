@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -77,27 +76,21 @@ export function renderLatestYaml({ version, fileName, sha512, size, blockMapSize
   ].join("\n");
 }
 
-function appBuilderBin(root) {
+async function writeBlockMap(root, file) {
+  // electron-builder 26 no longer ships the app-builder binary; use its JS blockmap builder.
   const req = createRequire(resolve(root, "node_modules/electron-builder/package.json"));
-  const exported = req("app-builder-bin");
-  const candidates = [exported, exported?.default, exported?.appBuilderPath].filter((value) => typeof value === "string");
-  const found = candidates.find((value) => existsSync(value));
-  if (found) return found;
-  throw new Error(`app-builder binary is missing (${candidates.join(", ") || typeof exported})`);
-}
-
-function writeBlockMap(root, file) {
+  const { buildBlockMap } = req(req.resolve("app-builder-lib/out/targets/blockmap/blockmap.js"));
   const output = `${file}.blockmap`;
-  execFileSync(appBuilderBin(root), ["blockmap", "--input", file, "--output", output], { stdio: "inherit" });
+  await buildBlockMap(file, "gzip", output);
   if (!existsSync(output)) throw new Error(`blockmap was not written for ${file}`);
 }
 
-export function writePlatformUpdateFiles({ root, outputDir, platform, version, releaseDate }) {
+export async function writePlatformUpdateFiles({ root, outputDir, platform, version, releaseDate }) {
   const spec = platformSpec(platform, version);
   for (const name of spec.blockmapFor) {
     const file = resolve(outputDir, name);
     if (!existsSync(file)) throw new Error(`Missing update payload: ${name}`);
-    writeBlockMap(root, file);
+    await writeBlockMap(root, file);
   }
   const payload = resolve(outputDir, spec.payload);
   const blockMap = `${payload}.blockmap`;
