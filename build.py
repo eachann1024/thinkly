@@ -11,7 +11,7 @@
     kill      强杀正在运行的Thinkly（安装版与开发实例，先 TERM 后 KILL）
     build     安装依赖并编译（renderer + main/preload + app-pack）
     package   强杀旧实例并打包平台安装包到 dist-desktop/
-    install   把最新打包产物安装到本机（mac: /Applications；linux: deb/AppImage；win: NSIS 静默）
+    install   把最新打包产物安装到本机（mac: /Applications；linux: AppImage；win: NSIS 静默）
     start     启动应用（优先安装副本，回退开发目录 electron .）
     release   发布 GitHub Release（读取 artifacts/，需 gh 已登录）
     all       build → package → install 一条龙
@@ -21,7 +21,7 @@
 示例:
     python3 build.py all            # 本地自用：编译打包并安装
     python3 build.py build --no-install
-    python3 build.py package --linux-targets AppImage,deb
+    python3 build.py package --linux-targets AppImage
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ def main() -> int:
         "--linux-targets",
         metavar="LIST",
         default=None,
-        help="linux 打包目标（逗号分隔，如 AppImage,deb），默认用 electron-builder.yml 全目标",
+        help="linux 打包目标（逗号分隔，如 AppImage），默认用 electron-builder.yml 的 AppImage",
     )
     args = parser.parse_args()
 

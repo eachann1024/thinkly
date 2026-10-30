@@ -6,14 +6,16 @@ import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { writePlatformUpdateFiles } from './desktop-update-files.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const [platform, arch] = process.argv.slice(2);
 const stage = process.argv.find(arg => arg.startsWith('--stage='))?.slice('--stage='.length) ?? 'all';
-const targets = { win: ['nsis'], mac: ['dmg', 'zip'], linux: ['AppImage', 'deb', 'pacman'] };
+const targets = { win: ['nsis'], mac: ['dmg', 'zip'], linux: ['AppImage'] };
 const host = { win: 'win32', mac: 'darwin', linux: 'linux' };
-if (process.platform !== host[platform] || !['x64', 'arm64'].includes(arch) || (platform === 'linux' && arch !== 'x64')) {
-  throw new Error('Expected native host and win x64/arm64, mac arm64/x64, or linux x64');
+const allowedArch = { win: 'x64', mac: 'arm64', linux: 'x64' };
+if (process.platform !== host[platform] || arch !== allowedArch[platform]) {
+  throw new Error('Expected native host and win x64, mac arm64, or linux x64');
 }
 if (!['all', 'unpacked', 'installer', 'collect'].includes(stage) || (stage !== 'all' && platform !== 'win')) {
   throw new Error(`Unsupported stage ${stage} for ${platform}`);
@@ -266,13 +268,17 @@ for (const file of files) {
   cpSync(from, resolve(output, file));
 }
 const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
+const generated = writePlatformUpdateFiles({
+  root, outputDir: output, platform, version: pkg.version, releaseDate: new Date().toISOString(),
+});
+const recorded = [...files, ...generated].sort();
 writeFileSync(resolve(output, 'BUILD.json'), JSON.stringify({
   commit, version: pkg.version, platform, arch,
   signed: platform === 'mac' ? Boolean(process.env.CSC_LINK) : signed,
   notarized: platform === 'mac' && Boolean(process.env.CSC_LINK && process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID),
   macInstallHelper: platform === 'mac' ? 1 : undefined,
   run: process.env.GITHUB_RUN_ID || null,
-  sourceArtifact: `source-${commit}`, files,
+  sourceArtifact: `source-${commit}`, files: recorded,
 }, null, 2) + '\n');
 writeFileSync(resolve(output, 'SHA256SUMS.txt'), readdirSync(output).filter(name => name !== 'SHA256SUMS.txt').sort().map(name =>
   `${createHash('sha256').update(readFileSync(resolve(output, name))).digest('hex')}  ${name}`

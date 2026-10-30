@@ -45,7 +45,7 @@ export function assertPublishVersion(version, tag, releases) {
 
 export function verifyBuildRecords(input, version, sha) {
   const records = new Map();
-  for (const [platform, arch] of [["mac", "arm64"], ["mac", "x64"], ["win", "x64"], ["win", "arm64"], ["linux", "x64"]]) {
+  for (const [platform, arch] of [["mac", "arm64"], ["win", "x64"], ["linux", "x64"]]) {
     const key = `${platform}-${arch}`;
     const record = JSON.parse(readFileSync(resolve(input, `thinkly-${key}-BUILD.json`), "utf8"));
     assert.equal(record.commit, sha, `${key} was built from a different commit`);
