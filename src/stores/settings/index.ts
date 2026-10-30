@@ -52,7 +52,7 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "thinkly-settings",
-      version: 14,
+      version: 15,
       merge: (persisted, current) => {
         const { sidebarTint: _removedSidebarTint, ...saved } =
           (persisted ?? {}) as Partial<SettingsState> & { sidebarTint?: unknown };

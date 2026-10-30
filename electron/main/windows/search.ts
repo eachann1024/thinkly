@@ -38,12 +38,22 @@ import { captureParkedWorkspaces, forgetParkedWorkspaces } from "./park";
 import { registry, SEARCH_IDLE_DESTROY_MS } from "./state";
 
 const RENDERER_READY_TIMEOUT_MS = 4000;
-const SEARCH_SHOW_BLUR_GRACE_MS = 600;
-let suppressSearchBlurUntil = 0;
+const SEARCH_FOCUS_SETTLE_MS = 300;
+let searchFocusSettled = false;
+let searchBlurTimer: ReturnType<typeof setTimeout> | null = null;
+let searchSettleTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearSearchTimer(timer: ReturnType<typeof setTimeout> | null): void {
+  if (timer) clearTimeout(timer);
+}
 
 function armSearchShowGuard(): void {
   if (process.platform !== "win32") return;
-  suppressSearchBlurUntil = Date.now() + SEARCH_SHOW_BLUR_GRACE_MS;
+  searchFocusSettled = false;
+  clearSearchTimer(searchBlurTimer);
+  clearSearchTimer(searchSettleTimer);
+  searchBlurTimer = null;
+  searchSettleTimer = null;
 }
 const rendererReady = new WeakMap<BrowserWindow, { promise: Promise<void>; resolve: () => void }>();
 
@@ -137,11 +147,32 @@ export function createSearchWindow(): BrowserWindow {
 
   win.on("blur", () => {
     if (win.webContents.isDevToolsOpened()) return;
-    if (Date.now() < suppressSearchBlurUntil) return;
+    if (process.platform === "win32") {
+      clearSearchTimer(searchSettleTimer);
+      searchSettleTimer = null;
+      if (!searchFocusSettled) return;
+      clearSearchTimer(searchBlurTimer);
+      searchBlurTimer = setTimeout(() => {
+        searchBlurTimer = null;
+        if (win.isDestroyed() || !win.isVisible() || win.isFocused()) return;
+        if (win.webContents.isDevToolsOpened()) return;
+        hideSearchWindow({ suppressActivate: false });
+      }, 200);
+      return;
+    }
     hideSearchWindow({ suppressActivate: false });
   });
 
   win.on("focus", () => {
+    clearSearchTimer(searchBlurTimer);
+    searchBlurTimer = null;
+    clearSearchTimer(searchSettleTimer);
+    searchSettleTimer = setTimeout(() => {
+      searchSettleTimer = null;
+      if (!win.isDestroyed() && win.isVisible() && win.isFocused()) {
+        searchFocusSettled = true;
+      }
+    }, SEARCH_FOCUS_SETTLE_MS);
     setHiddenThrottle(win, false);
     emitVisibilityChange();
   });
@@ -151,6 +182,11 @@ export function createSearchWindow(): BrowserWindow {
   });
 
   win.on("closed", () => {
+    clearSearchTimer(searchBlurTimer);
+    clearSearchTimer(searchSettleTimer);
+    searchBlurTimer = null;
+    searchSettleTimer = null;
+    searchFocusSettled = false;
     registry.unregister(id);
     clearIdleDestroyTimer("searchDestroyTimer");
     emitVisibilityChange();
@@ -198,6 +234,11 @@ export async function showSearchWindow(): Promise<void> {
 }
 
 export function hideSearchWindow(opts: { suppressActivate?: boolean } = {}): void {
+  clearSearchTimer(searchBlurTimer);
+  clearSearchTimer(searchSettleTimer);
+  searchBlurTimer = null;
+  searchSettleTimer = null;
+  searchFocusSettled = false;
   const win = getSearchWindow();
   if (!win || win.isDestroyed() || !win.isVisible()) return;
   if (opts.suppressActivate !== false) markQuicknoteActivateSuppressed();

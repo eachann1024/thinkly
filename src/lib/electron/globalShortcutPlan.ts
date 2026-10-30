@@ -43,6 +43,26 @@ export function windowsGlobalAccelerator(accelerator: string): string {
   return parts.join("+");
 }
 
+const WINDOWS_RESERVED_GLOBAL_SHORTCUTS = new Set([
+  "alt+space",
+  "alt+tab",
+  "alt+escape",
+  "alt+f4",
+  "control+escape",
+  "control+shift+escape",
+  "control+alt+delete",
+]);
+
+export function isBlockedWindowsGlobalAccelerator(canonical: string): boolean {
+  const parts = canonical
+    .split("+")
+    .map((part) => part.trim().toLowerCase())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  if (parts.includes("super")) return true;
+  return WINDOWS_RESERVED_GLOBAL_SHORTCUTS.has(parts.join("+"));
+}
+
 export function globalShortcutRegisterOrder(
   shortcut: string,
   platform: AcceleratorPlatform,
@@ -51,7 +71,8 @@ export function globalShortcutRegisterOrder(
   if (!accelerator) return [];
   if (platform === "win32") {
     const canonical = windowsGlobalAccelerator(accelerator);
-    return canonical ? [canonical] : [];
+    if (!canonical || isBlockedWindowsGlobalAccelerator(canonical)) return [];
+    return [canonical];
   }
   return electronAcceleratorAliases(accelerator, platform);
 }

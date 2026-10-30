@@ -55,6 +55,7 @@ function notifyStatus(
   shortcut: string,
 ) {
   if (status.state === "idle") return;
+  if (status.state === "occupied" || status.state === "invalid" || status.state === "error") return;
   const label = SLOT_LABEL[slot];
   const keys = shortcut ? formatShortcut(shortcut) : "";
   if (status.state === "active") {
