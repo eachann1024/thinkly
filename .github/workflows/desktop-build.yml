@@ -265,14 +265,14 @@ jobs:
           AUTO_BUMP: ${{ needs.prepare.outputs.auto_bump }}
         run: node scripts/publish-release.mjs
       - name: Start the Quark upload for the new release
-        # Only reached after a release was published. The hourly schedule in quark-upload.yml stays as a fallback,
+        # Only reached after a release was published. The schedule in quark-upload.yml stays as a fallback,
         # and the upload skips files that already exist, so a repeated trigger is harmless.
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           gh workflow run quark-upload.yml --ref main -f release_tag=latest \
-            || echo "::warning::Could not start quark-upload.yml; the hourly schedule will upload this release."
+            || echo "::warning::Could not start quark-upload.yml; the fallback schedule will upload this release."
   repair:
     name: Repair published download metadata
     needs: [prepare]

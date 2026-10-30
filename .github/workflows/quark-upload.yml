@@ -1,8 +1,11 @@
 name: Upload installers to Quark
 
 on:
+  workflow_run:
+    workflows: ["Desktop installers"]
+    types: [completed]
   schedule:
-    - cron: '17 * * * *'
+    - cron: '43 */2 * * *'
   workflow_dispatch:
     inputs:
       release_tag:
@@ -19,7 +22,7 @@ permissions:
 
 jobs:
   upload:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
