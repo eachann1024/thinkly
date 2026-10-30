@@ -7,44 +7,8 @@ import { uploadFile } from "./quark-oss.mjs";
 import { INSTALL_FOLDER as FOLDER_NAME, LEGACY_INSTALL_FOLDER as LEGACY_FOLDER_NAME, expectedInstallers } from "./quark-preflight.mjs";
 
 const NOTE_NAME = "说明.txt";
-const INSTALLERS = [
-  /^Thinkly-(\d+\.\d+\.\d+)-arm64\.dmg$/,
-  /^Thinkly-(\d+\.\d+\.\d+)\.dmg$/,
-  /^Thinkly-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
-  /^Thinkly-(\d+\.\d+\.\d+)\.AppImage$/,
-  /^Thinkly_(\d+\.\d+\.\d+)_amd64\.deb$/,
-  /^Thinkly-(\d+\.\d+\.\d+)\.pacman$/,
-  /^Goose\.Note-(\d+\.\d+\.\d+)-arm64\.dmg$/,
-  /^Goose\.Note-(\d+\.\d+\.\d+)\.dmg$/,
-  /^Goose\.Note-(\d+\.\d+\.\d+)-(?:x64|arm64)-setup\.exe$/,
-  /^Goose\.Note-(\d+\.\d+\.\d+)\.AppImage$/,
-  /^goose-note-app_(\d+\.\d+\.\d+)_amd64\.deb$/,
-  /^goose-note-app-(\d+\.\d+\.\d+)\.pacman$/,
-];
-
-function installerVersion(name) {
-  for (const pattern of INSTALLERS) {
-    const match = pattern.exec(name);
-    if (match) return match[1];
-  }
-  return "";
-}
-
-function compareSemver(left, right) {
-  const a = left.split(".").map(Number);
-  const b = right.split(".").map(Number);
-  for (let index = 0; index < 3; index += 1) {
-    if (a[index] !== b[index]) return a[index] - b[index];
-  }
-  return 0;
-}
-
 function noteText(version) {
   return `Thinkly 桌面版安装包。当前版本 v${version}。macOS（Apple 芯片）选 .dmg，Windows 选 x64 .exe，Linux 选 .AppImage。macOS 首次打开请看 https://github.com/eachann1024/thinkly/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/thinkly/releases\n`;
-}
-
-function isFile(item, name) {
-  return listed(item) && item.file_name === name;
 }
 
 function listed(item) {
@@ -52,10 +16,6 @@ function listed(item) {
   if (item.dir === true || item.file === false) return false;
   if (item.file_type === 0 && item.file !== true) return false;
   return true;
-}
-
-function knownFiles(entries) {
-  return entries.filter((item) => isFile(item, item.file_name) && (item.file_name === NOTE_NAME || installerVersion(item.file_name)));
 }
 
 function fileSize(item) {
@@ -180,13 +140,12 @@ async function uploadReplacing(cookie, folderId, source, name) {
 }
 
 async function retainLatest(cookie, folderId, version) {
-  const entries = knownFiles(await listChildren(cookie, folderId)).filter((item) => installerVersion(item.file_name));
-  const versions = [...new Set(entries.map((item) => installerVersion(item.file_name)))].sort(compareSemver).reverse();
-  const keep = new Set(versions.slice(0, 1));
-  const remove = entries.filter((item) => !keep.has(installerVersion(item.file_name)));
+  // The share shows only this release's public installers and the note; anything else (old versions, zips, extra formats) goes.
+  const keep = new Set([...expectedInstallers(version), NOTE_NAME]);
+  const remove = folderFiles(await listChildren(cookie, folderId)).filter((item) => !keep.has(item.file_name));
   await deleteFiles(cookie, remove.map((item) => item.fid));
-  for (const item of remove) console.log(`删除旧版本 ${item.file_name}`);
-  console.log(`保留版本 ${[...keep].join("、") || version}`);
+  for (const item of remove) console.log(`删除过时文件 ${item.file_name}`);
+  console.log(`保留版本 ${version}`);
 }
 
 function isQuarkDirectory(item) {

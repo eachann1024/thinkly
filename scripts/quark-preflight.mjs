@@ -58,6 +58,8 @@ export function sizesFromRelease(release, version) {
 export function releaseAlreadyPresent(entries, version, sizes) {
   const names = expectedInstallers(version);
   if (!names.length || !(sizes instanceof Map)) return false;
+  const allowed = new Set([...names, "说明.txt"]);
+  if ((entries ?? []).some((item) => listedFile(item) && !allowed.has(item.file_name))) return false;
   return names.every((name) => {
     const expected = sizes.get(name);
     if (!Number.isInteger(expected) || expected < 0) return false;
