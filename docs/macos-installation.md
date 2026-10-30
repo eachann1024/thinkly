@@ -2,6 +2,12 @@
 
 为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。
 
+公开下载只提供三个安装包：`Thinkly-<版本>-arm64.dmg`（Mac Apple 芯片）、`Thinkly-<版本>-x64-setup.exe`（Windows 64 位，ARM 电脑也能直接用）、`Thinkly-<版本>.AppImage`（Linux）。macOS 请下载带 `-arm64` 的 DMG。
+
+Intel Mac、Linux deb / pacman 包不提供。需要请到 [GitHub](https://github.com/eachann1024/thinkly) 拉取源码自行编译。
+
+zip、blockmap、yml 仅供应用内自动更新，无需下载。
+
 ## DMG 安装
 
 1. 打开 DMG，将「Thinkly」拖入「应用程序」，等待复制完成。

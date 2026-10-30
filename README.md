@@ -60,13 +60,13 @@ https://github.com/user-attachments/assets/3b1b91cb-34ca-4a10-9b8b-8a1de7f8d60d
 
 | 系统平台 | 安装包名称 | 架构说明与推荐 |
 | :--- | :--- | :--- |
-| **macOS** | `Thinkly-*-arm64.dmg` | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选此项）** |
-| | `Thinkly-*.dmg` | Intel 芯片老款 Mac（文件名无 arm64 标识） |
-| **Windows** | `Thinkly-*-x64-setup.exe` | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选此项）** |
-| | `Thinkly-*-arm64-setup.exe` | 骁龙 / ARM 架构 Windows 设备 |
-| **Linux** | `Thinkly-*.AppImage` | 免安装通用版（双击运行，部分发行版需 FUSE） |
-| | `Thinkly_*_amd64.deb` | Debian / Ubuntu 等系统 |
-| | `Thinkly-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+| **macOS** | `Thinkly-*-arm64.dmg` | Apple 芯片（M1–M4） |
+| **Windows** | `Thinkly-*-x64-setup.exe` | 64 位（ARM 电脑也能直接用） |
+| **Linux** | `Thinkly-*.AppImage` | AppImage 通用版（Ubuntu 22.04+ 需 libfuse2） |
+
+Intel Mac、Linux deb / pacman 包不提供。需要请到 [GitHub](https://github.com/eachann1024/thinkly) 拉取源码自行编译。
+
+zip、blockmap、yml 仅供应用内自动更新，无需下载。
 
 1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`，磁盘上的应用是 `Goose Note.app`；当前版本是 `Thinkly.app`，需要手动安装一次。
 

@@ -15,7 +15,7 @@ def cmd_release(_args: argparse.Namespace) -> None:
         die(
             "release",
             f"{artifacts} 为空。publish-release.mjs 面向 CI 汇总的完整产物"
-            "（双架构 dmg + 双架构 exe + AppImage/deb/pacman + macOS BUILD.json）；"
+            "（Apple 芯片 dmg、Windows x64 exe、AppImage，以及 arm64 mac zip、blockmap、latest*.yml 与 BUILD.json）；"
             "本地手工发布请先按 .github/workflows 汇总产物到 artifacts/。",
         )
     require_tool("gh", "发布需要 GitHub CLI 并已登录（gh auth login）。")

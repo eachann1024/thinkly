@@ -1,7 +1,7 @@
 import { t } from "../i18n/updates";
 import { app } from "electron";
 import { execFile, spawn } from "node:child_process";
-import { access, lstat, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { access, chmod, lstat, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { constants, openSync, closeSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -112,8 +112,36 @@ async function installMac(update: VerifiedUpdate): Promise<void> {
   app.quit();
 }
 
+async function installLinux(update: VerifiedUpdate): Promise<void> {
+  const target = process.env.APPIMAGE || "";
+  if (!target || !update.path.toLowerCase().endsWith(".appimage")) throw new Error(t("finishInstaller"));
+  await access(path.dirname(target), constants.W_OK);
+  await chmod(update.path, 0o755);
+  await flushBeforeUpdate();
+  const stage = await mkdtemp(path.join(app.getPath("temp"), "thinkly-update-"));
+  const script = path.join(stage, "install.sh");
+  await writeFile(script, `#!/bin/sh
+set -eu
+target="$1"
+next="$2"
+parent="$3"
+while kill -0 "$parent" 2>/dev/null; do
+  sleep 1
+done
+mv "$next" "$target"
+chmod 755 "$target"
+exec "$target"
+`, { mode: 0o700 });
+  const child = spawn("/bin/sh", [script, target, update.path, String(process.pid)], { detached: true, stdio: "ignore" });
+  await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
+  child.unref();
+  markQuitting();
+  app.quit();
+}
+
 export async function installUpdate(update: VerifiedUpdate): Promise<void> {
   if (process.platform === "darwin") return installMac(update);
+  if (process.platform === "linux") return installLinux(update);
   if (process.platform !== "win32" || !update.path.endsWith(".exe")) throw new Error(t("finishInstaller"));
   await flushBeforeUpdate();
   const child = spawn(update.path, ["--updated", "--force-run"], { detached: true, stdio: "ignore" });
