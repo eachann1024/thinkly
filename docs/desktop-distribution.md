@@ -4,7 +4,7 @@
 
 国内下载走夸克网盘。阿里云 OSS 国内同步已停用，不再读取 OSS 配置，也不再维护独立下载域名。
 
-每个平台只发布一个安装包：`Thinkly-<版本>-arm64.dmg`（Mac Apple 芯片）、`Thinkly-<版本>-x64-setup.exe`（Windows 64 位，ARM 电脑也能直接用）、`Thinkly-<版本>.AppImage`（Linux）。夸克「Thinkly 安装包」只放这三个文件，不放 zip、blockmap、yml。
+每个平台只发布一个安装包：`Thinkly-<版本>-arm64.dmg`（Mac Apple 芯片）、`Thinkly-<版本>-x64-setup.exe`（Windows 64 位，ARM 电脑也能直接用）、`Thinkly-<版本>.AppImage`（Linux）。夸克「Thinkly 安装包」只放这三个文件，上传时改成带平台的展示名：`Thinkly-<版本>-Mac-arm64.dmg`、`Thinkly-<版本>-Windows-x64-setup.exe`、`Thinkly-<版本>-Linux-x64.AppImage`（GitHub Release 和自动更新文件名不变），不放 zip、blockmap、yml。
 
 Intel Mac、Linux deb / pacman 包不提供。需要请到 [GitHub](https://github.com/eachann1024/thinkly) 拉取源码自行编译。
 

@@ -11,6 +11,20 @@ export function expectedInstallers(version) {
   return releaseInstallers(version).filter((name) => !name.endsWith(".zip"));
 }
 
+// Quark shows platform-labelled names; GitHub Release and auto-update files keep their original names.
+export function quarkName(version, source) {
+  const names = {
+    [`Thinkly-${version}-arm64.dmg`]: `Thinkly-${version}-Mac-arm64.dmg`,
+    [`Thinkly-${version}-x64-setup.exe`]: `Thinkly-${version}-Windows-x64-setup.exe`,
+    [`Thinkly-${version}.AppImage`]: `Thinkly-${version}-Linux-x64.AppImage`,
+  };
+  return names[source] ?? source;
+}
+
+export function quarkInstallers(version) {
+  return expectedInstallers(version).map((name) => quarkName(version, name));
+}
+
 function isDirectory(item) {
   return item?.file === false || item?.dir === true || item?.file_type === 0;
 }
@@ -47,7 +61,7 @@ export function sizesFromRelease(release, version) {
   for (const name of expectedInstallers(version)) {
     const size = assets.get(name);
     if (!Number.isInteger(size) || size < 0) missing.push(name);
-    else sizes.set(name, size);
+    else sizes.set(quarkName(version, name), size);
   }
   if (missing.length) {
     throw Object.assign(new QuarkFailure(`缺少安装包：${missing.join("、")}`), { reason: "missing_installers" });
@@ -56,7 +70,7 @@ export function sizesFromRelease(release, version) {
 }
 
 export function releaseAlreadyPresent(entries, version, sizes) {
-  const names = expectedInstallers(version);
+  const names = quarkInstallers(version);
   if (!names.length || !(sizes instanceof Map)) return false;
   const allowed = new Set([...names, "说明.txt"]);
   if ((entries ?? []).some((item) => listedFile(item) && !allowed.has(item.file_name))) return false;
