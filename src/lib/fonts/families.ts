@@ -3,15 +3,14 @@ export const SYSTEM_FONT_STACK =
 
 export const DEFAULT_FONT_NAMES = {
   default: SYSTEM_FONT_STACK,
-  serif: "仓耳今楷",
+  serif: "霞鹜文楷",
   mono: "JetBrains Mono",
 } as const;
 
-export const CANGER_JINKAI_LOCAL_NAMES = [
-  "仓耳今楷",
-  "仓耳今楷03W04",
-  "仓耳今楷03简繁 W04",
-  "TsangerJinKai03-W04",
+export const LXGW_WENKAI_LOCAL_NAMES = [
+  "霞鹜文楷",
+  "LXGW WenKai",
+  "LXGWWenKai-Regular",
 ] as const;
 
 export const SERIF_LOCAL_FALLBACKS = [
@@ -23,12 +22,12 @@ export const SERIF_LOCAL_FALLBACKS = [
   "Times",
 ];
 
-const CANGER_JINKAI_WOFF2_URLS = [
-  new URL("../../assets/fonts/TsangerJinKai03-W04.woff2", import.meta.url).href,
+const LXGW_WENKAI_WOFF2_URLS = [
+  new URL("../../assets/fonts/LXGWWenKai-Regular.woff2", import.meta.url).href,
 ] as const;
 
 export const REMOTE_FONT_SOURCES = {
-  仓耳今楷: CANGER_JINKAI_WOFF2_URLS,
+  霞鹜文楷: LXGW_WENKAI_WOFF2_URLS,
 } as const;
 
 export const UI_MONO_FALLBACKS = [
@@ -41,7 +40,7 @@ export const UI_MONO_FALLBACKS = [
   "Noto Sans SC",
 ];
 
-export type PersistentWoff2Family = "仓耳今楷";
+export type PersistentWoff2Family = "霞鹜文楷";
 
 export const trimFontName = (font: string) =>
   font.trim().replace(/^["']+|["']+$/g, "");
