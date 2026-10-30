@@ -4,11 +4,11 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, redactSecrets, renameFile } from "./quark-api.mjs";
 import { uploadFile } from "./quark-oss.mjs";
-import { INSTALL_FOLDER as FOLDER_NAME, LEGACY_INSTALL_FOLDER as LEGACY_FOLDER_NAME, expectedInstallers } from "./quark-preflight.mjs";
+import { INSTALL_FOLDER as FOLDER_NAME, LEGACY_INSTALL_FOLDER as LEGACY_FOLDER_NAME, expectedInstallers, quarkInstallers, quarkName } from "./quark-preflight.mjs";
 
 const NOTE_NAME = "说明.txt";
 function noteText(version) {
-  return `Thinkly 桌面版安装包。当前版本 v${version}。macOS（Apple 芯片）选 .dmg，Windows 选 x64 .exe，Linux 选 .AppImage。macOS 首次打开请看 https://github.com/eachann1024/thinkly/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/thinkly/releases\n`;
+  return `Thinkly 桌面版安装包。当前版本 v${version}。macOS（Apple 芯片）选 Thinkly-${version}-Mac-arm64.dmg，Windows 选 Thinkly-${version}-Windows-x64-setup.exe，Linux 选 Thinkly-${version}-Linux-x64.AppImage。macOS 首次打开请看 https://github.com/eachann1024/thinkly/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/thinkly/releases\n`;
 }
 
 function listed(item) {
@@ -143,7 +143,7 @@ async function uploadReplacing(cookie, folderId, source, name, { reuseSameSize =
 
 async function retainLatest(cookie, folderId, version) {
   // The share shows only this release's public installers and the note; anything else (old versions, zips, extra formats) goes.
-  const keep = new Set([...expectedInstallers(version), NOTE_NAME]);
+  const keep = new Set([...quarkInstallers(version), NOTE_NAME]);
   const remove = folderFiles(await listChildren(cookie, folderId)).filter((item) => !keep.has(item.file_name));
   await deleteFiles(cookie, remove.map((item) => item.fid));
   for (const item of remove) console.log(`删除过时文件 ${item.file_name}`);
@@ -177,7 +177,7 @@ async function main() {
   const missing = names.filter((name) => !present.has(name));
   if (missing.length) throw new QuarkFailure(`缺少安装包：${missing.join("、")}`);
   const folderId = await openInstallFolder(cookie);
-  for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
+  for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), quarkName(version, name));
   const noteDir = mkdtempSync(join(tmpdir(), "thinkly-quark-"));
   const note = join(noteDir, NOTE_NAME);
   writeFileSync(note, noteText(version));
