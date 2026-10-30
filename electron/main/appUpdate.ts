@@ -83,9 +83,10 @@ async function download(downloadUrl: string, filename: string): Promise<{ path: 
     }
     sendUpdateEvent({ type: "download.started", target: updateTarget(release.version, asset, details) });
     const update = await downloadVerifiedUpdate(release.version, asset, details);
+    const linuxInPlace = process.platform === "linux" && filename.toLowerCase().endsWith(".appimage") && Boolean(process.env.APPIMAGE);
     if (process.platform === "darwin" && filename.endsWith(".zip")) {
       await prepareMacUpdate(update);
-    } else if (process.platform !== "win32") {
+    } else if (process.platform !== "win32" && !linuxInPlace) {
       shell.showItemInFolder(update.path);
       sendUpdateEvent({ type: "download.completed", target: updateTarget(release.version, asset, details), path: update.path,
         message: t("openInstaller") });
@@ -224,7 +225,8 @@ export function startAutomaticUpdates(): void {
   const run = async () => {
     if (lifecycle.phase !== "empty" || downloadTask) return;
     const result = await checkForAppUpdate();
-    if (result.status === "available" && ((process.platform === "darwin" && result.assetName.endsWith("-mac.zip")) || process.platform === "win32")) {
+    const linuxAuto = result.status === "available" && process.platform === "linux" && result.assetName.toLowerCase().endsWith(".appimage") && Boolean(process.env.APPIMAGE);
+    if (result.status === "available" && (process.platform === "win32" || (process.platform === "darwin" && result.assetName.endsWith("-mac.zip")) || linuxAuto)) {
       await downloadAppUpdate(result.downloadUrl, result.assetName).catch((error) => console.error("[update]", error));
     }
   };

@@ -37,9 +37,8 @@ def package_with_builder(linux_targets: str | None) -> None:
         if IS_LINUX:
             log(
                 "package",
-                "提示：Linux 全目标打包（含 pacman）需要 libarchive-tools"
-                "（sudo apt install libarchive-tools）；"
-                "或用 --linux-targets AppImage,deb 只出部分目标。",
+                "提示：Linux 安装包是 AppImage。"
+                "需要其他格式时用 --linux-targets 指定，例如 AppImage。",
             )
         die("package", f"electron-builder 退出码 {error.returncode}")
     run(["node", "scripts/collect-desktop-artifacts.mjs"], cwd=ROOT, tag="package")
