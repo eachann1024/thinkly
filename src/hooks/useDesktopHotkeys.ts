@@ -6,21 +6,28 @@ zh-Hans:
   mainDisabled: "已关闭主窗口全局快捷键"
   quicknoteDisabled: "已关闭速记小窗全局快捷键"
   searchDisabled: "已关闭全局搜索快捷键"
-  shortcutUnavailable: "快捷键已被其他应用占用或无效"
+  shortcutUnavailable: "已被系统或其他应用占用，没有生效。请换一个，或恢复默认。"
+  searchShortcutUpdated: "全局搜索快捷键已更新"
+  searchShortcutUpdatedDetail: "Ctrl+Shift 在 Windows 上常被系统占用。已改成可用的默认快捷键。"
 en:
   hotkeysFailed: "Couldn’t register desktop shortcuts."
   mainDisabled: "The global shortcut for the main window is off."
   quicknoteDisabled: "The global shortcut for Quick Note is off."
   searchDisabled: "The global search shortcut is off."
-  shortcutUnavailable: "This shortcut is invalid or already used by another app."
+  shortcutUnavailable: "This shortcut is reserved by the system or another app and did not register. Choose another, or reset to the default."
+  searchShortcutUpdated: "Global search shortcut updated"
+  searchShortcutUpdatedDetail: "Ctrl+Shift is often reserved by Windows. The shortcut is now the working default."
 ja:
   hotkeysFailed: "デスクトップのショートカットを登録できませんでした"
   mainDisabled: "メインウィンドウのグローバルショートカットをオフにしました"
   quicknoteDisabled: "クイックノートのグローバルショートカットをオフにしました"
   searchDisabled: "グローバル検索のショートカットをオフにしました"
-  shortcutUnavailable: "ショートカットが他のアプリで使用されているか、無効です"
+  shortcutUnavailable: "システムまたは他のアプリが使用しているため登録できません。別のキーにするか、初期設定に戻してください。"
+  searchShortcutUpdated: "グローバル検索のショートカットを更新しました"
+  searchShortcutUpdatedDetail: "Windows では Ctrl+Shift がシステムに使われることがあります。使える初期設定に変更しました。"
 `);
 import { useEffect } from "react";
+import { toast } from "@/components/ui/sonner";
 import { isSetupGuideVisible } from "@/lib/setupGuide";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { syncAllDesktopGlobalHotkeys } from "@/lib/electron/globalHotkeys";
@@ -28,9 +35,34 @@ import {
   isShortcutRecorderTarget,
   shouldResumeGlobalHotkeysAfterFocusOut,
 } from "@/lib/electron/hotkeyCapture";
+import { formatShortcut, getPlatformKind } from "@/lib/utils";
+import {
+  legacySearchHotkeyReplacement,
+  takeLegacySearchHotkeyNotice,
+} from "@/stores/settings/types/desktop";
 import { useSettings } from "@/stores/useSettings";
 import type { DesktopHotkeyStatus } from "@/stores/settings/types";
 import type { HostHotkeyRegisterResult } from "@/lib/host/types";
+
+const announcedHotkeyFailures = new Map<string, number>();
+
+function announceHotkeyFailure(shortcut: string, status: DesktopHotkeyStatus): void {
+  if (status.state !== "occupied" && status.state !== "invalid" && status.state !== "error") return;
+  const message = status.message || storeText("shortcutUnavailable");
+  const key = `${shortcut}|${status.state}|${message}`;
+  const now = Date.now();
+  if (now - (announcedHotkeyFailures.get(key) ?? 0) < 1500) return;
+  announcedHotkeyFailures.set(key, now);
+  toast.error(message, {
+    description: shortcut.trim() ? formatShortcut(shortcut) : undefined,
+  });
+}
+
+function announceSearchHotkeyMoved(): void {
+  toast.message(storeText("searchShortcutUpdated"), {
+    description: storeText("searchShortcutUpdatedDetail"),
+  });
+}
 
 function statusFromRegisterResult(
   enabled: boolean,
@@ -97,6 +129,15 @@ export function useDesktopHotkeys(): void {
 
   useEffect(() => {
     if (!hydrated) return;
+    const platform = getPlatformKind() === "windows" ? "win32" : "";
+    const replacement = legacySearchHotkeyReplacement(searchHotkey, platform);
+    if (replacement && replacement !== searchHotkey) {
+      useSettings.getState().setSearchHotkey(replacement);
+      takeLegacySearchHotkeyNotice();
+      announceSearchHotkeyMoved();
+      return;
+    }
+    if (takeLegacySearchHotkeyNotice()) announceSearchHotkeyMoved();
     let cancelled = false;
 
     void (async () => {
@@ -109,6 +150,7 @@ export function useDesktopHotkeys(): void {
         wake: HostHotkeyRegisterResult;
         quicknote: HostHotkeyRegisterResult;
         search: HostHotkeyRegisterResult;
+        deferred?: boolean;
       };
       try {
         result = await syncAllDesktopGlobalHotkeys({
@@ -124,30 +166,32 @@ export function useDesktopHotkeys(): void {
       }
       if (cancelled) return;
       const settings = useSettings.getState();
-      settings.setWakeHotkeyStatus(
-        statusFromRegisterResult(
-          wakeHotkeyEnabled,
-          wakeHotkey,
-          result.wake,
-          storeText("mainDisabled"),
-        ),
+      const wakeStatus = statusFromRegisterResult(
+        wakeHotkeyEnabled,
+        wakeHotkey,
+        result.wake,
+        storeText("mainDisabled"),
       );
-      settings.setQuicknoteHotkeyStatus(
-        statusFromRegisterResult(
-          quicknoteHotkeyEnabled,
-          quicknoteHotkey,
-          result.quicknote,
-          storeText("quicknoteDisabled"),
-        ),
+      const quicknoteStatus = statusFromRegisterResult(
+        quicknoteHotkeyEnabled,
+        quicknoteHotkey,
+        result.quicknote,
+        storeText("quicknoteDisabled"),
       );
-      settings.setSearchHotkeyStatus(
-        statusFromRegisterResult(
-          searchHotkeyEnabled,
-          searchHotkey,
-          result.search,
-          storeText("searchDisabled"),
-        ),
+      const searchStatus = statusFromRegisterResult(
+        searchHotkeyEnabled,
+        searchHotkey,
+        result.search,
+        storeText("searchDisabled"),
       );
+      settings.setWakeHotkeyStatus(wakeStatus);
+      settings.setQuicknoteHotkeyStatus(quicknoteStatus);
+      settings.setSearchHotkeyStatus(searchStatus);
+      if (!result.deferred) {
+        announceHotkeyFailure(wakeHotkey, wakeStatus);
+        announceHotkeyFailure(quicknoteHotkey, quicknoteStatus);
+        announceHotkeyFailure(searchHotkey, searchStatus);
+      }
     })();
 
     return () => {
@@ -175,7 +219,7 @@ export function useDesktopHotkeys(): void {
     }) => {
       const settings = useSettings.getState();
       const desktop = settings.desktop;
-      settings.setWakeHotkeyStatus(
+      const wakeStatus: DesktopHotkeyStatus =
         !desktop.wakeHotkeyEnabled || !desktop.wakeHotkey.trim()
           ? { state: "disabled", message: storeText("mainDisabled") }
           : result.wakeOk
@@ -183,9 +227,8 @@ export function useDesktopHotkeys(): void {
             : {
                 state: "occupied",
                 message: storeText("shortcutUnavailable"),
-              },
-      );
-      settings.setQuicknoteHotkeyStatus(
+              };
+      const quicknoteStatus: DesktopHotkeyStatus =
         !desktop.quicknoteHotkeyEnabled || !desktop.quicknoteHotkey.trim()
           ? { state: "disabled", message: storeText("quicknoteDisabled") }
           : result.quicknoteOk
@@ -193,9 +236,8 @@ export function useDesktopHotkeys(): void {
             : {
                 state: "occupied",
                 message: storeText("shortcutUnavailable"),
-              },
-      );
-      settings.setSearchHotkeyStatus(
+              };
+      const searchStatus: DesktopHotkeyStatus =
         !desktop.searchHotkeyEnabled || !desktop.searchHotkey.trim()
           ? { state: "disabled", message: storeText("searchDisabled") }
           : result.searchOk
@@ -203,8 +245,13 @@ export function useDesktopHotkeys(): void {
             : {
                 state: "occupied",
                 message: storeText("shortcutUnavailable"),
-              },
-      );
+              };
+      settings.setWakeHotkeyStatus(wakeStatus);
+      settings.setQuicknoteHotkeyStatus(quicknoteStatus);
+      settings.setSearchHotkeyStatus(searchStatus);
+      announceHotkeyFailure(desktop.wakeHotkey, wakeStatus);
+      announceHotkeyFailure(desktop.quicknoteHotkey, quicknoteStatus);
+      announceHotkeyFailure(desktop.searchHotkey, searchStatus);
     };
 
     const onFocusIn = (event: FocusEvent) => {
