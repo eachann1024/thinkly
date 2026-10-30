@@ -3,6 +3,8 @@ import {
   DEFAULT_QUICKNOTE_HOTKEY,
   DEFAULT_SEARCH_HOTKEY,
   LEGACY_DEFAULT_QUICKNOTE_HOTKEY,
+  legacySearchHotkeyReplacement,
+  markLegacySearchHotkeyNotice,
   SIDEBAR_FONT_SIZE_DEFAULT,
   EDITOR_FONT_SIZE_DEFAULT,
   EDITOR_LINE_HEIGHT_DEFAULT,
@@ -124,6 +126,23 @@ export function migrateSettingsPersistedState(
     ) {
       desktopSettings.quicknoteHotkey = DEFAULT_QUICKNOTE_HOTKEY;
       changed = true;
+    }
+    if (version < 15 && typeof desktopSettings.searchHotkey === "string") {
+      const platform =
+        typeof process !== "undefined" && typeof process.platform === "string"
+          ? process.platform
+          : typeof navigator !== "undefined" && /Win/.test(navigator.platform || "")
+            ? "win32"
+            : "";
+      const replacement = legacySearchHotkeyReplacement(
+        desktopSettings.searchHotkey,
+        platform,
+      );
+      if (replacement) {
+        desktopSettings.searchHotkey = replacement;
+        markLegacySearchHotkeyNotice();
+        changed = true;
+      }
     }
     if (changed) {
       state.desktop = desktopSettings;

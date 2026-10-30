@@ -43,11 +43,22 @@ import {
   DEFAULT_SEARCH_HOTKEY,
   useSettings,
 } from "@/stores/useSettings";
+import type { DesktopHotkeyStatus } from "@/stores/settings/types";
 import { SettingsSectionCard } from "../../SettingsSectionCard";
 import { ShortcutField } from "../../ShortcutField";
 import { SETTINGS_OPTION_ROW_CLASS } from "./shortcutConfig";
 import { getAllConfiguredShortcuts } from "./shortcutConflict";
 import { useDesktopHotkeyToasts } from "./useDesktopHotkeyToasts";
+
+function HotkeyRegisterAlert({ status }: { status: DesktopHotkeyStatus }) {
+  if (status.state !== "occupied" && status.state !== "invalid" && status.state !== "error") return null;
+  if (!status.message) return null;
+  return (
+    <p role="alert" className="text-sm leading-5 text-destructive">
+      {status.message}
+    </p>
+  );
+}
 
 export function DesktopGlobalHotkeysCard({
   appShortcuts,
@@ -149,39 +160,48 @@ export function DesktopGlobalHotkeysCard({
         </div>
       )}
       <div className="space-y-3">
-        <ShortcutField
-          id="wake-hotkey"
-          title={uiText("showMainWindow_61e7")}
-          value={desktop.wakeHotkeyEnabled ? desktop.wakeHotkey : ""}
-          onChange={makeDesktopSetter(
-            "wake-hotkey",
-            setWakeHotkey,
-            setWakeHotkeyEnabled,
-          )}
-          resetValue={DEFAULT_WAKE_HOTKEY}
-        />
-        <ShortcutField
-          id="quicknote-hotkey"
-          title={uiText("showQuickNote_cd4c")}
-          value={desktop.quicknoteHotkeyEnabled ? desktop.quicknoteHotkey : ""}
-          onChange={makeDesktopSetter(
-            "quicknote-hotkey",
-            setQuicknoteHotkey,
-            setQuicknoteHotkeyEnabled,
-          )}
-          resetValue={DEFAULT_QUICKNOTE_HOTKEY}
-        />
-        <ShortcutField
-          id="search-hotkey"
-          title={uiText("showSearch_c05b")}
-          value={desktop.searchHotkeyEnabled ? desktop.searchHotkey : ""}
-          onChange={makeDesktopSetter(
-            "search-hotkey",
-            setSearchHotkey,
-            setSearchHotkeyEnabled,
-          )}
-          resetValue={DEFAULT_SEARCH_HOTKEY}
-        />
+        <div className="space-y-2">
+          <ShortcutField
+            id="wake-hotkey"
+            title={uiText("showMainWindow_61e7")}
+            value={desktop.wakeHotkeyEnabled ? desktop.wakeHotkey : ""}
+            onChange={makeDesktopSetter(
+              "wake-hotkey",
+              setWakeHotkey,
+              setWakeHotkeyEnabled,
+            )}
+            resetValue={DEFAULT_WAKE_HOTKEY}
+          />
+          <HotkeyRegisterAlert status={desktop.wakeHotkeyStatus} />
+        </div>
+        <div className="space-y-2">
+          <ShortcutField
+            id="quicknote-hotkey"
+            title={uiText("showQuickNote_cd4c")}
+            value={desktop.quicknoteHotkeyEnabled ? desktop.quicknoteHotkey : ""}
+            onChange={makeDesktopSetter(
+              "quicknote-hotkey",
+              setQuicknoteHotkey,
+              setQuicknoteHotkeyEnabled,
+            )}
+            resetValue={DEFAULT_QUICKNOTE_HOTKEY}
+          />
+          <HotkeyRegisterAlert status={desktop.quicknoteHotkeyStatus} />
+        </div>
+        <div className="space-y-2">
+          <ShortcutField
+            id="search-hotkey"
+            title={uiText("showSearch_c05b")}
+            value={desktop.searchHotkeyEnabled ? desktop.searchHotkey : ""}
+            onChange={makeDesktopSetter(
+              "search-hotkey",
+              setSearchHotkey,
+              setSearchHotkeyEnabled,
+            )}
+            resetValue={DEFAULT_SEARCH_HOTKEY}
+          />
+          <HotkeyRegisterAlert status={desktop.searchHotkeyStatus} />
+        </div>
       </div>
     </SettingsSectionCard>
   );

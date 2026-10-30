@@ -34,7 +34,36 @@ export interface PrivacySettings {
 
 export const DEFAULT_WAKE_HOTKEY = "CmdOrCtrl+Alt+N";
 
-export const DEFAULT_SEARCH_HOTKEY = "CmdOrCtrl+Shift+K";
+export const DEFAULT_SEARCH_HOTKEY = "CmdOrCtrl+Alt+K";
+
+const LEGACY_SEARCH_HOTKEY_ALIASES = new Set([
+  "cmdorctrl+shift+k",
+  "commandorcontrol+shift+k",
+  "ctrl+shift+k",
+  "control+shift+k",
+]);
+
+export function legacySearchHotkeyReplacement(
+  shortcut: string,
+  platform: string,
+): string | null {
+  if (platform !== "win32") return null;
+  const key = shortcut.trim().toLowerCase();
+  if (!LEGACY_SEARCH_HOTKEY_ALIASES.has(key) && key !== "mod+shift+k") return null;
+  return DEFAULT_SEARCH_HOTKEY;
+}
+
+let legacySearchHotkeyNotice = false;
+
+export function markLegacySearchHotkeyNotice(): void {
+  legacySearchHotkeyNotice = true;
+}
+
+export function takeLegacySearchHotkeyNotice(): boolean {
+  const pending = legacySearchHotkeyNotice;
+  legacySearchHotkeyNotice = false;
+  return pending;
+}
 
 export const DEFAULT_QUICKNOTE_HOTKEY = "Alt+N";
 
