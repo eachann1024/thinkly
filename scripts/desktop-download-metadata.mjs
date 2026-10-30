@@ -3,19 +3,11 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { REPO, versionFromTag } from "./desktop-release-support.mjs";
 import { publishedReleaseNotes } from "./desktop-release-notes.mjs";
+import { publicInstallers, publishedPayloads, releaseAssets } from "./desktop-update-files.mjs";
 
+export { publishedPayloads, releaseAssets };
 export function releaseInstallers(version) {
-  return [
-    `Thinkly-${version}-arm64.dmg`, `Thinkly-${version}.dmg`,
-    `Thinkly-${version}-arm64-mac.zip`, `Thinkly-${version}-mac.zip`,
-    `Thinkly-${version}-x64-setup.exe`, `Thinkly-${version}-arm64-setup.exe`,
-    `Thinkly-${version}.AppImage`, `Thinkly_${version}_amd64.deb`,
-    `Thinkly-${version}.pacman`,
-  ];
-}
-
-export function releaseAssets(version) {
-  return [...releaseInstallers(version), "SHA256SUMS.txt"].sort();
+  return publicInstallers(version);
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
@@ -32,17 +24,15 @@ export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes 
 
 export function createCask(version, tag, hashes, repo = REPO, signed = false) {
   const arm = `Thinkly-${version}-arm64.dmg`;
-  const intel = `Thinkly-${version}.dmg`;
-  assert.ok(hashes.has(arm) && hashes.has(intel), "Both macOS DMGs are required");
+  assert.ok(hashes.has(arm), "Apple silicon macOS DMG is required");
   return `cask "thinkly" do
-  arch arm: "-arm64", intel: ""
   version "${version},${tag.slice(`v${version}-`.length)}"
-  sha256 arm: "${hashes.get(arm)}",
-         intel: "${hashes.get(intel)}"
-  url "https://github.com/${repo}/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}#{arch}.dmg"
+  sha256 "${hashes.get(arm)}"
+  url "https://github.com/${repo}/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}-arm64.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
   homepage "https://github.com/${repo}"
+  depends_on arch: :arm64
   depends_on :macos
   app "Thinkly.app"
   zap trash: [
@@ -69,21 +59,20 @@ end
 }
 
 export function downloadMetadata(version, tag, hashes, signed, publishedAt, releaseNotes = "") {
-  const installers = releaseInstallers(version);
+  const feed = publishedPayloads(version);
   const files = {
     "Casks/thinkly.rb": createCask(version, tag, hashes, REPO, signed),
-    "updates/latest.json": JSON.stringify(createUpdateFeed(tag, installers, hashes, REPO, releaseNotes, publishedAt)) + "\n",
+    "updates/latest.json": JSON.stringify(createUpdateFeed(tag, feed, hashes, REPO, releaseNotes, publishedAt)) + "\n",
   };
   if (signed) {
-    for (const arch of ["arm64", "x64"]) {
-      const zip = installers.find((name) => name.endsWith(".zip") && name.includes("arm64") === (arch === "arm64"));
-      files[`updates/mac-${arch}.json`] = JSON.stringify({ currentRelease: version,
-        releases: [{ version, updateTo: {
-          url: `https://github.com/${REPO}/releases/download/${tag}/${encodeURIComponent(zip)}`,
-          name: version, notes: `Thinkly ${version}`, pub_date: publishedAt,
-        } }],
-      }) + "\n";
-    }
+    const zip = `Thinkly-${version}-arm64-mac.zip`;
+    assert.ok(feed.includes(zip), "Apple silicon macOS update ZIP is required");
+    files["updates/mac-arm64.json"] = JSON.stringify({ currentRelease: version,
+      releases: [{ version, updateTo: {
+        url: `https://github.com/${REPO}/releases/download/${tag}/${encodeURIComponent(zip)}`,
+        name: version, notes: `Thinkly ${version}`, pub_date: publishedAt,
+      } }],
+    }) + "\n";
   }
   return files;
 }
@@ -93,9 +82,9 @@ export function publishedDownloadMetadata(release) {
   const version = versionFromTag(release.tag_name);
   assert.ok(version, "Unsupported release tag");
   assert.deepEqual(release.assets.map((asset) => asset.name).sort(), releaseAssets(version),
-    "Published installers must include both macOS update ZIPs and match the allowlist");
+    "Published installers must include the Apple silicon update ZIP and match the allowlist");
   const hashes = new Map();
-  for (const name of releaseInstallers(version)) {
+  for (const name of publishedPayloads(version)) {
     const asset = release.assets.find((item) => item.name === name);
     assert.match(asset?.digest ?? "", /^sha256:[a-f0-9]{64}$/, `Missing published checksum: ${name}`);
     hashes.set(name, asset.digest.slice("sha256:".length));
@@ -108,7 +97,7 @@ export function publishedDownloadMetadata(release) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const version = /^\d+\.\d+\.\d+$/.test(process.argv[2] ?? "") ? process.argv[2] : "1.7.317";
   const tag = `v${version}-example1`;
-  const hashes = new Map(releaseInstallers(version).map((name) => [name, "a".repeat(64)]));
+  const hashes = new Map(publishedPayloads(version).map((name) => [name, "a".repeat(64)]));
   const files = downloadMetadata(version, tag, hashes, false, "2026-10-18T00:00:00.000Z", "example");
   for (const [path, content] of Object.entries(files)) {
     console.log(`----- ${path} -----`);

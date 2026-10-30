@@ -34,7 +34,7 @@ GitHub 仓库是 `eachann1024/thinkly`。所有语言统一显示 Thinkly。应�
 python3 build.py all                               # 编译 → 打包 → 安装 → 启动
 python3 build.py kill                              # 强杀运行中的 Thinkly（安装版与开发实例）
 python3 build.py build --no-install                # 跳过 bun install 只编译
-python3 build.py package --linux-targets AppImage,deb  # Linux 指定打包目标（缺 libarchive-tools、无法打 pacman 时）
+python3 build.py package --linux-targets AppImage  # Linux 只打 AppImage
 python3 build.py install / start / status / clean / release
 ```
 
@@ -46,9 +46,13 @@ python3 build.py install / start / status / clean / release
 - `dist-electron/packaged`：桌面构建中间产物。
 - `dist-desktop`：收集后的可分发应用与安装包。
 
-Windows 下载包必须匹配“设置 → 系统 → 关于”中的系统类型：Intel / AMD 电脑使用 `x64-setup.exe`，ARM 电脑使用 `arm64-setup.exe`。NSIS 的 `electron/installer.nsh` 在 ARM64 包启动时检查系统架构；不匹配时在卸载旧版、解压及注册文件关联之前退出，静默安装返回 Windows 错误码 1633。此检查不影响包含多个架构的安装包。
+公开下载只提供三个安装包：`Thinkly-<版本>-arm64.dmg`（Mac Apple 芯片）、`Thinkly-<版本>-x64-setup.exe`（Windows 64 位，ARM 电脑也能直接用）、`Thinkly-<版本>.AppImage`（Linux）。
 
-修改后重新构建即可生成桌面安装包。macOS 通过带安装指令的 DMG 分发，并提供应用下载更新所需 ZIP；首次安装授权见 [macOS 安装说明](docs/macos-installation.md)，具体产物见 [BUILD-ARTIFACTS.md](BUILD-ARTIFACTS.md)。
+Intel Mac、Linux deb / pacman 包不提供。需要请到 [GitHub](https://github.com/eachann1024/thinkly) 拉取源码自行编译。
+
+zip、blockmap、yml 仅供应用内自动更新，无需下载。
+
+修改后重新构建即可生成桌面安装包。macOS 通过带安装指令的 DMG 分发；应用内更新另用 arm64 zip，不放进下载表。首次安装授权见 [macOS 安装说明](docs/macos-installation.md)，具体产物见 [BUILD-ARTIFACTS.md](BUILD-ARTIFACTS.md)。
 
 ## 数据与验收
 
