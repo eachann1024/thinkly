@@ -1,6 +1,6 @@
 cask "thinkly" do
-  version "1.7.338,3d383d4"
-  sha256 "2fd6425e630465f5e32cbd895e45f6bae99a83d4a0b973e189ec3a55a17a75db"
+  version "1.7.339,fa5249f"
+  sha256 "5bde6ed44841c4fe5958716dc6df8a4ddf4d44464ebdf1f65db0ee396ebd770c"
   url "https://github.com/eachann1024/thinkly/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}-arm64.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
