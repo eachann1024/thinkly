@@ -1,5 +1,10 @@
 # 更新日志
 
+## 1.7.338
+
+- publish one installer per platform and a hidden update channel (#120)
+- build blockmaps with electron-builder's JS builder and keep only the three installers on Quark (#122)
+
 ## 1.7.337
 
 - Fix quick note save names to match slot titles
