@@ -2,7 +2,7 @@ name: Upload installers to Quark
 
 on:
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       release_tag:
