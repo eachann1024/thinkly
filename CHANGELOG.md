@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.7.339
+
+- always refresh Quark 说明.txt and allow forced Quark re-upload (#123)
+- platform-labelled installer names on Quark (#124)
+- use bundled LXGW WenKai as the default serif font
+- preserve bundled JinKai for existing custom selections
+- register a Windows-safe global search shortcut (#126)
+
 ## 1.7.338
 
 - publish one installer per platform and a hidden update channel (#120)
