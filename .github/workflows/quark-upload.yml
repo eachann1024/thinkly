@@ -9,6 +9,10 @@ on:
         description: Published release tag; latest uses the newest stable release
         type: string
         default: latest
+      force:
+        description: Re-upload even when the installers are already present (refreshes 说明.txt)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,6 +38,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           QUARK_COOKIE: ${{ secrets.QUARK_COOKIE }}
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || 'latest' }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
         run: |
           set -euo pipefail
           version=unknown
@@ -54,11 +59,16 @@ jobs:
           version="$parsed"
           gh release view "$tag" --repo "$GH_REPO" --json tagName,isDraft,isPrerelease,assets > release-meta.json || fail release_lookup_failed
           set +e
-          node scripts/quark-preflight.mjs release-meta.json "$version" "$require_stable" 2>preflight.err
+          node scripts/quark-preflight.mjs release-meta.json "$version" "$require_stable" >preflight.out 2>preflight.err
           code=$?
           set -e
+          cat preflight.out
           if [ -s preflight.err ]; then cat preflight.err >&2; fi
-          if [ "$code" -eq 0 ]; then exit 0; fi
+          if [ "$code" -eq 0 ]; then
+            # Only an "already present" skip can be forced; drafts and prereleases stay skipped.
+            if [ "$FORCE" != "true" ] || ! grep -q 'already present' preflight.out preflight.err; then exit 0; fi
+            code=10
+          fi
           if [ "$code" -ne 10 ]; then
             if ! grep -q 'QUARK_UPLOAD_FAILED' preflight.err; then fail preflight_failed; fi
             exit 1
