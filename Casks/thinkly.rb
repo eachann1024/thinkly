@@ -1,12 +1,11 @@
 cask "thinkly" do
-  arch arm: "-arm64", intel: ""
-  version "1.7.337,3f85041"
-  sha256 arm: "e5211f646d9f85c3d7bfcac5d69973a3942a5ae69468afcbe575864ec29263ef",
-         intel: "f765d0a674e2b27637eb6337fece00f150b8cb7c29d3b36ffcc8b8eab0f90328"
-  url "https://github.com/eachann1024/thinkly/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}#{arch}.dmg"
+  version "1.7.338,3d383d4"
+  sha256 "2fd6425e630465f5e32cbd895e45f6bae99a83d4a0b973e189ec3a55a17a75db"
+  url "https://github.com/eachann1024/thinkly/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}-arm64.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
   homepage "https://github.com/eachann1024/thinkly"
+  depends_on arch: :arm64
   depends_on :macos
   app "Thinkly.app"
   zap trash: [
