@@ -268,7 +268,7 @@ for (const file of files) {
   cpSync(from, resolve(output, file));
 }
 const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
-const generated = writePlatformUpdateFiles({
+const generated = await writePlatformUpdateFiles({
   root, outputDir: output, platform, version: pkg.version, releaseDate: new Date().toISOString(),
 });
 const recorded = [...files, ...generated].sort();
