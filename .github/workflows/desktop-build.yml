@@ -101,15 +101,9 @@ jobs:
           - platform: win
             arch: x64
             runner: windows-2022
-          - platform: win
-            arch: arm64
-            runner: windows-2022
           - platform: mac
             arch: arm64
             runner: macos-15
-          - platform: mac
-            arch: x64
-            runner: macos-15-intel
           - platform: linux
             arch: x64
             runner: ubuntu-24.04
@@ -139,9 +133,6 @@ jobs:
           path: .
       - name: Apply effective release version before packaging
         run: node scripts/apply-desktop-release-plan.mjs
-      - name: Install Linux packaging tools
-        if: matrix.platform == 'linux'
-        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
       - run: bun install --frozen-lockfile
       - name: Compile renderer, main and preload
         if: matrix.platform != 'mac' || matrix.arch != 'arm64'
@@ -227,18 +218,10 @@ jobs:
       - name: Collect signed Windows installer and checksums
         if: steps.signing.outputs.enabled == 'true'
         run: node scripts/build-ci-installers.mjs win ${{ matrix.arch }} --stage=collect
-      - name: Verify Arch package installs with dependencies
+      - name: Verify Linux AppImage
         if: matrix.platform == 'linux'
-        run: |
-          docker run --rm -v "$PWD/dist-desktop/ci:/packages:ro" archlinux:base bash -euc '
-            pacman -Syu --noconfirm
-            pacman -U --noconfirm /packages/*.pacman
-            pacman -Q thinkly
-            test -f "/opt/Thinkly/resources/app.asar"
-            test -x /usr/bin/thinkly
-            # Every shared library the binary needs must come from the declared pacman depends.
-            ! ldd "/opt/Thinkly/thinkly" | grep "not found"
-          '
+        shell: bash
+        run: files=(dist-desktop/ci/*.AppImage); test -f "${files[0]}" && test -x "${files[0]}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: thinkly-${{ matrix.platform }}-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
@@ -290,7 +273,6 @@ jobs:
         run: |
           gh workflow run quark-upload.yml --ref main -f release_tag=latest \
             || echo "::warning::Could not start quark-upload.yml; the daily schedule will upload this release."
-
   repair:
     name: Repair published download metadata
     needs: [prepare]

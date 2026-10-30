@@ -15,8 +15,9 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureChangelogSection, setPackageJsonVersion } from "./desktop-auto-release.mjs";
 import { assertPublishVersion, compareVersions, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
-import { publishedDownloadMetadata, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
+import { publishedDownloadMetadata, publishedPayloads, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
+import { releaseDownloadTemplate } from "./desktop-release-template.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
 const MANUAL_UPGRADE_VERSION = "1.7.318";
@@ -36,23 +37,13 @@ function manualUpgradeNotes(version) {
   ];
 }
 
-export function formatReleaseBody({ version, releaseNotes, repo, tag, signed, macHelper, windowsSigned }) {
-  const baseDownloadUrl = `https://github.com/${repo}/releases/download/${tag}`;
+export function formatReleaseBody({ version, date, releaseNotes, repo, signed, macHelper, windowsSigned }) {
+  const releaseDate = date || new Date().toISOString().slice(0, 10);
   return [
     markedReleaseNotes(releaseNotes),
     "",
     ...manualUpgradeNotes(version),
-    `### 📥 安装包下载`,
-    "",
-    "| 平台 | 安装包直接下载 | 架构与说明 |",
-    "| :--- | :--- | :--- |",
-    `| **macOS** | [Thinkly-${version}-arm64.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
-    `| | [Thinkly-${version}.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
-    `| **Windows** | [Thinkly-${version}-x64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
-    `| | [Thinkly-${version}-arm64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
-    `| **Linux** | [Thinkly-${version}.AppImage](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
-    `| | [Thinkly_${version}_amd64.deb](${baseDownloadUrl}/Thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
-    `| | [Thinkly-${version}.pacman](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./Thinkly-${version}.pacman\`） |`,
+    releaseDownloadTemplate({ version, date: releaseDate, repo }),
     "",
     "### macOS 安装说明",
     "",
@@ -97,25 +88,24 @@ async function main() {
   const stage = mkdtempSync(join(tmpdir(), "thinkly-release-"));
   try {
     const builds = verifyBuildRecords(input, version, sha);
-    const signed = ["arm64", "x64"].every((arch) =>
-      builds.get(`mac-${arch}`).signed === true && builds.get(`mac-${arch}`).notarized === true);
-    const macHelper = ["arm64", "x64"].every((arch) => builds.get(`mac-${arch}`).macInstallHelper === 1);
-    const windowsSigned = ["arm64", "x64"].every((arch) =>
-      builds.get(`win-${arch}`).signed === true);
-    const installers = releaseInstallers(version);
-    const available = readdirSync(input).filter((name) => /\.(exe|dmg|zip|AppImage|deb|rpm|pacman)$/.test(name));
-    const unexpected = available.filter((name) => !installers.includes(name));
-    assert.deepEqual(unexpected, [], `Unexpected installers would be dropped: ${unexpected.join(", ")}`);
+    const macBuild = builds.get("mac-arm64");
+    const signed = macBuild.signed === true && macBuild.notarized === true;
+    const macHelper = macBuild.macInstallHelper === 1;
+    const windowsSigned = builds.get("win-x64").signed === true;
+    const payloads = publishedPayloads(version);
+    const available = readdirSync(input).filter((name) => /\.(exe|dmg|zip|AppImage|deb|rpm|pacman|blockmap|yml)$/.test(name));
+    const unexpected = available.filter((name) => !payloads.includes(name));
+    assert.deepEqual(unexpected, [], `Unexpected release files would be dropped: ${unexpected.join(", ")}`);
     const hashes = new Map();
-    for (const name of installers) {
-      assert.ok(existsSync(join(input, name)), `Missing release installer: ${name}`);
+    for (const name of payloads) {
+      assert.ok(existsSync(join(input, name)), `Missing release file: ${name}`);
       copyFileSync(join(input, name), join(stage, name));
       hashes.set(name, createHash("sha256").update(readFileSync(join(stage, name))).digest("hex"));
     }
-    writeFileSync(join(stage, "SHA256SUMS.txt"), installers.map((name) => `${hashes.get(name)}  ${name}\n`).join(""));
+    writeFileSync(join(stage, "SHA256SUMS.txt"), payloads.map((name) => `${hashes.get(name)}  ${name}\n`).join(""));
     assert.deepEqual(readdirSync(stage).sort(), releaseAssets(version));
     const notes = formatReleaseBody({
-      version, releaseNotes, repo: REPO, tag, signed, macHelper, windowsSigned,
+      version, date: new Date().toISOString().slice(0, 10), releaseNotes, repo: REPO, signed, macHelper, windowsSigned,
     });
     const existing = findRelease(tag);
     if (!existing) {

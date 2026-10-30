@@ -131,6 +131,8 @@ public/fonts/*.otf
 !scripts/select-desktop-release.mjs
 !scripts/release-desktop.mjs
 !scripts/desktop-download-metadata.mjs
+!scripts/desktop-update-files.mjs
+!scripts/desktop-release-template.mjs
 !scripts/repair-desktop-metadata.mjs
 !scripts/collect-release-assets.mjs
 !scripts/distribution/

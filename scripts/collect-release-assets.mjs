@@ -5,7 +5,7 @@ import { ROOT } from "./desktop-release-support.mjs";
 const sha = process.env.SOURCE_SHA;
 const destination = resolve(ROOT, "artifacts");
 mkdirSync(destination);
-for (const prefix of ["source", "thinkly-win-x64", "thinkly-win-arm64", "thinkly-mac-arm64", "thinkly-mac-x64", "thinkly-linux-x64"]) {
+for (const prefix of ["source", "thinkly-win-x64", "thinkly-mac-arm64", "thinkly-linux-x64"]) {
   const source = resolve(ROOT, "downloaded-artifacts", `${prefix}-${sha}`);
   if (!existsSync(source) || !statSync(source).isDirectory()) throw new Error(`Missing artifact: ${source}`);
   for (const file of readdirSync(source)) {

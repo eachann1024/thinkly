@@ -171,8 +171,7 @@ mac:
     - target: dir
       arch:
         - arm64
-        - x64
-  # 只改压缩包文件名。.app 仍由 productName 决定。x64 的 CI 会去掉 -\${arch}，避免 -x64.dmg。
+  # 只改压缩包文件名。.app 仍由 productName 决定。CI 只打 Apple 芯片 arm64。
   artifactName: Thinkly-\${version}-\${arch}-mac.\${ext}
 dmg:
   artifactName: Thinkly-\${version}-\${arch}.\${ext}
@@ -223,8 +222,6 @@ linux:
   maintainer: ${JSON.stringify(linuxMaintainer)}
   target:
     - AppImage
-    - deb
-    - pacman
   desktop:
     entry:
       Name: Thinkly
@@ -237,21 +234,5 @@ linux:
       StartupWMClass: thinkly
 appImage:
   artifactName: Thinkly-\${version}.\${ext}
-deb:
-  packageName: thinkly
-  artifactName: Thinkly_\${version}_\${arch}.\${ext}
-pacman:
-  packageName: thinkly
-  artifactName: Thinkly-\${version}.\${ext}
-  depends:
-    - gtk3
-    - nss
-    - alsa-lib
-    - libxss
-    - libxtst
-    - libnotify
-    - libsecret
-    - xdg-utils
-    - libappindicator-gtk3
 `,
 );
