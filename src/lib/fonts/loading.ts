@@ -1,6 +1,6 @@
 import type { CustomFonts } from "@/stores/useSettings";
 import {
-  CANGER_JINKAI_LOCAL_NAMES,
+  LXGW_WENKAI_LOCAL_NAMES,
   DEFAULT_FONT_NAMES,
   REMOTE_FONT_SOURCES,
   toCssFontFamily,
@@ -88,13 +88,13 @@ export async function ensureEditorFontAvailable(
 ) {
   const category = fontFamily ?? "default";
   const selectedFamilies = splitFontList(customFonts[category].font);
-  const selectsJinKai = selectedFamilies.some((family) =>
-    CANGER_JINKAI_LOCAL_NAMES.some(
+  const selectsWenKai = selectedFamilies.some((family) =>
+    LXGW_WENKAI_LOCAL_NAMES.some(
       (localName) => localName.toLowerCase() === family.toLowerCase(),
     ),
   );
-  if (selectsJinKai || (category === "serif" && selectedFamilies.length === 0)) {
-    void ensurePersistentRemoteFont("仓耳今楷");
+  if (selectsWenKai || (category === "serif" && selectedFamilies.length === 0)) {
+    void ensurePersistentRemoteFont("霞鹜文楷");
     return;
   }
 

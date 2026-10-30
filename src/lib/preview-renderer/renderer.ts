@@ -27,7 +27,7 @@ if (bridge) {
       try {
         if (cancelled.has(job.id)) return;
         document.body.style.fontFamily = job.options.fontFamily || "sans-serif";
-        if (job.options.fontFamily?.includes("仓耳今楷")) await ensurePersistentRemoteFont("仓耳今楷");
+        if (job.options.fontFamily?.includes("霞鹜文楷")) await ensurePersistentRemoteFont("霞鹜文楷");
         await document.fonts.ready;
         const svg = await renderCachedMermaid(job.source, job.options, job.context, job.fontIdentity);
         if (!cancelled.has(job.id)) bridge.reply({ id: job.id, svg });

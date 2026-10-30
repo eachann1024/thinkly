@@ -36,9 +36,9 @@
 }
 
 @font-face {
-  font-family: "仓耳今楷";
+  font-family: "霞鹜文楷";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./assets/fonts/TsangerJinKai03-W04.woff2") format("woff2");
+  src: url("./assets/fonts/LXGWWenKai-Regular.woff2") format("woff2");
 }
