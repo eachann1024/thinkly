@@ -26,6 +26,7 @@ import { workspacesHeldHidden } from "./windows/state";
 
 const DEFAULT_WAKE = "CmdOrCtrl+Alt+N";
 const DEFAULT_QUICKNOTE = "Alt+N";
+const DEFAULT_SEARCH = "CmdOrCtrl+Alt+K";
 
 protocol.registerSchemesAsPrivileged([{ scheme: "goose-asset", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 installPerfInstrumentation();
@@ -112,7 +113,7 @@ function startApp(): void {
     registerHotkeys({
       wake: DEFAULT_WAKE,
       quicknote: DEFAULT_QUICKNOTE,
-      search: "",
+      search: DEFAULT_SEARCH,
     });
     startAutomaticUpdates();
     startGitSync();

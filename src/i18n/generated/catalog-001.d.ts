@@ -121,6 +121,6 @@ declare module "../types" {
     "src/components/ui/image-export/theme-model.ts#localMessages:1": { "sampleEdition": {  }; "sampleFile": {  }; "sampleHeading": {  } };
     "src/hooks/appHotkeys/actions.ts#block1:1": { "newFile": {  }; "newNote": {  } };
     "src/hooks/useAppUpdate.ts#block1:1": { "downloadUnavailable": {  }; "downloaded": {  }; "updateFailed": {  } };
-    "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "shortcutUnavailable": {  } };
+    "src/hooks/useDesktopHotkeys.ts#block1:1": { "hotkeysFailed": {  }; "mainDisabled": {  }; "quicknoteDisabled": {  }; "searchDisabled": {  }; "searchShortcutUpdated": {  }; "searchShortcutUpdatedDetail": {  }; "shortcutUnavailable": {  } };
   }
 }
