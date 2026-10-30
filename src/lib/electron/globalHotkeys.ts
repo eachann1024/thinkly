@@ -5,19 +5,19 @@ zh-Hans:
   desktopIntegrationIsUnavailable: "桌面桥不可用"
   finishRecordingBeforeRegisteringTheGlobalShortcut: "录制结束后才能注册全局快捷键"
   invalidShortcutRecordItAgain: "快捷键无效，请重新录制"
-  theShortcutIsInvalidOrAlreadyUsedByAnother: "快捷键已被其他应用占用或无效"
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "已被系统或其他应用占用，没有生效。请换一个，或恢复默认。"
   couldnTDisableTheShortcutTryAgain: "停用快捷键失败，请重试"
 en:
   desktopIntegrationIsUnavailable: "Desktop integration is unavailable"
   finishRecordingBeforeRegisteringTheGlobalShortcut: "Finish recording before registering the global shortcut"
   invalidShortcutRecordItAgain: "Invalid shortcut. Record it again."
-  theShortcutIsInvalidOrAlreadyUsedByAnother: "The shortcut is invalid or already used by another app"
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "This shortcut is reserved by the system or another app and did not register. Choose another, or reset to the default."
   couldnTDisableTheShortcutTryAgain: "Couldn’t disable the shortcut. Try again."
 ja:
   desktopIntegrationIsUnavailable: "デスクトップ連携を利用できません"
   finishRecordingBeforeRegisteringTheGlobalShortcut: "グローバルショートカットを登録するには、先に記録を完了してください"
   invalidShortcutRecordItAgain: "ショートカットが無効です。もう一度記録してください"
-  theShortcutIsInvalidOrAlreadyUsedByAnother: "ショートカットが無効か、他のアプリで使用されています"
+  theShortcutIsInvalidOrAlreadyUsedByAnother: "システムまたは他のアプリが使用しているため登録できません。別のキーにするか、初期設定に戻してください。"
   couldnTDisableTheShortcutTryAgain: "ショートカットを無効にできませんでした。もう一度お試しください"
 `;
 const uiText = createTranslator(localMessages);
