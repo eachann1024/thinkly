@@ -96,15 +96,17 @@ function logFolder(entries) {
   if (summary) appendFileSync(summary, `${["QUARK_FOLDER_FINAL", ...lines].join("\n")}\n`);
 }
 
-async function uploadReplacing(cookie, folderId, source, name) {
+async function uploadReplacing(cookie, folderId, source, name, { reuseSameSize = true } = {}) {
   const localSize = statSync(source).size;
   const files = related(await listChildren(cookie, folderId), name);
-  const exact = files.find((item) => item.file_name === name && fileSize(item) === localSize);
-  const alias = newest(files.filter((item) => fileRole(name, item.file_name) === "final" && item.file_name !== name && fileSize(item) === localSize));
-  const reusable = newest(files.filter((item) => fileRole(name, item.file_name) === "uploading" && fileSize(item) === localSize));
+  // 说明.txt carries the version, so an old note can have the same size; always replace it.
+  const sameSize = (item) => reuseSameSize && fileSize(item) === localSize;
+  const exact = files.find((item) => item.file_name === name && sameSize(item));
+  const alias = newest(files.filter((item) => fileRole(name, item.file_name) === "final" && item.file_name !== name && sameSize(item)));
+  const reusable = newest(files.filter((item) => fileRole(name, item.file_name) === "uploading" && sameSize(item)));
   const restored = files.some((item) => fileRole(name, item.file_name) === "final")
     ? undefined
-    : newest(files.filter((item) => fileRole(name, item.file_name) === "previous" && fileSize(item) === localSize));
+    : newest(files.filter((item) => fileRole(name, item.file_name) === "previous" && sameSize(item)));
   const chosen = exact ?? alias ?? restored;
   if (chosen) {
     if (chosen.file_name !== name) await commitReplacement(cookie, folderId, name, chosen.fid);
@@ -179,7 +181,7 @@ async function main() {
   const noteDir = mkdtempSync(join(tmpdir(), "thinkly-quark-"));
   const note = join(noteDir, NOTE_NAME);
   writeFileSync(note, noteText(version));
-  await uploadReplacing(cookie, folderId, note, NOTE_NAME);
+  await uploadReplacing(cookie, folderId, note, NOTE_NAME, { reuseSameSize: false });
   await retainLatest(cookie, folderId, version);
   logFolder(await listChildren(cookie, folderId));
   const summary = process.env.GITHUB_STEP_SUMMARY;
