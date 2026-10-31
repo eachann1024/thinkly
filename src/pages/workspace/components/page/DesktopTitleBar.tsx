@@ -57,12 +57,14 @@ import { TitleBarAiToggle } from "./titlebar/TitleBarAiToggle";
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
 import { HistoryElectronChrome } from "../history/history-view/HistoryToolbar";
+import { SettingsCloseButton } from "../sidebar/settings/SettingsCloseButton";
 
 
 
 export function DesktopTitleBar({
   page,
   settingsOpen = false,
+  onCloseSettings,
   sidebarCollapsedOverride,
   onToggleSidebar,
   isWelcomeTab,
@@ -269,8 +271,16 @@ export function DesktopTitleBar({
           {aiHeaderActions}
         </div>
       )}
-      { }
-      {settingsOpen ? <div className="min-w-0 flex-1" /> : null}
+      {settingsOpen && (
+        <div className="flex min-w-0 flex-1 items-center justify-end">
+          {onCloseSettings && (
+            <SettingsCloseButton
+              onClose={onCloseSettings}
+              className={isFramelessElectron ? "mr-2" : undefined}
+            />
+          )}
+        </div>
+      )}
       {isFramelessElectron ? <WinWindowControls /> : null}
     </div>
   );
