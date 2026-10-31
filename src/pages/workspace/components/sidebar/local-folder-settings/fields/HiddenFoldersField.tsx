@@ -55,7 +55,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { CornerTriangle, SettingsDotIcon } from "@/components/ui/dot-matrix";
+import { ReviewedStateArt, StateArtBackdrop } from "@/components/ui/dot-matrix";
 import * as GooseIcons from "@/components/ui/icons";
 import { SettingsSectionCard } from "../../settings/SettingsSectionCard";
 import {
@@ -137,9 +137,10 @@ export function HiddenFoldersField({
       </div>
 
       {folders.length === 0 && (
-        <p className={`flex items-center gap-2 text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
-          <SettingsDotIcon name="folderOff" size={18} />
-          {uiText("noHiddenFolders_8f82")}</p>
+        <p className={`relative isolate flex items-center gap-2 overflow-hidden text-sm text-muted-foreground ${SETTINGS_OPTION_ROW_CLASS}`}>
+          <StateArtBackdrop kind="visible" compact />
+          <ReviewedStateArt kind="visible" className="relative" />
+          <span className="relative">{uiText("noHiddenFolders_8f82")}</span></p>
       )}
       {folders.map((folder) => {
         const isDefaultFolder = DEFAULT_HIDDEN_FOLDERS.includes(folder);
@@ -218,9 +219,6 @@ export function HiddenFoldersField({
           )}
         </form>
       </Disclosure>
-      {folders.length === 0 && (
-        <CornerTriangle position="bottom-right" size={56} pitch={7} max={0.18} />
-      )}
     </SettingsSectionCard>
   );
 }
