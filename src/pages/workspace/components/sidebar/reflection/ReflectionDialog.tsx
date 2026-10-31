@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import { useEffect, useMemo, useState } from "react";
 import { createTranslator, i18nYaml } from "@/i18n";
 import { DialogShell } from "@/components/ui/dialog-shell";
-import { FlatlineArt } from "@/components/ui/dot-matrix";
+import { SelectedStateArt, SelectedStateBackdrop } from "@/components/ui/dot-matrix";
 import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { useSettings } from "@/stores/useSettings";
@@ -114,7 +114,10 @@ export function ReflectionDialog({ open, onOpenChange }: Props) {
     >
       {data && !hasEdits ? (
         <div>
-          <FlatlineArt className="mb-3.5 block max-w-full text-foreground" />
+          <div className="relative mb-3.5 w-[300px] max-w-full">
+            <SelectedStateBackdrop kind="reflection" compact />
+            <SelectedStateArt kind="reflection" className="relative block h-auto max-w-full" />
+          </div>
           <p className="text-sm text-muted-foreground">{uiText("empty")}</p>
         </div>
       ) : null}
