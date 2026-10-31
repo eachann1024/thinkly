@@ -41,7 +41,7 @@ import {
   Trash2,
 } from "@/components/ui/icons";
 import { SkeletonList } from "@/components/ui/skeleton";
-import { DotDecor, SettingsDotIcon } from "@/components/ui/dot-matrix";
+import { ReviewedStateArt, StateArtBackdrop } from "@/components/ui/dot-matrix";
 import { SettingsSectionCard } from "../SettingsSectionCard";
 import type { useWebdavRemoteActions } from "./useWebdavRemoteActions";
 import { formatFileSize, formatRemoteTime } from "./shared";
@@ -105,8 +105,8 @@ export function renderWebdavRemoteBackups(
             <SkeletonList rows={3} icon={false} label={uiText("loadingRemoteBackups_8208")} />
           ) : remoteFiles.length === 0 ? (
             <div className="relative flex flex-col items-center gap-2.5 overflow-hidden border border-dashed rounded-[var(--goose-control-radius)] border-muted py-10 text-center">
-              <DotDecor preset="webdav" compact />
-              <SettingsDotIcon name="cloudOff" size={40} className="relative" />
+              <StateArtBackdrop kind="webdav" />
+              <ReviewedStateArt kind="webdav" className="relative" />
               <p className="relative text-sm font-medium text-foreground">
                 {uiText("noRemoteBackups_5d1a")}</p>
             </div>
