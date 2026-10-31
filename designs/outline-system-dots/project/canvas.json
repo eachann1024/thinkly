@@ -1,8 +1,13 @@
 {
   "v": 3,
-  "createdOnFiles": { "v": 1, "at": "2026-10-31T07:39:55Z" },
-  "title": "文档大纲点阵插画",
-  "launch": { "view": "canvas" },
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-31T07:39:55Z"
+  },
+  "title": "Thinkly 点阵插画审图与改稿",
+  "launch": {
+    "view": "canvas"
+  },
   "pages": [],
   "boards": {
     "Main.dc.html": {
@@ -12,9 +17,146 @@
       "h": 520,
       "title": "文档大纲 · 深浅主题",
       "radius": 0
+    },
+    "OutlineReview.dc.html": {
+      "x": 0,
+      "y": 640,
+      "w": 960,
+      "h": 400,
+      "title": "文档大纲 · 左旧右新",
+      "radius": 0
+    },
+    "NoFolderReview.dc.html": {
+      "x": 1040,
+      "y": 640,
+      "w": 960,
+      "h": 400,
+      "title": "未关联本地文件夹 · 左旧右新",
+      "radius": 0
+    },
+    "FolderReview.dc.html": {
+      "x": 2080,
+      "y": 640,
+      "w": 960,
+      "h": 400,
+      "title": "空文件夹 · 左旧右新",
+      "radius": 0
+    },
+    "BookReview.dc.html": {
+      "x": 0,
+      "y": 1160,
+      "w": 960,
+      "h": 400,
+      "title": "未打开笔记 · 左旧右新",
+      "radius": 0
+    },
+    "NoteErrorReview.dc.html": {
+      "x": 1040,
+      "y": 1160,
+      "w": 960,
+      "h": 400,
+      "title": "笔记无法显示 · 左旧右新",
+      "radius": 0
+    },
+    "SplitMissingReview.dc.html": {
+      "x": 2080,
+      "y": 1160,
+      "w": 960,
+      "h": 400,
+      "title": "分屏笔记缺失 · 左旧右新",
+      "radius": 0
+    },
+    "BootstrapErrorReview.dc.html": {
+      "x": 0,
+      "y": 1680,
+      "w": 960,
+      "h": 400,
+      "title": "Thinkly 无法打开 · 左旧右新",
+      "radius": 0
+    },
+    "ReflectionReview.dc.html": {
+      "x": 1040,
+      "y": 1680,
+      "w": 960,
+      "h": 400,
+      "title": "回顾期间无编辑 · 左旧右新",
+      "radius": 0
+    },
+    "WebdavReview.dc.html": {
+      "x": 2080,
+      "y": 1680,
+      "w": 960,
+      "h": 400,
+      "title": "暂无远端备份 · 左旧右新",
+      "radius": 0
+    },
+    "AiLoadingReview.dc.html": {
+      "x": 0,
+      "y": 2200,
+      "w": 960,
+      "h": 400,
+      "title": "AI 设置加载 · 左旧右新",
+      "radius": 0
+    },
+    "AiModelReview.dc.html": {
+      "x": 1040,
+      "y": 2200,
+      "w": 960,
+      "h": 400,
+      "title": "未选择模型 · 左旧右新",
+      "radius": 0
+    },
+    "AiErrorReview.dc.html": {
+      "x": 2080,
+      "y": 2200,
+      "w": 960,
+      "h": 400,
+      "title": "AI 暂不可用 · 左旧右新",
+      "radius": 0
+    },
+    "BootstrapLoadingReview.dc.html": {
+      "x": 0,
+      "y": 2720,
+      "w": 960,
+      "h": 400,
+      "title": "打开或恢复 Thinkly · 左旧右新",
+      "radius": 0
+    },
+    "SmallFolderPlusReview.dc.html": {
+      "x": 1040,
+      "y": 2720,
+      "w": 960,
+      "h": 400,
+      "title": "添加本地文件夹 · 左旧右新",
+      "radius": 0
+    },
+    "SmallVisibleReview.dc.html": {
+      "x": 2080,
+      "y": 2720,
+      "w": 960,
+      "h": 400,
+      "title": "暂无隐藏文件夹 · 左旧右新",
+      "radius": 0
     }
   },
-  "order": ["Main.dc.html"],
+  "order": [
+    "Main.dc.html",
+    "OutlineReview.dc.html",
+    "NoFolderReview.dc.html",
+    "FolderReview.dc.html",
+    "BookReview.dc.html",
+    "NoteErrorReview.dc.html",
+    "SplitMissingReview.dc.html",
+    "BootstrapErrorReview.dc.html",
+    "ReflectionReview.dc.html",
+    "WebdavReview.dc.html",
+    "AiLoadingReview.dc.html",
+    "AiModelReview.dc.html",
+    "AiErrorReview.dc.html",
+    "BootstrapLoadingReview.dc.html",
+    "SmallFolderPlusReview.dc.html",
+    "SmallVisibleReview.dc.html"
+  ],
   "notes": {},
   "designSystems": []
 }
