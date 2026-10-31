@@ -90,7 +90,7 @@ export const AiComposerInput = forwardRef<
       ) : null}
 
       { }
-      <div ref={editorHostRef} className="relative min-w-0" />
+      <div ref={editorHostRef} data-ai-composer-host="" className="relative min-w-0" />
       <span
         ref={liveRegionRef}
         className="sr-only"
