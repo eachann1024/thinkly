@@ -1,8 +1,8 @@
 import { t } from "./i18n/gitErrors";
 import { assertRoot, scan, assertTree, safeTarget, ignored, safeParts } from "./gitSyncFiles";
 import { aliasGitLayout, planGitLayout, gitLayoutMetadata, assertGitLayoutTargets } from "./gitSyncLayout";
-import { createHash } from "node:crypto";
-import { lstat, mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { lstat, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { validateGitRepository, type GitRepositoryInput, type GitRepositoryFolder } from "../../src/lib/git-sync-contract";
 import { gitBytes } from "./gitSyncEngine";
@@ -11,13 +11,13 @@ import { GitConflictError, retainGitConflicts, type GitSyncConflict } from "./gi
 import { reconcileFiles } from "./gitSyncReconcile";
 import { describeGitSyncChanges } from "./gitSyncCommit";
 import { retainDeletedGitFiles } from "./gitSyncRecovery";
+import { applyGitSyncJournal, recoverGitSyncJournal, type GitSyncJournal } from "./gitSyncJournal";
 export { validateGitSyncFolder } from "./gitSyncFiles";
 export { GitConflictError, getGitConflict, resolveGitConflict } from "./gitSyncConflict";
 
 type Files = Record<string, string>;
 type Snapshots = Record<string, Files>;
-interface Journal { commit: string; before: Snapshots; after: Snapshots }
-interface Manifest { version: 1; identity: string; baseline: Snapshots; pending?: Journal; reboundKeys?: string[] }
+interface Manifest { version: 1; identity: string; baseline: Snapshots; pending?: GitSyncJournal; reboundKeys?: string[] }
 const git = async (root: string, args: string[]) => (await gitBytes(root, args)).toString("utf8").trim();
 const empty = (): Files => Object.create(null) as Files;
 const mappingKey = (folder: GitRepositoryFolder) => `${folder.notebookId}:${folder.remotePath}`;
@@ -37,40 +37,6 @@ export function reconcileGitFiles(base: Files | undefined, local: Files, remote:
   const merged = reconcileFiles(base, local, remote);
   assertTree(merged);
   return merged;
-}
-
-async function applyJournal(config: GitRepositoryInput, journal: Journal, verifyRoot?: (root: string) => Promise<void>) {
-  for (const folder of config.folders) {
-    await verifyRoot?.(folder.localPath);
-    const key = mappingKey(folder), before = journal.before[key] ?? empty(), after = journal.after[key] ?? empty();
-    const current = await scan(folder.localPath);
-    for (const name of new Set([...Object.keys(before), ...Object.keys(after), ...Object.keys(current)])) {
-      if (current[name] !== before[name] && current[name] !== after[name]) throw new Error(t("recoveryLocalChanged"));
-      await safeTarget(folder.localPath, name);
-    }
-  }
-  for (const folder of config.folders) {
-    const key = mappingKey(folder), before = journal.before[key] ?? empty(), after = journal.after[key] ?? empty();
-    for (const name of new Set([...Object.keys(before), ...Object.keys(after)])) {
-      await verifyRoot?.(folder.localPath);
-      const target = await safeTarget(folder.localPath, name);
-      const current = await readFile(target).then((value) => value.toString("base64")).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return undefined; throw error; });
-      if (current === after[name]) continue;
-      if (current !== before[name]) throw new Error(t("applyChanged"));
-      if (after[name] === undefined) {
-        await rm(target);
-        if (process.platform !== "win32") {
-          const directory = await open(path.dirname(target), "r");
-          try { await directory.sync(); } finally { await directory.close(); }
-        }
-      }
-      else {
-        await mkdir(path.dirname(target), { recursive: true });
-        await safeTarget(folder.localPath, name);
-        await durableAtomicWrite(target, Buffer.from(after[name]!, "base64"));
-      }
-    }
-  }
 }
 
 export interface GitRepositorySyncOptions {
@@ -103,6 +69,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
   aliasGitLayout(manifest.baseline, moves);
   aliasGitLayout(manifest.pending?.before, moves);
   aliasGitLayout(manifest.pending?.after, moves);
+  aliasGitLayout(manifest.pending?.baseline, moves);
   manifest.reboundKeys = manifest.reboundKeys?.map((key) => {
     const move = moves.find((entry) => key === `${entry.notebookId}:${entry.from}`);
     return move ? `${move.notebookId}:${move.to}` : key;
@@ -132,8 +99,15 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
     if (Object.keys(journal.after).some((key) => !selectedKeys.has(key) && !reboundAlias(key) && !moves.some((move) => key === `${move.notebookId}:${move.from}`))) throw new Error(t("pendingFolders"));
     const pushed = remoteHead && await git(work, ["merge-base", "--is-ancestor", manifest.pending.commit, remoteHead]).then(() => true).catch(() => false);
     if (pushed) {
-      await applyJournal(config, manifest.pending, options.verifyRoot);
-      manifest.baseline = { ...manifest.baseline, ...manifest.pending.after };
+      const recovered = recoverGitSyncJournal(config, identity, journal, local);
+      if (recovered !== journal) {
+        await atomicJson(path.join(root, `recovery-${journal.commit}-${randomUUID()}.json`), journal);
+        manifest.pending = recovered;
+        await atomicJson(manifestFile, manifest);
+      }
+      retainGitConflicts(config.id, new Set());
+      await applyGitSyncJournal(config, recovered, options.verifyRoot);
+      manifest.baseline = { ...manifest.baseline, ...(recovered.baseline ?? recovered.after) };
       delete manifest.pending;
       clearReboundKeys(manifest, config.folders);
       await atomicJson(manifestFile, manifest);
@@ -228,7 +202,7 @@ export async function syncGitRepository(input: GitRepositoryInput, options: GitR
     catch (error) { throw Object.assign(new Error(t("pushFailed", { reason: error instanceof Error ? error.message : t("retrySsh") })), { cause: error }); }
   }
   await options.afterPush?.();
-  await applyJournal(config, manifest.pending, options.verifyRoot);
+  await applyGitSyncJournal(config, manifest.pending, options.verifyRoot);
   manifest.baseline = { ...manifest.baseline, ...after };
   delete manifest.pending;
   clearReboundKeys(manifest, config.folders);

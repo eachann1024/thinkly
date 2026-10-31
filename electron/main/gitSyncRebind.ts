@@ -6,6 +6,7 @@ import { durableAtomicWrite } from "./gitSyncDisk";
 import { checkedGitRoot } from "./gitSyncFolders";
 import { validateGitSyncFolder } from "./gitRepositoryEngine";
 import type { GitMappingHistory } from "./gitSyncStore";
+import type { GitSyncJournal } from "./gitSyncJournal";
 
 type Snapshots = Record<string, Record<string, string>>;
 interface RebindManifest {
@@ -13,7 +14,7 @@ interface RebindManifest {
   identity: string;
   baseline: Snapshots;
   reboundKeys?: string[];
-  pending?: { commit: string; before: Snapshots; after: Snapshots };
+  pending?: GitSyncJournal;
 }
 
 export async function preserveReboundHistory(storageRoot: string, repositoryId: string, previous: GitRepositoryFolder, next: GitRepositoryFolder) {
@@ -27,7 +28,7 @@ export async function preserveReboundHistory(storageRoot: string, repositoryId: 
   if (manifest.version !== 1 || !manifest.baseline || typeof manifest.baseline !== "object") throw new Error(t("invalidRecovery"));
   const oldKey = `${previous.notebookId}:${previous.remotePath}`;
   const newKey = `${next.notebookId}:${next.remotePath}`;
-  for (const snapshots of oldKey === newKey ? [] : [manifest.baseline, manifest.pending?.before, manifest.pending?.after]) {
+  for (const snapshots of oldKey === newKey ? [] : [manifest.baseline, manifest.pending?.before, manifest.pending?.after, manifest.pending?.baseline]) {
     if (!snapshots || !Object.hasOwn(snapshots, oldKey)) continue;
     if (Object.hasOwn(snapshots, newKey) && JSON.stringify(snapshots[newKey]) !== JSON.stringify(snapshots[oldKey])) throw new Error(t("targetRecovery"));
     snapshots[newKey] = snapshots[oldKey]!;
