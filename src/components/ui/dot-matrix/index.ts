@@ -31,3 +31,4 @@ export { NoFolderFadeArt, NoFolderScatterArt, NoFolderTreeArt, NoFolderTrailArt 
 export { EmptyStateArt, type EmptyStateArtKind } from "./illustrations/EmptyStateArt";
 export { ReviewedStateArt, type ReviewedStateArtKind } from "./illustrations/ReviewedStateArt";
 export { StateArtBackdrop } from "./illustrations/StateArtBackdrop";
+export { SelectedStateArt, SelectedStateBackdrop } from "./illustrations/SelectedStateArt";

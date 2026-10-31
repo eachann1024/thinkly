@@ -7,6 +7,7 @@ export function DotMatrixMotion({
   width,
   height,
   viewBox,
+  preserveAspectRatio,
   origin,
   motion = "auto",
   className,
@@ -16,6 +17,7 @@ export function DotMatrixMotion({
   width: number;
   height: number;
   viewBox?: string;
+  preserveAspectRatio?: string;
   origin?: [number, number];
   motion?: "auto" | "corner";
   className?: string;
@@ -44,6 +46,7 @@ export function DotMatrixMotion({
       width={width}
       height={height}
       viewBox={viewBox ?? `0 0 ${width} ${height}`}
+      preserveAspectRatio={preserveAspectRatio}
       aria-hidden
       focusable="false"
     >

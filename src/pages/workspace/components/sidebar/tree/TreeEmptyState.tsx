@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "@/components/ui/icons";
 import {
-  DotDecor,
   NoFolderTrailArt,
-  NoFolderTreeArt,
+  SelectedStateArt,
+  SelectedStateBackdrop,
   TreeFadeArt,
   TreeTrailArt,
 } from "@/components/ui/dot-matrix";
@@ -44,9 +44,11 @@ function NoFolderState({ height }: { height: number }) {
       )}
       style={hasMeasuredHeight ? { height } : undefined}
     >
-      <DotDecor preset="noFolder" />
       <div data-no-folder-group className="relative z-[1] flex max-w-full flex-col items-center text-center">
-        <NoFolderTreeArt className="h-auto max-w-full text-foreground" />
+        <div className="relative max-w-full">
+          <SelectedStateBackdrop kind="noFolder" />
+          <SelectedStateArt kind="noFolder" className="relative h-auto max-w-full" />
+        </div>
         <p className="mt-3.5 text-sm font-normal leading-5 text-muted-foreground">
           {uiText("linkALocalFolderFirst_909e")}
         </p>

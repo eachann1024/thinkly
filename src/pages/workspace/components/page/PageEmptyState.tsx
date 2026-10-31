@@ -20,7 +20,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
-import { BookArt, DotDecor } from "@/components/ui/dot-matrix";
+import { SelectedStateArt, SelectedStateBackdrop } from "@/components/ui/dot-matrix";
 import { FilePlus2, FolderOpen } from "@/components/ui/icons";
 import { usePageEmptyState } from "./empty-state/usePageEmptyState";
 import "./empty-state/page-empty-state.css";
@@ -34,13 +34,16 @@ export function PageEmptyState() {
   useLocale();
   const { isLocalFolder, actions } = usePageEmptyState();
   const needsFolder = !isLocalFolder;
+  const art = needsFolder ? "noFolder" : "book";
   const [primary, ...secondary] = actions;
 
   return (
     <div className="workspace-page-empty h-full overflow-y-auto bg-[hsl(var(--goose-editor-bg))]">
-      <DotDecor preset="page" />
       <div className="page-empty-state">
-        <BookArt className="page-empty-state-illustration text-foreground" />
+        <div className="page-empty-state-illustration relative">
+          <SelectedStateBackdrop kind={art} />
+          <SelectedStateArt kind={art} width={220} height={180} className="relative block h-auto w-full" />
+        </div>
         <h1 className="page-empty-state-title text-foreground">
           {needsFolder ? uiText("openFolder") : uiText("startNote")}
         </h1>

@@ -15,6 +15,7 @@ let observerRebuildPending = false;
 const loopNames = new Set([
   "goose-dm-main-drift", "goose-dm-small-drift", "goose-dm-corner-drift",
   "goose-dm-breathe", "goose-dm-ripple", "goose-dm-glint", "goose-dm-flow", "goose-dm-wave", "goose-dm-progress",
+  "goose-dm-selected-breathe", "goose-dm-selected-ripple", "goose-dm-selected-sway",
   "goose-cs-float-lg", "goose-cs-float-sm", "goose-cs-blink", "goose-cs-blink-open",
   "goose-cs-blink-twice", "goose-cs-blink-twice-open",
 ]);
