@@ -6,9 +6,19 @@
   },
   "title": "Thinkly 点阵插画审图与改稿",
   "launch": {
-    "view": "canvas"
+    "view": "canvas",
+    "page": "alternatives"
   },
-  "pages": [],
+  "pages": [
+    {
+      "id": "applied",
+      "name": "已实施"
+    },
+    {
+      "id": "alternatives",
+      "name": "待选方案"
+    }
+  ],
   "boards": {
     "Main.dc.html": {
       "x": 0,
@@ -81,6 +91,69 @@
       "h": 400,
       "title": "暂无隐藏文件夹 · 左旧右新",
       "radius": 0
+    },
+    "NoFolderVariants.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 480,
+      "title": "未关联本地文件夹 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "FolderVariants.dc.html": {
+      "x": 1680,
+      "y": 0,
+      "w": 1600,
+      "h": 480,
+      "title": "空文件夹 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "BookVariants.dc.html": {
+      "x": 0,
+      "y": 600,
+      "w": 1600,
+      "h": 480,
+      "title": "未打开笔记 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "NoteErrorVariants.dc.html": {
+      "x": 1680,
+      "y": 600,
+      "w": 1600,
+      "h": 480,
+      "title": "笔记无法显示 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "SplitMissingVariants.dc.html": {
+      "x": 0,
+      "y": 1200,
+      "w": 1600,
+      "h": 480,
+      "title": "分屏笔记缺失 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "ReflectionVariants.dc.html": {
+      "x": 1680,
+      "y": 1200,
+      "w": 1600,
+      "h": 480,
+      "title": "回顾期间无编辑 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
+    },
+    "SmallFolderPlusVariants.dc.html": {
+      "x": 0,
+      "y": 1800,
+      "w": 1600,
+      "h": 480,
+      "title": "添加本地文件夹 · 旧版 / A / B / C",
+      "radius": 0,
+      "page": "alternatives"
     }
   },
   "order": [
@@ -92,7 +165,14 @@
     "AiModelReview.dc.html",
     "AiErrorReview.dc.html",
     "BootstrapLoadingReview.dc.html",
-    "SmallVisibleReview.dc.html"
+    "SmallVisibleReview.dc.html",
+    "NoFolderVariants.dc.html",
+    "FolderVariants.dc.html",
+    "BookVariants.dc.html",
+    "NoteErrorVariants.dc.html",
+    "SplitMissingVariants.dc.html",
+    "ReflectionVariants.dc.html",
+    "SmallFolderPlusVariants.dc.html"
   ],
   "notes": {},
   "designSystems": []
