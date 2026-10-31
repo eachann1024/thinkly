@@ -5,26 +5,24 @@ const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings/
 zh-Hans:
   settings_e366: "设置"
   settingsCategories_2590: "设置分类"
-  closeSettings_c252: "关闭设置"
 en:
   settings_e366: "Settings"
   settingsCategories_2590: "Settings categories"
-  closeSettings_c252: "Close settings"
 ja:
   settings_e366: "設定"
   settingsCategories_2590: "設定カテゴリ"
-  closeSettings_c252: "設定を閉じる"
 `;
 const uiText = createTranslator(localMessages);
-import { IconButton } from "@/components/ui/icon-button";
+import { isElectronRuntime } from "@/lib/electron/runtime";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { X, ChevronDown } from "@/components/ui/icons";
+import { ChevronDown } from "@/components/ui/icons";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import type { SettingsTab, SettingsTabConfig } from "./types";
 import { cn } from "@/lib/utils";
+import { SettingsCloseButton } from "./SettingsCloseButton";
 import "./settings-layout.css";
 import "./settings-compact.css";
 
@@ -150,14 +148,12 @@ export function SettingsScaffold({
                 </DropdownMenuContent>
               </DropdownMenu>
             </nav>
-            <IconButton size="xs"
-              type="button"
-              className="p-0 settings-close absolute right-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--goose-interactive-hover)] hover:text-[var(--goose-interactive-hover-fg)]"
-              aria-label={uiText("closeSettings_c252")}
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </IconButton>
+            {!isElectronRuntime() && (
+              <SettingsCloseButton
+                className="settings-close absolute right-4 top-4 z-10 rounded-lg"
+                onClose={onClose}
+              />
+            )}
             {children}
           </div>,
           mainContainer,
