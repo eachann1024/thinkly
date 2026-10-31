@@ -56,6 +56,7 @@ const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = 
     ),
   }),
   searchNotes: Type.Object({
+    notebookId: Type.Optional(Type.String({ description: "仅搜索指定笔记本；省略则搜索所有笔记本" })),
     query: Type.Optional(
       Type.String({ description: "搜索关键词", default: "" }),
     ),
@@ -224,6 +225,7 @@ export function getActivePiTools(
 ): AgentTool[] {
   const activeNames = new Set<string>([
     "loadSkill",
+    "listNotebooks", "listPages", "listFolder", "searchNotes", "readPage",
     ...ALWAYS_ON_CARD_TOOLS,
     ...getSkillToolNames(agentContext.loadedSkills),
   ]);
