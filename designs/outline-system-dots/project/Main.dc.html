@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文档大纲点阵插画</title>
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+  <helmet>
+    <style>
+      body { margin: 0; }
+      @keyframes outline-signal { 0%, 100% { opacity: 1; } 50% { opacity: .9; } }
+      @media (prefers-reduced-motion: reduce) { .outline-signal { animation: none !important; } }
+    </style>
+  </helmet>
+  <div style="display: flex; gap: 48px; padding: 48px 56px; width: 720px; height: 520px; box-sizing: border-box; background: #e8e8e8; font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;">
+    <sc-for list="{{surfaces}}" as="surface" hint-placeholder-count="2">
+      <section aria-label="{{surface.name}}" style="{{surface.style}}">
+        <div style="display: flex; align-items: center; padding: 12px 16px 4px; font-size: 14px; line-height: 20px;">
+          <strong style="font-weight: 560;">文档大纲</strong>
+        </div>
+        <div style="display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px 48px;">
+          <svg width="196" height="156" viewBox="0 0 196 156" aria-hidden="true" focusable="false" style="display: block; flex-shrink: 0; max-width: 100%; margin-bottom: 16px; overflow: visible;">
+            <g fill="currentColor" opacity=".3">
+              <sc-for list="{{frameDots}}" as="dot" hint-placeholder-count="70">
+                <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
+              </sc-for>
+            </g>
+            <g fill="currentColor" opacity=".28">
+              <sc-for list="{{guideDots}}" as="dot" hint-placeholder-count="12">
+                <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
+              </sc-for>
+            </g>
+            <g fill="currentColor" opacity=".68">
+              <sc-for list="{{rowDots}}" as="dot" hint-placeholder-count="24">
+                <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
+              </sc-for>
+            </g>
+            <g class="outline-signal" fill="{{surface.accent}}" style="animation: outline-signal 12s ease-in-out -6s infinite;">
+              <sc-for list="{{signalDots}}" as="dot" hint-placeholder-count="4">
+                <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
+              </sc-for>
+            </g>
+          </svg>
+          <p style="margin: 0; font-size: 14px; font-weight: 400; line-height: 21.7px; color: {{surface.secondary}};">正文暂无标题</p>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":520}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sample = (points, gap = 5.2) => {
+      const dots = [];
+      let remainder = 0;
+      for (let i = 1; i < points.length; i++) {
+        const [x0, y0] = points[i - 1];
+        const [x1, y1] = points[i];
+        const length = Math.hypot(x1 - x0, y1 - y0);
+        let along = remainder;
+        for (; along < length; along += gap) {
+          dots.push({ x: +(x0 + (x1 - x0) * along / length).toFixed(3), y: +(y0 + (y1 - y0) * along / length).toFixed(3) });
+        }
+        remainder = along - length;
+      }
+      return dots;
+    };
+    const segment = (x0, y, x1) => sample([[x0, y], [x1, y]], 5);
+    const shell = "display: flex; flex-direction: column; width: 280px; height: 424px; flex-shrink: 0; overflow: hidden;";
+    return {
+      surfaces: [
+        { name: "深色主题预览", style: shell + "background: #222222; color: #f0efec; color-scheme: dark;", secondary: "#c3c2b7", accent: "#779de8" },
+        { name: "浅色主题预览", style: shell + "background: #fafafa; color: #1f1e1d; color-scheme: light;", secondary: "#5e5d59", accent: "#547dd0" }
+      ],
+      frameDots: [
+        ...sample([[60, 32], [60.6, 28.9], [62.3, 26.3], [64.9, 24.6], [68, 24], [116, 24], [140, 48], [140, 124], [139.4, 127.1], [137.7, 129.7], [135.1, 131.4], [132, 132], [68, 132], [64.9, 131.4], [62.3, 129.7], [60.6, 127.1], [60, 124], [60, 32]]),
+        ...sample([[116, 29], [116, 48], [135, 48]])
+      ],
+      guideDots: [
+        ...sample([[75, 69], [75, 111], [83, 111]], 5),
+        ...segment(80, 81, 86),
+        ...sample([[90, 89], [90, 96], [98, 96]], 5)
+      ],
+      rowDots: [
+        ...segment(90, 61, 131),
+        ...segment(90, 81, 126),
+        ...segment(105, 96, 126),
+        ...segment(90, 111, 116)
+      ],
+      signalDots: [{ x: 73, y: 59 }, { x: 78, y: 59 }, { x: 73, y: 64 }, { x: 78, y: 64 }]
+    };
+  }
+}
+</script>
+</body>
+</html>
