@@ -82,11 +82,11 @@ export const electronGooseFs = {
   },
 
   readFileStat: undefined,
-  readFileStatAsync: async (path: string) => {
+  readFileStatAsync: async (path: string, accessRequestId?: string) => {
     const api = getGooseDesktop();
     if (!api) return { ok: false, error: uiText("desktopIntegrationIsUnavailable"), content: null };
     try {
-      const content = await api.fsReadText(path);
+      const content = await api.fsReadText(path, accessRequestId);
       rememberExists(path, true);
       return { ok: true, content };
     } catch (err) {

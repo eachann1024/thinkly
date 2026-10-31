@@ -131,6 +131,8 @@ export async function statMarkdownFile(
 export async function readMarkdownFile(
   gooseFs: GooseFs,
   filePath: string,
+  assertReadAllowed?: () => void,
+  accessRequestId?: string,
 ): Promise<{
   content: string | null;
   error?: string;
@@ -141,7 +143,7 @@ export async function readMarkdownFile(
     error?: string;
   }> => {
     if (gooseFs.readFileStatAsync) {
-      const result = await gooseFs.readFileStatAsync(filePath);
+      const result = await gooseFs.readFileStatAsync(filePath, accessRequestId);
       return {
         content: result.ok ? (result.content ?? "") : null,
         error: result.error || undefined,
@@ -168,7 +170,9 @@ export async function readMarkdownFile(
   };
 
   const before = await statMarkdownFile(gooseFs, filePath);
+  assertReadAllowed?.();
   const fileResult = await readContent();
+  if (fileResult.error) return fileResult;
   const after = await statMarkdownFile(gooseFs, filePath);
   const stat =
     before &&

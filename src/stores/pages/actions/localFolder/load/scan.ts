@@ -169,7 +169,7 @@ export const loadLocalFolderPagesOnce = async (
                   workspaceId: page.workspaceId,
                   parentId: page.parentId,
                   localFilePath: page.localFilePath,
-                  ...(current === currentPages[page.id] && page.localReadState === "error"
+                  ...(page.localReadState === "error"
                     ? { localReadState: page.localReadState, localReadError: page.localReadError } : {}),
                 }
               : page;

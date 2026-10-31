@@ -79,15 +79,15 @@ export const reloadLocalPageFromDiskAction = async (
       state.dirtyLocalPageIds[pageId]
     )
       return state;
+    if (parsed.readState === "error") {
+      return { pages: { ...state.pages, [pageId]: { ...current,
+        localReadState: "error", localReadError: parsed.readError,
+      } } };
+    }
     if (parsed.metadataId !== page.localMetadataId && (parsed.metadataId || page.localMetadataId)) {
       return { pages: { ...state.pages, [pageId]: {
         ...current, localReadState: "error",
         localReadError: "磁盘笔记 ID 已改变，已保留当前内容；请重新扫描笔记本以确认身份",
-      } } };
-    }
-    if (parsed.readState === "error") {
-      return { pages: { ...state.pages, [pageId]: { ...current,
-        localReadState: "error", localReadError: parsed.readError,
       } } };
     }
     applied = true;

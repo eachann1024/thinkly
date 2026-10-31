@@ -55,8 +55,8 @@ export function createRunWriteScope(params: {
     excludedPageIds: ref.excludedPageIds ? [...ref.excludedPageIds] : undefined }));
   return {
     version: 1, runId: params.runId,
-    notebookRoots: Object.fromEntries(params.targetReferences.map((ref) => [ref.notebookId,
-      useNotebooks.getState().notebooks[ref.notebookId]?.localPath ?? null])),
+    notebookRoots: Object.fromEntries(Object.values(useNotebooks.getState().notebooks)
+      .map((notebook) => [notebook.id, notebook.localPath ?? null])),
     sourceReferences: copy(params.sourceReferences),
     targetReferences: copy(params.targetReferences),
     writablePageIds: [...new Set(params.writablePageIds ?? params.targetReferences
@@ -85,52 +85,54 @@ export function resolveOperationTarget(
       parentId: target.parentId ?? operation.parentId ?? null,
     } : {}) };
   }
-  if (!scope) return { notebookId: fallbackNotebookId,
-    ...(operation.type === "create" ? { parentId: operation.parentId ?? null } : {}),
-    ...(operation.pageId ? { pageId: operation.pageId } : {}) };
-  const candidates = scope.targetReferences.filter((ref) => {
-    if (operation.type === "create") return ref.kind !== "page" &&
-      (operation.parentId === undefined || (ref.pageId ?? null) === operation.parentId);
+  const pages = usePages.getState().pages;
+  if (operation.type !== "create") {
     const ids = operation.pageIds ?? (operation.pageId ? [operation.pageId] : []);
-    return ref.kind === "page" && !!ref.pageId && ids.includes(ref.pageId);
-  });
-  const unique = [...new Map(candidates.map((ref) => [
-    `${ref.notebookId}:${ref.pageId ?? "root"}`, ref,
+    const notebookIds = new Set(ids.map((id) => pages[id]?.workspaceId));
+    if (!ids.length || ids.some((id) => !pages[id])) throw new Error("操作缺少有效目标页面");
+    if (notebookIds.size !== 1) throw new Error("跨笔记本操作请按笔记本分别绑定目标");
+    return { notebookId: pages[ids[0]!]!.workspaceId,
+      ...(operation.pageId ? { pageId: operation.pageId } : {}) };
+  }
+  if (operation.parentId) {
+    const parent = pages[operation.parentId];
+    if (!parent) throw new Error("新建目标目录不存在");
+    return { notebookId: parent.workspaceId, parentId: parent.id };
+  }
+  const refs = scope?.targetReferences.length ? scope.targetReferences : scope?.sourceReferences ?? [];
+  if (!refs.length) return { notebookId: fallbackNotebookId, parentId: operation.parentId ?? null };
+  const candidates = refs.map((ref) => ({ notebookId: ref.notebookId,
+    parentId: operation.parentId === null ? null : ref.kind === "notebook" ? null
+      : ref.kind === "folder" ? ref.pageId ?? null : pages[ref.pageId ?? ""]?.parentId ?? ref.parentId ?? null }));
+  const unique = [...new Map(candidates.map((candidate) => [
+    `${candidate.notebookId}:${candidate.parentId ?? "root"}`, candidate,
   ])).values()];
   if (unique.length !== 1) throw new Error("写入目的地不明确，请先指定笔记本和目录");
-  const ref = unique[0]!;
-  return { notebookId: ref.notebookId,
-    ...(operation.type === "create" ? { parentId: ref.pageId ?? null } : {}),
-    ...(operation.pageId ? { pageId: operation.pageId } : {}) };
+  return unique[0]!;
 }
 
 export function checkOperationScope(
   operation: ScopedOperation,
   target: OperationTarget,
   scope?: RunWriteScope,
-  legacyNotebookId?: string,
+  _legacyNotebookId?: string,
 ): string | null {
   if (!useNotebooks.getState().notebooks[target.notebookId]) return "目标笔记本不存在或已卸载";
-  if (!scope) return legacyNotebookId === target.notebookId ? null : "跨笔记本写入缺少本轮授权范围";
-  if (isRunWriteScopeRevoked(scope)) return "本轮写入范围已撤销";
-  if (scope.notebookRoots && scope.notebookRoots[target.notebookId] !==
+  if (scope && isRunWriteScopeRevoked(scope)) return "本轮写入范围已撤销";
+  if (scope?.notebookRoots && Object.hasOwn(scope.notebookRoots, target.notebookId) && scope.notebookRoots[target.notebookId] !==
       (useNotebooks.getState().notebooks[target.notebookId]?.localPath ?? null))
     return "本轮目标笔记本位置已变化，请重新选择";
-  const refs = scope.targetReferences.filter((ref) => ref.notebookId === target.notebookId);
+  const refs = scope?.targetReferences.filter((ref) => ref.notebookId === target.notebookId) ?? [];
   if (operation.type === "create") {
     const parentId = target.parentId ?? null;
-    const allowed = refs.some((ref) => parentId === null
-      ? ref.kind === "notebook"
-      : ref.kind === "folder" && ref.pageId === parentId);
-    if (!allowed) return "新建目标不在本轮授权目录内";
     if (parentId) {
       const parent = usePages.getState().pages[parentId];
       if (!parent || parent.workspaceId !== target.notebookId || !parent.isFolder || parent.trashedAt)
         return "新建目标目录不存在、已删除或归属发生变化";
-      const ref = refs.find((candidate) => candidate.kind === "folder" && candidate.pageId === parentId)!;
-      if ((ref.parentId !== undefined && ref.parentId !== (parent.parentId ?? null)) ||
+      const ref = refs.find((candidate) => candidate.kind === "folder" && candidate.pageId === parentId);
+      if (ref && ((ref.parentId !== undefined && ref.parentId !== (parent.parentId ?? null)) ||
           (ref.relativePath && ref.relativePath !== getLocationSnapshot(parent,
-            useNotebooks.getState().notebooks, usePages.getState().pages)))
+            useNotebooks.getState().notebooks, usePages.getState().pages))))
         return "本轮目标目录位置已变化，请重新选择";
     }
     return null;
@@ -139,14 +141,12 @@ export function checkOperationScope(
   if (!pageIds.length) return "操作缺少目标页面";
   for (const id of pageIds) {
     const page = usePages.getState().pages[id];
-    if (!page || page.workspaceId !== target.notebookId) return "目标页面与笔记本归属不一致";
+    if (!page || page.trashedAt || page.workspaceId !== target.notebookId) return "目标页面与笔记本归属不一致";
     const ref = refs.find((candidate) => candidate.kind === "page" && candidate.pageId === id);
     if (ref && ((ref.parentId !== undefined && ref.parentId !== (page.parentId ?? null)) ||
         (page.localFilePath && ref.relativePath && ref.relativePath !== getLocationSnapshot(page,
           useNotebooks.getState().notebooks, usePages.getState().pages))))
       return "本轮目标页面位置已变化，请重新选择";
-    if (!refs.some((ref) => ref.kind === "page" && ref.pageId === id) || !scope.writablePageIds.includes(id))
-      return "目标页面未获得本轮修改或删除授权；来源引用只读";
   }
   return null;
 }

@@ -11,6 +11,8 @@ const handoffs = new Map<string, MarkdownRead>();
 export function readSharedMarkdown(
   fs: GooseFs,
   path: string,
+  assertReadAllowed?: () => void,
+  accessRequestId?: string,
 ): Promise<MarkdownRead> {
   let reads = inFlight.get(fs);
   if (!reads) {
@@ -19,7 +21,7 @@ export function readSharedMarkdown(
   }
   const pending = reads.get(path);
   if (pending) return pending;
-  const request = readMarkdownFile(fs, path).finally(() => reads!.delete(path));
+  const request = readMarkdownFile(fs, path, assertReadAllowed, accessRequestId).finally(() => reads!.delete(path));
   reads.set(path, request);
   return request;
 }
@@ -27,13 +29,16 @@ export function readSharedMarkdown(
 export async function readUnchangedMarkdown(
   fs: GooseFs,
   path: string,
+  assertReadAllowed?: () => void,
+  accessRequestId?: string,
 ): Promise<MarkdownRead> {
   const stat = await statMarkdownFile(fs, path);
+  assertReadAllowed?.();
   const content = getLocalMdSnapshot(path);
   if (stat && content !== undefined && isStatMatchingSnapshot(path, stat)) {
     return { content, stat };
   }
-  return readSharedMarkdown(fs, path);
+  return readSharedMarkdown(fs, path, assertReadAllowed, accessRequestId);
 }
 
 export function withMarkdownReadHandoff(

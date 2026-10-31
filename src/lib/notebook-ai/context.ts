@@ -183,7 +183,7 @@ export function buildNotebookAiUserMessage(params: {
           contextIntro,
           contextBlock,
           implicitPage
-            ? `当前关联页 notebookId：${implicitPage.workspaceId}，pageId：${implicitPage.pageId}；只有用户明确要求修改时才生成写入范围。修改前先 readPage，再通过 executeBatchPlan 提交审批计划。`
+            ? `当前关联页 notebookId：${implicitPage.workspaceId}，pageId：${implicitPage.pageId}；用户要求修改时先 readPage，再通过 executeBatchPlan 提交审批计划，无需另行申请应用内写入权限。`
             : "",
         ]
           .filter(Boolean)
