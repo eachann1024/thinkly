@@ -4,27 +4,27 @@
     "v": 1,
     "at": "2026-10-31T07:39:55Z"
   },
-  "title": "Thinkly 点阵插画审图与改稿",
+  "title": "Thinkly 界面设计",
   "launch": {
     "view": "canvas",
     "page": "ai-composer"
   },
   "pages": [
     {
-      "id": "ai-composer",
-      "name": "AI 输入区"
-    },
-    {
       "id": "applied",
-      "name": "已实施"
+      "name": "点阵插画 · 已实施"
     },
     {
       "id": "alternatives",
-      "name": "待选方案"
+      "name": "点阵插画 · 备选"
     },
     {
       "id": "settings-layout",
-      "name": "设置布局 · 单列方案"
+      "name": "设置 · 布局方案"
+    },
+    {
+      "id": "ai-composer",
+      "name": "AI · 输入区"
     }
   ],
   "boards": {
