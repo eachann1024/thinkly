@@ -226,6 +226,9 @@ export function GitSyncContent({
                 </GitDetails>
               )}
               {conflicts.length > 0 && (
+                <p className="text-sm leading-6">{syncError}</p>
+              )}
+              {conflicts.length > 0 && (
                 <GitConflicts
                   key={id}
                   repositoryId={id}

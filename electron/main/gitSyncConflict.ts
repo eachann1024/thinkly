@@ -12,8 +12,8 @@ interface CachedConflict {
 const repositories = new Map<string, Map<string, CachedConflict>>();
 export class GitConflictError extends Error {
   readonly conflicts: readonly GitSyncConflict[];
-  constructor(conflicts: GitSyncConflict[]) {
-    super(t("conflict"));
+  constructor(conflicts: GitSyncConflict[], message = t("conflict")) {
+    super(message);
     this.name = "GitConflictError";
     this.conflicts = conflicts;
   }
