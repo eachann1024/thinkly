@@ -7,7 +7,7 @@
   "title": "Thinkly 点阵插画审图与改稿",
   "launch": {
     "view": "canvas",
-    "page": "alternatives"
+    "page": "settings-layout"
   },
   "pages": [
     {
@@ -17,9 +17,16 @@
     {
       "id": "alternatives",
       "name": "待选方案"
+    },
+    {
+      "id": "settings-layout",
+      "name": "设置布局 · 单列方案"
     }
   ],
   "boards": {
+    "SettingsRowA.dc.html": {"x":0,"y":0,"w":1280,"h":900,"title":"A · 完整侧栏与单列设置","page":"settings-layout","expand":"fill","is_interactive":true},
+    "SettingsRowB.dc.html": {"x":1360,"y":0,"w":1280,"h":900,"title":"B · 紧凑目录与整张纸面","page":"settings-layout","expand":"fill","is_interactive":true},
+    "SettingsRowC.dc.html": {"x":2720,"y":0,"w":1280,"h":900,"title":"C · 全幅封面与按需目录","page":"settings-layout","expand":"fill","is_interactive":true},
     "Main.dc.html": {
       "x": 0,
       "y": 0,
@@ -157,6 +164,9 @@
     }
   },
   "order": [
+    "SettingsRowA.dc.html",
+    "SettingsRowB.dc.html",
+    "SettingsRowC.dc.html",
     "Main.dc.html",
     "OutlineReview.dc.html",
     "BootstrapErrorReview.dc.html",

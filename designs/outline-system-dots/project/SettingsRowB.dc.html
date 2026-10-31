@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>设置 · 紧凑目录</title><script src="./support.js"></script></head>
+<body><x-dc><helmet><style>
+body{margin:0}*{box-sizing:border-box}
+.mock{--surface:#f8f8f8;--paper:#fff;--side:#f1f1f1;--ink:#1f1e1d;--muted:#5e5d59;--border:#e4e4e2;--accent:#547dd0;--select:#e5edfc;color-scheme:light}
+.mock[data-theme="dark"]{--surface:#181818;--paper:#222;--side:#292929;--ink:#f0efec;--muted:#c3c2b7;--border:#41413e;--accent:#779de8;--select:#343a45;color-scheme:dark}
+.mock button,.mock input,.mock select{font:inherit;color:inherit}
+.mock button{cursor:pointer;min-height:44px;border:0;background:transparent;border-radius:7px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:background-color 150ms}
+.mock button:hover,.mock button:focus-visible{outline:none;background:var(--select)}
+.mock a{color:inherit;text-decoration:none;text-underline-offset:4px}
+.mock svg{height:18px;width:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mock h1,.mock h2,.mock p{margin:0}
+.mock h2{font-size:16px;font-weight:560;margin:26px 0 8px}
+.mock select{min-height:36px;max-width:100%;width:196px;padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--paper)}
+.mock input[type="checkbox"]{appearance:none;flex:none;width:34px;height:20px;background:#b7b7b3;border-radius:12px;position:relative;margin:12px 0;cursor:pointer}
+.mock input[type="checkbox"]:after{content:"";position:absolute;width:16px;height:16px;top:2px;left:2px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0002;transition:transform 120ms}
+.mock input[type="checkbox"]:checked{background:var(--accent)}.mock input[type="checkbox"]:checked:after{transform:translateX(14px)}
+.mock input[type="range"]{accent-color:var(--accent);width:142px}
+.mock :focus-visible{outline:none;background:var(--select)}
+.mock [aria-pressed="true"]{background:var(--paper);box-shadow:inset 0 0 0 1px var(--border)}
+.mock ::selection{background:var(--select);color:var(--ink)}
+.mock .row{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:56px;border-bottom:1px solid var(--border)}
+.mock .row>label{display:flex;align-items:center;gap:12px;font-size:15px;line-height:22px}
+.mock .nav{display:flex;flex-direction:column;gap:4px}
+.mock .nav :is(a,span){min-height:44px;display:flex;align-items:center;gap:12px;padding:0 14px;border-radius:7px;white-space:nowrap}
+.mock .nav :is(a,span):hover,.mock .nav :is(a,span):focus-visible{background:var(--select)}
+.mock .nav :is(a,span)[aria-current="page"]{background:var(--select);box-shadow:inset 0 0 0 1px var(--accent);color:var(--ink)}
+.mock .main-scroll{scrollbar-width:thin;scrollbar-color:var(--border) var(--surface)}
+.mock .cover{width:100%;height:100%;object-fit:cover;object-position:center 55%;display:block}
+.mock .search{height:44px;background:var(--paper);border:1px solid var(--border);border-radius:8px;width:100%;padding:0 12px}
+@media(max-width:760px){.mock .layout{flex-wrap:wrap}.mock .sidebar{width:100%!important;flex-basis:100%!important;border-right:0!important}.mock .nav{flex-direction:row;overflow-x:auto}.mock .nav :is(a,span){flex-shrink:0}.mock .main{padding:20px!important}.mock .row{gap:12px;flex-wrap:wrap;padding:10px 0}.mock .row>label{flex:1 1 180px}.mock .range{max-width:100%}}
+.mock .cover{animation:lake-drift 38s ease-in-out infinite alternate}
+@keyframes lake-drift{from{object-position:50% 44%}to{object-position:50% 56%}}
+@media(prefers-reduced-motion:reduce){.mock *{transition:none!important;animation:none!important}}
+</style></helmet>
+<div class="mock" data-theme="{{theme}}" style="min-height:900px;width:100%;background:var(--surface);color:var(--ink);font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif"><div style="height:58px;display:flex;align-items:center;gap:18px;padding:0 26px;border-bottom:1px solid var(--border);background:var(--paper)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5 7 12l7 7"/><path d="M7 12h14"/></svg><span style="font-size:18px;font-weight:560">设置</span></div><div class="layout" style="display:flex;min-height:842px"><aside class="sidebar" style="width:174px;flex:0 0 174px;padding:22px 10px;background:var(--surface)"><nav class="nav" aria-label="设置分类"><a href="#appearance" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>外观与主题</a>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m9 3-.5 3-2 .8-2.5-1.2-2 3.4L4.5 11v2L2 15l2 3.4 2.5-1.2 2 .8.5 3h4l.5-3 2-.8 2.5 1.2 2-3.4-2.5-2v-2L20 9l-2-3.4-2.5 1.2-2-.8-.5-3z"/></svg>通用</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M10 13h.01M14 13h.01M18 13h.01M7 16h10"/></svg>快捷键</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg>本地文件夹</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 7v10M18 7v2a5 5 0 0 1-5 5H6"/></svg>Git 同步</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg>AI 助手</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/></svg>数据与备份</span>
+<span aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4z"/></svg>快速反馈</span></nav></aside><main class="main main-scroll" style="flex:1;min-width:0;padding:22px 36px 36px;height:842px;overflow:auto"><div style="max-width:920px;margin:0 auto"><div style="height:124px;overflow:hidden;border-radius:8px"><img class="cover" src="/_blob/aecda95f9c6f92738619e2ab7d0bc418" alt="雾山、静湖与远处的小舟"/></div><div id="appearance"><div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin:24px 0 4px"><h1 style="font-size:26px;font-weight:560;letter-spacing:-.02em">外观与主题</h1><button type="button" onClick="{{togglePreview}}" aria-expanded="{{previewOpen}}" style="color:var(--muted)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7"/><circle cx="12" cy="12" r="3"/></svg>预览</button></div><sc-if value="{{previewOpen}}" hint-placeholder-val="{{false}}"><div style="margin-top:18px;padding:24px;border:1px solid var(--border);border-radius:8px;background:var(--paper);line-height:1.7"><h2 style="margin:0 0 10px;font-size:20px">实际落地业务采集</h2><p>正文内容预览</p></div></sc-if><div style="background:var(--paper);border-radius:10px;padding:2px 28px 26px;margin-top:18px">
+<section aria-labelledby="theme-heading">
+<h2 id="theme-heading">主题</h2>
+<div class="row"><label>主题模式</label><div role="group" aria-label="主题模式" style="display:flex;padding:3px;gap:2px;background:var(--side);border-radius:8px"><button type="button" aria-pressed="{{systemMode}}" onClick="{{setSystem}}">跟随系统</button><button type="button" aria-pressed="{{lightMode}}" onClick="{{setLight}}">浅色</button><button type="button" aria-pressed="{{darkMode}}" onClick="{{setDark}}">深色</button></div></div>
+<div class="row"><label for="palette">配色与主题</label><select id="palette"><option>Ocean</option><option>石墨</option></select></div>
+</section>
+<section aria-labelledby="font-heading">
+<h2 id="font-heading">字体与阅读</h2>
+<div class="row"><label for="ui-font">界面字体</label><select id="ui-font"><option>默认</option><option>系统字体</option></select></div>
+<div class="row"><label for="scale">界面缩放</label><div class="range" style="display:flex;align-items:center;justify-content:flex-end;gap:16px;width:260px"><input id="scale" type="range" min="80" max="140" value="{{scale}}" onChange="{{changeScale}}"/><output for="scale" style="width:44px;font-variant-numeric:tabular-nums;text-align:right">{{scale}}%</output></div></div>
+<div class="row"><label for="default-font">默认字体</label><select id="default-font"><option>默认</option><option>霞鹜文楷</option><option>等宽</option></select></div>
+<div class="row"><label for="reading-width">阅读布局</label><select id="reading-width"><option>标准宽度</option><option>全宽</option></select></div>
+</section>
+<section aria-labelledby="sidebar-heading">
+<h2 id="sidebar-heading">侧栏</h2>
+<div class="row"><label for="folder-count">显示文件夹数量</label><input type="checkbox" id="folder-count" role="switch" checked="{{folderCount}}" onChange="{{changeFolderCount}}"/></div>
+</section>
+</div></div></div></main></div></div>
+</x-dc><script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mode=this.state.mode??(this.props.dark?'dark':'light');
+    return {
+      theme: mode==='dark'?'dark':'light', scale:this.state.scale??100,
+      systemMode:mode==='system', lightMode:mode==='light', darkMode:mode==='dark',
+      setSystem:()=>this.setState({mode:'system'}),setLight:()=>this.setState({mode:'light'}),setDark:()=>this.setState({mode:'dark'}),
+      folderCount:this.state.folderCount??true,changeFolderCount:event=>this.setState({folderCount:event.target.checked}),
+      changeScale:event=>this.setState({scale:Number(event.target.value)}),
+      menuOpen:this.state.menuOpen??false,toggleMenu:()=>this.setState({menuOpen:!this.state.menuOpen}),
+      previewOpen:this.state.previewOpen??false,togglePreview:()=>this.setState({previewOpen:!this.state.previewOpen})
+    };
+  }
+}</script></body></html>
