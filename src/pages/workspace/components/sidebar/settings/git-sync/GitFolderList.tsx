@@ -32,7 +32,7 @@ import { GitFolderIssue } from "./GitFolderIssue";
 import { notebookUnavailableReason, shortFolderReason } from "./gitSyncPresentation";
 import { Check } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
-import { DotFrameBox, SettingsDotIcon } from "@/components/ui/dot-matrix";
+import { SelectedStateArt, SelectedStateBackdrop } from "@/components/ui/dot-matrix";
 import type {
   GitFolderCheck,
   GitRepositoryFolder,
@@ -96,11 +96,12 @@ export function GitFolderList({
           {uiText("legacyRepositoriesSupportOnlyOneFolder_76b4")}</p>
       )}
       {!rows.length && (
-        <DotFrameBox className="flex max-w-[300px] flex-col items-start gap-2 p-3.5">
-          <SettingsDotIcon name="folderPlus" size={22} className="relative" />
+        <div className="relative flex max-w-[300px] flex-col items-start gap-2 rounded-lg p-3.5">
+          <SelectedStateBackdrop kind="folderPlus" compact />
+          <SelectedStateArt kind="folderPlus" className="relative" />
           <p className="relative text-sm text-muted-foreground">
             {uiText("noLocalFoldersAddALocal_8faf")}</p>
-        </DotFrameBox>
+        </div>
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] items-start gap-2">
         {rows.map((folder) => {
