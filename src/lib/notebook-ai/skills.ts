@@ -26,7 +26,7 @@ export const NOTEBOOK_SKILLS = {
     tools: ["readPage", "executeBatchPlan"],
   },
   deleteNote: {
-    description: "把本轮授权的页面移入垃圾箱",
+    description: "把用户指定的页面移入垃圾箱",
     content: deleteNoteSkill.trim(),
     tools: [
       "listPages",
@@ -37,7 +37,7 @@ export const NOTEBOOK_SKILLS = {
     ],
   },
   searchNotes: {
-    description: "在本轮来源范围搜索并读取页面",
+    description: "跨笔记本和目录搜索并读取页面",
     content: searchNotesSkill.trim(),
     tools: ["listPages", "listFolder", "searchNotes", "readPage"],
   },

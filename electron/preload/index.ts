@@ -34,7 +34,7 @@ const gooseDesktop = {
     invoke("desktop:selectDirectory", opts) as Promise<string | null>,
   showOpenDialog: (opts?: OpenFileDialogOptions) => invoke("desktop:showOpenDialog", opts) as Promise<string[] | null>,
   showSaveDialog: (opts?: SaveFileDialogOptions) => invoke("desktop:showSaveDialog", opts) as Promise<string | null>,
-  fsReadText: (p: string) => invoke("desktop:fsReadText", p) as Promise<string>,
+  fsReadText: (p: string, accessRequestId?: string) => invoke("desktop:fsReadText", p, accessRequestId) as Promise<string>,
   fsCompareAndSwapText: (p: string, expected: string | null, next: string) =>
     invoke("desktop:fsCompareAndSwapText", p, expected, next) as Promise<boolean>,
   fsWriteText: (p: string, data: string, exclusive?: boolean) =>

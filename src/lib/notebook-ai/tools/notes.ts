@@ -17,7 +17,7 @@ function canAccessNotebook(context: NotebookAiAgentContext, notebookId: string) 
 }
 
 export const listNotebooks = tool({
-  description: "返回本轮允许读取的笔记本及稳定身份。",
+  description: "返回所有已连接笔记本及稳定身份，可跨笔记本读取和定位操作目标。",
   inputSchema: z.object({}),
   execute: async (_input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
@@ -37,15 +37,15 @@ export const listPages = tool({
   }),
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
-    const targetId = input.notebookId ?? (context.resourceReferences || context.notebookIds ? null : context.notebookId);
-    if (targetId !== null && !canAccessNotebook(context, targetId)) {
-      return { error: "AI 只能访问当前绑定笔记本" };
+    const targetId = input.notebookId ?? context.notebookId;
+    if (!canAccessNotebook(context, targetId)) {
+      return { error: "笔记本不存在或已卸载" };
     }
-    try { for (const id of targetId === null ? readableNotebookIds(context) : [targetId]) await ensureNotebookReferenceIndex(id); }
+    try { await ensureNotebookReferenceIndex(targetId); }
     catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
     const pages = usePages.getState().pages;
     return Object.values(pages)
-      .filter((p) => canReadNotebookResource(context, p) && (targetId === null ? canAccessNotebook(context, p.workspaceId) : p.workspaceId === targetId))
+      .filter((p) => canReadNotebookResource(context, p) && p.workspaceId === targetId)
       .sort((a, b) => b.updatedAt - a.updatedAt)
       .map((p) => ({
         pageId: p.id,
@@ -61,17 +61,31 @@ export const listPages = tool({
 
 export const searchNotes = tool({
   description:
-    "在当前绑定笔记本中全文搜索。仅用于跨页面查找或目标页面不明确的任务；当前页编辑、润色、总结、删除区块时不要调用。返回匹配页面和命中片段。",
+    "在所有已连接笔记本中全文搜索，可用 notebookId 限定目标。仅用于跨页面查找或目标页面不明确的任务；已知页面直接 readPage。返回匹配页面和命中片段。",
   inputSchema: z.object({
     query: z.string().optional().default("").describe("搜索关键词"),
+    notebookId: z.string().optional().describe("仅搜索指定笔记本；省略则搜索所有笔记本"),
   }),
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
     const query = input.query.trim();
     if (!query) return [];
 
-    try { for (const id of readableNotebookIds(context)) await ensureNotebookReferenceIndex(id); }
-    catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
+    const ids = input.notebookId ? [input.notebookId] : readableNotebookIds(context);
+    const errors: string[] = [];
+    const loaded = new Set<string>();
+    for (const id of ids) {
+      try {
+        await ensureNotebookReferenceIndex(id);
+        loaded.add(id);
+        if (Object.values(usePages.getState().pages).some((page) =>
+          page.workspaceId === id && !page.trashedAt && page.localReadState === "error")) break;
+      }
+      catch (error) {
+        errors.push(`${id}: ${error instanceof Error ? error.message : String(error)}`);
+        break;
+      }
+    }
     const pages = usePages.getState().pages;
     const notebooks = useNotebooks.getState().notebooks;
     const queryLower = query.toLowerCase();
@@ -122,7 +136,12 @@ export const searchNotes = tool({
 
     for (const page of Object.values(pages)) {
       if (page.trashedAt) continue;
+      if (!loaded.has(page.workspaceId)) continue;
       if (!canReadNotebookResource(context, page)) continue;
+      if (page.localReadState === "error") {
+        errors.push(`${page.id}: ${page.localReadError || "页面读取失败"}`);
+        continue;
+      }
 
       const title = getPageTitle(page);
       const bodyText = getContentDerivationsForPage(page).text;
@@ -146,7 +165,7 @@ export const searchNotes = tool({
     candidates.sort((a, b) => b.score - a.score);
     const top = candidates.slice(0, 20);
 
-    return top.map(
+    const results = top.map(
       ({ pageId, notebookId, notebookName, title, rawCombined, matchIdx }) => {
         const safeIdx = Math.max(0, matchIdx);
         const start = Math.max(0, safeIdx - 60);
@@ -158,6 +177,8 @@ export const searchNotes = tool({
         return { pageId, notebookId, notebookName, title, snippet };
       },
     );
+    return errors.length ? { results, errors, complete: false,
+      unsearchedNotebookIds: ids.filter((id) => !loaded.has(id)) } : results;
   },
 });
 
@@ -171,14 +192,26 @@ export const readPage = tool({
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
     const pageId = input.pageId ?? context.currentPageId ?? "";
+    let refreshedIndex = false;
     try {
-      const ids = input.notebookId ? [input.notebookId] : readableNotebookIds(context);
-      if (ids.some((id) => !canAccessNotebook(context, id))) throw new Error("笔记本不在本轮读取范围内");
-      for (const id of ids) await ensureNotebookReferenceIndex(id);
+      const knownPage = usePages.getState().pages[pageId];
+      const ownerId = input.notebookId ?? knownPage?.workspaceId;
+      const ids = ownerId ? [ownerId] : readableNotebookIds(context);
+      if (ids.some((id) => !canAccessNotebook(context, id))) throw new Error("笔记本不存在或已卸载");
+      for (const id of ids) {
+        const before = useNotebooks.getState().getLocalFolderLoadState(id);
+        await ensureNotebookReferenceIndex(id);
+        refreshedIndex ||= before !== useNotebooks.getState().getLocalFolderLoadState(id);
+      }
     } catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
-    const page = usePages.getState().pages[pageId];
+    let page = usePages.getState().pages[pageId];
     if (!page || (input.notebookId && input.notebookId !== page.workspaceId)) return { error: "页面不存在或归属变化，请重新选择" };
-    if (page.isFolder || !canReadNotebookResource(context, page)) return { error: "页面不在本轮读取范围内；目录请先 listFolder" };
+    if (page.isFolder || !canReadNotebookResource(context, page)) return { error: "页面不存在或已删除；目录请先 listFolder" };
+    if (page.localReadState === "error" && page.localFilePath && !refreshedIndex) {
+      await usePages.getState().reloadLocalPageFromDisk(pageId);
+      page = usePages.getState().pages[pageId];
+      if (!page || !canReadNotebookResource(context, page)) return { error: "页面不存在或已删除" };
+    }
     if (page.localReadState === "error") return { error: page.localReadError || "页面读取失败" };
     const title = getPageTitle(page);
     const markdown = await blocksToMarkdown(page.content as BlockNoteContent);

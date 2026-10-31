@@ -27,6 +27,7 @@ declare global {
     ) => { ok: boolean; error?: string | null; content?: string | null };
     readFileStatAsync?: (
       path: string,
+      accessRequestId?: string,
     ) => Promise<{ ok: boolean; error?: string | null; content?: string | null }>;
     writeFile: (path: string, content: string, encoding?: string) => boolean;
     writeFileAsync?: (path: string, content: string, encoding?: string) => Promise<boolean>;
@@ -72,7 +73,7 @@ declare global {
     selectDirectory: (opts?: import("./lib/native-dialog-contract").DirectoryDialogOptions) => Promise<string | null>
     showOpenDialog: (opts?: import("./lib/native-dialog-contract").OpenFileDialogOptions) => Promise<string[] | null>
     showSaveDialog: (opts?: import("./lib/native-dialog-contract").SaveFileDialogOptions) => Promise<string | null>
-    fsReadText: (p: string) => Promise<string>
+    fsReadText: (p: string, accessRequestId?: string) => Promise<string>
     fsCompareAndSwapText: (p: string, expected: string | null, next: string) => Promise<boolean>
     fsWriteText: (p: string, data: string, exclusive?: boolean) => Promise<void>
     fsRead: (p: string) => Promise<Uint8Array>

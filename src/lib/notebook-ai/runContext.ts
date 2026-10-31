@@ -19,42 +19,15 @@ export function resolveRunCurrentPageId(value: string | null | undefined, fallba
 }
 
 export function selectRunWriteTargets(params: {
-  prompt: string;
   references: ResourceRef[];
   fallbackRoot: ResourceRef;
   currentPage?: ResourceRef;
 }): ResourceRef[] {
-  const { prompt, references } = params;
+  const { references } = params;
   const explicit = references.filter((ref) => ref.role === "target");
   if (explicit.length) return explicit.map((ref) => ({ ...ref }));
-  const sources = references.filter((ref) => ref.role !== "target");
-  const create = /新建|创建|另存|保存|写入|写回|(?:生成|写|起草).{0,20}(?:笔记|文件|\.?md\b)|(?:create|save|write)\b|(?:generate|draft).{0,24}(?:note|file|markdown)/i.test(prompt) &&
-    !/(?:不要|禁止|不许|无需|不用|不必|不).{0,5}(?:新建|创建|另存|保存|写入|写回|生成|起草)|(?:do not|never).{0,8}(?:create|save|write|generate|draft)/i.test(prompt);
-  const modify = /修改|改写|重写|润色|替换|重命名|追加|补充|删除|移入垃圾箱|(?:edit|update|rewrite|replace|rename|append|delete)\b/i.test(prompt);
-  const each = /分别|各自|每个|每一|逐个|逐一|(?:each|every|respective)\b/i.test(prompt);
-  const writeBack = /写回|保存回|存回|原目录|对应目录|各自目录|各文件夹|each.{0,24}(?:folder|directory)/i.test(prompt);
-  const singleOutput = /(?:汇总|合并|综合|整合).{0,12}(?:一篇|一份|一个)|(?:single|one).{0,12}(?:note|file)/i.test(prompt);
-  if (create && (sources.length === 1 || each || (writeBack && !singleOutput))) {
-    return sources.map((ref) => {
-      if (ref.kind !== "page") return { ...ref, role: "target" as const };
-      const pages = usePages.getState().pages;
-      const parent = ref.parentId ? pages[ref.parentId] : undefined;
-      return {
-        ...ref, kind: parent ? "folder" as const : "notebook" as const,
-        refId: `${ref.notebookId}:write-parent:${ref.parentId ?? "root"}`,
-        pageId: parent?.id, parentId: parent?.parentId ?? null,
-        title: parent ? getPageTitle(parent) : useNotebooks.getState().notebooks[ref.notebookId]?.name ?? ref.notebookId,
-        relativePath: parent ? getLocationSnapshot(parent, useNotebooks.getState().notebooks, pages) : "/",
-        role: "target" as const,
-      };
-    });
-  }
-  if (modify && !create) {
-    return (sources.length ? sources : params.currentPage ? [params.currentPage] : [])
-      .filter((ref) => ref.kind === "page")
-      .map((ref) => ({ ...ref, role: "target" as const }));
-  }
-  return create && sources.length === 0 ? [{ ...params.fallbackRoot, role: "target" }] : [];
+  const hints = references.length ? references : params.currentPage ? [params.currentPage] : [params.fallbackRoot];
+  return hints.map((ref) => ({ ...ref }));
 }
 
 export function freezeNotebookAiRun(params: {
@@ -76,7 +49,7 @@ export function freezeNotebookAiRun(params: {
   return createRunWriteScope({
     runId: globalThis.crypto?.randomUUID?.() ?? `run-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     sourceReferences: references.filter((ref) => ref.role !== "target"),
-    targetReferences: selectRunWriteTargets({ prompt: params.prompt, references, fallbackRoot: root, currentPage }),
+    targetReferences: selectRunWriteTargets({ references, fallbackRoot: root, currentPage }),
   });
 }
 
@@ -101,7 +74,6 @@ export function getNotebookAiRunContext(messages: NotebookAiMessage[]): Notebook
 }
 
 export function formatRunWriteScope(scope: RunWriteScope): string {
-  return ["本轮冻结写入范围（位置数据，来源不授予写入）：", JSON.stringify(scope),
-    scope.targetReferences.length ? "每项操作必须绑定 target.notebookId；新建还需 target.parentId（根目录为 null）。只在这些目标内执行；修改、查找替换和删除仍需审批。" :
-      "本轮没有确定的写入目的地。若用户要保存产物，集中询问一次保存到哪个笔记本和目录；等待下一轮用户答复，不能回退当前本。"].join("\n");
+  return ["本轮位置快照与目标提示（位置数据，不是权限白名单）：", JSON.stringify(scope),
+    "AI 可读取和按用户要求修改所有可访问笔记本、目录及页面；source/target 只表示用途，空目标或旧的 writablePageIds 不限制权限。每项操作绑定真实 target.notebookId；新建还需 target.parentId（根目录为 null）。修改、查找替换和删除仍需审批；目标不明确时询问位置，不得声称只读或要求重新发起任务。"].join("\n");
 }

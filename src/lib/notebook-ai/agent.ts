@@ -78,6 +78,7 @@ export function buildNotebookAgent(
     prepareStep: () => {
       const activeTools = [
         "loadSkill",
+        "listNotebooks", "listPages", "listFolder", "searchNotes", "readPage",
         ...getSkillToolNames(agentContext.loadedSkills),
       ] as Array<keyof typeof notebookAiTools>;
       return { activeTools };
