@@ -1,0 +1,191 @@
+[
+  {
+    "key": "NoFolder",
+    "title": "未关联本地文件夹",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "文件夹与待接点",
+        "background": "入口弧线",
+        "note": "文件夹和连接端之间保持间隙，不演示关联成功。"
+      },
+      {
+        "letter": "B",
+        "name": "本机与文件夹",
+        "background": "接口路径",
+        "note": "两个独立对象与未闭合短线表达尚未关联。"
+      },
+      {
+        "letter": "C",
+        "name": "入口与承托线",
+        "background": "承托轨迹",
+        "note": "开口文件夹停在入口轨迹上，蓝点往复微亮，不进入成功态。"
+      }
+    ]
+  },
+  {
+    "key": "Folder",
+    "title": "空文件夹",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "打开的空文件夹",
+        "background": "空腔层架",
+        "note": "正面清楚留空，只有边缘蓝点循环微亮。"
+      },
+      {
+        "letter": "B",
+        "name": "正面空封套",
+        "background": "标签开口",
+        "note": "内层是同一文件夹的空腔，不绘制文件、文字或删除符号。"
+      },
+      {
+        "letter": "C",
+        "name": "展开的前后片",
+        "background": "折页等距线",
+        "note": "用前后片的留空说明容量为空，轻抬幅度不超过 1.2px。"
+      }
+    ]
+  },
+  {
+    "key": "Book",
+    "title": "未打开笔记",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "合上的笔记本",
+        "background": "书脊层线",
+        "note": "笔记本闭合，循环强调书签，不暗示当前已打开文档。"
+      },
+      {
+        "letter": "B",
+        "name": "两页留白",
+        "background": "对向页弧",
+        "note": "沿用笔记语义，但两页完全留白，蓝点只在页边循环。"
+      },
+      {
+        "letter": "C",
+        "name": "待开启的纸页",
+        "background": "纸页折角",
+        "note": "空白折页与选择角，保持未选择笔记的状态。"
+      }
+    ]
+  },
+  {
+    "key": "NoteError",
+    "title": "笔记无法显示",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "纸页与外置警示",
+        "background": "断续边框",
+        "note": "完整纸页和外置红色警示，不画碎纸、删除或自动恢复。"
+      },
+      {
+        "letter": "B",
+        "name": "显示窗口",
+        "background": "视窗括线",
+        "note": "把不可显示落在窗口和警示上，保留文档完整。"
+      },
+      {
+        "letter": "C",
+        "name": "笔记本与显示括线",
+        "background": "分段视野弧",
+        "note": "闭合笔记与显示边界同时出现，表达显示受阻而非文件损坏。"
+      }
+    ]
+  },
+  {
+    "key": "SplitMissing",
+    "title": "分屏笔记缺失",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "双栏与空位",
+        "background": "双栏留口",
+        "note": "目标栏保留空位与问号，不断言笔记永久删除。"
+      },
+      {
+        "letter": "B",
+        "name": "独立页面与缺位框",
+        "background": "间断引用线",
+        "note": "主体改为独立页面和四角缺位框，不增加恢复按钮暗示。"
+      },
+      {
+        "letter": "C",
+        "name": "目标分屏与引用线",
+        "background": "分屏侧轨",
+        "note": "突出仍存在的分屏容器和未解析引用，保留关闭此格的原有语义。"
+      }
+    ]
+  },
+  {
+    "key": "Reflection",
+    "title": "回顾期间无编辑",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "空白时间区间",
+        "background": "时间区间线",
+        "note": "始终是平线，不生成伪造活动柱或增长轨迹。"
+      },
+      {
+        "letter": "B",
+        "name": "日期与空白记录",
+        "background": "日期括线",
+        "note": "空日历与平线对应所选日期区间，内部没有虚构日期。"
+      },
+      {
+        "letter": "C",
+        "name": "时钟与静默轨道",
+        "background": "时间弧线",
+        "note": "不指定虚假时刻，时钟外缘蓝点持续微亮，记录轨道保持空。"
+      }
+    ]
+  },
+  {
+    "key": "SmallFolderPlus",
+    "title": "添加本地文件夹",
+    "frames": 48,
+    "loop": 0,
+    "durationMs": 12000,
+    "variants": [
+      {
+        "letter": "A",
+        "name": "独立加号",
+        "background": "提示块四角",
+        "note": "22px 轮廓文件夹，右下加号独立，不与边框粘连。"
+      },
+      {
+        "letter": "B",
+        "name": "打开的文件夹",
+        "background": "文件夹外缘",
+        "note": "22px 开口文件夹与右上加号，背景属于提示块而非图标尺寸。"
+      },
+      {
+        "letter": "C",
+        "name": "内置加号",
+        "background": "入口节点线",
+        "note": "22px 正面文件夹与居中加号，保持提示图标而非可点击按钮。"
+      }
+    ]
+  }
+]
