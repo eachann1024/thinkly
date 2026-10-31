@@ -91,6 +91,7 @@ export function renderWorkspaceShell(
             isWelcomeTab={isWelcomeTab}
             inHistoryMode={!settingsOpen && inHistoryMode}
             settingsOpen={settingsOpen}
+            onCloseSettings={closeSettings}
             sidebarCollapsedOverride={effectiveSidebarCollapsed}
             onToggleSidebar={
               settingsOpen

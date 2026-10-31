@@ -4,6 +4,7 @@ import type { NotebookAiLayoutMode } from "../../notebook-ai/useNotebookAiPanel"
 export interface DesktopTitleBarProps {
   page?: Page;
   settingsOpen?: boolean;
+  onCloseSettings?: () => void;
   sidebarCollapsedOverride?: boolean;
   onToggleSidebar?: () => void;
   isWelcomeTab: boolean;

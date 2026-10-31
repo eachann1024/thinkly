@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
     "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
     "src/stores/pages/actions/create/recovery.ts#block1:1": { "draftDescription": {  }; "draftPreserved": {  } };
     "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };

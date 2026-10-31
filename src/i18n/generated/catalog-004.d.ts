@@ -75,10 +75,11 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/settings-dialog/useSettingsImportExport.tsx#localMessages:1": { "chooseAValidExportedZipBackup_0933": {  }; "exportComplete_105c": {  }; "exportFailed_dd51": {  }; "importComplete_b6d1": {  }; "importFailed_fddc": {  }; "noteBackup_fbdd": {  }; "notebooksRestored": { "notebooks": string | number; "pages": string | number }; "pleaseTryAgainLater_d610": {  } };
     "src/pages/workspace/components/sidebar/settings-dialog/useSettingsResetActions.tsx#localMessages:1": { "dataIsBeingResetOrRestored_eec4": {  }; "languageResetFailed": {  }; "resetComplete_faa3": {  }; "resetFailed_4d71": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsAppUpdate.tsx#localMessages:1": { "appUpdates_3f91": {  }; "checkForUpdates": {  }; "currentVersion": { "version": string | number }; "updateVersion": { "version": string | number } };
+    "src/pages/workspace/components/sidebar/settings/SettingsCloseButton.tsx#messages:1": { "closeSettings": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsDataPanel.tsx#localMessages:1": { "cancel_625f": {  }; "confirm_38cf": {  }; "dataManagement_2d71": {  }; "gettingStarted_9a32": {  }; "restartSetupGuide_8ab0": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsFeedback.tsx#localMessages:1": { "bodyPlaceholder_4f2a": {  }; "body_2c1e": {  }; "imageTooBig_2b63": {  }; "images_8d44": {  }; "needBody_4aa1": {  }; "offline_5d12": {  }; "removeFile_c0a8": { "name": string | number }; "replyEmailPlaceholder_8c19": {  }; "replyEmail_7a10": {  }; "send_6e02": {  }; "sending_1f90": {  }; "thanks_3c88": {  }; "tooManyImages_0e77": {  }; "videoTooBig_91c4": {  }; "video_9b21": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsLanguage.tsx#messages:1": { "conflict": {  }; "language": {  }; "readFailed": {  }; "saveFailed": {  }; "system": {  } };
-    "src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx#localMessages:1": { "closeSettings_c252": {  }; "settingsCategories_2590": {  }; "settings_e366": {  } };
+    "src/pages/workspace/components/sidebar/settings/SettingsScaffold.tsx#localMessages:1": { "settingsCategories_2590": {  }; "settings_e366": {  } };
     "src/pages/workspace/components/sidebar/settings/SettingsShortcuts.tsx#localMessages:1": { "clickAgainToConfirmReset_50cc": {  }; "keyboardShortcuts_f7d2": {  }; "resetToDefaults_7468": {  } };
     "src/pages/workspace/components/sidebar/settings/ShortcutField.tsx#localMessages:1": { "clear_288f": {  }; "clickThenPressAShortcut_b24f": {  }; "pressAShortcutEscToCancel_f78c": {  }; "resetToDefaults_7468": {  } };
     "src/pages/workspace/components/sidebar/settings/data-panel/renderDataImportExport.tsx#localMessages:1": { "deselectAll_a041": {  }; "exportFormat_230a": {  }; "export_c9e7": {  }; "exporting_caeb": {  }; "importAndExport_3a3a": {  }; "importZip_b770": {  }; "importing_d2b5": {  }; "resetAllData_b749": {  }; "selectAll_66ee": {  }; "selectNotebooks_d119": {  }; "selectedCount": { "selected": string | number; "total": string | number } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1": { "dropToCheckFile": {  }; "dropToImportIntoTheCurrentFolder": {  }; "dropToImportTextFile": {  }; "dropToOpenFolder": {  }; "opensAsALocalFolderNotebook": {  }; "supportsMdMarkdownAndTxt": {  } };
     "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
     "src/search.tsx#block1:1": { "title": {  } };
-    "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
   }
 }
