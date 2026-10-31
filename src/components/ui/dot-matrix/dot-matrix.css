@@ -159,7 +159,7 @@
     opacity: 1;
   }
   50% {
-    opacity: 0.9;
+    opacity: var(--dm-progress-low, 0.9);
   }
 }
 @keyframes goose-dm-shake {

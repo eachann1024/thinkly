@@ -11,18 +11,268 @@
   <helmet>
     <style>
       body { margin: 0; }
+.outline-main .goose-dm{width:100%;height:auto}
+.goose-dm {
+  --dm-ease: cubic-bezier(0.45, 0, 0.55, 1);
+  --dm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dm-loop-ease: steps(2, end);
+  overflow: visible;
+  transform-box: view-box;
+  transform-origin: var(--dm-ox, 50%) var(--dm-oy, 50%);
+}
+.goose-dm-corner {
+  --dm-loop-low: 0.92;
+}
+
+.goose-dm[data-dm-phase="in"].goose-dm-main {
+  animation: goose-dm-main-drift 12s var(--dm-loop-ease) -6s infinite both;
+}
+.goose-dm[data-dm-phase="in"].goose-dm-small {
+  animation: goose-dm-small-drift 11s var(--dm-loop-ease) -5.5s infinite both;
+}
+.goose-dm[data-dm-phase="in"].goose-dm-corner {
+  animation: goose-dm-corner-drift 14s var(--dm-loop-ease) -7s infinite both;
+}
+@keyframes goose-dm-main-drift {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-0.65px) scale(1.006);
+  }
+}
+@keyframes goose-dm-small-drift {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-0.35px) scale(1.006);
+  }
+}
+@keyframes goose-dm-corner-drift {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-0.35px) scale(1.004);
+  }
+}
+
+.goose-dm .goose-dm-rg {
+  transform-box: view-box;
+  transform-origin: var(--dm-ox, 50%) var(--dm-oy, 50%);
+}
+.goose-dm[data-dm-phase="pre"] .goose-dm-rg {
+  opacity: 0;
+}
+.goose-dm[data-dm-phase="in"]:not([data-dm-played]) .goose-dm-rg {
+  animation: goose-dm-enter 360ms var(--dm-ease-out) calc(var(--dm-i, 0) * 28ms)
+    backwards;
+}
+@keyframes goose-dm-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+.goose-dm .goose-dm-glint,
+.goose-dm .goose-dm-wave,
+.goose-dm .goose-dm-alert {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-breathe {
+  animation: goose-dm-breathe var(--dm-period, 12s) var(--dm-loop-ease)
+    var(--dm-delay, -6s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-ripple {
+  animation: goose-dm-ripple var(--dm-period, 12s) var(--dm-loop-ease)
+    var(--dm-delay, -6s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-glint {
+  animation: goose-dm-glint var(--dm-period, 9s) var(--dm-loop-ease)
+    var(--dm-delay, -7s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-flow {
+  animation: goose-dm-flow var(--dm-period, 10s) var(--dm-loop-ease)
+    var(--dm-delay, -5s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-wave {
+  animation: goose-dm-wave var(--dm-period, 10s) var(--dm-loop-ease)
+    var(--dm-delay, -5s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-progress {
+  animation: goose-dm-progress var(--dm-period, 4s) var(--dm-loop-ease)
+    var(--dm-delay, -2s) infinite both;
+}
+.goose-dm[data-dm-phase="in"] .goose-dm-alert {
+  animation:
+    goose-dm-shake 280ms cubic-bezier(0.36, 0.07, 0.19, 0.97)
+      var(--dm-alert-delay, 0.4s) 1 backwards,
+    goose-dm-breathe var(--dm-period, 10s) var(--dm-loop-ease) var(--dm-delay, -6s)
+      infinite both;
+}
+
+@keyframes goose-dm-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--dm-loop-low, 0.9);
+  }
+}
+@keyframes goose-dm-ripple {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--dm-loop-low, 0.9);
+  }
+}
+@keyframes goose-dm-glint {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  28% {
+    opacity: 0.92;
+  }
+  68% {
+    opacity: 0.96;
+    transform: scale(1.006);
+  }
+}
+@keyframes goose-dm-flow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.94;
+  }
+}
+@keyframes goose-dm-wave {
+  0%,
+  100% {
+    transform: translateY(-0.35px);
+  }
+  50% {
+    transform: translateY(0.35px);
+  }
+}
+@keyframes goose-dm-progress {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--dm-progress-low, 0.9);
+  }
+}
+@keyframes goose-dm-shake {
+  25% {
+    transform: translateX(-0.8px);
+  }
+  50% {
+    transform: translateX(0.8px);
+  }
+  75% {
+    transform: translateX(-0.4px);
+  }
+}
+
+.goose-dm[data-dm-paused] * {
+  animation-play-state: paused !important;
+}
+.goose-dm[data-dm-paused] {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-dm * {
+    animation: none !important;
+  }
+  .goose-dm {
+    animation: none !important;
+  }
+  .goose-dm .goose-dm-rg {
+    opacity: 1;
+  }
+}
+
+.goose-dm-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  container-type: size;
+}
+.goose-dm-decor-item {
+  display: none;
+}
+.goose-dm-decor-item > .goose-dm {
+  transform-origin: var(--dm-decor-o, center);
+}
+.goose-dm-decor-item[data-at="tl"] {
+  --dm-decor-o: left top;
+}
+.goose-dm-decor-item[data-at="tr"] {
+  --dm-decor-o: right top;
+}
+.goose-dm-decor-item[data-at="bl"] {
+  --dm-decor-o: left bottom;
+}
+.goose-dm-decor-item[data-at="br"] {
+  --dm-decor-o: right bottom;
+}
+@container (min-width: 220px) and (min-height: 220px) {
+  .goose-dm-decor[data-decor="area"] > .goose-dm-decor-item:not([data-minor]) {
+    display: block;
+  }
+}
+@container (min-width: 440px) and (min-height: 320px) {
+  .goose-dm-decor[data-decor="area"] > .goose-dm-decor-item {
+    display: block;
+  }
+}
+@container (min-width: 220px) and (min-height: 96px) {
+  .goose-dm-decor[data-decor="compact"]
+    > .goose-dm-decor-item:not([data-minor]) {
+    display: block;
+  }
+}
+@container (min-width: 380px) and (min-height: 96px) {
+  .goose-dm-decor[data-decor="compact"] > .goose-dm-decor-item {
+    display: block;
+  }
+}
+@container (max-width: 359px) {
+  .goose-dm-decor-item > .goose-dm {
+    scale: 0.72;
+  }
+}
+.goose-empty-art-ink{fill:currentColor}.goose-empty-art-accent{fill:var(--goose-accent-solid)}.goose-empty-art-danger{fill:var(--goose-color-danger)}.goose-empty-art-soft{opacity:.24}.goose-empty-art-secondary{opacity:.5}.goose-empty-art-body{opacity:.8}
       @keyframes outline-signal { 0%, 100% { opacity: 1; } 50% { opacity: .9; } }
       @media (prefers-reduced-motion: reduce) { .outline-signal { animation: none !important; } }
     </style>
   </helmet>
-  <div style="display: flex; gap: 48px; padding: 48px 56px; width: 720px; height: 520px; box-sizing: border-box; background: #e8e8e8; font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;">
+  <div class="outline-main" style="display: flex; gap: 48px; padding: 48px 56px; width: 720px; height: 520px; box-sizing: border-box; background: #e8e8e8; font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;">
     <sc-for list="{{surfaces}}" as="surface" hint-placeholder-count="2">
       <section aria-label="{{surface.name}}" style="{{surface.style}}">
         <div style="display: flex; align-items: center; padding: 12px 16px 4px; font-size: 14px; line-height: 20px;">
           <strong style="font-weight: 560;">文档大纲</strong>
         </div>
-        <div style="display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px 48px;">
-          <svg width="196" height="156" viewBox="0 0 196 156" aria-hidden="true" focusable="false" style="display: block; flex-shrink: 0; max-width: 100%; margin-bottom: 16px; overflow: visible;">
+        <div style="position: relative; display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px 48px;">
+<div aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none"><div style="width:100%;max-width:360px"><svg data-dm-phase="in" data-dm-played="" class="goose-dm goose-dm-main h-auto w-full max-w-[360px] shrink-0" style="--dm-loop-low:0.55;--dm-progress-low:0.55" width="320" height="190" viewBox="0 0 320 190" aria-hidden="true" focusable="false"><g class="goose-dm-rg" style="--dm-i:0"><g class="goose-dm-ripple" style="--dm-delay:-12.000s;--dm-period:12s"><circle cx="23.00" cy="41.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="47.30" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="53.60" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="59.90" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="66.20" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="72.50" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="78.80" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="85.10" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="91.40" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="97.70" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="104.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="110.30" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="116.60" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="23.00" cy="122.90" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="26.99" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="33.07" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="39.15" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="45.23" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="51.31" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle><circle cx="57.39" cy="125.00" r="0.90" opacity="0.190" fill="currentColor"></circle></g></g><g class="goose-dm-rg" style="--dm-i:1"><g class="goose-dm-ripple" style="--dm-delay:-10.286s;--dm-period:12s"><circle cx="39.00" cy="58.00" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="64.08" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="70.15" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="76.22" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="82.30" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="88.38" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="94.45" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="39.00" cy="100.53" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="42.63" cy="103.00" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="48.74" cy="103.00" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="54.84" cy="103.00" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="60.94" cy="103.00" r="0.90" opacity="0.140" fill="currentColor"></circle><circle cx="67.05" cy="103.00" r="0.90" opacity="0.140" fill="currentColor"></circle></g></g><g class="goose-dm-rg" style="--dm-i:2"><g class="goose-dm-ripple" style="--dm-delay:-8.571s;--dm-period:12s"><circle cx="281.00" cy="53.00" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="59.23" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="65.46" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="71.69" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="77.92" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="84.15" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="90.38" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="96.61" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="102.84" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="109.07" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="115.30" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="121.53" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="127.76" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="133.99" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="281.00" cy="140.22" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="276.75" cy="142.00" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="270.63" cy="142.00" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="264.51" cy="142.00" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="258.39" cy="142.00" r="0.90" opacity="0.170" fill="currentColor"></circle><circle cx="252.27" cy="142.00" r="0.90" opacity="0.170" fill="currentColor"></circle></g></g><g class="goose-dm-rg" style="--dm-i:3"><g class="goose-dm-ripple" style="--dm-delay:-6.857s;--dm-period:12s"><circle cx="263.00" cy="73.00" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="79.12" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="85.24" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="91.36" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="97.48" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="103.60" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="109.72" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="115.84" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="263.00" cy="121.96" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="258.95" cy="124.00" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="252.92" cy="124.00" r="0.90" opacity="0.120" fill="currentColor"></circle><circle cx="246.89" cy="124.00" r="0.90" opacity="0.120" fill="currentColor"></circle></g></g></svg></div></div>
+          <svg width="196" height="156" viewBox="0 0 196 156" aria-hidden="true" focusable="false" style="position: relative; display: block; flex-shrink: 0; max-width: 100%; margin-bottom: 16px; overflow: visible;">
             <g fill="currentColor" opacity=".3">
               <sc-for list="{{frameDots}}" as="dot" hint-placeholder-count="70">
                 <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
@@ -38,13 +288,13 @@
                 <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
               </sc-for>
             </g>
-            <g class="outline-signal" fill="{{surface.accent}}" style="animation: outline-signal 12s ease-in-out -6s infinite;">
+            <g class="outline-signal" fill="{{surface.accent}}" style="animation: outline-signal 12s steps(2,end) -6s infinite;">
               <sc-for list="{{signalDots}}" as="dot" hint-placeholder-count="4">
                 <circle cx="{{dot.x}}" cy="{{dot.y}}" r="1.45"></circle>
               </sc-for>
             </g>
           </svg>
-          <p style="margin: 0; font-size: 14px; font-weight: 400; line-height: 21.7px; color: {{surface.secondary}};">正文暂无标题</p>
+          <p style="position: relative; margin: 0; font-size: 14px; font-weight: 400; line-height: 21.7px; color: {{surface.secondary}};">正文暂无标题</p>
         </div>
       </section>
     </sc-for>

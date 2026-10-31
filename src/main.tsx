@@ -42,8 +42,8 @@ export const bootstrap = async (
     true,
   );
   const root = createRoot(rootElement);
-  if (mode === "lean") {
-    root.render(<BootstrapScreen lean />);
+  if (mode !== "search") {
+    root.render(<BootstrapScreen lean={lean} />);
   }
 
   try {
