@@ -1,5 +1,15 @@
 # 更新日志
 
+## 1.7.341
+
+- add system dot-matrix outline illustration mockup
+- simplify the outline empty-state dot illustration
+- audit dot illustrations and add before-after proposals
+- apply approved dot illustrations and animated backdrops
+- add three looping variants for remaining empty states
+- apply selected animated empty-state illustrations
+- add three single-column settings layout concepts
+
 ## 1.7.340
 
 - move close action into the desktop title bar
