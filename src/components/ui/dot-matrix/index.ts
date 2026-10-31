@@ -29,3 +29,5 @@ export { DotDecor, type DotDecorPreset } from "./decor";
 export { OutlineArt } from "./illustrations/OutlineArt";
 export { NoFolderFadeArt, NoFolderScatterArt, NoFolderTreeArt, NoFolderTrailArt } from "./illustrations/NoFolderArt";
 export { EmptyStateArt, type EmptyStateArtKind } from "./illustrations/EmptyStateArt";
+export { ReviewedStateArt, type ReviewedStateArtKind } from "./illustrations/ReviewedStateArt";
+export { StateArtBackdrop } from "./illustrations/StateArtBackdrop";

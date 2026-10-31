@@ -153,6 +153,7 @@ export function SidebarOutline({
       onHeadingClick={handleHeadingClick}
       emptyMessage={emptyMessage}
       emptyHint={emptyMessage ? null : undefined}
+      showBackdrop={!emptyMessage}
     />
   );
 }
