@@ -23,7 +23,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { EmptyState } from "@/components/ui/empty-state";
-import { DotDecor, EmptyStateArt } from "@/components/ui/dot-matrix";
+import { DotDecor, EmptyStateArt, SelectedStateArt, SelectedStateBackdrop } from "@/components/ui/dot-matrix";
 import { Button } from "@/components/ui/button";
 import { useCallback, useLayoutEffect, useRef } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -140,8 +140,8 @@ export function SplitEditorPane({
               resetKey={leaf.pageId}
               fallback={(_, reset) => (
                 <div className="goose-glitch-host relative flex min-h-[260px] items-center justify-center overflow-hidden">
-                  <DotDecor preset="splitError" />
-                  <EmptyState className="relative" title={uiText("theNoteCouldnTBeDisplayed")} role="alert" illustration={<EmptyStateArt kind="noteError" />} action={
+                  <SelectedStateBackdrop kind="noteError" />
+                  <EmptyState className="relative" title={uiText("theNoteCouldnTBeDisplayed")} role="alert" illustration={<SelectedStateArt kind="noteError" />} action={
                   <Button contentStyle="preserve" variant="ghost" size={null}
                     type="button" data-dm-arm
                     onClick={reset}

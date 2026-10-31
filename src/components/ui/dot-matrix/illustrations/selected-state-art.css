@@ -1,0 +1,39 @@
+.goose-dm.goose-dm-selected[data-dm-phase="in"] {
+  animation: none;
+}
+.goose-dm-selected-backdrop {
+  overflow: visible;
+}
+.goose-dm-selected[data-dm-phase="in"] [data-selected-motion] {
+  animation-duration: var(--dm-period, 12s);
+  animation-delay: var(--dm-delay, -12s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  transform-box: view-box;
+  transform-origin: var(--dm-selected-origin, 160px 104px);
+}
+.goose-dm-selected[data-dm-phase="in"] [data-selected-motion="breathe"] {
+  animation-name: goose-dm-selected-breathe;
+}
+.goose-dm-selected[data-dm-phase="in"] [data-selected-motion="ripple"] {
+  animation-name: goose-dm-selected-ripple;
+}
+.goose-dm-selected[data-dm-phase="in"] [data-selected-motion="sway"] {
+  animation-name: goose-dm-selected-sway;
+}
+.goose-dm-selected[data-dm-phase="in"] [data-selected-alert] {
+  animation: goose-dm-shake 280ms cubic-bezier(.36, .07, .19, .97) .4s 1 backwards;
+}
+@keyframes goose-dm-selected-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--dm-selected-low, .55); }
+}
+@keyframes goose-dm-selected-ripple {
+  0%, 100% { opacity: var(--dm-selected-low, .55); transform: scale(.992); }
+  50% { opacity: 1; transform: scale(1.008); }
+}
+@keyframes goose-dm-selected-sway {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  50% { opacity: var(--dm-selected-low, .8); transform: translateX(var(--dm-selected-shift, 1.2px)); }
+}
