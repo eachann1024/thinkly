@@ -12,6 +12,8 @@ interface ConflictContext {
   folder: GitRepositoryFolder;
   active: Set<string>;
   unresolved: GitSyncConflict[];
+  // After an interruption, content equal to base may be an intentional user revert.
+  recovering?: boolean;
 }
 const own = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 const fold = (value: string) => value.normalize("NFC").toLowerCase();
@@ -49,7 +51,7 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
     const b = noteGroupSignature(group.base), l = noteGroupSignature(group.local), r = noteGroupSignature(group.remote);
     let selected: Files;
     if (l === r) selected = group.local;
-    else if (l === b) selected = group.remote;
+    else if (l === b && !context?.recovering) selected = group.remote;
     else if (r === b) selected = group.local;
     else {
       if (!context) throw new Error(t("resolveFirst"));
@@ -74,9 +76,9 @@ export function reconcileFiles(base: Files | undefined, local: Files, remote: Fi
     const b = remainingBase?.[name], l = remainingLocal[name], r = remainingRemote[name];
     let value: string | undefined;
     if (l === r) value = l;
-    else if ((!remainingBase || !own(remainingBase, name)) && (l === undefined || r === undefined)) value = l ?? r;
-    else if (remainingBase && own(remainingBase, name) && l === b) value = r;
-    else if (remainingBase && own(remainingBase, name) && r === b) value = l;
+    else if (remainingBase && r === b) value = l;
+    else if (!context?.recovering && (!remainingBase || !own(remainingBase, name)) && (l === undefined || r === undefined)) value = l ?? r;
+    else if (!context?.recovering && remainingBase && own(remainingBase, name) && l === b) value = r;
     else {
       if (!context) throw new Error(t("resolveFirst"));
       const conflict = recordGitConflict(context.repositoryId, context.identity, context.folder, name, l, r);

@@ -7,7 +7,7 @@ zh-Hans:
   saving_9b80: "正在保存…"
   folderIssueCount: "{{count}} 个文件夹需要处理"
   noFoldersSelectedForSync_2971: "尚未选择同步文件夹"
-  contentConflicts_66cf: "有内容冲突"
+  contentConflicts_66cf: "请选择要保留的版本"
   initialSyncNotComplete_7378: "尚未完成首次同步"
   upToDate_ed28: "同步正常"
   automaticSyncIsOff_e5e2: "自动同步已关闭"
@@ -27,7 +27,7 @@ en:
   saving_9b80: "Saving…"
   folderIssueCount: "Folders needing attention: {{count}}"
   noFoldersSelectedForSync_2971: "No folders selected for sync"
-  contentConflicts_66cf: "Content conflicts"
+  contentConflicts_66cf: "Choose which versions to keep"
   initialSyncNotComplete_7378: "Initial sync not complete"
   upToDate_ed28: "Up to date"
   automaticSyncIsOff_e5e2: "Automatic sync is off"
@@ -47,7 +47,7 @@ ja:
   saving_9b80: "保存中…"
   folderIssueCount: "対応が必要なフォルダ：{{count}} 件"
   noFoldersSelectedForSync_2971: "同期するフォルダが選択されていません"
-  contentConflicts_66cf: "内容の競合があります"
+  contentConflicts_66cf: "保持するバージョンを選んでください"
   initialSyncNotComplete_7378: "初回同期が完了していません"
   upToDate_ed28: "最新の状態です"
   automaticSyncIsOff_e5e2: "自動同期はオフです"
@@ -63,7 +63,7 @@ ja:
   folderIssue: "{{name}}：{{reason}}"
 `;
 const uiText = createTranslator(localMessages);
-import { gitSyncActionLabel, type GitSyncAction } from "./gitSyncUiState";
+import { gitSyncActionLabel, localizeGitUiReason, type GitSyncAction } from "./gitSyncUiState";
 import { DEFAULT_GIT_SYNC_INTERVAL, validateGitRepository, normalizedGitRemote } from "@/lib/git-sync-contract";
 import type { GitDraft } from "./GitRepositoryForm";
 import { folderPathKey } from "./gitFolderRows";
@@ -153,7 +153,8 @@ export function repositoryLabel(remoteUrl: string) {
   return remoteUrl.replace(/^git@[^:]+:|^ssh:\/\/git@[^/]+\//, "").replace(/\.git$/, "");
 }
 export function shortSyncError(error: string) {
+  error = localizeGitUiReason(error);
   if (/网络|连接.*失败|超时|无法连接|network|connection.*failed|timed? out|timeout|cannot connect|could not connect|DNS/i.test(error)) return uiText("networkConnectionFailedPleaseTryAgain_9bb3");
   if (/SSH|公钥|鉴权|认证|public.key|authentication|authorization/i.test(error)) return uiText("sshConnectionFailedCheckYourConnection_9f5b");
-  return error.split(/[\n。；]/)[0].slice(0, 120);
+  return error.split(/[\n。；]|[.!?](?:\s|$)/)[0].slice(0, 120);
 }
