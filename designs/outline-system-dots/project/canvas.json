@@ -7,9 +7,13 @@
   "title": "Thinkly 点阵插画审图与改稿",
   "launch": {
     "view": "canvas",
-    "page": "settings-layout"
+    "page": "ai-composer"
   },
   "pages": [
+    {
+      "id": "ai-composer",
+      "name": "AI 输入区"
+    },
     {
       "id": "applied",
       "name": "已实施"
@@ -24,6 +28,9 @@
     }
   ],
   "boards": {
+    "AiComposerEmpty.dc.html": {"x":0,"y":0,"w":420,"h":240,"title":"AI 输入区 · 空白","page":"ai-composer"},
+    "AiComposerFilled.dc.html": {"x":500,"y":0,"w":420,"h":240,"title":"AI 输入区 · 多行输入","page":"ai-composer"},
+    "AiComposerDark.dc.html": {"x":1000,"y":0,"w":340,"h":240,"title":"AI 输入区 · 深色窄面板","page":"ai-composer"},
     "SettingsRowA.dc.html": {"x":0,"y":0,"w":1280,"h":900,"title":"A · 完整侧栏与单列设置","page":"settings-layout","expand":"fill","is_interactive":true},
     "SettingsRowB.dc.html": {"x":1360,"y":0,"w":1280,"h":900,"title":"B · 紧凑目录与整张纸面","page":"settings-layout","expand":"fill","is_interactive":true},
     "SettingsRowC.dc.html": {"x":2720,"y":0,"w":1280,"h":900,"title":"C · 全幅封面与按需目录","page":"settings-layout","expand":"fill","is_interactive":true},
@@ -164,6 +171,9 @@
     }
   },
   "order": [
+    "AiComposerEmpty.dc.html",
+    "AiComposerFilled.dc.html",
+    "AiComposerDark.dc.html",
     "SettingsRowA.dc.html",
     "SettingsRowB.dc.html",
     "SettingsRowC.dc.html",
