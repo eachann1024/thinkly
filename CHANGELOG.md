@@ -1,5 +1,10 @@
 # 更新日志
 
+## 1.7.340
+
+- move close action into the desktop title bar
+- recover interrupted sync through version choices
+
 ## 1.7.339
 
 - always refresh Quark 说明.txt and allow forced Quark re-upload (#123)
