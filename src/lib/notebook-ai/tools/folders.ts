@@ -57,7 +57,7 @@ async function diskCoverage(context: NotebookAiAgentContext, notebookId: string,
 }
 
 export const listFolder = tool({
-  description: "按稳定身份分页枚举已选来源目录的 MD 和子目录；默认递归。仅枚举不等于已读正文，必须按需 readPage，coverage 不完整时不得宣称全部读完。根目录必须显式传 notebookId 且在读取范围内。",
+  description: "按稳定身份分页枚举任意已连接笔记本目录的 MD 和子目录；默认递归。仅枚举不等于已读正文，必须按需 readPage，coverage 不完整时不得宣称全部读完。根目录显式传 notebookId。",
   inputSchema: z.object({
     notebookId: z.string(), folderId: z.string().optional(),
     recursive: z.boolean().optional().default(true),
@@ -68,13 +68,12 @@ export const listFolder = tool({
     const recursive = input.recursive ?? true;
     const limit = input.limit ?? 50;
     try {
-      if (!readableNotebookIds(context).includes(input.notebookId)) throw new Error("笔记本不在本轮读取范围内");
+      if (!readableNotebookIds(context).includes(input.notebookId)) throw new Error("笔记本不存在或已卸载");
       await ensureNotebookReferenceIndex(input.notebookId);
       const pages = usePages.getState().pages;
       const folder = input.folderId ? pages[input.folderId] : undefined;
-      if (input.folderId && (!folder?.isFolder || folder.workspaceId !== input.notebookId || !canReadNotebookResource(context, folder))) throw new Error("目录不存在或不在本轮读取范围内");
-      if (!input.folderId && context.resourceReferences && !context.resourceReferences.some((root) => root.notebookId === input.notebookId && root.kind === "notebook")) throw new Error("未选择此笔记本根目录，请指定已选目录");
-      if (!canReadFolderChildren(context, input.notebookId, input.folderId)) throw new Error("目录子项未包含在本轮读取范围内");
+      if (input.folderId && (!folder?.isFolder || folder.workspaceId !== input.notebookId || !canReadNotebookResource(context, folder))) throw new Error("目录不存在或已删除");
+      if (!canReadFolderChildren(context, input.notebookId, input.folderId)) throw new Error("目录不存在或已删除");
       const entries = enumerateFolderPages(pages, input.notebookId, input.folderId, recursive).filter((page) => canReadNotebookResource(context, page));
       const key = fingerprint(JSON.stringify([input.notebookId, input.folderId, recursive, entries.map((page) => [page.id, page.parentId, page.localFilePath, page.updatedAt])]));
       const [cursorKey, rawOffset] = input.cursor?.split(":") ?? [key, "0"];

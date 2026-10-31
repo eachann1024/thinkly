@@ -57,6 +57,22 @@ export async function scanLocalFolderPages({
   const hiddenFoldersSet = new Set(hiddenFolders);
   const cacheScope = JSON.stringify([basePath, [...hiddenFolders].sort()]);
   const resolveIdentity = createNoteIdentityResolver(basePath, notebookId, gooseFs, idMap, reservedPageIds);
+  let scanReadFailure: Error | undefined;
+  const accessRequestId = globalThis.crypto?.randomUUID?.() ?? `scan-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const assertScanReadAllowed = () => { if (scanReadFailure) throw scanReadFailure; };
+  const readForScan = async (filePath: string, force = forceRead) => {
+    try {
+      assertScanReadAllowed();
+      const result = await (force
+        ? readMarkdownFile(gooseFs, filePath, assertScanReadAllowed, accessRequestId)
+        : readUnchangedMarkdown(gooseFs, filePath, assertScanReadAllowed, accessRequestId));
+      if (result.error) throw new Error(result.error);
+      return result;
+    } catch (error) {
+      scanReadFailure ??= error instanceof Error ? error : new Error(String(error));
+      throw scanReadFailure;
+    }
+  };
 
   const scanDirectory = async (
     dirPath: string,
@@ -68,8 +84,8 @@ export async function scanLocalFolderPages({
       entries = await readDirectory(gooseFs, dirPath);
     } catch (error) {
       console.error("readDir failed", error);
-      if (dirPath === basePath) throw error;
-      return [];
+      // An unreadable subtree is not an empty directory; keep the prior index.
+      throw error;
     }
 
     const pages: Page[] = [];
@@ -130,11 +146,7 @@ export async function scanLocalFolderPages({
     for (let i = 0; i < pendingFiles.length; i += BATCH_SIZE) {
       const batch = pendingFiles.slice(i, i + BATCH_SIZE);
       const readResults = await Promise.allSettled(
-        batch.map(({ entry }) =>
-          forceRead
-            ? readMarkdownFile(gooseFs, entry.path)
-            : readUnchangedMarkdown(gooseFs, entry.path),
-        ),
+        batch.map(({ entry }) => readForScan(entry.path)),
       );
 
       let sliceStartedAt = nowForScanBudget();
@@ -142,11 +154,7 @@ export async function scanLocalFolderPages({
         const pending = batch[batchIndex];
         const readResult = readResults[batchIndex];
         if (readResult.status === "rejected") {
-          console.error(
-            "[local-folder-scanner] 跳过文件读取失败:",
-            readResult.reason,
-          );
-          continue;
+          throw readResult.reason;
         }
 
         try {
@@ -203,8 +211,9 @@ export async function scanLocalFolderPages({
         isFile: true,
         isDirectory: false,
       };
+      const read = await readForScan(filePath, true);
       const page = await buildMarkdownPage(notebookId, basePath, entry,
-        await readMarkdownFile(gooseFs, filePath), Date.now(), id, cacheScope, gooseFs, metadataCatalog);
+        read, Date.now(), id, cacheScope, gooseFs, metadataCatalog);
       if (await resolveIdentity(page)) idMapDirty = true;
       const parentPath = filePath.replace(/[\\/][^\\/]+$/, "");
       page.parentId = pages.find((candidate) =>
@@ -215,6 +224,7 @@ export async function scanLocalFolderPages({
       if (dirty) idMapDirty = true;
     } catch (error) {
       console.error("[local-folder-scanner] 显式打开文件读取失败", filePath, error);
+      throw error;
     }
   }
   pruneParsedMarkdown(

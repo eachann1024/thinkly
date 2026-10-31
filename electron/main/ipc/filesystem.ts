@@ -26,6 +26,8 @@ import { markRecentWrite, withSelfWriteMark } from "./watchEvents";
 import { hideGooseDirectory, registerGooseInternalIpc } from "./gooseInternal";
 import { saveNotebookAsset } from "../localFileAssets";
 import type { SaveLocalAssetRequest } from "../../../src/lib/local-file-asset-contract";
+import { withFilesystemAccess } from "../filesystemAccess";
+import { senderWindow } from "./common";
 
 export function registerFilesystemIpc(undoRoot: string): void {
   registerGooseInternalIpc();
@@ -40,11 +42,10 @@ export function registerFilesystemIpc(undoRoot: string): void {
     return committed;
   });
   ipcMain.handle("desktop:fsSaveAsset", (_event, input: SaveLocalAssetRequest) => saveNotebookAsset(input));
-  ipcMain.handle("desktop:fsReadText", async (_event, p: string) => {
-    const target = assertAllowed(p);
+  ipcMain.handle("desktop:fsReadText", async (event, p: string, accessRequestId?: string) => withFilesystemAccess(senderWindow(event), p, false, async (target) => {
     await waitForGitSyncRead(target);
     return readFile(target, "utf8");
-  });
+  }, typeof accessRequestId === "string" ? accessRequestId : undefined));
 
   ipcMain.handle(
     "desktop:fsWriteText",
@@ -55,12 +56,11 @@ export function registerFilesystemIpc(undoRoot: string): void {
     },
   );
 
-  ipcMain.handle("desktop:fsRead", async (_event, p: string) => {
-    const target = assertAllowed(p);
+  ipcMain.handle("desktop:fsRead", async (event, p: string) => withFilesystemAccess(senderWindow(event), p, false, async (target) => {
     await waitForGitSyncRead(target);
     const buf = await readFile(target);
     return new Uint8Array(buf);
-  });
+  }));
 
   ipcMain.handle(
     "desktop:fsWrite",
@@ -73,8 +73,7 @@ export function registerFilesystemIpc(undoRoot: string): void {
     },
   );
 
-  ipcMain.handle("desktop:fsReadDir", async (_event, p: string) => {
-    const target = assertAllowed(p);
+  ipcMain.handle("desktop:fsReadDir", async (event, p: string) => withFilesystemAccess(senderWindow(event), p, true, async (target) => {
     await waitForGitSyncRead(target);
     const entries = await readdir(target, { withFileTypes: true });
     return entries.map((entry) => ({
@@ -82,7 +81,7 @@ export function registerFilesystemIpc(undoRoot: string): void {
       isDirectory: entry.isDirectory(),
       path: path.join(target, entry.name),
     }));
-  });
+  }));
 
   ipcMain.handle("desktop:fsMkdir", async (_event, p: string) => {
     const target = assertAllowed(p);

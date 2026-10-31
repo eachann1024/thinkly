@@ -6,4 +6,4 @@ export const ALWAYS_ON_CARD_TOOLS = [
 ] as const;
 
 
-export const READ_ONLY_TOOL_NAMES = ["searchNotes", "readPage", "listPages", "listFolder", "searchWeb", "readWebPage", ...ALWAYS_ON_CARD_TOOLS] as const;
+export const READ_ONLY_TOOL_NAMES = ["listNotebooks", "searchNotes", "readPage", "listPages", "listFolder", "searchWeb", "readWebPage", ...ALWAYS_ON_CARD_TOOLS] as const;
