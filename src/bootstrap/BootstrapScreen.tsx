@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n";
+import { LaunchTrace } from "./LaunchTrace";
 import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/bootstrap/BootstrapScreen.tsx#localMessages:1">`
@@ -30,6 +31,7 @@ export function BootstrapScreen({ lean, error }: { lean: boolean; error?: unknow
   if (!error) {
     return (
       <main className="bootstrap-screen" role="status">
+        {!lean && <LaunchTrace />}
         <span className="sr-only">{lean ? uiText("restoring") : uiText("opening")}</span>
       </main>
     );

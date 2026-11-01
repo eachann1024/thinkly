@@ -2,6 +2,7 @@ import { useTabs } from "@/stores/useTabs";
 import { useSidebarView } from "@/stores/useSidebarView";
 import { useEditorSplitSelector } from "@/stores/useEditorSplit";
 import { focusedPageIdOf } from "@/lib/editor-split/tree";
+import { WORKSPACE_SIDEBAR_DEFAULT_WIDTH } from "@/lib/sidebarLayout";
 import { useEffectiveSidebarCollapsed } from "@/hooks/useWorkspaceViewportCollapse";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import {
@@ -138,7 +139,7 @@ export function useSidebarLayout({
 
   const workspaceResize = useSidebarResize({
     disableResize: disableResize || sidebarCollapsed || settingsOpen,
-    defaultWidth: 256,
+    defaultWidth: WORKSPACE_SIDEBAR_DEFAULT_WIDTH,
     onWidthPreview: previewSidebarWidth,
     maxWidth: sidebarMaxWidth,
   });
