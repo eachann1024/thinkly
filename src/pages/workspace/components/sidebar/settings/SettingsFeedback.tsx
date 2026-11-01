@@ -124,13 +124,13 @@ export function SettingsFeedback() {
   };
 
   return (
-    <form className="grid max-w-xl gap-4" onSubmit={submit}>
+    <form className="grid w-full gap-4" onSubmit={submit}>
       <Field label={uiText("body_2c1e")} required>
         <GripTextarea
           className={cn(fieldVariants(), "h-auto min-h-20")}
           paint={gripPaint.goose}
           gripLabel={uiText("body_2c1e")}
-          minHeight={120}
+          minHeight={280}
           name="message"
           required
           maxLength={4000}
@@ -148,13 +148,17 @@ export function SettingsFeedback() {
           onChange={(event) => setContact(event.target.value)}
         />
       </Field>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" onClick={() => imageRef.current?.click()}>
           {uiText("images_8d44")}{images.length ? ` ${images.length}` : ""}
         </Button>
         <Button type="button" variant="outline" onClick={() => videoRef.current?.click()}>
           {video ? video.name : uiText("video_9b21")}
         </Button>
+        <div className="ml-auto flex items-center gap-3">
+          <p aria-live="polite" className="text-sm">{notice}</p>
+          <Button type="submit" busy={busy} disabled={busy}>{busy ? uiText("sending_1f90") : uiText("send_6e02")}</Button>
+        </div>
       </div>
       <Input
         ref={imageRef}
@@ -187,10 +191,6 @@ export function SettingsFeedback() {
           ) : null}
         </div>
       ) : null}
-      <div className="flex items-center gap-3">
-        <Button type="submit" busy={busy} disabled={busy}>{busy ? uiText("sending_1f90") : uiText("send_6e02")}</Button>
-        <p aria-live="polite" className="text-sm">{notice}</p>
-      </div>
     </form>
   );
 }
