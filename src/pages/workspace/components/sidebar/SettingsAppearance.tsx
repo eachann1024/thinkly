@@ -29,7 +29,6 @@ import { renderReadingSettings } from "./appearance-settings/renderReadingSettin
 import { renderUIFontSizeSettings } from "./appearance-settings/renderUIFontSizeSettings";
 import { CanvasSettings } from "./appearance-settings/CanvasSettings";
 import { SidebarDisplaySettings } from "./appearance-settings/SidebarDisplaySettings";
-import { CharacterSettings } from "./appearance-settings/CharacterSettings";
 
 export function SettingsAppearance(props: SettingsAppearanceProps) {
   useLocale();
@@ -72,7 +71,6 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
       )}
       <div className="settings-appearance-options min-w-0 space-y-8">
         {section !== "reading" && renderAppearanceTheme(context)}
-        {section === "all" && <CharacterSettings />}
         {section !== "reading" && <CanvasSettings />}
         {section !== "reading" && <SidebarDisplaySettings />}
         {section !== "appearance" && (

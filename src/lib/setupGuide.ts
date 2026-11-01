@@ -7,5 +7,5 @@ export function isSetupGuideVisible(settings: {
   characterId: string | null;
 }): boolean {
   const surface = firstRunSurface(settings);
-  return surface === "character" || surface === "setup";
+  return surface === "setup";
 }
