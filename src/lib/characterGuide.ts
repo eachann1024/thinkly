@@ -30,7 +30,7 @@ export function firstRunSurface(settings: {
   setupGuideSeen: boolean;
   setupGuideOpen: boolean;
 }): FirstRunSurface {
-  return chooseFirstRunSurface(settings, KNOWN_CHARACTER_IDS);
+  return chooseFirstRunSurface(settings);
 }
 
 export const CHARACTER_SETTINGS_ANCHOR = "character";

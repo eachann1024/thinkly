@@ -1,6 +1,5 @@
 import { useLocale } from "@/i18n";
 import { SetupGuide } from "@/pages/workspace/components/SetupGuide";
-import { CharacterOnboarding } from "@/pages/workspace/components/character-onboarding/CharacterOnboarding";
 import { firstRunSurface } from "@/lib/characterGuide";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
@@ -142,7 +141,6 @@ function App() {
           <WorkspacePage />
         </div>
       )}
-      {surface === "character" && <CharacterOnboarding />}
       {surface === "setup" && <SetupGuide />}
       <AppUpdateDialog />
       <Toaster />

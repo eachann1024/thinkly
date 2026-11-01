@@ -11,7 +11,7 @@ export function characterGuideShouldShow(input: {
   return !input.knownCharacterIds.includes(input.characterId ?? "");
 }
 
-export type FirstRunSurface = "character" | "setup" | "app";
+export type FirstRunSurface = "setup" | "app";
 
 export function firstRunSurface(
   settings: {
@@ -20,13 +20,7 @@ export function firstRunSurface(
     setupGuideSeen: boolean;
     setupGuideOpen: boolean;
   },
-  knownCharacterIds: readonly string[],
 ): FirstRunSurface {
-  if (characterGuideShouldShow({
-    hydrated: settings._hasHydrated,
-    characterId: settings.characterId,
-    knownCharacterIds,
-  })) return "character";
   if (settings._hasHydrated && (settings.setupGuideOpen || !settings.setupGuideSeen)) return "setup";
   return "app";
 }
