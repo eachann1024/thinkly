@@ -51,7 +51,7 @@ export function SidebarFooter({
             <IconButton size="xs"
               type="button"
               data-feedback-entry=""
-              className={cn(btnClass, "feedback-rail-sheen", feedbackActive && activeClass)}
+              className={cn(btnClass, feedbackActive && activeClass)}
               aria-label={uiText("feedback_4c2a")}
               title={uiText("feedback_4c2a")}
               aria-pressed={feedbackActive}
