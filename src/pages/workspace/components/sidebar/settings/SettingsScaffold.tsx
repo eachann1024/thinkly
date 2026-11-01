@@ -17,7 +17,7 @@ import { isElectronRuntime } from "@/lib/electron/runtime";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { createPortal } from "react-dom";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { ChevronDown } from "@/components/ui/icons";
 import { useWorkspaceViewport } from "@/stores/useWorkspaceViewport";
 import type { SettingsTab, SettingsTabConfig } from "./types";
@@ -62,21 +62,27 @@ export function SettingsScaffold({
     }
     wasVisibleRef.current = visible;
   }, [visible, sidebarContainer, compact]);
-  const [navSheen, setNavSheen] = useState(false);
-  useEffect(() => {
-    setNavSheen(false);
-    if (!visible) return;
-    const start = window.setTimeout(() => {
-      setNavSheen(true);
-    }, 500);
-    const end = window.setTimeout(() => {
-      setNavSheen(false);
-    }, 3500);
-    return () => {
-      window.clearTimeout(start);
-      window.clearTimeout(end);
-    };
-  }, [visible, activeTab === "feedback"]);
+
+  const renderTab = (tab: SettingsTabConfig) => {
+    const Icon = tab.icon;
+    return (
+      <Button contentStyle="preserve" variant="ghost" size="sm"
+        key={tab.id}
+        type="button"
+        aria-current={activeTab === tab.id ? "page" : undefined}
+        data-selected={activeTab === tab.id || undefined}
+        data-settings-tab={tab.id}
+        onClick={() => onTabChange(tab.id)}
+        className={cn(
+          "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm",
+          activeTab !== tab.id && "text-muted-foreground",
+        )}
+      >
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="truncate">{tab.label}</span>
+      </Button>
+    );
+  };
 
   return (
     <>
@@ -95,30 +101,12 @@ export function SettingsScaffold({
             </div>
             <nav
               aria-label={uiText("settingsCategories_2590")}
-              className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
+              className="flex min-h-0 flex-1 flex-col gap-1"
             >
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <Button contentStyle="preserve" variant="ghost" size="sm"
-                    key={tab.id}
-                    type="button"
-                    aria-current={activeTab === tab.id ? "page" : undefined}
-                    data-selected={activeTab === tab.id || undefined}
-                    data-settings-tab={tab.id}
-                    onClick={() => onTabChange(tab.id)}
-                    className={cn(
-                      "goose-list-row goose-accent-selection h-auto border-0 inline-flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm",
-                      activeTab !== tab.id && "text-muted-foreground",
-                      tab.id === "feedback" && "feedback-sheen-target",
-                      tab.id === "feedback" && navSheen && "is-on",
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{tab.label}</span>
-                  </Button>
-                );
-              })}
+              <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+                {tabs.filter((tab) => tab.id !== "feedback").map(renderTab)}
+              </div>
+              {tabs.filter((tab) => tab.id === "feedback").map(renderTab)}
             </nav>
           </div>,
           sidebarContainer,
