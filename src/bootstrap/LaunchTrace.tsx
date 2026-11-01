@@ -1,62 +1,91 @@
 import type { CSSProperties } from "react";
+import { isElectronRuntime } from "@/lib/electron/runtime";
 import { WORKSPACE_SIDEBAR_DEFAULT_WIDTH } from "@/lib/sidebarLayout";
 import "./launch-trace.css";
 
-const sidebarBars = [132, 168, 120, 150, 104];
-const bodyBars = ["100%", "93.333%", "97.333%", "63.333%"];
-const stagger = (index: number): CSSProperties => ({
-  "--goose-launch-index": index,
+const sidebarBars = [96, 84, 64, 112];
+const bodyBars = [
+  { width: "34%", delay: 820, kind: "title" },
+  { width: "10%", delay: 880, kind: "heading" },
+  { width: "96%", delay: 920 },
+  { width: "88%", delay: 960 },
+  { width: "92%", delay: 1000 },
+  { width: "58%", delay: 1040 },
+  { width: "10%", delay: 1080, kind: "heading" },
+  { width: "84%", delay: 1120 },
+  { width: "70%", delay: 1160 },
+];
+const delayed = (delay: number, width?: string): CSSProperties => ({
+  "--goose-launch-delay": `${delay}ms`,
+  ...(width ? { width } : {}),
 }) as CSSProperties;
 
 export function LaunchTrace() {
+  // 工作区的平台 class 在挂载后才设置，启动骨架沿用相同的平台判断。
+  const platform = isElectronRuntime() && /Win/i.test(navigator.platform)
+    ? "windows"
+    : isElectronRuntime() && /Linux/i.test(navigator.platform) ? "linux" : "mac";
+
   return (
     <div
       className="goose-launch-root"
+      data-platform={platform}
+      aria-hidden="true"
       style={{ "--goose-launch-sidebar-width": `${WORKSPACE_SIDEBAR_DEFAULT_WIDTH}px` } as CSSProperties}
     >
-      <div className="goose-launch-sidebar">
-        <div className="goose-launch-sidebar-surface" />
-        <svg width="100%" height="100%" aria-hidden="true">
-          {sidebarBars.map((width, index) => (
-            <rect
-              key={index}
-              className="goose-launch-side-bar"
-              style={stagger(index)}
-              x="20" y={index === 0 ? 56 : 60 + index * 28}
-              width={Math.min(width, WORKSPACE_SIDEBAR_DEFAULT_WIDTH - 40)}
-              height="8" rx="4" fillOpacity={index === 0 ? 0.1 : 0.08}
-            />
+      <div className="goose-launch-titlebar">
+        <div className="goose-launch-navigation">
+          {[700, 740, 780].map((delay) => (
+            <span key={delay} className="goose-launch-bar goose-launch-in" style={delayed(delay)} />
           ))}
-          <line
-            className="goose-launch-divider"
-            x1={WORKSPACE_SIDEBAR_DEFAULT_WIDTH - 0.5} y1="0"
-            x2={WORKSPACE_SIDEBAR_DEFAULT_WIDTH - 0.5} y2="100%"
-            strokeWidth="1"
+        </div>
+        <span className="goose-launch-bar goose-launch-in goose-launch-tab" style={delayed(820)} />
+      </div>
+      <div className="goose-launch-rail">
+        {[560, 610, 660, 710, 760, 810].map((delay, index) => (
+          <span
+            key={delay}
+            className="goose-launch-icon goose-launch-pop"
+            data-selected={index === 0 || undefined}
+            style={delayed(delay)}
           />
+        ))}
+      </div>
+      <div className="goose-launch-panel">
+        <div className="goose-launch-fill">
+          <div className="goose-launch-sidebar">
+            {sidebarBars.map((width, index) => (
+              <span
+                key={width}
+                className="goose-launch-bar goose-launch-in"
+                style={delayed(760 + index * 40, `${width}px`)}
+              />
+            ))}
+            <span className="goose-launch-selected goose-launch-in" style={delayed(940)}>
+              <span className="goose-launch-bar" />
+            </span>
+          </div>
+          <div className="goose-launch-content">
+            <div className="goose-launch-document">
+              <div className="goose-launch-column">
+                {bodyBars.map(({ width, delay, kind }) => (
+                  <span
+                    key={delay}
+                    className="goose-launch-bar goose-launch-line"
+                    data-kind={kind}
+                    style={delayed(delay, width)}
+                  />
+                ))}
+                <span className="goose-launch-caret" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <span className="goose-launch-divider" />
+        <svg className="goose-launch-frame" aria-hidden="true">
+          <rect className="goose-launch-trace" x="0.5" y="0.5" pathLength="1" />
         </svg>
       </div>
-      <div className="goose-launch-content">
-        <svg className="goose-launch-column" width="100%" height="320" aria-hidden="true">
-          <rect
-            className="goose-launch-line" style={stagger(0)}
-            y="120" width="53.333%" height="14" rx="7" fillOpacity="0.14"
-          />
-          {bodyBars.map((width, index) => (
-            <rect
-              key={index}
-              className="goose-launch-line" style={stagger(index + 1)}
-              y={168 + index * 24} width={width} height="8" rx="4" fillOpacity="0.08"
-            />
-          ))}
-          <rect
-            className="goose-launch-line goose-launch-cursor" style={stagger(5)}
-            y="276" width="2" height="18" rx="1"
-          />
-        </svg>
-      </div>
-      <svg className="goose-launch-frame" width="100%" height="100%" aria-hidden="true">
-        <rect className="goose-launch-trace" x="0.5" y="0.5" rx="10" pathLength="1" />
-      </svg>
     </div>
   );
 }
