@@ -1,5 +1,16 @@
 # 更新日志
 
+## 1.7.343
+
+- widen feedback form and align send button with attachments
+- pin feedback navigation and remove sheen animations
+- show blank themed background during cold start
+- restore settings icon and fill appearance theme grid
+- add three cold-start motion concepts
+- add one-shot frame trace launch animation
+- add framed launch motion concepts in light and dark
+- replace launch trace with framed outline animation
+
 ## 1.7.342
 
 ### 2026-11-01 · AI 助手
