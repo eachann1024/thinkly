@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>A 点阵涟漪</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#526071}a:hover{color:#20242c}
+.a-root{--cycle:4.8s}
+.a-base{opacity:0;animation:a-base var(--cycle) ease-in-out infinite}
+.a-ring{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:a-ring var(--cycle) cubic-bezier(.22,.61,.36,1) infinite}
+.a-dot{transform-box:fill-box;transform-origin:center;animation:a-dot var(--cycle) cubic-bezier(.22,1,.36,1) infinite}
+.a-caret{transform-box:fill-box;transform-origin:center;transform:scaleY(0);opacity:0;animation:a-caret var(--cycle) ease-in-out infinite}
+.a-all{animation:a-all var(--cycle) ease-in-out infinite}
+@keyframes a-base{0%{opacity:0}18%{opacity:.16}60%{opacity:.16}80%,100%{opacity:0}}
+@keyframes a-ring{0%,6%{transform:scale(.02);opacity:1}46%{transform:scale(1.1);opacity:1}47%,100%{transform:scale(0);opacity:0}}
+@keyframes a-dot{0%{transform:scale(0);opacity:0}8%{transform:scale(1.25);opacity:1}14%,30%{transform:scale(1);opacity:1}36%,100%{transform:scale(0);opacity:0}}
+@keyframes a-caret{0%,32%{transform:scaleY(.1);opacity:0}40%{transform:scaleY(1);opacity:1}50%{opacity:1}55%{opacity:0}62%{opacity:1}68%{opacity:0}74%{opacity:1}100%{transform:scaleY(1);opacity:1}}
+@keyframes a-all{0%,82%{opacity:1}94%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.a-base,.a-ring,.a-dot,.a-caret,.a-all{animation:none}.a-caret{transform:none;opacity:1}}
+</style>
+</helmet>
+<main class="a-root" style="--ground: {{ground}}; --ink: {{ink}}; --accent: {{accent}}; width: 100%; height: 100vh; min-height: 480px; margin: 0; background: var(--ground); overflow: hidden; position: relative">
+<svg width="100%" height="100%" aria-hidden="true" style="display: block; position: absolute; inset: 0">
+<defs>
+<pattern id="a-grid" width="14" height="14" patternUnits="userSpaceOnUse" x="50%" y="50%">
+<circle cx="7" cy="7" r="1.2" style="fill: var(--ink)"></circle>
+</pattern>
+<pattern id="a-grid-accent" width="14" height="14" patternUnits="userSpaceOnUse" x="50%" y="50%">
+<circle cx="7" cy="7" r="1.5" style="fill: var(--accent)"></circle>
+</pattern>
+<mask id="a-ring-mask">
+<circle class="a-ring" cx="50%" cy="50%" r="71%" fill="none" stroke="#fff" stroke-width="70"></circle>
+</mask>
+</defs>
+<g class="a-all">
+<rect class="a-base" width="100%" height="100%" fill="url(#a-grid)"></rect>
+<rect width="100%" height="100%" fill="url(#a-grid-accent)" mask="url(#a-ring-mask)" style="opacity: .9"></rect>
+<svg x="50%" y="50%" overflow="visible">
+<circle class="a-dot" cx="0" cy="0" r="4" style="fill: var(--accent)"></circle>
+<rect class="a-caret" x="-1" y="-12" width="2" height="24" rx="1" style="fill: var(--accent)"></rect>
+</svg>
+</g>
+</svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">正在打开 Thinkly</span>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const dark = this.props.dark ?? false;
+return dark
+? { ground: '#181818', ink: '#ececec', accent: '#779de8' }
+: { ground: '#ffffff', ink: '#20242c', accent: '#547dd0' };
+}
+}
+</script>
+</body>
+</html>
