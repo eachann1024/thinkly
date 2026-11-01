@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>E 描边成窗</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#526071}a:hover{color:#20242c}
+.fo-bar{display:block;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent)}
+.fo-icon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;flex:none}
+.fo-icon::after{content:"";width:15px;height:15px;border-radius:4px;border:1.5px solid color-mix(in srgb,var(--ink) 50%,transparent)}
+.fo-icon-on{background:var(--paper);box-shadow:0 0 0 1px var(--line)}
+.fo-trace{width:calc(100% - 1px);height:calc(100% - 1px);fill:none;stroke:var(--accent);stroke-width:1.25;stroke-dasharray:1;stroke-dashoffset:1;animation:fo-draw 620ms cubic-bezier(.65,0,.35,1) both,fo-out 260ms ease-out 980ms both}
+.fo-divider{transform-origin:top;animation:fo-grow 320ms cubic-bezier(.22,1,.36,1) 480ms both,fo-out 260ms ease-out 980ms both}
+.fo-fill{animation:fo-in 360ms ease-out 560ms both}
+.fo-pop{animation:fo-pop 320ms cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--d) * 1ms)}
+.fo-in{animation:fo-in 300ms ease-out both;animation-delay:calc(var(--d) * 1ms)}
+.fo-line{transform-origin:left center;animation:fo-line 440ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--d) * 1ms)}
+.fo-caret{animation:fo-caret 1060ms steps(1) 1500ms infinite both}
+@keyframes fo-draw{to{stroke-dashoffset:0}}
+@keyframes fo-out{from{opacity:1}to{opacity:0}}
+@keyframes fo-in{from{opacity:0}to{opacity:1}}
+@keyframes fo-grow{from{transform:scaleY(0)}to{transform:none}}
+@keyframes fo-pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes fo-line{from{opacity:0;transform:scaleX(.35)}to{opacity:1;transform:none}}
+@keyframes fo-caret{0%{opacity:1}50%{opacity:0}}
+@media (max-width:760px){.fo-sidebar,.fo-divider{display:none}.fo-main{left:0 !important}.fo-tab{left:72px !important}}
+@media (prefers-reduced-motion:reduce){.fo-trace,.fo-divider{display:none}.fo-fill,.fo-pop,.fo-in,.fo-line,.fo-caret{animation:none}}
+</style>
+</helmet>
+<main style="--shell: {{shell}}; --side: {{side}}; --paper: {{paper}}; --ink: {{ink}}; --accent: {{accent}}; --line: {{line}}; position: relative; width: 100%; height: 100vh; min-height: 560px; margin: 0; background: var(--shell); overflow: hidden">
+<div style="position: absolute; left: 16px; top: 13px; display: flex; gap: 8px">
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span>
+</div>
+<sc-if value="{{ on }}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; inset: 0">
+<div style="position: absolute; left: 92px; top: 12px; display: flex; gap: 14px">
+<span class="fo-bar fo-in" style="--d: 700; width: 14px; height: 14px; border-radius: 4px"></span>
+<span class="fo-bar fo-in" style="--d: 740; width: 14px; height: 14px; border-radius: 4px"></span>
+<span class="fo-bar fo-in" style="--d: 780; width: 14px; height: 14px; border-radius: 4px"></span>
+</div>
+<span class="fo-bar fo-in fo-tab" style="--d: 820; position: absolute; left: 320px; top: 15px; width: 64px; height: 8px"></span>
+<div style="position: absolute; left: 0; top: 38px; bottom: 8px; width: 52px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 6px; box-sizing: border-box">
+<span class="fo-icon fo-icon-on fo-pop" style="--d: 560"></span>
+<span class="fo-icon fo-pop" style="--d: 610"></span>
+<span class="fo-icon fo-pop" style="--d: 660"></span>
+<span style="flex: 1"></span>
+<span class="fo-icon fo-pop" style="--d: 710"></span>
+<span class="fo-icon fo-pop" style="--d: 760"></span>
+<span class="fo-icon fo-pop" style="--d: 810"></span>
+</div>
+<div style="position: absolute; left: 52px; top: 38px; right: 4px; bottom: 4px">
+<div class="fo-fill" style="position: absolute; inset: 0; border-radius: 10px; overflow: hidden; background: var(--paper); box-shadow: 0 0 0 1px var(--line)">
+<div class="fo-sidebar" style="position: absolute; left: 0; top: 0; bottom: 0; width: 240px; box-sizing: border-box; background: var(--side); border-right: 1px solid var(--line); padding: 20px 16px; display: flex; flex-direction: column; gap: 22px">
+<span class="fo-bar fo-in" style="--d: 760; width: 96px; height: 8px"></span>
+<span class="fo-bar fo-in" style="--d: 800; width: 84px; height: 8px; margin-left: 18px"></span>
+<span class="fo-bar fo-in" style="--d: 840; width: 64px; height: 8px; margin-left: 18px"></span>
+<span class="fo-bar fo-in" style="--d: 880; width: 112px; height: 8px; margin-left: 18px"></span>
+<span class="fo-in" style="--d: 940; display: flex; align-items: center; height: 36px; margin: -10px -2px 0; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--accent)"><span class="fo-bar" style="width: 60px; height: 8px"></span></span>
+</div>
+<div class="fo-main" style="position: absolute; left: 240px; right: 0; top: 0; bottom: 0; display: flex; justify-content: center; padding: 40px 48px 0">
+<div style="width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 16px">
+<span class="fo-bar fo-line" style="--d: 820; width: 34%; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--ink) 16%, transparent)"></span>
+<span class="fo-bar fo-line" style="--d: 880; width: 10%; height: 12px; margin-top: 10px"></span>
+<span class="fo-bar fo-line" style="--d: 920; width: 96%; height: 8px"></span>
+<span class="fo-bar fo-line" style="--d: 960; width: 88%; height: 8px"></span>
+<span class="fo-bar fo-line" style="--d: 1000; width: 92%; height: 8px"></span>
+<span class="fo-bar fo-line" style="--d: 1040; width: 58%; height: 8px"></span>
+<span class="fo-bar fo-line" style="--d: 1080; width: 10%; height: 12px; margin-top: 10px"></span>
+<span class="fo-bar fo-line" style="--d: 1120; width: 84%; height: 8px"></span>
+<span class="fo-bar fo-line" style="--d: 1160; width: 70%; height: 8px"></span>
+<span class="fo-caret" style="width: 2px; height: 20px; border-radius: 1px; background: var(--accent)"></span>
+</div>
+</div>
+</div>
+<span class="fo-divider" style="position: absolute; left: 239px; top: 0; bottom: 0; width: 1.25px; background: var(--accent)"></span>
+<svg style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible" aria-hidden="true">
+<rect class="fo-trace" x="0.5" y="0.5" rx="10" pathLength="1"></rect>
+</svg>
+</div>
+</div>
+</sc-if>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">正在打开 Thinkly</span>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+state = { on: true };
+componentDidMount() {
+this.loop = setInterval(() => {
+this.setState({ on: false });
+this.back = setTimeout(() => this.setState({ on: true }), 450);
+}, 4200);
+}
+componentWillUnmount() {
+clearInterval(this.loop);
+clearTimeout(this.back);
+}
+renderVals() {
+const d = this.props.dark;
+const dark = d === true || d === 'true';
+const theme = dark
+? { shell: '#343434', side: '#222222', paper: '#181818', ink: '#ececec', accent: '#779de8', line: 'rgba(236,236,236,.12)' }
+: { shell: '#f1f1f1', side: '#fafafa', paper: '#ffffff', ink: '#20242c', accent: '#547dd0', line: 'rgba(32,36,44,.08)' };
+return { ...theme, on: this.state.on };
+}
+}
+</script>
+</body>
+</html>
