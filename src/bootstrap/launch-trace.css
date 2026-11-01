@@ -1,0 +1,130 @@
+.goose-launch-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: hsl(var(--goose-editor-bg));
+}
+
+.goose-launch-sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--goose-launch-sidebar-width);
+}
+
+.goose-launch-sidebar-surface {
+  position: absolute;
+  inset: 0;
+  background: var(--goose-sidebar-surface);
+  animation: goose-launch-fade 240ms ease-out 600ms both;
+}
+
+.goose-launch-sidebar > svg {
+  position: relative;
+  display: block;
+}
+
+.goose-launch-side-bar,
+.goose-launch-line {
+  fill: var(--goose-text-primary);
+}
+
+.goose-launch-side-bar {
+  animation: goose-launch-fade 240ms ease-out both;
+  animation-delay: calc(600ms + var(--goose-launch-index) * 50ms);
+}
+
+.goose-launch-divider {
+  stroke: var(--goose-accent-solid);
+  transform-box: fill-box;
+  transform-origin: top;
+  animation: goose-launch-divider 280ms cubic-bezier(0.22, 1, 0.36, 1) 400ms both;
+}
+
+.goose-launch-content {
+  position: absolute;
+  inset: 0 0 0 var(--goose-launch-sidebar-width);
+  display: flex;
+  justify-content: center;
+  padding: 0 32px;
+}
+
+.goose-launch-column {
+  display: block;
+  max-width: 720px;
+  overflow: visible;
+}
+
+.goose-launch-line {
+  transform-box: fill-box;
+  transform-origin: left;
+  animation: goose-launch-line 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(750ms + var(--goose-launch-index) * 70ms);
+}
+
+.goose-launch-cursor {
+  fill: var(--goose-accent-solid);
+}
+
+.goose-launch-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.goose-launch-trace {
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  fill: none;
+  stroke: var(--goose-accent-solid);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  /* 描边绘制是唯一的非 transform／opacity 动画。 */
+  animation: goose-launch-trace 520ms cubic-bezier(0.65, 0, 0.35, 1) both,
+    goose-launch-trace-exit 220ms ease-out 540ms forwards;
+}
+
+@keyframes goose-launch-trace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes goose-launch-trace-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes goose-launch-divider {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes goose-launch-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes goose-launch-line {
+  from { opacity: 0; transform: scaleX(0.2); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@media (max-width: 720px) {
+  .goose-launch-sidebar { display: none; }
+  .goose-launch-content { left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-launch-trace,
+  .goose-launch-divider,
+  .goose-launch-sidebar-surface,
+  .goose-launch-side-bar,
+  .goose-launch-line {
+    animation: none;
+  }
+
+  .goose-launch-trace { opacity: 0; }
+  .goose-launch-divider { transform: none; }
+  .goose-launch-side-bar,
+  .goose-launch-line { opacity: 1; transform: none; }
+}
