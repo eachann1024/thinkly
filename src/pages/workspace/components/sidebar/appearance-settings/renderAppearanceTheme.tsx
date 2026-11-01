@@ -144,7 +144,7 @@ export function renderAppearanceTheme(
         <div
           role="radiogroup"
           aria-labelledby="appearance-accent-color-label"
-          className="flex flex-wrap gap-2"
+          className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2"
         >
           {accentOptions.map((option, index) => {
             const selected = accentColor === option.value;
@@ -176,7 +176,7 @@ export function renderAppearanceTheme(
                   setFocusedAccentIndex(index);
                   setAccentColor(option.value);
                 }}
-                className="goose-accent-option goose-accent-selection flex h-11 min-w-[7rem] shrink-0 items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
+                className="goose-accent-option goose-accent-selection flex h-11 w-full min-w-0 items-center gap-2 rounded-lg px-2.5 text-left text-sm font-medium text-foreground transition-[background-color,color,box-shadow,transform]"
               >
                 <span
                   aria-hidden="true"
