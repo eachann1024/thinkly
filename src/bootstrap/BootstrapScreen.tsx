@@ -22,29 +22,31 @@ const uiText = createTranslator(localMessages);
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileText } from "@/components/ui/icons";
-import { DotIconArt } from "@/components/ui/dot-matrix/illustrations/DotIconArt";
-import { DotDecor } from "@/components/ui/dot-matrix/decor";
 import { ReviewedStateArt } from "@/components/ui/dot-matrix/illustrations/ReviewedStateArt";
 import { StateArtBackdrop } from "@/components/ui/dot-matrix/illustrations/StateArtBackdrop";
 
 export function BootstrapScreen({ lean, error }: { lean: boolean; error?: unknown }) {
   useLocale();
-  const message = error instanceof Error ? error.message : error ? String(error) : undefined;
+  if (!error) {
+    return (
+      <main className="bootstrap-screen" role="status">
+        <span className="sr-only">{lean ? uiText("restoring") : uiText("opening")}</span>
+      </main>
+    );
+  }
+  const message = error instanceof Error ? error.message : String(error);
   return (
     <main className="bootstrap-screen relative overflow-hidden">
-      {lean && !error ? <DotDecor preset="bootstrap" /> : <StateArtBackdrop kind={error ? "openError" : "opening"} />}
-      <EmptyState className="relative" icon={FileText} role={error ? "alert" : "status"}
-        illustration={error
-          ? <ReviewedStateArt key="failed" kind="openError" />
-          : lean ? <DotIconArt key="restoring" icon="doc" size={44} width={120} height={84} halo motion="progress-reverse" />
-          : <ReviewedStateArt key="loading" kind="opening" />}
-        title={error ? uiText("openFailed") : lean ? uiText("restoring") : uiText("opening")}
+      <StateArtBackdrop kind="openError" />
+      <EmptyState className="relative" icon={FileText} role="alert"
+        illustration={<ReviewedStateArt key="failed" kind="openError" />}
+        title={uiText("openFailed")}
         details={message}
-        action={error ? (
+        action={
           <Button contentStyle="preserve" variant="ghost" size={null} type="button"
             className="rounded-lg px-2 py-1 text-xs" onClick={() => window.location.reload()}>
             {uiText("reload")}</Button>
-        ) : undefined} />
+        } />
     </main>
   );
 }
