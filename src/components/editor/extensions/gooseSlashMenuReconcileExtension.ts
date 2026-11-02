@@ -30,7 +30,9 @@ export function createGooseSlashMenuReconcileExtension(
                 reconcileSlashSuggestionMenu(ed, {
                   allowSlashMenuOnFirstBlock: allowSlashMenuOnFirstBlockRef.current,
                 });
-                if (allowPageMentions()) reconcilePageMentionSuggestionMenu(ed);
+                reconcilePageMentionSuggestionMenu(ed, {
+                  allowPageMentions: allowPageMentions(),
+                });
               });
               return false;
             },
@@ -48,7 +50,9 @@ export function createGooseSlashMenuReconcileExtension(
             reconcileSlashSuggestionMenu(ed, {
               allowSlashMenuOnFirstBlock: allowSlashMenuOnFirstBlockRef.current,
             });
-            if (allowPageMentions()) reconcilePageMentionSuggestionMenu(ed);
+            reconcilePageMentionSuggestionMenu(ed, {
+              allowPageMentions: allowPageMentions(),
+            });
           });
           return null;
         },

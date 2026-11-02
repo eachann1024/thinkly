@@ -9,6 +9,7 @@ import {
   reconcilePageMentionSuggestionMenu,
 } from "@/components/editor/utils/slashMenuPolicy";
 import type { EditorRuntime } from "./useEditorSession";
+import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorClipboard.ts#messages:1">`
 zh-Hans:
@@ -32,6 +33,7 @@ export function useEditorClipboard(runtime: EditorRuntime) {
     platformRef,
     getActivePageLocalFilePathRef,
     usesRawEditorContentRef,
+    pageRef,
   } = runtime;
   useEffect(() => {
     const container = editorContainerRef.current;
@@ -87,7 +89,9 @@ export function useEditorClipboard(runtime: EditorRuntime) {
         reconcileSlashSuggestionMenu(editor, {
           allowSlashMenuOnFirstBlock: usesRawEditorContentRef.current,
         });
-        reconcilePageMentionSuggestionMenu(editor);
+        reconcilePageMentionSuggestionMenu(editor, {
+          allowPageMentions: !isQuickNoteEditorPage(pageRef.current),
+        });
       });
     container.addEventListener("compositionend", onCompositionEnd);
     return () =>
