@@ -70,7 +70,16 @@ import { renderNotebookIcon } from "./notebookUtils";
 
 export function LocalFolderTargetPicker() {
   const open = useLocalFolderTargetPicker((state) => state.picker.phase !== "closed");
-  return open ? <LocalFolderTargetPickerContent /> : null;
+  const closePicker = useLocalFolderTargetPicker((state) => state.closePicker);
+  return (
+    <CommandDialog
+      open={open}
+      onOpenChange={(next) => !next && closePicker()}
+      commandProps={{ shouldFilter: false }}
+    >
+      <LocalFolderTargetPickerContent />
+    </CommandDialog>
+  );
 }
 
 function LocalFolderTargetPickerContent() {
@@ -163,11 +172,7 @@ function LocalFolderTargetPickerContent() {
   };
 
   return (
-    <CommandDialog
-      open={open}
-      onOpenChange={(next) => !next && closePicker()}
-      commandProps={{ shouldFilter: false }}
-    >
+    <>
       <CommandInput
         ref={inputRef}
         value={query}
@@ -215,6 +220,6 @@ function LocalFolderTargetPickerContent() {
           </CommandGroup>
         )}
       </CommandList>
-    </CommandDialog>
+    </>
   );
 }
