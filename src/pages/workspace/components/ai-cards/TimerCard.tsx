@@ -1,5 +1,5 @@
 import { useLocale, createTranslator, i18nYaml } from "@/i18n";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimationControls, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Pause, Play, RotateCcw } from "@/components/ui/icons";
@@ -7,6 +7,7 @@ import { shell } from "@/lib/electron-platform/shell";
 import type { TimerCardData } from "@/lib/notebook-ai/cards/types";
 import { CardRing } from "./CardProgress";
 import { rowVariants } from "./cardMotion";
+import { useCardVisibility } from "./useCardVisibility";
 
 const messages = i18nYaml<"src/pages/workspace/components/ai-cards/TimerCard.tsx#messages:1">`
 zh-Hans:
@@ -59,7 +60,7 @@ export function TimerCard({ card }: { card: TimerCardData }) {
   const total = Math.max(1, Math.round(card.minutes * 60_000));
   const [state, setState] = useState<TimerState>(() => timers.get(key) ?? { total, remaining: total, endAt: null });
   const [now, setNow] = useState(() => Date.now());
-  const notified = useRef(false);
+  const { ref, visible } = useCardVisibility<HTMLDivElement>();
   const remaining = remainingOf(state, now);
   const running = state.endAt !== null && remaining > 0;
   const done = remaining <= 0;
@@ -67,19 +68,30 @@ export function TimerCard({ card }: { card: TimerCardData }) {
   useEffect(() => { timers.set(key, state); }, [key, state]);
 
   useEffect(() => {
-    if (state.endAt === null) return;
+    if (!visible || state.endAt === null) return;
+    setNow(Date.now());
     const timer = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(timer);
-  }, [state.endAt]);
+  }, [state.endAt, visible]);
 
   useEffect(() => {
-    if (!done || state.endAt === null) { notified.current = false; return; }
-    if (notified.current) return;
-    notified.current = true;
-    setState(prev => ({ ...prev, remaining: 0, endAt: null }));
-    shell.showNotification(t("finished", { title: card.title }));
-    if (!reduce) void pulse.start({ scale: [1, 1.06, 1, 1.04, 1], transition: { duration: 1.2, ease: "easeInOut" } });
-  }, [done, state.endAt, card.title, pulse, reduce]);
+    const deadline = state.endAt;
+    if (deadline === null) return;
+    let timer = 0;
+    const finish = () => {
+      const at = Date.now();
+      if (at < deadline) {
+        timer = window.setTimeout(finish, Math.min(deadline - at, 2_147_483_647));
+        return;
+      }
+      setNow(at);
+      setState(prev => ({ ...prev, remaining: 0, endAt: null }));
+      shell.showNotification(t("finished", { title: card.title }));
+      if (!reduce) void pulse.start({ scale: [1, 1.06, 1, 1.04, 1], transition: { duration: 1.2, ease: "easeInOut" } });
+    };
+    timer = window.setTimeout(finish, Math.max(0, Math.min(deadline - Date.now(), 2_147_483_647)));
+    return () => window.clearTimeout(timer);
+  }, [state.endAt, card.title, pulse, reduce]);
 
   const start = () => {
     const at = Date.now();
@@ -87,9 +99,9 @@ export function TimerCard({ card }: { card: TimerCardData }) {
     setState(prev => ({ ...prev, endAt: at + (prev.remaining > 0 ? prev.remaining : prev.total) }));
   };
   const pause = () => setState(prev => ({ ...prev, remaining: remainingOf(prev, Date.now()), endAt: null }));
-  const reset = () => { notified.current = false; setState({ total, remaining: total, endAt: null }); };
+  const reset = () => { setState({ total, remaining: total, endAt: null }); };
 
-  return <div className="ai-card-timer" data-done={done || undefined}>
+  return <div ref={ref} className="ai-card-timer" data-done={done || undefined}>
     <motion.div className="ai-card-timer-ring" variants={rowVariants}>
       <motion.span animate={pulse} style={{ display: "inline-flex" }}>
         <CardRing value={remaining / state.total} size={112} stroke={5}>
