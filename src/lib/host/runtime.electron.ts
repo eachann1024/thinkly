@@ -5,40 +5,12 @@ import type {
   HostRemoveResult,
 } from "./types";
 
-const WEB_DB_STORAGE_KEY = "thinkly:web-db";
-
-const readWebDb = (): Record<string, HostDoc<unknown>> => {
-  if (typeof window === "undefined") throw new Error("local-storage-unavailable");
-  const raw = window.localStorage.getItem(WEB_DB_STORAGE_KEY);
-  if (raw === null) return {};
-  const parsed: unknown = JSON.parse(raw);
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("local-storage-invalid-document-map");
-  }
-  for (const [id, value] of Object.entries(parsed)) {
-    if (!value || typeof value !== "object" || Array.isArray(value) ||
-      !("_id" in value) || value._id !== id || !("data" in value) ||
-      ("_rev" in value && value._rev !== undefined && typeof value._rev !== "string")) {
-      throw new Error("local-storage-invalid-document");
-    }
-  }
-  return parsed as Record<string, HostDoc<unknown>>;
-};
-
-const writeWebDb = (db: Record<string, HostDoc<unknown>>): boolean => {
-  if (typeof window === "undefined") return false;
-  try {
-    window.localStorage.setItem(WEB_DB_STORAGE_KEY, JSON.stringify(db));
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const nextWebRev = (current?: string): string => {
-  const rev = Number(String(current || "0").split("-")[0] || 0) + 1;
-  return `${rev}-${Date.now().toString(36)}`;
-};
+import {
+  allElectronDocuments,
+  getElectronDocument,
+  putElectronDocument,
+  removeElectronDocument,
+} from "./electronDocumentStorage";
 
 const electronAttachments = () => import("@/lib/electron/attachments");
 
@@ -56,37 +28,25 @@ export const hostRuntime: HostRuntime = {
   },
   db: {
     put: <T>(id: string, data: T, rev?: string): HostPutResult => {
-      let db: Record<string, HostDoc<unknown>>;
-      try { db = readWebDb(); }
-      catch { return { id, ok: false, error: "local-storage-read-failed" }; }
-      const nextRev = nextWebRev(rev || db[id]?._rev);
-      db[id] = { _id: id, _rev: nextRev, data };
-      if (!writeWebDb(db)) {
+      try {
+        return { id, ok: true, rev: putElectronDocument(id, data, rev) };
+      } catch {
         return { id, ok: false, error: "local-storage-write-failed" };
       }
-      return { id, ok: true, rev: nextRev };
     },
     get: <T>(id: string): HostDoc<T> | null => {
-      const db = readWebDb();
-      return Object.hasOwn(db, id) ? db[id] as HostDoc<T> : null;
+      return getElectronDocument<T>(id);
     },
     remove: (id: string): HostRemoveResult => {
-      let db: Record<string, HostDoc<unknown>>;
-      try { db = readWebDb(); }
-      catch { return { id, ok: false, error: "local-storage-read-failed" }; }
-      delete db[id];
-      if (!writeWebDb(db)) {
-        return { id, ok: false, error: "local-storage-write-failed" };
-      }
+      try { removeElectronDocument(id); }
+      catch { return { id, ok: false, error: "local-storage-write-failed" }; }
       void electronAttachments()
         .then((mod) => mod.removeAttachment(id))
         .catch(() => {});
       return { id, ok: true };
     },
     allDocs: <T>(prefix = ""): Array<HostDoc<T>> => {
-      return Object.values(readWebDb()).filter((doc) =>
-        doc._id.startsWith(prefix),
-      ) as Array<HostDoc<T>>;
+      return allElectronDocuments<T>(prefix);
     },
     postAttachment: async (id: string, data: Uint8Array, type: string) => {
       const mod = await electronAttachments();
