@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createAIContextPagesRevision } from "./aiContextPagesRevision";
 import {
   getLocalSkills,
   readGlobalAgentsPrompt,
@@ -19,9 +20,13 @@ export function useAIContextAvailability(
   active: boolean,
 ): AIContextAvailability {
   const [availability, setAvailability] = useState(EMPTY);
-  const pages = usePages((state) => state.pages);
-  const notebooks = useNotebooks((state) => state.notebooks);
-  const notebookId = useNotebooks((state) => state.activeNotebookId);
+  const notebookId = useNotebooks((state) => active ? state.activeNotebookId : null);
+  const notebookConfig = useNotebooks((state) => {
+    const notebook = notebookId ? state.notebooks[notebookId] : undefined;
+    return JSON.stringify([notebook?.source, notebook?.localPath]);
+  });
+  const selectSkillRevision = useMemo(() => createAIContextPagesRevision(notebookId), [notebookId]);
+  const skillRevision = usePages(selectSkillRevision);
 
   useEffect(() => {
     if (!active) {
@@ -46,7 +51,7 @@ export function useAIContextAvailability(
     refresh();
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
-  }, [active, notebookId, notebooks, pages]);
+  }, [active, notebookId, notebookConfig, skillRevision]);
 
   return active ? availability : EMPTY;
 }
