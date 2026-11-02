@@ -29,12 +29,16 @@ export function createInlinePreviewOutline(view: EditorView, key: PluginKey<Inli
   const paint = () => {
     frame = 0;
     if (view.isDestroyed || !view.dom.isConnected) return;
+    const parts = key.getState(view.state) ?? [];
+    if (!parts.length) return;
     const hostRect = host.getBoundingClientRect();
     const scaleX = hostRect.width / (host.offsetWidth || hostRect.width || 1);
     const scaleY = hostRect.height / (host.offsetHeight || hostRect.height || 1);
     const bounds = horizontalBounds(host);
-    let index = 0;
-    for (const group of groupInlinePreviewRanges(view.state.doc, key.getState(view.state) ?? [])) {
+    const offsetX = host.scrollLeft - host.clientLeft;
+    const offsetY = host.scrollTop - host.clientTop;
+    const styles: Array<{ left: string; top: string; width: string; height: string }> = [];
+    for (const group of groupInlinePreviewRanges(view.state.doc, parts)) {
       const rects = group.flatMap((part) => {
         const element = view.nodeDOM(part.blockFrom);
         return element instanceof HTMLElement ? [element.getBoundingClientRect()] : [];
@@ -45,35 +49,54 @@ export function createInlinePreviewOutline(view: EditorView, key: PluginKey<Inli
       const right = Math.min(Math.max(...rects.map((rect) => rect.right)) + 5 * scaleX, bounds.right - scaleX);
       const bottom = Math.max(...rects.map((rect) => rect.bottom));
       if (right <= left) continue;
+      styles.push({
+        left: `${(left - hostRect.left) / scaleX + offsetX}px`,
+        top: `${(top - hostRect.top) / scaleY + offsetY - 4}px`,
+        width: `${(right - left) / scaleX}px`,
+        height: `${(bottom - top) / scaleY + 8}px`,
+      });
+    }
+    styles.forEach((style, index) => {
       const outline = layer.children[index] as HTMLElement | undefined ?? view.dom.ownerDocument.createElement("div");
       if (!outline.parentElement) {
         outline.className = "goose-ai-range-outline";
         layer.append(outline);
       }
-      Object.assign(outline.style, {
-        left: `${(left - hostRect.left) / scaleX + host.scrollLeft - host.clientLeft}px`,
-        top: `${(top - hostRect.top) / scaleY + host.scrollTop - host.clientTop - 4}px`,
-        width: `${(right - left) / scaleX}px`,
-        height: `${(bottom - top) / scaleY + 8}px`,
-      });
-      index++;
-    }
-    while (layer.children.length > index) layer.lastElementChild?.remove();
+      Object.assign(outline.style, style);
+    });
+    while (layer.children.length > styles.length) layer.lastElementChild?.remove();
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(paint); };
   const observer = new ResizeObserver(schedule);
-  observer.observe(view.dom);
-  observer.observe(host);
-  view.dom.ownerDocument.addEventListener("scroll", schedule, true);
-  window.addEventListener("resize", schedule);
-  schedule();
+  let listening = false;
+  const detach = () => {
+    listening = false;
+    cancelAnimationFrame(frame);
+    frame = 0;
+    observer.disconnect();
+    view.dom.ownerDocument.removeEventListener("scroll", schedule, true);
+    window.removeEventListener("resize", schedule);
+  };
+  const update = () => {
+    if (!(key.getState(view.state)?.length)) {
+      if (listening) detach();
+      if (layer.childElementCount) layer.replaceChildren();
+      return;
+    }
+    if (!listening) {
+      listening = true;
+      observer.observe(view.dom);
+      observer.observe(host);
+      view.dom.ownerDocument.addEventListener("scroll", schedule, true);
+      window.addEventListener("resize", schedule);
+    }
+    schedule();
+  };
+  update();
   return {
-    update: schedule,
+    update,
     destroy() {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      view.dom.ownerDocument.removeEventListener("scroll", schedule, true);
-      window.removeEventListener("resize", schedule);
+      detach();
       layer.remove();
       host.classList.remove("goose-ai-range-host");
     },
