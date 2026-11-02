@@ -1,9 +1,10 @@
 import { useLocale, getFormatLocale, createTranslator, i18nYaml } from "@/i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { Moon, Sun } from "@/components/ui/icons";
 import type { WorldTimeCardData } from "@/lib/notebook-ai/cards/types";
 import { rowVariants } from "./cardMotion";
+import { useCardVisibility } from "./useCardVisibility";
 
 const messages = i18nYaml<"src/pages/workspace/components/ai-cards/WorldTimeCard.tsx#messages:1">`
 zh-Hans:
@@ -33,9 +34,11 @@ ja:
 `;
 const t = createTranslator(messages);
 
-function useNow() {
+function useNow(visible: boolean) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
+    if (!visible) return;
+    setNow(Date.now());
     let timer = 0;
     const tick = () => {
       setNow(Date.now());
@@ -43,15 +46,15 @@ function useNow() {
     };
     timer = window.setTimeout(tick, 1000 - (Date.now() % 1000) + 8);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [visible]);
   return now;
 }
 
 type Wall = { year: number; month: number; day: number; hour: number; minute: number; second: number };
 
-function wallTime(now: number, timeZone: string): Wall | null {
+function wallTime(now: number, formatter: Intl.DateTimeFormat): Wall | null {
   try {
-    const parts = new Intl.DateTimeFormat("en-US", { timeZone, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric" }).formatToParts(now);
+    const parts = formatter.formatToParts(now);
     const get = (type: string) => Number(parts.find(p => p.type === type)?.value ?? 0);
     return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute"), second: get("second") };
   } catch {
@@ -79,11 +82,20 @@ function dayShift(now: number, wall: Wall) {
 }
 
 function Clock({ label, timeZone, now }: { label: string; timeZone: string; now: number }) {
-  const wall = wallTime(now, timeZone);
-  if (!wall) return null;
   const locale = getFormatLocale();
-  const time = new Intl.DateTimeFormat(locale, { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(now);
-  const date = new Intl.DateTimeFormat(locale, { timeZone, month: "short", day: "numeric", weekday: "short" }).format(now);
+  const formatters = useMemo(() => {
+    try {
+      return {
+        wall: new Intl.DateTimeFormat("en-US", { timeZone, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric" }),
+        time: new Intl.DateTimeFormat(locale, { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
+        date: new Intl.DateTimeFormat(locale, { timeZone, month: "short", day: "numeric", weekday: "short" }),
+      };
+    } catch { return null; }
+  }, [locale, timeZone]);
+  const wall = formatters ? wallTime(now, formatters.wall) : null;
+  if (!wall || !formatters) return null;
+  const time = formatters.time.format(now);
+  const date = formatters.date.format(now);
   const isDay = wall.hour >= 6 && wall.hour < 18;
   const DayIcon = isDay ? Sun : Moon;
   const shift = dayShift(now, wall);
@@ -102,8 +114,9 @@ function Clock({ label, timeZone, now }: { label: string; timeZone: string; now:
 
 export function WorldTimeCard({ card }: { card: WorldTimeCardData }) {
   useLocale();
-  const now = useNow();
-  return <ul className="ai-card-clocks">
+  const { ref, visible } = useCardVisibility<HTMLUListElement>();
+  const now = useNow(visible);
+  return <ul ref={ref} className="ai-card-clocks">
     {card.entries.map(entry => <Clock key={`${entry.label}-${entry.timeZone}`} label={entry.label} timeZone={entry.timeZone} now={now}/>)}
   </ul>;
 }
