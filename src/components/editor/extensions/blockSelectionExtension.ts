@@ -7,6 +7,7 @@ import { GooseBlockSelection, adjacentBlock, currentBlockNode, selectedBlockRoot
 import { deleteSelectionSafely } from "./selectionDelete";
 import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
 import { createSparseBlockHandleDecorations, sparseBlockDecorationTargetsAtPositions } from "./sparseBlockHandleDecorations";
+import { handleHiddenCodePreviewKey, normalizeHiddenCodePreviewSelection } from "./hiddenCodePreviewSelection";
 
 const decorationsByDocument = new WeakMap<EditorState["doc"], {
   selection: EditorState["selection"];
@@ -17,9 +18,10 @@ export function resolveBlockSelectionDecorations(state: EditorState): Decoration
   const selection = state.selection;
   const cached = decorationsByDocument.get(state.doc);
   if (cached?.selection === selection) return cached.decorations;
+  const selectedNodeBlock = selection instanceof NodeSelection &&
+    ["blockContainer", "divider"].includes(selection.node.type.name) ? currentBlockNode(state) : null;
   const blocks = selection instanceof GooseBlockSelection ? selectedBlockRoots(state) :
-    selection instanceof NodeSelection && selection.node.type.name === "blockContainer"
-      ? [{ node: selection.node, pos: selection.from }] : [];
+    selectedNodeBlock ? [selectedNodeBlock] : [];
   if (!blocks.length) return null;
   const decorations = selection instanceof NodeSelection
     ? createSparseBlockHandleDecorations(state.doc, sparseBlockDecorationTargetsAtPositions(state.doc, blocks), () => ({
@@ -75,8 +77,12 @@ export function typeSlashAtSelectedBlockStart(
 
 export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
   key: "goose-block-selection",
+  runsBefore: ["goose-code-block-keyboard", "goose-media-block-enter", "default"],
   prosemirrorPlugins: [new Plugin({
     key: new PluginKey("goose-block-selection"),
+    appendTransaction(_transactions, _oldState, state) {
+      return normalizeHiddenCodePreviewSelection(editor, state);
+    },
     props: {
       decorations: resolveBlockSelectionDecorations,
       handleClick: restoreTextSelectionOnBlockClick,
@@ -93,6 +99,7 @@ export const gooseBlockSelectionExtension = createExtension(({ editor }) => ({
           return true;
         }
         if (!isBlockNodeSelection(state)) return false;
+        if (handleHiddenCodePreviewKey(editor, view, event)) return true;
         if (event.key === "Backspace" || event.key === "Delete") {
           return editor.isEditable && deleteSelectionSafely(view);
         }

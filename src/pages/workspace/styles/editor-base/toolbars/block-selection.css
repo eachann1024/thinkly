@@ -28,6 +28,11 @@
   display: none;
 }
 
+.workspace-editor-surface .bn-editor .bn-block-outer[data-goose-block-selected="true"]
+  > .bn-block > [data-content-type="divider"] hr {
+  border-top-color: color-mix(in srgb, var(--goose-accent-solid) 55%, transparent);
+}
+
 .bn-editor .bn-block-outer,
 .workspace-editor-surface:has(> .bn-container, > .bn-root) {
   overflow-clip-margin: 9px;

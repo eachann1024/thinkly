@@ -1,5 +1,7 @@
 import { NodeSelection, TextSelection, type EditorState, type Selection, type Transaction } from "prosemirror-state";
 import { getProtectedTitle } from "../utils/documentTitlePolicy";
+import { GooseBlockSelection } from "./blockSelectionModel";
+import { isHiddenCodePreview } from "./hiddenCodePreviewSelection";
 
 const MEDIA_TYPES = new Set(["image", "imageResize", "video", "audio", "file", "divider"]);
 export const MEDIA_KEYBOARD_DELETE_META = "goose-media-keyboard-delete";
@@ -36,8 +38,9 @@ export function selectAdjacentMediaForDeletion(
   const index = $from.index(depth - 1) + direction;
   if (index < 0 || index >= siblings.childCount) return false;
   const adjacent = siblings.child(index);
+  const preview = isHiddenCodePreview(editor, adjacent);
   if (adjacent.type.name !== "blockContainer" || adjacent.childCount !== 1 ||
-    !MEDIA_TYPES.has(adjacent.firstChild?.type.name ?? "")) return false;
+    (!MEDIA_TYPES.has(adjacent.firstChild?.type.name ?? "") && !preview)) return false;
 
   const from = $from.before(depth);
   const mediaPos = direction < 0 ? from - adjacent.nodeSize + 1 : from + container.nodeSize + 1;
@@ -45,9 +48,11 @@ export function selectAdjacentMediaForDeletion(
     $from.parent.content.size === 0 && container.childCount === 1 &&
     getProtectedTitle(state)?.pos !== from;
   editor.transact((tr) => {
-    tr.setMeta(MEDIA_KEYBOARD_DELETE_META, true);
+    if (!preview) tr.setMeta(MEDIA_KEYBOARD_DELETE_META, true);
     if (removeEmptyLine) tr.delete(from, from + container.nodeSize);
-    tr.setSelection(NodeSelection.create(tr.doc, tr.mapping.map(mediaPos)));
+    tr.setSelection(preview
+      ? GooseBlockSelection.create(tr.doc, tr.mapping.map(mediaPos - 1))
+      : NodeSelection.create(tr.doc, tr.mapping.map(mediaPos)));
     tr.scrollIntoView();
   });
   return true;
