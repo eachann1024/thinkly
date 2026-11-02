@@ -1,5 +1,6 @@
 import type { ChatTransport, UIMessageChunk } from "ai";
 import type { NotebookAiExecution, NotebookAiMessage } from "./types";
+import { noteCitationKey } from "./noteCitation";
 import { readExecutionSource } from "./executionSource";
 
 export function finishExecutionDetails(execution: NotebookAiExecution, now = Date.now()): NotebookAiExecution {
@@ -45,8 +46,9 @@ export function withExecutionDetails(
               const source = readExecutionSource(tool?.type ?? "", chunk.output, chunk.toolCallId);
               if (source) {
                 const sources = [...execution.sources!];
-                const position = sourcePositions.get(source.id) ?? sources.length;
-                sourcePositions.set(source.id, position);
+                const key = noteCitationKey(source.id, source.location);
+                const position = sourcePositions.get(key) ?? sources.length;
+                sourcePositions.set(key, position);
                 sources[position] = source;
                 execution = { ...execution, sources };
                 changed = true;

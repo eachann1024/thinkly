@@ -2,6 +2,9 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/hooks/useFileDrop.ts#localMessages:1": { "connectALocalFolderFirst": {  }; "couldnTImportThisFile": {  }; "couldnTLoadTheImporterTryAgain": {  }; "dropAPlainTextFileInMd": {  }; "filesImported": { "count": string | number }; "filesSkipped": { "count": string | number }; "folderOpened": {  }; "importFailed": {  }; "openLocalFolderSettings": {  }; "openOrConnectALocalFolderIn": {  }; "textFileImported": {  }; "theFileCouldnTBeReadAs": {  }; "theFileMayBeDamagedOrUse": {  }; "thisFileFormatIsnTSupportedYet": {  } };
+    "src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1": { "dropToCheckFile": {  }; "dropToImportIntoTheCurrentFolder": {  }; "dropToImportTextFile": {  }; "dropToOpenFolder": {  }; "opensAsALocalFolderNotebook": {  }; "supportsMdMarkdownAndTxt": {  } };
+    "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
     "src/search.tsx#block1:1": { "title": {  } };
     "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
     "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };

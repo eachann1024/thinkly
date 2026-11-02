@@ -1,5 +1,6 @@
 import type { InfoCardData } from "@/lib/notebook-ai/cards/types";
 import type { NoteSource } from "./retrieveNotes";
+import { noteCitationKey, noteCitationsInText } from "@/lib/notebook-ai/noteCitation";
 
 export type SheetStep = { id: number; name: string; subject: string; status: "running" | "done" | "error"; count?: number };
 
@@ -67,7 +68,7 @@ export function sheetAnswerReducer(state: SheetAnswerState, event: Event): Sheet
   const content = { question, sources, readPages, text, requestId, steps, thinking, cards };
   const status = state.status;
   if (event.type === "retrieved") return { ...content, status, sources: event.sources };
-  if (event.type === "source") return readPages.some(s => s.id === event.source.id) ? state : { ...content, status, readPages: [...readPages, event.source] };
+  if (event.type === "source") return readPages.some(s => noteCitationKey(s.id, s.location) === noteCitationKey(event.source.id, event.source.location)) ? state : { ...content, status, readPages: [...readPages, event.source] };
   if (event.type === "stepStart") return { ...content, status, steps: startStep(steps, event.name, event.subject) };
   if (event.type === "stepEnd") return { ...content, status, steps: endStep(steps, event) };
   if (event.type === "thinking") return event.text === thinking ? state : { ...content, status, thinking: event.text, steps: stepsAfterThinking(steps) };
@@ -87,7 +88,20 @@ export function visibleSources(answer: SheetAnswer): Array<{ index: number | nul
   const cited = citedNumbers(answer.text);
   const list: Array<{ index: number | null; source: NoteSource }> = answer.sources.flatMap((source, i) => cited.has(i + 1) ? [{ index: i + 1, source }] : []);
   if (answer.status !== "done") return list;
-  const shown = new Set(list.map(item => item.source.id));
-  for (const source of answer.readPages) if (!shown.has(source.id)) { shown.add(source.id); list.push({ index: null, source }); }
+  const shown = new Set(list.map(item => noteCitationKey(item.source.id, item.source.location)));
+  const citations = noteCitationsInText(answer.text);
+  for (const citation of citations) {
+    const base = [...answer.sources, ...answer.readPages].find(source => source.id === citation.pageId);
+    const key = noteCitationKey(citation.pageId, citation.location);
+    if (base && !shown.has(key)) {
+      shown.add(key); list.push({ index: null, source: { ...base, location: citation.location } });
+    }
+  }
+  for (const source of answer.readPages) {
+    const key = noteCitationKey(source.id, source.location);
+    if (!shown.has(key) && !citations.some(citation => citation.pageId === source.id)) {
+      shown.add(key); list.push({ index: null, source });
+    }
+  }
   return list;
 }

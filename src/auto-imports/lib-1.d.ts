@@ -51,6 +51,7 @@ declare global {
   const SYSTEM_FONT_STACK: typeof import('../lib/fontLoader').SYSTEM_FONT_STACK
   const applyAccentColor: typeof import('../lib/accentColor').applyAccentColor
   const applyAppearanceScaleVariables: typeof import('../lib/appearance').applyAppearanceScaleVariables
+  const applyFontSmoothing: typeof import('../lib/fontLoader').applyFontSmoothing
   const applyFontVariables: typeof import('../lib/fontLoader').applyFontVariables
   const applyFrontmatterBodyToContent: typeof import('../lib/local-frontmatter').applyFrontmatterBodyToContent
   const applyTrailingNewlineStyle: typeof import('../lib/local-md-snapshot').applyTrailingNewlineStyle
@@ -86,7 +87,6 @@ declare global {
   const decodeUnsupportedMarkdownForDisk: typeof import('../lib/markdown-raw-guard').decodeUnsupportedMarkdownForDisk
   const deleteLocalMdSnapshot: typeof import('../lib/local-md-snapshot').deleteLocalMdSnapshot
   const describeDiskWriteError: typeof import('../lib/diskWriteError').describeDiskWriteError
-  const encodeUnsupportedMarkdownForEditor: typeof import('../lib/markdown-raw-guard').encodeUnsupportedMarkdownForEditor
   const ensureEditorFontAvailable: typeof import('../lib/fontLoader').ensureEditorFontAvailable
   const ensureFilenameAsTitle: typeof import('../lib/local-title-binding').ensureFilenameAsTitle
   const ensurePersistentRemoteFont: typeof import('../lib/fontLoader').ensurePersistentRemoteFont

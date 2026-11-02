@@ -1,3 +1,4 @@
+import { readNoteLocation } from "@/lib/notebook-ai/noteCitationLocation";
 import type { NoteSource } from "./retrieveNotes";
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -39,7 +40,7 @@ export function toolEndInfo(name: string, result: unknown, isError: boolean): { 
 }
 
 export function readPageSource(result: unknown): NoteSource | null {
-  const page = result as { pageId?: unknown; title?: unknown; markdown?: unknown } | null;
+  const page = result as { pageId?: unknown; title?: unknown; markdown?: unknown; location?: unknown } | null;
   if (typeof page?.pageId !== "string" || typeof page.title !== "string") return null;
-  return { id: page.pageId, title: page.title, excerpt: typeof page.markdown === "string" ? page.markdown.slice(0, 200) : "" };
+  return { id: page.pageId, title: page.title, location: readNoteLocation(page.location), excerpt: typeof page.markdown === "string" ? page.markdown.slice(0, 200) : "" };
 }

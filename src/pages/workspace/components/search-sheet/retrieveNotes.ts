@@ -2,7 +2,9 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getCachedText } from "../command/searchBodyCache";
 import type { Page } from "@/types";
 
-export interface NoteSource { id: string; title: string; excerpt: string }
+import { bestNoteBlock, noteCitationHref, noteSourceLabel, type NoteBlockLocation } from "@/lib/notebook-ai/noteCitation";
+
+export interface NoteSource { id: string; title: string; excerpt: string; location?: NoteBlockLocation }
 interface Terms { strong: string[]; weak: string[] }
 
 const MAX_SOURCES = 6;
@@ -89,7 +91,9 @@ export function retrieveNotes(question: string, candidates: Page[], ranked: Page
   const excerptTerms = [...terms.strong, ...terms.weak];
   return kept.map(({ page, score }) => {
     const limit = Math.round(Math.min(SOURCE_CHARS.max, Math.max(SOURCE_CHARS.min, TOTAL_BUDGET * score / total)));
-    return { id: page.id, title: getPageTitle(page), excerpt: excerptOf(getCachedText(page), excerptTerms, limit) };
+    const title = getPageTitle(page);
+    const block = bestNoteBlock(page, excerptTerms, title);
+    return { id: page.id, title, excerpt: block ? excerptOf(block.text, excerptTerms, limit) : "", location: block?.location };
   });
 }
 
@@ -97,7 +101,7 @@ import { CARD_GUIDE } from "@/lib/notebook-ai/cardGuide";
 
 export function buildAgentPrompt(question: string, sources: NoteSource[], scopeLabel: string, allNotebooks: boolean) {
   const context = sources.length
-    ? sources.map((s, i) => `[${i + 1}] 《${s.title}》（pageId: ${s.id}）\n${s.excerpt}`).join("\n\n")
+    ? sources.map((s, i) => `[${i + 1}] 《${noteSourceLabel(s.title, s.location)}》（pageId: ${s.id}）\n引用链接：${noteCitationHref(s.id, s.location)}\n${s.excerpt}`).join("\n\n")
     : "（没有预检索到相关笔记）";
   const scope = allNotebooks
     ? `本次检索范围：${scopeLabel}。searchNotes / listPages / readPage 覆盖范围内的所有笔记本，回答时按“全部笔记”表述，不要说成某一个笔记本。`
@@ -107,7 +111,7 @@ export function buildAgentPrompt(question: string, sources: NoteSource[], scopeL
     scope,
     "先看给出的笔记摘录，摘录只是按相关度挑出的片段，与问题无关的直接忽略；不够时再用笔记工具查找，问题涉及笔记以外的事实时联网：天气 getWeather、汇率 getExchangeRate、时间时差 getWorldTime、币价 getCryptoPrice，其他资料、新闻用 searchWeb，必要时 readWebPage 读原文。",
     CARD_GUIDE,,
-    "回答用用户提问的语言，先给结论，简洁分点；引用摘录时在句末标注其编号如 [1]，只标注真正用到的；通过 readPage 读到的其他页面直接写出页面标题，不要自编编号；引用网页时附上链接。",
+    "回答用用户提问的语言，先给结论，简洁分点；引用摘录时在句末用编号作链接，如 [1](该摘录的引用链接)，只标注真正用到的；通过 readPage 读到的其他内容，使用对应 blocks 条目的 citationHref 写 Markdown 链接，标签为文件名 · locationLabel，不要自编编号或链接。引用网页时附上链接。",
     "确实查不到就直接说明，不要编造。",
   ].join("\n");
   return { system, prompt: `【笔记摘录】\n${context}\n\n【问题】\n${question}` };

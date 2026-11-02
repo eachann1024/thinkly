@@ -42,6 +42,7 @@ import { useEditorPaneRegistry } from "./editorPaneRegistry";
 import { useSettings } from "@/stores/useSettings";
 import { SearchEditorBridge } from "../sidebar/SearchEditorBridge";
 import { normalizePageLayout } from "@/lib/local-frontmatter";
+import { useNoteCitationNavigation } from "./useNoteCitationNavigation";
 
 export function SplitEditorPane({
   tabId,
@@ -76,6 +77,7 @@ export function SplitEditorPane({
     [leaf.id, leaf.pageId, registry],
   );
   const { cancelPendingRestoration } = usePaneScrollRestoration(leaf.pageId, scrollElRef);
+  useNoteCitationNavigation({ pageId: leaf.pageId, focused, editorRef, scrollRef: scrollElRef, cancelPendingRestoration });
   const page = usePages((state) => state.pages[leaf.pageId]);
   const title = page ? getPageTitle(page) : (leaf.title ?? uiText("thisNoteNoLongerExists"));
 

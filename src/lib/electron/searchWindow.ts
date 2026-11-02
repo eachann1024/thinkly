@@ -1,3 +1,4 @@
+import { readNoteLocation, type NoteBlockLocation } from "../notebook-ai/noteCitationLocation";
 
 export const SEARCH_WINDOW_WIDTH = 680;
 export const SEARCH_WINDOW_HEIGHT = 460;
@@ -47,6 +48,7 @@ export function centeredSearchWindowBounds(
 }
 
 export type OpenSearchResultPayload = {
+  location?: NoteBlockLocation;
   pageId: string;
   query: string;
   localFilePath?: string;
@@ -69,6 +71,8 @@ export function parseOpenSearchResultPayload(
   if (typeof filePath === "string" && filePath && filePath.length <= MAX_ID_LENGTH) {
     payload.localFilePath = filePath;
   }
+  const location = readNoteLocation(record.location);
+  if (location) payload.location = location;
   return payload;
 }
 
@@ -91,7 +95,7 @@ export const OPEN_BESIDE_PLACEMENTS = ["left", "right", "top", "bottom"] as cons
 export type OpenBesidePlacement = (typeof OPEN_BESIDE_PLACEMENTS)[number];
 export type SearchSplitAction = (typeof SEARCH_SPLIT_ACTIONS)[number];
 
-export type SearchAiSourcePayload = { id: string; title: string; index: number | null };
+export type SearchAiSourcePayload = { id: string; title: string; index: number | null; location?: NoteBlockLocation };
 
 type SearchAiBody = {
   token: string;
@@ -129,7 +133,7 @@ function parseAiSource(value: unknown): SearchAiSourcePayload | null {
   if (!id || id.length > MAX_ID_LENGTH || !title || title.length > MAX_TITLE_LENGTH) return null;
   const index = record.index;
   if (index !== null && (typeof index !== "number" || !Number.isInteger(index) || index < 1 || index > 99)) return null;
-  return { id, title, index };
+  return { id, title, index, location: readNoteLocation(record.location) };
 }
 
 function parseAiBody(record: Record<string, unknown>): SearchAiBody | null {

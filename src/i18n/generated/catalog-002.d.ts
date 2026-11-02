@@ -91,6 +91,7 @@ declare module "../types" {
     "src/lib/notebook-ai/localSkillParsing.ts#messages:1": { "localSkill": {  } };
     "src/lib/notebook-ai/messageTime.ts#messages:1": { "yesterday": { "time": string | number } };
     "src/lib/notebook-ai/model.ts#messages:1": { "chooseAModelInSettingsBeforeUsingThe": {  }; "detailCouldNotCreateAiModel": { "value1": string | number }; "enableTheAiAssistantInSettingsToUse": {  } };
+    "src/lib/notebook-ai/noteCitation.ts#messages:1": { "paragraph": { "number": string | number }; "section": { "heading": string | number } };
     "src/lib/notebook-ai/pi/model.ts#messages:1": { "chooseAModelInSettingsBeforeUsingThe": {  }; "detailCouldNotCreatePiModel": { "value1": string | number }; "enableTheAiAssistantInSettingsToUse": {  } };
     "src/lib/notebook-ai/pi/toolLabels.ts#messages:1": { "executeBatchPlan": {  }; "getCryptoPrice": {  }; "getExchangeRate": {  }; "getWeather": {  }; "getWorldTime": {  }; "listFolder": {  }; "listNotebooks": {  }; "listPages": {  }; "loadSkill": {  }; "readPage": {  }; "readWebPage": {  }; "searchNotes": {  }; "searchWeb": {  }; "showCalculator": {  }; "showChart": {  }; "showChecklist": {  }; "showChoices": {  }; "showComparison": {  }; "showCountdown": {  }; "showDefinition": {  }; "showDiagram": {  }; "showFlashcards": {  }; "showQuiz": {  }; "showRecipe": {  }; "showStats": {  }; "showSteps": {  }; "showSvg": {  }; "showTable": {  }; "showTimeline": {  }; "showTimer": {  }; "showUnitConverter": {  }; "showWidget": {  } };
     "src/lib/openAssociatedMarkdown.ts#localMessages:1": { "couldnTOpenThisMarkdownFile": {  }; "permission": {  }; "retry": {  }; "theFileIsnTAmongTheVisibleNotesIn": {  }; "theFileIsnTInsideAFolderThatCan": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/ReadingPreferences.tsx#localMessages:1": { "aLittleSpaceBetweenTheLinesMakes": {  }; "giveYourWordsRoomToBreathe": {  }; "lineSpacing": {  }; "lineSpacingPresets": {  }; "livePreview": {  }; "readingPreview": {  }; "relaxed": {  }; "standard": {  }; "textSize": {  }; "times": {  }; "writeDownSomethingWorthRememberingTodayThere": {  } };
     "src/pages/workspace/components/SetupGuide.tsx#localMessages:1": { "adjustReadingPreferences": {  }; "appearance": {  }; "appearancePreview": {  }; "back": {  }; "customizeAppearance": {  }; "exitSetup": {  }; "finishSetup": {  }; "next": {  }; "progress": { "step": string | number; "total": string | number }; "reading": {  }; "setupGuide": {  }; "setupSteps": {  } };
     "src/pages/workspace/components/ai-cards/CalculatorCard.tsx#messages:1": { "invalidFormula": {  } };
-    "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
   }
 }

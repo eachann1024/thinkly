@@ -1,4 +1,5 @@
 import type { NotebookAiExecution, NotebookAiExecutionSource } from "@/lib/notebook-ai/types";
+import { noteCitationKey } from "@/lib/notebook-ai/noteCitation";
 import { readExecutionSource } from "@/lib/notebook-ai/executionSource";
 import type { ToolProgressPart } from "./toolProgressModel";
 
@@ -70,7 +71,7 @@ export function executionSources(parts: ToolProgressPart[]): NotebookAiExecution
   for (const part of parts) {
     if (part.state !== "output-available" || (part.type !== "tool-readPage" && part.type !== "tool-readWebPage")) continue;
     const source = readExecutionSource(part.type, part.output, part.toolCallId);
-    if (source) sources.set(source.id, source);
+    if (source) sources.set(noteCitationKey(source.id, source.location), source);
   }
   return [...sources.values()];
 }

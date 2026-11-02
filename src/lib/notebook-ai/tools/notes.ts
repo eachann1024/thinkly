@@ -1,4 +1,5 @@
 import { tool } from "ai";
+import { bestNoteBlock, noteBlockExcerpts, noteCitationHref, noteLocationLabel } from "../noteCitation";
 import { z } from "zod";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -61,7 +62,7 @@ export const listPages = tool({
 
 export const searchNotes = tool({
   description:
-    "在所有已连接笔记本中全文搜索，可用 notebookId 限定目标。仅用于跨页面查找或目标页面不明确的任务；已知页面直接 readPage。返回匹配页面和命中片段。",
+    "在所有已连接笔记本中全文搜索，可用 notebookId 限定目标。仅用于跨页面查找或目标页面不明确的任务；已知页面直接 readPage。返回匹配页面、单块命中片段、location 和 citationHref；引用时用返回的 citationHref 作 Markdown 链接，标签为文件名 · locationLabel。",
   inputSchema: z.object({
     query: z.string().optional().default("").describe("搜索关键词"),
     notebookId: z.string().optional().describe("仅搜索指定笔记本；省略则搜索所有笔记本"),
@@ -174,7 +175,10 @@ export const searchNotes = tool({
         if (start > 0) snippet = "…" + snippet;
         if (end < rawCombined.length) snippet = snippet + "…";
 
-        return { pageId, notebookId, notebookName, title, snippet };
+        const block = bestNoteBlock(pages[pageId], [query, ...queryTerms], title);
+        return { pageId, notebookId, notebookName, title, snippet: block?.text.slice(0, 400) ?? snippet,
+          location: block?.location, locationLabel: noteLocationLabel(block?.location),
+          citationHref: noteCitationHref(pageId, block?.location) };
       },
     );
     return errors.length ? { results, errors, complete: false,
@@ -184,10 +188,12 @@ export const searchNotes = tool({
 
 export const readPage = tool({
   description:
-    "读取页面完整内容，返回标题和 Markdown 格式正文。当前页任务可省略 pageId，默认读取当前打开页面。",
+    "读取页面完整内容，返回标题、Markdown 和 blocks 段落引用。当前页可省略 pageId。已知搜索命中块时传 blockId（无 ID 传 blockIndex）；引用回答实际使用的段落时，必须用对应 blocks 条目的 citationHref 作 Markdown 链接，标签为文件名 · locationLabel，不得编造链接。",
   inputSchema: z.object({
     pageId: z.string().optional().describe("页面 id；省略则读取本轮绑定页面"),
     notebookId: z.string().optional().describe("跨笔记本读取时提供真实 notebookId"),
+    blockId: z.string().optional().describe("搜索结果 location.blockId；标记本次关注的段落"),
+    blockIndex: z.number().int().nonnegative().optional().describe("没有块 ID 时使用 location.blockIndex"),
   }),
   execute: async (input, { experimental_context }) => {
     const context = experimental_context as NotebookAiAgentContext;
@@ -215,6 +221,12 @@ export const readPage = tool({
     if (page.localReadState === "error") return { error: page.localReadError || "页面读取失败" };
     const title = getPageTitle(page);
     const markdown = await blocksToMarkdown(page.content as BlockNoteContent);
-    return { pageId, notebookId: page.workspaceId, parentId: page.parentId ?? null, relativePath: getLocationSnapshot(page, useNotebooks.getState().notebooks, usePages.getState().pages), title, markdown, readStatus: "ready" };
+    const excerpts = noteBlockExcerpts(page.content, title);
+    const selected = input.blockId ? excerpts.find(block => block.location.blockId === input.blockId)
+      : input.blockIndex !== undefined ? excerpts.find(block => block.location.blockIndex === input.blockIndex)
+      : excerpts.find(block => block.text !== block.location.heading && block.text !== title) ?? excerpts[0];
+    const blocks = excerpts.map(block => ({ location: block.location, locationLabel: noteLocationLabel(block.location),
+      excerpt: block.text.slice(0, 400), citationHref: noteCitationHref(pageId, block.location) }));
+    return { location: selected?.location, blocks, pageId, notebookId: page.workspaceId, parentId: page.parentId ?? null, relativePath: getLocationSnapshot(page, useNotebooks.getState().notebooks, usePages.getState().pages), title, markdown, readStatus: "ready" };
   },
 });

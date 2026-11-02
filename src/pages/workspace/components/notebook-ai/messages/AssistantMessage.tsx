@@ -97,6 +97,7 @@ export const AssistantMessage = memo(function AssistantMessage({
             isMessageStreaming={isStreaming}
             completion={completion}
             thinkingText={reasoningText}
+            answerText={msg.parts.filter(part => part.type === "text").map(part => part.text).join("\n")}
             footer={
               visibleApprovalPart ? (
                 <ApprovalPlanCard

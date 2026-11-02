@@ -65,6 +65,7 @@ export interface NotebookAiExecution {
 }
 
 export interface NotebookAiExecutionSource {
+  location?: import("./noteCitationLocation").NoteBlockLocation;
   id: string;
   title: string;
   kind: "note" | "web";

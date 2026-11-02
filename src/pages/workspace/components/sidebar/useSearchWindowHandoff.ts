@@ -16,6 +16,7 @@ import { askNotebookAi } from "../notebook-ai/approval/refinePlan";
 import { requestAiSlashCommand } from "../notebook-ai/session/slashCommandRequest";
 import { queueCardSend } from "../notebook-ai/cardSendQueue";
 import { openSheetConversation, saveSearchAiTranscript } from "../search-sheet/saveSheetConversation";
+import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
 import { useSearchSession } from "./useSearchSession";
 
 const TARGET_WAIT_MS = 20_000;
@@ -140,7 +141,7 @@ export function useSearchWindowHandoff(): void {
         detail: { selectionQuery: payload.query },
       }));
       cancelWait = waitForTarget(payload, (pageId) => {
-        useSearchSession.getState().targetPage(pageId, true);
+        navigateNotebookAiReference(pageId, id => useSearchSession.getState().targetPage(id, true), payload.location);
       });
     });
     const unsubscribeCommand = api.onSearchWindowCommand?.((command) => {

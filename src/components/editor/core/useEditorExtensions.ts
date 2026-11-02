@@ -45,6 +45,7 @@ import { gooseFakeSelectionExtension } from "@/components/editor/extensions/fake
 import { ArrowInputRuleExtension } from "@/components/editor/inputrules/arrowInputRule";
 import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlugin";
 import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/searchSessionHighlightPlugin";
+import { gooseCitationHighlightExtension } from "@/components/editor/extensions/citationHighlightExtension";
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
 import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
@@ -154,6 +155,7 @@ export function useEditorExtensions(session: EditorSession) {
     ArrowInputRuleExtension,
     gooseFindInPageExtension,
     gooseSearchSessionHighlightExtension,
+    gooseCitationHighlightExtension,
     gooseDividerInputRuleExtension(),
     ...(!__GOOSE_EDITOR_AI__
       ? []

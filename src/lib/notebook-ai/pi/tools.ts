@@ -62,6 +62,8 @@ const TOOL_PARAMETERS: Partial<Record<keyof typeof notebookAiTools, TSchema>> = 
     ),
   }),
   readPage: Type.Object({
+    blockId: Type.Optional(Type.String({ description: "搜索命中 location.blockId" })),
+    blockIndex: Type.Optional(Type.Integer({ minimum: 0, description: "无块 ID 时使用 location.blockIndex" })),
     notebookId: Type.Optional(Type.String()),
     pageId: Type.Optional(
       Type.String({ description: "页面 id；省略则读取当前打开页面" }),

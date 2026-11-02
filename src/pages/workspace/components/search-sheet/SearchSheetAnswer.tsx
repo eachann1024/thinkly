@@ -35,6 +35,9 @@ import type { SheetAnswer } from "./useSheetAnswer";
 import { visibleSources } from "./sheetAnswerState";
 import { SearchSheetSteps } from "./SearchSheetSteps";
 import { useStickToBottom } from "./useStickToBottom";
+import type { NoteSource } from "./retrieveNotes";
+import { noteCitationKey, noteSourceLabel } from "@/lib/notebook-ai/noteCitation";
+import { NoteCitationLink } from "../notebook-ai/messages/NoteCitationLink";
 
 const MD_PLUGINS = { cjk };
 const MD_CONTROLS = { table: false, code: true, mermaid: false } as const;
@@ -56,10 +59,13 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, scrol
   answer: SheetAnswer;
   scrollRef: RefObject<HTMLDivElement | null>;
   onBack: () => void;
-  onOpenSource: (id: string) => void;
+  onOpenSource: (source: Pick<NoteSource, "id" | "location">) => void;
   onContinue?: (followUp?: string) => void;
 }) {
   useLocale();
+  const markdownComponents = useMemo(() => ({ a: (props: Omit<React.ComponentProps<typeof NoteCitationLink>, "onOpenCitation">) =>
+    <NoteCitationLink {...props} onOpenCitation={({ pageId, location }) => onOpenSource({ id: pageId, location })} />,
+  }), [onOpenSource]);
   const waiting = answer.status === "loading";
   const streaming = answer.status === "streaming";
   const sources = visibleSources(answer);
@@ -78,12 +84,12 @@ export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, scrol
       {infoCards.map((card, index) => <InfoCard key={`${card.kind}-${index}`} card={card}/>)}
     </div></CardActionsProvider>}
     {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" isAnimating={streaming} animated={MD_ANIMATION}
-      plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
+      plugins={MD_PLUGINS} controls={MD_CONTROLS} components={markdownComponents}>{answer.text}</Streamdown>}
     {answer.status === "error" && <p className="search-sheet-answer-hint" role="alert">{answer.error}</p>}
     {(sources.length > 0 || links.length > 0) && <div className="search-sheet-answer-sources">
       <span className="search-sheet-label">{uiText("sources")}</span>
-      {sources.map(({ index, source }) => <Button contentStyle="preserve" variant="ghost" size="sm" key={source.id} className="search-sheet-source" onClick={() => onOpenSource(source.id)}>
-        {index && <span className="search-sheet-source-index">{index}</span>}<FileText size={14} aria-hidden="true"/><span className="search-sheet-source-title">{source.title}</span>
+      {sources.map(({ index, source }) => <Button contentStyle="preserve" variant="ghost" size="sm" key={noteCitationKey(source.id, source.location)} className="search-sheet-source" title={noteSourceLabel(source.title, source.location)} onClick={() => onOpenSource(source)}>
+        {index && <span className="search-sheet-source-index">{index}</span>}<FileText size={14} aria-hidden="true"/><span className="search-sheet-source-title">{noteSourceLabel(source.title, source.location)}</span>
       </Button>)}
       {links.map(link => <Button contentStyle="preserve" variant="ghost" size="sm" key={link.url} className="search-sheet-source" data-web="true"
         title={link.url} onClick={() => openExternalUrl(link.url)}>
