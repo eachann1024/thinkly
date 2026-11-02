@@ -15,7 +15,8 @@ html .workspace-shell > .workspace-stage > .workspace-sidebar-pane[data-sidebar-
   display: none !important;
 }
 
-.workspace-view-enter:not([hidden]),
+/* Editor tab/page swaps stay immediate; entry motion belongs to navigation. */
+:where(.workspace-sidebar-pane, .settings-shell) .workspace-view-enter:not([hidden]),
 .workspace-shell .workspace-sidebar-pane[data-sidebar-view="pages"] .sidebar-page-list:not([hidden]) {
   animation: workspace-navigation-enter 170ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -51,7 +52,7 @@ html .workspace-shell > .workspace-stage > .workspace-sidebar-pane[data-sidebar-
     transition: none;
   }
 
-  .workspace-view-enter:not([hidden]),
+  :where(.workspace-sidebar-pane, .settings-shell) .workspace-view-enter:not([hidden]),
   .workspace-shell .settings-shell[data-settings-tab] .settings-panel > .workspace-view-enter:not([hidden]),
   .workspace-shell .workspace-sidebar-pane[data-sidebar-view="pages"] .sidebar-page-list:not([hidden]) {
     animation: none;
