@@ -203,17 +203,18 @@ export function createUpdatePageSlice(
             !localPageHasPersistableContent(updates.content) && !state.dirtyLocalPageIds[id]
           );
 
-        if (shouldQueueContentSave || shouldQueueLocalSettingsSave) {
+        const shouldQueueSave = shouldQueueContentSave || shouldQueueLocalSettingsSave;
+        if (shouldQueueSave) {
           const contentForSave = shouldQueueContentSave
             ? updates.content!
             : updatedPage.content;
-          set((s) => ({
-            dirtyLocalPageIds: { ...s.dirtyLocalPageIds, [id]: true },
-          }));
           queueLocalPageSave(id, contentForSave, get, recoveryEntry?.revision);
         }
 
         return {
+          ...(shouldQueueSave && !state.dirtyLocalPageIds[id] ? {
+            dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [id]: true },
+          } : {}),
           pages: {
             ...state.pages,
             [id]: updatedPage,
