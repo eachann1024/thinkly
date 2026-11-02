@@ -1,5 +1,5 @@
 import type { ChatTransport, UIMessageChunk } from "ai";
-import type { NotebookAiExecution, NotebookAiMessage } from "./types";
+import type { NotebookAiExecution, NotebookAiMessage, NotebookAiModelPhase } from "./types";
 import { noteCitationKey } from "./noteCitation";
 import { readExecutionSource } from "./executionSource";
 
@@ -13,6 +13,13 @@ export function finishExecutionDetails(execution: NotebookAiExecution, now = Dat
   };
 }
 
+// What the model is doing between tool calls: silent until its first token, then thinking or writing.
+function chunkPhase(chunk: UIMessageChunk): NotebookAiModelPhase | undefined {
+  if (chunk.type === "reasoning-delta") return "think";
+  if (chunk.type === "text-delta" || chunk.type === "tool-input-start" || chunk.type === "tool-input-delta") return "compose";
+  if (chunk.type === "start-step" || chunk.type === "tool-output-available" || chunk.type === "tool-output-error") return "wait";
+}
+
 // Capture observed wall time at the shared UI stream boundary for both runtimes.
 // Historical messages without these measurements deliberately have no duration.
 export function withExecutionDetails(
@@ -22,14 +29,20 @@ export function withExecutionDetails(
   return {
     reconnectToStream: (options) => transport.reconnectToStream(options),
     async sendMessages(options) {
-      let execution: NotebookAiExecution = { startedAt: Date.now(), modelId, tools: {}, sources: [] };
+      const startedAt = Date.now();
+      let execution: NotebookAiExecution = { startedAt, modelId, tools: {}, sources: [], phases: [[startedAt, "wait"]] };
       const sourcePositions = new Map<string, number>();
       const stream = await transport.sendMessages(options);
-      const snapshot = () => ({ ...execution, tools: { ...execution.tools } });
+      const snapshot = () => ({ ...execution, tools: { ...execution.tools }, phases: [...execution.phases!] });
       return stream.pipeThrough(new TransformStream<UIMessageChunk, UIMessageChunk>({
         transform(chunk, controller) {
           const now = Date.now();
           let changed = false;
+          const phase = chunkPhase(chunk);
+          if (phase && execution.phases!.at(-1)![1] !== phase && !execution.endedAt) {
+            execution.phases!.push([now, phase]);
+            changed = true;
+          }
           if (chunk.type === "tool-input-available") {
             if (!execution.tools[chunk.toolCallId]) {
               execution.tools[chunk.toolCallId] = { startedAt: now, type: `tool-${chunk.toolName}` };

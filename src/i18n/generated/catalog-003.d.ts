@@ -57,9 +57,9 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1": { "conversationHistory": {  }; "deleteConversation": {  }; "noPreviousConversations": {  } };
     "src/pages/workspace/components/notebook-ai/ConversationTitle.tsx#messages:1": { "detailConversationTitle": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/DiagramCard.tsx#messages:1": { "diagram": {  }; "diagramGenerationFailed": {  }; "generatingDiagram": {  }; "theDiagramIsNotReadyYet": {  } };
-    "src/pages/workspace/components/notebook-ai/ExecutionSources.tsx#messages:1": { "next": {  }; "pages": {  }; "previous": {  }; "sources": { "count": string | number } };
-    "src/pages/workspace/components/notebook-ai/ExecutionTimeline.tsx#messages:1": { "average": {  }; "live": {  }; "peak": {  }; "unit": {  } };
-    "src/pages/workspace/components/notebook-ai/ExecutionTrace.tsx#messages:1": { "execution": {  }; "model": {  }; "read": {  }; "response": {  }; "visual": {  }; "write": {  } };
+    "src/pages/workspace/components/notebook-ai/ExecutionOverview.tsx#messages:1": { "compose": {  }; "detailCompose": { "chars": string | number; "rate": string | number }; "detailFirstWait": {  }; "detailWait": {  }; "live": {  }; "longest": { "stage": string | number; "time": string | number }; "nowCompose": {  }; "nowFirstWait": { "model": string | number }; "nowRead": {  }; "nowResponse": {  }; "nowThink": {  }; "nowVisual": {  }; "nowWait": { "model": string | number }; "nowWrite": {  }; "read": {  }; "response": {  }; "slow": {  }; "think": {  }; "visual": {  }; "wait": {  }; "write": {  } };
+    "src/pages/workspace/components/notebook-ai/ExecutionSources.tsx#messages:1": { "next": {  }; "note": { "count": string | number }; "pages": {  }; "previous": {  }; "sources": {  }; "web": { "count": string | number } };
+    "src/pages/workspace/components/notebook-ai/ExecutionTrace.tsx#messages:1": { "execution": {  }; "model": {  } };
     "src/pages/workspace/components/notebook-ai/ModelSelectorPopover.tsx#messages:1": { "default": {  }; "detailCurrentModel": { "value1": string | number }; "switchModel": {  } };
     "src/pages/workspace/components/notebook-ai/NotebookAiPanel.tsx#messages:1": { "aiAssistant": {  } };
     "src/pages/workspace/components/notebook-ai/SvgArtifactCard.tsx#messages:1": { "couldNotDisplayImage": {  }; "generatingImage": {  }; "generatingImage2": {  }; "image": {  } };

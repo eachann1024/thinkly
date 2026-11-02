@@ -1,14 +1,16 @@
-import type { NotebookAiExecution, NotebookAiExecutionSource } from "@/lib/notebook-ai/types";
+import type { NotebookAiExecution, NotebookAiExecutionSource, NotebookAiModelPhase } from "@/lib/notebook-ai/types";
 import { noteCitationKey } from "@/lib/notebook-ai/noteCitation";
 import { readExecutionSource } from "@/lib/notebook-ai/executionSource";
 import type { ToolProgressPart } from "./toolProgressModel";
 
-export type ExecutionStage = "read" | "write" | "visual" | "response";
+type ToolStage = "read" | "write" | "visual";
+/** `response` only appears for runs recorded before model phases were captured. */
+export type ExecutionStage = ToolStage | NotebookAiModelPhase | "response";
 export function formatExecutionTime(milliseconds: number, locale: string) {
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(Math.max(0, milliseconds) / 1000)}${locale.startsWith("zh") || locale.startsWith("ja") ? " 秒" : "s"}`;
 }
 
-function toolStage(type: string): ExecutionStage {
+function toolStage(type: string): ToolStage {
   if (/^tool-(read|search|list)/.test(type)) return "read";
   if (/^tool-show/.test(type)) return "visual";
   return "write";
@@ -25,8 +27,8 @@ function appendSegment(list: ExecutionSegment[], stage: ExecutionStage, start: n
 
 export function prepareExecutionSegments(execution: NotebookAiExecution, parts: ToolProgressPart[]) {
   const end = execution.endedAt ?? Infinity;
-  let legacyTypes: Map<string | undefined, ExecutionStage> | undefined;
-  const events: Array<{ at: number; stage: ExecutionStage; change: number }> = [];
+  let legacyTypes: Map<string | undefined, ToolStage> | undefined;
+  const events: Array<{ at: number; stage?: ToolStage; change: number; phase?: NotebookAiModelPhase }> = [];
   for (const [id, tool] of Object.entries(execution.tools)) {
     if (!tool.type) legacyTypes ??= new Map(parts.map(part => [part.toolCallId, toolStage(part.type)]));
     const stage = tool.type ? toolStage(tool.type) : legacyTypes?.get(id);
@@ -37,16 +39,19 @@ export function prepareExecutionSegments(execution: NotebookAiExecution, parts: 
     events.push({ at: start, stage, change: 1 });
     if (Number.isFinite(finish)) events.push({ at: finish, stage, change: -1 });
   }
+  for (const [at, phase] of execution.phases ?? []) events.push({ at: Math.max(execution.startedAt, at), change: 0, phase });
   events.sort((a, b) => a.at - b.at);
-  const active = { read: 0, write: 0, visual: 0, response: 0 };
-  const current = (): ExecutionStage => active.write ? "write" : active.visual ? "visual" : active.read ? "read" : "response";
+  const active = { read: 0, write: 0, visual: 0 };
+  let phase: ExecutionStage = execution.phases ? "wait" : "response";
+  const current = (): ExecutionStage => active.write ? "write" : active.visual ? "visual" : active.read ? "read" : phase;
   const closed: ExecutionSegment[] = [];
   let previous = execution.startedAt;
   for (const event of events) {
     // Allocate overlapping calls once, so the segments always sum to wall time.
-    appendSegment(closed, current(), previous, event.at);
-    active[event.stage] += event.change;
-    previous = event.at;
+    appendSegment(closed, current(), previous, Math.min(end, event.at));
+    if (event.stage) active[event.stage] += event.change;
+    if (event.phase) phase = event.phase;
+    previous = Math.min(end, Math.max(previous, event.at));
   }
   const tail = current();
   // Only the trailing segment moves; sorting and merging happen when tool data changes.
@@ -54,15 +59,6 @@ export function prepareExecutionSegments(execution: NotebookAiExecution, parts: 
     const result = closed.map(segment => ({ ...segment }));
     appendSegment(result, tail, previous, Math.min(end, now));
     return result;
-  };
-}
-
-export function prepareExecutionStages(execution: NotebookAiExecution, parts: ToolProgressPart[]) {
-  const segments = prepareExecutionSegments(execution, parts);
-  return (now: number) => {
-    const totals = { read: 0, write: 0, visual: 0, response: 0 };
-    for (const segment of segments(now)) totals[segment.stage] += segment.end - segment.start;
-    return (Object.entries(totals) as Array<[ExecutionStage, number]>).filter(([, duration]) => duration > 0);
   };
 }
 

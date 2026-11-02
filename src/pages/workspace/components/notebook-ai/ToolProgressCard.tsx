@@ -2,7 +2,7 @@ import { useLocale } from "@/i18n";
 import type { NotebookAiCompletion, NotebookAiExecution } from "@/lib/notebook-ai/types";
 import { useMemo, useState, type ReactNode } from "react";
 import { ExecutionTrace } from "./ExecutionTrace";
-import { ExecutionSources } from "./ExecutionSources";
+import { ExecutionSources, useExecutionSources } from "./ExecutionSources";
 import { PlanReviewProvider } from "./approval/PlanReviewContext";
 import { visibleBusyTickerLine } from "@/components/editor/ai/inlineBusyTicker";
 
@@ -151,9 +151,8 @@ export function ToolProgressCard({
           ) : null}
           {showTraceRow ? (
             <ExecutionTrace parts={parts} steps={steps} execution={execution}
-              running={isRunning} label={traceLabel} thinkingLine={thinkingLine} outputChars={(answerText?.length ?? 0) + (thinkingText?.length ?? 0)} statusLabel={stepStatusLabel} />
-          ) : null}
-          <ExecutionSources parts={parts} execution={execution} answerText={answerText} />
+              running={isRunning} label={traceLabel} thinkingLine={thinkingLine} outputChars={(answerText?.length ?? 0) + (thinkingText?.length ?? 0)} answerText={answerText} statusLabel={stepStatusLabel} />
+          ) : <LooseSources parts={parts} execution={execution} answerText={answerText} />}
           {children ? (
             <div
               className={cn(
@@ -183,4 +182,9 @@ export function ToolProgressCard({
       </WorkCardStatusContext.Provider>
     </PlanReviewProvider>
   );
+}
+
+/** Sources for answers without a trace row (e.g. citations only); otherwise they live inside the trace. */
+function LooseSources({ parts, execution, answerText }: { parts: ToolProgressPart[]; execution?: NotebookAiExecution; answerText?: string }) {
+  return <ExecutionSources sources={useExecutionSources(parts, execution, answerText)} />;
 }

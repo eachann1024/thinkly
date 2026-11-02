@@ -62,7 +62,11 @@ export interface NotebookAiExecution {
   modelId: string;
   tools: Record<string, { startedAt: number; endedAt?: number; type?: string }>;
   sources?: NotebookAiExecutionSource[];
+  /** Model activity changes as [at, phase]; tool intervals take precedence over these. */
+  phases?: Array<[number, NotebookAiModelPhase]>;
 }
+
+export type NotebookAiModelPhase = "wait" | "think" | "compose";
 
 export interface NotebookAiExecutionSource {
   location?: import("./noteCitationLocation").NoteBlockLocation;
