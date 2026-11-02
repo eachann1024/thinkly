@@ -11,6 +11,7 @@ import { ModelSelectorPopover } from "./ModelSelectorPopover";
 import { usePlanRefinementInput } from "./approval/usePlanRefinementInput";
 import { useComposerSurface } from "./composer/useComposerSurface";
 import { useComposerDraft } from "./composer/useComposerDraft";
+import { useComposerPlaceholder } from "./composer/useComposerPlaceholder";
 import { useComposerSubmission } from "./composer/useComposerSubmission";
 import { useComposerAttachments } from "./composer/useComposerAttachments";
 import { useComposerSelectionHandle } from "./composer/useComposerSelectionHandle";
@@ -49,7 +50,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       onSlashCommand,
       isStreaming,
       disabled,
-      placeholder = t("askAiUseForCommandsOrSkillsOr"),
+      placeholder: customPlaceholder,
       searchPages,
       onEscape,
       layout = "side-panel",
@@ -65,6 +66,13 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       isEmpty,
       setIsEmpty,
     } = surface;
+    const placeholder = useComposerPlaceholder({
+      placeholder: customPlaceholder,
+      fallback: t("askAiUseForCommandsOrSkillsOr"),
+      disabled,
+      isStreaming,
+      isEmpty,
+    });
     const { cancelPendingDraftPersist, handleContentChange } =
       useComposerDraft(notebookId);
     const handleEscape = useCallback(() => {

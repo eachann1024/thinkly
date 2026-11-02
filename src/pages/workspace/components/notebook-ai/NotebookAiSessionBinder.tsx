@@ -9,7 +9,7 @@ import { useConversationCompaction } from "./session/useConversationCompaction";
 import { useBatchApprovalActions } from "./session/useBatchApprovalActions";
 import { AI_SLASH_COMMAND_EVENT, takePendingAiSlashCommand } from "./session/slashCommandRequest";
 import type { ComposerSlashBuiltinId } from "@/lib/notebook-ai/composerSlashCommands";
-import type { NotebookAiSessionValue } from "./session/types";
+import type { NotebookAiSessionSnapshot } from "./session/types";
 
 const RELEASE_IDLE_MS = 30_000;
 
@@ -21,7 +21,7 @@ export function NotebookAiSessionBinder({
 }: {
   notebookId: string;
   panelOpen: boolean;
-  publish: (value: NotebookAiSessionValue) => void;
+  publish: (value: NotebookAiSessionSnapshot) => void;
   onRelease: () => void;
 }) {
   useLocale();
@@ -35,10 +35,9 @@ export function NotebookAiSessionBinder({
     isStreaming,
     isBusy,
     unavailableReason,
-    placeholderIndex,
     composerRevision,
   } = state;
-  const stopAll = useStreamLifecycle(state, panelOpen);
+  const stopAll = useStreamLifecycle(state);
   const send = useSendMessage(state);
   const {
     newConversation,
@@ -54,7 +53,7 @@ export function NotebookAiSessionBinder({
     compactConversation, selectConversation, deleteConversation, searchPages,
     onBatchApproval, onBatchUndo,
   });
-  const value = useMemo<NotebookAiSessionValue>(
+  const value = useMemo<NotebookAiSessionSnapshot>(
     () => ({
       notebookId,
       conversationId,
@@ -62,13 +61,13 @@ export function NotebookAiSessionBinder({
       status,
       error,
       ...commands,
+      commands,
       isStreaming,
       isBusy,
       unavailableReason,
-      placeholderIndex,
       composerRevision,
     }),
-    [commands, notebookId, conversationId, messages, status, error, isStreaming, isBusy, unavailableReason, placeholderIndex, composerRevision],
+    [commands, notebookId, conversationId, messages, status, error, isStreaming, isBusy, unavailableReason, composerRevision],
   );
 
   useLayoutEffect(() => {

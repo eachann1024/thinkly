@@ -5,11 +5,9 @@ import { OPEN_ESCAPE_LAYER_SELECTOR } from "@/lib/escape-close";
 import { isImeKeyboardEvent } from "@/hooks/useImeInput";
 import type { AiComposerPayload } from "@/components/editor/ai/composer/referenceLookup";
 import type { NotebookAiImageAttachment } from "../Composer";
-import {
-  getNotebookAiPlaceholderHints,
-  type NotebookAiSessionValue,
-} from "../NotebookAiSession";
+import type { NotebookAiSessionValue } from "../NotebookAiSession";
 import type { NotebookAiPanelProps } from "./types";
+import { useNotebookAiCommands } from "../session/context";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/usePanelCommands.ts#messages:1">`
 zh-Hans:
@@ -31,16 +29,14 @@ export function usePanelCommands(
 ) {
   useLocale();
   const { onClose, capturedSelection, onConsumeCapturedSelection } = props;
+  const { unavailableReason, isBusy } = session;
   const {
-    unavailableReason,
-    isBusy,
-    placeholderIndex,
     send,
     newConversation,
     compactConversation,
     selectConversation,
     deleteConversation,
-  } = session;
+  } = useNotebookAiCommands();
   const handlePanelKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (isWorkspaceSettingsOpen()) return;
@@ -73,7 +69,7 @@ export function usePanelCommands(
     ? t("configureAnAiModelInSettingsFirst")
     : isBusy
       ? t("generating")
-      : getNotebookAiPlaceholderHints()[placeholderIndex];
+      : undefined;
 
   const handleSend = useCallback(
     (

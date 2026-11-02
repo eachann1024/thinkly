@@ -5,7 +5,6 @@ import { useAiStatus } from "@/stores/useAiStatus";
 import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { sanitizeNotebookAiMessages } from "@/lib/notebook-ai/messageUtils";
 import { ensureNotebookAiMessageCreatedAt } from "@/lib/notebook-ai/messageTime";
-import { getNotebookAiPlaceholderHints } from "./helpers";
 import type { NotebookAiSessionScope } from "./types";
 import type { SessionState } from "./useSessionState";
 import { stopSessionChat } from "./sessionCompletion";
@@ -25,7 +24,7 @@ const t = createTranslator(messages);
 
 
 const NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS = 60_000;
-export function useStreamLifecycle(state: SessionState, panelOpen: boolean) {
+export function useStreamLifecycle(state: SessionState) {
   useLocale();
   const {
     activeSessionScopeRef,
@@ -46,10 +45,6 @@ export function useStreamLifecycle(state: SessionState, panelOpen: boolean) {
     isCompacting,
     error,
     clearError,
-    unavailableReason,
-    isBusy,
-    composerHasContent,
-    setPlaceholderIndex,
   } = state;
   useLayoutEffect(() => {
     activeSessionScopeRef.current = currentSessionScope;
@@ -170,36 +165,6 @@ export function useStreamLifecycle(state: SessionState, panelOpen: boolean) {
     clearError,
     requestCurrentPageIdRef,
   ]);
-
-  useEffect(() => {
-    if (!panelOpen || unavailableReason || isBusy || composerHasContent) return;
-
-    let timer: number | null = null;
-    const stop = () => {
-      if (timer === null) return;
-      window.clearInterval(timer);
-      timer = null;
-    };
-    const start = () => {
-      if (timer !== null) return;
-      timer = window.setInterval(() => {
-        setPlaceholderIndex(
-          (index) => (index + 1) % getNotebookAiPlaceholderHints().length,
-        );
-      }, 4500);
-    };
-    const sync = () => {
-      if (document.visibilityState === "visible") start();
-      else stop();
-    };
-
-    sync();
-    document.addEventListener("visibilitychange", sync);
-    return () => {
-      stop();
-      document.removeEventListener("visibilitychange", sync);
-    };
-  }, [panelOpen, unavailableReason, isBusy, composerHasContent, setPlaceholderIndex]);
 
   return stopAll;
 }

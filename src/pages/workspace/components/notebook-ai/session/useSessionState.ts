@@ -2,10 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useReducer } from "r
 import { useSettings } from "@/stores/useSettings";
 import { getAiAvailabilityError } from "@/lib/notebook-ai/availabilityError";
 import { useChat } from "@ai-sdk/react";
-import {
-  useNotebookAiChats,
-  composerDraftHasContent,
-} from "@/stores/useNotebookAiChats";
+import { useNotebookAiChats } from "@/stores/useNotebookAiChats";
 import { buildLanguageModel } from "@/lib/notebook-ai/model";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import { getSessionChat } from "./sessionChat";
@@ -31,7 +28,6 @@ export function useSessionState(notebookId: string) {
   const finishCompaction = useCallback((scope: NotebookAiSessionScope, requestId: number) => {
     dispatchScope({ type: "compaction-finished", scope, requestId });
   }, []);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [composerRevision, setComposerRevision] = useState(0);
 
   if (session.notebookId !== notebookId) {
@@ -39,7 +35,6 @@ export function useSessionState(notebookId: string) {
       .getState()
       .ensureFreshActiveConversation(notebookId);
     dispatchScope({ type: "notebook-changed", notebookId, conversationId: nextConversationId });
-    setPlaceholderIndex(0);
   }
   const { conversationId, generation: sessionGeneration } = session;
   const currentSessionScope = useMemo<NotebookAiSessionScope>(
@@ -62,10 +57,6 @@ export function useSessionState(notebookId: string) {
     (nextConversationId: string) =>
       dispatchScope({ type: "conversation-changed", conversationId: nextConversationId }),
     [],
-  );
-
-  const composerHasContent = useNotebookAiChats((s) =>
-    composerDraftHasContent(s.composerDrafts[notebookId]),
   );
 
   const ai = useSettings((state) => state.ai);
@@ -112,14 +103,11 @@ export function useSessionState(notebookId: string) {
     setConversationId,
     requestCurrentPageIdRef,
     compactAbortRef,
-    placeholderIndex,
-    setPlaceholderIndex,
     composerRevision,
     setComposerRevision,
     isCompacting,
     beginCompaction,
     finishCompaction,
-    composerHasContent,
     messages,
     sendMessage,
     status,

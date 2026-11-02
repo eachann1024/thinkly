@@ -1,13 +1,13 @@
 import { useLocale } from "@/i18n";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { ChatChrome } from "./beautiful-ui/ChatChrome";
 import { AiPanelResizeEdge } from "./AiPanelResizeEdge";
 import { isFullscreenAiLayout } from "./useNotebookAiPanel";
 import { useNotebookAiSession } from "./NotebookAiSession";
-import { NotebookAiSessionContext } from "./session/context";
-import { NotebookAiAssistantRuntimeProvider } from "./AssistantUiRuntimeProvider";
+import { useNotebookAiFirstUserMessage, useNotebookAiSessionReady } from "./session/context";
+import { NotebookAiRuntimeScope } from "./session/NotebookAiRuntimeScope";
 import type { NotebookAiPanelProps } from "./panel/types";
 import { getConversationSummary } from "@/lib/notebook-ai/conversationSummary";
 import { usePanelSurface } from "./panel/usePanelSurface";
@@ -28,8 +28,8 @@ ja:
 const t = createTranslator(messages);
 
 export function NotebookAiPanel(props: NotebookAiPanelProps) {
-  const session = useContext(NotebookAiSessionContext);
-  if (!session) return null;
+  const ready = useNotebookAiSessionReady();
+  if (!ready) return null;
   return <NotebookAiPanelReady {...props} />;
 }
 
@@ -56,19 +56,15 @@ function NotebookAiPanelReady(props: NotebookAiPanelProps) {
     onDragHandlePointerDown,
   } = surface;
   const session = useNotebookAiSession();
-  const { messages, isStreaming, isBusy, unavailableReason, stop } = session;
+  const { isBusy } = session;
+  const firstUserMessage = useNotebookAiFirstUserMessage();
   const drag = usePanelWorkspaceDrag(panelRootRef);
   const seed = usePanelComposerSeed(notebookId, session, surface);
   const commands = usePanelCommands(props, session, isFullscreen);
   const { handlePanelKeyDown } = commands;
-  const streamingMessageId =
-    isStreaming && messages.length > 0
-      ? messages[messages.length - 1].id
-      : undefined;
-
   const conversationSummary = useMemo(
-    () => getConversationSummary(messages),
-    [messages, locale],
+    () => getConversationSummary(firstUserMessage ? [firstUserMessage] : []),
+    [firstUserMessage, locale],
   );
 
   const headerToolbar = usePanelHeader(props, commands, {
@@ -79,12 +75,7 @@ function NotebookAiPanelReady(props: NotebookAiPanelProps) {
     conversationSummary,
   });
   return (
-    <NotebookAiAssistantRuntimeProvider
-      messages={messages}
-      isRunning={isBusy}
-      isDisabled={Boolean(unavailableReason)}
-      onCancel={stop}
-    >
+    <NotebookAiRuntimeScope>
     <div
       ref={panelRootRef}
       onDragEnter={drag.onDragOver}
@@ -130,10 +121,9 @@ function NotebookAiPanelReady(props: NotebookAiPanelProps) {
           commands={commands}
           seed={seed}
           isFullscreen={isFullscreen}
-          streamingMessageId={streamingMessageId}
         />
       </ChatChrome>
     </div>
-    </NotebookAiAssistantRuntimeProvider>
+    </NotebookAiRuntimeScope>
   );
 }

@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useState, type ReactNode, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
-import { NotebookAiSessionContext } from "./session/context";
-import type { NotebookAiSessionValue } from "./session/types";
+import { NotebookAiPanelVisibilityContext, NotebookAiSessionContext } from "./session/context";
+import { createNotebookAiSessionPublication } from "./session/publication";
 
 import { notebookAiSession } from "./notebookAiLoader";
 
@@ -27,29 +27,28 @@ export function NotebookAiSessionProvider({
   children,
 }: NotebookAiSessionProviderProps) {
   const [held, setHeld] = useState(false);
-  const [session, setSession] = useState<NotebookAiSessionValue | null>(null);
+  const [publication] = useState(createNotebookAiSessionPublication);
   if (panelOpen && !held) setHeld(true);
-  const publish = useCallback((value: NotebookAiSessionValue) => {
-    setSession((prev) => (prev === value ? prev : value));
-  }, []);
   const releaseRuntime = useCallback(() => {
     setHeld(false);
-    setSession(null);
-  }, []);
+    publication.clear();
+  }, [publication]);
 
   return (
-    <NotebookAiSessionContext.Provider value={session}>
-      {held ? (
-        <Suspense fallback={null}>
-          <NotebookAiSessionBinder
-            notebookId={notebookId}
-            panelOpen={panelOpen}
-            publish={publish}
-            onRelease={releaseRuntime}
-          />
-        </Suspense>
-      ) : null}
-      {children}
+    <NotebookAiSessionContext.Provider value={publication.store}>
+      <NotebookAiPanelVisibilityContext.Provider value={panelOpen}>
+        {held ? (
+          <Suspense fallback={null}>
+            <NotebookAiSessionBinder
+              notebookId={notebookId}
+              panelOpen={panelOpen}
+              publish={publication.publish}
+              onRelease={releaseRuntime}
+            />
+          </Suspense>
+        ) : null}
+        {children}
+      </NotebookAiPanelVisibilityContext.Provider>
     </NotebookAiSessionContext.Provider>
   );
 }

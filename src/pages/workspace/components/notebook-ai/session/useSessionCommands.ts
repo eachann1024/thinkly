@@ -1,11 +1,6 @@
 import { useMemo } from "react";
 import { useStableCallback } from "../useStableCallback";
-import type { NotebookAiSessionValue } from "./types";
-
-type Commands = Pick<NotebookAiSessionValue,
-  "clearError" | "stop" | "send" | "newConversation" | "ensureFreshConversation" |
-  "compactConversation" | "selectConversation" | "deleteConversation" |
-  "searchPages" | "onBatchApproval" | "onBatchUndo">;
+import type { NotebookAiSessionCommands as Commands } from "./types";
 
 export function useSessionCommands(commands: Commands): Commands {
   const clearError = useStableCallback(commands.clearError);
