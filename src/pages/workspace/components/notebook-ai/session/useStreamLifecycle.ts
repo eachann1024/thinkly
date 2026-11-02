@@ -25,7 +25,7 @@ const t = createTranslator(messages);
 
 
 const NOTEBOOK_AI_STREAM_IDLE_TIMEOUT_MS = 60_000;
-export function useStreamLifecycle(state: SessionState) {
+export function useStreamLifecycle(state: SessionState, panelOpen: boolean) {
   useLocale();
   const {
     activeSessionScopeRef,
@@ -172,7 +172,7 @@ export function useStreamLifecycle(state: SessionState) {
   ]);
 
   useEffect(() => {
-    if (unavailableReason || isBusy || composerHasContent) return;
+    if (!panelOpen || unavailableReason || isBusy || composerHasContent) return;
 
     let timer: number | null = null;
     const stop = () => {
@@ -199,7 +199,7 @@ export function useStreamLifecycle(state: SessionState) {
       stop();
       document.removeEventListener("visibilitychange", sync);
     };
-  }, [unavailableReason, isBusy, composerHasContent, setPlaceholderIndex]);
+  }, [panelOpen, unavailableReason, isBusy, composerHasContent, setPlaceholderIndex]);
 
   return stopAll;
 }
