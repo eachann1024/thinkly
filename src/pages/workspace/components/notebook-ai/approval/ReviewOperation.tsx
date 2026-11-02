@@ -1,7 +1,7 @@
 import { useLocale } from "@/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import {
   ArrowLeftRight,
   ClipboardCopy,
@@ -28,11 +28,12 @@ import {
 } from "./planReviewData";
 import { requestPlanRefinement } from "./refinePlan";
 import { ReviewDiff } from "./ReviewDiff";
+import { useReviewPages } from "./useReviewPages";
 import messages from "./ReviewOperation.messages.yaml";
 import { createTranslator } from "@/i18n";
 const t = createTranslator(messages);
 
-export function ReviewOperation({
+export const ReviewOperation = memo(function ReviewOperation({
   operation,
   journal,
   canSelect,
@@ -43,7 +44,7 @@ export function ReviewOperation({
   journal: BatchPlanJournal | null;
   canSelect: boolean;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (id: string) => void;
 }) {
   useLocale();
   const { onOpenPage } = useEditorPageContext();
@@ -51,6 +52,7 @@ export function ReviewOperation({
   const [copyStatus, setCopyStatus] = useState("");
   const [selectionText, setSelectionText] = useState("");
   const bodyRef = useRef<HTMLDivElement>(null);
+  const notebookMetadata = useReviewPages(operation, journal);
   const page = operationTargetPage(operation, journal);
   const title =
     operation.type === "create"
@@ -62,8 +64,8 @@ export function ReviewOperation({
           : page
             ? getPageTitle(page)
             : t("theTargetNoteIsNoLongerAvailable");
-  const oldText = originalMarkdown(operation, journal);
-  const newText = proposedMarkdown(operation, journal);
+  const oldText = useMemo(() => originalMarkdown(operation, journal), [operation, journal]);
+  const newText = useMemo(() => proposedMarkdown(operation, journal), [operation, journal, notebookMetadata]);
   const captureSelection = () => {
     const selection = window.getSelection();
     setSelectionText(
@@ -106,7 +108,7 @@ export function ReviewOperation({
           {canSelect ? (
             <Checkbox
               isSelected={selected}
-              onChange={onSelect}
+              onChange={() => onSelect(operation.operationId)}
               aria-label={t("detailApply", {
                 value1: planOperationKindLabel(operation.type),
                 value2: title,
@@ -245,4 +247,4 @@ export function ReviewOperation({
       </div>
     </section>
   );
-}
+});
