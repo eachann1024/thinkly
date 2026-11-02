@@ -56,6 +56,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/ConversationTitle.tsx#messages:1": { "detailConversationTitle": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/DiagramCard.tsx#messages:1": { "diagram": {  }; "diagramGenerationFailed": {  }; "generatingDiagram": {  }; "theDiagramIsNotReadyYet": {  } };
     "src/pages/workspace/components/notebook-ai/ExecutionSources.tsx#messages:1": { "next": {  }; "pages": {  }; "previous": {  }; "sources": { "count": string | number } };
+    "src/pages/workspace/components/notebook-ai/ExecutionTimeline.tsx#messages:1": { "average": {  }; "live": {  }; "peak": {  }; "unit": {  } };
     "src/pages/workspace/components/notebook-ai/ExecutionTrace.tsx#messages:1": { "execution": {  }; "model": {  }; "read": {  }; "response": {  }; "visual": {  }; "write": {  } };
     "src/pages/workspace/components/notebook-ai/ModelSelectorPopover.tsx#messages:1": { "default": {  }; "detailCurrentModel": { "value1": string | number }; "switchModel": {  } };
     "src/pages/workspace/components/notebook-ai/NotebookAiPanel.tsx#messages:1": { "aiAssistant": {  } };

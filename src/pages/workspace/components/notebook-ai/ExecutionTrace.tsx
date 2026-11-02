@@ -5,7 +5,9 @@ import type { NotebookAiExecution } from "@/lib/notebook-ai/types";
 import { ExecutionDisclosure } from "./ExecutionDisclosure";
 import { ToolProgressSteps } from "./ToolProgressSteps";
 import type { ProgressStep, ToolProgressPart } from "./toolProgressModel";
-import { prepareExecutionStages, formatExecutionTime } from "./executionPresentation";
+import { prepareExecutionSegments, formatExecutionTime } from "./executionPresentation";
+import { ExecutionTimeline } from "./ExecutionTimeline";
+import { useOutputSpeed } from "./useOutputSpeed";
 import { useLocale, i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ExecutionTrace.tsx#messages:1">`
 zh-Hans:
@@ -32,12 +34,14 @@ ja:
 `;
 const t = createTranslator(messages);
 
-export function ExecutionTrace({ parts, steps, execution, running, label, thinkingLine, statusLabel }: {
-  parts: ToolProgressPart[]; steps: ProgressStep[]; execution?: NotebookAiExecution; running: boolean;
+export function ExecutionTrace({ parts, steps, execution, running, label, thinkingLine, outputChars = 0, statusLabel }: {
+  parts: ToolProgressPart[]; steps: ProgressStep[]; execution?: NotebookAiExecution; running: boolean; outputChars?: number;
   label: string; thinkingLine: string; statusLabel: (status: ProgressStep["status"]) => string;
 }) {
   const locale = useLocale();
-  const [open, setOpen] = useState(false);
+  // Follow the run (open while working, folded when done) until the user toggles it by hand.
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const open = manualOpen ?? running;
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     if (!running || !execution || execution.endedAt) return;
@@ -48,22 +52,21 @@ export function ExecutionTrace({ parts, steps, execution, running, label, thinki
   const measuredEnd = execution?.endedAt ?? (running ? now : execution?.startedAt ?? now);
   const duration = execution && (running || execution.endedAt !== undefined)
     ? Math.max(0, measuredEnd - execution.startedAt) : undefined;
-  const timeline = useMemo(() => open && execution ? prepareExecutionStages(execution, parts) : null, [open, execution, parts]);
-  const stages = timeline?.(measuredEnd) ?? [];
+  const speed = useOutputSpeed(outputChars, now, running && !!execution && !execution.endedAt);
+  const timeline = useMemo(() => open && execution ? prepareExecutionSegments(execution, parts) : null, [open, execution, parts]);
+  const segments = timeline?.(measuredEnd) ?? [];
   const id = useId();
   return <div className="notebook-ai-work-trace notebook-ai-work-trace--foldable">
     <Button variant="ghost" size={null} contentStyle="preserve" className="notebook-ai-work-toggle"
-      aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)}>
+      aria-expanded={open} aria-controls={id} onClick={() => setManualOpen(!open)}>
       <ChevronRight className="notebook-ai-work-chev" size={16} />
       <span className="notebook-ai-work-toggle-label">{execution ? t("execution") : label}</span>
       {duration !== undefined ? <time className="notebook-ai-execution-duration">{formatExecutionTime(duration, locale)}</time> : null}
       {running && thinkingLine ? <span className="notebook-ai-work-think" title={thinkingLine}>{thinkingLine}</span> : null}
     </Button>
     <ExecutionDisclosure open={open} id={id}>
-      {stages.length ? <div className="notebook-ai-execution-stages">
-        <div className="notebook-ai-execution-bar" aria-hidden>{stages.map(([stage, value]) => <span key={stage} data-stage={stage} style={{ flex: value }} />)}</div>
-        <div className="notebook-ai-execution-legend">{stages.map(([stage, value]) => <span key={stage} data-stage={stage}>{t(stage)} {formatExecutionTime(value, locale)}</span>)}</div>
-      </div> : null}
+      {execution && segments.length ? <ExecutionTimeline segments={segments} startedAt={execution.startedAt} now={measuredEnd}
+        running={running} speed={speed} stageLabel={stage => t(stage)} /> : null}
       {execution?.modelId ? <p className="notebook-ai-execution-model"><span>{t("model")}</span><span title={execution.modelId}>{execution.modelId}</span></p> : null}
       <ToolProgressSteps steps={steps} execution={execution} statusLabel={statusLabel} />
     </ExecutionDisclosure>

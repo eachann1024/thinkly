@@ -82,6 +82,7 @@ interface ToolProgressCardProps {
   isMessageStreaming?: boolean;
   completion?: NotebookAiCompletion;
   thinkingText?: string;
+  answerText?: string;
   children?: ReactNode;
   footer?: ReactNode;
 }
@@ -92,6 +93,7 @@ export function ToolProgressCard({
   isMessageStreaming,
   completion,
   thinkingText,
+  answerText,
   children,
   footer,
 }: ToolProgressCardProps) {
@@ -149,7 +151,7 @@ export function ToolProgressCard({
           ) : null}
           {showTraceRow ? (
             <ExecutionTrace parts={parts} steps={steps} execution={execution}
-              running={isRunning} label={traceLabel} thinkingLine={thinkingLine} statusLabel={stepStatusLabel} />
+              running={isRunning} label={traceLabel} thinkingLine={thinkingLine} outputChars={(answerText?.length ?? 0) + (thinkingText?.length ?? 0)} statusLabel={stepStatusLabel} />
           ) : null}
           <ExecutionSources parts={parts} execution={execution} />
           {children ? (
