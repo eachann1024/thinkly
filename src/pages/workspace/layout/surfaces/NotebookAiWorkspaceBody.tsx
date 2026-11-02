@@ -76,10 +76,12 @@ function NotebookAiWorkspaceBody({
   const hideFolderHome =
     isElectronChrome && Boolean(page?.isFolder) && isLocalFolderPage;
 
+  const showEditor = !isWelcomeTab && !inHistoryMode && Boolean(
+    activePageId && page && !hideFolderHome && !(page.isFolder && isLocalFolderPage),
+  );
+
   return (
     <>
-      {
-}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {isWelcomeTab ? (
           <>
@@ -168,27 +170,27 @@ function NotebookAiWorkspaceBody({
                 ) : null}
               </div>
             </>
-          ) : (
-            <NotebookEditorSplitColumn
-              page={page}
-              activePageId={activePageId}
-              isLocalFolderPage={isLocalFolderPage}
-              handleOpenSearch={handleOpenSearch}
-              aiAvailableForNotebook={aiAvailableForNotebook}
-              aiPanelOpen={aiPanelOpen}
-              aiLayoutMode={aiLayoutMode}
-              showSideAiPanel={showSideAiPanel}
-              aiNotebookId={aiNotebookId}
-              editorRef={editorRef}
-              aiPanelCapturedSelection={aiPanelCapturedSelection}
-              consumeAiPanelCapturedSelection={consumeAiPanelCapturedSelection}
-              setAiLayoutMode={setAiLayoutMode}
-              closeAiPanel={closeAiPanel}
-            />
-          )
+          ) : null
         ) : (
           <PageEmptyState />
         )}
+        <NotebookEditorSplitColumn
+          visible={showEditor}
+          page={page}
+          activePageId={activePageId}
+          isLocalFolderPage={isLocalFolderPage}
+          handleOpenSearch={handleOpenSearch}
+          aiAvailableForNotebook={aiAvailableForNotebook}
+          aiPanelOpen={aiPanelOpen}
+          aiLayoutMode={aiLayoutMode}
+          showSideAiPanel={showSideAiPanel}
+          aiNotebookId={aiNotebookId}
+          editorRef={editorRef}
+          aiPanelCapturedSelection={aiPanelCapturedSelection}
+          consumeAiPanelCapturedSelection={consumeAiPanelCapturedSelection}
+          setAiLayoutMode={setAiLayoutMode}
+          closeAiPanel={closeAiPanel}
+        />
       </div>
 
       {showFullscreenAi && aiNotebookId && aiAvailableForNotebook ? (

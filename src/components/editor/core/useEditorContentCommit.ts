@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useLayoutEffect, useMemo } from "react";
 import { createDebounce } from "@/components/editor/utils/debounce";
 import {
   clonePageContent,
@@ -71,8 +71,10 @@ export function useEditorContentCommit(runtime: EditorRuntime) {
     [debouncedUpdate, readCurrentEditorContent],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     return () => {
+      // Activity hides disconnect layout effects before BlockNote refs. Flush
+      // while the outgoing editor and its page-bound callback are still live.
       commitEditorContent(pageIdForUpdateRef.current ?? undefined);
     };
   }, [commitEditorContent]);

@@ -5,6 +5,7 @@ import { createEditorSafeContent } from "@/components/editor/utils/blocknote-con
 import { useEditorShortcuts } from "@/components/editor/hooks/useEditorShortcuts";
 import { useEditorPaste } from "@/components/editor/hooks/useEditorPaste";
 import { EditorComposer } from "./EditorComposer";
+import { useEditorActivityRetention } from "./EditorActivity";
 import { editorSchema } from "./schema";
 import { useEditorSession } from "./useEditorSession";
 import { useEditorExtensions } from "./useEditorExtensions";
@@ -63,6 +64,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>(function Editor(
     ),
     [],
   );
+  useEditorActivityRetention(editor);
   useEditorLocale(editor, isQuickNoteEditorPage(page) ? "quicknote" : "note");
   editorInstanceRef.current = editor;
   if (fastOpen.current) {

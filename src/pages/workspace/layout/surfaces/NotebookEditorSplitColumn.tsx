@@ -6,8 +6,7 @@ import { usePages } from "@/stores/usePages";
 import { useTabs } from "@/stores/useTabs";
 import { PageHeader } from "../../components/page/PageHeader";
 import { type EditorRef } from "@/components/editor/core/Editor";
-import { SplitEditorPane } from "../../components/editor-split/SplitEditorPane";
-import { EditorSplitSurface } from "../../components/editor-split/EditorSplitSurface";
+import { CachedEditorSplitSurfaces } from "../../components/editor-split/CachedEditorSplitSurfaces";
 import { focusedPageIdOf, isSplitState } from "@/lib/editor-split/tree";
 import {
   useEditorSplit,
@@ -23,6 +22,7 @@ import { isElectronChrome } from "./workspaceLayoutConfig";
 import { GuardedNotebookAiPanel } from "./GuardedNotebookAiPanel";
 
 export function NotebookEditorSplitColumn({
+  visible,
   page,
   activePageId,
   isLocalFolderPage,
@@ -38,8 +38,9 @@ export function NotebookEditorSplitColumn({
   setAiLayoutMode,
   closeAiPanel,
 }: {
-  page: NonNullable<ReturnType<typeof usePages.getState>["pages"][string]>;
-  activePageId: string;
+  visible: boolean;
+  page: ReturnType<typeof usePages.getState>["pages"][string] | undefined;
+  activePageId: string | null | undefined;
   isLocalFolderPage: boolean;
   handleOpenSearch: () => void;
   aiAvailableForNotebook: boolean;
@@ -67,17 +68,17 @@ export function NotebookEditorSplitColumn({
   const focusedPageId = splitState ? focusedPageIdOf(splitState) : null;
 
   useLayoutEffect(() => {
-    if (!activeTabId || !activePageId) return;
+    if (!visible || !activeTabId || !activePageId) return;
     const activeTab = useTabs
       .getState()
       .openTabs.find((tab) => tab.id === activeTabId);
     if (!activeTab || activeTab.type || activeTab.pageId !== activePageId)
       return;
     useEditorSplit.getState().ensureTab(activeTabId, activePageId);
-  }, [activeTabId, activePageId]);
+  }, [visible, activeTabId, activePageId]);
 
   useLayoutEffect(() => {
-    if (!activeTabId || !focusedPageId) return;
+    if (!visible || !activeTabId || !focusedPageId) return;
     const activeTab = useTabs
       .getState()
       .openTabs.find((tab) => tab.id === activeTabId);
@@ -88,14 +89,15 @@ export function NotebookEditorSplitColumn({
       void usePages.getState().setActivePage(focusedPageId);
     }
     useTabs.getState().syncTabPageId(activeTabId, focusedPageId);
-  }, [activeTabId, focusedPageId]);
-
-  if (!activeTabId) return null;
+  }, [visible, activeTabId, focusedPageId]);
 
   return (
     <div
       className="workspace-editor-surface workspace-content-columns relative ml-0 mt-0 flex min-h-0 flex-1 flex-row gap-2 overflow-hidden"
       data-local-file-page={isLocalFolderPage ? "true" : undefined}
+      hidden={!visible}
+      inert={!visible}
+      style={visible ? undefined : { display: "none" }}
     >
       <div
         className={cn(
@@ -105,7 +107,7 @@ export function NotebookEditorSplitColumn({
         data-editor-split-column=""
         data-editor-split={isSplit ? "true" : undefined}
       >
-        {!isElectronChrome && (
+        {visible && page && activePageId && !isElectronChrome && (
           <PageHeader
             page={page}
             onOpenSearch={handleOpenSearch}
@@ -116,20 +118,10 @@ export function NotebookEditorSplitColumn({
           />
         )}
         <div className="min-h-0 flex-1">
-          <EditorSplitSurface
-            tabId={activeTabId}
-            renderPane={(leaf, { focused }) => (
-              <SplitEditorPane
-                tabId={activeTabId}
-                leaf={leaf}
-                focused={focused}
-                showChrome={isSplit}
-              />
-            )}
-          />
+          <CachedEditorSplitSurfaces visible={visible} />
         </div>
       </div>
-      {showSideAiPanel && aiNotebookId ? (
+      {visible && showSideAiPanel && aiNotebookId ? (
         <NotebookAiHostScope notebookId={aiNotebookId}>
           <GuardedNotebookAiPanel
             key={aiNotebookId}

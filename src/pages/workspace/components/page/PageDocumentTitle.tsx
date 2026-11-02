@@ -16,7 +16,7 @@ ja:
   noteTitle: "ノートのタイトル"
 `;
 const uiText = createTranslator(localMessages);
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { getPageTitle, UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
@@ -123,6 +123,10 @@ export function PageDocumentTitle({ page, focused, editable }: {
   };
   const commitRef = useRef(commit);
   commitRef.current = commit;
+  useLayoutEffect(() => () => {
+    // Hiding an Activity need not fire blur on the title field.
+    if (editingRef.current) void commitRef.current();
+  }, [page.id]);
 
   useEffect(() => {
     const field = fieldRef.current;

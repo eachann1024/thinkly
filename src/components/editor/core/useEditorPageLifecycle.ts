@@ -90,6 +90,9 @@ export function useEditorPageLifecycle(
     if (__GOOSE_EDITOR_AI__)
       editor.getExtension(GooseAIExtension)?.detachPage();
     if (activePageId === prevPageIdRef.current) {
+      // An Activity reveal keeps this exact document and history alive. Only
+      // the initial mount needs fast-open completion / history restoration.
+      if (loadedDocumentRef.current) return;
       const pending = takeFastOpen(editor);
       if (pending !== undefined) {
         const isLocalPage = contentModeRef.current === "raw";
