@@ -19,7 +19,7 @@ import {
 import { useEditorPlatform } from "@/components/editor/platform/context";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import type { ImageAlignment } from "@/components/editor/image/imageUtils";
-import { EDITOR_UI_SCALE_CHANGE_EVENT } from "@/lib/appearance";
+import { observeAnchorRect, sameAnchorRect } from "../../image/observeAnchorRect";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { toast } from "@/components/ui/sonner";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
@@ -86,6 +86,7 @@ function VideoBlockContent({
   const toolbarState = useBlockToolbarState(editor, block.id);
   const showToolbar = !toolbarState.suppressed && (selected || toolbarState.ready);
   const [toolbarRect, setToolbarRect] = useState<DOMRect | null>(null);
+  const toolbarRectRef = useRef<DOMRect | null>(null);
 
   const rawSrc = block.props.url as string;
   const activePageLocalFilePath = getActivePageLocalFilePath();
@@ -129,10 +130,15 @@ function VideoBlockContent({
     };
   }, [activePageLocalFilePath, platform.imageStorage, rawSrc]);
 
+  const applyToolbarRect = useCallback((rect: DOMRect) => {
+    if (sameAnchorRect(toolbarRectRef.current, rect)) return;
+    toolbarRectRef.current = rect;
+    setToolbarRect(rect);
+  }, []);
   const updateToolbarRect = useCallback(() => {
     const shell = shellRef.current;
-    if (shell) setToolbarRect(shell.getBoundingClientRect());
-  }, []);
+    if (shell) applyToolbarRect(shell.getBoundingClientRect());
+  }, [applyToolbarRect]);
 
   useEffect(() => {
     if (!showToolbar) return;
@@ -154,19 +160,12 @@ function VideoBlockContent({
     };
 
     document.addEventListener("pointerdown", handlePointerDown, true);
-    window.addEventListener("scroll", updateToolbarRect, true);
-    window.addEventListener("resize", updateToolbarRect);
-    window.addEventListener(EDITOR_UI_SCALE_CHANGE_EVENT, updateToolbarRect);
+    const stopObserving = observeAnchorRect(() => shellRef.current, applyToolbarRect);
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown, true);
-      window.removeEventListener("scroll", updateToolbarRect, true);
-      window.removeEventListener("resize", updateToolbarRect);
-      window.removeEventListener(
-        EDITOR_UI_SCALE_CHANGE_EVENT,
-        updateToolbarRect,
-      );
+      stopObserving();
     };
-  }, [editor, block.id, showToolbar, updateToolbarRect]);
+  }, [editor, block.id, showToolbar, updateToolbarRect, applyToolbarRect]);
 
   const handleEnterBelow = useCallback(() => {
     if (editor.isEditable) ensureParagraphAfter(editor, block);

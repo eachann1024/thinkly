@@ -13,6 +13,7 @@ import type { ImageLightboxProps } from "./lightboxTypes";
 import type { useLightboxActions } from "./useLightboxActions";
 import { subscribeBlockHover, useBlockToolbarState } from "../core/blockToolbarSequence";
 import { ownsBlockToolbar } from "../core/blockToolbarOwner";
+import { observeAnchorRect, sameAnchorRect } from "./observeAnchorRect";
 
 export function useSelectedImage(
   editor: ImageLightboxProps["editor"],
@@ -26,6 +27,7 @@ export function useSelectedImage(
     null,
   );
   const selectedImageRef = useRef<SelectedImageState | null>(null);
+  const selectedElements = useRef<{ image: HTMLImageElement; anchor: HTMLElement } | null>(null);
   const toolbarState = useBlockToolbarState(editor, selectedImage?.blockId ?? undefined);
   useEffect(() => {
     selectedImageRef.current = selectedImage;
@@ -45,6 +47,7 @@ export function useSelectedImage(
         ? (blockElement ?? img)
         : img;
 
+      selectedElements.current = { image: img, anchor: anchorElement };
       setSelectedImage({
         blockId,
         src:
@@ -93,28 +96,36 @@ export function useSelectedImage(
       else setSelectedImage(null);
     });
 
-    const handleReposition = () => {
-      const current = selectedImageRef.current;
-      if (!current) return;
-      const images = getImageElements(container);
-      const img = images[current.index];
-      if (!img) {
-        setSelectedImage(null);
-        return;
-      }
-      updateSelectedImageFromElement(img);
-    };
-
     document.addEventListener("pointerdown", handlePointerDown, true);
-    window.addEventListener("scroll", handleReposition, true);
-    window.addEventListener("resize", handleReposition);
     return () => {
       stopHover();
       document.removeEventListener("pointerdown", handlePointerDown, true);
-      window.removeEventListener("scroll", handleReposition, true);
-      window.removeEventListener("resize", handleReposition);
     };
   }, [editor, editorContainerRef, updateSelectedImageFromElement]);
+
+  useEffect(() => {
+    if (!selectedImage) return;
+    return observeAnchorRect(() => {
+      const cached = selectedElements.current;
+      if (cached?.image.isConnected && cached.anchor.isConnected) return cached.anchor;
+      const container = editorContainerRef.current;
+      const current = selectedImageRef.current;
+      if (!container || !current) return null;
+      const images = getImageElements(container);
+      const image = current.blockId
+        ? images.find(img => getBlockIdFromImage(img, container) === current.blockId)
+        : images[current.index];
+      if (!image) { setSelectedImage(null); return null; }
+      updateSelectedImageFromElement(image);
+      return selectedElements.current?.anchor ?? null;
+    }, (rect) => {
+      const current = selectedImageRef.current;
+      if (!current || sameAnchorRect(current.rect, rect)) return;
+      const next = { ...current, rect };
+      selectedImageRef.current = next;
+      setSelectedImage(next);
+    });
+  }, [selectedImage?.blockId, selectedImage?.index, editorContainerRef, updateSelectedImageFromElement]);
   const applyImageAlignment = useCallback(
     (alignment: ImageAlignment) => {
       if (!selectedImage?.blockId) return;
