@@ -2,6 +2,7 @@ import { useEditorSettings } from "@/components/editor/platform/hostContext";
 import { useCodeBlockEdit } from "./useCodeBlockEdit";
 import { useCodePreview } from "./useCodePreview";
 import { CodeBlockView } from "./CodeBlockView";
+import { useCodePreviewSelection } from "./useCodePreviewSelection";
 
 export function CodeBlockComponent({
   block,
@@ -27,6 +28,7 @@ export function CodeBlockComponent({
     onDefaultCodeBlockWrapChange,
   });
   const preview = useCodePreview(edit.getCodeContent, language, wrap, theme);
+  useCodePreviewSelection(editor, block.id, !preview.shouldShowSource, preview.setPreviewMode);
   return (
     <CodeBlockView
       block={block}
