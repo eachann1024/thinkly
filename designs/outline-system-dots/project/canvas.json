@@ -7,7 +7,7 @@
   "title": "Thinkly 界面设计",
   "launch": {
     "view": "canvas",
-    "page": "ai-composer"
+    "page": "editor-atoms"
   },
   "pages": [
     {
@@ -25,9 +25,16 @@
     {
       "id": "ai-composer",
       "name": "AI · 输入区"
+    },
+    {
+      "id": "editor-atoms",
+      "name": "编辑器 · 原子块选中"
     }
   ],
   "boards": {
+    "AtomDivider.dc.html": {"x":0,"y":0,"w":1120,"h":560,"title":"分割线 · 默认 / 悬停 / 选中","page":"editor-atoms","radius":0},
+    "AtomPreview.dc.html": {"x":1200,"y":0,"w":1120,"h":560,"title":"公式与 Mermaid 预览 · 现状 / 选中","page":"editor-atoms","radius":0},
+    "AtomDeleteFlow.dc.html": {"x":2400,"y":0,"w":1120,"h":560,"title":"Backspace 回到上一块 · 先选中再删除","page":"editor-atoms","radius":0},
     "AiComposerEmpty.dc.html": {"x":0,"y":0,"w":420,"h":240,"title":"AI 输入区 · 空白","page":"ai-composer"},
     "AiComposerFilled.dc.html": {"x":500,"y":0,"w":420,"h":240,"title":"AI 输入区 · 多行输入","page":"ai-composer"},
     "AiComposerDark.dc.html": {"x":1000,"y":0,"w":340,"h":240,"title":"AI 输入区 · 深色窄面板","page":"ai-composer"},
@@ -192,8 +199,11 @@
     "NoteErrorVariants.dc.html",
     "SplitMissingVariants.dc.html",
     "ReflectionVariants.dc.html",
-    "SmallFolderPlusVariants.dc.html"
+    "SmallFolderPlusVariants.dc.html",
+    "AtomDivider.dc.html",
+    "AtomPreview.dc.html",
+    "AtomDeleteFlow.dc.html"
   ],
-  "notes": {},
+  "notes": {"atomsTitle":{"x":0,"y":-300,"text":"原子块的选中反馈","kind":"title1","maxW":3520,"page":"editor-atoms"}},
   "designSystems": []
 }
