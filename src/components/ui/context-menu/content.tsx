@@ -7,7 +7,8 @@ import { useMenu } from "./state";
 import { OverlayLayerProvider, useOverlayLayer, useOverlayTopLayer } from "../overlay-layer";
 import { MenuRootContent } from "../menu-root";
 
-type ContentProps = React.HTMLAttributes<HTMLDivElement> & {
+type ContentProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> & {
+  children?: React.ReactNode | (() => React.ReactNode);
   editorContext?: boolean;
   onCloseAutoFocus?: (event: Event) => void;
   sideOffset?: number;
@@ -99,7 +100,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContentProps>
             }}
           >
             <FloatingList elementsRef={state.elements} labelsRef={state.labels}>
-              {children}
+              {typeof children === "function" ? children() : children}
             </FloatingList>
           </div>
         </FloatingFocusManager>

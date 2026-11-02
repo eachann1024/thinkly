@@ -1,39 +1,27 @@
 import { Component, createRef, type ReactNode } from "react";
-import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 
-const easeOut = [0.23, 1, 0.32, 1] as const;
-type FocusGuardProps = { present: boolean; onReturnFocus: () => void; children: ReactNode };
+type TreeBranchProps = {
+  expanded: boolean;
+  onReturnFocus: () => void;
+  children: ReactNode;
+};
 
-class CollapseFocusGuard extends Component<FocusGuardProps> {
+// Capture focus before React removes the descendants, then return it to the folder.
+// Branches enter/leave layout in one commit; MainTreeMotion animates only pixels.
+export class TreeBranch extends Component<TreeBranchProps> {
   private root = createRef<HTMLDivElement>();
-  getSnapshotBeforeUpdate(previous: FocusGuardProps) {
-    return previous.present && !this.props.present && !!this.root.current?.contains(document.activeElement);
+  getSnapshotBeforeUpdate(previous: TreeBranchProps) {
+    return previous.expanded && !this.props.expanded &&
+      !!this.root.current?.contains(document.activeElement);
   }
-  componentDidUpdate(_previous: FocusGuardProps, _state: unknown, hadFocus: boolean) {
+  componentDidUpdate(_previous: TreeBranchProps, _state: unknown, hadFocus: boolean) {
     if (hadFocus) this.props.onReturnFocus();
   }
-  render() { return <div ref={this.root}>{this.props.children}</div>; }
-}
-
-function BranchContent({ children, onReturnFocus }: { children: ReactNode; onReturnFocus: () => void }) {
-  const present = useIsPresent();
-  const reduceMotion = useReducedMotion();
-  return (
-    <CollapseFocusGuard present={present} onReturnFocus={onReturnFocus}>
-      <motion.div
-        className="goose-tree-branch"
-        inert={!present}
-        aria-hidden={!present || undefined}
-        initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-        animate={{ height: "auto", opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        transition={{ height: { duration: reduceMotion ? 0 : 0.18, ease: easeOut }, opacity: { duration: reduceMotion ? 0 : 0.15, ease: easeOut } }}
-        style={{ overflow: "hidden", overflowAnchor: "none" }}
-      >{children}</motion.div>
-    </CollapseFocusGuard>
-  );
-}
-
-export function TreeBranch({ expanded, children, onReturnFocus }: { expanded: boolean; children: ReactNode; onReturnFocus: () => void }) {
-  return <AnimatePresence initial={false}>{expanded && <BranchContent key="branch" onReturnFocus={onReturnFocus}>{children}</BranchContent>}</AnimatePresence>;
+  render() {
+    return this.props.expanded ? (
+      <div ref={this.root} className="goose-tree-branch">
+        {this.props.children}
+      </div>
+    ) : null;
+  }
 }

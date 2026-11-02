@@ -85,6 +85,11 @@
   min-height: 100%;
 }
 
+.sidebar-tree-scroll {
+  overflow-anchor: none;
+  scrollbar-gutter: stable;
+}
+
 .main-tree-row.main-tree-row--hovered {
   color: var(--goose-interactive-hover-fg) !important;
   background-color: var(--goose-interactive-hover) !important;
