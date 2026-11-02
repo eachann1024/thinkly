@@ -30,6 +30,7 @@ export interface AppearanceSliceState {
   defaultCodeBlockWrap: boolean;
   customFonts: CustomFonts;
   uiFontFamily: string | null;
+  fontSmoothing: boolean;
   uiFontSize: UIFontSize;
   editorFontSize: number;
   editorLineHeight: number;
@@ -59,6 +60,7 @@ export interface AppearanceSliceActions {
   ) => void;
   resetCustomFont: (type: "default" | "serif" | "mono") => void;
   setUIFontFamily: (font: string | null) => void;
+  setFontSmoothing: (enabled: boolean) => void;
   setUIFontSize: (size: UIFontSize) => void;
   setEditorFontSize: (size: number) => void;
   setEditorLineHeight: (height: number) => void;
@@ -92,6 +94,7 @@ export const APPEARANCE_INITIAL_STATE: AppearanceSliceState = {
     mono: { label: null, font: null },
   },
   uiFontFamily: null,
+  fontSmoothing: true,
   uiFontSize: DEFAULT_UI_FONT_SIZE,
   editorFontSize: EDITOR_FONT_SIZE_DEFAULT,
   editorLineHeight: EDITOR_LINE_HEIGHT_DEFAULT,
@@ -167,6 +170,7 @@ export function createAppearanceSlice(
       })),
     setUIFontFamily: (font) =>
       set({ uiFontFamily: normalizeLocalFontName(font) }),
+    setFontSmoothing: (fontSmoothing) => set({ fontSmoothing }),
     setUIFontSize: (uiFontSize) => set({ uiFontSize: normalizeUIFontSize(uiFontSize) }),
     setEditorFontSize: (size) =>
       set({

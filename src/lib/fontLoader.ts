@@ -24,6 +24,11 @@ export {
   waitForFonts,
 } from "./fonts/loading";
 
+export function applyFontSmoothing(enabled: boolean) {
+  if (typeof document === "undefined") return;
+  document.documentElement.dataset.fontSmoothing = enabled === false ? "off" : "on";
+}
+
 export function applyFontVariables(
   customFonts: CustomFonts,
   fonts: {

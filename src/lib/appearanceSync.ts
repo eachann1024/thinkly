@@ -2,7 +2,7 @@ import { useSettings } from "@/stores/settings";
 import { applyTheme } from "@/stores/settings/theme";
 import { applyAccentColor } from "./accentColor";
 import { applyAppearanceScaleVariables } from "./appearance";
-import { applyFontVariables } from "./fontLoader";
+import { applyFontVariables, applyFontSmoothing } from "./fontLoader";
 import { resolveTheme } from "./resolvedTheme";
 import { readThemeSurfaceSnapshot } from "./themeSurfaceSnapshot";
 import { APPEARANCE_KEYS, type AppearanceSnapshot } from "./appearance-contract";
@@ -36,6 +36,7 @@ function applyAppearanceChanges(
   if (changed("customFonts") || changed("uiFontFamily")) {
     applyFontVariables(state.customFonts, state);
   }
+  if (changed("fontSmoothing")) applyFontSmoothing(state.fontSmoothing);
 }
 
 function appearanceSignature(): string {

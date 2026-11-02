@@ -30,8 +30,8 @@ export function installAssetMaintenanceSnapshotResponder() {
       const pages = Object.values(usePages.getState().pages)
         .filter((page) => page.localFilePath && !page.isFolder)
         .map((page) => ({ localFilePath: page.localFilePath, content: page.content, isFolder: page.isFolder }));
-      const { theme, accentColor, customFonts, uiFontSize, editorFontSize, editorLineHeight, sidebarFontSize, uiFontFamily } = useSettings.getState();
-      const appearance = { theme, accentColor, customFonts, uiFontSize, editorFontSize, editorLineHeight, sidebarFontSize, uiFontFamily };
+      const { theme, accentColor, customFonts, uiFontSize, editorFontSize, editorLineHeight, sidebarFontSize, uiFontFamily, fontSmoothing } = useSettings.getState();
+      const appearance = { theme, accentColor, customFonts, uiFontSize, editorFontSize, editorLineHeight, sidebarFontSize, uiFontFamily, fontSmoothing };
       bridge.replySnapshot(requestId, { notebooks, pages: [...pages, ...detail.pages], appearance });
     } catch { bridge.replySnapshot(requestId, null); }
   });
