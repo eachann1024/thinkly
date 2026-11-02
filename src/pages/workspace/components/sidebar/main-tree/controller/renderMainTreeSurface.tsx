@@ -21,6 +21,7 @@ import {
 } from "react-complex-tree";
 import type { Page } from "@/types";
 import { MainTreeEdgeDropWatcher } from "../MainTreeEdgeDropWatcher";
+import { MainTreeMotion } from "../MainTreeMotion";
 import { getPageTitle } from "../treeAdapter";
 import {
   renderItem,
@@ -65,6 +66,7 @@ export function renderMainTreeSurface(
     lastClickModRef,
     verticalKeyboardNavigationRef,
     viewState,
+    expandedIds,
     toggleLocalDirectory,
     activateLocalDirectory,
     handleDrop,
@@ -128,6 +130,7 @@ export function renderMainTreeSurface(
           draggedItem={draggingItemId ? items[draggingItemId] : undefined}
           onEdgeDrop={handleMainTreeEdgeDrop}
         />
+        <MainTreeMotion notebookId={activeNotebookId} expandedIds={expandedIds} dragging={!!draggingItemId}>
         <ControlledTreeEnvironment<Page>
           items={items}
           getItemTitle={(item) =>
@@ -237,6 +240,7 @@ export function renderMainTreeSurface(
         >
           <Tree treeId="main" rootItem="root" treeLabel={uiText("page_59ce")} />
         </ControlledTreeEnvironment>
+        </MainTreeMotion>
       </div>
     </ContextMenuTrigger>
   );
