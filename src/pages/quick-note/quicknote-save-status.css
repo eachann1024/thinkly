@@ -6,12 +6,6 @@
   scroll-padding-bottom: 108px;
 }
 
-.quicknote-editor-surface
-  .workspace-editor-surface.max-w-none
-  .bn-editor {
-  padding-bottom: 108px;
-}
-
 .quicknote-editor-surface .bn-block-outer {
   scroll-margin-bottom: 108px;
 }
