@@ -142,8 +142,9 @@ export function reconcileSlashSuggestionMenu(
 
 export function reconcilePageMentionSuggestionMenu(
   editor: BlockNoteEditor<any, any, any>,
+  policy: { allowPageMentions: boolean },
 ): void {
-  if (!editor.isEditable) return;
+  if (!policy.allowPageMentions || !editor.isEditable) return;
 
   const sug = editor.getExtension(SuggestionMenu);
   if (!sug || sug.shown()) return;
