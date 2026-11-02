@@ -8,7 +8,7 @@ import {
 import { useTabs, type TabItem } from "@/stores/useTabs";
 
 function readTabRects(scroller: HTMLElement): TabRailRect[] {
-  return [...scroller.querySelectorAll<HTMLElement>(".tab-rail-item")].map(
+  return [...scroller.querySelectorAll<HTMLElement>(".tab-rail-item:not([data-tab-phase='out'])")].map(
     (el) => {
       const box = el.getBoundingClientRect();
       return {

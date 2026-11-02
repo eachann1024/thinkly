@@ -1,6 +1,7 @@
 .tab-rail {
   padding: 4px;
-  gap: 8px;
+  --tab-rail-gap: 8px;
+  gap: var(--tab-rail-gap);
 }
 .tab-rail-item {
   height: 36px;

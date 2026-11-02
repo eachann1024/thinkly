@@ -33,6 +33,8 @@ import { tabRailListClassName } from "./tabRailLayout";
 import { useFolderToolbarActions } from "./useFolderToolbarActions";
 
 import { useTabRail } from "./tab-rail/useTabRail";
+import { useTabRailMotion } from "./tab-rail/useTabRailMotion";
+import "./tab-rail/tab-rail-motion.css";
 import { SortableTabItem } from "./tab-rail/SortableTabItem";
 import { tabRailPageId } from "./tab-rail/model";
 import type { TabRailProps } from "./tab-rail/types";
@@ -60,12 +62,17 @@ export function TabRail({
     openTabs,
   } = useTabRail({ variant, onBeforeActivateTab });
 
+  const { items: motionItems, slotWidth, gap, gapAfter, closing } = useTabRailMotion(
+    visibleTabs.map((tab) => {
+      const pageId = tabRailPageId(tab, focusedPageByTabId);
+      return { tab, pageId, tabPage: tab.type === "welcome" ? undefined : getPage(pageId) };
+    }),
+    tabsScrollerRef,
+  );
   const tabItems = (
     <>
-      {visibleTabs.map((tab, visibleIndex) => {
-        const displayPageId = tabRailPageId(tab, focusedPageByTabId);
-        const tabPage =
-          tab.type === "welcome" ? undefined : getPage(displayPageId);
+      {motionItems.map(({ tab, pageId: displayPageId, tabPage, phase }) => {
+        const visibleIndex = visibleTabs.findIndex((item) => item.id === tab.id);
         const closableOtherTabs = visibleTabs.filter((item) => item.id !== tab.id);
         const closableLeftTabs = visibleTabs.slice(0, visibleIndex);
         const closableRightTabs = visibleTabs.slice(visibleIndex + 1);
@@ -74,10 +81,13 @@ export function TabRail({
             key={tab.id}
             tab={{ ...tab, pageId: displayPageId }}
             tabPage={tabPage}
+            phase={phase}
+            slotWidth={phase === "live" ? slotWidth : 0}
+            slotGap={gapAfter.has(tab.id) ? gap : 0}
             tabCount={visibleTabs.length}
             variant={variant}
             isActive={
-              activeTabId === tab.id &&
+              phase !== "out" && activeTabId === tab.id &&
               !(aiPanelOpen && isFullscreenAiLayout(aiLayoutMode))
             }
             hasLeftTabs={closableLeftTabs.length > 0}
@@ -119,6 +129,7 @@ export function TabRail({
         ref={tabsScrollerRef}
         role="tablist"
         data-workspace-tab-rail=""
+        data-tab-closing={closing || undefined}
         aria-label={uiText("openTabs")}
         className={cn(
           "relative @container min-w-0 flex-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
