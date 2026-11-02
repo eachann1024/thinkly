@@ -1,9 +1,9 @@
 import { useLocale } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import { usePages } from "@/stores/usePages";
+import { useStableCallback } from "../useStableCallback";
 import { usePlanReviewSelection } from "./PlanReviewContext";
 import { planReviewState } from "./reviewState";
-import { readReviewPlan } from "./planReviewData";
+import { useReviewPlan } from "./useReviewPlan";
 import { ReviewOperation } from "./ReviewOperation";
 import "./plan-review.css";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -61,8 +61,7 @@ export function ReviewProposal({
   };
 }) {
   useLocale();
-  usePages((state) => state.pages);
-  const { input, journal } = readReviewPlan(part);
+  const { input, journal } = useReviewPlan(part);
   const operations = input?.operations ?? [];
   const key = `${part.toolCallId ?? ""}:${input?.runId ?? ""}`;
   const { selectedIds, setSelectedIds, locked } = usePlanReviewSelection(
@@ -70,6 +69,11 @@ export function ReviewProposal({
     operations.map((op) => op.operationId),
     journal?.selectedOperationIds,
   );
+  const onSelect = useStableCallback((id: string) => {
+    setSelectedIds(selectedIds.includes(id)
+      ? selectedIds.filter((selectedId) => selectedId !== id)
+      : [...selectedIds, id]);
+  });
   const review = planReviewState(part, journal);
   const canSelect = review.phase === "approval" && !locked;
   if (!input) return null;
@@ -102,13 +106,7 @@ export function ReviewProposal({
           journal={journal}
           canSelect={canSelect}
           selected={selectedIds.includes(operation.operationId)}
-          onSelect={() =>
-            setSelectedIds(
-              selectedIds.includes(operation.operationId)
-                ? selectedIds.filter((id) => id !== operation.operationId)
-                : [...selectedIds, operation.operationId],
-            )
-          }
+          onSelect={onSelect}
         />
       ))}
     </div>

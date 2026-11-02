@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { useLocale } from "@/i18n";
 import { diffTextLines } from "../batchPlanDiff";
 import { i18nYaml, createTranslator } from "@/i18n";
@@ -12,7 +13,7 @@ ja:
 const t = createTranslator(messages);
 
 
-export function ReviewDiff({
+export const ReviewDiff = memo(function ReviewDiff({
   oldText,
   newText,
 }: {
@@ -20,9 +21,10 @@ export function ReviewDiff({
   newText: string;
 }) {
   useLocale();
+  const lines = useMemo(() => diffTextLines(oldText, newText), [oldText, newText]);
   return (
     <div className="notebook-ai-plan-diff" role="group" aria-label={t("changeDiff")}>
-      {diffTextLines(oldText, newText).map((line, i) => (
+      {lines.map((line, i) => (
         <div
           key={i}
           className={`notebook-ai-plan-diff-line${line.kind === "eq" ? "" : ` notebook-ai-plan-diff-line--${line.kind}`}`}
@@ -35,4 +37,4 @@ export function ReviewDiff({
       ))}
     </div>
   );
-}
+});
