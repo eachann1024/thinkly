@@ -15,7 +15,8 @@
  color: hsl(var(--foreground));
 }
 
-.notebook-ai-plan-file {
+.notebook-ai-plan-file + .notebook-ai-plan-file {
+ padding-top: 10px;
  border-top: 1px solid var(--goose-block-subtle-border);
 }
 
