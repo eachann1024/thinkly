@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>B 帘幕扫描</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.bs-bar{display:block;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);position:relative;overflow:hidden}
+.bs-ov .bs-bar::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--ink) 9%,transparent),transparent);animation:bs-sweep 1.6s ease-in-out infinite;animation-delay:calc(var(--d) * 1ms)}
+.bs-ov{position:absolute;inset:0;background:var(--paper);visibility:hidden;clip-path:inset(0 0 100% 0)}
+.bs-ov-cover{visibility:visible;animation:bs-drop 780ms cubic-bezier(.65,0,.35,1) both}
+.bs-ov-hold{visibility:visible;clip-path:inset(0)}
+.bs-ov-reveal{visibility:visible;animation:bs-lift 960ms cubic-bezier(.65,0,.35,1) both}
+.bs-scan{position:absolute;left:0;right:0;top:0;height:1.5px;background:var(--accent);opacity:0;pointer-events:none}
+.bs-scan-cover{animation:bs-scan-down 780ms cubic-bezier(.65,0,.35,1) both}
+.bs-scan-reveal{animation:bs-scan-down 960ms cubic-bezier(.65,0,.35,1) both}
+.bs-doc-reveal .bs-blk{animation:bs-blk-in 480ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--d) * 1ms + 120ms)}
+.bs-h1{font-size:28px;line-height:44px;font-weight:600;margin:0 0 8px}
+.bs-h2{font-size:18px;line-height:32px;font-weight:600;margin:20px 0 0}
+.bs-p{font-size:15px;line-height:26px;margin:0}
+.bs-li{font-size:15px;line-height:26px;margin:0;padding-left:22px;position:relative}
+.bs-li::before{content:"";position:absolute;left:6px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--sub)}
+.bs-icon{width:18px;height:18px;border-radius:5px;border:1.5px solid color-mix(in srgb,var(--ink) 40%,transparent);box-sizing:border-box}
+@keyframes bs-drop{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes bs-lift{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(100% 0 0 0);visibility:hidden}}
+@keyframes bs-scan-down{0%{top:0;opacity:1}92%{opacity:1}100%{top:calc(100% - 1.5px);opacity:0}}
+@keyframes bs-blk-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bs-sweep{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.bs-ov,.bs-ov .bs-bar,.bs-ov .bs-bar::after,.bs-blk{animation:none !important}}
+</style>
+</helmet>
+<main style="--shell: {{shell}}; --side: {{side}}; --paper: {{paper}}; --ink: {{ink}}; --sub: {{sub}}; --accent: {{accent}}; --line: {{line}}; position: relative; width: 100%; height: 100vh; min-height: 560px; background: var(--shell); overflow: hidden; font-family: -apple-system, 'PingFang SC', system-ui, sans-serif; color: var(--ink)">
+<div style="position: absolute; left: 16px; top: 13px; display: flex; gap: 8px">
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span>
+</div>
+<div style="position: absolute; left: 0; top: 44px; bottom: 0; width: 232px; box-sizing: border-box; padding: 14px 20px; display: flex; flex-direction: column; gap: 22px">
+<span class="bs-bar" style="width: 96px; height: 8px"></span>
+<span class="bs-bar" style="width: 120px; height: 8px; margin-left: 16px"></span>
+<span style="display: flex; align-items: center; height: 32px; margin: -8px -8px 0 8px; padding: 0 12px; border-radius: 8px; background: var(--paper); box-shadow: 0 0 0 1px var(--line)"><span class="bs-bar" style="width: 70px; height: 8px"></span></span>
+<span class="bs-bar" style="width: 88px; height: 8px; margin-left: 16px"></span>
+<span class="bs-bar" style="width: 104px; height: 8px; margin-left: 16px"></span>
+</div>
+<div style="position: absolute; left: 232px; right: 8px; top: 44px; bottom: 8px; border-radius: 10px; overflow: hidden; background: var(--paper); box-shadow: 0 0 0 1px var(--line)">
+<div style="height: 48px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box">
+<span style="font-size: 13px; color: var(--sub)">产品 / Q3 复盘</span>
+<span style="display: flex; gap: 14px"><span class="bs-icon"></span><span class="bs-icon"></span><span class="bs-icon"></span></span>
+</div>
+<div class="bs-doc-{{phase}}" style="padding: 20px 48px 0">
+<div style="max-width: 720px; margin: 0 auto">
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="6">
+<div class="bs-blk {{b.cls}}" style="--d: {{b.d}}">{{b.t}}</div>
+</sc-for>
+</div>
+</div>
+<div class="bs-scan bs-scan-{{phase}}" aria-hidden="true"></div>
+<div class="bs-ov bs-ov-{{phase}}" aria-hidden="true">
+<div style="height: 48px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box">
+<span class="bs-bar" style="--d: 0; width: 96px; height: 8px"></span>
+<span style="display: flex; gap: 14px"><span class="bs-bar" style="--d: 40; width: 18px; height: 18px; border-radius: 5px"></span><span class="bs-bar" style="--d: 60; width: 18px; height: 18px; border-radius: 5px"></span><span class="bs-bar" style="--d: 80; width: 18px; height: 18px; border-radius: 5px"></span></span>
+</div>
+<div style="padding: 20px 48px 0">
+<div style="max-width: 720px; margin: 0 auto">
+<sc-for list="{{skel}}" as="s" hint-placeholder-count="10">
+<div style="{{s.row}}"><span class="bs-bar" style="{{s.bar}}"></span></div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">AI 正在应用修改</span>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+state = { phase: 'idle', ver: 0 };
+componentDidMount() {
+const step = (ms, fn) => { this.timers.push(setTimeout(fn, ms)); };
+this.timers = [];
+const run = () => {
+this.timers = [];
+this.setState({ phase: 'idle' });
+step(1600, () => this.setState({ phase: 'cover' }));
+step(2380, () => this.setState({ phase: 'hold' }));
+step(3100, () => this.setState({ ver: (this.state.ver + 1) % 2 }));
+step(4100, () => this.setState({ phase: 'reveal' }));
+step(5120, () => this.setState({ phase: 'idle' }));
+step(7400, run);
+};
+run();
+}
+componentWillUnmount() { (this.timers || []).forEach(clearTimeout); }
+renderVals() {
+const d = this.props.dark;
+const dark = d === true || d === 'true';
+const theme = dark
+? { shell: '#343434', side: '#222222', paper: '#181818', ink: '#ececec', sub: '#b4b4b4', accent: '#779de8', line: 'rgba(236,236,236,.12)' }
+: { shell: '#f1f1f1', side: '#fafafa', paper: '#ffffff', ink: '#20242c', sub: '#526071', accent: '#547dd0', line: 'rgba(32,36,44,.08)' };
+const docs = [
+['Q3 产品复盘', '目标回顾', '本季度围绕搜索体验与协作效率两条主线推进，核心指标整体达成，其中检索响应时间较上季度下降了三成，团队反馈较为积极。', '主要进展', '全局搜索支持跨笔记本检索', '编辑器协作冲突率明显降低', '移动端启动速度完成首轮优化', '下一步', '下个季度将重点补齐离线场景，并继续打磨 AI 辅助写作的稳定性，计划在月底前完成内测并收集第一批反馈意见。'],
+['Q3 产品复盘', '目标回顾', '本季度围绕搜索体验、协作效率与稳定性三条主线推进，核心指标全部达成，检索响应时间较上季度下降四成，团队反馈持续向好。', '主要进展', '全局搜索支持跨笔记本与附件检索', '编辑器协作冲突率降至千分之二以下', '移动端启动速度完成两轮优化', '下一步', '下个季度将优先补齐离线场景，持续打磨 AI 辅助写作的稳定性，计划在月底前完成内测，并同步整理第一批用户反馈。']
+];
+const kinds = ['bs-h1', 'bs-h2', 'bs-p', 'bs-h2', 'bs-li', 'bs-li', 'bs-li', 'bs-h2', 'bs-p'];
+const doc = docs[this.state.ver];
+const hs = [52, 52, 52, 52, 26, 26, 26, 52, 52];
+const total = hs.reduce((a, b) => a + b, 0);
+let y = 0;
+const blocks = doc.map((t, i) => { const o = { t, cls: kinds[i], d: Math.round(y / total * 560) }; y += hs[i]; return o; });
+const plan = [['h1'], ['h2'], ['p', 2], ['h2'], ['li'], ['li'], ['li'], ['h2'], ['p', 2]];
+const skel = [];
+let n = 0;
+plan.forEach(([k, lines]) => {
+const rows = k === 'p' ? lines : 1;
+for (let r = 0; r < rows; r++) {
+const d = n++ * 50;
+let row = 'display:flex;align-items:center;height:26px;';
+let bar = 'height:8px;--d:' + d + ';';
+let w = r === rows - 1 && rows > 1 ? '58%' : '100%';
+if (k === 'h1') { row = 'display:flex;align-items:center;height:44px;margin-bottom:8px;'; bar = 'height:22px;border-radius:6px;--d:' + d + ';'; w = '34%'; }
+if (k === 'h2') { row = 'display:flex;align-items:center;height:32px;margin-top:20px;'; bar = 'height:13px;--d:' + d + ';'; w = '16%'; }
+if (k === 'li') { row += 'padding-left:22px;'; w = '72%'; }
+skel.push({ row, bar: bar + 'width:' + w });
+}
+});
+return { ...theme, phase: this.state.phase, blocks, skel };
+}
+}
+</script>
+</body>
+</html>

@@ -4,12 +4,8 @@ import { useLayoutEffect, useRef } from "react";
 import { reloadEditorPage } from "./reloadEditorPage";
 import {
   clonePageContent,
-  createEditorSafeContent,
-  normalizePageContent,
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
-import { toEditorBlocks } from "./editorContentPolicy";
-import { pageContentGroup } from "./replacePageContent";
 import { useEditorHostFocus } from "./useEditorHostFocus";
 import type { EditorRuntime } from "./useEditorSession";
 import type { EditorContentCommit } from "./useEditorContentCommit";
@@ -69,12 +65,7 @@ export function useEditorHostEvents(
     const handlePrepareWrite = (event: Event) => {
       const detail = (event as CustomEvent<PageWriteTransition>).detail;
       if (detail.pageId !== pageIdForUpdateRef.current) return;
-      const content = contentModeRef.current === "raw"
-        ? toEditorBlocks(detail.content) : normalizePageContent(detail.content);
-      const blocks = createEditorSafeContent(content, editor.schema);
-      const current = editor.prosemirrorState.doc;
-      const next = current.type.createChecked(current.attrs, pageContentGroup(current.type.schema, blocks as any));
-      detail.pending.push(showPageWriteSkeleton(editor.prosemirrorView, next, transitionController.current!.signal));
+      detail.pending.push(showPageWriteSkeleton(editor.prosemirrorView, transitionController.current!.signal));
     };
     window.addEventListener("goose-note:prepare-page-write", handlePrepareWrite);
 
