@@ -6,37 +6,26 @@ import { ExecutionDisclosure } from "./ExecutionDisclosure";
 import { ToolProgressSteps } from "./ToolProgressSteps";
 import type { ProgressStep, ToolProgressPart } from "./toolProgressModel";
 import { prepareExecutionSegments, formatExecutionTime } from "./executionPresentation";
-import { ExecutionTimeline } from "./ExecutionTimeline";
+import { ExecutionOverview } from "./ExecutionOverview";
+import { ExecutionSources, useExecutionSources } from "./ExecutionSources";
 import { useOutputSpeed } from "./useOutputSpeed";
 import { useLocale, i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ExecutionTrace.tsx#messages:1">`
 zh-Hans:
   execution: "执行过程"
   model: "本次模型"
-  read: "读取"
-  write: "工具处理"
-  visual: "可视化"
-  response: "响应"
 en:
   execution: "Execution"
   model: "Model"
-  read: "Reading"
-  write: "Tools"
-  visual: "Visualization"
-  response: "Response"
 ja:
   execution: "実行過程"
   model: "今回のモデル"
-  read: "読み取り"
-  write: "ツール処理"
-  visual: "可視化"
-  response: "応答"
 `;
 const t = createTranslator(messages);
 
-export function ExecutionTrace({ parts, steps, execution, running, label, thinkingLine, outputChars = 0, statusLabel }: {
+export function ExecutionTrace({ parts, steps, execution, running, label, thinkingLine, outputChars = 0, answerText, statusLabel }: {
   parts: ToolProgressPart[]; steps: ProgressStep[]; execution?: NotebookAiExecution; running: boolean; outputChars?: number;
-  label: string; thinkingLine: string; statusLabel: (status: ProgressStep["status"]) => string;
+  label: string; thinkingLine: string; answerText?: string; statusLabel: (status: ProgressStep["status"]) => string;
 }) {
   const locale = useLocale();
   // Follow the run (open while working, folded when done) until the user toggles it by hand.
@@ -55,6 +44,8 @@ export function ExecutionTrace({ parts, steps, execution, running, label, thinki
   const speed = useOutputSpeed(outputChars, now, running && !!execution && !execution.endedAt);
   const timeline = useMemo(() => open && execution ? prepareExecutionSegments(execution, parts) : null, [open, execution, parts]);
   const segments = timeline?.(measuredEnd) ?? [];
+  const sources = useExecutionSources(parts, execution, answerText);
+  const step = [...steps].reverse().find(item => item.status === "running")?.label;
   const id = useId();
   return <div className="notebook-ai-work-trace notebook-ai-work-trace--foldable">
     <Button variant="ghost" size={null} contentStyle="preserve" className="notebook-ai-work-toggle"
@@ -65,10 +56,11 @@ export function ExecutionTrace({ parts, steps, execution, running, label, thinki
       {running && thinkingLine ? <span className="notebook-ai-work-think" title={thinkingLine}>{thinkingLine}</span> : null}
     </Button>
     <ExecutionDisclosure open={open} id={id}>
-      {execution && segments.length ? <ExecutionTimeline segments={segments} startedAt={execution.startedAt} now={measuredEnd}
-        running={running} speed={speed} stageLabel={stage => t(stage)} /> : null}
-      {execution?.modelId ? <p className="notebook-ai-execution-model"><span>{t("model")}</span><span title={execution.modelId}>{execution.modelId}</span></p> : null}
+      {execution && segments.length ? <ExecutionOverview segments={segments} now={measuredEnd} running={running && !execution.endedAt}
+        model={execution.modelId} thinking={thinkingLine} step={step} speed={speed} /> : null}
       <ToolProgressSteps steps={steps} execution={execution} statusLabel={statusLabel} />
+      <ExecutionSources sources={sources} />
+      {execution?.modelId ? <p className="notebook-ai-execution-model"><span>{t("model")}</span><span title={execution.modelId}>{execution.modelId}</span></p> : null}
     </ExecutionDisclosure>
   </div>;
 }

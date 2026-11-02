@@ -1,0 +1,46 @@
+.notebook-ai-overview { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 12px; }
+.notebook-ai-overview p { margin: 0; }
+.notebook-ai-overview-now { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.notebook-ai-overview-title { color: var(--goose-text-primary); font-size: 18px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.notebook-ai-overview-detail { overflow: hidden; color: hsl(var(--muted-foreground)); font-size: 13px; line-height: 1.5; text-overflow: ellipsis; white-space: nowrap; }
+.notebook-ai-overview-clock { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding-top: 2px; }
+.notebook-ai-overview-clock time { color: var(--goose-text-primary); font: 600 26px/1.15 ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
+.notebook-ai-overview-clock span { color: var(--goose-text-warning); font-size: 12px; }
+
+/* Every segment shares one height; the live one only animates its fill, so nothing sticks out. */
+.notebook-ai-overview-bar { display: flex; height: 10px; gap: 2px; overflow: hidden; border-radius: 5px; }
+.notebook-ai-overview-bar > span { min-width: 3px; flex-basis: 0; background: var(--stage); transition: flex-grow .9s linear; }
+.notebook-ai-overview [data-stage="read"] { --stage: var(--goose-accent-solid); }
+.notebook-ai-overview [data-stage="write"] { --stage: var(--goose-text-warning); }
+.notebook-ai-overview [data-stage="visual"] { --stage: var(--goose-text-success); }
+.notebook-ai-overview [data-stage="think"] { --stage: var(--goose-editor-highlight-purple-text); }
+.notebook-ai-overview [data-stage="compose"] { --stage: var(--goose-text-primary); }
+.notebook-ai-overview [data-stage="wait"], .notebook-ai-overview [data-stage="response"] { --stage: hsl(var(--muted-foreground) / .55); }
+.notebook-ai-overview-bar > [data-live],
+.notebook-ai-overview-legend [data-current] dt::before {
+  background-image: repeating-linear-gradient(135deg, hsl(var(--background) / .45) 0 4px, transparent 4px 8px);
+  background-size: 16px 100%;
+  animation: notebook-ai-overview-crawl 1s linear infinite;
+}
+@keyframes notebook-ai-overview-crawl { from { background-position: 0 0; } to { background-position: 16px 0; } }
+
+.notebook-ai-overview-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 0; }
+.notebook-ai-overview-legend > div { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.notebook-ai-overview-legend dt { display: flex; align-items: center; gap: 6px; color: var(--goose-text-primary); font-size: 13px; }
+.notebook-ai-overview-legend dt::before { content: ""; flex: 0 0 10px; height: 10px; border-radius: 3px; background-color: var(--stage); }
+.notebook-ai-overview-legend dd { margin: 0; color: hsl(var(--muted-foreground)); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.notebook-ai-overview-legend [data-current] dd { color: var(--goose-text-primary); }
+
+.notebook-ai-execution-sources { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 10px; padding-top: 12px; border-top: 1px solid var(--goose-block-subtle-border); }
+.notebook-ai-execution-source-tabs { display: flex; gap: 2px; padding: 3px; border-radius: calc(var(--goose-control-radius) + 2px); background: hsl(var(--muted-foreground) / .12); }
+.notebook-ai-execution-source-tabs > button { flex: 1; min-height: 32px; padding: 4px 8px; border: 0; border-radius: var(--goose-control-radius); background: transparent; color: hsl(var(--muted-foreground)); font: inherit; font-size: 13px; cursor: pointer; }
+.notebook-ai-execution-source-tabs > button[aria-selected="true"] { background: hsl(var(--background)); color: var(--goose-text-primary); }
+.notebook-ai-execution-source-tabs > button:focus-visible { outline: 2px solid var(--goose-accent-solid); outline-offset: -2px; }
+.notebook-ai-execution-source-text { display: flex; min-width: 0; flex: 1; flex-direction: column; }
+.notebook-ai-execution-source-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notebook-ai-execution-source-text small { color: hsl(var(--muted-foreground)); font: 12px/16px ui-monospace, "SF Mono", Menlo, monospace; }
+
+@media (prefers-reduced-motion: reduce) {
+  .notebook-ai-overview-bar > span { transition: none; }
+  .notebook-ai-overview-bar > [data-live], .notebook-ai-overview-legend [data-current] dt::before { animation: none; }
+}
