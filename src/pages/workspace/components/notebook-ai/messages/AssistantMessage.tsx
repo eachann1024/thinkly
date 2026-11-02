@@ -1,6 +1,6 @@
 import { useLocale } from "@/i18n";
 import { MessagePrimitive } from "@assistant-ui/react";
-import { useMemo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
 import { ToolProgressCard } from "../ToolProgressCard";
 import { ApprovalPlanCard, BatchPlanProposal } from "../ApprovalPlanCard";
@@ -31,7 +31,7 @@ ja:
 `;
 const t = createTranslator(messages);
 
-export function AssistantMessage({
+export const AssistantMessage = memo(function AssistantMessage({
   msg,
   isStreaming,
   toolRenderBase,
@@ -82,10 +82,10 @@ export function AssistantMessage({
     hasText ||
     (isStreaming && (!hasText || reasoningText.length > 0));
 
-  const toolRenderValue: AssistantToolRenderContextValue = {
-    ...toolRenderBase,
-    isStreaming,
-  };
+  const toolRenderValue = useMemo<AssistantToolRenderContextValue>(
+    () => ({ ...toolRenderBase, isStreaming }),
+    [toolRenderBase, isStreaming],
+  );
 
   return (
     <AssistantToolRenderContext.Provider value={toolRenderValue}>
@@ -140,4 +140,4 @@ export function AssistantMessage({
       </MessagePrimitive.Root>
     </AssistantToolRenderContext.Provider>
   );
-}
+});
