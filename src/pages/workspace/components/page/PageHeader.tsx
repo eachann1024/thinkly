@@ -66,7 +66,7 @@ export function PageHeader({
   useLocale();
   const aiPhase = useAiStatus((state) => state.phase);
   const folderActionsAvailable = useFolderToolbarActions();
-  const { appShortcuts } = useSettings();
+  const appShortcuts = useSettings((state) => state.appShortcuts);
   const singleTabMode = useEffectiveSingleTabMode();
   const aiHeaderActions = useAiHeaderActions();
   const aiHeaderTitle = useAiHeaderTitle();

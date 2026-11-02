@@ -13,8 +13,6 @@ import type { AppHotkeyActions } from "./actions";
 export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
   const {
     appShortcutsRef,
-    openTabsRef,
-    activeTabIdRef,
     fixedShortcuts,
     matchesConfiguredShortcut,
     runUnifiedClose,
@@ -112,7 +110,7 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
       },
       handler: (event) => {
         const digit = Number(event.code.slice(-1));
-        const tabs = openTabsRef.current;
+        const tabs = useTabs.getState().openTabs;
         const targetTab = digit === 9 ? tabs[tabs.length - 1] : tabs[digit - 5];
         if (!targetTab) return;
         event.preventDefault();
@@ -128,11 +126,11 @@ export function createTabsHotkeys(actions: AppHotkeyActions): HotkeyEntry[] {
         !event.altKey &&
         event.key === "Tab",
       handler: (event) => {
-        const tabs = openTabsRef.current;
+        const { openTabs: tabs, activeTabId } = useTabs.getState();
         if (tabs.length < 2) return;
         event.preventDefault();
         const currentIndex = tabs.findIndex(
-          (tab) => tab.id === activeTabIdRef.current,
+          (tab) => tab.id === activeTabId,
         );
         const direction = event.shiftKey ? -1 : 1;
         const nextIndex =
