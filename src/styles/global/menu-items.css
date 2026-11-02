@@ -29,6 +29,17 @@
   background-color: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
 }
+:is(.goose-menu-surface, .goose-floating-surface, .dropdown__popover)
+  :is(.menu-item, .list-box-item, .goose-menu-item):where(:not([data-disabled="true"])):is([data-selected="true"], [aria-selected="true"], [aria-checked="true"]) {
+  box-shadow: inset 0 0 0 1px var(--goose-selection-border, var(--goose-interactive-selected-border));
+}
+:is(.goose-menu-surface, .goose-floating-surface, .dropdown__popover)
+  :is(.menu-item, .list-box-item, .goose-menu-item):is([data-disabled="true"], [aria-disabled="true"]) {
+  background-color: transparent;
+  color: var(--goose-text-disabled);
+  box-shadow: none;
+  cursor: not-allowed;
+}
 .goose-menu-separator,
 .goose-menu-surface [data-slot="separator"] {
   display: none;

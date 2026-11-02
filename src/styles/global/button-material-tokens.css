@@ -5,13 +5,10 @@
   --goose-button-secondary-bg: #fff;
   --goose-button-secondary-border: #d9d8d4;
   --goose-button-tertiary-bg: #ebebe8;
-  --goose-button-press: rgb(15 23 42 / .15);
-  --goose-button-step: calc(var(--goose-control-font-size, .875rem) / 14);
 }
 .dark {
   --goose-button-primary-bg: #58647b;
   --goose-button-secondary-bg: #2c2c2c;
   --goose-button-secondary-border: #4a4a4a;
   --goose-button-tertiary-bg: #3a3a3a;
-  --goose-button-press: rgb(0 0 0 / .5);
 }

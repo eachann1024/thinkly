@@ -3,21 +3,27 @@
     border-color 150ms ease, color 150ms ease;
 }
 .goose-button.goose-button-link {
+  color: var(--goose-text-link);
   text-decoration-line: underline;
   text-underline-offset: 4px;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
 }
 .goose-button.goose-button-link:where(:hover, :focus-visible) {
-  color: var(--goose-text-primary);
+  color: color-mix(in srgb, var(--goose-text-link) 82%, var(--goose-text-primary));
   text-decoration-color: currentColor;
 }
 :is(.goose-button-ghost, .goose-button-icon, [data-goose-control="toggle"],
   .goose-segmented-option, .goose-menu-item, button.goose-interactive, button.goose-list-row):where(:active, [data-pressed="true"]):where(
   :not(:disabled):not([aria-disabled="true"]):not([data-disabled="true"]):not([aria-busy="true"])
 ) {
-  background-color: var(--goose-interactive-hover);
-  color: var(--goose-interactive-hover-fg);
-  box-shadow: inset 0 var(--goose-button-step) calc(var(--goose-button-step) * 2) var(--goose-button-press);
+  background-color: var(--goose-interactive-selected);
+  color: var(--goose-interactive-selected-fg);
+}
+/* Only button-like controls scale; menu items, rows, tabs, radios and segments stay flat. */
+:is(.goose-button-ghost, .goose-button-icon, [data-goose-control="toggle"]):where(:active, [data-pressed="true"]):where(
+  :not(:disabled):not([aria-disabled="true"]):not([data-disabled="true"]):not([aria-busy="true"]):not([role="tab"]):not([role="radio"])
+) {
+  transform: scale(.98);
 }
 /* Selection is still owned by the accent/semantic system, including grouped controls. */
 .goose-button.goose-button-surface:is([aria-pressed="true"], [aria-selected="true"],
@@ -45,5 +51,5 @@
 :is(.goose-button, .goose-button-icon, [data-goose-control="toggle"])[aria-busy="true"] { cursor: progress; }
 @media (prefers-reduced-motion: reduce) {
   :is(.goose-button, .goose-button-icon, [data-goose-control="toggle"], .goose-segmented-option) { transition: none; }
-  .goose-button.goose-button-surface:active { transform: none; }
+  :is(.goose-button, .goose-button-icon, [data-goose-control="toggle"]):active { transform: none; }
 }
