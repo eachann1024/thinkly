@@ -5,20 +5,13 @@ import { useMemo, useState } from "react";
 import { ArrowDown } from "@/components/ui/icons";
 import { DotDecor, EmptyStateArt } from "@/components/ui/dot-matrix";
 import { ThreadPrimitive } from "@assistant-ui/react";
-import {
-  formatChatMessageTime,
-  shouldShowChatTimeDivider,
-} from "@/lib/notebook-ai/messageTime";
 import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import { cn } from "@/lib/utils";
 import { AssistantUiThreadViewport } from "./AssistantUiThreadViewport";
 import { ChatChrome } from "./beautiful-ui/ChatChrome";
-import { usePages } from "@/stores/usePages";
-import { getPageTitle } from "@/components/editor/utils/page-title";
 import type { ChatMessagesProps } from "./messages/types";
-import { UserMessage } from "./messages/UserMessage";
-import { AssistantMessage } from "./messages/AssistantMessage";
+import { ChatMessageRow } from "./messages/ChatMessageRow";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/ChatMessages.tsx#messages:1">`
 zh-Hans:
@@ -61,38 +54,17 @@ export function ChatMessages({
   onBatchApproval,
   onBatchUndo,
 }: ChatMessagesProps) {
-  const locale = useLocale();
+  useLocale();
   const isFullscreen = layout === "fullscreen";
   const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
     null,
   );
-  usePages((state) =>
-    messages
-      .flatMap((message) => message.metadata?.references ?? [])
-      .map((reference) => {
-        const page = state.pages[reference.pageId];
-        return page ? getPageTitle(page) : reference.titleSnapshot;
-      })
-      .join("\u0000"),
+  const messageIds = JSON.stringify(messages.map((message) => message.id));
+  const messagePositions = useMemo(
+    () => new Map<string, number>((JSON.parse(messageIds) as string[]).map((id, index) => [id, index])),
+    [messageIds],
   );
-  const messageById = useMemo(
-    () => new Map(messages.map((message) => [message.id, message])),
-    [messages],
-  );
-
-  const showTimeById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (let i = 0; i < messages.length; i++) {
-      const current = messages[i];
-      const previous = i > 0 ? messages[i - 1] : null;
-      if (!shouldShowChatTimeDivider(current, previous)) continue;
-      const at = current.metadata?.createdAt;
-      if (typeof at !== "number") continue;
-      const label = formatChatMessageTime(at);
-      if (label) map.set(current.id, label);
-    }
-    return map;
-  }, [messages, locale]);
+  const day = new Date().toDateString();
 
   const toolRenderBase = useMemo(
     () => ({
@@ -158,35 +130,19 @@ export function ChatMessages({
           >
             <ThreadPrimitive.Messages>
               {({ message }) => {
-                const sourceMessage = messageById.get(message.id);
-                if (!sourceMessage) return null;
-                const timeLabel = showTimeById.get(sourceMessage.id);
-                const body =
-                  sourceMessage.role === "user" ? (
-                    <UserMessage
-                      msg={sourceMessage}
-                      setPreviewContent={setPreviewContent}
-                    />
-                  ) : (
-                    <AssistantMessage
-                      msg={sourceMessage}
-                      isStreaming={streamingMessageId === sourceMessage.id}
-                      toolRenderBase={toolRenderBase}
-                    />
-                  );
+                const index = messagePositions.get(message.id);
+                if (index === undefined) return null;
+                const sourceMessage = messages[index];
                 return (
-                  <>
-                    {timeLabel ? (
-                      <div
-                        className="notebook-ai-message-time"
-                        role="separator"
-                        aria-label={timeLabel}
-                      >
-                        {timeLabel}
-                      </div>
-                    ) : null}
-                    {body}
-                  </>
+                  <ChatMessageRow
+                    msg={sourceMessage}
+                    previousAt={index > 0 ? messages[index - 1].metadata?.createdAt : undefined}
+                    first={index === 0}
+                    day={day}
+                    isStreaming={streamingMessageId === sourceMessage.id}
+                    toolRenderBase={toolRenderBase}
+                    setPreviewContent={setPreviewContent}
+                  />
                 );
               }}
             </ThreadPrimitive.Messages>
