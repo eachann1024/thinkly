@@ -34,7 +34,7 @@ import { getGooseDesktop } from "@/lib/electron/runtime";
 import { useTabs } from "@/stores/useTabs";
 
 export function useOpenLocalFolder() {
-  const { loadLocalFolderPages } = usePages();
+  const loadLocalFolderPages = usePages.getState().loadLocalFolderPages;
   const createLocalFolderNotebook = useNotebooks((state) => state.createLocalFolderNotebook);
   return useCallback(async () => {
     const desktop = getGooseDesktop();

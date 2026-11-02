@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useSettings, ACCENT_COLORS, type Theme, type AccentColor } from "@/stores/useSettings";
 import { Select as NativeSelect } from "@/components/ui/select";
 import { Field } from "@/components/ui/field";
@@ -8,7 +9,10 @@ import { GalleryComposer } from "./composer";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 
 export function ControlGallery() {
-  const settings = useSettings();
+  const settings = useSettings(useShallow((state) => ({
+    theme: state.theme, accentColor: state.accentColor, uiFontSize: state.uiFontSize,
+    setTheme: state.setTheme, setAccentColor: state.setAccentColor, setUIFontSize: state.setUIFontSize,
+  })));
   useResolvedTheme(settings.theme);
   return <main className="h-screen overflow-auto bg-background p-6 text-foreground">
     <div className="mx-auto flex max-w-5xl flex-col gap-8">

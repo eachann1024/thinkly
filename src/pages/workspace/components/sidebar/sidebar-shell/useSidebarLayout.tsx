@@ -41,9 +41,11 @@ export function useSidebarLayout({
 
   const { activeNotebookId, notebooks } = useNotebooks();
 
-  const { openInCurrentTab, activeTabId, openTabs } = useTabs();
-
-  const activeTab = openTabs.find((tab) => tab.id === activeTabId);
+  const openInCurrentTab = useTabs.getState().openInCurrentTab;
+  const activeTabId = useTabs((state) => state.activeTabId);
+  const activeTabType = useTabs((state) =>
+    state.openTabs.find((tab) => tab.id === state.activeTabId)?.type,
+  );
 
   const outlineTarget = useEditorSplitSelector(
     (state) => {
@@ -64,7 +66,7 @@ export function useSidebarLayout({
   );
 
   const outlinePageId =
-    selectedPageId === null || activeTab?.type ? null : outlineTarget.pageId;
+    selectedPageId === null || activeTabType ? null : outlineTarget.pageId;
 
   const outlinePage = usePages((s) =>
     outlinePageId ? s.pages[outlinePageId] : undefined,
@@ -184,8 +186,6 @@ export function useSidebarLayout({
     notebooks,
     openInCurrentTab,
     activeTabId,
-    openTabs,
-    activeTab,
     outlineTarget,
     outlinePageId,
     outlinePage,

@@ -40,7 +40,7 @@ import type { AppHotkeyRefs } from "./types";
 import { createCloseTargetTracker } from "./closeTarget";
 
 export function createHotkeyActions(refs: AppHotkeyRefs) {
-  const { appShortcutsRef, openTabsRef, activeTabIdRef } = refs;
+  const { appShortcutsRef } = refs;
   const fixedShortcuts = getFixedAppShortcuts();
   const closeTarget = createCloseTargetTracker(document);
 
@@ -129,9 +129,9 @@ export function createHotkeyActions(refs: AppHotkeyRefs) {
     if (fromEscape) return;
     if (closePaneOrTab() === "closed-pane") return;
     if (!isElectronRuntime() && effectiveSingleTabMode()) return;
-    const activeId = activeTabIdRef.current;
+    const { activeTabId: activeId, openTabs } = useTabs.getState();
     const loneVisibleTab = findLoneVisibleWorkspaceTab(
-      openTabsRef.current,
+      openTabs,
       (pageId) => usePages.getState().getPage(pageId),
       useNotebooks.getState().activeNotebookId,
     );

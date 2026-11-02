@@ -29,7 +29,7 @@ import { createTabsHotkeys } from "./tabs";
 import { installSplitLayoutMenuBridge } from "@/lib/editor-split/layoutCommands";
 
 export function installAppHotkeyListeners(refs: AppHotkeyRefs): () => void {
-  const { appShortcutsRef, openTabsRef, activeTabIdRef } = refs;
+  const { appShortcutsRef } = refs;
   const actions = createHotkeyActions(refs);
   const { runUnifiedClose, createNewNoteFromHotkey } = actions;
   const uninstallCloseTargetTracking = actions.installCloseTargetTracking();

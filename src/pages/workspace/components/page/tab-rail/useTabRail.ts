@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import { isStandaloneFile } from "@/lib/standaloneFileCapabilities";
 import { activateWorkspace } from "@/lib/settings-navigation";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -33,15 +34,16 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
   const pages = usePages((s) => s.pages);
   const getPage = (id: string) => pages[id];
   const activeNotebookId = useNotebooks((state) => state.activeNotebookId);
+  const { openTabs, activeTabId } = useTabs(
+    useShallow((state) => ({ openTabs: state.openTabs, activeTabId: state.activeTabId })),
+  );
   const {
-    openTabs,
-    activeTabId,
     setActiveTab,
     closeTab,
     reorderTabs,
     promotePreviewTab,
     syncNotebookForPage,
-  } = useTabs();
+  } = useTabs.getState();
   const setExpandPageId = usePages((s) => s.setExpandPageId);
   const setSidebarCollapsedView = useSidebarView((s) => s.setSidebarCollapsed);
   const locateInTree = (pageId: string) => {
@@ -50,7 +52,7 @@ export function useTabRail({ variant, onBeforeActivateTab }: Pick<TabRailProps, 
     syncNotebookForPage(pageId);
     setExpandPageId(pageId);
   };
-  const { closeTabShortcut } = useSettings();
+  const closeTabShortcut = useSettings((state) => state.closeTabShortcut);
   const visibleTabs = listVisibleWorkspaceTabs(
     openTabs,
     getPage,

@@ -53,7 +53,7 @@ export function FontSelector({
   compact = false,
 }: FontSelectorProps) {
   useLocale();
-  const { customFonts } = useSettings();
+  const customFonts = useSettings((state) => state.customFonts);
 
   const selectFont = (fontFamily: Page["fontFamily"]) => {
     if (fontFamily === value) return;

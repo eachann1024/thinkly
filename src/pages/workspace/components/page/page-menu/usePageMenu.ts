@@ -76,16 +76,18 @@ export function usePageMenu() {
     width: typeof window === "undefined" ? 0 : window.innerWidth,
     height: typeof window === "undefined" ? 0 : window.innerHeight,
   }));
+  const activePageId = usePages((state) => state.activePageId);
+  const page = usePages((state) =>
+    state.activePageId ? state.pages[state.activePageId] : undefined,
+  );
   const {
-    activePageId,
     getPage,
     updatePage,
     createPage,
     createLocalPageRecord,
     setActivePage,
-  } = usePages();
+  } = usePages.getState();
   const { activeNotebookId: sidebarNotebookId, notebooks } = useNotebooks();
-  const page = activePageId ? getPage(activePageId) : undefined;
   const activeNotebookId = page ? (notebooks[page.workspaceId]?.id ?? null) : sidebarNotebookId;
   const activeNotebook = activeNotebookId
     ? notebooks[activeNotebookId]
@@ -98,10 +100,14 @@ export function usePageMenu() {
   const importPending = useRef(false);
   const exportPending = useRef(false);
   const isLocalItem = Boolean(page?.localFilePath);
-  const { openTabs, activeTabId } = useTabs();
-  const activeTab = openTabs.find((tab) => tab.id === activeTabId);
+  const activeTab = useTabs((state) =>
+    state.openTabs.find((tab) => tab.id === state.activeTabId),
+  );
+  const tabHasStandaloneFile = usePages((state) =>
+    Boolean(activeTab && collectTabPageIds(activeTab).some((id) => isStandaloneFile(state.pages[id]))),
+  );
   const canOpenInNewWindow = isElectronRuntime() && !isStandaloneFile(page) &&
-    Boolean(activeTab && collectTabPageIds(activeTab).every((id) => !isStandaloneFile(getPage(id))));
+    Boolean(activeTab && !tabHasStandaloneFile);
 
   const captureSelectedBlocks = () => {
     const blocks = captureEditorSelectedBlocks();
