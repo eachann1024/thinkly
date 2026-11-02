@@ -1,6 +1,7 @@
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, FileText } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { noteCitationKey, noteCitationsInText, noteSourceLabel } from "@/lib/notebook-ai/noteCitation";
 import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
@@ -67,19 +68,15 @@ export function ExecutionSources({ sources }: { sources: NotebookAiExecutionSour
   const [requestedKind, setKind] = useState<Kind | null>(null);
   const kind = requestedKind && counts[requestedKind] ? requestedKind : kinds[0];
   const [requestedPage, setPage] = useState(0);
-  const id = useId();
   if (!kind) return null;
   const visible = sources.filter(source => source.kind === kind);
   const pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const page = Math.min(requestedPage, pages - 1);
   return <section className="notebook-ai-execution-sources" aria-label={t("sources")}>
-    <div className="notebook-ai-execution-source-tabs" role="tablist" aria-label={t("sources")}>
-      {kinds.map(item => <button key={item} type="button" role="tab" id={`${id}-${item}`} aria-controls={`${id}-list`}
-        aria-selected={item === kind} onClick={() => { setKind(item); setPage(0); }}>
-        {t(item, { count: counts[item] })}
-      </button>)}
-    </div>
-    <ul className="notebook-ai-execution-source-list" id={`${id}-list`} role="tabpanel" aria-labelledby={`${id}-${kind}`}>
+    <SegmentedControl className="notebook-ai-execution-source-tabs" aria-label={t("sources")} value={kind}
+      onValueChange={value => { setKind(value as Kind); setPage(0); }}
+      options={kinds.map(item => ({ value: item, label: t(item, { count: counts[item] }) }))} />
+    <ul className="notebook-ai-execution-source-list">
       {visible.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((source, index) => {
         const label = noteSourceLabel(source.title, source.location);
         return <li key={noteCitationKey(source.id, source.location)} aria-posinset={page * PAGE_SIZE + index + 1} aria-setsize={visible.length}>
