@@ -1,5 +1,15 @@
 # 更新日志
 
+## 1.7.344
+
+- generate scheduled reflections while workspace is in background
+- eliminate layout animation during folder toggles
+- remove geometry reads from folder expansion
+- defer inactive context menu anchor updates
+- prevent unintended punctuation suggestions
+- guard mention reconciliation after IME input
+- remove unnecessary editor scroll space
+
 ## 1.7.343
 
 - widen feedback form and align send button with attachments
