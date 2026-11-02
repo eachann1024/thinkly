@@ -3,7 +3,7 @@
   z-index: 30;
   overflow: hidden;
   pointer-events: auto;
-  background: var(--goose-editor-bg);
+  background: var(--goose-editor-surface);
   clip-path: inset(0 0 100% 0);
 }
 .goose-page-write-overlay[data-phase="cover"] {
