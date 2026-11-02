@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>执行过程 C 遥测仪表</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+@keyframes blink{50%{opacity:.25}}
+@keyframes caret{50%{opacity:0}}
+@keyframes sweep{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.5deg)}}
+.m{font-family:ui-monospace,'SF Mono',Menlo,'PingFang SC',monospace}
+.cell{height:22px;border-radius:1px}
+.b{background:#779de8}.a{background:#e6b455}.g{background:#c9c9c2}
+.hot{animation:blink .9s steps(1) infinite}
+</style>
+</helmet>
+<div class="m" style="width:560px;height:800px;box-sizing:border-box;padding:16px;background:#222222;color:#ececec">
+<div style="background:#181818;border:1px solid #3a3a3a;border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:14px">
+
+<div style="display:flex;align-items:center;gap:10px;font-size:13px">
+<span class="hot" style="width:10px;height:10px;background:#779de8"></span>
+<span style="font-weight:700;color:#779de8;letter-spacing:1px">处理中</span>
+<span style="color:#b4b4b4">/ 响应 / gemini-3.8-flash</span>
+<span style="margin-left:auto;font-size:15px;font-variant-numeric:tabular-nums">00:42</span>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
+<div style="background:#779de8;color:#10131a;padding:12px;border-radius:2px;display:flex;flex-direction:column;gap:18px">
+<span style="font-size:13px;font-weight:700">读取</span>
+<span style="font-size:26px;font-weight:700;line-height:1">6.2<span style="font-size:12px;font-weight:500"> 秒</span></span>
+</div>
+<div style="background:#e6b455;color:#17130a;padding:12px;border-radius:2px;display:flex;flex-direction:column;gap:18px">
+<span style="font-size:13px;font-weight:700">工具处理</span>
+<span style="font-size:26px;font-weight:700;line-height:1">3.1<span style="font-size:12px;font-weight:500"> 秒</span></span>
+</div>
+<div style="background:#c9c9c2;color:#16161a;padding:12px;border-radius:2px;display:flex;flex-direction:column;gap:18px;outline:2px solid #ececec;outline-offset:2px">
+<span style="font-size:13px;font-weight:700;display:flex;justify-content:space-between"><span>响应</span><span class="hot">● 进行中</span></span>
+<span style="font-size:26px;font-weight:700;line-height:1">32.7<span style="font-size:12px;font-weight:500"> 秒</span></span>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(50,minmax(0,1fr));gap:2px">
+<div class="cell b"></div><div class="cell b"></div><div class="cell b"></div><div class="cell b"></div><div class="cell b"></div><div class="cell b"></div><div class="cell b"></div><div class="cell b"></div>
+<div class="cell a"></div><div class="cell a"></div><div class="cell a"></div>
+<div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div>
+<div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div>
+<div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div>
+<div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g"></div><div class="cell g hot"></div><div class="cell g hot"></div><div class="cell g hot"></div>
+</div>
+
+<div style="display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:stretch">
+<div style="border:1px solid #3a3a3a;padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;position:relative">
+<svg viewBox="0 0 220 124" width="210" height="119" role="img" aria-label="实时速度 38 字每秒，平均 31">
+<path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#3a3a3a" stroke-width="14"/>
+<path d="M20 110 A90 90 0 0 1 102.9 20.3" fill="none" stroke="#c9c9c2" stroke-width="14"/>
+<line x1="84.2" y1="40.6" x2="75.8" y2="18.1" stroke="#e6b455" stroke-width="3"/>
+<text x="110" y="100" text-anchor="middle" font-size="38" font-weight="700" fill="#ececec" font-family="ui-monospace,Menlo,monospace">38</text>
+<text x="20" y="123" font-size="10" fill="#b4b4b4" font-family="ui-monospace,Menlo,monospace">0</text>
+<text x="188" y="123" font-size="10" fill="#b4b4b4" font-family="ui-monospace,Menlo,monospace">80</text>
+</svg>
+<div style="display:flex;justify-content:space-between;width:100%;font-size:12px;color:#b4b4b4;padding-top:2px"><span>实时 字/秒</span><span><span style="color:#e6b455">▌</span>平均 31</span></div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:space-between;font-size:12px;line-height:1.6;color:#b4b4b4;border:1px solid #3a3a3a;padding:10px 12px">
+<div><span style="color:#ececec">峰值</span> 54 字/秒</div>
+<div><span style="color:#ececec">已生成</span> 1,284 字</div>
+<div><span style="color:#ececec">读取</span> 1 次 · <span style="color:#ececec">写入</span> 1 次</div>
+<div style="color:#ececec">&gt; 正在撰写回复<span style="display:inline-block;width:7px;height:13px;background:#ececec;vertical-align:-2px;margin-left:3px;animation:caret 1s steps(1) infinite"></span></div>
+</div>
+</div>
+
+<div style="border-top:1px solid #3a3a3a;padding-top:12px;display:flex;flex-direction:column;gap:10px;font-size:13px">
+<div style="display:flex;gap:12px"><span style="color:#b4b4b4;width:46px">00:09</span><span>修改笔记</span><span style="margin-left:auto;color:#8fd4a0">完成</span></div>
+<div style="display:flex;gap:12px"><span style="color:#b4b4b4;width:46px">00:06</span><span>读取笔记 · Google 账号 Gemini</span><span style="margin-left:auto;color:#8fd4a0">完成</span></div>
+<div style="display:flex;gap:12px;color:#b4b4b4"><span style="width:46px">来源</span><span>Google 账号 Gemini · 「工具与教程」小节</span></div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

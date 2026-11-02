@@ -1,0 +1,17 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-02T10:00:00Z" },
+  "title": "AI 执行过程 · 实时反馈",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 560, "h": 800, "title": "A · 分段条 + 大图例块" },
+    "Timeline.dc.html": { "x": 640, "y": 0, "w": 560, "h": 800, "title": "B · 泳道时间线" },
+    "Telemetry.dc.html": { "x": 1280, "y": 0, "w": 560, "h": 800, "title": "C · 遥测仪表" }
+  },
+  "order": ["Main.dc.html", "Timeline.dc.html", "Telemetry.dc.html"],
+  "notes": {
+    "t": { "x": 0, "y": -240, "text": "AI 执行过程：实时速度 + 阶段配色", "kind": "title1", "maxW": 1840 }
+  },
+  "designSystems": []
+}

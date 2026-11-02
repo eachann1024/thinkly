@@ -13,7 +13,16 @@ function toolStage(type: string): ExecutionStage {
   return "write";
 }
 
-export function prepareExecutionStages(execution: NotebookAiExecution, parts: ToolProgressPart[]) {
+export interface ExecutionSegment { stage: ExecutionStage; start: number; end: number }
+
+function appendSegment(list: ExecutionSegment[], stage: ExecutionStage, start: number, end: number) {
+  if (end <= start) return;
+  const last = list[list.length - 1];
+  if (last?.stage === stage && last.end === start) last.end = end;
+  else list.push({ stage, start, end });
+}
+
+export function prepareExecutionSegments(execution: NotebookAiExecution, parts: ToolProgressPart[]) {
   const end = execution.endedAt ?? Infinity;
   let legacyTypes: Map<string | undefined, ExecutionStage> | undefined;
   const events: Array<{ at: number; stage: ExecutionStage; change: number }> = [];
@@ -28,22 +37,31 @@ export function prepareExecutionStages(execution: NotebookAiExecution, parts: To
     if (Number.isFinite(finish)) events.push({ at: finish, stage, change: -1 });
   }
   events.sort((a, b) => a.at - b.at);
-  const totals = { read: 0, write: 0, visual: 0, response: 0 };
   const active = { read: 0, write: 0, visual: 0, response: 0 };
+  const current = (): ExecutionStage => active.write ? "write" : active.visual ? "visual" : active.read ? "read" : "response";
+  const closed: ExecutionSegment[] = [];
   let previous = execution.startedAt;
   for (const event of events) {
     // Allocate overlapping calls once, so the segments always sum to wall time.
-    const stage = active.write ? "write" : active.visual ? "visual" : active.read ? "read" : "response";
-    totals[stage] += Math.max(0, event.at - previous);
+    appendSegment(closed, current(), previous, event.at);
     active[event.stage] += event.change;
     previous = event.at;
   }
-  const tail: ExecutionStage = active.write ? "write" : active.visual ? "visual" : active.read ? "read" : "response";
-  // Tick only the trailing segment; mapping and sorting happen when tool data changes.
+  const tail = current();
+  // Only the trailing segment moves; sorting and merging happen when tool data changes.
   return (now: number) => {
-    const result = { ...totals };
-    result[tail] += Math.max(0, Math.min(end, now) - previous);
-    return (Object.entries(result) as Array<[ExecutionStage, number]>).filter(([, duration]) => duration > 0);
+    const result = closed.map(segment => ({ ...segment }));
+    appendSegment(result, tail, previous, Math.min(end, now));
+    return result;
+  };
+}
+
+export function prepareExecutionStages(execution: NotebookAiExecution, parts: ToolProgressPart[]) {
+  const segments = prepareExecutionSegments(execution, parts);
+  return (now: number) => {
+    const totals = { read: 0, write: 0, visual: 0, response: 0 };
+    for (const segment of segments(now)) totals[segment.stage] += segment.end - segment.start;
+    return (Object.entries(totals) as Array<[ExecutionStage, number]>).filter(([, duration]) => duration > 0);
   };
 }
 

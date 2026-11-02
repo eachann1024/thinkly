@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>执行过程 A 分段条</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes slide{from{background-position:0 0}to{background-position:24px 0}}
+.live{background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.0) 0 6px,rgba(255,255,255,.28) 6px 12px);background-size:24px 100%;animation:slide .8s linear infinite}
+</style>
+</helmet>
+<div style="width:560px;height:800px;box-sizing:border-box;padding:16px;background:#222222;font-family:-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec">
+<div style="background:#181818;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+
+<div style="display:flex;align-items:center;gap:10px;padding:6px 6px 2px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#779de8" stroke-width="2.4" stroke-linecap="round" style="animation:spin 1s linear infinite" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>
+<span style="font-size:17px;font-weight:700;color:#779de8">处理中</span>
+<span style="margin-left:auto;font-size:13px;color:#b4b4b4">正在撰写回复</span>
+</div>
+
+<div style="background:#2c2c2c;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+<span style="font-size:15px;color:#b4b4b4">执行过程</span>
+<span style="margin-left:auto;font-size:15px;color:#b4b4b4;font-variant-numeric:tabular-nums">42 秒</span>
+</div>
+
+<div style="display:flex;gap:2px;height:14px">
+<div style="flex:15;background:#779de8;border-radius:7px 2px 2px 7px"></div>
+<div style="flex:7;background:#e6b455;border-radius:2px"></div>
+<div class="live" style="flex:78;background-color:#c9c9c2;border-radius:2px 7px 7px 2px"></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<div style="background:#232323;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#779de8"></span><span style="font-size:13px;color:#b4b4b4">读取</span></div>
+<div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">6.2<span style="font-size:13px;font-weight:400;color:#b4b4b4"> 秒</span></div>
+<div style="font-size:12px;color:#b4b4b4">15% · 1 次</div>
+</div>
+<div style="background:#232323;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#e6b455"></span><span style="font-size:13px;color:#b4b4b4">工具处理</span></div>
+<div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">3.1<span style="font-size:13px;font-weight:400;color:#b4b4b4"> 秒</span></div>
+<div style="font-size:12px;color:#b4b4b4">7% · 1 次</div>
+</div>
+<div style="background:#232323;border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:6px;border:1px solid #c9c9c2">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#c9c9c2"></span><span style="font-size:13px;color:#ececec">响应</span><span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:#c9c9c2;animation:pulse 1.2s ease-in-out infinite"></span></div>
+<div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">32.7<span style="font-size:13px;font-weight:400;color:#b4b4b4"> 秒</span></div>
+<div style="font-size:12px;color:#b4b4b4">78% · 进行中</div>
+</div>
+</div>
+
+<div style="background:#232323;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:92px">
+<span style="font-size:12px;color:#b4b4b4">实时速度</span>
+<div style="font-size:34px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums">38<span style="font-size:13px;font-weight:400;color:#b4b4b4"> 字/秒</span></div>
+<span style="font-size:12px;color:#b4b4b4">平均 31 · 峰值 54</span>
+</div>
+<svg viewBox="0 0 200 44" preserveAspectRatio="none" width="100%" height="56" style="flex:1;min-width:0" role="img" aria-label="最近 30 秒速度曲线">
+<line x1="0" y1="22.3" x2="200" y2="22.3" stroke="#b4b4b4" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>
+<polyline fill="none" stroke="#c9c9c2" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke" points="0,44 6.9,35.6 13.8,24.4 20.7,19.5 27.6,28.6 34.5,23 41.4,15.3 48.3,18.8 55.2,13.2 62.1,7.6 69,11.1 75.9,16.7 82.8,20.9 89.7,15.3 96.6,12.5 103.5,17.4 110.4,23.7 117.3,20.2 124.2,14.6 131.1,10.4 138,16 144.9,18.8 151.8,22.3 158.7,18.1 165.6,13.9 172.5,11.8 179.4,16.7 186.3,19.5 193.2,15.3 200,17.4"/>
+</svg>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#ececec;padding:0 2px">
+<span style="width:8px;height:8px;border-radius:50%;background:#c9c9c2;animation:pulse 1.2s ease-in-out infinite"></span>
+<span>正在撰写回复 · 已生成 1,284 字</span><span style="width:7px;height:15px;background:#ececec;animation:blink 1s steps(1) infinite"></span>
+</div>
+
+<div style="display:flex;gap:16px;font-size:14px;color:#b4b4b4"><span>本次模型</span><span>gemini-3.8-flash</span></div>
+
+<div style="display:flex;flex-direction:column;gap:14px;padding-top:2px">
+<div style="display:flex;align-items:center;gap:12px;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fd4a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span>修改笔记</span><span style="margin-left:auto;font-size:13px;color:#b4b4b4">完成</span></div>
+<div style="display:flex;align-items:center;gap:12px;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fd4a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span>读取笔记 · Google 账号 Gemini</span><span style="margin-left:auto;font-size:13px;color:#b4b4b4">完成</span></div>
+</div>
+</div>
+
+<div style="background:#2c2c2c;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><span style="font-size:15px">已读取 1 个来源</span></div>
+<div style="font-size:14px;color:#ececec;padding-left:4px">Google 账号 Gemini · 「工具与教程」小节</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
