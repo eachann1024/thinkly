@@ -13,8 +13,19 @@ export function finishSettingsOnlySave(id: string, token: number | undefined): v
   if (token !== undefined && settingsOnly.get(id)?.token === token) settingsOnly.delete(id);
 }
 
-export function isSidecarOnlyBlockChange(previous: unknown, next: unknown): boolean {
-  if (JSON.stringify(previous) === JSON.stringify(next)) return false;
+const fingerprints = new WeakMap<object, { raw: string | undefined; normalized?: string }>();
+function fingerprint(value: unknown): { raw: string | undefined; normalized?: string } {
+  if (!value || typeof value !== "object") return { raw: JSON.stringify(value) };
+  let cached = fingerprints.get(value);
+  if (!cached) {
+    cached = { raw: JSON.stringify(value) };
+    fingerprints.set(value, cached);
+  }
+  return cached;
+}
+
+function normalizedFingerprint(value: unknown, cached: { normalized?: string }): string {
+  if (cached.normalized !== undefined) return cached.normalized;
   const normalize = (value: unknown): unknown => {
     if (Array.isArray(value)) return value.map(item => normalize(item));
     if (!value || typeof value !== "object") return value;
@@ -31,5 +42,13 @@ export function isSidecarOnlyBlockChange(previous: unknown, next: unknown): bool
         : normalize(item)]).filter(([key, item]) => !["props", "styles", "children", "content"].includes(String(key)) ||
           !item || typeof item !== "object" || Object.keys(item).length > 0));
   };
-  return JSON.stringify(normalize(previous)) === JSON.stringify(normalize(next));
+  return cached.normalized = JSON.stringify(normalize(value));
+}
+
+export function isSidecarOnlyBlockChange(previous: unknown, next: unknown): boolean {
+  if (previous === next) return false;
+  const before = fingerprint(previous);
+  const after = fingerprint(next);
+  if (before.raw === after.raw) return false;
+  return normalizedFingerprint(previous, before) === normalizedFingerprint(next, after);
 }

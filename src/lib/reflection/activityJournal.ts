@@ -1,5 +1,5 @@
 import type { Page } from "@/types";
-import { countWordsInText, extractTextFromContent } from "@/components/editor/utils/content-text-extractor";
+import { getContentDerivations } from "./contentDerivations";
 import { isSidecarOnlyBlockChange } from "@/lib/note-metadata/settingsSave";
 import { dayKey } from "./weekRange";
 
@@ -26,10 +26,46 @@ export function isEditablePage(page: Page): boolean {
     page.localReadState !== "error" && page.id !== "__quicknote_draft__";
 }
 
-function signature(text: string): string {
-  let hash = 2166136261;
-  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
-  return `${text.length}:${hash >>> 0}`;
+const pending = new Map<string, Bucket>();
+let flushTimer: ReturnType<typeof setTimeout> | undefined;
+let lifecycleFlush = false;
+
+export function flushPageActivity(): void {
+  if (flushTimer !== undefined) clearTimeout(flushTimer);
+  flushTimer = undefined;
+  if (typeof window === "undefined" || pending.size === 0) return;
+  try {
+    const storage = window.localStorage;
+    prune(storage, Date.now());
+    for (const [key, bucket] of pending) {
+      storage.setItem(key, JSON.stringify(bucket));
+      pending.delete(key);
+    }
+  } catch (error) {
+    // Retain unwritten buckets for the next flush or close event.
+    console.error("[reflection] Could not persist edit activity", error);
+  }
+}
+
+function scheduleFlush(): void {
+  if (lifecycleFlush) flushPageActivity();
+  else if (flushTimer === undefined) flushTimer = setTimeout(flushPageActivity, 1_000);
+}
+
+if (typeof window !== "undefined") {
+  const close = () => {
+    // Save guards may commit the editor after this listener runs. Those final
+    // activity records must also be written synchronously during shutdown.
+    lifecycleFlush = true;
+    flushPageActivity();
+  };
+  window.addEventListener("pagehide", close);
+  window.addEventListener("beforeunload", close);
+  window.addEventListener("focus", () => { lifecycleFlush = false; });
+  window.document?.addEventListener("visibilitychange", () => {
+    lifecycleFlush = window.document.visibilityState === "hidden";
+    if (lifecycleFlush) flushPageActivity();
+  });
 }
 
 function decode(raw: string | null): Bucket | null {
@@ -65,28 +101,27 @@ export function recordPageActivity(before: Page, after: Page, activityId?: strin
     after.id === "__quicknote_draft__") return;
   try {
     if (isSidecarOnlyBlockChange(before.content, after.content)) return;
-    const beforeText = extractTextFromContent(before.content);
-    const afterText = extractTextFromContent(after.content);
-    if (beforeText === afterText) return;
+    const beforeDerived = getContentDerivations(before.content);
+    const afterDerived = getContentDerivations(after.content);
+    if (beforeDerived.text === afterDerived.text) return;
     const now = Date.now();
-    const storage = window.localStorage;
-    prune(storage, now);
     const key = activityId ? `${PREFIX}operation:${encodeURIComponent(activityId)}`
       : `${PREFIX}${dayKey(now)}:${encodeURIComponent(after.id)}:${writer}`;
-    const bucket = (!activityId && decode(storage.getItem(key))) || { pageId: after.id, sessions: [] };
+    const bucket = (!activityId && (pending.get(key) ?? decode(window.localStorage.getItem(key)))) || { pageId: after.id, sessions: [] };
     const previous = bucket.sessions.at(-1);
-    const delta = countWordsInText(afterText) - countWordsInText(beforeText);
+    const delta = afterDerived.wordCount - beforeDerived.wordCount;
     // Net changes within an editing burst avoid inflating immediate undo/redo.
     if (previous && now >= previous.lastAt && now - previous.lastAt < 15_000 &&
       now - previous.at < 300_000 && new Date(now).getHours() === new Date(previous.at).getHours() &&
-      previous.lastSignature === signature(beforeText)) {
+      previous.lastSignature === beforeDerived.textSignature) {
       previous.delta += delta;
       previous.lastAt = now;
-      previous.lastSignature = signature(afterText);
+      previous.lastSignature = afterDerived.textSignature;
     } else {
-      bucket.sessions.push({ at: now, lastAt: now, delta, lastSignature: signature(afterText) });
+      bucket.sessions.push({ at: now, lastAt: now, delta, lastSignature: afterDerived.textSignature });
     }
-    storage.setItem(key, JSON.stringify(bucket));
+    pending.set(key, bucket);
+    scheduleFlush();
   } catch (error) {
     console.error("[reflection] Could not persist edit activity", error);
   }
@@ -94,11 +129,12 @@ export function recordPageActivity(before: Page, after: Page, activityId?: strin
 
 export function readPageActivity(since: number, pages: Record<string, Page>): EditEvent[] {
   if (typeof window === "undefined") return [];
+  flushPageActivity();
   try {
     const storage = window.localStorage;
     const now = Date.now();
-    return keys(storage).flatMap((key) => {
-      const bucket = decode(storage.getItem(key));
+    return [...new Set([...keys(storage), ...pending.keys()])].flatMap((key) => {
+      const bucket = pending.get(key) ?? decode(storage.getItem(key));
       const page = bucket && pages[bucket.pageId];
       if (!bucket || !page || !isEditablePage(page)) return [];
       return bucket.sessions.filter((s) => s.at >= since && s.at <= now)
@@ -113,6 +149,8 @@ export function readPageActivity(since: number, pages: Record<string, Page>): Ed
 /** Compensation removes only the successful AI operation, preserving concurrent user edits. */
 export function removePageActivity(activityId: string): void {
   if (typeof window === "undefined") return;
-  try { window.localStorage.removeItem(`${PREFIX}operation:${encodeURIComponent(activityId)}`); }
+  const key = `${PREFIX}operation:${encodeURIComponent(activityId)}`;
+  pending.delete(key);
+  try { window.localStorage.removeItem(key); }
   catch (error) { console.error("[reflection] Could not remove compensated activity", error); }
 }

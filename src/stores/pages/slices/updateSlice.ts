@@ -32,7 +32,7 @@ import {
   recordRecoveryEntry,
   acknowledgeRecoveryEntry,
 } from "@/lib/storage/recoveryJournal";
-import { getContentSignature } from "@/components/editor/utils/blocknote-content";
+import { getContentDerivations } from "@/lib/reflection/contentDerivations";
 import { toast } from "@/components/ui/sonner";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
 import { queueLocalPageSave } from "../folderSync";
@@ -79,7 +79,7 @@ export function createUpdatePageSlice(
         Boolean(page) && "content" in updates && !silent &&
         (!page?.editorDraft || localPageHasPersistableContent(updates.content) ||
           localPageHasPersistableContent(page.content));
-      const baseSignature = getContentSignature(page?.content ?? null);
+      const baseSignature = () => getContentDerivations(page?.content).recoverySignature;
       const baseUpdatedAt = page?.updatedAt;
       const recoveryEntry = isDurableContentEdit || isSettingsEdit
         ? recordRecoveryEntry({
@@ -102,7 +102,7 @@ export function createUpdatePageSlice(
       if (recoveryEntry) {
         clearRecoveryJournalNotice(id);
       } else if (isDurableContentEdit || isSettingsEdit) {
-        showRecoveryJournalFailure(id, baseSignature, baseUpdatedAt, get, isLocal ? recoverySettings(page) : undefined);
+        showRecoveryJournalFailure(id, baseSignature(), baseUpdatedAt, get, isLocal ? recoverySettings(page) : undefined);
       }
       if (!silent && (isSettingsEdit || "content" in updates)) {
         const blockMetadataOnly = hasSidecarRoot && "content" in updates && isSidecarOnlyBlockChange(page.content, updates.content);
