@@ -81,7 +81,6 @@ export function usePageMenu() {
     state.activePageId ? state.pages[state.activePageId] : undefined,
   );
   const {
-    getPage,
     updatePage,
     createPage,
     createLocalPageRecord,
