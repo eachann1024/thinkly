@@ -162,11 +162,9 @@ export function useEditorPageLifecycle(
     syncedContentSignatureRef.current = nextSig;
 
     markProgrammaticRead(editor);
-    let replacedSize = 0;
     try {
       editor.transact((tr: Transaction) => {
         replacePageContent(tr, nextEditorContent as any);
-        replacedSize = tr.doc.nodeSize;
       });
     } catch (error) {
       console.error(
@@ -178,26 +176,6 @@ export function useEditorPageLifecycle(
       );
       const fallbackContent = createEditorSafeContent(undefined, editor.schema);
       editor.replaceBlocks(editor.document, fallbackContent as any);
-      replacedSize = 0;
-    }
-
-    const heavy = replacedSize > 20000;
-    const pageId = p?.id ?? null;
-    if (!heavy) {
-      const postReplaceRaw = clonePageContent(editor.document as BlockNoteContent);
-      syncedContentSignatureRef.current = getCachedContentSignature(
-        isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
-      );
-    } else {
-      const reconcile = () => {
-        if (pageIdForUpdateRef.current !== pageId || userInteractedRef.current) return;
-        const postReplaceRaw = clonePageContent(editor.document as BlockNoteContent);
-        syncedContentSignatureRef.current = getCachedContentSignature(
-          isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
-        );
-      };
-      if (typeof requestIdleCallback === "function") requestIdleCallback(reconcile, { timeout: 1500 });
-      else window.setTimeout(reconcile, 300);
     }
 
     if (view) {
@@ -216,17 +194,35 @@ export function useEditorPageLifecycle(
       );
     }
 
-    const normalizedSig = getCachedContentSignature(nextContent);
     if (
       p &&
       !isLocalPage &&
-      getCachedContentSignature(p.content) !== normalizedSig
+      getCachedContentSignature(p.content) !== getCachedContentSignature(nextContent)
     ) {
       onContentChangeRef.current(nextContent, { silent: true });
     }
 
     userInteractedRef.current = false;
     rememberLoadedDocument();
+
+    // BlockNote may add defaults during replacement. Reconcile that baseline
+    // off the switch path, but never after a document change or a user edit.
+    const loadedDoc = view.state.doc;
+    const pageId = p?.id ?? null;
+    const reconcile = () => {
+      if (pageIdForUpdateRef.current !== pageId || userInteractedRef.current ||
+          pendingEditorChangeRef.current || view.state.doc !== loadedDoc) return;
+      const postReplaceRaw = clonePageContent(editor.document as BlockNoteContent);
+      syncedContentSignatureRef.current = getCachedContentSignature(
+        isLocalPage ? postReplaceRaw : normalizePageContent(postReplaceRaw),
+      );
+    };
+    if (typeof requestIdleCallback === "function") {
+      const idle = requestIdleCallback(reconcile, { timeout: 1500 });
+      return () => cancelIdleCallback(idle);
+    }
+    const timer = window.setTimeout(reconcile, 300);
+    return () => window.clearTimeout(timer);
   }, [activePageId, debouncedUpdate, editor]);
 
   useLayoutEffect(() => {
