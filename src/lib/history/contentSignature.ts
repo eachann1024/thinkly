@@ -31,12 +31,20 @@ function normalizeContent(value: unknown, parentKey = "", defaults = defaultProp
   return result;
 }
 
+const contentSignatures = new WeakMap<object, string>();
+
 export function getHistoryContentSignature(content: BlockNoteContent): string {
+  const cacheable = content !== null && typeof content === "object";
+  const cached = cacheable ? contentSignatures.get(content) : undefined;
+  if (cached !== undefined) return cached;
+  let signature: string;
   try {
-    return JSON.stringify(normalizeContent(content ?? null));
+    signature = JSON.stringify(normalizeContent(content ?? null));
   } catch {
-    return "__goose-note-unserializable-history-content__";
+    signature = "__goose-note-unserializable-history-content__";
   }
+  if (cacheable) contentSignatures.set(content, signature);
+  return signature;
 }
 
 export function getHistoryVisibleSignature(
