@@ -68,7 +68,7 @@ export function SidebarContextMenu(props: SidebarContextMenuProps) {
           className="goose-sidebar-context-menu"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
-          {renderSidebarContextGroups(context)}
+          {() => renderSidebarContextGroups(context)}
         </ContextMenuContent>
       </ContextMenu>
     </SidebarRenameContext.Provider>
