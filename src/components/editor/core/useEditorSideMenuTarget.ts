@@ -18,6 +18,7 @@ import { isPointerInToolbarCorridor } from "./blockHandleGeometry";
 import { useBlockHandleReference } from "./useBlockHandleReference";
 import { findBlockHandleContent } from "./blockHandleDom";
 import { documentEdgeBlockIds } from "./documentEdgeBlockIds";
+import { getProtectedTitleBlockId } from "../utils/documentTitlePolicy";
 
 const SIDEBAR_INTERACTION_SELECTOR = ".workspace-sidebar-pane, .rct-main-tree";
 export function useEditorSideMenuTarget(
@@ -114,10 +115,10 @@ export function useEditorSideMenuTarget(
           ? isPointerInRects([content.getBoundingClientRect()], event.clientX, event.clientY)
           : isPointerOverBlockContent(content, event.clientX, event.clientY))
       ) {
-        hover(
-          content.closest<HTMLElement>('[data-node-type="blockContainer"]')
-            ?.dataset.id,
-        );
+        const hoveredId = content.closest<HTMLElement>('[data-node-type="blockContainer"]')
+          ?.dataset.id;
+        // The document title sits above all editor chrome and never gets a block handle.
+        hover(hoveredId && hoveredId === getProtectedTitleBlockId(editor) ? undefined : hoveredId);
       } else {
         hover(undefined);
       }
