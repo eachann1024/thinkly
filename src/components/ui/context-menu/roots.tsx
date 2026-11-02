@@ -63,12 +63,13 @@ export function ContextMenu(props: ContextMenuProps) {
 }
 export const ContextMenuTrigger = React.forwardRef<
   HTMLElement,
-  React.HTMLAttributes<HTMLElement> & { asChild?: boolean; disabled?: boolean }
+  React.HTMLAttributes<HTMLElement> & { asChild?: boolean; disabled?: boolean; deferReference?: boolean }
 >(
   (
     {
       asChild,
       disabled,
+      deferReference = false,
       children,
       onContextMenu,
       onKeyDown,
@@ -87,8 +88,17 @@ export const ContextMenuTrigger = React.forwardRef<
       longPress.current = null;
     };
     React.useEffect(() => cancelLongPress, []);
-    const ref = useMergeRefs([forwardedRef, state.refs.setReference]);
+    // Large lists only need an anchor ref while their menu is open. Registering
+    // every closed row with Floating UI schedules another render per new row.
+    const storeDomReference = React.useCallback((node: HTMLElement | null) => {
+      state.refs.domReference.current = node;
+    }, [state.refs.domReference]);
+    const ref = useMergeRefs([
+      forwardedRef,
+      deferReference && !state.open ? storeDomReference : state.refs.setReference,
+    ]);
     const openAt = (x: number, y: number, target: HTMLElement) => {
+      state.refs.setReference(target);
       state.refs.setPositionReference({
         contextElement: target,
         getBoundingClientRect: () => ({

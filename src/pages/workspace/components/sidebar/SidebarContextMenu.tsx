@@ -25,7 +25,7 @@ export function SidebarContextMenu(props: SidebarContextMenuProps) {
       value={{ page, renaming, setRenaming, rowRef }}
     >
       <ContextMenu onOpenChange={setMenuOpen}>
-        <ContextMenuTrigger asChild className="w-full">
+        <ContextMenuTrigger asChild deferReference className="w-full">
           <div
             ref={rowRef}
             tabIndex={-1}
