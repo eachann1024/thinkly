@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
 import { EditorHostBridge } from "@/pages/workspace/components/editor-host/EditorHostBridge";
+import { shouldUseRawEditorContent } from "../editor-host/editorContentMode";
 
 function createSyntheticAiHostPage(notebookId: string): Page {
   const now = Date.now();
@@ -35,6 +36,9 @@ export function NotebookAiHostScope({
       ? page.id
       : undefined;
   });
+  const useRawContent = usePages((state) => shouldUseRawEditorContent(
+    activePageId ? state.pages[activePageId] : undefined,
+  ));
   const hostPage = useMemo(
     () => (activePageId ? usePages.getState().pages[activePageId] : undefined)
       ?? createSyntheticAiHostPage(notebookId),
@@ -44,6 +48,8 @@ export function NotebookAiHostScope({
   return (
     <EditorHostBridge
       page={hostPage}
+      readPageOnDemand
+      contentMode={useRawContent ? "raw" : "normalized"}
       isEditorFullWidth
       onContentChangeOverride={ignoreContentChange}
     >
