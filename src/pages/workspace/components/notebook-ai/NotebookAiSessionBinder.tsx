@@ -1,5 +1,6 @@
 import { useLocale } from "@/i18n";
 import { useEffect, useLayoutEffect, useMemo } from "react";
+import { useSessionCommands } from "./session/useSessionCommands";
 import { useSessionState } from "./session/useSessionState";
 import { useStreamLifecycle } from "./session/useStreamLifecycle";
 import { useSendMessage } from "./session/useSendMessage";
@@ -37,7 +38,7 @@ export function NotebookAiSessionBinder({
     placeholderIndex,
     composerRevision,
   } = state;
-  const stopAll = useStreamLifecycle(state);
+  const stopAll = useStreamLifecycle(state, panelOpen);
   const send = useSendMessage(state);
   const {
     newConversation,
@@ -48,6 +49,11 @@ export function NotebookAiSessionBinder({
   } = useConversationActions(state);
   const compactConversation = useConversationCompaction(state);
   const { onBatchApproval, onBatchUndo } = useBatchApprovalActions(state);
+  const commands = useSessionCommands({
+    clearError, stop: stopAll, send, newConversation, ensureFreshConversation,
+    compactConversation, selectConversation, deleteConversation, searchPages,
+    onBatchApproval, onBatchUndo,
+  });
   const value = useMemo<NotebookAiSessionValue>(
     () => ({
       notebookId,
@@ -55,24 +61,14 @@ export function NotebookAiSessionBinder({
       messages,
       status,
       error,
-      clearError,
-      stop: stopAll,
+      ...commands,
       isStreaming,
       isBusy,
       unavailableReason,
       placeholderIndex,
       composerRevision,
-      send,
-      newConversation,
-      ensureFreshConversation,
-      compactConversation,
-      selectConversation,
-      deleteConversation,
-      searchPages,
-      onBatchApproval,
-      onBatchUndo,
     }),
-    [notebookId, conversationId, messages, status, error, clearError, stopAll, isStreaming, isBusy, unavailableReason, placeholderIndex, composerRevision, send, newConversation, ensureFreshConversation, compactConversation, selectConversation, deleteConversation, searchPages, onBatchApproval, onBatchUndo],
+    [commands, notebookId, conversationId, messages, status, error, isStreaming, isBusy, unavailableReason, placeholderIndex, composerRevision],
   );
 
   useLayoutEffect(() => {
@@ -81,8 +77,8 @@ export function NotebookAiSessionBinder({
 
   useEffect(() => {
     const run = (id: ComposerSlashBuiltinId) => {
-      if (id === "new") newConversation();
-      else compactConversation();
+      if (id === "new") commands.newConversation();
+      else commands.compactConversation();
     };
     const queued = takePendingAiSlashCommand();
     if (queued) run(queued);
@@ -92,7 +88,7 @@ export function NotebookAiSessionBinder({
     };
     window.addEventListener(AI_SLASH_COMMAND_EVENT, onCommand);
     return () => window.removeEventListener(AI_SLASH_COMMAND_EVENT, onCommand);
-  }, [newConversation, compactConversation]);
+  }, [commands]);
 
   useEffect(() => {
     if (panelOpen || isBusy) return;
