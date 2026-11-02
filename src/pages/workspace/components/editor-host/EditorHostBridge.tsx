@@ -61,6 +61,7 @@ interface EditorHostBridgeProps {
     options?: { silent?: boolean },
   ) => void;
   contentMode?: "raw" | "normalized";
+  readPageOnDemand?: boolean;
   children: ReactNode;
 }
 
@@ -69,6 +70,7 @@ export function EditorHostBridge({
   isEditorFullWidth,
   onContentChangeOverride,
   contentMode = shouldUseRawEditorContent(page) ? "raw" : "normalized",
+  readPageOnDemand = false,
   children,
 }: EditorHostBridgeProps) {
   useLocale();
@@ -122,7 +124,7 @@ export function EditorHostBridge({
   const { id, workspaceId } = page;
   const capabilities = useMemo<Omit<EditorPageContext, "page">>(
     () => ({
-      ...createEditorPageLinkCapabilities({ id, workspaceId } as Page),
+      ...createEditorPageLinkCapabilities(fallbackPage.current),
       contentMode,
       isEditorFullWidth,
       onContentChange: (
@@ -250,8 +252,8 @@ export function EditorHostBridge({
 
   const pageContext = useMemo<EditorPageContext>(() => ({
     ...capabilities,
-    get page() { return usePages.getState().pages[page.id] ?? page; },
-  }), [capabilities, page]);
+    get page() { return readPageOnDemand ? usePages.getState().pages[page.id] ?? page : page; },
+  }), [capabilities, page, readPageOnDemand]);
 
   return (
     <EditorPlatformProvider platform={editorPlatform}>
