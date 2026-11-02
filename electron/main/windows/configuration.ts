@@ -18,7 +18,7 @@ import {
   type WindowTabSnapshot,
 } from "../windowLayout";
 import type { WindowKind } from "../windowRegistry";
-import { windowState } from "./state";
+import { registry, windowState } from "./state";
 
 export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -86,6 +86,7 @@ export function windowWebPrefs(
 ): BrowserWindowConstructorOptions["webPreferences"] {
   return {
     ...sharedWebPrefs(),
+    backgroundThrottling: kind !== "workspace",
     additionalArguments: gooseWindowAdditionalArguments(windowId, kind),
   };
 }
@@ -110,7 +111,8 @@ export function setMainWindowTitleBarHeight(
 
 export function setHiddenThrottle(win: BrowserWindow, hidden: boolean): void {
   if (win.isDestroyed()) return;
-  win.webContents.backgroundThrottling = hidden;
+  // Workspace timers also run scheduled reflections while hidden or minimized.
+  win.webContents.backgroundThrottling = hidden && registry.findByWin(win)?.kind !== "workspace";
 }
 
 export function isExternalHttpUrl(url: string): boolean {
