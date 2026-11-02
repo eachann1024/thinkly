@@ -1,37 +1,36 @@
 import { showPageWriteSkeleton } from "./pageWriteSkeleton";
 import type { PageWriteTransition } from "@/lib/notebook-ai/pageWriteTransition";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
+import { reloadEditorPage } from "./reloadEditorPage";
 import {
   clonePageContent,
   createEditorSafeContent,
-  getContentSignature,
   normalizePageContent,
   type BlockNoteContent,
 } from "@/components/editor/utils/blocknote-content";
 import { toEditorBlocks } from "./editorContentPolicy";
-import { pageContentGroup, replacePageContent } from "./replacePageContent";
-import { markProgrammaticRead } from "./programmaticRead";
-import type { Transaction } from "@tiptap/pm/state";
+import { pageContentGroup } from "./replacePageContent";
 import { useEditorHostFocus } from "./useEditorHostFocus";
 import type { EditorRuntime } from "./useEditorSession";
 import type { EditorContentCommit } from "./useEditorContentCommit";
 
 export function useEditorHostEvents(
   runtime: EditorRuntime,
-  { commitEditorContent, debouncedUpdate }: EditorContentCommit,
+  contentCommit: EditorContentCommit,
   focusEditorSafely: () => void,
   isActiveEditor: boolean,
 ) {
+  const { commitEditorContent, debouncedUpdate } = contentCommit;
+  const latestRuntime = useRef(runtime);
+  latestRuntime.current = runtime;
+  const suspendedSource = useRef<{ pageId: string; content: unknown } | null>(null);
   const {
     editor,
     pageRef,
     pageIdForUpdateRef,
-    getLatestPage,
     contentModeRef,
     editorContainerRef,
     pendingEditorChangeRef,
-    syncedContentSignatureRef,
-    userInteractedRef,
   } = runtime;
   useEditorHostFocus(runtime, focusEditorSafely, isActiveEditor);
 
@@ -42,7 +41,15 @@ export function useEditorHostEvents(
     return () => controller.abort();
   }, [editor, runtime.activePageId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const boundPageId = runtime.activePageId;
+    const current = latestRuntime.current;
+    const page = current.getLatestPage?.(boundPageId ?? "") ?? pageRef.current;
+    const suspended = suspendedSource.current;
+    if (page && suspended?.pageId === page.id && suspended.content !== page.content &&
+        !pendingEditorChangeRef.current) {
+      reloadEditorPage(current, contentCommit, page.id);
+    }
     const handleFlush = (event: Event) => {
       const customEvent = event as CustomEvent<{ immediate?: boolean }>;
       if (customEvent.detail?.immediate) {
@@ -54,58 +61,9 @@ export function useEditorHostEvents(
 
     const handleReloadActiveEditor = (event: Event) => {
       const detail = (event as CustomEvent<{ pageId?: string }>).detail;
-      const activePage = pageRef.current;
-      const activeId = activePage?.id ?? null;
-      const targetId = detail?.pageId ?? activeId;
-      if (!targetId || targetId !== activeId) return;
-      if (targetId !== pageIdForUpdateRef.current) return;
-      const livePage = getLatestPage?.(targetId) ?? pageRef.current;
-      if (!livePage) return;
-      const isLocalPage = contentModeRef.current === "raw";
-      const nextContent = isLocalPage
-        ? toEditorBlocks(livePage.content)
-        : normalizePageContent(livePage.content);
-      const nextEditorContent = createEditorSafeContent(
-        nextContent,
-        editor.schema,
-      );
-      const currentRaw = clonePageContent(editor.document as BlockNoteContent);
-      const currentSignature = getContentSignature(
-        isLocalPage ? currentRaw : normalizePageContent(currentRaw),
-      );
-      const nextSignature = getContentSignature(nextEditorContent);
-
-      if (nextSignature === currentSignature) {
-        syncedContentSignatureRef.current = currentSignature;
-        return;
-      }
-      const scrollContainer = editorContainerRef.current?.closest<HTMLElement>(
-        ".page-scroll-container",
-      );
-      const scrollTop = scrollContainer?.scrollTop;
-      debouncedUpdate.cancel();
-      pendingEditorChangeRef.current = false;
-      try {
-        markProgrammaticRead(editor);
-        editor.transact((tr: Transaction) => replacePageContent(tr, nextEditorContent as any));
-      } catch (error) {
-        console.error(
-          "[goose-note] replace editor blocks failed during reload",
-          {
-            pageId: livePage.id,
-            error,
-          },
-        );
-        return;
-      }
-      const reloadedRaw = clonePageContent(editor.document as BlockNoteContent);
-      syncedContentSignatureRef.current = getContentSignature(
-        isLocalPage ? reloadedRaw : normalizePageContent(reloadedRaw),
-      );
-      userInteractedRef.current = false;
-      if (scrollContainer && typeof scrollTop === "number") {
-        scrollContainer.scrollTop = scrollTop;
-      }
+      if (!detail?.pageId && !isActiveEditor) return;
+      const targetId = detail?.pageId ?? pageRef.current?.id;
+      if (targetId) reloadEditorPage(latestRuntime.current, contentCommit, targetId);
     };
 
     const handlePrepareWrite = (event: Event) => {
@@ -149,6 +107,12 @@ export function useEditorHostEvents(
     );
 
     return () => {
+      // Activity cleanup runs before its refs disconnect. Record the source
+      // after flushing so our own save is not mistaken for an external edit.
+      if (boundPageId) commitEditorContent(boundPageId);
+      const current = latestRuntime.current;
+      const page = current.getLatestPage?.(boundPageId ?? "") ?? pageRef.current;
+      suspendedSource.current = page?.id === boundPageId ? { pageId: page.id, content: page.content } : null;
       window.removeEventListener("goose-note:prepare-page-write", handlePrepareWrite);
       window.removeEventListener(
         "goose-note:asset-references",
@@ -162,17 +126,15 @@ export function useEditorHostEvents(
     };
   }, [
     transitionController,
+    isActiveEditor,
     runtime.activePageId,
     commitEditorContent,
     debouncedUpdate,
     editor,
-    getLatestPage,
     contentModeRef,
     editorContainerRef,
     pageIdForUpdateRef,
     pageRef,
     pendingEditorChangeRef,
-    syncedContentSignatureRef,
-    userInteractedRef,
   ]);
 }
