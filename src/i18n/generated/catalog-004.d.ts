@@ -27,6 +27,7 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/SidebarSectionHeader.tsx#localMessages:1": { "collapseAllPages_a4fb": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/CanvasSettings.tsx#localMessages:1": { "canvas_4d7f": {  }; "dots_f4a6": {  }; "editorGrid_47a6": {  }; "grid_5340": {  }; "none_d81b": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/CharacterSettings.tsx#localMessages:1": { "character": {  } };
+    "src/pages/workspace/components/sidebar/appearance-settings/FontSmoothingSettings.tsx#localMessages:1": { "fontSmoothing": {  }; "fontSmoothingHint": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/SidebarDisplaySettings.tsx#localMessages:1": { "showFolderCounts_f654": {  }; "sidebar_63f4": {  } };
     "src/pages/workspace/components/sidebar/appearance-settings/renderAdditionalFontSettings.tsx#localMessages:1": { "fontCategory": { "category": string | number } };
     "src/pages/workspace/components/sidebar/appearance-settings/renderAppearanceTheme.tsx#localMessages:1": { "automatic_3aed": {  }; "colorsAndThemes_05fe": {  }; "darkMode_18d1": {  }; "fullTheme": { "theme": string | number }; "lightMode_8755": {  }; "themeMode_b0bb": {  }; "theme_9970": {  }; "useSystemSetting_71bb": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/pages/workspace/hooks/useFileDrop.ts#localMessages:1": { "connectALocalFolderFirst": {  }; "couldnTImportThisFile": {  }; "couldnTLoadTheImporterTryAgain": {  }; "dropAPlainTextFileInMd": {  }; "filesImported": { "count": string | number }; "filesSkipped": { "count": string | number }; "folderOpened": {  }; "importFailed": {  }; "openLocalFolderSettings": {  }; "openOrConnectALocalFolderIn": {  }; "textFileImported": {  }; "theFileCouldnTBeReadAs": {  }; "theFileMayBeDamagedOrUse": {  }; "thisFileFormatIsnTSupportedYet": {  } };
     "src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1": { "dropToCheckFile": {  }; "dropToImportIntoTheCurrentFolder": {  }; "dropToImportTextFile": {  }; "dropToOpenFolder": {  }; "opensAsALocalFolderNotebook": {  }; "supportsMdMarkdownAndTxt": {  } };
     "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
-    "src/search.tsx#block1:1": { "title": {  } };
   }
 }

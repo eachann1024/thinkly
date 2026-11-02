@@ -29,6 +29,7 @@ import { renderReadingSettings } from "./appearance-settings/renderReadingSettin
 import { renderUIFontSizeSettings } from "./appearance-settings/renderUIFontSizeSettings";
 import { CanvasSettings } from "./appearance-settings/CanvasSettings";
 import { SidebarDisplaySettings } from "./appearance-settings/SidebarDisplaySettings";
+import { FontSmoothingSettings } from "./appearance-settings/FontSmoothingSettings";
 
 export function SettingsAppearance(props: SettingsAppearanceProps) {
   useLocale();
@@ -87,6 +88,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
                     {uiText("interfaceAndSidebar_f3b6")}</DisclosureSummary>
                   <div className="mt-4 space-y-4">
                     {interfaceFontSettings}
+                    <FontSmoothingSettings />
                     {additionalFontSettings}
                     {uiFontSizeSettings}
                   </div>
@@ -95,6 +97,7 @@ export function SettingsAppearance(props: SettingsAppearanceProps) {
             ) : (
               <>
                 {interfaceFontSettings}
+                <FontSmoothingSettings />
                 {defaultFontSettings}
                 {additionalFontSettings}
                 <div className="space-y-3 border-t border-border/60 pt-4">
