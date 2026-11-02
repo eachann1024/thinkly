@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>C 点场 · 生成中</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+@keyframes lit{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(420px)}}
+.cr-col{width:3px;height:24px;transform-origin:bottom;animation:eq 1.2s ease-in-out infinite;background:radial-gradient(circle,#779de8 1.2px,transparent 1.6px) 0 0/3px 4px repeat-y;will-change:transform}
+.cr-cell{width:6px;height:6px;border-radius:2px;background:#2c2c2c}
+.cr-on{background:#779de8}
+.cr-now{background:#779de8;animation:lit 1s ease-in-out infinite}
+.cr-log{display:flex;gap:10px;font:12px/20px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#8f8e88;animation:rise .35s both}
+.cr-p{animation:rise .4s cubic-bezier(.22,.61,.36,1) both}
+.cr-icon{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#b4b4b4;cursor:pointer}
+.cr-icon:hover{background:#2c2c2c;color:#ececec}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="position:relative;width:420px;height:780px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;display:flex;flex-direction:column;overflow:hidden">
+
+<div style="height:44px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px 0 16px">
+<span style="font-size:13px;font-weight:500">AI 助手</span>
+<span style="margin-left:auto"></span>
+<button class="cr-icon" aria-label="新对话"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="cr-icon" aria-label="历史"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+<button class="cr-icon" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:18px;padding:16px">
+<div style="align-self:flex-end;max-width:80%;background:#242424;border-radius:12px;padding:8px 12px;font-size:14px;line-height:20px">把这两条命令解释清楚，整理成清单</div>
+
+<div style="border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#1b1b1b">
+<div style="display:flex;align-items:flex-end;gap:12px">
+<div aria-hidden="true" style="display:flex;align-items:flex-end;gap:2px;height:24px">
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="14"><span class="cr-col" style="{{c.style}}"></span></sc-for>
+</div>
+<div style="display:flex;flex-direction:column">
+<span style="font-size:13px;line-height:20px">生成回答</span>
+<span style="font:11px/16px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#8f8e88">42 tok/s · 6.2s</span>
+</div>
+</div>
+<div aria-hidden="true" style="display:grid;grid-template-columns:repeat(40,6px);gap:3px">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="40"><span class="{{c.cls}}"></span></sc-for>
+</div>
+<div style="display:flex;flex-direction:column">
+<div class="cr-log"><span style="color:#7fd1a0">✓</span>read  Mac.md<span style="margin-left:auto">0.4s</span></div>
+<div class="cr-log" style="animation-delay:.1s"><span style="color:#7fd1a0">✓</span>parse 2 code blocks<span style="margin-left:auto">1.8s</span></div>
+<div class="cr-log" style="animation-delay:.2s;color:#ececec"><span style="color:#779de8;animation:lit 1s infinite">●</span>write checklist<span style="margin-left:auto">4.0s</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:22px">
+<div class="cr-p">两条命令都在处理 Mac 的安全限制：</div>
+<div class="cr-p" style="animation-delay:.15s;display:flex;gap:10px"><span style="width:6px;height:6px;margin-top:8px;border-radius:2px;background:#779de8;flex:none"></span><span>锁定 <code style="font:12px/20px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#9db8ef">HIToolbox.plist</code>，输入法设置不再被系统改回</span></div>
+<div class="cr-p" style="animation-delay:.3s;display:flex;gap:10px"><span style="width:6px;height:6px;margin-top:8px;border-radius:2px;background:#779de8;flex:none"></span><span><code style="font:12px/20px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#9db8ef">xattr -rd</code> 去掉隔离标记，开源软件可以直接打开<span style="display:inline-block;width:6px;height:6px;margin-left:4px;border-radius:2px;background:#779de8;animation:lit .8s infinite"></span></span></div>
+</div>
+</div>
+
+<div style="flex:none;padding:0 16px 16px">
+<div style="position:relative;overflow:hidden;border-radius:12px;border:1px solid #333333;background:#1d1d1d">
+<div style="display:flex;align-items:center;gap:4px;height:44px;padding:0 6px">
+<button class="cr-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<label style="flex:1;min-width:0;font-size:14px;line-height:20px;color:#8f8e88;white-space:nowrap;overflow:hidden">继续追问…</label>
+<span style="font:500 11px/16px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#8f8e88;padding:0 4px">Flash</span>
+<button aria-label="停止生成" style="width:32px;height:32px;border:0;border-radius:8px;background:#ececec;display:grid;place-items:center;cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:#181818"></span></button>
+</div>
+<div aria-hidden="true" style="position:absolute;left:0;bottom:0;width:120px;height:1px;background:linear-gradient(90deg,transparent,#779de8,transparent);animation:scan 1.4s linear infinite"></div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":780}}'>
+class Component extends DCLogic {
+renderVals() {
+const cols = [];
+for (let i = 0; i < 14; i++) cols.push({ style: 'animation-delay:-' + ((i * 0.37) % 1.2).toFixed(2) + 's;animation-duration:' + (0.9 + (i % 4) * 0.15).toFixed(2) + 's' });
+const cells = [];
+for (let i = 0; i < 40; i++) cells.push({ cls: i < 26 ? 'cr-cell cr-on' : i === 26 ? 'cr-cell cr-now' : 'cr-cell' });
+return { cols, cells };
+}
+}
+</script>
+</body>
+</html>

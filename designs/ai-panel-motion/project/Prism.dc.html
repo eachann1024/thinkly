@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>B 棱光 · 空闲</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes orbitR{to{transform:rotate(-360deg)}}
+@keyframes breathe{0%,100%{transform:scale(.97)}50%{transform:scale(1.03)}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sweep{0%{transform:translateX(-120%)}60%,100%{transform:translateX(320%)}}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.pb-orb{position:relative;width:120px;height:120px;animation:breathe 8s ease-in-out infinite}
+.pb-blob{position:absolute;width:72px;height:72px;border-radius:50%;filter:blur(18px);opacity:.85;will-change:transform}
+.pb-row{font:inherit;width:100%;display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:#ececec;font-size:14px;text-align:left;cursor:pointer;transition:background-color .15s;animation:rise .55s cubic-bezier(.22,.61,.36,1) both}
+.pb-row:hover{background:#242424}
+.pb-row .pb-go{margin-left:auto;color:#6b6b6b;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .2s,color .15s}
+.pb-row:hover .pb-go{opacity:1;transform:none;color:#779de8}
+.pb-ic{width:28px;height:28px;flex:none;border-radius:8px;background:#242424;display:grid;place-items:center;color:#b4b4b4}
+.pb-pill{position:relative;overflow:hidden;border-radius:22px;background:#222222;border:1px solid #333333}
+.pb-pill::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);animation:sweep 6s ease-in-out infinite;pointer-events:none}
+.pb-beam{position:absolute;left:24px;right:24px;bottom:0;height:1px;overflow:hidden}
+.pb-beam span{position:absolute;inset:0;background:linear-gradient(90deg,transparent,#779de8 40%,#c7a6f0 60%,transparent);animation:slide 3.2s ease-in-out infinite alternate}
+.pb-icon{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#b4b4b4;cursor:pointer}
+.pb-icon:hover{background:#2c2c2c;color:#ececec}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width:420px;height:780px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;display:flex;flex-direction:column">
+
+<div style="height:44px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px 0 16px">
+<span style="font-size:13px;font-weight:500">AI 助手</span>
+<span style="margin-left:auto"></span>
+<button class="pb-icon" aria-label="新对话"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="pb-icon" aria-label="历史"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+<button class="pb-icon" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:28px;padding:24px 16px 20px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+<div class="pb-orb" aria-hidden="true">
+<div style="position:absolute;inset:0;animation:orbit 14s linear infinite">
+<span class="pb-blob" style="left:0;top:4px;background:#5b86e0"></span>
+<span class="pb-blob" style="right:0;top:20px;background:#a685e8"></span>
+</div>
+<div style="position:absolute;inset:0;animation:orbitR 10s linear infinite">
+<span class="pb-blob" style="left:26px;bottom:0;background:#4fb3c9"></span>
+</div>
+<div style="position:absolute;inset:34px;border-radius:50%;background:#181818;opacity:.55"></div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="font-size:20px;font-weight:560;line-height:28px;letter-spacing:-.01em">想怎么修改这篇笔记？</div>
+<div style="font-size:13px;line-height:20px;color:#8f8e88">Mac · 2 段代码</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:2px">
+<button class="pb-row" style="animation-delay:.1s"><span class="pb-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></span>润色这段文字<svg class="pb-go" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+<button class="pb-row" style="animation-delay:.18s"><span class="pb-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>整理成清单<svg class="pb-go" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+<button class="pb-row" style="animation-delay:.26s"><span class="pb-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span>提炼要点<svg class="pb-go" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+</div>
+</div>
+
+<div style="flex:none;padding:0 16px 16px">
+<div class="pb-pill">
+<div style="display:flex;align-items:center;gap:2px;height:44px;padding:0 6px 0 4px">
+<button class="pb-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<label style="flex:1;min-width:0;font-size:14px;line-height:20px;color:#8f8e88;white-space:nowrap;overflow:hidden">问点什么，或输入 / 调用指令</label>
+<button style="font:inherit;font-size:12px;color:#b4b4b4;background:#2a2a2a;border:0;border-radius:999px;height:28px;padding:0 10px;display:flex;align-items:center;gap:6px;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:#4fb3c9"></span>Flash</button>
+<button aria-label="发送" style="width:32px;height:32px;margin-left:4px;border:0;border-radius:50%;background:#779de8;color:#10151f;display:grid;place-items:center;cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</div>
+<div class="pb-beam" aria-hidden="true"><span></span></div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":780}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

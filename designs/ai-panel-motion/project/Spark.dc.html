@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>工具栏 AI 按钮与选区浮条</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes twinkle{0%,100%{transform:scale(.4);opacity:0}50%{transform:scale(1);opacity:1}}
+@keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(18deg) scale(1.08)}}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+.sp-btn{position:relative;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:#b4b4b4;display:grid;place-items:center;cursor:pointer;transition:background-color .15s,color .15s}
+.sp-btn:hover{background:#2c2c2c;color:#ececec}
+.sp-btn:hover .sp-star{animation:tilt .6s cubic-bezier(.22,.61,.36,1)}
+.sp-busy{overflow:hidden;isolation:isolate;background:#222222;color:#9db8ef}
+.sp-busy::before{content:"";position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;background:conic-gradient(transparent 0 55%,#779de8 80%,#c7a6f0 92%,transparent);animation:spin 1.4s linear infinite;z-index:-2}
+.sp-busy::after{content:"";position:absolute;inset:1.5px;border-radius:7px;background:#222222;z-index:-1}
+.sp-tw{position:absolute;width:4px;height:4px;border-radius:50%;background:#c9d8f7;animation:twinkle 1.8s ease-in-out infinite}
+.sp-act{font:inherit;font-size:13px;height:30px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:#ececec;display:flex;align-items:center;gap:6px;cursor:pointer;transition:background-color .15s}
+.sp-act:hover{background:#2c2c2c}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width:420px;height:560px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;padding:24px;display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12px;line-height:16px;color:#8f8e88">工具栏按钮</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0;border-radius:10px;background:#1f1f1f">
+<button class="sp-btn" aria-label="打开 AI 助手"><svg class="sp-star" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></button>
+<span style="font-size:12px;color:#b4b4b4">默认 · 悬停转一下</span>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0;border-radius:10px;background:#1f1f1f">
+<button class="sp-btn" aria-label="AI 助手已打开" style="background:#2c2c2c;color:#9db8ef;box-shadow:inset 0 0 0 1px #779de8"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></button>
+<span style="font-size:12px;color:#b4b4b4">面板已开</span>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0;border-radius:10px;background:#1f1f1f">
+<button class="sp-btn sp-busy" aria-label="AI 正在生成">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+<span class="sp-tw" style="right:5px;top:5px"></span>
+<span class="sp-tw" style="left:6px;bottom:6px;animation-delay:-.9s"></span>
+</button>
+<span style="font-size:12px;color:#b4b4b4">后台生成中</span>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12px;line-height:16px;color:#8f8e88">选中文字后的浮条</div>
+<div style="position:relative;padding:20px 16px 16px;border-radius:10px;background:#1f1f1f;font-size:16px;line-height:26px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:2px;padding:4px;border-radius:10px;background:#222222;border:1px solid #333333;box-shadow:0 8px 24px rgba(0,0,0,.35);align-self:flex-start;animation:pop .22s cubic-bezier(.22,.61,.36,1) both">
+<button class="sp-act" style="color:#9db8ef"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>问 AI</button>
+<button class="sp-act">润色</button>
+<button class="sp-act">解释</button>
+<button class="sp-act">翻译</button>
+</div>
+<div>禁用输入法：<span style="background:rgba(119,157,232,.28);border-radius:3px;padding:1px 0">先禁止修改</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-size:12px;line-height:16px;color:#8f8e88">文件树：AI 正在改的笔记</div>
+<div style="border-radius:10px;background:#222222;padding:6px;display:flex;flex-direction:column;gap:2px;font-size:14px">
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:6px;color:#c3c2b7">账号归档</div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:6px;background:#2c2c2c;box-shadow:inset 0 0 0 1px #779de8">Mac<span style="margin-left:auto;width:14px;height:14px;border-radius:50%;border:1.5px solid #779de8;border-right-color:transparent;box-sizing:border-box;animation:spin .9s linear infinite"></span></div>
+<div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border-radius:6px;color:#c3c2b7">linux</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":560}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

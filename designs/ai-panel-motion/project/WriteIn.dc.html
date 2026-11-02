@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>编辑器 · AI 写入笔记</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes sweep{0%{transform:translateX(-200px)}100%{transform:translateX(760px)}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes dock{from{opacity:0;transform:translate(-50%,10px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes lit{0%,100%{opacity:.35}50%{opacity:1}}
+.wi-line{animation:rise .45s cubic-bezier(.22,.61,.36,1) both}
+.wi-code{font:14px/22px 'JetBrains Mono',ui-monospace,Menlo,monospace;background:#242424;border-radius:6px;padding:4px 8px;align-self:flex-start}
+.wi-btn{font:inherit;font-size:13px;height:32px;padding:0 12px;border-radius:8px;border:0;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background-color .15s,transform .12s}
+.wi-btn:active{transform:scale(.98)}
+.wi-kbd{font:500 11px/16px 'JetBrains Mono',ui-monospace,Menlo,monospace;opacity:.6}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="position:relative;width:920px;height:560px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;overflow:hidden">
+
+<div style="width:720px;margin:0 auto;padding:40px 0;display:flex;flex-direction:column;gap:14px;font-size:17px;line-height:1.5">
+<h1 style="margin:0 0 6px;font-size:40px;line-height:48px;font-weight:700">Mac</h1>
+<div>禁用输入法：先禁止修改</div>
+<div class="wi-code">~/Library/Preferences/com.apple.HIToolbox.plist</div>
+<div>开源软件</div>
+<div class="wi-code">sudo xattr -rd com.apple.quarantine /Applications/.app</div>
+
+<div style="position:relative;margin-top:8px;padding:12px 16px 12px 20px;border-radius:10px;background:rgba(119,157,232,.07);overflow:hidden;display:flex;flex-direction:column;gap:8px">
+<span aria-hidden="true" style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#779de8;transform-origin:top;animation:grow .9s cubic-bezier(.22,.61,.36,1) both"></span>
+<span aria-hidden="true" style="position:absolute;top:0;bottom:0;left:0;width:160px;background:linear-gradient(90deg,transparent,rgba(157,184,239,.12),transparent);animation:sweep 2.6s ease-in-out infinite;will-change:transform"></span>
+<div class="wi-line" style="font-weight:600;display:flex;align-items:center;gap:8px">命令说明<span style="font-size:12px;font-weight:500;color:#9db8ef;background:rgba(119,157,232,.14);border-radius:999px;padding:0 8px;line-height:20px">AI 新增</span></div>
+<div class="wi-line" style="animation-delay:.25s;display:flex;gap:10px"><span style="color:#8f8e88">1.</span>锁定 HIToolbox.plist：防止系统把输入法改回默认。</div>
+<div class="wi-line" style="animation-delay:.5s;display:flex;gap:10px"><span style="color:#8f8e88">2.</span>xattr -rd：清除隔离标记，开源软件打开不再提示已损坏<span style="display:inline-block;width:2px;height:20px;align-self:center;background:#779de8;animation:lit .9s infinite"></span></div>
+</div>
+</div>
+
+<div style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:6px;border-radius:12px;background:#222222;border:1px solid #333333;box-shadow:0 8px 24px rgba(0,0,0,.35);animation:dock .35s .9s cubic-bezier(.22,.61,.36,1) both">
+<span style="display:flex;align-items:center;gap:8px;padding:0 8px 0 6px;font-size:13px;color:#b4b4b4"><span style="width:6px;height:6px;border-radius:50%;background:#779de8;animation:lit 1.2s infinite"></span>写入 3 行</span>
+<button class="wi-btn" style="background:#2c2c2c;color:#ececec">撤销<span class="wi-kbd">⌘Z</span></button>
+<button class="wi-btn" style="background:#ececec;color:#181818">保留<span class="wi-kbd">⌘↵</span></button>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":920,"height":560}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

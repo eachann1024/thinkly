@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>A 静流 · 生成中</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shine{0%{transform:translateX(-60px)}100%{transform:translateX(140px)}}
+@keyframes rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fill{from{transform:scaleX(.05)}to{transform:scaleX(.82)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.qr-shim{position:relative;display:inline-block;overflow:hidden;color:#8f8e88}
+.qr-shim::after{content:"";position:absolute;top:0;bottom:0;left:0;width:48px;background:linear-gradient(90deg,transparent,rgba(236,236,236,.55),transparent);mix-blend-mode:plus-lighter;animation:shine 1.8s ease-in-out infinite}
+.qr-edge{position:relative;border-radius:14px;padding:1px;overflow:hidden;isolation:isolate;background:#303030}
+.qr-edge::before{content:"";position:absolute;left:50%;top:50%;width:640px;height:640px;margin:-320px 0 0 -320px;background:conic-gradient(from 0deg,transparent 0 40%,#779de8 60%,#c7a6f0 75%,transparent 92%);animation:spin 2.4s linear infinite;will-change:transform;z-index:-1}
+.qr-line{animation:rise .4s cubic-bezier(.22,.61,.36,1) both}
+.qr-icon{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#b4b4b4;cursor:pointer}
+.qr-icon:hover{background:#2c2c2c;color:#ececec}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width:420px;height:780px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;display:flex;flex-direction:column">
+
+<div style="height:44px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px 0 16px;border-bottom:1px solid #262626">
+<span style="font-size:13px;font-weight:500">AI 助手</span>
+<span style="margin-left:auto"></span>
+<button class="qr-icon" aria-label="新对话"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="qr-icon" aria-label="历史"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+<button class="qr-icon" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:20px;padding:20px 16px">
+<div style="align-self:flex-end;max-width:80%;background:#262626;border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:14px;line-height:20px">把这两条命令解释清楚，整理成清单</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:8px;font-size:13px;line-height:20px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#779de8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="animation:spin 3s linear infinite"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>
+<span class="qr-shim">正在写入清单</span>
+<span style="margin-left:auto;color:#8f8e88;font-variant-numeric:tabular-nums">6.2 秒</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px;padding-left:24px;font-size:13px;line-height:20px;color:#b4b4b4">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:50%;background:#2d4a3a;color:#7fd1a0;display:grid;place-items:center;animation:pop .4s both"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>读取笔记 Mac<span style="margin-left:auto;color:#8f8e88;font-variant-numeric:tabular-nums">0.4 秒</span></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:50%;background:#2d4a3a;color:#7fd1a0;display:grid;place-items:center;animation:pop .4s .2s both"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>理解 2 段代码<span style="margin-left:auto;color:#8f8e88;font-variant-numeric:tabular-nums">1.8 秒</span></div>
+<div style="display:flex;align-items:center;gap:8px;color:#ececec"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid #779de8;border-right-color:transparent;box-sizing:border-box;animation:spin .9s linear infinite"></span>生成回答<span style="margin-left:auto;color:#8f8e88;font-variant-numeric:tabular-nums">42 字/秒</span></div>
+<div style="height:2px;border-radius:1px;background:#262626;overflow:hidden;margin-top:2px"><div style="height:100%;background:#779de8;transform-origin:left;animation:fill 8s cubic-bezier(.2,.7,.3,1) infinite alternate"></div></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:22px;color:#ececec">
+<div class="qr-line">两条命令都是解决 Mac 上的常见麻烦：</div>
+<div class="qr-line" style="animation-delay:.15s;display:flex;gap:8px"><span style="color:#8f8e88">1.</span><span><code style="font:12px/20px 'JetBrains Mono',ui-monospace,Menlo,monospace;background:#242424;border-radius:4px;padding:1px 4px">HIToolbox.plist</code> 记录输入法列表，先锁定它能防止系统改回去。</span></div>
+<div class="qr-line" style="animation-delay:.3s;display:flex;gap:8px"><span style="color:#8f8e88">2.</span><span><code style="font:12px/20px 'JetBrains Mono',ui-monospace,Menlo,monospace;background:#242424;border-radius:4px;padding:1px 4px">xattr -rd</code> 去掉隔离标记，打开开源软件不再提示“已损坏”<span style="display:inline-block;width:8px;height:16px;margin-left:2px;vertical-align:-3px;border-radius:2px;background:#779de8;animation:blink 1s ease-in-out infinite"></span></span></div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;padding:12px 16px 16px">
+<div class="qr-edge">
+<div style="display:flex;align-items:center;gap:4px;height:44px;padding:0 6px;border-radius:13px;background:#1f1f1f">
+<button class="qr-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<label style="flex:1;min-width:0;font-size:14px;line-height:20px;color:#8f8e88;white-space:nowrap;overflow:hidden">继续追问…</label>
+<span style="font-size:12px;color:#8f8e88;padding:0 6px">3.8 Flash</span>
+<button aria-label="停止生成" style="width:32px;height:32px;border:0;border-radius:9px;background:#ececec;display:grid;place-items:center;cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:#181818"></span></button>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":780}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
