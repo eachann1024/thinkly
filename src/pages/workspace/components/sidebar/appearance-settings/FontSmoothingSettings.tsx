@@ -14,6 +14,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { Switch, SwitchRow } from "@/components/ui/switch";
+import { isMacPlatform } from "@/lib/utils";
 import { useSettings } from "@/stores/useSettings";
 import { APPEARANCE_OPTION_ROW_CLASS } from "./shared";
 
@@ -23,6 +24,8 @@ export function FontSmoothingSettings() {
   useLocale();
   const enabled = useSettings((state) => state.fontSmoothing);
   const setEnabled = useSettings((state) => state.setFontSmoothing);
+  // -webkit-font-smoothing only changes rendering on macOS.
+  if (!isMacPlatform()) return null;
   return (
     <SwitchRow className={`flex items-center justify-between gap-3 ${APPEARANCE_OPTION_ROW_CLASS}`}>
       <span className="flex min-w-0 flex-col gap-1">
