@@ -47,6 +47,7 @@ import { gooseFindInPageExtension } from "@/components/editor/find/findInPagePlu
 import { gooseSearchSessionHighlightExtension } from "@/components/editor/find/searchSessionHighlightPlugin";
 import { createGooseSlashMenuReconcileExtension } from "@/components/editor/extensions/gooseSlashMenuReconcileExtension";
 import { createGooseBlockTypeKeyboardExtension } from "../extensions/blockTypeKeyboardExtension";
+import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { i18nYaml, createTranslator, useLocale } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/core/useEditorExtensions.ts#messages:1">`
 zh-Hans:
@@ -146,6 +147,7 @@ export function useEditorExtensions(session: EditorSession) {
     createGooseSlashMenuReconcileExtension(
       usesRawEditorContentRef,
       editorInstanceRef,
+      () => !isQuickNoteEditorPage(session.pageRef.current),
     ),
     gooseMarkdownInputRulesExtension(settingsRef),
     gooseFakeSelectionExtension,

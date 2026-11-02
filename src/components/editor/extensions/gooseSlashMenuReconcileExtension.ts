@@ -14,6 +14,7 @@ const PLUGIN_KEY = new PluginKey("goose-slash-menu-reconcile");
 export function createGooseSlashMenuReconcileExtension(
   allowSlashMenuOnFirstBlockRef: { current: boolean },
   editorRef: { current: BlockNoteEditor<any, any, any> | null },
+  allowPageMentions: () => boolean,
 ) {
   return createExtension({
     key: "goose-slash-menu-reconcile",
@@ -29,7 +30,7 @@ export function createGooseSlashMenuReconcileExtension(
                 reconcileSlashSuggestionMenu(ed, {
                   allowSlashMenuOnFirstBlock: allowSlashMenuOnFirstBlockRef.current,
                 });
-                reconcilePageMentionSuggestionMenu(ed);
+                if (allowPageMentions()) reconcilePageMentionSuggestionMenu(ed);
               });
               return false;
             },
@@ -47,7 +48,7 @@ export function createGooseSlashMenuReconcileExtension(
             reconcileSlashSuggestionMenu(ed, {
               allowSlashMenuOnFirstBlock: allowSlashMenuOnFirstBlockRef.current,
             });
-            reconcilePageMentionSuggestionMenu(ed);
+            if (allowPageMentions()) reconcilePageMentionSuggestionMenu(ed);
           });
           return null;
         },
