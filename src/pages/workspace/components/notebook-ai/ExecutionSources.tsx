@@ -2,7 +2,10 @@ import { useId, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, FileText, Globe } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
+import { noteCitationKey, noteCitationsInText, noteSourceLabel } from "@/lib/notebook-ai/noteCitation";
 import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
+import { usePages } from "@/stores/usePages";
+import { getPageTitle } from "@/components/editor/utils/page-title";
 import { openExternalUrl } from "../ai-cards/webLinks";
 import { ExecutionDisclosure } from "./ExecutionDisclosure";
 import { executionSources, formatExecutionTime } from "./executionPresentation";
@@ -28,10 +31,20 @@ ja:
 `;
 const t = createTranslator(messages);
 
-export function ExecutionSources({ parts, execution }: { parts: ToolProgressPart[]; execution?: NotebookAiExecution }) {
+export function ExecutionSources({ parts, execution, answerText = "" }: { parts: ToolProgressPart[]; execution?: NotebookAiExecution; answerText?: string }) {
   const locale = useLocale();
   const { onOpenPage } = useEditorPageContext();
-  const sources = useMemo(() => execution?.sources ?? executionSources(parts), [execution?.sources, parts]);
+  const sources = useMemo(() => {
+    const read = execution?.sources ?? executionSources(parts);
+    const citations = noteCitationsInText(answerText);
+    const citedPages = new Set(citations.map(citation => citation.pageId));
+    return [...read.filter(source => !citedPages.has(source.id)), ...citations.map(citation => {
+      const base = read.find(source => source.id === citation.pageId);
+      const page = usePages.getState().pages[citation.pageId];
+      return { ...base, id: citation.pageId, title: base?.title ?? (page ? getPageTitle(page) : citation.pageId),
+        kind: "note" as const, location: citation.location };
+    })];
+  }, [execution?.sources, parts, answerText]);
   const [open, setOpen] = useState(false);
   const [requestedPage, setPage] = useState(0);
   const pages = Math.max(1, Math.ceil(sources.length / 24));
@@ -48,11 +61,11 @@ export function ExecutionSources({ parts, execution }: { parts: ToolProgressPart
         {sources.slice(page * 24, (page + 1) * 24).map((source, index) => {
           const timing = source.toolCallId ? execution?.tools[source.toolCallId] : undefined;
           const Icon = source.kind === "note" ? FileText : Globe;
-          return <li key={source.id} aria-posinset={page * 24 + index + 1} aria-setsize={sources.length}><Button variant="ghost" size={null} contentStyle="preserve"
-            className="notebook-ai-execution-source" title={source.title}
-            onClick={() => source.url ? openExternalUrl(source.url) : navigateNotebookAiReference(source.id, onOpenPage)}>
-            <Icon size={16} /><span>{source.title}</span>
-            {timing?.endedAt ? <time>{formatExecutionTime(timing.endedAt - timing.startedAt, locale)}</time> : null}
+          return <li key={noteCitationKey(source.id, source.location)} aria-posinset={page * 24 + index + 1} aria-setsize={sources.length}><Button variant="ghost" size={null} contentStyle="preserve"
+            className="notebook-ai-execution-source" title={noteSourceLabel(source.title, source.location)}
+            onClick={() => source.url ? openExternalUrl(source.url) : navigateNotebookAiReference(source.id, onOpenPage, source.location)}>
+            <Icon size={16} /><span>{noteSourceLabel(source.title, source.location)}</span>
+            {timing?.endedAt && timing.endedAt - timing.startedAt >= 50 ? <time>{formatExecutionTime(timing.endedAt - timing.startedAt, locale)}</time> : null}
           </Button></li>;
         })}
       </ul>

@@ -30,7 +30,7 @@ const ProgressRow = memo(function ProgressRow({ step, statusLabel, position, tot
           <div className="notebook-ai-work-step-row">
             <span className="notebook-ai-work-step-label">{step.label}</span>
             <span className={cn("notebook-ai-work-step-st", step.status === "error" && "text-[var(--goose-color-danger-focus)]")}>
-              {timing?.endedAt ? `${formatExecutionTime(timing.endedAt - timing.startedAt, locale)} · ` : ""}{statusLabel(step.status)}
+              {timing?.endedAt && timing.endedAt - timing.startedAt >= 50 ? `${formatExecutionTime(timing.endedAt - timing.startedAt, locale)} · ` : ""}{statusLabel(step.status)}
             </span>
           </div>
           {step.status === "error" && step.detail ? <p className="notebook-ai-work-step-detail">{step.detail}</p> : null}
