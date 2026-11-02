@@ -9,9 +9,7 @@ import { useWorkspaceEvents } from "./hooks/useWorkspaceEvents";
 import { useWeeklyReflection } from "./hooks/useWeeklyReflection";
 import { useLocalFolderWatch } from "./hooks/useLocalFolderWatch";
 import { useFileDrop } from "./hooks/useFileDrop";
-import { getPageHistorySettings } from "@/lib/history/settings";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
-import { getContentSignature } from "@/components/editor/utils/blocknote-content";
 import { WorkspaceLayout } from "./WorkspaceLayout";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { bindOptionWindowDrag } from "@/lib/electron/windowDrag";
@@ -21,28 +19,9 @@ import {
   createEditorPaneRegistry,
 } from "./components/editor-split/editorPaneRegistry";
 
-function PageHistoryBinder() {
-  const activePageId = usePages((s) => s.activePageId);
-  const page = usePages((s) =>
-    activePageId ? s.pages[activePageId] : undefined,
-  );
-  const historyContentSig = useMemo(
-    () => (page ? getContentSignature(page.content) : ""),
-    [page],
-  );
-  useHistoryRecorder({
-    pageId: activePageId ?? null,
-    workspaceId: page?.workspaceId ?? null,
-    content: page?.isFolder || page?.localReadState === "error" ? undefined : page?.content,
-    signature: historyContentSig,
-    updatedAt: page?.updatedAt,
-    settingsSignature: page ? JSON.stringify(getPageHistorySettings(page)) : undefined,
-  });
-  return null;
-}
-
 export function WorkspacePage() {
   useLocale();
+  useHistoryRecorder();
   const { activePageId, getPage } = usePages(useShallow((s) => ({ activePageId: s.activePageId, getPage: s.getPage })));
   const { activeNotebookId, notebooks } = useNotebooks(useShallow((s) => ({ activeNotebookId: s.activeNotebookId, notebooks: s.notebooks })));
 
@@ -82,7 +61,6 @@ export function WorkspacePage() {
 
   return (
     <>
-      <PageHistoryBinder />
       <EditorPaneRegistryProvider value={paneRegistry}>
         <HistoryViewProvider>
           <WorkspaceLayout
