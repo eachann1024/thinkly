@@ -1,46 +1,26 @@
 import type { Page } from "@/types";
-import { getPageTitle } from "@/components/editor/utils/page-title";
+import { getPageTableSnapshot } from "./pageChanges";
+import { sidebarPageSignature } from "./sidebarPageSignature";
 
-const signatures = new WeakMap<Page, string>();
-
-function treeSignature(page: Page): string {
-  const cached = signatures.get(page);
-  if (cached !== undefined) return cached;
-  const signature = [
-    page.workspaceId,
-    page.parentId ?? "",
-    page.icon ?? "",
-    page.isFolder ? "1" : "0",
-    String(page.trashedAt ?? ""),
-    String(page.order ?? ""),
-    String(page.createdAt),
-    page.localFilePath ?? "",
-    page.localUnsaved ? "1" : "0",
-    page.editorDraft ? "1" : "0",
-    page.localPendingCreate ?? "",
-    page.localReadState ?? "",
-    page.isPinned ? "1" : "0",
-    page.isFavorite ? "1" : "0",
-    getPageTitle(page),
-  ].join("\0");
-  signatures.set(page, signature);
-  return signature;
-}
+const equivalentRevisions = new WeakMap<Record<string, Page>, number>();
 
 export function areSidebarPagesEqual(
   left: Record<string, Page>,
   right: Record<string, Page>,
 ): boolean {
   if (left === right) return true;
-  const leftIds = Object.keys(left);
-  const rightIds = Object.keys(right);
-  if (leftIds.length !== rightIds.length) return false;
-  for (const id of leftIds) {
-    const a = left[id];
-    const b = right[id];
-    if (a === b) continue;
-    if (!b) return false;
-    if (treeSignature(a) !== treeSignature(b)) return false;
+  const leftRevision = getPageTableSnapshot(left)?.sidebarRevision ?? equivalentRevisions.get(left);
+  const rightRevision = getPageTableSnapshot(right)?.sidebarRevision;
+  if (leftRevision !== undefined && rightRevision !== undefined) {
+    return leftRevision === rightRevision;
   }
+  // Historical/external tables may predate tracking. No key-array allocations.
+  for (const id in left) {
+    const a = left[id], b = right[id];
+    if (a === b) continue;
+    if (!b || sidebarPageSignature(a) !== sidebarPageSignature(b)) return false;
+  }
+  for (const id in right) if (!(id in left)) return false;
+  if (rightRevision !== undefined) equivalentRevisions.set(left, rightRevision);
   return true;
 }
