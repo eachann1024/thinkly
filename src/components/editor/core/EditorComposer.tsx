@@ -147,6 +147,7 @@ export function EditorComposer({
         editable={editable}
         theme={effectiveTheme}
         slashMenu={false}
+        emojiPicker={false}
         formattingToolbar={false}
         linkToolbar={false}
         sideMenu={false}
