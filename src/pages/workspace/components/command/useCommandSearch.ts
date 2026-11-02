@@ -18,9 +18,9 @@ import type { Page } from "@/types";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { computeCommandMatches, type CommandMatches } from "./cooperativeCommandSearch";
-import type { SearchNotebooks } from "./pageSearchCatalog";
+import { getSearchCatalog, type SearchNotebooks } from "./pageSearchCatalog";
 import { syncIndex } from "./pageSearchIndex";
-import { useCommandSearchScope } from "./useCommandSearchScope";
+import { useVersionedCommandSearchScope } from "./useVersionedCommandSearchScope";
 import { useCommandSearchRecent } from "./useCommandSearchRecent";
 import { isCommandSearchablePage, shouldIncludePageInCommandScope } from "./searchPageFilter";
 import { runWithPresence } from "@/lib/ui/presence";
@@ -87,10 +87,12 @@ export function useCommandSearch({
     setPagination((previous) => ({ ...previous, limit: previous.limit + SEARCH_RESULT_PAGE_SIZE }));
   }, []);
   const removeRecent = useCallback((id: string) => {
-    const nextIds = [...removedRecentIds, id];
-    runWithPresence(() => setRemovedRecentIds(nextIds));
-    localStorage.setItem("thinkly-recent-excludes", JSON.stringify(nextIds));
-  }, [removedRecentIds]);
+    runWithPresence(() => setRemovedRecentIds(previous => {
+      const nextIds = [...previous, id];
+      localStorage.setItem("thinkly-recent-excludes", JSON.stringify(nextIds));
+      return nextIds;
+    }));
+  }, []);
   useEffect(() => {
     const sync = (event: StorageEvent) => {
       if (event.key !== "thinkly-recent-excludes") return;
@@ -103,10 +105,12 @@ export function useCommandSearch({
     return () => window.removeEventListener("storage", sync);
   }, []);
 
-  const prepared = useCommandSearchScope(
+  const prepared = useVersionedCommandSearchScope(
     pages, notebooks, searchAllNotebooks, activeNotebookId, enabled,
   );
   const { scope: filteredPages, catalog, ready } = prepared;
+  const breadcrumbPages = useRef(pages);
+  useLayoutEffect(() => { breadcrumbPages.current = pages; }, [pages]);
   const getPageBreadcrumb = useCallback((page: Page): string[] => {
     const breadcrumb: string[] = [];
     let currentPage = page;
@@ -114,43 +118,43 @@ export function useCommandSearch({
       const title = getPageTitle(currentPage);
       if (title && title !== uiText("untitled")) breadcrumb.unshift(title);
       if (!currentPage.parentId) break;
-      currentPage = pages[currentPage.parentId];
+      currentPage = breadcrumbPages.current[currentPage.parentId];
     }
     const notebook = useNotebooks.getState().notebooks[page.workspaceId || "default"];
     if (notebook) breadcrumb.unshift(notebook.name);
     return breadcrumb;
-  }, [pages]);
+  }, []);
 
   const [completed, setCompleted] = useState<{
     query: string;
-    pages: CommandSearchState["pages"];
-    notebooks: SearchNotebooks;
+    version: object;
     scope: Page[];
     matches: CommandMatches | null;
     error: "search-failed" | null;
   } | null>(null);
-  const latest = useRef({ query: searchQuery, pages, notebooks, scope: filteredPages, enabled });
+  const latest = useRef({ query: searchQuery, version: prepared.version, scope: filteredPages, enabled });
   useLayoutEffect(() => {
-    latest.current = { query: searchQuery, pages, notebooks, scope: filteredPages, enabled };
-  }, [searchQuery, pages, notebooks, filteredPages, enabled]);
+    latest.current = { query: searchQuery, version: prepared.version, scope: filteredPages, enabled };
+  }, [searchQuery, prepared.version, filteredPages, enabled]);
   const currentCompletion = enabled && completed?.query === searchQuery &&
-    completed.pages === pages && completed.notebooks === notebooks &&
+    completed.version === prepared.version &&
     completed.scope === filteredPages ? completed : null;
 
   useEffect(() => {
     if (!enabled || !searchQuery.trim() || !ready || !catalog || prepared.error || currentCompletion) return;
     const controller = new AbortController();
-    const snapshot = { query: searchQuery, pages, notebooks, scope: filteredPages };
+    const snapshot = { query: searchQuery, version: prepared.version, scope: filteredPages };
     const isCurrent = () => {
       const current = latest.current;
       return !controller.signal.aborted && current.enabled && current.query === snapshot.query &&
-        current.pages === snapshot.pages && current.notebooks === snapshot.notebooks &&
+        current.version === snapshot.version &&
         current.scope === snapshot.scope;
     };
     void (async () => {
-      if (!await syncIndex(catalog) || !isCurrent()) return;
+      const indexCatalog = getSearchCatalog();
+      if (!await syncIndex(indexCatalog) || !isCurrent()) return;
       const matches = await computeCommandMatches(
-        filteredPages, searchQuery, controller.signal, catalog,
+        filteredPages, searchQuery, controller.signal, indexCatalog,
       );
       if (matches && isCurrent()) setCompleted({ ...snapshot, matches, error: null });
     })().catch((error: unknown) => {
@@ -159,7 +163,7 @@ export function useCommandSearch({
       setCompleted({ ...snapshot, matches: null, error: "search-failed" });
     });
     return () => { controller.abort(); };
-  }, [enabled, ready, catalog, prepared.error, filteredPages, pages, notebooks, searchQuery, currentCompletion]);
+  }, [enabled, ready, catalog, prepared.error, filteredPages, prepared.version, searchQuery, currentCompletion]);
 
   const hasQuery = Boolean(searchQuery.trim());
   const searchError = prepared.error ?? (currentCompletion?.error ? uiText("searchFailedTryDifferentKeywords") : null);

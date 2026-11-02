@@ -11,6 +11,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import MiniSearch from "minisearch";
 import type { Page } from "@/types";
+import { changedPageIds } from "@/stores/pages/pageChanges";
 import { getPageTitle, UNTITLED_PAGE_TITLE } from "@/components/editor/utils/page-title";
 import { getContentDerivationsForPage } from "@/components/editor/utils/content-page-derivations-cache";
 import type { SearchCatalog } from "./pageSearchCatalog";
@@ -40,6 +41,7 @@ function tokenize(text: string): string[] {
 interface IndexDoc { id: string; title: string; body: string }
 let miniSearch: MiniSearch<IndexDoc> | null = null;
 let indexedCatalog: SearchCatalog | null = null;
+const dirtyIds = new Set<string>();
 const indexedVersions = new Map<
   string, { updatedAt: number; content: Page["content"]; title: string }
 >();
@@ -68,41 +70,35 @@ async function maintainIndex(catalog: SearchCatalog, signal: AbortSignal): Promi
   await yieldSearchTask(signal, true);
   if (signal.aborted) return false;
   const ms = getInstance();
-  const pageIds = new Set<string>();
+  const changed = !indexedCatalog || indexedCatalog.notebookKey !== catalog.notebookKey
+    ? new Set([...indexedVersions.keys(), ...catalog.searchableIds])
+    : changedPageIds(indexedCatalog.pagesRef, catalog.pagesRef!);
+  for (const id of changed) dirtyIds.add(id);
   const pause = createSearchTaskBudget(signal, true);
-  for (const page of catalog.sortedByTitle) {
+  for (const id of dirtyIds) {
     if (signal.aborted) return false;
-    pageIds.add(page.id);
-    const wait = pause();
-    if (wait) await wait;
-  }
-  for (const id of indexedVersions.keys()) {
-    if (signal.aborted) return false;
-    if (!pageIds.has(id)) {
+    const page = catalog.searchableIds.has(id) ? catalog.pagesRef?.[id] : undefined;
+    if (!page) {
       if (ms.has(id)) ms.discard(id);
       indexedVersions.delete(id);
-    }
-    const wait = pause();
-    if (wait) await wait;
-  }
-  for (const page of catalog.sortedByTitle) {
-    if (signal.aborted) return false;
-    const current = indexedVersions.get(page.id);
-    const title = getPageTitle(page);
-    if (!current || current.updatedAt !== page.updatedAt ||
-      current.content !== page.content || current.title !== title) {
-      const doc: IndexDoc = {
-        id: page.id, title: isPlaceholderTitle(title) ? "" : title,
-        body: bodyForSearchIndex(page, title),
-      };
-      if (ms.has(page.id)) ms.replace(doc);
-      else ms.add(doc);
-      indexedVersions.set(page.id, { updatedAt: page.updatedAt, content: page.content, title });
+    } else {
+      const current = indexedVersions.get(id);
+      const title = getPageTitle(page);
+      if (!current || current.content !== page.content || current.title !== title) {
+        const doc: IndexDoc = {
+          id, title: isPlaceholderTitle(title) ? "" : title,
+          body: bodyForSearchIndex(page, title),
+        };
+        if (ms.has(id)) ms.replace(doc);
+        else ms.add(doc);
+        indexedVersions.set(id, { updatedAt: page.updatedAt, content: page.content, title });
+      }
     }
     const wait = pause();
     if (wait) await wait;
   }
   if (signal.aborted) return false;
+  dirtyIds.clear();
   indexedCatalog = catalog;
   return true;
 }
@@ -110,11 +106,10 @@ async function maintainIndex(catalog: SearchCatalog, signal: AbortSignal): Promi
 export function cancelIndexSync(): void {
   pending?.controller.abort();
   pending = null;
-  indexedCatalog = null;
 }
 
 export function syncIndex(catalog: SearchCatalog): Promise<boolean> {
-  if (indexedCatalog === catalog) return Promise.resolve(true);
+  if (indexedCatalog === catalog && dirtyIds.size === 0 && !pending) return Promise.resolve(true);
   if (pending?.catalog === catalog) return pending.promise;
   cancelIndexSync();
   const controller = new AbortController();
@@ -126,7 +121,7 @@ export function syncIndex(catalog: SearchCatalog): Promise<boolean> {
 }
 
 export function searchIndex(query: string, catalog: SearchCatalog): string[] | null {
-  if (!miniSearch || indexedCatalog !== catalog) return null;
+  if (!miniSearch || indexedCatalog !== catalog || dirtyIds.size > 0 || pending) return null;
   return miniSearch.search(query).map(result => result.id as string);
 }
 
@@ -134,4 +129,6 @@ export function resetIndex(): void {
   cancelIndexSync();
   miniSearch = null;
   indexedVersions.clear();
+  indexedCatalog = null;
+  dirtyIds.clear();
 }

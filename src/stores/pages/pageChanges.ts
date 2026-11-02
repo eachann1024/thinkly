@@ -26,8 +26,8 @@ function record(previous: Pages, next: Pages): void {
   // notifying consumers, so reentrant or bulk writes take the identity fallback.
   const currentHint = hint;
   hint = undefined;
-  const ids = currentHint?.pages === previous
-    ? (previous[currentHint.id] === next[currentHint.id] ? [] : [currentHint.id])
+  const ids = currentHint?.pages === previous && previous[currentHint.id] !== next[currentHint.id]
+    ? [currentHint.id]
     : diffPages(previous, next);
   if (ids.some(id => !previous[id] || !next[id] ||
       sidebarPageSignature(previous[id]) !== sidebarPageSignature(next[id]))) {

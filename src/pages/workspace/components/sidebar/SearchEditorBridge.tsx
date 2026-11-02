@@ -79,8 +79,8 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     originPageId: s.view.phase === "closed" ? null : s.view.context.originPageId,
     originScrollTop: s.view.phase === "closed" ? 0 : s.view.context.originScrollTop,
   })));
-  const page = usePages(s => s.pages[pageId]);
-  const pages = usePages(s => s.pages);
+  const pageTitle = usePages(s => s.pages[pageId] ? getPageTitle(s.pages[pageId]) : null);
+  const originExists = usePages(s => Boolean(session.originPageId && s.pages[session.originPageId]));
   const [count, setCount] = useState(0);
   const [current, setCurrent] = useState(0);
   const [message, setMessage] = useState("");
@@ -100,7 +100,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     if (!editor || editor._tiptapEditor.isDestroyed) return;
     const state = getSearchSessionHighlightState(editor);
     const match = state?.matches[state.current];
-    if (!match) { if (page && session.query && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase()) && scrollRef.current) scrollRef.current.scrollTop = 0; return; }
+    if (!match) { if (pageTitle !== null && session.query && pageTitle.toLowerCase().includes(session.query.trim().toLowerCase()) && scrollRef.current) scrollRef.current.scrollTop = 0; return; }
     cancelAnimationFrame(frame.current);
     const paint = () => {
       if (useSearchSession.getState().view.phase !== "reader" || editor._tiptapEditor.isDestroyed || editorRef.current?.editor !== editor || editor.prosemirrorView.dom.dataset.searchPageId !== pageId) return;
@@ -150,7 +150,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
       const request = latest.navigation;
       if (latest.view.phase === "closed" || request.phase !== "target" || request.pageId !== pageId || request.id === handled.current) return;
       handled.current = request.id;
-      const titleMatch = attached && query && page && getPageTitle(page).toLowerCase().includes(query.toLowerCase());
+      const titleMatch = attached && query && pageTitle !== null && pageTitle.toLowerCase().includes(query.toLowerCase());
       if (request.restoreTop !== null || (attached && (state?.matches.length || titleMatch))) cancelPendingRestoration();
       if (request.restoreTop !== null && scrollRef.current) scrollRef.current.scrollTop = request.restoreTop;
       else if (attached) locate();
@@ -180,7 +180,7 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     ready();
     window.addEventListener("goose-note:search-editor-ready", ready);
     return () => { cancelled = true; window.clearTimeout(timer); cancelAnimationFrame(frame.current); unsubscribe(); window.removeEventListener("goose-note:search-editor-ready", ready); };
-  }, [attached, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration]);
+  }, [attached, pageId, session.query, session.scope, session.requestNonce, key, editorRef, scrollRef, cancelPendingRestoration, pageTitle]);
   useEffect(() => () => {
     const editor = editorRef.current?.editor;
     if (editor && !editor._tiptapEditor.isDestroyed) clearSearchSessionHighlight(editor);
@@ -200,11 +200,11 @@ export function SearchEditorBridge({ pageId, focused, editorRef, scrollRef, canc
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [showChrome, focused, key]);
-  if (!showChrome || !page) return null;
-  const titleOnly = !count && session.query.trim() && getPageTitle(page).toLowerCase().includes(session.query.trim().toLowerCase());
+  }, [showChrome, focused, key, pageTitle]);
+  if (!showChrome || pageTitle === null) return null;
+  const titleOnly = !count && session.query.trim() && pageTitle.toLowerCase().includes(session.query.trim().toLowerCase());
   const originId = session.originPageId;
-  const canReturn = Boolean(originId && originId !== pageId && pages[originId]);
+  const canReturn = Boolean(originId && originId !== pageId && originExists);
   return (
     <div className="search-editor-matchbar" aria-label={uiText("searchMatchNavigation_00ab")}>
       <Button contentStyle="preserve" variant="ghost" size="sm" className="h-auto whitespace-normal border-0 px-0 py-0 text-inherit" aria-label={uiText("backToSearchResults_69e3")} onClick={() => { closeNotebookAiIfFullscreen(); useSearchSession.getState().reopenSheet(); }}><ArrowLeft size={16}/><span>{uiText("searchResults_098f")}</span></Button>
