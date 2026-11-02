@@ -39,6 +39,10 @@
   position: absolute;
   border-radius: 999px;
 }
+.goose-page-write-rule {
+  position: absolute;
+  background: var(--goose-skeleton-bg);
+}
 .goose-page-write-reveal .bn-block-group > * {
   animation: goose-page-write-rise 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--goose-write-delay, 0ms) + 120ms);

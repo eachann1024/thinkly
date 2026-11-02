@@ -4,7 +4,6 @@ import "./pageWriteSkeleton.css";
 const COVER_MS = 780;
 const HOLD_MS = 720;
 const LIFT_MS = 960;
-const MAX_BARS = 400;
 const BLOCKED_EVENTS = ["beforeinput", "paste", "cut", "drop", "keydown"];
 
 function scrollerOf(node: HTMLElement): HTMLElement {
@@ -15,39 +14,51 @@ function scrollerOf(node: HTMLElement): HTMLElement {
   return node.parentElement!;
 }
 
-const SOLID_TYPES = new Set(["image", "video", "audio", "file", "table", "codeBlock", "embed"]);
+interface BarBox { left: number; top: number; width: number; height: number; radius?: number; rule?: boolean }
 
-interface BarBox { left: number; top: number; width: number; height: number; radius?: number }
-
-// One block-shaped placeholder per top-level block, so the cover reads as a page, not as inline text.
-function blockBars(view: EditorView, area: DOMRect): BarBox[] {
-  const group = view.dom.querySelector(".bn-block-group");
+// A virtual page: title, headings, a table and paragraphs with comfortable rhythm.
+// It never mirrors real content, so nothing of the page (borders, media, margins) can leak through.
+function virtualBars(view: EditorView, area: DOMRect): BarBox[] {
+  const style = getComputedStyle(view.dom);
+  const rect = view.dom.getBoundingClientRect();
+  const padL = parseFloat(style.paddingLeft) || 0;
+  const padR = parseFloat(style.paddingRight) || 0;
+  const left = Math.max(rect.left - area.left + padL, 16);
+  const width = Math.max(Math.min(rect.width - padL - padR, area.width - left - 16), 160);
   const bars: BarBox[] = [];
-  for (const block of Array.from(group?.children ?? []) as HTMLElement[]) {
-    const rect = block.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0 || rect.bottom < area.top || rect.top > area.bottom) continue;
-    const type = block.querySelector("[data-content-type]")?.getAttribute("data-content-type") ?? "paragraph";
-    const left = rect.left - area.left;
-    const top = rect.top - area.top;
-    if (SOLID_TYPES.has(type)) {
-      bars.push({ left, top: top + 4, width: rect.width, height: Math.max(rect.height - 8, 12), radius: 8 });
-    } else if (type === "heading") {
-      bars.push({ left, top: top + (rect.height - 16) / 2, width: rect.width * 0.34, height: 16 });
-    } else {
-      const lines = Math.max(1, Math.round(rect.height / 26));
-      const inset = type.endsWith("ListItem") ? 22 : 0;
-      for (let i = 0; i < lines && bars.length < MAX_BARS; i++) {
-        const last = i === lines - 1 && lines > 1;
-        bars.push({
-          left: left + inset,
-          top: top + i * 26 + 9,
-          width: (rect.width - inset) * (last ? 0.58 : lines === 1 ? 0.72 : 1),
-          height: 8,
-        });
-      }
+  let y = 56;
+  const bar = (x: number, w: number, h: number, top = y, radius?: number) =>
+    bars.push({ left: left + x, top, width: w, height: h, radius });
+  const heading = (w: number) => { bar(0, width * w, 16, y + 8); y += 32 + 22; };
+  const paragraph = (lines: number) => {
+    for (let i = 0; i < lines; i++) {
+      bar(0, width * (i === lines - 1 ? 0.58 : i === 1 ? 0.93 : 1), 8, y + 9);
+      y += 28;
     }
-  }
-  return bars;
+    y += 24;
+  };
+  const table = (rows: number, cols: number) => {
+    const cell = width / cols;
+    for (let r = 0; r < rows; r++) {
+      const head = r === 0;
+      for (let c = 0; c < cols; c++) bar(c * cell + 18, cell * (head ? 0.32 : 0.2 + ((r * 3 + c * 5) % 4) * 0.12), 8, y + 22);
+      y += 52;
+      bars.push({ left, top: y, width, height: 1, rule: true });
+    }
+    bars.push({ left, top: y - rows * 52, width, height: 1, rule: true });
+    y += 44;
+  };
+  bar(0, width * 0.46, 32, y, 8);
+  y += 32 + 40;
+  heading(0.22);
+  table(5, 3);
+  heading(0.26);
+  paragraph(3);
+  paragraph(2);
+  heading(0.2);
+  table(4, 2);
+  paragraph(3);
+  return bars.filter((spec) => spec.top < area.height);
 }
 
 function revealBlocks(view: EditorView, area: DOMRect) {
@@ -85,6 +96,7 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
   overlay.append(scan);
   host.append(overlay);
 
+  const oldOpacity = view.dom.style.opacity;
   const oldBusy = view.dom.getAttribute("aria-busy");
   view.dom.setAttribute("aria-busy", "true");
   const preventEdit = (event: Event) => event.preventDefault();
@@ -109,9 +121,9 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
   const draw = () => {
     if (disposed || !view.dom.isConnected) return;
     const box = place();
-    const bars = blockBars(view, box).map((spec) => {
+    const bars = virtualBars(view, box).map((spec) => {
       const bar = document.createElement("span");
-      bar.className = "goose-skeleton goose-page-write-bar";
+      bar.className = spec.rule ? "goose-page-write-rule" : "goose-skeleton goose-page-write-bar";
       Object.assign(bar.style, {
         left: `${spec.left}px`,
         top: `${spec.top}px`,
@@ -139,6 +151,7 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
     cancelAnimationFrame(frame);
     clearTimeout(liftTimer);
     undoReveal();
+    view.dom.style.opacity = oldOpacity;
     overlay.remove();
     if (positionHost && host.style.position === "relative") host.style.position = oldPosition;
     observer.disconnect();
@@ -163,6 +176,7 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
       teardown();
       return;
     }
+    view.dom.style.opacity = oldOpacity;
     undoReveal = revealBlocks(view, scroller.getBoundingClientRect());
     overlay.dataset.phase = "reveal";
     liftTimer = window.setTimeout(teardown, LIFT_MS + 160);
@@ -179,6 +193,7 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
     await new Promise((resolve) => setTimeout(resolve, COVER_MS + HOLD_MS));
     if (disposed) return () => {};
     overlay.dataset.phase = "hold";
+    view.dom.style.opacity = "0";
     return lift;
   } catch {
     dispose();
