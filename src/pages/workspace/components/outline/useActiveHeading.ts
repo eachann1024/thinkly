@@ -1,19 +1,20 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { findActiveHeadingIndex } from "./activeHeadingSearch";
 
 export const OUTLINE_SCROLL_TARGET_OFFSET = 8;
 
-const OUTLINE_ACTIVE_ANCHOR_OFFSET = 24;
-const OUTLINE_RECOGNITION_MAX_OFFSET = 220;
-const OUTLINE_RECOGNITION_VIEWPORT_RATIO = 0.28;
 const HEADING_TEXT_SELECTOR =
   '.bn-block-content[data-content-type="heading"] h1, .bn-block-content[data-content-type="heading"] h2, .bn-block-content[data-content-type="heading"] h3, .bn-block-content[data-content-type="heading"] h4, .bn-block-content[data-content-type="heading"] h5, .bn-block-content[data-content-type="heading"] h6';
-const HEADING_CONTENT_SELECTOR = '.bn-block-content[data-content-type="heading"]';
+const HEADING_CONTENT_SELECTOR =
+  '.bn-block-content[data-content-type="heading"]';
 
 export function getHeadingAnchorElement(
   container: HTMLElement,
   id: string,
 ): HTMLElement | null {
-  const block = container.querySelector(`[data-id="${CSS.escape(id)}"]`) as HTMLElement | null;
+  const block = container.querySelector(
+    `[data-id="${CSS.escape(id)}"]`,
+  ) as HTMLElement | null;
   if (!block) return null;
   return (
     (block.querySelector(HEADING_TEXT_SELECTOR) as HTMLElement | null) ??
@@ -27,74 +28,6 @@ export function useActiveHeading(
   headingIds: string[],
 ) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const frameRef = useRef<number | null>(null);
-
-  const findTopMost = useCallback(() => {
-    const container = scrollContainerRef?.current;
-    if (!container || headingIds.length === 0) {
-      setActiveId((current) => (current === null ? current : null));
-      return;
-    }
-
-    let nearestPassedId: string | null = null;
-    let nearestPassedY = -Infinity;
-    let nearestUpcomingId: string | null = null;
-    let nearestUpcomingY = Infinity;
-    let lastVisibleId: string | null = null;
-
-    const containerRect = container.getBoundingClientRect();
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <= 2;
-    const recognitionOffset = Math.min(
-      OUTLINE_RECOGNITION_MAX_OFFSET,
-      Math.max(
-        OUTLINE_ACTIVE_ANCHOR_OFFSET,
-        container.clientHeight * OUTLINE_RECOGNITION_VIEWPORT_RATIO,
-      ),
-    );
-
-    for (const id of headingIds) {
-      const el = getHeadingAnchorElement(container, id);
-      if (!el) continue;
-      const rect = el.getBoundingClientRect();
-      const relativeY = rect.top - containerRect.top;
-
-      if (relativeY < container.clientHeight) {
-        lastVisibleId = id;
-      }
-
-      if (relativeY <= OUTLINE_ACTIVE_ANCHOR_OFFSET && relativeY > nearestPassedY) {
-        nearestPassedY = relativeY;
-        nearestPassedId = id;
-        continue;
-      }
-
-      if (relativeY > OUTLINE_ACTIVE_ANCHOR_OFFSET && relativeY < nearestUpcomingY) {
-        nearestUpcomingY = relativeY;
-        nearestUpcomingId = id;
-      }
-    }
-
-    const shouldUseVisibleUpcoming =
-      nearestPassedY < 0 && nearestUpcomingY <= recognitionOffset;
-    let nextActiveId = nearestPassedId ?? nearestUpcomingId;
-    if (shouldUseVisibleUpcoming && nearestUpcomingId) {
-      nextActiveId = nearestUpcomingId;
-    }
-    if (isNearBottom && lastVisibleId) {
-      nextActiveId = lastVisibleId;
-    }
-    setActiveId((current) => (current === nextActiveId ? current : nextActiveId));
-  }, [scrollContainerRef, headingIds]);
-
-  const scheduleFindTopMost = useCallback(() => {
-    if (frameRef.current !== null) return;
-    frameRef.current = window.requestAnimationFrame(() => {
-      frameRef.current = null;
-      findTopMost();
-    });
-  }, [findTopMost]);
 
   useEffect(() => {
     const container = scrollContainerRef?.current;
@@ -103,35 +36,115 @@ export function useActiveHeading(
       return;
     }
 
-    observerRef.current = new IntersectionObserver(
-      () => {
-        scheduleFindTopMost();
+    let frame: number | null = null;
+    let cacheDirty = true;
+    let headings: { id: string; element: HTMLElement }[] = [];
+    const candidates = new Set<number>();
+    const indexes = new Map<Element, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const index = indexes.get(entry.target);
+          if (index === undefined) continue;
+          if (entry.isIntersecting) candidates.add(index);
+          else candidates.delete(index);
+        }
+        schedule();
       },
-      {
-        root: container,
-        rootMargin: `-${OUTLINE_ACTIVE_ANCHOR_OFFSET}px 0px -60% 0px`,
-        threshold: 0,
-      },
+      { root: container, threshold: 0 },
     );
-    container.addEventListener("scroll", scheduleFindTopMost, { passive: true });
 
-    for (const id of headingIds) {
-      const el = container.querySelector(`[data-id="${CSS.escape(id)}"]`);
-      if (el) observerRef.current.observe(el);
+    const rebuildCache = () => {
+      observer.disconnect();
+      candidates.clear();
+      indexes.clear();
+      headings = [];
+      for (const id of headingIds) {
+        const element = getHeadingAnchorElement(container, id);
+        if (!element) continue;
+        indexes.set(element, headings.length);
+        headings.push({ id, element });
+        observer.observe(element);
+      }
+      resizeObserver.disconnect();
+      resizeObserver.observe(container);
+      const editorContent = container.querySelector(".bn-editor");
+      if (editorContent) resizeObserver.observe(editorContent);
+      cacheDirty = false;
+    };
+    const findTopMost = () => {
+      if (cacheDirty) rebuildCache();
+      const containerTop = container.getBoundingClientRect().top;
+      const measured = new Map<number, number>();
+      const getY = (index: number) => {
+        let y = measured.get(index);
+        if (y === undefined) {
+          y =
+            headings[index].element.getBoundingClientRect().top - containerTop;
+          measured.set(index, y);
+        }
+        return y;
+      };
+      const index = findActiveHeadingIndex(
+        headings.length,
+        getY,
+        candidates,
+        container.clientHeight,
+        container.scrollHeight - container.scrollTop - container.clientHeight <=
+          2,
+      );
+      const nextActiveId = index === null ? null : headings[index].id;
+      setActiveId((current) =>
+        current === nextActiveId ? current : nextActiveId,
+      );
+    };
+    function schedule() {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        findTopMost();
+      });
     }
 
+    // React/ProseMirror may replace heading DOM without changing the outline IDs.
+    const containsHeading = (node: Node) =>
+      node instanceof Element &&
+      (node.matches(HEADING_CONTENT_SELECTOR + ",h1,h2,h3,h4,h5,h6") ||
+        Boolean(node.querySelector(HEADING_CONTENT_SELECTOR)));
+    const mutations = new MutationObserver((records) => {
+      for (const record of records) {
+        if (
+          record.type === "attributes" ||
+          [...record.addedNodes, ...record.removedNodes].some(containsHeading)
+        ) {
+          cacheDirty = true;
+          break;
+        }
+      }
+      schedule();
+    });
+    mutations.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-id", "data-content-type"],
+    });
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(container);
+    container.addEventListener("scroll", schedule, { passive: true });
+    // Media loads can move headings while the scroll container keeps its size.
+    container.addEventListener("load", schedule, true);
     findTopMost();
 
     return () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-      container.removeEventListener("scroll", scheduleFindTopMost);
-      if (frameRef.current !== null) {
-        window.cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
+      observer.disconnect();
+      mutations.disconnect();
+      resizeObserver.disconnect();
+      container.removeEventListener("scroll", schedule);
+      container.removeEventListener("load", schedule, true);
+      if (frame !== null) cancelAnimationFrame(frame);
     };
-  }, [scrollContainerRef, headingIds, findTopMost, scheduleFindTopMost]);
+  }, [scrollContainerRef, headingIds]);
 
   return activeId;
 }

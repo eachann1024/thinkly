@@ -52,10 +52,12 @@ export function SidebarOutline({
   focusKey = pageId ?? "",
 }: SidebarOutlineProps) {
   useLocale();
-  const page = usePages((state) =>
-    pageId ? state.pages[pageId] : undefined,
-  );
-  const pageCanHaveOutline = Boolean(page && !page.isFolder && !page.trashedAt);
+  const pageStatus = usePages((state) => {
+    const page = pageId ? state.pages[pageId] : undefined;
+    if (!page || page.trashedAt) return "unavailable";
+    return page.isFolder ? "folder" : "note";
+  });
+  const pageCanHaveOutline = pageStatus === "note";
   const registry = useOptionalEditorPaneRegistry();
   const registryVersion = useSyncExternalStore(
     registry?.subscribe ?? subscribeEmpty,
@@ -65,13 +67,12 @@ export function SidebarOutline({
   const focusedPane = registry?.getFocusedEntry() ?? null;
   const paneMatches = Boolean(
     paneId &&
-      pageId &&
-      focusedPane?.paneId === paneId &&
-      focusedPane.pageId === pageId,
+    pageId &&
+    focusedPane?.paneId === paneId &&
+    focusedPane.pageId === pageId,
   );
-  const editor = pageCanHaveOutline && paneMatches
-    ? focusedPane?.editor ?? null
-    : null;
+  const editor =
+    pageCanHaveOutline && paneMatches ? (focusedPane?.editor ?? null) : null;
   const focusedScrollRef = useMemo<React.RefObject<HTMLDivElement | null>>(
     () => ({
       get current() {
@@ -122,25 +123,28 @@ export function SidebarOutline({
         elRect.top -
         containerRect.top -
         OUTLINE_SCROLL_TARGET_OFFSET;
-      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
         ? "auto"
         : "smooth";
       container.scrollTo({ top: Math.max(0, targetScroll), behavior });
-      window.dispatchEvent(new CustomEvent("goose-note:sidebar-navigation-complete"));
+      window.dispatchEvent(
+        new CustomEvent("goose-note:sidebar-navigation-complete"),
+      );
     },
     [focusedScrollRef],
   );
 
   const emptyMessage = !pageId
     ? uiText("selectANoteToViewIts_13a8")
-    : !page || page.trashedAt
+    : pageStatus === "unavailable"
       ? uiText("thisNoteIsUnavailable_0618")
-      : page.isFolder
-          ? uiText("foldersDoNotHaveAnOutline_45b6")
-          : !paneMatches
-            ? registry
-              ? uiText("loadingOutline_1285")
-              : uiText("noteContentIsTemporarilyUnavailable_0257")
+      : pageStatus === "folder"
+        ? uiText("foldersDoNotHaveAnOutline_45b6")
+        : !paneMatches
+          ? registry
+            ? uiText("loadingOutline_1285")
+            : uiText("noteContentIsTemporarilyUnavailable_0257")
           : !editor
             ? uiText("loadingOutline_1285")
             : undefined;

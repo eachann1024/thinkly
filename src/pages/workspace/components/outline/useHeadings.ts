@@ -12,6 +12,7 @@ ja:
 const uiText = createTranslator(localMessages);
 import { useEffect, useState, useCallback } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
+import { transactionTouchesHeadings } from "./headingTransactions";
 
 export interface HeadingItem {
   id: string;
@@ -112,28 +113,36 @@ export function useHeadings(
     if (!editor) return;
     const isComposing = () =>
       Boolean(
-        (editor as { prosemirrorView?: { composing?: boolean } }).prosemirrorView
-          ?.composing,
+        (editor as { prosemirrorView?: { composing?: boolean } })
+          .prosemirrorView?.composing,
       );
-    const unsub = editor.onChange?.(() => {
-      if (isComposing()) return;
-      refresh();
-    });
-    const dom = (editor as { prosemirrorView?: { dom?: HTMLElement } })
-      .prosemirrorView?.dom;
-    let compositionFrame: number | null = null;
-    const handleCompositionEnd = () => {
-      if (compositionFrame !== null) return;
-      compositionFrame = requestAnimationFrame(() => {
-        compositionFrame = null;
-        refresh();
+    let refreshFrame: number | null = null;
+    const scheduleRefresh = () => {
+      if (refreshFrame !== null) return;
+      refreshFrame = requestAnimationFrame(() => {
+        refreshFrame = null;
+        if (!isComposing()) refresh();
       });
     };
-    dom?.addEventListener("compositionend", handleCompositionEnd);
+    const tiptap = editor._tiptapEditor;
+    const handleUpdate: Parameters<typeof tiptap.on<"update">>[1] = ({
+      transaction,
+      appendedTransactions,
+    }) => {
+      if (isComposing()) return;
+      if (
+        [transaction, ...appendedTransactions].some(transactionTouchesHeadings)
+      ) {
+        scheduleRefresh();
+      }
+    };
+    tiptap.on("update", handleUpdate);
+    const dom = editor.prosemirrorView?.dom;
+    dom?.addEventListener("compositionend", scheduleRefresh);
     return () => {
-      if (compositionFrame !== null) cancelAnimationFrame(compositionFrame);
-      if (typeof unsub === "function") unsub();
-      dom?.removeEventListener("compositionend", handleCompositionEnd);
+      if (refreshFrame !== null) cancelAnimationFrame(refreshFrame);
+      tiptap.off("update", handleUpdate);
+      dom?.removeEventListener("compositionend", scheduleRefresh);
     };
   }, [editor, refresh, pageId]);
 
