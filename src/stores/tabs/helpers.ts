@@ -228,13 +228,33 @@ export const cancelScheduledActivePage = () => {
   ++activePageRequest;
 };
 
-export const scheduleSetActivePage = (pageId: string | null) => {
+let applyingActivePage = false;
+
+export const scheduleSetActivePage = (pageId: string | null): Promise<void> => {
   const request = ++activePageRequest;
-  setActivePageChain = setActivePageChain
-    .catch(() => {})
-    .then(() => {
-      if (request === activePageRequest) usePages.getState().setActivePage(pageId);
-    });
+  const apply = () => {
+    if (request !== activePageRequest) return;
+    applyingActivePage = true;
+    try {
+      usePages.getState().setActivePage(pageId);
+    } finally {
+      applyingActivePage = false;
+    }
+  };
+
+  if (applyingActivePage) {
+    // A flush/subscriber can request another page while the current one commits.
+    // Apply only the latest such request after the current setter has finished.
+    setActivePageChain = setActivePageChain.catch(() => {}).then(apply);
+  } else {
+    // Keep page and tab store updates in the same tick for React to batch them.
+    setActivePageChain = Promise.resolve();
+    try {
+      apply();
+    } catch (error) {
+      setActivePageChain = Promise.reject(error);
+    }
+  }
   return setActivePageChain;
 };
 
