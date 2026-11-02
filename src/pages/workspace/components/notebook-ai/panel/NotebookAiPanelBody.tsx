@@ -1,10 +1,9 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { useSettings } from "@/stores/useSettings";
-import { AiUnavailableState } from "./AiUnavailableState";
+import { NotebookAiMessageSurface } from "./NotebookAiMessageSurface";
 import { CircleAlert, X } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
-import { ChatMessages } from "../ChatMessages";
 import { Composer } from "../Composer";
 import {
   formatNotebookAiChatError,
@@ -14,8 +13,6 @@ import type { NotebookAiPanelProps } from "./types";
 import type { PanelCommands } from "./usePanelCommands";
 import type { PanelSurfaceState } from "./usePanelSurface";
 import type { usePanelComposerSeed } from "./usePanelComposerSeed";
-import { CardActionsProvider } from "../../ai-cards/cardActions";
-import { textPayload, usePanelCardActions } from "./usePanelCardActions";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/panel/NotebookAiPanelBody.tsx#messages:1">`
 zh-Hans:
@@ -37,7 +34,6 @@ export function NotebookAiPanelBody({
   commands,
   seed,
   isFullscreen,
-  streamingMessageId,
 }: {
   props: NotebookAiPanelProps;
   session: NotebookAiSessionValue;
@@ -45,16 +41,12 @@ export function NotebookAiPanelBody({
   commands: PanelCommands;
   seed: ReturnType<typeof usePanelComposerSeed>;
   isFullscreen: boolean;
-  streamingMessageId?: string;
 }) {
   useLocale();
-  const { notebookId, onClose, editorRef: _editorRef } = props;
+  const { notebookId, onClose } = props;
   const { bodyReady, composerDockRef, composerRef } = surface;
   const {
     unavailableReason,
-    messages,
-    onBatchApproval,
-    onBatchUndo,
     error,
     clearError,
     composerRevision,
@@ -66,38 +58,15 @@ export function NotebookAiPanelBody({
   const unavailable = !hydrated || Boolean(unavailableReason);
   const { composerSeedContent } = seed;
   const { handleSend, handleSlashCommand, composerPlaceholder } = commands;
-  const cardActions = usePanelCardActions({
-    notebookId, conversationId, isBusy, ready: bodyReady && !unavailable, editorRef: _editorRef, sendPayload: handleSend,
-  });
   return (
     <>
-      <div className="notebook-ai-zoom-slot notebook-ai-content-surface">
-        <div className="notebook-ai-zoom-surface">
-          {bodyReady && (!unavailable || messages.length > 0) ? (
-            <CardActionsProvider value={cardActions}>
-              <ChatMessages
-                messages={messages}
-                onEmptySuggestion={(text) => {
-                  void handleSend(textPayload(text), []);
-                }}
-                streamingMessageId={streamingMessageId}
-                editorRef={_editorRef}
-                layout={isFullscreen ? "fullscreen" : "side-panel"}
-                onBatchApproval={onBatchApproval}
-                onBatchUndo={onBatchUndo}
-              />
-            </CardActionsProvider>
-          ) : null}
-          {bodyReady && unavailable ? (
-            <AiUnavailableState
-              reason={unavailableReason}
-              error={error}
-              onRetry={clearError}
-              compact={messages.length > 0}
-            />
-          ) : null}
-        </div>
-      </div>
+      <NotebookAiMessageSurface
+        props={props}
+        bodyReady={bodyReady}
+        unavailable={unavailable}
+        isFullscreen={isFullscreen}
+        handleSend={handleSend}
+      />
 
       <div
         ref={composerDockRef}

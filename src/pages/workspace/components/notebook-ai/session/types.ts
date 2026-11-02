@@ -10,7 +10,6 @@ import type { getNotebookAiReferenceSuggestions } from "@/lib/notebook-ai/contex
 export interface NotebookAiSessionValue {
   notebookId: string;
   conversationId: string;
-  messages: NotebookAiMessage[];
   status: "submitted" | "streaming" | "ready" | "error";
   error: Error | undefined;
   clearError: () => void;
@@ -18,7 +17,6 @@ export interface NotebookAiSessionValue {
   isStreaming: boolean;
   isBusy: boolean;
   unavailableReason: string | undefined;
-  placeholderIndex: number;
   composerRevision: number;
   send: (
     payload: AiComposerPayload,
@@ -43,6 +41,16 @@ export interface NotebookAiSessionValue {
   ) => ReturnType<typeof getNotebookAiReferenceSuggestions>;
   onBatchApproval: (response: BatchApprovalResponse) => Promise<void>;
   onBatchUndo: (toolCallId: string, runId: string) => Promise<BatchUndoResult>;
+}
+
+export type NotebookAiSessionCommands = Pick<NotebookAiSessionValue,
+  "clearError" | "stop" | "send" | "newConversation" | "ensureFreshConversation" |
+  "compactConversation" | "selectConversation" | "deleteConversation" |
+  "searchPages" | "onBatchApproval" | "onBatchUndo">;
+
+export interface NotebookAiSessionSnapshot extends NotebookAiSessionValue {
+  messages: NotebookAiMessage[];
+  commands: NotebookAiSessionCommands;
 }
 
 export interface NotebookAiSessionScope {
