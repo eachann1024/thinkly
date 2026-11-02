@@ -18,7 +18,8 @@ ja:
 `);
 import { create } from "zustand";
 import type { QuickNoteState } from "./quicknote/types";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
+import { createQuickNotePartialize, createQuickNoteStorage, type PersistedQuickNote } from "./quickNotePersistence";
 import { createQuickNoteState } from "./quicknote/actions";
 import { quickNoteStorage, recoverQuickNoteDrafts } from "./quicknote/recovery";
 import {
@@ -36,22 +37,11 @@ import type { JSONContent } from "@/types";
 import { notifyRecoveryDrafts } from "@/lib/recoveryDraftNotice";
 
 export const useQuickNote = create<QuickNoteState>()(
-  persist(createQuickNoteState, {
+  persist<QuickNoteState, [], [], PersistedQuickNote>(createQuickNoteState, {
     name: "thinkly:quicknote",
     version: 3,
-    storage: createJSONStorage(() => quickNoteStorage),
-    partialize: (state) => ({
-      ...budgetQuickNoteHistory(state.undoStacks, state.redoStacks),
-      activeSlot: state.activeSlot,
-      drafts: state.drafts,
-      slotNames: state.slotNames,
-      pinned: true,
-      editorZoom: state.editorZoom,
-      windowWidth: state.windowWidth,
-      windowHeight: state.windowHeight,
-      windowX: state.windowX,
-      windowY: state.windowY,
-    }),
+    storage: createQuickNoteStorage(quickNoteStorage),
+    partialize: createQuickNotePartialize(),
     migrate: (persisted, version) => {
       const raw = (persisted ?? {}) as Record<string, unknown>;
       if (version < 1) {
