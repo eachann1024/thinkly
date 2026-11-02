@@ -7,11 +7,15 @@
   "boards": {
     "Main.dc.html": { "x": 0, "y": 0, "w": 560, "h": 800, "title": "A · 分段条 + 大图例块" },
     "Timeline.dc.html": { "x": 640, "y": 0, "w": 560, "h": 800, "title": "B · 泳道时间线" },
-    "Telemetry.dc.html": { "x": 1280, "y": 0, "w": 560, "h": 800, "title": "C · 遥测仪表" }
+    "Telemetry.dc.html": { "x": 1280, "y": 0, "w": 560, "h": 800, "title": "C · 遥测仪表" },
+    "Narrator.dc.html": { "x": 0, "y": 1220, "w": 560, "h": 860, "title": "D · 一句话现状" },
+    "Ledger.dc.html": { "x": 640, "y": 1220, "w": 560, "h": 860, "title": "E · 计时流水" },
+    "Budget.dc.html": { "x": 1280, "y": 1220, "w": 560, "h": 860, "title": "F · 时间去哪了" }
   },
-  "order": ["Main.dc.html", "Timeline.dc.html", "Telemetry.dc.html"],
+  "order": ["Main.dc.html", "Timeline.dc.html", "Telemetry.dc.html", "Narrator.dc.html", "Ledger.dc.html", "Budget.dc.html"],
   "notes": {
-    "t": { "x": 0, "y": -240, "text": "AI 执行过程：实时速度 + 阶段配色", "kind": "title1", "maxW": 1840 }
+    "t": { "x": 0, "y": -240, "text": "AI 执行过程：实时速度 + 阶段配色", "kind": "title1", "maxW": 1840 },
+    "t2": { "x": 0, "y": 980, "text": "第二轮：每段等待都说清在等什么", "kind": "title1", "maxW": 1840 }
   },
   "designSystems": []
 }

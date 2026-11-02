@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>执行过程 F 时间去哪了</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.m{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-variant-numeric:tabular-nums}
+.blk{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:8px;border-radius:6px;font-size:12px;min-width:0;overflow:hidden;white-space:nowrap}
+.pill{font:inherit;font-size:13px;border:1px solid #3a3a3a;border-radius:999px;padding:5px 12px;background:transparent;color:#b4b4b4;cursor:pointer}
+.pill.on{background:#ececec;border-color:#ececec;color:#181818}
+.src{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:#ececec;text-decoration:none;border-bottom:1px solid #2e2e2e}
+</style>
+</helmet>
+<div style="width:560px;height:860px;box-sizing:border-box;padding:16px;background:#222222;font-family:-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec">
+<div style="background:#181818;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+
+<div style="background:#2c2c2c;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#b4b4b4">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+<span>执行过程</span>
+<span style="margin-left:auto">完成 · gemini-3.8-flash</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:15px;color:#b4b4b4">共 <span class="m" style="color:#ececec">50.6</span> 秒，其中</div>
+<div style="font-size:22px;font-weight:600;line-height:1.35"><span class="m">41.2</span> 秒在等模型</div>
+<div style="font-size:13px;color:#b4b4b4">读笔记和查网页只占 3.7 秒，写字 5.7 秒</div>
+</div>
+
+<div style="display:flex;gap:3px;height:64px">
+<div class="blk" style="flex:4;background:#779de8;color:#10131a" title="读笔记 2.2 秒"><span style="font-weight:600">读</span></div>
+<div class="blk" style="flex:3;background:#e6b455;color:#17130a" title="查网页 1.5 秒"><span style="font-weight:600">查</span></div>
+<div class="blk" style="flex:19;background:#3a3a3a;color:#ececec;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 4px,transparent 4px 8px)"><span style="font-weight:600">等首字</span><span class="m">9.6s</span></div>
+<div class="blk" style="flex:63;background:#a99be0;color:#15121f"><span style="font-weight:600">思考 · 想了 2,310 字</span><span class="m">31.6s</span></div>
+<div class="blk" style="flex:11;background:#c9c9c2;color:#16161a"><span style="font-weight:600">写</span><span class="m">5.7s</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #3a3a3a;border-bottom:1px solid #3a3a3a">
+<div style="padding:10px 0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#b4b4b4">首字用时</span><span class="m" style="font-size:18px">9.6s</span></div>
+<div style="padding:10px 0 10px 14px;border-left:1px solid #3a3a3a;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#b4b4b4">写字速度</span><span class="m" style="font-size:18px">42<span style="font-size:12px;color:#b4b4b4"> 字/秒</span></span></div>
+<div style="padding:10px 0 10px 14px;border-left:1px solid #3a3a3a;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#b4b4b4">改动</span><span style="font-size:15px;padding-top:2px">1 页 · 已撤回</span></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:13px;color:#b4b4b4;margin-right:4px">读过</span>
+<div role="tablist" aria-label="来源分类" style="display:flex;gap:6px">
+<button class="pill on" role="tab" aria-selected="true">页面 2</button>
+<button class="pill" role="tab" aria-selected="false">网页 1</button>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<a class="src" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span>Google 账号 Gemini</span><span style="margin-left:auto;font-size:12px;color:#b4b4b4">「工具与教程」小节</span></a>
+<a class="src" href="#" style="border-bottom:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span>AI 工具清单</span><span style="margin-left:auto;font-size:12px;color:#b4b4b4">整页</span></a>
+</div>
+</div>
+
+<details style="font-size:14px;color:#b4b4b4">
+<summary style="cursor:pointer;padding:4px 0">3 个步骤</summary>
+<div style="display:flex;flex-direction:column;gap:8px;padding:8px 0 0 4px;color:#ececec">
+<span>读取笔记 · Google 账号 Gemini</span><span>读取网页 · support.google.com</span><span>修改笔记 · 已撤回</span>
+</div>
+</details>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":860}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>执行过程 E 计时流水</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+@keyframes tick{50%{opacity:.35}}
+.m{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:52px 14px minmax(0,1fr) 64px;align-items:center;column-gap:10px;min-height:40px;font-size:14px}
+.t{font-size:12px;color:#b4b4b4}
+.d{font-size:13px;text-align:right}
+.seg{display:flex;gap:2px;background:#232323;border-radius:10px;padding:3px}
+.seg button{flex:1;font:inherit;font-size:13px;border:0;border-radius:8px;padding:7px 0;background:transparent;color:#b4b4b4;cursor:pointer}
+.seg button.on{background:#3a3a3a;color:#ececec}
+</style>
+</helmet>
+<div style="width:560px;height:860px;box-sizing:border-box;padding:16px;background:#222222;font-family:-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec">
+<div style="background:#181818;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+
+<div style="background:#2c2c2c;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#b4b4b4">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+<span>执行过程</span>
+<span style="margin-left:auto">gemini-3.8-flash</span>
+</div>
+
+<div style="display:flex;flex-direction:column">
+<div class="row"><span class="t m">00:00</span><span style="width:8px;height:8px;border-radius:50%;background:#779de8"></span><span>读取笔记 · Google 账号 Gemini</span><span class="d m" style="color:#b4b4b4">2.2s</span></div>
+<div class="row"><span class="t m">00:02</span><span style="width:8px;height:8px;border-radius:50%;background:#e6b455"></span><span>读取网页 · support.google.com</span><span class="d m" style="color:#b4b4b4">1.5s</span></div>
+<div class="row"><span class="t m">00:04</span><span style="width:8px;height:8px;border-radius:50%;background:#a99be0"></span><span>思考<span style="color:#b4b4b4"> · 想了 820 字</span></span><span class="d m" style="color:#b4b4b4">5.1s</span></div>
+<div class="row" style="background:#353535;margin:4px -10px;padding:8px 10px;border-radius:10px;align-items:start">
+<span class="t m" style="padding-top:2px">00:09</span>
+<span style="width:8px;height:8px;border-radius:50%;background:#ececec;margin-top:7px;animation:tick 1s steps(1) infinite"></span>
+<span style="display:flex;flex-direction:column;gap:4px">
+<span style="font-weight:600">等模型开口</span>
+<span style="font-size:13px;color:#b4b4b4;line-height:1.5">请求已发给 gemini-3.8-flash，还没收到第一个字。超过 30 秒会提示你可以停止重试。</span>
+</span>
+<span class="d m" style="font-size:20px;font-weight:600;padding-top:0">9.6s</span>
+</div>
+<div class="row" style="color:#8a8a8a"><span class="t m" style="color:#8a8a8a">--:--</span><span style="width:8px;height:8px;border-radius:50%;border:1px solid #8a8a8a;box-sizing:border-box"></span><span>撰写回复</span><span class="d m">—</span></div>
+<div class="row" style="color:#8a8a8a"><span class="t m" style="color:#8a8a8a">--:--</span><span style="width:8px;height:8px;border-radius:50%;border:1px solid #8a8a8a;box-sizing:border-box"></span><span>修改笔记</span><span class="d m">—</span></div>
+</div>
+
+<div style="display:flex;align-items:center;gap:16px;border-top:1px solid #3a3a3a;padding-top:10px;font-size:13px;color:#b4b4b4">
+<span>已用 <span class="m" style="color:#ececec">18.4s</span></span>
+<span>其中在等 <span class="m" style="color:#ececec">9.6s</span></span>
+<span>工具 <span class="m" style="color:#ececec">2 次</span></span>
+</div>
+
+<div style="border-top:1px solid #3a3a3a;padding-top:12px;display:flex;flex-direction:column;gap:10px">
+<div class="seg" role="tablist" aria-label="来源分类">
+<button role="tab" aria-selected="false">页面 2</button>
+<button class="on" role="tab" aria-selected="true">网页 1</button>
+</div>
+<div style="display:flex;flex-direction:column">
+<a href="#" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 4px;text-decoration:none;color:#ececec">
+<span style="font-size:14px">Gemini Apps 帮助</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="grid-row:span 2;align-self:center"><path d="M7 17L17 7M9 7h8v8"/></svg>
+<span class="m" style="font-size:12px;color:#b4b4b4">support.google.com/gemini</span>
+</a>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":860}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
