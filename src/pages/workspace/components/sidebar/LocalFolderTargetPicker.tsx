@@ -69,6 +69,11 @@ import { movePageToNotebook } from "@/lib/move-page-to-notebook";
 import { renderNotebookIcon } from "./notebookUtils";
 
 export function LocalFolderTargetPicker() {
+  const open = useLocalFolderTargetPicker((state) => state.picker.phase !== "closed");
+  return open ? <LocalFolderTargetPickerContent /> : null;
+}
+
+function LocalFolderTargetPickerContent() {
   const locale = useLocale();
   const { picker, closePicker } = useLocalFolderTargetPicker();
   const open = picker.phase !== "closed";
