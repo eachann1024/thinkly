@@ -136,7 +136,7 @@ export function GitRepositoryForm(props: GitRepositoryFormProps) {
         />
       </div>
       <GitDetails title={uiText("advancedSettings_e370")}>
-        <div className="space-y-4 px-3 pb-3">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="git-sync-branch">{uiText("branch_bfc0")}</Label>
             <Input

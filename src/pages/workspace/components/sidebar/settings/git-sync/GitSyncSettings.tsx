@@ -63,8 +63,8 @@ export function GitSyncSettings({
   if (!config) return null;
   return (
     <SettingsSectionCard className="overflow-hidden p-0">
-      <GitDetails className="[&>button]:!rounded-none" title={uiText("syncSettings_1cbb")}>
-        <div className="max-w-[740px] px-3 pb-3">
+      <GitDetails className="!rounded-none [&>button]:!rounded-none" title={uiText("syncSettings_1cbb")}>
+        <div className="max-w-[740px]">
           <div className="divide-y divide-border">
             <div className="py-3">
               <GitRepositoryForm
