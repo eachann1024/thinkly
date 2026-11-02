@@ -17,7 +17,6 @@ import {
 } from "@/lib/unsavedLocalPage";
 import { useNotebooks } from "../useNotebooks";
 import { listVisibleWorkspaceTabs } from "@/pages/workspace/components/page/visibleTabs";
-import { runWithPresence } from "@/lib/ui/presence";
 
 export function createClosingTabActions(
   set: TabSet,
@@ -32,7 +31,6 @@ export function createClosingTabActions(
     closeTab: (tabId: string) => {
       if (effectiveSingleTabMode()) return;
       if (!get().openTabs.some((tab) => tab.id === tabId)) return;
-      runWithPresence(() => {
       const { openTabs, activeTabId, recentlyClosedPageIds } = get();
       const index = openTabs.findIndex((tab) => tab.id === tabId);
       if (index === -1) return;
@@ -108,10 +106,9 @@ export function createClosingTabActions(
           notebookStore.setActiveNotebook(nextActiveTab.workspaceId);
         }
       }
-      });
     },
 
-    closeOtherTabs: (tabId: string) => runWithPresence(() => {
+    closeOtherTabs: (tabId: string) => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentTab = openTabs.find((tab) => tab.id === tabId);
@@ -134,9 +131,9 @@ export function createClosingTabActions(
       const pageId = isSpecialTab(currentTab) ? null : workspaceTabPageId(currentTab);
       get().syncNotebookForPage(pageId);
       void scheduleSetActivePage(pageId);
-    }),
+    },
 
-    closeTabsToLeft: (tabId: string) => runWithPresence(() => {
+    closeTabsToLeft: (tabId: string) => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
@@ -168,9 +165,9 @@ export function createClosingTabActions(
         : null;
       get().syncNotebookForPage(nextPageId);
       void scheduleSetActivePage(nextPageId);
-    }),
+    },
 
-    closeTabsToRight: (tabId: string) => runWithPresence(() => {
+    closeTabsToRight: (tabId: string) => {
       if (effectiveSingleTabMode()) return;
       const { openTabs, activeTabId } = get();
       const currentIndex = openTabs.findIndex((tab) => tab.id === tabId);
@@ -202,6 +199,6 @@ export function createClosingTabActions(
         : null;
       get().syncNotebookForPage(nextPageId);
       void scheduleSetActivePage(nextPageId);
-    }),
+    },
   };
 }

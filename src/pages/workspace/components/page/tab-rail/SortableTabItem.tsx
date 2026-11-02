@@ -38,7 +38,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import * as GooseIcons from "@/components/ui/icons";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { useRef } from "react";
-import { presenceName } from "@/lib/ui/presence";
+import type { TabRailMotionItem } from "./useTabRailMotion";
 import type { Page } from "@/types";
 import { type TabItem } from "@/stores/useTabs";
 import { useSortable } from "@dnd-kit/sortable";
@@ -54,6 +54,9 @@ import type { TabRailVariant } from "./types";
 interface SortableTabItemProps {
   tab: TabItem;
   tabPage?: Page;
+  phase: TabRailMotionItem["phase"];
+  slotWidth?: number;
+  slotGap: number;
   tabCount: number;
   variant: TabRailVariant;
   isActive: boolean;
@@ -75,6 +78,9 @@ interface SortableTabItemProps {
 export function SortableTabItem({
   tab,
   tabPage,
+  phase,
+  slotWidth,
+  slotGap,
   tabCount,
   variant,
   isActive,
@@ -100,12 +106,15 @@ export function SortableTabItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: tab.id, disabled: !dragEnabled });
+  } = useSortable({ id: tab.id, disabled: !dragEnabled || phase === "out" });
+  const leaving = phase === "out";
   const windowDragStartedRef = useRef(false);
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
-    transition,
-    viewTransitionName: presenceName("tab", tab.id),
+    // Keep sortable's transform transition alongside the rail's layout/chrome transitions.
+    transition: [transition, "var(--tab-rail-transitions)"].filter(Boolean).join(", "),
+    ...(slotWidth === undefined ? {} : { flex: `0 0 ${slotWidth}px` }),
+    marginInlineEnd: slotGap,
   };
   const title =
     tab.type === "welcome"
@@ -131,9 +140,12 @@ export function SortableTabItem({
           {...(dragEnabled ? listeners : {})}
           aria-disabled={undefined}
           role="tab"
-          tabIndex={isActive ? 0 : -1}
+          tabIndex={!leaving && isActive ? 0 : -1}
           aria-selected={isActive}
-          data-tab-id={tab.id}
+          aria-hidden={leaving || undefined}
+          inert={leaving || undefined}
+          data-tab-phase={phase}
+          data-tab-id={leaving ? undefined : tab.id}
           data-tab-count={tabCount}
           data-tab-active={isActive || undefined}
           data-tab-page-id={tab.pageId}
@@ -162,7 +174,7 @@ export function SortableTabItem({
             }
           }}
           className={cn(
-            "group relative @container flex items-center gap-1 px-2 text-sm",
+            "group relative @container flex items-center overflow-hidden text-sm",
             tabCount > 1 && "goose-interactive",
             tabRailItemClassName(tabCount),
             tab.preview && "italic",
@@ -170,6 +182,7 @@ export function SortableTabItem({
             tabRailSelectionClassName(tabCount, isActive),
           )}
         >
+          <div className="tab-rail-content flex w-full min-w-0 items-center gap-1 px-2">
           <span
             className={cn(
               "tab-rail-title inline-flex min-w-0 flex-1 items-center overflow-hidden no-underline",
@@ -217,6 +230,7 @@ export function SortableTabItem({
             </Tooltip>
           </TooltipProvider>
           )}
+          </div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>

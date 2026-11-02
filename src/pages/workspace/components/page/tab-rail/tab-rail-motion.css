@@ -1,0 +1,55 @@
+[data-workspace-tab-rail].tab-rail {
+  --tab-rail-curve: cubic-bezier(.2, 0, 0, 1);
+  --tab-rail-layout-delay: 0ms;
+  gap: 0;
+  /* Keep interpolated slots clipped when switching from scroll to split. */
+  overflow-x: auto;
+}
+
+[data-workspace-tab-rail][data-tab-closing] {
+  --tab-rail-layout-delay: 60ms;
+}
+
+[data-workspace-tab-rail] .tab-rail-item {
+  --tab-rail-transitions:
+    flex-basis 220ms var(--tab-rail-curve) var(--tab-rail-layout-delay),
+    margin-inline-end 220ms var(--tab-rail-curve) var(--tab-rail-layout-delay),
+    background-color 150ms var(--tab-rail-curve),
+    box-shadow 150ms var(--tab-rail-curve),
+    color 150ms var(--tab-rail-curve);
+  padding-inline: 0;
+}
+
+:root .workspace-shell [data-workspace-tab-rail] .tab-rail-item[data-tab-phase="in"] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+[data-workspace-tab-rail] .tab-rail-content {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 140ms var(--tab-rail-curve) 80ms,
+    transform 140ms var(--tab-rail-curve) 80ms;
+}
+
+[data-workspace-tab-rail] [data-tab-phase="in"] .tab-rail-content {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+
+[data-workspace-tab-rail] [data-tab-phase="out"] {
+  pointer-events: none;
+}
+
+[data-workspace-tab-rail] [data-tab-phase="out"] .tab-rail-content {
+  opacity: 0;
+  transition: opacity 90ms var(--tab-rail-curve);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-workspace-tab-rail] .tab-rail-item,
+  [data-workspace-tab-rail] .tab-rail-content {
+    transition: none !important;
+  }
+}
