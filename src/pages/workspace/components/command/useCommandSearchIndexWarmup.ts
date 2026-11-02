@@ -2,13 +2,15 @@ import { useLocale } from "@/i18n";
 import { useEffect } from "react";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
-import { syncSearchCatalog } from "./pageSearchCatalog";
+import { cancelSearchCatalogSync, syncSearchCatalog } from "./pageSearchCatalog";
+import { useSearchSession } from "../sidebar/useSearchSession";
 import { syncIndex } from "./pageSearchIndex";
 
 export function useCommandSearchIndexWarmup(enabled = true): void {
-  useLocale();
+  const locale = useLocale();
+  const searchOpen = useSearchSession(state => state.view.phase !== "closed");
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !searchOpen) return;
     let idleId = 0;
     let timeoutId = 0;
     let revision = 0;
@@ -61,6 +63,7 @@ export function useCommandSearchIndexWarmup(enabled = true): void {
       cancel();
       unsubPages();
       unsubNotebooks();
+      cancelSearchCatalogSync();
     };
-  }, [enabled]);
+  }, [enabled, searchOpen, locale]);
 }
