@@ -13,7 +13,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import { type CSSProperties } from "react";
-import { isPlatformPrimaryModifierEvent } from "@/lib/shortcut-platform";
+import { useMainTreeSurfaceCallbacks } from "./useMainTreeSurfaceCallbacks";
 import {
   ControlledTreeEnvironment,
   InteractionMode,
@@ -23,7 +23,6 @@ import type { Page } from "@/types";
 import { MainTreeEdgeDropWatcher } from "../MainTreeEdgeDropWatcher";
 import { getPageTitle } from "../treeAdapter";
 import {
-  renderItem,
   renderItemArrow,
   renderItemsContainer,
   renderTreeContainer,
@@ -33,42 +32,23 @@ import {
   isLocalFolderDirectoryPage,
   isElectronLocalFolderDirectory,
   openPageFromSidebar,
-  shouldSuppressSidebarSelect,
 } from "@/lib/sidebarPageNavigation";
 import { MAIN_TREE_INDENT } from "../mainTreeDragGeometry";
 import type { useMainTreeDragActions } from "./useMainTreeDragActions";
 
-export function renderMainTreeSurface(
-  context: ReturnType<typeof useMainTreeDragActions>,
-) {
+const getItemTitle = (item: import("react-complex-tree").TreeItem<Page>) =>
+  item.index === "root" ? "" : item.data.localPendingCreate === "file" ? uiText("fileName_d2e2") : getPageTitle(item.data);
+
+export function renderMainTreeSurface(context: ReturnType<typeof useMainTreeDragActions>) {
+  return <MainTreeSurface context={context} />;
+}
+
+function MainTreeSurface({ context }: { context: ReturnType<typeof useMainTreeDragActions> }) {
+  const callbacks = useMainTreeSurfaceCallbacks(context);
   const {
-    activeNotebookId,
-    viewportHeight,
-    itemHeight,
-    pages,
-    draggingItemId,
-    draggingItemIdRef,
-    isLocalFolder,
-    expandView,
-    collapseView,
-    setFocusedView,
-    setSelectedView,
-    startCreateLocalFolder,
-    startCreateLocalFile,
-    cancelPendingCreate,
-    commitPendingCreate,
-    handleItemDragStart,
-    handleItemDragEnd,
-    items,
-    isAncestor,
-    scrollContainerRef,
-    lastClickModRef,
-    verticalKeyboardNavigationRef,
-    viewState,
-    toggleLocalDirectory,
-    activateLocalDirectory,
-    handleDrop,
-    handleMainTreeEdgeDrop,
+    viewportHeight, itemHeight, pages, draggingItemId, items,
+    scrollContainerRef, lastClickModRef, verticalKeyboardNavigationRef,
+    viewState, toggleLocalDirectory, handleMainTreeEdgeDrop,
   } = context;
   return (
     <ContextMenuTrigger asChild>
@@ -130,9 +110,7 @@ export function renderMainTreeSurface(
         />
         <ControlledTreeEnvironment<Page>
           items={items}
-          getItemTitle={(item) =>
-            item.index === "root" ? "" : item.data.localPendingCreate === "file" ? uiText("fileName_d2e2") : getPageTitle(item.data)
-          }
+          getItemTitle={getItemTitle}
           viewState={viewState}
           defaultInteractionMode={InteractionMode.ClickArrowToExpand}
           canDragAndDrop={true}
@@ -143,93 +121,7 @@ export function renderMainTreeSurface(
           canRename={false}
           canSearch={false}
           canSearchByStartingTyping={false}
-          canDropAt={(dragItems, target) => {
-            const targetId =
-              target.targetType === "between-items"
-                ? String(target.parentItem)
-                : String((target as any).targetItem);
-            if (targetId === "root") return true;
-            const parentPage = pages[targetId];
-            if (isLocalFolder && parentPage && !parentPage.isFolder)
-              return false;
-            return !dragItems.some((it) => {
-              const id = String(it.index);
-              return id === targetId || isAncestor(id, targetId);
-            });
-          }}
-          onExpandItem={(item) => {
-            if (!activeNotebookId) return;
-            expandView(activeNotebookId, String(item.index));
-          }}
-          onCollapseItem={(item) => {
-            if (!activeNotebookId) return;
-            collapseView(activeNotebookId, String(item.index));
-          }}
-          onFocusItem={(item) => {
-            if (!activeNotebookId) return;
-            const pageId = String(item.index);
-            setFocusedView(activeNotebookId, pageId);
-
-            if (!verticalKeyboardNavigationRef.current) return;
-            verticalKeyboardNavigationRef.current = false;
-            if (pageId === "root" || !pages[pageId]) return;
-            if (isElectronLocalFolderDirectory(pageId)) return;
-            setSelectedView(activeNotebookId, pageId);
-            openPageFromSidebar(pageId, "preview");
-          }}
-          onSelectItems={(selected) => {
-            if (!activeNotebookId) return;
-            if (draggingItemIdRef.current) return;
-            const last =
-              selected.length > 0
-                ? String(selected[selected.length - 1])
-                : null;
-            if (
-              last &&
-              last !== "root" &&
-              isElectronLocalFolderDirectory(last)
-            ) {
-              if (shouldSuppressSidebarSelect()) return;
-              setSelectedView(activeNotebookId, last);
-              return;
-            }
-            setSelectedView(activeNotebookId, last);
-            if (!last || last === "root") return;
-            if (shouldSuppressSidebarSelect()) return;
-            const page = pages[last];
-            if (!page) return;
-            if (isLocalFolderDirectoryPage(last)) {
-              toggleLocalDirectory(last);
-            }
-            const { meta, ctrl } = lastClickModRef.current;
-            if (isPlatformPrimaryModifierEvent({ metaKey: meta, ctrlKey: ctrl })) {
-              openPageFromSidebar(last, "permanent", { newTab: true });
-            } else {
-              openPageFromSidebar(last, "preview");
-            }
-          }}
-          onPrimaryAction={(item) => {
-            const id = String(item.index);
-            if (id === "root") return;
-            if (isLocalFolderDirectoryPage(id)) {
-              toggleLocalDirectory(id);
-              if (isElectronLocalFolderDirectory(id)) return;
-            }
-            openPageFromSidebar(id, "preview");
-          }}
-          onDrop={handleDrop}
-          renderItem={(args) =>
-            renderItem({
-              ...args,
-              onCreateLocalFile: startCreateLocalFile,
-              onCreateLocalFolder: startCreateLocalFolder,
-              onCommitPendingCreate: commitPendingCreate,
-              onCancelPendingCreate: cancelPendingCreate,
-              onItemDragStart: handleItemDragStart,
-              onItemDragEnd: handleItemDragEnd,
-              onActivateLocalDirectory: activateLocalDirectory,
-            })
-          }
+          {...callbacks}
           renderItemArrow={renderItemArrow}
           renderItemsContainer={renderItemsContainer}
           renderTreeContainer={renderTreeContainer}
