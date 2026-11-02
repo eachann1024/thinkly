@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Backspace 回到上一块 · 先选中再删除</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><style>body{margin:0}@keyframes gooseCaretBlink{0%,49%{opacity:1}50%,100%{opacity:0}}.goose-caret{animation:gooseCaretBlink 1.06s steps(1) infinite}</style></helmet>
+<div style="width:1120px;height:560px;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:1px;background:#e4e4e4;font-family:Inter,-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:22px;color:#20242c">
+
+  <!-- Divider · step 1 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">1 · 光标在分割线下一行行首</span>
+    <p style="margin:0">把讨论记录整理成两段。</p>
+    <div style="display:flex;align-items:center;height:28px"><div style="flex:1;height:0;border-top:1px solid #dfe2e6"></div></div>
+    <div style="display:flex;align-items:center;height:22px"><span class="goose-caret" style="display:block;width:1.5px;height:18px;background:#20242c"></span></div>
+  </div>
+  <!-- Divider · step 2 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">2 · Backspace：删空行，选中分割线</span>
+    <p style="margin:0">把讨论记录整理成两段。</p>
+    <div style="position:relative;display:flex;align-items:center;height:28px;border-radius:4px;background:#f0f3fb;box-shadow:7px 0 0 #f0f3fb,-7px 0 0 #f0f3fb">
+      <div style="position:absolute;top:0;bottom:0;left:-8px;right:-8px;border:1px solid #547dd0;border-radius:4px;pointer-events:none"></div>
+      <div style="flex:1;height:0;border-top:1px solid #9fb6e5"></div>
+    </div>
+  </div>
+  <!-- Divider · step 3 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">3 · 再按 Backspace：删除分割线</span>
+    <p style="margin:0;display:flex;align-items:center">把讨论记录整理成两段。<span class="goose-caret" style="display:block;width:1.5px;height:18px;margin-left:1px;background:#20242c"></span></p>
+  </div>
+
+  <!-- Preview · step 1 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">1 · 光标在公式下一行行首</span>
+    <div style="display:flex;align-items:center;justify-content:center;height:72px"><span style="font-family:'Latin Modern Math','STIX Two Math','Cambria Math',Georgia,serif;font-size:22px;font-style:italic">E = mc²</span></div>
+    <div style="display:flex;align-items:center;height:22px"><span class="goose-caret" style="display:block;width:1.5px;height:18px;background:#20242c"></span></div>
+  </div>
+  <!-- Preview · step 2 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">2 · Backspace：删空行，选中公式块</span>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;height:72px;border-radius:4px;background:#f0f3fb;box-shadow:7px 0 0 #f0f3fb,-7px 0 0 #f0f3fb">
+      <div style="position:absolute;top:0;bottom:0;left:-8px;right:-8px;border:1px solid #547dd0;border-radius:4px;pointer-events:none"></div>
+      <span style="font-family:'Latin Modern Math','STIX Two Math','Cambria Math',Georgia,serif;font-size:22px;font-style:italic">E = mc²</span>
+    </div>
+  </div>
+  <!-- Preview · step 3 -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 32px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">3 · 再按 Backspace 删除，Enter 编辑源码</span>
+    <div style="display:flex;flex-direction:column;border-radius:6px;background:#f6f7f9;padding:10px 12px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:20px">
+      <span style="display:flex;align-items:center">E = mc^2<span class="goose-caret" style="display:block;width:1.5px;height:16px;margin-left:1px;background:#20242c"></span></span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":560}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

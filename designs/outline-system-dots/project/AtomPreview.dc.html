@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>公式与 Mermaid 预览 · 现状 / 选中</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><style>body{margin:0}</style></helmet>
+<div style="width:1120px;height:560px;box-sizing:border-box;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:#e4e4e4;font-family:Inter,-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:22px;color:#20242c">
+
+  <!-- Math · current -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 40px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">现状 · 方向键进入后无任何反馈</span>
+    <p style="margin:0">损失函数定义如下：</p>
+    <div style="display:flex;align-items:center;justify-content:center;height:72px">
+      <span style="font-family:'Latin Modern Math','STIX Two Math','Cambria Math',Georgia,serif;font-size:22px;font-style:italic">L(θ) = − Σ y<sub style="font-size:13px">i</sub> log p<sub style="font-size:13px">θ</sub>(x<sub style="font-size:13px">i</sub>)</span>
+    </div>
+    <p style="margin:0">其中 θ 是模型参数。</p>
+  </div>
+
+  <!-- Math · selected -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 40px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">选中</span>
+    <p style="margin:0">损失函数定义如下：</p>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;height:72px;border-radius:4px;background:#f0f3fb;box-shadow:7px 0 0 #f0f3fb,-7px 0 0 #f0f3fb">
+      <div style="position:absolute;top:0;bottom:0;left:-8px;right:-8px;border:1px solid #547dd0;border-radius:4px;pointer-events:none"></div>
+      <span style="font-family:'Latin Modern Math','STIX Two Math','Cambria Math',Georgia,serif;font-size:22px;font-style:italic">L(θ) = − Σ y<sub style="font-size:13px">i</sub> log p<sub style="font-size:13px">θ</sub>(x<sub style="font-size:13px">i</sub>)</span>
+      <span style="display:{{hintDisplay}};position:absolute;right:8px;bottom:6px;align-items:center;gap:4px;font-size:12px;line-height:16px;color:#526071"><kbd style="font-family:inherit;padding:0 5px;border:1px solid #d5dae2;border-radius:4px;background:#ffffff">Enter</kbd>编辑</span>
+    </div>
+    <p style="margin:0">其中 θ 是模型参数。</p>
+  </div>
+
+  <!-- Mermaid · current -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 40px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">现状 · 光标落在隐藏的源码里</span>
+    <p style="margin:0">发布流程：</p>
+    <div style="display:flex;align-items:center;justify-content:center;height:104px">
+      <svg width="420" height="64" viewBox="0 0 420 64" role="img" aria-label="流程图：提交、审查、发布">
+        <g fill="#f4f6f9" stroke="#8a96a8" stroke-width="1"><rect x="1" y="12" width="100" height="40" rx="6"></rect><rect x="160" y="12" width="100" height="40" rx="6"></rect><rect x="319" y="12" width="100" height="40" rx="6"></rect></g>
+        <g stroke="#8a96a8" stroke-width="1.2" fill="none"><path d="M101 32h52M260 32h52"></path><path d="M148 28l5 4-5 4M307 28l5 4-5 4"></path></g>
+        <g font-size="13" fill="#20242c" text-anchor="middle" font-family="Inter,'PingFang SC',sans-serif"><text x="51" y="36">提交</text><text x="210" y="36">审查</text><text x="369" y="36">发布</text></g>
+      </svg>
+    </div>
+    <p style="margin:0">每一步都需要记录。</p>
+  </div>
+
+  <!-- Mermaid · selected -->
+  <div style="display:flex;flex-direction:column;gap:12px;padding:20px 40px 0 48px;background:#ffffff">
+    <span style="margin-left:-24px;font-size:12px;line-height:16px;color:#526071">选中</span>
+    <p style="margin:0">发布流程：</p>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;height:104px;border-radius:4px;background:#f0f3fb;box-shadow:7px 0 0 #f0f3fb,-7px 0 0 #f0f3fb">
+      <div style="position:absolute;top:0;bottom:0;left:-8px;right:-8px;border:1px solid #547dd0;border-radius:4px;pointer-events:none"></div>
+      <svg width="420" height="64" viewBox="0 0 420 64" role="img" aria-label="流程图：提交、审查、发布">
+        <g fill="#f4f6f9" stroke="#8a96a8" stroke-width="1"><rect x="1" y="12" width="100" height="40" rx="6"></rect><rect x="160" y="12" width="100" height="40" rx="6"></rect><rect x="319" y="12" width="100" height="40" rx="6"></rect></g>
+        <g stroke="#8a96a8" stroke-width="1.2" fill="none"><path d="M101 32h52M260 32h52"></path><path d="M148 28l5 4-5 4M307 28l5 4-5 4"></path></g>
+        <g font-size="13" fill="#20242c" text-anchor="middle" font-family="Inter,'PingFang SC',sans-serif"><text x="51" y="36">提交</text><text x="210" y="36">审查</text><text x="369" y="36">发布</text></g>
+      </svg>
+      <span style="display:{{hintDisplay}};position:absolute;right:8px;bottom:6px;align-items:center;gap:4px;font-size:12px;line-height:16px;color:#526071"><kbd style="font-family:inherit;padding:0 5px;border:1px solid #d5dae2;border-radius:4px;background:#ffffff">Enter</kbd>编辑</span>
+    </div>
+    <p style="margin:0">每一步都需要记录。</p>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showEnterHint":{"editor":"boolean","default":false,"label":"显示 Enter 编辑提示"},"$preview":{"width":1120,"height":560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { hintDisplay: (this.props.showEnterHint ?? false) ? 'flex' : 'none' };
+  }
+}
+</script>
+</body>
+</html>

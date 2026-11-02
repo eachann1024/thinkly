@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>其余功能 · A 工作台续篇</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#0a2588}a:hover{color:#163aa8}
+button{font-family:inherit;cursor:pointer}
+::selection{background:#f7c531;color:#0a2588}
+</style>
+</helmet>
+<section style="background: #f7f1e3; color: #0a2588; padding: 112px 24px 120px; box-sizing: border-box">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 style="margin: 0; font-family: 'Songti SC','Noto Serif CJK SC','Source Han Serif SC',serif; font-size: 60px; line-height: 1.15; font-weight: 900; max-width: 640px">记、找、对照、排版<br>都不用离开键盘</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.7; max-width: 420px">四件每天都会做的事，每一格都能点</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px">
+
+<div style="flex: 2 1 600px; min-width: 0; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">速记小窗，随叫随到</h3>
+<button type="button" onClick="{{summon}}" style="{{summonStyle}}">{{summonLabel}}</button>
+</div>
+<div style="position: relative; background: #e6dcc3; border-radius: 16px; min-height: 280px; padding: 20px; box-sizing: border-box; overflow: hidden">
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 420px">
+<span style="font-size: 15px; font-weight: 700; color: #5e5338">正在开会 · 第三季度规划.pptx</span>
+<div style="height: 14px; border-radius: 7px; background: #d6caac; width: 90%"></div>
+<div style="height: 14px; border-radius: 7px; background: #d6caac; width: 75%"></div>
+<div style="height: 14px; border-radius: 7px; background: #d6caac; width: 82%"></div>
+</div>
+<sc-if value="{{open}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; top: 16px; right: 16px; width: 320px; max-width: calc(100% - 32px); background: #fffaf0; border: 2px solid #0a2588; border-radius: 14px; box-shadow: 0 14px 32px rgba(10,37,136,0.22); display: flex; flex-direction: column">
+<div style="display: flex; gap: 4px; padding: 8px 8px 0">
+<sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+<button type="button" onClick="{{tb.pick}}" aria-label="{{tb.aria}}" style="{{tb.style}}">{{tb.n}}</button>
+</sc-for>
+</div>
+<p style="margin: 0; padding: 12px 14px; font-size: 15px; line-height: 1.7; min-height: 84px; white-space: pre-line">{{note}}</p>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 14px 12px; border-top: 1px solid #e6dcc3">
+<span style="font-size: 14px; color: #5e5338">{{saveNote}}</span>
+<button type="button" onClick="{{save}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; border: 2px solid #0a2588; background: #0a2588; color: #fffaf0; font-size: 14px; font-weight: 700">保存到笔记</button>
+</div>
+</div>
+</sc-if>
+</div>
+<span style="font-size: 15px">始终置顶，记得位置；Alt + 1–5 切换五张便签</span>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #0a2588; color: #fffaf0; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">一次搜遍所有笔记</h3>
+<span style="font-size: 15px">Ctrl + Shift + K，从任何地方唤起</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{queries}}" as="qq" hint-placeholder-count="3">
+<button type="button" onClick="{{qq.pick}}" style="{{qq.style}}">{{qq.q}}</button>
+</sc-for>
+</div>
+<div style="background: #fffaf0; color: #0a2588; border-radius: 14px; padding: 6px; display: flex; flex-direction: column">
+<sc-for list="{{hits}}" as="h" hint-placeholder-count="3">
+<div style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid #ece3cc">
+<span style="font-size: 14px; font-weight: 700">{{h.file}}</span>
+<span style="font-size: 15px; line-height: 1.5">{{h.pre}}<mark style="background: #f7c531; color: #0a2588; border-radius: 4px; padding: 0 2px">{{h.hit}}</mark>{{h.post}}</span>
+</div>
+</sc-for>
+</div>
+<span style="font-size: 15px">{{hitCount}}</span>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #1b4fd0; color: #fffaf0; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">分屏，思路不用来回切</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+<button type="button" onClick="{{m.pick}}" style="{{m.style}}">{{m.label}}</button>
+</sc-for>
+</div>
+<div style="{{gridStyle}}">
+<sc-for list="{{panes}}" as="pn" hint-placeholder-count="4">
+<div style="{{pn.style}}"><b style="font-size: 14px">{{pn.t}}</b><span style="font-size: 14px; line-height: 1.5">{{pn.d}}</span></div>
+</sc-for>
+</div>
+<button type="button" onClick="{{detach}}" style="{{detachStyle}}">{{detachLabel}}</button>
+</div>
+
+<div style="flex: 2 1 600px; min-width: 0; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">输入「/」，块就排好了</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 20px">
+<div style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 15px; color: #5e5338">也能输入中文顿号「、」，拼音就能搜</span>
+<sc-for list="{{blocks}}" as="bk" hint-placeholder-count="6">
+<button type="button" onClick="{{bk.pick}}" style="{{bk.style}}"><span>{{bk.name}}</span><span style="font-size: 14px; opacity: 0.7">{{bk.py}}</span></button>
+</sc-for>
+</div>
+<div style="flex: 2 1 320px; background: #f7f1e3; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; min-height: 260px; box-sizing: border-box">
+<span style="font-size: 22px; font-weight: 800">季度复盘</span>
+<sc-if value="{{show.table}}" hint-placeholder-val="{{true}}">
+<table style="width: 100%; border-collapse: collapse; font-size: 15px; background: #fffaf0; border-radius: 10px; overflow: hidden">
+<tr><th style="text-align: left; padding: 8px 10px; border-bottom: 1.5px solid #0a2588">项目</th><th style="text-align: left; padding: 8px 10px; border-bottom: 1.5px solid #0a2588">完成</th></tr>
+<tr><td style="padding: 8px 10px; border-bottom: 1px solid #e6dcc3">官网改版</td><td style="padding: 8px 10px; border-bottom: 1px solid #e6dcc3">42 项</td></tr>
+<tr><td style="padding: 8px 10px">App 内测</td><td style="padding: 8px 10px">31 项</td></tr>
+</table>
+</sc-if>
+<sc-if value="{{show.todo}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 16px">
+<label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> 发布复盘文档</label>
+<label style="display: flex; gap: 10px; align-items: center"><input type="checkbox"> 约下季度评审</label>
+</div>
+</sc-if>
+<sc-if value="{{show.callout}}" hint-placeholder-val="{{false}}">
+<div style="background: #fbe7a1; border-radius: 10px; padding: 12px 14px; font-size: 16px; line-height: 1.6">下季度把评审提前一周，留出返工时间</div>
+</sc-if>
+<sc-if value="{{show.code}}" hint-placeholder-val="{{false}}">
+<pre style="margin: 0; background: #0a2588; color: #fffaf0; border-radius: 10px; padding: 12px 14px; font-size: 14px; line-height: 1.6; overflow-x: auto"><code><span style="color: #f7c531">const</span> done = tasks.<span style="color: #9fc0ff">filter</span>(t =&gt; t.ok)</code></pre>
+</sc-if>
+<sc-if value="{{show.math}}" hint-placeholder-val="{{false}}">
+<div style="font-family: 'Times New Roman',serif; font-style: italic; font-size: 24px; text-align: center; padding: 8px">完成率 = 73 ÷ 90 ≈ 81%</div>
+</sc-if>
+<sc-if value="{{show.flow}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; font-size: 15px">
+<span style="border: 2px solid #0a2588; border-radius: 10px; padding: 8px 12px">提需求</span>
+<svg width="28" height="12" viewBox="0 0 28 12" aria-hidden="true"><path d="M0 6h24m-5-5 5 5-5 5" fill="none" stroke="#0a2588" stroke-width="2"></path></svg>
+<span style="border: 2px solid #0a2588; border-radius: 10px; padding: 8px 12px">评审</span>
+<svg width="28" height="12" viewBox="0 0 28 12" aria-hidden="true"><path d="M0 6h24m-5-5 5 5-5 5" fill="none" stroke="#0a2588" stroke-width="2"></path></svg>
+<span style="border: 2px solid #0a2588; border-radius: 10px; padding: 8px 12px; background: #f7c531">上线</span>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: true, tab: 1, saved: false, q: 0, mode: 'lr', detached: false, block: 'table' };
+  }
+  renderVals() {
+    const s = this.state;
+    const chip = (on, dark) => {
+      const base = 'min-height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:700;';
+      if (dark) return base + (on ? 'border:2px solid #fffaf0;background:#fffaf0;color:#0a2588' : 'border:2px solid rgba(255,250,240,0.55);background:transparent;color:#fffaf0');
+      return base + (on ? 'border:2px solid #0a2588;background:#0a2588;color:#fffaf0' : 'border:2px solid #0a2588;background:transparent;color:#0a2588');
+    };
+    const notes = ['预算砍 10%，先保官网改版\n周五前给设计稿', '游戏：第 4 章 Boss 弱火\n存档在祭坛旁', '买牛奶、电池', '读到一句：慢就是快', '下周一 10 点牙医'];
+    const queries = [
+      { q: '退租', hits: [['租房 / 合同要点.md', '', '退租', '须提前 30 天书面通知'], ['生活 / 搬家清单.md', '', '退租', '前拍照留底']] },
+      { q: '周报', hits: [['官网 / 周报 W27.md', '', '周报', '：首页改版评审'], ['App / 周报 W27.md', '', '周报', '：内测包已发'], ['后台 / 周报 W27.md', '', '周报', '：权限改造']] },
+      { q: 'Novablast', hits: [['运动 / 跑步记录.md', '下一双想试试亚瑟士 ', 'Novablast', '']] }
+    ];
+    const cur = queries[s.q];
+    const paneDefs = [['资料', '读到有启发的段落'], ['笔记', '写下自己的理解'], ['摘录', '保留原文上下文'], ['行动', '今天的一件事']];
+    const count = s.mode === 'four' ? 4 : 2;
+    const pane = 'background:rgba(255,250,240,0.14);border:1.5px solid rgba(255,250,240,0.6);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:4px;min-height:0;';
+    const blockDefs = [['table', '表格', 'biaoge'], ['todo', '待办', 'daiban'], ['callout', '标注', 'biaozhu'], ['code', '代码', 'daima'], ['math', '公式', 'gongshi'], ['flow', '流程图', 'liuchengtu']];
+    const show = {};
+    blockDefs.forEach(([id]) => { show[id] = s.block === id; });
+    return {
+      open: s.open,
+      summon: () => this.setState({ open: !s.open }),
+      summonLabel: s.open ? 'Esc 收回' : '按 Alt + N',
+      summonStyle: 'min-height:44px;padding:0 18px;border-radius:12px;font-size:15px;font-weight:800;border:2px solid #0a2588;box-shadow:0 3px 0 #0a2588;' + (s.open ? 'background:#fffaf0;color:#0a2588' : 'background:#f7c531;color:#0a2588'),
+      tabs: [1, 2, 3, 4, 5].map((n) => ({ n, aria: '便签 ' + n, pick: () => this.setState({ tab: n, saved: false }), style: 'min-width:36px;min-height:36px;border-radius:8px;font-size:14px;font-weight:700;' + (n === s.tab ? 'border:1.5px solid #0a2588;background:#0a2588;color:#fffaf0' : 'border:1.5px solid #e6dcc3;background:transparent;color:#0a2588') })),
+      note: notes[s.tab - 1],
+      saveNote: s.saved ? '已存进《随手记》' : '草稿自动保存',
+      save: () => this.setState({ saved: true }),
+      queries: queries.map((x, i) => ({ q: x.q, pick: () => this.setState({ q: i }), style: chip(i === s.q, true) })),
+      hits: cur.hits.map(([file, pre, hit, post]) => ({ file, pre, hit, post })),
+      hitCount: cur.hits.length + ' 篇笔记命中，回车直接打开',
+      modes: [['lr', '左右'], ['tb', '上下'], ['four', '四格']].map(([id, label]) => ({ label, pick: () => this.setState({ mode: id }), style: chip(id === s.mode, true) })),
+      gridStyle: 'display:grid;gap:8px;height:200px;' + (s.mode === 'lr' ? 'grid-template-columns:1fr 1fr' : s.mode === 'tb' ? 'grid-template-rows:1fr 1fr' : 'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr'),
+      panes: paneDefs.slice(0, count).map(([t, d], k) => ({ t, d, style: pane + (s.detached && k === count - 1 ? 'background:#fffaf0;color:#0a2588;transform:translate(10px,-8px) rotate(1.5deg);box-shadow:0 12px 24px rgba(0,8,50,0.35)' : '') })),
+      detach: () => this.setState({ detached: !s.detached }),
+      detachLabel: s.detached ? '放回分屏' : '把标签拖出来，变成独立窗口',
+      detachStyle: 'align-self:flex-start;min-height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:700;border:2px solid #fffaf0;' + (s.detached ? 'background:#fffaf0;color:#0a2588' : 'background:transparent;color:#fffaf0'),
+      blocks: blockDefs.map(([id, name, py]) => ({ name, py, pick: () => this.setState({ block: id }), style: 'display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;font-size:15px;font-weight:700;text-align:left;' + (id === s.block ? 'border:2px solid #0a2588;background:#0a2588;color:#fffaf0' : 'border:2px solid transparent;background:transparent;color:#0a2588') })),
+      show
+    };
+  }
+}
+</script>
+</body>
+</html>

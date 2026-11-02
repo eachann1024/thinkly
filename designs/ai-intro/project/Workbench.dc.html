@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Thinkly AI 介绍 · 能力工作台</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#0a2588}a:hover{color:#163aa8}
+button{font-family:inherit;cursor:pointer}
+::selection{background:#f7c531;color:#0a2588}
+</style>
+</helmet>
+<section style="background: #f7f1e3; color: #0a2588; padding: 112px 24px 120px; box-sizing: border-box">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 style="margin: 0; font-family: 'Songti SC','Noto Serif CJK SC','Source Han Serif SC',serif; font-size: 60px; line-height: 1.15; font-weight: 900; max-width: 640px">笔记里多了一位<br>肯干活的助手</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.7; max-width: 420px">每一格都能点。它读得懂你所有的笔记，也会上网、画图、出题；动你的文件之前，先问你</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px">
+
+<div style="flex: 2 1 600px; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">选中一段，告诉它怎么改</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{tones}}" as="t" hint-placeholder-count="6">
+<button type="button" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<p style="flex: 1 1 260px; margin: 0; font-size: 16px; line-height: 1.75; color: #5e5338; background: #f7f1e3; border-radius: 14px; padding: 16px">这个功能我们内部讨论了很久，大家觉得用户可能不太会去用，所以先不做了，等以后有数据了再看看。</p>
+<p style="flex: 1 1 260px; margin: 0; font-size: 16px; line-height: 1.75; background: #fbe7a1; border-radius: 14px; padding: 16px; white-space: pre-line">{{toneText}}</p>
+</div>
+<span style="font-size: 14px">改完先标出差异，你点「应用」才写回</span>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #0a2588; color: #fffaf0; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">向过去的自己提问</h3>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{qs}}" as="q" hint-placeholder-count="3">
+<button type="button" onClick="{{q.pick}}" style="{{q.style}}">{{q.q}}</button>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 16px; line-height: 1.7">{{qa.a}}</p>
+<button type="button" onClick="{{openSrc}}" style="{{srcStyle}}">{{srcLabel}}</button>
+<sc-if value="{{srcOpen}}" hint-placeholder-val="{{false}}">
+<div style="background: #fffaf0; color: #0a2588; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px; font-weight: 700">{{qa.src}}</span>
+<sc-for list="{{paras}}" as="pp" hint-placeholder-count="3">
+<p style="{{pp.style}}">{{pp.t}}</p>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">一句话，批量整理</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">「把三个项目文件夹里的周报，各合成一篇季度总结」</p>
+<sc-for list="{{plan}}" as="p" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 1.5">
+<span style="{{p.tag}}">{{p.op}}</span>
+<span style="flex: 1">{{p.t}}</span>
+</div>
+</sc-for>
+<sc-if value="{{diffOpen}}" hint-placeholder-val="{{false}}">
+<div style="background: #f7f1e3; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.6">
+<span style="font-weight: 700">官网 / 周报 W27.md</span>
+<span style="color: #5e5338">本周完成首页改版评审。</span>
+<span style="background: #cfe8d5; color: #1d6b3a; border-radius: 6px; padding: 2px 8px">+ 季度总结：《官网 Q3 总结》</span>
+<span style="color: #5e5338">还有 35 篇，同样只在末尾加一行</span>
+</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{toggleDiff}}" style="min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: 15px; font-weight: 700; border: 2px solid #0a2588; background: transparent; color: #0a2588">{{diffLabel}}</button>
+<button type="button" onClick="{{approve}}" style="{{approveStyle}}">{{approveLabel}}</button>
+</div>
+</div>
+
+<div style="flex: 2 1 600px; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">说一声，就画出来</h3>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{views}}" as="v" hint-placeholder-count="3">
+<button type="button" onClick="{{v.pick}}" style="{{v.style}}">{{v.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="background: #f7f1e3; border-radius: 16px; padding: 24px; min-height: 220px; box-sizing: border-box">
+<sc-if value="{{vis.chart}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 15px; font-weight: 700">本季度各项目完成的任务</span>
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="width: 64px; font-size: 15px">{{b.n}}</span>
+<div style="flex: 1; background: #ebe1c8; border-radius: 8px; height: 28px; overflow: hidden"><div style="{{b.style}}"></div></div>
+<span style="width: 32px; text-align: right; font-size: 15px; font-variant-numeric: tabular-nums">{{b.v}}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{vis.timeline}}" hint-placeholder-val="{{false}}">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{tl}}" as="e" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 3px solid #0a2588; padding-top: 12px">
+<span style="font-size: 14px; font-weight: 700">{{e.d}}</span>
+<span style="font-size: 15px; line-height: 1.5">{{e.t}}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{vis.compare}}" hint-placeholder-val="{{false}}">
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 15px">
+<thead><tr><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588"></th><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588">方案 A</th><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588; background: #fbe7a1">方案 B（推荐）</th></tr></thead>
+<tbody>
+<tr><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">上线时间</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">6 周</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8; background: #fbe7a1">3 周</td></tr>
+<tr><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">人手</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">4 人</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8; background: #fbe7a1">2 人</td></tr>
+<tr><td style="padding: 10px">风险</td><td style="padding: 10px">低</td><td style="padding: 10px; background: #fbe7a1">中</td></tr>
+</tbody>
+</table>
+</div>
+</sc-if>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<button type="button" onClick="{{insert}}" style="{{insertStyle}}">{{insertLabel}}</button>
+<span style="font-size: 15px">{{insertNote}}</span>
+</div>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #1b4fd0; color: #fffaf0; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">问实时的事</h3>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{lives}}" as="l" hint-placeholder-count="3">
+<button type="button" onClick="{{l.pick}}" style="{{l.style}}">{{l.label}}</button>
+</sc-for>
+</div>
+<span style="font-size: 15px">{{live.q}}</span>
+<span style="font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1">{{live.big}}</span>
+<span style="font-size: 15px; line-height: 1.6">{{live.sub}}</span>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #fffaf0; border: 2px solid #0a2588; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">替你上网查</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">「读一下这篇文章，要点记到《竞品观察》里」</p>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.6">
+<span>已读 1 个链接，又搜了 2 个来源</span>
+<span>追加 5 条要点到《竞品观察》</span>
+<span>每条都附上原文链接</span>
+</div>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; background: #f7c531; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">把笔记变成闪卡</h3>
+<button type="button" onClick="{{flip}}" style="min-height: 150px; background: #fffaf0; border: 2px solid #0a2588; border-radius: 16px; padding: 20px; color: #0a2588; text-align: left; display: flex; flex-direction: column; gap: 10px; justify-content: center">
+<span style="font-size: 14px">{{card.side}} · 点一下翻面</span>
+<span style="font-size: 19px; font-weight: 700; line-height: 1.5">{{card.text}}</span>
+</button>
+<span style="font-size: 15px">还有测验、清单、计算器、倒计时</span>
+</div>
+
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; align-items: center; border-top: 2px solid #0a2588; padding-top: 24px">
+<span style="font-size: 18px; font-weight: 800">用你自己的模型</span>
+<span style="font-size: 16px; line-height: 1.6">预置 DeepSeek，同时支持 OpenAI 协议</span>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tone: 'work', q: 0, src: false, approved: false, diff: false, view: 'chart', inserted: false, live: 'weather', back: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const chip = (on, dark) => {
+      const base = 'min-height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:700;';
+      if (dark) return base + (on ? 'border:2px solid #fffaf0;background:#fffaf0;color:#0a2588' : 'border:2px solid rgba(255,250,240,0.5);background:transparent;color:#fffaf0');
+      return base + (on ? 'border:2px solid #0a2588;background:#0a2588;color:#fffaf0' : 'border:2px solid #0a2588;background:transparent;color:#0a2588');
+    };
+    const toneMap = {
+      work: ['工作黑话', '经内部多轮评估，该需求用户价值尚不明确，本期暂缓排期，待数据沉淀后再做优先级判断。'],
+      polish: ['润色', '团队讨论后认为，这个功能的使用意愿暂不明确，因此先搁置，等有数据支撑再重新评估。'],
+      shorten: ['精简', '需求暂缓，等有数据再评估。'],
+      en: ['翻译成英文', 'After a long internal discussion, we doubt users will use this feature, so we are pausing it until we have data.'],
+      list: ['整理为列表', '内部讨论多轮\n用户使用意愿不明\n本期先不做\n有数据后再评估'],
+      todo: ['待办事项', '收集该功能的用户反馈\n两周后复看数据\n再决定是否排期']
+    };
+    const qs = [
+      { q: '我上次说要买哪个牌子的跑鞋？', a: '你在 9 月的跑步记录里写过，想试试亚瑟士 Novablast，原因是旧鞋太硬。', src: '跑步记录.md', loc: '9 月 21 日 · 第 2 段',
+        paras: [['9 月 21 日，晨跑 10 公里，配速 5:40。', 0], ['旧鞋太硬，跑完膝盖有点酸。下一双想试试亚瑟士 Novablast。', 1], ['下周把长距离加到 15 公里。', 0]] },
+      { q: '和房东约定的退租条件是什么？', a: '提前 30 天书面通知；押金在交房验收后 7 天内退还。', src: '租房 / 合同要点.md', loc: '「退租」小节',
+        paras: [['租期：2026 年 3 月至 2027 年 2 月。', 0], ['退租：提前 30 天书面通知；押金在交房验收后 7 天内退还。', 1], ['维修：200 元以下由租客承担。', 0]] },
+      { q: '我今年定的三个目标进度如何？', a: '读书 18/24 本；跑步 620/1000 公里；英语还没有开始记录。', src: '2026 目标.md', loc: '「10 月复盘」小节',
+        paras: [['读书：18 / 24 本。', 1], ['跑步：620 / 1000 公里。', 1], ['英语：还没开始记录。', 1]] }
+    ];
+    const cur = qs[s.q];
+    const done = s.approved;
+    const tag = (bg, fg) => 'flex:none;font-size:14px;font-weight:700;border-radius:8px;padding:3px 8px;background:' + bg + ';color:' + fg;
+    const views = [['chart', '图表'], ['timeline', '时间线'], ['compare', '对比表']];
+    const lives = {
+      weather: ['天气', '明早上海要带伞吗？', '小雨 16°C', '早高峰降水概率 60%，带把折叠伞'],
+      fx: ['汇率', '2000 日元是多少人民币？', '[实时汇率]', '按今天的中间价换算'],
+      time: ['时差', '伦敦下午 3 点是北京几点？', '23:00', '伦敦现在用夏令时，比北京晚 7 小时']
+    };
+    const L = lives[s.live];
+    return {
+      tones: Object.keys(toneMap).map((k) => ({ label: toneMap[k][0], style: chip(k === s.tone), pick: () => this.setState({ tone: k }) })),
+      toneText: toneMap[s.tone][1],
+      qs: qs.map((x, i) => ({ q: x.q, pick: () => this.setState({ q: i }), style: 'text-align:left;min-height:44px;padding:10px 14px;border-radius:12px;font-size:15px;line-height:1.5;' + (i === s.q ? 'background:#f7c531;color:#0a2588;border:2px solid #f7c531' : 'background:transparent;color:#fffaf0;border:2px solid rgba(255,250,240,0.4)') })),
+      qa: cur,
+      openSrc: () => this.setState({ src: !s.src }),
+      srcOpen: s.src,
+      srcLabel: s.src ? '收起原文' : '出处：' + cur.src + ' · ' + cur.loc,
+      srcStyle: 'align-self:flex-start;min-height:44px;padding:8px 12px;border-radius:10px;font-size:14px;text-align:left;' + (s.src ? 'border:1.5px solid #fffaf0;background:transparent;color:#fffaf0' : 'border:1.5px solid #f7c531;background:transparent;color:#f7c531'),
+      paras: cur.paras.map(([t, hit]) => ({ t, style: 'margin:0;font-size:15px;line-height:1.6;border-radius:6px;padding:2px 6px;' + (hit ? 'background:#fbe7a1;color:#0a2588' : 'color:#5e5338') })),
+      plan: [
+        { op: '读取', t: '3 个文件夹，共 36 篇周报', tag: tag('#e3dccb', '#0a2588') },
+        { op: '新建', t: '3 篇季度总结，各放回原文件夹', tag: tag('#0a2588', '#fffaf0') },
+        { op: '修改', t: '36 篇周报末尾各加一行总结链接', tag: tag('#f7c531', '#0a2588') },
+        { op: '状态', t: done ? '已写入，36 篇周报都改好了' : '新建直接做；修改先给你看改动，批准才写入', tag: tag(done ? '#cfe8d5' : '#f2d3c4', done ? '#1d6b3a' : '#7a2a0c') }
+      ],
+      diffOpen: s.diff,
+      toggleDiff: () => this.setState({ diff: !s.diff }),
+      diffLabel: s.diff ? '收起改动' : '逐条看改动',
+      approve: () => this.setState({ approved: !done }),
+      approveLabel: done ? '撤回演示' : '批准修改',
+      approveStyle: 'align-self:flex-start;min-height:44px;padding:0 20px;border-radius:999px;font-size:15px;font-weight:700;border:2px solid #0a2588;' + (done ? 'background:transparent;color:#0a2588' : 'background:#0a2588;color:#fffaf0'),
+      views: views.map(([id, label]) => ({ label, style: chip(id === s.view), pick: () => this.setState({ view: id, inserted: false }) })),
+      insert: () => this.setState({ inserted: !s.inserted }),
+      insertLabel: s.inserted ? '撤回演示' : '插入笔记',
+      insertStyle: 'min-height:44px;padding:0 20px;border-radius:999px;font-size:15px;font-weight:700;border:2px solid #0a2588;' + (s.inserted ? 'background:transparent;color:#0a2588' : 'background:#0a2588;color:#fffaf0'),
+      insertNote: s.inserted ? '已插到《项目周报》光标处，之后还能改数据' : '画好先放在对话里，点一下插进正文',
+      vis: { chart: s.view === 'chart', timeline: s.view === 'timeline', compare: s.view === 'compare' },
+      bars: [['官网', 42], ['App', 31], ['后台', 18]].map(([n, v]) => ({ n, v, style: 'height:100%;border-radius:8px;background:#1b4fd0;width:' + Math.round(v / 42 * 100) + '%' })),
+      tl: [{ d: '7 月 3 日', t: '立项会' }, { d: '8 月 15 日', t: '第一版内测' }, { d: '9 月 2 日', t: '改版定稿' }, { d: '9 月 28 日', t: '正式上线' }],
+      lives: Object.keys(lives).map((k) => ({ label: lives[k][0], style: chip(k === s.live, true), pick: () => this.setState({ live: k }) })),
+      live: { q: L[1], big: L[2], sub: L[3] },
+      flip: () => this.setState({ back: !s.back }),
+      card: s.back ? { side: '背面', text: '在给定预算下，选择能带来最大收益的那件事，而不是最紧急的那件事。' } : { side: '正面', text: '「机会成本」用一句话怎么解释？' }
+    };
+  }
+}
+</script>
+</body>
+</html>

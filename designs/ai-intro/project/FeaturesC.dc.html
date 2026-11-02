@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>其余功能 · C 一天里的四个时刻</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#0a2588}a:hover{color:#163aa8}
+button{font-family:inherit;cursor:pointer}
+::selection{background:#f7c531;color:#0a2588}
+</style>
+</helmet>
+<section style="background: #f7f1e3; color: #0a2588; padding: 112px 24px 120px; box-sizing: border-box">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 style="margin: 0; font-family: 'Songti SC','Noto Serif CJK SC','Source Han Serif SC',serif; font-size: 60px; line-height: 1.15; font-weight: 900; max-width: 640px">从早会到下班<br>它都在手边</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.7; max-width: 420px">点开一天里的任意时刻</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+<sc-for list="{{moments}}" as="m" hint-placeholder-count="4">
+<div style="{{m.cardStyle}}">
+<button type="button" onClick="{{m.pick}}" style="{{m.headStyle}}">
+<span style="font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1">{{m.time}}</span>
+<span style="font-size: 20px; font-weight: 800">{{m.title}}</span>
+<span style="font-size: 15px; line-height: 1.6">{{m.line}}</span>
+</button>
+<sc-if value="{{m.open}}" hint-placeholder-val="{{false}}">
+<div style="background: #fffaf0; color: #0a2588; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-height: 220px; box-sizing: border-box">
+<span style="font-size: 14px; font-weight: 700">{{m.demoHead}}</span>
+<sc-for list="{{m.rows}}" as="r" hint-placeholder-count="3">
+<span style="{{r.style}}">{{r.t}}</span>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: 0 };
+  }
+  renderVals() {
+    const o = this.state.open;
+    const row = (bg) => 'font-size:16px;line-height:1.6;border-radius:10px;padding:8px 12px;' + (bg ? 'background:' + bg : 'background:#f7f1e3');
+    const defs = [
+      { time: '09:30', title: '开会，随手记', line: '按 Alt + N，小窗浮在最上面', bg: '#fffaf0', fg: '#0a2588',
+        head: '速记 · 便签 1', rows: [['预算砍 10%，先保官网改版', ''], ['周五前给设计稿', ''], ['草稿自动保存', '#fbe7a1']] },
+      { time: '11:00', title: '找出上次的约定', line: 'Ctrl + Shift + K，搜遍所有笔记', bg: '#0a2588', fg: '#fffaf0',
+        head: '搜「退租」 · 2 篇命中', rows: [['租房 / 合同要点：退租须提前 30 天书面通知', '#fbe7a1'], ['生活 / 搬家清单：退租前拍照留底', '']] },
+      { time: '15:00', title: '边看资料边写', line: '左右、上下或四格分屏', bg: '#1b4fd0', fg: '#fffaf0',
+        head: '用户访谈 | 方案草稿', rows: [['左：「找旧笔记要翻好久」', ''], ['右：方案 = 全局搜索 + 引用出处', '#fbe7a1'], ['标签拖出去就是独立窗口', '']] },
+      { time: '18:00', title: '整理成一份复盘', line: '输入「/」，拼音也能搜', bg: '#f7c531', fg: '#0a2588',
+        head: '/biao → 表格', rows: [['项目 | 完成：官网 42 项，App 31 项', '#fbe7a1'], ['还有待办、标注、代码、公式、流程图', '']] }
+    ];
+    return {
+      moments: defs.map((d, i) => {
+        const open = i === o;
+        return {
+          time: d.time, title: d.title, line: d.line, open, demoHead: d.head,
+          rows: d.rows.map(([t, bg]) => ({ t, style: row(bg) })),
+          pick: () => this.setState({ open: i }),
+          cardStyle: 'min-width:0;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;background:' + d.bg + ';color:' + d.fg + ';flex:' + (open ? '3 1 420px' : '1 1 200px') + ';' + (d.bg === '#fffaf0' ? 'border:2px solid #0a2588;' : ''),
+          headStyle: 'display:flex;flex-direction:column;gap:10px;text-align:left;background:transparent;border:0;padding:4px;min-height:44px;color:inherit'
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>其余功能 · B 一个窗口四个按键</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#0a2588}a:hover{color:#163aa8}
+button{font-family:inherit;cursor:pointer}
+::selection{background:#f7c531;color:#0a2588}
+</style>
+</helmet>
+<section style="background: #0a2588; color: #fffaf0; padding: 112px 24px 120px; box-sizing: border-box">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 style="margin: 0; font-family: 'Songti SC','Noto Serif CJK SC','Source Han Serif SC',serif; font-size: 60px; line-height: 1.15; font-weight: 900; max-width: 640px">四个按键<br>管住一天的笔记</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.7; max-width: 420px">按下面的键，看窗口里发生什么</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="4">
+<button type="button" onClick="{{k.pick}}" style="{{k.style}}"><span style="{{k.capStyle}}">{{k.cap}}</span><span style="font-size: 16px; font-weight: 700">{{k.name}}</span></button>
+</sc-for>
+</div>
+
+<div style="background: #fffaf0; color: #0a2588; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,8,50,0.4)">
+<div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #e6dcc3; background: #f7f1e3">
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #e6dcc3"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #e6dcc3"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #e6dcc3"></span>
+<span style="margin-left: 12px; font-size: 14px; font-weight: 700">{{winTitle}}</span>
+</div>
+<div style="position: relative; min-height: 420px; padding: 28px; box-sizing: border-box">
+
+<sc-if value="{{is.quick}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 560px; opacity: 0.45">
+<span style="font-size: 22px; font-weight: 800">第三季度规划</span>
+<span style="font-size: 16px; line-height: 1.7">目标：官网改版上线，App 进入公测……</span>
+<span style="font-size: 16px; line-height: 1.7">风险：设计资源只有两个人……</span>
+</div>
+<div style="position: absolute; top: 28px; right: 28px; width: 340px; max-width: calc(100% - 56px); background: #fffaf0; border: 2px solid #0a2588; border-radius: 14px; box-shadow: 0 16px 36px rgba(10,37,136,0.25); padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px; font-weight: 700">速记 · 便签 1</span>
+<span style="font-size: 16px; line-height: 1.7">预算砍 10%，先保官网改版<br>周五前给设计稿</span>
+<span style="font-size: 14px; color: #5e5338">始终置顶，不挡你手上的事</span>
+</div>
+</sc-if>
+
+<sc-if value="{{is.search}}" hint-placeholder-val="{{false}}">
+<div style="max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px">
+<div style="border: 2px solid #0a2588; border-radius: 14px; padding: 14px 16px; font-size: 18px; font-weight: 700">退租</div>
+<sc-for list="{{hits}}" as="h" hint-placeholder-count="2">
+<div style="padding: 12px 16px; border-radius: 12px; background: #f7f1e3; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 14px; font-weight: 700">{{h.file}}</span>
+<span style="font-size: 16px; line-height: 1.5"><mark style="background: #f7c531; color: #0a2588; border-radius: 4px; padding: 0 2px">退租</mark>{{h.post}}</span>
+</div>
+</sc-for>
+<span style="font-size: 15px">2 篇笔记命中，回车直接打开</span>
+</div>
+</sc-if>
+
+<sc-if value="{{is.split}}" hint-placeholder-val="{{false}}">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-height: 360px">
+<div style="background: #f7f1e3; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px; font-weight: 700">资料 · 用户访谈.md</span>
+<span style="font-size: 16px; line-height: 1.7">「我每次找旧笔记都要翻好久，最后干脆重新写。」</span>
+</div>
+<div style="background: #fffaf0; border: 2px solid #0a2588; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px; font-weight: 700">笔记 · 方案草稿.md</span>
+<span style="font-size: 16px; line-height: 1.7">痛点：找不到旧笔记。<br>方案：全局搜索 + 引用出处。</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{is.blocks}}" hint-placeholder-val="{{false}}">
+<div style="max-width: 640px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 22px; font-weight: 800">季度复盘</span>
+<span style="font-size: 18px">/biao<span style="display: inline-block; width: 2px; height: 20px; background: #0a2588; vertical-align: middle; margin-left: 2px"></span></span>
+<div style="width: 260px; border: 2px solid #0a2588; border-radius: 12px; padding: 6px; display: flex; flex-direction: column; background: #fffaf0">
+<span style="padding: 10px 12px; border-radius: 8px; background: #0a2588; color: #fffaf0; font-size: 15px; font-weight: 700">表格</span>
+<span style="padding: 10px 12px; font-size: 15px">标注</span>
+</div>
+<span style="font-size: 15px; color: #5e5338">还有待办、代码、公式、流程图</span>
+</div>
+</sc-if>
+
+</div>
+</div>
+<p style="margin: 0; font-size: 18px; line-height: 1.7">{{caption}}</p>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { k: 'quick' };
+  }
+  renderVals() {
+    const k = this.state.k;
+    const defs = [
+      ['quick', 'Alt + N', '速记小窗', '正在开会 · 第三季度规划', '开会时按一下，小窗浮在最上面；记完自动保存，五张便签用 Alt + 1–5 切换'],
+      ['search', 'Ctrl + Shift + K', '全局搜索', '搜索所有笔记', '在任何软件里都能唤起，一次搜遍所有笔记，回车直接打开'],
+      ['split', '拖动标签', '分屏', '用户访谈 | 方案草稿', '资料和笔记左右摆开，也能上下或四格；标签拖出去就是独立窗口'],
+      ['blocks', '/', '块编辑', '季度复盘', '输入「/」或「、」，打拼音就能找到表格、待办、公式等块']
+    ];
+    const cur = defs.find((d) => d[0] === k);
+    const is = {};
+    defs.forEach((d) => { is[d[0]] = d[0] === k; });
+    return {
+      keys: defs.map(([id, cap, name]) => ({
+        cap, name,
+        pick: () => this.setState({ k: id }),
+        style: 'display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 18px 6px 6px;border-radius:14px;' + (id === k ? 'border:2px solid #f7c531;background:#f7c531;color:#0a2588' : 'border:2px solid rgba(255,250,240,0.45);background:transparent;color:#fffaf0'),
+        capStyle: 'font-size:15px;font-weight:800;padding:8px 12px;border-radius:10px;font-variant-numeric:tabular-nums;' + (id === k ? 'background:#fffaf0;color:#0a2588;box-shadow:0 3px 0 #0a2588' : 'background:rgba(255,250,240,0.12);color:#fffaf0;box-shadow:0 3px 0 rgba(0,8,50,0.6)')
+      })),
+      is,
+      winTitle: cur[3],
+      caption: cur[4],
+      hits: [{ file: '租房 / 合同要点.md', post: '须提前 30 天书面通知' }, { file: '生活 / 搬家清单.md', post: '前拍照留底' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

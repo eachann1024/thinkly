@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Thinkly AI 介绍 · 问一句，看它做</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#0a2588}a:hover{color:#163aa8}
+button{font-family:inherit;cursor:pointer}
+::selection{background:#f7c531;color:#0a2588}
+</style>
+</helmet>
+<section style="background: {{ground}}; color: #fffaf0; padding: 112px 24px 120px; box-sizing: border-box; min-height: 1080px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center">
+<h2 style="margin: 0; font-family: 'Songti SC','Noto Serif CJK SC','Source Han Serif SC',serif; font-size: 64px; line-height: 1.12; letter-spacing: -0.01em; font-weight: 900">AI 住在你的笔记里</h2>
+<p style="margin: 0; font-size: 20px; line-height: 1.6; max-width: 640px">帮你改、帮你找、帮你整理，还能画图、查网页、出题。挑一件事试试</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+<div style="flex: 1 1 320px; max-width: 380px; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{caps}}" as="c" hint-placeholder-count="9">
+<button type="button" onClick="{{c.pick}}" style="{{c.style}}">
+<span style="font-size: 17px; font-weight: 700">{{c.name}}</span>
+<span style="font-size: 14px; line-height: 1.5; opacity: 0.86">{{c.desc}}</span>
+</button>
+</sc-for>
+</div>
+<div style="flex: 999 1 560px; min-width: 0; background: #f7f1e3; color: #0a2588; border: 2px solid #0a2588; border-radius: 28px; padding: 28px; box-sizing: border-box; min-height: 640px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 24px 60px rgba(6,20,90,0.35)">
+<div style="display: flex; justify-content: flex-end">
+<div style="background: #0a2588; color: #fffaf0; border-radius: 18px 18px 4px 18px; padding: 12px 18px; font-size: 16px; line-height: 1.6; max-width: 80%">{{cur.ask}}</div>
+</div>
+
+<sc-if value="{{is.rewrite}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{tones}}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+<div style="background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #6a5d43; text-decoration: line-through">这次读书会大家聊得挺多的，但是感觉时间有点不够用，有些人没怎么说上话，下次可能要控制一下。</p>
+<p style="margin: 0; font-size: 17px; line-height: 1.75; background: #fbe7a1; border-radius: 8px; padding: 10px 12px; white-space: pre-line">{{toneText}}</p>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid #0a2588; background: #0a2588; color: #fffaf0; font-size: 15px; font-weight: 700">应用修改</button>
+<button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid #0a2588; background: transparent; color: #0a2588; font-size: 15px; font-weight: 700">放弃</button>
+<button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid #0a2588; background: transparent; color: #0a2588; font-size: 15px; font-weight: 700">重新生成</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{is.ask}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 17px; line-height: 1.8">上次复盘提到两点：<b>时间不够</b>，三位成员没轮到发言；建议<b>每人限时 5 分钟</b>，会前先排好发言顺序。另外，下次的书已经定了，是《置身事内》。</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 14px; font-weight: 700">出处</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<a href="#" style="font-size: 15px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 10px; padding: 8px 12px; text-decoration: none">读书会复盘 10-12.md · 第 2 段</a>
+<a href="#" style="font-size: 15px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 10px; padding: 8px 12px; text-decoration: none">书单.md · 待读</a>
+</div>
+</div>
+<p style="margin: 0; font-size: 14px; color: #4a4636">点出处，直接跳到原文那一段</p>
+</div>
+</sc-if>
+
+<sc-if value="{{is.manage}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 16px; line-height: 1.7">读了 9 篇会议记录，计划这样做：</p>
+<sc-for list="{{plan}}" as="p" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 14px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 14px; padding: 14px 16px">
+<span style="{{p.tagStyle}}">{{p.op}}</span>
+<span style="flex: 1; font-size: 16px; line-height: 1.5">{{p.text}}</span>
+<span style="font-size: 14px; font-weight: 700; color: {{p.stateColor}}">{{p.state}}</span>
+</div>
+</sc-for>
+<sc-if value="{{showApprove}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" onClick="{{approve}}" style="min-height: 44px; padding: 0 22px; border-radius: 999px; border: 2px solid #0a2588; background: #0a2588; color: #fffaf0; font-size: 15px; font-weight: 700">批准修改和删除</button>
+<span style="align-self: center; font-size: 14px; color: #4a4636">新建直接执行；改动和删除都要你点头</span>
+</div>
+</sc-if>
+<sc-if value="{{approved}}" hint-placeholder-val="{{false}}">
+<p style="margin: 0; font-size: 16px; font-weight: 700">3 项全部完成，「十月月报」已打开</p>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{is.visual}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{views}}" as="v" hint-placeholder-count="4">
+<button type="button" onClick="{{v.pick}}" style="{{v.style}}">{{v.label}}</button>
+</sc-for>
+</div>
+<div style="background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 24px; min-height: 300px; box-sizing: border-box">
+<sc-if value="{{vis.chart}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<span style="font-size: 16px; font-weight: 700">每月读完的书（本）</span>
+<div style="display: flex; align-items: flex-end; gap: 18px; height: 200px; border-bottom: 1.5px solid #0a2588; padding: 0 8px">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="6">
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%">
+<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{b.v}}</span>
+<div style="{{b.style}}"></div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; gap: 18px; padding: 0 8px">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="6">
+<span style="flex: 1; text-align: center; font-size: 14px">{{b.m}}</span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{vis.flow}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px; justify-content: center; padding-top: 70px">
+<sc-for list="{{flow}}" as="f" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="border: 1.5px solid #0a2588; border-radius: 12px; padding: 14px 18px; font-size: 16px; background: #f7f1e3">{{f.t}}</span>
+<sc-if value="{{f.arrow}}" hint-placeholder-val="{{true}}">
+<svg width="28" height="14" viewBox="0 0 28 14" aria-hidden="true"><path d="M1 7h24M19 1l6 6-6 6" fill="none" stroke="#0a2588" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{vis.table}}" hint-placeholder-val="{{false}}">
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 15px">
+<thead><tr><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588">书名</th><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588">作者</th><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588">读完</th><th style="text-align: left; padding: 10px; border-bottom: 1.5px solid #0a2588">评分</th></tr></thead>
+<tbody>
+<tr><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">置身事内</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">兰小欢</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">10 月</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">5</td></tr>
+<tr><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">原则</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">瑞·达利欧</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">9 月</td><td style="padding: 10px; border-bottom: 1px solid #d8cfb8">4</td></tr>
+<tr><td style="padding: 10px">长安的荔枝</td><td style="padding: 10px">马伯庸</td><td style="padding: 10px">8 月</td><td style="padding: 10px">4</td></tr>
+</tbody>
+</table>
+</div>
+</sc-if>
+<sc-if value="{{vis.poster}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; justify-content: center">
+<div style="width: 220px; height: 260px; background: #0a2588; color: #fffaf0; border-radius: 14px; padding: 22px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between">
+<span style="font-family: 'Songti SC','Noto Serif CJK SC',serif; font-size: 26px; font-weight: 900; line-height: 1.25">十月读书会</span>
+<span style="font-size: 15px; line-height: 1.6">《置身事内》<br>周六 14:00 · 每人限时 5 分钟</span>
+<span style="align-self: flex-start; background: #f7c531; color: #0a2588; border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 700">欢迎带朋友</span>
+</div>
+</div>
+</sc-if>
+</div>
+<p style="margin: 0; font-size: 14px; color: #4a4636">画好的图直接插进笔记</p>
+</div>
+</sc-if>
+
+<sc-if value="{{is.web}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 17px; line-height: 1.8">Front matter 是文件开头两行 <code style="font-family: 'SF Mono',Menlo,monospace; font-size: 15px; background: #fffaf0; padding: 1px 6px; border-radius: 6px">---</code> 之间的 YAML，用来写标题、标签、日期这类信息。已经整理成一篇笔记「Front matter 速查」。</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 14px; font-weight: 700">读了这些网页</span>
+<a href="https://jekyllrb.com/docs/front-matter/" style="font-size: 15px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 10px; padding: 10px 12px; text-decoration: none">jekyllrb.com/docs/front-matter</a>
+<a href="https://yaml.org/spec/1.2.2/" style="font-size: 15px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 10px; padding: 10px 12px; text-decoration: none">yaml.org/spec/1.2.2</a>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{is.live}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 1 1 200px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px">杭州 · 周六</span>
+<span style="font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums">18–23°C</span>
+<span style="font-size: 15px">小雨，降水概率 70%</span>
+</div>
+<div style="flex: 1 1 200px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px">汇率</span>
+<span style="font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums">100 USD</span>
+<span style="font-size: 15px">≈ [实时汇率] CNY</span>
+</div>
+<div style="flex: 1 1 200px; background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px">纽约现在</span>
+<span style="font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums">01:10</span>
+<span style="font-size: 15px">比北京晚 13 小时</span>
+</div>
+</div>
+<p style="margin: 0; font-size: 17px; line-height: 1.7">带把伞。周六下午雨最大，读书会改到室内更稳妥。</p>
+</div>
+</sc-if>
+
+<sc-if value="{{is.learn}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 14px">第 1 题 / 共 3 题</span>
+<span style="font-size: 18px; font-weight: 700; line-height: 1.6">书中认为，地方政府最主要的收入来源之一是？</span>
+<sc-for list="{{quiz}}" as="q" hint-placeholder-count="3">
+<button type="button" onClick="{{q.pick}}" style="{{q.style}}">{{q.t}}</button>
+</sc-for>
+<sc-if value="{{answered}}" hint-placeholder-val="{{false}}">
+<p style="margin: 0; font-size: 15px; line-height: 1.7">{{verdict}}</p>
+</sc-if>
+</div>
+<p style="margin: 0; font-size: 14px; color: #4a4636">也能做成闪卡、清单、计算器、倒计时</p>
+</div>
+</sc-if>
+
+<sc-if value="{{is.skill}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="background: #fffaf0; border: 1.5px solid #0a2588; border-radius: 16px; padding: 8px; display: flex; flex-direction: column">
+<sc-for list="{{skills}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; gap: 14px; align-items: baseline; padding: 12px 14px; border-radius: 10px; background: {{s.bg}}">
+<span style="font-family: 'SF Mono',Menlo,monospace; font-size: 15px; font-weight: 700; min-width: 96px">/{{s.n}}</span>
+<span style="font-size: 15px; line-height: 1.5">{{s.d}}</span>
+</div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.7">把常用要求写成一个 Markdown 文件放进 Skill 文件夹，输入 / 就能调用</p>
+</div>
+</sc-if>
+</div>
+</div>
+<p style="margin: 0; text-align: center; font-size: 16px; line-height: 1.7">AI 默认关闭，打开才工作 · 预置 DeepSeek，填 Key 即用 · 也能接任何 OpenAI / Anthropic 兼容服务</p>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"ground":{"editor":"color","default":"#1b4fd0","options":["#1b4fd0","#0a2588","#163aa8"]},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cap: 'rewrite', tone: 'polish', view: 'chart', approved: false, pickedQ: -1 };
+  }
+  renderVals() {
+    const s = this.state;
+    const caps = [
+      { id: 'rewrite', name: '选中就改', desc: '润色、精简、翻译、改口语，改完先给你看', ask: '选中一段，点「润色」' },
+      { id: 'ask', name: '问自己的笔记', desc: '记不清原话也能找，答案标出出处', ask: '读书会上次有什么要改进的？' },
+      { id: 'manage', name: '替你整理笔记', desc: '新建、改写、删除，跨文件夹一次做完', ask: '把十月的会议记录整理成月报，重复的草稿删掉' },
+      { id: 'visual', name: '画成图', desc: '表格、图表、流程图、海报', ask: '把我的读书记录画出来' },
+      { id: 'web', name: '上网查资料', desc: '读链接、搜网页，记下来源', ask: '查一下 Markdown front matter 怎么写，记成笔记' },
+      { id: 'live', name: '天气、汇率、时差', desc: '实时信息直接成卡片', ask: '周六去杭州读书会，要带伞吗？' },
+      { id: 'learn', name: '出题和复习', desc: '测验、闪卡、清单，从笔记里生成', ask: '根据《置身事内》的读书笔记出 3 道题' },
+      { id: 'skill', name: '你自己的 Skill', desc: '常用指令存成文件，输入 / 调用', ask: '/' }
+    ];
+    const rowOn = 'display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 18px;min-height:44px;border-radius:16px;border:2px solid #f7c531;background:#f7c531;color:#0a2588';
+    const rowOff = 'display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 18px;min-height:44px;border-radius:16px;border:2px solid rgba(255,250,240,0.32);background:transparent;color:#fffaf0';
+    const chip = (on) => on
+      ? 'min-height:44px;padding:0 18px;border-radius:999px;border:2px solid #0a2588;background:#0a2588;color:#fffaf0;font-size:15px;font-weight:700'
+      : 'min-height:44px;padding:0 18px;border-radius:999px;border:2px solid #0a2588;background:#fffaf0;color:#0a2588;font-size:15px;font-weight:700';
+    const toneMap = {
+      polish: ['润色', '这次读书会讨论热烈，但时间偏紧，有几位成员没来得及发言。下次需要控制每人的发言时长。'],
+      shorten: ['精简', '讨论热烈但超时，部分成员未发言；下次限时。'],
+      casual: ['口语化', '这次大家聊得很嗨，就是时间不太够，有人都没轮上说话，下回得掐点了。'],
+      en: ['翻译成英文', 'The book club had a lively discussion, but we ran short on time and a few members barely spoke. Next time we should limit each turn.'],
+      list: ['整理为列表', '讨论热烈\n时间不够用\n有人没轮到发言\n下次控制每人时长']
+    };
+    const views = [['chart', '图表'], ['flow', '流程图'], ['table', '表格'], ['poster', '海报']];
+    const bars = [['5 月', 1], ['6 月', 2], ['7 月', 3], ['8 月', 2], ['9 月', 4], ['10 月', 3]].map(([m, v]) => ({
+      m, v, style: 'width:100%;max-width:56px;border-radius:8px 8px 0 0;background:' + (m === '9 月' ? '#f7c531' : '#1b4fd0') + ';height:' + (v * 36) + 'px'
+    }));
+    const done = s.approved;
+    const tag = (bg, fg) => 'flex:none;min-width:44px;text-align:center;font-size:14px;font-weight:700;border-radius:8px;padding:4px 8px;background:' + bg + ';color:' + fg;
+    const plan = [
+      { op: '新建', text: '「十月月报」，汇总 9 次会议的决定和待办', state: '已完成', stateColor: '#1d6b3a', tagStyle: tag('#0a2588', '#fffaf0') },
+      { op: '修改', text: '「周会记录」末尾加上月报链接', state: done ? '已完成' : '等你确认', stateColor: done ? '#1d6b3a' : '#8a4b00', tagStyle: tag('#f7c531', '#0a2588') },
+      { op: '删除', text: '「草稿 3」「草稿 5」，内容已并入月报', state: done ? '已完成' : '等你确认', stateColor: done ? '#1d6b3a' : '#8a4b00', tagStyle: tag('#f2d3c4', '#7a2a0c') }
+    ];
+    const opts = ['土地出让收入', '个人所得税', '关税'];
+    const quiz = opts.map((t, i) => {
+      let bg = '#f7f1e3', bd = '#0a2588';
+      if (s.pickedQ >= 0 && i === 0) { bg = '#cfe8d5'; bd = '#1d6b3a'; }
+      else if (s.pickedQ === i) { bg = '#f6d3c7'; bd = '#a33a17'; }
+      return { t, pick: () => this.setState({ pickedQ: i }), style: 'text-align:left;min-height:48px;padding:10px 16px;border-radius:12px;font-size:16px;color:#0a2588;border:1.5px solid ' + bd + ';background:' + bg };
+    });
+    const cur = caps.find((c) => c.id === s.cap);
+    const is = {}; caps.forEach((c) => { is[c.id] = c.id === s.cap; });
+    const vis = {}; views.forEach(([id]) => { vis[id] = id === s.view; });
+    return {
+      ground: this.props.ground ?? '#1b4fd0',
+      caps: caps.map((c) => ({ ...c, style: c.id === s.cap ? rowOn : rowOff, pick: () => this.setState({ cap: c.id }) })),
+      cur, is, vis,
+      tones: Object.keys(toneMap).map((k) => ({ label: toneMap[k][0], style: chip(k === s.tone), pick: () => this.setState({ tone: k }) })),
+      toneText: toneMap[s.tone][1],
+      views: views.map(([id, label]) => ({ label, style: chip(id === s.view), pick: () => this.setState({ view: id }) })),
+      bars,
+      flow: ['会前排顺序', '每人 5 分钟', '自由讨论', '记录行动项'].map((t, i, a) => ({ t, arrow: i < a.length - 1 })),
+      plan, approved: done, showApprove: !done,
+      approve: () => this.setState({ approved: true }),
+      quiz, answered: s.pickedQ >= 0,
+      verdict: s.pickedQ === 0 ? '答对了。笔记第 3 章提到，土地财政是地方收入的重要部分。' : '再想想。答案是「土地出让收入」，见笔记第 3 章。',
+      skills: [
+        { n: '新会话', d: '开启空白对话，当前会话留在历史里' },
+        { n: '压缩', d: '把长对话压成摘要，腾出上下文' },
+        { n: '周报格式', d: '按团队模板整理本周笔记（你写的）' },
+        { n: '读书卡片', d: '一本书拆成金句、观点、行动三栏（你写的）' }
+      ].map((x, i) => ({ ...x, bg: i === 2 ? '#fbe7a1' : 'transparent' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

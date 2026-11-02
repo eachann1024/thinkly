@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Thinkly 应用内 · 出处跳到段落并高亮</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:-apple-system,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:#547dd0}a:hover{color:#3a62b4}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<section style="background: #e9ecf1; color: #20242c; padding: 64px 24px; box-sizing: border-box">
+<div style="max-width: 1240px; margin: 0 auto; background: #f1f1f1; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(20,30,60,0.18)">
+<div style="height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-bottom: 1px solid #e2e2e2">
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e"></span>
+<span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840"></span>
+<span style="margin-left: 16px; font-size: 14px; color: #526071">{{doc.path}}</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; min-height: 640px">
+
+<div style="flex: 1 1 380px; min-width: 0; background: #fafafa; border-right: 1px solid #e2e2e2; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<span style="font-size: 14px; font-weight: 700; color: #526071">问笔记</span>
+<div style="align-self: flex-end; background: #e5edfc; border-radius: 14px; padding: 10px 14px; font-size: 15px; line-height: 1.6; max-width: 90%">今年跑步装备花了多少？下一双鞋打算买什么？</div>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; font-size: 15px; line-height: 1.8">
+<span>今年买了两双跑鞋和一块手表，共 3,460 元</span>
+<button type="button" onClick="{{c1.pick}}" aria-label="出处 1" style="{{c1.style}}">1</button>
+<span>。下一双想试亚瑟士 Novablast，因为旧鞋太硬</span>
+<button type="button" onClick="{{c2.pick}}" aria-label="出处 2" style="{{c2.style}}">2</button>
+<span>。</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #e2e2e2; padding-top: 14px">
+<span style="font-size: 14px; font-weight: 700; color: #526071">出处</span>
+<sc-for list="{{srcs}}" as="sr" hint-placeholder-count="2">
+<button type="button" onClick="{{sr.pick}}" style="{{sr.style}}">
+<span style="font-size: 14px; font-weight: 700">{{sr.n}} · {{sr.file}}</span>
+<span style="font-size: 14px; color: #526071">{{sr.loc}}</span>
+<span style="font-size: 14px; line-height: 1.6">「{{sr.excerpt}}」</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="flex: 999 1 560px; min-width: 0; background: #ffffff; padding: 0 0 36px; box-sizing: border-box; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px; background: #f5f8fe; border-bottom: 1px solid #dfe7f7">
+<span style="font-size: 14px; color: #3a62b4">从 AI 回答跳转 · {{doc.loc}}</span>
+<button type="button" onClick="{{clear}}" style="min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #c9d6f0; background: #ffffff; color: #3a62b4; font-size: 14px">{{clearLabel}}</button>
+</div>
+<div style="padding: 28px 48px 0; display: flex; flex-direction: column; gap: 12px">
+<h3 style="margin: 0; font-size: 26px; font-weight: 800">{{doc.title}}</h3>
+<sc-for list="{{blocks}}" as="bk" hint-placeholder-count="5">
+<p style="{{bk.style}}">{{bk.t}}</p>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"highlight":{"editor":"color","default":"#fff1b8"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: 1, lit: true };
+  }
+  renderVals() {
+    const s = this.state;
+    const hl = this.props.highlight ?? '#fff1b8';
+    const docs = [
+      { n: 1, file: '运动开销.md', path: '记账 / 运动开销.md', title: '运动开销', loc: '「装备」小节 · 第 3 行', excerpt: '装备合计 3,460 元',
+        blocks: ['3 月：Novablast 3，899 元。', '6 月：越野跑鞋，1,060 元。', '装备合计 3,460 元：两双鞋加 9 月买的手表 1,501 元。', '报名费另记在「赛事」小节。'], hit: 2 },
+      { n: 2, file: '跑步记录.md', path: '运动 / 跑步记录.md', title: '跑步记录', loc: '9 月 21 日 · 第 2 段', excerpt: '下一双想试试亚瑟士 Novablast',
+        blocks: ['9 月 21 日，晨跑 10 公里，配速 5:40。', '旧鞋太硬，跑完膝盖有点酸。下一双想试试亚瑟士 Novablast。', '下周把长距离加到 15 公里。', '9 月 24 日，间歇跑 6 组。'], hit: 1 }
+    ];
+    const d = docs[s.open - 1];
+    const go = (n) => () => this.setState({ open: n, lit: true });
+    const cite = (n) => ({ pick: go(n), style: 'min-width:28px;min-height:28px;padding:0 6px;border-radius:6px;font-size:14px;font-weight:700;' + (s.open === n ? 'border:1px solid #547dd0;background:#547dd0;color:#ffffff' : 'border:1px solid #c9d6f0;background:#ffffff;color:#3a62b4') });
+    return {
+      c1: cite(1),
+      c2: cite(2),
+      srcs: docs.map((x) => ({ n: x.n, file: x.file, loc: x.loc, excerpt: x.excerpt, pick: go(x.n), style: 'display:flex;flex-direction:column;gap:4px;text-align:left;padding:10px 12px;border-radius:10px;color:#20242c;' + (s.open === x.n ? 'border:1px solid #547dd0;background:#ffffff' : 'border:1px solid #e2e2e2;background:transparent') })),
+      doc: d,
+      blocks: d.blocks.map((t, k) => ({ t, style: 'margin:0 -10px;padding:6px 10px;border-radius:8px;font-size:16px;line-height:1.8;' + (s.lit && k === d.hit ? 'background:' + hl + ';box-shadow:inset 0 0 0 1px #e8c95a' : 'background:transparent') })),
+      clear: () => this.setState({ lit: !s.lit }),
+      clearLabel: s.lit ? '取消高亮' : '再次高亮'
+    };
+  }
+}
+</script>
+</body>
+</html>
