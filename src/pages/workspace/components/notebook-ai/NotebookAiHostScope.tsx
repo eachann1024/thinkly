@@ -17,6 +17,8 @@ function createSyntheticAiHostPage(notebookId: string): Page {
   };
 }
 
+const ignoreContentChange = () => {};
+
 interface NotebookAiHostScopeProps {
   notebookId: string;
   children: ReactNode;
@@ -26,24 +28,24 @@ export function NotebookAiHostScope({
   notebookId,
   children,
 }: NotebookAiHostScopeProps) {
-  const activePage = usePages((s) => {
+  const activePageId = usePages((s) => {
     const id = s.activePageId;
     const page = id ? s.pages[id] : undefined;
-    if (page && page.workspaceId === notebookId && !page.trashedAt) return page;
-    return undefined;
+    return page && page.workspaceId === notebookId && !page.trashedAt
+      ? page.id
+      : undefined;
   });
-
-  const fallbackPage = useMemo(
-    () => createSyntheticAiHostPage(notebookId),
-    [notebookId],
+  const hostPage = useMemo(
+    () => (activePageId ? usePages.getState().pages[activePageId] : undefined)
+      ?? createSyntheticAiHostPage(notebookId),
+    [activePageId, notebookId],
   );
-  const hostPage = activePage ?? fallbackPage;
 
   return (
     <EditorHostBridge
       page={hostPage}
       isEditorFullWidth
-      onContentChangeOverride={() => {}}
+      onContentChangeOverride={ignoreContentChange}
     >
       {children}
     </EditorHostBridge>

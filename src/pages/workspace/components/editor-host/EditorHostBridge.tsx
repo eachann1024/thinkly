@@ -13,7 +13,7 @@ ja:
   noteNotFound: "このノートが見つかりません"
 `;
 const uiText = createTranslator(localMessages);
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import type { Page } from "@/types";
 import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -117,10 +117,12 @@ export function EditorHostBridge({
     ],
   );
 
-  const pageContext = useMemo<EditorPageContext>(
+  const fallbackPage = useRef(page);
+  fallbackPage.current = page;
+  const { id, workspaceId } = page;
+  const capabilities = useMemo<Omit<EditorPageContext, "page">>(
     () => ({
-      page,
-      ...createEditorPageLinkCapabilities(page),
+      ...createEditorPageLinkCapabilities({ id, workspaceId } as Page),
       contentMode,
       isEditorFullWidth,
       onContentChange: (
@@ -132,13 +134,13 @@ export function EditorHostBridge({
           return;
         }
         const pagesStore = usePages.getState();
-        const livePage = pagesStore.pages[page.id] ?? page;
+        const livePage = pagesStore.pages[id] ?? fallbackPage.current;
         const contentToSave =
           contentMode === "normalized" && effectiveSingleTabMode() && !livePage.editorDraft
             ? withInternalPageTitle(content, getPageTitle(livePage))
             : content;
         pagesStore.updatePage(
-          page.id,
+          id,
           { content: contentToSave } as Partial<Page>,
           options?.silent ? { silent: true } : undefined,
         );
@@ -173,11 +175,11 @@ export function EditorHostBridge({
         return true;
       },
       getActivePageLocalFilePath: () => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
+        const livePage = usePages.getState().pages[id] ?? fallbackPage.current;
         return livePage.localFilePath ?? null;
       },
       getActivePageLocalFolderRoot: () => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
+        const livePage = usePages.getState().pages[id] ?? fallbackPage.current;
         const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];
         return notebook?.source === "local-folder"
           ? (notebook.localPath ?? null)
@@ -185,7 +187,7 @@ export function EditorHostBridge({
       },
       onOpenLocalLink: openEditorLocalLink,
       onOpenMarkdownPath: async (source) => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
+        const livePage = usePages.getState().pages[id] ?? fallbackPage.current;
         const notebook = useNotebooks.getState().notebooks[livePage.workspaceId];
         const root = notebook?.source === "local-folder" ? notebook.localPath : null;
         const basePath = livePage.localFilePath;
@@ -205,7 +207,7 @@ export function EditorHostBridge({
         }
       },
       onOpenAttachment: async (source, fileName) => {
-        const livePage = usePages.getState().pages[page.id] ?? page;
+        const livePage = usePages.getState().pages[id] ?? fallbackPage.current;
         return openResourceExternally({
           source,
           fileName,
@@ -222,8 +224,8 @@ export function EditorHostBridge({
         const { pages } = usePages.getState();
         const { notebooks, activeNotebookId } = useNotebooks.getState();
         const includeFolders =
-          (page.workspaceId &&
-            notebooks[page.workspaceId]?.source === "local-folder") ||
+          (workspaceId &&
+            notebooks[workspaceId]?.source === "local-folder") ||
           (activeNotebookId != null &&
             notebooks[activeNotebookId]?.source === "local-folder");
         return getAiReferenceSuggestionItems(
@@ -243,8 +245,13 @@ export function EditorHostBridge({
         usePages.getState().pages[pageId] ?? null,
       onPromotePreview: () => useTabs.getState().promotePreviewTab(),
     }),
-    [page, contentMode, isEditorFullWidth, onContentChangeOverride],
+    [id, workspaceId, contentMode, isEditorFullWidth, onContentChangeOverride],
   );
+
+  const pageContext = useMemo<EditorPageContext>(() => ({
+    ...capabilities,
+    get page() { return usePages.getState().pages[page.id] ?? page; },
+  }), [capabilities, page]);
 
   return (
     <EditorPlatformProvider platform={editorPlatform}>
