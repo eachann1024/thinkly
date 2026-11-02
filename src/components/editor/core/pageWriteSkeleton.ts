@@ -10,28 +10,44 @@ const BLOCKED_EVENTS = ["beforeinput", "paste", "cut", "drop", "keydown"];
 function scrollerOf(node: HTMLElement): HTMLElement {
   for (let el: HTMLElement | null = node.parentElement; el; el = el.parentElement) {
     const overflowY = getComputedStyle(el).overflowY;
-    if ((overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight) return el;
+    if ((overflowY === "auto" || overflowY === "scroll")) return el;
   }
   return node.parentElement!;
 }
 
-function barRects(view: EditorView, area: DOMRect): DOMRect[] {
-  const rects: DOMRect[] = [];
-  const walker = document.createTreeWalker(view.dom, NodeFilter.SHOW_TEXT);
-  let text: Node | null;
-  while ((text = walker.nextNode()) && rects.length < MAX_BARS) {
-    if (!text.textContent?.trim()) continue;
-    const range = document.createRange();
-    range.selectNodeContents(text);
-    for (const rect of Array.from(range.getClientRects())) {
-      if (rect.width > 0 && rect.bottom > area.top && rect.top < area.bottom) rects.push(rect);
+const SOLID_TYPES = new Set(["image", "video", "audio", "file", "table", "codeBlock", "embed"]);
+
+interface BarBox { left: number; top: number; width: number; height: number; radius?: number }
+
+// One block-shaped placeholder per top-level block, so the cover reads as a page, not as inline text.
+function blockBars(view: EditorView, area: DOMRect): BarBox[] {
+  const group = view.dom.querySelector(".bn-block-group");
+  const bars: BarBox[] = [];
+  for (const block of Array.from(group?.children ?? []) as HTMLElement[]) {
+    const rect = block.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 || rect.bottom < area.top || rect.top > area.bottom) continue;
+    const type = block.querySelector("[data-content-type]")?.getAttribute("data-content-type") ?? "paragraph";
+    const left = rect.left - area.left;
+    const top = rect.top - area.top;
+    if (SOLID_TYPES.has(type)) {
+      bars.push({ left, top: top + 4, width: rect.width, height: Math.max(rect.height - 8, 12), radius: 8 });
+    } else if (type === "heading") {
+      bars.push({ left, top: top + (rect.height - 16) / 2, width: rect.width * 0.34, height: 16 });
+    } else {
+      const lines = Math.max(1, Math.round(rect.height / 26));
+      const inset = type.endsWith("ListItem") ? 22 : 0;
+      for (let i = 0; i < lines && bars.length < MAX_BARS; i++) {
+        const last = i === lines - 1 && lines > 1;
+        bars.push({
+          left: left + inset,
+          top: top + i * 26 + 9,
+          width: (rect.width - inset) * (last ? 0.58 : lines === 1 ? 0.72 : 1),
+          height: 8,
+        });
+      }
     }
   }
-  for (const media of view.dom.querySelectorAll("img, video, audio, iframe, hr")) {
-    const rect = media.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0 && rect.bottom > area.top && rect.top < area.bottom) rects.push(rect);
-  }
-  return rects;
+  return bars;
 }
 
 function revealBlocks(view: EditorView, area: DOMRect) {
@@ -93,15 +109,15 @@ export async function showPageWriteSkeleton(view: EditorView, signal: AbortSigna
   const draw = () => {
     if (disposed || !view.dom.isConnected) return;
     const box = place();
-    const bars = barRects(view, box).map((rect) => {
+    const bars = blockBars(view, box).map((spec) => {
       const bar = document.createElement("span");
       bar.className = "goose-skeleton goose-page-write-bar";
-      const height = rect.height > 30 ? rect.height * 0.5 : 8;
       Object.assign(bar.style, {
-        left: `${rect.left - box.left}px`,
-        top: `${rect.top - box.top + (rect.height - height) / 2}px`,
-        width: `${rect.width}px`,
-        height: `${height}px`,
+        left: `${spec.left}px`,
+        top: `${spec.top}px`,
+        width: `${spec.width}px`,
+        height: `${spec.height}px`,
+        ...(spec.radius ? { borderRadius: `${spec.radius}px` } : {}),
       });
       return bar;
     });

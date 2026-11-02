@@ -1,6 +1,6 @@
 .goose-page-write-overlay {
   position: absolute;
-  z-index: 5;
+  z-index: 30;
   overflow: hidden;
   pointer-events: auto;
   background: var(--goose-editor-bg);
