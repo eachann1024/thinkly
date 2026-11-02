@@ -34,5 +34,6 @@ export function scopeRange(scope: ReflectionScope, now = Date.now()): ScopeRange
   // Include today and use local calendar boundaries, including across DST changes.
   const end = addDays(now, 1);
   const start = addDays(end, -days);
-  return { scope, key: `rolling-v2:${scope}:${dayKey(now)}`, start, end, days };
+  // Keep the generated narrative until the next scheduled run, even as live stats roll forward.
+  return { scope, key: scheduledReflectionKey(scope, now), start, end, days };
 }
