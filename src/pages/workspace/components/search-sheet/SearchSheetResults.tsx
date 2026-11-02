@@ -22,7 +22,7 @@ ja:
   removeRecent: "{{title}}を最近開いた項目から削除"
 `;
 const uiText = createTranslator(localMessages);
-import { Fragment, memo } from "react";
+import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Clock3, FileText, Sparkles, X } from "@/components/ui/icons";
@@ -34,7 +34,7 @@ import { presenceName } from "@/lib/ui/presence";
 
 export const AI_ROW_ID = "search-sheet-ai";
 
-function Highlight({ text, query }: { text: string; query: string }) {
+const Highlight = memo(function Highlight({ text, query }: { text: string; query: string }) {
   const ranges = looseMatchRanges(text, query);
   if (!ranges.length) return <>{text}</>;
   const parts = [];
@@ -45,7 +45,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
     cursor = range.end;
   }
   return <>{parts}{text.slice(cursor)}</>;
-}
+});
 
 function formatDate(time: number) {
   const date = new Date(time), now = new Date();
@@ -66,27 +66,57 @@ export function AskAiRow({ query, selected, onAsk }: { query: string; selected: 
   </Button>;
 }
 
+interface ResultActions {
+  openResult: (page: SearchResultPage) => void;
+  removeRecent: (id: string) => void;
+}
+interface ResultRowProps extends ResultActions {
+  page: SearchResultPage; query: string; selected: boolean;
+  notebookName: string; parentTitle: string;
+}
+
+const SearchSheetResultRow = memo(function SearchSheetResultRow({
+  page, query, selected, notebookName, parentTitle, openResult, removeRecent,
+}: ResultRowProps) {
+  const locale = useLocale();
+  const hasQuery = Boolean(query.trim());
+  const display = useMemo(() => {
+    const path = [notebookName, parentTitle].filter(Boolean).join(" / ");
+    return {
+      title: getPageTitle(page),
+      meta: [path, formatDate(page.updatedAt)].filter(Boolean).join(" · "),
+      label: hasQuery ? matchLabel(page) : "",
+      snippet: page.matchKind === "title" || page.matchKind === "pinyin" ? "" : page.contentSnippet ?? "",
+      style: { viewTransitionName: presenceName("search", page.id) },
+    };
+  }, [page, notebookName, parentTitle, hasQuery, locale]);
+  const open = useCallback(() => openResult(page), [openResult, page]);
+  const remove = useCallback(() => removeRecent(page.id), [removeRecent, page.id]);
+  return <div className="search-sheet-row-wrap" style={display.style}>
+    <Button contentStyle="preserve" variant="ghost" size="sm" id={`search-result-${page.id}`} type="button" role="option" aria-selected={selected} className="search-sheet-row" onClick={open}>
+      <span className="search-sheet-row-icon">{hasQuery ? <FileText size={16} aria-hidden="true"/> : <Clock3 size={16} aria-hidden="true"/>}</span>
+      <span className="search-sheet-row-title"><Highlight text={display.title} query={query}/></span>
+      <span className="search-sheet-row-count">{display.label}</span>
+      <span className="search-sheet-row-meta">{display.meta}</span>
+      {hasQuery && display.snippet && <span className="search-sheet-row-snippet"><Highlight text={display.snippet} query={query}/></span>}
+    </Button>
+    {!hasQuery && <IconButton size="xs" className="p-0 search-sheet-remove" aria-label={uiText("removeRecent", {title: display.title})} onClick={remove}><X size={14}/></IconButton>}
+  </div>;
+});
+
 export const SearchSheetResults = memo(function SearchSheetResults({ results, query, selectedId, notebookNames, pages, openResult, removeRecent }: {
   results: SearchResultPage[]; query: string; selectedId: string | undefined;
   notebookNames: Record<string, string>; pages: Record<string, Page>;
-  openResult: (page: SearchResultPage) => void; removeRecent: (id: string) => void;
-}) {
+} & ResultActions) {
   useLocale();
-  const hasQuery = Boolean(query.trim());
-  return <>{results.map(page => {
-    const title = getPageTitle(page);
-    const parent = page.parentId ? pages[page.parentId] : undefined;
-    const path = [notebookNames[page.workspaceId], parent ? getPageTitle(parent) : ""].filter(Boolean).join(" / ");
-    const snippet = page.matchKind === "title" || page.matchKind === "pinyin" ? "" : page.contentSnippet ?? "";
-    return <div className="search-sheet-row-wrap" key={page.id} style={{ viewTransitionName: presenceName("search", page.id) }}>
-      <Button contentStyle="preserve" variant="ghost" size="sm" id={`search-result-${page.id}`} type="button" role="option" aria-selected={page.id === selectedId} className="search-sheet-row" onClick={() => openResult(page)}>
-        <span className="search-sheet-row-icon">{hasQuery ? <FileText size={16} aria-hidden="true"/> : <Clock3 size={16} aria-hidden="true"/>}</span>
-        <span className="search-sheet-row-title"><Highlight text={title} query={query}/></span>
-        <span className="search-sheet-row-count">{hasQuery ? matchLabel(page) : ""}</span>
-        <span className="search-sheet-row-meta">{[path, formatDate(page.updatedAt)].filter(Boolean).join(" · ")}</span>
-        {hasQuery && snippet && <span className="search-sheet-row-snippet"><Highlight text={snippet} query={query}/></span>}
-      </Button>
-      {!hasQuery && <IconButton size="xs" className="p-0 search-sheet-remove" aria-label={uiText("removeRecent", {title})} onClick={() => removeRecent(page.id)}><X size={14}/></IconButton>}
-    </div>;
-  })}</>;
+  const latestActions = useRef({ openResult, removeRecent });
+  useLayoutEffect(() => { latestActions.current = { openResult, removeRecent }; }, [openResult, removeRecent]);
+  const open = useCallback((page: SearchResultPage) => latestActions.current.openResult(page), []);
+  const remove = useCallback((id: string) => latestActions.current.removeRecent(id), []);
+  const rows = useMemo(() => results.map(page => ({
+    page, notebookName: notebookNames[page.workspaceId],
+    parentTitle: page.parentId && pages[page.parentId] ? getPageTitle(pages[page.parentId]) : "",
+  })), [results, notebookNames, pages]);
+  return <>{rows.map(row => <SearchSheetResultRow key={row.page.id} {...row}
+    query={query} selected={row.page.id === selectedId} openResult={open} removeRecent={remove}/>)}</>;
 });
