@@ -19,6 +19,38 @@
   text-overflow: ellipsis;
   color: var(--goose-text-placeholder);
   font: inherit;
+  font-style: normal;
+  font-weight: 400;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+/* Unified placeholder typography: same size, line-height and family as body text; only color differs. */
+.goose-blocknote-editor .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after {
+  color: var(--goose-text-placeholder);
+  font: inherit;
+  font-style: normal;
+  font-weight: 400;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+/* "/" key cap scales with body text so it never changes the line box. */
+.goose-blocknote-editor .goose-editor-placeholder kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 1.2em;
+  min-width: 1.35em;
+  margin-inline: 0.3em;
+  padding-inline: 0.3em;
+  vertical-align: baseline;
+  font-family: inherit;
+  font-size: 0.8em;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--goose-text-placeholder);
 }
 
 .goose-blocknote-editor:focus .goose-editor-placeholder {
