@@ -1,6 +1,6 @@
 :is(.goose-button, .goose-button-icon, [data-goose-control="toggle"], .goose-segmented-option) {
-  transition: transform 120ms ease, box-shadow 140ms ease,
-    background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition: transform 120ms ease, background-color 150ms ease,
+    border-color 150ms ease, color 150ms ease;
 }
 .goose-button.goose-button-link {
   text-decoration-line: underline;
@@ -23,9 +23,9 @@
 .goose-button.goose-button-surface:is([aria-pressed="true"], [aria-selected="true"],
   [aria-checked="true"], [data-selected="true"], [data-goose-selected="true"],
   [aria-expanded="true"], [aria-current="page"], [data-state="on"], [data-state="open"]) {
-  background-image: none;
   background-color: var(--goose-interactive-selected);
   color: var(--goose-interactive-selected-fg);
+  border-color: transparent;
   box-shadow: inset 0 0 0 1px var(--goose-selection-border, var(--goose-interactive-selected-border));
   transform: none;
 }
@@ -37,7 +37,7 @@
   transform: none;
 }
 .goose-button.goose-button-surface[aria-busy="true"] {
-  background-color: var(--button-bottom);
+  background-color: var(--button-bg);
   color: var(--button-fg);
   cursor: progress;
   transform: none;
